@@ -13,9 +13,12 @@ object AiProviderProtocol {
     /** Protocol 2.0 exposes the unified local and remote target catalog. */
     val PROTOCOL_V2 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 0)
 
+    /** Negotiated image inputs; text-only peers continue to select 2.0. */
+    val PROTOCOL_V2_1 = AiProtocolVersion(AiCommonProtocol.MAJOR_VERSION, 1)
+
     val HOST_PROTOCOL_RANGE = AiProtocolRange(
         PROTOCOL_V2,
-        PROTOCOL_V2,
+        PROTOCOL_V2_1,
     )
 
     const val SCHEMA_CAPABILITIES = 0x4150_0001
@@ -36,6 +39,8 @@ object AiProviderProtocol {
     const val SCHEMA_TARGET_LIST_REQUEST = 0x4150_0013
     const val SCHEMA_TARGET_INFO = 0x4150_0014
     const val SCHEMA_TARGET_PAGE = 0x4150_0015
+    const val SCHEMA_VISION_CAPABILITIES = 0x4150_0016
+    const val SCHEMA_IMAGE_METADATA = 0x4150_0017
 }
 
 object AiProviderBackendProfile {
@@ -97,6 +102,7 @@ object AiProviderCapabilityId {
     const val STRUCTURED_JSON = "structured-json"
     const val USAGE = "usage"
     const val PERSISTENT_SESSION = "persistent-session"
+    const val VISION = "vision"
 
     val VALUES: Set<String> = immutableSetOf(
         STREAMING,
@@ -105,6 +111,7 @@ object AiProviderCapabilityId {
         STRUCTURED_JSON,
         USAGE,
         PERSISTENT_SESSION,
+        VISION,
     )
 }
 
@@ -131,6 +138,9 @@ object AiFinishReason {
 object AiProviderMimeType {
     const val PLAIN = "text/plain"
     const val JSON = "application/json"
+    const val JPEG = "image/jpeg"
+    const val PNG = "image/png"
+    val IMAGE_VALUES: Set<String> = immutableSetOf(JPEG, PNG)
 
     val INPUT_VALUES: Set<String> = immutableSetOf(PLAIN, JSON)
     val SCHEMA_VALUES: Set<String> = immutableSetOf(JSON)
@@ -140,6 +150,13 @@ private fun <T> immutableSetOf(vararg values: T): Set<T> =
     Collections.unmodifiableSet(linkedSetOf(*values))
 
 object AiProviderLimits {
+    const val MAX_IMAGES = 4
+    const val MAX_IMAGE_BYTES = 4L * 1024L * 1024L
+    const val MAX_TOTAL_IMAGE_BYTES = 8L * 1024L * 1024L
+    const val MAX_IMAGE_EDGE = 4096
+    const val MAX_IMAGE_PIXELS = 16L * 1024L * 1024L
+    const val MAX_SESSION_IMAGES = 16
+    const val MAX_SESSION_IMAGE_BYTES = 32L * 1024L * 1024L
     const val MAX_MESSAGES = 256
     const val MAX_CONTENT_PARTS = 512
     const val MAX_TOOL_DEFINITIONS = 128

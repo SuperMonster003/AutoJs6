@@ -17,6 +17,8 @@ data class AiProviderQuotaSnapshot(
     val descriptorCount: Int,
     val effectiveMaximumOutputBytes: Long,
     val effectiveMaximumToolRounds: Int,
+    val imageCount: Int = 0,
+    val imageBytes: Long = 0L,
 )
 
 data class AiProviderCompletionQuotaSnapshot(
@@ -80,7 +82,13 @@ object AiProviderQuotaPolicy {
         require(request.tools.size <= AiProviderLimits.MAX_TOOL_DEFINITIONS) { "Tool count exceeds host quota" }
         require(request.tools.map { it.name }.distinct().size == request.tools.size) { "Duplicate tool name" }
 
+        val images = request.messages.flatMap { it.parts }.filter { it.isImage }
+        val imageQuota = if (images.isNotEmpty()) {
+            AiProviderImagePolicy.requireProtocol(request.protocolVersion)
+            AiProviderImagePolicy.validate(images, requireNotNull(provider.vision) { "Provider does not support images" })
+        } else AiImageQuotaSnapshot(0, 0)
         val requiredCapabilities = request.options.requiredCapabilityIds.toMutableSet().apply {
+            if (images.isNotEmpty()) add(AiProviderCapabilityId.VISION)
             if (request.options.stream) add(AiProviderCapabilityId.STREAMING)
             if (request.options.includeReasoning) add(AiProviderCapabilityId.REASONING)
             if (request.options.structuredJson) add(AiProviderCapabilityId.STRUCTURED_JSON)
@@ -94,7 +102,7 @@ object AiProviderQuotaPolicy {
         require(request.options.responseMimeType in provider.acceptedTextMimeTypes) {
             "Provider does not accept the requested response MIME type"
         }
-        request.messages.flatMap { it.parts }.forEach { part ->
+        request.messages.flatMap { it.parts }.filterNot { it.isImage }.forEach { part ->
             require(part.payload.mimeType in provider.acceptedTextMimeTypes) {
                 "Provider does not accept a message MIME type"
             }
@@ -113,6 +121,7 @@ object AiProviderQuotaPolicy {
         val inputBytes = request.messages
             .asSequence()
             .flatMap { it.parts.asSequence() }
+            .filterNot { it.isImage }
             .fold(0L) { total, part -> safeAdd(total, part.payload.declaredLengthBytes, "Input byte count") }
         require(inputBytes <= provider.maximumContextBytes) { "Input bytes exceed provider capability" }
         require(inputBytes <= AiProviderLimits.MAX_TOTAL_INPUT_BYTES) { "Input bytes exceed host quota" }
@@ -164,6 +173,7 @@ object AiProviderQuotaPolicy {
             descriptorCount = descriptorCount,
             effectiveMaximumOutputBytes = effectiveOutputLimit,
             effectiveMaximumToolRounds = effectiveToolRounds,
+            imageCount = imageQuota.count, imageBytes = imageQuota.bytes,
         )
     }
 
@@ -208,7 +218,29 @@ object AiProviderQuotaPolicy {
         batch: AiToolResultBatch,
         descriptorCount: Int,
         maximumDescriptors: Int,
-    ): Long = validateToolPayloads(batch.results.map { it.output }, descriptorCount, maximumDescriptors)
+    ): Long {
+        require(batch.results.all { it.imageParts.isEmpty() }) { "Image results require negotiated validation" }
+        return validateToolPayloads(batch.results.map { it.output }, descriptorCount, maximumDescriptors)
+    }
+
+    fun validateToolResults(
+        batch: AiToolResultBatch, descriptorCount: Int, maximumDescriptors: Int,
+        request: AiProviderRequest, capabilities: AiProviderCapabilities,
+    ): AiImageQuotaSnapshot {
+        val images = batch.results.flatMap { it.imageParts }
+        if (images.isEmpty()) {
+            validateToolResults(batch, descriptorCount, maximumDescriptors)
+            return AiImageQuotaSnapshot(0, 0)
+        }
+        AiProviderImagePolicy.requireProtocol(request.protocolVersion)
+        require(AiProviderCapabilityId.VISION in request.options.requiredCapabilityIds) { "Vision was not requested" }
+        val quota = AiProviderImagePolicy.validate(images, requireNotNull(capabilities.vision))
+        val allPayloads = batch.results.map { it.output } + images.map { it.payload }
+        AiDescriptorReferencePolicy.validateExactReferences(allPayloads.mapNotNull { it.descriptorIndex },
+            descriptorCount, protocolSessionDescriptorLimit(maximumDescriptors))
+        require(batch.results.sumOf { it.output.declaredLengthBytes } <= AiProviderLimits.MAX_TOTAL_TOOL_DATA_BYTES)
+        return quota
+    }
 
     /**
      * Validates the terminal payload against the original request and the descriptors delivered by
@@ -410,6 +442,7 @@ object AiProviderCapabilityNegotiator {
             acceptedSchemaMimeTypes = host.acceptedSchemaMimeTypes.filter { it in provider.acceptedSchemaMimeTypes },
             supportsPersistentSessions =
                 host.supportsPersistentSessions && provider.supportsPersistentSessions,
+            vision = host.vision?.let { hostVision -> provider.vision?.let(hostVision::intersect) },
         )
     }
 }

@@ -22,19 +22,24 @@ internal class AiPluginToolCall(val callId: String, val name: String, val argume
     override fun toString() = "AiPluginToolCall(name=$name, argumentBytes=${AiValidation.utf8Size(argumentsJson)})"
 }
 
-internal class AiPluginToolResult(val callId: String, val output: String, val isError: Boolean = false) {
-    fun toProtocol(): AiToolResult {
+internal class AiPluginToolResult(val callId: String, val output: String, val isError: Boolean = false,
+    images: List<AiPluginImage> = emptyList()) {
+    val images = images.toList()
+    fun toProtocol(firstImageIndex: Int = 0): AiToolResult {
         val bytes = output.toByteArray(Charsets.UTF_8)
         return AiToolResult(callId, AiPayloadReference(
             mimeType = AiProviderMimeType.PLAIN, declaredLengthBytes = bytes.size.toLong(),
             inlineBytes = bytes, charset = "utf-8",
-        ), isError)
+        ), isError, images.mapIndexed { index, image -> image.contentPart(firstImageIndex + index) })
     }
 
     override fun toString() = "AiPluginToolResult(outputBytes=${AiValidation.utf8Size(output)}, isError=$isError)"
 }
 
-internal fun List<AiPluginToolResult>.toProtocolToolResults() = AiToolResultBatch(map { it.toProtocol() })
+internal fun List<AiPluginToolResult>.toProtocolToolResults(): AiToolResultBatch {
+    var index = 0
+    return AiToolResultBatch(map { result -> result.toProtocol(index).also { index += result.images.size } })
+}
 
 /** Event route for Agent-owned tools, independently of text streaming. Script ask stays text-only. */
 internal fun interface AiPluginToolRunner {

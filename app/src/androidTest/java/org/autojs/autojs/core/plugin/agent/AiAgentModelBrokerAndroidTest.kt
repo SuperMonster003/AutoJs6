@@ -27,6 +27,183 @@ class AiAgentModelBrokerAndroidTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
 
+    @Test fun visionInitialPngAndJpegReachTheProviderThroughOwnedDescriptors() {
+        requireFake()
+        for (jpeg in listOf(false, true)) broker().use { broker ->
+            val info = JsonParser.parseString(broker.brokerInfo.getString(AiAgentContract.KEY_MODEL_BROKER_INFO_JSON)).asJsonObject
+            assertEquals(1, info[AiAgentContract.MODEL_INFO_VISION_VERSION].asInt)
+            val bytes = imageBytes(jpeg)
+            val descriptor = imageDescriptor(bytes)
+            val input = generate("local:echo", "Inspect the synthetic image").apply {
+                addProperty("maximumOutputTokens", 1024)
+                add("imageRefs", com.google.gson.JsonArray().apply { add(imageRef(bytes, initial = true, jpeg = jpeg)) })
+            }
+            val events = Events()
+            broker.generate(request(input).apply { putParcelableArray(AiAgentContract.KEY_MODEL_IMAGE_FDS, arrayOf(descriptor)) }, events)
+            val terminal = events.awaitTerminal()
+            assertEquals(terminal.toString(), "completed", terminal["type"].asString)
+            assertEquals("vision:images=1", terminal["text"].asString)
+            assertTrue(runCatching { descriptor.fd }.isFailure)
+            events.assertSequence()
+        }
+    }
+
+    @Test fun visionNativeToolsResumeTheSameSessionWithImageResults() {
+        requireFake()
+        for (stream in listOf(false, true)) broker().use { broker ->
+            val input = nativeRequest(stream).apply { addProperty("vision", true) }
+            val events = Events()
+            broker.generate(request(input), events)
+            val result = resultsFor(events.awaitTools())
+            val bytes = imageBytes(false)
+            result["results"].asJsonArray.single().asJsonObject.add("imageRefs", com.google.gson.JsonArray().apply { add(imageRef(bytes)) })
+            val descriptor = imageDescriptor(bytes)
+            broker.submitToolResults(request(result).apply { putParcelableArray(AiAgentContract.KEY_MODEL_IMAGE_FDS, arrayOf(descriptor)) })
+            val terminal = events.awaitTerminal()
+            assertEquals(terminal.toString(), "completed", terminal["type"].asString)
+            assertEquals("tool:observed:images=1", terminal["text"].asString)
+            assertTrue(runCatching { descriptor.fd }.isFailure)
+            events.assertSequence()
+        }
+    }
+
+    @Test fun visionInvalidBytesDimensionsDigestAndDescriptorCountsFailClosed() {
+        requireFake()
+        for (scenario in listOf("digest", "dimension", "invalid-image", "length", "missing", "extra")) broker().use { broker ->
+            val bytes = if (scenario == "invalid-image") "not an image".toByteArray() else imageBytes(false)
+            val metadata = imageRef(bytes, initial = true).apply {
+                if (scenario == "digest") addProperty("sha256", "a".repeat(64))
+                if (scenario == "dimension") addProperty("width", 31)
+                if (scenario == "length") addProperty("byteLength", bytes.size + 1)
+            }
+            val descriptors = when (scenario) {
+                "missing" -> emptyArray()
+                "extra" -> arrayOf(imageDescriptor(bytes), imageDescriptor(bytes))
+                else -> arrayOf(imageDescriptor(bytes))
+            }
+            val input = generate("local:echo", "private-image-prompt").apply {
+                addProperty("maximumOutputTokens", 1024)
+                add("imageRefs", com.google.gson.JsonArray().apply { add(metadata) })
+            }
+            val events = Events()
+            broker.generate(request(input).apply { putParcelableArray(AiAgentContract.KEY_MODEL_IMAGE_FDS, descriptors) }, events)
+            val terminal = events.awaitTerminal()
+            assertEquals(scenario + terminal, AiAgentContract.ERROR_INVALID_REQUEST, terminal["code"].asString)
+            broker.close()
+            assertTrue(descriptors.all { runCatching { it.fd }.isFailure })
+            assertFalse(events.values.joinToString().contains("private-image-prompt"))
+            events.assertSequence()
+        }
+    }
+
+    @Test fun visionUnsupportedTargetRejectsBeforeReadingAnOpenImagePipe() {
+        requireFake()
+        broker().use { broker ->
+            val pipe = ParcelFileDescriptor.createPipe()
+            try {
+                val input = generate("local:reasoning", "look").apply {
+                    add("imageRefs", com.google.gson.JsonArray().apply { add(imageRef(imageBytes(false), initial = true)) })
+                }
+                val events = Events()
+                broker.generate(request(input).apply { putParcelableArray(AiAgentContract.KEY_MODEL_IMAGE_FDS, arrayOf(pipe[0])) }, events)
+                assertEquals(AiAgentContract.ERROR_TARGET_UNSUPPORTED, events.awaitTerminal()["code"].asString)
+                broker.close()
+                assertTrue(runCatching { pipe[0].fd }.isFailure)
+            } finally { pipe.forEach { runCatching { it.close() } } }
+        }
+    }
+
+    @Test fun visionImagePipeReadsRemainCancellableAndKeepTheOriginalDeadline() {
+        requireFake()
+        for (cancel in listOf(true, false)) broker().use { broker ->
+            val pipe = ParcelFileDescriptor.createPipe()
+            try {
+                val input = generate("local:echo", "look").apply {
+                    addProperty("maximumOutputTokens", 1024)
+                    addProperty("timeoutMs", if (cancel) 15000 else 4000)
+                    add("imageRefs", com.google.gson.JsonArray().apply { add(imageRef(imageBytes(false), initial = true).apply {
+                        addProperty("byteLength", 256 * 1024)
+                    }) })
+                }
+                val events = Events()
+                broker.generate(request(input).apply { putParcelableArray(AiAgentContract.KEY_MODEL_IMAGE_FDS, arrayOf(pipe[0])) }, events)
+                // A write larger than pipe capacity proves the reader is active and awaiting EOF.
+                android.system.Os.write(pipe[1].fileDescriptor, ByteArray(128 * 1024), 0, 128 * 1024)
+                val before = SystemClock.elapsedRealtime()
+                if (cancel) broker.cancel(Bundle().apply {
+                    putInt(AiAgentContract.KEY_CONTRACT_VERSION, 1)
+                    putString(AiAgentContract.KEY_MODEL_REF_JSON, """{"requestId":"${input["requestId"].asString}"}""")
+                })
+                val terminal = events.awaitTerminal()
+                assertEquals(if (cancel) AiAgentContract.ERROR_CANCELLED else AiAgentContract.ERROR_MODEL_TIMEOUT, terminal["code"].asString)
+                if (cancel) assertTrue(SystemClock.elapsedRealtime() - before < 2000)
+                broker.close()
+                assertTrue(runCatching { pipe[0].fd }.isFailure)
+                events.assertSequence()
+            } finally { pipe.forEach { runCatching { it.close() } } }
+        }
+    }
+
+    @Test fun visionDescriptorArraysAreClosedOnBadTypesNullCallbacksAndForeignUid() {
+        fun descriptor() = ParcelFileDescriptor.open(java.io.File("/dev/null"), ParcelFileDescriptor.MODE_READ_ONLY)
+        broker().use { broker ->
+            for (mode in listOf("wrong-type", "nested", "deep-nested", "no-callback")) {
+                val fd = descriptor()
+                val bundle = request(generate("local:echo", "look")).apply {
+                    when (mode) {
+                        "wrong-type" -> putParcelableArray(AiAgentContract.KEY_MODEL_IMAGE_FDS, arrayOf(fd, Bundle()))
+                        "nested" -> putBundle("unknown", Bundle().apply { putParcelableArray("array", arrayOf(fd)) })
+                        "deep-nested" -> {
+                            var nested = Bundle().apply { putParcelable("fd", fd) }
+                            repeat(32) { nested = Bundle().apply { putBundle("child", nested) } }
+                            putBundle("unknown", nested)
+                        }
+                        else -> putParcelableArray(AiAgentContract.KEY_MODEL_IMAGE_FDS, arrayOf(fd))
+                    }
+                }
+                val events = Events()
+                broker.generate(bundle, if (mode == "no-callback") null else events)
+                if (mode != "no-callback") assertEquals(AiAgentContract.ERROR_INVALID_REQUEST, events.awaitTerminal()["code"].asString)
+                assertTrue(runCatching { fd.fd }.isFailure)
+            }
+        }
+        AiAgentModelBroker(context, Process.myUid() + 1, grant()).use { broker ->
+            val fd = descriptor()
+            assertThrows(SecurityException::class.java) { broker.generate(request(generate("local:echo", "look")).apply {
+                putParcelableArray(AiAgentContract.KEY_MODEL_IMAGE_FDS, arrayOf(fd))
+            }, Events()) }
+            assertTrue(runCatching { fd.fd }.isFailure)
+        }
+    }
+
+    private fun imageBytes(jpeg: Boolean): ByteArray {
+        val bitmap = android.graphics.Bitmap.createBitmap(32, 24, android.graphics.Bitmap.Config.ARGB_8888)
+        try {
+            bitmap.eraseColor(android.graphics.Color.GREEN)
+            return java.io.ByteArrayOutputStream().use { output ->
+                assertTrue(bitmap.compress(if (jpeg) android.graphics.Bitmap.CompressFormat.JPEG else android.graphics.Bitmap.CompressFormat.PNG, 70, output))
+                output.toByteArray()
+            }
+        } finally { bitmap.recycle() }
+    }
+
+    private fun imageDescriptor(bytes: ByteArray): ParcelFileDescriptor {
+        val file = java.io.File.createTempFile("agent-vision-test-", ".bin", context.cacheDir)
+        try {
+            file.writeBytes(bytes)
+            return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        } finally { file.delete() }
+    }
+
+    private fun imageRef(bytes: ByteArray, initial: Boolean = false, jpeg: Boolean = false) = JsonObject().apply {
+        addProperty("descriptorIndex", 0)
+        addProperty("mimeType", if (jpeg) "image/jpeg" else "image/png")
+        addProperty("byteLength", bytes.size)
+        addProperty("width", 32); addProperty("height", 24)
+        addProperty("sha256", java.security.MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it.toInt() and 255) })
+        if (initial) addProperty("messageIndex", 0)
+    }
+
     @Test fun nativeToolsRoundTripOnTheOriginalRequestWithAndWithoutStreaming() {
         requireFake()
         for (stream in listOf(false, true)) broker().use { broker ->

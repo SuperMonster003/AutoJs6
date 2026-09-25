@@ -350,7 +350,9 @@ internal object AiProviderSelectionPolicy {
         ) ?: return EvaluationResult(AiProviderCandidateRejection.PROTOCOL_UNSUPPORTED, null)
 
         val negotiatedCapabilities = runCatching {
-            AiProviderCapabilityNegotiator.intersect(hostCapabilities, candidate.capabilities)
+            AiProviderCapabilityNegotiator.intersect(hostCapabilities, candidate.capabilities).let { capabilities ->
+                if (protocol < AiProviderProtocol.PROTOCOL_V2_1) capabilities.copy(vision = null) else capabilities
+            }
         }.getOrNull() ?: return EvaluationResult(AiProviderCandidateRejection.CAPABILITY_MISMATCH, null)
         if (!requirement.isSatisfiedBy(negotiatedCapabilities)) {
             return EvaluationResult(AiProviderCandidateRejection.CAPABILITY_MISMATCH, null)

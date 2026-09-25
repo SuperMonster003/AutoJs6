@@ -21,7 +21,8 @@ internal object AiProviderHostTestFixtures {
         providerId: String = "fixture.provider",
         displayName: String = "Fixture Provider",
         implementationVersionCode: Long = 7L,
-        protocolRange: AiProtocolRange = AiProviderProtocol.HOST_PROTOCOL_RANGE,
+        // Legacy text fixtures intentionally stay on 2.0; vision tests opt into 2.1 explicitly.
+        protocolRange: AiProtocolRange = AiProtocolRange(AiProviderProtocol.PROTOCOL_V2, AiProviderProtocol.PROTOCOL_V2),
         locality: Int = AiDataLocality.ON_DEVICE,
         credentialMode: Int = if (locality == AiDataLocality.ON_DEVICE) {
             AiCredentialMode.NONE

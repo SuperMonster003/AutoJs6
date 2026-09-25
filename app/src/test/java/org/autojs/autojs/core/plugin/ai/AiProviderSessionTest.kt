@@ -1881,10 +1881,44 @@ class AiProviderSessionTest {
         assertEquals(AiProviderSessionEvent.Cancelled, active.harness.events.last())
     }
 
-    private fun activeHarness(stream: Boolean, toolRounds: Int = 0): ActiveHarness {
+    @Test fun imageToolDescriptorLeaseIsDeferredAndClosedOnSuccessFailureOrCancellation() {
+        for (mode in listOf("success", "cancel", "open-failure", "wrong-count")) {
+            val active = activeHarness(stream = false, toolRounds = 1, vision = true)
+            active.dispatch.callback.onToolCalls(PROVIDER_UID, AiProviderCodec.encodeToolCallBatch(AiToolCallBatch(
+                listOf(AiToolCall("call-1", "lookup", jsonPayload("{}"))))), RecordingIncomingDescriptors(0, RecordingDescriptorLease(0)))
+            active.harness.drain()
+            val result = AiToolResultBatch(listOf(AiToolResult("call-1", textPayload("screenshot"), imageParts = listOf(
+                AiContentPart(AiPayloadReference(AiProviderMimeType.PNG, 1, descriptorIndex = 0, sha256 = "a".repeat(64)),
+                    org.autojs.plugin.ai.provider.api.AiImageMetadata(1, 1))))))
+            var opened = 0
+            val lease = RecordingRequestLease(if (mode == "wrong-count") 0 else 1)
+            val factory = object : AiProviderSessionRequestDescriptorFactory {
+                override val count = 1
+                override fun open(): AiProviderSessionRequestDescriptorLease {
+                    opened++
+                    check(mode != "open-failure")
+                    return lease
+                }
+            }
+            assertTrue(active.harness.policy.submitToolResults(result, factory))
+            assertEquals(0, opened)
+            if (mode == "cancel") active.harness.policy.cancel()
+            active.harness.drain()
+            assertEquals(if (mode == "cancel") 0 else 1, opened)
+            assertEquals(if (mode in listOf("cancel", "open-failure")) 0 else 1, lease.closeCount.get())
+            assertEquals(if (mode == "success") listOf(1) else emptyList<Int>(), active.remote.resultDescriptorCounts)
+            if (mode in listOf("open-failure", "wrong-count")) {
+                assertTrue(active.harness.events.last() is AiProviderSessionEvent.Rejected)
+            }
+        }
+    }
+
+    private fun activeHarness(stream: Boolean, toolRounds: Int = 0, vision: Boolean = false): ActiveHarness {
         val lane = ManualExecutor()
-        val request = request(stream = stream, toolRounds = toolRounds)
-        val harness = harness(request = request, lane = lane)
+        val initial = request(stream = stream, toolRounds = toolRounds)
+        val request = if (vision) initial.copy(protocolVersion = AiProviderProtocol.PROTOCOL_V2_1,
+            options = initial.options.copy(requiredCapabilityIds = listOf(AiProviderCapabilityId.VISION))) else initial
+        val harness = harness(request = request, lane = lane, plan = plan(vision = vision))
         val dispatch = harness.policy.beginOpen() as AiProviderSessionOpenDecision.Dispatch
         dispatch.callback.onStarted(PROVIDER_UID, startedEnvelope(request))
         val remote = RecordingRemote()
@@ -1926,18 +1960,23 @@ class AiProviderSessionTest {
             AiProviderCapabilityId.STRUCTURED_JSON,
             AiProviderCapabilityId.USAGE,
         ),
+        vision: Boolean = false,
     ): AiProviderHostSessionPlan {
+        val capabilities = AiProviderHostTestFixtures.capabilities().copy(
+            vision = if (vision) org.autojs.plugin.ai.provider.api.AiVisionCapabilities() else null)
+        val provider = if (vision) AiProviderHostTestFixtures.providerInfo(protocolRange = AiProviderProtocol.HOST_PROTOCOL_RANGE)
+            else AiProviderHostTestFixtures.providerInfo()
         val selected = AiProviderSelectionPolicy.select(
-            candidates = listOf(AiProviderHostTestFixtures.candidate()),
+            candidates = listOf(AiProviderHostTestFixtures.candidate(providerInfo = provider, capabilities = capabilities)),
             environment = AiProviderHostTestFixtures.environment(),
-            hostCapabilities = AiProviderHostTestFixtures.capabilities(),
+            hostCapabilities = capabilities,
             requirement = AiProviderCapabilityRequirement(),
             options = AiProviderSelectionOptions(enabled = true),
         ) as AiProviderSelectionResult.Selected
         val target = AiProviderHostTestFixtures.target(
             targetId = TARGET_ID,
             modelId = MODEL_ID,
-            capabilityIds = targetCapabilityIds.toList(),
+            capabilityIds = targetCapabilityIds.toList() + if (vision) listOf(AiProviderCapabilityId.VISION) else emptyList(),
             maximumContextBytes = 512L * 1024L,
             maximumOutputBytes = 256L * 1024L,
         )
@@ -2344,6 +2383,7 @@ class AiProviderSessionTest {
     ) : AiProviderSessionRemote {
         val creditGrants: MutableList<Int> = Collections.synchronizedList(mutableListOf())
         val toolResults: MutableList<ByteArray> = Collections.synchronizedList(mutableListOf())
+        val resultDescriptorCounts = mutableListOf<Int>()
         val cancelCount = AtomicInteger()
         val closeCount = AtomicInteger()
 
@@ -2353,6 +2393,10 @@ class AiProviderSessionTest {
         }
 
         override fun submitToolResults(envelope: ByteArray) { toolResults += envelope.copyOf() }
+        override fun submitToolResults(envelope: ByteArray, descriptors: AiProviderSessionRequestDescriptorLease) {
+            resultDescriptorCounts += descriptors.count
+            toolResults += envelope.copyOf()
+        }
 
         override fun cancel() {
             cancelCount.incrementAndGet()

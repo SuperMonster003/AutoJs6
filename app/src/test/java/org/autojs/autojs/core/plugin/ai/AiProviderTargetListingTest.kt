@@ -638,7 +638,7 @@ class AiProviderTargetListingTest {
         lastUpdateTime = 123L,
         signerSha256 = listOf(AiProviderHostTestFixtures.SIGNER_A, AiProviderHostTestFixtures.SIGNER_B),
         providerInfo = AiProviderHostTestFixtures.providerInfo(),
-        protocolVersion = AiProviderProtocol.HOST_PROTOCOL_RANGE.maximum,
+        protocolVersion = AiProviderProtocol.PROTOCOL_V2,
         negotiatedCapabilities = capabilities,
     )
 

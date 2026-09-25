@@ -24,6 +24,12 @@ import org.autojs.autojs.core.plugin.ai.AiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.AiPluginStreamRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginTargetSummary
 import org.autojs.autojs.core.plugin.ai.AiPluginUsage
+import org.autojs.autojs.core.plugin.ai.AiPluginImage
+import org.autojs.autojs.core.plugin.ai.AiPluginImageDecoder
+import org.autojs.autojs.core.plugin.ai.AiPluginMessage
+import org.autojs.autojs.core.plugin.ai.AiPluginToolResult
+import org.autojs.plugin.ai.provider.api.AiProviderImagePolicy
+import org.autojs.plugin.ai.provider.api.AiProviderLimits
 import org.autojs.autojs.core.plugin.ai.AiPluginToolCall
 import org.autojs.autojs.core.plugin.ai.AiPluginToolRunner
 import org.autojs.autojs.core.plugin.ai.AiProviderComponent
@@ -94,6 +100,14 @@ internal class AiAgentModelBroker(
                 addProperty("maximumToolRounds", AiAgentContract.MAX_MODEL_TOOL_ROUNDS)
                 addProperty("maximumToolResultBytes", AiAgentContract.MAX_MODEL_TOOL_RESULT_BYTES)
                 addProperty("maximumToolResultBatchBytes", AiAgentContract.MAX_MODEL_TOOL_RESULTS_BYTES)
+                addProperty(AiAgentContract.MODEL_INFO_VISION_VERSION, AiAgentContract.MODEL_VISION_VERSION)
+                addProperty("maximumImages", AiAgentContract.MAX_MODEL_IMAGES)
+                addProperty("maximumImageBytes", AiAgentContract.MAX_MODEL_IMAGE_BYTES)
+                addProperty("maximumTotalImageBytes", AiAgentContract.MAX_MODEL_TOTAL_IMAGE_BYTES)
+                addProperty("maximumImageEdge", AiProviderLimits.MAX_IMAGE_EDGE)
+                addProperty("maximumImagePixels", AiProviderLimits.MAX_IMAGE_PIXELS)
+                addProperty("maximumSessionImages", AiProviderLimits.MAX_SESSION_IMAGES)
+                addProperty("maximumSessionImageBytes", AiProviderLimits.MAX_SESSION_IMAGE_BYTES)
             }
             putString(AiAgentContract.KEY_MODEL_BROKER_INFO_JSON, info.toString())
             putString(HostCapabilityContract.KEY_GRANT_JSON, JsonObject().apply {
@@ -213,6 +227,10 @@ internal class AiAgentModelBroker(
         private var toolOutputBytes = 0L
         private var toolResultBytes = 0L
         private var cumulativeInputBytes = 0L
+        private var retainedImageTokens = 0L
+        private var cumulativeImageTokens = 0L
+        private var sessionImageCount = 0
+        private var sessionImageBytes = 0L
         private var chargedTokens = 0L
         private var contextLimit = 0L
         private var usageUpdated = false
@@ -249,6 +267,7 @@ internal class AiAgentModelBroker(
                     timeout = decoded.second
                 } else {
                     val decoded = AiAgentModelRequests.decode(json, grant.maxInputBytesPerRequest)
+                    payload.validateImages(decoded.imageRefs)
                     if (payload.correlationId != null && payload.correlationId != decoded.requestId) {
                         throw AiAgentModelException(AiAgentContract.ERROR_INVALID_REQUEST)
                     }
@@ -308,25 +327,37 @@ internal class AiAgentModelBroker(
             }
             if ((decoded.responseSchemaJson != null && AiProviderCapabilityId.STRUCTURED_JSON !in target.capabilityIds) ||
                 (decoded.stream && AiProviderCapabilityId.STREAMING !in target.capabilityIds) ||
-                (decoded.tools.isNotEmpty() && AiProviderCapabilityId.TOOLS !in target.capabilityIds)) {
+                (decoded.tools.isNotEmpty() && AiProviderCapabilityId.TOOLS !in target.capabilityIds) ||
+                (decoded.vision && AiProviderCapabilityId.VISION !in target.capabilityIds)) {
                 return fail(AiAgentContract.ERROR_TARGET_UNSUPPORTED)
             }
             if (decoded.inputBytes > target.maximumContextBytes) return fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
+            synchronized(lock) {
+                if (finished) return
+                reservation = quota.reserve(requestId, decoded.inputBytes, decoded.maximumOutputTokens, decoded.imageTokens)
+                if (!reservation) return fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
+                cumulativeInputBytes = decoded.inputBytes
+                retainedImageTokens = decoded.imageTokens
+                cumulativeImageTokens = decoded.imageTokens
+                sessionImageCount = decoded.imageRefs.size
+                sessionImageBytes = decoded.imageRefs.sumOf { it.part.payload.declaredLengthBytes }
+                contextLimit = minOf(target.maximumContextBytes, grant.maxInputBytesPerRequest.toLong())
+            }
             val actualRequest = try {
-                AiPluginAskRequest(component, providerId, decoded.targetId, decoded.messages,
+                // Descriptor reads must not hold the operation lock: cancel/deadline can close them.
+                val images = payload.readImages(decoded.imageRefs, ::isFinished)
+                val messages = decoded.messages.mapIndexed { index, message ->
+                    AiPluginMessage(message.role, message.content, decoded.imageRefs.filter { it.messageIndex == index }
+                        .map { checkNotNull(images[it.descriptorIndex]) })
+                }
+                AiPluginAskRequest(component, providerId, decoded.targetId, messages,
                     remainingTimeout(decoded.timeoutMs),
                     maximumOutputBytes = minOf(AiAgentContract.MAX_MODEL_OUTPUT_BYTES.toLong(), target.maximumOutputBytes),
                     maximumOutputTokens = decoded.maximumOutputTokens, temperature = decoded.temperature,
                     responseSchemaJson = decoded.responseSchemaJson, tools = decoded.tools,
-                    maximumToolRounds = decoded.maximumToolRounds)
+                    maximumToolRounds = decoded.maximumToolRounds, vision = decoded.vision)
+            } catch (failure: AiAgentModelException) { return fail(failure.code)
             } catch (_: Exception) { return fail(AiAgentContract.ERROR_INVALID_REQUEST) }
-            synchronized(lock) {
-                if (finished) return
-                reservation = quota.reserve(requestId, decoded.inputBytes, decoded.maximumOutputTokens)
-                if (!reservation) return fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
-                cumulativeInputBytes = decoded.inputBytes
-                contextLimit = minOf(target.maximumContextBytes, grant.maxInputBytesPerRequest.toLong())
-            }
             synchronized(lock) {
                 if (finished) return
                 try {
@@ -365,7 +396,8 @@ internal class AiAgentModelBroker(
             // A Provider may report this round's usage after publishing its calls.
             if (!reservation && pendingToolIds.isNotEmpty()) {
                 val settled = quota.settleCumulative(requestId, next, cumulativeInputBytes,
-                    outputBytes + toolOutputBytes, chargedTokens, releaseReservation = false)
+                    outputBytes + toolOutputBytes, chargedTokens, releaseReservation = false,
+                    estimatedImageTokens = cumulativeImageTokens)
                 chargedTokens = settled.second
                 if (!settled.first) fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
             }
@@ -410,6 +442,7 @@ internal class AiAgentModelBroker(
             try { worker.execute {
                 try {
                     val submitted = AiAgentModelRequests.toolResults(incoming.read(::isFinished))
+                    incoming.validateImages(submitted.imageRefs)
                     synchronized(lock) {
                         if (finished) return@execute
                         if (submitted.requestId != requestId || submitted.round != toolRound ||
@@ -417,14 +450,35 @@ internal class AiAgentModelBroker(
                             return@execute fail(AiAgentContract.ERROR_INVALID_REQUEST)
                         }
                         val decoded = checkNotNull(request)
+                        if (submitted.imageRefs.isNotEmpty() && !decoded.vision) {
+                            return@execute fail(AiAgentContract.ERROR_TARGET_UNSUPPORTED)
+                        }
+                        val imageBytes = submitted.imageRefs.sumOf { it.part.payload.declaredLengthBytes }
+                        if (submitted.imageRefs.size > AiProviderLimits.MAX_SESSION_IMAGES - sessionImageCount ||
+                            imageBytes > AiProviderLimits.MAX_SESSION_IMAGE_BYTES - sessionImageBytes) {
+                            return@execute fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
+                        }
                         toolResultBytes += submitted.inputBytes
                         val inputBytes = decoded.inputBytes + outputBytes + toolOutputBytes + toolResultBytes
                         if (inputBytes > contextLimit) return@execute fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
-                        reservation = quota.reserve(requestId, inputBytes, decoded.maximumOutputTokens)
+                        val imageTokens = retainedImageTokens + submitted.imageTokens
+                        reservation = quota.reserve(requestId, inputBytes, decoded.maximumOutputTokens, imageTokens)
                         if (!reservation) return@execute fail(AiAgentContract.ERROR_QUOTA_EXCEEDED)
                         cumulativeInputBytes += inputBytes
+                        retainedImageTokens = imageTokens
+                        cumulativeImageTokens += imageTokens
+                        sessionImageCount += submitted.imageRefs.size
+                        sessionImageBytes += imageBytes
                         usageUpdated = false
-                        if (handle?.submitToolResults(submitted.results) != true) return@execute fail(AiAgentContract.ERROR_INVALID_REQUEST)
+                    }
+                    val images = incoming.readImages(submitted.imageRefs, ::isFinished)
+                    val results = submitted.results.map { result ->
+                        AiPluginToolResult(result.callId, result.output, result.isError,
+                            submitted.imagesByCallId[result.callId].orEmpty().map { checkNotNull(images[it.descriptorIndex]) })
+                    }
+                    synchronized(lock) {
+                        if (finished) return@execute
+                        if (handle?.submitToolResults(results) != true) return@execute fail(AiAgentContract.ERROR_INVALID_REQUEST)
                         pendingToolIds = emptySet()
                     }
                 } catch (failure: AiAgentModelException) { fail(failure.code)
@@ -493,7 +547,7 @@ internal class AiAgentModelBroker(
             if (!reservation) return true
             reservation = false
             val result = quota.settleCumulative(requestId, if (usageUpdated) usage else null,
-                cumulativeInputBytes, outputBytes + toolOutputBytes, chargedTokens)
+                cumulativeInputBytes, outputBytes + toolOutputBytes, chargedTokens, estimatedImageTokens = cumulativeImageTokens)
             chargedTokens = result.second
             return result.first
         }
@@ -574,10 +628,15 @@ internal class AiAgentModelBroker(
             @Suppress("DEPRECATION")
             val rawDescriptor = bundle?.get(AiAgentContract.KEY_PAYLOAD_FD)
             descriptor = rawDescriptor as? ParcelFileDescriptor
-            // Any descriptor outside the accepted payload slot is invalid, even if it was put
-            // in a String field. Retain only the one payload whose ownership we can accept.
-            if (closeBundleDescriptor(bundle, if (allowDescriptor) descriptor else null) ||
-                (rawDescriptor != null && descriptor == null)) {
+            @Suppress("DEPRECATION")
+            val rawImages = bundle?.get(AiAgentContract.KEY_MODEL_IMAGE_FDS)
+            val images = (rawImages as? Array<*>)?.filterIsInstance<ParcelFileDescriptor>().orEmpty()
+            if (closeBundleDescriptor(bundle, if (allowDescriptor) descriptor else null,
+                    if (allowDescriptor) images else emptyList()) ||
+                (rawDescriptor != null && descriptor == null) ||
+                (rawImages != null && (rawImages !is Array<*> || rawImages.size != images.size)) ||
+                images.size > AiAgentContract.MAX_MODEL_IMAGES ||
+                images.toSet().size != images.size || images.any { it === descriptor }) {
                 throw AiAgentModelException(AiAgentContract.ERROR_INVALID_REQUEST)
             }
             if (bundle?.getInt(AiAgentContract.KEY_CONTRACT_VERSION) != AiAgentContract.CONTRACT_VERSION) {
@@ -598,29 +657,44 @@ internal class AiAgentModelBroker(
                 }
                 AiAgentModelRequests.reference(reference)
             } else null
-            return Payload(inline, descriptor, correlationId)
+            return Payload(inline, descriptor, correlationId, images)
         } catch (failure: Exception) {
             closeBundleDescriptor(bundle)
             throw (failure as? AiAgentModelException ?: AiAgentModelException(AiAgentContract.ERROR_INVALID_REQUEST))
         }
     }
 
-    private class Payload(val inline: String?, private val descriptor: ParcelFileDescriptor?, val correlationId: String? = null) : Closeable {
+    private class Payload(val inline: String?, private val descriptor: ParcelFileDescriptor?,
+        val correlationId: String? = null, private val images: List<ParcelFileDescriptor> = emptyList()) : Closeable {
+        private var closed = false
+        fun validateImages(refs: List<AiAgentModelImageRef>) = AiAgentModelImages.validate(refs, images.size)
+        fun readImages(refs: List<AiAgentModelImageRef>, cancelled: () -> Boolean): Map<Int, AiPluginImage> {
+            validateImages(refs)
+            return refs.associate { ref ->
+                val bytes = AiProviderImagePolicy.materialize(ref.part) { index, length ->
+                    readDescriptor(images[index], length.toInt(), cancelled)
+                }
+                ref.descriptorIndex to AiPluginImageDecoder.decode(bytes, ref.part.payload.mimeType, checkNotNull(ref.part.image))
+            }
+        }
         fun read(cancelled: () -> Boolean): String {
             inline?.let { return it }
+            val bytes = readDescriptor(requireNotNull(descriptor), AiAgentContract.MAX_MODEL_REQUEST_PAYLOAD_BYTES, cancelled)
+            return Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
+        }
+        private fun readDescriptor(input: ParcelFileDescriptor, maximumBytes: Int, cancelled: () -> Boolean): ByteArray {
             val output = ByteArrayOutputStream()
-            requireNotNull(descriptor).use { input ->
-                // A sender can keep a pipe open forever. Nonblocking reads plus a bounded poll
-                // let deadline/death cleanup release the link worker even for a hostile pipe.
+            input.use {
+                // Bounded nonblocking reads preserve cancellation even for a sender-controlled pipe.
+                if (cancelled()) throw AiAgentModelException(AiAgentContract.ERROR_CANCELLED)
                 val reopened = synchronized(this) {
+                    if (closed) throw AiAgentModelException(AiAgentContract.ERROR_CANCELLED)
                     if (Build.VERSION.SDK_INT >= 30) {
                         val fd = input.fileDescriptor
                         Os.fcntlInt(fd, OsConstants.F_SETFL, Os.fcntlInt(fd, OsConstants.F_GETFL, 0) or OsConstants.O_NONBLOCK)
                         null
                     } else {
-                        // fcntlInt is not a public API before 30. Reopen our accepted file/pipe
-                        // with O_NONBLOCK, without hidden APIs or changing the sender's flags.
-                        // Serialize with cancellation so the numeric fd cannot be reused here.
                         val offset = try { Os.lseek(input.fileDescriptor, 0, OsConstants.SEEK_CUR) }
                         catch (failure: ErrnoException) { if (failure.errno == OsConstants.ESPIPE) null else throw failure }
                         Os.open("/proc/self/fd/${input.fd}", OsConstants.O_RDONLY or OsConstants.O_NONBLOCK or OsConstantsCompat.O_CLOEXEC, 0).also { fd ->
@@ -641,17 +715,19 @@ internal class AiAgentModelBroker(
                             throw failure
                         }
                         if (count == 0) break
-                        if (count > AiAgentContract.MAX_MODEL_REQUEST_PAYLOAD_BYTES - output.size()) {
-                            throw AiAgentModelException(AiAgentContract.ERROR_LIMIT_EXCEEDED)
-                        }
+                        if (count > maximumBytes - output.size()) throw AiAgentModelException(AiAgentContract.ERROR_LIMIT_EXCEEDED)
                         output.write(buffer, 0, count)
                     }
+                    input.checkError()
                 } finally { if (reopened != null) Os.close(reopened) }
             }
-            return Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
-                .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(output.toByteArray())).toString()
+            return output.toByteArray()
         }
-        override fun close() { synchronized(this) { runCatching { descriptor?.close() } } }
+        override fun close() { synchronized(this) {
+            closed = true
+            runCatching { descriptor?.close() }
+            images.forEach { runCatching { it.close() } }
+        } }
     }
 
     companion object {
@@ -660,16 +736,38 @@ internal class AiAgentModelBroker(
         private fun event(id: String, type: String, sequence: Long) = JsonObject().apply {
             addProperty("requestId", id); addProperty("type", type); addProperty("sequence", sequence)
         }
-        /** Closes every top-level descriptor, including rejected, unknown and mistyped fields. */
-        private fun closeBundleDescriptor(bundle: Bundle?, retainedPayload: ParcelFileDescriptor? = null): Boolean {
+        /** Closes descriptors in rejected, unknown or mistyped fields, including nested containers. */
+        private fun closeBundleDescriptor(bundle: Bundle?, retainedPayload: ParcelFileDescriptor? = null,
+            retainedImages: List<ParcelFileDescriptor> = emptyList()): Boolean {
             val keys = runCatching { bundle?.keySet()?.toList().orEmpty() }.getOrDefault(emptyList())
             var found = false
+            fun visit(value: Any?, accept: (ParcelFileDescriptor) -> Boolean) {
+                val pending = java.util.ArrayDeque<Any>()
+                val seen = java.util.Collections.newSetFromMap(java.util.IdentityHashMap<Any, Boolean>())
+                value?.let(pending::addLast)
+                while (pending.isNotEmpty()) {
+                    val next = pending.removeLast()
+                    if (!seen.add(next)) continue
+                    if (next is ParcelFileDescriptor) {
+                        if (!accept(next)) { found = true; runCatching { next.close() } }
+                    } else when (next) {
+                        is Array<*> -> next.forEach { it?.let(pending::addLast) }
+                        is List<*> -> next.forEach { it?.let(pending::addLast) }
+                        is Bundle -> runCatching { next.keySet().toList() }.getOrDefault(emptyList()).forEach { key ->
+                            @Suppress("DEPRECATION")
+                            val child = runCatching { next.get(key) }.getOrNull()
+                            child?.let(pending::addLast)
+                        }
+                    }
+                }
+            }
             for (key in keys) {
                 @Suppress("DEPRECATION")
-                val descriptor = runCatching { bundle?.get(key) }.getOrNull() as? ParcelFileDescriptor ?: continue
-                if (key == AiAgentContract.KEY_PAYLOAD_FD && descriptor === retainedPayload) continue
-                found = true
-                runCatching { descriptor.close() }
+                val value = runCatching { bundle?.get(key) }.getOrNull()
+                visit(value) { fd ->
+                    (key == AiAgentContract.KEY_PAYLOAD_FD && value === retainedPayload && fd === retainedPayload) ||
+                        (key == AiAgentContract.KEY_MODEL_IMAGE_FDS && value is Array<*> && retainedImages.any { it === fd })
+                }
             }
             return found
         }

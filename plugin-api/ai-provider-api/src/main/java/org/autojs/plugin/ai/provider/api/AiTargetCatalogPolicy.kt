@@ -5,6 +5,14 @@ import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.ai.common.api.AiProviderInfo
 
 object AiTargetCatalogPolicy {
+    /** Providers must apply this to every page before replying to an older host. */
+    fun forProtocol(target: AiTargetInfo, version: org.autojs.plugin.ai.common.api.AiProtocolVersion): AiTargetInfo {
+        require(version in AiProviderProtocol.HOST_PROTOCOL_RANGE)
+        return if (version < AiProviderProtocol.PROTOCOL_V2_1) {
+            target.copy(capabilityIds = target.capabilityIds.filterNot { it == AiProviderCapabilityId.VISION })
+        } else target
+    }
+
     fun requireCompatible(
         providerInfo: AiProviderInfo,
         providerCapabilities: AiProviderCapabilities,
@@ -25,7 +33,7 @@ object AiTargetCatalogPolicy {
                 "Target origin is outside its provider descriptor"
             }
         }
-        val providerCapabilityIds = providerCapabilities.capabilityIds()
+        val providerCapabilityIds = providerCapabilities.supportedCapabilityIds()
         require(target.capabilityIds.all { it in providerCapabilityIds }) {
             "Target capability exceeds its provider declaration"
         }
@@ -48,12 +56,4 @@ object AiTargetCatalogPolicy {
         else -> false
     }
 
-    private fun AiProviderCapabilities.capabilityIds(): Set<String> = buildSet {
-        if (supportsStreaming) add(AiProviderCapabilityId.STREAMING)
-        if (supportsReasoning) add(AiProviderCapabilityId.REASONING)
-        if (supportsTools) add(AiProviderCapabilityId.TOOLS)
-        if (supportsStructuredJson) add(AiProviderCapabilityId.STRUCTURED_JSON)
-        if (supportsUsage) add(AiProviderCapabilityId.USAGE)
-        if (supportsPersistentSessions) add(AiProviderCapabilityId.PERSISTENT_SESSION)
-    }
 }

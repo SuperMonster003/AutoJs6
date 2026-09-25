@@ -67,22 +67,37 @@ class AiToolCallBatch(
     override fun toString(): String = "AiToolCallBatch(callCount=${calls.size})"
 }
 
-data class AiToolResult(
+class AiToolResult(
     val callId: String,
     val output: AiPayloadReference,
     val isError: Boolean = false,
+    imageParts: List<AiContentPart> = emptyList(),
 ) {
+    val imageParts: List<AiContentPart> = immutableListSnapshot(imageParts)
     init {
         AiValidation.requireUtf8(callId, 1, AiProviderLimits.MAX_TOOL_CALL_ID_BYTES, "Tool call ID")
         require(callId.none { character -> Character.isISOControl(character) })
         require(output.mimeType in AiProviderMimeType.INPUT_VALUES)
         requireInlineTextPayload(output)
         require(output.declaredLengthBytes <= AiProviderLimits.MAX_TOOL_ARGUMENT_OR_RESULT_BYTES)
+        require(this.imageParts.all { it.isImage })
+        AiProviderImagePolicy.validate(this.imageParts, AiVisionCapabilities())
     }
+
+    operator fun component1() = callId
+    operator fun component2() = output
+    operator fun component3() = isError
+    operator fun component4() = imageParts
+    fun copy(callId: String = this.callId, output: AiPayloadReference = this.output,
+        isError: Boolean = this.isError, imageParts: List<AiContentPart> = this.imageParts) =
+        AiToolResult(callId, output, isError, imageParts)
+    override fun equals(other: Any?) = other is AiToolResult && callId == other.callId &&
+        output == other.output && isError == other.isError && imageParts == other.imageParts
+    override fun hashCode() = listOf(callId, output, isError, imageParts).hashCode()
 
     override fun toString(): String =
         "AiToolResult(outputMimeType=${output.mimeType}, outputBytes=${output.declaredLengthBytes}, " +
-            "outputDescriptorBacked=${!output.isInline}, isError=$isError)"
+            "outputDescriptorBacked=${!output.isInline}, isError=$isError, imageCount=${imageParts.size})"
 }
 
 class AiToolResultBatch(

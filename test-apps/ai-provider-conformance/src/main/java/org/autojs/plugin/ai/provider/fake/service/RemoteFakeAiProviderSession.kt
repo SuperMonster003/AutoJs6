@@ -142,10 +142,13 @@ internal class RemoteFakeAiProviderSession(
                         FakeAiProviderFixture.capabilities.maximumSessionDescriptors,
                         AiCommonLimits.MAX_DESCRIPTORS_PER_SESSION,
                     ),
+                    request = decodedRequest.getOrThrow(),
+                    capabilities = FakeAiProviderFixture.capabilities,
                 )
                 val texts = FakeAiPayloadMaterializer.materializeToolResults(
                     batch,
                     ownedResults::readDeclaredBytes,
+                    ::validateImage,
                 )
                 machine.submitToolResults(batch.results.map { it.callId })
                 synchronized(signal) {
@@ -229,6 +232,7 @@ internal class RemoteFakeAiProviderSession(
             val materialized = FakeAiPayloadMaterializer.materializeRequest(
                 request,
                 descriptors::readDeclaredBytes,
+                ::validateImage,
             )
             descriptors.close()
             ensureActive()
@@ -250,6 +254,15 @@ internal class RemoteFakeAiProviderSession(
                 finishFailed(AiErrorCode.PROVIDER_FAILED, "Fake AI provider failed")
             }
         }
+    }
+
+    private fun validateImage(part: org.autojs.plugin.ai.provider.api.AiContentPart, bytes: ByteArray) {
+        val metadata = requireNotNull(part.image)
+        val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        require(bounds.outMimeType == part.payload.mimeType && bounds.outWidth == metadata.width && bounds.outHeight == metadata.height)
+        val sampled = android.graphics.BitmapFactory.Options().apply { inSampleSize = maxOf(1, maxOf(metadata.width, metadata.height) / 128) }
+        requireNotNull(android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, sampled)).recycle()
     }
 
     private fun runNormal(request: AiProviderRequest, materialized: FakeMaterializedRequest) {

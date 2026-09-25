@@ -62,6 +62,8 @@ object AiAgentContract {
     const val KEY_MODEL_BROKER_INFO_JSON = "modelBrokerInfoJson"
     /** Optional ParcelFileDescriptor: exclusive alternative to the operation's inline JSON key. */
     const val KEY_PAYLOAD_FD = "payloadFd"
+    /** Separately negotiated image input descriptors, indexed by model imageRefs. */
+    const val KEY_MODEL_IMAGE_FDS = "modelImageFds"
     /** Optional String: one of ERROR_CODES for a synchronous failure. */
     const val KEY_ERROR_CODE = "errorCode"
     /** Optional String: human-readable failure detail, at most MAX_ERROR_MESSAGE_BYTES. */
@@ -123,6 +125,11 @@ object AiAgentContract {
     const val MODEL_EVENT_USAGE = "usage"
     const val MODEL_EVENT_TOOL_CALLS = "tool_calls"
     /** Optional broker extension; contract V1 and the original five transactions stay compatible. */
+    const val MODEL_VISION_VERSION = 1
+    const val MODEL_INFO_VISION_VERSION = "visionVersion"
+    const val MAX_MODEL_IMAGES = 4
+    const val MAX_MODEL_IMAGE_BYTES = 4L * 1024 * 1024
+    const val MAX_MODEL_TOTAL_IMAGE_BYTES = 8L * 1024 * 1024
     const val MODEL_TOOL_CALLING_VERSION = 1
     const val MODEL_INFO_TOOL_CALLING_VERSION = "toolCallingVersion"
     const val MAX_MODEL_TOOL_ROUNDS = 16

@@ -8,14 +8,15 @@ object FakeAiTargetPager {
     private val TOKEN = Regex("^fake-targets-v2:([1-9][0-9]*):([1-9][0-9]*)$")
 
     fun page(request: AiTargetListRequest): AiTargetPage {
-        AiProviderVersionPolicy.requireSelected(request.protocolVersion, FakeAiProviderFixture.protocolVersion)
+        require(request.protocolVersion in FakeAiProviderFixture.providerInfo.protocolRange)
         val offset = request.pageToken?.let { decodeToken(it, request.pageSize) } ?: 0
         val targets = FakeAiProviderFixture.publicTargets
         require(offset in 0 until targets.size) { "Target page token offset is out of range" }
         val end = minOf(offset + request.pageSize, targets.size)
         return AiTargetPage(
             catalogGeneration = FakeAiProviderFixture.CATALOG_GENERATION,
-            targets = targets.subList(offset, end),
+            targets = targets.subList(offset, end).map { org.autojs.plugin.ai.provider.api.AiTargetCatalogPolicy.forProtocol(
+                FakeAiProviderFixture.visionTarget(it), request.protocolVersion) },
             nextPageToken = if (end < targets.size) encodeToken(end, request.pageSize) else null,
         )
     }

@@ -168,11 +168,12 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/09/25
+###### 2026/09/26
 
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
 * `Feature` ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples
+* `Feature` The AI Agent model broker accepts image inputs and image tool results for compatible vision models (requires plugin support)
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
 * `Feature` MCP Server drawer switch with installation, activation, enablement, authorization, and compatibility guidance; notification Stop synchronization; saved plugin settings retained on reconnect; permission-checked settings entry from the drawer and Plugin Center. Restores a previously enabled server when AutoJs6 opens, unless the user stopped it while the host was absent; no boot startup.

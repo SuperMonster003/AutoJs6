@@ -76,9 +76,13 @@ class AiTerminalGate {
 class AiToolTurnPolicy(
     private val maximumRounds: Int,
     private val maximumOutstandingCalls: Int = AiProviderLimits.MAX_OUTSTANDING_TOOL_CALLS,
+    initialImageCount: Int = 0,
+    initialImageBytes: Long = 0,
 ) {
     private val seenCallIds = linkedSetOf<String>()
     private var outstandingCallIds: Set<String> = emptySet()
+    private var totalImageBytes = initialImageBytes.also { require(it in 0..AiProviderLimits.MAX_SESSION_IMAGE_BYTES) }
+    private var totalImages = initialImageCount.also { require(it in 0..AiProviderLimits.MAX_SESSION_IMAGES) }
 
     @get:Synchronized
     var completedRounds: Int = 0
@@ -113,7 +117,13 @@ class AiToolTurnPolicy(
         check(outstandingCallIds.isNotEmpty()) { "No tool turn is outstanding" }
         val ids = batch.results.mapTo(linkedSetOf()) { it.callId }
         require(ids == outstandingCallIds) { "Tool results do not exactly match the outstanding calls" }
+        val images = batch.results.flatMap { it.imageParts }
+        val imageBytes = images.sumOf { it.payload.declaredLengthBytes }
+        require(images.size <= AiProviderLimits.MAX_SESSION_IMAGES - totalImages)
+        require(imageBytes <= AiProviderLimits.MAX_SESSION_IMAGE_BYTES - totalImageBytes)
         addToolData(batch.results.map { it.output.declaredLengthBytes })
+        totalImages += images.size
+        totalImageBytes += imageBytes
         outstandingCallIds = emptySet()
         completedRounds += 1
     }
@@ -147,7 +157,9 @@ class AiProviderSessionPolicy(
     private val credits = AiCreditWindow()
     private val sequences = AiChunkSequencePolicy()
     private val terminals = AiTerminalGate()
-    private val tools = AiToolTurnPolicy(maximumToolRounds, maximumOutstandingToolCalls)
+    private val tools = AiToolTurnPolicy(maximumToolRounds, maximumOutstandingToolCalls,
+        expectedRequest?.messages?.sumOf { message -> message.parts.count { it.isImage } } ?: 0,
+        expectedRequest?.messages?.sumOf { message -> message.parts.filter { it.isImage }.sumOf { it.payload.declaredLengthBytes } } ?: 0)
     private val streamedTextDigest = MessageDigest.getInstance("SHA-256")
     private var usage: AiUsage? = null
     private var cancelRequested = false
@@ -256,6 +268,11 @@ class AiProviderSessionPolicy(
     @Synchronized
     fun submitToolResults(batch: AiToolResultBatch) {
         requireStarted()
+        if (batch.results.any { it.imageParts.isNotEmpty() }) {
+            val request = requireNotNull(expectedRequest)
+            AiProviderImagePolicy.requireProtocol(request.protocolVersion)
+            require(AiProviderCapabilityId.VISION in request.options.requiredCapabilityIds)
+        }
         tools.submit(batch)
     }
 

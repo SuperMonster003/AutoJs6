@@ -48,7 +48,7 @@ object FakeAiProviderFixture {
         displayName = "AutoJs6 fake target provider",
         implementationVersionName = PROVIDER_VERSION_NAME,
         implementationVersionCode = PROVIDER_VERSION_CODE,
-        protocolRange = AiProtocolRange(protocolVersion, protocolVersion),
+        protocolRange = AiProviderProtocol.HOST_PROTOCOL_RANGE,
         locality = AiDataLocality.HYBRID,
         credentialMode = AiCredentialMode.PLUGIN_MANAGED,
         declaredHttpsOrigins = listOf(REMOTE_ORIGIN),
@@ -73,6 +73,7 @@ object FakeAiProviderFixture {
         maximumSessionDescriptors = 32,
         acceptedTextMimeTypes = listOf(AiProviderMimeType.PLAIN, AiProviderMimeType.JSON),
         acceptedSchemaMimeTypes = listOf(AiProviderMimeType.JSON),
+        vision = org.autojs.plugin.ai.provider.api.AiVisionCapabilities(),
     )
 
     val publicTargets = listOf(
@@ -149,7 +150,7 @@ object FakeAiProviderFixture {
 
     fun requireSupportedRequest(request: AiProviderRequest) {
         require(request.providerId == PROVIDER_ID) { "Request targets a different provider" }
-        AiProviderVersionPolicy.requireSelected(request.protocolVersion, protocolVersion)
+        require(request.protocolVersion in providerInfo.protocolRange)
         if (FakeAiHostileScenario.fromTargetId(request.targetId) != null) {
             return
         }
@@ -157,7 +158,7 @@ object FakeAiProviderFixture {
             ?: throw IllegalArgumentException("Unknown fake target")
         require(target.configured && target.available) { "Fake target is not available" }
         val required = requiredCapabilities(request)
-        require(required.all { it in target.capabilityIds }) { "Fake target does not support the request" }
+        require(required.all { it in visionTarget(target).capabilityIds }) { "Fake target does not support the request" }
         if (request.targetId in setOf(TARGET_TOOLS, TARGET_AGENT_TOOLS)) {
             require(request.tools.isNotEmpty()) { "Fake tools target requires a tool definition" }
             require(request.options.maximumToolRounds > 0) { "Fake tools target requires a tool round" }
@@ -165,6 +166,10 @@ object FakeAiProviderFixture {
             require(request.tools.isEmpty()) { "Only the fake tools target accepts tools" }
         }
     }
+
+    fun visionTarget(target: AiTargetInfo): AiTargetInfo = if (target.targetId in setOf(TARGET_ECHO, TARGET_TOOLS)) {
+        target.copy(capabilityIds = target.capabilityIds + AiProviderCapabilityId.VISION)
+    } else target
 
     private fun requiredCapabilities(request: AiProviderRequest): Set<String> = buildSet {
         addAll(request.options.requiredCapabilityIds)

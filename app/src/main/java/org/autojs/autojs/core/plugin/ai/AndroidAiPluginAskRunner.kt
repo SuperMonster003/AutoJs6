@@ -51,7 +51,9 @@ import java.util.concurrent.atomic.AtomicReference
 internal fun AiPluginAskRequest.toProtocolMessages(): List<AiMessage> =
     messages.toProtocolMessages()
 
-private fun List<AiPluginMessage>.toProtocolMessages(): List<AiMessage> = map { message ->
+private fun List<AiPluginMessage>.toProtocolMessages(): List<AiMessage> {
+    var imageIndex = 0
+    return map { message ->
     val contentBytes = message.content.toByteArray(Charsets.UTF_8)
     check(contentBytes.size == message.contentBytes) { "AI plugin message UTF-8 size changed" }
     AiMessage(
@@ -65,8 +67,9 @@ private fun List<AiPluginMessage>.toProtocolMessages(): List<AiMessage> = map { 
                     charset = "utf-8",
                 ),
             ),
-        ),
+        ) + message.images.map { it.contentPart(imageIndex++) },
     )
+    }
 }
 
 internal fun aiProviderPluginCapabilityRequirement(
@@ -81,16 +84,17 @@ internal fun aiProviderPluginCapabilityRequirement(
         if (request.structuredJson) add(AiProviderCapabilityId.STRUCTURED_JSON)
         if (request.includeReasoning) add(AiProviderCapabilityId.REASONING)
         if (request.tools.isNotEmpty()) add(AiProviderCapabilityId.TOOLS)
+        if (request.vision) add(AiProviderCapabilityId.VISION)
     },
     minimumMessages = request.messages.size,
-    minimumContentParts = request.messages.size,
+    minimumContentParts = request.messages.size + request.images.size,
     minimumToolDefinitions = request.tools.size,
     minimumToolRounds = request.maximumToolRounds,
     minimumOutstandingToolCalls = if (request.tools.isNotEmpty()) 1 else 0,
     minimumContextBytes = request.inputBytes,
     minimumOutputBytes = 1L,
-    minimumRequestDescriptors = 0,
-    minimumSessionDescriptors = 0,
+    minimumRequestDescriptors = request.images.size,
+    minimumSessionDescriptors = if (request.vision) maxOf(1, request.images.size) else 0,
     requiredTextMimeTypes = buildSet {
         add(AiProviderMimeType.PLAIN)
         if (request.structuredJson) add(AiProviderMimeType.JSON)
@@ -374,7 +378,8 @@ private class ProcessAiPluginAskRunner(
         private var deadlineHandle: Closeable? = null
 
         fun start() {
-            if (request.tools.isNotEmpty() && (onStreamEvent == null || onSessionOpen != null)) {
+            if ((request.tools.isNotEmpty() && (onStreamEvent == null || onSessionOpen != null)) ||
+                (request.vision && onSessionOpen != null)) {
                 fail(AiPluginAskFailure.INVALID_REQUEST)
                 return
             }
@@ -400,7 +405,10 @@ private class ProcessAiPluginAskRunner(
         override fun submitToolResults(results: List<AiPluginToolResult>): Boolean {
             val batch = try { results.toProtocolToolResults() } catch (_: Exception) { return false }
             val session = synchronized(lock) { if (terminal) null else stageHandle as? AiProviderSessionRunHandle }
-            return session?.submitToolResults(batch) ?: false
+            val images = results.flatMap { it.images }
+            return if (images.isEmpty()) session?.submitToolResults(batch) ?: false
+                else if (!request.vision) false
+                else session?.submitToolResults(batch, AiPluginImageDescriptors(images, backend.applicationContext.cacheDir)) ?: false
         }
 
         override fun close() {
@@ -685,7 +693,8 @@ private class ProcessAiPluginAskRunner(
                 fail(AiPluginAskFailure.INVALID_REQUEST)
                 return
             }
-            val descriptors = AndroidAiProviderSessionRequestDescriptors(emptyArray())
+            val descriptors = try { AiPluginImageDescriptors(request.images, backend.applicationContext.cacheDir).open() }
+            catch (_: Exception) { fail(AiPluginAskFailure.INTERNAL_FAILURE); return }
             val handle = try {
                 backend.session.start(
                     AiProviderSessionRunRequest(
@@ -1845,6 +1854,7 @@ private class ProcessAiPluginAskRunner(
         const val CATALOG_PLACEHOLDER_PROMPT = "-"
 
         val HOST_CAPABILITIES = AiProviderCapabilities(
+            vision = org.autojs.plugin.ai.provider.api.AiVisionCapabilities(),
             supportsStreaming = true,
             supportsReasoning = true,
             supportsTools = true,

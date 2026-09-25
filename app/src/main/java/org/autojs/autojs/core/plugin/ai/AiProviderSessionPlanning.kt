@@ -226,6 +226,12 @@ private fun MessageDigest.putCapabilities(value: AiProviderCapabilities) {
     put(value.supportsStructuredJson)
     put(value.supportsUsage)
     put(value.supportsPersistentSessions)
+    put(value.vision != null)
+    value.vision?.let { vision ->
+        put(vision.maximumImages); put(vision.maximumImageBytes); put(vision.maximumTotalImageBytes)
+        put(vision.maximumImageEdge); put(vision.maximumImagePixels)
+        putStrings("accepted-image-mime-types", vision.acceptedImageMimeTypes.sorted())
+    }
     put(value.maximumMessages)
     put(value.maximumContentParts)
     put(value.maximumToolDefinitions)

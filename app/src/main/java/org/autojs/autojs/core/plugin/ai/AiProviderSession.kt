@@ -29,6 +29,12 @@ internal interface AiProviderSessionRequestDescriptorLease : Closeable {
     val count: Int
 }
 
+/** Creates a fresh, host-owned lease on the control lane, only after admission. */
+internal interface AiProviderSessionRequestDescriptorFactory {
+    val count: Int
+    fun open(): AiProviderSessionRequestDescriptorLease
+}
+
 /**
  * Incoming callback descriptors. [copyForAsync] is the sole receiver-owned asynchronous
  * ownership-transfer boundary; callers must not assume that platform PFD duplication preserves
@@ -50,6 +56,10 @@ internal interface AiProviderSessionRemote : Closeable {
     fun grantCredits(count: Int)
     fun cancel()
     fun submitToolResults(envelope: ByteArray) { throw UnsupportedOperationException() }
+    fun submitToolResults(envelope: ByteArray, descriptors: AiProviderSessionRequestDescriptorLease) {
+        require(descriptors.count == 0)
+        submitToolResults(envelope)
+    }
 }
 
 internal interface AiProviderSessionCallbackIngress {
@@ -296,9 +306,10 @@ internal class AiProviderSessionPolicy(
     fun binderDied(): Boolean = terminateExternal(AiProviderSessionEvent.BinderDied, cancelRemote = false)
 
     /** A single bounded submission may be queued for the currently published batch. */
-    fun submitToolResults(results: AiToolResultBatch): Boolean {
+    fun submitToolResults(results: AiToolResultBatch, descriptorFactory: AiProviderSessionRequestDescriptorFactory? = null): Boolean {
         val encoded = try {
-            AiProviderQuotaPolicy.validateToolResults(results, 0, 0)
+            AiProviderQuotaPolicy.validateToolResults(results, descriptorFactory?.count ?: 0,
+                maximumSessionDescriptors(), request, plan.pinnedProvider.negotiatedCapabilities)
             AiProviderCodec.encodeToolResultBatch(results).also {
                 require(it.size <= AiCommonLimits.MAX_BINDER_ENVELOPE_BYTES)
             }
@@ -314,12 +325,18 @@ internal class AiProviderSessionPolicy(
                     activeRemoteOperations += 1
                     checkNotNull(remote)
                 }
+                var descriptors: AiProviderSessionRequestDescriptorLease? = null
                 try {
                     checkNotNull(sessionPolicy).submitToolResults(results)
-                    active.submitToolResults(encoded)
+                    if (descriptorFactory == null) active.submitToolResults(encoded)
+                    else {
+                        descriptors = descriptorFactory.open()
+                        require(descriptors.count == descriptorFactory.count)
+                        if (synchronized(lock) { terminalEvent == null }) active.submitToolResults(encoded, descriptors)
+                    }
                 } catch (_: Throwable) {
                     terminateOnLane(AiProviderSessionEvent.Rejected(AiProviderSessionFailure.REMOTE_CONTROL_FAILED), true)
-                } finally { releaseRemoteOperation() }
+                } finally { runCatching { descriptors?.close() }; releaseRemoteOperation() }
             }
         } catch (_: RuntimeException) { executorRejected(); return false }
         return true
@@ -339,6 +356,7 @@ internal class AiProviderSessionPolicy(
             return AiProviderSessionFailure.REQUEST_INVALID
         }
         val required = request.options.requiredCapabilityIds.toMutableSet().apply {
+            if (request.messages.any { it.parts.any { part -> part.isImage } }) add(AiProviderCapabilityId.VISION)
             if (request.options.stream) add(AiProviderCapabilityId.STREAMING)
             if (request.options.includeReasoning) add(AiProviderCapabilityId.REASONING)
             if (request.options.structuredJson) add(AiProviderCapabilityId.STRUCTURED_JSON)

@@ -45,7 +45,7 @@ class AiAgentContractTest {
         val expected = setOf(
             "contractVersion", "linkConfigJson", "statusJson", "runRequestJson", "runEventJson",
             "runResponseJson", "runRefJson", "modelRequestJson", "modelEventJson", "modelRefJson",
-            "modelBrokerInfoJson", "payloadFd", "errorCode", "errorMessage",
+            "modelBrokerInfoJson", "payloadFd", "errorCode", "errorMessage", "modelImageFds",
         )
         assertEquals(expected, values.toSet())
         fields.forEach { field ->

@@ -67,6 +67,8 @@ object FakeAiProviderEngine {
             """{"kind":"done","done":{"status":"completed","summary":"Provider received Agent tool results","evidence":["Same Provider session resumed"]}}"""
         } else if (request.targetId == FakeAiProviderFixture.TARGET_TOOLS) {
             "tool:${requireNotNull(toolResult) { "Fake tool result is unavailable" }}"
+        } else if (materialized.imageCount > 0) {
+            "vision:images=${materialized.imageCount}"
         } else {
             materialized.prompt.ifEmpty { "fake" }
         }

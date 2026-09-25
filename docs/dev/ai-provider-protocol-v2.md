@@ -1,12 +1,13 @@
 # AI Provider Protocol V2
 
-This document defines the provider-neutral text-generation Binder contract used
+This document defines the provider-neutral text/tool-generation Binder contract used
 by AutoJs6 and independently released AI provider plugins. The checked-in API,
 codecs, lifecycle policies, and conformance tests are normative. This document
 explains the invariants those implementations enforce.
 
-The current contract is exactly protocol 2.0. Host and provider both advertise
-2.0 as their only supported version. Superseded AI wire interfaces, schema
+The host supports protocol 2.0 through 2.1. Version 2.1 adds explicitly negotiated
+image inputs; a 2.0 peer still negotiates 2.0 and retains its text wire encoding.
+Superseded AI wire interfaces, schema
 names, codecs, and service methods are not accepted and have no compatibility
 aliases.
 
@@ -20,9 +21,10 @@ aliases.
 | `test-apps:ai-provider-conformance` | Deterministic provider plus malformed, hostile, timeout, Binder, descriptor, catalog, and terminal-state cases |
 | `app/.../core/plugin/ai` | Exact-component discovery, trust pinning, catalog/session transports, target planning, descriptor ownership, and safe diagnostics |
 
-V2 is text generation only. Image, audio, and video remain separate protocol
-families and separate plugins. A provider supporting several modalities does
-not turn this contract into a mixed-media transport.
+V2.0 accepts text inputs only. V2.1 can accept images as input to text/tool
+generation when the host, provider and exact target support `vision`. Image
+generation, audio and video remain outside this contract. The maintainer approved
+this change to the earlier text-only boundary on 2026-09-25 for Agent P9.2.
 
 ## Discovery And Binder Surface
 
@@ -194,6 +196,52 @@ The text surface supports:
 
 Required capability IDs are explicit. The provider cannot emit an event or use
 a control outside the intersection of host, provider, target, and request.
+
+## Negotiated 2.1 Image Input
+
+Version and capability negotiation are both required. `getCapabilities` may
+append optional tag 18 containing `AiVisionCapabilities`; old decoders ignore
+this field. A 2.0 selection removes `vision` from the effective capabilities.
+Providers must apply `AiTargetCatalogPolicy.forProtocol` to each target before
+replying to `listTargets`, so 2.0 hosts never encounter an unknown capability ID.
+Declaring protocol 2.1 alone does not declare vision. Only actually supported
+model/profile targets may advertise it; LiteRT is not implicitly visual.
+
+An `AiContentPart` remains a text payload when image metadata is absent. An image
+part adds required tag 2 containing `AiImageMetadata(width, height)`. It accepts
+only `image/jpeg` or `image/png`, uses a descriptor (no inline/base64 alternative),
+has no charset, and requires its encoded byte length and SHA-256. Initial images
+may occur only in user messages. `AiToolResult` may append repeated required tag
+4 image parts beside its existing text output. Old readers reject these required
+fields, rather than silently dropping image content. Existing text codecs and
+AIDL transaction order remain unchanged.
+
+Request `vision` in `requiredCapabilityIds` before a native conversation can
+accept image tool results, including a conversation with no initial image. Tool
+results share one descriptor-index space across their text and image payloads.
+The same request/session ID, pending call IDs, round budget, deadline and callback
+remain in force. This host does not combine vision with persistent `ai.session`.
+
+| Image limit | Protocol ceiling |
+| --- | --- |
+| Images per request / tool-result batch | 4 |
+| Encoded bytes per image | 4 MiB |
+| Encoded bytes per request / batch | 8 MiB |
+| Width and height | 1-4096 pixels each |
+| Decoded pixel count | 16,777,216 |
+| Images across initial request and tool continuations | 16 |
+| Encoded bytes across the session | 32 MiB |
+
+The capability intersection can lower per-event limits or accepted MIME types.
+Text/context, schemas, image bytes/pixels and descriptor counts have independent
+limits; image bytes do not turn into UTF-8 text/context bytes. Every descriptor
+must be referenced exactly once. Validate metadata, capability and quotas before
+reading; then verify actual length, digest, decoded MIME/dimensions and image
+decodability before model use. Bounded sampling avoids allocating a full-size
+bitmap merely to validate it. Each receiver owns and closes its transferred FDs
+on every exit path. The host uses private temporary files unlinked after opening,
+and opens continuation descriptors only when their serialized dispatch starts.
+No image bytes, base64, hashes or paths are included in ordinary diagnostics.
 
 ## Session And Streaming Lifecycle
 

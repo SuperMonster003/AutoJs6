@@ -341,6 +341,19 @@ internal class AndroidAiProviderSession(
             }
         }
 
+        override fun submitToolResults(envelope: ByteArray, descriptors: AiProviderSessionRequestDescriptorLease) {
+            val owner = descriptors as? AndroidAiProviderSessionRequestDescriptors
+                ?: throw IllegalArgumentException("Unsupported image descriptor owner")
+            withObservedOperation {
+                synchronized(controlLock) {
+                    check(!closed.get()) { "AI remote session is closed" }
+                    owner.withBorrowedDescriptorsForOpen { values ->
+                        transactControl { session.submitToolResults(envelope, values) }
+                    }
+                }
+            }
+        }
+
         override fun grantCredits(count: Int) {
             check(count > 0) { "local AI session credits must be positive" }
             withObservedOperation {

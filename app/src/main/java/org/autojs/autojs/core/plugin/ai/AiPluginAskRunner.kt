@@ -24,10 +24,13 @@ internal enum class AiPluginMessageRole(val protocolValue: Int) {
 internal class AiPluginMessage(
     val role: AiPluginMessageRole,
     val content: String,
+    images: List<AiPluginImage> = emptyList(),
 ) {
+    val images = images.toList()
     val contentBytes: Int = AiValidation.utf8Size(content)
 
     init {
+        require(this.images.isEmpty() || role == AiPluginMessageRole.USER)
         AiValidation.requireUtf8(
             content,
             1,
@@ -37,7 +40,7 @@ internal class AiPluginMessage(
     }
 
     override fun toString(): String =
-        "AiPluginMessage(role=$role, contentBytes=$contentBytes)"
+        "AiPluginMessage(role=$role, contentBytes=$contentBytes, imageCount=${images.size})"
 }
 
 internal data class AiPluginUsage(
@@ -93,6 +96,7 @@ internal class AiPluginAskRequest(
     val includeReasoning: Boolean = false,
     tools: List<AiToolDefinition> = emptyList(),
     val maximumToolRounds: Int = 0,
+    val vision: Boolean = false,
 ) {
     val tools = tools.toList()
     val messages: List<AiPluginMessage> = messages.toList()
@@ -101,7 +105,11 @@ internal class AiPluginAskRequest(
     val responseSchemaBytes: Int? = responseSchemaJson?.let(AiValidation::utf8Size)
     val structuredJson: Boolean = responseSchemaJson != null
 
+    val images = this.messages.flatMap { it.images }
     init {
+        require(vision || images.isEmpty())
+        org.autojs.plugin.ai.provider.api.AiProviderImagePolicy.validate(
+            images.mapIndexed { index, image -> image.contentPart(index) }, org.autojs.plugin.ai.provider.api.AiVisionCapabilities())
         require(this.tools.size <= AiProviderLimits.MAX_TOOL_DEFINITIONS)
         require(this.tools.map { it.name }.distinct().size == this.tools.size)
         require(maximumToolRounds in 0..AiProviderLimits.MAX_TOOL_ROUNDS)
@@ -203,6 +211,7 @@ internal fun AiPluginAskRequest.toGenerationOptions(
             add(AiProviderCapabilityId.REASONING)
         }
         if (tools.isNotEmpty() && AiProviderCapabilityId.TOOLS !in this) add(AiProviderCapabilityId.TOOLS)
+        if (vision && AiProviderCapabilityId.VISION !in this) add(AiProviderCapabilityId.VISION)
     },
     temperature = temperature,
     topK = topK,

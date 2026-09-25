@@ -62,10 +62,7 @@ class AiAgentModelProtocolTest {
         assertNull(failure.cause)
     }
 
-    @Test fun imagesRemainUnsupportedAndToolDefinitionsRequireAnExplicitRoundLimit() {
-        listOf("imageRefs").forEach { key ->
-            rejected(valid().apply { add(key, JsonParser.parseString("[]")) }.toString(), AiAgentContract.ERROR_TARGET_UNSUPPORTED)
-        }
+    @Test fun toolDefinitionsRequireAnExplicitRoundLimit() {
         rejected(valid().apply { add("tools", JsonParser.parseString("[]")) }.toString())
         val toolRequest = valid().apply {
             add("tools", JsonParser.parseString("""[{"name":"ui_read","description":"Private description","inputSchema":{"type":"object"}}]"""))

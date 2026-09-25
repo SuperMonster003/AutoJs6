@@ -111,9 +111,64 @@ Each admitted request with a live callback has
 `started`, zero or more `chunk` events (streaming), optional `usage`, then exactly
 one `completed`, `failed` or `cancelled`. Sequences increase per request. The host
 does not expose credentials, private profile fields or raw Provider error bodies.
-Image inputs remain unsupported. Requests without tools keep the original
+Image inputs require the negotiated extension below. Requests without tools keep the original
 ask/stream behavior and do not enable native tool rounds. Public script `ai.ask`
 and `ai.stream` options do not expose this internal model-broker extension.
+
+### Model image extension
+
+Read `modelBrokerInfoJson.visionVersion` before using images; missing means
+unsupported. Extension version 1 preserves Agent contract V1 and its existing
+transactions. The selected catalog target must advertise `vision`, and the host
+must negotiate Provider 2.1 with vision capabilities. This is an internal broker
+extension; it does not add a public script `ai.ask` image option.
+
+Generation JSON can add `vision: true` to reserve support for later image tool
+results. Initial `imageRefs` also imply vision. Keep `messages` as role/content
+objects, and add references at the request root:
+
+```json
+{
+  "requestId": "vision-1",
+  "targetId": "profile:example",
+  "messages": [{"role": "user", "content": "Describe this synthetic image."}],
+  "vision": true,
+  "imageRefs": [{
+    "messageIndex": 0,
+    "descriptorIndex": 0,
+    "mimeType": "image/png",
+    "byteLength": 1234,
+    "width": 32,
+    "height": 24,
+    "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  }]
+}
+```
+
+The dimensions, byte length and hash above are illustrative; supply the actual
+encoded image values. The Bundle carries `modelImageFds`, a
+`ParcelFileDescriptor[]`, separate from the optional JSON `payloadFd`. Image
+indices consume every array entry exactly once. `messageIndex` must reference a
+user message. An individual native `results` entry can add `imageRefs` with the
+same fields except `messageIndex`; all entries share one FD array for that batch.
+The original request must have opted into vision before such results are sent.
+
+Only JPEG/PNG are accepted. Limits advertised by the broker are 4 images, 4 MiB
+per image, 8 MiB per batch, 4096 per edge, 16,777,216 pixels, and 16 images / 32 MiB
+across the initial request and its native continuations. Negotiation can narrow
+them. The UTF-8 JSON/text grant is independent of encoded image bytes. Target,
+index, quota, dimensions, digest and actual decode checks happen before model
+dispatch; unsupported inputs fail without dropping images or switching targets.
+Pipe reads honor cancellation and the original deadline. Malformed Bundles,
+foreign UIDs, null callbacks, teardown and failed reads also close image FDs.
+
+Admission reserves an image estimate of
+`1024 + 4 * ceil(width/32) * ceil(height/32)` tokens per image. Each native model
+continuation includes all retained images in its estimate, and cumulative
+reported Provider usage replaces estimates when available. This is a bounded
+fallback accounting policy, not a guarantee about a particular model's billing.
+The existing model-call rate, token, output and deadline budgets remain active.
+Raw images/base64/file paths are not emitted in events or ordinary logs.
 
 ### Native model tool extension
 

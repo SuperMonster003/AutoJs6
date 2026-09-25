@@ -6,6 +6,27 @@ import org.autojs.plugin.protocol.wire.TaggedWireDocument
 import org.autojs.plugin.protocol.wire.TaggedWireWriter
 
 object AiProviderCodec {
+    fun encodeVisionCapabilities(value: AiVisionCapabilities): ByteArray =
+        TaggedWireWriter(AiProviderProtocol.SCHEMA_VISION_CAPABILITIES, 1, 0)
+            .int32(1, value.maximumImages, true).int64(2, value.maximumImageBytes, true)
+            .int64(3, value.maximumTotalImageBytes, true).int32(4, value.maximumImageEdge, true)
+            .int64(5, value.maximumImagePixels, true).strings(6, value.acceptedImageMimeTypes).encode()
+
+    fun decodeVisionCapabilities(bytes: ByteArray): AiVisionCapabilities {
+        val value = document(bytes, AiProviderProtocol.SCHEMA_VISION_CAPABILITIES, (1..6).toSet(), setOf(6))
+        return AiVisionCapabilities(value.requireInt32(1), value.requireInt64(2), value.requireInt64(3),
+            value.requireInt32(4), value.requireInt64(5), value.strings(6))
+    }
+
+    fun encodeImageMetadata(value: AiImageMetadata): ByteArray =
+        TaggedWireWriter(AiProviderProtocol.SCHEMA_IMAGE_METADATA, 1, 0)
+            .int32(1, value.width, true).int32(2, value.height, true).encode()
+
+    fun decodeImageMetadata(bytes: ByteArray): AiImageMetadata {
+        val value = document(bytes, AiProviderProtocol.SCHEMA_IMAGE_METADATA, setOf(1, 2))
+        return AiImageMetadata(value.requireInt32(1), value.requireInt32(2))
+    }
+
     fun encodeCapabilities(value: AiProviderCapabilities): ByteArray =
         TaggedWireWriter(AiProviderProtocol.SCHEMA_CAPABILITIES, 1, 1)
             .boolean(1, value.supportsStreaming, true)
@@ -25,10 +46,11 @@ object AiProviderCodec {
             .strings(15, value.acceptedTextMimeTypes)
             .strings(16, value.acceptedSchemaMimeTypes)
             .boolean(17, value.supportsPersistentSessions, true)
+            .apply { value.vision?.let { document(18, encodeVisionCapabilities(it)) } }
             .encode()
 
     fun decodeCapabilities(bytes: ByteArray): AiProviderCapabilities {
-        val document = document(bytes, AiProviderProtocol.SCHEMA_CAPABILITIES, (1..17).toSet(), setOf(15, 16))
+        val document = document(bytes, AiProviderProtocol.SCHEMA_CAPABILITIES, (1..18).toSet(), setOf(15, 16))
         return AiProviderCapabilities(
             supportsStreaming = document.requireBoolean(1),
             supportsReasoning = document.requireBoolean(2),
@@ -47,6 +69,7 @@ object AiProviderCodec {
             acceptedTextMimeTypes = document.strings(15),
             acceptedSchemaMimeTypes = document.strings(16),
             supportsPersistentSessions = document.requireBoolean(17),
+            vision = document.optionalDocument(18)?.let(::decodeVisionCapabilities),
         )
     }
 
@@ -157,11 +180,14 @@ object AiProviderCodec {
     fun encodeContentPart(value: AiContentPart): ByteArray =
         TaggedWireWriter(AiProviderProtocol.SCHEMA_CONTENT_PART, 1, 0)
             .document(1, AiCommonCodec.encodePayloadReference(value.payload), true)
+            // Required when present: an old decoder must reject, never silently discard, an image.
+            .apply { value.image?.let { document(2, encodeImageMetadata(it), true) } }
             .encode()
 
     fun decodeContentPart(bytes: ByteArray): AiContentPart {
-        val document = document(bytes, AiProviderProtocol.SCHEMA_CONTENT_PART, setOf(1))
-        return AiContentPart(AiCommonCodec.decodePayloadReference(document.requireDocument(1)))
+        val document = document(bytes, AiProviderProtocol.SCHEMA_CONTENT_PART, setOf(1, 2))
+        return AiContentPart(AiCommonCodec.decodePayloadReference(document.requireDocument(1)),
+            document.optionalDocument(2)?.let(::decodeImageMetadata))
     }
 
     fun encodeMessage(value: AiMessage): ByteArray =
@@ -273,14 +299,16 @@ object AiProviderCodec {
             .string(1, value.callId, true)
             .document(2, AiCommonCodec.encodePayloadReference(value.output), true)
             .boolean(3, value.isError, true)
+            .apply { value.imageParts.forEach { document(4, encodeContentPart(it), true) } }
             .encode()
 
     fun decodeToolResult(bytes: ByteArray): AiToolResult {
-        val document = document(bytes, AiProviderProtocol.SCHEMA_TOOL_RESULT, setOf(1, 2, 3))
+        val document = document(bytes, AiProviderProtocol.SCHEMA_TOOL_RESULT, setOf(1, 2, 3, 4), setOf(4))
         return AiToolResult(
             callId = document.requireString(1),
             output = AiCommonCodec.decodePayloadReference(document.requireDocument(2)),
             isError = document.requireBoolean(3),
+            imageParts = document.documents(4).map(::decodeContentPart),
         )
     }
 

@@ -32,6 +32,7 @@ class AiProviderCapabilities(
     acceptedTextMimeTypes: List<String>,
     acceptedSchemaMimeTypes: List<String>,
     val supportsPersistentSessions: Boolean = false,
+    val vision: AiVisionCapabilities? = null,
 ) {
     val acceptedTextMimeTypes: List<String> = immutableListSnapshot(acceptedTextMimeTypes)
     val acceptedSchemaMimeTypes: List<String> = immutableListSnapshot(acceptedSchemaMimeTypes)
@@ -53,6 +54,7 @@ class AiProviderCapabilities(
         require(acceptedTextMimeTypes.all { it in AiProviderMimeType.INPUT_VALUES })
         require(acceptedSchemaMimeTypes.distinct().size == acceptedSchemaMimeTypes.size)
         require(acceptedSchemaMimeTypes.all { it in AiProviderMimeType.SCHEMA_VALUES })
+        require(vision == null || maximumRequestDescriptors > 0) { "Image inputs require request descriptors" }
         if (supportsTools) {
             require(maximumToolDefinitions > 0 && maximumToolRounds > 0 && maximumOutstandingToolCalls > 0)
             require(AiProviderMimeType.JSON in acceptedSchemaMimeTypes)
@@ -76,6 +78,7 @@ class AiProviderCapabilities(
     operator fun component15() = acceptedTextMimeTypes
     operator fun component16() = acceptedSchemaMimeTypes
     operator fun component17() = supportsPersistentSessions
+    operator fun component18() = vision
 
     fun supportedCapabilityIds(): Set<String> = buildSet {
         if (supportsStreaming) add(AiProviderCapabilityId.STREAMING)
@@ -84,6 +87,7 @@ class AiProviderCapabilities(
         if (supportsStructuredJson) add(AiProviderCapabilityId.STRUCTURED_JSON)
         if (supportsUsage) add(AiProviderCapabilityId.USAGE)
         if (supportsPersistentSessions) add(AiProviderCapabilityId.PERSISTENT_SESSION)
+        if (vision != null) add(AiProviderCapabilityId.VISION)
     }
 
     fun copy(
@@ -104,6 +108,7 @@ class AiProviderCapabilities(
         acceptedTextMimeTypes: List<String> = this.acceptedTextMimeTypes,
         acceptedSchemaMimeTypes: List<String> = this.acceptedSchemaMimeTypes,
         supportsPersistentSessions: Boolean = this.supportsPersistentSessions,
+        vision: AiVisionCapabilities? = this.vision,
     ) = AiProviderCapabilities(
         supportsStreaming = supportsStreaming,
         supportsReasoning = supportsReasoning,
@@ -122,6 +127,7 @@ class AiProviderCapabilities(
         acceptedTextMimeTypes = acceptedTextMimeTypes,
         acceptedSchemaMimeTypes = acceptedSchemaMimeTypes,
         supportsPersistentSessions = supportsPersistentSessions,
+        vision = vision,
     )
 
     override fun equals(other: Any?): Boolean =
@@ -142,7 +148,7 @@ class AiProviderCapabilities(
             maximumSessionDescriptors == other.maximumSessionDescriptors &&
             acceptedTextMimeTypes == other.acceptedTextMimeTypes &&
             acceptedSchemaMimeTypes == other.acceptedSchemaMimeTypes &&
-            supportsPersistentSessions == other.supportsPersistentSessions
+            supportsPersistentSessions == other.supportsPersistentSessions && vision == other.vision
 
     override fun hashCode(): Int = dataClassHashCode(
         supportsStreaming,
@@ -162,6 +168,7 @@ class AiProviderCapabilities(
         acceptedTextMimeTypes,
         acceptedSchemaMimeTypes,
         supportsPersistentSessions,
+        vision,
     )
 
     override fun toString(): String =
@@ -175,7 +182,7 @@ class AiProviderCapabilities(
             "maximumSessionDescriptors=$maximumSessionDescriptors, " +
             "acceptedTextMimeTypes=$acceptedTextMimeTypes, " +
             "acceptedSchemaMimeTypes=$acceptedSchemaMimeTypes, " +
-            "supportsPersistentSessions=$supportsPersistentSessions)"
+            "supportsPersistentSessions=$supportsPersistentSessions, vision=$vision)"
 }
 
 data class AiTargetListRequest(
@@ -413,10 +420,19 @@ class AiTargetPage(
 
 data class AiContentPart(
     val payload: AiPayloadReference,
+    val image: AiImageMetadata? = null,
 ) {
+    val isImage: Boolean get() = image != null
     init {
-        require(payload.mimeType in AiProviderMimeType.INPUT_VALUES) { "Unsupported text content MIME type" }
-        requireInlineTextPayload(payload)
+        if (image == null) {
+            require(payload.mimeType in AiProviderMimeType.INPUT_VALUES) { "Unsupported text content MIME type" }
+            requireInlineTextPayload(payload)
+        } else {
+            require(payload.mimeType in AiProviderMimeType.IMAGE_VALUES) { "Unsupported image MIME type" }
+            require(!payload.isInline && payload.charset == null) { "Images require binary descriptors" }
+            require(payload.declaredLengthBytes in 1..AiProviderLimits.MAX_IMAGE_BYTES)
+            require(payload.sha256 != null) { "An image requires its content digest" }
+        }
     }
 }
 
@@ -627,6 +643,13 @@ class AiProviderRequest(
         require(AiValidation.STABLE_ID.matches(providerId)) { "Invalid provider ID" }
         require(AiValidation.TARGET_ID.matches(targetId)) { "Invalid target ID" }
         require(messages.isNotEmpty()) { "AI messages must not be empty" }
+        if (messages.any { message -> message.parts.any { it.isImage } } ||
+            AiProviderCapabilityId.VISION in options.requiredCapabilityIds) {
+            AiProviderImagePolicy.requireProtocol(protocolVersion)
+        }
+        require(messages.all { it.role == AiMessageRole.USER || it.parts.none { part -> part.isImage } }) {
+            "Initial images belong to user messages"
+        }
     }
 
     operator fun component1() = requestId

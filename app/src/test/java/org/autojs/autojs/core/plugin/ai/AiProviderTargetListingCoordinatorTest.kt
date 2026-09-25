@@ -844,7 +844,7 @@ private fun pinned(
     lastUpdateTime = input.lastUpdateTime,
     signerSha256 = input.signerSha256,
     providerInfo = AiProviderHostTestFixtures.providerInfo(),
-    protocolVersion = AiProviderProtocol.HOST_PROTOCOL_RANGE.maximum,
+    protocolVersion = AiProviderProtocol.PROTOCOL_V2,
     negotiatedCapabilities = AiProviderHostTestFixtures.capabilities(),
 )
 

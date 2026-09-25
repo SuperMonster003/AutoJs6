@@ -8,6 +8,16 @@ fallback usage accounting, stable error mapping and terminal event ordering:
 .\gradlew.bat :app:testAppDebugUnitTest --tests '*AiAgentModelProtocolTest'
 ```
 
+P9.2 adds image admission, independent quotas, capability/version checks, native
+image-result ownership and image-token accounting. Run `*AiAgentModelVisionTest`,
+`*AiProviderVisionSelectionTest` and the Provider API suite alongside the existing
+tests. The Android broker class includes synthetic JPEG/PNG round trips and
+negative/cancellation cases. `AiProviderVisionCompatibilityAndroidTest` additionally
+requires `-e autojs.aiProvider.expectedMinor 0` or `1`, matching the explicitly
+installed old/new fake APK. Use a fresh host process for fault cases. Actual
+2026-09-26 outcomes and fixture boundaries are recorded in the
+[P9.2 host receipt](evidence/ai-agent-p92-host-20260926.md).
+
 Device checks use the same-signature `test-apps:ai-provider-conformance` APK. They are opt-in and
 do not contact a real model or network. Install the host, host androidTest and fake Provider APKs
 from the same build, then run on the intended device:
