@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -628,7 +629,7 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         Matcher matcher = pattern.matcher(input);
         Set<String> matches = new HashSet<>();
         while (matcher.find()) {
-            matches.add(matcher.group().toUpperCase());
+            matches.add(matcher.group().toUpperCase(Locale.ROOT));
         }
         if (matches.isEmpty()) {
             return input.trim();

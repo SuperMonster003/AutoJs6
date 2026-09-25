@@ -3239,7 +3239,18 @@ class AndroidNodeBridgeCapabilityProvider(
                             )
                         }
                         ensureNotificationChannel(descriptor)
-                        NotificationManagerCompat.from(appContext).notify(descriptor.id, descriptor.toNotification(appContext))
+                        try {
+                            NotificationManagerCompat.from(appContext).notify(descriptor.id, descriptor.toNotification(appContext))
+                        } catch (error: SecurityException) {
+                            // Preserve the bridge's permission-denied response if permission is revoked after the check.
+                            throw NotificationBridgeException(
+                                NodeBridgeError.permissionDenied(
+                                    message = "AutoJs6 notifications bridge could not post notification: ${error.message ?: error.javaClass.name}",
+                                    module = request.module,
+                                    method = request.method,
+                                ),
+                            )
+                        }
                         notificationHandles.remove(descriptor.id)?.release("notification.update")
                         val handle = resourceRegistry.register(
                             type = NodeBridgeResourceType.NOTIFICATION,

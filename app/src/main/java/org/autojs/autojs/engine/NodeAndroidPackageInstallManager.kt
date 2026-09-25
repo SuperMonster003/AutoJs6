@@ -1,5 +1,7 @@
 package org.autojs.autojs.engine
 
+import android.system.Os
+import android.system.OsConstants
 import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
@@ -7,7 +9,6 @@ import java.io.File
 import java.io.RandomAccessFile
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
 import java.security.MessageDigest
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
@@ -238,8 +239,7 @@ class NodeAndroidPackageInstallManager(
         collectPackageFiles(sourceDir, CancellationToken())
             .filter { includeRecord || it.name != RECORD_FILE }
             .forEach { file ->
-                val relative = sourceDir.canonicalFile.toPath().relativize(file.canonicalFile.toPath())
-                    .joinToString("/") { it.toString() }
+                val relative = file.canonicalFile.relativeTo(sourceDir.canonicalFile).invariantSeparatorsPath
                 digest.update(relative.toByteArray(StandardCharsets.UTF_8))
                 digest.update(0)
                 file.inputStream().use { input ->
@@ -448,8 +448,7 @@ class NodeAndroidPackageInstallManager(
             throw PackageInstallException(ERROR_BIN_DISABLED, "Package bin execution is disabled on Android.")
         }
         collectPackageFiles(request.sourceDir, CancellationToken()).forEach { file ->
-            val relative = request.sourceDir.canonicalFile.toPath().relativize(file.canonicalFile.toPath())
-                .joinToString("/") { it.toString() }
+            val relative = file.canonicalFile.relativeTo(request.sourceDir.canonicalFile).invariantSeparatorsPath
             val normalized = relative.replace('\\', '/')
             if (normalized.endsWith(".node") || normalized == "binding.gyp" ||
                 normalized.startsWith("build/Release/") || normalized.startsWith("build/Debug/")
@@ -463,7 +462,7 @@ class NodeAndroidPackageInstallManager(
         val sourceRoot = sourceDir.canonicalFile
         collectPackageFiles(sourceRoot, token).forEach { file ->
             token.throwIfCancellationRequested()
-            val relative = sourceRoot.toPath().relativize(file.canonicalFile.toPath()).joinToString("/") { it.toString() }
+            val relative = file.canonicalFile.relativeTo(sourceRoot).invariantSeparatorsPath
             val target = File(targetDir, relative)
             target.parentFile?.mkdirs()
             file.copyTo(target, overwrite = false)
@@ -475,7 +474,7 @@ class NodeAndroidPackageInstallManager(
         val result = mutableListOf<File>()
         fun visit(file: File) {
             token.throwIfCancellationRequested()
-            if (Files.isSymbolicLink(file.toPath())) {
+            if (OsConstants.S_ISLNK(Os.lstat(file.path).st_mode)) {
                 throw PackageInstallException(ERROR_PATH_ESCAPE, "Package symlinks are disabled on Android: ${file.path}.")
             }
             val canonical = file.canonicalFile
@@ -488,7 +487,7 @@ class NodeAndroidPackageInstallManager(
             }
         }
         visit(sourceRoot)
-        return result.sortedBy { sourceRoot.toPath().relativize(it.toPath()).joinToString("/") { part -> part.toString() } }
+        return result.sortedBy { it.relativeTo(sourceRoot).invariantSeparatorsPath }
     }
 
     private fun readRecord(packageDir: File): PackageRecord? {

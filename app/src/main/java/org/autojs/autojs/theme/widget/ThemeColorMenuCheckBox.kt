@@ -3,14 +3,14 @@ package org.autojs.autojs.theme.widget
 import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
-import android.widget.CheckBox
+import androidx.appcompat.widget.AppCompatCheckBox
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorMutable
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 
-class ThemeColorMenuCheckBox : CheckBox, ThemeColorMutable {
+class ThemeColorMenuCheckBox : AppCompatCheckBox, ThemeColorMutable {
 
     constructor(context: Context) : super(context) {
         init()
@@ -24,7 +24,7 @@ class ThemeColorMenuCheckBox : CheckBox, ThemeColorMutable {
         init()
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context.withWidgetFallbackStyle(defStyleAttr, defStyleRes), attrs, defStyleAttr) {
         init()
     }
 

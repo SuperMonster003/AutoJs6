@@ -64,9 +64,13 @@ public class EditIntentActivity extends BaseActivity {
                             | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
             );
             if ((permissionFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0) {
-                int persistableAccess = permissionFlags & (
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                );
+                int persistableAccess = 0;
+                if ((permissionFlags & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+                    persistableAccess |= Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                }
+                if ((permissionFlags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
+                    persistableAccess |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                }
                 if (persistableAccess != 0) {
                     try {
                         getContentResolver().takePersistableUriPermission(uri, persistableAccess);

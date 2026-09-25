@@ -248,6 +248,9 @@
         "AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration"
       ],
       "fix": [
+        "Compatibility of plugin file snapshots, Node.js package installation, TypeScript project file operations and terminal environment probes on Android 7/8.0",
+        "Shizuku permission request listeners remaining registered after destruction",
+        "Missing translations for Python long-running task notifications and missing English text in DEX compiler settings",
         "Official plugins requesting host appearance during host startup could crash preference initialization before the application context was ready",
         "AI Agent screen observations and actions could continue while the screen was off or locked instead of returning SCREEN_LOCKED",
         "Plugin capability brokers writing toast text into host logs when toast logging was requested",
@@ -474,6 +477,7 @@
       ],
       "improvement": [
         "AI Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",
+        "Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host",
         "Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record",
         "Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history; collapsed server controls also provide Disconnect all clients",
         "Terminal uses direct shell input, a two-row key bar with uppercase labels, fixed navigation and scrollable symbols, native text selection handles and Copy / Select all, grouped menus, content padding and a separate directory prompt line; tips remain menu-only and the session manager keeps new sessions open with individual resume / stop buttons",

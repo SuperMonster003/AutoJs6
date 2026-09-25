@@ -66,7 +66,9 @@ internal class NodeMediaStore(private val context: Context, private val resolveF
         }
 
         private fun downloadsUri(): Uri {
-            check(Build.VERSION.SDK_INT >= 29) { "The downloads collection requires Android 10 or newer." }
+            if (Build.VERSION.SDK_INT < 29) {
+                error("The downloads collection requires Android 10 or newer.")
+            }
             return MediaStore.Downloads.EXTERNAL_CONTENT_URI
         }
     }
@@ -141,7 +143,7 @@ internal class NodeMediaStore(private val context: Context, private val resolveF
             .put("columns", columns)
             .put("readPermissions", readPermissions)
             .put("legacyWritePermissionGranted", sdk < 29 && granted(Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            .put("allFilesAccess", sdk >= 30 && Environment.isExternalStorageManager())
+            .put("allFilesAccess", Build.VERSION.SDK_INT >= 30 && Environment.isExternalStorageManager())
             .put("queryPolicy", if (sdk >= 29) "granted_media_permissions_or_app_owned_items" else "read_external_storage_permission")
             .put("mutatePolicy", if (sdk >= 29) "app_owned_items_only" else "write_external_storage_permission")
             .put("filterPolicy", "structured_json_filters_only")

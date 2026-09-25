@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- AutoJs4 compatibility classes and resources are frozen. Keep their names,
+         values and behavior intact for scripts using the historical access paths.
+         Suppress diagnostics only in these files; modern host code stays checked.
+         zh-CN: 以下旧版兼容类与资源保持原样, 仅按路径压制诊断, 不豁免现代宿主代码. -->
+    <issue id="all">
+        <ignore path="src/main/java/com/stardust/**" />
+        <ignore path="src/main/res/layout/console_view_legacy.xml" />
+        <ignore path="src/main/res/values/colors_legacy.xml" />
+        <ignore path="src/main/res/values/dimens_legacy.xml" />
+        <ignore path="src/main/res/values/ids_legacy.xml" />
+        <ignore path="src/main/res/values/strings_legacy.xml" />
+        <ignore path="src/main/res/values-en/strings_legacy.xml" />
+    </issue>
+</lint>

@@ -708,6 +708,14 @@
     <string name="prompt_plugin_native_page_alignment">The native libraries in plugin %1$s are not aligned for 16 KB pages. This plugin may fail on this device. Upgrade the plugin before using it. Continue anyway?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">An app restart is needed to apply new settings</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">An app restart may be needed to make language applied as expected</string>
+    <string name="python_long_running_notification_channel_description">Status and stop controls for user-started long-running Python projects</string>
+    <string name="python_long_running_notification_channel_name">Python long-running tasks</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Preparing the Python runtime...</string>
+    <string name="python_long_running_notification_running">Running %1$s</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">Starting %1$s...</string>
+    <string name="python_long_running_notification_stop">Stop</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">Stopping %1$s...</string>
+    <string name="python_long_running_notification_title">Python project is running</string>
     <string name="screen_capturer_foreground_notification_channel_name">Screen capturer foreground service</string>
     <string name="screen_capturer_foreground_notification_text">This notification is being displayed for capturing screen</string>
     <string name="screen_capturer_foreground_notification_title">Screen capturer foreground service</string>
@@ -2378,13 +2386,5 @@
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
 
-    <string name="python_long_running_notification_channel_name">Python long-running tasks</string>
-    <string name="python_long_running_notification_channel_description">Status and stop controls for user-started long-running Python projects</string>
-    <string name="python_long_running_notification_title">Python project is running</string>
-    <string name="python_long_running_notification_preparing">Preparing the Python runtime…</string>
-    <string name="python_long_running_notification_starting">Starting %1$s…</string>
-    <string name="python_long_running_notification_running">Running %1$s</string>
-    <string name="python_long_running_notification_stopping">Stopping %1$s…</string>
-    <string name="python_long_running_notification_stop">Stop</string>
     <string name="warning_apk_native_page_alignment_unsupported">Native library %1$s has %2$d byte alignment. The generated APK may not run on devices with 16 KB pages. Update the library or plugin.</string>
 </resources>

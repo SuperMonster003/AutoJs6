@@ -713,6 +713,14 @@
     <string name="prompt_plugin_native_page_alignment">Las bibliotecas nativas del complemento %1$s no estan alineadas para paginas de 16 KB. El complemento puede fallar en este dispositivo. Actualicelo antes de usarlo. Continuar de todos modos?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Es necesario reiniciar la aplicación para aplicar los nuevos ajustes</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Puede ser necesario reiniciar la aplicación para que el idioma se aplique como se espera</string>
+    <string name="python_long_running_notification_channel_description">Estado y controles de parada de proyectos de Python de larga duración iniciados por el usuario</string>
+    <string name="python_long_running_notification_channel_name">Tareas de Python de larga duración</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Preparando el entorno de Python...</string>
+    <string name="python_long_running_notification_running">Ejecutando %1$s</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">Iniciando %1$s...</string>
+    <string name="python_long_running_notification_stop">Detener</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">Deteniendo %1$s...</string>
+    <string name="python_long_running_notification_title">El proyecto de Python está en ejecución</string>
     <string name="screen_capturer_foreground_notification_channel_name">Servicio de primer plano del capturador de pantalla</string>
     <string name="screen_capturer_foreground_notification_text">Se está mostrando esta notificación para capturar la pantalla</string>
     <string name="screen_capturer_foreground_notification_title">Servicio de captura de pantalla en primer plano</string>

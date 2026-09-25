@@ -715,6 +715,14 @@
     <string name="prompt_plugin_native_page_alignment">플러그인 %1$s의 네이티브 라이브러리가 16 KB 페이지에 맞게 정렬되지 않아 이 기기에서 작동하지 않을 수 있습니다. 사용 전에 플러그인을 업데이트하세요. 계속하시겠습니까?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">새로운 설정을 적용하려면 앱 재시작이 필요합니다</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">예상대로 언어를 적용하려면 앱 재시작이 필요할 수 있습니다.</string>
+    <string name="python_long_running_notification_channel_description">사용자가 시작한 Python 장기 실행 프로젝트의 상태 및 중지 제어</string>
+    <string name="python_long_running_notification_channel_name">Python 장기 실행 작업</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Python 런타임 준비 중...</string>
+    <string name="python_long_running_notification_running">%1$s 실행 중</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">%1$s 시작 중...</string>
+    <string name="python_long_running_notification_stop">중지</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">%1$s 중지 중...</string>
+    <string name="python_long_running_notification_title">Python 프로젝트 실행 중</string>
     <string name="screen_capturer_foreground_notification_channel_name">스크린 캡처 전경 서비스</string>
     <string name="screen_capturer_foreground_notification_text">이 알림은 화면 캡처를 위해 표시됩니다</string>
     <string name="screen_capturer_foreground_notification_title">스크린 캡처 전경 서비스</string>

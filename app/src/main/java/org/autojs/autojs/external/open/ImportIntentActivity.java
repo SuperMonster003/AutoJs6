@@ -27,11 +27,17 @@ public class ImportIntentActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        onNewIntent(getIntent());
+        handleIncomingIntent(getIntent());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingIntent(intent);
+    }
+
+    private void handleIncomingIntent(Intent intent) {
         try {
             handleIntent(intent);
         } catch (Exception e) {

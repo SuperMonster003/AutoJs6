@@ -7,6 +7,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.util.concurrent.TimeUnit
 
 class NodeCliProbeTest {
 
@@ -56,6 +59,48 @@ class NodeCliProbeTest {
         assertNotNull(result.error)
         assertFalse(result.timedOut)
         assertFalse(result.succeeded)
+    }
+
+    @Test
+    fun boundedWaitHandlesAnAlreadyExitedProcessWithoutWaiting() {
+        assertTrue(NodeCliProbe.waitForExit(ProbeProcess(0), 0))
+    }
+
+    @Test
+    fun boundedWaitTimesOutWithoutCallingTheBlockingWaitApi() {
+        val start = System.nanoTime()
+        assertFalse(NodeCliProbe.waitForExit(ProbeProcess(Long.MAX_VALUE), 20))
+        assertTrue(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) < 2_000)
+    }
+
+    @Test
+    fun boundedWaitObservesExitBeforeTheDeadline() {
+        assertTrue(NodeCliProbe.waitForExit(ProbeProcess(TimeUnit.MILLISECONDS.toNanos(20)), 2_000))
+    }
+
+    @Test
+    fun boundedWaitCanBeInterrupted() {
+        Thread.currentThread().interrupt()
+        try {
+            org.junit.Assert.assertThrows(InterruptedException::class.java) {
+                NodeCliProbe.waitForExit(ProbeProcess(Long.MAX_VALUE), 2_000)
+            }
+        } finally {
+            Thread.interrupted()
+        }
+    }
+
+    private class ProbeProcess(private val exitAfterNanos: Long) : Process() {
+        private val startedAt = System.nanoTime()
+        override fun exitValue(): Int {
+            if (System.nanoTime() - startedAt < exitAfterNanos) throw IllegalThreadStateException()
+            return 0
+        }
+        override fun waitFor(): Int = error("The probe must never wait without a deadline")
+        override fun destroy() = Unit
+        override fun getInputStream() = ByteArrayInputStream(byteArrayOf())
+        override fun getErrorStream() = ByteArrayInputStream(byteArrayOf())
+        override fun getOutputStream() = ByteArrayOutputStream()
     }
 
 }

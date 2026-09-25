@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.terminal
 
+import android.os.Build
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -80,9 +81,19 @@ object NodeCliProbe {
             thread(name = "NodeCliProbe-stdout") { process.inputStream.bufferedReader().use { stdout.append(it.readText()) } },
             thread(name = "NodeCliProbe-stderr") { process.errorStream.bufferedReader().use { stderr.append(it.readText()) } },
         )
-        val finished = runCatching { process.waitFor(timeoutMs, TimeUnit.MILLISECONDS) }.getOrDefault(false)
+        val finished = try {
+            waitForExit(process, timeoutMs)
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+            false
+        }
         if (!finished) {
-            process.destroyForcibly()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                process.destroyForcibly()
+            } else {
+                // Android 7 exposes only destroy() for terminating a Process.
+                process.destroy()
+            }
         }
         readers.forEach { runCatching { it.join(2_000) } }
         val exitCode = if (finished) process.exitValue() else null
@@ -90,5 +101,21 @@ object NodeCliProbe {
     }
 
     private fun elapsed(startedAt: Long) = System.currentTimeMillis() - startedAt
+
+    /** Bounded process wait using APIs available on Android 7. */
+    internal fun waitForExit(process: Process, timeoutMs: Long): Boolean {
+        val startedAt = System.nanoTime()
+        val timeoutNanos = TimeUnit.MILLISECONDS.toNanos(timeoutMs.coerceAtLeast(0))
+        while (true) {
+            try {
+                process.exitValue()
+                return true
+            } catch (_: IllegalThreadStateException) {
+                val remaining = timeoutNanos - (System.nanoTime() - startedAt)
+                if (remaining <= 0L) return false
+                TimeUnit.NANOSECONDS.sleep(minOf(remaining, TimeUnit.MILLISECONDS.toNanos(25)))
+            }
+        }
+    }
 
 }

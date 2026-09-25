@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import android.system.Os
 import android.system.OsConstants
+import org.autojs.autojs.util.OsConstantsCompat
 import android.system.StructStat
 import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
 import java.io.BufferedOutputStream
@@ -144,7 +145,7 @@ internal class BunPluginWorkspaceArchive private constructor(
         ) {
             val descriptor = Os.open(
                 file.path,
-                OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                OsConstants.O_RDONLY or OsConstantsCompat.O_CLOEXEC or OsConstants.O_NOFOLLOW,
                 0,
             )
             try {

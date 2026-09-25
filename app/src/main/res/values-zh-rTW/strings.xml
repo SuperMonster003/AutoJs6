@@ -710,6 +710,14 @@
     <string name="prompt_plugin_native_page_alignment">外掛程式 %1$s 的原生函式庫未按 16 KB 頁面大小對齊, 可能無法在此裝置上執行. 請升級外掛程式後再使用. 是否仍要繼續?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重啟應用才能完成文件源切換</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分內容可能需要重啟應用才能完成語言切換</string>
+    <string name="python_long_running_notification_channel_description">使用者啟動的 Python 長時間執行專案的狀態與停止控制</string>
+    <string name="python_long_running_notification_channel_name">Python 長時間執行工作</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">正在準備 Python 執行環境...</string>
+    <string name="python_long_running_notification_running">正在執行 %1$s</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">正在啟動 %1$s...</string>
+    <string name="python_long_running_notification_stop">停止</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">正在停止 %1$s...</string>
+    <string name="python_long_running_notification_title">Python 專案正在執行</string>
     <string name="screen_capturer_foreground_notification_channel_name">螢幕捕獲器前臺服務</string>
     <string name="screen_capturer_foreground_notification_text">此通知用於捕獲螢幕截圖</string>
     <string name="screen_capturer_foreground_notification_title">螢幕捕獲器前臺服務</string>

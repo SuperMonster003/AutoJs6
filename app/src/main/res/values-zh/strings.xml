@@ -709,6 +709,14 @@
     <string name="prompt_plugin_native_page_alignment">插件 %1$s 的原生库未按 16 KB 页大小对齐, 可能无法在此设备上运行. 请升级插件后再使用. 是否仍要继续?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重启应用才能完成文档源切换</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分内容可能需要重启应用才能完成语言切换</string>
+    <string name="python_long_running_notification_channel_description">显示用户启动的 Python 长任务状态与停止操作</string>
+    <string name="python_long_running_notification_channel_name">Python 长任务</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">正在准备 Python 运行时...</string>
+    <string name="python_long_running_notification_running">正在运行 %1$s</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">正在启动 %1$s...</string>
+    <string name="python_long_running_notification_stop">停止</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">正在停止 %1$s...</string>
+    <string name="python_long_running_notification_title">Python 项目正在运行</string>
     <string name="screen_capturer_foreground_notification_channel_name">屏幕捕获器前台服务</string>
     <string name="screen_capturer_foreground_notification_text">此通知用于捕获屏幕截图</string>
     <string name="screen_capturer_foreground_notification_title">屏幕捕获器前台服务</string>
@@ -2378,13 +2386,5 @@
     <string name="text_zero_means_unlimited">0 表示不限制</string>
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
-    <string name="python_long_running_notification_channel_name">Python 长任务</string>
-    <string name="python_long_running_notification_channel_description">显示用户启动的 Python 长任务状态与停止操作</string>
-    <string name="python_long_running_notification_title">Python 项目正在运行</string>
-    <string name="python_long_running_notification_preparing">正在准备 Python 运行时…</string>
-    <string name="python_long_running_notification_starting">正在启动 %1$s…</string>
-    <string name="python_long_running_notification_running">正在运行 %1$s</string>
-    <string name="python_long_running_notification_stopping">正在停止 %1$s…</string>
-    <string name="python_long_running_notification_stop">停止</string>
     <string name="warning_apk_native_page_alignment_unsupported">原生库 %1$s 的对齐值为 %2$d 字节. 生成的 APK 可能无法在页大小为 16 KB 的设备上运行. 请升级原生库或插件.</string>
 </resources>

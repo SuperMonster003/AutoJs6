@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.ParcelFileDescriptor
 import android.system.Os
 import android.system.OsConstants
+import org.autojs.autojs.util.OsConstantsCompat
 import org.autojs.autojs.script.PythonFileSource
 import org.autojs.autojs.script.PythonProjectLaunchPolicy
 import org.autojs.autojs.script.PythonProjectSource
@@ -443,7 +444,7 @@ internal class PythonPrivateExecutionSnapshot private constructor(
             }
             val descriptor = Os.open(
                 planned.file.path,
-                OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                OsConstants.O_RDONLY or OsConstantsCompat.O_CLOEXEC or OsConstants.O_NOFOLLOW,
                 0,
             )
             var total = 0L

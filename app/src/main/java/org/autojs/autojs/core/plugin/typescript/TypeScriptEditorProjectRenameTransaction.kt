@@ -400,7 +400,7 @@ internal class TypeScriptEditorProjectRenameTransaction(
                 Character.isHighSurrogate(text[offset - 1]) &&
                 Character.isLowSurrogate(text[offset]))
 
-    private fun File.isInside(root: File): Boolean = toPath().startsWith(root.toPath())
+    private fun File.isInside(root: File): Boolean = startsWith(root)
 
     private fun File.normalizedCanonicalFile(): File =
         runCatching { canonicalFile }.getOrElse { absoluteFile.normalize() }

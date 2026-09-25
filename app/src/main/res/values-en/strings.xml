@@ -113,6 +113,7 @@
     <string name="description_change_working_dir_preference">Change the path of the directory containing scripts</string>
     <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.</string>
     <string name="description_client_mode">Client mode allows AutoJs6 to actively connect to a remote server for [ script transfer / log printing / remote control ].\n\nTypically, the device and the server need to be on the same LAN or on a network where they can reach each other.</string>
+    <string name="description_dex_compiler_experimental_preference">Disabled by default. When enabled, runtime.loadJar prefers the explicitly selected exact-component provider signed like the host for raw JAR files. Provider failures fall back once to built-in D8/dx; cancellation does not fall back. AAR loading always uses the built-in path.</string>
     <string name="description_display_over_other_app">The \"display over other apps\" permission allows AutoJs6 to show floating windows or a floating button above other apps, enabling quick actions or information viewing on any screen.\n\nNote: without this permission, floating windows and the floating button may not be shown or may not work properly.</string>
     <string name="description_documentation_source_preference">Offline docs: Provided by the separately installed official Offline Docs plugin. No network connection is required, and the documentation can be updated independently of AutoJs6.\nOnline docs: Uses the online documentation site and requires a network connection. The content is kept up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
     <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
@@ -709,6 +710,14 @@
     <string name="prompt_plugin_native_page_alignment">The native libraries in plugin %1$s are not aligned for 16 KB pages. This plugin may fail on this device. Upgrade the plugin before using it. Continue anyway?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">An app restart is needed to apply new settings</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">An app restart may be needed to make language applied as expected</string>
+    <string name="python_long_running_notification_channel_description">Status and stop controls for user-started long-running Python projects</string>
+    <string name="python_long_running_notification_channel_name">Python long-running tasks</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Preparing the Python runtime...</string>
+    <string name="python_long_running_notification_running">Running %1$s</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">Starting %1$s...</string>
+    <string name="python_long_running_notification_stop">Stop</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">Stopping %1$s...</string>
+    <string name="python_long_running_notification_title">Python project is running</string>
     <string name="screen_capturer_foreground_notification_channel_name">Screen capturer foreground service</string>
     <string name="screen_capturer_foreground_notification_text">This notification is being displayed for capturing screen</string>
     <string name="screen_capturer_foreground_notification_title">Screen capturer foreground service</string>
@@ -731,6 +740,9 @@
     <string name="summary_clear_media_playback_history">Delete every playback position saved by the host</string>
     <string name="summary_code_editor_settings">Open the full code editor settings page</string>
     <string name="summary_delete_permanently_also_clear_history">Removes the version history of a file or directory that is deleted permanently</string>
+    <string name="summary_dex_compiler_experimental_disabled">Built-in D8/dx only; AAR always stays built-in</string>
+    <string name="summary_dex_compiler_experimental_disabled_with_selection">Built-in D8/dx only; retained provider: %1$s</string>
+    <string name="summary_dex_compiler_experimental_selected">Raw runtime.loadJar JARs prefer %1$s; failures fall back to built-in D8/dx</string>
     <string name="summary_dex_compiler_last_failure_details">Last provider failure: %1$s</string>
     <string name="summary_dex_compiler_last_path_builtin">Last JAR load: AutoJs6 built-in compiler</string>
     <string name="summary_dex_compiler_last_path_cache_hit">Last JAR load: reused a verified cached result</string>
@@ -1188,6 +1200,7 @@
     <string name="text_detected_ocr_plugins">Detected OCR plugins: %1$s.</string>
     <string name="text_developer_details_under_development">Developer details is under development</string>
     <string name="text_developer_options">Developer options</string>
+    <string name="text_dex_compiler">DEX compiler</string>
     <string name="text_dex_compiler_hint_busy">The plugin was busy. AutoJs6 used its built-in compiler; retry after a moment if needed.</string>
     <string name="text_dex_compiler_hint_fallback">The plugin path could not finish safely. AutoJs6 used its built-in compiler once for the same request.</string>
     <string name="text_dex_compiler_hint_timeout">The plugin timed out. AutoJs6 used its built-in compiler and bypasses the provider for the rest of this process.</string>
@@ -1199,6 +1212,10 @@
     <string name="text_device_name">Device name</string>
     <string name="text_device_product_name">Device product name</string>
     <string name="text_device_screen_resolution">Device screen resolution</string>
+    <string name="text_dex_compiler_no_eligible_providers">No eligible same-signed DEX compiler provider is installed. Cancel to preserve the current selection, or confirm the built-in compiler.</string>
+    <string name="text_dex_compiler_provider">Raw JAR compiler provider</string>
+    <string name="text_dex_compiler_provider_discovery_failed">Provider discovery failed. Cancel to preserve the current selection, or confirm the built-in compiler.</string>
+    <string name="text_dex_compiler_use_builtin">Built-in D8/dx (experiment off; AAR always built-in)</string>
     <string name="text_diff_stats">%1$d added, %2$d removed</string>
     <string name="text_diff_too_large">The content is too large for a line-by-line comparison, so only statistics are shown</string>
     <string name="text_directly_download">Download now</string>

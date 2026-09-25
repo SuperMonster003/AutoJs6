@@ -85,7 +85,7 @@ object WrappedShizuku {
         mHasBinder = false
     }
 
-    private val mRequestPermissionResultListener: (requestCode: Int, grantResult: Int) -> Unit = { requestCode: Int, grantResult: Int ->
+    private val mRequestPermissionResultListener = Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
         if (grantResult == PackageManager.PERMISSION_GRANTED && requestCode == mRequestCode) {
             bindUserService()
         }

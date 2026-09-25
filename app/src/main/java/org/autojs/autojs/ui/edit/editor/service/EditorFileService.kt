@@ -2,12 +2,15 @@ package org.autojs.autojs.ui.edit.editor.service
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import android.system.StructStat
 import android.view.View
+import androidx.annotation.RequiresApi
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
@@ -791,20 +794,16 @@ class EditorFileService(
 
         val expectedIdentity = regularFileIdentityOrNull(verifiedTemp)
             ?: throw IOException("Save As temporary path is not a regular file: $verifiedTemp")
-        val linked = runCatching {
+        try {
             Os.link(verifiedTemp.absolutePath, target.absolutePath)
-        }.isSuccess
-        if (!linked) {
-            try {
-                // Source and destination are siblings. Move the already-fsynced complete inode
-                // without requesting replacement; unlike direct copying, a process interruption
-                // cannot expose a half-written file under the final name.
-                Files.move(verifiedTemp.toPath(), target.toPath())
-            } catch (_: FileAlreadyExistsException) {
-                return false
-            } catch (error: Throwable) {
-                throw IOException("Cannot publish Save As target: $target", error)
+        } catch (error: ErrnoException) {
+            if (error.errno == OsConstants.EEXIST) return false
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                // No safe no-replacement move API exists here if the filesystem rejects hard links.
+                // Preserve the original instead of exposing a partial copy under the final name.
+                throw IOException("This filesystem cannot safely publish a new Save As file on Android 7: $target", error)
             }
+            if (!moveNewSaveAsTarget(verifiedTemp, target)) return false
         }
 
         val beforeVerification = regularFileIdentityOrNull(target)
@@ -820,6 +819,19 @@ class EditorFileService(
             throw IOException("Save As verification failed: $target")
         }
         target.parentFile?.let(::syncDirectoryBestEffort)
+        return true
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun moveNewSaveAsTarget(verifiedTemp: File, target: File): Boolean {
+        try {
+            // Publish the already-fsynced complete inode without requesting replacement.
+            Files.move(verifiedTemp.toPath(), target.toPath())
+        } catch (_: FileAlreadyExistsException) {
+            return false
+        } catch (error: Exception) {
+            throw IOException("Cannot publish Save As target: $target", error)
+        }
         return true
     }
 

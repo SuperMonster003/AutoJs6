@@ -626,7 +626,7 @@ class TerminalActivity : BaseActivity() {
             intent(context).putExtra(EXTRA_SESSION_ID, id).apply {
                 // Keep the caller and its dialog underneath a distinct terminal activity.
                 // zh-CN: 在独立终端 Activity 下保留调用页面及其对话框.
-                if (preserveManager) removeFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                if (preserveManager) flags = flags and Intent.FLAG_ACTIVITY_SINGLE_TOP.inv()
             }.startSafely(context)
         }
 

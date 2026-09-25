@@ -155,7 +155,6 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     fun headsethook() = mGlobalActionAutomator.headsethook()
 
     @ScriptInterface
-    @RequiresApi(Build.VERSION_CODES.R)
     fun switchToInputMethod(packageName: String): Boolean {
         ScriptRuntime.requiresApi(Build.VERSION_CODES.R)
         val inputMethodManager = ScriptRuntime.applicationContext
@@ -167,9 +166,12 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     }
 
     @ScriptInterface
-    @RequiresApi(Build.VERSION_CODES.R)
     fun switchToInputMethodWithId(inputMethodId: String): Boolean {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.R)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            // Preserve the standard script-facing version error before accessing the service.
+            ScriptRuntime.requiresApi(Build.VERSION_CODES.R)
+            return false
+        }
         ensureService()
         return accessibilityBridge.service
             ?.softKeyboardController

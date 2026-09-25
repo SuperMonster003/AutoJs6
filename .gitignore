@@ -59,6 +59,9 @@ AGENTS.md
 !/tools/size/
 !/tools/size/**
 /tools/size/__pycache__/
+!/tools/lint_audit/
+!/tools/lint_audit/**
+/tools/lint_audit/__pycache__/
 !/tools/ocr/
 !/tools/ocr/auto_mode_smoke.js
 !/tools/ocr/auto_mode_smoke.py

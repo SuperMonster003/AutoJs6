@@ -714,6 +714,14 @@
     <string name="prompt_plugin_native_page_alignment">プラグイン %1$s のネイティブライブラリは 16 KB ページに対応していないため, このデバイスで動作しない可能性があります. 使用前にプラグインを更新してください. 続行しますか?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">新しい設定を適用するには, アプリの再起動が必要です</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">言語を正しく適用するために, アプリの再起動が必要な場合があります</string>
+    <string name="python_long_running_notification_channel_description">ユーザーが開始した Python の長時間実行プロジェクトの状態表示と停止操作</string>
+    <string name="python_long_running_notification_channel_name">Python の長時間実行タスク</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Python ランタイムを準備中...</string>
+    <string name="python_long_running_notification_running">%1$s を実行中</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">%1$s を開始中...</string>
+    <string name="python_long_running_notification_stop">停止</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">%1$s を停止中...</string>
+    <string name="python_long_running_notification_title">Python プロジェクトを実行中</string>
     <string name="screen_capturer_foreground_notification_channel_name">スクリーンキャプチャーのフォアグラウンドサービス</string>
     <string name="screen_capturer_foreground_notification_text">画面のキャプチャを行うため, この通知が表示される</string>
     <string name="screen_capturer_foreground_notification_title">スクリーンキャプチャーのフォアグラウンドサービス</string>

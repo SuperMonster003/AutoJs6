@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EdgeEffect
 import androidx.annotation.StringRes
+import androidx.core.view.doOnNextLayout
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
@@ -120,9 +121,30 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
                 if (preferenceKey in unavailablePreferenceKeys && preference !is MaterialPreference) {
                     showUnavailableEditorSettingHint(getString(R.string.summary_editor_setting_unavailable_for_current_engine))
                 } else {
-                    preference.performClick()
+                    clickPreferenceRow(preference)
                 }
             }
+        }
+    }
+
+    private fun clickPreferenceRow(preference: Preference) {
+        val recycler = listView
+        val positions = recycler.adapter as? PreferenceGroup.PreferencePositionCallback ?: return
+        val position = positions.getPreferenceAdapterPosition(preference)
+        if (position == RecyclerView.NO_POSITION) return
+        val holder = recycler.findViewHolderForAdapterPosition(position)
+        if (holder != null) {
+            holder.itemView.performClick()
+        } else {
+            // Use the public View click path after scrolling has bound the requested row.
+            recycler.doOnNextLayout {
+                if (view == null) return@doOnNextLayout
+                val current = positions.getPreferenceAdapterPosition(preference)
+                if (current != RecyclerView.NO_POSITION) {
+                    recycler.findViewHolderForAdapterPosition(current)?.itemView?.performClick()
+                }
+            }
+            recycler.scrollToPosition(position)
         }
     }
 

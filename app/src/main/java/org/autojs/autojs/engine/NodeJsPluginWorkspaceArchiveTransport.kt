@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import org.autojs.autojs.util.OsConstantsCompat
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.json.JSONArray
 import org.json.JSONObject
@@ -357,7 +358,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                             output.putNextEntry(ZipEntry(relative).apply { time = explicit.file.lastModified() })
                             val descriptor = Os.open(
                                 explicit.file.path,
-                                OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                                OsConstants.O_RDONLY or OsConstantsCompat.O_CLOEXEC or OsConstants.O_NOFOLLOW,
                                 0,
                             )
                             try {
@@ -702,7 +703,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
             val before = Os.lstat(target.path)
             val descriptor = Os.open(
                 target.path,
-                OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                OsConstants.O_RDONLY or OsConstantsCompat.O_CLOEXEC or OsConstants.O_NOFOLLOW,
                 0,
             )
             try {

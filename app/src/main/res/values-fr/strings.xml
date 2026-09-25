@@ -713,6 +713,14 @@
     <string name="prompt_plugin_native_page_alignment">Les bibliotheques natives du plugin %1$s ne sont pas alignees pour des pages de 16 KB. Ce plugin peut echouer sur cet appareil. Mettez-le a jour avant utilisation. Continuer quand meme?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Un redémarrage de l\'application est nécessaire pour appliquer les nouveaux paramètres.</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Un redémarrage de l\'appli peut être nécessaire pour que la langue soit appliquée comme prévu.</string>
+    <string name="python_long_running_notification_channel_description">État et commandes d\'arrêt des projets Python de longue durée lancés par l\'utilisateur</string>
+    <string name="python_long_running_notification_channel_name">Tâches Python de longue durée</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Préparation de l\'environnement Python...</string>
+    <string name="python_long_running_notification_running">Exécution de %1$s</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">Démarrage de %1$s...</string>
+    <string name="python_long_running_notification_stop">Arrêter</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">Arrêt de %1$s...</string>
+    <string name="python_long_running_notification_title">Le projet Python est en cours</string>
     <string name="screen_capturer_foreground_notification_channel_name">Service de capture d\'écran en avant-plan</string>
     <string name="screen_capturer_foreground_notification_text">Cette notification s\'affiche pour la capture d\'écran.</string>
     <string name="screen_capturer_foreground_notification_title">Service de capture d\'écran en avant-plan</string>

@@ -96,7 +96,7 @@ class ScriptResourceRepository {
         resourceDirectories(root, type).forEach { directory ->
             extensions.forEach { extension ->
                 val candidate = File(directory, "$name.$extension").canonicalFile
-                if (candidate.toPath().startsWith(root.toPath()) && candidate.isFile) {
+                if (candidate.startsWith(root) && candidate.isFile) {
                     return candidate
                 }
             }

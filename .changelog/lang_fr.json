@@ -248,6 +248,9 @@
         "Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée"
       ],
       "fix": [
+        "Compatibilité des instantanés de fichiers des plugins, de l'installation des paquets Node.js, des opérations sur les fichiers des projets TypeScript et des sondes du terminal sous Android 7/8.0",
+        "Écouteurs des demandes d'autorisation Shizuku restant enregistrés après leur destruction",
+        "Traductions manquantes des notifications des tâches Python de longue durée et textes anglais manquants des paramètres du compilateur DEX",
         "La lecture de l'apparence par un plugin officiel pendant le démarrage pouvait faire échouer les préférences avant la disponibilité du contexte",
         "AI Agent poursuivait les observations et actions sur un écran éteint ou verrouillé au lieu de renvoyer SCREEN_LOCKED",
         "Texte des toasts écrit dans les journaux de l'hôte à la demande des plugins via le relais de capacités",
@@ -474,6 +477,7 @@
       ],
       "improvement": [
         "Lecture des données de modèle AI Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués",
+        "Les vérifications lint de l'hôte excluent par chemin les classes et ressources de compatibilité AutoJs4 et continuent à vérifier le reste de l'hôte",
         "Le centre des plugins écrit un enregistrement d'activation explicite et exécute le sondage d'activation après avoir observé une nouvelle installation d'un plugin désactivé par défaut (YOLO, MCP Server) signé avec le certificat officiel de l'hôte; les signataires tiers de confiance ou autorisés par l'utilisateur, les installations via adb et les mises à jour exigent toujours une activation manuelle, et les consommateurs à l'exécution continuent de lire uniquement l'enregistrement sauvegardé",
         "Les gestionnaires accessibilité, client, serveur et terminal partagent les boutons de déploiement et séparateurs; les réglages repliés sont accessibles dans une boîte de dialogue par une roue dentée, et les commandes client repliées incluent l'historique; les commandes serveur repliées proposent aussi Déconnecter tous les clients",
         "Le terminal utilise la saisie shell directe, deux rangées de touches en majuscules avec navigation fixe et symboles défilants, les poignées natives avec Copier / Tout sélectionner, des menus groupés, des marges et une ligne de répertoire séparée; conseils dans le menu uniquement, gestionnaire maintenu ouvert après création et boutons reprendre / arrêter par session",

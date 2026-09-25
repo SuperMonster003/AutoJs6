@@ -713,6 +713,14 @@
     <string name="prompt_plugin_native_page_alignment">Нативные библиотеки плагина %1$s не выровнены для страниц 16 KB. Плагин может не работать на этом устройстве. Обновите его перед использованием. Все равно продолжить?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Для применения новых настроек требуется перезапуск приложения</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Перезапуск приложения может потребоваться для того, чтобы язык применялся как положено</string>
+    <string name="python_long_running_notification_channel_description">Состояние и остановка длительных проектов Python, запущенных пользователем</string>
+    <string name="python_long_running_notification_channel_name">Длительные задачи Python</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Подготовка среды Python...</string>
+    <string name="python_long_running_notification_running">Выполняется %1$s</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">Запуск %1$s...</string>
+    <string name="python_long_running_notification_stop">Остановить</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">Остановка %1$s...</string>
+    <string name="python_long_running_notification_title">Проект Python выполняется</string>
     <string name="screen_capturer_foreground_notification_channel_name">Служба захвата экрана на переднем плане</string>
     <string name="screen_capturer_foreground_notification_text">Это уведомление отображается для захвата экрана</string>
     <string name="screen_capturer_foreground_notification_title">Служба захвата экрана на переднем плане</string>

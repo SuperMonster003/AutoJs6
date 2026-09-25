@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import android.annotation.SuppressLint
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -138,6 +139,9 @@ class NodeBridgeFileScope(root: File, private val legacyFileApi: Boolean = false
         return MkdirResult(relativePathOf(directory), created = true)
     }
 
+    // NodeBridgeFilesBridge supplies legacyFileApi from SDK_INT < 26; desktop tests use NIO.
+    // Keep this platform-independent branch injectable so both implementations can be tested.
+    @SuppressLint("NewApi")
     fun rename(from: String, to: String, overwrite: Boolean = false): RenameResult {
         val source = resolveWritable(from)
         val target = resolveWritable(to)
@@ -218,6 +222,8 @@ class NodeBridgeFileScope(root: File, private val legacyFileApi: Boolean = false
         return descendants + 1
     }
 
+    // The same SDK-selected branch as rename(), including the pre-26 implementation.
+    @SuppressLint("NewApi")
     private fun isSymbolicLink(file: File): Boolean = if (legacyFileApi) {
         val entry = file.parentFile?.let { File(it.canonicalFile, file.name) } ?: file
         entry.canonicalFile != entry.absoluteFile

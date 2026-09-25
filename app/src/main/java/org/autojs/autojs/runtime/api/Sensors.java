@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.looper.Loopers;
-import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.runtime.ScriptBridges;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.tool.MapBuilder;
@@ -16,6 +15,7 @@ import org.autojs.autojs.tool.MapBuilder;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -115,7 +115,7 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
     }
 
     public Sensor getSensor(String sensorName) {
-        sensorName = sensorName.toUpperCase();
+        sensorName = sensorName.toUpperCase(Locale.ROOT);
         Integer type = SENSORS.get(sensorName);
         type = type == null ? getSensorTypeByReflect(sensorName) : type;
         return type == null ? null : mSensorManager.getDefaultSensor(type);
@@ -123,7 +123,7 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
 
     private Integer getSensorTypeByReflect(String sensorName) {
         try {
-            Field field = Sensor.class.getField("TYPE_" + sensorName.toUpperCase(Language.getPrefLanguage().getLocale()));
+            Field field = Sensor.class.getField("TYPE_" + sensorName.toUpperCase(Locale.ROOT));
             return (Integer) field.get(null);
         } catch (Exception e) {
             return null;

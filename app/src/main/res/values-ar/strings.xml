@@ -715,6 +715,14 @@
     <string name="prompt_plugin_native_page_alignment">المكتبات الأصلية في الملحق %1$s غير محاذاة لصفحات 16 KB. قد لا يعمل الملحق على هذا الجهاز. قم بترقيته قبل الاستخدام. هل تريد المتابعة رغم ذلك?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">هناك حاجة إلى إعادة تشغيل التطبيق لتطبيق إعدادات جديدة</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة مطبقًا كما هو متوقع</string>
+    <string name="python_long_running_notification_channel_description">حالة مشاريع Python طويلة التشغيل التي بدأها المستخدم وعناصر التحكم في إيقافها</string>
+    <string name="python_long_running_notification_channel_name">مهام Python طويلة التشغيل</string>
+    <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">جار تحضير بيئة Python...</string>
+    <string name="python_long_running_notification_running">جار تشغيل %1$s</string>
+    <string name="python_long_running_notification_starting" tools:ignore="TypographyEllipsis">جار بدء %1$s...</string>
+    <string name="python_long_running_notification_stop">إيقاف</string>
+    <string name="python_long_running_notification_stopping" tools:ignore="TypographyEllipsis">جار إيقاف %1$s...</string>
+    <string name="python_long_running_notification_title">مشروع Python قيد التشغيل</string>
     <string name="screen_capturer_foreground_notification_channel_name">شاشة كابتوري فريجرونيد خدمة</string>
     <string name="screen_capturer_foreground_notification_text">يتم عرض هذا الإشعار لالتقاط الشاشة</string>
     <string name="screen_capturer_foreground_notification_title">شاشة كابتوري فريجرونيد خدمة</string>

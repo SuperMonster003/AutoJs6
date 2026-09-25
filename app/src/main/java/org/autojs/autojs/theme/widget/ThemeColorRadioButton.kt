@@ -2,7 +2,7 @@ package org.autojs.autojs.theme.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.RadioButton
+import androidx.appcompat.widget.AppCompatRadioButton
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager
@@ -11,7 +11,7 @@ import org.autojs.autojs.theme.ThemeColorMutable
 /**
  * Created by SuperMonster003 on May 6, 2025.
  */
-class ThemeColorRadioButton : RadioButton, ThemeColorMutable {
+class ThemeColorRadioButton : AppCompatRadioButton, ThemeColorMutable {
 
     constructor(context: Context) : super(context) {
         init()
@@ -25,7 +25,7 @@ class ThemeColorRadioButton : RadioButton, ThemeColorMutable {
         init()
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context.withWidgetFallbackStyle(defStyleAttr, defStyleRes), attrs, defStyleAttr) {
         init()
     }
 

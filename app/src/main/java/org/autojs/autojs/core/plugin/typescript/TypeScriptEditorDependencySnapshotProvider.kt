@@ -161,7 +161,7 @@ internal object TypeScriptEditorDependencySnapshotProvider {
     }
 
     private fun File.relativePathInside(root: File): String {
-        val path = root.toPath().relativize(toPath()).toString().replace(File.separatorChar, '/')
+        val path = relativeTo(root).invariantSeparatorsPath
         require(path.isNotBlank() && !path.startsWith('/') && '\\' !in path)
         require(path.split('/').all { segment ->
             segment.isNotEmpty() && segment != "." && segment != ".." &&
@@ -170,7 +170,7 @@ internal object TypeScriptEditorDependencySnapshotProvider {
         return path
     }
 
-    private fun File.isInside(root: File): Boolean = toPath().startsWith(root.toPath())
+    private fun File.isInside(root: File): Boolean = startsWith(root)
 
     private fun File.normalizedCanonicalFile(): File =
         runCatching { canonicalFile }.getOrElse { absoluteFile.normalize() }

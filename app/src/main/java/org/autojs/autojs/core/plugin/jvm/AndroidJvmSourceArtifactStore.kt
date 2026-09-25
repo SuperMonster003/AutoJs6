@@ -5,6 +5,7 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import org.autojs.autojs.util.OsConstantsCompat
 import org.autojs.plugin.jvmsource.api.JvmSourcePayloadKind
 import java.io.File
 import java.io.FileInputStream
@@ -43,7 +44,7 @@ internal class AndroidJvmSourceArtifactStore(
         JvmSourceR1Policy.requireSupportedFileName(sourceKind, file.name)
         val descriptor = Os.open(
             file.absolutePath,
-            OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+            OsConstants.O_RDONLY or OsConstantsCompat.O_CLOEXEC or OsConstants.O_NOFOLLOW,
             0,
         )
         val inputStream = try {
@@ -310,7 +311,7 @@ internal class AndroidJvmSourceArtifactStore(
             override fun readRegularFile(file: File, maximumBytes: Long): ByteArray {
                 val descriptor = Os.open(
                     file.absolutePath,
-                    OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                    OsConstants.O_RDONLY or OsConstantsCompat.O_CLOEXEC or OsConstants.O_NOFOLLOW,
                     0,
                 )
                 val stream = try {
@@ -369,7 +370,7 @@ internal class AndroidJvmSourceArtifactStore(
         fun canClaimStaleRoot(root: File): Boolean {
             val stream = openLeaseStream(
                 File(root, ROOT_LEASE_FILE),
-                OsConstants.O_RDWR or OsConstants.O_CREAT or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                OsConstants.O_RDWR or OsConstants.O_CREAT or OsConstantsCompat.O_CLOEXEC or OsConstants.O_NOFOLLOW,
             ) ?: return false
             return stream.use { output ->
                 if (!OsConstants.S_ISREG(Os.fstat(output.fd).st_mode)) return@use false
@@ -424,7 +425,7 @@ internal class AndroidJvmSourceArtifactStore(
                     openLeaseStream(
                         file,
                         OsConstants.O_RDWR or OsConstants.O_CREAT or OsConstants.O_EXCL or
-                            OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                            OsConstantsCompat.O_CLOEXEC or OsConstants.O_NOFOLLOW,
                     ),
                 ) { "Unable to create the JVM source host root lease" }
                 try {

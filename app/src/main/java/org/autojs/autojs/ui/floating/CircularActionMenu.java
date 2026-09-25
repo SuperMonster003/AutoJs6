@@ -102,10 +102,14 @@ public class CircularActionMenu extends FrameLayout {
         if (attrs == null)
             return;
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.CircularActionMenu);
-        mRadius = a.getDimensionPixelSize(R.styleable.CircularActionMenu_cam_radius, (int) mRadius);
-        int angleInDegree = a.getInt(R.styleable.CircularActionMenu_cam_angle, 0);
-        if (angleInDegree != 0) {
-            mAngle = (float) Math.toRadians(angleInDegree);
+        try {
+            mRadius = a.getDimensionPixelSize(R.styleable.CircularActionMenu_cam_radius, (int) mRadius);
+            int angleInDegree = a.getInt(R.styleable.CircularActionMenu_cam_angle, 0);
+            if (angleInDegree != 0) {
+                mAngle = (float) Math.toRadians(angleInDegree);
+            }
+        } finally {
+            a.recycle();
         }
         for (int i = 0; i < getItemCount(); i++) {
             View v = getItemAt(i);

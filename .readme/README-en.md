@@ -413,6 +413,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results
 * `Feature` AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart
 * `Feature` AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
+* `Fix` Compatibility of plugin file snapshots, Node.js package installation, TypeScript project file operations and terminal environment probes on Android 7/8.0
+* `Fix` Shizuku permission request listeners remaining registered after destruction
+* `Fix` Missing translations for Python long-running task notifications and missing English text in DEX compiler settings
 * `Fix` Official plugins requesting host appearance during host startup could crash preference initialization before the application context was ready
 * `Fix` AI Agent screen observations and actions could continue while the screen was off or locked instead of returning SCREEN_LOCKED
 * `Fix` Plugin capability brokers writing toast text into host logs when toast logging was requested
@@ -637,6 +640,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` When picking the APK for an update, a release without an asset for the first preferred ABI could pick a later lower-priority asset in the list (such as the universal one) instead of the asset of the next preferred ABI
 * `Fix` The built-in package installer could reject V2/V3-signed APKs on Android 9-11 with "Base APK has no verifiable signer" because the platform archive parser left the signing info empty; the deprecated archive signature view is now consulted as a fallback
 * `Improvement` AI Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
+* `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record
 * `Improvement` Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history; collapsed server controls also provide Disconnect all clients
 * `Improvement` Terminal uses direct shell input, a two-row key bar with uppercase labels, fixed navigation and scrollable symbols, native text selection handles and Copy / Select all, grouped menus, content padding and a separate directory prompt line; tips remain menu-only and the session manager keeps new sessions open with individual resume / stop buttons

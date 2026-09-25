@@ -770,11 +770,16 @@ internal class AndroidPythonHostCapabilityActions(
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setLocalOnly(true)
             .build()
-        NotificationManagerCompat.from(appContext).notify(
-            notificationTag,
-            PythonHostNoticePolicy.NOTIFICATION_ID,
-            notification,
-        )
+        try {
+            NotificationManagerCompat.from(appContext).notify(
+                notificationTag,
+                PythonHostNoticePolicy.NOTIFICATION_ID,
+                notification,
+            )
+        } catch (_: SecurityException) {
+            // Permission can be revoked between the earlier check and posting.
+            throw PythonHostCapabilityPermissionDeniedException()
+        }
     }
 
     override fun readFileText(path: String): String = hostFiles.readText(path)

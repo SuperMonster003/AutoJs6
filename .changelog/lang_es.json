@@ -248,6 +248,9 @@
         "El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada"
       ],
       "fix": [
+        "Compatibilidad de las instantáneas de archivos de plugins, la instalación de paquetes Node.js, las operaciones con archivos de proyectos TypeScript y las comprobaciones del terminal en Android 7/8.0",
+        "Los receptores de solicitudes de permisos de Shizuku permanecían registrados después de su destrucción",
+        "Traducciones ausentes en las notificaciones de tareas de Python de larga duración y textos en inglés ausentes en los ajustes del compilador DEX",
         "La lectura de la apariencia por plugins oficiales durante el arranque podía bloquear la inicialización de preferencias antes de disponer del contexto",
         "AI Agent continuaba observando y actuando con la pantalla apagada o bloqueada en lugar de devolver SCREEN_LOCKED",
         "El intermediario de capacidades de plugins escribía el texto de los toasts en el registro del anfitrión al solicitar su registro",
@@ -474,6 +477,7 @@
       ],
       "improvement": [
         "Lectura de datos de modelos de AI Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas",
+        "Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión",
         "El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado",
         "Los gestores de accesibilidad, cliente, servidor y terminal comparten botones de expansión y separadores; los ajustes contraídos se abren en un diálogo independiente con el engranaje y los controles del cliente contraídos incluyen el historial; los controles del servidor contraídos también ofrecen Desconectar todos los clientes",
         "El terminal usa entrada shell directa, dos filas de teclas en mayúsculas con navegación fija y símbolos desplazables, controles de selección nativos con Copiar / Seleccionar todo, menús agrupados, márgenes y una línea de directorio separada; consejos solo desde el menú, gestor abierto tras crear sesiones y botones individuales para continuar / detener",
