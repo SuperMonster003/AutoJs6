@@ -248,6 +248,7 @@
         "AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration"
       ],
       "fix": [
+        "Compact accessibility trees shortened resource IDs, preventing literal selectors from matching the displayed IDs",
         "Compatibility of plugin file snapshots, Node.js package installation, TypeScript project file operations and terminal environment probes on Android 7/8.0",
         "Shizuku permission request listeners remaining registered after destruction",
         "Missing translations for Python long-running task notifications and missing English text in DEX compiler settings",

@@ -115,7 +115,7 @@ object CompactNodeText {
         )
     }
 
-    /** Matches the released MCP formatter's header, marker order, escaping and footer. */
+    /** MCP-style rows retain complete resource IDs so they can be reused by literal bridge selectors. */
     fun render(packageName: String, activityName: String, nodes: List<Node>, truncated: Boolean, maxNodes: Int, maxDepth: Int): String = buildString {
         val pkg = token(packageName.take(256))
         val activity = token(activityName.take(256))
@@ -144,7 +144,7 @@ object CompactNodeText {
         node.markers.forEach { append(' ').append(it) }
         if (node.text.isNotEmpty()) append(" \"").append(clip(node.text)).append('"')
         if (node.desc.isNotEmpty()) append(" desc=\"").append(clip(node.desc)).append('"')
-        if (node.id.isNotEmpty()) append(" id=").append(token(node.id.substringAfterLast('/')))
+        if (node.id.isNotEmpty()) append(" id=").append(token(node.id))
         append(' ')
         if (node.childCount > 0) append(node.bounds.compact())
         else append("c=(").append(node.bounds.centerX).append(',').append(node.bounds.centerY).append(')')

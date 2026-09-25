@@ -251,6 +251,7 @@
 * `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Fonctionnalité` Entrée AI Agent dans le volet et gestion dans le centre de plugins, avec état de connexion, nombre de tâches, aide aux autorisations et reconnexion au redémarrage de l'hôte; entrée facultative dans les Outils de l'assistant lorsque l'APK publié figure dans l'index officiel
 * `Fonctionnalité` Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
+* `Correction` Les arbres compacts d'accessibilité abrégeaient les ID de ressources, empêchant les sélecteurs littéraux de retrouver les éléments affichés
 * `Correction` Compatibilité des instantanés de fichiers des plugins, de l'installation des paquets Node.js, des opérations sur les fichiers des projets TypeScript et des sondes du terminal sous Android 7/8.0
 * `Correction` Écouteurs des demandes d'autorisation Shizuku restant enregistrés après leur destruction
 * `Correction` Traductions manquantes des notifications des tâches Python de longue durée et textes anglais manquants des paramètres du compilateur DEX

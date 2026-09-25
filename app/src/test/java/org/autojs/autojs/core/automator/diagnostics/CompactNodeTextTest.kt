@@ -1,13 +1,14 @@
 package org.autojs.autojs.core.automator.diagnostics
 
 import org.autojs.autojs.core.automator.FakeUiNode
+import org.autojs.autojs.core.automator.bridge.BridgeSelector
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CompactNodeTextTest {
-    @Test fun releasedMcpAppendixBFixtureHasTheSameLines() {
+    @Test fun mcpStyleRowsRetainLiteralResourceIdsIncludingTheAndroidNamespace() {
         val root = FakeUiNode.root {
             className = "android.widget.FrameLayout"
             bounds(0, 0, 1080, 2400)
@@ -33,11 +34,23 @@ class CompactNodeTextTest {
         assertEquals("""
             window: com.android.settings/.Settings  bounds=[0,0][1080,2400]  nodes=5
             #n1 FrameLayout [0,0][1080,2400]
-            #n2  RecyclerView scrollable id=recycler_view [0,220][1080,2400]
-            #n3   LinearLayout clickable id=recycler_item [0,220][1080,376]
+            #n2  RecyclerView scrollable id=com.android.settings:id/recycler_view [0,220][1080,2400]
+            #n3   LinearLayout clickable id=com.android.settings:id/recycler_item [0,220][1080,376]
             #n4    TextView "Wi-Fi" c=(540,270)
-            #n5    Switch clickable checkable checked id=switch_widget c=(980,298)
+            #n5    Switch clickable checkable checked id=android:id/switch_widget c=(980,298)
         """.trimIndent(), CompactNodeText.render("com.android.settings", "com.android.settings.Settings", result.nodes, false, 200, 32))
+    }
+
+    @Test fun observedIdCanSelectItsNodeWithoutAliasingTheSameEntryInAnotherNamespace() {
+        val first = FakeUiNode.root { id = "example.app:id/button" }
+        val second = FakeUiNode.root { id = "android:id/button" }
+        val rows = CompactNodeText.collect(listOf(first, second)).nodes
+        for ((index, node) in listOf(first, second).withIndex()) {
+            val observed = Regex(" id=([^ ]+)").find(CompactNodeText.line(index + 1, rows[index]))!!.groupValues[1]
+            val selector = BridgeSelector(id = observed).toFilter()
+            assertTrue(selector.filter(node))
+            assertFalse(selector.filter(if (index == 0) second else first))
+        }
     }
 
     @Test fun escapedTextMarkersAndPasswordRedactionAreBounded() {

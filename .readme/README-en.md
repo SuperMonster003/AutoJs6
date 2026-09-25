@@ -413,6 +413,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results
 * `Feature` AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart; optional Tools entry in the installation wizard when a published APK is present in the official index
 * `Feature` AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
+* `Fix` Compact accessibility trees shortened resource IDs, preventing literal selectors from matching the displayed IDs
 * `Fix` Compatibility of plugin file snapshots, Node.js package installation, TypeScript project file operations and terminal environment probes on Android 7/8.0
 * `Fix` Shizuku permission request listeners remaining registered after destruction
 * `Fix` Missing translations for Python long-running task notifications and missing English text in DEX compiler settings

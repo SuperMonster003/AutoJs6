@@ -251,6 +251,7 @@
 * `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
 * `Nuevo` Acceso a AI Agent en el panel y gestión en el centro de complementos, con estado de conexión, recuento de tareas, guía de autorización y reconexión al reiniciar el anfitrión; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial
 * `Nuevo` El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
+* `Corrección` Los árboles compactos de accesibilidad abreviaban los ID de recursos e impedían que los selectores literales encontraran los elementos mostrados
 * `Corrección` Compatibilidad de las instantáneas de archivos de plugins, la instalación de paquetes Node.js, las operaciones con archivos de proyectos TypeScript y las comprobaciones del terminal en Android 7/8.0
 * `Corrección` Los receptores de solicitudes de permisos de Shizuku permanecían registrados después de su destrucción
 * `Corrección` Traducciones ausentes en las notificaciones de tareas de Python de larga duración y textos en inglés ausentes en los ajustes del compilador DEX

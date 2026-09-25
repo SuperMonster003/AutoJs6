@@ -150,6 +150,7 @@ class AiAgentPluginRoundTripTest {
         context.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         SystemClock.sleep(1000)
         var snapshot: String? = null
+        var observedId: String? = null
         val core = core()
         val model = ScriptedModel { step, request ->
             val result = if (step == 0) null else observation(request).getJSONObject("result")
@@ -157,8 +158,19 @@ class AiAgentPluginRoundTripTest {
                 0 -> tool("app_current")
                 1 -> { assertEquals("com.android.settings", result!!.getString("packageName")); tool("ui_dump") }
                 2 -> { snapshot = result!!.getString("snapshotId"); assertTrue(result.getInt("nodeCount") > 0); assertTrue(result.getJSONObject("changes").getBoolean("baseline")); tool("ui_dump") }
-                3 -> { assertEquals(snapshot, result!!.getJSONObject("changes").getString("previousSnapshotId")); assertFalse(result.getJSONObject("changes").getBoolean("baseline")); tool("ui_find", JSONObject().put("selector", JSONObject().put("className", "android.widget.TextView")).put("limit", 3)) }
-                4 -> { assertTrue(result!!.getJSONArray("nodes").length() in 1..3); tool("ui_wait_for", JSONObject().put("selector", JSONObject().put("className", "android.widget.TextView")).put("state", "appear")) }
+                3 -> {
+                    assertEquals(snapshot, result!!.getJSONObject("changes").getString("previousSnapshotId"))
+                    assertFalse(result.getJSONObject("changes").getBoolean("baseline"))
+                    observedId = Regex(" id=([^ \\n]+)").find(result.getString("text"))!!.groupValues[1]
+                    assertTrue("Observed ID must be directly usable by the literal selector", observedId!!.contains(":id/"))
+                    tool("ui_find", JSONObject().put("selector", JSONObject().put("id", observedId)).put("limit", 3))
+                }
+                4 -> {
+                    val nodes = result!!.getJSONArray("nodes")
+                    assertTrue(nodes.length() in 1..3)
+                    for (index in 0 until nodes.length()) assertEquals(observedId, nodes.getJSONObject(index).getString("id"))
+                    tool("ui_wait_for", JSONObject().put("selector", JSONObject().put("className", "android.widget.TextView")).put("state", "appear"))
+                }
                 5 -> { assertTrue(result!!.getBoolean("matched")); tool("ui_wait_for", JSONObject().put("selector", JSONObject().put("text", "AUTOJS6_P41_NO_SUCH_NODE")).put("state", "disappear")) }
                 6 -> { assertTrue(result!!.getBoolean("matched")); tool("screen_state") }
                 7 -> { assertTrue(result!!.getBoolean("screenOn")); tool("device_info") }
