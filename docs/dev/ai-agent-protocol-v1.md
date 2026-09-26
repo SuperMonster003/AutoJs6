@@ -17,6 +17,10 @@ check both installed metadata and the feature they intend to use.
 Native model tool continuations require host build **5297** and the broker's
 explicit `toolCallingVersion: 1` advertisement; a version number alone is not
 feature negotiation. The original 1.0.0 structured JSON path remains available.
+The public JavaScript `mcp` tool-group option requires a host containing the P10 public-option
+change (`3cdf7de13c`) and a supporting Agent version. The host build number remains
+5297 in this development checkout; that number alone does not prove MCP-option
+support. This addition does not change the V1 contract number or AIDL order.
 
 ## Identity and discovery
 
@@ -267,6 +271,7 @@ The `ERROR_CODES` vocabulary is fixed by `AiAgentContract`:
 | Link and queue | `PLUGIN_UNAVAILABLE`, `LINK_DETACHED`, `HOST_UNAVAILABLE`, `QUEUE_FULL` |
 | Run lookup/interaction | `RUN_NOT_FOUND`, `RUN_NOT_INTERACTIVE` |
 | Tool admission | `TOOL_UNKNOWN`, `TOOL_DISABLED`, `TOOL_ARGUMENTS_INVALID`, `CAPABILITY_DENIED` |
+| External tool execution | `TOOL_FAILED` |
 | Resource admission | `QUOTA_EXCEEDED`, `RATE_LIMITED`, `LIMIT_EXCEEDED` |
 | Model and decision | `TARGET_UNSUPPORTED`, `TARGET_UNAVAILABLE`, `MODEL_FAILED`, `MODEL_TIMEOUT`, `DECISION_UNPARSABLE` |
 | Observation/action | `A11Y_SERVICE_NOT_RUNNING`, `NODE_REF_STALE`, `NODE_NOT_FOUND`, `SCREEN_LOCKED`, `OCR_PLUGIN_REQUIRED` |
@@ -277,6 +282,17 @@ These are Agent control-plane codes used by the runner and public JS handles.
 Capability responses retain the shared broker's lowercase error categories;
 the plugin's tool layer maps those observations into Agent errors. Defining a
 code here does not grant a capability or imply support for a future tool.
+`TOOL_FAILED` represents an unsuccessful external tool operation, including an
+MCP `isError` result. It is not evidence of host death or successful task progress.
+The plugin can include a fixed MCP diagnostic reason in the observation; this
+does not add another public error-code family or expose remote error prose.
+The pre-P10 host at `cdf1b6a564` already preserves task-event/result JSON error
+codes without checking `ERROR_CODES`. Its run registry, run record and JS handle
+receive paths are unchanged by P10, so receiving `TOOL_FAILED` does not itself
+require a contract-version or minimum-host increase. `ERROR_CODES` also classifies
+ordinary exception messages in the JS error adapter; that is distinct from
+receiving a plugin task result. An older host can still reject an explicit `mcp`
+tool-group option before admission because that public-option vocabulary changed.
 
 Task protocol ceilings are one running task per link, eight queued tasks,
 4 KiB goal text, 8 KiB supplied context, 200 steps, 300 model calls, 30 minutes
@@ -393,6 +409,25 @@ be completed, partial, failed, blocked or cancelled; callers must inspect status
 `"script"` requires an owning script to respond. Observing a run does not grant
 ownership. Detached execution changes script-lifetime cancellation, not host
 permissions or confirmation rules, and never enables restart recovery.
+
+P10 adds `mcp` to the accepted tool-group names and leaves it disabled by default,
+including when an assistant's empty `tools` object resolves the defaults.
+Explicit selections such as `tools: ["mcp", "user"]` are still constrained by
+the plugin's global settings and selected preset. They do not configure a server,
+provide credentials, discover tools or approve an action. Server profiles,
+explicit tool selection, per-server risk, credentials and MCP transport belong
+to the Agent plugin. This host change does not implement the proposed MCP Client
+plugin or add MCP network requests to the model/capability brokers.
+
+The plugin freezes admitted MCP definitions into the same per-run catalog used
+for prompts, validation, confirmation and execution. Its JSON and native model
+paths preserve failed-tool observations; a native continuation marks an external
+tool failure with `isError: true` and does not replay the action. External server
+authority is independent of the host's built-in capability grant. Transport
+compatibility and validation limits are documented by the Agent implementation;
+acceptance of the `mcp` group alone is not a claim to support every MCP server.
+The scoped host change and its current validation are recorded in
+[P10 host evidence](evidence/ai-agent-p10-host-20260926.md).
 
 The maintained API and type documentation are in
 [AutoJs6 Documentation](https://github.com/SuperMonster003/AutoJs6-Documentation/blob/master/api/ai.md).
