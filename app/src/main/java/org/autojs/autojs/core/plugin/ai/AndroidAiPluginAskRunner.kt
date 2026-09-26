@@ -765,8 +765,10 @@ private class ProcessAiPluginAskRunner(
                             ),
                         )
                     }
-                    is AiProviderSessionEvent.ProviderFailed ->
-                        terminalSession(AiPluginAskFailure.PROVIDER_FAILED)
+                    is AiProviderSessionEvent.ProviderFailed -> {
+                        detachStage()
+                        finish(AiPluginAskOutcome.Failed(AiPluginAskFailure.PROVIDER_FAILED, transcript.error.providerReason))
+                    }
                     AiProviderSessionEvent.Cancelled ->
                         terminalSession(AiPluginAskFailure.CANCELLED)
                     AiProviderSessionEvent.TimedOut ->
@@ -869,7 +871,7 @@ private class ProcessAiPluginAskRunner(
                                 target = outcome.target,
                             )
                         is AiPluginAskOutcome.Failed ->
-                            AiPluginStreamEvent.Failed(outcome.failure)
+                            AiPluginStreamEvent.Failed(outcome.failure, outcome.providerReason)
                     }
                     runCatching { checkNotNull(onStreamEvent).invoke(event) }
                 }
@@ -1582,15 +1584,10 @@ private class ProcessAiPluginAskRunner(
             }
 
             private fun providerFailed(envelope: ByteArray?) {
-                val failure = runCatching {
-                    val error = AiCommonCodec.decodeError(requireEnvelope(envelope))
-                    when (error.code) {
-                        org.autojs.plugin.ai.common.api.AiErrorCode.TIMEOUT ->
-                            AiPluginAskFailure.TIMED_OUT
-                        else -> AiPluginAskFailure.PROVIDER_FAILED
-                    }
-                }.getOrDefault(AiPluginAskFailure.SESSION_REJECTED)
-                fail(failure, closeSession = true)
+                val outcome = runCatching {
+                    AiCommonCodec.decodeError(requireEnvelope(envelope)).toPluginAskFailure()
+                }.getOrDefault(AiPluginAskOutcome.Failed(AiPluginAskFailure.SESSION_REJECTED))
+                fail(outcome.failure, closeSession = true, providerReason = outcome.providerReason)
             }
 
             private fun complete(
@@ -1647,15 +1644,16 @@ private class ProcessAiPluginAskRunner(
                 failure: AiPluginAskFailure,
                 closeSession: Boolean,
                 cancelRemote: Boolean = false,
+                providerReason: AiPluginProviderFailureReason? = null,
             ): Boolean {
                 if (!terminal.compareAndSet(false, true)) return false
                 runCatching { policy.onFailed() }
                 disposeTurnResources()
                 return owner.finishTurn(this, closeSession, cancelRemote) {
                     if (streaming) {
-                        checkNotNull(onStreamEvent).invoke(AiPluginStreamEvent.Failed(failure))
+                        checkNotNull(onStreamEvent).invoke(AiPluginStreamEvent.Failed(failure, providerReason))
                     } else {
-                        checkNotNull(onOutcome).invoke(AiPluginAskOutcome.Failed(failure))
+                        checkNotNull(onOutcome).invoke(AiPluginAskOutcome.Failed(failure, providerReason))
                     }
                 }
             }

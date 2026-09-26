@@ -81,9 +81,39 @@ workspace changes. These device checks and the successful host/test APK build
 do not assert that whole-repository lint is now clean. No unrelated lint finding
 or concurrent workspace modification is included in this payload change.
 
-The existing provider runner exposes `AiPluginAskFailure` without backend response bodies. Thus
-the Agent can forward its stable enum but cannot distinguish an HTTP schema rejection from other
-`PROVIDER_FAILED` errors until the upstream provider error contract is extended.
+The Provider runner exposes fixed error categories without backend response bodies. Since the
+2026-09-26 follow-up, a PROVIDER_FAILED envelope may retain a host-allowlisted ONLINE_*
+category from the existing optional providerCode field. Unknown codes still produce the generic
+PROVIDER_FAILED reason. ONLINE_REQUEST_REJECTED identifies a request rejection, not proof of a
+schema error; it does not trigger the Agent's bare REQUEST_REJECTED fallback.
+
+## Safe online failure-category follow-up, 2026-09-26
+
+The decoded onFailed envelope retains only AiPluginProviderFailureReason, never the raw
+providerCode or message. AiProviderSessionErrorSummary carries this typed value to the ordinary
+Attempt path; ask, stream and native-tool dispatch preserve it through AiAgentModelBroker.
+Persistent sessions use the same allowlist. Each path retains its historical TIMEOUT mapping,
+while local deadlines and cancellation remain distinct. Public JS ask errors, model error codes,
+retry behavior and published AIDL/SDK contracts are unchanged.
+
+Related JVM checks passed 72/72: AiPluginProviderFailureReasonTest, AiProviderSessionTest,
+AiAgentModelProtocolTest and AiPluginAskRuntimeTest. The encoded callback test exercises all 17
+known codes plus unknown codes with text/stream/tools combinations. On QV770340J7 / XQ-DQ72 /
+Android 13 / API 33, AiPluginAskFailureDispatchAndroidTest passed both methods against the
+matching host Debug and androidTest APKs. It uses the real private Attempt dispatch without
+starting discovery, binding or model execution, covering ASK, STREAM, TOOLS and STREAM_TOOLS,
+duplicate terminals and resource release. Run it with:
+
+```powershell
+adb -s <serial> shell am instrument -w -r -e class org.autojs.autojs.core.plugin.ai.AiPluginAskFailureDispatchAndroidTest org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+A separate bounded real AiGoCode Wi-Fi diagnostic then returned MODEL_FAILED with the wire
+reason ONLINE_NETWORK_UNAVAILABLE after the UI action enabled Wi-Fi. Its 4 model calls,
+3 tools, 16974 input / 174 output tokens and 24053 ms are failure evidence, not task acceptance.
+The existing Agent final-result schema remains unchanged; use the E4 model events to inspect
+this diagnostic category. The code alone does not distinguish a transient network-policy failure
+from an IOException or establish a VPN or connection-pool root cause.
 
 ## Agent caller grant matrix
 

@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.ai
 
 import org.autojs.autojs.core.plugin.ai.AiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.AiPluginProviderFailureReason
 import org.autojs.autojs.core.plugin.ai.AiPluginAskHandle
 import org.autojs.autojs.core.plugin.ai.AiPluginAskOutcome
 import org.autojs.autojs.core.plugin.ai.AiPluginAskRequest
@@ -103,6 +104,26 @@ class AiPluginAskRuntimeTest {
         assertEquals("BUSY", error["code"])
         assertEquals(0, runner.handle.cancelCount.get())
         assertEquals(1, runner.handle.closeCount.get())
+    }
+
+    @Test
+    fun providerDiagnosticsLeaveThePublicAskErrorUnchanged() {
+        val dispatchers = TestDispatchers()
+        val runner = FakeRunner()
+        val runtime = AiPluginAskRuntime({ runner }, dispatchers::create)
+        val rejected = AtomicReference<Any?>()
+
+        runtime.ask(request()).onReject(callback(rejected::set))
+        runner.emit(AiPluginAskOutcome.Failed(AiPluginAskFailure.PROVIDER_FAILED,
+            AiPluginProviderFailureReason.ONLINE_NETWORK_UNAVAILABLE))
+        dispatchers.drain()
+
+        val error = rejected.get() as Map<*, *>
+        assertEquals("AiPluginRouteException", error["name"])
+        assertEquals("AI plugin ask failed (PROVIDER_FAILED)", error["message"])
+        assertEquals("PROVIDER_FAILED", error["code"])
+        assertNull(error["providerReason"])
+        assertNull(error["providerCode"])
     }
 
     @Test

@@ -251,6 +251,7 @@
         "El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada"
       ],
       "fix": [
+        "Los fallos de llamadas a modelos en línea de AI Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)",
         "La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío",
         "Los árboles compactos de accesibilidad abreviaban los ID de recursos e impedían que los selectores literales encontraran los elementos mostrados",
         "Compatibilidad de las instantáneas de archivos de plugins, la instalación de paquetes Node.js, las operaciones con archivos de proyectos TypeScript y las comprobaciones del terminal en Android 7/8.0",

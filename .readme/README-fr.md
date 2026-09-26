@@ -416,6 +416,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Fonctionnalité` Entrée AI Agent dans le volet et gestion dans le centre de plugins, avec état de connexion, nombre de tâches, aide aux autorisations et reconnexion au redémarrage de l'hôte; entrée facultative dans les Outils de l'assistant lorsque l'APK publié figure dans l'index officiel
 * `Fonctionnalité` Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
+* `Correction` Les échecs des appels aux modèles en ligne d'AI Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)
 * `Correction` La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide
 * `Correction` Les arbres compacts d'accessibilité abrégeaient les ID de ressources, empêchant les sélecteurs littéraux de retrouver les éléments affichés
 * `Correction` Compatibilité des instantanés de fichiers des plugins, de l'installation des paquets Node.js, des opérations sur les fichiers des projets TypeScript et des sondes du terminal sous Android 7/8.0

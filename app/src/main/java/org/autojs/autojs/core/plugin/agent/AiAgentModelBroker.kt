@@ -369,7 +369,7 @@ internal class AiAgentModelBroker(
                                 is AiPluginStreamEvent.Usage -> updateUsage(providerEvent.usage)
                                 is AiPluginStreamEvent.ToolCalls -> toolCalls(providerEvent.calls)
                                 is AiPluginStreamEvent.Completed -> complete(providerEvent.text, providerEvent.usage, providerEvent.finishReason)
-                                is AiPluginStreamEvent.Failed -> fail(providerEvent.failure.agentModelError(), providerEvent.failure.name)
+                                is AiPluginStreamEvent.Failed -> fail(providerEvent.failure.agentModelError(), providerEvent.failure.agentModelReason(providerEvent.providerReason))
                             }
                         } }
                         install(if (decoded.tools.isNotEmpty()) toolRunner.startTools(actualRequest, decoded.stream, listener)
@@ -378,7 +378,7 @@ internal class AiAgentModelBroker(
                         install(askRunner.start(actualRequest) { outcome -> enqueue(this) {
                             when (outcome) {
                                 is AiPluginAskOutcome.Completed -> complete(outcome.text, outcome.usage, outcome.finishReason)
-                                is AiPluginAskOutcome.Failed -> fail(outcome.failure.agentModelError(), outcome.failure.name)
+                                is AiPluginAskOutcome.Failed -> fail(outcome.failure.agentModelError(), outcome.failure.agentModelReason(outcome.providerReason))
                             }
                         } })
                     }
@@ -529,7 +529,7 @@ internal class AiAgentModelBroker(
             if (code == AiAgentContract.ERROR_CANCELLED) AiAgentContract.MODEL_EVENT_CANCELLED else AiAgentContract.MODEL_EVENT_FAILED,
             JsonObject().apply {
                 addProperty("code", code)
-                // Only the enum name is forwarded. Provider messages and prompts are never exposed.
+                // Only host-owned enum names are forwarded. Provider messages and prompts are never exposed.
                 providerReason?.let { addProperty("reason", it) }
             })
 

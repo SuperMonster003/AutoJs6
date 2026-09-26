@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.agent
 
 import com.google.gson.JsonParser
 import org.autojs.autojs.core.plugin.ai.AiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.AiPluginProviderFailureReason
 import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.AiPluginUsage
 import org.autojs.plugin.ai.agent.api.AiAgentContract
@@ -207,6 +208,20 @@ class AiAgentModelProtocolTest {
         sequence.next("started")
         assertEquals(2L, sequence.next("cancelled"))
         assertNull(sequence.next("completed"))
+    }
+
+    @Test fun providerDiagnosticsDoNotChangePrimaryErrorsOrStructuredFallbackReasons() {
+        val network = AiPluginProviderFailureReason.ONLINE_NETWORK_UNAVAILABLE
+        assertEquals("ONLINE_NETWORK_UNAVAILABLE", AiPluginAskFailure.PROVIDER_FAILED.agentModelReason(network))
+        assertEquals("PROVIDER_FAILED", AiPluginAskFailure.PROVIDER_FAILED.agentModelReason(null))
+        assertEquals("ONLINE_REQUEST_REJECTED", AiPluginAskFailure.PROVIDER_FAILED.agentModelReason(
+            AiPluginProviderFailureReason.ONLINE_REQUEST_REJECTED))
+        assertEquals(AiAgentContract.ERROR_MODEL_FAILED, AiPluginAskFailure.PROVIDER_FAILED.agentModelError())
+        AiPluginAskFailure.entries.filter { it != AiPluginAskFailure.PROVIDER_FAILED }.forEach { failure ->
+            assertEquals(failure.name, failure.agentModelReason(network))
+        }
+        assertEquals("TIMED_OUT", AiPluginAskFailure.TIMED_OUT.agentModelReason(network))
+        assertEquals("CANCELLED", AiPluginAskFailure.CANCELLED.agentModelReason(network))
     }
 
     private fun valid() = JsonParser.parseString("""{"requestId":"request-1","targetId":"local:gemma","messages":[{"role":"user","content":"private-prompt 中文"}]}""").asJsonObject

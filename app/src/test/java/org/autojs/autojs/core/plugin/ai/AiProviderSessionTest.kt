@@ -29,6 +29,7 @@ import org.autojs.plugin.ai.provider.api.AiToolResultBatch
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -1181,6 +1182,39 @@ class AiProviderSessionTest {
             terminalLane.shutdownNow()
             dataLane.shutdownNow()
         }
+    }
+
+    @Test
+    fun providerFailureIngressPreservesOnlySafeCategoriesForTextStreamAndTools() {
+        for ((stream, toolRounds) in listOf(false to 0, true to 0, false to 1, true to 1)) {
+            for (providerCode in AiPluginProviderFailureReason.entries.map { it.name } + listOf(
+                "ONLINE_NETWORK_UNAVAILABLE secret-token", "https://private.example/secret-token", null)) {
+                val active = activeHarness(stream, toolRounds)
+                active.dispatch.callback.onFailed(PROVIDER_UID, AiCommonCodec.encodeError(AiError(
+                    code = AiErrorCode.PROVIDER_FAILED, message = "private server response secret-token",
+                    providerCode = providerCode)))
+                active.harness.drain()
+                val event = active.harness.events.last() as AiProviderSessionEvent.ProviderFailed
+                assertEquals(AiErrorCode.PROVIDER_FAILED, event.error.code)
+                assertEquals(AiPluginProviderFailureReason.fromProviderCode(providerCode), event.error.providerReason)
+                assertEquals(providerCode != null, event.error.providerCodePresent)
+                assertFalse(event.toString().contains("private"))
+                assertFalse(event.toString().contains("secret-token"))
+                assertEquals(0, active.remote.cancelCount.get())
+                assertEquals(1, active.remote.closeCount.get())
+            }
+        }
+    }
+
+    @Test
+    fun protocolTimeoutFailureDoesNotAcquireAnOnlineCategoryAtIngress() {
+        val active = activeHarness(stream = false)
+        active.dispatch.callback.onFailed(PROVIDER_UID, AiCommonCodec.encodeError(AiError(
+            code = AiErrorCode.TIMEOUT, providerCode = "ONLINE_NETWORK_UNAVAILABLE")))
+        active.harness.drain()
+        val event = active.harness.events.last() as AiProviderSessionEvent.ProviderFailed
+        assertEquals(AiErrorCode.TIMEOUT, event.error.code)
+        assertNull(event.error.providerReason)
     }
 
     @Test

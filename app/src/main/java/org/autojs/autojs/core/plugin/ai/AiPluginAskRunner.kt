@@ -255,7 +255,10 @@ internal sealed class AiPluginAskOutcome {
                 "finishReason=$finishReason, usage=$usage)"
     }
 
-    data class Failed(val failure: AiPluginAskFailure) : AiPluginAskOutcome()
+    data class Failed(
+        val failure: AiPluginAskFailure,
+        val providerReason: AiPluginProviderFailureReason? = null,
+    ) : AiPluginAskOutcome()
 }
 
 internal interface AiPluginAskHandle : Closeable {
@@ -313,7 +316,10 @@ internal sealed class AiPluginStreamEvent {
                 "finishReason=$finishReason, usage=$usage)"
     }
 
-    data class Failed(val failure: AiPluginAskFailure) : AiPluginStreamEvent()
+    data class Failed(
+        val failure: AiPluginAskFailure,
+        val providerReason: AiPluginProviderFailureReason? = null,
+    ) : AiPluginStreamEvent()
 }
 
 internal fun interface AiPluginStreamRunner {

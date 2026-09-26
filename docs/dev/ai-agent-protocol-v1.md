@@ -322,6 +322,10 @@ the host-selected Provider.
 uses the full model request shape above; completion includes `text`, `finishReason`
 and `targetId`. Chunk events include `text` and increasing `chunkSequence`; failure
 events include a stable `code` and, when available, a stable Provider enum `reason`.
+For PROVIDER_FAILED, the host may preserve an exact, closed ONLINE_* category from the
+existing Provider error field; arbitrary provider codes and messages are discarded. This
+diagnostic does not change the main error code or permit replay. ONLINE_REQUEST_REJECTED
+is distinct from the bare REQUEST_REJECTED format-fallback signal.
 `cancel` uses `modelRefJson`, and identifies a request by `requestId`.
 
 Each link has bounded work queues, callback death cleanup, request deadlines,

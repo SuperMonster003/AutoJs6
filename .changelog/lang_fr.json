@@ -251,6 +251,7 @@
         "Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée"
       ],
       "fix": [
+        "Les échecs des appels aux modèles en ligne d'AI Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)",
         "La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide",
         "Les arbres compacts d'accessibilité abrégeaient les ID de ressources, empêchant les sélecteurs littéraux de retrouver les éléments affichés",
         "Compatibilité des instantanés de fichiers des plugins, de l'installation des paquets Node.js, des opérations sur les fichiers des projets TypeScript et des sondes du terminal sous Android 7/8.0",

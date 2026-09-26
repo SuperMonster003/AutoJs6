@@ -122,6 +122,7 @@ internal data class AiProviderSessionErrorSummary(
     val code: Int,
     val retryDisposition: Int,
     val providerCodePresent: Boolean,
+    val providerReason: AiPluginProviderFailureReason? = null,
 )
 
 internal sealed class AiProviderSessionEvent {
@@ -1028,6 +1029,7 @@ internal class AiProviderSessionPolicy(
                                 code = error.code,
                                 retryDisposition = error.retryDisposition,
                                 providerCodePresent = error.providerCode != null,
+                                providerReason = error.safeProviderFailureReason(),
                             ),
                         ),
                         cancelRemote = false,

@@ -3,6 +3,7 @@ package org.autojs.autojs.core.plugin.agent
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.autojs.autojs.core.plugin.ai.AiPluginAskFailure
+import org.autojs.autojs.core.plugin.ai.AiPluginProviderFailureReason
 import org.autojs.autojs.core.plugin.ai.AiPluginMessage
 import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.AiPluginUsage
@@ -289,3 +290,6 @@ internal fun AiPluginAskFailure.agentModelError(): String = when (this) {
     AiPluginAskFailure.INVALID_REQUEST -> AiAgentContract.ERROR_INVALID_REQUEST
     else -> AiAgentContract.ERROR_MODEL_FAILED
 }
+
+internal fun AiPluginAskFailure.agentModelReason(providerReason: AiPluginProviderFailureReason?): String =
+    if (this == AiPluginAskFailure.PROVIDER_FAILED) providerReason?.name ?: name else name
