@@ -57,6 +57,45 @@ internal class NodeBridgeAgentBridge(
                 reply(NodeBridgeResponse.success(request.id, JSONObject().put("agentInvocationId", id).put("stopped", true).toString()))
                 return
             }
+            if (request.module == "engines" && request.method == "execScript") {
+                require(args.length() == 3 && args.get(0) is String && args.get(1) is String && args.get(2) is JSONObject)
+                val name = args.getString(0)
+                val source = args.getString(1)
+                AgentDynamicScriptPolicy.validateSource(name, source)
+                val options = args.getJSONObject(2)
+                AgentDynamicScriptPolicy.validateOptions(options.keys().asSequence().toSet())
+                val invocationId = requireNotNull(optionalString(options, "agentInvocationId"))
+                val timeout = integer(options, "timeoutMs", 0).also { require(it in 1..AgentDynamicScriptPolicy.MAX_TIMEOUT_MS) }
+                    .coerceAtMost((request.timeoutMs - 750).coerceAtLeast(1))
+                val runId = optionalString(options, "agentRunId") ?: "agent-${UUID.randomUUID()}"
+                require(runId.matches(Regex("[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}")))
+                val preset = optionalString(options, "presetName").orEmpty().also {
+                    require(it.toByteArray(Charsets.UTF_8).size <= 256 && it.none(Character::isISOControl))
+                }
+                val capture = options.opt("captureConsole")?.let { require(it is Boolean); it } ?: true
+                if (!invocations.claim(invocationId)) throw AgentManifestException("CANCELLED", "Dynamic invocation is already closed")
+                val pending = Invocation()
+                synchronized(lock) { check(!closed); executions.add(pending) }
+                val handle = try {
+                    NodeBridgeEngineDispatchService.dispatchDynamic(appContext, request, name, source, engineInfo.cwd,
+                        runId, preset, timeout, capture) { response ->
+                        pending.completed.set(true)
+                        invocations.finish(invocationId)
+                        synchronized(lock) { executions.remove(pending) }
+                        reply(response)
+                    }
+                } catch (error: Throwable) {
+                    invocations.finish(invocationId)
+                    synchronized(lock) { executions.remove(pending) }
+                    throw error
+                }
+                synchronized(lock) {
+                    pending.handle = handle
+                    invocations.attach(invocationId, handle)
+                    if (closed && !pending.completed.get()) handle.close()
+                }
+                return
+            }
             val scripts = currentCatalog()
             when (request.method) {
                 "listScripts" -> {
@@ -136,10 +175,10 @@ internal class NodeBridgeAgentBridge(
                     "LIMIT_EXCEEDED" -> NodeBridgeError.resourceLimit("LIMIT_EXCEEDED", request.module, request.method)
                     else -> NodeBridgeError.invalidRequest(error.code, request.module, request.method)
                 }
-                is IllegalArgumentException -> NodeBridgeError.invalidRequest("Invalid registered script, arguments or directory scope.", request.module, request.method)
+                is IllegalArgumentException -> NodeBridgeError.invalidRequest("Invalid Agent script, arguments or directory scope.", request.module, request.method)
                 is SecurityException -> NodeBridgeError.permissionDenied("Script path is outside the permitted roots.", request.module, request.method)
                 is IllegalStateException -> NodeBridgeError.processDead("Agent script bridge is unavailable.")
-                else -> NodeBridgeError.providerFailed("Registered script operation failed.", request.module, request.method)
+                else -> NodeBridgeError.providerFailed("Agent script operation failed.", request.module, request.method)
             }
             reply(NodeBridgeResponse.failure(request.id, failure))
         }

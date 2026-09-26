@@ -1221,6 +1221,12 @@ class AndroidNodeBridgeCapabilityProvider(
             dispatchAgent(request, callback)
             return
         }
+        if (request.method == "execScript" && runCatching {
+                JSONArray(request.argsJson).optJSONObject(2)?.has("agentInvocationId") == true
+            }.getOrDefault(false)) {
+            dispatchAgent(request, callback)
+            return
+        }
         if (request.method == "execScript" || request.method == "execScriptFile") {
             NodeBridgeEngineDispatchService.dispatch(
                 appContext,

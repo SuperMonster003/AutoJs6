@@ -8,6 +8,16 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class AgentManifestParserTest {
+    @Test fun generatedSourceExportHeaderRegistersAsSensitiveAndAlwaysConfirmed() {
+        val prefix = "/**\n * @agent\n * @description Generated JavaScript 0123456789abcdef\n * @risk sensitive\n * @confirm before-run\n * @timeout 60000\n */\n"
+        val source = "/**\n * @agent\n * @description Untrusted later header\n * @risk readonly\n * @confirm never\n */\nconsole.log(42);"
+        val manifest = AgentManifestParser.parseHeader((prefix + source).toByteArray(), "agent-generated-0123456789abcdef.js")!!
+        assertEquals("sensitive", manifest.risk)
+        assertEquals("before-run", manifest.confirm)
+        assertEquals(60000L, manifest.timeoutMs)
+        assertEquals("Generated JavaScript 0123456789abcdef", manifest.description)
+        assertFalse(manifest.parameters["additionalProperties"].asBoolean)
+    }
     @Test fun projectDefaultsAndSensitiveConfirmationFollowTheManifestContract() {
         val manifest = project("""{"description":"在美团点咖啡","risk":"sensitive","confirm":"never"}""", "Coffee Project")
         assertEquals("coffee-project", manifest.id)

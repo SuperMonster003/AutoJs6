@@ -9,6 +9,9 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.ScriptExecutionListener
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.AutoFileSource
+import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.StringScriptSource
+import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.script.LuaFileSource
@@ -19,17 +22,16 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
-/** One already-authorized catalog invocation, owned by its bridge link's cancellation handle. */
-internal class AgentRegisteredScriptExecution(
-    private val launchPath: String,
+/** One authorized Agent script, with the same cancellation and result lifetime for file and inline sources. */
+internal class AgentOwnedScriptExecution private constructor(
     private val workingDirectory: String,
-    private val expectedScriptPath: String,
     parametersJson: String,
     runId: String,
     presetName: String?,
     private val timeoutMs: Long,
     private val captureConsole: Boolean,
-    private val cancellationRequested: () -> Boolean = { false },
+    private val cancellationRequested: () -> Boolean,
+    private val createSource: (File) -> Pair<ScriptSource, ExecutionConfig>,
 ) : ScriptExecutionListener {
     private val agentState = AgentScriptExecutionState(runId, parametersJson, presetName)
     private val lock = Object()
@@ -39,7 +41,7 @@ internal class AgentRegisteredScriptExecution(
     private var stopReason: String? = null
     private var responseFinished = false
 
-    init { require(timeoutMs in 1..MAX_TIMEOUT_MS) { "Invalid registered-script timeout" } }
+    init { require(timeoutMs in 1..MAX_TIMEOUT_MS) { "Invalid Agent script timeout" } }
 
     fun execute(): JSONObject {
         val console = AutoJs.instance.globalConsole
@@ -49,37 +51,16 @@ internal class AgentRegisteredScriptExecution(
             if (SystemClock.elapsedRealtime() >= deadline) requestStop(OUTCOME_TIMEOUT)
             if (synchronized(lock) { stopReason == null }) {
                 val cwd = File(workingDirectory).canonicalFile
-                val path = File(launchPath).canonicalFile
-                require(cwd.isDirectory && path.exists()) { "Registered script is unavailable" }
-                require(path == cwd || path.path.startsWith(cwd.path + File.separator)) {
-                    "Registered script is outside its working directory"
-                }
-                val launch = if (path.isDirectory) {
-                    ScriptLaunchSourceFactory.createAutoJsProjectLaunchForPythonPreview(path, cwd.path, PythonRuntimePreviewFeature.isEnabled)
-                } else {
-                    ScriptLaunchSourceFactory.createPathLaunch(path.path, workingDirectory = cwd.path,
-                        defaultWorkingDirectory = cwd.path)
-                }
-                val resolvedFile = when (val source = launch.source) {
-                    is JavaScriptFileSource -> source.file
-                    is PythonFileSource -> source.file
-                    is LuaFileSource -> source.file
-                    is JvmFileSource -> source.file
-                    is AutoFileSource -> source.file
-                    else -> throw IllegalArgumentException("Registered script has no verifiable file source")
-                }.canonicalFile
-                require(resolvedFile.isFile && resolvedFile == File(expectedScriptPath).canonicalFile &&
-                    resolvedFile.path.startsWith(cwd.path + File.separator)) {
-                    "Registered script launch no longer matches the authorized entry"
-                }
-                val config = launch.createExecutionConfig(ExecutionConfig(workingDirectory = cwd.path)).apply {
+                require(cwd.isDirectory) { "Agent working directory is unavailable" }
+                val (source, launchConfig) = createSource(cwd)
+                val config = launchConfig.apply {
                     agentExecutionState = agentState
                     val parameters = JSONObject(agentState.parametersJson)
                     for (key in parameters.keys()) {
-                        require(key.isNotBlank() && !key.contains('\u0000')) { "Invalid registered-script parameter name" }
+                        require(key.isNotBlank() && !key.contains('\u0000')) { "Invalid Agent script parameter name" }
                         val value = parameters.get(key)
                         require(value is String || value is Number || value is Boolean || value === JSONObject.NULL) {
-                            "Registered-script parameters must be scalar values"
+                            "Agent script parameters must be scalar values"
                         }
                         setArgument(key, value)
                     }
@@ -89,7 +70,7 @@ internal class AgentRegisteredScriptExecution(
                 if (synchronized(lock) { stopReason == null }) {
                     // The listener's onStart gate also closes cancellation between this check and
                     // execute(): an engine created later is stopped before evaluating its source.
-                    val started = AutoJs.instance.scriptEngineService.execute(launch.source, this, config)
+                    val started = AutoJs.instance.scriptEngineService.execute(source, this, config)
                     synchronized(lock) { execution = started }
                     if (!awaitOutcome(deadline, stopAware = true)) {
                         if (synchronized(lock) { stopReason == null }) requestStop(OUTCOME_TIMEOUT)
@@ -122,8 +103,8 @@ internal class AgentRegisteredScriptExecution(
                 .put("finished", outcome != null || execution == null)
                 .put("outcome", finalOutcome)
                 .put("error", when (finalOutcome) {
-                    OUTCOME_TIMEOUT -> JSONObject().put("code", "SCRIPT_TIMEOUT").put("message", "Registered script exceeded its timeout")
-                    OUTCOME_STOPPED -> JSONObject().put("code", "CANCELLED").put("message", "Registered script was stopped")
+                    OUTCOME_TIMEOUT -> JSONObject().put("code", "SCRIPT_TIMEOUT").put("message", "Agent script exceeded its timeout")
+                    OUTCOME_STOPPED -> JSONObject().put("code", "CANCELLED").put("message", "Agent script was stopped")
                     OUTCOME_EXCEPTION -> JSONObject().put("code", "SCRIPT_FAILED").put("message", boundedError(outcome?.error))
                     else -> JSONObject.NULL
                 })
@@ -202,6 +183,52 @@ internal class AgentRegisteredScriptExecution(
     private class Outcome(val error: Throwable?)
 
     companion object {
+        fun registered(
+            launchPath: String, workingDirectory: String, expectedScriptPath: String,
+            parametersJson: String, runId: String, presetName: String?, timeoutMs: Long,
+            captureConsole: Boolean, cancellationRequested: () -> Boolean,
+        ) = AgentOwnedScriptExecution(workingDirectory, parametersJson, runId, presetName,
+            timeoutMs, captureConsole, cancellationRequested) { cwd ->
+            val path = File(launchPath).canonicalFile
+            require(path.exists() && (path == cwd || path.path.startsWith(cwd.path + File.separator))) {
+                "Registered script is outside its working directory"
+            }
+            val launch = if (path.isDirectory) {
+                ScriptLaunchSourceFactory.createAutoJsProjectLaunchForPythonPreview(path, cwd.path, PythonRuntimePreviewFeature.isEnabled)
+            } else {
+                ScriptLaunchSourceFactory.createPathLaunch(path.path, workingDirectory = cwd.path, defaultWorkingDirectory = cwd.path)
+            }
+            val resolvedFile = when (val source = launch.source) {
+                is JavaScriptFileSource -> source.file
+                is PythonFileSource -> source.file
+                is LuaFileSource -> source.file
+                is JvmFileSource -> source.file
+                is AutoFileSource -> source.file
+                else -> throw IllegalArgumentException("Registered script has no verifiable file source")
+            }.canonicalFile
+            require(resolvedFile.isFile && resolvedFile == File(expectedScriptPath).canonicalFile &&
+                resolvedFile.path.startsWith(cwd.path + File.separator)) {
+                "Registered script launch no longer matches the authorized entry"
+            }
+            launch.source to launch.createExecutionConfig(ExecutionConfig(workingDirectory = cwd.path))
+        }
+
+        fun dynamic(
+            name: String, source: String, workingDirectory: String, runId: String, presetName: String?,
+            timeoutMs: Long, captureConsole: Boolean, cancellationRequested: () -> Boolean,
+        ): AgentOwnedScriptExecution {
+            AgentDynamicScriptPolicy.validateSource(name, source)
+            val script = StringScriptSource(name, source).apply { prefix = "\$agent/" }
+            require(script.engineName == JavaScriptSource.ENGINE &&
+                script.executionMode and (JavaScriptSource.EXECUTION_MODE_UI or JavaScriptSource.EXECUTION_MODE_UI_THREAD) == 0) {
+                "Dynamic Agent scripts require the standard background JavaScript runtime"
+            }
+            return AgentOwnedScriptExecution(workingDirectory, "{}", runId, presetName,
+                timeoutMs, captureConsole, cancellationRequested) { cwd ->
+                script to ExecutionConfig(workingDirectory = cwd.path)
+            }
+        }
+
         const val MAX_TIMEOUT_MS = 300_000L
         private const val STOP_SETTLE_MS = 500L
         private const val OUTCOME_SUCCESS = "success"
@@ -210,7 +237,7 @@ internal class AgentRegisteredScriptExecution(
         private const val OUTCOME_TIMEOUT = "timeout"
 
         private fun boundedError(error: Throwable?): String {
-            val message = error?.message ?: "Registered script failed"
+            val message = error?.message ?: "Agent script failed"
             val builder = StringBuilder()
             var bytes = 0
             for (codePoint in message.codePoints().toArray()) {

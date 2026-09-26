@@ -30,6 +30,14 @@ class AiAgentArgumentsTest {
         assertThrows(IllegalArgumentException::class.java) { AiAgentArguments.options(json("{\"context\":\"${"a".repeat(8192)}\",\"parameters\":{\"days\":30}}")) }
         AiAgentArguments.options(json("{\"context\":\"\",\"parameters\":{\"days\":30}}"))
     }
+    @Test fun dynamicScriptGroupIsRecognizedButNeverEnabledByDefault() {
+        AiAgentArguments.options(json("""{"tools":["script_dynamic"]}"""))
+        val inherited = AiAgentArguments.merge(json("""{"tools":{}}"""), json("""{"tools":{"disable":["shell"]}}"""))
+        assertFalse(inherited.getAsJsonArray("tools").any { it.asString == "script_dynamic" })
+        assertThrows(IllegalArgumentException::class.java) {
+            AiAgentArguments.merge(json("""{"tools":["observe"]}"""), json("""{"tools":["script_dynamic"]}"""))
+        }
+    }
     @Test fun assistantOverridesPreserveAndNarrowRestrictionsWithoutMutatingInput() {
         val base = json("""{"budget":{"maxSteps":20,"maxModelCalls":30},"tools":["observe","script","user"],"confirm":"cautious","scriptRoots":["/sdcard/Scripts/agent"]} """)
         val original = base.toString()

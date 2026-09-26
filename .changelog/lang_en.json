@@ -6,6 +6,7 @@
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
         "Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates",
         "ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples",
+        "AI Agent can run confirmed generated JavaScript, stop its own script on cancellation or timeout, and return structured results and console output; the script uses host permissions, without a file-access sandbox",
         "The AI Agent model broker accepts image inputs and image tool results for compatible vision models (requires plugin support)",
         "Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk",
         "Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports",
@@ -249,6 +250,7 @@
         "AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration"
       ],
       "fix": [
+        "Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty",
         "Compact accessibility trees shortened resource IDs, preventing literal selectors from matching the displayed IDs",
         "Compatibility of plugin file snapshots, Node.js package installation, TypeScript project file operations and terminal environment probes on Android 7/8.0",
         "Shizuku permission request listeners remaining registered after destruction",

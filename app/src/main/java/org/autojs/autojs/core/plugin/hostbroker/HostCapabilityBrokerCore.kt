@@ -89,11 +89,17 @@ class HostCapabilityBrokerCore(
         putString(HostCapabilityContract.KEY_HOST_CAPABILITY_BROKER_ID, id)
         putString(HostCapabilityContract.KEY_BRIDGE_ENGINE_INFO, engineInfo.toJson())
         putStringArray(HostCapabilityContract.KEY_HOST_CAPABILITY_MODULES, grant.modules.toTypedArray())
-        putStringArray(HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS, if (!destroyed.get() &&
-            "accessibility.readScreenText" in grant.allowedMethods &&
-            grant.permissions.containsAll(listOf("accessibility", "screen_capture", "ocr")) &&
-            runCatching { ocrAvailable(appContext) }.getOrDefault(false)
-        ) arrayOf("accessibility.readScreenText") else emptyArray())
+        putStringArray(HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS, buildList {
+            if (!destroyed.get()) {
+                if ("accessibility.readScreenText" in grant.allowedMethods &&
+                    grant.permissions.containsAll(listOf("accessibility", "screen_capture", "ocr")) &&
+                    runCatching { ocrAvailable(appContext) }.getOrDefault(false)) add("accessibility.readScreenText")
+                // Advertises the owned timeout/cancellation extension, not merely ordinary execScript.
+                if (engineInfo.engineName == "ai-agent" && provider is AndroidNodeBridgeCapabilityProvider &&
+                    grant.allowedMethods.containsAll(listOf("engines.execScript", "engines.stop")) &&
+                    grant.permissions.containsAll(listOf("engines", "engines.exec"))) add("engines.execScript")
+            }
+        }.toTypedArray())
         putStringArray(HostCapabilityContract.KEY_GRANT_METHODS, grant.allowedMethods.toTypedArray())
         putStringArray(HostCapabilityContract.KEY_GRANT_PERMISSIONS, grant.permissions.toTypedArray())
         putInt(HostCapabilityContract.KEY_GRANT_MAX_REQUEST_BYTES, grant.maxRequestBytes)

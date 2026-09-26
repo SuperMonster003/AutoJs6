@@ -11,6 +11,7 @@
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
 * `Nuevo` API ai.agent para iniciar y consultar tareas, eventos, respuestas, confirmaciones, cancelación y tareas detached en segundo plano; result/context exponen resultados y contexto de scripts registrados con @agent, con tres ejemplos
+* `Nuevo` AI Agent ejecuta JavaScript generado tras la confirmación, detiene su script al cancelar o agotar el tiempo y devuelve resultados estructurados y la salida de consola; el script usa los permisos del anfitrión, sin aislamiento del acceso a archivos
 * `Nuevo` El intermediario de modelos de AI Agent admite imágenes de entrada y en los resultados de herramientas para modelos visuales compatibles (requiere soporte de los plugins)
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
@@ -252,6 +253,7 @@
 * `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
 * `Nuevo` Acceso a AI Agent en el panel y gestión en el centro de complementos, con estado de conexión, recuento de tareas, guía de autorización y reconexión al reiniciar el anfitrión; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial
 * `Nuevo` El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
+* `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío
 * `Corrección` Los árboles compactos de accesibilidad abreviaban los ID de recursos e impedían que los selectores literales encontraran los elementos mostrados
 * `Corrección` Compatibilidad de las instantáneas de archivos de plugins, la instalación de paquetes Node.js, las operaciones con archivos de proyectos TypeScript y las comprobaciones del terminal en Android 7/8.0
 * `Corrección` Los receptores de solicitudes de permisos de Shizuku permanecían registrados después de su destrucción

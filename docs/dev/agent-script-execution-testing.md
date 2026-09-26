@@ -64,3 +64,40 @@ model, accessibility permission or a Node.js plugin. The project-entry mismatch 
 before any plugin engine is launched. Execution through other supported script engines follows
 the existing source factory and is not established by the Rhino device fixture. A test file by
 itself is not execution evidence; record the actual build/device results separately.
+
+## Generated JavaScript (AI Agent P9.3)
+
+The same owned execution lifetime now backs `engines.execScript(name, source, options)` when
+`options.agentInvocationId` is present. An Agent broker advertises `engines.execScript` in
+`availableOptionalMethods` only when both execution and stop are granted and the Android
+provider is available. Plugins must require that advertisement before offering dynamic
+source execution; an older host's ordinary `engines.execScript` grant alone is insufficient.
+No AIDL or SDK contract change is required. Calls without an invocation ID retain their
+existing Node/MCP launch and wait semantics.
+
+The owned extension accepts only `agentInvocationId` (lowercase UUID), `agentRunId`,
+`presetName`, `timeoutMs` (1..300000) and `captureConsole`. Source is non-empty, valid Unicode,
+contains no NUL, and is limited to 8192 UTF-8 bytes. The generated name is a bounded ASCII
+basename ending optionally in `.js`. The source uses the standard background JavaScript
+runtime; Node.js, Bun, QuickJS, UI and UI-thread directives are rejected before evaluation.
+The working directory is the host-provided workspace and cannot be overridden by the tool.
+
+The result shape matches registered scripts: `executionId`, `finished`, `outcome`, `error`,
+`result`, `resultReported`, `consoleTail`, and optional `consoleCaptureMode`. The run receives
+an empty parameter object and can report through `ai.agent.result` / `ai.agent.context`.
+Timeout, explicit stop, early stop and link destruction all retain the owned cancellation
+behavior described above. A completed invocation token cannot launch another script.
+
+This is ordinary host JavaScript execution, not a security sandbox. Source can use host APIs,
+including direct file access and child engines. The managed deadline stops the owned engine;
+it does not promise rollback of prior side effects or confinement of work explicitly started
+through other host APIs. Existing broker `files.write` still applies the workspace's canonical
+path / symlink policy, but that policy does not constrain file calls inside arbitrary source.
+The plugin keeps `script_dynamic` off by default and obtains confirmation for each source.
+Host assistant option merging also preserves default-off groups when merging `tools: {}`.
+
+`AgentDynamicScriptExecutionTest` covers real result/context/console output, exception and
+no-result fallback, actual timeout termination, stop isolation, link teardown, both early-stop
+races, malformed source/options, and unsupported runtime directives. It writes only temporary
+host-cache fixtures. `HostCapabilityBrokerStubTest` covers capability advertisement, and
+`AgentManifestParserTest` checks the plugin's exported sensitive `@agent` header.

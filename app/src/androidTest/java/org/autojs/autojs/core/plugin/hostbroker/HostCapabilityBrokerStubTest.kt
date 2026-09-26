@@ -22,6 +22,20 @@ import java.util.concurrent.TimeUnit
 class HostCapabilityBrokerStubTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
+    @Test fun dynamicExecutionDiscoveryRequiresAnAgentOwnerAndBothExecutionGrants() {
+        for (agent in listOf(true, false)) for (permission in listOf(true, false)) for (stop in listOf(true, false)) {
+            val methods = setOf("engines.execScript") + if (stop) setOf("engines.stop") else emptySet()
+            val grant = HostCapabilityGrant(methods, if (permission) setOf("engines", "engines.exec") else setOf("engines"))
+            val core = HostCapabilityBrokerCore(context, "dynamic-discovery", grant, engineName = if (agent) "ai-agent" else "plugin")
+            try {
+                assertEquals(agent && permission && stop,
+                    core.getBrokerInfo().getStringArray(HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS)!!.contains("engines.execScript"))
+                core.destroy(null)
+                assertFalse(core.getBrokerInfo().getStringArray(HostCapabilityContract.KEY_AVAILABLE_OPTIONAL_METHODS)!!.contains("engines.execScript"))
+            } finally { core.destroy(null) }
+        }
+    }
+
     @Test fun optionalOcrDiscoveryTracksAvailabilityAndNeverWidensTheGrant() {
         var installed = false
         val permissions = setOf("accessibility", "screen_capture", "ocr")

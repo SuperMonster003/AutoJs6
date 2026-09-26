@@ -11,6 +11,7 @@
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
 * `Feature` ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples
+* `Feature` AI Agent can run confirmed generated JavaScript, stop its own script on cancellation or timeout, and return structured results and console output; the script uses host permissions, without a file-access sandbox
 * `Feature` The AI Agent model broker accepts image inputs and image tool results for compatible vision models (requires plugin support)
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
@@ -252,6 +253,7 @@
 * `Feature` Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results
 * `Feature` AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart; optional Tools entry in the installation wizard when a published APK is present in the official index
 * `Feature` AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
+* `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
 * `Fix` Compact accessibility trees shortened resource IDs, preventing literal selectors from matching the displayed IDs
 * `Fix` Compatibility of plugin file snapshots, Node.js package installation, TypeScript project file operations and terminal environment probes on Android 7/8.0
 * `Fix` Shizuku permission request listeners remaining registered after destruction

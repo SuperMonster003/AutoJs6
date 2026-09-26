@@ -11,6 +11,7 @@
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
 * `Fonctionnalité` API de script ai.agent pour lancer et consulter les tâches, recevoir les événements, répondre, confirmer, annuler et exécuter en arrière-plan avec detached; result/context exposent les résultats et le contexte des scripts enregistrés par @agent, avec trois exemples
+* `Fonctionnalité` AI Agent exécute le JavaScript généré après confirmation, arrête son script en cas d'annulation ou de délai dépassé, et renvoie les résultats structurés et la console; le script utilise les permissions de l'hôte, sans isolation des accès aux fichiers
 * `Fonctionnalité` Le relais de modèles AI Agent accepte les images en entrée et dans les résultats des outils pour les modèles visuels compatibles (prise en charge par les plugins requise)
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables
@@ -252,6 +253,7 @@
 * `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Fonctionnalité` Entrée AI Agent dans le volet et gestion dans le centre de plugins, avec état de connexion, nombre de tâches, aide aux autorisations et reconnexion au redémarrage de l'hôte; entrée facultative dans les Outils de l'assistant lorsque l'APK publié figure dans l'index officiel
 * `Fonctionnalité` Les paramètres du plugin AI Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
+* `Correction` La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide
 * `Correction` Les arbres compacts d'accessibilité abrégeaient les ID de ressources, empêchant les sélecteurs littéraux de retrouver les éléments affichés
 * `Correction` Compatibilité des instantanés de fichiers des plugins, de l'installation des paquets Node.js, des opérations sur les fichiers des projets TypeScript et des sondes du terminal sous Android 7/8.0
 * `Correction` Écouteurs des demandes d'autorisation Shizuku restant enregistrés après leur destruction
