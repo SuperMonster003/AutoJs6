@@ -38,6 +38,18 @@ class AiAgentArgumentsTest {
             AiAgentArguments.merge(json("""{"tools":["observe"]}"""), json("""{"tools":["script_dynamic"]}"""))
         }
     }
+    @Test fun mcpGroupIsExplicitAndAssistantRestrictionsCannotBeExpanded() {
+        AiAgentArguments.options(json("""{"tools":["mcp","user"]}"""))
+        assertFalse(AiAgentArguments.effectiveTools(json("{}")).contains("mcp"))
+        val narrowed = AiAgentArguments.merge(json("""{"tools":["mcp","observe"]}"""), json("""{"tools":{"disable":["observe"]}}"""))
+        assertEquals(setOf("mcp"), AiAgentArguments.effectiveTools(narrowed["tools"]))
+        assertThrows(IllegalArgumentException::class.java) {
+            AiAgentArguments.merge(json("""{"tools":{}}"""), json("""{"tools":["mcp"]}"""))
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            AiAgentArguments.options(json("""{"tools":["mcp","mcp"]}"""))
+        }
+    }
     @Test fun assistantOverridesPreserveAndNarrowRestrictionsWithoutMutatingInput() {
         val base = json("""{"budget":{"maxSteps":20,"maxModelCalls":30},"tools":["observe","script","user"],"confirm":"cautious","scriptRoots":["/sdcard/Scripts/agent"]} """)
         val original = base.toString()

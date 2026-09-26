@@ -8,8 +8,8 @@ import org.autojs.plugin.ai.agent.api.AiAgentContract as C
 /** Public script arguments are validated before any plugin admission or side effect. */
 internal object AiAgentArguments {
     val optionKeys = setOf("preset", "target", "tools", "budget", "confirm", "interaction", "detached", "context", "parameters", "memory", "scriptRoots", "locale")
-    val groups = setOf("observe", "act", "ocr", "gesture", "script", "script_dynamic", "files", "shell", "memory", "user")
-    private val defaultGroups = groups - setOf("gesture", "script_dynamic", "files", "shell")
+    val groups = setOf("observe", "act", "ocr", "gesture", "script", "script_dynamic", "files", "shell", "memory", "user", "mcp")
+    private val defaultGroups = groups - setOf("gesture", "script_dynamic", "files", "shell", "mcp")
     private val budgets = mapOf("maxSteps" to 200L, "maxModelCalls" to 300L, "maxDurationMs" to 3_600_000L, "maxTotalTokens" to 1_000_000L)
 
     fun goal(value: String): String = text(value, "goal", C.MAX_GOAL_BYTES)

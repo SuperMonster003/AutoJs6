@@ -12,6 +12,7 @@
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
 * `Fonctionnalité` API de script ai.agent pour lancer et consulter les tâches, recevoir les événements, répondre, confirmer, annuler et exécuter en arrière-plan avec detached; result/context exposent les résultats et le contexte des scripts enregistrés par @agent, avec trois exemples
 * `Fonctionnalité` AI Agent exécute le JavaScript généré après confirmation, arrête son script en cas d'annulation ou de délai dépassé, et renvoie les résultats structurés et la console; le script utilise les permissions de l'hôte, sans isolation des accès aux fichiers
+* `Fonctionnalité` ai.agent: Outils MCP de serveurs locaux ou externes choisis, avec un niveau de risque par serveur et le groupe mcp désactivé par défaut
 * `Fonctionnalité` Le relais de modèles AI Agent accepte les images en entrée et dans les résultats des outils pour les modèles visuels compatibles (prise en charge par les plugins requise)
 * `Fonctionnalité` Gestion de l'autorisation du réseau local Android 17 dans le volet, les paramètres et les connexions VS Code initiées par l'utilisateur, avec déclaration selon le targetSdk effectif
 * `Fonctionnalité` Historique des arrêts de processus dans les paramètres sous Android 11 et ultérieur, avec les motifs système récents de plusieurs processus, identification du limiteur de mémoire et rapports copiables

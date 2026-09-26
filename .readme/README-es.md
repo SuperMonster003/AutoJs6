@@ -174,6 +174,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
 * `Nuevo` API ai.agent para iniciar y consultar tareas, eventos, respuestas, confirmaciones, cancelación y tareas detached en segundo plano; result/context exponen resultados y contexto de scripts registrados con @agent, con tres ejemplos
 * `Nuevo` AI Agent ejecuta JavaScript generado tras la confirmación, detiene su script al cancelar o agotar el tiempo y devuelve resultados estructurados y la salida de consola; el script usa los permisos del anfitrión, sin aislamiento del acceso a archivos
+* `Nuevo` ai.agent: Herramientas MCP de servidores locales o externos seleccionados, con riesgo por servidor y el grupo mcp desactivado inicialmente
 * `Nuevo` El intermediario de modelos de AI Agent admite imágenes de entrada y en los resultados de herramientas para modelos visuales compatibles (requiere soporte de los plugins)
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
