@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
@@ -25,6 +26,7 @@ import org.json.JSONObject
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -100,6 +102,138 @@ class AiAgentRealModelE4Test {
                 }
             }
             throw AssertionError("Catalog deadline")
+        }
+    }
+
+    /** Two bounded model-only observations. Collection success is not a model/task success. */
+    @Test fun modelFormatProbe() {
+        optIn()
+        val arguments = InstrumentationRegistry.getArguments()
+        val target = arguments.getString("autojs.agent.e4.probeTarget").orEmpty()
+        val caseId = arguments.getString("autojs.agent.e4.probeCase").orEmpty()
+        require(target.startsWith("profile:") && target.length in 9..256 && target.none(Char::isISOControl))
+        require(caseId.matches(Regex("[a-z0-9][a-z0-9_-]{0,63}")))
+        val directory = File(context.filesDir, "agent-e4/$caseId")
+        require(!directory.exists()) { "Use a fresh probe case ID; never overwrite prior evidence" }
+        check(directory.mkdirs())
+        val prompt = "Reply with exactly this JSON object and no Markdown: {\"answer\":\"ok\"}"
+        val expected = "{\"answer\":\"ok\"}"
+        val maximumOutputTokens = 2048 // Matches the Agent RunOptions default, without repair calls.
+        val roundTimeoutMs = 60_000L
+        val results = JSONArray()
+        val report = JSONObject().put("caseId", caseId).put("targetId", target)
+            .put("prompt", prompt).put("expected", JSONObject(expected)).put("stream", true)
+            .put("maximumOutputTokens", maximumOutputTokens).put("roundTimeoutMs", roundTimeoutMs)
+            .put("maximumGenerations", 2).put("tools", JSONArray()).put("results", results)
+            .put("collectionComplete", false)
+        write(directory, "probe.json", report)
+        var harnessFailed = false
+        // Keep the same target, messages, output ceiling and stream mode. Only schema admission changes.
+        for (structured in listOf(true, false)) {
+            val mode = if (structured) "structured" else "plain"
+            val requestId = "e4-probe-$mode-${UUID.randomUUID()}"
+            val events = LinkedBlockingQueue<JSONObject>()
+            val began = SystemClock.elapsedRealtime()
+            val row = JSONObject().put("mode", mode).put("structuredJson", structured)
+                .put("requestId", requestId).put("startedAt", System.currentTimeMillis())
+                .put("terminal", "harness_timeout").put("expectedMatched", false)
+            try {
+                // This creates no Agent link/capability broker, reads no credentials and performs no UI actions.
+                AiAgentModelBroker(context, Process.myUid(), AiAgentGrant.default()).use { broker ->
+                    val request = JSONObject().put("requestId", requestId).put("targetId", target)
+                        .put("messages", JSONArray().put(JSONObject().put("role", "user").put("content", prompt)))
+                        .put("structuredJson", structured).put("stream", true)
+                        .put("maximumOutputTokens", maximumOutputTokens).put("timeoutMs", roundTimeoutMs)
+                    if (structured) request.put("responseSchema", JSONObject()
+                        .put("type", "object").put("additionalProperties", false)
+                        .put("properties", JSONObject().put("answer", JSONObject().put("type", "string")))
+                        .put("required", JSONArray().put("answer")))
+                    try {
+                        broker.generate(envelope(C.KEY_MODEL_REQUEST_JSON, request), object : IAiAgentModelCallback.Stub() {
+                            override fun onEvent(event: Bundle) {
+                                // Ignore streaming text here; the bounded, verified terminal text is authoritative.
+                                val value = runCatching { readModelProbeEvent(event) }
+                                    .getOrElse { JSONObject().put("type", "harness_invalid_event") }
+                                if (value.optString("type") != "chunk") events.offer(value)
+                            }
+                        })
+                        while (true) {
+                            val remaining = roundTimeoutMs - (SystemClock.elapsedRealtime() - began)
+                            if (remaining <= 0L) break
+                            val event = events.poll(remaining, TimeUnit.MILLISECONDS) ?: break
+                            val type = event.optString("type")
+                            check(type != "harness_invalid_event" && event.optString("requestId") == requestId)
+                            if (type == "usage") row.put("usage", event.getJSONObject("usage"))
+                            if (type !in setOf("completed", "failed", "cancelled")) continue
+                            row.put("terminal", type)
+                            if (type == "completed") {
+                                val text = event.getString("text")
+                                check(text.toByteArray(Charsets.UTF_8).size <= C.MAX_MODEL_OUTPUT_BYTES)
+                                // The fixed prompt requests exact bytes. Do not accept JSONObject's lenient syntax.
+                                val matched = text.trim() == expected
+                                row.put("responseText", text).put("responseBytes", text.toByteArray(Charsets.UTF_8).size)
+                                    .put("finishReason", event.getInt("finishReason"))
+                                    .put("expectedMatched", matched).put("exactTextMatched", text.trim() == expected)
+                            } else {
+                                for (key in listOf("code", "reason")) event.optString(key).takeIf {
+                                    it.matches(Regex("[A-Z][A-Z0-9_]{0,63}"))
+                                }?.let { row.put(key, it) }
+                            }
+                            break
+                        }
+                    } finally {
+                        runCatching { broker.cancel(envelope(C.KEY_MODEL_REF_JSON, JSONObject().put("requestId", requestId))) }
+                    }
+                }
+            } catch (_: Exception) {
+                row.put("terminal", "harness_error")
+                harnessFailed = true
+            }
+            if (row.getString("terminal") == "harness_timeout") harnessFailed = true
+            row.put("elapsedMs", SystemClock.elapsedRealtime() - began)
+            results.put(row)
+            write(directory, "probe.json", report)
+            instrumentation.sendStatus(0, Bundle().apply {
+                putString("probeMode", mode); putString("probeTerminal", row.getString("terminal"))
+                putBoolean("probeExpectedMatched", row.getBoolean("expectedMatched"))
+                putInt("probeResponseBytes", row.optInt("responseBytes", 0))
+                putLong("probeElapsedMs", row.getLong("elapsedMs"))
+            })
+        }
+        report.put("collectionComplete", !harnessFailed)
+        write(directory, "probe.json", report)
+        assertTrue("Probe harness failed; see private evidence", !harnessFailed)
+    }
+
+    /** Broker events above the inline limit use a private-file FD, even for a bounded token request. */
+    @Suppress("DEPRECATION")
+    private fun readModelProbeEvent(event: Bundle): JSONObject {
+        val descriptor = event.getParcelable<ParcelFileDescriptor>(C.KEY_PAYLOAD_FD)
+        try {
+            check(event.getInt(C.KEY_CONTRACT_VERSION) == C.CONTRACT_VERSION)
+            val inline = event.getString(C.KEY_MODEL_EVENT_JSON)
+            check((inline == null) != (descriptor == null))
+            val text = if (inline != null) {
+                check(inline.toByteArray(Charsets.UTF_8).size <= C.MAX_EVENT_JSON_BYTES)
+                inline
+            } else {
+                // The production broker sends a regular private file; reject unsupported/unknown-size payloads.
+                check(checkNotNull(descriptor).statSize in 0..C.MAX_MODEL_REQUEST_PAYLOAD_BYTES.toLong())
+                ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { input ->
+                    val output = ByteArrayOutputStream()
+                    val buffer = ByteArray(8192)
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        check(output.size() + count <= C.MAX_MODEL_REQUEST_PAYLOAD_BYTES)
+                        output.write(buffer, 0, count)
+                    }
+                    output.toString(Charsets.UTF_8.name())
+                }
+            }
+            return JSONObject(text)
+        } finally {
+            descriptor?.close()
         }
     }
 
