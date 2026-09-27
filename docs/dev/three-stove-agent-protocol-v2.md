@@ -1,32 +1,40 @@
-# AI Agent plugin protocol V1
+# Three Stove Agent plugin protocol V2
 
-Status: **versioned V1**. The host provides model/capability brokers, registered
-script discovery/execution, screen observations/actions, drawer controls and
-Plugin Center management. The plugin implements the Agent loop, parameter
-completion, confirmations, task workbench, history, presets, memory and system
-entry points. Plugin 1.0.0 is published. The additive native-tool broker extension
-below is P9.1 host support; Provider and Agent adoption have separate roadmap gates.
+Status: **versioned V2**. V2 (2026-09-27) is the renamed contract line of the former
+AI Agent protocol V1 (`docs/dev/ai-agent-protocol-v1.md` in git history before the
+rename). The plugin ID/engine/category, service action, attach broadcast and extras,
+AIDL package, interface names, contract classes and capability keys all changed to
+Three Stove Agent identifiers, so a V1 plugin cannot bind the V2 host and
+`ThreeStoveAgentContract.MIN_SUPPORTED_CONTRACT_VERSION` is **2**. The transaction
+order, Bundle keys, JSON envelopes, limits and error vocabulary are unchanged from V1;
+the host build shipping the rename is **5298** and
+`ThreeStoveAgentIds.REQUIRED_HOST_VERSION_CODE` equals it. The host provides
+model/capability brokers, registered script discovery/execution, screen
+observations/actions, drawer controls and Plugin Center management. The plugin
+implements the Agent loop, parameter completion, confirmations, task workbench,
+history, presets, memory and system entry points. The additive native-tool broker
+extension below is P9.1 host support; Provider and Agent adoption have separate
+roadmap gates.
 
-The contract is `plugin-api/ai-agent-api`, package
-`org.autojs.plugin.ai.agent.api`. The base contract constant
-`AiAgentIds.REQUIRED_HOST_VERSION_CODE` remains **5286**. The current plugin's
-INFO/runtime metadata requires AutoJs6 6.8.0 / build **5289**, for inspected
-actions bound to execution. Complete public task APIs require build **5293**;
-registered-script `result`/`context` first appeared in build 5287. Consumers must
-check both installed metadata and the feature they intend to use.
-Native model tool continuations require host build **5297** and the broker's
-explicit `toolCallingVersion: 1` advertisement; a version number alone is not
-feature negotiation. The original 1.0.0 structured JSON path remains available.
-The public JavaScript `mcp` tool-group option requires a host containing the P10 public-option
-change (`3cdf7de13c`) and a supporting Agent version. The host build number remains
-5297 in this development checkout; that number alone does not prove MCP-option
-support. This addition does not change the V1 contract number or AIDL order.
+The contract is `plugin-api/three-stove-agent-api`, package
+`org.autojs.plugin.three.stove.agent.api`. Historical V1 floors (AI Agent 1.0.0,
+`REQUIRED_HOST_VERSION_CODE` **5286**): the plugin's INFO/runtime metadata required
+AutoJs6 6.8.0 / build **5289**, for inspected actions bound to execution; complete
+public task APIs required build **5293**; registered-script `result`/`context` first
+appeared in build 5287. Consumers must check both installed metadata and the
+feature they intend to use. Native model tool continuations require host build
+**5297** and the broker's explicit `toolCallingVersion: 1` advertisement; a version
+number alone is not feature negotiation. The original 1.0.0 structured JSON path
+remains available. The public JavaScript `mcp` tool-group option requires a host
+containing the P10 public-option change (`3cdf7de13c`) and a supporting Agent
+version; that build number alone does not prove MCP-option support. Neither
+addition changed the V1 contract number or AIDL order; V2 changes identifiers only.
 
 ## Identity and discovery
 
-Plugin ID/engine: `ai-agent`; variant: `default`; official package:
-`io.github.supermonster003.autojs6.plugin.ai.agent`.
-The service action is `org.autojs.plugin.AI_AGENT`, with category `ai-agent` and
+Plugin ID/engine: `three-stove-agent`; variant: `default`; official package:
+`io.github.supermonster003.autojs6.plugin.three.stove.agent`.
+The service action is `org.autojs.plugin.THREE_STOVE_AGENT`, with category `three-stove-agent` and
 the `org.autojs.permission.PLUGIN` signature permission. An INFO service remains
 the shared plugin-center discovery surface. ABI support is explicitly empty.
 
@@ -43,9 +51,9 @@ Management uses the existing INFO service to validate identity and the declared
 minimum host build. Runtime attachment independently validates the dedicated
 Agent interface and its contract. P2.5 connected task controls and the runner
 to the real host brokers. Both plugin service manifests and PluginInfo must agree
-on the packaged plugin's minimum host build; it may exceed the base V1 floor.
+on the packaged plugin's minimum host build; it may exceed the base V2 floor (5298).
 
-`AiAgentConnectionOwner` owns the link for the host process. Drawer instances
+`ThreeStoveAgentConnectionOwner` owns the link for the host process. Drawer instances
 own their dialogs only; disposing a drawer does not close the link. The drawer
 shows attachment state, one running task at most, and the queued task count.
 Its management action opens the plugin's task workbench. Discovery failures show
@@ -57,16 +65,16 @@ guidance. Confirmation is pinned to the current signing fingerprint set.
 
 | Interface | Transactions, in order |
 | --- | --- |
-| IAiAgentPlugin | getInfo, getCapabilities, attach |
-| IAiAgentLink | getStatus, startRun, respond, cancelRun, listRuns, getRun, listPresets, updateConfig, detach |
-| IAiAgentLinkCallback (oneway) | onStatus, onEvent |
-| IAiAgentRunCallback (oneway) | onRunEvent |
-| IAiAgentModelBroker | getBrokerInfo, listTargets, generate, cancel, destroy, submitToolResults (optional extension) |
-| IAiAgentModelCallback (oneway) | onEvent |
+| IThreeStoveAgentPlugin | getInfo, getCapabilities, attach |
+| IThreeStoveAgentLink | getStatus, startRun, respond, cancelRun, listRuns, getRun, listPresets, updateConfig, detach |
+| IThreeStoveAgentLinkCallback (oneway) | onStatus, onEvent |
+| IThreeStoveAgentRunCallback (oneway) | onRunEvent |
+| IThreeStoveAgentModelBroker | getBrokerInfo, listTargets, generate, cancel, destroy, submitToolResults (optional extension) |
+| IThreeStoveAgentModelCallback (oneway) | onEvent |
 
 `attach(config, modelBroker, capabilityBroker, callback)` returns the link. The
 capability argument is `IHostCapabilityBroker` from the [shared contract](host-capability-contract-v1.md).
-Every Agent control/model Bundle includes `AiAgentContract.KEY_CONTRACT_VERSION = 1`;
+Every Agent control/model Bundle includes `ThreeStoveAgentContract.KEY_CONTRACT_VERSION = 1`;
 capability dispatch/response Bundles follow their separate shared envelope.
 Methods only
 validate/admit work synchronously; model and tool work returns through callbacks.
@@ -74,7 +82,7 @@ New transactions may only be appended and require explicit version negotiation.
 
 ## Control and model envelopes
 
-The public constants and KDoc in `AiAgentContract` freeze the complete vocabulary.
+The public constants and KDoc in `ThreeStoveAgentContract` freeze the complete vocabulary.
 
 | Key | JSON contents |
 | --- | --- |
@@ -122,7 +130,7 @@ and `ai.stream` options do not expose this internal model-broker extension.
 ### Model image extension
 
 Read `modelBrokerInfoJson.visionVersion` before using images; missing means
-unsupported. Extension version 1 preserves Agent contract V1 and its existing
+unsupported. Extension version 1 preserves the Agent contract (V1, now V2) and its existing
 transactions. The selected catalog target must advertise `vision`, and the host
 must negotiate Provider 2.1 with vision capabilities. This is an internal broker
 extension; it does not add a public script `ai.ask` image option.
@@ -178,7 +186,7 @@ Raw images/base64/file paths are not emitted in events or ordinary logs.
 
 Read `modelBrokerInfoJson.toolCallingVersion` before using the appended transaction
 or supplying tool definitions. A missing value means unsupported. Version 1 of
-this extension retains Agent contract V1 and the original five transaction codes.
+this extension retains the Agent contract (V1, now V2) and the original five transaction codes.
 The selected catalog target must also advertise the Provider `tools` capability.
 Streaming remains optional and separately negotiated.
 
@@ -264,7 +272,7 @@ The plugin returns that observation to the model and does not discard it during
 the pre-action screen sample. Read-only screen-state and device-info calls remain
 available. This does not change direct Node.js scripts or other plugin families.
 
-The `ERROR_CODES` vocabulary is fixed by `AiAgentContract`:
+The `ERROR_CODES` vocabulary is fixed by `ThreeStoveAgentContract`:
 
 | Area | Codes |
 | --- | --- |
@@ -342,11 +350,11 @@ usage. No logging includes goals, messages, schema contents or model output.
 
 ## Attachment request authentication
 
-The explicit broadcast action is `org.autojs.autojs6.action.AI_AGENT_ATTACH` and
+The explicit broadcast action is `org.autojs.autojs6.action.THREE_STOVE_AGENT_ATTACH` and
 its package is set to the host. The exported receiver requires PLUGIN permission
 and routes to the same process-owned connection flow as the drawer.
 Its authentication implementation also validates a PendingIntent under
-`AiAgentActions.EXTRA_ATTACH_IDENTITY`. The plugin creates this immutable token
+`ThreeStoveAgentActions.EXTRA_ATTACH_IDENTITY`. The plugin creates this immutable token
 in its own package; the host checks `creatorPackage`, `creatorUid`, installed UID
 and official/trusted signer. On API 31 and newer it explicitly rejects a mutable
 token; earlier Android versions expose the creator identity but not that immutable
@@ -354,7 +362,7 @@ flag check. It never sends or retains the token. A plain package
 name extra, or `Binder.getCallingUid()` inside `onReceive`, is not sender proof.
 This token permits the same validation on Android versions before API 34.
 
-The existing MainActivity also consumes `EXTRA_AI_AGENT_ATTACH` with the same
+The existing MainActivity also consumes `EXTRA_THREE_STOVE_AGENT_ATTACH` with the same
 identity token and authorization checks. It removes the request extras before
 handling the request so activity recreation does not replay it. The plugin uses
 this fallback after 500 ms if the background attachment is not available, as
@@ -368,7 +376,7 @@ an auto-start policy. Plugin package and authorization/enablement changes refres
 admission and detach an unavailable link.
 
 Since build 5286, either authenticated attachment entry may include the existing
-`AiAgentContract.KEY_LINK_CONFIG_JSON` extra with exactly `{scriptRoots:[...]}`.
+`ThreeStoveAgentContract.KEY_LINK_CONFIG_JSON` extra with exactly `{scriptRoots:[...]}`.
 This is a proposal from plugin settings, not a grant: unknown/duplicate fields,
 duplicate paths, relative paths, traversal and oversized input are rejected.
 There are at most 32 extra roots, 1024 UTF-8 bytes per path and 8 KiB per proposal.
@@ -398,7 +406,7 @@ Entry evidence is recorded in [the host entry report](evidence/ai-agent-p15-2026
 and the [six-device attachment report](evidence/ai-agent-p7-compatibility-20260925.md).
 Independent peer, grant and reciprocal fake-host cases are documented in
 [P7 conformance](evidence/ai-agent-p7-conformance-20260925.md). Model and script
-execution have their own [broker](ai-agent-model-broker-testing.md) and
+execution have their own [broker](three-stove-agent-model-broker-testing.md) and
 [script](agent-script-execution-testing.md) tests. Deterministic conformance is
 separate from real-model task success and the final release gate.
 
@@ -440,13 +448,13 @@ task control. Registered-script examples are under `sample/agent/`.
 
 ## Installation catalog and release index
 
-The host installation wizard categorizes AI Agent under Tools using the exact
+The host installation wizard categorizes Three Stove Agent under Tools using the exact
 official package. It is optional in both built-in profiles. Drawer and Plugin
 Center discovery/enablement are unchanged.
 
 Download entries come from the separate AutoJs6-Official-Plugins-Index repository.
 Its generator admits published releases with APK assets and validates the required
-repository inventory. Add AI Agent to that inventory and regenerate after the
+repository inventory. Add Three Stove Agent to that inventory and regenerate after the
 first APK release is published. Before publication, the wizard omits the missing
 download entry; no placeholder release URL or fabricated version/hash is used.
 

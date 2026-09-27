@@ -1,4 +1,4 @@
-# Registered-script execution checks (AI Agent P1.4 / P3.3)
+# Registered-script execution checks (Three Stove Agent P1.4 / P3.3)
 
 `AgentRegisteredScriptExecutionTest` exercises the host `AndroidNodeBridgeCapabilityProvider`
 `agent` module through catalog discovery, manifest/default-argument validation, main-process
@@ -35,7 +35,7 @@ for 310 seconds, including the maximum 300-second execution deadline. It cannot 
 link's invocation. Numeric execution-ID stop calls keep their existing behavior. No AIDL
 transaction or contract version changes are needed, but the plugin requires host build 5287.
 
-`AiAgentPluginRoundTripTest`, enabled with `-e autojs.agent.plugin true`, also exercises the real
+`ThreeStoveAgentPluginRoundTripTest`, enabled with `-e autojs.agent.plugin true`, also exercises the real
 installed plugin with a scripted model: missing parameter feedback, a question, per-call
 confirmation, file/project execution, model `done`, the retained script result, timeout and
 task cancellation. The cleanup project deletes only the fixture's own old installer and keeps
@@ -65,7 +65,7 @@ before any plugin engine is launched. Execution through other supported script e
 the existing source factory and is not established by the Rhino device fixture. A test file by
 itself is not execution evidence; record the actual build/device results separately.
 
-## Generated JavaScript (AI Agent P9.3)
+## Generated JavaScript (Three Stove Agent P9.3)
 
 The same owned execution lifetime now backs `engines.execScript(name, source, options)` when
 `options.agentInvocationId` is present. An Agent broker advertises `engines.execScript` in

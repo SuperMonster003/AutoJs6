@@ -1,15 +1,15 @@
-# AI Agent model broker checks
+# Three Stove Agent model broker checks
 
 The P1.2 broker uses the existing Android AI Provider catalog, ask and stream runners. Its JVM
 checks cover strict request admission, byte limits, rolling call limits, token reservations,
 fallback usage accounting, stable error mapping and terminal event ordering:
 
 ```powershell
-.\gradlew.bat :app:testAppDebugUnitTest --tests '*AiAgentModelProtocolTest'
+.\gradlew.bat :app:testAppDebugUnitTest --tests '*ThreeStoveAgentModelProtocolTest'
 ```
 
 P9.2 adds image admission, independent quotas, capability/version checks, native
-image-result ownership and image-token accounting. Run `*AiAgentModelVisionTest`,
+image-result ownership and image-token accounting. Run `*ThreeStoveAgentModelVisionTest`,
 `*AiProviderVisionSelectionTest` and the Provider API suite alongside the existing
 tests. The Android broker class includes synthetic JPEG/PNG round trips and
 negative/cancellation cases. `AiProviderVisionCompatibilityAndroidTest` additionally
@@ -23,7 +23,7 @@ do not contact a real model or network. Install the host, host androidTest and f
 from the same build, then run on the intended device:
 
 ```powershell
-adb -s <serial> shell am instrument -w -r -e class org.autojs.autojs.core.plugin.agent.AiAgentModelBrokerAndroidTest -e autojs.aiAgent.model.conformance.enabled true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+adb -s <serial> shell am instrument -w -r -e class org.autojs.autojs.core.plugin.agent.ThreeStoveAgentModelBrokerAndroidTest -e autojs.threeStoveAgent.model.conformance.enabled true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 The public fake targets `local:echo` and `local:stream` pass normal catalog validation. Two exact
@@ -91,13 +91,13 @@ schema error; it does not trigger the Agent's bare REQUEST_REJECTED fallback.
 
 The decoded onFailed envelope retains only AiPluginProviderFailureReason, never the raw
 providerCode or message. AiProviderSessionErrorSummary carries this typed value to the ordinary
-Attempt path; ask, stream and native-tool dispatch preserve it through AiAgentModelBroker.
+Attempt path; ask, stream and native-tool dispatch preserve it through ThreeStoveAgentModelBroker.
 Persistent sessions use the same allowlist. Each path retains its historical TIMEOUT mapping,
 while local deadlines and cancellation remain distinct. Public JS ask errors, model error codes,
 retry behavior and published AIDL/SDK contracts are unchanged.
 
 Related JVM checks passed 72/72: AiPluginProviderFailureReasonTest, AiProviderSessionTest,
-AiAgentModelProtocolTest and AiPluginAskRuntimeTest. The encoded callback test exercises all 17
+ThreeStoveAgentModelProtocolTest and AiPluginAskRuntimeTest. The encoded callback test exercises all 17
 known codes plus unknown codes with text/stream/tools combinations. On QV770340J7 / XQ-DQ72 /
 Android 13 / API 33, AiPluginAskFailureDispatchAndroidTest passed both methods against the
 matching host Debug and androidTest APKs. It uses the real private Attempt dispatch without
@@ -117,8 +117,8 @@ from an IOException or establish a VPN or connection-pool root cause.
 
 ## Agent caller grant matrix
 
-`AiAgentGrantConformanceTest` uses the independent
-[`ai-agent-conformance` APK](../../test-apps/ai-agent-conformance/README.md) as
+`ThreeStoveAgentGrantConformanceTest` uses the independent
+[`three-stove-agent-conformance` APK](../../test-apps/three-stove-agent-conformance/README.md) as
 the actual caller. Unlike the provider integration tests above, it injects
 deterministic catalog/generation runners into the production model broker, so
 input, call-count and token limits can be reached without a real Provider,
@@ -128,9 +128,9 @@ log exclusion of private bodies and non-Agent attach broadcasts.
 
 ## P9.1 real Agent plus fake Provider
 
-`AiAgentNativeProviderRoundTripTest` binds the installed, independently built
+`ThreeStoveAgentNativeProviderRoundTripTest` binds the installed, independently built
 Agent plugin from the actual host UID. Its model broker is the production
-`AiAgentModelBroker`, using the separate same-test-signer fake Provider; device
+`ThreeStoveAgentModelBroker`, using the separate same-test-signer fake Provider; device
 observations use the production capability broker. Four cases verify a two-call
 native batch, whole-batch argument rejection before dispatch, refused clipboard
 confirmation without a write, and cancellation while the Provider waits for
@@ -143,7 +143,7 @@ release is supported by this external host instrumentation). Never sign a fake
 Provider with a production key or install it on a physical device. Run:
 
 ```powershell
-py test-apps/ai-agent-conformance/run_native_provider_matrix.py --adb <adb.exe> --serial <emulator-serial> --output <new-private-evidence-directory>
+py test-apps/three-stove-agent-conformance/run_native_provider_matrix.py --adb <adb.exe> --serial <emulator-serial> --output <new-private-evidence-directory>
 ```
 
 The driver accepts only a disposable `AI_Agent_Conformance_*` AVD containing the
@@ -161,7 +161,7 @@ its final per-case matrix passed 18/18. Those earlier failures remain in private
 evidence, separately from successful execution. This is deterministic contract
 evidence, not a successful cloud Wi-Fi or calculator task.
 
-`AiAgentRealModelE4Test` also accepts an opt-in evidence configuration field
+`ThreeStoveAgentRealModelE4Test` also accepts an opt-in evidence configuration field
 `modelPath: "json"`. It hides only native-extension negotiation from that test
 link, allowing the same installed host, Agent, Provider, target, tool grants,
 goal and budgets to exercise JSON decisions. `"auto"` keeps production
