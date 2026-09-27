@@ -12,16 +12,6 @@
     <string name="a11y_advanced_protection_on">Activada</string>
     <string name="a11y_advanced_protection_title">Protección avanzada</string>
     <string name="a11y_advanced_protection_unknown">No disponible</string>
-    <string name="ai_agent_state_activation">Se requiere activación</string>
-    <string name="ai_agent_state_attached">Conectado, en ejecución: %1$d, en cola: %2$d</string>
-    <string name="ai_agent_state_attaching">Conectando</string>
-    <string name="ai_agent_state_authorization">Se requiere autorización</string>
-    <string name="ai_agent_state_detached">Desconectado</string>
-    <string name="ai_agent_state_disabled">Complemento deshabilitado</string>
-    <string name="ai_agent_state_failed">Error de conexión</string>
-    <string name="ai_agent_state_host_unavailable">Anfitrión no disponible</string>
-    <string name="ai_agent_state_incompatible">Versión incompatible</string>
-    <string name="ai_agent_state_not_installed">Complemento no instalado</string>
     <string name="apk_builder_build">Construir</string>
     <string name="apk_builder_clean">Limpieza</string>
     <string name="apk_builder_package">Empaquetando</string>
@@ -107,7 +97,6 @@
     <string name="description_ace_lsp_file_types_preference">LSP solo se inicia para archivos cuyos nombres terminan con uno de los sufijos seleccionados. Usar valores predeterminados restaura el conjunto de sufijos de JavaScript, TypeScript, JSON, Auto.js y Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Muestra u oculta la guía del margen de impresión del editor Ace. Es la línea de límite de columna del lado derecho y solo cambia la presentación del código.</string>
     <string name="description_ace_word_wrap_enabled_preference">Activa el ajuste de línea del editor para líneas largas. Esto no modifica el contenido del archivo.</string>
-    <string name="description_ai_agent">Conecta el complemento AI Agent a AutoJs6. Usa Administrar para abrir su página de tareas. La conexión por sí sola no inicia tareas.</string>
     <string name="description_ai_settings_preference">Abre 3-Stone AI para gestionar los modelos locales, los servicios en línea y el objetivo predeterminado del módulo global ai.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">El permiso \"administrar todos los archivos\" (o \"acceso a todos los archivos\") permite que AutoJs6 [ cree / lea / modifique / elimine ] archivos directamente mediante rutas de archivo normales en el almacenamiento compartido, de modo que los scripts puedan acceder al \"Internal Storage\" y el explorador de archivos pueda mostrar y administrar archivos correctamente.\n\nEn dispositivos con Android 11+, esta es la forma principal de lograr acceso de lectura y escritura a todo el almacenamiento.</string>
     <string name="description_app_language_preference">Esta preferencia para cambiar el idioma de visualización de AutoJs6, incluyendo los mensajes de excepción de los scripts en ejecución.\n\nNota: puede ser necesario reiniciar la aplicación para que el idioma se aplique como se espera.</string>
@@ -174,6 +163,7 @@
     <string name="description_stable_mode">El modo estable hace que sea más estable al obtener los límites de diseño, pero algunos resultados pueden ser ignorados.\nEs necesario reiniciar el servicio de accesibilidad.</string>
     <string name="description_terminal">Ejecute comandos en sesiones de shell independientes. Las sesiones continúan en segundo plano al salir. Desactivar el interruptor finaliza todas las sesiones.</string>
     <string name="description_theme_color_preference">El color del tema se aplica a los widgets, incluidos, entre otros, los siguientes\nBarra de estado\nBarra de aplicaciones\nIcono de archivo\nIcono de elemento de tarea\nFAB\nTítulo de la categoría de ajustes\nBotón de cambio\n\nNota: A partir de la versión 6.2.0 de AutoJs6, todavía no hay diferencia entre el color primario, el color primario oscuro y el color de acento.</string>
+    <string name="description_three_stove_agent">Conecta el complemento Three Stove Agent a AutoJs6. Usa Administrar para abrir su página de tareas. La conexión por sí sola no inicia tareas.</string>
     <string name="description_timed_task_backend">Controla el mecanismo subyacente para activar scripts de forma programada.\n\nAlarmManager: Mediante la concesión del permiso \"Permitir configurar alarmas y recordatorios\", las tareas programadas pueden dispararse con mayor puntualidad.\nWorkManager: Amigable con el sistema; adecuado para tareas no críticas que toleran cierta demora.\nJobScheduler: Implementación antigua, mantenida por compatibilidad; la ejecución puede retrasarse con mayor probabilidad.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Escenarios de uso y diferencias:\n\n1. AlarmManager\nAdecuado para tareas sensibles a la puntualidad, p. ej., [recordatorios/scripts estrictamente programados/...].\nEn Android 12+ y con el permiso \"Permitir configurar alarmas y recordatorios\", puede ejecutar tareas de forma más puntual con la pantalla apagada o en estado de espera.\nSin dicho permiso, el sistema puede degradar la exactitud o retrasar la ejecución.\n\n2. WorkManager\nAdecuado para tareas que no requieren estricta puntualidad, p. ej., [sincronización no crítica/limpieza/estadísticas/...].\nSe programa según [batería/red/carga/estrategias de reposo/...], por lo que puede posponer la ejecución con la pantalla apagada o en espera.\nAunque no garantiza precisión temporal, tiene ventajas en [finalización fiable/reintentos en caso de fallo/encadenamiento/deduplicación de trabajos].\n\n3. JobScheduler\nImplementación histórica para compatibilidad.\nEn versiones recientes de Android, las tareas pueden experimentar mayores retrasos.\nPor lo general, no se recomienda salvo por motivos de compatibilidad.</string>
     <string name="description_usage_stats_access">Proporciona acceso al historial de uso del dispositivo y a las estadísticas, lo que da a currentPackage() un resultado más preciso</string>
@@ -677,15 +667,6 @@
     <string name="prompt_ace_editor_plugin_required">Instala o activa el plugin del editor Ace en el Centro de plugins para usar el motor Ace.</string>
     <string name="prompt_add_ignored_app_version">¿Está seguro de ignorar la versión actual de la actualización?\nPuedes gestionar todas las versiones ignoradas en los ajustes de la aplicación.</string>
     <string name="prompt_add_ignored_plugin_version">¿Está seguro de ignorar la versión actual de la actualización?\nPuedes gestionar todas las versiones ignoradas en los ajustes del plugin.</string>
-    <string name="prompt_ai_agent_activate">AI Agent está instalado, pero Android aún no lo ha activado. Actívalo para permitir la conexión a AutoJs6.</string>
-    <string name="prompt_ai_agent_application_disabled">Android ha deshabilitado AI Agent. Habilita la aplicación en los ajustes del sistema e inténtalo de nuevo.</string>
-    <string name="prompt_ai_agent_authorize">Autoriza este complemento en el centro de complementos antes de conectar AI Agent.</string>
-    <string name="prompt_ai_agent_enable">Habilitar el complemento AI Agent y conectarlo a AutoJs6?</string>
-    <string name="prompt_ai_agent_failed">No se puede conectar a AI Agent. Comprueba su estado y versión en el centro de complementos e inténtalo de nuevo.</string>
-    <string name="prompt_ai_agent_incompatible">Este complemento requiere AutoJs6 compilación %1$d o posterior. Instala versiones compatibles de AutoJs6 y AI Agent.</string>
-    <string name="prompt_ai_agent_install">Descarga AI Agent desde su página oficial de versiones, instálalo y habilítalo en AutoJs6. Si no hay versiones disponibles, vuelve más tarde.</string>
-    <string name="prompt_ai_agent_launcher_unavailable">La página de tareas de AI Agent no está disponible. Comprueba en el centro de complementos si la aplicación está habilitada y actualizada.</string>
-    <string name="prompt_ai_agent_trust">Autorizaste este complemento manualmente, pero su firmante no es oficial ni de confianza. Permitir que este firmante use los modelos y funciones del dispositivo de AutoJs6?</string>
     <string name="prompt_ai_plugin_application_enable_required">Android ha deshabilitado 3-Stone AI. Habilítalo en los ajustes de aplicaciones del sistema antes de abrir los ajustes del servicio de IA.</string>
     <string name="prompt_ai_plugin_enable_required">3-Stone AI está deshabilitado en el Centro de plugins. Habilítalo antes de abrir los ajustes del servicio de IA.</string>
     <string name="prompt_ai_plugin_install_required">Instala 3-Stone AI desde el Centro de plugins antes de abrir los ajustes del servicio de IA.</string>
@@ -713,6 +694,15 @@
     <string name="prompt_plugin_native_page_alignment">Las bibliotecas nativas del complemento %1$s no estan alineadas para paginas de 16 KB. El complemento puede fallar en este dispositivo. Actualicelo antes de usarlo. Continuar de todos modos?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Es necesario reiniciar la aplicación para aplicar los nuevos ajustes</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Puede ser necesario reiniciar la aplicación para que el idioma se aplique como se espera</string>
+    <string name="prompt_three_stove_agent_activate">Three Stove Agent está instalado, pero Android aún no lo ha activado. Actívalo para permitir la conexión a AutoJs6.</string>
+    <string name="prompt_three_stove_agent_application_disabled">Android ha deshabilitado Three Stove Agent. Habilita la aplicación en los ajustes del sistema e inténtalo de nuevo.</string>
+    <string name="prompt_three_stove_agent_authorize">Autoriza este complemento en el centro de complementos antes de conectar Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_enable">Habilitar el complemento Three Stove Agent y conectarlo a AutoJs6?</string>
+    <string name="prompt_three_stove_agent_failed">No se puede conectar a Three Stove Agent. Comprueba su estado y versión en el centro de complementos e inténtalo de nuevo.</string>
+    <string name="prompt_three_stove_agent_incompatible">Este complemento requiere AutoJs6 compilación %1$d o posterior. Instala versiones compatibles de AutoJs6 y Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_install">Descarga Three Stove Agent desde su página oficial de versiones, instálalo y habilítalo en AutoJs6. Si no hay versiones disponibles, vuelve más tarde.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">La página de tareas de Three Stove Agent no está disponible. Comprueba en el centro de complementos si la aplicación está habilitada y actualizada.</string>
+    <string name="prompt_three_stove_agent_trust">Autorizaste este complemento manualmente, pero su firmante no es oficial ni de confianza. Permitir que este firmante use los modelos y funciones del dispositivo de AutoJs6?</string>
     <string name="python_long_running_notification_channel_description">Estado y controles de parada de proyectos de Python de larga duración iniciados por el usuario</string>
     <string name="python_long_running_notification_channel_name">Tareas de Python de larga duración</string>
     <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Preparando el entorno de Python...</string>
@@ -2387,6 +2377,16 @@
     <string name="text_xiaomi_background_popup_permission">Ventanas emergentes en segundo plano</string>
     <string name="text_yearly_task">Tarea anual</string>
     <string name="text_zero_means_unlimited">0 significa sin límite</string>
+    <string name="three_stove_agent_state_activation">Se requiere activación</string>
+    <string name="three_stove_agent_state_attached">Conectado, en ejecución: %1$d, en cola: %2$d</string>
+    <string name="three_stove_agent_state_attaching">Conectando</string>
+    <string name="three_stove_agent_state_authorization">Se requiere autorización</string>
+    <string name="three_stove_agent_state_detached">Desconectado</string>
+    <string name="three_stove_agent_state_disabled">Complemento deshabilitado</string>
+    <string name="three_stove_agent_state_failed">Error de conexión</string>
+    <string name="three_stove_agent_state_host_unavailable">Anfitrión no disponible</string>
+    <string name="three_stove_agent_state_incompatible">Versión incompatible</string>
+    <string name="three_stove_agent_state_not_installed">Complemento no instalado</string>
     <string name="warn_continue_operation_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres continuar?</string>
     <string name="warn_exit_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres salir?</string>
     <string name="warning_apk_native_page_alignment_unsupported">La biblioteca nativa %1$s tiene una alineación de %2$d bytes. El APK generado puede ser incompatible con páginas de 16 KB. Actualice la biblioteca o el plugin.</string>

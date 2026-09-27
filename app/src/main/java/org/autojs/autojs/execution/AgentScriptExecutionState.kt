@@ -3,7 +3,7 @@ package org.autojs.autojs.execution
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.autojs.autojs.engine.ScriptEngine
-import org.autojs.plugin.ai.agent.api.AiAgentContract
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract
 import org.autojs.plugin.ai.provider.api.AiJsonSyntaxValidator
 
 /** Host-owned context and bounded result slot for one registered-script invocation. */
@@ -51,8 +51,8 @@ class AgentScriptExecutionState(
     override fun toString() = "AgentScriptExecutionState(parametersBytes=${parametersJson.toByteArray(Charsets.UTF_8).size})"
 
     companion object {
-        const val MAX_RESULT_BYTES = AiAgentContract.MAX_SCRIPT_RESULT_BYTES
-        const val MAX_PARAMETERS_BYTES = AiAgentContract.MAX_SCRIPT_ARGUMENTS_BYTES
+        const val MAX_RESULT_BYTES = ThreeStoveAgentContract.MAX_SCRIPT_RESULT_BYTES
+        const val MAX_PARAMETERS_BYTES = ThreeStoveAgentContract.MAX_SCRIPT_ARGUMENTS_BYTES
         private val RUN_ID = Regex("^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$")
 
         /** Execution-layer hook also used by the public ai.agent.result/context helpers. */

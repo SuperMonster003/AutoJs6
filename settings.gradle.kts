@@ -100,7 +100,7 @@ private val pluginApi = listOf(
     "ai-common-api",
     "ai-provider-api",
     "host-capability-api",
-    "ai-agent-api",
+    "three-stove-agent-api",
     "dex-compiler-api",
     "jvm-source-api",
     "editor-api",
@@ -135,7 +135,7 @@ private val plugins = listOf(
 )
 
 private val pluginConformanceTestApps = listOf(
-    "ai-agent-conformance",
+    "three-stove-agent-conformance",
     "ai-provider-conformance",
     "dex-compiler-conformance",
     "lua-runtime-conformance",

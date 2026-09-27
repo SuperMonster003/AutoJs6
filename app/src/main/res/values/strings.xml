@@ -7,16 +7,6 @@
     <string name="a11y_advanced_protection_on">On</string>
     <string name="a11y_advanced_protection_title">Advanced Protection</string>
     <string name="a11y_advanced_protection_unknown">Unavailable</string>
-    <string name="ai_agent_state_activation">Activation required</string>
-    <string name="ai_agent_state_attached">Connected, running: %1$d, queued: %2$d</string>
-    <string name="ai_agent_state_attaching">Connecting</string>
-    <string name="ai_agent_state_authorization">Authorization required</string>
-    <string name="ai_agent_state_detached">Disconnected</string>
-    <string name="ai_agent_state_disabled">Plugin disabled</string>
-    <string name="ai_agent_state_failed">Connection failed</string>
-    <string name="ai_agent_state_host_unavailable">Host unavailable</string>
-    <string name="ai_agent_state_incompatible">Incompatible version</string>
-    <string name="ai_agent_state_not_installed">Plugin not installed</string>
     <string name="apk_builder_build">Building</string>
     <string name="apk_builder_clean">Cleaning</string>
     <string name="apk_builder_package">Packaging</string>
@@ -102,7 +92,6 @@
     <string name="description_ace_lsp_file_types_preference">LSP is only started for files whose names end with one of the selected suffixes. Use default restores the JavaScript, TypeScript, JSON, Auto.js, and Node.js suffix set.</string>
     <string name="description_ace_print_margin_enabled_preference">Show or hide the Ace editor print margin guide. This is the right-side column limit line and only changes how code is displayed.</string>
     <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
-    <string name="description_ai_agent">Connect the AI Agent plugin to AutoJs6. Use Manage to open its task page. Connecting alone does not start a task.</string>
     <string name="description_ai_settings_preference">Open 3-Stone AI to manage local models, online services, and the default target used by the global ai module.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">The \"manage all files\" (or \"all files access\") permission allows AutoJs6 to directly [ create / read / modify / delete ] files in shared storage via normal file paths, allowing scripts to access \"Internal Storage\" and enabling the file manager to display and manage files properly.\n\nOn Android 11+ devices, this is the primary way to achieve full file read/write access.</string>
     <string name="description_app_language_preference">Preference for changing the display language of AutoJs6, including exception messages from running scripts.\n\nNote: an app restart may be needed to make language applied as expected.</string>
@@ -169,6 +158,7 @@
     <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
     <string name="description_terminal">Run commands in separate shell sessions. Sessions continue in the background when you leave. Turning off the switch ends all sessions.</string>
     <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFAB\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
+    <string name="description_three_stove_agent">Connect the Three Stove Agent plugin to AutoJs6. Use Manage to open its task page. Connecting alone does not start a task.</string>
     <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the \"Allow setting alarms and reminders\" permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Use cases and differences:\n\n1. AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the \"Allow setting alarms and reminders\" permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2. WorkManager\nBest for tasks that don\'t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can\'t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3. JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
     <string name="description_usage_stats_access">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
@@ -672,15 +662,6 @@
     <string name="prompt_ace_editor_plugin_required">Install or enable the Ace editor plugin in Plugin Center to use the Ace engine.</string>
     <string name="prompt_add_ignored_app_version">Are you sure to ignore current update version?\nYou can manage all ignored versions by app settings.</string>
     <string name="prompt_add_ignored_plugin_version">Are you sure to ignore current update version?\nYou can manage all ignored versions by plugin settings.</string>
-    <string name="prompt_ai_agent_activate">AI Agent is installed but has not been activated by Android. Activate it to allow AutoJs6 to connect.</string>
-    <string name="prompt_ai_agent_application_disabled">Android has disabled AI Agent. Enable the app in system settings and try again.</string>
-    <string name="prompt_ai_agent_authorize">Authorize this plugin in the Plugin Center before connecting AI Agent.</string>
-    <string name="prompt_ai_agent_enable">Enable the AI Agent plugin and connect it to AutoJs6?</string>
-    <string name="prompt_ai_agent_failed">Cannot connect to AI Agent. Check its status and version in the Plugin Center, then try again.</string>
-    <string name="prompt_ai_agent_incompatible">This plugin requires AutoJs6 build %1$d or later. Install compatible versions of AutoJs6 and AI Agent.</string>
-    <string name="prompt_ai_agent_install">Download AI Agent from its official releases page, then install and enable it in AutoJs6. If no release is available, check again later.</string>
-    <string name="prompt_ai_agent_launcher_unavailable">The AI Agent task page is unavailable. Check whether the app is enabled and up to date in the Plugin Center.</string>
-    <string name="prompt_ai_agent_trust">You authorized this plugin manually, but its signer is not official or trusted. Allow this signer to use AutoJs6 model and device capabilities?</string>
     <string name="prompt_ai_plugin_application_enable_required">3-Stone AI is disabled by Android. Enable it in system app settings before opening AI service settings.</string>
     <string name="prompt_ai_plugin_enable_required">3-Stone AI is disabled in Plugin Center. Enable it before opening AI service settings.</string>
     <string name="prompt_ai_plugin_install_required">Install 3-Stone AI from Plugin Center before opening AI service settings.</string>
@@ -708,6 +689,15 @@
     <string name="prompt_plugin_native_page_alignment">The native libraries in plugin %1$s are not aligned for 16 KB pages. This plugin may fail on this device. Upgrade the plugin before using it. Continue anyway?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">An app restart is needed to apply new settings</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">An app restart may be needed to make language applied as expected</string>
+    <string name="prompt_three_stove_agent_activate">Three Stove Agent is installed but has not been activated by Android. Activate it to allow AutoJs6 to connect.</string>
+    <string name="prompt_three_stove_agent_application_disabled">Android has disabled Three Stove Agent. Enable the app in system settings and try again.</string>
+    <string name="prompt_three_stove_agent_authorize">Authorize this plugin in the Plugin Center before connecting Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_enable">Enable the Three Stove Agent plugin and connect it to AutoJs6?</string>
+    <string name="prompt_three_stove_agent_failed">Cannot connect to Three Stove Agent. Check its status and version in the Plugin Center, then try again.</string>
+    <string name="prompt_three_stove_agent_incompatible">This plugin requires AutoJs6 build %1$d or later. Install compatible versions of AutoJs6 and Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_install">Download Three Stove Agent from its official releases page, then install and enable it in AutoJs6. If no release is available, check again later.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">The Three Stove Agent task page is unavailable. Check whether the app is enabled and up to date in the Plugin Center.</string>
+    <string name="prompt_three_stove_agent_trust">You authorized this plugin manually, but its signer is not official or trusted. Allow this signer to use AutoJs6 model and device capabilities?</string>
     <string name="python_long_running_notification_channel_description">Status and stop controls for user-started long-running Python projects</string>
     <string name="python_long_running_notification_channel_name">Python long-running tasks</string>
     <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Preparing the Python runtime...</string>
@@ -2383,6 +2373,16 @@
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
     <string name="text_yearly_task">Yearly task</string>
     <string name="text_zero_means_unlimited">0 means unlimited</string>
+    <string name="three_stove_agent_state_activation">Activation required</string>
+    <string name="three_stove_agent_state_attached">Connected, running: %1$d, queued: %2$d</string>
+    <string name="three_stove_agent_state_attaching">Connecting</string>
+    <string name="three_stove_agent_state_authorization">Authorization required</string>
+    <string name="three_stove_agent_state_detached">Disconnected</string>
+    <string name="three_stove_agent_state_disabled">Plugin disabled</string>
+    <string name="three_stove_agent_state_failed">Connection failed</string>
+    <string name="three_stove_agent_state_host_unavailable">Host unavailable</string>
+    <string name="three_stove_agent_state_incompatible">Incompatible version</string>
+    <string name="three_stove_agent_state_not_installed">Plugin not installed</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
 

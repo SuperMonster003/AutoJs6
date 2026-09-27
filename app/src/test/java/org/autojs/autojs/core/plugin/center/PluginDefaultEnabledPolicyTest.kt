@@ -8,11 +8,11 @@ import org.junit.Test
 class PluginDefaultEnabledPolicyTest {
 
     @Test
-    fun aiAgentUsesTheSameExplicitEnablePolicyAsMcp() {
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault("ai-agent"))
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(" AI-AGENT "))
+    fun threeStoveAgentUsesTheSameExplicitEnablePolicyAsMcp() {
+        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault("three-stove-agent"))
+        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(" THREE-STOVE-AGENT "))
         for (state in PluginAuthorizedState.entries) {
-            assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("ai-agent", state) ==
+            assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("three-stove-agent", state) ==
                 PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("mcp-server", state))
         }
     }

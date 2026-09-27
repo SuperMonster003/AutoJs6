@@ -3,7 +3,7 @@ package org.autojs.autojs.runtime.api.ai
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import org.autojs.plugin.ai.agent.api.AiAgentContract as C
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract as C
 
 /** Public script arguments are validated before any plugin admission or side effect. */
 internal object AiAgentArguments {

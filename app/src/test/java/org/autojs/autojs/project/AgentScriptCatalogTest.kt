@@ -2,7 +2,7 @@ package org.autojs.autojs.project
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.autojs.plugin.ai.agent.api.AiAgentContract
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract
 import org.junit.Assert.*
 import org.junit.Assume.assumeNoException
 import org.junit.Rule
@@ -84,7 +84,7 @@ class AgentScriptCatalogTest {
         val entries = catalog(large).listScripts()
         assertTrue(entries.isNotEmpty() && entries.size < 70)
         val encoded = entries.joinToString(prefix = "[", postfix = "]", separator = ",") { it.toJsonObject().toString() }
-        assertTrue(encoded.toByteArray(Charsets.UTF_8).size <= AiAgentContract.MAX_SCRIPT_CATALOG_BYTES)
+        assertTrue(encoded.toByteArray(Charsets.UTF_8).size <= ThreeStoveAgentContract.MAX_SCRIPT_CATALOG_BYTES)
     }
 
     @Test fun cacheInvalidatesOnMtimeAndReturnedGsonTreesCannotMutateFutureReads() {

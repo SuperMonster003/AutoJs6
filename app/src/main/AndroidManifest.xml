@@ -58,8 +58,8 @@
             <category android:name="screen-color-picker" />
         </intent>
         <intent>
-            <action android:name="org.autojs.plugin.AI_AGENT" />
-            <category android:name="ai-agent" />
+            <action android:name="org.autojs.plugin.THREE_STOVE_AGENT" />
+            <category android:name="three-stove-agent" />
         </intent>
         <intent>
             <action android:name="org.autojs.plugin.MCP_SERVER" />
@@ -939,11 +939,11 @@
             android:exported="false" />
 
         <receiver
-            android:name="org.autojs.autojs.core.plugin.agent.AiAgentAttachRequestReceiver"
+            android:name="org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver"
             android:exported="true"
             android:permission="org.autojs.permission.PLUGIN">
             <intent-filter>
-                <action android:name="org.autojs.autojs6.action.AI_AGENT_ATTACH" />
+                <action android:name="org.autojs.autojs6.action.THREE_STOVE_AGENT_ATTACH" />
             </intent-filter>
         </receiver>
 

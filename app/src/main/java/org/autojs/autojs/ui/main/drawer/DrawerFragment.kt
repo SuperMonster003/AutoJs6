@@ -23,9 +23,9 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
-import org.autojs.autojs.app.tool.AiAgentTool
-import org.autojs.autojs.core.plugin.agent.AiAgentUiPolicy
-import org.autojs.autojs.ui.settings.AiAgentLauncher
+import org.autojs.autojs.app.tool.ThreeStoveAgentTool
+import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentUiPolicy
+import org.autojs.autojs.ui.settings.ThreeStoveAgentLauncher
 import org.autojs.autojs.app.tool.McpServerTool
 import org.autojs.autojs.core.plugin.mcp.McpServerUiPolicy
 import org.autojs.autojs.ui.settings.McpServerSettingsLauncher
@@ -146,7 +146,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
     private lateinit var mMcpServerItem: DrawerMenuDisposableItem
-    private lateinit var mAiAgentItem: DrawerMenuDisposableItem
+    private lateinit var mThreeStoveAgentItem: DrawerMenuDisposableItem
     private lateinit var mNotificationPostItem: DrawerMenuToggleableItem
     private lateinit var mLocalNetworkPermissionItem: DrawerMenuToggleableItem
     private lateinit var mNotificationAccessItem: DrawerMenuToggleableItem
@@ -461,20 +461,20 @@ open class DrawerFragment : Fragment() {
             connectIfNotNormallyClosed()
         }
 
-        AiAgentTool(mActivity).apply {
+        ThreeStoveAgentTool(mActivity).apply {
             val tool = this
-            mAiAgentItem = DrawerMenuDisposableItem(
+            mThreeStoveAgentItem = DrawerMenuDisposableItem(
                 helper = tool,
-                icon = R.drawable.ic_ai_agent_black_48dp,
-                title = R.string.text_ai_agent,
-                descriptionRes = R.string.description_ai_agent,
+                icon = R.drawable.ic_three_stove_agent_black_48dp,
+                title = R.string.text_three_stove_agent,
+                descriptionRes = R.string.description_three_stove_agent,
             ) { neutralText(R.string.text_manage) }
-            mAiAgentItem.setOnLaunchManagerListener { d -> d?.dismiss(); AiAgentLauncher.launch(mActivity) }
+            mThreeStoveAgentItem.setOnLaunchManagerListener { d -> d?.dismiss(); ThreeStoveAgentLauncher.launch(mActivity) }
             lifecycleScope.launch {
                 state.collect { value ->
-                    mAiAgentItem.subtitle = AiAgentTool.subtitle(mContext, value)
-                    mAiAgentItem.setCheckedIfNeeded(AiAgentUiPolicy.checked(value.state))
-                    mAiAgentItem.isProgress = AiAgentUiPolicy.progress(value.state)
+                    mThreeStoveAgentItem.subtitle = ThreeStoveAgentTool.subtitle(mContext, value)
+                    mThreeStoveAgentItem.setCheckedIfNeeded(ThreeStoveAgentUiPolicy.checked(value.state))
+                    mThreeStoveAgentItem.isProgress = ThreeStoveAgentUiPolicy.progress(value.state)
                 }
             }
         }
@@ -942,7 +942,7 @@ open class DrawerFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mScreenColorPickerTool.refresh()
-        (mAiAgentItem.getHelper() as AiAgentTool).refresh()
+        (mThreeStoveAgentItem.getHelper() as ThreeStoveAgentTool).refresh()
         syncMenuItemStates()
     }
 
@@ -951,7 +951,7 @@ open class DrawerFragment : Fragment() {
         mClientModeItem.dispose()
         mServerModeItem.dispose()
         mMcpServerItem.dispose()
-        mAiAgentItem.dispose()
+        mThreeStoveAgentItem.dispose()
 
         dismissA11yServiceManager()
         dismissConnectionManagers()
@@ -994,7 +994,7 @@ open class DrawerFragment : Fragment() {
     fun onDrawerOpened(event: Event.OnDrawerOpened) {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.hide(WindowInsets.Type.systemBars())
         mScreenColorPickerTool.refresh()
-        (mAiAgentItem.getHelper() as AiAgentTool).refresh()
+        (mThreeStoveAgentItem.getHelper() as ThreeStoveAgentTool).refresh()
         syncMenuItemStates()
     }
 
@@ -1070,7 +1070,7 @@ open class DrawerFragment : Fragment() {
             mClientModeItem,
             mServerModeItem,
             mMcpServerItem,
-            mAiAgentItem,
+            mThreeStoveAgentItem,
             DrawerMenuGroup(R.string.text_permissions),
             mNotificationPostItem,
             mLocalNetworkPermissionItem,
@@ -1127,7 +1127,7 @@ open class DrawerFragment : Fragment() {
         mClientModeItem,
         mServerModeItem,
         mMcpServerItem,
-        mAiAgentItem,
+        mThreeStoveAgentItem,
         mNotificationPostItem,
         mLocalNetworkPermissionItem,
         mNotificationAccessItem,

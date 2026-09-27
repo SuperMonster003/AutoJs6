@@ -18,6 +18,7 @@ import org.autojs.autojs.engine.NodeBridgeResponse
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.plugin.host.capability.api.HostCapabilityContract
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -95,7 +96,7 @@ class HostCapabilityBrokerCore(
                     grant.permissions.containsAll(listOf("accessibility", "screen_capture", "ocr")) &&
                     runCatching { ocrAvailable(appContext) }.getOrDefault(false)) add("accessibility.readScreenText")
                 // Advertises the owned timeout/cancellation extension, not merely ordinary execScript.
-                if (engineInfo.engineName == "ai-agent" && provider is AndroidNodeBridgeCapabilityProvider &&
+                if (engineInfo.engineName == ThreeStoveAgentIds.ENGINE && provider is AndroidNodeBridgeCapabilityProvider &&
                     grant.allowedMethods.containsAll(listOf("engines.execScript", "engines.stop")) &&
                     grant.permissions.containsAll(listOf("engines", "engines.exec"))) add("engines.execScript")
             }

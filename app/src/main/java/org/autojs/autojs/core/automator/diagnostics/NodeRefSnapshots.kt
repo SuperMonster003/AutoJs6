@@ -2,7 +2,7 @@ package org.autojs.autojs.core.automator.diagnostics
 
 import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.bridge.BridgeAccessibilityLimits
-import org.autojs.plugin.ai.agent.api.AiAgentContract
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract
 import java.util.UUID
 
 /** One provider/link's LRU. It retains bounded value fingerprints, never AccessibilityNodeInfo. */
@@ -89,7 +89,7 @@ class NodeRefSnapshots(private val capacity: Int = MAX_SNAPSHOTS) : AutoCloseabl
     val size: Int get() = synchronized(lock) { snapshots.size }
 
     companion object {
-        const val MAX_SNAPSHOTS = AiAgentContract.MAX_SNAPSHOTS_PER_LINK
+        const val MAX_SNAPSHOTS = ThreeStoveAgentContract.MAX_SNAPSHOTS_PER_LINK
         const val MAX_WINDOW_KEY_CHARS = 2048
         // Action lookup must inspect beyond the display dump's 32-level formatting limit.
         // The independent 2000-node visit cap and tool deadline still bound the work.

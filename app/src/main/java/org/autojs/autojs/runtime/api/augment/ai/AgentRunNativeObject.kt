@@ -4,8 +4,8 @@ import android.os.Looper
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.autojs.autojs.core.eventloop.EventEmitter
-import org.autojs.autojs.core.plugin.agent.AiAgentRunRecord
-import org.autojs.autojs.core.plugin.agent.AiAgentRunRegistry
+import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentRunRecord
+import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentRunRegistry
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.ai.AiAgentArguments
@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 /** Events, Promise settlement, and all Rhino conversion stay on the creating script thread. */
 internal class AgentRunNativeObject(
     private val runtime: ScriptRuntime,
-    private val record: AiAgentRunRecord,
-    private val registry: AiAgentRunRegistry,
+    private val record: ThreeStoveAgentRunRecord,
+    private val registry: ThreeStoveAgentRunRegistry,
     private val ownsRun: Boolean,
 ) : NativeObject(), Closeable {
     private val originThread = Thread.currentThread()
@@ -157,7 +157,7 @@ internal class AgentRunNativeObject(
                 Thread.sleep(10)
             }
             dispatcher.drainOnOriginatingThread()
-            (localFailure.get() ?: record.failure)?.let { throw org.autojs.autojs.core.plugin.agent.AiAgentControlException(it["code"].asString) }
+            (localFailure.get() ?: record.failure)?.let { throw org.autojs.autojs.core.plugin.agent.ThreeStoveAgentControlException(it["code"].asString) }
             return js_json_parse(checkNotNull(record.result).toString())
         } finally { joining = false }
     }

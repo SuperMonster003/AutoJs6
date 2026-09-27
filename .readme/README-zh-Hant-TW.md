@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 9 月 22 日.
+資料更新於 2026 年 9 月 27 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -168,14 +168,14 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/09/26
+###### 2026/09/27
 
 * `新增` 介面動作將確認綁定至宿主檢查的節點, 支援文字追加與有界捲動, 並回報執行結果和視窗變化
 * `新增` 宿主回報已授權 OCR 插件可用時提供螢幕 OCR, 辨識結果合併為帶座標的有界文字行
 * `新增` ai.agent 腳本 API, 支援任務啟動, 查詢, 事件, 詢問回應, 確認, 取消與 detached 背景任務; result/context 提供 @agent 登記腳本結果和上下文, 附三個任務範例
-* `新增` AI Agent 支援執行經確認的生成 JavaScript, 取消或逾時會停止本次指令碼, 傳回結構化結果和主控台輸出; 指令碼使用宿主權限, 不提供檔案存取沙箱
+* `新增` Three Stove Agent 支援執行經確認的生成 JavaScript, 取消或逾時會停止本次指令碼, 傳回結構化結果和主控台輸出; 指令碼使用宿主權限, 不提供檔案存取沙箱
 * `新增` ai.agent: 本機或外部 MCP 伺服器的所選工具, 按伺服器設定風險等級, mcp 工具群組預設關閉
-* `新增` AI Agent 模型代理支援向視覺模型傳入圖片及工具結果圖片 (需要對應外掛程式支援)
+* `新增` Three Stove Agent 模型代理支援向視覺模型傳入圖片及工具結果圖片 (需要對應外掛程式支援)
 * `新增` Android 17 本機網路權限管理, 支援側欄, 設定頁及 VS Code 連線時按需申請, 並按實際 targetSdk 宣告權限
 * `新增` 設定頁支援檢視 Android 11 及以上的程序結束記錄, 包含多程序近期系統原因, 記憶體限制器識別與可複製報告
 * `新增` MCP 伺服器抽屜開關提供安裝, 啟用, 授權與相容性引導, 與通知停止操作同步, 重新連線時保留外掛程式設定, 抽屜及外掛程式中心透過權限檢查開啟同一設定頁. AutoJs6 開啟時恢復先前啟用的伺服器, 但遵循宿主離線期間的使用者停止操作, 不隨裝置開機自啟.
@@ -412,18 +412,18 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` `epub` 指令碼 API 的閱讀器控制 (外掛程式路線圖 P6.2): `epub.read(path, options?)` 開啟 Readium EPUB Reader 外掛程式的閱讀器並回傳 `EpubReaderSession` 事件發射器, 其 `open`, `progress`, `bookmark`, `error` 與 `close` 事件在指令碼執行緒到達, 提供 `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })` 以及屬性 `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`; 起始位置來自 `href`, `progression` 或 `locator` 並可附帶 `preferences`, 指令碼不再消費事件時得到 `error(LIMIT_EXCEEDED)` 與 `close(overflow)`, 指令碼結束時結束會話而閱讀器留給使用者繼續閱讀
 * `新增` 電子書範例 (外掛程式路線圖 P6.3): 應用程式內範例程式碼新增 "电子书" 目錄及 3 個指令碼 (EPUB 元数据与目录: 讀取 Download 或 Books 目錄下書籍的中繼資料, 目錄, 閱讀順序與位置數; 导出章节文本: 按章節或整本匯出純文字或 Markdown, 匯出封面並全文搜尋; 打开阅读器并监听进度: 以 `open` / `progress` / `bookmark` / `error` / `close` 監聽器驅動閱讀器工作階段, 設定起始偏好, 翻章並以 `close()` 把閱讀器留給使用者); 每個指令碼先檢查 `epub.isAvailable()` 並說明 Readium EPUB Reader 外掛程式的安裝方式
 * `新增` EPUB 契約版本 2 (螢光標示與筆記, 外掛路線圖 P9.4): 附加的 `IEpubBook.getAnnotations` (分頁, 按閱讀順序) 與閱讀器會話的 `highlight` 事件以 `annotations` 文件 (id, style, color, note, quote, 章節標題, locator, createdAt, updatedAt) 傳遞閱讀器中的螢光標示與筆記; 宿主依據外掛的 `epubMaxContractVersion` 協商版本並寫入每個請求, 版本 1 的外掛不會收到新呼叫; 指令碼 API `epub` 新增 `book.annotations()` 與 `epub.annotations(path)` (含 `Async` 形態), `EpubReaderSession` 發出 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 事件, `action` 為 added, updated 或 removed
-* `新增` AI Agent 外掛契約與宿主代理, 支援受限裝置能力, 模型呼叫配額及連線失效後的資源回收; 模型代理支援原生工具呼叫及結果續輪, 每輪檢查模型配額
+* `新增` Three Stove Agent 外掛契約與宿主代理, 支援受限裝置能力, 模型呼叫配額及連線失效後的資源回收; 模型代理支援原生工具呼叫及結果續輪, 每輪檢查模型配額
 * `新增` Agent 指令碼登記與受限執行, 支援 project.json / @agent 標頭註解, 參數驗證, 逾時停止及結構化結果回傳
-* `新增` AI Agent 側邊欄入口與外掛中心管理, 支援連線狀態, 任務數量, 授權引導及主程式重新啟動後恢復連線; 安裝精靈工具分類提供選用入口, 發行 APK 加入官方索引後可供安裝
-* `新增` AI Agent 外掛可設定附加指令碼目錄, 宿主校驗允許範圍後儲存並在重新連線時恢復, 無效目錄不會取代已接受的設定
-* `修復` AI Agent 呼叫線上模型失敗時遺失網路, 身分驗證及回應錯誤類別的問題 (需要 Provider 外掛支援)
+* `新增` Three Stove Agent 側邊欄入口與外掛中心管理, 支援連線狀態, 任務數量, 授權引導及主程式重新啟動後恢復連線; 安裝精靈工具分類提供選用入口, 發行 APK 加入官方索引後可供安裝
+* `新增` Three Stove Agent 外掛可設定附加指令碼目錄, 宿主校驗允許範圍後儲存並在重新連線時恢復, 無效目錄不會取代已接受的設定
+* `修復` Three Stove Agent 呼叫線上模型失敗時遺失網路, 身分驗證及回應錯誤類別的問題 (需要 Provider 外掛支援)
 * `修復` assistant 合併工具選項時, 空 tools 物件導致預設關閉的工具組被啟用的問題
 * `修復` 無障礙精簡節點樹縮短資源 ID, 導致依顯示 ID 查詢時無法比對控制項的問題
 * `修復` Android 7/8.0 裝置上部分外掛檔案快照, Node.js 套件安裝, TypeScript 專案檔案操作及終端環境探測的相容性問題
 * `修復` Shizuku 權限請求監聽器在銷毀後未正確取消註冊的問題
 * `修復` Python 長時間執行工作通知缺少部分語言譯文及 DEX 編譯器設定缺少英文文案的問題
 * `修復` 官方外掛在宿主啟動期間讀取外觀設定時, 因應用程式 Context 尚未就緒導致偏好設定初始化崩潰的問題
-* `修復` AI Agent 在螢幕關閉或鎖定時繼續觀察和操作螢幕而未傳回 SCREEN_LOCKED 的問題
+* `修復` Three Stove Agent 在螢幕關閉或鎖定時繼續觀察和操作螢幕而未傳回 SCREEN_LOCKED 的問題
 * `修復` 外掛能力代理在要求 toast 日誌時將文字內容寫入宿主日誌的問題
 * `修復` Agent 關閉操作確認視窗後誤報節點參照失效及顯示過時應用程式名稱的問題
 * `修復` 深層介面節點無法操作, 以及邊界或操作能力不同的巢狀容器被誤判為同一目標的問題
@@ -645,7 +645,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 客戶端模式的伺服端位址歷史記錄僅在握手失敗時寫入, 成功連線過的位址反而從不記錄, 導致位址對話框的 "歷史記錄" 始終為空的問題
 * `修復` 檢查更新選擇安裝套件時, 若清單中沒有與首選 ABI 相符的安裝套件, 可能選中清單靠後的低優先順序安裝套件 (如通用套件) 而非次優先 ABI 的安裝套件
 * `修復` 內建套件安裝器在 Android 9-11 上可能因平台封存解析器回傳的簽章資訊為空而以 "Base APK has no verifiable signer" 拒絕 V2/V3 簽章的 APK, 現回退至已棄用的封存簽章檢視
-* `最佳化` AI Agent 模型負載在 Android 7-10 上透過公開 API 讀取, 保留檔案位移與停滯管道取消能力
+* `最佳化` Three Stove Agent 模型負載在 Android 7-10 上透過公開 API 讀取, 保留檔案位移與停滯管道取消能力
 * `最佳化` 宿主 lint 檢查依路徑排除 AutoJs4 相容類別和資源, 其餘宿主程式碼繼續檢查
 * `最佳化` 外掛中心觀察到與宿主同憑證簽章 (OFFICIAL) 的預設關閉外掛 (YOLO, MCP Server) 完成全新安裝後自動寫入明確啟用記錄並完成啟用探測; 第三方信任或使用者授權簽章, adb 側載及覆蓋安裝仍需手動啟用, 執行時仍只讀取已儲存的記錄
 * `最佳化` 無障礙服務, 用戶端模式, 伺服器模式與終端機管理員統一分區標題的加減按鈕和分隔線; 設定區可完全收合並透過齒輪開啟獨立設定對話方塊; 用戶端模式收合後的控制列提供歷史記錄入口; 伺服器模式收合後的控制列提供中斷所有用戶端連線按鈕
@@ -812,7 +812,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 減少外掛一致性測試應用程式及宿主測試的 Manifest, Java 和 Kotlin 編譯警告, 保持原生程式庫封裝行為及 Android 版本相容性
 * `最佳化` accessibility.dump 的 compact 格式與 nodeRef 節點參照, 支援節點重新定位及失效參照拒絕
 * `最佳化` accessibility.readScreenText 方法, 透過擷取畫面與已授權 OCR 外掛回傳有上限的螢幕文字及位置
-* `最佳化` AI Agent 能力代理允許開啟通知欄和快捷設定, 其餘未授權按鍵動作保持拒絕
+* `最佳化` Three Stove Agent 能力代理允許開啟通知欄和快捷設定, 其餘未授權按鍵動作保持拒絕
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1094,7 +1094,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 22 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 27 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

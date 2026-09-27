@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.three.stove.agent.api.** { *; }
+-dontwarn org.autojs.plugin.three.stove.agent.api.**

@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 22, 2026.
+Data updated on Sep 27, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -168,14 +168,14 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/09/26
+###### 2026/09/27
 
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
 * `Feature` ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples
-* `Feature` AI Agent can run confirmed generated JavaScript, stop its own script on cancellation or timeout, and return structured results and console output; the script uses host permissions, without a file-access sandbox
+* `Feature` Three Stove Agent can run confirmed generated JavaScript, stop its own script on cancellation or timeout, and return structured results and console output; the script uses host permissions, without a file-access sandbox
 * `Feature` ai.agent: MCP tools from selected local or external servers, with per-server risk settings and the mcp group disabled by default
-* `Feature` The AI Agent model broker accepts image inputs and image tool results for compatible vision models (requires plugin support)
+* `Feature` The Three Stove Agent model broker accepts image inputs and image tool results for compatible vision models (requires plugin support)
 * `Feature` Android 17 local network permission controls in the drawer, settings and user-initiated VS Code connections, with permission declarations based on the actual targetSdk
 * `Feature` Process exit history in settings on Android 11 and later, with recent system reasons across app processes, memory limiter identification, and copyable reports
 * `Feature` MCP Server drawer switch with installation, activation, enablement, authorization, and compatibility guidance; notification Stop synchronization; saved plugin settings retained on reconnect; permission-checked settings entry from the drawer and Plugin Center. Restores a previously enabled server when AutoJs6 opens, unless the user stopped it while the host was absent; no boot startup.
@@ -412,18 +412,18 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Reader control of the `epub` script API (plugin roadmap P6.2): `epub.read(path, options?)` opens the reader of the Readium EPUB Reader plugin and returns an `EpubReaderSession` event emitter whose `open`, `progress`, `bookmark`, `error` and `close` events arrive on the script thread, with `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })` and the properties `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`; the start position comes from `href`, `progression` or `locator` with optional `preferences`, a script that stops draining its events gets `error(LIMIT_EXCEEDED)` and `close(overflow)`, and the script's exit ends the session while the reader stays open for the user
 * `Feature` EPUB samples (plugin roadmap P6.3): three scripts added to the new in-app sample directory "电子书" (EPUB 元数据与目录: metadata, table of contents, reading order and positions of a book found under Download or Books; 导出章节文本: chapter and whole-book text export as plain text or Markdown, cover export and full-text search; 打开阅读器并监听进度: a reader session with `open` / `progress` / `bookmark` / `error` / `close` listeners, start preferences, a chapter turn and `close()` that leaves the reader to the user); every script checks `epub.isAvailable()` first and explains how to install the Readium EPUB Reader plugin
 * `Feature` EPUB contract version 2 with highlights and notes (plugin roadmap P9.4): the appended `IEpubBook.getAnnotations` (paged, in reading order) and the `highlight` reader-session event carry the reader's highlights and notes as an `annotations` document (id, style, color, note, quote, chapter title, locator, createdAt, updatedAt); the host negotiates the version from the plugin's `epubMaxContractVersion` and stamps it on every request, so version-1 plugins never see the new call; the `epub` script API gains `book.annotations()` and `epub.annotations(path)` with their `Async` forms, and `EpubReaderSession` emits `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` with `action` added, updated or removed
-* `Feature` AI Agent plugin contract and host brokers with restricted device access, model-call quotas and resource cleanup when a link is lost; the model broker supports native tool-call continuations with per-round model quota checks
+* `Feature` Three Stove Agent plugin contract and host brokers with restricted device access, model-call quotas and resource cleanup when a link is lost; the model broker supports native tool-call continuations with per-round model quota checks
 * `Feature` Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results
-* `Feature` AI Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart; optional Tools entry in the installation wizard when a published APK is present in the official index
-* `Feature` AI Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
-* `Fix` AI Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
+* `Feature` Three Stove Agent drawer entry and Plugin Center management with connection status, task counts, authorization guidance and connection restoration after host restart; optional Tools entry in the installation wizard when a published APK is present in the official index
+* `Feature` Three Stove Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
+* `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
 * `Fix` Compact accessibility trees shortened resource IDs, preventing literal selectors from matching the displayed IDs
 * `Fix` Compatibility of plugin file snapshots, Node.js package installation, TypeScript project file operations and terminal environment probes on Android 7/8.0
 * `Fix` Shizuku permission request listeners remaining registered after destruction
 * `Fix` Missing translations for Python long-running task notifications and missing English text in DEX compiler settings
 * `Fix` Official plugins requesting host appearance during host startup could crash preference initialization before the application context was ready
-* `Fix` AI Agent screen observations and actions could continue while the screen was off or locked instead of returning SCREEN_LOCKED
+* `Fix` Three Stove Agent screen observations and actions could continue while the screen was off or locked instead of returning SCREEN_LOCKED
 * `Fix` Plugin capability brokers writing toast text into host logs when toast logging was requested
 * `Fix` Agent falsely rejecting node references and reporting an outdated app name after an action confirmation window closes
 * `Fix` Node actions handle deeply nested screens and distinguish container bounds and action capabilities when identifying a target
@@ -645,7 +645,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Client mode server address history was only written on a failed handshake and never for a successful connection, so the "History" of the address dialog stayed empty
 * `Fix` When picking the APK for an update, a release without an asset for the first preferred ABI could pick a later lower-priority asset in the list (such as the universal one) instead of the asset of the next preferred ABI
 * `Fix` The built-in package installer could reject V2/V3-signed APKs on Android 9-11 with "Base APK has no verifiable signer" because the platform archive parser left the signing info empty; the deprecated archive signature view is now consulted as a fallback
-* `Improvement` AI Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
+* `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record
 * `Improvement` Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history; collapsed server controls also provide Disconnect all clients
@@ -812,7 +812,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Reduce Manifest, Java and Kotlin compiler warnings in plugin conformance apps and host tests while preserving native library packaging and Android version compatibility
 * `Improvement` compact output and nodeRef references for accessibility.dump, with node relocation and stale-reference rejection
 * `Improvement` accessibility.readScreenText returns bounded screen text and positions using screenshots and authorized OCR plugins
-* `Improvement` AI Agent capability grants allow opening notifications and quick settings while other ungranted key actions remain denied
+* `Improvement` Three Stove Agent capability grants allow opening notifications and quick settings while other ungranted key actions remain denied
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1094,7 +1094,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 22, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 27, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

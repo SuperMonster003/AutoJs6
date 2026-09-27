@@ -12,16 +12,6 @@
     <string name="a11y_advanced_protection_on">Включена</string>
     <string name="a11y_advanced_protection_title">Расширенная защита</string>
     <string name="a11y_advanced_protection_unknown">Недоступно</string>
-    <string name="ai_agent_state_activation">Требуется активация</string>
-    <string name="ai_agent_state_attached">Подключено, выполняется: %1$d, в очереди: %2$d</string>
-    <string name="ai_agent_state_attaching">Подключение</string>
-    <string name="ai_agent_state_authorization">Требуется разрешение</string>
-    <string name="ai_agent_state_detached">Отключено</string>
-    <string name="ai_agent_state_disabled">Плагин отключен</string>
-    <string name="ai_agent_state_failed">Ошибка подключения</string>
-    <string name="ai_agent_state_host_unavailable">Хост недоступен</string>
-    <string name="ai_agent_state_incompatible">Несовместимая версия</string>
-    <string name="ai_agent_state_not_installed">Плагин не установлен</string>
     <string name="apk_builder_build">Строительство</string>
     <string name="apk_builder_clean">Очистка</string>
     <string name="apk_builder_package">Упаковка</string>
@@ -107,7 +97,6 @@
     <string name="description_ace_lsp_file_types_preference">LSP запускается только для файлов, имена которых заканчиваются одним из выбранных суффиксов. Значение по умолчанию восстанавливает набор суффиксов JavaScript, TypeScript, JSON, Auto.js и Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Показывает или скрывает линию границы печати в правой части редактора Ace. Изменяется только отображение кода.</string>
     <string name="description_ace_word_wrap_enabled_preference">Включает перенос длинных строк в редакторе. Содержимое файла не изменяется.</string>
-    <string name="description_ai_agent">Подключите плагин AI Agent к AutoJs6. Кнопка управления открывает страницу задач. Само подключение не запускает задачи.</string>
     <string name="description_ai_settings_preference">Откройте 3-Stone AI для управления локальными моделями, онлайн-сервисами и целью по умолчанию глобального модуля ai.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">Разрешение \"управление всеми файлами\" (или \"доступ ко всем файлам\") позволяет AutoJs6 напрямую [ создавать / читать / изменять / удалять ] файлы в общем хранилище через обычные пути файлов, чтобы скрипты могли получать доступ к \"Internal Storage\", а файловый менеджер мог корректно отображать и управлять файлами.\n\nНа устройствах Android 11+ это основной способ обеспечить полный доступ к чтению/записи файлов.</string>
     <string name="description_app_language_preference">Это предпочтение для изменения языка отображения AutoJs6, включая сообщения исключений от запущенных скриптов.\n\nПримечание: может потребоваться перезапуск приложения, чтобы язык был применен так, как ожидается.</string>
@@ -174,6 +163,7 @@
     <string name="description_stable_mode">Стабильный режим повышает стабильность при получении границ макета, но некоторые результаты могут быть проигнорированы.\nТребуется перезапуск службы доступности.</string>
     <string name="description_terminal">Выполняйте команды в отдельных сеансах shell. После выхода сеансы продолжают работать в фоне. Выключение переключателя завершает все сеансы.</string>
     <string name="description_theme_color_preference">Цвет темы применяется к виджетам, включая следующие, но не ограничиваясь ими:\nСтрока состояния\nПанель приложений\nЗначок файла\nЗначок элемента задачи\nFAB\nЗаголовок каталога настроек\nКнопка переключения\n\nПримечание: Начиная с версии AutoJs6 6.2.0, пока не существует различий между основным цветом, основным темным цветом и цветом акцента.</string>
+    <string name="description_three_stove_agent">Подключите плагин Three Stove Agent к AutoJs6. Кнопка управления открывает страницу задач. Само подключение не запускает задачи.</string>
     <string name="description_timed_task_backend">Управляет базовым механизмом по расписанию запуска скриптов.\n\nAlarmManager: При выдаче разрешения \"Разрешить настройку будильников и напоминаний\" задачи выполняются более точно по времени.\nWorkManager: Дружелюбен к системе; подходит для некритичных задач, допускающих задержку.\nJobScheduler: Устаревшая реализация, сохранена для совместимости; вероятность задержек выше.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Сценарии и отличия:\n\n1. AlarmManager\nПодходит для задач, чувствительных к точности времени, например [напоминания/строго по расписанию/...].\nВ Android 12+ при наличии разрешения \"Разрешить настройку будильников и напоминаний\" задачи запускаются более точно даже при выключенном экране/в ожидании.\nБез него система может понизить точность или отложить выполнение.\n\n2. WorkManager\nПодходит для задач без строгих требований к времени, например [некритичная синхронизация/очистка/статистика/...].\nПланирование учитывает [батарею/сеть/зарядку/политику сна/...], возможны задержки при выключенном экране или в ожидании.\nХотя точность не гарантируется, он силён в [надёжном завершении/повторных попытках/цепочках/дедупликации работ].\n\n3. JobScheduler\nИсторическая реализация для совместимости.\nНа новых версиях Android возможны более существенные задержки.\nНе рекомендуется, если это не необходимо ради совместимости.</string>
     <string name="description_usage_stats_access">Предоставляет доступ к истории использования устройства и статистике, что позволяет получить более точный результат в функции currentPackage()</string>
@@ -677,15 +667,6 @@
     <string name="prompt_ace_editor_plugin_required">Установите или включите плагин редактора Ace в Центре плагинов, чтобы использовать движок Ace.</string>
     <string name="prompt_add_ignored_app_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках приложения.</string>
     <string name="prompt_add_ignored_plugin_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках плагина.</string>
-    <string name="prompt_ai_agent_activate">AI Agent установлен, но еще не активирован Android. Активируйте его для подключения к AutoJs6.</string>
-    <string name="prompt_ai_agent_application_disabled">Android отключил AI Agent. Включите приложение в системных настройках и повторите попытку.</string>
-    <string name="prompt_ai_agent_authorize">Разрешите этот плагин в центре плагинов перед подключением AI Agent.</string>
-    <string name="prompt_ai_agent_enable">Включить плагин AI Agent и подключить его к AutoJs6?</string>
-    <string name="prompt_ai_agent_failed">Не удалось подключить AI Agent. Проверьте его состояние и версию в центре плагинов и повторите попытку.</string>
-    <string name="prompt_ai_agent_incompatible">Плагину требуется AutoJs6 сборки %1$d или новее. Установите совместимые версии AutoJs6 и AI Agent.</string>
-    <string name="prompt_ai_agent_install">Скачайте AI Agent с официальной страницы выпусков, установите и включите его в AutoJs6. Если выпусков пока нет, проверьте позже.</string>
-    <string name="prompt_ai_agent_launcher_unavailable">Страница задач AI Agent недоступна. Проверьте в центре плагинов, включено ли приложение и обновлено ли оно.</string>
-    <string name="prompt_ai_agent_trust">Вы разрешили этот плагин вручную, но его подпись не является официальной или доверенной. Разрешить этой подписи доступ к моделям и функциям устройства AutoJs6?</string>
     <string name="prompt_ai_plugin_application_enable_required">Приложение 3-Stone AI отключено в Android. Включите его в системных настройках приложения, прежде чем открывать настройки службы ИИ.</string>
     <string name="prompt_ai_plugin_enable_required">Плагин 3-Stone AI отключен в Центре плагинов. Включите его, прежде чем открывать настройки службы ИИ.</string>
     <string name="prompt_ai_plugin_install_required">Установите 3-Stone AI из Центра плагинов, прежде чем открывать настройки службы ИИ.</string>
@@ -713,6 +694,15 @@
     <string name="prompt_plugin_native_page_alignment">Нативные библиотеки плагина %1$s не выровнены для страниц 16 KB. Плагин может не работать на этом устройстве. Обновите его перед использованием. Все равно продолжить?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Для применения новых настроек требуется перезапуск приложения</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Перезапуск приложения может потребоваться для того, чтобы язык применялся как положено</string>
+    <string name="prompt_three_stove_agent_activate">Three Stove Agent установлен, но еще не активирован Android. Активируйте его для подключения к AutoJs6.</string>
+    <string name="prompt_three_stove_agent_application_disabled">Android отключил Three Stove Agent. Включите приложение в системных настройках и повторите попытку.</string>
+    <string name="prompt_three_stove_agent_authorize">Разрешите этот плагин в центре плагинов перед подключением Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_enable">Включить плагин Three Stove Agent и подключить его к AutoJs6?</string>
+    <string name="prompt_three_stove_agent_failed">Не удалось подключить Three Stove Agent. Проверьте его состояние и версию в центре плагинов и повторите попытку.</string>
+    <string name="prompt_three_stove_agent_incompatible">Плагину требуется AutoJs6 сборки %1$d или новее. Установите совместимые версии AutoJs6 и Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_install">Скачайте Three Stove Agent с официальной страницы выпусков, установите и включите его в AutoJs6. Если выпусков пока нет, проверьте позже.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">Страница задач Three Stove Agent недоступна. Проверьте в центре плагинов, включено ли приложение и обновлено ли оно.</string>
+    <string name="prompt_three_stove_agent_trust">Вы разрешили этот плагин вручную, но его подпись не является официальной или доверенной. Разрешить этой подписи доступ к моделям и функциям устройства AutoJs6?</string>
     <string name="python_long_running_notification_channel_description">Состояние и остановка длительных проектов Python, запущенных пользователем</string>
     <string name="python_long_running_notification_channel_name">Длительные задачи Python</string>
     <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">Подготовка среды Python...</string>
@@ -2387,6 +2377,16 @@
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="text_yearly_task">Ежегодная задача</string>
     <string name="text_zero_means_unlimited">0 означает отсутствие ограничений</string>
+    <string name="three_stove_agent_state_activation">Требуется активация</string>
+    <string name="three_stove_agent_state_attached">Подключено, выполняется: %1$d, в очереди: %2$d</string>
+    <string name="three_stove_agent_state_attaching">Подключение</string>
+    <string name="three_stove_agent_state_authorization">Требуется разрешение</string>
+    <string name="three_stove_agent_state_detached">Отключено</string>
+    <string name="three_stove_agent_state_disabled">Плагин отключен</string>
+    <string name="three_stove_agent_state_failed">Ошибка подключения</string>
+    <string name="three_stove_agent_state_host_unavailable">Хост недоступен</string>
+    <string name="three_stove_agent_state_incompatible">Несовместимая версия</string>
+    <string name="three_stove_agent_state_not_installed">Плагин не установлен</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
     <string name="warning_apk_native_page_alignment_unsupported">Нативная библиотека %1$s имеет выравнивание %2$d байт. Созданный APK может не работать на устройствах со страницами 16 KB. Обновите библиотеку или плагин.</string>

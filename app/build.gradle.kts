@@ -657,8 +657,8 @@ dependencies /* Unclassified */ {
     // Plugin API: host capability broker (shared)
     implementation(project(":plugin-api:host-capability-api"))
 
-    // Plugin API: AI Agent
-    implementation(project(":plugin-api:ai-agent-api"))
+    // Plugin API: Three Stove Agent
+    implementation(project(":plugin-api:three-stove-agent-api"))
 
     // Plugin API: AI Common API
     implementation(project(":plugin-api:ai-common-api"))

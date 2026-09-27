@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 22 日 に更新されました.
+データは 2026 年 9 月 27 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -168,14 +168,14 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/26
+###### 2026/09/27
 
 * `新機能` 画面操作の確認をホストが検査したノードに結び付け, テキスト追記と回数制限付きスクロールに対応し, 実行結果とウィンドウ変化を報告
 * `新機能` ホストが認可済み OCR プラグインの利用可否を通知し, 利用可能な場合のみ画面 OCR を公開して座標付きの制限された行に統合
 * `新機能` ai.agent スクリプト API: タスク開始, 検索, イベント, 質問への応答, 確認, キャンセル, detached バックグラウンドタスクに対応; result/context で @agent 登録スクリプトの結果とコンテキストを取得し, 3 つの例を付属
-* `新機能` AI Agent は確認済みの生成 JavaScript を実行し, キャンセルやタイムアウト時に対象スクリプトを停止して構造化結果とコンソール出力を返す; スクリプトはホスト権限を使用し, ファイルアクセスのサンドボックスは提供しない
+* `新機能` Three Stove Agent は確認済みの生成 JavaScript を実行し, キャンセルやタイムアウト時に対象スクリプトを停止して構造化結果とコンソール出力を返す; スクリプトはホスト権限を使用し, ファイルアクセスのサンドボックスは提供しない
 * `新機能` ai.agent: 選択したローカルまたは外部 MCP サーバーのツールに対応し, サーバーごとにリスクを設定. mcp グループは初期状態で無効
-* `新機能` AI Agent のモデル仲介機能が対応する視覚モデルへの画像入力とツール結果の画像送信に対応 (プラグイン側の対応が必要)
+* `新機能` Three Stove Agent のモデル仲介機能が対応する視覚モデルへの画像入力とツール結果の画像送信に対応 (プラグイン側の対応が必要)
 * `新機能` Android 17 のローカルネットワーク権限管理をドロワー, 設定, ユーザー操作による VS Code 接続に対応させ, 実際の targetSdk に応じて権限を宣言
 * `新機能` Android 11 以降の設定画面でプロセス終了履歴を表示し, 複数プロセスの最近のシステム理由, メモリ制限の識別, レポートのコピーに対応
 * `新機能` MCP サーバースイッチにインストール, 有効化, 承認, 互換性の案内を追加. 通知の停止と同期し, 再接続時も設定を保持. ドロワーとプラグインセンターから権限確認済みの同じ設定画面を開きます. AutoJs6 起動時は以前の有効状態を復元し, ホスト不在中の停止を尊重. 端末起動時の自動開始は行いません.
@@ -412,18 +412,18 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` `epub` スクリプト API のリーダー制御 (プラグインロードマップ P6.2): `epub.read(path, options?)` は Readium EPUB Reader プラグインのリーダーを開き, `open`, `progress`, `bookmark`, `error`, `close` の各イベントがスクリプトスレッドに届く `EpubReaderSession` イベントエミッターを返します. `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })` とプロパティ `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed` を備え, 開始位置は `href`, `progression` または `locator` で指定して `preferences` を添えられ, イベントを消費しなくなったスクリプトには `error(LIMIT_EXCEEDED)` と `close(overflow)` が届き, スクリプト終了時はセッションを終えつつリーダーはユーザーのために開いたままにします
 * `新機能` EPUB サンプル (プラグインロードマップ P6.3): アプリ内サンプルに新しいディレクトリ "电子书" と 3 本のスクリプトを追加しました (EPUB 元数据与目录: Download または Books 配下の書籍のメタデータ, 目次, 読み順と位置数; 导出章节文本: 章または全体のテキストをプレーンテキストか Markdown で書き出し, 表紙の書き出しと全文検索; 打开阅读器并监听进度: `open` / `progress` / `bookmark` / `error` / `close` リスナーで動かすリーダーセッション, 開始時の設定, 章送り, リーダーをユーザーに残す `close()`). どのスクリプトも先に `epub.isAvailable()` を確認し, Readium EPUB Reader プラグインの導入方法を案内します
 * `新機能` EPUB コントラクトバージョン 2 (ハイライトとノート, プラグインロードマップ P9.4): 追加された `IEpubBook.getAnnotations` (ページ単位, 読書順) とリーダーセッションの `highlight` イベントが, リーダーのハイライトとノートを `annotations` ドキュメント (id, style, color, note, quote, 章タイトル, locator, createdAt, updatedAt) として運びます. ホストはプラグインの `epubMaxContractVersion` からバージョンを交渉して各リクエストに記し, バージョン 1 のプラグインは新しい呼び出しを受けません. スクリプト API `epub` に `book.annotations()` と `epub.annotations(path)` (`Async` 形式あり) が加わり, `EpubReaderSession` は `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` を発行します (`action` は added, updated, removed)
-* `新機能` AI Agent プラグイン契約とホストプロキシ. デバイス機能へのアクセス制限, モデル呼び出しの割り当て制限, 接続喪失時のリソース解放に対応; モデルプロキシはネイティブツール呼び出しと結果による継続に対応し, 各ラウンドでモデルの利用上限を確認
+* `新機能` Three Stove Agent プラグイン契約とホストプロキシ. デバイス機能へのアクセス制限, モデル呼び出しの割り当て制限, 接続喪失時のリソース解放に対応; モデルプロキシはネイティブツール呼び出しと結果による継続に対応し, 各ラウンドでモデルの利用上限を確認
 * `新機能` project.json / @agent ヘッダーによる Agent スクリプト登録と範囲を制限した実行. 引数検証, タイムアウト時の停止, 構造化結果の返却に対応
-* `新機能` AI Agent のドロワー入口とプラグインセンター管理. 接続状態, タスク数, 許可の案内, ホスト再起動後の再接続に対応; 公開 APK が公式インデックスに登録されると, インストールウィザードのツール分類から任意で選択可能
-* `新機能` AI Agent プラグインで追加スクリプトフォルダーを設定でき, ホストが範囲を検証して保存し再接続時に復元する. 無効なフォルダーでは承認済み設定を維持する
-* `修正` AI Agent のオンラインモデル呼び出し失敗時にネットワーク, 認証, 応答のエラー分類が失われる問題 (Provider プラグインの対応が必要)
+* `新機能` Three Stove Agent のドロワー入口とプラグインセンター管理. 接続状態, タスク数, 許可の案内, ホスト再起動後の再接続に対応; 公開 APK が公式インデックスに登録されると, インストールウィザードのツール分類から任意で選択可能
+* `新機能` Three Stove Agent プラグインで追加スクリプトフォルダーを設定でき, ホストが範囲を検証して保存し再接続時に復元する. 無効なフォルダーでは承認済み設定を維持する
+* `修正` Three Stove Agent のオンラインモデル呼び出し失敗時にネットワーク, 認証, 応答のエラー分類が失われる問題 (Provider プラグインの対応が必要)
 * `修正` assistant のツール設定の統合時, 空の tools オブジェクトによって既定で無効なツールグループが有効になる問題
 * `修正` 簡易アクセシビリティツリーでリソース ID が短縮され, 表示された ID を使うセレクターが要素に一致しない問題
 * `修正` Android 7/8.0 におけるプラグインのファイルスナップショット, Node.js パッケージのインストール, TypeScript プロジェクトのファイル操作およびターミナル環境確認の互換性の問題
 * `修正` Shizuku の権限要求リスナーが破棄後も登録されたままになる問題
 * `修正` Python の長時間実行タスク通知の一部翻訳および DEX コンパイラ設定の英語文言の欠落
 * `修正` ホスト起動中に公式プラグインが外観設定を取得すると, アプリの Context が未準備のため設定の初期化がクラッシュする問題
-* `修正` AI Agent が画面消灯時やロック中に SCREEN_LOCKED を返さず, 画面の観察や操作を続ける問題
+* `修正` Three Stove Agent が画面消灯時やロック中に SCREEN_LOCKED を返さず, 画面の観察や操作を続ける問題
 * `修正` プラグインの機能プロキシで toast のログ出力を要求すると, 本文がホストのログに記録される問題
 * `修正` Agent で操作確認ウィンドウを閉じた後にノード参照が無効と誤判定され, 古いアプリ名が表示される問題
 * `修正` 深く入れ子になった画面のノードを操作できない問題と境界や操作能力が異なるコンテナーを同じ対象と誤認する問題
@@ -645,7 +645,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` クライアントモードのサーバーアドレス履歴がハンドシェイク失敗時にのみ書き込まれ, 接続に成功したアドレスは記録されず, アドレスダイアログの "履歴" が常に空になる問題
 * `修正` 更新用 APK の選択で, 最優先 ABI に一致するパッケージがないリリースでは, 次点 ABI のパッケージではなくリスト後方の低優先度パッケージ (ユニバーサル版など) が選ばれることがあった問題
 * `修正` 内蔵パッケージインストーラーが Android 9-11 で V2/V3 署名の APK を "Base APK has no verifiable signer" として拒否することがあった問題を修正 (プラットフォームのアーカイブパーサーが署名情報を空のまま返すため). 非推奨のアーカイブ署名ビューをフォールバックとして参照するように変更
-* `改善` Android 7-10 での AI Agent モデルデータ読み取りに公開 API を使用し, ファイル位置と停止したパイプのキャンセルを維持
+* `改善` Android 7-10 での Three Stove Agent モデルデータ読み取りに公開 API を使用し, ファイル位置と停止したパイプのキャンセルを維持
 * `改善` ホストの lint 検査は AutoJs4 互換クラスとリソースをパスで除外し, その他のホストコードの検査を継続
 * `改善` プラグインセンターがホストと同じ公式証明書で署名された既定で無効なプラグイン (YOLO, MCP Server) の新規インストールを検知すると, 明示的な有効化記録を書き込み有効化の探査を実行; 信頼済みサードパーティやユーザー許可の署名, adb によるインストールと更新は引き続き手動での有効化が必要で, 実行時は保存済みの記録のみを参照
 * `改善` ユーザー補助サービス, クライアントモード, サーバーモードとターミナルの管理画面で各区画の展開ボタンと区切り線を統一; 設定は完全に折りたたみ, 歯車から別のダイアログで表示可能; クライアント操作の折りたたみ時に履歴を表示; 折りたたんだサーバー操作にも全クライアント切断ボタンを表示
@@ -812,7 +812,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` プラグイン適合性テストアプリとホストテストの Manifest, Java, Kotlin コンパイル警告を削減し, ネイティブライブラリのパッケージングと Android バージョン互換性を維持
 * `改善` accessibility.dump の compact 形式と nodeRef ノード参照. ノードの再特定と無効な参照の拒否に対応
 * `改善` accessibility.readScreenText メソッド. スクリーンショットと許可済み OCR プラグインを使用し, 上限付きの画面テキストと位置を返却
-* `改善` AI Agent の権限で通知パネルとクイック設定を開けるようにし, その他の未許可キー操作は引き続き拒否
+* `改善` Three Stove Agent の権限で通知パネルとクイック設定を開けるようにし, その他の未許可キー操作は引き続き拒否
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1094,7 +1094,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 22 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 27 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 22 de September de 2026.
+Datos actualizados el 27 de September de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -168,14 +168,14 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/09/26
+###### 2026/09/27
 
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
 * `Nuevo` API ai.agent para iniciar y consultar tareas, eventos, respuestas, confirmaciones, cancelación y tareas detached en segundo plano; result/context exponen resultados y contexto de scripts registrados con @agent, con tres ejemplos
-* `Nuevo` AI Agent ejecuta JavaScript generado tras la confirmación, detiene su script al cancelar o agotar el tiempo y devuelve resultados estructurados y la salida de consola; el script usa los permisos del anfitrión, sin aislamiento del acceso a archivos
+* `Nuevo` Three Stove Agent ejecuta JavaScript generado tras la confirmación, detiene su script al cancelar o agotar el tiempo y devuelve resultados estructurados y la salida de consola; el script usa los permisos del anfitrión, sin aislamiento del acceso a archivos
 * `Nuevo` ai.agent: Herramientas MCP de servidores locales o externos seleccionados, con riesgo por servidor y el grupo mcp desactivado inicialmente
-* `Nuevo` El intermediario de modelos de AI Agent admite imágenes de entrada y en los resultados de herramientas para modelos visuales compatibles (requiere soporte de los plugins)
+* `Nuevo` El intermediario de modelos de Three Stove Agent admite imágenes de entrada y en los resultados de herramientas para modelos visuales compatibles (requiere soporte de los plugins)
 * `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real
 * `Nuevo` Historial de salidas de procesos en ajustes desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar
 * `Nuevo` Interruptor MCP Server con guías de instalación, activación, autorización y compatibilidad; sincronización con Detener en la notificación; ajustes conservados al reconectar; acceso verificado a la misma página desde el panel y el Centro de complementos. Restaura el servidor al abrir AutoJs6 salvo que el usuario lo detuviera sin el anfitrión; no arranca con el dispositivo.
@@ -412,18 +412,18 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Control del lector en la API de script `epub` (hoja de ruta del complemento P6.2): `epub.read(path, options?)` abre el lector del complemento Readium EPUB Reader y devuelve un emisor de eventos `EpubReaderSession` cuyos eventos `open`, `progress`, `bookmark`, `error` y `close` llegan en el hilo del script, con `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })` y las propiedades `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`; la posición inicial proviene de `href`, `progression` o `locator` con `preferences` opcionales, un script que deja de consumir sus eventos recibe `error(LIMIT_EXCEEDED)` y `close(overflow)`, y la salida del script termina la sesión mientras el lector permanece abierto para el usuario
 * `Nuevo` Ejemplos de EPUB (hoja de ruta del complemento P6.3): tres scripts añadidos al nuevo directorio de ejemplos integrado "电子书" (EPUB 元数据与目录: metadatos, índice, orden de lectura y posiciones de un libro hallado en Download o Books; 导出章节文本: exportación del texto de un capítulo o del libro entero como texto plano o Markdown, exportación de la portada y búsqueda de texto completo; 打开阅读器并监听进度: una sesión del lector con oyentes `open` / `progress` / `bookmark` / `error` / `close`, preferencias iniciales, un cambio de capítulo y `close()` que deja el lector al usuario); cada script comprueba primero `epub.isAvailable()` y explica cómo instalar el complemento Readium EPUB Reader
 * `Nuevo` Versión 2 del contrato EPUB con resaltados y notas (hoja de ruta del plugin P9.4): el `IEpubBook.getAnnotations` anexado (paginado, en orden de lectura) y el evento `highlight` de la sesión del lector llevan los resaltados y notas del lector como un documento `annotations` (id, style, color, note, quote, título del capítulo, locator, createdAt, updatedAt); el host negocia la versión a partir del `epubMaxContractVersion` del plugin y la marca en cada petición, así que los plugins de la versión 1 nunca ven la nueva llamada; la API de script `epub` gana `book.annotations()` y `epub.annotations(path)` con sus formas `Async`, y `EpubReaderSession` emite `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` con `action` added, updated o removed
-* `Nuevo` Contrato e intermediarios del anfitrión para AI Agent con acceso limitado al dispositivo, cuotas de llamadas a modelos y liberación de recursos al perder la conexión; el intermediario del modelo admite llamadas nativas a herramientas y su continuación, con control de cuota en cada ronda
+* `Nuevo` Contrato e intermediarios del anfitrión para Three Stove Agent con acceso limitado al dispositivo, cuotas de llamadas a modelos y liberación de recursos al perder la conexión; el intermediario del modelo admite llamadas nativas a herramientas y su continuación, con control de cuota en cada ronda
 * `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
-* `Nuevo` Acceso a AI Agent en el panel y gestión en el centro de complementos, con estado de conexión, recuento de tareas, guía de autorización y reconexión al reiniciar el anfitrión; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial
-* `Nuevo` El plugin AI Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
-* `Corrección` Los fallos de llamadas a modelos en línea de AI Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
+* `Nuevo` Acceso a Three Stove Agent en el panel y gestión en el centro de complementos, con estado de conexión, recuento de tareas, guía de autorización y reconexión al reiniciar el anfitrión; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial
+* `Nuevo` El plugin Three Stove Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
+* `Corrección` Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
 * `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío
 * `Corrección` Los árboles compactos de accesibilidad abreviaban los ID de recursos e impedían que los selectores literales encontraran los elementos mostrados
 * `Corrección` Compatibilidad de las instantáneas de archivos de plugins, la instalación de paquetes Node.js, las operaciones con archivos de proyectos TypeScript y las comprobaciones del terminal en Android 7/8.0
 * `Corrección` Los receptores de solicitudes de permisos de Shizuku permanecían registrados después de su destrucción
 * `Corrección` Traducciones ausentes en las notificaciones de tareas de Python de larga duración y textos en inglés ausentes en los ajustes del compilador DEX
 * `Corrección` La lectura de la apariencia por plugins oficiales durante el arranque podía bloquear la inicialización de preferencias antes de disponer del contexto
-* `Corrección` AI Agent continuaba observando y actuando con la pantalla apagada o bloqueada en lugar de devolver SCREEN_LOCKED
+* `Corrección` Three Stove Agent continuaba observando y actuando con la pantalla apagada o bloqueada en lugar de devolver SCREEN_LOCKED
 * `Corrección` El intermediario de capacidades de plugins escribía el texto de los toasts en el registro del anfitrión al solicitar su registro
 * `Corrección` Agent rechazaba referencias de nodos validas y mostraba un nombre de aplicacion desactualizado al cerrar la ventana de confirmacion
 * `Corrección` Las acciones sobre nodos admiten interfaces profundamente anidadas y distinguen límites y capacidades de acción de los contenedores al identificar un objetivo
@@ -645,7 +645,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` El historial de direcciones de servidor del modo cliente solo se escribía cuando fallaba el handshake y nunca en una conexión correcta, por lo que el "Historial" del diálogo de dirección permanecía vacío
 * `Corrección` Al elegir el APK de una actualización, una versión sin paquete para la primera ABI preferida podía elegir un paquete posterior de menor prioridad de la lista (como el universal) en lugar del paquete de la siguiente ABI preferida
 * `Corrección` El instalador de paquetes integrado podía rechazar APK firmados con V2/V3 en Android 9-11 con "Base APK has no verifiable signer" porque el analizador de archivos de la plataforma dejaba vacía la información de firma; ahora se consulta como alternativa la vista de firma de archivo obsoleta
-* `Mejora` Lectura de datos de modelos de AI Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
+* `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
 * `Mejora` El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado
 * `Mejora` Los gestores de accesibilidad, cliente, servidor y terminal comparten botones de expansión y separadores; los ajustes contraídos se abren en un diálogo independiente con el engranaje y los controles del cliente contraídos incluyen el historial; los controles del servidor contraídos también ofrecen Desconectar todos los clientes
@@ -812,7 +812,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android
 * `Mejora` Formato compact y referencias nodeRef para accessibility.dump, con reubicación de nodos y rechazo de referencias caducadas
 * `Mejora` accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados
-* `Mejora` Los permisos de AI Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas
+* `Mejora` Los permisos de Three Stove Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1094,7 +1094,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 22 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 27 de September de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

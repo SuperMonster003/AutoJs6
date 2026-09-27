@@ -3,7 +3,7 @@ package org.autojs.autojs.project
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.autojs.plugin.ai.agent.api.AiAgentContract
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -80,10 +80,10 @@ class AgentManifestParserTest {
     @Test fun headerMustBeFirstLeadingBlockAndMustEndInsideEightKiB() {
         assertNull(AgentManifestParser.parseHeader("/* ordinary */\n/**\n * @agent\n * @description later\n */".toByteArray(), "p"))
         assertNull(AgentManifestParser.parseHeader("run();\n/**\n * @agent\n * @description later\n */".toByteArray(), "p"))
-        val truncated = "/**\n * @agent\n * @description " + "x".repeat(AiAgentContract.MAX_MANIFEST_HEADER_BYTES) + "\n */"
+        val truncated = "/**\n * @agent\n * @description " + "x".repeat(ThreeStoveAgentContract.MAX_MANIFEST_HEADER_BYTES) + "\n */"
         assertThrows(AgentManifestException::class.java) { AgentManifestParser.parseHeader(truncated.toByteArray(), "p") }
         val prefix = "/**\n * @agent\n * @description valid\n */\n"
-        val padding = " ".repeat(AiAgentContract.MAX_MANIFEST_HEADER_BYTES - prefix.toByteArray().size - 1)
+        val padding = " ".repeat(ThreeStoveAgentContract.MAX_MANIFEST_HEADER_BYTES - prefix.toByteArray().size - 1)
         // The byte cap cuts a non-ASCII character after the complete header; it must not invalidate the header.
         assertEquals("valid", AgentManifestParser.parseHeader((prefix + padding + "文").toByteArray(), "p")!!.description)
         assertEquals("Unicode 😀", header("/**\n * @agent\n * @description Unicode 😀\n */").description)

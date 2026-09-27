@@ -4,8 +4,8 @@ import android.os.Environment
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import org.autojs.autojs.core.plugin.agent.AiAgentLinkController
-import org.autojs.autojs.core.plugin.agent.AiAgentControlException
+import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentLinkController
+import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentControlException
 import org.autojs.autojs.project.AgentScriptCatalog
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /** Per-ScriptRuntime facade; only the registry's immutable JVM run records can outlive it. */
 internal class AiAgentService(private val runtime: ScriptRuntime) : Closeable {
-    private val registry = AiAgentLinkController.get(GlobalAppContext.get()).scriptRuns
+    private val registry = ThreeStoveAgentLinkController.get(GlobalAppContext.get()).scriptRuns
     private val closed = AtomicBoolean()
     private val handles = ConcurrentHashMap<String, AgentRunNativeObject>()
     private val pending = ConcurrentHashMap.newKeySet<AiAsyncDispatcher>()
@@ -38,7 +38,7 @@ internal class AiAgentService(private val runtime: ScriptRuntime) : Closeable {
         handles[id]?.let { return it }
         return registry.get(id)?.let { handle(it, ownsRun = false) }
     }
-    private fun handle(record: org.autojs.autojs.core.plugin.agent.AiAgentRunRecord, ownsRun: Boolean): AgentRunNativeObject {
+    private fun handle(record: org.autojs.autojs.core.plugin.agent.ThreeStoveAgentRunRecord, ownsRun: Boolean): AgentRunNativeObject {
         if (handles.size >= 256) {
             if (ownsRun && !record.detached) runCatching { registry.cancel(record, "script-handle-limit") }
             throw IllegalStateException("Too many AgentRun handles in one script")
@@ -84,8 +84,8 @@ internal class AiAgentService(private val runtime: ScriptRuntime) : Closeable {
                 }
             } catch (failure: Exception) {
                 val error = JsonObject().apply {
-                    addProperty("code", (failure as? AiAgentControlException)?.code ?: "INVALID_REQUEST")
-                    addProperty("message", "AI Agent request could not be completed")
+                    addProperty("code", (failure as? ThreeStoveAgentControlException)?.code ?: "INVALID_REQUEST")
+                    addProperty("message", "Three Stove Agent request could not be completed")
                 }.toString()
                 dispatcher.terminalValues(arrayOf(error)) { values ->
                     try { promise.reject(js_json_parse(values[0] as String)) } finally { pending.remove(dispatcher) }

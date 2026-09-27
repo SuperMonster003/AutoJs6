@@ -3,12 +3,12 @@ package org.autojs.autojs.engine
 import com.google.gson.JsonArray
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
-import org.autojs.plugin.ai.agent.api.AiAgentContract
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract
 
 /** Text-only observations; account for the encoded UTF-8 JSON, including escaping. */
 internal object NodeScreenTextCodec {
-    const val MAX_ITEMS = AiAgentContract.MAX_SCREEN_TEXT_ITEMS
-    const val MAX_BYTES = AiAgentContract.MAX_SCREEN_TEXT_BYTES
+    const val MAX_ITEMS = ThreeStoveAgentContract.MAX_SCREEN_TEXT_ITEMS
+    const val MAX_BYTES = ThreeStoveAgentContract.MAX_SCREEN_TEXT_BYTES
 
     data class Bounds(val left: Int, val top: Int, val right: Int, val bottom: Int)
     data class Line(val text: String, val bounds: Bounds?, val confidence: Double?)

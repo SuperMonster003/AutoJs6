@@ -1,23 +1,23 @@
 package org.autojs.autojs.core.plugin.center
 
 import org.autojs.plugin.mcp.server.api.McpServerIds
-import org.autojs.plugin.ai.agent.api.AiAgentIds
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
 import org.autojs.plugin.yolo.api.YoloContract
 
 object PluginDefaultEnabledPolicy {
 
     /**
      * Whether a plugin without a saved enable preference counts as enabled. Exact-component
-     * plugins (YOLO, MCP Server, AI Agent) stay disabled until an explicit record exists, in Plugin Center
+     * plugins (YOLO, MCP Server, Three Stove Agent) stay disabled until an explicit record exists, in Plugin Center
      * and in every runtime consumer alike.
-     * zh-CN: 没有保存启用记录时插件是否视为已启用. 精确组件插件 (YOLO, MCP Server, AI Agent) 在插件中心与
+     * zh-CN: 没有保存启用记录时插件是否视为已启用. 精确组件插件 (YOLO, MCP Server, Three Stove Agent) 在插件中心与
      * 所有运行时消费者中均保持关闭, 直到存在显式记录.
      */
     fun isEnabledByDefault(engine: String?): Boolean {
         val normalizedEngine = engine?.trim()
         return !normalizedEngine.equals(YoloContract.ENGINE_ID, ignoreCase = true) &&
                 !normalizedEngine.equals(McpServerIds.ENGINE, ignoreCase = true) &&
-                !normalizedEngine.equals(AiAgentIds.ENGINE, ignoreCase = true)
+                !normalizedEngine.equals(ThreeStoveAgentIds.ENGINE, ignoreCase = true)
     }
 
     /**

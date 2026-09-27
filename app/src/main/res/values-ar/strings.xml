@@ -14,16 +14,6 @@
     <string name="a11y_advanced_protection_on">مفعلة</string>
     <string name="a11y_advanced_protection_title">الحماية المتقدمة</string>
     <string name="a11y_advanced_protection_unknown">غير متاح</string>
-    <string name="ai_agent_state_activation">يلزم التفعيل</string>
-    <string name="ai_agent_state_attached">متصل, قيد التشغيل: %1$d, في الانتظار: %2$d</string>
-    <string name="ai_agent_state_attaching">جار الاتصال</string>
-    <string name="ai_agent_state_authorization">يلزم الإذن</string>
-    <string name="ai_agent_state_detached">غير متصل</string>
-    <string name="ai_agent_state_disabled">الإضافة معطلة</string>
-    <string name="ai_agent_state_failed">فشل الاتصال</string>
-    <string name="ai_agent_state_host_unavailable">التطبيق المضيف غير متاح</string>
-    <string name="ai_agent_state_incompatible">إصدار غير متوافق</string>
-    <string name="ai_agent_state_not_installed">الإضافة غير مثبتة</string>
     <string name="apk_builder_build">مبنى</string>
     <string name="apk_builder_clean">تنظيف</string>
     <string name="apk_builder_package">التغليف </string>
@@ -109,7 +99,6 @@
     <string name="description_ace_lsp_file_types_preference">لا يبدأ LSP إلا للملفات التي تنتهي أسماؤها بإحدى اللواحق المحددة. يعيد خيار \"استخدام الافتراضي\" مجموعة لواحق JavaScript و TypeScript و JSON و Auto.js و Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">أظهر دليل هامش الطباعة في محرر Ace أو أخفه. هذا هو خط حد العمود على الجانب الأيمن, وهو يغير طريقة عرض الشفرة فقط.</string>
     <string name="description_ace_word_wrap_enabled_preference">فعّل التفاف الأسطر الطويلة في المحرر. لا يؤدي هذا إلى تعديل محتويات الملف.</string>
-    <string name="description_ai_agent">اربط إضافة AI Agent مع AutoJs6. استخدم زر الإدارة لفتح صفحة المهام. الاتصال وحده لا يبدأ أي مهمة.</string>
     <string name="description_ai_settings_preference">افتح 3-Stone AI لإدارة النماذج المحلية والخدمات عبر الإنترنت والهدف الافتراضي الذي تستخدمه وحدة ai العامة.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">يسمح إذن \"إدارة جميع الملفات\" (أو \"الوصول إلى جميع الملفات\") لـ AutoJs6 بـ [ إنشاء / قراءة / تعديل / حذف ] الملفات مباشرةً عبر مسارات الملفات العادية ضمن مساحة التخزين المشتركة، مما يتيح للسكربتات الوصول إلى \"Internal Storage\" ويُمكّن مدير الملفات من عرض الملفات وإدارتها بشكل صحيح.\n\nعلى أجهزة Android 11+، تُعد هذه الطريقة الأساسية لتحقيق قدرة القراءة والكتابة على كامل التخزين.</string>
     <string name="description_app_language_preference">هذا التفضيل لتغيير لغة العرض لـ AutoJs6 ، بما في ذلك رسائل الاستثناء من تشغيل البرامج النصية.\n\nملاحظة: قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة تطبيقها كما هو متوقع.</string>
@@ -176,6 +165,7 @@
     <string name="description_stable_mode">يجعل الوضع المستقر أكثر استقرارًا عند الحصول على حدود تخطيط ، ولكن قد يتم تجاهل بعض النتائج.\nإعادة تشغيل خدمة الوصول المطلوبة.</string>
     <string name="description_terminal">نفذ الأوامر في جلسات shell مستقلة. تستمر الجلسات في الخلفية عند مغادرة الصفحة. يؤدي إيقاف المفتاح إلى إنهاء جميع الجلسات.</string>
     <string name="description_theme_color_preference">يتم تطبيق لون النسق على عناصر واجهة المستخدم بما في ذلك على سبيل المثال لا الحصر العناصر التالية:\nشريط الحالة\nAppbar\nرمز الملف\nرمز عنصر المهمة\nفاب\nعنوان فئة الإعدادات\nزر التغيير\n\nملاحظة: اعتبارًا من الإصدار 6.2.0 من AutoJs6 ، لم يكن هناك فرق بين اللون الأساسي واللون الأساسي الداكن ولون التمييز حتى الآن.</string>
+    <string name="description_three_stove_agent">اربط إضافة Three Stove Agent مع AutoJs6. استخدم زر الإدارة لفتح صفحة المهام. الاتصال وحده لا يبدأ أي مهمة.</string>
     <string name="description_timed_task_backend">يتحكم في الآلية الأساسية لتشغيل السكربتات بشكل مجدول.\n\nAlarmManager: عبر منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن أن تصبح المهام أقرب إلى التنفيذ في الوقت المحدد.\nWorkManager: صديق للنظام؛ مناسب للمهام غير الحرجة التي تتحمل بعض التأخير.\nJobScheduler: تنفيذ قديم محفوظ للتوافق؛ احتمال التأخير أعلى.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">حالات الاستخدام والفروقات:\n\n1. AlarmManager\nمناسب للمهام الحسّاسة للتوقيت، مثل [التذكيرات/السكربتات الدقيقة التوقيت/...].\nعلى Android 12+ ومع منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن التنفيذ بدقة أكبر حتى مع إيقاف الشاشة أو في وضع السكون.\nبدون الإذن قد يقلل النظام الدقة أو يؤخر التنفيذ.\n\n2. WorkManager\nمناسب للمهام التي لا تتطلب دقة زمنية صارمة مثل [مزامنة غير حرجة/تنظيف/إحصاءات/...].\nيتم الجدولة وفق [حالة البطارية/الشبكة/الشحن/سياسات السكون/...], وقد تتأخر المهام عند إيقاف الشاشة أو في وضع السكون.\nلا يضمن الدقة الزمنية لكنه يوفر مزايا في [إتمام موثوق/إعادة المحاولة عند الفشل/سلاسل المهام/إزالة التكرار].\n\n3. JobScheduler\nتنفيذ تاريخي لأغراض التوافق.\nفي إصدارات أندرويد الحديثة قد تحدث تأخيرات أكبر.\nلا يُنصح به إلا لاعتبارات التوافق.</string>
     <string name="description_usage_stats_access">يوفر إمكانية الوصول إلى سجل وإحصائيات استخدام الجهاز مما يؤدي إلى CurrentPackage () نتيجة أكثر دقة</string>
@@ -679,15 +669,6 @@
     <string name="prompt_ace_editor_plugin_required">ثبّت اضافة محرر Ace أو فعّلها في مركز الاضافات لاستخدام محرك Ace.</string>
     <string name="prompt_add_ignored_app_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات التطبيق.</string>
     <string name="prompt_add_ignored_plugin_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات الإضافة.</string>
-    <string name="prompt_ai_agent_activate">تم تثبيت AI Agent لكن Android لم يفعله بعد. فعله للسماح بالاتصال مع AutoJs6.</string>
-    <string name="prompt_ai_agent_application_disabled">عطل Android تطبيق AI Agent. فعله في إعدادات النظام ثم حاول مجددا.</string>
-    <string name="prompt_ai_agent_authorize">امنح هذه الإضافة الإذن في مركز الإضافات قبل ربط AI Agent.</string>
-    <string name="prompt_ai_agent_enable">هل تريد تفعيل إضافة AI Agent وربطها مع AutoJs6?</string>
-    <string name="prompt_ai_agent_failed">تعذر الاتصال مع AI Agent. تحقق من حالته وإصداره في مركز الإضافات ثم حاول مجددا.</string>
-    <string name="prompt_ai_agent_incompatible">تتطلب هذه الإضافة AutoJs6 بالبناء %1$d أو أحدث. ثبت إصدارين متوافقين من AutoJs6 و AI Agent.</string>
-    <string name="prompt_ai_agent_install">نزل AI Agent من صفحة إصداراته الرسمية ثم ثبته وفعله في AutoJs6. إذا لم يتوفر إصدار فتحقق لاحقا.</string>
-    <string name="prompt_ai_agent_launcher_unavailable">صفحة مهام AI Agent غير متاحة. تحقق في مركز الإضافات من تفعيل التطبيق وتحديثه.</string>
-    <string name="prompt_ai_agent_trust">منحت هذه الإضافة إذنا يدويا لكن جهة توقيعها ليست رسمية أو موثوقة. هل تسمح لهذه الجهة باستخدام نماذج AutoJs6 وقدرات الجهاز?</string>
     <string name="prompt_ai_plugin_application_enable_required">تم تعطيل 3-Stone AI بواسطة Android. فعّله من إعدادات التطبيق في النظام قبل فتح إعدادات خدمة AI.</string>
     <string name="prompt_ai_plugin_enable_required">تم تعطيل 3-Stone AI في مركز الإضافات. فعّله قبل فتح إعدادات خدمة AI.</string>
     <string name="prompt_ai_plugin_install_required">ثبّت 3-Stone AI من مركز الإضافات قبل فتح إعدادات خدمة AI.</string>
@@ -715,6 +696,15 @@
     <string name="prompt_plugin_native_page_alignment">المكتبات الأصلية في الملحق %1$s غير محاذاة لصفحات 16 KB. قد لا يعمل الملحق على هذا الجهاز. قم بترقيته قبل الاستخدام. هل تريد المتابعة رغم ذلك?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">هناك حاجة إلى إعادة تشغيل التطبيق لتطبيق إعدادات جديدة</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة مطبقًا كما هو متوقع</string>
+    <string name="prompt_three_stove_agent_activate">تم تثبيت Three Stove Agent لكن Android لم يفعله بعد. فعله للسماح بالاتصال مع AutoJs6.</string>
+    <string name="prompt_three_stove_agent_application_disabled">عطل Android تطبيق Three Stove Agent. فعله في إعدادات النظام ثم حاول مجددا.</string>
+    <string name="prompt_three_stove_agent_authorize">امنح هذه الإضافة الإذن في مركز الإضافات قبل ربط Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_enable">هل تريد تفعيل إضافة Three Stove Agent وربطها مع AutoJs6?</string>
+    <string name="prompt_three_stove_agent_failed">تعذر الاتصال مع Three Stove Agent. تحقق من حالته وإصداره في مركز الإضافات ثم حاول مجددا.</string>
+    <string name="prompt_three_stove_agent_incompatible">تتطلب هذه الإضافة AutoJs6 بالبناء %1$d أو أحدث. ثبت إصدارين متوافقين من AutoJs6 و Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_install">نزل Three Stove Agent من صفحة إصداراته الرسمية ثم ثبته وفعله في AutoJs6. إذا لم يتوفر إصدار فتحقق لاحقا.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">صفحة مهام Three Stove Agent غير متاحة. تحقق في مركز الإضافات من تفعيل التطبيق وتحديثه.</string>
+    <string name="prompt_three_stove_agent_trust">منحت هذه الإضافة إذنا يدويا لكن جهة توقيعها ليست رسمية أو موثوقة. هل تسمح لهذه الجهة باستخدام نماذج AutoJs6 وقدرات الجهاز?</string>
     <string name="python_long_running_notification_channel_description">حالة مشاريع Python طويلة التشغيل التي بدأها المستخدم وعناصر التحكم في إيقافها</string>
     <string name="python_long_running_notification_channel_name">مهام Python طويلة التشغيل</string>
     <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">جار تحضير بيئة Python...</string>
@@ -2389,6 +2379,16 @@
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="text_yearly_task">مهمة سنوية</string>
     <string name="text_zero_means_unlimited">0 يعني بلا حدود</string>
+    <string name="three_stove_agent_state_activation">يلزم التفعيل</string>
+    <string name="three_stove_agent_state_attached">متصل, قيد التشغيل: %1$d, في الانتظار: %2$d</string>
+    <string name="three_stove_agent_state_attaching">جار الاتصال</string>
+    <string name="three_stove_agent_state_authorization">يلزم الإذن</string>
+    <string name="three_stove_agent_state_detached">غير متصل</string>
+    <string name="three_stove_agent_state_disabled">الإضافة معطلة</string>
+    <string name="three_stove_agent_state_failed">فشل الاتصال</string>
+    <string name="three_stove_agent_state_host_unavailable">التطبيق المضيف غير متاح</string>
+    <string name="three_stove_agent_state_incompatible">إصدار غير متوافق</string>
+    <string name="three_stove_agent_state_not_installed">الإضافة غير مثبتة</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
     <string name="warning_apk_native_page_alignment_unsupported">محاذاة المكتبة الأصلية %1$s هي %2$d بايت. قد لا يعمل ملف APK الناتج على أجهزة بصفحات 16 KB. يرجى تحديث المكتبة أو الإضافة.</string>

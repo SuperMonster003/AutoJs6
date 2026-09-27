@@ -9,16 +9,6 @@
     <string name="a11y_advanced_protection_on">已開啟</string>
     <string name="a11y_advanced_protection_title">進階保護</string>
     <string name="a11y_advanced_protection_unknown">無法讀取</string>
-    <string name="ai_agent_state_activation">需要啟用</string>
-    <string name="ai_agent_state_attached">已連接, 執行中: %1$d, 排隊: %2$d</string>
-    <string name="ai_agent_state_attaching">正在連接</string>
-    <string name="ai_agent_state_authorization">需要授權</string>
-    <string name="ai_agent_state_detached">已中斷連接</string>
-    <string name="ai_agent_state_disabled">插件已停用</string>
-    <string name="ai_agent_state_failed">連接失敗</string>
-    <string name="ai_agent_state_host_unavailable">主程式無法使用</string>
-    <string name="ai_agent_state_incompatible">版本不相容</string>
-    <string name="ai_agent_state_not_installed">尚未安裝插件</string>
     <string name="apk_builder_build">構建中</string>
     <string name="apk_builder_clean">清理臨時文件</string>
     <string name="apk_builder_package">打包中</string>
@@ -104,7 +94,6 @@
     <string name="description_ace_lsp_file_types_preference">LSP 只會針對檔名符合所選後綴的文件啓動. 使用默認值會恢復 JavaScript, TypeScript, JSON, Auto.js 和 Node.js 相關後綴.</string>
     <string name="description_ace_print_margin_enabled_preference">顯示或隱藏 Ace 編輯器右側的打印邊界參考線. 此設置只會改變代碼的顯示方式.</string>
     <string name="description_ace_word_wrap_enabled_preference">為長行啓用編輯器自動換行模式. 此設置不會修改文件內容.</string>
-    <string name="description_ai_agent">連接 AI Agent 插件與 AutoJs6. 透過管理按鈕開啟插件任務頁. 建立連接本身不會啟動任務.</string>
     <string name="description_ai_settings_preference">打開 3-Stone AI, 管理全域 ai 模組使用嘅本地模型, 網上服務及預設目標.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有文件\" (或 \"所有文件訪問\") 權限允許 AutoJs6 在共享存儲空間中通過常規文件路徑直接 [ 創建 / 讀取 / 修改 / 刪除 ] 文件, 使腳本可以訪問 \"內部存儲 (Internal Storage)\", 使文件管理器可以正常顯示及管理文件.\n\n在 Android 11+ 設備上, 這是實現全盤文件讀寫能力的主要方式.</string>
     <string name="description_app_language_preference">設置選項用於修改 AutoJs6 應用的文本內容顯示語言, 同時包括腳本運行產生的錯誤消息等.\n\n注: 部分內容可能需要重啓應用才能完成語言切換.</string>
@@ -171,6 +160,7 @@
     <string name="description_stable_mode">穩定模式省略佈局細節, 腳本分析佈局時更穩定, 但可能影響獲取的控件總量.\n需重啓無障礙服務.</string>
     <string name="description_terminal">在獨立的 shell 工作階段中執行命令. 離開頁面後工作階段繼續執行, 關閉開關將結束全部工作階段.</string>
     <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n文件圖標\n任務項圖標\n浮動操作按鈕 (FAB)\n設置頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
+    <string name="description_three_stove_agent">連接 Three Stove Agent 插件與 AutoJs6. 透過管理按鈕開啟插件任務頁. 建立連接本身不會啟動任務.</string>
     <string name="description_timed_task_backend">控制腳本定時觸發的底層機制.\n\nAlarmManager: 通過申請 \"允許設置鬧鐘和提醒\" 權限, 可使定時任務的觸發更接近準時.\nWorkManager: 系統友好, 適合可接受一定延遲的非關鍵定時任務.\nJobScheduler: 舊實現, 僅用作兼容保留, 定時任務出現延遲的概率較大.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用場景與差異説明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時腳本/...].\n在 Android 12+ 設備上獲取 \"允許設置鬧鐘和提醒\" 權限後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設置鬧鐘和提醒\" 權限時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網絡/充電情況/待機策略/... ] 進行調度, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為兼容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於兼容需要, 一般不推薦使用.</string>
     <string name="description_usage_stats_access">\"查看使用情況\" 權限可獲取本設備過去使用應用的情況, 從而使 \"獲取當前應用\" (currentPackage) 結果更準確</string>
@@ -674,15 +664,6 @@
     <string name="prompt_ace_editor_plugin_required">請在插件中心安裝或啓用 Ace 編輯器插件, 然後再使用 Ace 引擎.</string>
     <string name="prompt_add_ignored_app_version">確定忽略當前更新版本嗎?\n在應用設置中可管理已忽略的所有版本.</string>
     <string name="prompt_add_ignored_plugin_version">確定忽略當前更新版本嗎?\n在插件設置中可管理已忽略的所有版本.</string>
-    <string name="prompt_ai_agent_activate">已安裝 AI Agent, 但 Android 尚未啟用它. 請先啟用, 以便 AutoJs6 建立連接.</string>
-    <string name="prompt_ai_agent_application_disabled">Android 已停用 AI Agent. 請在系統設定中啟用應用程式後重試.</string>
-    <string name="prompt_ai_agent_authorize">請先在插件中心授權此插件, 再連接 AI Agent.</string>
-    <string name="prompt_ai_agent_enable">啟用 AI Agent 插件並連接至 AutoJs6?</string>
-    <string name="prompt_ai_agent_failed">無法連接 AI Agent. 請在插件中心檢查插件狀態和版本後重試.</string>
-    <string name="prompt_ai_agent_incompatible">此插件需要 AutoJs6 組建 %1$d 或更新版本. 請安裝相容的 AutoJs6 與 AI Agent.</string>
-    <string name="prompt_ai_agent_install">請從 AI Agent 的官方發行頁面下載安裝檔, 安裝後在 AutoJs6 中啟用. 如果尚無發行版本, 請稍後查看.</string>
-    <string name="prompt_ai_agent_launcher_unavailable">無法開啟 AI Agent 任務頁. 請在插件中心檢查應用程式是否啟用及是否需要更新.</string>
-    <string name="prompt_ai_agent_trust">你已手動授權此插件, 但其簽署者不在官方或受信任清單中. 是否允許此簽署者使用 AutoJs6 的模型與裝置功能?</string>
     <string name="prompt_ai_plugin_application_enable_required">Android 已停用 3-Stone AI. 請先喺系統應用程式設定中啟用, 再打開 AI 服務設定.</string>
     <string name="prompt_ai_plugin_enable_required">3-Stone AI 已喺插件中心停用. 請先啟用, 再打開 AI 服務設定.</string>
     <string name="prompt_ai_plugin_install_required">請先喺插件中心安裝 3-Stone AI, 再打開 AI 服務設定.</string>
@@ -710,6 +691,15 @@
     <string name="prompt_plugin_native_page_alignment">外掛程式 %1$s 的原生程式庫未按 16 KB 頁面大小對齊, 可能無法在此裝置上執行. 請升級外掛程式後再使用. 是否仍要繼續?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重啓應用才能完成文檔源切換</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分內容可能需要重啓應用才能完成語言切換</string>
+    <string name="prompt_three_stove_agent_activate">已安裝 Three Stove Agent, 但 Android 尚未啟用它. 請先啟用, 以便 AutoJs6 建立連接.</string>
+    <string name="prompt_three_stove_agent_application_disabled">Android 已停用 Three Stove Agent. 請在系統設定中啟用應用程式後重試.</string>
+    <string name="prompt_three_stove_agent_authorize">請先在插件中心授權此插件, 再連接 Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_enable">啟用 Three Stove Agent 插件並連接至 AutoJs6?</string>
+    <string name="prompt_three_stove_agent_failed">無法連接 Three Stove Agent. 請在插件中心檢查插件狀態和版本後重試.</string>
+    <string name="prompt_three_stove_agent_incompatible">此插件需要 AutoJs6 組建 %1$d 或更新版本. 請安裝相容的 AutoJs6 與 Three Stove Agent.</string>
+    <string name="prompt_three_stove_agent_install">請從 Three Stove Agent 的官方發行頁面下載安裝檔, 安裝後在 AutoJs6 中啟用. 如果尚無發行版本, 請稍後查看.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">無法開啟 Three Stove Agent 任務頁. 請在插件中心檢查應用程式是否啟用及是否需要更新.</string>
+    <string name="prompt_three_stove_agent_trust">你已手動授權此插件, 但其簽署者不在官方或受信任清單中. 是否允許此簽署者使用 AutoJs6 的模型與裝置功能?</string>
     <string name="python_long_running_notification_channel_description">使用者啟動的 Python 長時間執行專案的狀態與停止控制</string>
     <string name="python_long_running_notification_channel_name">Python 長時間執行任務</string>
     <string name="python_long_running_notification_preparing" tools:ignore="TypographyEllipsis">正在準備 Python 執行環境...</string>
@@ -2384,6 +2374,16 @@
     <string name="text_xiaomi_background_popup_permission">後台彈出界面</string>
     <string name="text_yearly_task">每年任務</string>
     <string name="text_zero_means_unlimited">0 表示不限制</string>
+    <string name="three_stove_agent_state_activation">需要啟用</string>
+    <string name="three_stove_agent_state_attached">已連接, 執行中: %1$d, 排隊: %2$d</string>
+    <string name="three_stove_agent_state_attaching">正在連接</string>
+    <string name="three_stove_agent_state_authorization">需要授權</string>
+    <string name="three_stove_agent_state_detached">已中斷連接</string>
+    <string name="three_stove_agent_state_disabled">插件已停用</string>
+    <string name="three_stove_agent_state_failed">連接失敗</string>
+    <string name="three_stove_agent_state_host_unavailable">主程式無法使用</string>
+    <string name="three_stove_agent_state_incompatible">版本不相容</string>
+    <string name="three_stove_agent_state_not_installed">尚未安裝插件</string>
     <string name="warn_continue_operation_without_saving_settings">設置尚未保存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設置尚未保存, 確定要退出嗎</string>
     <string name="warning_apk_native_page_alignment_unsupported">原生程式庫 %1$s 的對齊值為 %2$d 位元組. 產生的 APK 可能無法在頁面大小為 16 KB 的裝置上執行. 請升級原生程式庫或外掛程式.</string>

@@ -2,7 +2,7 @@ package org.autojs.autojs.project
 
 import com.google.gson.JsonObject
 import org.autojs.autojs.script.JavaScriptSource
-import org.autojs.plugin.ai.agent.api.AiAgentContract
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract
 import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
@@ -39,9 +39,9 @@ class AgentScriptCatalog(
 
     /** Invalid registrations are skipped; explicit read/execute requests fail instead. */
     @Synchronized
-    fun listScripts(roots: List<String>? = null, query: String? = null, limit: Int = AiAgentContract.MAX_SCRIPT_CATALOG_ENTRIES): List<AgentScriptEntry> {
-        if (limit !in 1..AiAgentContract.MAX_SCRIPT_CATALOG_ENTRIES ||
-            (query?.toByteArray(Charsets.UTF_8)?.size ?: 0) > AiAgentContract.MAX_GOAL_BYTES) {
+    fun listScripts(roots: List<String>? = null, query: String? = null, limit: Int = ThreeStoveAgentContract.MAX_SCRIPT_CATALOG_ENTRIES): List<AgentScriptEntry> {
+        if (limit !in 1..ThreeStoveAgentContract.MAX_SCRIPT_CATALOG_ENTRIES ||
+            (query?.toByteArray(Charsets.UTF_8)?.size ?: 0) > ThreeStoveAgentContract.MAX_GOAL_BYTES) {
             throw AgentManifestException("INVALID_REQUEST", "Script catalog query is invalid.")
         }
         val plans = requestedPlans(roots)
@@ -60,7 +60,7 @@ class AgentScriptCatalog(
             if (needle.isNotEmpty() && !(entry.id + " " + entry.description + " " +
                     entry.tags.joinToString(" ") + " " + entry.examples.joinToString(" ")).lowercase(Locale.ROOT).contains(needle)) return
             val next = entry.toJsonObject().toString().toByteArray(Charsets.UTF_8).size + if (matches.isEmpty()) 0 else 1
-            if (next > AiAgentContract.MAX_SCRIPT_CATALOG_BYTES - bytes) {
+            if (next > ThreeStoveAgentContract.MAX_SCRIPT_CATALOG_BYTES - bytes) {
                 stopped = true
                 return
             }
@@ -161,7 +161,7 @@ class AgentScriptCatalog(
             return it.copy(manifest = it.manifest?.snapshot())
         }
         val value = try {
-            val bytes = readPrefix(file, if (project) MAX_PROJECT_JSON_BYTES + 1 else AiAgentContract.MAX_MANIFEST_HEADER_BYTES)
+            val bytes = readPrefix(file, if (project) MAX_PROJECT_JSON_BYTES + 1 else ThreeStoveAgentContract.MAX_MANIFEST_HEADER_BYTES)
             if (project && bytes.size > MAX_PROJECT_JSON_BYTES) missing()
             if (project) {
                 val json = decode(bytes)
@@ -179,10 +179,10 @@ class AgentScriptCatalog(
     }
 
     private fun requestedPlans(requested: List<String>?): List<ScanRoot> {
-        val base = mutableListOf(ScanRoot(workingRoot, AiAgentContract.MAX_SCRIPT_SCAN_DEPTH))
+        val base = mutableListOf(ScanRoot(workingRoot, ThreeStoveAgentContract.MAX_SCRIPT_SCAN_DEPTH))
         val agent = File(workingRoot, "agent").canonicalFile
         if (contains(workingRoot, agent) && agent.isDirectory) base += ScanRoot(agent, 7)
-        additionalRoots.forEach { base += ScanRoot(it, AiAgentContract.MAX_SCRIPT_SCAN_DEPTH) }
+        additionalRoots.forEach { base += ScanRoot(it, ThreeStoveAgentContract.MAX_SCRIPT_SCAN_DEPTH) }
         if (requested == null) return base.distinctBy { it.root.path }
         if (requested.isEmpty()) return emptyList()
         return requested.flatMap { path ->
@@ -230,7 +230,7 @@ class AgentScriptCatalog(
     companion object {
         private const val MAX_CACHED_FILES = 1000
         private const val MAX_VISITED_ENTRIES = 20_000
-        private const val MAX_PROJECT_JSON_BYTES = AiAgentContract.MAX_SCRIPT_CATALOG_BYTES
+        private const val MAX_PROJECT_JSON_BYTES = ThreeStoveAgentContract.MAX_SCRIPT_CATALOG_BYTES
 
         private fun canonical(file: File): File = try { file.canonicalFile } catch (_: Exception) { denied() }
         private fun contains(root: File, file: File): Boolean = root == file || file.path.startsWith(

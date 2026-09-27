@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 22 日.
+数据更新于 2026 年 9 月 27 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -168,9 +168,10 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/26
+###### 2026/09/27
 
 * `提示` 部分内置功能改由独立插件提供, 使用前需在插件中心安装并启用对应插件
+* `提示` AI Agent 插件更名为 Three Stove Agent, 插件 ID, 服务 action 及契约包名一并变更, 已安装的 AI Agent 不再被识别, 需卸载后安装 Three Stove Agent
 * `提示` 打包应用的目标 SDK 版本由 29 调整为 37, 共享存储及本地网络访问需按系统要求授权
 * `提示` console 控件及控制台浮动窗口改为显示当前脚本日志, 全局日志可通过 globalconsole 控件或日志页面查看
 * `提示` contains 系列选择器的字符串参数恢复为字面子串匹配, 正则匹配需传入正则表达式参数
@@ -178,9 +179,9 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 界面动作将确认绑定到宿主检查的节点, 支持文字追加与有界滚动, 并报告执行结果和窗口变化
 * `新增` 宿主报告已授权 OCR 插件可用时提供屏幕 OCR, 识别结果合并为带坐标的有界文本行
 * `新增` ai.agent 脚本 API, 支持任务启动, 查询, 事件, 询问回应, 确认, 取消与 detached 后台任务; result/context 提供 @agent 登记脚本结果和上下文, 附三个任务示例
-* `新增` AI Agent 支持执行经确认的生成 JavaScript, 取消或超时会停止本次脚本, 返回结构化结果和控制台输出; 脚本使用宿主权限, 不提供文件访问沙箱
+* `新增` Three Stove Agent 支持执行经确认的生成 JavaScript, 取消或超时会停止本次脚本, 返回结构化结果和控制台输出; 脚本使用宿主权限, 不提供文件访问沙箱
 * `新增` ai.agent: 本机或外部 MCP 服务器的选定工具, 按服务器设置风险等级, mcp 工具组默认关闭
-* `新增` AI Agent 模型代理支持向视觉模型传入图片及工具结果图片 (需要相应插件适配)
+* `新增` Three Stove Agent 模型代理支持向视觉模型传入图片及工具结果图片 (需要相应插件适配)
 * `新增` 终端功能, 支持多会话管理, 后台运行, 快捷按键及终端记录复制/分享 (入口: 主页抽屉/文件管理器目录菜单/项目工具栏)
 * `新增` 终端支持 node/npm/npx/corepack/yarn/pnpm 命令及 npm 镜像源设置 (需要 Node.js Runtime 插件 1.5.0+)
 * `新增` MCP Server 插件, 用于通过 MCP 客户端访问 AutoJs6 的脚本, 文件及设备操作能力 (入口: 主页抽屉/插件中心)
@@ -278,18 +279,18 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` VSCode 插件支持远程文件管理及设备脚本运行, 大文件传输支持进度显示 (需要 VSCode 插件 1.1.0+)
 * `新增` 客户端模式及服务端模式增加连接管理器, 支持查看连接状态, 管理客户端及访问地址历史记录
 * `新增` 客户端模式支持意外断开后自动重连, 网络恢复时重试及应用启动时恢复连接
-* `新增` AI Agent 插件契约与宿主代理, 支持受限设备能力, 模型调用配额及链路失效后的资源回收; 模型代理支持原生工具调用及结果续轮, 每轮检查模型配额
+* `新增` Three Stove Agent 插件契约与宿主代理, 支持受限设备能力, 模型调用配额及链路失效后的资源回收; 模型代理支持原生工具调用及结果续轮, 每轮检查模型配额
 * `新增` Agent 脚本登记与受限执行, 支持 project.json / @agent 头注释, 参数校验, 超时停止及结构化结果回传
-* `新增` AI Agent 抽屉入口与插件中心管理, 支持连接状态, 任务计数, 授权引导及宿主重启后的连接恢复; 安装向导工具分类提供可选入口, 发行 APK 进入官方索引后可供安装
-* `新增` AI Agent 插件可配置附加脚本目录, 宿主校验允许范围后保存并在重连时恢复, 无效目录不会替换已接受的配置
-* `修复` AI Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
+* `新增` Three Stove Agent 抽屉入口与插件中心管理, 支持连接状态, 任务计数, 授权引导及宿主重启后的连接恢复; 安装向导工具分类提供可选入口, 发行 APK 进入官方索引后可供安装
+* `新增` Three Stove Agent 插件可配置附加脚本目录, 宿主校验允许范围后保存并在重连时恢复, 无效目录不会替换已接受的配置
+* `修复` Three Stove Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
 * `修复` assistant 合并工具选项时, 空 tools 对象导致默认关闭的工具组被启用的问题
 * `修复` 无障碍紧凑节点树缩短资源 ID, 导致按显示 ID 查询时无法匹配控件的问题
 * `修复` Android 7/8.0 设备上部分插件文件快照, Node.js 包安装, TypeScript 项目文件操作及终端环境探测的兼容性问题
 * `修复` Shizuku 权限请求监听器在销毁后未正确注销的问题
 * `修复` Python 长任务通知缺少部分语言译文及 DEX 编译器设置缺少英文文案的问题
 * `修复` 官方插件在宿主启动期间读取外观设置时, 因应用 Context 尚未就绪导致偏好设置初始化崩溃的问题
-* `修复` AI Agent 在屏幕关闭或锁屏时继续观察和操作屏幕而未返回 SCREEN_LOCKED 的问题
+* `修复` Three Stove Agent 在屏幕关闭或锁屏时继续观察和操作屏幕而未返回 SCREEN_LOCKED 的问题
 * `修复` 插件能力代理在请求 toast 日志时将文本正文写入宿主日志的问题
 * `修复` Agent 在关闭操作确认窗口后误报节点引用失效及显示滞后应用名称的问题
 * `修复` 深层界面节点无法操作, 以及边界或操作能力不同的嵌套容器被误判为同一目标的问题
@@ -435,7 +436,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息未同步至 README 通用数据的问题
 * `修复` 终端会话在启动期间关闭时可能遗留后台进程的问题
 * `修复` 内置软件包安装器在 Android 9-11 上可能因平台归档解析器返回的签名信息为空而以 "Base APK has no verifiable signer" 拒绝 V2/V3 签名的 APK, 现回退至已弃用的归档签名视图
-* `优化` AI Agent 模型载荷在 Android 7-10 上通过公开 API 读取, 保留文件偏移与停滞管道取消能力
+* `优化` Three Stove Agent 模型载荷在 Android 7-10 上通过公开 API 读取, 保留文件偏移与停滞管道取消能力
 * `优化` 宿主 lint 检查按路径排除 AutoJs4 兼容类和资源, 其余宿主代码继续检查
 * `优化` 应用及打包应用适配 Android 17, 完善本地网络授权, 高级保护及后台音频限制的提示
 * `优化` 应用及打包应用支持 16 KB 内存页, 并在插件安装, 加载及打包时提示不兼容的原生库
@@ -519,7 +520,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` Gradle 平台兼容数据及更新任务迁移至 AutoJs6-Gradle-Platform-Versions, Scrapers 工具支持跨仓库同步
 * `优化` accessibility.dump 的 compact 格式与 nodeRef 节点引用, 支持节点重定位及失效引用拒绝
 * `优化` accessibility.readScreenText 方法, 通过截图与已授权 OCR 插件返回有界屏幕文字及位置
-* `优化` AI Agent 能力代理允许打开通知栏和快捷设置, 其余未授权按键动作保持拒绝
+* `优化` Three Stove Agent 能力代理允许打开通知栏和快捷设置, 其余未授权按键动作保持拒绝
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -801,7 +802,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 22 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 27 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

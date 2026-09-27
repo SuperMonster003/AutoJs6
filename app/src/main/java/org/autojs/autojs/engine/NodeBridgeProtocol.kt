@@ -87,6 +87,7 @@ import org.autojs.plugin.paddle.ocr.api.OcrResult as PluginOcrResult
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
 import org.autojs.plugin.mediainfo.api.MediainfoQueryOptions
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -1015,7 +1016,7 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         // Agent observations and actions must not treat the lock screen as the target app.
         // These identities come from the host-owned broker, never from request parameters.
-        val agentScreenCall = engineInfo.backend == "plugin" && engineInfo.engineName == "ai-agent" && when (request.module) {
+        val agentScreenCall = engineInfo.backend == "plugin" && engineInfo.engineName == ThreeStoveAgentIds.ENGINE && when (request.module) {
             NodeBridgeModules.ACCESSIBILITY -> request.method !in setOf("isEnabled", "ensureEnabled")
             NodeBridgeModules.APP -> request.method in setOf("launchApp", "launchPackage")
             NodeBridgeModules.KEYS -> request.method in setOf("notifications", "quickSettings")

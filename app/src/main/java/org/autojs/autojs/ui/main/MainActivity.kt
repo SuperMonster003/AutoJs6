@@ -206,13 +206,13 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         // later from the Plugins tab fab or the Plugin Center.
         // zh-CN: 全新安装后仅展示一次; 用户可跳过, 之后可从插件标签页 fab 或插件中心重新打开.
         PluginInstallWizardDialog.showOnFirstRunIfNeeded(this)
-        org.autojs.autojs.core.plugin.agent.AiAgentAttachRequestReceiver.handleForegroundRequest(this, intent)
+        org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver.handleForegroundRequest(this, intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        org.autojs.autojs.core.plugin.agent.AiAgentAttachRequestReceiver.handleForegroundRequest(this, intent)
+        org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver.handleForegroundRequest(this, intent)
     }
 
     override fun onPostResume() {

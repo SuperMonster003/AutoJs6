@@ -27,6 +27,6 @@ public final class AgentCallbackDeathService extends Service {
         }
     }; }
     @Override public IBinder onBind(Intent intent) {
-        return callback("link".equals(intent.getAction()) ? "org.autojs.plugin.ai.agent.api.IAiAgentLinkCallback" : "org.autojs.plugin.ai.agent.api.IAiAgentRunCallback");
+        return callback("link".equals(intent.getAction()) ? "org.autojs.plugin.three.stove.agent.api.IThreeStoveAgentLinkCallback" : "org.autojs.plugin.three.stove.agent.api.IThreeStoveAgentRunCallback");
     }
 }

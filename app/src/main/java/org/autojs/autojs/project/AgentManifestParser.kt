@@ -5,7 +5,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
-import org.autojs.plugin.ai.agent.api.AiAgentContract
+import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract
 import org.autojs.plugin.ai.provider.api.AiJsonSyntaxValidator
 import java.math.BigDecimal
 import java.nio.ByteBuffer
@@ -112,7 +112,7 @@ object AgentManifestParser {
     /** Validates the declared subset and returns a copy with defaults applied; extra keys fail closed. */
     @JvmStatic
     fun validateArguments(manifest: AgentManifest, arguments: JsonObject): JsonObject = argumentGuard {
-        require(arguments.toString().toByteArray(Charsets.UTF_8).size <= AiAgentContract.MAX_SCRIPT_ARGUMENTS_BYTES)
+        require(arguments.toString().toByteArray(Charsets.UTF_8).size <= ThreeStoveAgentContract.MAX_SCRIPT_ARGUMENTS_BYTES)
         val schema = validateSchema(manifest.parameters)
         val properties = schema.getAsJsonObject("properties")
         require(arguments.keySet().all(properties::has))
@@ -123,7 +123,7 @@ object AgentManifestParser {
             if (result.has(name)) validateValue(property, result.get(name))
         }
         require(schema.getAsJsonArray("required").all { result.has(it.asString) })
-        require(result.toString().toByteArray(Charsets.UTF_8).size <= AiAgentContract.MAX_SCRIPT_ARGUMENTS_BYTES)
+        require(result.toString().toByteArray(Charsets.UTF_8).size <= ThreeStoveAgentContract.MAX_SCRIPT_ARGUMENTS_BYTES)
         result
     }
 
@@ -144,7 +144,7 @@ object AgentManifestParser {
         val declaredConfirm = value.optionalString("confirm") ?: "never"
         require(declaredConfirm in setOf("never", "before-run"))
         val timeout = value.get("timeoutMs")?.let(::integer) ?: 60_000L
-        require(timeout in 1..AiAgentContract.MAX_TOOL_TIMEOUT_MS)
+        require(timeout in 1..ThreeStoveAgentContract.MAX_TOOL_TIMEOUT_MS)
         return AgentManifest(id, description, parameters, result, risk,
             if (risk == "sensitive") "before-run" else declaredConfirm, timeout,
             value.strings("examples"), value.strings("tags"))
@@ -253,7 +253,7 @@ object AgentManifestParser {
     }
 
     private fun firstHeader(source: ByteArray): String? {
-        val bytes = source.copyOfRange(0, minOf(source.size, AiAgentContract.MAX_MANIFEST_HEADER_BYTES))
+        val bytes = source.copyOfRange(0, minOf(source.size, ThreeStoveAgentContract.MAX_MANIFEST_HEADER_BYTES))
         var index = if (bytes.size >= 3 && bytes[0] == 0xef.toByte() && bytes[1] == 0xbb.toByte() && bytes[2] == 0xbf.toByte()) 3 else 0
         fun at(offset: Int, value: Char) = offset < bytes.size && bytes[offset] == value.code.toByte()
         while (true) {
