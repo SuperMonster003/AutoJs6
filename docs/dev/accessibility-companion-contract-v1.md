@@ -1,7 +1,7 @@
 # Accessibility Companion Contract V1
 
 This document defines how AutoJs6 cooperates with official companion plugins that ship their own
-accessibility service, such as `AutoJs6-Plugin-Accessibility-Compat`. The normative constants live in
+accessibility service, such as `AutoJs6-Plugin-Three-Adapt-A11y`. The normative constants live in
 `plugin-api:common-plugin-api` as `AutoJs6AccessibilityCompanionContract`.
 
 ## Scope

@@ -120,7 +120,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             })
         }
 
-        if (packageName == "io.github.supermonster003.autojs6.plugin.accessibilitycompat") {
+        if (packageName == "io.github.supermonster003.autojs6.plugin.three.adapt.a11y") {
             preferenceScreen.addPreference(MaterialPreference(requireContext()).apply {
                 key = "accessibility_advanced_protection"
                 setTitle(R.string.a11y_advanced_protection_title)

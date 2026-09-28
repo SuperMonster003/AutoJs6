@@ -62,7 +62,7 @@ object PluginInstallWizardCatalog {
 
     val entries: List<PluginInstallWizardCatalogEntry> = listOf(
         // Accessibility service.
-        entry(official("accessibilitycompat"), "Accessibility Compat", ACCESSIBILITY),
+        entry(official("three.adapt.a11y"), "Three Adapt A11y", ACCESSIBILITY),
 
         // Code editor.
         entry(official("ace.editor"), "Ace Editor", EDITOR, minimal = true),
