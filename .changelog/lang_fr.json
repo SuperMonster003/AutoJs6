@@ -650,7 +650,8 @@
         "Format compact et références nodeRef pour accessibility.dump, avec relocalisation des éléments et rejet des références périmées",
         "accessibility.readScreenText renvoie du texte et des positions en quantité limitée à partir de captures et de plugins OCR autorisés",
         "Les autorisations Three Stove Agent permettent les notifications et les réglages rapides; les autres actions de touches non autorisées restent refusées",
-        "La méthode respond des objets de tâche ai.agent accepte un tableau de 1 à 8 chaînes non vides pour répondre à une demande de revue de plan de Three Stove Agent en mode plan (événements input dont kind vaut plan); les réponses texte et booléennes restent inchangées"
+        "La méthode respond des objets de tâche ai.agent accepte un tableau de 1 à 8 chaînes non vides pour répondre à une demande de revue de plan de Three Stove Agent en mode plan (événements input dont kind vaut plan); les réponses texte et booléennes restent inchangées",
+        "Lorsqu'un Provider rejette ou interrompt lui-même une requête (requête invalide, violation de protocole, problème de descripteur ou de quota, etc.), le courtier de modèles de Three Stove Agent signale l'étape par une raison fermée PROVIDER_* au lieu de tout réduire à un PROVIDER_FAILED sans raison; la raison dérive uniquement de AiErrorCode et ne contient aucun texte du Provider"
       ],
       "dependency": [
         "Android AXML modularise",

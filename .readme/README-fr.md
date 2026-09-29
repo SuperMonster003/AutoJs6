@@ -814,6 +814,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` accessibility.readScreenText renvoie du texte et des positions en quantité limitée à partir de captures et de plugins OCR autorisés
 * `Amélioration` Les autorisations Three Stove Agent permettent les notifications et les réglages rapides; les autres actions de touches non autorisées restent refusées
 * `Amélioration` La méthode respond des objets de tâche ai.agent accepte un tableau de 1 à 8 chaînes non vides pour répondre à une demande de revue de plan de Three Stove Agent en mode plan (événements input dont kind vaut plan); les réponses texte et booléennes restent inchangées
+* `Amélioration` Lorsqu'un Provider rejette ou interrompt lui-même une requête (requête invalide, violation de protocole, problème de descripteur ou de quota, etc.), le courtier de modèles de Three Stove Agent signale l'étape par une raison fermée PROVIDER_* au lieu de tout réduire à un PROVIDER_FAILED sans raison; la raison dérive uniquement de AiErrorCode et ne contient aucun texte du Provider
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

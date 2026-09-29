@@ -360,6 +360,7 @@
 * `优化` accessibility.readScreenText 方法, 通过截图与已授权 OCR 插件返回有界屏幕文字及位置
 * `优化` Three Stove Agent 能力代理允许打开通知栏和快捷设置, 其余未授权按键动作保持拒绝
 * `优化` ai.agent 任务对象的 respond 方法接受 1 到 8 条非空字符串组成的数组, 用于回应 Three Stove Agent 计划模式的计划审阅请求 (input 事件 kind 为 plan), 文本与布尔值回应保持不变
+* `优化` Three Stove Agent 模型代理在 Provider 自身拒绝或中断请求时 (无效请求, 协议违规, 描述符或配额问题等) 以封闭的 PROVIDER_* 原因码报告失败阶段, 不再一律折叠为不带原因的 PROVIDER_FAILED; 原因只来自 AiErrorCode, 不含 Provider 文本
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

@@ -814,6 +814,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` accessibility.readScreenText メソッド. スクリーンショットと許可済み OCR プラグインを使用し, 上限付きの画面テキストと位置を返却
 * `改善` Three Stove Agent の権限で通知パネルとクイック設定を開けるようにし, その他の未許可キー操作は引き続き拒否
 * `改善` ai.agent タスクオブジェクトの respond メソッドは, Three Stove Agent の計画モードにおける計画レビュー要求 (kind が plan の input イベント) への回答として, 1 から 8 件の空でない文字列の配列を受け付けます. 文字列と真偽値の回答は従来どおりです
+* `改善` Provider 自身がリクエストを拒否または中断した場合 (不正なリクエスト, プロトコル違反, ディスクリプタやクォータの問題など), Three Stove Agent のモデルブローカーは失敗した段階を閉じた PROVIDER_* 理由コードで報告し, 理由のない PROVIDER_FAILED に一律に畳み込まなくなりました. 理由は AiErrorCode のみから導かれ, Provider のテキストは含みません
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

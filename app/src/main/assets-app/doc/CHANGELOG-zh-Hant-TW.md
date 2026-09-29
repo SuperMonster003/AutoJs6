@@ -652,6 +652,7 @@
 * `最佳化` accessibility.readScreenText 方法, 透過擷取畫面與已授權 OCR 外掛回傳有上限的螢幕文字及位置
 * `最佳化` Three Stove Agent 能力代理允許開啟通知欄和快捷設定, 其餘未授權按鍵動作保持拒絕
 * `最佳化` ai.agent 任務物件的 respond 方法接受 1 到 8 條非空字串組成的陣列, 用於回應 Three Stove Agent 計劃模式的計劃審閱請求 (input 事件 kind 為 plan), 文字與布林值回應保持不變
+* `最佳化` Three Stove Agent 模型代理在 Provider 自身拒絕或中斷請求時 (無效請求, 協定違規, 描述符或配額問題等) 以封閉的 PROVIDER_* 原因碼報告失敗階段, 不再一律摺疊為不帶原因的 PROVIDER_FAILED; 原因只來自 AiErrorCode, 不含 Provider 文字
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

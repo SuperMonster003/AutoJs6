@@ -652,6 +652,7 @@
 * `개선` accessibility.readScreenText 메서드. 화면 캡처와 승인된 OCR 플러그인을 통해 크기가 제한된 화면 텍스트와 위치 반환
 * `개선` Three Stove Agent 권한으로 알림 창과 빠른 설정을 열 수 있으며 그 외 허용되지 않은 키 동작은 계속 거부
 * `개선` ai.agent 작업 객체의 respond 메서드가 Three Stove Agent 계획 모드의 계획 검토 요청 (kind가 plan인 input 이벤트)에 답하기 위해 1개에서 8개의 비어 있지 않은 문자열 배열을 받습니다. 문자열과 불리언 응답은 그대로입니다
+* `개선` Provider 자체가 요청을 거부하거나 중단한 경우 (잘못된 요청, 프로토콜 위반, 디스크립터 또는 할당량 문제 등) Three Stove Agent 모델 브로커는 실패 단계를 닫힌 PROVIDER_* 사유 코드로 보고하며, 더 이상 사유 없는 PROVIDER_FAILED로 한꺼번에 접지 않습니다. 사유는 AiErrorCode에서만 파생되며 Provider 텍스트를 담지 않습니다
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer

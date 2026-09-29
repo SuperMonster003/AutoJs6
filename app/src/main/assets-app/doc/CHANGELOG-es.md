@@ -652,6 +652,7 @@
 * `Mejora` accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados
 * `Mejora` Los permisos de Three Stove Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas
 * `Mejora` El método respond de los objetos de tarea de ai.agent acepta un arreglo de 1 a 8 cadenas no vacías para responder a una solicitud de revisión de plan de Three Stove Agent en modo de plan (eventos input con kind plan); las respuestas de texto y booleanas no cambian
+* `Mejora` Cuando el propio Provider rechaza o interrumpe una solicitud (solicitud inválida, violación de protocolo, problemas de descriptores o de cuota, etc.), el intermediario de modelos de Three Stove Agent informa la etapa con una razón cerrada PROVIDER_* en lugar de reducir todo a un PROVIDER_FAILED sin razón; la razón se deriva solo de AiErrorCode y no contiene texto del Provider
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

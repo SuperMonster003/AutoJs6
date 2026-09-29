@@ -652,6 +652,7 @@
 * `Improvement` accessibility.readScreenText returns bounded screen text and positions using screenshots and authorized OCR plugins
 * `Improvement` Three Stove Agent capability grants allow opening notifications and quick settings while other ungranted key actions remain denied
 * `Improvement` respond on ai.agent task objects accepts an array of 1 to 8 non-blank strings to answer a Three Stove Agent plan review request (input events with kind plan); text and boolean answers are unchanged
+* `Improvement` When a Provider itself rejects or aborts a request (invalid request, protocol violation, descriptor or quota problems and so on), the Three Stove Agent model broker reports the stage as a closed PROVIDER_* reason instead of collapsing everything into a reasonless PROVIDER_FAILED; the reason is derived from AiErrorCode only and carries no Provider text
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
