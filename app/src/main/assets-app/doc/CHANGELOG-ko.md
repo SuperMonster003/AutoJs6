@@ -653,6 +653,7 @@
 * `개선` Three Stove Agent 권한으로 알림 창과 빠른 설정을 열 수 있으며 그 외 허용되지 않은 키 동작은 계속 거부
 * `개선` ai.agent 작업 객체의 respond 메서드가 Three Stove Agent 계획 모드의 계획 검토 요청 (kind가 plan인 input 이벤트)에 답하기 위해 1개에서 8개의 비어 있지 않은 문자열 배열을 받습니다. 문자열과 불리언 응답은 그대로입니다
 * `개선` Provider 자체가 요청을 거부하거나 중단한 경우 (잘못된 요청, 프로토콜 위반, 디스크립터 또는 할당량 문제 등) Three Stove Agent 모델 브로커는 실패 단계를 닫힌 PROVIDER_* 사유 코드로 보고하며, 더 이상 사유 없는 PROVIDER_FAILED로 한꺼번에 접지 않습니다. 사유는 AiErrorCode에서만 파생되며 Provider 텍스트를 담지 않습니다
+* `개선` Three Stove Agent 모델 브로커는 네이티브 도구 결과 배치를 받아들일 때마다 요청의 timeoutMs로 기한을 다시 설정합니다. 따라서 각 이어가기 라운드가 전체 시간 제한을 가지며, 전체 턴은 플러그인의 작업 예산과 라운드 상한으로 제한됩니다. 결과를 제출하지 않고 기다리는 경우에는 여전히 원래 기한에 만료됩니다. 이전에는 다중 라운드 네이티브 작업이 첫 요청의 기한을 공유해 5분 뒤 MODEL_TIMEOUT으로 끝났습니다
 * `의존성` 모듈화 Android AXML
 * `의존성` 모듈화 Android ARSC Editor
 * `의존성` 모듈화 APK Signer

@@ -815,6 +815,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Three Stove Agent capability grants allow opening notifications and quick settings while other ungranted key actions remain denied
 * `Improvement` respond on ai.agent task objects accepts an array of 1 to 8 non-blank strings to answer a Three Stove Agent plan review request (input events with kind plan); text and boolean answers are unchanged
 * `Improvement` When a Provider itself rejects or aborts a request (invalid request, protocol violation, descriptor or quota problems and so on), the Three Stove Agent model broker reports the stage as a closed PROVIDER_* reason instead of collapsing everything into a reasonless PROVIDER_FAILED; the reason is derived from AiErrorCode only and carries no Provider text
+* `Improvement` The Three Stove Agent model broker re-arms the deadline with the request's timeoutMs after each accepted batch of native tool results, so every continuation round has the full timeout and the whole turn is bounded by the plugin's run budget and the round cap; waiting without submitting results still expires on the original deadline. Multi-round native tasks used to share the first request's deadline and ended with MODEL_TIMEOUT after 5 minutes
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

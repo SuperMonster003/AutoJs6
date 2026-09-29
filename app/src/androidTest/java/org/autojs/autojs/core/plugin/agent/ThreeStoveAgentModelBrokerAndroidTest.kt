@@ -259,6 +259,21 @@ class ThreeStoveAgentModelBrokerAndroidTest {
         }
     }
 
+    @Test fun acceptedToolResultsRestartTheGenerationDeadlineForTheNextRound() {
+        requireFake()
+        broker().use { broker ->
+            val events = Events()
+            broker.generate(request(nativeRequest(false).apply { addProperty("timeoutMs", 5000) }), events)
+            val calls = events.awaitTools()
+            // Submit right before the first request's deadline: the round that follows gets the full timeout again.
+            SystemClock.sleep(4_000)
+            broker.submitToolResults(request(resultsFor(calls)))
+            val terminal = events.awaitTerminal()
+            assertEquals(terminal.toString(), "completed", terminal["type"].asString)
+            assertEquals("tool:observed", terminal["text"].asString)
+        }
+    }
+
     @Test fun nativeToolsKeepTheGenerationDeadlineWhileWaitingForResults() {
         requireFake()
         broker().use { broker ->

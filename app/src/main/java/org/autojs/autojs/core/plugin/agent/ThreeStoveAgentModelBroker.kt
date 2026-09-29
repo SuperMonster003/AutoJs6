@@ -480,6 +480,10 @@ internal class ThreeStoveAgentModelBroker(
                         if (finished) return@execute
                         if (handle?.submitToolResults(results) != true) return@execute fail(ThreeStoveAgentContract.ERROR_INVALID_REQUEST)
                         pendingToolIds = emptySet()
+                        // An accepted batch starts a new model round: the request timeout applies to that round
+                        // again, so a long native turn is bounded by the plugin's run budget and the round cap,
+                        // not by the first request's deadline. Waiting without results still expires.
+                        armDeadline(decoded.timeoutMs + (SystemClock.elapsedRealtime() - startedAt))
                     }
                 } catch (failure: ThreeStoveAgentModelException) { fail(failure.code)
                 } catch (_: Exception) { fail(ThreeStoveAgentContract.ERROR_INVALID_REQUEST)

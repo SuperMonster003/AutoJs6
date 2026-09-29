@@ -815,6 +815,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` Three Stove Agent 能力代理允許開啟通知欄和快捷設定, 其餘未授權按鍵動作保持拒絕
 * `最佳化` ai.agent 任務物件的 respond 方法接受 1 到 8 條非空字串組成的陣列, 用於回應 Three Stove Agent 計劃模式的計劃審閱請求 (input 事件 kind 為 plan), 文字與布林值回應保持不變
 * `最佳化` Three Stove Agent 模型代理在 Provider 自身拒絕或中斷請求時 (無效請求, 協定違規, 描述符或配額問題等) 以封閉的 PROVIDER_* 原因碼報告失敗階段, 不再一律摺疊為不帶原因的 PROVIDER_FAILED; 原因只來自 AiErrorCode, 不含 Provider 文字
+* `最佳化` Three Stove Agent 模型代理在接受一批原生工具結果後按請求的 timeoutMs 重新設定截止時間, 每個續輪都擁有完整的逾時, 整輪由外掛的任務預算與續輪上限約束; 未提交結果的等待仍按原截止時間逾時. 此前多輪原生任務共用首個請求的截止時間, 超過 5 分鐘即以 MODEL_TIMEOUT 終止
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

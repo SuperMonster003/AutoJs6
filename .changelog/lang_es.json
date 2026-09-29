@@ -651,7 +651,8 @@
         "accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados",
         "Los permisos de Three Stove Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas",
         "El método respond de los objetos de tarea de ai.agent acepta un arreglo de 1 a 8 cadenas no vacías para responder a una solicitud de revisión de plan de Three Stove Agent en modo de plan (eventos input con kind plan); las respuestas de texto y booleanas no cambian",
-        "Cuando el propio Provider rechaza o interrumpe una solicitud (solicitud inválida, violación de protocolo, problemas de descriptores o de cuota, etc.), el intermediario de modelos de Three Stove Agent informa la etapa con una razón cerrada PROVIDER_* en lugar de reducir todo a un PROVIDER_FAILED sin razón; la razón se deriva solo de AiErrorCode y no contiene texto del Provider"
+        "Cuando el propio Provider rechaza o interrumpe una solicitud (solicitud inválida, violación de protocolo, problemas de descriptores o de cuota, etc.), el intermediario de modelos de Three Stove Agent informa la etapa con una razón cerrada PROVIDER_* en lugar de reducir todo a un PROVIDER_FAILED sin razón; la razón se deriva solo de AiErrorCode y no contiene texto del Provider",
+        "El intermediario de modelos de Three Stove Agent vuelve a fijar el plazo con el timeoutMs de la solicitud tras cada lote aceptado de resultados de herramientas nativas, de modo que cada ronda de continuación dispone del tiempo límite completo y el turno entero queda limitado por el presupuesto de tarea del plugin y el tope de rondas; la espera sin enviar resultados sigue caducando en el plazo original. Antes, las tareas nativas de varias rondas compartían el plazo de la primera solicitud y terminaban con MODEL_TIMEOUT a los 5 minutos"
       ],
       "dependency": [
         "Android AXML modularizado",
