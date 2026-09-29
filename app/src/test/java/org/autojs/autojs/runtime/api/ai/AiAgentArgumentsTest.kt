@@ -14,8 +14,12 @@ class AiAgentArgumentsTest {
     @Test fun invalidOptionsNeverReachTransport() {
         for (value in listOf("{\"unknown\":true}", "{\"detached\":1}", "{\"memory\":null}", "{\"target\":\"https://example.test\"}",
             "{\"interaction\":\"auto\"}", "{\"confirm\":\"never\"}", "{\"tools\":[\"shell\",\"shell\"]}", "{\"tools\":[\"bogus\"]}",
-            "{\"tools\":{\"all\":true}}", "{\"scriptRoots\":[\"/sdcard/../data\"]}", "{\"scriptRoots\":[\"relative\"]}", "{\"parameters\":[]}"))
+            "{\"tools\":{\"all\":true}}", "{\"scriptRoots\":[\"/sdcard/../data\"]}", "{\"scriptRoots\":[\"relative\"]}", "{\"parameters\":[]}",
+            "{\"plan\":1}", "{\"plan\":\"true\"}"))
             assertThrows(value, IllegalArgumentException::class.java) { AiAgentArguments.options(json(value)) }
+        // Plan mode is a plain flag that travels to the plugin unchanged.
+        assertEquals(true, AiAgentArguments.options(json("{\"plan\":true}"))["plan"].asBoolean)
+        assertEquals(false, AiAgentArguments.options(json("{\"plan\":false}"))["plan"].asBoolean)
     }
     @Test fun budgetsRejectFractionalCoercedAndOutOfRangeValues() {
         for (field in listOf("maxSteps", "maxModelCalls", "maxDurationMs", "maxTotalTokens")) {

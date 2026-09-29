@@ -11,6 +11,7 @@
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
 * `Feature` ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples
+* `Feature` The options of ai.agent.run and ai.agent.create accept a boolean plan: with true, Three Stove Agent enters plan mode, where the model first proposes 1 to 8 steps that are reviewed through an input event of kind plan before the first tool runs; when omitted, the preset's plan mode switch applies
 * `Feature` Three Stove Agent can run confirmed generated JavaScript, stop its own script on cancellation or timeout, and return structured results and console output; the script uses host permissions, without a file-access sandbox
 * `Feature` ai.agent: MCP tools from selected local or external servers, with per-server risk settings and the mcp group disabled by default
 * `Feature` The Three Stove Agent model broker accepts image inputs and image tool results for compatible vision models (requires plugin support)

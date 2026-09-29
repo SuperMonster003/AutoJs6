@@ -7,7 +7,7 @@ import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract as C
 
 /** Public script arguments are validated before any plugin admission or side effect. */
 internal object AiAgentArguments {
-    val optionKeys = setOf("preset", "target", "tools", "budget", "confirm", "interaction", "detached", "context", "parameters", "memory", "scriptRoots", "locale")
+    val optionKeys = setOf("preset", "target", "tools", "budget", "confirm", "interaction", "detached", "context", "parameters", "memory", "scriptRoots", "locale", "plan")
     val groups = setOf("observe", "act", "ocr", "gesture", "script", "script_dynamic", "files", "shell", "memory", "user", "mcp")
     private val defaultGroups = groups - setOf("gesture", "script_dynamic", "files", "shell", "mcp")
     private val budgets = mapOf("maxSteps" to 200L, "maxModelCalls" to 300L, "maxDurationMs" to 3_600_000L, "maxTotalTokens" to 1_000_000L)
@@ -22,7 +22,8 @@ internal object AiAgentArguments {
             require(target.matches(Regex("[a-z0-9][a-z0-9._-]{0,127}:[a-z0-9][a-z0-9._-]{0,127}"))) { "Invalid Agent target" }
         }
         value["locale"]?.let { text(string(it), "locale", 64) }
-        for (name in listOf("detached", "memory")) value[name]?.let { flag(it) }
+        // plan: Three Stove Agent plan mode (a reviewed plan before the first tool); the plugin validates it again.
+        for (name in listOf("detached", "memory", "plan")) value[name]?.let { flag(it) }
         value["confirm"]?.let { require(string(it) in setOf("default", "cautious")) { "Invalid confirmation policy" } }
         value["interaction"]?.let { require(string(it) in setOf("plugin", "script")) { "Invalid interaction mode" } }
         value["context"]?.let { text(string(it), "context", C.MAX_CONTEXT_BYTES, blank = true) }

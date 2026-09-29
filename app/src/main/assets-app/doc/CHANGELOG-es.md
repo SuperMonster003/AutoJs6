@@ -11,6 +11,7 @@
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
 * `Nuevo` API ai.agent para iniciar y consultar tareas, eventos, respuestas, confirmaciones, cancelación y tareas detached en segundo plano; result/context exponen resultados y contexto de scripts registrados con @agent, con tres ejemplos
+* `Nuevo` Las opciones de ai.agent.run y ai.agent.create aceptan un booleano plan: con true, Three Stove Agent entra en modo de plan, donde el modelo propone primero de 1 a 8 pasos que se revisan mediante un evento input de kind plan antes de ejecutar la primera herramienta; si se omite, se aplica el interruptor de modo de plan del preajuste
 * `Nuevo` Three Stove Agent ejecuta JavaScript generado tras la confirmación, detiene su script al cancelar o agotar el tiempo y devuelve resultados estructurados y la salida de consola; el script usa los permisos del anfitrión, sin aislamiento del acceso a archivos
 * `Nuevo` ai.agent: Herramientas MCP de servidores locales o externos seleccionados, con riesgo por servidor y el grupo mcp desactivado inicialmente
 * `Nuevo` El intermediario de modelos de Three Stove Agent admite imágenes de entrada y en los resultados de herramientas para modelos visuales compatibles (requiere soporte de los plugins)

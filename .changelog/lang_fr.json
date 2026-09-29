@@ -6,6 +6,7 @@
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
         "OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées",
         "API de script ai.agent pour lancer et consulter les tâches, recevoir les événements, répondre, confirmer, annuler et exécuter en arrière-plan avec detached; result/context exposent les résultats et le contexte des scripts enregistrés par @agent, avec trois exemples",
+        "Les options de ai.agent.run et ai.agent.create acceptent un booléen plan: avec true, Three Stove Agent passe en mode plan, où le modèle propose d'abord 1 à 8 étapes vérifiées via un événement input de kind plan avant l'exécution du premier outil; en cas d'omission, le réglage de mode plan du préréglage s'applique",
         "Three Stove Agent exécute le JavaScript généré après confirmation, arrête son script en cas d'annulation ou de délai dépassé, et renvoie les résultats structurés et la console; le script utilise les permissions de l'hôte, sans isolation des accès aux fichiers",
         "ai.agent: Outils MCP de serveurs locaux ou externes choisis, avec un niveau de risque par serveur et le groupe mcp désactivé par défaut",
         "Le relais de modèles Three Stove Agent accepte les images en entrée et dans les résultats des outils pour les modèles visuels compatibles (prise en charge par les plugins requise)",
