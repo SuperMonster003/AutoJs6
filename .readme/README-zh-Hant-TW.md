@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 9 月 27 日.
+資料更新於 2026 年 9 月 29 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `新增` 介面動作將確認綁定至宿主檢查的節點, 支援文字追加與有界捲動, 並回報執行結果和視窗變化
 * `新增` 宿主回報已授權 OCR 插件可用時提供螢幕 OCR, 辨識結果合併為帶座標的有界文字行
@@ -813,6 +813,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` accessibility.dump 的 compact 格式與 nodeRef 節點參照, 支援節點重新定位及失效參照拒絕
 * `最佳化` accessibility.readScreenText 方法, 透過擷取畫面與已授權 OCR 外掛回傳有上限的螢幕文字及位置
 * `最佳化` Three Stove Agent 能力代理允許開啟通知欄和快捷設定, 其餘未授權按鍵動作保持拒絕
+* `最佳化` ai.agent 任務物件的 respond 方法接受 1 到 8 條非空字串組成的陣列, 用於回應 Three Stove Agent 計劃模式的計劃審閱請求 (input 事件 kind 為 plan), 文字與布林值回應保持不變
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1094,7 +1095,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 27 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 29 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

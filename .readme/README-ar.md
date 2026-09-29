@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 27 September 2026.
+تم تحديث البيانات في 29 September 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -168,7 +168,7 @@
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `إضافة جديدة` ربط تأكيد إجراءات الشاشة بالعقد التي يفحصها المضيف مع إلحاق النص والتمرير المحدود والإبلاغ عن النتائج وتغير النافذة
 * `إضافة جديدة` يتاح OCR للشاشة فقط عندما يبلغ المضيف عن إضافة OCR معتمدة ومتاحة مع دمج النص في أسطر محدودة ذات إحداثيات
@@ -813,6 +813,7 @@
 * `تحسين` تنسيق compact ومراجع nodeRef في accessibility.dump مع إعادة تحديد العقد ورفض المراجع غير الصالحة
 * `تحسين` تعيد accessibility.readScreenText نص الشاشة ومواضعه ضمن حدود الحجم باستخدام لقطات الشاشة وإضافات OCR المصرح بها
 * `تحسين` تسمح صلاحيات Three Stove Agent بفتح الإشعارات والإعدادات السريعة مع استمرار رفض إجراءات المفاتيح الأخرى غير المصرح بها
+* `تحسين` تقبل الدالة respond في كائنات مهام ai.agent مصفوفة من 1 إلى 8 سلاسل غير فارغة للرد على طلب مراجعة الخطة في وضع الخطة لدى Three Stove Agent (أحداث input التي يكون kind فيها plan), وتبقى الردود النصية والمنطقية كما هي
 * `تحسين` تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1094,7 +1095,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 27 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 29 September 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

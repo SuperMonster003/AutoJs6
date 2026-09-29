@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `提示` 部分内置功能改由独立插件提供, 使用前需在插件中心安装并启用对应插件
 * `提示` AI Agent 插件更名为 Three Stove Agent, 插件 ID, 服务 action 及契约包名一并变更, 已安装的 AI Agent 不再被识别, 需卸载后安装 Three Stove Agent
@@ -359,6 +359,7 @@
 * `优化` accessibility.dump 的 compact 格式与 nodeRef 节点引用, 支持节点重定位及失效引用拒绝
 * `优化` accessibility.readScreenText 方法, 通过截图与已授权 OCR 插件返回有界屏幕文字及位置
 * `优化` Three Stove Agent 能力代理允许打开通知栏和快捷设置, 其余未授权按键动作保持拒绝
+* `优化` ai.agent 任务对象的 respond 方法接受 1 到 8 条非空字符串组成的数组, 用于回应 Three Stove Agent 计划模式的计划审阅请求 (input 事件 kind 为 plan), 文本与布尔值回应保持不变
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

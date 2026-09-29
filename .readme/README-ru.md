@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 27 September 2026 года.
+Данные обновлены на 29 September 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -168,7 +168,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `Новое` Подтверждение действий привязано к проверенным хостом узлам, с добавлением текста, ограниченной прокруткой и отчетом о результате и смене окна
 * `Новое` OCR экрана доступен только при наличии разрешенного OCR-плагина по данным хоста, с объединением текста в ограниченные строки с координатами
@@ -813,6 +813,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Улучшение` Формат compact и ссылки nodeRef для accessibility.dump, с повторным поиском узлов и отклонением устаревших ссылок
 * `Улучшение` Метод accessibility.readScreenText возвращает ограниченный объем текста и координат по снимкам экрана через авторизованные плагины OCR
 * `Улучшение` Разрешения Three Stove Agent позволяют открывать уведомления и быстрые настройки; остальные неразрешенные действия клавиш остаются запрещены
+* `Улучшение` Метод respond объектов задач ai.agent принимает массив из 1-8 непустых строк для ответа на запрос проверки плана Three Stove Agent в режиме плана (события input с kind plan); текстовые и логические ответы не изменились
 * `Улучшение` Изменения версий некоторых зависимостей или локальных библиотек _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1094,7 +1095,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 27 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 29 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

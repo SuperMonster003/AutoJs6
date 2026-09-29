@@ -63,7 +63,11 @@ internal class AgentRunNativeObject(
             require(args.size == 2)
             val id = text(args[0], "requestId", 128)
             val value = JsonParser.parseString(js_json_stringify(args[1]) as? String ?: throw IllegalArgumentException("Answer must be JSON"))
-            require(value.isJsonPrimitive && (value.asJsonPrimitive.isString || value.asJsonPrimitive.isBoolean)) { "Answer must be text or boolean" }
+            // A text or boolean answers ask requests; a plan review (kind "plan") is answered with 1 to 8 non-blank steps of at most 200 characters.
+            require(value.isJsonPrimitive && (value.asJsonPrimitive.isString || value.asJsonPrimitive.isBoolean) || value.isJsonArray && value.asJsonArray.size() in 1..8 &&
+                value.asJsonArray.all { it.isJsonPrimitive && it.asJsonPrimitive.isString && it.asString.isNotBlank() && it.asString.trim().codePointCount(0, it.asString.trim().length) <= 200 }) {
+                "Answer must be text, boolean or an array of 1 to 8 plan steps"
+            }
             require(value.toString().toByteArray(Charsets.UTF_8).size <= 4096)
             registry.respond(record, JsonObject().apply { addProperty("requestId", id); add("value", value) })
         }

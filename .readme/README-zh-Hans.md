@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 27 日.
+数据更新于 2026 年 9 月 29 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `提示` 部分内置功能改由独立插件提供, 使用前需在插件中心安装并启用对应插件
 * `提示` AI Agent 插件更名为 Three Stove Agent, 插件 ID, 服务 action 及契约包名一并变更, 已安装的 AI Agent 不再被识别, 需卸载后安装 Three Stove Agent
@@ -521,6 +521,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` accessibility.dump 的 compact 格式与 nodeRef 节点引用, 支持节点重定位及失效引用拒绝
 * `优化` accessibility.readScreenText 方法, 通过截图与已授权 OCR 插件返回有界屏幕文字及位置
 * `优化` Three Stove Agent 能力代理允许打开通知栏和快捷设置, 其余未授权按键动作保持拒绝
+* `优化` ai.agent 任务对象的 respond 方法接受 1 到 8 条非空字符串组成的数组, 用于回应 Three Stove Agent 计划模式的计划审阅请求 (input 事件 kind 为 plan), 文本与布尔值回应保持不变
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -802,7 +803,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 27 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 29 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

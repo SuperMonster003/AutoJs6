@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 27 日 に更新されました.
+データは 2026 年 9 月 29 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -168,7 +168,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `新機能` 画面操作の確認をホストが検査したノードに結び付け, テキスト追記と回数制限付きスクロールに対応し, 実行結果とウィンドウ変化を報告
 * `新機能` ホストが認可済み OCR プラグインの利用可否を通知し, 利用可能な場合のみ画面 OCR を公開して座標付きの制限された行に統合
@@ -813,6 +813,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` accessibility.dump の compact 形式と nodeRef ノード参照. ノードの再特定と無効な参照の拒否に対応
 * `改善` accessibility.readScreenText メソッド. スクリーンショットと許可済み OCR プラグインを使用し, 上限付きの画面テキストと位置を返却
 * `改善` Three Stove Agent の権限で通知パネルとクイック設定を開けるようにし, その他の未許可キー操作は引き続き拒否
+* `改善` ai.agent タスクオブジェクトの respond メソッドは, Three Stove Agent の計画モードにおける計画レビュー要求 (kind が plan の input イベント) への回答として, 1 から 8 件の空でない文字列の配列を受け付けます. 文字列と真偽値の回答は従来どおりです
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1094,7 +1095,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 27 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 29 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

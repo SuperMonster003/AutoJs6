@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `新增` 介面動作將確認綁定至宿主檢查的節點, 支援文字追加與有界捲動, 並回報執行結果和視窗變化
 * `新增` 宿主回報已授權 OCR 插件可用時提供螢幕 OCR, 辨識結果合併為帶座標的有界文字行
@@ -651,6 +651,7 @@
 * `最佳化` accessibility.dump 的 compact 格式與 nodeRef 節點參照, 支援節點重新定位及失效參照拒絕
 * `最佳化` accessibility.readScreenText 方法, 透過擷取畫面與已授權 OCR 外掛回傳有上限的螢幕文字及位置
 * `最佳化` Three Stove Agent 能力代理允許開啟通知欄和快捷設定, 其餘未授權按鍵動作保持拒絕
+* `最佳化` ai.agent 任務物件的 respond 方法接受 1 到 8 條非空字串組成的陣列, 用於回應 Three Stove Agent 計劃模式的計劃審閱請求 (input 事件 kind 為 plan), 文字與布林值回應保持不變
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

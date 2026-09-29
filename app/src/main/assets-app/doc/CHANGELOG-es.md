@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
@@ -651,6 +651,7 @@
 * `Mejora` Formato compact y referencias nodeRef para accessibility.dump, con reubicación de nodos y rechazo de referencias caducadas
 * `Mejora` accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados
 * `Mejora` Los permisos de Three Stove Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas
+* `Mejora` El método respond de los objetos de tarea de ai.agent acepta un arreglo de 1 a 8 cadenas no vacías para responder a una solicitud de revisión de plan de Three Stove Agent en modo de plan (eventos input con kind plan); las respuestas de texto y booleanas no cambian
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

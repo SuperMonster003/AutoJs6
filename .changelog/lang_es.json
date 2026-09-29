@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/27",
+      "released_date": "2026/09/29",
       "feature": [
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",
         "OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas",
@@ -649,7 +649,8 @@
         "Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android",
         "Formato compact y referencias nodeRef para accessibility.dump, con reubicación de nodos y rechazo de referencias caducadas",
         "accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados",
-        "Los permisos de Three Stove Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas"
+        "Los permisos de Three Stove Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas",
+        "El método respond de los objetos de tarea de ai.agent acepta un arreglo de 1 a 8 cadenas no vacías para responder a una solicitud de revisión de plan de Three Stove Agent en modo de plan (eventos input con kind plan); las respuestas de texto y booleanas no cambian"
       ],
       "dependency": [
         "Android AXML modularizado",

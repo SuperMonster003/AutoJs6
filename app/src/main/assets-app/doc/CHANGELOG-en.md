@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/27
+###### 2026/09/29
 
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
@@ -651,6 +651,7 @@
 * `Improvement` compact output and nodeRef references for accessibility.dump, with node relocation and stale-reference rejection
 * `Improvement` accessibility.readScreenText returns bounded screen text and positions using screenshots and authorized OCR plugins
 * `Improvement` Three Stove Agent capability grants allow opening notifications and quick settings while other ungranted key actions remain denied
+* `Improvement` respond on ai.agent task objects accepts an array of 1 to 8 non-blank strings to answer a Three Stove Agent plan review request (input events with kind plan); text and boolean answers are unchanged
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
