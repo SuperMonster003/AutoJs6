@@ -206,6 +206,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         // later from the Plugins tab fab or the Plugin Center.
         // zh-CN: 全新安装后仅展示一次; 用户可跳过, 之后可从插件标签页 fab 或插件中心重新打开.
         PluginInstallWizardDialog.showOnFirstRunIfNeeded(this)
+        org.autojs.autojs.ui.settings.ThreeStoveAgentGuide(this)
         org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver.handleForegroundRequest(this, intent)
     }
 

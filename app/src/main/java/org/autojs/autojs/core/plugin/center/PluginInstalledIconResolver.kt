@@ -12,6 +12,14 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 object PluginInstalledIconResolver {
+    private val transparentIconPackages = setOf(
+        "io.github.supermonster003.autojs6.plugin.threestoneai",
+        // Terra and Ember retain their published package IDs after their product/namespace rename.
+        "io.github.supermonster003.autojs6.plugin.audioplayer",
+        "io.github.supermonster003.autojs6.plugin.videoplayer",
+        "io.github.supermonster003.autojs6.plugin.three.stove.agent",
+        "io.github.supermonster003.autojs6.plugin.three.adapt.a11y",
+    )
 
     /**
      * Identity of a locally loaded icon for change detection without comparing Drawable
@@ -27,13 +35,21 @@ object PluginInstalledIconResolver {
 
     fun load(context: Context, appInfo: ApplicationInfo): Drawable? {
         val pm = context.packageManager
-        val iconResId = appInfo.icon.takeIf { it != 0 }
-            ?: appInfo.logo.takeIf { it != 0 }
         val fallbackIcon = { runCatching { appInfo.loadIcon(pm) }.getOrNull() }
 
         val packageContext = runCatching {
             context.createPackageContext(appInfo.packageName, 0)
         }.getOrNull()
+
+        // Three plugins reserve ic_launcher for their transparent in-app artwork. The application
+        // icon may instead be an adaptive launcher icon with an opaque background.
+        @Suppress("DiscouragedApi")
+        val transparentIcon = if (appInfo.packageName in transparentIconPackages) {
+            packageContext?.resources?.getIdentifier("ic_launcher", "mipmap", appInfo.packageName) ?: 0
+        } else 0
+        val iconResId = transparentIcon.takeIf { it != 0 }
+            ?: appInfo.icon.takeIf { it != 0 }
+            ?: appInfo.logo.takeIf { it != 0 }
 
         if (iconResId == null || packageContext == null) {
             return fallbackIcon()?.rasterizeForPluginCenter(context)
@@ -59,8 +75,10 @@ object PluginInstalledIconResolver {
     }
 
     /** Selects an already prepared raster without package loading or drawing on the UI thread. */
-    fun forCurrentMode(icon: Drawable): Drawable =
-        (icon as? ThemedInstalledIcon)?.forNightMode(ViewUtils.isNightModeEnabled) ?: icon
+    fun forCurrentMode(icon: Drawable): Drawable = forNightMode(icon, ViewUtils.isNightModeEnabled)
+
+    internal fun forNightMode(icon: Drawable, nightModeEnabled: Boolean): Drawable =
+        (icon as? ThemedInstalledIcon)?.forNightMode(nightModeEnabled) ?: icon
 
     private fun resolveThemedIcon(
         context: Context,

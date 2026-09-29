@@ -1034,6 +1034,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 if (!isAdded || _binding == null) return@launch
 
                 val item = latestFullItems.firstOrNull { it.packageName == packageName && it.isInstalled } ?: return@repeat
+                // Official Agent installations are enabled by the shared default policy, including
+                // installs completed while this page was stopped. Never override a saved opt-out.
+                if (item.engine == ThreeStoveAgentIds.ENGINE && item.authorizedState == PluginAuthorizedState.OFFICIAL) return@launch
                 // Default-off engines are auto-enabled only for the host's official signer; the
                 // runtime still reads the saved record, so adb sideloads stay disabled.
                 // zh-CN: 默认关闭的引擎仅对宿主官方签名自动启用; 运行时仍只读取已保存的记录, adb 侧装保持关闭.

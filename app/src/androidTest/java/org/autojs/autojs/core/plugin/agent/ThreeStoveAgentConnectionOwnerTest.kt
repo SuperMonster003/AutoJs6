@@ -16,9 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /** Exercises the process owner with a real controller and local Binder link, without a task. */
 class ThreeStoveAgentConnectionOwnerTest {
-    @Test fun defaultClosedDoesNotBindAndConcurrentConnectsShareOneLink() = fixture { f ->
-        f.owner.isNormallyClosed = true
-        assertEquals(ThreeStoveAgentUiState.DETACHED, f.owner.connect(automatic = true).await().state)
+    @Test fun startupIsLazyAndConcurrentUsesShareOneLinkDespiteTheOldDrawerPreference() = fixture { f ->
+        Pref.putBoolean(LEGACY_DRAWER_KEY, true)
+        f.owner.refresh()
+        assertEquals("detached", f.controller.scriptRuns.status()["state"].asString)
         assertEquals(0, f.attaches.get())
         val first = f.owner.connect()
         val second = f.owner.connect()
@@ -27,19 +28,27 @@ class ThreeStoveAgentConnectionOwnerTest {
         withTimeout(2000) { f.owner.state.first { it.state == ThreeStoveAgentUiState.ATTACHED } }
         assertEquals(1, f.attaches.get())
         assertEquals(0, f.runs.get())
-        assertFalse(f.owner.isNormallyClosed)
     }
 
-    @Test fun rememberedConnectionRestoresOnlyTheLinkAndDisconnectReleasesIt() = fixture { f ->
-        f.owner.isNormallyClosed = false
-        f.owner.restoreIfWanted()
+    @Test fun scriptQueriesConnectOnDemandAndDisconnectReleasesTheLink() = fixture { f ->
+        val presets = withContext(Dispatchers.IO) { f.controller.scriptRuns.presets() }
+        assertEquals(0, presets["presets"].asJsonArray.size())
         withTimeout(2000) { f.owner.state.first { it.state == ThreeStoveAgentUiState.ATTACHED } }
         assertEquals(1, f.attaches.get())
         assertEquals(0, f.runs.get())
         f.owner.disconnect()
         withTimeout(2000) { f.owner.state.first { it.state == ThreeStoveAgentUiState.DETACHED } }
-        assertTrue(f.owner.isNormallyClosed)
         assertEquals(1, f.closed.get())
+    }
+
+    @Test fun aSynchronousUiCallerNeverStartsAnOnDemandBind() = fixture { f ->
+        assertFalse(f.controller.ensureConnected(allowConnect = false))
+        assertEquals(0, f.attaches.get())
+        f.owner.connect().await()
+        assertTrue(f.controller.ensureConnected(allowConnect = false))
+        f.controller.detach()
+        assertFalse(f.controller.ensureConnected(allowConnect = false))
+        assertEquals(1, f.attaches.get())
     }
 
     @Test fun disabledPluginRevokesTheActiveLinkOnStateRefresh() = fixture { f ->
@@ -49,7 +58,11 @@ class ThreeStoveAgentConnectionOwnerTest {
         withTimeout(2000) { f.owner.state.first { it.state == ThreeStoveAgentUiState.PLUGIN_DISABLED } }
         assertEquals("detached", f.controller.status.value.state)
         assertEquals(1, f.closed.get())
-        assertTrue(f.owner.isNormallyClosed)
+        assertEquals(ThreeStoveAgentUiState.PLUGIN_DISABLED, f.owner.connect().await().state)
+        assertEquals(1, f.attaches.get())
+        f.inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.AVAILABLE)
+        assertEquals(ThreeStoveAgentUiState.ATTACHED, f.owner.connect().await().state)
+        assertEquals(2, f.attaches.get())
     }
 
     @Test fun pluginRequestsQueueForegroundGuidanceWithoutBindingAnUnavailablePlugin() = fixture { f ->
@@ -60,6 +73,29 @@ class ThreeStoveAgentConnectionOwnerTest {
         assertEquals(0, f.attaches.get())
         assertTrue(f.owner.consumeGuide(guide))
         assertFalse(f.owner.consumeGuide(guide))
+    }
+
+    @Test fun disablingWhileBindingRevokesTheCompletedLeaseWithoutStartingATask() = fixture { f ->
+        f.onAttach = { f.inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.PLUGIN_DISABLED) }
+        assertEquals(ThreeStoveAgentUiState.PLUGIN_DISABLED, f.owner.connect().await().state)
+        assertEquals("detached", f.controller.status.value.state)
+        assertEquals(1, f.attaches.get())
+        assertEquals(1, f.closed.get())
+        assertEquals(0, f.runs.get())
+    }
+
+    @Test fun catalogFallsBackWithoutAnEnableGuideAndConnectsWhenAvailable() = fixture { f ->
+        for (state in listOf(ThreeStoveAgentUiState.NOT_INSTALLED, ThreeStoveAgentUiState.PLUGIN_DISABLED, ThreeStoveAgentUiState.INCOMPATIBLE)) {
+            f.inspection = ThreeStoveAgentInspection(state)
+            assertEquals(emptyList<String>(), withContext(Dispatchers.IO) { f.controller.scriptRuns.roots() })
+            assertNull(f.owner.pendingGuide.value)
+        }
+        assertEquals(0, f.attaches.get())
+        f.inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.AVAILABLE)
+        assertEquals(emptyList<String>(), withContext(Dispatchers.IO) { f.controller.scriptRuns.roots() })
+        assertEquals(1, f.attaches.get())
+        assertEquals("attached", f.controller.status.value.state)
+        assertEquals(0, f.runs.get())
     }
 
     @Test fun approvedRootsPersistAcrossReattachWhileRejectedChangesPreserveTheLink() = fixture { f ->
@@ -86,13 +122,13 @@ class ThreeStoveAgentConnectionOwnerTest {
     }
 
     private fun fixture(block: suspend (Fixture) -> Unit) = runBlocking {
-        val previous = Pref.getBoolean(ThreeStoveAgentLinkController.NORMALLY_CLOSED_KEY, true)
+        val previous = Pref.getBoolean(LEGACY_DRAWER_KEY, true)
         val f = Fixture()
         try { withContext(Dispatchers.Main) { block(f) } }
         finally {
             f.controller.detach()
             f.scope.cancel()
-            Pref.putBoolean(ThreeStoveAgentLinkController.NORMALLY_CLOSED_KEY, previous)
+            Pref.putBoolean(LEGACY_DRAWER_KEY, previous)
         }
     }
 
@@ -104,24 +140,35 @@ class ThreeStoveAgentConnectionOwnerTest {
         val runs = AtomicInteger()
         val configurations = java.util.concurrent.CopyOnWriteArrayList<String>()
         var savedRoots = "{}"
+        var onAttach: () -> Unit = {}
         @Volatile var inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.AVAILABLE)
-        val controller = ThreeStoveAgentLinkController(context, scope = scope, available = { true }, uid = { Process.myUid() },
+        val controller: ThreeStoveAgentLinkController = ThreeStoveAgentLinkController(context, scope = scope, available = { inspection.state == ThreeStoveAgentUiState.AVAILABLE }, uid = { Process.myUid() },
+            connectOnDemand = { showGuide -> owner.ensureConnected(showGuide) },
             attachLink = { config, _, _ ->
                 configurations.add(config.getString(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_LINK_CONFIG_JSON)!!)
                 attaches.incrementAndGet()
+                onAttach()
                 AidlPluginHost.LeasedCall(object : IThreeStoveAgentLink.Stub() {
-                    override fun getStatus() = Bundle()
+                    override fun getStatus() = Bundle().apply {
+                        putInt(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_CONTRACT_VERSION, org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.CONTRACT_VERSION)
+                        putString(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_STATUS_JSON, "{\"scriptRoots\":[]}")
+                    }
                     override fun startRun(request: Bundle?, callback: IThreeStoveAgentRunCallback?) = Bundle().also { runs.incrementAndGet() }
                     override fun respond(response: Bundle?) = Bundle()
                     override fun cancelRun(ref: Bundle?) = Unit
                     override fun listRuns(query: Bundle?) = Bundle()
                     override fun getRun(ref: Bundle?) = Bundle()
-                    override fun listPresets(query: Bundle?) = Bundle()
+                    override fun listPresets(query: Bundle?) = Bundle().apply {
+                        putInt(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_CONTRACT_VERSION, org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.CONTRACT_VERSION)
+                        putString(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_RUN_RESPONSE_JSON, "{\"presets\":[]}")
+                    }
                     override fun updateConfig(config: Bundle?) { configurations.add(config!!.getString(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_LINK_CONFIG_JSON)!!) }
                     override fun detach(reason: Bundle?) = Unit
                 }, Closeable { closed.incrementAndGet() })
             })
-        val owner = ThreeStoveAgentConnectionOwner(context, controller, scope, { inspection }, observePluginChanges = false,
+        val owner: ThreeStoveAgentConnectionOwner = ThreeStoveAgentConnectionOwner(context, controller, scope, { inspection }, observePluginChanges = false,
             readRootConfiguration = { savedRoots }, saveRootConfiguration = { savedRoots = it })
     }
+
+    companion object { private const val LEGACY_DRAWER_KEY = "key_\$_three_stove_agent_normally_closed" }
 }

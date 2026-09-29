@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.agent
 
 import android.os.Binder
 import android.os.Bundle
+import android.os.Looper
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.coroutines.runBlocking
@@ -27,9 +28,9 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
     fun start(goal: String, options: JsonObject): ThreeStoveAgentRunRecord {
         val detached = options["detached"]?.asBoolean == true
         val interaction = options["interaction"]?.asString ?: "plugin"
-        if (!available) return rejected(goal, detached, interaction, C.ERROR_PLUGIN_UNAVAILABLE)
         var startedId: String? = null
         return try {
+            ensureConnection()
             val channel = Channel(pluginUid())
             call { link ->
                 val reply = decode(link.startRun(envelope(C.KEY_RUN_REQUEST_JSON, JsonObject().apply {
@@ -49,6 +50,7 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
 
     fun get(id: String): ThreeStoveAgentRunRecord? {
         runs[id]?.let { return it }
+        ensureConnection()
         return try { call { link ->
             runs[id]?.let { return@call it }
             val row = decode(link.getRun(reference(id)))
@@ -82,16 +84,29 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
     }
     fun cancel(record: ThreeStoveAgentRunRecord, reason: String) { if (!record.settled) cancelId(record.id, reason) }
     private fun cancelId(id: String, reason: String) = call { it.cancelRun(envelope(C.KEY_RUN_REF_JSON, JsonObject().apply { addProperty("runId", id); addProperty("reason", reason) })) }
-    fun list(limit: Int, offset: Int): JsonObject = call { decode(it.listRuns(envelope(C.KEY_RUN_REQUEST_JSON, JsonObject().apply { addProperty("limit", limit); addProperty("offset", offset) }))) }
-    fun presets(): JsonObject = call { decode(it.listPresets(envelope(C.KEY_RUN_REQUEST_JSON, JsonObject()))) }
+    fun list(limit: Int, offset: Int): JsonObject { ensureConnection(); return call { decode(it.listRuns(envelope(C.KEY_RUN_REQUEST_JSON, JsonObject().apply { addProperty("limit", limit); addProperty("offset", offset) }))) } }
+    fun presets(): JsonObject { ensureConnection(); return call { decode(it.listPresets(envelope(C.KEY_RUN_REQUEST_JSON, JsonObject()))) } }
     fun status(): JsonObject = JsonObject().apply {
         val status = controller.status.value
         addProperty("state", status.state); addProperty("queuedCount", status.queuedCount)
         status.runningRunId?.let { addProperty("runningRunId", it) }
         status.errorCode?.let { addProperty("errorCode", it) }
     }
-    fun roots(): List<String> = if (!available) emptyList() else call { link ->
-        decode(link.status, C.KEY_STATUS_JSON)["scriptRoots"]?.asJsonArray?.map { it.asString }.orEmpty()
+    // Local catalog metadata remains available without a plugin. Extra roots are optional;
+    // their discovery must neither reject the local query nor display an installation guide.
+    fun roots(): List<String> = runCatching {
+        ensureConnection(showGuide = false)
+        call { link -> decode(link.status, C.KEY_STATUS_JSON)["scriptRoots"]?.asJsonArray?.map { it.asString }.orEmpty() }
+    }.getOrDefault(emptyList())
+
+    private fun ensureConnection(showGuide: Boolean = true) {
+        // ServiceConnection callbacks arrive on the main looper; blocking it during a cold
+        // bind would deadlock. Normal script execution and async queries use worker threads.
+        val allowConnect = Looper.myLooper() != Looper.getMainLooper()
+        check(available || allowConnect) {
+            "Use a script worker thread for the initial Agent connection"
+        }
+        if (!runBlocking { controller.ensureConnected(allowConnect, showGuide) }) throw ThreeStoveAgentControlException(C.ERROR_PLUGIN_UNAVAILABLE)
     }
 
     private fun <T> call(action: (IThreeStoveAgentLink) -> T): T {
@@ -101,7 +116,7 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
     private fun rejected(goal: String, detached: Boolean, interaction: String, code: String) =
         ThreeStoveAgentRunRecord(UUID.randomUUID().toString(), goal, System.currentTimeMillis(), detached, interaction).apply {
             fail(code, "Three Stove Agent could not accept the task", if (code == C.ERROR_PLUGIN_UNAVAILABLE)
-                "Open AutoJs6 drawer > Three Stove Agent to enable and connect the plugin" else null)
+                "Check Three Stove Agent in AutoJs6 Plugin Center; initial connection requires a script worker thread" else null)
         }
 
     private inner class Channel(private val ownerUid: Int) : IThreeStoveAgentRunCallback.Stub() {

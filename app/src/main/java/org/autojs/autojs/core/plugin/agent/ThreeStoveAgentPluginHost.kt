@@ -29,7 +29,8 @@ object ThreeStoveAgentPluginHost {
         moduleLabel = "Three Stove Agent",
         proxyFactory = IThreeStoveAgentPlugin.Stub::asInterface,
         infoReader = { validatePluginInfo(it.getInfo()) },
-        defaultEnabled = false,
+        // attach() first enforces the signer-aware default and saved enablement via the inspector.
+        defaultEnabled = true,
         preBindValidator = ::validateService,
     )
 

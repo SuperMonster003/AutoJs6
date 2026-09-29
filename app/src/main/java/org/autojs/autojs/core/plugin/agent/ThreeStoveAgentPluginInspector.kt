@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentActions
@@ -56,7 +57,7 @@ object ThreeStoveAgentPluginInspector {
             pluginEnabled = PluginEnableStore.isEnabled(
                 context,
                 ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME,
-                defaultEnabled = false,
+                defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(ThreeStoveAgentIds.ENGINE, trust.authorizedState),
             ),
             authorized = PluginTrustManager.isAuthorized(context, ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME),
             trustedSigner = trust.isOfficial || trust.isTrusted,

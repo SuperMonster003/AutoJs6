@@ -3,14 +3,15 @@ package org.autojs.autojs.core.plugin.agent
 import org.junit.Assert.*
 import org.junit.Test
 
-class ThreeStoveAgentDrawerStateTest {
-    @Test fun onlyAnAttachedLinkChecksTheSwitchAndOnlyAttachingShowsProgress() {
-        for (state in ThreeStoveAgentUiState.entries) {
-            assertEquals(state.name, state == ThreeStoveAgentUiState.ATTACHED, ThreeStoveAgentUiPolicy.checked(state))
-            assertEquals(state.name, state == ThreeStoveAgentUiState.ATTACHING, ThreeStoveAgentUiPolicy.progress(state))
-        }
+class ThreeStoveAgentUiStateTest {
+    @Test fun disabledPluginIsNotActivatedByAnAutomaticConnection() {
+        assertEquals(ThreeStoveAgentUiState.PLUGIN_DISABLED, ThreeStoveAgentUiPolicy.availability(
+            ThreeStoveAgentPluginFacts(installed = true, stopped = true, pluginEnabled = false, authorized = true, trustedSigner = true),
+        ))
+        assertEquals(ThreeStoveAgentUiState.ACTIVATION_REQUIRED, ThreeStoveAgentUiPolicy.availability(
+            ThreeStoveAgentPluginFacts(installed = true, stopped = true, pluginEnabled = true, authorized = true, trustedSigner = true),
+        ))
     }
-
     @Test fun transportStatesNeverTurnFailuresOrUnknownValuesIntoConnectedUi() {
         assertEquals(ThreeStoveAgentUiState.ATTACHED, ThreeStoveAgentUiPolicy.linkState("attached"))
         assertEquals(ThreeStoveAgentUiState.ATTACHING, ThreeStoveAgentUiPolicy.linkState("attaching"))

@@ -43,7 +43,7 @@ class ThreeStoveAgentHostEntryContractTest {
                 .associate { it.getAttribute("name") to it.textContent }
         }
         val english = translated.getValue("values")
-        assertEquals(20, english.size)
+        assertEquals(9, english.size)
         assertEquals(english, translated.getValue("values-en"))
         translated.forEach { (locale, values) ->
             assertEquals(locale, english.keys, values.keys)

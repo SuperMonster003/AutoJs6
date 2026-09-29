@@ -415,7 +415,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` EPUB 契約版本 2 (高亮與筆記, 插件路線圖 P9.4): 附加的 `IEpubBook.getAnnotations` (分頁, 按閱讀順序) 與閱讀器會話的 `highlight` 事件以 `annotations` 文件 (id, style, color, note, quote, 章節標題, locator, createdAt, updatedAt) 傳遞閱讀器中的高亮與筆記; 宿主依據插件的 `epubMaxContractVersion` 協商版本並寫入每個請求, 版本 1 的插件不會收到新調用; 腳本 API `epub` 新增 `book.annotations()` 與 `epub.annotations(path)` (含 `Async` 形態), `EpubReaderSession` 發出 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 事件, `action` 為 added, updated 或 removed
 * `新增` Three Stove Agent 插件契約與宿主代理, 支援受限裝置能力, 模型呼叫配額及連線失效後的資源回收; 模型代理支援原生工具呼叫及結果續輪, 每輪檢查模型配額
 * `新增` Agent 腳本登記與受限執行, 支援 project.json / @agent 頭註解, 參數驗證, 逾時停止及結構化結果回傳
-* `新增` Three Stove Agent 側邊欄入口與插件中心管理, 支援連接狀態, 任務數量, 授權引導及主程式重新啟動後恢復連接; 安裝精靈工具分類提供可選入口, 發行 APK 加入官方索引後可供安裝
+* `新增` Three Stove Agent 插件中心管理與安裝, 啟用, 授權及相容性引導; 安裝精靈工具分類提供可選入口, 發行 APK 加入官方索引後可供安裝
 * `新增` Three Stove Agent 外掛可設定附加指令碼目錄, 宿主校驗允許範圍後儲存並在重新連線時恢復, 無效目錄不會取代已接受的設定
 * `修復` Three Stove Agent 呼叫線上模型失敗時遺失網絡, 身份驗證及回應錯誤類別的問題 (需要 Provider 插件支援)
 * `修復` assistant 合併工具選項時, 空 tools 物件導致預設關閉的工具組被啟用的問題
@@ -646,6 +646,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 客戶端模式的伺服端位址歷史記錄僅在握手失敗時寫入, 成功連線過的位址反而從不記錄, 導致位址對話框的 "歷史記錄" 始終為空的問題
 * `修復` 檢查更新選擇安裝包時, 若列表中沒有與首選 ABI 匹配的安裝包, 可能選中列表靠後的低優先級安裝包 (如通用包) 而非次優先 ABI 的安裝包
 * `修復` 內置軟件包安裝器在 Android 9-11 上可能因平台歸檔解析器返回的簽名信息為空而以 "Base APK has no verifiable signer" 拒絕 V2/V3 簽名的 APK, 現回退至已棄用的歸檔簽名視圖
+* `修復` 插件中心的五款 Three 系列插件圖示使用透明背景並跟隨宿主明暗主題, 避免顯示啟動器底色
 * `優化` Three Stove Agent 模型負載在 Android 7-10 上透過公開 API 讀取, 保留檔案位移與停滯管道取消能力
 * `優化` 宿主 lint 檢查按路徑排除 AutoJs4 相容類別和資源, 其餘宿主程式碼繼續檢查
 * `優化` 插件中心觀察到與宿主同證書簽名 (OFFICIAL) 的預設關閉插件 (YOLO, MCP Server) 完成全新安裝後自動寫入顯式啟用記錄並完成啟用探測; 第三方信任或使用者授權簽名, adb 側載及覆蓋安裝仍需手動啟用, 執行時仍只讀取已儲存的記錄
@@ -817,6 +818,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` ai.agent 任務物件的 respond 方法接受 1 到 8 條非空字串組成的陣列, 用於回應 Three Stove Agent 計劃模式的計劃審閱請求 (input 事件 kind 為 plan), 文字與布林值回應保持不變
 * `優化` Three Stove Agent 模型代理在 Provider 自身拒絕或中斷請求時 (無效請求, 協定違規, 描述符或配額問題等) 以封閉的 PROVIDER_* 原因碼報告失敗階段, 不再一律摺疊為不帶原因的 PROVIDER_FAILED; 原因只來自 AiErrorCode, 不含 Provider 文字
 * `優化` Three Stove Agent 模型代理在接受一批原生工具結果後按請求的 timeoutMs 重新設定截止時間, 每個續輪都擁有完整的逾時, 整輪由插件的任務預算與續輪上限約束; 未提交結果的等待仍按原截止時間逾時. 此前多輪原生任務共用首個請求的截止時間, 超過 5 分鐘即以 MODEL_TIMEOUT 終止
+* `優化` Three Stove Agent 統一由插件中心啟用和停用, 移除主頁側邊欄開關, 指令碼和插件介面按需自動連接; 官方插件安裝後預設啟用, 保留使用者明確儲存的停用狀態
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

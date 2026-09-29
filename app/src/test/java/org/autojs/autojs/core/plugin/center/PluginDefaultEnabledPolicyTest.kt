@@ -8,13 +8,17 @@ import org.junit.Test
 class PluginDefaultEnabledPolicyTest {
 
     @Test
-    fun threeStoveAgentUsesTheSameExplicitEnablePolicyAsMcp() {
+    fun onlyOfficialThreeStoveAgentIsEnabledWithoutAnInstallBroadcast() {
         assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault("three-stove-agent"))
         assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(" THREE-STOVE-AGENT "))
         for (state in PluginAuthorizedState.entries) {
+            assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault("three-stove-agent", state) ==
+                (state == PluginAuthorizedState.OFFICIAL))
             assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("three-stove-agent", state) ==
                 PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("mcp-server", state))
         }
+        assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault(" THREE-STOVE-AGENT ", PluginAuthorizedState.OFFICIAL))
+        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE, PluginAuthorizedState.OFFICIAL))
     }
 
     @Test

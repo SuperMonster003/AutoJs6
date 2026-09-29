@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.app.tool.ThreeStoveAgentTool
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
@@ -22,12 +21,12 @@ object ThreeStoveAgentLauncher {
 
     fun launch(context: Context) {
         if (runCatching { context.packageManager.getPackageInfo(ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME, 0) }.isFailure) {
-            ThreeStoveAgentTool.openPluginCenter(context)
+            ThreeStoveAgentGuide.openPluginCenter(context)
             return
         }
         if (resolveIntent(context)?.startSafely(context, true) == true) return
         MaterialDialog.Builder(context).title(R.string.text_three_stove_agent).content(R.string.prompt_three_stove_agent_launcher_unavailable)
             .negativeText(R.string.dialog_button_cancel).positiveText(R.string.text_plugin_center)
-            .onPositive { _, _ -> ThreeStoveAgentTool.openPluginCenter(context) }.show()
+            .onPositive { _, _ -> ThreeStoveAgentGuide.openPluginCenter(context) }.show()
     }
 }

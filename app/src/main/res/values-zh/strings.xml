@@ -159,7 +159,6 @@
     <string name="description_stable_mode">稳定模式省略布局细节, 脚本分析布局时更稳定, 但可能影响获取的控件总量.\n需重启无障碍服务.</string>
     <string name="description_terminal">在独立的 shell 会话中执行命令. 离开页面后会话继续运行, 关闭开关将结束全部会话.</string>
     <string name="description_theme_color_preference">主题色的应用范围包括但不限于以下部件:\n系统通知栏\n应用栏 (AppBar)\n文件图标\n任务项图标\n浮动操作按钮 (FAB)\n设置页面类别标题\n按钮开关\n\n注: 截至 6.2.0 版本, AutoJs6 主题色暂未对 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 强调色 (Accent Color) ] 作出区分.</string>
-    <string name="description_three_stove_agent">连接 Three Stove Agent 插件与 AutoJs6. 通过管理按钮打开插件任务页. 建立连接本身不会启动任务.</string>
     <string name="description_timed_task_backend">控制脚本定时触发的底层机制.\n\nAlarmManager: 通过申请 \"允许设置闹钟和提醒\" 权限, 可使定时任务的触发更接近准时.\nWorkManager: 系统友好, 适合可接受一定延迟的非关键定时任务.\nJobScheduler: 旧实现, 仅用作兼容保留, 定时任务出现延迟的概率较大.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用场景与差异说明: \n\n1. AlarmManager\n适用于准时性敏感的定时任务, 如 [提醒/严格定时脚本/...].\n在 Android 12+ 设备上获取 \"允许设置闹钟和提醒\" 权限后, 在息屏或待机状态时能够较准时地执行定时任务.\n在未授予 \"允许设置闹钟和提醒\" 权限时, 系统可能降级为不准时或延后执行任务.\n\n2. WorkManager\n适用于不要求严格准时执行的定时任务, 如 [非关键性同步/清理/统计/...].\n根据系统 [ 电量/网络/充电情况/待机策略/... ] 进行调度, 息屏或待机状态时可能推迟任务执行.\n虽无法保证时间精确性, 但在 [ 可靠完成/失败重试/链式执行/唯一任务去重 ] 等方面拥有独特优势.\n\n3. Job\n历史实现, 为兼容保留.\n在高版本安卓系统中定时任务可能存在较大的延迟执行问题.\n除非出于兼容需要, 一般不推荐使用.</string>
     <string name="description_usage_stats_access">\"查看使用情况\" 权限可获取本设备过去使用应用的情况, 从而使 \"获取当前应用\" (currentPackage) 结果更准确</string>
@@ -693,7 +692,7 @@
     <string name="prompt_three_stove_agent_activate">已安装 Three Stove Agent, 但 Android 尚未激活它. 请先激活, 以便 AutoJs6 建立连接.</string>
     <string name="prompt_three_stove_agent_application_disabled">Android 已停用 Three Stove Agent. 请在系统设置中启用应用后重试.</string>
     <string name="prompt_three_stove_agent_authorize">请先在插件中心授权此插件, 再连接 Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">启用 Three Stove Agent 插件并连接到 AutoJs6?</string>
+    <string name="prompt_three_stove_agent_enable">Three Stove Agent 已在插件中心禁用. 请在插件中心启用后重试.</string>
     <string name="prompt_three_stove_agent_failed">无法连接 Three Stove Agent. 请在插件中心检查插件状态和版本后重试.</string>
     <string name="prompt_three_stove_agent_incompatible">此插件需要 AutoJs6 构建 %1$d 或更高版本. 请安装相互兼容的 AutoJs6 与 Three Stove Agent.</string>
     <string name="prompt_three_stove_agent_install">请从 Three Stove Agent 的官方发行页面下载安装包, 安装后在 AutoJs6 中启用. 如果尚无发行版本, 请稍后查看.</string>
@@ -2374,16 +2373,6 @@
     <string name="text_xiaomi_background_popup_permission">后台弹出界面</string>
     <string name="text_yearly_task">每年任务</string>
     <string name="text_zero_means_unlimited">0 表示不限制</string>
-    <string name="three_stove_agent_state_activation">需要激活</string>
-    <string name="three_stove_agent_state_attached">已连接, 运行中: %1$d, 排队: %2$d</string>
-    <string name="three_stove_agent_state_attaching">正在连接</string>
-    <string name="three_stove_agent_state_authorization">需要授权</string>
-    <string name="three_stove_agent_state_detached">已断开</string>
-    <string name="three_stove_agent_state_disabled">插件已停用</string>
-    <string name="three_stove_agent_state_failed">连接失败</string>
-    <string name="three_stove_agent_state_host_unavailable">宿主不可用</string>
-    <string name="three_stove_agent_state_incompatible">版本不兼容</string>
-    <string name="three_stove_agent_state_not_installed">未安装插件</string>
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
     <string name="warning_apk_native_page_alignment_unsupported">原生库 %1$s 的对齐值为 %2$d 字节. 生成的 APK 可能无法在页大小为 16 KB 的设备上运行. 请升级原生库或插件.</string>

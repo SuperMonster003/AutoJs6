@@ -10,10 +10,11 @@ import android.view.ContextThemeWrapper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs.app.tool.ThreeStoveAgentTool
+import org.autojs.autojs.ui.settings.ThreeStoveAgentGuide
 import org.autojs.autojs.core.plugin.center.InstalledPluginRepository
 import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.settings.ThreeStoveAgentLauncher
 import org.autojs.autojs.engine.NodeAccessibilitySmokeActivity
@@ -39,8 +40,9 @@ class ThreeStoveAgentEntryDeviceTest {
         val owner = ThreeStoveAgentConnectionOwner.get(context)
         assertNull("Do not interrupt an existing task", controller.status.value.runningRunId)
         assertEquals(0, controller.status.value.queuedCount)
-        val wasClosed = owner.isNormallyClosed
-        val enabled = PluginEnableStore.isEnabled(context, ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME, false)
+        val enablePreferences = context.getSharedPreferences("plugin_center_enable_state", 0)
+        val enableKey = "key_\$_enabled_plugin_\$_${ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME}"
+        val enabled = if (enablePreferences.contains(enableKey)) enablePreferences.getBoolean(enableKey, false) else null
         val roots = Pref.getStringOrNull(ThreeStoveAgentConnectionOwner.ROOT_CONFIGURATION_KEY)
         fun await(message: String, check: () -> Boolean) {
             val deadline = SystemClock.elapsedRealtime() + 20_000
@@ -57,12 +59,10 @@ class ThreeStoveAgentEntryDeviceTest {
             }
             PluginEnableStore.setEnabled(context, ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME, true)
             assertEquals(ThreeStoveAgentUiState.AVAILABLE, ThreeStoveAgentPluginInspector.inspect(context).state)
-            assertTrue("Automatic host restoration is disabled", owner.isNormallyClosed)
             val started = SystemClock.elapsedRealtime()
             context.startActivity(checkNotNull(ThreeStoveAgentLauncher.resolveIntent(context))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
             await("Plugin broadcast must attach the real host controller") { controller.status.value.state == "attached" }
-            assertFalse(owner.isNormallyClosed)
             assertNull(controller.status.value.runningRunId)
             assertEquals(0, controller.status.value.queuedCount)
             instrumentation.sendStatus(0, android.os.Bundle().apply {
@@ -71,10 +71,28 @@ class ThreeStoveAgentEntryDeviceTest {
         } finally {
             instrumentation.runOnMainSync { owner.disconnect() }
             await("Final detach releases the production lease") { controller.status.value.state == "detached" }
-            PluginEnableStore.setEnabled(context, ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME, enabled)
+            enablePreferences.edit().apply { if (enabled == null) remove(enableKey) else putBoolean(enableKey, enabled) }.commit()
+            PluginStateChangeRegistry.notifyChanged(ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME)
             if (roots == null) Pref.remove(ThreeStoveAgentConnectionOwner.ROOT_CONFIGURATION_KEY)
             else Pref.putString(ThreeStoveAgentConnectionOwner.ROOT_CONFIGURATION_KEY, roots)
-            owner.isNormallyClosed = wasClosed
+        }
+    }
+
+    @Test fun officialInstallNeedsNoEnablePromptAndExplicitDisableWins() {
+        val packageName = ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME
+        assumeTrue(org.autojs.autojs.core.plugin.center.PluginTrustManager.resolveTrustInfo(context, packageName).isOfficial)
+        val preferences = context.getSharedPreferences("plugin_center_enable_state", 0)
+        val key = "key_\$_enabled_plugin_\$_$packageName"
+        val saved = if (preferences.contains(key)) preferences.getBoolean(key, false) else null
+        try {
+            preferences.edit().remove(key).commit()
+            val state = ThreeStoveAgentPluginInspector.inspect(context).state
+            assertTrue(state.name, state in setOf(ThreeStoveAgentUiState.AVAILABLE, ThreeStoveAgentUiState.ACTIVATION_REQUIRED))
+            PluginEnableStore.setEnabled(context, packageName, false)
+            assertEquals(ThreeStoveAgentUiState.PLUGIN_DISABLED, ThreeStoveAgentPluginInspector.inspect(context).state)
+        } finally {
+            preferences.edit().apply { if (saved == null) remove(key) else putBoolean(key, saved) }.commit()
+            PluginStateChangeRegistry.notifyChanged(packageName)
         }
     }
 
@@ -121,16 +139,6 @@ class ThreeStoveAgentEntryDeviceTest {
         } finally { identity.cancel() }
     }
 
-    @Test fun everyGuideStateRendersAndAttachedSubtitleShowsRunAndQueueCounts() {
-        for (state in ThreeStoveAgentUiState.entries) {
-            assertTrue(state.name, ThreeStoveAgentTool.subtitle(context, ThreeStoveAgentToolState(state)).isNotBlank())
-        }
-        val text = ThreeStoveAgentTool.subtitle(context, ThreeStoveAgentToolState(ThreeStoveAgentUiState.ATTACHED,
-            ThreeStoveAgentLinkStatus("attached", "test-run", queuedCount = 3)))
-        assertTrue(text.contains("1"))
-        assertTrue(text.contains("3"))
-    }
-
     @Test fun allDiscoveryGuidesShowTheirSpecificMessageAndDismissCleanly() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val activity = instrumentation.startActivitySync(Intent(context, NodeAccessibilitySmokeActivity::class.java)
@@ -138,9 +146,9 @@ class ThreeStoveAgentEntryDeviceTest {
         try {
             instrumentation.runOnMainSync {
                 val themed = ContextThemeWrapper(activity, context.applicationInfo.theme)
-                val tool = ThreeStoveAgentTool(themed)
-                val show = ThreeStoveAgentTool::class.java.getDeclaredMethod("showGuide", ThreeStoveAgentInspection::class.java).apply { isAccessible = true }
-                val field = ThreeStoveAgentTool::class.java.getDeclaredField("dialog").apply { isAccessible = true }
+                val tool = ThreeStoveAgentGuide(themed)
+                val show = ThreeStoveAgentGuide::class.java.getDeclaredMethod("showGuide", ThreeStoveAgentInspection::class.java).apply { isAccessible = true }
+                val field = ThreeStoveAgentGuide::class.java.getDeclaredField("dialog").apply { isAccessible = true }
                 val messages = mapOf(
                     ThreeStoveAgentUiState.NOT_INSTALLED to R.string.prompt_three_stove_agent_install,
                     ThreeStoveAgentUiState.APPLICATION_DISABLED to R.string.prompt_three_stove_agent_application_disabled,

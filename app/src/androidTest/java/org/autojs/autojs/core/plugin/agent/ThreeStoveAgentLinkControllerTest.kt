@@ -40,7 +40,6 @@ class ThreeStoveAgentLinkControllerTest {
     fun attachPinsBothBrokersAndDetachRevokesThemBeforeReleasingLease() = withFixture { fixture ->
         fixture.controller.attach()
         assertEquals("attached", fixture.controller.status.value.state)
-        assertFalse(fixture.controller.isNormallyClosed)
         assertEquals(1, fixture.calls.size)
         val call = fixture.calls.single()
         assertEquals(C.CONTRACT_VERSION, call.config.getInt(C.KEY_CONTRACT_VERSION))
@@ -48,7 +47,6 @@ class ThreeStoveAgentLinkControllerTest {
 
         fixture.controller.detach()
         assertEquals("detached", fixture.controller.status.value.state)
-        assertTrue(fixture.controller.isNormallyClosed)
         assertEquals(1, call.link.detachCount)
         assertEquals(1, call.closed.get())
         assertFalse(modelAvailable(call.brokers))
@@ -202,12 +200,10 @@ class ThreeStoveAgentLinkControllerTest {
         block: suspend (Fixture) -> Unit,
     ) = runBlocking {
         val fixture = Fixture(expectedUid, failAttach)
-        val previousNormallyClosed = fixture.controller.isNormallyClosed
         try {
             block(fixture)
         } finally {
             fixture.controller.detach()
-            fixture.controller.isNormallyClosed = previousNormallyClosed
             fixture.scope.cancel()
         }
     }

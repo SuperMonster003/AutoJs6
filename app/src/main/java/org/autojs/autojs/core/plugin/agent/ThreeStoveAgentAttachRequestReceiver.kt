@@ -59,7 +59,7 @@ class ThreeStoveAgentAttachRequestReceiver : BroadcastReceiver() {
             val expectedUid = context.packageManager.getApplicationInfo(ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME, 0).uid
             if (identity.creatorPackage != ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME || identity.creatorUid != expectedUid) return false
             val trust = PluginTrustManager.resolveTrustInfo(context, ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME)
-            trust.isOfficial || trust.isTrusted
+            trust.authorizedState != org.autojs.autojs.core.plugin.center.PluginAuthorizedState.REQUIRED
         }.getOrDefault(false)
     }
 }

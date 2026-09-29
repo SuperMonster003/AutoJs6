@@ -139,7 +139,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 if (getProcessNameCompat() == applicationInfo.processName) {
                     PackageInstallStatusCoordinator.initialize(this)
                     if (!AbstractAutoJs.isInrt) {
-                        org.autojs.autojs.core.plugin.agent.ThreeStoveAgentConnectionOwner.get(this).restoreIfWanted()
+                        org.autojs.autojs.core.plugin.agent.ThreeStoveAgentConnectionOwner.get(this).refresh()
                     }
                 }
                 scheduleDeferredMaintenance()

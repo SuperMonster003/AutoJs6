@@ -75,12 +75,11 @@ class ThreeStoveAgentPeerConformanceTest {
                     AidlPluginHost.LeasedCall(api.attach(config, owned.modelBroker, owned.capabilityBroker, callback), Closeable { released += index; binding.close() })
                 } catch (failure: Throwable) { binding.close(); throw failure }
             })
-        val previousClosed = controller.isNormallyClosed
         fun send(operation: String, generation: Int = 0, data: Bundle = Bundle()) = driver.control(operation, generation, data)
         fun emit(id: String, value: Bundle, generation: Int = 0) { send("run", generation, value.apply { putString("fixture.runId", id) }) }
         fun start() = controller.scriptRuns.start("Conformance echo \u4e2d\u6587", JsonObject().apply { addProperty("interaction", "script") })
         override fun close() {
-            runBlocking { controller.detach() }; controller.isNormallyClosed = previousClosed
+            runBlocking { controller.detach() }
             scope.cancel(); control.close()
         }
     }

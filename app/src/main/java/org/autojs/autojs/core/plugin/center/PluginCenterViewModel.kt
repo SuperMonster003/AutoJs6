@@ -745,14 +745,14 @@ class PluginCenterViewModel : ViewModel() {
             )
         }
 
-        val defaultEnabled = isInstalled && PluginDefaultEnabledPolicy.isEnabledByDefault(engine)
+        val defaultEnabled = isInstalled && PluginDefaultEnabledPolicy.isEnabledByDefault(engine, trustInfo.authorizedState)
         var enabled = enableStore.isEnabled(context, packageName, defaultEnabled = defaultEnabled)
         if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED && enabled) {
             enableStore.setEnabled(context, packageName, false)
             enabled = false
         }
         if (!isHostVersionCompatible(hostVersionCode, requiresHostVersion) && enabled) {
-            enableStore.setEnabled(context, packageName, false)
+            if (engine != ThreeStoveAgentIds.ENGINE) enableStore.setEnabled(context, packageName, false)
             enabled = false
         }
 
@@ -786,7 +786,9 @@ class PluginCenterViewModel : ViewModel() {
             // A later user-initiated enable always probes it again before restoring READY.
             // zh-CN: 无法完成发现的插件不得继续保持逻辑启用状态.
             // 用户后续主动启用时会再次实时探测, 成功后才恢复 READY.
-            enableStore.setEnabled(context, packageName, false)
+            // Agent availability checks still reject this build, but a transient install/probe
+            // failure must not become a permanent user opt-out from automatic availability.
+            if (engine != ThreeStoveAgentIds.ENGINE) enableStore.setEnabled(context, packageName, false)
             enabled = false
         }
         val lastError = authError ?: hostVersionError ?: mappedError

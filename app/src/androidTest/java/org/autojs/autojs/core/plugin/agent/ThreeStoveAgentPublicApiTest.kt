@@ -68,7 +68,6 @@ class ThreeStoveAgentPublicApiTest {
         check(context.bindService(Intent().setComponent(ComponentName(pkg,"$pkg.ThreeStoveAgentPluginService")),connection,Context.BIND_AUTO_CREATE))
         val singleton=ThreeStoveAgentLinkController::class.java.getDeclaredField("instance").apply { isAccessible=true }
         val old=singleton.get(null)
-        val normallyClosed=Pref.getBoolean(ThreeStoveAgentLinkController.NORMALLY_CLOSED_KEY,true)
         val work=File(context.cacheDir,"agent-p5-${UUID.randomUUID()}").apply { check(mkdirs()) }
         var controller: ThreeStoveAgentLinkController?=null
         try {
@@ -80,7 +79,7 @@ class ThreeStoveAgentPublicApiTest {
             action(controller,work)
         } finally {
             runBlocking { controller?.detach("test-finished") }
-            singleton.set(null,old); Pref.putBoolean(ThreeStoveAgentLinkController.NORMALLY_CLOSED_KEY,normallyClosed)
+            singleton.set(null,old)
             context.unbindService(connection)
             // Only this UUID directory under the application's private cache is owned by the fixture.
             assertEquals(context.cacheDir.canonicalFile,work.canonicalFile.parentFile)

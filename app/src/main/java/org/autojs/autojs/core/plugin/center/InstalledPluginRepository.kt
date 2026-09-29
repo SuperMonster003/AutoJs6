@@ -454,7 +454,7 @@ class InstalledPluginRepository {
         )
     }
 
-    // The first package-manager-only frame must honor Agent's default-off policy before INFO binds.
+    // The first package-manager-only frame must apply Agent's signer-aware policy before INFO binds.
     private fun Discovery.declaredAgentEngine(): String? = ThreeStoveAgentIds.ENGINE.takeIf {
         serviceAction == ThreeStoveAgentActions.SERVICE_ACTION && serviceInfo.packageName == ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME
     }

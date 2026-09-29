@@ -17,7 +17,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.autojs.core.plugin.hostbroker.HostCapabilityBrokerCore
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract as C
 import org.autojs.plugin.three.stove.agent.api.IThreeStoveAgentLink
 import org.autojs.plugin.three.stove.agent.api.IThreeStoveAgentLinkCallback
@@ -47,6 +46,7 @@ class ThreeStoveAgentLinkController(
     private val attachLink: suspend (Bundle, ThreeStoveAgentLinkBrokers, IThreeStoveAgentLinkCallback) -> AidlPluginHost.LeasedCall<IThreeStoveAgentLink> = { config, brokers, callback ->
         ThreeStoveAgentPluginHost.attach(context.applicationContext, config, brokers, callback)
     },
+    private val connectOnDemand: (suspend (Boolean) -> Boolean)? = null,
 ) {
     interface Listener {
         fun onStatus(status: ThreeStoveAgentLinkStatus) {}
@@ -87,9 +87,9 @@ class ThreeStoveAgentLinkController(
         scope.launch { runCatching { attach() } }
     }
 
-    var isNormallyClosed: Boolean
-        get() = Pref.getBoolean(NORMALLY_CLOSED_KEY, true)
-        set(value) = Pref.putBoolean(NORMALLY_CLOSED_KEY, value)
+    internal suspend fun ensureConnected(allowConnect: Boolean = true, showGuide: Boolean = true): Boolean = if (status.value.state == "attached") {
+        available()
+    } else allowConnect && connectOnDemand?.invoke(showGuide) == true
 
     suspend fun attach(configJson: String = "{}"): Unit = mutex.withLock {
         validateConfig(configJson)
@@ -99,12 +99,10 @@ class ThreeStoveAgentLinkController(
         desiredConfig = configJson
         val generation = policy.attach()
         attachLocked(generation)
-        isNormallyClosed = false
     }
 
     suspend fun detach(code: String = "user-request"): Unit = mutex.withLock {
         policy.detach()
-        isNormallyClosed = true
         rebindJob?.cancel()
         rebindJob = null
         val current = active
@@ -250,12 +248,12 @@ class ThreeStoveAgentLinkController(
     }
 
     companion object {
-        const val NORMALLY_CLOSED_KEY = "key_\$_three_stove_agent_normally_closed"
-
         @Volatile private var instance: ThreeStoveAgentLinkController? = null
 
         fun get(context: Context): ThreeStoveAgentLinkController = instance ?: synchronized(this) {
-            instance ?: ThreeStoveAgentLinkController(context.applicationContext).also { instance = it }
+            instance ?: ThreeStoveAgentLinkController(context.applicationContext, connectOnDemand = { showGuide ->
+                ThreeStoveAgentConnectionOwner.get(context.applicationContext).ensureConnected(showGuide)
+            }).also { instance = it }
         }
 
         internal fun reason(code: String) = Bundle().apply {

@@ -165,7 +165,6 @@
     <string name="description_stable_mode">안정 모드는 레이아웃 경계를 얻을 때 더 안정적이지만 일부 결과는 무시할 수 있습니다.\n접근성 서비스의 재시작이 필요합니다.</string>
     <string name="description_terminal">독립적인 shell 세션에서 명령을 실행합니다. 화면을 나가도 세션은 계속 실행됩니다. 스위치를 끄면 모든 세션이 종료됩니다.</string>
     <string name="description_theme_color_preference">테마 색상은 다음을 포함하되 이에 국한되지 않는 위젯에 적용됩니다.\n상태 표시 줄\n앱바\n파일 아이콘\n작업 항목 아이콘\n팹\n설정 카테고리 제목\n스위치 버튼\n\n참고: AutoJs6 버전 6.2.0 현재 기본 색상, 기본 어두운 색상 및 강조 색상 사이에는 아직 차이가 없습니다.</string>
-    <string name="description_three_stove_agent">Three Stove Agent 플러그인을 AutoJs6에 연결합니다. 관리 버튼으로 작업 화면을 엽니다. 연결만으로 작업이 시작되지는 않습니다.</string>
     <string name="description_timed_task_backend">스크립트를 정해진 시간에 실행하는 기본 메커니즘을 제어합니다.\n\nAlarmManager: 시스템의 \"알람 및 알림 설정 허용\" 권한을 부여하면 보다 정확한 시각에 가깝게 실행됩니다.\nWorkManager: 시스템 친화적이며, 일정 지연을 허용할 수 있는 비중요 작업에 적합합니다.\nJobScheduler: 호환성 유지를 위해 남겨둔 구방식으로, 지연 발생 가능성이 큽니다.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">사용 시나리오 및 차이점:\n\n1. AlarmManager\n[리마인더/엄격한 정시 스크립트/...] 등 시간 정확도가 중요한 작업에 적합합니다.\nAndroid 12+ 에서 \"알람 및 알림 설정 허용\" 권한이 있으면, 화면 꺼짐/대기 중에도 비교적 정확하게 실행됩니다.\n권한이 없으면 시스템이 정확도를 낮추거나 실행을 지연할 수 있습니다.\n\n2. WorkManager\n[비중요 동기화/정리/통계/...] 등 엄격한 정시성이 필요 없는 작업에 적합합니다.\n[배터리/네트워크/충전 상태/대기 정책/...] 에 따라 스케줄링되며, 화면 꺼짐/대기 중에는 지연될 수 있습니다.\n시간 정확도는 보장되지 않지만, [신뢰성 있는 완료/실패 재시도/체이닝/단일 작업 중복 방지] 에 장점이 있습니다.\n\n3. JobScheduler\n호환성 유지를 위한 기존 구현입니다.\n신형 Android 에서는 지연이 더 커질 수 있습니다.\n특별한 호환성 목적이 아니라면 일반적으로 권장하지 않습니다.</string>
     <string name="description_usage_stats_access">장치 사용 기록 및 통계에 대한 액세스를 제공하여 CurrentPackage ()보다 정확한 결과를 초래합니다.</string>
@@ -699,7 +698,7 @@
     <string name="prompt_three_stove_agent_activate">Three Stove Agent가 설치되었지만 Android에서 아직 활성화되지 않았습니다. AutoJs6에 연결하려면 활성화하세요.</string>
     <string name="prompt_three_stove_agent_application_disabled">Android에서 Three Stove Agent를 사용 중지했습니다. 시스템 설정에서 앱을 사용 설정하고 다시 시도하세요.</string>
     <string name="prompt_three_stove_agent_authorize">Three Stove Agent에 연결하기 전에 플러그인 센터에서 이 플러그인을 승인하세요.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent 플러그인을 활성화하고 AutoJs6에 연결할까요?</string>
+    <string name="prompt_three_stove_agent_enable">Three Stove Agent가 플러그인 센터에서 비활성화되어 있습니다. 활성화한 후 다시 시도하세요.</string>
     <string name="prompt_three_stove_agent_failed">Three Stove Agent에 연결할 수 없습니다. 플러그인 센터에서 상태와 버전을 확인하고 다시 시도하세요.</string>
     <string name="prompt_three_stove_agent_incompatible">이 플러그인은 AutoJs6 빌드 %1$d 이상이 필요합니다. 호환되는 AutoJs6와 Three Stove Agent를 설치하세요.</string>
     <string name="prompt_three_stove_agent_install">Three Stove Agent 공식 출시 페이지에서 다운로드하고 설치한 후 AutoJs6에서 활성화하세요. 출시 버전이 없다면 나중에 다시 확인하세요.</string>
@@ -2379,16 +2378,6 @@
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="text_yearly_task">연간 작업</string>
     <string name="text_zero_means_unlimited">0은 제한 없음을 의미합니다</string>
-    <string name="three_stove_agent_state_activation">활성화 필요</string>
-    <string name="three_stove_agent_state_attached">연결됨, 실행 중: %1$d, 대기 중: %2$d</string>
-    <string name="three_stove_agent_state_attaching">연결 중</string>
-    <string name="three_stove_agent_state_authorization">승인 필요</string>
-    <string name="three_stove_agent_state_detached">연결 해제됨</string>
-    <string name="three_stove_agent_state_disabled">플러그인 비활성화됨</string>
-    <string name="three_stove_agent_state_failed">연결 실패</string>
-    <string name="three_stove_agent_state_host_unavailable">호스트 사용 불가</string>
-    <string name="three_stove_agent_state_incompatible">호환되지 않는 버전</string>
-    <string name="three_stove_agent_state_not_installed">플러그인 미설치</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
     <string name="warning_apk_native_page_alignment_unsupported">네이티브 라이브러리 %1$s의 정렬은 %2$d바이트입니다. 생성된 APK는 페이지 크기가 16 KB인 기기에서 실행되지 않을 수 있습니다. 라이브러리 또는 플러그인을 업데이트하세요.</string>

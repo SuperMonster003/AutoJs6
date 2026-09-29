@@ -10,7 +10,7 @@ order, Bundle keys, JSON envelopes, limits and error vocabulary are unchanged fr
 the host build shipping the rename is **5298** and
 `ThreeStoveAgentIds.REQUIRED_HOST_VERSION_CODE` equals it. The host provides
 model/capability brokers, registered script discovery/execution, screen
-observations/actions, drawer controls and Plugin Center management. The plugin
+observations/actions, on-demand connection and Plugin Center management. The plugin
 implements the Agent loop, parameter completion, confirmations, task workbench,
 history, presets, memory and system entry points. The additive native-tool broker
 extension below is P9.1 host support; Provider and Agent adoption have separate
@@ -40,8 +40,10 @@ the shared plugin-center discovery surface. ABI support is explicitly empty.
 
 The host selects the exact package and service, checks contract/version metadata,
 enablement, signer authorization and host compatibility, and holds a dedicated
-binding lease. Enablement defaults to false without an explicit stored decision;
-the shared official fresh-install authorization policy is unchanged.
+binding lease. An officially signed installation defaults to enabled, including
+installations completed while Plugin Center is stopped. Other signers default to
+disabled. A saved user choice takes precedence; discovery failures do not overwrite
+Agent enablement, and runtime availability checks still reject unavailable builds.
 User-granted signers require the
 additional signer confirmation used by the host inspection policy. Provider and
 device brokers belong to one attachment and are revoked together on failure,
@@ -53,11 +55,14 @@ Agent interface and its contract. P2.5 connected task controls and the runner
 to the real host brokers. Both plugin service manifests and PluginInfo must agree
 on the packaged plugin's minimum host build; it may exceed the base V2 floor (5298).
 
-`ThreeStoveAgentConnectionOwner` owns the link for the host process. Drawer instances
-own their dialogs only; disposing a drawer does not close the link. The drawer
-shows attachment state, one running task at most, and the queued task count.
-Its management action opens the plugin's task workbench. Discovery failures show
-state-specific installation,
+`ThreeStoveAgentConnectionOwner` owns the link for the host process. Plugin Center
+is the sole enable/disable control; the home drawer contains no Agent switch.
+Scripts and the plugin UI connect on demand. Concurrent requests share one bind,
+and enablement is checked again after binding so a concurrent disable revokes the
+new lease. `ai.agent.status()` is read-only. Cold synchronous script calls use a
+worker thread: they must never block the main looper that delivers service callbacks.
+Host and Plugin Center activities own lifecycle-scoped dialogs, independently of
+the link. Plugin Center opens the plugin's task workbench. Failures show installation,
 activation, enablement, authorization, signer confirmation or compatibility
 guidance. Confirmation is pinned to the current signing fingerprint set.
 
@@ -74,7 +79,7 @@ guidance. Confirmation is pinned to the current signing fingerprint set.
 
 `attach(config, modelBroker, capabilityBroker, callback)` returns the link. The
 capability argument is `IHostCapabilityBroker` from the [shared contract](host-capability-contract-v1.md).
-Every Agent control/model Bundle includes `ThreeStoveAgentContract.KEY_CONTRACT_VERSION = 1`;
+Every Agent control/model Bundle includes `ThreeStoveAgentContract.KEY_CONTRACT_VERSION = 2`;
 capability dispatch/response Bundles follow their separate shared envelope.
 Methods only
 validate/admit work synchronously; model and tool work returns through callbacks.
@@ -352,11 +357,12 @@ usage. No logging includes goals, messages, schema contents or model output.
 
 The explicit broadcast action is `org.autojs.autojs6.action.THREE_STOVE_AGENT_ATTACH` and
 its package is set to the host. The exported receiver requires PLUGIN permission
-and routes to the same process-owned connection flow as the drawer.
+and routes to the same process-owned connection flow as script use.
 Its authentication implementation also validates a PendingIntent under
 `ThreeStoveAgentActions.EXTRA_ATTACH_IDENTITY`. The plugin creates this immutable token
 in its own package; the host checks `creatorPackage`, `creatorUid`, installed UID
-and official/trusted signer. On API 31 and newer it explicitly rejects a mutable
+and signer authorization. A user-granted signer still needs the separate pinned
+Agent capability confirmation before attachment. On API 31 and newer it explicitly rejects a mutable
 token; earlier Android versions expose the creator identity but not that immutable
 flag check. It never sends or retains the token. A plain package
 name extra, or `Binder.getCallingUid()` inside `onReceive`, is not sender proof.
@@ -369,8 +375,9 @@ this fallback after 500 ms if the background attachment is not available, as
 specified by D41. An unavailable request queues guidance for the resumed host
 UI instead of launching an activity from the broadcast receiver.
 
-Host main-process startup restores a connection when `isNormallyClosed` is false.
-It neither starts nor replays tasks. Following fixed roadmap decisions D15/D16,
+Host main-process startup inspects availability without connecting. The former
+`isNormallyClosed` drawer preference is ignored. Actual use connects automatically;
+connection establishment neither starts nor replays tasks. Following roadmap decisions D15/D16,
 there is no Agent boot receiver; P1.5's conflicting "boot" wording does not add
 an auto-start policy. Plugin package and authorization/enablement changes refresh
 admission and detach an unavailable link.
@@ -449,8 +456,9 @@ task control. Registered-script examples are under `sample/agent/`.
 ## Installation catalog and release index
 
 The host installation wizard categorizes Three Stove Agent under Tools using the exact
-official package. It is optional in both built-in profiles. Drawer and Plugin
-Center discovery/enablement are unchanged.
+official package. It is optional in both built-in profiles. Plugin Center is the
+sole enablement control; the official installation defaults to enabled unless the
+user has explicitly saved a disabled choice.
 
 Download entries come from the separate AutoJs6-Official-Plugins-Index repository.
 Its generator admits published releases with APK assets and validates the required

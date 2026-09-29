@@ -19,8 +19,6 @@ data class ThreeStoveAgentPluginFacts(
 )
 
 object ThreeStoveAgentUiPolicy {
-    fun checked(state: ThreeStoveAgentUiState) = state == ThreeStoveAgentUiState.ATTACHED
-    fun progress(state: ThreeStoveAgentUiState) = state == ThreeStoveAgentUiState.ATTACHING
 
     fun linkState(state: String): ThreeStoveAgentUiState = when (state) {
         "attaching" -> ThreeStoveAgentUiState.ATTACHING
@@ -43,8 +41,8 @@ object ThreeStoveAgentUiPolicy {
         !facts.compatible -> ThreeStoveAgentUiState.INCOMPATIBLE
         !facts.authorized -> ThreeStoveAgentUiState.AUTHORIZATION_REQUIRED
         !facts.trustedSigner && !facts.signerConfirmed -> ThreeStoveAgentUiState.TRUST_CONFIRMATION_REQUIRED
-        facts.stopped -> ThreeStoveAgentUiState.ACTIVATION_REQUIRED
         !facts.pluginEnabled -> ThreeStoveAgentUiState.PLUGIN_DISABLED
+        facts.stopped -> ThreeStoveAgentUiState.ACTIVATION_REQUIRED
         else -> ThreeStoveAgentUiState.AVAILABLE
     }
 }

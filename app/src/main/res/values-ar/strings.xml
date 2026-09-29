@@ -165,7 +165,6 @@
     <string name="description_stable_mode">يجعل الوضع المستقر أكثر استقرارًا عند الحصول على حدود تخطيط ، ولكن قد يتم تجاهل بعض النتائج.\nإعادة تشغيل خدمة الوصول المطلوبة.</string>
     <string name="description_terminal">نفذ الأوامر في جلسات shell مستقلة. تستمر الجلسات في الخلفية عند مغادرة الصفحة. يؤدي إيقاف المفتاح إلى إنهاء جميع الجلسات.</string>
     <string name="description_theme_color_preference">يتم تطبيق لون النسق على عناصر واجهة المستخدم بما في ذلك على سبيل المثال لا الحصر العناصر التالية:\nشريط الحالة\nAppbar\nرمز الملف\nرمز عنصر المهمة\nفاب\nعنوان فئة الإعدادات\nزر التغيير\n\nملاحظة: اعتبارًا من الإصدار 6.2.0 من AutoJs6 ، لم يكن هناك فرق بين اللون الأساسي واللون الأساسي الداكن ولون التمييز حتى الآن.</string>
-    <string name="description_three_stove_agent">اربط إضافة Three Stove Agent مع AutoJs6. استخدم زر الإدارة لفتح صفحة المهام. الاتصال وحده لا يبدأ أي مهمة.</string>
     <string name="description_timed_task_backend">يتحكم في الآلية الأساسية لتشغيل السكربتات بشكل مجدول.\n\nAlarmManager: عبر منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن أن تصبح المهام أقرب إلى التنفيذ في الوقت المحدد.\nWorkManager: صديق للنظام؛ مناسب للمهام غير الحرجة التي تتحمل بعض التأخير.\nJobScheduler: تنفيذ قديم محفوظ للتوافق؛ احتمال التأخير أعلى.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">حالات الاستخدام والفروقات:\n\n1. AlarmManager\nمناسب للمهام الحسّاسة للتوقيت، مثل [التذكيرات/السكربتات الدقيقة التوقيت/...].\nعلى Android 12+ ومع منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن التنفيذ بدقة أكبر حتى مع إيقاف الشاشة أو في وضع السكون.\nبدون الإذن قد يقلل النظام الدقة أو يؤخر التنفيذ.\n\n2. WorkManager\nمناسب للمهام التي لا تتطلب دقة زمنية صارمة مثل [مزامنة غير حرجة/تنظيف/إحصاءات/...].\nيتم الجدولة وفق [حالة البطارية/الشبكة/الشحن/سياسات السكون/...], وقد تتأخر المهام عند إيقاف الشاشة أو في وضع السكون.\nلا يضمن الدقة الزمنية لكنه يوفر مزايا في [إتمام موثوق/إعادة المحاولة عند الفشل/سلاسل المهام/إزالة التكرار].\n\n3. JobScheduler\nتنفيذ تاريخي لأغراض التوافق.\nفي إصدارات أندرويد الحديثة قد تحدث تأخيرات أكبر.\nلا يُنصح به إلا لاعتبارات التوافق.</string>
     <string name="description_usage_stats_access">يوفر إمكانية الوصول إلى سجل وإحصائيات استخدام الجهاز مما يؤدي إلى CurrentPackage () نتيجة أكثر دقة</string>
@@ -699,7 +698,7 @@
     <string name="prompt_three_stove_agent_activate">تم تثبيت Three Stove Agent لكن Android لم يفعله بعد. فعله للسماح بالاتصال مع AutoJs6.</string>
     <string name="prompt_three_stove_agent_application_disabled">عطل Android تطبيق Three Stove Agent. فعله في إعدادات النظام ثم حاول مجددا.</string>
     <string name="prompt_three_stove_agent_authorize">امنح هذه الإضافة الإذن في مركز الإضافات قبل ربط Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">هل تريد تفعيل إضافة Three Stove Agent وربطها مع AutoJs6?</string>
+    <string name="prompt_three_stove_agent_enable">Three Stove Agent معطل في مركز الإضافات. قم بتمكينه هناك ثم حاول مرة أخرى.</string>
     <string name="prompt_three_stove_agent_failed">تعذر الاتصال مع Three Stove Agent. تحقق من حالته وإصداره في مركز الإضافات ثم حاول مجددا.</string>
     <string name="prompt_three_stove_agent_incompatible">تتطلب هذه الإضافة AutoJs6 بالبناء %1$d أو أحدث. ثبت إصدارين متوافقين من AutoJs6 و Three Stove Agent.</string>
     <string name="prompt_three_stove_agent_install">نزل Three Stove Agent من صفحة إصداراته الرسمية ثم ثبته وفعله في AutoJs6. إذا لم يتوفر إصدار فتحقق لاحقا.</string>
@@ -2379,16 +2378,6 @@
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="text_yearly_task">مهمة سنوية</string>
     <string name="text_zero_means_unlimited">0 يعني بلا حدود</string>
-    <string name="three_stove_agent_state_activation">يلزم التفعيل</string>
-    <string name="three_stove_agent_state_attached">متصل, قيد التشغيل: %1$d, في الانتظار: %2$d</string>
-    <string name="three_stove_agent_state_attaching">جار الاتصال</string>
-    <string name="three_stove_agent_state_authorization">يلزم الإذن</string>
-    <string name="three_stove_agent_state_detached">غير متصل</string>
-    <string name="three_stove_agent_state_disabled">الإضافة معطلة</string>
-    <string name="three_stove_agent_state_failed">فشل الاتصال</string>
-    <string name="three_stove_agent_state_host_unavailable">التطبيق المضيف غير متاح</string>
-    <string name="three_stove_agent_state_incompatible">إصدار غير متوافق</string>
-    <string name="three_stove_agent_state_not_installed">الإضافة غير مثبتة</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
     <string name="warning_apk_native_page_alignment_unsupported">محاذاة المكتبة الأصلية %1$s هي %2$d بايت. قد لا يعمل ملف APK الناتج على أجهزة بصفحات 16 KB. يرجى تحديث المكتبة أو الإضافة.</string>

@@ -58,6 +58,7 @@ class PluginCenterActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        org.autojs.autojs.ui.settings.ThreeStoveAgentGuide(this)
 
         variantDisplayMode = intent.getStringExtra(EXTRA_VARIANT_DISPLAY_MODE)
             ?.runCatching { PluginVariantDisplayMode.valueOf(this) }

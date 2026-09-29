@@ -10,12 +10,13 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
+import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
 import org.autojs.autojs.core.pref.Pref
 
-data class ThreeStoveAgentToolState(val state: ThreeStoveAgentUiState, val status: ThreeStoveAgentLinkStatus = ThreeStoveAgentLinkStatus())
+data class ThreeStoveAgentConnectionState(val state: ThreeStoveAgentUiState, val status: ThreeStoveAgentLinkStatus = ThreeStoveAgentLinkStatus())
 
-/** Process-owned connection intent. Drawer disposal never detaches a live link or starts a run. */
+/** On-demand process-owned link. Plugin Center alone controls whether new connections are allowed. */
 class ThreeStoveAgentConnectionOwner internal constructor(
     context: Context,
     private val controller: ThreeStoveAgentLinkController = ThreeStoveAgentLinkController.get(context.applicationContext),
@@ -31,15 +32,11 @@ class ThreeStoveAgentConnectionOwner internal constructor(
     private val mutableGuide = MutableStateFlow<ThreeStoveAgentInspection?>(null)
     val pendingGuide = mutableGuide.asStateFlow()
     val state = combine(availability, controller.status) { available, status ->
-        ThreeStoveAgentToolState(if (available == ThreeStoveAgentUiState.AVAILABLE) ThreeStoveAgentUiPolicy.linkState(status.state) else available, status)
-    }.stateIn(scope, SharingStarted.Eagerly, ThreeStoveAgentToolState(ThreeStoveAgentUiState.DETACHED))
+        ThreeStoveAgentConnectionState(if (available == ThreeStoveAgentUiState.AVAILABLE) ThreeStoveAgentUiPolicy.linkState(status.state) else available, status)
+    }.stateIn(scope, SharingStarted.Eagerly, ThreeStoveAgentConnectionState(ThreeStoveAgentUiState.DETACHED))
     private var connectJob: Deferred<ThreeStoveAgentInspection>? = null
     private var connectingConfiguration: String? = null
     private var refreshJob: Job? = null
-    var isNormallyClosed: Boolean
-        get() = controller.isNormallyClosed
-        set(value) { controller.isNormallyClosed = value }
-
     init {
         if (observePluginChanges) observePluginChanges()
     }
@@ -63,20 +60,15 @@ class ThreeStoveAgentConnectionOwner internal constructor(
         }, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
-    /** Only host startup restores remembered connections. There is deliberately no boot receiver. */
-    fun restoreIfWanted() {
-        scope.launch { if (!isNormallyClosed) connect(automatic = true).await() }
-    }
-
     fun requestFromPlugin(configuration: String? = null) {
         scope.launch {
-            val inspection = connect(automatic = false, configuration = configuration).await()
+            val inspection = connect(configuration = configuration).await()
             if (ThreeStoveAgentUiPolicy.needsGuide(inspection.state)) mutableGuide.value = inspection
         }
     }
 
-    /** Called on the main thread, including through the receiver and drawer facade. */
-    fun connect(automatic: Boolean = false, configuration: String? = null): Deferred<ThreeStoveAgentInspection> {
+    /** Called on the main thread, including script requests marshalled here by ensureConnected. */
+    fun connect(configuration: String? = null): Deferred<ThreeStoveAgentInspection> {
         val normalized = configuration?.let(ThreeStoveAgentScriptRoots::configuration)
         connectJob?.takeIf { it.isActive }?.let {
             if (normalized == null || normalized == connectingConfiguration) return it
@@ -85,10 +77,14 @@ class ThreeStoveAgentConnectionOwner internal constructor(
         connectingConfiguration = normalized
         return scope.async {
             operation.withLock {
-                if (automatic && isNormallyClosed) return@withLock ThreeStoveAgentInspection(ThreeStoveAgentUiState.DETACHED)
                 mutableGuide.value = null
                 availability.value = ThreeStoveAgentUiState.ATTACHING
-                val inspection = inspect()
+                var inspection = inspect()
+                if (inspection.state == ThreeStoveAgentUiState.ACTIVATION_REQUIRED &&
+                    PluginWakeManager.tryAutoWakeIfNeeded(context, ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME)) {
+                    delay(300)
+                    inspection = inspect()
+                }
                 availability.value = inspection.state
                 if (inspection.state != ThreeStoveAgentUiState.AVAILABLE) return@withLock inspection
                 try {
@@ -102,7 +98,13 @@ class ThreeStoveAgentConnectionOwner internal constructor(
                         // Persist only a configuration the host validated and the plugin accepted.
                         if (normalized != null) saveRootConfiguration(normalized)
                     }
-                    inspection.copy(state = ThreeStoveAgentUiState.ATTACHED)
+                    // Disablement can race a slow bind. Recheck before exposing the completed link.
+                    val current = inspect()
+                    if (current.state != ThreeStoveAgentUiState.AVAILABLE) {
+                        withContext(Dispatchers.IO) { controller.detach("plugin-unavailable") }
+                        availability.value = current.state
+                        current
+                    } else inspection.copy(state = ThreeStoveAgentUiState.ATTACHED)
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (_: Exception) {
@@ -114,7 +116,6 @@ class ThreeStoveAgentConnectionOwner internal constructor(
     }
 
     fun disconnect() {
-        isNormallyClosed = true
         connectJob?.cancel()
         mutableGuide.value = null
         scope.launch {
@@ -123,6 +124,12 @@ class ThreeStoveAgentConnectionOwner internal constructor(
                 availability.value = ThreeStoveAgentUiState.AVAILABLE
             }
         }
+    }
+
+    suspend fun ensureConnected(showGuide: Boolean = true): Boolean = withContext(Dispatchers.Main.immediate) {
+        val inspection = connect().await()
+        if (showGuide && ThreeStoveAgentUiPolicy.needsGuide(inspection.state)) mutableGuide.value = inspection
+        inspection.state == ThreeStoveAgentUiState.ATTACHED
     }
 
     fun refresh() {

@@ -163,7 +163,6 @@
     <string name="description_stable_mode">El modo estable hace que sea más estable al obtener los límites de diseño, pero algunos resultados pueden ser ignorados.\nEs necesario reiniciar el servicio de accesibilidad.</string>
     <string name="description_terminal">Ejecute comandos en sesiones de shell independientes. Las sesiones continúan en segundo plano al salir. Desactivar el interruptor finaliza todas las sesiones.</string>
     <string name="description_theme_color_preference">El color del tema se aplica a los widgets, incluidos, entre otros, los siguientes\nBarra de estado\nBarra de aplicaciones\nIcono de archivo\nIcono de elemento de tarea\nFAB\nTítulo de la categoría de ajustes\nBotón de cambio\n\nNota: A partir de la versión 6.2.0 de AutoJs6, todavía no hay diferencia entre el color primario, el color primario oscuro y el color de acento.</string>
-    <string name="description_three_stove_agent">Conecta el complemento Three Stove Agent a AutoJs6. Usa Administrar para abrir su página de tareas. La conexión por sí sola no inicia tareas.</string>
     <string name="description_timed_task_backend">Controla el mecanismo subyacente para activar scripts de forma programada.\n\nAlarmManager: Mediante la concesión del permiso \"Permitir configurar alarmas y recordatorios\", las tareas programadas pueden dispararse con mayor puntualidad.\nWorkManager: Amigable con el sistema; adecuado para tareas no críticas que toleran cierta demora.\nJobScheduler: Implementación antigua, mantenida por compatibilidad; la ejecución puede retrasarse con mayor probabilidad.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Escenarios de uso y diferencias:\n\n1. AlarmManager\nAdecuado para tareas sensibles a la puntualidad, p. ej., [recordatorios/scripts estrictamente programados/...].\nEn Android 12+ y con el permiso \"Permitir configurar alarmas y recordatorios\", puede ejecutar tareas de forma más puntual con la pantalla apagada o en estado de espera.\nSin dicho permiso, el sistema puede degradar la exactitud o retrasar la ejecución.\n\n2. WorkManager\nAdecuado para tareas que no requieren estricta puntualidad, p. ej., [sincronización no crítica/limpieza/estadísticas/...].\nSe programa según [batería/red/carga/estrategias de reposo/...], por lo que puede posponer la ejecución con la pantalla apagada o en espera.\nAunque no garantiza precisión temporal, tiene ventajas en [finalización fiable/reintentos en caso de fallo/encadenamiento/deduplicación de trabajos].\n\n3. JobScheduler\nImplementación histórica para compatibilidad.\nEn versiones recientes de Android, las tareas pueden experimentar mayores retrasos.\nPor lo general, no se recomienda salvo por motivos de compatibilidad.</string>
     <string name="description_usage_stats_access">Proporciona acceso al historial de uso del dispositivo y a las estadísticas, lo que da a currentPackage() un resultado más preciso</string>
@@ -697,7 +696,7 @@
     <string name="prompt_three_stove_agent_activate">Three Stove Agent está instalado, pero Android aún no lo ha activado. Actívalo para permitir la conexión a AutoJs6.</string>
     <string name="prompt_three_stove_agent_application_disabled">Android ha deshabilitado Three Stove Agent. Habilita la aplicación en los ajustes del sistema e inténtalo de nuevo.</string>
     <string name="prompt_three_stove_agent_authorize">Autoriza este complemento en el centro de complementos antes de conectar Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">Habilitar el complemento Three Stove Agent y conectarlo a AutoJs6?</string>
+    <string name="prompt_three_stove_agent_enable">Three Stove Agent está desactivado en el centro de complementos. Actívelo allí e inténtelo de nuevo.</string>
     <string name="prompt_three_stove_agent_failed">No se puede conectar a Three Stove Agent. Comprueba su estado y versión en el centro de complementos e inténtalo de nuevo.</string>
     <string name="prompt_three_stove_agent_incompatible">Este complemento requiere AutoJs6 compilación %1$d o posterior. Instala versiones compatibles de AutoJs6 y Three Stove Agent.</string>
     <string name="prompt_three_stove_agent_install">Descarga Three Stove Agent desde su página oficial de versiones, instálalo y habilítalo en AutoJs6. Si no hay versiones disponibles, vuelve más tarde.</string>
@@ -2377,16 +2376,6 @@
     <string name="text_xiaomi_background_popup_permission">Ventanas emergentes en segundo plano</string>
     <string name="text_yearly_task">Tarea anual</string>
     <string name="text_zero_means_unlimited">0 significa sin límite</string>
-    <string name="three_stove_agent_state_activation">Se requiere activación</string>
-    <string name="three_stove_agent_state_attached">Conectado, en ejecución: %1$d, en cola: %2$d</string>
-    <string name="three_stove_agent_state_attaching">Conectando</string>
-    <string name="three_stove_agent_state_authorization">Se requiere autorización</string>
-    <string name="three_stove_agent_state_detached">Desconectado</string>
-    <string name="three_stove_agent_state_disabled">Complemento deshabilitado</string>
-    <string name="three_stove_agent_state_failed">Error de conexión</string>
-    <string name="three_stove_agent_state_host_unavailable">Anfitrión no disponible</string>
-    <string name="three_stove_agent_state_incompatible">Versión incompatible</string>
-    <string name="three_stove_agent_state_not_installed">Complemento no instalado</string>
     <string name="warn_continue_operation_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres continuar?</string>
     <string name="warn_exit_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres salir?</string>
     <string name="warning_apk_native_page_alignment_unsupported">La biblioteca nativa %1$s tiene una alineación de %2$d bytes. El APK generado puede ser incompatible con páginas de 16 KB. Actualice la biblioteca o el plugin.</string>

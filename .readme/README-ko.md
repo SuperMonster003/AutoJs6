@@ -415,7 +415,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` EPUB 계약 버전 2 (하이라이트와 메모, 플러그인 로드맵 P9.4): 추가된 `IEpubBook.getAnnotations` (페이지 단위, 읽기 순서) 와 리더 세션의 `highlight` 이벤트가 리더의 하이라이트와 메모를 `annotations` 문서 (id, style, color, note, quote, 장 제목, locator, createdAt, updatedAt) 로 전달합니다. 호스트는 플러그인의 `epubMaxContractVersion` 으로 버전을 협상하여 모든 요청에 기록하므로 버전 1 플러그인은 새 호출을 받지 않습니다. 스크립트 API `epub` 에 `book.annotations()` 와 `epub.annotations(path)` (`Async` 형태 포함) 가 추가되고, `EpubReaderSession` 은 `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` 를 발생시킵니다 (`action` 은 added, updated 또는 removed)
 * `추가` Three Stove Agent 플러그인 계약과 호스트 프록시. 제한된 기기 접근, 모델 호출 할당량 및 연결 손실 시 리소스 정리 지원; 모델 프록시가 네이티브 도구 호출과 결과 기반 후속 라운드를 지원하며 매 라운드 모델 할당량을 확인
 * `추가` project.json / @agent 헤더를 통한 Agent 스크립트 등록 및 범위가 제한된 실행. 인수 검증, 시간 초과 시 중지 및 구조화된 결과 반환 지원
-* `추가` Three Stove Agent 서랍 메뉴 및 플러그인 센터 관리. 연결 상태, 작업 수, 승인 안내 및 호스트 재시작 후 연결 복원 지원; 출시 APK가 공식 인덱스에 등록되면 설치 마법사 도구 분류에서 선택 가능
+* `추가` 플러그인 센터의 Three Stove Agent 관리 및 설치, 활성화, 승인, 호환성 안내; 출시 APK가 공식 인덱스에 등록되면 설치 마법사 도구 분류에서 선택 가능
 * `추가` Three Stove Agent 플러그인에서 추가 스크립트 폴더를 설정하면 호스트가 범위를 검증하고 저장하여 재연결 시 복원하며, 유효하지 않은 폴더는 승인된 설정을 변경하지 않음
 * `수정` Three Stove Agent 온라인 모델 호출 실패 시 네트워크, 인증 및 응답 오류 분류가 누락되는 문제 (Provider 플러그인 지원 필요)
 * `수정` assistant 도구 옵션 병합 시 기본 tools 객체가 비어 있으면 기본적으로 꺼진 도구 그룹이 켜지는 문제
@@ -646,6 +646,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 클라이언트 모드의 서버 주소 기록이 핸드셰이크 실패 시에만 기록되고 성공적으로 연결한 주소는 기록되지 않아 주소 대화 상자의 "기록"이 항상 비어 있던 문제
 * `수정` 업데이트용 APK 선택 시 최우선 ABI 에 맞는 패키지가 없는 릴리스에서 다음 우선순위 ABI 의 패키지 대신 목록 뒤쪽의 낮은 우선순위 패키지 (유니버설 등) 가 선택될 수 있었던 문제
 * `수정` 내장 패키지 설치 관리자가 Android 9-11에서 플랫폼 아카이브 파서가 서명 정보를 비워 두는 탓에 V2/V3 서명 APK를 "Base APK has no verifiable signer"로 거부할 수 있던 문제 수정, 이제 사용 중단된 아카이브 서명 뷰를 대체 수단으로 조회
+* `수정` 플러그인 센터의 Three 시리즈 5종이 런처 배경 없이 호스트의 밝은/어두운 테마를 따르는 투명 아이콘을 사용
 * `개선` Android 7-10 에서 Three Stove Agent 모델 데이터를 공개 API 로 읽으며 파일 위치와 정체된 파이프의 취소 동작 유지
 * `개선` 호스트 lint 검사는 경로에 따라 AutoJs4 호환 클래스와 리소스를 제외하고 나머지 호스트 코드를 계속 검사
 * `개선` 플러그인 센터가 호스트와 동일한 공식 인증서로 서명된 기본 비활성 플러그인 (YOLO, MCP Server) 의 신규 설치를 감지하면 명시적 활성화 기록을 기록하고 활성화 탐색을 실행; 신뢰된 서드파티 또는 사용자 승인 서명, adb 설치 및 업데이트는 계속 수동 활성화가 필요하며, 실행 시에는 저장된 기록만 참조
@@ -817,6 +818,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` ai.agent 작업 객체의 respond 메서드가 Three Stove Agent 계획 모드의 계획 검토 요청 (kind가 plan인 input 이벤트)에 답하기 위해 1개에서 8개의 비어 있지 않은 문자열 배열을 받습니다. 문자열과 불리언 응답은 그대로입니다
 * `개선` Provider 자체가 요청을 거부하거나 중단한 경우 (잘못된 요청, 프로토콜 위반, 디스크립터 또는 할당량 문제 등) Three Stove Agent 모델 브로커는 실패 단계를 닫힌 PROVIDER_* 사유 코드로 보고하며, 더 이상 사유 없는 PROVIDER_FAILED로 한꺼번에 접지 않습니다. 사유는 AiErrorCode에서만 파생되며 Provider 텍스트를 담지 않습니다
 * `개선` Three Stove Agent 모델 브로커는 네이티브 도구 결과 배치를 받아들일 때마다 요청의 timeoutMs로 기한을 다시 설정합니다. 따라서 각 이어가기 라운드가 전체 시간 제한을 가지며, 전체 턴은 플러그인의 작업 예산과 라운드 상한으로 제한됩니다. 결과를 제출하지 않고 기다리는 경우에는 여전히 원래 기한에 만료됩니다. 이전에는 다중 라운드 네이티브 작업이 첫 요청의 기한을 공유해 5분 뒤 MODEL_TIMEOUT으로 끝났습니다
+* `개선` Three Stove Agent 활성화와 비활성화를 플러그인 센터로 통합하고 홈 서랍 스위치를 제거. 스크립트와 플러그인 화면은 필요할 때 자동 연결하며 공식 설치는 기본 활성화하되 사용자가 명시적으로 저장한 비활성화 상태는 유지
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
