@@ -70,6 +70,10 @@
             <category android:name="mail" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.INSTALLER" />
+            <category android:name="installer" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.EPUB" />
             <category android:name="epub" />
         </intent>
@@ -373,76 +377,6 @@
         <activity
             android:name="org.autojs.autojs.ui.main.scripts.DisplayManifestActivity"
             android:theme="@style/AppTheme.Settings" />
-
-        <activity
-            android:name="org.autojs.autojs.ui.main.scripts.PackageInstallerActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:theme="@style/AppTheme.Transparent" />
-
-        <activity
-            android:name="org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:launchMode="singleTop"
-            android:taskAffinity=""
-            android:theme="@style/AppTheme.Transparent" />
-
-        <receiver
-            android:name="org.autojs.autojs.ui.main.scripts.PackageInstallStatusReceiver"
-            android:exported="false" />
-
-        <activity
-            android:name="org.autojs.autojs.ui.main.scripts.PackageInstallerEntryActivity"
-            android:enabled="${installerEnabled}"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:icon="${icon}"
-            android:label="${appName}"
-            android:theme="@style/AppTheme.Transparent">
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.INSTALL_PACKAGE" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="content" />
-                <data android:scheme="file" />
-                <data android:mimeType="application/vnd.android.package-archive" />
-                <data android:mimeType="application/x-apks" />
-                <data android:mimeType="application/vnd.apkm" />
-                <data android:mimeType="application/xapk-package-archive" />
-                <data android:mimeType="application/x-apkz" />
-                <data android:mimeType="application/x-aab" />
-                <data android:mimeType="application/vnd.android.aab" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.INSTALL_PACKAGE" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="content" />
-                <data android:host="*" />
-                <data android:mimeType="application/zip" />
-                <data android:mimeType="application/octet-stream" />
-                <data android:pathPattern=".*\\.apk" />
-                <data android:pathPattern=".*\\.APK" />
-                <data android:pathPattern=".*\\.apks" />
-                <data android:pathPattern=".*\\.APKS" />
-                <data android:pathPattern=".*\\.xapk" />
-                <data android:pathPattern=".*\\.XAPK" />
-                <data android:pathPattern=".*\\.apkm" />
-                <data android:pathPattern=".*\\.APKM" />
-                <data android:pathPattern=".*\\.apkz" />
-                <data android:pathPattern=".*\\.APKZ" />
-                <data android:pathPattern=".*\\.aab" />
-                <data android:pathPattern=".*\\.AAB" />
-            </intent-filter>
-        </activity>
 
         <activity
             android:name="org.autojs.autojs.ui.main.scripts.DisplayMediaInfoActivity"

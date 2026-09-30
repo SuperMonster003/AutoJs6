@@ -300,9 +300,6 @@
     <string name="error_an_error_occurred">エラーが発生しました</string>
     <string name="error_an_operation_is_not_implemented">操作が実装されていません</string>
     <string name="error_android_package_archive_invalid">無効な Android パッケージ: %1$s</string>
-    <string name="error_android_package_file_unavailable">Android パッケージファイルを利用できません</string>
-    <string name="error_android_package_installation_failed">パッケージのインストールに失敗しました: %1$s</string>
-    <string name="error_android_package_operation_in_progress">別の Android パッケージ操作がすでに進行中です</string>
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">インストール済みの APK Builder プラグインは, 互換性のある APK ビルド機能を宣言していません. この AutoJs6 バージョンに対応するプラグインビルドをインストールしてください.</string>
     <string name="error_apk_builder_template_host_version_outside_range">インストール済みの APK Builder プラグインが対応する AutoJs6 ホスト versionCode は %1$d-%2$d ですが, 現在のホストは %3$d です. 対応するプラグイン版をインストールしてください.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">インストール済みの APK Builder プラグインは信頼された公式証明書で署名されていないため, ビルドをブロックしました. パッケージ: %1$s. SHA-256: %2$s</string>
@@ -401,6 +398,7 @@
     <string name="error_images_must_have_the_same_size">画像は同じサイズでなければなりません</string>
     <string name="error_images_must_have_the_same_size_and_type">画像は同じサイズとタイプでなければなりません</string>
     <string name="error_input_fields_check_failed">入力フィールドのチェックに失敗</string>
+    <string name="error_installer_plugin_required_for_package_format">%1$s 形式のパッケージは %2$s プラグインでのみインストールできます. プラグインセンターでインストールまたは有効にしてください.</string>
     <string name="error_invalid_color">無効な色</string>
     <string name="error_invalid_compass">コンパスが無効です: %s</string>
     <string name="error_invalid_github_repo">無効な GitHub リポジトリ: %s</string>
@@ -455,9 +453,6 @@
     <string name="error_no_write_settings_permission">\"設定の書き込み\" 権限なし</string>
     <string name="error_official_plugin_missing">依存プラグインが不足しています: %1$s. AutoJs6 の \"プラグインセンター\" で関連する公式プラグインを検索してオンラインでインストールしてください</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView は 1 つの直接の子だけをホストできます</string>
-    <string name="error_package_installation_confirmation_expired">インストールの確認が無効になりました. パッケージを再度開いてインストールをやり直してください.</string>
-    <string name="error_package_installation_confirmation_missing">システムのインストール確認を利用できません</string>
-    <string name="error_package_installation_status">パッケージのインストールに失敗しました. ステータス: %1$d</string>
     <string name="error_parse_github_release_assets">GitHub リリースアセットの解析に失敗しました</string>
     <string name="error_parse_version_info">バージョン情報の解析に失敗しました</string>
     <string name="error_pattern_syntax">無効なパターン構文</string>
@@ -478,7 +473,6 @@
     <string name="error_regex_find_prev">正規表現で前を見つけることができません</string>
     <string name="error_repeated_colon_symbol">繰り返されるコロン記号</string>
     <string name="error_repeated_dot_symbol">ドット記号の繰り返し</string>
-    <string name="error_request_install_packages_permission_denied">続行する前に AutoJs6 に不明なアプリのインストールを許可してください</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">必要なプロパティ \"%1$s\" が null か存在しません</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" の解決済みパスは null にできません</string>
     <string name="error_save_failed">保存に失敗しました</string>
@@ -570,6 +564,7 @@
     <string name="hint_archive_password">アーカイブのパスワード</string>
     <string name="hint_find_with_regex">正規表現に対応しています. キャプチャしたグループには, \"$1\" から \"$9\" を使用します.</string>
     <string name="hint_github_token">GitHub パーソナルアクセストークンを貼り付けます</string>
+    <string name="hint_installer_plugin_recommended">ヒント: %1$s プラグインを使うと Shizuku または Root によるサイレントインストールと分割パッケージに対応できます. プラグインセンターで入手できます.</string>
     <string name="hint_long_click_run_to_debug">実行 ボタン長押しでデバッグ</string>
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
@@ -895,7 +890,6 @@
     <string name="text_action">動作</string>
     <string name="text_activated_successfully">有効化しました</string>
     <string name="text_active_window_root">アクティブウィンドウのルートノード</string>
-    <string name="text_activity_not_found_for_apk_installing">APK インストーラーなし</string>
     <string name="text_adb_tool_needed">ADB ツールが必要</string>
     <string name="text_add_application">アプリを追加</string>
     <string name="text_add_bom">BOM を追加</string>
@@ -1685,11 +1679,6 @@
     <string name="text_others">その他</string>
     <string name="text_output_apk_path">APK 出力パス</string>
     <string name="text_overwrite">上書き</string>
-    <string name="text_package_installation">アプリのインストール</string>
-    <string name="text_package_installation_confirmation_pending">続行してアプリのインストールを確認してください.</string>
-    <string name="text_package_installation_result_available">アプリのインストール結果を確認できます.</string>
-    <string name="text_package_installation_succeeded">パッケージをインストールしました</string>
-    <string name="text_package_installation_waiting">インストール状態を待機中</string>
     <string name="text_package_name">パッケージ名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">パッケージ名 (計算中...)</string>
     <string name="text_parent_folder">親フォルダー</string>
@@ -1937,7 +1926,6 @@
     <string name="text_r8_compiler_provider_discovery_failed">R8 provider の検出に失敗しました. キャンセルすると現在の選択を維持し, 確認すると明示的 R8 入口を無効にします.</string>
     <string name="text_r8_compiler_use_disabled">無効 (runtime.loadJarWithR8 は安全側に失敗)</string>
     <string name="text_re_signing_apk">APK を再署名中</string>
-    <string name="text_reading_android_package">Android パッケージを読み込み中</string>
     <string name="text_reading_splash_resources">スプラッシュ資源を読み込み中</string>
     <string name="text_recommended">推奨</string>
     <string name="text_reconnect">再接続</string>

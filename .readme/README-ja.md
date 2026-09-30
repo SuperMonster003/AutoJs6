@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 9 月 29 日 に更新されました.
+データは 2026 年 9 月 30 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -820,6 +820,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` Three Stove Agent のモデルブローカーは, ネイティブツール結果のバッチを受け付けるたびにリクエストの timeoutMs で期限を設定し直します. これにより各継続ラウンドが完全なタイムアウトを持ち, ターン全体はプラグインのタスク予算とラウンド上限で制限されます. 結果を送らずに待つ場合は従来どおり元の期限で失効します. 以前は複数ラウンドのネイティブタスクが最初のリクエストの期限を共有し, 5 分で MODEL_TIMEOUT により終了していました
 * `改善` Three Stove Agent の有効化と無効化をプラグインセンターに統一し, ホームのドロワースイッチを削除. スクリプトとプラグイン画面は使用時に自動接続し, 公式版はインストール後に既定で有効化. ユーザーが明示的に保存した無効設定は維持
 * `改善` 動画プレーヤー 3-Ember Player を 3-Amber Player に改名. 新しいアプリ ID に合わせてインストール案内, M3U 再生の優先順位, 透明アイコンの認識を更新
+* `改善` パッケージインストーラを 3-Setup Installer プラグインへ移行: ファイルマネージャ, プラグインセンター, ビルド完了と自動更新のインストール入口は, プラグインが利用可能ならそのインストールダイアログに, そうでなければシステムインストーラにパッケージを渡し, プラグインの導入を案内します. ホストは "AutoJs6 で APK を開く" のシステム入口を登録しなくなり, apks / xapk / apkm / apkz 分割コンテナにはプラグインが必要です
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1101,7 +1102,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 9 月 29 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 9 月 30 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

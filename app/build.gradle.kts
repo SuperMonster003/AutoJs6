@@ -745,6 +745,13 @@ dependencies /* Unclassified */ {
     // Plugin API: Mail API
     implementation(project(":plugin-api:mail-api"))
 
+    // Shared Android package archive parser (host app + 3-Setup Installer plugin).
+    // zh-CN: 宿主与 3-Setup Installer 插件共用的安装包解析器.
+    implementation(project(":plugin-api:package-archive-parser"))
+
+    // Plugin API: Installer API (3-Setup Installer)
+    implementation(project(":plugin-api:installer-api"))
+
     // Plugin API: EPUB API
     implementation(project(":plugin-api:epub-api"))
 }
@@ -978,7 +985,6 @@ android {
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
                     "authorities" to "org.autojs.autojs6.fileprovider",
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
-                    "installerEnabled" to "true",
                 )
             )
         }
@@ -1003,7 +1009,6 @@ android {
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
                     "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
                     "icon" to "@mipmap/ic_launcher",
-                    "installerEnabled" to "false",
                 )
             )
 

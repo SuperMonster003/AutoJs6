@@ -6,6 +6,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeNotNull
 import org.junit.Test
 import java.io.File
+import org.autojs.plugin.packagearchive.AndroidPackageArchiveInspector
+import org.autojs.plugin.packagearchive.AndroidPackageFormat
+import org.autojs.plugin.packagearchive.PackageDeviceSpec
 
 /** Runs the real Android ZIP/XML stack against an APK supplied on the test device. */
 class AndroidPackageArchiveDeviceTest {

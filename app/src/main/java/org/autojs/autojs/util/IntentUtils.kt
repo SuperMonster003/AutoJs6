@@ -149,24 +149,6 @@ object IntentUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun installApk(
-        context: Context,
-        path: String,
-        fileProviderAuthority: String = AppFileProvider.AUTHORITY,
-        exceptionHolder: ExceptionHolder? = null,
-    ) = Intent(Intent.ACTION_VIEW)
-        .setDataAndType(
-            getUriOfFile(context, path, fileProviderAuthority),
-            Mime.APPLICATION_VND_ANDROID_PACKAGE_ARCHIVE,
-        )
-        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-        .startSafely(context, true) {
-            exceptionHolder?.show(R.string.error_no_applications_available_for_installing_this_file)
-        }
-
-    @JvmStatic
-    @JvmOverloads
     fun getUriOfFile(context: Context, path: String?, fileProviderAuthority: String? = AppFileProvider.AUTHORITY): Uri =
         fileProviderAuthority?.let {
             FileProvider.getUriForFile(context, it, File(path ?: ""))

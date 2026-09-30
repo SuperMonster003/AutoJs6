@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 29 September 2026 года.
+Данные обновлены на 30 September 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -820,6 +820,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Улучшение` Брокер моделей Three Stove Agent после каждого принятого пакета результатов нативных инструментов заново устанавливает срок по timeoutMs запроса, так что каждый продолжающий раунд получает полный таймаут, а весь ход ограничен бюджетом задачи плагина и лимитом раундов; ожидание без отправки результатов по-прежнему истекает по исходному сроку. Раньше многораундовые нативные задачи делили срок первого запроса и завершались MODEL_TIMEOUT через 5 минут
 * `Улучшение` Three Stove Agent включается и отключается только в центре плагинов; переключатель бокового меню удален, скрипты и интерфейс подключаются по мере необходимости; официальные установки включены по умолчанию с сохранением явного отключения пользователем
 * `Улучшение` Видеоплеер 3-Ember Player переименован в 3-Amber Player; обновлены установка, приоритет воспроизведения M3U и распознавание прозрачных значков для нового идентификатора приложения
+* `Улучшение` Установщик пакетов перенесен в плагин 3-Setup Installer: точки установки файлового менеджера, Центра плагинов, завершенной сборки и самообновления передают пакет диалогу установки плагина, когда он доступен, и системному установщику в противном случае, с подсказкой установить плагин; хост больше не регистрирует системную точку "открыть APK с помощью AutoJs6", а контейнеры apks / xapk / apkm / apkz требуют плагина
 * `Улучшение` Изменения версий некоторых зависимостей или локальных библиотек _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1101,7 +1102,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 29 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 30 September 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

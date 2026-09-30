@@ -299,9 +299,6 @@
     <string name="error_an_error_occurred">Une erreur s\'est produite</string>
     <string name="error_an_operation_is_not_implemented">Une opération n\'est pas mise en œuvre</string>
     <string name="error_android_package_archive_invalid">Package Android non valide: %1$s</string>
-    <string name="error_android_package_file_unavailable">Le fichier du package Android est indisponible</string>
-    <string name="error_android_package_installation_failed">Échec de l\'installation du package: %1$s</string>
-    <string name="error_android_package_operation_in_progress">Une autre opération de package Android est déjà en cours</string>
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">Le plug-in APK Builder installé n\'annonce pas de capacité de construction d\'APK compatible. Installez une version du plug-in correspondant à cette version d\'AutoJs6.</string>
     <string name="error_apk_builder_template_host_version_outside_range">Le plugin APK Builder installé prend en charge les versionCode d\'hôte AutoJs6 %1$d-%2$d, mais l\'hôte actuel est %3$d. Installez la version correspondante du plugin.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">Le plugin APK Builder installé n\'est pas signé avec un certificat officiel approuvé, la construction est donc bloquée. Package: %1$s. SHA-256: %2$s</string>
@@ -400,6 +397,7 @@
     <string name="error_images_must_have_the_same_size">Les images doivent avoir la même taille</string>
     <string name="error_images_must_have_the_same_size_and_type">Les images doivent avoir la même taille et le même type</string>
     <string name="error_input_fields_check_failed">Échec de la vérification du champ de saisie</string>
+    <string name="error_installer_plugin_required_for_package_format">Les paquets au format %1$s ne peuvent etre installes qu\'avec le plugin %2$s. Installez-le ou activez-le dans le Centre des plugins.</string>
     <string name="error_invalid_color">Couleur invalide</string>
     <string name="error_invalid_compass">Compas non valide : %s</string>
     <string name="error_invalid_github_repo">Invalide le dépôt GitHub : %s</string>
@@ -454,9 +452,6 @@
     <string name="error_no_write_settings_permission">Non \"write settings\" permission</string>
     <string name="error_official_plugin_missing">Plugin dépendant manquant: %1$s. Recherchez et installez en ligne le plugin officiel associé dans le \"Centre des plugins\" d\'AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView ne peut accueillir qu\'un seul enfant direct.</string>
-    <string name="error_package_installation_confirmation_expired">La confirmation a expiré. Ouvrez à nouveau le paquet pour relancer l\'installation.</string>
-    <string name="error_package_installation_confirmation_missing">La confirmation d\'installation du système est indisponible</string>
-    <string name="error_package_installation_status">L\'installation du package a échoué avec l\'état %1$d</string>
     <string name="error_parse_github_release_assets">Échec de l\'analyse des ressources de la version GitHub</string>
     <string name="error_parse_version_info">Fail to parse version information</string>
     <string name="error_pattern_syntax">Syntaxe de motif invalide</string>
@@ -477,7 +472,6 @@
     <string name="error_regex_find_prev">Impossible de rechercher le précédent avec une expression régulière</string>
     <string name="error_repeated_colon_symbol">Symbole deux-points répété</string>
     <string name="error_repeated_dot_symbol">Symbole point répété</string>
-    <string name="error_request_install_packages_permission_denied">Autorisez AutoJs6 à installer des applications inconnues avant de continuer</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">La propriété requise \"%1$s\" est nulle ou n\'existe pas</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Le chemin résolu pour \"%1$s\" ne peut pas être nul</string>
     <string name="error_save_failed">Echec de l\'enregistrement</string>
@@ -569,6 +563,7 @@
     <string name="hint_archive_password">Mot de passe de l\'archive</string>
     <string name="hint_find_with_regex">La fonction Regex est prise en charge. Utilisez \"$1\" - \"$9\" pour les groupes capturés.</string>
     <string name="hint_github_token">Collez un jeton d\'accès personnel GitHub</string>
+    <string name="hint_installer_plugin_recommended">Astuce: le plugin %1$s ajoute l\'installation silencieuse via Shizuku ou Root et la prise en charge des paquets divises. Il se trouve dans le Centre des plugins.</string>
     <string name="hint_long_click_run_to_debug">Cliquez longuement sur le bouton \"Run\" pour déboguer</string>
     <string name="hint_loop_delay">Délai avant boucle</string>
     <string name="hint_loop_times">0 pour une boucle infinie</string>
@@ -894,7 +889,6 @@
     <string name="text_action">Action</string>
     <string name="text_activated_successfully">Activation reussie</string>
     <string name="text_active_window_root">Nœud racine de la fenêtre active</string>
-    <string name="text_activity_not_found_for_apk_installing">Pas d\'installateur d\'APK</string>
     <string name="text_adb_tool_needed">L\'outil ADB est nécessaire</string>
     <string name="text_add_application">Ajouter une application</string>
     <string name="text_add_bom">Ajouter un BOM</string>
@@ -1684,11 +1678,6 @@
     <string name="text_others">Autres</string>
     <string name="text_output_apk_path">Chemin de sortie de l\'APK</string>
     <string name="text_overwrite">Ecraser</string>
-    <string name="text_package_installation">Installation d\'application</string>
-    <string name="text_package_installation_confirmation_pending">Continuez pour confirmer l\'installation de l\'application.</string>
-    <string name="text_package_installation_result_available">Le résultat de l\'installation de l\'application est disponible.</string>
-    <string name="text_package_installation_succeeded">Package installé avec succès</string>
-    <string name="text_package_installation_waiting">En attente de l\'état de l\'installation</string>
     <string name="text_package_name">Nom du paquet</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nom du paquet (en cours de calcul...)</string>
     <string name="text_parent_folder">Dossier parent</string>
@@ -1936,7 +1925,6 @@
     <string name="text_r8_compiler_provider_discovery_failed">La découverte du provider R8 a échoué. Annulez pour conserver la sélection actuelle ou confirmez pour désactiver l\'entrée R8 explicite.</string>
     <string name="text_r8_compiler_use_disabled">Désactivé (runtime.loadJarWithR8 échoue sans repli)</string>
     <string name="text_re_signing_apk">Re-signature de l\'APK</string>
-    <string name="text_reading_android_package">Lecture du package Android</string>
     <string name="text_reading_splash_resources">Lecture des ressources d\'ecran de demarrage</string>
     <string name="text_recommended">Recommandé</string>
     <string name="text_reconnect">Reconnecter</string>

@@ -295,9 +295,6 @@
     <string name="error_an_error_occurred">发生错误</string>
     <string name="error_an_operation_is_not_implemented">操作尚未实现</string>
     <string name="error_android_package_archive_invalid">Android 安装包无效: %1$s</string>
-    <string name="error_android_package_file_unavailable">Android 安装包文件不可用</string>
-    <string name="error_android_package_installation_failed">安装包安装失败: %1$s</string>
-    <string name="error_android_package_operation_in_progress">已有另一个 Android 安装包操作正在进行</string>
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">已安装的 APK Builder 插件未声明兼容的 APK 构建能力. 请安装与当前 AutoJs6 版本匹配的插件构建.</string>
     <string name="error_apk_builder_template_host_version_outside_range">已安装的 APK 构建器插件支持 AutoJs6 宿主 versionCode %1$d-%2$d, 当前宿主为 %3$d. 请安装配套插件版本.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">已安装的 APK 构建器插件未使用受信任的官方证书签名, 已阻止打包. 软件包: %1$s. SHA-256: %2$s</string>
@@ -396,6 +393,7 @@
     <string name="error_images_must_have_the_same_size">图像大小需保持一致</string>
     <string name="error_images_must_have_the_same_size_and_type">图像大小及类型均需保持一致</string>
     <string name="error_input_fields_check_failed">输入字段检查未通过</string>
+    <string name="error_installer_plugin_required_for_package_format">%1$s 格式的安装包只能由 %2$s 插件安装. 请在插件中心安装或启用该插件.</string>
     <string name="error_invalid_color">无效的颜色</string>
     <string name="error_invalid_compass">无效的罗盘参数: %s</string>
     <string name="error_invalid_github_repo">无效的 GitHub 仓库: %s</string>
@@ -450,9 +448,6 @@
     <string name="error_no_write_settings_permission">缺少 \"修改系统设置\" 权限</string>
     <string name="error_official_plugin_missing">缺少依赖插件: %1$s, 可在 AutoJs6 \"插件中心\" 搜索并在线安装相关的官方插件</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView 只能拥有至多一个直接子控件</string>
-    <string name="error_package_installation_confirmation_expired">安装确认已失效. 请重新打开安装包以重新开始安装.</string>
-    <string name="error_package_installation_confirmation_missing">系统安装确认界面不可用</string>
-    <string name="error_package_installation_status">安装包安装失败, 状态码: %1$d</string>
     <string name="error_parse_github_release_assets">解析 GitHub 发行版资源信息失败</string>
     <string name="error_parse_version_info">无法解析版本信息</string>
     <string name="error_pattern_syntax">正则表达式句法错误</string>
@@ -473,7 +468,6 @@
     <string name="error_regex_find_prev">正则表达式不支持向前查找</string>
     <string name="error_repeated_colon_symbol">重复的分号符号</string>
     <string name="error_repeated_dot_symbol">重复的句点符号</string>
-    <string name="error_request_install_packages_permission_denied">请先允许 AutoJs6 安装未知应用</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">必需属性 \"%1$s\" 为空或不存在</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析后的路径 \"%1$s\" 不可为 null</string>
     <string name="error_save_failed">保存失败</string>
@@ -565,6 +559,7 @@
     <string name="hint_archive_password">档案密码</string>
     <string name="hint_find_with_regex">支持正则表达式搜索, 可使用 \"$1\" - \"$9\" 表示分组捕获</string>
     <string name="hint_github_token">粘贴 GitHub Personal Access Token</string>
+    <string name="hint_installer_plugin_recommended">提示: %1$s 插件支持通过 Shizuku 或 Root 静默安装以及分包安装, 可在插件中心获取.</string>
     <string name="hint_long_click_run_to_debug">长按 \"运行\" 图标可启动调试</string>
     <string name="hint_loop_delay">开始循环前的延迟</string>
     <string name="hint_loop_times">0 表示无限循环</string>
@@ -890,7 +885,6 @@
     <string name="text_action">动作</string>
     <string name="text_activated_successfully">激活成功</string>
     <string name="text_active_window_root">活动窗口根节点</string>
-    <string name="text_activity_not_found_for_apk_installing">找不到 APK 安装器</string>
     <string name="text_adb_tool_needed">需要 ADB 命令行工具</string>
     <string name="text_add_application">添加应用</string>
     <string name="text_add_bom">添加 BOM</string>
@@ -1681,11 +1675,6 @@
     <string name="text_others">其他</string>
     <string name="text_output_apk_path">打包应用保存路径</string>
     <string name="text_overwrite">覆盖</string>
-    <string name="text_package_installation">应用安装</string>
-    <string name="text_package_installation_confirmation_pending">继续以确认应用安装.</string>
-    <string name="text_package_installation_result_available">应用安装结果已就绪.</string>
-    <string name="text_package_installation_succeeded">安装包已成功安装</string>
-    <string name="text_package_installation_waiting">正在等待安装状态</string>
     <string name="text_package_name">包名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (计算中...)</string>
     <string name="text_parent_folder">父文件夹</string>
@@ -1933,7 +1922,6 @@
     <string name="text_r8_compiler_provider_discovery_failed">R8 provider 发现失败. 取消以保留当前选择, 或确认关闭显式 R8 入口.</string>
     <string name="text_r8_compiler_use_disabled">关闭 (runtime.loadJarWithR8 将直接失败)</string>
     <string name="text_re_signing_apk">正在重新签名 APK</string>
-    <string name="text_reading_android_package">正在读取 Android 安装包</string>
     <string name="text_reading_splash_resources">正在读取启动页资源</string>
     <string name="text_recommended">推荐</string>
     <string name="text_reconnect">重新连接</string>

@@ -301,9 +301,6 @@
     <string name="error_an_error_occurred">حدث خطأ</string>
     <string name="error_an_operation_is_not_implemented">لم يتم تنفيذ العملية</string>
     <string name="error_android_package_archive_invalid">حزمة Android غير صالحة: %1$s</string>
-    <string name="error_android_package_file_unavailable">ملف حزمة Android غير متاح</string>
-    <string name="error_android_package_installation_failed">فشل تثبيت الحزمة: %1$s</string>
-    <string name="error_android_package_operation_in_progress">هناك عملية أخرى لحزمة Android قيد التنفيذ بالفعل</string>
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">لا يعلن مكوّن APK Builder الإضافي المثبت عن قدرة متوافقة على إنشاء APK. ثبّت إصدارًا من المكوّن الإضافي يطابق إصدار AutoJs6 هذا.</string>
     <string name="error_apk_builder_template_host_version_outside_range">يدعم ملحق APK Builder المثبت رموز versionCode لمضيف AutoJs6 من %1$d إلى %2$d, لكن المضيف الحالي هو %3$d. ثبّت إصدار الملحق المطابق.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">ملحق APK Builder المثبت غير موقع بشهادة رسمية موثوقة, لذلك تم حظر البناء. الحزمة: %1$s. SHA-256: %2$s</string>
@@ -402,6 +399,7 @@
     <string name="error_images_must_have_the_same_size">يجب أن يكون للصور نفس الحجم</string>
     <string name="error_images_must_have_the_same_size_and_type">يجب أن تكون الصور بنفس الحجم والنوع</string>
     <string name="error_input_fields_check_failed">فشل فحص حقول الإدخال</string>
+    <string name="error_installer_plugin_required_for_package_format">لا يمكن تثبيت الحزم بتنسيق %1$s إلا عبر الاضافة %2$s. ثبّتها أو مكّنها في مركز الاضافات.</string>
     <string name="error_invalid_color">لون غير صالح</string>
     <string name="error_invalid_compass">بوصلة غير صالحة: %s</string>
     <string name="error_invalid_github_repo">مستودع جيثب غير صالح: %s</string>
@@ -456,9 +454,6 @@
     <string name="error_no_write_settings_permission">لا يوجد إذن \"إعدادات الكتابة\"</string>
     <string name="error_official_plugin_missing">المكون الإضافي التابع مفقود: %1$s. ابحث عن المكون الإضافي الرسمي ذي الصلة وثبّته عبر الإنترنت من \"مركز الإضافات\" في AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">يمكن أن تستضيف Scrollview طفلًا مباشرًا واحد فقط</string>
-    <string name="error_package_installation_confirmation_expired">انتهت صلاحية تأكيد التثبيت. افتح الحزمة مرة أخرى لإعادة بدء التثبيت.</string>
-    <string name="error_package_installation_confirmation_missing">تأكيد تثبيت النظام غير متاح</string>
-    <string name="error_package_installation_status">فشل تثبيت الحزمة بالحالة %1$d</string>
     <string name="error_parse_github_release_assets">فشل في تحليل أصول الإفراج عن جيثب</string>
     <string name="error_parse_version_info">فشل في تحليل معلومات الإصدار</string>
     <string name="error_pattern_syntax">بناء جملة نمط غير صالح</string>
@@ -479,7 +474,6 @@
     <string name="error_regex_find_prev">لا يمكن العثور على السابق مع Regex</string>
     <string name="error_repeated_colon_symbol">رمز القولون المتكرر</string>
     <string name="error_repeated_dot_symbol">تكرار رمز النقطة</string>
-    <string name="error_request_install_packages_permission_denied">اسمح لـ AutoJs6 بتثبيت تطبيقات غير معروفة قبل المتابعة</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">الخاصية المطلوبة \"%1$s\" خالية أو غير موجودة</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">المسار المُحلّ لـ \"%1$s\" لا يمكن أن يكون null</string>
     <string name="error_save_failed">فشل الحفظ</string>
@@ -571,6 +565,7 @@
     <string name="hint_archive_password">كلمة مرور الأرشيف</string>
     <string name="hint_find_with_regex">Regex مدعوم. استخدم \"$1\" - \"$9\" للمجموعات التي تم التقاطها.</string>
     <string name="hint_github_token">ألصق رمز وصول شخصي إلى GitHub</string>
+    <string name="hint_installer_plugin_recommended">تلميح: تضيف الاضافة %1$s التثبيت الصامت عبر Shizuku أو Root ودعم الحزم المقسمة. تجدها في مركز الاضافات.</string>
     <string name="hint_long_click_run_to_debug">انقر الطويل على زر \"تشغيل\" لتصحيح الأخطاء</string>
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
@@ -896,7 +891,6 @@
     <string name="text_action">عمل</string>
     <string name="text_activated_successfully">تم التفعيل بنجاح</string>
     <string name="text_active_window_root">العقدة الجذرية للنافذة النشطة</string>
-    <string name="text_activity_not_found_for_apk_installing">لا مثبت APK</string>
     <string name="text_adb_tool_needed">هناك حاجة إلى أداة ADB</string>
     <string name="text_add_application">إضافة تطبيق</string>
     <string name="text_add_bom">إضافة BOM</string>
@@ -1686,11 +1680,6 @@
     <string name="text_others">آحرون</string>
     <string name="text_output_apk_path">مسار الإخراج APK</string>
     <string name="text_overwrite">استبدال</string>
-    <string name="text_package_installation">تثبيت التطبيق</string>
-    <string name="text_package_installation_confirmation_pending">تابع لتأكيد تثبيت التطبيق.</string>
-    <string name="text_package_installation_result_available">نتيجة تثبيت التطبيق متاحة.</string>
-    <string name="text_package_installation_succeeded">تم تثبيت الحزمة بنجاح</string>
-    <string name="text_package_installation_waiting">في انتظار حالة التثبيت</string>
     <string name="text_package_name">اسم الحزمة</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">اسم الحزمة (جارٍ الحساب...)</string>
     <string name="text_parent_folder">المجلد الأصل</string>
@@ -1938,7 +1927,6 @@
     <string name="text_r8_compiler_provider_discovery_failed">فشل اكتشاف provider R8. اختر إلغاء للاحتفاظ بالاختيار الحالي أو أكد تعطيل مدخل R8 الصريح.</string>
     <string name="text_r8_compiler_use_disabled">معطل (يفشل runtime.loadJarWithR8 دون رجوع)</string>
     <string name="text_re_signing_apk">جارٍ اعادة توقيع APK</string>
-    <string name="text_reading_android_package">جارٍ قراءة حزمة Android</string>
     <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
     <string name="text_recommended">مُستَحسَن</string>
     <string name="text_reconnect">إعادة الاتصال</string>

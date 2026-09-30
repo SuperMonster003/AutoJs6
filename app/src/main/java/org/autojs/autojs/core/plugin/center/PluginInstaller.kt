@@ -9,8 +9,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.installer.PackageInstallRouter
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
-import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils.applyProgressThemeColorTintLists
 import org.autojs.autojs.util.DialogUtils.setProgressNumberFormatByBytes
@@ -49,7 +49,7 @@ object PluginInstaller {
             onPositive { dialog, _ ->
                 dialog.dismiss()
                 if (FileUtils.isLikelyApk(packageFile)) {
-                    PackageInstallerActivity.install(context, packageFile)
+                    PackageInstallRouter.install(context, packageFile)
                     return@onPositive
                 }
                 MaterialDialog.Builder(context)
@@ -62,7 +62,7 @@ object PluginInstaller {
                     .positiveColorRes(R.color.dialog_button_not_recommended)
                     .onPositive { d, _ ->
                         d.dismiss()
-                        PackageInstallerActivity.install(context, packageFile)
+                        PackageInstallRouter.install(context, packageFile)
                     }
                     .autoDismiss(false)
                     .cancelable(false)
@@ -78,7 +78,7 @@ object PluginInstaller {
     }
 
     fun installFromFileUri(context: Context, uri: Uri) {
-        PackageInstallerActivity.install(context, uri)
+        PackageInstallRouter.install(context, uri)
     }
 
     suspend fun installFromUrlWithPrompt(context: Context, url: String, expectedSha256: String? = null) {

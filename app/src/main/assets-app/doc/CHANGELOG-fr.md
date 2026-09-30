@@ -658,6 +658,7 @@
 * `Amélioration` Le courtier de modèles de Three Stove Agent réarme l'échéance avec le timeoutMs de la requête après chaque lot accepté de résultats d'outils natifs, de sorte que chaque tour de continuation dispose du délai complet et que le tour entier est limité par le budget de tâche du plugin et le plafond de tours; une attente sans soumission de résultats expire toujours à l'échéance initiale. Les tâches natives multi-tours partageaient auparavant l'échéance de la première requête et se terminaient par MODEL_TIMEOUT au bout de 5 minutes
 * `Amélioration` Three Stove Agent est activé et désactivé uniquement dans le centre de plugins; le commutateur du volet est retiré et les scripts et l'interface se connectent à la demande; les installations officielles sont activées par défaut, tout en conservant la désactivation choisie par l'utilisateur
 * `Amélioration` Renommer le lecteur vidéo 3-Ember Player en 3-Amber Player; adapter le guide d'installation, la priorité M3U et les icônes transparentes à son nouvel identifiant d'application
+* `Amélioration` L'installateur de paquets est transfere au plugin 3-Setup Installer: les entrees d'installation du gestionnaire de fichiers, du Centre des plugins, d'une compilation terminee et de la mise a jour automatique confient le paquet a la boite de dialogue du plugin lorsqu'il est disponible et a l'installateur systeme sinon, avec une invitation a installer le plugin; l'hote n'enregistre plus l'entree systeme "ouvrir l'APK avec AutoJs6", et les conteneurs apks / xapk / apkm / apkz necessitent le plugin
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise
@@ -699,6 +700,8 @@
 * `Dépendance` Suppression de la bibliothèque locale AndroidX AppCompat 1.0.2
 * `Dépendance` Ajout de ZXing Android Embedded version 4.3.0
 * `Dépendance` Ajout de AndroidX Test Ext JUnit version 1.3.0
+* `Dépendance` Modularisation de Package Archive Parser
+* `Dépendance` Modularisation d'Installer API
 
 # v6.7.0
 

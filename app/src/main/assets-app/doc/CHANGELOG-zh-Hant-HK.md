@@ -658,6 +658,7 @@
 * `優化` Three Stove Agent 模型代理在接受一批原生工具結果後按請求的 timeoutMs 重新設定截止時間, 每個續輪都擁有完整的逾時, 整輪由插件的任務預算與續輪上限約束; 未提交結果的等待仍按原截止時間逾時. 此前多輪原生任務共用首個請求的截止時間, 超過 5 分鐘即以 MODEL_TIMEOUT 終止
 * `優化` Three Stove Agent 統一由插件中心啟用和停用, 移除主頁側邊欄開關, 指令碼和插件介面按需自動連接; 官方插件安裝後預設啟用, 保留使用者明確儲存的停用狀態
 * `優化` 影片播放器 3-Ember Player 更名為 3-Amber Player, 更新插件安裝引導, M3U 播放優先次序及透明圖示識別, 使用新的獨立應用程式套件名稱
+* `優化` 安裝器能力遷出到 3-Setup Installer 插件: 檔案管理器, 插件中心, 打包完成與自更新的安裝入口在插件可用時交給插件的安裝對話框, 否則將 APK 交給系統安裝器並提示安裝插件; 宿主不再註冊 "用 AutoJs6 開啟 APK" 的系統入口, apks / xapk / apkm / apkz 分包容器需要插件才能安裝
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer
@@ -699,6 +700,8 @@
 * `依賴` 移除 AndroidX AppCompat 1.0.2 本地庫
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
 * `依賴` 附加 AndroidX Test Ext JUnit 版本 1.3.0
+* `依賴` 模組化 Package Archive Parser
+* `依賴` 模組化 Installer API
 
 # v6.7.0
 

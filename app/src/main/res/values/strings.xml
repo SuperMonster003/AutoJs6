@@ -294,9 +294,6 @@
     <string name="error_an_error_occurred">An error occurred</string>
     <string name="error_an_operation_is_not_implemented">An operation is not implemented</string>
     <string name="error_android_package_archive_invalid">Invalid Android package: %1$s</string>
-    <string name="error_android_package_file_unavailable">Android package file is unavailable</string>
-    <string name="error_android_package_installation_failed">Package installation failed: %1$s</string>
-    <string name="error_android_package_operation_in_progress">Another Android package operation is already in progress</string>
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">The installed APK Builder plugin does not declare a compatible APK build capability. Install a plugin build that matches this AutoJs6 version.</string>
     <string name="error_apk_builder_template_host_version_outside_range">The installed APK Builder plugin supports AutoJs6 host versionCode %1$d-%2$d, but the current host is %3$d. Install the matching plugin version.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">The installed APK Builder plugin is not signed with a trusted official certificate, so building was blocked. Package: %1$s. SHA-256: %2$s</string>
@@ -395,6 +392,7 @@
     <string name="error_images_must_have_the_same_size">Images must have the same size</string>
     <string name="error_images_must_have_the_same_size_and_type">Images must have the same size and type</string>
     <string name="error_input_fields_check_failed">Input fields check failed</string>
+    <string name="error_installer_plugin_required_for_package_format">Packages in the %1$s format can only be installed with the %2$s plugin. Install or enable it in Plugin Center.</string>
     <string name="error_invalid_color">Invalied color</string>
     <string name="error_invalid_compass">Invalid compass: %s</string>
     <string name="error_invalid_github_repo">Invalid GitHub repository: %s</string>
@@ -449,9 +447,6 @@
     <string name="error_no_write_settings_permission">No \"write settings\" permission</string>
     <string name="error_official_plugin_missing">Missing dependency plugin: %1$s, search and install the related official plugin online in AutoJs6 \"Plugin Center\"</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView can host only one direct child</string>
-    <string name="error_package_installation_confirmation_expired">The installation confirmation has expired. Open the package again to restart installation.</string>
-    <string name="error_package_installation_confirmation_missing">The system installation confirmation is unavailable</string>
-    <string name="error_package_installation_status">Package installation failed with status %1$d</string>
     <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
     <string name="error_parse_version_info">Failed to parse version information</string>
     <string name="error_pattern_syntax">Invalid pattern syntax</string>
@@ -472,7 +467,6 @@
     <string name="error_regex_find_prev">Cannot find previous with regex</string>
     <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
     <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
-    <string name="error_request_install_packages_permission_denied">Allow AutoJs6 to install unknown apps before continuing</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">Required property \"%1$s\" is nullish or does not exist</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
     <string name="error_save_failed">Save failed</string>
@@ -564,6 +558,7 @@
     <string name="hint_archive_password">Archive password</string>
     <string name="hint_find_with_regex">Regex is supported. Use \"$1\" - \"$9\" for captured groups.</string>
     <string name="hint_github_token">Paste a GitHub personal access token</string>
+    <string name="hint_installer_plugin_recommended">Tip: the %1$s plugin adds silent installation through Shizuku or Root and support for split packages. Find it in Plugin Center.</string>
     <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
     <string name="hint_loop_delay">Delay before loop</string>
     <string name="hint_loop_times">0 for infinite loop</string>
@@ -889,7 +884,6 @@
     <string name="text_action">Action</string>
     <string name="text_activated_successfully">Activated successfully</string>
     <string name="text_active_window_root">Active window root</string>
-    <string name="text_activity_not_found_for_apk_installing">No APK installer</string>
     <string name="text_adb_tool_needed">ADB tool is needed</string>
     <string name="text_add_application">Add app</string>
     <string name="text_add_bom">Add BOM</string>
@@ -1680,11 +1674,6 @@
     <string name="text_others">Others</string>
     <string name="text_output_apk_path">APK output path</string>
     <string name="text_overwrite">Overwrite</string>
-    <string name="text_package_installation">App installation</string>
-    <string name="text_package_installation_confirmation_pending">Continue to confirm the app installation.</string>
-    <string name="text_package_installation_result_available">The app installation result is available.</string>
-    <string name="text_package_installation_succeeded">Package installed successfully</string>
-    <string name="text_package_installation_waiting">Waiting for the installation status</string>
     <string name="text_package_name">Package name</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
     <string name="text_parent_folder">Parent folder</string>
@@ -1932,7 +1921,6 @@
     <string name="text_r8_compiler_provider_discovery_failed">R8 provider discovery failed. Cancel to preserve the current selection, or confirm to disable the explicit R8 entry.</string>
     <string name="text_r8_compiler_use_disabled">Disabled (runtime.loadJarWithR8 fails closed)</string>
     <string name="text_re_signing_apk">Re-signing APK</string>
-    <string name="text_reading_android_package">Reading Android package</string>
     <string name="text_reading_splash_resources">Reading splash resources</string>
     <string name="text_recommended">Recommended</string>
     <string name="text_reconnect">Reconnect</string>

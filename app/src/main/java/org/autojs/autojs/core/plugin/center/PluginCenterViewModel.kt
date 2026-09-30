@@ -22,6 +22,7 @@ import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
+import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentPluginHost
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentActions
@@ -44,6 +45,7 @@ import org.autojs.plugin.quickjs.runtime.api.QuickJsPluginIds
 import org.autojs.plugin.epub.api.EpubIds
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
+import org.autojs.plugin.installer.api.InstallerIds
 import org.autojs.plugin.mail.api.MailIds
 import org.autojs.plugin.mcp.server.api.McpServerIds
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
@@ -1057,6 +1059,7 @@ class PluginCenterViewModel : ViewModel() {
             McpServerIds.ENGINE to McpServerPluginHost.ACTION_MCP_SERVER,
             ThreeStoveAgentIds.ENGINE to ThreeStoveAgentActions.SERVICE_ACTION,
             MailIds.ENGINE to MailPluginHost.ACTION_MAIL,
+            InstallerIds.ENGINE to InstallerPluginHost.ACTION_INSTALLER,
             EpubIds.ENGINE to EpubPluginHost.ACTION_EPUB,
             YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,

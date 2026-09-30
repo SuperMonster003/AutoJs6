@@ -62,7 +62,7 @@ import org.autojs.autojs.ui.error.ErrorDialogActivity;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.keystore.ManageKeyStoreActivity;
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager;
-import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity;
+import org.autojs.autojs.core.plugin.installer.PackageInstallRouter;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
 import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
 import org.autojs.autojs.ui.widget.RoundCheckboxWithText;
@@ -3135,7 +3135,7 @@ public class BuildActivity extends BaseActivity {
             positiveButton.setText(getString(R.string.text_install));
             positiveButton.setTextColor(getColor(R.color.dialog_button_attraction));
             positiveButton.setOnClickListener(v -> {
-                PackageInstallerActivity.install(BuildActivity.this, outApk);
+                PackageInstallRouter.install(BuildActivity.this, outApk);
                 dismissProgressDialog();
             });
             var negativeButton = mProgressDialog.getActionButton(DialogAction.NEGATIVE);

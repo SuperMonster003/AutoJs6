@@ -128,6 +128,8 @@ private val pluginApi = listOf(
     "mcp-server-api",
     "mail-api",
     "epub-api",
+    "package-archive-parser",
+    "installer-api",
 )
 
 private val plugins = listOf(

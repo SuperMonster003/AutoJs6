@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 29 日.
+数据更新于 2026 年 9 月 30 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -528,6 +528,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` Three Stove Agent 模型代理在接受一批原生工具结果后按请求的 timeoutMs 重新设定截止时间, 每个续轮都拥有完整的超时, 整轮由插件的任务预算与续轮上限约束; 未提交结果的等待仍按原截止时间超时. 此前多轮原生任务共用首个请求的截止时间, 超过 5 分钟即以 MODEL_TIMEOUT 终止
 * `优化` Three Stove Agent 统一由插件中心启用和禁用, 移除主页抽屉开关, 脚本和插件界面按需自动连接; 官方插件安装后默认启用, 保留用户明确保存的禁用状态
 * `优化` 视频播放器 3-Ember Player 更名为 3-Amber Player, 更新插件安装引导, M3U 播放优先级及透明图标识别, 使用新的独立应用包名
+* `优化` 安装器能力迁出到 3-Setup Installer 插件: 文件管理器, 插件中心, 打包完成与自更新的安装入口在插件可用时交给插件的安装对话框, 否则将 APK 交给系统安装器并提示安装插件; 宿主不再注册 "用 AutoJs6 打开 APK" 的系统入口, apks / xapk / apkm / apkz 分包容器需要插件才能安装
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -809,7 +810,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 29 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 9 月 30 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

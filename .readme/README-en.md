@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 29, 2026.
+Data updated on Sep 30, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -820,6 +820,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` The Three Stove Agent model broker re-arms the deadline with the request's timeoutMs after each accepted batch of native tool results, so every continuation round has the full timeout and the whole turn is bounded by the plugin's run budget and the round cap; waiting without submitting results still expires on the original deadline. Multi-round native tasks used to share the first request's deadline and ended with MODEL_TIMEOUT after 5 minutes
 * `Improvement` Three Stove Agent is enabled and disabled only in Plugin Center; the home drawer switch is removed and scripts and the plugin UI connect on demand; official installations are enabled by default while explicit user disablement is preserved
 * `Improvement` Rename the video player from 3-Ember Player to 3-Amber Player; update plugin installation guidance, M3U playback preference and transparent icon recognition for its new application ID
+* `Improvement` The package installer moved to the 3-Setup Installer plugin: the install entries of the file manager, Plugin Center, a finished build and the self-update hand the package to the plugin's install dialog when the plugin is available and to the system installer otherwise, with a hint to install the plugin; the host no longer registers the "open APK with AutoJs6" system entry, and apks / xapk / apkm / apkz split containers need the plugin
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1101,7 +1102,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 29, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Sep 30, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

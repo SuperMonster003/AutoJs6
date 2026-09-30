@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 9 월 29 일.
+데이터 갱신일: 2026 년 9 월 30 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -820,6 +820,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Three Stove Agent 모델 브로커는 네이티브 도구 결과 배치를 받아들일 때마다 요청의 timeoutMs로 기한을 다시 설정합니다. 따라서 각 이어가기 라운드가 전체 시간 제한을 가지며, 전체 턴은 플러그인의 작업 예산과 라운드 상한으로 제한됩니다. 결과를 제출하지 않고 기다리는 경우에는 여전히 원래 기한에 만료됩니다. 이전에는 다중 라운드 네이티브 작업이 첫 요청의 기한을 공유해 5분 뒤 MODEL_TIMEOUT으로 끝났습니다
 * `개선` Three Stove Agent 활성화와 비활성화를 플러그인 센터로 통합하고 홈 서랍 스위치를 제거. 스크립트와 플러그인 화면은 필요할 때 자동 연결하며 공식 설치는 기본 활성화하되 사용자가 명시적으로 저장한 비활성화 상태는 유지
 * `개선` 동영상 플레이어 3-Ember Player를 3-Amber Player로 변경하고 새 앱 ID에 맞게 설치 안내, M3U 재생 우선순위 및 투명 아이콘 인식을 업데이트
+* `개선` 패키지 설치기를 3-Setup Installer 플러그인으로 이전: 파일 관리자, 플러그인 센터, 빌드 완료 및 자동 업데이트의 설치 진입점은 플러그인을 사용할 수 있으면 플러그인의 설치 대화상자로, 그렇지 않으면 시스템 설치기로 패키지를 전달하고 플러그인 설치를 안내합니다. 호스트는 더 이상 "AutoJs6로 APK 열기" 시스템 진입점을 등록하지 않으며, apks / xapk / apkm / apkz 분할 컨테이너에는 플러그인이 필요합니다
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1101,7 +1102,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 9 월 29 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 9 월 30 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

@@ -299,9 +299,6 @@
     <string name="error_an_error_occurred">Произошла ошибка</string>
     <string name="error_an_operation_is_not_implemented">Операция не выполняется</string>
     <string name="error_android_package_archive_invalid">Недопустимый пакет Android: %1$s</string>
-    <string name="error_android_package_file_unavailable">Файл пакета Android недоступен</string>
-    <string name="error_android_package_installation_failed">Не удалось установить пакет: %1$s</string>
-    <string name="error_android_package_operation_in_progress">Другая операция с пакетом Android уже выполняется</string>
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">Установленный плагин APK Builder не объявляет совместимую возможность сборки APK. Установите сборку плагина, соответствующую этой версии AutoJs6.</string>
     <string name="error_apk_builder_template_host_version_outside_range">Установленный плагин APK Builder поддерживает versionCode хоста AutoJs6 %1$d-%2$d, но текущий хост имеет код %3$d. Установите соответствующую версию плагина.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">Установленный плагин APK Builder не подписан доверенным официальным сертификатом, поэтому сборка заблокирована. Пакет: %1$s. SHA-256: %2$s</string>
@@ -400,6 +397,7 @@
     <string name="error_images_must_have_the_same_size">Изображения должны иметь одинаковый размер</string>
     <string name="error_images_must_have_the_same_size_and_type">Изображения должны иметь одинаковый размер и тип</string>
     <string name="error_input_fields_check_failed">Не удалось выполнить проверку поля ввода</string>
+    <string name="error_installer_plugin_required_for_package_format">Пакеты в формате %1$s можно установить только с помощью плагина %2$s. Установите или включите его в Центре плагинов.</string>
     <string name="error_invalid_color">Неверный цвет</string>
     <string name="error_invalid_compass">Неверный компас: %s</string>
     <string name="error_invalid_github_repo">Неверный репозиторий GitHub: %s</string>
@@ -454,9 +452,6 @@
     <string name="error_no_write_settings_permission">Нет разрешения \"запись настроек\"</string>
     <string name="error_official_plugin_missing">Отсутствует зависимый плагин: %1$s. Найдите и установите связанный официальный плагин онлайн в \"Центре плагинов\" AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView может содержать только одного прямого дочернего элемента</string>
-    <string name="error_package_installation_confirmation_expired">Подтверждение установки истекло. Откройте пакет повторно, чтобы начать установку заново.</string>
-    <string name="error_package_installation_confirmation_missing">Системное подтверждение установки недоступно</string>
-    <string name="error_package_installation_status">Установка пакета завершилась со статусом %1$d</string>
     <string name="error_parse_github_release_assets">Не удалось разобрать активы релиза GitHub</string>
     <string name="error_parse_version_info">Не удалось разобрать информацию о версии</string>
     <string name="error_pattern_syntax">Неверный синтаксис шаблона</string>
@@ -477,7 +472,6 @@
     <string name="error_regex_find_prev">Невозможно найти предыдущее значение с помощью regex</string>
     <string name="error_repeated_colon_symbol">Повторяющийся символ двоеточия</string>
     <string name="error_repeated_dot_symbol">Повторяющийся символ точки</string>
-    <string name="error_request_install_packages_permission_denied">Разрешите AutoJs6 устанавливать неизвестные приложения перед продолжением</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">Требуемое свойство \"%1$s\" пусто или не существует</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
     <string name="error_save_failed">Не удалось сохранить</string>
@@ -569,6 +563,7 @@
     <string name="hint_archive_password">Пароль архива</string>
     <string name="hint_find_with_regex">Поддерживается регекс. Используйте \"$1\" - \"$9\" для захваченных групп.</string>
     <string name="hint_github_token">Вставьте персональный токен доступа GitHub</string>
+    <string name="hint_installer_plugin_recommended">Совет: плагин %1$s добавляет тихую установку через Shizuku или Root и поддержку разделенных пакетов. Его можно найти в Центре плагинов.</string>
     <string name="hint_long_click_run_to_debug">Длительное нажатие кнопки \"Выполнить\" для отладки</string>
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
@@ -894,7 +889,6 @@
     <string name="text_action">Действие</string>
     <string name="text_activated_successfully">Активация выполнена</string>
     <string name="text_active_window_root">Корневой узел активного окна</string>
-    <string name="text_activity_not_found_for_apk_installing">Нет установщика APK</string>
     <string name="text_adb_tool_needed">Необходим инструмент ADB</string>
     <string name="text_add_application">Добавить приложение</string>
     <string name="text_add_bom">Добавить BOM</string>
@@ -1684,11 +1678,6 @@
     <string name="text_others">Другие</string>
     <string name="text_output_apk_path">Путь вывода APK</string>
     <string name="text_overwrite">Перезаписать</string>
-    <string name="text_package_installation">Установка приложения</string>
-    <string name="text_package_installation_confirmation_pending">Продолжите, чтобы подтвердить установку приложения.</string>
-    <string name="text_package_installation_result_available">Результат установки приложения доступен.</string>
-    <string name="text_package_installation_succeeded">Пакет успешно установлен</string>
-    <string name="text_package_installation_waiting">Ожидание состояния установки</string>
     <string name="text_package_name">Имя пакета</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Имя пакета (Вычисление...)</string>
     <string name="text_parent_folder">Родительская папка</string>
@@ -1936,7 +1925,6 @@
     <string name="text_r8_compiler_provider_discovery_failed">Не удалось обнаружить provider R8. Отмените действие, чтобы сохранить текущий выбор, или подтвердите отключение явной точки входа R8.</string>
     <string name="text_r8_compiler_use_disabled">Отключено (runtime.loadJarWithR8 завершается без перехода)</string>
     <string name="text_re_signing_apk">Повторная подпись APK</string>
-    <string name="text_reading_android_package">Чтение пакета Android</string>
     <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>
     <string name="text_recommended">Рекомендуемый</string>
     <string name="text_reconnect">Переподключить</string>

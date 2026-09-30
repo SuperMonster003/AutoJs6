@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 9 月 29 日.
+資料更新於 2026 年 9 月 30 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -820,6 +820,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` Three Stove Agent 模型代理在接受一批原生工具結果後按請求的 timeoutMs 重新設定截止時間, 每個續輪都擁有完整的逾時, 整輪由外掛的任務預算與續輪上限約束; 未提交結果的等待仍按原截止時間逾時. 此前多輪原生任務共用首個請求的截止時間, 超過 5 分鐘即以 MODEL_TIMEOUT 終止
 * `最佳化` Three Stove Agent 統一由外掛中心啟用和停用, 移除首頁側邊欄開關, 指令碼和外掛介面按需自動連線; 官方外掛安裝後預設啟用, 保留使用者明確儲存的停用狀態
 * `最佳化` 影片播放器 3-Ember Player 更名為 3-Amber Player, 更新外掛安裝引導, M3U 播放優先順序及透明圖示識別, 使用新的獨立應用程式套件名稱
+* `最佳化` 安裝器能力遷出到 3-Setup Installer 外掛: 檔案管理器, 外掛中心, 打包完成與自更新的安裝入口在外掛可用時交給外掛的安裝對話框, 否則將 APK 交給系統安裝器並提示安裝外掛; 宿主不再註冊 "用 AutoJs6 開啟 APK" 的系統入口, apks / xapk / apkm / apkz 分包容器需要外掛才能安裝
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1101,7 +1102,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 9 月 29 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 9 月 30 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

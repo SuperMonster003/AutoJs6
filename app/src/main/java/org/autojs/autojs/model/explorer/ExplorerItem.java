@@ -8,7 +8,7 @@ import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.script.PythonScriptSource;
 import org.autojs.autojs.runtime.api.Mime;
-import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity;
+import org.autojs.autojs.core.plugin.installer.PackageInstallRouter;
 import org.autojs.autojs.util.FileUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder;
@@ -98,11 +98,11 @@ public interface ExplorerItem {
     }
 
     default boolean install(@NotNull View view) {
-        return PackageInstallerActivity.install(view.getContext(), new File(getPath()));
+        return PackageInstallRouter.install(view.getContext(), new File(getPath()));
     }
 
     default boolean install(Context context) {
-        return PackageInstallerActivity.install(context, new File(getPath()));
+        return PackageInstallRouter.install(context, new File(getPath()));
     }
 
     default boolean play(@NotNull View view) {

@@ -103,25 +103,6 @@ public class IntentUtil {
         return goToAppDetailSettings(context, context.getPackageName());
     }
 
-    public static void installApk(Context context, String path, String fileProviderAuthority) throws ActivityNotFoundException {
-        Uri uri = getUriOfFile(context, path, fileProviderAuthority);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(uri, "application/vnd.android.package-archive");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        context.startActivity(intent);
-    }
-
-    public static void installApkOrToast(Context context, String path, String fileProviderAuthority) {
-        try {
-            installApk(context, path, fileProviderAuthority);
-        } catch (ActivityNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(context, R.string.text_activity_not_found_for_apk_installing, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     public static boolean viewFile(Context context, String path, String fileProviderAuthority) {
         String mimeType = MimeTypes.fromFileOr(path, "*/*");
         return viewFile(context, path, mimeType, fileProviderAuthority);

@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
+import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentPluginHost
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentActions
@@ -38,6 +39,7 @@ import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.epub.api.EpubActions
+import org.autojs.plugin.installer.api.InstallerActions
 import org.autojs.plugin.mail.api.MailActions
 import org.autojs.plugin.mcp.server.api.McpServerActions
 import org.autojs.plugin.mcp.server.api.McpServerIds
@@ -216,6 +218,9 @@ class InstalledPluginRepository {
         MailPluginHost.ACTION_MAIL -> MailPluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = MailPluginHost.ACTION_MAIL)
         }
+        InstallerPluginHost.ACTION_INSTALLER -> InstallerPluginHost.discover(context, packageName).map {
+            Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = InstallerPluginHost.ACTION_INSTALLER)
+        }
         EpubPluginHost.ACTION_EPUB -> EpubPluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = EpubPluginHost.ACTION_EPUB)
         }
@@ -250,6 +255,10 @@ class InstalledPluginRepository {
             ServiceQuery(
                 action = MailPluginHost.ACTION_MAIL,
                 category = MailActions.SERVICE_CATEGORY,
+            ),
+            ServiceQuery(
+                action = InstallerPluginHost.ACTION_INSTALLER,
+                category = InstallerActions.SERVICE_CATEGORY,
             ),
             ServiceQuery(
                 action = EpubPluginHost.ACTION_EPUB,

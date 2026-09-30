@@ -658,6 +658,7 @@
 * `Mejora` El intermediario de modelos de Three Stove Agent vuelve a fijar el plazo con el timeoutMs de la solicitud tras cada lote aceptado de resultados de herramientas nativas, de modo que cada ronda de continuación dispone del tiempo límite completo y el turno entero queda limitado por el presupuesto de tarea del plugin y el tope de rondas; la espera sin enviar resultados sigue caducando en el plazo original. Antes, las tareas nativas de varias rondas compartían el plazo de la primera solicitud y terminaban con MODEL_TIMEOUT a los 5 minutos
 * `Mejora` Three Stove Agent se activa y desactiva solo en el centro de complementos; se elimina el interruptor del panel y los scripts y la interfaz se conectan bajo demanda; las instalaciones oficiales se activan por defecto y se respeta la desactivación elegida por el usuario
 * `Mejora` Renombrar el reproductor de vídeo 3-Ember Player a 3-Amber Player; adaptar la guía de instalación, la prioridad M3U y los iconos transparentes al nuevo identificador de aplicación
+* `Mejora` El instalador de paquetes se traslada al plugin 3-Setup Installer: las entradas de instalacion del administrador de archivos, el Centro de plugins, una compilacion terminada y la actualizacion automatica entregan el paquete al dialogo de instalacion del plugin cuando esta disponible y al instalador del sistema en caso contrario, con un aviso para instalar el plugin; el host ya no registra la entrada del sistema "abrir APK con AutoJs6", y los contenedores apks / xapk / apkm / apkz requieren el plugin
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado
@@ -699,6 +700,8 @@
 * `Dependencia` Se elimina la biblioteca local AndroidX AppCompat 1.0.2
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 * `Dependencia` Anexado AndroidX Test Ext JUnit versión 1.3.0
+* `Dependencia` Modularizacion de Package Archive Parser
+* `Dependencia` Modularizacion de Installer API
 
 # v6.7.0
 

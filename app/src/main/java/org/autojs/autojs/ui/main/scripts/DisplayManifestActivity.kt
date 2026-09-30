@@ -10,6 +10,8 @@ import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 import java.io.File
 import java.util.regex.Pattern
+import org.autojs.plugin.packagearchive.AndroidPackageArchiveInspector
+import org.autojs.plugin.packagearchive.PackageDeviceSpec
 
 class DisplayManifestActivity : BaseDisplayContentActivity() {
 

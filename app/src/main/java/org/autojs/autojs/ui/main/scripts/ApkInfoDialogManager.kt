@@ -29,7 +29,15 @@ import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.ui.dialog.InfoDialog
 import org.autojs.autojs.ui.dialog.InfoDialogItems
 import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
+import org.autojs.autojs.core.plugin.installer.PackageInstallRouter
 import org.autojs.autojs6.R
+import org.autojs.plugin.packagearchive.AndroidPackageArchive
+import org.autojs.plugin.packagearchive.AndroidPackageArchiveInspector
+import org.autojs.plugin.packagearchive.AndroidPackageFormat
+import org.autojs.plugin.packagearchive.AndroidPackageSubtype
+import org.autojs.plugin.packagearchive.ApkSignatureDetector
+import org.autojs.plugin.packagearchive.ArchiveInstallationState
+import org.autojs.plugin.packagearchive.PackageDeviceSpec
 
 object ApkInfoDialogManager {
 
@@ -55,9 +63,7 @@ object ApkInfoDialogManager {
             packageFile = apkFile,
             builderApplier = builderApplier,
             onDismissListener = onDismissListener,
-            installAction = { file, expectedSha256 ->
-                PackageInstallerActivity.install(context, file, expectedSha256)
-            },
+            installAction = { file, _ -> PackageInstallRouter.install(context, file) },
         )
     }
 
@@ -69,7 +75,7 @@ object ApkInfoDialogManager {
         onDismissListener: DialogInterface.OnDismissListener?,
     ) = showPackageInfoDialog(
         context, packageFile, null, onDismissListener,
-        installAction = { file, sha256 -> PackageInstallerActivity.install(context, file, sha256) },
+        installAction = { file, _ -> PackageInstallRouter.install(context, file) },
         archiveActions = archiveActions,
     )
 

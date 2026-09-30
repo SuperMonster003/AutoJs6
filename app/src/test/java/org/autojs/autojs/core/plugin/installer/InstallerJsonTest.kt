@@ -1,0 +1,178 @@
+package org.autojs.autojs.core.plugin.installer
+
+import com.google.gson.JsonParser
+import org.autojs.plugin.installer.api.InstallerContract
+import org.autojs.plugin.installer.api.InstallerErrorCodes
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class InstallerJsonTest {
+
+    private fun sources(items: Int, splitsPerItem: Int = 1): List<InstallerJson.SourceEntry> =
+        (0 until items).flatMap { item -> (0 until splitsPerItem).map { split -> InstallerJson.SourceEntry(item, "item$item-split$split.apk", 1000L + split) } }
+
+    @Test
+    fun `install request carries sources interaction and every option`() {
+        val json = InstallerJson.encodeInstallRequest(
+            id = "host-1",
+            sources = listOf(InstallerJson.SourceEntry(0, "app.apk", 12345L), InstallerJson.SourceEntry(1, "base.apk", 1L), InstallerJson.SourceEntry(1, "split_config.arm64_v8a.apk", 2L)),
+            interaction = InstallerContract.INTERACTION_SILENT,
+            options = InstallerJson.InstallOptions(authorizer = InstallerContract.AUTHORIZER_SHIZUKU, allowDowngrade = true, installer = "com.android.vending", user = "10", deleteSource = true),
+        )
+        val root = JsonParser.parseString(json).asJsonObject
+        assertEquals("host-1", root["id"].asString)
+        assertEquals("silent", root["interaction"].asString)
+        val sources = root.getAsJsonArray("sources")
+        assertEquals(3, sources.size())
+        assertEquals(1, sources[2].asJsonObject["item"].asInt)
+        assertEquals("split_config.arm64_v8a.apk", sources[2].asJsonObject["displayName"].asString)
+        val options = root.getAsJsonObject("options")
+        assertEquals("shizuku", options["authorizer"].asString)
+        assertTrue(options["allowDowngrade"].asBoolean)
+        assertFalse(options["allowTestOnly"].asBoolean)
+        assertEquals("com.android.vending", options["installer"].asString)
+        assertEquals("10", options["user"].asString)
+        assertTrue(options["deleteSource"].asBoolean)
+        assertTrue(options["continueOnError"].asBoolean)
+        assertEquals(InstallerContract.DEFAULT_SESSION_TIMEOUT_MILLIS, options["timeoutMillis"].asLong)
+    }
+
+    @Test
+    fun `install request enforces the batch and split ceilings and the closed value sets`() {
+        InstallerJson.encodeInstallRequest("ok", sources(InstallerContract.MAX_BATCH_SOURCES), InstallerContract.INTERACTION_AUTO, InstallerJson.InstallOptions())
+        assertThrows(IllegalArgumentException::class.java) {
+            InstallerJson.encodeInstallRequest("too-many", sources(InstallerContract.MAX_BATCH_SOURCES + 1), InstallerContract.INTERACTION_AUTO, InstallerJson.InstallOptions())
+        }
+        InstallerJson.encodeInstallRequest("ok", sources(1, InstallerContract.MAX_SPLITS_PER_PACKAGE), InstallerContract.INTERACTION_AUTO, InstallerJson.InstallOptions())
+        assertThrows(IllegalArgumentException::class.java) {
+            InstallerJson.encodeInstallRequest("too-many-splits", sources(1, InstallerContract.MAX_SPLITS_PER_PACKAGE + 1), InstallerContract.INTERACTION_AUTO, InstallerJson.InstallOptions())
+        }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("empty", emptyList(), InstallerContract.INTERACTION_AUTO, InstallerJson.InstallOptions()) }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-interaction", sources(1), "notification", InstallerJson.InstallOptions()) }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-authorizer", sources(1), "auto", InstallerJson.InstallOptions(authorizer = "dhizuku")) }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-user", sources(1), "auto", InstallerJson.InstallOptions(user = "owner")) }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-timeout", sources(1), "auto", InstallerJson.InstallOptions(timeoutMillis = 0L)) }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("blank-installer", sources(1), "auto", InstallerJson.InstallOptions(installer = " ")) }
+        assertEquals("unknown user: -1", InstallerJson.InstallOptions(user = "-1").validate())
+        assertNull(InstallerJson.InstallOptions(user = InstallerContract.USER_ALL).validate())
+    }
+
+    @Test
+    fun `display names are truncated to the ceiling and the request stays below the JSON ceiling`() {
+        val longName = "a".repeat(InstallerContract.MAX_DISPLAY_NAME_LENGTH + 50) + ".apk"
+        val json = InstallerJson.encodeInstallRequest("long", listOf(InstallerJson.SourceEntry(0, longName, 1L)), "auto", InstallerJson.InstallOptions())
+        val stored = JsonParser.parseString(json).asJsonObject.getAsJsonArray("sources")[0].asJsonObject["displayName"].asString
+        assertEquals(InstallerContract.MAX_DISPLAY_NAME_LENGTH, stored.length)
+        assertTrue(json.length <= InstallerContract.MAX_JSON_BYTES)
+    }
+
+    @Test
+    fun `completion decodes a single result and a batch with a failed item`() {
+        val single = InstallerJson.decodeCompletion("""{"ok":true,"packageName":"com.example","versionName":"1.2","versionCode":12,"previousVersionCode":10,"authorizer":"root","interaction":"silent","durationMillis":321,"sourceDeleted":false,"notes":["n1"]}""")
+        assertTrue(single.allOk)
+        val result = single.single
+        assertEquals("com.example", result.packageName)
+        assertEquals(12L, result.versionCode)
+        assertEquals(10L, result.previousVersionCode)
+        assertEquals("root", result.authorizer)
+        assertEquals(listOf("n1"), result.notes)
+        assertNull(result.error)
+
+        val batch = InstallerJson.decodeCompletion("""{"results":[{"ok":true,"packageName":"a"},{"ok":false,"packageName":"b","error":{"code":"INSTALL_FAILED","message":"boom","status":4,"systemMessage":"INSTALL_FAILED_VERSION_DOWNGRADE"}}]}""")
+        assertFalse(batch.allOk)
+        assertEquals(2, batch.results.size)
+        val failed = batch.results[1]
+        assertFalse(failed.ok)
+        assertEquals(InstallerErrorCodes.INSTALL_FAILED, failed.error?.code)
+        assertEquals(4, failed.error?.status)
+        assertEquals("INSTALL_FAILED_VERSION_DOWNGRADE", failed.error?.systemMessage)
+        assertEquals("b", failed.error?.packageName)
+
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.decodeCompletion("""{"results":[]}""") }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.decodeCompletion("not json") }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.decodeCompletion(null) }
+    }
+
+    @Test
+    fun `errors normalize unknown codes and fall back to the default retry hint`() {
+        val known = InstallerJson.decodeError("""{"code":"AUTHORIZER_UNAVAILABLE","message":"Shizuku is not running"}""")
+        assertEquals(InstallerErrorCodes.AUTHORIZER_UNAVAILABLE, known.code)
+        assertTrue(known.retryable)
+        val unknown = InstallerJson.decodeError("""{"code":"WHATEVER","message":"x","retryable":true}""")
+        assertEquals(InstallerErrorCodes.INTERNAL, unknown.code)
+        assertTrue(unknown.message.startsWith("unknown error code WHATEVER"))
+        assertTrue(unknown.retryable)
+        val unreadable = InstallerJson.decodeError("[1,2]")
+        assertEquals(InstallerErrorCodes.INTERNAL, unreadable.code)
+        assertFalse(unreadable.retryable)
+    }
+
+    @Test
+    fun `status detail and user documents decode with their contract fields`() {
+        val status = InstallerJson.decodeSessionStatus("""{"state":"writing","index":1,"progress":0.5}""")
+        assertEquals(InstallerContract.STAGE_WRITING, status.state)
+        assertEquals(1, status.index)
+        assertEquals(0.5f, status.progress!!, 0.0001f)
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.decodeSessionStatus("""{"state":"verifying"}""") }
+
+        val stage = InstallerJson.decodeStageDetail("""{"index":2,"packageName":"c"}""")
+        assertEquals(2, stage.index)
+        assertEquals("c", stage.packageName)
+        assertNull(InstallerJson.decodeStageDetail(null).index)
+        val progress = InstallerJson.decodeProgressDetail("""{"index":0,"bytesWritten":10,"totalBytes":100}""")
+        assertEquals(10L, progress.bytesWritten)
+        assertEquals(100L, progress.totalBytes)
+
+        val authorizer = InstallerJson.decodeAuthorizerState("""{"available":true,"running":false,"granted":false,"reason":"stopped"}""")
+        assertTrue(authorizer.available)
+        assertFalse(authorizer.running)
+        assertEquals("stopped", authorizer.reason)
+        assertTrue(InstallerJson.decodeGranted("""{"granted":true}"""))
+
+        val state = InstallerJson.decodeDefaultInstallerState("""{"component":"a/b","isSelf":false,"method":"preferred","requiresClear":true}""")
+        assertEquals("a/b", state.component)
+        assertTrue(state.requiresClear)
+        assertEquals("preferred", state.method)
+
+        val users = InstallerJson.decodeUsers("""{"users":[{"id":0,"name":"Owner","primary":true,"running":true},{"id":10,"name":"Work","primary":false,"running":false}]}""")
+        assertEquals(listOf(0, 10), users.map { it.id })
+        assertTrue(users[0].primary)
+        assertFalse(users[1].running)
+        assertTrue(InstallerJson.decodeUsers("{}").isEmpty())
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.decodeUsers("""{"users":[{"name":"x"}]}""") }
+
+        val uninstall = InstallerJson.decodeUninstallResult("""{"ok":false,"packageName":"d","authorizer":"none","error":{"code":"USER_CANCELLED","message":"cancelled"}}""")
+        assertFalse(uninstall.ok)
+        assertEquals(InstallerErrorCodes.USER_CANCELLED, uninstall.error?.code)
+    }
+
+    @Test
+    fun `package archive info requires a known format and is returned normalized`() {
+        val json = InstallerJson.decodePackageArchiveInfo("""{"format":"xapk", "installable": true, "packageName": "e"}""")
+        assertEquals("""{"format":"xapk","installable":true,"packageName":"e"}""", json)
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.decodePackageArchiveInfo("""{"format":"ipa"}""") }
+    }
+
+    @Test
+    fun `uninstall and authorizer requests validate their options`() {
+        val json = InstallerJson.encodeUninstallRequest("com.example", InstallerJson.UninstallOptions(keepData = true, user = "all", interaction = "silent"))
+        val root = JsonParser.parseString(json).asJsonObject
+        assertEquals("com.example", root["packageName"].asString)
+        assertTrue(root["keepData"].asBoolean)
+        assertEquals("all", root["user"].asString)
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeUninstallRequest(" ", InstallerJson.UninstallOptions()) }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeUninstallRequest("x", InstallerJson.UninstallOptions(interaction = "notification")) }
+        assertEquals("""{"authorizer":"root"}""", InstallerJson.encodeAuthorizerRequest("root"))
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeAuthorizerRequest("sudo") }
+    }
+
+    @Test
+    fun `documents beyond the JSON ceiling are rejected`() {
+        val huge = "{\"format\":\"apk\",\"label\":\"" + "x".repeat(InstallerContract.MAX_JSON_BYTES) + "\"}"
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.decodePackageArchiveInfo(huge) }
+    }
+}

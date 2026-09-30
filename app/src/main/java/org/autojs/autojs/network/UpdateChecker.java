@@ -34,7 +34,7 @@ import org.autojs.autojs.network.download.DownloadManager;
 import org.autojs.autojs.network.entity.ExtendedVersionInfo;
 import org.autojs.autojs.network.entity.VersionInfo;
 import org.autojs.autojs.tool.SimpleObserver;
-import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity;
+import org.autojs.autojs.core.plugin.installer.PackageInstallRouter;
 import org.autojs.autojs.ui.settings.DisplayReleaseHistoryActivity;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.IntentUtils;
@@ -280,7 +280,7 @@ public class UpdateChecker {
     private void download(Context context, VersionInfo versionInfo) {
         Consumer<File> onNext = file -> {
             mUpdateDialog = null;
-            PackageInstallerActivity.install(context, file);
+            PackageInstallRouter.install(context, file);
         };
 
         Consumer<Throwable> onError = e -> {

@@ -23,12 +23,7 @@ import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.script.StringScriptSource
-import org.autojs.autojs.ui.main.scripts.AndroidPackageArchiveInspector
-import org.autojs.autojs.ui.main.scripts.AndroidPackageSessionInstaller
-import org.autojs.autojs.ui.main.scripts.PackageDeviceSpec
-import org.autojs.autojs.ui.main.scripts.PackageInstallStatusActivity
-import org.autojs.autojs.ui.main.scripts.PackageInstallStatusCoordinator
-import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity
+import org.autojs.autojs.core.plugin.installer.PackageInstallRouter
 import org.autojs.autojs.util.ActivityLaunchOptions
 import org.json.JSONObject
 import org.json.JSONArray
@@ -145,38 +140,15 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
                             if (intent.hasExtra("allowBelow")) putExtra("allowBelow", intent.getBooleanExtra("allowBelow", false))
                         })
                 }
-                "install" -> {
-                    Thread({
-                        runCatching {
-                            val apkName = intent.getStringExtra("apkName") ?: "sdk37-bal-install.apk"
-                            require(apkName.matches(Regex("[A-Za-z0-9_.-]+\\.apk")))
-                            val archive = AndroidPackageArchiveInspector.inspect(File(filesDir, apkName),
-                                PackageDeviceSpec.from(this), prepareForInstallation = true)
-                            AndroidPackageSessionInstaller.install(this, archive, File(cacheDir, "sdk37-bal-install-$caseId"))
-                        }.onSuccess { id -> handler.post {
-                            result.put("installSession", id)
-                            save()
-                            if (intent.getBooleanExtra("showConfirmation", false) && hasWindowFocus()) {
-                                startActivity(PackageInstallStatusActivity.showIntent(this, id))
-                            }
-                        } }
-                            .onFailure { error -> handler.post { result.put("installError", error.toString()); save() } }
-                    }, "SDK37-BAL-install").start()
-                }
-                "install-recovery" -> {
-                    result.put("installations", JSONArray().apply {
-                        PackageInstallStatusCoordinator.records(this@ActivityLaunchCompatibilityProbeActivity).forEach { record ->
-                            put(JSONObject().put("sessionId", record.sessionId).put("packageName", record.packageName)
-                                .put("status", record.status).put("generation", record.generation)
-                                .put("confirmationTokenExists", PackageInstallStatusCoordinator.confirmationToken(
-                                    this@ActivityLaunchCompatibilityProbeActivity, record) != null))
-                        }
-                    })
+                "install", "install-recovery" -> {
+                    // The session-based host installer and its status coordinator moved to the
+                    // 3-Setup Installer plugin (plugin roadmap P1.4); only the routed UI entry remains.
+                    error("Route $route was removed with the host installer")
                 }
                 "install-ui" -> {
                     val apkName = intent.getStringExtra("apkName") ?: "sdk37-bal-install.apk"
                     require(apkName.matches(Regex("[A-Za-z0-9_.-]+\\.apk")))
-                    result.put("installUiStarted", PackageInstallerActivity.install(this, File(filesDir, apkName)))
+                    result.put("installUiStarted", PackageInstallRouter.install(this, File(filesDir, apkName)))
                 }
                 else -> error("Unknown route: $route")
             }

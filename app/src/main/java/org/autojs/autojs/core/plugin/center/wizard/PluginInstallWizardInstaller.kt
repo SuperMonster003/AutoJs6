@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.center.PluginCenterProcessLogger
 import org.autojs.autojs.core.plugin.center.PluginInstaller
-import org.autojs.autojs.ui.main.scripts.PackageInstallerActivity
 import org.autojs.autojs.util.DialogUtils.applyProgressThemeColorTintLists
 import org.autojs.autojs.util.DialogUtils.setProgressNumberFormatByBytes
 import org.autojs.autojs.util.ViewUtils
@@ -228,9 +227,7 @@ object PluginInstallWizardInstaller {
                 try {
                     coroutineScope {
                         val awaitJob = launch {
-                            result = PluginInstallWizardInstallAwaiter.install(context, entry.item.packageName) {
-                                PackageInstallerActivity.install(context, entry.uri)
-                            }
+                            result = PluginInstallWizardInstallAwaiter.install(context, entry.item.packageName, entry.uri)
                         }
                         currentAwait = awaitJob
                         awaitJob.join()
