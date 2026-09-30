@@ -15,7 +15,7 @@ class PluginInstalledThreeIconTest {
         val packages = listOf(
             "io.github.supermonster003.autojs6.plugin.threestoneai",
             "io.github.supermonster003.autojs6.plugin.audioplayer",
-            "io.github.supermonster003.autojs6.plugin.videoplayer",
+            "io.github.supermonster003.autojs6.plugin.three.amber.player",
             "io.github.supermonster003.autojs6.plugin.three.stove.agent",
             "io.github.supermonster003.autojs6.plugin.three.adapt.a11y",
         )

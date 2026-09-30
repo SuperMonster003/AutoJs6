@@ -91,6 +91,10 @@ class PluginInstallWizardCatalogTest {
         assertEquals("Three Stove Agent", agent?.fallbackTitle)
         assertEquals(false, agent?.inStandard)
         assertEquals(false, agent?.inMinimal)
+        val amber = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.three.amber.player")
+        assertEquals(PluginInstallWizardCategory.PLAYER, amber?.category)
+        assertEquals("Three Amber Player", amber?.fallbackTitle)
+        assertFalse(PluginInstallWizardCatalog.contains("io.github.supermonster003.autojs6.plugin.videoplayer"))
         assertFalse(PluginInstallWizardCatalog.contains("com.example.unknown"))
     }
 

@@ -569,7 +569,7 @@
     <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
     <string name="hint_loop_delay">Delay before loop</string>
     <string name="hint_loop_times">0 for infinite loop</string>
-    <string name="hint_m3u_player_plugin_unavailable">No available player was found for this M3U playlist. Choose 3-Ember or 3-Terra to install, enable or authorize it in Plugin Center. 3-Ember is preferred.</string>
+    <string name="hint_m3u_player_plugin_unavailable">No available player was found for this M3U playlist. Choose 3-Amber or 3-Terra to install, enable or authorize it in Plugin Center. 3-Amber is preferred.</string>
     <string name="hint_ocr_default_engine_and_switching">Automatic OCR selection checks enabled plugins in this order: ML Kit OCR, Paddle OCR, Rapid OCR. Use ocr.mode or ocr.tap() to select an engine, or assign auto to ocr.mode to restore automatic selection.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 and domain are supported.</string>
     <string name="hint_plugin_process_failed_to_start">The plugin process could not start reliably. Update or reinstall the plugin; if the problem persists, contact the plugin developer.</string>

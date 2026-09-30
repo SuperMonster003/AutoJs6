@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.8.0
 
-###### 2026/09/29
+###### 2026/09/30
 
 * `提示` 部分内置功能改由独立插件提供, 使用前需在插件中心安装并启用对应插件
 * `提示` AI Agent 插件更名为 Three Stove Agent, 插件 ID, 服务 action 及契约包名一并变更, 已安装的 AI Agent 不再被识别, 需卸载后安装 Three Stove Agent
@@ -527,6 +527,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` Three Stove Agent 模型代理在 Provider 自身拒绝或中断请求时 (无效请求, 协议违规, 描述符或配额问题等) 以封闭的 PROVIDER_* 原因码报告失败阶段, 不再一律折叠为不带原因的 PROVIDER_FAILED; 原因只来自 AiErrorCode, 不含 Provider 文本
 * `优化` Three Stove Agent 模型代理在接受一批原生工具结果后按请求的 timeoutMs 重新设定截止时间, 每个续轮都拥有完整的超时, 整轮由插件的任务预算与续轮上限约束; 未提交结果的等待仍按原截止时间超时. 此前多轮原生任务共用首个请求的截止时间, 超过 5 分钟即以 MODEL_TIMEOUT 终止
 * `优化` Three Stove Agent 统一由插件中心启用和禁用, 移除主页抽屉开关, 脚本和插件界面按需自动连接; 官方插件安装后默认启用, 保留用户明确保存的禁用状态
+* `优化` 视频播放器 3-Ember Player 更名为 3-Amber Player, 更新插件安装引导, M3U 播放优先级及透明图标识别, 使用新的独立应用包名
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

@@ -4,7 +4,7 @@ import org.autojs.autojs.util.FileUtils
 
 internal object ExplorerM3uPlaylistPolicy {
 
-    const val VIDEO_PACKAGE = "io.github.supermonster003.autojs6.plugin.videoplayer"
+    const val VIDEO_PACKAGE = "io.github.supermonster003.autojs6.plugin.three.amber.player"
     const val AUDIO_PACKAGE = "io.github.supermonster003.autojs6.plugin.audioplayer"
 
     fun supports(type: FileUtils.TYPE): Boolean =

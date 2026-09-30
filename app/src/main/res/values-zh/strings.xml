@@ -568,7 +568,7 @@
     <string name="hint_long_click_run_to_debug">长按 \"运行\" 图标可启动调试</string>
     <string name="hint_loop_delay">开始循环前的延迟</string>
     <string name="hint_loop_times">0 表示无限循环</string>
-    <string name="hint_m3u_player_plugin_unavailable">未找到可用于播放此 M3U 列表的播放器. 请选择 3-Ember 或 3-Terra, 前往插件中心安装, 启用或授权. 优先使用 3-Ember.</string>
+    <string name="hint_m3u_player_plugin_unavailable">未找到可用于播放此 M3U 列表的播放器. 请选择 3-Amber 或 3-Terra, 前往插件中心安装, 启用或授权. 优先使用 3-Amber.</string>
     <string name="hint_ocr_default_engine_and_switching">OCR 自动选择按 ML Kit OCR, Paddle OCR, Rapid OCR 的顺序检查已启用的插件. 可通过 ocr.mode 或 ocr.tap() 指定引擎, 或将 ocr.mode 设为 auto 以恢复自动选择.</string>
     <string name="hint_pc_server_address_supported_formats">支持 IPv4, IPv6 及域名.</string>
     <string name="hint_plugin_process_failed_to_start">插件进程无法稳定启动. 请更新或重新安装插件; 如问题持续, 请联系插件开发者.</string>

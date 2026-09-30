@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify real Ember/Terra playback on an English-language disposable API 37 AVD."""
+"""Verify real Amber/Terra playback on an English-language disposable API 37 AVD."""
 
 import argparse
 import hashlib
@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 
 
 PLAYERS = {
-    'ember': ('Three-Ember-Player', 'videoplayer', 'threeemberplayer'),
+    'amber': ('Three-Amber-Player', 'three.amber.player', 'three.amber.player'),
     'terra': ('Three-Terra-Player', 'audioplayer', 'threeterraplayer'),
 }
 PREFIX = 'io.github.supermonster003.autojs6.plugin.'
@@ -100,7 +100,7 @@ def main():
             if 'targetSdk=37' not in shell('dumpsys', 'package', package):
                 raise RuntimeError('The installed player does not target SDK 37')
             shell('pm', 'grant', package, 'android.permission.POST_NOTIFICATIONS')
-            if name == 'ember':
+            if name == 'amber':
                 # Home normally enters visible PiP. Test the separate opt-in audio path.
                 shell('appops', 'set', package, 'PICTURE_IN_PICTURE', 'deny')
                 shell('run-as', package, 'mkdir', '-p', 'shared_prefs')

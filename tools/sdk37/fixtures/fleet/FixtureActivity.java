@@ -28,10 +28,10 @@ public class FixtureActivity extends Activity {
         root.addView(copy);
         setContentView(root);
         String player = getIntent().getStringExtra("player");
-        if (state == null && ("ember".equals(player) || "terra".equals(player))) {
+        if (state == null && ("amber".equals(player) || "terra".equals(player))) {
             root.postDelayed(() -> {
-                boolean video = "ember".equals(player);
-                String pkg = "io.github.supermonster003.autojs6.plugin." + (video ? "videoplayer" : "audioplayer");
+                boolean video = "amber".equals(player);
+                String pkg = "io.github.supermonster003.autojs6.plugin." + (video ? "three.amber.player" : "audioplayer");
                 // The public receiver is resolved by its documented ACTION_VIEW contract.
                 Uri uri = Uri.parse("content://org.autojs.sdk37.fleetfixture.files/fixture." + (video ? "mp4" : "m4a"));
                 Intent view = new Intent(Intent.ACTION_VIEW).setPackage(pkg)

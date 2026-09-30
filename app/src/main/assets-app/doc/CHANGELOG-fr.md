@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/29
+###### 2026/09/30
 
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
@@ -310,7 +310,7 @@
 * `Correction` Les actions Renommer et Supprimer des entrées d'archive ne respectaient pas les capacités de modification déclarées par la session active, ce qui pouvait exposer dans une session en lecture seule ou non compatible des opérations que le fournisseur ne pouvait pas terminer
 * `Correction` Les actions Explorer du gestionnaire de fichiers pouvaient conserver un cache ou des références de ligne obsolètes après l'activation, la réautorisation ou la mise à jour d'un plugin, obligeant les fichiers reconnus à revenir au sélecteur d'applications système jusqu'au redémarrage d'AutoJs6
 * `Correction` Les boutons vidéo du gestionnaire de fichiers pouvaient ouvrir le sélecteur d'applications système pour des formats déjà classés comme vidéo ; tous les types vidéo reconnus utilisent désormais d'abord le plugin officiel Video Player et, s'il est absent, désactivé, non autorisé, incompatible, indisponible ou impossible à lancer, l'hôte affiche des instructions de récupération avec l'option explicite "Ouvrir avec d'autres applications"
-* `Correction` Les lignes M3U pouvaient afficher simultanément les actions plugin, lecture et édition; la lecture privilégie désormais 3-Ember, puis 3-Terra, avec des liens vers le Centre de plugins pour installer, activer ou autoriser un lecteur indisponible
+* `Correction` Les lignes M3U pouvaient afficher simultanément les actions plugin, lecture et édition; la lecture privilégie désormais 3-Amber, puis 3-Terra, avec des liens vers le Centre de plugins pour installer, activer ou autoriser un lecteur indisponible
 * `Correction` Icônes de plugin redondantes pour les listes .m3u8/.pls/.wax/.wvx/.asx dans le gestionnaire de fichiers; conserver Lecture et Modifier ainsi que le lecteur associé
 * `Correction` La consultation des informations APK pouvait échouer pour les APK ordinaires contenant de nombreuses ressources en raison de la limite du nombre d'entrées; leur manifeste est désormais lu directement avec une limite de taille, tandis que les conteneurs multi-APK conservent la validation du parcours
 * `Correction` Le require Rhino CommonJS des applications empaquetées ne pouvait pas déchiffrer les modules JavaScript dépendants, ce qui faisait échouer avec "Cannot read file" les sorties TypeScript multifichiers compilées lors de l'empaquetage
@@ -657,6 +657,7 @@
 * `Amélioration` Lorsqu'un Provider rejette ou interrompt lui-même une requête (requête invalide, violation de protocole, problème de descripteur ou de quota, etc.), le courtier de modèles de Three Stove Agent signale l'étape par une raison fermée PROVIDER_* au lieu de tout réduire à un PROVIDER_FAILED sans raison; la raison dérive uniquement de AiErrorCode et ne contient aucun texte du Provider
 * `Amélioration` Le courtier de modèles de Three Stove Agent réarme l'échéance avec le timeoutMs de la requête après chaque lot accepté de résultats d'outils natifs, de sorte que chaque tour de continuation dispose du délai complet et que le tour entier est limité par le budget de tâche du plugin et le plafond de tours; une attente sans soumission de résultats expire toujours à l'échéance initiale. Les tâches natives multi-tours partageaient auparavant l'échéance de la première requête et se terminaient par MODEL_TIMEOUT au bout de 5 minutes
 * `Amélioration` Three Stove Agent est activé et désactivé uniquement dans le centre de plugins; le commutateur du volet est retiré et les scripts et l'interface se connectent à la demande; les installations officielles sont activées par défaut, tout en conservant la désactivation choisie par l'utilisateur
+* `Amélioration` Renommer le lecteur vidéo 3-Ember Player en 3-Amber Player; adapter le guide d'installation, la priorité M3U et les icônes transparentes à son nouvel identifiant d'application
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise

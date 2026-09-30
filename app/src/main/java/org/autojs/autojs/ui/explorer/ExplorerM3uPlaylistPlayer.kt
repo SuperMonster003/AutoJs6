@@ -23,7 +23,7 @@ internal object ExplorerM3uPlaylistPlayerUi {
                 .negativeColorRes(R.color.dialog_button_default)
                 .neutralText(R.string.plugin_three_terra_player_name)
                 .neutralColorRes(R.color.dialog_button_hint)
-                .positiveText(R.string.plugin_three_ember_player_name)
+                .positiveText(R.string.plugin_three_amber_player_name)
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .widgetThemeColor()
                 .onNeutral { _, _ -> openPluginCenter(context, ExplorerM3uPlaylistPolicy.AUDIO_PACKAGE) }

@@ -35,7 +35,7 @@ import java.util.Locale
 class ExplorerM3uPlaylistInstrumentationTest {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val ember = action(ExplorerM3uPlaylistPolicy.VIDEO_PACKAGE, "play-video")
+    private val amber = action(ExplorerM3uPlaylistPolicy.VIDEO_PACKAGE, "play-video")
     private val terra = action(ExplorerM3uPlaylistPolicy.AUDIO_PACKAGE, "play-audio")
 
     @Test
@@ -45,7 +45,7 @@ class ExplorerM3uPlaylistInstrumentationTest {
             FileUtils.TYPE.WAX, FileUtils.TYPE.WVX, FileUtils.TYPE.ASX,
         ).forEach { type ->
             val player = if (type == FileUtils.TYPE.WVX || type == FileUtils.TYPE.ASX ||
-                type == FileUtils.TYPE.M3U8_VIDEO) ember else terra
+                type == FileUtils.TYPE.M3U8_VIDEO) amber else terra
             val item = item(type)
             val provider = RecordingProvider(listOf(player))
             val controller = controller(provider)
@@ -60,13 +60,13 @@ class ExplorerM3uPlaylistInstrumentationTest {
     }
 
     @Test
-    fun eitherM3uClassificationKeepsTwoButtonsAndPrefersEmberOverCachedTerra() {
+    fun eitherM3uClassificationKeepsTwoButtonsAndPrefersAmberOverCachedTerra() {
         listOf(FileUtils.TYPE.M3U_AUDIO, FileUtils.TYPE.M3U_VIDEO).forEach { type ->
             val item = item(type)
-            val provider = RecordingProvider(listOf(terra, ember))
+            val provider = RecordingProvider(listOf(terra, amber))
             val controller = controller(provider)
             val selected = controller.resolve(ExplorerActionEntryPoint.PRIMARY_BUTTON, item)
-            assertSame(ember, selected)
+            assertSame(amber, selected)
             val state = ExplorerItemActionPolicy.resolve(item, selected)
             assertSame(ExplorerPrimaryAction.MEDIA_PLAY, state.primaryAction)
             assertEquals(2, iconCount(state))
@@ -75,12 +75,12 @@ class ExplorerM3uPlaylistInstrumentationTest {
             assertTrue(controller.launchOfficialMediaOrShowGuidance(
                 context, ExplorerActionEntryPoint.PRIMARY_BUTTON, item, preResolvedAction = terra,
             ))
-            assertSame(ember, provider.launched)
+            assertSame(amber, provider.launched)
         }
     }
 
     @Test
-    fun missingEmberUsesTerraForBothButtonAndDefaultClick() {
+    fun missingAmberUsesTerraForBothButtonAndDefaultClick() {
         listOf(ExplorerActionEntryPoint.PRIMARY_BUTTON, ExplorerActionEntryPoint.DEFAULT_CLICK).forEach { entryPoint ->
             val provider = RecordingProvider(listOf(terra))
             assertTrue(controller(provider).launchOfficialMediaOrShowGuidance(
@@ -91,8 +91,8 @@ class ExplorerM3uPlaylistInstrumentationTest {
     }
 
     @Test
-    fun unavailablePlayersLinkToEmberInPluginCenter() =
-        checkPluginCenterDestination("3-Ember", ExplorerM3uPlaylistPolicy.VIDEO_PACKAGE)
+    fun unavailablePlayersLinkToAmberInPluginCenter() =
+        checkPluginCenterDestination("3-Amber", ExplorerM3uPlaylistPolicy.VIDEO_PACKAGE)
 
     @Test
     fun unavailablePlayersLinkToTerraInPluginCenter() =

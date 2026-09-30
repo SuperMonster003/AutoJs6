@@ -120,7 +120,7 @@ object PluginInstallWizardCatalog {
         entry(official("offlinedocs"), "Offline Docs", DOCS, minimal = true),
 
         // Players.
-        entry(official("videoplayer"), "Three Ember Player", PLAYER),
+        entry(official("three.amber.player"), "Three Amber Player", PLAYER),
         entry(official("audioplayer"), "Three Terra Player", PLAYER),
 
         // Tools.

@@ -572,7 +572,7 @@
     <string name="hint_long_click_run_to_debug">Haga un clic largo en el botón \"Ejecutar\" para depurar</string>
     <string name="hint_loop_delay">Retraso antes del bucle</string>
     <string name="hint_loop_times">0 para bucle infinito</string>
-    <string name="hint_m3u_player_plugin_unavailable">No hay un reproductor disponible para esta lista M3U. Elija 3-Ember o 3-Terra para instalar, activar o autorizar el plugin en el Centro de plugins. 3-Ember tiene prioridad.</string>
+    <string name="hint_m3u_player_plugin_unavailable">No hay un reproductor disponible para esta lista M3U. Elija 3-Amber o 3-Terra para instalar, activar o autorizar el plugin en el Centro de plugins. 3-Amber tiene prioridad.</string>
     <string name="hint_ocr_default_engine_and_switching">La selección automática OCR comprueba los plugins habilitados en este orden: ML Kit OCR, Paddle OCR, Rapid OCR. Use ocr.mode u ocr.tap() para elegir un motor, o asigne auto a ocr.mode para restaurar la selección automática.</string>
     <string name="hint_pc_server_address_supported_formats">Se admiten IPv4, IPv6 y dominios.</string>
     <string name="hint_plugin_process_failed_to_start">El proceso del plugin no pudo iniciarse de forma estable. Actualiza o reinstala el plugin; si el problema persiste, contacta con el desarrollador del plugin.</string>

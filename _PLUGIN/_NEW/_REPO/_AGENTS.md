@@ -760,7 +760,7 @@ py .python/generate_markdown.py --check
 - 构建平台, Wake 激活, PluginInfo, 多语言生成和 README 样式: `D:/idea-projects/AutoJs6-Plugin-OpenCC`
 - 纯 JVM PluginInfo 与真实 Binder 测试: `D:/idea-projects/AutoJs6-Plugin-Pinyin4j`
 - 原生 ABI, 发布产物和 16 KB 验证: `D:/idea-projects/AutoJs6-Plugin-OpenCC` 与 `D:/idea-projects/AutoJs6-Plugin-MediaInfo`
-- Explorer Action, 独立设置和内置发行历史: `D:/idea-projects/AutoJs6-Plugin-Three-Ember-Player` 与 `D:/idea-projects/AutoJs6-Plugin-Three-Terra-Player`
+- Explorer Action, 独立设置和内置发行历史: `D:/idea-projects/AutoJs6-Plugin-Three-Amber-Player` 与 `D:/idea-projects/AutoJs6-Plugin-Three-Terra-Player`
 - 更新对话框与发行历史页面: `D:/idea-projects/AutoJs6-Plugin-Three-Stone-AI`
 - 宿主入口, 插件发现, 安装和启用引导: `D:/idea-projects/AutoJs6`
 

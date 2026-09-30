@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/09/29
+###### 2026/09/30
 
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
@@ -310,7 +310,7 @@
 * `Corrección` Las acciones Renombrar y Eliminar de entradas de archivo no respetaban las capacidades de modificación declaradas por la sesión actual, por lo que sesiones de solo lectura o no compatibles podían mostrar operaciones que el proveedor no podía completar
 * `Corrección` Las acciones Explorer del administrador de archivos podían conservar caché o referencias de fila obsoletas después de activar, volver a autorizar o actualizar un plugin, por lo que los archivos reconocidos volvían al selector de aplicaciones del sistema hasta reiniciar AutoJs6
 * `Corrección` Los botones de video del administrador de archivos podían abrir el selector de aplicaciones del sistema para formatos ya clasificados como video; ahora todos los tipos de video reconocidos usan primero el plugin oficial Video Player y, si falta, está desactivado, no está autorizado, es incompatible, no está disponible o no se inicia, el host muestra instrucciones de recuperación con la opción explícita "Abrir con otras aplicaciones"
-* `Corrección` Las filas M3U podían mostrar a la vez las acciones de plugin, reproducción y edición; la reproducción ahora prioriza 3-Ember y después 3-Terra, con enlaces al Centro de plugins para instalar, activar o autorizar un reproductor si no hay ninguno disponible
+* `Corrección` Las filas M3U podían mostrar a la vez las acciones de plugin, reproducción y edición; la reproducción ahora prioriza 3-Amber y después 3-Terra, con enlaces al Centro de plugins para instalar, activar o autorizar un reproductor si no hay ninguno disponible
 * `Corrección` Iconos de complemento redundantes para listas .m3u8/.pls/.wax/.wvx/.asx en el gestor de archivos; conservar Reproducir y Editar junto con el reproductor asociado
 * `Corrección` La consulta de información de APK ordinarios con muchos recursos podía fallar por el límite de entradas del archivo; ahora se lee directamente el manifiesto con un límite de tamaño, manteniendo la validación del recorrido para contenedores de varios APK
 * `Corrección` El require de Rhino CommonJS en aplicaciones empaquetadas no podía descifrar módulos JavaScript dependientes, por lo que la salida TypeScript multifichero compilada durante el empaquetado fallaba con "Cannot read file"
@@ -657,6 +657,7 @@
 * `Mejora` Cuando el propio Provider rechaza o interrumpe una solicitud (solicitud inválida, violación de protocolo, problemas de descriptores o de cuota, etc.), el intermediario de modelos de Three Stove Agent informa la etapa con una razón cerrada PROVIDER_* en lugar de reducir todo a un PROVIDER_FAILED sin razón; la razón se deriva solo de AiErrorCode y no contiene texto del Provider
 * `Mejora` El intermediario de modelos de Three Stove Agent vuelve a fijar el plazo con el timeoutMs de la solicitud tras cada lote aceptado de resultados de herramientas nativas, de modo que cada ronda de continuación dispone del tiempo límite completo y el turno entero queda limitado por el presupuesto de tarea del plugin y el tope de rondas; la espera sin enviar resultados sigue caducando en el plazo original. Antes, las tareas nativas de varias rondas compartían el plazo de la primera solicitud y terminaban con MODEL_TIMEOUT a los 5 minutos
 * `Mejora` Three Stove Agent se activa y desactiva solo en el centro de complementos; se elimina el interruptor del panel y los scripts y la interfaz se conectan bajo demanda; las instalaciones oficiales se activan por defecto y se respeta la desactivación elegida por el usuario
+* `Mejora` Renombrar el reproductor de vídeo 3-Ember Player a 3-Amber Player; adaptar la guía de instalación, la prioridad M3U y los iconos transparentes al nuevo identificador de aplicación
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

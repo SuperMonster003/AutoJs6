@@ -8,7 +8,7 @@ import org.junit.Test
 class ExplorerM3uPlaylistPolicyTest {
 
     @Test
-    fun emberTakesPriorityRegardlessOfDiscoveryOrder() {
+    fun amberTakesPriorityRegardlessOfDiscoveryOrder() {
         val video = ExplorerM3uPlaylistPolicy.VIDEO_PACKAGE
         val audio = ExplorerM3uPlaylistPolicy.AUDIO_PACKAGE
 
@@ -52,5 +52,6 @@ class ExplorerM3uPlaylistPolicyTest {
     fun missingOfficialPlayersRequireGuidanceEvenIfAnotherPluginIsAvailable() {
         assertNull(ExplorerM3uPlaylistPolicy.preferredPackage(emptySet()))
         assertNull(ExplorerM3uPlaylistPolicy.preferredPackage(setOf("example.other.player")))
+        assertNull(ExplorerM3uPlaylistPolicy.preferredPackage(setOf("io.github.supermonster003.autojs6.plugin.videoplayer")))
     }
 }

@@ -145,7 +145,7 @@ internal object ExplorerVideoPlayerPluginUi {
         }
     }.getOrNull()
 
-    const val OFFICIAL_PACKAGE = "io.github.supermonster003.autojs6.plugin.videoplayer"
+    const val OFFICIAL_PACKAGE = "io.github.supermonster003.autojs6.plugin.three.amber.player"
     private const val ACTION_ID = "play-video"
     private val EXTERNAL_VIEWER_COMPONENT = ComponentName(
         OFFICIAL_PACKAGE,

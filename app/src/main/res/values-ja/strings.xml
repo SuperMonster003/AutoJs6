@@ -573,7 +573,7 @@
     <string name="hint_long_click_run_to_debug">実行 ボタン長押しでデバッグ</string>
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
-    <string name="hint_m3u_player_plugin_unavailable">この M3U プレイリストで使用できるプレーヤーが見つかりません. 3-Ember または 3-Terra を選択し, プラグインセンターでインストール, 有効化または承認してください. 3-Ember が優先されます.</string>
+    <string name="hint_m3u_player_plugin_unavailable">この M3U プレイリストで使用できるプレーヤーが見つかりません. 3-Amber または 3-Terra を選択し, プラグインセンターでインストール, 有効化または承認してください. 3-Amber が優先されます.</string>
     <string name="hint_ocr_default_engine_and_switching">OCR の自動選択は ML Kit OCR, Paddle OCR, Rapid OCR の順に有効なプラグインを確認します. ocr.mode または ocr.tap() でエンジンを指定し, ocr.mode に auto を設定すると自動選択に戻ります.</string>
     <string name="hint_pc_server_address_supported_formats">IPv4/IPv6/およびドメイン名に対応しています.</string>
     <string name="hint_plugin_process_failed_to_start">プラグインプロセスを安定して起動できません. プラグインを更新または再インストールしてください. 問題が続く場合は, プラグイン開発者に連絡してください.</string>

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/29",
+      "released_date": "2026/09/30",
       "feature": [
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
         "Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates",
@@ -307,7 +307,7 @@
         "Archive entry Rename and Delete actions did not honor the current session's declared mutation capabilities, allowing read-only or unsupported sessions to expose operations the provider could not complete",
         "File manager Explorer actions could retain stale cache entries or row references after a plugin was enabled, re-authorized, or updated, causing recognized files to fall back to the system application chooser until AutoJs6 restarted",
         "File manager video buttons could open the system application chooser for formats already classified as video; all recognized video types now use the official Video Player plugin first, and if it is missing, disabled, unauthorized, incompatible, unavailable, or fails to launch, the host shows recovery guidance with an explicit \"Open with other apps\" option",
-        "M3U file rows could show plugin, play and edit actions together; playback now prefers 3-Ember, then 3-Terra, with Plugin Center links to install, enable or authorize a player when none is available",
+        "M3U file rows could show plugin, play and edit actions together; playback now prefers 3-Amber, then 3-Terra, with Plugin Center links to install, enable or authorize a player when none is available",
         "Redundant plugin action icons for .m3u8/.pls/.wax/.wvx/.asx playlists in the file manager; keep Play and Edit while retaining the matched player",
         "File manager APK inspection could fail on ordinary APKs with many resource entries because of the archive entry limit; standalone APKs now read a size-bounded manifest directly while multi-APK containers retain traversal validation",
         "Packaged Rhino CommonJS require could not decrypt dependent JavaScript modules, causing multi-file build-time TypeScript output to fail with \"Cannot read file\"",
@@ -655,7 +655,8 @@
         "respond on ai.agent task objects accepts an array of 1 to 8 non-blank strings to answer a Three Stove Agent plan review request (input events with kind plan); text and boolean answers are unchanged",
         "When a Provider itself rejects or aborts a request (invalid request, protocol violation, descriptor or quota problems and so on), the Three Stove Agent model broker reports the stage as a closed PROVIDER_* reason instead of collapsing everything into a reasonless PROVIDER_FAILED; the reason is derived from AiErrorCode only and carries no Provider text",
         "The Three Stove Agent model broker re-arms the deadline with the request's timeoutMs after each accepted batch of native tool results, so every continuation round has the full timeout and the whole turn is bounded by the plugin's run budget and the round cap; waiting without submitting results still expires on the original deadline. Multi-round native tasks used to share the first request's deadline and ended with MODEL_TIMEOUT after 5 minutes",
-        "Three Stove Agent is enabled and disabled only in Plugin Center; the home drawer switch is removed and scripts and the plugin UI connect on demand; official installations are enabled by default while explicit user disablement is preserved"
+        "Three Stove Agent is enabled and disabled only in Plugin Center; the home drawer switch is removed and scripts and the plugin UI connect on demand; official installations are enabled by default while explicit user disablement is preserved",
+        "Rename the video player from 3-Ember Player to 3-Amber Player; update plugin installation guidance, M3U playback preference and transparent icon recognition for its new application ID"
       ],
       "dependency": [
         "Modularized Android AXML",

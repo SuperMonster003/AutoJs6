@@ -14,9 +14,9 @@ import org.autojs.autojs6.R
 object PluginInstalledIconResolver {
     private val transparentIconPackages = setOf(
         "io.github.supermonster003.autojs6.plugin.threestoneai",
-        // Terra and Ember retain their published package IDs after their product/namespace rename.
+        // Terra retains its published package ID; Amber 4.0 adopts the maintainer-selected dotted ID.
         "io.github.supermonster003.autojs6.plugin.audioplayer",
-        "io.github.supermonster003.autojs6.plugin.videoplayer",
+        "io.github.supermonster003.autojs6.plugin.three.amber.player",
         "io.github.supermonster003.autojs6.plugin.three.stove.agent",
         "io.github.supermonster003.autojs6.plugin.three.adapt.a11y",
     )

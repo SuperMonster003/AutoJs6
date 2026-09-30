@@ -150,6 +150,6 @@ B4 的无用 CMake / Ninja CI 安装步骤清理已完成, 不属于剩余事项
 | --- | --- |
 | 图像与 OCR, 12 个 | Image-Quantization, ImGui, MLKit-Barcode, MLKit-OCR, OpenCV, Paddle-OCR-PP-OCRv3, Paddle-OCR-PP-OCRv4, Paddle-OCR-PP-OCRv5, Paddle-OCR-PP-OCRv6, Rapid-OCR-PP-OCRv3, Rapid-OCR-PP-OCRv6, Yolo-NCNN |
 | 语言与 AI, 7 个 | Java-Runtime, Kotlin-Runtime, Lua-Runtime, Python-Runtime, QuickJS-Runtime, TypeScript-Engine, Three-Stone-AI |
-| 其它, 11 个 | Accessibility-Compat, DEX-Compiler, File-Inspector, Image-Tools, Image-Viewer, Offline-Docs, Pinyin, Pinyin4j, R8-Compiler, Three-Ember-Player, Three-Terra-Player |
+| 其它, 11 个 | Accessibility-Compat, DEX-Compiler, File-Inspector, Image-Tools, Image-Viewer, Offline-Docs, Pinyin, Pinyin4j, R8-Compiler, Three-Amber-Player, Three-Terra-Player |
 
 QuickJS-Runtime 本轮所见仅有未跟踪 `.idea/`; R8 则有需要保留的特殊 AD 暂存状态. 按实际差异判断, 不把所有 dirty 状态等同于未完成产品代码.

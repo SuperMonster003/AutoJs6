@@ -574,7 +574,7 @@
     <string name="hint_long_click_run_to_debug">انقر الطويل على زر \"تشغيل\" لتصحيح الأخطاء</string>
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
-    <string name="hint_m3u_player_plugin_unavailable">لم يتم العثور على مشغل متاح لقائمة M3U هذه. اختر 3-Ember أو 3-Terra لتثبيته أو تفعيله أو منحه الإذن في مركز المكونات الإضافية. الأولوية لـ 3-Ember.</string>
+    <string name="hint_m3u_player_plugin_unavailable">لم يتم العثور على مشغل متاح لقائمة M3U هذه. اختر 3-Amber أو 3-Terra لتثبيته أو تفعيله أو منحه الإذن في مركز المكونات الإضافية. الأولوية لـ 3-Amber.</string>
     <string name="hint_ocr_default_engine_and_switching">يفحص اختيار OCR التلقائي الاضافات المفعلة بالترتيب ML Kit OCR, Paddle OCR, Rapid OCR. استخدم ocr.mode او ocr.tap() لاختيار محرك, او عين auto الى ocr.mode لاستعادة الاختيار التلقائي.</string>
     <string name="hint_pc_server_address_supported_formats">يتم دعم IPv4 و IPv6 وأسماء النطاقات.</string>
     <string name="hint_plugin_process_failed_to_start">تعذر بدء عملية المكون الإضافي بشكل موثوق. حدّث المكون الإضافي أو أعد تثبيته; وإذا استمرت المشكلة, فاتصل بمطور المكون الإضافي.</string>

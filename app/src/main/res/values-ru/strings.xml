@@ -572,7 +572,7 @@
     <string name="hint_long_click_run_to_debug">Длительное нажатие кнопки \"Выполнить\" для отладки</string>
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
-    <string name="hint_m3u_player_plugin_unavailable">Для этого списка M3U нет доступного проигрывателя. Выберите 3-Ember или 3-Terra для установки, включения или авторизации в Центре плагинов. Приоритет у 3-Ember.</string>
+    <string name="hint_m3u_player_plugin_unavailable">Для этого списка M3U нет доступного проигрывателя. Выберите 3-Amber или 3-Terra для установки, включения или авторизации в Центре плагинов. Приоритет у 3-Amber.</string>
     <string name="hint_ocr_default_engine_and_switching">Автовыбор OCR проверяет включенные плагины в порядке ML Kit OCR, Paddle OCR, Rapid OCR. Укажите движок через ocr.mode или ocr.tap(), либо присвойте ocr.mode значение auto для возврата к автовыбору.</string>
     <string name="hint_pc_server_address_supported_formats">Поддерживаются IPv4, IPv6 и доменные имена.</string>
     <string name="hint_plugin_process_failed_to_start">Не удалось стабильно запустить процесс плагина. Обновите или переустановите плагин; если проблема не исчезнет, обратитесь к разработчику плагина.</string>
