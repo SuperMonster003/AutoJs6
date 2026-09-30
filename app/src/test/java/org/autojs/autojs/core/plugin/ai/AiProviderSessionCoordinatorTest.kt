@@ -437,6 +437,54 @@ class AiProviderSessionCoordinatorTest {
     }
 
     @Test
+    fun lateOperationReturnLiftsTheFuseOnceTheRunSettles() {
+        val fixture = SessionCoordinatorFixture()
+        val lease = SessionRecordingRequestLease()
+        val transport = FakeSessionTransport(fixture)
+        val scheduler = FakeSessionDeadlineScheduler()
+        val clock = FakeSessionClock()
+        val worker = SessionManualExecutor()
+        val blocking = SessionManualExecutor()
+        val fallback = SessionManualExecutor()
+        val owner = AiProviderSessionProcessOwner()
+        val events = CopyOnWriteArrayList<AiProviderSessionRunEvent>()
+        transport.rpc.openBehavior = { callback, _, _, _, _ ->
+            callback.onStarted(PROVIDER_UID, fixture.startedEnvelope())
+            transport.remote
+        }
+
+        coordinator(transport, worker, blocking, fallback, scheduler, owner, clock)
+            .start(fixture.runRequest(lease), events::add)
+        drain(worker, blocking, fallback)
+        val observedOperation = transport.rpc.operationObserver.begin()
+        clock.nowMillis = fixture.request.options.timeoutMillis
+        scheduler.fire()
+        drain(worker, blocking, fallback)
+        assertEquals(AiProviderSessionAdmission.FUSED, owner.tryAcquire(fixture.snapshot.component))
+
+        observedOperation.close()
+        drain(worker, blocking, fallback)
+
+        assertEquals(
+            AiProviderSessionEvent.TimedOut::class.java,
+            (events.last() as AiProviderSessionRunEvent.Transcript).event.javaClass,
+        )
+        assertEquals(AiProviderSessionAdmission.ACQUIRED, owner.tryAcquire(fixture.snapshot.component))
+        owner.release()
+        val nextEvents = CopyOnWriteArrayList<AiProviderSessionRunEvent>()
+        val nextTransport = FakeSessionTransport(fixture)
+        nextTransport.rpc.openBehavior = { callback, _, _, _, _ ->
+            callback.onStarted(PROVIDER_UID, fixture.startedEnvelope())
+            nextTransport.remote
+        }
+        coordinator(nextTransport, worker, blocking, fallback, scheduler, owner, clock)
+            .start(fixture.runRequest(SessionRecordingRequestLease()), nextEvents::add)
+        drain(worker, blocking, fallback)
+        assertFalse(nextEvents.contains(AiProviderSessionRunEvent.Fused))
+        assertTrue((nextEvents.first() as AiProviderSessionRunEvent.Transcript).event is AiProviderSessionEvent.Started)
+    }
+
+    @Test
     fun timeoutAcceptedBeforeLastObservedOperationSettlesStillFusesComponent() {
         val fixture = SessionCoordinatorFixture()
         val lease = SessionRecordingRequestLease()
@@ -501,10 +549,12 @@ class AiProviderSessionCoordinatorTest {
             ),
             events.map { (it as AiProviderSessionRunEvent.Transcript).event.javaClass },
         )
+        // The settled run lifted its own fuse once the late operation returned (D52).
         assertEquals(
-            AiProviderSessionAdmission.FUSED,
+            AiProviderSessionAdmission.ACQUIRED,
             owner.tryAcquire(fixture.snapshot.component),
         )
+        owner.release()
         assertEquals(1, lease.closeCount.get())
         assertEquals(1, transport.remote.cancelCount.get())
         assertEquals(1, transport.remote.closeCount.get())
@@ -588,10 +638,12 @@ class AiProviderSessionCoordinatorTest {
         assertEquals(1, lease.closeCount.get())
         assertEquals(1, transport.remote.cancelCount.get())
         assertEquals(1, transport.remote.closeCount.get())
+        // The settled run lifted its own fuse once the late operation returned (D52).
         assertEquals(
-            AiProviderSessionAdmission.FUSED,
+            AiProviderSessionAdmission.ACQUIRED,
             owner.tryAcquire(fixture.snapshot.component),
         )
+        owner.release()
     }
 
     @Test
@@ -901,18 +953,12 @@ class AiProviderSessionCoordinatorTest {
             assertEquals(1, transport.remote.closeCount.get())
             assertEquals(1, transport.binding.closeCount.get())
             assertEquals(1, transport.rpc.prepared.closeCount.get())
-            if (expectFuse) {
-                assertEquals(
-                    AiProviderSessionAdmission.FUSED,
-                    owner.tryAcquire(fixture.snapshot.component),
-                )
-            } else {
-                assertEquals(
-                    AiProviderSessionAdmission.ACQUIRED,
-                    owner.tryAcquire(fixture.snapshot.component),
-                )
-                owner.release()
-            }
+            // Whether or not the blocked open fused the component, the settled run has lifted the fuse (D52).
+            assertEquals(
+                AiProviderSessionAdmission.ACQUIRED,
+                owner.tryAcquire(fixture.snapshot.component),
+            )
+            owner.release()
         } finally {
             releaseOpen.countDown()
             blocking.shutdownNow()

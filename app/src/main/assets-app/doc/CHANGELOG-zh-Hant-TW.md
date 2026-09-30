@@ -659,6 +659,7 @@
 * `最佳化` Three Stove Agent 統一由外掛中心啟用和停用, 移除首頁側邊欄開關, 指令碼和外掛介面按需自動連線; 官方外掛安裝後預設啟用, 保留使用者明確儲存的停用狀態
 * `最佳化` 影片播放器 3-Ember Player 更名為 3-Amber Player, 更新外掛安裝引導, M3U 播放優先順序及透明圖示識別, 使用新的獨立應用程式套件名稱
 * `最佳化` 安裝器能力遷出到 3-Setup Installer 外掛: 檔案管理器, 外掛中心, 打包完成與自更新的安裝入口在外掛可用時交給外掛的安裝對話框, 否則將 APK 交給系統安裝器並提示安裝外掛; 宿主不再註冊 "用 AutoJs6 開啟 APK" 的系統入口, apks / xapk / apkm / apkz 分包容器需要外掛才能安裝
+* `最佳化` Three Stove Agent 模型代理在一次模型呼叫逾時且同步 Binder 交易尚未返回時會熔斷該 Provider 元件, 此前熔斷持續到 AutoJs6 程序重啟, 後續任務立即以 RATE_LIMITED: FUSED 失敗; 現在該交易實際返回並結清後自動解除熔斷, 後續任務無需重啟即可再次准入
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

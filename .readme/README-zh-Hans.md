@@ -529,6 +529,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` Three Stove Agent 统一由插件中心启用和禁用, 移除主页抽屉开关, 脚本和插件界面按需自动连接; 官方插件安装后默认启用, 保留用户明确保存的禁用状态
 * `优化` 视频播放器 3-Ember Player 更名为 3-Amber Player, 更新插件安装引导, M3U 播放优先级及透明图标识别, 使用新的独立应用包名
 * `优化` 安装器能力迁出到 3-Setup Installer 插件: 文件管理器, 插件中心, 打包完成与自更新的安装入口在插件可用时交给插件的安装对话框, 否则将 APK 交给系统安装器并提示安装插件; 宿主不再注册 "用 AutoJs6 打开 APK" 的系统入口, apks / xapk / apkm / apkz 分包容器需要插件才能安装
+* `优化` Three Stove Agent 模型代理在一次模型调用超时且同步 Binder 事务尚未返回时会熔断该 Provider 组件, 此前熔断持续到 AutoJs6 进程重启, 后续任务立即以 RATE_LIMITED: FUSED 失败; 现在该事务实际返回并结清后自动解除熔断, 后续任务无需重启即可再次准入
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

@@ -659,6 +659,7 @@
 * `Improvement` Three Stove Agent is enabled and disabled only in Plugin Center; the home drawer switch is removed and scripts and the plugin UI connect on demand; official installations are enabled by default while explicit user disablement is preserved
 * `Improvement` Rename the video player from 3-Ember Player to 3-Amber Player; update plugin installation guidance, M3U playback preference and transparent icon recognition for its new application ID
 * `Improvement` The package installer moved to the 3-Setup Installer plugin: the install entries of the file manager, Plugin Center, a finished build and the self-update hand the package to the plugin's install dialog when the plugin is available and to the system installer otherwise, with a hint to install the plugin; the host no longer registers the "open APK with AutoJs6" system entry, and apks / xapk / apkm / apkz split containers need the plugin
+* `Improvement` The Three Stove Agent model broker fuses a Provider component when a model call times out while its synchronous Binder transaction has not returned; the fuse used to last until AutoJs6 restarted, failing later tasks at once with RATE_LIMITED: FUSED. It is now lifted automatically once that transaction has returned and the run has settled, so later tasks are admitted again without a restart
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

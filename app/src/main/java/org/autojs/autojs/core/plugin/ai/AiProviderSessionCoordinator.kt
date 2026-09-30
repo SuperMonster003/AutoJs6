@@ -165,7 +165,14 @@ internal interface AiProviderSessionRunHandle : Closeable {
         descriptors: AiProviderSessionRequestDescriptorFactory): Boolean = false
 }
 
-/** Process-lifetime, single-active admission and per-component fuse state. */
+/**
+ * Process-lifetime, single-active admission and per-component fuse state.
+ *
+ * A component is fused while a timed-out synchronous Binder transaction of its run is still
+ * unwinding. Once that run settles, that is, once every in-flight operation has actually returned,
+ * the run lifts its own fuse again so later tasks are admitted without a host restart
+ * (3-Stove Agent roadmap D52, 2026-09-30).
+ */
 internal class AiProviderSessionProcessOwner {
     private val lock = Any()
     private var active = false
@@ -185,6 +192,10 @@ internal class AiProviderSessionProcessOwner {
 
     internal fun fuse(component: AiProviderComponent) {
         synchronized(lock) { fusedComponents += component }
+    }
+
+    internal fun unfuse(component: AiProviderComponent) {
+        synchronized(lock) { fusedComponents -= component }
     }
 
     internal fun release() {
@@ -259,6 +270,7 @@ internal class AiProviderSessionCoordinator(
         private var openState = OpenState.NOT_ENTERED
         private var binderRpcInFlight = false
         private var operationsInFlight = 0
+        private var fusedByThisRun = false
         private var timeoutClaimed = false
         private var operationCrossedDeadline = false
         private var policyTerminalClaimInProgress = false
@@ -654,7 +666,7 @@ internal class AiProviderSessionCoordinator(
             }
             val fuse = synchronized(lifecycleLock) {
                 timeoutClaimed = true
-                ownerAcquired && (operationsInFlight > 0 || operationCrossedDeadline)
+                (ownerAcquired && (operationsInFlight > 0 || operationCrossedDeadline)).also { if (it) fusedByThisRun = true }
             }
             if (fuse) owner.fuse(request.snapshot.component)
             closeTransportEarly()
@@ -836,6 +848,7 @@ internal class AiProviderSessionCoordinator(
                     settlementInProgress = true
                     Settlement(
                         releaseOwner = ownerAcquired,
+                        liftFuse = fusedByThisRun,
                         event = outerTerminalOverride ?: mapPolicyTerminal(
                             checkNotNull(policyTerminalEvent),
                         ),
@@ -843,6 +856,9 @@ internal class AiProviderSessionCoordinator(
                 }
             } ?: return
             if (settlement.releaseOwner) owner.release()
+            // Settlement waits for every in-flight operation, so the transaction that fused the component has
+            // returned by now and the fuse no longer protects anything.
+            if (settlement.liftFuse) owner.unfuse(request.snapshot.component)
             synchronized(lifecycleLock) {
                 ownerAcquired = false
                 outcomeDelivered = true
@@ -925,6 +941,7 @@ internal class AiProviderSessionCoordinator(
                 if (expired) {
                     operationCrossedDeadline = true
                     fuseComponent = timeoutClaimed && ownerAcquired
+                    if (fuseComponent) fusedByThisRun = true
                     claimTimeout = !timeoutClaimed
                 }
             }
@@ -1013,6 +1030,7 @@ internal class AiProviderSessionCoordinator(
 
     private data class Settlement(
         val releaseOwner: Boolean,
+        val liftFuse: Boolean,
         val event: AiProviderSessionRunEvent,
     )
 
