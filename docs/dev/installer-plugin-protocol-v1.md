@@ -85,6 +85,8 @@ oneway IInstallerCallback
 - Every other method is asynchronous and answers exactly once through its callback (`onResult`
   or `onError`; `onCompleted` or `onFailed` for a session). A method that throws a
   `SecurityException` at the Binder boundary (caller check) answers nothing.
+- Invalid explicit names passed to the synchronous `getAuthorizerState` return `INVALID_ARGUMENT`
+  under `errorJson`, rather than attempting to marshal a plugin-specific exception across Binder.
 - `openSession` returns a session handle or `null`. `null` means the request was refused before
   a session existed (ceiling violation, malformed request); the reason arrives through
   `onFailed` with the `hostSessionId` of the request as the session id.
@@ -113,6 +115,12 @@ oneway IInstallerCallback
 
 Every string under a `*Json` key is at most `MAX_JSON_BYTES` (64 KiB); both sides reject longer
 documents with `INVALID_ARGUMENT`.
+
+The plugin bounds optional response metadata before serialization. If an installation result would
+exceed the ceiling, it preserves each item's outcome, version code, authorizer and actual interaction,
+but may omit version names, long notes and oversized error text. Successful items explain this in
+`notes`; errors explain it in `message` while retaining their code and platform status. A confirmed
+installation must not be changed into failure solely because its metadata exceeds the transport budget.
 
 ## JSON Documents
 
@@ -183,7 +191,8 @@ order; a failed item carries the error document instead of the version fields.
 ```
 
 `status` is `PackageInstaller.STATUS_*` when the platform produced the failure, otherwise
-absent. `systemMessage` is `EXTRA_STATUS_MESSAGE` verbatim. `retryable` defaults per
+absent. When included, `systemMessage` is `EXTRA_STATUS_MESSAGE` verbatim; the response budget rule
+above permits omitting oversized text with an explicit explanation. `retryable` defaults per
 `InstallerErrorCodes.RETRYABLE_DEFAULTS` when absent.
 
 ### Stage and progress detail (`detailJson`)
@@ -198,9 +207,12 @@ absent. `systemMessage` is `EXTRA_STATUS_MESSAGE` verbatim. `retryable` defaults
 ### Authorizer status (`statusJson` of `getAuthorizerState`)
 
 `{ "available": true, "running": true, "granted": false, "reason": "text or absent" }`.
-`available` means installed (Shizuku) or a `su` binary found (root), `running` means the Shizuku
-binder was received (always `true` for root and none), `granted` means the permission is held or
-a grant is cached.
+`available` means installed and supported (Shizuku), or an executable `su` binary found or root
+already confirmed (root). An active Shizuku server below API 11 is unavailable with an explanatory
+`reason`. `running` means the Shizuku binder is alive (always `true` for root and none), and `granted`
+means permission is held or the latest root authorization succeeded. Reading state never starts an
+authorization prompt. Root requests wait at most 10 seconds (or the shorter caller deadline);
+timeouts report `TIMEOUT`, while a completed refusal reports `AUTHORIZER_DENIED`.
 
 ### Default installer status (`statusJson` of `getDefaultInstallerState`, `resultJson` of `setDefaultInstaller`)
 
@@ -255,6 +267,12 @@ Request: `{ "authorizer": "auto" }`. Result: `{ "users": [ { "id": 0, "name": "O
 | default installer | shizuku, root | `addPreferredActivity` for the APK MIME filters (method `preferred`); `persistent` is reserved for a later version; `none` reports the state and lets the UI guide the user |
 | users | shizuku, root | `none` reports only the current user |
 
+For installation, `auto` prefers silent execution with a privileged authorizer, but accepts a system
+confirmation if the platform still requires one. The successful result then reports `interaction:
+"dialog"` and records the fallback in `notes`. Explicit `silent` never displays that confirmation and
+fails with `AUTHORIZER_REQUIRED`. A full byte-progress value means the data reached the session stream;
+commit validation and synchronization still precede the terminal result.
+
 ## Error Codes
 
 `InstallerErrorCodes.ALL`: `PLUGIN_UNAVAILABLE`, `INVALID_ARGUMENT`, `SOURCE_NOT_FOUND`,
@@ -267,8 +285,13 @@ Request: `{ "authorizer": "auto" }`. Result: `{ "users": [ { "id": 0, "name": "O
 `STATUS_FAILURE_CONFLICT` with `INSTALL_FAILED_UPDATE_INCOMPATIBLE` or
 `INSTALL_FAILED_SHARED_USER_INCOMPATIBLE` -> `SIGNATURE_MISMATCH`, `STATUS_FAILURE_STORAGE` ->
 `INSUFFICIENT_STORAGE`, `STATUS_FAILURE_INCOMPATIBLE` -> `INCOMPATIBLE_DEVICE`,
-`STATUS_FAILURE_INVALID` -> `INVALID_PACKAGE`, `STATUS_FAILURE_TIMEOUT` -> `TIMEOUT`, anything
+`STATUS_FAILURE_INVALID` with `INSTALL_FAILED_VERSION_DOWNGRADE` -> `INSTALL_FAILED` (the APK may be
+valid but its version is refused); other `STATUS_FAILURE_INVALID` -> `INVALID_PACKAGE`;
+`STATUS_FAILURE_TIMEOUT` -> `TIMEOUT`, anything
 else -> `INSTALL_FAILED` with `status` and `systemMessage` kept.
+
+A platform `SecurityException` from the regular (`none`) installer maps to `BLOCKED_BY_POLICY`, with
+the original message in `systemMessage`; it is not an unavailable/retryable privileged authorizer.
 
 ## Ceilings
 
