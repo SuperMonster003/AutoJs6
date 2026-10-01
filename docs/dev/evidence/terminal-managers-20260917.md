@@ -1,5 +1,7 @@
 # Terminal sessions and manager dialogs, 2026-09-17
 
+> Moved out: the built-in terminal this report describes was extracted into the 3-Shell Terminal plugin (`AutoJs6-Plugin-Three-Shell-Terminal`) and removed from the host on 2026-10-01 (plugin roadmap P1.3). The report is kept as historical evidence; the current contract is described in [the terminal plugin protocol](../terminal-plugin-protocol-v1.md).
+
 Follow-up: [terminal and manager interaction refinements](terminal-manager-refinements-20260917.md) supersede the separate command field and startup-close implementation described here.
 
 ## Scope

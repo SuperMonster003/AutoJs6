@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 9 月 30 日.
+数据更新于 2026 年 10 月 1 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -171,6 +171,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 ###### 2026/10/01
 
 * `提示` 部分内置功能改由独立插件提供, 使用前需在插件中心安装并启用对应插件
+* `提示` 终端改由 3-Shell Terminal 插件提供, 使用前需在插件中心安装并启用; 宿主内置终端的数据及设置不迁移, 升级后首次启动时自动清理
 * `提示` AI Agent 插件更名为 Three Stove Agent, 插件 ID, 服务 action 及契约包名一并变更, 已安装的 AI Agent 不再被识别, 需卸载后安装 Three Stove Agent
 * `提示` 打包应用的目标 SDK 版本由 29 调整为 37, 共享存储及本地网络访问需按系统要求授权
 * `提示` console 控件及控制台浮动窗口改为显示当前脚本日志, 全局日志可通过 globalconsole 控件或日志页面查看
@@ -183,8 +184,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Three Stove Agent 支持执行经确认的生成 JavaScript, 取消或超时会停止本次脚本, 返回结构化结果和控制台输出; 脚本使用宿主权限, 不提供文件访问沙箱
 * `新增` ai.agent: 本机或外部 MCP 服务器的选定工具, 按服务器设置风险等级, mcp 工具组默认关闭
 * `新增` Three Stove Agent 模型代理支持向视觉模型传入图片及工具结果图片 (需要相应插件适配)
-* `新增` 终端功能, 支持多会话管理, 后台运行, 快捷按键及终端记录复制/分享 (入口: 主页抽屉/文件管理器目录菜单/项目工具栏)
-* `新增` 终端支持 node/npm/npx/corepack/yarn/pnpm 命令及 npm 镜像源设置 (需要 Node.js Runtime 插件 1.5.0+)
+* `新增` 集成 3-Shell Terminal 插件: 主页抽屉, 文件管理器目录菜单及项目工具栏的终端入口改为打开插件终端, 抽屉开关同步插件会话数, 插件未安装, 已禁用或不兼容时分别引导至插件中心, 插件设置或升级提示
 * `新增` MCP Server 插件, 用于通过 MCP 客户端访问 AutoJs6 的脚本, 文件及设备操作能力 (入口: 主页抽屉/插件中心)
 * `新增` 插件安装向导, 用于首次启动时按分类勾选并批量安装官方插件, 内置 "标准" / "最小" / "全部" 配置并支持自定义配置的保存, 重命名及删除 (入口: 主页插件标签页悬浮按钮菜单 / 插件中心 "+" 菜单)
 * `新增` MCP Server 支持脚本管理, 文件读写, 控制台查询, 应用查询, 无障碍操作及截图, 并支持读取内置示例和离线项目文档 (Root 操作需单独授权)
@@ -289,7 +289,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` Three Stove Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
 * `修复` assistant 合并工具选项时, 空 tools 对象导致默认关闭的工具组被启用的问题
 * `修复` 无障碍紧凑节点树缩短资源 ID, 导致按显示 ID 查询时无法匹配控件的问题
-* `修复` Android 7/8.0 设备上部分插件文件快照, Node.js 包安装, TypeScript 项目文件操作及终端环境探测的兼容性问题
+* `修复` Android 7/8.0 设备上部分插件文件快照, Node.js 包安装及 TypeScript 项目文件操作的兼容性问题
 * `修复` Shizuku 权限请求监听器在销毁后未正确注销的问题
 * `修复` Python 长任务通知缺少部分语言译文及 DEX 编译器设置缺少英文文案的问题
 * `修复` 官方插件在宿主启动期间读取外观设置时, 因应用 Context 尚未就绪导致偏好设置初始化崩溃的问题
@@ -425,7 +425,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 打包 TypeScript 项目时 UI 执行模式丢失及加密依赖模块无法读取的问题
 * `修复` APK 打包取消时可能误报构建失败的问题
 * `修复` APK 打包产物的签名证书一致性校验及 Android 9-11 签名识别异常
-* `修复` 打包应用或宿主缺少运行时组件时, 终端原生库可能缺失或使用错误 ABI 导致应用崩溃的问题
+* `修复` 打包应用或宿主缺少运行时组件时, shell 原生库可能缺失或使用错误 ABI 导致应用崩溃的问题
 * `修复` VSCode 插件保存项目时已删除文件仍残留在设备或缓存目录中的问题 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
 * `修复` VSCode 插件接收项目归档时可能因日志处理导致内存不足的问题 _[`issue #523`](http://issues.autojs6.com/523)_
 * `修复` VSCode 插件的失效连接阻塞日志发送, 导致新连接无法接收日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_
@@ -437,7 +437,6 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 多变体构建时 Kotlin 编译内存不足的问题
 * `修复` Gradle 构建时 SDK 解析, WorkManager 初始化检查及打包模板路径解析异常
 * `修复` Scrapers 工具迁移后 Android Studio 下载信息未同步至 README 通用数据的问题
-* `修复` 终端会话在启动期间关闭时可能遗留后台进程的问题
 * `修复` 内置软件包安装器在 Android 9-11 上可能因平台归档解析器返回的签名信息为空而以 "Base APK has no verifiable signer" 拒绝 V2/V3 签名的 APK, 现回退至已弃用的归档签名视图
 * `修复` 插件中心的五款 Three 系列插件图标使用透明背景并跟随宿主明暗主题, 避免显示启动器底色
 * `修复` 安装包信息识别普通 ZIP 中的 APK 分包集合, 也支持没有常见安装包扩展名的同类容器
@@ -512,7 +511,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 版本历史避免重复快照, 文件覆盖前保留原有内容, 回收站恢复到新路径时同步迁移版本历史
 * `优化` 回收站完善容量提示, 损坏条目恢复与错误提示, 列表按差异刷新
 * `优化` 布局层次分析支持属性摘要, 父级高亮, 横向滚动及逐级选择父控件
-* `优化` 无障碍服务, 连接及终端管理器统一分组布局, 支持逐级展开, 收起及独立设置
+* `优化` 无障碍服务及连接管理器统一分组布局, 支持逐级展开, 收起及独立设置
 * `优化` 任务列表及脚本运行日志使用工作目录等路径简称, 并保留实际入口文件名与扩展名
 * `优化` 浮动按钮及相关窗口跟随应用语言与夜间模式, 菜单信息使用后台加载
 * `优化` 主页抽屉的 "连接到计算机" 分组更名为 "远程连接"
@@ -817,7 +816,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 9 月 30 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 10 月 1 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

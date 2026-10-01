@@ -1,5 +1,7 @@
 # Terminal and manager interaction refinements, 2026-09-17
 
+> Moved out: the built-in terminal this report describes was extracted into the 3-Shell Terminal plugin (`AutoJs6-Plugin-Three-Shell-Terminal`) and removed from the host on 2026-10-01 (plugin roadmap P1.3). The report is kept as historical evidence; the current contract is described in [the terminal plugin protocol](../terminal-plugin-protocol-v1.md).
+
 This follows [the initial terminal and manager work](terminal-managers-20260917.md). The direct-input and selection behavior below supersedes that report's separate command field and draft handling.
 
 The later [terminal navigation, console settings and Node media follow-up](terminal-console-node-media-20260917.md) changes New session and Resume to open a terminal activity immediately while keeping the manager underneath for Back navigation.

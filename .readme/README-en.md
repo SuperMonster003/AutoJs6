@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Sep 30, 2026.
+Data updated on Oct 1, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -375,9 +375,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` `images.matchTemplate` and `images.findPointByImage` accept a `scales` option (one factor or a list) to match templates captured at other resolutions; every match now exposes `width`, `height`, `scale`, `center` and `rect`, and `MatchingResult` gains `size`, `isEmpty()`, `isNotEmpty()` and `filter()`
 * `Feature` Floating run entry in the file explorer script menu, showing a translucent floating toolbar to start / stop the script, open it in the editor and view the log, following night mode and theme color
 * `Feature` Layout inspector: long press an attribute in the node info dialog to tick several and copy them as one chained selector (id('x').text('y')) or one object selector accepted by pickup() / detect(); "Save layout to file" writes the captured node tree to <working directory>/layouts/<time>.layout.json, and tapping such a file in the file explorer inspects it offline
-* `Feature` Terminal: an in-app shell (drawer "Tools" group, directory menu "Open in terminal", project toolbar) running /system/bin/sh in a pty, with a key bar for Esc / Tab / Ctrl / Alt and the cursor keys, pinch-to-zoom text size, transcript copy / share, an npm helper menu, and a banner explaining why node from the Node.js Runtime plugin is unavailable
-* `Feature` Terminal drawer switch follows live sessions and their count, with session creation, close-all control, and a manager for opening and closing individual sessions
-* `Feature` Terminal: node, npm, npx, corepack, yarn and pnpm from the Node.js Runtime plugin (1.5.0+), with the npm / corepack archive verified by SHA-256 and installed once per plugin build, command links rebuilt on every session, npm caches and global installs kept under the terminal prefix, and a new "Terminal" settings group (npm registry: npmjs.org / npmmirror.com / custom https URL, ignore lifecycle scripts, clear terminal data)
+* `Feature` 3-Shell Terminal plugin integration: the drawer item, the directory menu "Open in terminal" and the project toolbar open the plugin's terminal, the drawer switch follows the plugin's sessions, and a missing, disabled or incompatible plugin leads to the Plugin Center, the plugin settings or an update prompt
 * `Feature` `images.matchFeatures` accepts an image or path for either argument and detects features on the fly; new options `ransacThreshold`, `minInliers` and `maxFeatures`, `ObjectFrame` exposes `width`, `height`, `angle`, `bounds`, `points`, `matches` and `inliers`, and `ImageFeatures` exposes `count` and `method`
 * `Feature` Accessibility companion contract for official plugins: companions that publish a `follow-host` service policy are enabled and disabled together with the AutoJs6 accessibility service using the configured root, secure settings or Shizuku strategies, and receive the host service state broadcast
 * `Feature` Bun Runtime plugin project execution: a script below a directory carrying `project.json` or `package.json` is packed into a bounded workspace archive (at most 16384 entries and 64 MiB, regular files and directories only) for a plugin that declares `SUPPORTS_WORKSPACE_ARCHIVE`, so relative imports inside the project resolve; the entry file carries the current editor source, symbolic links and special files abort the run, and bare scripts or older plugins keep the single-source path
@@ -422,7 +420,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
 * `Fix` Compact accessibility trees shortened resource IDs, preventing literal selectors from matching the displayed IDs
-* `Fix` Compatibility of plugin file snapshots, Node.js package installation, TypeScript project file operations and terminal environment probes on Android 7/8.0
+* `Fix` Compatibility of plugin file snapshots, Node.js package installation and TypeScript project file operations on Android 7/8.0
 * `Fix` Shizuku permission request listeners remaining registered after destruction
 * `Fix` Missing translations for Python long-running task notifications and missing English text in DEX compiler settings
 * `Fix` Official plugins requesting host appearance during host startup could crash preference initialization before the application context was ready
@@ -437,7 +435,6 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Destroying the Node.js WebSocket provider cancelled connections before peers could receive graceful close frames
 * `Fix` Runnable Node.js projects without APK packaging metadata, such as host-events, not recognized as projects in the file list and project toolbar
 * `Fix` Node.js project start and finish logs showed main.js without its path instead of the full path and actual extension of the entry file, such as main.cjs
-* `Fix` Closing a terminal session during startup could leave its shell process running in the background
 * `Fix` The screen color picker settings button opens the plugin main page, and the MCP Server drawer subtitle is hidden when stopped
 * `Fix` Node.js workspace transfer and module loading leaked file descriptors, slowing subsequent scripts and application restart after projects with many files
 * `Fix` Node.js project writeback no longer replaces unchanged files, avoiding slow script completion and sluggish application response with large dependency trees
@@ -501,7 +498,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Node.js R6 soak evidence could reject a healthy persistent runtime when Android reported zero currently allocated native-heap bytes
 * `Fix` Node.js R6 packaged APK evidence was skipped or bound to arm64 because the collector did not stage a fresh Inrt template or pass the target ABI
 * `Fix` Node.js project launches ignored node.timeoutMs in project.json, causing scripts configured for longer waits to time out after about 5 seconds
-* `Fix` Cross-ABI app packaging could copy native libraries from the installed host process into another ABI directory, causing 32-bit packaged apps to load 64-bit terminal libraries and crash
+* `Fix` Cross-ABI app packaging could copy native libraries from the installed host process into another ABI directory, causing 32-bit packaged apps to load 64-bit shell native libraries and crash
 * `Fix` TypeScript UI scripts with compilation failures before engine creation could crash the host while reporting diagnostics because the global execution listener dereferenced a missing engine
 * `Fix` Stack-frame and compiler-diagnostic links treated one-based source columns as zero-based editor offsets, moving the cursor one character too far
 * `Fix` Experimental DEX compiler host could accept DEX versions incompatible with the requested minApi, reject the valid 65,536 field/method ID boundary, and recreate a rolled-back partial artifact when a queued pipe drain started late
@@ -562,7 +559,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Ace editor could become unresponsive and fall back to the native editor after an incompatible-encoding reload of a large file produced an extremely long text line
 * `Fix` Disabling or uninstalling the external Ace plugin while its editor or settings interface was active could cause unsaved editing state to be lost or leave the interface in an invalid state
 * `Fix` Plugin Center action icons were spaced too far from their labels after the row layout was flattened
-* `Fix` Plugin Center left September dates such as `Sept 13, 2026` unnormalized instead of displaying `yyyy-MM-dd`
+* `Fix` Plugin Center left September dates such as `Sep 13, 2026` unnormalized instead of displaying `yyyy-MM-dd`
 * `Fix` Plugin Center could display a stale remote icon instead of the current installed icon when a plugin had no online icon URL
 * `Fix` Switching Plugin Center between light and dark modes could briefly display an installed icon from the previous theme; both variants are now prepared in the background and the current theme is selected on the first bind
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
@@ -654,9 +651,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record
-* `Improvement` Accessibility, client mode, server mode and terminal managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history; collapsed server controls also provide Disconnect all clients
-* `Improvement` Terminal uses direct shell input, a two-row key bar with uppercase labels, fixed navigation and scrollable symbols, native text selection handles and Copy / Select all, grouped menus, content padding and a separate directory prompt line; tips remain menu-only and the session manager keeps new sessions open with individual resume / stop buttons
-* `Improvement` Creating or resuming a session from the terminal manager opens a terminal activity while preserving the manager for Back navigation; tapping the directory subtitle copies its full path instead of using a Copy home path menu item
+* `Improvement` Accessibility, client mode and server mode managers share section expand/collapse buttons and dividers; fully collapsed settings open in a separate dialog through a gear button, and collapsed client controls include address history; collapsed server controls also provide Disconnect all clients
 * `Improvement` Time visibility and format are remembered independently for the editor log panel, log activity, globalconsole element, console element and floating console; time is shown by default on the two log pages and hidden on the other three surfaces
 * `Improvement` Task lists and script start/finish logs consistently abbreviate known roots as $cwd, $sdcard, $sample, $files, $cache and $data while retaining actual entry names and extensions; directory matching respects component boundaries and trailing separators
 * `Improvement` The MCP Server drawer entry uses the MCP protocol icon with slightly thicker strokes, with size and tint matching the other entries
@@ -792,7 +787,6 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Screen capturer state is read without locking, and `images.releaseScreenCapturer` no longer blocks concurrent image calls while releasing
 * `Improvement` Pyramid levels of template matching use area interpolation, masked matching keeps the normalized correlation coefficient, and small `max` values still refine several candidates so the best match is not lost at coarse levels
 * `Improvement` Layout hierarchy window: rows summarize id / text / desc / clickable and other flags, the selected node and all of its ancestors are highlighted in the tree and outlined on screen, the tree scrolls sideways, a "Select parent node" menu item walks the selection upwards, and a one-time tip explains exiting with the volume down key
-* `Improvement` Terminal: sessions keep running in the background after leaving the screen (a foreground service shows the current directory in its notification with a "Close sessions" action), and reopening the terminal reattaches the running session
 * `Improvement` Feature matching keeps only RANSAC inliers and validates the projected quadrilateral, corrects a matcher incompatible with the descriptor type instead of throwing, accepts `scale` above 1 to enlarge small objects, and ORB detects up to 20000 key points by default so textured scenes no longer starve the object region
 * `Improvement` Node bridge adds the read-only app.listDocs / app.readDoc (enumerate and read the verified offline documentation assets of the installed AutoJs6-Plugin-Offline-Docs, paths confined to the docs root, 1 MiB per read, available: false without an eligible plugin) so that the MCP Server plugin can expose autojs6://docs/ resources
 * `Improvement` Retention limits for version history and trash (days, versions, per-file bytes, total bytes, tracked file size) treat zero or negative values uniformly as unlimited and share one policy object
@@ -1109,7 +1103,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 30, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Oct 1, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

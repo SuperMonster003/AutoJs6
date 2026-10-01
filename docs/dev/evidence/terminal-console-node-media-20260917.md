@@ -1,5 +1,7 @@
 # Terminal navigation, console time settings and Node media, 2026-09-17
 
+> Moved out: the built-in terminal this report describes was extracted into the 3-Shell Terminal plugin (`AutoJs6-Plugin-Three-Shell-Terminal`) and removed from the host on 2026-10-01 (plugin roadmap P1.3). The report is kept as historical evidence; the current contract is described in [the terminal plugin protocol](../terminal-plugin-protocol-v1.md).
+
 This follows [the terminal and manager refinements](terminal-manager-refinements-20260917.md). The working tree was clean at the start, based on `6cfaaba22`. The existing media implementation from `node-media-playback-mediastore` (`7fda1c629`) was reviewed and merged without conflicts for this change.
 
 ## Behavior
