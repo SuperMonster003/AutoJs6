@@ -113,20 +113,14 @@ open class DrawerFragment : Fragment() {
     private val drawerStatsDisposables: CompositeDisposable = CompositeDisposable()
 
     private var privateDrawerMenu: RecyclerView? = null
-    private var privateContext: WeakReference<Context?>? = null
-    private var privateActivity: WeakReference<MainActivity?>? = null
 
-    private var mContext
-        set(value) {
-            privateContext = WeakReference(value)
-        }
-        get() = privateContext!!.get()!!
+    // The Fragment stays attached after its view is destroyed, including during onDestroy cleanup.
+    // zh-CN: Fragment 的视图销毁后仍保持附着, 包括 onDestroy 清理阶段.
+    private val mContext: Context
+        get() = requireContext()
 
-    private var mActivity
-        set(value) {
-            privateActivity = WeakReference(value)
-        }
-        get() = privateActivity!!.get()!!
+    private val mActivity: MainActivity
+        get() = requireActivity() as MainActivity
 
     private var mDrawerMenu
         set(value) {
@@ -206,10 +200,6 @@ open class DrawerFragment : Fragment() {
         ThemeChangeNotifier.themeChanged.observe(this) {
             updateThemeColorSubtitle()
         }
-
-        mContext = requireContext()
-
-        mActivity = requireActivity() as MainActivity
 
         mA11yTool = AccessibilityTool(mContext)
 
@@ -956,20 +946,17 @@ open class DrawerFragment : Fragment() {
 
         // mActivity.unregisterReceiver(mReceiver)
 
-        // Dispose drawer subtitle observers.
-        // zh-CN: 释放抽屉子标题监听订阅.
-        drawerStatsDisposables.clear()
-
         ScreenColorPickerPluginStateMonitor.removeListener(screenColorPickerStateListener)
 
         EventBus.getDefault().unregister(this)
     }
 
     override fun onDestroyView() {
+        // These subscriptions access the RecyclerView and restart in onViewCreated.
+        // zh-CN: 这些订阅会访问 RecyclerView, 并在 onViewCreated 中重新建立.
+        drawerStatsDisposables.clear()
         super.onDestroyView()
         privateDrawerMenu = null
-        privateContext = null
-        privateActivity = null
     }
 
     @Suppress("unused", "UNUSED_PARAMETER")
@@ -1014,7 +1001,7 @@ open class DrawerFragment : Fragment() {
 
     private fun updateThemeColorSubtitle() {
         mThemeColorItem.subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext)
-        (mDrawerMenu.adapter as? DrawerMenuAdapter)?.notifyItemChanged(mThemeColorItem)
+        (privateDrawerMenu?.adapter as? DrawerMenuAdapter)?.notifyItemChanged(mThemeColorItem)
     }
 
     private fun showA11yServiceManager() {

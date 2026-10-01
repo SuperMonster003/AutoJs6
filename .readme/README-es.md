@@ -576,6 +576,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Los campos de búsqueda podían conservar el cursor azul predeterminado en lugar del color de primer plano adecuado para el tema, y sus indicaciones podían permanecer en el idioma de reserva en vez de seguir el idioma actual de la aplicación
 * `Corrección` El área táctil efectiva de los interruptores del cajón de inicio era demasiado pequeña
 * `Corrección` Los interruptores del cajón de inicio podían quedar recortados y los botones inferiores ocultos en pantallas estrechas como 360x640 o tras cambiar el tamaño de la ventana
+* `Corrección` Cerrar o recrear la pantalla principal podía bloquear la aplicación cuando la limpieza de los listeners del cajón lateral accedía a un contexto liberado
 * `Corrección` Los nombres de paquete y la información de Activity de las aplicaciones recientes mostrados en el menú del botón flotante eran incorrectos _[`issue #529`](http://issues.autojs6.com/529)_
 * `Corrección` El diálogo "Ejecutar script" del botón flotante podía no restaurarse tras minimizarlo (intento de corrección) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Corrección` El fondo de la pantalla de inicio no se extendía al área de recorte del borde corto

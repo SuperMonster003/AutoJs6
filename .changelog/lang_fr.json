@@ -411,6 +411,7 @@
         "Les champs de recherche pouvaient conserver le curseur bleu par défaut au lieu de la couleur de premier plan adaptée au thème, et leurs indications pouvaient rester dans la langue de repli au lieu de suivre la langue actuelle de l'application",
         "La zone tactile effective des interrupteurs du tiroir d'accueil était trop petite",
         "Les interrupteurs du tiroir d'accueil pouvaient être tronqués et les boutons inférieurs masqués sur les écrans étroits comme 360x640 ou après le redimensionnement de la fenêtre",
+        "La fermeture ou la recréation de l'écran d'accueil pouvait faire planter l'application lorsque le nettoyage des écouteurs du tiroir accédait à un contexte libéré",
         "Les noms de paquet et les informations d'Activity des applications récentes affichés dans le menu du bouton flottant étaient incorrects _[`issue #529`](http://issues.autojs6.com/529)_",
         "La boîte de dialogue \"Exécuter le script\" du bouton flottant pouvait ne pas être restaurée après sa réduction (tentative de correction) _[`issue #500`](http://issues.autojs6.com/500)_",
         "L'arrière-plan de l'écran de démarrage ne s'étendait pas dans la zone de découpe du bord court",

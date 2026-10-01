@@ -414,6 +414,7 @@
 * `Fix` Search fields could keep the default blue cursor instead of the theme-appropriate foreground color, while their hints could remain in the fallback language instead of following the current app language
 * `Fix` Switch views in home drawer settings had an excessively small effective touch area
 * `Fix` Home drawer switches could be clipped and bottom action buttons hidden on narrow screens such as 360x640 or after resizing the window
+* `Fix` Closing or recreating the home screen could crash the app when drawer listener cleanup accessed a released context
 * `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
 * `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Fix` Splash screen background did not extend into the short-edge display cutout area
