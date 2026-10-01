@@ -168,7 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/09/30
+###### 2026/10/01
 
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
@@ -647,6 +647,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Al elegir el APK de una actualización, una versión sin paquete para la primera ABI preferida podía elegir un paquete posterior de menor prioridad de la lista (como el universal) en lugar del paquete de la siguiente ABI preferida
 * `Corrección` El instalador de paquetes integrado podía rechazar APK firmados con V2/V3 en Android 9-11 con "Base APK has no verifiable signer" porque el analizador de archivos de la plataforma dejaba vacía la información de firma; ahora se consulta como alternativa la vista de firma de archivo obsoleta
 * `Corrección` Los cinco complementos Three usan iconos transparentes en el centro de complementos que siguen el tema claro u oscuro del anfitrión, sin fondos del lanzador
+* `Corrección` La inspeccion de paquetes reconoce conjuntos de APK divididos en archivos ZIP normales, incluso sin una extension de paquete conocida
 * `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
 * `Mejora` El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado

@@ -167,6 +167,33 @@ class AndroidPackageArchiveInspectorTest {
     }
 
     @Test
+    fun ordinaryZipAndRenamedContainerAreDetectedByApkEntries() {
+        listOf("packages.zip", "packages.bin").forEach { name ->
+            val file = temporaryFolder.newFile(name)
+            writeZip(
+                file,
+                "base.apk" to nestedApk(manifest()),
+                "split_config.en.apk" to nestedApk(manifest(split = "config.en")),
+            )
+
+            val archive = AndroidPackageArchiveInspector.inspect(file, arm64Device)
+
+            assertEquals(AndroidPackageFormat.APKS, archive.format)
+            assertEquals(AndroidPackageSubtype.GENERIC_APKS, archive.subtype)
+            assertEquals(listOf(null, "config.en"), archive.selectedApks.map { it.manifest.splitName })
+            assertTrue(archive.canInstall)
+        }
+    }
+
+    @Test
+    fun ordinaryZipWithoutApksRemainsUnsupported() {
+        val file = temporaryFolder.newFile("documents.zip")
+        writeZip(file, "notes.txt" to "Not an Android package".toByteArray())
+
+        assertFailsWithIOException { AndroidPackageArchiveInspector.inspect(file, arm64Device) }
+    }
+
+    @Test
     fun incompatibleAbiBlocksInstallation() {
         val apks = temporaryFolder.newFile("demo.apks")
         writeZip(

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/30",
+      "released_date": "2026/10/01",
       "feature": [
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
         "Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates",
@@ -481,7 +481,8 @@
         "Client mode server address history was only written on a failed handshake and never for a successful connection, so the \"History\" of the address dialog stayed empty",
         "When picking the APK for an update, a release without an asset for the first preferred ABI could pick a later lower-priority asset in the list (such as the universal one) instead of the asset of the next preferred ABI",
         "The built-in package installer could reject V2/V3-signed APKs on Android 9-11 with \"Base APK has no verifiable signer\" because the platform archive parser left the signing info empty; the deprecated archive signature view is now consulted as a fallback",
-        "The five Three plugins use transparent icons in Plugin Center that follow the host light or dark theme without launcher backgrounds"
+        "The five Three plugins use transparent icons in Plugin Center that follow the host light or dark theme without launcher backgrounds",
+        "Package inspection recognizes APK split sets in ordinary ZIP files, including equivalent containers without a known package extension"
       ],
       "improvement": [
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",

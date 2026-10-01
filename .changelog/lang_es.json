@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/09/30",
+      "released_date": "2026/10/01",
       "feature": [
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",
         "OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas",
@@ -481,7 +481,8 @@
         "El historial de direcciones de servidor del modo cliente solo se escribía cuando fallaba el handshake y nunca en una conexión correcta, por lo que el \"Historial\" del diálogo de dirección permanecía vacío",
         "Al elegir el APK de una actualización, una versión sin paquete para la primera ABI preferida podía elegir un paquete posterior de menor prioridad de la lista (como el universal) en lugar del paquete de la siguiente ABI preferida",
         "El instalador de paquetes integrado podía rechazar APK firmados con V2/V3 en Android 9-11 con \"Base APK has no verifiable signer\" porque el analizador de archivos de la plataforma dejaba vacía la información de firma; ahora se consulta como alternativa la vista de firma de archivo obsoleta",
-        "Los cinco complementos Three usan iconos transparentes en el centro de complementos que siguen el tema claro u oscuro del anfitrión, sin fondos del lanzador"
+        "Los cinco complementos Three usan iconos transparentes en el centro de complementos que siguen el tema claro u oscuro del anfitrión, sin fondos del lanzador",
+        "La inspeccion de paquetes reconoce conjuntos de APK divididos en archivos ZIP normales, incluso sin una extension de paquete conocida"
       ],
       "improvement": [
         "Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas",

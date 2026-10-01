@@ -636,6 +636,7 @@ object AndroidPackageArchiveInspector {
             extension == "xapk" -> AndroidPackageFormat.XAPK
             extension == "apkm" -> AndroidPackageFormat.APKM
             extension == "apkz" -> AndroidPackageFormat.APKZ
+            entryNames.any { it.endsWith(".apk", ignoreCase = true) } -> AndroidPackageFormat.APKS
             else -> throw IOException("Unsupported Android package container")
         }
     }
