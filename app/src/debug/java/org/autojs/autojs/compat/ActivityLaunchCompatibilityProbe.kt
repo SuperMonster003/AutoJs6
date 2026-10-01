@@ -217,6 +217,7 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
         if (::caseId.isInitialized && intent.getStringExtra("cancelInstallerProbe") == caseId) {
             installerProbeJob?.cancel()
             restoreInstallerPreference()
+            if (isTaskRoot) finishAndRemoveTask() else finish()
         }
     }
 
