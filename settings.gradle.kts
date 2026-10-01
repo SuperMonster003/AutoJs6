@@ -130,6 +130,7 @@ private val pluginApi = listOf(
     "epub-api",
     "package-archive-parser",
     "installer-api",
+    "terminal-api",
 )
 
 private val plugins = listOf(

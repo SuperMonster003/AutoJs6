@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.terminal.api.** { *; }
+-dontwarn org.autojs.plugin.terminal.api.**

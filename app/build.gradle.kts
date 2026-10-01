@@ -754,6 +754,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: EPUB API
     implementation(project(":plugin-api:epub-api"))
+
+    // Plugin API: Terminal API (3-Shell Terminal)
+    implementation(project(":plugin-api:terminal-api"))
 }
 
 dependencies /* MIME */ {
