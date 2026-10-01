@@ -485,7 +485,8 @@
         "L'installateur de paquets intégré pouvait rejeter les APK signés V2/V3 sur Android 9-11 avec \"Base APK has no verifiable signer\" car l'analyseur d'archive de la plateforme laissait les informations de signature vides ; la vue de signature d'archive obsolète est désormais consultée en secours",
         "Les cinq plugins Three affichent des icônes transparentes dans le centre de plugins, adaptées au thème clair ou sombre de l'hôte, sans arrière-plan du lanceur",
         "Les informations des paquets reconnaissent les ensembles APK fractionnes dans les ZIP ordinaires, y compris sans extension de paquet connue",
-        "L'écran de confirmation de 3-Setup Installer ne s'affichait pas sur Android 14 et versions ultérieures lors d'une installation lancée avec AutoJs6 au premier plan"
+        "L'écran de confirmation de 3-Setup Installer ne s'affichait pas sur Android 14 et versions ultérieures lors d'une installation lancée avec AutoJs6 au premier plan",
+        "La racine du manifeste et les UID partagés pouvaient être mal lus depuis des commentaires ou espaces de noms falsifiés; les attributs dupliqués, identifiants de ressources contradictoires et UID invérifiables arrêtent le traitement"
       ],
       "improvement": [
         "Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués",

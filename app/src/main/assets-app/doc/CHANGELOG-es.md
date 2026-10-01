@@ -489,6 +489,7 @@
 * `Corrección` Los cinco complementos Three usan iconos transparentes en el centro de complementos que siguen el tema claro u oscuro del anfitrión, sin fondos del lanzador
 * `Corrección` La inspeccion de paquetes reconoce conjuntos de APK divididos en archivos ZIP normales, incluso sin una extension de paquete conocida
 * `Corrección` La pantalla de confirmación de 3-Setup Installer no se abría en Android 14 y versiones posteriores al iniciar una instalación con AutoJs6 en primer plano
+* `Corrección` La raíz del manifiesto y los UID compartidos podían interpretarse desde comentarios o espacios de nombres falsos; los atributos duplicados, recursos contradictorios y UID no verificables detienen el procesamiento
 * `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
 * `Mejora` El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado

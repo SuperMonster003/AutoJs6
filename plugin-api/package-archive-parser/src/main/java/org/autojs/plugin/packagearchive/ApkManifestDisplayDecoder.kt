@@ -337,11 +337,15 @@ object ApkManifestDisplayDecoder {
                 throw IOException("Binary XML attributes exceed their chunk")
             }
             val attributes = ArrayList<DecodedAttribute>(attributeCount)
+            var sharedUserIdSeen = false
             repeat(attributeCount) { index ->
                 val offset = attributesStart + index * attributeSize
                 val attributeNamespace = strings().nullable(readI32(bytes, offset))
                 val attributeNameIndex = readI32(bytes, offset + 4)
-                val attributeName = strings().nullable(attributeNameIndex)
+                val declaredName = strings().nullable(attributeNameIndex)
+                val verifiedName = ManifestRootAttributes.compiledName(attributeNamespace, declaredName,
+                    resourceIds.getOrNull(attributeNameIndex) ?: 0)
+                val attributeName = verifiedName
                     ?.takeIf { it.isNotEmpty() }
                     ?: fallbackAttributeName(attributeNameIndex)
                 val rawValueIndex = readI32(bytes, offset + 8)
@@ -351,8 +355,15 @@ object ApkManifestDisplayDecoder {
                 }
                 val dataType = readU8(bytes, offset + 15)
                 val data = readI32(bytes, offset + 16)
-                val value = strings().nullable(rawValueIndex)
-                    ?: formatTypedValue(dataType, data)
+                val rawValue = strings().nullable(rawValueIndex)
+                val value = if (attributeNamespace == ManifestRootAttributes.ANDROID_NAMESPACE &&
+                    attributeName == ManifestRootAttributes.SHARED_USER_ID) {
+                    if (sharedUserIdSeen || dataType != TYPE_STRING) throw IOException("Shared UID attribute is duplicated or not a literal string")
+                    sharedUserIdSeen = true
+                    val typed = strings().required(data)
+                    if (rawValue != null && rawValue != typed) throw IOException("Shared UID raw and compiled values disagree")
+                    ManifestRootAttributes.requireLiteral(typed)
+                } else rawValue ?: formatTypedValue(dataType, data)
                 attributes += DecodedAttribute(attributeNamespace, attributeName, value)
             }
             renderer.startElement(namespace, name, attributes)

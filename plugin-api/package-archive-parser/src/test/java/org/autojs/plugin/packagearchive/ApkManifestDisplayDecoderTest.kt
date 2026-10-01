@@ -1,6 +1,7 @@
 package org.autojs.plugin.packagearchive
 
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -15,6 +16,36 @@ class ApkManifestDisplayDecoderTest {
 
     @get:Rule
     val temporaryFolder = TemporaryFolder()
+
+    @Test fun binarySharedUidUsesVerifiedResourceIdentityAndTypedLiteral() {
+        for (name in listOf("sharedUserId", "")) {
+            val summary = ManifestSummaryParser.parse(ApkManifestDisplayDecoder.decodeManifest(sharedUidManifest(name = name)))
+            assertEquals("com.example", summary.packageName)
+            assertEquals("android.uid.system", summary.sharedUserId)
+        }
+    }
+
+    @Test fun binarySharedUidAmbiguityCannotBecomeAnAbsentSummaryField() {
+        for (manifest in listOf(sharedUidManifest(name = "pretendOtherField"), sharedUidManifest(resourceId = 0),
+            sharedUidManifest(namespace = "urn:foreign"), sharedUidManifest(duplicate = true),
+            sharedUidManifest(rawMismatch = true), sharedUidManifest(type = TYPE_REFERENCE))) {
+            assertFailsWithIOException { ManifestSummaryParser.parse(ApkManifestDisplayDecoder.decodeManifest(manifest)) }
+        }
+    }
+
+    private fun sharedUidManifest(name: String = "sharedUserId", namespace: String = ManifestRootAttributes.ANDROID_NAMESPACE,
+        resourceId: Int = ManifestRootAttributes.SHARED_USER_ID_RESOURCE, duplicate: Boolean = false,
+        rawMismatch: Boolean = false, type: Int = TYPE_STRING): ByteArray {
+        val strings = listOf("android", namespace, "manifest", "package", "com.example", name, "android.uid.system", "other.uid")
+        val resources = LittleEndianWriter().apply {
+            u16(0x0180); u16(8); i32(8 + strings.size * 4)
+            strings.indices.forEach { i32(if (it == 5) resourceId else 0) }
+        }.toByteArray()
+        val shared = Attribute(namespace = 1, name = 5, rawValue = if (rawMismatch) 7 else 6, type = type, data = 6)
+        return wrapChunks(listOf(stringPool(strings), resources, namespaceChunk(true, 0, 1),
+            startElement(name = 2, attributes = listOf(Attribute(NO_INDEX, 3, 4, TYPE_STRING, 4)) +
+                List(if (duplicate) 2 else 1) { shared }), endElement(2), namespaceChunk(false, 0, 1)))
+    }
 
     @Test
     fun binaryManifestIsFullyDecodedAndPrettyPrinted() {

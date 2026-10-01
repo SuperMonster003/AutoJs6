@@ -206,6 +206,10 @@ object AabManifestDisplayDecoder {
             }
             val elementName = name?.takeIf { it.isNotEmpty() }
                 ?: throw malformed("element name is missing")
+            if (attributes.count { it.namespaceUri == ManifestRootAttributes.ANDROID_NAMESPACE &&
+                    it.name == ManifestRootAttributes.SHARED_USER_ID } > 1) {
+                throw malformed("shared UID attribute is duplicated")
+            }
             return XmlElement(namespaceUri, elementName, namespaces, attributes, children)
         }
 
@@ -238,9 +242,12 @@ object AabManifestDisplayDecoder {
             var name: String? = null
             var rawValue: String? = null
             var resourceId = 0
-            var compiledValue: String? = null
+            var compiledValue: Pair<String?, Boolean>? = null
+            val fields = HashSet<Int>()
+            var duplicatedField = false
             while (!reader.isAtEnd()) {
                 val tag = reader.readTag()
+                if (!fields.add(tag.fieldNumber)) duplicatedField = true
                 when (tag.fieldNumber) {
                     XML_ATTRIBUTE_NAMESPACE_URI_FIELD -> {
                         requireWire(tag, WIRE_LENGTH_DELIMITED)
@@ -265,22 +272,32 @@ object AabManifestDisplayDecoder {
                     else -> reader.skip(tag.wireType)
                 }
             }
-            val attributeName = name?.takeIf { it.isNotEmpty() }
+            val verifiedName = ManifestRootAttributes.compiledName(namespaceUri, name, resourceId)
+            val attributeName = verifiedName?.takeIf { it.isNotEmpty() }
                 ?: if (resourceId != 0) {
                     "_${hex8(resourceId)}_"
                 } else {
                     "_unknown_"
                 }
+            val value = if (namespaceUri == ManifestRootAttributes.ANDROID_NAMESPACE &&
+                attributeName == ManifestRootAttributes.SHARED_USER_ID) {
+                if (duplicatedField || compiledValue?.second == false) throw malformed("shared UID is ambiguous or not a literal string")
+                val typed = compiledValue?.first
+                if (compiledValue != null && typed == null) throw malformed("shared UID compiled value is missing")
+                if (typed != null && rawValue != null && typed != rawValue) throw malformed("shared UID raw and compiled values disagree")
+                ManifestRootAttributes.requireLiteral(typed ?: rawValue ?: throw malformed("shared UID value is missing"))
+            } else rawValue ?: compiledValue?.first.orEmpty()
             return XmlAttribute(
                 namespaceUri = namespaceUri,
                 name = attributeName,
-                value = rawValue ?: compiledValue.orEmpty(),
+                value = value,
             )
         }
 
-        private fun readItem(reader: ProtoReader): String? {
+        private fun readItem(reader: ProtoReader): Pair<String?, Boolean> {
             var value: String? = null
             var hasValue = false
+            var literalString = false
             while (!reader.isAtEnd()) {
                 val tag = reader.readTag()
                 val decoded = when (tag.fieldNumber) {
@@ -290,6 +307,7 @@ object AabManifestDisplayDecoder {
                     }
                     ITEM_STRING_FIELD, ITEM_RAW_STRING_FIELD, ITEM_STYLED_STRING_FIELD -> {
                         requireWire(tag, WIRE_LENGTH_DELIMITED)
+                        literalString = tag.fieldNumber != ITEM_STYLED_STRING_FIELD
                         readWrappedString(reader.readLengthDelimitedReader())
                     }
                     ITEM_PRIMITIVE_FIELD -> {
@@ -305,7 +323,7 @@ object AabManifestDisplayDecoder {
                 value = decoded
                 hasValue = true
             }
-            return value
+            return value to literalString
         }
 
         private fun readWrappedString(reader: ProtoReader): String? {

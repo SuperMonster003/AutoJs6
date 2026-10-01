@@ -485,7 +485,8 @@
         "The built-in package installer could reject V2/V3-signed APKs on Android 9-11 with \"Base APK has no verifiable signer\" because the platform archive parser left the signing info empty; the deprecated archive signature view is now consulted as a fallback",
         "The five Three plugins use transparent icons in Plugin Center that follow the host light or dark theme without launcher backgrounds",
         "Package inspection recognizes APK split sets in ordinary ZIP files, including equivalent containers without a known package extension",
-        "3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground"
+        "3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground",
+        "Package manifest roots and shared UIDs could be misread from comments or spoofed namespaces; duplicate attributes, conflicting resource identities and unverifiable shared UIDs now stop processing"
       ],
       "improvement": [
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",

@@ -1,6 +1,7 @@
 package org.autojs.plugin.packagearchive
 
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -16,6 +17,43 @@ class AabManifestDisplayDecoderTest {
 
     @get:Rule
     val temporaryFolder = TemporaryFolder()
+
+    @Test fun protobufSharedUidUsesVerifiedResourceAndMatchingLiteralValues() {
+        for (name in listOf("sharedUserId", "")) {
+            val summary = ManifestSummaryParser.parse(AabManifestDisplayDecoder.decodeManifest(sharedUidManifest(name = name)))
+            assertEquals("com.example.shared", summary.packageName)
+            assertEquals("android.uid.system", summary.sharedUserId)
+        }
+    }
+
+    @Test fun protobufSharedUidAmbiguityFailsClosed() {
+        for (manifest in listOf(sharedUidManifest(name = "otherField"), sharedUidManifest(resourceId = 0),
+            sharedUidManifest(namespace = "urn:foreign"), sharedUidManifest(duplicate = true),
+            sharedUidManifest(rawValue = "other.uid"), sharedUidManifest(reference = true))) {
+            captureIOException { ManifestSummaryParser.parse(AabManifestDisplayDecoder.decodeManifest(manifest)) }
+        }
+    }
+
+    private fun sharedUidManifest(name: String = "sharedUserId", namespace: String = ANDROID_NAMESPACE,
+        resourceId: Int = ManifestRootAttributes.SHARED_USER_ID_RESOURCE, duplicate: Boolean = false,
+        rawValue: String = "android.uid.system", reference: Boolean = false): ByteArray = ProtoWriter().apply {
+        message(XML_NODE_ELEMENT_FIELD) {
+            string(XML_ELEMENT_NAME_FIELD, "manifest")
+            message(XML_ELEMENT_ATTRIBUTE_FIELD) { string(XML_ATTRIBUTE_NAME_FIELD, "package"); string(XML_ATTRIBUTE_VALUE_FIELD, "com.example.shared") }
+            repeat(if (duplicate) 2 else 1) {
+                message(XML_ELEMENT_ATTRIBUTE_FIELD) {
+                    string(XML_ATTRIBUTE_NAMESPACE_URI_FIELD, namespace)
+                    string(XML_ATTRIBUTE_NAME_FIELD, name)
+                    varint(XML_ATTRIBUTE_RESOURCE_ID_FIELD, resourceId)
+                    string(XML_ATTRIBUTE_VALUE_FIELD, rawValue)
+                    message(XML_ATTRIBUTE_COMPILED_ITEM_FIELD) {
+                        if (reference) message(ITEM_REFERENCE_FIELD) { string(REFERENCE_NAME_FIELD, "string/shared") }
+                        else message(ITEM_STRING_FIELD) { string(WRAPPED_STRING_VALUE_FIELD, "android.uid.system") }
+                    }
+                }
+            }
+        }
+    }.toByteArray()
 
     @Test
     fun aabWithManyResourcesDecodesBaseManifest() {

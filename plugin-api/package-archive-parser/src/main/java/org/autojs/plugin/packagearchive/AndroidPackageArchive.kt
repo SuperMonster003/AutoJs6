@@ -292,7 +292,7 @@ data class StagedApk(
     val manifest: ManifestSummary,
 )
 
-data class ManifestSummary(
+data class ManifestSummary @JvmOverloads constructor(
     val packageName: String?,
     val splitName: String?,
     val configForSplit: String?,
@@ -306,6 +306,8 @@ data class ManifestSummary(
     val applicationLabel: String?,
     val requestedPermissions: List<String>,
     val usesSplits: List<String>,
+    /** Null only when the verified manifest root has no Android sharedUserId declaration. */
+    val sharedUserId: String? = null,
 )
 
 data class PackageDeviceSpec(
@@ -1037,7 +1039,6 @@ object AndroidPackageArchiveInspector {
 
 object ManifestSummaryParser {
 
-    private val manifestTag = Regex("""<manifest\b([^>]*)>""", RegexOption.IGNORE_CASE)
     private val applicationTag = Regex("""<application\b([^>]*)/?>""", RegexOption.IGNORE_CASE)
     private val usesSdkTag = Regex("""<uses-sdk\b([^>]*)/?>""", RegexOption.IGNORE_CASE)
     private val permissionTag = Regex("""<uses-permission(?:-sdk-\d+)?\b([^>]*)/?>""", RegexOption.IGNORE_CASE)
@@ -1045,9 +1046,8 @@ object ManifestSummaryParser {
     private val attribute = Regex("""(?:^|\s)([A-Za-z_][A-Za-z0-9_.-]*(?::[A-Za-z_][A-Za-z0-9_.-]*)?)\s*=\s*("([^"]*)"|'([^']*)')""")
 
     fun parse(xml: String): ManifestSummary {
-        val root = manifestTag.find(xml)?.groupValues?.get(1)
-            ?: throw IOException("Android manifest root element is missing")
-        val rootAttributes = parseAttributes(root)
+        val root = ManifestRootAttributes.read(xml)
+        val rootAttributes = root.attributes
         val sdkAttributes = usesSdkTag.find(xml)?.groupValues?.get(1)?.let(::parseAttributes).orEmpty()
         val applicationAttributes = applicationTag.find(xml)
             ?.groupValues
@@ -1085,6 +1085,7 @@ object ManifestSummaryParser {
                 .distinct()
                 .sorted()
                 .toList(),
+            sharedUserId = root.sharedUserId,
         )
     }
 
