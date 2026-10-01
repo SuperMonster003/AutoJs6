@@ -452,6 +452,8 @@
 * `수정` OpenCV 및 ImageQuant 플러그인 정책이 NDK r28c (28.2.13676358)로 빌드된 네이티브 라이브러리를 NDK 버전 불일치로 거부하여 다시 빌드한 OpenCV 플러그인 v1.1.2를 로드할 수 없던 문제 수정; 이제 r26b와 r28c 빌드를 모두 허용
 * `수정` OpenCV 및 Image Quantization 플러그인이 네이티브 라이브러리 캐시를 읽기 전용으로 설정하지 못해도 로드를 계속하던 문제, Android 17의 동적 코드 로드 제한 지원
 * `수정` Android 7.0 / 7.1의 runtime.loadDex에서 ART 최적화 출력과 입력 경로가 겹쳐 DEX 캐시가 손상되고 클래스 로드에 실패하는 문제
+* `수정` 동적으로 로드한 Kotlin 컴파일러가 Unsafe 원자적 연산 제한 또는 리플렉션 런타임 누락으로 컴파일에 실패하는 문제
+* `수정` 이전 Rhino 스코프 리플렉션 API의 비호환성으로 외부 라이브러리가 Java/Kotlin 클래스를 자동 등록하지 못하는 문제
 * `수정` MediaProjection 브리지 캡처에서 일시적으로 프레임이 없으면 최대 6회 재시도하여, 캡처 경로가 갱신된 뒤에도 재승인 없이 연속 촬영 지원
 * `수정` `images.imread`, `images.matToImage` 및 Mat 기반 이미지가 사용하는 OpenCV 행렬이 해제되지 않거나 가비지 수집될 수 있는 원본과 네이티브 핸들을 공유하여 네이티브 메모리 누수와 댕글링 포인터를 일으켰습니다
 * `수정` 스크립트가 종료될 때 실행 중인 다른 스크립트의 이미지까지 회수했습니다; 이제 이미지는 스크립트 런타임별로 등록하고 회수합니다
@@ -693,7 +695,6 @@
 * `의존성` Jackson DataBind 버전 2.13.4.2 제거
 * `의존성` Commons IO 버전 2.8.0 제거
 * `의존성` Apache Commons Lang3 버전 3.18.0 제거
-* `의존성` Kotlin Reflect 버전 2.4.0 제거
 * `의존성` Spongy Castle Prov 버전 1.58.0.0 제거
 * `의존성` Android dx 버전 1.14 제거
 * `의존성` Log4j 버전 1.2.17 제거
@@ -701,6 +702,7 @@
 * `의존성` AndroidX AppCompat 1.0.2 로컬 라이브러리 제거
 * `의존성` ZXing Android Embedded 버전 4.3.0 추가
 * `의존성` AndroidX Test Ext JUnit 버전 1.3.0 추가
+* `의존성` Android Hidden API Bypass 버전 6.1 추가
 * `의존성` Package Archive Parser 모듈화
 * `의존성` Installer API 모듈화
 

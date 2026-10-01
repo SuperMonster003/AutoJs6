@@ -42,6 +42,7 @@ flexbox = "3.0.0"
 foojay-resolver-convention = "1.0.0"
 glide = "5.0.5"
 gson = "2.13.2"
+hiddenapibypass = "6.1"
 interpolator = "1.0.0"
 jdeferred = "1.2.6"
 joda-time = "2.14.0"
@@ -104,6 +105,7 @@ eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
 interpolator = { group = "androidx.interpolator", name = "interpolator", version.ref = "interpolator" }
 jdeferred = { module = "org.jdeferred:jdeferred-android-aar", version.ref = "jdeferred" }
 joda-time = { module = "joda-time:joda-time", version.ref = "joda-time" }

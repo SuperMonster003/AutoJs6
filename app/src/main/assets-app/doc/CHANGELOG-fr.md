@@ -452,6 +452,8 @@
 * `Correction` Les politiques des plugins OpenCV et ImageQuant rejetaient les bibliothèques natives compilées avec le NDK r28c (28.2.13676358) pour incompatibilité de version du NDK, ce qui bloquait le plugin OpenCV v1.1.2 recompilé ; les compilations r26b et r28c sont désormais acceptées
 * `Correction` Les chargeurs des plugins OpenCV et Image Quantization continuaient après un échec de protection du cache en lecture seule; les fichiers natifs sont désormais vérifiés avant le chargement pour assurer la compatibilité avec Android 17
 * `Correction` runtime.loadDex sous Android 7.0 / 7.1 pouvait écraser le DEX en cache avec la sortie optimisée d'ART, provoquant un échec du chargement des classes
+* `Correction` Échec des compilateurs Kotlin chargés dynamiquement en raison de restrictions sur les opérations atomiques Unsafe ou de l'absence du runtime de réflexion
+* `Correction` Incompatibilité des anciennes API de réflexion des portées Rhino empêchant les bibliothèques externes d'enregistrer automatiquement les classes Java/Kotlin
 * `Correction` Les captures du pont MediaProjection réessaient jusqu'à six fois si une image manque temporairement, pour permettre les captures consécutives après le renouvellement du flux sans demander à nouveau le consentement
 * `Correction` Les matrices OpenCV derrière `images.imread`, `images.matToImage` et les images basées sur Mat n'étaient jamais libérées ou partageaient leur en-tête natif avec une source pouvant être récupérée par le ramasse-miettes, provoquant des fuites de mémoire native et des pointeurs pendants
 * `Correction` Un script qui se terminait recyclait les images de tous les autres scripts en cours; les images sont désormais enregistrées et recyclées par environnement d'exécution de script
@@ -693,7 +695,6 @@
 * `Dépendance` Suppression de Jackson DataBind version 2.13.4.2
 * `Dépendance` Suppression de Commons IO version 2.8.0
 * `Dépendance` Suppression de Apache Commons Lang3 version 3.18.0
-* `Dépendance` Suppression de Kotlin Reflect version 2.4.0
 * `Dépendance` Suppression de Spongy Castle Prov version 1.58.0.0
 * `Dépendance` Suppression de Android dx version 1.14
 * `Dépendance` Suppression de Log4j version 1.2.17
@@ -701,6 +702,7 @@
 * `Dépendance` Suppression de la bibliothèque locale AndroidX AppCompat 1.0.2
 * `Dépendance` Ajout de ZXing Android Embedded version 4.3.0
 * `Dépendance` Ajout de AndroidX Test Ext JUnit version 1.3.0
+* `Dépendance` Ajout de Android Hidden API Bypass version 6.1
 * `Dépendance` Modularisation de Package Archive Parser
 * `Dépendance` Modularisation d'Installer API
 

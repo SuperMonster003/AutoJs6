@@ -614,6 +614,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` OpenCV and ImageQuant plugin policies rejected native libraries built with NDK r28c (28.2.13676358) as a native NDK version mismatch, which blocked the rebuilt OpenCV plugin v1.1.2; both r26b and r28c builds are now accepted
 * `Fix` The OpenCV and Image Quantization plugin loaders continued after read-only cache protection failed; native files are now verified as read-only before loading for Android 17 compatibility
 * `Fix` runtime.loadDex on Android 7.0 / 7.1 could overwrite the staged DEX with ART's optimized output, causing class loading to fail
+* `Fix` Dynamically loaded Kotlin compilers failing due to restricted Unsafe atomics or a missing reflection runtime
+* `Fix` Legacy Rhino scope reflection APIs preventing external libraries from automatically registering Java/Kotlin classes
 * `Fix` MediaProjection bridge captures retry transient missing frames up to six times, allowing consecutive screenshots after the capture pipeline refreshes without requesting consent again
 * `Fix` OpenCV matrices behind `images.imread`, `images.matToImage` and Mat-backed images were either never released or shared a native header with a source that could be garbage collected, causing native memory leaks and dangling pointers
 * `Fix` A finishing script recycled the images of every other running script; images are now registered and recycled per script runtime

@@ -76,6 +76,7 @@ class AndroidClassLoader internal constructor(
     private val conversionLocks = ConcurrentHashMap<String, Any>()
 
     init {
+        AndroidJvmCompatibility.ensureInitialized()
         if (clearCacheOnInit && cacheDir.exists()) {
             deleteFilesOfDir(cacheDir)
         } else if (!cacheDir.exists() && !cacheDir.mkdirs()) {

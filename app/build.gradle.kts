@@ -209,6 +209,7 @@ val resourcePickFirstPatterns = listOf(
     "META-INF/NOTICE.*",
     "META-INF/notice.*",
     "META-INF/ASL2.0",
+    "META-INF/*.kotlin_module",
     "lib/x86/libc++_shared.so",
     "lib/x86_64/libc++_shared.so",
     "lib/armeabi-v7a/libc++_shared.so",
@@ -229,14 +230,6 @@ val resourceExcludePatterns = listOf(
     // kotlinx-coroutines debug probes.
     // zh-CN: kotlinx-coroutines 调试探针.
     "DebugProbesKt.bin",
-    // Kotlin metadata that only kotlin-reflect reads (module facade tables and the built-ins descriptors);
-    // kotlin-reflect is no longer bundled. Both the single-level and the nested form are listed because of
-    // the glob depth rule above.
-    // zh-CN: 仅由 kotlin-reflect 读取的 Kotlin 元数据 (模块外观表与内建类型描述); kotlin-reflect 已不再打包.
-    // 因上述 glob 深度规则, 单层与嵌套两种形式都列出.
-    "META-INF/*.kotlin_module",
-    "kotlin/*.kotlin_builtins",
-    "kotlin/**/*.kotlin_builtins",
 )
 
 // Only the zh-Hans and en release histories ship inside the APK (size roadmap P6.5, D14); the other
@@ -501,6 +494,12 @@ val slimRhinoJar = tasks.register<Jar>("slimRhinoJar") {
 }
 
 dependencies /* Unclassified */ {
+    // Loaded libraries share the host's kotlin.jvm.internal.Reflection factory through parent delegation.
+    // Bundle the matching reflection implementation and its metadata so it does not fall back to ClassReference.
+    // zh-CN: 外部库沿用宿主的 Kotlin 反射工厂, 必须保留配套实现及元数据, 避免退化为 ClassReference.
+    runtimeOnly(kotlin("reflect"))
+
+
     // Compose
     // implementation("androidx.compose.ui:ui-android:1.6.7")
 
@@ -648,6 +647,9 @@ dependencies /* Unclassified */ {
 
     // R8
     implementation(libs.r8)
+
+    // Restricted Unsafe atomics used by dynamically loaded JVM libraries on Android 9+.
+    implementation(libs.hiddenapibypass)
 
     // APK Signature Verification (apksig + keystore reading; the signer, CertCreator and SpongyCastle stay in
     // modules/apk-signer for the APK builder plugin)

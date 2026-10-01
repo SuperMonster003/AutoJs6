@@ -452,6 +452,8 @@
 * `Corrección` Las políticas de los plugins OpenCV e ImageQuant rechazaban las bibliotecas nativas compiladas con NDK r28c (28.2.13676358) por discrepancia de versión del NDK, lo que bloqueaba el plugin OpenCV v1.1.2 reconstruido; ahora se aceptan tanto las compilaciones r26b como r28c
 * `Corrección` Los cargadores de los complementos OpenCV e Image Quantization continuaban tras fallar la protección de la caché de solo lectura; los archivos nativos ahora se verifican antes de cargarse para garantizar la compatibilidad con Android 17
 * `Corrección` runtime.loadDex en Android 7.0 / 7.1 podía sobrescribir el DEX en caché con la salida optimizada de ART, provocando errores al cargar clases
+* `Corrección` Los compiladores Kotlin cargados dinámicamente fallaban por restricciones de las operaciones atómicas de Unsafe o por la falta del entorno de reflexión
+* `Corrección` Las API antiguas de reflexión de ámbitos de Rhino impedían que las bibliotecas externas registraran automáticamente clases Java/Kotlin
 * `Corrección` Las capturas del puente MediaProjection reintentan hasta seis veces si falta un fotograma temporalmente, permitiendo capturas consecutivas tras renovar el flujo sin volver a solicitar consentimiento
 * `Corrección` Las matrices de OpenCV detrás de `images.imread`, `images.matToImage` y las imágenes basadas en Mat nunca se liberaban o compartían el encabezado nativo con una fuente que podía ser recolectada, causando fugas de memoria nativa y punteros colgantes
 * `Corrección` Un script al finalizar reciclaba las imágenes de todos los demás scripts en ejecución; ahora las imágenes se registran y reciclan por entorno de ejecución de script
@@ -693,7 +695,6 @@
 * `Dependencia` Se elimina Jackson DataBind version 2.13.4.2
 * `Dependencia` Se elimina Commons IO version 2.8.0
 * `Dependencia` Se elimina Apache Commons Lang3 version 3.18.0
-* `Dependencia` Se elimina Kotlin Reflect version 2.4.0
 * `Dependencia` Se elimina Spongy Castle Prov version 1.58.0.0
 * `Dependencia` Se elimina Android dx version 1.14
 * `Dependencia` Se elimina Log4j version 1.2.17
@@ -701,6 +702,7 @@
 * `Dependencia` Se elimina la biblioteca local AndroidX AppCompat 1.0.2
 * `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
 * `Dependencia` Anexado AndroidX Test Ext JUnit versión 1.3.0
+* `Dependencia` Añadido Android Hidden API Bypass versión 6.1
 * `Dependencia` Modularizacion de Package Archive Parser
 * `Dependencia` Modularizacion de Installer API
 

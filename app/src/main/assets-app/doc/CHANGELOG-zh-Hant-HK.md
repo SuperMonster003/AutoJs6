@@ -452,6 +452,8 @@
 * `修復` OpenCV 與 ImageQuant 插件策略將以 NDK r28c (28.2.13676358) 構建的原生庫判定為原生 NDK 版本不匹配, 導致重編後的 OpenCV 插件 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 構建
 * `修復` OpenCV 與 Image Quantization 插件在原生函式庫快取唯讀設定失敗後仍嘗試載入的問題, 相容 Android 17 的動態程式碼載入限制
 * `修復` Android 7.0 / 7.1 的 runtime.loadDex 因 ART 最佳化輸出與輸入路徑重合, 損壞 DEX 快取並導致類別載入失敗的問題
+* `修復` 動態載入的 Kotlin 編譯器因 Unsafe 原子操作受限或反射執行庫缺失而編譯失敗的問題
+* `修復` 舊版 Rhino 作用域反射介面不相容導致外部程式庫無法自動註冊 Java/Kotlin 類別的問題
 * `修復` MediaProjection 橋接截圖遇到暫時空幀時最多重試 6 次, 支援擷取管線重新整理後的連續截圖, 無需再次申請授權
 * `修復` `images.imread`, `images.matToImage` 及基於 Mat 的圖片所使用的 OpenCV 矩陣要麼從未釋放, 要麼與可能被垃圾回收的來源共享原生句柄, 導致原生記憶體洩漏和懸空指針
 * `修復` 腳本結束時會回收其他正在運行腳本的圖片; 現在圖片按腳本運行時分別登記和回收
@@ -693,7 +695,6 @@
 * `依賴` 移除 Jackson DataBind 版本 2.13.4.2
 * `依賴` 移除 Commons IO 版本 2.8.0
 * `依賴` 移除 Apache Commons Lang3 版本 3.18.0
-* `依賴` 移除 Kotlin Reflect 版本 2.4.0
 * `依賴` 移除 Spongy Castle Prov 版本 1.58.0.0
 * `依賴` 移除 Android dx 版本 1.14
 * `依賴` 移除 Log4j 版本 1.2.17
@@ -701,6 +702,7 @@
 * `依賴` 移除 AndroidX AppCompat 1.0.2 本地庫
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
 * `依賴` 附加 AndroidX Test Ext JUnit 版本 1.3.0
+* `依賴` 附加 Android Hidden API Bypass 版本 6.1
 * `依賴` 模組化 Package Archive Parser
 * `依賴` 模組化 Installer API
 

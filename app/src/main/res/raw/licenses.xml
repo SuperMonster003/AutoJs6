@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <notices>
     <notice>
+        <name>Android Hidden API Bypass</name>
+        <url>https://github.com/LSPosed/AndroidHiddenApiBypass</url>
+        <copyright>Copyright 2021-2025 LSPosed</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
         <name>Rhino: JavaScript in Java</name>
         <url>https://github.com/mozilla/rhino</url>
         <copyright/>

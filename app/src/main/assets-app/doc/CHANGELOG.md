@@ -137,6 +137,8 @@
 * `修复` 深层界面节点无法操作, 以及边界或操作能力不同的嵌套容器被误判为同一目标的问题
 * `修复` runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
+* `修复` 动态加载的 Kotlin 编译器因 Unsafe 原子操作受限或反射运行库缺失而编译失败的问题
+* `修复` 旧版 Rhino 作用域反射接口不兼容导致外部库无法自动注册 Java/Kotlin 类的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题
 * `修复` Proxy 包装函数及部分 JavaScript 回调可能无法传入内置模块, 或出现参数嵌套与重载歧义的问题
 * `修复` EventEmitter#once 监听器在递归派发事件或回调抛出异常时可能被重复调用的问题
@@ -384,6 +386,7 @@
 * `依赖` 附加 AndroidX AsyncLayoutInflater 版本 1.1.0
 * `依赖` 附加 ZXing Android Embedded 版本 4.3.0
 * `依赖` 附加 AndroidX Test Ext JUnit 版本 1.3.0
+* `依赖` 附加 Android Hidden API Bypass 版本 6.1
 * `依赖` 升级 Android SDK 版本 36 -> 37
 * `依赖` 升级 Gradle 9 版本 9.4.0 -> 9.7.1
 * `依赖` 移除 Android Annotations 版本 4.8.0
@@ -409,7 +412,6 @@
 * `依赖` 移除 Jackson DataBind 版本 2.13.4.2
 * `依赖` 移除 Commons IO 版本 2.8.0
 * `依赖` 移除 Apache Commons Lang3 版本 3.18.0
-* `依赖` 移除 Kotlin Reflect 版本 2.4.0
 * `依赖` 移除 Spongy Castle Prov 版本 1.58.0.0
 * `依赖` 移除 Android dx 版本 1.14
 * `依赖` 移除 Log4j 版本 1.2.17
