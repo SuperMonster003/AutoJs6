@@ -683,6 +683,11 @@
     <string name="prompt_plugin_native_page_alignment">The native libraries in plugin %1$s are not aligned for 16 KB pages. This plugin may fail on this device. Upgrade the plugin before using it. Continue anyway?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">An app restart is needed to apply new settings</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">An app restart may be needed to make language applied as expected</string>
+    <string name="prompt_terminal_plugin_application_disabled">Android has disabled 3-Shell Terminal. Enable the app in its system settings, then try again.</string>
+    <string name="prompt_terminal_plugin_enable_required">3-Shell Terminal is disabled or not authorized in Plugin Center. Enable and authorize it before using the terminal.</string>
+    <string name="prompt_terminal_plugin_install_required">Install 3-Shell Terminal from Plugin Center to use the terminal. The built-in terminal has moved into this plugin.</string>
+    <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal requires AutoJs6 build %1$d or later. Update AutoJs6, or install a compatible plugin version from Plugin Center.</string>
+    <string name="prompt_terminal_plugin_update_required">The installed 3-Shell Terminal does not provide the terminal entry this AutoJs6 build expects. Update the plugin from Plugin Center.</string>
     <string name="prompt_three_stove_agent_activate">Three Stove Agent is installed but has not been activated by Android. Activate it to allow AutoJs6 to connect.</string>
     <string name="prompt_three_stove_agent_application_disabled">Android has disabled Three Stove Agent. Enable the app in system settings and try again.</string>
     <string name="prompt_three_stove_agent_authorize">Authorize this plugin in the Plugin Center before connecting Three Stove Agent.</string>
@@ -1058,6 +1063,7 @@
     <string name="text_clone_color_library">Clone a color library</string>
     <string name="text_close">Close</string>
     <string name="text_close_floating_button">Close floating button</string>
+    <string name="text_close_session">Close session</string>
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautify code</string>
     <string name="text_code_editor">Code editor</string>
@@ -2208,6 +2214,10 @@
     <string name="text_terminal_other_package_managers_content">yarn and pnpm are provided through corepack and are downloaded from the registry on first use. Run \"yarn --version\" or \"pnpm --version\" to activate them.</string>
     <string name="text_terminal_package_management">Package management</string>
     <string name="text_terminal_package_name_hint">Package name, e.g. is-odd</string>
+    <string name="text_terminal_plugin_disabled">3-Shell Terminal plugin disabled or unauthorized</string>
+    <string name="text_terminal_plugin_incompatible">3-Shell Terminal plugin incompatible</string>
+    <string name="text_terminal_plugin_required">3-Shell Terminal plugin required</string>
+    <string name="text_terminal_plugin_unavailable">3-Shell Terminal plugin unavailable</string>
     <string name="text_terminal_preparing_npm">Preparing npm and corepack from the Node.js Runtime plugin...</string>
     <string name="text_terminal_running">Running</string>
     <string name="text_terminal_running_sessions">Running\u0020\u0020[ Sessions: %1$d ]</string>

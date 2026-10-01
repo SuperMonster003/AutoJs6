@@ -13,6 +13,7 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.cardview.widget.CardView;
 import androidx.core.widget.ImageViewCompat;
 import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.core.plugin.terminal.TerminalLauncher;
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.Explorers;
@@ -23,7 +24,6 @@ import org.autojs.autojs.script.PythonProjectLaunchPolicy;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.project.ProjectConfigActivity;
 import org.autojs.autojs.ui.python.PythonRuntimePluginUi;
-import org.autojs.autojs.ui.terminal.TerminalActivity;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerProjectToolbarBinding;
@@ -191,7 +191,7 @@ public class ExplorerProjectToolbar extends CardView {
             return;
         }
         notifyOperated();
-        TerminalActivity.launch(getContext(), directory.getPath());
+        TerminalLauncher.INSTANCE.open(getContext(), directory.getPath());
     }
 
     @Override

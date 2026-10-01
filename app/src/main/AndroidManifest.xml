@@ -39,6 +39,7 @@
         <package android:name="io.github.supermonster003.autojs6.plugin.screencolorpicker" />
         <package android:name="io.github.supermonster003.autojs6.plugin.three.amber.player" />
         <package android:name="io.github.supermonster003.autojs6.plugin.mcp.server" />
+        <package android:name="io.github.supermonster003.autojs6.plugin.three.shell.terminal" />
         <intent>
             <action android:name="org.autojs.plugin.INFO" />
         </intent>
@@ -76,6 +77,16 @@
         <intent>
             <action android:name="org.autojs.plugin.EPUB" />
             <category android:name="epub" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.TERMINAL" />
+            <category android:name="terminal" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.TERMINAL_OPEN" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.TERMINAL_SETTINGS" />
         </intent>
         <intent>
             <action android:name="org.autojs.plugin.typescript.COMPILER" />

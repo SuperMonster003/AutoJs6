@@ -127,6 +127,7 @@ object PluginInstallWizardCatalog {
         entry(official("three.stove.agent"), "Three Stove Agent", TOOLS),
         entry(official("angus.mail"), "Angus Mail", TOOLS),
         entry(official("three.setup.installer"), "Three Setup Installer", TOOLS),
+        entry(official("three.shell.terminal"), "Three Shell Terminal", TOOLS),
         entry(official("mcp.server"), "MCP Server", TOOLS, standard = true),
         entry(official("threestoneai"), "Three Stone AI", TOOLS, standard = true),
         entry(official("screencolorpicker"), "Screen Color Picker", TOOLS),

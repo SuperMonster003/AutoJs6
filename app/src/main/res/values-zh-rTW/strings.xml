@@ -685,6 +685,11 @@
     <string name="prompt_plugin_native_page_alignment">外掛程式 %1$s 的原生函式庫未按 16 KB 頁面大小對齊, 可能無法在此裝置上執行. 請升級外掛程式後再使用. 是否仍要繼續?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重啟應用才能完成文件源切換</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分內容可能需要重啟應用才能完成語言切換</string>
+    <string name="prompt_terminal_plugin_application_disabled">Android 已停用 3-Shell Terminal. 請在系統應用程式設定中啟用後重試.</string>
+    <string name="prompt_terminal_plugin_enable_required">3-Shell Terminal 已在外掛程式中心停用或未授權. 請先啟用並授權, 再使用終端機.</string>
+    <string name="prompt_terminal_plugin_install_required">請從外掛程式中心安裝 3-Shell Terminal 以使用終端機. 內建終端機已遷入此外掛程式.</string>
+    <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal 需要 AutoJs6 建置 %1$d 或更高版本. 請更新 AutoJs6, 或從外掛程式中心安裝相容的外掛程式版本.</string>
+    <string name="prompt_terminal_plugin_update_required">已安裝的 3-Shell Terminal 未提供此 AutoJs6 建置所需的終端機入口. 請從外掛程式中心更新外掛程式.</string>
     <string name="prompt_three_stove_agent_activate">已安裝 Three Stove Agent, 但 Android 尚未啟用它. 請先啟用, 以便 AutoJs6 建立連線.</string>
     <string name="prompt_three_stove_agent_application_disabled">Android 已停用 Three Stove Agent. 請在系統設定中啟用應用程式後重試.</string>
     <string name="prompt_three_stove_agent_authorize">請先在外掛中心授權此外掛, 再連線 Three Stove Agent.</string>
@@ -1059,6 +1064,7 @@
     <string name="text_clone_color_library">克隆顏色庫</string>
     <string name="text_close">關閉</string>
     <string name="text_close_floating_button">關閉浮動按鈕</string>
+    <string name="text_close_session">關閉工作階段</string>
     <string name="text_code">程式碼</string>
     <string name="text_code_beautify">格式化程式碼</string>
     <string name="text_code_editor">程式碼編輯器</string>
@@ -2209,6 +2215,10 @@
     <string name="text_terminal_other_package_managers_content">yarn 與 pnpm 由 corepack 提供, 首次使用時從 registry 下載. 執行 \"yarn --version\" 或 \"pnpm --version\" 即可啟用.</string>
     <string name="text_terminal_package_management">套件管理</string>
     <string name="text_terminal_package_name_hint">套件名稱, 如 is-odd</string>
+    <string name="text_terminal_plugin_disabled">3-Shell Terminal 外掛程式已停用或未授權</string>
+    <string name="text_terminal_plugin_incompatible">3-Shell Terminal 外掛程式不相容</string>
+    <string name="text_terminal_plugin_required">需要 3-Shell Terminal 外掛程式</string>
+    <string name="text_terminal_plugin_unavailable">3-Shell Terminal 外掛程式無法使用</string>
     <string name="text_terminal_preparing_npm">正在從 Node.js 執行階段外掛程式準備 npm 與 corepack...</string>
     <string name="text_terminal_running">執行中</string>
     <string name="text_terminal_running_sessions">執行中\u0020\u0020[ 工作階段: %1$d ]</string>

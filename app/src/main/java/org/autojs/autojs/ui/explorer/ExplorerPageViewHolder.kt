@@ -17,6 +17,7 @@ import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
+import org.autojs.autojs.core.plugin.terminal.TerminalLauncher
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.ExplorerSamplePage
@@ -27,7 +28,6 @@ import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.project.BuildActivity
-import org.autojs.autojs.ui.terminal.TerminalActivity
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
@@ -237,7 +237,7 @@ internal class ExplorerPageViewHolder(
                 }
                 R.id.action_open_in_terminal -> {
                     host.hideHostDialog()
-                    TerminalActivity.launch(host.context, selectedItem.path)
+                    TerminalLauncher.open(host.context, selectedItem.path)
                 }
                 R.id.action_reset -> {
                     val o = Explorers.Providers.workspace()

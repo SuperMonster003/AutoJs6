@@ -690,6 +690,11 @@
     <string name="prompt_plugin_native_page_alignment">المكتبات الأصلية في الملحق %1$s غير محاذاة لصفحات 16 KB. قد لا يعمل الملحق على هذا الجهاز. قم بترقيته قبل الاستخدام. هل تريد المتابعة رغم ذلك?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">هناك حاجة إلى إعادة تشغيل التطبيق لتطبيق إعدادات جديدة</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة مطبقًا كما هو متوقع</string>
+    <string name="prompt_terminal_plugin_application_disabled">قام Android بتعطيل 3-Shell Terminal. فعّل التطبيق من إعدادات تطبيقات النظام ثم أعد المحاولة.</string>
+    <string name="prompt_terminal_plugin_enable_required">3-Shell Terminal معطّل أو غير مصرّح به في مركز الإضافات. فعّله وصرّح به قبل استخدام الطرفية.</string>
+    <string name="prompt_terminal_plugin_install_required">ثبّت 3-Shell Terminal من مركز الإضافات لاستخدام الطرفية. تم نقل الطرفية المدمجة إلى هذه الإضافة.</string>
+    <string name="prompt_terminal_plugin_requires_host">يتطلب 3-Shell Terminal الإصدار %1$d من AutoJs6 أو أحدث. حدّث AutoJs6 أو ثبّت إصدارًا متوافقًا من الإضافة من مركز الإضافات.</string>
+    <string name="prompt_terminal_plugin_update_required">إصدار 3-Shell Terminal المثبّت لا يوفر مدخل الطرفية الذي يتوقعه هذا الإصدار من AutoJs6. حدّث الإضافة من مركز الإضافات.</string>
     <string name="prompt_three_stove_agent_activate">تم تثبيت Three Stove Agent لكن Android لم يفعله بعد. فعله للسماح بالاتصال مع AutoJs6.</string>
     <string name="prompt_three_stove_agent_application_disabled">عطل Android تطبيق Three Stove Agent. فعله في إعدادات النظام ثم حاول مجددا.</string>
     <string name="prompt_three_stove_agent_authorize">امنح هذه الإضافة الإذن في مركز الإضافات قبل ربط Three Stove Agent.</string>
@@ -1064,6 +1069,7 @@
     <string name="text_clone_color_library">استنساخ مكتبة ألوان</string>
     <string name="text_close">قريب</string>
     <string name="text_close_floating_button">إغلاق الزر العائم</string>
+    <string name="text_close_session">إغلاق الجلسة</string>
     <string name="text_code">شفرة</string>
     <string name="text_code_beautify">رمز تجميل</string>
     <string name="text_code_editor">محرر الشفرة</string>
@@ -2214,6 +2220,10 @@
     <string name="text_terminal_other_package_managers_content">يتم توفير yarn و pnpm عبر corepack ويتم تنزيلهما من السجل عند أول استخدام. شغل \"yarn --version\" أو \"pnpm --version\" لتفعيلهما.</string>
     <string name="text_terminal_package_management">إدارة الحزم</string>
     <string name="text_terminal_package_name_hint">اسم الحزمة, مثل is-odd</string>
+    <string name="text_terminal_plugin_disabled">إضافة 3-Shell Terminal معطّلة أو غير مصرّح بها</string>
+    <string name="text_terminal_plugin_incompatible">إضافة 3-Shell Terminal غير متوافقة</string>
+    <string name="text_terminal_plugin_required">إضافة 3-Shell Terminal مطلوبة</string>
+    <string name="text_terminal_plugin_unavailable">إضافة 3-Shell Terminal غير متاحة</string>
     <string name="text_terminal_preparing_npm">جارٍ تحضير npm و corepack من إضافة Node.js Runtime...</string>
     <string name="text_terminal_running">قيد التشغيل</string>
     <string name="text_terminal_running_sessions">قيد التشغيل\u0020\u0020[ الجلسات: %1$d ]</string>

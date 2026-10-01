@@ -688,6 +688,11 @@
     <string name="prompt_plugin_native_page_alignment">Нативные библиотеки плагина %1$s не выровнены для страниц 16 KB. Плагин может не работать на этом устройстве. Обновите его перед использованием. Все равно продолжить?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Для применения новых настроек требуется перезапуск приложения</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Перезапуск приложения может потребоваться для того, чтобы язык применялся как положено</string>
+    <string name="prompt_terminal_plugin_application_disabled">Android отключил 3-Shell Terminal. Включите приложение в системных настройках и повторите попытку.</string>
+    <string name="prompt_terminal_plugin_enable_required">3-Shell Terminal отключён или не авторизован в центре плагинов. Включите и авторизуйте его перед использованием терминала.</string>
+    <string name="prompt_terminal_plugin_install_required">Установите 3-Shell Terminal из центра плагинов, чтобы использовать терминал. Встроенный терминал перенесён в этот плагин.</string>
+    <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal требует AutoJs6 сборки %1$d или новее. Обновите AutoJs6 или установите совместимую версию плагина из центра плагинов.</string>
+    <string name="prompt_terminal_plugin_update_required">Установленный 3-Shell Terminal не предоставляет точку входа терминала, которую ожидает эта сборка AutoJs6. Обновите плагин из центра плагинов.</string>
     <string name="prompt_three_stove_agent_activate">Three Stove Agent установлен, но еще не активирован Android. Активируйте его для подключения к AutoJs6.</string>
     <string name="prompt_three_stove_agent_application_disabled">Android отключил Three Stove Agent. Включите приложение в системных настройках и повторите попытку.</string>
     <string name="prompt_three_stove_agent_authorize">Разрешите этот плагин в центре плагинов перед подключением Three Stove Agent.</string>
@@ -1062,6 +1067,7 @@
     <string name="text_clone_color_library">Клонировать цветовую библиотеку</string>
     <string name="text_close">Закрыть</string>
     <string name="text_close_floating_button">Закрыть плавающую кнопку</string>
+    <string name="text_close_session">Закрыть сеанс</string>
     <string name="text_code">Код</string>
     <string name="text_code_beautify">Улучшить код</string>
     <string name="text_code_editor">Редактор кода</string>
@@ -2212,6 +2218,10 @@
     <string name="text_terminal_other_package_managers_content">yarn и pnpm предоставляются через corepack и загружаются из реестра при первом использовании. Выполните \"yarn --version\" или \"pnpm --version\", чтобы активировать их.</string>
     <string name="text_terminal_package_management">Управление пакетами</string>
     <string name="text_terminal_package_name_hint">Имя пакета, например is-odd</string>
+    <string name="text_terminal_plugin_disabled">Плагин 3-Shell Terminal отключён или не авторизован</string>
+    <string name="text_terminal_plugin_incompatible">Плагин 3-Shell Terminal несовместим</string>
+    <string name="text_terminal_plugin_required">Требуется плагин 3-Shell Terminal</string>
+    <string name="text_terminal_plugin_unavailable">Плагин 3-Shell Terminal недоступен</string>
     <string name="text_terminal_preparing_npm">Подготовка npm и corepack из плагина Node.js Runtime...</string>
     <string name="text_terminal_running">Работает</string>
     <string name="text_terminal_running_sessions">Работает\u0020\u0020[ Сеансы: %1$d ]</string>

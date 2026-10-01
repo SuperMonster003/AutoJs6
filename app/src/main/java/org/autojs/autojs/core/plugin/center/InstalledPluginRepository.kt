@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
+import org.autojs.autojs.core.plugin.terminal.TerminalPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
@@ -39,6 +40,7 @@ import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.epub.api.EpubActions
+import org.autojs.plugin.terminal.api.TerminalActions
 import org.autojs.plugin.installer.api.InstallerActions
 import org.autojs.plugin.mail.api.MailActions
 import org.autojs.plugin.mcp.server.api.McpServerActions
@@ -224,6 +226,9 @@ class InstalledPluginRepository {
         EpubPluginHost.ACTION_EPUB -> EpubPluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = EpubPluginHost.ACTION_EPUB)
         }
+        TerminalPluginHost.ACTION_TERMINAL -> TerminalPluginHost.discover(context, packageName).map {
+            Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = TerminalPluginHost.ACTION_TERMINAL)
+        }
         else -> listOf(preferred)
     }
 
@@ -263,6 +268,10 @@ class InstalledPluginRepository {
             ServiceQuery(
                 action = EpubPluginHost.ACTION_EPUB,
                 category = EpubActions.SERVICE_CATEGORY,
+            ),
+            ServiceQuery(
+                action = TerminalPluginHost.ACTION_TERMINAL,
+                category = TerminalActions.SERVICE_CATEGORY,
             ),
         )
         return specs.flatMap { spec ->

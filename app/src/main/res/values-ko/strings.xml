@@ -690,6 +690,11 @@
     <string name="prompt_plugin_native_page_alignment">플러그인 %1$s의 네이티브 라이브러리가 16 KB 페이지에 맞게 정렬되지 않아 이 기기에서 작동하지 않을 수 있습니다. 사용 전에 플러그인을 업데이트하세요. 계속하시겠습니까?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">새로운 설정을 적용하려면 앱 재시작이 필요합니다</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">예상대로 언어를 적용하려면 앱 재시작이 필요할 수 있습니다.</string>
+    <string name="prompt_terminal_plugin_application_disabled">Android 가 3-Shell Terminal 을 사용 중지했습니다. 시스템 앱 설정에서 사용 설정한 뒤 다시 시도하세요.</string>
+    <string name="prompt_terminal_plugin_enable_required">3-Shell Terminal 이 플러그인 센터에서 사용 중지되었거나 승인되지 않았습니다. 터미널을 사용하기 전에 사용 설정하고 승인하세요.</string>
+    <string name="prompt_terminal_plugin_install_required">터미널을 사용하려면 플러그인 센터에서 3-Shell Terminal 을 설치하세요. 내장 터미널은 이 플러그인으로 이전되었습니다.</string>
+    <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal 은 AutoJs6 빌드 %1$d 이상이 필요합니다. AutoJs6 를 업데이트하거나 플러그인 센터에서 호환되는 플러그인 버전을 설치하세요.</string>
+    <string name="prompt_terminal_plugin_update_required">설치된 3-Shell Terminal 은 이 AutoJs6 빌드가 요구하는 터미널 진입점을 제공하지 않습니다. 플러그인 센터에서 플러그인을 업데이트하세요.</string>
     <string name="prompt_three_stove_agent_activate">Three Stove Agent가 설치되었지만 Android에서 아직 활성화되지 않았습니다. AutoJs6에 연결하려면 활성화하세요.</string>
     <string name="prompt_three_stove_agent_application_disabled">Android에서 Three Stove Agent를 사용 중지했습니다. 시스템 설정에서 앱을 사용 설정하고 다시 시도하세요.</string>
     <string name="prompt_three_stove_agent_authorize">Three Stove Agent에 연결하기 전에 플러그인 센터에서 이 플러그인을 승인하세요.</string>
@@ -1064,6 +1069,7 @@
     <string name="text_clone_color_library">색상 라이브러리 복제</string>
     <string name="text_close">닫다</string>
     <string name="text_close_floating_button">플로팅 버튼 닫기</string>
+    <string name="text_close_session">세션 닫기</string>
     <string name="text_code">암호</string>
     <string name="text_code_beautify">코드를 아름답게하십시오</string>
     <string name="text_code_editor">코드 편집기</string>
@@ -2214,6 +2220,10 @@
     <string name="text_terminal_other_package_managers_content">yarn 과 pnpm 은 corepack 을 통해 제공되며 처음 사용할 때 레지스트리에서 다운로드됩니다. \"yarn --version\" 또는 \"pnpm --version\" 을 실행하면 활성화됩니다.</string>
     <string name="text_terminal_package_management">패키지 관리</string>
     <string name="text_terminal_package_name_hint">패키지 이름, 예: is-odd</string>
+    <string name="text_terminal_plugin_disabled">3-Shell Terminal 플러그인 사용 중지 또는 미승인</string>
+    <string name="text_terminal_plugin_incompatible">3-Shell Terminal 플러그인 호환되지 않음</string>
+    <string name="text_terminal_plugin_required">3-Shell Terminal 플러그인 필요</string>
+    <string name="text_terminal_plugin_unavailable">3-Shell Terminal 플러그인 사용 불가</string>
     <string name="text_terminal_preparing_npm">Node.js 런타임 플러그인에서 npm 과 corepack 을 준비하는 중...</string>
     <string name="text_terminal_running">실행 중</string>
     <string name="text_terminal_running_sessions">실행 중\u0020\u0020[ 세션: %1$d ]</string>

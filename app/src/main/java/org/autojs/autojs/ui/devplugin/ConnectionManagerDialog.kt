@@ -270,7 +270,7 @@ abstract class ConnectionManagerDialog protected constructor(
                 row.open.visibility = if (entry.onOpen != null) View.VISIBLE else View.GONE
                 row.close.visibility = if (entry.onClose != null) View.VISIBLE else View.GONE
                 row.open.contentDescription = "${getString(R.string.text_open)}: ${entry.title}"
-                row.close.contentDescription = "${getString(R.string.text_terminal_close_session)}: ${entry.title}"
+                row.close.contentDescription = "${getString(R.string.text_close_session)}: ${entry.title}"
             }
         }
         applyClientsLevel()

@@ -688,6 +688,11 @@
     <string name="prompt_plugin_native_page_alignment">Les bibliotheques natives du plugin %1$s ne sont pas alignees pour des pages de 16 KB. Ce plugin peut echouer sur cet appareil. Mettez-le a jour avant utilisation. Continuer quand meme?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Un redémarrage de l\'application est nécessaire pour appliquer les nouveaux paramètres.</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Un redémarrage de l\'appli peut être nécessaire pour que la langue soit appliquée comme prévu.</string>
+    <string name="prompt_terminal_plugin_application_disabled">Android a désactivé 3-Shell Terminal. Activez l\'application dans ses paramètres système, puis réessayez.</string>
+    <string name="prompt_terminal_plugin_enable_required">3-Shell Terminal est désactivé ou non autorisé dans le centre de plugins. Activez-le et autorisez-le avant d\'utiliser le terminal.</string>
+    <string name="prompt_terminal_plugin_install_required">Installez 3-Shell Terminal depuis le centre de plugins pour utiliser le terminal. Le terminal intégré a été déplacé dans ce plugin.</string>
+    <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal nécessite AutoJs6 build %1$d ou ultérieur. Mettez à jour AutoJs6 ou installez une version compatible du plugin depuis le centre de plugins.</string>
+    <string name="prompt_terminal_plugin_update_required">Le 3-Shell Terminal installé ne fournit pas l\'entrée de terminal attendue par cette version d\'AutoJs6. Mettez à jour le plugin depuis le centre de plugins.</string>
     <string name="prompt_three_stove_agent_activate">Three Stove Agent est installé mais Android ne l\'a pas encore activé. Activez-le pour permettre la connexion à AutoJs6.</string>
     <string name="prompt_three_stove_agent_application_disabled">Android a désactivé Three Stove Agent. Activez l\'application dans les paramètres système, puis réessayez.</string>
     <string name="prompt_three_stove_agent_authorize">Autorisez ce plugin dans le centre de plugins avant de connecter Three Stove Agent.</string>
@@ -1062,6 +1067,7 @@
     <string name="text_clone_color_library">Cloner une bibliothèque de couleurs</string>
     <string name="text_close">Fermeture</string>
     <string name="text_close_floating_button">Fermer le bouton flottant</string>
+    <string name="text_close_session">Fermer la session</string>
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautifier le code</string>
     <string name="text_code_editor">Editeur de code</string>
@@ -2212,6 +2218,10 @@
     <string name="text_terminal_other_package_managers_content">yarn et pnpm sont fournis via corepack et téléchargés depuis le registre à la première utilisation. Exécutez \"yarn --version\" ou \"pnpm --version\" pour les activer.</string>
     <string name="text_terminal_package_management">Gestion des paquets</string>
     <string name="text_terminal_package_name_hint">Nom du paquet, par ex. is-odd</string>
+    <string name="text_terminal_plugin_disabled">Plugin 3-Shell Terminal désactivé ou non autorisé</string>
+    <string name="text_terminal_plugin_incompatible">Plugin 3-Shell Terminal incompatible</string>
+    <string name="text_terminal_plugin_required">Plugin 3-Shell Terminal requis</string>
+    <string name="text_terminal_plugin_unavailable">Plugin 3-Shell Terminal indisponible</string>
     <string name="text_terminal_preparing_npm">Préparation de npm et corepack depuis le plugin Node.js Runtime...</string>
     <string name="text_terminal_running">En cours</string>
     <string name="text_terminal_running_sessions">En cours\u0020\u0020[ Sessions: %1$d ]</string>

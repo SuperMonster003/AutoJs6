@@ -110,6 +110,15 @@ public class DrawerMenuItem {
         return mSwitchEnabled;
     }
 
+    /**
+     * Shows or hides the switch of a toggleable item at runtime; a hidden switch renders the row as a
+     * plain entry whose taps still run the action (the terminal item degrades this way, roadmap D25).
+     * zh-CN: 运行时显示或隐藏可切换条目的开关; 隐藏后该行渲染为普通条目, 点击仍执行动作.
+     */
+    public void setSwitchEnabled(boolean switchEnabled) {
+        mSwitchEnabled = switchEnabled;
+    }
+
     public void setChecked(boolean checked) {
         mSwitchChecked = checked;
     }

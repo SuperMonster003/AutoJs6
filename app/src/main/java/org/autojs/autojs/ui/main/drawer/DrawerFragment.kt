@@ -32,6 +32,9 @@ import org.autojs.autojs.app.tool.ScreenColorPickerTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginStateMonitor
+import org.autojs.autojs.core.plugin.terminal.TerminalLauncher
+import org.autojs.autojs.core.plugin.terminal.TerminalPluginState
+import org.autojs.autojs.core.plugin.terminal.TerminalPluginStateMonitor
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.PrefRx
 import org.autojs.autojs.external.foreground.AppForegroundService
@@ -73,9 +76,6 @@ import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity
 import org.autojs.autojs.ui.storage.TrashActivity
 import org.autojs.autojs.ui.storage.VersionHistoryActivity
-import org.autojs.autojs.core.terminal.TerminalSessionManager
-import org.autojs.autojs.ui.terminal.TerminalManagerDialog
-import org.autojs.autojs.ui.terminal.TerminalActivity
 import org.autojs.autojs.util.ActivityLaunchOptions
 import org.autojs.autojs.util.IntentUtils.App.exit
 import org.autojs.autojs.util.IntentUtils.App.restart
@@ -175,9 +175,10 @@ open class DrawerFragment : Fragment() {
     // The VSCode connection managers (client / server mode), held the same way.
     // zh-CN: VSCode 连接管理器 (客户端 / 服务端模式), 以同样方式持有.
     private var mClientModeManagerDialog: WeakReference<MaterialDialog>? = null
-    private var mTerminalManagerDialog: WeakReference<MaterialDialog>? = null
-    private val terminalSessionListener: () -> Unit = {
-        activity?.runOnUiThread { if (view != null && ::mTerminalItem.isInitialized) mTerminalItem.sync() }
+    // The terminal plugin state monitor publishes on the main thread (plugin roadmap D26).
+    // zh-CN: 终端插件状态监听器在主线程发布 (插件路线图 D26).
+    private val terminalPluginStateListener: (TerminalPluginStateMonitor.Change) -> Unit = { _ ->
+        if (view != null && ::mTerminalItem.isInitialized) mTerminalItem.sync()
     }
     private var mServerModeManagerDialog: WeakReference<MaterialDialog>? = null
 
@@ -722,19 +723,38 @@ open class DrawerFragment : Fragment() {
             descriptionRes = R.string.description_keep_screen_on_when_in_foreground,
         )
 
+        // The terminal lives in the 3-Shell Terminal plugin (plugin roadmap D3 / D25 / D26): the switch
+        // mirrors the plugin's session count while the plugin is available, and the row degrades to a
+        // plain entry whose tap, title and manager actions all route through TerminalLauncher otherwise.
+        // zh-CN: 终端由 3-Shell Terminal 插件提供 (插件路线图 D3 / D25 / D26): 插件可用时开关镜像其会话数,
+        // 否则该行退化为普通条目, 点击 / 标题 / 管理器动作全部经 TerminalLauncher 路由.
         mTerminalItem = DrawerMenuToggleableItem(
             helper = object : DrawerMenuItemCustomHelper(mContext) {
                 override val isInMainThread = true
-                override val isActive get() = TerminalSessionManager.hasSessions
+                override val isActive get() = TerminalPluginStateMonitor.current(context).sessionCount > 0
                 override fun toggle(): Boolean {
-                    if (isActive) TerminalSessionManager.closeAll() else TerminalActivity.launchNew(context)
+                    if (isActive) TerminalLauncher.closeAll(context) else TerminalLauncher.openNew(context)
                     return true
                 }
+                override fun toggle(aimState: Boolean): Boolean {
+                    if (!TerminalPluginStateMonitor.current(context).available) {
+                        TerminalLauncher.open(context)
+                        return true
+                    }
+                    return super.toggle(aimState)
+                }
                 override fun refreshSubtitle(aimState: Boolean) {
-                    val count = TerminalSessionManager.activeSessions.size
-                    val subtitle = if (count > 0) context.getString(R.string.text_terminal_running_sessions, count) else null
-                    if (mTerminalItem.subtitle != subtitle) {
+                    val state = TerminalPluginStateMonitor.current(context)
+                    val subtitle = when (state.status) {
+                        TerminalPluginState.AVAILABLE -> state.sessionCount.takeIf { it > 0 }?.let { context.getString(R.string.text_terminal_running_sessions, it) }
+                        TerminalPluginState.NOT_INSTALLED -> context.getString(R.string.text_terminal_plugin_required)
+                        TerminalPluginState.DISABLED -> context.getString(R.string.text_terminal_plugin_disabled)
+                        TerminalPluginState.INCOMPATIBLE -> context.getString(R.string.text_terminal_plugin_incompatible)
+                        TerminalPluginState.UNAVAILABLE -> context.getString(R.string.text_terminal_plugin_unavailable)
+                    }
+                    if (mTerminalItem.subtitle != subtitle || mTerminalItem.isSwitchEnabled != state.available) {
                         mTerminalItem.subtitle = subtitle
+                        mTerminalItem.isSwitchEnabled = state.available
                         mTerminalItem.isChecked = mTerminalItem.isChecked
                     }
                 }
@@ -745,16 +765,15 @@ open class DrawerFragment : Fragment() {
             onTitleContainerClickListener = {
                 positiveText(R.string.text_terminal_new_session)
                 positiveColorRes(R.color.dialog_button_attraction)
-                onPositive { d, _ -> d.dismiss(); TerminalActivity.launchNew(mContext) }
+                onPositive { d, _ -> d.dismiss(); TerminalLauncher.openNew(mContext) }
             },
         ).also { item ->
             item.setOnLaunchManagerListener { d ->
                 d?.dismiss()
-                mTerminalManagerDialog?.get()?.dismiss()
-                mTerminalManagerDialog = WeakReference(TerminalManagerDialog.show(mContext))
+                TerminalLauncher.openManager(mContext)
             }
         }
-        TerminalSessionManager.addListener(terminalSessionListener)
+        TerminalPluginStateMonitor.addListener(mContext, terminalPluginStateListener)
 
         mThemeColorItem = DrawerMenuShortcutItem(
             icon = R.drawable.ic_personalize_thicker,
@@ -920,6 +939,7 @@ open class DrawerFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mScreenColorPickerTool.refresh()
+        TerminalPluginStateMonitor.refresh()
         syncMenuItemStates()
     }
 
@@ -931,9 +951,8 @@ open class DrawerFragment : Fragment() {
 
         dismissA11yServiceManager()
         dismissConnectionManagers()
-        mTerminalManagerDialog?.get()?.dismiss()
-        mTerminalManagerDialog = null
-        TerminalSessionManager.removeListener(terminalSessionListener)
+        TerminalPluginStateMonitor.removeListener(terminalPluginStateListener)
+        TerminalPluginStateMonitor.setVisible(mContext, false)
 
         // mActivity.unregisterReceiver(mReceiver)
 
@@ -970,6 +989,7 @@ open class DrawerFragment : Fragment() {
     fun onDrawerOpened(event: Event.OnDrawerOpened) {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.hide(WindowInsets.Type.systemBars())
         mScreenColorPickerTool.refresh()
+        TerminalPluginStateMonitor.setVisible(mContext, true)
         syncMenuItemStates()
     }
 
@@ -977,6 +997,7 @@ open class DrawerFragment : Fragment() {
     @Suppress("unused", "UNUSED_PARAMETER")
     fun onDrawerClosed(event: Event.OnDrawerClosed) {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.show(WindowInsets.Type.systemBars())
+        TerminalPluginStateMonitor.setVisible(mContext, false)
     }
 
     @Subscribe

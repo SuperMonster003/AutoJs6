@@ -19,6 +19,7 @@ object PluginInstalledIconResolver {
         "io.github.supermonster003.autojs6.plugin.three.amber.player",
         "io.github.supermonster003.autojs6.plugin.three.stove.agent",
         "io.github.supermonster003.autojs6.plugin.three.adapt.a11y",
+        "io.github.supermonster003.autojs6.plugin.three.shell.terminal",
     )
 
     /**

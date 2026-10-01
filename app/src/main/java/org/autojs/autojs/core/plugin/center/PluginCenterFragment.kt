@@ -26,6 +26,8 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
+import org.autojs.autojs.core.plugin.terminal.TerminalPluginHost
+import org.autojs.autojs.core.plugin.terminal.ThreeShellTerminalOfficialPlugin
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentPluginHost
@@ -243,6 +245,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 }
                 if (item.packageName == org.autojs.plugin.mcp.server.api.McpServerIds.DEFAULT_PACKAGE_NAME) {
                     org.autojs.autojs.ui.settings.McpServerSettingsLauncher.launch(contextRef)
+                    return
+                }
+                if (item.packageName == ThreeShellTerminalOfficialPlugin.PACKAGE_NAME) {
+                    org.autojs.autojs.ui.settings.TerminalPluginSettingsLauncher.launch(contextRef)
                     return
                 }
                 val installedCountForEngine = item.engine
@@ -1009,6 +1015,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             ThreeStoveAgentActions.SERVICE_ACTION -> ThreeStoveAgentPluginHost.probeMetadata(contextRef, item.packageName)
             MailPluginHost.ACTION_MAIL -> MailPluginHost.probe(contextRef, item.packageName)
             EpubPluginHost.ACTION_EPUB -> EpubPluginHost.probe(contextRef, item.packageName)
+            TerminalPluginHost.ACTION_TERMINAL -> TerminalPluginHost.probe(contextRef, item.packageName)
             ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             OfflineDocsPluginContract.ACTION -> withContext(Dispatchers.IO) {
                 OfflineDocsPluginHost.probe(contextRef, item.packageName)
