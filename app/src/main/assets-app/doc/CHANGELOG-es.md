@@ -255,6 +255,7 @@
 * `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
 * `Nuevo` Gestión de Three Stove Agent en el centro de complementos con ayuda de instalación, activación, autorización y compatibilidad; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial
 * `Nuevo` El plugin Three Stove Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
+* `Nuevo` Módulo installer para instalar, actualizar y desinstalar aplicaciones, con instalación silenciosa mediante Shizuku / Root (requiere el complemento 3-Setup Installer) (véase Documentación del proyecto > [Installer](https://docs.autojs6.com/#/installer))
 * `Corrección` Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
 * `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío
 * `Corrección` Los árboles compactos de accesibilidad abreviaban los ID de recursos e impedían que los selectores literales encontraran los elementos mostrados

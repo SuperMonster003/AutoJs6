@@ -25,6 +25,7 @@ class InstallerJsonTest {
         )
         val root = JsonParser.parseString(json).asJsonObject
         assertEquals("host-1", root["id"].asString)
+        assertTrue(root[InstallerContract.FIELD_BATCH].asBoolean)
         assertEquals("silent", root["interaction"].asString)
         val sources = root.getAsJsonArray("sources")
         assertEquals(3, sources.size())
@@ -39,6 +40,27 @@ class InstallerJsonTest {
         assertTrue(options["deleteSource"].asBoolean)
         assertTrue(options["continueOnError"].asBoolean)
         assertEquals(InstallerContract.DEFAULT_SESSION_TIMEOUT_MILLIS, options["timeoutMillis"].asLong)
+    }
+
+    @Test
+    fun `explicit batch preserves a one item array while legacy callers derive shape`() {
+        fun encoded(sources: List<InstallerJson.SourceEntry>, batch: Boolean? = null) = JsonParser.parseString(
+            if (batch == null) InstallerJson.encodeInstallRequest("shape", sources, "auto", InstallerJson.InstallOptions())
+            else InstallerJson.encodeInstallRequest("shape", sources, "auto", InstallerJson.InstallOptions(), isBatch = batch),
+        ).asJsonObject
+        assertTrue(encoded(sources(1), true)[InstallerContract.FIELD_BATCH].asBoolean)
+        assertFalse(encoded(sources(1))[InstallerContract.FIELD_BATCH].asBoolean)
+        assertFalse(encoded(sources(1, 2))[InstallerContract.FIELD_BATCH].asBoolean)
+        assertTrue(encoded(sources(2))[InstallerContract.FIELD_BATCH].asBoolean)
+        assertThrows(IllegalArgumentException::class.java) { encoded(sources(2), false) }
+    }
+
+    @Test
+    fun `one item batch error remains a completion result`() {
+        val completed = InstallerJson.decodeCompletion("""{"results":[{"ok":false,"error":{"code":"INVALID_PACKAGE","message":"bad archive"}}]}""")
+        assertEquals(1, completed.results.size)
+        assertFalse(completed.allOk)
+        assertEquals(InstallerErrorCodes.INVALID_PACKAGE, completed.single.error?.code)
     }
 
     @Test

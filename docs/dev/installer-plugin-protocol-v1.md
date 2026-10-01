@@ -9,8 +9,10 @@ the ceilings listed here. Transaction numbers are frozen in declaration order
 The host side (discovery, session client, install router and degradation, plugin roadmap P1.3)
 and the removal of the host's own installer (P1.4) follow in the same host line; the delivering
 host build is recorded in `InstallerIds.REQUIRED_HOST_VERSION_CODE` (P1.5). The plugin side
-implements the operations in plugin roadmap P2 and the dialogs in P3; the script API `installer`
-is plugin roadmap P4 and lives in the host. Sections marked "pending" are filled by those phases.
+implements the operations in plugin roadmap P2 and the dialogs in P3. The script API `installer`
+(plugin roadmap P4) is delivered by AutoJs6 6.8.0, host build 5300, as described below. This script
+layer keeps the V1 AIDL and contract version unchanged. The refreshed contract AAR adds the
+optional JSON field name `FIELD_BATCH` for preserving a one-item script array.
 
 ## Decision
 
@@ -129,6 +131,7 @@ installation must not be changed into failure solely because its metadata exceed
 ```json
 {
   "id": "host-generated id",
+  "batch": true,
   "sources": [
     { "item": 0, "displayName": "app.apk", "size": 12345678 },
     { "item": 1, "displayName": "base.apk", "size": 1000 },
@@ -152,6 +155,14 @@ installation must not be changed into failure solely because its metadata exceed
 `sources[n]` describes descriptor `n` of the `sources` array in order. Items with the same
 `item` value form one split set (plugin roadmap D20); a batch has several `item` values. At most
 `MAX_BATCH_SOURCES` items and `MAX_SPLITS_PER_PACKAGE` descriptors per item are accepted.
+The optional root `batch` boolean preserves the caller's batch shape independently of item count.
+`true` keeps the `results` envelope and the batch `continueOnError` behavior for even one item;
+`false` requires exactly one grouped item. A present non-boolean value, including null, is
+`INVALID_ARGUMENT`. If omitted, the plugin infers batch mode from whether there is more than one
+grouped item, preserving requests from older hosts. Hosts that do not specify batch shape in their
+client calls retain that same inference. Older V1 plugins can ignore the optional field; preserving
+one-item array failure semantics requires the updated plugin implementation. No AIDL transaction
+or contract version changes, and the host and plugin share `InstallerContract.FIELD_BATCH`.
 `deleteSource` only asks the plugin to report `sourceDeleted`; the party that owns the file
 deletes it (D25), so for host-provided descriptors the host deletes after `completed`.
 
@@ -379,8 +390,148 @@ store, the legacy `IntentUtils.installApk` helpers and fourteen strings only the
 `ApkInfoDialogManager` and `DisplayManifestActivity` stay as the read-only package information
 and now read the shared parser module (`docs/dev/package-archive-parser-v1.md`).
 
-## Script API (P4, pending)
+## Script API (P4)
 
-The `installer` global (`$installer`), its synchronous, `Async` and session forms and
-`InstallerError` are described here once plugin roadmap P4 lands; the reference lives in the
-`installer` module of the AutoJs6 documentation.
+AutoJs6 6.8.0, build 5300, exposes the global `installer` and its `$installer` alias. The script
+surface is implemented in `runtime/api/installer` and `runtime/api/augment/installer`; each
+`ScriptRuntime` owns an `InstallerService` and closes it on exit. The original V1 host-client
+minimum remains `InstallerIds.REQUIRED_HOST_VERSION_CODE = 5299`; build 5300 adds the script
+surface and optional batch-shape metadata without changing V1 AIDL transactions or the contract
+version. Full signatures and examples are maintained in
+the [installer module reference](https://docs.autojs6.com/#/installer) and
+[installer TypeScript declarations](https://github.com/SuperMonster003/AutoJs6-TypeScript-Declarations/blob/main/declarations/autojs6/aj6-int-installer.d.ts).
+
+### Public entry points
+
+| Area | Script entry points | Result |
+| --- | --- | --- |
+| Install or update | `install(source, options?)`, `installAsync(source, options?)`, `session(source, options?)` | `InstallResult`, a Promise of the same value, or an `InstallSession`; an array source produces `InstallResult[]` |
+| Uninstall | `uninstall(packageName, options?)`, `uninstallAsync(packageName, options?)` | `UninstallResult`, or a Promise of it |
+| Inspect | `inspect(source)`, `inspectAsync(source)` | `PackageArchiveInfo`, or a Promise of it; optional PNG icon data becomes an Android `Bitmap` on the script thread |
+| Authorizers | `authorizer.available`, `authorizer.state(name?)`, `authorizer.request(name, timeout?)`, `authorizer.requestAsync(name, timeout?)` | Available concrete names, state, or an authorization boolean |
+| Default installer | `isDefault()`, `setDefault(enabled?, options?)`, `setDefaultAsync(enabled?, options?)` | Boolean; `enabled` defaults to `true`, and setting returns whether the requested state was reached, including successful disable |
+| Device users | `users()`, `usersAsync()` | `DeviceUser[]`, or a Promise of it |
+| Plugin readiness | `isAvailable()`, read-only `status` | Boolean, or `{ available, pluginVersion?, contractVersion?, reason? }` for the selected plugin |
+| Errors | `installer.InstallerError` | Script error constructor, shared by thrown errors, Promise rejections and failed item results |
+
+`InstallerError` extends the script `Error` type and exposes `code`, `message` and `retryable`,
+plus `status`, `systemMessage`, `packageName` and `authorizer` when known. Failed batch items
+carry real `InstallerError` instances in their `error` field.
+
+`isAvailable()` and `status` are probes: a missing, disabled, unauthorized or incompatible plugin
+produces `false` or an unavailable status with a reason. Actions throw or reject `PLUGIN_UNAVAILABLE`
+in that situation. Script actions use the plugin; the host UI's system-installer degradation does
+not apply to this API. `app.uninstall` remains the separate system intent API; `installer.uninstall`
+adds plugin results, authorizer selection, `keepData` and target-user options.
+
+`authorizer.available` includes only concrete names whose actual `available` state is true, never
+`auto`; availability alone does not imply a running service or a grant. `state()` defaults to
+`auto` and aggregates readiness without claiming to know the plugin's configured selection order.
+`request("auto")` checks already available, running and granted paths and does not prompt for new
+Root or Shizuku authorization. Request a concrete name to initiate that authorization.
+
+### Sources, options and result shape
+
+A source is a local path string, a local `file://` URI, a readable `content://` URI, a
+`java.io.File` or an `android.net.Uri`. Relative paths use the script's `files.cwd()`. The host
+snapshots and validates arguments on the calling script thread, then opens sources on IO workers.
+Content providers may report unknown size (`-1`), including pipe sources; they remain cancellable.
+The script must already have access to the URI. A denied or revoked source read permission maps
+to `SOURCE_UNREADABLE`, rather than implying that the installer plugin is unavailable.
+
+| Source shape | Meaning and result shape |
+| --- | --- |
+| `"/sdcard/Download/app.apk"` | One application, one result |
+| `[sourceA, sourceB]` | Independent applications, at most 32 items, results in item order; even a one-item array returns an array |
+| `{ splits: [base, splitA] }` | One application's non-empty split set, at most 64 files, one result |
+| `[{ splits: [base, splitA] }, sourceB]` | A batch containing a split set and an independent application |
+
+The script host sends `batch: true` for array inputs, including a one-item array. With the default
+`continueOnError: true`, an invalid archive in `[source]` therefore returns one failed item in the
+result array; the same ordinary `source` reports the session failure directly. This is a root
+request field, not an additional script option.
+
+`splits` belongs only in a source object. `options.splits` is rejected. `inspect` accepts one
+ordinary source, not arrays or explicit split sets; it can describe AAB metadata, while attempting
+to install an AAB returns `UNSUPPORTED_FORMAT` and requires APKs generated with bundletool.
+Encoded V1 JSON documents retain the 64 KiB ceiling, and installer package names are limited to
+255 UTF-8 bytes. The script service runs at most four calls per script and admits at most
+36 calls in total, including those waiting for a running slot. Exceeding that admission capacity
+reports `INVALID_ARGUMENT`.
+
+Install options are `authorizer`, `interaction`, `allowDowngrade`, `allowTestOnly`,
+`bypassLowTargetSdk`, `installer`, `user`, `deleteSource`, `continueOnError` and `timeout`.
+Uninstall options are `authorizer`, `interaction`, `keepData`, `user` and `timeout`.
+Default-installer options contain only `authorizer`. Unknown keys, explicit null values,
+invalid enum values and out-of-range integers are rejected. Script `timeout` maps to the wire
+field `timeoutMillis`; `user` is `"current"`, `"all"` or a non-negative integer user id.
+An omitted or empty installer package name uses the plugin. Deletion and privilege flags default
+to `false`, `continueOnError` defaults to `true`, and `user` defaults to `"current"`.
+
+Both `authorizer` and `interaction` default to `"auto"`. **Scripts install silently by default
+when a privileged authorizer is available** (D32). The plugin applies its configured authorizer
+order; an explicitly selected authorizer does not fall back to another one. Without privilege,
+`auto` uses confirmation dialogs. If the system still requests confirmation on a privileged path,
+`auto` permits it and the result records `interaction: "dialog"` with a note. Use `dialog` to
+request confirmation explicitly. Explicit `silent` reports `AUTHORIZER_REQUIRED` when a
+confirmation would be needed.
+
+### Sessions, script threads and cancellation
+
+`session` returns an EventEmitter with a stable `id`, read-only `state` and `result`, plus
+`cancel()` and `wait(timeout?)`. Events are `stage`, `progress`, `complete`, `error` and `cancel`.
+The event methods are `on`, `addListener`, `once`, `off`, `removeListener`, `prependListener`,
+`prependOnceListener`, `removeAllListeners`, `listenerCount`, `listeners`, `eventNames`,
+`getMaxListeners`, `setMaxListeners` and `emit`. The object belongs to its creating script thread.
+`cancel()` reports whether a new local cancellation request was accepted; an already observed
+terminal result wins over a late cancellation. `result` is absent until completion and follows
+the original single-source or array-source shape. A completed batch may contain failed items.
+Progress is in `0..1`; reaching `1` does not replace the final installation result.
+
+Synchronous methods wait on the calling script thread and drain that thread's queued installer
+events while waiting. IO and Binder callbacks carry host DTOs or plain values, never Rhino
+objects. Promise callbacks, event listeners, result conversion and bitmap decoding run on the
+creating script thread. Pending Async calls and sessions hold a looper wait token until terminal
+delivery and its microtasks finish. An unhandled session `error` is logged to the script console
+instead of becoming an uncaught global error.
+
+Blocking methods and metadata getters reject the Android UI thread with `INVALID_ARGUMENT`;
+use an Async counterpart where provided. `session` also performs a synchronous availability
+check, so create it on a script worker thread. A session cannot recursively call `wait()` from
+listeners that are already being drained by its own `wait()`.
+
+`wait(timeout)` limits only that wait. Expiry throws `InstallerError` with code `TIMEOUT`, leaves
+the installation running, and permits a later wait. In contrast, install `options.timeout`
+covers the whole operation, including waiting for capacity and opening sources; expiry cancels
+the session. It defaults to 1,800,000 ms and accepts integer values in `1..7200000`; the same
+range applies to an explicit wait timeout. The plugin's default user-confirmation limit remains
+300,000 ms. A real terminal outcome already received is preserved when a deadline or cancel
+races with its delivery.
+
+Stopping the script rejects new work, cancels queued and running session work, releases local
+descriptors and bindings, and suppresses pending script callbacks. Late descriptors or session
+handles returned by an in-flight open are closed. V1 one-shot calls such as uninstall, authorizer
+request and default-installer changes have no remote cancellation token. Script exit cancels the
+host wait and releases its binding, but cannot revoke an operation or permission interaction
+already accepted by Android.
+
+### Host-owned source deletion (D25)
+
+Only explicit `deleteSource: true` requests deletion. After confirmed successful item results,
+the host attempts to delete path, File and local file-URI sources before publishing the script
+terminal result. Content URI sources stay with their owner and report `sourceDeleted: false`
+with an explanatory note. Failed or unprocessed items retain their sources. A file shared with
+any failed or unprocessed batch item is retained; successful items sharing one file reuse a
+single deletion result.
+
+The host retains its read-only descriptors until cleanup and compares the opened file with the
+current path by device/inode, size and modification/change timestamps. Symlinks, detected
+replacements, changed files and closed descriptors are refused. Callers must keep source paths
+stable until completion. Deletion is best effort: inability to delete adds a note and does not
+change `ok: true`; `sourceDeleted` is true only when all sources of that item were deleted.
+
+Host cleanup notes must not turn a valid result near the 64 KiB transport ceiling into a script
+failure. If enrichment would exceed that ceiling, the host retains the original per-item or
+batch wire JSON and updates the typed `sourceDeleted` and `notes` fields. Script conversion
+overlays those fields, preserving both plugin metadata and host cleanup notes. This does not
+change the V1 transport ceiling or discard an already confirmed result.

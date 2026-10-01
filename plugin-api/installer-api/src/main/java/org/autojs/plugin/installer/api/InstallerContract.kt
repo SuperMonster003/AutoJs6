@@ -43,6 +43,8 @@ object InstallerContract {
     // Request document fields.
 
     const val FIELD_ID = "id"
+    /** Optional Boolean: preserves batch semantics even when the request contains one item. */
+    const val FIELD_BATCH = "batch"
     const val FIELD_SOURCES = "sources"
     const val FIELD_OPTIONS = "options"
     const val FIELD_INTERACTION = "interaction"

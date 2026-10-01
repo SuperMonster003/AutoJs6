@@ -12,6 +12,7 @@ data class InstallerError(
     val status: Int? = null,
     val systemMessage: String? = null,
     val packageName: String? = null,
+    val authorizer: String? = null,
 )
 
 /** Thrown by the installer host client; the script layer turns it into the `InstallerError` JS object. */

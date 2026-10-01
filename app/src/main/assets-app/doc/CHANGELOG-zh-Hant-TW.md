@@ -255,6 +255,7 @@
 * `新增` Agent 指令碼登記與受限執行, 支援 project.json / @agent 標頭註解, 參數驗證, 逾時停止及結構化結果回傳
 * `新增` Three Stove Agent 外掛中心管理與安裝, 啟用, 授權及相容性引導; 安裝精靈工具分類提供選用入口, 發行 APK 加入官方索引後可供安裝
 * `新增` Three Stove Agent 外掛可設定附加指令碼目錄, 宿主校驗允許範圍後儲存並在重新連線時恢復, 無效目錄不會取代已接受的設定
+* `新增` installer 模組, 用於安裝, 更新與解除安裝應用程式, 支援 Shizuku / Root 靜默安裝 (需要 3-Setup Installer 外掛程式) (參閱 專案文件 > [安裝器](https://docs.autojs6.com/#/installer))
 * `修復` Three Stove Agent 呼叫線上模型失敗時遺失網路, 身分驗證及回應錯誤類別的問題 (需要 Provider 外掛支援)
 * `修復` assistant 合併工具選項時, 空 tools 物件導致預設關閉的工具組被啟用的問題
 * `修復` 無障礙精簡節點樹縮短資源 ID, 導致依顯示 ID 查詢時無法比對控制項的問題

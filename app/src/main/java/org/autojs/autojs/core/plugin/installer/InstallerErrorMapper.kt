@@ -2,8 +2,10 @@ package org.autojs.autojs.core.plugin.installer
 
 import android.os.DeadObjectException
 import android.os.RemoteException
+import android.os.OperationCanceledException
 import kotlinx.coroutines.TimeoutCancellationException
 import org.autojs.plugin.installer.api.InstallerErrorCodes
+import org.autojs.plugin.installer.api.InstallerContract
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InterruptedIOException
@@ -17,7 +19,7 @@ import kotlin.coroutines.cancellation.CancellationException
 object InstallerErrorMapper {
 
     /** Where a throwable was raised; the same exception type maps differently per phase. */
-    enum class Phase { DISCOVERY, OPEN, CALL, SESSION }
+    enum class Phase { DISCOVERY, SOURCE, OPEN, CALL, SESSION }
 
     private const val MAX_MESSAGE_CHARS = 2048
 
@@ -28,6 +30,7 @@ object InstallerErrorMapper {
         status: Int? = null,
         systemMessage: String? = null,
         packageName: String? = null,
+        authorizer: String? = null,
     ): InstallerError {
         val trimmedCode = code?.trim().orEmpty()
         val knownCode = if (InstallerErrorCodes.isKnown(trimmedCode)) trimmedCode else InstallerErrorCodes.INTERNAL
@@ -45,6 +48,7 @@ object InstallerErrorMapper {
             status = status,
             systemMessage = systemMessage?.take(MAX_MESSAGE_CHARS),
             packageName = packageName?.takeIf { it.isNotBlank() },
+            authorizer = authorizer?.takeIf { it in InstallerContract.AUTHORIZERS },
         )
     }
 
@@ -55,13 +59,16 @@ object InstallerErrorMapper {
         is InstallerPluginException -> throwable.error
         is TimeoutCancellationException -> error(InstallerErrorCodes.TIMEOUT, throwable.message ?: "installer operation timed out", retryable = true)
         is CancellationException -> error(InstallerErrorCodes.CANCELLED, "installer operation cancelled", retryable = false)
+        is OperationCanceledException -> error(InstallerErrorCodes.CANCELLED, "package source operation cancelled", retryable = false)
         is InterruptedException, is InterruptedIOException -> error(InstallerErrorCodes.CANCELLED, "installer operation interrupted", retryable = false)
         is DeadObjectException -> error(InstallerErrorCodes.PLUGIN_UNAVAILABLE, "installer plugin process died", retryable = true)
         is RemoteException -> when (phase) {
             Phase.CALL, Phase.SESSION -> error(InstallerErrorCodes.INTERNAL, describe("installer plugin call failed", throwable), retryable = true)
             else -> error(InstallerErrorCodes.PLUGIN_UNAVAILABLE, describe("installer plugin binding failed", throwable), retryable = false)
         }
-        is SecurityException -> error(InstallerErrorCodes.PLUGIN_UNAVAILABLE, describe("installer plugin refused the caller", throwable), retryable = false)
+        is SecurityException -> if (phase == Phase.SOURCE) {
+            error(InstallerErrorCodes.SOURCE_UNREADABLE, describe("package source access denied", throwable), retryable = false)
+        } else error(InstallerErrorCodes.PLUGIN_UNAVAILABLE, describe("installer plugin refused the caller", throwable), retryable = false)
         is FileNotFoundException -> error(InstallerErrorCodes.SOURCE_NOT_FOUND, describe("package source not found", throwable), retryable = false)
         is IOException -> error(InstallerErrorCodes.SOURCE_UNREADABLE, describe("package source cannot be read", throwable), retryable = false)
         is IllegalArgumentException -> error(InstallerErrorCodes.INVALID_ARGUMENT, describe("invalid argument", throwable), retryable = false)

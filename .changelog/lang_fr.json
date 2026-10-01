@@ -249,7 +249,8 @@
         "Contrat et relais hôte Three Stove Agent avec accès limité aux fonctions de l'appareil, quotas d'appels aux modèles et libération des ressources lors de la perte de connexion; le relais du modèle permet les appels natifs aux outils et leur continuation, avec contrôle du quota à chaque tour",
         "Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés",
         "Gestion de Three Stove Agent dans le centre de plugins avec aide pour l'installation, l'activation, les autorisations et la compatibilité; entrée facultative dans les Outils de l'assistant lorsque l'APK publié figure dans l'index officiel",
-        "Les paramètres du plugin Three Stove Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée"
+        "Les paramètres du plugin Three Stove Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée",
+        "Module installer pour installer, mettre à jour et désinstaller des applications, avec installation silencieuse via Shizuku / Root (nécessite le plugin 3-Setup Installer) (voir Documentation du projet > [Installer](https://docs.autojs6.com/#/installer))"
       ],
       "fix": [
         "Les échecs des appels aux modèles en ligne d'Three Stove Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)",

@@ -9,6 +9,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -25,6 +27,7 @@ import org.autojs.plugin.installer.api.InstallerContract
 import org.autojs.plugin.installer.api.InstallerErrorCodes
 import org.autojs.plugin.installer.api.InstallerIds
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.resume
 
 /** How long a refused `openSession` waits for the plugin's `onFailed` on the oneway callback. */
@@ -80,6 +83,11 @@ object InstallerPluginHost {
         host.call(context, target) { proxy -> proxy.getCapabilities() ?: Bundle() }
     }
 
+    /** Metadata of the same enabled/trusted/compatible selection used by installer calls. */
+    suspend fun getSelectedInfo(context: Context): PluginInfo = withContext(Dispatchers.IO) {
+        requireNotNull(selectOrThrow(context).pluginInfo)
+    }
+
     /** Authorizers the selected plugin implements (never `auto`). */
     suspend fun authorizers(context: Context): List<String> =
         getCapabilities(context).getStringArray(InstallerCapabilityKeys.AUTHORIZERS)?.filterNotNull()?.filter { it in InstallerContract.AUTHORIZERS }.orEmpty()
@@ -118,18 +126,42 @@ object InstallerPluginHost {
         interaction: String = InstallerContract.INTERACTION_AUTO,
         options: InstallerJson.InstallOptions = InstallerJson.InstallOptions(),
         listener: InstallerSessionListener = object : InstallerSessionListener {},
-    ): InstallerSessionHandle = withContext(Dispatchers.IO) {
-        val hostSessionId = UUID.randomUUID().toString()
-        val requestJson = InstallerJson.encodeInstallRequest(hostSessionId, sources.map { it.toEntry() }, interaction, options)
-        val request = InstallerBundles.request(requestJson, hostVersionCode, hostSessionId)
-        val descriptors = sources.map { it.descriptor }.toTypedArray<ParcelFileDescriptor>()
-        val target = selectOrThrow(context)
-        val callback = InstallerSessionCallbackBinder(hostSessionId, listener)
-        val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
-            proxy.openSession(descriptors, request, callback) ?: throw refusal(callback)
+        hostSessionId: String = UUID.randomUUID().toString(),
+        isBatch: Boolean = sources.map { it.item }.distinct().size > 1,
+    ): InstallerSessionHandle {
+        // withContext can discard a successfully constructed return value when cancellation wins
+        // the dispatcher handoff. Retain it outside that boundary so its lease/PFDs still close.
+        val handoff = AtomicReference<InstallerSessionHandle?>()
+        try {
+            return withContext(Dispatchers.IO) {
+                currentCoroutineContext().ensureActive()
+                val requestJson = InstallerJson.encodeInstallRequest(hostSessionId, sources.map { it.toEntry() }, interaction, options, isBatch)
+                val request = InstallerBundles.request(requestJson, hostVersionCode, hostSessionId)
+                val descriptors = sources.map { it.descriptor }.toTypedArray<ParcelFileDescriptor>()
+                val target = selectOrThrow(context)
+                val callback = InstallerSessionCallbackBinder(hostSessionId, listener)
+                val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
+                    proxy.openSession(descriptors, request, callback) ?: throw refusal(callback)
+                }
+                try {
+                    callback.pluginSessionId = runCatching { leased.value.getId() }.getOrNull()
+                    InstallerSessionHandle(hostSessionId, leased.value, leased.bindingLease, callback, sources, options.timeoutMillis).also {
+                        handoff.set(it)
+                        currentCoroutineContext().ensureActive()
+                    }
+                } catch (failure: Throwable) {
+                    if (handoff.get() == null) {
+                        runCatching { leased.value.close() }
+                        runCatching { leased.bindingLease.close() }
+                    }
+                    throw failure
+                }
+            }
+        } catch (failure: Throwable) {
+            runCatching { handoff.getAndSet(null)?.close() }
+            sources.forEach { it.close() }
+            throw failure
         }
-        callback.pluginSessionId = runCatching { leased.value.getId() }.getOrNull()
-        InstallerSessionHandle(hostSessionId, leased.value, leased.bindingLease, callback, sources, options.timeoutMillis)
     }
 
     suspend fun uninstall(context: Context, packageName: String, options: InstallerJson.UninstallOptions = InstallerJson.UninstallOptions()): InstallerJson.UninstallResult = withContext(Dispatchers.IO) {

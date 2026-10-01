@@ -97,12 +97,19 @@ object InstallerJson {
 
     // Encoding.
 
-    fun encodeInstallRequest(id: String, sources: List<SourceEntry>, interaction: String, options: InstallOptions): String {
+    fun encodeInstallRequest(
+        id: String,
+        sources: List<SourceEntry>,
+        interaction: String,
+        options: InstallOptions,
+        isBatch: Boolean = sources.map { it.item }.distinct().size > 1,
+    ): String {
         require(id.isNotBlank()) { "request id must not be blank" }
         require(InstallerContract.isInteraction(interaction)) { "unknown interaction: $interaction" }
         options.validate()?.let { throw IllegalArgumentException(it) }
         require(sources.isNotEmpty()) { "at least one package source is required" }
         val items = sources.map { it.item }.distinct()
+        require(isBatch || items.size == 1) { "a non-batch request must contain exactly one package" }
         require(items.size <= InstallerContract.MAX_BATCH_SOURCES) { "at most ${InstallerContract.MAX_BATCH_SOURCES} packages per request" }
         items.forEach { item ->
             val count = sources.count { it.item == item }
@@ -110,6 +117,7 @@ object InstallerJson {
         }
         val document = JsonObject().apply {
             addProperty(InstallerContract.FIELD_ID, id)
+            addProperty(InstallerContract.FIELD_BATCH, isBatch)
             add(InstallerContract.FIELD_SOURCES, JsonArray().apply {
                 sources.forEach { source ->
                     add(JsonObject().apply {
@@ -207,6 +215,7 @@ object InstallerJson {
         status = root.long(InstallerContract.FIELD_ERROR_STATUS)?.toInt(),
         systemMessage = root.string(InstallerContract.FIELD_ERROR_SYSTEM_MESSAGE),
         packageName = root.string(InstallerContract.FIELD_PACKAGE_NAME),
+        authorizer = root.string(InstallerContract.FIELD_AUTHORIZER),
     )
 
     fun decodeStageDetail(json: String?): StageDetail {

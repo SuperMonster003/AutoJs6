@@ -1,4 +1,6 @@
 *.apk
+!/app/src/androidTest/assets/installer/fixture-v1.apk
+!/app/src/androidTest/assets/installer/fixture-v2.apk
 *.zip
 *.exe
 *.iml

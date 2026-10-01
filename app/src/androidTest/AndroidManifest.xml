@@ -1,6 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <provider
+            android:name="org.autojs.autojs.runtime.api.augment.installer.InstallerSmokePipeProvider"
+            android:authorities="org.autojs.autojs6.test.installer.smoke.pipe"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN" />
+        <provider
+            android:name="org.autojs.autojs.core.plugin.installer.InstallerSourceTestProvider"
+            android:authorities="org.autojs.autojs6.test.installer.sources"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN" />
         <service
             android:name="org.autojs.autojs.core.plugin.agent.AgentCallbackDeathService"
             android:exported="true"

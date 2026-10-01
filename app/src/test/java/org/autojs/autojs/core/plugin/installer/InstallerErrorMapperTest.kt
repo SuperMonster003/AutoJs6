@@ -37,12 +37,20 @@ class InstallerErrorMapperTest {
         assertEquals(InstallerErrorCodes.SOURCE_UNREADABLE, InstallerErrorMapper.fromThrowable(IOException("locked"), InstallerErrorMapper.Phase.OPEN).code)
         assertEquals(InstallerErrorCodes.INVALID_ARGUMENT, InstallerErrorMapper.fromThrowable(IllegalArgumentException("bad"), InstallerErrorMapper.Phase.CALL).code)
         assertEquals(InstallerErrorCodes.PLUGIN_UNAVAILABLE, InstallerErrorMapper.fromThrowable(SecurityException("no"), InstallerErrorMapper.Phase.CALL).code)
+        assertEquals(InstallerErrorCodes.SOURCE_UNREADABLE, InstallerErrorMapper.fromThrowable(SecurityException("grant revoked"), InstallerErrorMapper.Phase.SOURCE).code)
         assertEquals(InstallerErrorCodes.PLUGIN_UNAVAILABLE, InstallerErrorMapper.fromThrowable(IllegalStateException("not found"), InstallerErrorMapper.Phase.DISCOVERY).code)
         assertEquals(InstallerErrorCodes.INTERNAL, InstallerErrorMapper.fromThrowable(IllegalStateException("bug"), InstallerErrorMapper.Phase.SESSION).code)
         assertEquals(InstallerErrorCodes.CANCELLED, InstallerErrorMapper.fromThrowable(InterruptedException(), InstallerErrorMapper.Phase.CALL).code)
         val wrapped = InstallerPluginException(InstallerErrorMapper.error(InstallerErrorCodes.USER_CANCELLED, "user"))
         assertEquals(wrapped.error, InstallerErrorMapper.fromThrowable(wrapped, InstallerErrorMapper.Phase.SESSION))
         assertEquals("USER_CANCELLED: user", wrapped.message)
+    }
+
+    @Test
+    fun `concrete authorizer survives error normalization`() {
+        assertEquals("shizuku", InstallerErrorMapper.normalize("INSTALL_FAILED", "denied", false, authorizer = "shizuku").authorizer)
+        assertEquals(null, InstallerErrorMapper.normalize("INSTALL_FAILED", "denied", false, authorizer = "unknown").authorizer)
+        assertEquals("root", InstallerJson.decodeError("""{"code":"INSTALL_FAILED","authorizer":"root"}""").authorizer)
     }
 
     @Test

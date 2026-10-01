@@ -249,7 +249,8 @@
         "Contrato e intermediarios del anfitrión para Three Stove Agent con acceso limitado al dispositivo, cuotas de llamadas a modelos y liberación de recursos al perder la conexión; el intermediario del modelo admite llamadas nativas a herramientas y su continuación, con control de cuota en cada ronda",
         "Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados",
         "Gestión de Three Stove Agent en el centro de complementos con ayuda de instalación, activación, autorización y compatibilidad; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial",
-        "El plugin Three Stove Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada"
+        "El plugin Three Stove Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada",
+        "Módulo installer para instalar, actualizar y desinstalar aplicaciones, con instalación silenciosa mediante Shizuku / Root (requiere el complemento 3-Setup Installer) (véase Documentación del proyecto > [Installer](https://docs.autojs6.com/#/installer))"
       ],
       "fix": [
         "Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)",

@@ -5,6 +5,8 @@ import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.autojs.plugin.installer.api.IInstallerSession
 import org.autojs.plugin.installer.api.IInstallerSessionCallback
@@ -125,10 +127,14 @@ class InstallerSessionHandle internal constructor(
         return try {
             withTimeout(timeoutMillis) { callback.outcome.await() }
         } catch (timeout: kotlinx.coroutines.TimeoutCancellationException) {
-            cancel()
             val failure = InstallerSessionOutcome.Failed(InstallerErrorMapper.error(InstallerErrorCodes.TIMEOUT, "installation timed out after $timeoutMillis ms", retryable = true))
+            // A real callback may already have won while this waiter was still queued for
+            // resumption. Settle before cancelling, so our own immediate CANCELLED callback
+            // cannot replace TIMEOUT, and always return the outcome that actually won.
             callback.settle(failure)
-            failure
+            val actual = withContext(NonCancellable) { callback.outcome.await() }
+            if (actual === failure) cancel()
+            actual
         }
     }
 

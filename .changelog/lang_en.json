@@ -249,7 +249,8 @@
         "Three Stove Agent plugin contract and host brokers with restricted device access, model-call quotas and resource cleanup when a link is lost; the model broker supports native tool-call continuations with per-round model quota checks",
         "Agent script registration and scoped execution with project.json / @agent headers, argument validation, timeout cancellation and structured results",
         "Three Stove Agent management in Plugin Center with installation, activation, authorization and compatibility guidance; optional Tools entry in the installation wizard when a published APK is present in the official index",
-        "Three Stove Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration"
+        "Three Stove Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration",
+        "installer module for installing, updating and uninstalling apps, with Shizuku / Root silent installation (requires the 3-Setup Installer plugin) (see Project documentation > [Installer](https://docs.autojs6.com/#/installer))"
       ],
       "fix": [
         "Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)",

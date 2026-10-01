@@ -249,7 +249,8 @@
         "Three Stove Agent 插件契約與宿主代理, 支援受限裝置能力, 模型呼叫配額及連線失效後的資源回收; 模型代理支援原生工具呼叫及結果續輪, 每輪檢查模型配額",
         "Agent 腳本登記與受限執行, 支援 project.json / @agent 頭註解, 參數驗證, 逾時停止及結構化結果回傳",
         "Three Stove Agent 插件中心管理與安裝, 啟用, 授權及相容性引導; 安裝精靈工具分類提供可選入口, 發行 APK 加入官方索引後可供安裝",
-        "Three Stove Agent 外掛可設定附加指令碼目錄, 宿主校驗允許範圍後儲存並在重新連線時恢復, 無效目錄不會取代已接受的設定"
+        "Three Stove Agent 外掛可設定附加指令碼目錄, 宿主校驗允許範圍後儲存並在重新連線時恢復, 無效目錄不會取代已接受的設定",
+        "installer 模組, 用於安裝, 更新與解除安裝應用程式, 支援 Shizuku / Root 靜默安裝 (需要 3-Setup Installer 外掛程式) (參閱 專案文件 > [安裝器](https://docs.autojs6.com/#/installer))"
       ],
       "fix": [
         "Three Stove Agent 呼叫線上模型失敗時遺失網絡, 身份驗證及回應錯誤類別的問題 (需要 Provider 插件支援)",
