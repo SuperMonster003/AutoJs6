@@ -94,12 +94,6 @@
             app:title="@string/text_nodejs_doctor"
             app:longClickPrompt="@string/description_nodejs_doctor_report_preference" />
 
-        <org.autojs.autojs.ui.settings.TerminalNodeProbePreference
-            app:key="@string/key_terminal_node_probe"
-            app:layout="@layout/preference_custom"
-            app:summary="@string/summary_terminal_node_probe"
-            app:title="@string/text_terminal_node_probe" />
-
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
 </PreferenceScreen>

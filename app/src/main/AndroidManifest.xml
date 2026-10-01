@@ -551,15 +551,6 @@
             android:theme="@style/AppTheme.FullScreen" />
 
         <activity
-            android:name="org.autojs.autojs.ui.terminal.TerminalActivity"
-            android:exported="false"
-            android:label="@string/text_terminal"
-            android:taskAffinity="org.autojs.autojs.ui.terminal.TerminalActivity"
-            android:launchMode="standard"
-            android:windowSoftInputMode="adjustResize|stateVisible"
-            android:theme="@style/AppTheme.FullScreen" />
-
-        <activity
             android:name="org.autojs.autojs.ui.doc.DocumentationActivity"
             android:exported="true"
             android:label="@string/text_app_shortcut_docs_long_label"
@@ -612,16 +603,6 @@
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Runs a user-started Python automation project with a persistent stop action and a bounded heartbeat lease" />
-        </service>
-
-        <service
-            android:name="org.autojs.autojs.core.terminal.TerminalSessionService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Keeps user-started terminal sessions and their shell processes (for example npm install) running while the terminal screen is not in front, with a persistent close action" />
         </service>
 
         <service

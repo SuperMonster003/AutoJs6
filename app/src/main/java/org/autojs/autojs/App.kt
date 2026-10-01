@@ -24,6 +24,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.companion.AccessibilityCompanionSync
+import org.autojs.autojs.core.plugin.terminal.TerminalLegacyCleanup
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputCoordinator
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
@@ -368,6 +369,8 @@ class App : Application(), WorkManagerConfiguration.Provider {
         if (getProcessNameCompat() == applicationInfo.processName) {
             runCatching { ExplorerActionOutputCoordinator.recover(this) }
                 .onFailure { Log.w(TAG, "Failed to recover Explorer Action output transactions.", it) }
+            runCatching { TerminalLegacyCleanup.schedule(this) }
+                .onFailure { Log.w(TAG, "Failed to schedule the legacy terminal cleanup.", it) }
         }
         runCatching { HistoryCleanupScheduler.scheduleStartupCleanup(this) }
             .onFailure { Log.w(TAG, "Failed to schedule startup history cleanup.", it) }

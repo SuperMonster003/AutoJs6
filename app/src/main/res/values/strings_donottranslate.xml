@@ -36,7 +36,6 @@
     <string name="default_key_root_mode" translatable="false">@string/key_root_mode_auto_detect</string>
     <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
     <string name="default_key_scheduled_restart_backend" translatable="false">@string/key_scheduled_restart_backend_work_manager</string>
-    <string name="default_key_terminal_npm_registry" translatable="false">@string/key_terminal_npm_registry_npmjs</string>
     <string name="default_key_timed_task_backend" translatable="false">@string/key_timed_task_backend_alarm</string>
     <string name="default_main_file_name" translatable="false">main.js</string>
     <string name="developer_full_name" translatable="false">SuperMonster003</string>
@@ -138,7 +137,6 @@
     <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
     <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
     <string name="key_dialog_selected_abi_is_unavailable" translatable="false">key_$_dialog_selected_abi_is_unavailable</string>
-    <string name="key_dialog_terminal_tips" translatable="false">key_$_dialog_terminal_tips</string>
     <string name="key_dialog_transparent_background_launcher_icon" translatable="false">key_$_dialog_transparent_background_launcher_icon</string>
     <string name="key_display_over_other_apps" translatable="false">key_$_display_over_other_apps</string>
     <string name="key_documentation_source" translatable="false">key_$_documentation_source</string>
@@ -284,19 +282,6 @@
     <string name="key_server_mode_restore_on_launch" translatable="false">key_$_server_mode_restore_on_launch</string>
     <string name="key_server_socket_normally_closed" translatable="false">key_$_server_socket_normally_closed</string>
     <string name="key_stable_mode" translatable="false">key_$_stable_mode</string>
-    <string name="key_terminal_clear_data" translatable="false">key_$_terminal_clear_data</string>
-    <string name="key_terminal_manager_control_level" translatable="false">key_$_terminal_manager_control_level</string>
-    <string name="key_terminal_manager_sessions_level" translatable="false">key_$_terminal_manager_sessions_level</string>
-    <string name="key_terminal_manager_settings_collapsed" translatable="false">key_$_terminal_manager_settings_collapsed</string>
-    <string name="key_terminal_manager_status_level" translatable="false">key_$_terminal_manager_status_level</string>
-    <string name="key_terminal_node_probe" translatable="false">key_$_terminal_node_probe</string>
-    <string name="key_terminal_npm_ignore_scripts" translatable="false">key_$_terminal_npm_ignore_scripts</string>
-    <string name="key_terminal_npm_registry" translatable="false">key_$_terminal_npm_registry</string>
-    <string name="key_terminal_npm_registry_custom" translatable="false">key_$_terminal_npm_registry_custom</string>
-    <string name="key_terminal_npm_registry_custom_url" translatable="false">key_$_terminal_npm_registry_custom_url</string>
-    <string name="key_terminal_npm_registry_npmjs" translatable="false">key_$_terminal_npm_registry_npmjs</string>
-    <string name="key_terminal_npm_registry_npmmirror" translatable="false">key_$_terminal_npm_registry_npmmirror</string>
-    <string name="key_terminal_text_size" translatable="false">key_$_terminal_text_size</string>
     <string name="key_theme_color" translatable="false">key_$_theme_color</string>
     <string name="key_theme_color_accent" translatable="false">key_$_theme_color_accent</string>
     <string name="key_theme_color_primary" translatable="false">key_$_theme_color_primary</string>
