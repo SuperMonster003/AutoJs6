@@ -12,8 +12,11 @@ object InstallerCapabilityKeys {
     /** Long: host `versionCode` the plugin requires (read type-agnostically by the host). */
     const val REQUIRES_HOST_VERSION = PluginCapabilityKeys.REQUIRES_HOST_VERSION
 
-    /** Int: [InstallerContract.CONTRACT_VERSION] implemented by the plugin. */
+    /** Int: oldest supported version. A V1-compatible plugin keeps advertising 1 here. */
     const val CONTRACT_VERSION = "installerContractVersion"
+
+    /** Int: optional newest supported version; absent means CONTRACT_VERSION only. */
+    const val MAX_CONTRACT_VERSION = "installerMaxContractVersion"
 
     /** String array: authorizers the plugin implements, a subset of [InstallerContract.AUTHORIZERS] (never `auto`). */
     const val AUTHORIZERS = "installerAuthorizers"
@@ -37,8 +40,12 @@ object InstallerCapabilityKeys {
     const val FEATURE_DEFAULT_INSTALLER = "default-installer"
     const val FEATURE_USERS = "users"
     const val FEATURE_INSPECT = "inspect"
+    /** V2: notification presentation for installation sessions. */
+    const val FEATURE_NOTIFICATION_INSTALL = "notification-install"
+    /** V2: setDefaultInstallerV2 can manage the persistent scope. */
+    const val FEATURE_PERSISTENT_DEFAULT_INSTALLER = "persistent-default-installer"
 
-    /** Every optional feature of contract version 1. */
+    /** Known optional features; only implemented features may be advertised by a plugin. */
     val FEATURES: List<String> = listOf(
         FEATURE_BATCH,
         FEATURE_SPLITS,
@@ -47,5 +54,7 @@ object InstallerCapabilityKeys {
         FEATURE_DEFAULT_INSTALLER,
         FEATURE_USERS,
         FEATURE_INSPECT,
+        FEATURE_NOTIFICATION_INSTALL,
+        FEATURE_PERSISTENT_DEFAULT_INSTALLER,
     )
 }

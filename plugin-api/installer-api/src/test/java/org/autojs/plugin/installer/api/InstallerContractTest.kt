@@ -26,18 +26,20 @@ class InstallerContractTest {
 
         assertEquals(PluginCapabilityKeys.REQUIRES_HOST_VERSION, InstallerCapabilityKeys.REQUIRES_HOST_VERSION)
         assertEquals("installerContractVersion", InstallerCapabilityKeys.CONTRACT_VERSION)
+        assertEquals("installerMaxContractVersion", InstallerCapabilityKeys.MAX_CONTRACT_VERSION)
         assertEquals("installerAuthorizers", InstallerCapabilityKeys.AUTHORIZERS)
         assertEquals("installerFeatures", InstallerCapabilityKeys.FEATURES_KEY)
         assertEquals("installerMaxBatch", InstallerCapabilityKeys.MAX_BATCH)
         assertEquals("installerMaxSplits", InstallerCapabilityKeys.MAX_SPLITS)
         assertEquals("installerSettingsVersion", InstallerCapabilityKeys.SETTINGS_VERSION)
         assertEquals(InstallerCapabilityKeys.FEATURES.size, InstallerCapabilityKeys.FEATURES.toSet().size)
-        assertEquals(listOf("batch", "splits", "delete-source", "silent-uninstall", "default-installer", "users", "inspect"), InstallerCapabilityKeys.FEATURES)
+        assertEquals(listOf("batch", "splits", "delete-source", "silent-uninstall", "default-installer", "users", "inspect",
+            "notification-install", "persistent-default-installer"), InstallerCapabilityKeys.FEATURES)
     }
 
     @Test
     fun contractVersionRangeIncludesItsBoundsAndRejectsNeighbours() {
-        assertEquals(1, InstallerContract.CONTRACT_VERSION)
+        assertEquals(2, InstallerContract.CONTRACT_VERSION)
         assertEquals(1, InstallerContract.MIN_CONTRACT_VERSION)
         assertTrue(InstallerContract.MIN_CONTRACT_VERSION <= InstallerContract.MAX_CONTRACT_VERSION)
         assertTrue(InstallerContract.supportsContractVersion(InstallerContract.MIN_CONTRACT_VERSION))
@@ -76,16 +78,20 @@ class InstallerContractTest {
 
     @Test
     fun closedValueSetsAreConsistent() {
-        assertEquals(listOf("none", "shizuku", "root"), InstallerContract.AUTHORIZERS)
+        assertEquals(listOf("none", "shizuku", "root", "dhizuku"), InstallerContract.AUTHORIZERS)
         assertTrue(InstallerContract.isAuthorizer("auto"))
         InstallerContract.AUTHORIZERS.forEach { assertTrue(InstallerContract.isAuthorizer(it)) }
-        assertFalse(InstallerContract.isAuthorizer("dhizuku"))
+        assertTrue(InstallerContract.isAuthorizer("dhizuku"))
         assertFalse(InstallerContract.isAuthorizer(null))
         assertFalse(InstallerContract.AUTHORIZER_AUTO in InstallerContract.AUTHORIZERS)
 
-        assertEquals(listOf("auto", "dialog", "silent"), InstallerContract.INTERACTIONS)
+        assertEquals(listOf("auto", "dialog", "silent", "notification"), InstallerContract.INTERACTIONS)
         assertTrue(InstallerContract.isInteraction("silent"))
-        assertFalse(InstallerContract.isInteraction("notification"))
+        assertTrue(InstallerContract.isInteraction("notification"))
+        assertEquals(listOf("preferred", "persistent"), InstallerContract.DEFAULT_MODES)
+        assertTrue(InstallerContract.isDefaultMode("persistent"))
+        assertFalse(InstallerContract.isDefaultMode("none"))
+        assertEquals("mode", InstallerContract.FIELD_MODE)
 
         assertEquals(8, InstallerContract.STAGES.size)
         assertEquals(InstallerContract.STAGES.size, InstallerContract.STAGES.toSet().size)
@@ -118,7 +124,7 @@ class InstallerContractTest {
 
     @Test
     fun errorCodesAreClosedUniqueAndSelfDescribing() {
-        assertEquals(20, InstallerErrorCodes.ALL.size)
+        assertEquals(21, InstallerErrorCodes.ALL.size)
         assertEquals(InstallerErrorCodes.ALL.size, InstallerErrorCodes.ALL.toSet().size)
         InstallerErrorCodes.ALL.forEach { code ->
             assertTrue(code, Regex("[A-Z][A-Z_]+").matches(code))

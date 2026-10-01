@@ -7,6 +7,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.autojs.autojs.core.plugin.installer.InstallerErrorMapper
+import org.autojs.autojs.core.plugin.installer.InstallerBundles
 import org.autojs.autojs.core.plugin.installer.InstallerJson
 import org.autojs.autojs.core.plugin.installer.InstallerPluginException
 import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
@@ -15,7 +16,6 @@ import org.autojs.autojs.core.plugin.installer.InstallerSource
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.installer.InstallerScriptArguments.Source
 import org.autojs.autojs.runtime.api.installer.InstallerScriptArguments.SourcePlan
-import org.autojs.plugin.installer.api.InstallerCapabilityKeys
 import org.autojs.plugin.installer.api.InstallerContract
 import org.autojs.plugin.installer.api.InstallerErrorCodes
 import java.io.Closeable
@@ -53,7 +53,7 @@ class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeab
             val info = InstallerPluginHost.getSelectedInfo(appContext)
             linkedMapOf<String, Any?>("available" to true).apply {
                 info.versionName.takeIf { it.isNotBlank() }?.let { put("pluginVersion", it) }
-                info.capabilities?.let { put("contractVersion", it.getInt(InstallerCapabilityKeys.CONTRACT_VERSION)) }
+                info.capabilities?.let { put("contractVersion", InstallerBundles.peer(it).contractVersion) }
             }
         } catch (cancelled: CancellationException) {
             throw cancelled
@@ -108,9 +108,10 @@ class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeab
     }
 
     /** True means the requested state was reached, including successfully disabling the default. */
-    suspend fun setDefault(enabled: Boolean, authorizer: String = InstallerContract.AUTHORIZER_AUTO): Boolean =
+    suspend fun setDefault(enabled: Boolean, authorizer: String = InstallerContract.AUTHORIZER_AUTO,
+        mode: String = InstallerContract.DEFAULT_MODE_PREFERRED): Boolean =
         call(InstallerErrorMapper.Phase.DISCOVERY) {
-            InstallerPluginHost.setDefaultInstaller(appContext, enabled, authorizer).isSelf == enabled
+            InstallerPluginHost.setDefaultInstaller(appContext, enabled, authorizer, mode).satisfies(enabled, mode)
         }
 
     suspend fun uninstall(packageName: String, options: InstallerJson.UninstallOptions): InstallerJson.UninstallResult =

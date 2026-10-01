@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/01
+###### 2026/10/02
 
 * `추가` 화면 작업 확인을 호스트가 검사한 노드에 연결하고 텍스트 추가와 횟수가 제한된 스크롤을 지원하며 실행 결과와 창 변경을 보고
 * `추가` 호스트가 승인된 OCR 플러그인의 가용성을 알릴 때만 화면 OCR을 제공하고 결과를 좌표가 포함된 제한된 텍스트 줄로 병합
@@ -253,7 +253,7 @@
 * `추가` project.json / @agent 헤더를 통한 Agent 스크립트 등록 및 범위가 제한된 실행. 인수 검증, 시간 초과 시 중지 및 구조화된 결과 반환 지원
 * `추가` 플러그인 센터의 Three Stove Agent 관리 및 설치, 활성화, 승인, 호환성 안내; 출시 APK가 공식 인덱스에 등록되면 설치 마법사 도구 분류에서 선택 가능
 * `추가` Three Stove Agent 플러그인에서 추가 스크립트 폴더를 설정하면 호스트가 범위를 검증하고 저장하여 재연결 시 복원하며, 유효하지 않은 폴더는 승인된 설정을 변경하지 않음
-* `추가` 앱 설치, 업데이트 및 제거를 위한 installer 모듈, Shizuku / Root 무인 설치 지원 (3-Setup Installer 플러그인 필요) (프로젝트 문서 > [Installer](https://docs.autojs6.com/#/installer) 참조)
+* `추가` 앱 설치, 업데이트 및 제거를 위한 installer 모듈. Shizuku / Root 무음 작업과 플러그인 기능 확인을 통한 Dhizuku 승인, notification 설치 및 setDefault의 mode: 'persistent' 옵션 지원. Dhizuku에는 기기/프로필 소유자 정책의 제한이 적용됨 (3-Setup Installer 플러그인 필요) (프로젝트 문서 > [Installer](https://docs.autojs6.com/#/installer) 참조)
 * `수정` APK Inspector 사용 시 파일 관리자의 정보 버튼이 숨겨져 설치 패키지 정보를 열 수 없는 문제
 * `수정` Three Stove Agent 온라인 모델 호출 실패 시 네트워크, 인증 및 응답 오류 분류가 누락되는 문제 (Provider 플러그인 지원 필요)
 * `수정` assistant 도구 옵션 병합 시 기본 tools 객체가 비어 있으면 기본적으로 꺼진 도구 그룹이 켜지는 문제

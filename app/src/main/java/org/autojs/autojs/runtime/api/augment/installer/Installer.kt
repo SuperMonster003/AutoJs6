@@ -122,8 +122,8 @@ class Installer(
     private fun setDefaultWork(args: Array<out Any?>): InstallerWork {
         InstallerJsArguments.count("installer.setDefault", args, 0..2)
         val enabled = InstallerScriptOptions.enabled(InstallerJsArguments.optional(args, 0))
-        val authorizer = InstallerScriptOptions.setDefault(InstallerJsArguments.optional(args, 1))
-        return { service.setDefault(enabled, authorizer) }
+        val options = InstallerScriptOptions.setDefault(InstallerJsArguments.optional(args, 1))
+        return { service.setDefault(enabled, options.authorizer, options.mode) }
     }
 
     private fun usersWork(args: Array<out Any?>): InstallerWork {

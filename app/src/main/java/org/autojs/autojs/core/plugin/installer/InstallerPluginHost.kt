@@ -90,12 +90,13 @@ object InstallerPluginHost {
 
     /** Authorizers the selected plugin implements (never `auto`). */
     suspend fun authorizers(context: Context): List<String> =
-        getCapabilities(context).getStringArray(InstallerCapabilityKeys.AUTHORIZERS)?.filterNotNull()?.filter { it in InstallerContract.AUTHORIZERS }.orEmpty()
+        InstallerBundles.peer(getCapabilities(context)).authorizers.toList()
 
     suspend fun getAuthorizerState(context: Context, authorizer: String): InstallerJson.AuthorizerState = withContext(Dispatchers.IO) {
         require(authorizer in InstallerContract.AUTHORIZERS) { "unknown authorizer: $authorizer" }
         val target = selectOrThrow(context)
         host.call(context, target) { proxy ->
+            peer(proxy).requireAuthorizer(authorizer)
             InstallerJson.decodeAuthorizerState(InstallerBundles.string(proxy.getAuthorizerState(authorizer), InstallerContract.KEY_STATUS_JSON))
         }
     }
@@ -104,15 +105,20 @@ object InstallerPluginHost {
     suspend fun requestAuthorizer(context: Context, authorizer: String, timeoutMillis: Long = InstallerContract.DEFAULT_USER_ACTION_TIMEOUT_MILLIS): Boolean = withContext(Dispatchers.IO) {
         require(authorizer in InstallerContract.AUTHORIZERS) { "unknown authorizer: $authorizer" }
         val target = selectOrThrow(context)
-        val json = oneShot(context, target, timeoutMillis) { proxy, callback -> proxy.requestAuthorizer(authorizer, callback) }
+        val json = oneShot(context, target, timeoutMillis) { proxy, peer, callback ->
+            peer.requireAuthorizer(authorizer)
+            proxy.requestAuthorizer(authorizer, callback)
+        }
         InstallerJson.decodeGranted(json)
     }
 
     /** Reads one package without installing it; the normalized PackageArchiveInfo document is returned as JSON. */
     suspend fun inspect(context: Context, source: InstallerSource): String = withContext(Dispatchers.IO) {
         val target = selectOrThrow(context)
-        val request = InstallerBundles.request(InstallerJson.encodeInspectRequest(source.displayName, source.size), hostVersionCode)
-        val json = oneShot(context, target, ONE_SHOT_TIMEOUT_MS) { proxy, callback -> proxy.inspect(source.descriptor, request, callback) }
+        val requestJson = InstallerJson.encodeInspectRequest(source.displayName, source.size)
+        val json = oneShot(context, target, ONE_SHOT_TIMEOUT_MS) { proxy, peer, callback ->
+            proxy.inspect(source.descriptor, InstallerBundles.request(requestJson, hostVersionCode, contractVersion = peer.contractVersion), callback)
+        }
         InstallerJson.decodePackageArchiveInfo(json)
     }
 
@@ -137,11 +143,13 @@ object InstallerPluginHost {
             return withContext(Dispatchers.IO) {
                 currentCoroutineContext().ensureActive()
                 val requestJson = InstallerJson.encodeInstallRequest(hostSessionId, sources.map { it.toEntry() }, interaction, options, isBatch, origin)
-                val request = InstallerBundles.request(requestJson, hostVersionCode, hostSessionId)
                 val descriptors = sources.map { it.descriptor }.toTypedArray<ParcelFileDescriptor>()
                 val target = selectOrThrow(context)
                 val callback = InstallerSessionCallbackBinder(hostSessionId, listener)
                 val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
+                    val peer = peer(proxy)
+                    peer.requireInstall(options.authorizer, interaction)
+                    val request = InstallerBundles.request(requestJson, hostVersionCode, hostSessionId, peer.contractVersion)
                     proxy.openSession(descriptors, request, callback) ?: throw refusal(callback)
                 }
                 try {
@@ -167,8 +175,11 @@ object InstallerPluginHost {
 
     suspend fun uninstall(context: Context, packageName: String, options: InstallerJson.UninstallOptions = InstallerJson.UninstallOptions()): InstallerJson.UninstallResult = withContext(Dispatchers.IO) {
         val target = selectOrThrow(context)
-        val request = InstallerBundles.request(InstallerJson.encodeUninstallRequest(packageName, options), hostVersionCode)
-        val json = oneShot(context, target, options.timeoutMillis) { proxy, callback -> proxy.uninstall(request, callback) }
+        val requestJson = InstallerJson.encodeUninstallRequest(packageName, options)
+        val json = oneShot(context, target, options.timeoutMillis) { proxy, peer, callback ->
+            peer.requireAuthorizer(options.authorizer)
+            proxy.uninstall(InstallerBundles.request(requestJson, hostVersionCode, contractVersion = peer.contractVersion), callback)
+        }
         InstallerJson.decodeUninstallResult(json)
     }
 
@@ -179,17 +190,26 @@ object InstallerPluginHost {
         }
     }
 
-    suspend fun setDefaultInstaller(context: Context, enable: Boolean, authorizer: String = InstallerContract.AUTHORIZER_AUTO): InstallerJson.DefaultInstallerState = withContext(Dispatchers.IO) {
+    suspend fun setDefaultInstaller(context: Context, enable: Boolean, authorizer: String = InstallerContract.AUTHORIZER_AUTO,
+        mode: String = InstallerContract.DEFAULT_MODE_PREFERRED): InstallerJson.DefaultInstallerState = withContext(Dispatchers.IO) {
         val target = selectOrThrow(context)
-        val request = InstallerBundles.request(InstallerJson.encodeAuthorizerRequest(authorizer), hostVersionCode)
-        val json = oneShot(context, target, InstallerContract.DEFAULT_USER_ACTION_TIMEOUT_MILLIS) { proxy, callback -> proxy.setDefaultInstaller(enable, request, callback) }
+        val requestJson = InstallerJson.encodeDefaultInstallerRequest(authorizer, mode)
+        val json = oneShot(context, target, InstallerContract.DEFAULT_USER_ACTION_TIMEOUT_MILLIS) { proxy, peer, callback ->
+            peer.requireDefault(authorizer, mode)
+            val request = InstallerBundles.request(requestJson, hostVersionCode, contractVersion = peer.contractVersion)
+            if (mode == InstallerContract.DEFAULT_MODE_PREFERRED) proxy.setDefaultInstaller(enable, request, callback)
+            else proxy.setDefaultInstallerV2(enable, request, callback)
+        }
         InstallerJson.decodeDefaultInstallerState(json)
     }
 
     suspend fun getUsers(context: Context, authorizer: String = InstallerContract.AUTHORIZER_AUTO): List<InstallerJson.DeviceUser> = withContext(Dispatchers.IO) {
         val target = selectOrThrow(context)
-        val request = InstallerBundles.request(InstallerJson.encodeAuthorizerRequest(authorizer), hostVersionCode)
-        val json = oneShot(context, target, ONE_SHOT_TIMEOUT_MS) { proxy, callback -> proxy.getUsers(request, callback) }
+        val requestJson = InstallerJson.encodeAuthorizerRequest(authorizer)
+        val json = oneShot(context, target, ONE_SHOT_TIMEOUT_MS) { proxy, peer, callback ->
+            peer.requireAuthorizer(authorizer)
+            proxy.getUsers(InstallerBundles.request(requestJson, hostVersionCode, contractVersion = peer.contractVersion), callback)
+        }
         InstallerJson.decodeUsers(json)
     }
 
@@ -198,7 +218,7 @@ object InstallerPluginHost {
         context: Context,
         target: AidlPluginHost.Discovered,
         timeoutMillis: Long,
-        invoke: (IInstallerPlugin, IInstallerCallback) -> Unit,
+        invoke: (IInstallerPlugin, InstallerPeer, IInstallerCallback) -> Unit,
     ): String? {
         val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy -> proxy }
         try {
@@ -214,7 +234,7 @@ object InstallerPluginHost {
                             if (continuation.isActive) continuation.resume(Result.failure(InstallerPluginException(mapped)))
                         }
                     }
-                    runCatching { invoke(leased.value, callback) }.onFailure { failure ->
+                    runCatching { invoke(leased.value, peer(leased.value), callback) }.onFailure { failure ->
                         if (continuation.isActive) continuation.resume(Result.failure(InstallerPluginException(InstallerErrorMapper.fromThrowable(failure, InstallerErrorMapper.Phase.CALL), failure)))
                     }
                 }.getOrThrow()
@@ -225,6 +245,10 @@ object InstallerPluginHost {
             runCatching { leased.bindingLease.close() }
         }
     }
+
+    /** Never infer support by attempting an unknown Binder transaction. */
+    private fun peer(proxy: IInstallerPlugin): InstallerPeer =
+        InstallerBundles.peer(requireNotNull(proxy.capabilities) { "Installer plugin capabilities are missing" })
 
     /**
      * The error of a refused `openSession`: the plugin reports it through the oneway session
@@ -253,12 +277,7 @@ object InstallerPluginHost {
         require(it.engine == InstallerIds.ENGINE) { "Unexpected installer plugin engine: ${it.engine}" }
         require(it.variant == InstallerIds.VARIANT_DEFAULT) { "Unexpected installer plugin variant: ${it.variant}" }
         val capabilities = requireNotNull(it.capabilities) { "Installer plugin capabilities are missing" }
-        val contractVersion = PluginCapabilityResolver.coerceLong(
-            @Suppress("DEPRECATION") capabilities.get(InstallerCapabilityKeys.CONTRACT_VERSION),
-        )?.toInt() ?: 0
-        require(InstallerContract.supportsContractVersion(contractVersion)) {
-            "Unsupported installer contract version: $contractVersion"
-        }
+        InstallerBundles.peer(capabilities)
         val requiredHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(capabilities) ?: 0L
         require(requiredHostVersion >= InstallerIds.REQUIRED_HOST_VERSION_CODE) {
             "Installer plugin required host version is missing or invalid"

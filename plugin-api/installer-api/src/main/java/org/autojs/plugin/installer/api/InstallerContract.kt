@@ -2,15 +2,17 @@ package org.autojs.plugin.installer.api
 
 /**
  * Frozen vocabulary of the installer contract: Bundle keys, JSON document fields, closed value
- * sets and the hard ceilings both sides enforce. Version 1 ships with plugin 1.0.0. The JSON
+ * sets and the hard ceilings both sides enforce. Version 2 extends version 1 without changing its
+ * transaction order. Peers advertise a minimum and maximum version; requests use the negotiated
+ * version, never the newest constant unconditionally. The JSON
  * documents carried under the `*_JSON` keys are described in
  * `docs/dev/installer-plugin-protocol-v1.md`.
  */
 object InstallerContract {
 
-    const val CONTRACT_VERSION = 1
+    const val CONTRACT_VERSION = 2
     const val MIN_CONTRACT_VERSION = 1
-    const val MAX_CONTRACT_VERSION = 1
+    const val MAX_CONTRACT_VERSION = 2
 
     fun supportsContractVersion(version: Int): Boolean = version in MIN_CONTRACT_VERSION..MAX_CONTRACT_VERSION
 
@@ -65,6 +67,8 @@ object InstallerContract {
     const val FIELD_CONTINUE_ON_ERROR = "continueOnError"
     const val FIELD_TIMEOUT_MILLIS = "timeoutMillis"
     const val FIELD_KEEP_DATA = "keepData"
+    /** V2 setDefaultInstallerV2 only; never sent to the V1 method. */
+    const val FIELD_MODE = "mode"
 
     // Result and status document fields.
 
@@ -129,15 +133,18 @@ object InstallerContract {
     const val AUTHORIZER_NONE = "none"
     const val AUTHORIZER_SHIZUKU = "shizuku"
     const val AUTHORIZER_ROOT = "root"
+    const val AUTHORIZER_DHIZUKU = "dhizuku"
 
     /** Authorizers a plugin may implement; `auto` is a request-side choice that never appears here. */
-    val AUTHORIZERS: List<String> = listOf(AUTHORIZER_NONE, AUTHORIZER_SHIZUKU, AUTHORIZER_ROOT)
+    val AUTHORIZERS: List<String> = listOf(AUTHORIZER_NONE, AUTHORIZER_SHIZUKU, AUTHORIZER_ROOT, AUTHORIZER_DHIZUKU)
 
     const val INTERACTION_AUTO = "auto"
     const val INTERACTION_DIALOG = "dialog"
     const val INTERACTION_SILENT = "silent"
+    /** V2 installation presentation; not an uninstall interaction. */
+    const val INTERACTION_NOTIFICATION = "notification"
 
-    val INTERACTIONS: List<String> = listOf(INTERACTION_AUTO, INTERACTION_DIALOG, INTERACTION_SILENT)
+    val INTERACTIONS: List<String> = listOf(INTERACTION_AUTO, INTERACTION_DIALOG, INTERACTION_SILENT, INTERACTION_NOTIFICATION)
 
     const val USER_CURRENT = "current"
     const val USER_ALL = "all"
@@ -184,6 +191,11 @@ object InstallerContract {
     const val DEFAULT_METHOD_PERSISTENT = "persistent"
     const val DEFAULT_METHOD_NONE = "none"
 
+    /** Requested scope; distinct from DEFAULT_METHOD_*, which describes the observed state. */
+    const val DEFAULT_MODE_PREFERRED = "preferred"
+    const val DEFAULT_MODE_PERSISTENT = "persistent"
+    val DEFAULT_MODES: List<String> = listOf(DEFAULT_MODE_PREFERRED, DEFAULT_MODE_PERSISTENT)
+
     // Ceilings (plugin roadmap D31). Both sides reject anything beyond them with INVALID_ARGUMENT.
 
     const val MAX_BATCH_SOURCES = 32
@@ -200,6 +212,8 @@ object InstallerContract {
     fun isAuthorizer(value: String?): Boolean = value != null && (value == AUTHORIZER_AUTO || value in AUTHORIZERS)
 
     fun isInteraction(value: String?): Boolean = value != null && value in INTERACTIONS
+
+    fun isDefaultMode(value: String?): Boolean = value != null && value in DEFAULT_MODES
 
     fun isStage(value: String?): Boolean = value != null && value in STAGES
 

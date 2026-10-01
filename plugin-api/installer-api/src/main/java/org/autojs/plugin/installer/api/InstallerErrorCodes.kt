@@ -2,7 +2,7 @@ package org.autojs.plugin.installer.api
 
 /**
  * Error codes of the error documents (`error.code`) and of the host-side `InstallerError`. The
- * set is closed for contract version 1; a code the host does not know is reported as [INTERNAL].
+ * set is closed per contract version; a code the host does not know is reported as [INTERNAL].
  */
 object InstallerErrorCodes {
 
@@ -37,8 +37,10 @@ object InstallerErrorCodes {
     /** The script stopped or `cancel()` was called. */
     const val CANCELLED = "CANCELLED"
     const val INTERNAL = "INTERNAL"
+    /** V2: notification presentation cannot be shown because permission or its channel is disabled. */
+    const val NOTIFICATION_UNAVAILABLE = "NOTIFICATION_UNAVAILABLE"
 
-    /** Every code of contract version 1, in the order of the protocol document. */
+    /** V1 codes keep their order; later versions append new codes. */
     val ALL: List<String> = listOf(
         PLUGIN_UNAVAILABLE,
         INVALID_ARGUMENT,
@@ -60,6 +62,7 @@ object InstallerErrorCodes {
         TIMEOUT,
         CANCELLED,
         INTERNAL,
+        NOTIFICATION_UNAVAILABLE,
     )
 
     /**

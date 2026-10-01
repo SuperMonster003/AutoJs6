@@ -94,10 +94,10 @@ class InstallerScriptOptionsTest {
         listOf("\"true\"", "1", "{}", "[]").forEach {
             assertTrue(invalid { InstallerScriptOptions.install(json("""{"allowDowngrade":$it}""")) }.contains("boolean"))
         }
-        listOf("notification", "Silent", " silent ").forEach {
+        listOf("Notification", "Silent", " silent ").forEach {
             invalid { InstallerScriptOptions.install(json("""{"interaction":"$it"}""")) }
         }
-        listOf("dhizuku", "ROOT", "", " root ").forEach { invalid { InstallerScriptOptions.authorizer(JsonPrimitive(it)) } }
+        listOf("DHIZUKU", "ROOT", "", " root ").forEach { invalid { InstallerScriptOptions.authorizer(JsonPrimitive(it)) } }
         invalid { InstallerScriptOptions.authorizer(JsonPrimitive(true)) }
     }
 
@@ -144,14 +144,30 @@ class InstallerScriptOptionsTest {
 
     @Test
     fun defaultInstallerAndAuthorizerHelpersKeepTheirOwnShapes() {
-        assertEquals("auto", InstallerScriptOptions.setDefault(null))
-        assertEquals("root", InstallerScriptOptions.setDefault(json("""{"authorizer":"root"}""")))
+        assertEquals("auto", InstallerScriptOptions.setDefault(null).authorizer)
+        assertEquals("preferred", InstallerScriptOptions.setDefault(null).mode)
+        assertEquals("root", InstallerScriptOptions.setDefault(json("""{"authorizer":"root"}""")).authorizer)
         assertTrue(InstallerScriptOptions.enabled(null))
         assertFalse(InstallerScriptOptions.enabled(JsonPrimitive(false)))
         assertEquals("none", InstallerScriptOptions.authorizer(JsonPrimitive("none")))
         assertEquals(42L, InstallerScriptOptions.timeout(null, 42L))
         invalid { InstallerScriptOptions.setDefault(json("""{"interaction":"silent"}""")) }
         invalid { InstallerScriptOptions.enabled(JsonPrimitive(1)) }
+    }
+
+    @Test
+    fun v2OptionsAreParsedWithoutPretendingThatTheSelectedPluginSupportsThem() {
+        val install = InstallerScriptOptions.install(json("""{"authorizer":"dhizuku","interaction":"notification"}"""))
+        assertEquals("dhizuku", install.install.authorizer)
+        assertEquals("notification", install.interaction)
+        val persistent = InstallerScriptOptions.setDefault(json("""{"authorizer":"dhizuku","mode":"persistent"}"""))
+        assertEquals("dhizuku", persistent.authorizer)
+        assertEquals("persistent", persistent.mode)
+        assertEquals("preferred", InstallerScriptOptions.setDefault(json("""{"mode":"preferred"}""")).mode)
+        for (value in listOf("null", "true", "1", "\"Persistent\"", "\"none\"")) {
+            invalid { InstallerScriptOptions.setDefault(json("""{"mode":$value}""")) }
+        }
+        invalid { InstallerScriptOptions.uninstall(json("""{"interaction":"notification"}""")) }
     }
 
     private fun json(value: String): JsonElement = JsonParser.parseString(value)

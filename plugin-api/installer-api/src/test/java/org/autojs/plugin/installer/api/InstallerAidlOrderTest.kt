@@ -76,6 +76,7 @@ class InstallerAidlOrderTest {
                     "Bundle getDefaultInstallerState()",
                     "void setDefaultInstaller(boolean enable, in Bundle request, IInstallerCallback callback)",
                     "void getUsers(in Bundle request, IInstallerCallback callback)",
+                    "void setDefaultInstallerV2(boolean enable, in Bundle request, IInstallerCallback callback)",
                 ),
             ),
             "IInstallerSession.aidl" to Declaration(

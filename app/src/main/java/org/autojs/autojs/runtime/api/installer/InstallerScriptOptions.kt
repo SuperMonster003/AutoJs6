@@ -47,24 +47,31 @@ data class InstallerScriptOptions(
 
         fun uninstall(value: JsonElement?): InstallerJson.UninstallOptions {
             val options = options(value, UNINSTALL_KEYS)
+            val interaction = interaction(options.get("interaction"))
+            if (interaction == InstallerContract.INTERACTION_NOTIFICATION) throw invalid("notification is an installation-only interaction")
             return InstallerJson.UninstallOptions(
                 authorizer = authorizer(options.get("authorizer")),
-                interaction = interaction(options.get("interaction")),
+                interaction = interaction,
                 keepData = boolean(options.get("keepData"), "options.keepData", false),
                 user = user(options.get("user")),
                 timeoutMillis = timeout(options.get("timeout")),
             )
         }
 
-        /** The default-installer operation accepts only its authorizer option. */
-        fun setDefault(value: JsonElement?): String = authorizer(options(value, setOf("authorizer")).get("authorizer"))
+        /** Preferred is the V1-compatible default; persistent is negotiated before its V2 call. */
+        fun setDefault(value: JsonElement?): InstallerJson.DefaultInstallerOptions {
+            val options = options(value, setOf("authorizer", "mode"))
+            val mode = options.get("mode")?.let { string(it, "options.mode") } ?: InstallerContract.DEFAULT_MODE_PREFERRED
+            if (!InstallerContract.isDefaultMode(mode)) throw invalid("'options.mode' must be preferred or persistent")
+            return InstallerJson.DefaultInstallerOptions(authorizer(options.get("authorizer")), mode)
+        }
 
         fun enabled(value: JsonElement?): Boolean = boolean(value, "enabled", true)
 
         fun authorizer(value: JsonElement?, default: String = InstallerContract.AUTHORIZER_AUTO): String {
             if (value == null) return default
             val name = string(value, "authorizer")
-            if (!InstallerContract.isAuthorizer(name)) throw invalid("'authorizer' must be one of auto, none, shizuku, root")
+            if (!InstallerContract.isAuthorizer(name)) throw invalid("'authorizer' must be one of auto, none, shizuku, root, dhizuku")
             return name
         }
 
@@ -96,7 +103,7 @@ data class InstallerScriptOptions(
         private fun interaction(value: JsonElement?): String {
             if (value == null) return InstallerContract.INTERACTION_AUTO
             val name = string(value, "options.interaction")
-            if (!InstallerContract.isInteraction(name)) throw invalid("'options.interaction' must be one of auto, dialog, silent")
+            if (!InstallerContract.isInteraction(name)) throw invalid("'options.interaction' must be one of auto, dialog, silent, notification")
             return name
         }
 

@@ -11,7 +11,7 @@ import org.autojs.plugin.installer.api.IInstallerSessionCallback;
  * Entry point of an installer plugin (action InstallerActions.SERVICE_ACTION, category
  * InstallerActions.SERVICE_CATEGORY). Transaction codes follow the declaration order, so methods
  * may only ever be appended, never inserted, removed or renamed. Contract version 1 declares the
- * ten methods below. Every request Bundle carries a JSON document under
+ * first ten methods below; V2 appends setDefaultInstallerV2. Every request Bundle carries a JSON document under
  * InstallerContract.KEY_REQUEST_JSON plus KEY_CONTRACT_VERSION and KEY_HOST_VERSION_CODE; every
  * asynchronous answer arrives exactly once through the callback. Non-oneway methods answer within
  * the Binder budget without touching a privileged process.
@@ -76,4 +76,11 @@ interface IInstallerPlugin {
      * under `users` of the result JSON; the none authorizer only reports the current user.
      */
     void getUsers(in Bundle request, IInstallerCallback callback);
+
+    /**
+     * V2 only. JSON {authorizer, mode}, where mode is preferred or persistent. The host calls
+     * this transaction only after V2 plus the persistent-default-installer feature are negotiated.
+     * Legacy setDefaultInstaller remains preferred-only and never receives a mode field.
+     */
+    void setDefaultInstallerV2(boolean enable, in Bundle request, IInstallerCallback callback);
 }

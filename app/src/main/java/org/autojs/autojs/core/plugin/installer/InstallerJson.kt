@@ -50,6 +50,7 @@ object InstallerJson {
         fun validate(): String? = when {
             !InstallerContract.isAuthorizer(authorizer) -> "unknown authorizer: $authorizer"
             !InstallerContract.isInteraction(interaction) -> "unknown interaction: $interaction"
+            interaction == InstallerContract.INTERACTION_NOTIFICATION -> "notification is an installation-only interaction"
             !isUser(user) -> "unknown user: $user"
             timeoutMillis <= 0L || timeoutMillis > InstallerContract.MAX_SESSION_TIMEOUT_MILLIS -> "timeoutMillis out of range"
             else -> null
@@ -86,7 +87,22 @@ object InstallerJson {
 
     data class AuthorizerState(val available: Boolean, val running: Boolean, val granted: Boolean, val reason: String?, val json: String)
 
-    data class DefaultInstallerState(val component: String?, val isSelf: Boolean, val method: String?, val requiresClear: Boolean, val json: String)
+    data class DefaultInstallerState(val component: String?, val isSelf: Boolean, val method: String?, val requiresClear: Boolean, val json: String) {
+        fun satisfies(enabled: Boolean, mode: String): Boolean = when (mode) {
+            InstallerContract.DEFAULT_MODE_PREFERRED -> isSelf == enabled
+            InstallerContract.DEFAULT_MODE_PERSISTENT -> {
+                check(method in setOf(InstallerContract.DEFAULT_METHOD_PREFERRED, InstallerContract.DEFAULT_METHOD_PERSISTENT,
+                    InstallerContract.DEFAULT_METHOD_NONE)) { "Persistent default result has no recognized method" }
+                (isSelf && method == InstallerContract.DEFAULT_METHOD_PERSISTENT) == enabled
+            }
+            else -> throw IllegalArgumentException("unknown default-installer mode: $mode")
+        }
+    }
+
+    data class DefaultInstallerOptions(
+        val authorizer: String = InstallerContract.AUTHORIZER_AUTO,
+        val mode: String = InstallerContract.DEFAULT_MODE_PREFERRED,
+    )
 
     data class DeviceUser(val id: Int, val name: String?, val primary: Boolean, val running: Boolean)
 
@@ -173,6 +189,16 @@ object InstallerJson {
     fun encodeAuthorizerRequest(authorizer: String): String {
         require(InstallerContract.isAuthorizer(authorizer)) { "unknown authorizer: $authorizer" }
         return JsonObject().apply { addProperty(InstallerContract.FIELD_AUTHORIZER, authorizer) }.toString()
+    }
+
+    fun encodeDefaultInstallerRequest(authorizer: String, mode: String): String {
+        require(InstallerContract.isAuthorizer(authorizer)) { "unknown authorizer: $authorizer" }
+        require(InstallerContract.isDefaultMode(mode)) { "unknown default-installer mode: $mode" }
+        return JsonObject().apply {
+            addProperty(InstallerContract.FIELD_AUTHORIZER, authorizer)
+            // Preferred requests retain the exact V1 shape, including when a newer peer is selected.
+            if (mode != InstallerContract.DEFAULT_MODE_PREFERRED) addProperty(InstallerContract.FIELD_MODE, mode)
+        }.toString()
     }
 
     // Decoding.

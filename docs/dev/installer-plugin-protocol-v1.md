@@ -16,6 +16,11 @@ optional JSON field name `FIELD_BATCH` for preserving a one-item script array.
 The later installation-history integration adds optional `FIELD_SOURCE_ORIGIN` metadata to
 distinguish host entries from scripts, also without changing V1 AIDL or script API signatures.
 
+The subsequent P8 host extension is specified in [Installer Plugin Protocol V2](installer-plugin-protocol-v2.md).
+This document retains the V1 wire vocabulary and transaction order. The current host supports
+V1 and V2; the compatible baseline host remains 5299, and optional capabilities are negotiated
+before new methods, authorizers or presentation modes are sent.
+
 ## Decision
 
 Package installation is a separate plugin APK with its own UID and processes. The privileged
@@ -336,12 +341,13 @@ the original message in `systemMessage`; it is not an unavailable/retryable priv
 
 ## Versioning
 
-- `InstallerContract.CONTRACT_VERSION` is 1; the supported range is 1..1. The host reads
+- In the original V1 implementation, `InstallerContract.CONTRACT_VERSION` is 1 and the supported range is 1..1. The host reads
   `installerContractVersion` from the capabilities before choosing a code path and never
   guesses a version from exceptions.
 - New methods are appended at the end of an interface; new Bundle keys and JSON fields are
-  optional and ignored by older readers. Contract version 2 (plugin roadmap P8) is expected to add
-  the `dhizuku` authorizer, the `notification` interaction and the `persistent` default method.
+  optional and ignored by older readers. The V2 extension adds a maximum-version capability,
+  `dhizuku`, installation interaction `notification` and the persistent default operation;
+  see the V2 document for its opt-in checks and preserved V1 behavior.
 - `InstallerIds.REQUIRED_HOST_VERSION_CODE` names the first host build with this module, the
   shared parser and the host client; the plugin repeats it in its `requiresHostVersion`
   meta-data.
@@ -479,7 +485,8 @@ reports `INVALID_ARGUMENT`.
 Install options are `authorizer`, `interaction`, `allowDowngrade`, `allowTestOnly`,
 `bypassLowTargetSdk`, `installer`, `user`, `deleteSource`, `continueOnError` and `timeout`.
 Uninstall options are `authorizer`, `interaction`, `keepData`, `user` and `timeout`.
-Default-installer options contain only `authorizer`. Unknown keys, explicit null values,
+V1 default-installer options contain only `authorizer`; the P8 host adds the optional `mode`
+described in the V2 document. Unknown keys, explicit null values,
 invalid enum values and out-of-range integers are rejected. Script `timeout` maps to the wire
 field `timeoutMillis`; `user` is `"current"`, `"all"` or a non-negative integer user id.
 An omitted or empty installer package name uses the plugin. Deletion and privilege flags default

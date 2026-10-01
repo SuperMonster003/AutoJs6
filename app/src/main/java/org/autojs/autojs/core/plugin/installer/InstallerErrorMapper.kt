@@ -95,6 +95,7 @@ object InstallerErrorMapper {
         InstallerErrorCodes.AUTHORIZER_UNAVAILABLE -> "authorizer is unavailable"
         InstallerErrorCodes.AUTHORIZER_DENIED -> "authorizer was denied"
         InstallerErrorCodes.AUTHORIZER_REQUIRED -> "a privileged authorizer is required"
+        InstallerErrorCodes.NOTIFICATION_UNAVAILABLE -> "installer notifications are unavailable"
         InstallerErrorCodes.USER_CANCELLED -> "cancelled by the user"
         InstallerErrorCodes.USER_ACTION_TIMEOUT -> "waiting for the user timed out"
         InstallerErrorCodes.SIGNATURE_MISMATCH -> "package signature does not match the installed application"

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/01",
+      "released_date": "2026/10/02",
       "feature": [
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
         "OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées",
@@ -248,7 +248,7 @@
         "Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés",
         "Gestion de Three Stove Agent dans le centre de plugins avec aide pour l'installation, l'activation, les autorisations et la compatibilité; entrée facultative dans les Outils de l'assistant lorsque l'APK publié figure dans l'index officiel",
         "Les paramètres du plugin Three Stove Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée",
-        "Module installer pour installer, mettre à jour et désinstaller des applications, avec installation silencieuse via Shizuku / Root (nécessite le plugin 3-Setup Installer) (voir Documentation du projet > [Installer](https://docs.autojs6.com/#/installer))"
+        "Module installer pour installer, mettre à jour et désinstaller des applications, avec opérations silencieuses Shizuku / Root et vérification des capacités pour Dhizuku, l'installation notification et l'option mode: 'persistent' de setDefault; Dhizuku reste soumis aux règles du propriétaire de l'appareil ou du profil (nécessite le plugin 3-Setup Installer) (voir Documentation du projet > [Installer](https://docs.autojs6.com/#/installer))"
       ],
       "fix": [
         "Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information",

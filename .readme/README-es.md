@@ -168,7 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/10/01
+###### 2026/10/02
 
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
@@ -415,7 +415,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
 * `Nuevo` Gestión de Three Stove Agent en el centro de complementos con ayuda de instalación, activación, autorización y compatibilidad; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial
 * `Nuevo` El plugin Three Stove Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
-* `Nuevo` Módulo installer para instalar, actualizar y desinstalar aplicaciones, con instalación silenciosa mediante Shizuku / Root (requiere el complemento 3-Setup Installer) (véase Documentación del proyecto > [Installer](https://docs.autojs6.com/#/installer))
+* `Nuevo` Módulo installer para instalar, actualizar y desinstalar aplicaciones, con operaciones silenciosas Shizuku / Root y comprobación de capacidades para Dhizuku, la instalación notification y la opción mode: 'persistent' de setDefault; Dhizuku sigue sujeto a las políticas del propietario del dispositivo o del perfil (requiere el plugin 3-Setup Installer) (véase Documentación del proyecto > [Installer](https://docs.autojs6.com/#/installer))
 * `Corrección` Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información
 * `Corrección` Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
 * `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío

@@ -87,8 +87,8 @@ class InstallerJsonTest {
             InstallerJson.encodeInstallRequest("too-many-splits", sources(1, InstallerContract.MAX_SPLITS_PER_PACKAGE + 1), InstallerContract.INTERACTION_AUTO, InstallerJson.InstallOptions())
         }
         assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("empty", emptyList(), InstallerContract.INTERACTION_AUTO, InstallerJson.InstallOptions()) }
-        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-interaction", sources(1), "notification", InstallerJson.InstallOptions()) }
-        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-authorizer", sources(1), "auto", InstallerJson.InstallOptions(authorizer = "dhizuku")) }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-interaction", sources(1), "notifications", InstallerJson.InstallOptions()) }
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-authorizer", sources(1), "auto", InstallerJson.InstallOptions(authorizer = "dhizuku-unknown")) }
         assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-user", sources(1), "auto", InstallerJson.InstallOptions(user = "owner")) }
         assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("bad-timeout", sources(1), "auto", InstallerJson.InstallOptions(timeoutMillis = 0L)) }
         assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeInstallRequest("blank-installer", sources(1), "auto", InstallerJson.InstallOptions(installer = " ")) }
@@ -209,5 +209,27 @@ class InstallerJsonTest {
     fun `documents beyond the JSON ceiling are rejected`() {
         val huge = "{\"format\":\"apk\",\"label\":\"" + "x".repeat(InstallerContract.MAX_JSON_BYTES) + "\"}"
         assertThrows(IllegalArgumentException::class.java) { InstallerJson.decodePackageArchiveInfo(huge) }
+    }
+
+    @Test
+    fun `preferred default requests retain the legacy shape and persistent carries only its mode`() {
+        assertEquals("""{"authorizer":"root"}""", InstallerJson.encodeDefaultInstallerRequest("root", "preferred"))
+        assertEquals("""{"authorizer":"dhizuku","mode":"persistent"}""", InstallerJson.encodeDefaultInstallerRequest("dhizuku", "persistent"))
+        assertThrows(IllegalArgumentException::class.java) { InstallerJson.encodeDefaultInstallerRequest("root", "all") }
+    }
+
+    @Test
+    fun `persistent success requires the requested scope while legacy booleans remain unchanged`() {
+        fun state(self: Boolean, method: String) = InstallerJson.decodeDefaultInstallerState("""{"isSelf":$self,"method":"$method"}""")
+        assertTrue(state(true, "preferred").satisfies(true, "preferred"))
+        assertTrue(state(false, "none").satisfies(false, "preferred"))
+        assertFalse(state(true, "persistent").satisfies(false, "preferred"))
+        assertFalse(state(true, "preferred").satisfies(true, "persistent"))
+        assertTrue(state(true, "persistent").satisfies(true, "persistent"))
+        assertTrue(state(true, "preferred").satisfies(false, "persistent"))
+        assertFalse(state(true, "persistent").satisfies(false, "persistent"))
+        assertThrows(IllegalStateException::class.java) { state(true, "unknown").satisfies(false, "persistent") }
+        // V1 decoding itself was deliberately permissive; later state strings remain parseable.
+        assertEquals("unknown", state(true, "unknown").method)
     }
 }

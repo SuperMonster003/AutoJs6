@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/01
+###### 2026/10/02
 
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
@@ -253,7 +253,7 @@
 * `Fonctionnalité` Enregistrement et exécution limitée des scripts Agent via project.json / en-têtes @agent, avec validation des paramètres, arrêt à expiration et résultats structurés
 * `Fonctionnalité` Gestion de Three Stove Agent dans le centre de plugins avec aide pour l'installation, l'activation, les autorisations et la compatibilité; entrée facultative dans les Outils de l'assistant lorsque l'APK publié figure dans l'index officiel
 * `Fonctionnalité` Les paramètres du plugin Three Stove Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
-* `Fonctionnalité` Module installer pour installer, mettre à jour et désinstaller des applications, avec installation silencieuse via Shizuku / Root (nécessite le plugin 3-Setup Installer) (voir Documentation du projet > [Installer](https://docs.autojs6.com/#/installer))
+* `Fonctionnalité` Module installer pour installer, mettre à jour et désinstaller des applications, avec opérations silencieuses Shizuku / Root et vérification des capacités pour Dhizuku, l'installation notification et l'option mode: 'persistent' de setDefault; Dhizuku reste soumis aux règles du propriétaire de l'appareil ou du profil (nécessite le plugin 3-Setup Installer) (voir Documentation du projet > [Installer](https://docs.autojs6.com/#/installer))
 * `Correction` Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information
 * `Correction` Les échecs des appels aux modèles en ligne d'Three Stove Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)
 * `Correction` La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide

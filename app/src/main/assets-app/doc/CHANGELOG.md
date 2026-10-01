@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/01
+###### 2026/10/02
 
 * `提示` 部分内置功能改由独立插件提供, 使用前需在插件中心安装并启用对应插件
 * `提示` 终端改由 3-Shell Terminal 插件提供, 使用前需在插件中心安装并启用; 宿主内置终端的数据及设置不迁移, 升级后首次启动时自动清理
@@ -122,7 +122,7 @@
 * `新增` Agent 脚本登记与受限执行, 支持 project.json / @agent 头注释, 参数校验, 超时停止及结构化结果回传
 * `新增` Three Stove Agent 插件中心管理与安装, 激活, 授权及兼容性引导; 安装向导工具分类提供可选入口, 发行 APK 进入官方索引后可供安装
 * `新增` Three Stove Agent 插件可配置附加脚本目录, 宿主校验允许范围后保存并在重连时恢复, 无效目录不会替换已接受的配置
-* `新增` installer 模块, 用于安装, 更新与卸载应用, 支持 Shizuku / Root 静默安装 (需要 3-Setup Installer 插件) (参阅 项目文档 > [安装器](https://docs.autojs6.com/#/installer))
+* `新增` installer 模块, 用于安装, 更新与卸载应用, 支持 Shizuku / Root 静默操作, 并按插件能力启用 Dhizuku 授权, notification 通知安装和 setDefault 的 mode: 'persistent' 选项; Dhizuku 受设备/工作资料所有者策略限制 (需要 3-Setup Installer 插件) (参阅 项目文档 > [安装器](https://docs.autojs6.com/#/installer))
 * `修复` 启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题
 * `修复` Three Stove Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
 * `修复` assistant 合并工具选项时, 空 tools 对象导致默认关闭的工具组被启用的问题
