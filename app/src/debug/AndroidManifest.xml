@@ -5,6 +5,18 @@
             android:name="org.autojs.autojs.app.ApplicationContextProbeProvider"
             android:authorities="${applicationId}.context-probe"
             android:exported="false" />
+        <provider
+            android:name="org.autojs.autojs.core.plugin.installer.InstallerProcessProbeProvider"
+            android:authorities="${applicationId}.installer-process-probe"
+            android:exported="false"
+            android:process=":installer_process_source" />
+        <activity
+            android:name="org.autojs.autojs.core.plugin.installer.InstallerProcessProbeActivity"
+            android:exported="true"
+            android:permission="android.permission.DUMP"
+            android:process=":installer_process_probe"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
         <service
             android:name="org.autojs.autojs.compat.ParcelCompatibilityProbeService"
             android:exported="false"
