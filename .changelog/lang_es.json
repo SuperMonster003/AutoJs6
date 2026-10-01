@@ -253,6 +253,7 @@
         "Módulo installer para instalar, actualizar y desinstalar aplicaciones, con instalación silenciosa mediante Shizuku / Root (requiere el complemento 3-Setup Installer) (véase Documentación del proyecto > [Installer](https://docs.autojs6.com/#/installer))"
       ],
       "fix": [
+        "Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información",
         "Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)",
         "La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío",
         "Los árboles compactos de accesibilidad abreviaban los ID de recursos e impedían que los selectores literales encontraran los elementos mostrados",

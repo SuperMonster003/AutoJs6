@@ -544,30 +544,33 @@ internal class ExplorerItemViewHolder(
         }
     }
 
-    private fun showInfo() {
+    private fun showInfo(
+        item: ExplorerItem = mExplorerItem,
+        primaryPluginAction: ResolvedExplorerAction? = mPrimaryPluginAction,
+    ) {
         // Hide host overlay dialog so the info dialog can be shown on top.
         // zh-CN: 隐藏宿主 overlay 对话框, 让信息对话框显示在最上层.
         host.hideHostDialog()
 
         when {
-            mPrimaryPluginAction?.descriptor?.presentation ==
+            primaryPluginAction?.descriptor?.presentation ==
                 org.autojs.plugin.explorer.api.ExplorerActionValues.PRESENTATION_HOST_EXPLORER -> {
                 val action = host.pluginActionProvider?.actionsFor(
                     host.pluginActionSurface,
                     ExplorerActionEntryPoint.OVERFLOW_MENU,
-                    mExplorerItem,
+                    item,
                 )?.firstOrNull { it.descriptor.id == "manage-archive" } ?: return
-                host.launchPluginAction(ExplorerActionEntryPoint.OVERFLOW_MENU, action, mExplorerItem)
-                host.notifyItemOperated(mExplorerItem)
+                host.launchPluginAction(ExplorerActionEntryPoint.OVERFLOW_MENU, action, item)
+                host.notifyItemOperated(item)
             }
-            mExplorerItem.type.isImageFile() -> {
-                ImageInfoDialogManager.showImageInfoDialog(host.context, File(mExplorerItem.path)) {
+            item.type.isImageFile() -> {
+                ImageInfoDialogManager.showImageInfoDialog(host.context, File(item.path)) {
                     host.showHostDialog()
                 }
-                host.notifyItemOperated(mExplorerItem)
+                host.notifyItemOperated(item)
             }
-            mExplorerItem.isInstallable -> {
-                val packageItem = mExplorerItem
+            item.isInstallable -> {
+                val packageItem = item
                 val archiveActions = host.pluginActionProvider?.actionsFor(
                     host.pluginActionSurface,
                     ExplorerActionEntryPoint.OVERFLOW_MENU,
@@ -586,10 +589,10 @@ internal class ExplorerItemViewHolder(
                     // zh-CN: 信息对话框关闭后恢复宿主对话框.
                     host.showHostDialog()
                 }
-                host.notifyItemOperated(mExplorerItem)
+                host.notifyItemOperated(item)
             }
-            mExplorerItem.isMediaMenu || mExplorerItem.isMediaPlayable -> {
-                val mediaItem = mExplorerItem
+            item.isMediaMenu || item.isMediaPlayable -> {
+                val mediaItem = item
                 MediaInfoDialogManager.showMediaInfoDialog(
                     context = host.context,
                     explorerItem = mediaItem,
@@ -610,7 +613,7 @@ internal class ExplorerItemViewHolder(
                         )
                     },
                 )
-                host.notifyItemOperated(mExplorerItem)
+                host.notifyItemOperated(item)
             }
         }
     }
@@ -632,9 +635,14 @@ internal class ExplorerItemViewHolder(
     @SuppressLint("CheckResult")
     private fun showOptionsMenu() {
         val actionItem = mExplorerItem
+        val actionPrimaryPlugin = mPrimaryPluginAction
         val popupMenu = PopupMenu(host.context, mOptions)
         popupMenu.inflate(R.menu.menu_script_options)
         val menu = popupMenu.menu
+        // Keep the host package information reachable when a plugin fills its row icon slot.
+        if (!actionItem.isInstallable || mInfo.isVisible) {
+            menu.removeItem(R.id.action_info)
+        }
         if (!mExplorerItem.type.isImageFile()) {
             menu.removeItem(R.id.action_edit_by_other_apps)
         }
@@ -692,6 +700,10 @@ internal class ExplorerItemViewHolder(
                 pluginMenuItems[menuId] = action
             }
         popupMenu.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.action_info) {
+                showInfo(actionItem, actionPrimaryPlugin)
+                return@setOnMenuItemClickListener true
+            }
             val pluginAction = pluginMenuItems[menuItem.itemId]
             if (pluginAction == null) {
                 return@setOnMenuItemClickListener host.onBuiltInMenuItem(menuItem)

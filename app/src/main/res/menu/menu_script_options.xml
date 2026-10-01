@@ -3,6 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/action_info"
+        android:title="@string/text_info" />
+    <item
         android:id="@+id/action_move_to"
         android:title="@string/text_move_to" />
     <item

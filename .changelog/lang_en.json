@@ -253,6 +253,7 @@
         "installer module for installing, updating and uninstalling apps, with Shizuku / Root silent installation (requires the 3-Setup Installer plugin) (see Project documentation > [Installer](https://docs.autojs6.com/#/installer))"
       ],
       "fix": [
+        "Package information becoming inaccessible from the file manager when APK Inspector hides the information button",
         "Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)",
         "Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty",
         "Compact accessibility trees shortened resource IDs, preventing literal selectors from matching the displayed IDs",

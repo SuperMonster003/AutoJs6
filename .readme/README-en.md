@@ -418,6 +418,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Three Stove Agent management in Plugin Center with installation, activation, authorization and compatibility guidance; optional Tools entry in the installation wizard when a published APK is present in the official index
 * `Feature` Three Stove Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
 * `Feature` installer module for installing, updating and uninstalling apps, with Shizuku / Root silent installation (requires the 3-Setup Installer plugin) (see Project documentation > [Installer](https://docs.autojs6.com/#/installer))
+* `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
 * `Fix` Compact accessibility trees shortened resource IDs, preventing literal selectors from matching the displayed IDs
