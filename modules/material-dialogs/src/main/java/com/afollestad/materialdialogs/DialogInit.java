@@ -239,13 +239,15 @@ class DialogInit {
                             : dialog.themeDelegate.createOptionsPopupMenu(
                                     builder.context, v, Gravity.END);
                     popupMenu.getMenuInflater().inflate(R.menu.md_more_options, popupMenu.getMenu());
-                    List<MaterialDialog.OptionMenuItemSpec> options = builder.options;
+                    // Async information can add options while this popup is open. Its actions
+                    // must keep the same indexes as the visible items until the popup closes.
+                    List<MaterialDialog.OptionMenuItemSpec> options = new ArrayList<>(builder.options);
                     for (int i = 0; i < options.size(); i++) {
                         MaterialDialog.OptionMenuItemSpec option = options.get(i);
                         popupMenu.getMenu().add(Menu.NONE, getDialogMenuOptionsItemActionIdByIndex(i), i, option.title());
                     }
                     popupMenu.setOnMenuItemClickListener(menuItem -> {
-                        List<MaterialDialog.OptionMenuItemSpec> optionMenuItemSpecs = builder.options;
+                        List<MaterialDialog.OptionMenuItemSpec> optionMenuItemSpecs = options;
                         for (int i = 0; i < optionMenuItemSpecs.size(); i++) {
                             MaterialDialog.OptionMenuItemSpec option = optionMenuItemSpecs.get(i);
                             int menuActionId = getDialogMenuOptionsItemActionIdByIndex(i);

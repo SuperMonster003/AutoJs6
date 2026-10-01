@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionHostFileInfoLoader
+import org.autojs.autojs.core.plugin.explorer.ExplorerActionHostFileInfo
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.ui.dialog.InfoDialog
@@ -101,10 +102,6 @@ object ApkInfoDialogManager {
             addItem(R.string.apk_info_target_sdk, id = "targetSdk")
             addItem(R.string.apk_info_max_sdk, id = "maxSdk").isVisible = false
             addItem(R.string.apk_info_device_sdk, id = "deviceSdk")
-            addItem(R.string.ellipsis_six, id = "pluginInfo").apply {
-                maxLines = 24
-                isVisible = false
-            }
             addItem(R.string.apk_info_exception, id = "installation").apply {
                 maxLines = 4
                 isVisible = false
@@ -116,22 +113,24 @@ object ApkInfoDialogManager {
         var expectedSourceSha256: String? = null
         var activeDialog: MaterialDialog? = null
         var moreInfoDialog: InfoDialog? = null
+        var pluginInfoDialog: InfoDialog? = null
         val moreInfo = MutableStateFlow<PackageMoreInfo?>(null)
+        val options = archiveActions.map { (label, action) ->
+            MaterialDialog.OptionMenuItemSpec(label) {
+                activeDialog?.dismiss()
+                action()
+            }
+        }.toMutableList().apply {
+            add(MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_more_information)) { parent ->
+                if (moreInfoDialog?.dialog?.isShowing != true) {
+                    moreInfoDialog = showMoreInfoDialog(context, parent, moreInfo)
+                }
+            })
+        }
 
         val dialog = infoDialog.builder
             .title(packageFile.name)
-            .options(
-                archiveActions.map { (label, action) ->
-                    MaterialDialog.OptionMenuItemSpec(label) {
-                        activeDialog?.dismiss()
-                        action()
-                    }
-                } + MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_more_information)) { parent ->
-                    if (moreInfoDialog?.dialog?.isShowing != true) {
-                        moreInfoDialog = showMoreInfoDialog(context, parent, moreInfo)
-                    }
-                },
-            )
+            .options(options)
             .autoDismiss(false)
             .iconRes(R.drawable.ic_three_dots_outline_small)
             .limitIconToDefaultSize()
@@ -155,6 +154,7 @@ object ApkInfoDialogManager {
             .let {
                 infoDialog.show(onDismissListener = { dismissed ->
                     moreInfoDialog?.dialog?.dismiss()
+                    pluginInfoDialog?.dialog?.dismiss()
                     onDismissListener?.onDismiss(dismissed)
                 })
             }
@@ -252,9 +252,11 @@ object ApkInfoDialogManager {
                         null
                     }
                     pluginInfo?.let { details ->
-                        items["pluginInfo"].key = details.title
-                        items["pluginInfo"].setValueIfAbsent(details.summary)
-                        items["pluginInfo"].isVisible = true
+                        options.add(options.lastIndex, MaterialDialog.OptionMenuItemSpec(details.title) { parent ->
+                            if (pluginInfoDialog?.dialog?.isShowing != true) {
+                                pluginInfoDialog = showPluginInfoDialog(context, parent, details)
+                            }
+                        })
                     }
                 }
             }.onFailure { error ->
@@ -287,6 +289,18 @@ object ApkInfoDialogManager {
             }
         }
         return infoDialog
+    }
+
+    private fun showPluginInfoDialog(context: Context, parent: MaterialDialog, details: ExplorerActionHostFileInfo): InfoDialog {
+        return InfoDialog(context).apply {
+            items.addItem(details.title, details.summary, id = "pluginInfo").maxLines = Int.MAX_VALUE
+            builder.title(parent.titleView.text)
+                .icon(parent.iconView.drawable)
+                .limitIconToDefaultSize()
+                .negativeText(R.string.dialog_button_dismiss)
+                .negativeColorRes(R.color.dialog_button_default)
+            show()
+        }
     }
 
     private fun showMoreInfoDialog(context: Context, parent: MaterialDialog, moreInfo: StateFlow<PackageMoreInfo?>): InfoDialog {

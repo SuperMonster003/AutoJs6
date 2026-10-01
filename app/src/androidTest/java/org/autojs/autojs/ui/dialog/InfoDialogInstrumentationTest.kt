@@ -10,10 +10,10 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.SystemClock
 import android.view.KeyEvent
-import android.view.MotionEvent
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.platform.app.InstrumentationRegistry
+import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
@@ -238,12 +238,12 @@ class InfoDialogInstrumentationTest {
         instrumentation.runOnMainSync {
             info = ApkInfoDialogManager.showApkInfoDialog(activity, source).also { dialogs += it }
             assertIllegalArgument { info.items["components"] }
+            assertIllegalArgument { info.items["pluginInfo"] }
             assertTrue(checkNotNull(info.dialog.optionsView).isShown)
         }
         captureIfRequested("package-main")
         instrumentation.runOnMainSync { checkNotNull(info.dialog.optionsView).performClick() }
-        val menuItem = awaitText(activity.getString(R.string.text_more_information))
-        tap(menuItem)
+        clickStableText(activity.getString(R.string.text_more_information))
         val componentsLabel = activity.getString(R.string.apk_info_components)
         awaitText(componentsLabel)
         awaitText(activity.getString(R.string.apk_info_components_apk, 1, 1, 0))
@@ -268,6 +268,100 @@ class InfoDialogInstrumentationTest {
         }
     }
 
+    @Test
+    fun openOptionsKeepTheirActionsWhenAnotherOptionArrivesBeforeThem() {
+        lateinit var info: InfoDialog
+        var originalClicks = 0
+        var insertedClicks = 0
+        val originalLabel = "Original information action"
+        val insertedLabel = "Additional information action"
+        val options = mutableListOf(
+            MaterialDialog.OptionMenuItemSpec(originalLabel) { originalClicks++ },
+        )
+        instrumentation.runOnMainSync {
+            info = InfoDialog(activity).apply {
+                items.addItem("Metadata", "Available while optional information loads")
+                builder.title("Options snapshot test").options(options).autoDismiss(false)
+                show()
+            }.also { dialogs += it }
+        }
+        openOptionsAfterLayout(info)
+        awaitStableText(originalLabel)
+        instrumentation.runOnMainSync {
+            // Match an optional plugin result arriving while the first popup remains visible.
+            options.add(0, MaterialDialog.OptionMenuItemSpec(insertedLabel) { insertedClicks++ })
+        }
+        clickStableText(originalLabel)
+        awaitMain { originalClicks == 1 || insertedClicks != 0 }
+        instrumentation.runOnMainSync {
+            assertEquals("The visible original option must retain its original action", 1, originalClicks)
+            assertEquals("An item not shown in this popup must not receive its click", 0, insertedClicks)
+            assertTrue(info.dialog.isShowing)
+        }
+        openOptionsAfterLayout(info, previousPopupLabels = listOf(originalLabel))
+        val insertedBounds = Rect().also { awaitStableText(insertedLabel).getBoundsInScreen(it) }
+        val originalBounds = Rect().also { awaitStableText(originalLabel).getBoundsInScreen(it) }
+        assertTrue("The next popup must include the new option before the original one", insertedBounds.bottom <= originalBounds.top)
+        clickStableText(insertedLabel)
+        awaitMain { insertedClicks == 1 }
+        instrumentation.runOnMainSync {
+            assertEquals(1, originalClicks)
+            assertEquals(1, insertedClicks)
+            assertTrue(info.dialog.isShowing)
+        }
+    }
+
+    private fun openOptionsAfterLayout(info: InfoDialog, previousPopupLabels: List<String> = emptyList()) {
+        instrumentation.waitForIdleSync()
+        val deadline = SystemClock.elapsedRealtime() + 30_000
+        var previousBounds: Rect? = null
+        var stableSince = 0L
+        while (SystemClock.elapsedRealtime() < deadline) {
+            var bounds: Rect? = null
+            instrumentation.runOnMainSync {
+                val decor = info.dialog.window?.decorView
+                val anchor = info.dialog.optionsView
+                if (info.dialog.isShowing && decor?.isAttachedToWindow == true && decor.hasWindowFocus() &&
+                    !decor.isLayoutRequested && anchor?.isShown == true && anchor.isEnabled &&
+                    anchor.width > 0 && anchor.height > 0 && !anchor.isLayoutRequested
+                ) {
+                    val visible = Rect()
+                    if (anchor.getGlobalVisibleRect(visible) && !visible.isEmpty) bounds = visible
+                }
+            }
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            val previousPopupGone = root != null && previousPopupLabels.none { label ->
+                root.findAccessibilityNodeInfosByText(label).any { it.text?.toString() == label && it.isVisibleToUser }
+            }
+            val now = SystemClock.elapsedRealtime()
+            if (bounds != null && previousPopupGone) {
+                if (bounds == previousBounds) {
+                    if (now - stableSince >= 250L) {
+                        instrumentation.waitForIdleSync()
+                        instrumentation.runOnMainSync {
+                            val decor = checkNotNull(info.dialog.window).decorView
+                            val anchor = checkNotNull(info.dialog.optionsView)
+                            assertTrue("The parent dialog must regain focus before opening its popup", decor.hasWindowFocus())
+                            assertTrue("The options anchor must finish layout before opening its popup",
+                                anchor.isShown && anchor.isEnabled && anchor.width > 0 && anchor.height > 0 &&
+                                    !anchor.isLayoutRequested && !decor.isLayoutRequested)
+                            assertTrue("The options button click was rejected", anchor.performClick())
+                        }
+                        return
+                    }
+                } else {
+                    previousBounds = bounds
+                    stableSince = now
+                }
+            } else {
+                previousBounds = null
+                stableSince = 0L
+            }
+            SystemClock.sleep(50)
+        }
+        throw AssertionError("The information dialog did not become ready to open its options popup")
+    }
+
     private fun awaitText(text: String): AccessibilityNodeInfo {
         val deadline = SystemClock.elapsedRealtime() + 30_000
         while (SystemClock.elapsedRealtime() < deadline) {
@@ -280,20 +374,46 @@ class InfoDialogInstrumentationTest {
         throw AssertionError("Information dialog text did not appear: $text")
     }
 
-    private fun tap(node: AccessibilityNodeInfo) {
-        val bounds = Rect().also { node.getBoundsInScreen(it) }
-        val downTime = SystemClock.uptimeMillis()
-        for (action in intArrayOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
-            val event = MotionEvent.obtain(
-                downTime, SystemClock.uptimeMillis(), action,
-                bounds.exactCenterX(), bounds.exactCenterY(), 0,
-            )
-            try {
-                instrumentation.sendPointerSync(event)
-            } finally {
-                event.recycle()
+    private fun awaitStableText(text: String): AccessibilityNodeInfo {
+        val deadline = SystemClock.elapsedRealtime() + 30_000
+        var previousBounds: Rect? = null
+        var previousWindow = -1
+        var stableSince = 0L
+        while (SystemClock.elapsedRealtime() < deadline) {
+            val now = SystemClock.elapsedRealtime()
+            val node = instrumentation.uiAutomation.rootInActiveWindow
+                ?.findAccessibilityNodeInfosByText(text)
+                ?.firstOrNull { it.text?.toString() == text && it.isVisibleToUser && it.isEnabled }
+            val bounds = node?.let { candidate -> Rect().also(candidate::getBoundsInScreen) }
+            if (node != null && bounds != null && !bounds.isEmpty) {
+                if (bounds == previousBounds && node.windowId == previousWindow) {
+                    // Popup nodes can exist before their entrance animation or anchor layout settles.
+                    if (now - stableSince >= 250L) return node
+                } else {
+                    previousBounds = bounds
+                    previousWindow = node.windowId
+                    stableSince = now
+                }
+            } else {
+                previousBounds = null
+                previousWindow = -1
+                stableSince = 0L
             }
+            SystemClock.sleep(50)
         }
+        throw AssertionError("Information dialog text did not become visible and stable: $text")
+    }
+
+    private fun clickStableText(text: String) {
+        var target = awaitStableText(text)
+        assertTrue("The menu item disappeared before its click: $text", target.refresh())
+        while (!target.isClickable || target.actionList.none { it.id == AccessibilityNodeInfo.ACTION_CLICK }) {
+            target = target.parent ?: throw AssertionError("No accessible click action for menu item: $text")
+        }
+        assertTrue("The menu item must remain visible and enabled: $text", target.isVisibleToUser && target.isEnabled)
+        // Activate the actual popup row. Retaining a text-node coordinate across popup animation
+        // can dismiss the popup outside its row without ever invoking the item's callback.
+        assertTrue("The menu click was rejected: $text", target.performAction(AccessibilityNodeInfo.ACTION_CLICK))
     }
 
     private fun captureIfRequested(name: String) {
