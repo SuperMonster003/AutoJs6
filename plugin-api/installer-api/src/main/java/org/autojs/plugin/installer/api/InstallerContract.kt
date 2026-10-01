@@ -99,6 +99,8 @@ object InstallerContract {
     const val FIELD_COMPONENT = "component"
     const val FIELD_IS_SELF = "isSelf"
     const val FIELD_METHOD = "method"
+    /** Optional Boolean: a local completed-configuration receipt, not an authoritative policy query. */
+    const val FIELD_PERSISTENT_CONFIGURED = "persistentConfigured"
     const val FIELD_REQUIRES_CLEAR = "requiresClear"
     const val FIELD_USERS = "users"
     const val FIELD_USER_ID = "id"

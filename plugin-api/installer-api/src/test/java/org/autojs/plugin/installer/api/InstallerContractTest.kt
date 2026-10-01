@@ -92,6 +92,7 @@ class InstallerContractTest {
         assertTrue(InstallerContract.isDefaultMode("persistent"))
         assertFalse(InstallerContract.isDefaultMode("none"))
         assertEquals("mode", InstallerContract.FIELD_MODE)
+        assertEquals("persistentConfigured", InstallerContract.FIELD_PERSISTENT_CONFIGURED)
 
         assertEquals(8, InstallerContract.STAGES.size)
         assertEquals(InstallerContract.STAGES.size, InstallerContract.STAGES.toSet().size)

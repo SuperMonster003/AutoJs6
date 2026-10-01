@@ -64,6 +64,20 @@ scope, either `preferred` or `persistent`; `DEFAULT_MODE_*` names are distinct f
 { "component": "package/activity", "isSelf": true, "method": "persistent", "requiresClear": false }
 ```
 
+An optional `persistentConfigured` boolean records the plugin's last completed local persistent
+configuration for the relevant owner. It is a receipt, not proof of the system's current policy;
+the host defaults an omitted value to false and never uses it to decide `isSelf` or operation
+success. A false or absent receipt likewise does not prove that no persistent policy exists.
+Read-only status must not derive `method: 'persistent'` from this receipt and ordinary intent
+resolution. An observed ordinary preferred record takes precedence; otherwise the method is
+`none` unless an authoritative policy read independently proves more.
+
+The Dhizuku persistent path currently accepts API 26 through 33. On API 34+, Android reports
+the final policy outcome to the owner's [PolicyUpdateReceiver](https://developer.android.com/reference/android/app/admin/DevicePolicyManager#addPersistentPreferredActivity(android.content.ComponentName,%20android.content.IntentFilter,%20android.content.ComponentName)), so a void DPM return is not treated
+as final success; until that result can be received, the plugin refuses this operation before
+writing. It never writes a policy merely to probe status. A successful explicit write response
+may report the operation's confirmed method separately from a later read-only state.
+
 The old `setDefaultInstaller` transaction remains preferred-only. The host continues to use it
 when mode is omitted or explicitly `preferred`, sending only `{ "authorizer": "..." }`, even
 when V2 is negotiated. Persistent requests use the appended transaction only after the capability

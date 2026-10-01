@@ -232,4 +232,14 @@ class InstallerJsonTest {
         // V1 decoding itself was deliberately permissive; later state strings remain parseable.
         assertEquals("unknown", state(true, "unknown").method)
     }
+
+    @Test
+    fun `a persistent receipt is optional metadata and never substitutes for an observed method`() {
+        val legacy = InstallerJson.decodeDefaultInstallerState("""{"isSelf":true,"method":"preferred"}""")
+        assertFalse(legacy.persistentConfigured)
+        val receipt = InstallerJson.decodeDefaultInstallerState("""{"isSelf":true,"method":"preferred","persistentConfigured":true}""")
+        assertTrue(receipt.persistentConfigured)
+        assertFalse(receipt.satisfies(true, "persistent"))
+        assertTrue(receipt.satisfies(true, "preferred"))
+    }
 }

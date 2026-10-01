@@ -87,7 +87,9 @@ object InstallerJson {
 
     data class AuthorizerState(val available: Boolean, val running: Boolean, val granted: Boolean, val reason: String?, val json: String)
 
-    data class DefaultInstallerState(val component: String?, val isSelf: Boolean, val method: String?, val requiresClear: Boolean, val json: String) {
+    data class DefaultInstallerState(val component: String?, val isSelf: Boolean, val method: String?, val requiresClear: Boolean, val json: String,
+        /** Local receipt only; absence is false, never proof that the system has no persistent policy. */
+        val persistentConfigured: Boolean = false) {
         fun satisfies(enabled: Boolean, mode: String): Boolean = when (mode) {
             InstallerContract.DEFAULT_MODE_PREFERRED -> isSelf == enabled
             InstallerContract.DEFAULT_MODE_PERSISTENT -> {
@@ -290,6 +292,7 @@ object InstallerJson {
             method = root.string(InstallerContract.FIELD_METHOD),
             requiresClear = root.boolean(InstallerContract.FIELD_REQUIRES_CLEAR) ?: false,
             json = root.toString(),
+            persistentConfigured = root.boolean(InstallerContract.FIELD_PERSISTENT_CONFIGURED) ?: false,
         )
     }
 

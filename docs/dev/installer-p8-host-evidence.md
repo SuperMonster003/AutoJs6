@@ -54,3 +54,16 @@ installer changelog renderings and version file. The parallel APK Inspector work
 `docs/dev/package-inspection-roadmap.md` is excluded. Public documentation and declaration/Offline
 Docs/Ace synchronization follow as separate repository changes. All commits remain local, with
 no push, tag, package publication or GitHub Release.
+
+## Build 5307: persistent configuration receipts
+
+The optional `persistentConfigured` field distinguishes a local completed configuration receipt
+from an authoritative system-policy read. Missing metadata decodes as false, and true metadata
+does not change the mode-specific operation-success check. The protocol documents this distinction
+and the plugin's conservative Dhizuku persistent-policy restriction to API 26 through 33 while
+API 34+ owner policy-result delivery is not available.
+
+`build/p8-configured-state-verify.log` records eight contract/AIDL tests and 15 host codec tests
+passing with no failures or skips, plus release AAR assembly. The refreshed release AAR is
+31,659 bytes, SHA-256 `5e2cdf1a5440d9d544d1f8bb82a4460dd12055c5b948c1e3dc038f941ca94fb6`.
+The V2 transaction set, original minimum host 5299 and script method signatures are unchanged.
