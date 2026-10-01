@@ -13,6 +13,8 @@ implements the operations in plugin roadmap P2 and the dialogs in P3. The script
 (plugin roadmap P4) is delivered by AutoJs6 6.8.0, host build 5300, as described below. This script
 layer keeps the V1 AIDL and contract version unchanged. The refreshed contract AAR adds the
 optional JSON field name `FIELD_BATCH` for preserving a one-item script array.
+The later installation-history integration adds optional `FIELD_SOURCE_ORIGIN` metadata to
+distinguish host entries from scripts, also without changing V1 AIDL or script API signatures.
 
 ## Decision
 
@@ -132,6 +134,7 @@ installation must not be changed into failure solely because its metadata exceed
 {
   "id": "host-generated id",
   "batch": true,
+  "sourceOrigin": "host",
   "sources": [
     { "item": 0, "displayName": "app.apk", "size": 12345678 },
     { "item": 1, "displayName": "base.apk", "size": 1000 },
@@ -163,6 +166,20 @@ grouped item, preserving requests from older hosts. Hosts that do not specify ba
 client calls retain that same inference. Older V1 plugins can ignore the optional field; preserving
 one-item array failure semantics requires the updated plugin implementation. No AIDL transaction
 or contract version changes, and the host and plugin share `InstallerContract.FIELD_BATCH`.
+
+The optional root `sourceOrigin` string identifies the entry point for the plugin's installation
+history. The Binder request accepts only `host` or `script`, using
+`InstallerContract.FIELD_SOURCE_ORIGIN`, `SOURCE_HOST` and `SOURCE_SCRIPT`. Updated host entry
+points default to `host`; the script installation service explicitly sends `script` for single,
+batch and split requests. Requests from older clients that omit this metadata are recorded as
+`host`; JSON null is treated as missing. Other non-null values are rejected with `INVALID_ARGUMENT`.
+Older V1 plugins may ignore this optional field. The plugin's `external` and `home` history labels
+are assigned by its own entry points and are not accepted in host request documents or read from
+external Intent options. This field changes display metadata only, not authorization, interaction,
+installation options, result shape or caller ownership. It is not a JavaScript option: existing
+script calls and TypeScript declarations remain unchanged, as do AIDL transactions and the V1
+contract version.
+
 `deleteSource` only asks the plugin to report `sourceDeleted`; the party that owns the file
 deletes it (D25), so for host-provided descriptors the host deletes after `completed`.
 

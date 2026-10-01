@@ -45,6 +45,8 @@ object InstallerContract {
     const val FIELD_ID = "id"
     /** Optional Boolean: preserves batch semantics even when the request contains one item. */
     const val FIELD_BATCH = "batch"
+    /** Optional String: trusted host entry point, `host` (default) or `script`. */
+    const val FIELD_SOURCE_ORIGIN = "sourceOrigin"
     const val FIELD_SOURCES = "sources"
     const val FIELD_OPTIONS = "options"
     const val FIELD_INTERACTION = "interaction"
@@ -116,6 +118,12 @@ object InstallerContract {
     const val FIELD_PROBLEMS = "problems"
 
     // Closed value sets.
+
+    const val SOURCE_HOST = "host"
+    const val SOURCE_SCRIPT = "script"
+    /** Plugin-local entry points; external Intent extras never supply these values. */
+    const val SOURCE_EXTERNAL = "external"
+    const val SOURCE_HOME = "home"
 
     const val AUTHORIZER_AUTO = "auto"
     const val AUTHORIZER_NONE = "none"

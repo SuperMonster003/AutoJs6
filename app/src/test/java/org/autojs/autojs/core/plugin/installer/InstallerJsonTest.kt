@@ -25,6 +25,7 @@ class InstallerJsonTest {
         )
         val root = JsonParser.parseString(json).asJsonObject
         assertEquals("host-1", root["id"].asString)
+        assertEquals(InstallerContract.SOURCE_HOST, root[InstallerContract.FIELD_SOURCE_ORIGIN].asString)
         assertTrue(root[InstallerContract.FIELD_BATCH].asBoolean)
         assertEquals("silent", root["interaction"].asString)
         val sources = root.getAsJsonArray("sources")
@@ -40,6 +41,18 @@ class InstallerJsonTest {
         assertTrue(options["deleteSource"].asBoolean)
         assertTrue(options["continueOnError"].asBoolean)
         assertEquals(InstallerContract.DEFAULT_SESSION_TIMEOUT_MILLIS, options["timeoutMillis"].asLong)
+    }
+
+    @Test
+    fun `script origin is explicit and local plugin origins cannot cross the host API`() {
+        val json = InstallerJson.encodeInstallRequest("script", sources(1), "silent", InstallerJson.InstallOptions(),
+            origin = InstallerContract.SOURCE_SCRIPT)
+        assertEquals("script", JsonParser.parseString(json).asJsonObject[InstallerContract.FIELD_SOURCE_ORIGIN].asString)
+        for (origin in listOf("home", "external", "unknown")) {
+            assertThrows(IllegalArgumentException::class.java) {
+                InstallerJson.encodeInstallRequest("invalid", sources(1), "auto", InstallerJson.InstallOptions(), origin = origin)
+            }
+        }
     }
 
     @Test

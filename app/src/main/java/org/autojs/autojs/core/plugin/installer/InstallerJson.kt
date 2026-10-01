@@ -103,8 +103,10 @@ object InstallerJson {
         interaction: String,
         options: InstallOptions,
         isBatch: Boolean = sources.map { it.item }.distinct().size > 1,
+        origin: String = InstallerContract.SOURCE_HOST,
     ): String {
         require(id.isNotBlank()) { "request id must not be blank" }
+        require(origin in setOf(InstallerContract.SOURCE_HOST, InstallerContract.SOURCE_SCRIPT)) { "unknown source origin: $origin" }
         require(InstallerContract.isInteraction(interaction)) { "unknown interaction: $interaction" }
         options.validate()?.let { throw IllegalArgumentException(it) }
         require(sources.isNotEmpty()) { "at least one package source is required" }
@@ -118,6 +120,7 @@ object InstallerJson {
         val document = JsonObject().apply {
             addProperty(InstallerContract.FIELD_ID, id)
             addProperty(InstallerContract.FIELD_BATCH, isBatch)
+            addProperty(InstallerContract.FIELD_SOURCE_ORIGIN, origin)
             add(InstallerContract.FIELD_SOURCES, JsonArray().apply {
                 sources.forEach { source ->
                     add(JsonObject().apply {

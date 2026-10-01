@@ -128,6 +128,7 @@ object InstallerPluginHost {
         listener: InstallerSessionListener = object : InstallerSessionListener {},
         hostSessionId: String = UUID.randomUUID().toString(),
         isBatch: Boolean = sources.map { it.item }.distinct().size > 1,
+        origin: String = InstallerContract.SOURCE_HOST,
     ): InstallerSessionHandle {
         // withContext can discard a successfully constructed return value when cancellation wins
         // the dispatcher handoff. Retain it outside that boundary so its lease/PFDs still close.
@@ -135,7 +136,7 @@ object InstallerPluginHost {
         try {
             return withContext(Dispatchers.IO) {
                 currentCoroutineContext().ensureActive()
-                val requestJson = InstallerJson.encodeInstallRequest(hostSessionId, sources.map { it.toEntry() }, interaction, options, isBatch)
+                val requestJson = InstallerJson.encodeInstallRequest(hostSessionId, sources.map { it.toEntry() }, interaction, options, isBatch, origin)
                 val request = InstallerBundles.request(requestJson, hostVersionCode, hostSessionId)
                 val descriptors = sources.map { it.descriptor }.toTypedArray<ParcelFileDescriptor>()
                 val target = selectOrThrow(context)

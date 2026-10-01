@@ -153,6 +153,7 @@ class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeab
                 val handle = try {
                     InstallerPluginHost.openSession(
                         appContext, sources, options.interaction, options.install, listener, hostSessionId = id, isBatch = plan.isBatch,
+                        origin = InstallerContract.SOURCE_SCRIPT,
                     )
                 } catch (failure: Throwable) {
                     throw mapped(failure, InstallerErrorMapper.Phase.OPEN)
