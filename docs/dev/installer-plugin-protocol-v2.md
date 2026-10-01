@@ -115,11 +115,28 @@ The host preserves the plugin's unsupported-argument or authorization result rat
 back to a different authorizer. Authorization to AutoJs6 itself does not grant the plugin access.
 
 For new plugin configurations, automatic order is Shizuku, Root, Dhizuku, none. Existing explicit
-orders and enabled-authorizer selections are preserved. Persistent default management initially
-uses Dhizuku; a Root/system identity experiment is not an implemented compatibility guarantee.
-Choose an authorizer that supports the requested default scope explicitly, as in the Dhizuku
-example above. Source delivery and capability negotiation do not claim a device matrix pass;
-actual environments and device evidence remain recorded in the plugin's roadmap.
+orders and enabled-authorizer selections are preserved. Persistent default management filters
+that order to enabled, usable Root in user 0 or Dhizuku on API 26 through 33. It skips Shizuku and
+none. An explicit identity, or a failure after auto selects one, never falls back to another
+identity or to preferred mode.
+
+The Root persistent implementation starts an isolated system UID/GID 1000 process without
+changing the shared RootService identity. It is limited to user 0 and the plugin's fixed four
+APK intent filters. It requires a compatible Root manager, inherited private file descriptors
+and framework/SELinux permission; incompatibility is reported without weakening SELinux. The
+production bridge was exercised on API 24, Magisk 25.2, SELinux Enforcing. This does not establish
+compatibility with other ROMs or Root managers. Competing APK persistent policies or unrecognized
+existing plugin policies are rejected before mutation; other packages' policies and ordinary
+defaults are preserved. Cancellation/failure only attempts rollback of proved newly created
+policies, not earlier policy. A hard process death or blocked Binder cannot guarantee rollback;
+unconfirmed operations retain their audit and are never replayed automatically.
+
+Dhizuku's grouped policy writes likewise are not a transaction. A partial failure retains a
+pending record and does not clear unknown earlier policy to simulate rollback. Passive status
+does not write or clear anything to test policy. The script surface has no DefaultInstallerState
+object or persistentConfigured property; isDefault and setDefault retain boolean results. Source
+delivery and capability negotiation do not claim a device matrix pass; actual environments and
+device evidence remain recorded in the plugin's roadmap.
 
 Notification presentation applies to install/installAsync/session. It does not silently replace
 an unsupported mode with `dialog` or `silent`. The plugin may still need Android's installation

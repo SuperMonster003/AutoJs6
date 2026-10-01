@@ -67,3 +67,10 @@ API 34+ owner policy-result delivery is not available.
 passing with no failures or skips, plus release AAR assembly. The refreshed release AAR is
 31,659 bytes, SHA-256 `5e2cdf1a5440d9d544d1f8bb82a4460dd12055c5b948c1e3dc038f941ca94fb6`.
 The V2 transaction set, original minimum host 5299 and script method signatures are unchanged.
+
+The final protocol follow-up documents the plugin's conditional Root/system persistent backend,
+operation-specific auto selection and partial-write boundary. `persistentConfigured` remains an
+optional host codec field; the script exposes no default-state object, so declarations must not
+invent a corresponding script property. That follow-up changes only these protocol/evidence
+documents and does not rebuild the host or include the separate concurrent Rhino/dependency
+working-tree changes. Plugin lifecycle and backend device results remain in its own evidence.
