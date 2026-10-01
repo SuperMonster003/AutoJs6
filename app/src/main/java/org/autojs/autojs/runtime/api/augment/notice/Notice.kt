@@ -18,7 +18,6 @@ import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.app.App
 import org.autojs.autojs.runtime.api.augment.util.Util
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
-import org.autojs.autojs.util.BeanProperties
 import org.autojs.autojs.util.NotificationUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
@@ -32,6 +31,9 @@ import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Undefined
 import java.util.function.Supplier
 import kotlin.math.roundToInt
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.declaredMemberProperties
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
@@ -243,25 +245,25 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 "Argument config ${config.jsBrief()} must be a JavaScript Object for notice.config"
             }
             val rtConfig = scriptRuntime.notice.config
-            // Properties are resolved through their JVM accessors (kotlin-reflect is not bundled); a nullish value
-            // resets the preset to what a fresh configuration holds, i.e. the Default switches or null.
-            // zh-CN: 属性经 JVM 访问器解析 (未打包 kotlin-reflect); 空值把预设重置为全新配置的取值, 即 Default 开关或 null.
+            val configProperties = rtConfig::class.declaredMemberProperties
+                .filter { it.visibility == KVisibility.PUBLIC }
+                .associateBy { it.name }
             val pristine by lazy { rtConfig.pristine() }
             config.forEach { entry ->
                 val (keyArg, value) = entry
                 val key = coerceString(keyArg)
-                val configProperty = BeanProperties.find(rtConfig.javaClass, key)
-                require(configProperty != null && Util.isPrimitive(arrayOf(configProperty.get(rtConfig)))) {
+                val configProperty = configProperties[key]
+                require(configProperty != null && Util.isPrimitive(arrayOf(configProperty.call(rtConfig)))) {
                     "Argument key \"${key.jsBrief()}\" is invalid for notice.config"
                 }
                 val valueToSet = when {
-                    value.isJsNullish() -> configProperty.get(pristine) /* To reset. */
+                    value.isJsNullish() -> configProperty.call(pristine) /* To reset. */
                     else -> value
                 }
-                require(configProperty.isMutable) {
+                require(configProperty is KMutableProperty1<*, *>) {
                     "Property config.$key for notice must be mutable"
                 }
-                configProperty.set(rtConfig, valueToSet)
+                configProperty.setter.call(rtConfig, valueToSet)
             }
             UNDEFINED
         }

@@ -52,6 +52,50 @@ class RhinoUpstreamCompatibilityTest {
         }
     """.trimIndent())
 
+    @Test
+    fun restoredKotlinReflectionBindingsPreserveScriptBehavior() = runScript(false, """
+        function check(value, label) { if (!value) throw new Error(label); }
+        function rejects(action, label) {
+            var rejected = false;
+            try { action(); } catch (e) { rejected = true; }
+            check(rejected, label);
+        }
+        check(s13n.time(1500, "ms", "s") === 1.5, "time conversion");
+        check(s13n.time(12, "h", "days") === 0.5, "time conversion to days");
+        check(WebSocket.CODE_CLOSE_NORMAL === 1000, "WebSocket constant");
+        check(WebSocket.EVENT_OPEN === "open", "WebSocket event");
+        check(typeof text === "function" && typeof selector === "function", "selector globals");
+        var configField = runtime.notice.getClass().getDeclaredField("config");
+        configField.setAccessible(true);
+        var config = configField.get(runtime.notice);
+        var originalDynamic = String(config.useDynamicDefaultNotificationId) === "true";
+        var originalChannel = String(config.defaultChannelId);
+        notice.config({
+            defaultTitle: "reflect-title",
+            defaultAutoCancel: true,
+            useDynamicDefaultNotificationId: !originalDynamic,
+            defaultChannelId: "reflect-channel"
+        });
+        check(String(config.defaultTitle) === "reflect-title", "notice string setter");
+        check(String(config.defaultAutoCancel) === "true", "notice nullable boolean setter");
+        check(String(config.useDynamicDefaultNotificationId) === String(!originalDynamic), "notice boolean setter");
+        check(String(config.defaultChannelId) === "reflect-channel", "notice custom accessor");
+        notice.config({
+            defaultTitle: null,
+            defaultAutoCancel: undefined,
+            useDynamicDefaultNotificationId: null,
+            defaultChannelId: undefined
+        });
+        check(config.defaultTitle === null && config.defaultAutoCancel === null, "notice nullable reset");
+        check(String(config.useDynamicDefaultNotificationId) === String(originalDynamic), "notice default switch reset");
+        check(String(config.defaultChannelId) === originalChannel, "notice computed default reset");
+        rejects(function() { notice.config({privateDefaultChannelId: "hidden"}); }, "private property");
+        rejects(function() { notice.config({pristine: true}); }, "method is not a property");
+        rejects(function() { notice.config({missing: true}); }, "unknown property");
+        rejects(function() { notice.config({useDynamicDefaultNotificationId: "wrong type"}); }, "wrong type");
+        rejects(function() { notice.config([]); }, "non-object configuration");
+    """.trimIndent())
+
     private fun runScript(uiMode: Boolean, body: String) {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val directory = File(context.cacheDir, "rhino-upstream-${UUID.randomUUID()}")

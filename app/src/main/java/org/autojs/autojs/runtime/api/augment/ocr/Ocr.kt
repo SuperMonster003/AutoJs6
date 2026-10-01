@@ -31,10 +31,10 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier
 import java.util.function.Consumer
 import java.util.function.Supplier
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.declaredMemberProperties
 import android.graphics.Rect as AndroidRect
 import org.autojs.autojs.runtime.api.augment.images.Images as AugmentableImages
 import org.opencv.core.Rect as OpencvRect
@@ -281,16 +281,8 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
 
             companion object {
 
-                /**
-                 * The instance field backing the [OcrMode] property called [name] (case-insensitive), made accessible,
-                 * or null. The enum's own non-static fields are exactly its constructor properties, so plain Java
-                 * reflection is enough and kotlin-reflect is not needed.
-                 * zh-CN: 名为 [name] (不区分大小写) 的 [OcrMode] 属性对应的实例字段 (已设为可访问), 找不到时为 null.
-                 * 枚举自身的非静态字段正是其构造属性, 因此普通 Java 反射足够, 不需要 kotlin-reflect.
-                 */
-                internal fun dispatcherProperty(name: String): Field? = OcrMode::class.java.declaredFields
-                    .firstOrNull { !Modifier.isStatic(it.modifiers) && !it.isSynthetic && it.name.equals(name, ignoreCase = true) }
-                    ?.apply { isAccessible = true }
+                internal fun dispatcherProperty(name: String): KProperty1<OcrMode, *>? =
+                    OcrMode::class.declaredMemberProperties.firstOrNull { it.name.equals(name, ignoreCase = true) }
 
             }
         }

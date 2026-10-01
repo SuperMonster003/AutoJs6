@@ -497,7 +497,7 @@ dependencies /* Unclassified */ {
     // Loaded libraries share the host's kotlin.jvm.internal.Reflection factory through parent delegation.
     // Bundle the matching reflection implementation and its metadata so it does not fall back to ClassReference.
     // zh-CN: 外部库沿用宿主的 Kotlin 反射工厂, 必须保留配套实现及元数据, 避免退化为 ClassReference.
-    runtimeOnly(kotlin("reflect"))
+    implementation(kotlin("reflect"))
 
 
     // Compose

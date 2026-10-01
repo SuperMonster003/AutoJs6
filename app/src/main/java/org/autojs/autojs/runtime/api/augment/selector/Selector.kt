@@ -33,6 +33,7 @@ import org.mozilla.javascript.VarScope
 import java.lang.reflect.Array as JavaArray
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import kotlin.reflect.full.declaredMembers
 
 class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
@@ -138,17 +139,11 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
     }
 
     private fun isInJavaObject(key: String): Boolean {
-        return key in ANY_MEMBER_NAMES
+        return Any::class.declaredMembers.any { it.name == key }
     }
 
     @Suppress("SameParameterValue")
     companion object : ArgumentGuards() {
-
-        // Members every object carries. This is the member set of kotlin.Any, which is what `Object::class`
-        // resolved to under kotlin-reflect (java.lang.Object maps to kotlin.Any), so the exported set is unchanged.
-        // zh-CN: 每个对象都具有的成员. 即 kotlin.Any 的成员集合, 也就是 kotlin-reflect 下 `Object::class` 的解析结果
-        // (java.lang.Object 映射为 kotlin.Any), 因此导出集合不变.
-        private val ANY_MEMBER_NAMES = setOf("equals", "hashCode", "toString")
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
