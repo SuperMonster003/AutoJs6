@@ -18,6 +18,22 @@ import org.junit.Test
 
 class InstallerScriptValuesTest {
 
+    @Test fun optionalAdvancedObservationsPassThroughWithoutChangingInstallationSuccess() {
+        for (status in InstallerContract.DEXOPT_STATUSES) {
+            val completion = InstallerJson.decodeCompletion("""{"ok":true,"packageName":"com.example.app","updateOwner":null,
+                "dexopt":{"filter":"speed-profile","status":"$status","message":"platform observation"}}""")
+            val result = InstallerScriptValues.installResult(completion.single)
+            assertEquals(true, result["ok"])
+            assertTrue(result.containsKey("updateOwner"))
+            assertNull(result["updateOwner"])
+            assertEquals(status, (result["dexopt"] as Map<*, *>)["status"])
+        }
+        val absent = InstallerScriptValues.installResult(InstallerJson.decodeCompletion("""{"ok":true}""").single)
+        assertFalse(absent.containsKey("updateOwner"))
+        assertFalse(absent.containsKey("dexopt"))
+        assertEquals("optimizing", InstallerJson.decodeSessionStatus("""{"state":"optimizing"}""").state)
+    }
+
     @Test
     fun integerFieldsKeepLongPrecisionAndNestedNullsKeepTheirKeys() {
         val value = InstallerScriptValues.toPlain("""{"versionCode":9223372036854775807,"old":-9223372036854775808,"list":[1,1e3,0.25,true,null,"x"],"optional":null}""") as Map<*, *>

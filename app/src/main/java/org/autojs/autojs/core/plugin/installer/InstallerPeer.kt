@@ -20,11 +20,16 @@ internal data class InstallerPeer(
         }
     }
 
-    fun requireInstall(authorizer: String, interaction: String) {
+    fun requireInstall(authorizer: String, interaction: String, options: InstallerJson.InstallOptions = InstallerJson.InstallOptions(authorizer = authorizer)) {
         requireAuthorizer(authorizer)
+        require(options.authorizer == authorizer) { "installation options and selected authorizer differ" }
+        options.validate()?.let { throw IllegalArgumentException(it) }
         require(InstallerContract.isInteraction(interaction)) { "unknown interaction: $interaction" }
         if (interaction == InstallerContract.INTERACTION_NOTIFICATION) {
             requireExtension(InstallerCapabilityKeys.FEATURE_NOTIFICATION_INSTALL, "notification installation")
+        }
+        if (options.hasAdvancedOptions) {
+            requireExtension(InstallerCapabilityKeys.FEATURE_ADVANCED_INSTALL_OPTIONS, "advanced installation options", 3)
         }
     }
 
@@ -36,10 +41,10 @@ internal data class InstallerPeer(
         }
     }
 
-    private fun requireExtension(feature: String, label: String) {
-        if (contractVersion < 2 || feature !in features) throw InstallerPluginException(
+    private fun requireExtension(feature: String, label: String, minimumVersion: Int = 2) {
+        if (contractVersion < minimumVersion || feature !in features) throw InstallerPluginException(
             InstallerErrorMapper.error(InstallerErrorCodes.INVALID_ARGUMENT,
-                "The selected installer plugin does not support $label; contract V2 and $feature are required", retryable = false))
+                "The selected installer plugin does not support $label; contract V$minimumVersion and $feature are required", retryable = false))
     }
 
     companion object {

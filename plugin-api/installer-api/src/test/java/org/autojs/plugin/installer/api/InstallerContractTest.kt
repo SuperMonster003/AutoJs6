@@ -34,12 +34,12 @@ class InstallerContractTest {
         assertEquals("installerSettingsVersion", InstallerCapabilityKeys.SETTINGS_VERSION)
         assertEquals(InstallerCapabilityKeys.FEATURES.size, InstallerCapabilityKeys.FEATURES.toSet().size)
         assertEquals(listOf("batch", "splits", "delete-source", "silent-uninstall", "default-installer", "users", "inspect",
-            "notification-install", "persistent-default-installer"), InstallerCapabilityKeys.FEATURES)
+            "notification-install", "persistent-default-installer", "advanced-install-options"), InstallerCapabilityKeys.FEATURES)
     }
 
     @Test
     fun contractVersionRangeIncludesItsBoundsAndRejectsNeighbours() {
-        assertEquals(2, InstallerContract.CONTRACT_VERSION)
+        assertEquals(3, InstallerContract.CONTRACT_VERSION)
         assertEquals(1, InstallerContract.MIN_CONTRACT_VERSION)
         assertTrue(InstallerContract.MIN_CONTRACT_VERSION <= InstallerContract.MAX_CONTRACT_VERSION)
         assertTrue(InstallerContract.supportsContractVersion(InstallerContract.MIN_CONTRACT_VERSION))
@@ -94,18 +94,40 @@ class InstallerContractTest {
         assertEquals("mode", InstallerContract.FIELD_MODE)
         assertEquals("persistentConfigured", InstallerContract.FIELD_PERSISTENT_CONFIGURED)
 
-        assertEquals(8, InstallerContract.STAGES.size)
+        assertEquals(9, InstallerContract.STAGES.size)
         assertEquals(InstallerContract.STAGES.size, InstallerContract.STAGES.toSet().size)
         assertEquals(setOf("completed", "failed", "cancelled"), InstallerContract.TERMINAL_STAGES)
         assertTrue(InstallerContract.TERMINAL_STAGES.all { it in InstallerContract.STAGES })
         assertTrue(InstallerContract.isTerminalStage("failed"))
         assertFalse(InstallerContract.isTerminalStage("writing"))
         assertTrue(InstallerContract.isStage("writing"))
+        assertTrue(InstallerContract.isStage("optimizing"))
         assertFalse(InstallerContract.isStage("verifying"))
 
         assertEquals(listOf("apk", "apks", "xapk", "apkm", "apkz", "zip", "aab", "unknown"), InstallerContract.FORMATS)
         assertEquals("current", InstallerContract.USER_CURRENT)
         assertEquals("all", InstallerContract.USER_ALL)
+    }
+
+    @Test
+    fun advancedInstallationVocabularyIsClosedAndStable() {
+        assertEquals(listOf("none", "verify", "speed-profile", "speed"), InstallerContract.DEXOPT_MODES)
+        assertEquals(listOf("unknown", "device-restore", "device-setup", "user", "policy"), InstallerContract.INSTALL_REASONS)
+        assertEquals(listOf("unspecified", "store", "local-file", "downloaded-file", "other"), InstallerContract.PACKAGE_SOURCES)
+        assertEquals(listOf("accepted", "failed", "cancelled", "timeout", "unavailable", "unknown"), InstallerContract.DEXOPT_STATUSES)
+        InstallerContract.DEXOPT_MODES.forEach { assertTrue(InstallerContract.isDexoptMode(it)) }
+        InstallerContract.INSTALL_REASONS.forEach { assertTrue(InstallerContract.isInstallReason(it)) }
+        InstallerContract.PACKAGE_SOURCES.forEach { assertTrue(InstallerContract.isPackageSource(it)) }
+        assertFalse(InstallerContract.isDexoptMode(null))
+        assertFalse(InstallerContract.isDexoptMode("everything"))
+        assertFalse(InstallerContract.isInstallReason("1"))
+        assertFalse(InstallerContract.isPackageSource("local"))
+        assertEquals("grantAllRequestedPermissions", InstallerContract.FIELD_GRANT_ALL_REQUESTED_PERMISSIONS)
+        assertEquals("requestUpdateOwnership", InstallerContract.FIELD_REQUEST_UPDATE_OWNERSHIP)
+        assertEquals("updateOwner", InstallerContract.FIELD_UPDATE_OWNER)
+        assertEquals("filter", InstallerContract.FIELD_FILTER)
+        assertEquals("status", InstallerContract.FIELD_DEXOPT_STATUS)
+        assertEquals("message", InstallerContract.FIELD_DEXOPT_MESSAGE)
     }
 
     @Test

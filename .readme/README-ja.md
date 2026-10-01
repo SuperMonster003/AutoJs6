@@ -824,6 +824,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` 動画プレーヤー 3-Ember Player を 3-Amber Player に改名. 新しいアプリ ID に合わせてインストール案内, M3U 再生の優先順位, 透明アイコンの認識を更新
 * `改善` パッケージインストーラを 3-Setup Installer プラグインへ移行: ファイルマネージャ, プラグインセンター, ビルド完了と自動更新のインストール入口は, プラグインが利用可能ならそのインストールダイアログに, そうでなければシステムインストーラにパッケージを渡し, プラグインの導入を案内します. ホストは "AutoJs6 で APK を開く" のシステム入口を登録しなくなり, apks / xapk / apkm / apkz 分割コンテナにはプラグインが必要です
 * `改善` インストール履歴で AutoJs6 の入口と installer スクリプトからのインストールを区別し, スクリプト API の使い方は変更なし (インストール履歴に対応した 3-Setup Installer が必要)
+* `改善` installer のインストールオプションに grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason, packageSource を指定可能. 選択したプラグインの対応機能を確認し, 省略時は従来の動作を維持. 明示的な false/none も対応が必要
 * `改善` Three Stove Agent のモデルブローカーは, モデル呼び出しがタイムアウトし同期 Binder トランザクションが未返却のとき Provider コンポーネントをヒューズしますが, これまでは AutoJs6 プロセスの再起動までヒューズが続き, 以降のタスクが即座に RATE_LIMITED: FUSED で失敗していました. そのトランザクションが実際に返り実行が精算されると自動的に解除され, 再起動なしで以降のタスクが再び受け付けられます
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 

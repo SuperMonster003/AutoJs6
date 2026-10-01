@@ -41,12 +41,36 @@ class InstallerPeerTest {
     }
 
     @Test fun versionRangesRejectOverflowAndUnsupportedMinimumButNegotiateAFutureMaximum() {
-        for ((base, max) in listOf(null to null, 0L to 2L, -1L to 2L, 3L to 3L,
+        for ((base, max) in listOf(null to null, 0L to 2L, -1L to 2L, 4L to 4L,
             2L to 1L, 1L to 0L, 4_294_967_297L to null, 1L to Long.MAX_VALUE)) {
             assertThrows(IllegalArgumentException::class.java) { InstallerPeer.negotiate(base, max, knownFeatures, knownAuthorizers) }
         }
-        assertEquals(2, InstallerPeer.negotiate(1, 3, knownFeatures, knownAuthorizers).contractVersion)
+        assertEquals(3, InstallerPeer.negotiate(1, 4, knownFeatures, knownAuthorizers).contractVersion)
         assertEquals(2, InstallerPeer.negotiate(2, null, knownFeatures, knownAuthorizers).contractVersion)
+    }
+
+    @Test fun advancedOptionsRequireBothV3AndTheLiveFeatureIncludingExplicitNoOps() {
+        val options = listOf(
+            InstallerJson.InstallOptions(grantAllRequestedPermissions = false),
+            InstallerJson.InstallOptions(requestUpdateOwnership = false),
+            InstallerJson.InstallOptions(dexopt = "none"),
+            InstallerJson.InstallOptions(installReason = "unknown"),
+            InstallerJson.InstallOptions(packageSource = "unspecified"),
+        )
+        for (version in listOf(1L, 2L, 3L)) {
+            for (features in listOf(emptySet(), knownFeatures)) {
+                val peer = InstallerPeer.negotiate(1, version, features, knownAuthorizers)
+                peer.requireInstall("auto", "auto")
+                for (value in options) {
+                    if (version == 3L && InstallerCapabilityKeys.FEATURE_ADVANCED_INSTALL_OPTIONS in features) {
+                        peer.requireInstall("auto", "auto", value)
+                    } else refused(InstallerErrorCodes.INVALID_ARGUMENT) { peer.requireInstall("auto", "auto", value) }
+                }
+            }
+        }
+        // Discovery of one plugin cannot authorize another Binder whose live capability changed.
+        val replacement = InstallerPeer.negotiate(1, 3, emptySet(), knownAuthorizers)
+        refused(InstallerErrorCodes.INVALID_ARGUMENT) { replacement.requireInstall("auto", "auto", options.first()) }
     }
 
     @Test fun unknownVocabularyNeverBecomesSupported() {

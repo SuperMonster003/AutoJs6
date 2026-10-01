@@ -32,6 +32,7 @@ class InstallerScriptOptionsTest {
             assertTrue(continueOnError)
             assertEquals(1_800_000L, timeoutMillis)
             assertNull(validate())
+            assertFalse(hasAdvancedOptions)
         }
         val uninstall = InstallerScriptOptions.uninstall(null)
         assertEquals("auto", uninstall.authorizer)
@@ -73,7 +74,8 @@ class InstallerScriptOptionsTest {
     fun explicitNullDoesNotSelectADefault() {
         invalid { InstallerScriptOptions.install(JsonNull.INSTANCE) }
         invalid { InstallerScriptOptions.uninstall(JsonNull.INSTANCE) }
-        listOf("authorizer", "interaction", "allowDowngrade", "allowTestOnly", "bypassLowTargetSdk", "installer", "user", "deleteSource", "continueOnError", "timeout").forEach {
+        listOf("authorizer", "interaction", "allowDowngrade", "allowTestOnly", "bypassLowTargetSdk", "installer", "user", "deleteSource", "continueOnError", "timeout",
+            "grantAllRequestedPermissions", "requestUpdateOwnership", "dexopt", "installReason", "packageSource").forEach {
             invalid { InstallerScriptOptions.install(json("""{"$it":null}""")) }
         }
         listOf("authorizer", "interaction", "keepData", "user", "timeout").forEach {
@@ -168,6 +170,30 @@ class InstallerScriptOptionsTest {
             invalid { InstallerScriptOptions.setDefault(json("""{"mode":$value}""")) }
         }
         invalid { InstallerScriptOptions.uninstall(json("""{"interaction":"notification"}""")) }
+    }
+
+    @Test fun advancedOptionsPreserveAbsenceAndExplicitNoOpsWithoutCoercion() {
+        with(InstallerScriptOptions.install(null).install) {
+            assertNull(grantAllRequestedPermissions); assertNull(requestUpdateOwnership)
+            assertNull(dexopt); assertNull(installReason); assertNull(packageSource)
+            assertFalse(hasAdvancedOptions)
+        }
+        with(InstallerScriptOptions.install(json("""{"grantAllRequestedPermissions":false,"requestUpdateOwnership":false,
+            "dexopt":"none","installReason":"unknown","packageSource":"unspecified"}""")).install) {
+            assertEquals(false, grantAllRequestedPermissions); assertEquals(false, requestUpdateOwnership)
+            assertEquals("none", dexopt); assertEquals("unknown", installReason); assertEquals("unspecified", packageSource)
+            assertTrue(hasAdvancedOptions)
+        }
+        for (key in listOf("grantAllRequestedPermissions", "requestUpdateOwnership")) {
+            for (value in listOf("1", "\"true\"", "{}", "[]")) invalid { InstallerScriptOptions.install(json("""{"$key":$value}""")) }
+        }
+        for ((key, values) in mapOf("dexopt" to InstallerContract.DEXOPT_MODES,
+            "installReason" to InstallerContract.INSTALL_REASONS, "packageSource" to InstallerContract.PACKAGE_SOURCES)) {
+            for (value in values) assertTrue(InstallerScriptOptions.install(json("""{"$key":"$value"}""")).install.hasAdvancedOptions)
+            for (value in listOf("0", "true", "\"ALL\"", "\"\"")) invalid { InstallerScriptOptions.install(json("""{"$key":$value}""")) }
+            invalid { InstallerScriptOptions.uninstall(json("""{"$key":"${values.first()}"}""")) }
+        }
+        invalid { InstallerScriptOptions.install(json("""{"overridePolicy":true}""")) }
     }
 
     private fun json(value: String): JsonElement = JsonParser.parseString(value)

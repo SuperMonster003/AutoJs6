@@ -824,6 +824,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 影片播放器 3-Ember Player 更名為 3-Amber Player, 更新插件安裝引導, M3U 播放優先次序及透明圖示識別, 使用新的獨立應用程式套件名稱
 * `優化` 安裝器能力遷出到 3-Setup Installer 插件: 檔案管理器, 插件中心, 打包完成與自更新的安裝入口在插件可用時交給插件的安裝對話框, 否則將 APK 交給系統安裝器並提示安裝插件; 宿主不再註冊 "用 AutoJs6 開啟 APK" 的系統入口, apks / xapk / apkm / apkz 分包容器需要插件才能安裝
 * `優化` 安裝歷史可區分 AutoJs6 入口與 installer 腳本發起的安裝, 腳本 API 用法不變 (需要支援安裝歷史的 3-Setup Installer 插件)
+* `優化` installer 安裝選項接受 grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason 及 packageSource, 按插件能力啟用; 省略保留原行為, 明確指定 false/none 仍需對應支援
 * `優化` Three Stove Agent 模型代理在一次模型呼叫逾時且同步 Binder 交易尚未返回時會熔斷該 Provider 元件, 此前熔斷持續到 AutoJs6 程序重啟, 後續任務立即以 RATE_LIMITED: FUSED 失敗; 現在該交易實際返回並結清後自動解除熔斷, 後續任務無需重啟即可再次准入
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 

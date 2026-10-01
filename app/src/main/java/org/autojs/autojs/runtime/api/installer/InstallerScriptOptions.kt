@@ -19,6 +19,7 @@ data class InstallerScriptOptions(
         private val INSTALL_KEYS = setOf(
             "authorizer", "interaction", "allowDowngrade", "allowTestOnly", "bypassLowTargetSdk",
             "installer", "user", "deleteSource", "continueOnError", "timeout",
+            "grantAllRequestedPermissions", "requestUpdateOwnership", "dexopt", "installReason", "packageSource",
         )
         private val UNINSTALL_KEYS = setOf("authorizer", "interaction", "keepData", "user", "timeout")
         private val PACKAGE_NAME = Regex("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+")
@@ -41,6 +42,15 @@ data class InstallerScriptOptions(
                     deleteSource = boolean(options.get("deleteSource"), "options.deleteSource", false),
                     continueOnError = boolean(options.get("continueOnError"), "options.continueOnError", true),
                     timeoutMillis = timeout(options.get("timeout")),
+                    grantAllRequestedPermissions = options.get("grantAllRequestedPermissions")?.let {
+                        boolean(it, "options.grantAllRequestedPermissions", false)
+                    },
+                    requestUpdateOwnership = options.get("requestUpdateOwnership")?.let {
+                        boolean(it, "options.requestUpdateOwnership", false)
+                    },
+                    dexopt = optionalEnum(options.get("dexopt"), "options.dexopt", InstallerContract.DEXOPT_MODES),
+                    installReason = optionalEnum(options.get("installReason"), "options.installReason", InstallerContract.INSTALL_REASONS),
+                    packageSource = optionalEnum(options.get("packageSource"), "options.packageSource", InstallerContract.PACKAGE_SOURCES),
                 ),
             )
         }
@@ -125,6 +135,11 @@ data class InstallerScriptOptions(
             if (value == null) return default
             if (!value.isJsonPrimitive || !value.asJsonPrimitive.isBoolean) throw invalid("'$label' must be a boolean")
             return value.asBoolean
+        }
+
+        private fun optionalEnum(value: JsonElement?, label: String, allowed: List<String>): String? {
+            if (value == null) return null
+            return string(value, label).also { if (it !in allowed) throw invalid("'$label' must be one of ${allowed.joinToString()}") }
         }
 
         private fun integer(value: JsonElement, label: String, range: LongRange): Long {

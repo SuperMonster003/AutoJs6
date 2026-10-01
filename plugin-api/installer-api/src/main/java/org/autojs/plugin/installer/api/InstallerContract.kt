@@ -2,17 +2,18 @@ package org.autojs.plugin.installer.api
 
 /**
  * Frozen vocabulary of the installer contract: Bundle keys, JSON document fields, closed value
- * sets and the hard ceilings both sides enforce. Version 2 extends version 1 without changing its
- * transaction order. Peers advertise a minimum and maximum version; requests use the negotiated
+ * sets and the hard ceilings both sides enforce. Version 3 adds negotiated installation options
+ * without changing the eleven V1/V2 transactions. Peers advertise minimum and maximum versions;
+ * requests use the negotiated
  * version, never the newest constant unconditionally. The JSON
  * documents carried under the `*_JSON` keys are described in
  * `docs/dev/installer-plugin-protocol-v1.md`.
  */
 object InstallerContract {
 
-    const val CONTRACT_VERSION = 2
+    const val CONTRACT_VERSION = 3
     const val MIN_CONTRACT_VERSION = 1
-    const val MAX_CONTRACT_VERSION = 2
+    const val MAX_CONTRACT_VERSION = 3
 
     fun supportsContractVersion(version: Int): Boolean = version in MIN_CONTRACT_VERSION..MAX_CONTRACT_VERSION
 
@@ -61,6 +62,12 @@ object InstallerContract {
     const val FIELD_ALLOW_DOWNGRADE = "allowDowngrade"
     const val FIELD_ALLOW_TEST_ONLY = "allowTestOnly"
     const val FIELD_BYPASS_LOW_TARGET_SDK = "bypassLowTargetSdk"
+    /** V3 options: omission preserves the backend's existing defaults; explicit no-ops still need V3. */
+    const val FIELD_GRANT_ALL_REQUESTED_PERMISSIONS = "grantAllRequestedPermissions"
+    const val FIELD_REQUEST_UPDATE_OWNERSHIP = "requestUpdateOwnership"
+    const val FIELD_DEXOPT = "dexopt"
+    const val FIELD_INSTALL_REASON = "installReason"
+    const val FIELD_PACKAGE_SOURCE = "packageSource"
     const val FIELD_INSTALLER = "installer"
     const val FIELD_USER = "user"
     const val FIELD_DELETE_SOURCE = "deleteSource"
@@ -86,6 +93,11 @@ object InstallerContract {
     const val FIELD_DURATION_MILLIS = "durationMillis"
     const val FIELD_SOURCE_DELETED = "sourceDeleted"
     const val FIELD_NOTES = "notes"
+    /** Optional V3 observations; accepted dexopt does not prove compilation actually ran. */
+    const val FIELD_UPDATE_OWNER = "updateOwner"
+    const val FIELD_FILTER = "filter"
+    const val FIELD_DEXOPT_STATUS = "status"
+    const val FIELD_DEXOPT_MESSAGE = "message"
     const val FIELD_STAGE = "stage"
     const val FIELD_STATE = "state"
     const val FIELD_INDEX = "index"
@@ -156,6 +168,8 @@ object InstallerContract {
     const val STAGE_CONFIRMING = "confirming"
     const val STAGE_WRITING = "writing"
     const val STAGE_COMMITTING = "committing"
+    /** V3 only, when a non-none manual dexopt was requested. */
+    const val STAGE_OPTIMIZING = "optimizing"
     const val STAGE_COMPLETED = "completed"
     const val STAGE_FAILED = "failed"
     const val STAGE_CANCELLED = "cancelled"
@@ -167,6 +181,7 @@ object InstallerContract {
         STAGE_CONFIRMING,
         STAGE_WRITING,
         STAGE_COMMITTING,
+        STAGE_OPTIMIZING,
         STAGE_COMPLETED,
         STAGE_FAILED,
         STAGE_CANCELLED,
@@ -198,6 +213,37 @@ object InstallerContract {
     const val DEFAULT_MODE_PERSISTENT = "persistent"
     val DEFAULT_MODES: List<String> = listOf(DEFAULT_MODE_PREFERRED, DEFAULT_MODE_PERSISTENT)
 
+    /** Extra manual compilation only; none does not disable Android's own compilation. */
+    const val DEXOPT_NONE = "none"
+    const val DEXOPT_VERIFY = "verify"
+    const val DEXOPT_SPEED_PROFILE = "speed-profile"
+    const val DEXOPT_SPEED = "speed"
+    val DEXOPT_MODES: List<String> = listOf(DEXOPT_NONE, DEXOPT_VERIFY, DEXOPT_SPEED_PROFILE, DEXOPT_SPEED)
+    const val DEXOPT_STATUS_ACCEPTED = "accepted"
+    const val DEXOPT_STATUS_FAILED = "failed"
+    const val DEXOPT_STATUS_CANCELLED = "cancelled"
+    const val DEXOPT_STATUS_TIMEOUT = "timeout"
+    const val DEXOPT_STATUS_UNAVAILABLE = "unavailable"
+    const val DEXOPT_STATUS_UNKNOWN = "unknown"
+    val DEXOPT_STATUSES: List<String> = listOf(DEXOPT_STATUS_ACCEPTED, DEXOPT_STATUS_FAILED,
+        DEXOPT_STATUS_CANCELLED, DEXOPT_STATUS_TIMEOUT, DEXOPT_STATUS_UNAVAILABLE, DEXOPT_STATUS_UNKNOWN)
+
+    const val INSTALL_REASON_UNKNOWN = "unknown"
+    const val INSTALL_REASON_DEVICE_RESTORE = "device-restore"
+    const val INSTALL_REASON_DEVICE_SETUP = "device-setup"
+    const val INSTALL_REASON_USER = "user"
+    const val INSTALL_REASON_POLICY = "policy"
+    val INSTALL_REASONS: List<String> = listOf(INSTALL_REASON_UNKNOWN, INSTALL_REASON_DEVICE_RESTORE,
+        INSTALL_REASON_DEVICE_SETUP, INSTALL_REASON_USER, INSTALL_REASON_POLICY)
+
+    const val PACKAGE_SOURCE_UNSPECIFIED = "unspecified"
+    const val PACKAGE_SOURCE_STORE = "store"
+    const val PACKAGE_SOURCE_LOCAL_FILE = "local-file"
+    const val PACKAGE_SOURCE_DOWNLOADED_FILE = "downloaded-file"
+    const val PACKAGE_SOURCE_OTHER = "other"
+    val PACKAGE_SOURCES: List<String> = listOf(PACKAGE_SOURCE_UNSPECIFIED, PACKAGE_SOURCE_STORE,
+        PACKAGE_SOURCE_LOCAL_FILE, PACKAGE_SOURCE_DOWNLOADED_FILE, PACKAGE_SOURCE_OTHER)
+
     // Ceilings (plugin roadmap D31). Both sides reject anything beyond them with INVALID_ARGUMENT.
 
     const val MAX_BATCH_SOURCES = 32
@@ -216,6 +262,12 @@ object InstallerContract {
     fun isInteraction(value: String?): Boolean = value != null && value in INTERACTIONS
 
     fun isDefaultMode(value: String?): Boolean = value != null && value in DEFAULT_MODES
+
+    fun isDexoptMode(value: String?): Boolean = value != null && value in DEXOPT_MODES
+
+    fun isInstallReason(value: String?): Boolean = value != null && value in INSTALL_REASONS
+
+    fun isPackageSource(value: String?): Boolean = value != null && value in PACKAGE_SOURCES
 
     fun isStage(value: String?): Boolean = value != null && value in STAGES
 

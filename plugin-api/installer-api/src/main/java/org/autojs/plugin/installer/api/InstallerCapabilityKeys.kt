@@ -44,6 +44,8 @@ object InstallerCapabilityKeys {
     const val FEATURE_NOTIFICATION_INSTALL = "notification-install"
     /** V2: setDefaultInstallerV2 can manage the persistent scope. */
     const val FEATURE_PERSISTENT_DEFAULT_INSTALLER = "persistent-default-installer"
+    /** V3: the five advanced installation options, with platform/authorizer checks at execution. */
+    const val FEATURE_ADVANCED_INSTALL_OPTIONS = "advanced-install-options"
 
     /** Known optional features; only implemented features may be advertised by a plugin. */
     val FEATURES: List<String> = listOf(
@@ -56,5 +58,6 @@ object InstallerCapabilityKeys {
         FEATURE_INSPECT,
         FEATURE_NOTIFICATION_INSTALL,
         FEATURE_PERSISTENT_DEFAULT_INSTALLER,
+        FEATURE_ADVANCED_INSTALL_OPTIONS,
     )
 }

@@ -29,13 +29,25 @@ object InstallerJson {
         val deleteSource: Boolean = false,
         val continueOnError: Boolean = true,
         val timeoutMillis: Long = InstallerContract.DEFAULT_SESSION_TIMEOUT_MILLIS,
+        /** Null means not provided, unlike an explicit false or none, which still requires V3. */
+        val grantAllRequestedPermissions: Boolean? = null,
+        val requestUpdateOwnership: Boolean? = null,
+        val dexopt: String? = null,
+        val installReason: String? = null,
+        val packageSource: String? = null,
     ) {
+        val hasAdvancedOptions: Boolean get() = grantAllRequestedPermissions != null || requestUpdateOwnership != null ||
+            dexopt != null || installReason != null || packageSource != null
+
         fun validate(): String? = when {
             !InstallerContract.isAuthorizer(authorizer) -> "unknown authorizer: $authorizer"
             installer != null && installer.length > InstallerContract.MAX_INSTALLER_PACKAGE_LENGTH -> "installer package name is too long"
             installer != null && installer.isBlank() -> "installer package name must not be blank"
             !isUser(user) -> "unknown user: $user"
             timeoutMillis <= 0L || timeoutMillis > InstallerContract.MAX_SESSION_TIMEOUT_MILLIS -> "timeoutMillis out of range"
+            dexopt != null && !InstallerContract.isDexoptMode(dexopt) -> "unknown dexopt mode: $dexopt"
+            installReason != null && !InstallerContract.isInstallReason(installReason) -> "unknown install reason: $installReason"
+            packageSource != null && !InstallerContract.isPackageSource(packageSource) -> "unknown package source: $packageSource"
             else -> null
         }
     }
@@ -159,6 +171,11 @@ object InstallerJson {
                 addProperty(InstallerContract.FIELD_DELETE_SOURCE, options.deleteSource)
                 addProperty(InstallerContract.FIELD_CONTINUE_ON_ERROR, options.continueOnError)
                 addProperty(InstallerContract.FIELD_TIMEOUT_MILLIS, options.timeoutMillis)
+                options.grantAllRequestedPermissions?.let { addProperty(InstallerContract.FIELD_GRANT_ALL_REQUESTED_PERMISSIONS, it) }
+                options.requestUpdateOwnership?.let { addProperty(InstallerContract.FIELD_REQUEST_UPDATE_OWNERSHIP, it) }
+                options.dexopt?.let { addProperty(InstallerContract.FIELD_DEXOPT, it) }
+                options.installReason?.let { addProperty(InstallerContract.FIELD_INSTALL_REASON, it) }
+                options.packageSource?.let { addProperty(InstallerContract.FIELD_PACKAGE_SOURCE, it) }
             })
         }
         return checkSize(document.toString(), "install request")

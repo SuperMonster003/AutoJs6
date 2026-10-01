@@ -661,6 +661,7 @@
         "Rename the video player from 3-Ember Player to 3-Amber Player; update plugin installation guidance, M3U playback preference and transparent icon recognition for its new application ID",
         "The package installer moved to the 3-Setup Installer plugin: the install entries of the file manager, Plugin Center, a finished build and the self-update hand the package to the plugin's install dialog when the plugin is available and to the system installer otherwise, with a hint to install the plugin; the host no longer registers the \"open APK with AutoJs6\" system entry, and apks / xapk / apkm / apkz split containers need the plugin",
         "Installation history distinguishes installs started from AutoJs6 entries and installer scripts, with no change to script API usage (requires a 3-Setup Installer version with installation history)",
+        "installer installation options accept grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason and packageSource when supported by the selected plugin; omission preserves existing behavior, while explicit false/none still requires support",
         "The Three Stove Agent model broker fuses a Provider component when a model call times out while its synchronous Binder transaction has not returned; the fuse used to last until AutoJs6 restarted, failing later tasks at once with RATE_LIMITED: FUSED. It is now lifted automatically once that transaction has returned and the run has settled, so later tasks are admitted again without a restart"
       ],
       "dependency": [

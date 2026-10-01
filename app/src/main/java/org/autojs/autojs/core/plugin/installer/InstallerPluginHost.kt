@@ -148,7 +148,7 @@ object InstallerPluginHost {
                 val callback = InstallerSessionCallbackBinder(hostSessionId, listener)
                 val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
                     val peer = peer(proxy)
-                    peer.requireInstall(options.authorizer, interaction)
+                    peer.requireInstall(options.authorizer, interaction, options)
                     val request = InstallerBundles.request(requestJson, hostVersionCode, hostSessionId, peer.contractVersion)
                     proxy.openSession(descriptors, request, callback) ?: throw refusal(callback)
                 }

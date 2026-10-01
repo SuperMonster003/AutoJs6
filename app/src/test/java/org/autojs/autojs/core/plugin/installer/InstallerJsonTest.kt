@@ -12,6 +12,23 @@ import org.junit.Test
 
 class InstallerJsonTest {
 
+    @Test fun `advanced option omission is distinct from explicitly requested false and none`() {
+        fun options(value: InstallerJson.InstallOptions) = JsonParser.parseString(
+            InstallerJson.encodeInstallRequest("v3", sources(1), "auto", value)).asJsonObject.getAsJsonObject("options")
+        val keys = setOf("grantAllRequestedPermissions", "requestUpdateOwnership", "dexopt", "installReason", "packageSource")
+        assertTrue(options(InstallerJson.InstallOptions()).keySet().intersect(keys).isEmpty())
+        val explicit = options(InstallerJson.InstallOptions(grantAllRequestedPermissions = false, requestUpdateOwnership = false,
+            dexopt = "none", installReason = "unknown", packageSource = "unspecified"))
+        assertTrue(explicit.keySet().containsAll(keys))
+        assertFalse(explicit["grantAllRequestedPermissions"].asBoolean)
+        assertFalse(explicit["requestUpdateOwnership"].asBoolean)
+        assertEquals("none", explicit["dexopt"].asString)
+        for (value in listOf(InstallerJson.InstallOptions(dexopt = "invalid"),
+            InstallerJson.InstallOptions(installReason = "1"), InstallerJson.InstallOptions(packageSource = "local"))) {
+            assertThrows(IllegalArgumentException::class.java) { options(value) }
+        }
+    }
+
     private fun sources(items: Int, splitsPerItem: Int = 1): List<InstallerJson.SourceEntry> =
         (0 until items).flatMap { item -> (0 until splitsPerItem).map { split -> InstallerJson.SourceEntry(item, "item$item-split$split.apk", 1000L + split) } }
 

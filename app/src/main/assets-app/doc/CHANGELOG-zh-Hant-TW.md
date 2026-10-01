@@ -662,6 +662,7 @@
 * `最佳化` 影片播放器 3-Ember Player 更名為 3-Amber Player, 更新外掛安裝引導, M3U 播放優先順序及透明圖示識別, 使用新的獨立應用程式套件名稱
 * `最佳化` 安裝器能力遷出到 3-Setup Installer 外掛: 檔案管理器, 外掛中心, 打包完成與自更新的安裝入口在外掛可用時交給外掛的安裝對話框, 否則將 APK 交給系統安裝器並提示安裝外掛; 宿主不再註冊 "用 AutoJs6 開啟 APK" 的系統入口, apks / xapk / apkm / apkz 分包容器需要外掛才能安裝
 * `最佳化` 安裝歷史可區分 AutoJs6 入口與 installer 指令碼發起的安裝, 指令碼 API 用法不變 (需要支援安裝歷史的 3-Setup Installer 外掛)
+* `最佳化` installer 安裝選項接受 grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason 及 packageSource, 依外掛能力啟用; 省略保留原行為, 明確指定 false/none 仍需對應支援
 * `最佳化` Three Stove Agent 模型代理在一次模型呼叫逾時且同步 Binder 交易尚未返回時會熔斷該 Provider 元件, 此前熔斷持續到 AutoJs6 程序重啟, 後續任務立即以 RATE_LIMITED: FUSED 失敗; 現在該交易實際返回並結清後自動解除熔斷, 後續任務無需重啟即可再次准入
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
