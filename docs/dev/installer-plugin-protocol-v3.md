@@ -44,9 +44,14 @@ The new metadata does not change the trusted `sourceOrigin` host/script history 
 Capability advertisement means that the plugin understands these options; it does not grant
 privileges or promise every option on every Android version. The plugin checks SDK, authorizer,
 target user, installation state and policy before applying them, and rejects unsupported
-requests without silently discarding flags or changing authorizer. Runtime permission requests
-and update ownership are requests to Android, not claims that all permissions or ownership
-were acquired. Android exposes install reasons from API 26, package-source metadata from API 33,
+requests without silently discarding flags or changing authorizer. Permission grants and update
+ownership are requests to Android, not claims that all declared permissions or ownership were
+acquired. Supported installer-changeable app-ops can also be affected, such as full-screen intent
+access on Android 14. Accessibility, overlay and arbitrary signature permissions are not granted;
+restricted/system-fixed/policy-fixed rules still apply, without an extra restricted-permission
+allowlist flag. A false ownership option does not revoke an existing owner. Updates or a package
+already installed in another user may cause Android to ignore the ownership request.
+Android exposes install reasons from API 26, package-source metadata from API 33,
 and update-ownership requests from API 34; ownership enforcement can only start on an initial
 installation. See the official [SessionParams reference](https://developer.android.com/reference/android/content/pm/PackageInstaller.SessionParams).
 
@@ -71,9 +76,10 @@ Install results may include:
 }
 ```
 
-- `updateOwner` appears only after ownership was requested and its actual state was read back.
-  A successful read with no owner uses explicit null. A failed read omits the field and records
-  a note; omission must not be interpreted as proof that no owner exists.
+- `updateOwner` appears only after ownership was requested and a read completed for the calling
+  identity. Null means Android returned no owner to that identity, either because none exists or
+  because visibility/profile filtering hid it. It does not prove globally absent ownership.
+  A failed read omits the field and records a note; omission also does not prove absence.
 - `dexopt` appears only when the extra non-`none` step was requested. Its status is one of
   `accepted`, `failed`, `cancelled`, `timeout`, `unavailable`, or `unknown`. `accepted` includes
   a system skip and does not claim that compilation ran. `unknown` covers an unrecognized or
@@ -85,12 +91,16 @@ Install results may include:
 
 ## Local installation policy
 
-Signature and blacklist policy remain local plugin settings. Their rejection uses the existing
+Signature checks remain a plugin-local gate, and blacklist rules are local settings. Rejection uses the existing
 `BLOCKED_BY_POLICY` code, with a message identifying the reason, so original hosts do not reduce
 an unfamiliar code to `INTERNAL`. Only the plugin's one-time dialog confirmation may override a
 signature-policy decision for that item. A blacklist decision is not overridable. The script
 options contain no bypass field or reusable authorization token. Platform signature validation
 still applies after any local confirmation. This protocol adds no per-source profile behavior.
+
+Installed-signature queries using none/Dhizuku cover the current user; Shizuku/Root can query
+globally. With nonempty SharedUID rules, an absent current-user package cannot exclude an
+existing record in another user, so an unverifiable global state is blocked without override.
 
 Public documentation and declarations are synchronized after the plugin's backend and device
 semantics settle; this contract change is not a release or device-matrix announcement.

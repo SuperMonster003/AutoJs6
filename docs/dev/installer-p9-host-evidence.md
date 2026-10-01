@@ -24,5 +24,25 @@ Validation on the implementation sources:
 
 Host build 5308 carries the script extension. This evidence does not claim plugin execution,
 post-install outcome checks or a new Android device matrix; those belong to the plugin's
-backend acceptance. Four associated public-documentation/declaration repositories are held
-until those semantics are validated. All changes and commits remain local.
+backend acceptance. Four associated public-documentation/declaration repositories are
+synchronized separately after semantic review; their checks do not replace device acceptance.
+All changes and commits remain local.
+
+## Fixed host test APK
+
+After the V3 host commit and the shared-parser commit, host build 5309 App Debug and androidTest
+assembly passed (`build/p9-host-debug5309.log`). Artifacts were copied immediately under
+`build/p9-fixed-host5309/`, with before/copy/after source hashes agreeing:
+
+- `host5309-universal.apk`: 42,236,039 bytes, SHA-256
+  `a2737d3ead27e64b2629336c71dab346085650ec2ed683137b1fb0819588f6ff`.
+- `host5309-androidTest.apk`: 3,433,353 bytes, SHA-256
+  `0275ee5a927ad2c9db2a5187f1603a69d9a388f9ebe8aff3b915ba96f155cff0`.
+
+The workspace was at `3876677bae`, but a parallel task introduced an untracked accessibility
+inspector package during this build, and its package is present in the DEX. This is an exactly
+identified integrated test APK, not a claim of a clean-commit-only build. That other task's
+sources were neither modified nor committed as part of the installer changes. Its later
+commit does not retroactively change this provenance boundary. Both release AARs were copied
+alongside the APKs with their already-recorded hashes. Device runs use only the dedicated AVD;
+this build step did not replace the host on a user device.
