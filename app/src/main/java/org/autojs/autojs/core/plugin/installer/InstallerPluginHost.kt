@@ -54,6 +54,7 @@ object InstallerPluginHost {
         proxyFactory = { binder -> IInstallerPlugin.Stub.asInterface(binder) },
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
         defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(InstallerIds.ENGINE),
+        allowActivityStarts = true,
         preBindValidator = ::validateService,
     )
 

@@ -40,6 +40,7 @@ class AidlPluginHost<I : IInterface>(
     private val proxyFactory: (IBinder) -> I,
     private val infoReader: (I) -> PluginInfo,
     private val defaultEnabled: Boolean = true,
+    private val allowActivityStarts: Boolean = false,
     private val preBindValidator: ((Context, ServiceInfo) -> Unit)? = null,
 ) {
 
@@ -402,6 +403,9 @@ class AidlPluginHost<I : IInterface>(
 
     private fun buildBindFlags(serviceInfo: ServiceInfo): Int {
         var flags = Context.BIND_AUTO_CREATE
+        // Only a plugin that owns a requested user interface receives this opt-in. Android still
+        // requires the bound client to be visible; background calls use the plugin notification.
+        if (allowActivityStarts && Build.VERSION.SDK_INT >= 34) flags = flags or Context.BIND_ALLOW_ACTIVITY_STARTS
         if (externalServiceFlag != 0 && bindExternalServiceFlag != 0 && (serviceInfo.flags and externalServiceFlag) != 0) {
             flags = flags or bindExternalServiceFlag
         }

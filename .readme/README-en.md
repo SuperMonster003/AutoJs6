@@ -648,6 +648,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The built-in package installer could reject V2/V3-signed APKs on Android 9-11 with "Base APK has no verifiable signer" because the platform archive parser left the signing info empty; the deprecated archive signature view is now consulted as a fallback
 * `Fix` The five Three plugins use transparent icons in Plugin Center that follow the host light or dark theme without launcher backgrounds
 * `Fix` Package inspection recognizes APK split sets in ordinary ZIP files, including equivalent containers without a known package extension
+* `Fix` 3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record

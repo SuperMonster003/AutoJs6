@@ -18,6 +18,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
@@ -36,6 +40,8 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
     private lateinit var route: String
     private lateinit var result: JSONObject
     private var priorPolicy: StrictMode.VmPolicy? = null
+    private var restoreInstallerEnabled: Boolean? = null
+    private var installerProbeJob: kotlinx.coroutines.Job? = null
     private var waitingForBelowAttempt = false
     private val launcher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
         result.put("resultCode", it.resultCode).put("resultCase", it.data?.getStringExtra("case"))
@@ -44,6 +50,7 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent.hasExtra("cancelInstallerProbe")) { finish(); return }
         caseId = requireNotNull(intent.getStringExtra("case"))
         require(caseId.matches(Regex("[A-Za-z0-9_-]{1,80}")))
         route = requireNotNull(intent.getStringExtra("route"))
@@ -150,13 +157,37 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
                     require(apkName.matches(Regex("[A-Za-z0-9_.-]+\\.apk")))
                     result.put("installUiStarted", PackageInstallRouter.install(this, File(filesDir, apkName)))
                 }
+                "installer-integration" -> {
+                    // Explicit DUMP-protected debug probe. Only the code-free installer fixture is
+                    // accepted; production host discovery, caller identity, binding and routing run unchanged.
+                    val apk = File(filesDir, "p3-installer-foreground-fixture.apk")
+                    val archive = requireNotNull(packageManager.getPackageArchiveInfo(apk.path, 0))
+                    check(archive.packageName == INSTALLER_FIXTURE && archive.applicationInfo?.flags?.and(android.content.pm.ApplicationInfo.FLAG_HAS_CODE) == 0)
+                    check(runCatching { packageManager.getPackageInfo(INSTALLER_FIXTURE, android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES) }.isFailure)
+                    restoreInstallerEnabled = PluginEnableStore.isEnabled(this, INSTALLER_PLUGIN)
+                    result.put("installerEnabledBefore", restoreInstallerEnabled)
+                    PluginEnableStore.setEnabled(this, INSTALLER_PLUGIN, true)
+                    installerProbeJob = lifecycleScope.launch {
+                        try {
+                            val outcome = PackageInstallRouter.installAndAwait(this@ActivityLaunchCompatibilityProbeActivity,
+                                AppFileProvider.getUriForFile(this@ActivityLaunchCompatibilityProbeActivity, apk), INSTALLER_FIXTURE, apk.name)
+                            result.put("installerSucceeded", outcome is PackageInstallRouter.AwaitResult.Success)
+                            if (outcome is PackageInstallRouter.AwaitResult.Failure) result.put("installerFailure", outcome.detail)
+                        } catch (failure: Exception) {
+                            result.put("installerFailure", failure.toString())
+                        } finally {
+                            restoreInstallerPreference()
+                            complete()
+                        }
+                    }
+                }
                 else -> error("Unknown route: $route")
             }
         } catch (error: Throwable) {
             result.put("error", error.toString())
         }
         save()
-        if (result.has("error") || route !in setOf("asm", "script-launch", "script-start")) {
+        if (result.has("error") || route !in setOf("asm", "script-launch", "script-start", "installer-integration")) {
             handler.postDelayed(::complete, if (route == "install") 12_000 else 6_000)
         }
     }
@@ -181,8 +212,16 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (::caseId.isInitialized && intent.getStringExtra("cancelInstallerProbe") == caseId) {
+            installerProbeJob?.cancel()
+            restoreInstallerPreference()
+        }
+    }
+
     private fun complete() {
-        if (route !in setOf("install", "install-recovery", "install-ui")) runCatching {
+        if (route !in setOf("install", "install-recovery", "install-ui", "installer-integration")) runCatching {
             val key = if (route == "script-launch") "launcher" else caseId
             val event = contentResolver.call(FIXTURE_URI, "read", key, null)?.getString("event") ?: "{}"
             result.put("fixtureEvent", JSONObject(event))
@@ -200,13 +239,24 @@ class ActivityLaunchCompatibilityProbeActivity : ComponentActivity() {
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
+        restoreInstallerPreference()
         priorPolicy?.let(StrictMode::setVmPolicy)
         super.onDestroy()
     }
 
     companion object {
+        private const val INSTALLER_PLUGIN = "io.github.supermonster003.autojs6.plugin.three.setup.installer"
+        private const val INSTALLER_FIXTURE = "io.github.supermonster003.autojs6.installer.spike.fixture"
         const val FIXTURE_PACKAGE = "org.autojs.sdk37.balfixture"
         val FIXTURE_URI: Uri = Uri.parse("content://$FIXTURE_PACKAGE")
+    }
+
+    private fun restoreInstallerPreference() {
+        restoreInstallerEnabled?.let { enabled ->
+            restoreInstallerEnabled = null
+            PluginEnableStore.setEnabled(applicationContext, INSTALLER_PLUGIN, enabled)
+            result.put("installerPreferenceRestored", PluginEnableStore.isEnabled(applicationContext, INSTALLER_PLUGIN) == enabled)
+        }
     }
 }
 

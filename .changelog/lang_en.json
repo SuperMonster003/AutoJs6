@@ -482,7 +482,8 @@
         "When picking the APK for an update, a release without an asset for the first preferred ABI could pick a later lower-priority asset in the list (such as the universal one) instead of the asset of the next preferred ABI",
         "The built-in package installer could reject V2/V3-signed APKs on Android 9-11 with \"Base APK has no verifiable signer\" because the platform archive parser left the signing info empty; the deprecated archive signature view is now consulted as a fallback",
         "The five Three plugins use transparent icons in Plugin Center that follow the host light or dark theme without launcher backgrounds",
-        "Package inspection recognizes APK split sets in ordinary ZIP files, including equivalent containers without a known package extension"
+        "Package inspection recognizes APK split sets in ordinary ZIP files, including equivalent containers without a known package extension",
+        "3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground"
       ],
       "improvement": [
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",

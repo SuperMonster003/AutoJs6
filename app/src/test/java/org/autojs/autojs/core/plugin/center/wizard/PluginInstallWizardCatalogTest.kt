@@ -78,7 +78,7 @@ class PluginInstallWizardCatalogTest {
             order,
         )
         assertFalse(PluginInstallWizardCatalog.entries.any { it.category == PluginInstallWizardCategory.OTHERS })
-        assertEquals(45, PluginInstallWizardCatalog.entries.size)
+        assertEquals(46, PluginInstallWizardCatalog.entries.size)
     }
 
     @Test
@@ -94,6 +94,11 @@ class PluginInstallWizardCatalogTest {
         val amber = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.three.amber.player")
         assertEquals(PluginInstallWizardCategory.PLAYER, amber?.category)
         assertEquals("Three Amber Player", amber?.fallbackTitle)
+        val installer = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.three.setup.installer")
+        assertEquals(PluginInstallWizardCategory.TOOLS, installer?.category)
+        assertEquals("Three Setup Installer", installer?.fallbackTitle)
+        assertEquals(false, installer?.inStandard)
+        assertEquals(false, installer?.inMinimal)
         assertFalse(PluginInstallWizardCatalog.contains("io.github.supermonster003.autojs6.plugin.videoplayer"))
         assertFalse(PluginInstallWizardCatalog.contains("com.example.unknown"))
     }
