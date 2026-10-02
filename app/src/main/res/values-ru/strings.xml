@@ -1470,6 +1470,7 @@
     <string name="text_inspector_copy_as_selector">Копировать как селектор</string>
     <string name="text_inspector_did_you_mean">Возможно, вы имели в виду: %1$s</string>
     <string name="text_inspector_expand_search_bar">Развернуть панель поиска</string>
+    <string name="text_inspector_expression_unfinished">Выражение не завершено</string>
     <string name="text_inspector_field_mode_intro">Режим полей: разделяйте условия пробелами, например text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
     <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">Профили фильтра</string>
@@ -1484,6 +1485,7 @@
     <string name="text_inspector_min_width">Мин. ширина (px)</string>
     <string name="text_inspector_mode_field">Поля</string>
     <string name="text_inspector_mode_keyword">Ключевое слово</string>
+    <string name="text_inspector_mode_selector">Селектор</string>
     <string name="text_inspector_next_match">Следующее совпадение</string>
     <string name="text_inspector_no_matching_nodes">Нет подходящих узлов</string>
     <string name="text_inspector_no_node_matches_keyword">Ни один узел не соответствует ключевому слову</string>
@@ -1510,7 +1512,6 @@
     <string name="text_inspector_profile_unsaved_content">В текущем профиле есть несохраненные изменения. Сохранить их, сохранить как новый профиль или отменить?</string>
     <string name="text_inspector_profile_unsaved_title">Несохраненные изменения</string>
     <string name="text_inspector_query_mode">Режим запроса: %1$s</string>
-    <string name="text_inspector_query_mode_unavailable">Этот режим запроса пока недоступен</string>
     <string name="text_inspector_range_max">Макс.</string>
     <string name="text_inspector_range_min">Мин.</string>
     <string name="text_inspector_regex_mode">Регулярное выражение</string>
@@ -1526,6 +1527,8 @@
     <string name="text_inspector_section_ranges">Числовые диапазоны</string>
     <string name="text_inspector_select_region">Выбрать область</string>
     <string name="text_inspector_selector_copied">Скопировано: %1$s</string>
+    <string name="text_inspector_selector_mode_intro">Режим селектора: цепочка вызовов как в скрипте, например text(\"OK\").clickable().depth(3) или textMatch(/ok|отмена/i); префикс selector() / $() необязателен</string>
+    <string name="text_inspector_selector_syntax_hint">name(\"str\") · name(3) · name(true) · nameMatch(/re/i) · a().b()</string>
     <string name="text_inspector_syntax_error_at">Позиция %1$d: %2$s</string>
     <string name="text_inspector_tri_any">Любое</string>
     <string name="text_inspector_tri_no">Нет</string>

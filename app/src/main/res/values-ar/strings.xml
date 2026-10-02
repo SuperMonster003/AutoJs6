@@ -1472,6 +1472,7 @@
     <string name="text_inspector_copy_as_selector">نسخ كمحدد</string>
     <string name="text_inspector_did_you_mean">هل تقصد: %1$s</string>
     <string name="text_inspector_expand_search_bar">توسيع شريط البحث</string>
+    <string name="text_inspector_expression_unfinished">التعبير غير مكتمل</string>
     <string name="text_inspector_field_mode_intro">وضع الحقول: افصل الشروط بمسافات, مثل text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
     <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">ملفات تعريف التصفية</string>
@@ -1486,6 +1487,7 @@
     <string name="text_inspector_min_width">أدنى عرض (px)</string>
     <string name="text_inspector_mode_field">الحقول</string>
     <string name="text_inspector_mode_keyword">كلمة مفتاحية</string>
+    <string name="text_inspector_mode_selector">المحدد</string>
     <string name="text_inspector_next_match">التطابق التالي</string>
     <string name="text_inspector_no_matching_nodes">لا توجد عقد مطابقة</string>
     <string name="text_inspector_no_node_matches_keyword">لا توجد عقدة تطابق الكلمة المفتاحية</string>
@@ -1512,7 +1514,6 @@
     <string name="text_inspector_profile_unsaved_content">يحتوي ملف التعريف الحالي على تغييرات غير محفوظة. هل تريد حفظها, أو حفظها كملف تعريف جديد, أو تجاهلها؟</string>
     <string name="text_inspector_profile_unsaved_title">تغييرات غير محفوظة</string>
     <string name="text_inspector_query_mode">وضع الاستعلام: %1$s</string>
-    <string name="text_inspector_query_mode_unavailable">وضع الاستعلام هذا غير متاح بعد</string>
     <string name="text_inspector_range_max">الأقصى</string>
     <string name="text_inspector_range_min">الأدنى</string>
     <string name="text_inspector_regex_mode">تعبير نمطي</string>
@@ -1528,6 +1529,8 @@
     <string name="text_inspector_section_ranges">النطاقات العددية</string>
     <string name="text_inspector_select_region">تحديد منطقة</string>
     <string name="text_inspector_selector_copied">تم النسخ: %1$s</string>
+    <string name="text_inspector_selector_mode_intro">وضع المحدد: سلسلة من الاستدعاءات كما في السكربت, مثل text(\"OK\").clickable().depth(3) أو textMatch(/ok|cancel/i); البادئة selector() / $() اختيارية</string>
+    <string name="text_inspector_selector_syntax_hint">name(\"str\") · name(3) · name(true) · nameMatch(/re/i) · a().b()</string>
     <string name="text_inspector_syntax_error_at">الموضع %1$d: %2$s</string>
     <string name="text_inspector_tri_any">أي</string>
     <string name="text_inspector_tri_no">لا</string>

@@ -227,6 +227,7 @@
     <string name="key_layout_inspector_filter_profiles" translatable="false">key_$_layout_inspector_filter_profiles</string>
     <string name="key_layout_inspector_query_history" translatable="false">key_$_layout_inspector_query_history</string>
     <string name="key_layout_inspector_query_mode" translatable="false">key_$_layout_inspector_query_mode</string>
+    <string name="key_layout_inspector_selector_mode_introduced">key_layout_inspector_selector_mode_introduced</string>
     <string name="key_local_network_permission" translatable="false">key_local_network_permission</string>
     <string name="key_log_activity_input_bar_visible" translatable="false">key_$_log_activity_input_bar_visible</string>
     <string name="key_log_activity_log_coloring" translatable="false">key_$_log_activity_log_coloring</string>

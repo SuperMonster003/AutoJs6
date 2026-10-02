@@ -37,10 +37,23 @@ class InspectorQueryTest {
     }
 
     @Test
-    fun selectorModeIsUnsupportedForNow() {
-        val compiled = InspectorQuery(mode = InspectorQuery.Mode.SELECTOR, text = "clickable()").compile() as InspectorQuery.Compiled.Error
-        assertEquals(InspectorQueryError.Kind.UNSUPPORTED_MODE, compiled.error.kind)
-        assertEquals("SELECTOR", compiled.error.detail)
+    fun selectorModeParsesChainedCalls() {
+        val compiled = InspectorQuery(mode = InspectorQuery.Mode.SELECTOR, text = " selector().text(\"Login\").clickable().textMatch(/^lo/i).minDepth(3) ").compile() as InspectorQuery.Compiled.Filters
+        assertEquals(listOf("text(\"Login\")", "clickable()", "textMatch(\"/^lo/i\")", "minDepth(3)"), compiled.filters.map { it.toString() })
+    }
+
+    @Test
+    fun selectorModeReportsSyntaxErrorsAndUnfinishedExpressionsApart() {
+        val unknown = InspectorQuery(mode = InspectorQuery.Mode.SELECTOR, text = "text(\"ok\").clikable()").compile() as InspectorQuery.Compiled.Error
+        assertEquals(InspectorQueryError.Kind.SYNTAX, unknown.error.kind)
+        assertEquals(11, unknown.error.position)
+        assertEquals("clikable", unknown.error.term)
+        assertTrue(unknown.error.toString(), "clickable" in unknown.error.candidates)
+
+        val unfinished = InspectorQuery(mode = InspectorQuery.Mode.SELECTOR, text = "text(\"").compile() as InspectorQuery.Compiled.Error
+        assertEquals(InspectorQueryError.Kind.INCOMPLETE, unfinished.error.kind)
+        assertEquals(5, unfinished.error.position)
+        assertEquals("expression not finished", unfinished.error.detail)
     }
 
     @Test
@@ -66,7 +79,7 @@ class InspectorQueryTest {
     fun errorRendersKindPositionTermDetailAndCandidates() {
         assertEquals("SYNTAX @3: boom", InspectorQueryError(InspectorQueryError.Kind.SYNTAX, "boom", 3).toString())
         assertEquals("SYNTAX @0 [foo=1]: no such property (font, foo2)", InspectorQueryError(InspectorQueryError.Kind.SYNTAX, "no such property", 0, "foo=1", listOf("font", "foo2")).toString())
-        assertEquals("UNSUPPORTED_MODE", InspectorQueryError(InspectorQueryError.Kind.UNSUPPORTED_MODE).toString())
+        assertEquals("INCOMPLETE", InspectorQueryError(InspectorQueryError.Kind.INCOMPLETE).toString())
     }
 
 }

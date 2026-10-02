@@ -1472,6 +1472,7 @@
     <string name="text_inspector_copy_as_selector">선택자로 복사</string>
     <string name="text_inspector_did_you_mean">다음을 의도했나요: %1$s</string>
     <string name="text_inspector_expand_search_bar">검색창 펼치기</string>
+    <string name="text_inspector_expression_unfinished">식이 끝나지 않았습니다</string>
     <string name="text_inspector_field_mode_intro">필드 모드: 조건을 공백으로 구분합니다. 예: text=확인 clickable, id~=btn_.*, !enabled, minDepth=3</string>
     <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">필터 프로필</string>
@@ -1486,6 +1487,7 @@
     <string name="text_inspector_min_width">최소 너비 (px)</string>
     <string name="text_inspector_mode_field">필드</string>
     <string name="text_inspector_mode_keyword">키워드</string>
+    <string name="text_inspector_mode_selector">선택자</string>
     <string name="text_inspector_next_match">다음 일치 항목</string>
     <string name="text_inspector_no_matching_nodes">일치하는 노드가 없습니다</string>
     <string name="text_inspector_no_node_matches_keyword">키워드와 일치하는 노드가 없습니다</string>
@@ -1512,7 +1514,6 @@
     <string name="text_inspector_profile_unsaved_content">현재 프로필에 저장하지 않은 변경 사항이 있습니다. 저장, 새 프로필로 저장, 또는 버릴까요?</string>
     <string name="text_inspector_profile_unsaved_title">저장하지 않은 변경 사항</string>
     <string name="text_inspector_query_mode">쿼리 모드: %1$s</string>
-    <string name="text_inspector_query_mode_unavailable">이 쿼리 모드는 아직 사용할 수 없습니다</string>
     <string name="text_inspector_range_max">최대</string>
     <string name="text_inspector_range_min">최소</string>
     <string name="text_inspector_regex_mode">정규 표현식</string>
@@ -1528,6 +1529,8 @@
     <string name="text_inspector_section_ranges">숫자 범위</string>
     <string name="text_inspector_select_region">영역 선택</string>
     <string name="text_inspector_selector_copied">복사됨: %1$s</string>
+    <string name="text_inspector_selector_mode_intro">선택자 모드: 스크립트처럼 호출을 연결합니다. 예: text(\"확인\").clickable().depth(3), textMatch(/확인|취소/i); 접두사 selector() / $()는 생략 가능</string>
+    <string name="text_inspector_selector_syntax_hint">name(\"str\") · name(3) · name(true) · nameMatch(/re/i) · a().b()</string>
     <string name="text_inspector_syntax_error_at">위치 %1$d: %2$s</string>
     <string name="text_inspector_tri_any">제한 없음</string>
     <string name="text_inspector_tri_no">아니요</string>

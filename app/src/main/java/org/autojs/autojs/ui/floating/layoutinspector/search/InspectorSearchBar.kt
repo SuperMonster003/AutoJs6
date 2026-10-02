@@ -328,17 +328,25 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         renderHint()
     }
 
-    /** The mode toggle cycles keyword -> field (-> selector once roadmap P5 lands); the first switch to the field mode shows the syntax once. zh-CN: 模式开关在关键词 -> 字段之间循环 (Roadmap P5 落地后加入选择器); 首次切到字段模式时展示一次语法. */
+    /** The mode toggle cycles keyword -> field -> selector (D2); the first switch into the field / selector mode shows its syntax once. zh-CN: 模式开关按关键词 -> 字段 -> 选择器循环 (D2); 首次切到字段 / 选择器模式时展示一次其语法. */
     private fun cycleMode() {
         val session = session ?: return
         val next = when (session.query.mode) {
             InspectorQuery.Mode.KEYWORD -> InspectorQuery.Mode.FIELD
-            else -> InspectorQuery.Mode.KEYWORD
+            InspectorQuery.Mode.FIELD -> InspectorQuery.Mode.SELECTOR
+            InspectorQuery.Mode.SELECTOR -> InspectorQuery.Mode.KEYWORD
         }
         session.setMode(next)
-        if (next == InspectorQuery.Mode.FIELD && !QueryModeStore.isFieldModeIntroduced) {
-            QueryModeStore.markFieldModeIntroduced()
-            ViewUtils.showToast(context, R.string.text_inspector_field_mode_intro, true)
+        when (next) {
+            InspectorQuery.Mode.FIELD -> if (!QueryModeStore.isFieldModeIntroduced) {
+                QueryModeStore.markFieldModeIntroduced()
+                ViewUtils.showToast(context, R.string.text_inspector_field_mode_intro, true)
+            }
+            InspectorQuery.Mode.SELECTOR -> if (!QueryModeStore.isSelectorModeIntroduced) {
+                QueryModeStore.markSelectorModeIntroduced()
+                ViewUtils.showToast(context, R.string.text_inspector_selector_mode_intro, true)
+            }
+            InspectorQuery.Mode.KEYWORD -> Unit
         }
     }
 
@@ -355,14 +363,26 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
             return
         }
         val error = session.error
+        val syntaxHint = when (session.query.mode) {
+            InspectorQuery.Mode.KEYWORD -> null
+            InspectorQuery.Mode.FIELD -> R.string.text_inspector_field_syntax_hint
+            InspectorQuery.Mode.SELECTOR -> R.string.text_inspector_selector_syntax_hint
+        }
         when {
+            // An unfinished expression is not a mistake: hint color, and the cheat sheet takes over while typing.
+            // zh-CN: 未结束的表达式不是错误: 用提示色, 输入中仍以速查为主.
+            error != null && error.kind == InspectorQueryError.Kind.INCOMPLETE -> {
+                hintView.text = if (syntaxHint != null && bar.query.hasFocus()) context.getString(syntaxHint) else describe(error)
+                hintView.setTextColor(hintColor)
+                hintView.visibility = VISIBLE
+            }
             error != null -> {
                 hintView.text = describe(error)
                 hintView.setTextColor(errorColor)
                 hintView.visibility = VISIBLE
             }
-            session.query.mode != InspectorQuery.Mode.KEYWORD && bar.query.hasFocus() -> {
-                hintView.text = context.getString(R.string.text_inspector_field_syntax_hint)
+            syntaxHint != null && bar.query.hasFocus() -> {
+                hintView.text = context.getString(syntaxHint)
                 hintView.setTextColor(hintColor)
                 hintView.visibility = VISIBLE
             }
@@ -417,6 +437,7 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
                 binding.text.setTextColor(normalColor)
                 val tag = when {
                     query.mode == InspectorQuery.Mode.FIELD -> FIELD_TAG
+                    query.mode == InspectorQuery.Mode.SELECTOR -> SELECTOR_TAG
                     query.regex -> REGEX_TAG
                     else -> ""
                 }
@@ -454,6 +475,10 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         val counter: String
         val counterColor: Int
         when {
+            error != null && error.kind == InspectorQueryError.Kind.INCOMPLETE -> {
+                counter = INCOMPLETE_COUNTER
+                counterColor = normalColor
+            }
             error != null -> {
                 counter = "!"
                 counterColor = errorColor
@@ -499,7 +524,7 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
 
     private fun describe(error: InspectorQueryError): String = when (error.kind) {
         InspectorQueryError.Kind.INVALID_REGEX -> context.getString(R.string.text_inspector_invalid_regex, error.detail.orEmpty())
-        InspectorQueryError.Kind.UNSUPPORTED_MODE -> context.getString(R.string.text_inspector_query_mode_unavailable)
+        InspectorQueryError.Kind.INCOMPLETE -> context.getString(R.string.text_inspector_expression_unfinished)
         InspectorQueryError.Kind.SYNTAX -> buildString {
             val detail = error.detail.orEmpty()
             append(if (error.position >= 0) context.getString(R.string.text_inspector_syntax_error_at, error.position, detail) else detail)
@@ -518,7 +543,7 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
     private fun modeName(mode: InspectorQuery.Mode): Int = when (mode) {
         InspectorQuery.Mode.KEYWORD -> R.string.text_inspector_mode_keyword
         InspectorQuery.Mode.FIELD -> R.string.text_inspector_mode_field
-        InspectorQuery.Mode.SELECTOR -> R.string.text_inspector_query_mode_unavailable
+        InspectorQuery.Mode.SELECTOR -> R.string.text_inspector_mode_selector
     }
 
     private fun setQueryText(text: String) {
@@ -612,11 +637,17 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         /** Marks field mode history rows; also the mode toggle's label for that mode. zh-CN: 标记字段模式的历史行; 也是该模式下模式开关的标签. */
         private const val FIELD_TAG = "k=v"
 
+        /** Marks selector mode history rows; also the mode toggle's label for that mode. zh-CN: 标记选择器模式的历史行; 也是该模式下模式开关的标签. */
+        private const val SELECTOR_TAG = "$()"
+
         private const val KEYWORD_LABEL = "Aa"
 
         private const val FIELD_LABEL = FIELD_TAG
 
-        private const val SELECTOR_LABEL = "$()"
+        private const val SELECTOR_LABEL = SELECTOR_TAG
+
+        /** The counter while the selector expression is unfinished. zh-CN: 选择器表达式未结束时的计数位. */
+        private const val INCOMPLETE_COUNTER = "\u2026"
 
     }
 

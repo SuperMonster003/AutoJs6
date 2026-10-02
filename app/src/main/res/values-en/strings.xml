@@ -1467,6 +1467,7 @@
     <string name="text_inspector_copy_as_selector">Copy as selector</string>
     <string name="text_inspector_did_you_mean">Did you mean: %1$s</string>
     <string name="text_inspector_expand_search_bar">Expand search bar</string>
+    <string name="text_inspector_expression_unfinished">Expression not finished</string>
     <string name="text_inspector_field_mode_intro">Field mode: separate conditions with spaces, e.g. text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
     <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">Filter profiles</string>
@@ -1481,6 +1482,7 @@
     <string name="text_inspector_min_width">Min width (px)</string>
     <string name="text_inspector_mode_field">Field</string>
     <string name="text_inspector_mode_keyword">Keyword</string>
+    <string name="text_inspector_mode_selector">Selector</string>
     <string name="text_inspector_next_match">Next match</string>
     <string name="text_inspector_no_matching_nodes">No matching nodes</string>
     <string name="text_inspector_no_node_matches_keyword">No node matches the keyword</string>
@@ -1507,7 +1509,6 @@
     <string name="text_inspector_profile_unsaved_content">The current profile has unsaved changes. Save them, save them as a new profile, or discard them?</string>
     <string name="text_inspector_profile_unsaved_title">Unsaved changes</string>
     <string name="text_inspector_query_mode">Query mode: %1$s</string>
-    <string name="text_inspector_query_mode_unavailable">This query mode is not available yet</string>
     <string name="text_inspector_range_max">Max</string>
     <string name="text_inspector_range_min">Min</string>
     <string name="text_inspector_regex_mode">Regular expression</string>
@@ -1523,6 +1524,8 @@
     <string name="text_inspector_section_ranges">Numeric ranges</string>
     <string name="text_inspector_select_region">Select region</string>
     <string name="text_inspector_selector_copied">Copied: %1$s</string>
+    <string name="text_inspector_selector_mode_intro">Selector mode: chain calls as in a script, e.g. text(\"OK\").clickable().depth(3) or textMatch(/ok|cancel/i); the selector() / $() prefix is optional</string>
+    <string name="text_inspector_selector_syntax_hint">name(\"str\") · name(3) · name(true) · nameMatch(/re/i) · a().b()</string>
     <string name="text_inspector_syntax_error_at">At %1$d: %2$s</string>
     <string name="text_inspector_tri_any">Any</string>
     <string name="text_inspector_tri_no">No</string>

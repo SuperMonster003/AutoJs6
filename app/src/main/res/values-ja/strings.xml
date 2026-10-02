@@ -1471,6 +1471,7 @@
     <string name="text_inspector_copy_as_selector">セレクターとしてコピー</string>
     <string name="text_inspector_did_you_mean">もしかして: %1$s</string>
     <string name="text_inspector_expand_search_bar">検索バーを展開</string>
+    <string name="text_inspector_expression_unfinished">式が未完了です</string>
     <string name="text_inspector_field_mode_intro">フィールドモード: 条件を空白で区切ります. 例: text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
     <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">フィルタープロファイル</string>
@@ -1485,6 +1486,7 @@
     <string name="text_inspector_min_width">最小幅 (px)</string>
     <string name="text_inspector_mode_field">フィールド</string>
     <string name="text_inspector_mode_keyword">キーワード</string>
+    <string name="text_inspector_mode_selector">セレクター</string>
     <string name="text_inspector_next_match">次の一致</string>
     <string name="text_inspector_no_matching_nodes">一致するノードがありません</string>
     <string name="text_inspector_no_node_matches_keyword">キーワードに一致するノードがありません</string>
@@ -1511,7 +1513,6 @@
     <string name="text_inspector_profile_unsaved_content">現在のプロファイルに未保存の変更があります. 保存, 新しいプロファイルとして保存, または破棄しますか?</string>
     <string name="text_inspector_profile_unsaved_title">未保存の変更</string>
     <string name="text_inspector_query_mode">クエリモード: %1$s</string>
-    <string name="text_inspector_query_mode_unavailable">このクエリモードはまだ利用できません</string>
     <string name="text_inspector_range_max">最大</string>
     <string name="text_inspector_range_min">最小</string>
     <string name="text_inspector_regex_mode">正規表現</string>
@@ -1527,6 +1528,8 @@
     <string name="text_inspector_section_ranges">数値範囲</string>
     <string name="text_inspector_select_region">領域を選択</string>
     <string name="text_inspector_selector_copied">コピーしました: %1$s</string>
+    <string name="text_inspector_selector_mode_intro">セレクターモード: スクリプトと同じようにメソッドを連鎖します. 例: text(\"OK\").clickable().depth(3), textMatch(/ok|cancel/i); 接頭辞 selector() / $() は省略可能</string>
+    <string name="text_inspector_selector_syntax_hint">name(\"str\") · name(3) · name(true) · nameMatch(/re/i) · a().b()</string>
     <string name="text_inspector_syntax_error_at">位置 %1$d: %2$s</string>
     <string name="text_inspector_tri_any">指定なし</string>
     <string name="text_inspector_tri_no">いいえ</string>

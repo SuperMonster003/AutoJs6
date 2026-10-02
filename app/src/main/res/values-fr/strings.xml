@@ -1470,6 +1470,7 @@
     <string name="text_inspector_copy_as_selector">Copier comme sélecteur</string>
     <string name="text_inspector_did_you_mean">Vouliez-vous dire : %1$s</string>
     <string name="text_inspector_expand_search_bar">Développer la barre de recherche</string>
+    <string name="text_inspector_expression_unfinished">Expression inachevée</string>
     <string name="text_inspector_field_mode_intro">Mode champ : séparez les conditions par des espaces, p. ex. text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
     <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">Profils de filtrage</string>
@@ -1484,6 +1485,7 @@
     <string name="text_inspector_min_width">Largeur min (px)</string>
     <string name="text_inspector_mode_field">Champ</string>
     <string name="text_inspector_mode_keyword">Mot-clé</string>
+    <string name="text_inspector_mode_selector">Sélecteur</string>
     <string name="text_inspector_next_match">Correspondance suivante</string>
     <string name="text_inspector_no_matching_nodes">Aucun nœud correspondant</string>
     <string name="text_inspector_no_node_matches_keyword">Aucun nœud ne correspond au mot-clé</string>
@@ -1510,7 +1512,6 @@
     <string name="text_inspector_profile_unsaved_content">Le profil actuel a des modifications non enregistrées. Les enregistrer, les enregistrer comme nouveau profil ou les abandonner ?</string>
     <string name="text_inspector_profile_unsaved_title">Modifications non enregistrées</string>
     <string name="text_inspector_query_mode">Mode de requête : %1$s</string>
-    <string name="text_inspector_query_mode_unavailable">Ce mode de requête n\'est pas encore disponible</string>
     <string name="text_inspector_range_max">Max</string>
     <string name="text_inspector_range_min">Min</string>
     <string name="text_inspector_regex_mode">Expression régulière</string>
@@ -1526,6 +1527,8 @@
     <string name="text_inspector_section_ranges">Plages numériques</string>
     <string name="text_inspector_select_region">Sélectionner une zone</string>
     <string name="text_inspector_selector_copied">Copié : %1$s</string>
+    <string name="text_inspector_selector_mode_intro">Mode sélecteur : enchaînez les appels comme dans un script, p. ex. text(\"OK\").clickable().depth(3) ou textMatch(/ok|annuler/i) ; le préfixe selector() / $() est facultatif</string>
+    <string name="text_inspector_selector_syntax_hint">name(\"str\") · name(3) · name(true) · nameMatch(/re/i) · a().b()</string>
     <string name="text_inspector_syntax_error_at">Position %1$d : %2$s</string>
     <string name="text_inspector_tri_any">Indifférent</string>
     <string name="text_inspector_tri_no">Non</string>

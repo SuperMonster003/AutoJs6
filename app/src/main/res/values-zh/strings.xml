@@ -1467,6 +1467,7 @@
     <string name="text_inspector_copy_as_selector">复制为选择器</string>
     <string name="text_inspector_did_you_mean">是否想输入: %1$s</string>
     <string name="text_inspector_expand_search_bar">展开搜索栏</string>
+    <string name="text_inspector_expression_unfinished">表达式未结束</string>
     <string name="text_inspector_field_mode_intro">字段模式: 以空格分隔多个条件, 如 text=确定 clickable, id~=btn_.*, !enabled, minDepth=3</string>
     <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">筛选配置</string>
@@ -1481,6 +1482,7 @@
     <string name="text_inspector_min_width">最小宽度 (px)</string>
     <string name="text_inspector_mode_field">字段</string>
     <string name="text_inspector_mode_keyword">关键词</string>
+    <string name="text_inspector_mode_selector">选择器</string>
     <string name="text_inspector_next_match">下一个匹配</string>
     <string name="text_inspector_no_matching_nodes">没有匹配的控件</string>
     <string name="text_inspector_no_node_matches_keyword">没有控件命中关键词</string>
@@ -1507,7 +1509,6 @@
     <string name="text_inspector_profile_unsaved_content">当前配置有未保存的修改. 保存, 另存为新配置, 还是放弃?</string>
     <string name="text_inspector_profile_unsaved_title">未保存的修改</string>
     <string name="text_inspector_query_mode">查询模式: %1$s</string>
-    <string name="text_inspector_query_mode_unavailable">该查询模式尚未开放</string>
     <string name="text_inspector_range_max">最大</string>
     <string name="text_inspector_range_min">最小</string>
     <string name="text_inspector_regex_mode">正则表达式</string>
@@ -1523,6 +1524,8 @@
     <string name="text_inspector_section_ranges">数值区间</string>
     <string name="text_inspector_select_region">框选区域</string>
     <string name="text_inspector_selector_copied">已复制: %1$s</string>
+    <string name="text_inspector_selector_mode_intro">选择器模式: 像脚本一样链式调用, 如 text(\"确定\").clickable().depth(3) 或 textMatch(/确定|取消/i); 前缀 selector() / $() 可省略</string>
+    <string name="text_inspector_selector_syntax_hint">name(\"str\") · name(3) · name(true) · nameMatch(/re/i) · a().b()</string>
     <string name="text_inspector_syntax_error_at">第 %1$d 位: %2$s</string>
     <string name="text_inspector_tri_any">不限</string>
     <string name="text_inspector_tri_no">否</string>

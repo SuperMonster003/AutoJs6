@@ -1467,6 +1467,7 @@
     <string name="text_inspector_copy_as_selector">複製為選擇器</string>
     <string name="text_inspector_did_you_mean">是否想輸入: %1$s</string>
     <string name="text_inspector_expand_search_bar">展開搜尋列</string>
+    <string name="text_inspector_expression_unfinished">運算式未結束</string>
     <string name="text_inspector_field_mode_intro">欄位模式: 以空格分隔多個條件, 如 text=確定 clickable, id~=btn_.*, !enabled, minDepth=3</string>
     <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">篩選設定檔</string>
@@ -1481,6 +1482,7 @@
     <string name="text_inspector_min_width">最小寬度 (px)</string>
     <string name="text_inspector_mode_field">欄位</string>
     <string name="text_inspector_mode_keyword">關鍵字</string>
+    <string name="text_inspector_mode_selector">選擇器</string>
     <string name="text_inspector_next_match">下一個相符項</string>
     <string name="text_inspector_no_matching_nodes">沒有相符的控制項</string>
     <string name="text_inspector_no_node_matches_keyword">沒有控制項符合關鍵字</string>
@@ -1507,7 +1509,6 @@
     <string name="text_inspector_profile_unsaved_content">目前設定檔有未儲存的修改. 儲存, 另存為新設定檔, 還是放棄?</string>
     <string name="text_inspector_profile_unsaved_title">未儲存的修改</string>
     <string name="text_inspector_query_mode">查詢模式: %1$s</string>
-    <string name="text_inspector_query_mode_unavailable">此查詢模式尚未開放</string>
     <string name="text_inspector_range_max">最大</string>
     <string name="text_inspector_range_min">最小</string>
     <string name="text_inspector_regex_mode">正規表示式</string>
@@ -1523,6 +1524,8 @@
     <string name="text_inspector_section_ranges">數值區間</string>
     <string name="text_inspector_select_region">框選區域</string>
     <string name="text_inspector_selector_copied">已複製: %1$s</string>
+    <string name="text_inspector_selector_mode_intro">選擇器模式: 像指令碼一樣鏈式呼叫, 如 text(\"確定\").clickable().depth(3) 或 textMatch(/確定|取消/i); 前綴 selector() / $() 可省略</string>
+    <string name="text_inspector_selector_syntax_hint">name(\"str\") · name(3) · name(true) · nameMatch(/re/i) · a().b()</string>
     <string name="text_inspector_syntax_error_at">第 %1$d 位: %2$s</string>
     <string name="text_inspector_tri_any">不限</string>
     <string name="text_inspector_tri_no">否</string>
