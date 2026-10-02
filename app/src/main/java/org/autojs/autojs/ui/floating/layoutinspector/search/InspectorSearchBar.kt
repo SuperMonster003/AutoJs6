@@ -61,6 +61,13 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         /** The user asked for the node info dialog of [node] (results list long-press). zh-CN: 用户要求查看 [node] 的节点信息 (结果列表长按). */
         fun onShowNodeInfo(node: NodeInfo)
 
+        /**
+         * The user wants to drag a region on the screen (roadmap P3.4); true when this window starts
+         * the drag, false when it cannot (the hierarchy window) and the bar should say so.
+         * zh-CN: 用户想在屏幕上拖出区域 (Roadmap P3.4); 本窗口开始拖拽时返回 true, 无法支持 (层次窗口) 时返回 false 并由搜索栏提示.
+         */
+        fun onSelectRegionRequested(): Boolean
+
         fun onExpandedChanged(expanded: Boolean)
 
     }
@@ -141,6 +148,7 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         bar.query.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) showHistoryIfIdle() else dismissHistory() }
         bar.query.setOnClickListener { showHistoryIfIdle() }
         bar.collapse.setOnClickListener { setExpanded(false) }
+        bar.filter.setOnClickListener { showFilterProfiles() }
         bar.regex.setOnClickListener { session?.let { it.setRegex(!it.query.regex) } }
         bar.previous.setOnClickListener { navigate(forward = false) }
         bar.next.setOnClickListener { navigate(forward = true) }
@@ -261,6 +269,15 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         dismissHistory()
         hideKeyboard()
         SearchResultsDialog(context, session, host).show()
+    }
+
+    /** The filter button opens the profile dialog (roadmap P3.2). zh-CN: 筛选按钮打开配置对话框 (Roadmap P3.2). */
+    private fun showFilterProfiles() {
+        val session = session ?: return
+        val host = host ?: return
+        dismissHistory()
+        hideKeyboard()
+        FilterProfileDialog(context, session, host).show()
     }
 
     /** Drops the history down under the bar when the focused input is empty and there is history. zh-CN: 输入框获焦且为空并且有历史时, 在搜索栏下方展开历史下拉. */
@@ -385,6 +402,11 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         }
         val regexColor = if (session.query.regex) ThemeColorManager.colorPrimary else ColorUtils.applyAlpha(normalColor, INACTIVE_ICON_ALPHA)
         bar.regex.imageTintList = ColorStateList.valueOf(regexColor)
+
+        val conditions = session.conditionCount
+        bar.filterBadge.text = if (conditions > MAX_BADGE) "$MAX_BADGE+" else conditions.toString()
+        bar.filterBadge.visibility = if (conditions > 0) VISIBLE else GONE
+        bar.filter.imageTintList = ColorStateList.valueOf(if (conditions > 0) ThemeColorManager.colorPrimary else normalColor)
     }
 
     private fun describe(error: InspectorQueryError): String = when (error.kind) {
@@ -469,6 +491,8 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         private const val HISTORY_MAX_HEIGHT_DP = 280
 
         private const val HISTORY_ELEVATION_DP = 6f
+
+        private const val MAX_BADGE = 9
 
         /** Marks history rows recorded with the regex switch on. zh-CN: 标记正则开关开启时记录的历史行. */
         private const val REGEX_TAG = "RegEx"

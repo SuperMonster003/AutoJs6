@@ -14,6 +14,7 @@ import org.autojs.autojs.ui.floating.LayoutFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchBar
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchSession
 import org.autojs.autojs.util.EventUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 /**
@@ -30,7 +31,10 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
 
     private lateinit var mSearchBar: InspectorSearchBar
 
-    private val mSearchListener = InspectorSearchSession.Listener { mLayoutBoundsView.invalidate() }
+    private val mSearchListener = InspectorSearchSession.Listener { session ->
+        mLayoutBoundsView.region = session.region
+        mLayoutBoundsView.invalidate()
+    }
 
     private val mSearchHost = object : InspectorSearchBar.Host {
 
@@ -43,6 +47,14 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
             setLayoutSelectedNode(node)
             mLayoutBoundsView.setSelectedNode(node)
             showNodeInfo()
+        }
+
+        /** The next drag on the bounds view becomes the session's region (roadmap P3.4). zh-CN: 边框视图上的下一次拖拽成为会话的区域条件 (Roadmap P3.4). */
+        override fun onSelectRegionRequested(): Boolean {
+            mSearchBar.setExpanded(false)
+            ViewUtils.showToast(serviceContext, R.string.text_inspector_region_drag_hint)
+            mLayoutBoundsView.startRegionSelection { rect -> requireSearchSession().setRegion(rect) }
+            return true
         }
 
         override fun onExpandedChanged(expanded: Boolean) {
@@ -98,6 +110,7 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
         val session = requireSearchSession()
         mLayoutBoundsView.let { view ->
             view.match = session
+            view.region = session.region
             view.setOnNodeInfoSelectListener { info: NodeInfo ->
                 setLayoutSelectedNode(info)
                 session.setCurrentMatch(info)
@@ -126,6 +139,10 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
     }
 
     private fun onBack() {
+        if (mLayoutBoundsView.isSelectingRegion) {
+            mLayoutBoundsView.cancelRegionSelection()
+            return
+        }
         if (!mSearchBar.onBackPressed()) close()
     }
 

@@ -13,15 +13,16 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="4dp"
-        android:paddingEnd="4dp">
+        android:paddingEnd="4dp"
+        tools:ignore="UseAppTint">
 
     <ImageButton
             android:id="@+id/collapse"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_inspector_collapse_search_bar"
-            android:padding="9dp"
+            android:padding="7dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_search_black_48dp"
             android:tint="@color/day_night" />
@@ -45,13 +46,46 @@
             android:textSize="14sp"
             tools:ignore="LabelFor" />
 
+    <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="36dp">
+
+        <ImageButton
+                android:id="@+id/filter"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_inspector_filter_profiles"
+                android:padding="7dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_filter_list_black_48dp"
+                android:tint="@color/day_night" />
+
+        <TextView
+                android:id="@+id/filter_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="14dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/layout_inspector_filter_badge"
+                android:gravity="center"
+                android:minWidth="14dp"
+                android:paddingStart="3dp"
+                android:paddingEnd="3dp"
+                android:textColor="@android:color/white"
+                android:textSize="9sp"
+                android:visibility="gone"
+                tools:text="3"
+                tools:visibility="visible" />
+
+    </FrameLayout>
+
     <ImageButton
             android:id="@+id/regex"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_inspector_regex_mode"
-            android:padding="9dp"
+            android:padding="7dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_regex"
             android:tint="@color/day_night" />
@@ -62,31 +96,31 @@
             android:layout_height="match_parent"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center"
-            android:minWidth="36dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:minWidth="32dp"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
             android:textColor="@color/day_night"
             android:textSize="12sp"
             tools:text="3/17" />
 
     <ImageButton
             android:id="@+id/previous"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_inspector_previous_match"
-            android:padding="8dp"
+            android:padding="6dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_expand_less_black_48dp"
             android:tint="@color/day_night" />
 
     <ImageButton
             android:id="@+id/next"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_inspector_next_match"
-            android:padding="8dp"
+            android:padding="6dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_expand_more_black_48dp"
             android:tint="@color/day_night" />

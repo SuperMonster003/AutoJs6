@@ -313,4 +313,38 @@
         <item name="android:scaleType">fitCenter</item>
     </style>
 
+    <!-- Section titles, check boxes and number inputs of the layout inspector filter profile dialog (roadmap P3.2). -->
+    <!-- zh-CN: 布局分析筛选配置对话框的区块标题, 复选框与数字输入框 (Roadmap P3.2). -->
+    <style name="LayoutInspectorFilterSection">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:textColor">@color/day_night_alpha_60</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="LayoutInspectorFilterCheck">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:minHeight">36dp</item>
+        <item name="android:textColor">@color/day_night</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="LayoutInspectorFilterNumber">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:inputType">number</item>
+        <item name="android:maxLength">7</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">@color/day_night</item>
+        <item name="android:textColorHint">@color/day_night_alpha_40</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
 </resources>

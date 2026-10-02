@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Badge over the filter button of the layout inspector search bar: the number of active conditions (roadmap P3.3). -->
+<!-- zh-CN: 布局分析搜索栏筛选按钮上的角标: 生效条件的数量 (Roadmap P3.3). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:shape="rectangle">
+    <solid android:color="@color/layout_hierarchy_window_node_bounds" />
+    <corners android:radius="7dp" />
+</shape>

@@ -1,30 +1,38 @@
 package org.autojs.autojs.ui.floating.layoutinspector.search
 
+import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import org.autojs.autojs.core.accessibility.NodeInfo
+import org.autojs.autojs.core.accessibility.inspector.FilterProfile
+import org.autojs.autojs.core.accessibility.inspector.FilterProfileCatalog
 import org.autojs.autojs.core.accessibility.inspector.InspectorNode
 import org.autojs.autojs.core.accessibility.inspector.InspectorQuery
 import org.autojs.autojs.core.accessibility.inspector.InspectorQueryError
 import org.autojs.autojs.core.accessibility.inspector.KeywordFilter
 import org.autojs.autojs.core.accessibility.inspector.QueryHistory
+import org.autojs.autojs.core.accessibility.inspector.TreeCandidates
 import org.autojs.autojs.core.accessibility.inspector.TreeMatch
+import org.autojs.autojs.core.automator.filter.BoundsFilter
 import org.autojs.autojs.core.automator.filter.Filter
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * The search state of one layout inspection (roadmap D5): the query, its compiled result over the
- * current root, the navigation cursor and the per-window search bar state. Created by the first
- * inspector window and handed to the next one on every bounds / hierarchy switch, so the user's
- * query survives the switch; dropped with the last window.
+ * The search state of one layout inspection (roadmap D5): the query, the filter profile being
+ * edited (roadmap D6, on top of the persisted [catalog]), the session-only region condition, their
+ * combined result over the current root, the navigation cursor and the per-window search bar
+ * state. Created by the first inspector window and handed to the next one on every bounds /
+ * hierarchy switch, so the user's query survives the switch; dropped with the last window. The
+ * selected profile is remembered across sessions and in effect as soon as the session starts.
  *
  * Text changes are evaluated after a 150 ms debounce (roadmap D17), everything else at once; all
  * calls happen on the main thread. Listeners are told after every evaluation and cursor move.
  *
- * zh-CN: 一次布局分析的搜索状态 (Roadmap D5): 查询, 其在当前根节点上的编译结果, 导航游标, 以及各窗口搜索栏的展开状态.
- * 由首个分析窗口创建, 范围 / 层次窗口每次互切时传给下一个窗口, 因此用户的查询不会因切换丢失; 随最后一个窗口一起丢弃.
+ * zh-CN: 一次布局分析的搜索状态 (Roadmap D5): 查询, 正在编辑的筛选配置 (Roadmap D6, 基于持久化的 [catalog]), 仅限本次会话的区域
+ * 条件, 它们在当前根节点上的合并结果, 导航游标, 以及各窗口搜索栏的展开状态. 由首个分析窗口创建, 范围 / 层次窗口每次互切时传给
+ * 下一个窗口, 因此用户的查询不会因切换丢失; 随最后一个窗口一起丢弃. 已选配置跨会话记忆, 会话一开始即生效.
  * 文本变化在 150 ms 去抖后求值 (Roadmap D17), 其余立即求值; 所有调用都在主线程. 每次求值与游标移动后通知监听者.
  *
  * Created by SuperMonster003 on Oct 2, 2026.
@@ -59,12 +67,34 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
 
     private var keywordFilter: KeywordFilter? = null
 
-    /** The filters of the last successful compile, for the explainer (roadmap P2.1). zh-CN: 最近一次成功编译的过滤器, 供解释器使用 (Roadmap P2.1). */
+    /** All filters in effect after the last evaluation (query, profile, region), for the explainer (roadmap P2.1). zh-CN: 最近一次求值生效的全部过滤器 (查询, 配置, 区域), 供解释器使用 (Roadmap P2.1). */
     var filters: List<Filter> = emptyList()
         private set
 
     /** The persisted query history (roadmap P2.2), loaded once per inspection. zh-CN: 持久化的查询历史 (Roadmap P2.2), 每次布局分析加载一次. */
     val history: QueryHistory by lazy { QueryHistoryStore.load() }
+
+    /** The persisted filter profiles with the remembered selection (roadmap D6). zh-CN: 持久化的筛选配置及记忆的选中项 (Roadmap D6). */
+    val catalog: FilterProfileCatalog = FilterProfileStore.load()
+
+    /**
+     * The profile in effect: the selected catalog entry plus the user's unsaved edits; compare with
+     * [isProfileDirty]. Edits apply at once (roadmap D6).
+     * zh-CN: 生效中的配置: 选中的目录条目加上用户未保存的修改; 见 [isProfileDirty]. 修改即时生效 (Roadmap D6).
+     */
+    var profile: FilterProfile = catalog.selected
+        private set
+
+    val isProfileDirty: Boolean get() = profile != catalog.selected
+
+    /** The screen-bound region condition (roadmap D5, P3.4), session-only. zh-CN: 与屏幕绑定的区域条件 (Roadmap D5, P3.4), 仅限本次会话. */
+    var region: Rect? = null
+        private set
+
+    /** Picker candidates of the current root (roadmap D16), computed on demand. zh-CN: 当前根节点的选择器候选 (Roadmap D16), 按需计算. */
+    val candidates: TreeCandidates get() = candidatesCache ?: TreeCandidates.collect(InspectorNode(root)).also { candidatesCache = it }
+
+    private var candidatesCache: TreeCandidates? = null
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -77,8 +107,15 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
         evaluate()
     }
 
-    /** Whether a query is in effect (matching or failing). zh-CN: 是否有查询在生效 (匹配中或失败). */
+    init {
+        if (!profile.isEmpty) evaluate()
+    }
+
+    /** Whether a query, profile or region is in effect (matching or failing). zh-CN: 是否有查询, 配置或区域在生效 (匹配中或失败). */
     val isActive: Boolean get() = !match.isUnfiltered || error != null
+
+    /** Conditions set outside the query text, shown as the filter badge. zh-CN: 查询文本之外设置的条件数, 用作筛选角标. */
+    val conditionCount: Int get() = profile.conditionCount + (if (region != null) 1 else 0)
 
     val matchCount: Int get() = match.count
 
@@ -115,6 +152,81 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
     fun setRoot(root: NodeInfo) {
         this.root = root
         currentMatch = null
+        candidatesCache = null
+        mainHandler.removeCallbacks(evaluateTask)
+        pending = false
+        evaluate()
+    }
+
+    /* Filter profile (roadmap D6). zh-CN: 筛选配置 (Roadmap D6). */
+
+    /** Applies an edited profile at once; it keeps the id of the selected entry. zh-CN: 立即应用编辑后的配置; 它保留选中条目的 id. */
+    fun setProfile(profile: FilterProfile) {
+        if (this.profile == profile) return
+        this.profile = profile.copy(id = catalog.selectedId)
+        evaluateNow()
+    }
+
+    /** Switches to a catalog entry, dropping unsaved edits; the selection is remembered. zh-CN: 切换到目录中的条目并丢弃未保存的修改; 选中项被记忆. */
+    fun selectProfile(id: String): FilterProfile {
+        profile = catalog.select(id)
+        FilterProfileStore.saveSelection(catalog)
+        evaluateNow()
+        return profile
+    }
+
+    /** Writes the edits back into the selected user profile; false for the default profile (use [saveProfileAs]). zh-CN: 把修改写回选中的用户配置; 默认配置返回 false (改用 [saveProfileAs]). */
+    fun saveProfile(): Boolean {
+        if (!catalog.update(profile)) return false
+        FilterProfileStore.save(catalog)
+        notifyListeners()
+        return true
+    }
+
+    /** Stores the current conditions as a new profile named [name] and selects it. zh-CN: 把当前条件存为名为 [name] 的新配置并选中它. */
+    fun saveProfileAs(name: String): FilterProfile {
+        profile = catalog.saveAs(profile, name)
+        FilterProfileStore.save(catalog)
+        notifyListeners()
+        return profile
+    }
+
+    fun discardProfileEdits() {
+        if (!isProfileDirty) return
+        profile = catalog.selected
+        evaluateNow()
+    }
+
+    fun renameProfile(id: String, name: String): Boolean {
+        if (!catalog.rename(id, name)) return false
+        if (id == catalog.selectedId) profile = profile.copy(name = catalog.selected.name)
+        FilterProfileStore.save(catalog)
+        notifyListeners()
+        return true
+    }
+
+    /** Deletes a user profile; when it was selected the default takes over at once. zh-CN: 删除用户配置; 若它正被选中则默认配置立即接替. */
+    fun deleteProfile(id: String): Boolean {
+        val wasSelected = id == catalog.selectedId
+        if (!catalog.delete(id)) return false
+        FilterProfileStore.save(catalog)
+        if (wasSelected) {
+            profile = catalog.selected
+            evaluateNow()
+        } else {
+            notifyListeners()
+        }
+        return true
+    }
+
+    /** Sets or clears the region condition (screen coordinates). zh-CN: 设置或清除区域条件 (屏幕坐标). */
+    fun setRegion(region: Rect?) {
+        if (this.region == region) return
+        this.region = region?.let(::Rect)
+        evaluateNow()
+    }
+
+    private fun evaluateNow() {
         mainHandler.removeCallbacks(evaluateTask)
         pending = false
         evaluate()
@@ -166,14 +278,21 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
         if (history.clear()) QueryHistoryStore.save(history)
     }
 
+    /**
+     * Query filters first (so the keyword is the first explainer step), then the profile, then the
+     * region. A query that does not compile leaves the tree unfiltered even when a profile is set,
+     * so the user sees the error rather than a silently narrower result.
+     * zh-CN: 查询过滤器在前 (关键词成为解释器的第一步), 其后为配置, 最后为区域. 查询无法编译时即使设置了配置也不筛选, 让用户看到错误
+     * 而非悄然变窄的结果.
+     */
     private fun evaluate() {
         val started = SystemClock.elapsedRealtime()
         when (val compiled = query.compile()) {
             is InspectorQuery.Compiled.Filters -> {
                 error = null
-                filters = compiled.filters
-                match = TreeMatch.evaluate(InspectorNode(root), compiled.filters)
                 keywordFilter = compiled.filters.firstOrNull() as? KeywordFilter
+                filters = compiled.filters + profile.toFilters() + listOfNotNull(regionFilter())
+                match = TreeMatch.evaluate(InspectorNode(root), filters)
             }
             is InspectorQuery.Compiled.Error -> {
                 error = compiled.error
@@ -183,8 +302,12 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
             }
         }
         currentMatch?.let { if (!match.isMatched(InspectorNode(it))) currentMatch = null }
-        Log.d(TAG, "evaluate: ${match.count} matches, ${SystemClock.elapsedRealtime() - started} ms, query = $query")
+        Log.d(TAG, "evaluate: ${match.count} matches, ${SystemClock.elapsedRealtime() - started} ms, query = $query, profile = ${profile.conditionCount} condition(s), region = $region")
         notifyListeners()
+    }
+
+    private fun regionFilter(): Filter? = region?.let {
+        BoundsFilter(it.left.toDouble(), it.top.toDouble(), it.right.toDouble(), it.bottom.toDouble(), BoundsFilter.TYPE_INSIDE)
     }
 
     private fun notifyListeners() {

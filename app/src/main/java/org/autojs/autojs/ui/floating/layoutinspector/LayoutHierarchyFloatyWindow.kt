@@ -58,6 +58,9 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
             showNodeInfo()
         }
 
+        /** Regions are dragged on the screen, which only the bounds window shows. zh-CN: 区域需在屏幕上拖出, 只有范围窗口能提供. */
+        override fun onSelectRegionRequested(): Boolean = false
+
         override fun onExpandedChanged(expanded: Boolean) {
             requireSearchSession().isBarExpandedInHierarchy = expanded
         }

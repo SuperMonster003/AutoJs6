@@ -4,17 +4,24 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.DashPathEffect
 import android.graphics.Paint
+import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.Region
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import org.autojs.autojs.core.accessibility.NodeInfo
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorMatchView
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.util.Collections
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Created by Stardust on Mar 10, 2017.
@@ -52,6 +59,58 @@ open class LayoutBoundsView : View {
             field = value
             invalidate()
         }
+
+    /**
+     * The active region condition in screen coordinates (roadmap P3.4), outlined so the user sees
+     * what the filter is bound to; null draws nothing.
+     * zh-CN: 生效中的区域条件, 屏幕坐标 (Roadmap P3.4), 勾出边框让用户看到筛选绑定的范围; null 时不绘制.
+     */
+    var region: Rect? = null
+        set(value) {
+            field = value?.let(::Rect)
+            invalidate()
+        }
+
+    private var mRegionListener: ((Rect) -> Unit)? = null
+
+    /** Scratch rect for drawing the region without allocating in onDraw. zh-CN: 绘制区域用的暂存矩形, 避免在 onDraw 中分配. */
+    private val mRegionDrawRect = Rect()
+    private var mRegionDragStart: Point? = null
+    private var mRegionDrag: Rect? = null
+
+    private val mRegionFillPaint = Paint().apply {
+        style = Paint.Style.FILL
+        color = ColorUtils.applyAlpha(ThemeColorManager.colorPrimary, REGION_FILL_ALPHA)
+    }
+
+    private val mRegionStrokePaint = Paint().apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 3f
+        pathEffect = DashPathEffect(floatArrayOf(12f, 8f), 0f)
+        color = ThemeColorManager.colorPrimary
+    }
+
+    /** Whether the next touch gesture drags a region instead of selecting a node. zh-CN: 下一次触摸手势是否用于拖出区域而非点选节点. */
+    val isSelectingRegion: Boolean get() = mRegionListener != null
+
+    /**
+     * The next drag on this view becomes a region (screen coordinates) handed to [listener]; a drag
+     * smaller than the touch slop cancels. One gesture only.
+     * zh-CN: 本视图上的下一次拖拽成为交给 [listener] 的区域 (屏幕坐标); 小于触摸阈值的拖拽视为取消. 仅一次手势.
+     */
+    fun startRegionSelection(listener: (Rect) -> Unit) {
+        mRegionListener = listener
+        mRegionDragStart = null
+        mRegionDrag = null
+        setSelectedNode(null)
+    }
+
+    fun cancelRegionSelection() {
+        mRegionListener = null
+        mRegionDragStart = null
+        mRegionDrag = null
+        invalidate()
+    }
 
     private fun isShown(node: NodeInfo): Boolean = !node.hidden && match?.isMatched(node) != false
 
@@ -125,6 +184,12 @@ open class LayoutBoundsView : View {
             boundsPaint.color = touchedNodeBoundsColor
             drawRect(canvas, mTouchedNode!!.boundsInScreen, statusBarHeight, boundsPaint)
         }
+        (mRegionDrag ?: region)?.let { rect ->
+            mRegionDrawRect.set(rect)
+            mRegionDrawRect.offset(0, -statusBarHeight)
+            canvas.drawRect(mRegionDrawRect, mRegionFillPaint)
+            canvas.drawRect(mRegionDrawRect, mRegionStrokePaint)
+        }
     }
 
     private fun draw(canvas: Canvas, node: NodeInfo?) {
@@ -145,6 +210,10 @@ open class LayoutBoundsView : View {
      */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (isSelectingRegion) {
+            onRegionTouch(event)
+            return true
+        }
         if (mRootNode != null) {
             setSelectedNode(findNodeAt(mRootNode!!, event.rawX.toInt(), event.rawY.toInt()))
         }
@@ -152,6 +221,35 @@ open class LayoutBoundsView : View {
             onNodeInfoClick(mTouchedNode!!)
         }
         return true
+    }
+
+    private fun onRegionTouch(event: MotionEvent) {
+        val x = event.rawX.toInt()
+        val y = event.rawY.toInt()
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                mRegionDragStart = Point(x, y)
+                mRegionDrag = Rect(x, y, x, y)
+                invalidate()
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val start = mRegionDragStart ?: return
+                mRegionDrag = Rect(min(start.x, x), min(start.y, y), max(start.x, x), max(start.y, y))
+                invalidate()
+            }
+            MotionEvent.ACTION_UP -> {
+                val listener = mRegionListener
+                val start = mRegionDragStart
+                cancelRegionSelection()
+                if (listener == null || start == null) return
+                // The up position is part of the drag too (injected gestures may end without a trailing move).
+                // zh-CN: 抬起位置同样属于拖拽 (注入的手势可能没有末尾的移动事件).
+                val rect = Rect(min(start.x, x), min(start.y, y), max(start.x, x), max(start.y, y))
+                val slop = ViewConfiguration.get(context).scaledTouchSlop
+                if (rect.width() >= slop && rect.height() >= slop) listener(rect)
+            }
+            MotionEvent.ACTION_CANCEL -> cancelRegionSelection()
+        }
     }
 
     private fun onNodeInfoClick(nodeInfo: NodeInfo) {
@@ -184,6 +282,9 @@ open class LayoutBoundsView : View {
     }
 
     companion object {
+
+        private const val REGION_FILL_ALPHA = 0.12
+
         /**
          * Draws [rect] (screen coordinates) onto [canvas], shifted up by [statusBarHeight] and
          * right by [dx] (the horizontal scroll offset of a scrolled list drawing over the screen).
