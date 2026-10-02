@@ -33,7 +33,9 @@ The original host worktree was not edited or staged. Only local commits are auth
   modifiers: padding, fillMaxWidth, testTag, semantics. Other properties/modifiers/commands fail with
   typed errors. NodeStore validates and publishes whole immutable transactions, including cycle,
   identity, ownership, scope, callback and size constraints. It bounds intermediate node growth and
-  rejects ancestry cycles before mutation so a later remove cannot recurse through a corrupt graph.
+  rejects ancestry cycles before mutation. Deletion is iterative even when intermediate moves form
+  a deep chain; an exact 2000-operation regression creates/removes a 2000-node chain before final
+  validation without consuming the Java call stack.
 - P0 renderer/loader/session fixtures are retired. Unused api.spike definitions remain only in the
   unchanged frozen AAR; its SHA-256 remains e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21.
   V1 signatures, snapshot and wire tags are unchanged. No new third-party dependency was introduced.
@@ -51,7 +53,7 @@ the user-facing module feature belongs to P1.3/P3 once the entry is available.
 | --- | --- |
 | Host Compose JVM | 16 pass: reconciliation 5, session limits/dispatch/rollback 4, callbacks 2, selection 2, shared classpaths 3 |
 | Frozen API JVM | 13 pass, including exact V1 snapshot and no-Compose host source guard |
-| Plugin JVM | 24 pass, including 5 NodeStore tests replacing the retired P0 tree tests |
+| Plugin JVM | 25 pass, including 6 NodeStore tests replacing the retired P0 tree tests |
 | Host APKs | app debug + instrumentation assemble; native 16 KB alignment gate passes |
 | Shared classpaths | app/inrt debug/release resolve the same 51 shared components; no Compose implementation in host |
 | Plugin APKs/lint | debug, instrumentation, signed/minified release assemble; debug lint clean; release 0 errors, 3 pre-existing unused identity-resource warnings |
@@ -59,8 +61,8 @@ the user-facing module feature belongs to P1.3/P3 once the entry is available.
 | API 35 arm64 | Xiaomi Pad 6 Pro 968e9f18: 7/7 host tests with debug plugin; 2/2 counter/dispose + standalone INFO with minified release |
 | Plugin instrumentation | Xiaomi API 35, matching debug APK/test APK: 5/5 activation/discovery/native inventory tests |
 | Docs/icons | 36 generated Markdown artifacts consistent; 2 generated icon assets consistent |
-| Local release | autojs6-plugin-compose-ui-v1.0.0-de8e3228.apk, 1460582 bytes, CRC32 de8e3228; signature, exact native inventory and ELF/zip 16 KB alignment pass |
-| DEX boundary | debug 9230935 bytes / 88527 method references; release 1460582 bytes / 28245 references; no host API/shared AndroidX/coroutine definitions bundled |
+| Local release | autojs6-plugin-compose-ui-v1.0.0-dd04919c.apk, 1460582 bytes, CRC32 dd04919c; signature, exact native inventory and ELF/zip 16 KB alignment pass |
+| DEX boundary | debug 9255392 bytes / 88527 method references; release 1460582 bytes / 28245 references; no host API/shared AndroidX/coroutine definitions bundled |
 
 Device cases cover parent class identity, cache-hit gate rechecks, resource locale/density/night
 alignment, real graphics-path iteration (native on API 24), Activity and RawWindow owners, queued
