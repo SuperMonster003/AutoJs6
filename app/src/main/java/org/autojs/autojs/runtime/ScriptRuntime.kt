@@ -38,6 +38,7 @@ import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.ai.AiService
 import org.autojs.autojs.runtime.api.epub.EpubService
+import org.autojs.autojs.runtime.api.terminal.TerminalService
 import org.autojs.autojs.runtime.api.mail.MailService
 import org.autojs.autojs.runtime.api.installer.InstallerService
 import org.autojs.autojs.runtime.api.augment.ai.Ai
@@ -77,6 +78,7 @@ import org.autojs.autojs.runtime.api.augment.jsox.Mathx
 import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.api.augment.media.Media
 import org.autojs.autojs.runtime.api.augment.epub.Epub
+import org.autojs.autojs.runtime.api.augment.terminal.Terminal
 import org.autojs.autojs.runtime.api.augment.mail.Mail
 import org.autojs.autojs.runtime.api.augment.installer.Installer
 import org.autojs.autojs.runtime.api.augment.mediainfo.Mediainfo
@@ -300,6 +302,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     private val mail: MailService
     private val installer: InstallerService
     private val epub: EpubService
+    private val terminal: TerminalService
 
     @JvmField
     @ScriptVariable
@@ -497,6 +500,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         mail = MailService(mUiHandlerAppContext, this)
         installer = InstallerService(mUiHandlerAppContext, this)
         epub = EpubService(mUiHandlerAppContext, this)
+        terminal = TerminalService(mUiHandlerAppContext, this)
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()
 
@@ -824,6 +828,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         ignoresException { mail.close() }
         ignoresException { installer.close() }
         ignoresException { epub.close() }
+        ignoresException { terminal.close() }
         ignoresException { ai.close() }
         ignoresException { tts.close() }
         if (::threads.isInitialized) ignoresException { threads.shutDownAll() }
@@ -1055,6 +1060,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Mail(this, mail).augment(target)
         Installer(this, installer).augment(target)
         Epub(this, epub).augment(target)
+        Terminal(this, terminal).augment(target)
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
     }
