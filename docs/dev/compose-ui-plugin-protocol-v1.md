@@ -1,7 +1,8 @@
 # Compose UI contract V1
 
-Status: P1.1 frozen on 2026-10-02. This document specifies the host/plugin boundary, not delivery of
-the script API or production renderer. The host owns `plugin-api/compose-ui-api`; the plugin consumes
+Status: V1 frozen at P1.1 on 2026-10-02; P1.2 implements the host loader/session and a minimal V1
+renderer for integration. This document specifies the full boundary, not delivery of the script API
+or the complete renderer. The host owns `plugin-api/compose-ui-api`; the plugin consumes
 its release AAR as compileOnly. The contract depends on Android, Kotlin/JDK and common-plugin-api,
 and contains no Compose implementation dependency.
 
@@ -17,13 +18,14 @@ and contains no Compose implementation dependency.
   A change to these semantics requires an explicit version decision and a reviewed snapshot update.
 - `CONTRACT_VERSION=1`, `MIN_SUPPORTED=1`. `REQUIRED_HOST_VERSION_CODE=5308` is deliberately still
   provisional and will be back-filled in P1.3; this metadata correction does not change the V1 wire API.
-- `api.spike` (version -1) is a retained P0 regression fixture, excluded from the frozen V1 surface.
-  The prototype plugin factory still implements it until P2.1. It must never be accepted as a V1
-  renderer. Its diagnostic classOrigins/probe/diagnostics methods are not V1 loading methods.
+- `api.spike` (version -1) is outside the frozen V1 surface. P1.2 removes all implementation/test
+  consumers; its unused definitions remain in the unchanged staged AAR until artifact maintenance.
+  Its former diagnostics are not V1 loading methods.
 
 The host now packages the V1 API module in app/inrt. The small legacy fixture types travel in the
-same AAR during this transition, but no spike Activity or loader is added to the host APK. Production
-loader selection, caching, fingerprint negotiation and renderer migration remain P1.2/P2.1 work.
+same AAR during this transition. The host now packages ComposeUiPluginHost/Loader, ComposeSession,
+TreeReconciler, CallbackRegistry, ScriptUiDispatcher, resource/window owners and ComposeThemeBridge.
+No temporary Android component or Compose implementation is added to the host APK.
 
 ## Loading and thread ownership
 
@@ -191,3 +193,43 @@ P1.2 implements production selection/loading, transactions, callback registry an
 P1.3 registers the plugin and establishes the actual minimum host build. P2 migrates the prototype
 renderer from api.spike to loading/model V1 and advertises only implemented catalog entries. This
 freeze is not evidence that all 30 entries are rendered or that the compose script global exists.
+
+## P1.2 implementation boundary
+
+The host rechecks installation, Android enablement, Plugin Center enablement, authorization,
+minimum host version and INFO/factory metadata before loading code. Contract version precedes
+capability fingerprint negotiation. Failure codes are stable; selection messages are localized in
+all host languages. The process code cache is keyed by package, version, APK path and update time.
+Package install/update/removal broadcasts invalidate code and owner caches. System/component
+enablement and host enable/trust changes invalidate selection;
+a still-identical authorized APK reuses its process loader so JNI ownership stays consistent.
+An existing session owns its loaded renderer until close; a package update affects subsequent loads.
+
+Each script engine owns a ComposeSessionScope (at most 8 sessions). Session mutations stay on a
+ScriptUiDispatcher; UI mode dispatches mutations directly on main and always queues events/tick
+flushes. Non-UI mode captures ScriptAsyncDispatcher on the originating script thread. The session
+keeps one in-flight main-thread transaction and one pending immutable target. Multiple renders in
+one scheduler turn coalesce, success advances generation and callback bindings together, and a
+failed transaction discards dependent pending targets while preserving the last acknowledged tree.
+Closing immediately fences event ingress, clears script references and queued work, and schedules
+main-thread detach/dispose without waiting across threads. Engine exit wiring belongs to P3/P4.
+
+TreeReconciler scopes keys to a parent and matches unkeyed nodes by same-type index. It preserves
+IDs across moves/compatible slot edits, allocates monotonically, and warns once per session for an
+unkeyed list. Props are complete replacements. Callback IDs only resolve for the current generation,
+node and event binding. The bounded event queue drops the oldest event on overflow and reports a
+warning containing only session metadata. Unsupported component types are rejected before dispatch.
+
+The plugin entry now implements V1. Its preview supports Column content, Text.text, Button.enabled
+and click, primary/content-slot children, and padding/fillMaxWidth/testTag/semantics modifiers.
+The component list contains only Column/Text/Button and FEATURES is empty. Other properties,
+modifiers and commands return typed errors; they are not silently ignored. Default theme handling
+uses the host seed as primary and the host night flag. Full Material tonal palettes, typography,
+dynamic colors, all catalog properties and remaining components are P2 work. The Compose version
+capability is generated from the BOM-resolved runtime, not a separate source-code version literal.
+
+NodeStore validates a private transaction workspace, graph closure, catalog/scope constraints and
+preview support before publishing an immutable frame. Ancestry cycles are rejected before mutation;
+intermediate working node count is bounded as well as final tree size. A failed batch retains both
+tree and generation. Explicit disposal releases composition, recomposer, coroutine scope and tree.
+Host adapter disposal additionally releases Activity, mount closure and lifecycle/theme observers.

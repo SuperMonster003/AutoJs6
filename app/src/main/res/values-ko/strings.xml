@@ -325,6 +325,10 @@
     <string name="error_check_for_update">업데이트를 확인하지 못했습니다</string>
     <string name="error_colon_must_follow_a_valid_ip_address">콜론은 유효한 IP 주소를 따라야 합니다</string>
     <string name="error_compass_cannot_be_null">나침반은 무효가 될 수 없다</string>
+    <string name="error_compose_host_too_old">플러그인 \"%1$s\"을 사용하려면 AutoJs6를 업데이트하세요.</string>
+    <string name="error_compose_plugin_incompatible">플러그인 \"%1$s\"이 호환되지 않습니다. AutoJs6와 플러그인을 업데이트하세요.</string>
+    <string name="error_compose_plugin_system_disabled">Android 설정에서 플러그인 \"%1$s\"이 비활성화되어 있습니다. 활성화한 후 다시 시도하세요.</string>
+    <string name="error_compose_shared_dependencies">AutoJs6와 플러그인 \"%1$s\"의 종속성이 일치하지 않습니다. 둘 다 호환되는 버전으로 업데이트하세요.</string>
     <string name="error_conditions_not_met_for_record">스크립트 녹화에는 다음 조건 중 하나 이상이 필요합니다:\n- Root 권한\n- Shizuku 권한</string>
     <string name="error_connect_to_remote">원격 서버에 연결할 수 없습니다: %s</string>
     <string name="error_connection_failed_with_host">\"%1$s\"에 연결하지 못했습니다.</string>

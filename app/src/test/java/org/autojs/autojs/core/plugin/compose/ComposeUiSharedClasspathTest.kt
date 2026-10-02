@@ -34,7 +34,7 @@ class ComposeUiSharedClasspathTest {
         }
     }
 
-    @Test fun temporaryEntryAndDraftLoaderExistOnlyInInstrumentation() {
+    @Test fun productionSourcesUseTheFrozenContractAndNoTemporaryActivity() {
         val app = File(requireNotNull(System.getProperty("compose.host.project")), "app")
         listOf("main", "debug", "release", "app", "inrt").forEach { sourceSet ->
             val source = File(app, "src/$sourceSet")
@@ -47,7 +47,8 @@ class ComposeUiSharedClasspathTest {
             assertTrue("Temporary P0 entry leaked into $sourceSet: $violations", violations.isEmpty())
         }
         assertFalse(File(app, "src/androidTest/AndroidManifest.xml").readText().contains("ComposeSpikeActivity"))
-        assertTrue(File(app, "src/androidTest/java/org/autojs/autojs/core/plugin/compose/ComposeSpikeSession.kt").isFile)
+        assertTrue(File(app, "src/main/java/org/autojs/autojs/core/plugin/compose/ComposeSession.kt").isFile)
+        assertTrue(File(app, "src/androidTest/java/org/autojs/autojs/core/plugin/compose/ComposeUiLoaderTest.kt").isFile)
     }
 
     private fun fingerprint(records: List<String>): String = MessageDigest.getInstance("SHA-256")

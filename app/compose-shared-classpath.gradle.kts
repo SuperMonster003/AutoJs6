@@ -34,6 +34,9 @@ val verifyComposeSharedClasspath = tasks.register("verifyComposeUiSharedClasspat
     }
 }
 
+// Fingerprint negotiation describes the resolved host, so every APK build must enforce its lock.
+tasks.matching { it.name == "preBuild" }.configureEach { dependsOn(verifyComposeSharedClasspath) }
+
 tasks.withType<Test>().configureEach {
     // src/test is shared by all Android variants. Invalidate tests when either snapshot changes.
     dependsOn(verifyComposeSharedClasspath)

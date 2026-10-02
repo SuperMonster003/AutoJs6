@@ -324,6 +324,10 @@
     <string name="error_check_for_update">更新のチェックに失敗しました</string>
     <string name="error_colon_must_follow_a_valid_ip_address">有効な IP アドレスの後にコロンが続くこと</string>
     <string name="error_compass_cannot_be_null">コンパスは null にできません</string>
+    <string name="error_compose_host_too_old">プラグイン \"%1$s\" を使うには AutoJs6 を更新してください.</string>
+    <string name="error_compose_plugin_incompatible">プラグイン \"%1$s\" に互換性がありません. AutoJs6 とプラグインを更新してください.</string>
+    <string name="error_compose_plugin_system_disabled">プラグイン \"%1$s\" は Android 設定で無効になっています. 有効にして再試行してください.</string>
+    <string name="error_compose_shared_dependencies">AutoJs6 とプラグイン \"%1$s\" の依存関係が一致しません. 両方を互換性のあるバージョンに更新してください.</string>
     <string name="error_conditions_not_met_for_record">スクリプト録画には次の条件のうち少なくとも1つが必要です:\n- Root 権限\n- Shizuku 権限</string>
     <string name="error_connect_to_remote">リモートサーバーに接続できません. %s</string>
     <string name="error_connection_failed_with_host">\"%1$s\" への接続に失敗しました.</string>

@@ -320,6 +320,10 @@
     <string name="error_check_for_update">檢查更新失敗</string>
     <string name="error_colon_must_follow_a_valid_ip_address">冒號需跟隨有效的 IP 地址</string>
     <string name="error_compass_cannot_be_null">羅盤參數不能為 null</string>
+    <string name="error_compose_host_too_old">請升級 AutoJs6 後使用插件 \"%1$s\"</string>
+    <string name="error_compose_plugin_incompatible">插件 \"%1$s\" 不兼容. 請升級 AutoJs6 和插件</string>
+    <string name="error_compose_plugin_system_disabled">插件 \"%1$s\" 已在 Android 設定中停用. 請啟用後重試</string>
+    <string name="error_compose_shared_dependencies">AutoJs6 與插件 \"%1$s\" 的依賴版本不匹配. 請將兩者升級至兼容版本</string>
     <string name="error_conditions_not_met_for_record">腳本錄製需至少滿足以下條件之一:\n- Root 權限\n- Shizuku 權限</string>
     <string name="error_connect_to_remote">連接失敗: %s</string>
     <string name="error_connection_failed_with_host">連接至 \"%1$s\" 失敗.</string>

@@ -318,6 +318,10 @@
     <string name="error_check_for_update">Failed to check for updates</string>
     <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
     <string name="error_compass_cannot_be_null">Compass cannot be null</string>
+    <string name="error_compose_host_too_old">Update AutoJs6 to use plugin \"%1$s\".</string>
+    <string name="error_compose_plugin_incompatible">Plugin \"%1$s\" is incompatible. Update AutoJs6 and the plugin.</string>
+    <string name="error_compose_plugin_system_disabled">Plugin \"%1$s\" is disabled in Android settings. Enable it and try again.</string>
+    <string name="error_compose_shared_dependencies">AutoJs6 and plugin \"%1$s\" require matching dependencies. Update both to compatible versions.</string>
     <string name="error_conditions_not_met_for_record">Script recording requires at least one of the following conditions:\n- Root access\n- Shizuku access</string>
     <string name="error_connect_to_remote">Cannot connect to the remote server: %s</string>
     <string name="error_connection_failed_with_host">Failed to connect to \"%1$s\".</string>

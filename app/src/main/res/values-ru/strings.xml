@@ -323,6 +323,10 @@
     <string name="error_check_for_update">Не удалось проверить наличие обновлений</string>
     <string name="error_colon_must_follow_a_valid_ip_address">Двоеточие должно следовать за действительным IP-адресом</string>
     <string name="error_compass_cannot_be_null">Компас не может быть нулевым</string>
+    <string name="error_compose_host_too_old">Обновите AutoJs6 для использования плагина \"%1$s\".</string>
+    <string name="error_compose_plugin_incompatible">Плагин \"%1$s\" несовместим. Обновите AutoJs6 и плагин.</string>
+    <string name="error_compose_plugin_system_disabled">Плагин \"%1$s\" отключен в настройках Android. Включите его и повторите попытку.</string>
+    <string name="error_compose_shared_dependencies">Зависимости AutoJs6 и плагина \"%1$s\" не совпадают. Обновите оба до совместимых версий.</string>
     <string name="error_conditions_not_met_for_record">Запись скриптов требует выполнения хотя бы одного из следующих условий:\n- Доступ root\n- Доступ Shizuku</string>
     <string name="error_connect_to_remote">Не удается подключиться к удаленному серверу: %s</string>
     <string name="error_connection_failed_with_host">Не удалось подключиться к \"%1$s\".</string>
