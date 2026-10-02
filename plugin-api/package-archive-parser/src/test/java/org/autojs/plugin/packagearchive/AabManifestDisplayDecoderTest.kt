@@ -18,6 +18,54 @@ class AabManifestDisplayDecoderTest {
     @get:Rule
     val temporaryFolder = TemporaryFolder()
 
+    @Test fun protobufPermissionPreviewRespectsAndroidIdentityEvenWhenElementNameIsEncodedLast() {
+        for (name in listOf("name", "")) {
+            val summary = ManifestSummaryParser.parse(AabManifestDisplayDecoder.decodeManifest(permissionManifest(name = name)))
+            assertEquals(listOf("android.permission.CAMERA"), summary.requestedPermissions)
+        }
+        assertTrue(ManifestSummaryParser.parse(AabManifestDisplayDecoder.decodeManifest(permissionManifest(includeAndroid = false))).requestedPermissions.isEmpty())
+    }
+
+    @Test fun protobufPermissionResourceIdentityAndRawTypedAgreementAreRequired() {
+        for (manifest in listOf(permissionManifest(name = "otherField"), permissionManifest(resourceId = 0), permissionManifest(resourceId = android.R.attr.label),
+            permissionManifest(namespace = "urn:foreign"), permissionManifest(duplicate = true),
+            permissionManifest(rawValue = "fake.shadow"), permissionManifest(reference = true))) {
+            captureIOException { ManifestSummaryParser.parse(AabManifestDisplayDecoder.decodeManifest(manifest)) }
+        }
+    }
+
+    private fun permissionManifest(name: String = "name", namespace: String = ANDROID_NAMESPACE,
+        resourceId: Int = ManifestRootAttributes.PERMISSION_NAME_RESOURCE, duplicate: Boolean = false,
+        rawValue: String = "android.permission.CAMERA", reference: Boolean = false, includeAndroid: Boolean = true): ByteArray = ProtoWriter().apply {
+        message(XML_NODE_ELEMENT_FIELD) {
+            string(XML_ELEMENT_NAME_FIELD, "manifest")
+            message(XML_ELEMENT_ATTRIBUTE_FIELD) { string(XML_ATTRIBUTE_NAME_FIELD, "package"); string(XML_ATTRIBUTE_VALUE_FIELD, "com.example") }
+            message(XML_ELEMENT_CHILD_FIELD) {
+                message(XML_NODE_ELEMENT_FIELD) {
+                    message(XML_ELEMENT_ATTRIBUTE_FIELD) {
+                        string(XML_ATTRIBUTE_NAMESPACE_URI_FIELD, "http://schemas.android.com/tools")
+                        string(XML_ATTRIBUTE_NAME_FIELD, "name")
+                        string(XML_ATTRIBUTE_VALUE_FIELD, "fake.shadow")
+                    }
+                    repeat(if (!includeAndroid) 0 else if (duplicate) 2 else 1) {
+                        message(XML_ELEMENT_ATTRIBUTE_FIELD) {
+                            string(XML_ATTRIBUTE_NAMESPACE_URI_FIELD, namespace)
+                            string(XML_ATTRIBUTE_NAME_FIELD, name)
+                            varint(XML_ATTRIBUTE_RESOURCE_ID_FIELD, resourceId)
+                            string(XML_ATTRIBUTE_VALUE_FIELD, rawValue)
+                            message(XML_ATTRIBUTE_COMPILED_ITEM_FIELD) {
+                                if (reference) message(ITEM_REFERENCE_FIELD) { string(REFERENCE_NAME_FIELD, "string/permission") }
+                                else message(ITEM_STRING_FIELD) { string(WRAPPED_STRING_VALUE_FIELD, "android.permission.CAMERA") }
+                            }
+                        }
+                    }
+                    // Protobuf singular fields can arrive after their repeated attributes.
+                    string(XML_ELEMENT_NAME_FIELD, "uses-permission")
+                }
+            }
+        }
+    }.toByteArray()
+
     @Test fun protobufSharedUidUsesVerifiedResourceAndMatchingLiteralValues() {
         for (name in listOf("sharedUserId", "")) {
             val summary = ManifestSummaryParser.parse(AabManifestDisplayDecoder.decodeManifest(sharedUidManifest(name = name)))

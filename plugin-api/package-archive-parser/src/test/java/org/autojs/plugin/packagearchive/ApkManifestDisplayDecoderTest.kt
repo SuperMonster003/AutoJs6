@@ -17,6 +17,39 @@ class ApkManifestDisplayDecoderTest {
     @get:Rule
     val temporaryFolder = TemporaryFolder()
 
+    @Test fun binaryPermissionPreviewCannotBeShadowedByForeignAttributes() {
+        for (name in listOf("name", "")) {
+            val summary = ManifestSummaryParser.parse(ApkManifestDisplayDecoder.decodeManifest(permissionManifest(name = name)))
+            assertEquals(listOf("android.permission.CAMERA"), summary.requestedPermissions)
+        }
+        assertTrue(ManifestSummaryParser.parse(ApkManifestDisplayDecoder.decodeManifest(permissionManifest(includeAndroid = false))).requestedPermissions.isEmpty())
+    }
+
+    @Test fun binaryPermissionIdentityAndTypedValueMustBeProved() {
+        for (manifest in listOf(permissionManifest(name = "label"), permissionManifest(resourceId = 0), permissionManifest(resourceId = android.R.attr.label),
+            permissionManifest(namespace = "urn:foreign"), permissionManifest(duplicate = true),
+            permissionManifest(rawMismatch = true), permissionManifest(type = TYPE_REFERENCE))) {
+            assertFailsWithIOException { ManifestSummaryParser.parse(ApkManifestDisplayDecoder.decodeManifest(manifest)) }
+        }
+    }
+
+    private fun permissionManifest(name: String = "name", namespace: String = ManifestRootAttributes.ANDROID_NAMESPACE,
+        resourceId: Int = ManifestRootAttributes.PERMISSION_NAME_RESOURCE, duplicate: Boolean = false,
+        rawMismatch: Boolean = false, type: Int = TYPE_STRING, includeAndroid: Boolean = true): ByteArray {
+        val strings = listOf("android", namespace, "manifest", "package", "com.example", "uses-permission", name,
+            "android.permission.CAMERA", "fake.shadow", "http://schemas.android.com/tools", "tools", "unused", "name")
+        val resources = LittleEndianWriter().apply {
+            u16(0x0180); u16(8); i32(8 + strings.size * 4)
+            strings.indices.forEach { i32(if (it == 6) resourceId else 0) }
+        }.toByteArray()
+        val attribute = Attribute(namespace = 1, name = 6, rawValue = if (rawMismatch) 8 else 7, type = type, data = 7)
+        return wrapChunks(listOf(stringPool(strings), resources, namespaceChunk(true, 0, 1), namespaceChunk(true, 10, 9),
+            startElement(name = 2, attributes = listOf(Attribute(NO_INDEX, 3, 4, TYPE_STRING, 4))),
+            startElement(name = 5, attributes = listOf(Attribute(9, 12, 8, TYPE_STRING, 8)) +
+                List(if (!includeAndroid) 0 else if (duplicate) 2 else 1) { attribute }),
+            endElement(5), endElement(2), namespaceChunk(false, 10, 9), namespaceChunk(false, 0, 1)))
+    }
+
     @Test fun binarySharedUidUsesVerifiedResourceIdentityAndTypedLiteral() {
         for (name in listOf("sharedUserId", "")) {
             val summary = ManifestSummaryParser.parse(ApkManifestDisplayDecoder.decodeManifest(sharedUidManifest(name = name)))

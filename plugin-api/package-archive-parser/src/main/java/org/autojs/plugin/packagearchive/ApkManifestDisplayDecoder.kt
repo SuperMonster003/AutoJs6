@@ -338,13 +338,18 @@ object ApkManifestDisplayDecoder {
             }
             val attributes = ArrayList<DecodedAttribute>(attributeCount)
             var sharedUserIdSeen = false
+            var permissionNameSeen = false
+            val permissionElement = ManifestRootAttributes.isPermissionElement(name)
             repeat(attributeCount) { index ->
                 val offset = attributesStart + index * attributeSize
                 val attributeNamespace = strings().nullable(readI32(bytes, offset))
                 val attributeNameIndex = readI32(bytes, offset + 4)
                 val declaredName = strings().nullable(attributeNameIndex)
-                val verifiedName = ManifestRootAttributes.compiledName(attributeNamespace, declaredName,
+                val sharedName = ManifestRootAttributes.compiledName(attributeNamespace, declaredName,
                     resourceIds.getOrNull(attributeNameIndex) ?: 0)
+                val verifiedName = if (permissionElement) ManifestRootAttributes.compiledName(attributeNamespace, sharedName,
+                    resourceIds.getOrNull(attributeNameIndex) ?: 0, ManifestRootAttributes.PERMISSION_NAME,
+                    ManifestRootAttributes.PERMISSION_NAME_RESOURCE, "Permission name") else sharedName
                 val attributeName = verifiedName
                     ?.takeIf { it.isNotEmpty() }
                     ?: fallbackAttributeName(attributeNameIndex)
@@ -356,13 +361,18 @@ object ApkManifestDisplayDecoder {
                 val dataType = readU8(bytes, offset + 15)
                 val data = readI32(bytes, offset + 16)
                 val rawValue = strings().nullable(rawValueIndex)
-                val value = if (attributeNamespace == ManifestRootAttributes.ANDROID_NAMESPACE &&
-                    attributeName == ManifestRootAttributes.SHARED_USER_ID) {
-                    if (sharedUserIdSeen || dataType != TYPE_STRING) throw IOException("Shared UID attribute is duplicated or not a literal string")
-                    sharedUserIdSeen = true
+                val shared = attributeNamespace == ManifestRootAttributes.ANDROID_NAMESPACE && attributeName == ManifestRootAttributes.SHARED_USER_ID
+                val permission = permissionElement && attributeNamespace == ManifestRootAttributes.ANDROID_NAMESPACE &&
+                    attributeName == ManifestRootAttributes.PERMISSION_NAME
+                val value = if (shared || permission) {
+                    val label = if (shared) "Shared UID" else "Permission name"
+                    if ((shared && sharedUserIdSeen) || (permission && permissionNameSeen) || dataType != TYPE_STRING) {
+                        throw IOException("$label attribute is duplicated or not a literal string")
+                    }
+                    if (shared) sharedUserIdSeen = true else permissionNameSeen = true
                     val typed = strings().required(data)
-                    if (rawValue != null && rawValue != typed) throw IOException("Shared UID raw and compiled values disagree")
-                    ManifestRootAttributes.requireLiteral(typed)
+                    if (rawValue != null && rawValue != typed) throw IOException("$label raw and compiled values disagree")
+                    ManifestRootAttributes.requireLiteral(typed, label)
                 } else rawValue ?: formatTypedValue(dataType, data)
                 attributes += DecodedAttribute(attributeNamespace, attributeName, value)
             }

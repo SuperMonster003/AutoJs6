@@ -1041,7 +1041,6 @@ object ManifestSummaryParser {
 
     private val applicationTag = Regex("""<application\b([^>]*)/?>""", RegexOption.IGNORE_CASE)
     private val usesSdkTag = Regex("""<uses-sdk\b([^>]*)/?>""", RegexOption.IGNORE_CASE)
-    private val permissionTag = Regex("""<uses-permission(?:-sdk-\d+)?\b([^>]*)/?>""", RegexOption.IGNORE_CASE)
     private val usesSplitTag = Regex("""<uses-split\b([^>]*)/?>""", RegexOption.IGNORE_CASE)
     private val attribute = Regex("""(?:^|\s)([A-Za-z_][A-Za-z0-9_.-]*(?::[A-Za-z_][A-Za-z0-9_.-]*)?)\s*=\s*("([^"]*)"|'([^']*)')""")
 
@@ -1073,12 +1072,7 @@ object ManifestSummaryParser {
             targetSdk = sdkAttributes.value("targetSdkVersion")?.toIntFlexible(),
             maxSdk = sdkAttributes.value("maxSdkVersion")?.toIntFlexible(),
             applicationLabel = applicationAttributes.value("label")?.takeIf(String::isNotBlank),
-            requestedPermissions = permissionTag.findAll(xml)
-                .mapNotNull { match -> parseAttributes(match.groupValues[1]).value("name") }
-                .filter(String::isNotBlank)
-                .distinct()
-                .sorted()
-                .toList(),
+            requestedPermissions = root.requestedPermissions,
             usesSplits = usesSplitTag.findAll(xml)
                 .mapNotNull { match -> parseAttributes(match.groupValues[1]).value("name") }
                 .filter(String::isNotBlank)

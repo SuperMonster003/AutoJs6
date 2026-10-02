@@ -210,6 +210,29 @@ object AabManifestDisplayDecoder {
                     it.name == ManifestRootAttributes.SHARED_USER_ID } > 1) {
                 throw malformed("shared UID attribute is duplicated")
             }
+            if (ManifestRootAttributes.isPermissionElement(elementName)) {
+                var seen = false
+                for (index in attributes.indices) {
+                    val attribute = attributes[index]
+                    val verified = ManifestRootAttributes.compiledName(attribute.namespaceUri, attribute.declaredName,
+                        attribute.resourceId, ManifestRootAttributes.PERMISSION_NAME,
+                        ManifestRootAttributes.PERMISSION_NAME_RESOURCE, "Permission name")
+                    if (attribute.namespaceUri == ManifestRootAttributes.ANDROID_NAMESPACE && verified == ManifestRootAttributes.PERMISSION_NAME) {
+                        if (seen || attribute.duplicatedFields || attribute.compiledValue?.second == false) {
+                            throw malformed("permission name is duplicated, ambiguous or not a literal string")
+                        }
+                        seen = true
+                        val typed = attribute.compiledValue?.first
+                        if (attribute.compiledValue != null && typed == null) throw malformed("permission name compiled value is missing")
+                        if (typed != null && attribute.rawValue != null && typed != attribute.rawValue) {
+                            throw malformed("permission name raw and compiled values disagree")
+                        }
+                        val value = ManifestRootAttributes.requireLiteral(typed ?: attribute.rawValue
+                            ?: throw malformed("permission name value is missing"), "Permission name")
+                        attributes[index] = attribute.copy(name = ManifestRootAttributes.PERMISSION_NAME, value = value)
+                    }
+                }
+            }
             return XmlElement(namespaceUri, elementName, namespaces, attributes, children)
         }
 
@@ -291,6 +314,11 @@ object AabManifestDisplayDecoder {
                 namespaceUri = namespaceUri,
                 name = attributeName,
                 value = value,
+                declaredName = name,
+                resourceId = resourceId,
+                rawValue = rawValue,
+                compiledValue = compiledValue,
+                duplicatedFields = duplicatedField,
             )
         }
 
@@ -839,6 +867,11 @@ object AabManifestDisplayDecoder {
         val namespaceUri: String,
         val name: String,
         val value: String,
+        val declaredName: String?,
+        val resourceId: Int,
+        val rawValue: String?,
+        val compiledValue: Pair<String?, Boolean>?,
+        val duplicatedFields: Boolean,
     )
 
     private data class Tag(val fieldNumber: Int, val wireType: Int)
