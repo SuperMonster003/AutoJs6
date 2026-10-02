@@ -37,6 +37,8 @@
 | D15 | Roadmap 位于 `docs/dev/`; 每个子条目一个提交 | 与仓库既有 roadmap 的位置与风格一致. 提交只暂存本功能的文件 (工作区可能有其他会话的未提交改动). |
 | D16 | 离线布局享有同样能力 | 从文件打开的布局 (`LayoutSnapshotViewer`, `isOffline = true`) 与实时捕获走同一 `NodeInfo` 树; 包名 / 动作候选取自树本身, 不依赖实时窗口列表. |
 | D17 | 性能预算 | 输入去抖 150 ms 后在主线程求值; 目标: 10,000 节点的树单次求值 <= 50 ms (API 33 中端机); 超出预算则 P6 迁至后台线程并以序号丢弃过期结果. |
+| D18 | 类名预设按简化类名后缀匹配 (Q5 拍板, 2026-10-02) | 预设 = 后缀模式集合 + 显式排除, 匹配对象为去掉包名的简化类名: 按钮 (`*Button`), 文本 (`*TextView`, 排除 `*EditText`), 输入 (`*EditText`, `*AutoCompleteTextView`), 图片 (`*ImageView`, 排除 `*ImageButton`), 复选与开关 (`*CheckBox`, `*Switch*`, `*RadioButton`, `*ToggleButton`), 列表与滚动 (`*RecyclerView`, `*ListView`, `*ScrollView`, `*ViewPager*`, `*GridView`), 容器 (`*Layout`, `*ViewGroup`, `*Container`). 规则表位于引擎包, 可单测; 多个预设之间为 OR. |
+| D19 | 字段模式比较运算经注册表新增 `min*` / `max*` 属性 (Q1 拍板, 2026-10-02) | P4 为选择器注册表新增 `minDepth` / `maxDepth` / `minChildCount` / `maxChildCount` / `minIndexInParent` / `maxIndexInParent`, 字段模式写法为 `minDepth=3`, 脚本 `select()` 与链式选择器同步可用; 作为脚本公开 API 变更, 该阶段必须同步文档 / d.ts / Ace 声明三个关联仓库. |
 
 ---
 
@@ -118,7 +120,7 @@
 
 - [ ] P4.1 模式开关接入 "字段" 模式: `InspectorQuery` 字段模式经 `SelectorStringParser.parse(text, UiSelector(null))` 得到过滤器 (D11); 解析错误显示位置, 出错条件与候选属性名 (复用 `SelectorStringException` 的渲染); 输入框下方 (展开态) 显示一行语法速查提示, 首次切换时 toast 指向附录 E 的语法.
 - [ ] P4.2 "复制为选择器" (D8): 会话当前条件 (查询 + 配置 + 区域) 合成 `Selector.toString()`; 关键词模式按当前匹配节点命中的属性输出; 不可表达条件以注释附加; 复制后 toast "已复制". 单测: `SelectorExportTest` (关键词命中属性映射, 注释附加, 正则开关).
-- [ ] P4.3 Q1 拍板并落地 (比较运算 / 不做).
+- [ ] P4.3 Q1 落地 (D19): 选择器注册表新增 `minDepth` / `maxDepth` / `minChildCount` / `maxChildCount` / `minIndexInParent` / `maxIndexInParent` (脚本 `select()` 与字段模式同步可用, 单测覆盖边界与非法值), 并同步文档 / d.ts / Ace 声明三个关联仓库 (使用方式第 5 条).
 - [ ] P4.4 字符串 + changelog (feature 2 条) + 冒烟 (附录 B 第 14-15 项) + 提交.
 
 ### P5 选择器模式
@@ -140,11 +142,11 @@
 
 | 编号 | 问题 | 建议 |
 | --- | --- | --- |
-| Q1 | 字段模式是否支持比较运算 (`depth>3`, `childCount<=2`)? 注册表对 width / height / left 等有 `min*` / `max*` 属性 (`minWidth=100`), 但 depth / childCount / indexInParent 只有精确匹配. | 三个选项: (a) 解析器层糖 (`key>n` 映射到 `IntRangeFilter`, 仅布局分析可用, 破坏 D11 "一套语法" 承诺); (b) 注册表新增 `minDepth` / `maxDepth` / `minChildCount` / `maxChildCount` / `minIndexInParent` / `maxIndexInParent` (脚本 API 新增, 需同步文档 / d.ts / Ace 声明); (c) 不做, 区间需求走筛选配置的数值区间. 建议 P4 先 (c), 若使用中确有需要再按 (b) 独立立项. |
+| Q1 | (已拍板 2026-10-02: 选 (b), 见 D19) 字段模式是否支持比较运算 (`depth>3`, `childCount<=2`)? 注册表对 width / height / left 等有 `min*` / `max*` 属性 (`minWidth=100`), 但 depth / childCount / indexInParent 只有精确匹配. | 三个选项: (a) 解析器层糖 (`key>n` 映射到 `IntRangeFilter`, 仅布局分析可用, 破坏 D11 "一套语法" 承诺); (b) 注册表新增 `minDepth` / `maxDepth` / `minChildCount` / `maxChildCount` / `minIndexInParent` / `maxIndexInParent` (脚本 API 新增, 需同步文档 / d.ts / Ace 声明); (c) 不做, 区间需求走筛选配置的数值区间. 建议 P4 先 (c), 若使用中确有需要再按 (b) 独立立项. |
 | Q2 | 选择器模式是否改用 Rhino 求值 (在无 bridge 的 `UiSelector` 上执行用户输入)? | 建议维持 D12 的自研解析器: 每次击键求值, 需要无副作用与毫秒级返回; Rhino 方案只在解析器覆盖不了的写法 (模板字符串, 变量) 成为真实诉求时再评估. |
 | Q3 | 关键词模式的匹配字段是否纳入 `packageName` / `idHex` / `fullId` 之外的属性 (如 `actionNames`)? | 建议维持 text / desc / id (完整资源 id, 子串即覆盖简单 id) / className 四项; 包名命中会让 `com` 之类的关键词匹配整棵树, 走筛选配置的包名维度更合适. |
 | Q4 | 是否把搜索能力暴露给 MCP Server 插件的远程布局检查? | 建议不做: 远程侧已有 `auto.dump` / 选择器查询, 本功能面向手机端交互. |
-| Q5 | 类名预设如何匹配: 固定类名清单, 还是按简化类名后缀的启发式 (如 "按钮" = 以 `Button` 结尾, 含 `ImageButton` / `MaterialButton` / `AppCompatButton`)? | 建议后缀启发式 + 显式例外表: 按钮 (`*Button`), 文本 (`*TextView`, 不含 `*EditText`), 输入 (`*EditText`, `*AutoCompleteTextView`), 图片 (`*ImageView`, 不含 `*ImageButton`), 复选与开关 (`*CheckBox`, `*Switch*`, `*RadioButton`, `*ToggleButton`), 列表与滚动 (`*RecyclerView`, `*ListView`, `*ScrollView`, `*ViewPager*`, `*GridView`), 容器 (`*Layout`, `*ViewGroup`, `*Container`), Web (`*WebView`), 其他 (不属于以上任一). 清单在 P3.2 落地时固定并写入附录 E. |
+| Q5 | (已拍板 2026-10-02: 后缀启发式 + 例外表, 见 D18) 类名预设如何匹配: 固定类名清单, 还是按简化类名后缀的启发式 (如 "按钮" = 以 `Button` 结尾, 含 `ImageButton` / `MaterialButton` / `AppCompatButton`)? | 建议后缀启发式 + 显式例外表: 按钮 (`*Button`), 文本 (`*TextView`, 不含 `*EditText`), 输入 (`*EditText`, `*AutoCompleteTextView`), 图片 (`*ImageView`, 不含 `*ImageButton`), 复选与开关 (`*CheckBox`, `*Switch*`, `*RadioButton`, `*ToggleButton`), 列表与滚动 (`*RecyclerView`, `*ListView`, `*ScrollView`, `*ViewPager*`, `*GridView`), 容器 (`*Layout`, `*ViewGroup`, `*Container`), Web (`*WebView`), 其他 (不属于以上任一). 清单在 P3.2 落地时固定并写入附录 E. |
 | Q6 | 层次窗口是否也应隐藏 `hidden` 节点 (现状与范围窗口不一致)? | 本 Roadmap 不处理; 建议另行记录为 improvement, 因为它改变既有行为. |
 | Q7 | 搜索栏在横屏 / 平板的宽度策略: 占满宽度, 还是限制最大宽度 (如 480 dp) 并居中? | 建议限制最大宽度并居中, 与节点信息对话框的观感一致; P1.5 落地时按此实现, 若维护者另有偏好在此回填. |
 
