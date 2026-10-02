@@ -708,7 +708,8 @@
         "Добавлен AndroidX Test Ext JUnit версии 1.3.0",
         "Добавлен Android Hidden API Bypass версии 6.1",
         "Модуляризация Package Archive Parser",
-        "Модуляризация Installer API"
+        "Модуляризация Installer API",
+        "Согласованы lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 и window 1.5.0 в сборках Debug для проверки Compose UI"
       ]
     },
     "v6.7.0": {

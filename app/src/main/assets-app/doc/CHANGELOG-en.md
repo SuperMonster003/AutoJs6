@@ -708,6 +708,7 @@
 * `Dependency` Added Android Hidden API Bypass version 6.1
 * `Dependency` Modularize Package Archive Parser
 * `Dependency` Modularize Installer API
+* `Dependency` Align lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in debug builds for Compose UI verification
 
 # v6.7.0
 

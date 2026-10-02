@@ -708,6 +708,7 @@
 * `التبعيات` إضافة Android Hidden API Bypass بالإصدار 6.1
 * `التبعيات` تحويل Package Archive Parser إلى وحدة
 * `التبعيات` تحويل Installer API إلى وحدة
+* `التبعيات` مواءمة lifecycle 2.9.4 و savedstate 1.3.2 و emoji2 1.4.0 و window 1.5.0 في إصدارات Debug للتحقق من Compose UI
 
 # v6.7.0
 

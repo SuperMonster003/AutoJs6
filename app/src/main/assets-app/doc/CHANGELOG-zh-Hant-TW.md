@@ -708,6 +708,7 @@
 * `依賴` 附加 Android Hidden API Bypass 版本 6.1
 * `依賴` 模組化 Package Archive Parser
 * `依賴` 模組化 Installer API
+* `依賴` Debug 建置對齊 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 與 window 1.5.0, 用於 Compose UI 驗證
 
 # v6.7.0
 

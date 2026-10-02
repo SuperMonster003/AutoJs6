@@ -422,6 +422,7 @@
 * `依赖` 移除 AndroidX AppCompat (Legacy) 版本 1.0.2
 * `依赖` 模块化 Package Archive Parser
 * `依赖` 模块化 Installer API
+* `依赖` Debug 构建对齐 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 与 window 1.5.0, 用于 Compose UI 验证
 
 # v6.7.0
 

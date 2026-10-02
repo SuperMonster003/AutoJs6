@@ -22,6 +22,14 @@ plugins {
 }
 
 val globalApplicationId = "org.autojs.autojs6"
+apply(from = "compose-spike.gradle.kts")
+if (providers.gradleProperty("composeUiSpike").orNull == "true") {
+    android.buildTypes.named("debug") {
+        applicationIdSuffix = ".compose.spike"
+        manifestPlaceholders["authorities"] = "org.autojs.autojs6.compose.spike.fileprovider"
+        manifestPlaceholders["appName"] = "Compose spike host"
+    }
+}
 
 val flavorDimension = "channel"
 val flavorNameApp = "app"

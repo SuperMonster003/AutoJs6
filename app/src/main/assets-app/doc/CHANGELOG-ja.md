@@ -708,6 +708,7 @@
 * `依存関係` Android Hidden API Bypass バージョン 6.1 を追加
 * `依存関係` Package Archive Parser をモジュール化
 * `依存関係` Installer API をモジュール化
+* `依存関係` Compose UI 検証用の Debug ビルドで lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0, window 1.5.0 に整合
 
 # v6.7.0
 
