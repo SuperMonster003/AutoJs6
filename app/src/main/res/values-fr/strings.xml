@@ -1467,7 +1467,9 @@
     <string name="text_inspector_clear_query_history">Effacer l\'historique de recherche</string>
     <string name="text_inspector_clear_region">Effacer la zone</string>
     <string name="text_inspector_collapse_search_bar">Réduire la barre de recherche</string>
+    <string name="text_inspector_copy_always_ask">Toujours demander</string>
     <string name="text_inspector_copy_as_selector">Copier comme sélecteur</string>
+    <string name="text_inspector_copy_button_behavior">Comportement du bouton Copier</string>
     <string name="text_inspector_did_you_mean">Vouliez-vous dire : %1$s</string>
     <string name="text_inspector_expand_search_bar">Développer la barre de recherche</string>
     <string name="text_inspector_expression_unfinished">Expression inachevée</string>

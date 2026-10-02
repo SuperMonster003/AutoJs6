@@ -22,7 +22,7 @@
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_inspector_collapse_search_bar"
-            android:padding="7dp"
+            android:padding="5dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_search_black_48dp"
             android:tint="@color/day_night" />
@@ -54,7 +54,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center"
             android:textColor="@color/day_night"
-            android:textSize="11sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             tools:text="Aa" />
 
@@ -68,7 +68,7 @@
                 android:layout_height="36dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/text_inspector_filter_profiles"
-                android:padding="7dp"
+                android:padding="5dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_filter_list_black_48dp"
                 android:tint="@color/day_night" />
@@ -97,7 +97,7 @@
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_inspector_regex_mode"
-            android:padding="7dp"
+            android:padding="5dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_inspector_regex"
             android:tint="@color/day_night" />
@@ -121,7 +121,7 @@
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_inspector_previous_match"
-            android:padding="6dp"
+            android:padding="4dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_expand_less_black_48dp"
             android:tint="@color/day_night" />
@@ -132,7 +132,7 @@
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/text_inspector_next_match"
-            android:padding="6dp"
+            android:padding="4dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_expand_more_black_48dp"
             android:tint="@color/day_night" />

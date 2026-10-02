@@ -449,6 +449,7 @@
 * `修復` `UiObject.clickBounds()` 在腳本線程上臨時準備 Looper 並在手勢完成後 `quit()`, 實際退出的是腳本線程自身的事件循環, 此後 `setTimeout` 等回調不再執行且腳本提前結束; 現在由查詢得到的節點經腳本的手勢派發器 (servant Looper) 點按, 其它來源的節點保持原路徑
 * `修復` `pickup` / `detect` 的結果類型 `['compass', 'p']` 一律報 "未知結果類型", 因 `compass` 在攔截表中登記為 `String` 參數而其簽名為 `CharSequence`; 現在可用
 * `修復` 佈局分析器為集合控件的子項生成代碼且未選擇動作時, 生成的 `forEach` 代碼塊含無效語句 `target.;`; 現在省略該行
+* `修復` 佈局分析浮動視窗及其對話框的文字/控制項在部分主題色或夜間模式下對比度不足的問題
 * `修復` 控件集合數組上同名的多個重載只保留最後一個 (如 `performAction(action)` 與 `performAction(action, ...args)`), 以另一種參數個數調用會報參數不匹配; 現在按名稱綁定全部重載
 * `修復` `textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 等 `contains` 系列的普通字符串參數自 6.7.0 Alpha13 起被當作正則模式 (`textContains(".")` 匹配任意非空文本, `textContains("1+1")` 匹配 "11", `textContains("(")` 報錯), 現在恢復為字面子串, 與 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 正則需求請傳正則參數 (`textContains(/re/i)`) 或使用 `textMatch` / `textMatches`, 字符串形式的 "/re/flags" 在 `contains` 中不再視為正則
 * `修復` 懸浮窗 (`floaty.rawWindow` / `floaty.window`) 的 `requestFocus()` / `disableFocus()` 在腳本線程調用時直接更新已附着窗口的佈局, 偶發 `CalledFromWrongThreadException`; 現改為在 UI 線程執行 (與 `setSize` / `setPosition` 一致)
@@ -676,7 +677,8 @@
 * `優化` installer 安裝選項接受 grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason 及 packageSource, 按插件能力啟用; 省略保留原行為, 明確指定 false/none 仍需對應支援
 * `優化` Three Stove Agent 模型代理在一次模型呼叫逾時且同步 Binder 交易尚未返回時會熔斷該 Provider 元件, 此前熔斷持續到 AutoJs6 程序重啟, 後續任務立即以 RATE_LIMITED: FUSED 失敗; 現在該交易實際返回並結清後自動解除熔斷, 後續任務無需重啟即可再次准入
 * `優化` 佈局層次分析頁面移除左側的層級彩色直線 (僅保留縮排), 展開 / 收起標識移到控制項文字左側: 可展開為右箭頭, 已展開為下箭頭, 無子孫控制項為小空心圓, 三類圖示統一著色並適當加深
-* `優化` 佈局分析搜尋列的正則開關圖示重新設計為簡潔的 ".*" 字樣
+* `優化` 佈局分析的節點資訊對話框以主題色背景標示多選項, 切換多選時保持列表項高度不變; 按鈕調整為 "設定/返回/複製", 複製方式支援 "總是詢問/複製物件選擇器/複製鏈式選擇器" 並跨工作階段記憶, 預設為 "總是詢問"
+* `優化` 佈局分析搜尋列的查詢模式/篩選/正則/導覽按鈕增大顯示尺寸, 正則開關使用簡潔的 ".*" 字樣
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

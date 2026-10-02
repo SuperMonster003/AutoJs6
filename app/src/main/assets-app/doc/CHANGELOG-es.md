@@ -499,6 +499,7 @@
 * `Corrección` La inspeccion de paquetes reconoce conjuntos de APK divididos en archivos ZIP normales, incluso sin una extension de paquete conocida
 * `Corrección` La pantalla de confirmación de 3-Setup Installer no se abría en Android 14 y versiones posteriores al iniciar una instalación con AutoJs6 en primer plano
 * `Corrección` La raíz del manifiesto y los UID compartidos podían interpretarse desde comentarios o espacios de nombres falsos; los atributos duplicados, recursos contradictorios y UID no verificables detienen el procesamiento
+* `Corrección` Contraste insuficiente del texto y los controles de las ventanas flotantes y los diálogos del análisis de diseño con algunos colores de tema o en modo nocturno
 * `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
 * `Mejora` El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado
@@ -676,7 +677,8 @@
 * `Mejora` Las opciones de instalación de installer aceptan grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason y packageSource según las capacidades del plugin elegido; omitirlas conserva el comportamiento anterior y false/none explícito también requiere compatibilidad
 * `Mejora` El intermediario de modelos de Three Stove Agent funde un componente Provider cuando una llamada al modelo agota el tiempo mientras su transacción Binder síncrona aún no ha vuelto; antes el fusible duraba hasta reiniciar AutoJs6 y las tareas posteriores fallaban de inmediato con RATE_LIMITED: FUSED. Ahora se levanta automáticamente cuando esa transacción vuelve y la ejecución se liquida, de modo que las tareas posteriores se admiten de nuevo sin reiniciar
 * `Mejora` Las filas del análisis de jerarquía eliminan las barras de nivel de colores de la izquierda (la sangría se mantiene) y colocan la marca de expandir / contraer junto al texto del nodo: chevrón derecho para filas contraídas, chevrón abajo para filas expandidas y un pequeño círculo hueco para filas sin descendientes, los tres con un mismo tono ligeramente más oscuro
-* `Mejora` El conmutador de regex de la barra de búsqueda del análisis de diseño recibe un icono ".*" limpio
+* `Mejora` La selección múltiple de atributos usa fondos con el color del tema sin cambiar la altura de las filas; los botones son Ajustes / Volver / Copiar, y el comportamiento de copia se recuerda entre sesiones: Preguntar siempre (predeterminado), Copiar selector de objeto o Copiar selector encadenado
+* `Mejora` Símbolos más grandes para el modo de consulta, filtros, regex y navegación en la barra de búsqueda del análisis de diseño; el conmutador de regex usa un icono ".*" sencillo
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

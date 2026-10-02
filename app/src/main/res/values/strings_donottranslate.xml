@@ -225,6 +225,7 @@
     <string name="key_layout_inspector_field_mode_introduced" translatable="false">key_$_layout_inspector_field_mode_introduced</string>
     <string name="key_layout_inspector_filter_profile_selected" translatable="false">key_$_layout_inspector_filter_profile_selected</string>
     <string name="key_layout_inspector_filter_profiles" translatable="false">key_$_layout_inspector_filter_profiles</string>
+    <string name="key_layout_inspector_node_copy_mode" translatable="false">key_$_layout_inspector_node_copy_mode</string>
     <string name="key_layout_inspector_query_history" translatable="false">key_$_layout_inspector_query_history</string>
     <string name="key_layout_inspector_query_mode" translatable="false">key_$_layout_inspector_query_mode</string>
     <string name="key_layout_inspector_selector_mode_introduced">key_layout_inspector_selector_mode_introduced</string>

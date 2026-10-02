@@ -12,12 +12,10 @@ import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.inspector.InspectorNode
 import org.autojs.autojs.core.accessibility.inspector.TreeMatch
 import org.autojs.autojs.event.BackCompat
-import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.LayoutFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchBar
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchSession
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.EventUtils
 import org.autojs.autojs6.R
 
@@ -121,18 +119,13 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
     }
 
     override fun onViewCreated(v: View) {
-        val background = context.getColor(R.color.layout_hierarchy_window_background) /* color_shadow */
+        val background = serviceContext.getColor(R.color.layout_hierarchy_window_background) /* color_shadow */
         v.setBackgroundColor(background)
         val session = requireSearchSession()
         mLayoutHierarchyView.apply {
             setShowClickedNodeBounds(true)
             boundsPaint.strokeWidth = 3f
             boundsPaint.color = context.getColor(R.color.layout_hierarchy_window_node_bounds)
-            setClickedBackgroundColor(context.getColor(R.color.layout_hierarchy_window_clicked_background))
-            // The theme color, corrected until it reads on the window background in both day and night mode.
-            // zh-CN: 主题色, 经对比度修正后在日间与夜间的窗口背景上都可读.
-            setHighlightTextColor(ColorUtils.adjustThemeColorForContrast(ColorUtils.applyAlpha(background, 1.0), 4.5))
-            setMatchHighlightColor(ColorUtils.applyAlpha(ThemeColorManager.colorPrimary, MATCH_HIGHLIGHT_ALPHA))
             setOnItemLongClickListener { view: View, info: NodeInfo ->
                 setLayoutSelectedNode(info)
                 showMenuForRow(view)
@@ -168,12 +161,6 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
             }
             menu.showAsDropDownAtLocation(row, row.height, x, y)
         }
-    }
-
-    companion object {
-
-        private const val MATCH_HIGHLIGHT_ALPHA = 0.3
-
     }
 
 }

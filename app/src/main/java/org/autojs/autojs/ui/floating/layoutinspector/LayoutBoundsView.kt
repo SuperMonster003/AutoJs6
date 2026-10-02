@@ -90,6 +90,12 @@ open class LayoutBoundsView : View {
         color = ThemeColorManager.colorPrimary
     }
 
+    // A contrasting outline keeps the themed region visible over arbitrary captured content.
+    private val mRegionOutlinePaint = Paint(mRegionStrokePaint).apply {
+        strokeWidth = 6f
+        color = if (ColorUtils.isLuminanceLight(mRegionStrokePaint.color)) Color.BLACK else Color.WHITE
+    }
+
     /** Whether the next touch gesture drags a region instead of selecting a node. zh-CN: 下一次触摸手势是否用于拖出区域而非点选节点. */
     val isSelectingRegion: Boolean get() = mRegionListener != null
 
@@ -188,6 +194,7 @@ open class LayoutBoundsView : View {
             mRegionDrawRect.set(rect)
             mRegionDrawRect.offset(0, -statusBarHeight)
             canvas.drawRect(mRegionDrawRect, mRegionFillPaint)
+            canvas.drawRect(mRegionDrawRect, mRegionOutlinePaint)
             canvas.drawRect(mRegionDrawRect, mRegionStrokePaint)
         }
     }

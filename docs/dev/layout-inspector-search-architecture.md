@@ -234,3 +234,13 @@ JVM 基准 `TreeMatchBenchmarkTest` (10,000 节点合成树: 4 层外壳 + 2,000
 4. 查询编译失败时保持树不筛选 (错误可见优先于结果变窄).
 5. 搜索栏与窗口只通过 `InspectorSearchSession.Listener` / `InspectorSearchBar.Host` / `InspectorMatchView` 三个接口交互; `LayoutHierarchyView` 保持 Java (Roadmap D14), 行状态在 `getViewForObject` 中由数据推导.
 6. 脚本公开 API 的任何变更 (注册表新增属性) 必须同步文档 / d.ts / Ace 三个仓库 (Roadmap D19 的先例).
+
+## 9. 浮窗主题与节点信息多选 (2026-10-02)
+
+`InspectorTheme` 按控件实际所在的对话框 / 搜索栏 / 层次窗口背景计算主题色, 复用宿主 `ColorUtils.adjustColorForContrast`. 普通文字与主题色文字的目标对比度为 4.5, 控件为 3.0; 半透明窗口分别检查纯黑与纯白底图合成后的背景. 多选行与命中子串使用不透明的主题色混合背景, 文字按该背景单独计算, 避免高亮背景与主题色文字相互抵消. 层次搜索的祖先行使用符合对比度要求的次要文字色, 不再通过降低整段文字透明度来淡化.
+
+`InspectorDialogBuilder` 为节点信息, 搜索结果, 筛选配置及其子对话框, 窗口切换和代码生成提供相同的宿主语言 / 明暗配置及主题色策略. 构建器 context 本身也包装 `AppTheme`, 因此 MaterialDialog 的列表行与单选按钮能够解析主题属性. 范围框选的主题色虚线额外绘制对比色轮廓, 以适应下方任意应用内容.
+
+`NodeInfoDialog` 管理节点信息的按钮与复制方式, `NodeInfoView` 只管理属性和选中行. 长按进入多选, 单击切换行背景; 不插入复选框, 不改变文字列宽或行高. 取消最后一项后保留多选模式并禁用复制, "返回" 清空选择并退出多选. 多选按钮为 "设置 / 返回 / 复制". 设置中的复制方式按 `ASK` / `OBJECT` / `CHAINED` 存入 `key_layout_inspector_node_copy_mode`, 缺省或未知值按 `ASK` 处理; 只在确认设置后写入, 临时的格式选择不改变偏好.
+
+设备测试 `InspectorUiDeviceTest` 覆盖明暗模式和多种主题色的对比度, 小宽度与字体放大时多选前后的行坐标, 以及复制偏好的默认值 / 持久化 / 未知值回退. `tools/layout-inspector/smoke-region.py` 使用实际节点边界补测实时与离线区域筛选, 跨窗口传递及清除, 避免不同设备的固定点击坐标造成误判.

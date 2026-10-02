@@ -23,8 +23,7 @@ import androidx.core.view.isVisible
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.inspector.InspectorQuery
 import org.autojs.autojs.core.accessibility.inspector.InspectorQueryError
-import org.autojs.autojs.theme.ThemeColorManager
-import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.ui.floating.layoutinspector.InspectorTheme
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.LayoutInspectorHistoryItemBinding
@@ -96,9 +95,11 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
 
     private val maxBarWidth = (MAX_BAR_WIDTH_DP * resources.displayMetrics.density).roundToInt()
 
-    private val normalColor = context.getColor(R.color.day_night)
+    private val colors = InspectorTheme(context, context.getColor(R.color.layout_inspector_search_surface))
 
-    private val errorColor = context.getColor(R.color.layout_hierarchy_window_node_bounds)
+    private val normalColor = colors.text
+
+    private val errorColor = colors.readable(context.getColor(R.color.layout_hierarchy_window_node_bounds))
 
     private val inputMethodManager get() = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
@@ -144,9 +145,12 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         setPadding(horizontal, vertical, horizontal, vertical)
     }
 
-    private val hintColor = ColorUtils.applyAlpha(normalColor, HINT_TEXT_ALPHA)
+    private val hintColor = colors.secondaryText
 
     init {
+        colors.applyTo(bar.query)
+        bar.filterBadge.backgroundTintList = ColorStateList.valueOf(colors.accent)
+        bar.filterBadge.setTextColor(colors.onAccent)
         val barLp = bar.root.layoutParams as LayoutParams
         for (dropDown in listOf(historyList, hintView)) {
             addView(dropDown, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply {
@@ -442,11 +446,12 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
                     else -> ""
                 }
                 binding.tag.text = tag
+                binding.tag.setTextColor(colors.secondaryText)
                 binding.tag.visibility = if (tag.isEmpty()) GONE else VISIBLE
             } else {
                 binding.text.setText(R.string.text_inspector_clear_query_history)
                 binding.text.gravity = Gravity.CENTER
-                binding.text.setTextColor(ThemeColorManager.colorPrimary)
+                binding.text.setTextColor(colors.accent)
                 binding.tag.visibility = GONE
             }
             return binding.root
@@ -505,7 +510,7 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
             button.isEnabled = navigable
             button.alpha = if (navigable) 1f else DISABLED_ALPHA
         }
-        val regexColor = if (session.query.regex) ThemeColorManager.colorPrimary else ColorUtils.applyAlpha(normalColor, INACTIVE_ICON_ALPHA)
+        val regexColor = if (session.query.regex) colors.control else colors.secondaryText
         bar.regex.imageTintList = ColorStateList.valueOf(regexColor)
         // The regex switch belongs to the keyword mode only (D2); the other modes spell regexes themselves.
         // zh-CN: 正则开关只属于关键词模式 (D2); 其他模式自行表达正则.
@@ -513,13 +518,13 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         bar.regex.visibility = if (mode == InspectorQuery.Mode.KEYWORD) VISIBLE else GONE
         bar.mode.text = modeLabel(mode)
         bar.mode.contentDescription = context.getString(R.string.text_inspector_query_mode, context.getString(modeName(mode)))
-        bar.mode.setTextColor(if (mode == InspectorQuery.Mode.KEYWORD) normalColor else ThemeColorManager.colorPrimary)
+        bar.mode.setTextColor(if (mode == InspectorQuery.Mode.KEYWORD) normalColor else colors.accent)
         renderHint()
 
         val conditions = session.conditionCount
         bar.filterBadge.text = if (conditions > MAX_BADGE) "$MAX_BADGE+" else conditions.toString()
         bar.filterBadge.visibility = if (conditions > 0) VISIBLE else GONE
-        bar.filter.imageTintList = ColorStateList.valueOf(if (conditions > 0) ThemeColorManager.colorPrimary else normalColor)
+        bar.filter.imageTintList = ColorStateList.valueOf(if (conditions > 0) colors.control else normalColor)
     }
 
     private fun describe(error: InspectorQueryError): String = when (error.kind) {
@@ -615,8 +620,6 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
 
         private const val DISABLED_ALPHA = 0.38f
 
-        private const val INACTIVE_ICON_ALPHA = 0.6
-
         private const val HISTORY_OFFSET_DP = 4
 
         private const val HISTORY_MAX_HEIGHT_DP = 280
@@ -628,8 +631,6 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         private const val HINT_PADDING_H_DP = 12
 
         private const val HINT_PADDING_V_DP = 8
-
-        private const val HINT_TEXT_ALPHA = 0.7
 
         /** Marks history rows recorded with the regex switch on. zh-CN: 标记正则开关开启时记录的历史行. */
         private const val REGEX_TAG = "RegEx"

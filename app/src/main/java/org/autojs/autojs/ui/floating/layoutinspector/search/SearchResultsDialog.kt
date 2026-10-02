@@ -4,20 +4,20 @@ import android.content.Context
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.app.AppLevelThemeDialogBuilder
+import org.autojs.autojs.ui.floating.layoutinspector.InspectorDialogBuilder
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.inspector.InspectorNode
 import org.autojs.autojs.core.automator.diagnostics.SelectorExplainer
-import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyView
-import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.ui.floating.layoutinspector.InspectorTheme
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.LayoutInspectorResultItemBinding
 
@@ -42,11 +42,11 @@ class SearchResultsDialog(
 
     private var dialog: MaterialDialog? = null
 
-    private val highlightColor = ColorUtils.applyAlpha(ThemeColorManager.colorPrimary, HIGHLIGHT_ALPHA)
+    private val colors = InspectorTheme(context)
 
     fun show() {
         val matches = session.match.matches.map { it.info }
-        val builder = AppLevelThemeDialogBuilder(context)
+        val builder = InspectorDialogBuilder(context)
             .title(context.getString(R.string.text_inspector_matches_title, matches.size))
             .positiveText(R.string.dialog_button_dismiss)
             // "Copy as selector" (roadmap P4.2, D8) lives here since the bar has no overflow menu.
@@ -86,7 +86,8 @@ class SearchResultsDialog(
     private fun highlight(summary: String): CharSequence {
         val range = session.highlightRange(summary) ?: return summary
         return SpannableString(summary).apply {
-            setSpan(BackgroundColorSpan(highlightColor), range.first, range.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(BackgroundColorSpan(colors.matchBackground), range.first, range.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(ForegroundColorSpan(colors.matchText), range.first, range.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
     }
 
@@ -124,8 +125,9 @@ class SearchResultsDialog(
             val node = nodes[position]
             val isCurrent = node === session.currentMatch
             holder.binding.title.text = highlight(LayoutHierarchyView.summarize(node))
-            holder.binding.title.setTextColor(if (isCurrent) ThemeColorManager.colorPrimary else context.getColor(R.color.day_night))
+            holder.binding.title.setTextColor(if (isCurrent) colors.accent else colors.text)
             holder.binding.subtitle.text = describeDetails(node)
+            holder.binding.subtitle.setTextColor(colors.secondaryText)
             holder.binding.root.setOnClickListener {
                 session.setCurrentMatch(node)
                 dialog?.dismiss()
@@ -143,8 +145,6 @@ class SearchResultsDialog(
     private class Holder(val binding: LayoutInspectorResultItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     companion object {
-
-        private const val HIGHLIGHT_ALPHA = 0.3
 
         private const val PATH_EDGE = 2
 

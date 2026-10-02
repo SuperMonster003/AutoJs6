@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui.floating.layoutinspector.search
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Build
 import android.text.Editable
@@ -21,16 +20,15 @@ import android.widget.TextView
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.app.AppLevelThemeDialogBuilder
+import org.autojs.autojs.ui.floating.layoutinspector.InspectorDialogBuilder
 import org.autojs.autojs.core.accessibility.inspector.ClassPreset
 import org.autojs.autojs.core.accessibility.inspector.FilterProfile
 import org.autojs.autojs.core.accessibility.inspector.FilterProfile.BooleanProperty
 import org.autojs.autojs.core.accessibility.inspector.FilterProfile.IntRangeSpec
 import org.autojs.autojs.core.accessibility.inspector.FilterProfile.Tri
 import org.autojs.autojs.core.accessibility.inspector.FilterProfileCatalog
-import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.ui.floating.layoutinspector.InspectorTheme
 import org.autojs.autojs.ui.floating.FloatyWindowManger
-import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.LayoutInspectorFilterDialogBinding
@@ -67,7 +65,9 @@ class FilterProfileDialog(
     /** Set while the controls are rebuilt from the profile, so their listeners stay quiet. zh-CN: 由配置重建控件期间置位, 使监听器保持沉默. */
     private var rebuilding = false
 
-    private val themeTint = ColorStateList.valueOf(ThemeColorManager.colorPrimary)
+    private val colors = InspectorTheme(context)
+
+    private val themeTint = colors.controls
 
     private val density = context.resources.displayMetrics.density
 
@@ -97,7 +97,7 @@ class FilterProfileDialog(
         buildRangeRows()
         bindStaticControls()
         render()
-        val dialog = AppLevelThemeDialogBuilder(context)
+        val dialog = InspectorDialogBuilder(context)
             .title(R.string.text_inspector_filter_profiles)
             .customView(binding.root, true)
             .autoDismiss(false)
@@ -194,8 +194,7 @@ class FilterProfileDialog(
         maxLines = 1
         isSingleLine = true
         textSize = 13f
-        setTextColor(context.getColor(R.color.day_night))
-        setHintTextColor(context.getColor(R.color.day_night_alpha_40))
+        colors.applyTo(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
         addTextChangedListener(changeWatcher)
     }
@@ -224,12 +223,16 @@ class FilterProfileDialog(
         }
         binding.minWidth.addTextChangedListener(changeWatcher)
         binding.minHeight.addTextChangedListener(changeWatcher)
-        binding.classNamesToggle.setTextColor(ThemeColorManager.colorPrimary)
+        colors.applyTo(binding.minWidth)
+        colors.applyTo(binding.minHeight)
+        binding.profileDefaultHint.setTextColor(colors.secondaryText)
+        binding.classNames.setTextColor(colors.secondaryText)
+        binding.classNamesToggle.setTextColor(colors.accent)
         binding.classNamesToggle.setOnClickListener {
             binding.classNames.isVisible = !binding.classNames.isVisible
         }
-        binding.selectRegion.setTextColor(ThemeColorManager.colorPrimary)
-        binding.clearRegion.setTextColor(ThemeColorManager.colorPrimary)
+        binding.selectRegion.setTextColor(colors.accent)
+        binding.clearRegion.setTextColor(colors.accent)
         binding.selectRegion.setOnClickListener {
             if (host.onSelectRegionRequested()) {
                 dialog?.dismiss()
@@ -241,7 +244,7 @@ class FilterProfileDialog(
             session.setRegion(null)
             renderRegion()
         }
-        binding.profileModified.setTextColor(ThemeColorManager.colorPrimary)
+        binding.profileModified.setTextColor(colors.accent)
         val candidates = session.candidates
         binding.classNamesToggle.text = context.getString(R.string.text_inspector_class_names_in_tree, candidates.classNames.size)
         binding.classNames.text = candidates.classNames.joinToString("\n") { (name, count) -> "$name x $count" }
@@ -415,7 +418,7 @@ class FilterProfileDialog(
                 minHeight = dp(48)
                 minimumHeight = dp(48)
                 setPadding(dp(24), 0, dp(24), 0)
-                setTextColor(if (selected) ThemeColorManager.colorPrimary else context.getColor(R.color.day_night))
+                setTextColor(if (selected) colors.accent else colors.text)
                 typeface = if (selected) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
                 setBackgroundResource(background)
                 setOnClickListener {
@@ -424,7 +427,7 @@ class FilterProfileDialog(
                 }
             }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         }
-        picker = AppLevelThemeDialogBuilder(context)
+        picker = InspectorDialogBuilder(context)
             .title(R.string.text_inspector_choose_profile)
             .customView(list, true)
             .negativeText(R.string.dialog_button_cancel)
@@ -444,7 +447,7 @@ class FilterProfileDialog(
     }
 
     private fun promptUnsaved(then: (() -> Unit)?) {
-        AppLevelThemeDialogBuilder(context)
+        InspectorDialogBuilder(context)
             .title(R.string.text_inspector_profile_unsaved_title)
             .content(R.string.text_inspector_profile_unsaved_content)
             .cancelable(false)
@@ -490,7 +493,7 @@ class FilterProfileDialog(
     }
 
     private fun promptName(titleRes: Int, prefill: String?, exceptId: String?, onConfirmed: (String) -> Unit) {
-        AppLevelThemeDialogBuilder(context)
+        InspectorDialogBuilder(context)
             .title(titleRes)
             .input(context.getString(R.string.text_inspector_profile_name_hint), prefill, false) { d, input ->
                 val error = session.catalog.validateName(input.toString(), exceptId)
@@ -501,7 +504,6 @@ class FilterProfileDialog(
                 }
             }
             .alwaysCallInputCallback()
-            .widgetThemeColor()
             .negativeText(R.string.dialog_button_cancel)
             .positiveText(R.string.dialog_button_confirm)
             .onNegative { d, _ -> d.dismiss() }
@@ -520,7 +522,7 @@ class FilterProfileDialog(
     private fun confirmDelete() {
         val profile = session.profile
         if (profile.isDefault) return
-        AppLevelThemeDialogBuilder(context)
+        InspectorDialogBuilder(context)
             .content(context.getString(R.string.text_inspector_profile_delete_confirm, profile.name))
             .negativeText(R.string.dialog_button_cancel)
             .positiveText(R.string.text_delete)

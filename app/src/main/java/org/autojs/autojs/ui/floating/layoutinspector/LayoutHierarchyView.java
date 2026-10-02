@@ -9,6 +9,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -92,6 +93,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private int mClickedColor = 0x99b2b3b7;
     private int mDefaultTextColor;
     private int mHighlightTextColor;
+    private InspectorTheme mColors;
     private NodeInfo mRootNode;
     private int mContentWidth;
     private TextPaint mRowTextPaint;
@@ -113,9 +115,6 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private Set<NodeInfo> mExpandedBeforeMatch;
 
     private int mMatchHighlightColor = 0x4D2196F3;
-
-    /** Opacity of the rows kept only because a descendant matches. zh-CN: 仅因后代匹配而保留的行的不透明度. */
-    private static final float ANCESTOR_ROW_ALPHA = 0.55f;
 
     public LayoutHierarchyView(Context context) {
         super(context);
@@ -199,12 +198,16 @@ public class LayoutHierarchyView extends MultiLevelListView {
         }
         SpannableString spannable = new SpannableString(summary);
         spannable.setSpan(new BackgroundColorSpan(mMatchHighlightColor), range.getFirst(), range.getLast() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(mColors.getMatchText()), range.getFirst(), range.getLast() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return spannable;
     }
 
     private void init() {
-        mDefaultTextColor = getContext().getColor(R.color.day_night);
-        mHighlightTextColor = getContext().getColor(R.color.layout_hierarchy_window_node_bounds);
+        mColors = new InspectorTheme(getContext(), getContext().getColor(R.color.layout_hierarchy_window_background));
+        mDefaultTextColor = mColors.getText();
+        mHighlightTextColor = mColors.getAccent();
+        mClickedColor = mColors.getSelectionBackground();
+        mMatchHighlightColor = mColors.getMatchBackground();
         initRowMetrics();
         mAdapter = new Adapter();
         setAdapter(mAdapter);
@@ -507,11 +510,14 @@ public class LayoutHierarchyView extends MultiLevelListView {
             boolean filtered = isFiltered();
             boolean isMatch = filtered && mMatch.isMatched(nodeInfo);
             viewHolder.nameView.setText(isMatch ? highlight(summary) : summary);
-            viewHolder.nameView.setAlpha(filtered && !isMatch ? ANCESTOR_ROW_ALPHA : 1f);
 
             boolean isSelected = nodeInfo == mClickedNodeInfo;
             boolean isAncestor = mNodePath.contains(nodeInfo);
-            viewHolder.nameView.setTextColor(isSelected || isAncestor ? mHighlightTextColor : mDefaultTextColor);
+            viewHolder.nameView.setTextColor(isSelected ? mColors.getSelectionAccent()
+                    : filtered && !isMatch ? mColors.getSecondaryText()
+                    : isAncestor ? mHighlightTextColor : mDefaultTextColor);
+            viewHolder.iconView.setImageTintList(android.content.res.ColorStateList.valueOf(
+                    isSelected ? mColors.getSelectionText() : mColors.getSecondaryText()));
             convertView.setBackgroundColor(isSelected ? mClickedColor : Color.TRANSPARENT);
 
             if (viewHolder.infoView.getVisibility() == VISIBLE) {

@@ -1464,7 +1464,9 @@
     <string name="text_inspector_clear_query_history">清空搜索历史</string>
     <string name="text_inspector_clear_region">清除区域</string>
     <string name="text_inspector_collapse_search_bar">收起搜索栏</string>
+    <string name="text_inspector_copy_always_ask">总是询问</string>
     <string name="text_inspector_copy_as_selector">复制为选择器</string>
+    <string name="text_inspector_copy_button_behavior">复制按钮行为</string>
     <string name="text_inspector_did_you_mean">是否想输入: %1$s</string>
     <string name="text_inspector_expand_search_bar">展开搜索栏</string>
     <string name="text_inspector_expression_unfinished">表达式未结束</string>
