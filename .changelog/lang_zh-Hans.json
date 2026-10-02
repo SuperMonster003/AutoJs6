@@ -127,7 +127,8 @@
         "布局范围分析窗口支持框选区域: 在筛选配置中选择 \"框选区域\" 后拖出矩形, 只保留完全位于该区域内的控件, 切换到层次窗口同样生效",
         "布局分析搜索栏新增字段模式: 点击模式开关 (Aa / k=v) 切换, 以脚本选择器字符串语法输入多个条件 (如 text=确定 clickable, id~=btn_.*, !enabled, minDepth=3); 输入框获焦时显示语法速查, 语法错误时在提示条中显示出错位置, 条件及候选名称; 查询模式跨会话记忆",
         "布局分析支持 \"复制为选择器\": 在搜索结果对话框点击 \"复制为选择器\" 或长按计数位, 把关键词 (按当前匹配命中的 text / desc / id / className 属性输出 Contains / Match 调用), 字段条件, 筛选配置与框选区域渲染为链式脚本选择器并复制到剪贴板; 无法表达的条件以注释形式附在末尾",
-        "选择器新增 minDepth / maxDepth / minIndexInParent / maxIndexInParent 方法 (与 minChildCount / maxChildCount 一致, 含边界), 并支持在选择器字符串语法中使用 (如 minDepth=3)"
+        "选择器新增 minDepth / maxDepth / minIndexInParent / maxIndexInParent 方法 (与 minChildCount / maxChildCount 一致, 含边界), 并支持在选择器字符串语法中使用 (如 minDepth=3)",
+        "布局分析搜索栏新增选择器模式: 模式开关循环至 \"$()\" 后, 像脚本一样输入链式选择器表达式 (如 text(\"确定\").clickable().depth(3), textMatch(/确定|取消/i), 前缀 selector() / $() 可省略), 字符串 / 数字 / 布尔 / 正则字面量按脚本语义落到选择器注册表; 输入到一半时显示 \"表达式未结束\" 而非报错, 语法错误显示位置, 调用与候选方法名, \"复制为选择器\" 输出规范化后的表达式"
       ],
       "fix": [
         "启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题",
