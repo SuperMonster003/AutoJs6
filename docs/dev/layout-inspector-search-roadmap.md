@@ -118,10 +118,10 @@
 
 ### P4 字段模式与选择器导出
 
-- [ ] P4.1 模式开关接入 "字段" 模式: `InspectorQuery` 字段模式经 `SelectorStringParser.parse(text, UiSelector(null))` 得到过滤器 (D11); 解析错误显示位置, 出错条件与候选属性名 (复用 `SelectorStringException` 的渲染); 输入框下方 (展开态) 显示一行语法速查提示, 首次切换时 toast 指向附录 E 的语法.
-- [ ] P4.2 "复制为选择器" (D8): 会话当前条件 (查询 + 配置 + 区域) 合成 `Selector.toString()`; 关键词模式按当前匹配节点命中的属性输出; 不可表达条件以注释附加; 复制后 toast "已复制". 单测: `SelectorExportTest` (关键词命中属性映射, 注释附加, 正则开关).
-- [ ] P4.3 Q1 落地 (D19): 选择器注册表新增 `minDepth` / `maxDepth` / `minChildCount` / `maxChildCount` / `minIndexInParent` / `maxIndexInParent` (脚本 `select()` 与字段模式同步可用, 单测覆盖边界与非法值), 并同步文档 / d.ts / Ace 声明三个关联仓库 (使用方式第 5 条).
-- [ ] P4.4 字符串 + changelog (feature 2 条) + 冒烟 (附录 B 第 14-15 项) + 提交.
+- [x] P4.1 模式开关接入 "字段" 模式: `InspectorQuery` 字段模式经 `SelectorStringParser.parse(text, UiSelector(null))` 得到过滤器 (D11); 解析错误显示位置, 出错条件与候选属性名 (复用 `SelectorStringException` 的渲染); 输入框下方 (展开态) 显示一行语法速查提示, 首次切换时 toast 指向附录 E 的语法. 证据 E3: 提交 `9d53d9fa5a`; `InspectorQueryTest` (字段模式解析, 语法错误携带 position / term / candidates). 实现差异: 模式开关为搜索栏上的 `Aa` / `k=v` 文字按钮 (选择器模式待 P5 加入循环), 非关键词模式下隐藏正则开关; 语法速查与错误共用搜索栏下方的窗口内提示条 (与历史下拉同理, 不在悬浮窗上开弹窗), 字段模式输入框获焦时显示速查, 查询无法编译时显示红色错误 (`第 N 位: ...` + `是否想输入: ...`), 计数位同时显示 `!` 并把错误放入 contentDescription; 历史行带 `k=v` 标记; 首次切到字段模式 toast 一次 (`key_layout_inspector_field_mode_introduced`), 模式经 `key_layout_inspector_query_mode` 跨会话记忆 (`QueryModeStore`). Redmi 22120RN86C (API 33) 与 AVD (API 24): `text=WLAN clickable` / `id~=title` / `!enabled` / `text=WLAN` 的计数 (0 / 13 / 2 / 1) 与脚本选择器参照 (`counts_p4.js`) 一致; `text=ok clikable` 显示 `At 8: unknown property "clikable" / Did you mean: clickable`; 退出再打开分析窗口后仍为字段模式.
+- [x] P4.2 "复制为选择器" (D8): 会话当前条件 (查询 + 配置 + 区域) 合成 `Selector.toString()`; 关键词模式按当前匹配节点命中的属性输出; 不可表达条件以注释附加; 复制后 toast "已复制". 单测: `SelectorExportTest` (关键词命中属性映射, 注释附加, 正则开关). 证据 E3: 提交 `9d53d9fa5a`; `SelectorExportTest` (8). 实现差异: `SelectorExport.render(query, queryFilters, hit, extraFilters)` 逐过滤器取 `toString()` 而非组装 `Selector` (关键词按当前匹配命中的属性映射, 无当前匹配时取首个匹配, 再回退 text); `ActionFilter` 重新以带引号名称渲染; 以 `/*` 开头的片段归入尾随注释; 入口为结果对话框的中性按钮 "复制为选择器" 与长按计数位 (搜索栏仍无溢出菜单), 复制文本同时写入 logcat (`SelectorClipboard`); D19 落地后 depth 区间输出为合法调用而非注释. Redmi (API 33) 与 AVD (API 24): 字段查询经对话框按钮得到 `text("WLAN").clickable()`, 关键词得到 `textContains("WLAN")`, 正则开关得到 `textMatch(/^WL/)`, 加 clickable = 是 + depth 3..6 (另存为 P4Smoke) 得到 `textContains("WLAN").clickable(true).minDepth(3).maxDepth(6)`; 四段文本经 `export_check.js` 以脚本运行, 计数与分析窗口一致 (Redmi 0 / 1 / 1 / 0); 查询有错时 toast 错误且不复制.
+- [x] P4.3 Q1 落地 (D19): 选择器注册表新增 `minDepth` / `maxDepth` / `minChildCount` / `maxChildCount` / `minIndexInParent` / `maxIndexInParent` (脚本 `select()` 与字段模式同步可用, 单测覆盖边界与非法值), 并同步文档 / d.ts / Ace 声明三个关联仓库 (使用方式第 5 条). 证据 E1: 宿主提交 `46e0692558` (`minChildCount` / `maxChildCount` 自 6.2.0 已存在, 实际新增四个; `Entries.intBounds` 统一派生三对, 表 129 项 / 196 重载; `SelectorRegistryTest.integerBoundsFilterInclusively`, `SelectorStringParserTest.integerBoundsReadAsMinAndMaxKeys`; `UiSelectorBuilders` 新增四个 `@ScriptInterface` 方法, `UiSelectorBuildersTest` 通过); 文档 `de25422` (`api/uiSelectorType.md` 四节 + `select()` 示例, 页面已重新生成); d.ts `0bceb07` (4.29.0, 另补上 int 声明缺失的 `childCount` / `minChildCount` / `maxChildCount`, `aj6dts -Publish` 更新 aj6-main-app / aj6-resources, tsc 对 index.d.ts 与新调用无错误); Ace `ed62609` (1.21.0, build 123, 内置类型 4.29.0, LSP 声明重新生成). 三个仓库均仅本地提交.
+- [x] P4.4 字符串 + changelog (feature 2 条) + 冒烟 (附录 B 第 14-15 项) + 提交. 证据 E3: 字符串 10 键 x 11 文件随 `9d53d9fa5a`; changelog feature 3 条 x 10 语言 (字段模式, 复制为选择器, 选择器 `min*` / `max*` 方法) `ec8dbfc9b3`; 附录 B 第 14-15 项于 Redmi 22120RN86C (API 33) 与 AVD (API 24, x86; 其 Settings 无 WLAN 文本故计数为 0, 导出与脚本复跑仍一致), 脚本 `build/inspector-smoke/p4_redmi.sh` (阶段 7-8, 设备感知) + `counts_p4.js` + `export_check.js`; Sony G8441 (API 28) 仍因重装后重启的图案锁未覆盖.
 
 ### P5 选择器模式
 
@@ -166,7 +166,7 @@
 12. 区域框选: 范围窗口拖出矩形后只剩区域内节点, 搜索栏出现区域 Chip, 切到层次窗口同样生效, 清除 Chip 后恢复 (P3.4).
 13. 离线布局 (从文件打开): 以上搜索 / 配置 / 区域全部可用, 包名与动作候选来自文件内容 (D16).
 14. 字段模式: `text=确定 clickable` / `id~=btn_.*` / `!enabled` 各一次; 错误 `foo=1` 显示位置与候选属性名 (P4.1).
-15. 复制为选择器: 关键词命中 text 时得到 `textContains("...")`; 加配置 clickable 后得到 `textContains("...").clickable()`; depth 区间以注释附加; 粘贴到脚本编辑器可运行 (P4.2).
+15. 复制为选择器: 关键词命中 text 时得到 `textContains("...")`; 加配置 clickable 后得到 `textContains("...").clickable()`; depth 区间以注释附加; 粘贴到脚本编辑器可运行 (P4.2). 备注 (2026-10-02): D19 落地后 depth 区间输出为合法调用 `minDepth(3).maxDepth(6)`, 配置的 clickable 输出为 `clickable(true)`.
 16. 选择器模式: `text("确定").clickable()` / `textMatches(/确定|取消/i)` / 输入到 `text("` 为止显示 "表达式未结束" 而非错误 (P5.1, P5.2).
 
 ## 附录 C. 证据等级
@@ -184,9 +184,9 @@
 | --- | --- |
 | 引擎 (新增) | `core/accessibility/inspector/InspectorNode.kt` (P0.1), `KeywordFilter.kt` / `InspectorQuery.kt` (P0.2), `TreeMatch.kt` (P0.3), `QueryHistory.kt` (P2.2), `FilterProfile.kt` / `FilterProfileCatalog.kt` / `InspectorFilters.kt` (P3.1), `SelectorExport.kt` (P4.2), `SelectorCallParser.kt` (P5.1) |
 | 引擎 (复用, 只读) | `core/automator/UiNode.kt`, `core/automator/filter/{Filter,Selector,StringMatcher,StringProperty,StringPropertyFilter,BooleanFilter,IntFilter,MetricsFilter,BoundsFilter,ActionFilter,JsRegexUtils}.kt`, `core/automator/selector/{SelectorRegistry,SelectorEntry,SelectorStringParser}.kt`, `core/automator/diagnostics/SelectorExplainer.kt`, `core/accessibility/UiSelector.kt` (无 bridge 构造) |
-| 界面 (新增) | `ui/floating/layoutinspector/search/InspectorSearchSession.kt` (P1.1), `InspectorSearchBar.kt` / `InspectorSearchPill.kt` (P1.2), `SearchResultsDialog.kt` (P2.1), `FilterProfileDialog.kt` (P3.2), `res/layout/layout_inspector_search_bar.xml`, `res/layout/layout_inspector_search_pill.xml`, `res/layout/dialog_inspector_search_results*.xml`, `res/layout/dialog_inspector_filter_profile*.xml`, `res/drawable/ic_inspector_search.xml`, `ic_inspector_regex.xml`, `ic_inspector_history.xml` |
+| 界面 (新增) | `ui/floating/layoutinspector/search/InspectorSearchSession.kt` (P1.1), `InspectorSearchBar.kt` / `InspectorSearchPill.kt` (P1.2), `SearchResultsDialog.kt` (P2.1), `FilterProfileDialog.kt` (P3.2), `QueryModeStore.kt` (P4.1), `SelectorClipboard.kt` (P4.2), `res/layout/layout_inspector_search_bar.xml`, `res/layout/layout_inspector_search_pill.xml`, `res/layout/dialog_inspector_search_results*.xml`, `res/layout/dialog_inspector_filter_profile*.xml`, `res/drawable/ic_inspector_search.xml`, `ic_inspector_regex.xml`, `ic_inspector_history.xml` |
 | 界面 (改动) | `ui/floating/LayoutFloatyWindow.kt` (会话传递, 菜单), `ui/floating/layoutinspector/LayoutHierarchyFloatyWindow.kt` / `LayoutHierarchyView.java` (P1.3), `LayoutBoundsFloatyWindow.kt` / `LayoutBoundsView.kt` (P1.4, P3.4), `LayoutSnapshotViewer.kt` (会话创建), `ui/floating/CircularMenu.java` (会话创建) |
-| 偏好键 | `res/values/strings_donottranslate.xml`: `key_layout_inspector_query_history`, `key_layout_inspector_query_mode`, `key_layout_inspector_filter_profiles`, `key_layout_inspector_filter_profile_selected` |
+| 偏好键 | `res/values/strings_donottranslate.xml`: `key_layout_inspector_query_history`, `key_layout_inspector_query_mode`, `key_layout_inspector_field_mode_introduced`, `key_layout_inspector_filter_profiles`, `key_layout_inspector_filter_profile_selected` |
 | 字符串 | `res/values{,-ar,-en,-es,-fr,-ja,-ko,-ru,-zh,-zh-rHK,-zh-rTW}/strings.xml` |
 | 单测 | `app/src/test/java/org/autojs/autojs/core/accessibility/inspector/*Test.kt`, 复用 `app/src/test/java/org/autojs/autojs/core/automator/FakeUiNode.kt` |
 | 文档 | 本文, `docs/dev/layout-inspector-search-architecture.md` (P6.2) |
@@ -197,7 +197,7 @@
 
 | 写法 | 含义 | 示例 |
 | --- | --- | --- |
-| `key=value` | 属性等于 / 单参数重载 | `text=确定`, `depth=3`, `className=Button`, `bounds=0,0,1080,200` |
+| `key=value` | 属性等于 / 单参数重载 | `text=确定`, `depth=3`, `minDepth=3` (D19), `className=Button`, `bounds=0,0,1080,200` |
 | `key="a b"` / `key='a b'` | 含空格的值 (转义 `\"` `\\` `\n` `\t`) | `text="Sign in"` |
 | `key~=regex` / `key=/re/flags` | 正则搜索 (`keyMatch`), 适用于 text / desc / content / id / className / packageName | `id~=btn_.*`, `text=/确定|取消/i` |
 | `key` | 无参重载 (布尔为 true) | `clickable`, `scrollable` |
