@@ -9,17 +9,23 @@ import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.Gravity
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.BaseAdapter
 import android.widget.FrameLayout
+import android.widget.ListView
 import org.autojs.autojs.core.accessibility.NodeInfo
+import org.autojs.autojs.core.accessibility.inspector.InspectorQuery
 import org.autojs.autojs.core.accessibility.inspector.InspectorQueryError
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.LayoutInspectorHistoryItemBinding
 import org.autojs.autojs6.databinding.LayoutInspectorSearchBarBinding
 import org.autojs.autojs6.databinding.LayoutInspectorSearchPillBinding
 import kotlin.math.hypot
@@ -52,6 +58,9 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         /** The user navigated to [node]; the window selects and reveals it. zh-CN: 用户导航到了 [node]; 窗口应选中并展示它. */
         fun onCurrentMatchChanged(node: NodeInfo)
 
+        /** The user asked for the node info dialog of [node] (results list long-press). zh-CN: 用户要求查看 [node] 的节点信息 (结果列表长按). */
+        fun onShowNodeInfo(node: NodeInfo)
+
         fun onExpandedChanged(expanded: Boolean)
 
     }
@@ -63,6 +72,10 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
 
     var isExpanded = true
         private set
+
+    /** Height the expanded bar occupies at the top, margins included; windows that place content under it use it as top inset. zh-CN: 展开态搜索栏在顶部占据的高度 (含边距); 把内容放在其下方的窗口以此作为顶部内边距. */
+    val barHeightPx: Int
+        get() = (bar.root.layoutParams as LayoutParams).let { it.height + it.topMargin + it.bottomMargin }
 
     private val bar = LayoutInspectorSearchBarBinding.inflate(LayoutInflater.from(context), this, true)
 
@@ -80,12 +93,44 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
 
     private val inputMethodManager get() = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
+    /**
+     * The query history drop-down (roadmap P2.2): an in-window list under the bar rather than a
+     * popup window, because a popup surface over the overlay window aborts HWUI on some devices
+     * (Redmi 22120RN86C, API 33: `Failed to set damage region on surface ... EGL_BAD_ACCESS`).
+     * zh-CN: 查询历史下拉 (Roadmap P2.2): 窗口内嵌在搜索栏下方的列表, 而非弹出窗口, 因为悬浮窗之上的弹出窗口 surface 会在部分设备上
+     * 使 HWUI 中止 (Redmi 22120RN86C, API 33: `Failed to set damage region on surface ... EGL_BAD_ACCESS`).
+     */
+    private val historyList = DropDownListView(context).apply {
+        visibility = GONE
+        // Must not take focus from the input: that would hide the IME and, through the focus
+        // listener, close the drop-down on the first touch.
+        // zh-CN: 不能从输入框夺走焦点: 否则会收起 IME, 并经焦点监听在第一次触摸时就关闭下拉.
+        isFocusable = false
+        isFocusableInTouchMode = false
+        divider = null
+        dividerHeight = 0
+        isVerticalScrollBarEnabled = false
+        background = context.getDrawable(R.drawable.layout_inspector_history_surface)
+        elevation = HISTORY_ELEVATION_DP * resources.displayMetrics.density
+        clipToOutline = true
+        maxHeight = (HISTORY_MAX_HEIGHT_DP * resources.displayMetrics.density).roundToInt()
+        setOnItemClickListener { _, _, position, _ -> onHistoryItemClicked(position) }
+        setOnItemLongClickListener { _, _, position, _ -> onHistoryItemLongClicked(position) }
+    }
+
     init {
+        val barLp = bar.root.layoutParams as LayoutParams
+        addView(historyList, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply {
+            topMargin = barLp.topMargin + barLp.height + (HISTORY_OFFSET_DP * resources.displayMetrics.density).roundToInt()
+            leftMargin = barLp.leftMargin
+            rightMargin = barLp.rightMargin
+        })
         bar.query.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
             override fun afterTextChanged(s: Editable) {
                 if (!suppressWatcher) session?.setText(s.toString())
+                if (s.isNotEmpty()) dismissHistory() else if (bar.query.hasFocus()) showHistoryIfIdle()
             }
         })
         bar.query.setOnEditorActionListener { _, actionId, event ->
@@ -93,11 +138,13 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
             if (submit) navigate(forward = true)
             submit
         }
+        bar.query.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) showHistoryIfIdle() else dismissHistory() }
+        bar.query.setOnClickListener { showHistoryIfIdle() }
         bar.collapse.setOnClickListener { setExpanded(false) }
         bar.regex.setOnClickListener { session?.let { it.setRegex(!it.query.regex) } }
         bar.previous.setOnClickListener { navigate(forward = false) }
         bar.next.setOnClickListener { navigate(forward = true) }
-        bar.count.setOnClickListener { session?.error?.let { ViewUtils.showToast(context, describe(it), true) } }
+        bar.count.setOnClickListener { showResults() }
         pill.root.setOnClickListener { setExpanded(true, focus = true) }
         installPillDrag()
     }
@@ -119,6 +166,7 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         if (expanded) {
             if (focus) showKeyboard()
         } else {
+            dismissHistory()
             hideKeyboard()
         }
         host?.onExpandedChanged(expanded)
@@ -128,6 +176,10 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
     fun onBackPressed(): Boolean {
         val session = session ?: return false
         if (!isExpanded) return false
+        if (historyList.visibility == VISIBLE) {
+            dismissHistory()
+            return true
+        }
         if (bar.query.text.isNotEmpty()) {
             setQueryText("")
             session.setText("", immediate = true)
@@ -148,11 +200,12 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onDetachedFromWindow() {
+        dismissHistory()
         session?.removeListener(this)
         super.onDetachedFromWindow()
     }
 
-    /** Caps the expanded bar at [MAX_BAR_WIDTH_DP] and centers it (roadmap Q7). zh-CN: 展开态宽度上限 [MAX_BAR_WIDTH_DP] 并居中 (Roadmap Q7). */
+    /** Caps the expanded bar (and the drop-down under it) at [MAX_BAR_WIDTH_DP] and centers them (roadmap Q7). zh-CN: 展开态搜索栏 (及其下拉) 宽度上限 [MAX_BAR_WIDTH_DP] 并居中 (Roadmap Q7). */
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val lp = bar.root.layoutParams as LayoutParams
         val available = MeasureSpec.getSize(widthMeasureSpec) - lp.leftMargin - lp.rightMargin
@@ -160,17 +213,142 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         if (target > 0 && lp.width != target) {
             lp.width = target
         }
+        val listLp = historyList.layoutParams as LayoutParams
+        if (target > 0 && listLp.width != target) {
+            listLp.width = target
+        }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
+    /** A touch outside the bar and the drop-down closes the drop-down; the touch itself goes on to whatever is beneath. zh-CN: 搜索栏与下拉之外的触摸关闭下拉; 触摸本身继续传给下方的视图. */
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN && historyList.visibility == VISIBLE && !hits(bar.root, ev) && !hits(historyList, ev)) {
+            dismissHistory()
+        }
+        return super.onInterceptTouchEvent(ev)
+    }
+
+    private fun hits(view: View, ev: MotionEvent): Boolean {
+        return ev.x >= view.left && ev.x < view.right && ev.y >= view.top && ev.y < view.bottom
     }
 
     private fun navigate(forward: Boolean) {
         val session = session ?: return
+        session.commitQuery()
         val node = if (forward) session.next() else session.previous()
         if (node == null) {
             if (session.isActive && session.error == null) ViewUtils.showToast(context, R.string.text_inspector_no_matching_nodes)
             return
         }
         host?.onCurrentMatchChanged(node)
+    }
+
+    /**
+     * The counter opens the results list (roadmap P2.1, D1); for a query that does not compile it
+     * shows the error instead, and it does nothing while no query is in effect.
+     * zh-CN: 计数位打开结果列表 (Roadmap P2.1, D1); 查询无法编译时改为显示错误, 没有查询生效时不响应.
+     */
+    private fun showResults() {
+        val session = session ?: return
+        val host = host ?: return
+        session.error?.let {
+            ViewUtils.showToast(context, describe(it), true)
+            return
+        }
+        session.flush()
+        if (session.isUnfiltered) return
+        session.commitQuery()
+        dismissHistory()
+        hideKeyboard()
+        SearchResultsDialog(context, session, host).show()
+    }
+
+    /** Drops the history down under the bar when the focused input is empty and there is history. zh-CN: 输入框获焦且为空并且有历史时, 在搜索栏下方展开历史下拉. */
+    private fun showHistoryIfIdle() {
+        val session = session ?: return
+        if (!isExpanded || bar.query.text.isNotEmpty() || session.history.isEmpty) {
+            dismissHistory()
+            return
+        }
+        historyList.adapter = HistoryAdapter(session.history.items)
+        historyList.visibility = VISIBLE
+    }
+
+    private fun dismissHistory() {
+        historyList.visibility = GONE
+    }
+
+    private fun onHistoryItemClicked(position: Int) {
+        val session = session ?: return
+        val items = session.history.items
+        dismissHistory()
+        if (position >= items.size) {
+            session.clearHistory()
+            return
+        }
+        val query = items[position]
+        setQueryText(query.text)
+        session.setQuery(query, immediate = true)
+        render()
+    }
+
+    private fun onHistoryItemLongClicked(position: Int): Boolean {
+        val session = session ?: return false
+        val items = session.history.items
+        if (position >= items.size) return false
+        session.removeFromHistory(items[position])
+        ViewUtils.showToast(context, R.string.text_inspector_history_entry_removed)
+        if (session.history.isEmpty) dismissHistory() else showHistoryIfIdle()
+        return true
+    }
+
+    /** History rows (query text with a regex tag) followed by a "clear history" row. zh-CN: 历史行 (查询文本与正则标记), 末尾为 "清空历史" 行. */
+    private inner class HistoryAdapter(private val items: List<InspectorQuery>) : BaseAdapter() {
+
+        override fun getCount() = items.size + 1
+
+        override fun getItem(position: Int): Any? = items.getOrNull(position)
+
+        override fun getItemId(position: Int) = position.toLong()
+
+        override fun getViewTypeCount() = 2
+
+        override fun getItemViewType(position: Int) = if (position < items.size) 0 else 1
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val binding = convertView?.let { LayoutInspectorHistoryItemBinding.bind(it) }
+                ?: LayoutInspectorHistoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val query = items.getOrNull(position)
+            if (query != null) {
+                binding.text.text = query.text
+                binding.text.gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                binding.text.setTextColor(normalColor)
+                binding.tag.text = if (query.regex) REGEX_TAG else ""
+                binding.tag.visibility = if (query.regex) VISIBLE else GONE
+            } else {
+                binding.text.setText(R.string.text_inspector_clear_query_history)
+                binding.text.gravity = Gravity.CENTER
+                binding.text.setTextColor(ThemeColorManager.colorPrimary)
+                binding.tag.visibility = GONE
+            }
+            return binding.root
+        }
+
+    }
+
+    /** A list whose height stops growing at [maxHeight]. zh-CN: 高度不超过 [maxHeight] 的列表. */
+    private class DropDownListView(context: Context) : ListView(context) {
+
+        var maxHeight = Int.MAX_VALUE
+
+        override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+            val available = when (MeasureSpec.getMode(heightMeasureSpec)) {
+                MeasureSpec.UNSPECIFIED -> maxHeight
+                else -> min(MeasureSpec.getSize(heightMeasureSpec), maxHeight)
+            }
+            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(available, MeasureSpec.AT_MOST))
+        }
+
     }
 
     private fun render() {
@@ -195,7 +373,7 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         }
         bar.count.text = counter
         bar.count.setTextColor(counterColor)
-        bar.count.contentDescription = error?.let(::describe)
+        bar.count.contentDescription = error?.let(::describe) ?: context.getString(R.string.text_inspector_view_matches)
         pill.pillCount.text = counter
         pill.pillCount.setTextColor(counterColor)
         pill.pillCount.visibility = if (counter.isEmpty()) GONE else VISIBLE
@@ -285,6 +463,15 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         private const val DISABLED_ALPHA = 0.38f
 
         private const val INACTIVE_ICON_ALPHA = 0.6
+
+        private const val HISTORY_OFFSET_DP = 4
+
+        private const val HISTORY_MAX_HEIGHT_DP = 280
+
+        private const val HISTORY_ELEVATION_DP = 6f
+
+        /** Marks history rows recorded with the regex switch on. zh-CN: 标记正则开关开启时记录的历史行. */
+        private const val REGEX_TAG = "RegEx"
 
     }
 

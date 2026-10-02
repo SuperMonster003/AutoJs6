@@ -39,6 +39,12 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
             mLayoutBoundsView.setSelectedNode(node)
         }
 
+        override fun onShowNodeInfo(node: NodeInfo) {
+            setLayoutSelectedNode(node)
+            mLayoutBoundsView.setSelectedNode(node)
+            showNodeInfo()
+        }
+
         override fun onExpandedChanged(expanded: Boolean) {
             requireSearchSession().isBarExpandedInBounds = expanded
         }

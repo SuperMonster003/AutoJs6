@@ -430,7 +430,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     }
 
     @NonNull
-    private static String simplifyClassName(@Nullable CharSequence className) {
+    public static String simplifyClassName(@Nullable CharSequence className) {
         if (className == null) {
             return "";
         }

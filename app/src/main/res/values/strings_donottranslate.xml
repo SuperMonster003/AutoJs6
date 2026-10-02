@@ -222,6 +222,7 @@
     <string name="key_launcher_icon_adaptive" translatable="false">key_$_launcher_icon_adaptive</string>
     <string name="key_launcher_icon_transparent_background" translatable="false">key_$_launcher_icon_transparent_background</string>
     <string name="key_launcher_shortcuts" translatable="false">key_$_launcher_shortcuts</string>
+    <string name="key_layout_inspector_query_history" translatable="false">key_$_layout_inspector_query_history</string>
     <string name="key_local_network_permission" translatable="false">key_local_network_permission</string>
     <string name="key_log_activity_input_bar_visible" translatable="false">key_$_log_activity_input_bar_visible</string>
     <string name="key_log_activity_log_coloring" translatable="false">key_$_log_activity_log_coloring</string>

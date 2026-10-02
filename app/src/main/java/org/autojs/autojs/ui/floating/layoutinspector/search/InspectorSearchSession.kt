@@ -9,7 +9,9 @@ import org.autojs.autojs.core.accessibility.inspector.InspectorNode
 import org.autojs.autojs.core.accessibility.inspector.InspectorQuery
 import org.autojs.autojs.core.accessibility.inspector.InspectorQueryError
 import org.autojs.autojs.core.accessibility.inspector.KeywordFilter
+import org.autojs.autojs.core.accessibility.inspector.QueryHistory
 import org.autojs.autojs.core.accessibility.inspector.TreeMatch
+import org.autojs.autojs.core.automator.filter.Filter
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -56,6 +58,13 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
     var isBarExpandedInBounds = false
 
     private var keywordFilter: KeywordFilter? = null
+
+    /** The filters of the last successful compile, for the explainer (roadmap P2.1). zh-CN: 最近一次成功编译的过滤器, 供解释器使用 (Roadmap P2.1). */
+    var filters: List<Filter> = emptyList()
+        private set
+
+    /** The persisted query history (roadmap P2.2), loaded once per inspection. zh-CN: 持久化的查询历史 (Roadmap P2.2), 每次布局分析加载一次. */
+    val history: QueryHistory by lazy { QueryHistoryStore.load() }
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -139,16 +148,36 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
         notifyListeners()
     }
 
+    /**
+     * Writes the current query into the history; called when the user submits it (enter, previous /
+     * next, results list), not on every keystroke (roadmap P2.2). Failing queries are not recorded.
+     * zh-CN: 把当前查询写入历史; 在用户提交时调用 (回车, 上一个 / 下一个, 结果列表), 而非每次击键 (Roadmap P2.2). 编译失败的查询不记录.
+     */
+    fun commitQuery() {
+        flush()
+        if (error == null && history.record(query)) QueryHistoryStore.save(history)
+    }
+
+    fun removeFromHistory(query: InspectorQuery) {
+        if (history.remove(query)) QueryHistoryStore.save(history)
+    }
+
+    fun clearHistory() {
+        if (history.clear()) QueryHistoryStore.save(history)
+    }
+
     private fun evaluate() {
         val started = SystemClock.elapsedRealtime()
         when (val compiled = query.compile()) {
             is InspectorQuery.Compiled.Filters -> {
                 error = null
+                filters = compiled.filters
                 match = TreeMatch.evaluate(InspectorNode(root), compiled.filters)
                 keywordFilter = compiled.filters.firstOrNull() as? KeywordFilter
             }
             is InspectorQuery.Compiled.Error -> {
                 error = compiled.error
+                filters = emptyList()
                 match = TreeMatch.unfiltered()
                 keywordFilter = null
             }

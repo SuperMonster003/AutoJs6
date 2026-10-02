@@ -1,11 +1,12 @@
 package org.autojs.autojs.ui.floating.layoutinspector
 
 import android.content.Context
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
-import android.widget.LinearLayout
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.inspector.InspectorNode
@@ -51,6 +52,12 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
             mLayoutHierarchyView.setSelectedNode(node)
         }
 
+        override fun onShowNodeInfo(node: NodeInfo) {
+            setLayoutSelectedNode(node)
+            mLayoutHierarchyView.setSelectedNode(node)
+            showNodeInfo()
+        }
+
         override fun onExpandedChanged(expanded: Boolean) {
             requireSearchSession().isBarExpandedInHierarchy = expanded
         }
@@ -69,11 +76,13 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
     )
 
     /**
-     * The search bar sits above the tree, which is inside a horizontal scroller so that deeply
-     * nested rows, wider than the screen, can be read in full; the vertical container is the window
-     * root and therefore handles keys (the back key is offered to the search bar first).
-     * zh-CN: 搜索栏位于树的上方; 树放在横向滚动容器内, 比屏幕更宽的深层行可以完整阅读; 纵向容器是窗口根视图, 因而由它处理按键
-     * (返回键先交给搜索栏).
+     * The search bar overlays the top of the window and the tree starts below it; the tree is inside
+     * a horizontal scroller so that deeply nested rows, wider than the screen, can be read in full.
+     * The bar view covers the whole window so that its history drop-down can overlay the tree (touches
+     * it does not use fall through). The container is the window root and therefore handles keys (the
+     * back key is offered to the search bar first).
+     * zh-CN: 搜索栏叠在窗口顶部, 树从其下方开始; 树放在横向滚动容器内, 比屏幕更宽的深层行可以完整阅读. 搜索栏视图覆盖整个窗口,
+     * 以便其历史下拉可以叠在树之上 (它不使用的触摸会透传下去). 容器是窗口根视图, 因而由它处理按键 (返回键先交给搜索栏).
      */
     override fun onCreateView(floatyService: FloatyService): View {
         onCreate(floatyService)
@@ -91,7 +100,7 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
         val searchBar = createSearchBar(defaultExpanded = true, expanded = requireSearchSession().isBarExpandedInHierarchy, host = mSearchHost)
             .also { mSearchBar = it }
 
-        return object : LinearLayout(context) {
+        return object : FrameLayout(context) {
             @Suppress("DEPRECATION")
             override fun dispatchKeyEvent(e: KeyEvent) = when {
                 EventUtils.isKeyBackAndActionUp(e) -> true.also { onBack() }
@@ -99,9 +108,11 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
                 else -> super.dispatchKeyEvent(e)
             }
         }.also { container ->
-            container.orientation = LinearLayout.VERTICAL
-            container.addView(searchBar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-            container.addView(scroller, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+            val scrollerParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
+                topMargin = searchBar.barHeightPx
+            }
+            container.addView(scroller, scrollerParams)
+            container.addView(searchBar, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.TOP))
             BackCompat.installViewBackHandler(container, BackCompat.Priority.OVERLAY) { onBack() }
         }
     }
