@@ -102,9 +102,9 @@
 
 ### P2 结果列表与查询历史
 
-- [ ] P2.1 `SearchResultsDialog` (`AppLevelThemeDialogBuilder` + RecyclerView, 窗口类型同节点信息对话框): 每行主文本 `LayoutHierarchyView.summarize(node)`, 副文本为路径 (`FrameLayout > LinearLayout > Button`, 以简化类名拼接, 过长时省略中段) 与 `depth` / `bounds`; 点击 -> 关闭对话框, 设为当前匹配并在当前窗口跳转选中; 长按 -> 打开节点信息对话框. 零匹配时标题区显示 `SelectorExplainer` 的逐过滤器计数摘要 (如 `text 命中 12 -> clickable 后 0`), 关键词模式只有一个过滤器时显示 "无节点命中关键词".
-- [ ] P2.2 `QueryHistory` (引擎包, 纯逻辑: 追加去重, 上限 20, 最新在前, 删除单条, 清空; Gson 编解码) + Pref 适配 (`key_layout_inspector_query_history`); 搜索栏输入框获焦且为空时弹出历史下拉 (`ListPopupWindow`), 点击填入, 长按删除, 末项 "清空历史". 查询在 "提交" (回车 / 点击下一个 / 打开结果列表) 时写入历史, 不在每次击键时写入. 单测: `QueryHistoryTest`.
-- [ ] P2.3 字符串 + changelog (feature 1 条) + 冒烟 (附录 B 第 7-8 项) + 提交.
+- [x] P2.1 `SearchResultsDialog` (`AppLevelThemeDialogBuilder` + RecyclerView, 窗口类型同节点信息对话框): 每行主文本 `LayoutHierarchyView.summarize(node)`, 副文本为路径 (`FrameLayout > LinearLayout > Button`, 以简化类名拼接, 过长时省略中段) 与 `depth` / `bounds`; 点击 -> 关闭对话框, 设为当前匹配并在当前窗口跳转选中; 长按 -> 打开节点信息对话框. 零匹配时标题区显示 `SelectorExplainer` 的逐过滤器计数摘要 (如 `text 命中 12 -> clickable 后 0`), 关键词模式只有一个过滤器时显示 "无节点命中关键词". 证据 E3: 提交 `067717680f`; 入口为点击搜索栏计数位 (D1 所述溢出菜单尚未存在; 零匹配时计数位为红色 `0`, 同样可点); 行副文本两行 (路径 / `depth` 与边界); 零匹配解释: 单个过滤器显示 `text_inspector_no_node_matches_keyword`, 多个过滤器走 `SelectorExplainer` 逐过滤器计数 (`text_inspector_filter_tally`, P3 起才会出现). Redmi 22120RN86C (API 33) 与 AVD (API 24): 对话框, 点击跳转选中, 长按打开节点信息, 零匹配说明均通过.
+- [x] P2.2 `QueryHistory` (引擎包, 纯逻辑: 追加去重, 上限 20, 最新在前, 删除单条, 清空; Gson 编解码) + Pref 适配 (`key_layout_inspector_query_history`); 搜索栏输入框获焦且为空时弹出历史下拉 (`ListPopupWindow`), 点击填入, 长按删除, 末项 "清空历史". 查询在 "提交" (回车 / 点击下一个 / 打开结果列表) 时写入历史, 不在每次击键时写入. 单测: `QueryHistoryTest`. 证据 E3: 提交 `067717680f`; `QueryHistoryTest` (7). 实现差异: 下拉为窗口内嵌的 `ListView` (`InspectorSearchBar.historyList`) 而非 `ListPopupWindow`: 悬浮窗之上的弹出窗口 surface 在 Redmi 22120RN86C (API 33) 上必现 HWUI 中止 (`Failed to set damage region on surface ... EGL_BAD_ACCESS`, 进程被杀); 为此层次窗口根视图改为 `FrameLayout` (树以搜索栏高度为顶部边距, 搜索栏视图铺满窗口以便下拉叠在树上), 下拉列表不可获焦以免收起 IME. 去重键为模式 + 去空白文本, 重复提交采用较新的正则开关. Redmi (API 33) 与 AVD (API 24): 获焦且为空时下拉, 点击填入 (IME 保持), 长按删除, 末行清空, 外部点击收起, 退出重进后仍在.
+- [x] P2.3 字符串 + changelog (feature 1 条) + 冒烟 (附录 B 第 7-8 项) + 提交. 证据 E3: 提交 `067717680f`; 6 条字符串 x 11 文件, changelog feature 1 条 x 10 语言; 附录 B 第 7-8 项于 Redmi 22120RN86C (API 33) 与 AVD (API 24, x86). Sony G8441 (API 28) 同样通过 (重装后无障碍服务未重新绑定, 需重启设备; 设备状态问题, 与本功能无关).
 
 ### P3 筛选配置
 
