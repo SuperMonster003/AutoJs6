@@ -103,6 +103,52 @@ class InstallerSessionHandleDeviceTest {
         }
     }
 
+    @Test
+    fun earlyCompletionCarriesOnlyTheLocalSourceProfileNegotiation(): Unit = runBlocking {
+        for (negotiated in listOf(false, true)) {
+            val observed = AtomicReference<InstallerJson.Completion?>()
+            val callback = InstallerSessionCallbackBinder(ID, object : InstallerSessionListener {
+                override fun onCompleted(completion: InstallerJson.Completion) { observed.set(completion) }
+            }).apply { sourceProfilesEnabled = negotiated }
+            // A remote can synchronously finish openSession before the handle exists. A JSON
+            // value cannot forge (or erase) the host's negotiation decision in either direction.
+            callback.onCompleted(ID, Bundle().apply {
+                putString(InstallerContract.KEY_RESULT_JSON,
+                    """{"ok":true,"sourceProfilesEnabled":${!negotiated},"sourceDeleteRequested":true}""")
+            })
+            InstallerSessionHandle(ID, FakeSession(callback), Closeable {}, callback, emptyList(), 5_000).use { handle ->
+                val result = (handle.await() as InstallerSessionOutcome.Completed).completion
+                assertEquals(negotiated, result.sourceProfilesEnabled)
+                assertEquals(negotiated, observed.get()?.sourceProfilesEnabled)
+                assertEquals(true, result.single.sourceDeleteRequested)
+            }
+        }
+    }
+
+    @Test
+    fun hostUiHonorsNegotiatedCleanupBeforeClosingOwnedDescriptors(): Unit = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        for (negotiated in listOf(false, true)) {
+            val file = File(context.cacheDir, "installer-ui-cleanup-${UUID.randomUUID()}.apk").apply { writeText("owned fixture") }
+            try {
+                val source = InstallerSource.fromFile(file)
+                Fixture(sources = listOf(source)).use { fixture ->
+                    fixture.callback.sourceProfilesEnabled = negotiated
+                    fixture.callback.onCompleted(ID, Bundle().apply {
+                        putString(InstallerContract.KEY_RESULT_JSON, """{"ok":true,"sourceDeleteRequested":true}""")
+                    })
+                    val result = PackageInstallRouter.awaitAndCleanOwnedSources(fixture.handle, listOf(source))
+                    assertTrue(result is InstallerSessionOutcome.Completed)
+                    assertEquals(!negotiated, file.exists())
+                    assertTrue(source.descriptor.fileDescriptor.valid())
+                    assertEquals(0, fixture.session.closes.get())
+                }
+            } finally {
+                file.delete()
+            }
+        }
+    }
+
     private class Fixture(
         timeoutMillis: Long = 5_000,
         sources: List<InstallerSource> = emptyList(),

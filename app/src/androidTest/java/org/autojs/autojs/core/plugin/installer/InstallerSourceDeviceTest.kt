@@ -62,6 +62,37 @@ class InstallerSourceDeviceTest {
     }
 
     @Test
+    fun profileRetainedHardLinkProtectsTheOtherOwnedPath() = withDirectory { directory ->
+        val first = File(directory, "first.apk").apply { writeText("shared source fixture") }
+        val second = File(directory, "second.apk")
+        Os.link(first.path, second.path)
+        InstallerSource.fromFile(first, item = 0).use { source ->
+            InstallerSource.fromFile(second, item = 1).use { retained ->
+                assertNotEquals(source.ownershipKey, retained.ownershipKey)
+                assertEquals(source.retentionKey, retained.retentionKey)
+                val completion = InstallerJson.decodeCompletion("""{"results":[
+                    {"ok":true,"sourceDeleteRequested":true},
+                    {"ok":true,"sourceDeleteRequested":false}
+                ]}""").copy(sourceProfilesEnabled = true)
+                val sources = listOf(source, retained).map { opened -> object : InstallerSourceDeletion.Source {
+                    override val item = opened.item
+                    override val isOwnedFile = true
+                    override val ownershipKey = opened.ownershipKey
+                    override val retentionKey = opened.retentionKey
+                    override fun deleteIfUnchanged() = opened.deleteOwnedFileIfUnchanged()
+                } }
+                val result = InstallerSourceDeletion.apply(completion, sources, requested = false)
+                assertTrue(result.allOk)
+                assertTrue(result.results.all { it.sourceDeleted == false })
+                assertTrue(first.isFile)
+                assertTrue(second.isFile)
+                assertTrue(source.descriptor.fileDescriptor.valid())
+                assertTrue(retained.descriptor.fileDescriptor.valid())
+            }
+        }
+    }
+
+    @Test
     fun unknownSizeContentPipeCanBeConsumedWithoutOwningItsSource() {
         InstallerSource.fromUri(context, Uri.parse("content://org.autojs.autojs6.test.installer.sources/stream")).use { source ->
             assertEquals("stream.apk", source.displayName)

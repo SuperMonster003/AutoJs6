@@ -74,8 +74,8 @@ class InstallerScriptOptionsTest {
     fun explicitNullDoesNotSelectADefault() {
         invalid { InstallerScriptOptions.install(JsonNull.INSTANCE) }
         invalid { InstallerScriptOptions.uninstall(JsonNull.INSTANCE) }
-        listOf("authorizer", "interaction", "allowDowngrade", "allowTestOnly", "bypassLowTargetSdk", "installer", "user", "deleteSource", "continueOnError", "timeout",
-            "grantAllRequestedPermissions", "requestUpdateOwnership", "dexopt", "installReason", "packageSource").forEach {
+        listOf("authorizer", "interaction", "allowDowngrade", "allowTestOnly", "bypassLowTargetSdk", "user", "deleteSource", "continueOnError", "timeout",
+            "grantAllRequestedPermissions", "requestUpdateOwnership", "dexopt").forEach {
             invalid { InstallerScriptOptions.install(json("""{"$it":null}""")) }
         }
         listOf("authorizer", "interaction", "keepData", "user", "timeout").forEach {
@@ -194,6 +194,28 @@ class InstallerScriptOptionsTest {
             invalid { InstallerScriptOptions.uninstall(json("""{"$key":"${values.first()}"}""")) }
         }
         invalid { InstallerScriptOptions.install(json("""{"overridePolicy":true}""")) }
+    }
+
+    @Test fun profileOverridesPreserveExplicitDefaultsAndOnlyThreeNullableResets() {
+        val absent = InstallerScriptOptions.install(null).install
+        assertEquals(emptySet<String>(), absent.providedOptions)
+        assertNull(absent.explicitDeleteSource)
+        val document = json("""{"authorizer":"auto","user":"current","deleteSource":false,"installer":null,
+            "installReason":null,"packageSource":null,"interaction":"auto","timeout":42}""").asJsonObject
+        val parsed = InstallerScriptOptions.install(document).install
+        document.remove("deleteSource")
+        document.addProperty("authorizer", "root")
+        assertEquals(setOf("authorizer", "user", "deleteSource", "installer", "installReason", "packageSource", "timeoutMillis"), parsed.providedOptions)
+        assertEquals("auto", parsed.authorizer)
+        assertEquals("current", parsed.user)
+        assertEquals(false, parsed.explicitDeleteSource)
+        assertNull(parsed.installer); assertNull(parsed.installReason); assertNull(parsed.packageSource)
+        assertTrue(parsed.hasAdvancedOptions)
+        assertEquals(setOf("installer"), InstallerScriptOptions.install(json("""{"installer":""}""")).install.providedOptions)
+        assertNull(InstallerScriptOptions.install(json("""{"installer":""}""")).install.installer)
+        org.junit.Assert.assertThrows(UnsupportedOperationException::class.java) {
+            (parsed.providedOptions as MutableSet<String>).clear()
+        }
     }
 
     private fun json(value: String): JsonElement = JsonParser.parseString(value)

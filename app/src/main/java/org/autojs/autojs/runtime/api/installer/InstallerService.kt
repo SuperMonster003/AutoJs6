@@ -13,6 +13,7 @@ import org.autojs.autojs.core.plugin.installer.InstallerPluginException
 import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
 import org.autojs.autojs.core.plugin.installer.InstallerSessionListener
 import org.autojs.autojs.core.plugin.installer.InstallerSource
+import org.autojs.autojs.core.plugin.installer.InstallerSourceDeletion
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.installer.InstallerScriptArguments.Source
 import org.autojs.autojs.runtime.api.installer.InstallerScriptArguments.SourcePlan
@@ -146,7 +147,7 @@ class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeab
         listener: InstallerSessionListener = object : InstallerSessionListener {},
     ): InstallerOperation = synchronized(lock) {
         ensureOpen()
-        val sourceLease = SourceLease(plan, options.install.deleteSource)
+        val sourceLease = SourceLease(plan, options.install.deleteSource, options.install.explicitDeleteSource)
         val backend = object : InstallerOperationBackend {
             override suspend fun open(id: String, listener: InstallerSessionListener): InstallerOperationSession {
                 requirePlugin()
@@ -247,7 +248,8 @@ class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeab
     private fun mapped(failure: Throwable, phase: InstallerErrorMapper.Phase): InstallerPluginException =
         failure as? InstallerPluginException ?: InstallerPluginException(InstallerErrorMapper.fromThrowable(failure, phase), failure)
 
-    private inner class SourceLease(private val plan: SourcePlan, private val deleteSource: Boolean) : Closeable {
+    private inner class SourceLease(private val plan: SourcePlan, private val deleteSource: Boolean,
+        private val explicitDeleteSource: Boolean? = deleteSource) : Closeable {
         private val sourceLock = Any()
         private val signal = CancellationSignal()
         private val cancelSent = AtomicBoolean()
@@ -262,9 +264,6 @@ class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeab
             continuation.invokeOnCancellation { close() }
             try {
                 synchronized(sourceLock) { if (closed) throw CancellationException("package sources are closed") }
-                val ownershipKey = (source as? Source.FilePath)?.file?.let { file ->
-                    runCatching { file.canonicalPath }.getOrDefault(file.absolutePath)
-                }
                 val opened = when (source) {
                     is Source.FilePath -> InstallerSource.fromFile(source.file, item)
                     is Source.ContentUri -> InstallerSource.fromUri(appContext, Uri.parse(source.uri), item, cancellationSignal = signal)
@@ -274,7 +273,7 @@ class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeab
                         opened.close()
                         throw CancellationException("package sources are closed")
                     }
-                    sources += opened to ownershipKey
+                    sources += opened to opened.ownershipKey
                 }
                 continuation.resume(opened)
             } catch (failure: Throwable) {
@@ -296,11 +295,12 @@ class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeab
                         override val item: Int = item
                         override val isOwnedFile: Boolean = source is Source.FilePath
                         override val ownershipKey: String? = owned?.second ?: (source as? Source.FilePath)?.file?.absolutePath
+                        override val retentionKey: String? = owned?.first?.retentionKey ?: ownershipKey
                         override fun deleteIfUnchanged(): Boolean = owned?.first?.deleteOwnedFileIfUnchanged() == true
                     }
                 }
             }
-            return InstallerSourceDeletion.apply(completion, deletionSources, deleteSource)
+            return InstallerSourceDeletion.apply(completion, deletionSources, deleteSource, explicitDeleteSource)
         }
 
         override fun close() {

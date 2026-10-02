@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.installer
 
 import org.autojs.autojs.core.plugin.installer.InstallerJson
+import org.autojs.autojs.core.plugin.installer.InstallerSourceDeletion
 import org.autojs.plugin.installer.api.InstallerContract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -10,6 +11,63 @@ import org.junit.Test
 import java.util.UUID
 
 class InstallerSourceDeletionTest {
+
+    @Test fun `negotiated effective deletion applies per item and explicit false vetoes the plugin`() {
+        val completion = profiled("""{"ok":true,"sourceDeleteRequested":true}""")
+        val inherited = FakeSource(0)
+        assertTrue(InstallerSourceDeletion.apply(completion, listOf(inherited), false).single.sourceDeleted == true)
+        assertEquals(1, inherited.deletes)
+        val explicitFalse = FakeSource(0)
+        val kept = InstallerSourceDeletion.apply(completion, listOf(explicitFalse), false, explicitRequest = false)
+        assertEquals(0, explicitFalse.deletes)
+        assertTrue(kept.single.ok)
+        assertEquals(false, kept.single.sourceDeleteRequested)
+        assertEquals(false, kept.single.sourceDeleted)
+        assertTrue(kept.single.notes.single().contains("explicit deleteSource:false"))
+        assertTrue(kept.sourceProfilesEnabled)
+    }
+
+    @Test fun `missing or nonboolean negotiated cleanup decisions retain sources without changing installed success`() {
+        for (json in listOf("""{"ok":true}""", """{"ok":true,"sourceDeleteRequested":null}""",
+            """{"ok":true,"sourceDeleteRequested":"true"}""", """{"ok":true,"sourceDeleteRequested":1}""")) {
+            val source = FakeSource(0)
+            val result = InstallerSourceDeletion.apply(profiled(json), listOf(source), true, explicitRequest = true)
+            assertEquals(0, source.deletes); assertTrue(result.single.ok)
+            assertEquals(false, result.single.sourceDeleted)
+            assertTrue(result.single.notes.single().contains("sourceDeleteRequested"))
+            val plain = InstallerScriptValues.completion(result, false) as Map<*, *>
+            assertFalse(plain.containsKey("sourceDeleteRequested"))
+        }
+    }
+
+    @Test fun `a successful false item protects a shared source from a successful true item`() {
+        val completion = profiled("""{"results":[{"ok":true,"sourceDeleteRequested":true},{"ok":true,"sourceDeleteRequested":false}]}""")
+        val yes = FakeSource(0, ownershipKey = "/same.apk")
+        val no = FakeSource(1, ownershipKey = "/same.apk")
+        val result = InstallerSourceDeletion.apply(completion, listOf(yes, no), false)
+        assertEquals(0, yes.deletes); assertEquals(0, no.deletes)
+        assertTrue(result.results.all { it.ok && it.sourceDeleted == false })
+    }
+
+    @Test fun `provable physical aliases stay retained even under different paths or a content provider`() {
+        val completion = profiled("""{"results":[{"ok":true,"sourceDeleteRequested":true},{"ok":true,"sourceDeleteRequested":false}]}""")
+        for (owned in listOf(true, false)) {
+            val yes = FakeSource(0, ownershipKey = "/one.apk", retentionKey = "device:inode")
+            val no = FakeSource(1, isOwnedFile = owned, ownershipKey = "/another.apk", retentionKey = "device:inode")
+            InstallerSourceDeletion.apply(completion, listOf(yes, no), false)
+            assertEquals(0, yes.deletes); assertEquals(0, no.deletes)
+        }
+    }
+
+    @Test fun `legacy replies cannot activate profile cleanup and new fields do not override legacy requests`() {
+        val source = FakeSource(0)
+        val spoof = InstallerJson.decodeCompletion("""{"ok":true,"sourceProfilesEnabled":true,"sourceDeleteRequested":true}""")
+        assertSame(spoof, InstallerSourceDeletion.apply(spoof, listOf(source), false))
+        assertEquals(0, source.deletes)
+        val legacy = InstallerJson.decodeCompletion("""{"ok":true,"sourceDeleteRequested":false}""")
+        assertEquals(true, InstallerSourceDeletion.apply(legacy, listOf(source), true).single.sourceDeleted)
+        assertEquals(1, source.deletes)
+    }
 
     @Test
     fun `batch failure keeps its source while successful items are deleted`() {
@@ -150,10 +208,13 @@ class InstallerSourceDeletionTest {
 
     private fun success() = InstallerJson.decodeCompletion("""{"ok":true,"sourceDeleted":false}""")
 
+    private fun profiled(json: String) = InstallerJson.decodeCompletion(json).copy(sourceProfilesEnabled = true)
+
     private class FakeSource(
         override val item: Int,
         override val isOwnedFile: Boolean = true,
         override val ownershipKey: String? = UUID.randomUUID().toString(),
+        override val retentionKey: String? = ownershipKey,
         private val allowed: Boolean = true,
         private val error: Throwable? = null,
     ) : InstallerSourceDeletion.Source {

@@ -35,9 +35,13 @@ object InstallerJson {
         val dexopt: String? = null,
         val installReason: String? = null,
         val packageSource: String? = null,
+        /** Host-only snapshot of explicit wire option names. Null preserves unknown native callers' legacy behavior. */
+        val providedOptions: Set<String>? = null,
     ) {
         val hasAdvancedOptions: Boolean get() = grantAllRequestedPermissions != null || requestUpdateOwnership != null ||
-            dexopt != null || installReason != null || packageSource != null
+            dexopt != null || installReason != null || packageSource != null || providedOptions.orEmpty().any { it in ADVANCED_OPTION_FIELDS }
+
+        val explicitDeleteSource: Boolean? get() = if (providedOptions == null || InstallerContract.FIELD_DELETE_SOURCE in providedOptions) deleteSource else null
 
         fun validate(): String? = when {
             !InstallerContract.isAuthorizer(authorizer) -> "unknown authorizer: $authorizer"
@@ -48,7 +52,18 @@ object InstallerJson {
             dexopt != null && !InstallerContract.isDexoptMode(dexopt) -> "unknown dexopt mode: $dexopt"
             installReason != null && !InstallerContract.isInstallReason(installReason) -> "unknown install reason: $installReason"
             packageSource != null && !InstallerContract.isPackageSource(packageSource) -> "unknown package source: $packageSource"
+            providedOptions?.any { it !in InstallerContract.PROFILE_OPTION_FIELDS && it !in SESSION_OPTION_FIELDS } == true -> "unknown provided installation option"
+            InstallerContract.FIELD_GRANT_ALL_REQUESTED_PERMISSIONS in providedOptions.orEmpty() && grantAllRequestedPermissions == null -> "explicit grantAllRequestedPermissions cannot be null"
+            InstallerContract.FIELD_REQUEST_UPDATE_OWNERSHIP in providedOptions.orEmpty() && requestUpdateOwnership == null -> "explicit requestUpdateOwnership cannot be null"
+            InstallerContract.FIELD_DEXOPT in providedOptions.orEmpty() && dexopt == null -> "explicit dexopt cannot be null"
             else -> null
+        }
+
+        private companion object {
+            val ADVANCED_OPTION_FIELDS = setOf(InstallerContract.FIELD_GRANT_ALL_REQUESTED_PERMISSIONS,
+                InstallerContract.FIELD_REQUEST_UPDATE_OWNERSHIP, InstallerContract.FIELD_DEXOPT,
+                InstallerContract.FIELD_INSTALL_REASON, InstallerContract.FIELD_PACKAGE_SOURCE)
+            val SESSION_OPTION_FIELDS = setOf(InstallerContract.FIELD_TIMEOUT_MILLIS, InstallerContract.FIELD_CONTINUE_ON_ERROR)
         }
     }
 
@@ -83,10 +98,13 @@ object InstallerJson {
         val notes: List<String>,
         val error: InstallerError?,
         val json: String,
+        val sourceDeleteRequested: Boolean? = null,
     )
 
     /** `onCompleted` payload: one result, or the item results of a batch. */
-    data class Completion(val results: List<InstallResult>, val json: String) {
+    data class Completion(val results: List<InstallResult>, val json: String,
+        /** Local Binder-negotiation fact, never decoded from a plugin-controlled JSON field. */
+        val sourceProfilesEnabled: Boolean = false) {
         val single: InstallResult get() = results.single()
         val allOk: Boolean get() = results.all { it.ok }
     }
@@ -134,11 +152,13 @@ object InstallerJson {
         options: InstallOptions,
         isBatch: Boolean = sources.map { it.item }.distinct().size > 1,
         origin: String = InstallerContract.SOURCE_HOST,
+        applySourceProfiles: Boolean = false,
     ): String {
         require(id.isNotBlank()) { "request id must not be blank" }
         require(origin in setOf(InstallerContract.SOURCE_HOST, InstallerContract.SOURCE_SCRIPT)) { "unknown source origin: $origin" }
         require(InstallerContract.isInteraction(interaction)) { "unknown interaction: $interaction" }
         options.validate()?.let { throw IllegalArgumentException(it) }
+        require(!applySourceProfiles || options.providedOptions != null) { "source profiles require an explicit option-presence snapshot" }
         require(sources.isNotEmpty()) { "at least one package source is required" }
         val items = sources.map { it.item }.distinct()
         require(isBatch || items.size == 1) { "a non-batch request must contain exactly one package" }
@@ -151,6 +171,7 @@ object InstallerJson {
             addProperty(InstallerContract.FIELD_ID, id)
             addProperty(InstallerContract.FIELD_BATCH, isBatch)
             addProperty(InstallerContract.FIELD_SOURCE_ORIGIN, origin)
+            if (applySourceProfiles) addProperty(InstallerContract.FIELD_APPLY_SOURCE_PROFILES, true)
             add(InstallerContract.FIELD_SOURCES, JsonArray().apply {
                 sources.forEach { source ->
                     add(JsonObject().apply {
@@ -176,6 +197,15 @@ object InstallerJson {
                 options.dexopt?.let { addProperty(InstallerContract.FIELD_DEXOPT, it) }
                 options.installReason?.let { addProperty(InstallerContract.FIELD_INSTALL_REASON, it) }
                 options.packageSource?.let { addProperty(InstallerContract.FIELD_PACKAGE_SOURCE, it) }
+                if (applySourceProfiles) {
+                    val provided = requireNotNull(options.providedOptions)
+                    InstallerContract.PROFILE_OPTION_FIELDS.filterNot { it in provided }.forEach { remove(it) }
+                    // Null is a deliberate reset only when the caller explicitly supplied a
+                    // nullable field. Legacy peers never receive these JSON nulls or the marker.
+                    for (field in listOf(InstallerContract.FIELD_INSTALLER, InstallerContract.FIELD_INSTALL_REASON, InstallerContract.FIELD_PACKAGE_SOURCE)) {
+                        if (field in provided && !has(field)) add(field, com.google.gson.JsonNull.INSTANCE)
+                    }
+                }
             })
         }
         return checkSize(document.toString(), "install request")
@@ -241,6 +271,7 @@ object InstallerJson {
         interaction = root.string(InstallerContract.FIELD_INTERACTION),
         durationMillis = root.long(InstallerContract.FIELD_DURATION_MILLIS),
         sourceDeleted = root.boolean(InstallerContract.FIELD_SOURCE_DELETED),
+        sourceDeleteRequested = root.boolean(InstallerContract.FIELD_SOURCE_DELETE_REQUESTED),
         notes = root.getAsJsonArrayOrNull(InstallerContract.FIELD_NOTES)?.mapNotNull { it.takeIf(JsonElement::isJsonPrimitive)?.asString }.orEmpty(),
         error = root.getAsJsonObjectOrNull(InstallerContract.FIELD_ERROR)?.let(::decodeErrorObject)?.let { error ->
             // A failed batch item names its package on the item; the nested error may omit it.

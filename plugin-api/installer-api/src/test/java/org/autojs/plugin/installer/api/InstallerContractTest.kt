@@ -34,7 +34,7 @@ class InstallerContractTest {
         assertEquals("installerSettingsVersion", InstallerCapabilityKeys.SETTINGS_VERSION)
         assertEquals(InstallerCapabilityKeys.FEATURES.size, InstallerCapabilityKeys.FEATURES.toSet().size)
         assertEquals(listOf("batch", "splits", "delete-source", "silent-uninstall", "default-installer", "users", "inspect",
-            "notification-install", "persistent-default-installer", "advanced-install-options"), InstallerCapabilityKeys.FEATURES)
+            "notification-install", "persistent-default-installer", "advanced-install-options", "source-profiles"), InstallerCapabilityKeys.FEATURES)
     }
 
     @Test
@@ -128,6 +128,17 @@ class InstallerContractTest {
         assertEquals("filter", InstallerContract.FIELD_FILTER)
         assertEquals("status", InstallerContract.FIELD_DEXOPT_STATUS)
         assertEquals("message", InstallerContract.FIELD_DEXOPT_MESSAGE)
+    }
+
+    @Test fun sourceProfileExtensionPreservesTheV3AndSessionBoundaries() {
+        assertEquals(3, InstallerContract.CONTRACT_VERSION)
+        assertEquals("applySourceProfiles", InstallerContract.FIELD_APPLY_SOURCE_PROFILES)
+        assertEquals("sourceDeleteRequested", InstallerContract.FIELD_SOURCE_DELETE_REQUESTED)
+        assertEquals(12, InstallerContract.PROFILE_OPTION_FIELDS.size)
+        assertEquals(12, InstallerContract.PROFILE_OPTION_FIELDS.toSet().size)
+        assertFalse(InstallerContract.FIELD_INTERACTION in InstallerContract.PROFILE_OPTION_FIELDS)
+        assertFalse(InstallerContract.FIELD_TIMEOUT_MILLIS in InstallerContract.PROFILE_OPTION_FIELDS)
+        assertFalse(InstallerContract.FIELD_CONTINUE_ON_ERROR in InstallerContract.PROFILE_OPTION_FIELDS)
     }
 
     @Test

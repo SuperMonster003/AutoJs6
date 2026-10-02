@@ -32,7 +32,9 @@ The fields live inside the existing `options` JSON object:
 
 The host retains a separate omitted state for all five fields and does not encode missing
 fields. Explicit `false`, `none`, `unknown` and `unspecified` are still supplied V3 requests,
-so they still require negotiation. Explicit JSON null, numeric enum values, string booleans,
+so they still require negotiation. `installReason` and `packageSource` also accept explicit
+JSON null to reset a source-profile value; their presence still requires V3 and the advanced
+feature. Null for the other three advanced fields, numeric enum values, string booleans,
 unknown enum strings and unknown script keys are rejected rather than coerced. Uninstall and
 default-installer options do not acquire these installation-only fields.
 
@@ -86,8 +88,57 @@ Install results may include:
   lost result. The optional message describes the observation without changing its status.
 - A post-install observation does not reverse an already confirmed installation. The host
   preserves the complete raw result document, including nested extension objects and explicit
-  null, while keeping its normalized `ok` and error handling. There are no new required result
-  fields or new Kotlin `InstallResult` constructor arguments.
+  null, while keeping its normalized `ok` and error handling. These observations add no required
+  result fields; the separately negotiated source-profile extension below has its own cleanup
+  decision requirement.
+
+## Source profiles within V3
+
+`source-profiles` is an optional feature on the same live V3 Binder lease. The host sends
+`applySourceProfiles: true` at the request root only after that lease advertises the feature.
+The host UI/script implementation of this extension starts with host build 5312.
+There is no new AIDL transaction or contract version. A discovery-only advertisement, V1/V2
+peer, or V3 peer without the feature cannot opt in. Requests from older hosts lack this marker
+and do not apply remote source profiles. Native host callers whose explicit field presence is
+unknown also retain their original full request shape.
+
+On an opted-in host/script request, `options` contains only explicitly supplied values for the
+twelve per-package fields: `authorizer`, `allowDowngrade`, `allowTestOnly`, `bypassLowTargetSdk`,
+`installer`, `user`, `deleteSource`, `grantAllRequestedPermissions`, `requestUpdateOwnership`,
+`dexopt`, `installReason`, and `packageSource`. The host's `providedOptions` set is local state,
+not a second wire field. Explicit false, `auto`, `current`, and `none` remain present and take
+precedence over matching profile defaults. Only `installer`, `installReason`, and `packageSource`
+allow an explicit null reset; `installer: ''` is the existing spelling of the same installer
+reset. On older peers, the host sends the prior full/defaulted object and omits nullable resets
+whose legacy meaning is already the default. Explicit advanced nulls still require the
+advanced feature before that operation is sent.
+
+`interaction` remains at the request root. `timeoutMillis` and `continueOnError` remain
+session-wide options and are always encoded with their effective values. Profiles cannot
+override them or restart/extend a batch deadline. Host UI requests keep `dialog`; script
+requests keep the chosen interaction or `auto` when omitted.
+
+The plugin owns profile storage, matching and validation. It freezes the selected configuration
+when processing starts, then uses the real parsed package name and trusted origin to select
+the first enabled matching entry in settings order. One entry provides defaults per package;
+entries are not merged. Prefix matching is case-sensitive text matching, not filename matching.
+Authorizer, target-user, SDK and mandatory local policy checks still apply to the final options.
+No profile can grant itself a signature or blacklist exception.
+
+Each successful item of an opted-in request must include a boolean `sourceDeleteRequested`,
+including false. It reports the final effective request, not a claim that a file was deleted.
+The host records the negotiation fact before calling `openSession`, so even a synchronous
+terminal callback carries the correct local cleanup mode. A JSON field cannot forge that fact.
+
+For both script and host UI file sources, the host performs requested deletion after complete
+item results, on an IO worker and before closing its descriptors. Explicit script
+`deleteSource: false` is a hard veto. A missing or non-boolean cleanup decision retains the file
+and adds a note without changing confirmed installation success. Content URI ownership is never
+assumed. Unsuccessful, unprocessed, and successful-but-retained items protect any shared path or
+provable regular-file alias from another item's cleanup. Identity/replacement checks still run
+immediately before deletion, and `sourceDeleted` is true only when all owned sources of that
+item were safely removed. Without this negotiated extension, the existing explicit deletion
+behavior remains in force and the new result field does not authorize cleanup.
 
 ## Local installation policy
 
@@ -96,7 +147,7 @@ Signature checks remain a plugin-local gate, and blacklist rules are local setti
 an unfamiliar code to `INTERNAL`. Only the plugin's one-time dialog confirmation may override a
 signature-policy decision for that item. A blacklist decision is not overridable. The script
 options contain no bypass field or reusable authorization token. Platform signature validation
-still applies after any local confirmation. This protocol adds no per-source profile behavior.
+still applies after any local confirmation. Source-profile defaults cannot bypass this gate.
 
 Installed-signature queries using none/Dhizuku cover the current user; Shizuku/Root can query
 globally. With nonempty SharedUID rules, an absent current-user package cannot exclude an

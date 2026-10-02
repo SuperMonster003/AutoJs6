@@ -12,6 +12,38 @@ import org.junit.Test
 
 class InstallerJsonTest {
 
+    @Test fun `source profile requests are sparse while legacy JSON keeps its exact defaults`() {
+        fun encoded(value: InstallerJson.InstallOptions, profiles: Boolean) = JsonParser.parseString(
+            InstallerJson.encodeInstallRequest("profiles", sources(1), "dialog", value, applySourceProfiles = profiles)).asJsonObject
+        val defaults = InstallerJson.InstallOptions(providedOptions = emptySet())
+        val sparse = encoded(defaults, true)
+        assertTrue(sparse["applySourceProfiles"].asBoolean)
+        assertEquals("dialog", sparse["interaction"].asString)
+        assertEquals(setOf("continueOnError", "timeoutMillis"), sparse.getAsJsonObject("options").keySet())
+        val legacy = encoded(defaults, false)
+        assertFalse(legacy.has("applySourceProfiles"))
+        assertEquals("auto", legacy.getAsJsonObject("options")["authorizer"].asString)
+        assertFalse(legacy.getAsJsonObject("options")["deleteSource"].asBoolean)
+        val values = InstallerJson.InstallOptions(authorizer = "auto", user = "current", deleteSource = false,
+            providedOptions = setOf("authorizer", "user", "deleteSource", "installer", "installReason", "packageSource"))
+        val options = encoded(values, true).getAsJsonObject("options")
+        assertEquals("auto", options["authorizer"].asString); assertEquals("current", options["user"].asString)
+        assertFalse(options["deleteSource"].asBoolean)
+        for (field in listOf("installer", "installReason", "packageSource")) assertTrue(options[field].isJsonNull)
+        for (field in listOf("installer", "installReason", "packageSource")) assertFalse(encoded(values, false).getAsJsonObject("options").has(field))
+        assertThrows(IllegalArgumentException::class.java) { encoded(InstallerJson.InstallOptions(), true) }
+        assertThrows(IllegalArgumentException::class.java) { encoded(InstallerJson.InstallOptions(providedOptions = setOf("notAnOption")), false) }
+    }
+
+    @Test fun `plugin JSON cannot manufacture the local source profile negotiation fact`() {
+        val value = InstallerJson.decodeCompletion("""{"ok":true,"sourceProfilesEnabled":true,"sourceDeleteRequested":true}""")
+        assertFalse(value.sourceProfilesEnabled)
+        assertEquals(true, value.single.sourceDeleteRequested)
+        for (invalid in listOf("null", "\"true\"", "1", "{}")) {
+            assertNull(InstallerJson.decodeCompletion("""{"ok":true,"sourceDeleteRequested":$invalid}""").single.sourceDeleteRequested)
+        }
+    }
+
     @Test fun `advanced option omission is distinct from explicitly requested false and none`() {
         fun options(value: InstallerJson.InstallOptions) = JsonParser.parseString(
             InstallerJson.encodeInstallRequest("v3", sources(1), "auto", value)).asJsonObject.getAsJsonObject("options")
