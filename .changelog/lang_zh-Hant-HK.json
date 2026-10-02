@@ -712,7 +712,8 @@
         "升級 AndroidX Lifecycle 版本 2.6.2 -> 2.9.4",
         "升級 AndroidX SavedState 版本 1.2.1 -> 1.3.2",
         "升級 AndroidX Emoji2 版本 1.3.0 -> 1.4.0",
-        "升級 AndroidX Window 版本 1.0.0 -> 1.5.0"
+        "升級 AndroidX Window 版本 1.0.0 -> 1.5.0",
+        "模組化 Compose UI API"
       ]
     },
     "v6.7.0": {

@@ -712,6 +712,7 @@
 * `依存関係` AndroidX SavedState を 1.2.1 -> 1.3.2 に更新
 * `依存関係` AndroidX Emoji2 を 1.3.0 -> 1.4.0 に更新
 * `依存関係` AndroidX Window を 1.0.0 -> 1.5.0 に更新
+* `依存関係` Compose UI API をモジュール化
 
 # v6.7.0
 

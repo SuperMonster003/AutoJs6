@@ -712,6 +712,7 @@
 * `Dependency` Upgrade AndroidX SavedState from 1.2.1 to 1.3.2
 * `Dependency` Upgrade AndroidX Emoji2 from 1.3.0 to 1.4.0
 * `Dependency` Upgrade AndroidX Window from 1.0.0 to 1.5.0
+* `Dependency` Modularize Compose UI API
 
 # v6.7.0
 

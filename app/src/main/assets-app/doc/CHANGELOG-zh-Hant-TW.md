@@ -712,6 +712,7 @@
 * `依賴` 升級 AndroidX SavedState 版本 1.2.1 -> 1.3.2
 * `依賴` 升級 AndroidX Emoji2 版本 1.3.0 -> 1.4.0
 * `依賴` 升級 AndroidX Window 版本 1.0.0 -> 1.5.0
+* `依賴` 模組化 Compose UI API
 
 # v6.7.0
 

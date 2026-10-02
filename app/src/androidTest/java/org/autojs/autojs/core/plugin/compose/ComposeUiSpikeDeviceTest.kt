@@ -2,8 +2,11 @@ package org.autojs.autojs.core.plugin.compose
 
 import android.content.Context
 import android.content.Intent
+import android.content.ComponentName
+import android.content.ServiceConnection
 import android.content.res.Configuration
 import android.os.Debug
+import android.os.IBinder
 import android.os.SystemClock
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +22,9 @@ import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.plugin.compose.api.spike.ComposeUiRenderer
 import org.autojs.plugin.compose.api.spike.SpikeContract
+import org.autojs.plugin.compose.api.ComposeUiIds
+import org.autojs.plugin.common.api.IPluginInfoProvider
+import org.autojs.plugin.common.api.PluginCapabilityKeys
 import org.junit.Assert.*
 import org.junit.Assume.assumeTrue
 import org.junit.Test
@@ -26,6 +32,9 @@ import org.junit.Before
 import org.junit.After
 import org.junit.runner.RunWith
 import java.util.Locale
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(AndroidJUnit4::class)
 class ComposeUiSpikeDeviceTest {
@@ -180,6 +189,29 @@ class ComposeUiSpikeDeviceTest {
             PluginEnableStore.setEnabled(context, SpikeContract.PACKAGE, false)
             fails(ComposeSpikeLoader.Error.NOT_ENABLED) { ComposeSpikeLoader(context).load() }
         } finally { PluginEnableStore.setEnabled(context, SpikeContract.PACKAGE, original) }
+    }
+
+    @Test fun standaloneInfoProcessDoesNotNeedTheHostProvidedV1Classes() {
+        // The plugin is NOT instrumented here: its own process must answer with only its APK classpath.
+        val service = Intent(SpikeContract.INFO_ACTION).addCategory(SpikeContract.INFO_CATEGORY).setPackage(SpikeContract.PACKAGE)
+        val ready = CountDownLatch(1)
+        val remote = AtomicReference<IBinder>()
+        val connection = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName, binder: IBinder) { remote.set(binder); ready.countDown() }
+            override fun onServiceDisconnected(name: ComponentName) = Unit
+        }
+        assertTrue(context.bindService(service, connection, Context.BIND_AUTO_CREATE))
+        try {
+            assertTrue("Standalone INFO service did not connect", ready.await(10, TimeUnit.SECONDS))
+            val info = IPluginInfoProvider.Stub.asInterface(remote.get()).info
+            assertEquals(ComposeUiIds.PLUGIN_ID, info.id)
+            assertEquals(ComposeUiIds.ENGINE, info.engine)
+            assertEquals(ComposeUiIds.VARIANT, info.variant)
+            assertTrue(requireNotNull(info.supportedAbis).isEmpty())
+            val capabilities = requireNotNull(info.capabilities)
+            assertEquals(setOf(PluginCapabilityKeys.REQUIRES_HOST_VERSION), capabilities.keySet())
+            assertEquals(ComposeUiIds.REQUIRED_HOST_VERSION_CODE, capabilities.getLong(PluginCapabilityKeys.REQUIRES_HOST_VERSION))
+        } finally { context.unbindService(connection) }
     }
 
     @Test fun pssBeforeLoadAfterLoadAndAfterDestroy() {

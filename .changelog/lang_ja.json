@@ -712,7 +712,8 @@
         "AndroidX Lifecycle を 2.6.2 -> 2.9.4 に更新",
         "AndroidX SavedState を 1.2.1 -> 1.3.2 に更新",
         "AndroidX Emoji2 を 1.3.0 -> 1.4.0 に更新",
-        "AndroidX Window を 1.0.0 -> 1.5.0 に更新"
+        "AndroidX Window を 1.0.0 -> 1.5.0 に更新",
+        "Compose UI API をモジュール化"
       ]
     },
     "v6.7.0": {

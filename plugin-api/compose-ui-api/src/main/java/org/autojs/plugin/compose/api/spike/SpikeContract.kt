@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 
-/** P0 experiment only. Deliberately NOT the V1 API that P1.1 will freeze. No Compose dependency. */
+/** P0 regression fixture only, outside the frozen V1 surface. Remove with the P2.1 renderer migration. */
 object SpikeContract {
     const val VERSION = -1
     const val PACKAGE = "io.github.supermonster003.autojs6.plugin.compose.ui"

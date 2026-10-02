@@ -712,6 +712,7 @@
 * `의존성` AndroidX SavedState 버전 업그레이드 1.2.1 -> 1.3.2
 * `의존성` AndroidX Emoji2 버전 업그레이드 1.3.0 -> 1.4.0
 * `의존성` AndroidX Window 버전 업그레이드 1.0.0 -> 1.5.0
+* `의존성` Compose UI API 모듈화
 
 # v6.7.0
 

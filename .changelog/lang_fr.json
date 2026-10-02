@@ -712,7 +712,8 @@
         "Mise à niveau de AndroidX Lifecycle 2.6.2 -> 2.9.4",
         "Mise à niveau de AndroidX SavedState 1.2.1 -> 1.3.2",
         "Mise à niveau de AndroidX Emoji2 1.3.0 -> 1.4.0",
-        "Mise à niveau de AndroidX Window 1.0.0 -> 1.5.0"
+        "Mise à niveau de AndroidX Window 1.0.0 -> 1.5.0",
+        "Modularisation de Compose UI API"
       ]
     },
     "v6.7.0": {

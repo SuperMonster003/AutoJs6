@@ -524,6 +524,8 @@ dependencies /* Unclassified */ {
     implementation(libs.savedstate.ktx)
     implementation(libs.emoji2)
     implementation(libs.window)
+    // V1 contract is provided by the host parent loader. Rendering remains in the separate plugin APK.
+    implementation(project(":plugin-api:compose-ui-api"))
 
     // LeakCanary
     if (leakCanaryEnabled) {
@@ -795,8 +797,6 @@ dependencies /* Test */ {
     // zh-CN: JVM 测试中的 BKS 密钥库需要名为 "BC" 的 provider (Android 自带, 桌面 JDK 没有).
     testImplementation(libs.bcprov.jdk15on)
     androidTestImplementation(libs.test.runner)
-    // P0 draft belongs only to the loading test fixture until the V1 API is frozen in P1.1.
-    androidTestImplementation(project(":plugin-api:compose-ui-api"))
     androidTestImplementation(libs.test.ext.junit)
 
     // Rhino is compileOnly for the main source set; tests need it on their compile classpath too.

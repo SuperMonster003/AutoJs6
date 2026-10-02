@@ -16,8 +16,8 @@ val verifyComposeSharedClasspath = tasks.register("verifyComposeUiSharedClasspat
         val records = mutableListOf<String>()
         composeHostVariants.forEach { variant ->
             val components = configurations.getByName("${variant}RuntimeClasspath").incoming.resolutionResult.allComponents
-            check(components.none { it.id.displayName.contains(":plugin-api:compose-ui-api") }) {
-                "The P0 draft API must stay outside the $variant host APK until P1.1"
+            check(components.any { it.id.displayName.contains(":plugin-api:compose-ui-api") }) {
+                "The V1 API must be supplied by the $variant host parent loader"
             }
             val resolved = components.mapNotNull { it.moduleVersion }.associate { "${it.group}:${it.name}" to it.version }
             locked.forEach { (id, version) -> check(resolved[id] == version) { "$variant $id: locked $version, resolved ${resolved[id]}" } }
@@ -30,7 +30,7 @@ val verifyComposeSharedClasspath = tasks.register("verifyComposeUiSharedClasspat
             parentFile.mkdirs()
             writeText(records.joinToString("\n", postfix = "\n"))
         }
-        println("Compose host shared classpath verified: ${locked.size} components in ${composeHostVariants.size} variants; no Compose or draft API in host")
+        println("Compose host shared classpath verified: ${locked.size} components in ${composeHostVariants.size} variants; V1 API present, no Compose implementation")
     }
 }
 

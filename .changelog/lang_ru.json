@@ -712,7 +712,8 @@
         "Обновление AndroidX Lifecycle 2.6.2 -> 2.9.4",
         "Обновление AndroidX SavedState 1.2.1 -> 1.3.2",
         "Обновление AndroidX Emoji2 1.3.0 -> 1.4.0",
-        "Обновление AndroidX Window 1.0.0 -> 1.5.0"
+        "Обновление AndroidX Window 1.0.0 -> 1.5.0",
+        "Модульная организация Compose UI API"
       ]
     },
     "v6.7.0": {

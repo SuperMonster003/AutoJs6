@@ -712,7 +712,8 @@
         "AndroidX Lifecycle 버전 업그레이드 2.6.2 -> 2.9.4",
         "AndroidX SavedState 버전 업그레이드 1.2.1 -> 1.3.2",
         "AndroidX Emoji2 버전 업그레이드 1.3.0 -> 1.4.0",
-        "AndroidX Window 버전 업그레이드 1.0.0 -> 1.5.0"
+        "AndroidX Window 버전 업그레이드 1.0.0 -> 1.5.0",
+        "Compose UI API 모듈화"
       ]
     },
     "v6.7.0": {

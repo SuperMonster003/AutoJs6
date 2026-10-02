@@ -712,6 +712,7 @@
 * `Dépendance` Mise à niveau de AndroidX SavedState 1.2.1 -> 1.3.2
 * `Dépendance` Mise à niveau de AndroidX Emoji2 1.3.0 -> 1.4.0
 * `Dépendance` Mise à niveau de AndroidX Window 1.0.0 -> 1.5.0
+* `Dépendance` Modularisation de Compose UI API
 
 # v6.7.0
 
