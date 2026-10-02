@@ -19,6 +19,11 @@ import org.autojs.autojs.core.accessibility.inspector.TreeMatch
 import org.autojs.autojs.core.automator.filter.BoundsFilter
 import org.autojs.autojs.core.automator.filter.Filter
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.Executor
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * The search state of one layout inspection (roadmap D5): the query, the filter profile being
@@ -28,13 +33,20 @@ import java.util.concurrent.CopyOnWriteArrayList
  * hierarchy switch, so the user's query survives the switch; dropped with the last window. The
  * selected profile is remembered across sessions and in effect as soon as the session starts.
  *
- * Text changes are evaluated after a 150 ms debounce (roadmap D17), everything else at once; all
- * calls happen on the main thread. Listeners are told after every evaluation and cursor move.
+ * Text changes are evaluated after a 150 ms debounce (roadmap D17), everything else at once. The
+ * query is compiled on the main thread (so an error shows at once), the tree walk runs on a single
+ * worker thread and its result is applied on the main thread unless a newer evaluation has been
+ * requested meanwhile (sequence numbers); the previous match stays in effect until then. Calls that
+ * need the result right away (navigation, export, commit) go through [flush], which evaluates
+ * synchronously. All public calls happen on the main thread. Listeners are told after every applied
+ * evaluation and cursor move.
  *
  * zh-CN: 一次布局分析的搜索状态 (Roadmap D5): 查询, 正在编辑的筛选配置 (Roadmap D6, 基于持久化的 [catalog]), 仅限本次会话的区域
  * 条件, 它们在当前根节点上的合并结果, 导航游标, 以及各窗口搜索栏的展开状态. 由首个分析窗口创建, 范围 / 层次窗口每次互切时传给
  * 下一个窗口, 因此用户的查询不会因切换丢失; 随最后一个窗口一起丢弃. 已选配置跨会话记忆, 会话一开始即生效.
- * 文本变化在 150 ms 去抖后求值 (Roadmap D17), 其余立即求值; 所有调用都在主线程. 每次求值与游标移动后通知监听者.
+ * 文本变化在 150 ms 去抖后求值 (Roadmap D17), 其余立即求值. 查询在主线程编译 (错误即时可见), 树遍历在单个工作线程执行, 结果回到
+ * 主线程应用, 除非期间又有新的求值请求 (序号判定); 在此之前上一次匹配结果继续生效. 需要立即拿到结果的调用 (导航, 导出, 提交) 经
+ * [flush] 同步求值. 所有公开调用都在主线程. 每次应用求值结果与游标移动后通知监听者.
  *
  * Created by SuperMonster003 on Oct 2, 2026.
  */
@@ -104,7 +116,17 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
 
     private val listeners = CopyOnWriteArrayList<Listener>()
 
+    /** A debounced evaluation is scheduled. zh-CN: 有去抖中的求值待执行. */
     private var pending = false
+
+    /** A tree walk is running on the worker and its result has not been applied yet. zh-CN: 工作线程上有树遍历在进行, 结果尚未应用. */
+    private var inFlight = false
+
+    /** The number of the evaluation requested last (main thread); a result is applied only when it still carries this number. zh-CN: 最近一次请求的求值序号 (主线程); 结果只在序号仍匹配时应用. */
+    private var sequence = 0
+
+    /** [sequence] as the worker sees it, so a superseded walk is skipped before it starts. zh-CN: 工作线程可见的 [sequence], 被取代的遍历在开始前即跳过. */
+    private val latest = AtomicInteger()
 
     private val evaluateTask = Runnable {
         pending = false
@@ -256,12 +278,16 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
         evaluate()
     }
 
-    /** Runs a debounced evaluation now, so that navigation sees the latest text. zh-CN: 立即执行尚在去抖中的求值, 使导航看到最新文本. */
+    /**
+     * Brings the result up to date synchronously: a debounced or still running evaluation is
+     * replaced by one on the calling thread, so that navigation, export and commit see the latest
+     * text. zh-CN: 同步地把结果更新到最新: 去抖中或仍在工作线程上的求值被调用线程上的一次求值取代, 使导航 / 导出 / 提交看到最新文本.
+     */
     fun flush() {
-        if (!pending) return
+        if (!pending && !inFlight) return
         mainHandler.removeCallbacks(evaluateTask)
         pending = false
-        evaluate()
+        evaluate(sync = true)
     }
 
     fun next(): NodeInfo? = move(forward = true)
@@ -306,29 +332,58 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
      * Query filters first (so the keyword is the first explainer step), then the profile, then the
      * region. A query that does not compile leaves the tree unfiltered even when a profile is set,
      * so the user sees the error rather than a silently narrower result.
+     *
+     * The compile step runs here, on the main thread; the tree walk runs on [EXECUTOR] (roadmap
+     * D17, P6.1: a 10,000-node page takes about 100 ms on an API 33 mid-range phone) and comes back
+     * through [apply], which drops it when [sequence] has moved on. [sync] walks the tree right here
+     * instead and invalidates whatever the worker is doing.
      * zh-CN: 查询过滤器在前 (关键词成为解释器的第一步), 其后为配置, 最后为区域. 查询无法编译时即使设置了配置也不筛选, 让用户看到错误
-     * 而非悄然变窄的结果.
+     * 而非悄然变窄的结果. 编译在本方法 (主线程) 完成; 树遍历在 [EXECUTOR] 上进行 (Roadmap D17, P6.1: 10,000 节点页面在 API 33 中端机
+     * 约 100 ms), 经 [apply] 回到主线程, [sequence] 已前进时丢弃. [sync] 则在此处直接遍历, 并使工作线程上的遍历作废.
      */
-    private fun evaluate() {
+    private fun evaluate(sync: Boolean = false) {
         val started = SystemClock.elapsedRealtime()
+        val seq = ++sequence
+        latest.set(seq)
+        inFlight = false
         when (val compiled = query.compile()) {
             is InspectorQuery.Compiled.Filters -> {
                 error = null
                 keywordFilter = compiled.filters.firstOrNull() as? KeywordFilter
                 queryFilters = compiled.filters
-                filters = compiled.filters + profile.toFilters() + listOfNotNull(regionFilter())
-                match = TreeMatch.evaluate(InspectorNode(root), filters)
+                val filters = compiled.filters + profile.toFilters() + listOfNotNull(regionFilter())
+                this.filters = filters
+                val root = InspectorNode(root)
+                if (sync || filters.isEmpty()) {
+                    apply(TreeMatch.evaluate(root, filters), started, walkMillis = null)
+                } else {
+                    inFlight = true
+                    EXECUTOR.execute {
+                        if (latest.get() != seq) return@execute
+                        val walkStarted = SystemClock.elapsedRealtime()
+                        val match = TreeMatch.evaluate(root, filters)
+                        val walkMillis = SystemClock.elapsedRealtime() - walkStarted
+                        mainHandler.post { if (sequence == seq) apply(match, started, walkMillis) }
+                    }
+                }
             }
             is InspectorQuery.Compiled.Error -> {
                 error = compiled.error
                 queryFilters = emptyList()
                 filters = emptyList()
-                match = TreeMatch.unfiltered()
                 keywordFilter = null
+                apply(TreeMatch.unfiltered(), started, walkMillis = null)
             }
         }
+    }
+
+    /** Installs an evaluation result (main thread). zh-CN: 应用求值结果 (主线程). */
+    private fun apply(match: TreeMatch<InspectorNode>, started: Long, walkMillis: Long?) {
+        inFlight = false
+        this.match = match
         currentMatch?.let { if (!match.isMatched(InspectorNode(it))) currentMatch = null }
-        Log.d(TAG, "evaluate: ${match.count} matches, ${SystemClock.elapsedRealtime() - started} ms, query = $query, profile = ${profile.conditionCount} condition(s), region = $region")
+        val walk = if (walkMillis != null) ", walk $walkMillis ms on the worker" else ", walk on the main thread"
+        Log.d(TAG, "evaluate: ${match.count} matches, ${SystemClock.elapsedRealtime() - started} ms, query = $query, profile = ${profile.conditionCount} condition(s), region = $region$walk")
         notifyListeners()
     }
 
@@ -353,6 +408,15 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
         private const val TAG = "InspectorSearchSession"
 
         const val DEBOUNCE_MILLIS = 150L
+
+        /**
+         * One worker shared by all sessions, created on demand and gone after ten idle seconds; a
+         * single thread so that a walk superseded while queued is skipped instead of run in parallel.
+         * zh-CN: 全部会话共享的单个工作线程, 按需创建, 空闲十秒后退出; 单线程使排队期间被取代的遍历直接跳过而非并行执行.
+         */
+        private val EXECUTOR: Executor = ThreadPoolExecutor(0, 1, 10L, TimeUnit.SECONDS, LinkedBlockingQueue()) { runnable ->
+            Thread(runnable, "InspectorSearch").apply { isDaemon = true }
+        }
 
     }
 
