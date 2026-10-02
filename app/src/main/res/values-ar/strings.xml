@@ -1464,6 +1464,15 @@
     <string name="text_inspect_layout">فحص التصميم</string>
     <string name="text_inspect_layout_bounds">فحص حدود التصميم</string>
     <string name="text_inspect_layout_hierarchy">فحص التسلسل الهرمي للتخطيط</string>
+    <string name="text_inspector_collapse_search_bar">طي شريط البحث</string>
+    <string name="text_inspector_expand_search_bar">توسيع شريط البحث</string>
+    <string name="text_inspector_invalid_regex">تعبير نمطي غير صالح: %1$s</string>
+    <string name="text_inspector_next_match">التطابق التالي</string>
+    <string name="text_inspector_no_matching_nodes">لا توجد عقد مطابقة</string>
+    <string name="text_inspector_previous_match">التطابق السابق</string>
+    <string name="text_inspector_query_mode_unavailable">وضع الاستعلام هذا غير متاح بعد</string>
+    <string name="text_inspector_regex_mode">تعبير نمطي</string>
+    <string name="text_inspector_search_hint">البحث عن العقد</string>
     <string name="text_install">تثبيت</string>
     <string name="text_install_from_local_file">التثبيت من \"ملف محلي\"</string>
     <string name="text_install_from_official_plugin_library">التثبيت من \"مكتبة الاضافات الرسمية\"</string>

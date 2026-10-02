@@ -254,6 +254,7 @@
 * `新增` Three Stove Agent 插件中心管理與安裝, 啟用, 授權及相容性引導; 安裝精靈工具分類提供可選入口, 發行 APK 加入官方索引後可供安裝
 * `新增` Three Stove Agent 外掛可設定附加指令碼目錄, 宿主校驗允許範圍後儲存並在重新連線時恢復, 無效目錄不會取代已接受的設定
 * `新增` installer 模組, 用於安裝, 更新與解除安裝應用程式, 支援 Shizuku / Root 靜默操作, 並按插件能力啟用 Dhizuku 授權, notification 通知安裝及 setDefault 的 mode: 'persistent' 選項; Dhizuku 受裝置/工作資料擁有者政策限制 (需要 3-Setup Installer 插件) (參閱 專案文件 > [安裝器](https://docs.autojs6.com/#/installer))
+* `新增` 佈局分析的層次與範圍視窗頂部提供搜尋列, 按關鍵字或正規表示式比對控制項的 text / desc / id / className: 層次視窗只保留相符節點及其祖先並標示命中內容, 範圍視窗只繪製相符節點的邊框, 可在相符項之間前後跳轉, 搜尋列可收起為可拖曳的浮標, 在兩個視窗之間切換時保留查詢
 * `修復` 啟用 APK Inspector 後, 檔案管理器的安裝套件資訊入口被隱藏且無法從更多選單存取的問題
 * `修復` Three Stove Agent 呼叫線上模型失敗時遺失網絡, 身份驗證及回應錯誤類別的問題 (需要 Provider 插件支援)
 * `修復` assistant 合併工具選項時, 空 tools 物件導致預設關閉的工具組被啟用的問題

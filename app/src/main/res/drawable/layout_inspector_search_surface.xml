@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rounded surface of the inspector search bar and its collapsed pill. zh-CN: 搜索栏与其收起态浮标的圆角底面. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:shape="rectangle">
+    <solid android:color="@color/layout_inspector_search_surface" />
+    <corners android:radius="22dp" />
+</shape>

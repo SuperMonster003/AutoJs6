@@ -187,6 +187,8 @@
     <color name="layout_node_info_view_decoration_line">#1B212121</color>
     <color name="layout_hierarchy_window_background">#CCE2F1F8</color>
     <color name="layout_hierarchy_window_clicked_background">#BF90A4AE</color>
+    <color name="layout_inspector_search_surface">#F2FAFAFA</color>
+    <color name="layout_inspector_search_hint">#8A212121</color>
 
     <color name="sliding_up_panel_shadow_color">#99444444</color>
     <color name="color_selector_item_text">#DE111214</color>

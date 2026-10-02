@@ -24,6 +24,8 @@ import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsView
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoView
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchBar
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchSession
 import org.autojs.autojs.ui.widget.BubblePopupMenu
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ContextUtils.withHostConfiguration
@@ -47,6 +49,15 @@ abstract class LayoutFloatyWindow(
 
     /** True for a layout loaded from a file: there are no live windows to switch to or to save. zh-CN: 从文件读入的布局为 true: 没有可切换或可保存的实时窗口. */
     var isOffline = false
+
+    /**
+     * Search state shared by the inspector windows of one inspection (roadmap D5): created by the
+     * first window, handed to the next one on every bounds / hierarchy switch.
+     * zh-CN: 同一次布局分析的各窗口共享的搜索状态 (Roadmap D5): 由首个窗口创建, 范围 / 层次互切时交给下一个窗口.
+     */
+    var searchSession: InspectorSearchSession? = null
+
+    protected val serviceContext: Context get() = mServiceContext
 
     private val mMainHandler = Handler(Looper.getMainLooper())
 
@@ -105,6 +116,22 @@ abstract class LayoutFloatyWindow(
         // The service context follows the system's language and night mode; the host app's settings are wanted here.
         // zh-CN: service context 跟随系统的语言与夜间模式, 此处需要的是宿主应用的设置.
         mServiceContext = if (isServiceRelied) ContextThemeWrapper(floatyService.withHostConfiguration(), R.style.AppTheme) else context
+        if (searchSession == null) searchSession = InspectorSearchSession(capture.root)
+    }
+
+    protected fun requireSearchSession(): InspectorSearchSession = searchSession ?: InspectorSearchSession(capture.root).also { searchSession = it }
+
+    /**
+     * A search bar bound to the shared session; [defaultExpanded] is the initial state of this
+     * window kind (roadmap D9) and decides whether the back key collapses an empty bar.
+     * zh-CN: 绑定到共享会话的搜索栏; [defaultExpanded] 为该类窗口的初始状态 (Roadmap D9), 并决定返回键是否收起空的搜索栏.
+     */
+    protected fun createSearchBar(defaultExpanded: Boolean, expanded: Boolean, host: InspectorSearchBar.Host): InspectorSearchBar {
+        return InspectorSearchBar(ContextThemeWrapper(mServiceContext, R.style.AppTheme)).apply {
+            this.host = host
+            collapsesOnBack = !defaultExpanded
+            bind(requireSearchSession(), expanded)
+        }
     }
 
     fun setLayoutSelectedNode(selectedNode: NodeInfo?) {
@@ -182,6 +209,7 @@ abstract class LayoutFloatyWindow(
             .apply {
                 setLayoutSelectedNode(mLayoutSelectedNode)
                 isOffline = this@LayoutFloatyWindow.isOffline
+                searchSession = this@LayoutFloatyWindow.searchSession
             }
             .let { FloatyService.addWindow(it) }
     }
@@ -192,6 +220,7 @@ abstract class LayoutFloatyWindow(
             .apply {
                 setLayoutSelectedNode(mLayoutSelectedNode)
                 isOffline = this@LayoutFloatyWindow.isOffline
+                searchSession = this@LayoutFloatyWindow.searchSession
             }
             .let { FloatyService.addWindow(it) }
     }
@@ -259,6 +288,7 @@ abstract class LayoutFloatyWindow(
             builder.itemList[position].window.root?.let {
                 dialog.dismiss()
                 capture.root = it
+                searchSession?.setRoot(it)
                 mLayoutSelectedNode = null
                 showLayoutBounds()
             }

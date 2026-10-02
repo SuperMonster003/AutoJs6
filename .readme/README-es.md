@@ -71,7 +71,7 @@ La siguiente tabla enumera algunos proyectos relacionados con Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Datos actualizados el 1 de October de 2026.
+Datos actualizados el 2 de October de 2026.
 
 Las entradas de datos están ordenadas en orden descendente por `última actividad`.
 
@@ -416,6 +416,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Gestión de Three Stove Agent en el centro de complementos con ayuda de instalación, activación, autorización y compatibilidad; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial
 * `Nuevo` El plugin Three Stove Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
 * `Nuevo` Módulo installer para instalar, actualizar y desinstalar aplicaciones, con operaciones silenciosas Shizuku / Root y comprobación de capacidades para Dhizuku, la instalación notification y la opción mode: 'persistent' de setDefault; Dhizuku sigue sujeto a las políticas del propietario del dispositivo o del perfil (requiere el plugin 3-Setup Installer) (véase Documentación del proyecto > [Installer](https://docs.autojs6.com/#/installer))
+* `Nuevo` Barra de búsqueda en la parte superior de las ventanas de análisis de jerarquía y de límites de diseño, que filtra nodos por palabra clave o expresión regular sobre text / desc / id / className: la ventana de jerarquía conserva solo los nodos coincidentes y sus ancestros y resalta la coincidencia, la ventana de límites dibuja solo los nodos coincidentes, las coincidencias se recorren hacia adelante y atrás, la barra se contrae en una píldora arrastrable y la consulta se mantiene al cambiar entre ambas ventanas
 * `Corrección` Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información
 * `Corrección` Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
 * `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío
@@ -1108,7 +1109,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 1 de October de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
+Hasta el 2 de October de 2026, AutoJs6 soporta hasta la versión `26` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

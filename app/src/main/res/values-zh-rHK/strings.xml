@@ -1459,6 +1459,15 @@
     <string name="text_inspect_layout">佈局分析</string>
     <string name="text_inspect_layout_bounds">佈局範圍分析</string>
     <string name="text_inspect_layout_hierarchy">佈局層次分析</string>
+    <string name="text_inspector_collapse_search_bar">收起搜尋列</string>
+    <string name="text_inspector_expand_search_bar">展開搜尋列</string>
+    <string name="text_inspector_invalid_regex">正規表示式無效: %1$s</string>
+    <string name="text_inspector_next_match">下一個相符項</string>
+    <string name="text_inspector_no_matching_nodes">沒有相符的控制項</string>
+    <string name="text_inspector_previous_match">上一個相符項</string>
+    <string name="text_inspector_query_mode_unavailable">此查詢模式尚未開放</string>
+    <string name="text_inspector_regex_mode">正規表示式</string>
+    <string name="text_inspector_search_hint">搜尋控制項</string>
     <string name="text_install">安裝</string>
     <string name="text_install_from_local_file">從 \"本地文件\" 安裝</string>
     <string name="text_install_from_official_plugin_library">從 \"官方插件庫\" 安裝</string>

@@ -1459,6 +1459,15 @@
     <string name="text_inspect_layout">Inspect layout</string>
     <string name="text_inspect_layout_bounds">Inspect layout bounds</string>
     <string name="text_inspect_layout_hierarchy">Inspect layout hierarchy</string>
+    <string name="text_inspector_collapse_search_bar">Collapse search bar</string>
+    <string name="text_inspector_expand_search_bar">Expand search bar</string>
+    <string name="text_inspector_invalid_regex">Invalid regular expression: %1$s</string>
+    <string name="text_inspector_next_match">Next match</string>
+    <string name="text_inspector_no_matching_nodes">No matching nodes</string>
+    <string name="text_inspector_previous_match">Previous match</string>
+    <string name="text_inspector_query_mode_unavailable">This query mode is not available yet</string>
+    <string name="text_inspector_regex_mode">Regular expression</string>
+    <string name="text_inspector_search_hint">Search nodes</string>
     <string name="text_install">Install</string>
     <string name="text_install_from_local_file">Install from \"Local File\"</string>
     <string name="text_install_from_official_plugin_library">Install from \"Official Plugin Library\"</string>

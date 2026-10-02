@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 10 月 1 日 に更新されました.
+データは 2026 年 10 月 2 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -416,6 +416,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` プラグインセンターでの Three Stove Agent 管理とインストール, 有効化, 許可, 互換性の案内; 公開 APK が公式インデックスに登録されると, インストールウィザードのツール分類から任意で選択可能
 * `新機能` Three Stove Agent プラグインで追加スクリプトフォルダーを設定でき, ホストが範囲を検証して保存し再接続時に復元する. 無効なフォルダーでは承認済み設定を維持する
 * `新機能` アプリのインストール, 更新, アンインストールを行う installer モジュール. Shizuku / Root のサイレント操作に対応し, プラグインの機能を確認して Dhizuku 認可, notification インストール, setDefault の mode: 'persistent' オプションを使用. Dhizuku はデバイス/プロファイル所有者のポリシーによる制限を受ける (3-Setup Installer プラグインが必要) (参照: プロジェクトドキュメント > [Installer](https://docs.autojs6.com/#/installer))
+* `新機能` レイアウト階層とレイアウト範囲の解析ウィンドウ上部に検索バーを配置し, キーワードまたは正規表現で text / desc / id / className を照合: 階層ウィンドウは一致ノードとその祖先のみを残して一致箇所を強調表示し, 範囲ウィンドウは一致ノードの枠のみを描画, 一致項目間を前後に移動でき, 検索バーはドラッグ可能なピルに折りたため, 2 つのウィンドウを切り替えてもクエリは保持される
 * `修正` APK Inspector 有効時にファイルマネージャーの情報ボタンが隠れ, インストールパッケージ情報を開けなくなる問題
 * `修正` Three Stove Agent のオンラインモデル呼び出し失敗時にネットワーク, 認証, 応答のエラー分類が失われる問題 (Provider プラグインの対応が必要)
 * `修正` assistant のツール設定の統合時, 空の tools オブジェクトによって既定で無効なツールグループが有効になる問題
@@ -1108,7 +1109,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 10 月 1 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 10 月 2 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

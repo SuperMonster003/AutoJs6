@@ -1462,6 +1462,15 @@
     <string name="text_inspect_layout">Inspeccionar el diseño</string>
     <string name="text_inspect_layout_bounds">Inspeccionar los límites del diseño</string>
     <string name="text_inspect_layout_hierarchy">Inspeccionar la jerarquía del diseño</string>
+    <string name="text_inspector_collapse_search_bar">Contraer la barra de búsqueda</string>
+    <string name="text_inspector_expand_search_bar">Expandir la barra de búsqueda</string>
+    <string name="text_inspector_invalid_regex">Expresión regular no válida: %1$s</string>
+    <string name="text_inspector_next_match">Siguiente coincidencia</string>
+    <string name="text_inspector_no_matching_nodes">No hay nodos coincidentes</string>
+    <string name="text_inspector_previous_match">Coincidencia anterior</string>
+    <string name="text_inspector_query_mode_unavailable">Este modo de consulta aún no está disponible</string>
+    <string name="text_inspector_regex_mode">Expresión regular</string>
+    <string name="text_inspector_search_hint">Buscar nodos</string>
     <string name="text_install">Instalar</string>
     <string name="text_install_from_local_file">Instalar desde \"Archivo local\"</string>
     <string name="text_install_from_official_plugin_library">Instalar desde \"Biblioteca oficial de plugins\"</string>

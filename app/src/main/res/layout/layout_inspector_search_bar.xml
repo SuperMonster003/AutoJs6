@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Expanded search bar of the layout inspector windows (roadmap P1.2); hosted by InspectorSearchBar. -->
+<!-- zh-CN: 布局分析窗口展开态的搜索栏 (Roadmap P1.2); 由 InspectorSearchBar 承载. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/bar"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_margin="8dp"
+        android:background="@drawable/layout_inspector_search_surface"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp">
+
+    <ImageButton
+            android:id="@+id/collapse"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/text_inspector_collapse_search_bar"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_search_black_48dp"
+            android:tint="@color/day_night" />
+
+    <EditText
+            android:id="@+id/query"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/text_inspector_search_hint"
+            android:imeOptions="actionSearch|flagNoExtractUi"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLines="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:singleLine="true"
+            android:textColor="@color/day_night"
+            android:textColorHint="@color/layout_inspector_search_hint"
+            android:textSize="14sp"
+            tools:ignore="LabelFor" />
+
+    <ImageButton
+            android:id="@+id/regex"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/text_inspector_regex_mode"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_regex"
+            android:tint="@color/day_night" />
+
+    <TextView
+            android:id="@+id/count"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:minWidth="36dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:textColor="@color/day_night"
+            android:textSize="12sp"
+            tools:text="3/17" />
+
+    <ImageButton
+            android:id="@+id/previous"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/text_inspector_previous_match"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_expand_less_black_48dp"
+            android:tint="@color/day_night" />
+
+    <ImageButton
+            android:id="@+id/next"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/text_inspector_next_match"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_expand_more_black_48dp"
+            android:tint="@color/day_night" />
+
+</LinearLayout>

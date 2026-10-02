@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 10 月 1 日.
+数据更新于 2026 年 10 月 2 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -285,6 +285,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Three Stove Agent 插件中心管理与安装, 激活, 授权及兼容性引导; 安装向导工具分类提供可选入口, 发行 APK 进入官方索引后可供安装
 * `新增` Three Stove Agent 插件可配置附加脚本目录, 宿主校验允许范围后保存并在重连时恢复, 无效目录不会替换已接受的配置
 * `新增` installer 模块, 用于安装, 更新与卸载应用, 支持 Shizuku / Root 静默操作, 并按插件能力启用 Dhizuku 授权, notification 通知安装和 setDefault 的 mode: 'persistent' 选项; Dhizuku 受设备/工作资料所有者策略限制 (需要 3-Setup Installer 插件) (参阅 项目文档 > [安装器](https://docs.autojs6.com/#/installer))
+* `新增` 布局分析的层次与范围窗口顶部提供搜索栏, 按关键词或正则表达式匹配控件的 text / desc / id / className: 层次窗口只保留匹配节点及其祖先并高亮命中内容, 范围窗口只绘制匹配节点的边框, 可在匹配项之间前后跳转, 搜索栏可收起为可拖动的浮标, 在两个窗口之间切换时保留查询
 * `修复` 启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题
 * `修复` Three Stove Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
 * `修复` assistant 合并工具选项时, 空 tools 对象导致默认关闭的工具组被启用的问题
@@ -821,7 +822,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 10 月 1 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 10 月 2 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

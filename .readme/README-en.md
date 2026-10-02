@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Oct 1, 2026.
+Data updated on Oct 2, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -416,6 +416,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Three Stove Agent management in Plugin Center with installation, activation, authorization and compatibility guidance; optional Tools entry in the installation wizard when a published APK is present in the official index
 * `Feature` Three Stove Agent plugin settings can propose extra script folders, which the host validates, saves and restores on reconnect; invalid folders preserve the accepted configuration
 * `Feature` installer module for installing, updating and uninstalling apps, with silent Shizuku / Root operations and capability checks for Dhizuku authorization, notification installation and the mode: 'persistent' option of setDefault; Dhizuku remains subject to device/profile owner policies (requires the 3-Setup Installer plugin) (see Project documentation > [Installer](https://docs.autojs6.com/#/installer))
+* `Feature` Search bar at the top of the layout hierarchy and layout bounds inspector windows, matching nodes by keyword or regular expression over text / desc / id / className: the hierarchy window keeps only matching nodes and their ancestors and highlights the hit, the bounds window outlines only matching nodes, matches can be stepped through back and forth, the bar collapses into a draggable pill, and the query is kept when switching between the two windows
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
@@ -1108,7 +1109,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Oct 1, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Oct 2, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

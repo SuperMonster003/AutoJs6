@@ -1462,6 +1462,15 @@
     <string name="text_inspect_layout">Проверить макет</string>
     <string name="text_inspect_layout_bounds">Осмотр границ макета</string>
     <string name="text_inspect_layout_hierarchy">Проверить иерархию макета</string>
+    <string name="text_inspector_collapse_search_bar">Свернуть панель поиска</string>
+    <string name="text_inspector_expand_search_bar">Развернуть панель поиска</string>
+    <string name="text_inspector_invalid_regex">Недопустимое регулярное выражение: %1$s</string>
+    <string name="text_inspector_next_match">Следующее совпадение</string>
+    <string name="text_inspector_no_matching_nodes">Нет подходящих узлов</string>
+    <string name="text_inspector_previous_match">Предыдущее совпадение</string>
+    <string name="text_inspector_query_mode_unavailable">Этот режим запроса пока недоступен</string>
+    <string name="text_inspector_regex_mode">Регулярное выражение</string>
+    <string name="text_inspector_search_hint">Поиск узлов</string>
     <string name="text_install">Установить</string>
     <string name="text_install_from_local_file">Установить из \"Локального файла\"</string>
     <string name="text_install_from_official_plugin_library">Установить из \"Официальной библиотеки плагинов\"</string>

@@ -1463,6 +1463,15 @@
     <string name="text_inspect_layout">レイアウトの検査</string>
     <string name="text_inspect_layout_bounds">レイアウト境界の検査</string>
     <string name="text_inspect_layout_hierarchy">レイアウト階層の検査</string>
+    <string name="text_inspector_collapse_search_bar">検索バーを折りたたむ</string>
+    <string name="text_inspector_expand_search_bar">検索バーを展開</string>
+    <string name="text_inspector_invalid_regex">正規表現が無効です: %1$s</string>
+    <string name="text_inspector_next_match">次の一致</string>
+    <string name="text_inspector_no_matching_nodes">一致するノードがありません</string>
+    <string name="text_inspector_previous_match">前の一致</string>
+    <string name="text_inspector_query_mode_unavailable">このクエリモードはまだ利用できません</string>
+    <string name="text_inspector_regex_mode">正規表現</string>
+    <string name="text_inspector_search_hint">ノードを検索</string>
     <string name="text_install">インストール</string>
     <string name="text_install_from_local_file">\"ローカルファイル\" からインストール</string>
     <string name="text_install_from_official_plugin_library">\"公式プラグインライブラリ\" からインストール</string>

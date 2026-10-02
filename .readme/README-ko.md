@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 10 월 1 일.
+데이터 갱신일: 2026 년 10 월 2 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -416,6 +416,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 플러그인 센터의 Three Stove Agent 관리 및 설치, 활성화, 승인, 호환성 안내; 출시 APK가 공식 인덱스에 등록되면 설치 마법사 도구 분류에서 선택 가능
 * `추가` Three Stove Agent 플러그인에서 추가 스크립트 폴더를 설정하면 호스트가 범위를 검증하고 저장하여 재연결 시 복원하며, 유효하지 않은 폴더는 승인된 설정을 변경하지 않음
 * `추가` 앱 설치, 업데이트 및 제거를 위한 installer 모듈. Shizuku / Root 무음 작업과 플러그인 기능 확인을 통한 Dhizuku 승인, notification 설치 및 setDefault의 mode: 'persistent' 옵션 지원. Dhizuku에는 기기/프로필 소유자 정책의 제한이 적용됨 (3-Setup Installer 플러그인 필요) (프로젝트 문서 > [Installer](https://docs.autojs6.com/#/installer) 참조)
+* `추가` 레이아웃 계층 및 레이아웃 범위 분석 창 상단에 검색창을 제공하여 키워드 또는 정규 표현식으로 text / desc / id / className 을 일치시킴: 계층 창은 일치 노드와 그 조상만 남기고 일치 부분을 강조하며, 범위 창은 일치 노드의 테두리만 그리고, 일치 항목 사이를 앞뒤로 이동할 수 있으며, 검색창은 드래그 가능한 알약 모양으로 접히고, 두 창을 전환해도 쿼리가 유지됨
 * `수정` APK Inspector 사용 시 파일 관리자의 정보 버튼이 숨겨져 설치 패키지 정보를 열 수 없는 문제
 * `수정` Three Stove Agent 온라인 모델 호출 실패 시 네트워크, 인증 및 응답 오류 분류가 누락되는 문제 (Provider 플러그인 지원 필요)
 * `수정` assistant 도구 옵션 병합 시 기본 tools 객체가 비어 있으면 기본적으로 꺼진 도구 그룹이 켜지는 문제
@@ -1108,7 +1109,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 10 월 1 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 10 월 2 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

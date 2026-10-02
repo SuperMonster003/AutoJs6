@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 1 October 2026.
+تم تحديث البيانات في 2 October 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -416,6 +416,7 @@
 * `إضافة جديدة` إدارة Three Stove Agent في مركز الإضافات مع إرشادات التثبيت والتفعيل والإذن والتوافق; مدخل اختياري ضمن الأدوات في معالج التثبيت عند وجود APK منشور في الفهرس الرسمي
 * `إضافة جديدة` تتيح إعدادات إضافة Three Stove Agent اقتراح مجلدات سكربتات إضافية يتحقق منها المضيف ويحفظها ويستعيدها عند إعادة الاتصال; تبقي المجلدات غير الصالحة الإعداد المعتمد
 * `إضافة جديدة` وحدة installer لتثبيت التطبيقات وتحديثها وإزالتها, مع عمليات Shizuku / Root الصامتة والتحقق من الإمكانات قبل استخدام تفويض Dhizuku وتثبيت notification وخيار mode: 'persistent' في setDefault; تظل Dhizuku خاضعة لسياسات مالك الجهاز أو الملف الشخصي (يتطلب ملحق 3-Setup Installer) (راجع توثيق المشروع > [Installer](https://docs.autojs6.com/#/installer))
+* `إضافة جديدة` شريط بحث أعلى نافذتي تحليل التسلسل الهرمي وحدود التخطيط, يطابق العقد بكلمة مفتاحية أو تعبير نمطي عبر text / desc / id / className: تُبقي نافذة التسلسل الهرمي على العقد المطابقة وأسلافها فقط مع إبراز موضع التطابق, وترسم نافذة الحدود إطارات العقد المطابقة فقط, ويمكن التنقل بين التطابقات للأمام والخلف, ويمكن طي الشريط إلى زر قابل للسحب, ويُحتفظ بالاستعلام عند التبديل بين النافذتين
 * `تصليح` تعذر فتح معلومات حزم التثبيت من مدير الملفات عند إخفاء زر المعلومات بعد تفعيل APK Inspector
 * `تصليح` فقدان فئات أخطاء الشبكة والمصادقة والاستجابة عند فشل استدعاءات نماذج Three Stove Agent عبر الإنترنت (يتطلب دعم إضافة Provider)
 * `تصليح` لم يعد دمج خيارات أدوات assistant يفعل المجموعات المعطلة افتراضيا عندما يكون كائن tools الأساسي فارغا
@@ -1108,7 +1109,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 1 October 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 2 October 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

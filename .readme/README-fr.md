@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 1 October 2026.
+Données mises à jour le 2 October 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -416,6 +416,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Gestion de Three Stove Agent dans le centre de plugins avec aide pour l'installation, l'activation, les autorisations et la compatibilité; entrée facultative dans les Outils de l'assistant lorsque l'APK publié figure dans l'index officiel
 * `Fonctionnalité` Les paramètres du plugin Three Stove Agent proposent des dossiers de scripts supplémentaires, validés, enregistrés et restaurés à la reconnexion par l'hôte; un dossier invalide conserve la configuration acceptée
 * `Fonctionnalité` Module installer pour installer, mettre à jour et désinstaller des applications, avec opérations silencieuses Shizuku / Root et vérification des capacités pour Dhizuku, l'installation notification et l'option mode: 'persistent' de setDefault; Dhizuku reste soumis aux règles du propriétaire de l'appareil ou du profil (nécessite le plugin 3-Setup Installer) (voir Documentation du projet > [Installer](https://docs.autojs6.com/#/installer))
+* `Fonctionnalité` Barre de recherche en haut des fenêtres d'analyse de la hiérarchie et des limites de mise en page, qui filtre les nœuds par mot-clé ou expression régulière sur text / desc / id / className : la fenêtre de hiérarchie ne conserve que les nœuds correspondants et leurs ancêtres en surlignant la correspondance, la fenêtre des limites ne trace que les nœuds correspondants, les correspondances peuvent être parcourues dans les deux sens, la barre se replie en une pastille déplaçable et la requête est conservée lors du passage d'une fenêtre à l'autre
 * `Correction` Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information
 * `Correction` Les échecs des appels aux modèles en ligne d'Three Stove Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)
 * `Correction` La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide
@@ -1108,7 +1109,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 1 October 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 2 October 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

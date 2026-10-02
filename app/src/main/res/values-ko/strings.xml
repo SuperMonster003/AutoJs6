@@ -1464,6 +1464,15 @@
     <string name="text_inspect_layout">레이아웃을 검사하십시오</string>
     <string name="text_inspect_layout_bounds">레이아웃 경계를 검사하십시오</string>
     <string name="text_inspect_layout_hierarchy">레이아웃 계층 구조를 검사하십시오</string>
+    <string name="text_inspector_collapse_search_bar">검색창 접기</string>
+    <string name="text_inspector_expand_search_bar">검색창 펼치기</string>
+    <string name="text_inspector_invalid_regex">잘못된 정규 표현식: %1$s</string>
+    <string name="text_inspector_next_match">다음 일치 항목</string>
+    <string name="text_inspector_no_matching_nodes">일치하는 노드가 없습니다</string>
+    <string name="text_inspector_previous_match">이전 일치 항목</string>
+    <string name="text_inspector_query_mode_unavailable">이 쿼리 모드는 아직 사용할 수 없습니다</string>
+    <string name="text_inspector_regex_mode">정규 표현식</string>
+    <string name="text_inspector_search_hint">노드 검색</string>
     <string name="text_install">설치</string>
     <string name="text_install_from_local_file">\"로컬 파일\"에서 설치</string>
     <string name="text_install_from_official_plugin_library">\"공식 플러그인 라이브러리\" 에서 설치</string>

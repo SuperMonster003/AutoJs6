@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import org.autojs.autojs.core.accessibility.NodeInfo
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorMatchView
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.util.Collections
@@ -40,6 +41,19 @@ open class LayoutBoundsView : View {
 
     var statusBarHeight = 0
         protected set
+
+    /**
+     * The active search (roadmap D4): only the nodes it matches are drawn and hit-tested; null or an
+     * unfiltered match shows every node. Hidden nodes stay hidden either way.
+     * zh-CN: 当前搜索 (Roadmap D4): 只绘制并点选其匹配的节点; null 或无筛选的匹配结果显示全部节点. 被隐藏的节点无论如何都不显示.
+     */
+    var match: InspectorMatchView? = null
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    private fun isShown(node: NodeInfo): Boolean = !node.hidden && match?.isMatched(node) != false
 
     constructor(context: Context) : super(context)
 
@@ -115,13 +129,20 @@ open class LayoutBoundsView : View {
 
     private fun draw(canvas: Canvas, node: NodeInfo?) {
         if (node == null) return
-        if (!node.hidden) {
+        if (isShown(node)) {
             drawRect(canvas, node.boundsInScreen, statusBarHeight, boundsPaint)
         }
         for (child in node.children) {
             draw(canvas, child)
         }
     }
+    /**
+     * Every event is consumed: the view claims the gesture on ACTION_DOWN so that, when it is nested
+     * in a container (the inspector window puts the search bar over it), the later ACTION_UP that
+     * opens the node menu is still delivered to it.
+     * zh-CN: 消费全部事件: 视图在 ACTION_DOWN 时认领手势, 这样当它嵌套在容器中 (分析窗口把搜索栏叠在其上) 时, 之后打开节点菜单的
+     * ACTION_UP 仍会送达本视图.
+     */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (mRootNode != null) {
@@ -129,9 +150,8 @@ open class LayoutBoundsView : View {
         }
         if (event.action == MotionEvent.ACTION_UP && mTouchedNode != null) {
             onNodeInfoClick(mTouchedNode!!)
-            return true
         }
-        return super.onTouchEvent(event)
+        return true
     }
 
     private fun onNodeInfoClick(nodeInfo: NodeInfo) {
@@ -149,7 +169,7 @@ open class LayoutBoundsView : View {
     private fun findNodeAt(node: NodeInfo, x: Int, y: Int, list: MutableList<NodeInfo>) {
         for (child in node.children) {
             if (child.boundsInScreen.contains(x, y)) {
-                if (!child.hidden) {
+                if (isShown(child)) {
                     list.add(child)
                 }
                 findNodeAt(child, x, y, list)
