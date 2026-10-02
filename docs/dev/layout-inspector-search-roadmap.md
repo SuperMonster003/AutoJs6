@@ -40,6 +40,7 @@
 | D18 | 类名预设按简化类名后缀匹配 (Q5 拍板, 2026-10-02) | 预设 = 后缀模式集合 + 显式排除, 匹配对象为去掉包名的简化类名: 按钮 (`*Button`), 文本 (`*TextView`, 排除 `*EditText`), 输入 (`*EditText`, `*AutoCompleteTextView`), 图片 (`*ImageView`, 排除 `*ImageButton`), 复选与开关 (`*CheckBox`, `*Switch*`, `*RadioButton`, `*ToggleButton`), 列表与滚动 (`*RecyclerView`, `*ListView`, `*ScrollView`, `*ViewPager*`, `*GridView`), 容器 (`*Layout`, `*ViewGroup`, `*Container`). 规则表位于引擎包, 可单测; 多个预设之间为 OR. |
 | D20 | 附录 A 其余待决事项全部采用建议方案 (Q2-Q4, Q6, Q7 拍板, 2026-10-02) | Q2: 选择器模式维持 D12 自研解析器, 不以 Rhino 求值 (P5 已按此落地); Q3: 关键词模式维持 text / desc / id / className 四项; Q4: 不向 MCP Server 插件暴露搜索能力; Q6: 层次窗口隐藏 `hidden` 节点一事不在本 Roadmap 处理, 另行记录为 improvement; Q7: 搜索栏限制最大宽度并居中 (P1.5 已按此落地, `InspectorSearchBar` 的 `maxBarWidth`). |
 | D19 | 字段模式比较运算经注册表新增 `min*` / `max*` 属性 (Q1 拍板, 2026-10-02) | P4 为选择器注册表新增 `minDepth` / `maxDepth` / `minChildCount` / `maxChildCount` / `minIndexInParent` / `maxIndexInParent`, 字段模式写法为 `minDepth=3`, 脚本 `select()` 与链式选择器同步可用; 作为脚本公开 API 变更, 该阶段必须同步文档 / d.ts / Ace 声明三个关联仓库. |
+| D21 | 浮窗外观与节点信息交互追加需求 (2026-10-02) | 所有布局分析浮窗按背景调整主题色对比度; 节点多选用主题色背景替代复选框并保持行高, 按钮为 "设置 / 返回 / 复制"; 复制方式记忆为 "总是询问 / 复制对象选择器 / 复制链式选择器", 默认为询问; 搜索栏模式及相邻图标增大. 属于恢复 P6.3 时追加的界面任务, 不改变搜索语法和脚本 API. 提交 `3316bd49f3`. |
 
 ---
 
@@ -134,7 +135,7 @@
 
 - [x] P6.1 性能: 用 `FakeUiNode` 构造 10,000 节点合成树的 JVM 基准 (`TreeMatchBenchmarkTest`, 仅记录耗时不断言), 与真机复杂页面 (如系统设置 / 浏览器) 的 `Log.d` 耗时对照; 超出 D17 预算则迁至后台线程 (序号丢弃过期结果) 并更新 D17. 证据 E3: 提交 `daaf12413f`. JVM 基准 `TreeMatchBenchmarkTest` (10,000 节点, 深度 6, 3 次预热后 7 次取中位数, 开发机): 先序遍历 0.5 ms, 关键词 3.6 ms, 关键词正则 5.9 ms, 字段 3.1 ms, 选择器 2.6 ms, 11 个过滤器的配置 2.2 ms, 关键词 + 配置 3.2 ms, 候选扫描 3.8 ms. 真机 (Redmi 22120RN86C, API 33, 改动前主线程求值, `InspectorSearchSession` 的 evaluate 日志): 系统设置首页 126 节点 2-18 ms; 原生浏览器中的 Wikipedia 条目 681 节点 3-17 ms (首次 44 ms); 原生浏览器中 2,500 行 HTML 页面 5,883 节点: 关键词 35-57 ms, 关键词正则 78-103 ms, 字段 11-55 ms, 选择器 13-25 ms. 正则关键词突破 50 ms 预算, 故按 D17 约定把树遍历迁至工作线程 (查询仍在主线程编译, 结果按序号回主线程应用, `flush()` 同步兜底, 单个共享工作线程空闲 10 s 退出); 改动后同一页面遍历 15-107 ms 全部在工作线程 (日志尾部 `walk N ms on the worker`), 系统设置首页 0-1 ms, 主线程只承担编译与应用. 备注: 10,000 个 View 的脚本 UI 页面 (与无障碍服务同进程) 捕获到的树只有 1 个节点, 原因未查, 真机基准改用浏览器页面; MIUI 浏览器拒绝 file:// 且 Windows 防火墙拦截局域网访问, 页面经 `adb reverse tcp:8765` 取自 PC 上的 `python -m http.server`; AOSP HTML Viewer 的 WebView 不暴露 DOM 节点. 脚本 `build/inspector-smoke/p6_bench.sh settings|browser|http` + `big_tree.html`.
 - [x] P6.2 架构说明 `docs/dev/layout-inspector-search-architecture.md`: 引擎分层 (`InspectorNode` -> `Selector` -> `TreeMatch`), 会话状态与窗口生命周期, 配置存储格式 (JSON 结构与兼容规则), 三种模式的语法入口与错误渲染, 与脚本选择器引擎的依赖面 (只读复用的类清单), 可测性. 证据 E0: 提交 `1aefdd45a6` (纯文档, 含 P6.1 后的工作线程遍历与 D17 修订).
-- [ ] P6.3 全机队冒烟 (附录 B 全部): AVD API 24, Sony G8441 API 28, Sony XQ-AT72 API 31, Redmi 22120RN86C / Sony XQ-DQ72 API 33, Xiaomi Pad 23046RP50C API 35; 记录 IME 行为差异与悬浮窗焦点问题.
+- [ ] P6.3 全机队冒烟 (附录 B 全部): AVD API 24, Sony G8441 API 28, Sony XQ-AT72 API 31, Redmi 22120RN86C / Sony XQ-DQ72 API 33, Xiaomi Pad 23046RP50C API 35; 记录 IME 行为差异与悬浮窗焦点问题. 进展 E3 (2026-10-02): 五台完成主流程复跑及实时 / 离线区域增补, 六台的新界面设备测试 18/18 通过; API 28 本轮实时捕获仍受系统失效服务连接阻挡, 未记作全机队通过. 详见 [设备验证记录](layout-inspector-search-device-validation.md), 含旧脚本误判与剩余验收项.
 - [ ] P6.4 用户文档: 文档项目 (`D:/webstorm-projects/AutoJs6-Documentation`) 目前没有布局分析专页 (只在 `api/app.md` 提及), 本阶段评估是否新增 "布局分析" 使用页 (含搜索语法速查); 若新增则按 `AGENTS.md` 的文档生成流程同步. 可选, 由维护者拍板.
 
 ---
