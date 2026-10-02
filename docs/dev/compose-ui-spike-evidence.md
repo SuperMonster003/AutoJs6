@@ -1,7 +1,7 @@
 # P0.2 in-process loading evidence
 
 Date: 2026-10-02. Scope: the P0 draft and a dedicated debug host, not the frozen V1 contract or
-the script-facing `compose` API. P0.3 / Q1 remains a separate decision.
+the script-facing `compose` API. P0.3 / Q1 was decided on 2026-10-02; the historical P0.2 results below remain unchanged.
 
 ## Sources and isolation
 
@@ -129,9 +129,9 @@ or clear a user's installed host to run this probe.
 
 ## P0.3 handoff and limits
 
-Q1 recommendation: upgrade host shared dependencies to the verified debug versions, then run host
-regressions before promoting the loader. Do not enable the isolated-loader fallback without a new
-experiment. P0.3 still needs the maintainer decision and retirement/promotion of the debug entry.
+Q1(b) was explicitly approved by the maintainer on 2026-10-02. P0.3 applies the verified versions
+to all host variants and removes the temporary host Activity. The in-process parent-first design
+is retained; the isolated-loader fallback is not enabled. See the P0.3 addendum below.
 P1 must replace the draft API, pin a real minimum host build, negotiate the fingerprint, cache
 loaders, handle package updates, and add host-release R8 rules for every shared class boundary.
 The current spike is not a production error-containment or script-session implementation.
@@ -143,3 +143,97 @@ These remain later gates; only the two devices above are used as new functional 
 Public references: [PathClassLoader constructors](https://developer.android.com/reference/dalvik/system/PathClassLoader)
 and [Compose in Views lifecycle disposal](https://developer.android.com/develop/ui/compose/migrate/interoperability-apis/compose-in-views).
 The results and R8 exceptions above are local observations, not conclusions inferred from those documents.
+
+Local host commit: `21dff98f26` on `spike/compose-ui-p0`. The plugin change is the commit containing
+this evidence (VERSION_BUILD=7). All four temporary packages were removed from both test devices;
+the original host builds remain (Redmi 5310, AVD 5304). The AVD started by this session was stopped.
+
+
+## P0.3 addendum: Q1(b) accepted and applied (2026-10-02)
+
+The maintainer explicitly approved Q1(b). The host version catalog now declares lifecycle 2.9.4,
+savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0. They are ordinary implementation dependencies
+for app/inrt debug/release, rather than debug-only additions. The 51-component canonical lock
+fingerprint remains `f3042acc624d499feea9907a20257b62debaa6c523f40bfce19b084274334576`.
+Canonical records are sorted by Maven coordinate (before `=`), not by the complete record string.
+
+`app/compose-shared-classpath.gradle.kts` resolves all four runtime classpaths and rejects drift,
+Compose implementations and the draft API in host APK dependencies. `ComposeUiSharedClasspathTest`
+checks the resolved snapshots against the plugin fingerprint and guards removal of the temporary
+host entry. No dependency on a sibling repository is introduced into either build.
+
+The temporary `ComposeSpikeActivity` has been removed. The draft API is now an androidTestImplementation;
+its loading helpers live only under androidTest. `ComposeSpikeSession` uses the existing host
+AboutActivity for the counter, and closes on its real lifecycle. RawWindow continues to use the
+host service. The test fixture refuses to alter enable preferences unless the target has the
+explicit `.compose.spike` application ID. The `-PcomposeUiSpike=true` property only provides a
+separate test installation; it no longer adds a development UI entry to the host.
+
+The fixture uses an existing target Activity because synchronous instrumentation launch requires
+an Activity in the instrumented process. See the [Android Instrumentation implementation](https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/Instrumentation.java).
+The test loader's parent supplies the draft contract from instrumentation and delegates shared
+AndroidX/Kotlin types to the target. P0.2 remains the historical proof with a contract packaged in
+the debug host; P1 must implement the frozen V1 contract in the production host.
+
+D10 stays parent-first with an APK native path chosen from the process ABI. D11 preserves the
+host theme, window and services, and delegates resources/assets/configuration to the plugin.
+Floating windows must provide lifecycle/saved-state owners before attachment and destroy them
+on close. The P0.2 R8 corrections remain required for the plugin. The V1 API draft omits diagnostic
+classOrigins/probe/diagnostics methods, and no isolated-loader or process-external fallback is enabled.
+
+| P0.3 validation | Result |
+| --- | --- |
+| Host shared runtime dependency graph | All 51 entries match in appDebug, appRelease, inrtDebug, inrtRelease |
+| Host targeted JVM tests | 18 pass: ComposeUiSharedClasspathTest 3, PluginDefaultEnabledPolicyTest 7, PluginNativeAlignmentPolicyTest 2, ExplorerViewStateLifecyclePolicyTest 6 |
+| Plugin JVM tests and shared classpath | 24 pass; both plugin classpaths still match the same fingerprint |
+| Host APK assembly | app debug, debug instrumentation and release pass; release native alignment gate passes |
+| Manifest / DEX boundary | All five appDebug and five appRelease merged manifests contain no temporary entry; arm64 debug/release DEX contain neither the P0 loader nor draft contract |
+| API 24 x86, dedicated Compose_UI_P03_API24 AVD | 12/12 pass: loading probe 5, drawer lifecycle 3, plugin-center presentation 4 |
+| API 33 arm64, Redmi 22120RN86C | The same 12/12 pass |
+| Plugin docs / icons | 36 generated documents consistent; icon check passes |
+
+Device runs use host build 5309 from the isolated branch and the unchanged signed plugin build 7
+(`f7a437db`, release with R8). The plugin implementation and staged draft AAR have not changed in
+P0.3; plugin build 8 records the documentation/lock-provenance commit and is not a new device-tested APK.
+The host's existing release configuration has minification disabled, so a successful release build
+must not be described as minified-host validation.
+
+The first fresh API 24 run hit a runtime storage permission dialog: dumpsys showed GrantPermissionsActivity
+as the resumed/focused Activity and both the host Activity and drawer remained STARTED. The API 33 first
+run also had an immediate lifecycle assertion failure. Only the dedicated fixture package was granted
+READ/WRITE_EXTERNAL_STORAGE on API 24 and POST_NOTIFICATIONS on API 33. The original drawer tests were
+then restored without weaker assertions or extra waits, and all 12 cases passed on both devices.
+IDE debugging remained unavailable for this worktree (outside-project path rejection); diagnosis used
+the real foreground Activity/process state and instrumented assertions.
+
+Host reproduction (after installing the matching ABI host, test APK and plugin):
+
+```powershell
+.\gradlew.bat '-PcomposeUiSpike=true' '-Pautojs.gradle.build.number.auto.increment.enabled=false' '-Pautojs.gradle.build.time.update.enabled=false' :app:verifyComposeUiSharedClasspath :app:testAppDebugUnitTest --tests org.autojs.autojs.core.plugin.compose.ComposeUiSharedClasspathTest --tests org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicyTest --tests org.autojs.autojs.core.plugin.center.PluginNativeAlignmentPolicyTest --tests org.autojs.autojs.ui.explorer.ExplorerViewStateLifecyclePolicyTest :app:assembleAppDebug :app:assembleAppDebugAndroidTest :app:assembleAppRelease
+# API 24 test fixture only:
+adb -s <serial> shell pm grant org.autojs.autojs6.compose.spike android.permission.READ_EXTERNAL_STORAGE
+adb -s <serial> shell pm grant org.autojs.autojs6.compose.spike android.permission.WRITE_EXTERNAL_STORAGE
+# API 33 test fixture only:
+adb -s <serial> shell pm grant org.autojs.autojs6.compose.spike android.permission.POST_NOTIFICATIONS
+adb -s <serial> shell appops set org.autojs.autojs6.compose.spike SYSTEM_ALERT_WINDOW allow
+adb -s <serial> shell am instrument -w -r -e class org.autojs.autojs.core.plugin.compose.ComposeUiSpikeDeviceTest,org.autojs.autojs.ui.main.drawer.DrawerLifecycleInstrumentationTest,org.autojs.autojs.core.plugin.center.PluginCenterPresentationDeviceTest org.autojs.autojs6.compose.spike.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+Not rerun: the full host JVM/lint suites, inrt APK assembly/device execution, API 28/31/35/37 device
+matrix, manual TalkBack/IME coverage, LeakCanary and remote CI. The present change is covered by the
+four resolved dependency graphs, targeted host regression suites, app APK builds and API 24/33 runs;
+the remaining compatibility matrix belongs to P5. Inrt release/debug dependency resolution is
+verified, but that is not evidence of assembled or runnable inrt APKs.
+
+P0 is complete. Continue at P1.1 to freeze the Compose-free V1 contract and stage its release AAR,
+then implement the production loader/session in P1.2 and confirm the minimum host version in P1.3.
+The provisional minimum 5308 and contract target 1 remain unchanged; the P0 draft version -1 is not
+advertised as a delivered V1 or script API. All host changes remain on the isolated local branch;
+the original host worktree's unrelated edits are preserved and no remote publishing occurs.
+
+
+P0.3 cleanup: all three temporary packages were uninstalled successfully from both devices and
+the dedicated API 24 emulator was stopped. The original running AVD was not stopped. Automatic
+approval review rejected deletion of the newly created AVD cache with only `blocked by policy`;
+its ignored local directory `build/compose-p03/avd-api24` and the `Compose_UI_P03_API24` registration
+remain available locally. No source, test result or commit depends on deleting this cache.

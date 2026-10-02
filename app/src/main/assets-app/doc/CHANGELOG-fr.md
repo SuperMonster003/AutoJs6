@@ -708,7 +708,10 @@
 * `Dépendance` Ajout de Android Hidden API Bypass version 6.1
 * `Dépendance` Modularisation de Package Archive Parser
 * `Dépendance` Modularisation d'Installer API
-* `Dépendance` Alignement de lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 et window 1.5.0 dans les builds Debug pour vérifier Compose UI
+* `Dépendance` Mise à niveau de AndroidX Lifecycle 2.6.2 -> 2.9.4
+* `Dépendance` Mise à niveau de AndroidX SavedState 1.2.1 -> 1.3.2
+* `Dépendance` Mise à niveau de AndroidX Emoji2 1.3.0 -> 1.4.0
+* `Dépendance` Mise à niveau de AndroidX Window 1.0.0 -> 1.5.0
 
 # v6.7.0
 

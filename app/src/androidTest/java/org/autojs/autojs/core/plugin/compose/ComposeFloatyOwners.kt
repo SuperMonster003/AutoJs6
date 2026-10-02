@@ -9,7 +9,7 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
-/** One owner per window. Attach before WindowManager.addView; destroy when the window closes. */
+/** P0 fixture: one owner per window, attached before WindowManager.addView and destroyed on close. */
 class ComposeFloatyOwners : LifecycleOwner, SavedStateRegistryOwner {
     private val registry = LifecycleRegistry(this)
     private val savedState = SavedStateRegistryController.create(this)

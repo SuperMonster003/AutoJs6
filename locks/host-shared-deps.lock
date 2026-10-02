@@ -1,4 +1,4 @@
-# P0.2 debug host e86186920d + app/compose-spike.gradle.kts; NOT a release compatibility promise.
+# Q1(b), approved 2026-10-02: shared host classpath for app/inrt debug/release; V1 loading is still pending P1.
 # Exact Maven component versions. Kotlin is bundled for INFO and shared parent-first in the host.
 androidx.activity:activity=1.12.2
 androidx.activity:activity-ktx=1.12.2

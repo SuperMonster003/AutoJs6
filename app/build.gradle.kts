@@ -22,7 +22,7 @@ plugins {
 }
 
 val globalApplicationId = "org.autojs.autojs6"
-apply(from = "compose-spike.gradle.kts")
+apply(from = "compose-shared-classpath.gradle.kts")
 if (providers.gradleProperty("composeUiSpike").orNull == "true") {
     android.buildTypes.named("debug") {
         applicationIdSuffix = ".compose.spike"
@@ -517,6 +517,14 @@ dependencies /* Unclassified */ {
     // AndroidX Activity
     implementation(libs.activity.ktx)
 
+    // Compose UI Q1(b): shared AndroidX versions are the same in app/inrt and debug/release.
+    // The renderer remains external; no Compose runtime is added to the host.
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.viewmodel.savedstate)
+    implementation(libs.savedstate.ktx)
+    implementation(libs.emoji2)
+    implementation(libs.window)
+
     // LeakCanary
     if (leakCanaryEnabled) {
         debugImplementation(libs.leakcanary)
@@ -787,6 +795,8 @@ dependencies /* Test */ {
     // zh-CN: JVM 测试中的 BKS 密钥库需要名为 "BC" 的 provider (Android 自带, 桌面 JDK 没有).
     testImplementation(libs.bcprov.jdk15on)
     androidTestImplementation(libs.test.runner)
+    // P0 draft belongs only to the loading test fixture until the V1 API is frozen in P1.1.
+    androidTestImplementation(project(":plugin-api:compose-ui-api"))
     androidTestImplementation(libs.test.ext.junit)
 
     // Rhino is compileOnly for the main source set; tests need it on their compile classpath too.

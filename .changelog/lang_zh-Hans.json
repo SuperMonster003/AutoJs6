@@ -425,7 +425,10 @@
         "移除 AndroidX AppCompat (Legacy) 版本 1.0.2",
         "模块化 Package Archive Parser",
         "模块化 Installer API",
-        "Debug 构建对齐 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 与 window 1.5.0, 用于 Compose UI 验证"
+        "升级 AndroidX Lifecycle 版本 2.6.2 -> 2.9.4",
+        "升级 AndroidX SavedState 版本 1.2.1 -> 1.3.2",
+        "升级 AndroidX Emoji2 版本 1.3.0 -> 1.4.0",
+        "升级 AndroidX Window 版本 1.0.0 -> 1.5.0"
       ]
     },
     "v6.7.0": {

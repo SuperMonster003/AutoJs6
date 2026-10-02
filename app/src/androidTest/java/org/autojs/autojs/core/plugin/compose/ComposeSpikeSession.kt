@@ -1,16 +1,20 @@
 package org.autojs.autojs.core.plugin.compose
 
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import org.autojs.plugin.compose.api.spike.ComposeUiRenderer
 import org.autojs.plugin.compose.api.spike.SpikeContract
 import org.autojs.plugin.compose.api.spike.UiNode
 
-/** Same AppCompatActivity owner chain as ScriptExecuteActivity. No release manifest entry. */
-class ComposeSpikeActivity : AppCompatActivity() {
+/** Instrumentation fixture using an existing host Activity. No temporary Android component. */
+class ComposeSpikeSession(val activity: AppCompatActivity) : DefaultLifecycleObserver {
+    val isDestroyed get() = activity.isDestroyed
+    val resources get() = activity.resources
+    val theme get() = activity.theme
     var renderer: ComposeUiRenderer? = null
         private set
     var loaded: ComposeSpikeLoader.Loaded? = null
@@ -21,17 +25,13 @@ class ComposeSpikeActivity : AppCompatActivity() {
         private set
     private val events = Handler(Looper.getMainLooper())
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // Tests can measure the same empty Activity before loading the plugin.
-        if (!intent.getBooleanExtra("defer", false)) mount()
-    }
+    init { activity.lifecycle.addObserver(this) }
 
     fun mount() {
         check(renderer == null)
         try {
-            val plugin = ComposeSpikeLoader(this).load().also { loaded = it }
-            val instance = plugin.factory.create(plugin.context(this)) { event ->
+            val plugin = ComposeSpikeLoader(activity).load().also { loaded = it }
+            val instance = plugin.factory.create(plugin.context(activity)) { event ->
                 // Always queue. No script/counter callback can run synchronously in composition or layout.
                 events.post {
                     if (isDestroyed) return@post
@@ -44,28 +44,30 @@ class ComposeSpikeActivity : AppCompatActivity() {
                 }
             }.also { renderer = it }
             instance.apply(tree(count))
-            setContentView(instance.view())
+            activity.setContentView(instance.view())
         } catch (failure: ComposeSpikeLoader.Failure) {
             error = failure.code.name
-            setContentView(TextView(this).apply { text = failure.code.name })
+            activity.setContentView(TextView(activity).apply { text = failure.code.name })
         } catch (_: LinkageError) {
             error = ComposeSpikeLoader.Error.LOAD_FAILED.name
-            setContentView(TextView(this).apply { text = error })
+            activity.setContentView(TextView(activity).apply { text = error })
         } catch (_: RuntimeException) {
             renderer?.dispose()
             renderer = null
             error = SpikeContract.RENDER_FAILED
-            setContentView(TextView(this).apply { text = error })
+            activity.setContentView(TextView(activity).apply { text = error })
         }
     }
 
-    override fun onDestroy() {
+    override fun onDestroy(owner: LifecycleOwner) {
         events.removeCallbacksAndMessages(null)
         renderer?.dispose()
         renderer = null
         loaded = null
-        super.onDestroy()
+        activity.lifecycle.removeObserver(this)
     }
+
+    fun finish() = activity.finish()
 
     companion object {
         fun tree(count: Int) = UiNode(SpikeContract.COLUMN, children = listOf(

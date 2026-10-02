@@ -708,7 +708,10 @@
 * `의존성` Android Hidden API Bypass 버전 6.1 추가
 * `의존성` Package Archive Parser 모듈화
 * `의존성` Installer API 모듈화
-* `의존성` Compose UI 검증을 위해 Debug 빌드에서 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0, window 1.5.0 사용
+* `의존성` AndroidX Lifecycle 버전 업그레이드 2.6.2 -> 2.9.4
+* `의존성` AndroidX SavedState 버전 업그레이드 1.2.1 -> 1.3.2
+* `의존성` AndroidX Emoji2 버전 업그레이드 1.3.0 -> 1.4.0
+* `의존성` AndroidX Window 버전 업그레이드 1.0.0 -> 1.5.0
 
 # v6.7.0
 

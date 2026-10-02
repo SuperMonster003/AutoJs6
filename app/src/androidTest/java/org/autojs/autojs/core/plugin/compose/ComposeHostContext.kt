@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Configuration
 
-/** Resources use the plugin's IDs; the Activity still owns windows, theme and system services. */
+/** P0 fixture: resources use plugin IDs; the Activity owns windows, theme and system services. */
 class ComposeHostContext(
     base: Context,
     private val plugin: Context,

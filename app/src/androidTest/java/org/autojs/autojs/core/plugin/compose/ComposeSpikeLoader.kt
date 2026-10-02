@@ -13,7 +13,7 @@ import org.autojs.plugin.compose.api.spike.ComposeUiRendererFactory
 import org.autojs.plugin.compose.api.spike.SpikeContract
 import java.util.zip.ZipFile
 
-/** Debug-only probe. P1 adds selection, negotiated capabilities, cache invalidation and script errors. */
+/** Instrumentation-only probe. P1 implements the production loader against the frozen V1 API. */
 class ComposeSpikeLoader(private val context: Context) {
     enum class Error { NOT_INSTALLED, SYSTEM_DISABLED, NOT_ENABLED, NOT_AUTHORIZED, HOST_TOO_OLD, FACTORY_MISSING, CONTRACT_MISMATCH, LOAD_FAILED }
     class Failure(val code: Error, cause: Throwable? = null) : RuntimeException(code.name, cause)
@@ -43,7 +43,8 @@ class ComposeSpikeLoader(private val context: Context) {
             abis.firstOrNull { zip.getEntry("lib/$it/libandroidx.graphics.path.so") != null }
         } ?: throw Failure(Error.LOAD_FAILED)
         val nativePath = "${info.sourceDir}!/lib/$abi"
-        val loader = PathClassLoader(info.sourceDir, nativePath, context.classLoader)
+        // The draft contract now exists only in instrumentation; its loader delegates host classes to the target.
+        val loader = PathClassLoader(info.sourceDir, nativePath, ComposeUiRendererFactory::class.java.classLoader)
         val factory = instantiate(name, loader)
         checkContract(factory.contractVersion())
         return Loaded(factory, loader, context.createPackageContext(info.packageName, 0), nativePath)

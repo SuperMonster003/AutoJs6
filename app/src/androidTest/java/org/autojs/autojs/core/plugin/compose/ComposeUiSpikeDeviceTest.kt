@@ -16,9 +16,11 @@ import org.autojs.autojs.core.floaty.BaseResizableFloatyWindow
 import org.autojs.autojs.core.floaty.RawWindow
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
+import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.plugin.compose.api.spike.ComposeUiRenderer
 import org.autojs.plugin.compose.api.spike.SpikeContract
 import org.junit.Assert.*
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.Before
 import org.junit.After
@@ -31,12 +33,15 @@ class ComposeUiSpikeDeviceTest {
     private val context = instrumentation.targetContext
     private var previousEnabled = true
     @Before fun enableDedicatedTestHostPlugin() {
+        assumeTrue("Use -PcomposeUiSpike=true to preserve the user's host", context.packageName.endsWith(".compose.spike"))
         // This preference belongs to the separate .compose.spike host, never the user's AutoJs6.
         previousEnabled = PluginEnableStore.isEnabled(context, SpikeContract.PACKAGE)
         PluginEnableStore.setEnabled(context, SpikeContract.PACKAGE, true)
     }
     @After fun restoreDedicatedTestHostPreference() {
-        PluginEnableStore.setEnabled(context, SpikeContract.PACKAGE, previousEnabled)
+        if (context.packageName.endsWith(".compose.spike")) {
+            PluginEnableStore.setEnabled(context, SpikeContract.PACKAGE, previousEnabled)
+        }
     }
     private fun main(block: () -> Unit) = instrumentation.runOnMainSync(block)
     private fun await(message: String, condition: () -> Boolean) {
@@ -44,9 +49,18 @@ class ComposeUiSpikeDeviceTest {
         while (!condition() && SystemClock.uptimeMillis() < deadline) SystemClock.sleep(50)
         assertTrue(message, condition())
     }
-    private fun start(defer: Boolean = false) = instrumentation.startActivitySync(
-        Intent(context, ComposeSpikeActivity::class.java).putExtra("defer", defer).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-    ) as ComposeSpikeActivity
+    private fun start(defer: Boolean = false): ComposeSpikeSession {
+        val activity = instrumentation.startActivitySync(
+            Intent(context, AboutActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        ) as AboutActivity
+        lateinit var session: ComposeSpikeSession
+        main {
+            session = ComposeSpikeSession(activity)
+            if (!defer) session.mount()
+        }
+        instrumentation.waitForIdleSync()
+        return session
+    }
 
     @Test fun activityCounterUsesPluginClassesHostOwnersAndQueuedEvents() {
         val activity = start()
@@ -56,12 +70,13 @@ class ComposeUiSpikeDeviceTest {
             val loaded = requireNotNull(activity.loaded)
             loaded.factory.classOrigins().forEach { (name, type) ->
                 if (name in setOf("compose", "runtime")) assertSame(name, loaded.loader, type.classLoader)
+                else if (name == "contract") assertSame(name, org.autojs.plugin.compose.api.spike.ComposeUiRendererFactory::class.java, type)
                 else assertSame(name, context.classLoader.loadClass(type.name), type)
             }
             main {
                 renderer = requireNotNull(activity.renderer)
-                assertSame(activity, renderer!!.view().findViewTreeLifecycleOwner())
-                assertSame(activity, renderer!!.view().findViewTreeSavedStateRegistryOwner())
+                assertSame(activity.activity, renderer!!.view().findViewTreeLifecycleOwner())
+                assertSame(activity.activity, renderer!!.view().findViewTreeSavedStateRegistryOwner())
             }
             await("counter accessible", { nodeWithText("Count: 0") != null })
             val button = requireNotNull(nodeWithText("+1"))
@@ -95,7 +110,7 @@ class ComposeUiSpikeDeviceTest {
                     densityDpi = 240
                     uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or Configuration.UI_MODE_NIGHT_YES
                 }
-                val wrapper = ComposeHostContext(activity, loaded.pluginContext, loaded.loader, config)
+                val wrapper = ComposeHostContext(activity.activity, loaded.pluginContext, loaded.loader, config)
                 val result = loaded.factory.probe(wrapper)
                 assertEquals(3, result.getInt("pathSegments"))
                 assertEquals(240, result.getInt("densityDpi"))
@@ -124,7 +139,7 @@ class ComposeUiSpikeDeviceTest {
                 val service = FloatyService.instance
                 val loaded = ComposeSpikeLoader(context).load()
                 val instance = loaded.factory.create(loaded.context(service)) {}.also { renderer = it }
-                instance.apply(ComposeSpikeActivity.tree(7))
+                instance.apply(ComposeSpikeSession.tree(7))
                 val view = instance.view()
                 assertNull(view.findViewTreeLifecycleOwner())
                 assertNull(view.findViewTreeSavedStateRegistryOwner())

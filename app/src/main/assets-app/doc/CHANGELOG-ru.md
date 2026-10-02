@@ -708,7 +708,10 @@
 * `Зависимость` Добавлен Android Hidden API Bypass версии 6.1
 * `Зависимость` Модуляризация Package Archive Parser
 * `Зависимость` Модуляризация Installer API
-* `Зависимость` Согласованы lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 и window 1.5.0 в сборках Debug для проверки Compose UI
+* `Зависимость` Обновление AndroidX Lifecycle 2.6.2 -> 2.9.4
+* `Зависимость` Обновление AndroidX SavedState 1.2.1 -> 1.3.2
+* `Зависимость` Обновление AndroidX Emoji2 1.3.0 -> 1.4.0
+* `Зависимость` Обновление AndroidX Window 1.0.0 -> 1.5.0
 
 # v6.7.0
 

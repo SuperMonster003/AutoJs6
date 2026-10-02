@@ -1,11 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <activity
-            android:name="org.autojs.autojs.core.plugin.compose.ComposeSpikeActivity"
-            android:exported="true"
-            android:permission="android.permission.DUMP"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <provider
             android:name="org.autojs.autojs.app.ApplicationContextProbeProvider"
             android:authorities="${applicationId}.context-probe"
