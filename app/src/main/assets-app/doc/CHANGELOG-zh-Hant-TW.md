@@ -214,7 +214,7 @@
 * `新增` 檔案管理器指令碼選單 "懸浮執行" 項, 以半透明懸浮工具列進行指令碼啟停 / 編輯 / 檢視日誌, 跟隨夜間模式與主題色
 * `新增` 版面分析: 節點資訊對話方塊中長按屬性可勾選多項, 並合併複製為鏈式選擇器 (id('x').text('y')) 或 pickup() / detect() 可接受的物件選擇器; "儲存版面配置為檔案" 把擷取的節點樹寫入 <工作目錄>/layouts/<時間>.layout.json, 在檔案管理器中點選該檔案即可離線分析
 * `新增` 整合 3-Shell Terminal 外掛程式: 側拉選單, 檔案管理器目錄選單及專案工具列的終端機入口改為開啟外掛程式終端機, 側拉選單開關同步外掛程式工作階段數, 外掛程式未安裝, 已停用或不相容時分別引導至外掛程式中心, 外掛程式設定或升級提示
-* `新增` 指令碼全域物件 terminal: 工作階段管理, 可見執行與輸出監聽, 支援等待輸出和結束代碼 (需要 3-Shell Terminal 插件)
+* `新增` 指令碼全域物件 terminal: 工作階段管理, 可見執行與輸出監聽, 支援等待輸出和結束代碼 (需要 3-Shell Terminal 插件) (參閱 範例程式碼 > 终端)
 * `新增` `images.matchFeatures` 的兩個參數均可直接傳入圖片或路徑並即時偵測特徵; 新增 `ransacThreshold`, `minInliers` 與 `maxFeatures` 選項, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 與 `inliers` 屬性, `ImageFeatures` 新增 `count` 與 `method` 屬性
 * `新增` 官方外掛無障礙伴生契約: 發布 `follow-host` 服務策略的伴生外掛隨 AutoJs6 無障礙服務一同啟用與停用, 使用已設定的 root, 安全設定或 Shizuku 策略, 並接收宿主服務狀態廣播
 * `新增` Bun Runtime 外掛專案執行: 位於含 `project.json` 或 `package.json` 目錄下的指令碼會打成有界工作區封存 (最多 16384 項目與 64 MiB, 只收一般檔案與目錄) 交給宣告了 `SUPPORTS_WORKSPACE_ARCHIVE` 的外掛, 專案內的相對匯入可以解析; 進入點檔案使用編輯器目前原始碼, 符號連結與特殊檔案直接中止執行, 裸指令碼或舊版外掛保持單一原始碼路徑

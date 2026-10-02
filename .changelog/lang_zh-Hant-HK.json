@@ -209,7 +209,7 @@
         "檔案管理器腳本選單 \"懸浮運行\" 項, 以半透明懸浮工具列進行腳本啟停 / 編輯 / 查看日誌, 跟隨夜間模式與主題色",
         "佈局分析: 節點資訊對話框中長按屬性可勾選多項, 並合併複製為鏈式選擇器 (id('x').text('y')) 或 pickup() / detect() 可接受的物件選擇器; \"儲存佈局為檔案\" 把捕獲的節點樹寫入 <工作目錄>/layouts/<時間>.layout.json, 在檔案管理器中點擊該檔案即可離線分析",
         "整合 3-Shell Terminal 插件: 側拉選單, 檔案管理器目錄選單及專案工具列的終端入口改為開啟插件終端, 側拉選單開關同步插件工作階段數, 插件未安裝, 已停用或不相容時分別引導至插件中心, 插件設定或升級提示",
-        "指令碼全域物件 terminal: 工作階段管理, 可見執行與輸出監聽, 支援等待輸出和結束代碼 (需要 3-Shell Terminal 插件)",
+        "指令碼全域物件 terminal: 工作階段管理, 可見執行與輸出監聽, 支援等待輸出和結束代碼 (需要 3-Shell Terminal 插件) (參閱 範例程式碼 > 终端)",
         "`images.matchFeatures` 的兩個參數均可直接傳入圖片或路徑並即時檢測特徵; 新增 `ransacThreshold`, `minInliers` 和 `maxFeatures` 選項, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 和 `inliers` 屬性, `ImageFeatures` 新增 `count` 和 `method` 屬性",
         "官方插件無障礙伴生契約: 發佈 `follow-host` 服務策略的伴生插件隨 AutoJs6 無障礙服務一同啟用及停用, 使用已配置的 root, 安全設定或 Shizuku 策略, 並接收宿主服務狀態廣播",
         "Bun Runtime 外掛專案執行: 位於含 `project.json` 或 `package.json` 目錄下的指令碼會打成有界工作區歸檔 (最多 16384 條目及 64 MiB, 只收普通檔案及目錄) 交給宣告了 `SUPPORTS_WORKSPACE_ARCHIVE` 的外掛, 專案內的相對匯入可以解析; 入口檔案使用編輯器目前原始碼, 符號連結及特殊檔案直接中止執行, 裸指令碼或舊版外掛保持單一原始碼路徑",

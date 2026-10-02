@@ -11,8 +11,8 @@ monitor, plugin roadmap P1.2) and the removal of the host's own terminal with th
 cleanup (P1.3) follow in the same host line; the delivering host build is recorded in
 `TerminalIds.REQUIRED_HOST_VERSION_CODE` (P1.4, build 5304). The plugin side implements the
 sessions, the Binder service and the Node.js integration in plugin roadmap P2 and the terminal UI
-in P3. The script API `terminal` (plugin roadmap P4) is not delivered yet; its section is added
-here when P4.3 lands, without changing the V1 AIDL or the contract version.
+in P3. The Rhino script API `terminal` is implemented in P4.1-P4.3 (2026-10-02), including
+session events and output pipes, without changing the V1 AIDL or the contract version.
 
 ## Decision
 
@@ -383,6 +383,114 @@ and without a marker, so an upgrade installation ends up without the old data af
 start. The host keeps `ic_terminal_black_48dp`, `text_terminal`, `description_terminal`
 (rewritten to name the plugin), `text_open_in_terminal`, `text_terminal_new_session` and
 `text_terminal_running_sessions` (D27) and the ten plugin-state strings P1.2 added.
+
+## Script API (P4)
+
+The Rhino globals `terminal` and `$terminal` refer to the same module. Check
+`terminal.isAvailable()` before starting work and direct an unavailable user to Plugin Center.
+`terminal.state()` returns `available`, `not_installed`, `disabled`, `incompatible` or
+`unavailable`. Every API failure is a JavaScript `terminal.TerminalError` (an `Error` subtype)
+with `code`, `message` and, where applicable, `sessionId`. An unavailable plugin produces
+`PLUGIN_UNAVAILABLE`; a contract or minimum-host mismatch produces `PLUGIN_INCOMPATIBLE`.
+Both include the host's localized install, enable or update hint when one is available.
+
+| Operation | Synchronous form | Promise form |
+| --- | --- | --- |
+| Create a visible shell | `open(dirOrOptions?)` | `openAsync(dirOrOptions?)` |
+| List sessions | `sessions()` | `sessionsAsync()` |
+| Find one session, or null | `session(id)` | - |
+| Close one / all sessions | `close(id)`, `closeAll()` | `closeAsync(id)`, `closeAllAsync()` |
+| Bring the terminal to the front | `show(id?)` | `showAsync(id?)` |
+| Execute a shell command | `exec(command, options?)` | `execAsync(command, options?)` |
+| Execute an npm script | `npm.run(script, dir?, options?)` | `npm.runAsync(script, dir?, options?)` |
+| Query shell, Node.js and storage environment | `env()` | `envAsync()` |
+| Test availability | `isAvailable()` | `isAvailableAsync()` |
+| Inspect availability state | `state()` | - |
+
+`open` accepts a directory string or `{ cwd, env, show, title }`. Relative paths follow
+`files.path` against the script's working directory; `cwd` defaults to `files.cwd()` (the
+plugin HOME when the script has no working directory). URI paths such as `content://` are
+rejected. `show` defaults to true. `env` cannot replace `HOME`, `PREFIX` or `PATH` and observes
+the contract ceilings. Unknown option names and invalid shapes fail with `INVALID_ARGUMENT`.
+The plugin has its own storage permissions: a host storage grant does not grant the plugin
+access. A refused shared-storage directory is `STORAGE_PERMISSION_REQUIRED`.
+
+`exec` adds `{ keepOpen, wait, timeout, stripAnsi }` to these options. `keepOpen` defaults to
+true: after the command finishes, an interactive shell remains. **Use `keepOpen: false` when
+waiting for the command's exit code.** `wait: true` waits for the session to exit; with the
+default `keepOpen: true`, it waits for the remaining interactive shell too. `wait` defaults to
+false; `timeout` defaults to 600000 ms and `0` means no limit. A timeout leaves the session
+running so it can be inspected or closed explicitly. `npm.run` executes `npm run <script>`
+using the same options; it requires the trusted Node.js Runtime toolchain. It does not install
+dependencies or bypass Android restrictions on executable files and native addons.
+
+```js
+if (terminal.isAvailable()) {
+    let result = terminal.exec('echo ready; exit 3', {
+        cwd: terminal.env().home, show: false, keepOpen: false, wait: true,
+    });
+    console.log(result.exitCode); // 3
+}
+```
+
+Returned sessions expose `id`, `cwd`, `title`, `createdAt` (epoch milliseconds), `pid`, `state`
+and `exitCode` (null until observed). `isAlive()` refreshes the snapshot. They inherit the
+host EventEmitter operations, including `on`, `once`, `prependListener`, `prependOnceListener`,
+`removeListener`, `off` and `removeAllListeners`. Operations on the session are:
+
+| Method | Result and semantics |
+| --- | --- |
+| `write(textOrBytes)` / `writeAsync(textOrBytes)` | UTF-8 text or byte values 0..255, up to 64 KiB; include `\n` to execute a typed command, `[3]` sends Ctrl+C |
+| `show()` / `showAsync()` | Opens the existing session using `TERMINAL_OPEN` |
+| `close()` / `closeAsync()` | Whether an existing session was closed |
+| `waitFor(pattern, timeout?)` / `waitForAsync(pattern, timeout?)` | First subsequent matching line or prompt fragment; nonempty substring or RegExp, default 600000 ms, `0` unlimited |
+| `transcript(maxBytes?)` / `transcriptAsync(maxBytes?)` | Current screen and scrollback text, newest text retained; limit 1..1048576 UTF-8 bytes, further bounded by Binder reply size |
+
+`waitFor` opens its own output subscription starting at the time of the call; it does not
+search old transcript text. It returns the matching text, reports `TIMEOUT` when the deadline
+passes, and `SESSION_CLOSED` when the stream ends first. It always releases its subscription.
+The RegExp uses the host selector API's Java-compatible regex translation; stateful JavaScript
+`lastIndex` is not advanced. `transcript` is terminal-rendered text, not an exact raw byte log.
+
+## Session stream and lifecycle (P4.2)
+
+- `output(text)` delivers UTF-8 lines with ANSI control sequences stripped by default.
+  `stripAnsi: false` on `exec` / `npm.run` preserves control sequences. Lines are split at
+  64 KiB of UTF-8 without splitting a code point. A pipe idle for 100 ms flushes an incomplete
+  line as a fragment, allowing scripts to answer prompts that do not end in a newline.
+- `exit(code)` comes after the subscribed pipe has drained, once, and no output event follows
+  it. The callback is registered before opening sessions so even quick commands retain their
+  exit code. A listener for `exit` alone does not open an output pipe.
+- `overflow(droppedBytes)` reports output lost because the plugin buffer or host script queue
+  filled. Reports are coalesced; the final host count is delivered before `exit` even when the
+  script queue was full. This is a lossy observation channel, not an archival log. The Binder
+  overflow callback and the pipe are separate transports; reports cannot identify an exact
+  byte offset in the output.
+- The first output or overflow listener opens a pipe; removing the last such listener closes
+  it, including after a `once` listener fires. The first subscription of a session created by
+  this script requests the current transcript before live output. Recovered sessions from
+  `sessions()` / `session(id)` start with live output. Replay only covers the current screen
+  and scrollback of a still-existing session, so output produced before an already-removed
+  session was subscribed cannot be recovered.
+- Blocking terminal methods run work in a coroutine and drain terminal deliveries on their
+  originating script thread while waiting. An `output` listener can call `write` while
+  `waitFor` is blocked. Promise results and listeners run on that same thread, using the
+  shared dispatcher and script looper. UI-thread synchronous calls are rejected with
+  `INVALID_ARGUMENT`; use the Async forms there. This does not promise to pump arbitrary
+  application timers while a terminal method blocks.
+- Each script owns a callback binding lease and its subscriptions. Script exit cancels reads,
+  unregisters its callback, releases the lease and suppresses queued deliveries; it leaves
+  user sessions running. Plugin process death destroys its sessions. Pipe cancellation uses
+  bounded polling so it works on API 24 without leaving a blocked reader thread behind.
+
+The host examples under `sample/终端/` cover opening the script directory, waiting for an npm
+script, and answering a prompt while listening to output. Each starts with an availability
+guard. Visible execution uses the same Android activity-start rules as `app.startActivity`;
+the system can restrict bringing a screen forward from the background.
+
+Public documentation, TypeScript declarations, Ace completion and the offline documentation
+bundle remain the coordinated P7.1 deliverable in the plugin roadmap. These repositories were
+checked for an existing terminal declaration/page during P4.3; none exists yet.
 
 ## Tests
 
