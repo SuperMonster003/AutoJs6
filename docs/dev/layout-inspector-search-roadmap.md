@@ -125,9 +125,9 @@
 
 ### P5 选择器模式
 
-- [ ] P5.1 `SelectorCallParser` (引擎包, D12): 词法 (标识符, `.`, `(`, `)`, `,`, 字符串, 数字, 布尔, 正则字面量, 空白), 语法 (可选 `selector()` / `$()` 前缀, 一个或多个 `name(args)` 以 `.` 相连, 允许末尾不完整以便边输入边求值时给出 "表达式未结束" 而非误报), 每个调用经 `SelectorRegistry.apply(selector, name, args)`; 错误带位置与候选 (复用 `SelectorStringParser.suggest`). 正则字面量转为 Rhino `NativeRegExp`? 否: 注册表 REGEX 参数类型要求 `NativeRegExp`, 解析器改走字符串重载的 JS 字面量形式 (`textMatches("/re/i")`), 由 `StringMatcher` 的 `compileJsOrPlainRegex` 保留标志 (验证 `textMatches` / `textMatch` 支持该形式; `text(/re/)` 这类 equals 形式的正则在字符串重载中不保留整体匹配语义, 需在解析器中映射为 `textMatches("/^(?:re)$/flags")`). 单测: `SelectorCallParserTest`.
-- [ ] P5.2 模式开关接入 "选择器" 模式, 错误显示同 P4.1; "复制为选择器" 在此模式下原样输出规范化后的表达式.
-- [ ] P5.3 字符串 + changelog (feature 1 条) + 冒烟 (附录 B 第 16 项) + 提交.
+- [x] P5.1 `SelectorCallParser` (引擎包, D12): 词法 (标识符, `.`, `(`, `)`, `,`, 字符串, 数字, 布尔, 正则字面量, 空白), 语法 (可选 `selector()` / `$()` 前缀, 一个或多个 `name(args)` 以 `.` 相连, 允许末尾不完整以便边输入边求值时给出 "表达式未结束" 而非误报), 每个调用经 `SelectorRegistry.apply(selector, name, args)`; 错误带位置与候选 (复用 `SelectorStringParser.suggest`). 正则字面量转为 Rhino `NativeRegExp`? 否: 注册表 REGEX 参数类型要求 `NativeRegExp`, 解析器改走字符串重载的 JS 字面量形式 (`textMatches("/re/i")`), 由 `StringMatcher` 的 `compileJsOrPlainRegex` 保留标志 (验证 `textMatches` / `textMatch` 支持该形式; `text(/re/)` 这类 equals 形式的正则在字符串重载中不保留整体匹配语义, 需在解析器中映射为 `textMatches("/^(?:re)$/flags")`). 单测: `SelectorCallParserTest`. 证据 E1: 提交 `f17be99dab`; `SelectorCallParserTest` (10). 实现差异: 正则字面量交给同名 (`...Match` / `...Matches`) 或改名后 (`...Contains` -> `...Match`, 等值形式 `name` -> `nameMatches`) 方法的字符串重载, 由 `StringMatcher` 的 `compileJsOrPlainRegex` 保留标志; 等值形式无需 `^(?:re)$` 锚定, 因为 `matches(s)` 本就是整体匹配 (与 `equals(NativeRegExp)` 语义相同); 脚本不接受 `RegExp` 的位置 (如 `textStartsWith(/x/)`, `depth(/3/)`) 报错. 方法名在读到其 `(` 时即对照注册表 (`clikable(` 为未知, `clikable` 仍为未结束); 词法按需产出, 错误报告在读取实际停下的位置; 字符串转义支持 `\n \t \r \b \f \0 \uXXXX` 与引号 / 反斜杠.
+- [x] P5.2 模式开关接入 "选择器" 模式, 错误显示同 P4.1; "复制为选择器" 在此模式下原样输出规范化后的表达式. 证据 E3: 提交 `f17be99dab`; `InspectorQueryTest` (选择器模式编译, 语法错误与未结束分开报告). 实现差异: 模式开关循环 `Aa` -> `k=v` -> `$()`, 首次切到选择器模式 toast 一次 (`key_layout_inspector_selector_mode_introduced`); 新增 `InspectorQueryError.Kind.INCOMPLETE` 取代 P1 的 `UNSUPPORTED_MODE` 占位 (字符串 `text_inspector_query_mode_unavailable` 已删除): 未结束时计数位显示 `…` (普通色), 提示条以提示色显示速查 (获焦) 或 "表达式未结束", 不显示红色错误; 历史行带 `$()` 标记; 导出即过滤器的 `toString()` 链 (如 `text(/wlan/i).clickable(false)` 导出为 `textMatches("/wlan/i").clickable(false)`). Redmi 22120RN86C (API 33): `text("WLAN")` 1 / `textMatches(/WLAN|Bluetooth/i)` 2 / `clickable().minDepth(3).maxDepth(6)` 0 / `selector().enabled(false)` 2 / `$().idMatch(/title/)` 13, 与脚本参照一致; `text("` 与 `text("WLAN").cli` 显示 `…`; `text("WLAN").clikable()` 显示 `At 13: unknown selector method "clikable" / Did you mean: clickable`, `textMatch(/(/)` 与 `depth("x")` 显示 `!`; 两段导出文本以脚本复跑计数一致; 退出再打开仍为选择器模式. AVD (API 24, x86) 通过同一脚本: 计数为 0 (其 Settings 无 WLAN 文本) 但 `$().idMatch(/title/)` 1, 未结束 / 错误 / 候选 / 导出 / 历史标记 / 持久化行为与 Redmi 一致 (需先 `settings put secure spell_checker_enabled 0`, 否则 AOSP 键盘的拼写弹窗吞掉输入).
+- [x] P5.3 字符串 + changelog (feature 1 条) + 冒烟 (附录 B 第 16 项) + 提交. 证据 E3: 字符串 4 键 x 11 文件 (含 `\"` 转义, 否则 Android 资源会吞掉 `name("str")` 中的引号) 随 `f17be99dab`; changelog feature 1 条 x 10 语言 `4458baa4b9`; 附录 B 第 16 项于 Redmi 22120RN86C (API 33) 与 AVD (API 24, x86), 脚本 `build/inspector-smoke/p5_redmi.sh 9` (复用 `counts_p4.js` / `export_check.js`); Sony G8441 (API 28) 仍因图案锁未覆盖.
 
 ### P6 质量, 性能与文档
 
@@ -167,7 +167,7 @@
 13. 离线布局 (从文件打开): 以上搜索 / 配置 / 区域全部可用, 包名与动作候选来自文件内容 (D16).
 14. 字段模式: `text=确定 clickable` / `id~=btn_.*` / `!enabled` 各一次; 错误 `foo=1` 显示位置与候选属性名 (P4.1).
 15. 复制为选择器: 关键词命中 text 时得到 `textContains("...")`; 加配置 clickable 后得到 `textContains("...").clickable()`; depth 区间以注释附加; 粘贴到脚本编辑器可运行 (P4.2). 备注 (2026-10-02): D19 落地后 depth 区间输出为合法调用 `minDepth(3).maxDepth(6)`, 配置的 clickable 输出为 `clickable(true)`.
-16. 选择器模式: `text("确定").clickable()` / `textMatches(/确定|取消/i)` / 输入到 `text("` 为止显示 "表达式未结束" 而非错误 (P5.1, P5.2).
+16. 选择器模式: `text("确定").clickable()` / `textMatches(/确定|取消/i)` / 输入到 `text("` 为止显示 "表达式未结束" 而非错误 (P5.1, P5.2). 备注 (2026-10-02): 未结束时计数位为 `…`, 提示条在获焦时优先显示语法速查.
 
 ## 附录 C. 证据等级
 
@@ -182,11 +182,11 @@
 
 | 关注点 | 文件 |
 | --- | --- |
-| 引擎 (新增) | `core/accessibility/inspector/InspectorNode.kt` (P0.1), `KeywordFilter.kt` / `InspectorQuery.kt` (P0.2), `TreeMatch.kt` (P0.3), `QueryHistory.kt` (P2.2), `FilterProfile.kt` / `FilterProfileCatalog.kt` / `InspectorFilters.kt` (P3.1), `SelectorExport.kt` (P4.2), `SelectorCallParser.kt` (P5.1) |
+| 引擎 (新增) | `core/accessibility/inspector/InspectorNode.kt` (P0.1), `KeywordFilter.kt` / `InspectorQuery.kt` (P0.2), `TreeMatch.kt` (P0.3), `QueryHistory.kt` (P2.2), `FilterProfile.kt` / `FilterProfileCatalog.kt` / `InspectorFilters.kt` (P3.1), `SelectorExport.kt` (P4.2), `SelectorCallParser.kt` (P5.1, 含 `SelectorCallException`) |
 | 引擎 (复用, 只读) | `core/automator/UiNode.kt`, `core/automator/filter/{Filter,Selector,StringMatcher,StringProperty,StringPropertyFilter,BooleanFilter,IntFilter,MetricsFilter,BoundsFilter,ActionFilter,JsRegexUtils}.kt`, `core/automator/selector/{SelectorRegistry,SelectorEntry,SelectorStringParser}.kt`, `core/automator/diagnostics/SelectorExplainer.kt`, `core/accessibility/UiSelector.kt` (无 bridge 构造) |
 | 界面 (新增) | `ui/floating/layoutinspector/search/InspectorSearchSession.kt` (P1.1), `InspectorSearchBar.kt` / `InspectorSearchPill.kt` (P1.2), `SearchResultsDialog.kt` (P2.1), `FilterProfileDialog.kt` (P3.2), `QueryModeStore.kt` (P4.1), `SelectorClipboard.kt` (P4.2), `res/layout/layout_inspector_search_bar.xml`, `res/layout/layout_inspector_search_pill.xml`, `res/layout/dialog_inspector_search_results*.xml`, `res/layout/dialog_inspector_filter_profile*.xml`, `res/drawable/ic_inspector_search.xml`, `ic_inspector_regex.xml`, `ic_inspector_history.xml` |
 | 界面 (改动) | `ui/floating/LayoutFloatyWindow.kt` (会话传递, 菜单), `ui/floating/layoutinspector/LayoutHierarchyFloatyWindow.kt` / `LayoutHierarchyView.java` (P1.3), `LayoutBoundsFloatyWindow.kt` / `LayoutBoundsView.kt` (P1.4, P3.4), `LayoutSnapshotViewer.kt` (会话创建), `ui/floating/CircularMenu.java` (会话创建) |
-| 偏好键 | `res/values/strings_donottranslate.xml`: `key_layout_inspector_query_history`, `key_layout_inspector_query_mode`, `key_layout_inspector_field_mode_introduced`, `key_layout_inspector_filter_profiles`, `key_layout_inspector_filter_profile_selected` |
+| 偏好键 | `res/values/strings_donottranslate.xml`: `key_layout_inspector_query_history`, `key_layout_inspector_query_mode`, `key_layout_inspector_field_mode_introduced`, `key_layout_inspector_selector_mode_introduced`, `key_layout_inspector_filter_profiles`, `key_layout_inspector_filter_profile_selected` |
 | 字符串 | `res/values{,-ar,-en,-es,-fr,-ja,-ko,-ru,-zh,-zh-rHK,-zh-rTW}/strings.xml` |
 | 单测 | `app/src/test/java/org/autojs/autojs/core/accessibility/inspector/*Test.kt`, 复用 `app/src/test/java/org/autojs/autojs/core/automator/FakeUiNode.kt` |
 | 文档 | 本文, `docs/dev/layout-inspector-search-architecture.md` (P6.2) |
@@ -203,7 +203,7 @@
 | `key` | 无参重载 (布尔为 true) | `clickable`, `scrollable` |
 | `!key` | 布尔为 false | `!enabled` |
 
-选择器模式 (D12) 支持的字面量: `"str"` / `'str'` (含转义), 整数与小数, `true` / `false`, `/re/flags`; 方法名以 `SelectorRegistry.names` 为准 (与脚本 `UiSelector` 一致), 可选前缀 `selector().` / `$().`.
+选择器模式 (D12) 支持的字面量: `"str"` / `'str'` (含转义), 整数与小数, `true` / `false`, `/re/flags`; 方法名以 `SelectorRegistry.names` 为准 (与脚本 `UiSelector` 一致), 可选前缀 `selector().` / `$().`. 正则字面量只能出现在脚本接受 `RegExp` 的位置 (`name` / `nameContains` / `nameMatch` / `nameMatches`), 落地为对应 `Match` / `Matches` 方法的 JS 字面量字符串重载 (P5.1).
 
 类名预设清单 (D18, `ClassPreset`, P3.2 落地时固定; 规则按简化类名匹配, 导出为等价的 `classNameMatches("...")` 正则):
 
