@@ -231,8 +231,30 @@ class SelectorRegistryTest {
 
     @Test
     fun theTableHasTheExpectedSize() {
-        assertEquals(125, SelectorRegistry.entries.size)
-        assertEquals(192, SelectorRegistry.entries.sumOf { it.overloads.size })
+        assertEquals(129, SelectorRegistry.entries.size)
+        assertEquals(196, SelectorRegistry.entries.sumOf { it.overloads.size })
+    }
+
+    @Test
+    fun integerBoundsFilterInclusively() {
+        // icon: depth 1, indexInParent 0; login: depth 0, childCount 1 (layout inspector roadmap D19).
+        val icon = login.find("icon")
+        assertTrue(filterOf("minDepth", 1).filter(icon))
+        assertFalse(filterOf("minDepth", 2).filter(icon))
+        assertTrue(filterOf("maxDepth", 1).filter(icon))
+        assertFalse(filterOf("maxDepth", 0).filter(icon))
+        assertTrue(filterOf("minIndexInParent", 0).filter(icon))
+        assertFalse(filterOf("minIndexInParent", 1).filter(icon))
+        assertTrue(filterOf("maxIndexInParent", 0).filter(icon))
+        assertTrue(filterOf("minChildCount", 1).filter(login))
+        assertFalse(filterOf("maxChildCount", 0).filter(login))
+        assertEquals("minDepth(3)", filterOf("minDepth", 3).toString())
+        assertEquals("maxIndexInParent(2)", filterOf("maxIndexInParent", 2.0).toString())
+        assertEquals(Outcome.NO_MATCHING_OVERLOAD, outcome("minDepth", "x", lenient = true))
+        assertEquals(Outcome.NO_MATCHING_OVERLOAD, outcome("maxDepth", null))
+        assertEquals(Outcome.NO_MATCHING_OVERLOAD, outcome("minIndexInParent"))
+        assertEquals(1, SelectorRegistry.entry("minDepth")!!.getter!!(icon))
+        assertEquals(0, SelectorRegistry.entry("maxIndexInParent")!!.getter!!(icon))
     }
 
 }
