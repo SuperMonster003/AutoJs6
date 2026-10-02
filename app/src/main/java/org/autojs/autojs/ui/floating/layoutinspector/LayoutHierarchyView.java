@@ -13,11 +13,13 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,7 +27,6 @@ import androidx.annotation.Nullable;
 
 import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorMatchView;
-import org.autojs.autojs.ui.widget.LevelBeamView;
 import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
@@ -67,7 +68,8 @@ public class LayoutHierarchyView extends MultiLevelListView {
 
     private static final String WIDGET_PACKAGE_PREFIX = "android.widget.";
     private static final float ROW_TEXT_SIZE_SP = 14f;
-    private static final float ROW_EXTRA_WIDTH_DP = 5 + 3 + 3 + 10 + 10 + 5 + 8;
+    /** Row padding, icon, icon margin, text margins, row padding and slack (see `layout_hierarchy_view_item.xml`). zh-CN: 行内边距, 图标, 图标边距, 文字边距, 行内边距与余量 (见 `layout_hierarchy_view_item.xml`). */
+    private static final float ROW_EXTRA_WIDTH_DP = 5 + 12 + 4 + 3 + 3 + 5 + 8;
     private static final int MAX_CONTENT_WIDTH_SCREENS = 3;
 
     private Adapter mAdapter;
@@ -93,8 +95,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private NodeInfo mRootNode;
     private int mContentWidth;
     private TextPaint mRowTextPaint;
-    private float mRowBeamPadding;
-    private float mRowBeamStep;
+    private float mRowIndentStep;
     private float mRowExtraWidth;
     private final Set<NodeInfo> mInitiallyExpandedNodes = new HashSet<>();
     /** Ancestors of the selected node, root included, the node itself excluded. zh-CN: 选中节点的祖先集合, 含根, 不含自身. */
@@ -294,8 +295,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private void initRowMetrics() {
         mRowTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mRowTextPaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, ROW_TEXT_SIZE_SP, getResources().getDisplayMetrics()));
-        mRowBeamPadding = getResources().getDimension(R.dimen.level_beam_view_padding_left) + getResources().getDimension(R.dimen.level_beam_view_padding_right);
-        mRowBeamStep = getResources().getDimension(R.dimen.level_beam_view_line_width) + getResources().getDimension(R.dimen.level_beam_view_line_offset);
+        mRowIndentStep = getResources().getDimension(R.dimen.layout_hierarchy_view_indent_step);
         mRowExtraWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ROW_EXTRA_WIDTH_DP, getResources().getDisplayMetrics());
     }
 
@@ -310,7 +310,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
         for (int i = 0; i < mAdapter.getDisplayedItemCount(); i++) {
             NodeInfo node = (NodeInfo) mAdapter.getDisplayedObject(i);
             int level = mAdapter.getDisplayedItemInfo(i).getLevel();
-            float width = mRowBeamPadding + (level + 1) * mRowBeamStep + mRowTextPaint.measureText(summarize(node)) + mRowExtraWidth;
+            float width = level * mRowIndentStep + mRowTextPaint.measureText(summarize(node)) + mRowExtraWidth;
             if (width > max) max = width;
         }
         int contentWidth = (int) Math.ceil(max);
@@ -444,15 +444,15 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private static class ViewHolder {
         TextView nameView;
         TextView infoView;
-        ImageView arrowView;
-        LevelBeamView levelBeamView;
+        ImageView iconView;
+        Space indentView;
         NodeInfo nodeInfo;
 
         ViewHolder(View view) {
             infoView = view.findViewById(R.id.dataItemInfo);
             nameView = view.findViewById(R.id.dataItemName);
-            arrowView = view.findViewById(R.id.dataItemArrow);
-            levelBeamView = view.findViewById(R.id.dataItemLevelBeam);
+            iconView = view.findViewById(R.id.dataItemIcon);
+            indentView = view.findViewById(R.id.dataItemIndent);
         }
     }
 
@@ -518,16 +518,23 @@ public class LayoutHierarchyView extends MultiLevelListView {
                 viewHolder.infoView.setText(getItemInfoDsc(itemInfo));
             }
 
-            if (itemInfo.isExpandable() && !isAlwaysExpanded()) {
-                viewHolder.arrowView.setVisibility(View.VISIBLE);
-                viewHolder.arrowView.setImageResource(itemInfo.isExpanded()
-                        ? R.drawable.arrow_up
-                        : R.drawable.arrow_down);
+            // The icon sits right before the text and tells the row apart: collapsed (tap to expand),
+            // expanded (tap to collapse) or a leaf; the indent alone conveys the nesting.
+            // zh-CN: 图标紧靠文字之前并区分行的状态: 已收起 (点击展开), 已展开 (点击收起) 或无子孙; 嵌套关系仅由缩进体现.
+            if (itemInfo.isExpandable()) {
+                viewHolder.iconView.setImageResource(itemInfo.isExpanded() || isAlwaysExpanded()
+                        ? R.drawable.ic_hierarchy_expanded
+                        : R.drawable.ic_hierarchy_collapsed);
             } else {
-                viewHolder.arrowView.setVisibility(View.GONE);
+                viewHolder.iconView.setImageResource(R.drawable.ic_hierarchy_leaf);
             }
 
-            viewHolder.levelBeamView.setLevel(itemInfo.getLevel());
+            int indent = Math.round(itemInfo.getLevel() * mRowIndentStep);
+            ViewGroup.LayoutParams indentParams = viewHolder.indentView.getLayoutParams();
+            if (indentParams.width != indent) {
+                indentParams.width = indent;
+                viewHolder.indentView.setLayoutParams(indentParams);
+            }
             return convertView;
         }
 

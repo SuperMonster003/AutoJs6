@@ -20,10 +20,9 @@
     <dimen name="icon_developer_identifier_image_padding">5dp</dimen>
     <dimen name="icon_developer_identifier_image_side_length">48dp</dimen>
     <dimen name="icon_developer_identifier_image_side_length_compact">40dp</dimen>
-    <dimen name="level_beam_view_line_offset">3dp</dimen>
-    <dimen name="level_beam_view_line_width">2dp</dimen>
-    <dimen name="level_beam_view_padding_left">2dp</dimen>
-    <dimen name="level_beam_view_padding_right">-2dp</dimen>
+    <dimen name="layout_hierarchy_view_indent_step">5dp</dimen>
+    <dimen name="layout_hierarchy_view_row_icon_margin_end">4dp</dimen>
+    <dimen name="layout_hierarchy_view_row_icon_size">12dp</dimen>
     <dimen name="padding_circular_menu_normal">5dp</dimen>
     <dimen name="padding_circular_menu_recording">8dp</dimen>
     <dimen name="script_and_folder_list_divider_left_margin">0dp</dimen>

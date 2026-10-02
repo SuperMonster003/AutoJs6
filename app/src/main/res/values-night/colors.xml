@@ -26,7 +26,7 @@
     <color name="console_view_debug">#DFE0E0E0</color>
     <color name="console_view_verbose">#7F7F80</color>
 
-    <color name="layout_hierarchy_view_level_beam_5">@color/md_lime_500</color>
+    <color name="layout_hierarchy_view_row_icon">#CCBFBFBF</color>
 
     <color name="dialog_button_advanced_settings">@color/md_blue_gray_200</color>
     <color name="dialog_button_default">#03A9F4</color>

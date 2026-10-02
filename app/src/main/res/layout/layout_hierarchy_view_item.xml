@@ -6,11 +6,24 @@
         android:layout_height="32dp"
         android:padding="5dp">
 
-    <org.autojs.autojs.ui.widget.LevelBeamView
-            android:id="@+id/dataItemLevelBeam"
+    <!-- Indent only (its width is set per level by the adapter); the former level beams are gone. zh-CN: 仅缩进 (宽度由适配器按层级设置); 原来的层级竖线已去除. -->
+    <Space
+            android:id="@+id/dataItemIndent"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_centerVertical="true" />
+
+    <!-- Collapsed (chevron right), expanded (chevron down) or leaf (hollow circle). zh-CN: 已收起 (右箭头), 已展开 (下箭头) 或无子孙 (空心圆). -->
+    <ImageView
+            android:id="@+id/dataItemIcon"
+            android:layout_width="@dimen/layout_hierarchy_view_row_icon_size"
+            android:layout_height="@dimen/layout_hierarchy_view_row_icon_size"
             android:layout_centerVertical="true"
-            android:layout_width="wrap_content"
-            android:layout_height="28dp" />
+            android:layout_marginEnd="@dimen/layout_hierarchy_view_row_icon_margin_end"
+            android:layout_toEndOf="@id/dataItemIndent"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_hierarchy_leaf"
+            app:tint="@color/layout_hierarchy_view_row_icon" />
 
     <LinearLayout
             android:layout_width="wrap_content"
@@ -18,8 +31,7 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="3dp"
             android:layout_marginEnd="3dp"
-            android:layout_toStartOf="@+id/dataItemArrow"
-            android:layout_toEndOf="@+id/dataItemLevelBeam"
+            android:layout_toEndOf="@id/dataItemIcon"
             android:gravity="start|center_vertical"
             android:orientation="vertical">
 
@@ -41,16 +53,5 @@
                 android:textSize="12sp"
                 android:visibility="gone" />
     </LinearLayout>
-
-    <ImageView
-            android:id="@+id/dataItemArrow"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
-            android:src="@drawable/arrow_down"
-            android:alpha="0.8"
-            app:tint="@color/day_night" />
 
 </RelativeLayout>

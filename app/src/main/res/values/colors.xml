@@ -74,11 +74,7 @@
     <color name="floating_console_view_error">#FFCDD2</color>
     <color name="floating_console_view_assert">#FCE4EC</color>
 
-    <color name="layout_hierarchy_view_level_beam_1">@color/md_light_blue_500</color>
-    <color name="layout_hierarchy_view_level_beam_2">@color/md_light_blue_500</color>
-    <color name="layout_hierarchy_view_level_beam_3">@color/md_teal_500</color>
-    <color name="layout_hierarchy_view_level_beam_4">@color/md_teal_500</color>
-    <color name="layout_hierarchy_view_level_beam_5">@color/md_orange_500</color>
+    <color name="layout_hierarchy_view_row_icon">#CC212121</color>
 
     <color name="dialog_button_advanced_settings">@color/md_blue_gray_800</color>
     <color name="dialog_button_attraction">#7B1FA2</color>

@@ -99,7 +99,7 @@
             android:contentDescription="@string/text_inspector_regex_mode"
             android:padding="7dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_regex"
+            android:src="@drawable/ic_inspector_regex"
             android:tint="@color/day_night" />
 
     <TextView
