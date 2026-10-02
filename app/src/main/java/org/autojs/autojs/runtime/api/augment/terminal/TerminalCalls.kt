@@ -3,7 +3,6 @@ package org.autojs.autojs.runtime.api.augment.terminal
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
-import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils
@@ -28,10 +27,10 @@ import org.mozilla.javascript.Undefined
  */
 internal object TerminalCalls {
 
-    /** Runs [work] on the script thread until it completes and returns its outcome as a script value. zh-CN: 在脚本线程上运行 [work] 直到完成并把结果作为脚本值返回. */
+    /** Runs [work] on the script thread until it completes (pumping this thread's terminal events meanwhile) and returns its outcome as a script value. zh-CN: 在脚本线程上运行 [work] 直到完成 (期间泵送本线程的终端事件) 并把结果作为脚本值返回. */
     fun sync(scriptRuntime: ScriptRuntime, work: TerminalWork): Any? {
         try {
-            val value = runBlocking(scriptRuntime.coroutineContext) { work(null) }
+            val value = TerminalPromises.sync(scriptRuntime) { work(null) }
             val produced = if (value is TerminalPromises.OnScriptThread) value.produce() else value
             return RhinoUtils.toJsValue(scriptRuntime.topLevelScope, produced)
         } catch (t: Throwable) {

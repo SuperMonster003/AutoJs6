@@ -242,7 +242,7 @@ class Terminal(
         val request = TerminalScriptArguments.request(options, service.cwd())
         return { _ ->
             val session = service.open(request, show = options.show)
-            TerminalPromises.OnScriptThread { TerminalSessionNativeObject(scriptRuntime, service, session) }
+            TerminalPromises.OnScriptThread { TerminalSessionNativeObject(scriptRuntime, service, session, replayOutput = true) }
         }
     }
 
@@ -280,13 +280,14 @@ class Terminal(
     private fun npmRunWork(script: Any?, dir: Any?, options: Any?): TerminalWork =
         runWork(TerminalScriptArguments.npmRun(TerminalCalls.json(script), TerminalCalls.json(dir), TerminalCalls.json(options)))
 
-    /** `exec` / `npm.run`: open with the command, then wait for the exit when `wait` (P4.2 adds the output pipe). zh-CN: `exec` / `npm.run`: 带命令打开, `wait` 时再等待退出 (P4.2 加输出管道). */
+    /** `exec` / `npm.run`: registers the exit callback, opens with the command, then waits for the exit when `wait`. zh-CN: `exec` / `npm.run`: 登记退出回调, 带命令打开, `wait` 时再等待退出. */
     private fun runWork(exec: TerminalScriptArguments.Exec): TerminalWork {
         val request = TerminalScriptArguments.request(exec.open, service.cwd(), exec.command, exec.keepOpen)
         return { _ ->
+            service.ensureCallback()
             var session = service.open(request, show = exec.open.show)
             if (exec.wait) session = service.awaitExit(session, exec.timeoutMillis)
-            TerminalPromises.OnScriptThread { TerminalSessionNativeObject(scriptRuntime, service, session) }
+            TerminalPromises.OnScriptThread { TerminalSessionNativeObject(scriptRuntime, service, session, exec.stripAnsi, replayOutput = true) }
         }
     }
 

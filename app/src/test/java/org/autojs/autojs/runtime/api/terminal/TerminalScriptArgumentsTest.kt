@@ -195,6 +195,34 @@ class TerminalScriptArgumentsTest {
         assertEquals("not_installed", TerminalScriptArguments.stateName(TerminalPluginState.NOT_INSTALLED))
     }
 
+    @Test
+    fun waitForAndTranscriptArgumentsAreChecked() {
+        assertEquals(TerminalScriptArguments.DEFAULT_WAIT_TIMEOUT_MILLIS, TerminalScriptArguments.waitTimeout(null))
+        assertEquals(0L, TerminalScriptArguments.waitTimeout(json("0")))
+        assertEquals(60_000L, TerminalScriptArguments.waitTimeout(json("60000")))
+        assertTrue(invalidMessage { TerminalScriptArguments.waitTimeout(json("-5")) }.contains("'timeout' must be a non-negative integer"))
+        assertTrue(invalidMessage { TerminalScriptArguments.waitTimeout(json("\"soon\"")) }.contains("'timeout' must be a non-negative number"))
+
+        assertEquals(TerminalContract.MAX_TRANSCRIPT_BYTES, TerminalScriptArguments.transcriptMaxBytes(null))
+        assertEquals(10, TerminalScriptArguments.transcriptMaxBytes(json("10")))
+        assertEquals(TerminalContract.MAX_TRANSCRIPT_BYTES, TerminalScriptArguments.transcriptMaxBytes(json("${TerminalContract.MAX_TRANSCRIPT_BYTES}")))
+        assertTrue(invalidMessage { TerminalScriptArguments.transcriptMaxBytes(json("0")) }.contains("within 1..${TerminalContract.MAX_TRANSCRIPT_BYTES}"))
+        assertTrue(invalidMessage { TerminalScriptArguments.transcriptMaxBytes(json("${TerminalContract.MAX_TRANSCRIPT_BYTES + 1}")) }.contains("within 1..${TerminalContract.MAX_TRANSCRIPT_BYTES}"))
+        assertTrue(invalidMessage { TerminalScriptArguments.transcriptMaxBytes(json("1.5")) }.contains("must be an integer"))
+        assertTrue(invalidMessage { TerminalScriptArguments.transcriptMaxBytes(json("\"all\"")) }.contains("'maxBytes' must be a number"))
+
+        val regex = TerminalScriptArguments.lineMatcher("/line2|Is this OK\\?/i", null)
+        assertTrue(regex("LINE2 done"))
+        assertTrue(regex("Is this OK? (yes)"))
+        assertFalse(regex("line3"))
+        val plain = TerminalScriptArguments.lineMatcher(null, "ok?")
+        assertTrue(plain("Is this ok? yes"))
+        assertFalse(plain("Is this ok"))
+        assertTrue(invalidMessage { TerminalScriptArguments.lineMatcher(null, "") }.contains("'pattern' must not be empty"))
+        assertTrue(invalidMessage { TerminalScriptArguments.lineMatcher(null, null) }.contains("'pattern' must be a string or a RegExp"))
+        assertTrue(invalidMessage { TerminalScriptArguments.lineMatcher("/(/", null) }.contains("'pattern' is not a valid regular expression"))
+    }
+
     private fun json(text: String): JsonElement = JsonParser.parseString(text)
 
     private fun invalidMessage(block: () -> Unit): String {

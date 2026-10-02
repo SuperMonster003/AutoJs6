@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.terminal
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import org.autojs.autojs.core.automator.filter.JsRegexUtils
 import org.autojs.autojs.core.plugin.terminal.TerminalErrorMapper
 import org.autojs.autojs.core.plugin.terminal.TerminalJson
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginException
@@ -167,6 +168,43 @@ internal object TerminalScriptArguments {
 
     /** The five-state name of `terminal.state()` (appendix A.1). zh-CN: `terminal.state()` 的五态名称 (附录 A.1). */
     fun stateName(state: TerminalPluginState): String = state.name.lowercase()
+
+    // ------------------------------------------------------------------ third tier (P4.2)
+
+    /** `waitFor(pattern, timeout?)`: milliseconds, `0` for no limit, default [DEFAULT_WAIT_TIMEOUT_MILLIS]. zh-CN: `waitFor(pattern, timeout?)`: 毫秒, `0` 表示不限, 默认 [DEFAULT_WAIT_TIMEOUT_MILLIS]. */
+    fun waitTimeout(value: JsonElement?, label: String = TIMEOUT): Long =
+        if (value == null || value.isJsonNull) DEFAULT_WAIT_TIMEOUT_MILLIS else millis(value, label)
+
+    /** `transcript(maxBytes?)`: `1..MAX_TRANSCRIPT_BYTES`, default the maximum. zh-CN: `transcript(maxBytes?)`: `1..MAX_TRANSCRIPT_BYTES`, 默认取最大值. */
+    fun transcriptMaxBytes(value: JsonElement?, label: String = "maxBytes"): Int {
+        if (value == null || value.isJsonNull) return TerminalContract.MAX_TRANSCRIPT_BYTES
+        val number = value.takeIf { it.isJsonPrimitive && it.asJsonPrimitive.isNumber }?.asDouble
+            ?: throw invalid("'$label' must be a number of bytes, got ${brief(value)}")
+        if (number.isNaN() || number != floor(number) || number < 1 || number > TerminalContract.MAX_TRANSCRIPT_BYTES) {
+            throw invalid("'$label' must be an integer within 1..${TerminalContract.MAX_TRANSCRIPT_BYTES}, got ${value.asJsonPrimitive.asString}")
+        }
+        return number.toInt()
+    }
+
+    /**
+     * The line test of `waitFor`: [regexLiteral] is a JavaScript RegExp as `RegExp.toString()`
+     * renders it (`/.../flags`, compiled like the selector API does), otherwise [text] is a
+     * non-empty substring.
+     * zh-CN: `waitFor` 的行判定: [regexLiteral] 是 `RegExp.toString()` 形态的 JavaScript 正则 (`/.../flags`, 像选择器 API 一样编译), 否则 [text] 为非空子串.
+     */
+    fun lineMatcher(regexLiteral: String?, text: String?, label: String = "pattern"): (String) -> Boolean {
+        if (regexLiteral != null) {
+            val regex = try {
+                JsRegexUtils.compileJsOrPlainRegex(regexLiteral)
+            } catch (e: RuntimeException) {
+                throw invalid("'$label' is not a valid regular expression: ${e.message.orEmpty()}")
+            }
+            return { line -> regex.containsMatchIn(line) }
+        }
+        if (text == null) throw invalid("'$label' must be a string or a RegExp")
+        if (text.isEmpty()) throw invalid("'$label' must not be empty")
+        return { line -> line.contains(text) }
+    }
 
     fun invalid(message: String): TerminalPluginException =
         TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.INVALID_ARGUMENT, message))

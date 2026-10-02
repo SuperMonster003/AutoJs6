@@ -3,10 +3,17 @@ package org.autojs.autojs.runtime.api.terminal
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.core.plugin.terminal.TerminalError
 import org.autojs.autojs.core.plugin.terminal.TerminalErrorMapper
 import org.autojs.autojs.core.plugin.terminal.TerminalInspection
@@ -20,34 +27,85 @@ import org.autojs.autojs.core.plugin.terminal.TerminalPluginState
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginStateMonitor
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs6.R
+import org.autojs.plugin.terminal.api.ITerminalCallback
 import org.autojs.plugin.terminal.api.TerminalContract
 import org.autojs.plugin.terminal.api.TerminalErrorCodes
 import java.io.Closeable
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Per-script owner of the `terminal` script API (plugin roadmap P4.1): the Binder calls of the
- * 3-Shell Terminal plugin a script makes, the `TERMINAL_OPEN` screen starts (D19), the exit
- * wait of `exec({ wait: true })` and the script's working directory. Sessions belong to the
- * plugin and its user, not to the script: [close] runs on script exit, refuses later calls and
- * (from P4.2 on) drops the output subscriptions, but closes no session; a session started with
- * `keepOpen: false` ends itself when its command ends. Plugin-availability refusals
- * (`PLUGIN_UNAVAILABLE`, `PLUGIN_INCOMPATIBLE`) get the localized hint of the plugin center in
- * front of the technical message.
- * zh-CN: `terminal` 脚本 API 的每脚本属主 (插件路线图 P4.1): 脚本对 3-Shell Terminal 插件发起的 Binder 调用, `TERMINAL_OPEN` 界面启动 (D19),
- * `exec({ wait: true })` 的退出等待与脚本工作目录. 会话属于插件及其用户而非脚本: [close] 在脚本退出时运行, 拒绝之后的调用并 (自 P4.2 起) 丢弃输出订阅,
- * 但不关闭任何会话; 以 `keepOpen: false` 启动的会话在命令结束时自行结束. 插件可用性拒绝 (`PLUGIN_UNAVAILABLE`, `PLUGIN_INCOMPATIBLE`) 在技术信息前加上
- * 插件中心的本地化提示.
+ * Per-script owner of the `terminal` script API (plugin roadmap P4.1 and P4.2): the Binder calls
+ * of the 3-Shell Terminal plugin a script makes, the `TERMINAL_OPEN` screen starts (D19), the
+ * script's working directory, and (P4.2) the plugin callback with its exit codes and overflow
+ * reports, the output subscriptions with their pipe pumps, and the waits behind
+ * `exec({ wait: true })` and `waitFor`. The callback is registered over a dedicated binding lease
+ * the first time a script needs events, so the plugin stays bound for the script's life (D26).
+ * Sessions belong to the plugin and its user, not to the script: [close] runs on script exit,
+ * refuses later calls, cancels the subscriptions, drops the callback and the lease, but closes no
+ * session; a session started with `keepOpen: false` ends itself when its command ends.
+ * Plugin-availability refusals (`PLUGIN_UNAVAILABLE`, `PLUGIN_INCOMPATIBLE`) get the localized
+ * hint of the plugin center in front of the technical message.
+ * zh-CN: `terminal` 脚本 API 的每脚本属主 (插件路线图 P4.1 与 P4.2): 脚本对 3-Shell Terminal 插件发起的 Binder 调用, `TERMINAL_OPEN` 界面启动 (D19), 脚本
+ * 工作目录, 以及 (P4.2) 带退出码与溢出报告的插件回调, 带管道泵的输出订阅, `exec({ wait: true })` 与 `waitFor` 背后的等待. 脚本首次需要事件时经专用绑定租约
+ * 注册回调, 因此插件在脚本存续期间保持绑定 (D26). 会话属于插件及其用户而非脚本: [close] 在脚本退出时运行, 拒绝之后的调用, 取消订阅, 丢弃回调与租约, 但不
+ * 关闭任何会话; 以 `keepOpen: false` 启动的会话在命令结束时自行结束. 插件可用性拒绝 (`PLUGIN_UNAVAILABLE`, `PLUGIN_INCOMPATIBLE`) 在技术信息前加上插件中心的
+ * 本地化提示.
  */
 class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime) : Closeable {
+
+    /** One live output subscription of this script; [cancel] ends it. zh-CN: 本脚本的一个活动输出订阅; [cancel] 结束它. */
+    inner class Subscription internal constructor(val id: String, val sessionId: String, internal val pump: TerminalOutputPump) {
+        val isFinished: Boolean
+            get() = pump.isFinished
+
+        fun cancel() = unsubscribe(this)
+        internal fun start() = pump.start()
+    }
 
     /** The application context the plugin is bound with. zh-CN: 绑定插件所用的应用上下文. */
     val appContext: Context = context.applicationContext
 
     private val closed = AtomicBoolean(false)
 
+    private val callbackLock = Any()
+    private val callbackMutex = Mutex()
+    private var callbackLease: Closeable? = null
+
+    private val exitLock = Any()
+    private val exitCodes = LinkedHashMap<String, Int>()
+    private val exitListeners = HashMap<String, MutableList<(Int) -> Unit>>()
+
+    private val overflowListeners = ConcurrentHashMap<String, (Long) -> Unit>()
+    private val subscriptions = ConcurrentHashMap<String, Subscription>()
+
+    private val callback = object : ITerminalCallback.Stub() {
+        override fun onSessionsChanged(count: Int, sessionsJson: String?) = Unit
+
+        override fun onSessionExited(sessionId: String?, exitCode: Int) {
+            val id = sessionId?.takeIf { it.isNotBlank() } ?: return
+            val listeners = synchronized(exitLock) {
+                exitCodes[id] = exitCode
+                while (exitCodes.size > MAX_REMEMBERED_EXITS) exitCodes.remove(exitCodes.keys.first())
+                exitListeners.remove(id)
+            }
+            listeners?.forEach { listener ->
+                runCatching { listener(exitCode) }.onFailure { Log.w(TAG, "exit listener of session $id failed: ${it.message}") }
+            }
+        }
+
+        override fun onOutputOverflow(sessionId: String?, subscriptionId: String?, droppedBytes: Long) {
+            val listener = subscriptionId?.let(overflowListeners::get) ?: return
+            runCatching { listener(droppedBytes) }.onFailure { Log.w(TAG, "overflow listener of $subscriptionId failed: ${it.message}") }
+        }
+    }
+
     val isClosed: Boolean
         get() = closed.get()
+
+    /** How many output subscriptions are live right now. zh-CN: 当前活动的输出订阅数. */
+    val subscriptionCount: Int
+        get() = subscriptions.size
 
     /** The script's working directory, the default `cwd` of every request. zh-CN: 脚本工作目录, 每个请求的默认 `cwd`. */
     fun cwd(): String? = scriptRuntime.files.cwd()
@@ -75,33 +133,11 @@ class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime
 
     /** Opens a session from the validated [request] and shows its screen when [show]. zh-CN: 以已校验的 [request] 打开会话, [show] 时显示其界面. */
     suspend fun open(request: TerminalJson.OpenRequest, show: Boolean): TerminalJson.Session {
-        ensureOpen()
+        ensureCallback()
         val session = guarded { TerminalPluginHost.openSession(appContext, request) }
         TerminalPluginStateMonitor.refresh(TerminalPluginStateMonitor.Cause.REFRESHED)
         if (show) show(session.id)
         return session
-    }
-
-    /**
-     * Waits until [session] exited and returns its last known document; a session the plugin no
-     * longer lists (a `keepOpen: false` session is dropped as soon as its command ended) counts as
-     * exited with the exit code last seen. [timeoutMillis] `0` means no limit, otherwise `TIMEOUT`.
-     * P4.2 replaces the polling with the plugin's exit callback, which also carries the exit code.
-     * zh-CN: 等待 [session] 退出并返回其最后已知文档; 插件不再列出的会话 (`keepOpen: false` 的会话在命令结束时即被移除) 以最后所见退出码视为已退出.
-     * [timeoutMillis] 为 `0` 表示不限, 否则超时为 `TIMEOUT`. P4.2 以插件的退出回调取代轮询, 回调同时带退出码.
-     */
-    suspend fun awaitExit(session: TerminalJson.Session, timeoutMillis: Long): TerminalJson.Session {
-        suspend fun poll(): TerminalJson.Session {
-            var latest = session
-            while (!latest.isExited) {
-                latest = session(session.id) ?: return latest.copy(alive = false, state = TerminalContract.STATE_EXITED)
-                if (!latest.isExited) delay(EXIT_POLL_MILLIS)
-            }
-            return latest
-        }
-        if (timeoutMillis <= 0L) return poll()
-        return withTimeoutOrNull(timeoutMillis) { poll() }
-            ?: throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.TIMEOUT, "terminal session ${session.id} did not exit within $timeoutMillis ms", session.id))
     }
 
     suspend fun close(id: String): Boolean = guarded { TerminalPluginHost.closeSession(appContext, id) }
@@ -115,6 +151,9 @@ class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime
     }
 
     suspend fun environment(): TerminalJson.Environment = guarded { TerminalPluginHost.getEnvironment(appContext) }
+
+    /** `transcript(maxBytes?)`: the session's screen and scrollback text. zh-CN: `transcript(maxBytes?)`: 会话的屏幕与回滚文本. */
+    suspend fun transcript(id: String, maxBytes: Int): TerminalPluginHost.Transcript = guarded { TerminalPluginHost.readTranscript(appContext, id, maxBytes) }
 
     /**
      * Shows session [id], or the plugin's most recent session (a new one at home when none) for
@@ -147,6 +186,181 @@ class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime
         }
     }
 
+    // ------------------------------------------------------------------ events (P4.2)
+
+    /**
+     * Registers the script's plugin callback once, over a dedicated binding lease that is held
+     * until [close]; later calls are free. Must run before a session whose exit matters is opened,
+     * so a fast exit is not missed.
+     * zh-CN: 经专用绑定租约注册一次脚本的插件回调, 租约持有到 [close]; 之后的调用无开销. 须在打开关心退出的会话之前运行, 以免错过很快的退出.
+     */
+    suspend fun ensureCallback() = callbackMutex.withLock {
+        ensureOpen()
+        if (synchronized(callbackLock) { callbackLease != null }) return@withLock
+        // Binder registration cannot be cancelled halfway: retain or release the acquired lease.
+        withContext(NonCancellable) {
+            val lease = guarded { TerminalPluginHost.registerCallbackLeased(appContext, callback) }
+            val kept = synchronized(callbackLock) {
+                if (!closed.get()) {
+                    callbackLease = lease
+                    true
+                } else false
+            }
+            if (!kept) {
+                runCatching { TerminalPluginHost.unregisterCallback(appContext, callback) }
+                runCatching { lease.close() }
+            }
+        }
+        ensureOpen()
+    }
+
+    /** The exit code the plugin reported for [sessionId], when this script's callback saw it. zh-CN: 插件为 [sessionId] 报告过的退出码 (本脚本的回调看到时). */
+    fun exitCodeOf(sessionId: String): Int? = synchronized(exitLock) { exitCodes[sessionId] }
+
+    /**
+     * Calls [listener] once with the exit code of [sessionId]: right away when it is already known,
+     * otherwise from the plugin callback's thread. Returns the handle that withdraws the listener.
+     * zh-CN: 以 [sessionId] 的退出码调用 [listener] 一次: 已知时立即调用, 否则在插件回调线程上调用. 返回撤回监听器的句柄.
+     */
+    fun onExit(sessionId: String, listener: (Int) -> Unit): () -> Unit {
+        val known = synchronized(exitLock) {
+            exitCodes[sessionId] ?: run {
+                exitListeners.getOrPut(sessionId) { mutableListOf() }.add(listener)
+                null
+            }
+        }
+        if (known != null) {
+            listener(known)
+            return {}
+        }
+        return {
+            synchronized(exitLock) {
+                exitListeners[sessionId]?.let { list ->
+                    list.remove(listener)
+                    if (list.isEmpty()) exitListeners.remove(sessionId)
+                }
+            }
+        }
+    }
+
+    /**
+     * Waits until [session] exited and returns its document with the exit code the plugin
+     * reported through the callback; a session the plugin no longer lists without a report counts
+     * as exited with the code last seen. [timeoutMillis] `0` means no limit, otherwise `TIMEOUT`.
+     * zh-CN: 等待 [session] 退出并返回带插件经回调报告的退出码的文档; 插件不再列出却无报告的会话以最后所见退出码视为已退出. [timeoutMillis] 为 `0` 表示不限,
+     * 否则超时为 `TIMEOUT`.
+     */
+    suspend fun awaitExit(session: TerminalJson.Session, timeoutMillis: Long): TerminalJson.Session {
+        ensureCallback()
+        exitCodeOf(session.id)?.let { return exited(session, it) }
+        val reported = CompletableDeferred<Int>()
+        val withdraw = onExit(session.id) { code -> reported.complete(code) }
+        try {
+            suspend fun poll(): TerminalJson.Session {
+                var latest = session
+                while (true) {
+                    withTimeoutOrNull(EXIT_POLL_MILLIS) { reported.await() }?.let { return exited(latest, it) }
+                    val current = session(session.id)
+                    if (current == null) {
+                        // Gone from the list: the exit report may still be a moment behind. zh-CN: 已不在列表: 退出报告可能稍后才到.
+                        withTimeoutOrNull(EXIT_GRACE_MILLIS) { reported.await() }?.let { return exited(latest, it) }
+                        return exited(latest, exitCodeOf(session.id) ?: latest.exitCode)
+                    }
+                    latest = current
+                    if (current.isExited) return exited(current, exitCodeOf(session.id) ?: current.exitCode)
+                }
+            }
+            if (timeoutMillis <= 0L) return poll()
+            return withTimeoutOrNull(timeoutMillis) { poll() }
+                ?: throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.TIMEOUT, "terminal session ${session.id} did not exit within $timeoutMillis ms", session.id))
+        } finally {
+            withdraw()
+        }
+    }
+
+    /**
+     * Subscribes to the output of [sessionId] and pumps the pipe into [reader] on a worker thread;
+     * the plugin's overflow reports reach [TerminalOutputReader.noteOverflow]. [fromStart] replays
+     * the transcript first.
+     * zh-CN: 订阅 [sessionId] 的输出并在工作线程上把管道泵入 [reader]; 插件的溢出报告送达 [TerminalOutputReader.noteOverflow]. [fromStart] 先回放转录.
+     */
+    internal suspend fun subscribe(sessionId: String, fromStart: Boolean, reader: TerminalOutputReader, startImmediately: Boolean = true): Subscription {
+        ensureCallback()
+        // The receiver must take ownership of an acquired fd even if script exit races Binder.
+        val opened = withContext(NonCancellable) { guarded { TerminalPluginHost.subscribeOutput(appContext, sessionId, fromStart) } }
+        val pump = TerminalOutputPump(opened.readEnd, reader) { finished ->
+            subscriptions.values.firstOrNull { it.pump === finished }?.let { ended ->
+                subscriptions.remove(ended.id)
+                overflowListeners.remove(ended.id)
+            }
+        }
+        val subscription = Subscription(opened.id, sessionId, pump)
+        subscriptions[opened.id] = subscription
+        overflowListeners[opened.id] = reader::noteOverflow
+        if (closed.get()) {
+            // The script exited while the plugin was answering. zh-CN: 插件应答期间脚本已退出.
+            unsubscribe(subscription)
+            ensureOpen()
+        }
+        if (startImmediately) pump.start()
+        return subscription
+    }
+
+    /** Cancels [subscription]: the plugin closes the write end (the pump ends at end of stream), then the read end is closed. zh-CN: 取消 [subscription]: 插件关闭写端 (泵在流结束时结束), 之后关闭读端. */
+    fun unsubscribe(subscription: Subscription) {
+        subscriptions.remove(subscription.id)
+        overflowListeners.remove(subscription.id)
+        subscription.pump.close()
+        subscription.pump.start()
+        releaseScope.launch {
+            runCatching { TerminalPluginHost.unsubscribeOutput(appContext, subscription.id) }
+        }
+    }
+
+    /**
+     * `waitFor`: the first output line of [sessionId] that satisfies [matcher], read from a
+     * subscription of its own that starts now; `TIMEOUT` after [timeoutMillis] (`0` = no limit),
+     * `SESSION_CLOSED` when the session ended first.
+     * zh-CN: `waitFor`: [sessionId] 自此刻起的专属订阅里第一条满足 [matcher] 的输出行; [timeoutMillis] (`0` 表示不限) 后为 `TIMEOUT`, 会话先结束则为
+     * `SESSION_CLOSED`.
+     */
+    suspend fun waitForLine(sessionId: String, stripAnsi: Boolean, matcher: (String) -> Boolean, timeoutMillis: Long): String {
+        val outcome = CompletableDeferred<String?>()
+        val reader = TerminalOutputReader(
+            object : TerminalOutputReader.Sink {
+                override fun onLine(line: String) {
+                    if (!outcome.isCompleted && matcher(line)) outcome.complete(line)
+                }
+
+                override fun onOverflow(droppedBytes: Long) = Unit
+
+                override fun onEnd() {
+                    outcome.complete(null)
+                }
+            },
+            stripAnsi,
+        )
+        val subscription = subscribe(sessionId, fromStart = false, reader)
+        try {
+            val settled = if (timeoutMillis <= 0L) {
+                outcome.await()
+                true
+            } else {
+                withTimeoutOrNull(timeoutMillis) {
+                    outcome.await()
+                    true
+                } ?: false
+            }
+            if (!settled) throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.TIMEOUT, "no output line matched within $timeoutMillis ms", sessionId))
+            return outcome.await()
+                ?: throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.SESSION_CLOSED, "terminal session $sessionId ended before a line matched", sessionId))
+        } finally {
+            unsubscribe(subscription)
+        }
+    }
+
+    // ------------------------------------------------------------------ lifecycle
+
     /** The plugin-availability failures with the localized hint in front (script-facing). zh-CN: 带本地化提示前缀的插件可用性失败 (面向脚本). */
     fun localized(e: TerminalPluginException): TerminalPluginException {
         if (e.code != TerminalErrorCodes.PLUGIN_UNAVAILABLE && e.code != TerminalErrorCodes.PLUGIN_INCOMPATIBLE) return e
@@ -156,7 +370,23 @@ class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime
     }
 
     override fun close() {
-        closed.compareAndSet(false, true)
+        if (!closed.compareAndSet(false, true)) return
+        val active = subscriptions.values.toList()
+        subscriptions.clear()
+        overflowListeners.clear()
+        synchronized(exitLock) { exitListeners.clear() }
+        val lease = synchronized(callbackLock) { callbackLease.also { callbackLease = null } }
+        active.forEach { it.pump.close(); it.pump.start() }
+        if (active.isEmpty() && lease == null) {
+            return
+        }
+        releaseScope.launch {
+            active.forEach { subscription -> runCatching { TerminalPluginHost.unsubscribeOutput(appContext, subscription.id) } }
+            if (lease != null) {
+                runCatching { TerminalPluginHost.unregisterCallback(appContext, callback) }
+                runCatching { lease.close() }
+            }
+        }
     }
 
     internal fun ensureOpen() {
@@ -164,6 +394,9 @@ class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime
             throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.SESSION_CLOSED, "the script is exiting"))
         }
     }
+
+    private fun exited(session: TerminalJson.Session, code: Int?): TerminalJson.Session =
+        session.copy(alive = false, state = TerminalContract.STATE_EXITED, exitCode = code ?: session.exitCode)
 
     private suspend fun <T> guarded(block: suspend () -> T): T {
         ensureOpen()
@@ -199,6 +432,12 @@ class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime
     }
 
     private companion object {
+        // Release jobs outlive a stopped script; closing one service must not cancel a queued
+        // unsubscribe while another script in the same process still owns the callback binding.
+        val releaseScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        const val TAG = "TerminalService"
         const val EXIT_POLL_MILLIS = 250L
+        const val EXIT_GRACE_MILLIS = 1_000L
+        const val MAX_REMEMBERED_EXITS = 64
     }
 }
