@@ -1469,7 +1469,11 @@
     <string name="text_inspector_clear_query_history">검색 기록 지우기</string>
     <string name="text_inspector_clear_region">영역 지우기</string>
     <string name="text_inspector_collapse_search_bar">검색창 접기</string>
+    <string name="text_inspector_copy_as_selector">선택자로 복사</string>
+    <string name="text_inspector_did_you_mean">다음을 의도했나요: %1$s</string>
     <string name="text_inspector_expand_search_bar">검색창 펼치기</string>
+    <string name="text_inspector_field_mode_intro">필드 모드: 조건을 공백으로 구분합니다. 예: text=확인 clickable, id~=btn_.*, !enabled, minDepth=3</string>
+    <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">필터 프로필</string>
     <string name="text_inspector_filter_tally">%1$s: 단독 일치 %2$d개, 적용 후 %3$d개 남음</string>
     <string name="text_inspector_has_desc">desc 있음</string>
@@ -1480,9 +1484,12 @@
     <string name="text_inspector_matches_title">일치 항목 (%1$d)</string>
     <string name="text_inspector_min_height">최소 높이 (px)</string>
     <string name="text_inspector_min_width">최소 너비 (px)</string>
+    <string name="text_inspector_mode_field">필드</string>
+    <string name="text_inspector_mode_keyword">키워드</string>
     <string name="text_inspector_next_match">다음 일치 항목</string>
     <string name="text_inspector_no_matching_nodes">일치하는 노드가 없습니다</string>
     <string name="text_inspector_no_node_matches_keyword">키워드와 일치하는 노드가 없습니다</string>
+    <string name="text_inspector_nothing_to_copy">복사할 조건이 없습니다</string>
     <string name="text_inspector_on_screen_only">화면 내만</string>
     <string name="text_inspector_preset_button">버튼</string>
     <string name="text_inspector_preset_container">컨테이너</string>
@@ -1504,6 +1511,7 @@
     <string name="text_inspector_profile_saved">프로필을 저장했습니다</string>
     <string name="text_inspector_profile_unsaved_content">현재 프로필에 저장하지 않은 변경 사항이 있습니다. 저장, 새 프로필로 저장, 또는 버릴까요?</string>
     <string name="text_inspector_profile_unsaved_title">저장하지 않은 변경 사항</string>
+    <string name="text_inspector_query_mode">쿼리 모드: %1$s</string>
     <string name="text_inspector_query_mode_unavailable">이 쿼리 모드는 아직 사용할 수 없습니다</string>
     <string name="text_inspector_range_max">최대</string>
     <string name="text_inspector_range_min">최소</string>
@@ -1519,6 +1527,8 @@
     <string name="text_inspector_section_presence">값 있음</string>
     <string name="text_inspector_section_ranges">숫자 범위</string>
     <string name="text_inspector_select_region">영역 선택</string>
+    <string name="text_inspector_selector_copied">복사됨: %1$s</string>
+    <string name="text_inspector_syntax_error_at">위치 %1$d: %2$s</string>
     <string name="text_inspector_tri_any">제한 없음</string>
     <string name="text_inspector_tri_no">아니요</string>
     <string name="text_inspector_tri_yes">예</string>

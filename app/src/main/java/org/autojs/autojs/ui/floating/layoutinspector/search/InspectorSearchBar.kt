@@ -18,6 +18,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.BaseAdapter
 import android.widget.FrameLayout
 import android.widget.ListView
+import android.widget.TextView
+import androidx.core.view.isVisible
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.inspector.InspectorQuery
 import org.autojs.autojs.core.accessibility.inspector.InspectorQueryError
@@ -125,13 +127,34 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         setOnItemLongClickListener { _, _, position, _ -> onHistoryItemLongClicked(position) }
     }
 
+    /**
+     * The strip under the bar (roadmap P4.1): the field mode syntax cheat sheet while the input has
+     * focus, or the error (position, term, candidates) while the query does not compile. An
+     * in-window view for the same reason as [historyList]; hidden while the history is dropped down.
+     * zh-CN: 搜索栏下方的提示条 (Roadmap P4.1): 输入框获焦时显示字段模式语法速查, 查询无法编译时显示错误 (位置, 条件, 候选).
+     * 与 [historyList] 出于同一原因使用窗口内视图; 历史下拉展开时隐藏.
+     */
+    private val hintView = TextView(context).apply {
+        visibility = GONE
+        textSize = 12f
+        background = context.getDrawable(R.drawable.layout_inspector_history_surface)
+        elevation = HISTORY_ELEVATION_DP * resources.displayMetrics.density
+        val horizontal = (HINT_PADDING_H_DP * resources.displayMetrics.density).roundToInt()
+        val vertical = (HINT_PADDING_V_DP * resources.displayMetrics.density).roundToInt()
+        setPadding(horizontal, vertical, horizontal, vertical)
+    }
+
+    private val hintColor = ColorUtils.applyAlpha(normalColor, HINT_TEXT_ALPHA)
+
     init {
         val barLp = bar.root.layoutParams as LayoutParams
-        addView(historyList, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply {
-            topMargin = barLp.topMargin + barLp.height + (HISTORY_OFFSET_DP * resources.displayMetrics.density).roundToInt()
-            leftMargin = barLp.leftMargin
-            rightMargin = barLp.rightMargin
-        })
+        for (dropDown in listOf(historyList, hintView)) {
+            addView(dropDown, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply {
+                topMargin = barLp.topMargin + barLp.height + (HISTORY_OFFSET_DP * resources.displayMetrics.density).roundToInt()
+                leftMargin = barLp.leftMargin
+                rightMargin = barLp.rightMargin
+            })
+        }
         bar.query.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
@@ -145,11 +168,16 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
             if (submit) navigate(forward = true)
             submit
         }
-        bar.query.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) showHistoryIfIdle() else dismissHistory() }
+        bar.query.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) showHistoryIfIdle() else dismissHistory()
+            renderHint()
+        }
         bar.query.setOnClickListener { showHistoryIfIdle() }
         bar.collapse.setOnClickListener { setExpanded(false) }
         bar.filter.setOnClickListener { showFilterProfiles() }
         bar.regex.setOnClickListener { session?.let { it.setRegex(!it.query.regex) } }
+        bar.mode.setOnClickListener { cycleMode() }
+        bar.count.setOnLongClickListener { copySelector(); true }
         bar.previous.setOnClickListener { navigate(forward = false) }
         bar.next.setOnClickListener { navigate(forward = true) }
         bar.count.setOnClickListener { showResults() }
@@ -177,6 +205,7 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
             dismissHistory()
             hideKeyboard()
         }
+        renderHint()
         host?.onExpandedChanged(expanded)
     }
 
@@ -221,9 +250,11 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         if (target > 0 && lp.width != target) {
             lp.width = target
         }
-        val listLp = historyList.layoutParams as LayoutParams
-        if (target > 0 && listLp.width != target) {
-            listLp.width = target
+        for (dropDown in listOf(historyList, hintView)) {
+            val dropLp = dropDown.layoutParams as LayoutParams
+            if (target > 0 && dropLp.width != target) {
+                dropLp.width = target
+            }
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
@@ -289,10 +320,54 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         }
         historyList.adapter = HistoryAdapter(session.history.items)
         historyList.visibility = VISIBLE
+        renderHint()
     }
 
     private fun dismissHistory() {
         historyList.visibility = GONE
+        renderHint()
+    }
+
+    /** The mode toggle cycles keyword -> field (-> selector once roadmap P5 lands); the first switch to the field mode shows the syntax once. zh-CN: 模式开关在关键词 -> 字段之间循环 (Roadmap P5 落地后加入选择器); 首次切到字段模式时展示一次语法. */
+    private fun cycleMode() {
+        val session = session ?: return
+        val next = when (session.query.mode) {
+            InspectorQuery.Mode.KEYWORD -> InspectorQuery.Mode.FIELD
+            else -> InspectorQuery.Mode.KEYWORD
+        }
+        session.setMode(next)
+        if (next == InspectorQuery.Mode.FIELD && !QueryModeStore.isFieldModeIntroduced) {
+            QueryModeStore.markFieldModeIntroduced()
+            ViewUtils.showToast(context, R.string.text_inspector_field_mode_intro, true)
+        }
+    }
+
+    /** Long-press on the counter copies the conditions as a selector (roadmap P4.2, D8). zh-CN: 长按计数位把条件复制为选择器 (Roadmap P4.2, D8). */
+    private fun copySelector() {
+        val session = session ?: return
+        SelectorClipboard.copy(context, session) { it.error?.let(::describe).orEmpty() }
+    }
+
+    private fun renderHint() {
+        val session = session
+        if (session == null || !isExpanded || historyList.isVisible) {
+            hintView.visibility = GONE
+            return
+        }
+        val error = session.error
+        when {
+            error != null -> {
+                hintView.text = describe(error)
+                hintView.setTextColor(errorColor)
+                hintView.visibility = VISIBLE
+            }
+            session.query.mode != InspectorQuery.Mode.KEYWORD && bar.query.hasFocus() -> {
+                hintView.text = context.getString(R.string.text_inspector_field_syntax_hint)
+                hintView.setTextColor(hintColor)
+                hintView.visibility = VISIBLE
+            }
+            else -> hintView.visibility = GONE
+        }
     }
 
     private fun onHistoryItemClicked(position: Int) {
@@ -340,8 +415,13 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
                 binding.text.text = query.text
                 binding.text.gravity = Gravity.START or Gravity.CENTER_VERTICAL
                 binding.text.setTextColor(normalColor)
-                binding.tag.text = if (query.regex) REGEX_TAG else ""
-                binding.tag.visibility = if (query.regex) VISIBLE else GONE
+                val tag = when {
+                    query.mode == InspectorQuery.Mode.FIELD -> FIELD_TAG
+                    query.regex -> REGEX_TAG
+                    else -> ""
+                }
+                binding.tag.text = tag
+                binding.tag.visibility = if (tag.isEmpty()) GONE else VISIBLE
             } else {
                 binding.text.setText(R.string.text_inspector_clear_query_history)
                 binding.text.gravity = Gravity.CENTER
@@ -402,6 +482,14 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
         }
         val regexColor = if (session.query.regex) ThemeColorManager.colorPrimary else ColorUtils.applyAlpha(normalColor, INACTIVE_ICON_ALPHA)
         bar.regex.imageTintList = ColorStateList.valueOf(regexColor)
+        // The regex switch belongs to the keyword mode only (D2); the other modes spell regexes themselves.
+        // zh-CN: 正则开关只属于关键词模式 (D2); 其他模式自行表达正则.
+        val mode = session.query.mode
+        bar.regex.visibility = if (mode == InspectorQuery.Mode.KEYWORD) VISIBLE else GONE
+        bar.mode.text = modeLabel(mode)
+        bar.mode.contentDescription = context.getString(R.string.text_inspector_query_mode, context.getString(modeName(mode)))
+        bar.mode.setTextColor(if (mode == InspectorQuery.Mode.KEYWORD) normalColor else ThemeColorManager.colorPrimary)
+        renderHint()
 
         val conditions = session.conditionCount
         bar.filterBadge.text = if (conditions > MAX_BADGE) "$MAX_BADGE+" else conditions.toString()
@@ -412,7 +500,25 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
     private fun describe(error: InspectorQueryError): String = when (error.kind) {
         InspectorQueryError.Kind.INVALID_REGEX -> context.getString(R.string.text_inspector_invalid_regex, error.detail.orEmpty())
         InspectorQueryError.Kind.UNSUPPORTED_MODE -> context.getString(R.string.text_inspector_query_mode_unavailable)
-        InspectorQueryError.Kind.SYNTAX -> error.detail.orEmpty()
+        InspectorQueryError.Kind.SYNTAX -> buildString {
+            val detail = error.detail.orEmpty()
+            append(if (error.position >= 0) context.getString(R.string.text_inspector_syntax_error_at, error.position, detail) else detail)
+            if (error.candidates.isNotEmpty()) {
+                append('\n').append(context.getString(R.string.text_inspector_did_you_mean, error.candidates.joinToString(", ")))
+            }
+        }
+    }
+
+    private fun modeLabel(mode: InspectorQuery.Mode): String = when (mode) {
+        InspectorQuery.Mode.KEYWORD -> KEYWORD_LABEL
+        InspectorQuery.Mode.FIELD -> FIELD_LABEL
+        InspectorQuery.Mode.SELECTOR -> SELECTOR_LABEL
+    }
+
+    private fun modeName(mode: InspectorQuery.Mode): Int = when (mode) {
+        InspectorQuery.Mode.KEYWORD -> R.string.text_inspector_mode_keyword
+        InspectorQuery.Mode.FIELD -> R.string.text_inspector_mode_field
+        InspectorQuery.Mode.SELECTOR -> R.string.text_inspector_query_mode_unavailable
     }
 
     private fun setQueryText(text: String) {
@@ -494,8 +600,23 @@ class InspectorSearchBar @JvmOverloads constructor(context: Context, attrs: Attr
 
         private const val MAX_BADGE = 9
 
+        private const val HINT_PADDING_H_DP = 12
+
+        private const val HINT_PADDING_V_DP = 8
+
+        private const val HINT_TEXT_ALPHA = 0.7
+
         /** Marks history rows recorded with the regex switch on. zh-CN: 标记正则开关开启时记录的历史行. */
         private const val REGEX_TAG = "RegEx"
+
+        /** Marks field mode history rows; also the mode toggle's label for that mode. zh-CN: 标记字段模式的历史行; 也是该模式下模式开关的标签. */
+        private const val FIELD_TAG = "k=v"
+
+        private const val KEYWORD_LABEL = "Aa"
+
+        private const val FIELD_LABEL = FIELD_TAG
+
+        private const val SELECTOR_LABEL = "$()"
 
     }
 

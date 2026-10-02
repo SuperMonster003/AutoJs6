@@ -1467,7 +1467,11 @@
     <string name="text_inspector_clear_query_history">Borrar el historial de búsqueda</string>
     <string name="text_inspector_clear_region">Borrar región</string>
     <string name="text_inspector_collapse_search_bar">Contraer la barra de búsqueda</string>
+    <string name="text_inspector_copy_as_selector">Copiar como selector</string>
+    <string name="text_inspector_did_you_mean">¿Quiso decir: %1$s?</string>
     <string name="text_inspector_expand_search_bar">Expandir la barra de búsqueda</string>
+    <string name="text_inspector_field_mode_intro">Modo campo: separe las condiciones con espacios, p. ej. text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
+    <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">Perfiles de filtro</string>
     <string name="text_inspector_filter_tally">%1$s: %2$d coincide(n) por sí solo, %3$d quedan después</string>
     <string name="text_inspector_has_desc">Tiene desc</string>
@@ -1478,9 +1482,12 @@
     <string name="text_inspector_matches_title">Coincidencias (%1$d)</string>
     <string name="text_inspector_min_height">Altura mín. (px)</string>
     <string name="text_inspector_min_width">Anchura mín. (px)</string>
+    <string name="text_inspector_mode_field">Campo</string>
+    <string name="text_inspector_mode_keyword">Palabra clave</string>
     <string name="text_inspector_next_match">Siguiente coincidencia</string>
     <string name="text_inspector_no_matching_nodes">No hay nodos coincidentes</string>
     <string name="text_inspector_no_node_matches_keyword">Ningún nodo coincide con la palabra clave</string>
+    <string name="text_inspector_nothing_to_copy">No hay condiciones que copiar</string>
     <string name="text_inspector_on_screen_only">Solo en pantalla</string>
     <string name="text_inspector_preset_button">Botones</string>
     <string name="text_inspector_preset_container">Contenedores</string>
@@ -1502,6 +1509,7 @@
     <string name="text_inspector_profile_saved">Perfil guardado</string>
     <string name="text_inspector_profile_unsaved_content">El perfil actual tiene cambios sin guardar. ¿Guardarlos, guardarlos como un perfil nuevo o descartarlos?</string>
     <string name="text_inspector_profile_unsaved_title">Cambios sin guardar</string>
+    <string name="text_inspector_query_mode">Modo de consulta: %1$s</string>
     <string name="text_inspector_query_mode_unavailable">Este modo de consulta aún no está disponible</string>
     <string name="text_inspector_range_max">Máx.</string>
     <string name="text_inspector_range_min">Mín.</string>
@@ -1517,6 +1525,8 @@
     <string name="text_inspector_section_presence">Tiene valor</string>
     <string name="text_inspector_section_ranges">Rangos numéricos</string>
     <string name="text_inspector_select_region">Seleccionar región</string>
+    <string name="text_inspector_selector_copied">Copiado: %1$s</string>
+    <string name="text_inspector_syntax_error_at">Posición %1$d: %2$s</string>
     <string name="text_inspector_tri_any">Cualquiera</string>
     <string name="text_inspector_tri_no">No</string>
     <string name="text_inspector_tri_yes">Sí</string>

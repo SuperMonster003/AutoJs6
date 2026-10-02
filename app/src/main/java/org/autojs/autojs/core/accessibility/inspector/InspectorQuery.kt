@@ -1,6 +1,10 @@
 package org.autojs.autojs.core.accessibility.inspector
 
+import org.autojs.autojs.core.accessibility.AccessibilityBridge
+import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.filter.Filter
+import org.autojs.autojs.core.automator.selector.SelectorStringException
+import org.autojs.autojs.core.automator.selector.SelectorStringParser
 import java.util.regex.PatternSyntaxException
 
 /**
@@ -36,8 +40,20 @@ data class InspectorQuery(
             } catch (e: PatternSyntaxException) {
                 Compiled.Error(InspectorQueryError(InspectorQueryError.Kind.INVALID_REGEX, e.description ?: e.message, e.index))
             }
-            Mode.FIELD, Mode.SELECTOR -> Compiled.Error(InspectorQueryError(InspectorQueryError.Kind.UNSUPPORTED_MODE, mode.name))
+            Mode.FIELD -> try {
+                val selector = parser.parse(text.trim(), UiSelector(null as AccessibilityBridge?))
+                Compiled.Filters(selector.selector.filters.toList())
+            } catch (e: SelectorStringException) {
+                Compiled.Error(InspectorQueryError(InspectorQueryError.Kind.SYNTAX, e.detail, e.position, e.term, e.candidates))
+            }
+            Mode.SELECTOR -> Compiled.Error(InspectorQueryError(InspectorQueryError.Kind.UNSUPPORTED_MODE, mode.name))
         }
+    }
+
+    companion object {
+
+        private val parser by lazy { SelectorStringParser() }
+
     }
 
     sealed class Compiled {
@@ -53,18 +69,28 @@ data class InspectorQuery(
 }
 
 /**
- * Why a query did not compile: the [kind] selects the message, [detail] is the parser's own text
- * and [position] the offending character offset (-1 when unknown).
- * zh-CN: 查询未能编译的原因: [kind] 决定消息, [detail] 为解析器自身的文本, [position] 为出错字符偏移 (未知时为 -1).
+ * Why a query did not compile: the [kind] selects the message, [detail] is the parser's own text,
+ * [position] the offending character offset (-1 when unknown), [term] the offending condition and
+ * [candidates] property names close to an unknown key (field mode, roadmap P4.1).
+ * zh-CN: 查询未能编译的原因: [kind] 决定消息, [detail] 为解析器自身的文本, [position] 为出错字符偏移 (未知时为 -1), [term] 为出错的条件,
+ * [candidates] 为与未知键相近的属性名 (字段模式, Roadmap P4.1).
  */
-class InspectorQueryError(val kind: Kind, val detail: String? = null, val position: Int = -1) {
+class InspectorQueryError(
+    val kind: Kind,
+    val detail: String? = null,
+    val position: Int = -1,
+    val term: String? = null,
+    val candidates: List<String> = emptyList(),
+) {
 
     enum class Kind { INVALID_REGEX, UNSUPPORTED_MODE, SYNTAX }
 
     override fun toString(): String = buildString {
         append(kind.name)
         if (position >= 0) append(" @").append(position)
+        if (!term.isNullOrEmpty()) append(" [").append(term).append("]")
         if (!detail.isNullOrEmpty()) append(": ").append(detail)
+        if (candidates.isNotEmpty()) append(" (").append(candidates.joinToString(", ")).append(")")
     }
 
 }

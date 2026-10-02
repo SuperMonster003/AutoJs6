@@ -1469,7 +1469,11 @@
     <string name="text_inspector_clear_query_history">مسح سجل البحث</string>
     <string name="text_inspector_clear_region">مسح المنطقة</string>
     <string name="text_inspector_collapse_search_bar">طي شريط البحث</string>
+    <string name="text_inspector_copy_as_selector">نسخ كمحدد</string>
+    <string name="text_inspector_did_you_mean">هل تقصد: %1$s</string>
     <string name="text_inspector_expand_search_bar">توسيع شريط البحث</string>
+    <string name="text_inspector_field_mode_intro">وضع الحقول: افصل الشروط بمسافات, مثل text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
+    <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">ملفات تعريف التصفية</string>
     <string name="text_inspector_filter_tally">%1$s: %2$d مطابقة بمفرده, %3$d متبقية بعده</string>
     <string name="text_inspector_has_desc">يحتوي على desc</string>
@@ -1480,9 +1484,12 @@
     <string name="text_inspector_matches_title">التطابقات (%1$d)</string>
     <string name="text_inspector_min_height">أدنى ارتفاع (px)</string>
     <string name="text_inspector_min_width">أدنى عرض (px)</string>
+    <string name="text_inspector_mode_field">الحقول</string>
+    <string name="text_inspector_mode_keyword">كلمة مفتاحية</string>
     <string name="text_inspector_next_match">التطابق التالي</string>
     <string name="text_inspector_no_matching_nodes">لا توجد عقد مطابقة</string>
     <string name="text_inspector_no_node_matches_keyword">لا توجد عقدة تطابق الكلمة المفتاحية</string>
+    <string name="text_inspector_nothing_to_copy">لا توجد شروط للنسخ</string>
     <string name="text_inspector_on_screen_only">داخل الشاشة فقط</string>
     <string name="text_inspector_preset_button">الأزرار</string>
     <string name="text_inspector_preset_container">الحاويات</string>
@@ -1504,6 +1511,7 @@
     <string name="text_inspector_profile_saved">تم حفظ ملف التعريف</string>
     <string name="text_inspector_profile_unsaved_content">يحتوي ملف التعريف الحالي على تغييرات غير محفوظة. هل تريد حفظها, أو حفظها كملف تعريف جديد, أو تجاهلها؟</string>
     <string name="text_inspector_profile_unsaved_title">تغييرات غير محفوظة</string>
+    <string name="text_inspector_query_mode">وضع الاستعلام: %1$s</string>
     <string name="text_inspector_query_mode_unavailable">وضع الاستعلام هذا غير متاح بعد</string>
     <string name="text_inspector_range_max">الأقصى</string>
     <string name="text_inspector_range_min">الأدنى</string>
@@ -1519,6 +1527,8 @@
     <string name="text_inspector_section_presence">يحتوي على قيمة</string>
     <string name="text_inspector_section_ranges">النطاقات العددية</string>
     <string name="text_inspector_select_region">تحديد منطقة</string>
+    <string name="text_inspector_selector_copied">تم النسخ: %1$s</string>
+    <string name="text_inspector_syntax_error_at">الموضع %1$d: %2$s</string>
     <string name="text_inspector_tri_any">أي</string>
     <string name="text_inspector_tri_no">لا</string>
     <string name="text_inspector_tri_yes">نعم</string>

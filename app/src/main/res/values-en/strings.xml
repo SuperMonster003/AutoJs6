@@ -1464,7 +1464,11 @@
     <string name="text_inspector_clear_query_history">Clear search history</string>
     <string name="text_inspector_clear_region">Clear region</string>
     <string name="text_inspector_collapse_search_bar">Collapse search bar</string>
+    <string name="text_inspector_copy_as_selector">Copy as selector</string>
+    <string name="text_inspector_did_you_mean">Did you mean: %1$s</string>
     <string name="text_inspector_expand_search_bar">Expand search bar</string>
+    <string name="text_inspector_field_mode_intro">Field mode: separate conditions with spaces, e.g. text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
+    <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">Filter profiles</string>
     <string name="text_inspector_filter_tally">%1$s: %2$d matched alone, %3$d left after it</string>
     <string name="text_inspector_has_desc">Has desc</string>
@@ -1475,9 +1479,12 @@
     <string name="text_inspector_matches_title">Matches (%1$d)</string>
     <string name="text_inspector_min_height">Min height (px)</string>
     <string name="text_inspector_min_width">Min width (px)</string>
+    <string name="text_inspector_mode_field">Field</string>
+    <string name="text_inspector_mode_keyword">Keyword</string>
     <string name="text_inspector_next_match">Next match</string>
     <string name="text_inspector_no_matching_nodes">No matching nodes</string>
     <string name="text_inspector_no_node_matches_keyword">No node matches the keyword</string>
+    <string name="text_inspector_nothing_to_copy">No conditions to copy</string>
     <string name="text_inspector_on_screen_only">On screen only</string>
     <string name="text_inspector_preset_button">Buttons</string>
     <string name="text_inspector_preset_container">Containers</string>
@@ -1499,6 +1506,7 @@
     <string name="text_inspector_profile_saved">Profile saved</string>
     <string name="text_inspector_profile_unsaved_content">The current profile has unsaved changes. Save them, save them as a new profile, or discard them?</string>
     <string name="text_inspector_profile_unsaved_title">Unsaved changes</string>
+    <string name="text_inspector_query_mode">Query mode: %1$s</string>
     <string name="text_inspector_query_mode_unavailable">This query mode is not available yet</string>
     <string name="text_inspector_range_max">Max</string>
     <string name="text_inspector_range_min">Min</string>
@@ -1514,6 +1522,8 @@
     <string name="text_inspector_section_presence">Has value</string>
     <string name="text_inspector_section_ranges">Numeric ranges</string>
     <string name="text_inspector_select_region">Select region</string>
+    <string name="text_inspector_selector_copied">Copied: %1$s</string>
+    <string name="text_inspector_syntax_error_at">At %1$d: %2$s</string>
     <string name="text_inspector_tri_any">Any</string>
     <string name="text_inspector_tri_no">No</string>
     <string name="text_inspector_tri_yes">Yes</string>

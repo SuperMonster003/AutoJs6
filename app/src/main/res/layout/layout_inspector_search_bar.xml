@@ -46,6 +46,18 @@
             android:textSize="14sp"
             tools:ignore="LabelFor" />
 
+    <!-- Query mode toggle (roadmap D2 / P4.1): "Aa" keyword, "k=v" field. zh-CN: 查询模式开关 (Roadmap D2 / P4.1): "Aa" 关键词, "k=v" 字段. -->
+    <TextView
+            android:id="@+id/mode"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:textColor="@color/day_night"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="Aa" />
+
     <FrameLayout
             android:layout_width="36dp"
             android:layout_height="36dp">

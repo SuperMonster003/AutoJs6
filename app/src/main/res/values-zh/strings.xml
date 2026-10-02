@@ -1464,7 +1464,11 @@
     <string name="text_inspector_clear_query_history">清空搜索历史</string>
     <string name="text_inspector_clear_region">清除区域</string>
     <string name="text_inspector_collapse_search_bar">收起搜索栏</string>
+    <string name="text_inspector_copy_as_selector">复制为选择器</string>
+    <string name="text_inspector_did_you_mean">是否想输入: %1$s</string>
     <string name="text_inspector_expand_search_bar">展开搜索栏</string>
+    <string name="text_inspector_field_mode_intro">字段模式: 以空格分隔多个条件, 如 text=确定 clickable, id~=btn_.*, !enabled, minDepth=3</string>
+    <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">筛选配置</string>
     <string name="text_inspector_filter_tally">%1$s: 单独命中 %2$d 个, 叠加后剩余 %3$d 个</string>
     <string name="text_inspector_has_desc">有 desc</string>
@@ -1475,9 +1479,12 @@
     <string name="text_inspector_matches_title">匹配结果 (%1$d)</string>
     <string name="text_inspector_min_height">最小高度 (px)</string>
     <string name="text_inspector_min_width">最小宽度 (px)</string>
+    <string name="text_inspector_mode_field">字段</string>
+    <string name="text_inspector_mode_keyword">关键词</string>
     <string name="text_inspector_next_match">下一个匹配</string>
     <string name="text_inspector_no_matching_nodes">没有匹配的控件</string>
     <string name="text_inspector_no_node_matches_keyword">没有控件命中关键词</string>
+    <string name="text_inspector_nothing_to_copy">没有可复制的条件</string>
     <string name="text_inspector_on_screen_only">仅屏幕内</string>
     <string name="text_inspector_preset_button">按钮</string>
     <string name="text_inspector_preset_container">容器</string>
@@ -1499,6 +1506,7 @@
     <string name="text_inspector_profile_saved">配置已保存</string>
     <string name="text_inspector_profile_unsaved_content">当前配置有未保存的修改. 保存, 另存为新配置, 还是放弃?</string>
     <string name="text_inspector_profile_unsaved_title">未保存的修改</string>
+    <string name="text_inspector_query_mode">查询模式: %1$s</string>
     <string name="text_inspector_query_mode_unavailable">该查询模式尚未开放</string>
     <string name="text_inspector_range_max">最大</string>
     <string name="text_inspector_range_min">最小</string>
@@ -1514,6 +1522,8 @@
     <string name="text_inspector_section_presence">有值</string>
     <string name="text_inspector_section_ranges">数值区间</string>
     <string name="text_inspector_select_region">框选区域</string>
+    <string name="text_inspector_selector_copied">已复制: %1$s</string>
+    <string name="text_inspector_syntax_error_at">第 %1$d 位: %2$s</string>
     <string name="text_inspector_tri_any">不限</string>
     <string name="text_inspector_tri_no">否</string>
     <string name="text_inspector_tri_yes">是</string>

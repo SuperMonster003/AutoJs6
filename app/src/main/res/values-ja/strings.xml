@@ -1468,7 +1468,11 @@
     <string name="text_inspector_clear_query_history">検索履歴を消去</string>
     <string name="text_inspector_clear_region">領域をクリア</string>
     <string name="text_inspector_collapse_search_bar">検索バーを折りたたむ</string>
+    <string name="text_inspector_copy_as_selector">セレクターとしてコピー</string>
+    <string name="text_inspector_did_you_mean">もしかして: %1$s</string>
     <string name="text_inspector_expand_search_bar">検索バーを展開</string>
+    <string name="text_inspector_field_mode_intro">フィールドモード: 条件を空白で区切ります. 例: text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
+    <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">フィルタープロファイル</string>
     <string name="text_inspector_filter_tally">%1$s: 単独で %2$d 件一致, 適用後 %3$d 件</string>
     <string name="text_inspector_has_desc">desc あり</string>
@@ -1479,9 +1483,12 @@
     <string name="text_inspector_matches_title">一致項目 (%1$d)</string>
     <string name="text_inspector_min_height">最小高さ (px)</string>
     <string name="text_inspector_min_width">最小幅 (px)</string>
+    <string name="text_inspector_mode_field">フィールド</string>
+    <string name="text_inspector_mode_keyword">キーワード</string>
     <string name="text_inspector_next_match">次の一致</string>
     <string name="text_inspector_no_matching_nodes">一致するノードがありません</string>
     <string name="text_inspector_no_node_matches_keyword">キーワードに一致するノードがありません</string>
+    <string name="text_inspector_nothing_to_copy">コピーする条件がありません</string>
     <string name="text_inspector_on_screen_only">画面内のみ</string>
     <string name="text_inspector_preset_button">ボタン</string>
     <string name="text_inspector_preset_container">コンテナ</string>
@@ -1503,6 +1510,7 @@
     <string name="text_inspector_profile_saved">プロファイルを保存しました</string>
     <string name="text_inspector_profile_unsaved_content">現在のプロファイルに未保存の変更があります. 保存, 新しいプロファイルとして保存, または破棄しますか?</string>
     <string name="text_inspector_profile_unsaved_title">未保存の変更</string>
+    <string name="text_inspector_query_mode">クエリモード: %1$s</string>
     <string name="text_inspector_query_mode_unavailable">このクエリモードはまだ利用できません</string>
     <string name="text_inspector_range_max">最大</string>
     <string name="text_inspector_range_min">最小</string>
@@ -1518,6 +1526,8 @@
     <string name="text_inspector_section_presence">値あり</string>
     <string name="text_inspector_section_ranges">数値範囲</string>
     <string name="text_inspector_select_region">領域を選択</string>
+    <string name="text_inspector_selector_copied">コピーしました: %1$s</string>
+    <string name="text_inspector_syntax_error_at">位置 %1$d: %2$s</string>
     <string name="text_inspector_tri_any">指定なし</string>
     <string name="text_inspector_tri_no">いいえ</string>
     <string name="text_inspector_tri_yes">はい</string>

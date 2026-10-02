@@ -49,6 +49,10 @@ class SearchResultsDialog(
         val builder = AppLevelThemeDialogBuilder(context)
             .title(context.getString(R.string.text_inspector_matches_title, matches.size))
             .positiveText(R.string.dialog_button_dismiss)
+            // "Copy as selector" (roadmap P4.2, D8) lives here since the bar has no overflow menu.
+            // zh-CN: "复制为选择器" (Roadmap P4.2, D8) 放在这里, 因为搜索栏没有溢出菜单.
+            .neutralText(R.string.text_inspector_copy_as_selector)
+            .onNeutral { _, _ -> SelectorClipboard.copy(context, session) { it.error?.toString().orEmpty() } }
         var list: RecyclerView? = null
         if (matches.isEmpty()) {
             builder.content(explain())

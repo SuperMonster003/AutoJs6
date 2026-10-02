@@ -1464,7 +1464,11 @@
     <string name="text_inspector_clear_query_history">清除搜尋記錄</string>
     <string name="text_inspector_clear_region">清除區域</string>
     <string name="text_inspector_collapse_search_bar">收起搜尋列</string>
+    <string name="text_inspector_copy_as_selector">複製為選擇器</string>
+    <string name="text_inspector_did_you_mean">是否想輸入: %1$s</string>
     <string name="text_inspector_expand_search_bar">展開搜尋列</string>
+    <string name="text_inspector_field_mode_intro">欄位模式: 以空格分隔多個條件, 如 text=確定 clickable, id~=btn_.*, !enabled, minDepth=3</string>
+    <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">篩選設定檔</string>
     <string name="text_inspector_filter_tally">%1$s: 單獨符合 %2$d 個, 疊加後剩餘 %3$d 個</string>
     <string name="text_inspector_has_desc">有 desc</string>
@@ -1475,9 +1479,12 @@
     <string name="text_inspector_matches_title">相符結果 (%1$d)</string>
     <string name="text_inspector_min_height">最小高度 (px)</string>
     <string name="text_inspector_min_width">最小寬度 (px)</string>
+    <string name="text_inspector_mode_field">欄位</string>
+    <string name="text_inspector_mode_keyword">關鍵詞</string>
     <string name="text_inspector_next_match">下一個相符項</string>
     <string name="text_inspector_no_matching_nodes">沒有相符的控制項</string>
     <string name="text_inspector_no_node_matches_keyword">沒有控制項符合關鍵字</string>
+    <string name="text_inspector_nothing_to_copy">沒有可複製的條件</string>
     <string name="text_inspector_on_screen_only">僅限畫面內</string>
     <string name="text_inspector_preset_button">按鈕</string>
     <string name="text_inspector_preset_container">容器</string>
@@ -1499,6 +1506,7 @@
     <string name="text_inspector_profile_saved">設定檔已儲存</string>
     <string name="text_inspector_profile_unsaved_content">目前設定檔有未儲存的修改. 儲存, 另存為新設定檔, 還是放棄?</string>
     <string name="text_inspector_profile_unsaved_title">未儲存的修改</string>
+    <string name="text_inspector_query_mode">查詢模式: %1$s</string>
     <string name="text_inspector_query_mode_unavailable">此查詢模式尚未開放</string>
     <string name="text_inspector_range_max">最大</string>
     <string name="text_inspector_range_min">最小</string>
@@ -1514,6 +1522,8 @@
     <string name="text_inspector_section_presence">有值</string>
     <string name="text_inspector_section_ranges">數值區間</string>
     <string name="text_inspector_select_region">框選區域</string>
+    <string name="text_inspector_selector_copied">已複製: %1$s</string>
+    <string name="text_inspector_syntax_error_at">第 %1$d 位: %2$s</string>
     <string name="text_inspector_tri_any">不限</string>
     <string name="text_inspector_tri_no">否</string>
     <string name="text_inspector_tri_yes">是</string>

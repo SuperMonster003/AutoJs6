@@ -1467,7 +1467,11 @@
     <string name="text_inspector_clear_query_history">Effacer l\'historique de recherche</string>
     <string name="text_inspector_clear_region">Effacer la zone</string>
     <string name="text_inspector_collapse_search_bar">Réduire la barre de recherche</string>
+    <string name="text_inspector_copy_as_selector">Copier comme sélecteur</string>
+    <string name="text_inspector_did_you_mean">Vouliez-vous dire : %1$s</string>
     <string name="text_inspector_expand_search_bar">Développer la barre de recherche</string>
+    <string name="text_inspector_field_mode_intro">Mode champ : séparez les conditions par des espaces, p. ex. text=OK clickable, id~=btn_.*, !enabled, minDepth=3</string>
+    <string name="text_inspector_field_syntax_hint">key=value · key~=regex · key · !key · minDepth=3</string>
     <string name="text_inspector_filter_profiles">Profils de filtrage</string>
     <string name="text_inspector_filter_tally">%1$s : %2$d correspondant(s) seul, %3$d restant(s) ensuite</string>
     <string name="text_inspector_has_desc">A un desc</string>
@@ -1478,9 +1482,12 @@
     <string name="text_inspector_matches_title">Correspondances (%1$d)</string>
     <string name="text_inspector_min_height">Hauteur min (px)</string>
     <string name="text_inspector_min_width">Largeur min (px)</string>
+    <string name="text_inspector_mode_field">Champ</string>
+    <string name="text_inspector_mode_keyword">Mot-clé</string>
     <string name="text_inspector_next_match">Correspondance suivante</string>
     <string name="text_inspector_no_matching_nodes">Aucun nœud correspondant</string>
     <string name="text_inspector_no_node_matches_keyword">Aucun nœud ne correspond au mot-clé</string>
+    <string name="text_inspector_nothing_to_copy">Aucune condition à copier</string>
     <string name="text_inspector_on_screen_only">À l\'écran seulement</string>
     <string name="text_inspector_preset_button">Boutons</string>
     <string name="text_inspector_preset_container">Conteneurs</string>
@@ -1502,6 +1509,7 @@
     <string name="text_inspector_profile_saved">Profil enregistré</string>
     <string name="text_inspector_profile_unsaved_content">Le profil actuel a des modifications non enregistrées. Les enregistrer, les enregistrer comme nouveau profil ou les abandonner ?</string>
     <string name="text_inspector_profile_unsaved_title">Modifications non enregistrées</string>
+    <string name="text_inspector_query_mode">Mode de requête : %1$s</string>
     <string name="text_inspector_query_mode_unavailable">Ce mode de requête n\'est pas encore disponible</string>
     <string name="text_inspector_range_max">Max</string>
     <string name="text_inspector_range_min">Min</string>
@@ -1517,6 +1525,8 @@
     <string name="text_inspector_section_presence">A une valeur</string>
     <string name="text_inspector_section_ranges">Plages numériques</string>
     <string name="text_inspector_select_region">Sélectionner une zone</string>
+    <string name="text_inspector_selector_copied">Copié : %1$s</string>
+    <string name="text_inspector_syntax_error_at">Position %1$d : %2$s</string>
     <string name="text_inspector_tri_any">Indifférent</string>
     <string name="text_inspector_tri_no">Non</string>
     <string name="text_inspector_tri_yes">Oui</string>

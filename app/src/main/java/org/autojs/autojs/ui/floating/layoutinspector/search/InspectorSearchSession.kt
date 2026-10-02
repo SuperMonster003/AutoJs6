@@ -12,6 +12,7 @@ import org.autojs.autojs.core.accessibility.inspector.InspectorNode
 import org.autojs.autojs.core.accessibility.inspector.InspectorQuery
 import org.autojs.autojs.core.accessibility.inspector.InspectorQueryError
 import org.autojs.autojs.core.accessibility.inspector.KeywordFilter
+import org.autojs.autojs.core.accessibility.inspector.SelectorExport
 import org.autojs.autojs.core.accessibility.inspector.QueryHistory
 import org.autojs.autojs.core.accessibility.inspector.TreeCandidates
 import org.autojs.autojs.core.accessibility.inspector.TreeMatch
@@ -46,7 +47,7 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
     var root: NodeInfo = root
         private set
 
-    var query: InspectorQuery = InspectorQuery()
+    var query: InspectorQuery = InspectorQuery(mode = QueryModeStore.load())
         private set
 
     /** Why the query does not compile, or null. zh-CN: 查询未能编译的原因, 无则为 null. */
@@ -70,6 +71,9 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
     /** All filters in effect after the last evaluation (query, profile, region), for the explainer (roadmap P2.1). zh-CN: 最近一次求值生效的全部过滤器 (查询, 配置, 区域), 供解释器使用 (Roadmap P2.1). */
     var filters: List<Filter> = emptyList()
         private set
+
+    /** The filters the query text alone compiled to (the head of [filters]). zh-CN: 仅由查询文本编译出的过滤器 ([filters] 的开头部分). */
+    private var queryFilters: List<Filter> = emptyList()
 
     /** The persisted query history (roadmap P2.2), loaded once per inspection. zh-CN: 持久化的查询历史 (Roadmap P2.2), 每次布局分析加载一次. */
     val history: QueryHistory by lazy { QueryHistoryStore.load() }
@@ -133,6 +137,7 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
     /** Replaces the query; text-only changes are debounced unless [immediate]. zh-CN: 替换查询; 仅文本变化时去抖, 除非 [immediate]. */
     fun setQuery(query: InspectorQuery, immediate: Boolean = false) {
         if (this.query == query) return
+        if (query.mode != this.query.mode) QueryModeStore.save(query.mode)
         this.query = query
         mainHandler.removeCallbacks(evaluateTask)
         if (immediate) {
@@ -147,6 +152,25 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
     fun setText(text: String, immediate: Boolean = false) = setQuery(query.copy(text = text), immediate)
 
     fun setRegex(enabled: Boolean) = setQuery(query.copy(regex = enabled), immediate = true)
+
+    /** Switches the query mode (roadmap D2 / P4.1); the mode is remembered across sessions by [setQuery]. zh-CN: 切换查询模式 (Roadmap D2 / P4.1); 模式由 [setQuery] 跨会话记忆. */
+    fun setMode(mode: InspectorQuery.Mode) = setQuery(query.copy(mode = mode), immediate = true)
+
+    /**
+     * "Copy as selector" (roadmap P4.2, D8): the conditions in effect as a script selector, or null
+     * while the query does not compile. The keyword property is the one the current match hit
+     * (falling back to the first match, then to text).
+     * zh-CN: "复制为选择器" (Roadmap P4.2, D8): 生效中的条件渲染为脚本选择器, 查询无法编译时为 null. 关键词属性取当前匹配命中的属性
+     * (依次回退到首个匹配, 再到 text).
+     */
+    fun exportSelector(): SelectorExport.Rendered? {
+        flush()
+        if (error != null) return null
+        val keyword = keywordFilter
+        val node = currentMatch?.let(::InspectorNode)?.takeIf { match.isMatched(it) } ?: match.matches.firstOrNull()
+        val hit = if (keyword != null && node != null) keyword.hit(node) else null
+        return SelectorExport.render(query, queryFilters, hit, profile.toFilters() + listOfNotNull(regionFilter()))
+    }
 
     /** Re-evaluates over a new root (window switch) and forgets the cursor. zh-CN: 在新的根节点上重新求值 (切换窗口) 并清除游标. */
     fun setRoot(root: NodeInfo) {
@@ -291,11 +315,13 @@ class InspectorSearchSession(root: NodeInfo) : InspectorMatchView {
             is InspectorQuery.Compiled.Filters -> {
                 error = null
                 keywordFilter = compiled.filters.firstOrNull() as? KeywordFilter
+                queryFilters = compiled.filters
                 filters = compiled.filters + profile.toFilters() + listOfNotNull(regionFilter())
                 match = TreeMatch.evaluate(InspectorNode(root), filters)
             }
             is InspectorQuery.Compiled.Error -> {
                 error = compiled.error
+                queryFilters = emptyList()
                 filters = emptyList()
                 match = TreeMatch.unfiltered()
                 keywordFilter = null
