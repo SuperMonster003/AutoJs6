@@ -55,3 +55,37 @@ SHA-256 `4681a41e3e10fc2c8589cf3e5e0f4c898e07155290c48ada9c4527a7b87c5b0b`.
 Its three production/test API files are those committed with this evidence; the independent
 API module does not encode the host versionCode. The shared manifest parser AAR is unchanged.
 This evidence does not claim a new device installation matrix or a remote publication.
+
+## First dedicated-device run and alias fixture correction
+
+The fixed host 5312 and test APKs were run only on this task's dedicated API 31 emulator-5562.
+The early callback negotiation and host UI owned-file cleanup methods passed. The initial
+hard-link method failed at `Os.link`, before exercising cleanup. The device's audit log explicitly
+denied the `link` permission from `untrusted_app` to its own `app_data_file`; cache and files
+were both internal app data, not external/FUSE paths. Moving the fixture directory cannot
+remove this SELinux restriction, and no permissions or SELinux policy were changed.
+
+Build 5313 changes only the test fixture: the existing test-only ContentProvider receives a
+duplicate descriptor for a uniquely named, test-owned private file and returns another descriptor
+at `fixture/<UUID>`. The ordinary path and content source have distinct ownership keys but the
+same actual fstat device/inode identity. The test verifies that a retained content alias protects
+the owned file. A finally block closes exactly that registration and verifies it is no longer
+openable, and the original private file/directory is removed by the fixture cleanup. There is no
+shell-created hard link, permission expansion, source-path transfer or success-by-skip.
+The pure JVM physical-alias/hard-link decision coverage remains; real device hard-link creation
+is not claimed. The renamed method is `profileRetainedProviderAliasProtectsTheOwnedFile`.
+
+The original failure remains in the installer plugin's
+`build/profiles-host-device-5562/result.txt`. Later execution of the corrected test is recorded
+with the main plugin's device evidence. The installer production implementation and API AAR
+remain those of build 5312.
+
+The corrected Android test assembly passed in 4m52s. Its first incremental compiler attempt
+lost an unrelated Python test class and a compiler backup, then Gradle's automatic non-daemon
+fallback completed successfully. No shared cache was deleted and no other task's sources were
+changed. The fixed artifact is `build/p9-profiles-alias-fixed/host5313-androidTest.apk`,
+3,433,353 bytes, SHA-256
+`59defd5b943ad8f7c512eb82654b28d5cb018fc24e1b50ded520ed4c21bf10d7`.
+DEX inspection confirms the new alias method and registration/cleanup implementation are present,
+and the old hard-link method is absent. Use this test APK with the fixed production host 5312;
+no replacement production host APK was built for the fixture correction.
