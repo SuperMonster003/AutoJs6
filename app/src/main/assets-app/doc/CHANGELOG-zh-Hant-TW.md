@@ -675,6 +675,8 @@
 * `最佳化` installer 及主程式安裝入口可使用外掛設定的來源/套件名稱前綴設定檔, 明確指定的選項優先, installer/installReason/packageSource 的 null 可清除繼承值; 刪除來源須安裝成功, 並保留同批明確保留或未成功項目共用的檔案 (需要支援來源設定檔的 3-Setup Installer 外掛)
 * `最佳化` installer 安裝選項接受 grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason 及 packageSource, 依外掛能力啟用; 省略保留原行為, 明確指定 false/none 仍需對應支援
 * `最佳化` Three Stove Agent 模型代理在一次模型呼叫逾時且同步 Binder 交易尚未返回時會熔斷該 Provider 元件, 此前熔斷持續到 AutoJs6 程序重啟, 後續任務立即以 RATE_LIMITED: FUSED 失敗; 現在該交易實際返回並結清後自動解除熔斷, 後續任務無需重啟即可再次准入
+* `最佳化` 佈局層次分析頁面移除左側的層級彩色直線 (僅保留縮排), 展開 / 收起標識移到控制項文字左側: 可展開為右箭頭, 已展開為下箭頭, 無子孫控制項為小空心圓, 三類圖示統一著色並適當加深
+* `最佳化` 佈局分析搜尋列的正規表示式開關圖示重新設計為簡潔的 ".*" 字樣
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

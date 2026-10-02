@@ -550,6 +550,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` installer 和宿主安装入口可使用插件设置的来源/包名前缀配置, 显式选项优先, installer/installReason/packageSource 的 null 可清除继承值; 删除来源需安装成功且保留同批明确保留或未成功项目共用的文件 (需要支持来源配置的 3-Setup Installer 插件)
 * `优化` installer 安装选项接受 grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason 和 packageSource, 按插件能力启用; 省略保持原行为, 显式 false/none 仍需对应支持
 * `优化` Three Stove Agent 模型代理在一次模型调用超时且同步 Binder 事务尚未返回时会熔断该 Provider 组件, 此前熔断持续到 AutoJs6 进程重启, 后续任务立即以 RATE_LIMITED: FUSED 失败; 现在该事务实际返回并结清后自动解除熔断, 后续任务无需重启即可再次准入
+* `优化` 布局层次分析页面去除左侧的层级彩色竖线 (仅保留缩进), 展开 / 收起标识移到控件文字左侧: 可展开为右箭头, 已展开为下箭头, 无子孙控件为小空心圆, 三类图标统一着色并适当加深
+* `优化` 布局分析搜索栏的正则开关图标重新设计为简洁的 ".*" 字样
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

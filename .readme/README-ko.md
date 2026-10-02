@@ -837,6 +837,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` installer 및 호스트 설치 진입점에서 플러그인의 출처/패키지 이름 접두사별 프로필 사용 가능. 명시적 옵션을 우선하며 installer/installReason/packageSource의 null은 상속 값을 해제. 소스 삭제는 설치 성공 후에만 수행하고 같은 일괄 작업의 보존 대상 또는 미성공 항목과 공유하는 파일은 유지 (지원하는 3-Setup Installer 필요)
 * `개선` installer 설치 옵션에서 grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason 및 packageSource를 선택한 플러그인의 기능에 따라 사용. 생략 시 기존 동작을 유지하며 명시적인 false/none도 지원 여부를 확인
 * `개선` Three Stove Agent 모델 브로커는 모델 호출이 시간 초과되고 동기 Binder 트랜잭션이 아직 반환되지 않았을 때 해당 Provider 구성 요소를 차단합니다. 이전에는 이 차단이 AutoJs6 프로세스를 재시작할 때까지 유지되어 이후 작업이 즉시 RATE_LIMITED: FUSED 로 실패했습니다. 이제 그 트랜잭션이 실제로 반환되고 실행이 정산되면 차단이 자동 해제되어 재시작 없이 이후 작업이 다시 허용됩니다
+* `개선` 레이아웃 계층 분석 행에서 왼쪽의 색상 레벨 선을 제거하고 (들여쓰기는 유지) 펼침 / 접힘 표시를 노드 텍스트 바로 왼쪽으로 이동: 접힌 행은 오른쪽 꺾쇠, 펼친 행은 아래쪽 꺾쇠, 자손이 없는 행은 작은 빈 원이며 세 아이콘 모두 같은 약간 진한 색으로 표시
+* `개선` 레이아웃 분석 검색창의 정규식 전환 아이콘을 간결한 ".*" 모양으로 새로 디자인
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

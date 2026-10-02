@@ -675,6 +675,8 @@
 * `Improvement` installer and host installation entries can use the plugin's source/package-prefix profiles, with explicit options taking precedence and null resetting inherited installer/installReason/packageSource values; source deletion requires successful installation and retains files shared with retained or unsuccessful batch items (requires a 3-Setup Installer version with source profiles)
 * `Improvement` installer installation options accept grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason and packageSource when supported by the selected plugin; omission preserves existing behavior, while explicit false/none still requires support
 * `Improvement` The Three Stove Agent model broker fuses a Provider component when a model call times out while its synchronous Binder transaction has not returned; the fuse used to last until AutoJs6 restarted, failing later tasks at once with RATE_LIMITED: FUSED. It is now lifted automatically once that transaction has returned and the run has settled, so later tasks are admitted again without a restart
+* `Improvement` Layout hierarchy rows drop the colored level beams on the left (the indent stays) and move the expand / collapse marker next to the node text: a right chevron for collapsed rows, a down chevron for expanded rows and a small hollow circle for rows without descendants, all three in one slightly darker tint
+* `Improvement` The regex switch of the layout inspector search bar gets a clean ".*" icon
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
