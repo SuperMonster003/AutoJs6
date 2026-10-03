@@ -268,6 +268,7 @@
 * `Feature` "Copy as selector" in the layout inspector: tap "Copy as selector" in the search results dialog or long-press the counter to put the keyword (as the Contains / Match call of the text / desc / id / className property the current match hit), the field conditions, the filter profile and the selected region on the clipboard as a chained script selector; conditions that cannot be expressed are appended as comments
 * `Feature` Selector methods minDepth / maxDepth / minIndexInParent / maxIndexInParent (inclusive, like minChildCount / maxChildCount), also usable in the selector string syntax (such as minDepth=3)
 * `Feature` Selector mode in the layout inspector search bar: once the mode toggle reaches "$()", type a chained selector expression as in a script (such as text("OK").clickable().depth(3) or textMatch(/ok|cancel/i); the selector() / $() prefix is optional) and its string / number / boolean / regex literals land on the selector registry with script semantics; a half-typed expression shows "Expression not finished" instead of an error, syntax errors show the position, the call and candidate method names, and "Copy as selector" outputs the normalized expression
+* `Feature` Layout Inspector "Generate code" supports single-widget/collection scopes, waiting until found/waiting with a timeout/immediate checks, action receivers and text parameters, Classic/Flow styles, alternative plans and location explanations, with matching widgets previewable in the layout
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
@@ -456,6 +457,7 @@
 * `Fix` When the layout inspector generated code for a child of a collection widget without an action selected, the generated `forEach` block contained the invalid statement `target.;`; the line is omitted now
 * `Fix` Text and controls in layout inspector floating windows and dialogs had insufficient contrast with some theme colors or in night mode
 * `Fix` Incomplete escaping of quotes, backslashes, and control characters in Layout Inspector "Copy as selector" and selector string output
+* `Fix` Layout Inspector code generation ignored text-setting and some query actions, expanded a single list target into actions on the whole group, used deprecated query calls, silently fell back from Flow or failed on long presses, and located same-named IDs across packages incorrectly
 * `Fix` Of several overloads with the same name on a widget collection array only the last one survived (such as `performAction(action)` next to `performAction(action, ...args)`), so calling it with the other number of arguments failed with a parameter mismatch; all overloads are bound per name now
 * `Fix` Since 6.7.0 Alpha13 a plain string passed to the `contains` selector family (`textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` etc.) was compiled as a regex pattern (`textContains(".")` matched any non-empty text, `textContains("1+1")` matched "11", `textContains("(")` threw); it is a literal substring again, consistent with `text(s)` / `textStartsWith` / `textEndsWith`; pass a regex (`textContains(/re/i)`) or use `textMatch` / `textMatches` for patterns, and a string in the form "/re/flags" is no longer treated as a regex by `contains`
 * `Fix` `requestFocus()` / `disableFocus()` of floating windows (`floaty.rawWindow` / `floaty.window`) updated the layout of the attached window right on the script thread and occasionally threw `CalledFromWrongThreadException`; they now run on the UI thread (like `setSize` / `setPosition`)
@@ -688,6 +690,7 @@
 * `Improvement` Node info multi-selection uses themed row backgrounds with unchanged row heights; the buttons are Settings / Back / Copy, and the copy behavior is remembered across sessions: Always ask (default), Copy object selector, or Copy chained selector
 * `Improvement` Larger query mode, filter, regex and navigation symbols in the layout inspector search bar; the regex switch uses a simple ".*" icon
 * `Improvement` Mail account settings and Plugin Center now recognize 3-Stamp Mail under its new package name
+* `Improvement` Plugin Center prefers dedicated transparent monochrome icons for standalone plugins, follows the host light or dark theme, and retains fallback support for older plugin versions
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

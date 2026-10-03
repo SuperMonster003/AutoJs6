@@ -13,6 +13,7 @@
 * `Fonctionnalité` API de scripts compose pour le mode UI et les fenêtres flottantes raw ou redimensionnables: objets de nœuds, state/render, ref, mises à jour groupées, thèmes et commandes Snackbar (nécessite le plugin Compose UI)
 * `Fonctionnalité` compose.floaty prend en charge les scripts hors mode UI, les commandes de position / taille / focus, les mises à jour depuis les threads de travail via compose.post et la fermeture automatique des fenêtres à l'arrêt du script
 * `Fonctionnalité` Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur
+* `Fonctionnalité` La fonction "Générer du code" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
 * `Fonctionnalité` API de script ai.agent pour lancer et consulter les tâches, recevoir les événements, répondre, confirmer, annuler et exécuter en arrière-plan avec detached; result/context exposent les résultats et le contexte des scripts enregistrés par @agent, avec trois exemples
@@ -269,6 +270,7 @@
 * `Fonctionnalité` Méthodes de sélecteur minDepth / maxDepth / minIndexInParent / maxIndexInParent (bornes incluses, comme minChildCount / maxChildCount), également utilisables dans la syntaxe de chaîne des sélecteurs (par exemple minDepth=3)
 * `Fonctionnalité` Mode sélecteur dans la barre de recherche de l'analyse de mise en page : une fois le sélecteur de mode sur « $() », saisissez une expression de sélecteur chaînée comme dans un script (par exemple text("OK").clickable().depth(3) ou textMatch(/ok|annuler/i) ; le préfixe selector() / $() est facultatif) ; ses littéraux chaîne / nombre / booléen / regex atteignent le registre des sélecteurs avec la sémantique des scripts, une expression à moitié saisie affiche « Expression inachevée » au lieu d'une erreur, les erreurs de syntaxe affichent la position, l'appel et les noms de méthode candidats, et « Copier comme sélecteur » produit l'expression normalisée
 * `Correction` Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans "Copier en tant que sélecteur" de l'inspecteur de disposition et la représentation textuelle des sélecteurs
+* `Correction` La génération de code de l'inspecteur de disposition ignorait la saisie de texte et certaines actions de recherche, appliquait les actions à tout le groupe pour une seule cible de liste, utilisait des appels obsolètes, abandonnait silencieusement Flow ou échouait sur les appuis longs, et localisait incorrectement les ID identiques entre paquets
 * `Correction` Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information
 * `Correction` Les échecs des appels aux modèles en ligne d'Three Stove Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)
 * `Correction` La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide
@@ -688,6 +690,7 @@
 * `Amélioration` La sélection multiple des attributs utilise un fond aux couleurs du thème sans modifier la hauteur des lignes; les boutons deviennent Paramètres / Retour / Copier, et le comportement de copie est mémorisé entre les sessions: Toujours demander (par défaut), Copier le sélecteur objet ou Copier le sélecteur chaîné
 * `Amélioration` Symboles agrandis pour le mode de recherche, les filtres, les expressions régulières et la navigation dans la barre de recherche de l'analyse de mise en page; le bouton des expressions régulières utilise une icône ".*" simple
 * `Amélioration` Les paramètres des comptes de courrier et le Centre de plugins reconnaissent le nouveau nom et le paquet de 3-Stamp Mail
+* `Amélioration` Le Centre de plugins privilégie les icônes monochromes transparentes des plugins autonomes, suit le thème clair ou sombre de l'hôte et reste compatible avec les anciennes versions
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise

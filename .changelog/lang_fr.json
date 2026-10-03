@@ -6,6 +6,7 @@
         "API de scripts compose pour le mode UI et les fenêtres flottantes raw ou redimensionnables: objets de nœuds, state/render, ref, mises à jour groupées, thèmes et commandes Snackbar (nécessite le plugin Compose UI)",
         "compose.floaty prend en charge les scripts hors mode UI, les commandes de position / taille / focus, les mises à jour depuis les threads de travail via compose.post et la fermeture automatique des fenêtres à l'arrêt du script",
         "Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur",
+        "La fonction \"Générer du code\" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition",
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
         "OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées",
         "API de script ai.agent pour lancer et consulter les tâches, recevoir les événements, répondre, confirmer, annuler et exécuter en arrière-plan avec detached; result/context exposent les résultats et le contexte des scripts enregistrés par @agent, avec trois exemples",
@@ -264,6 +265,7 @@
       ],
       "fix": [
         "Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans \"Copier en tant que sélecteur\" de l'inspecteur de disposition et la représentation textuelle des sélecteurs",
+        "La génération de code de l'inspecteur de disposition ignorait la saisie de texte et certaines actions de recherche, appliquait les actions à tout le groupe pour une seule cible de liste, utilisait des appels obsolètes, abandonnait silencieusement Flow ou échouait sur les appuis longs, et localisait incorrectement les ID identiques entre paquets",
         "Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information",
         "Les échecs des appels aux modèles en ligne d'Three Stove Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)",
         "La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide",
@@ -684,7 +686,8 @@
         "Les lignes de l'analyse de hiérarchie perdent les barres de niveau colorées à gauche (le retrait est conservé) et placent le repère déplier / replier à côté du texte du nœud : chevron droit pour une ligne repliée, chevron bas pour une ligne dépliée et petit cercle creux pour une ligne sans descendants, les trois dans une même teinte légèrement plus foncée",
         "La sélection multiple des attributs utilise un fond aux couleurs du thème sans modifier la hauteur des lignes; les boutons deviennent Paramètres / Retour / Copier, et le comportement de copie est mémorisé entre les sessions: Toujours demander (par défaut), Copier le sélecteur objet ou Copier le sélecteur chaîné",
         "Symboles agrandis pour le mode de recherche, les filtres, les expressions régulières et la navigation dans la barre de recherche de l'analyse de mise en page; le bouton des expressions régulières utilise une icône \".*\" simple",
-        "Les paramètres des comptes de courrier et le Centre de plugins reconnaissent le nouveau nom et le paquet de 3-Stamp Mail"
+        "Les paramètres des comptes de courrier et le Centre de plugins reconnaissent le nouveau nom et le paquet de 3-Stamp Mail",
+        "Le Centre de plugins privilégie les icônes monochromes transparentes des plugins autonomes, suit le thème clair ou sombre de l'hôte et reste compatible avec les anciennes versions"
       ],
       "dependency": [
         "Android AXML modularise",

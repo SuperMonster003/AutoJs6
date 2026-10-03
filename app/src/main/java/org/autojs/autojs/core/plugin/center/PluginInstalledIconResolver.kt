@@ -12,18 +12,6 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 object PluginInstalledIconResolver {
-    private val transparentIconPackages = setOf(
-        "io.github.supermonster003.autojs6.plugin.threestoneai",
-        // Terra retains its published package ID; Amber 4.0 adopts the maintainer-selected dotted ID.
-        "io.github.supermonster003.autojs6.plugin.audioplayer",
-        "io.github.supermonster003.autojs6.plugin.three.amber.player",
-        "io.github.supermonster003.autojs6.plugin.three.stove.agent",
-        "io.github.supermonster003.autojs6.plugin.three.adapt.a11y",
-        "io.github.supermonster003.autojs6.plugin.three.shell.terminal",
-        "io.github.supermonster003.autojs6.plugin.three.color.picker",
-        "io.github.supermonster003.autojs6.plugin.three.stamp.mail",
-    )
-
     /**
      * Identity of a locally loaded icon for change detection without comparing Drawable
      * instances: it only changes when the package build or the night mode changes.
@@ -44,13 +32,14 @@ object PluginInstalledIconResolver {
             context.createPackageContext(appInfo.packageName, 0)
         }.getOrNull()
 
-        // Three plugins reserve ic_launcher for their transparent in-app artwork. The application
-        // icon may instead be an adaptive launcher icon with an opaque background.
+        // All standalone plugins provide dedicated transparent, neutral artwork.
+        // Older official APKs use the known transparent launcher/UI resource.
+        // Resolve resource names under the host theme, never the active launcher alias.
         @Suppress("DiscouragedApi")
-        val transparentIcon = if (appInfo.packageName in transparentIconPackages) {
-            packageContext?.resources?.getIdentifier("ic_launcher", "mipmap", appInfo.packageName) ?: 0
-        } else 0
-        val iconResId = transparentIcon.takeIf { it != 0 }
+        val transparentIcon = PluginIconResourcePolicy.candidates(appInfo.packageName).firstNotNullOfOrNull { name ->
+            packageContext?.resources?.getIdentifier(name, "mipmap", appInfo.packageName)?.takeIf { it != 0 }
+        }
+        val iconResId = transparentIcon
             ?: appInfo.icon.takeIf { it != 0 }
             ?: appInfo.logo.takeIf { it != 0 }
 

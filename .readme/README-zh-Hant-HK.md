@@ -430,6 +430,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 佈局分析支援 "複製為選擇器": 在搜尋結果對話框點擊 "複製為選擇器" 或長按計數位, 把關鍵詞 (按目前符合項命中的 text / desc / id / className 屬性輸出 Contains / Match 呼叫), 欄位條件, 篩選設定檔與框選區域繪製為鏈式指令碼選擇器並複製到剪貼簿; 無法表達的條件以註解形式附在末尾
 * `新增` 選擇器新增 minDepth / maxDepth / minIndexInParent / maxIndexInParent 方法 (與 minChildCount / maxChildCount 一致, 含邊界), 並支援在選擇器字串語法中使用 (如 minDepth=3)
 * `新增` 佈局分析搜尋列新增選擇器模式: 模式開關循環至 "$()" 後, 像指令碼一樣輸入鏈式選擇器運算式 (如 text("確定").clickable().depth(3), textMatch(/確定|取消/i), 前綴 selector() / $() 可省略), 字串 / 數字 / 布林 / 正則字面量按指令碼語義落到選擇器註冊表; 輸入到一半時顯示 "運算式未結束" 而非報錯, 語法錯誤顯示位置, 呼叫與候選方法名稱, "複製為選擇器" 輸出正規化後的運算式
+* `新增` 佈局分析 "產生程式碼" 支援單個/集合範圍, 等待找到/限時等待/立即判斷, 動作接收者與設定文字參數, 經典/Flow 風格, 備選方案與定位理由, 並可在佈局中預覽符合結果
 * `修復` 啟用 APK Inspector 後, 檔案管理器的安裝套件資訊入口被隱藏且無法從更多選單存取的問題
 * `修復` Three Stove Agent 呼叫線上模型失敗時遺失網絡, 身份驗證及回應錯誤類別的問題 (需要 Provider 插件支援)
 * `修復` assistant 合併工具選項時, 空 tools 物件導致預設關閉的工具組被啟用的問題
@@ -618,6 +619,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 佈局分析器為集合控件的子項生成代碼且未選擇動作時, 生成的 `forEach` 代碼塊含無效語句 `target.;`; 現在省略該行
 * `修復` 佈局分析浮動視窗及其對話框的文字/控制項在部分主題色或夜間模式下對比度不足的問題
 * `修復` 佈局分析 "複製為選擇器" 及選擇器字串輸出中引號, 反斜線與控制字元跳脫不完整的問題
+* `修復` 佈局分析 "產生程式碼" 忽略設定文字及部分查詢動作, 將單個清單目標擴展為整組操作, 使用已棄用的查詢呼叫, Flow 組合回退或長按報錯, 跨套件同名 id 定位不正確的問題
 * `修復` 控件集合數組上同名的多個重載只保留最後一個 (如 `performAction(action)` 與 `performAction(action, ...args)`), 以另一種參數個數調用會報參數不匹配; 現在按名稱綁定全部重載
 * `修復` `textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 等 `contains` 系列的普通字符串參數自 6.7.0 Alpha13 起被當作正則模式 (`textContains(".")` 匹配任意非空文本, `textContains("1+1")` 匹配 "11", `textContains("(")` 報錯), 現在恢復為字面子串, 與 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 正則需求請傳正則參數 (`textContains(/re/i)`) 或使用 `textMatch` / `textMatches`, 字符串形式的 "/re/flags" 在 `contains` 中不再視為正則
 * `修復` 懸浮窗 (`floaty.rawWindow` / `floaty.window`) 的 `requestFocus()` / `disableFocus()` 在腳本線程調用時直接更新已附着窗口的佈局, 偶發 `CalledFromWrongThreadException`; 現改為在 UI 線程執行 (與 `setSize` / `setPosition` 一致)
@@ -850,6 +852,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 佈局分析的節點資訊對話框以主題色背景標示多選項, 切換多選時保持列表項高度不變; 按鈕調整為 "設定/返回/複製", 複製方式支援 "總是詢問/複製物件選擇器/複製鏈式選擇器" 並跨工作階段記憶, 預設為 "總是詢問"
 * `優化` 佈局分析搜尋列的查詢模式/篩選/正則/導覽按鈕增大顯示尺寸, 正則開關使用簡潔的 ".*" 字樣
 * `優化` 郵件帳戶設定與插件中心配合 3-Stamp Mail 嘅新名稱及套件名稱
+* `優化` 插件中心優先使用獨立插件的專用透明黑白圖示, 跟隨宿主亮暗主題並兼容舊版插件圖示
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

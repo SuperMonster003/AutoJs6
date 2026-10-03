@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item name="codegen_fixture_delete" type="id" />
+    <item name="codegen_fixture_list" type="id" />
     <item name="python_selector_button" type="id" />
     <item name="python_selector_input" type="id" />
 </resources>
