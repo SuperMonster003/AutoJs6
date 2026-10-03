@@ -120,7 +120,7 @@ D1-D6 来自 2026-10-03 的需求原文, 为硬性要求; D7-D21 是本 Roadmap 
 
 ### P1 规则流水线与对话框改造 (不含模型, 可单独发布)
 
-- [ ] P1.1 `TargetSets` (`codegen/TargetSets.kt`): 由所选节点推导 "集合" 范围的候选目标集合, 按顺序给出至多 3 个且去重: (a) 整个窗口中 `fullId` 与 `className` 都相同的节点; (b) 最近的 "重复容器" (子节点中至少 2 个与目标所在子树结构签名相同的祖先) 内, 与目标结构签名 (`className`, `fullId`, 相对容器项的路径) 相同的节点; (c) 整个窗口中 `text` 相同且非空的节点. 只返回 size >= 2 的集合, 每个集合带数量与一句程序生成的说明. 单测 `TargetSetsTest` (夹具 `list-duplicates`: (a)(b) 均为 20 项; 无重复时返回空).
+- [x] P1.1 `TargetSets` (`codegen/TargetSets.kt`): 由所选节点推导 "集合" 范围的候选目标集合, 按顺序给出至多 3 个且去重: (a) 整个窗口中 `fullId` 与 `className` 都相同的节点; (b) 最近的 "重复容器" (子节点中至少 2 个与目标所在子树结构签名相同的祖先) 内, 与目标结构签名 (`className`, `fullId`, 相对容器项的路径) 相同的节点; (c) 整个窗口中 `text` 相同且非空的节点. 只返回 size >= 2 的集合, 每个集合带数量与一句程序生成的说明. 单测 `TargetSetsTest` (夹具 `list-duplicates`: (a)(b) 均为 20 项; 无重复时返回空). 证据 (E1, 2026-10-03): TargetSetsTest 9 项通过, 含三类建议与去重, 无 id/文本, 跨包 id, 最近重复容器, 新建节点包装及错误索引元数据, 5,000 层树. 描述保存为消息键与参数, 界面本地化在 P1.8 接入.
 - [ ] P1.2 `CandidateSearch` (`codegen/search/CandidateSearch.kt`): 按附录 E.1 的 5 个计划族确定性枚举候选, 便宜的在前:
   - `SELF`: 在允许的属性 (id / text / desc 由请求开关决定; `className`, `packageName` 始终可用; 布尔属性与 `depth` 作为结构条件, 带排序惩罚; 不用 bounds) 的子集上构造选择器, 再做贪心精简: 逐个删除条件, 删除后仍满足验证就保留删除 (修复 F4). id 默认用条目名, 条目名在窗口内跨包重名时改用完整 id (修复 F10).
   - `SELF_INDEX`: 选择器 + `findOnce(i)`, `i` 为目标在先序匹配中的位置, 末尾附近时另给负序号; 只用于单目标.
