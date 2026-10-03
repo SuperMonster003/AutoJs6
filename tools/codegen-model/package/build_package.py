@@ -32,6 +32,10 @@ MAX_MODEL_BYTES = 32 + MAX_TREES * (1 + MAX_DEPTH * 6 + (1 << MAX_DEPTH) * 4)
 ZIP_NAMES = ("manifest.json", "model.bin", "features.json", "MODEL_CARD.md", "LICENSE")
 MODEL_ID = re.compile(r"[a-z0-9][a-z0-9._-]{1,63}")
 HEX_SHA256 = re.compile(r"[0-9a-f]{64}")
+OFFSET_TIMESTAMP = re.compile(
+    r"([0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9])"
+    r"(?:\.([0-9]{1,9}))?(Z|[+-](?:0[0-9]|1[0-8]):[0-5][0-9])"
+)
 
 
 @dataclass(frozen=True)
@@ -220,13 +224,17 @@ def _bounded_text(value, name, maximum=1024):
 
 
 def _timestamp(value, name):
-    _bounded_text(value, name)
+    _bounded_text(value, name, 64)
+    if OFFSET_TIMESTAMP.fullmatch(value) is None:
+        raise ValueError(name + " must be a calendar ISO-8601 timestamp with seconds and a UTC offset")
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as error:
         raise ValueError(name + " must be an ISO-8601 timestamp with a UTC offset") from error
-    if parsed.tzinfo is None or "T" not in value or abs(parsed.utcoffset().total_seconds()) > 18 * 3600:
+    if parsed.tzinfo is None or abs(parsed.utcoffset().total_seconds()) > 18 * 3600:
         raise ValueError(name + " must be an ISO-8601 timestamp with a UTC offset")
+    # datetime only checks the calendar/offset. Retain all nine fractional digits
+    # for Java OffsetDateTime; do not rewrite from Python's microsecond precision.
     return value
 
 

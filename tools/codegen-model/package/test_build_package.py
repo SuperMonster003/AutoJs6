@@ -212,6 +212,19 @@ class PackageBuildTest(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.fixture = PackageFixture(self.temporary.name)
 
+    def manifest_times(self, created_at, trained_at):
+        dataset = deepcopy(self.fixture.dataset)
+        dataset["generatedAt"] = created_at
+        write_json(self.fixture.root / "dataset-manifest.json", dataset)
+        digest = sha256(self.fixture.root / "dataset-manifest.json")
+        training = deepcopy(self.fixture.training)
+        training["completedAt"] = trained_at
+        training["inputSha256"]["manifest"] = digest
+        write_json(self.fixture.root / "train-log.json", training)
+        metrics = deepcopy(self.fixture.metrics)
+        metrics["datasetHashes"]["manifest"] = digest
+        write_json(self.fixture.root / "metrics.json", metrics)
+
     def test_two_packages_are_byte_identical_and_have_fixed_entries(self):
         manifest = self.fixture.build("one.ajcgm")
         self.fixture.build("two.ajcgm")
@@ -280,6 +293,47 @@ class PackageBuildTest(unittest.TestCase):
             write_json(self.fixture.root / "train-log.json", training)
             with self.assertRaises(ValueError):
                 self.fixture.build()
+
+    def test_manifest_calendar_timestamps_reject_formats_the_host_cannot_parse(self):
+        invalid = (
+            "2026-W40-6T00:00:00Z",
+            "20261003T000000Z",
+            "2026-10-03T00:00:00.1234567890Z",
+            "2026-10-03T00:00:00+12:99",
+            "2026-10-03T00:00:00+18:01",
+            "2026-02-29T00:00:00Z",
+        )
+        for field in ("dataset.createdAt", "training.trainedAt"):
+            for value in invalid:
+                with self.subTest(field=field, value=value):
+                    self.manifest_times(
+                        value if field == "dataset.createdAt" else self.fixture.dataset["generatedAt"],
+                        value if field == "training.trainedAt" else self.fixture.training["completedAt"],
+                    )
+                    with self.assertRaisesRegex(ValueError, field.replace(".", r"\.")):
+                        self.fixture.build()
+                    self.assertFalse((self.fixture.root / "first.ajcgm").exists())
+
+    def test_manifest_preserves_legal_calendar_offsets_and_nanosecond_text(self):
+        legal = (
+            "2026-10-03T00:00:00Z",
+            "2026-10-03T08:15:30+08:00",
+            "2024-02-29T00:00:00.1Z",
+            "2026-10-03T08:15:30.123456789+08:00",
+            "2026-10-03T00:00:00.000000001-00:00",
+            "2026-10-03T00:00:00+18:00",
+            "2026-10-03T00:00:00-18:00",
+        )
+        for index, value in enumerate(legal):
+            with self.subTest(value=value):
+                self.manifest_times(value, value)
+                name = f"timestamp-{index}.ajcgm"
+                manifest = self.fixture.build(name)
+                with zipfile.ZipFile(self.fixture.root / name) as archive:
+                    emitted = json.loads(archive.read("manifest.json"))
+                for actual in (manifest, emitted):
+                    self.assertEqual(value, actual["dataset"]["createdAt"])
+                    self.assertEqual(value, actual["training"]["trainedAt"])
 
     def test_explicit_license_and_existing_output_are_preserved(self):
         first = self.fixture.root / "first.ajcgm"
