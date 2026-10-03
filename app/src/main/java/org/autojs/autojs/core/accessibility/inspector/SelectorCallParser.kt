@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.accessibility.inspector
 
 import org.autojs.autojs.core.accessibility.UiSelector
+import org.autojs.autojs.core.automator.filter.JsLiteral
 import org.autojs.autojs.core.automator.selector.SelectorArgType
 import org.autojs.autojs.core.automator.selector.SelectorEntry
 import org.autojs.autojs.core.automator.selector.SelectorRegistry
@@ -290,7 +291,7 @@ class SelectorCallParser(private val registry: SelectorRegistry = SelectorRegist
 
         /** [value] as the user would type it, for messages. zh-CN: 用于消息的 [value] 书写形式. */
         fun literal(value: Any?): String = when (value) {
-            is String -> SelectorExport.quote(value)
+            is String -> JsLiteral.quote(value)
             else -> value.toString()
         }
 

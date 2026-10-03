@@ -260,6 +260,7 @@
         "Mode sélecteur dans la barre de recherche de l'analyse de mise en page : une fois le sélecteur de mode sur « $() », saisissez une expression de sélecteur chaînée comme dans un script (par exemple text(\"OK\").clickable().depth(3) ou textMatch(/ok|annuler/i) ; le préfixe selector() / $() est facultatif) ; ses littéraux chaîne / nombre / booléen / regex atteignent le registre des sélecteurs avec la sémantique des scripts, une expression à moitié saisie affiche « Expression inachevée » au lieu d'une erreur, les erreurs de syntaxe affichent la position, l'appel et les noms de méthode candidats, et « Copier comme sélecteur » produit l'expression normalisée"
       ],
       "fix": [
+        "Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans \"Copier en tant que sélecteur\" de l'inspecteur de disposition et la représentation textuelle des sélecteurs",
         "Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information",
         "Les échecs des appels aux modèles en ligne d'Three Stove Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)",
         "La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide",

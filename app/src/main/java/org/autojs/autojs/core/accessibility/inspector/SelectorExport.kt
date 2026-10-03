@@ -2,6 +2,7 @@ package org.autojs.autojs.core.accessibility.inspector
 
 import org.autojs.autojs.core.automator.filter.ActionFilter
 import org.autojs.autojs.core.automator.filter.Filter
+import org.autojs.autojs.core.automator.filter.JsLiteral.quote
 import org.autojs.autojs.core.automator.filter.JsRegexUtils
 
 /**
@@ -70,22 +71,6 @@ object SelectorExport {
             else -> filter.toString()
         }
         if (rendered.startsWith(COMMENT_PREFIX)) comments += rendered else calls += rendered
-    }
-
-    /** A double-quoted JS string literal. zh-CN: 双引号 JS 字符串字面量. */
-    fun quote(s: String): String = buildString {
-        append('"')
-        for (ch in s) {
-            when (ch) {
-                '\\' -> append("\\\\")
-                '"' -> append("\\\"")
-                '\n' -> append("\\n")
-                '\r' -> append("\\r")
-                '\t' -> append("\\t")
-                else -> append(ch)
-            }
-        }
-        append('"')
     }
 
 }
