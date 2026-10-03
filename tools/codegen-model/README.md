@@ -245,3 +245,35 @@ Score ties use a deterministic convention shared with the future Android ranker:
 scores descending, form disjoint batches whose scores differ by less than `1e-6` from each batch
 maximum, then order each batch by the Kotlin rule rank. This avoids a non-transitive approximate
 comparator and does not depend on candidate input order.
+
+## Prioritize the next private collection
+
+First use `label_real.py` to confirm the capture-state target(s). Future states may be skipped;
+the saved single-state task expresses the intended target without inventing future truth. A raw
+layout with no selected target lacks a generation intent and cannot supply candidate plans.
+Tasks with two or more confirmed states already support labeling and are excluded from this queue.
+
+Export capture-only Kotlin candidates to a new private directory:
+
+```powershell
+$env:CODEGEN_PRIVATE_DIR = 'D:\codegen-private'
+$env:CODEGEN_QUEUE_DIR = 'D:\codegen-private\tasks'
+$env:CODEGEN_QUEUE_OUTPUT_DIR = 'D:\codegen-private\candidate-export-1'
+$env:CODEGEN_GENERATOR_COMMIT = (git rev-parse HEAD).Trim()
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.dataset.CodeGenQueueExportTask'
+Remove-Item Env:CODEGEN_QUEUE_DIR, Env:CODEGEN_QUEUE_OUTPUT_DIR, Env:CODEGEN_GENERATOR_COMMIT
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/train/queue.py --candidates D:\codegen-private\candidate-export-1\candidates.jsonl --features D:\codegen-private\candidate-export-1\features.json --model tools/codegen-model/out/p3-first/model.cbm --output D:\codegen-private\queue-1
+```
+
+The JVM export writes `candidates.jsonl`, `features.json`, and `queue-manifest.json`. It uses the
+same capture-state search, verifier and feature extractor, without producing survival labels.
+Each candidate records its plan key, zero-based rule rank and feature vector. Task/snapshot
+checksums bind it to the maintained capture intent; changing targets or layouts requires re-export.
+Existing export directories are preserved and completed exports are published together.
+
+`queue.jsonl` contains only model/rule disagreements with a small raw score gap (default `0.1`,
+configurable by `--max-score-gap`), ordered by gap and stable task identity. `--limit` defaults to
+100; optional `--labels` excludes already labeled group IDs. `queue-summary.json` records exclusions
+and provenance. The score gap is a collection heuristic, not a confidence probability. Follow the
+queue to capture additional states and explicitly confirm targets with the annotation tool;
+the queue does not edit existing truth or accept a recommended correspondence automatically.
