@@ -17,6 +17,7 @@ import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoRootN
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.parseWindowType
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
+import org.autojs.autojs.ui.floating.codegen.CodeGenerateDialog
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsView
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
@@ -58,6 +59,8 @@ abstract class LayoutFloatyWindow(
     private val mMainHandler = Handler(Looper.getMainLooper())
 
     private val mNodeInfoDialog by lazy { NodeInfoDialog(mServiceContext) }
+
+    private var mCodeGenerateDialog: CodeGenerateDialog? = null
 
     fun onCreate(floatyService: FloatyService) {
         // The service context follows the system's language and night mode; the host app's settings are wanted here.
@@ -189,9 +192,16 @@ abstract class LayoutFloatyWindow(
     }
 
     protected fun generateCode() {
-        CodeGenerateDialog(mServiceContext, capture.root, mLayoutSelectedNode)
-            .build()
-            .showAdaptive()
+        val target = mLayoutSelectedNode ?: return
+        mCodeGenerateDialog?.dispose()
+        mCodeGenerateDialog = CodeGenerateDialog(mServiceContext, capture.root, target)
+            .also { it.build().showAdaptive() }
+    }
+
+    override fun close() {
+        mCodeGenerateDialog?.dispose()
+        mCodeGenerateDialog = null
+        super.close()
     }
 
     /**

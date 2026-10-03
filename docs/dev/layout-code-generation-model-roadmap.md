@@ -137,7 +137,7 @@ D1-D6 来自 2026-10-03 的需求原文, 为硬性要求; D7-D21 是本 Roadmap 
 
 本轮 P1.1-P1.7 的本地提交: P1.1 = ba4cbd9621, P1.3 = b9c77c2386, P1.2 = 00436a9bd3, P1.4 = 3c43a915a2, P1.5 = 1e0aa872de, P1.6 = 9a2b599b47; P1.7 为本次引擎整合提交. 先提交 P1.3 是为满足 P1.2 的验证依赖, 未增加或拆分路线图条目.
 
-- [ ] P1.8 对话框选项改造与引擎切换: `CodeGenerateDialog.java` 改写为 Kotlin 并移到 `ui/floating/codegen/CodeGenerateDialog.kt` (删除原 Java 文件), 入口 `LayoutFloatyWindow.kt:192` 同步修改; 仍基于 `InspectorDialogBuilder` 与现有 `OptionGroup` 列表 (F12). 选项区:
+- [x] P1.8 对话框选项改造与引擎切换: `CodeGenerateDialog.java` 改写为 Kotlin 并移到 `ui/floating/codegen/CodeGenerateDialog.kt` (删除原 Java 文件), 入口 `LayoutFloatyWindow.kt:192` 同步修改; 仍基于 `InspectorDialogBuilder` 与现有 `OptionGroup` 列表 (F12). 选项区:
   - 可用属性: id / text / desc 三个复选 (默认值沿用现状).
   - 范围: 单个 (默认) / 集合. 选 "集合" 时列出 `TargetSets` 给出的至多 3 个集合 (单选, 显示数量与说明); 没有集合时 "集合" 置灰并注明 "未找到相似控件".
   - 查询方式: 等待找到 (默认) / 限时等待 (超时输入框, 默认 10,000 ms, 见 Q3) / 立即判断.
@@ -145,7 +145,7 @@ D1-D6 来自 2026-10-03 的需求原文, 为硬性要求; D7-D21 是本 Roadmap 
   - 动作接收者: 自动 (默认, 目标自身不支持该动作时取最近支持的祖先) / 自身.
   - 代码风格: 经典 / Flow.
 
-  选项状态抽成纯 Kotlin `CodeGenOptionsState` (`ui/floating/codegen/CodeGenOptionsState.kt`), `toRequest(root, target, targetSets)` 产出 `CodeGenRequest`, 请求无效时在对话框内显示具体错误 (不关闭对话框). 输入框所在的悬浮窗对话框必须可获焦点, 在 AVD API 24 与 HyperOS 设备上确认输入法能弹出. 生成在对话框持有的单线程执行器上运行, 带 `CancellationSignal`; 超过 300 ms 显示 "正在生成" 与 "取消" (D19). 本条目暂用现有的简单结果对话框显示首选代码与第一行理由, 失败时显示 `CodeGenFailure` 的原因文字 (F11). 同一提交删除 `codegeneration/**` 与 `FlowCodeStyleTest` (提交前 grep 确认 `com.stardust.**` 以外无引用). 单测 `CodeGenOptionsStateTest`: 每个选项到请求字段的映射, 默认值, 集合选择, 超时输入非法时的错误.
+  选项状态抽成纯 Kotlin `CodeGenOptionsState` (`ui/floating/codegen/CodeGenOptionsState.kt`), `toRequest(root, target, targetSets)` 产出 `CodeGenRequest`, 请求无效时在对话框内显示具体错误 (不关闭对话框). 输入框所在的悬浮窗对话框必须可获焦点, 在 AVD API 24 与 HyperOS 设备上确认输入法能弹出. 生成在对话框持有的单线程执行器上运行, 带 `CancellationSignal`; 超过 300 ms 显示 "正在生成" 与 "取消" (D19). 本条目暂用现有的简单结果对话框显示首选代码与第一行理由, 失败时显示 `CodeGenFailure` 的原因文字 (F11). 同一提交删除 `codegeneration/**` 与 `FlowCodeStyleTest` (提交前 grep 确认 `com.stardust.**` 以外无引用). 单测 `CodeGenOptionsStateTest`: 每个选项到请求字段的映射, 默认值, 集合选择, 超时输入非法时的错误. 证据 (E3, 2026-10-03): CodeGenOptionsStateTest 15 项通过; 新界面已接入, 旧生成器及 FlowCodeStyleTest 已删除. 78 个共用字符串键同步 11 文件, 结构化理由/错误由 CodeGenText 本地化. API 24 AVD 与 Redmi 22120RN86C API 33 均通过选项映射, 非法超时保留输入, 实际悬浮窗 IME 显示/收回/再次显示及 320 dp 布局检查. 联合 JVM 测试 222 项通过; 设备工具随 P1.10 收尾提交.
 - [ ] P1.9 结果对话框 (`ui/floating/codegen/CodeGenResultDialog.kt`): 显示代码 (等宽, 可选中复制), 1-3 行理由, 解析命中数 (单个 "命中 1 个", 集合 "命中 20 个, 与所选集合一致"), 以及至多 9 个备选. 备选用对话框内 `RecyclerView` 列出 (每行: 族 + 主要条件的一行摘要), 点按切换上方显示的代码与理由; 不用 `PopupWindow`, 不用 MaterialDialog `items()` (F12). 按钮: 复制 / 在布局中显示 / 关闭. "在布局中显示" 隐藏 (不销毁) 结果对话框, 把当前计划的解析结果作为临时 `InspectorMatchView` (`ui/floating/layoutinspector/search/InspectorMatchView.kt:15`) 设到当前视图 (边界视图为 `LayoutBoundsView.kt:57` 的 `match`, 层次视图为其对应入口), 下一次点按视图时恢复原来的搜索匹配并重新显示结果对话框. 临时匹配以 `TreeMatch` (`core/accessibility/inspector/TreeMatch.kt`) 构造; 若没有 "由节点集合构造" 的工厂则新增 `TreeMatch.ofMatched(root, nodes)` (kept = 命中节点及其祖先). 单测 `TreeMatchOfMatchedTest` (`FakeUiNode` 树: 命中, 保留, 非命中, 空集合).
 - [ ] P1.10 发布收尾: changelog feature 1 条 (生成代码重写: 3 种查询方式, 集合范围, 动作接收者, 设置文本参数, 备选与理由, 布局中预览) 与 fix 1 条 (一句话合并 F1 / F2 / F5 / F8 / F9 / F10 / F18), 各 10 语言并重新生成 markdown; 字符串已在 P1.8 / P1.9 中随条目同步 11 个 `strings.xml`. 附录 B 第 1-6 项在 Redmi 22120RN86C (API 33) 与 AVD (API 24) 上执行并记录 (E3). 编译与单测 (`codegen.*`, `inspector.*`, `JsLiteralTest`) 通过; `tools/size/apk_size_report.py` 记录 P1 前后 universal APK 大小. P1 至此可单独发布.
 
