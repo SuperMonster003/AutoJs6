@@ -18,6 +18,10 @@ The [P4 package/runtime report](reports/p4-model-runtime-2026.10-1.md) records a
 on 5,012 candidates, malformed-package checks and JVM measurements. The Kotlin inference core is
 implemented; Android device benchmarks and generation-UI integration remain subsequent stages.
 
+The [P5 distribution and P6 catalog report](reports/p5-distribution-2026.10-1.md) records
+local signing/release-tool verification and Python-to-Kotlin catalog interoperability.
+Formal signing material and the remote workflow acceptance run remain maintainer inputs.
+
 ## Build and prepare
 
 From the repository root, build the controlled View application:
