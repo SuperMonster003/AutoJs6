@@ -684,6 +684,7 @@
 * `Improvement` Node info multi-selection uses themed row backgrounds with unchanged row heights; the buttons are Settings / Back / Copy, and the copy behavior is remembered across sessions: Always ask (default), Copy object selector, or Copy chained selector
 * `Improvement` Larger query mode, filter, regex and navigation symbols in the layout inspector search bar; the regex switch uses a simple ".*" icon
 * `Improvement` Mail account settings and Plugin Center now recognize 3-Stamp Mail under its new package name
+* `Improvement` Plugin Center prefers dedicated transparent monochrome icons for standalone plugins, follows the host light or dark theme, and retains fallback support for older plugin versions
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

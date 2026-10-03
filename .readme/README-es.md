@@ -846,6 +846,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` La selección múltiple de atributos usa fondos con el color del tema sin cambiar la altura de las filas; los botones son Ajustes / Volver / Copiar, y el comportamiento de copia se recuerda entre sesiones: Preguntar siempre (predeterminado), Copiar selector de objeto o Copiar selector encadenado
 * `Mejora` Símbolos más grandes para el modo de consulta, filtros, regex y navegación en la barra de búsqueda del análisis de diseño; el conmutador de regex usa un icono ".*" sencillo
 * `Mejora` Los ajustes de cuentas de correo y el Centro de plugins reconocen el nuevo nombre y paquete de 3-Stamp Mail
+* `Mejora` El Centro de complementos prioriza iconos monocromos transparentes para complementos independientes, sigue el tema claro u oscuro del anfitrión y mantiene compatibilidad con versiones anteriores
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

@@ -684,6 +684,7 @@
 * `Mejora` La selección múltiple de atributos usa fondos con el color del tema sin cambiar la altura de las filas; los botones son Ajustes / Volver / Copiar, y el comportamiento de copia se recuerda entre sesiones: Preguntar siempre (predeterminado), Copiar selector de objeto o Copiar selector encadenado
 * `Mejora` Símbolos más grandes para el modo de consulta, filtros, regex y navegación en la barra de búsqueda del análisis de diseño; el conmutador de regex usa un icono ".*" sencillo
 * `Mejora` Los ajustes de cuentas de correo y el Centro de plugins reconocen el nuevo nombre y paquete de 3-Stamp Mail
+* `Mejora` El Centro de complementos prioriza iconos monocromos transparentes para complementos independientes, sigue el tema claro u oscuro del anfitrión y mantiene compatibilidad con versiones anteriores
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado
