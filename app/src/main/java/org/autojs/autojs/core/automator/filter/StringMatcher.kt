@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
+import org.autojs.autojs.core.automator.filter.JsLiteral.quote
 import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
@@ -77,8 +78,6 @@ sealed class StringMatcher(val suffix: String, val argument: String) {
         fun match(s: String): StringMatcher = Pattern("Match", quote(s), compile(s), whole = false)
 
         fun match(regex: NativeRegExp): StringMatcher = Pattern("Match", literal(regex), compile(regex), whole = false)
-
-        private fun quote(s: String) = "\"$s\""
 
         private fun compile(s: String) = JsRegexUtils.compileJsOrPlainRegex(s)
 

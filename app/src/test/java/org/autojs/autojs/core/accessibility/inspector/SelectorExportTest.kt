@@ -5,6 +5,7 @@ import org.autojs.autojs.core.accessibility.inspector.FilterProfile.IntRangeSpec
 import org.autojs.autojs.core.accessibility.inspector.FilterProfile.Tri
 import org.autojs.autojs.core.automator.filter.BoundsFilter
 import org.autojs.autojs.core.automator.filter.Filter
+import org.autojs.autojs.core.automator.filter.JsLiteral
 import org.autojs.autojs.core.automator.filter.ScreenScale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -90,7 +91,7 @@ class SelectorExportTest {
 
     @Test
     fun stringLiteralsAreEscaped() {
-        assertEquals("\"a\\\"b\\\\c\\n\"", SelectorExport.quote("a\"b\\c\n"))
+        assertEquals("\"a\\\"b\\\\c\\n\"", JsLiteral.quote("a\"b\\c\n"))
         assertEquals("textContains(\"say \\\"hi\\\"\")", SelectorExport.render(keyword("say \"hi\""), emptyList(), KeywordProperty.TEXT, emptyList()).text)
     }
 

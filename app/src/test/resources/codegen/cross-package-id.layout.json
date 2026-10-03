@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "generator": "AutoJs6",
+  "capturedAt": "2026-10-03T00:00:00+0800",
+  "root": {
+    "packageName": "org.autojs.test.codegen.fixture",
+    "className": "android.widget.FrameLayout",
+    "childCount": 2,
+    "children": [
+      {"packageName": "android", "id": "title", "fullId": "android:id/title", "className": "android.widget.TextView", "text": "标题", "indexInParent": 0, "depth": 1},
+      {"packageName": "org.autojs.test.codegen.fixture", "id": "title", "fullId": "org.autojs.test.codegen.fixture:id/title", "className": "android.widget.TextView", "text": "标题", "indexInParent": 1, "depth": 1}
+    ]
+  }
+}

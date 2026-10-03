@@ -616,6 +616,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` `pickup` / `detect` 的結果類型 `['compass', 'p']` 一律報 "未知結果類型", 因 `compass` 在攔截表中登記為 `String` 參數而其簽名為 `CharSequence`; 現在可用
 * `修復` 佈局分析器為集合控件的子項生成代碼且未選擇動作時, 生成的 `forEach` 代碼塊含無效語句 `target.;`; 現在省略該行
 * `修復` 佈局分析浮動視窗及其對話框的文字/控制項在部分主題色或夜間模式下對比度不足的問題
+* `修復` 佈局分析 "複製為選擇器" 及選擇器字串輸出中引號, 反斜線與控制字元跳脫不完整的問題
 * `修復` 控件集合數組上同名的多個重載只保留最後一個 (如 `performAction(action)` 與 `performAction(action, ...args)`), 以另一種參數個數調用會報參數不匹配; 現在按名稱綁定全部重載
 * `修復` `textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains` 等 `contains` 系列的普通字符串參數自 6.7.0 Alpha13 起被當作正則模式 (`textContains(".")` 匹配任意非空文本, `textContains("1+1")` 匹配 "11", `textContains("(")` 報錯), 現在恢復為字面子串, 與 `text(s)` / `textStartsWith` / `textEndsWith` 一致; 正則需求請傳正則參數 (`textContains(/re/i)`) 或使用 `textMatch` / `textMatches`, 字符串形式的 "/re/flags" 在 `contains` 中不再視為正則
 * `修復` 懸浮窗 (`floaty.rawWindow` / `floaty.window`) 的 `requestFocus()` / `disableFocus()` 在腳本線程調用時直接更新已附着窗口的佈局, 偶發 `CalledFromWrongThreadException`; 現改為在 UI 線程執行 (與 `setSize` / `setPosition` 一致)
