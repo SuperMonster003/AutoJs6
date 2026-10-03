@@ -78,11 +78,14 @@ class PluginInstallWizardCatalogTest {
             order,
         )
         assertFalse(PluginInstallWizardCatalog.entries.any { it.category == PluginInstallWizardCategory.OTHERS })
-        assertEquals(46, PluginInstallWizardCatalog.entries.size)
+        assertEquals(47, PluginInstallWizardCatalog.entries.size)
     }
 
     @Test
     fun lookupByPackageName() {
+        val terminal = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.three.shell.terminal")
+        assertEquals(PluginInstallWizardCategory.TOOLS, terminal?.category)
+        assertEquals("Three Shell Terminal", terminal?.fallbackTitle)
         val entry = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.opencv")
         assertEquals(PluginInstallWizardCategory.IMAGE, entry?.category)
         assertTrue(entry?.inStandard == true)

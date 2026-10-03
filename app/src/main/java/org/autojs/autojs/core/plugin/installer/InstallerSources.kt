@@ -27,6 +27,10 @@ class InstallerSource private constructor(
     val descriptor: ParcelFileDescriptor,
     /** The file the host may delete on `deleteSource` (plugin roadmap D25); null for content URIs. */
     val ownedFile: File?,
+    /** Captured at opening; a later symlink/path change cannot redefine an alias group. */
+    val ownershipKey: String? = null,
+    /** Regular-file identity shared by provable aliases, including a provider's file descriptor. */
+    val retentionKey: String? = null,
     private val openedIdentity: Identity? = null,
 ) : Closeable {
 
@@ -46,6 +50,7 @@ class InstallerSource private constructor(
 
     private data class Identity(val device: Long, val inode: Long, val size: Long, val modified: Long,
         val changed: Long, val modifiedNanos: Long, val changedNanos: Long) {
+        val retentionKey: String get() = "$device:$inode"
         companion object {
             fun read(stat: StructStat): Identity? = if (!OsConstants.S_ISREG(stat.st_mode)) null else Identity(
                 stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime, stat.st_ctime,
@@ -68,7 +73,8 @@ class InstallerSource private constructor(
                 val identity = Identity.read(Os.fstat(descriptor.fileDescriptor))
                     ?: throw IOException("package source is not a regular file: ${file.path}")
                 if (identity.size <= 0L) throw IOException("package source is empty: ${file.path}")
-                return InstallerSource(item, file.name.take(InstallerContract.MAX_DISPLAY_NAME_LENGTH), identity.size, descriptor, file, identity)
+                val key = runCatching { file.canonicalPath }.getOrDefault(file.absolutePath)
+                return InstallerSource(item, file.name.take(InstallerContract.MAX_DISPLAY_NAME_LENGTH), identity.size, descriptor, file, key, identity.retentionKey, identity)
             } catch (failure: Throwable) {
                 runCatching { descriptor.close() }
                 throw if (failure is android.system.ErrnoException) IOException("package source metadata is unreadable", failure) else failure
@@ -105,7 +111,8 @@ class InstallerSource private constructor(
                 if (size < 0L) size = runCatching { descriptor.statSize }.getOrDefault(-1L)
                 if (size == 0L) throw IOException("package source is empty: $uri")
                 val displayName = (name?.takeIf { it.isNotBlank() } ?: uri.lastPathSegment ?: "package").take(InstallerContract.MAX_DISPLAY_NAME_LENGTH)
-                return InstallerSource(item, displayName, size.coerceAtLeast(-1L), descriptor, null)
+                val retention = runCatching { Identity.read(Os.fstat(descriptor.fileDescriptor))?.retentionKey }.getOrNull()
+                return InstallerSource(item, displayName, size.coerceAtLeast(-1L), descriptor, null, retentionKey = retention)
             } catch (failure: Throwable) {
                 runCatching { descriptor.close() }
                 throw failure

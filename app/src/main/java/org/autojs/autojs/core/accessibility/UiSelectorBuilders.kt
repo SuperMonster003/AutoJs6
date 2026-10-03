@@ -616,4 +616,16 @@ abstract class UiSelectorBuilders {
     @ScriptInterface
     fun maxChildCount(max: Int): UiSelector = applyEntry("maxChildCount", max)
 
+    @ScriptInterface
+    fun minDepth(min: Int): UiSelector = applyEntry("minDepth", min)
+
+    @ScriptInterface
+    fun maxDepth(max: Int): UiSelector = applyEntry("maxDepth", max)
+
+    @ScriptInterface
+    fun minIndexInParent(min: Int): UiSelector = applyEntry("minIndexInParent", min)
+
+    @ScriptInterface
+    fun maxIndexInParent(max: Int): UiSelector = applyEntry("maxIndexInParent", max)
+
 }

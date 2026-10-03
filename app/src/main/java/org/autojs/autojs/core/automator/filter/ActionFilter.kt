@@ -5,7 +5,7 @@ import org.autojs.autojs.core.automator.UiNode
 /**
  * Created by SuperMonster003 on Nov 19, 2022.
  */
-class ActionFilter(private val actions: Array<out Any>) : Filter {
+class ActionFilter(val actions: Array<out Any>) : Filter {
 
     override fun filter(node: UiNode<*>) = node.hasAction(*actions)
 

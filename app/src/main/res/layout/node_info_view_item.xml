@@ -4,27 +4,12 @@
               android:id="@+id/item"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:background="?selectableItemBackground"
+              android:foreground="?selectableItemBackground"
               android:clickable="true"
               android:focusable="true"
               android:gravity="center_vertical"
               android:orientation="horizontal"
               android:padding="8dp">
-
-    <!-- Shown in selection mode only; the row itself handles the taps. -->
-    <!-- zh-CN: 仅在多选模式下显示; 点击由行本身处理. -->
-    <CheckBox
-            android:id="@+id/check"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:clickable="false"
-            android:focusable="false"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:visibility="gone"
-            tools:ignore="TouchTargetSizeCheck"
-            tools:visibility="visible"/>
 
     <TextView
             android:id="@+id/name"

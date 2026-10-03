@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 10 월 1 일.
+데이터 갱신일: 2026 년 10 월 2 일.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -376,6 +376,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 파일 관리자 스크립트 메뉴의 "플로팅 실행" 항목, 반투명 플로팅 툴바로 스크립트 시작 / 중지, 편집, 로그 보기가 가능하며 야간 모드와 테마 색상을 따릅니다
 * `추가` 레이아웃 분석: 노드 정보 대화상자에서 속성을 길게 누르면 여러 개를 선택해 하나의 체인 선택자 (id('x').text('y')) 또는 pickup() / detect() 가 받아들이는 객체 선택자로 복사할 수 있고, "레이아웃을 파일로 저장" 은 캡처한 노드 트리를 <작업 디렉터리>/layouts/<시각>.layout.json 에 기록하며, 파일 관리자에서 해당 파일을 탭하면 오프라인으로 분석할 수 있습니다
 * `추가` 3-Shell Terminal 플러그인 통합: 드로어 항목, 디렉터리 메뉴의 "터미널에서 열기" 와 프로젝트 툴바에서 플러그인의 터미널을 열고, 드로어 스위치는 플러그인 세션 수를 반영하며, 플러그인이 설치되지 않았거나 비활성화 또는 호환되지 않으면 플러그인 센터, 플러그인 설정 또는 업데이트 안내로 이동
+* `추가` 스크립트 전역 객체 terminal: 세션 관리, 화면에 표시되는 실행 및 출력 이벤트, 출력 대기와 종료 코드 지원 (3-Shell Terminal 플러그인 필요) (예제 코드 > 终端 참조)
 * `추가` `images.matchFeatures`의 두 인수에 이미지나 경로를 직접 전달하면 즉시 특징을 검출합니다; `ransacThreshold`, `minInliers`, `maxFeatures` 옵션이 추가되고 `ObjectFrame`은 `width`, `height`, `angle`, `bounds`, `points`, `matches`, `inliers`를, `ImageFeatures`는 `count`와 `method`를 제공합니다
 * `추가` 공식 플러그인용 접근성 컴패니언 계약: `follow-host` 서비스 정책을 게시하는 컴패니언은 구성된 root, 보안 설정 또는 Shizuku 전략으로 AutoJs6 접근성 서비스와 함께 활성화 및 비활성화되며 호스트 서비스 상태 브로드캐스트를 받습니다
 * `추가` Bun Runtime 플러그인 프로젝트 실행: `project.json` 또는 `package.json`이 있는 디렉터리 아래의 스크립트는 크기가 제한된 워크스페이스 아카이브 (최대 16384 항목과 64 MiB, 일반 파일과 디렉터리만)로 묶여 `SUPPORTS_WORKSPACE_ARCHIVE`를 선언한 플러그인에 전달되므로 프로젝트 내부의 상대 경로 가져오기가 해석됨; 진입점 파일은 편집기의 현재 소스를 사용하고, 심볼릭 링크와 특수 파일은 실행을 중단하며, 단독 스크립트나 이전 플러그인은 단일 소스 경로를 유지
@@ -416,6 +417,14 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` 플러그인 센터의 Three Stove Agent 관리 및 설치, 활성화, 승인, 호환성 안내; 출시 APK가 공식 인덱스에 등록되면 설치 마법사 도구 분류에서 선택 가능
 * `추가` Three Stove Agent 플러그인에서 추가 스크립트 폴더를 설정하면 호스트가 범위를 검증하고 저장하여 재연결 시 복원하며, 유효하지 않은 폴더는 승인된 설정을 변경하지 않음
 * `추가` 앱 설치, 업데이트 및 제거를 위한 installer 모듈. Shizuku / Root 무음 작업과 플러그인 기능 확인을 통한 Dhizuku 승인, notification 설치 및 setDefault의 mode: 'persistent' 옵션 지원. Dhizuku에는 기기/프로필 소유자 정책의 제한이 적용됨 (3-Setup Installer 플러그인 필요) (프로젝트 문서 > [Installer](https://docs.autojs6.com/#/installer) 참조)
+* `추가` 레이아웃 계층 및 레이아웃 범위 분석 창 상단에 검색창을 제공하여 키워드 또는 정규 표현식으로 text / desc / id / className 을 일치시킴: 계층 창은 일치 노드와 그 조상만 남기고 일치 부분을 강조하며, 범위 창은 일치 노드의 테두리만 그리고, 일치 항목 사이를 앞뒤로 이동할 수 있으며, 검색창은 드래그 가능한 알약 모양으로 접히고, 두 창을 전환해도 쿼리가 유지됨
+* `추가` 레이아웃 분석 검색창의 일치 수를 탭하면 결과 목록 대화상자가 열리고 (노드 요약, 경로, 깊이와 경계 표시, 탭하여 선택으로 이동, 길게 눌러 노드 정보 보기, 일치 항목이 없으면 이유 표시), 검색창은 쿼리 기록을 유지함 (Enter 또는 이동 시 기록, 최대 20개, 입력란이 비어 있을 때 드롭다운 표시, 길게 눌러 삭제, 지우기 가능, 세션 간 유지)
+* `추가` 레이아웃 분석 검색창에 필터 프로필 추가: 불리언 속성 3단계 (clickable / scrollable / enabled 등 14개), id / text / desc 유무, 클래스 이름 프리셋 (버튼 / 텍스트 / 입력란 / 이미지 / 체크박스 및 스위치 / 목록 및 스크롤 / 컨테이너), depth / childCount / indexInParent 범위, 최소 너비와 높이, 화면 내만, 패키지 이름과 동작으로 노드를 필터링; 수정할 수 없는 기본 프로필 내장, 변경 사항은 즉시 적용되며 사용자 프로필로 저장 가능 (다른 이름으로 저장 / 이름 바꾸기 / 삭제), 선택한 프로필은 세션 간 유지됨
+* `추가` 레이아웃 범위 분석 창에서 영역 선택 지원: 필터 프로필에서 "영역 선택"을 고른 뒤 사각형을 드래그하면 해당 영역 안에 완전히 들어가는 노드만 남으며, 계층 창으로 전환해도 유지됨
+* `추가` 레이아웃 분석 검색창에 필드 모드 추가: 모드 전환 (Aa / k=v)을 탭하여 스크립트 선택자 문자열 구문으로 여러 조건을 입력합니다 (예: text=확인 clickable, id~=btn_.*, !enabled, minDepth=3); 입력란에 포커스가 있는 동안 구문 요약을 표시하고, 구문 오류 시 힌트 줄에 위치, 조건, 후보 이름을 표시하며, 쿼리 모드는 세션 간 유지됩니다
+* `추가` 레이아웃 분석에 "선택자로 복사" 추가: 검색 결과 대화상자의 "선택자로 복사"를 탭하거나 카운터를 길게 누르면 키워드 (현재 일치 항목이 적중한 text / desc / id / className 속성의 Contains / Match 호출로), 필드 조건, 필터 프로필, 선택 영역을 체인 형식의 스크립트 선택자로 클립보드에 복사합니다; 표현할 수 없는 조건은 주석으로 끝에 덧붙입니다
+* `추가` 선택자에 minDepth / maxDepth / minIndexInParent / maxIndexInParent 메서드 추가 (minChildCount / maxChildCount와 같이 경계 포함), 선택자 문자열 구문에서도 사용 가능 (예: minDepth=3)
+* `추가` 레이아웃 분석 검색창에 선택자 모드 추가: 모드 전환이 "$()"에 이르면 스크립트처럼 체인 선택자 식을 입력합니다 (예: text("확인").clickable().depth(3), textMatch(/확인|취소/i); 접두사 selector() / $()는 생략 가능). 문자열 / 숫자 / 불리언 / 정규식 리터럴은 스크립트 의미 그대로 선택자 레지스트리에 전달되며, 입력 중인 식은 오류 대신 "식이 끝나지 않았습니다"로 표시하고, 구문 오류는 위치, 호출, 후보 메서드 이름을 표시하며, "선택자로 복사"는 정규화된 식을 출력합니다
 * `수정` APK Inspector 사용 시 파일 관리자의 정보 버튼이 숨겨져 설치 패키지 정보를 열 수 없는 문제
 * `수정` Three Stove Agent 온라인 모델 호출 실패 시 네트워크, 인증 및 응답 오류 분류가 누락되는 문제 (Provider 플러그인 지원 필요)
 * `수정` assistant 도구 옵션 병합 시 기본 tools 객체가 비어 있으면 기본적으로 꺼진 도구 그룹이 켜지는 문제
@@ -652,6 +661,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 패키지 정보에서 일반 ZIP의 분할 APK 세트를 인식하며, 알려진 패키지 확장자가 없는 동일한 컨테이너도 지원
 * `수정` Android 14 이상에서 AutoJs6가 포그라운드에 있을 때 설치를 시작하면 3-Setup Installer 확인 화면이 표시되지 않는 문제
 * `수정` 패키지 루트 매니페스트와 공유 UID가 주석이나 위조된 네임스페이스로 잘못 해석될 수 있는 문제. 중복 속성, 리소스 식별 충돌 및 확인할 수 없는 공유 UID는 처리를 중단
+* `수정` 일부 테마 색상이나 야간 모드에서 레이아웃 분석 플로팅 창 및 대화상자의 텍스트/컨트롤 대비가 부족한 문제
 * `개선` Android 7-10 에서 Three Stove Agent 모델 데이터를 공개 API 로 읽으며 파일 위치와 정체된 파이프의 취소 동작 유지
 * `개선` 호스트 lint 검사는 경로에 따라 AutoJs4 호환 클래스와 리소스를 제외하고 나머지 호스트 코드를 계속 검사
 * `개선` 플러그인 센터가 호스트와 동일한 공식 인증서로 서명된 기본 비활성 플러그인 (YOLO, MCP Server) 의 신규 설치를 감지하면 명시적 활성화 기록을 기록하고 활성화 탐색을 실행; 신뢰된 서드파티 또는 사용자 승인 서명, adb 설치 및 업데이트는 계속 수동 활성화가 필요하며, 실행 시에는 저장된 기록만 참조
@@ -825,8 +835,12 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` 동영상 플레이어 3-Ember Player를 3-Amber Player로 변경하고 새 앱 ID에 맞게 설치 안내, M3U 재생 우선순위 및 투명 아이콘 인식을 업데이트
 * `개선` 패키지 설치기를 3-Setup Installer 플러그인으로 이전: 파일 관리자, 플러그인 센터, 빌드 완료 및 자동 업데이트의 설치 진입점은 플러그인을 사용할 수 있으면 플러그인의 설치 대화상자로, 그렇지 않으면 시스템 설치기로 패키지를 전달하고 플러그인 설치를 안내합니다. 호스트는 더 이상 "AutoJs6로 APK 열기" 시스템 진입점을 등록하지 않으며, apks / xapk / apkm / apkz 분할 컨테이너에는 플러그인이 필요합니다
 * `개선` 설치 기록에서 AutoJs6 진입점과 installer 스크립트가 시작한 설치를 구분하며 스크립트 API 사용법은 유지 (설치 기록을 지원하는 3-Setup Installer 버전 필요)
+* `개선` installer 및 호스트 설치 진입점에서 플러그인의 출처/패키지 이름 접두사별 프로필 사용 가능. 명시적 옵션을 우선하며 installer/installReason/packageSource의 null은 상속 값을 해제. 소스 삭제는 설치 성공 후에만 수행하고 같은 일괄 작업의 보존 대상 또는 미성공 항목과 공유하는 파일은 유지 (지원하는 3-Setup Installer 필요)
 * `개선` installer 설치 옵션에서 grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason 및 packageSource를 선택한 플러그인의 기능에 따라 사용. 생략 시 기존 동작을 유지하며 명시적인 false/none도 지원 여부를 확인
 * `개선` Three Stove Agent 모델 브로커는 모델 호출이 시간 초과되고 동기 Binder 트랜잭션이 아직 반환되지 않았을 때 해당 Provider 구성 요소를 차단합니다. 이전에는 이 차단이 AutoJs6 프로세스를 재시작할 때까지 유지되어 이후 작업이 즉시 RATE_LIMITED: FUSED 로 실패했습니다. 이제 그 트랜잭션이 실제로 반환되고 실행이 정산되면 차단이 자동 해제되어 재시작 없이 이후 작업이 다시 허용됩니다
+* `개선` 레이아웃 계층 분석 행에서 왼쪽의 색상 레벨 선을 제거하고 (들여쓰기는 유지) 펼침 / 접힘 표시를 노드 텍스트 바로 왼쪽으로 이동: 접힌 행은 오른쪽 꺾쇠, 펼친 행은 아래쪽 꺾쇠, 자손이 없는 행은 작은 빈 원이며 세 아이콘 모두 같은 약간 진한 색으로 표시
+* `개선` 노드 정보의 다중 선택을 테마 색상 배경으로 표시하고 전환 시 행 높이를 유지; 버튼을 설정/뒤로/복사로 변경하고, 복사 동작은 항상 묻기 (기본값)/객체 선택자 복사/체인 선택자 복사 중에서 선택하며 세션 간에 기억
+* `개선` 레이아웃 분석 검색창의 쿼리 모드/필터/정규식/탐색 표시를 확대하고, 정규식 전환에 간결한 ".*" 아이콘 사용
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1108,7 +1122,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 10 월 1 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026 년 10 월 2 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

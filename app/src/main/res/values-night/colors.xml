@@ -26,7 +26,7 @@
     <color name="console_view_debug">#DFE0E0E0</color>
     <color name="console_view_verbose">#7F7F80</color>
 
-    <color name="layout_hierarchy_view_level_beam_5">@color/md_lime_500</color>
+    <color name="layout_hierarchy_view_row_icon">#CCBFBFBF</color>
 
     <color name="dialog_button_advanced_settings">@color/md_blue_gray_200</color>
     <color name="dialog_button_default">#03A9F4</color>
@@ -90,6 +90,8 @@
     <color name="layout_node_info_view_decoration_line">#1BF5F5F5</color>
     <color name="layout_hierarchy_window_background">#CC102027</color>
     <color name="layout_hierarchy_window_clicked_background">#BF546E7A</color>
+    <color name="layout_inspector_search_surface">#F2263238</color>
+    <color name="layout_inspector_search_hint">#8AF5F5F5</color>
 
     <color name="color_selector_item_text">#DEFEFEFE</color>
     <color name="drawer_item_subtitle_color">@color/md_gray_600</color>

@@ -7,6 +7,9 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import androidx.core.os.BundleCompat
+import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.AidlPluginHost
@@ -21,6 +24,7 @@ import org.autojs.plugin.terminal.api.TerminalCapabilityKeys
 import org.autojs.plugin.terminal.api.TerminalContract
 import org.autojs.plugin.terminal.api.TerminalErrorCodes
 import org.autojs.plugin.terminal.api.TerminalIds
+import java.io.Closeable
 
 /**
  * Host wrapper for the terminal Binder contract (plugin roadmap P1.2, decisions D3 / D25): any
@@ -114,6 +118,39 @@ object TerminalPluginHost {
     suspend fun registerCallback(context: Context, callback: ITerminalCallback) = call(context) { proxy -> proxy.registerCallback(callback) }
 
     suspend fun unregisterCallback(context: Context, callback: ITerminalCallback) = call(context) { proxy -> proxy.unregisterCallback(callback) }
+
+    /** An output subscription (B.1): the plugin's pipe read end for one session and the id that cancels it. The receiver owns the read end. */
+    data class OutputSubscription(val id: String, val readEnd: ParcelFileDescriptor)
+
+    /** `subscribeOutput` for [sessionId]; [fromStart] replays the current transcript first (B.2). Plugin roadmap P4.2. */
+    suspend fun subscribeOutput(context: Context, sessionId: String, fromStart: Boolean = false): OutputSubscription = call(context) { proxy ->
+        val options = JsonObject().apply { addProperty(TerminalContract.FIELD_FROM_START, fromStart) }.toString()
+        val bundle = proxy.subscribeOutput(requireSessionId(sessionId), options) ?: Bundle()
+        TerminalErrorMapper.fromBundle(bundle)?.let { throw TerminalPluginException(it) }
+        val id = bundle.getString(TerminalContract.KEY_SUBSCRIPTION_ID)?.takeIf { it.isNotBlank() }
+            ?: throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.INTERNAL, "subscribeOutput returned no subscription id", sessionId))
+        val readEnd = BundleCompat.getParcelable(bundle, TerminalContract.KEY_FD, ParcelFileDescriptor::class.java)
+            ?: throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.INTERNAL, "subscribeOutput returned no pipe", sessionId))
+        OutputSubscription(id, readEnd)
+    }
+
+    suspend fun unsubscribeOutput(context: Context, subscriptionId: String) = call(context) { proxy -> proxy.unsubscribeOutput(subscriptionId) }
+
+    /**
+     * Registers [callback] over a dedicated binding and returns its lease: the plugin stays bound,
+     * so the callback and the output subscriptions of this client survive the idle unbinding of
+     * the pooled connection (D26), until the lease is closed. Plugin roadmap P4.2.
+     */
+    suspend fun registerCallbackLeased(context: Context, callback: ITerminalCallback): Closeable = withContext(Dispatchers.IO) {
+        val target = selectForCall(context)
+        try {
+            host.callWithDedicatedBindingLease(context, target) { proxy -> proxy.registerCallback(callback) }.bindingLease
+        } catch (e: TerminalPluginException) {
+            throw e
+        } catch (t: Throwable) {
+            throw TerminalPluginException(TerminalErrorMapper.fromThrowable(t, TerminalErrorMapper.Phase.CALL), t)
+        }
+    }
 
     private suspend fun <T> call(context: Context, phase: TerminalErrorMapper.Phase = TerminalErrorMapper.Phase.CALL, block: (ITerminalPlugin) -> T): T = withContext(Dispatchers.IO) {
         val target = selectForCall(context)

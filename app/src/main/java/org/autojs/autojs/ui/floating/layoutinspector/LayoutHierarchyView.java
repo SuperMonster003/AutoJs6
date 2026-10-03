@@ -5,23 +5,29 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextPaint;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.autojs.autojs.core.accessibility.NodeInfo;
-import org.autojs.autojs.ui.widget.LevelBeamView;
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorMatchView;
 import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
@@ -32,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import kotlin.ranges.IntRange;
 import pl.openrnd.multilevellistview.ItemInfo;
 import pl.openrnd.multilevellistview.MultiLevelListAdapter;
 import pl.openrnd.multilevellistview.MultiLevelListView;
@@ -62,7 +69,8 @@ public class LayoutHierarchyView extends MultiLevelListView {
 
     private static final String WIDGET_PACKAGE_PREFIX = "android.widget.";
     private static final float ROW_TEXT_SIZE_SP = 14f;
-    private static final float ROW_EXTRA_WIDTH_DP = 5 + 3 + 3 + 10 + 10 + 5 + 8;
+    /** Row padding, icon, icon margin, text margins, row padding and slack (see `layout_hierarchy_view_item.xml`). zh-CN: 行内边距, 图标, 图标边距, 文字边距, 行内边距与余量 (见 `layout_hierarchy_view_item.xml`). */
+    private static final float ROW_EXTRA_WIDTH_DP = 5 + 12 + 4 + 3 + 3 + 5 + 8;
     private static final int MAX_CONTENT_WIDTH_SCREENS = 3;
 
     private Adapter mAdapter;
@@ -85,15 +93,28 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private int mClickedColor = 0x99b2b3b7;
     private int mDefaultTextColor;
     private int mHighlightTextColor;
+    private InspectorTheme mColors;
     private NodeInfo mRootNode;
     private int mContentWidth;
     private TextPaint mRowTextPaint;
-    private float mRowBeamPadding;
-    private float mRowBeamStep;
+    private float mRowIndentStep;
     private float mRowExtraWidth;
     private final Set<NodeInfo> mInitiallyExpandedNodes = new HashSet<>();
     /** Ancestors of the selected node, root included, the node itself excluded. zh-CN: 选中节点的祖先集合, 含根, 不含自身. */
     private final Set<NodeInfo> mNodePath = new HashSet<>();
+
+    /** The active search, which prunes the tree to its kept nodes and highlights its matches (roadmap D3). zh-CN: 当前搜索, 把树裁剪为其保留节点并高亮其匹配项 (Roadmap D3). */
+    @Nullable
+    private InspectorMatchView mMatch;
+
+    /** Whether the tree is currently pruned by mMatch. zh-CN: 树当前是否被 mMatch 裁剪. */
+    private boolean mFiltered;
+
+    /** The rows expanded when the search started, restored when it is cleared. zh-CN: 搜索开始时已展开的行, 清空搜索时还原. */
+    @Nullable
+    private Set<NodeInfo> mExpandedBeforeMatch;
+
+    private int mMatchHighlightColor = 0x4D2196F3;
 
     public LayoutHierarchyView(Context context) {
         super(context);
@@ -125,9 +146,68 @@ public class LayoutHierarchyView extends MultiLevelListView {
         mAdapter.notifyDataSetChanged();
     }
 
+    /** Background of the matched part of a row's text while a search is active. zh-CN: 搜索生效时行文本中命中部分的背景色. */
+    public void setMatchHighlightColor(int color) {
+        mMatchHighlightColor = color;
+        mAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Prunes the tree to the nodes [match] keeps (matches and their ancestors, all expanded) and
+     * highlights the matches; null or an unfiltered match restores the full tree with the rows that
+     * were expanded before the search started. Call again whenever the match changes.
+     * zh-CN: 把树裁剪为 [match] 保留的节点 (匹配项及其祖先, 全部展开) 并高亮匹配项; null 或无筛选的匹配结果恢复完整树, 并还原
+     * 搜索开始前已展开的行. 匹配结果变化时需再次调用.
+     */
+    public void setMatch(@Nullable InspectorMatchView match) {
+        // The match view is usually the live search session, so the previous state cannot be read
+        // back from it: it is remembered in mFiltered.
+        // zh-CN: 匹配视图通常就是实时的搜索会话, 无法从它读回之前的状态: 由 mFiltered 记住.
+        boolean wasFiltered = mFiltered;
+        boolean filtered = match != null && !match.isUnfiltered();
+        mMatch = match;
+        mFiltered = filtered;
+        if (filtered && !wasFiltered) {
+            mExpandedBeforeMatch = new HashSet<>();
+            for (Object expanded : mAdapter.getExpandedObjects()) {
+                mExpandedBeforeMatch.add((NodeInfo) expanded);
+            }
+        } else if (!filtered && wasFiltered) {
+            mInitiallyExpandedNodes.clear();
+            if (mExpandedBeforeMatch != null) {
+                mInitiallyExpandedNodes.addAll(mExpandedBeforeMatch);
+            }
+            // The selection made during the search stays reachable. zh-CN: 搜索期间做出的选择保持可见.
+            if (mClickedNodeInfo != null) {
+                mInitiallyExpandedNodes.addAll(mNodePath);
+            }
+            mExpandedBeforeMatch = null;
+        }
+        mAdapter.reloadData();
+        invalidate();
+    }
+
+    private boolean isFiltered() {
+        return mFiltered;
+    }
+
+    private CharSequence highlight(String summary) {
+        IntRange range = mMatch == null ? null : mMatch.highlightRange(summary);
+        if (range == null || range.isEmpty() || range.getLast() >= summary.length()) {
+            return summary;
+        }
+        SpannableString spannable = new SpannableString(summary);
+        spannable.setSpan(new BackgroundColorSpan(mMatchHighlightColor), range.getFirst(), range.getLast() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(mColors.getMatchText()), range.getFirst(), range.getLast() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return spannable;
+    }
+
     private void init() {
-        mDefaultTextColor = getContext().getColor(R.color.day_night);
-        mHighlightTextColor = getContext().getColor(R.color.layout_hierarchy_window_node_bounds);
+        mColors = new InspectorTheme(getContext(), getContext().getColor(R.color.layout_hierarchy_window_background));
+        mDefaultTextColor = mColors.getText();
+        mHighlightTextColor = mColors.getAccent();
+        mClickedColor = mColors.getSelectionBackground();
+        mMatchHighlightColor = mColors.getMatchBackground();
         initRowMetrics();
         mAdapter = new Adapter();
         setAdapter(mAdapter);
@@ -218,8 +298,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private void initRowMetrics() {
         mRowTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mRowTextPaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, ROW_TEXT_SIZE_SP, getResources().getDisplayMetrics()));
-        mRowBeamPadding = getResources().getDimension(R.dimen.level_beam_view_padding_left) + getResources().getDimension(R.dimen.level_beam_view_padding_right);
-        mRowBeamStep = getResources().getDimension(R.dimen.level_beam_view_line_width) + getResources().getDimension(R.dimen.level_beam_view_line_offset);
+        mRowIndentStep = getResources().getDimension(R.dimen.layout_hierarchy_view_indent_step);
         mRowExtraWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ROW_EXTRA_WIDTH_DP, getResources().getDisplayMetrics());
     }
 
@@ -234,7 +313,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
         for (int i = 0; i < mAdapter.getDisplayedItemCount(); i++) {
             NodeInfo node = (NodeInfo) mAdapter.getDisplayedObject(i);
             int level = mAdapter.getDisplayedItemInfo(i).getLevel();
-            float width = mRowBeamPadding + (level + 1) * mRowBeamStep + mRowTextPaint.measureText(summarize(node)) + mRowExtraWidth;
+            float width = level * mRowIndentStep + mRowTextPaint.measureText(summarize(node)) + mRowExtraWidth;
             if (width > max) max = width;
         }
         int contentWidth = (int) Math.ceil(max);
@@ -354,7 +433,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     }
 
     @NonNull
-    private static String simplifyClassName(@Nullable CharSequence className) {
+    public static String simplifyClassName(@Nullable CharSequence className) {
         if (className == null) {
             return "";
         }
@@ -368,15 +447,15 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private static class ViewHolder {
         TextView nameView;
         TextView infoView;
-        ImageView arrowView;
-        LevelBeamView levelBeamView;
+        ImageView iconView;
+        Space indentView;
         NodeInfo nodeInfo;
 
         ViewHolder(View view) {
             infoView = view.findViewById(R.id.dataItemInfo);
             nameView = view.findViewById(R.id.dataItemName);
-            arrowView = view.findViewById(R.id.dataItemArrow);
-            levelBeamView = view.findViewById(R.id.dataItemLevelBeam);
+            iconView = view.findViewById(R.id.dataItemIcon);
+            indentView = view.findViewById(R.id.dataItemIndent);
         }
     }
 
@@ -391,17 +470,27 @@ public class LayoutHierarchyView extends MultiLevelListView {
 
         @Override
         protected List<?> getSubObjects(Object object) {
-            return ((NodeInfo) object).getChildren();
+            List<NodeInfo> children = ((NodeInfo) object).getChildren();
+            if (!isFiltered()) {
+                return children;
+            }
+            List<NodeInfo> kept = new ArrayList<>(children.size());
+            for (NodeInfo child : children) {
+                if (mMatch.isKept(child)) {
+                    kept.add(child);
+                }
+            }
+            return kept;
         }
 
         @Override
         protected boolean isExpandable(Object object) {
-            return !((NodeInfo) object).getChildren().isEmpty();
+            return !getSubObjects(object).isEmpty();
         }
 
         @Override
         protected boolean isInitiallyExpanded(Object object) {
-            return mInitiallyExpandedNodes.contains((NodeInfo) object);
+            return isFiltered() || mInitiallyExpandedNodes.contains((NodeInfo) object);
         }
 
         @SuppressLint("InflateParams")
@@ -417,27 +506,41 @@ public class LayoutHierarchyView extends MultiLevelListView {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
             viewHolder.nodeInfo = nodeInfo;
-            viewHolder.nameView.setText(summarize(nodeInfo));
+            String summary = summarize(nodeInfo);
+            boolean filtered = isFiltered();
+            boolean isMatch = filtered && mMatch.isMatched(nodeInfo);
+            viewHolder.nameView.setText(isMatch ? highlight(summary) : summary);
 
             boolean isSelected = nodeInfo == mClickedNodeInfo;
             boolean isAncestor = mNodePath.contains(nodeInfo);
-            viewHolder.nameView.setTextColor(isSelected || isAncestor ? mHighlightTextColor : mDefaultTextColor);
+            viewHolder.nameView.setTextColor(isSelected ? mColors.getSelectionAccent()
+                    : filtered && !isMatch ? mColors.getSecondaryText()
+                    : isAncestor ? mHighlightTextColor : mDefaultTextColor);
+            viewHolder.iconView.setImageTintList(android.content.res.ColorStateList.valueOf(
+                    isSelected ? mColors.getSelectionText() : mColors.getSecondaryText()));
             convertView.setBackgroundColor(isSelected ? mClickedColor : Color.TRANSPARENT);
 
             if (viewHolder.infoView.getVisibility() == VISIBLE) {
                 viewHolder.infoView.setText(getItemInfoDsc(itemInfo));
             }
 
-            if (itemInfo.isExpandable() && !isAlwaysExpanded()) {
-                viewHolder.arrowView.setVisibility(View.VISIBLE);
-                viewHolder.arrowView.setImageResource(itemInfo.isExpanded()
-                        ? R.drawable.arrow_up
-                        : R.drawable.arrow_down);
+            // The icon sits right before the text and tells the row apart: collapsed (tap to expand),
+            // expanded (tap to collapse) or a leaf; the indent alone conveys the nesting.
+            // zh-CN: 图标紧靠文字之前并区分行的状态: 已收起 (点击展开), 已展开 (点击收起) 或无子孙; 嵌套关系仅由缩进体现.
+            if (itemInfo.isExpandable()) {
+                viewHolder.iconView.setImageResource(itemInfo.isExpanded() || isAlwaysExpanded()
+                        ? R.drawable.ic_hierarchy_expanded
+                        : R.drawable.ic_hierarchy_collapsed);
             } else {
-                viewHolder.arrowView.setVisibility(View.GONE);
+                viewHolder.iconView.setImageResource(R.drawable.ic_hierarchy_leaf);
             }
 
-            viewHolder.levelBeamView.setLevel(itemInfo.getLevel());
+            int indent = Math.round(itemInfo.getLevel() * mRowIndentStep);
+            ViewGroup.LayoutParams indentParams = viewHolder.indentView.getLayoutParams();
+            if (indentParams.width != indent) {
+                indentParams.width = indent;
+                viewHolder.indentView.setLayoutParams(indentParams);
+            }
             return convertView;
         }
 

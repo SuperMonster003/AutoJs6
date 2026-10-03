@@ -186,6 +186,16 @@ object SelectorRegistry {
         entry(name, getter = { property[it] }) { f1<Int>(int(paramName)) { IntFilter(property, it) } }
     }
 
+    /**
+     * `minX(min)` / `maxX(max)`: the inclusive lower and upper bound of an integer property, so a
+     * range reads `minDepth(3).maxDepth(5)` (layout inspector roadmap D19).
+     * zh-CN: `minX(min)` / `maxX(max)`: 整数属性的闭区间下界与上界, 区间写作 `minDepth(3).maxDepth(5)` (布局分析 Roadmap D19).
+     */
+    private fun Entries.intBounds(property: IntFilter.Property) {
+        entry("min${property.capitalized}", getter = { property[it] }) { f1<Int>(int("min")) { IntFilter(property, IntFilter.Comparison.Min(it)) } }
+        entry("max${property.capitalized}", getter = { property[it] }) { f1<Int>(int("max")) { IntFilter(property, IntFilter.Comparison.Max(it)) } }
+    }
+
     private fun buildEntries(): List<SelectorEntry> = Entries().apply {
         stringFamily("id", StringProperty.ID, { it.id() }, equals = { IdFilter.equals(it) }, startsWith = { IdFilter.startsWith(it) })
         entry("idHex", getter = { it.idHex() }) { f1<String>(string("str")) { StringPropertyFilter(StringProperty.ID_HEX, StringMatcher.equals(it)) } }
@@ -267,8 +277,9 @@ object SelectorRegistry {
         intProperty("drawingOrder", "order", IntFilter.Property.DRAWING_ORDER)
         intProperty("indexInParent", "index", IntFilter.Property.INDEX_IN_PARENT)
         intProperty("childCount", "count", IntFilter.Property.CHILD_COUNT)
-        entry("minChildCount", getter = { it.childCount() }) { f1<Int>(int("min")) { IntFilter(IntFilter.Property.CHILD_COUNT, IntFilter.Comparison.Min(it)) } }
-        entry("maxChildCount", getter = { it.childCount() }) { f1<Int>(int("max")) { IntFilter(IntFilter.Property.CHILD_COUNT, IntFilter.Comparison.Max(it)) } }
+        intBounds(IntFilter.Property.CHILD_COUNT)
+        intBounds(IntFilter.Property.DEPTH)
+        intBounds(IntFilter.Property.INDEX_IN_PARENT)
     }.list
 
 }

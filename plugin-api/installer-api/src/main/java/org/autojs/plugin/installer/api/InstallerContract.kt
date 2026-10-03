@@ -50,6 +50,8 @@ object InstallerContract {
     const val FIELD_BATCH = "batch"
     /** Optional String: trusted host entry point, `host` (default) or `script`. */
     const val FIELD_SOURCE_ORIGIN = "sourceOrigin"
+    /** V3 source-profiles only: omitted/false retains the pre-profile remote behavior. */
+    const val FIELD_APPLY_SOURCE_PROFILES = "applySourceProfiles"
     const val FIELD_SOURCES = "sources"
     const val FIELD_OPTIONS = "options"
     const val FIELD_INTERACTION = "interaction"
@@ -92,6 +94,8 @@ object InstallerContract {
     const val FIELD_PREVIOUS_VERSION_CODE = "previousVersionCode"
     const val FIELD_DURATION_MILLIS = "durationMillis"
     const val FIELD_SOURCE_DELETED = "sourceDeleted"
+    /** Required Boolean on each successful result of an opted-in source-profile request. */
+    const val FIELD_SOURCE_DELETE_REQUESTED = "sourceDeleteRequested"
     const val FIELD_NOTES = "notes"
     /** Optional V3 observations; accepted dexopt does not prove compilation actually ran. */
     const val FIELD_UPDATE_OWNER = "updateOwner"
@@ -243,6 +247,12 @@ object InstallerContract {
     const val PACKAGE_SOURCE_OTHER = "other"
     val PACKAGE_SOURCES: List<String> = listOf(PACKAGE_SOURCE_UNSPECIFIED, PACKAGE_SOURCE_STORE,
         PACKAGE_SOURCE_LOCAL_FILE, PACKAGE_SOURCE_DOWNLOADED_FILE, PACKAGE_SOURCE_OTHER)
+
+    /** Only these per-package fields can be inherited; timing, batch policy and interaction stay session-wide. */
+    val PROFILE_OPTION_FIELDS: List<String> = listOf(FIELD_AUTHORIZER, FIELD_ALLOW_DOWNGRADE, FIELD_ALLOW_TEST_ONLY,
+        FIELD_BYPASS_LOW_TARGET_SDK, FIELD_INSTALLER, FIELD_USER, FIELD_DELETE_SOURCE,
+        FIELD_GRANT_ALL_REQUESTED_PERMISSIONS, FIELD_REQUEST_UPDATE_OWNERSHIP, FIELD_DEXOPT,
+        FIELD_INSTALL_REASON, FIELD_PACKAGE_SOURCE)
 
     // Ceilings (plugin roadmap D31). Both sides reject anything beyond them with INVALID_ARGUMENT.
 

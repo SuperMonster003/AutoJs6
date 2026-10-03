@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Content of the layout inspector filter profile dialog (roadmap P3.2); the dynamic rows (booleans, presets, packages, actions) are added by FilterProfileDialog. -->
+<!-- zh-CN: 布局分析筛选配置对话框的内容 (Roadmap P3.2); 动态行 (布尔, 预设, 包名, 动作) 由 FilterProfileDialog 添加. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="8dp"
+        tools:ignore="UseAppTint">
+
+    <!-- Profile header: picker, dirty marker, rename / delete. zh-CN: 配置头部: 选择器, 已修改标记, 改名 / 删除. -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+        <LinearLayout
+                android:id="@+id/profile_picker"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:id="@+id/profile_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/day_night"
+                    android:textSize="16sp"
+                    tools:text="Default" />
+
+            <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_arrow_drop_down_black_36dp"
+                    android:tint="@color/day_night" />
+
+            <TextView
+                    android:id="@+id/profile_modified"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/text_inspector_profile_modified"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+        </LinearLayout>
+
+        <ImageButton
+                android:id="@+id/profile_rename"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_rename"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_edit_24dp"
+                android:tint="@color/day_night" />
+
+        <ImageButton
+                android:id="@+id/profile_delete"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_delete"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_delete_black_24dp"
+                android:tint="@color/day_night" />
+
+    </LinearLayout>
+
+    <TextView
+            android:id="@+id/profile_default_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/text_inspector_profile_default_readonly"
+            android:textColor="@color/day_night_alpha_60"
+            android:textSize="12sp" />
+
+    <TextView
+            style="@style/LayoutInspectorFilterSection"
+            android:text="@string/text_inspector_section_booleans" />
+
+    <LinearLayout
+            android:id="@+id/booleans"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    <TextView
+            style="@style/LayoutInspectorFilterSection"
+            android:text="@string/text_inspector_section_presence" />
+
+    <com.google.android.flexbox.FlexboxLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexWrap="wrap">
+
+        <CheckBox
+                android:id="@+id/require_id"
+                style="@style/LayoutInspectorFilterCheck"
+                android:text="@string/text_inspector_has_id" />
+
+        <CheckBox
+                android:id="@+id/require_text"
+                style="@style/LayoutInspectorFilterCheck"
+                android:text="@string/text_inspector_has_text" />
+
+        <CheckBox
+                android:id="@+id/require_desc"
+                style="@style/LayoutInspectorFilterCheck"
+                android:text="@string/text_inspector_has_desc" />
+
+    </com.google.android.flexbox.FlexboxLayout>
+
+    <TextView
+            style="@style/LayoutInspectorFilterSection"
+            android:text="@string/text_inspector_section_class_presets" />
+
+    <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/presets"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexWrap="wrap" />
+
+    <TextView
+            android:id="@+id/class_names_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:textSize="12sp"
+            tools:text="Class names in this tree (23)" />
+
+    <TextView
+            android:id="@+id/class_names"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textColor="@color/day_night_alpha_70"
+            android:textSize="11sp"
+            android:visibility="gone"
+            tools:text="TextView x 12\nFrameLayout x 9" />
+
+    <TextView
+            style="@style/LayoutInspectorFilterSection"
+            android:text="@string/text_inspector_section_ranges" />
+
+    <LinearLayout
+            android:id="@+id/ranges"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    <TextView
+            style="@style/LayoutInspectorFilterSection"
+            android:text="@string/text_inspector_section_geometry" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+        <EditText
+                android:id="@+id/min_width"
+                style="@style/LayoutInspectorFilterNumber"
+                android:hint="@string/text_inspector_min_width"
+                android:importantForAutofill="no"
+                tools:ignore="LabelFor" />
+
+        <EditText
+                android:id="@+id/min_height"
+                style="@style/LayoutInspectorFilterNumber"
+                android:layout_marginStart="12dp"
+                android:hint="@string/text_inspector_min_height"
+                android:importantForAutofill="no"
+                tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <CheckBox
+            android:id="@+id/on_screen_only"
+            style="@style/LayoutInspectorFilterCheck"
+            android:text="@string/text_inspector_on_screen_only" />
+
+    <!-- Region label on its own line; the buttons follow on the next, right-aligned. zh-CN: 区域标签独占一行, 按钮在下一行靠右. -->
+    <TextView
+            android:id="@+id/region_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:textColor="@color/day_night"
+            android:textSize="13sp"
+            tools:text="Region: [0,120][720,900]" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal">
+
+        <Button
+                android:id="@+id/select_region"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="0dp"
+                android:text="@string/text_inspector_select_region"
+                android:textAllCaps="false"
+                android:textSize="13sp" />
+
+        <Button
+                android:id="@+id/clear_region"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="0dp"
+                android:text="@string/text_inspector_clear_region"
+                android:textAllCaps="false"
+                android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <TextView
+            style="@style/LayoutInspectorFilterSection"
+            android:text="@string/text_package_name" />
+
+    <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/packages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexWrap="wrap" />
+
+    <TextView
+            style="@style/LayoutInspectorFilterSection"
+            android:text="@string/text_inspector_section_actions" />
+
+    <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexWrap="wrap" />
+
+</LinearLayout>

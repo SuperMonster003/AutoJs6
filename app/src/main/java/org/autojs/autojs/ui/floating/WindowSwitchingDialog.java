@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
-import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
+import org.autojs.autojs.ui.floating.layoutinspector.InspectorDialogBuilder;
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoDataItem;
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoDataSummary;
 import org.autojs.autojs6.R;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Created by SuperMonster003 on May 19, 2024.
  */
-public class WindowSwitchingDialog extends AppLevelThemeDialogBuilder {
+public class WindowSwitchingDialog extends InspectorDialogBuilder {
 
     private final List<WindowInfoDataSummary> mItemList;
     private final Adapter mAdapter;

@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 10 月 1 日.
+資料更新於 2026 年 10 月 2 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -376,6 +376,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 檔案管理器指令碼選單 "懸浮執行" 項, 以半透明懸浮工具列進行指令碼啟停 / 編輯 / 檢視日誌, 跟隨夜間模式與主題色
 * `新增` 版面分析: 節點資訊對話方塊中長按屬性可勾選多項, 並合併複製為鏈式選擇器 (id('x').text('y')) 或 pickup() / detect() 可接受的物件選擇器; "儲存版面配置為檔案" 把擷取的節點樹寫入 <工作目錄>/layouts/<時間>.layout.json, 在檔案管理器中點選該檔案即可離線分析
 * `新增` 整合 3-Shell Terminal 外掛程式: 側拉選單, 檔案管理器目錄選單及專案工具列的終端機入口改為開啟外掛程式終端機, 側拉選單開關同步外掛程式工作階段數, 外掛程式未安裝, 已停用或不相容時分別引導至外掛程式中心, 外掛程式設定或升級提示
+* `新增` 指令碼全域物件 terminal: 工作階段管理, 可見執行與輸出監聽, 支援等待輸出和結束代碼 (需要 3-Shell Terminal 插件) (參閱 範例程式碼 > 终端)
 * `新增` `images.matchFeatures` 的兩個參數均可直接傳入圖片或路徑並即時偵測特徵; 新增 `ransacThreshold`, `minInliers` 與 `maxFeatures` 選項, `ObjectFrame` 新增 `width`, `height`, `angle`, `bounds`, `points`, `matches` 與 `inliers` 屬性, `ImageFeatures` 新增 `count` 與 `method` 屬性
 * `新增` 官方外掛無障礙伴生契約: 發布 `follow-host` 服務策略的伴生外掛隨 AutoJs6 無障礙服務一同啟用與停用, 使用已設定的 root, 安全設定或 Shizuku 策略, 並接收宿主服務狀態廣播
 * `新增` Bun Runtime 外掛專案執行: 位於含 `project.json` 或 `package.json` 目錄下的指令碼會打成有界工作區封存 (最多 16384 項目與 64 MiB, 只收一般檔案與目錄) 交給宣告了 `SUPPORTS_WORKSPACE_ARCHIVE` 的外掛, 專案內的相對匯入可以解析; 進入點檔案使用編輯器目前原始碼, 符號連結與特殊檔案直接中止執行, 裸指令碼或舊版外掛保持單一原始碼路徑
@@ -416,6 +417,14 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Three Stove Agent 外掛中心管理與安裝, 啟用, 授權及相容性引導; 安裝精靈工具分類提供選用入口, 發行 APK 加入官方索引後可供安裝
 * `新增` Three Stove Agent 外掛可設定附加指令碼目錄, 宿主校驗允許範圍後儲存並在重新連線時恢復, 無效目錄不會取代已接受的設定
 * `新增` installer 模組, 用於安裝, 更新與解除安裝應用程式, 支援 Shizuku / Root 靜默操作, 並依外掛能力啟用 Dhizuku 授權, notification 通知安裝及 setDefault 的 mode: 'persistent' 選項; Dhizuku 受裝置/工作資料擁有者政策限制 (需要 3-Setup Installer 外掛) (參閱 專案文件 > [安裝器](https://docs.autojs6.com/#/installer))
+* `新增` 佈局分析的層次與範圍視窗頂部提供搜尋列, 按關鍵字或正規表示式比對控制項的 text / desc / id / className: 層次視窗只保留相符節點及其祖先並標示命中內容, 範圍視窗只繪製相符節點的邊框, 可在相符項之間前後跳轉, 搜尋列可收起為可拖曳的浮標, 在兩個視窗之間切換時保留查詢
+* `新增` 佈局分析搜尋列點按相符計數可開啟結果清單對話框 (顯示節點摘要, 路徑, 深度與邊界, 點按跳轉選取, 長按檢視控制項資訊, 零相符時說明原因), 並提供查詢記錄 (按 Enter 或跳轉時記錄, 最多 20 筆, 輸入框為空時下拉顯示, 長按刪除, 可清除, 跨工作階段保留)
+* `新增` 佈局分析搜尋列新增篩選設定檔: 按布林屬性三態 (clickable / scrollable / enabled 等 14 項), 有 id / text / desc, 類別名稱預設 (按鈕 / 文字 / 輸入框 / 圖片 / 核取方塊與開關 / 清單與捲動 / 容器), depth / childCount / indexInParent 區間, 最小寬高, 僅限畫面內, 套件名稱與動作篩選控制項; 內建不可修改的預設設定檔, 修改即時生效並可儲存為使用者設定檔 (支援另存為 / 重新命名 / 刪除), 已選設定檔跨工作階段記憶
+* `新增` 佈局範圍分析視窗支援框選區域: 在篩選設定檔中選擇 "框選區域" 後拖出矩形, 只保留完全位於該區域內的控制項, 切換到層次視窗同樣生效
+* `新增` 佈局分析搜尋列新增欄位模式: 點擊模式開關 (Aa / k=v) 切換, 以指令碼選擇器字串語法輸入多個條件 (如 text=確定 clickable, id~=btn_.*, !enabled, minDepth=3); 輸入框取得焦點時顯示語法速查, 語法錯誤時在提示列中顯示出錯位置, 條件及候選名稱; 查詢模式跨工作階段記憶
+* `新增` 佈局分析支援 "複製為選擇器": 在搜尋結果對話框點擊 "複製為選擇器" 或長按計數位, 把關鍵字 (按目前符合項命中的 text / desc / id / className 屬性輸出 Contains / Match 呼叫), 欄位條件, 篩選設定檔與框選區域繪製為鏈式指令碼選擇器並複製到剪貼簿; 無法表達的條件以註解形式附在末尾
+* `新增` 選擇器新增 minDepth / maxDepth / minIndexInParent / maxIndexInParent 方法 (與 minChildCount / maxChildCount 一致, 含邊界), 並支援在選擇器字串語法中使用 (如 minDepth=3)
+* `新增` 佈局分析搜尋列新增選擇器模式: 模式開關循環至 "$()" 後, 像指令碼一樣輸入鏈式選擇器運算式 (如 text("確定").clickable().depth(3), textMatch(/確定|取消/i), 前綴 selector() / $() 可省略), 字串 / 數字 / 布林 / 正則字面量按指令碼語義落到選擇器註冊表; 輸入到一半時顯示 "運算式未結束" 而非報錯, 語法錯誤顯示位置, 呼叫與候選方法名稱, "複製為選擇器" 輸出正規化後的運算式
 * `修復` 啟用 APK Inspector 後, 檔案管理器的安裝套件資訊入口被隱藏且無法從更多選單存取的問題
 * `修復` Three Stove Agent 呼叫線上模型失敗時遺失網路, 身分驗證及回應錯誤類別的問題 (需要 Provider 外掛支援)
 * `修復` assistant 合併工具選項時, 空 tools 物件導致預設關閉的工具組被啟用的問題
@@ -526,6 +535,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` `auto.services` 在未設定 root 或安全設定自動啟用方式時總是回傳空陣列的問題 (讀取已啟用服務清單並不需要這些權限)
 * `修復` 側拉抽屜的無障礙服務開關對 "已啟用但未執行" 的服務顯示為開啟的問題 (現顯示為關閉並帶 "故障" 副標題, 開啟開關即重新啟用)
 * `修復` 浮動按鈕的 "佈局範圍分析" / "佈局層次分析" 在無障礙服務未啟用但可自動啟動 (root 或安全設定) 時需要觸發兩次的問題 (第一次僅啟動服務, 第二次才執行分析; 現服務啟動後立即接續分析, 快速設定磚與佈局分析廣播同理, 且啟動過程不再阻塞主執行緒)
+* `修復` 版面分析浮動視窗及其對話方塊的文字/控制項在部分主題色或夜間模式下對比度不足的問題
 * `修復` 無障礙服務重新啟動 (含被系統解除繫結後重新繫結) 後, 指令碼此前透過 `auto.registerEvent` 註冊的事件回呼與 `events.observeKey()` 的按鍵監聽全部失效的問題 (訂閱現由程序級事件匯流排持有, 不再隨服務實例消亡)
 * `修復` Rhino 引擎更新後作用域 API 相容性回歸導致部分執行環境輔助功能異常的問題
 * `修復` Rhino 模組橋接對 null/undefined, Callable, 建構函式, 原型, realm 及 Kotlin 傳回值的處理不正確, 可能造成跨 realm 物件, 回呼遺失或執行階段例外的問題
@@ -825,8 +835,12 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 影片播放器 3-Ember Player 更名為 3-Amber Player, 更新外掛安裝引導, M3U 播放優先順序及透明圖示識別, 使用新的獨立應用程式套件名稱
 * `最佳化` 安裝器能力遷出到 3-Setup Installer 外掛: 檔案管理器, 外掛中心, 打包完成與自更新的安裝入口在外掛可用時交給外掛的安裝對話框, 否則將 APK 交給系統安裝器並提示安裝外掛; 宿主不再註冊 "用 AutoJs6 開啟 APK" 的系統入口, apks / xapk / apkm / apkz 分包容器需要外掛才能安裝
 * `最佳化` 安裝歷史可區分 AutoJs6 入口與 installer 指令碼發起的安裝, 指令碼 API 用法不變 (需要支援安裝歷史的 3-Setup Installer 外掛)
+* `最佳化` installer 及主程式安裝入口可使用外掛設定的來源/套件名稱前綴設定檔, 明確指定的選項優先, installer/installReason/packageSource 的 null 可清除繼承值; 刪除來源須安裝成功, 並保留同批明確保留或未成功項目共用的檔案 (需要支援來源設定檔的 3-Setup Installer 外掛)
 * `最佳化` installer 安裝選項接受 grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason 及 packageSource, 依外掛能力啟用; 省略保留原行為, 明確指定 false/none 仍需對應支援
 * `最佳化` Three Stove Agent 模型代理在一次模型呼叫逾時且同步 Binder 交易尚未返回時會熔斷該 Provider 元件, 此前熔斷持續到 AutoJs6 程序重啟, 後續任務立即以 RATE_LIMITED: FUSED 失敗; 現在該交易實際返回並結清後自動解除熔斷, 後續任務無需重啟即可再次准入
+* `最佳化` 佈局層次分析頁面移除左側的層級彩色直線 (僅保留縮排), 展開 / 收起標識移到控制項文字左側: 可展開為右箭頭, 已展開為下箭頭, 無子孫控制項為小空心圓, 三類圖示統一著色並適當加深
+* `最佳化` 版面分析的節點資訊對話方塊以主題色背景標示多選項, 切換多選時保持清單項目高度不變; 按鈕調整為 "設定/返回/複製", 複製方式支援 "總是詢問/複製物件選擇器/複製鏈式選擇器" 並跨工作階段記憶, 預設為 "總是詢問"
+* `最佳化` 版面分析搜尋列的查詢模式/篩選/正規表示式/導覽按鈕增大顯示尺寸, 正規表示式開關使用簡潔的 ".*" 字樣
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1108,7 +1122,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 10 月 1 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 10 月 2 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

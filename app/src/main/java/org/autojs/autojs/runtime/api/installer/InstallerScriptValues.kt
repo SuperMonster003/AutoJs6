@@ -49,6 +49,7 @@ object InstallerScriptValues {
         value.interaction?.let { put("interaction", it) }
         value.durationMillis?.let { put("durationMillis", it) }
         value.sourceDeleted?.let { put("sourceDeleted", it) }
+        value.sourceDeleteRequested?.let { put("sourceDeleteRequested", it) } ?: remove("sourceDeleteRequested")
         if (value.notes.isNotEmpty() || containsKey("notes")) put("notes", value.notes)
         value.error?.let { put("error", mergeError(get("error"), it)) }
     }

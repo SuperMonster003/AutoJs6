@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Surface of the in-window query history drop-down under the layout inspector search bar (roadmap P2.2). -->
+<!-- zh-CN: 布局分析搜索栏下方窗口内查询历史下拉的底板 (Roadmap P2.2). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:shape="rectangle">
+    <solid android:color="@color/layout_inspector_search_surface" />
+    <corners android:radius="12dp" />
+</shape>

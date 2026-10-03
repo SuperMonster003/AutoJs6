@@ -41,6 +41,9 @@ internal data class InstallerPeer(
         }
     }
 
+    fun usesSourceProfiles(options: InstallerJson.InstallOptions): Boolean = options.providedOptions != null &&
+        contractVersion >= 3 && InstallerCapabilityKeys.FEATURE_SOURCE_PROFILES in features
+
     private fun requireExtension(feature: String, label: String, minimumVersion: Int = 2) {
         if (contractVersion < minimumVersion || feature !in features) throw InstallerPluginException(
             InstallerErrorMapper.error(InstallerErrorCodes.INVALID_ARGUMENT,

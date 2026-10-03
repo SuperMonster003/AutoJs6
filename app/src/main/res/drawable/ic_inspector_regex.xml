@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inspector search bar regex switch: the ".*" monogram (a dot on the baseline and a six-armed asterisk). zh-CN: 布局分析搜索栏正则开关: ".*" 字样 (基线上的点与六臂星号). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
+    <path
+            android:fillColor="#FF000000"
+            android:pathData="M5.2,15a2.2,2.2 0 1,0 0.01,0z" />
+    <path
+            android:strokeColor="#FF000000"
+            android:strokeLineCap="round"
+            android:strokeWidth="2.2"
+            android:pathData="M15.5,4.5L15.5,16.5M10.3,7.5L20.7,13.5M10.3,13.5L20.7,7.5" />
+</vector>

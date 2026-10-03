@@ -6,9 +6,6 @@ import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
-import com.afollestad.materialdialogs.DialogAction
-import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.app.AppLevelThemeDialogBuilder
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.LayoutSnapshotFiles
 import org.autojs.autojs.core.accessibility.NodeInfo
@@ -23,9 +20,10 @@ import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsView
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
-import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoView
+import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoDialog
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchBar
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchSession
 import org.autojs.autojs.ui.widget.BubblePopupMenu
-import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ContextUtils.withHostConfiguration
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.ViewUtils
@@ -48,63 +46,39 @@ abstract class LayoutFloatyWindow(
     /** True for a layout loaded from a file: there are no live windows to switch to or to save. zh-CN: 从文件读入的布局为 true: 没有可切换或可保存的实时窗口. */
     var isOffline = false
 
+    /**
+     * Search state shared by the inspector windows of one inspection (roadmap D5): created by the
+     * first window, handed to the next one on every bounds / hierarchy switch.
+     * zh-CN: 同一次布局分析的各窗口共享的搜索状态 (Roadmap D5): 由首个窗口创建, 范围 / 层次互切时交给下一个窗口.
+     */
+    var searchSession: InspectorSearchSession? = null
+
+    protected val serviceContext: Context get() = mServiceContext
+
     private val mMainHandler = Handler(Looper.getMainLooper())
 
-    private val mNodeInfoView by lazy {
-        NodeInfoView(mServiceContext).also { view ->
-            view.onSelectionModeChanged = { enabled -> applyNodeInfoDialogButtons(enabled) }
-        }
-    }
-
-    /**
-     * The dialog does not dismiss itself: in selection mode the buttons copy the ticked attributes
-     * as a chained or an object selector, or clear the selection.
-     * zh-CN: 对话框不自动关闭: 多选模式下按钮把勾选的属性复制为链式或对象选择器, 或清除勾选.
-     */
-    private val mNodeInfoDialog by lazy {
-        AppLevelThemeDialogBuilder(mServiceContext)
-            .customView(mNodeInfoView, false)
-            .autoDismiss(false)
-            .positiveText(R.string.dialog_button_dismiss)
-            .onAny { dialog, which -> onNodeInfoDialogButton(dialog, which) }
-            .build()
-            .also { it.window!!.setType(FloatyWindowManger.getWindowType()) }
-    }
-
-    private fun onNodeInfoDialogButton(dialog: MaterialDialog, which: DialogAction) {
-        when (which) {
-            DialogAction.POSITIVE -> when {
-                mNodeInfoView.isSelectionMode -> copySelectorAndDismiss(dialog, mNodeInfoView.buildChainedSelector())
-                else -> dialog.dismiss()
-            }
-            DialogAction.NEUTRAL -> copySelectorAndDismiss(dialog, mNodeInfoView.buildObjectSelector())
-            DialogAction.NEGATIVE -> mNodeInfoView.deselectAll()
-        }
-    }
-
-    private fun copySelectorAndDismiss(dialog: MaterialDialog, selector: String) {
-        ClipboardUtils.setClip(mServiceContext, selector)
-        ViewUtils.showToast(mServiceContext, R.string.text_already_copied_to_clip)
-        dialog.dismiss()
-    }
-
-    private fun applyNodeInfoDialogButtons(selectionMode: Boolean) {
-        val dialog = mNodeInfoDialog
-        if (selectionMode) {
-            dialog.setActionButton(DialogAction.POSITIVE, R.string.text_copy_chained_selector)
-            dialog.setActionButton(DialogAction.NEUTRAL, R.string.text_copy_object_selector)
-            dialog.setActionButton(DialogAction.NEGATIVE, R.string.text_deselect_all)
-        } else {
-            dialog.setActionButton(DialogAction.POSITIVE, R.string.dialog_button_dismiss)
-            dialog.setActionButton(DialogAction.NEUTRAL, null)
-            dialog.setActionButton(DialogAction.NEGATIVE, null)
-        }
-    }
+    private val mNodeInfoDialog by lazy { NodeInfoDialog(mServiceContext) }
 
     fun onCreate(floatyService: FloatyService) {
         // The service context follows the system's language and night mode; the host app's settings are wanted here.
         // zh-CN: service context 跟随系统的语言与夜间模式, 此处需要的是宿主应用的设置.
         mServiceContext = if (isServiceRelied) ContextThemeWrapper(floatyService.withHostConfiguration(), R.style.AppTheme) else context
+        if (searchSession == null) searchSession = InspectorSearchSession(capture.root)
+    }
+
+    protected fun requireSearchSession(): InspectorSearchSession = searchSession ?: InspectorSearchSession(capture.root).also { searchSession = it }
+
+    /**
+     * A search bar bound to the shared session; [defaultExpanded] is the initial state of this
+     * window kind (roadmap D9) and decides whether the back key collapses an empty bar.
+     * zh-CN: 绑定到共享会话的搜索栏; [defaultExpanded] 为该类窗口的初始状态 (Roadmap D9), 并决定返回键是否收起空的搜索栏.
+     */
+    protected fun createSearchBar(defaultExpanded: Boolean, expanded: Boolean, host: InspectorSearchBar.Host): InspectorSearchBar {
+        return InspectorSearchBar(ContextThemeWrapper(mServiceContext, R.style.AppTheme)).apply {
+            this.host = host
+            collapsesOnBack = !defaultExpanded
+            bind(requireSearchSession(), expanded)
+        }
     }
 
     fun setLayoutSelectedNode(selectedNode: NodeInfo?) {
@@ -167,13 +141,7 @@ abstract class LayoutFloatyWindow(
     }
 
     protected fun showNodeInfo() {
-        mLayoutSelectedNode?.let { mNodeInfoView.setNodeInfo(it) }
-        applyNodeInfoDialogButtons(mNodeInfoView.isSelectionMode)
-        mNodeInfoDialog.show()
-        if (!sMultiSelectHintShown) {
-            sMultiSelectHintShown = true
-            ViewUtils.showToast(mServiceContext, R.string.text_long_press_to_select_multiple_attributes, true)
-        }
+        mLayoutSelectedNode?.let { mNodeInfoDialog.show(it) }
     }
 
     protected fun showLayoutBounds() {
@@ -182,6 +150,7 @@ abstract class LayoutFloatyWindow(
             .apply {
                 setLayoutSelectedNode(mLayoutSelectedNode)
                 isOffline = this@LayoutFloatyWindow.isOffline
+                searchSession = this@LayoutFloatyWindow.searchSession
             }
             .let { FloatyService.addWindow(it) }
     }
@@ -192,6 +161,7 @@ abstract class LayoutFloatyWindow(
             .apply {
                 setLayoutSelectedNode(mLayoutSelectedNode)
                 isOffline = this@LayoutFloatyWindow.isOffline
+                searchSession = this@LayoutFloatyWindow.searchSession
             }
             .let { FloatyService.addWindow(it) }
     }
@@ -219,7 +189,7 @@ abstract class LayoutFloatyWindow(
     }
 
     protected fun generateCode() {
-        CodeGenerateDialog(context, capture.root, mLayoutSelectedNode)
+        CodeGenerateDialog(mServiceContext, capture.root, mLayoutSelectedNode)
             .build()
             .showAdaptive()
     }
@@ -251,7 +221,7 @@ abstract class LayoutFloatyWindow(
                 rootNode = WindowInfoRootNodeDataItem(context.getString(R.string.text_captured_window_info_root_node), win.rootClassName, context.getString(R.string.text_captured_window_info_root_node_unknown)),
             )
         }
-        val builder = WindowSwitchingDialog(context, windowInfoList).apply {
+        val builder = WindowSwitchingDialog(mServiceContext, windowInfoList).apply {
             sortItems(compareBy { it.order.rawValue })
         }
         val dialog = builder.build().showAdaptive()
@@ -259,6 +229,7 @@ abstract class LayoutFloatyWindow(
             builder.itemList[position].window.root?.let {
                 dialog.dismiss()
                 capture.root = it
+                searchSession?.setRoot(it)
                 mLayoutSelectedNode = null
                 showLayoutBounds()
             }
@@ -285,8 +256,6 @@ abstract class LayoutFloatyWindow(
         protected val SPLIT_LINE: Nothing? = null
 
         // private var sExitTipsShownInProcess = false
-
-        private var sMultiSelectHintShown = false
 
     }
 

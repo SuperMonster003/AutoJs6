@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.installer
 
 import android.net.Uri
 import android.os.CancellationSignal
+import android.os.Bundle
 import android.os.OperationCanceledException
 import android.os.ParcelFileDescriptor
 import android.system.Os
@@ -59,6 +60,52 @@ class InstallerSourceDeviceTest {
         source.close()
         assertFalse(source.deleteOwnedFileIfUnchanged())
         assertTrue(file.exists())
+    }
+
+    @Test
+    fun profileRetainedProviderAliasProtectsTheOwnedFile() = withDirectory { directory ->
+        val first = File(directory, "first.apk").apply { writeText("shared source fixture") }
+        val id = java.util.UUID.randomUUID().toString()
+        val uri = Uri.parse("content://org.autojs.autojs6.test.installer.sources/fixture/$id")
+        InstallerSource.fromFile(first, item = 0).use { source ->
+            try {
+                ParcelFileDescriptor.dup(source.descriptor.fileDescriptor).use { shared ->
+                    val reply = context.contentResolver.call(uri, InstallerSourceTestProvider.REGISTER_ALIAS,
+                        id, Bundle().apply { putParcelable("descriptor", shared) })
+                    assertEquals(true, reply?.getBoolean("ok"))
+                }
+                InstallerSource.fromUri(context, uri, item = 1).use { retained ->
+                    assertNotEquals(source.ownershipKey, retained.ownershipKey)
+                    assertNotNull(source.retentionKey)
+                    assertEquals(source.retentionKey, retained.retentionKey)
+                    assertNull(retained.ownedFile)
+                    val completion = InstallerJson.decodeCompletion("""{"results":[
+                        {"ok":true,"sourceDeleteRequested":true},
+                        {"ok":true,"sourceDeleteRequested":false}
+                    ]}""").copy(sourceProfilesEnabled = true)
+                    val sources = listOf(source, retained).map { opened -> object : InstallerSourceDeletion.Source {
+                        override val item = opened.item
+                        override val isOwnedFile = opened.ownedFile != null
+                        override val ownershipKey = opened.ownershipKey
+                        override val retentionKey = opened.retentionKey
+                        override fun deleteIfUnchanged() = opened.deleteOwnedFileIfUnchanged()
+                    } }
+                    val result = InstallerSourceDeletion.apply(completion, sources, requested = false)
+                    assertTrue(result.allOk)
+                    assertTrue(result.results.all { it.sourceDeleted == false })
+                    assertTrue(first.isFile)
+                    assertTrue(source.descriptor.fileDescriptor.valid())
+                    assertTrue(retained.descriptor.fileDescriptor.valid())
+                }
+            } finally {
+                // The provider closes only this random registration; it never owns a source path.
+                val reply = context.contentResolver.call(uri, InstallerSourceTestProvider.CLEAR_ALIAS, id, null)
+                assertEquals(true, reply?.getBoolean("ok"))
+                assertThrows(java.io.FileNotFoundException::class.java) {
+                    context.contentResolver.openFileDescriptor(uri, "r")?.close()
+                }
+            }
+        }
     }
 
     @Test

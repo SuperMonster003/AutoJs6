@@ -35,8 +35,10 @@ data class InstallerScriptOptions(
                     allowTestOnly = boolean(options.get("allowTestOnly"), "options.allowTestOnly", false),
                     bypassLowTargetSdk = boolean(options.get("bypassLowTargetSdk"), "options.bypassLowTargetSdk", false),
                     installer = options.get("installer")?.let {
-                        val name = string(it, "options.installer")
-                        if (name.isEmpty()) null else packageName(name, "options.installer")
+                        if (it.isJsonNull) null else {
+                            val name = string(it, "options.installer")
+                            if (name.isEmpty()) null else packageName(name, "options.installer")
+                        }
                     },
                     user = user(options.get("user")),
                     deleteSource = boolean(options.get("deleteSource"), "options.deleteSource", false),
@@ -49,8 +51,10 @@ data class InstallerScriptOptions(
                         boolean(it, "options.requestUpdateOwnership", false)
                     },
                     dexopt = optionalEnum(options.get("dexopt"), "options.dexopt", InstallerContract.DEXOPT_MODES),
-                    installReason = optionalEnum(options.get("installReason"), "options.installReason", InstallerContract.INSTALL_REASONS),
-                    packageSource = optionalEnum(options.get("packageSource"), "options.packageSource", InstallerContract.PACKAGE_SOURCES),
+                    installReason = optionalEnum(options.get("installReason"), "options.installReason", InstallerContract.INSTALL_REASONS, nullable = true),
+                    packageSource = optionalEnum(options.get("packageSource"), "options.packageSource", InstallerContract.PACKAGE_SOURCES, nullable = true),
+                    providedOptions = java.util.Collections.unmodifiableSet(options.keySet().filterNot { it == "interaction" }
+                        .mapTo(linkedSetOf()) { if (it == "timeout") InstallerContract.FIELD_TIMEOUT_MILLIS else it }),
                 ),
             )
         }
@@ -137,8 +141,9 @@ data class InstallerScriptOptions(
             return value.asBoolean
         }
 
-        private fun optionalEnum(value: JsonElement?, label: String, allowed: List<String>): String? {
+        private fun optionalEnum(value: JsonElement?, label: String, allowed: List<String>, nullable: Boolean = false): String? {
             if (value == null) return null
+            if (nullable && value.isJsonNull) return null
             return string(value, label).also { if (it !in allowed) throw invalid("'$label' must be one of ${allowed.joinToString()}") }
         }
 

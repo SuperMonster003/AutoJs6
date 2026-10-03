@@ -130,7 +130,7 @@ object InstallerPluginHost {
         context: Context,
         sources: List<InstallerSource>,
         interaction: String = InstallerContract.INTERACTION_AUTO,
-        options: InstallerJson.InstallOptions = InstallerJson.InstallOptions(),
+        options: InstallerJson.InstallOptions = InstallerJson.InstallOptions(providedOptions = emptySet()),
         listener: InstallerSessionListener = object : InstallerSessionListener {},
         hostSessionId: String = UUID.randomUUID().toString(),
         isBatch: Boolean = sources.map { it.item }.distinct().size > 1,
@@ -139,22 +139,27 @@ object InstallerPluginHost {
         // withContext can discard a successfully constructed return value when cancellation wins
         // the dispatcher handoff. Retain it outside that boundary so its lease/PFDs still close.
         val handoff = AtomicReference<InstallerSessionHandle?>()
+        val captured = options.copy(providedOptions = options.providedOptions?.toSet())
         try {
             return withContext(Dispatchers.IO) {
                 currentCoroutineContext().ensureActive()
-                val requestJson = InstallerJson.encodeInstallRequest(hostSessionId, sources.map { it.toEntry() }, interaction, options, isBatch, origin)
+                val entries = sources.map { it.toEntry() }
+                val legacyJson = InstallerJson.encodeInstallRequest(hostSessionId, entries, interaction, captured, isBatch, origin)
                 val descriptors = sources.map { it.descriptor }.toTypedArray<ParcelFileDescriptor>()
                 val target = selectOrThrow(context)
                 val callback = InstallerSessionCallbackBinder(hostSessionId, listener)
                 val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
                     val peer = peer(proxy)
-                    peer.requireInstall(options.authorizer, interaction, options)
+                    peer.requireInstall(captured.authorizer, interaction, captured)
+                    callback.sourceProfilesEnabled = peer.usesSourceProfiles(captured)
+                    val requestJson = if (callback.sourceProfilesEnabled) InstallerJson.encodeInstallRequest(
+                        hostSessionId, entries, interaction, captured, isBatch, origin, applySourceProfiles = true) else legacyJson
                     val request = InstallerBundles.request(requestJson, hostVersionCode, hostSessionId, peer.contractVersion)
                     proxy.openSession(descriptors, request, callback) ?: throw refusal(callback)
                 }
                 try {
                     callback.pluginSessionId = runCatching { leased.value.getId() }.getOrNull()
-                    InstallerSessionHandle(hostSessionId, leased.value, leased.bindingLease, callback, sources, options.timeoutMillis).also {
+                    InstallerSessionHandle(hostSessionId, leased.value, leased.bindingLease, callback, sources, captured.timeoutMillis).also {
                         handoff.set(it)
                         currentCoroutineContext().ensureActive()
                     }

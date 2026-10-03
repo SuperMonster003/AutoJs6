@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout hierarchy row: collapsed, tap to expand (chevron right). zh-CN: 布局层次行: 已收起, 点击展开 (右箭头). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
+    <path
+            android:fillColor="#FF000000"
+            android:pathData="M7.23,18.43L13.64,12 7.23,5.57 9.2,3.6 17.6,12 9.2,20.4 7.23,18.43z" />
+</vector>

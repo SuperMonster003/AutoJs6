@@ -43,6 +43,9 @@ internal class InstallerSessionCallbackBinder(
     @Volatile
     var pluginSessionId: String? = null
 
+    /** Set on the leased peer before openSession can send an early terminal callback. */
+    @Volatile var sourceProfilesEnabled: Boolean = false
+
     private fun accepts(sessionId: String?): Boolean = sessionId == null || sessionId == pluginSessionId || sessionId == hostSessionId
 
     override fun onStage(sessionId: String?, stage: String?, detail: Bundle?) {
@@ -74,11 +77,13 @@ internal class InstallerSessionCallbackBinder(
     }
 
     fun settle(value: InstallerSessionOutcome) {
-        if (!outcome.complete(value)) return
+        val observed = if (value is InstallerSessionOutcome.Completed && value.completion.sourceProfilesEnabled != sourceProfilesEnabled) value.copy(
+            completion = value.completion.copy(sourceProfilesEnabled = sourceProfilesEnabled)) else value
+        if (!outcome.complete(observed)) return
         runCatching {
-            when (value) {
-                is InstallerSessionOutcome.Completed -> listener.onCompleted(value.completion)
-                is InstallerSessionOutcome.Failed -> listener.onFailed(value.error)
+            when (observed) {
+                is InstallerSessionOutcome.Completed -> listener.onCompleted(observed.completion)
+                is InstallerSessionOutcome.Failed -> listener.onFailed(observed.error)
             }
         }.onFailure { Log.w(TAG, "session listener failed on terminal outcome", it) }
     }

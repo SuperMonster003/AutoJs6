@@ -56,6 +56,8 @@ class InstallerPeerTest {
             InstallerJson.InstallOptions(dexopt = "none"),
             InstallerJson.InstallOptions(installReason = "unknown"),
             InstallerJson.InstallOptions(packageSource = "unspecified"),
+            InstallerJson.InstallOptions(installReason = null, providedOptions = setOf("installReason")),
+            InstallerJson.InstallOptions(packageSource = null, providedOptions = setOf("packageSource")),
         )
         for (version in listOf(1L, 2L, 3L)) {
             for (features in listOf(emptySet(), knownFeatures)) {
@@ -71,6 +73,18 @@ class InstallerPeerTest {
         // Discovery of one plugin cannot authorize another Binder whose live capability changed.
         val replacement = InstallerPeer.negotiate(1, 3, emptySet(), knownAuthorizers)
         refused(InstallerErrorCodes.INVALID_ARGUMENT) { replacement.requireInstall("auto", "auto", options.first()) }
+    }
+
+    @Test fun sourceProfileOptInNeedsPresenceInformationAndTheSamePeersV3Feature() {
+        val absent = InstallerJson.InstallOptions(providedOptions = emptySet())
+        for (version in listOf(1L, 2L, 3L)) for (features in listOf(emptySet(), knownFeatures)) {
+            val peer = InstallerPeer.negotiate(1, version, features, knownAuthorizers)
+            assertEquals(version == 3L && InstallerCapabilityKeys.FEATURE_SOURCE_PROFILES in features, peer.usesSourceProfiles(absent))
+            assertFalse(peer.usesSourceProfiles(InstallerJson.InstallOptions()))
+        }
+        val advancedOnly = InstallerPeer.negotiate(1, 3, setOf(InstallerCapabilityKeys.FEATURE_ADVANCED_INSTALL_OPTIONS), knownAuthorizers)
+        assertFalse(advancedOnly.usesSourceProfiles(absent))
+        advancedOnly.requireInstall("auto", "auto", InstallerJson.InstallOptions(providedOptions = setOf("installReason")))
     }
 
     @Test fun unknownVocabularyNeverBecomesSupported() {

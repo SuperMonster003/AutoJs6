@@ -236,4 +236,17 @@ class SelectorStringParserTest {
         assertFalse(select(" \t ").selector.filters.isNotEmpty())
     }
 
+
+    @Test
+    fun integerBoundsReadAsMinAndMaxKeys() {
+        assertEquals(listOf("deep"), names("minDepth=2"))
+        assertEquals(listOf("login", "logout"), names("maxDepth=1 clickable"))
+        assertEquals(listOf("signIn"), names("minIndexInParent=3"))
+        assertEquals(listOf("login", "deep"), names("maxIndexInParent=0 clickable"))
+        assertEquals("minDepth(2).maxDepth(3)", select("minDepth=2 maxDepth=3").toString())
+        val e = error("minDepth=x")
+        assertEquals(0, e.position)
+        assertTrue(e.detail, "minDepth" in e.detail)
+    }
+
 }

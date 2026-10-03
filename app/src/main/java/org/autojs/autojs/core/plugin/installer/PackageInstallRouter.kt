@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -103,7 +104,7 @@ object PackageInstallRouter {
                     source.close()
                     throw failure
                 }
-                handle.use { it.await() }
+                handle.use { awaitAndCleanOwnedSources(it, listOf(source)) }
             }.getOrElse { failure ->
                 val error = InstallerErrorMapper.fromThrowable(failure, InstallerErrorMapper.Phase.OPEN)
                 if (error.code != InstallerErrorCodes.PLUGIN_UNAVAILABLE) return AwaitResult.Failure(error.message)
@@ -146,7 +147,7 @@ object PackageInstallRouter {
                     source.close()
                     throw failure
                 }
-                scope.launch(Dispatchers.IO) { handle.use { it.await() } }
+                scope.launch(Dispatchers.IO) { handle.use { awaitAndCleanOwnedSources(it, listOf(source)) } }
                 true
             }.getOrElse { failure ->
                 val error = InstallerErrorMapper.fromThrowable(failure, InstallerErrorMapper.Phase.OPEN)
@@ -164,6 +165,25 @@ object PackageInstallRouter {
             return
         }
         launchSystemInstaller(context, systemUri())
+    }
+
+    /** Host UI uses the same owned-file rules as scripts, on IO and before closing the handle. */
+    internal suspend fun awaitAndCleanOwnedSources(handle: InstallerSessionHandle, sources: List<InstallerSource>): InstallerSessionOutcome {
+        val outcome = handle.await()
+        if (outcome !is InstallerSessionOutcome.Completed || !outcome.completion.sourceProfilesEnabled) return outcome
+        // Once a real terminal success is known, a cancelled UI waiter must not turn that fact
+        // into CANCELLED at the dispatcher handoff. Cleanup remains local and closes no handle.
+        return withContext(Dispatchers.IO + NonCancellable) {
+            val groups = sources.map { it.item }.distinct()
+            val owned = sources.map { source -> object : InstallerSourceDeletion.Source {
+                override val item = groups.indexOf(source.item)
+                override val isOwnedFile = source.ownedFile != null
+                override val ownershipKey = source.ownershipKey
+                override val retentionKey = source.retentionKey
+                override fun deleteIfUnchanged() = source.deleteOwnedFileIfUnchanged()
+            } }
+            outcome.copy(completion = InstallerSourceDeletion.apply(outcome.completion, owned, requested = false))
+        }
     }
 
     /** Hands an APK to the system installer; the one-time hint names the plugin that would do more. */

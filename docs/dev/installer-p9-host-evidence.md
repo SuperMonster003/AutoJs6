@@ -16,8 +16,10 @@ Validation on the implementation sources:
   it failed during task selection, then the supported Debug unit-test task passed.
 - `build/p9-host-parser-verify.log`: 96 installer-related host JVM tests across 14 classes,
   no failures/errors/skips. App Debug main and unit-test sources compiled. The shared parser's
-  separate 54-test suite and release assembly also passed in this invocation; parser changes
+  separate 62-test suite and release assembly also passed in this invocation; parser changes
   and their provenance are committed separately.
+  The initially reported 54 count was read from existing XML reports while parallel test work
+  was still running; the complete source/test inventory is 62, and the final build passed.
 - The release installer API AAR is 32,967 bytes, SHA-256
   `39971b5d9f29901075259e50da73367b1122c5f9453b4a9528d664c8cbfe575c`.
   No unknown transaction or actual installation was used to infer peer support.

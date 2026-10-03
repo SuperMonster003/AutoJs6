@@ -19,7 +19,8 @@ import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 import com.bignerdranch.expandablerecyclerview.model.Parent;
 
-import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
+import org.autojs.autojs.ui.floating.layoutinspector.InspectorDialogBuilder;
+import org.autojs.autojs.ui.floating.layoutinspector.InspectorTheme;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.codegeneration.CodeGenerator;
 import org.autojs.autojs.codegeneration.CodeStyle;
@@ -38,7 +39,7 @@ import java.util.List;
 /**
  * Created by Stardust on Nov 6, 2017.
  */
-public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
+public class CodeGenerateDialog extends InspectorDialogBuilder {
 
     private final List<OptionGroup> mOptionGroups = new ListBuilder<OptionGroup>()
             .add(new OptionGroup(R.string.text_options, false)
@@ -88,15 +89,13 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
 
     private void generateCodeAndShow() {
         String code = generateCode();
-        AppLevelThemeDialogBuilder builder = new AppLevelThemeDialogBuilder(context);
+        InspectorDialogBuilder builder = new InspectorDialogBuilder(context);
         if (code != null) {
             DialogUtils.showAdaptive(builder
                     .title(R.string.text_generated_code)
                     .content(code)
                     .negativeText(R.string.dialog_button_cancel)
-                    .negativeColorRes(R.color.dialog_button_default)
                     .positiveText(R.string.dialog_button_copy)
-                    .positiveColorRes(R.color.dialog_button_hint)
                     .onPositive(((dialog, which) -> {
                         ClipboardUtils.setClip(context, code);
                         ViewUtils.showToast(context, R.string.text_already_copied_to_clip);
@@ -107,7 +106,6 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
                     .title(R.string.text_prompt)
                     .content(R.string.text_failed_to_generate)
                     .positiveText(R.string.dialog_button_dismiss)
-                    .positiveColorRes(R.color.dialog_button_failure)
                     .build());
         }
     }
@@ -205,6 +203,7 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
             title = binding.title;
 
             checkBox = binding.checkbox;
+            checkBox.setButtonTintList(new InspectorTheme(itemView.getContext()).getControls());
             checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> onCheckedChanged());
 
             itemView.setOnClickListener(view -> checkBox.toggle());
