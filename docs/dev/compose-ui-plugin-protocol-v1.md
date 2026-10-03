@@ -1,8 +1,8 @@
 # Compose UI contract V1
 
-Status: V1 frozen at P1.1 on 2026-10-02; P1.3 registration and P2.1/P2.2/P2.3/P2.6 are
-implemented on 2026-10-03. P2.4/P2.5 and the P3 script entry remain in development. This document specifies the full boundary, not delivery of the script API
-or the complete renderer. The host owns `plugin-api/compose-ui-api`; the plugin consumes
+Status: V1 frozen at P1.1 on 2026-10-02; P1.3 registration and the P2 renderer are
+implemented on 2026-10-03. The P3 script entry remains in development. This document specifies the full boundary, not delivery of the script API.
+The host owns `plugin-api/compose-ui-api`; the plugin consumes
 its release AAR as compileOnly. The contract depends on Android, Kotlin/JDK and common-plugin-api,
 and contains no Compose implementation dependency.
 
@@ -250,10 +250,9 @@ P1.3 changelog therefore describes installed-plugin management and the developme
 
 ## Current P2 renderer boundary
 
-The dispatch/capability table now contains 20 node types: Column, Row, Box, Spacer, Surface, Card,
-HorizontalDivider, Text, Icon, Image, Button, ElevatedButton, FilledTonalButton, OutlinedButton,
-TextButton, IconButton, Switch, Checkbox, RadioButton and Slider. All catalog properties and content
-slots of these types are mapped. Text inherits the surrounding Material text style when no style is
+The dispatch table now contains all 29 V1 node types, and the capability list also includes the
+command-only Snackbar entry (30 total). All catalog properties and slots are mapped.
+Text inherits the surrounding Material text style when no style is
 provided; explicit style/size/weight overrides merge normally. Icons use an explicit 280-name table
 from the pinned core artifact: 49 glyph names in 5 styles plus 35 auto-mirrored variants. Plain
 Home means Filled.Home; Outlined.Home and AutoMirrored.Filled.ArrowBack are examples of qualified
@@ -264,8 +263,10 @@ Each clickable uses its own enabled flag and the component's enabled property; a
 clickable does not disable an outer hit region. Native controls retain an explicitly supplied node
 click callback; without one an enabled modifier supplies native activation. Modifier operations are
 keyed by name and occurrence around the whole composable loop item, preserving scroll state across
-unrelated styling changes. A plain ScrollTo offset addresses the outermost scroll modifier; indexed
-commands require a future Lazy handler. Focus observation is independent of command capability.
+unrelated styling changes. A plain ScrollTo offset addresses the outermost scroll modifier on ordinary
+nodes; LazyColumn/LazyRow use their native list state for indexed and absolute-pixel scrolling.
+Lazy keys use the child key, falling back to nodeId; item type supplies the reuse contentType.
+Focus observation is independent of command capability.
 Command membership is checked against the accepted tree before scheduling and again before execution,
 so removing a node rejects queued commands even before Compose disposes its old handle.
 
@@ -290,7 +291,40 @@ recomposer, jobs and snapshots on close. Initial empty batches and generation 0 
 rejected after the first accepted batch. Unknown names have a debug-only diagnostic placeholder;
 release rejects them, and known unimplemented components remain absent from capabilities.
 
-TextField/OutlinedTextField, lazy lists, Scaffold/TopAppBar/dialogs/snackbar/progress components and
-the public compose script API are not delivered yet. FEATURES remains empty; the component table is
-the authority for availability. IME, accessibility fleet coverage, inrt execution, long-running memory
-and performance gates remain later roadmap work.
+TextField/OutlinedTextField own TextFieldState outside composition, retaining edits while a lazy
+item is offscreen. Only removal or a component type change releases the editor. Initial editSeq is
+0; text, UTF-16 selection and composition changes advance it. Value-change notifications coalesce
+per display frame and use the latest accepted callback/generation. Edit synchronously observes
+native state before comparing the supplied sequence: both older and future values fail with
+INVALID_ARGUMENT and prop=editSeq. Failed edits leave text and selection intact. Existing-field
+text declarations cannot change through tree patches; programmatic writes use Edit. A text-only
+replacement moves the caret to the new end, while selection-only edits preserve the text.
+Read-only fields still allow selection; disabled/stale input connections cannot mutate an editor.
+Native user input obeys the same 65536 UTF-16 limit and emits a typed error after rejecting overflow.
+Password visual transformation masks display and input semantics and suppresses copy/cut while
+preserving readOnly and multiline support; it is always hidden, without last-character reveal.
+
+Scaffold owns only its measured topBar/content spacing. TopAppBar and Scaffold use zero system
+insets. For ScriptExecuteActivity, the host's ComposeActivityInsets lease selects adjustResize and
+applies system-bar padding with bottom=max(systemBars.bottom, ime.bottom); it consumes those insets.
+The renderer adds neither systemBarsPadding nor imePadding. Detach restores the prior soft-input
+mode and legacy system-bar-only padding. Other embedders must supply the same single-owner policy;
+floaty-specific keyboard behavior remains P3.4 validation work. This follows Android's documented
+[inset-consumption rules](https://developer.android.com/develop/ui/compose/system/insets-ui).
+
+Session ShowSnackbar chooses the first Scaffold in stable preorder (primary children first, then
+slots sorted by name). A custom snackbarHost replaces that native host and makes ShowSnackbar fail
+with INVALID_ARGUMENT rather than silently targeting another Scaffold. Without any Scaffold it also
+fails. A bounded FIFO holds at most 1024 active/queued requests, using the shared event budget.
+Each accepted request produces one ACTION or DISMISS at NO_NODE_ID with its execution generation;
+removing/replacing the selected host dismisses pending requests, and session close cancels silently.
+The host reserves one-shot command callbacks separately from node bindings, within the same 4096
+callback limit, so unrelated tree commits do not discard command results. The terminal result releases
+its command reference before invocation. Submission failure, event eviction and close also release
+references; evicted results are not invoked. A callback ID already used for a command cannot be reused
+for another command. Node event generations remain strict. AlertDialog.open is controlled by tree
+props; dismissal emits a request without closing the dialog until a patch accepts it.
+
+The public compose script API is not delivered yet. FEATURES remains empty; the component table is
+the authority for availability. Full accessibility fleet coverage, floaty/inrt execution, long-running
+memory checks and performance thresholds remain later roadmap work.
