@@ -9,8 +9,9 @@
 ###### 2026/10/03
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
-* `Hint` Compose UI is a development preview. The compose script API is available in UI mode; floating windows are still in development
-* `Feature` compose script API for UI mode: node handles, state/render, refs, batched updates, themes and Snackbar commands (requires the Compose UI plugin)
+* `Hint` Compose UI remains a local development preview. UI mode and floating-window APIs are implemented; the plugin is not listed in the official index or formally released
+* `Feature` compose script API for UI mode and raw or resizable floating windows: node handles, state/render, refs, batched updates, themes and Snackbar commands (requires the Compose UI plugin)
+* `Feature` compose.floaty supports non-UI scripts, window position / size / focus controls, worker-thread UI updates through compose.post, and automatic window cleanup when scripts stop
 * `Feature` Plugin Center recognizes and manages installed Compose UI development preview plugins, requiring host 6.8.0 / 5316 or later
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
@@ -506,6 +507,7 @@
 * `Fix` 3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground
 * `Fix` Package manifest roots and shared UIDs could be misread from comments or spoofed namespaces; duplicate attributes, conflicting resource identities and unverifiable shared UIDs now stop processing
 * `Improvement` The Compose UI development preview supports native text editing and keyboard avoidance, with each Snackbar action or dismissal reported once
+* `Improvement` ComposeError provides localized messages and stable codes with node / property / cause and script stack details; each engine supports up to 8 sessions, rejects closed-handle operations, and clears callbacks, refs and pending work on close
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record

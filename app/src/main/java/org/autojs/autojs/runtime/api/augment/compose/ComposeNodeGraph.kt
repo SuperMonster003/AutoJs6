@@ -197,18 +197,27 @@ class ComposeNodeGraph(
         }
     }
 
-    fun mount(root: ComposeNode, binding: ComposeNodeBinding) = transaction {
+    fun mount(root: ComposeNode, binding: ComposeNodeBinding, replacing: ComposeNodeBinding? = null) = transaction {
         usable(root)
         if (binding.isClosed) fail(ComposeUiErrorCodes.SESSION_CLOSED)
         if (roots.containsKey(binding) || root.parent != null || roots.values.any { it === root }) fail(ComposeUiErrorCodes.INVALID_ARGUMENT)
-        if (roots.size >= ComposeUiLimits.MAX_SESSIONS_PER_ENGINE) fail(ComposeUiErrorCodes.LIMIT_EXCEEDED)
+        val replacement = replacing?.takeIf { roots.containsKey(it) && !it.isClosed }
+        if (roots.keys.count { !it.isClosed } - (if (replacement == null) 0 else 1) >= ComposeUiLimits.MAX_SESSIONS_PER_ENGINE) fail(ComposeUiErrorCodes.LIMIT_EXCEEDED)
         val snapshot = buildSnapshot(root, strictRoot = true)
         snapshot.states.keys.forEach { node ->
             if (node.affinity != null && node.affinity !== binding) fail(ComposeUiErrorCodes.NODE_DETACHED, node)
         }
+        // The prior native UI remains alive until this complete replacement has been validated.
+        // Transaction rollback restores its graph binding if publication rejects the new target.
+        replacement?.let { roots.remove(it) }
         roots[binding] = root
         if (warnedRoots.remove(root)) warnedBindings += binding
         mutation!!.dirty += binding
+    }
+
+    internal fun hasBinding(binding: ComposeNodeBinding): Boolean {
+        checkThread()
+        return !closed && !binding.isClosed && roots.containsKey(binding)
     }
 
     fun snapshot(root: ComposeNode): ComposeNodeSnapshot { usable(root); return buildSnapshot(root, strictRoot = true) }
@@ -224,7 +233,9 @@ class ComposeNodeGraph(
         snapshot.states.forEach { (node, state) ->
             if (isField(node) && old?.states?.containsKey(node) != true) resetEditor(node, state)
         }
-        old?.refs?.keys?.filter { it !in snapshot.refs }?.forEach { it.current = null }
+        old?.refs?.filterKeys { it !in snapshot.refs }?.forEach { (ref, node) ->
+            if (ref.current === node) ref.current = null
+        }
         snapshot.refs.forEach { (ref, node) -> ref.current = node }
     }
 
@@ -256,7 +267,7 @@ class ComposeNodeGraph(
     fun unmount(binding: ComposeNodeBinding) {
         usable()
         roots.remove(binding)
-        accepted.remove(binding)?.refs?.keys?.forEach { it.current = null }
+        accepted.remove(binding)?.refs?.forEach { (ref, node) -> if (ref.current === node) ref.current = null }
         published.remove(binding)
         if (binding.isClosed) known.toList().filter { it.affinity === binding }.forEach(::releaseResources)
         if (binding.isClosed) warnedBindings.remove(binding)

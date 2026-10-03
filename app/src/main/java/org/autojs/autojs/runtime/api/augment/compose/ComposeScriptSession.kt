@@ -13,12 +13,20 @@ import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /** One script-visible mount, binding stable handles to the core's acknowledged transaction stream. */
-internal class ComposeScriptSession(private val owner: Compose, val id: Int, private val initialTheme: ThemeSpec?) : ComposeNodeBinding, Closeable {
+internal class ComposeScriptSession(private val owner: Compose, val id: Int, private val initialTheme: ThemeSpec?,
+    private val floatyOptions: ComposeFloatyOptions? = null, private var replacingUi: ComposeNodeBinding? = null) : ComposeNodeBinding, Closeable {
     private val closed = AtomicBoolean()
     override val isClosed get() = closed.get()
-    private lateinit var core: ComposeSession
+    val isFloaty get() = floatyOptions != null
+    private var window: ComposeFloatyControl? = null
+    private var windowFacade: ComposeFloatyWindow? = null
+    private val lifetime = AtomicReference<Closeable?>()
+    private val finished = AtomicBoolean()
+    @Volatile private lateinit var core: ComposeSession
+    private val startupFailure = AtomicReference<Throwable?>()
     private var reaction: ComposeReactiveRuntime.Reaction? = null
     private var root: ComposeNode? = null
     private var accepted: ComposeNodeSnapshot? = null
@@ -35,7 +43,7 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
         private set
     val js = NativeObject().apply {
         RhinoUtils.initNativeObjectPrototype(owner.scope, this)
-        defineProperty("root", { root?.js }, null, READONLY or PERMANENT)
+        defineProperty("root", { if (isClosed) null else root?.js }, null, READONLY or PERMANENT)
         defineProperty("isClosed", RhinoUtils.newBaseFunction(owner.scope, "isClosed", { args ->
             composeArguments(args, 0, name = "isClosed"); isClosed
         }, RhinoUtils.NOT_CONSTRUCTABLE), READONLY or PERMANENT)
@@ -58,12 +66,36 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
     }
 
     fun open(source: Any?) {
-        val opened = owner.platform.createRenderer(id, { mountedView = it }, ::close)
+        val opened = if (floatyOptions == null) owner.platform.createRenderer(id, { mountedView = it }, ::close)
+        else owner.platform.createFloatyRenderer(id, floatyOptions, { mountedView = it }, ::close) { failure ->
+            startupFailure.compareAndSet(null, failure)
+            if (::core.isInitialized) startupFailure.getAndSet(null)?.let(core::failInitialization)
+        }
+        window = opened.window
+        lifetime.set(opened.lifetime)
+        if (isClosed) {
+            lifetime.getAndSet(null)?.close()
+            opened.window?.close()
+            throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)
+        }
         // A core session may close independently; the shared engine dispatcher remains usable.
         val dispatcher = object : ScriptUiDispatcher by owner.platform.dispatcher { override fun close() = Unit }
-        core = ComposeSession(id, dispatcher, owner.platform.mainExecutor, opened.renderer, opened.components,
-            { failure -> owner.platform.report(failure) }, owner.platform::warn, ::finish)
-        core.open(); initialTheme?.let(core::setTheme)
+        try {
+            core = ComposeSession(id, dispatcher, owner.platform.mainExecutor, opened.renderer, opened.components,
+                { failure -> owner.platform.report(failure) }, owner.platform::warn, ::finish)
+        } catch (failure: Throwable) {
+            // Native ownership is already provisional when control-channel reservation can fail.
+            // No core exists to dispose these resources during the outer session.close().
+            owner.platform.mainExecutor.execute {
+                try { try { opened.window?.close() } finally { opened.renderer.dispose() } }
+                catch (_: Exception) { }
+                catch (_: LinkageError) { }
+            }
+            throw failure
+        }
+        core.open()
+        startupFailure.getAndSet(null)?.let(core::failInitialization)
+        initialTheme?.let(core::setTheme)
         if (source is Function) {
             val render = owner.reactive.reaction {
                 try {
@@ -79,7 +111,11 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
             reaction = render
             render.run()
         } else root = owner.graph.node(source)!!
-        owner.graph.mount(requireNotNull(root), this)
+        try { owner.graph.mount(requireNotNull(root), this, replacingUi) } finally { replacingUi = null }
+    }
+    fun floatingWindow(): ComposeFloatyWindow {
+        usable()
+        return windowFacade ?: ComposeFloatyWindow(owner, this, requireNotNull(window), requireNotNull(floatyOptions).raw).also { windowFacade = it }
     }
     fun attach() { usable(); core.attach() }
     fun setTheme(theme: ThemeSpec) { usable(); core.setTheme(theme) }
@@ -157,15 +193,17 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
     private fun scheduleCommands() {
         if (commandsScheduled || isClosed || commands.isEmpty()) return
         commandsScheduled = true
-        owner.platform.post(0) {
-            commandsScheduled = false
-            if (!isClosed && pending == null) {
-                val ready = commands.toList().also { commands.clear() }
-                ready.forEach { request ->
-                    try { executePending(request) } catch (failure: Exception) { owner.platform.report(failure) }
+        try {
+            owner.platform.post(0) {
+                commandsScheduled = false
+                if (!isClosed && pending == null) {
+                    val ready = commands.toList().also { commands.clear() }
+                    ready.forEach { request ->
+                        try { executePending(request) } catch (failure: Exception) { owner.platform.report(failure) }
+                    }
                 }
             }
-        }
+        } catch (failure: Throwable) { commandsScheduled = false; commands.clear(); throw failure }
     }
     private fun executePending(request: PendingCommand) {
         val command = request.command
@@ -210,20 +248,37 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
         owner.checkThread()
         if (isClosed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)
     }
-    fun stopRenderer() { if (::core.isInitialized) core.close() }
+    fun stopRenderer() = close()
     override fun close() {
-        if (!closed.compareAndSet(false, true)) return
-        if (::core.isInitialized) core.close() else finish()
+        if (!closed.compareAndSet(false, true)) {
+            if (owner.platform.dispatcher.isDispatchThread()) {
+                if (::core.isInitialized) core.close() else finish()
+            }
+            return
+        }
+        // Before core construction, open() still owns startup on the script thread. Its cancellation
+        // check/catch finishes cleanup there; a native callback must not use the ordinary post queue.
+        try { if (::core.isInitialized) core.close() else if (owner.platform.dispatcher.isDispatchThread()) finish() }
+        finally { lifetime.getAndSet(null)?.close() }
     }
     private fun finish() {
+        if (!finished.compareAndSet(false, true)) return
         closed.set(true)
+        startupFailure.set(null)
+        replacingUi = null
         reaction?.close(); reaction = null
         owner.graph.unmount(this)
         root = null; pending = null; accepted = null; callbacks.clear(); commands.clear(); notificationCallbacks.clear(); mountedView = null
         owner.ended(this)
         val listeners = closeListeners.toList().also { closeListeners.clear() }
-        listeners.forEach { function ->
-            try { owner.call(function, js) } catch (failure: Exception) { owner.platform.report(failure) }
+        try {
+            listeners.forEach { function ->
+                try { owner.call(function, js) } catch (failure: Exception) { owner.platform.report(failure) }
+                catch (failure: LinkageError) { owner.platform.report(failure) }
+            }
+        } finally {
+            window = null; windowFacade = null
+            lifetime.getAndSet(null)?.close()
         }
     }
 }

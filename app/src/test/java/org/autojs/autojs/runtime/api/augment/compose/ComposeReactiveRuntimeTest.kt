@@ -18,6 +18,7 @@ class ComposeReactiveRuntimeTest {
     private val tasks = ArrayDeque<() -> Unit>()
     private val errors = ArrayList<Throwable>()
     private var scriptThread = true
+    private var rejectPost = false
 
     @Before fun enter() {
         context = Context.enter().apply { languageVersion = Context.VERSION_ES6; isInterpretedMode = true }
@@ -25,7 +26,10 @@ class ComposeReactiveRuntimeTest {
         ScriptableObject.putProperty(scope, "ComposeError", ComposeJsErrors.constructor(scope))
         runtime = ComposeReactiveRuntime(scope, {
             if (!scriptThread) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, "Use compose.post")
-        }, tasks::addLast, errors::add)
+        }, { action ->
+            if (rejectPost) throw ComposeUiContractException(ComposeUiErrorCodes.LIMIT_EXCEEDED)
+            tasks.addLast(action)
+        }, errors::add)
     }
 
     @After fun exit() { runtime.close(); Context.exit() }
@@ -42,6 +46,20 @@ class ComposeReactiveRuntimeTest {
         assertTrue(errors.isEmpty())
         state.write(10)
         assertTrue("Writing the existing primitive value does not rerender", tasks.isEmpty())
+    }
+
+    @Test fun aRejectedPostDoesNotPermanentlyDisarmReactiveUpdates() {
+        val state = runtime.state(0)
+        val rendered = ArrayList<Any?>()
+        runtime.reaction { rendered += state.read() }.run()
+        rejectPost = true
+        assertThrows(ComposeUiContractException::class.java) { state.write(1) }
+        assertTrue(tasks.isEmpty())
+        rejectPost = false
+        state.write(2)
+        drain()
+        assertEquals(listOf(0, 2), rendered)
+        assertTrue(errors.isEmpty())
     }
 
     @Test fun aSuccessfulBranchSwitchUnsubscribesStateThatTheNewRenderDoesNotRead() {

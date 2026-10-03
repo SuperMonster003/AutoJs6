@@ -92,16 +92,18 @@ internal class ComposeReactiveRuntime(
     private fun schedule() {
         if (closed || batchDepth > 0 || scheduled || dirty.isEmpty()) return
         scheduled = true
-        post {
-            scheduled = false
-            if (!closed) {
-                val pending = dirty.toList().also { dirty.clear() }
-                pending.forEach { reaction ->
-                    try { reaction.run() } catch (failure: Exception) { onError(failure) }
-                    catch (failure: LinkageError) { onError(failure) }
+        try {
+            post {
+                scheduled = false
+                if (!closed) {
+                    val pending = dirty.toList().also { dirty.clear() }
+                    pending.forEach { reaction ->
+                        try { reaction.run() } catch (failure: Exception) { onError(failure) }
+                        catch (failure: LinkageError) { onError(failure) }
+                    }
                 }
             }
-        }
+        } catch (failure: Throwable) { scheduled = false; throw failure }
     }
     private fun usable() {
         checkThread()
@@ -125,7 +127,7 @@ internal class ComposeRef(scope: VarScope) : NativeObject(), ComposeNodeRef {
     override var current: ComposeNode? = null
     init {
         RhinoUtils.initNativeObjectPrototype(scope, this)
-        defineProperty("current", { current?.js }, null, READONLY or PERMANENT)
+        defineProperty("current", { current?.takeUnless { it.affinity?.isClosed == true }?.js }, null, READONLY or PERMANENT)
     }
     override fun getClassName() = "ComposeRef"
 }

@@ -171,8 +171,9 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 ###### 2026/10/03
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
-* `Astuce` Compose UI est un aperçu de développement. L'API de scripts compose est disponible en mode UI; les fenêtres flottantes restent en développement
-* `Fonctionnalité` API de scripts compose pour le mode UI: objets de noeuds, state/render, ref, mises à jour groupées, thèmes et commandes Snackbar (nécessite le plugin Compose UI)
+* `Astuce` Compose UI reste un aperçu de développement local. Les API du mode UI et des fenêtres flottantes sont implémentées; le plugin n'est pas inscrit à l'index officiel et n'a pas fait l'objet d'une publication officielle
+* `Fonctionnalité` API de scripts compose pour le mode UI et les fenêtres flottantes raw ou redimensionnables: objets de nœuds, state/render, ref, mises à jour groupées, thèmes et commandes Snackbar (nécessite le plugin Compose UI)
+* `Fonctionnalité` compose.floaty prend en charge les scripts hors mode UI, les commandes de position / taille / focus, les mises à jour depuis les threads de travail via compose.post et la fermeture automatique des fenêtres à l'arrêt du script
 * `Fonctionnalité` Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
@@ -668,6 +669,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` L'écran de confirmation de 3-Setup Installer ne s'affichait pas sur Android 14 et versions ultérieures lors d'une installation lancée avec AutoJs6 au premier plan
 * `Correction` La racine du manifeste et les UID partagés pouvaient être mal lus depuis des commentaires ou espaces de noms falsifiés; les attributs dupliqués, identifiants de ressources contradictoires et UID invérifiables arrêtent le traitement
 * `Amélioration` L'aperçu de développement de Compose UI prend en charge la saisie native et évite que le clavier masque le contenu, avec un seul résultat par action ou fermeture de Snackbar
+* `Amélioration` ComposeError fournit des messages localisés et des codes stables avec le nœud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions, refuse les opérations après fermeture et libère les rappels, les références et les tâches en attente
 * `Amélioration` Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués
 * `Amélioration` Les vérifications lint de l'hôte excluent par chemin les classes et ressources de compatibilité AutoJs4 et continuent à vérifier le reste de l'hôte
 * `Amélioration` Le centre des plugins écrit un enregistrement d'activation explicite et exécute le sondage d'activation après avoir observé une nouvelle installation d'un plugin désactivé par défaut (YOLO, MCP Server) signé avec le certificat officiel de l'hôte; les signataires tiers de confiance ou autorisés par l'utilisateur, les installations via adb et les mises à jour exigent toujours une activation manuelle, et les consommateurs à l'exécution continuent de lire uniquement l'enregistrement sauvegardé

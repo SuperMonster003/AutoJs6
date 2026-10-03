@@ -9,8 +9,9 @@
 ###### 2026/10/03
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
-* `Sugerencia` Compose UI es una versión preliminar de desarrollo. La API de scripts compose está disponible en modo UI; las ventanas flotantes siguen en desarrollo
-* `Nuevo` API de scripts compose para el modo UI: referencias a nodos, state/render, ref, actualizaciones por lotes, temas y comandos Snackbar (requiere el complemento Compose UI)
+* `Sugerencia` Compose UI sigue siendo una versión preliminar de desarrollo local. Las API del modo UI y de ventanas flotantes están implementadas; el complemento aún no figura en el índice oficial ni se ha publicado formalmente
+* `Nuevo` API de scripts compose para el modo UI y ventanas flotantes raw o redimensionables: referencias a nodos, state/render, ref, actualizaciones por lotes, temas y comandos Snackbar (requiere el complemento Compose UI)
+* `Nuevo` compose.floaty admite scripts sin modo UI, controles de posición / tamaño / foco, actualizaciones desde hilos de trabajo mediante compose.post y cierre automático de ventanas al finalizar el script
 * `Nuevo` El Centro de complementos reconoce y administra los complementos instalados de la versión preliminar de desarrollo de Compose UI, con el host 6.8.0 / 5316 o posterior
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
@@ -506,6 +507,7 @@
 * `Corrección` La raíz del manifiesto y los UID compartidos podían interpretarse desde comentarios o espacios de nombres falsos; los atributos duplicados, recursos contradictorios y UID no verificables detienen el procesamiento
 * `Corrección` Contraste insuficiente del texto y los controles de las ventanas flotantes y los diálogos del análisis de diseño con algunos colores de tema o en modo nocturno
 * `Mejora` La versión preliminar de desarrollo de Compose UI admite edición de texto nativa y evita que el teclado cubra el contenido, con un único aviso por acción o cierre de Snackbar
+* `Mejora` ComposeError ofrece mensajes localizados y códigos estables con detalles del nodo, la propiedad, la causa y la pila del script; cada motor admite hasta 8 sesiones, rechaza operaciones tras el cierre y limpia callbacks, referencias y tareas pendientes
 * `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
 * `Mejora` El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado

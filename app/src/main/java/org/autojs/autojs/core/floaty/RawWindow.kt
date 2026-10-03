@@ -25,17 +25,34 @@ class RawWindow(
 ) : FloatyWindow() {
 
     private val mInflateException = VolatileDispose<RuntimeException>()
+    internal var creationObserver: ((Throwable?) -> Unit)? = null
+    internal var closeObserver: (() -> Unit)? = null
+    private var managedClosed = false
 
     var contentView: View? = null
 
     override fun onCreate(floatyService: FloatyService, windowManager: WindowManager) {
+        if (managedClosed) return
         try {
             super.onCreate(floatyService, windowManager)
         } catch (e: RuntimeException) {
             mInflateException.setAndNotify(e)
+            creationObserver?.invoke(e)
+            return
+        } catch (e: LinkageError) {
+            if (creationObserver == null) throw e
+            mInflateException.setAndNotify(IllegalStateException("Floating window creation failed", e))
+            creationObserver?.invoke(e)
             return
         }
         mInflateException.setAndNotify(Exceptions.NO_EXCEPTION)
+        creationObserver?.invoke(null)
+    }
+
+    override fun close() {
+        if (creationObserver != null || closeObserver != null) managedClosed = true
+        val observer = closeObserver.also { closeObserver = null; creationObserver = null }
+        try { super.close() } finally { observer?.invoke() }
     }
 
     override fun onCreateView(floatyService: FloatyService): View {

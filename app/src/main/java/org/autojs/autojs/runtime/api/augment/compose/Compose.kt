@@ -26,6 +26,8 @@ class Compose internal constructor(
     internal val scope = runtime.topLevelScope
     private val origin = Thread.currentThread()
     private val closed = AtomicBoolean()
+    private val cleanupFinished = AtomicBoolean()
+    private val cleanupChannel = platform.dispatcher.createControlChannel(::finishClose)
     internal val graph = ComposeNodeGraph(scope, values, ::invokeCallback, ::checkThread,
         translateError = { ComposeJsErrors.exception(scope, it) }, warn = platform::warn)
     internal val reactive = ComposeReactiveRuntime(scope, ::checkThread, { platform.post(0, it) }, ::reportRenderFailure)
@@ -33,6 +35,8 @@ class Compose internal constructor(
     private var nextSessionId = 1L
     private var defaultTheme: ThemeSpec? = null
     private var defaultThemeInput: Map<String, Any?> = emptyMap()
+
+    init { ComposeJsErrors.installLocalizer(scope, platform::errorMessage) }
 
     override val keys = listOf(AugmentableKey("compose"))
     override val scriptErrorPassThroughInvoke = true
@@ -57,6 +61,7 @@ class Compose internal constructor(
             "ref" to { args -> composeArguments(args, 0, name = "ref"); ComposeRef(scope) },
             "batch" to { args -> composeArguments(args, 1, name = "batch"); batch(composeFunction(args[0], "batch")) },
             "mount" to { args -> mount(args).js },
+            "floaty" to { args -> mount(args, floating = true).floatingWindow() },
             "post" to { args -> post(args); Undefined.instance },
             "theme" to { args -> theme(args) },
         )
@@ -65,7 +70,7 @@ class Compose internal constructor(
         }
         functions.map { (name, action) ->
             name to RhinoUtils.newBaseFunction(scope, name, { args ->
-                if (name == "post") ComposeJsErrors.guard(scope) { action(args) } else guarded { action(args) }
+                if (name == "post") guardError { action(args) } else guarded { action(args) }
             }, RhinoUtils.NOT_CONSTRUCTABLE)
         } + ("ComposeError" to ComposeJsErrors.constructor(scope))
     }
@@ -81,23 +86,36 @@ class Compose internal constructor(
         return graph.create(type, props, children.takeIf { it.isNotEmpty() })
     }
 
-    private fun mount(args: Array<out Any?>): ComposeScriptSession {
+    private fun mount(args: Array<out Any?>, floating: Boolean = false): ComposeScriptSession {
         usable()
-        composeArguments(args, 1, 2, "mount")
-        val options = values.objectProperties(args.getOrNull(1), "mount")
-        if (options.keys.any { it != "theme" }) throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_PROP,
+        val method = if (floating) "floaty" else "mount"
+        composeArguments(args, 1, 2, method)
+        val options = values.objectProperties(args.getOrNull(1), method)
+        val floatingOptions = if (floating) ComposeFloatyOptions.parse(args.getOrNull(1)) else null
+        if (!floating && options.keys.any { it != "theme" }) throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_PROP,
             prop = options.keys.first { it != "theme" })
-        if (live.size >= ComposeUiLimits.MAX_SESSIONS_PER_ENGINE || nextSessionId > Int.MAX_VALUE) throw ComposeUiContractException(ComposeUiErrorCodes.LIMIT_EXCEEDED)
+        val previousUi = if (floating) emptyList() else live.filter { !it.isFloaty && !it.isClosed }
+        if (live.count { !it.isClosed } - previousUi.size >= ComposeUiLimits.MAX_SESSIONS_PER_ENGINE || nextSessionId > Int.MAX_VALUE) {
+            throw ComposeUiContractException(ComposeUiErrorCodes.LIMIT_EXCEEDED)
+        }
         val source = args[0]
         if (source !is Function && graph.node(source) == null) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, "mount requires a node or render function")
         val theme = options["theme"]?.let(values::theme) ?: defaultTheme
-        val session = ComposeScriptSession(this, (nextSessionId++).toInt(), theme)
+        val session = ComposeScriptSession(this, (nextSessionId++).toInt(), theme, floatingOptions, previousUi.firstOrNull())
         try {
             session.open(source)
             // The new content is valid and its renderer opened; replacing UI now closes prior mounts.
-            live.toList().forEach { it.close() }
+            previousUi.forEach { it.close() }
             live += session
-            session.attach()
+            if (floating) platform.post(0) {
+                // A callback/batch may still be validating its graph when floaty returns. Never
+                // attach a native window for a mount that the surrounding transaction rolled back.
+                if (!session.isClosed) {
+                    if (graph.hasBinding(session)) try { session.attach() }
+                    catch (failure: Throwable) { try { platform.report(failure) } finally { session.close() } }
+                    else session.close()
+                }
+            } else session.attach()
             return session
         } catch (failure: Throwable) { session.close(); throw failure }
     }
@@ -135,13 +153,13 @@ class Compose internal constructor(
         defaultThemeInput = mapOf("seed" to parsed.seedArgb, "colors" to parsed.colorOverrides,
             "dark" to parsed.dark, "dynamicColor" to parsed.dynamicColor,
             "typography" to mapOf("fontFamily" to parsed.fontFamily, "scale" to parsed.fontScale))
-        live.lastOrNull()?.setTheme(parsed)
+        live.lastOrNull { !it.isClosed }?.setTheme(parsed)
         return RhinoUtils.toJsValue(scope, defaultThemeInput)
     }
 
     /** Called by the existing ui.setContentView path, including ui.layout and layoutFile. */
     fun beforeSetContentView(view: Any) {
-        live.filter { it.mountedView != null && it.mountedView !== view }.toList().forEach {
+        live.filter { !it.isFloaty && it.mountedView != null && it.mountedView !== view }.toList().forEach {
             platform.warn("Compose UI session closed because ui content was replaced")
             it.close()
         }
@@ -152,7 +170,8 @@ class Compose internal constructor(
             "Compose mutations require the owning script dispatcher; use compose.post")
     }
     internal fun usable() { checkThread(); if (closed.get()) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED) }
-    internal fun <T> guarded(action: () -> T): T = ComposeJsErrors.guard(scope) { usable(); action() }
+    internal fun <T> guardError(action: () -> T): T = ComposeJsErrors.guard(scope, action)
+    internal fun <T> guarded(action: () -> T): T = guardError { usable(); action() }
     internal fun renderFailure(failure: Throwable): Throwable = when {
         failure is ComposeUiContractException || failure is ComposeUiError -> failure
         failure is JavaScriptException && (failure.value as? Scriptable)?.let { ComposeJsErrors.constructor(scope).hasInstance(it) } == true -> failure
@@ -178,14 +197,20 @@ class Compose internal constructor(
     }
 
     override fun close() {
-        if (!closed.compareAndSet(false, true)) return
+        val first = closed.compareAndSet(false, true)
         // Close core sessions immediately so teardown never waits for a script dispatcher.
-        live.toList().forEach { it.stopRenderer() }
-        platform.dispatcher.dispatch {
-            try {
-                live.toList().forEach { it.close() }
-                reactive.close(); graph.close(); live.clear()
-            } finally { platform.close() }
-        }
+        if (first) live.toList().forEach { it.stopRenderer() }
+        // A force-stop can reject the earlier queued cleanup while its looper is exiting. The
+        // runtime's owner-thread exit hook can finish it directly even after close was requested.
+        if (platform.dispatcher.isDispatchThread()) finishClose()
+        else if (first) cleanupChannel.request()
+    }
+    private fun finishClose() {
+        checkThread()
+        if (!cleanupFinished.compareAndSet(false, true)) return
+        try {
+            live.toList().forEach { it.close() }
+            reactive.close(); graph.close(); live.clear()
+        } finally { cleanupChannel.close(); platform.close() }
     }
 }
