@@ -5,7 +5,8 @@ Date: 2026-10-03. Measured implementation: host commit
 and minified Compose UI release 1.0.0 / 19. Both accepted runs passed exact sample-set,
 uniqueness, process-identity and PSS-pairing validation: 118 records per device, 236 total.
 The compact [performance summary](p5-performance-summary.json) records the main values and method.
-No official release, remote publication or performance gate is implied.
+The maintainer approved the first review rules on 2026-10-03. This remains a local
+preview with a manual review requirement; the measurements do not imply public release.
 
 ## Scope and endpoints
 
@@ -139,13 +140,15 @@ render, and small-tree batches coalesced to one render. This campaign does not e
 repeated unchanged large-tree rebuilds dominate updates, and does not justify an F.6 API change
 or speculative production optimization. No production performance optimization was added.
 
-## Q5 proposals, confirmation pending
+## Q5 first review rules, approved 2026-10-03
 
-No budget is enforced. Proposed future p90 review budgets use current p90 * 1.5 rounded upward
-to 5 ms, only under the same device, host/plugin configuration, workload and observation method.
-They are initial review candidates, not general Android latency promises.
+The maintainer accepted these values as the first review rules. Future p90 review
+budgets use current p90 * 1.5 rounded upward to 5 ms, only under the same device,
+workload, build mode, warmups, sample count and observation method. Record both
+the host and plugin versions/commits when comparing changes. These values trigger
+review; they are not general Android latency promises or automatic release approval.
 
-| Operation | API24 candidate ms | API35 candidate ms |
+| Operation | API24 review ms | API35 review ms |
 | --- | --- | --- |
 | Warm UI mount | 750 | 435 |
 | UI single state update | 130 | 190 |
@@ -154,11 +157,19 @@ They are initial review candidates, not general Android latency promises.
 | Floaty 100 assignments in one callback | 125 | 240 |
 | Warm 1000-item LazyColumn mount | 2090 | 1410 |
 
-Artifact proposals are at most **2,612,576 APK bytes** and **49,194 DEX method references**,
+Artifact review budgets are **2,612,576 APK bytes** and **49,194 DEX method references**,
 the ceiling of this baseline plus 10%. Dependency changes require explicit baseline review.
-Cold timing, PSS and AVD frame variation remain observation-only. Batch coalescing is a functional
-observation of one render for one callback's 100 assignments. Maintainer confirmation is pending;
-neither this document nor its JSON enables a release gate.
+When a result exceeds any review budget, repeat the measurement or provide an
+auditable explanation and evidence, then obtain the maintainer's decision on
+acceptance. Preserve the previous baseline and the exceedance until that decision;
+do not silently widen limits or select only favorable reruns. Apply the same review
+to reasonable feature/dependency growth. The Compose UI plugin AGENTS.md section14 records this requirement.
+
+Cold timing, PSS and all scroll-frame metrics remain observation-only until more
+stability evidence supports a limit. Batch coalescing remains a functional observation
+of one render for one callback's 100 assignments. The collector's automatically
+calculated candidate values do not replace these approved rules or the required
+maintainer decision for a breach.
 
 ## Provenance and reproduction
 

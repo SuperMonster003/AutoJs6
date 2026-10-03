@@ -632,10 +632,9 @@
       }
     }
   ],
-  "thresholdProposal": {
-    "ownerApproved": false,
-    "enforced": false,
-    "latencyRule": "Compare future p90 under the same device/build/method with current p90 * 1.5, rounded upward to 5 ms.",
+  "reviewRules": {
+    "ownerApproved": true,
+    "latencyRule": "Compare future p90 under the same device, workload, build mode, warmups, sample count and observation method with the approved baseline p90 * 1.5, rounded upward to 5 ms; record both source revisions.",
     "latencyBudgetsMs": [
       {
         "operation": "Warm UI mount",
@@ -676,9 +675,13 @@
     "observationOnly": [
       "Cold timing with n=3",
       "Single-process PSS sequence",
-      "AVD frame-period variation",
+      "Scroll-frame metrics on all devices pending stability evidence",
       "Presentation drops not measured"
-    ]
+    ],
+    "approvedOn": "2026-10-03",
+    "enforcementMode": "maintainer_review",
+    "automatedReleaseGate": false,
+    "exceedanceAction": "Retest or provide an explanation with evidence, then obtain explicit maintainer acceptance. Keep the previous baseline until that decision; do not silently widen limits or select favorable reruns."
   },
   "analysis": {
     "existingPropertySnapshotComparison": "TreeReconciler.diff compares props, modifiers and callbacks; it emits SetProps only on change. ComposeSession.flush accepts empty patch lists without renderer.apply.",
