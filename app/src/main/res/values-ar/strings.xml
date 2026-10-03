@@ -329,6 +329,7 @@
     <string name="error_compose_plugin_incompatible">الإضافة \"%1$s\" غير متوافقة. حدث AutoJs6 والإضافة.</string>
     <string name="error_compose_plugin_system_disabled">الإضافة \"%1$s\" معطلة في إعدادات Android. فعلها ثم حاول مجددا.</string>
     <string name="error_compose_shared_dependencies">تبعيات AutoJs6 والإضافة \"%1$s\" غير متطابقة. حدث كليهما إلى إصدارين متوافقين.</string>
+    <string name="error_compose_ui_mode_required">يتطلب عرض Compose UI وضع UI. أضف \"ui\"; في بداية البرنامج النصي.</string>
     <string name="error_conditions_not_met_for_record">يتطلب تسجيل السكربتات توفر شرط واحد على الاقل مما يلي:\n- صلاحيات Root\n- صلاحيات Shizuku</string>
     <string name="error_connect_to_remote">لا يمكن الاتصال بالخادم البعيد: %s</string>
     <string name="error_connection_failed_with_host">فشل الاتصال بـ \"%1$s\".</string>

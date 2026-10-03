@@ -23,13 +23,13 @@ interface ScriptUiDispatcher : AutoCloseable {
         }
 
         /** Called on the script's originating thread. One dispatcher is owned by one session. */
-        fun forRuntime(runtime: ScriptRuntime, uiMode: Boolean): ScriptUiDispatcher {
+        fun forRuntime(runtime: ScriptRuntime, uiMode: Boolean, keepAlive: Boolean = true): ScriptUiDispatcher {
             if (uiMode) {
                 check(Looper.myLooper() == Looper.getMainLooper())
                 return main()
             }
             val origin = Thread.currentThread()
-            val async = ScriptAsyncDispatcher(runtime)
+            val async = ScriptAsyncDispatcher(runtime, keepAlive)
             return object : ScriptUiDispatcher {
                 override fun isDispatchThread() = Thread.currentThread() === origin
                 override fun post(action: () -> Unit) { async.dispatchValues(emptyArray()) { action() } }

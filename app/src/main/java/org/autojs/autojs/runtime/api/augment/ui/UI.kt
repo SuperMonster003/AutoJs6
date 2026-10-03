@@ -588,6 +588,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 "Argument \"view\" ${view.jsBrief()} for ui.setContentView must be a View"
             }
             ensureActivity(scriptRuntime) { activity ->
+                scriptRuntime.beforeSetUiContent(view)
                 scriptRuntime.ui.view = view
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     activity.setContentView(view)

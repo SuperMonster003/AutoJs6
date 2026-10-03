@@ -327,6 +327,7 @@
     <string name="error_compose_plugin_incompatible">Le plugin \"%1$s\" est incompatible. Mettez AutoJs6 et le plugin à jour.</string>
     <string name="error_compose_plugin_system_disabled">Le plugin \"%1$s\" est désactivé dans les paramètres Android. Activez-le puis réessayez.</string>
     <string name="error_compose_shared_dependencies">Les dépendances AutoJs6 et du plugin \"%1$s\" diffèrent. Mettez les deux à jour vers des versions compatibles.</string>
+    <string name="error_compose_ui_mode_required">Le montage de Compose UI nécessite le mode UI. Ajoutez \"ui\"; au début du script.</string>
     <string name="error_conditions_not_met_for_record">L\'enregistrement de scripts necessite au moins l\'une des conditions suivantes:\n- Acces root\n- Acces Shizuku</string>
     <string name="error_connect_to_remote">Impossible de se connecter au serveur distant : %s</string>
     <string name="error_connection_failed_with_host">Échec de la connexion à \"%1$s\".</string>

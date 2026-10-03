@@ -54,6 +54,7 @@ import org.autojs.autojs.runtime.api.augment.canvas.Canvas
 import org.autojs.autojs.runtime.api.augment.colors.Color
 import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.runtime.api.augment.console.Console
+import org.autojs.autojs.runtime.api.augment.compose.Compose
 import org.autojs.autojs.runtime.api.augment.continuation.Continuation
 import org.autojs.autojs.runtime.api.augment.converter.Converter
 import org.autojs.autojs.runtime.api.augment.cryptyo.Crypto
@@ -303,6 +304,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     private val installer: InstallerService
     private val epub: EpubService
     private val terminal: TerminalService
+    private var compose: Compose? = null
 
     @JvmField
     @ScriptVariable
@@ -805,6 +807,8 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         ignoresException { RootUtils.resetRuntimeOverriddenRootModeState() }
 
+        ignoresException { compose?.close() }
+
         // Recycle all ImageWrapper instances recorded for this runtime (never those of other running scripts).
         // zh-CN: 回收当前运行时记录的全部 ImageWrapper 实例 (不影响其他仍在运行的脚本).
         ignoresException { CoreImageWrapper.recycleAll(this) }
@@ -849,6 +853,8 @@ class ScriptRuntime private constructor(builder: Builder) {
     }
 
     fun getProperty(key: String) = mProperties[key]
+
+    fun beforeSetUiContent(view: android.view.View) { compose?.beforeSetContentView(view) }
 
     fun putProperty(key: String, value: Any) = mProperties.put(key, value)
 
@@ -1061,6 +1067,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Installer(this, installer).augment(target)
         Epub(this, epub).augment(target)
         Terminal(this, terminal).augment(target)
+        Compose(this).also { compose = it }.augment(target)
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
     }

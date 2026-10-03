@@ -324,6 +324,7 @@
     <string name="error_compose_plugin_incompatible">外掛 \"%1$s\" 不相容. 請升級 AutoJs6 與外掛</string>
     <string name="error_compose_plugin_system_disabled">外掛 \"%1$s\" 已在 Android 設定中停用. 請啟用後重試</string>
     <string name="error_compose_shared_dependencies">AutoJs6 與外掛 \"%1$s\" 的依賴版本不相符. 請將兩者升級至相容版本</string>
+    <string name="error_compose_ui_mode_required">掛載 Compose UI 需要 UI 模式. 請在指令碼開頭加入 \"ui\";</string>
     <string name="error_conditions_not_met_for_record">指令碼錄製需至少滿足以下條件之一:\n- Root 許可權\n- Shizuku 許可權</string>
     <string name="error_connect_to_remote">連線失敗: %s</string>
     <string name="error_connection_failed_with_host">連線至 \"%1$s\" 失敗.</string>

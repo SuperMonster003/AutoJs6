@@ -37,7 +37,7 @@ class ComposeAndroidRenderer(
         lifecycleOwner?.lifecycle?.addObserver(this)
         val base = requireNotNull(context)
         val theme = ComposeThemeBridge(base) {
-            if (overrideTheme == null) try { renderer?.setTheme(it) }
+            try { renderer?.setTheme(resolveComposeTheme(it, overrideTheme)) }
             catch (failure: Exception) { themeError(sink, failure) }
             catch (failure: LinkageError) { themeError(sink, failure) }
         }.also { bridge = it }
@@ -69,7 +69,10 @@ class ComposeAndroidRenderer(
     }
     override fun apply(batch: UiPatchBatch) { requireNotNull(renderer).apply(batch); generation = batch.generation }
     override fun execute(command: UiCommand) = requireNotNull(renderer).execute(command)
-    override fun setTheme(theme: ThemeSpec) { overrideTheme = theme; requireNotNull(renderer).setTheme(theme) }
+    override fun setTheme(theme: ThemeSpec) {
+        overrideTheme = theme
+        requireNotNull(renderer).setTheme(resolveComposeTheme(requireNotNull(bridge).snapshot(), theme))
+    }
     override fun onDestroy(owner: LifecycleOwner) { onDestroyed?.invoke() }
     private fun themeError(sink: ComposeUiEventSink, failure: Throwable) {
         val error = ComposeUiError.from(failure)
@@ -87,3 +90,13 @@ class ComposeAndroidRenderer(
         }
     }
 }
+
+/** Partial script overrides retain the live host defaults for unspecified fields. */
+internal fun resolveComposeTheme(host: ThemeSpec, override: ThemeSpec?): ThemeSpec = if (override == null) host else ThemeSpec(
+    seedArgb = override.seedArgb ?: host.seedArgb,
+    colorOverrides = host.colorOverrides + override.colorOverrides,
+    dark = override.dark ?: host.dark,
+    dynamicColor = override.dynamicColor,
+    fontFamily = override.fontFamily ?: host.fontFamily,
+    fontScale = override.fontScale ?: host.fontScale,
+)

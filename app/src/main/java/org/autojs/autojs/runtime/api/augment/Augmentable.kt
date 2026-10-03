@@ -158,6 +158,9 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
      */
     open val scriptErrorPassThroughFunctions: Set<String> = emptySet()
 
+    /** Opt-in for callable modules that expose their own script Error subclass. */
+    open val scriptErrorPassThroughInvoke: Boolean = false
+
     /**
      * List element cases: <br>
      * - <1> - name to class
@@ -259,6 +262,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
             try {
                 RhinoUtils.toJsValue(creationScope, (this as Invokable).invoke(*args))
             } catch (e: Exception) {
+                if (scriptErrorPassThroughInvoke && e is JavaScriptException) throw e
                 if (ScriptInterruptedException.causedByInterrupt(e)) {
                     throw e
                 }
