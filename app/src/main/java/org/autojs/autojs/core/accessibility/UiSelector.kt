@@ -5,6 +5,8 @@ package org.autojs.autojs.core.accessibility
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.default
 import org.autojs.autojs.core.automator.ActionArgument
 import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.UiObject
@@ -290,12 +292,13 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     internal fun findAndReturnList(root: UiObject, max: Int = Int.MAX_VALUE): List<UiObject> = searchAlgorithm.search(root, selector, max)
 
     /**
-     * The search over any [UiNode] tree (the code generator's captured tree); nodes not matched are
-     * released through [org.autojs.autojs.core.accessibility.node.NodeLifecycle.default], a no-op for
-     * in-memory nodes. zh-CN: 对任意 [UiNode] 树 (代码生成器捕获的树) 的搜索; 未命中的节点经
-     * [org.autojs.autojs.core.accessibility.node.NodeLifecycle.default] 释放, 对内存节点为空操作.
+     * The search over any [UiNode] tree. Captured-tree callers can supply a no-op [lifecycle] when
+     * they retain the nodes across queries; other callers keep the platform's default policy.
+     * zh-CN: 对任意 [UiNode] 树的搜索. 捕获树调用方跨查询保留节点时可提供不回收的 [lifecycle],
+     * 其它调用方继续使用平台默认策略.
      */
-    internal fun <N : UiNode<N>> searchIn(root: N, max: Int = Int.MAX_VALUE): List<N> = searchAlgorithm.search(root, selector, max)
+    internal fun <N : UiNode<N>> searchIn(root: N, max: Int = Int.MAX_VALUE, lifecycle: NodeLifecycle = NodeLifecycle.default): List<N> =
+        searchAlgorithm.search(root, selector, max, lifecycle)
 
     protected fun findImpl(max: Int): UiObjectCollection = findImpl(mAccessibilityBridge?.windowRoots() ?: emptyList(), max)
 
