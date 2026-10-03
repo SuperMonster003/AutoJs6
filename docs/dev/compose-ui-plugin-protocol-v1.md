@@ -1,8 +1,8 @@
 # Compose UI contract V1
 
 Status: V1 frozen at P1.1 on 2026-10-02; P1.3 registration and the P2 renderer are
-implemented on 2026-10-03. P3.1/P3.2/P3.3 provide the UI script entry in the matching local host preview;
-the P3.4 floaty entry and remaining P3.5 integration guards are still pending.
+implemented on 2026-10-03. P3.1-P3.5 provide UI and floating-window script entries, lifecycle guards
+and localized errors in the matching local host preview.
 The host owns `plugin-api/compose-ui-api`; the plugin consumes
 its release AAR as compileOnly. The contract depends on Android, Kotlin/JDK and common-plugin-api,
 and contains no Compose implementation dependency.
@@ -403,7 +403,82 @@ live host seed/night/font defaults. Reads return independent objects. `sessions`
 array snapshot. Global ComposeError and compose.ComposeError share a per-scope Error constructor
 with code/message/nodeId/prop/cause, stack and plugin-selection retryability.
 
+## P3.4/P3.5 floating sessions and lifecycle guards
+
+`compose.floaty(nodeOrRender, options?)` is available in UI and non-UI scripts. It shares the same
+node/state/render pipeline and returns a ComposeFloatyWindow with `.session`, session forwarding
+methods, and native window controls. The default is a resizable window; `raw:true` selects RawWindow.
+`x/y`, `width/height`, `touchable`, `focusable` and `theme` are accepted. Geometry uses integer physical
+pixels, matching legacy floaty, while node dimensions retain their catalog dp/sp units. Size also
+accepts MATCH_PARENT (-1) and WRAP_CONTENT (-2). Missing geometry preserves native defaults; touchable
+defaults true and focusable false. Unknown options and invalid types/ranges fail before native work.
+
+The facade supports setPosition, setSize, getX/getY/getWidth/getHeight, requestFocus, disableFocus,
+setTouchable and close. setAdjustEnabled controls the resizable chrome and returns INVALID_ARGUMENT
+for a raw window. Geometry getters return native snapshots (-1 coordinates / 0 measured size before
+creation); queued settings coalesce until the service is ready. Changing focus/touchability does not
+reset a position or size subsequently changed by the user's native drag/resize interaction.
+
+Overlay permission uses existing floaty.ensurePermission semantics and returns PERMISSION_REQUIRED
+without opening a permission dialog. Availability/version probes still describe plugin availability,
+independent of the additional permission needed for floating windows. Creation/WM failures are
+reported on the script dispatcher and close the failed session. A bounded service-start deadline
+prevents pending creation from holding a script alive indefinitely.
+
+The Android adapter uses existing FloatyService, RawWindow/BaseResizableFloatyWindow and the owning
+runtime's floaty registry. It does not use their blocking creation wait. Lifecycle and saved-state
+owners are installed before WindowManager attachment. Focus/blur/scroll commands wait for the next
+post-apply pre-draw, when native command handles exist; the queue is bounded and cancelled on close.
+Native editing and Snackbar commands continue to use accepted data directly.
+
+Provisional registry ownership exists before deferred attachment. Immediate floaty.closeAll, a native
+close button, service teardown or script exit therefore closes a window even during service startup.
+Cancelled managed windows cannot be resurrected by a stale service-creation snapshot. The existing
+CopyOnWriteArraySet registry no longer holds a monitor while a script waits for main during legacy
+closeAll; only snapshot members are removed, preserving concurrent later additions.
+
+Each floating session owns one idempotent script-looper wait token, acquired on the script thread.
+It keeps an otherwise idle non-UI script alive while the session exists and releases on close or
+failed creation, including cancellation before the script cleanup queue runs. Native callbacks never
+invoke JS on Android main for a non-UI script. Mutations and events return to the captured script
+dispatcher; workers update through compose.post. Closing the last window lets an otherwise idle
+script finish. Engine exit removes native windows immediately and clears queued work/refs/callbacks.
+An explicit Timer rejection from a quitting script looper cancels late posts without escaping onto
+Android main. Queue overflow and unrelated scheduling failures still propagate. If force-stop drops
+the first script cleanup dispatch, the owner-thread exit hook retries that cleanup; callback receipts,
+close notification, native disposal and wait-token release remain exactly once.
+Native events, commit receipts and close notifications use reserved, bounded control channels,
+separate from the ordinary script post queue. A full ordinary queue therefore cannot throw through
+a native window callback or permanently disarm event delivery. Immediate user posts fail with
+LIMIT_EXCEEDED at capacity; delayed posts report that code and cancel that callback if their deadline
+finds the queue full. A rejected reactive/command post resets its scheduling flag so a later update
+can recover. An unrecoverable renderer-open failure reports its error and closes the failed session;
+ordinary rejected tree patches retain the existing recovery behavior.
+Control slots are reserved during session construction. If that reservation fails, the already-created
+provisional window and renderer are both disposed and the wait token is released. Rapid same-turn
+create/close cycles may reach the pending-cleanup budget; yielding to the script dispatcher releases
+those reservations. A failed reservation never leaves an invisible floaty registry entry.
+
+The eight-session limit counts UI and floating sessions together. Replacing a UI session at the limit
+preserves unrelated floaties and validates the replacement before closing the old UI. ui.layout only
+replaces the UI mount. Closed root/ref getters become null immediately, and closing one binding cannot
+clear a ref currently owned by another binding. Other retained-handle/window mutations report
+SESSION_CLOSED. A floating mount inside a rolled-back transaction never attaches later or retains an
+invisible reaction. Multi-session node transactions retain their existing atomic-rejection policy;
+independent sessions can be updated separately or react to shared state.
+
+All 18 error codes have host-localized messages. Existing Plugin Center selection messages remain
+verbatim; script-domain errors retain component/property/node details. The per-realm ComposeError
+constructor preserves nested causes, JS error identity and source stacks, supports cyclic causes
+without recursive conversion, and passes engine interruption through. Strings are provided for all
+10 host languages (11 resource directories), with completeness/sort tests.
+
+Focus validation uses actual attached editor, window focus and InputMethodManager readiness before
+requesting the keyboard. API24, Sony API31 and HyperOS API35 exercise real IME windows and native
+InputConnection edits. HyperOS validation uses the desktop hosting surface and requestFocus; this
+does not claim unrestricted overlay behavior above other apps on that ROM.
+
 This remains a local development preview under D7. Use the matching host source/build containing
-the script entry; the renderer's unchanged 5316 contract floor does not by itself distinguish older
-unpublished builds with the same build number. `compose.floaty`, examples/types/full user docs and
-the remaining compatibility/performance gates are delivered in their existing roadmap stages.
+the script entry; the renderer's unchanged 5316 contract floor does not distinguish older unpublished
+builds with the same number. Example bundles, declarations/full user docs and the remaining
+compatibility/performance gates continue in their existing roadmap stages.
