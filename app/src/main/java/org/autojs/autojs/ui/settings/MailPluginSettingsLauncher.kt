@@ -1,7 +1,7 @@
 package org.autojs.autojs.ui.settings
 
 import android.content.Context
-import org.autojs.autojs.core.plugin.mail.AngusMailOfficialPlugin
+import org.autojs.autojs.core.plugin.mail.ThreeStampMailOfficialPlugin
 import org.autojs.autojs6.R
 import org.autojs.plugin.mail.api.MailActions
 
@@ -12,8 +12,8 @@ import org.autojs.plugin.mail.api.MailActions
 internal object MailPluginSettingsLauncher {
 
     val target = OfficialPluginSettingsTarget(
-        packageName = AngusMailOfficialPlugin.PACKAGE_NAME,
-        displayName = AngusMailOfficialPlugin.DISPLAY_NAME,
+        packageName = ThreeStampMailOfficialPlugin.PACKAGE_NAME,
+        displayName = ThreeStampMailOfficialPlugin.DISPLAY_NAME,
         action = MailActions.OPEN_SETTINGS,
         permission = MailActions.PLUGIN_PERMISSION,
         title = R.string.text_mail_settings,

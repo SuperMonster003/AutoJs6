@@ -140,7 +140,7 @@
     <string name="description_launcher_icon_preference">يدعم رمز المشغّل وضعي عرض: الرمز المتكيّف أو الرمز التقليدي بخلفية شفافة. قد يختلف تأثير العرض الفعلي عبر أنظمة أندرويد المختلفة. قد يستغرق الأمر بضع ثوانٍ ليصبح التغيير ساريًا بعد تبديل وضع العرض.</string>
     <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
     <string name="description_local_network_permission">السماح بالاتصال بالأجهزة والخدمات على الشبكة المحلية, بما فيها VS Code. يمكن للبرامج النصية طلب هذا الإذن صراحة.</string>
-    <string name="description_mail_settings_preference">افتح Angus Mail لحفظ الحسابات المستخدمة مع mail.connect(\'alias\') واختبار اتصالها واختيار الحساب الافتراضي.</string>
+    <string name="description_mail_settings_preference">افتح 3-Stamp Mail لحفظ الحسابات المستخدمة مع mail.connect(\'alias\') واختبار اتصالها واختيار الحساب الافتراضي.</string>
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
     <string name="description_mcp_server">اسمح لعملاء الذكاء الاصطناعي المقترنين بأتمتة هذا الجهاز عبر إضافة MCP Server. افتح الإعدادات لاختيار المنفذ والشبكة والرمز ومجموعات الأدوات.</string>
     <string name="description_night_mode">يُستخدم للتحكم في استراتيجية الوضع الليلي في AutoJs6 وعكسها.\n\nملاحظة: مفتاح الوضع الليلي ومفتاح الوضع الليلي التلقائي مرتبطان ويؤثر كل منهما في الآخر.</string>
@@ -668,10 +668,10 @@
     <string name="prompt_ai_plugin_install_required">ثبّت 3-Stone AI من مركز الإضافات قبل فتح إعدادات خدمة AI.</string>
     <string name="prompt_ai_plugin_settings_unavailable">لا يوفر 3-Stone AI المثبت مدخل إعدادات موثوقًا. حدّثه أو أعد تثبيته من مركز الإضافات.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">قد لا يكون الملف الحالي حزمة ملحق صالحة. هل تريد المتابعة بالتثبيت؟\n\nURI: \"%1$s\"</string>
-    <string name="prompt_mail_plugin_application_enable_required">تم تعطيل Angus Mail بواسطة Android. فعّله من إعدادات التطبيق في النظام قبل فتح إعدادات حسابات البريد.</string>
-    <string name="prompt_mail_plugin_enable_required">تم تعطيل Angus Mail في مركز الإضافات. فعّله قبل فتح إعدادات حسابات البريد.</string>
-    <string name="prompt_mail_plugin_install_required">ثبّت Angus Mail من مركز الإضافات قبل فتح إعدادات حسابات البريد.</string>
-    <string name="prompt_mail_plugin_settings_unavailable">لا يوفر Angus Mail المثبت مدخل إعدادات موثوقًا. حدّثه أو أعد تثبيته من مركز الإضافات.</string>
+    <string name="prompt_mail_plugin_application_enable_required">تم تعطيل 3-Stamp Mail بواسطة Android. فعّله من إعدادات التطبيق في النظام قبل فتح إعدادات حسابات البريد.</string>
+    <string name="prompt_mail_plugin_enable_required">تم تعطيل 3-Stamp Mail في مركز الإضافات. فعّله قبل فتح إعدادات حسابات البريد.</string>
+    <string name="prompt_mail_plugin_install_required">ثبّت 3-Stamp Mail من مركز الإضافات قبل فتح إعدادات حسابات البريد.</string>
+    <string name="prompt_mail_plugin_settings_unavailable">لا يوفر 3-Stamp Mail المثبت مدخل إعدادات موثوقًا. حدّثه أو أعد تثبيته من مركز الإضافات.</string>
     <string name="prompt_mcp_server_activate">MCP Server مثبت لكن Android لم ينشطه بعد. نشطه الآن للسماح باتصال AutoJs6.</string>
     <string name="prompt_mcp_server_application_disabled">عطل Android تطبيق MCP Server. فعله في إعدادات النظام ثم حاول مجددا.</string>
     <string name="prompt_mcp_server_authorize">تحتاج هذه الإضافة إلى تفويض في مركز الإضافات قبل السماح بوصول MCP إلى الجهاز.</string>

@@ -8,7 +8,7 @@ vocabulary and the ceilings listed here. Transaction numbers are frozen in decla
 later contract version may only append methods and optional keys. The host side of this
 protocol (discovery, session client, attachment sink and source, watch bridge) landed with roadmap
 P1.2, and the delivering host build is recorded in `MailIds.REQUIRED_HOST_VERSION_CODE`. The
-plugin side (Angus Mail, package `io.github.supermonster003.autojs6.plugin.angus.mail`)
+plugin side (3-Stamp Mail, package `io.github.supermonster003.autojs6.plugin.three.stamp.mail`)
 implements every operation of this document: plugin roadmap P2 (build 12) delivered the
 operations, P4 (builds 27 and later) the saved accounts behind `listSavedAccounts` and the alias
 form of `openSession`, P5 (build 35) the watches and P6 (builds 37 to 46) the compatibility
@@ -26,7 +26,7 @@ handlers and the account store live in that plugin and are never loaded into the
 The host contributes discovery, a per-session Binder client, file transfer through descriptors
 and the script objects; it never sees a mailbox connection (roadmap D1, D2, D25).
 
-The stable engine, variant and official plugin id are `mail` / `default` / `angus-mail`. The
+The stable engine, variant and official plugin id are `mail` / `default` / `three-stamp-mail`. The
 discovery actions are:
 
 - `org.autojs.plugin.INFO` (plugin info service)

@@ -683,6 +683,7 @@
 * `Mejora` Las filas del análisis de jerarquía eliminan las barras de nivel de colores de la izquierda (la sangría se mantiene) y colocan la marca de expandir / contraer junto al texto del nodo: chevrón derecho para filas contraídas, chevrón abajo para filas expandidas y un pequeño círculo hueco para filas sin descendientes, los tres con un mismo tono ligeramente más oscuro
 * `Mejora` La selección múltiple de atributos usa fondos con el color del tema sin cambiar la altura de las filas; los botones son Ajustes / Volver / Copiar, y el comportamiento de copia se recuerda entre sesiones: Preguntar siempre (predeterminado), Copiar selector de objeto o Copiar selector encadenado
 * `Mejora` Símbolos más grandes para el modo de consulta, filtros, regex y navegación en la barra de búsqueda del análisis de diseño; el conmutador de regex usa un icono ".*" sencillo
+* `Mejora` Los ajustes de cuentas de correo y el Centro de plugins reconocen el nuevo nombre y paquete de 3-Stamp Mail
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

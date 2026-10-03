@@ -134,7 +134,7 @@
     <string name="description_launcher_icon_preference">启动器图标支持自适应图标显示方式与传统透明背景图标显示方式. 不同安卓系统的图标实际显示效果可能有所不同. 切换显示方式后, 可能需要几秒钟的时间生效.</string>
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中执行特定操作, 用户可以在启动器中显示这些快捷方式, 并快速开始某些任务或启动某个活动, 如阅读 AutoJs6 应用文档, 启动 AutoJs6 设置页面等.</string>
     <string name="description_local_network_permission">允许连接局域网中的设备和服务, 包括 VS Code. 脚本可显式申请此权限.</string>
-    <string name="description_mail_settings_preference">打开 Angus Mail, 保存供 mail.connect(\'alias\') 使用的账户, 测试连接并选择默认账户.</string>
+    <string name="description_mail_settings_preference">打开 3-Stamp Mail, 保存供 mail.connect(\'alias\') 使用的账户, 测试连接并选择默认账户.</string>
     <string name="description_manage_ignored_updates_preference">点击可查看或管理列表项.\n长按可移除列表项.</string>
     <string name="description_mcp_server">通过 MCP Server 插件允许已配对 AI 客户端操作此设备. 打开设置可配置端口, 网络访问, 令牌和工具分组.</string>
     <string name="description_night_mode">用于控制并反映 AutoJs6 夜间模式策略.\n\n注: 夜间模式开关与自动夜间模式开关互相关联且互相影响.</string>
@@ -662,10 +662,10 @@
     <string name="prompt_ai_plugin_install_required">请先从插件中心安装 3-Stone AI, 再打开 AI 服务设置.</string>
     <string name="prompt_ai_plugin_settings_unavailable">已安装的 3-Stone AI 没有可信的设置入口. 请从插件中心更新或重新安装.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">当前文件可能不是有效的插件包, 是否继续安装?\n\nURI: \"%1$s\"</string>
-    <string name="prompt_mail_plugin_application_enable_required">Android 已停用 Angus Mail. 请先在系统应用设置中启用, 再打开邮件账户设置.</string>
-    <string name="prompt_mail_plugin_enable_required">Angus Mail 已在插件中心停用. 请先启用, 再打开邮件账户设置.</string>
-    <string name="prompt_mail_plugin_install_required">请先从插件中心安装 Angus Mail, 再打开邮件账户设置.</string>
-    <string name="prompt_mail_plugin_settings_unavailable">已安装的 Angus Mail 没有可信的设置入口. 请从插件中心更新或重新安装.</string>
+    <string name="prompt_mail_plugin_application_enable_required">Android 已停用 3-Stamp Mail. 请先在系统应用设置中启用, 再打开邮件账户设置.</string>
+    <string name="prompt_mail_plugin_enable_required">3-Stamp Mail 已在插件中心停用. 请先启用, 再打开邮件账户设置.</string>
+    <string name="prompt_mail_plugin_install_required">请先从插件中心安装 3-Stamp Mail, 再打开邮件账户设置.</string>
+    <string name="prompt_mail_plugin_settings_unavailable">已安装的 3-Stamp Mail 没有可信的设置入口. 请从插件中心更新或重新安装.</string>
     <string name="prompt_mcp_server_activate">MCP Server 已安装, 但尚未被 Android 激活. 立即激活以允许 AutoJs6 连接.</string>
     <string name="prompt_mcp_server_application_disabled">Android 已停用 MCP Server. 请在系统应用设置中启用后重试.</string>
     <string name="prompt_mcp_server_authorize">此插件需要先在插件中心获得授权, 才能通过 MCP 访问此设备.</string>

@@ -35,7 +35,7 @@ class PluginSettingsPolicyTest {
         assertEquals("org.autojs.plugin.MAIL_SETTINGS", MailActions.OPEN_SETTINGS)
         assertEquals(MailActions.OPEN_SETTINGS, mail.action)
         assertEquals(MailActions.PLUGIN_PERMISSION, mail.permission)
-        assertEquals("Angus Mail", mail.displayName)
+        assertEquals("3-Stamp Mail", mail.displayName)
     }
 
     private fun assertState(
