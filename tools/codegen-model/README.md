@@ -14,6 +14,10 @@ The [first P3 model report](reports/p3-first-model-2026.10-1.md) records a 6-tre
 two reproducible full fits, held-out comparison against the rule baseline, and the synthetic
 private queue integration. Real application evaluation and Android inference remain subsequent work.
 
+The [P4 package/runtime report](reports/p4-model-runtime-2026.10-1.md) records actual Kotlin parity
+on 5,012 candidates, malformed-package checks and JVM measurements. The Kotlin inference core is
+implemented; Android device benchmarks and generation-UI integration remain subsequent stages.
+
 ## Build and prepare
 
 From the repository root, build the controlled View application:
