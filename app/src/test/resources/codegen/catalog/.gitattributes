@@ -1,0 +1,2 @@
+*.der binary
+*.json text eol=lf
