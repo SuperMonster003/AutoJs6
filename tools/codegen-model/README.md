@@ -10,6 +10,10 @@ The first complete controlled run is documented in the
 [P2 acceptance report](reports/p2-dataset-2026.10-1.md): 2,688 task groups, 1,152 distinct snapshots,
 133,704 candidate labels, zero discarded states, and byte-identical repeated JVM exports.
 
+The [first P3 model report](reports/p3-first-model-2026.10-1.md) records a 6-tree candidate model,
+two reproducible full fits, held-out comparison against the rule baseline, and the synthetic
+private queue integration. Real application evaluation and Android inference remain subsequent work.
+
 ## Build and prepare
 
 From the repository root, build the controlled View application:
