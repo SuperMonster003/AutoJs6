@@ -5,6 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Looper
 import android.os.SystemClock
+import android.graphics.Rect
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputConnection
+import androidx.activity.ComponentActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -25,6 +33,10 @@ import org.autojs.plugin.compose.api.model.UiEvent
 import org.autojs.plugin.compose.api.model.UiNode
 import org.autojs.plugin.compose.api.model.UiTree
 import org.autojs.plugin.compose.api.model.UiValue
+import org.autojs.plugin.compose.api.model.UiCommand
+import org.autojs.plugin.compose.api.model.SnackbarDuration
+import org.autojs.plugin.compose.api.ComposeUiSlots as S
+import org.autojs.plugin.compose.api.model.ScopeKind
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Assume.assumeTrue
@@ -197,10 +209,178 @@ class ComposeUiControlsTest {
         }
     }
 
-    private inner class Fixture(private val id: Int) : Closeable {
-        private val activity = instrumentation.startActivitySync(
-            Intent(context, AboutActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        ) as AboutActivity
+    @Test fun xiaomiChineseImeCommitsCandidateThroughInstalledKeyboard() {
+        val ime = android.provider.Settings.Secure.getString(context.contentResolver, android.provider.Settings.Secure.DEFAULT_INPUT_METHOD)
+        assumeTrue("Chinese IME acceptance device: API33 with its existing Xiaomi Sogou IME", android.os.Build.VERSION.SDK_INT == 33 && ime?.contains("com.sohu.inputmethod.sogou.xiaomi") == true)
+        // Device acceptance opts in after confirming the installed IME's English QWERTY layout.
+        // Only its language key is toggled, and it is toggled back before the fixture closes.
+        assumeTrue(InstrumentationRegistry.getArguments().getString("composeSogouEnglishQwerty") == "true")
+        Fixture(45, insetProbe = true).use { fixture ->
+            main { fixture.session.render(inputTree(fixture.callback())); fixture.session.attach() }
+            fixture.await("Chinese IME fixture is visible") { node("input") != null }
+            click("input")
+            fixture.await("Existing Chinese IME is shown") { fixture.imeBottom() > 0 }
+            fixture.await("Chinese IME window and its animation have settled") {
+                fixture.imeBottom() > 150 * context.resources.displayMetrics.density &&
+                    kotlin.math.abs(fixture.keyboardTop().toLong() - fieldBounds().bottom) <= 3
+            }
+            val keyboard = requireNotNull(instrumentation.uiAutomation.windows.firstOrNull {
+                it.type == android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD
+            }).let { Rect().also(it::getBoundsInScreen) }
+            fun tap(x: Float, y: Float) {
+                val now = SystemClock.uptimeMillis()
+                val down = android.view.MotionEvent.obtain(now, now, android.view.MotionEvent.ACTION_DOWN, x, y, 0)
+                val up = android.view.MotionEvent.obtain(now, now + 80, android.view.MotionEvent.ACTION_UP, x, y, 0)
+                down.source = android.view.InputDevice.SOURCE_TOUCHSCREEN
+                up.source = android.view.InputDevice.SOURCE_TOUCHSCREEN
+                try {
+                    assertTrue(instrumentation.uiAutomation.injectInputEvent(down, true))
+                    assertTrue(instrumentation.uiAutomation.injectInputEvent(up, true))
+                } finally { down.recycle(); up.recycle() }
+            }
+            fun languageKey() = tap(keyboard.left + keyboard.width() * .7875f, keyboard.top + keyboard.height() * .76f)
+            fun snapshot(name: String) {
+                instrumentation.uiAutomation.takeScreenshot()?.let { bitmap ->
+                    try { java.io.File(context.getExternalFilesDir(null), name).outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) } }
+                    finally { bitmap.recycle() }
+                }
+            }
+            snapshot("compose-ime-before.png")
+            languageKey()
+            try {
+                SystemClock.sleep(300)
+                // Physical QWERTY touches exercise the installed IME's composing/candidate path.
+                for ((x, y) in listOf(.70f to .60f, .75f to .275f, .60f to .439f, .11f to .439f, .85f to .275f)) {
+                    tap(keyboard.left + keyboard.width() * x, keyboard.top + keyboard.height() * y)
+                }
+                // Sogou may keep pinyin entirely in its own candidate buffer until selection.
+                SystemClock.sleep(500)
+                val candidate = imeCandidate("你好")
+                if (candidate != null) Rect().also(candidate::getBoundsInScreen).let { tap(it.exactCenterX(), it.exactCenterY()) }
+                else tap(keyboard.left + keyboard.width() * .11f, keyboard.top + keyboard.height() * .145f)
+                fixture.await("Chinese candidate reaches native state and queued callback") {
+                    fixture.delivered.lastOrNull()?.payload?.getString(F.TEXT) == "你好"
+                }
+                assertTrue(fixture.delivered.last().payload.getLong(F.EDIT_SEQ) > 0)
+                fixture.assertQueuedDelivery()
+            } finally {
+                languageKey()
+                SystemClock.sleep(300)
+                snapshot("compose-ime-after.png")
+            }
+        }
+    }
+
+    private fun imeCandidate(text: String): AccessibilityNodeInfo? {
+        fun find(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
+            if (node.text?.toString() == text || node.contentDescription?.toString() == text) return node
+            for (i in 0 until node.childCount) node.getChild(i)?.let { find(it)?.let { found -> return found } }
+            return null
+        }
+        return instrumentation.uiAutomation.windows.asSequence()
+            .filter { it.type == android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD }
+            .mapNotNull { it.root }.mapNotNull(::find).firstOrNull()
+    }
+
+    @Test fun nativeInputConnectionAndScaffoldShareOneHostKeyboardInset() {
+        Fixture(43, insetProbe = true).use { fixture ->
+            var changed = 0
+            main {
+                changed = fixture.callback()
+                fixture.session.render(inputTree(changed))
+                fixture.session.attach()
+            }
+            fixture.await("Native field is exposed") { node("input") != null }
+            fixture.await("Initial system-bar insets settle") { kotlin.math.abs(fieldBounds().bottom - fixture.contentBottom()) <= 3 }
+            val original = fieldBounds()
+            android.util.Log.i("ComposeInsetProbe", "Before keyboard: ${fixture.insetSnapshot()}")
+            val softMode = fixture.originalSoftInputMode
+            click("input")
+            fixture.await("Keyboard insets reach the host") { fixture.imeBottom() > 0 }
+            fixture.await("Field moves exactly to the keyboard edge") {
+                val field = fieldBounds()
+                val keyboard = fixture.keyboardTop()
+                field.bottom <= keyboard + 3 && keyboard - field.bottom < 12 * context.resources.displayMetrics.density
+            }
+            assertTrue("Visible viewport shrinks when IME opens", fieldBounds().bottom < original.bottom)
+            android.util.Log.i("ComposeInsetProbe", "Keyboard shown: ${fixture.insetSnapshot()}")
+            lateinit var connection: InputConnection
+            main {
+                connection = requireNotNull(fixture.editor().onCreateInputConnection(EditorInfo()))
+                assertTrue(connection.setComposingText("ni", 1))
+                assertTrue(connection.setComposingText("nihao", 1))
+                assertTrue(connection.commitText("你好", 1))
+                assertTrue(connection.finishComposingText())
+            }
+            fixture.await("Native composing commit is delivered without script echo") { fixture.delivered.lastOrNull()?.payload?.getString(F.TEXT) == "你好" }
+            main {
+                assertTrue(connection.commitText("粘贴🙂", 1))
+                assertTrue(connection.deleteSurroundingText(2, 0))
+                assertTrue(connection.deleteSurroundingText(1, 0))
+                assertTrue(connection.setSelection(1, 0))
+            }
+            fixture.await("Delete and reversed UTF-16 selection are delivered") {
+                fixture.delivered.lastOrNull()?.payload?.let { it.getString(F.TEXT) == "你好粘" && it.getInt(F.SELECTION_START) == 1 && it.getInt(F.SELECTION_END) == 0 } == true
+            }
+            main {
+                val fieldId = fixture.session.tree!!.nodes.single { it.type == C.OUTLINED_TEXT_FIELD }.nodeId
+                fixture.session.execute(UiCommand.Edit(fieldId, text = "脚本", editSeq = fixture.delivered.last().payload.getLong(F.EDIT_SEQ)))
+            }
+            fixture.await("Current edit sequence permits script replacement") { fixture.delivered.lastOrNull()?.payload?.getString(F.TEXT) == "脚本" }
+            instrumentation.sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
+            fixture.await("Keyboard hiding restores the original content height") { fixture.imeBottom() == 0 && kotlin.math.abs(fieldBounds().bottom - original.bottom) <= 3 }
+            android.util.Log.i("ComposeInsetProbe", "Keyboard hidden: ${fixture.insetSnapshot()}")
+            main { fixture.session.detach() }
+            instrumentation.waitForIdleSync()
+            main { assertEquals("Detach restores the Activity's soft input policy", softMode, fixture.activity.window.attributes.softInputMode) }
+            fixture.assertQueuedDelivery()
+        }
+    }
+
+    @Test fun snackbarCommandCallbackSurvivesNewTreeAndTerminatesOnHostRemoval() {
+        Fixture(44, insetProbe = true).use { fixture ->
+            fun tree(text: String) = UiTree(1, listOf(UiNode(1, C.SCAFFOLD, slots = mapOf(S.CONTENT to 2)),
+                UiNode(2, C.TEXT, props = mapOf(P.TEXT to UiValue.Str(text)))))
+            main { fixture.session.render(tree("Before")); fixture.session.attach() }
+            fixture.await("Initial tree commits") { fixture.generation() == 1L }
+            main {
+                fixture.session.execute(UiCommand.ShowSnackbar("Command result", "Accept", SnackbarDuration.INDEFINITE, fixture.callback()))
+            }
+            fixture.await("Action is visible") { findText("Accept") != null }
+            main { fixture.session.render(tree("After")) }
+            fixture.await("Unrelated tree commits while command is active") { fixture.generation() == 2L }
+            assertTrue(requireNotNull(findText("Accept")).performAction(AccessibilityNodeInfo.ACTION_CLICK))
+            fixture.await("Command action reaches its original callback") { fixture.delivered.any { it.type == E.ACTION } }
+            assertEquals(1L, fixture.delivered.single().generation)
+            main { assertEquals(0, fixture.session.callbackCount) }
+            main {
+                fixture.session.execute(UiCommand.ShowSnackbar("Removed host", duration = SnackbarDuration.INDEFINITE, callbackId = fixture.callback()))
+                fixture.session.render(UiTree(3, listOf(UiNode(3, C.TEXT, props = mapOf(P.TEXT to UiValue.Str("Closed host"))))))
+            }
+            fixture.await("Removing Scaffold delivers one dismissal") { fixture.delivered.size == 2 }
+            assertEquals(E.DISMISS, fixture.delivered.last().type)
+            assertEquals(2L, fixture.delivered.last().generation)
+            main { assertEquals(0, fixture.session.callbackCount) }
+            fixture.assertQueuedDelivery()
+        }
+    }
+
+    private fun inputTree(callback: Int) = UiTree(1, listOf(
+        UiNode(1, C.SCAFFOLD, modifier = listOf(ModifierOp(M.FILL_MAX_SIZE)), slots = mapOf(S.CONTENT to 2)),
+        UiNode(2, C.BOX, modifier = listOf(ModifierOp(M.FILL_MAX_SIZE)), children = listOf(3)),
+        UiNode(3, C.OUTLINED_TEXT_FIELD, "input", props = mapOf(P.SINGLE_LINE to UiValue.Bool(true)),
+            modifier = tagged("input") + listOf(ModifierOp(M.FILL_MAX_WIDTH),
+                ModifierOp(M.ALIGN, listOf(UiValue.Enum("bottomCenter")), ScopeKind.BOX)),
+            callbacks = mapOf(E.VALUE_CHANGE to callback)),
+    ))
+    private fun fieldBounds() = Rect().also { requireNotNull(node("input")).getBoundsInScreen(it) }
+
+    private inner class Fixture(private val id: Int, insetProbe: Boolean = false) : Closeable {
+        val activity = instrumentation.startActivitySync(
+            Intent(context, if (insetProbe) ComposeInsetsProbeActivity::class.java else AboutActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        ) as ComponentActivity
+        init { if (insetProbe) main { activity.window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN) } }
+        val originalSoftInputMode = activity.window.attributes.softInputMode
         lateinit var session: ComposeSession
             private set
         val delivered = ConcurrentLinkedQueue<UiEvent>()
@@ -243,7 +423,44 @@ class ComposeUiControlsTest {
         }
 
         fun generation(): Long { var result = 0L; main { result = session.generation }; return result }
-
+        fun imeBottom(): Int { var value = 0; main { value = ViewCompat.getRootWindowInsets(activity.window.decorView)?.getInsets(WindowInsetsCompat.Type.ime())?.bottom ?: 0 }; return value }
+        fun contentBottom(): Int {
+            var value = 0
+            main {
+                val decor = activity.window.decorView
+                val location = IntArray(2).also(decor::getLocationOnScreen)
+                value = location[1] + decor.height - (ViewCompat.getRootWindowInsets(decor)?.getInsets(WindowInsetsCompat.Type.systemBars())?.bottom ?: 0)
+            }
+            return value
+        }
+        fun keyboardTop(): Int {
+            val keyboard = instrumentation.uiAutomation.windows.firstOrNull { it.type == android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD }
+            return keyboard?.let { Rect().also(it::getBoundsInScreen).top } ?: Int.MAX_VALUE
+        }
+        fun insetSnapshot(): String {
+            var value = ""
+            main {
+                val decor = activity.window.decorView
+                val content = activity.findViewById<View>(android.R.id.content)
+                val rootInsets = ViewCompat.getRootWindowInsets(decor)
+                val visible = Rect().also(decor::getWindowVisibleDisplayFrame)
+                val field = node("input")?.let { Rect().also(it::getBoundsInScreen) }
+                value = "decor=${decor.width}x${decor.height}, content=${content.width}x${content.height}, " +
+                    "padding=${content.paddingTop}/${content.paddingBottom}, visible=$visible, field=$field, " +
+                    "ime=${rootInsets?.getInsets(WindowInsetsCompat.Type.ime())?.bottom}, " +
+                    "bars=${rootInsets?.getInsets(WindowInsetsCompat.Type.systemBars())?.bottom}, " +
+                    "keyboardTop=${keyboardTop()}, softInput=${activity.window.attributes.softInputMode}"
+            }
+            return value
+        }
+        fun editor(): View {
+            fun find(view: View): View? {
+                if (view.onCheckIsTextEditor()) return view
+                if (view is ViewGroup) for (index in 0 until view.childCount) find(view.getChildAt(index))?.let { return it }
+                return null
+            }
+            return requireNotNull(find(activity.window.decorView))
+        }
         fun await(message: String, condition: () -> Boolean) {
             val deadline = SystemClock.uptimeMillis() + 15000
             do {
@@ -252,7 +469,7 @@ class ComposeUiControlsTest {
                 SystemClock.sleep(50)
             } while (SystemClock.uptimeMillis() < deadline)
             checkErrors()
-            fail(message)
+            fail("$message; ${insetSnapshot()}")
         }
 
         fun assertQueuedDelivery() {
@@ -299,6 +516,20 @@ class ComposeUiControlsTest {
             return null
         }
         // Only inspect this isolated test host, including when another app owns accessibility focus.
+        return instrumentation.uiAutomation.windows.asSequence().mapNotNull { it.root }
+            .filter { it.packageName?.toString() == context.packageName }.mapNotNull(::find).firstOrNull()
+    }
+    private fun findText(text: String): AccessibilityNodeInfo? {
+        fun contains(node: AccessibilityNodeInfo): Boolean {
+            if (node.text?.toString() == text) return true
+            for (i in 0 until node.childCount) if (node.getChild(i)?.let(::contains) == true) return true
+            return false
+        }
+        fun find(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
+            if (node.isClickable && contains(node)) return node
+            for (i in 0 until node.childCount) node.getChild(i)?.let { find(it)?.let { found -> return found } }
+            return null
+        }
         return instrumentation.uiAutomation.windows.asSequence().mapNotNull { it.root }
             .filter { it.packageName?.toString() == context.packageName }.mapNotNull(::find).firstOrNull()
     }

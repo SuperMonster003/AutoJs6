@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <activity
+            android:name="org.autojs.autojs.core.plugin.compose.ComposeInsetsProbeActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
         <provider
             android:name="org.autojs.autojs.app.ApplicationContextProbeProvider"
             android:authorities="${applicationId}.context-probe"

@@ -9,6 +9,7 @@ import android.os.Bundle
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.loading.*
 import org.autojs.plugin.compose.api.model.*
+import java.io.Closeable
 
 /** Main-thread adapter. Script code owns the session; Activity/window owners own attachment. */
 class ComposeAndroidRenderer(
@@ -29,6 +30,7 @@ class ComposeAndroidRenderer(
     private var overrideTheme: ThemeSpec? = null
     private var disposed = false
     private var generation = 0L
+    private var insetsLease: Closeable? = null
 
     override fun open(sink: ComposeUiEventSink) {
         check(!disposed && renderer == null)
@@ -52,10 +54,19 @@ class ComposeAndroidRenderer(
     override fun attach() {
         val view = requireNotNull(renderer).view()
         if (view.parent != null) return
-        floatyOwners?.attach(view)
-        requireNotNull(mount).invoke(view)
+        insetsLease = (context as? ComposeInsetsHost)?.acquireComposeInsets()
+        try {
+            floatyOwners?.attach(view)
+            requireNotNull(mount).invoke(view)
+        } catch (failure: Throwable) {
+            insetsLease?.close(); insetsLease = null
+            throw failure
+        }
     }
-    override fun detach() { renderer?.view()?.let { (it.parent as? ViewGroup)?.removeView(it) } }
+    override fun detach() {
+        try { renderer?.view()?.let { (it.parent as? ViewGroup)?.removeView(it) } }
+        finally { insetsLease?.close(); insetsLease = null }
+    }
     override fun apply(batch: UiPatchBatch) { requireNotNull(renderer).apply(batch); generation = batch.generation }
     override fun execute(command: UiCommand) = requireNotNull(renderer).execute(command)
     override fun setTheme(theme: ThemeSpec) { overrideTheme = theme; requireNotNull(renderer).setTheme(theme) }
