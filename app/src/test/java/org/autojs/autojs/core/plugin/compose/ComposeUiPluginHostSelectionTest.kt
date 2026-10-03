@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.compose
 
 import org.autojs.plugin.compose.api.ComposeUiErrorCodes
+import org.autojs.plugin.compose.api.ComposeUiIds
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -13,7 +14,7 @@ class ComposeUiPluginHostSelectionTest {
         override fun systemEnabled() = gate(1)
         override fun centerEnabled() = gate(2)
         override fun authorized() = gate(3)
-        override fun requiredHostVersion() = if (gate(4)) 5308L else Long.MAX_VALUE
+        override fun requiredHostVersion() = if (gate(4)) ComposeUiIds.REQUIRED_HOST_VERSION_CODE else Long.MAX_VALUE
         override fun hasFactoryAndInfoService() = gate(5)
     }
     @Test fun preLoadGatesAreLazyOrderedAndHaveTypedFailures() {
@@ -21,10 +22,10 @@ class ComposeUiPluginHostSelectionTest {
             SelectionFailure.UNAUTHORIZED, SelectionFailure.HOST_TOO_OLD, SelectionFailure.DISCOVERY)
         reasons.forEachIndexed { i, reason ->
             val packages = Packages(i)
-            assertEquals(reason, ComposeUiPluginSelection.beforeLoad(packages, 5309))
+            assertEquals(reason, ComposeUiPluginSelection.beforeLoad(packages, ComposeUiIds.REQUIRED_HOST_VERSION_CODE))
             assertEquals((0..i).toList(), packages.calls)
         }
-        assertNull(ComposeUiPluginSelection.beforeLoad(Packages(-1), 5309))
+        assertNull(ComposeUiPluginSelection.beforeLoad(Packages(-1), ComposeUiIds.REQUIRED_HOST_VERSION_CODE))
         assertEquals(ComposeUiErrorCodes.PLUGIN_DISABLED, SelectionFailure.SYSTEM_DISABLED.code)
         assertEquals(ComposeUiErrorCodes.PLUGIN_UNAUTHORIZED, SelectionFailure.UNAUTHORIZED.code)
         assertEquals(ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE, SelectionFailure.HOST_TOO_OLD.code)

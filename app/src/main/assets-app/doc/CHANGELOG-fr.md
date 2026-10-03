@@ -6,8 +6,10 @@
 
 # v6.8.0
 
-###### 2026/10/02
+###### 2026/10/03
 
+* `Astuce` Compose UI est un aperçu de développement; l'API de scripts compose n'est pas encore disponible
+* `Fonctionnalité` Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur; l'API de scripts compose reste en développement
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
 * `Fonctionnalité` API de script ai.agent pour lancer et consulter les tâches, recevoir les événements, répondre, confirmer, annuler et exécuter en arrière-plan avec detached; result/context exposent les résultats et le contexte des scripts enregistrés par @agent, avec trois exemples

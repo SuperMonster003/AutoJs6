@@ -16,8 +16,9 @@ and contains no Compose implementation dependency.
 - `src/test/resources/compose-ui-v1.snapshot` is the reviewed compatibility snapshot: public literals,
   enum names, loading method signatures, model constructors/getters, and all catalog records.
   A change to these semantics requires an explicit version decision and a reviewed snapshot update.
-- `CONTRACT_VERSION=1`, `MIN_SUPPORTED=1`. `REQUIRED_HOST_VERSION_CODE=5308` is deliberately still
-  provisional and will be back-filled in P1.3; this metadata correction does not change the V1 wire API.
+- `CONTRACT_VERSION=1`, `MIN_SUPPORTED=1`. `REQUIRED_HOST_VERSION_CODE=5316` is confirmed at P1.3 (AutoJs6 6.8.0). This build includes
+  the V1 loader, session core, shared dependencies and Plugin Center registration. Only this deployment
+  metadata changes in the frozen snapshot; the V1 wire API remains unchanged.
 - `api.spike` (version -1) is outside the frozen V1 surface. P1.2 removes all implementation/test
   consumers; its unused definitions remain in the unchanged staged AAR until artifact maintenance.
   Its former diagnostics are not V1 loading methods.
@@ -233,3 +234,16 @@ preview support before publishing an immutable frame. Ancestry cycles are reject
 intermediate working node count is bounded as well as final tree size. A failed batch retains both
 tree and generation. Explicit disposal releases composition, recomposer, coroutine scope and tree.
 Host adapter disposal additionally releases Activity, mount closure and lifecycle/theme observers.
+
+## P1.3 Plugin Center registration
+
+Compose UI is an optional entry in the install wizard's UI category, alongside ImGui. Both are
+INFO-only plugins: neither is assigned a Binder capability service action. Compose additionally
+uses the application-level renderer factory metadata and the in-process V1 loading API; ImGui's
+renderer registration mechanism is not reused. Generic INFO package visibility already covers
+discovery, signer authorization, enablement and requiresHostVersion presentation.
+
+The confirmed minimum host is 6.8.0 / 5316. The wizard catalog pre-registers the official package,
+but its existing loader skips entries absent from the remote index. Local integration does not
+publish a download or enable the future compose script global; that API remains P3 work. The
+P1.3 changelog therefore describes installed-plugin management and the development preview.

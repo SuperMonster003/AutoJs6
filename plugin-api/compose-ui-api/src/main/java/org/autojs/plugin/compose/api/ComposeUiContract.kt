@@ -9,8 +9,8 @@ object ComposeUiIds {
     const val PLUGIN_ID = "compose-ui"
     const val ENGINE = "compose"
     const val VARIANT = "default"
-    /** Provisional until the first host containing the production loader is established in P1.3. */
-    const val REQUIRED_HOST_VERSION_CODE = 5308L
+    /** First host build containing the V1 loader, session core and Plugin Center registration. */
+    const val REQUIRED_HOST_VERSION_CODE = 5316L
 }
 
 object ComposeUiContract {

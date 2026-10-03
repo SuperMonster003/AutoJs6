@@ -168,8 +168,10 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/10/02
+###### 2026/10/03
 
+* `Hint` Compose UI is a development preview; the compose script API is not yet available
+* `Feature` Plugin Center recognizes and manages installed Compose UI development preview plugins, requiring host 6.8.0 / 5316 or later; the compose script API is still in development
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
 * `Feature` ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples

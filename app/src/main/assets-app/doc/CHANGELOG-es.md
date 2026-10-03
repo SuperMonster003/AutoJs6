@@ -6,8 +6,10 @@
 
 # v6.8.0
 
-###### 2026/10/02
+###### 2026/10/03
 
+* `Sugerencia` Compose UI es una versión preliminar de desarrollo; la API de scripts compose aún no está disponible
+* `Nuevo` El Centro de complementos reconoce y administra los complementos instalados de la versión preliminar de desarrollo de Compose UI, con el host 6.8.0 / 5316 o posterior; la API de scripts compose sigue en desarrollo
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
 * `Nuevo` API ai.agent para iniciar y consultar tareas, eventos, respuestas, confirmaciones, cancelación y tareas detached en segundo plano; result/context exponen resultados y contexto de scripts registrados con @agent, con tres ejemplos
