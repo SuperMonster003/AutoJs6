@@ -1,0 +1,690 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-03",
+  "recordCount": 236,
+  "host": {
+    "commit": "472f52e39b151be10920fe774958e4aed9d8b808",
+    "version": "6.8.0",
+    "build": 5317,
+    "debuggable": true
+  },
+  "plugin": {
+    "version": "1.0.0",
+    "build": 19,
+    "debuggable": false,
+    "minified": true,
+    "artifact": {
+      "file": "autojs6-plugin-compose-ui-v1.0.0-5b2f63ce.apk",
+      "bytes": 2375069,
+      "sha256": "317316ff9ab160d4f235e667a219aac6496f9e431bc6b5a80c2977a250e62b4f",
+      "crc32": "5b2f63ce",
+      "dex": [
+        {
+          "file": "classes.dex",
+          "uncompressedBytes": 6167508,
+          "methodReferenceCount": 44721,
+          "classDefinitionCount": 7143
+        }
+      ],
+      "methodReferencesSummedAcrossDex": 44721,
+      "classDefinitionsSummedAcrossDex": 7143,
+      "methodCountInterpretation": "DEX method_ids references, summed per DEX; not unique defined methods."
+    }
+  },
+  "method": {
+    "latencyUnit": "ms",
+    "primaryStart": "Immediately before compose.mount, or the first state assignment in the actual button callback.",
+    "primaryEnd": "Matching visible accessibility text, then two Choreographer callbacks and a screenshot pixel matching the per-mount swatch palette.",
+    "endpointMeaning": "Instrumented visibility confirmation upper bound, not a hardware presentation timestamp or pure renderer latency.",
+    "cold": "Three fresh host processes; APK, dex and filesystem caches preserved.",
+    "warm": "Two same-process warmups, then ten new-engine mounts or ten updates per surface and operation.",
+    "percentile": "Linear interpolation at (n - 1) * p; n=3 cold p90 is descriptive only.",
+    "overhead": "8 ms polling sleeps, full accessible-tree queries, two display callbacks, screenshots and any window transitions remain included. Concurrent components cannot be subtracted to derive pure renderer cost.",
+    "pss": "Whole instrumented host PSS paired by runId and PID against its own empty-native-UI engine median.",
+    "frameMetricSources": [
+      "https://developer.android.com/reference/android/view/FrameMetrics",
+      "https://developer.android.com/reference/android/view/Window.OnFrameMetricsAvailableListener"
+    ]
+  },
+  "sampling": {
+    "coldProcessesPerDevice": 3,
+    "warmups": 2,
+    "samplesPerWarmGroup": 10,
+    "pollMs": 8,
+    "scrollTracesPerDevice": 10,
+    "swipesPerTrace": 12,
+    "pssStagesPerDevice": 9,
+    "pssReadingsPerStage": 5,
+    "pssSettleMs": 500,
+    "pssIntervalMs": 100
+  },
+  "rawRecordDigests": [
+    {
+      "device": "api24_x86_avd",
+      "sha256": "49a929b928c0271f269858b4c23efb98a0ca42a95a4f863830d03f6931d7682a",
+      "records": 118
+    },
+    {
+      "device": "api35_xiaomi_pad",
+      "sha256": "fb6413d32b2beeffdbaae6cbcb497f7a58bcc1915e3442f554194f80ef0f09de",
+      "records": 118
+    }
+  ],
+  "devices": [
+    {
+      "id": "api24_x86_avd",
+      "model": "Google Android SDK built for x86",
+      "api": 24,
+      "abi": "x86",
+      "process64Bit": false,
+      "records": 118,
+      "latency": [
+        {
+          "operation": "Cold UI mount",
+          "samples": 3,
+          "visibilityConfirmationMs": {
+            "median": 1606.8311,
+            "p90": 1674.90526
+          },
+          "semanticsObservedMs": {
+            "median": 1523.8429,
+            "p90": 1603.76834
+          },
+          "observationMedianMs": {
+            "treeQueries": 574.1921,
+            "twoDisplayCallbacks": 21.6929,
+            "screenshots": 36.4549
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 18.332,
+            "p90": 22.0844
+          },
+          "renderCountRange": [
+            1,
+            1
+          ]
+        },
+        {
+          "operation": "Warm UI mount",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 491.61775,
+            "p90": 498.91264
+          },
+          "semanticsObservedMs": {
+            "median": 98.1771,
+            "p90": 107.11769
+          },
+          "observationMedianMs": {
+            "treeQueries": 197.98025,
+            "twoDisplayCallbacks": 23.2961,
+            "screenshots": 61.3398
+          },
+          "medianScreenshotCount": 2.5,
+          "scriptRenderBuildMs": {
+            "median": 3.63675,
+            "p90": 6.57564
+          },
+          "renderCountRange": [
+            1,
+            1
+          ]
+        },
+        {
+          "operation": "UI single state update",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 75.9608,
+            "p90": 86.25113
+          },
+          "semanticsObservedMs": {
+            "median": 33.6069,
+            "p90": 41.00794
+          },
+          "observationMedianMs": {
+            "treeQueries": 41.33105,
+            "twoDisplayCallbacks": 21.4865,
+            "screenshots": 15.7621
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 2.72635,
+            "p90": 5.77331
+          },
+          "renderCountRange": [
+            1,
+            1
+          ],
+          "stateAssignmentLoopMs": {
+            "median": 0.3865,
+            "p90": 1.84217
+          }
+        },
+        {
+          "operation": "Floaty single state update",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 72.4902,
+            "p90": 82.65985
+          },
+          "semanticsObservedMs": {
+            "median": 22.7696,
+            "p90": 32.77002
+          },
+          "observationMedianMs": {
+            "treeQueries": 27.5605,
+            "twoDisplayCallbacks": 24.8247,
+            "screenshots": 18.43675
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 2.0086,
+            "p90": 5.30551
+          },
+          "renderCountRange": [
+            1,
+            1
+          ],
+          "stateAssignmentLoopMs": {
+            "median": 0.10375,
+            "p90": 0.15879
+          }
+        },
+        {
+          "operation": "UI 100 assignments in one callback",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 72.83805,
+            "p90": 75.88862
+          },
+          "semanticsObservedMs": {
+            "median": 27.2185,
+            "p90": 28.76206
+          },
+          "observationMedianMs": {
+            "treeQueries": 34.674,
+            "twoDisplayCallbacks": 23.8164,
+            "screenshots": 15.9233
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 2.1258,
+            "p90": 4.47741
+          },
+          "renderCountRange": [
+            1,
+            1
+          ],
+          "stateAssignmentLoopMs": {
+            "median": 0.3782,
+            "p90": 2.16735
+          }
+        },
+        {
+          "operation": "Floaty 100 assignments in one callback",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 72.2951,
+            "p90": 81.41209
+          },
+          "semanticsObservedMs": {
+            "median": 22.32245,
+            "p90": 28.95253
+          },
+          "observationMedianMs": {
+            "treeQueries": 26.97855,
+            "twoDisplayCallbacks": 25.04205,
+            "screenshots": 19.5034
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 1.60025,
+            "p90": 1.82169
+          },
+          "renderCountRange": [
+            1,
+            1
+          ],
+          "stateAssignmentLoopMs": {
+            "median": 0.1819,
+            "p90": 0.21016
+          }
+        },
+        {
+          "operation": "Warm 1000-item LazyColumn mount",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 1061.52005,
+            "p90": 1392.49273
+          },
+          "semanticsObservedMs": {
+            "median": 880.65265,
+            "p90": 1321.15118
+          },
+          "observationMedianMs": {
+            "treeQueries": 536.65635,
+            "twoDisplayCallbacks": 22.3871,
+            "screenshots": 91.2051
+          },
+          "medianScreenshotCount": 4.0,
+          "scriptRenderBuildMs": {
+            "median": 641.8341,
+            "p90": 801.10219
+          },
+          "renderCountRange": [
+            1,
+            1
+          ]
+        }
+      ],
+      "scroll": {
+        "traceCount": 10,
+        "swipesPerTrace": 12,
+        "nominalSwipeMs": 360,
+        "pauseBetweenSwipesMs": 120,
+        "flingTailMs": 750,
+        "refreshRateHz": 60.000003814697266,
+        "framesMeasured": 3586,
+        "renderAndIssueMs": {
+          "median": 14.288232,
+          "p90": 35.975949,
+          "max": 96.031004
+        },
+        "renderOverRefreshPeriodCount": 1761,
+        "renderOverRefreshPeriodPercent": 49.107640825432235,
+        "estimatedExcessRefreshPeriods": 2396,
+        "framesWithSystemDeadline": 0,
+        "systemDeadlineMissCount": 0,
+        "systemDeadlineMissPercent": null,
+        "metricReportsDropped": 0,
+        "collectionOverflow": 0,
+        "perTraceRenderOverPeriodPercentRange": [
+          0.0,
+          91.57303370786516
+        ],
+        "presentationDropCount": null
+      },
+      "pss": {
+        "readingsPerStage": 5,
+        "independentProcesses": 1,
+        "forcedGc": false,
+        "baseline": "empty_native_ui_engine",
+        "baselineMedianMiB": 117.387695,
+        "stages": {
+          "after_compose_ui_close": {
+            "medianMiB": 131.652344,
+            "pairedDeltaMiB": 14.264648
+          },
+          "after_empty_ui_close": {
+            "medianMiB": 117.322266,
+            "pairedDeltaMiB": -0.06543
+          },
+          "after_floaty_close": {
+            "medianMiB": 133.938477,
+            "pairedDeltaMiB": 16.550781
+          },
+          "after_list_close": {
+            "medianMiB": 155.071289,
+            "pairedDeltaMiB": 37.683594
+          },
+          "empty_native_ui_engine": {
+            "medianMiB": 117.387695,
+            "pairedDeltaMiB": 0.0
+          },
+          "first_compose_ui": {
+            "medianMiB": 131.257812,
+            "pairedDeltaMiB": 13.870117
+          },
+          "instrumented_host_before_script": {
+            "medianMiB": 93.649414,
+            "pairedDeltaMiB": -23.738281
+          },
+          "warm_compose_1000_item_list": {
+            "medianMiB": 160.641602,
+            "pairedDeltaMiB": 43.253906
+          },
+          "warm_compose_floaty": {
+            "medianMiB": 133.817383,
+            "pairedDeltaMiB": 16.429688
+          }
+        }
+      }
+    },
+    {
+      "id": "api35_xiaomi_pad",
+      "model": "Xiaomi 23046RP50C",
+      "api": 35,
+      "abi": "arm64-v8a",
+      "process64Bit": true,
+      "records": 118,
+      "latency": [
+        {
+          "operation": "Cold UI mount",
+          "samples": 3,
+          "visibilityConfirmationMs": {
+            "median": 485.891614,
+            "p90": 489.829323
+          },
+          "semanticsObservedMs": {
+            "median": 410.98875,
+            "p90": 416.184376
+          },
+          "observationMedianMs": {
+            "treeQueries": 297.552452,
+            "twoDisplayCallbacks": 13.862135,
+            "screenshots": 44.119166
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 14.747136,
+            "p90": 14.757219
+          },
+          "renderCountRange": [
+            1,
+            1
+          ]
+        },
+        {
+          "operation": "Warm UI mount",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 235.265156,
+            "p90": 286.961672
+          },
+          "semanticsObservedMs": {
+            "median": 114.497526,
+            "p90": 128.748094
+          },
+          "observationMedianMs": {
+            "treeQueries": 120.477735,
+            "twoDisplayCallbacks": 10.285938,
+            "screenshots": 71.235625
+          },
+          "medianScreenshotCount": 2.0,
+          "scriptRenderBuildMs": {
+            "median": 3.342109,
+            "p90": 4.003068
+          },
+          "renderCountRange": [
+            1,
+            1
+          ]
+        },
+        {
+          "operation": "UI single state update",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 112.185339,
+            "p90": 124.446468
+          },
+          "semanticsObservedMs": {
+            "median": 49.637501,
+            "p90": 59.010786
+          },
+          "observationMedianMs": {
+            "treeQueries": 63.588281,
+            "twoDisplayCallbacks": 12.305599,
+            "screenshots": 37.514532
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 9.935156,
+            "p90": 11.316603
+          },
+          "renderCountRange": [
+            1,
+            1
+          ],
+          "stateAssignmentLoopMs": {
+            "median": 0.296224,
+            "p90": 0.32176
+          }
+        },
+        {
+          "operation": "Floaty single state update",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 77.02664,
+            "p90": 137.136677
+          },
+          "semanticsObservedMs": {
+            "median": 24.699089,
+            "p90": 43.117714
+          },
+          "observationMedianMs": {
+            "treeQueries": 26.801381,
+            "twoDisplayCallbacks": 10.954557,
+            "screenshots": 31.410442
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 3.599219,
+            "p90": 6.585875
+          },
+          "renderCountRange": [
+            1,
+            1
+          ],
+          "stateAssignmentLoopMs": {
+            "median": 0.123203,
+            "p90": 0.194604
+          }
+        },
+        {
+          "operation": "UI 100 assignments in one callback",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 94.690494,
+            "p90": 105.110854
+          },
+          "semanticsObservedMs": {
+            "median": 35.50349,
+            "p90": 46.599672
+          },
+          "observationMedianMs": {
+            "treeQueries": 46.716901,
+            "twoDisplayCallbacks": 10.558124,
+            "screenshots": 37.656042
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 5.839947,
+            "p90": 8.825474
+          },
+          "renderCountRange": [
+            1,
+            1
+          ],
+          "stateAssignmentLoopMs": {
+            "median": 1.614453,
+            "p90": 3.169046
+          }
+        },
+        {
+          "operation": "Floaty 100 assignments in one callback",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 151.602135,
+            "p90": 157.238693
+          },
+          "semanticsObservedMs": {
+            "median": 41.395443,
+            "p90": 45.219864
+          },
+          "observationMedianMs": {
+            "treeQueries": 66.156927,
+            "twoDisplayCallbacks": 11.904141,
+            "screenshots": 69.977058
+          },
+          "medianScreenshotCount": 1.0,
+          "scriptRenderBuildMs": {
+            "median": 5.663125,
+            "p90": 6.005344
+          },
+          "renderCountRange": [
+            1,
+            1
+          ],
+          "stateAssignmentLoopMs": {
+            "median": 1.488906,
+            "p90": 1.790636
+          }
+        },
+        {
+          "operation": "Warm 1000-item LazyColumn mount",
+          "samples": 10,
+          "visibilityConfirmationMs": {
+            "median": 876.860026,
+            "p90": 936.808775
+          },
+          "semanticsObservedMs": {
+            "median": 756.5025,
+            "p90": 805.725343
+          },
+          "observationMedianMs": {
+            "treeQueries": 190.936226,
+            "twoDisplayCallbacks": 10.030755,
+            "screenshots": 72.638594
+          },
+          "medianScreenshotCount": 2.0,
+          "scriptRenderBuildMs": {
+            "median": 565.803463,
+            "p90": 599.043401
+          },
+          "renderCountRange": [
+            1,
+            1
+          ]
+        }
+      ],
+      "scroll": {
+        "traceCount": 10,
+        "swipesPerTrace": 12,
+        "nominalSwipeMs": 360,
+        "pauseBetweenSwipesMs": 120,
+        "flingTailMs": 750,
+        "refreshRateHz": 144.00001525878906,
+        "framesMeasured": 7198,
+        "renderAndIssueMs": {
+          "median": 4.489126,
+          "p90": 6.157174,
+          "max": 14.853024
+        },
+        "renderOverRefreshPeriodCount": 88,
+        "renderOverRefreshPeriodPercent": 1.2225618227285358,
+        "estimatedExcessRefreshPeriods": 90,
+        "framesWithSystemDeadline": 7198,
+        "systemDeadlineMissCount": 3,
+        "systemDeadlineMissPercent": 0.04167824395665463,
+        "metricReportsDropped": 0,
+        "collectionOverflow": 0,
+        "perTraceRenderOverPeriodPercentRange": [
+          0.41379310344827586,
+          3.0428769017980635
+        ],
+        "presentationDropCount": null
+      },
+      "pss": {
+        "readingsPerStage": 5,
+        "independentProcesses": 1,
+        "forcedGc": false,
+        "baseline": "empty_native_ui_engine",
+        "baselineMedianMiB": 299.333008,
+        "stages": {
+          "after_compose_ui_close": {
+            "medianMiB": 302.980469,
+            "pairedDeltaMiB": 3.647461
+          },
+          "after_empty_ui_close": {
+            "medianMiB": 280.844727,
+            "pairedDeltaMiB": -18.488281
+          },
+          "after_floaty_close": {
+            "medianMiB": 311.654297,
+            "pairedDeltaMiB": 12.321289
+          },
+          "after_list_close": {
+            "medianMiB": 270.057617,
+            "pairedDeltaMiB": -29.275391
+          },
+          "empty_native_ui_engine": {
+            "medianMiB": 299.333008,
+            "pairedDeltaMiB": 0.0
+          },
+          "first_compose_ui": {
+            "medianMiB": 384.619141,
+            "pairedDeltaMiB": 85.286133
+          },
+          "instrumented_host_before_script": {
+            "medianMiB": 223.128906,
+            "pairedDeltaMiB": -76.204102
+          },
+          "warm_compose_1000_item_list": {
+            "medianMiB": 351.326172,
+            "pairedDeltaMiB": 51.993164
+          },
+          "warm_compose_floaty": {
+            "medianMiB": 314.6875,
+            "pairedDeltaMiB": 15.354492
+          }
+        }
+      }
+    }
+  ],
+  "thresholdProposal": {
+    "ownerApproved": false,
+    "enforced": false,
+    "latencyRule": "Compare future p90 under the same device/build/method with current p90 * 1.5, rounded upward to 5 ms.",
+    "latencyBudgetsMs": [
+      {
+        "operation": "Warm UI mount",
+        "api24_x86_avd": 750,
+        "api35_xiaomi_pad": 435
+      },
+      {
+        "operation": "UI single state update",
+        "api24_x86_avd": 130,
+        "api35_xiaomi_pad": 190
+      },
+      {
+        "operation": "Floaty single state update",
+        "api24_x86_avd": 125,
+        "api35_xiaomi_pad": 210
+      },
+      {
+        "operation": "UI 100 assignments in one callback",
+        "api24_x86_avd": 115,
+        "api35_xiaomi_pad": 160
+      },
+      {
+        "operation": "Floaty 100 assignments in one callback",
+        "api24_x86_avd": 125,
+        "api35_xiaomi_pad": 240
+      },
+      {
+        "operation": "Warm 1000-item LazyColumn mount",
+        "api24_x86_avd": 2090,
+        "api35_xiaomi_pad": 1410
+      }
+    ],
+    "artifactReviewBudget": {
+      "apkBytes": 2612576,
+      "dexMethodReferences": 49194,
+      "rule": "ceil(measured baseline * 1.10); explicit dependency changes need baseline review"
+    },
+    "observationOnly": [
+      "Cold timing with n=3",
+      "Single-process PSS sequence",
+      "AVD frame-period variation",
+      "Presentation drops not measured"
+    ]
+  },
+  "analysis": {
+    "existingPropertySnapshotComparison": "TreeReconciler.diff compares props, modifiers and callbacks; it emits SetProps only on change. ComposeSession.flush accepts empty patch lists without renderer.apply.",
+    "initialListConstruction": "Creating 1000 script nodes is visibly costly; an initial mount must insert its full tree and cannot benefit from unchanged-property suppression.",
+    "scrollInterpretation": "Scroll callbacks update only a test atomic, not Compose state. The trace does not repeatedly rebuild the JS tree.",
+    "productionOptimizationAddedForPerformance": false,
+    "fineGrainedReactiveUpdateConclusion": "This campaign does not establish that repeated unchanged large-tree rebuilds dominate updates, so it does not justify an F.6 API change."
+  }
+}
