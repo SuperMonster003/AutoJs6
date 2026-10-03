@@ -2,6 +2,7 @@ package org.autojs.autojs.core.accessibility.inspector
 
 import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.filter.Filter
+import java.util.Collections
 
 /**
  * The result of evaluating the inspector filters over a node tree (roadmap P0.3): the [matches] in
@@ -51,6 +52,44 @@ class TreeMatch<N : UiNode<N>> private constructor(
     }
 
     companion object {
+
+        /**
+         * Builds a temporary match from already resolved nodes. Results follow the captured tree's
+         * pre-order, independent of the input order; duplicates and nodes outside [root] are ignored.
+         * An empty input is an empty match, not an unfiltered tree. The kept ancestors are taken
+         * from this traversal, so a subtree root never keeps nodes outside its boundary.
+         *
+         * zh-CN: 从已解析的节点构造临时匹配. 按捕获树的先序排列, 忽略输入顺序, 重复项及 [root] 外的节点.
+         * 空输入表示零匹配, 而非无筛选. 保留的祖先以本次遍历为准, 不越过子树根节点的边界.
+         */
+        fun <N : UiNode<N>> ofMatched(root: N, nodes: Collection<N>): TreeMatch<N> {
+            val requested = nodes.toHashSet()
+            if (requested.isEmpty()) return TreeMatch(emptyList(), emptySet(), emptySet(), isUnfiltered = false)
+            val matches = ArrayList<N>()
+            val parents = HashMap<N, N?>()
+            val stack = ArrayDeque<Pair<N, N?>>()
+            stack.addLast(root to null)
+            while (stack.isNotEmpty()) {
+                val (node, parent) = stack.removeLast()
+                if (parents.containsKey(node)) continue
+                parents[node] = parent
+                if (node in requested) matches += node
+                for (index in node.childCount() - 1 downTo 0) {
+                    node.child(index)?.let { stack.addLast(it to node) }
+                }
+            }
+            val kept = HashSet<N>()
+            for (node in matches) {
+                var ancestor: N? = node
+                while (ancestor != null && kept.add(ancestor)) ancestor = parents[ancestor]
+            }
+            return TreeMatch(
+                Collections.unmodifiableList(matches),
+                Collections.unmodifiableSet(matches.toHashSet()),
+                Collections.unmodifiableSet(kept),
+                isUnfiltered = false,
+            )
+        }
 
         /**
          * Evaluates [filters] (all must pass) over the subtree rooted at [root] in pre-order; an

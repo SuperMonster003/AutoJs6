@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.floating.layoutinspector
 import android.content.Context
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -13,6 +14,7 @@ import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.LayoutFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchBar
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchSession
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorMatchView
 import org.autojs.autojs.util.EventUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -93,6 +95,9 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
             .also { mSearchBar = it }
 
         return object : FrameLayout(context) {
+            override fun dispatchTouchEvent(event: MotionEvent): Boolean =
+                onCodeGenPreviewTouch(event) || super.dispatchTouchEvent(event)
+
             @Suppress("DEPRECATION")
             override fun dispatchKeyEvent(e: KeyEvent) = when {
                 EventUtils.isKeyBackAndActionUp(e) -> true.also { onBack() }
@@ -128,6 +133,14 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
         super.close()
     }
 
+    override fun applyCodeGenPreview(match: InspectorMatchView?) {
+        if (::mLayoutBoundsView.isInitialized) {
+            mLayoutBoundsView.cancelRegionSelection()
+            mLayoutBoundsView.match = match ?: requireSearchSession()
+            mLayoutBoundsView.invalidate()
+        }
+    }
+
     /**
      * The parent is outlined and the menu reopened at its bottom edge, so the selection can be
      * walked up level by level without leaving the menu.
@@ -139,6 +152,7 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
     }
 
     private fun onBack() {
+        if (finishCodeGenPreview()) return
         if (mLayoutBoundsView.isSelectingRegion) {
             mLayoutBoundsView.cancelRegionSelection()
             return

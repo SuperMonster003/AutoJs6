@@ -4,11 +4,14 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.ContextThemeWrapper
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.LayoutSnapshotFiles
 import org.autojs.autojs.core.accessibility.NodeInfo
+import org.autojs.autojs.core.accessibility.inspector.InspectorNode
+import org.autojs.autojs.core.accessibility.inspector.TreeMatch
 import org.autojs.autojs.core.accessibility.WindowInfo
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoDataItem
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoDataSummary
@@ -18,12 +21,14 @@ import org.autojs.autojs.core.accessibility.WindowInfo.Companion.parseWindowType
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.codegen.CodeGenerateDialog
+import org.autojs.autojs.ui.floating.codegen.CodeGenResultDialog
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsView
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoDialog
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchBar
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchSession
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorMatchView
 import org.autojs.autojs.ui.widget.BubblePopupMenu
 import org.autojs.autojs.util.ContextUtils.withHostConfiguration
 import org.autojs.autojs.util.DialogUtils.showAdaptive
@@ -61,12 +66,18 @@ abstract class LayoutFloatyWindow(
     private val mNodeInfoDialog by lazy { NodeInfoDialog(mServiceContext) }
 
     private var mCodeGenerateDialog: CodeGenerateDialog? = null
+    private var mCodeGenResultDialog: CodeGenResultDialog? = null
+    private var mCodeGenPreviewReturn: (() -> Unit)? = null
+    private var mCodeGenClosed = false
+
+    protected val isCodeGenPreview: Boolean get() = mCodeGenPreviewReturn != null
 
     fun onCreate(floatyService: FloatyService) {
         // The service context follows the system's language and night mode; the host app's settings are wanted here.
         // zh-CN: service context 跟随系统的语言与夜间模式, 此处需要的是宿主应用的设置.
         mServiceContext = if (isServiceRelied) ContextThemeWrapper(floatyService.withHostConfiguration(), R.style.AppTheme) else context
         if (searchSession == null) searchSession = InspectorSearchSession(capture.root)
+        mCodeGenClosed = false
     }
 
     protected fun requireSearchSession(): InspectorSearchSession = searchSession ?: InspectorSearchSession(capture.root).also { searchSession = it }
@@ -194,13 +205,57 @@ abstract class LayoutFloatyWindow(
     protected fun generateCode() {
         val target = mLayoutSelectedNode ?: return
         mCodeGenerateDialog?.dispose()
-        mCodeGenerateDialog = CodeGenerateDialog(mServiceContext, capture.root, target)
-            .also { it.build().showAdaptive() }
+        mCodeGenResultDialog?.dispose()
+        finishCodeGenPreview(restoreDialog = false)
+        mCodeGenerateDialog = CodeGenerateDialog(mServiceContext, capture.root, target) { result ->
+            if (!mCodeGenClosed) {
+                mCodeGenResultDialog?.dispose()
+                mCodeGenResultDialog = CodeGenResultDialog(mServiceContext, result, ::previewGeneratedTargets).also {
+                    it.build().showAdaptive()
+                }
+            }
+        }.also { it.build().showAdaptive() }
+    }
+
+    protected fun previewGeneratedTargets(nodes: List<NodeInfo>, onReturn: () -> Unit) {
+        if (mCodeGenClosed) return
+        finishCodeGenPreview(restoreDialog = false)
+        val match = TreeMatch.ofMatched(InspectorNode(capture.root), nodes.map(::InspectorNode))
+        mCodeGenPreviewReturn = onReturn
+        applyCodeGenPreview(object : InspectorMatchView {
+            override val isUnfiltered = false
+            override fun isKept(node: NodeInfo) = match.isKept(InspectorNode(node))
+            override fun isMatched(node: NodeInfo) = match.isMatched(InspectorNode(node))
+            override fun highlightRange(text: CharSequence): IntRange? = null
+        })
+    }
+
+    /** Null restores the inspector's existing search session. zh-CN: null 恢复分析器原有搜索会话. */
+    protected open fun applyCodeGenPreview(match: InspectorMatchView?) = Unit
+
+    /** Consume the return tap before it selects a node or opens a menu.
+     * zh-CN: 在返回点按选中节点或打开菜单之前消费它. */
+    protected fun onCodeGenPreviewTouch(event: MotionEvent): Boolean {
+        if (!isCodeGenPreview) return false
+        if (event.actionMasked == MotionEvent.ACTION_UP) finishCodeGenPreview()
+        return true
+    }
+
+    protected fun finishCodeGenPreview(restoreDialog: Boolean = true): Boolean {
+        val onReturn = mCodeGenPreviewReturn ?: return false
+        mCodeGenPreviewReturn = null
+        applyCodeGenPreview(null)
+        if (restoreDialog && !mCodeGenClosed) onReturn()
+        return true
     }
 
     override fun close() {
+        mCodeGenClosed = true
         mCodeGenerateDialog?.dispose()
         mCodeGenerateDialog = null
+        mCodeGenResultDialog?.dispose()
+        mCodeGenResultDialog = null
+        finishCodeGenPreview(restoreDialog = false)
         super.close()
     }
 

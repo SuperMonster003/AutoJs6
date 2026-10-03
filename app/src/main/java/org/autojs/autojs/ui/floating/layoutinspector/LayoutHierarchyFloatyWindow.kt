@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.floating.layoutinspector
 import android.content.Context
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -16,6 +17,7 @@ import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.LayoutFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchBar
 import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorSearchSession
+import org.autojs.autojs.ui.floating.layoutinspector.search.InspectorMatchView
 import org.autojs.autojs.util.EventUtils
 import org.autojs.autojs6.R
 
@@ -37,7 +39,7 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
     private var mAppliedMatch: TreeMatch<InspectorNode>? = null
 
     private val mSearchListener = InspectorSearchSession.Listener { session ->
-        if (session.match !== mAppliedMatch) {
+        if (!isCodeGenPreview && session.match !== mAppliedMatch) {
             mAppliedMatch = session.match
             mLayoutHierarchyView.setMatch(session)
         }
@@ -102,6 +104,9 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
             .also { mSearchBar = it }
 
         return object : FrameLayout(context) {
+            override fun dispatchTouchEvent(event: MotionEvent): Boolean =
+                onCodeGenPreviewTouch(event) || super.dispatchTouchEvent(event)
+
             @Suppress("DEPRECATION")
             override fun dispatchKeyEvent(e: KeyEvent) = when {
                 EventUtils.isKeyBackAndActionUp(e) -> true.also { onBack() }
@@ -143,11 +148,20 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
         super.close()
     }
 
+    override fun applyCodeGenPreview(match: InspectorMatchView?) {
+        if (::mLayoutHierarchyView.isInitialized) {
+            val session = requireSearchSession()
+            mLayoutHierarchyView.setMatch(match ?: session)
+            if (match == null) mAppliedMatch = session.match
+        }
+    }
+
     override fun onParentNodeSelected(node: NodeInfo) {
         mLayoutHierarchyView.setSelectedNode(node)
     }
 
     private fun onBack() {
+        if (finishCodeGenPreview()) return
         if (!mSearchBar.onBackPressed()) close()
     }
 
