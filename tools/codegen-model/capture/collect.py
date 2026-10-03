@@ -233,6 +233,8 @@ def collect(args: argparse.Namespace) -> dict:
         raise ValueError("Invalid seed range")
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=True)
+    if not (output / "groups").resolve().is_relative_to(output):
+        raise ValueError("Dataset groups directory must not link outside the output directory")
     adb = Adb(args.adb, args.serial)
     worker = CaptureWorker(adb)
     fixture_dump = adb.shell("dumpsys", "package", FIXTURE)
@@ -282,6 +284,8 @@ def collect(args: argparse.Namespace) -> dict:
                 if scenario in completed:
                     continue
                 destination = output / "groups" / scenario
+                if not destination.resolve().is_relative_to(output):
+                    raise ValueError("Scenario destination must stay inside the output directory")
                 if destination.exists():
                     # A process can stop after the directory rename but before the manifest
                     # checkpoint. Retain that unpublished scenario outside the exporter root.

@@ -1,6 +1,7 @@
 import argparse
 from contextlib import redirect_stdout
 import io
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -105,6 +106,38 @@ class RecoveryTest(unittest.TestCase):
                                   output=str(output), adb="adb", serial="test", generator_commit="a" * 40)
         with patch("capture.collect.Adb", FakeAdb), patch("capture.collect.CaptureWorker", worker), redirect_stdout(io.StringIO()):
             return collect(args)
+
+    def test_external_groups_link_is_rejected_without_moving_existing_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output, external = Path(directory) / "dataset", Path(directory) / "external"
+            output.mkdir()
+            external.mkdir()
+            original = external / "untouched.txt"
+            original.write_text("keep", encoding="utf-8")
+            link = output / "groups"
+            junction = False
+            try:
+                link.symlink_to(external, target_is_directory=True)
+            except OSError:
+                if os.name != "nt":
+                    self.skipTest("This system does not permit directory symlinks")
+                # Windows directory junctions do not require the symlink privilege. Paths are
+                # values in task-specific environment variables, never interpolated shell code.
+                environment = dict(os.environ, CODEGEN_TEST_LINK=str(link), CODEGEN_TEST_TARGET=str(external))
+                subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                                "New-Item -ItemType Junction -Path $env:CODEGEN_TEST_LINK -Target $env:CODEGEN_TEST_TARGET | Out-Null"],
+                               env=environment, check=True, capture_output=True)
+                junction = True
+            try:
+                with self.assertRaisesRegex(ValueError, "must not link outside"):
+                    self.run_collect(output)
+                self.assertEqual("keep", original.read_text(encoding="utf-8"))
+                self.assertEqual([original], list(external.iterdir()))
+            finally:
+                if junction:
+                    link.rmdir()  # Remove only the junction itself, never recurse into its target.
+                else:
+                    link.unlink()
 
     def test_timeout_counts_as_discard_and_uncheckpointed_old_tasks_are_quarantined(self):
         with tempfile.TemporaryDirectory() as directory:

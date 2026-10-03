@@ -6,6 +6,10 @@ They produce observed plan-survival labels using the host's actual candidate gen
 There is no training dependency in P2; Python uses only the standard library and `unittest`.
 Task JSON is specified in [FORMAT.md](FORMAT.md).
 
+The first complete controlled run is documented in the
+[P2 acceptance report](reports/p2-dataset-2026.10-1.md): 2,688 task groups, 1,152 distinct snapshots,
+133,704 candidate labels, zero discarded states, and byte-identical repeated JVM exports.
+
 ## Build and prepare
 
 From the repository root, build the controlled View application:
