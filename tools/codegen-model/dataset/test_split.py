@@ -186,11 +186,14 @@ class SplitTest(unittest.TestCase):
         self.task(data)
         self.artifacts(data)
         features = self.output / "features.csv"
+        write_json(self.output / "features.json", {"format": 1, "featureSchemaVersion": 1,
+                                                   "names": ["feature"], "namesHash": hashlib.sha256(b"feature").hexdigest()[:16]})
         features.write_text("split,groupId,planKey,label,feature\ntrain,g,plan-0,1,0.5\n", encoding="utf-8")
         kwargs = {"labels_path": self.output / "labels.jsonl", "rules_path": self.output / "rules.jsonl", "features_path": features}
         manifest = self.build(**kwargs)
         self.assertEqual("complete", manifest["status"])
         self.assertEqual(sha256(features), manifest["artifacts"]["features"]["sha256"])
+        self.assertEqual(sha256(self.output / "features.json"), manifest["artifacts"]["featureSchema"]["sha256"])
         features.write_text("split,groupId,planKey,label,feature\ntest,g,plan-0,1,0.5\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "Feature split"):
             self.build(**kwargs)

@@ -2,10 +2,13 @@ package org.autojs.autojs.core.accessibility.codegen.dataset
 
 import com.google.gson.JsonParser
 import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest
+import org.autojs.autojs.core.accessibility.codegen.features.CandidateFeatures
+import org.autojs.autojs.core.accessibility.codegen.features.FeatureSchema
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
 import org.autojs.autojs.core.accessibility.codegen.rank.RuleRanker
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -70,6 +73,12 @@ class CodeGenDatasetExporterTest {
         assertEquals(original.labels.map { it.candidate.plan.planKey }, changed.labels.map { it.candidate.plan.planKey })
         assertEquals(original.labels.single { it.ruleSelected }.candidate.plan.planKey, changed.labels.single { it.ruleSelected }.candidate.plan.planKey)
         assertTrue(original.labels.zip(changed.labels).any { (before, after) -> before.survival != after.survival })
+        val request = group.request.forState(group.states[group.captureState])
+        val beforeFeatures = CandidateFeatures.prepare(request, original.search.candidates, original.captureTree)
+        val afterFeatures = CandidateFeatures.prepare(request, changed.search.candidates, changed.captureTree)
+        original.labels.zip(changed.labels).forEach { (before, after) ->
+            assertArrayEquals(beforeFeatures.extract(before.candidate), afterFeatures.extract(after.candidate), 0f)
+        }
     }
 
     @Test
@@ -82,7 +91,7 @@ class CodeGenDatasetExporterTest {
         assertTrue(summary.candidates > 0)
         assertEquals(0, summary.groupsWithoutCandidates)
         assertEquals(summary, DatasetExporter.export(input, second, "abc1234567"))
-        for (name in listOf("labels.jsonl", "rules.jsonl", "export-manifest.json")) {
+        for (name in listOf("labels.jsonl", "rules.jsonl", "features.csv", "features.json", "export-manifest.json")) {
             val text = File(first, name).readText()
             assertEquals(text, File(second, name).readText())
             assertFalse(text.contains(input.absolutePath))
@@ -92,6 +101,11 @@ class CodeGenDatasetExporterTest {
         val pairs = labels.map { it["groupId"].asString to it["planKey"].asString }
         assertEquals(pairs.sortedWith(compareBy({ it.first }, { it.second })), pairs)
         labels.groupBy { it["groupId"].asString }.values.forEach { group -> assertEquals(1, group.count { it["ruleSelected"].asBoolean }) }
+        assertEquals((listOf("split", "groupId", "planKey", "label") + FeatureSchema.names).joinToString(","), File(first, "features.csv").useLines { it.first() })
+        val schema = JsonParser.parseString(File(first, "features.json").readText()).asJsonObject
+        assertEquals(FeatureSchema.featureSchemaVersion, schema["featureSchemaVersion"].asInt)
+        assertEquals(FeatureSchema.namesHash, schema["namesHash"].asString)
+        assertEquals(FeatureSchema.names, schema.getAsJsonArray("names").map { it.asString })
     }
 
     @Test
@@ -118,7 +132,7 @@ class CodeGenDatasetExporterTest {
     fun failedLaterGroupPreservesAllPreviousExportFilesAndRemovesStaging() {
         val input = input()
         DatasetExporter.export(input)
-        val names = listOf("labels.jsonl", "rules.jsonl", "export-manifest.json")
+        val names = listOf("labels.jsonl", "rules.jsonl", "features.csv", "features.json", "export-manifest.json")
         val before = names.associateWith { File(input, it).readText() }
         val file = File(input, "shuffle/shuffle.cgtask.json")
         val json = JsonParser.parseString(file.readText()).asJsonObject
@@ -139,9 +153,48 @@ class CodeGenDatasetExporterTest {
         assertThrows(IllegalArgumentException::class.java) { DatasetExporter.label(group.copy(states = group.states.take(1))) }
     }
 
+    @Test
+    fun missingSplitUnknownGroupsAndFamilyLeakageDoNotOverwriteExports() {
+        val input = input()
+        DatasetExporter.export(input)
+        val before = File(input, "features.csv").readText()
+        val split = File(input, "split-map.json")
+        val original = split.readText()
+        val json = JsonParser.parseString(original).asJsonObject
+        json.getAsJsonObject("assignment").remove("manual-shuffle")
+        split.writeText(json.toString())
+        assertThrows(IllegalArgumentException::class.java) { DatasetExporter.export(input) }
+        assertEquals(before, File(input, "features.csv").readText())
+        split.writeText(original)
+        for (name in listOf("shuffle", "collection")) {
+            val task = File(input, "$name/$name.cgtask.json")
+            val data = JsonParser.parseString(task.readText()).asJsonObject
+            data.addProperty("screenFamily", "same-family")
+            task.writeText(data.toString())
+        }
+        assertThrows(IllegalArgumentException::class.java) { DatasetExporter.export(input) }
+        assertEquals(before, File(input, "features.csv").readText())
+    }
+
+    @Test
+    fun csvMetadataEscapesQuotesCommasAndLineBreaks() {
+        assertEquals("plain,\"a,b\",\"say \"\"yes\"\"\",\"line\nnext\",\"line\rnext\"\n",
+            FeatureExport.csvRow(listOf("plain", "a,b", "say \"yes\"", "line\nnext", "line\rnext")))
+    }
+
+    @Test
+    fun privateOutputsStayUnderTheConfiguredRootOutsideGit() {
+        val root = temporary.newFolder()
+        FeatureExport.requirePrivate(File(root, "output/features.csv"), root)
+        assertThrows(IllegalArgumentException::class.java) { FeatureExport.requirePrivate(temporary.newFile(), root) }
+        File(root, ".git").writeText("gitdir: elsewhere")
+        assertThrows(IllegalArgumentException::class.java) { FeatureExport.requirePrivate(File(root, "output/features.csv"), root) }
+    }
+
     private fun fixture(name: String) = File(requireNotNull(javaClass.getResource("/codegen/dataset/$name/$name.cgtask.json")).toURI())
 
     private fun input(): File = temporary.newFolder().also { folder ->
         for (name in listOf("shuffle", "collection")) requireNotNull(fixture(name).parentFile).copyRecursively(File(folder, name))
+        File(folder, "split-map.json").writeText("""{"format":1,"datasetId":"handwritten","assignment":{"manual-shuffle":"train","manual-collection":"test"}}""")
     }
 }

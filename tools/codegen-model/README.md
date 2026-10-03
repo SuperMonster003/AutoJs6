@@ -1,6 +1,6 @@
-# Layout code generation dataset tools
+# Layout code generation data and training tools
 
-These offline development tools implement P2 of
+These offline development tools implement P2 and P3 of
 [`layout-code-generation-model-roadmap.md`](../../docs/dev/layout-code-generation-model-roadmap.md).
 They produce observed plan-survival labels using the host's actual candidate generator and verifier.
 There is no training dependency in P2; Python uses only the standard library and `unittest`.
@@ -87,12 +87,14 @@ It compares node counts and the entire preorder class-name sequence against the 
 and writes `comparison.json`. The inspector capture is read from the UI's actual capture object;
 the helper does not replace it with another scripted capture.
 
-## Export survival labels
+## Export survival labels and numeric features
 
 From the repository root, run the explicitly enabled JVM exporter. Candidate search, all
-cross-state checks, and the rule baseline use the same Kotlin implementations as the host:
+cross-state checks, features, and the rule baseline use the same Kotlin implementations as the host.
+Create the frozen split map before this export (the first manifest may have pending labels):
 
 ```powershell
+python tools/codegen-model/dataset/split.py --input tools/codegen-model/out/cg-ds-2026.10-1 --output tools/codegen-model/out/cg-ds-2026.10-1 --dataset-id cg-ds-2026.10-1 --provenance tools/codegen-model/out/cg-ds-2026.10-1/collection.json
 $env:CODEGEN_DATASET_DIR = (Resolve-Path 'tools/codegen-model/out/cg-ds-2026.10-1').Path
 $env:CODEGEN_GENERATOR_COMMIT = (git rev-parse HEAD).Trim()
 .\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.dataset.CodeGenDatasetExportTask'
@@ -103,14 +105,21 @@ Remove-Item Env:CODEGEN_DATASET_DIR, Env:CODEGEN_GENERATOR_COMMIT
 up-to-date result. Without `CODEGEN_DATASET_DIR`, normal unit-test runs skip this offline job.
 Optional `CODEGEN_DATASET_OUTPUT_DIR` selects another output directory. For real input, keep
 the input and all exported artifacts inside `CODEGEN_PRIVATE_DIR`, outside Git worktrees.
+`CODEGEN_SPLIT_MAP` can select another frozen split-map file; its assignment must cover exactly
+the exported groups, preserve complete fixture families, and put every real group in `real-test`.
 
-The exporter writes deterministic `labels.jsonl`, `rules.jsonl`, and `export-manifest.json`.
+The exporter writes deterministic `labels.jsonl`, `rules.jsonl`, `features.csv`, `features.json`,
+and `export-manifest.json`. The CSV columns are `split,groupId,planKey,label` followed by the 64
+ordered names in [FEATURES.md](FEATURES.md). The schema version is 1 and its name hash is
+`9c6a5d8279ffca0e`. Metadata fields are CSV-quoted; every feature is a finite Kotlin `Float`.
+Python reads these vectors directly and does not reconstruct features from layouts or labels.
 It generates candidates only on `captureState`, then verifies those unchanged plans in each
 other state. Survival is the observed fraction of successful future states. `rules.jsonl`
 contains every group, including zero-candidate groups, and the rule-selected plan and survival.
-The manifest records input and output checksums. A failed parse or changed input does not
+The manifest records input, split-map, schema and output checksums. A failed parse or changed input does not
 replace a previous complete export. Run twice with unchanged input, commit, and output options
-to compare all three artifacts byte for byte.
+to compare all five artifacts byte for byte. Refresh the dataset manifest with `dataset.split`
+after exporting; it validates the Kotlin producer's hashes and records the feature/schema artifacts.
 
 ## Label real applications locally
 
@@ -153,8 +162,9 @@ If the input roots differ from the exporter's input directory, supply `--export-
 
 Run once before label export if a split map is needed, then repeat the same command after the JVM
 export. Missing labels or features are explicitly pending with null hashes, never placeholder
-files. P2 ends with verified labels and `features-pending`; P3.2 produces the real feature file
-and its checksum. `--generated-at` accepts a fixed timestamp for reproducible manifest comparison.
+files. P2 originally ended with verified labels and `features-pending`; P3.2 supplies the real
+feature/schema files and their checksums, moving the manifest to `complete`.
+`--generated-at` accepts a fixed timestamp for reproducible manifest comparison.
 
 The hash assignment unit is the entire `screenFamily`, including all seeds and states. Quotas
 use 70/15/15 with largest-remainder rounding. Eight indivisible, equally sized families therefore

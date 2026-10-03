@@ -4,7 +4,11 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import org.autojs.autojs.core.accessibility.codegen.NodeTree
 import org.autojs.autojs.core.accessibility.codegen.SnapshotNode
+import org.autojs.autojs.core.accessibility.codegen.features.CandidateFeatures
+import org.autojs.autojs.core.accessibility.codegen.features.FeatureSchema
 import org.autojs.autojs.core.accessibility.codegen.rank.RuleRanker
 import org.autojs.autojs.core.accessibility.codegen.search.CandidateSearch
 import org.autojs.autojs.core.accessibility.codegen.search.SearchResult
@@ -27,7 +31,8 @@ class CodeGenDatasetExportTask {
         assumeTrue("Set CODEGEN_DATASET_DIR to run the offline dataset exporter", directory != null)
         val input = File(requireNotNull(directory))
         val output = System.getenv("CODEGEN_DATASET_OUTPUT_DIR")?.takeIf { it.isNotBlank() }?.let(::File) ?: input
-        val summary = DatasetExporter.export(input, output, System.getenv("CODEGEN_GENERATOR_COMMIT"))
+        val splits = System.getenv("CODEGEN_SPLIT_MAP")?.takeIf { it.isNotBlank() }?.let(::File) ?: File(input, "split-map.json")
+        val summary = DatasetExporter.export(input, output, System.getenv("CODEGEN_GENERATOR_COMMIT"), splits)
         println("Codegen dataset: ${summary.groups} groups, ${summary.candidates} candidates, ${summary.groupsWithoutCandidates} groups without candidates")
     }
 }
@@ -35,7 +40,7 @@ class CodeGenDatasetExportTask {
 /** Test-source tooling deliberately stays out of the application APK. */
 internal object DatasetExporter {
     private val gson = GsonBuilder().disableHtmlEscaping().serializeNulls().create()
-    private val artifactNames = listOf("labels.jsonl", "rules.jsonl", "export-manifest.json")
+    private val artifactNames = listOf("labels.jsonl", "rules.jsonl", "features.csv", "features.json", "export-manifest.json")
 
     data class FailedState(val stateId: String, val mutations: List<String>, val rejection: Rejected)
     data class Label(
@@ -44,7 +49,7 @@ internal object DatasetExporter {
         val failedStates: List<FailedState>,
         val ruleSelected: Boolean,
     )
-    data class LabeledGroup(val group: TaskGroup, val search: SearchResult<SnapshotNode>, val labels: List<Label>)
+    data class LabeledGroup(val group: TaskGroup, val search: SearchResult<SnapshotNode>, val labels: List<Label>, val captureTree: NodeTree<SnapshotNode>)
     data class Summary(val groups: Int, val candidates: Int, val groupsWithoutCandidates: Int)
     private data class InputFile(val file: File, val sha256: String)
 
@@ -67,10 +72,15 @@ internal object DatasetExporter {
             }
             Label(candidate, (future.size - failures.size).toDouble() / future.size, failures, candidate.plan.planKey == ruleKey)
         }
-        return LabeledGroup(group, search, labels)
+        return LabeledGroup(group, search, labels, captureVerifier.tree)
     }
 
-    fun export(inputDirectory: File, outputDirectory: File = inputDirectory, generatorCommit: String? = null): Summary {
+    fun export(
+        inputDirectory: File,
+        outputDirectory: File = inputDirectory,
+        generatorCommit: String? = null,
+        splitFile: File = File(inputDirectory, "split-map.json"),
+    ): Summary {
         val input = inputDirectory.canonicalFile
         require(input.isDirectory) { "CODEGEN_DATASET_DIR must be an existing directory" }
         val commit = generatorCommit?.takeIf { it.isNotBlank() }
@@ -87,6 +97,18 @@ internal object DatasetExporter {
         }.toList().sortedBy { it.first }
         require(tasks.isNotEmpty()) { "Dataset has no .cgtask.json tasks" }
         require(tasks.map { it.first }.distinct().size == tasks.size) { "Dataset groupId values must be unique" }
+        require(splitFile.isFile) { "Create split-map.json with dataset.split before exporting features, or set CODEGEN_SPLIT_MAP" }
+        val splitSha256 = sha256(splitFile)
+        val splitJson = JsonParser.parseString(splitFile.readText(Charsets.UTF_8)).asJsonObject
+        require(splitJson["format"]?.toString() == "1") { "Unknown split-map format" }
+        val datasetId = splitJson["datasetId"]?.takeIf { it.isJsonPrimitive && it.asJsonPrimitive.isString }?.asString
+        require(!datasetId.isNullOrBlank()) { "split-map requires datasetId" }
+        val assignmentJson = splitJson.getAsJsonObject("assignment") ?: error("split-map requires assignment")
+        val assignment = assignmentJson.entrySet().associate { (id, split) ->
+            require(split.isJsonPrimitive && split.asJsonPrimitive.isString && split.asString in setOf("train", "valid", "test", "real-test")) { "Unknown split for $id" }
+            id to split.asString
+        }
+        require(assignment.keys == tasks.map { it.first }.toSet()) { "split-map must contain exactly the exported task groups" }
         val output = outputDirectory.canonicalFile
         require(output.isDirectory || output.mkdirs()) { "Cannot create dataset output directory" }
         artifactNames.forEach { name -> require(!File(output, name).exists() || File(output, name).isFile) { "Output $name is not a regular file" } }
@@ -98,23 +120,43 @@ internal object DatasetExporter {
             }
             var candidateCount = 0
             var groupsWithoutCandidates = 0
-            File(staging, "labels.jsonl").bufferedWriter(Charsets.UTF_8).use { labels ->
-                File(staging, "rules.jsonl").bufferedWriter(Charsets.UTF_8).use { rules ->
-                    tasks.forEach { (groupId, file) ->
-                        val group = TaskGroup.load(file) { snapshot ->
-                            recordInput(snapshot)
-                            snapshots.getOrPut(snapshot) { SnapshotNode.load(snapshot) }
+            val familySplits = HashMap<String, String>()
+            File(staging, "features.json").writeText(gson.toJson(FeatureExport.schemaJson()) + "\n", Charsets.UTF_8)
+            File(staging, "features.csv").bufferedWriter(Charsets.UTF_8).use { features ->
+                features.write(FeatureExport.csvRow(listOf("split", "groupId", "planKey", "label") + FeatureSchema.names))
+                File(staging, "labels.jsonl").bufferedWriter(Charsets.UTF_8).use { labels ->
+                    File(staging, "rules.jsonl").bufferedWriter(Charsets.UTF_8).use { rules ->
+                        tasks.forEach { (groupId, file) ->
+                            val group = TaskGroup.load(file) { snapshot ->
+                                recordInput(snapshot)
+                                snapshots.getOrPut(snapshot) { SnapshotNode.load(snapshot) }
+                            }
+                            require(group.groupId == groupId) { "Task identity changed during export" }
+                            val split = assignment.getValue(groupId)
+                            if (group.source == "real") {
+                                require(split == "real-test") { "Real application groups belong only in real-test" }
+                                FeatureExport.requirePrivate(file)
+                                FeatureExport.requirePrivate(output)
+                            } else {
+                                require(split != "real-test") { "Fixture groups cannot enter real-test" }
+                                val previous = familySplits.putIfAbsent(group.screenFamily, split)
+                                require(previous == null || previous == split) { "A screen family must not cross dataset splits" }
+                            }
+                            val labeled = label(group)
+                            val captureRequest = group.request.forState(group.states[group.captureState])
+                            val featureGroup = if (labeled.labels.isEmpty()) null else CandidateFeatures.prepare(captureRequest, labeled.search.candidates, labeled.captureTree)
+                            candidateCount += labeled.labels.size
+                            if (labeled.labels.isEmpty()) groupsWithoutCandidates++
+                            labeled.labels.forEach { label ->
+                                labels.write(gson.toJson(labelJson(group, label)))
+                                labels.write("\n")
+                                val vector = requireNotNull(featureGroup).extract(label.candidate)
+                                require(vector.size == FeatureSchema.names.size && vector.all { it.isFinite() }) { "Invalid feature vector" }
+                                features.write(FeatureExport.csvRow(listOf(split, groupId, label.candidate.plan.planKey, label.survival.toString()) + vector.map(Float::toString)))
+                            }
+                            rules.write(gson.toJson(ruleJson(labeled)))
+                            rules.write("\n")
                         }
-                        require(group.groupId == groupId) { "Task identity changed during export" }
-                        val labeled = label(group)
-                        candidateCount += labeled.labels.size
-                        if (labeled.labels.isEmpty()) groupsWithoutCandidates++
-                        labeled.labels.forEach { label ->
-                            labels.write(gson.toJson(labelJson(group, label)))
-                            labels.write("\n")
-                        }
-                        rules.write(gson.toJson(ruleJson(labeled)))
-                        rules.write("\n")
                     }
                 }
             }
@@ -127,6 +169,7 @@ internal object DatasetExporter {
                 inputDigest.update(entry.sha256.toByteArray(Charsets.US_ASCII))
                 inputDigest.update('\n'.code.toByte())
             }
+            require(sha256(splitFile) == splitSha256) { "Dataset split changed during export" }
             val manifest = JsonObject().apply {
                 addProperty("format", 1)
                 addProperty("tool", "CodeGenDatasetExportTask")
@@ -134,6 +177,7 @@ internal object DatasetExporter {
                 addProperty("taskFormat", TaskGroup.FORMAT)
                 addProperty("labelDefinition", "verified-other-states-v1")
                 addProperty("generatorCommit", commit?.lowercase())
+                addProperty("datasetId", datasetId)
                 addProperty("groups", summary.groups)
                 addProperty("groupsWithCandidates", summary.groups - summary.groupsWithoutCandidates)
                 addProperty("groupsWithoutCandidates", summary.groupsWithoutCandidates)
@@ -142,6 +186,11 @@ internal object DatasetExporter {
                 addProperty("inputSha256", inputDigest.digest().hex())
                 addProperty("labelsSha256", sha256(File(staging, "labels.jsonl")))
                 addProperty("rulesSha256", sha256(File(staging, "rules.jsonl")))
+                addProperty("featuresSha256", sha256(File(staging, "features.csv")))
+                addProperty("featureSchemaSha256", sha256(File(staging, "features.json")))
+                addProperty("splitMapSha256", splitSha256)
+                addProperty("featureSchemaVersion", FeatureSchema.featureSchemaVersion)
+                addProperty("featureNamesHash", FeatureSchema.namesHash)
                 add("searchBudget", JsonObject().apply {
                     addProperty("maxAttempts", 2_000)
                     addProperty("maxVerified", 200)

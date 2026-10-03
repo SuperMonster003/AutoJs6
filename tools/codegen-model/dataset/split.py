@@ -161,7 +161,7 @@ def validate_labels(groups, labels_path, rules_path):
     return labels, counts
 
 
-def validate_features(path, labels, assignment):
+def validate_features(path, labels, assignment, schema=None):
     seen = set()
     with Path(path).open(encoding="utf-8-sig", newline="") as source:
         reader = csv.DictReader(source)
@@ -169,6 +169,8 @@ def validate_features(path, labels, assignment):
         metadata = {"split", "groupId", "planKey", "label"}
         if len(columns) != len(set(columns)) or not metadata.issubset(columns) or len(columns) <= 4:
             raise ValueError("features.csv requires split/groupId/planKey/label and numeric feature columns")
+        if schema is not None and columns != ["split", "groupId", "planKey", "label", *schema["names"]]:
+            raise ValueError("Feature columns differ from features.json")
         for row in reader:
             key = (row["groupId"], row["planKey"])
             if None in row or key not in labels or key in seen:
@@ -186,6 +188,22 @@ def validate_features(path, labels, assignment):
             seen.add(key)
     if seen != set(labels):
         raise ValueError("Missing feature candidates")
+
+
+def validate_feature_schema(path):
+    schema = read_json(path)
+    if (not isinstance(schema, dict) or set(schema) != {"format", "featureSchemaVersion", "names", "namesHash"}
+            or type(schema["format"]) is not int or schema["format"] != 1
+            or type(schema["featureSchemaVersion"]) is not int or schema["featureSchemaVersion"] != 1):
+        raise ValueError("Unsupported feature schema")
+    names = schema["names"]
+    if (not isinstance(names, list) or not names or any(not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_]*", name) for name in names)
+            or len(names) != len(set(names))):
+        raise ValueError("Feature names must be distinct column names")
+    expected = hashlib.sha256("\n".join(names).encode("utf-8")).hexdigest()[:16]
+    if schema["namesHash"] != expected:
+        raise ValueError("Feature namesHash differs from its ordered names")
+    return schema
 
 
 def _artifact(path, pending_reason):
@@ -295,6 +313,7 @@ def build_dataset(inputs, *, output, dataset_id, provenance_path=None, labels_pa
     if (labels_path is None) != (rules_path is None):
         raise ValueError("Provide labels.jsonl and rules.jsonl together to verify candidate completeness")
     labels, candidate_counts = ({}, None) if labels_path is None else validate_labels(groups, labels_path, rules_path)
+    exported = None
     if export_manifest_path is None and labels_path is not None:
         adjacent = Path(labels_path).parent / "export-manifest.json"
         if adjacent.is_file():
@@ -306,11 +325,21 @@ def build_dataset(inputs, *, output, dataset_id, provenance_path=None, labels_pa
             if len(inputs) != 1 or not Path(inputs[0]).is_dir():
                 raise ValueError("Provide --export-input-root matching CODEGEN_DATASET_DIR")
             export_input_root = inputs[0]
-        validate_export(export_manifest_path, export_input_root, records, labels_path, rules_path, sum(candidate_counts.values()))
+        exported = validate_export(export_manifest_path, export_input_root, records, labels_path, rules_path, sum(candidate_counts.values()))
+    feature_schema_path, feature_schema = None, None
     if features_path is not None:
         if labels_path is None:
             raise ValueError("features.csv requires completed labels")
-        validate_features(features_path, labels, assignment)
+        feature_schema_path = Path(features_path).parent / "features.json"
+        if any(group["source"] == "real" for group in groups):
+            private_path(feature_schema_path)
+        feature_schema = validate_feature_schema(feature_schema_path)
+        validate_features(features_path, labels, assignment, feature_schema)
+        if exported is not None:
+            for field, value in (("featuresSha256", sha256(features_path)), ("featureSchemaSha256", sha256(feature_schema_path)),
+                                 ("featureSchemaVersion", feature_schema["featureSchemaVersion"]), ("featureNamesHash", feature_schema["namesHash"])):
+                if exported.get(field) != value:
+                    raise ValueError("Exporter " + field + " differs; rerun the JVM feature export")
     statistics = {}
     for split in SPLITS:
         selected = [group for group in groups if assignment[group["groupId"]] == split]
@@ -364,6 +393,7 @@ def build_dataset(inputs, *, output, dataset_id, provenance_path=None, labels_pa
             "labels": _artifact(labels_path, "Run CodeGenDatasetExportTask to generate labels.jsonl and rules.jsonl"),
             "rules": _artifact(rules_path, "Run CodeGenDatasetExportTask"),
             "features": _artifact(features_path, "Feature export is implemented in P3.2; no placeholder hash is used"),
+            "featureSchema": _artifact(feature_schema_path, "Run the JVM exporter to generate features.json"),
             "tasks": {"count": len(task_records), "sha256": content_hash(task_records)},
             "snapshots": {"count": len(snapshot_records), "uniqueFiles": len(cached_hashes), "sha256": content_hash(snapshot_records)},
             "provenance": _artifact(provenance_path, "Capture provenance not supplied"),
