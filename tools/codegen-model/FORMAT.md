@@ -128,7 +128,8 @@ alongside ranking metrics instead of silently dropping such groups.
 commit, input and output SHA-256 values, search limits, total groups/candidates,
 groups with and without candidates, and distinct snapshot count. `inputSha256`
 hashes a UTF-8 stream of `relativePath + NUL + fileSha256 + LF` for all task files
-and referenced snapshots, sorted by forward-slash relative path. It contains no
+and referenced snapshots, sorted by forward-slash relative path in UTF-16 code-unit
+order (the JVM string order). It contains no
 absolute paths, timestamps, machine identity, or layout contents. Collection
 provenance such as devices and fixture version belongs in `collection.json` and
 the later dataset manifest.

@@ -82,3 +82,28 @@ python -m capture.compare_inspector --serial DEVICE --output out/inspector-compa
 It compares node counts and the entire preorder class-name sequence against the worker capture,
 and writes `comparison.json`. The inspector capture is read from the UI's actual capture object;
 the helper does not replace it with another scripted capture.
+
+## Export survival labels
+
+From the repository root, run the explicitly enabled JVM exporter. Candidate search, all
+cross-state checks, and the rule baseline use the same Kotlin implementations as the host:
+
+```powershell
+$env:CODEGEN_DATASET_DIR = (Resolve-Path 'tools/codegen-model/out/cg-ds-2026.10-1').Path
+$env:CODEGEN_GENERATOR_COMMIT = (git rev-parse HEAD).Trim()
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.dataset.CodeGenDatasetExportTask'
+Remove-Item Env:CODEGEN_DATASET_DIR, Env:CODEGEN_GENERATOR_COMMIT
+```
+
+`--rerun` forces only this test task, so changing the dataset path cannot accidentally reuse an
+up-to-date result. Without `CODEGEN_DATASET_DIR`, normal unit-test runs skip this offline job.
+Optional `CODEGEN_DATASET_OUTPUT_DIR` selects another output directory. For real input, keep
+the input and all exported artifacts inside `CODEGEN_PRIVATE_DIR`, outside Git worktrees.
+
+The exporter writes deterministic `labels.jsonl`, `rules.jsonl`, and `export-manifest.json`.
+It generates candidates only on `captureState`, then verifies those unchanged plans in each
+other state. Survival is the observed fraction of successful future states. `rules.jsonl`
+contains every group, including zero-candidate groups, and the rule-selected plan and survival.
+The manifest records input and output checksums. A failed parse or changed input does not
+replace a previous complete export. Run twice with unchanged input, commit, and output options
+to compare all three artifacts byte for byte.
