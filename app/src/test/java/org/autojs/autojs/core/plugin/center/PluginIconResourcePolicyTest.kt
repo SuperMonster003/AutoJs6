@@ -8,7 +8,7 @@ class PluginIconResourcePolicyTest {
         assertEquals(listOf("ic_plugin_center", "ic_launcher"),
             PluginIconResourcePolicy.candidates("io.github.supermonster003.autojs6.plugin.three.setup.installer"))
         assertEquals(listOf("ic_plugin_center", "ic_launcher_transparent"),
-            PluginIconResourcePolicy.candidates("io.github.supermonster003.autojs6.plugin.readium.epub.reader"))
+            PluginIconResourcePolicy.candidates("io.github.supermonster003.autojs6.plugin.three.folio.epub"))
     }
 
     @Test fun newlyAddedPluginsCanOptInWithoutAHostAllowlistUpdate() {

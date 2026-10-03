@@ -107,8 +107,8 @@ internal object ExplorerDocumentPreviewerPluginUi {
             mimeType = MIME_MARKDOWN,
         )
         FileUtils.PreviewerType.EPUB -> PreviewerSpec(
-            packageName = READIUM_EPUB_READER_PACKAGE,
-            nameRes = R.string.plugin_readium_epub_reader_name,
+            packageName = THREE_FOLIO_EPUB_PACKAGE,
+            nameRes = R.string.plugin_three_folio_epub_name,
             mimeType = MIME_EPUB,
         )
         null -> null
@@ -158,8 +158,8 @@ internal object ExplorerDocumentPreviewerPluginUi {
         "io.github.supermonster003.autojs6.plugin.htmlpreviewer"
     private const val MARKDOWN_PREVIEWER_PACKAGE =
         "io.github.supermonster003.autojs6.plugin.markdownpreviewer"
-    private const val READIUM_EPUB_READER_PACKAGE =
-        "io.github.supermonster003.autojs6.plugin.readium.epub.reader"
+    private const val THREE_FOLIO_EPUB_PACKAGE =
+        "io.github.supermonster003.autojs6.plugin.three.folio.epub"
     private const val MIME_HTML = "text/html"
     private const val MIME_MARKDOWN = "text/markdown"
     private const val MIME_EPUB = "application/epub+zip"

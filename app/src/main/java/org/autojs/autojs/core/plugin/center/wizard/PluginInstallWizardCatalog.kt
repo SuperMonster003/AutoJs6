@@ -80,7 +80,7 @@ object PluginInstallWizardCatalog {
         entry(official("htmlpreviewer"), "HTML Previewer", FILE_MANAGER, standard = true),
         entry(official("markdownpreviewer"), "Markdown Previewer", FILE_MANAGER, standard = true),
         entry(official("mediainfo"), "MediaInfo", FILE_MANAGER, standard = true),
-        entry(official("readium.epub.reader"), "Readium EPUB Reader", FILE_MANAGER),
+        entry(official("three.folio.epub"), "Three Folio EPUB", FILE_MANAGER),
 
         // Script runtimes.
         entry(official("bun.runtime"), "Bun Runtime", RUNTIME),

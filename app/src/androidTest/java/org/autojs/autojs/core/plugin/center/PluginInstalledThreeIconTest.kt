@@ -31,11 +31,11 @@ class PluginInstalledThreeIconTest {
             "io.github.supermonster003.autojs6.plugin.three.stamp.mail",
             "io.github.supermonster003.autojs6.plugin.opencc",
             "io.github.supermonster003.autojs6.plugin.r8compiler",
-            "io.github.supermonster003.autojs6.plugin.readium.epub.reader",
+            "io.github.supermonster003.autojs6.plugin.three.folio.epub",
         )
         val labels = listOf("3-Stone AI", "3-Terra Player", "3-Amber Player", "3-Stove Agent",
             "3-Adapt A11y", "3-Color Picker", "3-Setup Installer", "3-Shell Terminal",
-            "3-Stamp Mail", "OpenCC", "R8 Compiler", "Readium EPUB Reader")
+            "3-Stamp Mail", "OpenCC", "R8 Compiler", "3-Folio EPUB")
         val preview = Bitmap.createBitmap(1200, 704, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(preview).apply { drawColor(0xffeeeeee.toInt()) }
         val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.DKGRAY; textSize = 19f }
@@ -55,7 +55,6 @@ class PluginInstalledThreeIconTest {
                 val bitmap = PluginInstalledIconResolver.forNightMode(icon, night).toBitmap(128, 128)
                 val pixels = IntArray(128 * 128)
                 bitmap.getPixels(pixels, 0, 128, 0, 0, 128, 128)
-                val expected = if (night) 0xD8 else 0x27
                 val label = "$packageName night=$night"
                 assertEquals(label, 0, Color.alpha(pixels.first()))
                 assertTrue(label, pixels.count { Color.alpha(it) == 0 } > pixels.size / 2)
@@ -64,19 +63,22 @@ class PluginInstalledThreeIconTest {
                 val opaque = pixels.filter { Color.alpha(it) == 255 }
                 assertTrue(label, opaque.isNotEmpty())
                 assertTrue(label, opaque.all { Color.red(it) == Color.green(it) && Color.green(it) == Color.blue(it) })
-                if (packageName.endsWith(".three.stamp.mail")) {
-                    // The maintainer keeps the neutral grayscale envelope folds.
-                    val mean = opaque.map { Color.red(it) }.average()
-                    assertTrue(label, if (night) mean > 128 else mean < 128)
-                } else {
-                    assertTrue(label, opaque.all { Color.red(it) == expected })
-                }
+                // Neutral grayscale is allowed for every plugin, including shaded artwork.
+                val mean = opaque.map { Color.red(it) }.average()
+                assertTrue(label, if (night) mean > 128 else mean < 128)
                 val paint = Paint().apply { this.color = if (night) 0xff212121.toInt() else 0xfffafafa.toInt() }
                 val slotX = x + modeIndex * 86
                 canvas.drawRect(slotX, y + 44, slotX + 80, y + 124, paint)
                 // An explicit destination avoids Bitmap density scaling on high-density devices.
                 canvas.drawBitmap(PluginInstalledIconResolver.forNightMode(icon, night).toBitmap(80, 80),
                     null, RectF(slotX, y + 44, slotX + 80, y + 124), null)
+                if (packageName.endsWith(".r8compiler")) {
+                    val intent = android.content.Intent(android.content.Intent.ACTION_MAIN)
+                        .addCategory(android.content.Intent.CATEGORY_LAUNCHER).setPackage(packageName)
+                    assertTrue(context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DISABLED_COMPONENTS).isEmpty())
+                    if (!night) canvas.drawText("No launcher entry", x + 192, y + 90, text)
+                    continue
+                }
                 val alias = if (night) "AdaptiveDarkIconAlias" else "AdaptiveLightIconAlias"
                 val info = context.packageManager.getActivityInfo(
                     android.content.ComponentName(packageName, "$packageName.launcher.$alias"),

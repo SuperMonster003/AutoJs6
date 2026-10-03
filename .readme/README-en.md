@@ -666,6 +666,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Package inspection recognizes APK split sets in ordinary ZIP files, including equivalent containers without a known package extension
 * `Fix` 3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground
 * `Fix` Package manifest roots and shared UIDs could be misread from comments or spoofed namespaces; duplicate attributes, conflicting resource identities and unverifiable shared UIDs now stop processing
+* `Fix` Plugin Center could restore removed or renamed plugins from cache after a successful index refresh
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record
@@ -847,6 +848,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Larger query mode, filter, regex and navigation symbols in the layout inspector search bar; the regex switch uses a simple ".*" icon
 * `Improvement` Mail account settings and Plugin Center now recognize 3-Stamp Mail under its new package name
 * `Improvement` Plugin Center prefers dedicated transparent monochrome icons for standalone plugins, follows the host light or dark theme, and retains fallback support for older plugin versions
+* `Improvement` Official catalog icons keep the same source and appearance before and after installation, including neutral grayscale artwork
+* `Improvement` EPUB integration uses the new 3-Folio EPUB installation identity while preserving the existing epub API and file-manager actions
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

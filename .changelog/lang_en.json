@@ -499,7 +499,8 @@
         "The five Three plugins use transparent icons in Plugin Center that follow the host light or dark theme without launcher backgrounds",
         "Package inspection recognizes APK split sets in ordinary ZIP files, including equivalent containers without a known package extension",
         "3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground",
-        "Package manifest roots and shared UIDs could be misread from comments or spoofed namespaces; duplicate attributes, conflicting resource identities and unverifiable shared UIDs now stop processing"
+        "Package manifest roots and shared UIDs could be misread from comments or spoofed namespaces; duplicate attributes, conflicting resource identities and unverifiable shared UIDs now stop processing",
+        "Plugin Center could restore removed or renamed plugins from cache after a successful index refresh"
       ],
       "improvement": [
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",
@@ -682,7 +683,9 @@
         "Node info multi-selection uses themed row backgrounds with unchanged row heights; the buttons are Settings / Back / Copy, and the copy behavior is remembered across sessions: Always ask (default), Copy object selector, or Copy chained selector",
         "Larger query mode, filter, regex and navigation symbols in the layout inspector search bar; the regex switch uses a simple \".*\" icon",
         "Mail account settings and Plugin Center now recognize 3-Stamp Mail under its new package name",
-        "Plugin Center prefers dedicated transparent monochrome icons for standalone plugins, follows the host light or dark theme, and retains fallback support for older plugin versions"
+        "Plugin Center prefers dedicated transparent monochrome icons for standalone plugins, follows the host light or dark theme, and retains fallback support for older plugin versions",
+        "Official catalog icons keep the same source and appearance before and after installation, including neutral grayscale artwork",
+        "EPUB integration uses the new 3-Folio EPUB installation identity while preserving the existing epub API and file-manager actions"
       ],
       "dependency": [
         "Modularized Android AXML",

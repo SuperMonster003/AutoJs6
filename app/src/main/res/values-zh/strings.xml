@@ -335,7 +335,7 @@
     <string name="error_empty_github_release_assets">无可供下载的 GitHub 发行版资源</string>
     <string name="error_empty_shell_command">命令为空</string>
     <string name="error_enable_server">AutoJs6 服务启用失败: %s</string>
-    <string name="error_epub_plugin_unavailable">Readium EPUB Reader 插件不可用. 请在插件中心安装, 启用或更新后重试.</string>
+    <string name="error_epub_plugin_unavailable">3-Folio EPUB 插件不可用. 请在插件中心安装, 启用或更新后重试.</string>
     <string name="error_excessive_height_for_template_n_region">高度超限: 模板图像 [%1$d] > 限定区域 [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">宽度超限: 模板图像 [%1$d] > 限定区域 [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">应用当前历史颜色失败</string>

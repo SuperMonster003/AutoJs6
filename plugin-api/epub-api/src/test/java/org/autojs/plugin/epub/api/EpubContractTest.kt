@@ -20,10 +20,10 @@ class EpubContractTest {
         assertEquals("org.autojs.plugin.EPUB_READER_OPEN", EpubActions.READER_ACTIVITY_ACTION)
         assertEquals("org.autojs.plugin.epub.extra.SESSION_TOKEN", EpubActions.EXTRA_SESSION_TOKEN)
 
-        assertEquals("readium-epub-reader", EpubIds.PLUGIN_ID)
+        assertEquals("three-folio-epub", EpubIds.PLUGIN_ID)
         assertEquals("epub", EpubIds.ENGINE)
         assertEquals("default", EpubIds.VARIANT_DEFAULT)
-        assertEquals("io.github.supermonster003.autojs6.plugin.readium.epub.reader", EpubIds.DEFAULT_PACKAGE_NAME)
+        assertEquals("io.github.supermonster003.autojs6.plugin.three.folio.epub", EpubIds.DEFAULT_PACKAGE_NAME)
         assertEquals(5282L, EpubIds.REQUIRED_HOST_VERSION_CODE)
 
         assertEquals(PluginCapabilityKeys.REQUIRES_HOST_VERSION, EpubCapabilityKeys.REQUIRES_HOST_VERSION)

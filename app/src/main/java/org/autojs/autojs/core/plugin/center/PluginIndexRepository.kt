@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
+import android.util.AtomicFile
 import android.util.Log
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
@@ -65,12 +66,9 @@ class PluginIndexRepository {
         private fun githubAuthKeyOf(token: String?): String = token?.let { "${it.length}:${it.hashCode()}" } ?: "anonymous"
     }
 
+    // Entries, source membership, locale and freshness always travel together.
     @Volatile
-    private var memoryCache: List<PluginIndexEntry>? = null
-    @Volatile
-    private var memoryFetchedSources: Set<PluginIndexSource>? = null
-    @Volatile
-    private var memoryLanguageTag: String? = null
+    private var memorySnapshot: CacheSnapshot? = null
 
     suspend fun getCachedIndex(
         context: Context,
@@ -81,18 +79,8 @@ class PluginIndexRepository {
         }
         val currentLanguageTag = normalizeLanguageTag(Language.getPrefLanguage().getLocalCompatibleLanguageTag()) ?: "en"
         val cacheFile = resolveCacheFile(context)
-        val cacheSnapshot = when {
-            memoryCache != null && memoryFetchedSources != null -> CacheSnapshot(
-                entries = memoryCache.orEmpty(),
-                fetchedSources = memoryFetchedSources.orEmpty(),
-                languageTag = memoryLanguageTag,
-            )
-            else -> readCacheSafely(cacheFile)?.also { parsed ->
-                memoryCache = parsed.entries
-                memoryFetchedSources = parsed.fetchedSources
-                memoryLanguageTag = parsed.languageTag
-            }
-        } ?: return@withContext emptyList()
+        val cacheSnapshot = memorySnapshot ?: readCacheSafely(cacheFile)?.also { memorySnapshot = it }
+            ?: return@withContext emptyList()
         if (!isSameLanguageTag(cacheSnapshot.languageTag, currentLanguageTag)) {
             Log.i(TAG, "Plugin index cache language changed: ${cacheSnapshot.languageTag} -> $currentLanguageTag, skip cached index.")
             return@withContext emptyList()
@@ -108,21 +96,11 @@ class PluginIndexRepository {
     ): List<PluginIndexEntry> = withContext(Dispatchers.IO) {
         val currentLanguageTag = normalizeLanguageTag(Language.getPrefLanguage().getLocalCompatibleLanguageTag()) ?: "en"
         val cacheFile = resolveCacheFile(context)
-        val cacheSnapshot = when {
-            memoryCache != null && memoryFetchedSources != null -> CacheSnapshot(
-                entries = memoryCache.orEmpty(),
-                fetchedSources = memoryFetchedSources.orEmpty(),
-                languageTag = memoryLanguageTag,
-            )
-            else -> readCacheSafely(cacheFile)?.also { parsed ->
-                memoryCache = parsed.entries
-                memoryFetchedSources = parsed.fetchedSources
-                memoryLanguageTag = parsed.languageTag
-            }
-        }
+        val cacheSnapshot = memorySnapshot ?: readCacheSafely(cacheFile)?.also { memorySnapshot = it }
         val cachedAll = cacheSnapshot?.entries
-        val cachedFetchedSources = cacheSnapshot?.fetchedSources ?: memoryFetchedSources.orEmpty()
-        val cachedLanguageTag = cacheSnapshot?.languageTag ?: memoryLanguageTag
+        val cachedFetchedSources = cacheSnapshot?.fetchedSources.orEmpty()
+        val cachedLanguageTag = cacheSnapshot?.languageTag
+        val cachedFetchedAtMs = cacheSnapshot?.fetchedAtMs.orEmpty()
         val hasLanguageMismatch = cachedAll != null && !isSameLanguageTag(cachedLanguageTag, currentLanguageTag)
         val now = System.currentTimeMillis()
         val githubAuthKey = githubAuthKeyOf(GitHubTokenStore.getToken(context))
@@ -147,11 +125,13 @@ class PluginIndexRepository {
             cachedAll?.let {
                 val missingSources = enabledSources - cachedFetchedSources
                 val hasOfficialAbiGaps = hasOfficialAbiGaps(it, enabledSources)
-                if (missingSources.isEmpty() && !hasOfficialAbiGaps && !hasLanguageMismatch) {
+                val sourcesFresh = enabledSources.all { source -> PluginIndexCachePolicy.isFresh(cachedFetchedAtMs[source], now) }
+                if (missingSources.isEmpty() && !hasOfficialAbiGaps && !hasLanguageMismatch && sourcesFresh) {
                     return@withContext filterBySource(it, enabledSources)
                 }
-                if (missingSources.isEmpty() && hasOfficialAbiGaps && !hasLanguageMismatch && now - lastNetworkFetchAttemptMs < officialAbiGapRetryIntervalMs) {
-                    Log.i(TAG, "Cache has official ABI gaps, but refresh attempted recently. Use cache.")
+                if (missingSources.isEmpty() && !hasLanguageMismatch &&
+                    PluginIndexCachePolicy.wasAttemptRecent(lastNetworkFetchAttemptMs, now, officialAbiGapRetryIntervalMs)) {
+                    Log.i(TAG, "Index cache needs refresh, but a refresh was attempted recently. Use the last good snapshot.")
                     return@withContext filterBySource(it, enabledSources)
                 }
                 Log.i(TAG, "Cache missing sources $missingSources, try online fetch once.")
@@ -164,7 +144,8 @@ class PluginIndexRepository {
             }
         }
 
-        if (forceRefresh && cachedAll != null && now - lastNetworkFetchAttemptMs < forceRefreshMinIntervalMs) {
+        if (forceRefresh && cachedAll != null &&
+            PluginIndexCachePolicy.wasAttemptRecent(lastNetworkFetchAttemptMs, now, forceRefreshMinIntervalMs)) {
             Log.i(TAG, "Skip too-frequent force refresh (<${forceRefreshMinIntervalMs / 1000}s), use cache.")
             PluginCenterProcessLogger.i("Skip online plugin index refresh: refresh interval is too short.")
             return@withContext filterBySource(cachedAll, enabledSources)
@@ -178,7 +159,6 @@ class PluginIndexRepository {
         lastNetworkFetchAttemptMs = now
         PluginCenterProcessLogger.i("Start online plugin index refresh: sources=${enabledSources.joinToString { it.name }}.")
 
-        val cachedBySource = cachedAll.orEmpty().groupBy { it.source }
         val freshBySource = linkedMapOf<PluginIndexSource, List<PluginIndexEntry>>()
         val fetchedFromNetworkBySource = linkedMapOf<PluginIndexSource, Boolean>()
 
@@ -192,14 +172,7 @@ class PluginIndexRepository {
                 onIssue?.invoke(PluginIndexFetchIssue(PluginIndexSource.OFFICIAL, message))
             }
             fetchedFromNetworkBySource[PluginIndexSource.OFFICIAL] = fetchResult.isSuccess
-            val entriesFresh = fetchResult.getOrElse {
-                cachedBySource[PluginIndexSource.OFFICIAL].orEmpty()
-            }
-            val entries = stabilizeEntriesWithCache(
-                fresh = entriesFresh,
-                cached = cachedBySource[PluginIndexSource.OFFICIAL].orEmpty(),
-            )
-            freshBySource[PluginIndexSource.OFFICIAL] = entries
+            fetchResult.onSuccess { entries -> freshBySource[PluginIndexSource.OFFICIAL] = entries }
         }
 
         if (PluginIndexSource.THIRD_PARTY in enabledSources) {
@@ -212,19 +185,15 @@ class PluginIndexRepository {
                 onIssue?.invoke(PluginIndexFetchIssue(PluginIndexSource.THIRD_PARTY, message))
             }
             fetchedFromNetworkBySource[PluginIndexSource.THIRD_PARTY] = fetchResult.isSuccess
-            val entriesFresh = fetchResult.getOrElse {
-                cachedBySource[PluginIndexSource.THIRD_PARTY].orEmpty()
-            }
-            val entries = stabilizeEntriesWithCache(
-                fresh = entriesFresh,
-                cached = cachedBySource[PluginIndexSource.THIRD_PARTY].orEmpty(),
-            )
-            freshBySource[PluginIndexSource.THIRD_PARTY] = entries
+            fetchResult.onSuccess { entries -> freshBySource[PluginIndexSource.THIRD_PARTY] = entries }
         }
 
-        val resultForSelected = freshBySource.values.flatten()
-        val untouched = cachedAll.orEmpty().filterNot { it.source in enabledSources }
-        val finalAll = (resultForSelected + untouched).distinctBy { "${it.source}:${it.packageName}" }
+        // Only successful responses replace a source. Removed entries must not be
+        // appended back from cache; failed/disabled sources retain their snapshot.
+        val finalAll = PluginIndexCachePolicy.replaceSuccessfulSources(
+            cachedAll.orEmpty(), freshBySource, PluginIndexEntry::source,
+        ).distinctBy { "${it.source}:${it.packageName}" }
+        val finalFetchedAtMs = cachedFetchedAtMs + freshBySource.keys.associateWith { now }
         val fetchedThisRound = enabledSources.filterTo(linkedSetOf()) { source ->
             fetchedFromNetworkBySource[source] == true || source in cachedFetchedSources
         }
@@ -236,14 +205,11 @@ class PluginIndexRepository {
             else -> cachedLanguageTag
         }
 
-        memoryCache = finalAll
-        memoryFetchedSources = finalFetchedSources
-        memoryLanguageTag = finalLanguageTag
-        writeCache(cacheFile, finalAll, finalFetchedSources, finalLanguageTag)
+        memorySnapshot = CacheSnapshot(finalAll, finalFetchedSources, finalLanguageTag, finalFetchedAtMs)
+        writeCache(cacheFile, finalAll, finalFetchedSources, finalLanguageTag, finalFetchedAtMs)
         PluginCenterProcessLogger.i("Online plugin index refresh finished: entries=${filterBySource(finalAll, enabledSources).size}.")
 
-        val fallback = memoryCache ?: cachedAll.orEmpty()
-        return@withContext filterBySource(fallback, enabledSources)
+        return@withContext filterBySource(finalAll, enabledSources)
     }
 
     private fun filterBySource(
@@ -262,42 +228,6 @@ class PluginIndexRepository {
     ): Boolean {
         if (PluginIndexSource.OFFICIAL !in enabledSources) return false
         return entries.any { it.source == PluginIndexSource.OFFICIAL && it.supportedAbis == null }
-    }
-
-    private fun stabilizeEntriesWithCache(
-        fresh: List<PluginIndexEntry>,
-        cached: List<PluginIndexEntry>,
-    ): List<PluginIndexEntry> {
-        if (fresh.isEmpty()) return cached
-        if (cached.isEmpty()) return fresh
-        val cachedByPackage = cached.associateBy { it.packageName }
-        val mergedFresh = fresh.map { entry ->
-            val cachedEntry = cachedByPackage[entry.packageName] ?: return@map entry
-            val stableTitle = when {
-                entry.title.isBlank() -> cachedEntry.title
-                isLikelyVersionLike(entry.title) && cachedEntry.title.isNotBlank() -> cachedEntry.title
-                else -> entry.title
-            }
-            entry.copy(
-                title = stableTitle,
-                iconUrl = entry.iconUrl ?: cachedEntry.iconUrl,
-                description = entry.description ?: cachedEntry.description,
-                author = entry.author ?: cachedEntry.author,
-                instructionHardCoded = entry.instructionHardCoded ?: cachedEntry.instructionHardCoded,
-                instructionMarkdownUrl = entry.instructionMarkdownUrl ?: cachedEntry.instructionMarkdownUrl,
-                collaborators = entry.collaborators.ifEmpty { cachedEntry.collaborators },
-                releases = entry.releases.ifEmpty { cachedEntry.releases },
-                supportedAbis = entry.supportedAbis ?: cachedEntry.supportedAbis,
-                tags = entry.tags.ifEmpty { cachedEntry.tags },
-                requiresHostVersion = entry.requiresHostVersion ?: cachedEntry.requiresHostVersion,
-                engine = entry.engine ?: cachedEntry.engine,
-                variant = entry.variant ?: cachedEntry.variant,
-                engineId = entry.engineId ?: cachedEntry.engineId,
-            )
-        }
-        val freshPackages = mergedFresh.mapTo(linkedSetOf()) { it.packageName }
-        val keepCachedMissing = cached.filterNot { it.packageName in freshPackages }
-        return mergedFresh + keepCachedMissing
     }
 
     private fun Throwable.toIssueMessage(): String = message
@@ -578,6 +508,10 @@ class PluginIndexRepository {
             requestMethod = "GET"
             connectTimeout = connectTimeoutMs
             readTimeout = readTimeoutMs
+            // This repository owns freshness and offline fallback. Once it elects
+            // to fetch, revalidate mutable branch metadata with HTTP caches too.
+            useCaches = false
+            setRequestProperty("Cache-Control", "no-cache")
             setRequestProperty("Accept", accept)
             setRequestProperty("User-Agent", "${context.getString(R.string.app_name)}/${BuildConfig.VERSION_NAME} (PluginCenter)")
             if (isGitHubApi) {
@@ -634,8 +568,7 @@ class PluginIndexRepository {
 
     private fun readCacheSafely(file: File): CacheSnapshot? =
         runCatching {
-            if (!file.exists() || !file.canRead()) return null
-            val text = file.readText()
+            val text = AtomicFile(file).openRead().bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
             parseCacheJson(text)
         }.getOrNull()
 
@@ -644,9 +577,11 @@ class PluginIndexRepository {
         entries: List<PluginIndexEntry>,
         fetchedSources: Set<PluginIndexSource>,
         languageTag: String?,
+        fetchedAtMs: Map<PluginIndexSource, Long>,
     ) {
         runCatching {
             val root = JSONObject()
+            root.put("fetchedAtMs", JSONObject().apply { fetchedAtMs.forEach { (source, time) -> put(source.name, time) } })
             root.put("languageTag", languageTag ?: JSONObject.NULL)
             val items = JSONArray()
             entries.forEach { entry ->
@@ -700,7 +635,15 @@ class PluginIndexRepository {
                         .sorted(),
                 ),
             )
-            file.writeText(root.toString())
+            val atomic = AtomicFile(file)
+            val stream = atomic.startWrite()
+            try {
+                stream.write(root.toString().toByteArray(StandardCharsets.UTF_8))
+                atomic.finishWrite(stream)
+            } catch (failure: Throwable) {
+                atomic.failWrite(stream)
+                throw failure
+            }
         }.onFailure {
             Log.w(TAG, "Failed to write plugin index cache: ${it.message}")
         }
@@ -732,6 +675,11 @@ class PluginIndexRepository {
             entries = list,
             fetchedSources = fetchedSources,
             languageTag = languageTag,
+            fetchedAtMs = root.optJSONObject("fetchedAtMs")?.let { times ->
+                PluginIndexSource.entries.mapNotNull { source ->
+                    times.optLong(source.name, 0L).takeIf { it > 0 }?.let { source to it }
+                }.toMap()
+            }.orEmpty(),
         )
     }
 
@@ -752,7 +700,14 @@ class PluginIndexRepository {
         defaultSource: PluginIndexSource,
         languageTag: String?,
     ): List<PluginIndexEntry> {
-        val arr = root.optJSONArray("items") ?: root.optJSONArray("plugins") ?: JSONArray()
+        val arr = root.optJSONArray("items") ?: root.optJSONArray("plugins")
+            ?: throw IllegalArgumentException("Plugin index must contain an items or plugins array")
+        // A malformed response must not masquerade as an authoritative empty source.
+        for (i in 0 until arr.length()) {
+            val item = arr.optJSONObject(i)
+                ?: throw IllegalArgumentException("Plugin index item $i is not an object")
+            require(item.optString("packageName").isNotBlank()) { "Plugin index item $i has no package name" }
+        }
         val list = mutableListOf<PluginIndexEntry>()
 
         for (i in 0 until arr.length()) {
@@ -947,5 +902,6 @@ class PluginIndexRepository {
         val entries: List<PluginIndexEntry>,
         val fetchedSources: Set<PluginIndexSource>,
         val languageTag: String?,
+        val fetchedAtMs: Map<PluginIndexSource, Long>,
     )
 }

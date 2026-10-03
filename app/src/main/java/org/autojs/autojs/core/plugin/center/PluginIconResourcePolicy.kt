@@ -14,7 +14,7 @@ internal object PluginIconResourcePolicy {
         "io.github.supermonster003.autojs6.plugin.three.stamp.mail" to "ic_launcher",
         "io.github.supermonster003.autojs6.plugin.opencc" to "ic_launcher_transparent",
         "io.github.supermonster003.autojs6.plugin.r8compiler" to "ic_launcher_transparent",
-        "io.github.supermonster003.autojs6.plugin.readium.epub.reader" to "ic_launcher_transparent",
+        "io.github.supermonster003.autojs6.plugin.three.folio.epub" to "ic_launcher_transparent",
     )
 
     fun candidates(packageName: String): List<String> =

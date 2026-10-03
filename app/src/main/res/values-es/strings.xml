@@ -339,7 +339,7 @@
     <string name="error_empty_github_release_assets">No hay activos de la versión de GitHub para descargar</string>
     <string name="error_empty_shell_command">El comando está vacío</string>
     <string name="error_enable_server">No se puede habilitar el servidor AutoJs6: %s</string>
-    <string name="error_epub_plugin_unavailable">El plugin Readium EPUB Reader no está disponible. Instálelo, actívelo o actualícelo en el Centro de plugins y vuelva a intentarlo.</string>
+    <string name="error_epub_plugin_unavailable">El plugin 3-Folio EPUB no está disponible. Instálelo, actívelo o actualícelo en el Centro de plugins y vuelva a intentarlo.</string>
     <string name="error_excessive_height_for_template_n_region">Altura excesiva: plantilla [%1$d] > región [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">Anchura excesiva: plantilla [%1$d] > región [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">Error al aplicar el historial de color actual</string>
