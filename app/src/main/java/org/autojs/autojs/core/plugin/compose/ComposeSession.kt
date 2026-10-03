@@ -37,16 +37,27 @@ class ComposeSession(
     private class Submission(val tree: UiTree, val completion: ((CommitResult) -> Unit)?) {
         var completed = false
     }
+    private class Receipt(val submission: Submission, val failure: Throwable?)
     @Volatile var state = State.NEW
         private set
     private val closing = AtomicBoolean()
+    private val initializationFailed = AtomicBoolean()
+    private val scriptCleanupFinished = AtomicBoolean()
     private val callbacks = CallbackRegistry()
     private val reconciler = TreeReconciler { warn("Compose UI session $sessionId: list children have no key") }
     private val eventLock = Any()
     private val events = ArrayDeque<UiEvent>()
     private val droppedCommands = CommandResultEvictions()
-    private var eventScheduled = false
     private var overflowWarning = false
+    // Native producers write only this bounded mailbox. A receipt has one slot because a second
+    // frame cannot start until the script acknowledges the first. Command tickets are bounded by
+    // the callback registry; ordinary diagnostic failures share the event queue's count bound.
+    private var receipt: Receipt? = null
+    private var initializationFailure: Throwable? = null
+    private val nativeFailures = ArrayDeque<Throwable>()
+    private val failedCommands = LinkedHashSet<CallbackRegistry.CommandBinding>()
+    private var discardFailedCommands = false
+    private var failureOverflow = false
     private var pending: Submission? = null
     private var flight: Submission? = null
     private var flushScheduled = false
@@ -59,12 +70,26 @@ class ComposeSession(
     val callbackCount get() = callbacks.size
 
     init { require(sessionId > 0) }
+    private val control = script.createControlChannel(::drainControls)
 
     fun open() {
         confined()
         if (state != State.NEW) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
         state = State.OPEN
-        effect { renderer.open(this) }
+        main.execute {
+            if (canRender()) try { renderer.open(this) }
+            catch (failure: Exception) { failInitialization(failure) }
+            catch (failure: LinkageError) { failInitialization(failure) }
+        }
+    }
+
+    /** Initialization cannot recover by applying another frame, unlike an ordinary apply failure. */
+    fun failInitialization(failure: Throwable) {
+        synchronized(eventLock) {
+            if (closing.get() || !initializationFailed.compareAndSet(false, true)) return
+            initializationFailure = failure
+        }
+        control.request()
     }
 
     fun registerCallback(callback: (UiEvent) -> Unit): Int { usable(); return callbacks.register(callback) }
@@ -130,13 +155,13 @@ class ComposeSession(
             effect { renderer.execute(command) }
         } else {
             main.execute commandEffect@{
-                if (closing.get()) return@commandEffect
+                if (!canRender()) return@commandEffect
                 // A node event may have already queued the drain. Publish before execute so that
                 // drain cannot observe a terminal command event before its generation is known.
                 binding.publishGeneration(appliedGeneration)
                 try { renderer.execute(command) }
-                catch (failure: Exception) { script.post { callbacks.releaseCommand(binding); report(failure) } }
-                catch (failure: LinkageError) { script.post { callbacks.releaseCommand(binding); report(failure) } }
+                catch (failure: Exception) { nativeFailure(failure, binding) }
+                catch (failure: LinkageError) { nativeFailure(failure, binding) }
             }
         }
     }
@@ -144,44 +169,55 @@ class ComposeSession(
     private fun scheduleFlush() {
         if (flushScheduled || flight != null) return
         flushScheduled = true
-        script.post {
-            flushScheduled = false
-            if (closing.get()) return@post
-            val submission = pending ?: return@post
-            val target = submission.tree
-            pending = null
-            val patches = TreeReconciler.diff(tree, target)
-            if (patches.isEmpty()) {
-                callbacks.retain(tree)
-                complete(submission, CommitResult.Accepted(target, generation))
-                return@post
-            }
-            val batch = UiPatchBatch(sessionId, generation + 1, patches)
-            flight = submission
-            main.execute {
+        control.request()
+    }
+
+    private fun flush() {
+        if (!flushScheduled || flight != null) return
+        flushScheduled = false
+        if (closing.get()) return
+        val submission = pending ?: return
+        val target = submission.tree
+        pending = null
+        val patches = TreeReconciler.diff(tree, target)
+        if (patches.isEmpty()) {
+            callbacks.retain(tree)
+            complete(submission, CommitResult.Accepted(target, generation))
+            return
+        }
+        val batch = UiPatchBatch(sessionId, generation + 1, patches)
+        flight = submission
+        main.execute {
+            if (!canRender()) return@execute
+            val failure = try { renderer.apply(batch); appliedGeneration = batch.generation; null } catch (error: Exception) { error } catch (error: LinkageError) { error }
+            synchronized(eventLock) {
                 if (closing.get()) return@execute
-                val failure = try { renderer.apply(batch); appliedGeneration = batch.generation; null } catch (error: Exception) { error } catch (error: LinkageError) { error }
-                // Main completion is enqueued before any subsequently emitted view event.
-                script.dispatch {
-                    if (closing.get()) return@dispatch
-                    flight = null
-                    if (failure == null) {
-                        tree = target
-                        generation = batch.generation
-                        callbacks.commit(target, generation, pending?.tree)
-                        complete(submission, CommitResult.Accepted(target, generation))
-                        if (pending != null) scheduleFlush()
-                    } else {
-                        val dependent = pending
-                        pending = null
-                        callbacks.retain(tree)
-                        val rejection = CommitResult.Rejected(ComposeUiError.from(failure))
-                        complete(submission, rejection)
-                        dependent?.let { complete(it, rejection) }
-                        report(failure)
-                    }
-                }
+                receipt = Receipt(submission, failure)
             }
+            // The reserved control drain handles this receipt before events of its generation.
+            control.request()
+        }
+    }
+
+    private fun acknowledge(result: Receipt) {
+        val submission = result.submission
+        val target = submission.tree
+        flight = null
+        val failure = result.failure
+        if (failure == null) {
+            tree = target
+            generation = appliedGeneration
+            callbacks.commit(target, generation, pending?.tree)
+            complete(submission, CommitResult.Accepted(target, generation))
+            if (pending != null) scheduleFlush()
+        } else {
+            val dependent = pending
+            pending = null
+            callbacks.retain(tree)
+            val rejection = CommitResult.Rejected(ComposeUiError.from(failure))
+            complete(submission, rejection)
+            dependent?.let { complete(it, rejection) }
+            report(failure)
         }
     }
 
@@ -195,15 +231,12 @@ class ComposeSession(
                 overflowWarning = true
             }
             events.addLast(event)
-            if (eventScheduled) return
-            eventScheduled = true
         }
-        script.post(::drainEvents)
+        control.request()
     }
 
     private fun drainEvents() {
         val (batch, overflow) = synchronized(eventLock) {
-            eventScheduled = false
             droppedCommands.drain(callbacks)
             (events.toList() to overflowWarning).also { events.clear(); overflowWarning = false }
         }
@@ -225,14 +258,56 @@ class ComposeSession(
 
     private fun effect(action: () -> Unit) {
         main.execute {
-            if (!closing.get()) try { action() } catch (failure: Exception) { script.post { report(failure) } }
-            catch (failure: LinkageError) { script.post { report(failure) } }
+            if (canRender()) try { action() } catch (failure: Exception) { nativeFailure(failure) }
+            catch (failure: LinkageError) { nativeFailure(failure) }
         }
+    }
+
+    private fun nativeFailure(failure: Throwable, command: CallbackRegistry.CommandBinding? = null) {
+        synchronized(eventLock) {
+            if (closing.get()) return
+            if (command != null && !discardFailedCommands) {
+                if (failedCommands.size == ComposeUiLimits.MAX_CALLBACKS_PER_SESSION) {
+                    failedCommands.clear(); discardFailedCommands = true
+                } else failedCommands += command
+            }
+            if (nativeFailures.size == ComposeUiLimits.EVENT_QUEUE_CAPACITY) {
+                nativeFailures.removeFirst(); failureOverflow = true
+            }
+            nativeFailures.addLast(failure)
+        }
+        control.request()
+    }
+
+    private fun drainControls() {
+        confined()
+        if (closing.get()) { finishOnScriptThread(); return }
+        val fatal = synchronized(eventLock) { initializationFailure.also { initializationFailure = null } }
+        if (fatal != null) {
+            try { report(fatal) } finally { close() }
+            return
+        }
+        val completed = synchronized(eventLock) { receipt.also { receipt = null } }
+        completed?.let(::acknowledge)
+        if (closing.get()) { finishOnScriptThread(); return }
+        val failures = synchronized(eventLock) {
+            if (discardFailedCommands) callbacks.discardAllCommands()
+            else failedCommands.forEach(callbacks::releaseCommand)
+            failedCommands.clear(); discardFailedCommands = false
+            val overflow = failureOverflow.also { failureOverflow = false }
+            nativeFailures.toList().also { nativeFailures.clear() } to overflow
+        }
+        if (failures.second) warn("Compose UI session $sessionId: native error queue overflow")
+        failures.first.forEach(::report)
+        drainEvents()
+        flush()
     }
 
     private fun report(failure: Throwable) {
         if (!closing.get()) onError(ComposeUiError.from(failure))
     }
+
+    private fun canRender() = !closing.get() && !initializationFailed.get()
 
     private fun complete(submission: Submission, result: CommitResult) {
         if (submission.completed) return
@@ -244,17 +319,34 @@ class ComposeSession(
 
     /** Callable from engine/Activity/window teardown. No thread waits for another dispatcher. */
     override fun close() {
-        if (!closing.compareAndSet(false, true)) return
-        state = State.CLOSED
-        synchronized(eventLock) { events.clear(); droppedCommands.clear(); eventScheduled = false }
-        script.dispatch {
-            val outstanding = listOfNotNull(flight, pending)
-            callbacks.close(); pending = null; flight = null; tree = null
-            val rejection = CommitResult.Rejected(ComposeUiError(ComposeUiErrorCodes.SESSION_CLOSED))
-            outstanding.forEach { complete(it, rejection) }
-            try { onClosed() } finally { script.close() }
+        if (!closing.compareAndSet(false, true)) {
+            // A quitting Looper can reject the original cross-thread cleanup. Engine teardown
+            // still has an opportunity to release script-owned state on the originating thread.
+            if (script.isDispatchThread()) finishOnScriptThread()
+            return
         }
-        main.execute { try { renderer.dispose() } catch (_: Exception) { } catch (_: LinkageError) { } }
+        state = State.CLOSED
+        synchronized(eventLock) { events.clear(); droppedCommands.clear() }
+        try {
+            if (script.isDispatchThread()) finishOnScriptThread() else control.request()
+        } finally {
+            main.execute { try { renderer.dispose() } catch (_: Exception) { } catch (_: LinkageError) { } }
+        }
+    }
+
+    private fun finishOnScriptThread() {
+        confined()
+        if (!scriptCleanupFinished.compareAndSet(false, true)) return
+        control.close()
+        synchronized(eventLock) {
+            events.clear(); droppedCommands.clear(); receipt = null; initializationFailure = null
+            nativeFailures.clear(); failedCommands.clear(); discardFailedCommands = false; failureOverflow = false
+        }
+        val outstanding = listOfNotNull(flight, pending)
+        callbacks.close(); pending = null; flight = null; tree = null; flushScheduled = false
+        val rejection = CommitResult.Rejected(ComposeUiError(ComposeUiErrorCodes.SESSION_CLOSED))
+        outstanding.forEach { complete(it, rejection) }
+        try { onClosed() } finally { script.close() }
     }
 
     private fun confined() { check(script.isDispatchThread()) { "Compose UI mutations require the script dispatcher" } }

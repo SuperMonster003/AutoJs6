@@ -13,15 +13,18 @@ class ComposeSessionSubmissionTest {
         val tasks = ArrayDeque<() -> Unit>()
         var current = true
         var closed = false
+        var dropPosts = false
+        var closeCalls = 0
         override fun isDispatchThread() = current
-        override fun post(action: () -> Unit) { if (!closed) tasks.add(action) }
+        override fun post(action: () -> Unit) { if (!closed && !dropPosts) tasks.add(action) }
         fun drain() { while (tasks.isNotEmpty()) tasks.removeFirst()() }
-        override fun close() { closed = true; tasks.clear() }
+        override fun close() { closeCalls++; closed = true; tasks.clear() }
     }
 
     private class Renderer : ComposeSessionRenderer {
         val batches = ArrayList<UiPatchBatch>()
         var reject = false
+        var disposals = 0
         override fun open(sink: ComposeUiEventSink) = Unit
         override fun attach() = Unit
         override fun detach() = Unit
@@ -31,15 +34,16 @@ class ComposeSessionSubmissionTest {
         }
         override fun execute(command: UiCommand) = Unit
         override fun setTheme(theme: ThemeSpec) = Unit
-        override fun dispose() = Unit
+        override fun dispose() { disposals++ }
     }
 
-    private class Fixture {
+    private class Fixture(onClosed: () -> Unit = {}) {
         val script = Dispatcher()
         val renderer = Renderer()
         val main = ArrayDeque<Runnable>()
         val errors = ArrayList<ComposeUiError>()
-        val session = ComposeSession(1, script, Executor(main::add), renderer, setOf(ComposeUiComponents.TEXT), errors::add)
+        val session = ComposeSession(1, script, Executor(main::add), renderer, setOf(ComposeUiComponents.TEXT), errors::add,
+            onClosed = onClosed)
         init { session.open(); main() }
         fun main() {
             script.current = false
@@ -169,5 +173,67 @@ class ComposeSessionSubmissionTest {
         fixture.settle()
         assertTrue(outcomes.single() is ComposeSession.CommitResult.Accepted)
         assertEquals(tree("valid"), fixture.session.tree)
+    }
+
+    @Test fun ownerCloseRetriesCleanupDroppedByAQuittingScriptDispatcher() {
+        var closed = 0
+        val fixture = Fixture { closed++ }
+        val published = fixture.session.registerCallback {}
+        fixture.accepted("published", published)
+        val outcomes = ArrayList<ComposeSession.CommitResult>()
+        val flight = fixture.session.registerCallback {}
+        fixture.session.submitStableTree(tree("flight", flight)) {
+            assertTrue(fixture.script.current)
+            outcomes += it
+        }
+        fixture.script.drain()
+        val pending = fixture.session.registerCallback {}
+        fixture.session.submitStableTree(tree("pending", pending)) {
+            assertTrue(fixture.script.current)
+            outcomes += it
+        }
+        fixture.script.dropPosts = true
+        fixture.script.current = false
+        fixture.session.close()
+        assertEquals(ComposeSession.State.CLOSED, fixture.session.state)
+        assertEquals(0, closed)
+        assertTrue(outcomes.isEmpty())
+        assertEquals(3, fixture.session.callbackCount)
+        assertNotNull(fixture.session.tree)
+        fixture.main()
+        assertEquals(1, fixture.renderer.disposals)
+
+        fixture.session.close()
+        assertEquals(0, fixture.session.callbackCount)
+        assertNull(fixture.session.tree)
+        assertEquals(2, outcomes.size)
+        assertTrue(outcomes.all { it is ComposeSession.CommitResult.Rejected && it.error.code == ComposeUiErrorCodes.SESSION_CLOSED })
+        assertEquals(1, closed)
+        assertEquals(1, fixture.script.closeCalls)
+        fixture.session.close(); fixture.main()
+        assertEquals(2, outcomes.size)
+        assertEquals(1, closed)
+        assertEquals(1, fixture.renderer.disposals)
+        assertEquals(1, fixture.script.closeCalls)
+    }
+
+    @Test fun aLateCleanupDeliveryCannotRepeatOwnerRecoveryOrSubmissionReceipts() {
+        var closed = 0
+        val fixture = Fixture { closed++ }
+        val outcomes = ArrayList<ComposeSession.CommitResult>()
+        fixture.session.submitStableTree(tree("pending"), outcomes::add)
+        fixture.script.current = false
+        fixture.session.close()
+        val lateCleanup = fixture.script.tasks.removeFirst()
+        fixture.script.current = true
+        fixture.session.close()
+        assertEquals(1, outcomes.size)
+        assertEquals(1, closed)
+        lateCleanup()
+        fixture.main()
+        assertEquals(1, outcomes.size)
+        assertEquals(1, closed)
+        assertEquals(1, fixture.script.closeCalls)
+        assertEquals(1, fixture.renderer.disposals)
     }
 }

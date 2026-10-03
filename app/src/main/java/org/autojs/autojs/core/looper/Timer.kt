@@ -137,7 +137,7 @@ class Timer {
             mPendingCallbacks.add(pending)
             if (!mHandler.postAtTime(pending, uptime)) {
                 mPendingCallbacks.remove(pending)
-                throw IllegalStateException("Unable to schedule a timer callback because its looper is exiting")
+                throw TimerCallbackRejectedException()
             }
             // Retain the historical high-water mark for callers, but never use it to decide
             // whether work remains: cancelled callbacks can leave this far in the future.
