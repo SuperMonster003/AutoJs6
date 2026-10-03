@@ -345,3 +345,18 @@ must agree. Changed model/dataset inputs reject export before publishing its new
 variables. The package derives from the controlled-only P3 model; the `.gitattributes` beside it
 preserves package bytes and LF reference-file hashes across checkouts. The external test alone
 is skipped when `CODEGEN_PARITY_DIR` is absent.
+
+## Measure the model budget on the JVM
+
+```powershell
+$env:CODEGEN_BENCH = '1'
+$env:CODEGEN_BENCH_DIR = (Join-Path (Get-Location) 'build/codegen-benchmark/p4')
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.model.ModelBenchmarkTest'
+Remove-Item Env:CODEGEN_BENCH, Env:CODEGEN_BENCH_DIR
+```
+
+The fixed-seed benchmark loads 1,024 depth-6 trees and measures feature extraction plus scoring
+for 200 independently verified candidate plans in a 5,000-node layout. It records first and
+warm package loads, separate feature/score P50/P95, and exact backing-array bytes. These numbers
+exclude JVM object headers, temporary parsing buffers, and feature contexts from the array total;
+Android first-load, latency and resident-memory acceptance still belong to P8.2.
