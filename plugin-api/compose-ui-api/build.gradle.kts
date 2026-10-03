@@ -26,3 +26,17 @@ tasks.withType<Test>().configureEach {
     systemProperty("compose.api.root", rootProject.projectDir.absolutePath)
     systemProperty("compose.api.reportDir", layout.buildDirectory.dir("reports/contract").get().asFile.absolutePath)
 }
+
+tasks.register<JavaExec>("exportComposeUiCatalog") {
+    group = "documentation"
+    description = "Export the actual frozen V1 component catalog as JSON for declaration/documentation checks."
+    dependsOn("testDebugUnitTest")
+    classpath = files(provider {
+        val unitTests = tasks.named<Test>("testDebugUnitTest").get()
+        unitTests.classpath + unitTests.testClassesDirs
+    })
+    mainClass.set("org.autojs.plugin.compose.api.ComposeCatalogExporter")
+    val target = layout.buildDirectory.file("reports/compose-ui/component-catalog-v1.json")
+    outputs.file(target)
+    args(target.get().asFile.absolutePath)
+}

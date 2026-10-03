@@ -1,0 +1,185 @@
+"""Pure Python regressions for the P4.3 gate; run with unittest discover -s .python."""
+
+import contextlib
+import copy
+import io
+import json
+from pathlib import Path
+import tempfile
+import unittest
+
+import compose_catalog_check as tool
+
+
+def value_type(*kinds, enum=(), elements=(), minimum=None, maximum=None, length=(0, 2000)):
+    return {"kinds": list(kinds), "enumValues": list(enum), "minimum": minimum, "maximum": maximum,
+            "minimumExclusive": False, "integral": False, "listKinds": list(elements),
+            "listMinimum": length[0], "listMaximum": length[1]}
+
+
+def prop(name, kind, *, required=False, aliases=(), default=None, update="SET_PROPS"):
+    return {"name": name, "type": kind, "required": required, "default": default,
+            "aliases": list(aliases), "update": update}
+
+
+def component(name, properties=(), invocation="NODE"):
+    return {"name": name, "invocation": invocation, "children": "NONE", "scope": "ANY",
+            "commands": [], "properties": list(properties), "slots": [], "events": []}
+
+
+def fixture():
+    components = [
+        component("Switch", [prop("checked", value_type("BOOLEAN"), default={"kind": "BOOLEAN", "value": False})]),
+        component("TextField", [prop("text", value_type("STRING"), aliases=["value"], default={"kind": "STRING", "value": ""}, update="EDIT_COMMAND")]),
+        component("Snackbar", [prop("message", value_type("STRING"), required=True)], invocation="COMMAND"),
+        component("Slider", [prop("range", value_type("LIST", elements=["NUMBER"], length=(2, 2)))]),
+        component("Spacer"),
+    ]
+    return {"schemaVersion": 1, "contractVersion": 1, "source": tool.SOURCE,
+            "componentCount": len(components), "propertyCount": 4, "valueKinds": sorted(tool.KINDS), "components": components}
+
+
+class CatalogGateTest(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix="compose-catalog-test-")
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.catalog = tool.validate_catalog(fixture())
+        self.catalog_file = self.root / "catalog.json"
+        self.catalog_file.write_text(json.dumps(self.catalog), encoding="utf-8")
+        self.dts = self.root / "aj6-int-compose.d.ts"
+        self.docs = self.root / "compose.md"
+        self.dts.write_text("// Handwritten API is outside the catalog projection.\n" + tool.render_dts(self.catalog), encoding="utf-8")
+        self.docs.write_text("# Compose\n\n" + tool.render_docs(self.catalog) + "\nOther API documentation.\n", encoding="utf-8")
+
+    def run_cli(self, *args):
+        output, errors = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(errors):
+            status = tool.main(list(args))
+        return status, output.getvalue(), errors.getvalue()
+
+    def check(self):
+        return self.run_cli("check", "--catalog", str(self.catalog_file), "--dts", str(self.dts), "--docs", str(self.docs))
+
+    def test_matching_delivered_regions_pass_and_ignore_unrelated_handwritten_sections(self):
+        status, output, errors = self.check()
+        self.assertEqual(0, status, errors)
+        self.assertIn("5 components / 4 canonical properties", output)
+        self.assertEqual("", errors)
+
+    def test_missing_component_without_properties_still_fails(self):
+        text = self.dts.read_text(encoding="utf-8")
+        self.dts.write_text(text.replace('        "Spacer": {\n        };\n', ""), encoding="utf-8")
+        status, _, errors = self.check()
+        self.assertEqual(1, status)
+        self.assertIn('"Spacer"', errors)
+
+    def test_missing_typescript_property_is_not_hidden_by_matching_component_and_hash(self):
+        text = self.dts.read_text(encoding="utf-8")
+        self.dts.write_text(text.replace('            "checked"?: boolean;\n', ""), encoding="utf-8")
+        status, _, errors = self.check()
+        self.assertEqual(1, status)
+        self.assertIn('"checked"?: boolean;', errors)
+
+    def test_wrong_typescript_property_type_fails(self):
+        text = self.dts.read_text(encoding="utf-8")
+        self.dts.write_text(text.replace('"checked"?: boolean;', '"checked"?: string;'), encoding="utf-8")
+        status, _, errors = self.check()
+        self.assertEqual(1, status)
+        self.assertIn('"checked"?: string;', errors)
+        self.assertIn('"checked"?: boolean;', errors)
+
+    def test_missing_markdown_property_row_fails(self):
+        lines = self.docs.read_text(encoding="utf-8").splitlines()
+        self.docs.write_text("\n".join(line for line in lines if not line.startswith("| <code>Switch</code> | <code>checked</code> |")) + "\n", encoding="utf-8")
+        status, _, errors = self.check()
+        self.assertEqual(1, status)
+        self.assertIn("component documentation differs", errors)
+        self.assertIn("<code>checked</code>", errors)
+
+    def test_wrong_markdown_type_fails(self):
+        text = self.docs.read_text(encoding="utf-8")
+        self.docs.write_text(text.replace("<code>checked</code> | <code>boolean</code>", "<code>checked</code> | <code>number</code>"), encoding="utf-8")
+        status, _, errors = self.check()
+        self.assertEqual(1, status)
+        self.assertIn("<code>number</code>", errors)
+
+    def test_aliases_required_properties_and_tuple_types_are_real_declarations(self):
+        text = tool.render_dts(self.catalog)
+        self.assertIn('"value"?: string;', text)
+        self.assertIn('"message": string;', text)
+        self.assertIn('"range"?: readonly [number, number];', text)
+        node_names = next(line for line in text.splitlines() if "type ComposeCatalogNodeName" in line)
+        command_names = next(line for line in text.splitlines() if "type ComposeCatalogCommandName" in line)
+        self.assertNotIn('"Snackbar"', node_names)
+        self.assertIn('"Snackbar"', command_names)
+        self.dts.write_text(self.dts.read_text(encoding="utf-8").replace('            "value"?: string;\n', ""), encoding="utf-8")
+        self.assertEqual(1, self.check()[0])
+
+    def test_missing_external_files_and_markers_are_failures_before_p6_delivery(self):
+        self.dts.unlink()
+        status, output, errors = self.check()
+        self.assertEqual(1, status)
+        self.assertNotIn("OK:", output)
+        self.assertIn("not a successful consistency check", errors)
+        self.dts.write_text("declare namespace Internal {}\n", encoding="utf-8")
+        self.assertIn("exactly one catalog start/end marker", self.check()[2])
+
+    def test_duplicate_or_reversed_markers_are_rejected(self):
+        self.dts.write_text(tool.render_dts(self.catalog) * 2, encoding="utf-8")
+        self.assertIn("exactly one", self.check()[2])
+        self.dts.write_text(tool.DTS_END + "\n" + tool.DTS_START + "\n", encoding="utf-8")
+        self.assertIn("reversed", self.check()[2])
+
+    def test_generation_is_explicitly_not_a_check(self):
+        output_dir = self.root / "fragments"
+        status, output, errors = self.run_cli("generate", "--catalog", str(self.catalog_file), "--output-dir", str(output_dir))
+        self.assertEqual(0, status, errors)
+        self.assertIn("NOT been checked", output)
+        self.assertEqual(tool.render_dts(self.catalog), (output_dir / "compose-catalog.fragment.d.ts").read_text(encoding="utf-8"))
+        self.assertEqual(tool.render_docs(self.catalog), (output_dir / "compose-catalog.fragment.md").read_text(encoding="utf-8"))
+
+    def test_crlf_outputs_are_portable_but_catalog_type_corruption_is_not_accepted(self):
+        self.dts.write_bytes(tool.render_dts(self.catalog).replace("\n", "\r\n").encode("utf-8"))
+        self.assertEqual(0, self.check()[0])
+        broken = copy.deepcopy(self.catalog)
+        broken["components"][0]["properties"][0]["type"]["kinds"] = ["UNREVIEWED_KIND"]
+        with self.assertRaisesRegex(tool.CatalogError, "unsupported value kind"):
+            tool.validate_catalog(broken)
+
+    def test_markdown_union_types_and_default_pipes_do_not_create_extra_table_columns(self):
+        catalog = copy.deepcopy(self.catalog)
+        catalog["components"][0]["properties"].append(prop("color", value_type("COLOR", "NULL")))
+        catalog["components"][1]["properties"][0]["default"]["value"] = "left|right"
+        catalog["propertyCount"] += 1
+        text = tool.render_docs(tool.validate_catalog(catalog))
+        self.assertIn("ComposeColorInput &#124; null", text)
+        self.assertIn("left&#124;right", text)
+        for line in text.splitlines():
+            if line.startswith("|"):
+                self.assertEqual(10, len(line.split("|")), line)
+
+    def test_missing_documentation_table_is_not_a_successful_p6_check(self):
+        self.docs.write_text("# Compose\nP6 reference is not delivered yet.\n", encoding="utf-8")
+        status, output, errors = self.check()
+        self.assertEqual(1, status)
+        self.assertNotIn("OK:", output)
+        self.assertIn("component documentation: expected exactly one catalog start/end marker", errors)
+
+    def test_partial_or_duplicate_export_is_rejected_before_generation(self):
+        broken = copy.deepcopy(self.catalog)
+        broken["components"].pop()
+        with self.assertRaisesRegex(tool.CatalogError, "component count"):
+            tool.validate_catalog(broken)
+        broken = copy.deepcopy(self.catalog)
+        broken["components"][0]["properties"].append(copy.deepcopy(broken["components"][0]["properties"][0]))
+        with self.assertRaisesRegex(tool.CatalogError, "duplicate property/alias"):
+            tool.validate_catalog(broken)
+        broken = copy.deepcopy(self.catalog)
+        broken["components"][0]["properties"][0]["required"] = "false"
+        with self.assertRaisesRegex(tool.CatalogError, "required must be a boolean"):
+            tool.validate_catalog(broken)
+
+
+if __name__ == "__main__":
+    unittest.main()
