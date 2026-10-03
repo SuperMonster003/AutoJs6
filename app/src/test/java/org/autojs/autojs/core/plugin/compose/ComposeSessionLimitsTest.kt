@@ -20,13 +20,18 @@ class ComposeSessionLimitsTest {
     }
     private class Renderer : ComposeSessionRenderer {
         val batches = ArrayList<UiPatchBatch>()
+        val commands = ArrayList<UiCommand>()
         var reject = false
+        var rejectCommands = false
         var disposals = 0
         override fun open(sink: ComposeUiEventSink) = Unit
         override fun attach() = Unit
         override fun detach() = Unit
         override fun apply(batch: UiPatchBatch) { if (reject) throw ComposeUiContractException(ComposeUiErrorCodes.RENDER_FAILED); batches += batch }
-        override fun execute(command: UiCommand) = Unit
+        override fun execute(command: UiCommand) {
+            if (rejectCommands) throw ComposeUiContractException(ComposeUiErrorCodes.RENDER_FAILED)
+            commands += command
+        }
         override fun setTheme(theme: ThemeSpec) = Unit
         override fun dispose() { disposals++ }
     }
@@ -88,5 +93,79 @@ class ComposeSessionLimitsTest {
             (4..4001).map { UiNode(it, ComposeUiComponents.TEXT, props = mapOf(ComposeUiProps.TEXT to UiValue.Str(value))) })
         val reconciler = TreeReconciler(); val before = reconciler.reconcile(null, wide("a")).tree
         limited { reconciler.reconcile(before, wide("b")) }
+    }
+
+    @Test fun snackbarCallbacksRemainAliveWhenTreesChangeAndCloseReleasesThem() {
+        val script = Dispatcher(); val renderer = Renderer()
+        val session = session(script, renderer)
+        val callback = session.registerCallback { }
+        session.execute(UiCommand.ShowSnackbar("status", callbackId = callback))
+        session.render(text("first")); script.drain()
+        session.render(text("second")); script.drain()
+        assertEquals(1, session.callbackCount)
+        assertEquals(1, renderer.commands.size)
+        assertEquals(2L, session.generation)
+        session.close()
+        assertEquals(0, session.callbackCount)
+    }
+
+    @Test fun rejectedSnackbarReleasesItsBindingOnTheScriptDispatcher() {
+        val script = Dispatcher(); val renderer = Renderer(); val errors = ArrayList<ComposeUiError>()
+        val tasks = ArrayDeque<Runnable>()
+        val session = session(script, renderer, errors, Executor(tasks::add))
+        fun main() { script.current = false; while (tasks.isNotEmpty()) tasks.removeFirst().run(); script.current = true }
+        main()
+        renderer.rejectCommands = true
+        val callback = session.registerCallback { }
+        session.execute(UiCommand.ShowSnackbar("status", callbackId = callback))
+        main()
+        assertEquals(1, session.callbackCount)
+        assertTrue(errors.isEmpty())
+        script.drain()
+        assertEquals(0, session.callbackCount)
+        assertEquals(ComposeUiErrorCodes.RENDER_FAILED, errors.single().code)
+        assertTrue(renderer.commands.isEmpty())
+    }
+
+    @Test fun unregisteredAndDuplicateCommandCallbacksFailBeforeRendererSubmission() {
+        val script = Dispatcher(); val renderer = Renderer()
+        val session = session(script, renderer)
+        fun invalid(action: () -> Unit) {
+            try { action(); fail("Expected invalid callback") }
+            catch (failure: ComposeUiContractException) { assertEquals(ComposeUiErrorCodes.INVALID_ARGUMENT, failure.code) }
+        }
+        invalid { session.execute(UiCommand.ShowSnackbar("status", callbackId = 123)) }
+        assertTrue(renderer.commands.isEmpty())
+        val callback = session.registerCallback { }
+        session.execute(UiCommand.ShowSnackbar("first", callbackId = callback))
+        invalid { session.execute(UiCommand.ShowSnackbar("duplicate", callbackId = callback)) }
+        assertEquals(1, renderer.commands.size)
+        assertEquals(1, session.callbackCount)
+    }
+
+    @Test fun failedPendingApplyDoesNotPruneACommandWaitingBehindIt() {
+        val script = Dispatcher(); val renderer = Renderer(); val errors = ArrayList<ComposeUiError>()
+        val tasks = ArrayDeque<Runnable>()
+        val session = session(script, renderer, errors, Executor(tasks::add))
+        fun main() { script.current = false; while (tasks.isNotEmpty()) tasks.removeFirst().run(); script.current = true }
+        main()
+        renderer.reject = true
+        session.render(text("rejected")); script.drain()
+        val callback = session.registerCallback { }
+        session.execute(UiCommand.ShowSnackbar("still active", callbackId = callback))
+        main(); script.drain()
+        assertNull(session.tree)
+        assertEquals(0L, session.generation)
+        assertEquals(1, session.callbackCount)
+        assertEquals(1, renderer.commands.size)
+        assertEquals(ComposeUiErrorCodes.RENDER_FAILED, errors.single().code)
+        // A second, failed command is released while the first command remains held.
+        renderer.rejectCommands = true
+        session.execute(UiCommand.ShowSnackbar("rejected command", callbackId = session.registerCallback { }))
+        main(); script.drain()
+        assertEquals(1, session.callbackCount)
+        assertEquals(2, errors.size)
+        session.close(); main()
+        assertEquals(0, session.callbackCount)
     }
 }

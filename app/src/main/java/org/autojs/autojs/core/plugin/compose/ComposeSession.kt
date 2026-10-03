@@ -36,11 +36,14 @@ class ComposeSession(
     private val reconciler = TreeReconciler { warn("Compose UI session $sessionId: list children have no key") }
     private val eventLock = Any()
     private val events = ArrayDeque<UiEvent>()
+    private val droppedCommands = CommandResultEvictions()
     private var eventScheduled = false
     private var overflowWarning = false
     private var pending: UiTree? = null
     private var flight: UiTree? = null
     private var flushScheduled = false
+    // Main-thread value: a command may run after apply succeeds but before its script acknowledgement.
+    private var appliedGeneration = 0L
     var tree: UiTree? = null
         private set
     var generation = 0L
@@ -67,6 +70,7 @@ class ComposeSession(
         val result = reconciler.reconcile(pending ?: flight ?: tree, draft)
         TreeReconciler.diff(flight ?: tree, result.tree)
         pending = result.tree
+        callbacks.stage(flight, pending)
         scheduleFlush()
     }
 
@@ -84,7 +88,20 @@ class ComposeSession(
             is UiCommand.ShowSnackbar -> null
         }
         if (id != null && tree?.nodes?.none { it.nodeId == id } != false) throw ComposeUiContractException(ComposeUiErrorCodes.NODE_DETACHED, nodeId = id)
-        effect { renderer.execute(command) }
+        val binding = (command as? UiCommand.ShowSnackbar)?.callbackId?.let(callbacks::reserveCommand)
+        if (binding == null) {
+            effect { renderer.execute(command) }
+        } else {
+            main.execute commandEffect@{
+                if (closing.get()) return@commandEffect
+                // A node event may have already queued the drain. Publish before execute so that
+                // drain cannot observe a terminal command event before its generation is known.
+                binding.publishGeneration(appliedGeneration)
+                try { renderer.execute(command) }
+                catch (failure: Exception) { script.post { callbacks.releaseCommand(binding); report(failure) } }
+                catch (failure: LinkageError) { script.post { callbacks.releaseCommand(binding); report(failure) } }
+            }
+        }
     }
 
     private fun scheduleFlush() {
@@ -101,7 +118,7 @@ class ComposeSession(
             flight = target
             main.execute {
                 if (closing.get()) return@execute
-                val failure = try { renderer.apply(batch); null } catch (error: Exception) { error } catch (error: LinkageError) { error }
+                val failure = try { renderer.apply(batch); appliedGeneration = batch.generation; null } catch (error: Exception) { error } catch (error: LinkageError) { error }
                 // Main completion is enqueued before any subsequently emitted view event.
                 script.dispatch {
                     if (closing.get()) return@dispatch
@@ -125,7 +142,11 @@ class ComposeSession(
         if (closing.get() || event.sessionId != sessionId) return
         synchronized(eventLock) {
             if (closing.get()) return
-            if (events.size == ComposeUiLimits.EVENT_QUEUE_CAPACITY) { events.removeFirst(); overflowWarning = true }
+            if (events.size == ComposeUiLimits.EVENT_QUEUE_CAPACITY) {
+                val dropped = events.removeFirst()
+                droppedCommands.add(dropped.generation, dropped.nodeId, dropped.type, dropped.callbackId)
+                overflowWarning = true
+            }
             events.addLast(event)
             if (eventScheduled) return
             eventScheduled = true
@@ -136,19 +157,20 @@ class ComposeSession(
     private fun drainEvents() {
         val (batch, overflow) = synchronized(eventLock) {
             eventScheduled = false
+            droppedCommands.drain(callbacks)
             (events.toList() to overflowWarning).also { events.clear(); overflowWarning = false }
         }
         if (overflow) warn("Compose UI session $sessionId: event queue overflow")
         for (event in batch) {
             if (closing.get()) return
-            if (event.generation != generation) continue
             if (event.callbackId == ComposeUiContract.SYSTEM_CALLBACK_ID && event.type == ComposeUiEvents.ERROR) {
+                if (event.generation != generation) continue
                 report(ComposeUiError(event.payload.getString(ComposeUiEventFields.CODE) ?: ComposeUiErrorCodes.RENDER_FAILED,
                     nodeId = event.nodeId.takeUnless { it == ComposeUiContract.NO_NODE_ID },
                     prop = event.payload.getString(ComposeUiEventFields.PROP)))
             } else {
                 callbacks.resolve(event.generation, event.nodeId, event.type, event.callbackId)?.let { callback ->
-                    try { callback(event) } catch (failure: Exception) { report(failure) }
+                    try { callback(event) } catch (failure: Exception) { report(failure) } catch (failure: LinkageError) { report(failure) }
                 }
             }
         }
@@ -169,7 +191,7 @@ class ComposeSession(
     override fun close() {
         if (!closing.compareAndSet(false, true)) return
         state = State.CLOSED
-        synchronized(eventLock) { events.clear(); eventScheduled = false }
+        synchronized(eventLock) { events.clear(); droppedCommands.clear(); eventScheduled = false }
         script.dispatch {
             callbacks.close(); pending = null; flight = null; tree = null
             try { onClosed() } finally { script.close() }
