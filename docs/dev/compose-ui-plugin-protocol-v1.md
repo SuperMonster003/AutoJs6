@@ -1,7 +1,8 @@
 # Compose UI contract V1
 
 Status: V1 frozen at P1.1 on 2026-10-02; P1.3 registration and the P2 renderer are
-implemented on 2026-10-03. The P3 script entry remains in development. This document specifies the full boundary, not delivery of the script API.
+implemented on 2026-10-03. P3.1/P3.2/P3.3 provide the UI script entry in the matching local host preview;
+the P3.4 floaty entry and remaining P3.5 integration guards are still pending.
 The host owns `plugin-api/compose-ui-api`; the plugin consumes
 its release AAR as compileOnly. The contract depends on Android, Kotlin/JDK and common-plugin-api,
 and contains no Compose implementation dependency.
@@ -325,6 +326,84 @@ references; evicted results are not invoked. A callback ID already used for a co
 for another command. Node event generations remain strict. AlertDialog.open is controlled by tree
 props; dismissal emits a request without closing the dialog until a patch accepts it.
 
-The public compose script API is not delivered yet. FEATURES remains empty; the component table is
-the authority for availability. Full accessibility fleet coverage, floaty/inrt execution, long-running
-memory checks and performance thresholds remain later roadmap work.
+FEATURES remains empty; the component table is the authority for renderer availability. The matching
+host now provides the UI script API below. Full accessibility fleet coverage, floaty/inrt execution,
+long-running memory checks and performance thresholds remain later roadmap work.
+
+## P3.1/P3.2/P3.3 local script implementation
+
+The host installs `compose` and `$compose` as the same callable object before plugin auto-mount.
+Calling it is an alias for `compose.mount`. `isAvailable()` and read-only `version` probe the existing
+installation, enablement, trust and version gates; version is `{plugin, contract, compose}` or null.
+The 29 element factory names are derived from V1 NODE entries. Snackbar stays a session command,
+not an element factory. `createElement(type, props?, ...children)` shares the same conversion path.
+
+Element props extract key/ref, child/slot nodes, onX callbacks and an immutable modifier chain before
+catalog conversion. Numbers default to dp for dimension properties, explicit dp/sp strings must
+match the catalog type, and colors use the host colors module. Text styles, shapes, icons and theme
+values are checked before publication. ImageWrapper, decoded local files and host @drawable/name
+resources retain a host owner while the weak BitmapRef is in use; Bitmap values returned by src
+getters can be reassigned. URL loading is absent. None of these Rhino values cross into the APK.
+
+`ComposeNode` supports read-only type/key/nodeId/parent/children, validated property/shortcut
+accessors, set/get, append/insert/remove/replace/clear, slot, on/off and focus/blur/scrollTo/edit.
+Unmounted nodes report nodeId=-1 while keeping an internal positive identity for future publication.
+Child arrays are snapshots. Mutations validate the candidate connected tree before publishing, with
+atomic rollback for cycles, duplicate keys, wrong scopes, bad values or capacity failures. A closed
+session's retained handles report SESSION_CLOSED; commands on detached nodes report NODE_DETACHED.
+Ownership cannot move between sessions. Unsupported property writes cannot create stray JS fields.
+
+One engine owns a graph; each mount publishes stable IDs through ComposeSession.submitStableTree.
+Accepted/rejected/superseded receipts run on the script dispatcher exactly once, including a no-op.
+Callbacks are immutable versioned local tokens mapped to live core IDs, pruned on supersession and
+acknowledgement. Script functions, close listeners and command callbacks share the bounded budget.
+When an earlier listener closes the session, subsequent listeners from the same input stop running.
+Cross-parent/slot transfers use an atomic SetRoot fallback where incremental insert ordering would
+otherwise collide; ordinary same-parent reorders still produce Move.
+
+`state(initial)` exposes value, tracks reads during render and queues one render per scheduler tick.
+`batch(fn)` coalesces state and handle writes; it does not roll back state values when user code throws.
+A successful render prunes obsolete dependencies; a failed render retains the old view and enough
+old/attempted dependencies to retry when its inputs change. Actual script exceptions become
+RENDER_FAILED with their cause/stack. Structural INVALID_ARGUMENT, DUPLICATE_KEY and other typed
+validation errors retain their codes. Rendering never uses the generic helper that terminates UI
+scripts on a callback exception. Asynchronous errors are reported through the script console.
+
+Fresh render nodes match old handle objects by parent/key/type, or type plus same-type position when
+unkeyed. Explicit nodes created outside that render keep their identity. Missing keys warn once per
+session. `ref().current` is published only after an accepted frame and cleared on removal/close;
+failed frames restore the accepted graph and refs. A rejected initial frame remains connected so a
+subsequent valid update can recover. Native TextField events maintain the handle's current text,
+selection and editSeq; pending edits coalesce to the complete final text/selection before dispatch.
+An accepted field removal ends its native editing lifetime. The local editor then returns to that
+lifetime's wire text declaration, end caret and sequence 0; reinsertion starts the corresponding new
+lifetime. A coalesced remove/readd that never leaves the accepted tree preserves editing state.
+One bounded deferred edit carries pre-mount selection or a detached local edit into insertion, while
+retaining its original sequence. Old captured writes are not refreshed to bypass native arbitration.
+
+Callback arguments are checkedChange(checked), slider valueChange(value), field
+valueChange(text, {start,end}, editSeq), focusChange(focused), and scroll(firstVisibleIndex|null,
+pixelOffset). Click, longClick, valueChangeFinished and dismissRequest have no positional payload.
+Callbacks use their node as this. All run on the originating script dispatcher after renderer enqueue.
+
+`mount(nodeOrRender, {theme?})` requires a real UI ScriptExecuteActivity, mounts via the existing
+ui.setContentViewRhinoRuntime path and returns root/update/post/showSnackbar/close/isClosed/on('close').
+Repeated mount closes the prior UI session. ui.layout/layoutFile/setContentView replacing its view
+closes it and warns; native Activity events retain the existing ui emitter. Activity destroy and
+engine exit close sessions, compositions, callback references, queued work and image owners.
+The P2.4 single host inset owner remains in use. Lifecycle validation includes 20 real mount/close
+cycles; this does not replace the later long-running heap/memory matrix.
+
+`post(fn, delay?)` marshals worker updates without waiting on the UI thread; delay is a nonnegative
+integer number of milliseconds. Session post cancels when that session closes, and engine exit
+cancels module posts. Mutating state or handles from another thread requires post. The module's idle
+dispatcher does not keep a non-UI script alive merely because the global object was installed.
+`theme(spec?)` reads/sets the default and updates the current session; partial overrides preserve
+live host seed/night/font defaults. Reads return independent objects. `sessions` is a read-only
+array snapshot. Global ComposeError and compose.ComposeError share a per-scope Error constructor
+with code/message/nodeId/prop/cause, stack and plugin-selection retryability.
+
+This remains a local development preview under D7. Use the matching host source/build containing
+the script entry; the renderer's unchanged 5316 contract floor does not by itself distinguish older
+unpublished builds with the same build number. `compose.floaty`, examples/types/full user docs and
+the remaining compatibility/performance gates are delivered in their existing roadmap stages.

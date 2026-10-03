@@ -171,8 +171,9 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 ###### 2026/10/03
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
-* `Astuce` Compose UI est un aperçu de développement; l'API de scripts compose n'est pas encore disponible
-* `Fonctionnalité` Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur; l'API de scripts compose reste en développement
+* `Astuce` Compose UI est un aperçu de développement. L'API de scripts compose est disponible en mode UI; les fenêtres flottantes restent en développement
+* `Fonctionnalité` API de scripts compose pour le mode UI: objets de noeuds, state/render, ref, mises à jour groupées, thèmes et commandes Snackbar (nécessite le plugin Compose UI)
+* `Fonctionnalité` Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
 * `Fonctionnalité` API de script ai.agent pour lancer et consulter les tâches, recevoir les événements, répondre, confirmer, annuler et exécuter en arrière-plan avec detached; result/context exposent les résultats et le contexte des scripts enregistrés par @agent, avec trois exemples
@@ -665,7 +666,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les informations des paquets reconnaissent les ensembles APK fractionnes dans les ZIP ordinaires, y compris sans extension de paquet connue
 * `Correction` L'écran de confirmation de 3-Setup Installer ne s'affichait pas sur Android 14 et versions ultérieures lors d'une installation lancée avec AutoJs6 au premier plan
 * `Correction` La racine du manifeste et les UID partagés pouvaient être mal lus depuis des commentaires ou espaces de noms falsifiés; les attributs dupliqués, identifiants de ressources contradictoires et UID invérifiables arrêtent le traitement
-* `Amélioration` L'aperçu de développement de Compose UI prend en charge la saisie native et évite que le clavier masque le contenu, avec un seul résultat par action ou fermeture de Snackbar; l'API de scripts compose n'est pas encore disponible
+* `Amélioration` L'aperçu de développement de Compose UI prend en charge la saisie native et évite que le clavier masque le contenu, avec un seul résultat par action ou fermeture de Snackbar
 * `Amélioration` Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués
 * `Amélioration` Les vérifications lint de l'hôte excluent par chemin les classes et ressources de compatibilité AutoJs4 et continuent à vérifier le reste de l'hôte
 * `Amélioration` Le centre des plugins écrit un enregistrement d'activation explicite et exécute le sondage d'activation après avoir observé une nouvelle installation d'un plugin désactivé par défaut (YOLO, MCP Server) signé avec le certificat officiel de l'hôte; les signataires tiers de confiance ou autorisés par l'utilisateur, les installations via adb et les mises à jour exigent toujours une activation manuelle, et les consommateurs à l'exécution continuent de lire uniquement l'enregistrement sauvegardé
