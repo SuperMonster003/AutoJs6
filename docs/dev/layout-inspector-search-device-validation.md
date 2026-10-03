@@ -1,10 +1,10 @@
 # 布局分析搜索 P6.3 设备验证
 
-日期: 2026-10-02. 宿主版本: 6.8.0 (5315). 界面调整提交: `3316bd49f3`.
+初次记录: 2026-10-02. 收尾复核: 2026-10-03. 宿主版本: 6.8.0 (5315). 界面调整提交: `3316bd49f3`.
 
 ## 当前结论
 
-P6.3 **尚未关闭**. API 24 AVD, Sony API 31 / 33, Redmi API 33 和 Xiaomi Pad API 35 已完成附录 B 的主流程复跑, 并通过实时 / 离线区域筛选增补. Sony G8441 API 28 的新界面设备测试通过, 但这一轮实时捕获受系统中失效的无障碍服务连接阻挡, 不能把旧会话的部分记录或测试脚本的退出码当作全机队通过.
+P6.3 **已于 2026-10-03 完成**. API 24 AVD, Sony API 31 / 33, Redmi API 33 和 Xiaomi Pad API 35 的主流程与区域增补证据保留; Sony G8441 API 28 在获准重启后完成了附录 B 的全部补测, API 24 保存配置后的 Done 关闭检查也已补齐. Sony G8441 和 Redmi 的宿主无障碍服务最终均处于实际已绑定状态, 实时捕获和搜索可用.
 
 恢复时工作区干净, P6.1 / P6.2 已提交. 上次会话中留在 `build/inspector-smoke/` 的脚本和日志已复用; 原日志另外保留在其 `previous-session/` 子目录. 本次没有修改搜索引擎或公开脚本 API.
 
@@ -21,14 +21,14 @@ P6.3 **尚未关闭**. API 24 AVD, Sony API 31 / 33, Redmi API 33 和 Xiaomi Pad
 .\gradlew.bat :app:assembleAppDebug :app:assembleAppDebugAndroidTest :app:testAppDebugUnitTest --tests 'org.autojs.autojs.core.accessibility.inspector.*' --tests 'org.autojs.autojs.ui.floating.layoutinspector.*' --console=plain
 ```
 
-最终构建通过, 用时 3 分 49 秒. APK 通过构建中的 16 KB 原生库对齐检查. 设备测试使用手动安装测试 APK 后的 `am instrument`, 没有执行会卸载宿主的 connectedAndroidTest 清理流程.
+界面改动对应的 2026-10-02 构建通过, 用时 3 分 49 秒. APK 通过构建中的 16 KB 原生库对齐检查. 设备测试使用手动安装测试 APK 后的 `am instrument`, 没有执行会卸载宿主的 connectedAndroidTest 清理流程. 2026-10-03 使用同一宿主构建进行实际界面复核.
 
 ## 设备记录
 
 | 设备 | API | 新界面设备测试 | 附录 B 主流程 | 实时 / 离线区域增补 |
 | --- | --- | --- | --- | --- |
-| AVD, Android SDK built for x86 | 24 | 3/3 | 复跑完成; 配置保存已写入偏好, 一次 Done 定位漏测另行检查默认配置关闭按钮 | 通过; 离线末尾清除步骤遇到一次 adb 读取失败, 保留现场重试该步骤后通过 |
-| Sony G8441 | 28 | 3/3 | 本轮未完成: 系统服务连接失效 | 未重新验收 |
+| AVD, Android SDK built for x86 | 24 | 3/3 | 复跑完成; 2026-10-03 补齐新建配置保存后的 Done 关闭, 再次打开和删除测试配置 | 通过; 离线末尾清除步骤遇到一次 adb 读取失败, 保留现场重试该步骤后通过 |
+| Sony G8441 | 28 | 3/3 | 2026-10-03 复核完成; 6 组导出与脚本计数一致; 查询历史, 查询模式与已选配置经应用进程重启后保持 | 2026-10-03 通过 |
 | Sony XQ-AT72 | 31 | 3/3 | 复跑完成; 6 组导出选择器与脚本计数一致 | 通过 |
 | Redmi 22120RN86C | 33 | 3/3 | 复跑完成; 6 组导出选择器与脚本计数一致 | 通过 |
 | Sony XQ-DQ72 | 33 | 3/3 | 复跑完成; 6 组导出选择器与脚本计数一致 | 通过 |
@@ -46,6 +46,7 @@ API 24 同样完成 6 组导出与脚本计数核对. 其系统设置页没有 W
 4. 区域拖拽从屏幕边缘开始会触发系统返回手势. 增补从内部向左上反向拖拽, 以实际可见节点决定区域和点选位置.
 5. 展开浮标会使空查询获焦并显示历史下拉. 未收起搜索栏就点击画布, 实际可能选择了历史条目, 造成查询突然变化或找不到节点菜单. 增补先检查计数和角标, 再收起搜索栏点选画布.
 6. API 24 的 TYPE_PHONE 窗口在初始化时有状态栏偏移与可访问性坐标暂不一致的情况. 工具在未展开时重试原坐标与状态栏修正坐标. adb dump 偶尔返回不完整 XML 或读取错误, 只重试有界的读取过程, 不把缺失输出当作通过.
+7. 2026-10-03 的收尾复核使用保持连接的 UiAutomation 测试驱动, 连接时指定 `FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES`. 对按钮和输入框使用可访问性动作, 对画布仍使用真实坐标拖拽 / 点击; 在对话框切换时刷新测试端的节点缓存. 这样可避免每次 `uiautomator dump` 对宿主服务的暂时停用和旧节点缓存造成的定位误判. 操作结束后另行检查宿主服务实际绑定状态.
 
 增补工具:
 
@@ -55,13 +56,24 @@ python tools/layout-inspector/smoke-region.py <adb-serial>
 
 工具使用系统设置页, 或设备 `/sdcard/inspector-target.txt` 中已经配置的测试页面 URL. 它断言区域内存在匹配项, 角标生效, 点击可打开节点菜单, 切换层次窗口保留区域, 清除后角标消失; 保存并离线打开后再检查非零搜索, 文件中的包名候选及同样的区域操作, 并确认离线菜单不提供实时窗口操作. 需要已安装的宿主及已启用的无障碍服务 / 悬浮窗权限.
 
-## 剩余验收与证据位置
+## 2026-10-03 闭环复核
 
-Sony G8441 的设置仍显示宿主服务已启用, 但 `dumpsys accessibility` 没有宿主的已绑定实例; `dumpsys activity services org.autojs.autojs6` 保留了宿主 AccessibilityServiceUsher 的 `ConnectionRecord ... DEAD`. 重启应用和重新启用该服务没有恢复本轮捕获. 已请求维护者确认是否重启该设备; 未经确认没有重启. 应在系统服务恢复后补齐本轮实时流程和区域增补, 再决定是否勾选 P6.3.
+2026-10-02 遇到的 Sony G8441 和 Redmi 失效连接记录保留为环境诊断证据: 当时设置显示宿主服务已启用, 系统却没有实际绑定实例, 并保留了 AccessibilityServiceUsher 的 `ConnectionRecord ... DEAD`. 维护者于 2026-10-03 授权重启后, 两台设备均已重启并恢复实际绑定. Redmi 重新完成实时层次捕获和 TextView 搜索 (26 个匹配), 关闭分析窗口后服务仍已绑定.
 
-设备 instrumentation 结束会影响宿主服务绑定. 测试后已单独执行恢复并检查实际绑定状态, 不能只看 secure setting 中是否含组件名. AVD, Sony API 31 / 33 和平板已恢复绑定; Redmi 已完成本轮功能验证, 但最后一次 instrumentation 后再次出现未恢复的绑定, 系统同样保留了 DEAD 连接. Redmi 的重启也已单独请求维护者确认, 没有擅自重启. 这些设备当前状态与之前已录制的功能检查结果分开记录. 恢复输出在本地 `service-restoration.log`.
+Sony G8441 收尾检查包括:
 
-另保留 API 24 保存配置后 Done 按钮的稳定 UI 复核: 本轮确认了新配置已写入偏好, 默认配置的 Done 关闭操作也已单独通过, 但随后重试新建配置时没有可靠定位到名称输入框, 因此不把这一额外流程计入通过项.
+- 范围搜索和 IME, 匹配项前后导航, 零匹配时点击不打开节点菜单, 清空后恢复命中; 层次裁剪及展开状态还原; 两种窗口之间保留查询 / 正则 / 当前序号; 返回键和音量减退出
+- 结果列表查看 / 跳转 / 长按节点信息, 零匹配说明, 历史填入 / 删除 / 清空, 21 次查询保留最新 20 条及重复查询去重
+- 关键词 / 字段 / 选择器模式, 未结束表达式和语法错误; 6 组导出代码在实际脚本中重新执行, 计数依次为 15 / 15 / 15 / 15 / 15 / 0, 与分析器一致
+- clickable = 否, 有 text, 按钮类名预设, depth 3..5, 最小宽高, 仅屏幕内, 包名和动作筛选, 结果与本次捕获树的属性核对一致
+- 默认配置保护, 未保存提示, 另存为 / 重命名 / Done 关闭, 新一次布局分析继续使用已选配置; 确认应用进程 PID 改变后, 20 条历史, 字段模式和已选配置仍保持, 随后删除测试配置并回退默认
+- 实时区域筛选 / 跨窗口保留 / 清除, 保存布局并离线打开后的非零搜索, 文件中的包名 / 动作候选和区域操作, 离线菜单隐藏实时窗口操作
+
+API 24 缺项也已补齐. 本轮输入框的实际资源 ID 为 `android:id/input`, 旧脚本使用 `md_input` 导致名称输入框定位失败. 按实际节点定位并处理输入法遮挡后, 新建配置保存, 保存后的 Done 关闭, 再次打开该配置和删除测试配置均通过.
+
+本轮测试结束后恢复了测试前的布局分析偏好. Sony G8441 和 Redmi 的输入法与重启前一致, 实际服务绑定均正常. 临时启动用于补测的 API 24 模拟器已关闭.
+
+## 证据位置
 
 本地证据均在 `build/inspector-smoke/` (gitignored):
 
@@ -69,8 +81,17 @@ Sony G8441 的设置仍显示宿主服务已启用, 但 `dumpsys accessibility` 
 - `fleet-<serial>.log`: 本轮主流程, `previous-session/`: 恢复时的旧日志与无效轮次
 - `region-<serial>/result.json` 及 PNG: 五台设备的增补结果与截图
 - `region-emulator-5554-resume.log`: adb 读取失败后的离线清除步骤复核
-- `profile-emulator-5554-resume.log`: 默认配置 Done 关闭复核; 后续单独重试的新建配置流程未完成, 不额外记作通过
+- `profile-emulator-5554-resume.log`: 2026-10-02 默认配置 Done 关闭复核及旧脚本的未完成步骤, 已由下列 2026-10-03 记录补齐
 - `node-ui-bek749scrwv4wo8h.json` 及 PNG: 多选行坐标, 按钮和复制方式检查
-- `service-restoration.log`: 测试后服务恢复检查
+- `service-restoration.log`: 2026-10-02 测试后的服务恢复检查
+
+2026-10-03 证据位于其 `2026-10-03/` 子目录:
+
+- `before-reboot-*.json`, `after-*.json`, `redmi-recovery.json`: 重启前后状态, 输入法及实时搜索复核
+- `verification-BH900ASK9E.json`, `final-BH900ASK9E.json`: Sony 分段检查和最终逐项结果
+- `sony-phase-a.log`, `sony-phase-a-resume.log`, `sony-history-export.log`, `sony-final.log`: 原始操作输出; 测试工具的定位 / 记录问题修正后从相应步骤续跑, 最终结论结合全部记录确认
+- `sony-process-restart.json`, `persist-BH900ASK9E.json`: 应用进程重启与持久化核对
+- `profile-avd-confirm.log`, `profile-emulator-5554.json`: API 24 保存后 Done 关闭及删除测试配置的通过证据
+- `InspectorProbe.java`, `probe_client.py`, `verify_sony*.py`, `verification-helper.js` 及 PNG: 保持宿主服务连接的测试驱动, 脚本和界面截图
 
 这些原始记录用于复核本次结论; 持久化的验收状态以本文和 Roadmap 为准.
