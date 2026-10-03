@@ -1,0 +1,5 @@
+{"version":1,"root":{"packageName":"org.autojs.test.codegen.fixture","className":"android.widget.LinearLayout","fullId":"org.autojs.test.codegen.fixture:id/list","children":[
+  {"className":"android.widget.Button","fullId":"org.autojs.test.codegen.fixture:id/buy","text":"Alpha","clickable":true,"enabled":true,"visibleToUser":true,"depth":1,"indexInParent":0},
+  {"className":"android.widget.Button","fullId":"org.autojs.test.codegen.fixture:id/buy","text":"Beta","clickable":true,"enabled":true,"visibleToUser":true,"depth":1,"indexInParent":1},
+  {"className":"android.widget.Button","fullId":"org.autojs.test.codegen.fixture:id/buy","text":"Gamma","clickable":true,"enabled":true,"visibleToUser":true,"depth":1,"indexInParent":2}
+]}}

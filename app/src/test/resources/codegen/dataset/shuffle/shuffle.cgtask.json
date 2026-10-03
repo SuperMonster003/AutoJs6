@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "groupId": "manual-shuffle",
+  "source": "fixture",
+  "app": "org.autojs.test.codegen.fixture",
+  "screenFamily": "manual-list",
+  "request": {"scope": "single", "attributes": ["id", "text", "desc"], "action": "click"},
+  "states": [
+    {"stateId": "s0", "snapshot": "s0.layout.json", "mutations": [], "targets": [[1]]},
+    {"stateId": "s1", "snapshot": "s1.layout.json", "mutations": ["shuffle"], "targets": [[0]]},
+    {"stateId": "s2", "snapshot": "s2.layout.json", "mutations": ["shuffle"], "targets": [[2]]}
+  ]
+}
