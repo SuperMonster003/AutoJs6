@@ -303,3 +303,22 @@ ZIP entries use fixed order, timestamp and permissions and the stored method, ma
 packages byte-identical without depending on a zlib version. Borders/leaves are Float32; bias,
 scale and accumulation are Double. Feature-index mappings, strict `>` thresholds, leaf-bit order
 and CRC32 are validated with an independent two-tree binary fixture.
+
+## Load and score with Kotlin
+
+`ModelPackageReader(hostVersionCode, temporaryDirectory).read(File)` or `read(InputStream)`
+returns `ModelPackage(manifest, features, model)` or `Rejected(reason, detail)`. In Android code,
+pass the actual host version and an existing writable `context.cacheDir`; the JVM default temp
+directory is intended for desktop tools/tests. The reader owns and removes its bounded temporary
+snapshot, while an input stream remains owned by its caller.
+
+The loader validates central/local ZIP records, entry boundaries and checksums, the exact five
+entry names, compression/size limits, UTF-8 and JSON structure, host/schema compatibility and the
+binary tree payload. Card/license text is streamed instead of retained as large strings. The
+parsed model stores compact immutable arrays and requires no external inference runtime.
+
+`ModelRanker(model, RuleRanker(), budgetMs = 150)` extracts the shared Kotlin features once per
+candidate group and preserves the original verified objects. Use complete detached captures,
+as produced by the layout inspector. Near ties follow the P3 score-batch convention. Feature,
+score and sorting failures or budget exhaustion produce `RankerUnavailable`; cancellation is
+propagated. The generation-dialog selection and fallback path will be connected in P7.
