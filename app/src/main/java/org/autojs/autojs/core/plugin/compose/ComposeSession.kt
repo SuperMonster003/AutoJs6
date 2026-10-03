@@ -143,7 +143,9 @@ class ComposeSession(
             if (closing.get()) return
             if (event.generation != generation) continue
             if (event.callbackId == ComposeUiContract.SYSTEM_CALLBACK_ID && event.type == ComposeUiEvents.ERROR) {
-                report(ComposeUiError(event.payload.getString(ComposeUiEventFields.CODE) ?: ComposeUiErrorCodes.RENDER_FAILED))
+                report(ComposeUiError(event.payload.getString(ComposeUiEventFields.CODE) ?: ComposeUiErrorCodes.RENDER_FAILED,
+                    nodeId = event.nodeId.takeUnless { it == ComposeUiContract.NO_NODE_ID },
+                    prop = event.payload.getString(ComposeUiEventFields.PROP)))
             } else {
                 callbacks.resolve(event.generation, event.nodeId, event.type, event.callbackId)?.let { callback ->
                     try { callback(event) } catch (failure: Exception) { report(failure) }

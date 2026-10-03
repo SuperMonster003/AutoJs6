@@ -1,7 +1,7 @@
 # Compose UI contract V1
 
-Status: V1 frozen at P1.1 on 2026-10-02; P1.2 implements the host loader/session and a minimal V1
-renderer for integration. This document specifies the full boundary, not delivery of the script API
+Status: V1 frozen at P1.1 on 2026-10-02; P1.3 registration and P2.1/P2.2/P2.3/P2.6 are
+implemented on 2026-10-03. P2.4/P2.5 and the P3 script entry remain in development. This document specifies the full boundary, not delivery of the script API
 or the complete renderer. The host owns `plugin-api/compose-ui-api`; the plugin consumes
 its release AAR as compileOnly. The contract depends on Android, Kotlin/JDK and common-plugin-api,
 and contains no Compose implementation dependency.
@@ -195,7 +195,7 @@ P1.3 registers the plugin and establishes the actual minimum host build. P2 migr
 renderer from api.spike to loading/model V1 and advertises only implemented catalog entries. This
 freeze is not evidence that all 30 entries are rendered or that the compose script global exists.
 
-## P1.2 implementation boundary
+## Historical P1.2 implementation boundary
 
 The host rechecks installation, Android enablement, Plugin Center enablement, authorization,
 minimum host version and INFO/factory metadata before loading code. Contract version precedes
@@ -247,3 +247,50 @@ The confirmed minimum host is 6.8.0 / 5316. The wizard catalog pre-registers the
 but its existing loader skips entries absent from the remote index. Local integration does not
 publish a download or enable the future compose script global; that API remains P3 work. The
 P1.3 changelog therefore describes installed-plugin management and the development preview.
+
+## Current P2 renderer boundary
+
+The dispatch/capability table now contains 20 node types: Column, Row, Box, Spacer, Surface, Card,
+HorizontalDivider, Text, Icon, Image, Button, ElevatedButton, FilledTonalButton, OutlinedButton,
+TextButton, IconButton, Switch, Checkbox, RadioButton and Slider. All catalog properties and content
+slots of these types are mapped. Text inherits the surrounding Material text style when no style is
+provided; explicit style/size/weight overrides merge normally. Icons use an explicit 280-name table
+from the pinned core artifact: 49 glyph names in 5 styles plus 35 auto-mirrored variants. Plain
+Home means Filled.Home; Outlined.Home and AutoMirrored.Filled.ArrowBack are examples of qualified
+names. Names are case-insensitive. No extended icon or XML Material Components dependency is added.
+
+The full 20-operation Modifier chain is interpreted in order with catalog defaults and scope checks.
+Each clickable uses its own enabled flag and the component's enabled property; a disabled inner
+clickable does not disable an outer hit region. Native controls retain an explicitly supplied node
+click callback; without one an enabled modifier supplies native activation. Modifier operations are
+keyed by name and occurrence around the whole composable loop item, preserving scroll state across
+unrelated styling changes. A plain ScrollTo offset addresses the outermost scroll modifier; indexed
+commands require a future Lazy handler. Focus observation is independent of command capability.
+Command membership is checked against the accepted tree before scheduling and again before execution,
+so removing a node rejects queued commands even before Compose disposes its old handle.
+
+Controlled Switch/Checkbox/RadioButton/Slider values remain owned by host props. Events are proposals;
+without a host patch the rendered value does not change. The queued event carries the generation of
+the frame that produced it. NodeId/prop details on renderer error events now survive host dispatch.
+Slider limits also bound its derived tick collection to MAX_VALUE_ITEMS (steps + 2 <= 2000), and
+ranges must remain distinct and finite after conversion to Compose floats; violations fail before
+composition with LIMIT_EXCEEDED or INVALID_ARGUMENT, preserving the previous frame.
+
+Theme mapping covers all 48 V1 color overrides, system/explicit night mode, Android 12+ dynamic
+colors, the 15 public typography roles, font families and font scale. A seed uses an independent
+CIELAB/LCh tonal palette with gamut reduction, not Google's HCT algorithm. Explicit colors win over
+the selected palette. Dynamic colors fall back to the seed on API24-30. Missing font scale retains
+the host/system density object; an explicit scale overrides only fontScale, preserving density.
+
+Borrowed bitmap painters resolve the weak handle on every draw, never cache or recycle the Bitmap,
+and draw blank after expiration/recycle. A container around ComposeView contains runtime/linkage
+failures during Android measure/layout/draw, reports once per failed traversal and allows retry on
+a later frame. Fatal VM errors are not masked. The renderer releases composition, command handles,
+recomposer, jobs and snapshots on close. Initial empty batches and generation 0 are valid; replay is
+rejected after the first accepted batch. Unknown names have a debug-only diagnostic placeholder;
+release rejects them, and known unimplemented components remain absent from capabilities.
+
+TextField/OutlinedTextField, lazy lists, Scaffold/TopAppBar/dialogs/snackbar/progress components and
+the public compose script API are not delivered yet. FEATURES remains empty; the component table is
+the authority for availability. IME, accessibility fleet coverage, inrt execution, long-running memory
+and performance gates remain later roadmap work.

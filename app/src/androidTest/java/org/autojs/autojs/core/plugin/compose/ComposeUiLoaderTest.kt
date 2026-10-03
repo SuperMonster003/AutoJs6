@@ -119,7 +119,7 @@ class ComposeUiLoaderTest {
         await("Activity closes session") { session.state == ComposeSession.State.CLOSED }
         main {
             assertFalse(view.isAttachedToWindow)
-            if (debugProvider) assertEquals(false, view.javaClass.getMethod("getHasComposition").invoke(view))
+            if (debugProvider) assertEquals(false, hasComposition(view))
             try { instance.view(); fail("Disposed renderer must reject view creation") }
             catch (e: ComposeUiContractException) { assertEquals(ComposeUiErrorCodes.SESSION_CLOSED, e.code) }
             assertEquals(0, session.callbackCount); assertNull(session.tree)
@@ -197,12 +197,12 @@ class ComposeUiLoaderTest {
                 session.render(counter(7, callback)); session.attach()
                 assertSame(owners, view.findViewTreeLifecycleOwner()); assertSame(owners, view.findViewTreeSavedStateRegistryOwner())
             }
-            await("floaty composition") { var composed = false; main { composed = view.javaClass.getMethod("getHasComposition").invoke(view) == true }; composed }
+            await("floaty composition") { var composed = false; main { composed = hasComposition(view) == true }; composed }
             assertTrue(errors.toString(), errors.isEmpty())
         } finally { main { if (started) session.close(); window?.close(); activity.finish() } }
         main {
             assertEquals(androidx.lifecycle.Lifecycle.State.DESTROYED, owners.lifecycle.currentState)
-            assertEquals(false, view.javaClass.getMethod("getHasComposition").invoke(view)); assertEquals(0, session.callbackCount)
+            assertEquals(false, hasComposition(view)); assertEquals(0, session.callbackCount)
         }
     }
 
@@ -256,13 +256,22 @@ class ComposeUiLoaderTest {
         assertEquals(ComposeUiLimits.EVENT_QUEUE_CAPACITY, delivered.size)
         assertEquals(2, delivered.first()); assertEquals(1, warnings.size)
         main {
+            session.enqueue(UiEvent(9, session.generation, 17, ComposeUiEvents.ERROR, ComposeUiContract.SYSTEM_CALLBACK_ID,
+                Bundle().apply { putString(ComposeUiEventFields.CODE, ComposeUiErrorCodes.INVALID_ARGUMENT); putString(ComposeUiEventFields.PROP, ComposeUiProps.VALUE) }))
+            assertTrue(errors.isEmpty())
+        }
+        instrumentation.waitForIdleSync()
+        assertEquals(17, errors.single().nodeId)
+        assertEquals(ComposeUiProps.VALUE, errors.single().prop)
+        assertEquals(ComposeUiErrorCodes.INVALID_ARGUMENT, errors.single().code)
+        main {
             session.enqueue(event(-1, 0))
             session.enqueue(event(-2))
             session.close()
         }
         instrumentation.waitForIdleSync()
         assertEquals(ComposeUiLimits.EVENT_QUEUE_CAPACITY, delivered.size)
-        assertEquals(0, session.callbackCount); assertTrue(errors.isEmpty())
+        assertEquals(0, session.callbackCount); assertEquals(1, errors.size)
     }
 
     @Test fun standaloneInfoStillRunsWithoutTheHostProvidedApiClasses() {
@@ -279,6 +288,13 @@ class ComposeUiLoaderTest {
             assertEquals(ComposeUiIds.PLUGIN_ID, info.id); assertTrue(info.supportedAbis!!.isEmpty())
             assertEquals(setOf(PluginCapabilityKeys.REQUIRES_HOST_VERSION), info.capabilities!!.keySet())
         } finally { context.unbindService(connection) }
+    }
+
+    /** Debug-only Compose introspection stays in the test, while release tests use the V1 lifecycle. */
+    private fun hasComposition(view: View): Boolean {
+        val getter = view.javaClass.methods.firstOrNull { it.name == "getHasComposition" && it.parameterCount == 0 }
+        if (getter != null) return getter.invoke(view) == true
+        return view is ViewGroup && (0 until view.childCount).any { hasComposition(view.getChildAt(it)) }
     }
 
     private fun nodeWithText(text: String): AccessibilityNodeInfo? {
