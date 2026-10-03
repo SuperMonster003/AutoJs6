@@ -380,16 +380,16 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         private val EXTRA_EXECUTION_ID = ScriptExecuteActivity::class.java.name + ".execution_id"
 
         @JvmStatic
-        fun execute(context: Context, manager: ScriptEngineManager, task: ScriptExecutionTask): ActivityScriptExecution {
-            val execution = ActivityScriptExecution(manager, task)
+        fun start(context: Context, execution: ActivityScriptExecution): Boolean {
+            // ScriptEngineService publishes this execution before Android can run onCreate.
             val started = Intent(context, ScriptExecuteActivity::class.java)
                 .putExtra(EXTRA_EXECUTION_ID, execution.id)
-                .addFlags(task.config.intentFlags)
+                .addFlags(execution.config.intentFlags)
                 .startSafely(context)
             if (started) {
                 execution.markActivityStarted()
             }
-            return execution
+            return started
         }
     }
 }

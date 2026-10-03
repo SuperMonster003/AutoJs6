@@ -265,6 +265,7 @@
         "Layout Inspector \"Generate code\" supports single-widget/collection scopes, waiting until found/waiting with a timeout/immediate checks, action receivers and text parameters, Classic/Flow styles, alternative plans and location explanations, with matching widgets previewable in the layout"
       ],
       "fix": [
+        "Packaged UI scripts occasionally displaying a blank page and exiting during startup",
         "Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates",
         "Package information becoming inaccessible from the file manager when APK Inspector hides the information button",
         "Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)",
