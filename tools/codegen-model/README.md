@@ -20,7 +20,9 @@ implemented; Android device benchmarks and generation-UI integration remain subs
 
 The [P5 distribution and P6 catalog report](reports/p5-distribution-2026.10-1.md) records
 local signing/release-tool verification and Python-to-Kotlin catalog interoperability.
-Formal signing material and the remote workflow acceptance run remain maintainer inputs.
+The maintainer subsequently supplied the production signing material and completed the
+[P5.4 remote release acceptance](reports/p5-release-acceptance-2026.10-1.md): 63 CI tests,
+published assets, independent signature/package readback and anonymous public downloads passed.
 
 ## Build and prepare
 
