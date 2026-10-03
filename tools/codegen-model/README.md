@@ -131,3 +131,34 @@ and only within the private directory. Raw layouts, tasks, labels, and split map
 stay private. The initial automated dataset contains controlled fixture data only; completing
 this annotation tool does not mean the roadmap's suggested real-app evaluation sample has been
 collected. Real application groups belong exclusively in `real-test` at this stage.
+
+## Freeze splits and write the manifest
+
+After collection finishes, run from `tools/codegen-model`:
+
+```powershell
+python -m dataset.split --input out/cg-ds-2026.10-1 --output out/cg-ds-2026.10-1 --dataset-id cg-ds-2026.10-1 --provenance out/cg-ds-2026.10-1/collection.json
+```
+
+The command writes `split-map.json` and `dataset-manifest.json`. It rejects incomplete collection,
+disagreement between recorded and discovered groups, inconsistent capture counters, and a discard
+rate above 2%. It detects `labels.jsonl`, `rules.jsonl`, `export-manifest.json`, and later
+`features.csv` beside its output. Alternatively pass `--labels`, `--rules`, and `--features`.
+The exporter input digest and artifact hashes reject stale labels after task or snapshot changes.
+If the input roots differ from the exporter's input directory, supply `--export-input-root`.
+
+Run once before label export if a split map is needed, then repeat the same command after the JVM
+export. Missing labels or features are explicitly pending with null hashes, never placeholder
+files. P2 ends with verified labels and `features-pending`; P3.2 produces the real feature file
+and its checksum. `--generated-at` accepts a fixed timestamp for reproducible manifest comparison.
+
+The hash assignment unit is the entire `screenFamily`, including all seeds and states. Quotas
+use 70/15/15 with largest-remainder rounding. Eight indivisible, equally sized families therefore
+produce 6/1/1 families: **75% / 12.5% / 12.5%**. A three-percentage-point bound is impossible for
+this eight-family dataset; tests verify the target tolerance with sufficiently many families and
+verify the exact rounding for eight. The manifest records actual family and group ratios. Freeze
+the split map before training; introducing new families can change hash-ranked assignments.
+
+Real application tasks always go to independent `real-test`, grouped by app. For a dataset that
+contains any real tasks, all combined labels, features, split maps, and manifests must also stay
+in `CODEGEN_PRIVATE_DIR`. Publish only separately reviewed aggregate reports.
