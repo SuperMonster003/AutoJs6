@@ -1,0 +1,84 @@
+package org.autojs.autojs.core.accessibility.codegen.rank
+
+import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest
+import org.autojs.autojs.core.accessibility.codegen.plan.Condition
+import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan
+import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
+import org.autojs.autojs.core.accessibility.codegen.verify.Verified
+import org.autojs.autojs.core.automator.UiNode
+import java.util.Collections
+import kotlin.math.max
+
+/**
+ * A deterministic, model-free baseline. Costs are additive: a cheaper family can still lose when
+ * it relies on changing content or long positional paths. The plan key breaks every score tie.
+ * zh-CN: 确定且无模型的基线. 代价可累加, 因而较简单的族在依赖动态内容或长位置路径时仍可落后;
+ * 所有同分候选均以计划键定序.
+ */
+class RuleRanker : Ranker {
+    override fun <N : UiNode<N>> rank(request: CodeGenRequest<N>, verified: List<Verified<N>>): List<Ranked<N>> {
+        val ranked = verified.map { Ranked(it, -cost(it).toDouble()) }
+            .sortedWith(compareByDescending<Ranked<N>> { it.score }.thenBy { it.plan.planKey })
+        return Collections.unmodifiableList(ranked)
+    }
+
+    internal fun <N : UiNode<N>> cost(candidate: Verified<N>): Long {
+        val plan = candidate.plan
+        val facts = candidate.facts
+        val familyCost = when (plan.family) {
+            LocatePlan.Family.SELF -> 0L
+            LocatePlan.Family.ANCHOR_SEARCH -> 40L
+            LocatePlan.Family.ANCHOR_PATH -> 80L
+            LocatePlan.Family.CONTAINER_ITEMS -> 120L
+            LocatePlan.Family.SELF_INDEX -> 160L
+        }
+        val conditionCost = conditions(plan).sumOf(::conditionCost)
+        val dynamicCost = (if (facts.dynamicText) 32L else 0L) + (if (facts.dynamicDesc) 32L else 0L)
+        val pathLength = facts.pathUpLevels.toLong() + facts.pathChildSteps + facts.receiverUpLevels
+        val pathCost = pathLength * 2L + max(0L, pathLength - LONG_PATH_THRESHOLD) * 6L
+        val ordinalCost = ordinalDistance(plan) * 2L
+        // A first-of-many SELF is valid, but more sensitive to order than a unique selector.
+        // zh-CN: SELF 取多个匹配中的首项虽然有效, 但比唯一选择器更依赖顺序.
+        val firstMatchCost = if (plan.cardinality == LocatePlan.Cardinality.ONE &&
+            plan.family != LocatePlan.Family.SELF_INDEX && facts.selectorMatchCount > 1
+        ) 64L + (facts.selectorMatchCount - 1).toLong().coerceAtMost(100L) else 0L
+        return familyCost + conditionCost + dynamicCost + pathCost + ordinalCost + firstMatchCost
+    }
+
+    companion object {
+        internal const val LONG_PATH_THRESHOLD = 2L
+        internal const val LARGE_INDEX_THRESHOLD = 8L
+
+        internal fun conditions(plan: LocatePlan): List<Condition> =
+            plan.selector.conditions + plan.steps.filterIsInstance<PlanStep.Search>().flatMap { it.selector.conditions }
+
+        internal fun isStructural(condition: Condition): Boolean =
+            condition.attr !in setOf("id", "desc", "text", "className", "packageName")
+
+        private fun conditionCost(condition: Condition): Long = when (condition.attr) {
+            "id" -> if (isFullId(condition.value)) 1L else 2L
+            "desc" -> 4L
+            "text" -> 6L
+            "packageName" -> 7L
+            "className" -> 8L
+            else -> 16L
+        }
+
+        private fun isFullId(value: Any): Boolean {
+            val text = value as? String ?: return false
+            val separator = text.indexOf(":id/")
+            return separator > 0 && separator + 4 < text.length
+        }
+
+        /** Distance from the specified edge, so child(-1) and child(0) have equal cost.
+         * zh-CN: 自指定边缘的距离, 因而 child(-1) 与 child(0) 代价相同. */
+        internal fun ordinalDistance(plan: LocatePlan): Long = plan.steps.sumOf { step ->
+            val index = when (step) {
+                is PlanStep.Index -> step.index
+                is PlanStep.Child -> step.index
+                else -> return@sumOf 0L
+            }
+            if (index >= 0) index.toLong() else -index.toLong() - 1L
+        }
+    }
+}

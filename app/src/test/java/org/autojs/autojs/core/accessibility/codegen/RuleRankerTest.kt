@@ -1,0 +1,159 @@
+package org.autojs.autojs.core.accessibility.codegen
+
+import org.autojs.autojs.core.accessibility.codegen.plan.Condition
+import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan
+import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
+import org.autojs.autojs.core.accessibility.codegen.plan.SelectorSpec
+import org.autojs.autojs.core.accessibility.codegen.rank.RuleRanker
+import org.autojs.autojs.core.accessibility.codegen.verify.PlanVerifier
+import org.autojs.autojs.core.accessibility.codegen.verify.Verified
+import org.autojs.autojs.core.automator.FakeUiNode
+import org.autojs.autojs.core.automator.UiNode
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.io.File
+import kotlin.random.Random
+
+class RuleRankerTest {
+    private val ranker = RuleRanker()
+    private fun spec(attr: String, value: Any) = SelectorSpec(Condition(attr, value))
+    private fun self(attr: String, value: Any) = LocatePlan(LocatePlan.Family.SELF, spec(attr, value))
+    private fun <N : UiNode<N>> verified(verifier: PlanVerifier<N>, request: CodeGenRequest<N>, plan: LocatePlan): Verified<N> {
+        val result = verifier.verify(request, plan)
+        assertTrue("Expected verified: $result", result is Verified)
+        return result as Verified<N>
+    }
+
+    @Test
+    fun loginFixturePrefersDescriptionForInputAndTextForButton() {
+        val root = SnapshotNode.load(File(requireNotNull(javaClass.getResource("/codegen/login.layout.json")).toURI()))
+        val verifier = PlanVerifier(root)
+        val input = CodeGenRequest(listOf(root.child(1)!!))
+        val byDescription = self("desc", "密码")
+        val byIndex = LocatePlan(LocatePlan.Family.SELF_INDEX, spec("className", "android.widget.EditText"), listOf(PlanStep.Index(1)))
+        assertEquals(byDescription, ranker.rank(input, listOf(byIndex, byDescription).map { verified(verifier, input, it) }).first().plan)
+        val button = CodeGenRequest(listOf(root.child(2)!!))
+        val byText = self("text", "登录")
+        assertEquals(byText, ranker.rank(button, listOf(self("className", "android.widget.Button"), byText).map { verified(verifier, button, it) }).first().plan)
+    }
+
+    @Test
+    fun stableExactConditionsFollowDocumentedCostOrder() {
+        val root = FakeUiNode.root {
+            child("target", clickable = true) {
+                id = "app:id/target"; desc = "Target"; text = "Target"; className = "android.widget.Button"
+            }
+        }
+        val request = CodeGenRequest(listOf(root.find("target")))
+        val verifier = PlanVerifier(root)
+        val plans = listOf(self("id", "app:id/target"), self("id", "target"), self("desc", "Target"),
+            self("text", "Target"), self("className", "Button"), self("clickable", true))
+        val input = plans.reversed().map { verified(verifier, request, it) }
+        assertEquals(plans, ranker.rank(request, input).map { it.plan })
+    }
+
+    @Test
+    fun equalComplexityFamiliesFollowBaselinePreference() {
+        val root = FakeUiNode.root {
+            id = "app:id/root"
+            child("target") {
+                id = "app:id/target"
+                child("label") { id = "app:id/label" }
+            }
+        }
+        val request = CodeGenRequest(listOf(root.find("target")))
+        val verifier = PlanVerifier(root)
+        val direct = self("id", "app:id/target")
+        val scoped = LocatePlan(LocatePlan.Family.ANCHOR_SEARCH, spec("id", "app:id/root"), listOf(PlanStep.Search(spec("id", "app:id/target"))))
+        val path = LocatePlan(LocatePlan.Family.ANCHOR_PATH, spec("id", "app:id/label"), listOf(PlanStep.Up(1)))
+        val index = LocatePlan(LocatePlan.Family.SELF_INDEX, spec("id", "app:id/target"), listOf(PlanStep.Index(0)))
+        val plans = listOf(direct, scoped, path, index)
+        val ranked = ranker.rank(request, plans.reversed().map { verified(verifier, request, it) })
+        assertEquals(plans, ranked.map { it.plan })
+        val collectionRequest = request.copy(scope = CodeGenRequest.Scope.COLLECTION)
+        val collection = LocatePlan(LocatePlan.Family.CONTAINER_ITEMS, spec("id", "app:id/root"),
+            listOf(PlanStep.Search(spec("id", "app:id/target"))), LocatePlan.Cardinality.ALL)
+        val collectionScore = ranker.rank(collectionRequest, listOf(verified(verifier, collectionRequest, collection))).single().score
+        assertTrue(ranked[2].score > collectionScore)
+        assertTrue(collectionScore > ranked[3].score)
+    }
+
+    @Test
+    fun changingTextAndDescriptionLoseToStableAlternatives() {
+        val root = FakeUiNode.root {
+            child("target") { text = "Pay 19"; desc = "Pay 19"; className = "android.widget.Button" }
+        }
+        val request = CodeGenRequest(listOf(root.find("target")))
+        val verifier = PlanVerifier(root)
+        val plans = listOf(self("text", "Pay 19"), self("desc", "Pay 19"), self("className", "Button"))
+        val ranked = ranker.rank(request, plans.map { verified(verifier, request, it) })
+        assertEquals("className", ranked.first().plan.selector.conditions.single().attr)
+    }
+
+    @Test
+    fun firstOfManyIsPenalizedAlthoughItPassesVerification() {
+        val root = FakeUiNode.root {
+            child("target") { className = "android.widget.Button"; text = "Pay 19" }
+            child("other") { className = "android.widget.Button" }
+        }
+        val request = CodeGenRequest(listOf(root.find("target")))
+        val verifier = PlanVerifier(root)
+        val broad = verified(verifier, request, self("className", "Button"))
+        val precise = verified(verifier, request, LocatePlan(LocatePlan.Family.SELF,
+            SelectorSpec(Condition("className", "Button"), Condition("indexInParent", 0))))
+        assertEquals(2, broad.facts.selectorMatchCount)
+        assertSame(precise, ranker.rank(request, listOf(broad, precise)).first().verified)
+        val exactText = verified(verifier, request, self("text", "Pay 19"))
+        assertSame(exactText, ranker.rank(request, listOf(broad, exactText)).first().verified)
+    }
+
+    @Test
+    fun shorterPathsAndSmallerEdgeRelativeIndicesWin() {
+        val root = FakeUiNode.root {
+            id = "app:id/root"
+            child("one") {
+                id = "app:id/one"
+                child("two") {
+                    id = "app:id/two"
+                    child("target") { id = "app:id/target" }
+                }
+            }
+        }
+        val verifier = PlanVerifier(root)
+        val request = CodeGenRequest(listOf(root.find("target")))
+        val long = LocatePlan(LocatePlan.Family.ANCHOR_PATH, spec("id", "app:id/root"), List(3) { PlanStep.Child(0) })
+        val short = LocatePlan(LocatePlan.Family.ANCHOR_PATH, spec("id", "app:id/two"), listOf(PlanStep.Child(0)))
+        assertEquals(short, ranker.rank(request, listOf(long, short).map { verified(verifier, request, it) }).first().plan)
+
+        val list = FakeUiNode.root { repeat(20) { child("item$it") { className = "android.widget.Button" } } }
+        val listVerifier = PlanVerifier(list)
+        val listRequest = CodeGenRequest(listOf(list.find("item19")))
+        val end = LocatePlan(LocatePlan.Family.SELF_INDEX, spec("className", "Button"), listOf(PlanStep.Index(-1)))
+        val start = LocatePlan(LocatePlan.Family.SELF_INDEX, spec("className", "Button"), listOf(PlanStep.Index(19)))
+        assertEquals(end, ranker.rank(listRequest, listOf(start, end).map { verified(listVerifier, listRequest, it) }).first().plan)
+    }
+
+    @Test
+    fun tiedScoresHaveStablePlanKeyOrderAndPreserveAllCandidates() {
+        val root = FakeUiNode.root {
+            child("target") { id = "app:id/target"; text = "Target"; desc = "Target" }
+        }
+        val request = CodeGenRequest(listOf(root.find("target")))
+        val verifier = PlanVerifier(root)
+        val plans = listOf(self("text", "Target"), LocatePlan(LocatePlan.Family.SELF,
+            SelectorSpec(Condition("desc", "Target"), Condition("id", "target"))))
+        val candidates = plans.map { verified(verifier, request, it) }
+        val expected = plans.sortedBy { it.planKey }
+        repeat(20) { seed ->
+            val ranked = ranker.rank(request, candidates.shuffled(Random(seed)))
+            assertEquals(1, ranked.map { it.score }.distinct().size)
+            assertEquals(expected, ranked.map { it.plan })
+            assertEquals(candidates.toSet(), ranked.map { it.verified }.toSet())
+            assertThrows(UnsupportedOperationException::class.java) { (ranked as MutableList<*>).clear() }
+        }
+        assertTrue(ranker.rank(request, emptyList()).isEmpty())
+    }
+}
