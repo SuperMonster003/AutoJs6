@@ -1,9 +1,13 @@
 # Compose UI contract V1
 
-Status: V1 frozen at P1.1 on 2026-10-02; P1.3 registration and the P2 renderer are
-implemented on 2026-10-03. P3.1-P3.5 provide UI and floating-window script entries, lifecycle guards
-and localized errors in the matching local host preview.
-P4 adds packaged examples, verified host accessibility selectors and catalog/documentation guards.
+Status: frozen V1 with host commit `ec34abc00f` (6.8.0 / 5317 production integration).
+The wire contract was frozen at P1.1 on 2026-10-02; the matching local preview now
+includes the full V1 renderer, UI and floating-window script entries, lifecycle
+guards, localized errors, five examples and verified accessibility selectors.
+P5 validates the six-device matrix, actual packaged applications and performance
+observations. P6 supplies the complete API reference and TypeScript/Ace declarations;
+the component projections are checked against the same frozen catalog. Distribution
+remains local under D7, with no official index registration or public release.
 The host owns `plugin-api/compose-ui-api`; the plugin consumes
 its release AAR as compileOnly. The contract depends on Android, Kotlin/JDK and common-plugin-api,
 and contains no Compose implementation dependency.

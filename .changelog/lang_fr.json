@@ -3,9 +3,10 @@
     "v6.8.0": {
       "released_date": "2026/10/03",
       "feature": [
-        "API de scripts compose pour le mode UI et les fenêtres flottantes raw ou redimensionnables: objets de nœuds, state/render, ref, mises à jour groupées, thèmes et commandes Snackbar (nécessite le plugin Compose UI)",
-        "compose.floaty prend en charge les scripts hors mode UI, les commandes de position / taille / focus, les mises à jour depuis les threads de travail via compose.post et la fermeture automatique des fenêtres à l'arrêt du script",
+        "API de scripts compose / $compose avec 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, mises à jour groupées, publications en file, thèmes et commandes de session Snackbar (nécessite le plugin Compose UI)",
+        "compose.mount héberge les pages UI; compose.floaty propose aux scripts UI ou hors UI des fenêtres raw ou redimensionnables, position/taille en pixels, contrôle du toucher/focus et mises à jour depuis les workers via compose.post, avec libération des sessions à la fermeture ou à l'arrêt du script",
         "La catégorie Compose UI des exemples intégrés propose un compteur, la validation de formulaire, une liste de 1000 éléments, un HUD flottant et des thèmes, avec les prérequis de plugin et d'autorisations pour chaque script",
+        "Référence API complète de Compose UI avec complétion de types Ace Editor et contenu local Offline Docs pour les composants, noeuds, états, modificateurs, thèmes, sessions et fenêtres flottantes",
         "Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur",
         "La fonction \"Générer du code\" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition",
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
@@ -508,8 +509,8 @@
         "La racine du manifeste et les UID partagés pouvaient être mal lus depuis des commentaires ou espaces de noms falsifiés; les attributs dupliqués, identifiants de ressources contradictoires et UID invérifiables arrêtent le traitement"
       ],
       "improvement": [
-        "L'aperçu de développement de Compose UI prend en charge la saisie native et évite que le clavier masque le contenu, avec un seul résultat par action ou fermeture de Snackbar",
-        "ComposeError fournit des messages localisés et des codes stables avec le nœud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions, refuse les opérations après fermeture et libère les rappels, les références et les tâches en attente; La mise à jour, la désinstallation ou la désactivation du plugin ferme ses sessions actives et signale l'erreur correspondante",
+        "La saisie native Compose UI préserve la sélection et la composition IME, évite que le clavier masque le contenu et transmet une seule fois chaque action ou fermeture de Snackbar",
+        "ComposeError fournit des messages localisés et des codes stables avec le noeud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions actives, refuse les opérations après fermeture et libère rappels, références et tâches en attente; la mise à jour, désinstallation ou désactivation du plugin ferme ses sessions actives avec l'erreur correspondante",
         "Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués",
         "Les vérifications lint de l'hôte excluent par chemin les classes et ressources de compatibilité AutoJs4 et continuent à vérifier le reste de l'hôte",
         "Le centre des plugins écrit un enregistrement d'activation explicite et exécute le sondage d'activation après avoir observé une nouvelle installation d'un plugin désactivé par défaut (YOLO, MCP Server) signé avec le certificat officiel de l'hôte; les signataires tiers de confiance ou autorisés par l'utilisateur, les installations via adb et les mises à jour exigent toujours une activation manuelle, et les consommateurs à l'exécution continuent de lire uniquement l'enregistrement sauvegardé",
@@ -744,7 +745,7 @@
       ],
       "hint": [
         "Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé",
-        "Compose UI reste un aperçu de développement local. Les API du mode UI et des fenêtres flottantes sont implémentées; le plugin n'est pas inscrit à l'index officiel et n'a pas fait l'objet d'une publication officielle"
+        "Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement"
       ]
     },
     "v6.7.0": {

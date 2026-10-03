@@ -4,12 +4,12 @@
    gradlew :plugin-api:compose-ui-api:exportComposeUiCatalog
 2. Generate reviewable fragments, without changing external repositories:
    py .python/compose_catalog_check.py generate --output-dir build/compose-catalog
-3. During P6, paste each complete marked fragment into aj6-int-compose.d.ts / api/compose.md.
+3. During P6, paste each complete marked fragment into aj6-int-compose.d.ts / api/composeComponents.md.
    Declare the named Compose*Input helper types in Internal alongside the generated interfaces,
    and use ComposeCatalogProps in the public element factory signatures. Handwritten API methods,
    input conversion helper definitions and cross-property rules remain outside this inventory gate.
 4. Check the delivered files against a fresh export:
-   py .python/compose_catalog_check.py check --dts <aj6-int-compose.d.ts> --docs <api/compose.md>
+   py .python/compose_catalog_check.py check --dts <aj6-int-compose.d.ts> --docs <api/composeComponents.md>
 
 Generate is not a successful consistency check. Check fails for missing files or markers, including
 before P6 has been delivered. No Kotlin, TypeScript or Markdown source is parsed with heuristics:
