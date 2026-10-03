@@ -1,0 +1,14 @@
+{
+  "format": 1,
+  "groupId": "manual-collection",
+  "source": "fixture",
+  "app": "org.autojs.test.codegen.fixture",
+  "screenFamily": "manual-grid",
+  "request": {"scope": "collection", "attributes": ["id", "text", "desc"], "action": "click", "receiver": "self"},
+  "captureState": 0,
+  "states": [
+    {"stateId": "s0", "snapshot": "s0.layout.json", "mutations": [], "targets": [[0], [1]]},
+    {"stateId": "s1", "snapshot": "s1.layout.json", "mutations": ["retext"], "targets": [[0], [1]]},
+    {"stateId": "s2", "snapshot": "s2.layout.json", "mutations": ["strip-ids"], "targets": [[0], [1]]}
+  ]
+}

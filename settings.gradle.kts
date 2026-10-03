@@ -149,6 +149,10 @@ private val pluginConformanceTestApps = listOf(
     "yolo-provider-conformance",
 )
 
+private val codegenFixtureApps = listOf(
+    "codegen-fixture",
+)
+
 include(
     ":app",
     *modules.map { ":modules:$it" }.toTypedArray(),
@@ -156,6 +160,7 @@ include(
     *pluginApi.map { ":plugin-api:$it" }.toTypedArray(),
     *plugins.map { ":plugins:$it" }.toTypedArray(),
     *pluginConformanceTestApps.map { ":test-apps:$it" }.toTypedArray(),
+    *codegenFixtureApps.map { ":test-apps:$it" }.toTypedArray(),
 )
 
 modules.forEach {
@@ -171,5 +176,9 @@ plugins.forEach {
 }
 
 pluginConformanceTestApps.forEach {
+    project(":test-apps:$it").projectDir = File("test-apps", it)
+}
+
+codegenFixtureApps.forEach {
     project(":test-apps:$it").projectDir = File("test-apps", it)
 }

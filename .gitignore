@@ -41,6 +41,7 @@ AGENTS.md
 /release/
 /releases/
 /tools/*
+!/tools/codegen-model/
 !/tools/pangu/
 !/tools/lua/
 /tools/lua/*

@@ -1,0 +1,30 @@
+<resources>
+    <item name="a01" type="id" />
+    <item name="a02" type="id" />
+    <item name="a03" type="id" />
+    <item name="a04" type="id" />
+    <item name="a05" type="id" />
+    <item name="a06" type="id" />
+    <item name="a07" type="id" />
+    <item name="a08" type="id" />
+    <item name="a09" type="id" />
+    <item name="a10" type="id" />
+    <item name="a11" type="id" />
+    <item name="a12" type="id" />
+    <item name="action_primary" type="id" />
+    <item name="action_secondary" type="id" />
+    <item name="card_action" type="id" />
+    <item name="codegen_truth" type="id" />
+    <item name="email" type="id" />
+    <item name="item_action" type="id" />
+    <item name="item_row" type="id" />
+    <item name="item_title" type="id" />
+    <item name="panel_content" type="id" />
+    <item name="password" type="id" />
+    <item name="remember" type="id" />
+    <item name="screen_content" type="id" />
+    <item name="screen_title" type="id" />
+    <item name="setting_switch" type="id" />
+    <item name="tab_item" type="id" />
+    <item name="wrapper" type="id" />
+</resources>

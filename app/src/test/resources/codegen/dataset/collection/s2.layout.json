@@ -1,0 +1,4 @@
+{"version":1,"root":{"packageName":"org.autojs.test.codegen.fixture","className":"android.widget.LinearLayout","children":[
+  {"className":"android.widget.Button","text":"Buy","clickable":true,"enabled":true,"depth":1,"indexInParent":0},
+  {"className":"android.widget.Button","text":"Buy","clickable":true,"enabled":true,"depth":1,"indexInParent":1}
+]}}
