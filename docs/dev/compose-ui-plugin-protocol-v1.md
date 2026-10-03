@@ -3,6 +3,7 @@
 Status: V1 frozen at P1.1 on 2026-10-02; P1.3 registration and the P2 renderer are
 implemented on 2026-10-03. P3.1-P3.5 provide UI and floating-window script entries, lifecycle guards
 and localized errors in the matching local host preview.
+P4 adds packaged examples, verified host accessibility selectors and catalog/documentation guards.
 The host owns `plugin-api/compose-ui-api`; the plugin consumes
 its release AAR as compileOnly. The contract depends on Android, Kotlin/JDK and common-plugin-api,
 and contains no Compose implementation dependency.
@@ -310,7 +311,7 @@ insets. For ScriptExecuteActivity, the host's ComposeActivityInsets lease select
 applies system-bar padding with bottom=max(systemBars.bottom, ime.bottom); it consumes those insets.
 The renderer adds neither systemBarsPadding nor imePadding. Detach restores the prior soft-input
 mode and legacy system-bar-only padding. Other embedders must supply the same single-owner policy;
-floaty-specific keyboard behavior remains P3.4 validation work. This follows Android's documented
+floaty-specific keyboard behavior was validated in P3.4 with explicit window focus. This follows Android's documented
 [inset-consumption rules](https://developer.android.com/develop/ui/compose/system/insets-ui).
 
 Session ShowSnackbar chooses the first Scaffold in stable preorder (primary children first, then
@@ -480,5 +481,60 @@ does not claim unrestricted overlay behavior above other apps on that ROM.
 
 This remains a local development preview under D7. Use the matching host source/build containing
 the script entry; the renderer's unchanged 5316 contract floor does not distinguish older unpublished
-builds with the same number. Example bundles, declarations/full user docs and the remaining
+builds with the same number. Complete declarations/user docs and the remaining
 compatibility/performance gates continue in their existing roadmap stages.
+
+## P4 examples, accessibility and catalog guards
+
+The plugin packages five indexed scripts in `assets/examples/`: counter (state/render), form
+(retained handles, native input, Switch/Slider and validation), list (1000 stable keys and scrollTo),
+floaty-hud (non-UI worker updates and owned cleanup), and theme (seed/dark/dynamic colors).
+`.python/sync_examples.py --host <checkout> [--check]` maintains byte-identical host copies in
+`app/src/main/assets-app/sample/Compose UI/` and the manifest in `assets-app/indices/`.
+The existing host browser discovers the category dynamically; it needs no separate category registry.
+Host device tests execute those actual packaged assets and check their equality with the installed
+plugin, including against a minified release plugin.
+
+Field valueChange includes text/selection/composition notifications. A form that treats a saved
+value as dirty should compare the text before replacing its saved-status message. The example also
+keeps validation feedback beside the focused editor so it remains visible when the IME resizes the
+viewport. These are application-level choices, not changes to native event delivery.
+
+The renderer enables testTagsAsResourceId at its root. A tag `start_button` is exposed verbatim as
+viewIdResourceName; packageName is still the host. `id('start_button')`, `idContains('start_')` and
+`idMatches('start_button')` or `idMatches(/^start_button$/)` match it. idMatches matches the whole
+value, and adding a `pkg:id/` prefix does not match that raw tag. Tags do not create Android R.id
+resources or replace stable Compose handle IDs.
+
+The host's actual Android accessibility tree is distinct from ComposeTestRule's default merged
+tree. In the tested Button with one tagged Text and a description, the clickable parent has ID
+start_button, empty text and no description; the Text child has ID start_label and its own text.
+The separate description child has no ID or click action. Both children's parent is start_button;
+the parent class is android.view.View and there is also a role child. Prefer the action component's
+own tag; text()/desc() can find child nodes whose clickable ancestor must be selected separately.
+Do not assume that id(...).text(...) describes the same node or that every Button parent reports
+android.widget.Button. Only composed/visible lazy-list items are available to these selectors.
+
+This was verified through the real built-in host service and Rhino selectors, including
+`id('start_button').findOnce().click()` reaching the script callback, on API24 x86 and API35 x86_64.
+Inspecting the host's own UI requires Guard Mode off; the tested child structure uses default
+Stable Mode off. Blocking selector waits belong to a non-UI script or worker. This is not a TalkBack
+or third-party-service certification. The user-facing rules are in AutoJs6-Documentation's
+`api/compose.md`; the rest of that API reference and declarations remain P6 work.
+
+`:plugin-api:compose-ui-api:exportComposeUiCatalog` exports actual ComponentCatalog.V1 objects
+from a JVM test-source tool, outside the frozen AAR. Its JSON includes 30 entries (29 NODE and
+Snackbar COMMAND), 114 canonical properties and 12 aliases. The host tool
+`.python/compose_catalog_check.py generate` produces TypeScript property interfaces and Markdown
+tables; `check --dts <file> --docs <file>` compares the marked generated regions and rejects missing
+files/regions, missing properties, wrong types and stale metadata. Generation is not a passed
+consistency check. P6 still supplies input helper types, public factory signatures, handwritten API
+methods and cross-property rules, then runs the real three-way check.
+
+Plugin instrumentation coverage is opt-in with `-PcomposeUiCoverage=true` for debug only, using
+JaCoCo 0.8.14. CI runs the complete suite on API24 x86 and API35 x86_64 and preserves reports.
+For explicit adb runs, collect each owned device's coverage .ec under
+`app/build/outputs/compose-coverage/`, then run `:app:reportComposeUiDeviceCoverage` with the same
+flag and matching uninstrumented compiler output. The report includes plugin source classes,
+excluding dependency classes and generated BuildConfig; release APKs contain no coverage runtime.
+Measured coverage and reproduction details are recorded in the plugin repository's `docs/dev/p4-evidence.md`.
