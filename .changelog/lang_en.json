@@ -2,9 +2,6 @@
   "$data": {
     "v6.8.0": {
       "released_date": "2026/10/03",
-      "hint": [
-        "Compose UI is a development preview; the compose script API is not yet available"
-      ],
       "feature": [
         "Plugin Center recognizes and manages installed Compose UI development preview plugins, requiring host 6.8.0 / 5316 or later; the compose script API is still in development",
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
@@ -732,6 +729,10 @@
         "Upgrade AndroidX Emoji2 from 1.3.0 to 1.4.0",
         "Upgrade AndroidX Window from 1.0.0 to 1.5.0",
         "Modularize Compose UI API"
+      ],
+      "hint": [
+        "The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged",
+        "Compose UI is a development preview; the compose script API is not yet available"
       ]
     },
     "v6.7.0": {

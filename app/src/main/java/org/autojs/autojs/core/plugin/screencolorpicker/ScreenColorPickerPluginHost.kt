@@ -24,7 +24,7 @@ object ScreenColorPickerPluginHost {
     private val host = AidlPluginHost(
         action = ACTION_SCREEN_COLOR_PICKER,
         tag = "ScreenColorPickerHost",
-        moduleLabel = "Screen Color Picker",
+        moduleLabel = "3-Color Picker",
         proxyFactory = { binder -> IScreenColorPickerPlugin.Stub.asInterface(binder) },
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
         preBindValidator = ::validateService,
@@ -70,7 +70,7 @@ object ScreenColorPickerPluginHost {
             engineId = ScreenColorPickerContract.PLUGIN_ID,
             engine = ScreenColorPickerContract.ENGINE,
             variant = ScreenColorPickerContract.VARIANT_DEFAULT,
-            label = "Screen Color Picker",
+            label = "3-Color Picker",
         )
     }
 

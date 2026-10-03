@@ -2,9 +2,6 @@
   "$data": {
     "v6.8.0": {
       "released_date": "2026/10/03",
-      "hint": [
-        "Compose UI est un aperçu de développement; l'API de scripts compose n'est pas encore disponible"
-      ],
       "feature": [
         "Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur; l'API de scripts compose reste en développement",
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
@@ -732,6 +729,10 @@
         "Mise à niveau de AndroidX Emoji2 1.3.0 -> 1.4.0",
         "Mise à niveau de AndroidX Window 1.0.0 -> 1.5.0",
         "Modularisation de Compose UI API"
+      ],
+      "hint": [
+        "Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé",
+        "Compose UI est un aperçu de développement; l'API de scripts compose n'est pas encore disponible"
       ]
     },
     "v6.7.0": {
