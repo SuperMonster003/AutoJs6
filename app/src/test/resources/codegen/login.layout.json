@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "generator": "AutoJs6",
+  "capturedAt": "2026-10-03T00:00:00+0800",
+  "root": {
+    "packageName": "org.autojs.test.codegen.fixture",
+    "className": "android.widget.LinearLayout",
+    "bounds": [0, 0, 720, 1280],
+    "childCount": 3,
+    "children": [
+      {"packageName": "org.autojs.test.codegen.fixture", "className": "android.widget.EditText", "desc": "用户名", "bounds": [24, 80, 696, 160], "editable": true, "enabled": true, "indexInParent": 0, "depth": 1, "actionNames": ["ACTION_SET_TEXT"]},
+      {"packageName": "org.autojs.test.codegen.fixture", "className": "android.widget.EditText", "desc": "密码", "bounds": [24, 180, 696, 260], "editable": true, "enabled": true, "indexInParent": 1, "depth": 1, "actionNames": ["ACTION_SET_TEXT"]},
+      {"packageName": "org.autojs.test.codegen.fixture", "className": "android.widget.Button", "text": "登录", "bounds": [24, 300, 696, 380], "clickable": true, "enabled": true, "indexInParent": 2, "depth": 1, "actionNames": ["ACTION_CLICK"]}
+    ]
+  }
+}
