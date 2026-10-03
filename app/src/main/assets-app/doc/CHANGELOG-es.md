@@ -12,6 +12,7 @@
 * `Sugerencia` Compose UI sigue siendo una versión preliminar de desarrollo local. Las API del modo UI y de ventanas flotantes están implementadas; el complemento aún no figura en el índice oficial ni se ha publicado formalmente
 * `Nuevo` API de scripts compose para el modo UI y ventanas flotantes raw o redimensionables: referencias a nodos, state/render, ref, actualizaciones por lotes, temas y comandos Snackbar (requiere el complemento Compose UI)
 * `Nuevo` compose.floaty admite scripts sin modo UI, controles de posición / tamaño / foco, actualizaciones desde hilos de trabajo mediante compose.post y cierre automático de ventanas al finalizar el script
+* `Nuevo` La categoría Compose UI de ejemplos integrados ofrece scripts de contador, validación de formularios, lista de 1000 elementos, HUD flotante y temas, cada uno con sus requisitos de complemento y permisos
 * `Nuevo` El Centro de complementos reconoce y administra los complementos instalados de la versión preliminar de desarrollo de Compose UI, con el host 6.8.0 / 5316 o posterior
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas

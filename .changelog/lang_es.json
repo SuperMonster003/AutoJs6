@@ -5,6 +5,7 @@
       "feature": [
         "API de scripts compose para el modo UI y ventanas flotantes raw o redimensionables: referencias a nodos, state/render, ref, actualizaciones por lotes, temas y comandos Snackbar (requiere el complemento Compose UI)",
         "compose.floaty admite scripts sin modo UI, controles de posición / tamaño / foco, actualizaciones desde hilos de trabajo mediante compose.post y cierre automático de ventanas al finalizar el script",
+        "La categoría Compose UI de ejemplos integrados ofrece scripts de contador, validación de formularios, lista de 1000 elementos, HUD flotante y temas, cada uno con sus requisitos de complemento y permisos",
         "El Centro de complementos reconoce y administra los complementos instalados de la versión preliminar de desarrollo de Compose UI, con el host 6.8.0 / 5316 o posterior",
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",
         "OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas",

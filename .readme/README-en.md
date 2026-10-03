@@ -174,6 +174,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Hint` Compose UI remains a local development preview. UI mode and floating-window APIs are implemented; the plugin is not listed in the official index or formally released
 * `Feature` compose script API for UI mode and raw or resizable floating windows: node handles, state/render, refs, batched updates, themes and Snackbar commands (requires the Compose UI plugin)
 * `Feature` compose.floaty supports non-UI scripts, window position / size / focus controls, worker-thread UI updates through compose.post, and automatic window cleanup when scripts stop
+* `Feature` The Compose UI category of built-in samples provides counter, form validation, 1000-item list, floating HUD, and theme scripts, each with plugin and permission prerequisites
 * `Feature` Plugin Center recognizes and manages installed Compose UI development preview plugins, requiring host 6.8.0 / 5316 or later
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
