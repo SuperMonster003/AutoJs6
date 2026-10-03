@@ -63,4 +63,36 @@ class TreeReconcilerTest {
         assertNotEquals(first.rootId, result.tree.rootId)
         assertTrue(result.patches.single() is UiPatch.SetRoot)
     }
+
+    @Test fun draftIdentityMapIncludesSlotsAndReservesIdsFromStableHandleTrees() {
+        val reconciler = TreeReconciler()
+        val previous = UiTree(700, listOf(UiNode(700, C.BUTTON, slots = mapOf(S.CONTENT to 701)),
+            UiNode(701, C.COLUMN, children = listOf(702)), UiNode(702, C.TEXT, "kept")))
+        val draft = UiTree(10, listOf(UiNode(10, C.BUTTON, slots = mapOf(S.CONTENT to 11)),
+            UiNode(11, C.COLUMN, children = listOf(12, 13)), UiNode(12, C.TEXT, "kept"), UiNode(13, C.TEXT, "new")))
+        val result = reconciler.reconcile(previous, draft)
+        assertEquals(mapOf(10 to 700, 11 to 701, 12 to 702, 13 to 703), result.draftToStable)
+        assertEquals(4, result.tree.nodes.map { it.nodeId }.toSet().size)
+        assertTrue(result.patches.single() is UiPatch.Insert)
+    }
+
+    @Test fun crossParentAndChildToSlotTransfersUseOneAtomicReplacement() {
+        val previous = UiTree(1, listOf(UiNode(1, C.ROW, children = listOf(2, 3)),
+            UiNode(2, C.COLUMN), UiNode(3, C.COLUMN, children = listOf(4)), UiNode(4, C.TEXT, "retained")))
+        // The destination is visited before the old owner: an Insert here would duplicate ID 4.
+        val moved = UiTree(1, listOf(UiNode(1, C.ROW, children = listOf(2, 3)),
+            UiNode(2, C.COLUMN, children = listOf(4)), UiNode(3, C.COLUMN), UiNode(4, C.TEXT, "retained")))
+        assertSame(moved, (TreeReconciler.diff(previous, moved).single() as UiPatch.SetRoot).tree)
+        val asSlot = UiTree(1, listOf(UiNode(1, C.ROW, children = listOf(2, 3)),
+            UiNode(2, C.COLUMN, slots = mapOf(S.CONTENT to 4)), UiNode(3, C.COLUMN), UiNode(4, C.TEXT, "retained")))
+        assertSame(asSlot, (TreeReconciler.diff(moved, asSlot).single() as UiPatch.SetRoot).tree)
+    }
+
+    @Test fun retainingAnIdWhileItsTypeOrKeyChangesCannotProduceAnIncompletePropsPatch() {
+        val before = UiTree(1, listOf(UiNode(1, C.COLUMN, children = listOf(2)), UiNode(2, C.TEXT, "before")))
+        for (changed in listOf(UiNode(2, C.TEXT, "after"), UiNode(2, C.BUTTON, "before"))) {
+            val next = UiTree(1, listOf(UiNode(1, C.COLUMN, children = listOf(2)), changed))
+            assertSame(next, (TreeReconciler.diff(before, next).single() as UiPatch.SetRoot).tree)
+        }
+    }
 }

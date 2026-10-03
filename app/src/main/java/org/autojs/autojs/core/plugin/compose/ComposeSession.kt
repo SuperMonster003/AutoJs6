@@ -29,6 +29,14 @@ class ComposeSession(
     private val onClosed: () -> Unit = {},
 ) : ComposeUiEventSink, AutoCloseable {
     enum class State { NEW, OPEN, ATTACHED, CLOSED }
+    sealed interface CommitResult {
+        data class Accepted(val tree: UiTree, val generation: Long) : CommitResult
+        data class Rejected(val error: ComposeUiError) : CommitResult
+        data object Superseded : CommitResult
+    }
+    private class Submission(val tree: UiTree, val completion: ((CommitResult) -> Unit)?) {
+        var completed = false
+    }
     @Volatile var state = State.NEW
         private set
     private val closing = AtomicBoolean()
@@ -39,8 +47,8 @@ class ComposeSession(
     private val droppedCommands = CommandResultEvictions()
     private var eventScheduled = false
     private var overflowWarning = false
-    private var pending: UiTree? = null
-    private var flight: UiTree? = null
+    private var pending: Submission? = null
+    private var flight: Submission? = null
     private var flushScheduled = false
     // Main-thread value: a command may run after apply succeeds but before its script acknowledgement.
     private var appliedGeneration = 0L
@@ -60,18 +68,47 @@ class ComposeSession(
     }
 
     fun registerCallback(callback: (UiEvent) -> Unit): Int { usable(); return callbacks.register(callback) }
+    fun containsCallback(callbackId: Int): Boolean { usable(); return callbacks.contains(callbackId) }
+
+    /** A failed script snapshot may have registered callbacks before validation rejected the tree. */
+    fun discardUnusedCallbacks() {
+        usable()
+        callbacks.retain(tree, pending?.tree, flight?.tree)
+    }
 
     /** Repeated renders in the same scheduler turn replace the pending target and yield one batch. */
     fun render(draft: UiTree) {
         usable()
-        draft.nodes.firstOrNull { it.type !in components }?.let { throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_COMPONENT, nodeId = it.nodeId) }
-        callbacks.validate(draft)
+        validateCallbacksAndComponents(draft)
         // Validate and bound the prospective diff synchronously, before publishing pending state.
-        val result = reconciler.reconcile(pending ?: flight ?: tree, draft)
-        TreeReconciler.diff(flight ?: tree, result.tree)
-        pending = result.tree
-        callbacks.stage(flight, pending)
+        val result = reconciler.reconcile(pending?.tree ?: flight?.tree ?: tree, draft)
+        submit(Submission(result.tree, null))
+    }
+
+    /**
+     * Submit a handle graph whose node IDs are already stable. Validation failures throw before
+     * staging. Once staged, exactly one completion runs on the script dispatcher, including no-op,
+     * replacement by a newer target, renderer rejection or close. Superseded is not a rollback.
+     */
+    fun submitStableTree(next: UiTree, completion: (CommitResult) -> Unit = {}) {
+        usable()
+        validateCallbacksAndComponents(next)
+        TreeReconciler.validate(next)
+        submit(Submission(next, completion))
+    }
+
+    private fun validateCallbacksAndComponents(next: UiTree) {
+        next.nodes.firstOrNull { it.type !in components }?.let { throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_COMPONENT, nodeId = it.nodeId) }
+        callbacks.validate(next)
+    }
+
+    private fun submit(submission: Submission) {
+        TreeReconciler.diff(flight?.tree ?: tree, submission.tree)
+        val superseded = pending
+        pending = submission
+        callbacks.stage(flight?.tree, pending?.tree)
         scheduleFlush()
+        superseded?.let { complete(it, CommitResult.Superseded) }
     }
 
     fun attach() { usable(); state = State.ATTACHED; effect { renderer.attach() } }
@@ -110,12 +147,17 @@ class ComposeSession(
         script.post {
             flushScheduled = false
             if (closing.get()) return@post
-            val target = pending ?: return@post
+            val submission = pending ?: return@post
+            val target = submission.tree
             pending = null
             val patches = TreeReconciler.diff(tree, target)
-            if (patches.isEmpty()) { callbacks.retain(tree); return@post }
+            if (patches.isEmpty()) {
+                callbacks.retain(tree)
+                complete(submission, CommitResult.Accepted(target, generation))
+                return@post
+            }
             val batch = UiPatchBatch(sessionId, generation + 1, patches)
-            flight = target
+            flight = submission
             main.execute {
                 if (closing.get()) return@execute
                 val failure = try { renderer.apply(batch); appliedGeneration = batch.generation; null } catch (error: Exception) { error } catch (error: LinkageError) { error }
@@ -126,11 +168,16 @@ class ComposeSession(
                     if (failure == null) {
                         tree = target
                         generation = batch.generation
-                        callbacks.commit(target, generation, pending)
+                        callbacks.commit(target, generation, pending?.tree)
+                        complete(submission, CommitResult.Accepted(target, generation))
                         if (pending != null) scheduleFlush()
                     } else {
+                        val dependent = pending
                         pending = null
                         callbacks.retain(tree)
+                        val rejection = CommitResult.Rejected(ComposeUiError.from(failure))
+                        complete(submission, rejection)
+                        dependent?.let { complete(it, rejection) }
                         report(failure)
                     }
                 }
@@ -187,13 +234,24 @@ class ComposeSession(
         if (!closing.get()) onError(ComposeUiError.from(failure))
     }
 
+    private fun complete(submission: Submission, result: CommitResult) {
+        if (submission.completed) return
+        submission.completed = true
+        try { submission.completion?.invoke(result) }
+        catch (failure: Exception) { report(failure) }
+        catch (failure: LinkageError) { report(failure) }
+    }
+
     /** Callable from engine/Activity/window teardown. No thread waits for another dispatcher. */
     override fun close() {
         if (!closing.compareAndSet(false, true)) return
         state = State.CLOSED
         synchronized(eventLock) { events.clear(); droppedCommands.clear(); eventScheduled = false }
         script.dispatch {
+            val outstanding = listOfNotNull(flight, pending)
             callbacks.close(); pending = null; flight = null; tree = null
+            val rejection = CommitResult.Rejected(ComposeUiError(ComposeUiErrorCodes.SESSION_CLOSED))
+            outstanding.forEach { complete(it, rejection) }
             try { onClosed() } finally { script.close() }
         }
         main.execute { try { renderer.dispose() } catch (_: Exception) { } catch (_: LinkageError) { } }

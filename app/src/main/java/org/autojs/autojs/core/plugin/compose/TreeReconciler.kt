@@ -10,19 +10,23 @@ import org.autojs.plugin.compose.api.model.UiTree
 
 /** Script-side identity allocation. Draft IDs are references within one render, never live handles. */
 class TreeReconciler(private val missingKey: () -> Unit = {}) {
-    data class Result(val tree: UiTree, val patches: List<UiPatch>)
+    data class Result(val tree: UiTree, val patches: List<UiPatch>, val draftToStable: Map<Int, Int>)
     private var nextId = 1L
     private var warned = false
 
     fun reconcile(previous: UiTree?, draft: UiTree): Result {
         val old = previous?.nodes?.associateBy { it.nodeId }.orEmpty()
+        // Stable handle submissions may allocate IDs outside this reconciler. Never reuse one.
+        old.keys.maxOrNull()?.let { nextId = maxOf(nextId, it.toLong() + 1) }
         val input = draft.nodes.associateBy { it.nodeId }
         val output = LinkedHashMap<Int, UiNode>()
+        val identities = LinkedHashMap<Int, Int>()
         fun compatible(a: UiNode?, b: UiNode) = a?.type == b.type && a.key == b.key
         fun visit(draftId: Int, candidate: UiNode?): Int {
             val node = input.getValue(draftId)
             val prior = candidate?.takeIf { compatible(it, node) }
             val id = prior?.nodeId ?: allocateId()
+            identities[draftId] = id
             val keyed = prior?.children.orEmpty().map(old::getValue).filter { it.key != null }.associateBy { it.key }
             val unkeyed = prior?.children.orEmpty().map(old::getValue).filter { it.key == null }.groupBy { it.type }
             val indices = HashMap<String, Int>()
@@ -46,7 +50,7 @@ class TreeReconciler(private val missingKey: () -> Unit = {}) {
         val root = visit(draft.rootId, previous?.rootId?.let(old::get))
         val tree = UiTree(root, output.values.toList())
         validate(tree)
-        return Result(tree, diff(previous, tree))
+        return Result(tree, diff(previous, tree), java.util.Collections.unmodifiableMap(LinkedHashMap(identities)))
     }
 
     private fun allocateId(): Int {
@@ -67,6 +71,24 @@ class TreeReconciler(private val missingKey: () -> Unit = {}) {
             if (previous == null || previous.rootId != next.rootId) return listOf(UiPatch.SetRoot(next))
             val old = previous.nodes.associateBy { it.nodeId }
             val nodes = next.nodes.associateBy { it.nodeId }
+            // A retained handle can move between parents or between children and named slots.
+            // Per-parent insert/remove traversal cannot safely order every such transfer: inserting
+            // before the old owner is visited would duplicate an ID. Publish these uncommon edits
+            // as one validated atomic replacement; ordinary sibling reorder still emits Move.
+            data class Owner(val parent: Int, val slot: String?)
+            fun owners(tree: UiTree) = buildMap {
+                tree.nodes.forEach { parent ->
+                    parent.children.forEach { put(it, Owner(parent.nodeId, null)) }
+                    parent.slots.forEach { (slot, child) -> put(child, Owner(parent.nodeId, slot)) }
+                }
+            }
+            val beforeOwners = owners(previous)
+            val afterOwners = owners(next)
+            if (old.keys.any { id ->
+                val after = nodes[id]
+                after != null && (old.getValue(id).type != after.type || old.getValue(id).key != after.key ||
+                    beforeOwners[id] != afterOwners[id])
+            }) return listOf(UiPatch.SetRoot(next))
             val patches = ArrayList<UiPatch>()
             fun add(patch: UiPatch) {
                 if (patches.size == ComposeUiLimits.MAX_PATCHES_PER_BATCH) throw ComposeUiContractException(ComposeUiErrorCodes.LIMIT_EXCEEDED)

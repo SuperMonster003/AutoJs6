@@ -25,6 +25,7 @@ class CallbackRegistry {
         internal fun publishGeneration(generation: Long) { this.generation = generation }
     }
     val size get() = callbacks.size
+    fun contains(callbackId: Int) = callbackId in callbacks
 
     fun register(callback: (UiEvent) -> Unit): Int {
         if (closed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)
@@ -46,9 +47,9 @@ class CallbackRegistry {
         retain(tree, pending)
     }
 
-    fun retain(tree: UiTree?, pending: UiTree? = null) {
-        treeReferences = ids(tree) + ids(pending)
-        stagedReferences = ids(pending)
+    fun retain(tree: UiTree?, pending: UiTree? = null, flight: UiTree? = null) {
+        treeReferences = ids(tree) + ids(pending) + ids(flight)
+        stagedReferences = ids(pending) + ids(flight)
         callbacks.keys.retainAll(treeReferences + commands.keys)
     }
 
