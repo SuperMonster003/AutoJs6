@@ -680,6 +680,7 @@
 * `Amélioration` Les lignes de l'analyse de hiérarchie perdent les barres de niveau colorées à gauche (le retrait est conservé) et placent le repère déplier / replier à côté du texte du nœud : chevron droit pour une ligne repliée, chevron bas pour une ligne dépliée et petit cercle creux pour une ligne sans descendants, les trois dans une même teinte légèrement plus foncée
 * `Amélioration` La sélection multiple des attributs utilise un fond aux couleurs du thème sans modifier la hauteur des lignes; les boutons deviennent Paramètres / Retour / Copier, et le comportement de copie est mémorisé entre les sessions: Toujours demander (par défaut), Copier le sélecteur objet ou Copier le sélecteur chaîné
 * `Amélioration` Symboles agrandis pour le mode de recherche, les filtres, les expressions régulières et la navigation dans la barre de recherche de l'analyse de mise en page; le bouton des expressions régulières utilise une icône ".*" simple
+* `Amélioration` Les paramètres des comptes de courrier et le Centre de plugins reconnaissent le nouveau nom et le paquet de 3-Stamp Mail
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise

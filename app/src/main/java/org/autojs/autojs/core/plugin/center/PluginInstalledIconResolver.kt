@@ -21,6 +21,7 @@ object PluginInstalledIconResolver {
         "io.github.supermonster003.autojs6.plugin.three.adapt.a11y",
         "io.github.supermonster003.autojs6.plugin.three.shell.terminal",
         "io.github.supermonster003.autojs6.plugin.three.color.picker",
+        "io.github.supermonster003.autojs6.plugin.three.stamp.mail",
     )
 
     /**

@@ -138,7 +138,7 @@
     <string name="description_launcher_icon_preference">Значок запуска поддерживает режимы отображения адаптивного значка или наследуемого значка с прозрачным фоном. Фактический вид может различаться на разных версиях Android. После переключения режима отображения может пройти несколько секунд, прежде чем изменения вступят в силу.</string>
     <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
     <string name="description_local_network_permission">Разрешить соединения с устройствами и службами локальной сети, включая VS Code. Скрипты могут явно запрашивать это разрешение.</string>
-    <string name="description_mail_settings_preference">Откройте Angus Mail, чтобы сохранить учётные записи для mail.connect(\'alias\'), проверить их подключение и выбрать основную.</string>
+    <string name="description_mail_settings_preference">Откройте 3-Stamp Mail, чтобы сохранить учётные записи для mail.connect(\'alias\'), проверить их подключение и выбрать основную.</string>
     <string name="description_manage_ignored_updates_preference">Нажмите для просмотра или управления элементами списка.\nДлинное нажатие для удаления элемента списка.</string>
     <string name="description_mcp_server">Разрешите сопряженным ИИ-клиентам управлять устройством через плагин MCP Server. В настройках можно выбрать порт, сеть, токен и группы инструментов.</string>
     <string name="description_night_mode">Позволяет управлять и отражать стратегию ночного режима AutoJs6.\n\nПримечание: переключатель ночного режима и переключатель автоматического ночного режима связаны и взаимно влияют друг на друга.</string>
@@ -662,10 +662,10 @@
     <string name="prompt_ai_plugin_install_required">Установите 3-Stone AI из Центра плагинов, прежде чем открывать настройки службы ИИ.</string>
     <string name="prompt_ai_plugin_settings_unavailable">Установленный 3-Stone AI не предоставляет доверенной точки входа в настройки. Обновите или переустановите его из Центра плагинов.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">Текущий файл может быть недействительным пакетом плагина. Продолжить установку?\n\nURI: \"%1$s\"</string>
-    <string name="prompt_mail_plugin_application_enable_required">Приложение Angus Mail отключено в Android. Включите его в системных настройках приложения, прежде чем открывать настройки почтовых учётных записей.</string>
-    <string name="prompt_mail_plugin_enable_required">Плагин Angus Mail отключен в Центре плагинов. Включите его, прежде чем открывать настройки почтовых учётных записей.</string>
-    <string name="prompt_mail_plugin_install_required">Установите Angus Mail из Центра плагинов, прежде чем открывать настройки почтовых учётных записей.</string>
-    <string name="prompt_mail_plugin_settings_unavailable">Установленный Angus Mail не предоставляет доверенной точки входа в настройки. Обновите или переустановите его из Центра плагинов.</string>
+    <string name="prompt_mail_plugin_application_enable_required">Приложение 3-Stamp Mail отключено в Android. Включите его в системных настройках приложения, прежде чем открывать настройки почтовых учётных записей.</string>
+    <string name="prompt_mail_plugin_enable_required">Плагин 3-Stamp Mail отключен в Центре плагинов. Включите его, прежде чем открывать настройки почтовых учётных записей.</string>
+    <string name="prompt_mail_plugin_install_required">Установите 3-Stamp Mail из Центра плагинов, прежде чем открывать настройки почтовых учётных записей.</string>
+    <string name="prompt_mail_plugin_settings_unavailable">Установленный 3-Stamp Mail не предоставляет доверенной точки входа в настройки. Обновите или переустановите его из Центра плагинов.</string>
     <string name="prompt_mcp_server_activate">MCP Server установлен, но еще не активирован Android. Активируйте его для подключения AutoJs6.</string>
     <string name="prompt_mcp_server_application_disabled">Android отключил MCP Server. Включите приложение в системных настройках и повторите попытку.</string>
     <string name="prompt_mcp_server_authorize">Для доступа MCP к устройству плагину сначала требуется разрешение в Центре плагинов.</string>

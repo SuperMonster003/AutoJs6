@@ -842,6 +842,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Layout hierarchy rows drop the colored level beams on the left (the indent stays) and move the expand / collapse marker next to the node text: a right chevron for collapsed rows, a down chevron for expanded rows and a small hollow circle for rows without descendants, all three in one slightly darker tint
 * `Improvement` Node info multi-selection uses themed row backgrounds with unchanged row heights; the buttons are Settings / Back / Copy, and the copy behavior is remembered across sessions: Always ask (default), Copy object selector, or Copy chained selector
 * `Improvement` Larger query mode, filter, regex and navigation symbols in the layout inspector search bar; the regex switch uses a simple ".*" icon
+* `Improvement` Mail account settings and Plugin Center now recognize 3-Stamp Mail under its new package name
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

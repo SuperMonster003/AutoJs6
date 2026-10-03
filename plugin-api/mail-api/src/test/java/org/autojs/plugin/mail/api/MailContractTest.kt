@@ -18,11 +18,11 @@ class MailContractTest {
         assertEquals("org.autojs.permission.PLUGIN", MailActions.PLUGIN_PERMISSION)
         assertEquals("org.autojs.plugin.MAIL_SETTINGS", MailActions.OPEN_SETTINGS)
 
-        assertEquals("angus-mail", MailIds.PLUGIN_ID)
+        assertEquals("three-stamp-mail", MailIds.PLUGIN_ID)
         assertEquals("mail", MailIds.ENGINE)
         assertEquals("default", MailIds.VARIANT_DEFAULT)
-        assertEquals("io.github.supermonster003.autojs6.plugin.angus.mail", MailIds.DEFAULT_PACKAGE_NAME)
-        assertTrue(MailIds.REQUIRED_HOST_VERSION_CODE > 5279L)
+        assertEquals("io.github.supermonster003.autojs6.plugin.three.stamp.mail", MailIds.DEFAULT_PACKAGE_NAME)
+        assertEquals(5282L, MailIds.REQUIRED_HOST_VERSION_CODE)
 
         assertEquals(PluginCapabilityKeys.REQUIRES_HOST_VERSION, MailCapabilityKeys.REQUIRES_HOST_VERSION)
         assertEquals("mailContractVersion", MailCapabilityKeys.CONTRACT_VERSION)

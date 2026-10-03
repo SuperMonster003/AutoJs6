@@ -677,7 +677,8 @@
         "Le courtier de modèles de Three Stove Agent met en fusible un composant Provider lorsqu'un appel au modèle expire alors que sa transaction Binder synchrone n'est pas encore revenue ; le fusible durait jusqu'au redémarrage d'AutoJs6 et les tâches suivantes échouaient aussitôt avec RATE_LIMITED: FUSED. Il est désormais levé automatiquement une fois cette transaction revenue et l'exécution soldée, si bien que les tâches suivantes sont de nouveau admises sans redémarrage",
         "Les lignes de l'analyse de hiérarchie perdent les barres de niveau colorées à gauche (le retrait est conservé) et placent le repère déplier / replier à côté du texte du nœud : chevron droit pour une ligne repliée, chevron bas pour une ligne dépliée et petit cercle creux pour une ligne sans descendants, les trois dans une même teinte légèrement plus foncée",
         "La sélection multiple des attributs utilise un fond aux couleurs du thème sans modifier la hauteur des lignes; les boutons deviennent Paramètres / Retour / Copier, et le comportement de copie est mémorisé entre les sessions: Toujours demander (par défaut), Copier le sélecteur objet ou Copier le sélecteur chaîné",
-        "Symboles agrandis pour le mode de recherche, les filtres, les expressions régulières et la navigation dans la barre de recherche de l'analyse de mise en page; le bouton des expressions régulières utilise une icône \".*\" simple"
+        "Symboles agrandis pour le mode de recherche, les filtres, les expressions régulières et la navigation dans la barre de recherche de l'analyse de mise en page; le bouton des expressions régulières utilise une icône \".*\" simple",
+        "Les paramètres des comptes de courrier et le Centre de plugins reconnaissent le nouveau nom et le paquet de 3-Stamp Mail"
       ],
       "dependency": [
         "Android AXML modularise",

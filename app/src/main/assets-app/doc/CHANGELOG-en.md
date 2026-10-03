@@ -680,6 +680,7 @@
 * `Improvement` Layout hierarchy rows drop the colored level beams on the left (the indent stays) and move the expand / collapse marker next to the node text: a right chevron for collapsed rows, a down chevron for expanded rows and a small hollow circle for rows without descendants, all three in one slightly darker tint
 * `Improvement` Node info multi-selection uses themed row backgrounds with unchanged row heights; the buttons are Settings / Back / Copy, and the copy behavior is remembered across sessions: Always ask (default), Copy object selector, or Copy chained selector
 * `Improvement` Larger query mode, filter, regex and navigation symbols in the layout inspector search bar; the regex switch uses a simple ".*" icon
+* `Improvement` Mail account settings and Plugin Center now recognize 3-Stamp Mail under its new package name
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

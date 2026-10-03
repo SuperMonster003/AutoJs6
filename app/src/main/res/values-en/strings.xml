@@ -135,7 +135,7 @@
     <string name="description_launcher_icon_preference">Launcher icon supports both adaptive icon or legacy transparent background icon display modes. The actual display effect may vary on different Android systems. It may take a few seconds to take effect after switching display modes.</string>
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
     <string name="description_local_network_permission">Allow connections to devices and services on the local network, including VS Code. Scripts can request this permission explicitly.</string>
-    <string name="description_mail_settings_preference">Open Angus Mail to save accounts for mail.connect(\'alias\'), test their connections, and pick the default one.</string>
+    <string name="description_mail_settings_preference">Open 3-Stamp Mail to save accounts for mail.connect(\'alias\'), test their connections, and pick the default one.</string>
     <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
     <string name="description_mcp_server">Allow paired AI clients to automate this device through the MCP Server plugin. Open Settings to choose the port, network access, token, and tool groups.</string>
     <string name="description_night_mode">Used to control and reflect AutoJs6\'s night mode strategy.\n\nNote: the night mode toggle and the auto night mode toggle are linked and affect each other.</string>
@@ -659,10 +659,10 @@
     <string name="prompt_ai_plugin_install_required">Install 3-Stone AI from Plugin Center before opening AI service settings.</string>
     <string name="prompt_ai_plugin_settings_unavailable">The installed 3-Stone AI has no trusted settings entry. Update or reinstall it from Plugin Center.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">The current file may not be a valid plugin package, do you want to continue with installation?\n\nURI: \"%1$s\"</string>
-    <string name="prompt_mail_plugin_application_enable_required">Angus Mail is disabled by Android. Enable it in system app settings before opening mail account settings.</string>
-    <string name="prompt_mail_plugin_enable_required">Angus Mail is disabled in Plugin Center. Enable it before opening mail account settings.</string>
-    <string name="prompt_mail_plugin_install_required">Install Angus Mail from Plugin Center before opening mail account settings.</string>
-    <string name="prompt_mail_plugin_settings_unavailable">The installed Angus Mail has no trusted settings entry. Update or reinstall it from Plugin Center.</string>
+    <string name="prompt_mail_plugin_application_enable_required">3-Stamp Mail is disabled by Android. Enable it in system app settings before opening mail account settings.</string>
+    <string name="prompt_mail_plugin_enable_required">3-Stamp Mail is disabled in Plugin Center. Enable it before opening mail account settings.</string>
+    <string name="prompt_mail_plugin_install_required">Install 3-Stamp Mail from Plugin Center before opening mail account settings.</string>
+    <string name="prompt_mail_plugin_settings_unavailable">The installed 3-Stamp Mail has no trusted settings entry. Update or reinstall it from Plugin Center.</string>
     <string name="prompt_mcp_server_activate">MCP Server is installed but Android has not activated it yet. Activate it now to allow AutoJs6 to connect.</string>
     <string name="prompt_mcp_server_application_disabled">Android has disabled MCP Server. Enable the app in its system settings, then try again.</string>
     <string name="prompt_mcp_server_authorize">This plugin needs authorization in the Plugin Center before it can provide MCP access to this device.</string>
