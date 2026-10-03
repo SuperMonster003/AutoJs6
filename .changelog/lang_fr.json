@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/02",
+      "released_date": "2026/10/03",
       "feature": [
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
         "OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées",
@@ -723,6 +723,9 @@
         "Ajout de Android Hidden API Bypass version 6.1",
         "Modularisation de Package Archive Parser",
         "Modularisation d'Installer API"
+      ],
+      "hint": [
+        "Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé"
       ]
     },
     "v6.7.0": {

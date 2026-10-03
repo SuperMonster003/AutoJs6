@@ -13,13 +13,13 @@ public final class ScreenColorPickerContract {
     public static final String SERVICE_CATEGORY = "screen-color-picker";
     public static final String PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN";
 
-    public static final String PLUGIN_ID = "screen-color-picker";
+    public static final String PLUGIN_ID = "three-color-picker";
     public static final String ENGINE = "screen-color-picker";
     public static final String VARIANT_DEFAULT = "default";
 
     public static final String DEFAULT_PACKAGE_NAME =
-            "io.github.supermonster003.autojs6.plugin.screencolorpicker";
-    public static final long REQUIRED_HOST_VERSION_CODE = 5278L;
+            "io.github.supermonster003.autojs6.plugin.three.color.picker";
+    public static final long REQUIRED_HOST_VERSION_CODE = 5316L;
 
     public static final String CAPABILITY_CONTRACT_VERSION =
             "screenColorPickerContractVersion";

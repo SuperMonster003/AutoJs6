@@ -36,7 +36,7 @@
 
     <queries>
         <package android:name="io.github.supermonster003.autojs6.plugin.python.runtime" />
-        <package android:name="io.github.supermonster003.autojs6.plugin.screencolorpicker" />
+        <package android:name="io.github.supermonster003.autojs6.plugin.three.color.picker" />
         <package android:name="io.github.supermonster003.autojs6.plugin.three.amber.player" />
         <package android:name="io.github.supermonster003.autojs6.plugin.mcp.server" />
         <package android:name="io.github.supermonster003.autojs6.plugin.three.shell.terminal" />

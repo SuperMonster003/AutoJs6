@@ -13,14 +13,14 @@ class ScreenColorPickerContractTest {
         assertEquals(1, ScreenColorPickerContract.VERSION)
         assertEquals("org.autojs.plugin.SCREEN_COLOR_PICKER", ScreenColorPickerContract.SERVICE_ACTION)
         assertEquals("screen-color-picker", ScreenColorPickerContract.SERVICE_CATEGORY)
-        assertEquals("screen-color-picker", ScreenColorPickerContract.PLUGIN_ID)
+        assertEquals("three-color-picker", ScreenColorPickerContract.PLUGIN_ID)
         assertEquals("screen-color-picker", ScreenColorPickerContract.ENGINE)
         assertEquals("default", ScreenColorPickerContract.VARIANT_DEFAULT)
         assertEquals(
-            "io.github.supermonster003.autojs6.plugin.screencolorpicker",
+            "io.github.supermonster003.autojs6.plugin.three.color.picker",
             ScreenColorPickerContract.DEFAULT_PACKAGE_NAME,
         )
-        assertEquals(5278L, ScreenColorPickerContract.REQUIRED_HOST_VERSION_CODE)
+        assertEquals(5316L, ScreenColorPickerContract.REQUIRED_HOST_VERSION_CODE)
         assertEquals(
             PluginCapabilityKeys.REQUIRES_HOST_VERSION,
             ScreenColorPickerContract.CAPABILITY_REQUIRES_HOST_VERSION,
