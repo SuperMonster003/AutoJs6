@@ -15,6 +15,7 @@ import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.compose.api.ComposeUiContract
 import org.autojs.plugin.compose.api.ComposeUiIds
+import java.io.Closeable
 
 /** One host per owner. Cached code has no Activity references; gates are checked on EVERY lookup. */
 class ComposeUiPluginHost(context: Context) : AutoCloseable {
@@ -22,12 +23,12 @@ class ComposeUiPluginHost(context: Context) : AutoCloseable {
     private val loader = ComposeUiPluginLoader()
     private var cached: ComposeUiPluginLoader.Loaded? = null
     private var closed = false
-    private val changed: (String) -> Unit = { if (it == ComposeUiIds.PLUGIN_PACKAGE_NAME) invalidate() }
+    private val subscriptions = ComposePackageSubscriptions()
+    private val changed: (String) -> Unit = { if (it == ComposeUiIds.PLUGIN_PACKAGE_NAME) refreshSubscriptions() }
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             intent.data?.schemeSpecificPart?.let { name ->
-                // Component/system enablement changes do not replace APK code or its JNI owner.
-                if (intent.action != Intent.ACTION_PACKAGE_CHANGED) ComposeUiPluginLoader.invalidatePackage(name)
+                if (name != ComposeUiIds.PLUGIN_PACKAGE_NAME) return
                 changed(name)
             }
         }
@@ -56,10 +57,36 @@ class ComposeUiPluginHost(context: Context) : AutoCloseable {
     }
 
     fun isAvailable(): Boolean = try { load(); true } catch (_: ComposeUiError) { false }
+
+    internal fun watch(identity: ComposeUiPluginLoader.Package, invalidated: (Throwable) -> Unit): Closeable {
+        val watch = synchronized(this) { check(!closed); subscriptions.add(identity, invalidated) }
+        // Cover replacement between load() and listener registration, before a broadcast is handled.
+        try { refreshSubscriptions(); return watch }
+        catch (failure: Throwable) { watch.close(); throw failure }
+    }
+
+    private fun refreshSubscriptions() {
+        // Snapshot BEFORE querying PackageManager: another owner may load/subscribe to a new APK
+        // while this query still describes the previous one. Its own registration verifies it.
+        val observed = synchronized(this) { if (closed) return; cached to subscriptions.snapshot() }
+        val observedCode = ComposeUiPluginLoader.cachedPackages(ComposeUiIds.PLUGIN_PACKAGE_NAME)
+        val inventory = AndroidInventory(context)
+        val failure = ComposeUiPluginSelection.beforeLoad(inventory, BuildConfig.VERSION_CODE.toLong())
+        val installed = inventory.identityOrNull()
+        synchronized(this) {
+            if (closed) return
+            if (cached === observed.first && (failure != null || cached?.identity != installed)) cached = null
+        }
+        // Keep a newly loaded current epoch when delayed replacement broadcasts arrive. Recreating
+        // an identical loader would also create a second owner for the same APK's JNI library.
+        ComposeUiPluginLoader.invalidatePackage(ComposeUiIds.PLUGIN_PACKAGE_NAME, installed, observedCode)
+        subscriptions.changed(installed, failure?.let { ComposeUiError.selection(context, it) }, observed.second)
+    }
     @Synchronized internal fun invalidate() { cached = null }
     @Synchronized override fun close() {
         if (closed) return
         closed = true; cached = null
+        subscriptions.close()
         PluginStateChangeRegistry.removeListener(changed)
         context.unregisterReceiver(receiver)
     }
@@ -86,7 +113,10 @@ class ComposeUiPluginHost(context: Context) : AutoCloseable {
                 it.enabled && it.exported && it.permission == ComposeUiContract.PLUGIN_PERMISSION
             }
         }
-        fun identity() = info!!.let { pkg -> ComposeUiPluginLoader.Package(pkg.packageName, PackageInfoCompat.getLongVersionCode(pkg),
-            pkg.lastUpdateTime, pkg.applicationInfo!!.sourceDir, pkg.applicationInfo!!.metaData.getString(ComposeUiContract.META_RENDERER_FACTORY)!!) }
+        fun identity() = requireNotNull(identityOrNull())
+        fun identityOrNull() = info?.let { pkg -> pkg.applicationInfo?.let { app ->
+            ComposeUiPluginLoader.Package(pkg.packageName, PackageInfoCompat.getLongVersionCode(pkg),
+                pkg.lastUpdateTime, app.sourceDir, app.metaData?.getString(ComposeUiContract.META_RENDERER_FACTORY).orEmpty())
+        } }
     }
 }

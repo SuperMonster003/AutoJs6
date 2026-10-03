@@ -2,7 +2,6 @@ package org.autojs.autojs.core.plugin.compose
 
 import android.content.*
 import android.content.res.Configuration
-import android.graphics.Path
 import android.os.*
 import android.view.View
 import android.view.ViewGroup
@@ -144,7 +143,7 @@ class ComposeUiLoaderTest {
         assertTrue(first.nativePath.contains("!/lib/"))
     }
 
-    @Test fun pluginResourcesFollowHostConfigurationAndNativePathIteratorExecutes() {
+    @Test fun pluginResourcesFollowHostConfigurationAndNativeLibraryInitializes() {
         val loaded = host.load()
         val activity = activity()
         try {
@@ -161,12 +160,7 @@ class ComposeUiLoaderTest {
                 assertEquals(language, wrapper.resources.configuration.locales[0].language)
                 assertSame(activity.theme, wrapper.theme)
             }
-            // Public AndroidX source API. Reflection avoids adding graphics-path or Compose to the host.
-            val path = Path().apply { moveTo(0f, 0f); lineTo(20f, 20f); close() }
-            val iterator = loaded.loader.loadClass("androidx.graphics.path.PathUtilities").getMethod("iterator", Path::class.java).invoke(null, path) as Iterator<*>
-            var segments = 0
-            while (iterator.hasNext()) { iterator.next(); segments++ }
-            assertEquals(3, segments)
+            assertGraphicsPathNativeLibraryInitialization(loaded)
         } finally { main { activity.finish() } }
     }
 

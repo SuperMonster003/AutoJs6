@@ -24,6 +24,7 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
     private var window: ComposeFloatyControl? = null
     private var windowFacade: ComposeFloatyWindow? = null
     private val lifetime = AtomicReference<Closeable?>()
+    private val packageWatch = AtomicReference<Closeable?>()
     private val finished = AtomicBoolean()
     @Volatile private lateinit var core: ComposeSession
     private val startupFailure = AtomicReference<Throwable?>()
@@ -93,6 +94,11 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
             }
             throw failure
         }
+        opened.watchInvalidation?.invoke(core::failInitialization)?.let { watch ->
+            packageWatch.set(watch)
+            if (isClosed) packageWatch.getAndSet(null)?.close()
+        }
+        if (isClosed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)
         core.open()
         startupFailure.getAndSet(null)?.let(core::failInitialization)
         initialTheme?.let(core::setTheme)
@@ -259,7 +265,7 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
         // Before core construction, open() still owns startup on the script thread. Its cancellation
         // check/catch finishes cleanup there; a native callback must not use the ordinary post queue.
         try { if (::core.isInitialized) core.close() else if (owner.platform.dispatcher.isDispatchThread()) finish() }
-        finally { lifetime.getAndSet(null)?.close() }
+        finally { releaseOwnership() }
     }
     private fun finish() {
         if (!finished.compareAndSet(false, true)) return
@@ -278,7 +284,11 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
             }
         } finally {
             window = null; windowFacade = null
-            lifetime.getAndSet(null)?.close()
+            releaseOwnership()
         }
+    }
+
+    private fun releaseOwnership() {
+        try { packageWatch.getAndSet(null)?.close() } finally { lifetime.getAndSet(null)?.close() }
     }
 }

@@ -265,6 +265,7 @@
         "Modo selector en la barra de búsqueda del análisis de diseño: cuando el conmutador de modo llega a \"$()\", escriba una expresión de selector encadenada como en un script (por ejemplo text(\"OK\").clickable().depth(3) o textMatch(/ok|cancelar/i); el prefijo selector() / $() es opcional); sus literales de cadena / número / booleano / regex llegan al registro de selectores con la semántica de los scripts, una expresión a medio escribir muestra \"Expresión sin terminar\" en lugar de un error, los errores de sintaxis muestran la posición, la llamada y los nombres de método candidatos, y \"Copiar como selector\" produce la expresión normalizada"
       ],
       "fix": [
+        "Compose UI rechaza volver a montar páginas o ventanas flotantes dentro del callback de renderizado y conserva la página actual; permite volver a montar páginas después de actualizar el plugin",
         "Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información",
         "Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)",
         "La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío",
@@ -507,7 +508,7 @@
       ],
       "improvement": [
         "La versión preliminar de desarrollo de Compose UI admite edición de texto nativa y evita que el teclado cubra el contenido, con un único aviso por acción o cierre de Snackbar",
-        "ComposeError ofrece mensajes localizados y códigos estables con detalles del nodo, la propiedad, la causa y la pila del script; cada motor admite hasta 8 sesiones, rechaza operaciones tras el cierre y limpia callbacks, referencias y tareas pendientes",
+        "ComposeError ofrece mensajes localizados y códigos estables con detalles del nodo, la propiedad, la causa y la pila del script; cada motor admite hasta 8 sesiones, rechaza operaciones tras el cierre y limpia callbacks, referencias y tareas pendientes; Actualizar, desinstalar o desactivar el plugin cierra sus sesiones activas y comunica el error correspondiente",
         "Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas",
         "Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión",
         "El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado",

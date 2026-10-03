@@ -88,6 +88,8 @@ class Compose internal constructor(
 
     private fun mount(args: Array<out Any?>, floating: Boolean = false): ComposeScriptSession {
         usable()
+        if (reactive.isRendering) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+            "A render callback cannot create another Compose mount")
         val method = if (floating) "floaty" else "mount"
         composeArguments(args, 1, 2, method)
         val options = values.objectProperties(args.getOrNull(1), method)

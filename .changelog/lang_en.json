@@ -265,6 +265,7 @@
         "Layout Inspector \"Generate code\" supports single-widget/collection scopes, waiting until found/waiting with a timeout/immediate checks, action receivers and text parameters, Classic/Flow styles, alternative plans and location explanations, with matching widgets previewable in the layout"
       ],
       "fix": [
+        "Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates",
         "Package information becoming inaccessible from the file manager when APK Inspector hides the information button",
         "Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)",
         "Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty",
@@ -507,7 +508,7 @@
       ],
       "improvement": [
         "The Compose UI development preview supports native text editing and keyboard avoidance, with each Snackbar action or dismissal reported once",
-        "ComposeError provides localized messages and stable codes with node / property / cause and script stack details; each engine supports up to 8 sessions, rejects closed-handle operations, and clears callbacks, refs and pending work on close",
+        "ComposeError provides localized messages and stable codes with node / property / cause and script stack details; each engine supports up to 8 sessions, rejects closed-handle operations, and clears callbacks, refs and pending work on close; Updating, uninstalling or disabling the plugin closes its active sessions and reports the corresponding error",
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",
         "Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host",
         "Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record",

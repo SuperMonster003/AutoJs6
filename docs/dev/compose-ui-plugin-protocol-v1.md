@@ -206,7 +206,10 @@ all host languages. The process code cache is keyed by package, version, APK pat
 Package install/update/removal broadcasts invalidate code and owner caches. System/component
 enablement and host enable/trust changes invalidate selection;
 a still-identical authorized APK reuses its process loader so JNI ownership stays consistent.
-An existing session owns its loaded renderer until close; a package update affects subsequent loads.
+At P1.2 an existing session retained its renderer until close. P5.1 adds live package-identity
+subscriptions: replacement/removal closes affected sessions with PLUGIN_UNAVAILABLE, while
+enable/trust changes retain their specific gate errors. Queries snapshot subscriptions and code
+keys before consulting PackageManager, so delayed results cannot invalidate newly observed epochs.
 
 Each script engine owns a ComposeSessionScope (at most 8 sessions). Session mutations stay on a
 ScriptUiDispatcher; UI mode dispatches mutations directly on main and always queues events/tick
@@ -387,11 +390,19 @@ valueChange(text, {start,end}, editSeq), focusChange(focused), and scroll(firstV
 pixelOffset). Click, longClick, valueChangeFinished and dismissRequest have no positional payload.
 Callbacks use their node as this. All run on the originating script dispatcher after renderer enqueue.
 
-`mount(nodeOrRender, {theme?})` requires a real UI ScriptExecuteActivity, mounts via the existing
-ui.setContentViewRhinoRuntime path and returns root/update/post/showSnackbar/close/isClosed/on('close').
+`mount(nodeOrRender, {theme?})` requires a real UI ScriptExecuteActivity and returns
+root/update/post/showSnackbar/close/isClosed/on('close'). P5.1 preserves the normal UI content
+replacement notification and runtime.ui.view assignment, then calls Activity.setContentView on
+the already validated main thread. An attach failure uses the session's fatal control channel
+and RENDERER_FAILED, without the generic UI helper terminating the entire engine first.
 Repeated mount closes the prior UI session. ui.layout/layoutFile/setContentView replacing its view
 closes it and warns; native Activity events retain the existing ui emitter. Activity destroy and
 engine exit close sessions, compositions, callback references, queued work and image owners.
+The existing Manifest handles orientation/size configuration changes without destroying the
+engine; a real Activity recreation still destroys it. A render callback cannot call mount/floaty
+recursively. Each plugin ComposeView gets a distinct public LifecycleOwner/SavedStateRegistryOwner
+identity delegating to the original host Lifecycle/SavedStateRegistry, with ViewModel ownership
+still inherited. This bounds Compose1.12 view-tree caches to that renderer across APK replacement.
 The P2.4 single host inset owner remains in use. Lifecycle validation includes 20 real mount/close
 cycles; this does not replace the later long-running heap/memory matrix.
 

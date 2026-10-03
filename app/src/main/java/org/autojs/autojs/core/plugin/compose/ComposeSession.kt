@@ -136,7 +136,15 @@ class ComposeSession(
         superseded?.let { complete(it, CommitResult.Superseded) }
     }
 
-    fun attach() { usable(); state = State.ATTACHED; effect { renderer.attach() } }
+    fun attach() {
+        usable()
+        state = State.ATTACHED
+        main.execute {
+            if (canRender()) try { renderer.attach() }
+            catch (failure: Exception) { failInitialization(failure) }
+            catch (failure: LinkageError) { failInitialization(failure) }
+        }
+    }
     fun detach() { usable(); state = State.OPEN; effect { renderer.detach() } }
     fun setTheme(theme: ThemeSpec) { usable(); effect { renderer.setTheme(theme) } }
 

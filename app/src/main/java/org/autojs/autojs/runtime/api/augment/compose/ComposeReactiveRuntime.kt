@@ -20,6 +20,7 @@ internal class ComposeReactiveRuntime(
     private var scheduled = false
     private var batchDepth = 0
     private var closed = false
+    val isRendering: Boolean get() = collecting != null
 
     inner class State(initial: Any?) : NativeObject() {
         private var stored = initial

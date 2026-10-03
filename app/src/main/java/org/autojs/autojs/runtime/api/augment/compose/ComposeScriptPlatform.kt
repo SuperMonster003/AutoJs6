@@ -13,7 +13,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.ScriptDispatchQueueOverflowException
-import org.autojs.autojs.runtime.api.augment.ui.UI
 import org.autojs.autojs6.R
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.model.UiValue
@@ -23,7 +22,8 @@ import java.util.concurrent.Executor
 /** JVM-testable platform boundary. All script values and scheduling remain in the owning runtime. */
 internal interface ComposeScriptPlatform : Closeable {
     data class Opened(val renderer: ComposeSessionRenderer, val components: Set<String>,
-        val window: ComposeFloatyControl? = null, val lifetime: Closeable = Closeable {})
+        val window: ComposeFloatyControl? = null, val lifetime: Closeable = Closeable {},
+        val watchInvalidation: (((Throwable) -> Unit) -> Closeable)? = null)
     val dispatcher: ScriptUiDispatcher
     val mainExecutor: Executor
     fun version(): Map<String, Any>?
@@ -68,9 +68,14 @@ internal class AndroidComposeScriptPlatform(private val runtime: ScriptRuntime) 
         val loaded = plugin()
         val renderer = ComposeAndroidRenderer(activity, loaded, sessionId, { view ->
             beforeMount(view)
-            UI.setContentViewRhinoRuntime(runtime, view)
+            // Already on the owning UI thread. Keep attach failures in the Compose session's
+            // error boundary; the generic ui helper terminates UI scripts on callback exceptions.
+            runtime.beforeSetUiContent(view)
+            runtime.ui.view = view
+            activity.setContentView(view)
         }, activity, onDestroyed = onDestroyed)
-        return ComposeScriptPlatform.Opened(renderer, loaded.components)
+        return ComposeScriptPlatform.Opened(renderer, loaded.components,
+            watchInvalidation = { invalidated -> host.watch(loaded.identity, invalidated) })
     }
 
     override fun createFloatyRenderer(sessionId: Int, options: ComposeFloatyOptions, beforeMount: (Any) -> Unit,
@@ -84,7 +89,8 @@ internal class AndroidComposeScriptPlatform(private val runtime: ScriptRuntime) 
         val lifetime = Closeable { token.release() }
         try {
             val renderer = AndroidComposeFloatyRenderer(runtime, loaded, sessionId, options, beforeMount, onDestroyed, onFailure)
-            return ComposeScriptPlatform.Opened(renderer, loaded.components, renderer.window, lifetime)
+            return ComposeScriptPlatform.Opened(renderer, loaded.components, renderer.window, lifetime,
+                watchInvalidation = { invalidated -> host.watch(loaded.identity, invalidated) })
         } catch (failure: Throwable) { lifetime.close(); throw failure }
     }
 

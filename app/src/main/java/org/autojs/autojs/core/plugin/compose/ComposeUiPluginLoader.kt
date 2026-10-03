@@ -24,14 +24,8 @@ class ComposeUiPluginLoader {
         fun context(base: Context) = ComposeHostContext(base, pluginContext, loader)
     }
 
-    internal fun load(context: Context, identity: Package, fingerprint: String): Loaded = synchronized(codeCache) {
-        // JNI libraries belong to a ClassLoader. Share the same loader across script/Activity owners.
-        codeCache[identity]?.let { return@synchronized it }
-        loadUncached(context, identity, fingerprint).also { loaded ->
-            codeCache.keys.removeAll { it.name == identity.name }
-            codeCache[identity] = loaded
-        }
-    }
+    internal fun load(context: Context, identity: Package, fingerprint: String): Loaded =
+        loadCachedIdentity(codeCache, identity) { loadUncached(context, identity, fingerprint) }
 
     private fun loadUncached(context: Context, identity: Package, fingerprint: String): Loaded {
         try {
@@ -67,6 +61,18 @@ class ComposeUiPluginLoader {
 
     companion object {
         private val codeCache = HashMap<Package, Loaded>()
-        internal fun invalidatePackage(name: String) = synchronized(codeCache) { codeCache.keys.removeAll { it.name == name } }
+
+        // JNI libraries belong to one ClassLoader. A caller may have read an old PackageManager
+        // identity before another caller loaded the new APK, so insertion must not evict siblings.
+        // Host refresh owns pruning through a snapshot taken before its package inventory query.
+        internal fun <T : Any> loadCachedIdentity(cache: MutableMap<Package, T>, identity: Package, create: () -> T): T =
+            synchronized(cache) { cache.getOrPut(identity, create) }
+
+        internal fun cachedPackages(name: String): Set<Package> = synchronized(codeCache) {
+            codeCache.keys.filter { it.name == name }.toSet()
+        }
+        internal fun invalidatePackage(name: String, keep: Package? = null, observed: Set<Package>? = null) = synchronized(codeCache) {
+            codeCache.keys.removeAll { it.name == name && it != keep && (observed == null || it in observed) }
+        }
     }
 }
