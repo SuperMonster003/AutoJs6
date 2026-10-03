@@ -95,4 +95,394 @@ D1-D6 来自 2026-10-03 的需求原文, 为硬性要求; D7-D21 是本 Roadmap 
 | F17 | Shared-Assets 仓库只有 `ace-fonts/` 一个资产族; README 要求新资产族各自的目录 / manifest / tag 前缀 / 工作流 / 完整性策略 / 签名密钥, 不用 Git LFS, Release 资产内容寻址且不可替换. 宿主没有任何 ML 依赖, `test-apps/` 只有插件一致性应用 | `AutoJs6-Shared-Assets/README.md:9-14, 22-28, 46-66`, `gradle/libs.versions.toml`, `settings.gradle.kts:140-158` |
 | F18 | Flow 风格的长按输出全局 `waitThenLongClick(sel).sync()`, 但该函数只注册在 `flow` 对象上 (全局只有 `waitAsync` / `waitThenClick` / `waitForStable*` 等), 运行时抛 `ReferenceError`; `FlowCodeStyleTest` 断言的正是这一错误形式 | `CodeStyle.kt:34`, `Flow.kt:96-107` (`globalAssignmentFunctions`), `FlowCodeStyleTest.kt:17` |
 
-<!-- CONTINUE-CODEGEN-ROADMAP -->
+---
+
+## 4. 阶段总览
+
+依赖关系: P0 -> P1 -> {P2 -> P3 -> P4} 与 {P5 -> P6} 两线并行 -> P7 -> P8. P1 完成即可单独发布 (规则排序, 不含模型); P6 只依赖 P4.2 的包读取器, 可先用 P4.4 的测试包联调.
+以下路径省略前缀 `app/src/main/java/org/autojs/autojs/`, 引擎包 `core/accessibility/codegen/` 简写为 `codegen/`.
+
+### P0 引擎基座 (JVM, 无界面)
+
+- [x] P0.1 `CodeGenRequest` (`codegen/CodeGenRequest.kt`): 泛型于 `N : UiNode<N>`, 字段为目标集合 `targets: List<N>` (单个范围时 size = 1), `scope` (`SINGLE` / `COLLECTION`), `mode` (`WAIT` 不限时等待 / `WAIT_TIMEOUT(ms)` 限时等待 / `CHECK` 立即判断), `action` (`NONE` / `CLICK` / `LONG_CLICK` / `SET_TEXT(text)` / `SCROLL_FORWARD` / `SCROLL_BACKWARD`), `receiver` (`AUTO` / `SELF`), `attributes: Set<Attr>` (`ID` / `TEXT` / `DESC`), `style` (`CLASSIC` / `FLOW`). `validate()` 返回错误枚举列表而非抛异常: 目标为空, `SINGLE` 但目标多于 1 个, `WAIT_TIMEOUT` 超出 100..600,000 ms, `SET_TEXT` 的目标不可编辑且接收者为 `AUTO`. 附旧对话框 4 个查询选项到新请求的映射 `LegacyMode.toRequest(...)` (附录 E.1 末表). 单测: `CodeGenRequestTest` (每条校验规则 1 例, 映射 4 例). 证据 (E1, 2026-10-03): CodeGenRequestTest 12 项通过, 含超时两端边界, 错误累积, 四种旧模式与无选项映射; P0.5 记录联合编译与回归结果.
+- [ ] P0.2 `SnapshotNode` (`codegen/SnapshotNode.kt`): 直接包装 `NodeInfoSnapshot` 实现 `UiNode<SnapshotNode>` (D11), `id()` 返回 `fullId` (与 `InspectorNode` 一致, F10), 父指针在构造时建立, `performAction` 恒为 `false`; `SnapshotNode.load(file)` 读取 `.layout.json` 信封 (Gson, 与 `LayoutSnapshotFiles` 同一结构). 测试夹具 `app/src/test/resources/codegen/`: `login.layout.json` (无 id 的输入框与按钮), `list-duplicates.layout.json` (20 行列表, 每行文本 "删除" 重复, 行内 id 相同), `cross-package-id.layout.json` (两个包各有 `id/title`), 均为手写小树 (<= 200 节点); 5,000 节点的大树由测试代码生成, 不入库. 单测: `SnapshotNodeTest` (加载, 父子一致, `fullId`, 先序遍历顺序与 `InspectorNodes.preOrder` 相同).
+- [ ] P0.3 共享 JS 字符串字面量转义 (修复 F7): 把 `SelectorExport.quote` (`core/accessibility/inspector/SelectorExport.kt:76`, 已转义 `\\` `"` `\n` `\r` `\t`) 移到 `core/automator/filter/JsLiteral.kt` 的 `JsLiteral.quote(s)`, 补充 `\u2028` / `\u2029` 与其他控制字符 (`\u00XX`), `StringMatcher.kt:81` 与 `SelectorExport` 都改用它. 往返单测 `JsLiteralTest`: 含 `"` / `\` / 换行 / 制表 / `\u2028` / emoji 的文本, 生成 `text(...)` 后经 `SelectorCallParser.parse` 解析, 再在 `FakeUiNode` 树上匹配到原节点; 另以 Rhino `Parser` 解析无语法错误. 这是用户可见的修复 ("复制为选择器" 与脚本中 `Selector.toString()`): changelog fix 1 条 x 10 语言.
+- [ ] P0.4 `LocatePlan` IR (`codegen/plan/LocatePlan.kt`): `SelectorSpec` (有序条件列表 `Condition(attr, value)`, 只含注册表已有的选择器名), `PlanStep` (`Index(i)` 即 `findOnce(i)`, 负数自末尾计; `Up(n)` 即 `parent(n)`; `Child(i)` 即 `child(i)`, 负数自末尾计; `Search(spec)` 即锚点子树内 `findOne(spec)`, 含锚点自身), `cardinality` (`ONE` / `ALL`), `receiver` (`Self` / `Up(n)`), `family` (`SELF` / `SELF_INDEX` / `ANCHOR_PATH` / `ANCHOR_SEARCH` / `CONTAINER_ITEMS`, 定义见附录 E.1). 提供稳定的 `planKey` (去重与日志用) 与 `SelectorText.render(spec)` (唯一的选择器文本出口, 使用 `JsLiteral.quote`). 单测 `LocatePlanTest`: `planKey` 稳定且区分步骤顺序, `SelectorText` 对每种条件名的输出与 `SelectorCallParser` 往返一致.
+- [ ] P0.5 编译 (`:app:compileAppDebugKotlin`) 与单测 (`:app:testAppDebugUnitTest --tests "org.autojs.autojs.core.accessibility.codegen.*"` 及 `JsLiteralTest`, `inspector.*` 回归) 通过; P0.3 单独一个提交 (含 changelog), 其余每个子条目一个提交. 除 P0.3 外无用户可见变化.
+
+### P1 规则流水线与对话框改造 (不含模型, 可单独发布)
+
+- [ ] P1.1 `TargetSets` (`codegen/TargetSets.kt`): 由所选节点推导 "集合" 范围的候选目标集合, 按顺序给出至多 3 个且去重: (a) 整个窗口中 `fullId` 与 `className` 都相同的节点; (b) 最近的 "重复容器" (子节点中至少 2 个与目标所在子树结构签名相同的祖先) 内, 与目标结构签名 (`className`, `fullId`, 相对容器项的路径) 相同的节点; (c) 整个窗口中 `text` 相同且非空的节点. 只返回 size >= 2 的集合, 每个集合带数量与一句程序生成的说明. 单测 `TargetSetsTest` (夹具 `list-duplicates`: (a)(b) 均为 20 项; 无重复时返回空).
+- [ ] P1.2 `CandidateSearch` (`codegen/search/CandidateSearch.kt`): 按附录 E.1 的 5 个计划族确定性枚举候选, 便宜的在前:
+  - `SELF`: 在允许的属性 (id / text / desc 由请求开关决定; `className`, `packageName` 始终可用; 布尔属性与 `depth` 作为结构条件, 带排序惩罚; 不用 bounds) 的子集上构造选择器, 再做贪心精简: 逐个删除条件, 删除后仍满足验证就保留删除 (修复 F4). id 默认用条目名, 条目名在窗口内跨包重名时改用完整 id (修复 F10).
+  - `SELF_INDEX`: 选择器 + `findOnce(i)`, `i` 为目标在先序匹配中的位置, 末尾附近时另给负序号; 只用于单目标.
+  - `ANCHOR_PATH`: 锚点为目标 6 级以内的祖先, 祖先的兄弟, 或近祖先的后代中自身选择器唯一的节点, 路径为至多 4 步的罗盘步骤 (向上, 子节点序号, 兄弟).
+  - `ANCHOR_SEARCH`: 唯一定位的祖先锚点 + 子树内 `findOne(spec)`.
+  - `CONTAINER_ITEMS`: 只用于集合, 唯一定位的容器 + `find(spec)`.
+
+  预算按 D19: 至多尝试 2,000 个, 保留 200 个通过验证的; 可由 `CancellationSignal` 中途取消. 单测 `CandidateSearchTest`: 每个族至少 1 个夹具命中, 精简后不含冗余条件, 预算截断后仍确定 (同一输入两次结果相同), 跨包重名时输出完整 id.
+- [ ] P1.3 `PlanVerifier` (`codegen/verify/PlanVerifier.kt`): 以脚本语义在捕获树上执行计划 (D10). 选择器匹配直接调用 `UiSelector.searchIn` (DFS 先序, 与 `findOnce(i)` / `untilFindOne` / `find` 一致), 罗盘步骤直接调用 `Compass.navigate`, `findOne(spec)` / `find(spec)` 包含接收者自身. 判定: 单目标要求解析结果 `=== target`; 集合要求解析集合与目标集合相等; 动作接收者 `Up(n)` 解析后须支持该动作 (可点击 / 可长按 / 可编辑 / 可滚动), `SELF` 不检查. 返回 `Verified(plan, resolved, facts)` 或 `Rejected(reason)`; `facts` 记录锚点匹配数, 序号, 步数, 文本是否像动态内容 (含数字 / 时间 / 计数) 等, 供排序与 P3 特征使用. 单测 `PlanVerifierTest`: 序号偏移 1 被拒, 集合多 1 项或少 1 项被拒, `findOne` 含自身, 接收者不可点击被拒, 与真实 `UiSelector` 在 `FakeUiNode` 树上的结果逐项一致.
+- [ ] P1.4 `ClassicRenderer` (`codegen/render/ClassicRenderer.kt`): 按附录 E.1 渲染 3 种查询方式 x 2 种范围 x 6 种动作 x 5 个族. 关系步骤统一渲染为一次 `compass("...")` 调用 (返回 null 而不抛异常, 与 Flow 的 `compass` 选项同一字符串); 选择器文本只经 `SelectorText.render`. 不输出已弃用的 `findOne()` / `waitFor()` (修复 F2, F8); 设置文本带参数 (修复 F1); 立即判断不留空分支 (修复 F2); 单目标不改写成对每项操作 (修复 F5). 单测 `ClassicRendererTest`: 全组合快照 (附录 E.1 每行 1 例), 每段输出经 Rhino `Parser` 解析无语法错误, 不含 `waitFor(` 与无参 `findOne()`.
+- [ ] P1.5 `FlowRenderer` (`codegen/render/FlowRenderer.kt`): 全部组合都有 Flow 形式 (修复 F9). `SELF` 族 (可带罗盘) 直接以选择器为条件: `waitThenClick(sel)`, `waitAsync(sel, opts).longClick()` 等; 其余族以函数为条件, 函数体即经典的 "单次解析" 表达式. 集合加 `resultType: 'widgets'`; 立即判断用 `flow.whenPresent(cond, w => ..., { timeout: 0 })`; 只用全局已注册的 `waitAsync` / `waitThenClick`, 其余经 `flow.` 调用 (修复 F18). 单测 `FlowRendererTest`: 同 P1.4 的全组合与 Rhino 解析; 另以白名单断言输出中的每个全局函数名都在 `Flow.globalAssignmentFunctions` 或 Automator 全局列表中.
+- [ ] P1.6 `RuleRanker` 与理由文字 (`codegen/rank/RuleRanker.kt`, `codegen/rank/Explanation.kt`): `Ranker` 接口 `rank(request, verified): List<Ranked>`; `RuleRanker` 按固定代价排序 (族: `SELF` < `ANCHOR_SEARCH` < `ANCHOR_PATH` < `CONTAINER_ITEMS` < `SELF_INDEX`; 条件: 完整 id < 条目名 id < desc < text < className < 结构条件; 动态文本, 长路径, 大序号加罚), 同分时以 `planKey` 定序. `Explanation` 依据计划结构生成 1-3 行理由 (例: "以 id 唯一定位", "在 20 个相同项中取第 4 个, 列表顺序变化时会失效", "仅在当前活动窗口上验证"), 不含概率 (D7). 单测 `RuleRankerTest` (夹具上首选计划符合预期, 全序确定), `ExplanationTest` (每个族与每条加罚各 1 例).
+- [ ] P1.7 `CodeGenEngine` (`codegen/CodeGenEngine.kt`): 编排 `request -> search -> verify -> rank -> render`, 返回 `CodeGenResult` (首选 + 至多 9 个备选, 每项含代码, 理由, 解析命中数) 或 `CodeGenFailure` (原因枚举: 请求无效 / 无候选 / 全部未通过验证 / 已取消 / 超出预算, 附最接近的被拒原因). 由调用方提供线程; 记录各阶段耗时 (日志, 供 P8.2). 单测 `CodeGenEngineTest`: 3 个夹具的端到端输出快照, 取消后返回 "已取消", 失败时原因非空 (修复 F11 的 "无原因").
+
+- [ ] P1.8 对话框选项改造与引擎切换: `CodeGenerateDialog.java` 改写为 Kotlin 并移到 `ui/floating/codegen/CodeGenerateDialog.kt` (删除原 Java 文件), 入口 `LayoutFloatyWindow.kt:192` 同步修改; 仍基于 `InspectorDialogBuilder` 与现有 `OptionGroup` 列表 (F12). 选项区:
+  - 可用属性: id / text / desc 三个复选 (默认值沿用现状).
+  - 范围: 单个 (默认) / 集合. 选 "集合" 时列出 `TargetSets` 给出的至多 3 个集合 (单选, 显示数量与说明); 没有集合时 "集合" 置灰并注明 "未找到相似控件".
+  - 查询方式: 等待找到 (默认) / 限时等待 (超时输入框, 默认 10,000 ms, 见 Q3) / 立即判断.
+  - 动作: 无 (默认) / 点击 / 长按 / 设置文本 (文本输入框) / 向前滚动 / 向后滚动, 改为单选 (旧版为多选且后者覆盖前者, "设置文本" 被忽略, F1).
+  - 动作接收者: 自动 (默认, 目标自身不支持该动作时取最近支持的祖先) / 自身.
+  - 代码风格: 经典 / Flow.
+
+  选项状态抽成纯 Kotlin `CodeGenOptionsState` (`ui/floating/codegen/CodeGenOptionsState.kt`), `toRequest(root, target, targetSets)` 产出 `CodeGenRequest`, 请求无效时在对话框内显示具体错误 (不关闭对话框). 输入框所在的悬浮窗对话框必须可获焦点, 在 AVD API 24 与 HyperOS 设备上确认输入法能弹出. 生成在对话框持有的单线程执行器上运行, 带 `CancellationSignal`; 超过 300 ms 显示 "正在生成" 与 "取消" (D19). 本条目暂用现有的简单结果对话框显示首选代码与第一行理由, 失败时显示 `CodeGenFailure` 的原因文字 (F11). 同一提交删除 `codegeneration/**` 与 `FlowCodeStyleTest` (提交前 grep 确认 `com.stardust.**` 以外无引用). 单测 `CodeGenOptionsStateTest`: 每个选项到请求字段的映射, 默认值, 集合选择, 超时输入非法时的错误.
+- [ ] P1.9 结果对话框 (`ui/floating/codegen/CodeGenResultDialog.kt`): 显示代码 (等宽, 可选中复制), 1-3 行理由, 解析命中数 (单个 "命中 1 个", 集合 "命中 20 个, 与所选集合一致"), 以及至多 9 个备选. 备选用对话框内 `RecyclerView` 列出 (每行: 族 + 主要条件的一行摘要), 点按切换上方显示的代码与理由; 不用 `PopupWindow`, 不用 MaterialDialog `items()` (F12). 按钮: 复制 / 在布局中显示 / 关闭. "在布局中显示" 隐藏 (不销毁) 结果对话框, 把当前计划的解析结果作为临时 `InspectorMatchView` (`ui/floating/layoutinspector/search/InspectorMatchView.kt:15`) 设到当前视图 (边界视图为 `LayoutBoundsView.kt:57` 的 `match`, 层次视图为其对应入口), 下一次点按视图时恢复原来的搜索匹配并重新显示结果对话框. 临时匹配以 `TreeMatch` (`core/accessibility/inspector/TreeMatch.kt`) 构造; 若没有 "由节点集合构造" 的工厂则新增 `TreeMatch.ofMatched(root, nodes)` (kept = 命中节点及其祖先). 单测 `TreeMatchOfMatchedTest` (`FakeUiNode` 树: 命中, 保留, 非命中, 空集合).
+- [ ] P1.10 发布收尾: changelog feature 1 条 (生成代码重写: 3 种查询方式, 集合范围, 动作接收者, 设置文本参数, 备选与理由, 布局中预览) 与 fix 1 条 (一句话合并 F1 / F2 / F5 / F8 / F9 / F10 / F18), 各 10 语言并重新生成 markdown; 字符串已在 P1.8 / P1.9 中随条目同步 11 个 `strings.xml`. 附录 B 第 1-6 项在 Redmi 22120RN86C (API 33) 与 AVD (API 24) 上执行并记录 (E3). 编译与单测 (`codegen.*`, `inspector.*`, `JsLiteralTest`) 通过; `tools/size/apk_size_report.py` 记录 P1 前后 universal APK 大小. P1 至此可单独发布.
+
+### P2 训练数据 (受控应用 + 自动标注 + 真实应用少量标注)
+
+模型要学的不是 "能否定位" (候选都已在捕获状态上验证, D7), 而是 "哪个计划在界面变化后仍然定位到同一目标". 因此训练样本以 "任务组" 为单位: 同一界面同一目标的多个状态 S0..Sk; 候选在 S0 上生成并验证, 标签 = 该计划在 S1..Sk 上仍解析到对应目标的比例. 工具代码统一放 `tools/codegen-model/` (D21), Python 用标准库 + `unittest`, 训练依赖在 P3 单独锁定.
+
+- [ ] P2.1 任务组格式 `*.cgtask.json` (`tools/codegen-model/FORMAT.md` 与 Kotlin 读取器 `codegen/dataset/TaskGroup.kt`): 字段 `format` (1), `groupId`, `source` (`fixture` / `real`), `app` (包名), `screenFamily` (划分数据集用, P2.6), `request` (范围, 可用属性, 动作所需能力; 与 `CodeGenRequest` 对应, 查询方式与风格不影响定位, 不入任务), `captureState` (默认 0), `states[]` (每项: `stateId`, `snapshot` (同目录下的 `.layout.json` 相对路径), `mutations` (施加的变化列表), `targets` (目标在该快照中的子节点序号路径, 如 `[0, 2, 1]`; 集合为路径列表)). 读取器校验路径存在, 各状态目标数一致, 单个范围恰好 1 个目标. 单测 `TaskGroupTest` (正常组, 路径越界, 目标数不一致, 未知 `format`).
+- [ ] P2.2 受控应用 `test-apps/codegen-fixture` (包名 `org.autojs.test.codegen.fixture`, 仅 View 体系, debug 签名, 不发布): `settings.gradle.kts` 新增列表 `codegenFixtureApps` 并加入 `include(...)` (不并入 `pluginConformanceTestApps`), `test-apps/README.md` 增加一段说明此类 "数据采集用应用". 界面族至少 8 个: 登录表单, 含重复项的列表 (RecyclerView), 设置页 (开关行), 网格, 选项卡, 对话框, 嵌套滚动, 无 id 界面. 启动参数 `am start -n <pkg>/.MainActivity --es screen <name> --el seed <n> --es mutations <a,b,...>` 决定界面与变化, 变化种类 (每种对应一类计划失效):
+  - `shuffle` / `insert` / `delete`: 列表重排, 插入, 删除行 (使 `findOnce(i)` 与 `child(i)` 失效).
+  - `retext`: 计数, 时间, 用户名等动态文本改变; `locale`: 中英文切换 (使 text / desc 条件失效).
+  - `strip-ids` / `rename-ids`: 去掉或改名资源 id (模拟混淆或应用升级).
+  - `wrap`: 在若干层级插入额外的包裹布局 (使 `parent(n)` 与长路径失效); `sibling`: 插入兄弟节点.
+
+  真值: 每个参与任务的 View 带 `setTag(R.id.codegen_truth, key)`; 界面空闲后应用把 `{key, getGlobalVisibleRect, 层级深度}` 写到 `files/truth/<stateId>.json`. 动作回执: 被点击 / 长按 / 设置文本 / 滚动的 View 追加一行到 `files/receipts.jsonl` (`key`, 动作, 参数, 时间). 两者都经 `adb exec-out run-as <pkg> cat ...` 读取. 同一 `seed` + `mutations` 两次启动的真值文件逐字节相同 (确定性).
+- [ ] P2.3 采集驱动 `tools/codegen-model/capture/` (`collect.py` + 设备脚本 `capture.js`): `collect.py` 按计划表 (界面族 x seed x 变化组合) 逐个启动受控应用, 等待空闲, 经 `RunIntentActivity` 运行 `capture.js`, 拉回快照与真值. `capture.js` 只用 Java 互操作调用宿主现有代码 (`NodeInfo.Companion.capture` 取活动窗口根, `LayoutSnapshotFiles.INSTANCE.save`), 不新增脚本 API. 真值与快照的关联 (`capture/join.py`): 以 `getGlobalVisibleRect` == 快照 `bounds` 为主, 深度为辅; 未关联或多重关联的状态丢弃并计数. 一个界面先手工用布局分析捕获, 确认与 `capture.js` 的结果节点数和先序 `className` 序列相同 (E3, 记录设备). 单测 `test_join.py` (唯一关联, 裁剪导致的不一致, 重复 bounds).
+- [ ] P2.4 自动标注 (JVM 工具任务 `CodeGenDatasetExportTask`, 位于 `app/src/test/java/.../codegen/dataset/`, 未设置环境变量 `CODEGEN_DATASET_DIR` 时 `Assume` 跳过, 因此日常单测不运行): 对每个任务组, 在捕获状态上运行 P1 的 `CandidateSearch` + `PlanVerifier`, 再把每个通过验证的计划在其他状态上用同一 `PlanVerifier` 执行 (目标按 `targets` 路径映射), 得到 `survival = 通过的状态数 / (k)`. 输出 `labels.jsonl` (每行: `groupId`, `planKey`, `family`, `survival`, 失败的状态与变化种类). 同时输出 RuleRanker 的首选, 供 P3.4 对比. 运行命令写入 `tools/codegen-model/README.md`. 单测: 在 2 个手写任务组上 `survival` 与预期一致 (含 `shuffle` 使 `SELF_INDEX` 得 0).
+
+- [ ] P2.5 真实应用标注 (`tools/codegen-model/label/label_real.py`, 命令行, 不联网): 维护者用布局分析对同一界面在不同时间 / 应用版本 / 语言下保存多个 `.layout.json` (现有 "保存布局" 功能, `LayoutFloatyWindow.kt:178`). 工具在第一个状态上以序号, 文本或 id 查询选出目标 (集合可多选), 在后续状态上按 `fullId` + `className` + 文本 + 相对位置自动推荐对应节点, 由维护者确认, 跳过或改选; 输出 `*.cgtask.json` (`source: real`). 真实快照与任务组只存在维护者本机目录 (环境变量 `CODEGEN_PRIVATE_DIR`), 不入任何公开仓库 (D18, Q6). 首轮规模见 Q8 (建议 >= 30 个应用, >= 150 个任务组). 单测 `test_label_real.py` (推荐算法: 重排后仍找到, 文本改变时按 id 找到, 无法确定时不自动确认).
+- [ ] P2.6 数据集划分与 manifest (`tools/codegen-model/dataset/split.py`): 以 `screenFamily` (受控数据) 或 `app` (真实数据) 为单位做确定性哈希划分 train / valid / test = 70 / 15 / 15, 同一界面族的所有状态与 seed 只落在同一份 (避免泄漏); 真实数据另设独立的 `real-test` 份, 不参与训练 (Q6 可放宽). `dataset-manifest.json`: `datasetId` (如 `cg-ds-2026.10-1`), 生成时间, 生成器提交 hash, 受控应用 `versionCode`, 采集设备列表, 各份的任务组数 / 候选数 / 来源 / 界面族 / 变化种类统计, `labels.jsonl` 与 `features.csv` 的 sha256. 首个数据集目标: 受控数据 >= 2,000 个任务组, 覆盖全部 8 个界面族与全部变化种类. 单测 `test_split.py` (确定性, 无跨份界面族, 比例误差 <= 3%).
+- [ ] P2.7 阶段收尾: `:test-apps:codegen-fixture:assembleDebug` 通过; `python -m unittest discover tools/codegen-model` 通过; 在 Redmi 22120RN86C 上完成一次全量采集, 记录耗时, 丢弃率 (P2.3 未关联状态), 首个 manifest (E2); 若丢弃率 > 2% 先修关联再继续. 每个子条目一个提交; 采集产物不入库 (`tools/codegen-model/.gitignore` 忽略 `out/`).
+
+### P3 特征与训练 (PC 侧)
+
+- [ ] P3.1 `CandidateFeatures` (`codegen/features/CandidateFeatures.kt`): 输入 `(request, Verified, 同组全部 Verified)`, 输出定长 `FloatArray`, 特征清单与编码见附录 E.3, 全部为有限数值 (NaN / 无穷视为缺陷, 测试断言). `FeatureSchema` 常量: `featureSchemaVersion = 1`, `names`, `namesHash` (名称以 `\n` 连接后 sha256 的前 16 位十六进制). 宿主声明 `SUPPORTED_SCHEMA = 1..1` (D13). 单测 `CandidateFeaturesTest`: 3 个夹具上的特征向量快照, 组内相对特征 (如 "规则代价名次") 与组成员顺序无关, `namesHash` 固定写在测试里 (改特征必须同时升 `featureSchemaVersion` 并更新该值).
+- [ ] P3.2 特征导出: 扩展 P2.4 的 `CodeGenDatasetExportTask`, 同一次运行输出 `features.csv` (`split`, `groupId`, `planKey`, `label`, 特征列, 列名即 `FeatureSchema.names`) 与 `features.json` (schema 版本, 名称, 哈希; 即模型包中的同名文件). Python 不重算任何特征 (D13). 单测: 导出的列名与 `FeatureSchema` 一致, 同一输入两次导出逐字节相同.
+- [ ] P3.3 训练 (`tools/codegen-model/train/train.py`, `requirements.txt` 以 `==` 锁定 CatBoost 与 numpy 版本, Python 3.12): `CatBoostRanker`, 损失 YetiRank (备选 PairLogit, Q7), `group_id = groupId`, 标签为 `survival` 分级 (0 / 0.5 / 1 映射到 0..2), 深度 6, 迭代 <= 1024, 以 valid 早停, `random_seed` 固定, `thread_count=1` 以保证可复现. 只用数值特征 (D12). 输出 `out/<run>/model.cbm`, `model.json` (`save_model(format="json")`, 供 P4.1 转换), `train-log.json` (参数, 数据集 `datasetId`, 耗时, 树数, 深度). 复现要求: 同一数据集与参数两次训练 `model.json` 相同 (记录在 README; 若 CatBoost 在该平台不可复现, 记录差异并以 P4.4 一致性为准).
+- [ ] P3.4 评估与失败归因 (`tools/codegen-model/train/evaluate.py`): 在 test 与 real-test 上计算附录 E.4 的指标, 与 P2.4 输出的 RuleRanker 首选逐组对比, 分族 / 变化种类 / 界面族 / 来源统计. 输出 `report.md` (人读) 与 `metrics.json` (P8.1 门槛读取). 失败归因: 列出模型首选 `survival` 低于规则首选的前 50 个任务组 (组 id, 两边的 `planKey`, 失败的变化种类), 供下一轮补数据. 单测 `test_evaluate.py` (手写 3 组, 指标与手算一致).
+- [ ] P3.5 主动学习队列 (`tools/codegen-model/train/queue.py`): 对真实数据中未标注或只有单状态的界面, 按 "模型首选与规则首选不同" 且 "两者分差小" 排序, 输出 `queue.jsonl`, 作为下一轮 P2.5 采集的优先列表. 单测: 排序确定, 已标注的组不入队.
+- [ ] P3.6 阶段收尾: `:app:testAppDebugUnitTest --tests "*.codegen.*"` 与 `python -m unittest discover tools/codegen-model` 通过; 首个模型的 `report.md` 附在提交说明或 `tools/codegen-model/reports/` (只含聚合指标, 不含真实应用快照内容); 记录训练机器与耗时.
+
+### P4 模型包与端上推理
+
+- [ ] P4.1 打包工具 (`tools/codegen-model/package/build_package.py`): 读 CatBoost `model.json` (`oblivious_trees[].splits` / `leaf_values`, `features_info.float_features`, `scale_and_bias`), 写 `model.bin`: 魔数 `AJCG`, 格式版本 `u16 = 1`, 特征数 `u16`, 树数 `u32`, 偏置 `f64`, 缩放 `f64`, 之后逐棵树: 深度 `u8`, d 个 (`u16` 特征序号, `f32` 阈值), 2^d 个 `f32` 叶值; 小端, 末尾 `u32` CRC32. 判定语义与 CatBoost 一致 (`value > border` 记为 1, 第 i 个分裂对应叶序号第 i 位, 以 P4.4 一致性测试为准). 拒绝打包: 存在类别特征, 树深 > 8, 树数 > 4,096, 特征数与 `features.json` 不一致. 再生成 `manifest.json` (附录 E.2), 复制 `features.json`, `MODEL_CARD.md` (模板含数据集 `datasetId`, 指标摘要, 已知局限), `LICENSE`, 打成 `.ajcgm` (zip, 条目顺序与时间戳固定, 可复现). 单测 `test_build_package.py`: 手写 2 棵树的 `model.json` 打包后逐字节与夹具一致, 类别特征被拒.
+- [ ] P4.2 包读取器 (`codegen/model/ModelPackageReader.kt`, D14): 输入 `InputStream` 或文件, 输出 `ModelPackage` (manifest, features, 解析后的模型) 或 `Rejected(reason, detail)`. 校验:
+  - zip: 条目白名单 (5 个固定名, 不允许目录, 重复名, `..`, 绝对路径), 单条目解压 <= 100 MiB, `model.bin` 与 `manifest.json` 必须存在, 总解压大小 <= 100 MiB (D2), 压缩比 > 200 视为炸弹.
+  - `manifest.json`: `format == 1`, 必填字段齐全, `modelId` 匹配 `^[a-z0-9][a-z0-9._-]{1,63}$`, `versionCode` > 0, `model.sha256` 与实际一致, `featureSchemaVersion` 在 `SUPPORTED_SCHEMA` 内 (否则 `Rejected(INCOMPATIBLE_SCHEMA)`, 管理页显示 "不兼容", D13), `featureNamesHash` 等于宿主 `FeatureSchema.namesHash`.
+  - `model.bin`: 魔数, 格式版本, CRC32, 特征序号 < 特征数, 深度 1..8, 叶数 = 2^d, 阈值与叶值有限, 文件长度与头部声明完全一致.
+
+  解析后的模型以紧凑数组存放 (`IntArray` 特征序号, `FloatArray` 阈值与叶值), 4,096 棵深度 8 的上限对应约 4.2 MiB, 满足 D2 的 32 MiB 常驻. 单测 `ModelPackageReaderTest`: 每条拒绝规则 1 例 (包在测试中用代码生成); 随机变异测试 (对合法包逐字节翻转 / 截断 / 追加, 固定种子 2,000 次) 只会得到 `ModelPackage` 或 `Rejected`, 从不抛出其他异常.
+- [ ] P4.3 推理与 `ModelRanker` (`codegen/model/ObliviousTreeModel.kt`, `codegen/rank/ModelRanker.kt`): `score(features: FloatArray): Double` 无分配, 逐树计算叶序号后累加, 最后 `bias + scale * sum`. `ModelRanker(model, ruleRanker, budgetMs)` 实现 `Ranker`: 先算全部特征 (P3.1), 再打分, 按分数降序, 分差 < 1e-6 时以 `RuleRanker` 的顺序定序 (结果全序确定). 超出 `budgetMs` (默认 150 ms) 或抛异常时抛出 `RankerUnavailable(reason)`, 由 P7.4 回退. 模型只改变顺序: `ModelRanker` 的输出集合恒等于输入集合 (D7, 测试断言). 单测 `ObliviousTreeModelTest` (手算 2 棵树), `ModelRankerTest` (集合不变, 同分定序, 超时与异常转为 `RankerUnavailable`).
+- [ ] P4.4 一致性与测试包: `tools/codegen-model/package/export_parity.py` 用 CatBoost `predict` 对 test 份的前 5,000 个候选输出 `parity.jsonl` (特征 + 期望分数); Kotlin `ModelParityTest` 读取包与 parity 文件 (环境变量 `CODEGEN_PARITY_DIR`, 未设置时跳过): 每个分数 `|差| <= 1e-4`, 每组首选相同. 另提交一个只用受控夹具训练的小测试包 `app/src/test/resources/codegen/models/tiny-test-v1.ajcgm` (< 64 KiB, `modelId = autojs6.codegen.tiny-test`) 及其 `parity.jsonl`, 使一致性测试在日常单测中也运行一次; 该包同时供 P6 联调 (P6 可先于 P3 完成).
+- [ ] P4.5 预算基准 (`ModelBenchmarkTest`, 环境变量 `CODEGEN_BENCH=1` 才运行): 1,024 棵深度 6 的随机模型, 加载耗时, 200 个候选的特征 + 打分耗时, 解析后的对象大小 (按数组长度计算); JVM 上记录数值, 设备数值在 P8.2 测得. 预期: 打分 200 个候选 <= 20 ms (设备), 加载 <= 200 ms (D19).
+- [ ] P4.6 阶段收尾: 编译与 `codegen.*` 单测通过 (含 `tiny-test` 一致性), `python -m unittest discover tools/codegen-model` 通过; 记录 `tiny-test` 包与首个正式候选模型的大小. 每个子条目一个提交.
+
+### P5 Shared-Assets 资产族 `codegen-models/` (在 `AutoJs6-Shared-Assets` 仓库内提交)
+
+布局与 `ace-fonts/` 同构 (F17): 已审核的包作为源输入直接入库 (不用 Git LFS), Release 资产内容寻址且不可替换, 目录离线签名, 私钥不入库.
+
+- [ ] P5.1 目录结构与 README: `codegen-models/README.md` (用途, 信任策略, 版本与 tag 规则, 发布流程), `sources/<modelId>/<versionCode>/` (`.ajcgm`, `MODEL_CARD.md`, `dataset-manifest.json`), `catalogs/catalog-v1.json` + `catalog-v1.sig.json`, `catalogs/history/vN/`, `catalogs/pending/vN/`, `keys/catalog-signing-public.pem`, `schemas/` (`catalog-v1.schema.json`, `signature-v1.schema.json`, `model-manifest-v1.schema.json`). 根 README 的 "Components" 与 "Repository layout" 增加该族一行. tag 前缀 `codegen-models-vN` (N 为目录版本), 资产名 `autojs6-codegen-<modelId>-v<versionCode>-<sha8>.ajcgm`.
+- [ ] P5.2 目录 schema (`catalog-v1.schema.json`, 字段见附录 E.2 后半): `schemaVersion: 1`, `catalogVersion` (单调递增, 拒绝回滚), `releaseTag`, `generatedAt`, `models[]` (每项: `modelId`, `displayName`, 多语言 `summary`, `versions[]`, `recommendedVersionCode`). 每个版本: `versionCode`, `versionName`, `featureSchemaVersion`, `featureNamesHash`, `minHostVersionCode`, `artifact` (`fileName`, `size`, `sha256`, `url`, `urls[]`), `releasedAt`, `datasetId`, `metrics` (附录 E.4 的摘要), `license` (`spdx`), 可选 `deprecated` / `revoked` (撤回的版本客户端提示更新, 不再提供下载). 同一 `modelId` + `versionCode` 在历次目录中内容不得改变 (客户端检测到即拒绝, 同 Ace 的 "同版本异内容").
+- [ ] P5.3 分发工具 `tools/codegen-model-distribution/` (参照 `tools/ace-font-distribution/` 的结构, 复用其签名格式与 `crypto.py` 的算法, 新密钥): `generate_keys.py` (离线生成 P-256 密钥对, 输出 keyId), `prepare_catalog.py` (扫描 `sources/`, 读取每个包的 `manifest.json`, 校验与 P4.2 相同的规则的 Python 子集, 计算大小与 sha256, 合并历史版本, 写入 `catalogs/pending/vN/`), `validate_catalog.py` (schema + 不变量: 版本唯一, 历史条目不变, 单文件 < 100 MiB (D2), url 指向本次或更早的 tag), `sign_catalog.py`, `verify_catalog.py`, `verify_release.py` (对照目录逐个校验 Release 资产). 单测 `tests/test_distribution.py`: 回滚被拒, 同版本异内容被拒, 超大文件被拒, 签名往返, 篡改一个字节后验签失败.
+- [ ] P5.4 工作流 `.github/workflows/publish-codegen-models.yml` (`workflow_dispatch`, 输入 `release_tag` 与期望 `key_id`, 环境 `codegen-models-release`, Python 3.12): 复现目录与资产 -> `verify_catalog.py` -> 拒绝已存在的 tag / Release (不可变) -> 创建 Release 并上传资产 -> `verify_release.py` 回读校验. 与 `publish-ace-fonts.yml` 的并发组, 权限范围一致. 先在 fork 或私有测试仓库用 `tiny-test` 包 (P4.4) 跑通一次, 记录 run 链接 (E2).
+- [ ] P5.5 宿主侧内置文件: 生成 `res/raw/codegen_model_catalog_public_key_v1.der` (由 P5.3 的公钥转换) 与引导目录 `res/raw/codegen_model_catalog_v1.json` (首次为空 `models: []` 的已签名目录, 或首个正式发布后的目录; 只用于离线时显示 "已知的官方模型" 与官方来源判定, D15). 引导目录与签名一起内置, 宿主同样验签. 本条目的宿主提交只含这两个文件与生成命令说明.
+- [ ] P5.6 阶段收尾: `python -m unittest discover tools/codegen-model-distribution` 通过; Shared-Assets 中每个子条目一个提交; 签名私钥由维护者离线保管, 签名与 dispatch 由维护者执行 (使用方式第 5 条).
+
+### P6 宿主模型管理 (目录, 下载, 导入, 版本)
+
+存储与对比逻辑写成不依赖 Android 的纯 Kotlin (文件系统路径与时钟注入), 界面只做展示; 全部单测在 JVM 上运行.
+
+- [ ] P6.1 目录仓库 (`codegen/store/ModelCatalog.kt`, `ModelCatalogParser.kt`, `ModelCatalogRepository.kt`): 结构对照 `FontCatalogRepository` 另写 (D16). 地址 `https://raw.githubusercontent.com/SuperMonster003/AutoJs6-Shared-Assets/main/codegen-models/catalogs/catalog-v1.json` 与同目录 `.sig.json` (镜像见 Q4). 验签复用 `EcdsaP256CatalogSignatureVerifier` (新公钥, `expectedKeyId`, `expectedCatalogFileName = "catalog-v1.json"`). 规则:
+  - 拒绝回滚 (`catalogVersion` 小于已缓存值) 与同版本异内容 (同一 `modelId` + `versionCode` 的 sha256 与此前见过的不同).
+  - 验签或解析失败时保留旧缓存. 缓存 24 h (D18), 位于 `noBackupFilesDir/codegen_models/catalog/`.
+  - 离线时用缓存, 再退到引导目录 (P5.5).
+  - `minHostVersionCode` 高于当前宿主的版本标为 "需要更新 AutoJs6", schema 不兼容的版本标为 "不兼容", 两者都不提供下载.
+
+  debug 构建可经 `src/debug/` 覆盖目录地址与公钥, 指向 P5.4 的测试仓库; release 构建只认正式公钥. 单测 `ModelCatalogParserTest` (必填字段, 未知字段忽略, 非法 `modelId`), `ModelCatalogRepositoryTest` (假 fetcher: 回滚被拒, 同版本异内容被拒, 坏签名保留缓存, 24 h 内不联网, 离线用引导目录).
+- [ ] P6.2 存储与登记表 (`codegen/store/ModelStore.kt`, D17): 布局 `noBackupFilesDir/codegen_models/<modelId>/<versionCode>-<sha8>/model.ajcgm` + `registry.json`. 登记项: `modelId`, `versionCode`, `versionName`, `sha256`, `size`, `featureSchemaVersion`, `source` (`OFFICIAL` / `CUSTOM`), `origin` (目录版本或导入文件名), `installedAt`, manifest 摘要 (附录 E.5 所需字段). 安装流程:
+  1. 写入 `staging/` 临时文件.
+  2. `ModelPackageReader` (P4.2) 校验.
+  3. 判定来源: sha256 出现在任一已验证目录 (当前, 缓存, 引导) 中为 `OFFICIAL`, 否则为 `CUSTOM` (D15).
+  4. 原子改名到目标目录.
+  5. 在文件锁内以 "临时文件 + 改名" 更新登记表.
+
+  启动时对账: 删除没有目录的登记项, 删除不在登记表中的目录与残留的 `staging/`. 当前模型 Pref `key_codegen_model_current` (值 `modelId@versionCode-sha8`, 键名入 `strings_donottranslate.xml`). 删除当前版本后 Pref 置空 (视为 "未安装", 下次生成按 D4 提示). 单测 `ModelStoreTest`: 安装, 坏包被拒且无残留, 改名前中断后对账无登记项, 来源判定, 删除当前版本, 同一 `modelId` 的多版本并存.
+- [ ] P6.3 下载器 (`codegen/store/ModelDownloader.kt`): 连接层复用 `FontDownloadSource` / `OkHttpFontDownloadSource` (D16), 事件 `ModelDownloadEvent` (`Queued` / `Progress(bytesDownloaded, totalBytes)` / `Success(installed)` / `Failure(error)` / `Cancelled`, 与 `FontDownloadEvent` 同形), `ModelDownloadSubscription.cancel()`. 流程:
+  - 按 `urls` 顺序尝试镜像, 边下载边计算 sha256, 写入 `staging/`.
+  - 超过目录声明的 `size` 立即中止. 结束后大小与 sha256 必须一致, 再交给 `ModelStore` 安装.
+  - 取消或失败时删除临时文件.
+  - 同一版本同时只有一个下载, 重复请求返回同一订阅.
+
+  进度事件至多每 100 ms 或每 1% 发送一次. 单测 `ModelDownloaderTest` (假源: 进度单调, 中途取消无残留, 超长中止, sha256 不符, 首个镜像失败后用第二个, 重复请求共享订阅).
+
+- [ ] P6.4 重复检测与版本对比 (`codegen/store/DuplicateCheck.kt`, `codegen/store/VersionComparison.kt`, 纯 Kotlin, D6): `DuplicateCheck.evaluate(incoming, registry)` 返回:
+  - `None`: 无同 `modelId` 且无同 sha256, 直接安装.
+  - `Identical(existing)`: 已安装相同 sha256 (不论 `modelId` 是否相同), 只提示 "已存在相同模型", 不安装.
+  - `SameModel(existing: List, compareWith)`: 已有同 `modelId` 的其他版本 (含同 `versionCode` 不同内容). `compareWith` 取同 `versionCode` 的那一项, 否则取当前使用的版本, 否则取 `versionCode` 最大的版本.
+
+  `VersionComparison.build(old, new)` 输出附录 E.5 的行列表 `Row(field, oldText, newText, differs)`. 下载在线模型时, 检测在下载之前进行 (目录已给出 sha256 与 manifest 摘要), 不会先下载再提示. 选项与后果: 替换 = 安装新版本并删除 `compareWith`, 若被删的是当前版本则当前切到新版本; 保留两者 = 安装新版本, 当前不变 (目录名含 sha8, 同 `versionCode` 也可并存); 取消 = 不安装, 删除临时文件. 单测 `DuplicateCheckTest` (每种结果与 `compareWith` 选择规则各 1 例), `VersionComparisonTest` (差异标记, 缺失字段显示为 "-").
+- [ ] P6.5 对比视图与对话框 (`ui/floating/codegen/ModelComparisonView.kt`): 一个不依赖对话框类型的 View (两列表格: 字段名 / 已安装 / 新的, 差异行用主题强调色背景与 "≠" 标记, 不只靠颜色区分). 同一 View 用于设置页 (应用 context 的普通对话框) 与布局分析悬浮窗 (`InspectorDialogBuilder`, P7.2). 对话框 `ModelDuplicateDialog`: 标题 "已存在同名模型", 内容为对比视图, 按钮 替换 / 保留两者 / 取消; `Identical` 时只有一行说明与 "知道了". 界面文字 11 个 `strings.xml`.
+- [ ] P6.6 更新 (`codegen/store/ModelUpdates.kt` + 界面): 已安装的官方模型在已验证目录中存在更高 `versionCode` (且兼容, 未撤回) 时标记 "可更新". 更新不弹确认 (D6): 直接开始下载, 进度对话框上方为进度条与 "已下载 / 总大小" 及 "取消", 下方为新旧版本的对比视图 (P6.5); 完成后同一对话框显示 "已更新到 vX", 对比视图保留, 按钮 "删除旧版本" / "完成". 更新完成后若旧版本是当前版本, 当前切到新版本; 旧版本默认保留 (Q11). 自定义模型不参与在线更新 (只能再次导入). 检查更新只在打开管理页与点击 "检查更新" 时联网 (D18); 生成时若缓存目录显示有新版本, 只在结果对话框注明 "有新版本可用", 不自动下载. 单测 `ModelUpdatesTest` (更高版本, 不兼容版本, 撤回版本, 自定义模型不提示, 更新后当前版本切换).
+- [ ] P6.7 模型管理页 (`ui/settings/codegen/CodeGenModelsActivity.kt` + 入口 `CodeGenModelsPreference`, 沿用 `TrashAndVersionHistorySettingsActivity` / `TrashAndVersionHistorySettingsPreference` 的 Activity + 入口 Preference 模式; 入口位置见 Q12, 建议放在 `fragment_preferences.xml` 的无障碍服务分类 (`text_a11y_service`) 末尾). 内容:
+  - "已安装" 分组: 按 `modelId` 分组, 每个版本一行: 名称, 版本, 来源 (官方 / 自定义), 大小, 状态 (可用 / 不兼容 / 需要更新 AutoJs6), 单选 "当前使用". 行菜单: 设为当前, 查看模型卡 (`MODEL_CARD.md` 以纯文本显示), 删除 (删除当前版本时提示生成将改用规则排序).
+  - "可下载" 分组: 已验证目录中未安装的模型 / 版本, 显示大小与来源 "官方", 按钮 "下载" (先过 P6.4 的检测, 再显示与 P7.2 相同形式的进度).
+  - 顶栏操作: 检查更新, 导入本地模型 (`ActivityResultContracts.OpenDocument`, 同 `PluginFragment.kt:44`; 经 `ContentResolver` 复制到 `staging/`, 超过 100 MiB 中止, 之后走 P6.4 与 P6.2).
+  - 目录获取失败时显示原因与重试, 已安装模型照常可用.
+
+  页面逻辑抽成 `CodeGenModelsViewModel` (纯 Kotlin 状态: 分组, 行状态, 操作可用性), 单测 `CodeGenModelsStateTest`. 界面文字 11 个 `strings.xml`.
+- [ ] P6.8 阶段收尾: 编译与 `codegen.*` 单测通过; 在 AVD (API 24) 与 Redmi 22120RN86C (API 33) 上用 `tiny-test` 包与 P5.4 测试仓库目录执行附录 B 第 7-10 项 (导入, 重复, 更新, 管理页操作与离线), 记录 (E3). 每个子条目一个提交.
+
+### P7 对话框集成 (模型开关, 按需下载, 回退)
+
+- [ ] P7.1 开关: P1.8 的选项区末尾新增复选框 "使用模型辅助生成" (默认勾选, 文案见 Q1, 是否记忆见 Q2), 下方一行小字显示当前状态: "当前模型: X vN" / "未安装, 生成时可下载" / "当前模型不兼容". `CodeGenOptionsState` 增加 `useModel` 字段. 关闭时: 不读目录, 不加载模型, 不联网, 只用 `RuleRanker` (D3). 单测: `CodeGenOptionsStateTest` 补充默认值与记忆行为.
+- [ ] P7.2 生成流程状态机 (`ui/floating/codegen/CodeGenFlow.kt`, 纯 Kotlin, 界面与网络以接口注入): 点击 "生成" 后:
+  1. `useModel` 关闭: 规则排序, 直接生成.
+  2. 当前模型可用 (Pref 指向已安装且兼容的版本): 经 P7.3 加载并排序.
+  3. 当前模型不可用, 但已安装兼容版本: 自动选用目录推荐的 `modelId` 中 `versionCode` 最大的已安装版本 (没有则选最近安装的), 写入 Pref, 结果中注明 "已切换到 X vN".
+  4. 未安装任何兼容版本: 读取目录 (24 h 缓存, 否则联网, 超时 8 s). 目录可用时显示下载提示: 模型名, 版本, 大小, 来源 "官方 (AutoJs6-Shared-Assets)", 按钮 下载 / 使用规则生成 / 取消 (D4). 目录不可用时提示原因, 按钮 重试 / 使用规则生成 / 取消.
+  5. 选择下载: 先过 `DuplicateCheck` (P6.4; 例如本机只有不兼容的旧版本时, 显示对比视图与 替换 / 保留两者 / 取消), 再显示进度对话框 (进度条, "已下载 / 总大小", 取消). 完成后关闭进度对话框, 自动继续本次生成 (同一请求, 不需要再点一次).
+  6. 下载取消或失败: 进度对话框变为说明 (原因) + 按钮 使用规则生成 / 重试 / 关闭, 不阻塞本次生成 (D4).
+
+  "取消" 在任一步骤都结束本次生成且不留后台任务 (下载订阅一并取消). 所有对话框基于 `InspectorDialogBuilder`, 在布局分析悬浮窗之上显示; 不用 `PopupWindow`, 不用 `items()` (F12). 单测 `CodeGenFlowTest` (假目录 / 下载器 / 存储): 每条分支的步骤序列, 下载完成后自动继续, 取消无残留订阅, 目录不可用时的回退.
+- [ ] P7.3 模型加载与缓存 (`codegen/model/ModelCache.kt`): 进程内只缓存一个已加载模型, 键为 `modelId@versionCode-sha8`; 首次使用在生成线程上加载 (不在主线程), 切换或删除当前模型时释放. 加载失败 (包损坏, 不兼容) 时把该版本标记为 "不可用" 直到下次启动, 本次回退规则排序. 单测 `ModelCacheTest` (命中, 切换释放, 失败标记).
+- [ ] P7.4 回退与说明 (`CodeGenEngine` 接入 `Ranker` 选择): 引擎接受 `ranker` 参数, `ModelRanker` 抛出 `RankerUnavailable` 时用 `RuleRanker` 重排同一批已验证候选 (不重新搜索). 结果对话框在理由下方显示一行排序来源:
+  - "排序: 模型 X vN" (正常).
+  - "排序: 规则 (原因)", 原因为以下之一: 已关闭模型辅助, 未安装模型, 下载已取消, 下载失败, 模型不兼容, 模型加载失败, 模型打分超时.
+  - 缓存目录显示有新版本时追加 "有新版本可用", 点按打开 P6.7 管理页.
+
+  单测 `CodeGenEngineTest` 补充: 每种原因的回退输出与规则排序完全一致, 模型排序的结果集合与规则排序相同 (D7).
+- [ ] P7.5 文字与 changelog: 新增界面文字同步 11 个 `strings.xml`; changelog feature 1 条 (模型辅助生成: 按需下载, 本地导入, 多版本与更新, 版本对比) x 10 语言. 偏好键入 `strings_donottranslate.xml`.
+- [ ] P7.6 阶段收尾: 编译与 `codegen.*` 单测通过; 附录 B 第 11-14 项在 AVD (API 24), Redmi 22120RN86C (API 33), Xiaomi Pad 23046RP50C (API 35) 上执行 (E3), 包括飞行模式下的回退与下载中途取消. 每个子条目一个提交.
+
+### P8 评估, 性能与发布
+
+- [ ] P8.1 发布门槛 (`tools/codegen-model/train/gate.py`): 读 P3.4 的 `metrics.json`, 按附录 E.4 判定通过 / 不通过, 输出一段可粘贴到 `MODEL_CARD.md` 的摘要. 不通过时 `prepare_catalog.py` (P5.3) 拒绝收录该版本 (以 `gate.json` 的 sha256 绑定模型包). 单测 `test_gate.py` (每条门槛恰在边界上与边界外各 1 例).
+- [ ] P8.2 性能 (`CodeGenBenchmarkTest` (JVM) + 设备上的 `codegen-bench.js`, 用 Java 互操作调用 `CodeGenEngine`, 不新增脚本 API): 5,000 节点生成树与 3 个真实大界面 (桌面, 设置首页, 长列表), 各 30 次, 记录各阶段 P50 / P95 (搜索, 验证, 特征, 排序, 渲染) 与模型首次加载耗时, 结果以表格写入本条目. 门槛 (D19): Redmi 22120RN86C (API 33) 上 P95 <= 1 s, 首次加载 <= 200 ms, 常驻内存 <= 32 MiB (`Debug.getNativeHeapAllocatedSize` 与 Java 堆差值). 超标时优先降低候选预算 (D19 的 2,000 / 200), 并记录对 E.4 指标的影响.
+- [ ] P8.3 首个官方模型发布 (Shared-Assets): 通过 P8.1 门槛的包放入 `codegen-models/sources/autojs6.codegen.ranker/<versionCode>/` (`modelId` 见 Q13), 运行 `prepare_catalog.py`, 由维护者离线签名并 dispatch `publish-codegen-models.yml` (tag `codegen-models-v1`), `verify_release.py` 回读通过; 宿主更新引导目录 `res/raw/codegen_model_catalog_v1.json` (P5.5) 为签名后的目录. 记录 run 链接, 资产 sha256, 模型大小 (D2: 目标 1-5 MiB).
+- [ ] P8.4 APK 体积: `python tools/size/apk_size_report.py` 对比 P0 前 (快照 `2082edef14`) 与 P8.3 后的 universal APK, 增量 <= 256 KiB (D1), 结果写入本条目; 超标时先检查是否误把 `.ajcgm` 打进了 `res/raw` 或 `assets`.
+- [ ] P8.5 舰队冒烟与架构说明: 附录 B 全部条目在 AVD (API 24), Sony G8441 (API 28), Sony XQ-AT72 (API 31), Redmi 22120RN86C (API 33), Xiaomi Pad 23046RP50C (API 35) 上执行, 结果表 (条目 x 设备) 写入本条目 (E3). 另写 `docs/dev/layout-code-generation-architecture.md` (流水线, 包与模块, 信任链, 数据流, 如何训练与发布新版本, 已知局限), 只写实现事实, 不重复本 Roadmap 的决策表.
+- [ ] P8.6 (可选) 用户文档页: 在文档仓库的布局分析页面增加 "生成代码" 小节 (选项含义, 模型辅助的作用与隐私说明, 如何导入本地模型). 仅文档, 不涉及 d.ts / Ace 声明 (D9).
+
+---
+
+## 附录 A. 待决事项
+
+| 编号 | 问题 | 建议 |
+| --- | --- | --- |
+| Q1 | 复选框文案: "使用模型辅助生成" / "智能排序候选代码" / "使用本地模型优选"? | 建议 "使用模型优选结果", 副标题 "在本机对候选代码排序, 不联网上传布局"; 更准确地表达 "模型只排序" (D7). |
+| Q2 | 开关是否跨会话记忆? D3 要求默认开启. | 建议记忆 (Pref `key_codegen_use_model`, 默认 true): 关闭过的用户不会每次被下载提示打扰. |
+| Q3 | 限时等待的默认超时与输入范围; Flow 的 "等待找到" 用 `timeout: Infinity` 还是 Flow 默认 10 s? | 建议限时默认 10,000 ms, 范围 100..600,000 ms; Flow 的 "等待找到" 显式写 `timeout: Infinity`, 与经典风格的 `untilFindOne` 语义一致. |
+| Q4 | 目录地址与镜像: 只用 `raw.githubusercontent.com`, 还是加 jsDelivr 等镜像? | 建议与 Ace 字体一致 (同一地址形式); 资产 `urls[]` 预留镜像位, 首版只有 GitHub Release. |
+| Q5 | Shared-Assets 收录哪些文件: 只收模型包与模型卡, 还是也收数据集 manifest 与评估报告? | 建议收模型包, `MODEL_CARD.md`, `dataset-manifest.json` (只含统计与哈希) 与 `metrics.json`; 训练代码留在宿主仓库 (D21). |
+| Q6 | 真实应用快照的使用范围: 只用于测试评估, 还是也参与训练? | 建议首版只用于 real-test 评估 (避免任何第三方界面内容进入模型); 待受控数据的指标稳定后再决定是否参与训练. |
+| Q7 | 训练框架: CatBoost (对称树, 解释器最简单) 还是 LightGBM (普通树)? | 建议 CatBoost (D12): 对称树的端上解释器约 100 行, 无分配, 文件格式简单. |
+| Q8 | 真实应用标注规模与应用清单. | 建议首轮 >= 30 个应用 (系统设置, 主流 IM, 购物, 地图, 浏览器等), 每个 >= 5 个任务组, 每组 >= 3 个状态. |
+| Q9 | 是否支持框选 "区域" 作为生成目标 (布局分析已有区域框选)? | 建议不做 (§2 非目标), 待单个 / 集合两种范围稳定后另议. |
+| Q10 | 同一时刻一个 "当前模型" (D5), 还是每次生成可临时选择? | 建议一个当前模型, 在管理页切换; 生成对话框只显示当前模型名. |
+| Q11 | 更新后旧版本默认保留还是删除? | 建议保留, 完成界面提供 "删除旧版本" (P6.6); 管理页显示占用空间. |
+| Q12 | 模型管理入口放在设置的哪个分类? | 建议放在 "无障碍服务" 分类末尾 (与布局分析同属自动化功能); 备选: 新建 "布局分析" 分类. |
+| Q13 | 官方 `modelId` 与显示名. | 建议 `autojs6.codegen.ranker`, 显示名 "AutoJs6 代码生成排序模型". |
+
+## 附录 B. 冒烟清单
+
+每项都把生成的代码粘贴到脚本编辑器中运行一次, 目标应用保持在前台 (运行脚本前切回目标界面).
+
+1. 设置文本: 在登录界面输入框上选 "设置文本" 并填入 `a"b\c`, 生成的代码运行后输入框内容正好是 `a"b\c`; "复制为选择器" 对含引号与换行的文本得到合法字符串 (F1, F7, P0.3).
+2. 三种查询方式 x 点击: 等待找到 / 限时等待 3,000 ms / 立即判断 各生成一次并运行, 动作都被执行; 输出中没有 `waitFor(`, 没有无参 `findOne()`, 没有空的 `if` 分支 (F2, F8).
+3. 列表中的重复项: 在 20 行 "删除" 按钮的第 4 行上生成 (单个, 点击), 运行后只点击第 4 行; 理由中出现 "在 20 个相同项中取第 4 个" 一类说明; 结果对话框 "在布局中显示" 只勾出第 4 行 (F3, F4, F5).
+4. 集合: 同一列表选范围 "集合" 中的 "同一列表中的 20 个相似项", 生成 `clickEach` 形式, 命中数显示 20 且 "与所选集合一致"; 运行后 20 行都被点击 (F3, F5).
+5. Flow 风格: 长按, 设置文本, 限时等待, 立即判断各一次, 全部可运行, 无 `ReferenceError`; 长按输出为 `flow.waitThenLongClick(...)` 或 `waitAsync(...).longClick()` (F9, F18).
+6. 跨包同名 id 与无 id 界面: 设置页 `android:id/title` 一类控件生成时使用完整 id 或附加区分条件, 运行时命中所选控件; 无 id 界面也能给出结果, 失败时显示具体原因而非 "生成失败" (F6, F10, F11).
+7. 本地导入: 管理页导入 `tiny-test-v1.ajcgm`, 显示来源 "自定义", 状态 "可用"; 再导入一个改坏一个字节的包, 显示被拒原因, 登记表无残留 (P6.2, P6.7).
+8. 重复检测: 再次导入同一文件, 只提示 "已存在相同模型"; 导入同 `modelId` 的 v2, 显示并排对比表 (差异行带 "≠"), 分别试 "保留两者" 与 "替换", 结果符合 P6.4 (D6).
+9. 更新: 测试目录中发布 v2 后, 管理页显示 "可更新", 点击后直接开始下载 (无确认), 进度对话框下方显示新旧对比, 完成后当前版本切到 v2, "删除旧版本" 可用 (P6.6, D6).
+10. 管理页操作与离线: 切换当前模型, 查看模型卡, 删除当前版本 (提示改用规则排序); 飞行模式下打开管理页, 显示目录获取失败与重试, 已安装模型照常可用 (P6.1, P6.7).
+11. 关闭开关: 取消勾选 "使用模型辅助生成" 后生成, 抓包或日志确认无网络请求, 结果显示 "排序: 规则 (已关闭模型辅助)" (D3).
+12. 首次下载: 无已安装模型时生成, 显示下载提示 (模型名, 版本, 大小, 来源); 选 "下载" 后显示进度与 "已下载 / 总大小", 完成后不需要再点 "生成" 就直接显示结果, 排序来源为模型 (D4).
+13. 取消与失败: 下载中途点 "取消", 临时文件被删除, 对话框提供 "使用规则生成", 选后得到规则结果; 断网时下载失败同样可回退 (D4, P7.2).
+14. 回退原因: 设为当前的模型被替换为 schema 不兼容的包后生成, 结果显示 "排序: 规则 (模型不兼容)"; 模型与规则两种排序下结果集合相同, 只有顺序不同 (D7, D20, P7.4).
+
+## 附录 C. 证据等级
+
+| 等级 | 含义 |
+| --- | --- |
+| E0 | 代码已提交, 编译通过 |
+| E1 | E0 + JVM 单测 / Python 单测通过 |
+| E2 | E1 + AVD 冒烟或 CI run 通过 (记录 API level 或 run 链接) |
+| E3 | E2 + 真机冒烟通过 (记录机型) |
+
+## 附录 D. 文件地图
+
+| 关注点 | 文件 |
+| --- | --- |
+| 引擎 (新增) | `core/accessibility/codegen/`: `CodeGenRequest.kt` (P0.1), `SnapshotNode.kt` (P0.2), `plan/LocatePlan.kt` + `plan/SelectorText.kt` (P0.4), `TargetSets.kt` (P1.1), `search/CandidateSearch.kt` (P1.2), `verify/PlanVerifier.kt` (P1.3), `render/ClassicRenderer.kt` / `render/FlowRenderer.kt` (P1.4, P1.5), `rank/{Ranker,RuleRanker,Explanation,ModelRanker}.kt` (P1.6, P4.3), `CodeGenEngine.kt` (P1.7), `dataset/TaskGroup.kt` (P2.1), `features/{CandidateFeatures,FeatureSchema}.kt` (P3.1), `model/{ModelPackageReader,ObliviousTreeModel,ModelCache}.kt` (P4.2, P4.3, P7.3) |
+| 存储 (新增) | `core/accessibility/codegen/store/`: `ModelCatalog*.kt` (P6.1), `ModelStore.kt` (P6.2), `ModelDownloader.kt` (P6.3), `DuplicateCheck.kt` / `VersionComparison.kt` (P6.4), `ModelUpdates.kt` (P6.6) |
+| 引擎 (复用, 只读) | `core/automator/UiNode.kt`, `core/accessibility/UiSelector.kt` (`searchIn`), `core/automator/pick/Compass.kt`, `core/accessibility/inspector/{InspectorNode,SelectorCallParser,TreeMatch}.kt`, `core/accessibility/NodeInfoSnapshot.kt`, `LayoutSnapshotFiles.kt`, `ui/edit/editor/ace/font/{FontCatalogSignatureVerifier,FontDownloader}.kt` (D16) |
+| 引擎 (改动) | `core/automator/filter/JsLiteral.kt` (新增) + `StringMatcher.kt`, `core/accessibility/inspector/SelectorExport.kt` (P0.3), `TreeMatch.kt` (P1.9 的 `ofMatched`, 如需) |
+| 界面 (新增 / 改动) | `ui/floating/codegen/{CodeGenerateDialog,CodeGenOptionsState,CodeGenResultDialog,CodeGenFlow,ModelComparisonView,ModelDuplicateDialog}.kt`, `ui/settings/codegen/{CodeGenModelsActivity,CodeGenModelsPreference,CodeGenModelsViewModel}.kt`, `ui/floating/LayoutFloatyWindow.kt` (入口), `res/xml/fragment_preferences.xml` (Q12), `AndroidManifest.xml` (管理页 Activity) |
+| 删除 | `codegeneration/**`, `ui/floating/CodeGenerateDialog.java`, `app/src/test/.../FlowCodeStyleTest.kt` (P1.8) |
+| 资源 | `res/values{,-ar,-en,-es,-fr,-ja,-ko,-ru,-zh,-zh-rHK,-zh-rTW}/strings.xml`, `strings_donottranslate.xml` (`key_codegen_use_model`, `key_codegen_model_current`), `res/raw/codegen_model_catalog_v1.json`, `res/raw/codegen_model_catalog_public_key_v1.der` (P5.5) |
+| 单测与夹具 | `app/src/test/java/org/autojs/autojs/core/accessibility/codegen/**`, `app/src/test/resources/codegen/*.layout.json`, `app/src/test/resources/codegen/models/tiny-test-v1.ajcgm`, 复用 `core/automator/FakeUiNode.kt` |
+| 数据与训练 | `test-apps/codegen-fixture/` (P2.2), `tools/codegen-model/{capture,label,dataset,train,package}/` (P2-P4, P8.1) |
+| Shared-Assets | `codegen-models/`, `tools/codegen-model-distribution/`, `.github/workflows/publish-codegen-models.yml` (P5) |
+| 文档 | 本文, `docs/dev/layout-code-generation-architecture.md` (P8.5) |
+
+## 附录 E. 速查
+
+### E.1 计划族与渲染表
+
+记号: `S` = 目标自身的选择器, `A` = 锚点或容器的选择器, `T` = 子树内的选择器 (三者都由 `SelectorText.render` 输出); `c` = 罗盘字符串; `i` = 序号; `t` = 超时毫秒; `act()` / `actEach()` = 第四张表的动作调用. 表中以 `;` 分隔的语句在输出中各占一行; 输出只用 `let`, 不用 `const`.
+
+计划族:
+
+| 族 | 计划含义 | 范围 | 一次解析 (返回控件 / 集合, 找不到为 null) |
+| --- | --- | --- | --- |
+| `SELF` | 目标自身的选择器; 单个取先序第一个, 集合取全部匹配 | 单个, 集合 | `S.findOnce()` / `S.find()` |
+| `SELF_INDEX` | 选择器的第 i 个匹配, 负数自末尾计 | 单个 | `S.findOnce(i)` |
+| `ANCHOR_PATH` | 唯一锚点 + 罗盘路径 | 单个 | `function locate() { let a = A.findOnce(); return a && a.compass("c"); }` |
+| `ANCHOR_SEARCH` | 唯一祖先锚点 + 子树内首个匹配 (含锚点自身) | 单个 | `function locate() { let a = A.findOnce(); return a && a.findOne(T); }` |
+| `CONTAINER_ITEMS` | 唯一容器 + 子树内全部匹配 | 集合 | `function locate() { let a = A.findOnce(); let ws = a && a.find(T); return ws && ws.nonEmpty() ? ws : null; }` |
+
+`locate()` 在集合为空时也返回 `null`: 全局 `wait` 与 Flow 的函数条件都把空集合视为 "已满足" (`Global.kt` 的 `isWaitConditionSatisfied`), 必须由函数自己排除.
+
+经典风格 (`ClassicRenderer`), `SELF` 族直接用选择器 API:
+
+| 查询方式 | 单个 | 集合 | 无动作时 (单个 / 集合) |
+| --- | --- | --- | --- |
+| 等待找到 | `S.untilFindOne().act();` | `S.untilFind().actEach();` | `let w = S.untilFindOne();` / `let ws = S.untilFind();` |
+| 限时等待 | `let w = S.findOne(t); if (w) { w.act(); }` | `if (S.findOne(t)) { S.find().actEach(); }` | `let w = S.findOne(t);` / `let ws = S.findOne(t) ? S.find() : null;` |
+| 立即判断 | `let w = S.findOnce(); if (w) { w.act(); }` | `let ws = S.find(); if (ws.nonEmpty()) { ws.actEach(); }` | `let found = S.exists();` / `let ws = S.find();` |
+
+经典风格, `SELF_INDEX` 与其余族先输出 `locate()` (`SELF_INDEX` 为 `function locate() { return S.findOnce(i); }`), 再用全局 `wait` (超时 >= 100 ms 时第二个参数按超时解释, 与 P0.1 的输入下限一致):
+
+| 查询方式 | 有动作 | 无动作 |
+| --- | --- | --- |
+| 等待找到 | `wait(locate, Infinity, 200, { then: w => w.act() });` | `let w = wait(locate, Infinity, 200, { then: w => w });` |
+| 限时等待 | `wait(locate, t, 200, { then: w => w.act() });` | `let w = wait(locate, t, 200, { then: w => w });` (超时为 `false`: `else` 返回 `null` 时不覆盖结果) |
+| 立即判断 | `let w = locate(); if (w) { w.act(); }` | `let w = locate();` |
+
+集合把 `w.act()` 换成 `ws.actEach()`. 动作接收者为 `Up(n)` 时: 单个对解析结果追加 `.parent(n)` 并在动作前判空; 集合改为 `ws.each(w => { let r = w.parent(n); if (r) { r.act(); } })`.
+
+Flow 风格 (`FlowRenderer`). 条件 `C`: `SELF` 族为 `S` (单个且接收者为 `Up(n)` 时加选项 `compass: 'pN'`), 其余族为 `locate`; 集合加选项 `resultType: 'widgets'`:
+
+| 查询方式 | 有动作 | 无动作 |
+| --- | --- | --- |
+| 等待找到 | 点击: `waitThenClick(C, { timeout: Infinity }).sync();`; 其他: `waitAsync(C, { timeout: Infinity }).act().sync();` | `let w = waitAsync(C, { timeout: Infinity }).sync();` |
+| 限时等待 | `flow.whenPresent(C, w => w.act(), { timeout: t }).sync();` | `let w = null; flow.whenPresent(C, x => { w = x; }, { timeout: t }).sync();` |
+| 立即判断 | 同限时等待, `{ timeout: 0 }` | 同限时等待, `{ timeout: 0 }` |
+
+`flow.whenPresent` 超时只跳过处理函数而不抛错 (`FlowScheduler.runWhenPresent`), 与经典风格的 "找不到就跳过" 一致; 等待找到用 `timeout: Infinity` (Q3), 不用 Flow 默认的 10 s. 链上的动作 (`.click()` / `.setText(x)` 等) 对集合逐个执行. 集合且接收者为 `Up(n)` 时动作放进回调 (`.then(ws => ...)` / 处理函数), 内容同经典风格.
+
+动作:
+
+| 动作 | 单个 `act()` | 集合 `actEach()` | Flow 链 | 接收者须具备 (P1.3) |
+| --- | --- | --- | --- | --- |
+| 点击 | `click()` | `clickEach()` | `waitThenClick(...)` 或 `.click()` | clickable |
+| 长按 | `longClick()` | `longClickEach()` | `.longClick()` (不用全局 `waitThenLongClick`, F18) | longClickable |
+| 设置文本 | `setText("x")` | `setTextEach("x")` | `.setText("x")` | editable |
+| 向前滚动 | `scrollForward()` | `scrollForwardEach()` | `.scrollForward()` | scrollable |
+| 向后滚动 | `scrollBackward()` | `scrollBackwardEach()` | `.scrollBackward()` | scrollable |
+
+`"x"` 经 `JsLiteral.quote` 输出 (P0.3).
+
+旧对话框查询选项到新请求的映射 (`LegacyMode.toRequest`, P0.1):
+
+| 旧选项 | 新请求 | 说明 |
+| --- | --- | --- |
+| 直到找到一个 (默认) | 单个, 等待找到 | 旧版输出已弃用的无参 `findOne()` (F8) |
+| 直到找到所有 | 集合 (取 `TargetSets` 首项), 等待找到 | 旧版只要求非空, 不检查集合 (F3) |
+| 等待控件出现 | 单个, 等待找到 | 旧版输出 `waitFor()` 且忽略动作 (F2); 新版保留动作 |
+| 判断控件存在 | 单个, 立即判断 | 旧版输出空的 `if` 分支 (F2) |
+| 未勾选任何项 | 单个, 等待找到 | 旧版静默回退 (F8); 新版为单选, 不会出现 |
+
+### E.2 模型包与目录字段
+
+`.ajcgm` 内的 `manifest.json` (P4.1 写, P4.2 读, `model-manifest-v1.schema.json` 约束):
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `format` | int | 固定 1 |
+| `modelId` | string | `^[a-z0-9][a-z0-9._-]{1,63}$`, 官方为 `autojs6.codegen.ranker` (Q13) |
+| `displayName` | object | 语言标签到名称, 至少含 `en`; 缺当前语言时回退 `en` |
+| `versionCode` / `versionName` | int / string | `versionCode` > 0, 同一 `modelId` 内单调递增 |
+| `kind` / `algorithm` | string | 固定 `ranker` / `catboost-oblivious` |
+| `featureSchemaVersion` / `featureNamesHash` | int / string | 与宿主 `FeatureSchema` 比较 (D13) |
+| `model` | object | `file` (`model.bin`), `size`, `sha256`, `trees`, `depth` (最大深度), `features` (特征数) |
+| `dataset` | object | `datasetId`, `groups` (训练任务组数), `createdAt` |
+| `metrics` | object | 附录 E.4 指标的摘要: `test` / `realTest` 各含 `top1Survival`, `ruleTop1Survival`, `regret`, `groups` |
+| `training` | object | 工具版本 (CatBoost, Python), 宿主仓库提交 hash, `trainedAt` |
+| `minHostVersionCode` | int | 低于此值的宿主显示 "需要更新 AutoJs6" |
+| `license` / `publisher` | string | SPDX 表达式 / 发布者 (官方为 `AutoJs6`) |
+
+目录 (`catalog-v1.json`) 的每个版本项字段见 P5.2; 其中 `featureSchemaVersion`, `featureNamesHash`, `minHostVersionCode`, `datasetId`, `metrics`, `license` 与包内 manifest 必须一致 (`prepare_catalog.py` 校验), 使下载前即可做重复检测与版本对比 (P6.4).
+
+### E.3 候选特征 (`featureSchemaVersion = 1`)
+
+全部为 `Float`; 布尔记 0 / 1; 计数类做 `ln(1 + x)`; 缺失记 -1 (CatBoost 只按阈值分裂, -1 落在最左侧). 组内相对特征以同一请求的全部已验证候选为组.
+
+| 分组 | 特征 | 来源 |
+| --- | --- | --- |
+| 请求 | `scope_collection`, `action_*` (6 个独热), `attr_id` / `attr_text` / `attr_desc` 开关 | `CodeGenRequest` |
+| 族 | `family_*` (5 个独热), `receiver_up_levels` | `LocatePlan` |
+| 选择器 | `cond_count`, `has_full_id`, `has_entry_id`, `has_text`, `has_desc`, `has_class`, `has_package`, `structural_cond_count` | `SelectorSpec` (锚点与目标各一组, 前缀 `self_` / `anchor_`) |
+| id 质量 | `id_entry_len`, `id_looks_obfuscated` (条目名 <= 2 字符或无元音的随机串), `id_cross_package_dup` | 条件值, 窗口统计 |
+| 文本质量 | `text_len`, `text_digit_ratio`, `text_dynamic` (数字 / 时间 / 计数模式), `text_cjk_ratio`, `desc_len`, `desc_dynamic` | 条件值, `facts` |
+| 序号 | `index_abs`, `index_negative`, `index_rel` (i / 匹配数), `selector_match_count` | `PlanStep.Index`, `facts` |
+| 路径 | `path_steps`, `path_up_levels`, `path_child_steps`, `path_sibling_steps`, `path_max_child_index`, `anchor_distance` | `PlanStep` |
+| 容器 | `container_item_count`, `container_item_uniform` (项结构签名一致比例) | `facts` |
+| 目标 | `target_depth`, `target_has_id`, `target_has_text`, `target_clickable`, `target_in_list` (有可滚动且子节点重复的祖先), `target_same_class_siblings`, `target_set_size` | 目标节点 |
+| 组内相对 | `rule_rank_norm` (规则名次 / 组大小), `rule_cost_gap` (与组内最优的代价差), `group_size`, `family_rank_in_group` | 同组 `Verified` |
+
+特征名称以表中顺序展开 (独热按枚举顺序), 完整列表以 `FeatureSchema.names` 为准, 本表只是分组说明; 修改任何特征 (增删, 改顺序, 改编码) 都必须升 `featureSchemaVersion` (P3.1).
+
+### E.4 评估指标与发布门槛
+
+每个任务组 g 有已验证候选集合 V(g), 每个候选有 `survival` ∈ [0, 1] (P2.4). 记 `best(g) = max survival`, 排序器首选为 `top(g)`.
+
+| 指标 | 定义 |
+| --- | --- |
+| `top1Survival` | 各组 `survival(top(g))` 的平均值 |
+| `ruleTop1Survival` | 同上, 首选取 `RuleRanker` 的结果 |
+| `regret` | 各组 `best(g) - survival(top(g))` 的平均值 |
+| `perfectRate` | `survival(top(g)) == 1` 的组所占比例 |
+| `worseThanRule` | `survival(top(g)) < survival(ruleTop(g)) - 0.01` 的组所占比例 |
+| `top3Recall` | 前 3 名中存在 `survival == best(g)` 的组所占比例 (对应结果对话框的备选) |
+
+指标按 test 与 real-test 分别计算, 并按族, 变化种类, 界面族细分 (P3.4). 发布门槛 (P8.1, 全部满足才允许进入目录):
+
+| 编号 | 门槛 |
+| --- | --- |
+| G1 | test: `top1Survival` >= `ruleTop1Survival` + 0.05 |
+| G2 | real-test: `top1Survival` >= `ruleTop1Survival` (不劣于规则, D20); real-test 组数 >= 150 |
+| G3 | test 与 real-test: `worseThanRule` <= 5% |
+| G4 | 任一变化种类上 `top1Survival` 不低于规则 0.05 以上 (避免以某类退化换取平均提升) |
+| G5 | 新版本相对当前官方版本: real-test 的 `top1Survival` 不下降超过 0.01 |
+| G6 | 包大小 < 100 MiB 且目标 1-5 MiB (D2); 设备上满足 D19 (P8.2) |
+| G7 | P4.4 一致性测试通过 (每个分数误差 <= 1e-4, 每组首选相同) |
+
+G1 / G2 的数值为首版建议, 由维护者在 P8.1 前确认 (可随数据规模调整, 调整记录在本表).
+
+### E.5 版本对比字段
+
+`VersionComparison.build(old, new)` (P6.4) 输出以下行, 顺序固定; 两侧值不同的行标记 `differs` (界面以强调色背景 + "≠" 标出):
+
+| 行 | 内容 | 来源 |
+| --- | --- | --- |
+| 名称 | `displayName` (当前语言) + `modelId` | manifest |
+| 版本 | `versionName` (`versionCode`) | manifest |
+| 来源 | 官方 / 自定义 (D15) | 登记表或目录 |
+| 内容 | sha256 前 12 位 | 文件 |
+| 大小 | 人类可读 (KiB / MiB) | 文件或目录 |
+| 兼容性 | `featureSchemaVersion` + "兼容 / 不兼容 / 需要更新 AutoJs6" | manifest + 宿主 |
+| 数据集 | `datasetId` 与创建日期 | manifest |
+| 指标 | `top1Survival` (real-test) 与相对规则的差值 | manifest `metrics` |
+| 发布时间 | `releasedAt` (目录) 或 `trainedAt` (包) | 目录 / manifest |
+| 安装时间 | `installedAt`; 新版本一侧显示 "-" | 登记表 |
+| 许可证 | `license` | manifest |
+| 状态 | 当前使用 / 已安装 / 已撤回 | 登记表 + 目录 |
+
+缺失的字段显示 "-" (`VersionComparisonTest`). 下载前的对比用目录中的值, 导入时用包内 manifest 的值, 两者字段相同 (E.2).
