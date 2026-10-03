@@ -1,6 +1,6 @@
 # Layout code generation data and training tools
 
-These offline development tools implement P2 and P3 of
+These offline development tools implement P2, P3 and P4 of
 [`layout-code-generation-model-roadmap.md`](../../docs/dev/layout-code-generation-model-roadmap.md).
 They produce observed plan-survival labels using the host's actual candidate generator and verifier.
 There is no training dependency in P2; Python uses only the standard library and `unittest`.
@@ -281,3 +281,25 @@ configurable by `--max-score-gap`), ordered by gap and stable task identity. `--
 and provenance. The score gap is a collection heuristic, not a confidence probability. Follow the
 queue to capture additional states and explicitly confirm targets with the annotation tool;
 the queue does not edit existing truth or accept a recommended correspondence automatically.
+
+## Package the local candidate
+
+The standard-library packager converts the checked CatBoost JSON to `model.bin` and a five-file
+`.ajcgm` archive. See [the exact binary/package format](package/FORMAT.md). All numerical model
+inputs and metadata are checked before a new output file is published; an existing package is
+never overwritten. Package construction itself does not publish a model or grant official trust.
+
+```powershell
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/package/build_package.py --model-json tools/codegen-model/out/p3-first/model.json --features-json tools/codegen-model/out/p3-first/features.json --dataset-manifest tools/codegen-model/out/cg-ds-2026.10-1/dataset-manifest.json --train-log tools/codegen-model/out/p3-first/train-log.json --metrics tools/codegen-model/out/p3-first/evaluation/metrics.json --license-file PATH_TO_MODEL_LICENSE --spdx MODEL_SPDX_EXPRESSION --publisher AutoJs6 --model-id autojs6.codegen.ranker --version-code 1 --version-name 0.1.0 --display-name "en=AutoJs6 Code Generation Ranker" --min-host-version-code 5318 --output tools/codegen-model/out/p4/candidate-v1.ajcgm
+```
+
+`--license-file` and `--spdx` require an explicit maintainer choice. The current local acceptance
+candidate uses `LicenseRef-LocalEvaluation` with an unpublished evaluation notice. The committed
+tiny test package uses the repository's existing MPL-2.0 license text; it contains the same six
+trees learned entirely from controlled fixtures, under model ID `autojs6.codegen.tiny-test`.
+The eventual distributed model's license remains a release decision.
+
+ZIP entries use fixed order, timestamp and permissions and the stored method, making repeated
+packages byte-identical without depending on a zlib version. Borders/leaves are Float32; bias,
+scale and accumulation are Double. Feature-index mappings, strict `>` thresholds, leaf-bit order
+and CRC32 are validated with an independent two-tree binary fixture.
