@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/10/03",
       "feature": [
+        "La fonction \"Générer du code\" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition",
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
         "OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées",
         "API de script ai.agent pour lancer et consulter les tâches, recevoir les événements, répondre, confirmer, annuler et exécuter en arrière-plan avec detached; result/context exposent les résultats et le contexte des scripts enregistrés par @agent, avec trois exemples",
@@ -261,6 +262,7 @@
       ],
       "fix": [
         "Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans \"Copier en tant que sélecteur\" de l'inspecteur de disposition et la représentation textuelle des sélecteurs",
+        "La génération de code de l'inspecteur de disposition ignorait la saisie de texte et certaines actions de recherche, appliquait les actions à tout le groupe pour une seule cible de liste, utilisait des appels obsolètes, abandonnait silencieusement Flow ou échouait sur les appuis longs, et localisait incorrectement les ID identiques entre paquets",
         "Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information",
         "Les échecs des appels aux modèles en ligne d'Three Stove Agent perdaient les catégories d'erreurs réseau, d'authentification et de réponse (nécessite la prise en charge du plugin Provider)",
         "La fusion des options d'outils d'un assistant n'active plus les groupes désactivés par défaut lorsque l'objet tools de base est vide",
