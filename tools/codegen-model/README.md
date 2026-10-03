@@ -107,3 +107,27 @@ contains every group, including zero-candidate groups, and the rule-selected pla
 The manifest records input and output checksums. A failed parse or changed input does not
 replace a previous complete export. Run twice with unchanged input, commit, and output options
 to compare all three artifacts byte for byte.
+
+## Label real applications locally
+
+Use the existing layout inspector's Save layout action to capture the same screen at different
+times, app versions, or languages. Copy those snapshots into a private local directory outside
+every Git worktree. From `tools/codegen-model`:
+
+```powershell
+$env:CODEGEN_PRIVATE_DIR = 'D:\codegen-private'
+python -m label.label_real --snapshots D:\codegen-private\screen\s0.layout.json D:\codegen-private\screen\s1.layout.json --group-id real-example-1 --app com.example.app --screen-family checkout --output D:\codegen-private\tasks\example.cgtask.json --scope single --action click --target 'id submit'
+```
+
+Choose targets using `index 3` (zero-based preorder), `index 3,7` for a collection, `text QUERY`,
+or `id QUERY`. Subsequent states recommend correspondences using full ID, class, text, and relative
+position. Every state still requires an explicit `confirm`, `skip`, or `change`; a recommendation,
+empty response, or EOF never approves a target. All confirmed states keep the same target count.
+Skipping the first state writes nothing. One confirmed state may be saved for later collection,
+but the survival exporter requires at least two. `--mutations` can describe each state's changes.
+
+The tool copies snapshots only when needed to keep relative references below the task folder,
+and only within the private directory. Raw layouts, tasks, labels, and split maps from real apps
+stay private. The initial automated dataset contains controlled fixture data only; completing
+this annotation tool does not mean the roadmap's suggested real-app evaluation sample has been
+collected. Real application groups belong exclusively in `real-test` at this stage.
