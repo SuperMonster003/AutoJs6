@@ -221,3 +221,27 @@ The pinned versions provide Python 3.12 Windows wheels in [CatBoost's package re
 and [NumPy's package release](https://pypi.org/project/numpy/2.2.6/). Training parameters follow
 the [CatBoostRanker API](https://catboost.ai/docs/en/concepts/python-reference_catboostranker)
 and [overfitting detector options](https://catboost.ai/docs/en/references/training-parameters/overfitting-detection).
+
+## Evaluate held-out tasks
+
+```powershell
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/train/evaluate.py --dataset tools/codegen-model/out/cg-ds-2026.10-1 --model tools/codegen-model/out/p3-first/model.cbm --output tools/codegen-model/out/p3-first/evaluation
+```
+
+The evaluator predicts with the actual model on test and independent real-test. It writes
+`metrics.json` and `report.md` containing all six roadmap E.4 metrics, the original rule baseline,
+coverage including groups with no candidates, and breakdowns by selected plan family, mutation,
+screen family and source. Mutation buckets contain groups whose evaluation states carry that
+mutation and can overlap. The 50 largest model-versus-rule regressions include the two plans
+and their failed mutations for the next collection round.
+
+Empty real-test has zero groups and null metrics. It cannot establish real-app quality or pass
+the later real-test publication gate. Current tasks and snapshots are checked against the frozen
+manifest as well as the feature/label hashes, so changing targets without re-exporting is rejected.
+Detailed reports may include private text inside plan keys; reports from any real-containing
+dataset stay in `CODEGEN_PRIVATE_DIR`. Public reports must contain reviewed aggregates only.
+
+Score ties use a deterministic convention shared with the future Android ranker: sort exact
+scores descending, form disjoint batches whose scores differ by less than `1e-6` from each batch
+maximum, then order each batch by the Kotlin rule rank. This avoids a non-transitive approximate
+comparator and does not depend on candidate input order.
