@@ -176,3 +176,48 @@ the split map before training; introducing new families can change hash-ranked a
 Real application tasks always go to independent `real-test`, grouped by app. For a dataset that
 contains any real tasks, all combined labels, features, split maps, and manifests must also stay
 in `CODEGEN_PRIVATE_DIR`. Publish only separately reviewed aggregate reports.
+
+## Train a candidate model
+
+Training uses Python 3.12 and the exact PC dependencies in `train/requirements.txt`:
+CatBoost 1.2.10 and NumPy 2.2.6. Create an isolated environment under ignored `out/`, then train
+from the completed dataset manifest. Run these commands from the repository root:
+
+```powershell
+py -3.12 -m venv tools/codegen-model/out/venv-py312
+& tools/codegen-model/out/venv-py312/Scripts/python.exe -m pip install -r tools/codegen-model/train/requirements.txt
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/train/train.py --dataset tools/codegen-model/out/cg-ds-2026.10-1 --output tools/codegen-model/out/p3-first
+```
+
+The default is CPU `CatBoostRanker`, YetiRank, symmetric depth-6 trees, at most 1,024 iterations,
+seed `20261003`, one thread, learning rate `0.05`, and validation `NDCG:top=1` early stopping
+after 64 non-improving iterations. Only train and valid participate in fitting and early stopping.
+The first dataset's observed labels `0 / 0.5 / 1` become grades `0 / 1 / 2`. Other survival
+fractions remain valid for evaluation but require an explicit future training-grade policy;
+the current trainer rejects them instead of silently changing their meaning.
+
+`--output` must name a new directory outside the frozen dataset. The completed run contains
+`model.cbm`, CatBoost's original `model.raw.json`, canonical `model.json`, `features.json`, and
+`train-log.json`. The log records input and producer hashes, capture and feature-export commits,
+all parameters, dependency versions, machine, timing, tree count, and validation history.
+
+CatBoost's raw JSON contains a model GUID and training-completion time. Canonical `model.json`
+removes only `model_info.model_guid` and `model_info.train_finish_time`, retaining the original
+export for audit. Numerical splits, thresholds, leaves, feature definitions and scale/bias are
+unchanged. Train again into a second directory with the same dataset/options and compare both
+the canonical bytes and the numerical contents of the original exports. Android package and
+inference parity are handled by the subsequent P4 tools.
+
+The standard Python tests do not require CatBoost. To include the actual two-fit and model-loading
+tests in the pinned environment:
+
+```powershell
+$env:CODEGEN_TEST_TRAINING = '1'
+& tools/codegen-model/out/venv-py312/Scripts/python.exe -m unittest discover tools/codegen-model
+Remove-Item Env:CODEGEN_TEST_TRAINING
+```
+
+The pinned versions provide Python 3.12 Windows wheels in [CatBoost's package release](https://pypi.org/project/catboost/1.2.10/)
+and [NumPy's package release](https://pypi.org/project/numpy/2.2.6/). Training parameters follow
+the [CatBoostRanker API](https://catboost.ai/docs/en/concepts/python-reference_catboostranker)
+and [overfitting detector options](https://catboost.ai/docs/en/references/training-parameters/overfitting-detection).
