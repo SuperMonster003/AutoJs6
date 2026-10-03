@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.augment.compose
 
 import org.autojs.autojs.core.plugin.compose.ComposeUiError
 import org.autojs.autojs.rhino.TopLevelScope
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.plugin.compose.api.ComposeUiContractException
 import org.autojs.plugin.compose.api.ComposeUiErrorCodes as Codes
 import org.junit.After
@@ -116,6 +117,94 @@ class ComposeJsErrorsTest {
             ComposeJsErrors.guard(scope) { throw thrown }
         }
         assertSame(thrown, actual)
+    }
+
+    @Test fun localizedPrefixesKeepComponentDetailsAndPluginCenterMessagesVerbatim() {
+        ComposeJsErrors.installLocalizer(scope) { it.localizedMessage { "未知 Compose 属性." } }
+        val failure = ComposeUiContractException(Codes.UNKNOWN_PROP, "Text.missing: Unknown property", 41, "missing")
+        val localized = converted(failure)
+        val message = property(localized, "message").toString()
+        assertTrue(message, message.startsWith("未知 Compose 属性."))
+        assertTrue(message, message.contains("Text.missing"))
+        assertTrue(message, message.contains("nodeId=41"))
+        assertEquals("missing", property(localized, "prop"))
+        assertEquals(41, property(localized, "nodeId"))
+        assertEquals(Codes.UNKNOWN_PROP, property(localized, "code"))
+        assertEquals("Text.missing: Unknown property", failure.message)
+
+        val prefix = "请先在插件中心授权 Compose UI"
+        assertEquals(prefix, property(converted(ComposeUiError(Codes.PLUGIN_UNAUTHORIZED, prefix)), "message"))
+        val otherScope = TopLevelScope().apply { initStandardObjects(context, false) }
+        val independent = (ComposeJsErrors.exception(otherScope, failure) as JavaScriptException).value as Scriptable
+        assertEquals(failure.message, property(independent, "message"))
+    }
+
+    @Test fun everyFrozenErrorCodeKeepsMetadataWithItsLocalizedMessage() {
+        val codes = Codes::class.java.declaredFields.filter { it.type == String::class.java }.map { it.get(null) as String }
+        assertEquals(18, codes.size)
+        ComposeJsErrors.installLocalizer(scope) { error -> error.localizedMessage { "localized ${error.code}" } }
+        for (code in codes) {
+            val value = converted(ComposeUiError(code, nodeId = 17, prop = "text"))
+            assertEquals(code, property(value, "code"))
+            assertEquals(17, property(value, "nodeId"))
+            assertEquals("text", property(value, "prop"))
+            val message = property(value, "message").toString()
+            assertTrue(message, message.startsWith("localized $code"))
+            assertTrue(message, message.contains("prop=text"))
+            assertEquals(code.startsWith("PLUGIN_"), property(value, "retryable"))
+        }
+        ComposeJsErrors.installLocalizer(scope) { "Updated locale" }
+        assertEquals("Updated locale", property(converted(ComposeUiError(Codes.INVALID_ARGUMENT)), "message"))
+    }
+
+    @Test fun nestedContractCausesPreserveTheOriginalScriptObjectAndStack() {
+        val scriptFailure = try {
+            evaluate("function buildInvalidForm() { throw new Error('invalid form'); } buildInvalidForm();", "nested-form.js")
+            throw AssertionError("Script throw expected")
+        } catch (failure: JavaScriptException) { failure }
+        val hostFailure = IllegalArgumentException("conversion failed", scriptFailure)
+        val contract = ComposeUiContractException(Codes.INVALID_ARGUMENT, "Text.style: Invalid value", 25, "style", hostFailure)
+        val error = converted(contract)
+        val nativeCause = property(error, "cause") as Scriptable
+        assertEquals(Codes.INVALID_ARGUMENT, property(nativeCause, "code"))
+        assertEquals(25, property(nativeCause, "nodeId"))
+        assertEquals("style", property(nativeCause, "prop"))
+        val conversionCause = property(nativeCause, "cause") as Scriptable
+        assertEquals("conversion failed", property(conversionCause, "message"))
+        assertSame(scriptFailure.value, property(conversionCause, "cause"))
+        val scriptCause = property(conversionCause, "cause") as Scriptable
+        assertTrue(property(scriptCause, "stack").toString().contains("nested-form.js"))
+    }
+
+    @Test(timeout = 5000) fun cyclicHostCausesRemainInspectableWithoutRecursiveConversion() {
+        val outer = IllegalStateException("outer")
+        val inner = IllegalArgumentException("inner")
+        outer.initCause(inner)
+        inner.initCause(outer)
+        val value = converted(ComposeUiError(Codes.RENDERER_FAILED, cause = outer))
+        val convertedOuter = property(value, "cause") as Scriptable
+        val convertedInner = property(convertedOuter, "cause") as Scriptable
+        assertEquals("outer", property(convertedOuter, "message"))
+        assertEquals("inner", property(convertedInner, "message"))
+        assertSame(convertedOuter, property(convertedInner, "cause"))
+    }
+
+    @Test fun engineInterruptionDoesNotBecomeAUserFacingComposeFailure() {
+        val stop = ScriptInterruptedException()
+        assertSame(stop, ComposeJsErrors.exception(scope, stop))
+        val wrapped = IllegalStateException("stopping", stop)
+        assertSame(wrapped, ComposeJsErrors.exception(scope, wrapped))
+        val checked = InterruptedException("stopping")
+        val converted = ComposeJsErrors.exception(scope, checked)
+        assertTrue(converted is ScriptInterruptedException)
+        assertSame(checked, converted.cause)
+    }
+
+    @Test fun unavailableLocalizationDoesNotReplaceTheOriginalFailure() {
+        ComposeJsErrors.installLocalizer(scope) { throw IllegalStateException("Missing test resource") }
+        val value = converted(ComposeUiContractException(Codes.UNKNOWN_COMPONENT, "MissingWidget: Unknown component"))
+        assertEquals(Codes.UNKNOWN_COMPONENT, property(value, "code"))
+        assertEquals("MissingWidget: Unknown component", property(value, "message"))
     }
 
     private fun converted(failure: Throwable) = (ComposeJsErrors.exception(scope, failure) as JavaScriptException).value as Scriptable
