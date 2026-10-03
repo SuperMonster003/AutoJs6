@@ -322,3 +322,26 @@ candidate group and preserves the original verified objects. Use complete detach
 as produced by the layout inspector. Near ties follow the P3 score-batch convention. Feature,
 score and sorting failures or budget exhaustion produce `RankerUnavailable`; cancellation is
 propagated. The generation-dialog selection and fallback path will be connected in P7.
+
+## Verify CatBoost-to-Kotlin parity
+
+```powershell
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/package/export_parity.py --dataset tools/codegen-model/out/cg-ds-2026.10-1 --reference-model tools/codegen-model/out/p3-first/model.cbm --package tools/codegen-model/out/p4/local-candidate-v1.ajcgm --output tools/codegen-model/out/p4/full-parity
+$env:CODEGEN_PARITY_DIR = (Resolve-Path 'tools/codegen-model/out/p4/full-parity').Path
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.model.ModelParityTest'
+Remove-Item Env:CODEGEN_PARITY_DIR
+```
+
+The export contains actual CatBoost scores, Float32 feature values, complete groups and expected
+top choices. It takes the first 5,000 test candidates and finishes their last group, yielding
+5,012 candidates / 130 groups for the current dataset. This small extension prevents a truncated
+group from appearing to pass a full top-choice comparison. The desktop export first checks the
+quantized binary; Kotlin then independently uses its package reader, interpreter and shared
+score-order function. Every score must differ by at most `1e-4`, and every group's top choice
+must agree. Changed model/dataset inputs reject export before publishing its new directory.
+
+`app/src/test/resources/codegen/models/` also contains a 23,633-byte MPL-2.0 tiny package and
+152 reference candidates / 4 complete groups. Its parity test always runs without environment
+variables. The package derives from the controlled-only P3 model; the `.gitattributes` beside it
+preserves package bytes and LF reference-file hashes across checkouts. The external test alone
+is skipped when `CODEGEN_PARITY_DIR` is absent.
