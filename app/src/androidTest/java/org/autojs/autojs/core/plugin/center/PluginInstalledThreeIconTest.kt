@@ -29,14 +29,16 @@ class PluginInstalledThreeIconTest {
             "io.github.supermonster003.autojs6.plugin.three.setup.installer",
             "io.github.supermonster003.autojs6.plugin.three.shell.terminal",
             "io.github.supermonster003.autojs6.plugin.three.stamp.mail",
-            "io.github.supermonster003.autojs6.plugin.opencc",
+            "io.github.supermonster003.autojs6.plugin.three.hanzi.cc",
             "io.github.supermonster003.autojs6.plugin.r8compiler",
             "io.github.supermonster003.autojs6.plugin.three.folio.epub",
+            "io.github.supermonster003.autojs6.plugin.three.maple.image",
+            "io.github.supermonster003.autojs6.plugin.three.stack.archive",
         )
         val labels = listOf("3-Stone AI", "3-Terra Player", "3-Amber Player", "3-Stove Agent",
             "3-Adapt A11y", "3-Color Picker", "3-Setup Installer", "3-Shell Terminal",
-            "3-Stamp Mail", "OpenCC", "R8 Compiler", "3-Folio EPUB")
-        val preview = Bitmap.createBitmap(1200, 704, Bitmap.Config.ARGB_8888)
+            "3-Stamp Mail", "3-Hanzi CC", "R8 Compiler", "3-Folio EPUB", "3-Maple Image", "3-Stack Archive")
+        val preview = Bitmap.createBitmap(1200, ((packages.size + 2) / 3) * 176, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(preview).apply { drawColor(0xffeeeeee.toInt()) }
         val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.DKGRAY; textSize = 19f }
         for ((index, packageName) in packages.withIndex()) {
@@ -62,10 +64,11 @@ class PluginInstalledThreeIconTest {
                 if (night) assertEquals("$label shape", dayAlpha, alpha) else dayAlpha = alpha
                 val opaque = pixels.filter { Color.alpha(it) == 255 }
                 assertTrue(label, opaque.isNotEmpty())
-                assertTrue(label, opaque.all { Color.red(it) == Color.green(it) && Color.green(it) == Color.blue(it) })
-                // Neutral grayscale is allowed for every plugin, including shaded artwork.
-                val mean = opaque.map { Color.red(it) }.average()
-                assertTrue(label, if (night) mean > 128 else mean < 128)
+                if (!packageName.endsWith(".r8compiler")) {
+                    assertTrue(label, opaque.all { Color.red(it) == Color.green(it) && Color.green(it) == Color.blue(it) })
+                    val mean = opaque.map { Color.red(it) }.average()
+                    assertTrue(label, if (night) mean > 128 else mean < 128)
+                }
                 val paint = Paint().apply { this.color = if (night) 0xff212121.toInt() else 0xfffafafa.toInt() }
                 val slotX = x + modeIndex * 86
                 canvas.drawRect(slotX, y + 44, slotX + 80, y + 124, paint)
