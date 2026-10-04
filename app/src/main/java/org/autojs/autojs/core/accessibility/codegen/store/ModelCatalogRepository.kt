@@ -49,6 +49,34 @@ class ModelCatalogRepository(
 
     fun current(): ModelCatalog? = loadBestAvailable()
 
+    /** Holds catalog -> store lock order across an authorized installation. No network access.
+     * zh-CN: 安装期间按目录锁 -> 存储锁的顺序保持授权有效, 本方法不联网. */
+    fun <T> withDownloadAuthorization(
+        modelId: String,
+        requested: CatalogModelVersion,
+        action: (catalogVersion: Int, version: CatalogModelVersion) -> T,
+    ): T {
+        val result = locked {
+            val catalog = bestAvailableLocked()?.catalog
+                ?: throw ModelDownloadAuthorizationException("No verified model catalog is available")
+            val current = catalog.find(modelId)?.versions?.firstOrNull { it.versionCode == requested.versionCode }
+                ?: throw ModelDownloadAuthorizationException("Model version is no longer present in the catalog")
+            if (!requested.canDownload || !catalog.canDownload(modelId, current.versionCode)) {
+                throw ModelDownloadAuthorizationException("Model version is not authorized for download")
+            }
+            // Compare all immutable values, not just a caller-copyable fingerprint. Deprecation may
+            // change while an explicit download is in progress; revoked/incompatible versions cannot.
+            if (requested.copy(deprecated = current.deprecated, revoked = current.revoked,
+                    compatibility = current.compatibility) != current) {
+                throw ModelDownloadAuthorizationException("Requested artifact differs from the verified catalog")
+            }
+            // Preserve installation/cancellation exceptions instead of mislabelling them as
+            // catalog-storage failures in locked().
+            runCatching { action(catalog.catalogVersion, current) }
+        }
+        return result.getOrThrow()
+    }
+
     /** Reads the verified remote cache. A stale/uncertain cache remains explicitly display-only. */
     fun loadCached(): ModelCatalog? = locked {
         val snapshot = if (recover(cacheFile)) readCache() else null

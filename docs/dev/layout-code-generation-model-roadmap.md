@@ -239,13 +239,13 @@ py -3.12 tools/codegen-model-distribution/prepare_bootstrap.py --catalog codegen
   5. 在文件锁内以 "临时文件 + 改名" 更新登记表.
 
   启动时对账: 删除没有目录的登记项, 删除不在登记表中的目录与残留的 `staging/`. 当前模型 Pref `key_codegen_model_current` (值 `modelId@versionCode-sha8`, 键名入 `strings_donottranslate.xml`). 删除当前版本后 Pref 置空 (视为 "未安装", 下次生成按 D4 提示). 单测 `ModelStoreTest`: 安装, 坏包被拒且无残留, 改名前中断后对账无登记项, 来源判定, 删除当前版本, 同一 `modelId` 的多版本并存. 证据 (E1/E2, 2026-10-04): ModelStore 与 Android 路径/Pref 适配完成, 实际包读取器验证私有安装快照后再原子安装/登记. 多版本和同 versionCode 不同内容可并存; 完整 SHA 判同一内容, 实际 SHA8 碰撞回归确认拒绝覆盖. 当前选择以登记表日志协调 Pref 持久化, 包括 SharedPreferences 内存已变但落盘失败的恢复. 对账保留 catalog/debug 缓存, 坏 registry 停止清理, 活跃 staging 租约跨实例保护且避免 POSIX 第二 FD 关闭问题. ModelStoreTest 32 项中 30 通过、2 项 Windows 符号链接权限限制跳过; Pref 适配 2 项通过. 真实测试包经下载/安装/选中/删除流程通过; 手机验收仍归 P6.8.
-- [ ] P6.3 下载器 (`codegen/store/ModelDownloader.kt`): 连接层复用 `FontDownloadSource` / `OkHttpFontDownloadSource` (D16), 事件 `ModelDownloadEvent` (`Queued` / `Progress(bytesDownloaded, totalBytes)` / `Success(installed)` / `Failure(error)` / `Cancelled`, 与 `FontDownloadEvent` 同形), `ModelDownloadSubscription.cancel()`. 流程:
+- [x] P6.3 下载器 (`codegen/store/ModelDownloader.kt`): 连接层复用 `FontDownloadSource` / `OkHttpFontDownloadSource` (D16), 事件 `ModelDownloadEvent` (`Queued` / `Progress(bytesDownloaded, totalBytes)` / `Success(installed)` / `Failure(error)` / `Cancelled`, 与 `FontDownloadEvent` 同形), `ModelDownloadSubscription.cancel()`. 流程:
   - 按 `urls` 顺序尝试镜像, 边下载边计算 sha256, 写入 `staging/`.
   - 超过目录声明的 `size` 立即中止. 结束后大小与 sha256 必须一致, 再交给 `ModelStore` 安装.
   - 取消或失败时删除临时文件.
   - 同一版本同时只有一个下载, 重复请求返回同一订阅.
 
-  进度事件至多每 100 ms 或每 1% 发送一次. 单测 `ModelDownloaderTest` (假源: 进度单调, 中途取消无残留, 超长中止, sha256 不符, 首个镜像失败后用第二个, 重复请求共享订阅).
+  进度事件至多每 100 ms 或每 1% 发送一次. 单测 `ModelDownloaderTest` (假源: 进度单调, 中途取消无残留, 超长中止, sha256 不符, 首个镜像失败后用第二个, 重复请求共享订阅). 证据 (E1/E2, 2026-10-04): ModelDownloader 复用 HTTP 连接层, 完成大小/完整 SHA 校验, 镜像重试、单调节流进度、共享订阅与取消清理. 网络访问前与持有目录锁的安装提交前都检查已验证目录, 撤回或元数据变化阻止安装; 实际包 manifest 逐字段匹配目录, 数值零按 Python/目录语义归一化. 14 项假源测试通过, 含并发共享、废弃状态更新、撤回、坏包摘要、伪造 URL、观察者异常和重入取消. ModelDownloadIntegrationTest 用真实公开 HTTPS/测试公钥/包读取器完成 23,633 B tiny 包安装、来源判定、选中与删除. Android 共用服务共享下载并在主线程投递事件; 此次无设备验收或发布.
 
 - [ ] P6.4 重复检测与版本对比 (`codegen/store/DuplicateCheck.kt`, `codegen/store/VersionComparison.kt`, 纯 Kotlin, D6): `DuplicateCheck.evaluate(incoming, registry)` 返回:
   - `None`: 无同 `modelId` 且无同 sha256, 直接安装.
