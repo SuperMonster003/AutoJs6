@@ -126,6 +126,7 @@
     <string name="key_client_mode_reconnect_on_network_change" translatable="false">key_$_client_mode_reconnect_on_network_change</string>
     <string name="key_client_mode_restore_on_launch" translatable="false">key_$_client_mode_restore_on_launch</string>
     <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
+    <string name="key_codegen_model_current" translatable="false">key_$_codegen_model_current</string>
     <string name="key_color_select_activity_legacy_layout" translatable="false">key_$_color_select_activity_legacy_layout</string>
     <string name="key_console_element_time_format" translatable="false">key_$_console_element_time_format</string>
     <string name="key_console_element_time_visible" translatable="false">key_$_console_element_time_visible</string>

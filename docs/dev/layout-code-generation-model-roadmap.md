@@ -231,14 +231,14 @@ py -3.12 tools/codegen-model-distribution/prepare_bootstrap.py --catalog codegen
   - `minHostVersionCode` 高于当前宿主的版本标为 "需要更新 AutoJs6", schema 不兼容的版本标为 "不兼容", 两者都不提供下载.
 
   debug 构建可经 `src/debug/` 覆盖目录地址与公钥, 指向 P5.4 的测试仓库; release 构建只认正式公钥. 单测 `ModelCatalogParserTest` (必填字段, 未知字段忽略, 非法 `modelId`), `ModelCatalogRepositoryTest` (假 fetcher: 回滚被拒, 同版本异内容被拒, 坏签名保留缓存, 24 h 内不联网, 离线用引导目录). 证据 (E1/E2, 2026-10-04): 在既有目录仓库基础上完成 ModelCatalogConfiguration 与 CodegenCatalogFactory; 正式 namespace/keyId/完整 SPKI 固定校验, release 变体与工厂双重要求正式配置. debug 默认正式源, 显式源码开关可选择已发布测试源; 目录缓存、模型根目录及当前选择 Pref 均隔离. 实际正式/测试签名资源验证通过, release 资源符号表仅含正式 key/bootstrap. 配置测试 7 项、debug 变体 2 项、release 变体 1 项通过; debug/release Kotlin 编译通过. UI 入口仍按后续条目接入.
-- [ ] P6.2 存储与登记表 (`codegen/store/ModelStore.kt`, D17): 布局 `noBackupFilesDir/codegen_models/<modelId>/<versionCode>-<sha8>/model.ajcgm` + `registry.json`. 登记项: `modelId`, `versionCode`, `versionName`, `sha256`, `size`, `featureSchemaVersion`, `source` (`OFFICIAL` / `CUSTOM`), `origin` (目录版本或导入文件名), `installedAt`, manifest 摘要 (附录 E.5 所需字段). 安装流程:
+- [x] P6.2 存储与登记表 (`codegen/store/ModelStore.kt`, D17): 布局 `noBackupFilesDir/codegen_models/<modelId>/<versionCode>-<sha8>/model.ajcgm` + `registry.json`. 登记项: `modelId`, `versionCode`, `versionName`, `sha256`, `size`, `featureSchemaVersion`, `source` (`OFFICIAL` / `CUSTOM`), `origin` (目录版本或导入文件名), `installedAt`, manifest 摘要 (附录 E.5 所需字段). 安装流程:
   1. 写入 `staging/` 临时文件.
   2. `ModelPackageReader` (P4.2) 校验.
   3. 判定来源: sha256 出现在任一已验证目录 (当前, 缓存, 引导) 中为 `OFFICIAL`, 否则为 `CUSTOM` (D15).
   4. 原子改名到目标目录.
   5. 在文件锁内以 "临时文件 + 改名" 更新登记表.
 
-  启动时对账: 删除没有目录的登记项, 删除不在登记表中的目录与残留的 `staging/`. 当前模型 Pref `key_codegen_model_current` (值 `modelId@versionCode-sha8`, 键名入 `strings_donottranslate.xml`). 删除当前版本后 Pref 置空 (视为 "未安装", 下次生成按 D4 提示). 单测 `ModelStoreTest`: 安装, 坏包被拒且无残留, 改名前中断后对账无登记项, 来源判定, 删除当前版本, 同一 `modelId` 的多版本并存.
+  启动时对账: 删除没有目录的登记项, 删除不在登记表中的目录与残留的 `staging/`. 当前模型 Pref `key_codegen_model_current` (值 `modelId@versionCode-sha8`, 键名入 `strings_donottranslate.xml`). 删除当前版本后 Pref 置空 (视为 "未安装", 下次生成按 D4 提示). 单测 `ModelStoreTest`: 安装, 坏包被拒且无残留, 改名前中断后对账无登记项, 来源判定, 删除当前版本, 同一 `modelId` 的多版本并存. 证据 (E1/E2, 2026-10-04): ModelStore 与 Android 路径/Pref 适配完成, 实际包读取器验证私有安装快照后再原子安装/登记. 多版本和同 versionCode 不同内容可并存; 完整 SHA 判同一内容, 实际 SHA8 碰撞回归确认拒绝覆盖. 当前选择以登记表日志协调 Pref 持久化, 包括 SharedPreferences 内存已变但落盘失败的恢复. 对账保留 catalog/debug 缓存, 坏 registry 停止清理, 活跃 staging 租约跨实例保护且避免 POSIX 第二 FD 关闭问题. ModelStoreTest 32 项中 30 通过、2 项 Windows 符号链接权限限制跳过; Pref 适配 2 项通过. 真实测试包经下载/安装/选中/删除流程通过; 手机验收仍归 P6.8.
 - [ ] P6.3 下载器 (`codegen/store/ModelDownloader.kt`): 连接层复用 `FontDownloadSource` / `OkHttpFontDownloadSource` (D16), 事件 `ModelDownloadEvent` (`Queued` / `Progress(bytesDownloaded, totalBytes)` / `Success(installed)` / `Failure(error)` / `Cancelled`, 与 `FontDownloadEvent` 同形), `ModelDownloadSubscription.cancel()`. 流程:
   - 按 `urls` 顺序尝试镜像, 边下载边计算 sha256, 写入 `staging/`.
   - 超过目录声明的 `size` 立即中止. 结束后大小与 sha256 必须一致, 再交给 `ModelStore` 安装.
