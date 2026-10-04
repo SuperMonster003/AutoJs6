@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/03",
+      "released_date": "2026/10/04",
       "feature": [
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",
         "OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas",
@@ -685,7 +685,9 @@
         "Los ajustes de cuentas de correo y el Centro de plugins reconocen el nuevo nombre y paquete de 3-Stamp Mail",
         "El Centro de complementos prioriza iconos monocromos transparentes para complementos independientes, sigue el tema claro u oscuro del anfitrión y mantiene compatibilidad con versiones anteriores",
         "Los iconos del catálogo oficial mantienen la misma fuente, tamaño y estilo antes y después de instalar, con tonos grises neutros",
-        "Integración con la nueva identidad de 3-Folio EPUB conservando las API epub y las acciones del administrador de archivos"
+        "Integración con la nueva identidad de 3-Folio EPUB conservando las API epub y las acciones del administrador de archivos",
+        "El asistente del centro de plugins usa las nuevas identidades de 3-Maple Image, 3-Stack Archive y 3-Hanzi CC, con una sola recomendación para ver y editar imágenes",
+        "El centro de plugins y su asistente admiten fondos circulares claros y oscuros independientes, con colores neutros fijos para la serie Three y el mismo diseño antes y después de instalar"
       ],
       "dependency": [
         "Android AXML modularizado",

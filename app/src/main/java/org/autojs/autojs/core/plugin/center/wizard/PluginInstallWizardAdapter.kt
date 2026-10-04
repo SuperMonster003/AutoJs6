@@ -213,6 +213,10 @@ class PluginInstallWizardAdapter(
         }
 
         private fun loadIcon(iconView: CircleImageView, item: PluginInstallWizardItem) {
+            iconView.circleBackgroundColor = org.autojs.autojs.core.plugin.center.PluginIconBackgroundPolicy.resolve(
+                item.packageName, org.autojs.autojs.util.ViewUtils.isNightModeEnabled, item.iconBackgroundColor,
+                item.nightIconBackgroundColor, item.installedIcon?.let(PluginInstalledIconResolver::backgroundForCurrentMode),
+            )
             item.installedIcon?.let { installedIcon ->
                 clearIcon()
                 iconView.setImageDrawable(PluginInstalledIconResolver.forCurrentMode(installedIcon))

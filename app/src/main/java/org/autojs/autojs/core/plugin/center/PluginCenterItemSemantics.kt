@@ -71,6 +71,8 @@ object PluginCenterItemSemantics {
                 && a.remoteIconUrl == b.remoteIconUrl
                 && a.remoteNightIconUrl == b.remoteNightIconUrl
                 && a.forceIgnoreLocalIcon == b.forceIgnoreLocalIcon
+                && a.iconBackgroundColor == b.iconBackgroundColor
+                && a.nightIconBackgroundColor == b.nightIconBackgroundColor
                 && a.iconSignature == b.iconSignature
     }
 

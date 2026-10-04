@@ -590,6 +590,8 @@ class PluginIndexRepository {
                 obj.put("iconUrl", entry.iconUrl?.toString())
                 obj.put("nightIconUrl", entry.nightIconUrl?.toString())
                 obj.put("forceIgnoreLocalIcon", entry.forceIgnoreLocalIcon)
+                obj.put("iconBackgroundColor", entry.iconBackgroundColor)
+                obj.put("nightIconBackgroundColor", entry.nightIconBackgroundColor)
                 obj.put("title", entry.title)
                 obj.put("description", entry.description)
                 obj.put("instructionHardCoded", entry.instructionHardCoded)
@@ -800,6 +802,8 @@ class PluginIndexRepository {
                 iconUrl = iconUrl,
                 nightIconUrl = nightIconUrl,
                 forceIgnoreLocalIcon = forceIgnoreLocalIcon,
+                iconBackgroundColor = PluginIconBackgroundPolicy.normalized(obj.optString("iconBackgroundColor")),
+                nightIconBackgroundColor = PluginIconBackgroundPolicy.normalized(obj.optString("nightIconBackgroundColor")),
                 title = title,
                 description = description,
                 instructionHardCoded = instructionHardCoded,

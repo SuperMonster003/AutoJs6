@@ -41,7 +41,8 @@ class PluginIndexCacheDeviceTest {
         val file = File.createTempFile("plugin-index-contract-", ".json", context.cacheDir)
         val entry = PluginIndexEntry(packageName = "example.plugin", title = "Example",
             iconUrl = Uri.parse("https://example.test/day-hash.png"),
-            nightIconUrl = Uri.parse("https://example.test/night-hash.png"), forceIgnoreLocalIcon = true)
+            nightIconUrl = Uri.parse("https://example.test/night-hash.png"), forceIgnoreLocalIcon = true,
+            iconBackgroundColor = "#e4b2ff", nightIconBackgroundColor = "transparent")
         val writer = PluginIndexRepository::class.java.getDeclaredMethod("writeCache",
             File::class.java, List::class.java, Set::class.java, String::class.java, Map::class.java)
             .apply { isAccessible = true }
@@ -54,6 +55,8 @@ class PluginIndexCacheDeviceTest {
             assertEquals(entry.iconUrl, restored.iconUrl)
             assertEquals(entry.nightIconUrl, restored.nightIconUrl)
             assertTrue(restored.forceIgnoreLocalIcon)
+            assertEquals(entry.iconBackgroundColor, restored.iconBackgroundColor)
+            assertEquals(entry.nightIconBackgroundColor, restored.nightIconBackgroundColor)
         } finally {
             AtomicFile(file).delete()
         }

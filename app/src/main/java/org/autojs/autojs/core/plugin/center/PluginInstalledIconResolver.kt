@@ -63,11 +63,29 @@ object PluginInstalledIconResolver {
         } else {
             nightSource.rasterizeForPluginCenter(context)
         }
-        return if (dayIcon === nightIcon) dayIcon else ThemedInstalledIcon(dayIcon, nightIcon)
+        return ThemedInstalledIcon(
+            dayIcon, nightIcon,
+            resolveBackground(packageContext, false), resolveBackground(packageContext, true),
+        )
     }
 
     /** Selects an already prepared raster without package loading or drawing on the UI thread. */
     fun forCurrentMode(icon: Drawable): Drawable = forNightMode(icon, ViewUtils.isNightModeEnabled)
+
+    fun backgroundForCurrentMode(icon: Drawable): Int? =
+        (icon as? ThemedInstalledIcon)?.background(ViewUtils.isNightModeEnabled)
+
+    private fun resolveBackground(packageContext: Context, night: Boolean): Int? {
+        val config = Configuration(packageContext.resources.configuration)
+        config.uiMode = (config.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+            if (night) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+        val themed = packageContext.createConfigurationContext(config)
+        return runCatching {
+            @Suppress("DiscouragedApi")
+            val id = themed.resources.getIdentifier("ic_plugin_center_background", "color", packageContext.packageName)
+            if (id == 0) null else themed.getColor(id)
+        }.getOrNull()
+    }
 
     internal fun forNightMode(icon: Drawable, nightModeEnabled: Boolean): Drawable =
         (icon as? ThemedInstalledIcon)?.forNightMode(nightModeEnabled) ?: icon
@@ -115,7 +133,10 @@ object PluginInstalledIconResolver {
     private class ThemedInstalledIcon(
         private val dayIcon: Drawable,
         private val nightIcon: Drawable,
+        private val dayBackground: Int? = null,
+        private val nightBackground: Int? = null,
     ) : DrawableWrapper(if (ViewUtils.isNightModeEnabled) nightIcon else dayIcon) {
         fun forNightMode(nightModeEnabled: Boolean): Drawable = if (nightModeEnabled) nightIcon else dayIcon
+        fun background(night: Boolean): Int? = if (night) nightBackground else dayBackground
     }
 }

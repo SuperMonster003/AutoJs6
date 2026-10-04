@@ -168,7 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/10/03
+###### 2026/10/04
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
@@ -850,6 +850,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` El Centro de complementos prioriza iconos monocromos transparentes para complementos independientes, sigue el tema claro u oscuro del anfitrión y mantiene compatibilidad con versiones anteriores
 * `Mejora` Los iconos del catálogo oficial mantienen la misma fuente, tamaño y estilo antes y después de instalar, con tonos grises neutros
 * `Mejora` Integración con la nueva identidad de 3-Folio EPUB conservando las API epub y las acciones del administrador de archivos
+* `Mejora` El asistente del centro de plugins usa las nuevas identidades de 3-Maple Image, 3-Stack Archive y 3-Hanzi CC, con una sola recomendación para ver y editar imágenes
+* `Mejora` El centro de plugins y su asistente admiten fondos circulares claros y oscuros independientes, con colores neutros fijos para la serie Three y el mismo diseño antes y después de instalar
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

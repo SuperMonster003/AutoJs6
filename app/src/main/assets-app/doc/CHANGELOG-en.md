@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/03
+###### 2026/10/04
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
@@ -688,6 +688,8 @@
 * `Improvement` Plugin Center prefers dedicated transparent monochrome icons for standalone plugins, follows the host light or dark theme, and retains fallback support for older plugin versions
 * `Improvement` Official catalog icons keep the same source and appearance before and after installation, including neutral grayscale artwork
 * `Improvement` EPUB integration uses the new 3-Folio EPUB installation identity while preserving the existing epub API and file-manager actions
+* `Improvement` Plugin Center setup tracks the new installation identities of 3-Maple Image, 3-Stack Archive and 3-Hanzi CC, combining image viewing and editing into one recommended item
+* `Improvement` Plugin Center and setup support separate light and dark circular icon backgrounds, with fixed neutral colors for the Three series and consistent catalog artwork and backgrounds before and after installation
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

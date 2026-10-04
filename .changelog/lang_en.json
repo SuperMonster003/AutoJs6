@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/03",
+      "released_date": "2026/10/04",
       "feature": [
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
         "Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates",
@@ -685,7 +685,9 @@
         "Mail account settings and Plugin Center now recognize 3-Stamp Mail under its new package name",
         "Plugin Center prefers dedicated transparent monochrome icons for standalone plugins, follows the host light or dark theme, and retains fallback support for older plugin versions",
         "Official catalog icons keep the same source and appearance before and after installation, including neutral grayscale artwork",
-        "EPUB integration uses the new 3-Folio EPUB installation identity while preserving the existing epub API and file-manager actions"
+        "EPUB integration uses the new 3-Folio EPUB installation identity while preserving the existing epub API and file-manager actions",
+        "Plugin Center setup tracks the new installation identities of 3-Maple Image, 3-Stack Archive and 3-Hanzi CC, combining image viewing and editing into one recommended item",
+        "Plugin Center and setup support separate light and dark circular icon backgrounds, with fixed neutral colors for the Three series and consistent catalog artwork and backgrounds before and after installation"
       ],
       "dependency": [
         "Modularized Android AXML",

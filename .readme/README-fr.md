@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/10/03
+###### 2026/10/04
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
 * `Fonctionnalité` La fonction "Générer du code" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition
@@ -850,6 +850,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Le Centre de plugins privilégie les icônes monochromes transparentes des plugins autonomes, suit le thème clair ou sombre de l'hôte et reste compatible avec les anciennes versions
 * `Amélioration` Les icônes du catalogue officiel gardent la même source, taille et apparence avant et après installation, avec prise en charge des gris neutres
 * `Amélioration` Intégration de la nouvelle identité de 3-Folio EPUB en conservant les API epub et les actions du gestionnaire de fichiers
+* `Amélioration` L'assistant du centre de plugins utilise les nouvelles identités de 3-Maple Image, 3-Stack Archive et 3-Hanzi CC, en réunissant la lecture et la retouche d'images dans une seule recommandation
+* `Amélioration` Le centre de plugins et son assistant affichent des fonds circulaires clairs et sombres distincts, avec des couleurs neutres fixes pour la série Three et un rendu identique avant et après installation
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

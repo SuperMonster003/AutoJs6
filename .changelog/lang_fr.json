@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/03",
+      "released_date": "2026/10/04",
       "feature": [
         "La fonction \"Générer du code\" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition",
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
@@ -685,7 +685,9 @@
         "Les paramètres des comptes de courrier et le Centre de plugins reconnaissent le nouveau nom et le paquet de 3-Stamp Mail",
         "Le Centre de plugins privilégie les icônes monochromes transparentes des plugins autonomes, suit le thème clair ou sombre de l'hôte et reste compatible avec les anciennes versions",
         "Les icônes du catalogue officiel gardent la même source, taille et apparence avant et après installation, avec prise en charge des gris neutres",
-        "Intégration de la nouvelle identité de 3-Folio EPUB en conservant les API epub et les actions du gestionnaire de fichiers"
+        "Intégration de la nouvelle identité de 3-Folio EPUB en conservant les API epub et les actions du gestionnaire de fichiers",
+        "L'assistant du centre de plugins utilise les nouvelles identités de 3-Maple Image, 3-Stack Archive et 3-Hanzi CC, en réunissant la lecture et la retouche d'images dans une seule recommandation",
+        "Le centre de plugins et son assistant affichent des fonds circulaires clairs et sombres distincts, avec des couleurs neutres fixes pour la série Three et un rendu identique avant et après installation"
       ],
       "dependency": [
         "Android AXML modularise",

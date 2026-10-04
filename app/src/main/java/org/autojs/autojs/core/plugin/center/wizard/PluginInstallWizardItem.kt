@@ -26,6 +26,8 @@ data class PluginInstallWizardItem(
     val isNativeAlignmentMismatch: Boolean = false,
     /** Icon of the installed package, prepared off the UI thread; null when not installed. */
     val installedIcon: Drawable? = null,
+    val iconBackgroundColor: String? = null,
+    val nightIconBackgroundColor: String? = null,
 ) {
 
     val hasInstallableApk: Boolean
