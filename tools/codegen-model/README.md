@@ -24,6 +24,11 @@ The maintainer subsequently supplied the production signing material and complet
 [P5.4 remote release acceptance](reports/p5-release-acceptance-2026.10-1.md): 63 CI tests,
 published assets, independent signature/package readback and anonymous public downloads passed.
 
+The [P6.1-P6.4 backend report](reports/p6-store-download-2026.10-1.md) records production/debug
+trust and storage isolation, atomic model installation, cancellable downloads, duplicate/version
+comparison, and a real public download through the Kotlin pipeline. Management and generation
+UI integration remain subsequent roadmap items.
+
 ## Build and prepare
 
 From the repository root, build the controlled View application:
