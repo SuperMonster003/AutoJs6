@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/03
+###### 2026/10/04
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Hint` Compose UI and its API reference, Ace Editor type completion and Offline Docs content are delivered as a local integration requiring a matching local host build; the plugin is not listed in the official index or formally released
@@ -271,6 +271,7 @@
 * `Feature` Selector methods minDepth / maxDepth / minIndexInParent / maxIndexInParent (inclusive, like minChildCount / maxChildCount), also usable in the selector string syntax (such as minDepth=3)
 * `Feature` Selector mode in the layout inspector search bar: once the mode toggle reaches "$()", type a chained selector expression as in a script (such as text("OK").clickable().depth(3) or textMatch(/ok|cancel/i); the selector() / $() prefix is optional) and its string / number / boolean / regex literals land on the selector registry with script semantics; a half-typed expression shows "Expression not finished" instead of an error, syntax errors show the position, the call and candidate method names, and "Copy as selector" outputs the normalized expression
 * `Feature` Layout Inspector "Generate code" supports single-widget/collection scopes, waiting until found/waiting with a timeout/immediate checks, action receivers and text parameters, Classic/Flow styles, alternative plans and location explanations, with matching widgets previewable in the layout
+* `Feature` TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes
 * `Fix` Packaged UI scripts occasionally displaying a blank page and exiting during startup
 * `Fix` Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button

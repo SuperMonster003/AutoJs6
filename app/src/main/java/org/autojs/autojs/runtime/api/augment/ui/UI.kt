@@ -92,6 +92,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
     override val keys = listOf(AugmentableKey("ui"))
 
+    override val scriptErrorPassThroughFunctions = setOf(::__autojs6Tsx.name, ::layout.name)
+
     private val mProperties = ConcurrentHashMap<String, Any>()
 
     private val mWidgetConstructor = object : BaseFunction() {
@@ -384,6 +386,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ): Any = TypeScriptTsxRuntime.create(
             args,
             TypeScriptTsxRuntime.messageResolver(globalContext),
+            scriptRuntime.composeForTsx(),
         )
 
         @JvmStatic
@@ -526,6 +529,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 val tsxLayout = TypeScriptTsxRuntime.renderOrNull(
                     xml,
                     TypeScriptTsxRuntime.messageResolver(globalContext),
+                    scriptRuntime.composeForTsx(),
                 )
                 val inflated = scriptRuntime.ui.layoutInflater.inflate(
                     tsxLayout?.xml ?: toXMLString(xml),

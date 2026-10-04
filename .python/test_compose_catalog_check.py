@@ -138,6 +138,32 @@ class CatalogGateTest(unittest.TestCase):
         self.assertIn("NOT been checked", output)
         self.assertEqual(tool.render_dts(self.catalog), (output_dir / "compose-catalog.fragment.d.ts").read_text(encoding="utf-8"))
         self.assertEqual(tool.render_docs(self.catalog), (output_dir / "compose-catalog.fragment.md").read_text(encoding="utf-8"))
+        self.assertEqual(tool.render_jsx(self.catalog), (output_dir / "compose-jsx.fragment.d.ts").read_text(encoding="utf-8"))
+
+    def test_jsx_map_uses_exact_node_props_without_changing_global_element_or_legacy_tags(self):
+        text = tool.render_jsx(self.catalog)
+        self.assertIn('"compose:Switch": Internal.ComposeProps<"Switch">;', text)
+        self.assertIn('"compose:Spacer": Internal.ComposeProps<"Spacer">;', text)
+        self.assertNotIn('"compose:Snackbar"', text)
+        self.assertNotIn('type Element', text)
+        self.assertNotIn('interface Element ', text)
+        self.assertNotIn('any', text)
+        self.assertNotIn('[name:', text)
+        self.assertNotIn('"text":', text)
+
+    def test_jsx_check_is_required_when_requested_and_rejects_widening_or_missing_tags(self):
+        jsx = self.root / "jsx.d.ts"
+        def check_jsx():
+            return self.run_cli("check", "--catalog", str(self.catalog_file), "--dts", str(self.dts),
+                                "--docs", str(self.docs), "--jsx", str(jsx))
+        self.assertEqual(1, check_jsx()[0])
+        expected = tool.render_jsx(self.catalog)
+        jsx.write_text("// Legacy declarations remain outside this generated region.\n" + expected, encoding="utf-8")
+        self.assertEqual(0, check_jsx()[0])
+        jsx.write_text(expected.replace('Internal.ComposeProps<"Switch">', 'any'), encoding="utf-8")
+        self.assertEqual(1, check_jsx()[0])
+        jsx.write_text(expected.replace('        "compose:Spacer": Internal.ComposeProps<"Spacer">;\n', ''), encoding="utf-8")
+        self.assertEqual(1, check_jsx()[0])
 
     def test_crlf_outputs_are_portable_but_catalog_type_corruption_is_not_accepted(self):
         self.dts.write_bytes(tool.render_dts(self.catalog).replace("\n", "\r\n").encode("utf-8"))

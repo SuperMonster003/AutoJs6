@@ -106,7 +106,7 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
             val render = owner.reactive.reaction {
                 try {
                     root = owner.graph.render(root) {
-                        owner.graph.node(owner.call(source)) ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+                        owner.graph.root(owner.call(source)) ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
                             "render must return one ComposeNode")
                     }
                 } catch (failure: Throwable) {

@@ -306,6 +306,8 @@ class ScriptRuntime private constructor(builder: Builder) {
     private val terminal: TerminalService
     private var compose: Compose? = null
 
+    internal fun composeForTsx(): Compose = checkNotNull(compose)
+
     @JvmField
     @ScriptVariable
     val device: ApiDevice

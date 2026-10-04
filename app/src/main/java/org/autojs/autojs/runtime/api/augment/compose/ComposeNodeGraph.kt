@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.compose
 
 import org.autojs.plugin.compose.api.*
+import org.autojs.autojs.runtime.api.augment.ui.TypeScriptTsxFragment
 import org.autojs.plugin.compose.api.ComposeUiComponents as C
 import org.autojs.plugin.compose.api.ComposeUiEventFields as F
 import org.autojs.plugin.compose.api.ComposeUiEvents as E
@@ -25,6 +26,7 @@ class ComposeNodeGraph(
     val translateError: (Throwable) -> RuntimeException = { it as? RuntimeException ?: RuntimeException(it) },
     private val warn: (String) -> Unit = {},
 ) : AutoCloseable {
+    internal val tsxOwner = Any()
     private val catalog = ComponentCatalog.V1
     private val roots = IdentityHashMap<ComposeNodeBinding, ComposeNode>()
     private val accepted = IdentityHashMap<ComposeNodeBinding, ComposeNodeSnapshot>()
@@ -51,6 +53,17 @@ class ComposeNodeGraph(
         is ComposeNode -> raw.takeIf { it.graph === this }
         is ComposeNodeNativeObject -> raw.node.takeIf { it.graph === this }
         else -> null
+    }
+
+    internal fun root(value: Any?): ComposeNode? {
+        val raw = ComposeScriptValues.unwrap(value)
+        if (raw is TypeScriptTsxFragment) return transaction {
+            val expanded = children(raw)
+            if (expanded.size != 1) fail(ComposeUiErrorCodes.INVALID_ARGUMENT)
+            expanded.single()
+        }
+        if ((raw is ComposeNode || raw is ComposeNodeNativeObject) && node(raw) == null) fail(ComposeUiErrorCodes.NODE_DETACHED)
+        return node(raw)
     }
 
     fun create(type: String, props: Any? = null, children: Any? = null): ComposeNode = transaction {
@@ -561,13 +574,20 @@ class ComposeNodeGraph(
     private fun children(raw: Any?): List<ComposeNode> {
         val output = ArrayList<ComposeNode>()
         val arrays = Collections.newSetFromMap(IdentityHashMap<Any, Boolean>())
+        var entries = 0
         fun visit(raw: Any?, depth: Int) {
-            if (depth > ComposeUiLimits.MAX_DEPTH) fail(ComposeUiErrorCodes.LIMIT_EXCEEDED)
+            if (++entries > TypeScriptTsxFragment.MAX_INPUT_ENTRIES || depth > ComposeUiLimits.MAX_DEPTH) fail(ComposeUiErrorCodes.LIMIT_EXCEEDED)
             val value = ComposeScriptValues.unwrap(raw)
             when {
                 ComposeScriptValues.isNullish(value) || value == false -> Unit
                 node(value) != null -> output += node(value)!!
                 value is ComposeNode || value is ComposeNodeNativeObject -> fail(ComposeUiErrorCodes.NODE_DETACHED)
+                value is TypeScriptTsxFragment -> {
+                    if (value.owner !== tsxOwner) fail(ComposeUiErrorCodes.NODE_DETACHED)
+                    entries += value.cost - value.values.size - 1
+                    if (entries > TypeScriptTsxFragment.MAX_INPUT_ENTRIES || depth + value.depth > ComposeUiLimits.MAX_DEPTH) fail(ComposeUiErrorCodes.LIMIT_EXCEEDED)
+                    value.values.forEach { visit(it, depth + 1) }
+                }
                 value is CharSequence -> output += create(C.TEXT, mapOf(P.TEXT to value.toString()))
                 ComposeScriptValues.isArray(value) -> {
                     if (!arrays.add(value!!)) fail(ComposeUiErrorCodes.INVALID_ARGUMENT)

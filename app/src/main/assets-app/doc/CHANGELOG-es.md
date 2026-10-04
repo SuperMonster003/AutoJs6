@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/03
+###### 2026/10/04
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Sugerencia` Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente
@@ -271,6 +271,7 @@
 * `Nuevo` "Copiar como selector" en el análisis de diseño: toque "Copiar como selector" en el diálogo de resultados o mantenga pulsado el contador para copiar al portapapeles la palabra clave (como llamada Contains / Match de la propiedad text / desc / id / className acertada por la coincidencia actual), las condiciones de campo, el perfil de filtro y la región seleccionada como un selector de script encadenado; las condiciones que no pueden expresarse se añaden como comentarios
 * `Nuevo` Métodos de selector minDepth / maxDepth / minIndexInParent / maxIndexInParent (inclusivos, como minChildCount / maxChildCount), utilizables también en la sintaxis de cadena de los selectores (por ejemplo minDepth=3)
 * `Nuevo` Modo selector en la barra de búsqueda del análisis de diseño: cuando el conmutador de modo llega a "$()", escriba una expresión de selector encadenada como en un script (por ejemplo text("OK").clickable().depth(3) o textMatch(/ok|cancelar/i); el prefijo selector() / $() es opcional); sus literales de cadena / número / booleano / regex llegan al registro de selectores con la semántica de los scripts, una expresión a medio escribir muestra "Expresión sin terminar" en lugar de un error, los errores de sintaxis muestran la posición, la llamada y los nombres de método candidatos, y "Copiar como selector" produce la expresión normalizada
+* `Nuevo` TSX admite `<compose.Column>`, `<compose:Text>`, referencias a fábricas de nodos, fragmentos, slots y callbacks reactivos; un mismo árbol no puede mezclar Compose y nodos XML existentes
 * `Corrección` Los scripts UI empaquetados que a veces mostraban una página en blanco y se cerraban al iniciarse
 * `Corrección` Compose UI rechaza volver a montar páginas o ventanas flotantes dentro del callback de renderizado y conserva la página actual; permite volver a montar páginas después de actualizar el plugin
 * `Corrección` Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información

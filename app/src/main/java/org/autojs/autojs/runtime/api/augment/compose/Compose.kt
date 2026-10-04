@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
+import org.autojs.autojs.runtime.api.augment.ui.TypeScriptTsxFragment
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
@@ -15,6 +16,7 @@ import org.mozilla.javascript.Function
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Supplier
+import java.util.IdentityHashMap
 
 /** Catalog-derived script entry. The host owns handles/functions; only V1 data reaches the APK. */
 class Compose internal constructor(
@@ -35,6 +37,7 @@ class Compose internal constructor(
     private var nextSessionId = 1L
     private var defaultTheme: ThemeSpec? = null
     private var defaultThemeInput: Map<String, Any?> = emptyMap()
+    private val tsxFactories = IdentityHashMap<Function, String>()
 
     init { ComposeJsErrors.installLocalizer(scope, platform::errorMessage) }
 
@@ -71,16 +74,31 @@ class Compose internal constructor(
         functions.map { (name, action) ->
             name to RhinoUtils.newBaseFunction(scope, name, { args ->
                 if (name == "post") guardError { action(args) } else guarded { action(args) }
-            }, RhinoUtils.NOT_CONSTRUCTABLE)
+            }, RhinoUtils.NOT_CONSTRUCTABLE).also { function ->
+                if (ComponentCatalog.V1.component(name)?.invocation == ComponentInvocation.NODE) tsxFactories[function] = name
+            }
         } + ("ComposeError" to ComposeJsErrors.constructor(scope))
     }
 
     override fun invoke(vararg args: Any?): Any? = guarded { mount(args).js }
 
+    internal fun isTsxType(type: Any?): Boolean = type is Function ||
+        type is String && (type.startsWith("compose:") || ComponentCatalog.V1.component(type) != null)
+
+    internal fun createTsx(type: Any?, props: Any?, children: List<Any?>): Any = guarded {
+        val name = when (type) {
+            is String -> type.removePrefix("compose:")
+            is Function -> tsxFactories[type] ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
+            else -> throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
+        }
+        graph.create(name, props, children.takeIf { it.isNotEmpty() }).js
+    }
+
     private fun create(type: String, args: Array<out Any?>): ComposeNode {
         val first = args.firstOrNull()
         val isProps = composeNullish(first) || first is Map<*, *> ||
-            first is Scriptable && first !is NativeArray && first !is Function && graph.node(first) == null
+            first is Scriptable && first !is NativeArray && first !is Function && graph.node(first) == null &&
+            ComposeScriptValues.unwrap(first) !is TypeScriptTsxFragment
         val props = if (isProps) first else null
         val children = if (isProps) args.drop(1) else args.toList()
         return graph.create(type, props, children.takeIf { it.isNotEmpty() })
@@ -100,8 +118,8 @@ class Compose internal constructor(
         if (live.count { !it.isClosed } - previousUi.size >= ComposeUiLimits.MAX_SESSIONS_PER_ENGINE || nextSessionId > Int.MAX_VALUE) {
             throw ComposeUiContractException(ComposeUiErrorCodes.LIMIT_EXCEEDED)
         }
-        val source = args[0]
-        if (source !is Function && graph.node(source) == null) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, "mount requires a node or render function")
+        val source = args[0].let { value -> if (value is Function) value else graph.root(value)
+            ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, "mount requires a node or render function") }
         val theme = options["theme"]?.let(values::theme) ?: defaultTheme
         val session = ComposeScriptSession(this, (nextSessionId++).toInt(), theme, floatingOptions, previousUi.firstOrNull())
         try {

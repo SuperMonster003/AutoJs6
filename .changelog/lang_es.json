@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/03",
+      "released_date": "2026/10/04",
       "feature": [
         "API de scripts compose / $compose con 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, actualizaciones agrupadas, tareas encoladas, temas y comandos de sesión Snackbar (requiere el complemento Compose UI)",
         "compose.mount aloja páginas UI; compose.floaty admite scripts con o sin UI, ventanas raw o redimensionables, posición/tamaño en píxeles, controles táctiles/de foco y actualizaciones de trabajadores mediante compose.post, con limpieza de las sesiones al cerrar o terminar el script",
@@ -263,7 +263,8 @@
         "Modo campo en la barra de búsqueda del análisis de diseño: toque el conmutador de modo (Aa / k=v) para introducir varias condiciones con la sintaxis de cadena de los selectores de script (por ejemplo text=OK clickable, id~=btn_.*, !enabled, minDepth=3); mientras el campo tiene el foco se muestra una guía rápida de la sintaxis, los errores de sintaxis muestran la posición, el término y los nombres candidatos en una franja de ayuda, y el modo de consulta se recuerda entre sesiones",
         "\"Copiar como selector\" en el análisis de diseño: toque \"Copiar como selector\" en el diálogo de resultados o mantenga pulsado el contador para copiar al portapapeles la palabra clave (como llamada Contains / Match de la propiedad text / desc / id / className acertada por la coincidencia actual), las condiciones de campo, el perfil de filtro y la región seleccionada como un selector de script encadenado; las condiciones que no pueden expresarse se añaden como comentarios",
         "Métodos de selector minDepth / maxDepth / minIndexInParent / maxIndexInParent (inclusivos, como minChildCount / maxChildCount), utilizables también en la sintaxis de cadena de los selectores (por ejemplo minDepth=3)",
-        "Modo selector en la barra de búsqueda del análisis de diseño: cuando el conmutador de modo llega a \"$()\", escriba una expresión de selector encadenada como en un script (por ejemplo text(\"OK\").clickable().depth(3) o textMatch(/ok|cancelar/i); el prefijo selector() / $() es opcional); sus literales de cadena / número / booleano / regex llegan al registro de selectores con la semántica de los scripts, una expresión a medio escribir muestra \"Expresión sin terminar\" en lugar de un error, los errores de sintaxis muestran la posición, la llamada y los nombres de método candidatos, y \"Copiar como selector\" produce la expresión normalizada"
+        "Modo selector en la barra de búsqueda del análisis de diseño: cuando el conmutador de modo llega a \"$()\", escriba una expresión de selector encadenada como en un script (por ejemplo text(\"OK\").clickable().depth(3) o textMatch(/ok|cancelar/i); el prefijo selector() / $() es opcional); sus literales de cadena / número / booleano / regex llegan al registro de selectores con la semántica de los scripts, una expresión a medio escribir muestra \"Expresión sin terminar\" en lugar de un error, los errores de sintaxis muestran la posición, la llamada y los nombres de método candidatos, y \"Copiar como selector\" produce la expresión normalizada",
+        "TSX admite `<compose.Column>`, `<compose:Text>`, referencias a fábricas de nodos, fragmentos, slots y callbacks reactivos; un mismo árbol no puede mezclar Compose y nodos XML existentes"
       ],
       "fix": [
         "Los scripts UI empaquetados que a veces mostraban una página en blanco y se cerraban al iniciarse",

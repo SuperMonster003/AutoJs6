@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/03
+###### 2026/10/04
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
 * `Astuce` Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement
@@ -271,6 +271,7 @@
 * `Fonctionnalité` « Copier comme sélecteur » dans l'analyse de mise en page : touchez « Copier comme sélecteur » dans la boîte de dialogue des résultats ou appuyez longuement sur le compteur pour placer dans le presse-papiers le mot-clé (sous forme d'appel Contains / Match de la propriété text / desc / id / className touchée par la correspondance courante), les conditions de champ, le profil de filtrage et la zone sélectionnée en tant que sélecteur de script chaîné ; les conditions inexprimables sont ajoutées en commentaires
 * `Fonctionnalité` Méthodes de sélecteur minDepth / maxDepth / minIndexInParent / maxIndexInParent (bornes incluses, comme minChildCount / maxChildCount), également utilisables dans la syntaxe de chaîne des sélecteurs (par exemple minDepth=3)
 * `Fonctionnalité` Mode sélecteur dans la barre de recherche de l'analyse de mise en page : une fois le sélecteur de mode sur « $() », saisissez une expression de sélecteur chaînée comme dans un script (par exemple text("OK").clickable().depth(3) ou textMatch(/ok|annuler/i) ; le préfixe selector() / $() est facultatif) ; ses littéraux chaîne / nombre / booléen / regex atteignent le registre des sélecteurs avec la sémantique des scripts, une expression à moitié saisie affiche « Expression inachevée » au lieu d'une erreur, les erreurs de syntaxe affichent la position, l'appel et les noms de méthode candidats, et « Copier comme sélecteur » produit l'expression normalisée
+* `Fonctionnalité` TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML
 * `Correction` La fermeture occasionnelle des scripts UI empaquetés après l'affichage d'une page vide au démarrage
 * `Correction` Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin
 * `Correction` Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans "Copier en tant que sélecteur" de l'inspecteur de disposition et la représentation textuelle des sélecteurs

@@ -7,8 +7,12 @@ import org.autojs.autojs6.R
 import org.autojs.autojs.core.ui.JsViewHelper
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.augment.compose.Compose
+import org.autojs.autojs.runtime.api.augment.compose.ComposeNode
+import org.autojs.autojs.runtime.api.augment.compose.ComposeNodeNativeObject
+import org.autojs.plugin.compose.api.ComposeUiContractException
+import org.autojs.plugin.compose.api.ComposeUiErrorCodes
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
@@ -68,12 +72,19 @@ internal object TypeScriptTsxRuntime {
         val listener: Callable,
     )
 
-    fun create(args: Array<out Any?>, messages: MessageResolver): Value {
+    fun create(args: Array<out Any?>, messages: MessageResolver, compose: Compose? = null): Any = composeBoundary(compose) {
         require(args.size >= 2) {
             messages.text(R.string.error_typescript_tsx_factory_arguments)
         }
-        val rawType = args[0].jsUnwrapped()
+        val rawType = unwrapTsxValue(args[0])
         val isFragment = rawType === FragmentToken
+        if (isFragment) {
+            parseProps(args[1], true, messages)
+            return@composeBoundary TypeScriptTsxFragment.create(compose?.graph?.tsxOwner, args.drop(2))
+        }
+        if (compose?.isTsxType(rawType) == true) {
+            return@composeBoundary compose.createTsx(rawType, args[1], args.drop(2))
+        }
         val tagName = when {
             isFragment -> null
             rawType is String && TAG_NAME.matches(rawType) -> rawType
@@ -86,8 +97,8 @@ internal object TypeScriptTsxRuntime {
         }
         val parsedProps = parseProps(args[1], isFragment, messages)
         val children = ArrayList<Child>()
-        args.drop(2).forEach { child -> appendChild(child, children, 0, messages) }
-        return Value(
+        args.drop(2).forEach { child -> appendChild(child, children, 0, messages, compose?.graph?.tsxOwner) }
+        Value(
             tagName = tagName,
             attributes = parsedProps.first,
             onClick = parsedProps.second,
@@ -95,10 +106,22 @@ internal object TypeScriptTsxRuntime {
         )
     }
 
-    fun renderOrNull(value: Any?, messages: MessageResolver): RenderedLayout? {
-        val root = value.jsUnwrapped() as? Value ?: return null
+    fun renderOrNull(value: Any?, messages: MessageResolver, compose: Compose? = null): RenderedLayout? = composeBoundary(compose) {
+        val raw = unwrapTsxValue(value)
+        rejectComposeNode(raw)
+        if (raw !is Value && raw !is TypeScriptTsxFragment) return@composeBoundary null
         val roots = ArrayList<Value>()
-        flattenRoot(root, roots, 0, messages)
+        if (raw is Value) flattenRoot(raw, roots, 0, messages)
+        else {
+            val children = ArrayList<Child>()
+            appendChild(raw, children, 0, messages, compose?.graph?.tsxOwner)
+            children.forEach { child -> when (child) {
+                is Child.Element -> flattenRoot(child.value, roots, 0, messages)
+                is Child.Text -> require(child.value.isBlank()) {
+                    messages.text(R.string.error_typescript_tsx_root_fragment_text)
+                }
+            } }
+        }
         require(roots.size == 1) {
             messages.text(R.string.error_typescript_tsx_root_count)
         }
@@ -111,7 +134,19 @@ internal object TypeScriptTsxRuntime {
         require(xml.toByteArray(Charsets.UTF_8).size <= MAXIMUM_XML_BYTES) {
             messages.text(R.string.error_typescript_tsx_layout_xml_limit)
         }
-        return RenderedLayout(xml, bindings.toList(), messages)
+        RenderedLayout(xml, bindings.toList(), messages)
+    }
+
+    private fun <T> composeBoundary(compose: Compose?, action: () -> T): T = try { action() }
+    catch (failure: ComposeUiContractException) {
+        if (compose == null) throw failure
+        compose.guardError { throw failure }
+    }
+
+    private fun rejectComposeNode(value: Any?) {
+        if (value is ComposeNode || value is ComposeNodeNativeObject) {
+            throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
+        }
     }
 
     private fun parseProps(
@@ -161,7 +196,7 @@ internal object TypeScriptTsxRuntime {
         name: String,
         messages: MessageResolver,
     ): String {
-        val unwrapped = value.jsUnwrapped()
+        val unwrapped = unwrapTsxValue(value)
         require(!unwrapped.isJsNullish()) {
             messages.text(R.string.error_typescript_tsx_attribute_nullish, name)
         }
@@ -185,13 +220,25 @@ internal object TypeScriptTsxRuntime {
         destination: MutableList<Child>,
         depth: Int,
         messages: MessageResolver,
+        owner: Any? = null,
     ) {
         require(depth <= MAXIMUM_ARRAY_DEPTH) {
             messages.text(R.string.error_typescript_tsx_child_arrays_too_deep)
         }
-        val unwrapped = value.jsUnwrapped()
+        val unwrapped = unwrapTsxValue(value)
+        rejectComposeNode(unwrapped)
         when {
             unwrapped.isJsNullish() || unwrapped is Boolean -> Unit
+            unwrapped is TypeScriptTsxFragment -> {
+                if (unwrapped.owner !== owner) throw ComposeUiContractException(ComposeUiErrorCodes.NODE_DETACHED)
+                require(depth + unwrapped.arrayDepth <= MAXIMUM_ARRAY_DEPTH) {
+                    messages.text(R.string.error_typescript_tsx_child_arrays_too_deep)
+                }
+                require(unwrapped.largestArray <= MAXIMUM_CHILDREN_PER_ARRAY) {
+                    messages.text(R.string.error_typescript_tsx_child_array_too_large)
+                }
+                unwrapped.values.forEach { appendChild(it, destination, depth, messages, owner) }
+            }
             unwrapped is Value -> {
                 if (unwrapped.tagName == null) {
                     unwrapped.children.forEach { child -> appendNormalizedChild(child, destination) }
@@ -204,8 +251,17 @@ internal object TypeScriptTsxRuntime {
                     messages.text(R.string.error_typescript_tsx_child_array_too_large)
                 }
                 for (index in 0 until unwrapped.length) {
-                    appendChild(unwrapped[index], destination, depth + 1, messages)
+                    appendChild(unwrapped[index], destination, depth + 1, messages, owner)
                 }
+            }
+            unwrapped is List<*> || unwrapped is Array<*> -> {
+                // The former generic unwrapper normalized Java collections into NativeArray.
+                // Preserve that XML behavior explicitly while retaining branded Scriptable values.
+                val values = if (unwrapped is List<*>) unwrapped else (unwrapped as Array<*>).asList()
+                require(values.size <= MAXIMUM_CHILDREN_PER_ARRAY) {
+                    messages.text(R.string.error_typescript_tsx_child_array_too_large)
+                }
+                values.forEach { appendChild(it, destination, depth + 1, messages, owner) }
             }
             unwrapped is String -> {
                 requireValidXmlText(unwrapped, messages)

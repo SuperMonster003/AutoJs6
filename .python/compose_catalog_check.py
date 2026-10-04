@@ -9,7 +9,10 @@
    and use ComposeCatalogProps in the public element factory signatures. Handwritten API methods,
    input conversion helper definitions and cross-property rules remain outside this inventory gate.
 4. Check the delivered files against a fresh export:
-   py .python/compose_catalog_check.py check --dts <aj6-int-compose.d.ts> --docs <api/composeComponents.md>
+   py .python/compose_catalog_check.py check --dts <aj6-int-compose.d.ts> --docs <api/composeComponents.md> --jsx <aj6-jsx-element-extension.d.ts>
+
+The separate JSX region maps only NODE entries to compose:Name intrinsic tags. It does not redefine
+legacy XML intrinsic attributes, JSX.Element, or the ordinary Compose factory signatures.
 
 Generate is not a successful consistency check. Check fails for missing files or markers, including
 before P6 has been delivered. No Kotlin, TypeScript or Markdown source is parsed with heuristics:
@@ -35,6 +38,8 @@ DTS_START = "// <autojs6-compose-catalog:v1>"
 DTS_END = "// </autojs6-compose-catalog:v1>"
 DOC_START = "<!-- autojs6-compose-catalog:v1:start -->"
 DOC_END = "<!-- autojs6-compose-catalog:v1:end -->"
+JSX_START = "// <autojs6-compose-jsx:v1>"
+JSX_END = "// </autojs6-compose-jsx:v1>"
 KINDS = {"STRING", "NUMBER", "BOOLEAN", "COLOR", "DP", "SP", "ENUM", "TEXT_STYLE", "BITMAP", "ICON_NAME", "SHAPE", "LIST", "NULL"}
 TYPE_NAMES = {
     "STRING": "string", "NUMBER": "number", "BOOLEAN": "boolean", "COLOR": "ComposeColorInput",
@@ -217,6 +222,17 @@ def code(value: Any) -> str:
     return "<code>" + html.escape(rendered).replace("|", "&#124;") + "</code>"
 
 
+def render_jsx(catalog: dict[str, Any]) -> str:
+    lines = [JSX_START, f"// Generated from {SOURCE}; schema=1; contract=1; sha256={digest(catalog)}.",
+             "// Ordinary factories provide value-tag typing; these names never replace legacy XML tags.",
+             "declare namespace JSX {", "    interface IntrinsicElements {"]
+    for component in sorted(catalog["components"], key=lambda item: item["name"]):
+        if component["invocation"] == "NODE":
+            name = component["name"]
+            lines.append(f"        {json.dumps('compose:' + name)}: Internal.ComposeProps<{json.dumps(name)}>;")
+    return "\n".join(lines + ["    }", "}", JSX_END, ""])
+
+
 def render_docs(catalog: dict[str, Any]) -> str:
     lines = [DOC_START, f"<!-- Generated from {SOURCE}; schema=1; contract=1; sha256={digest(catalog)}. -->", "",
              "| Component | Invocation | Children | Scope | Canonical properties | Slots | Events | Commands |",
@@ -279,6 +295,7 @@ def main(argv: list[str] | None = None) -> int:
     check.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     check.add_argument("--dts", type=Path, required=True)
     check.add_argument("--docs", type=Path, required=True)
+    check.add_argument("--jsx", type=Path, help="Also require the delivered Compose JSX intrinsic map")
     args = parser.parse_args(argv)
     try:
         catalog = load_catalog(args.catalog)
@@ -287,11 +304,19 @@ def main(argv: list[str] | None = None) -> int:
             args.output_dir.mkdir(parents=True, exist_ok=True)
             (args.output_dir / "compose-catalog.fragment.d.ts").write_text(dts, encoding="utf-8", newline="\n")
             (args.output_dir / "compose-catalog.fragment.md").write_text(docs, encoding="utf-8", newline="\n")
+            (args.output_dir / "compose-jsx.fragment.d.ts").write_text(render_jsx(catalog), encoding="utf-8", newline="\n")
             print(f"GENERATED {catalog['componentCount']} components / {catalog['propertyCount']} canonical properties in {args.output_dir}; external files have NOT been checked.")
         else:
             check_artifact(args.dts, dts, DTS_START, DTS_END, "TypeScript declarations")
             check_artifact(args.docs, docs, DOC_START, DOC_END, "component documentation")
+            if args.jsx is not None:
+                check_artifact(args.jsx, render_jsx(catalog), JSX_START, JSX_END, "JSX intrinsic declarations")
             print(f"OK: {catalog['componentCount']} components / {catalog['propertyCount']} canonical properties match both supplied catalog regions.")
+            if args.jsx is not None:
+                count = sum(component['invocation'] == 'NODE' for component in catalog['components'])
+                print(f"OK: {count} Compose JSX intrinsic tags match the supplied JSX region.")
+            else:
+                print("JSX intrinsic region was not requested and has NOT been checked.")
         return 0
     except (CatalogError, OSError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
