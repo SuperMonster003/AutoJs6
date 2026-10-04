@@ -224,13 +224,13 @@ py -3.12 tools/codegen-model-distribution/prepare_bootstrap.py --catalog codegen
 
 存储与对比逻辑写成不依赖 Android 的纯 Kotlin (文件系统路径与时钟注入), 界面只做展示; 全部单测在 JVM 上运行.
 
-- [ ] P6.1 目录仓库 (`codegen/store/ModelCatalog.kt`, `ModelCatalogParser.kt`, `ModelCatalogRepository.kt`): 结构对照 `FontCatalogRepository` 另写 (D16). 地址 `https://raw.githubusercontent.com/SuperMonster003/AutoJs6-Shared-Assets/main/codegen-models/catalogs/catalog-v1.json` 与同目录 `.sig.json` (镜像见 Q4). 验签复用 `EcdsaP256CatalogSignatureVerifier` (新公钥, `expectedKeyId`, `expectedCatalogFileName = "catalog-v1.json"`). 规则:
+- [x] P6.1 目录仓库 (`codegen/store/ModelCatalog.kt`, `ModelCatalogParser.kt`, `ModelCatalogRepository.kt`): 结构对照 `FontCatalogRepository` 另写 (D16). 地址 `https://raw.githubusercontent.com/SuperMonster003/AutoJs6-Shared-Assets/main/codegen-models/catalogs/catalog-v1.json` 与同目录 `.sig.json` (镜像见 Q4). 验签复用 `EcdsaP256CatalogSignatureVerifier` (新公钥, `expectedKeyId`, `expectedCatalogFileName = "catalog-v1.json"`). 规则:
   - 拒绝回滚 (`catalogVersion` 小于已缓存值) 与同版本异内容 (同一 `modelId` + `versionCode` 的 sha256 与此前见过的不同).
   - 验签或解析失败时保留旧缓存. 缓存 24 h (D18), 位于 `noBackupFilesDir/codegen_models/catalog/`.
   - 离线时用缓存, 再退到引导目录 (P5.5).
   - `minHostVersionCode` 高于当前宿主的版本标为 "需要更新 AutoJs6", schema 不兼容的版本标为 "不兼容", 两者都不提供下载.
 
-  debug 构建可经 `src/debug/` 覆盖目录地址与公钥, 指向 P5.4 的测试仓库; release 构建只认正式公钥. 单测 `ModelCatalogParserTest` (必填字段, 未知字段忽略, 非法 `modelId`), `ModelCatalogRepositoryTest` (假 fetcher: 回滚被拒, 同版本异内容被拒, 坏签名保留缓存, 24 h 内不联网, 离线用引导目录). 进展 (E1, 2026-10-03): 宿主本地提交 32e5bf478d 已实现注入式纯 Kotlin 目录仓库; 目录/缓存/bootstrap 全部验签, 24 h 缓存、持久已见版本记录、撤回单向、双实例防回滚、故障后的只展示回退均验证. 联合编译与回归 347 项通过、4 项 opt-in 作业跳过; 最后边界修复后的目录定向测试 32 项全部通过 (Parser 8 / Repository 21 / Python-OpenSSL→Kotlin 互操作 3). P5.5 的正式公钥/引导资源现已落位, debug/release 配置工厂仍待接入, 本项暂不勾选; UI、下载与导入后续按原条目实施.
+  debug 构建可经 `src/debug/` 覆盖目录地址与公钥, 指向 P5.4 的测试仓库; release 构建只认正式公钥. 单测 `ModelCatalogParserTest` (必填字段, 未知字段忽略, 非法 `modelId`), `ModelCatalogRepositoryTest` (假 fetcher: 回滚被拒, 同版本异内容被拒, 坏签名保留缓存, 24 h 内不联网, 离线用引导目录). 证据 (E1/E2, 2026-10-04): 在既有目录仓库基础上完成 ModelCatalogConfiguration 与 CodegenCatalogFactory; 正式 namespace/keyId/完整 SPKI 固定校验, release 变体与工厂双重要求正式配置. debug 默认正式源, 显式源码开关可选择已发布测试源; 目录缓存、模型根目录及当前选择 Pref 均隔离. 实际正式/测试签名资源验证通过, release 资源符号表仅含正式 key/bootstrap. 配置测试 7 项、debug 变体 2 项、release 变体 1 项通过; debug/release Kotlin 编译通过. UI 入口仍按后续条目接入.
 - [ ] P6.2 存储与登记表 (`codegen/store/ModelStore.kt`, D17): 布局 `noBackupFilesDir/codegen_models/<modelId>/<versionCode>-<sha8>/model.ajcgm` + `registry.json`. 登记项: `modelId`, `versionCode`, `versionName`, `sha256`, `size`, `featureSchemaVersion`, `source` (`OFFICIAL` / `CUSTOM`), `origin` (目录版本或导入文件名), `installedAt`, manifest 摘要 (附录 E.5 所需字段). 安装流程:
   1. 写入 `staging/` 临时文件.
   2. `ModelPackageReader` (P4.2) 校验.
