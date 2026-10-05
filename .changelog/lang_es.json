@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/04",
+      "released_date": "2026/10/05",
       "feature": [
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",
         "OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas",
@@ -500,7 +500,8 @@
         "La pantalla de confirmación de 3-Setup Installer no se abría en Android 14 y versiones posteriores al iniciar una instalación con AutoJs6 en primer plano",
         "La raíz del manifiesto y los UID compartidos podían interpretarse desde comentarios o espacios de nombres falsos; los atributos duplicados, recursos contradictorios y UID no verificables detienen el procesamiento",
         "Contraste insuficiente del texto y los controles de las ventanas flotantes y los diálogos del análisis de diseño con algunos colores de tema o en modo nocturno",
-        "El Centro de complementos restauraba desde la caché complementos retirados o renombrados tras actualizar el índice correctamente"
+        "El Centro de complementos restauraba desde la caché complementos retirados o renombrados tras actualizar el índice correctamente",
+        "Falta del fondo circular de los iconos en los detalles del centro de plugins y bordes en caché que no se actualizaban al cambiar de tema"
       ],
       "improvement": [
         "Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas",

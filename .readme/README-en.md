@@ -168,7 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/10/04
+###### 2026/10/05
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
@@ -667,6 +667,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` 3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground
 * `Fix` Package manifest roots and shared UIDs could be misread from comments or spoofed namespaces; duplicate attributes, conflicting resource identities and unverifiable shared UIDs now stop processing
 * `Fix` Plugin Center could restore removed or renamed plugins from cache after a successful index refresh
+* `Fix` Missing circular icon backgrounds in Plugin Center details dialogs and stale themed borders when cached artwork is reused
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record

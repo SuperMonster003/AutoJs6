@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/04",
+      "released_date": "2026/10/05",
       "feature": [
         "La fonction \"Générer du code\" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition",
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
@@ -500,7 +500,8 @@
         "Les informations des paquets reconnaissent les ensembles APK fractionnes dans les ZIP ordinaires, y compris sans extension de paquet connue",
         "L'écran de confirmation de 3-Setup Installer ne s'affichait pas sur Android 14 et versions ultérieures lors d'une installation lancée avec AutoJs6 au premier plan",
         "La racine du manifeste et les UID partagés pouvaient être mal lus depuis des commentaires ou espaces de noms falsifiés; les attributs dupliqués, identifiants de ressources contradictoires et UID invérifiables arrêtent le traitement",
-        "Le Centre de plugins pouvait restaurer depuis le cache des plugins retirés ou renommés après une actualisation réussie"
+        "Le Centre de plugins pouvait restaurer depuis le cache des plugins retirés ou renommés après une actualisation réussie",
+        "Absence du fond circulaire des icônes dans les détails du centre de plugins et bordures des icônes en cache non actualisées lors du changement de thème"
       ],
       "improvement": [
         "Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués",
