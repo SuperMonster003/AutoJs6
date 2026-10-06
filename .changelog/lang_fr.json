@@ -504,7 +504,8 @@
         "L'écran de confirmation de 3-Setup Installer ne s'affichait pas sur Android 14 et versions ultérieures lors d'une installation lancée avec AutoJs6 au premier plan",
         "La racine du manifeste et les UID partagés pouvaient être mal lus depuis des commentaires ou espaces de noms falsifiés; les attributs dupliqués, identifiants de ressources contradictoires et UID invérifiables arrêtent le traitement",
         "Le Centre de plugins pouvait restaurer depuis le cache des plugins retirés ou renommés après une actualisation réussie",
-        "Absence du fond circulaire des icônes dans les détails du centre de plugins et bordures des icônes en cache non actualisées lors du changement de thème"
+        "Absence du fond circulaire des icônes dans les détails du centre de plugins et bordures des icônes en cache non actualisées lors du changement de thème",
+        "Les couleurs Material choisies dans l'ancienne disposition ne pouvaient pas être retrouvées avec \"Localiser la couleur du thème actuel\" après un changement de disposition, et la page des couleurs Material n'affichait pas le résumé de la couleur actuelle"
       ],
       "improvement": [
         "Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués",

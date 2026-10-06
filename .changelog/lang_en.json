@@ -504,7 +504,8 @@
         "3-Setup Installer confirmation screens not opening on Android 14 and later when installation is started while AutoJs6 is in the foreground",
         "Package manifest roots and shared UIDs could be misread from comments or spoofed namespaces; duplicate attributes, conflicting resource identities and unverifiable shared UIDs now stop processing",
         "Plugin Center could restore removed or renamed plugins from cache after a successful index refresh",
-        "Missing circular icon backgrounds in Plugin Center details dialogs and stale themed borders when cached artwork is reused"
+        "Missing circular icon backgrounds in Plugin Center details dialogs and stale themed borders when cached artwork is reused",
+        "Material colors chosen in the legacy layout could not be found with \"Locate current theme color\" after switching layouts, and the Material colors page did not show the current color summary"
       ],
       "improvement": [
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",
