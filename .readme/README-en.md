@@ -168,7 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/10/06
+###### 2026/10/07
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
@@ -430,6 +430,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Selector methods minDepth / maxDepth / minIndexInParent / maxIndexInParent (inclusive, like minChildCount / maxChildCount), also usable in the selector string syntax (such as minDepth=3)
 * `Feature` Selector mode in the layout inspector search bar: once the mode toggle reaches "$()", type a chained selector expression as in a script (such as text("OK").clickable().depth(3) or textMatch(/ok|cancel/i); the selector() / $() prefix is optional) and its string / number / boolean / regex literals land on the selector registry with script semantics; a half-typed expression shows "Expression not finished" instead of an error, syntax errors show the position, the call and candidate method names, and "Copy as selector" outputs the normalized expression
 * `Feature` Layout Inspector "Generate code" supports single-widget/collection scopes, waiting until found/waiting with a timeout/immediate checks, action receivers and text parameters, Classic/Flow styles, alternative plans and location explanations, with matching widgets previewable in the layout
+* `Feature` User color libraries for the theme color: create or clone a library, add colors from the color palette, another library or history, and rename, change values, reorder by dragging or delete in batches
+* `Feature` Intelligent color library: each group holds a day and a night color that follow night mode, and groups rotate in sequence or at random on state changes, app start or at an interval (first change now, at the next whole minute or at the next whole hour); rotation pauses while theme color pages are open
+* `Feature` Intelligent color library presets "Material day and night" (19 Material 50 / 800 pairs) and "Background color"; clone a preset or create a new library, then adjust the state source, group rotation, order and group colors in the editor
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
@@ -858,6 +861,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` EPUB integration uses the new 3-Folio EPUB installation identity while preserving the existing epub API and file-manager actions
 * `Improvement` Plugin Center setup tracks the new installation identities of 3-Maple Image, 3-Stack Archive and 3-Hanzi CC, combining image viewing and editing into one recommended item
 * `Improvement` Plugin Center and setup support separate light and dark circular icon backgrounds, with fixed neutral colors for the Three series and consistent catalog artwork and backgrounds before and after installation
+* `Improvement` The light and dark window background entries of the default color library are merged into one "Background color" entry offering Light, Dark, Auto and Auto inverted; selections made before the upgrade are kept
+* `Improvement` The theme color summary names the library and color (the current group for intelligent color libraries), and "Locate current theme color" finds colors in user libraries and the active intelligent color library; the legacy layout shows the active intelligent color library by name, and choosing a color there turns it off
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

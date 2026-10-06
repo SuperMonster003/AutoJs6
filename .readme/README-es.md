@@ -168,7 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/10/06
+###### 2026/10/07
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
@@ -430,6 +430,9 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` "Copiar como selector" en el análisis de diseño: toque "Copiar como selector" en el diálogo de resultados o mantenga pulsado el contador para copiar al portapapeles la palabra clave (como llamada Contains / Match de la propiedad text / desc / id / className acertada por la coincidencia actual), las condiciones de campo, el perfil de filtro y la región seleccionada como un selector de script encadenado; las condiciones que no pueden expresarse se añaden como comentarios
 * `Nuevo` Métodos de selector minDepth / maxDepth / minIndexInParent / maxIndexInParent (inclusivos, como minChildCount / maxChildCount), utilizables también en la sintaxis de cadena de los selectores (por ejemplo minDepth=3)
 * `Nuevo` Modo selector en la barra de búsqueda del análisis de diseño: cuando el conmutador de modo llega a "$()", escriba una expresión de selector encadenada como en un script (por ejemplo text("OK").clickable().depth(3) o textMatch(/ok|cancelar/i); el prefijo selector() / $() es opcional); sus literales de cadena / número / booleano / regex llegan al registro de selectores con la semántica de los scripts, una expresión a medio escribir muestra "Expresión sin terminar" en lugar de un error, los errores de sintaxis muestran la posición, la llamada y los nombres de método candidatos, y "Copiar como selector" produce la expresión normalizada
+* `Nuevo` Bibliotecas de colores propias para el color del tema: crear o clonar una biblioteca, añadir colores desde la paleta, otra biblioteca o el historial, y renombrar, cambiar valores, reordenar arrastrando o eliminar por lotes
+* `Nuevo` Biblioteca de colores inteligente: cada grupo tiene un color de día y otro de noche que siguen al modo nocturno, y los grupos rotan en secuencia o al azar con cada cambio de estado, al iniciar la app o a intervalos (primer cambio ahora, en el próximo minuto exacto o en la próxima hora en punto); la rotación se pausa mientras las páginas del color del tema están abiertas
+* `Nuevo` Bibliotecas de colores inteligentes predefinidas "Material día y noche" (19 pares Material 50 / 800) y "Color de fondo"; clona una predefinida o crea una nueva biblioteca y ajusta en el editor la fuente de estado, la rotación de grupos, el orden y los colores de cada grupo
 * `Corrección` Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información
 * `Corrección` Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
 * `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío
@@ -858,6 +861,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Integración con la nueva identidad de 3-Folio EPUB conservando las API epub y las acciones del administrador de archivos
 * `Mejora` El asistente del centro de plugins usa las nuevas identidades de 3-Maple Image, 3-Stack Archive y 3-Hanzi CC, con una sola recomendación para ver y editar imágenes
 * `Mejora` El centro de plugins y su asistente admiten fondos circulares claros y oscuros independientes, con colores neutros fijos para la serie Three y el mismo diseño antes y después de instalar
+* `Mejora` Las entradas de fondo de ventana claro y oscuro de la biblioteca de colores predeterminada se combinan en una sola entrada "Color de fondo" con las opciones Claro, Oscuro, Automático y Automático (invertido); las selecciones anteriores a la actualización se conservan
+* `Mejora` El resumen del color del tema indica la biblioteca y el nombre del color (el grupo actual en las bibliotecas inteligentes), y "Localizar color del tema actual" encuentra colores de bibliotecas propias y la biblioteca inteligente activa; el diseño antiguo muestra el nombre de la biblioteca inteligente activa y elegir un color en él la desactiva
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

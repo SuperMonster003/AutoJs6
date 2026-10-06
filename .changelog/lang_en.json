@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/06",
+      "released_date": "2026/10/07",
       "feature": [
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
         "Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates",
@@ -261,7 +261,10 @@
         "\"Copy as selector\" in the layout inspector: tap \"Copy as selector\" in the search results dialog or long-press the counter to put the keyword (as the Contains / Match call of the text / desc / id / className property the current match hit), the field conditions, the filter profile and the selected region on the clipboard as a chained script selector; conditions that cannot be expressed are appended as comments",
         "Selector methods minDepth / maxDepth / minIndexInParent / maxIndexInParent (inclusive, like minChildCount / maxChildCount), also usable in the selector string syntax (such as minDepth=3)",
         "Selector mode in the layout inspector search bar: once the mode toggle reaches \"$()\", type a chained selector expression as in a script (such as text(\"OK\").clickable().depth(3) or textMatch(/ok|cancel/i); the selector() / $() prefix is optional) and its string / number / boolean / regex literals land on the selector registry with script semantics; a half-typed expression shows \"Expression not finished\" instead of an error, syntax errors show the position, the call and candidate method names, and \"Copy as selector\" outputs the normalized expression",
-        "Layout Inspector \"Generate code\" supports single-widget/collection scopes, waiting until found/waiting with a timeout/immediate checks, action receivers and text parameters, Classic/Flow styles, alternative plans and location explanations, with matching widgets previewable in the layout"
+        "Layout Inspector \"Generate code\" supports single-widget/collection scopes, waiting until found/waiting with a timeout/immediate checks, action receivers and text parameters, Classic/Flow styles, alternative plans and location explanations, with matching widgets previewable in the layout",
+        "User color libraries for the theme color: create or clone a library, add colors from the color palette, another library or history, and rename, change values, reorder by dragging or delete in batches",
+        "Intelligent color library: each group holds a day and a night color that follow night mode, and groups rotate in sequence or at random on state changes, app start or at an interval (first change now, at the next whole minute or at the next whole hour); rotation pauses while theme color pages are open",
+        "Intelligent color library presets \"Material day and night\" (19 Material 50 / 800 pairs) and \"Background color\"; clone a preset or create a new library, then adjust the state source, group rotation, order and group colors in the editor"
       ],
       "fix": [
         "Package information becoming inaccessible from the file manager when APK Inspector hides the information button",
@@ -693,7 +696,9 @@
         "Official catalog icons keep the same source and appearance before and after installation, including neutral grayscale artwork",
         "EPUB integration uses the new 3-Folio EPUB installation identity while preserving the existing epub API and file-manager actions",
         "Plugin Center setup tracks the new installation identities of 3-Maple Image, 3-Stack Archive and 3-Hanzi CC, combining image viewing and editing into one recommended item",
-        "Plugin Center and setup support separate light and dark circular icon backgrounds, with fixed neutral colors for the Three series and consistent catalog artwork and backgrounds before and after installation"
+        "Plugin Center and setup support separate light and dark circular icon backgrounds, with fixed neutral colors for the Three series and consistent catalog artwork and backgrounds before and after installation",
+        "The light and dark window background entries of the default color library are merged into one \"Background color\" entry offering Light, Dark, Auto and Auto inverted; selections made before the upgrade are kept",
+        "The theme color summary names the library and color (the current group for intelligent color libraries), and \"Locate current theme color\" finds colors in user libraries and the active intelligent color library; the legacy layout shows the active intelligent color library by name, and choosing a color there turns it off"
       ],
       "dependency": [
         "Modularized Android AXML",
