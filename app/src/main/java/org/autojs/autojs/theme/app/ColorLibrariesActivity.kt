@@ -121,7 +121,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             ViewUtils.showToast(this, R.string.text_no_user_color_libraries)
             return
         }
-        ColorLibraryDialogs.showMultiChoice(this, R.string.text_delete_color_libraries, libraries.map { it.name }) { indices ->
+        ColorLibraryDialogs.showMultiChoice(this, R.string.text_choose_color_libraries_to_delete, libraries.map { it.name }) { indices ->
             val chosen = indices.map { libraries[it] }
             ColorLibraryDialogs.showConfirm(this, getString(R.string.text_delete_color_libraries_confirm, chosen.size)) {
                 lifecycleScope.launch {

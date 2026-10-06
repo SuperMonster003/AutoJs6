@@ -80,10 +80,18 @@ class GlobalColorSearchAdapter(
         notifyDataSetChanged()
     }
 
-    private fun shortLibraryName(name: String) = if (name.length <= LIBRARY_NAME_LENGTH) name else name.take(LIBRARY_NAME_LENGTH - 2).trimEnd() + "..."
+    /**
+     * Shortens long names in the middle: names of copies often differ only at the end, such as "(copy)" and "(2)".
+     * zh-CN: 在中间截断过长的名称: 副本的名称往往只在末尾不同, 例如 "(副本)" 与 "(2)".
+     */
+    private fun shortLibraryName(name: String): String = when {
+        name.length <= LIBRARY_NAME_LENGTH -> name
+        else -> name.take(LIBRARY_NAME_HEAD).trimEnd() + "..." + name.takeLast(LIBRARY_NAME_LENGTH - LIBRARY_NAME_HEAD - 3).trimStart()
+    }
 
     companion object {
-        private const val LIBRARY_NAME_LENGTH = 16
+        private const val LIBRARY_NAME_LENGTH = 24
+        private const val LIBRARY_NAME_HEAD = 12
     }
 
 }

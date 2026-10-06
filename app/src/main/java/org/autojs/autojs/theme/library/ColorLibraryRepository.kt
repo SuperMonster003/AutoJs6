@@ -59,15 +59,21 @@ class ColorLibraryRepository(
     suspend fun listColors(libraryId: Long): List<LibraryColor> = dao.listColors(libraryId)
 
     /**
-     * Creates a plain library; [name] is made unique among existing libraries.
-     * zh-CN: 新建普通库; [name] 会在现有库名中去重.
+     * Creates a plain library; [name] is made unique among existing libraries and [reservedNames] (such as preset names).
+     * zh-CN: 新建普通库; [name] 会在现有库名与 [reservedNames] (例如预设库名) 中去重.
      */
-    suspend fun createPlainLibrary(name: String, kind: String, origin: String? = null, colors: List<NewColor> = emptyList()): ColorLibrary {
+    suspend fun createPlainLibrary(
+        name: String,
+        kind: String,
+        origin: String? = null,
+        colors: List<NewColor> = emptyList(),
+        reservedNames: Collection<String> = emptyList(),
+    ): ColorLibrary {
         val time = now()
         val library = ColorLibrary(
             kind = kind,
             isIntelligent = false,
-            name = LibraryNaming.unique(name, dao.listLibraryNames()),
+            name = LibraryNaming.unique(name, dao.listLibraryNames() + reservedNames),
             origin = origin,
             position = dao.nextLibraryPosition(),
             createdTime = time,
@@ -173,6 +179,7 @@ class ColorLibraryRepository(
         groups: List<IntelligentGroup>,
         kind: String = ColorLibrary.Kind.CREATED,
         origin: String? = null,
+        reservedNames: Collection<String> = emptyList(),
     ): IntelligentSnapshot {
         val time = now()
         val configJson = IntelligentConfigJson.encode(config)
@@ -196,7 +203,7 @@ class ColorLibraryRepository(
                     ColorLibrary(
                         kind = kind,
                         isIntelligent = true,
-                        name = LibraryNaming.unique(name, dao.listLibraryNames()),
+                        name = LibraryNaming.unique(name, dao.listLibraryNames() + reservedNames),
                         origin = origin,
                         configJson = configJson,
                         position = dao.nextLibraryPosition(),

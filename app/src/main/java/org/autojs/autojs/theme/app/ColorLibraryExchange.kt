@@ -237,6 +237,10 @@ class ColorLibraryExchange(private val activity: AppCompatActivity, private val 
     }
 
     private fun importLibraries(libraries: List<ColorLibraryJson.Library>, fileName: String?) {
+        // Imported libraries never take the name of a preset, such as an exported preset snapshot would.
+        // zh-CN: 导入的库不使用预设库的名称 (例如导出的预设快照).
+        val presetNames = ColorLibrariesActivity.presetColorLibraries.map { activity.getString(it.nameRes) } +
+                IntelligentPresets.all(activity).map { it.name }
         activity.lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
@@ -247,13 +251,14 @@ class ColorLibraryExchange(private val activity: AppCompatActivity, private val 
                                 ColorLibrary.Kind.IMPORTED,
                                 origin = fileName,
                                 colors = library.colors.map { ColorLibraryRepository.NewColor(it.color, it.name) },
+                                reservedNames = presetNames,
                             )
                             is ColorLibraryJson.IntelligentLibrary -> {
                                 // Decoded groups use their file index as id; new groups need temporary negative ids.
                                 // zh-CN: 解码后的组以文件下标为 id; 新组需要临时的负数 id.
                                 val groups = library.groups.mapIndexed { index, group -> group.copy(id = -(index + 1L)) }
                                 val config = library.config.remapGroupIds(library.groups.zip(groups).associate { (old, new) -> old.id to new.id })
-                                repository.saveIntelligent(null, library.name, config, groups, ColorLibrary.Kind.IMPORTED, origin = fileName)
+                                repository.saveIntelligent(null, library.name, config, groups, ColorLibrary.Kind.IMPORTED, origin = fileName, reservedNames = presetNames)
                             }
                         }
                     }
