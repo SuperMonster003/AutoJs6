@@ -16,7 +16,9 @@ import org.autojs.autojs.theme.library.ColorSelectionCodec
 import org.autojs.autojs.util.ViewUtils.setOnSubtitleViewClickListener
 import org.autojs.autojs.util.ViewUtils.setOnTitleViewClickListener
 import org.autojs.autojs.theme.ThemeChangeNotifier
+import org.autojs.autojs.theme.ThemeColorCoordinator
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
@@ -141,8 +143,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
                         isForciblyEnableAppBarColorTransition = true
 
-                        ThemeColorManager.setThemeColor(getColor(item.colorRes))
-                        ThemeChangeNotifier.notifyThemeChanged()
+                        ThemeColorCoordinator.apply(getColor(item.colorRes), ThemeColorSource.USER)
                     }
                 } ?: ViewUtils.showToast(this@ColorLibrariesActivity, R.string.error_failed_to_apply_current_color_history, true)
             }

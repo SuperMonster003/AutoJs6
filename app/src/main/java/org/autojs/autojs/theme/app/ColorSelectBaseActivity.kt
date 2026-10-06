@@ -29,7 +29,9 @@ import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeChangeNotifier
+import org.autojs.autojs.theme.ThemeColorCoordinator
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorEntities.ColorHistory
 import org.autojs.autojs.theme.app.ColorEntities.ColorInfo
 import org.autojs.autojs.theme.app.ColorEntities.PaletteHistory
@@ -281,8 +283,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
         isForciblyEnableAppBarColorTransition = true
 
-        ThemeColorManager.setThemeColor(color)
-        ThemeChangeNotifier.notifyThemeChanged()
+        ThemeColorCoordinator.apply(color, ThemeColorSource.USER)
     }
 
     private fun showColorPickerHistory(colorPickerDialog: ColorPickerDialog) {

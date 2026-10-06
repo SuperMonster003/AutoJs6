@@ -17,9 +17,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorHelper
-import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.ThemeColorCoordinator
+import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_PALETTE
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_MATERIAL
@@ -116,8 +116,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
         savePrefsForLegacy()
         savePrefsForLibraries()
         selectedColor?.let {
-            ThemeColorManager.setThemeColor(it)
-            ThemeChangeNotifier.notifyThemeChanged()
+            ThemeColorCoordinator.apply(it, ThemeColorSource.USER)
         }
     }
 

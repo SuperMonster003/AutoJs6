@@ -6,8 +6,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import org.autojs.autojs.theme.ThemeChangeNotifier
-import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.ThemeColorCoordinator
+import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.SELECT_NONE
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForColorHistory
@@ -76,8 +76,7 @@ class ColorItemAdapter(
     }
 
     private fun applyThemeColor(context: Context, item: PresetColorItem) {
-        ThemeColorManager.setThemeColor(context.getColor(item.colorRes))
-        ThemeChangeNotifier.notifyThemeChanged()
+        ThemeColorCoordinator.apply(context.getColor(item.colorRes), ThemeColorSource.USER)
     }
 
     fun onItemConfirmed(context: Context, position: Int) {
