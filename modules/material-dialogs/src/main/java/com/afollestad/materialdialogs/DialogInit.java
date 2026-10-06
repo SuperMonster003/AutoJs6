@@ -1,5 +1,6 @@
 package com.afollestad.materialdialogs;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -11,17 +12,24 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import androidx.annotation.ColorInt;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.annotation.UiThread;
+import androidx.appcompat.view.menu.MenuPopupHelper;
+import androidx.appcompat.view.menu.ShowableListMenu;
 import androidx.appcompat.widget.PopupMenu;
 import com.afollestad.materialdialogs.internal.MDAdapter;
 import com.afollestad.materialdialogs.internal.MDButton;
@@ -32,6 +40,7 @@ import me.zhanghai.android.materialprogressbar.HorizontalProgressDrawable;
 import me.zhanghai.android.materialprogressbar.IndeterminateCircularProgressDrawable;
 import me.zhanghai.android.materialprogressbar.IndeterminateHorizontalProgressDrawable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -242,9 +251,15 @@ class DialogInit {
                     // Async information can add options while this popup is open. Its actions
                     // must keep the same indexes as the visible items until the popup closes.
                     List<MaterialDialog.OptionMenuItemSpec> options = new ArrayList<>(builder.options);
+                    boolean hasCheckable = false;
                     for (int i = 0; i < options.size(); i++) {
                         MaterialDialog.OptionMenuItemSpec option = options.get(i);
-                        popupMenu.getMenu().add(Menu.NONE, getDialogMenuOptionsItemActionIdByIndex(i), i, option.title());
+                        MenuItem menuItem = popupMenu.getMenu().add(Menu.NONE, getDialogMenuOptionsItemActionIdByIndex(i), i, option.title());
+                        Boolean checked = option.checked();
+                        if (checked != null) {
+                            menuItem.setCheckable(true).setChecked(checked);
+                            hasCheckable = true;
+                        }
                     }
                     popupMenu.setOnMenuItemClickListener(menuItem -> {
                         List<MaterialDialog.OptionMenuItemSpec> optionMenuItemSpecs = options;
@@ -262,6 +277,9 @@ class DialogInit {
                         dialog.themeDelegate.onPrepareOptionsPopupMenu(popupMenu);
                     }
                     popupMenu.show();
+                    if (hasCheckable && builder.widgetColorSet) {
+                        tintOptionsCheckBoxes(popupMenu, builder.widgetColor);
+                    }
                 });
             }
             if (builder.title == null && builder.options == null) {
@@ -495,6 +513,53 @@ class DialogInit {
         if (index == 9) return R.id.menu_options_item_index_9;
         if (index < 0) throw new IllegalArgumentException("Dialog menu options item index cannot be negative: " + index);
         throw new IllegalArgumentException("Dialog menu cannot have more than 10 options");
+    }
+
+    /**
+     * Tints the check boxes of checkable option items with the dialog widget color. The popup
+     * builds its rows lazily, so rows added after the first layout are tinted as they attach.
+     * <p>
+     * zh-CN: 使用对话框 widget 颜色为可勾选选项的复选框着色. 弹出菜单延迟创建行视图, 因此后续加入的行在添加时着色.
+     */
+    @SuppressLint({"RestrictedApi", "DiscouragedPrivateApi"})
+    private static void tintOptionsCheckBoxes(@NonNull PopupMenu popupMenu, @ColorInt int color) {
+        ListView listView;
+        try {
+            Field field = PopupMenu.class.getDeclaredField("mPopup");
+            field.setAccessible(true);
+            Object helper = field.get(popupMenu);
+            if (!(helper instanceof MenuPopupHelper)) return;
+            Object popup = MenuPopupHelper.class.getMethod("getPopup").invoke(helper);
+            if (!(popup instanceof ShowableListMenu)) return;
+            listView = ((ShowableListMenu) popup).getListView();
+        } catch (Throwable ignored) {
+            return;
+        }
+        if (listView == null) return;
+        for (int i = 0; i < listView.getChildCount(); i++) {
+            tintCheckBoxes(listView.getChildAt(i), color);
+        }
+        listView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
+            @Override
+            public void onChildViewAdded(View parent, View child) {
+                tintCheckBoxes(child, color);
+            }
+
+            @Override
+            public void onChildViewRemoved(View parent, View child) {
+                /* Nothing to do. */
+            }
+        });
+    }
+
+    private static void tintCheckBoxes(@Nullable View view, @ColorInt int color) {
+        if (view instanceof CheckBox) {
+            MDTintHelper.setTint((CheckBox) view, color);
+        } else if (view instanceof ViewGroup group) {
+            for (int i = 0; i < group.getChildCount(); i++) {
+                tintCheckBoxes(group.getChildAt(i), color);
+            }
+        }
     }
 
     private static void fixCanvasScalingWhenHardwareAccelerated(ProgressBar pb) {

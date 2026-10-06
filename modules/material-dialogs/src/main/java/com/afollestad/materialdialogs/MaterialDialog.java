@@ -2356,7 +2356,18 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         }
     }
 
-    public record OptionMenuItemSpec(String title, OnClickListener onClickListener) {
+    /**
+     * An entry of the title options menu. A non-null {@code checked} renders a checkable entry whose
+     * check box follows the widget color of the dialog when one was set.
+     * <p>
+     * zh-CN: 标题选项菜单中的一项. {@code checked} 非 null 时显示为可勾选项, 若对话框设置了 widget 颜色, 复选框随之着色.
+     */
+    public record OptionMenuItemSpec(String title, OnClickListener onClickListener, @Nullable Boolean checked) {
+
+        public OptionMenuItemSpec(String title, OnClickListener onClickListener) {
+            this(title, onClickListener, null);
+        }
+
         public interface OnClickListener {
             void onClick(MaterialDialog dialog);
         }
