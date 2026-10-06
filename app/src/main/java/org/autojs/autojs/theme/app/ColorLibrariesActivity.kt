@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import org.autojs.autojs.core.image.ColorItems
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.theme.library.ColorSelection
+import org.autojs.autojs.theme.library.ColorSelectionCodec
 import org.autojs.autojs.util.ViewUtils.setOnSubtitleViewClickListener
 import org.autojs.autojs.util.ViewUtils.setOnTitleViewClickListener
 import org.autojs.autojs.theme.ThemeChangeNotifier
@@ -95,28 +96,19 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
     }
 
     private fun setUpSelectedPosition(adapter: ColorItemAdapter) {
-        when (Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)) {
-            SELECT_NONE -> when (val legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)) {
-                customColorPosition -> Unit
-                SELECT_NONE, defaultColorPosition -> {
-                    adapter.selectedLibraryId = COLOR_LIBRARY_ID_DEFAULT
-                    adapter.selectedItemId = adapter.items().firstOrNull {
-                        it.libraryId == COLOR_LIBRARY_ID_DEFAULT && getColor(it.colorRes) == getColor(R.color.theme_color_default)
-                    }?.itemId ?: SELECT_NONE
-                }
-                else -> when (val calculatedIndex = legacyIndex - maxOf(customColorPosition, defaultColorPosition) - 1) {
-                    in ColorItems.MATERIAL_COLORS.indices -> {
-                        val (colorRes, _) = ColorItems.MATERIAL_COLORS[calculatedIndex]
-                        adapter.selectedLibraryId = COLOR_LIBRARY_ID_MATERIAL
-                        adapter.selectedItemId = adapter.items().firstOrNull {
-                            it.libraryId == COLOR_LIBRARY_ID_MATERIAL && it.colorRes == colorRes
-                        }?.itemId ?: SELECT_NONE
-                    }
-                }
+        when (val selection = currentColorSelection()) {
+            ColorSelection.Palette -> Unit
+            is ColorSelection.Preset -> {
+                adapter.selectedLibraryId = selection.libraryId
+                // Without a stored item (e.g. a legacy default selection), match the current theme color.
+                // zh-CN: 没有保存的条目时 (例如 legacy 的默认色选择), 按当前主题色匹配.
+                adapter.selectedItemId = selection.itemId ?: adapter.items().firstOrNull {
+                    it.libraryId == selection.libraryId && getColor(it.colorRes) == ThemeColorManager.colorPrimary
+                }?.itemId ?: SELECT_NONE
             }
-            else -> {
-                adapter.selectedLibraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)
-                adapter.selectedItemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE)
+            else -> ColorSelectionCodec.encode(selection).let { (libraryId, itemId) ->
+                adapter.selectedLibraryId = libraryId
+                adapter.selectedItemId = itemId
             }
         }
     }

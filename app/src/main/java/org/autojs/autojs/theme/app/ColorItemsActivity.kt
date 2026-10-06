@@ -20,15 +20,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
-import org.autojs.autojs.core.image.ColorItems
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_MATERIAL
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
+import org.autojs.autojs.theme.library.ColorSelection
+import org.autojs.autojs.theme.library.ColorSelectionCodec
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
@@ -101,9 +99,12 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
         }
     }
 
+    private val isLibraryOfCurrentSelection: Boolean
+        get() = (currentColorSelection() as? ColorSelection.Preset)?.libraryId == mLibrary.id
+
     private fun updateClickListener(toolbar: Toolbar) {
-        when (mLibrary.id) {
-            Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE) -> OnClickListener {
+        when {
+            isLibraryOfCurrentSelection -> OnClickListener {
                 showColorDetails(ThemeColorManager.colorPrimary, getSubtitle(false))
             }
             else -> null
@@ -113,37 +114,27 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
         }
     }
 
-    override fun getSubtitle(withHexSuffix: Boolean): String? = when (mLibrary.id) {
-        Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE) -> {
-            getCurrentColorSummary(this, withIdentifierPrefix = false, withHexSuffix = withHexSuffix)
-        }
+    override fun getSubtitle(withHexSuffix: Boolean): String? = when {
+        isLibraryOfCurrentSelection -> getCurrentColorSummary(this, withIdentifierPrefix = false, withHexSuffix = withHexSuffix)
         else -> null
     }
 
     private fun setUpSelectedPosition(adapter: ColorItemAdapter) {
-        when (val prefLibraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)) {
-            SELECT_NONE -> when (val legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)) {
-                customColorPosition -> Unit
-                SELECT_NONE, defaultColorPosition -> when (mLibrary.id) {
-                    COLOR_LIBRARY_ID_DEFAULT -> {
-                        adapter.selectedLibraryId = COLOR_LIBRARY_ID_DEFAULT
-                        adapter.selectedItemId = mLibrary.colors.firstOrNull { getColor(it.colorRes) == getColor(R.color.theme_color_default) }?.itemId ?: SELECT_NONE
-                    }
+        when (val selection = currentColorSelection()) {
+            ColorSelection.Palette -> Unit
+            is ColorSelection.Preset -> {
+                adapter.selectedLibraryId = selection.libraryId
+                adapter.selectedItemId = when (selection.libraryId) {
+                    // Without a stored item (e.g. a legacy default selection), match the current theme color.
+                    // zh-CN: 没有保存的条目时 (例如 legacy 的默认色选择), 按当前主题色匹配.
+                    mLibrary.id -> selection.itemId
+                        ?: mLibrary.colors.firstOrNull { getColor(it.colorRes) == ThemeColorManager.colorPrimary }?.itemId
+                        ?: SELECT_NONE
+                    else -> SELECT_NONE
                 }
-                else -> when (val calculatedIndex = legacyIndex - maxOf(customColorPosition, defaultColorPosition) - 1) {
-                    in ColorItems.MATERIAL_COLORS.indices -> {
-                        val (colorRes, _) = ColorItems.MATERIAL_COLORS[calculatedIndex]
-                        adapter.selectedLibraryId = COLOR_LIBRARY_ID_MATERIAL
-                        adapter.selectedItemId = mLibrary.colors.firstOrNull { it.colorRes == colorRes }?.itemId ?: SELECT_NONE
-                    }
-                }
-            }
-            mLibrary.id -> {
-                adapter.selectedLibraryId = mLibrary.id
-                adapter.selectedItemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE)
             }
             else -> {
-                adapter.selectedLibraryId = prefLibraryId
+                adapter.selectedLibraryId = ColorSelectionCodec.encode(selection).first
                 adapter.selectedItemId = SELECT_NONE
             }
         }

@@ -41,6 +41,8 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRAR
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
+import org.autojs.autojs.theme.library.ColorSelection
+import org.autojs.autojs.theme.library.ColorSelectionCodec
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.ThemeColorLayoutSwitchedEvent
 import org.autojs.autojs.util.ColorUtils
@@ -197,8 +199,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     }
 
     protected fun checkAndGetTargetInfoForThemeColorLocate(): TargetInfoForLocate? {
-        val targetLibraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_DEFAULT)
-        if (targetLibraryId == COLOR_LIBRARY_ID_PALETTE) {
+        val selection = currentColorSelection()
+        if (selection is ColorSelection.Palette) {
             MaterialDialog.Builder(this)
                 .title(R.string.text_prompt)
                 .content(R.string.content_current_theme_color_configured_by_palette, ColorUtils.toHex(currentColor, 6))
@@ -210,8 +212,10 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 .show()
             return null
         }
-        val targetLibrary = presetColorLibraries.find { it.id == targetLibraryId }
-        if (targetLibrary == null) {
+        val preset = selection as? ColorSelection.Preset
+        val targetLibrary = preset?.let { presetColorLibraries.find { library -> library.id == it.libraryId } }
+        if (preset == null || targetLibrary == null) {
+            val targetLibraryId = ColorSelectionCodec.encode(selection).first
             val targetLibraryIdHexString = "0x${targetLibraryId.absoluteValue.toString(16)}".let {
                 if (targetLibraryId < 0) "-$it" else it
             }
@@ -228,13 +232,11 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 .show()
             return null
         }
-        val defaultTargetItemIndex = when {
-            targetLibraryId == COLOR_LIBRARY_ID_DEFAULT -> {
-                targetLibrary.colors.find { getColor(it.colorRes) == ThemeColorManager.colorPrimary }?.itemId ?: SELECT_NONE
-            }
-            else -> SELECT_NONE
-        }
-        val targetItemIndex = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, defaultTargetItemIndex)
+        // Without a stored item (e.g. a legacy default selection), match the current theme color.
+        // zh-CN: 没有保存的条目时 (例如 legacy 的默认色选择), 按当前主题色匹配.
+        val targetItemIndex = preset.itemId
+            ?: targetLibrary.colors.find { getColor(it.colorRes) == ThemeColorManager.colorPrimary }?.itemId
+            ?: SELECT_NONE
         if (targetItemIndex !in targetLibrary.colors.indices) {
             MaterialDialog.Builder(this)
                 .title(R.string.text_failed_to_locate)
@@ -249,7 +251,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 .show()
             return null
         }
-        return TargetInfoForLocate(targetLibraryId, targetItemIndex)
+        return TargetInfoForLocate(targetLibrary.id, targetItemIndex)
     }
 
     protected fun showColorPicker(initialColor: Int? = null) {
@@ -655,6 +657,18 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             intent.startSafely(context)
         }
 
+        /**
+         * The stored theme color selection, normalized by [ColorSelectionCodec] (legacy index included).
+         * zh-CN: 经 [ColorSelectionCodec] 归一化 (含 legacy 索引) 的已保存主题色选中状态.
+         */
+        @JvmStatic
+        fun currentColorSelection(): ColorSelection = ColorSelectionCodec.decode(
+            libraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE),
+            itemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE),
+            legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE),
+            materialColorCount = ColorItems.MATERIAL_COLORS.size,
+        )
+
         @JvmStatic
         fun getCurrentColorSummary(context: Context, withIdentifierPrefix: Boolean = true, withHexSuffix: Boolean = true): String = when {
             isLegacyLayout -> when (val index = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, defaultColorPosition)) {
@@ -682,28 +696,18 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 var identifier: String? = null
                 var colorName: String? = null
                 val colorInt = ThemeColorManager.colorPrimary
-                val libraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)
-                val libraryItemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE)
-                when (libraryId) {
-                    COLOR_LIBRARY_ID_PALETTE -> {
+                when (val selection = currentColorSelection()) {
+                    ColorSelection.Palette -> {
                         identifier = context.getString(R.string.color_library_identifier_palette)
                     }
-                    SELECT_NONE -> {
-                        val legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
-                        when (legacyIndex) {
-                            customColorPosition -> identifier = context.getString(R.string.color_library_identifier_palette)
-                            SELECT_NONE, defaultColorPosition -> identifier = context.getString(R.string.color_library_identifier_default_colors)
-                            else -> {
-                                val calculatedIndex = legacyIndex - maxOf(customColorPosition, defaultColorPosition) - 1
-                                if (calculatedIndex in ColorItems.MATERIAL_COLORS.indices) {
-                                    val (_, nameRes) = ColorItems.MATERIAL_COLORS[calculatedIndex]
-                                    identifier = context.getString(R.string.color_library_identifier_material_design_colors)
-                                    colorName = context.getString(nameRes)
-                                }
-                            }
-                        }
+                    is ColorSelection.UserColor -> {
+                        identifier = context.getString(R.string.color_library_identifier_created)
                     }
-                    else -> presetColorLibraries.find { it.id == libraryId }?.let { lib: PresetColorLibrary ->
+                    is ColorSelection.Intelligent -> {
+                        identifier = context.getString(R.string.color_library_identifier_intelligent_colors)
+                    }
+                    is ColorSelection.Unknown -> Unit
+                    is ColorSelection.Preset -> presetColorLibraries.find { it.id == selection.libraryId }?.let { lib: PresetColorLibrary ->
                         // identifier = when {
                         //     lib.isCreated -> {
                         //         lib.identifierString?.let { idStr ->
@@ -734,8 +738,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         //     else -> context.getString(lib.identifierRes)
                         // }
                         identifier = context.getString(lib.identifierRes)
-                        if (libraryItemId != -1) {
-                            lib.colors.find { it.itemId == libraryItemId }?.let { item ->
+                        selection.itemId?.let { itemId ->
+                            lib.colors.find { it.itemId == itemId }?.let { item ->
                                 // colorName = item.nameString
                                 //     ?: item.nameRes.takeUnless {
                                 //         it == R.string.text_unknown
