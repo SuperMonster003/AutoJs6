@@ -185,6 +185,7 @@
     <string name="dialog_button_clear">지우기</string>
     <string name="dialog_button_clear_all">모두 지우기</string>
     <string name="dialog_button_clear_items">지우기</string>
+    <string name="dialog_button_close">닫기</string>
     <string name="dialog_button_confirm">확인</string>
     <string name="dialog_button_connect">연결</string>
     <string name="dialog_button_continue">@string/text_continue</string>
@@ -775,6 +776,7 @@
     <string name="summary_restore_connection_on_launch">앱 시작 시 마지막 서버에 다시 연결합니다 (명시적으로 연결을 해제한 경우 제외)</string>
     <string name="summary_restore_server_on_launch">앱 시작 시 다시 수신 대기합니다 (명시적으로 중지한 경우 제외)</string>
     <string name="summary_retention_policies">버전 기록, 휴지통, 긴급 초안의 보관 일수 및 용량 상한</string>
+    <string name="summary_setup_wizards">자주 쓰는 권한 부여 및 공식 플러그인 설치</string>
     <string name="text_and_n_more">... 외 %d개</string>
     <string name="text_auto_reconnect">자동 재연결</string>
     <string name="text_batch_restore_summary">복원 %1$d개, 건너뜀 %2$d개, 실패 %3$d개</string>
@@ -902,7 +904,6 @@
     <string name="text_alias_password">별칭 비밀번호</string>
     <string name="text_all">전체</string>
     <string name="text_all_files_access">모든 파일에 액세스합니다</string>
-    <string name="text_all_files_access_is_needed">\"모든 파일 액세스\"는 전화기의 스크립트 파일에 액세스하려면 필요합니다.</string>
     <string name="text_all_history_entries">모든 기록 항목</string>
     <string name="text_all_items_cleared">모든 항목이 삭제되었습니다</string>
     <string name="text_all_settings">모든 설정</string>
@@ -1290,7 +1291,6 @@
     <string name="text_disconnect_all_clients">모든 클라이언트 연결 해제</string>
     <string name="text_disconnected">연결 끊김</string>
     <string name="text_display_over_other_app">다른 앱에 표시됩니다</string>
-    <string name="text_display_over_other_app_is_recommended">\"다른 앱 위의 디스플레이\"권한은 모든 위젯을 올바르게 표시하는 것이 좋습니다.</string>
     <string name="text_disposable_task">일회용 작업</string>
     <string name="text_disposable_task_time_before_now">시간은 지금보다 늦어야합니다</string>
     <string name="text_do_not_ask_again_for_this_version">이 버전을 다시 요청하지 마십시오</string>
@@ -1928,6 +1928,16 @@
     <string name="text_permission_revoked_with_root">허가가 취소되었습니다 (루트 포함)</string>
     <string name="text_permission_revoked_with_shizuku">권한 취소됨 (Shizuku 사용)</string>
     <string name="text_permission_test">파마 테스트</string>
+    <string name="text_permission_wizard">권한 마법사</string>
+    <string name="text_permission_wizard_all_granted">선택한 권한이 모두 부여되었습니다</string>
+    <string name="text_permission_wizard_grant">부여</string>
+    <string name="text_permission_wizard_grant_with_count">부여 (%1$d)</string>
+    <string name="text_permission_wizard_hint">부여할 권한을 선택하세요. 권한은 하나씩 차례로 요청되며 나중에 홈 서랍에서도 부여할 수 있습니다</string>
+    <string name="text_permission_wizard_not_granted_summary">다음 권한이 아직 부여되지 않았습니다. 나중에 홈 서랍에서 부여할 수 있습니다:\n\n%1$s</string>
+    <string name="text_permission_wizard_reminder">부여되지 않은 권한: %1$s</string>
+    <string name="text_permission_wizard_requires_root_or_shizuku">Root 또는 Shizuku 필요</string>
+    <string name="text_permission_wizard_show_granted">부여된 권한 표시</string>
+    <string name="text_permission_wizard_step">권한 (%1$d/%2$d): %3$s</string>
     <string name="text_permissions">권한</string>
     <string name="text_permissions_list">권한 목록</string>
     <string name="text_pin">고정</string>
@@ -1956,6 +1966,8 @@
     <string name="text_plugin_details">플러그인 상세</string>
     <string name="text_plugin_hidden_manage">숨겨진 플러그인 관리</string>
     <string name="text_plugin_install_wizard">플러그인 설치 마법사</string>
+    <string name="text_plugin_install_wizard_all_installed">선택한 플러그인을 모두 설치했습니다 (%1$d)</string>
+    <string name="text_plugin_install_wizard_allow_unknown_apps">AutoJs6에 알 수 없는 앱 설치를 허용한 후 돌아오면 계속합니다</string>
     <string name="text_plugin_install_wizard_cancel_remaining">나머지 취소</string>
     <string name="text_plugin_install_wizard_category_accessibility">접근성 서비스</string>
     <string name="text_plugin_install_wizard_category_apk_builder">앱 패키징</string>
@@ -1971,33 +1983,26 @@
     <string name="text_plugin_install_wizard_category_ui">UI</string>
     <string name="text_plugin_install_wizard_confirm_in_system_installer">시스템 설치 화면에서 설치를 확인하세요. 완료되면 다음 플러그인이 자동으로 시작됩니다</string>
     <string name="text_plugin_install_wizard_downloading_with_progress">다운로드 중 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_downloads_finished">모든 다운로드 완료</string>
     <string name="text_plugin_install_wizard_hint">필요한 플러그인을 선택하여 한 번에 설치합니다. 모든 플러그인은 나중에도 플러그인 센터에서 설치할 수 있습니다</string>
     <string name="text_plugin_install_wizard_incompatible_confirm">다음 플러그인은 이 기기와 호환되지 않을 수 있습니다 (ABI 또는 네이티브 페이지 크기). 계속할까요?\n\n%1$s</string>
     <string name="text_plugin_install_wizard_incompatible_hint">이 기기와 호환되지 않을 수 있습니다</string>
     <string name="text_plugin_install_wizard_index_unavailable">플러그인 인덱스를 불러올 수 없습니다: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_confirmed">설치가 확인되지 않았습니다</string>
     <string name="text_plugin_install_wizard_install_not_started">설치 프로그램이 시작되지 않았습니다</string>
     <string name="text_plugin_install_wizard_install_with_count">설치 (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_plugins">플러그인 설치 중</string>
     <string name="text_plugin_install_wizard_installing_with_progress">설치 중 (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">캐시 공간이 부족합니다: 약 %1$s 필요, %2$s 사용 가능</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">플러그인 인덱스를 불러오는 중...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">인덱스에 설치할 수 있는 플러그인이 없습니다</string>
     <string name="text_plugin_install_wizard_no_selection">선택한 플러그인이 없습니다</string>
-    <string name="text_plugin_install_wizard_profile">프로필</string>
-    <string name="text_plugin_install_wizard_profile_delete">프로필 삭제</string>
-    <string name="text_plugin_install_wizard_profile_delete_confirm">프로필 \"%1$s\"을(를) 삭제할까요?</string>
-    <string name="text_plugin_install_wizard_profile_deleted">프로필을 삭제했습니다</string>
-    <string name="text_plugin_install_wizard_profile_minimal">최소</string>
-    <string name="text_plugin_install_wizard_profile_name_exists">같은 이름의 프로필이 이미 있습니다</string>
-    <string name="text_plugin_install_wizard_profile_name_hint">프로필 이름</string>
-    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">프로필 이름 바꾸기...</string>
-    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">현재 선택을 새 프로필로 저장...</string>
-    <string name="text_plugin_install_wizard_profile_saved">프로필을 저장했습니다</string>
-    <string name="text_plugin_install_wizard_profile_standard">표준</string>
-    <string name="text_plugin_install_wizard_profile_update">현재 선택으로 이 프로필 업데이트</string>
+    <string name="text_plugin_install_wizard_show_installed">설치된 플러그인 표시</string>
     <string name="text_plugin_install_wizard_summary_cancelled">취소됨: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">실패: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">설치됨: %1$d</string>
     <string name="text_plugin_install_wizard_summary_title">플러그인 설치 완료</string>
+    <string name="text_plugin_install_wizard_waiting_for_download" tools:ignore="TypographyEllipsis">다운로드 대기 중...</string>
     <string name="text_plugin_instruction">플러그인 사용 설명</string>
     <string name="text_plugin_instruction_auto_mounted_hint">힌트:\n\n현재 이 플러그인에는 자동 마운트가 활성화되어 있으며, 마운트 경로는 `%1$s`입니다.\n\n따라서 `plugins.load`를 명시적으로 호출하지 않고도 `%2$s`를 바로 사용할 수 있습니다.</string>
     <string name="text_plugin_instruction_example_title">플러그인 사용 예시 (플러그인에 `exec` 메서드가 있다고 가정): </string>
@@ -2239,8 +2244,11 @@
     <string name="text_set_breakpoint">중단 점을 설정하십시오</string>
     <string name="text_set_editor_setting_action" formatted="true">%1$s 설정</string>
     <string name="text_settings">설정</string>
+    <string name="text_setup_wizards">설정 마법사</string>
+    <string name="text_setup_wizards_hint">실행할 마법사를 선택하세요. 선택한 마법사는 차례로 실행됩니다</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 값이 일치하지 않습니다.\n\n예상: %1$s\n실제: %2$s</string>
     <string name="text_shizuku_access">Shizuku 권한</string>
+    <string name="text_shizuku_not_running">Shizuku가 실행 중이 아닙니다</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">먼저 Shizuku 서비스를 실행해야 할 수 있습니다</string>
     <string name="text_should_not_be_empty">텍스트는 비어질 수 없다</string>
     <string name="text_show">표시</string>
@@ -2295,6 +2303,7 @@
     <string name="text_start">시작</string>
     <string name="text_start_record">녹음을 시작하십시오</string>
     <string name="text_start_running">달리기</string>
+    <string name="text_start_wizard">마법사 시작</string>
     <string name="text_state_or_province">주 또는 도</string>
     <string name="text_stop">중지</string>
     <string name="text_stop_reconnecting">재연결 중지</string>
@@ -2456,8 +2465,21 @@
     <string name="text_waiting_for_vscode_approval">VSCode 에서 승인 대기 중...</string>
     <string name="text_weekly_task">주간 과제</string>
     <string name="text_weekly_task_should_check_day_of_week">최소한 하루를 선택해야합니다</string>
+    <string name="text_welcome_to_app">%1$s에 오신 것을 환영합니다</string>
     <string name="text_window_state_changes_only">창 상태 변경만</string>
     <string name="text_windows">창</string>
+    <string name="text_wizard_profile">프로필</string>
+    <string name="text_wizard_profile_delete">프로필 삭제</string>
+    <string name="text_wizard_profile_delete_confirm">프로필 \"%1$s\"을(를) 삭제할까요?</string>
+    <string name="text_wizard_profile_deleted">프로필을 삭제했습니다</string>
+    <string name="text_wizard_profile_minimal">최소</string>
+    <string name="text_wizard_profile_name_exists">같은 이름의 프로필이 이미 있습니다</string>
+    <string name="text_wizard_profile_name_hint">프로필 이름</string>
+    <string name="text_wizard_profile_rename" tools:ignore="TypographyEllipsis">프로필 이름 바꾸기...</string>
+    <string name="text_wizard_profile_save_as" tools:ignore="TypographyEllipsis">현재 선택을 새 프로필로 저장...</string>
+    <string name="text_wizard_profile_saved">프로필을 저장했습니다</string>
+    <string name="text_wizard_profile_standard">표준</string>
+    <string name="text_wizard_profile_update">현재 선택으로 이 프로필 업데이트</string>
     <string name="text_working_dir_path">작업 디렉토리 경로</string>
     <string name="text_working_dir_path_with_value">작업 디렉토리: %1$s</string>
     <string name="text_working_directory">작업 디렉터리</string>

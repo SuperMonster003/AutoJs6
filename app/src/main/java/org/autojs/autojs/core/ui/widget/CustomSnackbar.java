@@ -9,6 +9,7 @@ import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -90,6 +91,18 @@ public class CustomSnackbar extends BaseTransientBottomBar<CustomSnackbar> {
     @NonNull
     public CustomSnackbar setText(@NonNull CharSequence message) {
         ((CustomSnackbarContentLayout) mContent).getCustomTextView().setText(message);
+        return this;
+    }
+
+    /**
+     * Sets the text color of both action buttons.
+     * zh-CN: 设置两个操作按钮的文字颜色.
+     */
+    @NonNull
+    public CustomSnackbar setActionTextColor(@ColorInt int color) {
+        CustomSnackbarContentLayout content = (CustomSnackbarContentLayout) mContent;
+        content.getActionOneView().setTextColor(color);
+        content.getActionTwoView().setTextColor(color);
         return this;
     }
 

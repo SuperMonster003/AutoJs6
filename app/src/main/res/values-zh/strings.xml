@@ -179,6 +179,7 @@
     <string name="dialog_button_clear">清空</string>
     <string name="dialog_button_clear_all">清空全部</string>
     <string name="dialog_button_clear_items">清空记录</string>
+    <string name="dialog_button_close">关闭</string>
     <string name="dialog_button_confirm">确定</string>
     <string name="dialog_button_connect">连接</string>
     <string name="dialog_button_continue">@string/text_continue</string>
@@ -769,6 +770,7 @@
     <string name="summary_restore_connection_on_launch">应用启动时重新连接上次的服务端 (显式断开连接后除外)</string>
     <string name="summary_restore_server_on_launch">应用启动时重新开始监听 (显式停止后除外)</string>
     <string name="summary_retention_policies">版本历史, 回收站与紧急草稿的保留天数与容量上限</string>
+    <string name="summary_setup_wizards">授予常用权限及安装官方插件</string>
     <string name="text_and_n_more">... 及其他 %d 项</string>
     <string name="text_auto_reconnect">自动重连</string>
     <string name="text_batch_restore_summary">已恢复 %1$d, 跳过 %2$d, 失败 %3$d</string>
@@ -896,7 +898,6 @@
     <string name="text_alias_password">别名密码</string>
     <string name="text_all">全部</string>
     <string name="text_all_files_access">所有文件管理权限</string>
-    <string name="text_all_files_access_is_needed">需要授予 \"所有文件管理权限\" 才能正常读写脚本文件</string>
     <string name="text_all_history_entries">全部历史记录</string>
     <string name="text_all_items_cleared">全部记录已清空</string>
     <string name="text_all_settings">全部设置</string>
@@ -1285,7 +1286,6 @@
     <string name="text_disconnect_all_clients">断开所有客户端</string>
     <string name="text_disconnected">已断开</string>
     <string name="text_display_over_other_app">显示在其他应用上层</string>
-    <string name="text_display_over_other_app_is_recommended">建议授予 \"显示在其他应用上层\" 权限以确保应用窗口组件正常显示</string>
     <string name="text_disposable_task">一次性任务</string>
     <string name="text_disposable_task_time_before_now">任务时间小于当前时间</string>
     <string name="text_do_not_ask_again_for_this_version">此版本不再提示</string>
@@ -1923,6 +1923,16 @@
     <string name="text_permission_revoked_with_root">已撤消授权 (使用 root)</string>
     <string name="text_permission_revoked_with_shizuku">已撤消授权 (使用 Shizuku)</string>
     <string name="text_permission_test">权限测试</string>
+    <string name="text_permission_wizard">权限申请向导</string>
+    <string name="text_permission_wizard_all_granted">所选权限已全部授予</string>
+    <string name="text_permission_wizard_grant">授予</string>
+    <string name="text_permission_wizard_grant_with_count">授予 (%1$d)</string>
+    <string name="text_permission_wizard_hint">勾选需要授予的权限, 将依次申请, 之后仍可随时在主页抽屉中授予</string>
+    <string name="text_permission_wizard_not_granted_summary">以下权限尚未授予, 之后可在主页抽屉中授予:\n\n%1$s</string>
+    <string name="text_permission_wizard_reminder">尚未授予权限: %1$s</string>
+    <string name="text_permission_wizard_requires_root_or_shizuku">需要 Root 或 Shizuku 权限</string>
+    <string name="text_permission_wizard_show_granted">显示已授予权限</string>
+    <string name="text_permission_wizard_step">权限申请 (%1$d/%2$d): %3$s</string>
     <string name="text_permissions">权限</string>
     <string name="text_permissions_list">权限列表</string>
     <string name="text_pin">固定</string>
@@ -1951,6 +1961,8 @@
     <string name="text_plugin_details">插件详情</string>
     <string name="text_plugin_hidden_manage">管理隐藏插件</string>
     <string name="text_plugin_install_wizard">插件安装向导</string>
+    <string name="text_plugin_install_wizard_all_installed">所选插件已全部安装 (%1$d)</string>
+    <string name="text_plugin_install_wizard_allow_unknown_apps">请允许 AutoJs6 安装未知应用, 返回后继续安装</string>
     <string name="text_plugin_install_wizard_cancel_remaining">取消剩余</string>
     <string name="text_plugin_install_wizard_category_accessibility">无障碍服务</string>
     <string name="text_plugin_install_wizard_category_apk_builder">打包应用</string>
@@ -1966,33 +1978,26 @@
     <string name="text_plugin_install_wizard_category_ui">UI</string>
     <string name="text_plugin_install_wizard_confirm_in_system_installer">请在系统安装界面中确认安装, 完成后将自动开始下一个插件</string>
     <string name="text_plugin_install_wizard_downloading_with_progress">正在下载 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_downloads_finished">下载已全部完成</string>
     <string name="text_plugin_install_wizard_hint">勾选需要的插件后一次性批量安装, 之后仍可随时在插件中心安装</string>
     <string name="text_plugin_install_wizard_incompatible_confirm">以下插件可能与当前设备不兼容 (ABI 或原生页大小), 是否继续?\n\n%1$s</string>
     <string name="text_plugin_install_wizard_incompatible_hint">可能与当前设备不兼容</string>
     <string name="text_plugin_install_wizard_index_unavailable">插件索引加载失败: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_confirmed">未确认安装</string>
     <string name="text_plugin_install_wizard_install_not_started">安装程序未启动</string>
     <string name="text_plugin_install_wizard_install_with_count">安装 (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_plugins">正在安装插件</string>
     <string name="text_plugin_install_wizard_installing_with_progress">正在安装 (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">缓存空间不足: 约需 %1$s, 可用 %2$s</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">正在加载插件索引...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">索引中没有可安装的插件</string>
     <string name="text_plugin_install_wizard_no_selection">未选择任何插件</string>
-    <string name="text_plugin_install_wizard_profile">配置</string>
-    <string name="text_plugin_install_wizard_profile_delete">删除配置</string>
-    <string name="text_plugin_install_wizard_profile_delete_confirm">确定删除配置 \"%1$s\"?</string>
-    <string name="text_plugin_install_wizard_profile_deleted">配置已删除</string>
-    <string name="text_plugin_install_wizard_profile_minimal">最小</string>
-    <string name="text_plugin_install_wizard_profile_name_exists">已存在同名配置</string>
-    <string name="text_plugin_install_wizard_profile_name_hint">配置名称</string>
-    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">重命名配置...</string>
-    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">将当前选择保存为新配置...</string>
-    <string name="text_plugin_install_wizard_profile_saved">配置已保存</string>
-    <string name="text_plugin_install_wizard_profile_standard">标准</string>
-    <string name="text_plugin_install_wizard_profile_update">用当前选择更新此配置</string>
+    <string name="text_plugin_install_wizard_show_installed">显示已安装插件</string>
     <string name="text_plugin_install_wizard_summary_cancelled">已取消: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">失败: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">已安装: %1$d</string>
     <string name="text_plugin_install_wizard_summary_title">插件安装完成</string>
+    <string name="text_plugin_install_wizard_waiting_for_download" tools:ignore="TypographyEllipsis">等待下载...</string>
     <string name="text_plugin_instruction">插件使用说明</string>
     <string name="text_plugin_instruction_auto_mounted_hint">提示:\n\n当前插件已开启自动挂载, 挂载路径为 `%1$s`.\n\n因此可直接使用 `%2$s` 而无需显式调用 `plugins.load`.</string>
     <string name="text_plugin_instruction_example_title">插件使用示例 (假设插件存在一个 `exec` 方法): </string>
@@ -2234,8 +2239,11 @@
     <string name="text_set_breakpoint">设置断点</string>
     <string name="text_set_editor_setting_action" formatted="true">设置%1$s</string>
     <string name="text_settings">设置</string>
+    <string name="text_setup_wizards">设置向导</string>
+    <string name="text_setup_wizards_hint">选择需要运行的向导, 所选向导将依次进行</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 验证不一致.\n\n期望值: %1$s\n实际值: %2$s</string>
     <string name="text_shizuku_access">Shizuku 权限</string>
+    <string name="text_shizuku_not_running">Shizuku 未运行</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">可能需要先运行 Shizuku 服务</string>
     <string name="text_should_not_be_empty">文本不能为空</string>
     <string name="text_show">显示</string>
@@ -2290,6 +2298,7 @@
     <string name="text_start">启动</string>
     <string name="text_start_record">开始录制</string>
     <string name="text_start_running">开始运行</string>
+    <string name="text_start_wizard">开始向导</string>
     <string name="text_state_or_province">州或省份</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">停止重连</string>
@@ -2451,8 +2460,21 @@
     <string name="text_waiting_for_vscode_approval">等待 VSCode 端确认...</string>
     <string name="text_weekly_task">每周任务</string>
     <string name="text_weekly_task_should_check_day_of_week">需至少选择一天</string>
+    <string name="text_welcome_to_app">欢迎使用 %1$s</string>
     <string name="text_window_state_changes_only">仅窗口状态变化</string>
     <string name="text_windows">窗口</string>
+    <string name="text_wizard_profile">配置</string>
+    <string name="text_wizard_profile_delete">删除配置</string>
+    <string name="text_wizard_profile_delete_confirm">确定删除配置 \"%1$s\"?</string>
+    <string name="text_wizard_profile_deleted">配置已删除</string>
+    <string name="text_wizard_profile_minimal">最小</string>
+    <string name="text_wizard_profile_name_exists">已存在同名配置</string>
+    <string name="text_wizard_profile_name_hint">配置名称</string>
+    <string name="text_wizard_profile_rename" tools:ignore="TypographyEllipsis">重命名配置...</string>
+    <string name="text_wizard_profile_save_as" tools:ignore="TypographyEllipsis">将当前选择保存为新配置...</string>
+    <string name="text_wizard_profile_saved">配置已保存</string>
+    <string name="text_wizard_profile_standard">标准</string>
+    <string name="text_wizard_profile_update">用当前选择更新此配置</string>
     <string name="text_working_dir_path">工作路径</string>
     <string name="text_working_dir_path_with_value">工作路径: %1$s</string>
     <string name="text_working_directory">工作目录</string>

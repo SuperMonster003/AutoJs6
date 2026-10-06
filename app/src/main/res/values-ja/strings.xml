@@ -184,6 +184,7 @@
     <string name="dialog_button_clear">クリア</string>
     <string name="dialog_button_clear_all">全てクリア</string>
     <string name="dialog_button_clear_items">クリア</string>
+    <string name="dialog_button_close">閉じる</string>
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">接続</string>
     <string name="dialog_button_continue">@string/text_continue</string>
@@ -774,6 +775,7 @@
     <string name="summary_restore_connection_on_launch">アプリ起動時に前回のサーバーへ再接続します (明示的に切断した場合を除く)</string>
     <string name="summary_restore_server_on_launch">アプリ起動時に再び待機します (明示的に停止した場合を除く)</string>
     <string name="summary_retention_policies">バージョン履歴, ゴミ箱, 緊急下書きの保持日数とサイズ上限</string>
+    <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
     <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_auto_reconnect">自動再接続</string>
     <string name="text_batch_restore_summary">復元 %1$d 件, スキップ %2$d 件, 失敗 %3$d 件</string>
@@ -901,7 +903,6 @@
     <string name="text_alias_password">エイリアスのパスワード</string>
     <string name="text_all">すべて</string>
     <string name="text_all_files_access">全ファイルアクセス</string>
-    <string name="text_all_files_access_is_needed">携帯電話上のスクリプトファイルにアクセスするために, \"すべてのファイルへのアクセス\" が必要です</string>
     <string name="text_all_history_entries">すべての履歴</string>
     <string name="text_all_items_cleared">すべての項目を削除しました</string>
     <string name="text_all_settings">すべての設定</string>
@@ -1289,7 +1290,6 @@
     <string name="text_disconnect_all_clients">すべてのクライアントを切断</string>
     <string name="text_disconnected">切断済み</string>
     <string name="text_display_over_other_app">他のアプリの上に表示する</string>
-    <string name="text_display_over_other_app_is_recommended">すべてのウィジェットを正しく表示するために, \"Display over other apps\" パーミッションの使用を推奨します</string>
     <string name="text_disposable_task">使い捨てタスク</string>
     <string name="text_disposable_task_time_before_now">時間は今より遅くなるはずです</string>
     <string name="text_do_not_ask_again_for_this_version">このバージョンでは再表示を要求しない</string>
@@ -1927,6 +1927,16 @@
     <string name="text_permission_revoked_with_root">(root で) 権限が取り消された</string>
     <string name="text_permission_revoked_with_shizuku">許可が取り消されました (Shizuku を使用)</string>
     <string name="text_permission_test">許可テスト</string>
+    <string name="text_permission_wizard">権限ウィザード</string>
+    <string name="text_permission_wizard_all_granted">選択したすべての権限が付与されました</string>
+    <string name="text_permission_wizard_grant">付与</string>
+    <string name="text_permission_wizard_grant_with_count">付与 (%1$d)</string>
+    <string name="text_permission_wizard_hint">付与する権限にチェックを入れます. 権限は順番に申請され, 後からホームのドロワーでも付与できます</string>
+    <string name="text_permission_wizard_not_granted_summary">次の権限はまだ付与されていません. 後からホームのドロワーで付与できます:\n\n%1$s</string>
+    <string name="text_permission_wizard_reminder">未付与の権限: %1$s</string>
+    <string name="text_permission_wizard_requires_root_or_shizuku">Root または Shizuku が必要です</string>
+    <string name="text_permission_wizard_show_granted">付与済みの権限を表示</string>
+    <string name="text_permission_wizard_step">権限 (%1$d/%2$d): %3$s</string>
     <string name="text_permissions">許可</string>
     <string name="text_permissions_list">許可リスト</string>
     <string name="text_pin">固定</string>
@@ -1955,6 +1965,8 @@
     <string name="text_plugin_details">プラグイン詳細</string>
     <string name="text_plugin_hidden_manage">非表示プラグインを管理</string>
     <string name="text_plugin_install_wizard">プラグインインストールウィザード</string>
+    <string name="text_plugin_install_wizard_all_installed">選択したプラグインをすべてインストールしました (%1$d)</string>
+    <string name="text_plugin_install_wizard_allow_unknown_apps">不明なアプリのインストールを AutoJs6 に許可してください. 戻ると続行します</string>
     <string name="text_plugin_install_wizard_cancel_remaining">残りをキャンセル</string>
     <string name="text_plugin_install_wizard_category_accessibility">アクセシビリティサービス</string>
     <string name="text_plugin_install_wizard_category_apk_builder">アプリのパッケージ化</string>
@@ -1970,33 +1982,26 @@
     <string name="text_plugin_install_wizard_category_ui">UI</string>
     <string name="text_plugin_install_wizard_confirm_in_system_installer">システムのインストーラーでインストールを確認してください. 完了後に次のプラグインが自動的に始まります</string>
     <string name="text_plugin_install_wizard_downloading_with_progress">ダウンロード中 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_downloads_finished">すべてのダウンロードが完了しました</string>
     <string name="text_plugin_install_wizard_hint">必要なプラグインにチェックを入れて一括でインストールします. プラグインは後からでもプラグインセンターから追加できます</string>
     <string name="text_plugin_install_wizard_incompatible_confirm">次のプラグインはこのデバイスと互換性がない可能性があります (ABI またはネイティブページサイズ). 続行しますか?\n\n%1$s</string>
     <string name="text_plugin_install_wizard_incompatible_hint">このデバイスと互換性がない可能性があります</string>
     <string name="text_plugin_install_wizard_index_unavailable">プラグインインデックスを読み込めませんでした: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_confirmed">インストールが確認されませんでした</string>
     <string name="text_plugin_install_wizard_install_not_started">インストーラーが開始されませんでした</string>
     <string name="text_plugin_install_wizard_install_with_count">インストール (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_plugins">プラグインをインストール中</string>
     <string name="text_plugin_install_wizard_installing_with_progress">インストール中 (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">キャッシュ領域が不足しています: 約 %1$s が必要, 利用可能 %2$s</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">プラグインインデックスを読み込み中...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">インデックスにインストール可能なプラグインがありません</string>
     <string name="text_plugin_install_wizard_no_selection">プラグインが選択されていません</string>
-    <string name="text_plugin_install_wizard_profile">プロファイル</string>
-    <string name="text_plugin_install_wizard_profile_delete">プロファイルを削除</string>
-    <string name="text_plugin_install_wizard_profile_delete_confirm">プロファイル \"%1$s\" を削除しますか?</string>
-    <string name="text_plugin_install_wizard_profile_deleted">プロファイルを削除しました</string>
-    <string name="text_plugin_install_wizard_profile_minimal">最小</string>
-    <string name="text_plugin_install_wizard_profile_name_exists">同じ名前のプロファイルが既に存在します</string>
-    <string name="text_plugin_install_wizard_profile_name_hint">プロファイル名</string>
-    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">プロファイル名を変更...</string>
-    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">現在の選択を新しいプロファイルとして保存...</string>
-    <string name="text_plugin_install_wizard_profile_saved">プロファイルを保存しました</string>
-    <string name="text_plugin_install_wizard_profile_standard">標準</string>
-    <string name="text_plugin_install_wizard_profile_update">現在の選択でこのプロファイルを更新</string>
+    <string name="text_plugin_install_wizard_show_installed">インストール済みプラグインを表示</string>
     <string name="text_plugin_install_wizard_summary_cancelled">キャンセル: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">失敗: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">インストール済み: %1$d</string>
     <string name="text_plugin_install_wizard_summary_title">プラグインのインストールが完了しました</string>
+    <string name="text_plugin_install_wizard_waiting_for_download" tools:ignore="TypographyEllipsis">ダウンロードを待機中...</string>
     <string name="text_plugin_instruction">プラグイン使用説明</string>
     <string name="text_plugin_instruction_auto_mounted_hint">ヒント:\n\n現在, このプラグインでは自動マウントが有効で, マウントパスは `%1$s` です.\n\nそのため, `plugins.load` を明示的に呼び出さなくても `%2$s` を直接使用できます.</string>
     <string name="text_plugin_instruction_example_title">プラグイン使用例 (プラグインに `exec` メソッドがあると仮定): </string>
@@ -2238,8 +2243,11 @@
     <string name="text_set_breakpoint">ブレークポイントの設定</string>
     <string name="text_set_editor_setting_action" formatted="true">%1$s を設定</string>
     <string name="text_settings">設定</string>
+    <string name="text_setup_wizards">セットアップウィザード</string>
+    <string name="text_setup_wizards_hint">実行するウィザードを選択してください. 選択したウィザードは順番に実行されます</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 が一致しません.\n\n期待値: %1$s\n実際: %2$s</string>
     <string name="text_shizuku_access">Shizuku のパーミッション</string>
+    <string name="text_shizuku_not_running">Shizuku が実行されていません</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">最初に Shizuku サービスを実行する必要があるかもしれない</string>
     <string name="text_should_not_be_empty">テキストを空にすることはできません</string>
     <string name="text_show">表示</string>
@@ -2294,6 +2302,7 @@
     <string name="text_start">起動</string>
     <string name="text_start_record">記録開始</string>
     <string name="text_start_running">実行中</string>
+    <string name="text_start_wizard">ウィザードを開始</string>
     <string name="text_state_or_province">州または省</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">再接続を停止</string>
@@ -2455,8 +2464,21 @@
     <string name="text_waiting_for_vscode_approval">VSCode 側の承認を待っています...</string>
     <string name="text_weekly_task">週次タスク</string>
     <string name="text_weekly_task_should_check_day_of_week">最低 1 日選択する必要があります</string>
+    <string name="text_welcome_to_app">%1$s へようこそ</string>
     <string name="text_window_state_changes_only">ウィンドウ状態の変化のみ</string>
     <string name="text_windows">ウィンドウ</string>
+    <string name="text_wizard_profile">プロファイル</string>
+    <string name="text_wizard_profile_delete">プロファイルを削除</string>
+    <string name="text_wizard_profile_delete_confirm">プロファイル \"%1$s\" を削除しますか?</string>
+    <string name="text_wizard_profile_deleted">プロファイルを削除しました</string>
+    <string name="text_wizard_profile_minimal">最小</string>
+    <string name="text_wizard_profile_name_exists">同じ名前のプロファイルが既に存在します</string>
+    <string name="text_wizard_profile_name_hint">プロファイル名</string>
+    <string name="text_wizard_profile_rename" tools:ignore="TypographyEllipsis">プロファイル名を変更...</string>
+    <string name="text_wizard_profile_save_as" tools:ignore="TypographyEllipsis">現在の選択を新しいプロファイルとして保存...</string>
+    <string name="text_wizard_profile_saved">プロファイルを保存しました</string>
+    <string name="text_wizard_profile_standard">標準</string>
+    <string name="text_wizard_profile_update">現在の選択でこのプロファイルを更新</string>
     <string name="text_working_dir_path">作業ディレクトリのパス</string>
     <string name="text_working_dir_path_with_value">作業ディレクトリ: %1$s</string>
     <string name="text_working_directory">作業ディレクトリ</string>

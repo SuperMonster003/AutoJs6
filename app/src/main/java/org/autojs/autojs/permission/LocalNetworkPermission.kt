@@ -18,7 +18,7 @@ import org.autojs.autojs6.R
 import java.util.WeakHashMap
 
 /** User-initiated permission requests; never called automatically at app startup. */
-class LocalNetworkPermission(override val context: Context) : PermissionItemHelper, AbleToUrge {
+class LocalNetworkPermission(override val context: Context) : PermissionItemHelper {
 
     override val isInMainThread = true
 
@@ -68,10 +68,6 @@ class LocalNetworkPermission(override val context: Context) : PermissionItemHelp
     override fun revoke(): Boolean = false.also { if (isRequired(context)) config() }
 
     fun config() = IntentUtils.launchAppDetailsSettings(context)
-
-    override fun urge() { request() }
-
-    override fun urgeIfNeeded() { requestIfNeeded() }
 
     companion object {
 

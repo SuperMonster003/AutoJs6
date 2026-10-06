@@ -180,6 +180,7 @@
     <string name="dialog_button_clear">Clear</string>
     <string name="dialog_button_clear_all">Clear all</string>
     <string name="dialog_button_clear_items">Clear</string>
+    <string name="dialog_button_close">Close</string>
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Connect</string>
     <string name="dialog_button_continue">@string/text_continue</string>
@@ -770,6 +771,7 @@
     <string name="summary_restore_connection_on_launch">Reconnect to the last server when the app starts, unless the connection was disconnected explicitly</string>
     <string name="summary_restore_server_on_launch">Listen again when the app starts, unless the server was stopped explicitly</string>
     <string name="summary_retention_policies">Retention days and size limits for version history, trash and emergency drafts</string>
+    <string name="summary_setup_wizards">Grant common permissions and install official plugins</string>
     <string name="text_and_n_more">... and %d more</string>
     <string name="text_auto_reconnect">Auto reconnect</string>
     <string name="text_batch_restore_summary">Restored %1$d, skipped %2$d, failed %3$d</string>
@@ -897,7 +899,6 @@
     <string name="text_alias_password">Alias Password</string>
     <string name="text_all">All</string>
     <string name="text_all_files_access">All files access</string>
-    <string name="text_all_files_access_is_needed">\"All files access\" is needed to access script files on the phone</string>
     <string name="text_all_history_entries">All history entries</string>
     <string name="text_all_items_cleared">All items have been cleared</string>
     <string name="text_all_settings">All settings</string>
@@ -1285,7 +1286,6 @@
     <string name="text_disconnect_all_clients">Disconnect all clients</string>
     <string name="text_disconnected">Disconnected</string>
     <string name="text_display_over_other_app">Display over other apps</string>
-    <string name="text_display_over_other_app_is_recommended">\"Display over other apps\" permission is recommended to make all widgets displayed properly</string>
     <string name="text_disposable_task">Disposable task</string>
     <string name="text_disposable_task_time_before_now">Time should be later than now</string>
     <string name="text_do_not_ask_again_for_this_version">Don\'t ask again for this version</string>
@@ -1923,6 +1923,16 @@
     <string name="text_permission_revoked_with_root">Permission revoked (with root)</string>
     <string name="text_permission_revoked_with_shizuku">Permission revoked (with Shizuku)</string>
     <string name="text_permission_test">Perm test</string>
+    <string name="text_permission_wizard">Permission wizard</string>
+    <string name="text_permission_wizard_all_granted">All selected permissions are granted</string>
+    <string name="text_permission_wizard_grant">Grant</string>
+    <string name="text_permission_wizard_grant_with_count">Grant (%1$d)</string>
+    <string name="text_permission_wizard_hint">Tick the permissions to grant. They are requested one after another, and each one can also be granted later from the home drawer</string>
+    <string name="text_permission_wizard_not_granted_summary">The following permissions are not granted yet. They can be granted later from the home drawer:\n\n%1$s</string>
+    <string name="text_permission_wizard_reminder">Permissions not granted: %1$s</string>
+    <string name="text_permission_wizard_requires_root_or_shizuku">Requires Root or Shizuku</string>
+    <string name="text_permission_wizard_show_granted">Show granted permissions</string>
+    <string name="text_permission_wizard_step">Permission (%1$d/%2$d): %3$s</string>
     <string name="text_permissions">Permissions</string>
     <string name="text_permissions_list">Permissions</string>
     <string name="text_pin">Pin</string>
@@ -1951,6 +1961,8 @@
     <string name="text_plugin_details">Plugin details</string>
     <string name="text_plugin_hidden_manage">Manage hidden plugins</string>
     <string name="text_plugin_install_wizard">Plugin install wizard</string>
+    <string name="text_plugin_install_wizard_all_installed">All selected plugins are installed (%1$d)</string>
+    <string name="text_plugin_install_wizard_allow_unknown_apps">Allow AutoJs6 to install unknown apps, then return to continue</string>
     <string name="text_plugin_install_wizard_cancel_remaining">Cancel remaining</string>
     <string name="text_plugin_install_wizard_category_accessibility">Accessibility service</string>
     <string name="text_plugin_install_wizard_category_apk_builder">App packaging</string>
@@ -1966,33 +1978,26 @@
     <string name="text_plugin_install_wizard_category_ui">UI</string>
     <string name="text_plugin_install_wizard_confirm_in_system_installer">Confirm the installation in the system installer. The next plugin starts automatically afterwards</string>
     <string name="text_plugin_install_wizard_downloading_with_progress">Downloading (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_downloads_finished">All downloads finished</string>
     <string name="text_plugin_install_wizard_hint">Tick the plugins you need and install them in one batch. Every plugin stays available in the Plugin Center later</string>
     <string name="text_plugin_install_wizard_incompatible_confirm">The following plugins may be incompatible with this device (ABI or native page size). Continue anyway?\n\n%1$s</string>
     <string name="text_plugin_install_wizard_incompatible_hint">May be incompatible with this device</string>
     <string name="text_plugin_install_wizard_index_unavailable">The plugin index could not be loaded: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_confirmed">The installation was not confirmed</string>
     <string name="text_plugin_install_wizard_install_not_started">The installer did not start</string>
     <string name="text_plugin_install_wizard_install_with_count">Install (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_plugins">Installing plugins</string>
     <string name="text_plugin_install_wizard_installing_with_progress">Installing (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">Insufficient cache space: about %1$s is needed, %2$s available</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">Loading the plugin index...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">The index contains no installable plugin</string>
     <string name="text_plugin_install_wizard_no_selection">No plugin is selected</string>
-    <string name="text_plugin_install_wizard_profile">Profile</string>
-    <string name="text_plugin_install_wizard_profile_delete">Delete profile</string>
-    <string name="text_plugin_install_wizard_profile_delete_confirm">Delete profile \"%1$s\"?</string>
-    <string name="text_plugin_install_wizard_profile_deleted">Profile deleted</string>
-    <string name="text_plugin_install_wizard_profile_minimal">Minimal</string>
-    <string name="text_plugin_install_wizard_profile_name_exists">A profile with this name already exists</string>
-    <string name="text_plugin_install_wizard_profile_name_hint">Profile name</string>
-    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">Rename profile...</string>
-    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">Save selection as new profile...</string>
-    <string name="text_plugin_install_wizard_profile_saved">Profile saved</string>
-    <string name="text_plugin_install_wizard_profile_standard">Standard</string>
-    <string name="text_plugin_install_wizard_profile_update">Update this profile with the selection</string>
+    <string name="text_plugin_install_wizard_show_installed">Show installed plugins</string>
     <string name="text_plugin_install_wizard_summary_cancelled">Cancelled: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">Failed: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">Installed: %1$d</string>
     <string name="text_plugin_install_wizard_summary_title">Plugin installation finished</string>
+    <string name="text_plugin_install_wizard_waiting_for_download" tools:ignore="TypographyEllipsis">Waiting for the download...</string>
     <string name="text_plugin_instruction">Usage instruction</string>
     <string name="text_plugin_instruction_auto_mounted_hint">Hint:\n\nAuto-mount is currently enabled for this plugin, mounted at `%1$s`.\n\nTherefore, you can directly use `%2$s` without explicitly calling `plugins.load`.</string>
     <string name="text_plugin_instruction_example_title">Plugin usage example (assuming plugin has an `exec` method):</string>
@@ -2234,8 +2239,11 @@
     <string name="text_set_breakpoint">Set a breakpoint</string>
     <string name="text_set_editor_setting_action" formatted="true">Set %1$s</string>
     <string name="text_settings">Settings</string>
+    <string name="text_setup_wizards">Setup wizards</string>
+    <string name="text_setup_wizards_hint">Choose the wizards to run. The chosen wizards run one after another</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 mismatch.\n\nExpected: %1$s\nActual: %2$s</string>
     <string name="text_shizuku_access">Shizuku access</string>
+    <string name="text_shizuku_not_running">Shizuku is not running</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">Shizuku service may need to be run first</string>
     <string name="text_should_not_be_empty">Text cannot be empty</string>
     <string name="text_show">Show</string>
@@ -2290,6 +2298,7 @@
     <string name="text_start">Start</string>
     <string name="text_start_record">Start recording</string>
     <string name="text_start_running">Running</string>
+    <string name="text_start_wizard">Start wizard</string>
     <string name="text_state_or_province">State or Province</string>
     <string name="text_stop">Stop</string>
     <string name="text_stop_reconnecting">Stop reconnecting</string>
@@ -2451,8 +2460,21 @@
     <string name="text_waiting_for_vscode_approval">Waiting for approval in VSCode...</string>
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
+    <string name="text_welcome_to_app">Welcome to %1$s</string>
     <string name="text_window_state_changes_only">Window state changes only</string>
     <string name="text_windows">Windows</string>
+    <string name="text_wizard_profile">Profile</string>
+    <string name="text_wizard_profile_delete">Delete profile</string>
+    <string name="text_wizard_profile_delete_confirm">Delete profile \"%1$s\"?</string>
+    <string name="text_wizard_profile_deleted">Profile deleted</string>
+    <string name="text_wizard_profile_minimal">Minimal</string>
+    <string name="text_wizard_profile_name_exists">A profile with this name already exists</string>
+    <string name="text_wizard_profile_name_hint">Profile name</string>
+    <string name="text_wizard_profile_rename" tools:ignore="TypographyEllipsis">Rename profile...</string>
+    <string name="text_wizard_profile_save_as" tools:ignore="TypographyEllipsis">Save selection as new profile...</string>
+    <string name="text_wizard_profile_saved">Profile saved</string>
+    <string name="text_wizard_profile_standard">Standard</string>
+    <string name="text_wizard_profile_update">Update this profile with the selection</string>
     <string name="text_working_dir_path">Working directory path</string>
     <string name="text_working_dir_path_with_value">Working directory: %1$s</string>
     <string name="text_working_directory">Working directory</string>

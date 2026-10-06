@@ -131,11 +131,9 @@
     <string name="key_console_element_time_format" translatable="false">key_$_console_element_time_format</string>
     <string name="key_console_element_time_visible" translatable="false">key_$_console_element_time_visible</string>
     <string name="key_delete_permanently_also_clear_history" translatable="false">key_$_delete_permanently_also_clear_history</string>
-    <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
     <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
     <string name="key_dialog_layout_inspector_exit_tips" translatable="false">key_$_dialog_layout_inspector_exit_tips</string>
     <string name="key_dialog_log_entries_exported" translatable="false">key_$_dialog_log_entries_exported</string>
-    <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
     <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
     <string name="key_dialog_selected_abi_is_unavailable" translatable="false">key_$_dialog_selected_abi_is_unavailable</string>
     <string name="key_dialog_transparent_background_launcher_icon" translatable="false">key_$_dialog_transparent_background_launcher_icon</string>
@@ -254,7 +252,6 @@
     <string name="key_plugin_center_show_official_plugins" translatable="false">key_$_plugin_center_show_official_plugins</string>
     <string name="key_plugin_center_show_third_party_plugins" translatable="false">key_$_plugin_center_show_third_party_plugins</string>
     <string name="key_post_notifications_permission" translatable="false">key_$_post_notifications_permission</string>
-    <string name="key_post_notifications_permission_auto_request_done" translatable="false">key_$_post_notifications_permission_auto_request_done</string>
     <string name="key_post_notifications_permission_request_attempted" translatable="false">key_$_post_notifications_permission_request_attempted</string>
     <string name="key_pref_bundle_default_item" translatable="false">key_$_pref_bundle_default_item</string>
     <string name="key_pref_bundle_disabled_items" translatable="false">key_$_pref_bundle_disabled_items</string>
@@ -289,6 +286,8 @@
     <string name="key_server_mode_notify_connection_changes" translatable="false">key_$_server_mode_notify_connection_changes</string>
     <string name="key_server_mode_restore_on_launch" translatable="false">key_$_server_mode_restore_on_launch</string>
     <string name="key_server_socket_normally_closed" translatable="false">key_$_server_socket_normally_closed</string>
+    <string name="key_setup_wizard_welcome_done" translatable="false">key_$_setup_wizard_welcome_done</string>
+    <string name="key_setup_wizards" translatable="false">key_$_setup_wizards</string>
     <string name="key_stable_mode" translatable="false">key_$_stable_mode</string>
     <string name="key_theme_color" translatable="false">key_$_theme_color</string>
     <string name="key_theme_color_accent" translatable="false">key_$_theme_color_accent</string>

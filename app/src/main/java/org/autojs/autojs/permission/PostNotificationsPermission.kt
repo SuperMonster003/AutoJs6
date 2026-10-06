@@ -21,7 +21,7 @@ import java.util.WeakHashMap
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 24, 2026.
  * Modified by SuperMonster003 as of Jan 25, 2026.
  */
-class PostNotificationsPermission(override val context: Context) : PermissionItemHelper, AbleToUrge {
+class PostNotificationsPermission(override val context: Context) : PermissionItemHelper {
 
     override val isInMainThread = true
 
@@ -30,10 +30,10 @@ class PostNotificationsPermission(override val context: Context) : PermissionIte
     override fun request(): Boolean = false.also {
         // Manual request from UI interaction.
         // zh-CN: 来自 UI 手动触发的请求.
-        if (!requestForTiramisuAndAbove(isAuto = false)) config()
+        if (!requestForTiramisuAndAbove()) config()
     }
 
-    private fun requestForTiramisuAndAbove(isAuto: Boolean): Boolean {
+    private fun requestForTiramisuAndAbove(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
         when (val activity = context.findActivity()) {
             is FragmentActivity -> {
@@ -48,28 +48,22 @@ class PostNotificationsPermission(override val context: Context) : PermissionIte
                     ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS)
 
                 // If request has been attempted before and system will no longer show the permission dialog,
-                // redirect to settings for manual flow.
-                // zh-CN: 若之前已尝试过请求且系统不再弹出授权对话框, 则在手动流程下直接跳转设置页.
+                // redirect to settings.
+                // zh-CN: 若之前已尝试过请求且系统不再弹出授权对话框, 则直接跳转设置页.
                 if (hasAttemptedRequest && !shouldShowRationale) {
-                    if (!isAuto) config()
+                    config()
                     return true
                 }
 
                 val launchRequest = {
-                    // Mark request attempt (independent from auto request).
-                    // zh-CN: 记录已尝试发起系统权限请求 (与是否自动请求无关).
+                    // Mark request attempt.
+                    // zh-CN: 记录已尝试发起系统权限请求.
                     Pref.putBoolean(R.string.key_post_notifications_permission_request_attempted, true)
 
-                    // Mark auto request as done (only for auto flow).
-                    // zh-CN: 记录自动申请流程已执行 (仅用于抑制后续自动弹窗).
-                    if (isAuto) {
-                        Pref.putBoolean(R.string.key_post_notifications_permission_auto_request_done, true)
-                    }
-
-                    // Set one-shot callback to fallback to settings when denied (manual flow only).
-                    // zh-CN: 设置一次性回调; 若用户拒绝授权, 则在手动流程下回退到设置页.
+                    // Set one-shot callback to fallback to settings when denied.
+                    // zh-CN: 设置一次性回调; 若用户拒绝授权, 则回退到设置页.
                     setPostNotificationsResultCallback(activity) { granted ->
-                        if (!granted && !isAuto) {
+                        if (!granted) {
                             config()
                         }
                     }
@@ -120,22 +114,6 @@ class PostNotificationsPermission(override val context: Context) : PermissionIte
     override fun revoke(): Boolean = false.also { config() }
 
     fun config() = NotificationUtils.launchSettings()
-
-    override fun urge() {
-        // Auto request on app start (should not jump to settings automatically).
-        // zh-CN: 应用启动时的自动请求 (不应自动跳转设置页).
-        requestForTiramisuAndAbove(isAuto = true)
-    }
-
-    override fun urgeIfNeeded() {
-        // Auto request should happen only once after fresh install / clear data.
-        // zh-CN: 自动请求仅在全新安装或清除数据后的首次启动执行一次.
-        if (!Pref.getBoolean(R.string.key_post_notifications_permission_auto_request_done, false)) {
-            if (!has()) {
-                urge()
-            }
-        }
-    }
 
     companion object {
 

@@ -185,6 +185,7 @@
     <string name="dialog_button_clear">مسح</string>
     <string name="dialog_button_clear_all">مسح الكل</string>
     <string name="dialog_button_clear_items">مسح</string>
+    <string name="dialog_button_close">إغلاق</string>
     <string name="dialog_button_confirm">نعم</string>
     <string name="dialog_button_connect">اتصال</string>
     <string name="dialog_button_continue">@string/text_continue</string>
@@ -775,6 +776,7 @@
     <string name="summary_restore_connection_on_launch">عند بدء التطبيق, إعادة الاتصال بآخر خادم ما لم يتم قطع الاتصال صراحة</string>
     <string name="summary_restore_server_on_launch">عند بدء التطبيق, الاستماع مجددا ما لم يتم إيقاف الخادم صراحة</string>
     <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
+    <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
     <string name="text_and_n_more">... و %d اخرى</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
     <string name="text_batch_restore_summary">تمت الاستعادة %1$d, تم التخطي %2$d, فشل %3$d</string>
@@ -902,7 +904,6 @@
     <string name="text_alias_password">كلمة مرور الاسم المستعار</string>
     <string name="text_all">الكل</string>
     <string name="text_all_files_access">جميع الملفات وصول</string>
-    <string name="text_all_files_access_is_needed">هناك حاجة إلى \"All Files Access\" للوصول إلى ملفات البرنامج النصي على الهاتف</string>
     <string name="text_all_history_entries">كل ادخالات السجل</string>
     <string name="text_all_items_cleared">تم مسح جميع العناصر</string>
     <string name="text_all_settings">جميع الإعدادات</string>
@@ -1290,7 +1291,6 @@
     <string name="text_disconnect_all_clients">قطع اتصال جميع العملاء</string>
     <string name="text_disconnected">غير متصل</string>
     <string name="text_display_over_other_app">عرض على تطبيقات أخرى</string>
-    <string name="text_display_over_other_app_is_recommended">يوصى بإذن \"العرض عبر التطبيقات الأخرى\" لعرض جميع عناصر واجهة المستخدم بشكل صحيح</string>
     <string name="text_disposable_task">مهمة يمكن التخلص منها</string>
     <string name="text_disposable_task_time_before_now">يجب أن يكون الوقت متأخراً الآن</string>
     <string name="text_do_not_ask_again_for_this_version">لا تسأل مرة أخرى عن هذا الإصدار</string>
@@ -1928,6 +1928,16 @@
     <string name="text_permission_revoked_with_root">إلغاء الإذن (مع الجذر)</string>
     <string name="text_permission_revoked_with_shizuku">تم إبطال الإذن (مع Shizuku)</string>
     <string name="text_permission_test">اختبار بيرم</string>
+    <string name="text_permission_wizard">معالج الأذونات</string>
+    <string name="text_permission_wizard_all_granted">تم منح جميع الأذونات المحددة</string>
+    <string name="text_permission_wizard_grant">منح</string>
+    <string name="text_permission_wizard_grant_with_count">منح (%1$d)</string>
+    <string name="text_permission_wizard_hint">حدد الأذونات المراد منحها. تُطلب واحدًا تلو الآخر, ويمكن منح كل منها لاحقًا من الدرج الرئيسي</string>
+    <string name="text_permission_wizard_not_granted_summary">لم يتم منح الأذونات التالية بعد. يمكن منحها لاحقًا من الدرج الرئيسي:\n\n%1$s</string>
+    <string name="text_permission_wizard_reminder">أذونات غير ممنوحة: %1$s</string>
+    <string name="text_permission_wizard_requires_root_or_shizuku">يتطلب Root أو Shizuku</string>
+    <string name="text_permission_wizard_show_granted">عرض الأذونات الممنوحة</string>
+    <string name="text_permission_wizard_step">الإذن (%1$d/%2$d): %3$s</string>
     <string name="text_permissions">أذونات</string>
     <string name="text_permissions_list">الأذونات</string>
     <string name="text_pin">تثبيت</string>
@@ -1956,6 +1966,8 @@
     <string name="text_plugin_details">تفاصيل الملحق</string>
     <string name="text_plugin_hidden_manage">إدارة المكونات الإضافية المخفية</string>
     <string name="text_plugin_install_wizard">معالج تثبيت الإضافات</string>
+    <string name="text_plugin_install_wizard_all_installed">تم تثبيت جميع الإضافات المحددة (%1$d)</string>
+    <string name="text_plugin_install_wizard_allow_unknown_apps">اسمح لـ AutoJs6 بتثبيت التطبيقات غير المعروفة, ثم عُد للمتابعة</string>
     <string name="text_plugin_install_wizard_cancel_remaining">إلغاء المتبقي</string>
     <string name="text_plugin_install_wizard_category_accessibility">خدمة إمكانية الوصول</string>
     <string name="text_plugin_install_wizard_category_apk_builder">تغليف التطبيقات</string>
@@ -1971,33 +1983,26 @@
     <string name="text_plugin_install_wizard_category_ui">واجهة المستخدم</string>
     <string name="text_plugin_install_wizard_confirm_in_system_installer">أكّد التثبيت في مثبّت النظام. ستبدأ الإضافة التالية تلقائيًا بعد ذلك</string>
     <string name="text_plugin_install_wizard_downloading_with_progress">جارٍ التنزيل (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_downloads_finished">اكتملت جميع التنزيلات</string>
     <string name="text_plugin_install_wizard_hint">حدد الإضافات التي تحتاجها وثبّتها دفعة واحدة. تبقى كل الإضافات متاحة لاحقًا في مركز الإضافات</string>
     <string name="text_plugin_install_wizard_incompatible_confirm">قد لا تكون الإضافات التالية متوافقة مع هذا الجهاز (ABI أو حجم الصفحة الأصلي). هل تريد المتابعة على أي حال؟\n\n%1$s</string>
     <string name="text_plugin_install_wizard_incompatible_hint">قد لا يكون متوافقًا مع هذا الجهاز</string>
     <string name="text_plugin_install_wizard_index_unavailable">تعذر تحميل فهرس الإضافات: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_confirmed">لم يتم تأكيد التثبيت</string>
     <string name="text_plugin_install_wizard_install_not_started">لم يبدأ المثبّت</string>
     <string name="text_plugin_install_wizard_install_with_count">تثبيت (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_plugins">جارٍ تثبيت الإضافات</string>
     <string name="text_plugin_install_wizard_installing_with_progress">جارٍ التثبيت (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">مساحة ذاكرة التخزين المؤقت غير كافية: مطلوب حوالي %1$s، المتاح %2$s</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">جارٍ تحميل فهرس الإضافات...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">لا يحتوي الفهرس على أي إضافة قابلة للتثبيت</string>
     <string name="text_plugin_install_wizard_no_selection">لم يتم تحديد أي إضافة</string>
-    <string name="text_plugin_install_wizard_profile">الملف الشخصي</string>
-    <string name="text_plugin_install_wizard_profile_delete">حذف الملف الشخصي</string>
-    <string name="text_plugin_install_wizard_profile_delete_confirm">هل تريد حذف الملف الشخصي \"%1$s\"؟</string>
-    <string name="text_plugin_install_wizard_profile_deleted">تم حذف الملف الشخصي</string>
-    <string name="text_plugin_install_wizard_profile_minimal">الحد الأدنى</string>
-    <string name="text_plugin_install_wizard_profile_name_exists">يوجد ملف شخصي بهذا الاسم بالفعل</string>
-    <string name="text_plugin_install_wizard_profile_name_hint">اسم الملف الشخصي</string>
-    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">إعادة تسمية الملف الشخصي...</string>
-    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">حفظ التحديد كملف شخصي جديد...</string>
-    <string name="text_plugin_install_wizard_profile_saved">تم حفظ الملف الشخصي</string>
-    <string name="text_plugin_install_wizard_profile_standard">قياسي</string>
-    <string name="text_plugin_install_wizard_profile_update">تحديث هذا الملف الشخصي بالتحديد الحالي</string>
+    <string name="text_plugin_install_wizard_show_installed">عرض الإضافات المثبتة</string>
     <string name="text_plugin_install_wizard_summary_cancelled">تم الإلغاء: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">فشل: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">تم التثبيت: %1$d</string>
     <string name="text_plugin_install_wizard_summary_title">اكتمل تثبيت الإضافات</string>
+    <string name="text_plugin_install_wizard_waiting_for_download" tools:ignore="TypographyEllipsis">في انتظار التنزيل...</string>
     <string name="text_plugin_instruction">تعليمات استخدام الاضافة</string>
     <string name="text_plugin_instruction_auto_mounted_hint">تلميح:\n\nالتحميل التلقائي مفعّل حاليا لهذا المكون الإضافي, ومسار التحميل هو `%1$s`.\n\nلذلك, يمكنك استخدام `%2$s` مباشرة دون استدعاء `plugins.load` بشكل صريح.</string>
     <string name="text_plugin_instruction_example_title">مثال على استخدام الاضافة (على افتراض ان الاضافة تحتوي على طريقة `exec`): </string>
@@ -2239,8 +2244,11 @@
     <string name="text_set_breakpoint">ضبط نقطة توقف</string>
     <string name="text_set_editor_setting_action" formatted="true">تعيين %1$s</string>
     <string name="text_settings">إعدادات</string>
+    <string name="text_setup_wizards">معالجات الإعداد</string>
+    <string name="text_setup_wizards_hint">اختر المعالجات المراد تشغيلها. تعمل المعالجات المختارة واحدًا تلو الآخر</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">عدم تطابق SHA-256.\n\nالمتوقّع: %1$s\nالفعلي: %2$s</string>
     <string name="text_shizuku_access">وصول Shizuku</string>
+    <string name="text_shizuku_not_running">Shizuku لا يعمل</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">قد يلزم تشغيل خدمة Shizuku أولاً</string>
     <string name="text_should_not_be_empty">النص لا يمكن أن يكون فارغًا</string>
     <string name="text_show">إظهار</string>
@@ -2295,6 +2303,7 @@
     <string name="text_start">بدء</string>
     <string name="text_start_record">ابدأ التسجيل</string>
     <string name="text_start_running">ادارة</string>
+    <string name="text_start_wizard">بدء المعالج</string>
     <string name="text_state_or_province">الولاية أو المقاطعة</string>
     <string name="text_stop">قف</string>
     <string name="text_stop_reconnecting">إيقاف إعادة الاتصال</string>
@@ -2456,8 +2465,21 @@
     <string name="text_waiting_for_vscode_approval">في انتظار الموافقة في VSCode...</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>
     <string name="text_weekly_task_should_check_day_of_week">يجب اختيار يوم واحد على الأقل</string>
+    <string name="text_welcome_to_app">مرحبًا بك في %1$s</string>
     <string name="text_window_state_changes_only">تغييرات حالة النافذة فقط</string>
     <string name="text_windows">النوافذ</string>
+    <string name="text_wizard_profile">الملف الشخصي</string>
+    <string name="text_wizard_profile_delete">حذف الملف الشخصي</string>
+    <string name="text_wizard_profile_delete_confirm">هل تريد حذف الملف الشخصي \"%1$s\"؟</string>
+    <string name="text_wizard_profile_deleted">تم حذف الملف الشخصي</string>
+    <string name="text_wizard_profile_minimal">الحد الأدنى</string>
+    <string name="text_wizard_profile_name_exists">يوجد ملف شخصي بهذا الاسم بالفعل</string>
+    <string name="text_wizard_profile_name_hint">اسم الملف الشخصي</string>
+    <string name="text_wizard_profile_rename" tools:ignore="TypographyEllipsis">إعادة تسمية الملف الشخصي...</string>
+    <string name="text_wizard_profile_save_as" tools:ignore="TypographyEllipsis">حفظ التحديد كملف شخصي جديد...</string>
+    <string name="text_wizard_profile_saved">تم حفظ الملف الشخصي</string>
+    <string name="text_wizard_profile_standard">قياسي</string>
+    <string name="text_wizard_profile_update">تحديث هذا الملف الشخصي بالتحديد الحالي</string>
     <string name="text_working_dir_path">مسار دليل العمل</string>
     <string name="text_working_dir_path_with_value">دليل العمل: %1$s</string>
     <string name="text_working_directory">دليل العمل</string>

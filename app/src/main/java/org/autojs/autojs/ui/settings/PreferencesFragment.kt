@@ -15,6 +15,7 @@ import org.autojs.autojs.theme.preference.LocalNetworkPermissionSwitchPreference
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.error.ProcessExitHistoryActivity
+import org.autojs.autojs.ui.wizard.SetupWizards
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 
@@ -25,6 +26,10 @@ class PreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.OnShar
         setPreferencesFromResource(R.xml.fragment_preferences, rootKey)
         findPreference<Preference>("process_exit_history")?.setOnPreferenceClickListener {
             startActivity(Intent(requireContext(), ProcessExitHistoryActivity::class.java))
+            true
+        }
+        findPreference<Preference>(getString(R.string.key_setup_wizards))?.setOnPreferenceClickListener {
+            SetupWizards.showChooser(requireActivity())
             true
         }
     }

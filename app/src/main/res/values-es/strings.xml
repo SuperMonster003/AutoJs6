@@ -183,6 +183,7 @@
     <string name="dialog_button_clear">Borrar</string>
     <string name="dialog_button_clear_all">Borrar todo</string>
     <string name="dialog_button_clear_items">Borrar</string>
+    <string name="dialog_button_close">Cerrar</string>
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Conectar</string>
     <string name="dialog_button_continue">@string/text_continue</string>
@@ -773,6 +774,7 @@
     <string name="summary_restore_connection_on_launch">Al iniciar la aplicación, reconectar con el último servidor, salvo que la conexión se haya cerrado explícitamente</string>
     <string name="summary_restore_server_on_launch">Al iniciar la aplicación, volver a escuchar, salvo que el servidor se haya detenido explícitamente</string>
     <string name="summary_retention_policies">Días de retención y límites de tamaño del historial de versiones, la papelera y los borradores de emergencia</string>
+    <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
     <string name="text_and_n_more">... y %d más</string>
     <string name="text_auto_reconnect">Reconexión automática</string>
     <string name="text_batch_restore_summary">Restaurados %1$d, omitidos %2$d, fallidos %3$d</string>
@@ -900,7 +902,6 @@
     <string name="text_alias_password">Contraseña del alias</string>
     <string name="text_all">Todos</string>
     <string name="text_all_files_access">Acceso a todos los archivos</string>
-    <string name="text_all_files_access_is_needed">Se necesita \"All files access\" para acceder a los archivos de script en el teléfono</string>
     <string name="text_all_history_entries">Todas las entradas del historial</string>
     <string name="text_all_items_cleared">Todos los elementos han sido borrados</string>
     <string name="text_all_settings">Todos los ajustes</string>
@@ -1288,7 +1289,6 @@
     <string name="text_disconnect_all_clients">Desconectar todos los clientes</string>
     <string name="text_disconnected">Desconectado</string>
     <string name="text_display_over_other_app">Mostrar sobre otras aplicaciones</string>
-    <string name="text_display_over_other_app_is_recommended">Se recomienda el permiso \"Mostrar sobre otras aplicaciones\" para que todos los widgets se muestren correctamente</string>
     <string name="text_disposable_task">Tarea desechable</string>
     <string name="text_disposable_task_time_before_now">La hora debería ser posterior a la actual</string>
     <string name="text_do_not_ask_again_for_this_version">No volver a pedir esta versión</string>
@@ -1926,6 +1926,16 @@
     <string name="text_permission_revoked_with_root">Permiso revocado (con root)</string>
     <string name="text_permission_revoked_with_shizuku">Permiso revocado (con Shizuku)</string>
     <string name="text_permission_test">Prueba de permisos</string>
+    <string name="text_permission_wizard">Asistente de permisos</string>
+    <string name="text_permission_wizard_all_granted">Se concedieron todos los permisos seleccionados</string>
+    <string name="text_permission_wizard_grant">Conceder</string>
+    <string name="text_permission_wizard_grant_with_count">Conceder (%1$d)</string>
+    <string name="text_permission_wizard_hint">Marca los permisos que quieres conceder. Se solicitan uno tras otro y cada uno puede concederse más tarde desde el panel lateral de inicio</string>
+    <string name="text_permission_wizard_not_granted_summary">Los siguientes permisos aún no se han concedido. Pueden concederse más tarde desde el panel lateral de inicio:\n\n%1$s</string>
+    <string name="text_permission_wizard_reminder">Permisos no concedidos: %1$s</string>
+    <string name="text_permission_wizard_requires_root_or_shizuku">Requiere Root o Shizuku</string>
+    <string name="text_permission_wizard_show_granted">Mostrar permisos concedidos</string>
+    <string name="text_permission_wizard_step">Permiso (%1$d/%2$d): %3$s</string>
     <string name="text_permissions">Permisos</string>
     <string name="text_permissions_list">Permisos</string>
     <string name="text_pin">Fijar</string>
@@ -1954,6 +1964,8 @@
     <string name="text_plugin_details">Detalles del complemento</string>
     <string name="text_plugin_hidden_manage">Gestionar plugins ocultos</string>
     <string name="text_plugin_install_wizard">Asistente de instalación de plugins</string>
+    <string name="text_plugin_install_wizard_all_installed">Todos los plugins seleccionados están instalados (%1$d)</string>
+    <string name="text_plugin_install_wizard_allow_unknown_apps">Permite que AutoJs6 instale apps desconocidas y vuelve para continuar</string>
     <string name="text_plugin_install_wizard_cancel_remaining">Cancelar los restantes</string>
     <string name="text_plugin_install_wizard_category_accessibility">Servicio de accesibilidad</string>
     <string name="text_plugin_install_wizard_category_apk_builder">Empaquetado de aplicaciones</string>
@@ -1969,33 +1981,26 @@
     <string name="text_plugin_install_wizard_category_ui">UI</string>
     <string name="text_plugin_install_wizard_confirm_in_system_installer">Confirma la instalación en el instalador del sistema. El siguiente plugin comenzará automáticamente después</string>
     <string name="text_plugin_install_wizard_downloading_with_progress">Descargando (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_downloads_finished">Todas las descargas han finalizado</string>
     <string name="text_plugin_install_wizard_hint">Marca los plugins que necesitas e instálalos en un solo lote. Todos seguirán disponibles en el Centro de plugins</string>
     <string name="text_plugin_install_wizard_incompatible_confirm">Los siguientes plugins pueden no ser compatibles con este dispositivo (ABI o tamaño de página nativo). ¿Continuar de todos modos?\n\n%1$s</string>
     <string name="text_plugin_install_wizard_incompatible_hint">Puede no ser compatible con este dispositivo</string>
     <string name="text_plugin_install_wizard_index_unavailable">No se pudo cargar el índice de plugins: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_confirmed">No se confirmó la instalación</string>
     <string name="text_plugin_install_wizard_install_not_started">El instalador no se inició</string>
     <string name="text_plugin_install_wizard_install_with_count">Instalar (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_plugins">Instalando plugins</string>
     <string name="text_plugin_install_wizard_installing_with_progress">Instalando (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">Espacio de caché insuficiente: se necesitan unos %1$s, disponibles %2$s</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">Cargando el índice de plugins...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">El índice no contiene ningún plugin instalable</string>
     <string name="text_plugin_install_wizard_no_selection">No se ha seleccionado ningún plugin</string>
-    <string name="text_plugin_install_wizard_profile">Perfil</string>
-    <string name="text_plugin_install_wizard_profile_delete">Eliminar perfil</string>
-    <string name="text_plugin_install_wizard_profile_delete_confirm">¿Eliminar el perfil \"%1$s\"?</string>
-    <string name="text_plugin_install_wizard_profile_deleted">Perfil eliminado</string>
-    <string name="text_plugin_install_wizard_profile_minimal">Mínimo</string>
-    <string name="text_plugin_install_wizard_profile_name_exists">Ya existe un perfil con este nombre</string>
-    <string name="text_plugin_install_wizard_profile_name_hint">Nombre del perfil</string>
-    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">Cambiar el nombre del perfil...</string>
-    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">Guardar la selección como nuevo perfil...</string>
-    <string name="text_plugin_install_wizard_profile_saved">Perfil guardado</string>
-    <string name="text_plugin_install_wizard_profile_standard">Estándar</string>
-    <string name="text_plugin_install_wizard_profile_update">Actualizar este perfil con la selección</string>
+    <string name="text_plugin_install_wizard_show_installed">Mostrar plugins instalados</string>
     <string name="text_plugin_install_wizard_summary_cancelled">Cancelados: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">Fallidos: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">Instalados: %1$d</string>
     <string name="text_plugin_install_wizard_summary_title">Instalación de plugins finalizada</string>
+    <string name="text_plugin_install_wizard_waiting_for_download" tools:ignore="TypographyEllipsis">Esperando la descarga...</string>
     <string name="text_plugin_instruction">Instrucciones de uso</string>
     <string name="text_plugin_instruction_auto_mounted_hint">Sugerencia:\n\nEl montaje automático está activado para este plugin. La ruta de montaje es `%1$s`.\n\nPor lo tanto, puedes usar `%2$s` directamente sin llamar explícitamente a `plugins.load`.</string>
     <string name="text_plugin_instruction_example_title">Ejemplo de uso del plugin (suponiendo que el plugin tiene un metodo `exec`): </string>
@@ -2237,8 +2242,11 @@
     <string name="text_set_breakpoint">Establecer un punto de interrupción</string>
     <string name="text_set_editor_setting_action" formatted="true">Establecer %1$s</string>
     <string name="text_settings">Configuración</string>
+    <string name="text_setup_wizards">Asistentes de configuración</string>
+    <string name="text_setup_wizards_hint">Elige los asistentes que quieres ejecutar. Los elegidos se ejecutarán uno tras otro</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">Discordancia de SHA-256.\n\nEsperado: %1$s\nReal: %2$s</string>
     <string name="text_shizuku_access">Permisos de Shizuku</string>
+    <string name="text_shizuku_not_running">Shizuku no se está ejecutando</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">Puede que necesite ejecutar primero el servicio Shizuku</string>
     <string name="text_should_not_be_empty">El texto no puede estar vacío</string>
     <string name="text_show">Mostrar</string>
@@ -2293,6 +2301,7 @@
     <string name="text_start">Iniciar</string>
     <string name="text_start_record">Comenzar a grabar</string>
     <string name="text_start_running">Ejecutando</string>
+    <string name="text_start_wizard">Iniciar asistente</string>
     <string name="text_state_or_province">Estado o provincia</string>
     <string name="text_stop">Detener</string>
     <string name="text_stop_reconnecting">Dejar de reconectar</string>
@@ -2454,8 +2463,21 @@
     <string name="text_waiting_for_vscode_approval">Esperando la aprobación en VSCode...</string>
     <string name="text_weekly_task">Tarea semanal</string>
     <string name="text_weekly_task_should_check_day_of_week">Debe seleccionarse al menos un día</string>
+    <string name="text_welcome_to_app">Te damos la bienvenida a %1$s</string>
     <string name="text_window_state_changes_only">Solo cambios de estado de ventana</string>
     <string name="text_windows">Ventanas</string>
+    <string name="text_wizard_profile">Perfil</string>
+    <string name="text_wizard_profile_delete">Eliminar perfil</string>
+    <string name="text_wizard_profile_delete_confirm">¿Eliminar el perfil \"%1$s\"?</string>
+    <string name="text_wizard_profile_deleted">Perfil eliminado</string>
+    <string name="text_wizard_profile_minimal">Mínimo</string>
+    <string name="text_wizard_profile_name_exists">Ya existe un perfil con este nombre</string>
+    <string name="text_wizard_profile_name_hint">Nombre del perfil</string>
+    <string name="text_wizard_profile_rename" tools:ignore="TypographyEllipsis">Cambiar el nombre del perfil...</string>
+    <string name="text_wizard_profile_save_as" tools:ignore="TypographyEllipsis">Guardar la selección como nuevo perfil...</string>
+    <string name="text_wizard_profile_saved">Perfil guardado</string>
+    <string name="text_wizard_profile_standard">Estándar</string>
+    <string name="text_wizard_profile_update">Actualizar este perfil con la selección</string>
     <string name="text_working_dir_path">Ruta del directorio de trabajo</string>
     <string name="text_working_dir_path_with_value">Ruta del directorio de trabajo: %1$s</string>
     <string name="text_working_directory">Directorio de trabajo</string>

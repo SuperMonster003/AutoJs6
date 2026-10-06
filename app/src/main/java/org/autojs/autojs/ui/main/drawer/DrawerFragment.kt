@@ -76,6 +76,7 @@ import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity
 import org.autojs.autojs.ui.storage.TrashActivity
 import org.autojs.autojs.ui.storage.VersionHistoryActivity
+import org.autojs.autojs.ui.wizard.SetupWizards
 import org.autojs.autojs.util.ActivityLaunchOptions
 import org.autojs.autojs.util.IntentUtils.App.exit
 import org.autojs.autojs.util.IntentUtils.App.restart
@@ -1053,7 +1054,9 @@ open class DrawerFragment : Fragment() {
             mClientModeItem,
             mServerModeItem,
             mMcpServerItem,
-            DrawerMenuGroup(R.string.text_permissions),
+            DrawerMenuGroup(R.string.text_permissions, R.drawable.ic_plugin_install_wizard, R.string.text_permission_wizard) {
+                SetupWizards.showPermissionWizard(mActivity)
+            },
             mNotificationPostItem,
             mLocalNetworkPermissionItem,
             mNotificationAccessItem,

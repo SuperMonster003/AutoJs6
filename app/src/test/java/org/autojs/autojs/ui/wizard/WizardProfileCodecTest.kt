@@ -1,37 +1,56 @@
-package org.autojs.autojs.core.plugin.center.wizard
+package org.autojs.autojs.ui.wizard
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class PluginInstallWizardProfileCodecTest {
+class WizardProfileCodecTest {
+
+    private val codec = WizardProfileCodec(membersKey = "packages")
 
     @Test
-    fun roundTripKeepsIdNameAndPackageOrder() {
-        val first = PluginInstallWizardProfile.custom("OCR set", linkedSetOf("b.pkg", "a.pkg"), id = "custom-1")
-        val second = PluginInstallWizardProfile.custom("  Runtime set ", emptySet(), id = "custom-2")
+    fun roundTripKeepsIdNameAndMemberOrder() {
+        val first = WizardProfile.custom("OCR set", linkedSetOf("b.pkg", "a.pkg"), id = "custom-1")
+        val second = WizardProfile.custom("  Runtime set ", emptySet(), id = "custom-2")
 
-        val decoded = PluginInstallWizardProfileCodec.decode(PluginInstallWizardProfileCodec.encode(listOf(first, second)))
+        val decoded = codec.decode(codec.encode(listOf(first, second)))
 
         assertEquals(listOf(first, second.copy(customName = "Runtime set")), decoded)
-        assertEquals(listOf("b.pkg", "a.pkg"), decoded[0].packageNames.toList())
+        assertEquals(listOf("b.pkg", "a.pkg"), decoded[0].memberIds.toList())
         assertTrue(decoded.all { it.isCustom })
     }
 
     @Test
     fun builtInProfilesAreNeverPersisted() {
-        val json = PluginInstallWizardProfileCodec.encode(
-            listOf(PluginInstallWizardProfile.STANDARD, PluginInstallWizardProfile.custom("x", setOf("a"), id = "custom-x")),
-        )
-        assertEquals(listOf("custom-x"), PluginInstallWizardProfileCodec.decode(json).map { it.id })
+        val json = codec.encode(listOf(WizardProfile.STANDARD, WizardProfile.custom("x", setOf("a"), id = "custom-x")))
+        assertEquals(listOf("custom-x"), codec.decode(json).map { it.id })
+    }
+
+    @Test
+    fun documentsOfThePluginWizardStayReadable() {
+        // Written by the plugin install wizard before profiles were shared between wizards.
+        // zh-CN: 由各向导共用配置之前的插件安装向导写入.
+        val json = """[{"id":"custom-1","name":"Work","packages":["org.autojs.a","org.autojs.b"]}]"""
+        val decoded = codec.decode(json)
+        assertEquals(listOf("custom-1"), decoded.map { it.id })
+        assertEquals(listOf("org.autojs.a", "org.autojs.b"), decoded[0].memberIds.toList())
+    }
+
+    @Test
+    fun membersKeyIsConfigurable() {
+        val permissions = WizardProfileCodec(membersKey = "permissions")
+        val json = permissions.encode(listOf(WizardProfile.custom("Mine", linkedSetOf("all_files_access"), id = "custom-p")))
+        assertTrue(json.contains("\"permissions\""))
+        assertEquals(setOf("all_files_access"), permissions.decode(json).single().memberIds)
+        assertEquals(emptySet<String>(), codec.decode(json).single().memberIds)
     }
 
     @Test
     fun decodeToleratesGarbage() {
-        assertEquals(emptyList<PluginInstallWizardProfile>(), PluginInstallWizardProfileCodec.decode(null))
-        assertEquals(emptyList<PluginInstallWizardProfile>(), PluginInstallWizardProfileCodec.decode(""))
-        assertEquals(emptyList<PluginInstallWizardProfile>(), PluginInstallWizardProfileCodec.decode("{not json"))
-        assertEquals(emptyList<PluginInstallWizardProfile>(), PluginInstallWizardProfileCodec.decode("{\"id\":\"x\"}"))
+        assertEquals(emptyList<WizardProfile>(), codec.decode(null))
+        assertEquals(emptyList<WizardProfile>(), codec.decode(""))
+        assertEquals(emptyList<WizardProfile>(), codec.decode("{not json"))
+        assertEquals(emptyList<WizardProfile>(), codec.decode("{\"id\":\"x\"}"))
     }
 
     @Test
@@ -47,11 +66,11 @@ class PluginInstallWizardProfileCodecTest {
             ]
         """.trimIndent()
 
-        val decoded = PluginInstallWizardProfileCodec.decode(json)
+        val decoded = codec.decode(json)
 
         assertEquals(listOf("custom-1", "custom-4"), decoded.map { it.id })
-        assertEquals(setOf("a", "3"), decoded[0].packageNames)
-        assertEquals(emptySet<String>(), decoded[1].packageNames)
+        assertEquals(setOf("a", "3"), decoded[0].memberIds)
+        assertEquals(emptySet<String>(), decoded[1].memberIds)
     }
 
 }

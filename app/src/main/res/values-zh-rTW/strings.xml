@@ -180,6 +180,7 @@
     <string name="dialog_button_clear">清空</string>
     <string name="dialog_button_clear_all">清空全部</string>
     <string name="dialog_button_clear_items">清空記錄</string>
+    <string name="dialog_button_close">關閉</string>
     <string name="dialog_button_confirm">確定</string>
     <string name="dialog_button_connect">連線</string>
     <string name="dialog_button_continue">@string/text_continue</string>
@@ -770,6 +771,7 @@
     <string name="summary_restore_connection_on_launch">應用程式啟動時重新連線上次的伺服端 (顯式斷開連線後除外)</string>
     <string name="summary_restore_server_on_launch">應用程式啟動時重新開始監聽 (顯式停止後除外)</string>
     <string name="summary_retention_policies">版本歷史, 回收站與緊急草稿的保留天數與容量上限</string>
+    <string name="summary_setup_wizards">授予常用許可權及安裝官方外掛</string>
     <string name="text_and_n_more">... 及其他 %d 項</string>
     <string name="text_auto_reconnect">自動重連</string>
     <string name="text_batch_restore_summary">已還原 %1$d, 略過 %2$d, 失敗 %3$d</string>
@@ -897,7 +899,6 @@
     <string name="text_alias_password">別名密碼</string>
     <string name="text_all">全部</string>
     <string name="text_all_files_access">所有檔案管理許可權</string>
-    <string name="text_all_files_access_is_needed">需要授予 \"所有檔案管理許可權\" 才能正常讀寫指令碼檔案</string>
     <string name="text_all_history_entries">全部歷史記錄</string>
     <string name="text_all_items_cleared">全部記錄已清空</string>
     <string name="text_all_settings">全部設定</string>
@@ -1285,7 +1286,6 @@
     <string name="text_disconnect_all_clients">斷開所有客戶端</string>
     <string name="text_disconnected">已斷開</string>
     <string name="text_display_over_other_app">顯示在其他應用上層</string>
-    <string name="text_display_over_other_app_is_recommended">建議授予 \"顯示在其他應用上層\" 許可權以確保應用視窗元件正常顯示</string>
     <string name="text_disposable_task">一次性任務</string>
     <string name="text_disposable_task_time_before_now">任務時間小於當前時間</string>
     <string name="text_do_not_ask_again_for_this_version">此版本不再提示</string>
@@ -1923,6 +1923,16 @@
     <string name="text_permission_revoked_with_root">已撤消授權 (使用 root)</string>
     <string name="text_permission_revoked_with_shizuku">已撤消授權 (使用 Shizuku)</string>
     <string name="text_permission_test">許可權測試</string>
+    <string name="text_permission_wizard">許可權申請精靈</string>
+    <string name="text_permission_wizard_all_granted">所選許可權已全部授予</string>
+    <string name="text_permission_wizard_grant">授予</string>
+    <string name="text_permission_wizard_grant_with_count">授予 (%1$d)</string>
+    <string name="text_permission_wizard_hint">勾選需要授予的許可權, 將依次申請, 之後仍可隨時在主頁抽屜中授予</string>
+    <string name="text_permission_wizard_not_granted_summary">以下許可權尚未授予, 之後可在主頁抽屜中授予:\n\n%1$s</string>
+    <string name="text_permission_wizard_reminder">尚未授予許可權: %1$s</string>
+    <string name="text_permission_wizard_requires_root_or_shizuku">需要 Root 或 Shizuku 許可權</string>
+    <string name="text_permission_wizard_show_granted">顯示已授予許可權</string>
+    <string name="text_permission_wizard_step">許可權申請 (%1$d/%2$d): %3$s</string>
     <string name="text_permissions">許可權</string>
     <string name="text_permissions_list">許可權列表</string>
     <string name="text_pin">固定</string>
@@ -1951,6 +1961,8 @@
     <string name="text_plugin_details">外掛詳情</string>
     <string name="text_plugin_hidden_manage">管理隱藏外掛</string>
     <string name="text_plugin_install_wizard">外掛安裝精靈</string>
+    <string name="text_plugin_install_wizard_all_installed">所選外掛已全部安裝 (%1$d)</string>
+    <string name="text_plugin_install_wizard_allow_unknown_apps">請允許 AutoJs6 安裝未知應用程式, 返回後繼續安裝</string>
     <string name="text_plugin_install_wizard_cancel_remaining">取消剩餘</string>
     <string name="text_plugin_install_wizard_category_accessibility">無障礙服務</string>
     <string name="text_plugin_install_wizard_category_apk_builder">打包應用程式</string>
@@ -1966,33 +1978,26 @@
     <string name="text_plugin_install_wizard_category_ui">UI</string>
     <string name="text_plugin_install_wizard_confirm_in_system_installer">請在系統安裝介面中確認安裝, 完成後將自動開始下一個外掛</string>
     <string name="text_plugin_install_wizard_downloading_with_progress">正在下載 (%1$d/%2$d)</string>
+    <string name="text_plugin_install_wizard_downloads_finished">下載已全部完成</string>
     <string name="text_plugin_install_wizard_hint">勾選需要的外掛後一次性批次安裝, 之後仍可隨時在外掛中心安裝</string>
     <string name="text_plugin_install_wizard_incompatible_confirm">以下外掛可能與目前裝置不相容 (ABI 或原生分頁大小), 是否繼續?\n\n%1$s</string>
     <string name="text_plugin_install_wizard_incompatible_hint">可能與目前裝置不相容</string>
     <string name="text_plugin_install_wizard_index_unavailable">外掛索引載入失敗: %1$s</string>
+    <string name="text_plugin_install_wizard_install_not_confirmed">未確認安裝</string>
     <string name="text_plugin_install_wizard_install_not_started">安裝程式未啟動</string>
     <string name="text_plugin_install_wizard_install_with_count">安裝 (%1$d)</string>
+    <string name="text_plugin_install_wizard_installing_plugins">正在安裝外掛</string>
     <string name="text_plugin_install_wizard_installing_with_progress">正在安裝 (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">快取空間不足: 約需 %1$s, 可用 %2$s</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">正在載入外掛索引...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">索引中沒有可安裝的外掛</string>
     <string name="text_plugin_install_wizard_no_selection">未選擇任何外掛</string>
-    <string name="text_plugin_install_wizard_profile">設定檔</string>
-    <string name="text_plugin_install_wizard_profile_delete">刪除設定檔</string>
-    <string name="text_plugin_install_wizard_profile_delete_confirm">確定刪除設定檔 \"%1$s\"?</string>
-    <string name="text_plugin_install_wizard_profile_deleted">設定檔已刪除</string>
-    <string name="text_plugin_install_wizard_profile_minimal">最小</string>
-    <string name="text_plugin_install_wizard_profile_name_exists">已存在同名設定檔</string>
-    <string name="text_plugin_install_wizard_profile_name_hint">設定檔名稱</string>
-    <string name="text_plugin_install_wizard_profile_rename" tools:ignore="TypographyEllipsis">重新命名設定檔...</string>
-    <string name="text_plugin_install_wizard_profile_save_as" tools:ignore="TypographyEllipsis">將目前選擇儲存為新設定檔...</string>
-    <string name="text_plugin_install_wizard_profile_saved">設定檔已儲存</string>
-    <string name="text_plugin_install_wizard_profile_standard">標準</string>
-    <string name="text_plugin_install_wizard_profile_update">用目前選擇更新此設定檔</string>
+    <string name="text_plugin_install_wizard_show_installed">顯示已安裝外掛</string>
     <string name="text_plugin_install_wizard_summary_cancelled">已取消: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">失敗: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">已安裝: %1$d</string>
     <string name="text_plugin_install_wizard_summary_title">外掛安裝完成</string>
+    <string name="text_plugin_install_wizard_waiting_for_download" tools:ignore="TypographyEllipsis">等待下載...</string>
     <string name="text_plugin_instruction">外掛使用說明</string>
     <string name="text_plugin_instruction_auto_mounted_hint">提示:\n\n當前外掛已開啟自動掛載, 掛載路徑為 `%1$s`.\n\n因此可直接使用 `%2$s` 而無需顯式呼叫 `plugins.load`.</string>
     <string name="text_plugin_instruction_example_title">外掛使用示例 (假設外掛存在一個 `exec` 方法): </string>
@@ -2234,8 +2239,11 @@
     <string name="text_set_breakpoint">設定斷點</string>
     <string name="text_set_editor_setting_action" formatted="true">設定 %1$s</string>
     <string name="text_settings">設定</string>
+    <string name="text_setup_wizards">設定精靈</string>
+    <string name="text_setup_wizards_hint">選擇需要執行的精靈, 所選精靈將依次進行</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 驗證不一致.\n\n期望值: %1$s\n實際值: %2$s</string>
     <string name="text_shizuku_access">Shizuku 許可權</string>
+    <string name="text_shizuku_not_running">Shizuku 未執行</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">可能需要先執行 Shizuku 服務</string>
     <string name="text_should_not_be_empty">文字不能為空</string>
     <string name="text_show">顯示</string>
@@ -2290,6 +2298,7 @@
     <string name="text_start">啟動</string>
     <string name="text_start_record">開始錄製</string>
     <string name="text_start_running">開始執行</string>
+    <string name="text_start_wizard">開始精靈</string>
     <string name="text_state_or_province">州或省份</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">停止重連</string>
@@ -2451,8 +2460,21 @@
     <string name="text_waiting_for_vscode_approval">等待 VSCode 端確認...</string>
     <string name="text_weekly_task">每週任務</string>
     <string name="text_weekly_task_should_check_day_of_week">需至少選擇一天</string>
+    <string name="text_welcome_to_app">歡迎使用 %1$s</string>
     <string name="text_window_state_changes_only">僅視窗狀態變化</string>
     <string name="text_windows">視窗</string>
+    <string name="text_wizard_profile">設定檔</string>
+    <string name="text_wizard_profile_delete">刪除設定檔</string>
+    <string name="text_wizard_profile_delete_confirm">確定刪除設定檔 \"%1$s\"?</string>
+    <string name="text_wizard_profile_deleted">設定檔已刪除</string>
+    <string name="text_wizard_profile_minimal">最小</string>
+    <string name="text_wizard_profile_name_exists">已存在同名設定檔</string>
+    <string name="text_wizard_profile_name_hint">設定檔名稱</string>
+    <string name="text_wizard_profile_rename" tools:ignore="TypographyEllipsis">重新命名設定檔...</string>
+    <string name="text_wizard_profile_save_as" tools:ignore="TypographyEllipsis">將目前選擇儲存為新設定檔...</string>
+    <string name="text_wizard_profile_saved">設定檔已儲存</string>
+    <string name="text_wizard_profile_standard">標準</string>
+    <string name="text_wizard_profile_update">用目前選擇更新此設定檔</string>
     <string name="text_working_dir_path">工作路徑</string>
     <string name="text_working_dir_path_with_value">工作路徑: %1$s</string>
     <string name="text_working_directory">工作目錄</string>

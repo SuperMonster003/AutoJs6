@@ -83,6 +83,12 @@
             app:summary="@string/summary_text_launcher_shortcuts"
             app:longClickPrompt="@string/description_launcher_shortcuts" />
 
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_setup_wizards"
+            app:title="@string/text_setup_wizards"
+            app:summary="@string/summary_setup_wizards" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory

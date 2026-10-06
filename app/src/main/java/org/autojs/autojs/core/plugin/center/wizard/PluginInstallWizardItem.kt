@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.center.wizard
 
 import android.graphics.drawable.Drawable
+import org.autojs.autojs.ui.wizard.WizardSelectionPolicy
 
 /**
  * One plugin row of the wizard, merged from the built-in catalog, the official
@@ -33,17 +34,19 @@ data class PluginInstallWizardItem(
     val hasInstallableApk: Boolean
         get() = !apkUrl.isNullOrBlank()
 
+    /** Installed plugins and index entries without an APK cannot be ticked. */
     val isSelectable: Boolean
-        get() = PluginInstallWizardSelectionPolicy.isSelectable(isInstalled, hasInstallableApk)
+        get() = !isInstalled && hasInstallableApk
 
     val isPossiblyIncompatible: Boolean
         get() = isAbiMismatch || isNativeAlignmentMismatch
 
-    fun toCandidate() = PluginInstallWizardSelectionPolicy.Candidate(
-        packageName = packageName,
+    fun toCandidate() = WizardSelectionPolicy.Candidate(
+        id = packageName,
         inStandard = inStandard,
         inMinimal = inMinimal,
         selectable = isSelectable,
+        done = isInstalled,
     )
 
 }
@@ -59,11 +62,16 @@ sealed class PluginInstallWizardRow {
 
     companion object {
 
-        /** Groups [items] by category in catalog order, dropping empty categories. */
-        fun build(items: List<PluginInstallWizardItem>): List<PluginInstallWizardRow> {
+        /**
+         * Groups [items] by category in catalog order. Installed plugins are left out unless
+         * [showInstalled] is set, and categories without a visible row are dropped with their header.
+         */
+        fun build(items: List<PluginInstallWizardItem>, showInstalled: Boolean = true): List<PluginInstallWizardRow> {
             val rows = ArrayList<PluginInstallWizardRow>(items.size + PluginInstallWizardCategory.entries.size)
             PluginInstallWizardCategory.entries.forEach { category ->
-                val members = items.filter { it.category == category }
+                val members = items.filter {
+                    it.category == category && WizardSelectionPolicy.isRowVisible(it.isInstalled, showInstalled)
+                }
                 if (members.isEmpty()) return@forEach
                 rows += Header(category, members.map { it.packageName })
                 members.forEach { rows += Plugin(it) }
