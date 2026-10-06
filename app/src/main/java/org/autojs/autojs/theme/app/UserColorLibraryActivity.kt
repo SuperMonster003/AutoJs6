@@ -78,7 +78,9 @@ class UserColorLibraryActivity : ColorSelectBaseActivity() {
             ItemTouchHelper(DragCallback()).attachToRecyclerView(it)
         }
 
-        load()
+        load {
+            if (intent.hasExtra(EXTRA_SCROLL_TO_COLOR_ID)) scrollToColor(intent.getLongExtra(EXTRA_SCROLL_TO_COLOR_ID, -1L))
+        }
     }
 
     override fun getSubtitle(withHexSuffix: Boolean): String? = when (selectedColorIdInThisLibrary) {
@@ -247,6 +249,10 @@ class UserColorLibraryActivity : ColorSelectBaseActivity() {
             return
         }
         searchMenuItem?.collapseActionView()
+        scrollToColor(colorId)
+    }
+
+    private fun scrollToColor(colorId: Long) {
         val position = adapter.items.indexOfFirst { it.id == colorId }
         if (position >= 0) {
             (binding.colorsRecyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, 0)
@@ -344,10 +350,12 @@ class UserColorLibraryActivity : ColorSelectBaseActivity() {
     companion object {
 
         private const val EXTRA_LIBRARY_ROW_ID = "LIBRARY_ROW_ID"
+        private const val EXTRA_SCROLL_TO_COLOR_ID = "SCROLL_TO_COLOR_ID"
 
-        fun launch(context: Context, libraryRowId: Long) {
+        fun launch(context: Context, libraryRowId: Long, scrollToColorId: Long? = null) {
             Intent(context, UserColorLibraryActivity::class.java)
                 .putExtra(EXTRA_LIBRARY_ROW_ID, libraryRowId)
+                .apply { scrollToColorId?.let { putExtra(EXTRA_SCROLL_TO_COLOR_ID, it) } }
                 .startSafely(context)
         }
 

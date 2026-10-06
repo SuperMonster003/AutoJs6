@@ -218,6 +218,19 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
     protected fun checkAndGetTargetInfoForThemeColorLocate(): TargetInfoForLocate? {
         val selection = currentColorSelection()
+        // User libraries and intelligent libraries have their own pages (roadmap P1.7).
+        // zh-CN: 用户库与智能库有各自的页面 (Roadmap P1.7).
+        when (selection) {
+            is ColorSelection.UserColor -> {
+                UserColorLibraryActivity.launch(this, selection.libraryRowId, scrollToColorId = selection.colorRowId)
+                return null
+            }
+            is ColorSelection.Intelligent -> {
+                IntelligentLibraryActivity.launch(this, selection.libraryId)
+                return null
+            }
+            else -> Unit
+        }
         if (selection is ColorSelection.Palette) {
             MaterialDialog.Builder(this)
                 .title(R.string.text_prompt)
@@ -793,6 +806,13 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
         @JvmStatic
         fun getCurrentColorSummary(context: Context, withIdentifierPrefix: Boolean = true, withHexSuffix: Boolean = true): String = when {
+            // The legacy layout cannot show intelligent libraries; name the active one instead (D13).
+            // zh-CN: 旧布局无法显示智能库; 改为显示激活中的智能库名称 (D13).
+            isLegacyLayout && currentColorSelection() is ColorSelection.Intelligent -> {
+                val name = Pref.getStringOrNull(KEY_SELECTED_COLOR_LIBRARY_NAME) ?: context.getString(R.string.color_library_title_intelligent_colors)
+                val summary = "${context.getString(R.string.color_library_identifier_intelligent_colors)}: $name"
+                if (withHexSuffix) "$summary [${ColorUtils.toString(ThemeColorManager.colorPrimary)}]" else summary
+            }
             isLegacyLayout -> when (val index = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, defaultColorPosition)) {
                 SELECT_NONE -> {
                     val colorInt = ThemeColorManager.colorPrimary
