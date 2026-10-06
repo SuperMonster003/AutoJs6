@@ -168,7 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/10/05
+###### 2026/10/06
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
@@ -292,7 +292,10 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Developer options add a default-off R1 switch for experimental remote APK building; disabled state blocks provider discovery and session opening, failures stop the current build without automatic local fallback, existing output remains protected by atomic publication, and process-local diagnostics retain only bounded enum/number fields
 * `Feature` Plugin Center supports APK Builder Template plugins, allowing on-demand installation and updates of templates required for app packaging
 * `Feature` Long-pressing the floating button on the Home Plugins tab opens the Plugin Center
-* `Feature` Plugin install wizard for ticking official plugins by category and installing them in one batch on the first launch, with the built-in "Standard" / "Minimal" / "All" profiles and custom profiles that can be saved, renamed and deleted (entries: the floating button menu of the Home Plugins tab / the "+" menu of the Plugin Center)
+* `Feature` Setup wizards for running the permission wizard and the plugin install wizard one after another, offered by a welcome prompt on the Home page after the first launch (entry: Settings > Config > Setup wizards)
+* `Feature` Permission wizard for ticking the permissions of the Home drawer and requesting them one after another, with the built-in "Standard" / "Minimal" / "All" profiles and custom profiles; granted permissions can be hidden from the menu (entries: Setup wizards / the button of the "Permissions" group title in the Home drawer)
+* `Feature` Plugin install wizard for ticking official plugins by category and installing them in one batch, with the built-in "Standard" / "Minimal" / "All" profiles and custom profiles that can be saved, renamed and deleted; installed plugins can be hidden from the menu (entries: Setup wizards / the floating button menu of the Home Plugins tab / the "+" menu of the Plugin Center)
+* `Feature` Plugin install wizard installs while downloading, installs silently through the 3-Setup Installer plugin when Shizuku / Root / Dhizuku authorization is usable, and checks the install unknown apps permission before downloading when the system installer is used
 * `Feature` runtime.loadAar method, for dynamically loading AAR files
 * `Feature` Explicit runtime.loadJarWithR8 entry with default-off exact-component selection, same-signature identity pinning, bounded five-artifact R8 transport, isolated cache adoption, and fail-closed behavior without D8/dx fallback
 * `Feature` ui.useAndroidLayout supports native Android layout widgets, include/merge, script project res references, and Drawable XML such as shape/selector/layer-list
@@ -708,6 +711,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Improved argument compatibility for KeyCode methods _[`issue #492`](http://issues.autojs6.com/492)_
 * `Improvement` KeyCode methods support sending key code commands with Shizuku permission
 * `Improvement` Deferred initialization of non-critical components to improve app startup performance
+* `Improvement` The app no longer shows permission request dialogs on startup; when all files access is missing, the Home page shows a reminder that can grant it directly
 * `Improvement` Cached compilation results for bundled Rhino resources and metadata for runtime enhancement functions to improve script initialization performance
 * `Improvement` Synced the Rhino engine with upstream, adding new.target support and improving scope, TypedArray, and debugger compatibility
 * `Improvement` Improved formatting performance for large arrays in the Rhino console

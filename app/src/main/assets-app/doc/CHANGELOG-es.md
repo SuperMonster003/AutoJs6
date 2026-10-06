@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/05
+###### 2026/10/06
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
@@ -130,7 +130,10 @@
 * `Nuevo` Las opciones de desarrollador añaden un interruptor R1 desactivado de forma predeterminada para la compilación remota experimental de APK; el estado desactivado bloquea el descubrimiento del provider y la apertura de sesiones, los fallos detienen la compilación actual sin reserva local automática, la salida existente queda protegida mediante publicación atómica y los diagnósticos del proceso solo conservan campos enum y numéricos limitados
 * `Nuevo` El Centro de plugins admite plugins APK Builder Template, permitiendo instalar y actualizar bajo demanda las plantillas necesarias para empaquetar aplicaciones
 * `Nuevo` Una pulsación prolongada del botón flotante de la pestaña Plugins de la página de inicio abre el Centro de plugins
-* `Nuevo` Asistente de instalación de plugins para marcar plugins oficiales por categoría e instalarlos en un solo lote en el primer inicio, con los perfiles integrados "Estándar" / "Mínimo" / "Todos" y perfiles personalizados que se pueden guardar, renombrar y eliminar (entradas: menú del botón flotante de la pestaña Plugins de la página de inicio / menú "+" del Centro de plugins)
+* `Nuevo` Asistentes de configuración para ejecutar uno tras otro el asistente de permisos y el asistente de instalación de plugins, ofrecidos por un aviso de bienvenida en la página de inicio tras el primer inicio (entrada: Ajustes > Configuración > Asistentes de configuración)
+* `Nuevo` Asistente de permisos para marcar los permisos del menú lateral de la página de inicio y solicitarlos uno tras otro, con los perfiles integrados "Estándar" / "Mínimo" / "Todos" y perfiles personalizados; los permisos concedidos se pueden ocultar desde el menú (entradas: Asistentes de configuración / botón del título del grupo "Permisos" en el menú lateral de la página de inicio)
+* `Nuevo` Asistente de instalación de plugins para marcar plugins oficiales por categoría e instalarlos en un solo lote, con los perfiles integrados "Estándar" / "Mínimo" / "Todos" y perfiles personalizados que se pueden guardar, renombrar y eliminar; los plugins instalados se pueden ocultar desde el menú (entradas: Asistentes de configuración / menú del botón flotante de la pestaña Plugins de la página de inicio / menú "+" del Centro de plugins)
+* `Nuevo` El asistente de instalación de plugins instala mientras descarga, instala en silencio mediante el plugin 3-Setup Installer cuando hay una autorización Shizuku / Root / Dhizuku utilizable y comprueba el permiso para instalar apps desconocidas antes de descargar cuando se usa el instalador del sistema
 * `Nuevo` Método runtime.loadAar, para cargar archivos AAR dinámicamente
 * `Nuevo` Entrada explícita runtime.loadJarWithR8 con selección de componente exacto desactivada de forma predeterminada, fijación de identidad con la misma firma, transporte R8 acotado de cinco artefactos, adopción de caché aislada y cierre seguro sin fallback a D8/dx
 * `Nuevo` ui.useAndroidLayout admite controles de diseño nativos de Android, include/merge, referencias res del proyecto de scripts y archivos Drawable XML como shape/selector/layer-list
@@ -547,6 +550,7 @@
 * `Mejora` Mejorada la compatibilidad de argumentos de los métodos KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
 * `Mejora` Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku
 * `Mejora` Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación
+* `Mejora` La aplicación ya no muestra diálogos de solicitud de permisos al iniciarse; cuando falta el acceso a todos los archivos, la página de inicio muestra un recordatorio que permite concederlo directamente
 * `Mejora` Almacenados en caché los resultados de compilación de los recursos Rhino integrados y los metadatos de las funciones de extensión del entorno de ejecución para mejorar el rendimiento de inicialización de scripts
 * `Mejora` Sincronización del motor Rhino con el proyecto original, con soporte para new.target y mejoras de compatibilidad de ámbitos, TypedArray y depurador
 * `Mejora` Mejorado el rendimiento del formateo de arrays de gran tamaño en la consola Rhino

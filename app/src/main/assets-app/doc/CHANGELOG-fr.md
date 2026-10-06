@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/05
+###### 2026/10/06
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
 * `Fonctionnalité` La fonction "Générer du code" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition
@@ -131,7 +131,10 @@
 * `Fonctionnalité` Les options développeur ajoutent un commutateur R1 désactivé par défaut pour la construction distante expérimentale d'APK; l'état désactivé bloque la découverte du provider et l'ouverture de session, les échecs arrêtent la construction en cours sans repli local automatique, la sortie existante reste protégée par publication atomique, et les diagnostics du processus ne conservent que des champs enum et numériques bornés
 * `Fonctionnalité` Le Centre des plugins prend en charge les plugins APK Builder Template, permettant d'installer et de mettre à jour à la demande les modèles nécessaires à l'empaquetage
 * `Fonctionnalité` Un appui long sur le bouton flottant de l'onglet Plugins de la page d'accueil ouvre le Centre des plugins
-* `Fonctionnalité` Assistant d'installation des plugins pour cocher les plugins officiels par catégorie et les installer en une seule fois au premier lancement, avec les profils intégrés "Standard" / "Minimal" / "Tous" et des profils personnalisés pouvant être enregistrés, renommés et supprimés (entrées : menu du bouton flottant de l'onglet Plugins de la page d'accueil / menu "+" du Centre des plugins)
+* `Fonctionnalité` Assistants de configuration pour lancer l'un après l'autre l'assistant des permissions et l'assistant d'installation des plugins, proposés par un message de bienvenue sur la page d'accueil après le premier lancement (entrée : Paramètres > Configuration > Assistants de configuration)
+* `Fonctionnalité` Assistant des permissions pour cocher les permissions du tiroir latéral de l'accueil et les demander l'une après l'autre, avec les profils intégrés "Standard" / "Minimal" / "Tous" et des profils personnalisés; les permissions accordées peuvent être masquées depuis le menu (entrées : Assistants de configuration / bouton du titre du groupe "Permissions" dans le tiroir latéral de l'accueil)
+* `Fonctionnalité` Assistant d'installation des plugins pour cocher les plugins officiels par catégorie et les installer en une seule fois, avec les profils intégrés "Standard" / "Minimal" / "Tous" et des profils personnalisés pouvant être enregistrés, renommés et supprimés; les plugins installés peuvent être masqués depuis le menu (entrées : Assistants de configuration / menu du bouton flottant de l'onglet Plugins de la page d'accueil / menu "+" du Centre des plugins)
+* `Fonctionnalité` L'assistant d'installation des plugins installe pendant le téléchargement, installe en silence via le plugin 3-Setup Installer lorsqu'une autorisation Shizuku / Root / Dhizuku est utilisable, et vérifie la permission d'installer des applis inconnues avant le téléchargement lorsque l'installateur du système est utilisé
 * `Fonctionnalité` Méthode runtime.loadAar, pour charger dynamiquement des fichiers AAR
 * `Fonctionnalité` Entrée explicite runtime.loadJarWithR8 avec sélection de composant exact désactivée par défaut, épinglage de l'identité de même signature, transport R8 borné de cinq artefacts, adoption d'un cache isolé et échec fermé sans repli D8/dx
 * `Fonctionnalité` ui.useAndroidLayout prend en charge les widgets de mise en page Android natifs, include/merge, les références res des projets de scripts et les fichiers Drawable XML comme shape/selector/layer-list
@@ -547,6 +550,7 @@
 * `Amélioration` Amélioration de la compatibilité des arguments des méthodes KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
 * `Amélioration` Les méthodes KeyCode permettent d'envoyer des commandes de touche avec l'autorisation Shizuku
 * `Amélioration` Initialisation différée des composants non critiques pour améliorer les performances de démarrage de l'application
+* `Amélioration` L'application n'affiche plus de boîtes de dialogue de demande de permission au démarrage; lorsque l'accès à tous les fichiers manque, la page d'accueil affiche un rappel permettant de l'accorder directement
 * `Amélioration` Mise en cache des résultats de compilation des ressources Rhino intégrées et des métadonnées des fonctions d'extension de l'environnement d'exécution pour améliorer les performances d'initialisation des scripts
 * `Amélioration` Synchronisation du moteur Rhino avec le projet amont, avec prise en charge de new.target et une meilleure compatibilité des portées, des TypedArray et du débogueur
 * `Amélioration` Amélioration des performances de formatage des grands tableaux dans la console Rhino
