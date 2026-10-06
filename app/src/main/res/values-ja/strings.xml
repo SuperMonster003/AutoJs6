@@ -1280,6 +1280,8 @@
     <string name="text_delete">削除</string>
     <string name="text_delete_all">すべて削除</string>
     <string name="text_delete_color_confirm">色 \"%1$s\" を削除しますか?</string>
+    <string name="text_delete_color_libraries" tools:ignore="TypographyEllipsis">カラーライブラリを削除...</string>
+    <string name="text_delete_color_libraries_confirm">選択したカラーライブラリ (%1$d 件) を削除しますか?\n\nその色と履歴も削除されます</string>
     <string name="text_delete_color_library_confirm">カラーライブラリ \"%1$s\" を削除しますか?\n\n含まれる色とその履歴も削除されます</string>
     <string name="text_delete_colors">色を削除</string>
     <string name="text_delete_colors_confirm">選択した色 (%1$d 件) を削除しますか?</string>
@@ -1860,6 +1862,7 @@
     <string name="text_no_scripts_to_stop_running">実行を停止するスクリプトなし</string>
     <string name="text_no_search_results_for_keyword">一致する項目が見つかりません:\n\n%1$s</string>
     <string name="text_no_symbols_hint">現在の設定は空です.\nここをタップして記号を作成します.</string>
+    <string name="text_no_user_color_libraries">ユーザーカラーライブラリはまだありません</string>
     <string name="text_no_version_history">バージョン履歴なし</string>
     <string name="text_node_audio_recording">Node.js が音声を録音しています</string>
     <string name="text_node_audio_recording_channel">Node.js の音声録音</string>
@@ -1871,6 +1874,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Node.js Doctor レポートを生成しています...</string>
     <string name="text_nodejs_doctor_generation_failed">Node.js Doctor レポートの生成に失敗しました</string>
     <string name="text_none">なし</string>
+    <string name="text_not_enough_color_libraries_to_reorder">並べ替えには 2 個以上のユーザーカラーライブラリが必要です</string>
     <string name="text_not_granted">許可されない</string>
     <string name="text_not_installed">未インストール</string>
     <string name="text_not_intelligent_confirm">状態が 1 つでグループも 1 つだけの場合, 色は変わりません\n\nこのまま保存しますか?</string>
@@ -2200,6 +2204,8 @@
     <string name="text_remove_selected_from_trash_confirm">選択した %d 件の項目をゴミ箱から完全に削除しますか?</string>
     <string name="text_rename">名前の変更</string>
     <string name="text_rename_color_library">カラーライブラリの名前を変更</string>
+    <string name="text_reorder_color_libraries">カラーライブラリの並べ替え</string>
+    <string name="text_reorder_color_libraries_hint">ユーザーカラーライブラリを長押ししてドラッグすると位置を変更できます</string>
     <string name="text_reorder_colors">色の並べ替え</string>
     <string name="text_reorder_colors_hint">色を長押ししてドラッグすると位置を変更できます</string>
     <string name="text_repeat_count_must_be_positive">回数は 0 より大きい必要があります</string>

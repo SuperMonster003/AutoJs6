@@ -45,6 +45,17 @@ class ColorLibraryRepository(
 
     suspend fun findColor(id: Long): LibraryColor? = dao.findColor(id)
 
+    /**
+     * Every color of the plain user libraries with its library, in list order (roadmap P2.4).
+     * zh-CN: 全部普通用户库的颜色及其所属库, 按列表顺序排列 (Roadmap P2.4).
+     */
+    suspend fun listAllPlainColors(): List<Pair<ColorLibrary, LibraryColor>> {
+        val colorsByLibrary = dao.listAllColors().groupBy { it.libraryId }
+        return dao.listLibraries().filterNot { it.isIntelligent }.flatMap { library ->
+            colorsByLibrary[library.id].orEmpty().sortedWith(compareBy({ it.position }, { it.id })).map { library to it }
+        }
+    }
+
     suspend fun listColors(libraryId: Long): List<LibraryColor> = dao.listColors(libraryId)
 
     /**
@@ -126,6 +137,18 @@ class ColorLibraryRepository(
             dao.updateColors(changed)
             dao.touchLibrary(libraryId, now())
         }
+    }
+
+    /**
+     * Stores the order of [orderedIds] as positions `0..n-1`; libraries not listed (such as intelligent libraries when
+     * reordering plain ones) keep their relative order after them (roadmap P2.5).
+     * zh-CN: 按 [orderedIds] 的顺序保存为位置 `0..n-1`; 未列出的库 (例如调整普通库顺序时的智能库) 保持原相对顺序排在其后 (Roadmap P2.5).
+     */
+    suspend fun reorderLibraries(orderedIds: List<Long>) {
+        val rank = orderedIds.withIndex().associate { (index, id) -> id to index }
+        val sorted = dao.listLibraries().sortedWith(compareBy<ColorLibrary> { rank[it.id] ?: Int.MAX_VALUE }.thenBy { it.position })
+        val changed = sorted.mapIndexedNotNull { index, library -> library.takeIf { it.position != index }?.copy(position = index) }
+        if (changed.isNotEmpty()) dao.updateLibraries(changed)
     }
 
     suspend fun listIntelligentLibraries(): List<IntelligentSnapshot> {

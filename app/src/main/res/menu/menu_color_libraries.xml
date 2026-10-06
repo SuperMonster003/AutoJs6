@@ -59,6 +59,16 @@
         android:title="@string/text_export_color_libraries"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_reorder_color_libraries"
+        android:title="@string/text_reorder_color_libraries"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete_color_libraries"
+        android:title="@string/text_delete_color_libraries"
+        app:showAsAction="never" />
+
     <item android:title="@string/text_more">
 
         <menu>

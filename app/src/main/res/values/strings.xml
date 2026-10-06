@@ -1275,6 +1275,8 @@
     <string name="text_delete">Delete</string>
     <string name="text_delete_all">Delete All</string>
     <string name="text_delete_color_confirm">Delete the color \"%1$s\"?</string>
+    <string name="text_delete_color_libraries" tools:ignore="TypographyEllipsis">Delete color libraries...</string>
+    <string name="text_delete_color_libraries_confirm">Delete the selected color libraries (%1$d)?\n\nTheir colors and their history will also be removed</string>
     <string name="text_delete_color_library_confirm">Delete the color library \"%1$s\"?\n\nIts colors and their history will also be removed</string>
     <string name="text_delete_colors">Delete colors</string>
     <string name="text_delete_colors_confirm">Delete the selected colors (%1$d)?</string>
@@ -1855,6 +1857,7 @@
     <string name="text_no_scripts_to_stop_running">No scripts to stop running</string>
     <string name="text_no_search_results_for_keyword">No results found for:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Current configuration is empty.\nTap here to create a symbol.</string>
+    <string name="text_no_user_color_libraries">No color libraries of your own yet</string>
     <string name="text_no_version_history">No version history</string>
     <string name="text_node_audio_recording">Node.js is recording audio</string>
     <string name="text_node_audio_recording_channel">Node.js audio recording</string>
@@ -1866,6 +1869,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Generating Node.js Doctor report...</string>
     <string name="text_nodejs_doctor_generation_failed">Failed to generate Node.js Doctor report</string>
     <string name="text_none">None</string>
+    <string name="text_not_enough_color_libraries_to_reorder">Reordering needs at least 2 color libraries of your own</string>
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_installed">Not installed</string>
     <string name="text_not_intelligent_confirm">With one state and one group, the color never changes\n\nSave anyway?</string>
@@ -2195,6 +2199,8 @@
     <string name="text_remove_selected_from_trash_confirm">Remove the %d selected items from trash permanently?</string>
     <string name="text_rename">Rename</string>
     <string name="text_rename_color_library">Rename color library</string>
+    <string name="text_reorder_color_libraries">Reorder color libraries</string>
+    <string name="text_reorder_color_libraries_hint">Long press one of your color libraries and drag it to a new position</string>
     <string name="text_reorder_colors">Reorder colors</string>
     <string name="text_reorder_colors_hint">Long press a color and drag it to a new position</string>
     <string name="text_repeat_count_must_be_positive">Times must be greater than 0</string>

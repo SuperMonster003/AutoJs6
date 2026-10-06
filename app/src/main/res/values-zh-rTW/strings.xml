@@ -1276,6 +1276,8 @@
     <string name="text_delete">刪除</string>
     <string name="text_delete_all">刪除全部</string>
     <string name="text_delete_color_confirm">是否刪除顏色 \"%1$s\"</string>
+    <string name="text_delete_color_libraries" tools:ignore="TypographyEllipsis">刪除顏色庫...</string>
+    <string name="text_delete_color_libraries_confirm">是否刪除所選顏色庫 (%1$d 個)\n\n其中的顏色及其歷史記錄也將一併移除</string>
     <string name="text_delete_color_library_confirm">是否刪除顏色庫 \"%1$s\"\n\n其中的顏色及其歷史記錄也將一併移除</string>
     <string name="text_delete_colors">刪除顏色</string>
     <string name="text_delete_colors_confirm">是否刪除所選顏色 (%1$d 個)</string>
@@ -1856,6 +1858,7 @@
     <string name="text_no_scripts_to_stop_running">無執行中的指令碼</string>
     <string name="text_no_search_results_for_keyword">未找到匹配項:\n\n%1$s</string>
     <string name="text_no_symbols_hint">當前配置為空.\n點選此處可新建符號.</string>
+    <string name="text_no_user_color_libraries">暫無自建顏色庫</string>
     <string name="text_no_version_history">無版本歷史</string>
     <string name="text_node_audio_recording">Node.js 正在錄音</string>
     <string name="text_node_audio_recording_channel">Node.js 錄音</string>
@@ -1867,6 +1870,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">正在產生 Node.js Doctor 報告...</string>
     <string name="text_nodejs_doctor_generation_failed">無法產生 Node.js Doctor 報告</string>
     <string name="text_none">無</string>
+    <string name="text_not_enough_color_libraries_to_reorder">調整順序需要至少 2 個自建顏色庫</string>
     <string name="text_not_granted">未授予</string>
     <string name="text_not_installed">未安裝</string>
     <string name="text_not_intelligent_confirm">目前設定不具備智慧表現\n\n是否繼續儲存</string>
@@ -2196,6 +2200,8 @@
     <string name="text_remove_selected_from_trash_confirm">從回收站永久移除選取的 %d 個項目?</string>
     <string name="text_rename">重新命名</string>
     <string name="text_rename_color_library">重新命名顏色庫</string>
+    <string name="text_reorder_color_libraries">調整顏色庫順序</string>
+    <string name="text_reorder_color_libraries_hint">長按自建顏色庫並拖曳以調整位置</string>
     <string name="text_reorder_colors">調整顏色順序</string>
     <string name="text_reorder_colors_hint">長按顏色並拖曳以調整位置</string>
     <string name="text_repeat_count_must_be_positive">次數必須大於 0</string>

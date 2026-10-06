@@ -2,6 +2,8 @@
 
 Color search supports the following 4 methods. All methods are case-insensitive.
 
+On the color library list, search covers the preset color libraries, the colors of your own color libraries and the groups of intelligent color libraries (a group matches by its name or by any of its colors). Each result ends with the color library it belongs to.
+
 ### 1. Color Name
 
 Search using the color name as shown in the current language.

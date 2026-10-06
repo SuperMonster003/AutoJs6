@@ -1279,6 +1279,8 @@
     <string name="text_delete">Suppression</string>
     <string name="text_delete_all">Tout supprimer</string>
     <string name="text_delete_color_confirm">Supprimer la couleur \"%1$s\"?</string>
+    <string name="text_delete_color_libraries" tools:ignore="TypographyEllipsis">Supprimer des bibliothèques de couleurs...</string>
+    <string name="text_delete_color_libraries_confirm">Supprimer les bibliothèques de couleurs sélectionnées (%1$d)?\n\nLeurs couleurs et leur historique seront également supprimés</string>
     <string name="text_delete_color_library_confirm">Supprimer la bibliothèque de couleurs \"%1$s\"?\n\nSes couleurs et leur historique seront également supprimés</string>
     <string name="text_delete_colors">Supprimer des couleurs</string>
     <string name="text_delete_colors_confirm">Supprimer les couleurs sélectionnées (%1$d)?</string>
@@ -1859,6 +1861,7 @@
     <string name="text_no_scripts_to_stop_running">Pas de scripts à arrêter de fonctionner</string>
     <string name="text_no_search_results_for_keyword">Aucun resultat pour:\n\n%1$s</string>
     <string name="text_no_symbols_hint">La config actuelle est vide.\nAppuyez ici pour creer un symbole.</string>
+    <string name="text_no_user_color_libraries">Aucune bibliothèque de couleurs personnelle pour le moment</string>
     <string name="text_no_version_history">Aucun historique des versions</string>
     <string name="text_node_audio_recording">Node.js enregistre du son</string>
     <string name="text_node_audio_recording_channel">Enregistrement audio Node.js</string>
@@ -1870,6 +1873,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Génération du rapport de diagnostic Node.js...</string>
     <string name="text_nodejs_doctor_generation_failed">Échec de la génération du rapport de diagnostic Node.js</string>
     <string name="text_none">Aucun</string>
+    <string name="text_not_enough_color_libraries_to_reorder">La réorganisation nécessite au moins 2 bibliothèques de couleurs personnelles</string>
     <string name="text_not_granted">Non accordée</string>
     <string name="text_not_installed">Non installé</string>
     <string name="text_not_intelligent_confirm">Avec un seul état et un seul groupe, la couleur ne change jamais\n\nEnregistrer quand même?</string>
@@ -2199,6 +2203,8 @@
     <string name="text_remove_selected_from_trash_confirm">Supprimer définitivement de la corbeille les %d éléments sélectionnés ?</string>
     <string name="text_rename">Renommer</string>
     <string name="text_rename_color_library">Renommer la bibliothèque de couleurs</string>
+    <string name="text_reorder_color_libraries">Réorganiser les bibliothèques de couleurs</string>
+    <string name="text_reorder_color_libraries_hint">Appuyez longuement sur l\'une de vos bibliothèques de couleurs et faites-la glisser vers une nouvelle position</string>
     <string name="text_reorder_colors">Réorganiser les couleurs</string>
     <string name="text_reorder_colors_hint">Appuyez longuement sur une couleur et faites-la glisser vers une nouvelle position</string>
     <string name="text_repeat_count_must_be_positive">Le nombre de répétitions doit être supérieur à 0</string>

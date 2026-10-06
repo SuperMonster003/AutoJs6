@@ -8,7 +8,9 @@ import android.view.MenuItem
 import androidx.core.view.forEach
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +25,6 @@ import org.autojs.autojs.theme.intelligent.IntelligentPresets
 import org.autojs.autojs.theme.library.ColorLibraryIds
 import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.ColorSelection
-import org.autojs.autojs.theme.library.ColorSelectionCodec
 import org.autojs.autojs.util.ViewUtils.setOnSubtitleViewClickListener
 import org.autojs.autojs.util.ViewUtils.setOnTitleViewClickListener
 import org.autojs.autojs.theme.ThemeChangeNotifier
@@ -53,16 +54,24 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         ColorLibraryAdapter(presetRows, ::onLibraryClick, ::onLibraryLongClick)
     }
 
-    private val colorItemAdapter: ColorItemAdapter by lazy {
-        ColorItemAdapter(presetColorItems, isShowLibraryIdentifier = true)
+    private val searchAdapter: GlobalColorSearchAdapter by lazy {
+        GlobalColorSearchAdapter(::isSearchItemChecked, ::onSearchItemClick)
     }
+
+    /** User colors and intelligent groups loaded when the search opens. zh-CN: 打开搜索时加载的用户颜色与智能库组. */
+    private var searchableUserItems: List<GlobalColorSearchItem> = emptyList()
+
+    private var lastQuery: String? = null
+
+    private var searchMenuItem: MenuItem? = null
+    private var reorderMenuItem: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         ThemeChangeNotifier.themeChanged.observe(this) {
             libraryAdapter.notifyDataSetChanged()
-            colorItemAdapter.notifyDataSetChanged()
+            searchAdapter.notifyDataSetChanged()
         }
 
         MtActivityColorLibrariesBinding.inflate(layoutInflater).let {
@@ -83,7 +92,68 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             it.adapter = libraryAdapter
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
             it.excludePaddingClippableViewFromBottomNavigationBar()
+            ItemTouchHelper(LibraryDragCallback()).attachToRecyclerView(it)
         }
+    }
+
+    private fun setReordering(reordering: Boolean) {
+        if (reordering) {
+            if (libraryAdapter.userRows.size < 2) {
+                ViewUtils.showToast(this, R.string.text_not_enough_color_libraries_to_reorder)
+                return
+            }
+            searchMenuItem?.collapseActionView()
+            ViewUtils.showToast(this, R.string.text_reorder_color_libraries_hint)
+        }
+        libraryAdapter.isReordering = reordering
+        reorderMenuItem?.setTitle(if (reordering) R.string.text_finish_reordering else R.string.text_reorder_color_libraries)
+    }
+
+    /** Saves the order after every drag, so leaving the page never loses it. zh-CN: 每次拖动结束即保存顺序, 离开页面不会丢失. */
+    private fun saveLibraryOrder() {
+        val order = libraryAdapter.userRows.map { it.summary.library.id }
+        lifecycleScope.launch { withContext(Dispatchers.IO) { repository.reorderLibraries(order) } }
+    }
+
+    private fun chooseLibrariesToDelete() {
+        val libraries = libraryAdapter.userRows.map { it.summary.library }
+        if (libraries.isEmpty()) {
+            ViewUtils.showToast(this, R.string.text_no_user_color_libraries)
+            return
+        }
+        ColorLibraryDialogs.showMultiChoice(this, R.string.text_delete_color_libraries, libraries.map { it.name }) { indices ->
+            val chosen = indices.map { libraries[it] }
+            ColorLibraryDialogs.showConfirm(this, getString(R.string.text_delete_color_libraries_confirm, chosen.size)) {
+                lifecycleScope.launch {
+                    val selectedRowId = (currentColorSelection() as? ColorSelection.UserColor)?.libraryRowId
+                    withContext(Dispatchers.IO) { chosen.forEach { repository.deleteLibrary(it) } }
+                    if (chosen.any { it.id == selectedRowId }) fallBackToPaletteSelection(this@ColorLibrariesActivity)
+                    refreshUserLibraries()
+                }
+            }
+        }
+    }
+
+    private inner class LibraryDragCallback : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+
+        override fun isLongPressDragEnabled() = libraryAdapter.isReordering
+
+        override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int = when {
+            libraryAdapter.isUserRow(viewHolder.bindingAdapterPosition) -> super.getMovementFlags(recyclerView, viewHolder)
+            else -> 0
+        }
+
+        override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            return libraryAdapter.move(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+        }
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            saveLibraryOrder()
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+
     }
 
     override fun onResume() {
@@ -223,17 +293,18 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_color_libraries, menu)
+        searchMenuItem = menu.findItem(R.id.action_search_color)
+        reorderMenuItem = menu.findItem(R.id.action_reorder_color_libraries)
 
         binding.toolbar.setMenuIconsColorByColorLuminance(this, currentColor)
 
         setUpSearchMenu(
             menu,
-            onQueryTextSimpleListener = { query ->
-                filterColorsFromColorItems(query, presetColorItems, colorItemAdapter)
-            },
+            onQueryTextSimpleListener = { query -> search(query) },
             onMenuItemActionExpand = {
-                mRecyclerView.adapter = colorItemAdapter
-                setUpSelectedPosition(colorItemAdapter)
+                if (libraryAdapter.isReordering) setReordering(false)
+                mRecyclerView.adapter = searchAdapter
+                loadSearchableUserItems()
                 menu.forEach { it.isVisible = it.isVisible.not() }
             },
             onMenuItemActionCollapse = {
@@ -245,22 +316,66 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    private fun setUpSelectedPosition(adapter: ColorItemAdapter) {
-        when (val selection = currentColorSelection()) {
-            ColorSelection.Palette -> Unit
-            is ColorSelection.Preset -> {
-                adapter.selectedLibraryId = selection.libraryId
-                // Without a stored item (e.g. a legacy default selection), match the current theme color.
-                // zh-CN: 没有保存的条目时 (例如 legacy 的默认色选择), 按当前主题色匹配.
-                adapter.selectedItemId = selection.itemId ?: adapter.items().firstOrNull {
-                    it.libraryId == selection.libraryId && getColor(it.colorRes) == ThemeColorManager.colorPrimary
-                }?.itemId ?: SELECT_NONE
-            }
-            else -> ColorSelectionCodec.encode(selection).let { (libraryId, itemId) ->
-                adapter.selectedLibraryId = libraryId
-                adapter.selectedItemId = itemId
-            }
+    /**
+     * Searches preset colors, user library colors and intelligent groups (roadmap P2.4).
+     * zh-CN: 搜索预设颜色, 用户库颜色与智能库的组 (Roadmap P2.4).
+     */
+    private fun search(query: String?) {
+        lastQuery = query
+        val userItems = searchableUserItems
+        searchColors(query, { matcher ->
+            val presets = presetColorItems.filter { matcher?.matches(it) ?: true }.map { GlobalColorSearchItem.Preset(it) }
+            presets + userItems.filter { item -> matcher?.let { matches(it, item) } ?: true }
+        }) { searchAdapter.updateData(it) }
+    }
+
+    private fun matches(matcher: ColorQueryMatcher, item: GlobalColorSearchItem): Boolean = when (item) {
+        is GlobalColorSearchItem.Preset -> matcher.matches(item.item)
+        is GlobalColorSearchItem.UserColor -> {
+            val hex = String.format("#%06X", 0xFFFFFF and item.color.color)
+            val name = item.color.name ?: hex
+            matcher.matches(listOf(hex), { name }, { name })
         }
+        is GlobalColorSearchItem.Group -> {
+            val colors = item.group.states.values.mapNotNull { it.primary }
+            val name = IntelligentSummaryFormatter.groupName(item.snapshot.config, item.group)
+            matcher.matches(colors.map { String.format("#%06X", 0xFFFFFF and it) }, { name }, { name })
+        }
+    }
+
+    private fun loadSearchableUserItems() {
+        lifecycleScope.launch {
+            val (colors, intelligent) = withContext(Dispatchers.IO) { repository.listAllPlainColors() to repository.listIntelligentLibraries() }
+            val snapshots = IntelligentPresets.all(this@ColorLibrariesActivity) + intelligent
+            searchableUserItems = colors.map { (library, color) -> GlobalColorSearchItem.UserColor(library.name, color) } +
+                    snapshots.flatMap { snapshot -> snapshot.groups.filter { it.hasColor }.map { GlobalColorSearchItem.Group(snapshot, it) } }
+            search(lastQuery)
+        }
+    }
+
+    private fun isSearchItemChecked(item: GlobalColorSearchItem): Boolean = when (item) {
+        is GlobalColorSearchItem.Preset -> (currentColorSelection() as? ColorSelection.Preset)?.let { selection ->
+            // Without a stored item (e.g. a legacy default selection), match the current theme color.
+            // zh-CN: 没有保存的条目时 (例如 legacy 的默认色选择), 按当前主题色匹配.
+            selection.libraryId == item.item.libraryId && when (val itemId = selection.itemId) {
+                null -> getColor(item.item.colorRes) == ThemeColorManager.colorPrimary
+                else -> itemId == item.item.itemId
+            }
+        } == true
+        is GlobalColorSearchItem.UserColor -> (currentColorSelection() as? ColorSelection.UserColor)?.let {
+            it.libraryRowId == item.color.libraryId && it.colorRowId == item.color.id
+        } == true
+        is GlobalColorSearchItem.Group -> IntelligentColorEngine.activeSnapshot?.libraryId == item.snapshot.libraryId &&
+                IntelligentColorEngine.shownGroupId == item.group.id
+    }
+
+    private fun onSearchItemClick(item: GlobalColorSearchItem) {
+        when (item) {
+            is GlobalColorSearchItem.Preset -> applyPresetItem(item.item)
+            is GlobalColorSearchItem.UserColor -> applyUserLibraryColor(item.libraryName, item.color)
+            is GlobalColorSearchItem.Group -> activateIntelligentLibrary(item.snapshot, item.group.id)
+        }
+        searchAdapter.notifyDataSetChanged()
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -282,6 +397,14 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         }
         R.id.action_export_color_libraries -> {
             lifecycleScope.launch { exchange.chooseAndExport(exchange.allChoices()) }
+            true
+        }
+        R.id.action_reorder_color_libraries -> {
+            setReordering(!libraryAdapter.isReordering)
+            true
+        }
+        R.id.action_delete_color_libraries -> {
+            chooseLibrariesToDelete()
             true
         }
         R.id.action_clone_color_library -> {

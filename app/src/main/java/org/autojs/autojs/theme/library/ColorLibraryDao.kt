@@ -29,6 +29,9 @@ interface ColorLibraryDao {
     @Update
     suspend fun updateLibrary(library: ColorLibrary)
 
+    @Update
+    suspend fun updateLibraries(libraries: List<ColorLibrary>)
+
     @Query("DELETE FROM color_library WHERE id = :id")
     suspend fun deleteLibrary(id: Long)
 

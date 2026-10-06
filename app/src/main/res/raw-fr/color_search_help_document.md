@@ -2,6 +2,8 @@
 
 La recherche de couleurs prend en charge les 5 méthodes suivantes. Toutes sont insensibles à la casse.
 
+Sur la liste des bibliothèques de couleurs, la recherche couvre les bibliothèques prédéfinies, les couleurs de vos bibliothèques personnelles et les groupes des bibliothèques de couleurs intelligentes (un groupe correspond par son nom ou par l'une de ses couleurs). Chaque résultat se termine par la bibliothèque de couleurs à laquelle il appartient.
+
 ### 1. Nom de couleur (langue actuelle)
 
 Utilisez le nom de la couleur tel qu'il est affiché dans la langue en cours.

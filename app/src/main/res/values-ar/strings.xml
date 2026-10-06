@@ -1281,6 +1281,8 @@
     <string name="text_delete">حذف</string>
     <string name="text_delete_all">حذف الكل</string>
     <string name="text_delete_color_confirm">هل تريد حذف اللون \"%1$s\"?</string>
+    <string name="text_delete_color_libraries" tools:ignore="TypographyEllipsis">حذف مكتبات الألوان...</string>
+    <string name="text_delete_color_libraries_confirm">هل تريد حذف مكتبات الألوان المحددة (%1$d)?\n\nستتم إزالة ألوانها وسجلها أيضا</string>
     <string name="text_delete_color_library_confirm">هل تريد حذف مكتبة الألوان \"%1$s\"?\n\nستتم أيضا إزالة ألوانها وسجلها</string>
     <string name="text_delete_colors">حذف الألوان</string>
     <string name="text_delete_colors_confirm">هل تريد حذف الألوان المحددة (%1$d)?</string>
@@ -1861,6 +1863,7 @@
     <string name="text_no_scripts_to_stop_running">لا توجد نصوص للتوقف عن الجري</string>
     <string name="text_no_search_results_for_keyword">لم يتم العثور على نتائج لـ:\n\n%1$s</string>
     <string name="text_no_symbols_hint">الاعدادات الحالية فارغة.\nاضغط هنا لانشاء رمز.</string>
+    <string name="text_no_user_color_libraries">لا توجد مكتبات ألوان خاصة بعد</string>
     <string name="text_no_version_history">لا يوجد سجل للاصدارات</string>
     <string name="text_node_audio_recording">يسجل Node.js الصوت</string>
     <string name="text_node_audio_recording_channel">تسجيل الصوت عبر Node.js</string>
@@ -1872,6 +1875,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">جار إنشاء تقرير تشخيص Node.js...</string>
     <string name="text_nodejs_doctor_generation_failed">فشل إنشاء تقرير تشخيص Node.js</string>
     <string name="text_none">لا يوجد</string>
+    <string name="text_not_enough_color_libraries_to_reorder">تتطلب إعادة الترتيب مكتبتي ألوان خاصتين على الأقل</string>
     <string name="text_not_granted">لم تمنح</string>
     <string name="text_not_installed">غير مثبّت</string>
     <string name="text_not_intelligent_confirm">مع حالة واحدة ومجموعة واحدة لن يتغير اللون أبدا\n\nهل تريد الحفظ على أي حال?</string>
@@ -2201,6 +2205,8 @@
     <string name="text_remove_selected_from_trash_confirm">ازالة %d من العناصر المحددة من سلة المحذوفات نهائيا؟</string>
     <string name="text_rename">إعادة تسمية</string>
     <string name="text_rename_color_library">إعادة تسمية مكتبة الألوان</string>
+    <string name="text_reorder_color_libraries">إعادة ترتيب مكتبات الألوان</string>
+    <string name="text_reorder_color_libraries_hint">اضغط مطولا على إحدى مكتبات ألوانك واسحبها إلى موضع جديد</string>
     <string name="text_reorder_colors">إعادة ترتيب الألوان</string>
     <string name="text_reorder_colors_hint">اضغط مطولا على لون واسحبه إلى موضع جديد</string>
     <string name="text_repeat_count_must_be_positive">يجب أن يكون عدد المرات أكبر من 0</string>

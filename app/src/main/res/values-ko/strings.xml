@@ -1281,6 +1281,8 @@
     <string name="text_delete">삭제</string>
     <string name="text_delete_all">모두 삭제</string>
     <string name="text_delete_color_confirm">색상 \"%1$s\"을(를) 삭제하시겠습니까?</string>
+    <string name="text_delete_color_libraries" tools:ignore="TypographyEllipsis">색상 라이브러리 삭제...</string>
+    <string name="text_delete_color_libraries_confirm">선택한 색상 라이브러리 (%1$d개)를 삭제하시겠습니까?\n\n그 안의 색상과 기록도 함께 삭제됩니다</string>
     <string name="text_delete_color_library_confirm">색상 라이브러리 \"%1$s\"을(를) 삭제하시겠습니까?\n\n포함된 색상과 해당 기록도 함께 삭제됩니다</string>
     <string name="text_delete_colors">색상 삭제</string>
     <string name="text_delete_colors_confirm">선택한 색상 (%1$d개)을 삭제하시겠습니까?</string>
@@ -1861,6 +1863,7 @@
     <string name="text_no_scripts_to_stop_running">실행을 멈출 스크립트가 없습니다</string>
     <string name="text_no_search_results_for_keyword">일치하는 항목이 없습니다:\n\n%1$s</string>
     <string name="text_no_symbols_hint">현재 설정이 비어 있습니다.\n여기를 눌러 기호를 만드세요.</string>
+    <string name="text_no_user_color_libraries">아직 사용자 색상 라이브러리가 없습니다</string>
     <string name="text_no_version_history">버전 기록 없음</string>
     <string name="text_node_audio_recording">Node.js에서 오디오를 녹음하고 있습니다</string>
     <string name="text_node_audio_recording_channel">Node.js 오디오 녹음</string>
@@ -1872,6 +1875,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Node.js Doctor 보고서 생성 중...</string>
     <string name="text_nodejs_doctor_generation_failed">Node.js Doctor 보고서를 생성하지 못했습니다</string>
     <string name="text_none">없음</string>
+    <string name="text_not_enough_color_libraries_to_reorder">순서를 변경하려면 사용자 색상 라이브러리가 2개 이상 필요합니다</string>
     <string name="text_not_granted">부여되지 않았습니다</string>
     <string name="text_not_installed">설치되지 않음</string>
     <string name="text_not_intelligent_confirm">상태와 그룹이 하나뿐이면 색상이 바뀌지 않습니다\n\n그래도 저장하시겠습니까?</string>
@@ -2201,6 +2205,8 @@
     <string name="text_remove_selected_from_trash_confirm">선택한 %d개 항목을 휴지통에서 영구 삭제할까요?</string>
     <string name="text_rename">이름 바꾸기</string>
     <string name="text_rename_color_library">색상 라이브러리 이름 바꾸기</string>
+    <string name="text_reorder_color_libraries">색상 라이브러리 순서 변경</string>
+    <string name="text_reorder_color_libraries_hint">사용자 색상 라이브러리를 길게 누른 채 끌어서 위치를 변경하세요</string>
     <string name="text_reorder_colors">색상 순서 변경</string>
     <string name="text_reorder_colors_hint">색상을 길게 누른 채 끌어서 위치를 변경하세요</string>
     <string name="text_repeat_count_must_be_positive">횟수는 0보다 커야 합니다</string>

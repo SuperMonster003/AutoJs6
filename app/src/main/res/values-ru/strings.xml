@@ -1279,6 +1279,8 @@
     <string name="text_delete">Удалить</string>
     <string name="text_delete_all">Удалить все</string>
     <string name="text_delete_color_confirm">Удалить цвет \"%1$s\"?</string>
+    <string name="text_delete_color_libraries" tools:ignore="TypographyEllipsis">Удалить цветовые библиотеки...</string>
+    <string name="text_delete_color_libraries_confirm">Удалить выбранные цветовые библиотеки (%1$d)?\n\nИх цвета и история тоже будут удалены</string>
     <string name="text_delete_color_library_confirm">Удалить цветовую библиотеку \"%1$s\"?\n\nЕё цвета и их история также будут удалены</string>
     <string name="text_delete_colors">Удалить цвета</string>
     <string name="text_delete_colors_confirm">Удалить выбранные цвета (%1$d)?</string>
@@ -1859,6 +1861,7 @@
     <string name="text_no_scripts_to_stop_running">Нет скриптов для остановки выполнения</string>
     <string name="text_no_search_results_for_keyword">Ничего не найдено по запросу:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Текущая конфигурация пуста.\nНажмите здесь, чтобы создать символ.</string>
+    <string name="text_no_user_color_libraries">Собственных цветовых библиотек пока нет</string>
     <string name="text_no_version_history">Нет истории версий</string>
     <string name="text_node_audio_recording">Node.js записывает звук</string>
     <string name="text_node_audio_recording_channel">Запись звука Node.js</string>
@@ -1870,6 +1873,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Создание диагностического отчёта Node.js...</string>
     <string name="text_nodejs_doctor_generation_failed">Не удалось создать диагностический отчёт Node.js</string>
     <string name="text_none">Нет</string>
+    <string name="text_not_enough_color_libraries_to_reorder">Для изменения порядка нужно не менее 2 собственных цветовых библиотек</string>
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_installed">Не установлено</string>
     <string name="text_not_intelligent_confirm">При одном состоянии и одной группе цвет никогда не меняется\n\nВсё равно сохранить?</string>
@@ -2199,6 +2203,8 @@
     <string name="text_remove_selected_from_trash_confirm">Удалить %d выбранных элементов из корзины навсегда?</string>
     <string name="text_rename">Переименовать</string>
     <string name="text_rename_color_library">Переименовать цветовую библиотеку</string>
+    <string name="text_reorder_color_libraries">Изменить порядок цветовых библиотек</string>
+    <string name="text_reorder_color_libraries_hint">Нажмите и удерживайте свою цветовую библиотеку, затем перетащите её на новое место</string>
     <string name="text_reorder_colors">Изменить порядок цветов</string>
     <string name="text_reorder_colors_hint">Нажмите и удерживайте цвет, затем перетащите его на новое место</string>
     <string name="text_repeat_count_must_be_positive">Количество повторений должно быть больше 0</string>

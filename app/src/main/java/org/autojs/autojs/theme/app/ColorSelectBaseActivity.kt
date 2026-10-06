@@ -658,35 +658,57 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         mSearchJob?.cancel()
         mSearchJob = lifecycleScope.launch {
             withContext(Dispatchers.Default) {
-                if (query.isNullOrBlank()) return@withContext colorItems
-                val searchTerm = query.trimStart()
-                val cleanedSearchTerm = searchTerm.drop(1)
-                val normalizedQuery = normalizeForMatching(searchTerm)
-                colorItems.filter { colorItem ->
-                    val colorHex = String.format("#%06X", 0xFFFFFF and getColor(colorItem.colorRes))
-                    val enName by lazy { StringUtils.getStringForLocale(this@ColorSelectBaseActivity, Locale.forLanguageTag("en"), colorItem.nameRes) }
-                    val localizedName by lazy { getString(colorItem.nameRes) }
-                    when {
-                        searchTerm.startsWith("#") -> {
-                            searchMatch(cleanedSearchTerm, colorHex) {
-                                colorHex.contains(searchTerm, ignoreCase = true)
-                            }
-                        }
-                        searchTerm.startsWith("$") -> {
-                            searchMatch(cleanedSearchTerm, enName) {
-                                normalizeForMatching(enName).contains(normalizedQuery, ignoreCase = true)
-                            }
-                        }
-                        else -> {
-                            searchMatch(searchTerm, localizedName) {
-                                normalizeForMatching(localizedName).contains(normalizedQuery, ignoreCase = true)
-                            }
-                        }
-                    }
-                }
+                val matcher = colorQueryMatcher(query) ?: return@withContext colorItems
+                colorItems.filter { matcher.matches(it) }
             }.let { filteredResult -> colorItemAdapter.updateData(filteredResult) }
         }
     }
+
+    /**
+     * Runs [filter] for [query] off the main thread, cancelling any search still running, and delivers the result on the main thread.
+     * zh-CN: 在主线程之外针对 [query] 执行 [filter], 并取消仍在进行的搜索, 结果在主线程交付.
+     */
+    protected fun <T> searchColors(query: String?, filter: (ColorQueryMatcher?) -> List<T>, onResult: (List<T>) -> Unit) {
+        mSearchJob?.cancel()
+        mSearchJob = lifecycleScope.launch {
+            onResult(withContext(Dispatchers.Default) { filter(colorQueryMatcher(query)) })
+        }
+    }
+
+    /**
+     * Matches colors against a search query: `#...` matches color values, `$...` English names, anything else
+     * localized names; each form may be a regular expression (see the search help page).
+     * zh-CN: 按搜索词匹配颜色: `#...` 匹配色值, `$...` 匹配英文名称, 其他匹配本地化名称; 各形式均可为正则表达式 (见搜索帮助页).
+     */
+    inner class ColorQueryMatcher(query: String) {
+
+        private val searchTerm = query.trimStart()
+        private val cleanedSearchTerm = searchTerm.drop(1)
+        private val normalizedQuery = normalizeForMatching(searchTerm)
+
+        /** [hexes] are `#RRGGBB` values; the names are computed only when needed. zh-CN: [hexes] 为 `#RRGGBB` 色值; 名称仅在需要时计算. */
+        fun matches(hexes: List<String>, englishName: () -> String, localizedName: () -> String): Boolean = when {
+            searchTerm.startsWith("#") -> hexes.any { hex ->
+                searchMatch(cleanedSearchTerm, hex) { hex.contains(searchTerm, ignoreCase = true) }
+            }
+            searchTerm.startsWith("$") -> englishName().let { name ->
+                searchMatch(cleanedSearchTerm, name) { normalizeForMatching(name).contains(normalizedQuery, ignoreCase = true) }
+            }
+            else -> localizedName().let { name ->
+                searchMatch(searchTerm, name) { normalizeForMatching(name).contains(normalizedQuery, ignoreCase = true) }
+            }
+        }
+
+        fun matches(item: PresetColorItem): Boolean = matches(
+            hexes = listOf(String.format("#%06X", 0xFFFFFF and getColor(item.colorRes))),
+            englishName = { StringUtils.getStringForLocale(this@ColorSelectBaseActivity, Locale.forLanguageTag("en"), item.nameRes) },
+            localizedName = { getString(item.nameRes) },
+        )
+
+    }
+
+    /** Null for a blank query, which matches everything. zh-CN: 搜索词为空白时返回 null, 表示匹配全部. */
+    protected fun colorQueryMatcher(query: String?): ColorQueryMatcher? = query?.takeIf { it.isNotBlank() }?.let { ColorQueryMatcher(it) }
 
     fun searchMatch(search: String, text: String, nonRegexMatch: () -> Boolean) = when {
         isRegexSearch(search) -> {

@@ -25,6 +25,15 @@ class ColorLibraryAdapter(
     private val onItemLongClick: (LibraryRow) -> Unit = {},
 ) : RecyclerView.Adapter<ColorLibraryViewHolder>() {
 
+    /**
+     * While true, rows do not react to clicks and user rows can be dragged among themselves (roadmap P2.5).
+     * zh-CN: 为 true 时各行不响应点击, 用户库行可在彼此之间拖动 (Roadmap P2.5).
+     */
+    var isReordering = false
+
+    val userRows: List<LibraryRow.User>
+        get() = rows.filterIsInstance<LibraryRow.User>()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorLibraryViewHolder {
         val binding = MtColorLibrariesRecyclerViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ColorLibraryViewHolder(binding)
@@ -33,8 +42,8 @@ class ColorLibraryAdapter(
     override fun onBindViewHolder(holder: ColorLibraryViewHolder, position: Int) {
         val row = rows[position]
         holder.bind(row)
-        holder.itemView.setOnClickListener { onItemClick(row) }
-        holder.itemView.setOnLongClickListener { true.also { onItemLongClick(row) } }
+        holder.itemView.setOnClickListener { if (!isReordering) onItemClick(row) }
+        holder.itemView.setOnLongClickListener { (!isReordering).also { if (it) onItemLongClick(row) } }
     }
 
     override fun getItemCount() = rows.size
@@ -42,6 +51,16 @@ class ColorLibraryAdapter(
     fun updateData(newRows: List<LibraryRow>) {
         rows = newRows
         notifyDataSetChanged()
+    }
+
+    fun isUserRow(position: Int) = rows.getOrNull(position) is LibraryRow.User
+
+    /** Moves a user row; preset rows stay where they are. zh-CN: 移动用户库行; 预设库行保持不动. */
+    fun move(from: Int, to: Int): Boolean {
+        if (!isUserRow(from) || !isUserRow(to)) return false
+        rows = rows.toMutableList().apply { add(to, removeAt(from)) }
+        notifyItemMoved(from, to)
+        return true
     }
 
 }
