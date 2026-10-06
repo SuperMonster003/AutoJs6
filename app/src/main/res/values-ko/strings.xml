@@ -779,6 +779,7 @@
     <string name="summary_setup_wizard_welcome_reset">다음 실행 시 홈에서 설정 마법사 환영 안내를 다시 표시합니다</string>
     <string name="summary_setup_wizards">자주 쓰는 권한 부여 및 공식 플러그인 설치</string>
     <string name="text_add_colors">색상 추가</string>
+    <string name="text_add_group">그룹 추가</string>
     <string name="text_and_n_more">... 외 %d개</string>
     <string name="text_auto_reconnect">자동 재연결</string>
     <string name="text_background_color_dark">어두운 색</string>
@@ -1036,6 +1037,7 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">업데이트 확인 (로컬 버전 무시)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">업데이트 확인 시 최신 원격 버전을 직접 가져옵니다</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">업데이트 확인 ...</string>
+    <string name="text_choose_at_least_one_color">적어도 하나의 상태에 색상을 선택하세요</string>
     <string name="text_choose_color_library">색상 라이브러리 선택</string>
     <string name="text_choose_color_library_to_clone">복제할 색상 라이브러리 선택</string>
     <string name="text_choose_colors_to_add">추가할 색상 선택</string>
@@ -1337,6 +1339,8 @@
     <string name="text_drawer_open">열린 서랍</string>
     <string name="text_edit">편집하다</string>
     <string name="text_edit_by_other_apps">다른 앱으로 편집</string>
+    <string name="text_edit_group">그룹 편집</string>
+    <string name="text_edit_intelligent_color_library">인텔리전트 색상 라이브러리 편집</string>
     <string name="text_edit_label">레이블 편집</string>
     <string name="text_edit_prepare_script">사전 사전 자연 스크립트를 편집하십시오</string>
     <string name="text_edit_script">스크립트 편집</string>
@@ -1485,6 +1489,7 @@
     <string name="text_find_prev_simplified">이전을</string>
     <string name="text_finish_reordering">순서 변경 완료</string>
     <string name="text_first_and_last_name">성명</string>
+    <string name="text_first_rotation_at">첫 전환: %1$s</string>
     <string name="text_floating_button">플로팅 버튼</string>
     <string name="text_floating_run">플로팅 실행</string>
     <string name="text_folder">폴더</string>
@@ -1509,7 +1514,11 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 부여하기</string>
     <string name="text_granted">부여된</string>
     <string name="text_group_disabled">비활성화됨</string>
+    <string name="text_group_enabled">사용</string>
+    <string name="text_group_name_optional">그룹 이름 (선택 사항)</string>
+    <string name="text_group_order">전환 방식</string>
     <string name="text_group_unavailable">이 그룹은 비활성화되었거나 색상이 없습니다</string>
+    <string name="text_groups">그룹</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d개 그룹</string>
     <string name="text_guard_mode">가드 모드</string>
     <string name="text_help">돕다</string>
@@ -1521,6 +1530,13 @@
     <string name="text_hide_plugin">플러그인 숨기기</string>
     <string name="text_hide_same_frame_nodes">동일 프레임의 노드를 숨기기</string>
     <string name="text_hint">힌트</string>
+    <string name="text_hint_groups_without_color">일부 사용 중인 그룹에 색상이 없어 건너뜁니다</string>
+    <string name="text_hint_missing_state_colors">일부 그룹에 색상이 없는 상태가 있어 색상이 있는 첫 번째 상태를 사용합니다</string>
+    <string name="text_hint_no_available_groups">색상이 있는 사용 중인 그룹이 없어 저장은 되지만 사용할 수 없습니다</string>
+    <string name="text_hint_not_intelligent">상태와 그룹이 하나뿐이면 색상이 바뀌지 않습니다</string>
+    <string name="text_hint_rotation_without_effect">일부 전환 시점은 효과가 없습니다: 사용 가능한 그룹이 두 개 미만이거나 상태 소스의 상태가 하나입니다</string>
+    <string name="text_hint_short_interval">1분보다 짧은 간격은 색상이 자주 바뀌고 전력을 더 소모합니다</string>
+    <string name="text_hint_unsupported_items">이 버전에서 지원하지 않는 항목이 포함되어 있으며 적용되지 않습니다</string>
     <string name="text_history">기록</string>
     <string name="text_history_has_been_cleared">기록이 삭제되었습니다</string>
     <string name="text_history_max_days">버전 기록 보관 일수</string>
@@ -1658,6 +1674,14 @@
     <string name="text_intelligent_mine">내 라이브러리</string>
     <string name="text_intelligent_preset_material_day_night">머티리얼 주야간 쌍</string>
     <string name="text_intelligent_presets">프리셋</string>
+    <string name="text_interval_anchor_next_hour">다음 정시</string>
+    <string name="text_interval_anchor_next_minute">다음 정분</string>
+    <string name="text_interval_anchor_now">지금</string>
+    <string name="text_interval_first_rotation">기준 시점</string>
+    <string name="text_interval_unit_hour">시간</string>
+    <string name="text_interval_unit_minute">분</string>
+    <string name="text_interval_unit_second">초</string>
+    <string name="text_interval_value">간격</string>
     <string name="text_invalid_character_is_removed">잘못된 문자가 제거되었습니다</string>
     <string name="text_invalid_package_name">잘못된 패키지 이름</string>
     <string name="text_invalid_project">잘못된 프로젝트</string>
@@ -1779,10 +1803,12 @@
     <string name="text_n_unchanged_lines_hidden">변경되지 않은 %d줄 숨김, 탭하여 펼치기</string>
     <string name="text_n_versions">%d개 버전</string>
     <string name="text_name">이름</string>
+    <string name="text_name_required">이름을 입력하세요</string>
     <string name="text_need_to_enable_a11y_service">접근성 서비스를 활성화해야합니다</string>
     <string name="text_new_color_library">새 색상 라이브러리</string>
     <string name="text_new_file">새로운 파일</string>
     <string name="text_new_folder">새 폴더</string>
+    <string name="text_new_group">새 그룹</string>
     <string name="text_new_intelligent_color_library">새 인텔리전트 색상 라이브러리</string>
     <string name="text_new_key_store">서명 키 생성</string>
     <string name="text_new_path">새로운 길</string>
@@ -1836,6 +1862,7 @@
     <string name="text_none">없음</string>
     <string name="text_not_granted">부여되지 않았습니다</string>
     <string name="text_not_installed">설치되지 않음</string>
+    <string name="text_not_intelligent_confirm">상태와 그룹이 하나뿐이면 색상이 바뀌지 않습니다\n\n그래도 저장하시겠습니까?</string>
     <string name="text_not_running">실행 중이 아님</string>
     <string name="text_not_showing_main_activity">주요 활동을 보여주지 않습니다</string>
     <string name="text_notification">공고</string>
@@ -2137,6 +2164,7 @@
     <string name="text_recorded_output_file_type">기록 된 출력 파일 유형</string>
     <string name="text_redo">다시 하다</string>
     <string name="text_redo_simplified">다시</string>
+    <string name="text_reference_state">기준 상태</string>
     <string name="text_refresh">새로 고치다</string>
     <string name="text_refresh_explorer_may_needed">탐색기 페이지 스 와이프-프리프 쉬가 필요할 수 있습니다</string>
     <string name="text_regex">성과선</string>
@@ -2212,7 +2240,9 @@
     <string name="text_root_manager_apps_empty">후보 앱이 없습니다. 설치된 앱을 직접 추가할 수 있습니다.</string>
     <string name="text_root_mode_title">루트 권한 확인</string>
     <string name="text_rotation_app_start">앱 시작</string>
+    <string name="text_rotation_interval">시간 간격</string>
     <string name="text_rotation_state_change">상태 변경</string>
+    <string name="text_rotation_triggers">그룹 전환 시점</string>
     <string name="text_run">운영</string>
     <string name="text_run_on_battery_change">배터리가 변경되었습니다</string>
     <string name="text_run_on_boot">부팅</string>
@@ -2236,10 +2266,12 @@
     <string name="text_run_simplified">운영</string>
     <string name="text_running_task">실행 작업</string>
     <string name="text_same_as_current_file">현재 파일과 동일</string>
+    <string name="text_same_as_state">%1$s과(와) 동일</string>
     <string name="text_sample">샘플</string>
     <string name="text_sample_name">실행 서비스</string>
     <string name="text_save">구하다</string>
     <string name="text_save_and_exit">저장하고 종료</string>
+    <string name="text_save_changes_confirm">나가기 전에 변경 사항을 저장하시겠습니까?</string>
     <string name="text_save_configuration_as">다른 이름으로 저장</string>
     <string name="text_save_layout_to_file">레이아웃을 파일로 저장</string>
     <string name="text_save_simplified">구하다</string>
@@ -2358,9 +2390,11 @@
     <string name="text_start_record">녹음을 시작하십시오</string>
     <string name="text_start_running">달리기</string>
     <string name="text_start_wizard">마법사 시작</string>
+    <string name="text_state_color_single">색상</string>
     <string name="text_state_day">주간</string>
     <string name="text_state_night">야간</string>
     <string name="text_state_or_province">주 또는 도</string>
+    <string name="text_state_source">상태 소스</string>
     <string name="text_state_source_none">없음</string>
     <string name="text_stop">중지</string>
     <string name="text_stop_reconnecting">재연결 중지</string>

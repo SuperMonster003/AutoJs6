@@ -779,6 +779,7 @@
     <string name="summary_setup_wizard_welcome_reset">إظهار رسالة ترحيب معالجات الإعداد في الصفحة الرئيسية مرة أخرى عند التشغيل التالي</string>
     <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
     <string name="text_add_colors">إضافة ألوان</string>
+    <string name="text_add_group">إضافة مجموعة</string>
     <string name="text_and_n_more">... و %d اخرى</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
     <string name="text_background_color_dark">داكن</string>
@@ -1036,6 +1037,7 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">التحقق من وجود تحديثات (تجاهل النسخة المحلية)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">الحصول مباشرة على آخر نسخة عن بُعد عند التحقق من التحديثات</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">البحث عن تحديثات...</string>
+    <string name="text_choose_at_least_one_color">اختر لونا لحالة واحدة على الأقل</string>
     <string name="text_choose_color_library">اختر مكتبة ألوان</string>
     <string name="text_choose_color_library_to_clone">اختر مكتبة الألوان المراد استنساخها</string>
     <string name="text_choose_colors_to_add">اختر الألوان المراد إضافتها</string>
@@ -1337,6 +1339,8 @@
     <string name="text_drawer_open">درج مفتوح</string>
     <string name="text_edit">يحرر</string>
     <string name="text_edit_by_other_apps">تحرير باستخدام تطبيقات أخرى</string>
+    <string name="text_edit_group">تعديل المجموعة</string>
+    <string name="text_edit_intelligent_color_library">تعديل مكتبة الألوان الذكية</string>
     <string name="text_edit_label">تعديل التسمية</string>
     <string name="text_edit_prepare_script">تحرير البرنامج النصي قبل التنفيذ</string>
     <string name="text_edit_script">تحرير البرنامج النصي</string>
@@ -1485,6 +1489,7 @@
     <string name="text_find_prev_simplified">سابق</string>
     <string name="text_finish_reordering">إنهاء إعادة الترتيب</string>
     <string name="text_first_and_last_name">الاسم</string>
+    <string name="text_first_rotation_at">أول تغيير: %1$s</string>
     <string name="text_floating_button">زر عائم</string>
     <string name="text_floating_run">تشغيل عائم</string>
     <string name="text_folder">مجلد</string>
@@ -1509,7 +1514,11 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">منح الوصول إلى AutoJs6 في تطبيق Shizuku</string>
     <string name="text_granted">ممنوح</string>
     <string name="text_group_disabled">معطل</string>
+    <string name="text_group_enabled">مفعل</string>
+    <string name="text_group_name_optional">اسم المجموعة (اختياري)</string>
+    <string name="text_group_order">ترتيب المجموعات</string>
     <string name="text_group_unavailable">هذه المجموعة معطلة أو لا تحتوي على لون</string>
+    <string name="text_groups">المجموعات</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d مجموعات</string>
     <string name="text_guard_mode">وضع الحرس</string>
     <string name="text_help">مساعدة</string>
@@ -1521,6 +1530,13 @@
     <string name="text_hide_plugin">إخفاء المكون الإضافي</string>
     <string name="text_hide_same_frame_nodes">إخفاء العقدة ذات الإطار المماثل</string>
     <string name="text_hint">تلميح</string>
+    <string name="text_hint_groups_without_color">بعض المجموعات المفعلة بلا لون وسيتم تخطيها</string>
+    <string name="text_hint_missing_state_colors">تفتقد بعض المجموعات ألوانا لبعض الحالات; ستستخدم أول حالة لها لون</string>
+    <string name="text_hint_no_available_groups">لا توجد مجموعة مفعلة لها لون; يمكن حفظ المكتبة لكن لا يمكن استخدامها</string>
+    <string name="text_hint_not_intelligent">مع حالة واحدة ومجموعة واحدة لن يتغير اللون أبدا</string>
+    <string name="text_hint_rotation_without_effect">بعض محفزات التبديل بلا أثر: المجموعات المتاحة أقل من اثنتين, أو لمصدر الحالة حالة واحدة</string>
+    <string name="text_hint_short_interval">الفواصل الأقصر من دقيقة تغير الألوان كثيرا وتستهلك طاقة أكثر</string>
+    <string name="text_hint_unsupported_items">يحتوي على عناصر لا يدعمها هذا الإصدار; لن يكون لها أثر</string>
     <string name="text_history">السجل</string>
     <string name="text_history_has_been_cleared">تم مسح السجل</string>
     <string name="text_history_max_days">ايام الاحتفاظ بسجل الاصدارات</string>
@@ -1658,6 +1674,14 @@
     <string name="text_intelligent_mine">مكتباتي</string>
     <string name="text_intelligent_preset_material_day_night">ألوان المواد نهارا وليلا</string>
     <string name="text_intelligent_presets">الإعدادات المسبقة</string>
+    <string name="text_interval_anchor_next_hour">الساعة الكاملة التالية</string>
+    <string name="text_interval_anchor_next_minute">الدقيقة الكاملة التالية</string>
+    <string name="text_interval_anchor_now">الآن</string>
+    <string name="text_interval_first_rotation">الحساب ابتداء من</string>
+    <string name="text_interval_unit_hour">ساعات</string>
+    <string name="text_interval_unit_minute">دقائق</string>
+    <string name="text_interval_unit_second">ثوان</string>
+    <string name="text_interval_value">الفاصل</string>
     <string name="text_invalid_character_is_removed">تمت إزالة حرف غير صالح</string>
     <string name="text_invalid_package_name">اسم الحزمة غير صالح</string>
     <string name="text_invalid_project">مشروع غير صالح</string>
@@ -1779,10 +1803,12 @@
     <string name="text_n_unchanged_lines_hidden">تم اخفاء %d سطر دون تغيير, انقر للتوسيع</string>
     <string name="text_n_versions">%d اصدار</string>
     <string name="text_name">اسم</string>
+    <string name="text_name_required">أدخل اسما</string>
     <string name="text_need_to_enable_a11y_service">تحتاج إلى تمكين خدمة الوصول</string>
     <string name="text_new_color_library">مكتبة ألوان جديدة</string>
     <string name="text_new_file">ملف جديد</string>
     <string name="text_new_folder">مجلد جديد</string>
+    <string name="text_new_group">مجموعة جديدة</string>
     <string name="text_new_intelligent_color_library">مكتبة ألوان ذكية جديدة</string>
     <string name="text_new_key_store">إنشاء مفتاح التوقيع</string>
     <string name="text_new_path">طريق جديد</string>
@@ -1836,6 +1862,7 @@
     <string name="text_none">لا يوجد</string>
     <string name="text_not_granted">لم تمنح</string>
     <string name="text_not_installed">غير مثبّت</string>
+    <string name="text_not_intelligent_confirm">مع حالة واحدة ومجموعة واحدة لن يتغير اللون أبدا\n\nهل تريد الحفظ على أي حال?</string>
     <string name="text_not_running">غير قيد التشغيل</string>
     <string name="text_not_showing_main_activity">لا تظهر النشاط الرئيسي</string>
     <string name="text_notification">تنبيه</string>
@@ -2137,6 +2164,7 @@
     <string name="text_recorded_output_file_type">نوع ملف الإخراج المسجل</string>
     <string name="text_redo">إعادة</string>
     <string name="text_redo_simplified">إعادة</string>
+    <string name="text_reference_state">الحالة المرجعية</string>
     <string name="text_refresh">ينعش</string>
     <string name="text_refresh_explorer_may_needed">قد تكون هناك حاجة إلى صفحة مستكشف التمرير إلى الحفر</string>
     <string name="text_regex">Regex</string>
@@ -2212,7 +2240,9 @@
     <string name="text_root_manager_apps_empty">لم يتم العثور على تطبيقات مرشحة. يمكنك إضافة تطبيق مثبت.</string>
     <string name="text_root_mode_title">التحقق من صلاحيات الروت</string>
     <string name="text_rotation_app_start">بدء التطبيق</string>
+    <string name="text_rotation_interval">فاصل زمني</string>
     <string name="text_rotation_state_change">تغير الحالة</string>
+    <string name="text_rotation_triggers">تبديل المجموعات</string>
     <string name="text_run">يجري</string>
     <string name="text_run_on_battery_change">على البطارية تغيرت</string>
     <string name="text_run_on_boot">على التمهيد</string>
@@ -2236,10 +2266,12 @@
     <string name="text_run_simplified">يجري</string>
     <string name="text_running_task">تشغيل المهمة</string>
     <string name="text_same_as_current_file">مطابق للملف الحالي</string>
+    <string name="text_same_as_state">مثل %1$s</string>
     <string name="text_sample">عينات</string>
     <string name="text_sample_name">خدمة التشغيل</string>
     <string name="text_save">احفظ</string>
     <string name="text_save_and_exit">حفظ وخروج</string>
+    <string name="text_save_changes_confirm">هل تريد حفظ التغييرات قبل المغادرة?</string>
     <string name="text_save_configuration_as">حفظ الاعدادات باسم</string>
     <string name="text_save_layout_to_file">حفظ التخطيط في ملف</string>
     <string name="text_save_simplified">احفظ</string>
@@ -2358,9 +2390,11 @@
     <string name="text_start_record">ابدأ التسجيل</string>
     <string name="text_start_running">ادارة</string>
     <string name="text_start_wizard">بدء المعالج</string>
+    <string name="text_state_color_single">اللون</string>
     <string name="text_state_day">نهار</string>
     <string name="text_state_night">ليل</string>
     <string name="text_state_or_province">الولاية أو المقاطعة</string>
+    <string name="text_state_source">مصدر الحالة</string>
     <string name="text_state_source_none">لا شيء</string>
     <string name="text_stop">قف</string>
     <string name="text_stop_reconnecting">إيقاف إعادة الاتصال</string>

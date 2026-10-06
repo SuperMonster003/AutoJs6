@@ -1,8 +1,6 @@
 package org.autojs.autojs.theme.app
 
 import android.content.Context
-import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs6.R
 
 /**
  * Opens the intelligent library editor; [libraryId] null creates a new library.
@@ -10,8 +8,6 @@ import org.autojs.autojs6.R
  */
 object IntelligentLibraryEditorLauncher {
 
-    fun open(context: Context, libraryId: Int?) {
-        ViewUtils.showToast(context, R.string.text_under_development)
-    }
+    fun open(context: Context, libraryId: Int?) = IntelligentLibraryEditorActivity.launch(context, libraryId)
 
 }

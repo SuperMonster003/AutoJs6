@@ -778,6 +778,7 @@
     <string name="summary_setup_wizard_welcome_reset">次回起動時にホームでセットアップウィザードのウェルカム表示を再表示します</string>
     <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
     <string name="text_add_colors">色を追加</string>
+    <string name="text_add_group">グループを追加</string>
     <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_auto_reconnect">自動再接続</string>
     <string name="text_background_color_dark">ダーク</string>
@@ -1035,6 +1036,7 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">アップデートの確認 (ローカルバージョンを無視する)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">アップデートを確認する際に, 最新のリモートバージョンを直接取得する</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">アップデートを確認中...</string>
+    <string name="text_choose_at_least_one_color">少なくとも 1 つの状態に色を選択してください</string>
     <string name="text_choose_color_library">カラーライブラリを選択</string>
     <string name="text_choose_color_library_to_clone">複製するカラーライブラリを選択</string>
     <string name="text_choose_colors_to_add">追加する色を選択</string>
@@ -1336,6 +1338,8 @@
     <string name="text_drawer_open">ドロワーを開く</string>
     <string name="text_edit">編集する</string>
     <string name="text_edit_by_other_apps">他のアプリで編集</string>
+    <string name="text_edit_group">グループを編集</string>
+    <string name="text_edit_intelligent_color_library">インテリジェントカラーライブラリを編集</string>
     <string name="text_edit_label">ラベルを編集</string>
     <string name="text_edit_prepare_script">実行前スクリプトの編集</string>
     <string name="text_edit_script">スクリプトの編集</string>
@@ -1484,6 +1488,7 @@
     <string name="text_find_prev_simplified">前へ</string>
     <string name="text_finish_reordering">並べ替えを完了</string>
     <string name="text_first_and_last_name">氏名</string>
+    <string name="text_first_rotation_at">最初の切り替え: %1$s</string>
     <string name="text_floating_button">フローティングボタン</string>
     <string name="text_floating_run">フローティング実行</string>
     <string name="text_folder">フォルダー</string>
@@ -1508,7 +1513,11 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を付与する</string>
     <string name="text_granted">許可する</string>
     <string name="text_group_disabled">無効</string>
+    <string name="text_group_enabled">有効</string>
+    <string name="text_group_name_optional">グループ名 (任意)</string>
+    <string name="text_group_order">切り替え方法</string>
     <string name="text_group_unavailable">このグループは無効か, 色がありません</string>
+    <string name="text_groups">グループ</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d グループ</string>
     <string name="text_guard_mode">ガードモード</string>
     <string name="text_help">ヘルプ</string>
@@ -1520,6 +1529,13 @@
     <string name="text_hide_plugin">プラグインを非表示</string>
     <string name="text_hide_same_frame_nodes">同じフレームのノードを隠す</string>
     <string name="text_hint">ヒント</string>
+    <string name="text_hint_groups_without_color">有効なグループの一部に色がなく, スキップされます</string>
+    <string name="text_hint_missing_state_colors">一部のグループに色のない状態があり, 色のある最初の状態が使われます</string>
+    <string name="text_hint_no_available_groups">色のある有効なグループがないため, 保存はできますが使用できません</string>
+    <string name="text_hint_not_intelligent">状態が 1 つでグループも 1 つだけの場合, 色は変わりません</string>
+    <string name="text_hint_rotation_without_effect">一部の切り替えタイミングは効果がありません: 利用可能なグループが 2 つ未満か, 状態ソースの状態が 1 つです</string>
+    <string name="text_hint_short_interval">1 分未満の間隔では色が頻繁に変わり, 電力消費も増えます</string>
+    <string name="text_hint_unsupported_items">このバージョンで未対応の項目が含まれており, それらは機能しません</string>
     <string name="text_history">履歴</string>
     <string name="text_history_has_been_cleared">履歴を消去しました</string>
     <string name="text_history_max_days">バージョン履歴の保持日数</string>
@@ -1657,6 +1673,14 @@
     <string name="text_intelligent_mine">マイライブラリ</string>
     <string name="text_intelligent_preset_material_day_night">マテリアル昼夜ペア</string>
     <string name="text_intelligent_presets">プリセット</string>
+    <string name="text_interval_anchor_next_hour">次の正時</string>
+    <string name="text_interval_anchor_next_minute">次のちょうどの分</string>
+    <string name="text_interval_anchor_now">今すぐ</string>
+    <string name="text_interval_first_rotation">起点</string>
+    <string name="text_interval_unit_hour">時間</string>
+    <string name="text_interval_unit_minute">分</string>
+    <string name="text_interval_unit_second">秒</string>
+    <string name="text_interval_value">間隔</string>
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>
@@ -1778,10 +1802,12 @@
     <string name="text_n_unchanged_lines_hidden">変更のない %d 行を非表示中. タップして展開</string>
     <string name="text_n_versions">%d バージョン</string>
     <string name="text_name">名称</string>
+    <string name="text_name_required">名前を入力してください</string>
     <string name="text_need_to_enable_a11y_service">アクセシビリティサービスを有効にする必要があります</string>
     <string name="text_new_color_library">新しいカラーパレット</string>
     <string name="text_new_file">新規ファイル</string>
     <string name="text_new_folder">新規フォルダ</string>
+    <string name="text_new_group">新しいグループ</string>
     <string name="text_new_intelligent_color_library">新しいインテリジェントカラーパレット</string>
     <string name="text_new_key_store">署名キーを生成</string>
     <string name="text_new_path">新しいパス</string>
@@ -1835,6 +1861,7 @@
     <string name="text_none">なし</string>
     <string name="text_not_granted">許可されない</string>
     <string name="text_not_installed">未インストール</string>
+    <string name="text_not_intelligent_confirm">状態が 1 つでグループも 1 つだけの場合, 色は変わりません\n\nこのまま保存しますか?</string>
     <string name="text_not_running">実行されていません</string>
     <string name="text_not_showing_main_activity">メインのアクティビティが表示されない</string>
     <string name="text_notification">通知</string>
@@ -2136,6 +2163,7 @@
     <string name="text_recorded_output_file_type">記録された出力ファイルの種類</string>
     <string name="text_redo">やり直し</string>
     <string name="text_redo_simplified">やり直</string>
+    <string name="text_reference_state">基準となる状態</string>
     <string name="text_refresh">リフレッシュ</string>
     <string name="text_refresh_explorer_may_needed">エクスプローラーページのスワイプによる更新が必要な場合があります</string>
     <string name="text_regex">レジェックス</string>
@@ -2211,7 +2239,9 @@
     <string name="text_root_manager_apps_empty">候補が見つかりません. インストール済みアプリを追加できます.</string>
     <string name="text_root_mode_title">Root 権限の確認</string>
     <string name="text_rotation_app_start">アプリ起動</string>
+    <string name="text_rotation_interval">時間間隔</string>
     <string name="text_rotation_state_change">状態の変化</string>
+    <string name="text_rotation_triggers">グループの切り替えタイミング</string>
     <string name="text_run">実行</string>
     <string name="text_run_on_battery_change">バッテリー交換時</string>
     <string name="text_run_on_boot">起動したとき</string>
@@ -2235,10 +2265,12 @@
     <string name="text_run_simplified">実行</string>
     <string name="text_running_task">タスクの実行</string>
     <string name="text_same_as_current_file">現在のファイルと同一</string>
+    <string name="text_same_as_state">%1$s と同じ</string>
     <string name="text_sample">サンプル</string>
     <string name="text_sample_name">サービスの実行</string>
     <string name="text_save">保存する</string>
     <string name="text_save_and_exit">保存して終了</string>
+    <string name="text_save_changes_confirm">終了する前に変更を保存しますか?</string>
     <string name="text_save_configuration_as">設定を別名で保存</string>
     <string name="text_save_layout_to_file">レイアウトをファイルに保存</string>
     <string name="text_save_simplified">保存</string>
@@ -2357,9 +2389,11 @@
     <string name="text_start_record">記録開始</string>
     <string name="text_start_running">実行中</string>
     <string name="text_start_wizard">ウィザードを開始</string>
+    <string name="text_state_color_single">色</string>
     <string name="text_state_day">昼</string>
     <string name="text_state_night">夜</string>
     <string name="text_state_or_province">州または省</string>
+    <string name="text_state_source">状態ソース</string>
     <string name="text_state_source_none">なし</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">再接続を停止</string>

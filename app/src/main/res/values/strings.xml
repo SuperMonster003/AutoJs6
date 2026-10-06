@@ -772,6 +772,7 @@
     <string name="summary_setup_wizard_welcome_reset">Show the welcome prompt of the setup wizards on the home page again on the next launch</string>
     <string name="summary_setup_wizards">Grant common permissions and install official plugins</string>
     <string name="text_add_colors">Add colors</string>
+    <string name="text_add_group">Add group</string>
     <string name="text_and_n_more">... and %d more</string>
     <string name="text_auto_reconnect">Auto reconnect</string>
     <string name="text_background_color_dark">Dark</string>
@@ -1029,6 +1030,7 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">Check for updates (ignore the local version)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">Fetch the latest remote version directly when checking for updates</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
+    <string name="text_choose_at_least_one_color">Choose a color for at least one state</string>
     <string name="text_choose_color_library">Choose a color library</string>
     <string name="text_choose_color_library_to_clone">Choose a color library to clone</string>
     <string name="text_choose_colors_to_add">Choose colors to add</string>
@@ -1331,6 +1333,8 @@
     <string name="text_drawer_open">Open drawer</string>
     <string name="text_edit">Edit</string>
     <string name="text_edit_by_other_apps">Edit with other apps</string>
+    <string name="text_edit_group">Edit group</string>
+    <string name="text_edit_intelligent_color_library">Edit intelligent color library</string>
     <string name="text_edit_label">Edit label</string>
     <string name="text_edit_prepare_script">Edit pre-execute script</string>
     <string name="text_edit_script">Edit script</string>
@@ -1479,6 +1483,7 @@
     <string name="text_find_prev_simplified">Prev</string>
     <string name="text_finish_reordering">Finish reordering</string>
     <string name="text_first_and_last_name">Full Name</string>
+    <string name="text_first_rotation_at">First change: %1$s</string>
     <string name="text_floating_button">Floating button</string>
     <string name="text_floating_run">Floating run</string>
     <string name="text_folder">Folder</string>
@@ -1503,7 +1508,11 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">Grant AutoJs6 access in Shizuku app</string>
     <string name="text_granted">Granted</string>
     <string name="text_group_disabled">Disabled</string>
+    <string name="text_group_enabled">Enabled</string>
+    <string name="text_group_name_optional">Group name (optional)</string>
+    <string name="text_group_order">Group order</string>
     <string name="text_group_unavailable">This group is disabled or has no color</string>
+    <string name="text_groups">Groups</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d groups</string>
     <string name="text_guard_mode">Guard mode</string>
     <string name="text_help">Help</string>
@@ -1515,6 +1524,13 @@
     <string name="text_hide_plugin">Hide plugin</string>
     <string name="text_hide_same_frame_nodes">Hide same frame nodes</string>
     <string name="text_hint">Hint</string>
+    <string name="text_hint_groups_without_color">Some enabled groups have no color and will be skipped</string>
+    <string name="text_hint_missing_state_colors">Some groups lack colors for some states; the first state with a color is used instead</string>
+    <string name="text_hint_no_available_groups">No enabled group has a color; the library can be saved but not used</string>
+    <string name="text_hint_not_intelligent">With one state and one group, the color never changes</string>
+    <string name="text_hint_rotation_without_effect">Some rotation triggers have no effect: fewer than two groups are available, or the state source has one state</string>
+    <string name="text_hint_short_interval">Intervals shorter than one minute change colors often and use more power</string>
+    <string name="text_hint_unsupported_items">Contains items this version does not support; they have no effect</string>
     <string name="text_history">History</string>
     <string name="text_history_has_been_cleared">The history has been cleared</string>
     <string name="text_history_max_days">Version history retention days</string>
@@ -1652,6 +1668,14 @@
     <string name="text_intelligent_mine">Mine</string>
     <string name="text_intelligent_preset_material_day_night">Material day and night</string>
     <string name="text_intelligent_presets">Presets</string>
+    <string name="text_interval_anchor_next_hour">Next whole hour</string>
+    <string name="text_interval_anchor_next_minute">Next whole minute</string>
+    <string name="text_interval_anchor_now">Now</string>
+    <string name="text_interval_first_rotation">Counted from</string>
+    <string name="text_interval_unit_hour">Hours</string>
+    <string name="text_interval_unit_minute">Minutes</string>
+    <string name="text_interval_unit_second">Seconds</string>
+    <string name="text_interval_value">Interval</string>
     <string name="text_invalid_character_is_removed">Invalid character is removed</string>
     <string name="text_invalid_package_name">Invalid package name</string>
     <string name="text_invalid_project">Invalid project</string>
@@ -1773,10 +1797,12 @@
     <string name="text_n_unchanged_lines_hidden">%d unchanged lines hidden, tap to expand</string>
     <string name="text_n_versions">%d versions</string>
     <string name="text_name">Name</string>
+    <string name="text_name_required">Enter a name</string>
     <string name="text_need_to_enable_a11y_service">Need to enable accessibility service</string>
     <string name="text_new_color_library">New color library</string>
     <string name="text_new_file">New file</string>
     <string name="text_new_folder">New folder</string>
+    <string name="text_new_group">New group</string>
     <string name="text_new_intelligent_color_library">New intelligent color library</string>
     <string name="text_new_key_store">New Key Store</string>
     <string name="text_new_path">New path</string>
@@ -1830,6 +1856,7 @@
     <string name="text_none">None</string>
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_installed">Not installed</string>
+    <string name="text_not_intelligent_confirm">With one state and one group, the color never changes\n\nSave anyway?</string>
     <string name="text_not_running">Not running</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
     <string name="text_notification">Notification</string>
@@ -2131,6 +2158,7 @@
     <string name="text_recorded_output_file_type">Recorded output file type</string>
     <string name="text_redo">Redo</string>
     <string name="text_redo_simplified">Redo</string>
+    <string name="text_reference_state">Reference state</string>
     <string name="text_refresh">Refresh</string>
     <string name="text_refresh_explorer_may_needed">An explorer page swipe-to-refresh may be needed</string>
     <string name="text_regex">Regex</string>
@@ -2206,7 +2234,9 @@
     <string name="text_root_manager_apps_empty">No candidates found. You can add an installed app.</string>
     <string name="text_root_mode_title">Root access check</string>
     <string name="text_rotation_app_start">App start</string>
+    <string name="text_rotation_interval">Interval</string>
     <string name="text_rotation_state_change">State change</string>
+    <string name="text_rotation_triggers">Group rotation</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
     <string name="text_run_on_boot">On booted</string>
@@ -2230,10 +2260,12 @@
     <string name="text_run_simplified">Run</string>
     <string name="text_running_task">Running task</string>
     <string name="text_same_as_current_file">Same as the current file</string>
+    <string name="text_same_as_state">Same as %1$s</string>
     <string name="text_sample">Samples</string>
     <string name="text_sample_name">Running service</string>
     <string name="text_save">Save</string>
     <string name="text_save_and_exit">Save and exit</string>
+    <string name="text_save_changes_confirm">Save the changes before leaving?</string>
     <string name="text_save_configuration_as">Save configuration as</string>
     <string name="text_save_layout_to_file">Save layout to file</string>
     <string name="text_save_simplified">Save</string>
@@ -2352,9 +2384,11 @@
     <string name="text_start_record">Start recording</string>
     <string name="text_start_running">Running</string>
     <string name="text_start_wizard">Start wizard</string>
+    <string name="text_state_color_single">Color</string>
     <string name="text_state_day">Day</string>
     <string name="text_state_night">Night</string>
     <string name="text_state_or_province">State or Province</string>
+    <string name="text_state_source">State source</string>
     <string name="text_state_source_none">None</string>
     <string name="text_stop">Stop</string>
     <string name="text_stop_reconnecting">Stop reconnecting</string>

@@ -777,6 +777,7 @@
     <string name="summary_setup_wizard_welcome_reset">Afficher à nouveau le message de bienvenue des assistants de configuration sur la page d\'accueil au prochain lancement</string>
     <string name="summary_setup_wizards">Accorder les permissions courantes et installer les plugins officiels</string>
     <string name="text_add_colors">Ajouter des couleurs</string>
+    <string name="text_add_group">Ajouter un groupe</string>
     <string name="text_and_n_more">... et %d de plus</string>
     <string name="text_auto_reconnect">Reconnexion automatique</string>
     <string name="text_background_color_dark">Sombre</string>
@@ -1034,6 +1035,7 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">Vérifier les mises à jour (ignorer la version locale)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">Récupérer directement la dernière version distante lors de la vérification des mises à jour</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Recherche de mises à jour...</string>
+    <string name="text_choose_at_least_one_color">Choisissez une couleur pour au moins un état</string>
     <string name="text_choose_color_library">Choisir une bibliothèque de couleurs</string>
     <string name="text_choose_color_library_to_clone">Choisir la bibliothèque de couleurs à cloner</string>
     <string name="text_choose_colors_to_add">Choisir les couleurs à ajouter</string>
@@ -1335,6 +1337,8 @@
     <string name="text_drawer_open">Ouvrir le tiroir</string>
     <string name="text_edit">Editer</string>
     <string name="text_edit_by_other_apps">Modifier avec d\'autres applications</string>
+    <string name="text_edit_group">Modifier le groupe</string>
+    <string name="text_edit_intelligent_color_library">Modifier la bibliothèque de couleurs intelligente</string>
     <string name="text_edit_label">Modifier le libellé</string>
     <string name="text_edit_prepare_script">Editer le script de pré-exécution</string>
     <string name="text_edit_script">Editer le script</string>
@@ -1483,6 +1487,7 @@
     <string name="text_find_prev_simplified">Précé</string>
     <string name="text_finish_reordering">Terminer le réagencement</string>
     <string name="text_first_and_last_name">Nom complet</string>
+    <string name="text_first_rotation_at">Premier changement : %1$s</string>
     <string name="text_floating_button">Bouton flottant</string>
     <string name="text_floating_run">Exécution flottante</string>
     <string name="text_folder">Dossier</string>
@@ -1507,7 +1512,11 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">Accorder des privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_granted">Accordé</string>
     <string name="text_group_disabled">Désactivé</string>
+    <string name="text_group_enabled">Activé</string>
+    <string name="text_group_name_optional">Nom du groupe (facultatif)</string>
+    <string name="text_group_order">Ordre des groupes</string>
     <string name="text_group_unavailable">Ce groupe est désactivé ou n\'a pas de couleur</string>
+    <string name="text_groups">Groupes</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d groupes</string>
     <string name="text_guard_mode">Mode garde</string>
     <string name="text_help">Aide</string>
@@ -1519,6 +1528,13 @@
     <string name="text_hide_plugin">Masquer le plugin</string>
     <string name="text_hide_same_frame_nodes">Masquer le nœud du même cadre</string>
     <string name="text_hint">Astuce</string>
+    <string name="text_hint_groups_without_color">Certains groupes activés n\'ont pas de couleur et seront ignorés</string>
+    <string name="text_hint_missing_state_colors">Certains groupes n\'ont pas de couleur pour certains états; le premier état coloré est utilisé</string>
+    <string name="text_hint_no_available_groups">Aucun groupe activé n\'a de couleur; la bibliothèque peut être enregistrée mais pas utilisée</string>
+    <string name="text_hint_not_intelligent">Avec un seul état et un seul groupe, la couleur ne change jamais</string>
+    <string name="text_hint_rotation_without_effect">Certains déclencheurs sont sans effet: moins de deux groupes disponibles, ou la source d\'état n\'a qu\'un état</string>
+    <string name="text_hint_short_interval">Les intervalles de moins d\'une minute changent souvent les couleurs et consomment plus d\'énergie</string>
+    <string name="text_hint_unsupported_items">Contient des éléments non pris en charge par cette version; ils sont sans effet</string>
     <string name="text_history">Historique</string>
     <string name="text_history_has_been_cleared">L\'historique a ete efface</string>
     <string name="text_history_max_days">Jours de conservation de l\'historique des versions</string>
@@ -1656,6 +1672,14 @@
     <string name="text_intelligent_mine">Mes bibliothèques</string>
     <string name="text_intelligent_preset_material_day_night">Material jour et nuit</string>
     <string name="text_intelligent_presets">Préréglages</string>
+    <string name="text_interval_anchor_next_hour">Prochaine heure pleine</string>
+    <string name="text_interval_anchor_next_minute">Prochaine minute pleine</string>
+    <string name="text_interval_anchor_now">Maintenant</string>
+    <string name="text_interval_first_rotation">À partir de</string>
+    <string name="text_interval_unit_hour">Heures</string>
+    <string name="text_interval_unit_minute">Minutes</string>
+    <string name="text_interval_unit_second">Secondes</string>
+    <string name="text_interval_value">Intervalle</string>
     <string name="text_invalid_character_is_removed">Caractère invalide est supprimé</string>
     <string name="text_invalid_package_name">Nom de paquet non valide</string>
     <string name="text_invalid_project">Projet non valide</string>
@@ -1777,10 +1801,12 @@
     <string name="text_n_unchanged_lines_hidden">%d lignes inchangées masquées, appuyez pour développer</string>
     <string name="text_n_versions">%d versions</string>
     <string name="text_name">Nom</string>
+    <string name="text_name_required">Saisissez un nom</string>
     <string name="text_need_to_enable_a11y_service">Nécessité d\'activer le service d\'accessibilité</string>
     <string name="text_new_color_library">Nouvelle bibliothèque de couleurs</string>
     <string name="text_new_file">Nouveau fichier</string>
     <string name="text_new_folder">Nouveau dossier</string>
+    <string name="text_new_group">Nouveau groupe</string>
     <string name="text_new_intelligent_color_library">Nouvelle bibliothèque de couleurs intelligente</string>
     <string name="text_new_key_store">Générer une clé de signature</string>
     <string name="text_new_path">Nouveau chemin</string>
@@ -1834,6 +1860,7 @@
     <string name="text_none">Aucun</string>
     <string name="text_not_granted">Non accordée</string>
     <string name="text_not_installed">Non installé</string>
+    <string name="text_not_intelligent_confirm">Avec un seul état et un seul groupe, la couleur ne change jamais\n\nEnregistrer quand même?</string>
     <string name="text_not_running">Non démarré</string>
     <string name="text_not_showing_main_activity">Activité principale non affichée</string>
     <string name="text_notification">Notification</string>
@@ -2135,6 +2162,7 @@
     <string name="text_recorded_output_file_type">Type de fichier de sortie enregistré</string>
     <string name="text_redo">Refaire</string>
     <string name="text_redo_simplified">Refai</string>
+    <string name="text_reference_state">État de référence</string>
     <string name="text_refresh">Actualiser</string>
     <string name="text_refresh_explorer_may_needed">Il peut être nécessaire de faire glisser la page de l\'explorateur pour la rafraîchir</string>
     <string name="text_regex">Regex</string>
@@ -2210,7 +2238,9 @@
     <string name="text_root_manager_apps_empty">Aucun candidat trouvé. Vous pouvez ajouter une application installée.</string>
     <string name="text_root_mode_title">Vérification de l\'accès root</string>
     <string name="text_rotation_app_start">Démarrage de l\'app</string>
+    <string name="text_rotation_interval">Intervalle</string>
     <string name="text_rotation_state_change">Changement d\'état</string>
+    <string name="text_rotation_triggers">Rotation des groupes</string>
     <string name="text_run">Exécuter</string>
     <string name="text_run_on_battery_change">Sur changement de batterie</string>
     <string name="text_run_on_boot">Sur démarrage</string>
@@ -2234,10 +2264,12 @@
     <string name="text_run_simplified">Exéc</string>
     <string name="text_running_task">Exécution d\'une tâche</string>
     <string name="text_same_as_current_file">Identique au fichier actuel</string>
+    <string name="text_same_as_state">Identique à %1$s</string>
     <string name="text_sample">Echantillons</string>
     <string name="text_sample_name">Service en cours d\'exécution</string>
     <string name="text_save">Enregistrer</string>
     <string name="text_save_and_exit">Enregistrer et quitter</string>
+    <string name="text_save_changes_confirm">Enregistrer les modifications avant de quitter?</string>
     <string name="text_save_configuration_as">Enregistrer la config sous</string>
     <string name="text_save_layout_to_file">Enregistrer la mise en page dans un fichier</string>
     <string name="text_save_simplified">Enreg</string>
@@ -2356,9 +2388,11 @@
     <string name="text_start_record">Démarrer l\'enregistrement</string>
     <string name="text_start_running">En cours d\'exécution</string>
     <string name="text_start_wizard">Lancer l\'assistant</string>
+    <string name="text_state_color_single">Couleur</string>
     <string name="text_state_day">Jour</string>
     <string name="text_state_night">Nuit</string>
     <string name="text_state_or_province">État ou province</string>
+    <string name="text_state_source">Source d\'état</string>
     <string name="text_state_source_none">Aucun</string>
     <string name="text_stop">Stop</string>
     <string name="text_stop_reconnecting">Arrêter la reconnexion</string>

@@ -774,6 +774,7 @@
     <string name="summary_setup_wizard_welcome_reset">下次啟動時在主頁再次顯示設定精靈的歡迎提示</string>
     <string name="summary_setup_wizards">授予常用許可權及安裝官方外掛</string>
     <string name="text_add_colors">新增顏色</string>
+    <string name="text_add_group">新增群組</string>
     <string name="text_and_n_more">... 及其他 %d 項</string>
     <string name="text_auto_reconnect">自動重連</string>
     <string name="text_background_color_dark">暗色</string>
@@ -1031,6 +1032,7 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">檢查更新 (忽略本地版本)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">檢查更新時, 直接從遠端獲取最新版本</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">正在檢查更新...</string>
+    <string name="text_choose_at_least_one_color">請至少為一個狀態選擇顏色</string>
     <string name="text_choose_color_library">選擇顏色庫</string>
     <string name="text_choose_color_library_to_clone">選擇要克隆的顏色庫</string>
     <string name="text_choose_colors_to_add">選擇要新增的顏色</string>
@@ -1332,6 +1334,8 @@
     <string name="text_drawer_open">開啟側拉抽屜</string>
     <string name="text_edit">編輯</string>
     <string name="text_edit_by_other_apps">使用其他應用程式編輯</string>
+    <string name="text_edit_group">編輯群組</string>
+    <string name="text_edit_intelligent_color_library">編輯智慧顏色庫</string>
     <string name="text_edit_label">編輯標籤</string>
     <string name="text_edit_prepare_script">編輯預執行指令碼</string>
     <string name="text_edit_script">編輯指令碼</string>
@@ -1480,6 +1484,7 @@
     <string name="text_find_prev_simplified">上一個</string>
     <string name="text_finish_reordering">完成調整</string>
     <string name="text_first_and_last_name">姓名</string>
+    <string name="text_first_rotation_at">首次換組: %1$s</string>
     <string name="text_floating_button">浮動按鈕</string>
     <string name="text_floating_run">懸浮執行</string>
     <string name="text_folder">資料夾</string>
@@ -1504,7 +1509,11 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">在 Shizuku 應用中授予 AutoJs6 許可權</string>
     <string name="text_granted">已授予</string>
     <string name="text_group_disabled">已停用</string>
+    <string name="text_group_enabled">啟用</string>
+    <string name="text_group_name_optional">群組名稱 (選填)</string>
+    <string name="text_group_order">切換方式</string>
     <string name="text_group_unavailable">此群組已停用或沒有顏色</string>
+    <string name="text_groups">群組</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d 個群組</string>
     <string name="text_guard_mode">保護模式</string>
     <string name="text_help">幫助</string>
@@ -1516,6 +1525,13 @@
     <string name="text_hide_plugin">隱藏外掛</string>
     <string name="text_hide_same_frame_nodes">隱藏同框節點</string>
     <string name="text_hint">提示</string>
+    <string name="text_hint_groups_without_color">部分啟用的群組沒有顏色, 將被略過</string>
+    <string name="text_hint_missing_state_colors">部分群組缺少某些狀態的顏色, 將使用第一個有顏色的狀態</string>
+    <string name="text_hint_no_available_groups">沒有帶顏色的啟用群組, 儲存後無法使用此庫</string>
+    <string name="text_hint_not_intelligent">單狀態且只有一個群組時, 顏色不會變化, 目前設定不具備智慧表現</string>
+    <string name="text_hint_rotation_without_effect">部分換組時機不會產生效果: 可用群組少於兩個, 或狀態源只有一個狀態</string>
+    <string name="text_hint_short_interval">時間間隔短於 1 分鐘時, 頻繁變色可能影響觀感並增加耗電</string>
+    <string name="text_hint_unsupported_items">包含目前版本不支援的項目, 它們不會生效</string>
     <string name="text_history">歷史記錄</string>
     <string name="text_history_has_been_cleared">歷史記錄已清空</string>
     <string name="text_history_max_days">版本歷史保留天數</string>
@@ -1653,6 +1669,14 @@
     <string name="text_intelligent_mine">我的</string>
     <string name="text_intelligent_preset_material_day_night">材料設計日夜配對</string>
     <string name="text_intelligent_presets">預設</string>
+    <string name="text_interval_anchor_next_hour">下一個整點</string>
+    <string name="text_interval_anchor_next_minute">下一個整分</string>
+    <string name="text_interval_anchor_now">現在</string>
+    <string name="text_interval_first_rotation">最近一次觸發時機</string>
+    <string name="text_interval_unit_hour">小時</string>
+    <string name="text_interval_unit_minute">分鐘</string>
+    <string name="text_interval_unit_second">秒</string>
+    <string name="text_interval_value">間隔</string>
     <string name="text_invalid_character_is_removed">無效字元已被移除</string>
     <string name="text_invalid_package_name">無效包名</string>
     <string name="text_invalid_project">無效專案</string>
@@ -1774,10 +1798,12 @@
     <string name="text_n_unchanged_lines_hidden">已隱藏 %d 行未變更內容, 點擊展開</string>
     <string name="text_n_versions">%d 個版本</string>
     <string name="text_name">名稱</string>
+    <string name="text_name_required">請輸入名稱</string>
     <string name="text_need_to_enable_a11y_service">需要啟用無障礙服務</string>
     <string name="text_new_color_library">新建顏色庫</string>
     <string name="text_new_file">新建檔案</string>
     <string name="text_new_folder">新建資料夾</string>
+    <string name="text_new_group">新增群組</string>
     <string name="text_new_intelligent_color_library">新建智慧顏色庫</string>
     <string name="text_new_key_store">生成簽名密鑰</string>
     <string name="text_new_path">新路徑</string>
@@ -1831,6 +1857,7 @@
     <string name="text_none">無</string>
     <string name="text_not_granted">未授予</string>
     <string name="text_not_installed">未安裝</string>
+    <string name="text_not_intelligent_confirm">目前設定不具備智慧表現\n\n是否繼續儲存</string>
     <string name="text_not_running">未執行</string>
     <string name="text_not_showing_main_activity">不顯示主介面</string>
     <string name="text_notification">通知</string>
@@ -2132,6 +2159,7 @@
     <string name="text_recorded_output_file_type">錄製生成檔案型別</string>
     <string name="text_redo">重做</string>
     <string name="text_redo_simplified">重做</string>
+    <string name="text_reference_state">參照狀態</string>
     <string name="text_refresh">重新整理</string>
     <string name="text_refresh_explorer_may_needed">可能需要下拉重新整理檔案瀏覽器頁面</string>
     <string name="text_regex">正則表示式</string>
@@ -2207,7 +2235,9 @@
     <string name="text_root_manager_apps_empty">未找到候選應用程式. 可手動新增已安裝的應用程式.</string>
     <string name="text_root_mode_title">Root 許可權檢查</string>
     <string name="text_rotation_app_start">應用程式啟動</string>
+    <string name="text_rotation_interval">時間間隔</string>
     <string name="text_rotation_state_change">狀態變化</string>
+    <string name="text_rotation_triggers">換組時機</string>
     <string name="text_run">執行</string>
     <string name="text_run_on_battery_change">電量變化時</string>
     <string name="text_run_on_boot">開機時</string>
@@ -2231,10 +2261,12 @@
     <string name="text_run_simplified">執行</string>
     <string name="text_running_task">執行中任務</string>
     <string name="text_same_as_current_file">與目前檔案一致</string>
+    <string name="text_same_as_state">與 %1$s 相同</string>
     <string name="text_sample">示例程式碼</string>
     <string name="text_sample_name">正在執行的服務</string>
     <string name="text_save">儲存</string>
     <string name="text_save_and_exit">儲存並退出</string>
+    <string name="text_save_changes_confirm">是否在離開前儲存變更</string>
     <string name="text_save_configuration_as">配置另存為</string>
     <string name="text_save_layout_to_file">儲存版面配置為檔案</string>
     <string name="text_save_simplified">儲存</string>
@@ -2353,9 +2385,11 @@
     <string name="text_start_record">開始錄製</string>
     <string name="text_start_running">開始執行</string>
     <string name="text_start_wizard">開始精靈</string>
+    <string name="text_state_color_single">顏色</string>
     <string name="text_state_day">日</string>
     <string name="text_state_night">夜</string>
     <string name="text_state_or_province">州或省份</string>
+    <string name="text_state_source">狀態源</string>
     <string name="text_state_source_none">無</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">停止重連</string>

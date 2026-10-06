@@ -777,6 +777,7 @@
     <string name="summary_setup_wizard_welcome_reset">Снова показать приветствие мастеров настройки на главной странице при следующем запуске</string>
     <string name="summary_setup_wizards">Предоставление основных разрешений и установка официальных плагинов</string>
     <string name="text_add_colors">Добавить цвета</string>
+    <string name="text_add_group">Добавить группу</string>
     <string name="text_and_n_more">... и еще %d</string>
     <string name="text_auto_reconnect">Автоматическое переподключение</string>
     <string name="text_background_color_dark">Тёмный</string>
@@ -1034,6 +1035,7 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">Проверить обновления (игнорировать локальную версию)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">При проверке обновлений напрямую получать последнюю удалённую версию</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Проверка обновлений...</string>
+    <string name="text_choose_at_least_one_color">Выберите цвет хотя бы для одного состояния</string>
     <string name="text_choose_color_library">Выберите цветовую библиотеку</string>
     <string name="text_choose_color_library_to_clone">Выберите цветовую библиотеку для клонирования</string>
     <string name="text_choose_colors_to_add">Выберите цвета для добавления</string>
@@ -1335,6 +1337,8 @@
     <string name="text_drawer_open">Открыть ящик</string>
     <string name="text_edit">Редактировать</string>
     <string name="text_edit_by_other_apps">Редактировать в других приложениях</string>
+    <string name="text_edit_group">Изменить группу</string>
+    <string name="text_edit_intelligent_color_library">Изменить интеллектуальную цветовую библиотеку</string>
     <string name="text_edit_label">Изменить метку</string>
     <string name="text_edit_prepare_script">Редактирование сценария перед выполнением</string>
     <string name="text_edit_script">Редактирование скрипта</string>
@@ -1483,6 +1487,7 @@
     <string name="text_find_prev_simplified">Преды</string>
     <string name="text_finish_reordering">Завершить сортировку</string>
     <string name="text_first_and_last_name">Полное имя</string>
+    <string name="text_first_rotation_at">Первая смена: %1$s</string>
     <string name="text_floating_button">Плавающая кнопка</string>
     <string name="text_floating_run">Плавающий запуск</string>
     <string name="text_folder">Папка</string>
@@ -1507,7 +1512,11 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">Предоставление привилегий AutoJs6 в приложении Shizuku</string>
     <string name="text_granted">Разрешено</string>
     <string name="text_group_disabled">Отключено</string>
+    <string name="text_group_enabled">Включено</string>
+    <string name="text_group_name_optional">Название группы (необязательно)</string>
+    <string name="text_group_order">Порядок групп</string>
     <string name="text_group_unavailable">Эта группа отключена или не содержит цвета</string>
+    <string name="text_groups">Группы</string>
     <string name="text_groups_enabled_of_total">Групп: %1$d/%2$d</string>
     <string name="text_guard_mode">Режим охраны</string>
     <string name="text_help">Справка</string>
@@ -1519,6 +1528,13 @@
     <string name="text_hide_plugin">Скрыть плагин</string>
     <string name="text_hide_same_frame_nodes">Скрыть узел того же фрейма</string>
     <string name="text_hint">Подсказка</string>
+    <string name="text_hint_groups_without_color">У некоторых включённых групп нет цвета, они будут пропущены</string>
+    <string name="text_hint_missing_state_colors">У некоторых групп нет цвета для части состояний; используется первое состояние с цветом</string>
+    <string name="text_hint_no_available_groups">Нет включённых групп с цветом; библиотеку можно сохранить, но не использовать</string>
+    <string name="text_hint_not_intelligent">При одном состоянии и одной группе цвет никогда не меняется</string>
+    <string name="text_hint_rotation_without_effect">Некоторые условия смены не действуют: доступно меньше двух групп или у источника состояния одно состояние</string>
+    <string name="text_hint_short_interval">Интервалы короче минуты часто меняют цвет и расходуют больше энергии</string>
+    <string name="text_hint_unsupported_items">Содержит элементы, не поддерживаемые этой версией; они не действуют</string>
     <string name="text_history">История</string>
     <string name="text_history_has_been_cleared">История очищена</string>
     <string name="text_history_max_days">Срок хранения истории версий (дней)</string>
@@ -1656,6 +1672,14 @@
     <string name="text_intelligent_mine">Мои</string>
     <string name="text_intelligent_preset_material_day_night">Material день и ночь</string>
     <string name="text_intelligent_presets">Предустановки</string>
+    <string name="text_interval_anchor_next_hour">Следующий целый час</string>
+    <string name="text_interval_anchor_next_minute">Следующая целая минута</string>
+    <string name="text_interval_anchor_now">Сейчас</string>
+    <string name="text_interval_first_rotation">Отсчёт от</string>
+    <string name="text_interval_unit_hour">Часы</string>
+    <string name="text_interval_unit_minute">Минуты</string>
+    <string name="text_interval_unit_second">Секунды</string>
+    <string name="text_interval_value">Интервал</string>
     <string name="text_invalid_character_is_removed">Недопустимый символ удален</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>
@@ -1777,10 +1801,12 @@
     <string name="text_n_unchanged_lines_hidden">Скрыто неизмененных строк: %d, нажмите, чтобы развернуть</string>
     <string name="text_n_versions">%d вер.</string>
     <string name="text_name">Имя</string>
+    <string name="text_name_required">Введите имя</string>
     <string name="text_need_to_enable_a11y_service">Необходимо включить службу доступности</string>
     <string name="text_new_color_library">Новая цветовая библиотека</string>
     <string name="text_new_file">Новый файл</string>
     <string name="text_new_folder">Новая папка</string>
+    <string name="text_new_group">Новая группа</string>
     <string name="text_new_intelligent_color_library">Новая интеллектуальная цветовая библиотека</string>
     <string name="text_new_key_store">Создать ключ подписи</string>
     <string name="text_new_path">Новый путь</string>
@@ -1834,6 +1860,7 @@
     <string name="text_none">Нет</string>
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_installed">Не установлено</string>
+    <string name="text_not_intelligent_confirm">При одном состоянии и одной группе цвет никогда не меняется\n\nВсё равно сохранить?</string>
     <string name="text_not_running">Не запущено</string>
     <string name="text_not_showing_main_activity">Не показывает основную деятельность</string>
     <string name="text_notification">Уведомление</string>
@@ -2135,6 +2162,7 @@
     <string name="text_recorded_output_file_type">Тип выходного файла записи</string>
     <string name="text_redo">Повторить</string>
     <string name="text_redo_simplified">Повто</string>
+    <string name="text_reference_state">Опорное состояние</string>
     <string name="text_refresh">Обновить</string>
     <string name="text_refresh_explorer_may_needed">Может потребоваться пролистывание страницы проводника для обновления</string>
     <string name="text_regex">Regex</string>
@@ -2210,7 +2238,9 @@
     <string name="text_root_manager_apps_empty">Подходящие приложения не найдены. Можно добавить установленное приложение вручную.</string>
     <string name="text_root_mode_title">Проверка прав root</string>
     <string name="text_rotation_app_start">Запуск приложения</string>
+    <string name="text_rotation_interval">Интервал</string>
     <string name="text_rotation_state_change">Смена состояния</string>
+    <string name="text_rotation_triggers">Смена групп</string>
     <string name="text_run">Запустить</string>
     <string name="text_run_on_battery_change">При смене батареи</string>
     <string name="text_run_on_boot">При загрузке</string>
@@ -2234,10 +2264,12 @@
     <string name="text_run_simplified">Запуст</string>
     <string name="text_running_task">Выполняемая задача</string>
     <string name="text_same_as_current_file">Совпадает с текущим файлом</string>
+    <string name="text_same_as_state">Как %1$s</string>
     <string name="text_sample">Образцы</string>
     <string name="text_sample_name">Запуск сервиса</string>
     <string name="text_save">Сохранить</string>
     <string name="text_save_and_exit">Сохранить и выйти</string>
+    <string name="text_save_changes_confirm">Сохранить изменения перед выходом?</string>
     <string name="text_save_configuration_as">Сохранить конфигурацию как</string>
     <string name="text_save_layout_to_file">Сохранить компоновку в файл</string>
     <string name="text_save_simplified">Сохран</string>
@@ -2356,9 +2388,11 @@
     <string name="text_start_record">Начало записи</string>
     <string name="text_start_running">Выполнение</string>
     <string name="text_start_wizard">Запустить мастер</string>
+    <string name="text_state_color_single">Цвет</string>
     <string name="text_state_day">День</string>
     <string name="text_state_night">Ночь</string>
     <string name="text_state_or_province">Штат или провинция</string>
+    <string name="text_state_source">Источник состояния</string>
     <string name="text_state_source_none">Нет</string>
     <string name="text_stop">Остановить</string>
     <string name="text_stop_reconnecting">Прекратить переподключение</string>

@@ -777,6 +777,7 @@
     <string name="summary_setup_wizard_welcome_reset">Volver a mostrar el aviso de bienvenida de los asistentes de configuración en la página de inicio en el próximo inicio</string>
     <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
     <string name="text_add_colors">Agregar colores</string>
+    <string name="text_add_group">Agregar grupo</string>
     <string name="text_and_n_more">... y %d más</string>
     <string name="text_auto_reconnect">Reconexión automática</string>
     <string name="text_background_color_dark">Oscuro</string>
@@ -1034,6 +1035,7 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">Buscar actualizaciones (ignorar la versión local)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">Obtener directamente la última versión remota al buscar actualizaciones</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Comprobando las actualizaciones...</string>
+    <string name="text_choose_at_least_one_color">Elige un color para al menos un estado</string>
     <string name="text_choose_color_library">Elegir una biblioteca de colores</string>
     <string name="text_choose_color_library_to_clone">Elegir la biblioteca de colores que se clonará</string>
     <string name="text_choose_colors_to_add">Elegir los colores que se agregarán</string>
@@ -1335,6 +1337,8 @@
     <string name="text_drawer_open">Abrir el cajón</string>
     <string name="text_edit">Editar</string>
     <string name="text_edit_by_other_apps">Editar con otras aplicaciones</string>
+    <string name="text_edit_group">Editar grupo</string>
+    <string name="text_edit_intelligent_color_library">Editar biblioteca de colores inteligente</string>
     <string name="text_edit_label">Editar etiqueta</string>
     <string name="text_edit_prepare_script">Editar script de preejecución</string>
     <string name="text_edit_script">Editar script</string>
@@ -1483,6 +1487,7 @@
     <string name="text_find_prev_simplified">Anter</string>
     <string name="text_finish_reordering">Terminar de reordenar</string>
     <string name="text_first_and_last_name">Nombre completo</string>
+    <string name="text_first_rotation_at">Primer cambio: %1$s</string>
     <string name="text_floating_button">Botón flotante</string>
     <string name="text_floating_run">Ejecución flotante</string>
     <string name="text_folder">Carpeta</string>
@@ -1507,7 +1512,11 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">Conceder privilegios AutoJs6 en una aplicación Shizuku</string>
     <string name="text_granted">Concedido</string>
     <string name="text_group_disabled">Desactivado</string>
+    <string name="text_group_enabled">Activado</string>
+    <string name="text_group_name_optional">Nombre del grupo (opcional)</string>
+    <string name="text_group_order">Orden de los grupos</string>
     <string name="text_group_unavailable">Este grupo está desactivado o no tiene color</string>
+    <string name="text_groups">Grupos</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d grupos</string>
     <string name="text_guard_mode">Modo de protección</string>
     <string name="text_help">Ayuda</string>
@@ -1519,6 +1528,13 @@
     <string name="text_hide_plugin">Ocultar plugin</string>
     <string name="text_hide_same_frame_nodes">Ocultar nodo del mismo marco</string>
     <string name="text_hint">Sugerencia</string>
+    <string name="text_hint_groups_without_color">Algunos grupos activados no tienen color y se omitirán</string>
+    <string name="text_hint_missing_state_colors">A algunos grupos les faltan colores para ciertos estados; se usa el primer estado con color</string>
+    <string name="text_hint_no_available_groups">Ningún grupo activado tiene color; la biblioteca se puede guardar pero no usar</string>
+    <string name="text_hint_not_intelligent">Con un solo estado y un solo grupo, el color nunca cambia</string>
+    <string name="text_hint_rotation_without_effect">Algunos disparadores no tienen efecto: hay menos de dos grupos disponibles o la fuente de estado tiene un solo estado</string>
+    <string name="text_hint_short_interval">Los intervalos de menos de un minuto cambian los colores a menudo y consumen más energía</string>
+    <string name="text_hint_unsupported_items">Contiene elementos que esta versión no admite; no tienen efecto</string>
     <string name="text_history">Historial</string>
     <string name="text_history_has_been_cleared">El historial se ha borrado</string>
     <string name="text_history_max_days">Días de retención del historial de versiones</string>
@@ -1656,6 +1672,14 @@
     <string name="text_intelligent_mine">Mis bibliotecas</string>
     <string name="text_intelligent_preset_material_day_night">Material día y noche</string>
     <string name="text_intelligent_presets">Predefinidos</string>
+    <string name="text_interval_anchor_next_hour">Próxima hora en punto</string>
+    <string name="text_interval_anchor_next_minute">Próximo minuto exacto</string>
+    <string name="text_interval_anchor_now">Ahora</string>
+    <string name="text_interval_first_rotation">Contar desde</string>
+    <string name="text_interval_unit_hour">Horas</string>
+    <string name="text_interval_unit_minute">Minutos</string>
+    <string name="text_interval_unit_second">Segundos</string>
+    <string name="text_interval_value">Intervalo</string>
     <string name="text_invalid_character_is_removed">Carácter inválido ha sido removido</string>
     <string name="text_invalid_package_name">Nombre de paquete no válido</string>
     <string name="text_invalid_project">Proyecto no válido</string>
@@ -1777,10 +1801,12 @@
     <string name="text_n_unchanged_lines_hidden">%d líneas sin cambios ocultas, toca para expandir</string>
     <string name="text_n_versions">%d versiones</string>
     <string name="text_name">Nombre</string>
+    <string name="text_name_required">Introduce un nombre</string>
     <string name="text_need_to_enable_a11y_service">Necesidad de habilitar el servicio de accesibilidad</string>
     <string name="text_new_color_library">Nueva biblioteca de colores</string>
     <string name="text_new_file">Nuevo archivo</string>
     <string name="text_new_folder">Nueva carpeta</string>
+    <string name="text_new_group">Nuevo grupo</string>
     <string name="text_new_intelligent_color_library">Nueva biblioteca de colores inteligente</string>
     <string name="text_new_key_store">Generar clave de firma</string>
     <string name="text_new_path">Nueva ruta</string>
@@ -1834,6 +1860,7 @@
     <string name="text_none">Ninguno</string>
     <string name="text_not_granted">No se concede</string>
     <string name="text_not_installed">No instalado</string>
+    <string name="text_not_intelligent_confirm">Con un solo estado y un solo grupo, el color nunca cambia\n\n¿Guardar de todos modos?</string>
     <string name="text_not_running">No está en ejecución</string>
     <string name="text_not_showing_main_activity">No muestra la actividad principal</string>
     <string name="text_notification">Notificación</string>
@@ -2135,6 +2162,7 @@
     <string name="text_recorded_output_file_type">Tipo de archivo de salida grabado</string>
     <string name="text_redo">Rehacer</string>
     <string name="text_redo_simplified">Rehac</string>
+    <string name="text_reference_state">Estado de referencia</string>
     <string name="text_refresh">Actualizar</string>
     <string name="text_refresh_explorer_may_needed">Es posible que sea necesario pasar la página del explorador para refrescarla</string>
     <string name="text_regex">Regex</string>
@@ -2210,7 +2238,9 @@
     <string name="text_root_manager_apps_empty">No se encontraron candidatas. Puede añadir una aplicación instalada.</string>
     <string name="text_root_mode_title">Comprobación de acceso root</string>
     <string name="text_rotation_app_start">Inicio de la app</string>
+    <string name="text_rotation_interval">Intervalo</string>
     <string name="text_rotation_state_change">Cambio de estado</string>
+    <string name="text_rotation_triggers">Rotación de grupos</string>
     <string name="text_run">Ejecutar</string>
     <string name="text_run_on_battery_change">Al cambiar la batería</string>
     <string name="text_run_on_boot">Al arrancar</string>
@@ -2234,10 +2264,12 @@
     <string name="text_run_simplified">Ejec</string>
     <string name="text_running_task">Ejecutar tarea</string>
     <string name="text_same_as_current_file">Igual que el archivo actual</string>
+    <string name="text_same_as_state">Igual que %1$s</string>
     <string name="text_sample">Muestras</string>
     <string name="text_sample_name">Ejecutar servicio</string>
     <string name="text_save">Guardar</string>
     <string name="text_save_and_exit">Guardar y salir</string>
+    <string name="text_save_changes_confirm">¿Guardar los cambios antes de salir?</string>
     <string name="text_save_configuration_as">Guardar configuracion como</string>
     <string name="text_save_layout_to_file">Guardar diseño en archivo</string>
     <string name="text_save_simplified">Guarda</string>
@@ -2356,9 +2388,11 @@
     <string name="text_start_record">Comenzar a grabar</string>
     <string name="text_start_running">Ejecutando</string>
     <string name="text_start_wizard">Iniciar asistente</string>
+    <string name="text_state_color_single">Color</string>
     <string name="text_state_day">Día</string>
     <string name="text_state_night">Noche</string>
     <string name="text_state_or_province">Estado o provincia</string>
+    <string name="text_state_source">Fuente de estado</string>
     <string name="text_state_source_none">Ninguno</string>
     <string name="text_stop">Detener</string>
     <string name="text_stop_reconnecting">Dejar de reconectar</string>
