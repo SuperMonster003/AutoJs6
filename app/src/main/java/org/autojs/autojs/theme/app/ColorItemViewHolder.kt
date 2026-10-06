@@ -25,20 +25,29 @@ class ColorItemViewHolder(itemViewBinding: MtColorLibraryRecyclerViewItemBinding
     private val colorLibraryIdentifierView: TextView = itemViewBinding.colorLibraryIdentifier
 
     fun bind(item: PresetColorItem, selectedLibraryId: Int, selectedItemId: Int, isShowLibraryIdentifier: Boolean) {
-        val color = context.getColor(item.colorRes)
-        val colorName = context.getString(item.nameRes)
-        val colorDesc = String.format("#%06X", 0xFFFFFF and color)
-
-        ThemeColorHelper.setBackgroundColor(colorView, color)
-        nameView.text = colorName
-        descView.text = colorDesc
-        if (isShowLibraryIdentifier) {
-            presetColorLibraries.find { it.id == item.libraryId }?.let {
-                colorLibraryIdentifierView.text = context.getString(it.identifierRes)
-            }
+        val identifier = when {
+            isShowLibraryIdentifier -> presetColorLibraries.find { it.id == item.libraryId }?.let { context.getString(it.identifierRes) }
+            else -> null
         }
-        subtitleSplitLineView.isVisible = !colorLibraryIdentifierView.text.isNullOrBlank()
-        setChecked(selectedLibraryId == item.libraryId && selectedItemId == item.itemId, color)
+        bind(
+            color = context.getColor(item.colorRes),
+            name = context.getString(item.nameRes),
+            identifier = identifier,
+            checked = selectedLibraryId == item.libraryId && selectedItemId == item.itemId,
+        )
+    }
+
+    /**
+     * Binds raw values; the description shows the color as `#RRGGBB`.
+     * zh-CN: 按原始值绑定; 描述显示为 `#RRGGBB` 形式的色值.
+     */
+    fun bind(@ColorInt color: Int, name: String, identifier: String?, checked: Boolean) {
+        ThemeColorHelper.setBackgroundColor(colorView, color)
+        nameView.text = name
+        descView.text = String.format("#%06X", 0xFFFFFF and color)
+        colorLibraryIdentifierView.text = identifier
+        subtitleSplitLineView.isVisible = !identifier.isNullOrBlank()
+        setChecked(checked, color)
     }
 
     fun setChecked(checked: Boolean, @ColorInt refColor: Int? = null) {

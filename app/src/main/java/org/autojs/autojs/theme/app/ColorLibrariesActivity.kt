@@ -6,11 +6,21 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.view.forEach
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
+import com.afollestad.materialdialogs.MaterialDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.image.ColorItems
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
+import org.autojs.autojs.theme.app.ColorHistoryItemViewHolder.Companion.ColorHistoryItem
+import org.autojs.autojs.theme.library.ColorLibraryIds
+import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.ColorSelection
 import org.autojs.autojs.theme.library.ColorSelectionCodec
 import org.autojs.autojs.util.ViewUtils.setOnSubtitleViewClickListener
@@ -32,12 +42,12 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     private lateinit var mRecyclerView: ThemeColorRecyclerView
 
+    private val repository by lazy { ColorLibraryRepository.get(this) }
+
+    private val presetRows by lazy { presetColorLibraries.map { LibraryRow.Preset(it) } }
+
     private val libraryAdapter: ColorLibraryAdapter by lazy {
-        ColorLibraryAdapter(presetColorLibraries) { library ->
-            val intent = Intent(this, ColorItemsActivity::class.java)
-            intent.putExtra(INTENT_IDENTIFIER_LIBRARY_ID, library.id)
-            startActivity(intent)
-        }
+        ColorLibraryAdapter(presetRows, ::onLibraryClick, ::onLibraryLongClick)
     }
 
     private val colorItemAdapter: ColorItemAdapter by lazy {
@@ -71,6 +81,150 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
             it.excludePaddingClippableViewFromBottomNavigationBar()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshUserLibraries()
+    }
+
+    private fun refreshUserLibraries() {
+        lifecycleScope.launch {
+            val summaries = withContext(Dispatchers.IO) { repository.listPlainLibraries() }
+            libraryAdapter.updateData(presetRows + summaries.map { LibraryRow.User(it) })
+        }
+    }
+
+    private fun onLibraryClick(row: LibraryRow) {
+        when (row) {
+            is LibraryRow.Preset -> when {
+                row.library.isIntelligent -> MaterialDialog.Builder(this)
+                    .title(R.string.text_under_development_title)
+                    .content(R.string.text_under_development_content)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .show()
+                else -> startActivity(Intent(this, ColorItemsActivity::class.java).putExtra(INTENT_IDENTIFIER_LIBRARY_ID, row.library.id))
+            }
+            is LibraryRow.User -> UserColorLibraryActivity.launch(this, row.summary.library.id)
+        }
+    }
+
+    private fun onLibraryLongClick(row: LibraryRow) {
+        when (row) {
+            is LibraryRow.Preset -> if (!row.library.isIntelligent) {
+                ColorLibraryDialogs.showActions(
+                    this, getString(row.library.nameRes), listOf(
+                        getString(R.string.text_open) to { onLibraryClick(row) },
+                        getString(R.string.text_clone) to { cloneFrom(getString(row.library.nameRes), presetColorsOf(row)) },
+                    )
+                )
+            }
+            is LibraryRow.User -> {
+                val library = row.summary.library
+                ColorLibraryDialogs.showActions(
+                    this, library.name, listOf(
+                        getString(R.string.text_open) to { onLibraryClick(row) },
+                        getString(R.string.text_rename) to { renameLibrary(library) },
+                        getString(R.string.text_clone) to { cloneFrom(library.name) { withContext(Dispatchers.IO) { repository.listColors(library.id) }.map { ColorLibraryRepository.NewColor(it.color, it.name) } } },
+                        getString(R.string.text_delete) to { deleteLibrary(library) },
+                    )
+                )
+            }
+        }
+    }
+
+    private fun presetColorsOf(row: LibraryRow.Preset): suspend () -> List<ColorLibraryRepository.NewColor> = {
+        row.library.colors.map { ColorLibraryRepository.NewColor(getColor(it.colorRes), getString(it.nameRes)) }
+    }
+
+    private fun createLibrary() {
+        ColorLibraryDialogs.showNameInput(this, R.string.text_new_color_library, null) { name ->
+            name ?: return@showNameInput
+            lifecycleScope.launch {
+                val created = withContext(Dispatchers.IO) { repository.createPlainLibrary(name, ColorLibrary.Kind.CREATED) }
+                UserColorLibraryActivity.launch(this@ColorLibrariesActivity, created.id)
+            }
+        }
+    }
+
+    private fun chooseLibraryToClone() {
+        lifecycleScope.launch {
+            val sources = listColorSources()
+            ColorLibraryDialogs.showSingleChoice(this@ColorLibrariesActivity, R.string.text_choose_color_library_to_clone, sources.map { it.name }) { which ->
+                cloneFrom(sources[which].name, sources[which].loadColors)
+            }
+        }
+    }
+
+    private fun cloneFrom(sourceName: String, loadColors: suspend () -> List<ColorLibraryRepository.NewColor>) {
+        lifecycleScope.launch {
+            val colors = loadColors()
+            val name = getString(R.string.text_color_library_copy_name, sourceName)
+            val created = withContext(Dispatchers.IO) {
+                repository.createPlainLibrary(name, ColorLibrary.Kind.CLONED, origin = sourceName, colors = colors)
+            }
+            UserColorLibraryActivity.launch(this@ColorLibrariesActivity, created.id)
+        }
+    }
+
+    private fun renameLibrary(library: ColorLibrary) {
+        ColorLibraryDialogs.showNameInput(this, R.string.text_rename_color_library, library.name) { name ->
+            name ?: return@showNameInput
+            lifecycleScope.launch {
+                val stored = withContext(Dispatchers.IO) { repository.renameLibrary(library.id, name) }
+                if ((currentColorSelection() as? ColorSelection.UserColor)?.libraryRowId == library.id) {
+                    savePrefsForSelectionNames(stored, Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME))
+                    updateSubtitle(binding.toolbar)
+                }
+                refreshUserLibraries()
+            }
+        }
+    }
+
+    private fun deleteLibrary(library: ColorLibrary) {
+        ColorLibraryDialogs.showConfirm(this, getString(R.string.text_delete_color_library_confirm, library.name)) {
+            lifecycleScope.launch {
+                val wasSelected = (currentColorSelection() as? ColorSelection.UserColor)?.libraryRowId == library.id
+                withContext(Dispatchers.IO) { repository.deleteLibrary(library) }
+                if (wasSelected) {
+                    // Keep the theme color, but record it as a palette selection. zh-CN: 保留主题色, 但改记为调色盘选择.
+                    savePrefsForLibraries(COLOR_LIBRARY_ID_PALETTE, 0)
+                    savePrefsForLegacyPalette(ThemeColorManager.colorPrimary)
+                    saveDatabaseForPaletteHistory(lifecycleScope, applicationContext, ThemeColorManager.colorPrimary)
+                    ThemeChangeNotifier.notifyThemeChanged()
+                }
+                refreshUserLibraries()
+            }
+        }
+    }
+
+    private fun applyHistoryItem(item: ColorHistoryItem) {
+        val libraryId = item.libraryId
+        val itemId = item.itemId
+        when {
+            libraryId != null && itemId != null && ColorLibraryIds.isUserPlain(libraryId) -> lifecycleScope.launch {
+                val color = withContext(Dispatchers.IO) { repository.findColor(itemId.toLong()) }
+                val library = color?.let { withContext(Dispatchers.IO) { repository.findLibrary(it.libraryId) } }
+                when {
+                    color == null || library == null -> ViewUtils.showToast(this@ColorLibrariesActivity, R.string.error_failed_to_apply_current_color_history, true)
+                    else -> applyUserLibraryColor(library.name, color)
+                }
+            }
+            libraryId != null && itemId != null -> {
+                presetColorLibraries.find { it.id == libraryId }?.colors?.find { it.itemId == itemId }?.let { applyPresetItem(it) }
+                    ?: ViewUtils.showToast(this, R.string.error_failed_to_apply_current_color_history, true)
+            }
+            else -> onColorPickerConfirmed(item.colorInt)
+        }
+    }
+
+    private fun applyPresetItem(item: PresetColorItem) {
+        savePrefsForLibraries(item)
+        savePrefsForLegacy(this, item)
+        saveDatabaseForColorHistory(applicationContext = applicationContext, libraryId = item.libraryId, itemId = item.itemId)
+        isForciblyEnableAppBarColorTransition = true
+        ThemeColorCoordinator.apply(getColor(item.colorRes), ThemeColorSource.USER)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -121,36 +275,11 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             true
         }
         R.id.action_show_all_history_entries -> {
-            showColorHistory { selectedHistoryItem ->
-                val identifier = selectedHistoryItem.colorLibraryIdentifier ?: run {
-                    ViewUtils.showToast(this@ColorLibrariesActivity, R.string.error_failed_to_apply_current_color_history, true)
-                    return@showColorHistory
-                }
-                if (identifier == getString(R.string.color_library_identifier_palette)) {
-                    onColorPickerConfirmed(selectedHistoryItem.colorInt)
-                    return@showColorHistory
-                }
-                presetColorLibraries.find { getString(it.identifierRes) == identifier }?.let { library ->
-                    library.colors.firstOrNull { getColor(it.colorRes) == selectedHistoryItem.colorInt }?.let { item ->
-                        savePrefsForLibraries(item)
-                        savePrefsForLegacy(this, item)
-
-                        saveDatabaseForColorHistory(
-                            applicationContext = applicationContext,
-                            libraryId = item.libraryId,
-                            itemId = item.itemId,
-                        )
-
-                        isForciblyEnableAppBarColorTransition = true
-
-                        ThemeColorCoordinator.apply(getColor(item.colorRes), ThemeColorSource.USER)
-                    }
-                } ?: ViewUtils.showToast(this@ColorLibrariesActivity, R.string.error_failed_to_apply_current_color_history, true)
-            }
+            showColorHistory { selectedHistoryItem -> applyHistoryItem(selectedHistoryItem) }
             true
         }
         R.id.action_new_color_library -> {
-            ViewUtils.showToast(this, R.string.text_under_development)
+            createLibrary()
             true
         }
         R.id.action_import_color_library -> {
@@ -158,7 +287,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             true
         }
         R.id.action_clone_color_library -> {
-            ViewUtils.showToast(this, R.string.text_under_development)
+            chooseLibraryToClone()
             true
         }
         R.id.action_locate_current_theme_color -> {

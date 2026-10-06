@@ -56,4 +56,7 @@ interface ColorHistoryDao {
     @Query("DELETE FROM color_history WHERE library_id = :libraryId")
     suspend fun deleteAllByLibraryId(libraryId: Long)
 
+    @Query("DELETE FROM color_history WHERE library_id = :libraryId AND item_id IN (:itemIds)")
+    suspend fun deleteByLibraryIdAndItemIds(libraryId: Long, itemIds: List<Long>)
+
 }

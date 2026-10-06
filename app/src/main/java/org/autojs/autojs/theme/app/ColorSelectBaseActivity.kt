@@ -34,6 +34,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorEntities.ColorHistory
 import org.autojs.autojs.theme.app.ColorEntities.ColorInfo
+import org.autojs.autojs.theme.app.ColorEntities.LibraryColor
 import org.autojs.autojs.theme.app.ColorEntities.PaletteHistory
 import org.autojs.autojs.theme.app.ColorHistoryItemViewHolder.Companion.ColorHistoryItem
 import org.autojs.autojs.theme.app.ColorInfoDialogManager.CustomColorInfoDialogNeutral.NeutralButtonCallback
@@ -43,6 +44,8 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRAR
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
+import org.autojs.autojs.theme.library.ColorLibraryIds
+import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.ColorSelection
 import org.autojs.autojs.theme.library.ColorSelectionCodec
 import org.autojs.autojs.ui.BaseActivity
@@ -275,6 +278,62 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             .show(supportFragmentManager, "ColorPickerTagForColorLibraries")
     }
 
+    /**
+     * Shows the palette and reports the picked color without applying it as the theme color.
+     * zh-CN: 显示调色盘并回传所选颜色, 不将其应用为主题色.
+     */
+    protected fun showColorPickerFor(initialColor: Int, onPicked: (Int) -> Unit) {
+        ColorPickerDialog.newBuilder()
+            .setUseLegacyMode(isLegacyLayout)
+            .setAllowCustom(true)
+            .setAllowPresets(!isLegacyLayout)
+            .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
+            .setShowAlphaSlider(false)
+            .setDialogTitle(R.string.dialog_title_color_palette)
+            .setColor(initialColor)
+            .setColorHistoryHandler { showColorPickerHistory(it) }
+            .create()
+            .setColorPickerDialogListener { _, color: Int -> onPicked(color or -0x1000000) }
+            .show(supportFragmentManager, "ColorPickerTagForLibraryColor")
+    }
+
+    /**
+     * A library whose colors can be cloned or copied: presets first, then user plain libraries.
+     * zh-CN: 可被克隆或复制颜色的颜色库: 先是预设库, 然后是用户普通库.
+     */
+    protected class ColorSource(val name: String, val isPreset: Boolean, val loadColors: suspend () -> List<ColorLibraryRepository.NewColor>)
+
+    protected suspend fun listColorSources(excludeUserLibraryId: Long? = null): List<ColorSource> {
+        val repository = ColorLibraryRepository.get(this)
+        val presets = presetColorLibraries.filterNot { it.isIntelligent }.map { library ->
+            ColorSource(getString(library.nameRes), isPreset = true) {
+                library.colors.map { ColorLibraryRepository.NewColor(getColor(it.colorRes), getString(it.nameRes)) }
+            }
+        }
+        val users = withContext(Dispatchers.IO) { repository.listPlainLibraries() }
+            .filter { it.library.id != excludeUserLibraryId }
+            .map { summary ->
+                ColorSource(summary.library.name, isPreset = false) {
+                    withContext(Dispatchers.IO) { repository.listColors(summary.library.id) }.map { ColorLibraryRepository.NewColor(it.color, it.name) }
+                }
+            }
+        return presets + users
+    }
+
+    /**
+     * Applies a color of a user library as the theme color (roadmap P1.1, D13).
+     * zh-CN: 将用户库中的颜色应用为主题色 (Roadmap P1.1, D13).
+     */
+    protected fun applyUserLibraryColor(libraryName: String, color: LibraryColor) {
+        val libraryId = ColorLibraryIds.ofUserLibrary(color.libraryId, intelligent = false)
+        savePrefsForLibraries(libraryId, color.id.toInt())
+        savePrefsForLegacyPalette(color.color)
+        savePrefsForSelectionNames(libraryName, color.name)
+        saveDatabaseForColorHistory(lifecycleScope, applicationContext, libraryId, color.id.toInt())
+        isForciblyEnableAppBarColorTransition = true
+        ThemeColorCoordinator.apply(color.color, ThemeColorSource.USER)
+    }
+
     protected fun onColorPickerConfirmed(color: Int) {
         savePrefsForLegacyPalette(color)
         savePrefsForLibraries(COLOR_LIBRARY_ID_PALETTE, 0)
@@ -444,65 +503,88 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     .show()
             }
 
-            val colorHistory = withContext(Dispatchers.IO) {
-                when {
-                    isShowAllHistoryEntries -> colorHistoryDao.getAll()
-                    else -> colorHistoryDao.getAllByLibraryId(libraryId.toLong())
-                }
-            }
-
-            val historyItems = colorHistory.mapNotNull { history ->
-                var colorInt: Int? = null
-                var colorName: String? = null
-                var colorLibraryIdentifier: String? = null
-
-                val presetColorLibrary = presetColorLibraries.find { it.id == history.libraryId }
-
-                if (presetColorLibrary != null) {
-                    presetColorLibrary.colors.find { it.itemId == history.itemId }?.let { item ->
-                        colorInt = getColor(item.colorRes)
-                        colorName = getString(item.nameRes)
-                        if (isShowAllHistoryEntries) {
-                            colorLibraryIdentifier = getString(presetColorLibrary.identifierRes)
-                        }
-                    }
-                } else {
-                    // TODO by SuperMonster003 on Apr 8, 2025.
-                    //  ! Check out new color lib data (imported/created/cloned).
-                    //  ! zh-CN: 检查新建颜色库数据 (导入/创建/克隆).
-                }
-
-                if (colorInt != null) {
-                    return@mapNotNull ColorHistoryItem(history.lastUsedTime, colorInt!!, colorName, colorLibraryIdentifier)
-                }
-                // TODO by SuperMonster003 on Apr 8 ,2025.
-                //  ! Obsolete data should be removed from database.
-                //  ! Data will not be removed so far as color lib creation has not been completed yet.
-                //  ! zh-CN: 孤立数据应从数据库中移除, 但目前暂未完成颜色库建立相关功能, 此处暂时不做数据移除处理.
-                return@mapNotNull null
-            }.toMutableList()
-
-            if (isShowAllHistoryEntries) {
-                val paletteIdentifier = getString(R.string.color_library_identifier_palette)
-                if (paletteHistoryDao == null) {
-                    paletteHistoryDao = withContext(Dispatchers.IO) {
-                        ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
-                    }
-                }
-                historyItems += paletteHistoryDao.getAll().map { history ->
-                    ColorHistoryItem(
-                        lastUsedTime = history.lastUsedTime,
-                        colorInt = history.colorInfo.colorInt,
-                        colorName = null,
-                        colorLibraryIdentifier = paletteIdentifier
-                    )
-                }
-            }
+            val historyItems = loadColorHistoryItems(libraryId)
 
             launch(Dispatchers.Main) {
-                adapter.updateData(historyItems.sortedByDescending { it.lastUsedTime })
+                adapter.updateData(historyItems)
             }
         }
+    }
+
+    /**
+     * History entries of [libraryId], or of every library plus the palette when it is null, newest first.
+     * Entries whose library item no longer exists are skipped.
+     * zh-CN: [libraryId] 的历史条目; 为 null 时包含全部颜色库及调色盘, 按时间倒序. 对应条目已不存在的记录会被跳过.
+     */
+    protected suspend fun loadColorHistoryItems(libraryId: Int?): List<ColorHistoryItem> {
+        val isShowAllHistoryEntries = libraryId == null
+        val database = ColorHistoryDatabase.getInstance(applicationContext)
+        val colorHistory = withContext(Dispatchers.IO) {
+            when {
+                isShowAllHistoryEntries -> database.colorHistoryDao().getAll()
+                else -> database.colorHistoryDao().getAllByLibraryId(libraryId.toLong())
+            }
+        }
+
+        // Colors of user libraries, keyed by row id. zh-CN: 用户库中的颜色, 按行 id 索引.
+        val userColors = withContext(Dispatchers.IO) {
+            when {
+                colorHistory.none { ColorLibraryIds.isUserPlain(it.libraryId) } -> emptyMap()
+                else -> database.colorLibraryDao().let { dao ->
+                    val names = dao.listLibraries().associate { it.id to it.name }
+                    dao.listAllColors().associate { it.id to (it to names[it.libraryId]) }
+                }
+            }
+        }
+
+        val historyItems = colorHistory.mapNotNull { history ->
+            var colorInt: Int? = null
+            var colorName: String? = null
+            var colorLibraryIdentifier: String? = null
+
+            val presetColorLibrary = presetColorLibraries.find { it.id == history.libraryId }
+
+            if (presetColorLibrary != null) {
+                presetColorLibrary.colors.find { it.itemId == history.itemId }?.let { item ->
+                    colorInt = getColor(item.colorRes)
+                    colorName = getString(item.nameRes)
+                    if (isShowAllHistoryEntries) {
+                        colorLibraryIdentifier = getString(presetColorLibrary.identifierRes)
+                    }
+                }
+            } else if (ColorLibraryIds.isUserPlain(history.libraryId)) {
+                userColors[history.itemId.toLong()]?.let { (color, libraryName) ->
+                    colorInt = color.color
+                    colorName = color.name
+                    if (isShowAllHistoryEntries) {
+                        colorLibraryIdentifier = libraryName ?: getString(R.string.color_library_identifier_created)
+                    }
+                }
+            }
+
+            if (colorInt != null) {
+                return@mapNotNull ColorHistoryItem(history.lastUsedTime, colorInt!!, colorName, colorLibraryIdentifier, history.libraryId, history.itemId)
+            }
+            // TODO by SuperMonster003 on Apr 8 ,2025.
+            //  ! Obsolete data should be removed from database.
+            //  ! Data will not be removed so far as color lib creation has not been completed yet.
+            //  ! zh-CN: 孤立数据应从数据库中移除, 但目前暂未完成颜色库建立相关功能, 此处暂时不做数据移除处理.
+            return@mapNotNull null
+        }.toMutableList()
+
+        if (isShowAllHistoryEntries) {
+            val paletteIdentifier = getString(R.string.color_library_identifier_palette)
+            historyItems += database.paletteHistoryDao().getAll().map { history ->
+                ColorHistoryItem(
+                    lastUsedTime = history.lastUsedTime,
+                    colorInt = history.colorInfo.colorInt,
+                    colorName = null,
+                    colorLibraryIdentifier = paletteIdentifier
+                )
+            }
+        }
+
+        return historyItems.sortedByDescending { it.lastUsedTime }
     }
 
     protected fun showColorDetails(color: Int?, title: String? = null, parentDialog: DialogFragment? = null) {
@@ -616,6 +698,15 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         const val KEY_SELECTED_COLOR_LIBRARY_ID = "SELECTED_COLOR_LIBRARY_ID"
         const val KEY_SELECTED_COLOR_ITEM_ID = "SELECTED_COLOR_LIBRARY_ITEM_ID"
 
+        /**
+         * Display names of a user or intelligent selection, cached so summaries need no database access.
+         * zh-CN: 用户库或智能库选中项的显示名称缓存, 使摘要无需访问数据库.
+         */
+        const val KEY_SELECTED_COLOR_LIBRARY_NAME = "SELECTED_COLOR_LIBRARY_NAME"
+        const val KEY_SELECTED_COLOR_ITEM_NAME = "SELECTED_COLOR_LIBRARY_ITEM_NAME"
+
+        private const val LIBRARY_NAME_SUMMARY_LENGTH = 12
+
         const val INTENT_IDENTIFIER_LIBRARY_ID = "LIBRARY_ID"
         const val INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO = "INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO"
 
@@ -702,7 +793,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         identifier = context.getString(R.string.color_library_identifier_palette)
                     }
                     is ColorSelection.UserColor -> {
-                        identifier = context.getString(R.string.color_library_identifier_created)
+                        identifier = selectionLibraryNameForSummary() ?: context.getString(R.string.color_library_identifier_created)
+                        colorName = Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME)
                     }
                     is ColorSelection.Intelligent -> {
                         identifier = context.getString(R.string.color_library_identifier_intelligent_colors)
@@ -812,7 +904,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             dao.upsert(ColorHistory(libraryId = libraryId, itemId = itemId).apply { setLastUsedTimeCurrent() })
         }
 
-        protected fun savePrefsForLegacyPalette(color: Int) {
+        @JvmStatic
+        fun savePrefsForLegacyPalette(color: Int) {
             Pref.putInt(KEY_CUSTOM_COLOR, color or -0x1000000)
             Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, customColorPosition)
         }
@@ -851,6 +944,15 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         fun savePrefsForLibraries(libraryId: Int, itemId: Int) {
             Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, libraryId)
             Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, itemId)
+        }
+
+        fun savePrefsForSelectionNames(libraryName: String?, itemName: String?) {
+            Pref.putString(KEY_SELECTED_COLOR_LIBRARY_NAME, libraryName)
+            Pref.putString(KEY_SELECTED_COLOR_ITEM_NAME, itemName)
+        }
+
+        private fun selectionLibraryNameForSummary(): String? = Pref.getStringOrNull(KEY_SELECTED_COLOR_LIBRARY_NAME)?.let {
+            if (it.length <= LIBRARY_NAME_SUMMARY_LENGTH) it else it.take(LIBRARY_NAME_SUMMARY_LENGTH - 2).trimEnd() + "..."
         }
 
     }

@@ -773,6 +773,7 @@
     <string name="summary_retention_policies">Retention days and size limits for version history, trash and emergency drafts</string>
     <string name="summary_setup_wizard_welcome_reset">Show the welcome prompt of the setup wizards on the home page again on the next launch</string>
     <string name="summary_setup_wizards">Grant common permissions and install official plugins</string>
+    <string name="text_add_colors">Add colors</string>
     <string name="text_and_n_more">... and %d more</string>
     <string name="text_auto_reconnect">Auto reconnect</string>
     <string name="text_batch_restore_summary">Restored %1$d, skipped %2$d, failed %3$d</string>
@@ -1018,6 +1019,7 @@
     <string name="text_captured_window_info_type_of_system">System</string>
     <string name="text_captured_window_info_type_unknown">Unknown type</string>
     <string name="text_category_filter">Category filter</string>
+    <string name="text_change_color_value">Change color value</string>
     <string name="text_change_working_dir">Change working directory</string>
     <string name="text_changelog">Changelog</string>
     <string name="text_changelog_item_dependency">Some dependency or local library version adjustments</string>
@@ -1025,6 +1027,9 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">Check for updates (ignore the local version)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">Fetch the latest remote version directly when checking for updates</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
+    <string name="text_choose_color_library">Choose a color library</string>
+    <string name="text_choose_color_library_to_clone">Choose a color library to clone</string>
+    <string name="text_choose_colors_to_add">Choose colors to add</string>
     <string name="text_choose_delete_strategy">Choose delete strategy</string>
     <string name="text_choose_restore_path">Choose restore path</string>
     <string name="text_city_or_locality">City or Locality</string>
@@ -1056,6 +1061,7 @@
     <string name="text_client_mode_manager">Client mode manager</string>
     <string name="text_client_n">Client %d</string>
     <string name="text_clients">Clients</string>
+    <string name="text_clone">Clone</string>
     <string name="text_clone_color_library">Clone a color library</string>
     <string name="text_close">Close</string>
     <string name="text_close_floating_button">Close floating button</string>
@@ -1144,6 +1150,10 @@
     <string name="text_codegen_timeout_error">Enter a whole number from 100 to 600000 ms</string>
     <string name="text_collapse_all">Collapse all</string>
     <string name="text_color_library">Color library</string>
+    <string name="text_color_library_copy_name">%1$s (copy)</string>
+    <string name="text_color_library_empty">No colors yet\n\nUse \"Add colors\" in the menu to add some</string>
+    <string name="text_color_library_name">Color library name</string>
+    <string name="text_color_name_optional">Color name (optional)</string>
     <string name="text_color_palette">Color palette</string>
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
     <string name="text_comment">Comment</string>
@@ -1247,6 +1257,10 @@
     <string name="text_delay_time">Delay time</string>
     <string name="text_delete">Delete</string>
     <string name="text_delete_all">Delete All</string>
+    <string name="text_delete_color_confirm">Delete the color \"%1$s\"?</string>
+    <string name="text_delete_color_library_confirm">Delete the color library \"%1$s\"?\n\nIts colors and their history will also be removed</string>
+    <string name="text_delete_colors">Delete colors</string>
+    <string name="text_delete_colors_confirm">Delete the selected colors (%1$d)?</string>
     <string name="text_delete_file">Delete file</string>
     <string name="text_delete_folder">Delete folder</string>
     <string name="text_delete_items">Delete items</string>
@@ -1457,6 +1471,7 @@
     <string name="text_find_next_simplified">Next</string>
     <string name="text_find_or_replace">Find / Replace</string>
     <string name="text_find_prev_simplified">Prev</string>
+    <string name="text_finish_reordering">Finish reordering</string>
     <string name="text_first_and_last_name">Full Name</string>
     <string name="text_floating_button">Floating button</string>
     <string name="text_floating_run">Floating run</string>
@@ -1465,6 +1480,9 @@
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Foreground service</string>
     <string name="text_formatting_completed">Formatting completed</string>
+    <string name="text_from_color_history">From history</string>
+    <string name="text_from_color_library">From a color library</string>
+    <string name="text_from_color_palette">From the color palette</string>
     <string name="text_function">Function</string>
     <string name="text_fx_keyboard">Fx keyboard</string>
     <string name="text_general">General</string>
@@ -1761,6 +1779,7 @@
     <string name="text_no_broken_items">No broken items</string>
     <string name="text_no_browser">No browser installed</string>
     <string name="text_no_clients_connected">No VSCode client is connected</string>
+    <string name="text_no_colors_available">No colors available</string>
     <string name="text_no_content">No content</string>
     <string name="text_no_content_description">No content description</string>
     <string name="text_no_data">No data</string>
@@ -2116,6 +2135,9 @@
     <string name="text_remove_from_trash_confirm">Remove this item from trash permanently?</string>
     <string name="text_remove_selected_from_trash_confirm">Remove the %d selected items from trash permanently?</string>
     <string name="text_rename">Rename</string>
+    <string name="text_rename_color_library">Rename color library</string>
+    <string name="text_reorder_colors">Reorder colors</string>
+    <string name="text_reorder_colors_hint">Long press a color and drag it to a new position</string>
     <string name="text_repeat_count_must_be_positive">Times must be greater than 0</string>
     <string name="text_repeat_count_times">Times</string>
     <string name="text_repeat_end">Ends</string>

@@ -776,6 +776,7 @@
     <string name="summary_retention_policies">Días de retención y límites de tamaño del historial de versiones, la papelera y los borradores de emergencia</string>
     <string name="summary_setup_wizard_welcome_reset">Volver a mostrar el aviso de bienvenida de los asistentes de configuración en la página de inicio en el próximo inicio</string>
     <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
+    <string name="text_add_colors">Agregar colores</string>
     <string name="text_and_n_more">... y %d más</string>
     <string name="text_auto_reconnect">Reconexión automática</string>
     <string name="text_batch_restore_summary">Restaurados %1$d, omitidos %2$d, fallidos %3$d</string>
@@ -1021,6 +1022,7 @@
     <string name="text_captured_window_info_type_of_system">Sistema</string>
     <string name="text_captured_window_info_type_unknown">Tipo desconocido</string>
     <string name="text_category_filter">Filtro de categoría</string>
+    <string name="text_change_color_value">Cambiar el valor del color</string>
     <string name="text_change_working_dir">Cambiar el directorio de trabajo</string>
     <string name="text_changelog">Registro de cambios</string>
     <string name="text_changelog_item_dependency">Ajustes en algunas dependencias o versiones de bibliotecas locales</string>
@@ -1028,6 +1030,9 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">Buscar actualizaciones (ignorar la versión local)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">Obtener directamente la última versión remota al buscar actualizaciones</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Comprobando las actualizaciones...</string>
+    <string name="text_choose_color_library">Elegir una biblioteca de colores</string>
+    <string name="text_choose_color_library_to_clone">Elegir la biblioteca de colores que se clonará</string>
+    <string name="text_choose_colors_to_add">Elegir los colores que se agregarán</string>
     <string name="text_choose_delete_strategy">Elegir metodo de eliminacion</string>
     <string name="text_choose_restore_path">Elegir ruta de restauracion</string>
     <string name="text_city_or_locality">Ciudad o localidad</string>
@@ -1059,6 +1064,7 @@
     <string name="text_client_mode_manager">Administrador del modo cliente</string>
     <string name="text_client_n">Cliente %d</string>
     <string name="text_clients">Clientes</string>
+    <string name="text_clone">Clonar</string>
     <string name="text_clone_color_library">Clonar biblioteca de colores</string>
     <string name="text_close">Cerrar</string>
     <string name="text_close_floating_button">Cerrar botón flotante</string>
@@ -1147,6 +1153,10 @@
     <string name="text_codegen_timeout_error">Introduzca un entero entre 100 y 600000 ms</string>
     <string name="text_collapse_all">Contraer todo</string>
     <string name="text_color_library">Biblioteca de colores</string>
+    <string name="text_color_library_copy_name">%1$s (copia)</string>
+    <string name="text_color_library_empty">Todavía no hay colores\n\nUsa \"Agregar colores\" en el menú para añadirlos</string>
+    <string name="text_color_library_name">Nombre de la biblioteca de colores</string>
+    <string name="text_color_name_optional">Nombre del color (opcional)</string>
     <string name="text_color_palette">Paleta de colores</string>
     <string name="text_command_already_copied_to_clip">Comando copiado en el portapapeles</string>
     <string name="text_comment">Comente</string>
@@ -1250,6 +1260,10 @@
     <string name="text_delay_time">Tiempo de retraso</string>
     <string name="text_delete">Borrar</string>
     <string name="text_delete_all">Eliminar todo</string>
+    <string name="text_delete_color_confirm">¿Eliminar el color \"%1$s\"?</string>
+    <string name="text_delete_color_library_confirm">¿Eliminar la biblioteca de colores \"%1$s\"?\n\nSus colores y su historial también se eliminarán</string>
+    <string name="text_delete_colors">Eliminar colores</string>
+    <string name="text_delete_colors_confirm">¿Eliminar los colores seleccionados (%1$d)?</string>
     <string name="text_delete_file">Eliminar archivo</string>
     <string name="text_delete_folder">Eliminar carpeta</string>
     <string name="text_delete_items">Eliminar elementos</string>
@@ -1460,6 +1474,7 @@
     <string name="text_find_next_simplified">Sigui</string>
     <string name="text_find_or_replace">Buscar / Reemplazar</string>
     <string name="text_find_prev_simplified">Anter</string>
+    <string name="text_finish_reordering">Terminar de reordenar</string>
     <string name="text_first_and_last_name">Nombre completo</string>
     <string name="text_floating_button">Botón flotante</string>
     <string name="text_floating_run">Ejecución flotante</string>
@@ -1468,6 +1483,9 @@
     <string name="text_force_stop">Forzar parada</string>
     <string name="text_foreground_service">Servicio de primer plano</string>
     <string name="text_formatting_completed">Formateo completado</string>
+    <string name="text_from_color_history">Desde el historial</string>
+    <string name="text_from_color_library">Desde una biblioteca de colores</string>
+    <string name="text_from_color_palette">Desde la paleta de colores</string>
     <string name="text_function">Función</string>
     <string name="text_fx_keyboard">Fx teclado</string>
     <string name="text_general">General</string>
@@ -1764,6 +1782,7 @@
     <string name="text_no_broken_items">No hay elementos dañados</string>
     <string name="text_no_browser">No hay navegador instalado</string>
     <string name="text_no_clients_connected">Ningún cliente de VSCode conectado</string>
+    <string name="text_no_colors_available">No hay colores disponibles</string>
     <string name="text_no_content">Sin contenido</string>
     <string name="text_no_content_description">Sin descripción de contenido</string>
     <string name="text_no_data">Sin datos</string>
@@ -2119,6 +2138,9 @@
     <string name="text_remove_from_trash_confirm">¿Eliminar este elemento de la papelera de forma permanente?</string>
     <string name="text_remove_selected_from_trash_confirm">¿Eliminar permanentemente de la papelera los %d elementos seleccionados?</string>
     <string name="text_rename">Cambiar el nombre de</string>
+    <string name="text_rename_color_library">Cambiar el nombre de la biblioteca de colores</string>
+    <string name="text_reorder_colors">Reordenar colores</string>
+    <string name="text_reorder_colors_hint">Mantén pulsado un color y arrástralo a una nueva posición</string>
     <string name="text_repeat_count_must_be_positive">La cantidad de veces debe ser mayor que 0</string>
     <string name="text_repeat_count_times">Veces</string>
     <string name="text_repeat_end">Finaliza</string>

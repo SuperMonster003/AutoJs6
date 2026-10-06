@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
 import org.autojs.autojs.theme.app.ColorEntities.ColorGroup
@@ -40,17 +41,42 @@ interface ColorLibraryDao {
     @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM color_library")
     suspend fun nextLibraryPosition(): Int
 
+    @Query("SELECT name FROM color_library")
+    suspend fun listLibraryNames(): List<String>
+
+    @Query("UPDATE color_library SET modified_time = :time WHERE id = :id")
+    suspend fun touchLibrary(id: Long, time: Long)
+
+    @Transaction
+    suspend fun insertLibraryWithColors(library: ColorLibrary, colors: List<LibraryColor>): Long {
+        val libraryId = insertLibrary(library)
+        if (colors.isNotEmpty()) insertColors(colors.map { it.copy(libraryId = libraryId) })
+        return libraryId
+    }
+
     @Insert
     suspend fun insertColors(colors: List<LibraryColor>): List<Long>
 
     @Update
     suspend fun updateColor(color: LibraryColor)
 
+    @Update
+    suspend fun updateColors(colors: List<LibraryColor>)
+
     @Query("DELETE FROM color_library_color WHERE id IN (:ids)")
     suspend fun deleteColors(ids: List<Long>)
 
+    @Query("SELECT * FROM color_library_color WHERE id = :id")
+    suspend fun findColor(id: Long): LibraryColor?
+
     @Query("SELECT * FROM color_library_color WHERE library_id = :libraryId ORDER BY position, id")
     suspend fun listColors(libraryId: Long): List<LibraryColor>
+
+    @Query("SELECT * FROM color_library_color ORDER BY library_id, position, id")
+    suspend fun listAllColors(): List<LibraryColor>
+
+    @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM color_library_color WHERE library_id = :libraryId")
+    suspend fun nextColorPosition(libraryId: Long): Int
 
     @Insert
     suspend fun insertGroup(group: ColorGroup): Long

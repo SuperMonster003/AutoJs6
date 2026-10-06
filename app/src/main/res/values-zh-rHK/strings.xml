@@ -773,6 +773,7 @@
     <string name="summary_retention_policies">版本歷史, 回收站與緊急草稿的保留天數與容量上限</string>
     <string name="summary_setup_wizard_welcome_reset">下次啟動時在主頁再次顯示設定精靈的歡迎提示</string>
     <string name="summary_setup_wizards">授予常用權限及安裝官方插件</string>
+    <string name="text_add_colors">添加顏色</string>
     <string name="text_and_n_more">... 及其他 %d 項</string>
     <string name="text_auto_reconnect">自動重連</string>
     <string name="text_batch_restore_summary">已還原 %1$d, 略過 %2$d, 失敗 %3$d</string>
@@ -1018,6 +1019,7 @@
     <string name="text_captured_window_info_type_of_system">系統</string>
     <string name="text_captured_window_info_type_unknown">未知類型</string>
     <string name="text_category_filter">類別篩選</string>
+    <string name="text_change_color_value">修改色值</string>
     <string name="text_change_working_dir">更改工作路徑</string>
     <string name="text_changelog">更新日誌</string>
     <string name="text_changelog_item_dependency">部分依賴或本地庫版本調整</string>
@@ -1025,6 +1027,9 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">檢查更新 (忽略本地版本)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">檢查更新時, 直接從遠程獲取最新版本</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">正在檢查更新...</string>
+    <string name="text_choose_color_library">選擇顏色庫</string>
+    <string name="text_choose_color_library_to_clone">選擇要克隆的顏色庫</string>
+    <string name="text_choose_colors_to_add">選擇要添加的顏色</string>
     <string name="text_choose_delete_strategy">選擇刪除策略</string>
     <string name="text_choose_restore_path">選擇恢復路徑</string>
     <string name="text_city_or_locality">城市或區域</string>
@@ -1056,6 +1061,7 @@
     <string name="text_client_mode_manager">客戶端模式管理器</string>
     <string name="text_client_n">客戶端 %d</string>
     <string name="text_clients">客戶端</string>
+    <string name="text_clone">克隆</string>
     <string name="text_clone_color_library">克隆顏色庫</string>
     <string name="text_close">關閉</string>
     <string name="text_close_floating_button">關閉浮動按鈕</string>
@@ -1144,6 +1150,10 @@
     <string name="text_codegen_timeout_error">請輸入 100 到 600000 ms 之間的整數</string>
     <string name="text_collapse_all">收起全部</string>
     <string name="text_color_library">顏色庫</string>
+    <string name="text_color_library_copy_name">%1$s (副本)</string>
+    <string name="text_color_library_empty">暫無顏色\n\n可通過選單中的 \"添加顏色\" 添加</string>
+    <string name="text_color_library_name">顏色庫名稱</string>
+    <string name="text_color_name_optional">顏色名稱 (可選)</string>
     <string name="text_color_palette">調色盤</string>
     <string name="text_command_already_copied_to_clip">指令已複製到剪貼板</string>
     <string name="text_comment">註釋</string>
@@ -1247,6 +1257,10 @@
     <string name="text_delay_time">延遲時間</string>
     <string name="text_delete">刪除</string>
     <string name="text_delete_all">刪除全部</string>
+    <string name="text_delete_color_confirm">是否刪除顏色 \"%1$s\"</string>
+    <string name="text_delete_color_library_confirm">是否刪除顏色庫 \"%1$s\"\n\n其中的顏色及其歷史記錄也將一併移除</string>
+    <string name="text_delete_colors">刪除顏色</string>
+    <string name="text_delete_colors_confirm">是否刪除所選顏色 (%1$d 個)</string>
     <string name="text_delete_file">刪除文件</string>
     <string name="text_delete_folder">刪除文件夾</string>
     <string name="text_delete_items">刪除項目</string>
@@ -1457,6 +1471,7 @@
     <string name="text_find_next_simplified">下一個</string>
     <string name="text_find_or_replace">查找 / 替換</string>
     <string name="text_find_prev_simplified">上一個</string>
+    <string name="text_finish_reordering">完成調整</string>
     <string name="text_first_and_last_name">姓名</string>
     <string name="text_floating_button">浮動按鈕</string>
     <string name="text_floating_run">懸浮運行</string>
@@ -1465,6 +1480,9 @@
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">前台服務</string>
     <string name="text_formatting_completed">格式化已完成</string>
+    <string name="text_from_color_history">從歷史記錄</string>
+    <string name="text_from_color_library">從顏色庫</string>
+    <string name="text_from_color_palette">從調色盤</string>
     <string name="text_function">函數</string>
     <string name="text_fx_keyboard">多功能鍵盤</string>
     <string name="text_general">一般</string>
@@ -1761,6 +1779,7 @@
     <string name="text_no_broken_items">沒有失效項目</string>
     <string name="text_no_browser">未安裝瀏覽器應用</string>
     <string name="text_no_clients_connected">暫無已連接的 VSCode 客戶端</string>
+    <string name="text_no_colors_available">沒有可用的顏色</string>
     <string name="text_no_content">無內容</string>
     <string name="text_no_content_description">無內容描述</string>
     <string name="text_no_data">無數據</string>
@@ -2116,6 +2135,9 @@
     <string name="text_remove_from_trash_confirm">是否永久刪除此項目</string>
     <string name="text_remove_selected_from_trash_confirm">從回收站永久移除選取的 %d 個項目?</string>
     <string name="text_rename">重命名</string>
+    <string name="text_rename_color_library">重命名顏色庫</string>
+    <string name="text_reorder_colors">調整顏色順序</string>
+    <string name="text_reorder_colors_hint">長按顏色並拖動以調整位置</string>
     <string name="text_repeat_count_must_be_positive">次數必須大於 0</string>
     <string name="text_repeat_count_times">次數</string>
     <string name="text_repeat_end">結束條件</string>

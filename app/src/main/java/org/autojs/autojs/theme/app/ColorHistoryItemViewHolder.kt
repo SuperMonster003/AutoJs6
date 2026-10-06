@@ -42,6 +42,9 @@ class ColorHistoryItemViewHolder(itemViewBinding: MtColorHistoryRecyclerViewItem
             val colorInt: Int,
             val colorName: String? = null,
             val colorLibraryIdentifier: String? = null,
+            /** The stored selection ids, when the entry comes from `color_history`. zh-CN: 条目来自 `color_history` 时保存的选中 id. */
+            val libraryId: Int? = null,
+            val itemId: Int? = null,
         ) {
             val lastUsedTimeString = TimeUtils.formatTimestamp(lastUsedTime)
         }

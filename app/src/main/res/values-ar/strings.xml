@@ -778,6 +778,7 @@
     <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
     <string name="summary_setup_wizard_welcome_reset">إظهار رسالة ترحيب معالجات الإعداد في الصفحة الرئيسية مرة أخرى عند التشغيل التالي</string>
     <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
+    <string name="text_add_colors">إضافة ألوان</string>
     <string name="text_and_n_more">... و %d اخرى</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
     <string name="text_batch_restore_summary">تمت الاستعادة %1$d, تم التخطي %2$d, فشل %3$d</string>
@@ -1023,6 +1024,7 @@
     <string name="text_captured_window_info_type_of_system">النظام</string>
     <string name="text_captured_window_info_type_unknown">نوع غير معروف</string>
     <string name="text_category_filter">فلتر الفئة</string>
+    <string name="text_change_color_value">تغيير قيمة اللون</string>
     <string name="text_change_working_dir">تغيير دليل العمل</string>
     <string name="text_changelog">سجل التغييرات</string>
     <string name="text_changelog_item_dependency">تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية</string>
@@ -1030,6 +1032,9 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">التحقق من وجود تحديثات (تجاهل النسخة المحلية)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">الحصول مباشرة على آخر نسخة عن بُعد عند التحقق من التحديثات</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">البحث عن تحديثات...</string>
+    <string name="text_choose_color_library">اختر مكتبة ألوان</string>
+    <string name="text_choose_color_library_to_clone">اختر مكتبة الألوان المراد استنساخها</string>
+    <string name="text_choose_colors_to_add">اختر الألوان المراد إضافتها</string>
     <string name="text_choose_delete_strategy">اختر طريقة الحذف</string>
     <string name="text_choose_restore_path">اختر مسار الاستعادة</string>
     <string name="text_city_or_locality">المدينة أو المنطقة</string>
@@ -1061,6 +1066,7 @@
     <string name="text_client_mode_manager">مدير وضع العميل</string>
     <string name="text_client_n">العميل %d</string>
     <string name="text_clients">العملاء</string>
+    <string name="text_clone">استنساخ</string>
     <string name="text_clone_color_library">استنساخ مكتبة ألوان</string>
     <string name="text_close">قريب</string>
     <string name="text_close_floating_button">إغلاق الزر العائم</string>
@@ -1149,6 +1155,10 @@
     <string name="text_codegen_timeout_error">أدخل عددا صحيحا من 100 إلى 600000 ms</string>
     <string name="text_collapse_all">طيّ الكل</string>
     <string name="text_color_library">مكتبة الألوان</string>
+    <string name="text_color_library_copy_name">%1$s (نسخة)</string>
+    <string name="text_color_library_empty">لا توجد ألوان بعد\n\nاستخدم \"إضافة ألوان\" في القائمة لإضافتها</string>
+    <string name="text_color_library_name">اسم مكتبة الألوان</string>
+    <string name="text_color_name_optional">اسم اللون (اختياري)</string>
     <string name="text_color_palette">لوحة الألوان</string>
     <string name="text_command_already_copied_to_clip">تم نسخ الأمر إلى الحافظة</string>
     <string name="text_comment">تعليق</string>
@@ -1252,6 +1262,10 @@
     <string name="text_delay_time">مدة التأخير</string>
     <string name="text_delete">حذف</string>
     <string name="text_delete_all">حذف الكل</string>
+    <string name="text_delete_color_confirm">هل تريد حذف اللون \"%1$s\"?</string>
+    <string name="text_delete_color_library_confirm">هل تريد حذف مكتبة الألوان \"%1$s\"?\n\nستتم أيضا إزالة ألوانها وسجلها</string>
+    <string name="text_delete_colors">حذف الألوان</string>
+    <string name="text_delete_colors_confirm">هل تريد حذف الألوان المحددة (%1$d)?</string>
     <string name="text_delete_file">حذف الملف</string>
     <string name="text_delete_folder">حذف المجلد</string>
     <string name="text_delete_items">حذف العناصر</string>
@@ -1462,6 +1476,7 @@
     <string name="text_find_next_simplified">التالي</string>
     <string name="text_find_or_replace">البحث / استبدال</string>
     <string name="text_find_prev_simplified">سابق</string>
+    <string name="text_finish_reordering">إنهاء إعادة الترتيب</string>
     <string name="text_first_and_last_name">الاسم</string>
     <string name="text_floating_button">زر عائم</string>
     <string name="text_floating_run">تشغيل عائم</string>
@@ -1470,6 +1485,9 @@
     <string name="text_force_stop">توقف إجباري</string>
     <string name="text_foreground_service">خدمة المقدمة</string>
     <string name="text_formatting_completed">اكتمل التنسيق</string>
+    <string name="text_from_color_history">من السجل</string>
+    <string name="text_from_color_library">من مكتبة ألوان</string>
+    <string name="text_from_color_palette">من لوحة الألوان</string>
     <string name="text_function">وظيفة</string>
     <string name="text_fx_keyboard">لوحة مفاتيح Fx</string>
     <string name="text_general">عام</string>
@@ -1766,6 +1784,7 @@
     <string name="text_no_broken_items">لا توجد عناصر تالفة</string>
     <string name="text_no_browser">لم يتم تثبيت متصفح</string>
     <string name="text_no_clients_connected">لا يوجد عميل VSCode متصل</string>
+    <string name="text_no_colors_available">لا توجد ألوان متاحة</string>
     <string name="text_no_content">لا يوجد محتوى</string>
     <string name="text_no_content_description">لا يوجد وصف للمحتوى</string>
     <string name="text_no_data">لا توجد بيانات</string>
@@ -2121,6 +2140,9 @@
     <string name="text_remove_from_trash_confirm">هل تريد حذف هذا العنصر من سلة المحذوفات نهائيا?</string>
     <string name="text_remove_selected_from_trash_confirm">ازالة %d من العناصر المحددة من سلة المحذوفات نهائيا؟</string>
     <string name="text_rename">إعادة تسمية</string>
+    <string name="text_rename_color_library">إعادة تسمية مكتبة الألوان</string>
+    <string name="text_reorder_colors">إعادة ترتيب الألوان</string>
+    <string name="text_reorder_colors_hint">اضغط مطولا على لون واسحبه إلى موضع جديد</string>
     <string name="text_repeat_count_must_be_positive">يجب أن يكون عدد المرات أكبر من 0</string>
     <string name="text_repeat_count_times">مرات</string>
     <string name="text_repeat_end">ينتهي</string>

@@ -777,6 +777,7 @@
     <string name="summary_retention_policies">バージョン履歴, ゴミ箱, 緊急下書きの保持日数とサイズ上限</string>
     <string name="summary_setup_wizard_welcome_reset">次回起動時にホームでセットアップウィザードのウェルカム表示を再表示します</string>
     <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
+    <string name="text_add_colors">色を追加</string>
     <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_auto_reconnect">自動再接続</string>
     <string name="text_batch_restore_summary">復元 %1$d 件, スキップ %2$d 件, 失敗 %3$d 件</string>
@@ -1022,6 +1023,7 @@
     <string name="text_captured_window_info_type_of_system">システム</string>
     <string name="text_captured_window_info_type_unknown">不明なタイプ</string>
     <string name="text_category_filter">カテゴリフィルター</string>
+    <string name="text_change_color_value">色の値を変更</string>
     <string name="text_change_working_dir">作業ディレクトリの変更</string>
     <string name="text_changelog">更新ログ</string>
     <string name="text_changelog_item_dependency">一部の依存関係またはローカルライブラリのバージョン調整</string>
@@ -1029,6 +1031,9 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">アップデートの確認 (ローカルバージョンを無視する)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">アップデートを確認する際に, 最新のリモートバージョンを直接取得する</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">アップデートを確認中...</string>
+    <string name="text_choose_color_library">カラーライブラリを選択</string>
+    <string name="text_choose_color_library_to_clone">複製するカラーライブラリを選択</string>
+    <string name="text_choose_colors_to_add">追加する色を選択</string>
     <string name="text_choose_delete_strategy">削除方法を選択</string>
     <string name="text_choose_restore_path">復元先を選択</string>
     <string name="text_city_or_locality">市区町村</string>
@@ -1060,6 +1065,7 @@
     <string name="text_client_mode_manager">クライアントモードマネージャー</string>
     <string name="text_client_n">クライアント %d</string>
     <string name="text_clients">クライアント</string>
+    <string name="text_clone">複製</string>
     <string name="text_clone_color_library">カラーライブラリを複製</string>
     <string name="text_close">閉じる</string>
     <string name="text_close_floating_button">フローティングボタンを閉じる</string>
@@ -1148,6 +1154,10 @@
     <string name="text_codegen_timeout_error">100 から 600000 ms の整数を入力してください</string>
     <string name="text_collapse_all">すべて折りたたむ</string>
     <string name="text_color_library">カラーライブラリ</string>
+    <string name="text_color_library_copy_name">%1$s (コピー)</string>
+    <string name="text_color_library_empty">まだ色がありません\n\nメニューの \"色を追加\" から追加できます</string>
+    <string name="text_color_library_name">カラーライブラリ名</string>
+    <string name="text_color_name_optional">色の名前 (任意)</string>
     <string name="text_color_palette">カラーパレット</string>
     <string name="text_command_already_copied_to_clip">クリップボードにコピーされたコマンド</string>
     <string name="text_comment">コメント</string>
@@ -1251,6 +1261,10 @@
     <string name="text_delay_time">遅延時間</string>
     <string name="text_delete">削除</string>
     <string name="text_delete_all">すべて削除</string>
+    <string name="text_delete_color_confirm">色 \"%1$s\" を削除しますか?</string>
+    <string name="text_delete_color_library_confirm">カラーライブラリ \"%1$s\" を削除しますか?\n\n含まれる色とその履歴も削除されます</string>
+    <string name="text_delete_colors">色を削除</string>
+    <string name="text_delete_colors_confirm">選択した色 (%1$d 件) を削除しますか?</string>
     <string name="text_delete_file">ファイルを削除</string>
     <string name="text_delete_folder">フォルダーを削除</string>
     <string name="text_delete_items">項目を削除</string>
@@ -1461,6 +1475,7 @@
     <string name="text_find_next_simplified">次へ</string>
     <string name="text_find_or_replace">検索/置換</string>
     <string name="text_find_prev_simplified">前へ</string>
+    <string name="text_finish_reordering">並べ替えを完了</string>
     <string name="text_first_and_last_name">氏名</string>
     <string name="text_floating_button">フローティングボタン</string>
     <string name="text_floating_run">フローティング実行</string>
@@ -1469,6 +1484,9 @@
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">フォアグラウンドサービス</string>
     <string name="text_formatting_completed">フォーマット完了</string>
+    <string name="text_from_color_history">履歴から</string>
+    <string name="text_from_color_library">カラーライブラリから</string>
+    <string name="text_from_color_palette">カラーパレットから</string>
     <string name="text_function">関数</string>
     <string name="text_fx_keyboard">Fx キーボード</string>
     <string name="text_general">一般</string>
@@ -1765,6 +1783,7 @@
     <string name="text_no_broken_items">無効な項目はありません</string>
     <string name="text_no_browser">ブラウザがインストールされていない</string>
     <string name="text_no_clients_connected">接続中の VSCode クライアントはありません</string>
+    <string name="text_no_colors_available">利用できる色がありません</string>
     <string name="text_no_content">内容なし</string>
     <string name="text_no_content_description">コンテンツの説明がありません</string>
     <string name="text_no_data">データなし</string>
@@ -2120,6 +2139,9 @@
     <string name="text_remove_from_trash_confirm">この項目をゴミ箱から完全に削除しますか?</string>
     <string name="text_remove_selected_from_trash_confirm">選択した %d 件の項目をゴミ箱から完全に削除しますか?</string>
     <string name="text_rename">名前の変更</string>
+    <string name="text_rename_color_library">カラーライブラリの名前を変更</string>
+    <string name="text_reorder_colors">色の並べ替え</string>
+    <string name="text_reorder_colors_hint">色を長押ししてドラッグすると位置を変更できます</string>
     <string name="text_repeat_count_must_be_positive">回数は 0 より大きい必要があります</string>
     <string name="text_repeat_count_times">回</string>
     <string name="text_repeat_end">終了条件</string>
