@@ -774,6 +774,7 @@
     <string name="summary_restore_connection_on_launch">Al iniciar la aplicación, reconectar con el último servidor, salvo que la conexión se haya cerrado explícitamente</string>
     <string name="summary_restore_server_on_launch">Al iniciar la aplicación, volver a escuchar, salvo que el servidor se haya detenido explícitamente</string>
     <string name="summary_retention_policies">Días de retención y límites de tamaño del historial de versiones, la papelera y los borradores de emergencia</string>
+    <string name="summary_setup_wizard_welcome_reset">Volver a mostrar el aviso de bienvenida de los asistentes de configuración en la página de inicio en el próximo inicio</string>
     <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
     <string name="text_and_n_more">... y %d más</string>
     <string name="text_auto_reconnect">Reconexión automática</string>
@@ -2242,6 +2243,8 @@
     <string name="text_set_breakpoint">Establecer un punto de interrupción</string>
     <string name="text_set_editor_setting_action" formatted="true">Establecer %1$s</string>
     <string name="text_settings">Configuración</string>
+    <string name="text_setup_wizard_welcome_reset">Restablecer el aviso de bienvenida</string>
+    <string name="text_setup_wizard_welcome_reset_done">El aviso de bienvenida volverá a aparecer en el próximo inicio</string>
     <string name="text_setup_wizards">Asistentes de configuración</string>
     <string name="text_setup_wizards_hint">Elige los asistentes que quieres ejecutar. Los elegidos se ejecutarán uno tras otro</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">Discordancia de SHA-256.\n\nEsperado: %1$s\nReal: %2$s</string>

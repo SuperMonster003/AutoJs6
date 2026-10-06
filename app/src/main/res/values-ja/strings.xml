@@ -775,6 +775,7 @@
     <string name="summary_restore_connection_on_launch">アプリ起動時に前回のサーバーへ再接続します (明示的に切断した場合を除く)</string>
     <string name="summary_restore_server_on_launch">アプリ起動時に再び待機します (明示的に停止した場合を除く)</string>
     <string name="summary_retention_policies">バージョン履歴, ゴミ箱, 緊急下書きの保持日数とサイズ上限</string>
+    <string name="summary_setup_wizard_welcome_reset">次回起動時にホームでセットアップウィザードのウェルカム表示を再表示します</string>
     <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
     <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_auto_reconnect">自動再接続</string>
@@ -2243,6 +2244,8 @@
     <string name="text_set_breakpoint">ブレークポイントの設定</string>
     <string name="text_set_editor_setting_action" formatted="true">%1$s を設定</string>
     <string name="text_settings">設定</string>
+    <string name="text_setup_wizard_welcome_reset">ウェルカム表示をリセット</string>
+    <string name="text_setup_wizard_welcome_reset_done">次回起動時にウェルカム表示が再表示されます</string>
     <string name="text_setup_wizards">セットアップウィザード</string>
     <string name="text_setup_wizards_hint">実行するウィザードを選択してください. 選択したウィザードは順番に実行されます</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 が一致しません.\n\n期待値: %1$s\n実際: %2$s</string>

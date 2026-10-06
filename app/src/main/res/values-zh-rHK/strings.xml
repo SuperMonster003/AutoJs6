@@ -771,6 +771,7 @@
     <string name="summary_restore_connection_on_launch">應用程式啟動時重新連線上次的伺服端 (顯式斷開連線後除外)</string>
     <string name="summary_restore_server_on_launch">應用程式啟動時重新開始監聽 (顯式停止後除外)</string>
     <string name="summary_retention_policies">版本歷史, 回收站與緊急草稿的保留天數與容量上限</string>
+    <string name="summary_setup_wizard_welcome_reset">下次啟動時在主頁再次顯示設定精靈的歡迎提示</string>
     <string name="summary_setup_wizards">授予常用權限及安裝官方插件</string>
     <string name="text_and_n_more">... 及其他 %d 項</string>
     <string name="text_auto_reconnect">自動重連</string>
@@ -2239,6 +2240,8 @@
     <string name="text_set_breakpoint">設置斷點</string>
     <string name="text_set_editor_setting_action" formatted="true">設置 %1$s</string>
     <string name="text_settings">設置</string>
+    <string name="text_setup_wizard_welcome_reset">重設歡迎提示</string>
+    <string name="text_setup_wizard_welcome_reset_done">歡迎提示將在下次啟動時再次顯示</string>
     <string name="text_setup_wizards">設定精靈</string>
     <string name="text_setup_wizards_hint">選擇需要運行的精靈, 所選精靈將依次進行</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 驗證不一致.\n\n期望值: %1$s\n實際值: %2$s</string>

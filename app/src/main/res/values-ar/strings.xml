@@ -776,6 +776,7 @@
     <string name="summary_restore_connection_on_launch">عند بدء التطبيق, إعادة الاتصال بآخر خادم ما لم يتم قطع الاتصال صراحة</string>
     <string name="summary_restore_server_on_launch">عند بدء التطبيق, الاستماع مجددا ما لم يتم إيقاف الخادم صراحة</string>
     <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
+    <string name="summary_setup_wizard_welcome_reset">إظهار رسالة ترحيب معالجات الإعداد في الصفحة الرئيسية مرة أخرى عند التشغيل التالي</string>
     <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
     <string name="text_and_n_more">... و %d اخرى</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
@@ -2244,6 +2245,8 @@
     <string name="text_set_breakpoint">ضبط نقطة توقف</string>
     <string name="text_set_editor_setting_action" formatted="true">تعيين %1$s</string>
     <string name="text_settings">إعدادات</string>
+    <string name="text_setup_wizard_welcome_reset">إعادة تعيين رسالة الترحيب</string>
+    <string name="text_setup_wizard_welcome_reset_done">ستظهر رسالة الترحيب مرة أخرى عند التشغيل التالي</string>
     <string name="text_setup_wizards">معالجات الإعداد</string>
     <string name="text_setup_wizards_hint">اختر المعالجات المراد تشغيلها. تعمل المعالجات المختارة واحدًا تلو الآخر</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">عدم تطابق SHA-256.\n\nالمتوقّع: %1$s\nالفعلي: %2$s</string>

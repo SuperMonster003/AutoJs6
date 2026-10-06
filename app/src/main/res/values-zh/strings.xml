@@ -770,6 +770,7 @@
     <string name="summary_restore_connection_on_launch">应用启动时重新连接上次的服务端 (显式断开连接后除外)</string>
     <string name="summary_restore_server_on_launch">应用启动时重新开始监听 (显式停止后除外)</string>
     <string name="summary_retention_policies">版本历史, 回收站与紧急草稿的保留天数与容量上限</string>
+    <string name="summary_setup_wizard_welcome_reset">下次启动时在主页再次显示设置向导的欢迎提示</string>
     <string name="summary_setup_wizards">授予常用权限及安装官方插件</string>
     <string name="text_and_n_more">... 及其他 %d 项</string>
     <string name="text_auto_reconnect">自动重连</string>
@@ -2239,6 +2240,8 @@
     <string name="text_set_breakpoint">设置断点</string>
     <string name="text_set_editor_setting_action" formatted="true">设置%1$s</string>
     <string name="text_settings">设置</string>
+    <string name="text_setup_wizard_welcome_reset">重置欢迎提示</string>
+    <string name="text_setup_wizard_welcome_reset_done">欢迎提示将在下次启动时再次显示</string>
     <string name="text_setup_wizards">设置向导</string>
     <string name="text_setup_wizards_hint">选择需要运行的向导, 所选向导将依次进行</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 验证不一致.\n\n期望值: %1$s\n实际值: %2$s</string>

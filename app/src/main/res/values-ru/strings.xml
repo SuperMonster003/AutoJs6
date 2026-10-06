@@ -774,6 +774,7 @@
     <string name="summary_restore_connection_on_launch">При запуске приложения подключаться к последнему серверу, если подключение не было разорвано явно</string>
     <string name="summary_restore_server_on_launch">При запуске приложения снова начинать прослушивание, если сервер не был остановлен явно</string>
     <string name="summary_retention_policies">Сроки хранения и ограничения размера для истории версий, корзины и аварийных черновиков</string>
+    <string name="summary_setup_wizard_welcome_reset">Снова показать приветствие мастеров настройки на главной странице при следующем запуске</string>
     <string name="summary_setup_wizards">Предоставление основных разрешений и установка официальных плагинов</string>
     <string name="text_and_n_more">... и еще %d</string>
     <string name="text_auto_reconnect">Автоматическое переподключение</string>
@@ -2242,6 +2243,8 @@
     <string name="text_set_breakpoint">Установить точку останова</string>
     <string name="text_set_editor_setting_action" formatted="true">Установить %1$s</string>
     <string name="text_settings">Настройки</string>
+    <string name="text_setup_wizard_welcome_reset">Сбросить приветствие</string>
+    <string name="text_setup_wizard_welcome_reset_done">Приветствие снова появится при следующем запуске</string>
     <string name="text_setup_wizards">Мастера настройки</string>
     <string name="text_setup_wizards_hint">Выберите мастера для запуска. Выбранные мастера запускаются по очереди</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">Несовпадение SHA-256.\n\nОжидалось: %1$s\nФактически: %2$s</string>

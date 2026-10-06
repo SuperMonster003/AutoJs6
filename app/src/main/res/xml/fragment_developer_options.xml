@@ -96,4 +96,27 @@
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_setup_wizards">
+
+        <org.autojs.autojs.ui.settings.ResetSetupWizardWelcomePreference
+            app:layout="@layout/preference_custom"
+            app:summary="@string/summary_setup_wizard_welcome_reset"
+            app:title="@string/text_setup_wizard_welcome_reset" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_debug">
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:layout="@layout/preference_custom"
+            app:key="process_exit_history"
+            app:title="@string/text_process_exit_history"
+            app:summary="@string/summary_process_exit_history" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
 </PreferenceScreen>

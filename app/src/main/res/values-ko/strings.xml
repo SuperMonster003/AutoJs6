@@ -776,6 +776,7 @@
     <string name="summary_restore_connection_on_launch">앱 시작 시 마지막 서버에 다시 연결합니다 (명시적으로 연결을 해제한 경우 제외)</string>
     <string name="summary_restore_server_on_launch">앱 시작 시 다시 수신 대기합니다 (명시적으로 중지한 경우 제외)</string>
     <string name="summary_retention_policies">버전 기록, 휴지통, 긴급 초안의 보관 일수 및 용량 상한</string>
+    <string name="summary_setup_wizard_welcome_reset">다음 실행 시 홈에서 설정 마법사 환영 안내를 다시 표시합니다</string>
     <string name="summary_setup_wizards">자주 쓰는 권한 부여 및 공식 플러그인 설치</string>
     <string name="text_and_n_more">... 외 %d개</string>
     <string name="text_auto_reconnect">자동 재연결</string>
@@ -2244,6 +2245,8 @@
     <string name="text_set_breakpoint">중단 점을 설정하십시오</string>
     <string name="text_set_editor_setting_action" formatted="true">%1$s 설정</string>
     <string name="text_settings">설정</string>
+    <string name="text_setup_wizard_welcome_reset">환영 안내 초기화</string>
+    <string name="text_setup_wizard_welcome_reset_done">다음 실행 시 환영 안내가 다시 표시됩니다</string>
     <string name="text_setup_wizards">설정 마법사</string>
     <string name="text_setup_wizards_hint">실행할 마법사를 선택하세요. 선택한 마법사는 차례로 실행됩니다</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 값이 일치하지 않습니다.\n\n예상: %1$s\n실제: %2$s</string>

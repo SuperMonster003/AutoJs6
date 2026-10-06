@@ -774,6 +774,7 @@
     <string name="summary_restore_connection_on_launch">Au démarrage de l\'application, se reconnecter au dernier serveur, sauf si la connexion a été fermée explicitement</string>
     <string name="summary_restore_server_on_launch">Au démarrage de l\'application, se remettre en écoute, sauf si le serveur a été arrêté explicitement</string>
     <string name="summary_retention_policies">Jours de conservation et limites de taille de l\'historique des versions, de la corbeille et des brouillons d\'urgence</string>
+    <string name="summary_setup_wizard_welcome_reset">Afficher à nouveau le message de bienvenue des assistants de configuration sur la page d\'accueil au prochain lancement</string>
     <string name="summary_setup_wizards">Accorder les permissions courantes et installer les plugins officiels</string>
     <string name="text_and_n_more">... et %d de plus</string>
     <string name="text_auto_reconnect">Reconnexion automatique</string>
@@ -2242,6 +2243,8 @@
     <string name="text_set_breakpoint">Définir un point d\'arrêt</string>
     <string name="text_set_editor_setting_action" formatted="true">Définir %1$s</string>
     <string name="text_settings">Réglages</string>
+    <string name="text_setup_wizard_welcome_reset">Réinitialiser le message de bienvenue</string>
+    <string name="text_setup_wizard_welcome_reset_done">Le message de bienvenue réapparaîtra au prochain lancement</string>
     <string name="text_setup_wizards">Assistants de configuration</string>
     <string name="text_setup_wizards_hint">Choisissez les assistants à lancer. Ils s\'exécutent l\'un après l\'autre</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">Incohérence du SHA-256.\n\nAttendu : %1$s\nObtenu : %2$s</string>
