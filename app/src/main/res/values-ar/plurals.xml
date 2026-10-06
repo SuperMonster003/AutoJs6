@@ -132,6 +132,24 @@
         <item quantity="other">سيتم تخطي %d قيمة غير صالحة</item>
     </plurals>
 
+    <plurals name="text_n_overrides">
+        <item quantity="zero">%d استثناء</item>
+        <item quantity="one">استثناء واحد</item>
+        <item quantity="two">استثناءان</item>
+        <item quantity="few">%d استثناءات</item>
+        <item quantity="many">%d استثناء</item>
+        <item quantity="other">%d استثناء</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="zero">%d مرة يوميا</item>
+        <item quantity="one">مرة واحدة يوميا</item>
+        <item quantity="two">مرتان يوميا</item>
+        <item quantity="few">%d مرات يوميا</item>
+        <item quantity="many">%d مرة يوميا</item>
+        <item quantity="other">%d مرة يوميا</item>
+    </plurals>
+
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="zero">سيتم تخطي %d مكتبة ألوان من نوع غير معروف</item>
         <item quantity="one">سيتم تخطي مكتبة ألوان واحدة من نوع غير معروف</item>

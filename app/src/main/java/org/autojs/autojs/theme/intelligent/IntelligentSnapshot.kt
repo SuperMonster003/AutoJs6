@@ -54,6 +54,7 @@ object IntelligentEngineJson {
         state.overrideGroupId?.let { addProperty("overrideGroupId", it) }
         state.intervalAnchorAt?.let { addProperty("intervalAnchorAt", it) }
         state.nextDueAt?.let { addProperty("nextDueAt", it) }
+        state.dailyDueAt?.let { addProperty("dailyDueAt", it) }
         state.lastRotatedAt?.let { addProperty("lastRotatedAt", it) }
     }.toString()
 
@@ -65,6 +66,7 @@ object IntelligentEngineJson {
             overrideGroupId = root.long("overrideGroupId"),
             intervalAnchorAt = root.long("intervalAnchorAt"),
             nextDueAt = root.long("nextDueAt"),
+            dailyDueAt = root.long("dailyDueAt"),
             lastRotatedAt = root.long("lastRotatedAt"),
         )
     }

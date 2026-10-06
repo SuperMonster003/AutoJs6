@@ -56,6 +56,14 @@
         <item quantity="other">잘못된 값 %d개는 건너뜁니다</item>
     </plurals>
 
+    <plurals name="text_n_overrides">
+        <item quantity="other">재정의 %d</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="other">하루 %d회</item>
+    </plurals>
+
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="other">알 수 없는 유형의 색상 라이브러리 %d개는 건너뜁니다</item>
     </plurals>

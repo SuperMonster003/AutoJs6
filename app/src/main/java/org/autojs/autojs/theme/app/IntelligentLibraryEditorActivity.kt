@@ -190,7 +190,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         binding.orderDescending.isVisible = sequential != null
         binding.orderDescending.isChecked = sequential?.descending == true
         binding.referenceStateRow.isVisible = sequential != null && sequential.key in COLOR_SORT_KEYS && stateKeys.size > 1
-        binding.referenceStateSummary.text = IntelligentSummaryFormatter.stateLabel(this, referenceStateOf(sequential))
+        binding.referenceStateSummary.text = IntelligentSummaryFormatter.stateLabel(this, stateSource, referenceStateOf(sequential))
         isBinding = false
 
         groupAdapter.notifyDataSetChanged()
@@ -369,7 +369,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
 
     private fun chooseReferenceState() {
         val sequential = order as? GroupOrder.Sequential ?: return
-        ColorLibraryDialogs.showSingleChoice(this, R.string.text_reference_state, stateKeys.map { IntelligentSummaryFormatter.stateLabel(this, it) }) { which ->
+        ColorLibraryDialogs.showSingleChoice(this, R.string.text_reference_state, stateKeys.map { IntelligentSummaryFormatter.stateLabel(this, stateSource, it) }) { which ->
             order = sequential.copy(referenceState = stateKeys[which])
             refresh()
         }
@@ -500,10 +500,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             .show()
     }
 
-    private fun stateLabelForEditor(key: String) = when (stateSource) {
-        StateSource.NightMode -> IntelligentSummaryFormatter.stateLabel(this, key)
-        else -> getString(R.string.text_state_color_single)
-    }
+    private fun stateLabelForEditor(key: String) = IntelligentSummaryFormatter.stateLabel(this, stateSource, key)
 
     private val isDirty: Boolean
         get() = initialModel != null && currentModel() != initialModel

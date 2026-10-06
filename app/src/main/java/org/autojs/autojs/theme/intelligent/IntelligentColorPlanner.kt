@@ -19,8 +19,16 @@ data class IntelligentRuntimeState(
     val overrideGroupId: Long? = null,
     val intervalAnchorAt: Long? = null,
     val nextDueAt: Long? = null,
+    /** The next daily trigger (roadmap P3.4). zh-CN: 下一次每日定时 (Roadmap P3.4). */
+    val dailyDueAt: Long? = null,
     val lastRotatedAt: Long? = null,
-)
+) {
+
+    /** The earliest rotation due time, interval or daily. zh-CN: 最早的换组到期时间 (时间间隔或每日定时). */
+    val earliestDueAt: Long?
+        get() = listOfNotNull(nextDueAt, dailyDueAt).minOrNull()
+
+}
 
 enum class IntelligentEvent {
 
@@ -117,11 +125,26 @@ class IntelligentColorPlanner(
             }
         }
 
+        // Daily times share the "rotate once when overdue" rule of intervals (D5).
+        // zh-CN: 每日定时与时间间隔一样, 过期时只换一次 (D5).
+        val daily = config.daily
+        var dailyDueAt: Long? = null
+        var dailyFired = false
+        if (daily != null) {
+            val armed = !activating && runtime.dailyDueAt != null
+            dailyFired = armed && input.now >= runtime.dailyDueAt!!
+            dailyDueAt = when {
+                armed && !dailyFired -> runtime.dailyDueAt
+                else -> DailySchedule.nextDue(daily.times, input.now, input.zone)
+            }
+        }
+
         val stateChanged = runtime.lastStateKey != null && runtime.lastStateKey != stateKey
         val fired = !activating && (
                 (stateChanged && RotationTrigger.StateChange in config.rotation)
                         || (input.event == IntelligentEvent.APP_START && RotationTrigger.AppStart in config.rotation)
                         || intervalFired
+                        || dailyFired
                         || input.event == IntelligentEvent.SCRIPT_NEXT
                 )
 
@@ -166,6 +189,7 @@ class IntelligentColorPlanner(
                 overrideGroupId = overrideGroupId,
                 intervalAnchorAt = anchorAt,
                 nextDueAt = nextDueAt,
+                dailyDueAt = dailyDueAt,
                 lastRotatedAt = if (rotated) input.now else runtime.lastRotatedAt,
             ),
         )

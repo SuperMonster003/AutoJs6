@@ -61,15 +61,16 @@ class IntelligentConfigJsonTest {
 
     @Test
     fun unknownTypesSurviveARoundTrip() {
+        // Known types with values this version cannot read count as unsupported too.
         val source = """{"type":"weekday","mode":"weekend"}"""
-        val trigger = """{"type":"daily","times":["08:00","20:00"]}"""
+        val trigger = """{"type":"onUnlock","delay":5}"""
         val condition = """{"type":"holiday","id":"spring-festival"}"""
         val input = """{"version":2,"stateSource":$source,"rotation":[$trigger],"overrides":[{"when":$condition,"group":3}]}"""
 
         val config = IntelligentConfigJson.decode(input)
         assertTrue(config.hasUnsupportedItems)
         assertEquals("weekday", (config.stateSource as StateSource.Unsupported).type)
-        assertEquals("daily", (config.rotation.single() as RotationTrigger.Unsupported).type)
+        assertEquals("onUnlock", (config.rotation.single() as RotationTrigger.Unsupported).type)
         assertEquals(3L, config.overrides.single().groupId)
 
         val output = JsonParser.parseString(IntelligentConfigJson.encode(config)).asJsonObject
@@ -116,6 +117,62 @@ class IntelligentConfigJsonTest {
         // 5 seconds is the lower bound (D19); minutes and hours start at 1; 9999 is the upper bound.
         assertEquals(listOf(5, 1, 9999), intervals.map { it.every })
         assertEquals(listOf(5, 1, 1), IntervalUnit.entries.map { it.minimumEvery })
+    }
+
+    @Test
+    fun conditionTypesRoundTrip() {
+        val sources = listOf(
+            StateSource.TimePeriods(listOf(6 * 60, 12 * 60 + 30, 18 * 60)),
+            StateSource.SunriseSunset(),
+            StateSource.SunriseSunset(GeoLocation(39.9, 116.4)),
+            StateSource.Weekday(workdaysOnly = false),
+            StateSource.Weekday(workdaysOnly = true),
+            StateSource.Seasons(),
+            StateSource.Seasons(Hemisphere.SOUTH),
+            StateSource.Battery(listOf(20, 80)),
+            StateSource.Charging,
+            StateSource.PowerSave,
+            StateSource.AccessibilityService,
+            StateSource.ScriptRunning,
+        )
+        sources.forEach { source ->
+            val config = IntelligentConfig(
+                stateSource = source,
+                rotation = listOf(RotationTrigger.StateChange, RotationTrigger.Daily(listOf(8 * 60, 20 * 60))),
+                overrides = listOf(
+                    DateOverride(DateCondition.Holiday("christmas", daysBefore = 1, daysAfter = 1), 3L),
+                    DateOverride(DateCondition.Holiday("springFestival"), 2L),
+                ),
+            )
+            assertEquals(config, roundTrip(config))
+        }
+        val encoded = JsonParser.parseString(IntelligentConfigJson.encode(IntelligentConfig(StateSource.TimePeriods(listOf(6 * 60, 18 * 60))))).asJsonObject
+        assertEquals("""{"type":"timePeriods","starts":["06:00","18:00"]}""", encoded["stateSource"].toString())
+    }
+
+    @Test
+    fun invalidConditionValuesAreRepairedOrUnsupported() {
+        val config = IntelligentConfigJson.decode(
+            """{"version":1,
+                "stateSource":{"type":"timePeriods","starts":["18:00","06:00","06:00","25:00","x"]},
+                "rotation":[{"type":"daily","times":["20:00","08:00","bad"]},{"type":"daily","times":[]}],
+                "overrides":[
+                  {"when":{"type":"holiday","id":"christmas","before":-3,"after":99},"group":1},
+                  {"when":{"type":"holiday","id":"unknownDay"},"group":2}]}"""
+        )
+        assertEquals(StateSource.TimePeriods(listOf(6 * 60, 18 * 60)), config.stateSource)
+        assertEquals(RotationTrigger.Daily(listOf(8 * 60, 20 * 60)), config.rotation[0])
+        assertTrue(config.rotation[1] is RotationTrigger.Unsupported)
+        assertEquals(DateCondition.Holiday("christmas", 0, DateCondition.Holiday.MAX_EXTRA_DAYS), config.overrides[0].condition)
+        assertTrue(config.overrides[1].condition is DateCondition.Unsupported)
+
+        fun source(json: String) = IntelligentConfigJson.decode("""{"version":1,"stateSource":$json}""").stateSource
+        assertTrue(source("""{"type":"timePeriods","starts":["06:00"]}""") is StateSource.Unsupported)
+        assertEquals(StateSource.Battery(listOf(20, 80)), source("""{"type":"battery","thresholds":[80,0,20,150,20]}"""))
+        assertTrue(source("""{"type":"battery","thresholds":[0,100]}""") is StateSource.Unsupported)
+        assertTrue(source("""{"type":"sunriseSunset","latitude":120,"longitude":0}""") is StateSource.Unsupported)
+        assertTrue(source("""{"type":"weekday","mode":"fortnight"}""") is StateSource.Unsupported)
+        assertEquals(StateSource.Seasons(null), source("""{"type":"season","hemisphere":"east"}"""))
     }
 
 }

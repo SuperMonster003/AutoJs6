@@ -258,4 +258,37 @@ class IntelligentColorPlannerTest {
         assertNull(result.color)
     }
 
+    @Test
+    fun dailyTimesRotateOnceWhenOverdue() {
+        val config = IntelligentConfig(rotation = listOf(RotationTrigger.Daily(listOf(8 * 60, 20 * 60))))
+        val groups = listOf(single(1, red), single(2, green), single(3, blue))
+        // Activated at 15:51, the next daily time is 20:00 the same day.
+        val activated = plan(config, groups, ACTIVATE, start = 1L)
+        assertEquals(at(20, 0), activated.runtime.dailyDueAt)
+        assertEquals(at(20, 0), activated.runtime.earliestDueAt)
+        // Before the time nothing happens.
+        val early = plan(config, groups, EVALUATE, activated.runtime, now = at(19, 59))
+        assertEquals(1L, early.groupId)
+        assertFalse(early.rotated)
+        // Long overdue (the process was dead over 20:00 and the next 08:00): only one rotation, re-armed after now.
+        val late = plan(config, groups, EVALUATE, activated.runtime, now = at(20, 0) + 13 * 60 * minute)
+        assertEquals(2L, late.groupId)
+        assertTrue(late.rotated)
+        assertEquals(ZonedDateTime.of(2026, 10, 7, 20, 0, 0, 0, zone).toInstant().toEpochMilli(), late.runtime.dailyDueAt)
+    }
+
+    @Test
+    fun dailyAndIntervalDueTogetherRotateOnce() {
+        val config = IntelligentConfig(
+            rotation = listOf(RotationTrigger.Interval(1, IntervalUnit.HOUR, IntervalAnchor.NEXT_HOUR), RotationTrigger.Daily(listOf(16 * 60))),
+        )
+        val groups = listOf(single(1, red), single(2, green), single(3, blue))
+        val activated = plan(config, groups, ACTIVATE, start = 1L)
+        assertEquals(at(16, 0), activated.runtime.nextDueAt)
+        assertEquals(at(16, 0), activated.runtime.dailyDueAt)
+        val result = plan(config, groups, EVALUATE, activated.runtime, now = at(16, 0, 1))
+        assertEquals(2L, result.groupId)
+        assertTrue(result.runtime.earliestDueAt!! > at(16, 0, 1))
+    }
+
 }

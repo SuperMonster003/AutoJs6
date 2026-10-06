@@ -76,6 +76,16 @@
         <item quantity="other">%d valeurs invalides seront ignorées</item>
     </plurals>
 
+    <plurals name="text_n_overrides">
+        <item quantity="one">%d remplacement</item>
+        <item quantity="other">%d remplacements</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="one">%d fois par jour</item>
+        <item quantity="other">%d fois par jour</item>
+    </plurals>
+
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="one">%d bibliothèque de couleurs de type inconnu sera ignorée</item>
         <item quantity="other">%d bibliothèques de couleurs de type inconnu seront ignorées</item>

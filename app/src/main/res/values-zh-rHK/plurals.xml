@@ -56,6 +56,14 @@
         <item quantity="other">%d 個無效值將被略過</item>
     </plurals>
 
+    <plurals name="text_n_overrides">
+        <item quantity="other">覆蓋 %d</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="other">每天 %d 次</item>
+    </plurals>
+
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="other">%d 個未知類型的顏色庫將被略過</item>
     </plurals>

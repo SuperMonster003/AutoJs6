@@ -56,6 +56,14 @@
         <item quantity="other">%d 個の無効な値はスキップされます</item>
     </plurals>
 
+    <plurals name="text_n_overrides">
+        <item quantity="other">上書き %d</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="other">1 日 %d 回</item>
+    </plurals>
+
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="other">種類が不明な %d 個のカラーライブラリはスキップされます</item>
     </plurals>

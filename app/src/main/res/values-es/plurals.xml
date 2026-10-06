@@ -76,6 +76,16 @@
         <item quantity="other">Se omitirán %d valores no válidos</item>
     </plurals>
 
+    <plurals name="text_n_overrides">
+        <item quantity="one">%d excepción</item>
+        <item quantity="other">%d excepciones</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="one">%d vez al día</item>
+        <item quantity="other">%d veces al día</item>
+    </plurals>
+
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="one">Se omitirá %d biblioteca de colores de tipo desconocido</item>
         <item quantity="other">Se omitirán %d bibliotecas de colores de tipo desconocido</item>

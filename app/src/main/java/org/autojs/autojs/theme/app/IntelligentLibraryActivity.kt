@@ -19,7 +19,6 @@ import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
 import org.autojs.autojs.theme.intelligent.IntelligentGroup
 import org.autojs.autojs.theme.intelligent.IntelligentPresets
 import org.autojs.autojs.theme.intelligent.IntelligentSnapshot
-import org.autojs.autojs.theme.intelligent.StateKeys
 import org.autojs.autojs.theme.intelligent.StateSource
 import org.autojs.autojs.theme.library.ColorLibraryIds
 import org.autojs.autojs.theme.library.ColorLibraryRepository
@@ -117,8 +116,8 @@ class IntelligentLibraryActivity : ColorSelectBaseActivity() {
             val runtime = IntelligentColorEngine.runtimeState
             lines += getString(R.string.text_in_use)
             if (current.config.stateSource !is StateSource.None) {
-                val state = runtime.lastStateKey ?: StateKeys.DAY
-                lines += getString(R.string.text_current_state, IntelligentSummaryFormatter.stateLabel(this, state))
+                val state = runtime.lastStateKey ?: current.config.stateKeys.first()
+                lines += getString(R.string.text_current_state, IntelligentSummaryFormatter.stateLabel(this, current.config.stateSource, state))
             }
             current.group(IntelligentColorEngine.shownGroupId)?.let { group ->
                 lines += getString(R.string.text_current_group, IntelligentSummaryFormatter.groupName(current.config, group))

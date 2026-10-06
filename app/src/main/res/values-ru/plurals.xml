@@ -100,6 +100,20 @@
         <item quantity="other">%d недопустимого значения будут пропущены</item>
     </plurals>
 
+    <plurals name="text_n_overrides">
+        <item quantity="one">%d замена</item>
+        <item quantity="few">%d замены</item>
+        <item quantity="many">%d замен</item>
+        <item quantity="other">%d замены</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="one">%d раз в день</item>
+        <item quantity="few">%d раза в день</item>
+        <item quantity="many">%d раз в день</item>
+        <item quantity="other">%d раза в день</item>
+    </plurals>
+
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="one">%d цветовая библиотека неизвестного типа будет пропущена</item>
         <item quantity="few">%d цветовые библиотеки неизвестного типа будут пропущены</item>

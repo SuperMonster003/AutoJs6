@@ -70,6 +70,16 @@
         <item quantity="other">%d invalid values will be skipped</item>
     </plurals>
 
+    <plurals name="text_n_overrides">
+        <item quantity="one">%d override</item>
+        <item quantity="other">%d overrides</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="one">%d time a day</item>
+        <item quantity="other">%d times a day</item>
+    </plurals>
+
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="one">%d color library of an unknown type will be skipped</item>
         <item quantity="other">%d color libraries of unknown types will be skipped</item>

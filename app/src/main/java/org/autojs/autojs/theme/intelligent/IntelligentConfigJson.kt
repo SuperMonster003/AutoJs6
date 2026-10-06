@@ -4,6 +4,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.autojs.autojs.theme.intelligent.calendar.HolidayCalendar
 
 /**
  * Storage codec of [IntelligentConfig] (the `config_json` column), versioned by [IntelligentConfig.VERSION].
@@ -28,10 +29,24 @@ object IntelligentConfigJson {
 
     private const val TYPE_NONE = "none"
     private const val TYPE_NIGHT_MODE = "nightMode"
+    private const val TYPE_TIME_PERIODS = "timePeriods"
+    private const val TYPE_SUNRISE_SUNSET = "sunriseSunset"
+    private const val TYPE_WEEKDAY = "weekday"
+    private const val TYPE_SEASON = "season"
+    private const val TYPE_BATTERY = "battery"
+    private const val TYPE_CHARGING = "charging"
+    private const val TYPE_POWER_SAVE = "powerSave"
+    private const val TYPE_ACCESSIBILITY_SERVICE = "accessibilityService"
+    private const val TYPE_SCRIPT_RUNNING = "scriptRunning"
     private const val TYPE_STATE_CHANGE = "stateChange"
     private const val TYPE_APP_START = "appStart"
     private const val TYPE_INTERVAL = "interval"
+    private const val TYPE_DAILY = "daily"
     private const val TYPE_DATE_RANGE = "dateRange"
+    private const val TYPE_HOLIDAY = "holiday"
+
+    private const val WEEKDAY_MODE_DAYS = "days"
+    private const val WEEKDAY_MODE_WORKDAYS = "workdays"
 
     private const val MODE_SEQUENTIAL = "sequential"
     private const val MODE_RANDOM = "random"
@@ -64,13 +79,66 @@ object IntelligentConfigJson {
     private fun encodeStateSource(source: StateSource): JsonElement = when (source) {
         StateSource.None -> typed(TYPE_NONE)
         StateSource.NightMode -> typed(TYPE_NIGHT_MODE)
+        is StateSource.TimePeriods -> typed(TYPE_TIME_PERIODS).apply { add("starts", times(source.starts)) }
+        is StateSource.SunriseSunset -> typed(TYPE_SUNRISE_SUNSET).apply {
+            source.location?.let {
+                addProperty("latitude", it.latitude)
+                addProperty("longitude", it.longitude)
+            }
+        }
+        is StateSource.Weekday -> typed(TYPE_WEEKDAY).apply {
+            addProperty("mode", if (source.workdaysOnly) WEEKDAY_MODE_WORKDAYS else WEEKDAY_MODE_DAYS)
+        }
+        is StateSource.Seasons -> typed(TYPE_SEASON).apply { source.hemisphere?.let { addProperty("hemisphere", it.key) } }
+        is StateSource.Battery -> typed(TYPE_BATTERY).apply { add("thresholds", JsonArray().apply { source.thresholds.forEach { add(it) } }) }
+        StateSource.Charging -> typed(TYPE_CHARGING)
+        StateSource.PowerSave -> typed(TYPE_POWER_SAVE)
+        StateSource.AccessibilityService -> typed(TYPE_ACCESSIBILITY_SERVICE)
+        StateSource.ScriptRunning -> typed(TYPE_SCRIPT_RUNNING)
         is StateSource.Unsupported -> raw(source.raw, source.type)
     }
 
     private fun decodeStateSource(json: JsonObject): StateSource = when (val type = json.string(KEY_TYPE)) {
         null, TYPE_NONE -> StateSource.None
         TYPE_NIGHT_MODE -> StateSource.NightMode
+        TYPE_TIME_PERIODS -> parseTimes(json.arrayOrNull("starts"))?.let(StateSource.TimePeriods::normalized)
+            ?: StateSource.Unsupported(type, json.toString())
+        TYPE_SUNRISE_SUNSET -> {
+            val latitude = json.double("latitude")
+            val longitude = json.double("longitude")
+            when {
+                latitude == null && longitude == null -> StateSource.SunriseSunset()
+                latitude != null && longitude != null && latitude in -90.0..90.0 && longitude in -180.0..180.0 ->
+                    StateSource.SunriseSunset(GeoLocation(latitude, longitude))
+                else -> StateSource.Unsupported(type, json.toString())
+            }
+        }
+        TYPE_WEEKDAY -> when (json.string("mode")) {
+            null, WEEKDAY_MODE_DAYS -> StateSource.Weekday(workdaysOnly = false)
+            WEEKDAY_MODE_WORKDAYS -> StateSource.Weekday(workdaysOnly = true)
+            else -> StateSource.Unsupported(type, json.toString())
+        }
+        TYPE_SEASON -> StateSource.Seasons(Hemisphere.of(json.string("hemisphere")))
+        TYPE_BATTERY -> json.arrayOrNull("thresholds")?.mapNotNull { element ->
+            element.takeIf { it.isJsonPrimitive && it.asJsonPrimitive.isNumber }?.asDouble?.takeIf { it == Math.floor(it) }?.toInt()
+        }?.let(StateSource.Battery::normalized) ?: StateSource.Unsupported(type, json.toString())
+        TYPE_CHARGING -> StateSource.Charging
+        TYPE_POWER_SAVE -> StateSource.PowerSave
+        TYPE_ACCESSIBILITY_SERVICE -> StateSource.AccessibilityService
+        TYPE_SCRIPT_RUNNING -> StateSource.ScriptRunning
         else -> StateSource.Unsupported(type, json.toString())
+    }
+
+    /** Minutes of the day as `HH:mm` strings. zh-CN: 一天中的分钟数, 写为 `HH:mm` 字符串. */
+    private fun times(minutes: List<Int>) = JsonArray().apply { minutes.forEach { add("%02d:%02d".format(it / 60, it % 60)) } }
+
+    /** Parses `HH:mm` strings, skipping invalid ones; null when the array is missing. zh-CN: 解析 `HH:mm` 字符串并跳过无效项; 数组缺失时返回 null. */
+    private fun parseTimes(array: JsonArray?): List<Int>? = array?.mapNotNull { element ->
+        val text = element.takeIf { it.isJsonPrimitive && it.asJsonPrimitive.isString }?.asString ?: return@mapNotNull null
+        val parts = text.split(':')
+        val hour = parts.getOrNull(0)?.toIntOrNull()
+        val minute = parts.getOrNull(1)?.toIntOrNull()
+        if (parts.size != 2 || hour == null || minute == null || hour !in 0..23 || minute !in 0..59) null else hour * 60 + minute
     }
 
     private fun encodeTrigger(trigger: RotationTrigger): JsonElement = when (trigger) {
@@ -81,6 +149,7 @@ object IntelligentConfigJson {
             addProperty("unit", trigger.unit.key)
             addProperty("anchor", trigger.anchor.key)
         }
+        is RotationTrigger.Daily -> typed(TYPE_DAILY).apply { add("times", times(trigger.times)) }
         is RotationTrigger.Unsupported -> raw(trigger.raw, trigger.type)
     }
 
@@ -97,6 +166,8 @@ object IntelligentConfigJson {
                     anchor = IntervalAnchor.of(json.string("anchor")) ?: IntervalAnchor.NOW,
                 )
             }
+            TYPE_DAILY -> parseTimes(json.arrayOrNull("times"))?.let(RotationTrigger.Daily::normalized)
+                ?: RotationTrigger.Unsupported(type, json.toString())
             else -> RotationTrigger.Unsupported(type, json.toString())
         }
     }
@@ -137,11 +208,22 @@ object IntelligentConfigJson {
             addProperty("to", monthDay(condition.toMonth, condition.toDay))
             condition.year?.let { addProperty("year", it) }
         }
+        is DateCondition.Holiday -> typed(TYPE_HOLIDAY).apply {
+            addProperty("id", condition.id)
+            if (condition.daysBefore > 0) addProperty("before", condition.daysBefore)
+            if (condition.daysAfter > 0) addProperty("after", condition.daysAfter)
+        }
         is DateCondition.Unsupported -> raw(condition.raw, condition.type)
     }
 
     private fun decodeCondition(json: JsonObject): DateCondition {
         val type = json.string(KEY_TYPE) ?: ""
+        if (type == TYPE_HOLIDAY) {
+            // Holidays unknown to this version stay unsupported. zh-CN: 当前版本不认识的节日保持为不受支持.
+            val id = json.string("id")?.takeIf { HolidayCalendar.find(it) != null } ?: return DateCondition.Unsupported(type, json.toString())
+            fun extra(key: String) = (json.int(key) ?: 0).coerceIn(0, DateCondition.Holiday.MAX_EXTRA_DAYS)
+            return DateCondition.Holiday(id, extra("before"), extra("after"))
+        }
         if (type != TYPE_DATE_RANGE) return DateCondition.Unsupported(type, json.toString())
         val from = parseMonthDay(json.string("from"))
         val to = parseMonthDay(json.string("to"))
@@ -182,5 +264,7 @@ object IntelligentConfigJson {
         ?.takeIf { it == Math.floor(it) && !it.isInfinite() }?.toLong()
 
     private fun JsonObject.int(key: String): Int? = long(key)?.takeIf { it in Int.MIN_VALUE..Int.MAX_VALUE }?.toInt()
+
+    private fun JsonObject.double(key: String): Double? = primitive(key)?.takeIf { it.isNumber }?.asDouble?.takeIf { it.isFinite() }
 
 }

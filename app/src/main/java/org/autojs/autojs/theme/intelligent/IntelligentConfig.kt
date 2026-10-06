@@ -26,6 +26,10 @@ data class IntelligentConfig(
     val interval: RotationTrigger.Interval?
         get() = rotation.firstNotNullOfOrNull { it as? RotationTrigger.Interval }
 
+    /** The first daily trigger; the editor allows only one. zh-CN: 第一个每日定时换组时机; 编辑器只允许一个. */
+    val daily: RotationTrigger.Daily?
+        get() = rotation.firstNotNullOfOrNull { it as? RotationTrigger.Daily }
+
     val hasUnsupportedItems: Boolean
         get() = stateSource is StateSource.Unsupported
                 || rotation.any { it is RotationTrigger.Unsupported }
@@ -51,11 +55,43 @@ object StateKeys {
     const val DEFAULT = "default"
     const val DAY = "day"
     const val NIGHT = "night"
+    const val OFF = "off"
+    const val ON = "on"
+    const val WORKDAY = "workday"
+    const val WEEKEND = "weekend"
+
+    fun period(index: Int) = "period:$index"
+
+    /** ISO day of week, 1 (Monday) to 7 (Sunday). zh-CN: ISO 星期, 1 (星期一) 至 7 (星期日). */
+    fun weekday(isoDay: Int) = "weekday:$isoDay"
+
+    fun season(season: Season) = "season:${season.key}"
+
+    fun battery(index: Int) = "battery:$index"
+}
+
+enum class Season(val key: String) {
+    SPRING("spring"), SUMMER("summer"), AUTUMN("autumn"), WINTER("winter")
+}
+
+enum class Hemisphere(val key: String) {
+    NORTH("north"), SOUTH("south");
+
+    companion object {
+        fun of(key: String?) = entries.firstOrNull { it.key == key }
+    }
+}
+
+/** A place on Earth in degrees; north and east are positive. zh-CN: 以度表示的地点; 北纬与东经为正. */
+data class GeoLocation(val latitude: Double, val longitude: Double) {
+    val hemisphere get() = if (latitude < 0) Hemisphere.SOUTH else Hemisphere.NORTH
 }
 
 /**
  * Decides which color of a group is used. Its [stateKeys] are stable identifiers in display order.
+ * Sources sharing a meaning share keys (day / night, off / on), so colors carry over when the source changes.
  * zh-CN: 决定使用组内哪个颜色. [stateKeys] 为按显示顺序排列的稳定标识.
+ * 含义相同的状态源共用 key (日 / 夜, 关 / 开), 因此更换状态源时颜色可以沿用.
  */
 sealed interface StateSource {
 
@@ -67,6 +103,91 @@ sealed interface StateSource {
 
     data object NightMode : StateSource {
         override val stateKeys = listOf(StateKeys.DAY, StateKeys.NIGHT)
+    }
+
+    /**
+     * The day split into periods starting at [starts] (minutes of the day, ascending, 2 to 6 of them); the last
+     * period runs past midnight into the first start (roadmap P3.1).
+     * zh-CN: 按 [starts] (一天中的分钟数, 升序, 2 至 6 个) 划分的时段; 最后一个时段跨过午夜持续到第一个起始时刻 (Roadmap P3.1).
+     */
+    data class TimePeriods(val starts: List<Int>) : StateSource {
+        override val stateKeys get() = starts.indices.map(StateKeys::period)
+
+        companion object {
+            const val MIN_PERIODS = 2
+            const val MAX_PERIODS = 6
+            val DEFAULT = TimePeriods(listOf(6 * 60, 18 * 60))
+
+            /** Sorted, distinct and within a day, or null when fewer than 2 remain. zh-CN: 排序, 去重并限定在一天之内; 不足 2 个时返回 null. */
+            fun normalized(starts: List<Int>): TimePeriods? {
+                val valid = starts.filter { it in 0 until 24 * 60 }.distinct().sorted().take(MAX_PERIODS)
+                return if (valid.size >= MIN_PERIODS) TimePeriods(valid) else null
+            }
+        }
+    }
+
+    /**
+     * Daytime or night by sunrise and sunset at [location]; null infers it from the time zone (D20, roadmap P3.1).
+     * zh-CN: 按 [location] 的日出日落区分白天与夜晚; 为 null 时由时区推断 (D20, Roadmap P3.1).
+     */
+    data class SunriseSunset(val location: GeoLocation? = null) : StateSource {
+        override val stateKeys = listOf(StateKeys.DAY, StateKeys.NIGHT)
+    }
+
+    /**
+     * Each day of the week, or workdays (Monday to Friday) and the weekend (roadmap P3.2).
+     * zh-CN: 一周中的每一天, 或工作日 (星期一至星期五) 与周末 (Roadmap P3.2).
+     */
+    data class Weekday(val workdaysOnly: Boolean = false) : StateSource {
+        override val stateKeys
+            get() = if (workdaysOnly) listOf(StateKeys.WORKDAY, StateKeys.WEEKEND) else (1..7).map(StateKeys::weekday)
+    }
+
+    /**
+     * Meteorological seasons (spring is March to May in the north); null [hemisphere] infers it from the time zone (D20, roadmap P3.2).
+     * zh-CN: 气象季节 (北半球春季为 3 至 5 月); [hemisphere] 为 null 时由时区推断 (D20, Roadmap P3.2).
+     */
+    data class Seasons(val hemisphere: Hemisphere? = null) : StateSource {
+        override val stateKeys = Season.entries.map(StateKeys::season)
+    }
+
+    /**
+     * Battery level ranges split at [thresholds] (percentages, ascending, 1 to 4 of them), with 2 points of
+     * hysteresis when leaving a range (roadmap P3.3).
+     * zh-CN: 以 [thresholds] (百分比, 升序, 1 至 4 个) 划分的电量区间, 离开当前区间时有 2 个百分点的迟滞 (Roadmap P3.3).
+     */
+    data class Battery(val thresholds: List<Int>) : StateSource {
+        override val stateKeys get() = (0..thresholds.size).map(StateKeys::battery)
+
+        companion object {
+            const val MAX_THRESHOLDS = 4
+            val DEFAULT = Battery(listOf(20))
+
+            fun normalized(thresholds: List<Int>): Battery? {
+                val valid = thresholds.filter { it in 1..99 }.distinct().sorted().take(MAX_THRESHOLDS)
+                return if (valid.isNotEmpty()) Battery(valid) else null
+            }
+        }
+    }
+
+    /** Whether the device is charging (roadmap P3.3). zh-CN: 设备是否正在充电 (Roadmap P3.3). */
+    data object Charging : StateSource {
+        override val stateKeys = listOf(StateKeys.OFF, StateKeys.ON)
+    }
+
+    /** Whether battery saver is on (roadmap P3.3). zh-CN: 省电模式是否开启 (Roadmap P3.3). */
+    data object PowerSave : StateSource {
+        override val stateKeys = listOf(StateKeys.OFF, StateKeys.ON)
+    }
+
+    /** Whether the AutoJs6 accessibility service is running (roadmap P3.3). zh-CN: AutoJs6 无障碍服务是否正在运行 (Roadmap P3.3). */
+    data object AccessibilityService : StateSource {
+        override val stateKeys = listOf(StateKeys.OFF, StateKeys.ON)
+    }
+
+    /** Whether any script is running (roadmap P3.3). zh-CN: 是否有脚本正在运行 (Roadmap P3.3). */
+    data object ScriptRunning : StateSource {
+        override val stateKeys = listOf(StateKeys.OFF, StateKeys.ON)
     }
 
     data class Unsupported(val type: String, val raw: String) : StateSource {
@@ -103,6 +224,21 @@ sealed interface RotationTrigger {
              */
             fun normalizedEvery(every: Int, unit: IntervalUnit) = every.coerceIn(unit.minimumEvery, MAX_EVERY)
 
+        }
+    }
+
+    /**
+     * Fires every day at [times] (minutes of the day, ascending, 1 to [MAX_TIMES] of them), local time (roadmap P3.4).
+     * zh-CN: 每天在 [times] (一天中的分钟数, 升序, 1 至 [MAX_TIMES] 个) 的本地时刻触发 (Roadmap P3.4).
+     */
+    data class Daily(val times: List<Int>) : RotationTrigger {
+        companion object {
+            const val MAX_TIMES = 12
+
+            fun normalized(times: List<Int>): Daily? {
+                val valid = times.filter { it in 0 until 24 * 60 }.distinct().sorted().take(MAX_TIMES)
+                return if (valid.isNotEmpty()) Daily(valid) else null
+            }
         }
     }
 
@@ -190,6 +326,16 @@ sealed interface DateCondition {
         val toDay: Int,
         val year: Int? = null,
     ) : DateCondition
+
+    /**
+     * A holiday of `HolidayCalendar` by [id], widened by [daysBefore] and [daysAfter] (roadmap P3.5).
+     * zh-CN: `HolidayCalendar` 中以 [id] 标识的节日, 向前扩展 [daysBefore] 天, 向后扩展 [daysAfter] 天 (Roadmap P3.5).
+     */
+    data class Holiday(val id: String, val daysBefore: Int = 0, val daysAfter: Int = 0) : DateCondition {
+        companion object {
+            const val MAX_EXTRA_DAYS = 30
+        }
+    }
 
     data class Unsupported(val type: String, val raw: String) : DateCondition
 
