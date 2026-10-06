@@ -785,6 +785,8 @@
     <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
     <string name="text_add_colors">Agregar colores</string>
     <string name="text_add_group">Agregar grupo</string>
+    <string name="text_add_override">Añadir excepción</string>
+    <string name="text_add_time">Añadir hora</string>
     <string name="text_and_n_more">... y %d más</string>
     <string name="text_auto_reconnect">Reconexión automática</string>
     <string name="text_background_color_dark">Oscuro</string>
@@ -792,6 +794,8 @@
     <string name="text_background_color_inverse">Automático (invertido)</string>
     <string name="text_background_color_light">Claro</string>
     <string name="text_batch_restore_summary">Restaurados %1$d, omitidos %2$d, fallidos %3$d</string>
+    <string name="text_battery_thresholds">Umbrales de batería</string>
+    <string name="text_battery_thresholds_hint">De 1 a %1$d porcentajes entre 1 y 99, separados por comas, por ejemplo 20, 80</string>
     <string name="text_binary_content_cannot_be_previewed">El contenido binario no se puede previsualizar</string>
     <string name="text_bun_host_capabilities">Puente de capacidades de Bun</string>
     <string name="text_bun_host_info_grant">Instantánea de información del host</string>
@@ -1050,6 +1054,7 @@
     <string name="text_choose_color_library_to_clone">Elegir la biblioteca de colores que se clonará</string>
     <string name="text_choose_colors_to_add">Elegir los colores que se agregarán</string>
     <string name="text_choose_delete_strategy">Elegir metodo de eliminacion</string>
+    <string name="text_choose_holiday">Elegir una festividad</string>
     <string name="text_choose_restore_path">Elegir ruta de restauracion</string>
     <string name="text_choose_window_background_as_theme_color">Usar un color de fondo de ventana de AutoJs6 como color del tema</string>
     <string name="text_city_or_locality">Ciudad o localidad</string>
@@ -1253,6 +1258,7 @@
     <string name="text_current">Actual</string>
     <string name="text_current_file">Archivo actual</string>
     <string name="text_current_group">Grupo actual: %1$s</string>
+    <string name="text_current_override">Excepción por fecha: %1$s</string>
     <string name="text_current_page_configuration">Configuracion de la página actual</string>
     <string name="text_current_state">Estado actual: %1$s</string>
     <string name="text_current_version">Versión actual</string>
@@ -1260,6 +1266,8 @@
     <string name="text_daily_at">Cada día a las %1$s</string>
     <string name="text_daily_task">Tarea diaria</string>
     <string name="text_date">Fecha</string>
+    <string name="text_date_overrides">Excepciones por fecha</string>
+    <string name="text_date_overrides_hint">Mientras una fecha coincide, se muestra su grupo y la rotación se pausa; gana el primer elemento que coincida</string>
     <string name="text_day1">Lunes</string>
     <string name="text_day2">Mar</string>
     <string name="text_day3">Miércoles</string>
@@ -1353,6 +1361,7 @@
     <string name="text_edit_group">Editar grupo</string>
     <string name="text_edit_intelligent_color_library">Editar biblioteca de colores inteligente</string>
     <string name="text_edit_label">Editar etiqueta</string>
+    <string name="text_edit_override">Editar excepción</string>
     <string name="text_edit_prepare_script">Editar script de preejecución</string>
     <string name="text_edit_script">Editar script</string>
     <string name="text_editor_assistance">Asistencia</string>
@@ -1535,6 +1544,9 @@
     <string name="text_groups_enabled_of_total">%1$d/%2$d grupos</string>
     <string name="text_guard_mode">Modo de protección</string>
     <string name="text_help">Ayuda</string>
+    <string name="text_hemisphere">Hemisferio</string>
+    <string name="text_hemisphere_north">Hemisferio norte</string>
+    <string name="text_hemisphere_south">Hemisferio sur</string>
     <string name="text_hidden_files_description">Si los archivos y carpetas ocultos se muestran o no en el explorador de archivos. Se considera que un archivo o carpeta está oculto si su nombre comienza con un carácter de punto (\".\").</string>
     <string name="text_hidden_files_title">Archivos y carpetas ocultos</string>
     <string name="text_hide">Ocultar</string>
@@ -1557,6 +1569,20 @@
     <string name="text_history_max_total_bytes">Tamaño máximo total del historial</string>
     <string name="text_history_max_total_bytes_per_file">Tamaño máximo del historial por archivo</string>
     <string name="text_history_max_versions">Máximo de versiones por archivo</string>
+    <string name="text_holiday_christmas">Navidad</string>
+    <string name="text_holiday_double_ninth_festival">Festival del Doble Nueve</string>
+    <string name="text_holiday_dragon_boat_festival">Festival del Bote del Dragón</string>
+    <string name="text_holiday_easter">Pascua</string>
+    <string name="text_holiday_fathers_day">Día del Padre (junio)</string>
+    <string name="text_holiday_halloween">Halloween</string>
+    <string name="text_holiday_lantern_festival">Festival de los Faroles</string>
+    <string name="text_holiday_mid_autumn_festival">Festival del Medio Otoño</string>
+    <string name="text_holiday_mothers_day">Día de la Madre (mayo)</string>
+    <string name="text_holiday_new_year">Año Nuevo</string>
+    <string name="text_holiday_qixi_festival">Festival Qixi</string>
+    <string name="text_holiday_spring_festival">Fiesta de la Primavera</string>
+    <string name="text_holiday_thanksgiving">Acción de Gracias</string>
+    <string name="text_holiday_valentines_day">San Valentín</string>
     <string name="text_icon">Icono</string>
     <string name="text_ignore_battery_optimizations">Ignorar las optimizaciones de la batería</string>
     <string name="text_ignored_updates">Ignorar actualizaciones</string>
@@ -1696,7 +1722,10 @@
     <string name="text_interval_unit_second">Segundos</string>
     <string name="text_interval_value">Intervalo</string>
     <string name="text_interval_value_range">Intervalo (%1$d a %2$d)</string>
+    <string name="text_invalid_battery_thresholds">Umbrales no válidos</string>
     <string name="text_invalid_character_is_removed">Carácter inválido ha sido removido</string>
+    <string name="text_invalid_coordinates">Coordenadas no válidas</string>
+    <string name="text_invalid_month_day">Introduce las fechas como MM-DD, por ejemplo 12-24</string>
     <string name="text_invalid_package_name">Nombre de paquete no válido</string>
     <string name="text_invalid_project">Proyecto no válido</string>
     <string name="text_invert_selection">Invertir seleccion</string>
@@ -1728,6 +1757,7 @@
     <string name="text_last_updates_checked_time">Última comprobación: %s</string>
     <string name="text_latest_activity">Última actividad</string>
     <string name="text_latest_package">Último paquete</string>
+    <string name="text_latitude_range">Latitud (-90 a 90, norte positivo)</string>
     <string name="text_launch">Iniciar</string>
     <string name="text_launch_config">Iniciar la configuración</string>
     <string name="text_launch_debugger">Iniciar el depurador</string>
@@ -1756,6 +1786,10 @@
     <string name="text_local_network_permission">Permiso de red local</string>
     <string name="text_local_network_permission_settings">El acceso a la red local está desactivado. Permite los dispositivos cercanos en los permisos de la aplicación, vuelve e inténtalo de nuevo.</string>
     <string name="text_locate_current_theme_color">Localizar color del tema actual</string>
+    <string name="text_location">Ubicación</string>
+    <string name="text_location_estimated">estimación</string>
+    <string name="text_location_from_time_zone">Según la zona horaria (%1$s)</string>
+    <string name="text_location_manual">Introducir coordenadas</string>
     <string name="text_log">Registrar</string>
     <string name="text_log_coloring">Coloreado de registros</string>
     <string name="text_logging_in">Iniciar sesión</string>
@@ -1763,6 +1797,7 @@
     <string name="text_login_succeed">Inicio de sesión exitoso</string>
     <string name="text_logout">Cierre de sesión</string>
     <string name="text_long_press_to_select_multiple_attributes">Mantén pulsado un atributo para seleccionar varios y copiarlos como un solo selector</string>
+    <string name="text_longitude_range">Longitud (-180 a 180, este positivo)</string>
     <string name="text_loop_delay">Retraso del bucle (segundos)</string>
     <string name="text_loop_interval">Intervalo de bucle (segundos)</string>
     <string name="text_loop_times">Tiempos de bucle</string>
@@ -1846,6 +1881,7 @@
     <string name="text_no_data">Sin datos</string>
     <string name="text_no_differences">Sin diferencias</string>
     <string name="text_no_exif_information">No hay información EXIF</string>
+    <string name="text_no_groups_for_override">Añade primero un grupo</string>
     <string name="text_no_hidden_plugins">No hay plugins ocultos</string>
     <string name="text_no_history">Sin historial</string>
     <string name="text_no_ignored_updates">No hay actualizaciones ignoradas</string>
@@ -1913,6 +1949,16 @@
     <string name="text_original_file_recovery_path">Ruta de recuperación del archivo original</string>
     <string name="text_others">Otros</string>
     <string name="text_output_apk_path">Ruta de salida del APK</string>
+    <string name="text_override_date_range">Intervalo de fechas</string>
+    <string name="text_override_days_after">Días después</string>
+    <string name="text_override_days_before">Días antes</string>
+    <string name="text_override_extended">%1$s (-%2$d / +%3$d días)</string>
+    <string name="text_override_from">Inicio (MM-DD)</string>
+    <string name="text_override_holiday">Festividad</string>
+    <string name="text_override_range_once">%1$s (solo %2$d)</string>
+    <string name="text_override_target_group">Grupo a mostrar</string>
+    <string name="text_override_to">Fin (MM-DD)</string>
+    <string name="text_override_year_optional">Solo el año de inicio (opcional)</string>
     <string name="text_overwrite">Sobrescribir</string>
     <string name="text_package_name">Nombre del paquete</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nombre del paquete (Calculando...)</string>
@@ -1926,6 +1972,7 @@
     <string name="text_pause">Pausar</string>
     <string name="text_pc_server_address">Dirección del servidor del PC</string>
     <string name="text_percentage_colon_value">Uso: %1$s</string>
+    <string name="text_period_count_range">De %1$d a %2$d franjas</string>
     <string name="text_permission_desc_access_coarse_location">Permitir que la aplicación acceda a la ubicación aproximada a través de la red</string>
     <string name="text_permission_desc_access_fine_location">Permitir que la aplicación acceda a la ubicación precisa a través de GPS</string>
     <string name="text_permission_desc_access_location_extra_commands">Permitir que la aplicación acceda a comandos adicionales del proveedor de ubicación</string>
@@ -2258,6 +2305,7 @@
     <string name="text_root_manager_apps_empty">No se encontraron candidatas. Puede añadir una aplicación instalada.</string>
     <string name="text_root_mode_title">Comprobación de acceso root</string>
     <string name="text_rotation_app_start">Inicio de la app</string>
+    <string name="text_rotation_daily">Horas diarias</string>
     <string name="text_rotation_interval">Intervalo</string>
     <string name="text_rotation_state_change">Cambio de estado</string>
     <string name="text_rotation_triggers">Rotación de grupos</string>
@@ -2486,8 +2534,10 @@
     <string name="text_theme_preview_use">Usar</string>
     <string name="text_theme_previewer">Vista previa de temas</string>
     <string name="text_time">Tiempo</string>
+    <string name="text_time_count_limit">Como máximo %1$d horas</string>
     <string name="text_time_format">Formato de hora</string>
     <string name="text_time_format_pattern_hint">p. ej. HH:mm:ss.SSS</string>
+    <string name="text_time_list_hint">Toca una hora para cambiarla y mantenla pulsada para quitarla</string>
     <string name="text_time_visible">Mostrar hora</string>
     <string name="text_timed_task">Tarea cronometrada</string>
     <string name="text_timed_task_backend_title">Motor de programación de tareas temporizadas</string>

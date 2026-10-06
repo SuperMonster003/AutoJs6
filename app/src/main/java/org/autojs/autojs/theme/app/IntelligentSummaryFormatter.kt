@@ -1,6 +1,7 @@
 package org.autojs.autojs.theme.app
 
 import android.content.Context
+import org.autojs.autojs.theme.intelligent.DateCondition
 import org.autojs.autojs.theme.intelligent.GroupOrder
 import org.autojs.autojs.theme.intelligent.IntelligentConfig
 import org.autojs.autojs.theme.intelligent.IntelligentGroup
@@ -10,8 +11,10 @@ import org.autojs.autojs.theme.intelligent.Season
 import org.autojs.autojs.theme.intelligent.SortKey
 import org.autojs.autojs.theme.intelligent.StateKeys
 import org.autojs.autojs.theme.intelligent.StateSource
+import org.autojs.autojs.theme.intelligent.calendar.TimeZoneLocations
 import org.autojs.autojs6.R
 import java.time.DayOfWeek
+import java.time.ZoneId
 import java.time.format.TextStyle
 
 /**
@@ -146,6 +149,65 @@ object IntelligentSummaryFormatter {
             StateSource.AccessibilityService, StateSource.ScriptRunning -> if (on) R.string.text_state_running else R.string.text_not_running
             else -> if (on) R.string.text_enabled else R.string.text_disabled
         }
+    )
+
+    /**
+     * The state source with its settings, for the editor: "Time periods: 06:00, 18:00", "Battery level: 20%, 80%".
+     * zh-CN: 带设置的状态源, 用于编辑器: "时段: 06:00, 18:00", "电量: 20%, 80%".
+     */
+    fun stateSourceDetail(context: Context, source: StateSource): String {
+        val label = stateSourceLabel(context, source) ?: return context.getString(R.string.text_state_source_none)
+        val detail = when (source) {
+            is StateSource.TimePeriods -> source.starts.joinToString(", ", transform = ::formatMinutes)
+            is StateSource.SunriseSunset -> source.location?.let(IntelligentConditionDialogs::formatLocation)
+                ?: IntelligentConditionDialogs.inferredLocationLabel(context)
+            is StateSource.Seasons -> source.hemisphere?.let { IntelligentConditionDialogs.hemisphereLabel(context, it) }
+                ?: context.getString(R.string.text_location_from_time_zone, IntelligentConditionDialogs.hemisphereLabel(context, inferredHemisphere()))
+            is StateSource.Battery -> source.thresholds.joinToString(", ") { "$it%" }
+            else -> null
+        }
+        return if (detail == null) label else "$label: $detail"
+    }
+
+    private fun inferredHemisphere() = TimeZoneLocations.infer(ZoneId.systemDefault()).location.hemisphere
+
+    fun holidayName(context: Context, id: String): String = HOLIDAY_NAMES[id]?.let(context::getString) ?: id
+
+    /**
+     * A date override condition: "12-24 ~ 12-26", "Christmas (-1 / +1 days)".
+     * zh-CN: 日期覆盖层的条件: "12-24 ~ 12-26", "圣诞节 (前 1 天 / 后 1 天)".
+     */
+    fun overrideLabel(context: Context, condition: DateCondition): String = when (condition) {
+        is DateCondition.DateRange -> {
+            val range = "${IntelligentConditionDialogs.monthDay(condition.fromMonth, condition.fromDay)} ~ " +
+                    IntelligentConditionDialogs.monthDay(condition.toMonth, condition.toDay)
+            condition.year?.let { context.getString(R.string.text_override_range_once, range, it) } ?: range
+        }
+        is DateCondition.Holiday -> {
+            val name = holidayName(context, condition.id)
+            when {
+                condition.daysBefore == 0 && condition.daysAfter == 0 -> name
+                else -> context.getString(R.string.text_override_extended, name, condition.daysBefore, condition.daysAfter)
+            }
+        }
+        is DateCondition.Unsupported -> context.getString(R.string.text_unsupported)
+    }
+
+    private val HOLIDAY_NAMES = mapOf(
+        "newYear" to R.string.text_holiday_new_year,
+        "valentinesDay" to R.string.text_holiday_valentines_day,
+        "halloween" to R.string.text_holiday_halloween,
+        "christmas" to R.string.text_holiday_christmas,
+        "springFestival" to R.string.text_holiday_spring_festival,
+        "lanternFestival" to R.string.text_holiday_lantern_festival,
+        "dragonBoatFestival" to R.string.text_holiday_dragon_boat_festival,
+        "qixiFestival" to R.string.text_holiday_qixi_festival,
+        "midAutumnFestival" to R.string.text_holiday_mid_autumn_festival,
+        "doubleNinthFestival" to R.string.text_holiday_double_ninth_festival,
+        "easter" to R.string.text_holiday_easter,
+        "mothersDay" to R.string.text_holiday_mothers_day,
+        "fathersDay" to R.string.text_holiday_fathers_day,
+        "thanksgiving" to R.string.text_holiday_thanksgiving,
     )
 
     fun seasonLabel(context: Context, season: Season): String = context.getString(

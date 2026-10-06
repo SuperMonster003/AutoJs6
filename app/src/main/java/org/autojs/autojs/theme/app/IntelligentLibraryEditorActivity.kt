@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.intelligent.DateCondition
 import org.autojs.autojs.theme.intelligent.DateOverride
 import org.autojs.autojs.theme.intelligent.GroupOrder
 import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
@@ -78,11 +79,15 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
     private var appStartChecked = false
     private var intervalChecked = false
     private var interval = RotationTrigger.Interval(1, IntervalUnit.HOUR, IntervalAnchor.NEXT_HOUR)
+    private var dailyChecked = false
+    private var daily = RotationTrigger.Daily(listOf(8 * 60, 20 * 60))
     private var order: GroupOrder = GroupOrder.Sequential()
 
-    /** Items this version cannot edit, kept as they are. zh-CN: 当前版本无法编辑的条目, 原样保留. */
+    /** Rotation triggers this version cannot edit, kept as they are. zh-CN: 当前版本无法编辑的换组时机, 原样保留. */
     private var keptRotation: List<RotationTrigger> = emptyList()
-    private var keptOverrides: List<DateOverride> = emptyList()
+
+    /** Date overrides in priority order (roadmap P3.5). zh-CN: 按优先级排列的日期覆盖层 (Roadmap P3.5). */
+    private val overrides = mutableListOf<DateOverride>()
 
     private val groups = mutableListOf<IntelligentGroup>()
     private var nextTemporaryGroupId = -1L
@@ -91,6 +96,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
     private var isBinding = false
 
     private val groupAdapter = EditorGroupAdapter()
+    private val overrideAdapter = EditorOverrideAdapter()
 
     private val stateKeys: List<String>
         get() = stateSource.stateKeys
@@ -118,8 +124,18 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             ItemTouchHelper(GroupDragCallback()).attachToRecyclerView(it)
         }
 
+        binding.overridesRecyclerView.let {
+            it.layoutManager = LinearLayoutManager(this)
+            it.adapter = overrideAdapter
+            it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
+            ItemTouchHelper(OverrideDragCallback()).attachToRecyclerView(it)
+        }
+
         binding.stateSourceRow.setOnClickListener { chooseStateSource() }
         binding.intervalSummary.setOnClickListener { editInterval() }
+        binding.dailySummary.setOnClickListener { editDailyTimes() }
+        binding.rotationDaily.setOnCheckedChangeListener { _, checked -> if (!isBinding) dailyChecked = checked.also { refresh() } }
+        binding.addOverride.setOnClickListener { editOverride(null) }
         binding.orderRow.setOnClickListener { chooseOrder() }
         binding.referenceStateRow.setOnClickListener { chooseReferenceState() }
         binding.addGroup.setOnClickListener { editGroup(null) }
@@ -153,8 +169,12 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
                     intervalChecked = true
                     interval = it
                 }
+                config.daily?.let {
+                    dailyChecked = true
+                    daily = it
+                }
                 keptRotation = config.rotation.filterIsInstance<RotationTrigger.Unsupported>()
-                keptOverrides = config.overrides
+                overrides += config.overrides
                 order = config.order
                 groups += existing.groups
             }
@@ -171,20 +191,23 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             if (stateChangeChecked && stateKeys.size > 1) add(RotationTrigger.StateChange)
             if (appStartChecked) add(RotationTrigger.AppStart)
             if (intervalChecked) add(interval)
+            if (dailyChecked) add(daily)
             addAll(keptRotation)
         },
         order = order,
-        overrides = keptOverrides,
+        overrides = overrides.toList(),
     )
 
     private fun refresh() {
         isBinding = true
-        binding.stateSourceSummary.text = IntelligentSummaryFormatter.stateSourceLabel(this, stateSource) ?: getString(R.string.text_state_source_none)
+        binding.stateSourceSummary.text = IntelligentSummaryFormatter.stateSourceDetail(this, stateSource)
         binding.rotationStateChange.isChecked = stateChangeChecked && stateKeys.size > 1
         binding.rotationStateChange.isEnabled = stateKeys.size > 1
         binding.rotationAppStart.isChecked = appStartChecked
         binding.rotationInterval.isChecked = intervalChecked
         binding.intervalSummary.text = intervalSummary()
+        binding.rotationDaily.isChecked = dailyChecked
+        binding.dailySummary.text = IntelligentSummaryFormatter.dailyLabel(this, daily.times)
         binding.orderSummary.text = IntelligentSummaryFormatter.orderLabel(this, order)
         val sequential = order as? GroupOrder.Sequential
         binding.orderDescending.isVisible = sequential != null
@@ -194,6 +217,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         isBinding = false
 
         groupAdapter.notifyDataSetChanged()
+        overrideAdapter.notifyDataSetChanged()
         binding.groupsEmpty.isVisible = groups.isEmpty()
         binding.hintsView.text = hints().joinToString("\n") { "- $it" }
         binding.hintsView.isVisible = binding.hintsView.text.isNotEmpty()
@@ -217,14 +241,33 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         return HINTS.filter { (issue, _) -> issue in issues }.map { (_, res) -> getString(res) }
     }
 
+    /**
+     * All state sources (roadmap 4.4); configurable ones keep their current settings when already selected.
+     * zh-CN: 全部状态源 (Roadmap 4.4); 可设置的状态源在已选中时沿用当前设置.
+     */
+    private fun sourceOptions(): List<StateSource> = listOf(
+        StateSource.None,
+        StateSource.NightMode,
+        stateSource as? StateSource.TimePeriods ?: StateSource.TimePeriods.DEFAULT,
+        stateSource as? StateSource.SunriseSunset ?: StateSource.SunriseSunset(),
+        StateSource.Weekday(workdaysOnly = false),
+        StateSource.Weekday(workdaysOnly = true),
+        stateSource as? StateSource.Seasons ?: StateSource.Seasons(),
+        stateSource as? StateSource.Battery ?: StateSource.Battery.DEFAULT,
+        StateSource.Charging,
+        StateSource.PowerSave,
+        StateSource.AccessibilityService,
+        StateSource.ScriptRunning,
+    )
+
     private fun chooseStateSource() {
-        val sources = listOf(StateSource.None, StateSource.NightMode)
+        val sources = sourceOptions()
         val labels = sources.map { IntelligentSummaryFormatter.stateSourceLabel(this, it) ?: getString(R.string.text_state_source_none) }
         MaterialDialog.Builder(this)
             .title(R.string.text_state_source)
             .items(labels)
             .itemsCallbackSingleChoice(sources.indexOf(stateSource)) { _, _, which, _ ->
-                sources.getOrNull(which)?.takeIf { it != stateSource }?.let { changeStateSource(it) }
+                sources.getOrNull(which)?.let { configureStateSource(it) }
                 true
             }
             .negativeText(R.string.dialog_button_cancel)
@@ -234,24 +277,73 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             .show()
     }
 
+    /** Opens the settings of configurable sources, then applies the source. zh-CN: 可设置的状态源先打开其设置, 再应用该状态源. */
+    private fun configureStateSource(source: StateSource) {
+        when (source) {
+            is StateSource.TimePeriods -> IntelligentConditionDialogs.editTimes(
+                this, getString(R.string.text_state_source_time_periods), source.starts,
+                StateSource.TimePeriods.MIN_PERIODS, StateSource.TimePeriods.MAX_PERIODS,
+                getString(R.string.text_period_count_range, StateSource.TimePeriods.MIN_PERIODS, StateSource.TimePeriods.MAX_PERIODS),
+            ) { starts -> StateSource.TimePeriods.normalized(starts)?.let(::changeStateSource) }
+            is StateSource.SunriseSunset -> IntelligentConditionDialogs.editLocation(this, source.location) { changeStateSource(StateSource.SunriseSunset(it)) }
+            is StateSource.Seasons -> IntelligentConditionDialogs.editHemisphere(this, source.hemisphere) { changeStateSource(StateSource.Seasons(it)) }
+            is StateSource.Battery -> IntelligentConditionDialogs.editBatteryThresholds(this, source.thresholds) { changeStateSource(StateSource.Battery(it)) }
+            else -> if (source != stateSource) changeStateSource(source)
+        }
+    }
+
     /**
-     * Moves each group's colors to the new states by position; the first new state falls back to the first colored state.
-     * zh-CN: 按位置将各组颜色迁移到新的状态; 第一个新状态回退为第一个有颜色的状态.
+     * Moves each group's colors to the new states: by state key when the sources share keys (day / night, on / off,
+     * or the same source with new settings), otherwise by position. A group never loses all of its colors: the first
+     * colored state moves to the first new state (roadmap P3.6).
+     * zh-CN: 将各组颜色迁移到新的状态: 两个状态源有相同的 key 时 (日 / 夜, 开 / 关, 或同一状态源换了设置) 按 key 迁移,
+     * 否则按位置迁移. 组不会丢失全部颜色: 第一个有颜色的状态会迁移到第一个新状态 (Roadmap P3.6).
      */
     private fun changeStateSource(newSource: StateSource) {
         val oldKeys = stateKeys
         val newKeys = newSource.stateKeys
+        val byKey = oldKeys.any { it in newKeys }
         groups.replaceAll { group ->
             val moved = newKeys.mapIndexedNotNull { index, key ->
-                val colors = oldKeys.getOrNull(index)?.let { group.states[it] }
-                    ?: if (index == 0) oldKeys.firstNotNullOfOrNull { group.states[it]?.takeIf { c -> c.primary != null } } else null
-                colors?.let { key to it }
+                val colors = if (byKey) group.states[key] else oldKeys.getOrNull(index)?.let { group.states[it] }
+                colors?.takeIf { it.primary != null }?.let { key to it }
             }.toMap()
-            group.copy(states = moved)
+            val firstColored = oldKeys.firstNotNullOfOrNull { group.states[it]?.takeIf { colors -> colors.primary != null } }
+                ?: group.states.values.firstOrNull { it.primary != null }
+            group.copy(states = moved.ifEmpty { firstColored?.let { mapOf(newKeys.first() to it) }.orEmpty() })
         }
         stateSource = newSource
-        (order as? GroupOrder.Sequential)?.let { order = it.copy(referenceState = null) }
+        (order as? GroupOrder.Sequential)?.let { order = it.copy(referenceState = it.referenceState?.takeIf { key -> key in newKeys }) }
         refresh()
+    }
+
+    private fun editDailyTimes() {
+        IntelligentConditionDialogs.editTimes(
+            this, getString(R.string.text_rotation_daily), daily.times, 1, RotationTrigger.Daily.MAX_TIMES,
+            getString(R.string.text_time_count_limit, RotationTrigger.Daily.MAX_TIMES),
+        ) { times ->
+            RotationTrigger.Daily.normalized(times)?.let {
+                daily = it
+                dailyChecked = true
+                refresh()
+            }
+        }
+    }
+
+    private fun editOverride(index: Int?) {
+        IntelligentConditionDialogs.editOverride(
+            this, buildConfig(), groups.toList(), index?.let { overrides.getOrNull(it) },
+            onDone = { edited ->
+                if (index == null) overrides += edited else overrides[index] = edited
+                refresh()
+            },
+            onDelete = index?.let { position ->
+                {
+                    overrides.removeAt(position)
+                    refresh()
+                }
+            },
+        )
     }
 
     @SuppressLint("SetTextI18n")
@@ -491,7 +583,9 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
                     neutralText(R.string.text_delete)
                     neutralColorRes(R.color.dialog_button_caution)
                     onNeutral { dialog, _ ->
-                        groups.removeAt(index)
+                        // Overrides showing the deleted group could never apply. zh-CN: 显示已删除组的覆盖层永远无法生效.
+                        val removed = groups.removeAt(index)
+                        overrides.removeAll { it.groupId == removed.id }
                         dialog.dismiss()
                         refresh()
                     }
@@ -591,6 +685,55 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             )
             holder.itemView.alpha = if (group.enabled && group.hasColor) 1f else 0.5f
             holder.itemView.setOnClickListener { holder.bindingAdapterPosition.takeIf { it in groups.indices }?.let { editGroup(it) } }
+        }
+
+    }
+
+    /**
+     * Date overrides in priority order; each row shows the colors and the name of the group it shows.
+     * zh-CN: 按优先级排列的日期覆盖层; 每行显示其所显示组的颜色与名称.
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    private inner class EditorOverrideAdapter : RecyclerView.Adapter<ColorItemViewHolder>() {
+
+        override fun getItemCount() = overrides.size
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorItemViewHolder {
+            return ColorItemViewHolder(MtColorLibraryRecyclerViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        }
+
+        override fun onBindViewHolder(holder: ColorItemViewHolder, position: Int) {
+            val config = buildConfig()
+            val override = overrides[position]
+            val group = groups.firstOrNull { it.id == override.groupId }
+            holder.bind(
+                colors = group?.let { IntelligentSummaryFormatter.stateColors(config, it) }?.ifEmpty { null } ?: listOf(getColor(R.color.window_background)),
+                name = IntelligentSummaryFormatter.overrideLabel(this@IntelligentLibraryEditorActivity, override.condition),
+                identifier = group?.let { IntelligentSummaryFormatter.groupName(config, it) } ?: "-",
+                checked = false,
+            )
+            holder.itemView.alpha = if (group != null && override.condition !is DateCondition.Unsupported) 1f else 0.5f
+            holder.itemView.setOnClickListener { holder.bindingAdapterPosition.takeIf { it in overrides.indices }?.let { editOverride(it) } }
+        }
+
+    }
+
+    private inner class OverrideDragCallback : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+
+        override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            val from = viewHolder.bindingAdapterPosition
+            val to = target.bindingAdapterPosition
+            if (from !in overrides.indices || to !in overrides.indices) return false
+            overrides.add(to, overrides.removeAt(from))
+            overrideAdapter.notifyItemMoved(from, to)
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            refresh()
         }
 
     }

@@ -786,6 +786,8 @@
     <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
     <string name="text_add_colors">色を追加</string>
     <string name="text_add_group">グループを追加</string>
+    <string name="text_add_override">上書きを追加</string>
+    <string name="text_add_time">時刻を追加</string>
     <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_auto_reconnect">自動再接続</string>
     <string name="text_background_color_dark">ダーク</string>
@@ -793,6 +795,8 @@
     <string name="text_background_color_inverse">自動 (反転)</string>
     <string name="text_background_color_light">ライト</string>
     <string name="text_batch_restore_summary">復元 %1$d 件, スキップ %2$d 件, 失敗 %3$d 件</string>
+    <string name="text_battery_thresholds">バッテリーのしきい値</string>
+    <string name="text_battery_thresholds_hint">1 ~ 99 の百分率を 1 ~ %1$d 個, カンマ区切りで入力 (例: 20, 80)</string>
     <string name="text_binary_content_cannot_be_previewed">バイナリの内容はプレビューできません</string>
     <string name="text_bun_host_capabilities">Bun 機能ブリッジ</string>
     <string name="text_bun_host_info_grant">ホスト情報スナップショット</string>
@@ -1051,6 +1055,7 @@
     <string name="text_choose_color_library_to_clone">複製するカラーライブラリを選択</string>
     <string name="text_choose_colors_to_add">追加する色を選択</string>
     <string name="text_choose_delete_strategy">削除方法を選択</string>
+    <string name="text_choose_holiday">祝祭日を選択</string>
     <string name="text_choose_restore_path">復元先を選択</string>
     <string name="text_choose_window_background_as_theme_color">AutoJs6 のウィンドウ背景色をテーマカラーとして使用</string>
     <string name="text_city_or_locality">市区町村</string>
@@ -1254,6 +1259,7 @@
     <string name="text_current">現在</string>
     <string name="text_current_file">現在のファイル</string>
     <string name="text_current_group">現在のグループ: %1$s</string>
+    <string name="text_current_override">日付による上書き: %1$s</string>
     <string name="text_current_page_configuration">現在のページ設定</string>
     <string name="text_current_state">現在の状態: %1$s</string>
     <string name="text_current_version">現在のバージョン</string>
@@ -1261,6 +1267,8 @@
     <string name="text_daily_at">毎日 %1$s</string>
     <string name="text_daily_task">デイリータスク</string>
     <string name="text_date">日付</string>
+    <string name="text_date_overrides">日付による上書き</string>
+    <string name="text_date_overrides_hint">日付が一致する間は指定したグループを表示し, 切り替えを一時停止します. 上から最初に一致したものが有効です</string>
     <string name="text_day1">月</string>
     <string name="text_day2">火</string>
     <string name="text_day3">水</string>
@@ -1354,6 +1362,7 @@
     <string name="text_edit_group">グループを編集</string>
     <string name="text_edit_intelligent_color_library">インテリジェントカラーライブラリを編集</string>
     <string name="text_edit_label">ラベルを編集</string>
+    <string name="text_edit_override">上書きを編集</string>
     <string name="text_edit_prepare_script">実行前スクリプトの編集</string>
     <string name="text_edit_script">スクリプトの編集</string>
     <string name="text_editor_assistance">支援機能</string>
@@ -1536,6 +1545,9 @@
     <string name="text_groups_enabled_of_total">%1$d/%2$d グループ</string>
     <string name="text_guard_mode">ガードモード</string>
     <string name="text_help">ヘルプ</string>
+    <string name="text_hemisphere">半球</string>
+    <string name="text_hemisphere_north">北半球</string>
+    <string name="text_hemisphere_south">南半球</string>
     <string name="text_hidden_files_description">ファイルエクスプローラーに隠しファイルや隠しフォルダーを表示するかどうかを設定します. ファイルやフォルダーの名前がピリオド (\".\") で始まっている場合, 隠しファイルとして扱われます</string>
     <string name="text_hidden_files_title">隠しファイルと隠しフォルダー</string>
     <string name="text_hide">隠す</string>
@@ -1558,6 +1570,20 @@
     <string name="text_history_max_total_bytes">履歴の合計サイズ上限</string>
     <string name="text_history_max_total_bytes_per_file">ファイルごとの履歴サイズ上限</string>
     <string name="text_history_max_versions">ファイルごとの最大バージョン数</string>
+    <string name="text_holiday_christmas">クリスマス</string>
+    <string name="text_holiday_double_ninth_festival">重陽節</string>
+    <string name="text_holiday_dragon_boat_festival">端午節</string>
+    <string name="text_holiday_easter">イースター</string>
+    <string name="text_holiday_fathers_day">父の日</string>
+    <string name="text_holiday_halloween">ハロウィン</string>
+    <string name="text_holiday_lantern_festival">元宵節</string>
+    <string name="text_holiday_mid_autumn_festival">中秋節</string>
+    <string name="text_holiday_mothers_day">母の日</string>
+    <string name="text_holiday_new_year">元日</string>
+    <string name="text_holiday_qixi_festival">七夕 (旧暦)</string>
+    <string name="text_holiday_spring_festival">春節</string>
+    <string name="text_holiday_thanksgiving">感謝祭</string>
+    <string name="text_holiday_valentines_day">バレンタインデー</string>
     <string name="text_icon">アイコン</string>
     <string name="text_ignore_battery_optimizations">バッテリーの最適化を無視する</string>
     <string name="text_ignored_updates">アップデートを無視する</string>
@@ -1697,7 +1723,10 @@
     <string name="text_interval_unit_second">秒</string>
     <string name="text_interval_value">間隔</string>
     <string name="text_interval_value_range">間隔 (%1$d ~ %2$d)</string>
+    <string name="text_invalid_battery_thresholds">しきい値が無効です</string>
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
+    <string name="text_invalid_coordinates">座標が無効です</string>
+    <string name="text_invalid_month_day">日付は 月-日 の形式で入力してください (例: 12-24)</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>
     <string name="text_invert_selection">反転</string>
@@ -1729,6 +1758,7 @@
     <string name="text_last_updates_checked_time">最終チェック: %s</string>
     <string name="text_latest_activity">最新の活動</string>
     <string name="text_latest_package">最新のパッケージ</string>
+    <string name="text_latitude_range">緯度 (-90 ~ 90, 北緯が正)</string>
     <string name="text_launch">起動</string>
     <string name="text_launch_config">コンフィグを起動する</string>
     <string name="text_launch_debugger">デバッガを起動する</string>
@@ -1757,6 +1787,10 @@
     <string name="text_local_network_permission">ローカルネットワーク権限</string>
     <string name="text_local_network_permission_settings">ローカルネットワークへのアクセスが許可されていません. システム設定のアプリ権限で付近のデバイスを許可し, 戻って再試行してください.</string>
     <string name="text_locate_current_theme_color">現在のテーマカラーを特定</string>
+    <string name="text_location">位置</string>
+    <string name="text_location_estimated">推定</string>
+    <string name="text_location_from_time_zone">タイムゾーンから推定 (%1$s)</string>
+    <string name="text_location_manual">座標を入力</string>
     <string name="text_log">ログ</string>
     <string name="text_log_coloring">ログの色分け</string>
     <string name="text_logging_in">ログイン</string>
@@ -1764,6 +1798,7 @@
     <string name="text_login_succeed">ログインに成功しました</string>
     <string name="text_logout">ログアウト</string>
     <string name="text_long_press_to_select_multiple_attributes">属性を長押しすると複数選択して 1 つのセレクタとしてコピーできます</string>
+    <string name="text_longitude_range">経度 (-180 ~ 180, 東経が正)</string>
     <string name="text_loop_delay">ループ遅延時間 (秒)</string>
     <string name="text_loop_interval">ループ間隔 (秒)</string>
     <string name="text_loop_times">ループ回数</string>
@@ -1847,6 +1882,7 @@
     <string name="text_no_data">データなし</string>
     <string name="text_no_differences">差異はありません</string>
     <string name="text_no_exif_information">EXIF 情報がありません</string>
+    <string name="text_no_groups_for_override">先にグループを追加してください</string>
     <string name="text_no_hidden_plugins">非表示のプラグインはありません</string>
     <string name="text_no_history">履歴なし</string>
     <string name="text_no_ignored_updates">無視された更新がない</string>
@@ -1914,6 +1950,16 @@
     <string name="text_original_file_recovery_path">元のファイルの復元パス</string>
     <string name="text_others">その他</string>
     <string name="text_output_apk_path">APK 出力パス</string>
+    <string name="text_override_date_range">期間</string>
+    <string name="text_override_days_after">後の日数</string>
+    <string name="text_override_days_before">前の日数</string>
+    <string name="text_override_extended">%1$s (前 %2$d 日 / 後 %3$d 日)</string>
+    <string name="text_override_from">開始 (月-日)</string>
+    <string name="text_override_holiday">祝祭日</string>
+    <string name="text_override_range_once">%1$s (%2$d 年のみ)</string>
+    <string name="text_override_target_group">表示するグループ</string>
+    <string name="text_override_to">終了 (月-日)</string>
+    <string name="text_override_year_optional">この年に始まる回のみ (任意)</string>
     <string name="text_overwrite">上書き</string>
     <string name="text_package_name">パッケージ名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">パッケージ名 (計算中...)</string>
@@ -1927,6 +1973,7 @@
     <string name="text_pause">一時停止</string>
     <string name="text_pc_server_address">PC サーバーのアドレス</string>
     <string name="text_percentage_colon_value">使用率: %1$s</string>
+    <string name="text_period_count_range">時間帯は %1$d ~ %2$d 個</string>
     <string name="text_permission_desc_access_coarse_location">アプリがネットワーク経由で大まかな位置情報にアクセスすることを許可します</string>
     <string name="text_permission_desc_access_fine_location">アプリが GPS 経由で正確な位置情報を取得することを許可します</string>
     <string name="text_permission_desc_access_location_extra_commands">アプリが位置情報プロバイダからの追加コマンドにアクセスすることを許可します</string>
@@ -2259,6 +2306,7 @@
     <string name="text_root_manager_apps_empty">候補が見つかりません. インストール済みアプリを追加できます.</string>
     <string name="text_root_mode_title">Root 権限の確認</string>
     <string name="text_rotation_app_start">アプリ起動</string>
+    <string name="text_rotation_daily">毎日の時刻</string>
     <string name="text_rotation_interval">時間間隔</string>
     <string name="text_rotation_state_change">状態の変化</string>
     <string name="text_rotation_triggers">グループの切り替えタイミング</string>
@@ -2487,8 +2535,10 @@
     <string name="text_theme_preview_use">使用</string>
     <string name="text_theme_previewer">テーマプレビュー</string>
     <string name="text_time">時間</string>
+    <string name="text_time_count_limit">時刻は最大 %1$d 個です</string>
     <string name="text_time_format">時刻の形式</string>
     <string name="text_time_format_pattern_hint">例: HH:mm:ss.SSS</string>
+    <string name="text_time_list_hint">時刻をタップすると変更, 長押しすると削除できます</string>
     <string name="text_time_visible">時刻を表示</string>
     <string name="text_timed_task">時間指定タスク</string>
     <string name="text_timed_task_backend_title">定時タスクのスケジューリングエンジン</string>

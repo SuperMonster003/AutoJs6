@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.theme.ThemeChangeNotifier
+import org.autojs.autojs.theme.intelligent.DateOverrides
 import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
 import org.autojs.autojs.theme.intelligent.IntelligentGroup
 import org.autojs.autojs.theme.intelligent.IntelligentPresets
@@ -27,6 +28,7 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MtActivityIntelligentLibraryBinding
+import java.time.LocalDate
 
 /**
  * One intelligent library: its groups and, when active, its running state (roadmap P1.2).
@@ -119,10 +121,16 @@ class IntelligentLibraryActivity : ColorSelectBaseActivity() {
                 val state = runtime.lastStateKey ?: current.config.stateKeys.first()
                 lines += getString(R.string.text_current_state, IntelligentSummaryFormatter.stateLabel(this, current.config.stateSource, state))
             }
+            if (runtime.overrideGroupId != null) {
+                DateOverrides.firstMatch(current.config.overrides, LocalDate.now())?.let { override ->
+                    lines += getString(R.string.text_current_override, IntelligentSummaryFormatter.overrideLabel(this, override.condition))
+                }
+            }
             current.group(IntelligentColorEngine.shownGroupId)?.let { group ->
                 lines += getString(R.string.text_current_group, IntelligentSummaryFormatter.groupName(current.config, group))
             }
-            runtime.nextDueAt?.let { dueAt ->
+            // Rotation pauses while a date override is shown (D4). zh-CN: 日期覆盖层生效期间暂停换组 (D4).
+            runtime.earliestDueAt?.takeIf { runtime.overrideGroupId == null }?.let { dueAt ->
                 val flags = DateUtils.FORMAT_SHOW_TIME or (if (DateUtils.isToday(dueAt)) 0 else DateUtils.FORMAT_SHOW_DATE)
                 lines += getString(R.string.text_next_rotation_at, DateUtils.formatDateTime(this, dueAt, flags))
             }

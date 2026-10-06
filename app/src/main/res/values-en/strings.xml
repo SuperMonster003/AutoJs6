@@ -782,6 +782,8 @@
     <string name="summary_setup_wizards">Grant common permissions and install official plugins</string>
     <string name="text_add_colors">Add colors</string>
     <string name="text_add_group">Add group</string>
+    <string name="text_add_override">Add override</string>
+    <string name="text_add_time">Add time</string>
     <string name="text_and_n_more">... and %d more</string>
     <string name="text_auto_reconnect">Auto reconnect</string>
     <string name="text_background_color_dark">Dark</string>
@@ -789,6 +791,8 @@
     <string name="text_background_color_inverse">Auto inverted</string>
     <string name="text_background_color_light">Light</string>
     <string name="text_batch_restore_summary">Restored %1$d, skipped %2$d, failed %3$d</string>
+    <string name="text_battery_thresholds">Battery thresholds</string>
+    <string name="text_battery_thresholds_hint">1 to %1$d percentages from 1 to 99, separated by commas, such as 20, 80</string>
     <string name="text_binary_content_cannot_be_previewed">Binary content cannot be previewed</string>
     <string name="text_bun_host_capabilities">Bun capability bridge</string>
     <string name="text_bun_host_info_grant">Host info snapshot</string>
@@ -1047,6 +1051,7 @@
     <string name="text_choose_color_library_to_clone">Choose a color library to clone</string>
     <string name="text_choose_colors_to_add">Choose colors to add</string>
     <string name="text_choose_delete_strategy">Choose delete strategy</string>
+    <string name="text_choose_holiday">Choose a holiday</string>
     <string name="text_choose_restore_path">Choose restore path</string>
     <string name="text_choose_window_background_as_theme_color">Use an AutoJs6 window background color as the theme color</string>
     <string name="text_city_or_locality">City or Locality</string>
@@ -1250,6 +1255,7 @@
     <string name="text_current">Current</string>
     <string name="text_current_file">Current file</string>
     <string name="text_current_group">Current group: %1$s</string>
+    <string name="text_current_override">Date override: %1$s</string>
     <string name="text_current_page_configuration">Current page configuration</string>
     <string name="text_current_state">Current state: %1$s</string>
     <string name="text_current_version">Current version</string>
@@ -1257,6 +1263,8 @@
     <string name="text_daily_at">Daily at %1$s</string>
     <string name="text_daily_task">Daily task</string>
     <string name="text_date">Date</string>
+    <string name="text_date_overrides">Date overrides</string>
+    <string name="text_date_overrides_hint">While a date matches, its group is shown and rotation pauses; the first matching item wins</string>
     <string name="text_day1">Mon</string>
     <string name="text_day2">Tue</string>
     <string name="text_day3">Wed</string>
@@ -1350,6 +1358,7 @@
     <string name="text_edit_group">Edit group</string>
     <string name="text_edit_intelligent_color_library">Edit intelligent color library</string>
     <string name="text_edit_label">Edit label</string>
+    <string name="text_edit_override">Edit override</string>
     <string name="text_edit_prepare_script">Edit pre-execute script</string>
     <string name="text_edit_script">Edit script</string>
     <string name="text_editor_assistance">Assistance</string>
@@ -1532,6 +1541,9 @@
     <string name="text_groups_enabled_of_total">%1$d/%2$d groups</string>
     <string name="text_guard_mode">Guard mode</string>
     <string name="text_help">Help</string>
+    <string name="text_hemisphere">Hemisphere</string>
+    <string name="text_hemisphere_north">Northern hemisphere</string>
+    <string name="text_hemisphere_south">Southern hemisphere</string>
     <string name="text_hidden_files_description">Whether the hidden files and folders show or not in file explorer. A file or folder is considered to be hidden if its name begins with a period character (\".\").</string>
     <string name="text_hidden_files_title">Hidden files and folders</string>
     <string name="text_hide">Hide</string>
@@ -1554,6 +1566,20 @@
     <string name="text_history_max_total_bytes">Max total history size</string>
     <string name="text_history_max_total_bytes_per_file">Max history size per file</string>
     <string name="text_history_max_versions">Max versions per file</string>
+    <string name="text_holiday_christmas">Christmas</string>
+    <string name="text_holiday_double_ninth_festival">Double Ninth Festival</string>
+    <string name="text_holiday_dragon_boat_festival">Dragon Boat Festival</string>
+    <string name="text_holiday_easter">Easter</string>
+    <string name="text_holiday_fathers_day">Father\'s Day</string>
+    <string name="text_holiday_halloween">Halloween</string>
+    <string name="text_holiday_lantern_festival">Lantern Festival</string>
+    <string name="text_holiday_mid_autumn_festival">Mid-Autumn Festival</string>
+    <string name="text_holiday_mothers_day">Mother\'s Day</string>
+    <string name="text_holiday_new_year">New Year\'s Day</string>
+    <string name="text_holiday_qixi_festival">Qixi Festival</string>
+    <string name="text_holiday_spring_festival">Spring Festival</string>
+    <string name="text_holiday_thanksgiving">Thanksgiving</string>
+    <string name="text_holiday_valentines_day">Valentine\'s Day</string>
     <string name="text_icon">Icon</string>
     <string name="text_ignore_battery_optimizations">Ignore battery optimizations</string>
     <string name="text_ignored_updates">Ignored updates</string>
@@ -1693,7 +1719,10 @@
     <string name="text_interval_unit_second">Seconds</string>
     <string name="text_interval_value">Interval</string>
     <string name="text_interval_value_range">Interval (%1$d to %2$d)</string>
+    <string name="text_invalid_battery_thresholds">Invalid thresholds</string>
     <string name="text_invalid_character_is_removed">Invalid character is removed</string>
+    <string name="text_invalid_coordinates">Invalid coordinates</string>
+    <string name="text_invalid_month_day">Enter dates as MM-DD, such as 12-24</string>
     <string name="text_invalid_package_name">Invalid package name</string>
     <string name="text_invalid_project">Invalid project</string>
     <string name="text_invert_selection">Invert selection</string>
@@ -1725,6 +1754,7 @@
     <string name="text_last_updates_checked_time">Last checked: %s</string>
     <string name="text_latest_activity">Latest activity</string>
     <string name="text_latest_package">Latest package</string>
+    <string name="text_latitude_range">Latitude (-90 to 90, north positive)</string>
     <string name="text_launch">Launch</string>
     <string name="text_launch_config">Launch config</string>
     <string name="text_launch_debugger">Launch debugger</string>
@@ -1753,6 +1783,10 @@
     <string name="text_local_network_permission">Local network permission</string>
     <string name="text_local_network_permission_settings">Local network access is disabled. You can allow Nearby devices in the app permissions in system settings, then return and retry.</string>
     <string name="text_locate_current_theme_color">Locate current theme color</string>
+    <string name="text_location">Location</string>
+    <string name="text_location_estimated">estimated</string>
+    <string name="text_location_from_time_zone">From the time zone (%1$s)</string>
+    <string name="text_location_manual">Enter coordinates</string>
     <string name="text_log">Log</string>
     <string name="text_log_coloring">Log coloring</string>
     <string name="text_logging_in">Logging in</string>
@@ -1760,6 +1794,7 @@
     <string name="text_login_succeed">Login succeeded</string>
     <string name="text_logout">Logout</string>
     <string name="text_long_press_to_select_multiple_attributes">Long press an attribute to select several and copy them as one selector</string>
+    <string name="text_longitude_range">Longitude (-180 to 180, east positive)</string>
     <string name="text_loop_delay">Loop delay (sec)</string>
     <string name="text_loop_interval">Loop interval (sec)</string>
     <string name="text_loop_times">Loop times</string>
@@ -1843,6 +1878,7 @@
     <string name="text_no_data">No data</string>
     <string name="text_no_differences">No differences</string>
     <string name="text_no_exif_information">No EXIF information</string>
+    <string name="text_no_groups_for_override">Add a group first</string>
     <string name="text_no_hidden_plugins">No hidden plugins</string>
     <string name="text_no_history">No history</string>
     <string name="text_no_ignored_updates">No ignored updates</string>
@@ -1910,6 +1946,16 @@
     <string name="text_original_file_recovery_path">Original file recovery path</string>
     <string name="text_others">Others</string>
     <string name="text_output_apk_path">APK output path</string>
+    <string name="text_override_date_range">Date range</string>
+    <string name="text_override_days_after">Days after</string>
+    <string name="text_override_days_before">Days before</string>
+    <string name="text_override_extended">%1$s (-%2$d / +%3$d days)</string>
+    <string name="text_override_from">From (MM-DD)</string>
+    <string name="text_override_holiday">Holiday</string>
+    <string name="text_override_range_once">%1$s (%2$d only)</string>
+    <string name="text_override_target_group">Group to show</string>
+    <string name="text_override_to">To (MM-DD)</string>
+    <string name="text_override_year_optional">Only in the year starting (optional)</string>
     <string name="text_overwrite">Overwrite</string>
     <string name="text_package_name">Package name</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
@@ -1923,6 +1969,7 @@
     <string name="text_pause">Pause</string>
     <string name="text_pc_server_address">PC server address</string>
     <string name="text_percentage_colon_value">Usage: %1$s</string>
+    <string name="text_period_count_range">%1$d to %2$d periods</string>
     <string name="text_permission_desc_access_coarse_location">Allow the app to access approximate location via network</string>
     <string name="text_permission_desc_access_fine_location">Allow the app to access precise location via GPS</string>
     <string name="text_permission_desc_access_location_extra_commands">Allow the app to access extra commands for location providers</string>
@@ -2255,6 +2302,7 @@
     <string name="text_root_manager_apps_empty">No candidates found. You can add an installed app.</string>
     <string name="text_root_mode_title">Root access check</string>
     <string name="text_rotation_app_start">App start</string>
+    <string name="text_rotation_daily">Daily times</string>
     <string name="text_rotation_interval">Interval</string>
     <string name="text_rotation_state_change">State change</string>
     <string name="text_rotation_triggers">Group rotation</string>
@@ -2483,8 +2531,10 @@
     <string name="text_theme_preview_use">Use</string>
     <string name="text_theme_previewer">Theme previewer</string>
     <string name="text_time">Time</string>
+    <string name="text_time_count_limit">At most %1$d times</string>
     <string name="text_time_format">Time format</string>
     <string name="text_time_format_pattern_hint">e.g. HH:mm:ss.SSS</string>
+    <string name="text_time_list_hint">Tap a time to change it, long press to remove it</string>
     <string name="text_time_visible">Show time</string>
     <string name="text_timed_task">Timed task</string>
     <string name="text_timed_task_backend_title">Timed task scheduling engine</string>

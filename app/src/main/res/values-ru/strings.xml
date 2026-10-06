@@ -785,6 +785,8 @@
     <string name="summary_setup_wizards">Предоставление основных разрешений и установка официальных плагинов</string>
     <string name="text_add_colors">Добавить цвета</string>
     <string name="text_add_group">Добавить группу</string>
+    <string name="text_add_override">Добавить замену</string>
+    <string name="text_add_time">Добавить время</string>
     <string name="text_and_n_more">... и еще %d</string>
     <string name="text_auto_reconnect">Автоматическое переподключение</string>
     <string name="text_background_color_dark">Тёмный</string>
@@ -792,6 +794,8 @@
     <string name="text_background_color_inverse">Автоматически (инверсия)</string>
     <string name="text_background_color_light">Светлый</string>
     <string name="text_batch_restore_summary">Восстановлено: %1$d, пропущено: %2$d, ошибок: %3$d</string>
+    <string name="text_battery_thresholds">Пороги заряда</string>
+    <string name="text_battery_thresholds_hint">От 1 до %1$d процентов от 1 до 99 через запятую, например 20, 80</string>
     <string name="text_binary_content_cannot_be_previewed">Двоичное содержимое нельзя просмотреть</string>
     <string name="text_bun_host_capabilities">Мост возможностей Bun</string>
     <string name="text_bun_host_info_grant">Снимок сведений о хосте</string>
@@ -1050,6 +1054,7 @@
     <string name="text_choose_color_library_to_clone">Выберите цветовую библиотеку для клонирования</string>
     <string name="text_choose_colors_to_add">Выберите цвета для добавления</string>
     <string name="text_choose_delete_strategy">Выберите способ удаления</string>
+    <string name="text_choose_holiday">Выберите праздник</string>
     <string name="text_choose_restore_path">Выберите путь восстановления</string>
     <string name="text_choose_window_background_as_theme_color">Использовать цвет фона окна AutoJs6 как цвет темы</string>
     <string name="text_city_or_locality">Город или населенный пункт</string>
@@ -1253,6 +1258,7 @@
     <string name="text_current">Текущая</string>
     <string name="text_current_file">Текущий файл</string>
     <string name="text_current_group">Текущая группа: %1$s</string>
+    <string name="text_current_override">Замена по дате: %1$s</string>
     <string name="text_current_page_configuration">Конфигурация страницы</string>
     <string name="text_current_state">Текущее состояние: %1$s</string>
     <string name="text_current_version">Текущая версия</string>
@@ -1260,6 +1266,8 @@
     <string name="text_daily_at">Ежедневно в %1$s</string>
     <string name="text_daily_task">Ежедневная задача</string>
     <string name="text_date">Дата</string>
+    <string name="text_date_overrides">Замены по датам</string>
+    <string name="text_date_overrides_hint">Пока дата совпадает, показывается её группа и смена групп приостанавливается; действует первый совпавший пункт</string>
     <string name="text_day1">Пн</string>
     <string name="text_day2">Вт</string>
     <string name="text_day3">Ср</string>
@@ -1353,6 +1361,7 @@
     <string name="text_edit_group">Изменить группу</string>
     <string name="text_edit_intelligent_color_library">Изменить интеллектуальную цветовую библиотеку</string>
     <string name="text_edit_label">Изменить метку</string>
+    <string name="text_edit_override">Изменить замену</string>
     <string name="text_edit_prepare_script">Редактирование сценария перед выполнением</string>
     <string name="text_edit_script">Редактирование скрипта</string>
     <string name="text_editor_assistance">Помощь</string>
@@ -1535,6 +1544,9 @@
     <string name="text_groups_enabled_of_total">Групп: %1$d/%2$d</string>
     <string name="text_guard_mode">Режим охраны</string>
     <string name="text_help">Справка</string>
+    <string name="text_hemisphere">Полушарие</string>
+    <string name="text_hemisphere_north">Северное полушарие</string>
+    <string name="text_hemisphere_south">Южное полушарие</string>
     <string name="text_hidden_files_description">Отображать или нет скрытые файлы и папки в проводнике файлов. Файл или папка считаются скрытыми, если их имя начинается с символа точки (\".\").</string>
     <string name="text_hidden_files_title">Скрытые файлы и папки</string>
     <string name="text_hide">Скрыть</string>
@@ -1557,6 +1569,20 @@
     <string name="text_history_max_total_bytes">Максимальный общий размер истории</string>
     <string name="text_history_max_total_bytes_per_file">Максимальный размер истории на файл</string>
     <string name="text_history_max_versions">Максимум версий на файл</string>
+    <string name="text_holiday_christmas">Рождество</string>
+    <string name="text_holiday_double_ninth_festival">Праздник двойной девятки</string>
+    <string name="text_holiday_dragon_boat_festival">Праздник драконьих лодок</string>
+    <string name="text_holiday_easter">Пасха (западная)</string>
+    <string name="text_holiday_fathers_day">День отца (июнь)</string>
+    <string name="text_holiday_halloween">Хэллоуин</string>
+    <string name="text_holiday_lantern_festival">Праздник фонарей</string>
+    <string name="text_holiday_mid_autumn_festival">Праздник середины осени</string>
+    <string name="text_holiday_mothers_day">День матери (май)</string>
+    <string name="text_holiday_new_year">Новый год</string>
+    <string name="text_holiday_qixi_festival">Праздник Цисицзе</string>
+    <string name="text_holiday_spring_festival">Праздник весны</string>
+    <string name="text_holiday_thanksgiving">День благодарения</string>
+    <string name="text_holiday_valentines_day">День святого Валентина</string>
     <string name="text_icon">Значок</string>
     <string name="text_ignore_battery_optimizations">Игнорировать оптимизацию батареи</string>
     <string name="text_ignored_updates">Игнорировать обновления</string>
@@ -1696,7 +1722,10 @@
     <string name="text_interval_unit_second">Секунды</string>
     <string name="text_interval_value">Интервал</string>
     <string name="text_interval_value_range">Интервал (от %1$d до %2$d)</string>
+    <string name="text_invalid_battery_thresholds">Недопустимые пороги</string>
     <string name="text_invalid_character_is_removed">Недопустимый символ удален</string>
+    <string name="text_invalid_coordinates">Недопустимые координаты</string>
+    <string name="text_invalid_month_day">Вводите даты в формате ММ-ДД, например 12-24</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>
     <string name="text_invert_selection">Инвертировать</string>
@@ -1728,6 +1757,7 @@
     <string name="text_last_updates_checked_time">Последняя проверка: %s</string>
     <string name="text_latest_activity">Последняя активность</string>
     <string name="text_latest_package">Последний пакет</string>
+    <string name="text_latitude_range">Широта (от -90 до 90, север положительный)</string>
     <string name="text_launch">Запустить</string>
     <string name="text_launch_config">Запуск конфигурации</string>
     <string name="text_launch_debugger">Запуск отладчика</string>
@@ -1756,6 +1786,10 @@
     <string name="text_local_network_permission">Разрешение доступа к локальной сети</string>
     <string name="text_local_network_permission_settings">Доступ к локальной сети запрещен. Разрешите доступ к устройствам поблизости в разрешениях приложения, затем вернитесь и повторите попытку.</string>
     <string name="text_locate_current_theme_color">Найти текущий цвет темы</string>
+    <string name="text_location">Местоположение</string>
+    <string name="text_location_estimated">приблизительно</string>
+    <string name="text_location_from_time_zone">По часовому поясу (%1$s)</string>
+    <string name="text_location_manual">Ввести координаты</string>
     <string name="text_log">Журнал</string>
     <string name="text_log_coloring">Раскраска логов</string>
     <string name="text_logging_in">Вход в систему</string>
@@ -1763,6 +1797,7 @@
     <string name="text_login_succeed">Вход выполнен успешно</string>
     <string name="text_logout">Выход из системы</string>
     <string name="text_long_press_to_select_multiple_attributes">Долгое нажатие на атрибут позволяет выбрать несколько и скопировать их как один селектор</string>
+    <string name="text_longitude_range">Долгота (от -180 до 180, восток положительный)</string>
     <string name="text_loop_delay">Задержка цикла (сек)</string>
     <string name="text_loop_interval">Интервал между циклами (сек)</string>
     <string name="text_loop_times">Время выполнения цикла</string>
@@ -1846,6 +1881,7 @@
     <string name="text_no_data">Нет данных</string>
     <string name="text_no_differences">Различий нет</string>
     <string name="text_no_exif_information">Нет информации EXIF</string>
+    <string name="text_no_groups_for_override">Сначала добавьте группу</string>
     <string name="text_no_hidden_plugins">Нет скрытых плагинов</string>
     <string name="text_no_history">Истории нет</string>
     <string name="text_no_ignored_updates">Нет проигнорированных обновлений</string>
@@ -1913,6 +1949,16 @@
     <string name="text_original_file_recovery_path">Путь восстановления исходного файла</string>
     <string name="text_others">Другие</string>
     <string name="text_output_apk_path">Путь вывода APK</string>
+    <string name="text_override_date_range">Диапазон дат</string>
+    <string name="text_override_days_after">Дней после</string>
+    <string name="text_override_days_before">Дней до</string>
+    <string name="text_override_extended">%1$s (-%2$d / +%3$d дн.)</string>
+    <string name="text_override_from">Начало (ММ-ДД)</string>
+    <string name="text_override_holiday">Праздник</string>
+    <string name="text_override_range_once">%1$s (только %2$d)</string>
+    <string name="text_override_target_group">Показываемая группа</string>
+    <string name="text_override_to">Конец (ММ-ДД)</string>
+    <string name="text_override_year_optional">Только в году начала (необязательно)</string>
     <string name="text_overwrite">Перезаписать</string>
     <string name="text_package_name">Имя пакета</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Имя пакета (Вычисление...)</string>
@@ -1926,6 +1972,7 @@
     <string name="text_pause">Пауза</string>
     <string name="text_pc_server_address">Адрес сервера ПК</string>
     <string name="text_percentage_colon_value">Использовано: %1$s</string>
+    <string name="text_period_count_range">От %1$d до %2$d периодов</string>
     <string name="text_permission_desc_access_coarse_location">Разрешить приложению получать приблизительную геолокацию через сеть</string>
     <string name="text_permission_desc_access_fine_location">Разрешить приложению получать точную геолокацию через GPS</string>
     <string name="text_permission_desc_access_location_extra_commands">Разрешить приложению доступ к дополнительным командам провайдера геолокации</string>
@@ -2258,6 +2305,7 @@
     <string name="text_root_manager_apps_empty">Подходящие приложения не найдены. Можно добавить установленное приложение вручную.</string>
     <string name="text_root_mode_title">Проверка прав root</string>
     <string name="text_rotation_app_start">Запуск приложения</string>
+    <string name="text_rotation_daily">Ежедневно в заданное время</string>
     <string name="text_rotation_interval">Интервал</string>
     <string name="text_rotation_state_change">Смена состояния</string>
     <string name="text_rotation_triggers">Смена групп</string>
@@ -2486,8 +2534,10 @@
     <string name="text_theme_preview_use">Использовать</string>
     <string name="text_theme_previewer">Предпросмотр тем</string>
     <string name="text_time">Время</string>
+    <string name="text_time_count_limit">Не более %1$d значений времени</string>
     <string name="text_time_format">Формат времени</string>
     <string name="text_time_format_pattern_hint">Например, HH:mm:ss.SSS</string>
+    <string name="text_time_list_hint">Нажмите на время, чтобы изменить его, удерживайте, чтобы удалить</string>
     <string name="text_time_visible">Показывать время</string>
     <string name="text_timed_task">Задание по времени</string>
     <string name="text_timed_task_backend_title">Движок планирования таймерных задач</string>

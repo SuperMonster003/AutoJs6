@@ -20,6 +20,7 @@ import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
 import org.autojs.autojs.theme.library.ColorSelection
 import java.text.Collator
+import java.time.Instant
 import java.time.ZoneId
 
 /**
@@ -63,6 +64,9 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
     private var runtime = IntelligentRuntimeState()
 
     private var timeReceiverRegistered = false
+
+    /** When the state of a time based source changes next; not persisted, a cold start resolves it again. zh-CN: 时间类状态源下一次变化的时间; 不持久化, 冷启动时重新计算. */
+    private var nextStateChangeAt: Long? = null
 
     private val _changes = MutableLiveData(Unit)
 
@@ -150,7 +154,9 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         Pref.remove(KEY_SNAPSHOT)
         Pref.remove(KEY_RUNTIME)
         handler.removeCallbacks(dueRunnable)
+        nextStateChangeAt = null
         updateTimeReceiver(false)
+        DeviceStateMonitor.stopAll()
         _changes.postValue(Unit)
     }
 
@@ -158,7 +164,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
 
     override fun onResumed() = evaluate(IntelligentEvent.EVALUATE)
 
-    override fun onNightModeChanged(isNight: Boolean) = evaluate(IntelligentEvent.EVALUATE)
+    override fun onNightModeChanged(isNight: Boolean) = evaluateIfNeeded()
 
     fun evaluate(event: IntelligentEvent) {
         val active = snapshot ?: return
@@ -174,29 +180,39 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
     }
 
     /**
-     * Evaluates only when an interval is due or the state has changed, so frequent callers stay cheap.
-     * zh-CN: 仅在时间间隔到期或状态已变化时评估, 使频繁调用保持低开销.
+     * Evaluates only when a rotation is due, the state or the date override has changed, or the color drifted, so
+     * frequent callers (resuming activities, battery broadcasts) stay cheap.
+     * zh-CN: 仅在换组到期, 状态或日期覆盖已变化, 或颜色偏离预期时评估, 使频繁调用方 (Activity 恢复, 电池广播) 保持低开销.
      */
     private fun evaluateIfNeeded() {
         val active = snapshot ?: return
-        val due =runtime.nextDueAt?.let { System.currentTimeMillis() >= it } == true
-        val stateChanged = runtime.lastStateKey != stateKeyOf(active.config)
-        val colorDrifted = ThemeColorManager.currentThemeColor != expectedThemeColor(active)
-        if (due || stateChanged || colorDrifted) evaluate(IntelligentEvent.EVALUATE)
+        val now = System.currentTimeMillis()
+        val due = listOfNotNull(runtime.earliestDueAt, nextStateChangeAt).any { now >= it }
+        val state = resolveState(active.config, now)
+        val stateChanged = runtime.lastStateKey != state.stateKey
+        val overrideChanged = runtime.overrideGroupId != overrideGroupOf(active.config, now)
+        val colorDrifted = ThemeColorManager.currentThemeColor != expectedThemeColor(active, state.stateKey)
+        if (due || stateChanged || overrideChanged || colorDrifted) evaluate(IntelligentEvent.EVALUATE)
     }
 
     private fun plan(event: IntelligentEvent, startGroupId: Long?, source: ThemeColorSource) {
         val active = snapshot ?: return
+        val now = System.currentTimeMillis()
+        val zone = ZoneId.systemDefault()
+        watchDeviceFacts(active.config)
+        val state = resolveState(active.config, now)
+        nextStateChangeAt = state.nextChangeAt
         val result = planner.plan(
             PlannerInput(
                 config = active.config,
                 groups = active.groups,
-                stateKey = stateKeyOf(active.config),
-                now = System.currentTimeMillis(),
+                stateKey = state.stateKey,
+                now = now,
                 event = event,
                 runtime = runtime,
+                overrideGroupId = overrideGroupOf(active.config, now),
                 startGroupId = startGroupId,
-                zone = ZoneId.systemDefault(),
+                zone = zone,
             )
         )
         runtime = result.runtime
@@ -209,8 +225,32 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
             }
         }
         scheduleNext()
-        updateTimeReceiver(active.config.interval != null)
+        updateTimeReceiver(usesTime(active.config))
         _changes.postValue(Unit)
+    }
+
+    /**
+     * The current state of the active source, read from night mode and the watched device facts (roadmap P3.1 to P3.3).
+     * zh-CN: 激活库状态源的当前状态, 取自夜间模式与所监听的设备状态 (Roadmap P3.1 至 P3.3).
+     */
+    private fun resolveState(config: IntelligentConfig, now: Long): StateResolution {
+        val facts = DeviceStateMonitor.read(appContext, DeviceStateMonitor.factsFor(config.stateSource)).copy(isNight = NightModeState.isNight)
+        return StateResolver.resolve(config.stateSource, now, ZoneId.systemDefault(), facts, runtime.lastStateKey)
+    }
+
+    /** The group of the first matching date override today (roadmap P3.5). zh-CN: 今天第一个命中的日期覆盖层的组 (Roadmap P3.5). */
+    private fun overrideGroupOf(config: IntelligentConfig, now: Long): Long? {
+        if (config.overrides.isEmpty()) return null
+        val today = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()).toLocalDate()
+        return DateOverrides.firstMatch(config.overrides, today)?.groupId
+    }
+
+    private fun usesTime(config: IntelligentConfig): Boolean {
+        return config.interval != null || config.daily != null || config.overrides.isNotEmpty() || nextStateChangeAt != null
+    }
+
+    private fun watchDeviceFacts(config: IntelligentConfig) {
+        DeviceStateMonitor.watch(appContext, DeviceStateMonitor.factsFor(config.stateSource)) { evaluateIfNeeded() }
     }
 
     /**
@@ -225,15 +265,23 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         return fresh
     }
 
-    private fun expectedThemeColor(active: IntelligentSnapshot): ThemeColor? {
-        val color = active.group(shownGroupId)?.resolve(stateKeyOf(active.config), active.config.stateKeys) ?: return null
+    private fun expectedThemeColor(active: IntelligentSnapshot, stateKey: String): ThemeColor? {
+        val color = active.group(shownGroupId)?.resolve(stateKey, active.config.stateKeys) ?: return null
         return ThemeColor(color.primary, color.dark ?: color.primary, color.accent ?: color.primary)
     }
 
+    /**
+     * Wakes at the earliest of: a rotation due time, the next change of a time based state, and the next midnight
+     * when date overrides exist.
+     * zh-CN: 在以下时间中最早者唤醒: 换组到期时间, 时间类状态的下一次变化, 以及存在日期覆盖层时的下一个午夜.
+     */
     private fun scheduleNext() {
         handler.removeCallbacks(dueRunnable)
-        val dueAt = runtime.nextDueAt ?: return
-        handler.postDelayed(dueRunnable, (dueAt - System.currentTimeMillis()).coerceAtLeast(0L))
+        val active = snapshot ?: return
+        val now = System.currentTimeMillis()
+        val midnight = if (active.config.overrides.isNotEmpty()) DailySchedule.nextMidnight(now, ZoneId.systemDefault()) else null
+        val dueAt = listOfNotNull(runtime.earliestDueAt, nextStateChangeAt, midnight).minOrNull() ?: return
+        handler.postDelayed(dueRunnable, (dueAt - now).coerceAtLeast(0L))
     }
 
     private fun updateTimeReceiver(needed: Boolean) {
@@ -248,11 +296,6 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
             runCatching { appContext.unregisterReceiver(timeReceiver) }
         }
         timeReceiverRegistered = needed
-    }
-
-    private fun stateKeyOf(config: IntelligentConfig): String = when (config.stateSource) {
-        StateSource.NightMode -> if (NightModeState.isNight) StateKeys.NIGHT else StateKeys.DAY
-        else -> config.stateKeys.first()
     }
 
     private fun isSelectionOf(active: IntelligentSnapshot): Boolean {

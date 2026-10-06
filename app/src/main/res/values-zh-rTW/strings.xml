@@ -782,6 +782,8 @@
     <string name="summary_setup_wizards">授予常用許可權及安裝官方外掛</string>
     <string name="text_add_colors">新增顏色</string>
     <string name="text_add_group">新增群組</string>
+    <string name="text_add_override">新增覆蓋</string>
+    <string name="text_add_time">新增時刻</string>
     <string name="text_and_n_more">... 及其他 %d 項</string>
     <string name="text_auto_reconnect">自動重連</string>
     <string name="text_background_color_dark">暗色</string>
@@ -789,6 +791,8 @@
     <string name="text_background_color_inverse">自動反色</string>
     <string name="text_background_color_light">亮色</string>
     <string name="text_batch_restore_summary">已還原 %1$d, 略過 %2$d, 失敗 %3$d</string>
+    <string name="text_battery_thresholds">電量閾值</string>
+    <string name="text_battery_thresholds_hint">1 至 %1$d 個 1 至 99 的百分比, 以逗號分隔, 例如 20, 80</string>
     <string name="text_binary_content_cannot_be_previewed">二進位內容無法預覽</string>
     <string name="text_bun_host_capabilities">Bun 能力橋</string>
     <string name="text_bun_host_info_grant">宿主資訊快照</string>
@@ -1047,6 +1051,7 @@
     <string name="text_choose_color_library_to_clone">選擇要克隆的顏色庫</string>
     <string name="text_choose_colors_to_add">選擇要新增的顏色</string>
     <string name="text_choose_delete_strategy">選擇刪除策略</string>
+    <string name="text_choose_holiday">選擇節日</string>
     <string name="text_choose_restore_path">選擇恢復路徑</string>
     <string name="text_choose_window_background_as_theme_color">選擇一個 AutoJs6 視窗背景色作為主題色</string>
     <string name="text_city_or_locality">城市或區域</string>
@@ -1250,6 +1255,7 @@
     <string name="text_current">目前</string>
     <string name="text_current_file">目前檔案</string>
     <string name="text_current_group">目前群組: %1$s</string>
+    <string name="text_current_override">日期覆蓋: %1$s</string>
     <string name="text_current_page_configuration">當前頁面配置</string>
     <string name="text_current_state">目前狀態: %1$s</string>
     <string name="text_current_version">當前版本</string>
@@ -1257,6 +1263,8 @@
     <string name="text_daily_at">每天 %1$s</string>
     <string name="text_daily_task">每日任務</string>
     <string name="text_date">日期</string>
+    <string name="text_date_overrides">日期覆蓋</string>
+    <string name="text_date_overrides_hint">日期命中期間顯示指定的組並暫停換組; 由上而下第一個命中者生效</string>
     <string name="text_day1">一</string>
     <string name="text_day2">二</string>
     <string name="text_day3">三</string>
@@ -1350,6 +1358,7 @@
     <string name="text_edit_group">編輯群組</string>
     <string name="text_edit_intelligent_color_library">編輯智慧顏色庫</string>
     <string name="text_edit_label">編輯標籤</string>
+    <string name="text_edit_override">編輯覆蓋</string>
     <string name="text_edit_prepare_script">編輯預執行指令碼</string>
     <string name="text_edit_script">編輯指令碼</string>
     <string name="text_editor_assistance">輔助</string>
@@ -1532,6 +1541,9 @@
     <string name="text_groups_enabled_of_total">%1$d/%2$d 個群組</string>
     <string name="text_guard_mode">保護模式</string>
     <string name="text_help">幫助</string>
+    <string name="text_hemisphere">半球</string>
+    <string name="text_hemisphere_north">北半球</string>
+    <string name="text_hemisphere_south">南半球</string>
     <string name="text_hidden_files_description">設定是否在檔案瀏覽器頁面顯示隱藏檔案和資料夾 (檔名以 \".\" 開頭)</string>
     <string name="text_hidden_files_title">隱藏檔案和資料夾</string>
     <string name="text_hide">隱藏</string>
@@ -1554,6 +1566,20 @@
     <string name="text_history_max_total_bytes">版本歷史總容量上限</string>
     <string name="text_history_max_total_bytes_per_file">每個檔案的歷史容量上限</string>
     <string name="text_history_max_versions">每個檔案的最大版本數</string>
+    <string name="text_holiday_christmas">聖誕節</string>
+    <string name="text_holiday_double_ninth_festival">重陽節</string>
+    <string name="text_holiday_dragon_boat_festival">端午節</string>
+    <string name="text_holiday_easter">復活節</string>
+    <string name="text_holiday_fathers_day">父親節</string>
+    <string name="text_holiday_halloween">萬聖節前夕</string>
+    <string name="text_holiday_lantern_festival">元宵節</string>
+    <string name="text_holiday_mid_autumn_festival">中秋節</string>
+    <string name="text_holiday_mothers_day">母親節</string>
+    <string name="text_holiday_new_year">元旦</string>
+    <string name="text_holiday_qixi_festival">七夕</string>
+    <string name="text_holiday_spring_festival">春節</string>
+    <string name="text_holiday_thanksgiving">感恩節</string>
+    <string name="text_holiday_valentines_day">情人節</string>
     <string name="text_icon">圖示</string>
     <string name="text_ignore_battery_optimizations">忽略電池最佳化</string>
     <string name="text_ignored_updates">已忽略更新</string>
@@ -1693,7 +1719,10 @@
     <string name="text_interval_unit_second">秒</string>
     <string name="text_interval_value">間隔</string>
     <string name="text_interval_value_range">間隔 (%1$d 至 %2$d)</string>
+    <string name="text_invalid_battery_thresholds">閾值無效</string>
     <string name="text_invalid_character_is_removed">無效字元已被移除</string>
+    <string name="text_invalid_coordinates">座標無效</string>
+    <string name="text_invalid_month_day">請按 月-日 格式輸入日期, 例如 12-24</string>
     <string name="text_invalid_package_name">無效包名</string>
     <string name="text_invalid_project">無效專案</string>
     <string name="text_invert_selection">反選</string>
@@ -1725,6 +1754,7 @@
     <string name="text_last_updates_checked_time">上次檢查: %s</string>
     <string name="text_latest_activity">最近活動</string>
     <string name="text_latest_package">最近包名</string>
+    <string name="text_latitude_range">緯度 (-90 至 90, 北緯為正)</string>
     <string name="text_launch">啟動</string>
     <string name="text_launch_config">執行配置</string>
     <string name="text_launch_debugger">啟動除錯</string>
@@ -1753,6 +1783,10 @@
     <string name="text_local_network_permission">本機網路權限</string>
     <string name="text_local_network_permission_settings">本機網路存取未獲授權. 可在系統設定的應用程式權限中允許附近的裝置, 然後返回並重試.</string>
     <string name="text_locate_current_theme_color">定位當前主題色</string>
+    <string name="text_location">位置</string>
+    <string name="text_location_estimated">估算</string>
+    <string name="text_location_from_time_zone">按時區推斷 (%1$s)</string>
+    <string name="text_location_manual">手動輸入座標</string>
     <string name="text_log">日誌</string>
     <string name="text_log_coloring">日誌著色</string>
     <string name="text_logging_in">登入中</string>
@@ -1760,6 +1794,7 @@
     <string name="text_login_succeed">登入成功</string>
     <string name="text_logout">退出登入</string>
     <string name="text_long_press_to_select_multiple_attributes">長按屬性可多選並合併複製為一個選擇器</string>
+    <string name="text_longitude_range">經度 (-180 至 180, 東經為正)</string>
     <string name="text_loop_delay">延遲執行 (秒)</string>
     <string name="text_loop_interval">迴圈間隔 (秒)</string>
     <string name="text_loop_times">迴圈次數</string>
@@ -1843,6 +1878,7 @@
     <string name="text_no_data">無資料</string>
     <string name="text_no_differences">無差異</string>
     <string name="text_no_exif_information">沒有 EXIF 資訊</string>
+    <string name="text_no_groups_for_override">請先新增組</string>
     <string name="text_no_hidden_plugins">暫無隱藏外掛</string>
     <string name="text_no_history">無歷史記錄</string>
     <string name="text_no_ignored_updates">暫無已忽略更新</string>
@@ -1910,6 +1946,16 @@
     <string name="text_original_file_recovery_path">原始檔案復原路徑</string>
     <string name="text_others">其他</string>
     <string name="text_output_apk_path">打包應用儲存路徑</string>
+    <string name="text_override_date_range">日期區間</string>
+    <string name="text_override_days_after">延後天數</string>
+    <string name="text_override_days_before">提前天數</string>
+    <string name="text_override_extended">%1$s (前 %2$d 天 / 後 %3$d 天)</string>
+    <string name="text_override_from">開始 (月-日)</string>
+    <string name="text_override_holiday">節日</string>
+    <string name="text_override_range_once">%1$s (僅 %2$d 年)</string>
+    <string name="text_override_target_group">顯示的組</string>
+    <string name="text_override_to">結束 (月-日)</string>
+    <string name="text_override_year_optional">僅在此年開始的那一次 (可選)</string>
     <string name="text_overwrite">覆蓋</string>
     <string name="text_package_name">包名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (計算中...)</string>
@@ -1923,6 +1969,7 @@
     <string name="text_pause">暫停</string>
     <string name="text_pc_server_address">PC 服務端地址</string>
     <string name="text_percentage_colon_value">使用率: %1$s</string>
+    <string name="text_period_count_range">%1$d 至 %2$d 個時段</string>
     <string name="text_permission_desc_access_coarse_location">允許應用通過網絡訪問粗略的位置信息</string>
     <string name="text_permission_desc_access_fine_location">允許應用通過 GPS 獲取精確的位置信息</string>
     <string name="text_permission_desc_access_location_extra_commands">允許應用訪問位置提供者的額外命令</string>
@@ -2255,6 +2302,7 @@
     <string name="text_root_manager_apps_empty">未找到候選應用程式. 可手動新增已安裝的應用程式.</string>
     <string name="text_root_mode_title">Root 許可權檢查</string>
     <string name="text_rotation_app_start">應用程式啟動</string>
+    <string name="text_rotation_daily">每日定時</string>
     <string name="text_rotation_interval">時間間隔</string>
     <string name="text_rotation_state_change">狀態變化</string>
     <string name="text_rotation_triggers">換組時機</string>
@@ -2483,8 +2531,10 @@
     <string name="text_theme_preview_use">使用</string>
     <string name="text_theme_previewer">主題預覽器</string>
     <string name="text_time">時間</string>
+    <string name="text_time_count_limit">最多 %1$d 個時刻</string>
     <string name="text_time_format">時間格式</string>
     <string name="text_time_format_pattern_hint">例如 HH:mm:ss.SSS</string>
+    <string name="text_time_list_hint">點擊時刻可修改, 長按可刪除</string>
     <string name="text_time_visible">顯示時間</string>
     <string name="text_timed_task">定時任務</string>
     <string name="text_timed_task_backend_title">定時任務排程引擎</string>

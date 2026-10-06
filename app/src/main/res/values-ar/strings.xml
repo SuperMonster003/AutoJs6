@@ -787,6 +787,8 @@
     <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
     <string name="text_add_colors">إضافة ألوان</string>
     <string name="text_add_group">إضافة مجموعة</string>
+    <string name="text_add_override">إضافة استثناء</string>
+    <string name="text_add_time">إضافة وقت</string>
     <string name="text_and_n_more">... و %d اخرى</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
     <string name="text_background_color_dark">داكن</string>
@@ -794,6 +796,8 @@
     <string name="text_background_color_inverse">تلقائي (معكوس)</string>
     <string name="text_background_color_light">فاتح</string>
     <string name="text_batch_restore_summary">تمت الاستعادة %1$d, تم التخطي %2$d, فشل %3$d</string>
+    <string name="text_battery_thresholds">عتبات البطارية</string>
+    <string name="text_battery_thresholds_hint">من 1 إلى %1$d نسب مئوية بين 1 و99 مفصولة بفواصل، مثل 20, 80</string>
     <string name="text_binary_content_cannot_be_previewed">لا يمكن معاينة المحتوى الثنائي</string>
     <string name="text_bun_host_capabilities">جسر قدرات Bun</string>
     <string name="text_bun_host_info_grant">لقطة معلومات المضيف</string>
@@ -1052,6 +1056,7 @@
     <string name="text_choose_color_library_to_clone">اختر مكتبة الألوان المراد استنساخها</string>
     <string name="text_choose_colors_to_add">اختر الألوان المراد إضافتها</string>
     <string name="text_choose_delete_strategy">اختر طريقة الحذف</string>
+    <string name="text_choose_holiday">اختر مناسبة</string>
     <string name="text_choose_restore_path">اختر مسار الاستعادة</string>
     <string name="text_choose_window_background_as_theme_color">استخدام لون خلفية نافذة AutoJs6 كلون للثيم</string>
     <string name="text_city_or_locality">المدينة أو المنطقة</string>
@@ -1255,6 +1260,7 @@
     <string name="text_current">الحالي</string>
     <string name="text_current_file">الملف الحالي</string>
     <string name="text_current_group">المجموعة الحالية: %1$s</string>
+    <string name="text_current_override">استثناء حسب التاريخ: %1$s</string>
     <string name="text_current_page_configuration">اعدادات الصفحة الحالية</string>
     <string name="text_current_state">الحالة الحالية: %1$s</string>
     <string name="text_current_version">النسخة الحالية</string>
@@ -1262,6 +1268,8 @@
     <string name="text_daily_at">يوميا في %1$s</string>
     <string name="text_daily_task">مهام يومية</string>
     <string name="text_date">تاريخ</string>
+    <string name="text_date_overrides">استثناءات حسب التاريخ</string>
+    <string name="text_date_overrides_hint">طالما تطابق التاريخ تُعرض مجموعته ويتوقف التبديل مؤقتا، ويسري أول عنصر مطابق</string>
     <string name="text_day1">الاثنين</string>
     <string name="text_day2">الثلاثاء</string>
     <string name="text_day3">تزوج</string>
@@ -1355,6 +1363,7 @@
     <string name="text_edit_group">تعديل المجموعة</string>
     <string name="text_edit_intelligent_color_library">تعديل مكتبة الألوان الذكية</string>
     <string name="text_edit_label">تعديل التسمية</string>
+    <string name="text_edit_override">تعديل الاستثناء</string>
     <string name="text_edit_prepare_script">تحرير البرنامج النصي قبل التنفيذ</string>
     <string name="text_edit_script">تحرير البرنامج النصي</string>
     <string name="text_editor_assistance">المساعدة</string>
@@ -1537,6 +1546,9 @@
     <string name="text_groups_enabled_of_total">%1$d/%2$d مجموعات</string>
     <string name="text_guard_mode">وضع الحرس</string>
     <string name="text_help">مساعدة</string>
+    <string name="text_hemisphere">نصف الكرة</string>
+    <string name="text_hemisphere_north">نصف الكرة الشمالي</string>
+    <string name="text_hemisphere_south">نصف الكرة الجنوبي</string>
     <string name="text_hidden_files_description">ما إذا كانت الملفات والمجلدات المخفية تظهر أم لا في مستكشف الملفات. يعتبر ملف أو مجلد مخفيًا إذا بدأ اسمه بحرف فترة (\".\").</string>
     <string name="text_hidden_files_title">الملفات والمجلدات المخفية</string>
     <string name="text_hide">إخفاء</string>
@@ -1559,6 +1571,20 @@
     <string name="text_history_max_total_bytes">الحد الاقصى لاجمالي حجم السجل</string>
     <string name="text_history_max_total_bytes_per_file">الحد الاقصى لحجم السجل لكل ملف</string>
     <string name="text_history_max_versions">الحد الاقصى للاصدارات لكل ملف</string>
+    <string name="text_holiday_christmas">عيد الميلاد</string>
+    <string name="text_holiday_double_ninth_festival">مهرجان التاسع المزدوج</string>
+    <string name="text_holiday_dragon_boat_festival">مهرجان قوارب التنين</string>
+    <string name="text_holiday_easter">عيد الفصح</string>
+    <string name="text_holiday_fathers_day">عيد الأب (يونيو)</string>
+    <string name="text_holiday_halloween">الهالوين</string>
+    <string name="text_holiday_lantern_festival">مهرجان الفوانيس</string>
+    <string name="text_holiday_mid_autumn_festival">مهرجان منتصف الخريف</string>
+    <string name="text_holiday_mothers_day">عيد الأم (مايو)</string>
+    <string name="text_holiday_new_year">رأس السنة الميلادية</string>
+    <string name="text_holiday_qixi_festival">مهرجان تشيشي</string>
+    <string name="text_holiday_spring_festival">عيد الربيع</string>
+    <string name="text_holiday_thanksgiving">عيد الشكر</string>
+    <string name="text_holiday_valentines_day">عيد الحب</string>
     <string name="text_icon">أيقونة</string>
     <string name="text_ignore_battery_optimizations">تجاهل تحسينات البطارية</string>
     <string name="text_ignored_updates">تحديثات تجاهل</string>
@@ -1698,7 +1724,10 @@
     <string name="text_interval_unit_second">ثوان</string>
     <string name="text_interval_value">الفاصل</string>
     <string name="text_interval_value_range">الفاصل (%1$d إلى %2$d)</string>
+    <string name="text_invalid_battery_thresholds">عتبات غير صالحة</string>
     <string name="text_invalid_character_is_removed">تمت إزالة حرف غير صالح</string>
+    <string name="text_invalid_coordinates">إحداثيات غير صالحة</string>
+    <string name="text_invalid_month_day">أدخل التواريخ بصيغة شهر-يوم، مثل 12-24</string>
     <string name="text_invalid_package_name">اسم الحزمة غير صالح</string>
     <string name="text_invalid_project">مشروع غير صالح</string>
     <string name="text_invert_selection">عكس التحديد</string>
@@ -1730,6 +1759,7 @@
     <string name="text_last_updates_checked_time">آخر فحص: %s</string>
     <string name="text_latest_activity">النشاط الاخير</string>
     <string name="text_latest_package">أحدث حزمة</string>
+    <string name="text_latitude_range">خط العرض (من -90 إلى 90، الشمال موجب)</string>
     <string name="text_launch">تشغيل</string>
     <string name="text_launch_config">إطلاق التكوين</string>
     <string name="text_launch_debugger">إطلاق الأخطاء</string>
@@ -1758,6 +1788,10 @@
     <string name="text_local_network_permission">إذن الشبكة المحلية</string>
     <string name="text_local_network_permission_settings">الوصول إلى الشبكة المحلية غير مسموح. اسمح بالأجهزة القريبة ضمن أذونات التطبيق في إعدادات النظام, ثم عد وحاول مجددا.</string>
     <string name="text_locate_current_theme_color">تحديد لون الثيم الحالي</string>
+    <string name="text_location">الموقع</string>
+    <string name="text_location_estimated">تقديري</string>
+    <string name="text_location_from_time_zone">حسب المنطقة الزمنية (%1$s)</string>
+    <string name="text_location_manual">إدخال الإحداثيات</string>
     <string name="text_log">سجل</string>
     <string name="text_log_coloring">تلوين السجلات</string>
     <string name="text_logging_in">تسجيل الدخول</string>
@@ -1765,6 +1799,7 @@
     <string name="text_login_succeed">نجح تسجيل الدخول</string>
     <string name="text_logout">تسجيل خروج</string>
     <string name="text_long_press_to_select_multiple_attributes">اضغط مطولا على سمة لتحديد عدة سمات ونسخها كمحدد واحد</string>
+    <string name="text_longitude_range">خط الطول (من -180 إلى 180، الشرق موجب)</string>
     <string name="text_loop_delay">تأخير حلقة (ثانية)</string>
     <string name="text_loop_interval">فاصل الحلقة (ثانية)</string>
     <string name="text_loop_times">أوقات حلقة</string>
@@ -1848,6 +1883,7 @@
     <string name="text_no_data">لا توجد بيانات</string>
     <string name="text_no_differences">لا توجد اختلافات</string>
     <string name="text_no_exif_information">لا توجد معلومات EXIF</string>
+    <string name="text_no_groups_for_override">أضف مجموعة أولا</string>
     <string name="text_no_hidden_plugins">لا توجد مكونات إضافية مخفية</string>
     <string name="text_no_history">لا يوجد سجل</string>
     <string name="text_no_ignored_updates">لا تحديثات تم تجاهلها</string>
@@ -1915,6 +1951,16 @@
     <string name="text_original_file_recovery_path">مسار استرداد الملف الأصلي</string>
     <string name="text_others">آحرون</string>
     <string name="text_output_apk_path">مسار الإخراج APK</string>
+    <string name="text_override_date_range">نطاق تاريخ</string>
+    <string name="text_override_days_after">أيام بعد</string>
+    <string name="text_override_days_before">أيام قبل</string>
+    <string name="text_override_extended">%1$s (-%2$d / +%3$d أيام)</string>
+    <string name="text_override_from">البداية (شهر-يوم)</string>
+    <string name="text_override_holiday">مناسبة</string>
+    <string name="text_override_range_once">%1$s (%2$d فقط)</string>
+    <string name="text_override_target_group">المجموعة المعروضة</string>
+    <string name="text_override_to">النهاية (شهر-يوم)</string>
+    <string name="text_override_year_optional">فقط في سنة البدء (اختياري)</string>
     <string name="text_overwrite">استبدال</string>
     <string name="text_package_name">اسم الحزمة</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">اسم الحزمة (جارٍ الحساب...)</string>
@@ -1928,6 +1974,7 @@
     <string name="text_pause">إيقاف مؤقت</string>
     <string name="text_pc_server_address">عنوان خادم الكمبيوتر</string>
     <string name="text_percentage_colon_value">الاستخدام: %1$s</string>
+    <string name="text_period_count_range">من %1$d إلى %2$d فترات</string>
     <string name="text_permission_desc_access_coarse_location">يسمح للتطبيق بالوصول إلى معلومات الموقع التقريبية عبر الشبكة</string>
     <string name="text_permission_desc_access_fine_location">يسمح للتطبيق بالحصول على معلومات الموقع الدقيقة عبر نظام تحديد المواقع العالمي (GPS)</string>
     <string name="text_permission_desc_access_location_extra_commands">يسمح للتطبيق بالوصول إلى أوامر إضافية من مزودي خدمات الموقع</string>
@@ -2260,6 +2307,7 @@
     <string name="text_root_manager_apps_empty">لم يتم العثور على تطبيقات مرشحة. يمكنك إضافة تطبيق مثبت.</string>
     <string name="text_root_mode_title">التحقق من صلاحيات الروت</string>
     <string name="text_rotation_app_start">بدء التطبيق</string>
+    <string name="text_rotation_daily">أوقات يومية</string>
     <string name="text_rotation_interval">فاصل زمني</string>
     <string name="text_rotation_state_change">تغير الحالة</string>
     <string name="text_rotation_triggers">تبديل المجموعات</string>
@@ -2488,8 +2536,10 @@
     <string name="text_theme_preview_use">استخدام</string>
     <string name="text_theme_previewer">معاينة السمات</string>
     <string name="text_time">زمن</string>
+    <string name="text_time_count_limit">%1$d أوقات كحد أقصى</string>
     <string name="text_time_format">تنسيق الوقت</string>
     <string name="text_time_format_pattern_hint">مثال: HH:mm:ss.SSS</string>
+    <string name="text_time_list_hint">اضغط على الوقت لتغييره، واضغط مطولا لإزالته</string>
     <string name="text_time_visible">إظهار الوقت</string>
     <string name="text_timed_task">مهمة توقيت</string>
     <string name="text_timed_task_backend_title">محرك جدولة المهام المؤقتة</string>
