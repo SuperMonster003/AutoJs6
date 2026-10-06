@@ -92,7 +92,7 @@ object IntelligentConfigJson {
             TYPE_INTERVAL -> {
                 val unit = IntervalUnit.of(json.string("unit")) ?: return RotationTrigger.Unsupported(type, json.toString())
                 RotationTrigger.Interval(
-                    every = (json.int("every") ?: 1).coerceAtLeast(1),
+                    every = RotationTrigger.Interval.normalizedEvery(json.int("every") ?: 1, unit),
                     unit = unit,
                     anchor = IntervalAnchor.of(json.string("anchor")) ?: IntervalAnchor.NOW,
                 )

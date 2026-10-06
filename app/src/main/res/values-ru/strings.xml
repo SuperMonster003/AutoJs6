@@ -1680,6 +1680,7 @@
     <string name="text_interval_unit_minute">Минуты</string>
     <string name="text_interval_unit_second">Секунды</string>
     <string name="text_interval_value">Интервал</string>
+    <string name="text_interval_value_range">Интервал (от %1$d до %2$d)</string>
     <string name="text_invalid_character_is_removed">Недопустимый символ удален</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>

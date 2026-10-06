@@ -1677,6 +1677,7 @@
     <string name="text_interval_unit_minute">Minutes</string>
     <string name="text_interval_unit_second">Seconds</string>
     <string name="text_interval_value">Interval</string>
+    <string name="text_interval_value_range">Interval (%1$d to %2$d)</string>
     <string name="text_invalid_character_is_removed">Invalid character is removed</string>
     <string name="text_invalid_package_name">Invalid package name</string>
     <string name="text_invalid_project">Invalid project</string>

@@ -1681,6 +1681,7 @@
     <string name="text_interval_unit_minute">分</string>
     <string name="text_interval_unit_second">秒</string>
     <string name="text_interval_value">間隔</string>
+    <string name="text_interval_value_range">間隔 (%1$d ~ %2$d)</string>
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>

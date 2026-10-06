@@ -137,4 +137,28 @@ class ThemeColorDerivationTest {
         assertTrue("weaker contrast $weaker", weaker >= 3.5)
     }
 
+    // md_teal_50..900 and md_yellow_50..900.
+    private val teal = listOf(0xFFE0F2F1, 0xFFB2DFDB, 0xFF80CBC4, 0xFF4DB6AC, 0xFF26A69A, 0xFF009688, 0xFF00897B, 0xFF00796B, 0xFF00695C, 0xFF004D40).map { it.toInt() }
+    private val yellow = listOf(0xFFFFFDE7, 0xFFFFF9C4, 0xFFFFF59D, 0xFFFFF176, 0xFFFFEE58, 0xFFFFEB3B, 0xFFFDD835, 0xFFFBC02D, 0xFFF9A825, 0xFFF57F17).map { it.toInt() }
+
+    @Test
+    fun shadesArePickedByContrastAgainstWindowBackgrounds() {
+        // Teal 400 has 2.87:1 against the light background, so day is 500; teal 800 has 2.27:1 against the night one, so night is 700.
+        assertEquals(0xFF009688.toInt(), ThemeColorDerivation.pickDayShade(teal))
+        assertEquals(0xFF00796B.toInt(), ThemeColorDerivation.pickNightShade(teal))
+        assertTrue(ColorMetrics.contrastRatio(ThemeColorDerivation.pickDayShade(teal), WINDOW_BACKGROUND_LIGHT) >= 3.0)
+        assertTrue(ColorMetrics.contrastRatio(ThemeColorDerivation.pickNightShade(teal), WINDOW_BACKGROUND_NIGHT) >= 3.0)
+        // The order of the input does not matter.
+        assertEquals(ThemeColorDerivation.pickDayShade(teal), ThemeColorDerivation.pickDayShade(teal.shuffled(java.util.Random(7))))
+        assertEquals(ThemeColorDerivation.pickNightShade(teal), ThemeColorDerivation.pickNightShade(teal.reversed()))
+    }
+
+    @Test
+    fun shadeFallsBackToTheMostContrastingOne() {
+        // No yellow reaches 3:1 against the light background; 900 contrasts most. At night 900 is the darkest passing shade.
+        assertEquals(0xFFF57F17.toInt(), ThemeColorDerivation.pickDayShade(yellow))
+        assertEquals(0xFFF57F17.toInt(), ThemeColorDerivation.pickNightShade(yellow))
+        assertEquals(white, ThemeColorDerivation.pickDayShade(listOf(white), ratio = 21.0))
+    }
+
 }

@@ -1677,6 +1677,7 @@
     <string name="text_interval_unit_minute">分鐘</string>
     <string name="text_interval_unit_second">秒</string>
     <string name="text_interval_value">間隔</string>
+    <string name="text_interval_value_range">間隔 (%1$d 至 %2$d)</string>
     <string name="text_invalid_character_is_removed">無效字符已被移除</string>
     <string name="text_invalid_package_name">無效包名</string>
     <string name="text_invalid_project">無效項目</string>

@@ -105,7 +105,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         ThemeColorCoordinator.listener = this
         NightModeState.addListener(this)
         application.registerActivityLifecycleCallbacks(foregroundCallbacks)
-        snapshot = IntelligentEngineJson.decodeSnapshot(Pref.getStringOrNull(KEY_SNAPSHOT))
+        snapshot = IntelligentEngineJson.decodeSnapshot(Pref.getStringOrNull(KEY_SNAPSHOT))?.let(::refreshPreset)
         runtime = IntelligentEngineJson.decodeRuntime(Pref.getStringOrNull(KEY_RUNTIME))
         if (snapshot != null) evaluate(IntelligentEvent.APP_START)
     }
@@ -211,6 +211,18 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         scheduleNext()
         updateTimeReceiver(active.config.interval != null)
         _changes.postValue(Unit)
+    }
+
+    /**
+     * Presets are defined in code, so a saved snapshot of one is rebuilt on start: their colors may change between
+     * versions (D24) and their names follow the current language. Group ids are stable, so the current group is kept.
+     * zh-CN: 预设定义在代码中, 因此保存的预设快照在启动时重建: 其颜色可能随版本变化 (D24), 名称跟随当前语言. 组 id 稳定, 当前组保持不变.
+     */
+    private fun refreshPreset(saved: IntelligentSnapshot): IntelligentSnapshot {
+        if (!IntelligentPresets.isPreset(saved.libraryId)) return saved
+        val fresh = IntelligentPresets.find(appContext, saved.libraryId) ?: return saved
+        if (fresh != saved) Pref.putString(KEY_SNAPSHOT, IntelligentEngineJson.encodeSnapshot(fresh))
+        return fresh
     }
 
     private fun expectedThemeColor(active: IntelligentSnapshot): ThemeColor? {

@@ -1682,6 +1682,7 @@
     <string name="text_interval_unit_minute">دقائق</string>
     <string name="text_interval_unit_second">ثوان</string>
     <string name="text_interval_value">الفاصل</string>
+    <string name="text_interval_value_range">الفاصل (%1$d إلى %2$d)</string>
     <string name="text_invalid_character_is_removed">تمت إزالة حرف غير صالح</string>
     <string name="text_invalid_package_name">اسم الحزمة غير صالح</string>
     <string name="text_invalid_project">مشروع غير صالح</string>

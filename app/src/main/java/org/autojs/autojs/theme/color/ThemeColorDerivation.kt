@@ -11,10 +11,12 @@ import kotlin.math.min
  * - [deriveDark] / [deriveAccent]: the optional `colorPrimaryDark` / `colorAccent` of a theme color.
  * - [nightVariant] / [dayVariant]: fill the other state of a day / night group from one known color.
  * - [ensureContrast] / [ensureContrastAgainstBoth]: the nearest color along the lightness axis that meets a contrast ratio.
+ * - [pickDayShade] / [pickNightShade]: pick existing shades of a tonal family by contrast instead of deriving new colors.
  * zh-CN:
  * - [deriveDark] / [deriveAccent]: 主题色可选的 `colorPrimaryDark` / `colorAccent`.
  * - [nightVariant] / [dayVariant]: 由日 / 夜组中已知的一个颜色补全另一个状态.
  * - [ensureContrast] / [ensureContrastAgainstBoth]: 沿亮度轴寻找满足对比度要求的最近颜色.
+ * - [pickDayShade] / [pickNightShade]: 按对比度从色系的既有色阶中挑选, 而非派生新颜色.
  *
  * Inputs are treated as opaque; outputs are opaque.
  * zh-CN: 输入按不透明处理, 输出均为不透明颜色.
@@ -107,6 +109,32 @@ object ThemeColorDerivation {
             else -> lch.c * DAY_CHROMA_FACTOR
         }
         return OkColor.fromOkLch(OkLch(lightness, chroma, lch.h))
+    }
+
+    /**
+     * The day shade of a tonal family: the lightest of [shades] that meets [ratio] against [background],
+     * or the most contrasting shade when none does (roadmap D24). The order of [shades] does not matter.
+     * zh-CN: 色系的日间色阶: [shades] 中与 [background] 对比度满足 [ratio] 的最浅者; 均不满足时取对比度最高者 (Roadmap D24).
+     * [shades] 的顺序不影响结果.
+     */
+    @JvmOverloads
+    fun pickDayShade(shades: List<Int>, background: Int = WINDOW_BACKGROUND_LIGHT, ratio: Double = UI_COMPONENT_CONTRAST): Int =
+        pickShade(shades.sortedByDescending { ColorMetrics.relativeLuminance(it) }, background, ratio)
+
+    /**
+     * The night shade of a tonal family: the darkest of [shades] that meets [ratio] against [background],
+     * or the most contrasting shade when none does (roadmap D24). The order of [shades] does not matter.
+     * zh-CN: 色系的夜间色阶: [shades] 中与 [background] 对比度满足 [ratio] 的最深者; 均不满足时取对比度最高者 (Roadmap D24).
+     * [shades] 的顺序不影响结果.
+     */
+    @JvmOverloads
+    fun pickNightShade(shades: List<Int>, background: Int = WINDOW_BACKGROUND_NIGHT, ratio: Double = UI_COMPONENT_CONTRAST): Int =
+        pickShade(shades.sortedBy { ColorMetrics.relativeLuminance(it) }, background, ratio)
+
+    private fun pickShade(preferred: List<Int>, background: Int, ratio: Double): Int {
+        require(preferred.isNotEmpty()) { "No shades to pick from" }
+        return preferred.firstOrNull { ColorMetrics.contrastRatio(it, background) >= ratio }
+            ?: preferred.maxBy { ColorMetrics.contrastRatio(it, background) }
     }
 
     /**

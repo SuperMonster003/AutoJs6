@@ -104,4 +104,18 @@ class IntelligentConfigJsonTest {
         assertEquals(DateCondition.DateRange(2, 29, 3, 1), config.overrides[1].condition)
     }
 
+    @Test
+    fun intervalCountsAreClampedToTheEditorRange() {
+        val config = IntelligentConfigJson.decode(
+            """{"version":1,"rotation":[
+                {"type":"interval","every":1,"unit":"second"},
+                {"type":"interval","every":0,"unit":"minute"},
+                {"type":"interval","every":100000,"unit":"hour"}]}"""
+        )
+        val intervals = config.rotation.filterIsInstance<RotationTrigger.Interval>()
+        // 5 seconds is the lower bound (D19); minutes and hours start at 1; 9999 is the upper bound.
+        assertEquals(listOf(5, 1, 9999), intervals.map { it.every })
+        assertEquals(listOf(5, 1, 1), IntervalUnit.entries.map { it.minimumEvery })
+    }
+
 }

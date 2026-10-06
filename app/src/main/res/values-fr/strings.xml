@@ -1680,6 +1680,7 @@
     <string name="text_interval_unit_minute">Minutes</string>
     <string name="text_interval_unit_second">Secondes</string>
     <string name="text_interval_value">Intervalle</string>
+    <string name="text_interval_value_range">Intervalle (%1$d à %2$d)</string>
     <string name="text_invalid_character_is_removed">Caractère invalide est supprimé</string>
     <string name="text_invalid_package_name">Nom de paquet non valide</string>
     <string name="text_invalid_project">Projet non valide</string>

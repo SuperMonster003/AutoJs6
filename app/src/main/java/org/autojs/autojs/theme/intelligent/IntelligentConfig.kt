@@ -82,6 +82,18 @@ sealed interface RotationTrigger {
     data class Interval(val every: Int, val unit: IntervalUnit, val anchor: IntervalAnchor = IntervalAnchor.NOW) : RotationTrigger {
         val periodMillis: Long
             get() = every.coerceAtLeast(1) * unit.millis
+
+        companion object {
+
+            const val MAX_EVERY = 9999
+
+            /**
+             * Clamps [every] to what the editor accepts: at least [IntervalUnit.minimumEvery] (5 seconds, D19) and at most [MAX_EVERY].
+             * zh-CN: 将 [every] 限制在编辑器接受的范围内: 不小于 [IntervalUnit.minimumEvery] (5 秒, D19), 不大于 [MAX_EVERY].
+             */
+            fun normalizedEvery(every: Int, unit: IntervalUnit) = every.coerceIn(unit.minimumEvery, MAX_EVERY)
+
+        }
     }
 
     data class Unsupported(val type: String, val raw: String) : RotationTrigger
@@ -92,6 +104,10 @@ enum class IntervalUnit(val key: String, val millis: Long) {
     SECOND("second", 1_000L),
     MINUTE("minute", 60_000L),
     HOUR("hour", 3_600_000L);
+
+    /** The smallest count of this unit not below [IntervalSchedule.MIN_PERIOD_MILLIS]. zh-CN: 不低于 [IntervalSchedule.MIN_PERIOD_MILLIS] 的最小数量. */
+    val minimumEvery: Int
+        get() = ((IntervalSchedule.MIN_PERIOD_MILLIS + millis - 1) / millis).toInt().coerceAtLeast(1)
 
     companion object {
         fun of(key: String?) = entries.firstOrNull { it.key == key }

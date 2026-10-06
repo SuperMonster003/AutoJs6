@@ -1,6 +1,8 @@
 package org.autojs.autojs.theme.intelligent
 
 import android.content.Context
+import org.autojs.autojs.core.image.ColorItems
+import org.autojs.autojs.theme.color.ThemeColorDerivation
 import org.autojs.autojs6.R
 
 /**
@@ -20,28 +22,34 @@ object IntelligentPresets {
     const val BACKGROUND_GROUP_FOLLOW = 2L
     const val BACKGROUND_GROUP_INVERSE = 3L
 
-    /** Material families with their 50 and 800 shades (day / night). zh-CN: Material 色系及其 50 与 800 色阶 (日 / 夜). */
+    /**
+     * Material families by their 50 shade; the shades 50..900 follow it in [ColorItems.MATERIAL_COLORS].
+     * zh-CN: 以 50 色阶表示的 Material 色系; 50..900 各色阶在 [ColorItems.MATERIAL_COLORS] 中紧随其后.
+     */
     private val MATERIAL_FAMILIES = listOf(
-        Triple(R.string.md_red_50, R.color.md_red_50, R.color.md_red_800),
-        Triple(R.string.md_pink_50, R.color.md_pink_50, R.color.md_pink_800),
-        Triple(R.string.md_purple_50, R.color.md_purple_50, R.color.md_purple_800),
-        Triple(R.string.md_deep_purple_50, R.color.md_deep_purple_50, R.color.md_deep_purple_800),
-        Triple(R.string.md_indigo_50, R.color.md_indigo_50, R.color.md_indigo_800),
-        Triple(R.string.md_blue_50, R.color.md_blue_50, R.color.md_blue_800),
-        Triple(R.string.md_light_blue_50, R.color.md_light_blue_50, R.color.md_light_blue_800),
-        Triple(R.string.md_cyan_50, R.color.md_cyan_50, R.color.md_cyan_800),
-        Triple(R.string.md_teal_50, R.color.md_teal_50, R.color.md_teal_800),
-        Triple(R.string.md_green_50, R.color.md_green_50, R.color.md_green_800),
-        Triple(R.string.md_light_green_50, R.color.md_light_green_50, R.color.md_light_green_800),
-        Triple(R.string.md_lime_50, R.color.md_lime_50, R.color.md_lime_800),
-        Triple(R.string.md_yellow_50, R.color.md_yellow_50, R.color.md_yellow_800),
-        Triple(R.string.md_amber_50, R.color.md_amber_50, R.color.md_amber_800),
-        Triple(R.string.md_orange_50, R.color.md_orange_50, R.color.md_orange_800),
-        Triple(R.string.md_deep_orange_50, R.color.md_deep_orange_50, R.color.md_deep_orange_800),
-        Triple(R.string.md_brown_50, R.color.md_brown_50, R.color.md_brown_800),
-        Triple(R.string.md_gray_50, R.color.md_gray_50, R.color.md_gray_800),
-        Triple(R.string.md_blue_gray_50, R.color.md_blue_gray_50, R.color.md_blue_gray_800),
+        R.color.md_red_50 to R.string.md_red_50,
+        R.color.md_pink_50 to R.string.md_pink_50,
+        R.color.md_purple_50 to R.string.md_purple_50,
+        R.color.md_deep_purple_50 to R.string.md_deep_purple_50,
+        R.color.md_indigo_50 to R.string.md_indigo_50,
+        R.color.md_blue_50 to R.string.md_blue_50,
+        R.color.md_light_blue_50 to R.string.md_light_blue_50,
+        R.color.md_cyan_50 to R.string.md_cyan_50,
+        R.color.md_teal_50 to R.string.md_teal_50,
+        R.color.md_green_50 to R.string.md_green_50,
+        R.color.md_light_green_50 to R.string.md_light_green_50,
+        R.color.md_lime_50 to R.string.md_lime_50,
+        R.color.md_yellow_50 to R.string.md_yellow_50,
+        R.color.md_amber_50 to R.string.md_amber_50,
+        R.color.md_orange_50 to R.string.md_orange_50,
+        R.color.md_deep_orange_50 to R.string.md_deep_orange_50,
+        R.color.md_brown_50 to R.string.md_brown_50,
+        R.color.md_gray_50 to R.string.md_gray_50,
+        R.color.md_blue_gray_50 to R.string.md_blue_gray_50,
     )
+
+    /** The shades 50, 100, ..., 900. zh-CN: 色阶 50, 100, ..., 900. */
+    private const val TONAL_SHADE_COUNT = 10
 
     private val SHADE_SUFFIX = Regex("\\s*\\(\\d+\\)$")
 
@@ -53,20 +61,27 @@ object IntelligentPresets {
         else -> null
     }
 
+    fun isPreset(libraryId: Int) = libraryId == ID_MATERIAL_DAY_NIGHT || libraryId == ID_BACKGROUND
+
     /**
-     * One group per Material family: day = 50, night = 800, following night mode; picking a group pins it.
-     * zh-CN: 每个 Material 色系一组: 日 = 50, 夜 = 800, 跟随夜间模式; 选择一组即固定使用该组.
+     * One group per Material family following night mode; picking a group pins it. The shades are picked by
+     * contrast against the window backgrounds (D24): day = the lightest shade with at least 3:1 against the light
+     * background, night = the darkest shade with at least 3:1 against the night background.
+     * zh-CN: 每个 Material 色系一组, 跟随夜间模式; 选择一组即固定使用该组. 色阶按与窗口背景的对比度挑选 (D24):
+     * 日 = 与日间背景对比度不低于 3:1 的最浅色阶, 夜 = 与夜间背景对比度不低于 3:1 的最深色阶.
      */
     fun materialDayNight(context: Context) = IntelligentSnapshot(
         libraryId = ID_MATERIAL_DAY_NIGHT,
         name = context.getString(R.string.text_intelligent_preset_material_day_night),
         config = IntelligentConfig(StateSource.NightMode),
-        groups = MATERIAL_FAMILIES.mapIndexed { index, (nameRes, dayRes, nightRes) ->
+        groups = MATERIAL_FAMILIES.mapIndexed { index, (fiftyRes, nameRes) ->
+            val start = ColorItems.MATERIAL_COLORS.indexOfFirst { it.first == fiftyRes }
+            val shades = ColorItems.MATERIAL_COLORS.subList(start, start + TONAL_SHADE_COUNT).map { context.getColor(it.first) }
             IntelligentGroup(
                 id = index.toLong(),
                 name = context.getString(nameRes).replace(SHADE_SUFFIX, ""),
                 position = index,
-                states = dayNight(context.getColor(dayRes), context.getColor(nightRes)),
+                states = dayNight(ThemeColorDerivation.pickDayShade(shades), ThemeColorDerivation.pickNightShade(shades)),
             )
         },
     )

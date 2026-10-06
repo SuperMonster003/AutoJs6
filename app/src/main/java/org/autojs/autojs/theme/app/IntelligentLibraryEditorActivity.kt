@@ -291,10 +291,15 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
                 isChecked = anchor == interval.anchor
             }.also { anchorGroup.addView(it) }
         }
+        fun checkedUnit() = unitGroup.findViewById<View>(unitGroup.checkedRadioButtonId)?.tag as? IntervalUnit ?: interval.unit
+        fun enteredEvery(unit: IntervalUnit) = RotationTrigger.Interval.normalizedEvery(valueInput.text?.toString()?.toIntOrNull() ?: interval.every, unit)
+        fun updateValueHint() {
+            valueInput.hint = getString(R.string.text_interval_value_range, checkedUnit().minimumEvery, RotationTrigger.Interval.MAX_EVERY)
+        }
         fun updateAnchorLabels() {
             val now = System.currentTimeMillis()
-            val every = valueInput.text?.toString()?.toIntOrNull()?.coerceAtLeast(1) ?: interval.every
-            val unit = unitGroup.findViewById<View>(unitGroup.checkedRadioButtonId)?.tag as? IntervalUnit ?: interval.unit
+            val unit = checkedUnit()
+            val every = enteredEvery(unit)
             anchorButtons.forEach { button ->
                 val anchor = button.tag as IntervalAnchor
                 val anchorAt = IntervalSchedule.anchorAt(now, anchor, ZoneId.systemDefault())
@@ -309,9 +314,13 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
                 button.text = "$label (${getString(R.string.text_first_rotation_at, formatTime(firstDue))})"
             }
         }
+        updateValueHint()
         updateAnchorLabels()
         valueInput.addTextChangedListener(SimpleTextWatcher { updateAnchorLabels() })
-        unitGroup.setOnCheckedChangeListener { _, _ -> updateAnchorLabels() }
+        unitGroup.setOnCheckedChangeListener { _, _ ->
+            updateValueHint()
+            updateAnchorLabels()
+        }
         content.addView(valueInput)
         content.addView(unitGroup)
         content.addView(anchorHeader)
@@ -325,8 +334,8 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             .positiveText(R.string.dialog_button_confirm)
             .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { _, _ ->
-                val every = valueInput.text?.toString()?.toIntOrNull()?.coerceIn(1, MAX_INTERVAL_VALUE) ?: interval.every
-                val unit = unitGroup.findViewById<View>(unitGroup.checkedRadioButtonId)?.tag as? IntervalUnit ?: interval.unit
+                val unit = checkedUnit()
+                val every = enteredEvery(unit)
                 val anchor = anchorGroup.findViewById<View>(anchorGroup.checkedRadioButtonId)?.tag as? IntervalAnchor ?: interval.anchor
                 interval = RotationTrigger.Interval(every, unit, anchor)
                 intervalChecked = true
@@ -619,7 +628,6 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
 
         private const val EXTRA_ROW_ID = "INTELLIGENT_LIBRARY_ROW_ID"
 
-        private const val MAX_INTERVAL_VALUE = 9999
 
         private val COLOR_SORT_KEYS = setOf(SortKey.LIGHTNESS, SortKey.HUE, SortKey.CHROMA)
 
