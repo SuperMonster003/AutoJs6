@@ -14,6 +14,7 @@ import org.autojs.autojs.ui.wizard.WizardProfile
 import org.autojs.autojs.ui.wizard.WizardProfileController
 import org.autojs.autojs.ui.wizard.WizardProfileStore
 import org.autojs.autojs.ui.wizard.WizardSelectionPolicy
+import org.autojs.autojs.ui.wizard.WizardUi
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogWizardBinding
@@ -64,6 +65,7 @@ object PermissionWizardDialog {
 
         fun show() {
             binding.wizardHint.setText(R.string.text_permission_wizard_hint)
+            WizardUi.tintLoadingProgress(binding.wizardProgress)
             binding.wizardRetry.isVisible = false
             binding.wizardList.apply {
                 layoutManager = LinearLayoutManager(activity)

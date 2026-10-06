@@ -20,6 +20,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.wizard.WizardProfile
 import org.autojs.autojs.ui.wizard.WizardSelectionPolicy
 import org.autojs.autojs.ui.wizard.WizardSelectionPolicy.CheckBoxState
+import org.autojs.autojs.ui.wizard.WizardUi
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PluginInstallWizardHeaderItemBinding
@@ -222,6 +223,7 @@ class PluginInstallWizardAdapter(
             binding.pluginInstallWizardItemCheckbox.apply {
                 isVisible = state != CheckBoxState.HIDDEN
                 isEnabled = state == CheckBoxState.SELECTABLE
+                alpha = if (state == CheckBoxState.DONE_IN_PROFILE) WizardUi.LOCKED_CHECK_BOX_ALPHA else 1f
                 isChecked = when (state) {
                     CheckBoxState.DONE_IN_PROFILE -> true
                     CheckBoxState.SELECTABLE -> item.packageName in selected

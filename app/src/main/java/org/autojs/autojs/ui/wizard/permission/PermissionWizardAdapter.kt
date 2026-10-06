@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.ui.wizard.WizardProfile
 import org.autojs.autojs.ui.wizard.WizardSelectionPolicy
 import org.autojs.autojs.ui.wizard.WizardSelectionPolicy.CheckBoxState
+import org.autojs.autojs.ui.wizard.WizardUi
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PermissionWizardItemBinding
 
@@ -125,6 +126,7 @@ class PermissionWizardAdapter(
             binding.permissionWizardItemCheckbox.apply {
                 isVisible = state != CheckBoxState.HIDDEN
                 isEnabled = state == CheckBoxState.SELECTABLE
+                alpha = if (state == CheckBoxState.DONE_IN_PROFILE) WizardUi.LOCKED_CHECK_BOX_ALPHA else 1f
                 isChecked = when (state) {
                     CheckBoxState.DONE_IN_PROFILE -> true
                     CheckBoxState.SELECTABLE -> item.id in selected

@@ -22,6 +22,7 @@ import org.autojs.autojs.ui.wizard.permission.PermissionWizardRunner
 import org.autojs.autojs.ui.wizard.permission.PermissionWizardStates
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.SnackbarUtils.coverNavigationBar
 import org.autojs.autojs6.R
 
 /**
@@ -71,6 +72,7 @@ object SetupWizards {
                 showChooser(activity)
             }
             .setActionTextColor(snackbarActionColor())
+            .coverNavigationBar()
             .addCallback(object : BaseTransientBottomBar.BaseCallback<CustomSnackbar>() {
                 override fun onDismissed(transientBottomBar: CustomSnackbar?, event: Int) {
                     if (event == BaseTransientBottomBar.BaseCallback.DISMISS_EVENT_SWIPE) markWelcomeDone()
@@ -90,6 +92,7 @@ object SetupWizards {
         Snackbar.make(anchor, activity.getString(R.string.text_permission_wizard_reminder, names), Snackbar.LENGTH_LONG)
             .setAction(R.string.text_permission_wizard_grant) { requestPermissions(activity, missing) }
             .setActionTextColor(snackbarActionColor())
+            .coverNavigationBar()
             .show()
     }
 

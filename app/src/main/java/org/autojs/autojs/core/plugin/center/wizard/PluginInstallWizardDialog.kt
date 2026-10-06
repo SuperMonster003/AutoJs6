@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.autojs.autojs.ui.wizard.WizardProfile
 import org.autojs.autojs.ui.wizard.WizardProfileController
 import org.autojs.autojs.ui.wizard.WizardSelectionPolicy
+import org.autojs.autojs.ui.wizard.WizardUi
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -64,6 +65,7 @@ object PluginInstallWizardDialog {
 
         fun show() {
             binding.wizardHint.setText(R.string.text_plugin_install_wizard_hint)
+            WizardUi.tintLoadingProgress(binding.wizardProgress)
             binding.wizardList.apply {
                 layoutManager = LinearLayoutManager(context)
                 adapter = this@Session.adapter

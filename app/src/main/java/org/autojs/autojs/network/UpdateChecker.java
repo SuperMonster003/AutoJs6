@@ -39,6 +39,7 @@ import org.autojs.autojs.ui.settings.DisplayReleaseHistoryActivity;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder;
+import org.autojs.autojs.util.SnackbarUtils;
 import org.autojs.autojs.util.TextUtils;
 import org.autojs.autojs.util.UpdateUtils;
 import org.autojs.autojs.util.ViewUtils;
@@ -352,10 +353,10 @@ public class UpdateChecker {
         String ver = versionInfo.getVersionName();
         String content = mContext.getString(R.string.text_new_version_found) + ": " + ver;
 
-        CustomSnackbar.make(mView, content, BaseTransientBottomBar.LENGTH_INDEFINITE)
-                .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
-                .setActionOne(R.string.text_updates_snack_bar_act_view, v -> showUpdateInfoDialog(versionInfo, mView.getContext()))
-                .setActionTwo(R.string.text_updates_snack_bar_act_later, v -> Pref.refreshLastUpdatesPostponedTimestamp())
+        SnackbarUtils.coverNavigationBar(CustomSnackbar.make(mView, content, BaseTransientBottomBar.LENGTH_INDEFINITE)
+                        .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
+                        .setActionOne(R.string.text_updates_snack_bar_act_view, v -> showUpdateInfoDialog(versionInfo, mView.getContext()))
+                        .setActionTwo(R.string.text_updates_snack_bar_act_later, v -> Pref.refreshLastUpdatesPostponedTimestamp()))
                 .show();
     }
 
