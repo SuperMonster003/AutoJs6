@@ -162,6 +162,10 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
 
     fun evaluate(event: IntelligentEvent) {
         val active = snapshot ?: return
+        // Theme color pages hold pause tokens: neither the group nor the color changes meanwhile,
+        // and the release of the last token evaluates once through onResumed (D6).
+        // zh-CN: 主题色页面持有暂停令牌: 期间组与颜色均不变化, 最后一个令牌释放时经 onResumed 评估一次 (D6).
+        if (ThemeColorCoordinator.isPaused) return
         if (!isSelectionOf(active)) {
             deactivate()
             return
@@ -175,10 +179,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      */
     private fun evaluateIfNeeded() {
         val active = snapshot ?: return
-        // Theme color pages hold pause tokens; their release triggers one evaluation (D6).
-        // zh-CN: 主题色页面持有暂停令牌; 令牌全部释放时会触发一次评估 (D6).
-        if (ThemeColorCoordinator.isPaused) return
-        val due = runtime.nextDueAt?.let { System.currentTimeMillis() >= it } == true
+        val due =runtime.nextDueAt?.let { System.currentTimeMillis() >= it } == true
         val stateChanged = runtime.lastStateKey != stateKeyOf(active.config)
         val colorDrifted = ThemeColorManager.currentThemeColor != expectedThemeColor(active)
         if (due || stateChanged || colorDrifted) evaluate(IntelligentEvent.EVALUATE)
