@@ -779,6 +779,10 @@
     <string name="text_add_colors">Ajouter des couleurs</string>
     <string name="text_and_n_more">... et %d de plus</string>
     <string name="text_auto_reconnect">Reconnexion automatique</string>
+    <string name="text_background_color_dark">Sombre</string>
+    <string name="text_background_color_follow">Automatique</string>
+    <string name="text_background_color_inverse">Automatique (inversé)</string>
+    <string name="text_background_color_light">Clair</string>
     <string name="text_batch_restore_summary">Restaurés %1$d, ignorés %2$d, échoués %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">Le contenu binaire ne peut pas être prévisualisé</string>
     <string name="text_bun_host_capabilities">Pont de capacités Bun</string>
@@ -1035,6 +1039,7 @@
     <string name="text_choose_colors_to_add">Choisir les couleurs à ajouter</string>
     <string name="text_choose_delete_strategy">Choisir la methode de suppression</string>
     <string name="text_choose_restore_path">Choisir le chemin de restauration</string>
+    <string name="text_choose_window_background_as_theme_color">Utiliser une couleur d\'arrière-plan de fenêtre d\'AutoJs6 comme couleur du thème</string>
     <string name="text_city_or_locality">Ville ou localité</string>
     <string name="text_class_or_package_name">Nom de la classe ou du paquet</string>
     <string name="text_clean">Nettoyer</string>
@@ -1642,6 +1647,7 @@
     <string name="text_installable">Installable</string>
     <string name="text_installed">Installé</string>
     <string name="text_integrity_verification_failed">Échec de la vérification de l\'intégrité</string>
+    <string name="text_intelligent_preset_material_day_night">Material jour et nuit</string>
     <string name="text_invalid_character_is_removed">Caractère invalide est supprimé</string>
     <string name="text_invalid_package_name">Nom de paquet non valide</string>
     <string name="text_invalid_project">Projet non valide</string>
@@ -2327,6 +2333,8 @@
     <string name="text_start_record">Démarrer l\'enregistrement</string>
     <string name="text_start_running">En cours d\'exécution</string>
     <string name="text_start_wizard">Lancer l\'assistant</string>
+    <string name="text_state_day">Jour</string>
+    <string name="text_state_night">Nuit</string>
     <string name="text_state_or_province">État ou province</string>
     <string name="text_stop">Stop</string>
     <string name="text_stop_reconnecting">Arrêter la reconnexion</string>

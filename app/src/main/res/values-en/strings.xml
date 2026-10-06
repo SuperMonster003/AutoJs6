@@ -776,6 +776,10 @@
     <string name="text_add_colors">Add colors</string>
     <string name="text_and_n_more">... and %d more</string>
     <string name="text_auto_reconnect">Auto reconnect</string>
+    <string name="text_background_color_dark">Dark</string>
+    <string name="text_background_color_follow">Auto</string>
+    <string name="text_background_color_inverse">Auto inverted</string>
+    <string name="text_background_color_light">Light</string>
     <string name="text_batch_restore_summary">Restored %1$d, skipped %2$d, failed %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">Binary content cannot be previewed</string>
     <string name="text_bun_host_capabilities">Bun capability bridge</string>
@@ -1032,6 +1036,7 @@
     <string name="text_choose_colors_to_add">Choose colors to add</string>
     <string name="text_choose_delete_strategy">Choose delete strategy</string>
     <string name="text_choose_restore_path">Choose restore path</string>
+    <string name="text_choose_window_background_as_theme_color">Use an AutoJs6 window background color as the theme color</string>
     <string name="text_city_or_locality">City or Locality</string>
     <string name="text_class_or_package_name">Class / Package name</string>
     <string name="text_clean">Clean</string>
@@ -1639,6 +1644,7 @@
     <string name="text_installable">Installable</string>
     <string name="text_installed">Installed</string>
     <string name="text_integrity_verification_failed">Integrity verification failed</string>
+    <string name="text_intelligent_preset_material_day_night">Material day and night</string>
     <string name="text_invalid_character_is_removed">Invalid character is removed</string>
     <string name="text_invalid_package_name">Invalid package name</string>
     <string name="text_invalid_project">Invalid project</string>
@@ -2324,6 +2330,8 @@
     <string name="text_start_record">Start recording</string>
     <string name="text_start_running">Running</string>
     <string name="text_start_wizard">Start wizard</string>
+    <string name="text_state_day">Day</string>
+    <string name="text_state_night">Night</string>
     <string name="text_state_or_province">State or Province</string>
     <string name="text_stop">Stop</string>
     <string name="text_stop_reconnecting">Stop reconnecting</string>

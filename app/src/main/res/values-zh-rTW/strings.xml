@@ -776,6 +776,10 @@
     <string name="text_add_colors">新增顏色</string>
     <string name="text_and_n_more">... 及其他 %d 項</string>
     <string name="text_auto_reconnect">自動重連</string>
+    <string name="text_background_color_dark">暗色</string>
+    <string name="text_background_color_follow">自動跟隨</string>
+    <string name="text_background_color_inverse">自動反色</string>
+    <string name="text_background_color_light">亮色</string>
     <string name="text_batch_restore_summary">已還原 %1$d, 略過 %2$d, 失敗 %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">二進位內容無法預覽</string>
     <string name="text_bun_host_capabilities">Bun 能力橋</string>
@@ -1032,6 +1036,7 @@
     <string name="text_choose_colors_to_add">選擇要新增的顏色</string>
     <string name="text_choose_delete_strategy">選擇刪除策略</string>
     <string name="text_choose_restore_path">選擇恢復路徑</string>
+    <string name="text_choose_window_background_as_theme_color">選擇一個 AutoJs6 視窗背景色作為主題色</string>
     <string name="text_city_or_locality">城市或區域</string>
     <string name="text_class_or_package_name">類/包名</string>
     <string name="text_clean">清理</string>
@@ -1639,6 +1644,7 @@
     <string name="text_installable">可安裝</string>
     <string name="text_installed">已安裝</string>
     <string name="text_integrity_verification_failed">完整性驗證失敗</string>
+    <string name="text_intelligent_preset_material_day_night">材料設計日夜配對</string>
     <string name="text_invalid_character_is_removed">無效字元已被移除</string>
     <string name="text_invalid_package_name">無效包名</string>
     <string name="text_invalid_project">無效專案</string>
@@ -2324,6 +2330,8 @@
     <string name="text_start_record">開始錄製</string>
     <string name="text_start_running">開始執行</string>
     <string name="text_start_wizard">開始精靈</string>
+    <string name="text_state_day">日</string>
+    <string name="text_state_night">夜</string>
     <string name="text_state_or_province">州或省份</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">停止重連</string>

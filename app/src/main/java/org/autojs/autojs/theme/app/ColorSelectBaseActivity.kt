@@ -46,6 +46,8 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRAR
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
+import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
+import org.autojs.autojs.theme.intelligent.IntelligentSnapshot
 import org.autojs.autojs.theme.library.ColorLibraryIds
 import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.ColorSelection
@@ -343,6 +345,23 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         saveDatabaseForColorHistory(lifecycleScope, applicationContext, libraryId, color.id.toInt())
         isForciblyEnableAppBarColorTransition = true
         ThemeColorCoordinator.apply(color.color, ThemeColorSource.USER)
+    }
+
+    protected fun applyPresetItem(item: PresetColorItem) {
+        savePrefsForLibraries(item)
+        savePrefsForLegacy(this, item)
+        saveDatabaseForColorHistory(applicationContext = applicationContext, libraryId = item.libraryId, itemId = item.itemId)
+        isForciblyEnableAppBarColorTransition = true
+        ThemeColorCoordinator.apply(getColor(item.colorRes), ThemeColorSource.USER)
+    }
+
+    /**
+     * Activates an intelligent library starting from [groupId]; its color applies at once (roadmap P1.2).
+     * zh-CN: 激活智能库并从 [groupId] 开始; 其颜色立即生效 (Roadmap P1.2).
+     */
+    protected fun activateIntelligentLibrary(snapshot: IntelligentSnapshot, groupId: Long?) {
+        isForciblyEnableAppBarColorTransition = true
+        IntelligentColorEngine.activate(snapshot, groupId)
     }
 
     protected fun onColorPickerConfirmed(color: Int) {
@@ -808,7 +827,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         colorName = Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME)
                     }
                     is ColorSelection.Intelligent -> {
-                        identifier = context.getString(R.string.color_library_identifier_intelligent_colors)
+                        identifier = selectionLibraryNameForSummary() ?: context.getString(R.string.color_library_identifier_intelligent_colors)
+                        colorName = Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME)
                     }
                     is ColorSelection.Unknown -> Unit
                     is ColorSelection.Preset -> presetColorLibraries.find { it.id == selection.libraryId }?.let { lib: PresetColorLibrary ->

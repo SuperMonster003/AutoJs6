@@ -219,14 +219,6 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         }
     }
 
-    private fun applyPresetItem(item: PresetColorItem) {
-        savePrefsForLibraries(item)
-        savePrefsForLegacy(this, item)
-        saveDatabaseForColorHistory(applicationContext = applicationContext, libraryId = item.libraryId, itemId = item.itemId)
-        isForciblyEnableAppBarColorTransition = true
-        ThemeColorCoordinator.apply(getColor(item.colorRes), ThemeColorSource.USER)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_color_libraries, menu)
 
@@ -399,12 +391,38 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             presetColorLibraries.flatMap { it.colors }
         }
 
+        /** Item ids of the two window backgrounds in the default library. zh-CN: 默认颜色库中两个窗口背景色的条目 id. */
+        const val ITEM_ID_WINDOW_BACKGROUND_LIGHT = 3
+        const val ITEM_ID_WINDOW_BACKGROUND_NIGHT = 4
+
+        /**
+         * The items shown on a library page. In the default library the two window backgrounds are merged into one
+         * "background color" entry (roadmap P1.6), which keeps the light item id so stored selections still match.
+         * zh-CN: 颜色库页面显示的条目. 默认颜色库中的两个窗口背景色合并为一个 "背景色" 条目 (Roadmap P1.6),
+         * 该条目沿用亮色的条目 id, 使已保存的选中状态仍能对应.
+         */
+        fun displayColorsOf(library: PresetColorLibrary): List<PresetColorItem> = when {
+            !library.isDefault -> library.colors
+            else -> library.colors.mapNotNull { item ->
+                when (item.itemId) {
+                    ITEM_ID_WINDOW_BACKGROUND_LIGHT -> item.copy(nameRes = R.string.text_background_color, mergedColorRes = R.color.window_background_night)
+                    ITEM_ID_WINDOW_BACKGROUND_NIGHT -> null
+                    else -> item
+                }
+            }
+        }
+
         data class PresetColorItem(
             val itemId: Int,
             val libraryId: Int,
             val colorRes: Int,
             val nameRes: Int,
-        )
+            /** A second color shown with [colorRes] for a merged entry. zh-CN: 合并条目中与 [colorRes] 一同显示的第二种颜色. */
+            val mergedColorRes: Int? = null,
+        ) {
+            val isMerged: Boolean
+                get() = mergedColorRes != null
+        }
 
         data class PresetColorLibrary(
             val id: Int,

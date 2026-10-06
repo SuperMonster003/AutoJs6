@@ -21,6 +21,8 @@ class ColorItemAdapter(
     internal var items: List<PresetColorItem>,
     private var isShowLibraryIdentifier: Boolean = false,
     private val onItemClick: ((positionOfCurrentSelection: Int) -> Unit)? = null,
+    /** Handles merged entries, which have no single color to apply. zh-CN: 处理合并条目, 这类条目没有可直接应用的单一颜色. */
+    private val onMergedItemClick: ((PresetColorItem) -> Unit)? = null,
 ) : RecyclerView.Adapter<ColorItemViewHolder>() {
 
     var selectedItemId = SELECT_NONE
@@ -81,6 +83,10 @@ class ColorItemAdapter(
 
     fun onItemConfirmed(context: Context, position: Int) {
         val item: PresetColorItem = items[position]
+        if (item.isMerged) {
+            onMergedItemClick?.invoke(item)
+            return
+        }
         savePrefsAndDatabase(context, item)
         updateSelectedPosition(item, position)
         applyThemeColor(context, item)

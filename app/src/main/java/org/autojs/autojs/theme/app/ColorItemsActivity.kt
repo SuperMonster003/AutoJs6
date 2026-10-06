@@ -20,9 +20,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
+import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.ITEM_ID_WINDOW_BACKGROUND_LIGHT
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.ITEM_ID_WINDOW_BACKGROUND_NIGHT
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.displayColorsOf
+import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
+import org.autojs.autojs.theme.intelligent.IntelligentPresets
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.theme.library.ColorSelection
@@ -86,7 +92,7 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
 
         binding.colorItemsRecyclerView.let { it ->
             it.layoutManager = LinearLayoutManager(this)
-            it.adapter = ColorItemAdapter(library.colors).also { mAdapter = it }
+            it.adapter = ColorItemAdapter(displayColorsOf(library), onMergedItemClick = { showBackgroundColorDialog() }).also { mAdapter = it }
 
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
             it.excludePaddingClippableViewFromBottomNavigationBar()
@@ -100,7 +106,64 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
     }
 
     private val isLibraryOfCurrentSelection: Boolean
-        get() = (currentColorSelection() as? ColorSelection.Preset)?.libraryId == mLibrary.id
+        get() = when (val selection = currentColorSelection()) {
+            is ColorSelection.Preset -> selection.libraryId == mLibrary.id
+            is ColorSelection.Intelligent -> mLibrary.isDefault && selection.libraryId == IntelligentPresets.ID_BACKGROUND
+            else -> false
+        }
+
+    /**
+     * The id shown for [itemId]: the night window background is part of the merged entry.
+     * zh-CN: [itemId] 在列表中对应的 id: 夜间窗口背景色属于合并条目.
+     */
+    private fun displayItemIdOf(itemId: Int): Int = when {
+        mLibrary.isDefault && itemId == ITEM_ID_WINDOW_BACKGROUND_NIGHT -> ITEM_ID_WINDOW_BACKGROUND_LIGHT
+        else -> itemId
+    }
+
+    private fun showBackgroundColorDialog() {
+        val light = getColor(R.color.window_background_light)
+        val dark = getColor(R.color.window_background_night)
+        fun hex(color: Int) = String.format("#%06X", 0xFFFFFF and color)
+        val labels = listOf(
+            "${getString(R.string.text_background_color_light)}  ${hex(light)}",
+            "${getString(R.string.text_background_color_dark)}  ${hex(dark)}",
+            "${getString(R.string.text_background_color_follow)}  ${hex(light)} / ${hex(dark)}",
+            "${getString(R.string.text_background_color_inverse)}  ${hex(dark)} / ${hex(light)}",
+        )
+        val selectedIndex = when (val selection = currentColorSelection()) {
+            is ColorSelection.Preset -> when {
+                selection.libraryId != mLibrary.id -> -1
+                selection.itemId == ITEM_ID_WINDOW_BACKGROUND_LIGHT -> 0
+                selection.itemId == ITEM_ID_WINDOW_BACKGROUND_NIGHT -> 1
+                else -> -1
+            }
+            is ColorSelection.Intelligent -> when (selection.libraryId) {
+                IntelligentPresets.ID_BACKGROUND -> IntelligentColorEngine.shownGroupId?.toInt()
+                    ?.takeIf { IntelligentColorEngine.activeSnapshot?.libraryId == IntelligentPresets.ID_BACKGROUND } ?: -1
+                else -> -1
+            }
+            else -> -1
+        }
+        MaterialDialog.Builder(this)
+            .title(R.string.text_background_color)
+            .content(R.string.text_choose_window_background_as_theme_color)
+            .items(labels)
+            .itemsCallbackSingleChoice(selectedIndex) { _, _, which, _ ->
+                when (which) {
+                    0 -> mLibrary.colors.find { it.itemId == ITEM_ID_WINDOW_BACKGROUND_LIGHT }?.let { applyPresetItem(it) }
+                    1 -> mLibrary.colors.find { it.itemId == ITEM_ID_WINDOW_BACKGROUND_NIGHT }?.let { applyPresetItem(it) }
+                    2 -> activateIntelligentLibrary(IntelligentPresets.background(this), IntelligentPresets.BACKGROUND_GROUP_FOLLOW)
+                    3 -> activateIntelligentLibrary(IntelligentPresets.background(this), IntelligentPresets.BACKGROUND_GROUP_INVERSE)
+                }
+                true
+            }
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .show()
+    }
 
     private fun updateClickListener(toolbar: Toolbar) {
         when {
@@ -127,27 +190,37 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
                 adapter.selectedItemId = when (selection.libraryId) {
                     // Without a stored item (e.g. a legacy default selection), match the current theme color.
                     // zh-CN: 没有保存的条目时 (例如 legacy 的默认色选择), 按当前主题色匹配.
-                    mLibrary.id -> selection.itemId
-                        ?: mLibrary.colors.firstOrNull { getColor(it.colorRes) == ThemeColorManager.colorPrimary }?.itemId
-                        ?: SELECT_NONE
+                    mLibrary.id -> displayItemIdOf(
+                        selection.itemId
+                            ?: mLibrary.colors.firstOrNull { getColor(it.colorRes) == ThemeColorManager.colorPrimary }?.itemId
+                            ?: SELECT_NONE
+                    )
                     else -> SELECT_NONE
                 }
             }
-            else -> {
-                adapter.selectedLibraryId = ColorSelectionCodec.encode(selection).first
-                adapter.selectedItemId = SELECT_NONE
+            else -> when {
+                // The background preset shows as the merged entry. zh-CN: "背景色" 预设显示为合并条目.
+                mLibrary.isDefault && (selection as? ColorSelection.Intelligent)?.libraryId == IntelligentPresets.ID_BACKGROUND -> {
+                    adapter.selectedLibraryId = mLibrary.id
+                    adapter.selectedItemId = ITEM_ID_WINDOW_BACKGROUND_LIGHT
+                }
+                else -> {
+                    adapter.selectedLibraryId = ColorSelectionCodec.encode(selection).first
+                    adapter.selectedItemId = SELECT_NONE
+                }
             }
         }
     }
 
     private fun scrollToPositionOnceIfNeeded(recyclerView: ThemeColorRecyclerView) {
         if (mInitiallyItemIdScrollTo < 0) return
-        val targetPosition = mLibrary.colors.indexOfFirst { it.itemId == mInitiallyItemIdScrollTo }
+        val targetItemId = displayItemIdOf(mInitiallyItemIdScrollTo)
+        val targetPosition = mAdapter.items.indexOfFirst { it.itemId == targetItemId }
         if (targetPosition < 0) {
             mInitiallyItemIdScrollTo = -1
             return
         }
-        val targetItem = mLibrary.colors[targetPosition]
+        val targetItem = mAdapter.items[targetPosition]
 
         if (recyclerView.findViewHolderForAdapterPosition(targetPosition) != null) {
             highlightColorItem(recyclerView, targetPosition, targetItem)
@@ -267,7 +340,7 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
 
         setUpSearchMenu(
             menu,
-            onQueryTextSimpleListener = { query -> filterColorsFromColorItems(query, mLibrary.colors, mAdapter) },
+            onQueryTextSimpleListener = { query -> filterColorsFromColorItems(query, displayColorsOf(mLibrary), mAdapter) },
             onMenuItemActionExpand = { menu.forEach { it.isVisible = it.isVisible.not() } },
             onMenuItemActionCollapse = { menu.forEach { it.isVisible = it.isVisible.not() } },
         )
@@ -282,12 +355,11 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
         }
         R.id.action_show_history -> {
             showColorHistory(mLibrary.id) { selectedHistoryItem ->
-                when (val targetIndex = mAdapter.items.indexOfFirst { getColor(it.colorRes) == selectedHistoryItem.colorInt }) {
-                    -1 -> ViewUtils.showToast(this, R.string.error_failed_to_apply_current_color_history, true)
-                    else -> {
-                        isForciblyEnableAppBarColorTransition = true
-                        mAdapter.onItemConfirmed(this, targetIndex)
-                    }
+                val item = selectedHistoryItem.itemId?.let { id -> mLibrary.colors.find { it.itemId == id } }
+                    ?: mLibrary.colors.find { getColor(it.colorRes) == selectedHistoryItem.colorInt }
+                when (item) {
+                    null -> ViewUtils.showToast(this, R.string.error_failed_to_apply_current_color_history, true)
+                    else -> applyPresetItem(item)
                 }
             }
             true
@@ -306,7 +378,8 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
         when (targetLibraryId) {
             mLibrary.id -> {
                 val recyclerView = binding.colorItemsRecyclerView
-                val viewHolder = recyclerView.findViewHolderForAdapterPosition(targetIndex)
+                val targetPosition = displayItemIdOf(targetIndex).let { id -> mAdapter.items.indexOfFirst { it.itemId == id } }
+                val viewHolder = recyclerView.findViewHolderForAdapterPosition(targetPosition)
 
                 viewHolder?.itemView?.let { itemView ->
                     (itemView.tag as? ValueAnimator)?.cancel()

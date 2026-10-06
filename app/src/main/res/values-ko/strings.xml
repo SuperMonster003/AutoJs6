@@ -781,6 +781,10 @@
     <string name="text_add_colors">색상 추가</string>
     <string name="text_and_n_more">... 외 %d개</string>
     <string name="text_auto_reconnect">자동 재연결</string>
+    <string name="text_background_color_dark">어두운 색</string>
+    <string name="text_background_color_follow">자동</string>
+    <string name="text_background_color_inverse">자동 (반전)</string>
+    <string name="text_background_color_light">밝은 색</string>
     <string name="text_batch_restore_summary">복원 %1$d개, 건너뜀 %2$d개, 실패 %3$d개</string>
     <string name="text_binary_content_cannot_be_previewed">바이너리 내용은 미리 볼 수 없습니다</string>
     <string name="text_bun_host_capabilities">Bun 기능 브리지</string>
@@ -1037,6 +1041,7 @@
     <string name="text_choose_colors_to_add">추가할 색상 선택</string>
     <string name="text_choose_delete_strategy">삭제 방식 선택</string>
     <string name="text_choose_restore_path">복원 경로 선택</string>
+    <string name="text_choose_window_background_as_theme_color">AutoJs6 창 배경색을 테마 색상으로 사용</string>
     <string name="text_city_or_locality">시 또는 지역</string>
     <string name="text_class_or_package_name">클래스 / 패키지 이름</string>
     <string name="text_clean">정리</string>
@@ -1644,6 +1649,7 @@
     <string name="text_installable">설치 가능</string>
     <string name="text_installed">설치됨</string>
     <string name="text_integrity_verification_failed">무결성 검증에 실패했습니다</string>
+    <string name="text_intelligent_preset_material_day_night">머티리얼 주야간 쌍</string>
     <string name="text_invalid_character_is_removed">잘못된 문자가 제거되었습니다</string>
     <string name="text_invalid_package_name">잘못된 패키지 이름</string>
     <string name="text_invalid_project">잘못된 프로젝트</string>
@@ -2329,6 +2335,8 @@
     <string name="text_start_record">녹음을 시작하십시오</string>
     <string name="text_start_running">달리기</string>
     <string name="text_start_wizard">마법사 시작</string>
+    <string name="text_state_day">주간</string>
+    <string name="text_state_night">야간</string>
     <string name="text_state_or_province">주 또는 도</string>
     <string name="text_stop">중지</string>
     <string name="text_stop_reconnecting">재연결 중지</string>

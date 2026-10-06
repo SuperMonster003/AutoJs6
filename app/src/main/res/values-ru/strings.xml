@@ -779,6 +779,10 @@
     <string name="text_add_colors">Добавить цвета</string>
     <string name="text_and_n_more">... и еще %d</string>
     <string name="text_auto_reconnect">Автоматическое переподключение</string>
+    <string name="text_background_color_dark">Тёмный</string>
+    <string name="text_background_color_follow">Автоматически</string>
+    <string name="text_background_color_inverse">Автоматически (инверсия)</string>
+    <string name="text_background_color_light">Светлый</string>
     <string name="text_batch_restore_summary">Восстановлено: %1$d, пропущено: %2$d, ошибок: %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">Двоичное содержимое нельзя просмотреть</string>
     <string name="text_bun_host_capabilities">Мост возможностей Bun</string>
@@ -1035,6 +1039,7 @@
     <string name="text_choose_colors_to_add">Выберите цвета для добавления</string>
     <string name="text_choose_delete_strategy">Выберите способ удаления</string>
     <string name="text_choose_restore_path">Выберите путь восстановления</string>
+    <string name="text_choose_window_background_as_theme_color">Использовать цвет фона окна AutoJs6 как цвет темы</string>
     <string name="text_city_or_locality">Город или населенный пункт</string>
     <string name="text_class_or_package_name">Имя класса / пакета</string>
     <string name="text_clean">Очистить</string>
@@ -1642,6 +1647,7 @@
     <string name="text_installable">Устанавливаемый</string>
     <string name="text_installed">Установлено</string>
     <string name="text_integrity_verification_failed">Сбой проверки целостности</string>
+    <string name="text_intelligent_preset_material_day_night">Material день и ночь</string>
     <string name="text_invalid_character_is_removed">Недопустимый символ удален</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>
@@ -2327,6 +2333,8 @@
     <string name="text_start_record">Начало записи</string>
     <string name="text_start_running">Выполнение</string>
     <string name="text_start_wizard">Запустить мастер</string>
+    <string name="text_state_day">День</string>
+    <string name="text_state_night">Ночь</string>
     <string name="text_state_or_province">Штат или провинция</string>
     <string name="text_stop">Остановить</string>
     <string name="text_stop_reconnecting">Прекратить переподключение</string>

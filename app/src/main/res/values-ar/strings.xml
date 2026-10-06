@@ -781,6 +781,10 @@
     <string name="text_add_colors">إضافة ألوان</string>
     <string name="text_and_n_more">... و %d اخرى</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
+    <string name="text_background_color_dark">داكن</string>
+    <string name="text_background_color_follow">تلقائي</string>
+    <string name="text_background_color_inverse">تلقائي (معكوس)</string>
+    <string name="text_background_color_light">فاتح</string>
     <string name="text_batch_restore_summary">تمت الاستعادة %1$d, تم التخطي %2$d, فشل %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">لا يمكن معاينة المحتوى الثنائي</string>
     <string name="text_bun_host_capabilities">جسر قدرات Bun</string>
@@ -1037,6 +1041,7 @@
     <string name="text_choose_colors_to_add">اختر الألوان المراد إضافتها</string>
     <string name="text_choose_delete_strategy">اختر طريقة الحذف</string>
     <string name="text_choose_restore_path">اختر مسار الاستعادة</string>
+    <string name="text_choose_window_background_as_theme_color">استخدام لون خلفية نافذة AutoJs6 كلون للثيم</string>
     <string name="text_city_or_locality">المدينة أو المنطقة</string>
     <string name="text_class_or_package_name">اسم الفئة / الحزمة</string>
     <string name="text_clean">تنظيف</string>
@@ -1644,6 +1649,7 @@
     <string name="text_installable">قابل للتثبيت</string>
     <string name="text_installed">مثبّت</string>
     <string name="text_integrity_verification_failed">فشل التحقق من السلامة</string>
+    <string name="text_intelligent_preset_material_day_night">ألوان المواد نهارا وليلا</string>
     <string name="text_invalid_character_is_removed">تمت إزالة حرف غير صالح</string>
     <string name="text_invalid_package_name">اسم الحزمة غير صالح</string>
     <string name="text_invalid_project">مشروع غير صالح</string>
@@ -2329,6 +2335,8 @@
     <string name="text_start_record">ابدأ التسجيل</string>
     <string name="text_start_running">ادارة</string>
     <string name="text_start_wizard">بدء المعالج</string>
+    <string name="text_state_day">نهار</string>
+    <string name="text_state_night">ليل</string>
     <string name="text_state_or_province">الولاية أو المقاطعة</string>
     <string name="text_stop">قف</string>
     <string name="text_stop_reconnecting">إيقاف إعادة الاتصال</string>

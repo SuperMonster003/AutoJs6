@@ -779,6 +779,10 @@
     <string name="text_add_colors">Agregar colores</string>
     <string name="text_and_n_more">... y %d más</string>
     <string name="text_auto_reconnect">Reconexión automática</string>
+    <string name="text_background_color_dark">Oscuro</string>
+    <string name="text_background_color_follow">Automático</string>
+    <string name="text_background_color_inverse">Automático (invertido)</string>
+    <string name="text_background_color_light">Claro</string>
     <string name="text_batch_restore_summary">Restaurados %1$d, omitidos %2$d, fallidos %3$d</string>
     <string name="text_binary_content_cannot_be_previewed">El contenido binario no se puede previsualizar</string>
     <string name="text_bun_host_capabilities">Puente de capacidades de Bun</string>
@@ -1035,6 +1039,7 @@
     <string name="text_choose_colors_to_add">Elegir los colores que se agregarán</string>
     <string name="text_choose_delete_strategy">Elegir metodo de eliminacion</string>
     <string name="text_choose_restore_path">Elegir ruta de restauracion</string>
+    <string name="text_choose_window_background_as_theme_color">Usar un color de fondo de ventana de AutoJs6 como color del tema</string>
     <string name="text_city_or_locality">Ciudad o localidad</string>
     <string name="text_class_or_package_name">Nombre de la clase/paquete</string>
     <string name="text_clean">Limpiar</string>
@@ -1642,6 +1647,7 @@
     <string name="text_installable">Instalable</string>
     <string name="text_installed">Instalado</string>
     <string name="text_integrity_verification_failed">La verificación de integridad falló</string>
+    <string name="text_intelligent_preset_material_day_night">Material día y noche</string>
     <string name="text_invalid_character_is_removed">Carácter inválido ha sido removido</string>
     <string name="text_invalid_package_name">Nombre de paquete no válido</string>
     <string name="text_invalid_project">Proyecto no válido</string>
@@ -2327,6 +2333,8 @@
     <string name="text_start_record">Comenzar a grabar</string>
     <string name="text_start_running">Ejecutando</string>
     <string name="text_start_wizard">Iniciar asistente</string>
+    <string name="text_state_day">Día</string>
+    <string name="text_state_night">Noche</string>
     <string name="text_state_or_province">Estado o provincia</string>
     <string name="text_stop">Detener</string>
     <string name="text_stop_reconnecting">Dejar de reconectar</string>

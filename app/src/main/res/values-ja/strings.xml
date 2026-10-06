@@ -780,6 +780,10 @@
     <string name="text_add_colors">色を追加</string>
     <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_auto_reconnect">自動再接続</string>
+    <string name="text_background_color_dark">ダーク</string>
+    <string name="text_background_color_follow">自動</string>
+    <string name="text_background_color_inverse">自動 (反転)</string>
+    <string name="text_background_color_light">ライト</string>
     <string name="text_batch_restore_summary">復元 %1$d 件, スキップ %2$d 件, 失敗 %3$d 件</string>
     <string name="text_binary_content_cannot_be_previewed">バイナリの内容はプレビューできません</string>
     <string name="text_bun_host_capabilities">Bun 機能ブリッジ</string>
@@ -1036,6 +1040,7 @@
     <string name="text_choose_colors_to_add">追加する色を選択</string>
     <string name="text_choose_delete_strategy">削除方法を選択</string>
     <string name="text_choose_restore_path">復元先を選択</string>
+    <string name="text_choose_window_background_as_theme_color">AutoJs6 のウィンドウ背景色をテーマカラーとして使用</string>
     <string name="text_city_or_locality">市区町村</string>
     <string name="text_class_or_package_name">クラス名/パッケージ名</string>
     <string name="text_clean">クリーン</string>
@@ -1643,6 +1648,7 @@
     <string name="text_installable">インストール可</string>
     <string name="text_installed">インストール済み</string>
     <string name="text_integrity_verification_failed">整合性の検証に失敗しました</string>
+    <string name="text_intelligent_preset_material_day_night">マテリアル昼夜ペア</string>
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>
@@ -2328,6 +2334,8 @@
     <string name="text_start_record">記録開始</string>
     <string name="text_start_running">実行中</string>
     <string name="text_start_wizard">ウィザードを開始</string>
+    <string name="text_state_day">昼</string>
+    <string name="text_state_night">夜</string>
     <string name="text_state_or_province">州または省</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">再接続を停止</string>
