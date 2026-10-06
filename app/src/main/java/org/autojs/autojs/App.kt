@@ -40,6 +40,7 @@ import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.storage.file.TmpScriptFilesCleanupScheduler
 import org.autojs.autojs.storage.history.HistoryCleanupScheduler
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
 import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
 import org.autojs.autojs.tool.CrashHandler
@@ -138,6 +139,9 @@ class App : Application(), WorkManagerConfiguration.Provider {
 
                 if (getProcessNameCompat() == applicationInfo.processName) {
                     if (!AbstractAutoJs.isInrt) {
+                        // Before any Activity draws, so a due change shows no flash (roadmap D9).
+                        // zh-CN: 在任何 Activity 绘制之前执行, 使到期的变化不会闪色 (Roadmap D9).
+                        IntelligentColorEngine.init(this)
                         org.autojs.autojs.core.plugin.agent.ThreeStoveAgentConnectionOwner.get(this).refresh()
                     }
                 }

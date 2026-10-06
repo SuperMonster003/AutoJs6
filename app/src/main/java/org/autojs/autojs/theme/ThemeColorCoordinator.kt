@@ -54,7 +54,7 @@ object ThemeColorCoordinator {
 
     @JvmStatic
     fun apply(themeColor: ThemeColor, source: ThemeColorSource) {
-        if (source == ThemeColorSource.USER || source == ThemeColorSource.RESTORE) {
+        if (source == ThemeColorSource.USER || source == ThemeColorSource.RESTORE || source == ThemeColorSource.ACTIVATION) {
             handler.removeCallbacks(flushRunnable)
         }
         perform { policy.request(themeColor, source, SystemClock.uptimeMillis()) }

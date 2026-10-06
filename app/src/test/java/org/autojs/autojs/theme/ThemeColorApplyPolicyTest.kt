@@ -1,6 +1,7 @@
 package org.autojs.autojs.theme
 
 import org.autojs.autojs.theme.ThemeColorApplyPolicy.Action
+import org.autojs.autojs.theme.ThemeColorSource.ACTIVATION
 import org.autojs.autojs.theme.ThemeColorSource.INTELLIGENT
 import org.autojs.autojs.theme.ThemeColorSource.RESTORE
 import org.autojs.autojs.theme.ThemeColorSource.SCRIPT
@@ -20,6 +21,15 @@ class ThemeColorApplyPolicyTest {
         policy.pause("page")
         assertEquals(Action.Apply(1, USER), policy.request(1, USER, 0))
         assertEquals(Action.Apply(2, RESTORE), policy.request(2, RESTORE, 0))
+    }
+
+    @Test
+    fun activationAppliesWhilePausedAndKeepsTheLibraryActive() {
+        policy.request(1, SCRIPT, 0)
+        policy.pause("page")
+        assertEquals(Action.Apply(2, ACTIVATION), policy.request(2, ACTIVATION, 100))
+        assertNull(policy.pendingScript)
+        assertFalse(ThemeColorApplyPolicy.deactivatesIntelligent(ACTIVATION))
     }
 
     @Test

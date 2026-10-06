@@ -3,6 +3,8 @@ package org.autojs.autojs.theme.app
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -93,6 +95,10 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Intelligent changes wait while any theme color page is open (roadmap D6).
+        // zh-CN: 任一主题色页面打开期间, 智能修改暂缓 (Roadmap D6).
+        ThemeColorCoordinator.pause(this)
+
         ThemeChangeNotifier.themeChanged.observe(this) {
             updateAppBarColorContent(ThemeColorManager.colorPrimary)
         }
@@ -103,6 +109,11 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         if (intent.getBooleanExtra("isToggled", false)) {
             EventBus.getDefault().post(object : ThemeColorLayoutSwitchedEvent {})
         }
+    }
+
+    override fun onDestroy() {
+        releasePauseToken(this)
+        super.onDestroy()
     }
 
     protected fun setUpToolbar(toolbar: Toolbar) {
@@ -944,6 +955,31 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         fun savePrefsForLibraries(libraryId: Int, itemId: Int) {
             Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, libraryId)
             Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, itemId)
+        }
+
+        /**
+         * Records an active intelligent library as the selection; the item id holds the starting group (D9).
+         * zh-CN: 将激活的智能库记为选中状态; 条目 id 保存起始组 (D9).
+         */
+        @JvmStatic
+        fun savePrefsForIntelligent(libraryId: Int, startGroupId: Long?) {
+            ColorSelectionCodec.encode(ColorSelection.Intelligent(libraryId, startGroupId)).let { (library, item) ->
+                savePrefsForLibraries(library, item)
+            }
+            Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+        }
+
+        /**
+         * Releases the pause token of a theme color page. When the page is only being recreated (rotation, night
+         * mode), the release waits one main loop turn so the new instance takes its token first.
+         * zh-CN: 释放主题色页面的暂停令牌. 页面只是在重建 (旋转, 夜间模式) 时, 延后一轮主线程循环释放, 让新实例先取得令牌.
+         */
+        @JvmStatic
+        fun releasePauseToken(activity: android.app.Activity) {
+            when {
+                activity.isChangingConfigurations -> Handler(Looper.getMainLooper()).post { ThemeColorCoordinator.resume(activity) }
+                else -> ThemeColorCoordinator.resume(activity)
+            }
         }
 
         fun savePrefsForSelectionNames(libraryName: String?, itemName: String?) {
