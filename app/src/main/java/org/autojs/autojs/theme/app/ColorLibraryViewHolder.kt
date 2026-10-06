@@ -1,6 +1,5 @@
 package org.autojs.autojs.theme.app
 
-import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.widget.ImageView
 import android.widget.TextView
@@ -34,13 +33,7 @@ class ColorLibraryViewHolder(itemViewBinding: MtColorLibrariesRecyclerViewItemBi
         val library = row.library
         libraryName.text = context.getString(library.nameRes)
 
-        description.text = when {
-            library.isIntelligent -> {
-                @SuppressLint("SetTextI18n")
-                "[ ${context.getString(R.string.text_under_development)} ]"
-            }
-            else -> totalSum(library.colors.size)
-        }
+        description.text = row.description ?: totalSum(library.colors.size)
 
         when {
             library.isDefault -> colorItemView.setImageResource(R.drawable.ic_color_library_default)

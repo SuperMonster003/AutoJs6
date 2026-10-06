@@ -24,6 +24,21 @@
         <item quantity="other">%d scripts arrêtés</item>
     </plurals>
 
+    <plurals name="text_every_n_hours">
+        <item quantity="one">Toutes les %d heure</item>
+        <item quantity="other">Toutes les %d heures</item>
+    </plurals>
+
+    <plurals name="text_every_n_minutes">
+        <item quantity="one">Toutes les %d minute</item>
+        <item quantity="other">Toutes les %d minutes</item>
+    </plurals>
+
+    <plurals name="text_every_n_seconds">
+        <item quantity="one">Toutes les %d seconde</item>
+        <item quantity="other">Toutes les %d secondes</item>
+    </plurals>
+
     <plurals name="text_items_total_sum">
         <item quantity="one">Total %d élément</item>
         <item quantity="many">Total %d éléments</item>
@@ -34,6 +49,11 @@
         <item quantity="one">Total : %d élément</item>
         <item quantity="many">Total : %d éléments</item>
         <item quantity="other">Total : %d éléments</item>
+    </plurals>
+
+    <plurals name="text_n_groups">
+        <item quantity="one">%d groupe</item>
+        <item quantity="other">%d groupes</item>
     </plurals>
 
 </resources>

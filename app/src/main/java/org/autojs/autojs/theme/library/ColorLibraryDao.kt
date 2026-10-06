@@ -90,6 +90,42 @@ interface ColorLibraryDao {
     @Query("SELECT * FROM color_group WHERE library_id = :libraryId ORDER BY position, id")
     suspend fun listGroups(libraryId: Long): List<ColorGroup>
 
+    /**
+     * Replaces the groups of [libraryId] with [groups] (states in the same order). Groups that already belong to the
+     * library keep their ids, so an active library keeps its current group; other groups are inserted and groups not
+     * listed are deleted with their states. Returns the stored ids in order.
+     * zh-CN: 用 [groups] (状态按相同顺序) 替换 [libraryId] 的全部组. 已属于该库的组保留 id, 使激活库保持当前组;
+     * 其余组新插入, 未列出的组连同其状态一并删除. 按顺序返回保存后的 id.
+     */
+    @Transaction
+    suspend fun saveGroups(libraryId: Long, groups: List<ColorGroup>, states: List<List<ColorGroupState>>): List<Long> {
+        val existingIds = listGroups(libraryId).map { it.id }.toSet()
+        val keptIds = groups.map { it.id }.filter { it in existingIds }.toSet()
+        (existingIds - keptIds).forEach { deleteGroup(it) }
+        return groups.mapIndexed { index, group ->
+            val id = when (group.id) {
+                in keptIds -> group.id.also { updateGroup(group.copy(libraryId = libraryId)) }
+                else -> insertGroup(group.copy(id = 0L, libraryId = libraryId))
+            }
+            deleteStates(id)
+            upsertStates(states.getOrNull(index).orEmpty().map { it.copy(groupId = id) })
+            id
+        }
+    }
+
+    @Transaction
+    suspend fun insertIntelligentLibrary(library: ColorLibrary, groups: List<ColorGroup>, states: List<List<ColorGroupState>>): Long {
+        val libraryId = insertLibrary(library)
+        saveGroups(libraryId, groups, states)
+        return libraryId
+    }
+
+    @Transaction
+    suspend fun updateIntelligentLibrary(library: ColorLibrary, groups: List<ColorGroup>, states: List<List<ColorGroupState>>) {
+        updateLibrary(library)
+        saveGroups(library.id, groups, states)
+    }
+
     @Upsert
     suspend fun upsertStates(states: List<ColorGroupState>)
 

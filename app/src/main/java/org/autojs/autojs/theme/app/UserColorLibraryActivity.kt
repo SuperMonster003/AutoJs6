@@ -21,7 +21,6 @@ import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
 import org.autojs.autojs.theme.app.ColorEntities.LibraryColor
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_PALETTE
 import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.ColorSelection
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -179,20 +178,9 @@ class UserColorLibraryActivity : ColorSelectBaseActivity() {
     private fun deleteColors(ids: List<Long>) {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) { repository.deleteColors(libraryRowId, ids) }
-            if (selectedColorIdInThisLibrary in ids) fallBackToPaletteSelection()
+            if (selectedColorIdInThisLibrary in ids) fallBackToPaletteSelection(this@UserColorLibraryActivity)
             load()
         }
-    }
-
-    /**
-     * The selected color is gone: keep the theme color, but record it as a palette selection.
-     * zh-CN: 选中的颜色已不存在: 保留主题色, 但改记为调色盘选择.
-     */
-    private fun fallBackToPaletteSelection() {
-        savePrefsForLibraries(COLOR_LIBRARY_ID_PALETTE, 0)
-        savePrefsForLegacyPalette(ThemeColorManager.colorPrimary)
-        saveDatabaseForPaletteHistory(lifecycleScope, applicationContext, ThemeColorManager.colorPrimary)
-        ThemeChangeNotifier.notifyThemeChanged()
     }
 
     private fun addColors(colors: List<ColorLibraryRepository.NewColor>) {
@@ -334,7 +322,7 @@ class UserColorLibraryActivity : ColorSelectBaseActivity() {
             lifecycleScope.launch {
                 val wasSelected = selectedColorIdInThisLibrary != null
                 withContext(Dispatchers.IO) { repository.deleteLibrary(current) }
-                if (wasSelected) fallBackToPaletteSelection()
+                if (wasSelected) fallBackToPaletteSelection(this@UserColorLibraryActivity)
                 finish()
             }
         }

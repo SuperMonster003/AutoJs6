@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_edit_intelligent_library"
+        android:title="@string/text_edit"
+        android:icon="@drawable/ic_edit_white_24dp"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_locate_current_theme_color"
+        android:title="@string/text_locate_current_theme_color"
+        android:icon="@drawable/ic_locate"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_clone_intelligent_library"
+        android:title="@string/text_clone"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_rename_intelligent_library"
+        android:title="@string/text_rename"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete_intelligent_library"
+        android:title="@string/text_delete"
+        app:showAsAction="never" />
+
+</menu>

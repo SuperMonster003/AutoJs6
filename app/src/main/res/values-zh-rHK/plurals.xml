@@ -16,12 +16,28 @@
         <item quantity="other">已停止運行 %d 個腳本</item>
     </plurals>
 
+    <plurals name="text_every_n_hours">
+        <item quantity="other">每 %d 小時</item>
+    </plurals>
+
+    <plurals name="text_every_n_minutes">
+        <item quantity="other">每 %d 分鐘</item>
+    </plurals>
+
+    <plurals name="text_every_n_seconds">
+        <item quantity="other">每 %d 秒</item>
+    </plurals>
+
     <plurals name="text_items_total_sum">
         <item quantity="other">共計 %d 項</item>
     </plurals>
 
     <plurals name="text_items_total_sum_with_colon">
         <item quantity="other">共計: %d 項</item>
+    </plurals>
+
+    <plurals name="text_n_groups">
+        <item quantity="other">%d 組</item>
     </plurals>
 
 </resources>

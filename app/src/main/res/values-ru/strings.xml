@@ -1240,7 +1240,9 @@
     <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
     <string name="text_current">Текущая</string>
     <string name="text_current_file">Текущий файл</string>
+    <string name="text_current_group">Текущая группа: %1$s</string>
     <string name="text_current_page_configuration">Конфигурация страницы</string>
+    <string name="text_current_state">Текущее состояние: %1$s</string>
     <string name="text_current_version">Текущая версия</string>
     <string name="text_custom">Пользовательский</string>
     <string name="text_daily_task">Ежедневная задача</string>
@@ -1504,6 +1506,9 @@
     <string name="text_go_to_settings">Перейдите в \"Настройки\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Предоставление привилегий AutoJs6 в приложении Shizuku</string>
     <string name="text_granted">Разрешено</string>
+    <string name="text_group_disabled">Отключено</string>
+    <string name="text_group_unavailable">Эта группа отключена или не содержит цвета</string>
+    <string name="text_groups_enabled_of_total">Групп: %1$d/%2$d</string>
     <string name="text_guard_mode">Режим охраны</string>
     <string name="text_help">Справка</string>
     <string name="text_hidden_files_description">Отображать или нет скрытые файлы и папки в проводнике файлов. Файл или папка считаются скрытыми, если их имя начинается с символа точки (\".\").</string>
@@ -1555,6 +1560,7 @@
     <string name="text_in_process_instance">Экземпляр в процессе</string>
     <string name="text_adopted_by_first_event">принят по первому событию (onServiceConnected не вызван)</string>
     <string name="text_in_progress">В процессе выполнения</string>
+    <string name="text_in_use">Используется</string>
     <string name="text_info">Информация</string>
     <string name="text_input_bar">Строка ввода</string>
     <string name="text_inrt_shared_storage_required">Проекту нужен доступ к общим файлам. Разрешите доступ к хранилищу и вернитесь сюда для запуска скрипта. При отмене скрипт останется остановленным. Доступ ко всем файлам не включает закрытые каталоги других приложений.</string>
@@ -1647,7 +1653,9 @@
     <string name="text_installable">Устанавливаемый</string>
     <string name="text_installed">Установлено</string>
     <string name="text_integrity_verification_failed">Сбой проверки целостности</string>
+    <string name="text_intelligent_mine">Мои</string>
     <string name="text_intelligent_preset_material_day_night">Material день и ночь</string>
+    <string name="text_intelligent_presets">Предустановки</string>
     <string name="text_invalid_character_is_removed">Недопустимый символ удален</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>
@@ -1781,9 +1789,11 @@
     <string name="text_new_version_found">Найдена новая версия</string>
     <string name="text_new_watching_variables">Новые наблюдающие переменные</string>
     <string name="text_next_retry">Следующая попытка</string>
+    <string name="text_next_rotation_at">Следующая смена: %1$s</string>
     <string name="text_next_run_time">Следующий запуск</string>
     <string name="text_night_mode">Ночной режим</string>
     <string name="text_no_auto_mount_plugins">Нет плагинов с авто-монтированием</string>
+    <string name="text_no_available_groups">Нет доступных групп</string>
     <string name="text_no_available_plugins_found_hint">Доступные плагины не найдены</string>
     <string name="text_no_broken_items">Поврежденных элементов нет</string>
     <string name="text_no_browser">Не установлен браузер</string>
@@ -1798,6 +1808,7 @@
     <string name="text_no_history">Истории нет</string>
     <string name="text_no_ignored_updates">Нет проигнорированных обновлений</string>
     <string name="text_no_instruction_available">Инструкции недоступны</string>
+    <string name="text_no_intelligent_libraries">Интеллектуальных цветовых библиотек пока нет\n\nСоздайте её через пункт меню \"Новая интеллектуальная цветовая библиотека\" или клонируйте предустановку</string>
     <string name="text_no_js_code_to_copy">Нет JavaScript-кода для копирования</string>
     <string name="text_no_log_entries_to_copy">Нет записей журнала для копирования</string>
     <string name="text_no_log_entries_to_export">Нет записей журнала для экспорта</string>
@@ -1848,6 +1859,9 @@
     <string name="text_operation_is_completed">Операция завершена</string>
     <string name="text_operational">Работоспособна</string>
     <string name="text_options">Опции</string>
+    <string name="text_order_random">Случайно</string>
+    <string name="text_order_sequential">По порядку</string>
+    <string name="text_order_sequential_by">По порядку (%1$s)</string>
     <string name="text_organization">Название организации</string>
     <string name="text_organizational_unit">Организационная единица</string>
     <string name="text_original_developer">Оригинальный разработчик</string>
@@ -2195,6 +2209,8 @@
     <string name="text_root_manager_apps">Приложения для управления root</string>
     <string name="text_root_manager_apps_empty">Подходящие приложения не найдены. Можно добавить установленное приложение вручную.</string>
     <string name="text_root_mode_title">Проверка прав root</string>
+    <string name="text_rotation_app_start">Запуск приложения</string>
+    <string name="text_rotation_state_change">Смена состояния</string>
     <string name="text_run">Запустить</string>
     <string name="text_run_on_battery_change">При смене батареи</string>
     <string name="text_run_on_boot">При загрузке</string>
@@ -2310,6 +2326,13 @@
     <string name="text_sort_by_time_desc">Время (сначала новые)</string>
     <string name="text_sort_descending">По убыванию</string>
     <string name="text_sort_field">Поле сортировки</string>
+    <string name="text_sort_key_chroma">Насыщенность</string>
+    <string name="text_sort_key_created">Время создания</string>
+    <string name="text_sort_key_hue">Оттенок</string>
+    <string name="text_sort_key_lightness">Яркость</string>
+    <string name="text_sort_key_manual">Вручную</string>
+    <string name="text_sort_key_modified">Время изменения</string>
+    <string name="text_sort_key_name">Имя</string>
     <string name="text_sort_order">Порядок сортировки</string>
     <string name="text_sort_secondary">Вторичная сортировка</string>
     <string name="text_sort_strategy_author">Разработчик</string>
@@ -2336,6 +2359,7 @@
     <string name="text_state_day">День</string>
     <string name="text_state_night">Ночь</string>
     <string name="text_state_or_province">Штат или провинция</string>
+    <string name="text_state_source_none">Нет</string>
     <string name="text_stop">Остановить</string>
     <string name="text_stop_reconnecting">Прекратить переподключение</string>
     <string name="text_stop_simplified">Стоп</string>
@@ -2439,6 +2463,7 @@
     <string name="text_unpin">Открепить</string>
     <string name="text_unsaved_changes">Несохраненные изменения</string>
     <string name="text_unsigned_apk_created">Неподписанный APK создан</string>
+    <string name="text_unsupported">Не поддерживается</string>
     <string name="text_unverified">Не подтверждено</string>
     <string name="text_updatable">Доступно обновление</string>
     <string name="text_update">Обновить</string>

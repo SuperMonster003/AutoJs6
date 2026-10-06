@@ -127,10 +127,16 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      * zh-CN: 激活库被编辑后替换其保存的数据; 当前组仍存在时保持不变.
      */
     fun onLibraryChanged(snapshot: IntelligentSnapshot) {
-        if (this.snapshot?.libraryId != snapshot.libraryId) return
+        val previous = this.snapshot ?: return
+        if (previous.libraryId != snapshot.libraryId) return
         this.snapshot = snapshot
         Pref.putString(KEY_SNAPSHOT, IntelligentEngineJson.encodeSnapshot(snapshot))
-        plan(IntelligentEvent.ACTIVATE, runtime.currentGroupId, ThemeColorSource.INTELLIGENT)
+        // A changed configuration re-arms the schedule; a rename or group edit keeps it.
+        // zh-CN: 配置变化时重新安排调度; 仅重命名或编辑组时保持原调度.
+        when (previous.config) {
+            snapshot.config -> plan(IntelligentEvent.EVALUATE, null, ThemeColorSource.INTELLIGENT)
+            else -> plan(IntelligentEvent.ACTIVATE, runtime.currentGroupId, ThemeColorSource.INTELLIGENT)
+        }
     }
 
     fun onLibraryDeleted(libraryId: Int) {

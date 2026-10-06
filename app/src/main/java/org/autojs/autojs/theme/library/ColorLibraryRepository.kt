@@ -1,9 +1,16 @@
 package org.autojs.autojs.theme.library
 
 import android.content.Context
+import org.autojs.autojs.theme.app.ColorEntities.ColorGroup
+import org.autojs.autojs.theme.app.ColorEntities.ColorGroupState
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
 import org.autojs.autojs.theme.app.ColorEntities.LibraryColor
 import org.autojs.autojs.theme.app.ColorHistoryDatabase
+import org.autojs.autojs.theme.intelligent.IntelligentConfig
+import org.autojs.autojs.theme.intelligent.IntelligentConfigJson
+import org.autojs.autojs.theme.intelligent.IntelligentGroup
+import org.autojs.autojs.theme.intelligent.IntelligentSnapshot
+import org.autojs.autojs.theme.intelligent.StateColors
 
 /**
  * Operations on user color libraries (roadmap P1.1). All functions must run off the main thread.
@@ -115,6 +122,90 @@ class ColorLibraryRepository(
             dao.updateColors(changed)
             dao.touchLibrary(libraryId, now())
         }
+    }
+
+    suspend fun listIntelligentLibraries(): List<IntelligentSnapshot> {
+        return dao.listLibraries().filter { it.isIntelligent }.map { snapshotOf(it) }
+    }
+
+    suspend fun loadIntelligent(rowId: Long): IntelligentSnapshot? {
+        return dao.findLibrary(rowId)?.takeIf { it.isIntelligent }?.let { snapshotOf(it) }
+    }
+
+    /**
+     * Creates ([rowId] null) or updates an intelligent library. Groups with an id that already belongs to the library
+     * keep it; any other id (such as a negative editor id) creates a new group. Returns the stored library.
+     * zh-CN: 新建 ([rowId] 为 null) 或更新智能库. id 已属于该库的组保留其 id; 其他 id (例如编辑器中的负数 id) 新建组. 返回保存后的库.
+     */
+    suspend fun saveIntelligent(
+        rowId: Long?,
+        name: String,
+        config: IntelligentConfig,
+        groups: List<IntelligentGroup>,
+        kind: String = ColorLibrary.Kind.CREATED,
+        origin: String? = null,
+    ): IntelligentSnapshot {
+        val time = now()
+        val configJson = IntelligentConfigJson.encode(config)
+        val groupRows = groups.mapIndexed { index, group ->
+            ColorGroup(
+                id = group.id,
+                libraryId = rowId ?: 0L,
+                name = group.name,
+                enabled = group.enabled,
+                position = index,
+                createdTime = group.createdTime.takeIf { it > 0L } ?: time,
+                modifiedTime = group.modifiedTime.takeIf { it > 0L } ?: time,
+            )
+        }
+        val stateRows = groups.map { group ->
+            group.states.map { (key, colors) -> ColorGroupState(0L, key, colors.primary, colors.accent, colors.dark) }
+        }
+        val libraryId = when (val existing = rowId?.let { dao.findLibrary(it) }) {
+            null -> dao.insertIntelligentLibrary(
+                ColorLibrary(
+                    kind = kind,
+                    isIntelligent = true,
+                    name = LibraryNaming.unique(name, dao.listLibraryNames()),
+                    origin = origin,
+                    configJson = configJson,
+                    position = dao.nextLibraryPosition(),
+                    createdTime = time,
+                    modifiedTime = time,
+                ),
+                groupRows,
+                stateRows,
+            )
+            else -> existing.id.also { id ->
+                val others = dao.listLibraries().filter { it.id != id }.map { it.name }
+                dao.updateIntelligentLibrary(
+                    existing.copy(name = LibraryNaming.unique(name, others), configJson = configJson, modifiedTime = time),
+                    groupRows,
+                    stateRows,
+                )
+            }
+        }
+        return loadIntelligent(libraryId)!!
+    }
+
+    private suspend fun snapshotOf(library: ColorLibrary): IntelligentSnapshot {
+        val states = dao.listStates(library.id).groupBy { it.groupId }
+        return IntelligentSnapshot(
+            libraryId = ColorLibraryIds.ofUserLibrary(library.id, intelligent = true),
+            name = library.name,
+            config = IntelligentConfigJson.decode(library.configJson),
+            groups = dao.listGroups(library.id).map { group ->
+                IntelligentGroup(
+                    id = group.id,
+                    name = group.name,
+                    enabled = group.enabled,
+                    position = group.position,
+                    createdTime = group.createdTime,
+                    modifiedTime = group.modifiedTime,
+                    states = states[group.id].orEmpty().associate { it.stateKey to StateColors(it.primaryColor, it.accentColor, it.darkColor) },
+                )
+            },
+        )
     }
 
     companion object {

@@ -1237,7 +1237,9 @@
     <string name="text_creating_unsigned_apk">Creating unsigned APK</string>
     <string name="text_current">Current</string>
     <string name="text_current_file">Current file</string>
+    <string name="text_current_group">Current group: %1$s</string>
     <string name="text_current_page_configuration">Current page configuration</string>
+    <string name="text_current_state">Current state: %1$s</string>
     <string name="text_current_version">Current version</string>
     <string name="text_custom">Custom</string>
     <string name="text_daily_task">Daily task</string>
@@ -1501,6 +1503,9 @@
     <string name="text_go_to_settings">Go to \"Settings\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Grant AutoJs6 access in Shizuku app</string>
     <string name="text_granted">Granted</string>
+    <string name="text_group_disabled">Disabled</string>
+    <string name="text_group_unavailable">This group is disabled or has no color</string>
+    <string name="text_groups_enabled_of_total">%1$d/%2$d groups</string>
     <string name="text_guard_mode">Guard mode</string>
     <string name="text_help">Help</string>
     <string name="text_hidden_files_description">Whether the hidden files and folders show or not in file explorer. A file or folder is considered to be hidden if its name begins with a period character (\".\").</string>
@@ -1552,6 +1557,7 @@
     <string name="text_in_process_instance">In-process instance</string>
     <string name="text_adopted_by_first_event">adopted from its first event (onServiceConnected not invoked)</string>
     <string name="text_in_progress">In progress</string>
+    <string name="text_in_use">In use</string>
     <string name="text_info">Information</string>
     <string name="text_input_bar">Input bar</string>
     <string name="text_inrt_shared_storage_required">This project needs access to shared files. Grant storage access, then return here to start the script. Cancelling keeps the script stopped. All files access does not include other apps\' private directories.</string>
@@ -1644,7 +1650,9 @@
     <string name="text_installable">Installable</string>
     <string name="text_installed">Installed</string>
     <string name="text_integrity_verification_failed">Integrity verification failed</string>
+    <string name="text_intelligent_mine">Mine</string>
     <string name="text_intelligent_preset_material_day_night">Material day and night</string>
+    <string name="text_intelligent_presets">Presets</string>
     <string name="text_invalid_character_is_removed">Invalid character is removed</string>
     <string name="text_invalid_package_name">Invalid package name</string>
     <string name="text_invalid_project">Invalid project</string>
@@ -1778,9 +1786,11 @@
     <string name="text_new_version_found">New version found</string>
     <string name="text_new_watching_variables">New watching variables</string>
     <string name="text_next_retry">Next retry</string>
+    <string name="text_next_rotation_at">Next change: %1$s</string>
     <string name="text_next_run_time">Next run</string>
     <string name="text_night_mode">Night mode</string>
     <string name="text_no_auto_mount_plugins">No plugins with auto-mount enabled</string>
+    <string name="text_no_available_groups">No available groups</string>
     <string name="text_no_available_plugins_found_hint">No available plugins found</string>
     <string name="text_no_broken_items">No broken items</string>
     <string name="text_no_browser">No browser installed</string>
@@ -1795,6 +1805,7 @@
     <string name="text_no_history">No history</string>
     <string name="text_no_ignored_updates">No ignored updates</string>
     <string name="text_no_instruction_available">No instruction available</string>
+    <string name="text_no_intelligent_libraries">No intelligent color libraries yet\n\nCreate one with \"New intelligent color library\" in the menu, or clone a preset</string>
     <string name="text_no_js_code_to_copy">No JavaScript code to copy</string>
     <string name="text_no_log_entries_to_copy">No log entries to copy</string>
     <string name="text_no_log_entries_to_export">No log entries to export</string>
@@ -1845,6 +1856,9 @@
     <string name="text_operation_is_completed">Operation is completed</string>
     <string name="text_operational">Operational</string>
     <string name="text_options">Options</string>
+    <string name="text_order_random">Random</string>
+    <string name="text_order_sequential">Sequential</string>
+    <string name="text_order_sequential_by">Sequential (%1$s)</string>
     <string name="text_organization">Organization Name</string>
     <string name="text_organizational_unit">Organizational Unit</string>
     <string name="text_original_developer">Original developer</string>
@@ -2192,6 +2206,8 @@
     <string name="text_root_manager_apps">Root management apps</string>
     <string name="text_root_manager_apps_empty">No candidates found. You can add an installed app.</string>
     <string name="text_root_mode_title">Root access check</string>
+    <string name="text_rotation_app_start">App start</string>
+    <string name="text_rotation_state_change">State change</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
     <string name="text_run_on_boot">On booted</string>
@@ -2307,6 +2323,13 @@
     <string name="text_sort_by_time_desc">Time (newest first)</string>
     <string name="text_sort_descending">Descending</string>
     <string name="text_sort_field">Sort field</string>
+    <string name="text_sort_key_chroma">Chroma</string>
+    <string name="text_sort_key_created">Created time</string>
+    <string name="text_sort_key_hue">Hue</string>
+    <string name="text_sort_key_lightness">Lightness</string>
+    <string name="text_sort_key_manual">Manual</string>
+    <string name="text_sort_key_modified">Modified time</string>
+    <string name="text_sort_key_name">Name</string>
     <string name="text_sort_order">Sort order</string>
     <string name="text_sort_secondary">Secondary sort</string>
     <string name="text_sort_strategy_author">Author</string>
@@ -2333,6 +2356,7 @@
     <string name="text_state_day">Day</string>
     <string name="text_state_night">Night</string>
     <string name="text_state_or_province">State or Province</string>
+    <string name="text_state_source_none">None</string>
     <string name="text_stop">Stop</string>
     <string name="text_stop_reconnecting">Stop reconnecting</string>
     <string name="text_stop_simplified">Stop</string>
@@ -2436,6 +2460,7 @@
     <string name="text_unpin">Unpin</string>
     <string name="text_unsaved_changes">Unsaved changes</string>
     <string name="text_unsigned_apk_created">Unsigned APK created</string>
+    <string name="text_unsupported">Unsupported</string>
     <string name="text_unverified">Unverified</string>
     <string name="text_updatable">Updatable</string>
     <string name="text_update">Update</string>

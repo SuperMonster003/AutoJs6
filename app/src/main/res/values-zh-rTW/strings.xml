@@ -1237,7 +1237,9 @@
     <string name="text_creating_unsigned_apk">正在建立未簽名 APK</string>
     <string name="text_current">目前</string>
     <string name="text_current_file">目前檔案</string>
+    <string name="text_current_group">目前群組: %1$s</string>
     <string name="text_current_page_configuration">當前頁面配置</string>
+    <string name="text_current_state">目前狀態: %1$s</string>
     <string name="text_current_version">當前版本</string>
     <string name="text_custom">自訂</string>
     <string name="text_daily_task">每日任務</string>
@@ -1501,6 +1503,9 @@
     <string name="text_go_to_settings">開啟 \"設定\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">在 Shizuku 應用中授予 AutoJs6 許可權</string>
     <string name="text_granted">已授予</string>
+    <string name="text_group_disabled">已停用</string>
+    <string name="text_group_unavailable">此群組已停用或沒有顏色</string>
+    <string name="text_groups_enabled_of_total">%1$d/%2$d 個群組</string>
     <string name="text_guard_mode">保護模式</string>
     <string name="text_help">幫助</string>
     <string name="text_hidden_files_description">設定是否在檔案瀏覽器頁面顯示隱藏檔案和資料夾 (檔名以 \".\" 開頭)</string>
@@ -1552,6 +1557,7 @@
     <string name="text_in_process_instance">處理程序內執行個體</string>
     <string name="text_adopted_by_first_event">由首個事件採納 (onServiceConnected 未回呼)</string>
     <string name="text_in_progress">處理中</string>
+    <string name="text_in_use">使用中</string>
     <string name="text_info">資訊</string>
     <string name="text_input_bar">輸入框</string>
     <string name="text_inrt_shared_storage_required">此專案需要存取共用檔案. 請授予儲存空間存取權限, 然後返回此頁面啟動指令碼. 取消後指令碼保持停止. 所有檔案存取權限不包含其他應用程式的私人目錄.</string>
@@ -1644,7 +1650,9 @@
     <string name="text_installable">可安裝</string>
     <string name="text_installed">已安裝</string>
     <string name="text_integrity_verification_failed">完整性驗證失敗</string>
+    <string name="text_intelligent_mine">我的</string>
     <string name="text_intelligent_preset_material_day_night">材料設計日夜配對</string>
+    <string name="text_intelligent_presets">預設</string>
     <string name="text_invalid_character_is_removed">無效字元已被移除</string>
     <string name="text_invalid_package_name">無效包名</string>
     <string name="text_invalid_project">無效專案</string>
@@ -1778,9 +1786,11 @@
     <string name="text_new_version_found">檢測到新版本</string>
     <string name="text_new_watching_variables">增加監視的變數或表示式</string>
     <string name="text_next_retry">下次重試</string>
+    <string name="text_next_rotation_at">下次換組: %1$s</string>
     <string name="text_next_run_time">下次執行</string>
     <string name="text_night_mode">夜間模式</string>
     <string name="text_no_auto_mount_plugins">暫無自動掛載外掛</string>
+    <string name="text_no_available_groups">無可用群組</string>
     <string name="text_no_available_plugins_found_hint">未發現可用外掛</string>
     <string name="text_no_broken_items">沒有失效項目</string>
     <string name="text_no_browser">未安裝瀏覽器應用</string>
@@ -1795,6 +1805,7 @@
     <string name="text_no_history">無歷史記錄</string>
     <string name="text_no_ignored_updates">暫無已忽略更新</string>
     <string name="text_no_instruction_available">暫無可用說明</string>
+    <string name="text_no_intelligent_libraries">暫無智慧顏色庫\n\n可透過選單中的 \"新建智慧顏色庫\" 建立, 或複製一個預設</string>
     <string name="text_no_js_code_to_copy">無可複製的 JavaScript 程式碼</string>
     <string name="text_no_log_entries_to_copy">無可複製的日誌條目</string>
     <string name="text_no_log_entries_to_export">無可導出的日誌條目</string>
@@ -1845,6 +1856,9 @@
     <string name="text_operation_is_completed">操作已完成</string>
     <string name="text_operational">可操作</string>
     <string name="text_options">選項</string>
+    <string name="text_order_random">隨機切換</string>
+    <string name="text_order_sequential">順序切換</string>
+    <string name="text_order_sequential_by">順序 (%1$s)</string>
     <string name="text_organization">組織名稱</string>
     <string name="text_organizational_unit">組織單位</string>
     <string name="text_original_developer">原始開發者</string>
@@ -2192,6 +2206,8 @@
     <string name="text_root_manager_apps">root 管理應用程式</string>
     <string name="text_root_manager_apps_empty">未找到候選應用程式. 可手動新增已安裝的應用程式.</string>
     <string name="text_root_mode_title">Root 許可權檢查</string>
+    <string name="text_rotation_app_start">應用程式啟動</string>
+    <string name="text_rotation_state_change">狀態變化</string>
     <string name="text_run">執行</string>
     <string name="text_run_on_battery_change">電量變化時</string>
     <string name="text_run_on_boot">開機時</string>
@@ -2307,6 +2323,13 @@
     <string name="text_sort_by_time_desc">時間 (最新優先)</string>
     <string name="text_sort_descending">降序</string>
     <string name="text_sort_field">排序欄位</string>
+    <string name="text_sort_key_chroma">彩度</string>
+    <string name="text_sort_key_created">建立時間</string>
+    <string name="text_sort_key_hue">色相</string>
+    <string name="text_sort_key_lightness">亮度</string>
+    <string name="text_sort_key_manual">手動</string>
+    <string name="text_sort_key_modified">修改時間</string>
+    <string name="text_sort_key_name">名稱</string>
     <string name="text_sort_order">排序次序</string>
     <string name="text_sort_secondary">二級排序</string>
     <string name="text_sort_strategy_author">開發者</string>
@@ -2333,6 +2356,7 @@
     <string name="text_state_day">日</string>
     <string name="text_state_night">夜</string>
     <string name="text_state_or_province">州或省份</string>
+    <string name="text_state_source_none">無</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">停止重連</string>
     <string name="text_stop_simplified">停止</string>
@@ -2436,6 +2460,7 @@
     <string name="text_unpin">取消固定</string>
     <string name="text_unsaved_changes">未儲存的變更</string>
     <string name="text_unsigned_apk_created">未簽名 APK 已建立</string>
+    <string name="text_unsupported">不受支援</string>
     <string name="text_unverified">未驗證</string>
     <string name="text_updatable">可更新</string>
     <string name="text_update">更新</string>

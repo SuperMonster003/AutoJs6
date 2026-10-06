@@ -30,6 +30,27 @@
         <item quantity="other">%d скрипта остановлено</item>
     </plurals>
 
+    <plurals name="text_every_n_hours">
+        <item quantity="one">Каждый %d час</item>
+        <item quantity="few">Каждые %d часа</item>
+        <item quantity="many">Каждые %d часов</item>
+        <item quantity="other">Каждые %d часа</item>
+    </plurals>
+
+    <plurals name="text_every_n_minutes">
+        <item quantity="one">Каждую %d минуту</item>
+        <item quantity="few">Каждые %d минуты</item>
+        <item quantity="many">Каждые %d минут</item>
+        <item quantity="other">Каждые %d минуты</item>
+    </plurals>
+
+    <plurals name="text_every_n_seconds">
+        <item quantity="one">Каждую %d секунду</item>
+        <item quantity="few">Каждые %d секунды</item>
+        <item quantity="many">Каждые %d секунд</item>
+        <item quantity="other">Каждые %d секунды</item>
+    </plurals>
+
     <plurals name="text_items_total_sum">
         <item quantity="one">Итого %d элемент</item>
         <item quantity="few">Итого %d элемента</item>
@@ -42,6 +63,13 @@
         <item quantity="few">Итого: %d элемента</item>
         <item quantity="many">Итого: %d элементов</item>
         <item quantity="other">Итого: %d элемента</item>
+    </plurals>
+
+    <plurals name="text_n_groups">
+        <item quantity="one">%d группа</item>
+        <item quantity="few">%d группы</item>
+        <item quantity="many">%d групп</item>
+        <item quantity="other">%d группы</item>
     </plurals>
 
 </resources>

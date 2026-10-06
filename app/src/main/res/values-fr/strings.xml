@@ -1240,7 +1240,9 @@
     <string name="text_creating_unsigned_apk">Creation de l\'APK non signe</string>
     <string name="text_current">Actuel</string>
     <string name="text_current_file">Fichier actuel</string>
+    <string name="text_current_group">Groupe actuel : %1$s</string>
     <string name="text_current_page_configuration">Config de la page</string>
+    <string name="text_current_state">État actuel : %1$s</string>
     <string name="text_current_version">Version actuelle</string>
     <string name="text_custom">Personnalisé</string>
     <string name="text_daily_task">Tâche quotidienne</string>
@@ -1504,6 +1506,9 @@
     <string name="text_go_to_settings">Aller à \"Settings\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Accorder des privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_granted">Accordé</string>
+    <string name="text_group_disabled">Désactivé</string>
+    <string name="text_group_unavailable">Ce groupe est désactivé ou n\'a pas de couleur</string>
+    <string name="text_groups_enabled_of_total">%1$d/%2$d groupes</string>
     <string name="text_guard_mode">Mode garde</string>
     <string name="text_help">Aide</string>
     <string name="text_hidden_files_description">Si les fichiers et dossiers cachés s\'affichent ou non dans l\'explorateur de fichiers. Un fichier ou un dossier est considéré comme caché si son nom commence par un caractère de point (\".\").</string>
@@ -1555,6 +1560,7 @@
     <string name="text_in_process_instance">Instance dans le processus</string>
     <string name="text_adopted_by_first_event">adopté à partir de son premier événement (onServiceConnected non invoqué)</string>
     <string name="text_in_progress">En cours</string>
+    <string name="text_in_use">Utilisé</string>
     <string name="text_info">Information</string>
     <string name="text_input_bar">Barre de saisie</string>
     <string name="text_inrt_shared_storage_required">Ce projet doit accéder aux fichiers partagés. Autorisez cet accès, puis revenez ici pour lancer le script. En cas d\'annulation, le script reste arrêté. L\'accès à tous les fichiers ne couvre pas les répertoires privés des autres applications.</string>
@@ -1647,7 +1653,9 @@
     <string name="text_installable">Installable</string>
     <string name="text_installed">Installé</string>
     <string name="text_integrity_verification_failed">Échec de la vérification de l\'intégrité</string>
+    <string name="text_intelligent_mine">Mes bibliothèques</string>
     <string name="text_intelligent_preset_material_day_night">Material jour et nuit</string>
+    <string name="text_intelligent_presets">Préréglages</string>
     <string name="text_invalid_character_is_removed">Caractère invalide est supprimé</string>
     <string name="text_invalid_package_name">Nom de paquet non valide</string>
     <string name="text_invalid_project">Projet non valide</string>
@@ -1781,9 +1789,11 @@
     <string name="text_new_version_found">Nouvelle version trouvée</string>
     <string name="text_new_watching_variables">Nouvelles variables de surveillance</string>
     <string name="text_next_retry">Prochaine tentative</string>
+    <string name="text_next_rotation_at">Prochain changement : %1$s</string>
     <string name="text_next_run_time">Prochaine exécution</string>
     <string name="text_night_mode">Mode nuit</string>
     <string name="text_no_auto_mount_plugins">Aucun plugin avec montage automatique</string>
+    <string name="text_no_available_groups">Aucun groupe disponible</string>
     <string name="text_no_available_plugins_found_hint">Aucun plugin disponible trouve</string>
     <string name="text_no_broken_items">Aucun élément défectueux</string>
     <string name="text_no_browser">Aucun navigateur n\'est installé</string>
@@ -1798,6 +1808,7 @@
     <string name="text_no_history">Aucun historique</string>
     <string name="text_no_ignored_updates">Aucune mise à jour ignorée</string>
     <string name="text_no_instruction_available">Aucune instruction disponible</string>
+    <string name="text_no_intelligent_libraries">Aucune bibliothèque de couleurs intelligente pour le moment\n\nCréez-en une avec \"Nouvelle bibliothèque de couleurs intelligente\" dans le menu, ou clonez un préréglage</string>
     <string name="text_no_js_code_to_copy">Aucun code JavaScript a copier</string>
     <string name="text_no_log_entries_to_copy">Aucune entrée de journal à copier</string>
     <string name="text_no_log_entries_to_export">Aucune entrée de journal à exporter</string>
@@ -1848,6 +1859,9 @@
     <string name="text_operation_is_completed">L\'opération est terminée</string>
     <string name="text_operational">Opérationnel</string>
     <string name="text_options">Options</string>
+    <string name="text_order_random">Aléatoire</string>
+    <string name="text_order_sequential">Séquentiel</string>
+    <string name="text_order_sequential_by">Séquentiel (%1$s)</string>
     <string name="text_organization">Nom de l\'organisation</string>
     <string name="text_organizational_unit">Unité organisationnelle</string>
     <string name="text_original_developer">Développeur d\'origine</string>
@@ -2195,6 +2209,8 @@
     <string name="text_root_manager_apps">Applications de gestion root</string>
     <string name="text_root_manager_apps_empty">Aucun candidat trouvé. Vous pouvez ajouter une application installée.</string>
     <string name="text_root_mode_title">Vérification de l\'accès root</string>
+    <string name="text_rotation_app_start">Démarrage de l\'app</string>
+    <string name="text_rotation_state_change">Changement d\'état</string>
     <string name="text_run">Exécuter</string>
     <string name="text_run_on_battery_change">Sur changement de batterie</string>
     <string name="text_run_on_boot">Sur démarrage</string>
@@ -2310,6 +2326,13 @@
     <string name="text_sort_by_time_desc">Heure (plus recent d\'abord)</string>
     <string name="text_sort_descending">Décroissant</string>
     <string name="text_sort_field">Champ de tri</string>
+    <string name="text_sort_key_chroma">Chroma</string>
+    <string name="text_sort_key_created">Date de création</string>
+    <string name="text_sort_key_hue">Teinte</string>
+    <string name="text_sort_key_lightness">Luminosité</string>
+    <string name="text_sort_key_manual">Manuel</string>
+    <string name="text_sort_key_modified">Date de modification</string>
+    <string name="text_sort_key_name">Nom</string>
     <string name="text_sort_order">Ordre de tri</string>
     <string name="text_sort_secondary">Tri secondaire</string>
     <string name="text_sort_strategy_author">Développeur</string>
@@ -2336,6 +2359,7 @@
     <string name="text_state_day">Jour</string>
     <string name="text_state_night">Nuit</string>
     <string name="text_state_or_province">État ou province</string>
+    <string name="text_state_source_none">Aucun</string>
     <string name="text_stop">Stop</string>
     <string name="text_stop_reconnecting">Arrêter la reconnexion</string>
     <string name="text_stop_simplified">Arreter</string>
@@ -2439,6 +2463,7 @@
     <string name="text_unpin">Désépingler</string>
     <string name="text_unsaved_changes">Modifications non enregistrées</string>
     <string name="text_unsigned_apk_created">APK non signe cree</string>
+    <string name="text_unsupported">Non pris en charge</string>
     <string name="text_unverified">Non vérifié</string>
     <string name="text_updatable">Mise a jour dispo</string>
     <string name="text_update">Mettre a jour</string>

@@ -41,6 +41,33 @@
     </plurals>
 
     <!-- المجموع %d عنصر -->
+    <plurals name="text_every_n_hours">
+        <item quantity="zero">كل %d ساعة</item>
+        <item quantity="one">كل %d ساعة</item>
+        <item quantity="two">كل %d ساعة</item>
+        <item quantity="few">كل %d ساعات</item>
+        <item quantity="many">كل %d ساعة</item>
+        <item quantity="other">كل %d ساعة</item>
+    </plurals>
+
+    <plurals name="text_every_n_minutes">
+        <item quantity="zero">كل %d دقيقة</item>
+        <item quantity="one">كل %d دقيقة</item>
+        <item quantity="two">كل %d دقيقة</item>
+        <item quantity="few">كل %d دقائق</item>
+        <item quantity="many">كل %d دقيقة</item>
+        <item quantity="other">كل %d دقيقة</item>
+    </plurals>
+
+    <plurals name="text_every_n_seconds">
+        <item quantity="zero">كل %d ثانية</item>
+        <item quantity="one">كل %d ثانية</item>
+        <item quantity="two">كل %d ثانية</item>
+        <item quantity="few">كل %d ثوان</item>
+        <item quantity="many">كل %d ثانية</item>
+        <item quantity="other">كل %d ثانية</item>
+    </plurals>
+
     <plurals name="text_items_total_sum">
         <item quantity="zero">المجموع لا عناصر</item>
         <item quantity="one">المجموع عنصر واحد</item>
@@ -58,6 +85,15 @@
         <item quantity="few">المجموع: %d عناصر</item>
         <item quantity="many">المجموع: %d عنصراً</item>
         <item quantity="other">المجموع: %d عنصر</item>
+    </plurals>
+
+    <plurals name="text_n_groups">
+        <item quantity="zero">%d مجموعة</item>
+        <item quantity="one">%d مجموعة</item>
+        <item quantity="two">%d مجموعتان</item>
+        <item quantity="few">%d مجموعات</item>
+        <item quantity="many">%d مجموعة</item>
+        <item quantity="other">%d مجموعة</item>
     </plurals>
 
 </resources>

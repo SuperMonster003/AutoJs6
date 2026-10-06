@@ -13,7 +13,8 @@ import org.autojs.autojs6.databinding.MtColorLibrariesRecyclerViewItemBinding
  * zh-CN: 颜色库页面的一行: 预设库或用户库.
  */
 sealed interface LibraryRow {
-    data class Preset(val library: PresetColorLibrary) : LibraryRow
+    /** [description] replaces the default item count when set. zh-CN: 设置 [description] 时替代默认的条目数量描述. */
+    data class Preset(val library: PresetColorLibrary, val description: String? = null) : LibraryRow
     data class User(val summary: PlainLibrarySummary) : LibraryRow
 }
 

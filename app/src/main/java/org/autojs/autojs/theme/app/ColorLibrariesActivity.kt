@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
-import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,6 +18,8 @@ import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
 import org.autojs.autojs.theme.app.ColorHistoryItemViewHolder.Companion.ColorHistoryItem
+import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
+import org.autojs.autojs.theme.intelligent.IntelligentPresets
 import org.autojs.autojs.theme.library.ColorLibraryIds
 import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.ColorSelection
@@ -91,19 +92,22 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
     private fun refreshUserLibraries() {
         lifecycleScope.launch {
             val summaries = withContext(Dispatchers.IO) { repository.listPlainLibraries() }
-            libraryAdapter.updateData(presetRows + summaries.map { LibraryRow.User(it) })
+            val intelligentCount = IntelligentPresets.all(this@ColorLibrariesActivity).size + withContext(Dispatchers.IO) { repository.listIntelligentLibraries().size }
+            val intelligentDescription = buildString {
+                append(resources.getQuantityString(R.plurals.text_items_total_sum_with_colon, intelligentCount, intelligentCount))
+                IntelligentColorEngine.activeSnapshot?.let { append("\n${getString(R.string.text_in_use)}: ${it.name}") }
+            }
+            val rows = presetRows.map { row ->
+                if (row.library.isIntelligent) row.copy(description = intelligentDescription) else row
+            }
+            libraryAdapter.updateData(rows + summaries.map { LibraryRow.User(it) })
         }
     }
 
     private fun onLibraryClick(row: LibraryRow) {
         when (row) {
             is LibraryRow.Preset -> when {
-                row.library.isIntelligent -> MaterialDialog.Builder(this)
-                    .title(R.string.text_under_development_title)
-                    .content(R.string.text_under_development_content)
-                    .positiveText(R.string.dialog_button_dismiss)
-                    .positiveColorRes(R.color.dialog_button_default)
-                    .show()
+                row.library.isIntelligent -> IntelligentLibrariesActivity.launch(this)
                 else -> startActivity(Intent(this, ColorItemsActivity::class.java).putExtra(INTENT_IDENTIFIER_LIBRARY_ID, row.library.id))
             }
             is LibraryRow.User -> UserColorLibraryActivity.launch(this, row.summary.library.id)
@@ -187,13 +191,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             lifecycleScope.launch {
                 val wasSelected = (currentColorSelection() as? ColorSelection.UserColor)?.libraryRowId == library.id
                 withContext(Dispatchers.IO) { repository.deleteLibrary(library) }
-                if (wasSelected) {
-                    // Keep the theme color, but record it as a palette selection. zh-CN: 保留主题色, 但改记为调色盘选择.
-                    savePrefsForLibraries(COLOR_LIBRARY_ID_PALETTE, 0)
-                    savePrefsForLegacyPalette(ThemeColorManager.colorPrimary)
-                    saveDatabaseForPaletteHistory(lifecycleScope, applicationContext, ThemeColorManager.colorPrimary)
-                    ThemeChangeNotifier.notifyThemeChanged()
-                }
+                if (wasSelected) fallBackToPaletteSelection(this@ColorLibrariesActivity)
                 refreshUserLibraries()
             }
         }

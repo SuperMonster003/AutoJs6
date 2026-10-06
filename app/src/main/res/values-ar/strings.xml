@@ -1242,7 +1242,9 @@
     <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
     <string name="text_current">الحالي</string>
     <string name="text_current_file">الملف الحالي</string>
+    <string name="text_current_group">المجموعة الحالية: %1$s</string>
     <string name="text_current_page_configuration">اعدادات الصفحة الحالية</string>
+    <string name="text_current_state">الحالة الحالية: %1$s</string>
     <string name="text_current_version">النسخة الحالية</string>
     <string name="text_custom">مخصص</string>
     <string name="text_daily_task">مهام يومية</string>
@@ -1506,6 +1508,9 @@
     <string name="text_go_to_settings">اذهب للاعدادات\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">منح الوصول إلى AutoJs6 في تطبيق Shizuku</string>
     <string name="text_granted">ممنوح</string>
+    <string name="text_group_disabled">معطل</string>
+    <string name="text_group_unavailable">هذه المجموعة معطلة أو لا تحتوي على لون</string>
+    <string name="text_groups_enabled_of_total">%1$d/%2$d مجموعات</string>
     <string name="text_guard_mode">وضع الحرس</string>
     <string name="text_help">مساعدة</string>
     <string name="text_hidden_files_description">ما إذا كانت الملفات والمجلدات المخفية تظهر أم لا في مستكشف الملفات. يعتبر ملف أو مجلد مخفيًا إذا بدأ اسمه بحرف فترة (\".\").</string>
@@ -1557,6 +1562,7 @@
     <string name="text_in_process_instance">مثيل داخل العملية</string>
     <string name="text_adopted_by_first_event">تم اعتماده من أول حدث (لم يتم استدعاء onServiceConnected)</string>
     <string name="text_in_progress">في تَقَدم</string>
+    <string name="text_in_use">قيد الاستخدام</string>
     <string name="text_info">معلومة</string>
     <string name="text_input_bar">شريط الإدخال</string>
     <string name="text_inrt_shared_storage_required">يحتاج هذا المشروع إلى الوصول إلى الملفات المشتركة. امنح إذن التخزين ثم عد إلى هذه الصفحة لتشغيل النص. يبقى النص متوقفا عند الإلغاء. لا يشمل الوصول إلى جميع الملفات المجلدات الخاصة بالتطبيقات الأخرى.</string>
@@ -1649,7 +1655,9 @@
     <string name="text_installable">قابل للتثبيت</string>
     <string name="text_installed">مثبّت</string>
     <string name="text_integrity_verification_failed">فشل التحقق من السلامة</string>
+    <string name="text_intelligent_mine">مكتباتي</string>
     <string name="text_intelligent_preset_material_day_night">ألوان المواد نهارا وليلا</string>
+    <string name="text_intelligent_presets">الإعدادات المسبقة</string>
     <string name="text_invalid_character_is_removed">تمت إزالة حرف غير صالح</string>
     <string name="text_invalid_package_name">اسم الحزمة غير صالح</string>
     <string name="text_invalid_project">مشروع غير صالح</string>
@@ -1783,9 +1791,11 @@
     <string name="text_new_version_found">تم العثور على نسخة جديدة</string>
     <string name="text_new_watching_variables">متغيرات مشاهدة جديدة</string>
     <string name="text_next_retry">المحاولة التالية</string>
+    <string name="text_next_rotation_at">التغيير التالي: %1$s</string>
     <string name="text_next_run_time">الجولة التالية</string>
     <string name="text_night_mode">وضع الليل</string>
     <string name="text_no_auto_mount_plugins">لا توجد مكونات إضافية مع تمكين التحميل التلقائي</string>
+    <string name="text_no_available_groups">لا توجد مجموعات متاحة</string>
     <string name="text_no_available_plugins_found_hint">لم يتم العثور على اضافات متاحة</string>
     <string name="text_no_broken_items">لا توجد عناصر تالفة</string>
     <string name="text_no_browser">لم يتم تثبيت متصفح</string>
@@ -1800,6 +1810,7 @@
     <string name="text_no_history">لا يوجد سجل</string>
     <string name="text_no_ignored_updates">لا تحديثات تم تجاهلها</string>
     <string name="text_no_instruction_available">لا توجد تعليمات متاحة</string>
+    <string name="text_no_intelligent_libraries">لا توجد مكتبات ألوان ذكية بعد\n\nأنشئ واحدة عبر \"مكتبة ألوان ذكية جديدة\" في القائمة, أو استنسخ إعدادا مسبقا</string>
     <string name="text_no_js_code_to_copy">لا يوجد كود JavaScript قابل للنسخ</string>
     <string name="text_no_log_entries_to_copy">لا توجد إدخالات سجل لنسخها</string>
     <string name="text_no_log_entries_to_export">لا توجد إدخالات سجل للتصدير</string>
@@ -1850,6 +1861,9 @@
     <string name="text_operation_is_completed">تم الانتهاء من العملية</string>
     <string name="text_operational">قابلة للتشغيل</string>
     <string name="text_options">خيارات</string>
+    <string name="text_order_random">عشوائي</string>
+    <string name="text_order_sequential">تسلسلي</string>
+    <string name="text_order_sequential_by">تسلسلي (%1$s)</string>
     <string name="text_organization">اسم المنظمة</string>
     <string name="text_organizational_unit">وحدة التنظيم</string>
     <string name="text_original_developer">المطور الأصلي</string>
@@ -2197,6 +2211,8 @@
     <string name="text_root_manager_apps">تطبيقات إدارة root</string>
     <string name="text_root_manager_apps_empty">لم يتم العثور على تطبيقات مرشحة. يمكنك إضافة تطبيق مثبت.</string>
     <string name="text_root_mode_title">التحقق من صلاحيات الروت</string>
+    <string name="text_rotation_app_start">بدء التطبيق</string>
+    <string name="text_rotation_state_change">تغير الحالة</string>
     <string name="text_run">يجري</string>
     <string name="text_run_on_battery_change">على البطارية تغيرت</string>
     <string name="text_run_on_boot">على التمهيد</string>
@@ -2312,6 +2328,13 @@
     <string name="text_sort_by_time_desc">الوقت (الاحدث اولا)</string>
     <string name="text_sort_descending">تنازلي</string>
     <string name="text_sort_field">حقل الفرز</string>
+    <string name="text_sort_key_chroma">التشبع</string>
+    <string name="text_sort_key_created">وقت الإنشاء</string>
+    <string name="text_sort_key_hue">درجة اللون</string>
+    <string name="text_sort_key_lightness">السطوع</string>
+    <string name="text_sort_key_manual">يدوي</string>
+    <string name="text_sort_key_modified">وقت التعديل</string>
+    <string name="text_sort_key_name">الاسم</string>
     <string name="text_sort_order">ترتيب الفرز</string>
     <string name="text_sort_secondary">فرز ثانوي</string>
     <string name="text_sort_strategy_author">المطور</string>
@@ -2338,6 +2361,7 @@
     <string name="text_state_day">نهار</string>
     <string name="text_state_night">ليل</string>
     <string name="text_state_or_province">الولاية أو المقاطعة</string>
+    <string name="text_state_source_none">لا شيء</string>
     <string name="text_stop">قف</string>
     <string name="text_stop_reconnecting">إيقاف إعادة الاتصال</string>
     <string name="text_stop_simplified">ايقاف</string>
@@ -2441,6 +2465,7 @@
     <string name="text_unpin">الغاء التثبيت</string>
     <string name="text_unsaved_changes">تغييرات غير محفوظة</string>
     <string name="text_unsigned_apk_created">تم انشاء APK غير موقّع</string>
+    <string name="text_unsupported">غير مدعوم</string>
     <string name="text_unverified">لم يتم التحقق</string>
     <string name="text_updatable">قابل للتحديث</string>
     <string name="text_update">تحديث</string>

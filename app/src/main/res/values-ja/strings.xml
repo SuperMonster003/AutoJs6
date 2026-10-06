@@ -1241,7 +1241,9 @@
     <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
     <string name="text_current">現在</string>
     <string name="text_current_file">現在のファイル</string>
+    <string name="text_current_group">現在のグループ: %1$s</string>
     <string name="text_current_page_configuration">現在のページ設定</string>
+    <string name="text_current_state">現在の状態: %1$s</string>
     <string name="text_current_version">現在のバージョン</string>
     <string name="text_custom">カスタム</string>
     <string name="text_daily_task">デイリータスク</string>
@@ -1505,6 +1507,9 @@
     <string name="text_go_to_settings">\"設定\" に進む</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を付与する</string>
     <string name="text_granted">許可する</string>
+    <string name="text_group_disabled">無効</string>
+    <string name="text_group_unavailable">このグループは無効か, 色がありません</string>
+    <string name="text_groups_enabled_of_total">%1$d/%2$d グループ</string>
     <string name="text_guard_mode">ガードモード</string>
     <string name="text_help">ヘルプ</string>
     <string name="text_hidden_files_description">ファイルエクスプローラーに隠しファイルや隠しフォルダーを表示するかどうかを設定します. ファイルやフォルダーの名前がピリオド (\".\") で始まっている場合, 隠しファイルとして扱われます</string>
@@ -1556,6 +1561,7 @@
     <string name="text_in_process_instance">プロセス内インスタンス</string>
     <string name="text_adopted_by_first_event">最初のイベントから採用 (onServiceConnected 未呼び出し)</string>
     <string name="text_in_progress">進行中</string>
+    <string name="text_in_use">使用中</string>
     <string name="text_info">インフォメーション</string>
     <string name="text_input_bar">入力バー</string>
     <string name="text_inrt_shared_storage_required">このプロジェクトには共有ファイルへのアクセスが必要です. ストレージへのアクセスを許可してからこの画面に戻ると, スクリプトが起動します. キャンセルすると停止したままになります. すべてのファイルへのアクセスでも, 他のアプリの専用ディレクトリは対象外です.</string>
@@ -1648,7 +1654,9 @@
     <string name="text_installable">インストール可</string>
     <string name="text_installed">インストール済み</string>
     <string name="text_integrity_verification_failed">整合性の検証に失敗しました</string>
+    <string name="text_intelligent_mine">マイライブラリ</string>
     <string name="text_intelligent_preset_material_day_night">マテリアル昼夜ペア</string>
+    <string name="text_intelligent_presets">プリセット</string>
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>
@@ -1782,9 +1790,11 @@
     <string name="text_new_version_found">新しいバージョンが見つかりました</string>
     <string name="text_new_watching_variables">新しいウォッチング変数</string>
     <string name="text_next_retry">次回の再試行</string>
+    <string name="text_next_rotation_at">次の切り替え: %1$s</string>
     <string name="text_next_run_time">次回の実行</string>
     <string name="text_night_mode">夜間モード</string>
     <string name="text_no_auto_mount_plugins">自動マウントされたプラグインはありません</string>
+    <string name="text_no_available_groups">利用可能なグループがありません</string>
     <string name="text_no_available_plugins_found_hint">利用可能なプラグインが見つかりません</string>
     <string name="text_no_broken_items">無効な項目はありません</string>
     <string name="text_no_browser">ブラウザがインストールされていない</string>
@@ -1799,6 +1809,7 @@
     <string name="text_no_history">履歴なし</string>
     <string name="text_no_ignored_updates">無視された更新がない</string>
     <string name="text_no_instruction_available">利用可能な説明はありません</string>
+    <string name="text_no_intelligent_libraries">インテリジェントカラーライブラリはまだありません\n\nメニューの \"新しいインテリジェントカラーパレット\" で作成するか, プリセットを複製してください</string>
     <string name="text_no_js_code_to_copy">コピー可能な JavaScript コードがありません</string>
     <string name="text_no_log_entries_to_copy">コピーするログエントリがありません</string>
     <string name="text_no_log_entries_to_export">エクスポートするログエントリがありません</string>
@@ -1849,6 +1860,9 @@
     <string name="text_operation_is_completed">操作が完了しました</string>
     <string name="text_operational">動作可能</string>
     <string name="text_options">オプション</string>
+    <string name="text_order_random">ランダム</string>
+    <string name="text_order_sequential">順番</string>
+    <string name="text_order_sequential_by">順番 (%1$s)</string>
     <string name="text_organization">組織名</string>
     <string name="text_organizational_unit">組織単位</string>
     <string name="text_original_developer">オリジナル開発者</string>
@@ -2196,6 +2210,8 @@
     <string name="text_root_manager_apps">root 管理アプリ</string>
     <string name="text_root_manager_apps_empty">候補が見つかりません. インストール済みアプリを追加できます.</string>
     <string name="text_root_mode_title">Root 権限の確認</string>
+    <string name="text_rotation_app_start">アプリ起動</string>
+    <string name="text_rotation_state_change">状態の変化</string>
     <string name="text_run">実行</string>
     <string name="text_run_on_battery_change">バッテリー交換時</string>
     <string name="text_run_on_boot">起動したとき</string>
@@ -2311,6 +2327,13 @@
     <string name="text_sort_by_time_desc">時間 (新しい順)</string>
     <string name="text_sort_descending">降順</string>
     <string name="text_sort_field">並び替え項目</string>
+    <string name="text_sort_key_chroma">彩度</string>
+    <string name="text_sort_key_created">作成日時</string>
+    <string name="text_sort_key_hue">色相</string>
+    <string name="text_sort_key_lightness">明度</string>
+    <string name="text_sort_key_manual">手動</string>
+    <string name="text_sort_key_modified">更新日時</string>
+    <string name="text_sort_key_name">名前</string>
     <string name="text_sort_order">並び順</string>
     <string name="text_sort_secondary">第2ソート</string>
     <string name="text_sort_strategy_author">開発者</string>
@@ -2337,6 +2360,7 @@
     <string name="text_state_day">昼</string>
     <string name="text_state_night">夜</string>
     <string name="text_state_or_province">州または省</string>
+    <string name="text_state_source_none">なし</string>
     <string name="text_stop">停止</string>
     <string name="text_stop_reconnecting">再接続を停止</string>
     <string name="text_stop_simplified">停止</string>
@@ -2440,6 +2464,7 @@
     <string name="text_unpin">固定を解除</string>
     <string name="text_unsaved_changes">未保存の変更</string>
     <string name="text_unsigned_apk_created">未署名 APK を作成しました</string>
+    <string name="text_unsupported">非対応</string>
     <string name="text_unverified">未確認</string>
     <string name="text_updatable">更新あり</string>
     <string name="text_update">更新</string>

@@ -1242,7 +1242,9 @@
     <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
     <string name="text_current">현재</string>
     <string name="text_current_file">현재 파일</string>
+    <string name="text_current_group">현재 그룹: %1$s</string>
     <string name="text_current_page_configuration">현재 페이지 설정</string>
+    <string name="text_current_state">현재 상태: %1$s</string>
     <string name="text_current_version">현재 버전</string>
     <string name="text_custom">사용자 지정</string>
     <string name="text_daily_task">일상적인 작업</string>
@@ -1506,6 +1508,9 @@
     <string name="text_go_to_settings">설정으로 바로 가기\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 부여하기</string>
     <string name="text_granted">부여된</string>
+    <string name="text_group_disabled">비활성화됨</string>
+    <string name="text_group_unavailable">이 그룹은 비활성화되었거나 색상이 없습니다</string>
+    <string name="text_groups_enabled_of_total">%1$d/%2$d개 그룹</string>
     <string name="text_guard_mode">가드 모드</string>
     <string name="text_help">돕다</string>
     <string name="text_hidden_files_description">숨겨진 파일과 폴더가 파일 탐색기에 표시되는지 여부. 이름이 기간 문자로 시작되면 파일 또는 폴더가 숨겨진 것으로 간주됩니다 ( \".\").</string>
@@ -1557,6 +1562,7 @@
     <string name="text_in_process_instance">프로세스 내 인스턴스</string>
     <string name="text_adopted_by_first_event">첫 이벤트에서 채택됨 (onServiceConnected 미호출)</string>
     <string name="text_in_progress">진행 중</string>
+    <string name="text_in_use">사용 중</string>
     <string name="text_info">정보</string>
     <string name="text_input_bar">입력 바</string>
     <string name="text_inrt_shared_storage_required">이 프로젝트는 공유 파일에 접근해야 합니다. 저장소 접근을 허용한 후 이 화면으로 돌아오면 스크립트가 시작됩니다. 취소하면 스크립트는 중지 상태를 유지합니다. 모든 파일 접근 권한으로도 다른 앱의 비공개 디렉터리에는 접근할 수 없습니다.</string>
@@ -1649,7 +1655,9 @@
     <string name="text_installable">설치 가능</string>
     <string name="text_installed">설치됨</string>
     <string name="text_integrity_verification_failed">무결성 검증에 실패했습니다</string>
+    <string name="text_intelligent_mine">내 라이브러리</string>
     <string name="text_intelligent_preset_material_day_night">머티리얼 주야간 쌍</string>
+    <string name="text_intelligent_presets">프리셋</string>
     <string name="text_invalid_character_is_removed">잘못된 문자가 제거되었습니다</string>
     <string name="text_invalid_package_name">잘못된 패키지 이름</string>
     <string name="text_invalid_project">잘못된 프로젝트</string>
@@ -1783,9 +1791,11 @@
     <string name="text_new_version_found">새 버전이 발견되었습니다</string>
     <string name="text_new_watching_variables">새로운 시청 변수</string>
     <string name="text_next_retry">다음 재시도</string>
+    <string name="text_next_rotation_at">다음 전환: %1$s</string>
     <string name="text_next_run_time">다음 달리기</string>
     <string name="text_night_mode">야간 모드</string>
     <string name="text_no_auto_mount_plugins">자동 마운트된 플러그인이 없습니다</string>
+    <string name="text_no_available_groups">사용 가능한 그룹 없음</string>
     <string name="text_no_available_plugins_found_hint">사용 가능한 플러그인을 찾지 못했습니다</string>
     <string name="text_no_broken_items">손상된 항목 없음</string>
     <string name="text_no_browser">브라우저가 설치되지 않았습니다</string>
@@ -1800,6 +1810,7 @@
     <string name="text_no_history">기록 없음</string>
     <string name="text_no_ignored_updates">무시되지 않았습니다</string>
     <string name="text_no_instruction_available">사용 가능한 설명이 없습니다</string>
+    <string name="text_no_intelligent_libraries">아직 인텔리전트 색상 라이브러리가 없습니다\n\n메뉴의 \"새 인텔리전트 색상 라이브러리\"로 만들거나 프리셋을 복제하세요</string>
     <string name="text_no_js_code_to_copy">복사할 JavaScript 코드가 없습니다</string>
     <string name="text_no_log_entries_to_copy">복사할 로그 항목이 없습니다</string>
     <string name="text_no_log_entries_to_export">내보낼 로그 항목이 없습니다</string>
@@ -1850,6 +1861,9 @@
     <string name="text_operation_is_completed">작동이 완료되었습니다</string>
     <string name="text_operational">작동 가능</string>
     <string name="text_options">옵션</string>
+    <string name="text_order_random">무작위</string>
+    <string name="text_order_sequential">순서대로</string>
+    <string name="text_order_sequential_by">순서대로 (%1$s)</string>
     <string name="text_organization">조직명</string>
     <string name="text_organizational_unit">조직 단위</string>
     <string name="text_original_developer">원래 개발자</string>
@@ -2197,6 +2211,8 @@
     <string name="text_root_manager_apps">root 관리 앱</string>
     <string name="text_root_manager_apps_empty">후보 앱이 없습니다. 설치된 앱을 직접 추가할 수 있습니다.</string>
     <string name="text_root_mode_title">루트 권한 확인</string>
+    <string name="text_rotation_app_start">앱 시작</string>
+    <string name="text_rotation_state_change">상태 변경</string>
     <string name="text_run">운영</string>
     <string name="text_run_on_battery_change">배터리가 변경되었습니다</string>
     <string name="text_run_on_boot">부팅</string>
@@ -2312,6 +2328,13 @@
     <string name="text_sort_by_time_desc">시간 (최신순)</string>
     <string name="text_sort_descending">내림차순</string>
     <string name="text_sort_field">정렬 필드</string>
+    <string name="text_sort_key_chroma">채도</string>
+    <string name="text_sort_key_created">생성 시간</string>
+    <string name="text_sort_key_hue">색상환</string>
+    <string name="text_sort_key_lightness">밝기</string>
+    <string name="text_sort_key_manual">수동</string>
+    <string name="text_sort_key_modified">수정 시간</string>
+    <string name="text_sort_key_name">이름</string>
     <string name="text_sort_order">정렬 순서</string>
     <string name="text_sort_secondary">2차 정렬</string>
     <string name="text_sort_strategy_author">개발자</string>
@@ -2338,6 +2361,7 @@
     <string name="text_state_day">주간</string>
     <string name="text_state_night">야간</string>
     <string name="text_state_or_province">주 또는 도</string>
+    <string name="text_state_source_none">없음</string>
     <string name="text_stop">중지</string>
     <string name="text_stop_reconnecting">재연결 중지</string>
     <string name="text_stop_simplified">중지</string>
@@ -2441,6 +2465,7 @@
     <string name="text_unpin">고정 해제</string>
     <string name="text_unsaved_changes">저장되지 않은 변경 사항</string>
     <string name="text_unsigned_apk_created">서명되지 않은 APK가 생성됨</string>
+    <string name="text_unsupported">지원되지 않음</string>
     <string name="text_unverified">미확인</string>
     <string name="text_updatable">업데이트 가능</string>
     <string name="text_update">업데이트</string>

@@ -978,6 +978,19 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
 
         /**
+         * The selected library or color is gone: keep the theme color, but record it as a palette selection.
+         * zh-CN: 选中的颜色库或颜色已不存在: 保留主题色, 但改记为调色盘选择.
+         */
+        @JvmStatic
+        fun fallBackToPaletteSelection(context: Context) {
+            val color = ThemeColorManager.colorPrimary
+            savePrefsForLibraries(COLOR_LIBRARY_ID_PALETTE, 0)
+            savePrefsForLegacyPalette(color)
+            saveDatabaseForPaletteHistory(applicationContext = context.applicationContext, color = color)
+            ThemeChangeNotifier.notifyThemeChanged()
+        }
+
+        /**
          * Records an active intelligent library as the selection; the item id holds the starting group (D9).
          * zh-CN: 将激活的智能库记为选中状态; 条目 id 保存起始组 (D9).
          */

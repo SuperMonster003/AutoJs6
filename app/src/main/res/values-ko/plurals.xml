@@ -16,12 +16,28 @@
         <item quantity="other">%d개의 스크립트가 중지되었습니다</item>
     </plurals>
 
+    <plurals name="text_every_n_hours">
+        <item quantity="other">%d시간마다</item>
+    </plurals>
+
+    <plurals name="text_every_n_minutes">
+        <item quantity="other">%d분마다</item>
+    </plurals>
+
+    <plurals name="text_every_n_seconds">
+        <item quantity="other">%d초마다</item>
+    </plurals>
+
     <plurals name="text_items_total_sum">
         <item quantity="other">총 %d개 항목</item>
     </plurals>
 
     <plurals name="text_items_total_sum_with_colon">
         <item quantity="other">총: %d개 항목</item>
+    </plurals>
+
+    <plurals name="text_n_groups">
+        <item quantity="other">%d개 그룹</item>
     </plurals>
 
 </resources>
