@@ -93,7 +93,7 @@
 | 颜色库 | 颜色的集合. 预设库只读; 自建库可编辑; 智能库是内容为 "组" 的自建库. |
 | 状态源 | 决定 "当前处于哪个状态" 的来源, 每个智能库恰好 1 个. "无" 只有 1 个状态. |
 | 状态 | 状态源的一个取值, 以稳定的 key 标识 (如 `day` / `night`, `period:0`, `weekday:1`, `season:summer`), 切换状态源时按 key 迁移颜色. |
-| 组 | 一个或多个颜色构成一组: 每个状态各有一个颜色 (primary, 可选 accent / dark). 某状态未填时取首个状态的颜色 (即旧思路的 "与 '开' 相同"). 组可启用或禁用. |
+| 组 | 一个或多个颜色构成一组: 每个状态各有一个颜色 (primary, 可选 accent / dark). 某状态未填时, 取按状态顺序第一个已填颜色的状态 (即旧思路的 "与 '开' 相同", 日 / 夜任一方均可借用另一方). 组可启用或禁用. |
 | 换组时机 | 何时从当前组切换到下一组, 每个智能库 0~n 个. 没有换组时机时固定在用户选中的组. |
 | 切换方式 | 下一组如何选取: 顺序 (按排序键, 正序或倒序, 到末尾后循环) 或随机 (组数 >= 2 时不与当前组相同). |
 | 日期覆盖层 | 有序的 "日期条件 -> 组" 列表, 命中时临时改用指定组 (D4). |
@@ -123,7 +123,7 @@
 2. 若处于暂停 (D6): 只记录待处理事件 (同类合并) 后返回.
 3. 覆盖层命中: 目标组 = 覆盖组, 首次命中时记住进入前的组; 未命中且刚离开覆盖期: 恢复进入前的组.
 4. 否则, 若事件属于已勾选的换组时机: 按切换方式选取下一组 (跳过禁用组; 当前组已删除或已禁用时直接取下一组).
-5. 有效颜色 = 目标组[当前状态] (缺失时取首个状态), 按 D2 补全 accent / dark.
+5. 有效颜色 = 目标组[当前状态] (缺失时取按状态顺序第一个有颜色的状态), 按 D2 补全 accent / dark.
 6. 与当前主题色不同则 `ThemeColorCoordinator.apply(..., INTELLIGENT)`; 持久化运行时状态与激活快照 (D9), 安排下一次计时.
 
 "状态变化" 作为换组时机时, 先换组再取新状态的颜色, 与旧思路 "夜间模式 | 5 组 | 随机切换" 的行为一致.
@@ -164,7 +164,7 @@
 | 0 个组, 或全部组被禁用 (且无覆盖层) | 可保存, 不可激活; 卡片显示 "无可用组" |
 | 状态源只有 1 个状态, 启用组不超过 1 个, 且无覆盖层 | 保存或激活时提示 "当前设置不具备智能表现, 是否继续" |
 | 勾选了换组时机但启用组不超过 1 个 | 提示换组时机不会产生效果 |
-| 某些状态缺少颜色 | 以首个状态的颜色补齐并提示 |
+| 某些状态缺少颜色 | 以按状态顺序第一个有颜色的状态补齐并提示 |
 | 时间间隔低于 1 分钟 | 提示频繁变色的观感与耗电 (下限见 Q3) |
 
 ### 4.8 卡片摘要格式
@@ -187,7 +187,7 @@
 - [x] P0.3 Room schema v2 (D8, F3, F7): 新表 `color_library` (`kind`, `is_intelligent`, `name`, `origin`, `config_json`, `position`, 创建 / 修改时间), `color_library_color` (普通自建库的颜色: `name`, `color`, `position`, 时间), `color_group` (`name`, `enabled`, `position`, 时间), `color_group_state` (`group_id`, `state_key`, `primary_color` / `accent_color` / `dark_color` 可空), `color_favorite` (`color` 唯一, `pinned`, `position`, 时间); `color_history` 与 `palette_history` 增加 `use_count INTEGER NOT NULL DEFAULT 1`, `source TEXT NOT NULL DEFAULT 'USER'`, `source_detail TEXT`; 外键级联删除; 删除占位实体; `MIGRATION_1_2`; `exportSchema = true`, 1.json 按现有实体反推 (做法同 `HistoryDatabase`). 验收: `:app:kspAppDebugKotlin` 生成 2.json; `androidTest/.../ColorHistoryDatabaseMigrationTest` 编译通过 (1 -> 2 保留历史数据, 新表可读写), 真机执行列入 P7.2. 证据: 1.json 未手工反推, 而是先在 version 1 上打开 `exportSchema` 由 KSP 从原实体生成 (真实 identityHash `d86daee1...`; 嵌入字段 `hex` 实际排在 `last_used_time` 之后, 手工反推易错), 再升级实体由 KSP 生成 2.json (`c54aa10b...`), `MIGRATION_1_2` 的建表语句逐字取自 2.json; 实体类名为 `ColorLibrary` / `LibraryColor` / `ColorGroup` / `ColorGroupState` / `FavoriteColor`, 来源常量 `HistorySource`, DAO 为 `theme/library/ColorLibraryDao` (库 / 颜色 / 组 / 状态 `@Upsert` / 收藏); `ColorHistoryDatabase.createBuilder` 供生产与迁移测试共用. `ColorHistoryDatabaseMigrationTest` (2 例: v1 历史行保留且新列取默认值; 新表可写, 收藏按颜色唯一, 删除库级联清除颜色 / 组 / 状态) 经 `:app:compileAppDebugAndroidTestKotlin` 编译通过, 真机执行留待 P7.2, 2026-10-06.
 - [ ] P0.4 选中状态与 ID 空间 (D9, F4): 值类型 `ColorSelection` (预设条目 / 调色板 / 自建库颜色 / 智能库 + 起始组) 与 `ColorSelectionCodec` (读写现有两个键, 兼容 legacy 索引与 `SELECT_NONE`); `getCurrentColorSummary` 与 `checkAndGetTargetInfoForThemeColorLocate` 改用之. 验收: 单测覆盖所有既有 Pref 组合, 解码结果与当前行为一致; 新 ID 分段往返无损.
 - [ ] P0.5 主题色协调器 (D6, D10, D11, F6): `ThemeColorCoordinator.apply(themeColor, source, detail)` 作为唯一入口, 4 个调用点迁移; 暂停引用计数 (`pause(token)` / `resume(token)`, 全部恢复后回调引擎); `SCRIPT` 500 ms 合并窗口; 历史写入规则 (`INTELLIGENT` 不写). 决策部分抽为纯对象 `ThemeColorApplyPolicy`. 验收: 单测覆盖 来源 x 暂停 x 合并 的组合; 手动选色行为与改造前一致 (E2).
-- [ ] P0.6 引擎核心 (D3, D4, D15): `IntelligentConfig` + `IntelligentConfigJson` (version 1, 未知字段忽略); `IntelligentColorPlanner` (输入: 配置, 组, 当前状态 key, 覆盖层命中, 事件, 运行时状态; 输出: 目标组, 有效颜色, 新运行时状态, 下次到期时间), 实现 4.3 的流程与 4.6 的切换方式 (名称排序的 Collator 由调用方注入, 随机源可注入种子); `IntervalSchedule.nextDue(now, every, unit, anchor)` (anchor = 现在 / 下一个整分 / 下一个整时) 与补算 (过期只换一次); `IntelligentConfigValidator` 产出 4.7 的各类结论. 验收: 单测覆盖顺序 (各排序键, 正倒序, 循环), 随机不连续重复, 禁用组跳过, 当前组被删除, 覆盖层进入与离开, 补算, 校验结论.
+- [x] P0.6 引擎核心 (D3, D4, D15): `IntelligentConfig` + `IntelligentConfigJson` (version 1, 未知字段忽略); `IntelligentColorPlanner` (输入: 配置, 组, 当前状态 key, 覆盖层命中, 事件, 运行时状态; 输出: 目标组, 有效颜色, 新运行时状态, 下次到期时间), 实现 4.3 的流程与 4.6 的切换方式 (名称排序的 Collator 由调用方注入, 随机源可注入种子); `IntervalSchedule.nextDue(now, every, unit, anchor)` (anchor = 现在 / 下一个整分 / 下一个整时) 与补算 (过期只换一次); `IntelligentConfigValidator` 产出 4.7 的各类结论. 验收: 单测覆盖顺序 (各排序键, 正倒序, 循环), 随机不连续重复, 禁用组跳过, 当前组被删除, 覆盖层进入与离开, 补算, 校验结论. 证据: 包 `theme/intelligent` (`IntelligentConfig` 含组模型 `IntelligentGroup` / `StateColors` / `EffectiveColor`, `IntelligentConfigJson` 基于 Gson 树模型, `IntervalSchedule`, `IntelligentColorPlanner`, `IntelligentConfigValidator`); JVM 单测 34 例: `IntelligentColorPlannerTest` (15), `IntervalScheduleTest` (5, 含 +05:30 时区的本地整点与夏令时跳变), `IntelligentConfigJsonTest` (6, 含未知类型原样往返与非法值修复), `IntelligentConfigValidatorTest` (8), 2026-10-06. 实现要点: 覆盖层命中期间 `currentGroupId` 保持不变, 另记 `overrideGroupId`, 因此离开时无需 "进入前的组" 字段; 换组时机 "脚本" 由 `SCRIPT_NEXT` 事件表达, 不要求勾选; 时间间隔下限暂定 5 秒 (`IntervalSchedule.MIN_PERIOD_MILLIS`, 待 Q3 拍板); 覆盖层的日期匹配 (P3.5) 由调用方解析后以 `overrideGroupId` 传入.
 - [ ] P0.7 阶段收尾: `:app:compileAppDebugKotlin`, `:app:testAppDebugUnitTest --tests "org.autojs.autojs.theme.*"`, `:app:compileAppDebugAndroidTestKotlin` 通过; 无用户可见变化, 不写 changelog; 本表证据回填.
 
 ### P1 最小闭环: 自建库基础 + 智能库 (夜间模式 / 应用启动 / 时间间隔) + 两个预设
@@ -291,14 +291,14 @@
       "name": "暖冷交替",
       "config": {
         "version": 1,
-        "stateSource": { "type": "nightMode", "nightSameAsDay": false },
+        "stateSource": { "type": "nightMode" },
         "rotation": [
           { "type": "stateChange" },
           { "type": "interval", "every": 1, "unit": "hour", "anchor": "nextHour" }
         ],
         "order": { "mode": "sequential", "key": "hue", "referenceState": "day", "descending": false },
         "overrides": [
-          { "when": { "type": "dateRange", "from": "12-24", "to": "12-26", "repeat": "yearly" }, "group": 3 }
+          { "when": { "type": "dateRange", "from": "12-24", "to": "12-26" }, "group": 3 }
         ]
       },
       "groups": [
@@ -312,7 +312,7 @@
 }
 ```
 
-约定: 颜色为不透明的 `#RRGGBB`; 时间为 ISO 8601, 可省略 (省略时以导入时刻填充); `group` 为同一库 `groups` 数组的下标; 状态 key 与 4.1 一致; 未知字段忽略; `config.version` 与 `schemaVersion` 各自独立演进.
+约定: 颜色为不透明的 `#RRGGBB`; 时间为 ISO 8601, 可省略 (省略时以导入时刻填充); `group` 为同一库 `groups` 数组的下标 (数据库中的 `config_json` 存的是组的行 id, 导入导出时互相映射); `dateRange` 省略 `year` 时每年重复, 指定 `year` 时只在从该年开始的那一次生效, 起点晚于终点表示跨年; 状态 key 与 4.1 一致; 未知字段忽略; `config.version` 与 `schemaVersion` 各自独立演进.
 
 ## 附录 C. 冒烟清单
 
