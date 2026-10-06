@@ -31,6 +31,16 @@ data class IntelligentConfig(
                 || rotation.any { it is RotationTrigger.Unsupported }
                 || overrides.any { it.condition is DateCondition.Unsupported }
 
+    /**
+     * Rewrites the group references of the overrides through [mapping] (old id to new id), dropping overrides
+     * whose group is not in it. Used when groups get new ids, as in cloning, saving new groups and importing.
+     * zh-CN: 按 [mapping] (旧 id 到新 id) 改写覆盖层引用的组, 不在映射中的覆盖层被移除. 用于组获得新 id 的场合, 如克隆, 保存新组与导入.
+     */
+    fun remapGroupIds(mapping: Map<Long, Long>): IntelligentConfig {
+        if (overrides.isEmpty()) return this
+        return copy(overrides = overrides.mapNotNull { override -> mapping[override.groupId]?.let { override.copy(groupId = it) } })
+    }
+
     companion object {
         const val VERSION = 1
     }

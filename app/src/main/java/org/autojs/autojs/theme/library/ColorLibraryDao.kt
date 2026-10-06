@@ -113,18 +113,24 @@ interface ColorLibraryDao {
         }
     }
 
+    /** Returns the library id and the saved group ids in the order of [groups]. zh-CN: 返回库 id 与按 [groups] 顺序保存后的组 id. */
     @Transaction
-    suspend fun insertIntelligentLibrary(library: ColorLibrary, groups: List<ColorGroup>, states: List<List<ColorGroupState>>): Long {
+    suspend fun insertIntelligentLibrary(library: ColorLibrary, groups: List<ColorGroup>, states: List<List<ColorGroupState>>): SavedIntelligentLibrary {
         val libraryId = insertLibrary(library)
-        saveGroups(libraryId, groups, states)
-        return libraryId
+        return SavedIntelligentLibrary(libraryId, saveGroups(libraryId, groups, states))
     }
 
+    /** Returns the library id and the saved group ids in the order of [groups]. zh-CN: 返回库 id 与按 [groups] 顺序保存后的组 id. */
     @Transaction
-    suspend fun updateIntelligentLibrary(library: ColorLibrary, groups: List<ColorGroup>, states: List<List<ColorGroupState>>) {
+    suspend fun updateIntelligentLibrary(library: ColorLibrary, groups: List<ColorGroup>, states: List<List<ColorGroupState>>): SavedIntelligentLibrary {
         updateLibrary(library)
-        saveGroups(library.id, groups, states)
+        return SavedIntelligentLibrary(library.id, saveGroups(library.id, groups, states))
     }
+
+    @Query("UPDATE color_library SET config_json = :configJson WHERE id = :id")
+    suspend fun updateLibraryConfig(id: Long, configJson: String)
+
+    data class SavedIntelligentLibrary(val libraryId: Long, val groupIds: List<Long>)
 
     @Upsert
     suspend fun upsertStates(states: List<ColorGroupState>)

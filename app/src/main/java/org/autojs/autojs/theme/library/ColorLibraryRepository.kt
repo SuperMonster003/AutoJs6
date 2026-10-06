@@ -1,6 +1,7 @@
 package org.autojs.autojs.theme.library
 
 import android.content.Context
+import androidx.room.withTransaction
 import org.autojs.autojs.theme.app.ColorEntities.ColorGroup
 import org.autojs.autojs.theme.app.ColorEntities.ColorGroupState
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
@@ -134,8 +135,10 @@ class ColorLibraryRepository(
 
     /**
      * Creates ([rowId] null) or updates an intelligent library. Groups with an id that already belongs to the library
-     * keep it; any other id (such as a negative editor id) creates a new group. Returns the stored library.
-     * zh-CN: 新建 ([rowId] 为 null) 或更新智能库. id 已属于该库的组保留其 id; 其他 id (例如编辑器中的负数 id) 新建组. 返回保存后的库.
+     * keep it; any other id (such as a negative editor id) creates a new group. The overrides of [config] refer to the
+     * ids in [groups] and are rewritten to the stored ids. Returns the stored library.
+     * zh-CN: 新建 ([rowId] 为 null) 或更新智能库. id 已属于该库的组保留其 id; 其他 id (例如编辑器中的负数 id) 新建组.
+     * [config] 的覆盖层引用 [groups] 中的 id, 保存时改写为实际的 id. 返回保存后的库.
      */
     suspend fun saveIntelligent(
         rowId: Long?,
@@ -161,29 +164,36 @@ class ColorLibraryRepository(
         val stateRows = groups.map { group ->
             group.states.map { (key, colors) -> ColorGroupState(0L, key, colors.primary, colors.accent, colors.dark) }
         }
-        val libraryId = when (val existing = rowId?.let { dao.findLibrary(it) }) {
-            null -> dao.insertIntelligentLibrary(
-                ColorLibrary(
-                    kind = kind,
-                    isIntelligent = true,
-                    name = LibraryNaming.unique(name, dao.listLibraryNames()),
-                    origin = origin,
-                    configJson = configJson,
-                    position = dao.nextLibraryPosition(),
-                    createdTime = time,
-                    modifiedTime = time,
-                ),
-                groupRows,
-                stateRows,
-            )
-            else -> existing.id.also { id ->
-                val others = dao.listLibraries().filter { it.id != id }.map { it.name }
-                dao.updateIntelligentLibrary(
-                    existing.copy(name = LibraryNaming.unique(name, others), configJson = configJson, modifiedTime = time),
+        val libraryId = database.withTransaction {
+            val saved = when (val existing = rowId?.let { dao.findLibrary(it) }) {
+                null -> dao.insertIntelligentLibrary(
+                    ColorLibrary(
+                        kind = kind,
+                        isIntelligent = true,
+                        name = LibraryNaming.unique(name, dao.listLibraryNames()),
+                        origin = origin,
+                        configJson = configJson,
+                        position = dao.nextLibraryPosition(),
+                        createdTime = time,
+                        modifiedTime = time,
+                    ),
                     groupRows,
                     stateRows,
                 )
+                else -> {
+                    val others = dao.listLibraries().filter { it.id != existing.id }.map { it.name }
+                    dao.updateIntelligentLibrary(
+                        existing.copy(name = LibraryNaming.unique(name, others), configJson = configJson, modifiedTime = time),
+                        groupRows,
+                        stateRows,
+                    )
+                }
             }
+            // Overrides refer to the ids of [groups]; new groups have just received their stored ids.
+            // zh-CN: 覆盖层引用的是 [groups] 中的 id; 新组刚刚获得保存后的 id.
+            val remapped = config.remapGroupIds(groups.map { it.id }.zip(saved.groupIds).toMap())
+            if (remapped != config) dao.updateLibraryConfig(saved.libraryId, IntelligentConfigJson.encode(remapped))
+            saved.libraryId
         }
         return loadIntelligent(libraryId)!!
     }

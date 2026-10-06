@@ -30,8 +30,9 @@ class IntelligentLibraryOperations(private val activity: AppCompatActivity) {
         activity.lifecycleScope.launch {
             val name = activity.getString(R.string.text_color_library_copy_name, source.name)
             val groups = source.groups.mapIndexed { index, group -> group.copy(id = -(index + 1L), createdTime = 0L, modifiedTime = 0L) }
+            val config = source.config.remapGroupIds(source.groups.zip(groups).associate { (old, new) -> old.id to new.id })
             val cloned = withContext(Dispatchers.IO) {
-                repository.saveIntelligent(null, name, source.config, groups, ColorLibrary.Kind.CLONED, origin = source.name)
+                repository.saveIntelligent(null, name, config, groups, ColorLibrary.Kind.CLONED, origin = source.name)
             }
             onCloned(cloned)
         }

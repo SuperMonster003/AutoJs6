@@ -211,7 +211,7 @@
 
 ### P2 自建库完善与交换 (AutoJs6 JSON)
 
-- [ ] P2.1 `ColorLibraryJson` 编解码 (D14, 附录 B): 纯对象; 颜色一律 `#RRGGBB`; 组在文件内以下标引用; 限额: 文件不超过 2 MiB, 库不超过 256 个, 每库颜色或组不超过 4096 个. 验收: 单测覆盖往返无损, 未知字段忽略, 高版本 schema 拒绝, 非法色值, 超限.
+- [x] P2.1 `ColorLibraryJson` 编解码 (D14, 附录 B): 纯对象; 颜色一律 `#RRGGBB`; 组在文件内以下标引用; 限额: 文件不超过 2 MiB, 库不超过 256 个, 每库颜色或组不超过 4096 个. 验收: 单测覆盖往返无损, 未知字段忽略, 高版本 schema 拒绝, 非法色值, 超限. 证据: `theme/library/ColorLibraryJson` (Gson 树模型; 编码为带缩进的 JSON, 时间为带偏移的 ISO 8601, 精确到秒; 智能库配置复用 `IntelligentConfigJson.toJson` / `fromJson`, 覆盖层的组 id 与文件下标经 `IntelligentConfig.remapGroupIds` 互相映射, 解码后组以下标为 id; 读取时也接受 `#AARRGGBB` 并去除透明度; 未知类型的库跳过并计数, 无效色值, 非对象的组与指向不存在组的覆盖层丢弃并按库计数 (`droppedValues`), 供导入预览提示; 错误为 `ColorLibraryJsonException` + `Reason` (过大 / 格式错误 / 不是颜色库文件 / 更高版本 schema 附版本号 / 无可导入的库 / 库过多 / 某库条目过多附库名), 编码时同样检查限额). `ColorLibraryJsonTest` (JVM, 9 例: 往返且组按下标重编号, 文件结构与附录 B 一致, 未知字段与类型, 不可导入的文件 (含 schemaVersion 99), 无效色值计数, 三项限额的边界与超限, 库名规范化与回退, 不受支持的配置原样往返, 色值严格解析). 同时修正: 组获得新 id 时覆盖层引用随之改写 (`ColorLibraryRepository.saveIntelligent` 在同一事务内按保存后的组 id 改写, 克隆时先映射到临时 id), 此前克隆或新建组会使覆盖层指向错误的组 (覆盖层自 P3.5 起可编辑, 当前无用户可见影响). `theme.*` 单测 91 例 (E1), 2026-10-07.
 - [ ] P2.2 导出: 库长按 "导出", 以及菜单 "导出颜色库..." 多选 (可含预设库与预设智能库的快照); SAF `CreateDocument` (`application/json`, 默认名 `autojs6-colors-yyyyMMdd-HHmmss.json`); IO 线程写出.
 - [ ] P2.3 导入: "添加颜色库 > 导入颜色库" 走 SAF `OpenDocument`; IO 线程解析与校验; 预览对话框 (库名, 类型, 颜色数或组数, 可勾选); 重名自动加序号 `名称 (2)`; 导入的库 `kind = IMPORTED` 并启用 imported 图标; 智能库配置引用了当前版本不支持的状态源或换组时机时, 保留原始 JSON 并在编辑器中标注 "不受支持, 不会生效"; 错误映射为本地化文案.
 - [ ] P2.4 全局搜索覆盖自建库颜色与智能库组颜色 (`filterColorsFromColorItems` 的数据源扩展, 结果带库标识前缀); 搜索帮助页同步说明.
