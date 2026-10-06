@@ -45,6 +45,8 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     private val repository by lazy { ColorLibraryRepository.get(this) }
 
+    private val exchange = ColorLibraryExchange(this) { refreshUserLibraries() }
+
     private val presetRows by lazy { presetColorLibraries.map { LibraryRow.Preset(it) } }
 
     private val libraryAdapter: ColorLibraryAdapter by lazy {
@@ -121,6 +123,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                     this, getString(row.library.nameRes), listOf(
                         getString(R.string.text_open) to { onLibraryClick(row) },
                         getString(R.string.text_clone) to { cloneFrom(getString(row.library.nameRes), presetColorsOf(row)) },
+                        getString(R.string.text_export) to { exchange.export(listOf(ColorLibraryExchange.Source.PresetPlain(row.library.id))) },
                     )
                 )
             }
@@ -131,6 +134,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                         getString(R.string.text_open) to { onLibraryClick(row) },
                         getString(R.string.text_rename) to { renameLibrary(library) },
                         getString(R.string.text_clone) to { cloneFrom(library.name) { withContext(Dispatchers.IO) { repository.listColors(library.id) }.map { ColorLibraryRepository.NewColor(it.color, it.name) } } },
+                        getString(R.string.text_export) to { exchange.export(listOf(ColorLibraryExchange.Source.User(library.id))) },
                         getString(R.string.text_delete) to { deleteLibrary(library) },
                     )
                 )
@@ -273,7 +277,11 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             true
         }
         R.id.action_import_color_library -> {
-            ViewUtils.showToast(this, R.string.text_under_development)
+            exchange.import()
+            true
+        }
+        R.id.action_export_color_libraries -> {
+            lifecycleScope.launch { exchange.chooseAndExport(exchange.allChoices()) }
             true
         }
         R.id.action_clone_color_library -> {

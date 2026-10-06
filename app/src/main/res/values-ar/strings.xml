@@ -325,6 +325,12 @@
     <string name="error_change_password_error_match">لا تتطابق كلمات المرور هذه</string>
     <string name="error_check_for_update">فشل في التحقق من التحديثات</string>
     <string name="error_colon_must_follow_a_valid_ip_address">يجب أن يتبع القولون عنوان IP صالحًا</string>
+    <string name="error_color_library_file_malformed">الملف ليس JSON صالحا</string>
+    <string name="error_color_library_file_newer_schema">يستخدم الملف إصدار التنسيق %1$s ويتطلب إصدارا أحدث من AutoJs6</string>
+    <string name="error_color_library_file_no_libraries">لا يحتوي الملف على مكتبات ألوان يمكن استيرادها</string>
+    <string name="error_color_library_file_too_large">الملف كبير جدا (أكثر من %1$s)</string>
+    <string name="error_color_library_file_too_many_libraries">يحتوي الملف على أكثر من %1$d مكتبة ألوان</string>
+    <string name="error_color_library_too_many_items">تحتوي مكتبة الألوان \"%1$s\" على أكثر من %2$d لون أو مجموعة</string>
     <string name="error_compass_cannot_be_null">لا يمكن أن تكون البوصلة لاغية</string>
     <string name="error_conditions_not_met_for_record">يتطلب تسجيل السكربتات توفر شرط واحد على الاقل مما يلي:\n- صلاحيات Root\n- صلاحيات Shizuku</string>
     <string name="error_connect_to_remote">لا يمكن الاتصال بالخادم البعيد: %s</string>
@@ -450,6 +456,7 @@
     <string name="error_no_such_selector_method" formatted="false">لا توجد طريقة محددة %s (%s: %s)</string>
     <string name="error_no_usage_stats_permission">لا يوجد إذن \"إحصائيات الاستخدام\"</string>
     <string name="error_no_write_settings_permission">لا يوجد إذن \"إعدادات الكتابة\"</string>
+    <string name="error_not_a_color_library_file">الملف ليس ملف مكتبة ألوان AutoJs6</string>
     <string name="error_official_plugin_missing">المكون الإضافي التابع مفقود: %1$s. ابحث عن المكون الإضافي الرسمي ذي الصلة وثبّته عبر الإنترنت من \"مركز الإضافات\" في AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">يمكن أن تستضيف Scrollview طفلًا مباشرًا واحد فقط</string>
     <string name="error_parse_github_release_assets">فشل في تحليل أصول الإفراج عن جيثب</string>
@@ -1038,6 +1045,8 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">الحصول مباشرة على آخر نسخة عن بُعد عند التحقق من التحديثات</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">البحث عن تحديثات...</string>
     <string name="text_choose_at_least_one_color">اختر لونا لحالة واحدة على الأقل</string>
+    <string name="text_choose_color_libraries_to_export">اختر مكتبات الألوان المراد تصديرها</string>
+    <string name="text_choose_color_libraries_to_import">اختر مكتبات الألوان المراد استيرادها</string>
     <string name="text_choose_color_library">اختر مكتبة ألوان</string>
     <string name="text_choose_color_library_to_clone">اختر مكتبة الألوان المراد استنساخها</string>
     <string name="text_choose_colors_to_add">اختر الألوان المراد إضافتها</string>
@@ -1413,6 +1422,7 @@
     <string name="text_expires_at">ينتهي</string>
     <string name="text_export">يصدّر</string>
     <string name="text_export_all">تصدير الكل</string>
+    <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">تصدير مكتبات الألوان...</string>
     <string name="text_export_selected">تصدير المحدد</string>
     <string name="text_exported">تصدير</string>
     <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
@@ -1437,6 +1447,7 @@
     <string name="text_failed_to_enable_a11y_service">فشل تفعيل خدمة إمكانية الوصول</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">فشل في تمكين خدمة الوصول مع الوصول إلى الجذر</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">فشل في تمكين خدمة إمكانية الوصول مع إعدادات آمنة</string>
+    <string name="text_failed_to_export_color_libraries">فشل تصدير مكتبات الألوان</string>
     <string name="text_failed_to_export_log_entries">فشل تصدير إدخالات السجل</string>
     <string name="text_failed_to_format">فشل التنسيق</string>
     <string name="text_failed_to_generate">فشل إنشاء رمز</string>
@@ -2497,6 +2508,7 @@
     <string name="text_unknown_title_for_plugin">عنوان غير معروف</string>
     <string name="text_unknown_version_for_plugin">إصدار غير معروف</string>
     <string name="text_unlimited">بلا حدود</string>
+    <string name="text_unnamed_color_library">مكتبة ألوان بلا اسم</string>
     <string name="text_unpin">الغاء التثبيت</string>
     <string name="text_unsaved_changes">تغييرات غير محفوظة</string>
     <string name="text_unsigned_apk_created">تم انشاء APK غير موقّع</string>

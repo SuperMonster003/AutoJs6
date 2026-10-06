@@ -51,9 +51,34 @@
         <item quantity="other">Total : %d éléments</item>
     </plurals>
 
+    <plurals name="text_n_color_libraries_exported">
+        <item quantity="one">%d bibliothèque de couleurs exportée</item>
+        <item quantity="other">%d bibliothèques de couleurs exportées</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_imported">
+        <item quantity="one">%d bibliothèque de couleurs importée</item>
+        <item quantity="other">%d bibliothèques de couleurs importées</item>
+    </plurals>
+
+    <plurals name="text_n_colors">
+        <item quantity="one">%d couleur</item>
+        <item quantity="other">%d couleurs</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="one">%d groupe</item>
         <item quantity="other">%d groupes</item>
+    </plurals>
+
+    <plurals name="text_n_invalid_values_skipped">
+        <item quantity="one">%d valeur invalide sera ignorée</item>
+        <item quantity="other">%d valeurs invalides seront ignorées</item>
+    </plurals>
+
+    <plurals name="text_n_unknown_libraries_skipped">
+        <item quantity="one">%d bibliothèque de couleurs de type inconnu sera ignorée</item>
+        <item quantity="other">%d bibliothèques de couleurs de type inconnu seront ignorées</item>
     </plurals>
 
 </resources>

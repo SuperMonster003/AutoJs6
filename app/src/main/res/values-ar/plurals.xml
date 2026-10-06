@@ -87,6 +87,33 @@
         <item quantity="other">المجموع: %d عنصر</item>
     </plurals>
 
+    <plurals name="text_n_color_libraries_exported">
+        <item quantity="zero">تم تصدير %d مكتبة ألوان</item>
+        <item quantity="one">تم تصدير مكتبة ألوان واحدة</item>
+        <item quantity="two">تم تصدير مكتبتي ألوان</item>
+        <item quantity="few">تم تصدير %d مكتبات ألوان</item>
+        <item quantity="many">تم تصدير %d مكتبة ألوان</item>
+        <item quantity="other">تم تصدير %d مكتبة ألوان</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_imported">
+        <item quantity="zero">تم استيراد %d مكتبة ألوان</item>
+        <item quantity="one">تم استيراد مكتبة ألوان واحدة</item>
+        <item quantity="two">تم استيراد مكتبتي ألوان</item>
+        <item quantity="few">تم استيراد %d مكتبات ألوان</item>
+        <item quantity="many">تم استيراد %d مكتبة ألوان</item>
+        <item quantity="other">تم استيراد %d مكتبة ألوان</item>
+    </plurals>
+
+    <plurals name="text_n_colors">
+        <item quantity="zero">%d لون</item>
+        <item quantity="one">لون واحد</item>
+        <item quantity="two">لونان</item>
+        <item quantity="few">%d ألوان</item>
+        <item quantity="many">%d لونا</item>
+        <item quantity="other">%d لون</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="zero">%d مجموعة</item>
         <item quantity="one">%d مجموعة</item>
@@ -94,6 +121,24 @@
         <item quantity="few">%d مجموعات</item>
         <item quantity="many">%d مجموعة</item>
         <item quantity="other">%d مجموعة</item>
+    </plurals>
+
+    <plurals name="text_n_invalid_values_skipped">
+        <item quantity="zero">سيتم تخطي %d قيمة غير صالحة</item>
+        <item quantity="one">سيتم تخطي قيمة واحدة غير صالحة</item>
+        <item quantity="two">سيتم تخطي قيمتين غير صالحتين</item>
+        <item quantity="few">سيتم تخطي %d قيم غير صالحة</item>
+        <item quantity="many">سيتم تخطي %d قيمة غير صالحة</item>
+        <item quantity="other">سيتم تخطي %d قيمة غير صالحة</item>
+    </plurals>
+
+    <plurals name="text_n_unknown_libraries_skipped">
+        <item quantity="zero">سيتم تخطي %d مكتبة ألوان من نوع غير معروف</item>
+        <item quantity="one">سيتم تخطي مكتبة ألوان واحدة من نوع غير معروف</item>
+        <item quantity="two">سيتم تخطي مكتبتي ألوان من نوع غير معروف</item>
+        <item quantity="few">سيتم تخطي %d مكتبات ألوان من نوع غير معروف</item>
+        <item quantity="many">سيتم تخطي %d مكتبة ألوان من نوع غير معروف</item>
+        <item quantity="other">سيتم تخطي %d مكتبة ألوان من نوع غير معروف</item>
     </plurals>
 
 </resources>

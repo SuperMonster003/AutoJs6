@@ -38,6 +38,9 @@ class ColorLibraryRepository(
         }
     }
 
+    /** All user libraries, plain and intelligent, in list order. zh-CN: 按列表顺序排列的全部用户库 (含普通库与智能库). */
+    suspend fun listLibraries(): List<ColorLibrary> = dao.listLibraries()
+
     suspend fun findLibrary(id: Long): ColorLibrary? = dao.findLibrary(id)
 
     suspend fun findColor(id: Long): LibraryColor? = dao.findColor(id)

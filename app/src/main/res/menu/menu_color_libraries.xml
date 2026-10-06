@@ -54,6 +54,11 @@
 
     </item>
 
+    <item
+        android:id="@+id/action_export_color_libraries"
+        android:title="@string/text_export_color_libraries"
+        app:showAsAction="never" />
+
     <item android:title="@string/text_more">
 
         <menu>

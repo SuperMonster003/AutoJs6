@@ -36,8 +36,28 @@
         <item quantity="other">共計: %d 項</item>
     </plurals>
 
+    <plurals name="text_n_color_libraries_exported">
+        <item quantity="other">已導出 %d 個顏色庫</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_imported">
+        <item quantity="other">已導入 %d 個顏色庫</item>
+    </plurals>
+
+    <plurals name="text_n_colors">
+        <item quantity="other">%d 色</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="other">%d 組</item>
+    </plurals>
+
+    <plurals name="text_n_invalid_values_skipped">
+        <item quantity="other">%d 個無效值將被略過</item>
+    </plurals>
+
+    <plurals name="text_n_unknown_libraries_skipped">
+        <item quantity="other">%d 個未知類型的顏色庫將被略過</item>
     </plurals>
 
 </resources>

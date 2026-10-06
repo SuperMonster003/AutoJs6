@@ -323,6 +323,12 @@
     <string name="error_change_password_error_match">Las contraseñas no coinciden</string>
     <string name="error_check_for_update">Fallo en la comprobación de las actualizaciones</string>
     <string name="error_colon_must_follow_a_valid_ip_address">Dos puntos deben seguir a una dirección IP válida</string>
+    <string name="error_color_library_file_malformed">El archivo no es un JSON válido</string>
+    <string name="error_color_library_file_newer_schema">El archivo usa la versión de formato %1$s y requiere una versión más reciente de AutoJs6</string>
+    <string name="error_color_library_file_no_libraries">El archivo no contiene bibliotecas de colores que se puedan importar</string>
+    <string name="error_color_library_file_too_large">El archivo es demasiado grande (más de %1$s)</string>
+    <string name="error_color_library_file_too_many_libraries">El archivo contiene más de %1$d bibliotecas de colores</string>
+    <string name="error_color_library_too_many_items">La biblioteca de colores \"%1$s\" tiene más de %2$d colores o grupos</string>
     <string name="error_compass_cannot_be_null">La brújula no puede ser nula</string>
     <string name="error_conditions_not_met_for_record">La grabacion de scripts requiere al menos una de las siguientes condiciones:\n- Acceso root\n- Acceso Shizuku</string>
     <string name="error_connect_to_remote">No se puede conectar con el servidor remoto: %s</string>
@@ -448,6 +454,7 @@
     <string name="error_no_such_selector_method" formatted="false">No existe el método selector %s(%s: %s)</string>
     <string name="error_no_usage_stats_permission">Sin permiso de \"estadísticas de uso\".</string>
     <string name="error_no_write_settings_permission">Sin permiso de \"escritura en la configuración\".</string>
+    <string name="error_not_a_color_library_file">El archivo no es un archivo de biblioteca de colores de AutoJs6</string>
     <string name="error_official_plugin_missing">Falta el plugin dependiente: %1$s. Busca e instala en línea el plugin oficial relacionado en el \"Centro de plugins\" de AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView sólo puede albergar un hijo directo</string>
     <string name="error_parse_github_release_assets">Fallo al analizar los activos de publicación de GitHub</string>
@@ -1036,6 +1043,8 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">Obtener directamente la última versión remota al buscar actualizaciones</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Comprobando las actualizaciones...</string>
     <string name="text_choose_at_least_one_color">Elige un color para al menos un estado</string>
+    <string name="text_choose_color_libraries_to_export">Elegir las bibliotecas de colores para exportar</string>
+    <string name="text_choose_color_libraries_to_import">Elegir las bibliotecas de colores para importar</string>
     <string name="text_choose_color_library">Elegir una biblioteca de colores</string>
     <string name="text_choose_color_library_to_clone">Elegir la biblioteca de colores que se clonará</string>
     <string name="text_choose_colors_to_add">Elegir los colores que se agregarán</string>
@@ -1411,6 +1420,7 @@
     <string name="text_expires_at">Caduca</string>
     <string name="text_export">Exportar</string>
     <string name="text_export_all">Exportar todo</string>
+    <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">Exportar bibliotecas de colores...</string>
     <string name="text_export_selected">Exportar seleccionados</string>
     <string name="text_exported">Exportado</string>
     <string name="text_extending_js_build_in_objects">Extensión de los objetos incorporados de JavaScript</string>
@@ -1435,6 +1445,7 @@
     <string name="text_failed_to_enable_a11y_service">No se pudo activar el servicio de accesibilidad</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Fallo al habilitar el servicio de accesibilidad con acceso root</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Fallo al habilitar el servicio de accesibilidad con una configuración segura</string>
+    <string name="text_failed_to_export_color_libraries">No se pudieron exportar las bibliotecas de colores</string>
     <string name="text_failed_to_export_log_entries">Error al exportar entradas de registro</string>
     <string name="text_failed_to_format">Error de formato</string>
     <string name="text_failed_to_generate">Error al generar el código</string>
@@ -2495,6 +2506,7 @@
     <string name="text_unknown_title_for_plugin">Título Desconocido</string>
     <string name="text_unknown_version_for_plugin">Versión Desconocida</string>
     <string name="text_unlimited">Sin límite</string>
+    <string name="text_unnamed_color_library">Biblioteca de colores sin nombre</string>
     <string name="text_unpin">Dejar de fijar</string>
     <string name="text_unsaved_changes">Cambios sin guardar</string>
     <string name="text_unsigned_apk_created">APK sin firmar creado</string>

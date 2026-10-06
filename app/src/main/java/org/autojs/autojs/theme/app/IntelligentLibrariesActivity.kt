@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
 import org.autojs.autojs.theme.intelligent.IntelligentPresets
+import org.autojs.autojs.theme.library.ColorLibraryIds
 import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
@@ -34,6 +35,8 @@ class IntelligentLibrariesActivity : ColorSelectBaseActivity() {
     private val repository by lazy { ColorLibraryRepository.get(this) }
 
     private val operations by lazy { IntelligentLibraryOperations(this) }
+
+    private val exchange = ColorLibraryExchange(this) { load() }
 
     private val adapter = IntelligentLibraryAdapter(::openLibrary, ::onLibraryLongClick)
 
@@ -93,9 +96,15 @@ class IntelligentLibrariesActivity : ColorSelectBaseActivity() {
             if (!row.isPreset) add(getString(R.string.text_edit) to { openEditor(snapshot.libraryId) })
             if (!row.isPreset) add(getString(R.string.text_rename) to { operations.rename(snapshot) { load() } })
             add(getString(R.string.text_clone) to { operations.clone(snapshot) { IntelligentLibraryActivity.launch(this@IntelligentLibrariesActivity, it.libraryId) } })
+            exportSourceOf(row)?.let { source -> add(getString(R.string.text_export) to { exchange.export(listOf(source)) }) }
             if (!row.isPreset) add(getString(R.string.text_delete) to { operations.delete(snapshot) { load() } })
         }
         ColorLibraryDialogs.showActions(this, snapshot.name, actions)
+    }
+
+    private fun exportSourceOf(row: IntelligentLibraryRow.Library): ColorLibraryExchange.Source? = when {
+        row.isPreset -> ColorLibraryExchange.Source.PresetIntelligent(row.snapshot.libraryId)
+        else -> ColorLibraryIds.userRowIdOf(row.snapshot.libraryId)?.let { ColorLibraryExchange.Source.User(it) }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

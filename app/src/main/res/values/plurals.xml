@@ -45,9 +45,34 @@
         <item quantity="other">Total: %d items</item>
     </plurals>
 
+    <plurals name="text_n_color_libraries_exported">
+        <item quantity="one">Exported %d color library</item>
+        <item quantity="other">Exported %d color libraries</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_imported">
+        <item quantity="one">Imported %d color library</item>
+        <item quantity="other">Imported %d color libraries</item>
+    </plurals>
+
+    <plurals name="text_n_colors">
+        <item quantity="one">%d color</item>
+        <item quantity="other">%d colors</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="one">%d group</item>
         <item quantity="other">%d groups</item>
+    </plurals>
+
+    <plurals name="text_n_invalid_values_skipped">
+        <item quantity="one">%d invalid value will be skipped</item>
+        <item quantity="other">%d invalid values will be skipped</item>
+    </plurals>
+
+    <plurals name="text_n_unknown_libraries_skipped">
+        <item quantity="one">%d color library of an unknown type will be skipped</item>
+        <item quantity="other">%d color libraries of unknown types will be skipped</item>
     </plurals>
 
 </resources>

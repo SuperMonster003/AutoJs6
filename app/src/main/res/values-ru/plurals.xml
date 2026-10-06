@@ -65,11 +65,46 @@
         <item quantity="other">Итого: %d элемента</item>
     </plurals>
 
+    <plurals name="text_n_color_libraries_exported">
+        <item quantity="one">Экспортирована %d цветовая библиотека</item>
+        <item quantity="few">Экспортировано %d цветовые библиотеки</item>
+        <item quantity="many">Экспортировано %d цветовых библиотек</item>
+        <item quantity="other">Экспортировано %d цветовой библиотеки</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_imported">
+        <item quantity="one">Импортирована %d цветовая библиотека</item>
+        <item quantity="few">Импортировано %d цветовые библиотеки</item>
+        <item quantity="many">Импортировано %d цветовых библиотек</item>
+        <item quantity="other">Импортировано %d цветовой библиотеки</item>
+    </plurals>
+
+    <plurals name="text_n_colors">
+        <item quantity="one">%d цвет</item>
+        <item quantity="few">%d цвета</item>
+        <item quantity="many">%d цветов</item>
+        <item quantity="other">%d цвета</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="one">%d группа</item>
         <item quantity="few">%d группы</item>
         <item quantity="many">%d групп</item>
         <item quantity="other">%d группы</item>
+    </plurals>
+
+    <plurals name="text_n_invalid_values_skipped">
+        <item quantity="one">%d недопустимое значение будет пропущено</item>
+        <item quantity="few">%d недопустимых значения будут пропущены</item>
+        <item quantity="many">%d недопустимых значений будут пропущены</item>
+        <item quantity="other">%d недопустимого значения будут пропущены</item>
+    </plurals>
+
+    <plurals name="text_n_unknown_libraries_skipped">
+        <item quantity="one">%d цветовая библиотека неизвестного типа будет пропущена</item>
+        <item quantity="few">%d цветовые библиотеки неизвестного типа будут пропущены</item>
+        <item quantity="many">%d цветовых библиотек неизвестного типа будут пропущены</item>
+        <item quantity="other">%d цветовой библиотеки неизвестного типа будут пропущены</item>
     </plurals>
 
 </resources>

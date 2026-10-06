@@ -324,6 +324,12 @@
     <string name="error_change_password_error_match">これらのパスワードは一致しませんでした</string>
     <string name="error_check_for_update">更新のチェックに失敗しました</string>
     <string name="error_colon_must_follow_a_valid_ip_address">有効な IP アドレスの後にコロンが続くこと</string>
+    <string name="error_color_library_file_malformed">ファイルが有効な JSON ではありません</string>
+    <string name="error_color_library_file_newer_schema">ファイルの形式バージョンは %1$s で, より新しいバージョンの AutoJs6 が必要です</string>
+    <string name="error_color_library_file_no_libraries">ファイルにインポートできるカラーライブラリがありません</string>
+    <string name="error_color_library_file_too_large">ファイルが大きすぎます (%1$s を超えています)</string>
+    <string name="error_color_library_file_too_many_libraries">ファイル内のカラーライブラリが %1$d 個を超えています</string>
+    <string name="error_color_library_too_many_items">カラーライブラリ \"%1$s\" の色またはグループが %2$d 個を超えています</string>
     <string name="error_compass_cannot_be_null">コンパスは null にできません</string>
     <string name="error_conditions_not_met_for_record">スクリプト録画には次の条件のうち少なくとも1つが必要です:\n- Root 権限\n- Shizuku 権限</string>
     <string name="error_connect_to_remote">リモートサーバーに接続できません. %s</string>
@@ -449,6 +455,7 @@
     <string name="error_no_such_selector_method" formatted="false">そのようなセレクタメソッドはありません %s(%s: %s)</string>
     <string name="error_no_usage_stats_permission">\"使用統計\" 権限がありません</string>
     <string name="error_no_write_settings_permission">\"設定の書き込み\" 権限なし</string>
+    <string name="error_not_a_color_library_file">ファイルは AutoJs6 のカラーライブラリファイルではありません</string>
     <string name="error_official_plugin_missing">依存プラグインが不足しています: %1$s. AutoJs6 の \"プラグインセンター\" で関連する公式プラグインを検索してオンラインでインストールしてください</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView は 1 つの直接の子だけをホストできます</string>
     <string name="error_parse_github_release_assets">GitHub リリースアセットの解析に失敗しました</string>
@@ -1037,6 +1044,8 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">アップデートを確認する際に, 最新のリモートバージョンを直接取得する</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">アップデートを確認中...</string>
     <string name="text_choose_at_least_one_color">少なくとも 1 つの状態に色を選択してください</string>
+    <string name="text_choose_color_libraries_to_export">エクスポートするカラーライブラリを選択</string>
+    <string name="text_choose_color_libraries_to_import">インポートするカラーライブラリを選択</string>
     <string name="text_choose_color_library">カラーライブラリを選択</string>
     <string name="text_choose_color_library_to_clone">複製するカラーライブラリを選択</string>
     <string name="text_choose_colors_to_add">追加する色を選択</string>
@@ -1412,6 +1421,7 @@
     <string name="text_expires_at">期限</string>
     <string name="text_export">輸出</string>
     <string name="text_export_all">全てエクスポート</string>
+    <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">カラーライブラリをエクスポート...</string>
     <string name="text_export_selected">選択をエクスポート</string>
     <string name="text_exported">エクスポートされました</string>
     <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
@@ -1436,6 +1446,7 @@
     <string name="text_failed_to_enable_a11y_service">アクセシビリティサービスの有効化に失敗しました</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">ルートアクセスによるアクセシビリティサービスの有効化に失敗しました</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">セキュア設定によるアクセシビリティサービスの有効化に失敗しました</string>
+    <string name="text_failed_to_export_color_libraries">カラーライブラリのエクスポートに失敗しました</string>
     <string name="text_failed_to_export_log_entries">ログエントリのエクスポートに失敗しました</string>
     <string name="text_failed_to_format">フォーマット失敗</string>
     <string name="text_failed_to_generate">コード生成の失敗</string>
@@ -2496,6 +2507,7 @@
     <string name="text_unknown_title_for_plugin">不明なタイトル</string>
     <string name="text_unknown_version_for_plugin">不明なバージョン</string>
     <string name="text_unlimited">無制限</string>
+    <string name="text_unnamed_color_library">名前のないカラーライブラリ</string>
     <string name="text_unpin">固定を解除</string>
     <string name="text_unsaved_changes">未保存の変更</string>
     <string name="text_unsigned_apk_created">未署名 APK を作成しました</string>

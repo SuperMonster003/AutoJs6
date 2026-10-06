@@ -36,8 +36,28 @@
         <item quantity="other">合計: %d 件</item>
     </plurals>
 
+    <plurals name="text_n_color_libraries_exported">
+        <item quantity="other">%d 個のカラーライブラリをエクスポートしました</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_imported">
+        <item quantity="other">%d 個のカラーライブラリをインポートしました</item>
+    </plurals>
+
+    <plurals name="text_n_colors">
+        <item quantity="other">%d 色</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="other">%d グループ</item>
+    </plurals>
+
+    <plurals name="text_n_invalid_values_skipped">
+        <item quantity="other">%d 個の無効な値はスキップされます</item>
+    </plurals>
+
+    <plurals name="text_n_unknown_libraries_skipped">
+        <item quantity="other">種類が不明な %d 個のカラーライブラリはスキップされます</item>
     </plurals>
 
 </resources>

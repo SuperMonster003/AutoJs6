@@ -325,6 +325,12 @@
     <string name="error_change_password_error_match">그 암호는 일치하지 않았다</string>
     <string name="error_check_for_update">업데이트를 확인하지 못했습니다</string>
     <string name="error_colon_must_follow_a_valid_ip_address">콜론은 유효한 IP 주소를 따라야 합니다</string>
+    <string name="error_color_library_file_malformed">파일이 올바른 JSON이 아닙니다</string>
+    <string name="error_color_library_file_newer_schema">파일 형식 버전이 %1$s이며 더 새로운 버전의 AutoJs6이 필요합니다</string>
+    <string name="error_color_library_file_no_libraries">파일에 가져올 수 있는 색상 라이브러리가 없습니다</string>
+    <string name="error_color_library_file_too_large">파일이 너무 큽니다 (%1$s 초과)</string>
+    <string name="error_color_library_file_too_many_libraries">파일에 색상 라이브러리가 %1$d개를 초과합니다</string>
+    <string name="error_color_library_too_many_items">색상 라이브러리 \"%1$s\"의 색상 또는 그룹이 %2$d개를 초과합니다</string>
     <string name="error_compass_cannot_be_null">나침반은 무효가 될 수 없다</string>
     <string name="error_conditions_not_met_for_record">스크립트 녹화에는 다음 조건 중 하나 이상이 필요합니다:\n- Root 권한\n- Shizuku 권한</string>
     <string name="error_connect_to_remote">원격 서버에 연결할 수 없습니다: %s</string>
@@ -450,6 +456,7 @@
     <string name="error_no_such_selector_method" formatted="false">그러한 선택기 방법 %s(%s: %s)</string>
     <string name="error_no_usage_stats_permission">\"사용 통계\" 권한이 없습니다</string>
     <string name="error_no_write_settings_permission">\"쓰기 설정\" 권한이 없습니다</string>
+    <string name="error_not_a_color_library_file">파일이 AutoJs6 색상 라이브러리 파일이 아닙니다</string>
     <string name="error_official_plugin_missing">의존 플러그인이 없습니다: %1$s. AutoJs6 \"플러그인 센터\"에서 관련 공식 플러그인을 검색해 온라인으로 설치하세요</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView 는 직접 자녀 한 명만 호스팅 할 수 있습니다</string>
     <string name="error_parse_github_release_assets">GitHub 릴리스 자산을 구문 분석하지 못했습니다</string>
@@ -1038,6 +1045,8 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">업데이트 확인 시 최신 원격 버전을 직접 가져옵니다</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">업데이트 확인 ...</string>
     <string name="text_choose_at_least_one_color">적어도 하나의 상태에 색상을 선택하세요</string>
+    <string name="text_choose_color_libraries_to_export">내보낼 색상 라이브러리 선택</string>
+    <string name="text_choose_color_libraries_to_import">가져올 색상 라이브러리 선택</string>
     <string name="text_choose_color_library">색상 라이브러리 선택</string>
     <string name="text_choose_color_library_to_clone">복제할 색상 라이브러리 선택</string>
     <string name="text_choose_colors_to_add">추가할 색상 선택</string>
@@ -1413,6 +1422,7 @@
     <string name="text_expires_at">만료</string>
     <string name="text_export">내보내다</string>
     <string name="text_export_all">모두 내보내기</string>
+    <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">색상 라이브러리 내보내기...</string>
     <string name="text_export_selected">선택 항목 내보내기</string>
     <string name="text_exported">내보낸</string>
     <string name="text_extending_js_build_in_objects">JavaScript 내장 개체 확장</string>
@@ -1437,6 +1447,7 @@
     <string name="text_failed_to_enable_a11y_service">접근성 서비스를 활성화하지 못했습니다</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">루트 액세스로 접근성 서비스를 활성화하지 못했습니다</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">안전한 설정으로 접근성 서비스를 활성화하지 못했습니다</string>
+    <string name="text_failed_to_export_color_libraries">색상 라이브러리를 내보내지 못했습니다</string>
     <string name="text_failed_to_export_log_entries">로그 항목을 내보내지 못했습니다</string>
     <string name="text_failed_to_format">포맷 실패</string>
     <string name="text_failed_to_generate">코드를 생성하지 못했습니다</string>
@@ -2497,6 +2508,7 @@
     <string name="text_unknown_title_for_plugin">알 수 없는 제목</string>
     <string name="text_unknown_version_for_plugin">알 수 없는 버전</string>
     <string name="text_unlimited">제한 없음</string>
+    <string name="text_unnamed_color_library">이름 없는 색상 라이브러리</string>
     <string name="text_unpin">고정 해제</string>
     <string name="text_unsaved_changes">저장되지 않은 변경 사항</string>
     <string name="text_unsigned_apk_created">서명되지 않은 APK가 생성됨</string>

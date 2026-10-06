@@ -323,6 +323,12 @@
     <string name="error_change_password_error_match">Эти пароли не совпадают</string>
     <string name="error_check_for_update">Не удалось проверить наличие обновлений</string>
     <string name="error_colon_must_follow_a_valid_ip_address">Двоеточие должно следовать за действительным IP-адресом</string>
+    <string name="error_color_library_file_malformed">Файл не является корректным JSON</string>
+    <string name="error_color_library_file_newer_schema">Файл использует версию формата %1$s и требует более новой версии AutoJs6</string>
+    <string name="error_color_library_file_no_libraries">Файл не содержит цветовых библиотек, которые можно импортировать</string>
+    <string name="error_color_library_file_too_large">Файл слишком большой (более %1$s)</string>
+    <string name="error_color_library_file_too_many_libraries">Файл содержит более %1$d цветовых библиотек</string>
+    <string name="error_color_library_too_many_items">Цветовая библиотека \"%1$s\" содержит более %2$d цветов или групп</string>
     <string name="error_compass_cannot_be_null">Компас не может быть нулевым</string>
     <string name="error_conditions_not_met_for_record">Запись скриптов требует выполнения хотя бы одного из следующих условий:\n- Доступ root\n- Доступ Shizuku</string>
     <string name="error_connect_to_remote">Не удается подключиться к удаленному серверу: %s</string>
@@ -448,6 +454,7 @@
     <string name="error_no_such_selector_method" formatted="false">Нет такого метода селектора %s(%s: %s)</string>
     <string name="error_no_usage_stats_permission">Нет разрешения \"статистика использования\"</string>
     <string name="error_no_write_settings_permission">Нет разрешения \"запись настроек\"</string>
+    <string name="error_not_a_color_library_file">Файл не является файлом цветовой библиотеки AutoJs6</string>
     <string name="error_official_plugin_missing">Отсутствует зависимый плагин: %1$s. Найдите и установите связанный официальный плагин онлайн в \"Центре плагинов\" AutoJs6</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView может содержать только одного прямого дочернего элемента</string>
     <string name="error_parse_github_release_assets">Не удалось разобрать активы релиза GitHub</string>
@@ -1036,6 +1043,8 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">При проверке обновлений напрямую получать последнюю удалённую версию</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Проверка обновлений...</string>
     <string name="text_choose_at_least_one_color">Выберите цвет хотя бы для одного состояния</string>
+    <string name="text_choose_color_libraries_to_export">Выберите цветовые библиотеки для экспорта</string>
+    <string name="text_choose_color_libraries_to_import">Выберите цветовые библиотеки для импорта</string>
     <string name="text_choose_color_library">Выберите цветовую библиотеку</string>
     <string name="text_choose_color_library_to_clone">Выберите цветовую библиотеку для клонирования</string>
     <string name="text_choose_colors_to_add">Выберите цвета для добавления</string>
@@ -1411,6 +1420,7 @@
     <string name="text_expires_at">Истекает</string>
     <string name="text_export">Экспорт</string>
     <string name="text_export_all">Экспортировать все</string>
+    <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">Экспортировать цветовые библиотеки...</string>
     <string name="text_export_selected">Экспорт выбранного</string>
     <string name="text_exported">Экспортировано</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
@@ -1435,6 +1445,7 @@
     <string name="text_failed_to_enable_a11y_service">Не удалось включить службу специальных возможностей</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Не удалось включить службу доступности с доступом root</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Не удалось включить службу доступности с безопасными настройками</string>
+    <string name="text_failed_to_export_color_libraries">Не удалось экспортировать цветовые библиотеки</string>
     <string name="text_failed_to_export_log_entries">Не удалось экспортировать записи журнала</string>
     <string name="text_failed_to_format">Не удалось отформатировать</string>
     <string name="text_failed_to_generate">Не удалось сгенерировать код</string>
@@ -2495,6 +2506,7 @@
     <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
     <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
     <string name="text_unlimited">Без ограничений</string>
+    <string name="text_unnamed_color_library">Безымянная цветовая библиотека</string>
     <string name="text_unpin">Открепить</string>
     <string name="text_unsaved_changes">Несохраненные изменения</string>
     <string name="text_unsigned_apk_created">Неподписанный APK создан</string>
