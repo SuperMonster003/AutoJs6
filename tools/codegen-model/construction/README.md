@@ -179,12 +179,86 @@ The diagnostic replays baseline plans through legal grammar operations and
 compares their prefixes to actual expansions. It is an explanation of a frozen
 evaluation, not a policy update or evidence that a failed case was fixed.
 
+## Second experiment: frontier retention and expansion
+
+`ConstructionSearch` keeps `FAMILY_SCORE` as its default. The optional
+`ANCHOR_PHASE_FAIR` controller retains breadth across `(anchor, phase)` buckets
+and rotates both their retention and expansion; the model orders alternatives
+within a bucket. It uses the same family quotas, total frontier cap and counter
+budgets. No additional overflow queue stores pruned states. When anchors exceed
+their quota, cyclic captured position chooses the survivors; anchor scores do
+not override this choice. If a quota leaves only one state per anchor, advancing
+phase can discard same-phase condition extensions. These are measured tradeoffs,
+not claims that the controller always finds a usable plan.
+
+The second experiment freezes the original 59-tree construction policy and the
+tiny-v1 final ranker. It compares original search, legacy heuristic/model search,
+and fair heuristic/model search. The five methods therefore separate controller
+effects from model effects. This is an offline controller experiment, not a new
+trained or installable model release.
+
+From the repository root, set absolute input paths and create a new protocol:
+
+```powershell
+$env:CODEGEN_CONSTRUCTION_DATASET = [IO.Path]::GetFullPath('tools/codegen-model/out/cg-ds-2026.10-1')
+$env:CODEGEN_CONSTRUCTION_EXPORT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-export-1')
+$env:CODEGEN_CONSTRUCTION_POLICY_DIR = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-fit-1')
+$env:CODEGEN_CONSTRUCTION_R2_PROTOCOL = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r2-protocol')
+$env:CODEGEN_CONSTRUCTION_R2_MODE = 'freeze'
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionSecondExperimentTask'
+
+$env:CODEGEN_CONSTRUCTION_R2_MODE = 'develop'
+$env:CODEGEN_CONSTRUCTION_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r2-development')
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionSecondExperimentTask'
+
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/construction/select_frontier.py `
+  --protocol-dir $env:CODEGEN_CONSTRUCTION_R2_PROTOCOL `
+  --development-dir $env:CODEGEN_CONSTRUCTION_OUTPUT
+```
+
+The freeze binds source identities, input hashes, model bytes, budgets and all
+task memberships. Development uses only the original 168 training and 28
+validation tasks. The selection tool recomputes quality from all five results
+per task, refusing missing, duplicate, non-finite or held-out rows. It admits
+`fair_model` only if validation coverage, best survival and top1 survival do not
+decrease against `legacy_model`, at least one of these means improves on train
+or valid, and every development run has no error or deadline stop. A rejected
+decision remains recorded; do not edit it to open the holdout. This admission
+criterion is separate from the roadmap's production release gate.
+
+Only after the selection command succeeds, run:
+
+```powershell
+$env:CODEGEN_CONSTRUCTION_R2_DEVELOPMENT = $env:CODEGEN_CONSTRUCTION_OUTPUT
+$env:CODEGEN_CONSTRUCTION_R2_MODE = 'holdout'
+$env:CODEGEN_CONSTRUCTION_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r2-holdout')
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionSecondExperimentTask'
+Remove-Item Env:CODEGEN_CONSTRUCTION_R2_MODE
+```
+
+The runner independently rechecks the decision and its hashes before evaluation.
+It reports three separate cohorts: 28 captured tasks whose snapshot clusters
+were unused in the first construction experiment, 24 independently authored new
+synthetic tasks, and the 24 previously inspected synthetic regression tasks.
+The captured tasks still belong to the same held-out list family and appeared
+in the earlier P3 ranking evaluation. The synthetic tasks contain familiar UI
+concepts and are not real application evidence. Only the newly authored cohort
+is fresh to the complete pipeline research. No cohort may be discarded because
+it yields no candidates, errors or late results.
+
+Source changes after freezing require a new protocol and development run. Use
+fresh output directories, preserve rejected experiments, and never retune on
+the held-out results. The first experiment's exact reproduction requires its
+recorded source revision; its source binding deliberately rejects later changes.
+
 ## Tests
 
 ```powershell
 $env:CODEGEN_TEST_TRAINING = '1'
 & tools/codegen-model/out/venv-py312/Scripts/python.exe -m unittest discover `
   -s tools/codegen-model/construction -t tools/codegen-model -p test_train.py
+& tools/codegen-model/out/venv-py312/Scripts/python.exe -m unittest discover `
+  -s tools/codegen-model/construction -t tools/codegen-model -p test_select_frontier.py
 ```
 
 The opt-in real training test fits twice with unchanged input, then changes only
