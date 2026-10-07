@@ -208,6 +208,32 @@ assertSignature(api, source, source.length, {
   activeParameter: 0,
 });
 
+// Overloaded built-ins pick the overload that still has a slot for the active argument.
+source = "list.splice(0, 1, ";
+help = assertSignature(api, source, source.length, {
+  caption: "Array.prototype.splice",
+  activeParameter: 2,
+  activeSignature: 1,
+});
+assert(help.signatures.length === 2, "splice should expose two overloads");
+assert(help.signature.includes("...items"), "A third argument should select the variadic splice overload");
+assert(help.isVariadic === true, "The selected splice overload should be variadic");
+source = "list.splice(0, ";
+assertSignature(api, source, source.length, {
+  caption: "Array.prototype.splice",
+  activeParameter: 1,
+  activeSignature: 0,
+});
+source = "JSON.parse(";
+assertSignature(api, source, source.length, { caption: "JSON.parse", activeParameter: 0 });
+source = "Array.from(items, ";
+assertSignature(api, source, source.length, { caption: "Array.from", activeParameter: 1, activeSignature: 1 });
+source = "Math.max(1, 2, 3, ";
+help = assertSignature(api, source, source.length, { caption: "Math.max", activeParameter: 3 });
+assert(help.isVariadic === true, "Math.max should be variadic");
+assert(api.findSignatureHelpFromText("parse(", "parse(".length) === null, "A bare parse() must not match JSON.parse");
+assert(api.findSignatureHelpFromText("list.slice(", "list.slice(".length) === null, "A bare slice() must not match Array.prototype.slice");
+
 assert(
   api.findSignatureHelpFromText("unknownThing(", "unknownThing(".length) === null,
   "Unknown functions should not produce signature help",

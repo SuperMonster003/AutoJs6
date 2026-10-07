@@ -476,6 +476,23 @@ assertSignatureHelp(completer, "app.autojs.setRootMode('root', ", {
   signature: "setRootMode(mode: -1 | 0 | 1 | boolean | 'auto' | 'root' | 'non-root', isWriteIntoPreference?: boolean | 'write_into_pref'): void",
   activeParameter: 1,
 });
+// Declaration-backed overloads reach the runtime index and signature help picks by argument count.
+const overloadHelp = assertSignatureHelp(completer, "app.startActivity(", {
+  caption: "app.startActivity",
+  activeParameter: 0,
+  activeSignature: 0,
+});
+if (!Array.isArray(overloadHelp.signatures) || overloadHelp.signatures.length !== 2) {
+  throw new Error(`app.startActivity should expose two overloads, got ${JSON.stringify(overloadHelp.signatures)}`);
+}
+if (overloadHelp.signatures[0].signature !== overloadHelp.signature) {
+  throw new Error("The top-level signature should mirror the active overload");
+}
+assertSignatureHelp(completer, "app.startActivity(intent, ", {
+  caption: "app.startActivity",
+  activeParameter: 1,
+  activeSignature: 1,
+});
 
 const fallbackCompleter = createFallbackCompleter();
 assertIncludes(valuesFor(completer, "ai.agent.", ""), ["run", "create", "get", "list", "catalog", "presets", "status", "result", "context"], "Agent module");
