@@ -285,6 +285,8 @@
 * `Feature` Complete Compose UI API reference with companion Ace Editor type completion and local Offline Docs content for components, nodes, state, modifiers, themes, sessions and floating windows
 * `Feature` Plugin Center recognizes and manages installed Compose UI development preview plugins, requiring host 6.8.0 / 5316 or later
 * `Feature` TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes
+* `Feature` XML `<compose>` containers and compose.attach embed independent Compose sessions in UI pages or legacy floating windows; compose.AndroidView embeds an existing Android View or one returned by a synchronous factory
+* `Feature` ui.inflate accepts compiled XML TSX layouts and binds their onClick callbacks
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
@@ -529,6 +531,7 @@
 * `Fix` Material colors chosen in the legacy layout could not be found with "Locate current theme color" after switching layouts, and the Material colors page did not show the current color summary
 * `Fix` Packaged UI scripts occasionally displaying a blank page and exiting during startup
 * `Fix` Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates
+* `Fix` Component factories treated the first positional node as a property object when several node arguments were supplied
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record

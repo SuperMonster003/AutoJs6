@@ -67,7 +67,7 @@ class ComposeScriptApiTest {
         val names = ComponentCatalog.V1.components.filter { it.invocation == ComponentInvocation.NODE }.map { it.name }.toSet()
         assertEquals(29, names.size)
         val factories = module.ids.filterIsInstance<String>().filter { it.firstOrNull()?.isUpperCase() == true && it != "ComposeError" }.toSet()
-        assertEquals(names, factories)
+        assertEquals(names + "AndroidView", factories)
         names.forEach { assertTrue("Factory $it is missing", module.get(it, module) is Function) }
         assertTrue(jsBoolean("compose.isAvailable() && compose.version.plugin === '1.0.0' && compose.version.contract === 1 && compose.version.compose === '1.12.1'"))
         assertTrue(jsBoolean("typeof compose.Snackbar === 'undefined'"))

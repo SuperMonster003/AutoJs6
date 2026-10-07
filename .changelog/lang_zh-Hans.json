@@ -150,7 +150,9 @@
         "内置示例的 Compose UI 分类提供计数器, 表单校验, 1000 项列表, 悬浮 HUD 与主题五个脚本, 每例说明插件与权限前提",
         "Compose UI 完整 API 参考及配套 Ace Editor 类型补全, Offline Docs 本地文档, 覆盖组件, 节点, 状态, 修饰链, 主题, 会话和悬浮窗",
         "插件中心支持识别与管理已安装的 Compose UI 开发预览插件, 需要宿主 6.8.0 / 5316 或更高版本",
-        "TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点"
+        "TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点",
+        "XML `<compose>` 容器与 compose.attach 可在 UI 页面或旧悬浮窗内嵌入独立 Compose 会话; compose.AndroidView 可承载现有 Android View 或同步工厂返回的 View",
+        "ui.inflate 支持编译后的 XML TSX 布局及其 onClick 回调绑定"
       ],
       "fix": [
         "启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题",
@@ -320,7 +322,8 @@
         "插件中心详情对话框图标缺少圆形底色, 以及缓存图标描边未随亮暗主题更新的问题",
         "在传统布局中选择的材料设计颜色, 切换布局后无法通过 \"定位当前主题色\" 找到, 且材料设计颜色页面不显示当前颜色摘要的问题",
         "打包的 UI 脚本启动时偶发显示空白页面后退出的问题",
-        "Compose UI 在渲染回调中拒绝再次挂载页面或悬浮窗并保留当前页面, 支持插件更新后重新挂载页面"
+        "Compose UI 在渲染回调中拒绝再次挂载页面或悬浮窗并保留当前页面, 支持插件更新后重新挂载页面",
+        "组件工厂接收多个位置节点参数时将首个节点误判为属性对象的问题"
       ],
       "improvement": [
         "Three Stove Agent 模型载荷在 Android 7-10 上通过公开 API 读取, 保留文件偏移与停滞管道取消能力",

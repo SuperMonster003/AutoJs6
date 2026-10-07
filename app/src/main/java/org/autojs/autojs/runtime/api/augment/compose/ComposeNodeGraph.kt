@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.augment.compose
 
 import org.autojs.plugin.compose.api.*
 import org.autojs.autojs.runtime.api.augment.ui.TypeScriptTsxFragment
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.plugin.compose.api.ComposeUiComponents as C
 import org.autojs.plugin.compose.api.ComposeUiEventFields as F
 import org.autojs.plugin.compose.api.ComposeUiEvents as E
@@ -9,6 +10,7 @@ import org.autojs.plugin.compose.api.ComposeUiProps as P
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.catalog.ComponentInvocation
 import org.autojs.plugin.compose.api.model.*
+import org.autojs.plugin.compose.api.interop.AndroidViewInteropV1
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeArray
@@ -25,15 +27,17 @@ class ComposeNodeGraph(
     private val checkThread: () -> Unit = {},
     val translateError: (Throwable) -> RuntimeException = { it as? RuntimeException ?: RuntimeException(it) },
     private val warn: (String) -> Unit = {},
+    private val prepareView: (Any?) -> android.view.View = { throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, prop = "view") },
 ) : AutoCloseable {
     internal val tsxOwner = Any()
-    private val catalog = ComponentCatalog.V1
+    private val catalog = AndroidViewInteropV1.catalog
     private val roots = IdentityHashMap<ComposeNodeBinding, ComposeNode>()
     private val accepted = IdentityHashMap<ComposeNodeBinding, ComposeNodeSnapshot>()
     private val published = IdentityHashMap<ComposeNodeBinding, ComposeNodeSnapshot>()
     private val known = Collections.newSetFromMap(java.util.WeakHashMap<ComposeNode, Boolean>())
     private var nextNode = 1L
     private var nextCallback = 1L
+    private var nextViewLease = 1L
     private var closed = false
     private var mutation: Mutation? = null
     private val warnedBindings = Collections.newSetFromMap(java.util.WeakHashMap<ComposeNodeBinding, Boolean>())
@@ -166,6 +170,9 @@ class ComposeNodeGraph(
             used += target
             val source = input.state
             val prior = if (target === input) null else old(target)
+            val nativeView = source.nativeView?.let { nativeLease(target, it.view) ?: it }
+            val nativeSource = if (nativeView == null) source.source else source.source +
+                (AndroidViewInteropV1.PROP_VIEW to UiValue.Num(nativeView.id.toDouble()))
             val keyed = prior?.children.orEmpty().filter { it.key != null }.associateBy { it.key }
             val unkeyed = prior?.children.orEmpty().filter { it.key == null }.groupBy { it.type }
             val ordinals = HashMap<String, Int>()
@@ -185,8 +192,8 @@ class ComposeNodeGraph(
                 } ?: handlers
             }
             target.state = source.copy(parent = target.state.parent, children = target.state.children, slots = target.state.slots,
-                listeners = listeners, modifierCallbacks = prior?.modifierCallbacks ?: source.modifierCallbacks)
-            normalize(target, source.source, source.explicitModifier, source.images)
+                listeners = listeners, modifierCallbacks = prior?.modifierCallbacks ?: source.modifierCallbacks, nativeView = nativeView)
+            normalize(target, nativeSource, source.explicitModifier, source.images)
             if (isField(target) && target.mountedOnce) {
                 // Declarative text remains a declaration. Native typing is reconciled through edit.
                 val requested = source.props[P.TEXT] as? UiValue.Str
@@ -291,6 +298,9 @@ class ComposeNodeGraph(
     internal fun get(node: ComposeNode, name: String): Any? {
         usable(node)
         if (name == "modifier") return node.state.explicitModifier ?: Undefined.instance
+        if (node.type == AndroidViewInteropV1.COMPONENT && name == AndroidViewInteropV1.PROP_VIEW) {
+            return node.state.nativeView?.view?.let { RhinoUtils.toJsValue(scope, it) } ?: Undefined.instance
+        }
         val spec = catalog.requireComponent(node.type)
         val prop = spec.props.firstOrNull { it.name == name || name in it.aliases }
         val canonical = prop?.name ?: name
@@ -323,6 +333,15 @@ class ComposeNodeGraph(
                     listeners(node, event, functions)
                 }
                 name in setOf("key", "type", "nodeId", "parent", "children") -> fail(ComposeUiErrorCodes.UNKNOWN_PROP, node, name)
+                node.type == AndroidViewInteropV1.COMPONENT && name == AndroidViewInteropV1.PROP_VIEW -> {
+                    val view = prepareView(value)
+                    val lease = nativeLease(node, view) ?: run {
+                        if (nextViewLease > Int.MAX_VALUE) fail(ComposeUiErrorCodes.LIMIT_EXCEEDED, node, name)
+                        ComposeNativeViewLease((nextViewLease++).toInt(), view)
+                    }
+                    node.state = node.state.copy(nativeView = lease)
+                    source[name] = UiValue.Num(lease.id.toDouble())
+                }
                 else -> {
                     val converted = values.property(node.type, name, value)
                     if (!canonicalNames.add(converted.name)) fail(ComposeUiErrorCodes.INVALID_ARGUMENT, node, converted.name)
@@ -519,6 +538,7 @@ class ComposeNodeGraph(
         val callbacks = LinkedHashMap<Int, (UiEvent) -> Unit>()
         val references = IdentityHashMap<ComposeNodeRef, ComposeNode>()
         val retained = ArrayList<Any>()
+        val nativeViews = Collections.newSetFromMap(IdentityHashMap<android.view.View, Boolean>())
         var functionCount = 0
         val pending = java.util.ArrayDeque<Pair<ComposeNode, Int>>().apply { add(root to 1) }
         while (pending.isNotEmpty()) {
@@ -526,6 +546,7 @@ class ComposeNodeGraph(
             if (node.graph !== this || states.put(node, node.state) != null) fail(ComposeUiErrorCodes.INVALID_ARGUMENT, node)
             if (depth > ComposeUiLimits.MAX_DEPTH || states.size > ComposeUiLimits.MAX_NODES_PER_SESSION) fail(ComposeUiErrorCodes.LIMIT_EXCEEDED, node)
             val state = node.state
+            state.nativeView?.let { if (!nativeViews.add(it.view)) fail(ComposeUiErrorCodes.INVALID_ARGUMENT, node, "view") }
             val wire = UiNode(node.stableId, node.type, node.key, state.props, state.modifier,
                 state.children.map { it.stableId }, state.slots.mapValues { it.value.stableId }, state.listeners.mapValues { it.value.token })
             val parent = if (node === root) null else node.parent?.type
@@ -629,7 +650,7 @@ class ComposeNodeGraph(
 
     private fun rollback(work: Mutation) {
         work.backups.forEach { (node, backup) -> node.state = backup.state; node.editor = backup.editor; node.deferredEdit = backup.deferredEdit; node.affinity = backup.affinity; node.mountedOnce = backup.mountedOnce }
-        work.created.forEach { node -> node.state = node.state.copy(parent = null, children = emptyList(), slots = emptyMap()); node.affinity = null; node.mountedOnce = false; node.deferredEdit = null }
+        work.created.forEach { node -> node.state = node.state.copy(parent = null, children = emptyList(), slots = emptyMap(), nativeView = null); node.affinity = null; node.mountedOnce = false; node.deferredEdit = null }
         roots.clear(); roots.putAll(work.roots)
         published.clear(); published.putAll(work.published)
     }
@@ -686,10 +707,16 @@ class ComposeNodeGraph(
     private fun isField(node: ComposeNode) = node.type == C.TEXT_FIELD || node.type == C.OUTLINED_TEXT_FIELD
 
     private fun releaseResources(node: ComposeNode) {
-        node.state = node.state.copy(listeners = emptyMap(), modifierCallbacks = emptyMap(), images = emptyMap(), explicitModifier = null, ref = null)
+        node.state = node.state.copy(listeners = emptyMap(), modifierCallbacks = emptyMap(), images = emptyMap(), nativeView = null, explicitModifier = null, ref = null)
         node.editor = null
         node.deferredEdit = null
     }
+
+    /** Coalesced A -> B -> A updates retain A's accepted/in-flight native ownership ticket. */
+    private fun nativeLease(node: ComposeNode, view: android.view.View): ComposeNativeViewLease? =
+        sequenceOf(node.state.nativeView, accepted[node.affinity]?.states?.get(node)?.nativeView,
+            published[node.affinity]?.states?.get(node)?.nativeView, mutation?.backups?.get(node)?.state?.nativeView,
+            (node.affinity as? ComposeScriptSession)?.nativeLease(node, view)).filterNotNull().firstOrNull { it.view === view }
 
     override fun close() {
         checkThread()

@@ -393,7 +393,8 @@ class ComposeUiControlsTest {
         init {
             try {
                 val loaded = host.load()
-                val recording = loaded.copy(factory = object : ComposeUiRendererFactory by loaded.factory {
+                // Keep the V1 event/IME guard on its recorded base factory; F2 tests cover interop.
+                val recording = loaded.copy(androidViewFactory = null, factory = object : ComposeUiRendererFactory by loaded.factory {
                     override fun create(environment: ComposeUiHostEnvironment): ComposeUiRenderer {
                         val observed = object : ComposeUiHostEnvironment by environment {
                             override val eventSink = ComposeUiEventSink { event ->

@@ -9,7 +9,7 @@ import org.autojs.plugin.compose.api.model.UiPatch
 import org.autojs.plugin.compose.api.model.UiTree
 
 /** Script-side identity allocation. Draft IDs are references within one render, never live handles. */
-class TreeReconciler(private val missingKey: () -> Unit = {}) {
+class TreeReconciler(private val catalog: ComponentCatalog = ComponentCatalog.V1, private val missingKey: () -> Unit = {}) {
     data class Result(val tree: UiTree, val patches: List<UiPatch>, val draftToStable: Map<Int, Int>)
     private var nextId = 1L
     private var warned = false
@@ -49,7 +49,7 @@ class TreeReconciler(private val missingKey: () -> Unit = {}) {
         }
         val root = visit(draft.rootId, previous?.rootId?.let(old::get))
         val tree = UiTree(root, output.values.toList())
-        validate(tree)
+        validate(tree, catalog)
         return Result(tree, diff(previous, tree), java.util.Collections.unmodifiableMap(LinkedHashMap(identities)))
     }
 
@@ -59,11 +59,11 @@ class TreeReconciler(private val missingKey: () -> Unit = {}) {
     }
 
     companion object {
-        fun validate(tree: UiTree) {
+        fun validate(tree: UiTree, catalog: ComponentCatalog = ComponentCatalog.V1) {
             val nodes = tree.nodes.associateBy { it.nodeId }
             val parents = HashMap<Int, String>()
             tree.nodes.forEach { node -> (node.children + node.slots.values).forEach { parents[it] = node.type } }
-            nodes.values.forEach { ComponentCatalog.V1.validateNode(it, parents[it.nodeId]) }
+            nodes.values.forEach { catalog.validateNode(it, parents[it.nodeId]) }
         }
 
         /** Both trees already have stable IDs. Moves use indices after removal, as defined by V1. */

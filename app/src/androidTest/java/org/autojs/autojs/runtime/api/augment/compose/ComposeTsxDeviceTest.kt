@@ -72,6 +72,24 @@ class ComposeTsxDeviceTest {
         }
     }
 
+    @Test fun realCompilerBridgesXmlComposeContainersAndInflatedTsxAndroidViews() {
+        Running("interop", ui = true).use { running ->
+            assertTrue(running.javaScript.contains("__autojs6Tsx(compose.AndroidView"))
+            assertTrue(running.javaScript.contains("\"compose\""))
+            running.await("Compiled XML compose container and AndroidView are visible") {
+                text("tsx-interop-count") == "F2 TSX count: 0" && node { it.text?.toString() == "F2 inflated TSX native button" } != null
+            }
+            assertEquals("1", running.property("factories"))
+            repeat(2) { index ->
+                clickNode(requireNotNull(node { it.text?.toString() == "F2 inflated TSX native button" }))
+                running.await("Native TSX click survives mixed-domain rejection and updates Compose") {
+                    text("tsx-interop-count") == "F2 TSX count: ${index + 1}" && running.property("clicks") == "${index + 1}"
+                }
+            }
+            assertEquals("Saving the node preserves its native View across render", "1", running.property("factories"))
+        }
+    }
+
     @Test fun realCompilerPreservesFactoriesNamespaceSlotsStateCallbacksAndRefs() {
         Running("counter", ui = true).use { running ->
             assertTrue(running.javaScript.contains("__autojs6Tsx(compose.Text"))

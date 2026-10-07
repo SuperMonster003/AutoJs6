@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-07",
+  "previousAarSha256": "3ba7c215262e889034eef61e6ba0d5414839712a03284e3d009a96696cce5266",
+  "currentAarSha256": "0aaff93a27d405e8db7a513172ba1a2ebe60a3b8a09d4f27d8c9eaa03544d4a3",
+  "retainedClassCount": 197,
+  "changedRetainedClasses": [],
+  "removedExperimentalClasses": [
+    "org/autojs/plugin/compose/api/spike/ComposeUiContractException.class",
+    "org/autojs/plugin/compose/api/spike/ComposeUiEventSink.class",
+    "org/autojs/plugin/compose/api/spike/ComposeUiRenderer.class",
+    "org/autojs/plugin/compose/api/spike/ComposeUiRendererFactory.class",
+    "org/autojs/plugin/compose/api/spike/SpikeContract.class",
+    "org/autojs/plugin/compose/api/spike/UiEvent.class",
+    "org/autojs/plugin/compose/api/spike/UiNode.class"
+  ],
+  "addedInteropClasses": [
+    "org/autojs/plugin/compose/api/interop/AndroidViewBindingV1.class",
+    "org/autojs/plugin/compose/api/interop/AndroidViewClaimTable$Claim.class",
+    "org/autojs/plugin/compose/api/interop/AndroidViewClaimTable$Entry.class",
+    "org/autojs/plugin/compose/api/interop/AndroidViewClaimTable$IdentityReference.class",
+    "org/autojs/plugin/compose/api/interop/AndroidViewClaimTable.class",
+    "org/autojs/plugin/compose/api/interop/AndroidViewClaimsV1.class",
+    "org/autojs/plugin/compose/api/interop/AndroidViewInteropV1.class",
+    "org/autojs/plugin/compose/api/interop/AndroidViewRendererFactoryV1.class",
+    "org/autojs/plugin/compose/api/interop/AndroidViewRendererV1.class"
+  ]
+}

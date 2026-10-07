@@ -72,7 +72,8 @@ class ComposeUiLoaderTest {
         val loaded = host.load()
         val debugProvider = loaded.pluginContext.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0
         lateinit var instance: ComposeUiRenderer
-        val recording = loaded.copy(factory = object : ComposeUiRendererFactory by loaded.factory {
+        // This fixture guards the frozen V1 entry, independently of optional interop factories.
+        val recording = loaded.copy(androidViewFactory = null, factory = object : ComposeUiRendererFactory by loaded.factory {
             override fun create(environment: ComposeUiHostEnvironment): ComposeUiRenderer = loaded.factory.create(environment).also { instance = it }
         })
         var count = 0

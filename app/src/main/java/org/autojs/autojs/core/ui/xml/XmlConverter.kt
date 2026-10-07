@@ -48,6 +48,7 @@ object XmlConverter {
                 .map("checkedtext", JsCheckedTextView::class.java.name)
                 .map("chronometer", JsChronometer::class.java.name)
                 .map("console", JsConsoleView::class.java.name)
+                .map("compose", ComposeContainerView::class.java.name)
                 .map("globalconsole", JsGlobalConsoleView::class.java.name)
                 .map("datepicker", JsDatePicker::class.java.name)
                 .map("drawer", JsDrawerLayout::class.java.name)

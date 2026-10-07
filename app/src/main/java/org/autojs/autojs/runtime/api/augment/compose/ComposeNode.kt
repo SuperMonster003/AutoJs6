@@ -30,6 +30,7 @@ class ComposeNodeSnapshot internal constructor(
 )
 
 internal data class ComposeNodeListeners(val token: Int, val functions: List<Function>)
+internal data class ComposeNativeViewLease(val id: Int, val view: android.view.View)
 
 internal data class ComposeNodeState(
     val source: Map<String, UiValue> = emptyMap(),
@@ -39,6 +40,7 @@ internal data class ComposeNodeState(
     val modifierCallbacks: Map<Int, Function> = emptyMap(),
     val listeners: Map<String, ComposeNodeListeners> = emptyMap(),
     val images: Map<String, List<Any>> = emptyMap(),
+    val nativeView: ComposeNativeViewLease? = null,
     val children: List<ComposeNode> = emptyList(),
     val slots: Map<String, ComposeNode> = emptyMap(),
     val parent: ComposeNode? = null,

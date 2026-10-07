@@ -13,6 +13,9 @@
 
 The separate JSX region maps only NODE entries to compose:Name intrinsic tags. It does not redefine
 legacy XML intrinsic attributes, JSX.Element, or the ordinary Compose factory signatures.
+F2 is a separate extension: exportComposeUiInteropCatalog writes component-catalog-interop-v1.json.
+Pass --interop-catalog <that export> to generate/check its additional marked regions. The V1 outputs
+remain unchanged; an interop check also requires --jsx and never accepts wire lease IDs as script Views.
 
 Generate is not a successful consistency check. Check fails for missing files or markers, including
 before P6 has been delivered. No Kotlin, TypeScript or Markdown source is parsed with heuristics:
@@ -40,6 +43,15 @@ DOC_START = "<!-- autojs6-compose-catalog:v1:start -->"
 DOC_END = "<!-- autojs6-compose-catalog:v1:end -->"
 JSX_START = "// <autojs6-compose-jsx:v1>"
 JSX_END = "// </autojs6-compose-jsx:v1>"
+INTEROP_SOURCE = "org.autojs.plugin.compose.api.interop.AndroidViewInteropV1"
+INTEROP_FEATURE = "android-view-interop-v1"
+INTEROP_DTS_START = "// <autojs6-compose-interop:f2>"
+INTEROP_DTS_END = "// </autojs6-compose-interop:f2>"
+INTEROP_DOC_START = "<!-- autojs6-compose-interop:f2:start -->"
+INTEROP_DOC_END = "<!-- autojs6-compose-interop:f2:end -->"
+INTEROP_JSX_START = "// <autojs6-compose-interop-jsx:f2>"
+INTEROP_JSX_END = "// </autojs6-compose-interop-jsx:f2>"
+VIEW_PROJECTION = {"input": "View | ((context: android.content.Context) => View)", "output": "View", "wire": "leaseId"}
 KINDS = {"STRING", "NUMBER", "BOOLEAN", "COLOR", "DP", "SP", "ENUM", "TEXT_STYLE", "BITMAP", "ICON_NAME", "SHAPE", "LIST", "NULL"}
 TYPE_NAMES = {
     "STRING": "string", "NUMBER": "number", "BOOLEAN": "boolean", "COLOR": "ComposeColorInput",
@@ -107,12 +119,12 @@ def validate_default(value: Any, label: str) -> None:
         require(isinstance(item, dict), f"{label}: expected a structured default")
 
 
-def validate_catalog(catalog: Any) -> dict[str, Any]:
+def validate_catalog(catalog: Any, *, expected_source: str = SOURCE) -> dict[str, Any]:
     object_keys(catalog, {"schemaVersion", "contractVersion", "source", "componentCount", "propertyCount", "valueKinds", "components"}, "catalog")
     require(type(catalog["schemaVersion"]) is int and type(catalog["contractVersion"]) is int and
             catalog["schemaVersion"] == 1 and catalog["contractVersion"] == 1,
             "Unsupported catalog schema/contract version; update this tool explicitly")
-    require(catalog["source"] == SOURCE, "Catalog must be exported from the frozen ComponentCatalog.V1")
+    require(catalog["source"] == expected_source, f"Catalog must be exported from {expected_source}")
     require(set(names(catalog["valueKinds"], "valueKinds")) == KINDS, "Unexpected frozen ValueKind inventory")
     require(isinstance(catalog["components"], list) and bool(catalog["components"]), "Catalog components are missing")
     component_names: list[str] = []
@@ -168,6 +180,32 @@ def validate_catalog(catalog: Any) -> dict[str, Any]:
     require(type(catalog["componentCount"]) is int and catalog["componentCount"] == len(component_names), "Export component count does not match its inventory")
     require(type(catalog["propertyCount"]) is int and catalog["propertyCount"] == property_count, "Export property count does not match its inventory")
     return catalog
+
+
+def validate_interop_catalog(interop: Any, catalog: dict[str, Any]) -> dict[str, Any]:
+    extension_keys = {"extensionVersion", "feature", "scriptProjection"}
+    catalog_keys = {"schemaVersion", "contractVersion", "source", "componentCount", "propertyCount", "valueKinds", "components"}
+    object_keys(interop, catalog_keys | extension_keys, "interop catalog")
+    validate_catalog({key: interop[key] for key in catalog_keys}, expected_source=INTEROP_SOURCE)
+    require(type(interop["extensionVersion"]) is int and interop["extensionVersion"] == 1, "Unsupported interop extension version")
+    require(interop["feature"] == INTEROP_FEATURE, "Unexpected interop feature")
+    names_in_base = {component["name"] for component in catalog["components"]}
+    require(not names_in_base.intersection(component["name"] for component in interop["components"]), "Interop cannot replace frozen V1 components")
+    require(interop["componentCount"] == 1 and interop["propertyCount"] == 1 and interop["components"][0]["name"] == "AndroidView",
+            "F2 must contain exactly the AndroidView extension")
+    component = interop["components"][0]
+    require(component["invocation"] == "NODE" and component["children"] == "NONE" and component["scope"] == "ANY" and
+            not component["slots"] and not component["commands"], "Unexpected AndroidView structure")
+    box = next((item for item in catalog["components"] if item["name"] == "Box"), None)
+    require(box is not None and component["events"] == box["events"], "AndroidView must use the existing common events")
+    prop = component["properties"][0]
+    expected_type = {"kinds": ["NUMBER"], "enumValues": [], "minimum": 1, "maximum": 2147483647,
+                     "minimumExclusive": False, "integral": True, "listKinds": [], "listMinimum": 0, "listMaximum": 2000}
+    require(prop == {"name": "view", "type": expected_type, "required": True, "default": None, "aliases": [], "update": "SET_PROPS"},
+            "AndroidView wire view must be the bounded, required lease ID")
+    require(interop["scriptProjection"] == {"AndroidView.view": VIEW_PROJECTION},
+            "AndroidView script View/factory projection is missing or changed")
+    return interop
 
 
 def canonical(value: Any) -> str:
@@ -233,6 +271,37 @@ def render_jsx(catalog: dict[str, Any]) -> str:
     return "\n".join(lines + ["    }", "}", JSX_END, ""])
 
 
+def interop_notice(interop: dict[str, Any]) -> str:
+    return f"Generated from {INTEROP_SOURCE}; schema=1; contract=1; extension=1; feature={INTEROP_FEATURE}; sha256={digest(interop)}."
+
+
+def render_interop_dts(interop: dict[str, Any]) -> str:
+    return "\n".join([INTEROP_DTS_START, "// " + interop_notice(interop),
+                       "// Script View inputs remain outside the frozen V1 wire value inventory.",
+                       "declare namespace Internal {", "    interface ComposeInteropCatalogProps {",
+                       '        "AndroidView": { "view": ComposeViewInput; };', "    }",
+                       '    type ComposeInteropNodeName = "AndroidView";', "}", INTEROP_DTS_END, ""])
+
+
+def render_interop_jsx(interop: dict[str, Any]) -> str:
+    return "\n".join([INTEROP_JSX_START, "// " + interop_notice(interop), "declare namespace JSX {",
+                       "    interface IntrinsicElements {", '        "compose:AndroidView": Internal.ComposeProps<"AndroidView">;',
+                       "    }", "}", INTEROP_JSX_END, ""])
+
+
+def render_interop_docs(interop: dict[str, Any]) -> str:
+    component = interop["components"][0]
+    return "\n".join([INTEROP_DOC_START, "<!-- " + interop_notice(interop) + " -->", "",
+                       "| Component | Children | Slots | Events | Feature |",
+                       "| --- | --- | --- | --- | --- |",
+                       "| " + " | ".join([code(component["name"]), component["children"], "-",
+                                          ", ".join(code(event["name"]) for event in component["events"]), code(interop["feature"])]) + " |",
+                       "", "| Property | Script input | Getter | Required |",
+                       "| --- | --- | --- | --- |",
+                       "| " + " | ".join([code("view"), code(VIEW_PROJECTION["input"]), code(VIEW_PROJECTION["output"]), "true"]) + " |",
+                       "", INTEROP_DOC_END, ""])
+
+
 def render_docs(catalog: dict[str, Any]) -> str:
     lines = [DOC_START, f"<!-- Generated from {SOURCE}; schema=1; contract=1; sha256={digest(catalog)}. -->", "",
              "| Component | Invocation | Children | Scope | Canonical properties | Slots | Events | Commands |",
@@ -269,6 +338,13 @@ def load_catalog(path: Path) -> dict[str, Any]:
         raise CatalogError(f"Invalid catalog JSON: {path}: {error}") from error
 
 
+def load_interop_catalog(path: Path, catalog: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return validate_interop_catalog(json.loads(read_text(path, "interop catalog export")), catalog)
+    except (json.JSONDecodeError, RecursionError) as error:
+        raise CatalogError(f"Invalid interop catalog JSON: {path}: {error}") from error
+
+
 def marked_region(content: str, start: str, end: str, label: str) -> str:
     lines = content.splitlines()
     starts = [index for index, line in enumerate(lines) if line.strip() == start]
@@ -290,33 +366,50 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     generate = commands.add_parser("generate", help="Write fragments only; never claim declaration/docs consistency")
     generate.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    generate.add_argument("--interop-catalog", type=Path, help="Also generate the separate F2 extension projections")
     generate.add_argument("--output-dir", type=Path, required=True)
     check = commands.add_parser("check", help="Require and compare both delivered P6 marked regions")
     check.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    check.add_argument("--interop-catalog", type=Path, help="Also require all delivered F2 extension projections")
     check.add_argument("--dts", type=Path, required=True)
     check.add_argument("--docs", type=Path, required=True)
     check.add_argument("--jsx", type=Path, help="Also require the delivered Compose JSX intrinsic map")
     args = parser.parse_args(argv)
     try:
         catalog = load_catalog(args.catalog)
+        interop = load_interop_catalog(args.interop_catalog, catalog) if args.interop_catalog is not None else None
         dts, docs = render_dts(catalog), render_docs(catalog)
         if args.command == "generate":
             args.output_dir.mkdir(parents=True, exist_ok=True)
             (args.output_dir / "compose-catalog.fragment.d.ts").write_text(dts, encoding="utf-8", newline="\n")
             (args.output_dir / "compose-catalog.fragment.md").write_text(docs, encoding="utf-8", newline="\n")
             (args.output_dir / "compose-jsx.fragment.d.ts").write_text(render_jsx(catalog), encoding="utf-8", newline="\n")
+            if interop is not None:
+                for name, content in [("compose-interop.fragment.d.ts", render_interop_dts(interop)),
+                                      ("compose-interop.fragment.md", render_interop_docs(interop)),
+                                      ("compose-interop-jsx.fragment.d.ts", render_interop_jsx(interop))]:
+                    (args.output_dir / name).write_text(content, encoding="utf-8", newline="\n")
             print(f"GENERATED {catalog['componentCount']} components / {catalog['propertyCount']} canonical properties in {args.output_dir}; external files have NOT been checked.")
         else:
             check_artifact(args.dts, dts, DTS_START, DTS_END, "TypeScript declarations")
             check_artifact(args.docs, docs, DOC_START, DOC_END, "component documentation")
             if args.jsx is not None:
                 check_artifact(args.jsx, render_jsx(catalog), JSX_START, JSX_END, "JSX intrinsic declarations")
+            if interop is not None:
+                require(args.jsx is not None, "An interop consistency check requires --jsx")
+                check_artifact(args.dts, render_interop_dts(interop), INTEROP_DTS_START, INTEROP_DTS_END, "interop TypeScript declarations")
+                check_artifact(args.docs, render_interop_docs(interop), INTEROP_DOC_START, INTEROP_DOC_END, "interop documentation")
+                check_artifact(args.jsx, render_interop_jsx(interop), INTEROP_JSX_START, INTEROP_JSX_END, "interop JSX declarations")
             print(f"OK: {catalog['componentCount']} components / {catalog['propertyCount']} canonical properties match both supplied catalog regions.")
             if args.jsx is not None:
                 count = sum(component['invocation'] == 'NODE' for component in catalog['components'])
                 print(f"OK: {count} Compose JSX intrinsic tags match the supplied JSX region.")
             else:
                 print("JSX intrinsic region was not requested and has NOT been checked.")
+            if interop is not None:
+                print("OK: AndroidView script inputs, documentation and JSX match the separate F2 extension.")
+            else:
+                print("F2 interop regions were not requested and have NOT been checked.")
         return 0
     except (CatalogError, OSError) as error:
         print(f"ERROR: {error}", file=sys.stderr)

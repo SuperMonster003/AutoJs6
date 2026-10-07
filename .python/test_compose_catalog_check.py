@@ -39,6 +39,16 @@ def fixture():
             "componentCount": len(components), "propertyCount": 4, "valueKinds": sorted(tool.KINDS), "components": components}
 
 
+def interop_fixture():
+    view_type = value_type("NUMBER", minimum=1, maximum=2147483647)
+    view_type["integral"] = True
+    return {"schemaVersion": 1, "contractVersion": 1, "extensionVersion": 1,
+            "source": tool.INTEROP_SOURCE, "feature": tool.INTEROP_FEATURE,
+            "componentCount": 1, "propertyCount": 1, "valueKinds": sorted(tool.KINDS),
+            "components": [component("AndroidView", [prop("view", view_type, required=True)])],
+            "scriptProjection": {"AndroidView.view": copy.deepcopy(tool.VIEW_PROJECTION)}}
+
+
 class CatalogGateTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="compose-catalog-test-")
@@ -164,6 +174,65 @@ class CatalogGateTest(unittest.TestCase):
         self.assertEqual(1, check_jsx()[0])
         jsx.write_text(expected.replace('        "compose:Spacer": Internal.ComposeProps<"Spacer">;\n', ''), encoding="utf-8")
         self.assertEqual(1, check_jsx()[0])
+
+    def test_interop_is_separate_and_projects_script_views_instead_of_wire_numbers(self):
+        base = fixture()
+        base["components"].append(component("Box"))
+        base["componentCount"] += 1
+        base = tool.validate_catalog(base)
+        before = [tool.render_dts(base), tool.render_docs(base), tool.render_jsx(base)]
+        interop = tool.validate_interop_catalog(interop_fixture(), base)
+        self.assertIn('"view": ComposeViewInput', tool.render_interop_dts(interop))
+        self.assertNotIn('"view": number', tool.render_interop_dts(interop))
+        self.assertIn('"compose:AndroidView": Internal.ComposeProps<"AndroidView">', tool.render_interop_jsx(interop))
+        self.assertNotIn('"compose:Text"', tool.render_interop_jsx(interop))
+        self.assertNotIn('type Element', tool.render_interop_jsx(interop))
+        self.assertIn('View &#124; ((context: android.content.Context) =&gt; View)', tool.render_interop_docs(interop))
+        self.assertEqual(before, [tool.render_dts(base), tool.render_docs(base), tool.render_jsx(base)])
+
+    def test_interop_rejects_wire_drift_missing_script_projection_and_base_replacement(self):
+        base = fixture()
+        base["components"].append(component("Box"))
+        base["componentCount"] += 1
+        mutations = [
+            lambda x: x.update(feature="unreviewed"),
+            lambda x: x.update(extensionVersion=2),
+            lambda x: x["scriptProjection"].clear(),
+            lambda x: x["scriptProjection"]["AndroidView.view"].update(input="number"),
+            lambda x: x["components"][0]["properties"][0]["type"].update(maximum=2147483648),
+            lambda x: x["components"][0].update(name="Box"),
+            lambda x: x["components"][0].update(children="MANY"),
+            lambda x: x["components"][0]["slots"].append({"name": "content", "required": False}),
+        ]
+        for mutate in mutations:
+            broken = interop_fixture()
+            mutate(broken)
+            with self.subTest(broken=broken):
+                with self.assertRaises(tool.CatalogError):
+                    tool.validate_interop_catalog(broken, base)
+
+    def test_interop_check_requires_all_three_regions_and_never_prints_partial_success(self):
+        base = fixture()
+        base["components"].append(component("Box"))
+        base["componentCount"] += 1
+        self.catalog_file.write_text(json.dumps(base), encoding="utf-8")
+        interop = tool.validate_interop_catalog(interop_fixture(), base)
+        interop_file = self.root / "interop.json"
+        interop_file.write_text(json.dumps(interop), encoding="utf-8")
+        jsx = self.root / "jsx.d.ts"
+        self.dts.write_text(tool.render_dts(base) + tool.render_interop_dts(interop), encoding="utf-8")
+        self.docs.write_text(tool.render_docs(base) + tool.render_interop_docs(interop), encoding="utf-8")
+        jsx.write_text(tool.render_jsx(base) + tool.render_interop_jsx(interop), encoding="utf-8")
+        args = ["check", "--catalog", str(self.catalog_file), "--interop-catalog", str(interop_file),
+                "--dts", str(self.dts), "--docs", str(self.docs)]
+        self.assertEqual(1, self.run_cli(*args)[0])
+        self.assertEqual(0, self.run_cli(*args, "--jsx", str(jsx))[0])
+        jsx.write_text(tool.render_jsx(base), encoding="utf-8")
+        status, output, _ = self.run_cli(*args, "--jsx", str(jsx))
+        self.assertEqual(1, status)
+        self.assertNotIn("OK:", output)
+        jsx.write_text(tool.render_jsx(base) + tool.render_interop_jsx(interop).replace('Internal.ComposeProps<"AndroidView">', 'any'), encoding="utf-8")
+        self.assertEqual(1, self.run_cli(*args, "--jsx", str(jsx))[0])
 
     def test_crlf_outputs_are_portable_but_catalog_type_corruption_is_not_accepted(self):
         self.dts.write_bytes(tool.render_dts(self.catalog).replace("\n", "\r\n").encode("utf-8"))

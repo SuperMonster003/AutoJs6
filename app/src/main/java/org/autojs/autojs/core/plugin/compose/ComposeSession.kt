@@ -3,6 +3,8 @@ package org.autojs.autojs.core.plugin.compose
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.loading.ComposeUiEventSink
 import org.autojs.plugin.compose.api.model.*
+import org.autojs.plugin.compose.api.interop.AndroidViewBindingV1
+import org.autojs.plugin.compose.api.interop.AndroidViewInteropV1
 import java.util.ArrayDeque
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
@@ -13,6 +15,8 @@ interface ComposeSessionRenderer {
     fun attach()
     fun detach()
     fun apply(batch: UiPatchBatch)
+    fun apply(batch: UiPatchBatch, views: List<AndroidViewBindingV1>) = apply(batch)
+    fun validateViews(views: List<AndroidViewBindingV1>) = Unit
     fun execute(command: UiCommand)
     fun setTheme(theme: ThemeSpec)
     fun dispose()
@@ -34,7 +38,7 @@ class ComposeSession(
         data class Rejected(val error: ComposeUiError) : CommitResult
         data object Superseded : CommitResult
     }
-    private class Submission(val tree: UiTree, val completion: ((CommitResult) -> Unit)?) {
+    private class Submission(val tree: UiTree, val completion: ((CommitResult) -> Unit)?, val views: List<AndroidViewBindingV1> = emptyList()) {
         var completed = false
     }
     private class Receipt(val submission: Submission, val failure: Throwable?)
@@ -44,7 +48,9 @@ class ComposeSession(
     private val initializationFailed = AtomicBoolean()
     private val scriptCleanupFinished = AtomicBoolean()
     private val callbacks = CallbackRegistry()
-    private val reconciler = TreeReconciler { warn("Compose UI session $sessionId: list children have no key") }
+    private val catalog = if (AndroidViewInteropV1.COMPONENT in components) AndroidViewInteropV1.catalog
+        else org.autojs.plugin.compose.api.catalog.ComponentCatalog.V1
+    private val reconciler = TreeReconciler(catalog) { warn("Compose UI session $sessionId: list children have no key") }
     private val eventLock = Any()
     private val events = ArrayDeque<UiEvent>()
     private val droppedCommands = CommandResultEvictions()
@@ -65,6 +71,7 @@ class ComposeSession(
     private var appliedGeneration = 0L
     var tree: UiTree? = null
         private set
+    private var treeViews: List<AndroidViewBindingV1> = emptyList()
     var generation = 0L
         private set
     val callbackCount get() = callbacks.size
@@ -115,15 +122,20 @@ class ComposeSession(
      * staging. Once staged, exactly one completion runs on the script dispatcher, including no-op,
      * replacement by a newer target, renderer rejection or close. Superseded is not a rollback.
      */
-    fun submitStableTree(next: UiTree, completion: (CommitResult) -> Unit = {}) {
+    fun submitStableTree(next: UiTree, completion: (CommitResult) -> Unit = {}) = submitStableTree(next, emptyList(), completion)
+
+    fun submitStableTree(next: UiTree, views: List<AndroidViewBindingV1>, completion: (CommitResult) -> Unit = {}) {
         usable()
         validateCallbacksAndComponents(next)
-        TreeReconciler.validate(next)
-        submit(Submission(next, completion))
+        TreeReconciler.validate(next, catalog)
+        submit(Submission(next, completion, views.toList()))
     }
 
     private fun validateCallbacksAndComponents(next: UiTree) {
-        next.nodes.firstOrNull { it.type !in components }?.let { throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_COMPONENT, nodeId = it.nodeId) }
+        next.nodes.firstOrNull { it.type !in components }?.let {
+            throw ComposeUiContractException(if (it.type == AndroidViewInteropV1.COMPONENT) ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE
+                else ComposeUiErrorCodes.UNKNOWN_COMPONENT, nodeId = it.nodeId)
+        }
         callbacks.validate(next)
     }
 
@@ -187,7 +199,11 @@ class ComposeSession(
         val submission = pending ?: return
         val target = submission.tree
         pending = null
-        val patches = TreeReconciler.diff(tree, target)
+        val diff = TreeReconciler.diff(tree, target)
+        val sameViews = submission.views.size == treeViews.size && submission.views.all { binding ->
+            treeViews.any { it.nodeId == binding.nodeId && it.leaseId == binding.leaseId && it.view === binding.view }
+        }
+        val patches = if (diff.isEmpty() && !sameViews) listOf(UiPatch.SetRoot(target)) else diff
         if (patches.isEmpty()) {
             callbacks.retain(tree)
             complete(submission, CommitResult.Accepted(target, generation))
@@ -197,7 +213,7 @@ class ComposeSession(
         flight = submission
         main.execute {
             if (!canRender()) return@execute
-            val failure = try { renderer.apply(batch); appliedGeneration = batch.generation; null } catch (error: Exception) { error } catch (error: LinkageError) { error }
+            val failure = try { renderer.apply(batch, submission.views); appliedGeneration = batch.generation; null } catch (error: Exception) { error } catch (error: LinkageError) { error }
             synchronized(eventLock) {
                 if (closing.get()) return@execute
                 receipt = Receipt(submission, failure)
@@ -214,6 +230,7 @@ class ComposeSession(
         val failure = result.failure
         if (failure == null) {
             tree = target
+            treeViews = submission.views
             generation = appliedGeneration
             callbacks.commit(target, generation, pending?.tree)
             complete(submission, CommitResult.Accepted(target, generation))
@@ -351,7 +368,7 @@ class ComposeSession(
             nativeFailures.clear(); failedCommands.clear(); discardFailedCommands = false; failureOverflow = false
         }
         val outstanding = listOfNotNull(flight, pending)
-        callbacks.close(); pending = null; flight = null; tree = null; flushScheduled = false
+        callbacks.close(); pending = null; flight = null; tree = null; treeViews = emptyList(); flushScheduled = false
         val rejection = CommitResult.Rejected(ComposeUiError(ComposeUiErrorCodes.SESSION_CLOSED))
         outstanding.forEach { complete(it, rejection) }
         try { onClosed() } finally { script.close() }

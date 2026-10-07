@@ -92,7 +92,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
     override val keys = listOf(AugmentableKey("ui"))
 
-    override val scriptErrorPassThroughFunctions = setOf(::__autojs6Tsx.name, ::layout.name)
+    override val scriptErrorPassThroughFunctions = setOf(::__autojs6Tsx.name, ::layout.name, ::inflate.name)
 
     private val mProperties = ConcurrentHashMap<String, Any>()
 
@@ -429,7 +429,11 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 activity is ScriptExecuteActivity -> activity
                 else -> throw WrappedIllegalArgumentException("Global activity ${activity.jsBrief()} must be a ScriptExecuteActivity")
             }
-            val inflatedView = scriptRuntime.ui.layoutInflater.inflate(toXMLString(xml), parentView, coerceBoolean(isAttachedToParent, false))
+            val tsxLayout = TypeScriptTsxRuntime.renderOrNull(
+                xml, TypeScriptTsxRuntime.messageResolver(globalContext), scriptRuntime.composeForTsx(),
+            )
+            val inflatedView = scriptRuntime.ui.layoutInflater.inflate(tsxLayout?.xml ?: toXMLString(xml), parentView, coerceBoolean(isAttachedToParent, false))
+            tsxLayout?.attachClickHandlers(scriptRuntime, inflatedView)
             return ViewExtras.getNativeView(scriptRuntime.topLevelScope, inflatedView, inflatedView::class.java, scriptRuntime)
         }
 

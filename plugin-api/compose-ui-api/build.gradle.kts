@@ -40,3 +40,17 @@ tasks.register<JavaExec>("exportComposeUiCatalog") {
     outputs.file(target)
     args(target.get().asFile.absolutePath)
 }
+
+tasks.register<JavaExec>("exportComposeUiInteropCatalog") {
+    group = "documentation"
+    description = "Export the negotiated AndroidView extension without changing the frozen V1 catalog."
+    dependsOn("testDebugUnitTest")
+    classpath = files(provider {
+        val unitTests = tasks.named<Test>("testDebugUnitTest").get()
+        unitTests.classpath + unitTests.testClassesDirs
+    })
+    mainClass.set("org.autojs.plugin.compose.api.ComposeInteropCatalogExporter")
+    val target = layout.buildDirectory.file("reports/compose-ui/component-catalog-interop-v1.json")
+    outputs.file(target)
+    args(target.get().asFile.absolutePath)
+}

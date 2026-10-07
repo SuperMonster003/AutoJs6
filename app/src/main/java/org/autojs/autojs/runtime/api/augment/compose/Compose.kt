@@ -11,6 +11,7 @@ import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.catalog.ComponentInvocation
 import org.autojs.plugin.compose.api.model.*
+import org.autojs.plugin.compose.api.interop.AndroidViewInteropV1
 import org.mozilla.javascript.*
 import org.mozilla.javascript.Function
 import java.io.Closeable
@@ -31,12 +32,14 @@ class Compose internal constructor(
     private val cleanupFinished = AtomicBoolean()
     private val cleanupChannel = platform.dispatcher.createControlChannel(::finishClose)
     internal val graph = ComposeNodeGraph(scope, values, ::invokeCallback, ::checkThread,
-        translateError = { ComposeJsErrors.exception(scope, it) }, warn = platform::warn)
+        translateError = { ComposeJsErrors.exception(scope, it) }, warn = platform::warn, prepareView = ::prepareNativeView)
     internal val reactive = ComposeReactiveRuntime(scope, ::checkThread, { platform.post(0, it) }, ::reportRenderFailure)
     private val live = java.util.concurrent.CopyOnWriteArraySet<ComposeScriptSession>()
     private var nextSessionId = 1L
     private var defaultTheme: ThemeSpec? = null
     private var defaultThemeInput: Map<String, Any?> = emptyMap()
+    @Volatile private var preparingView = false
+    private var mountInProgress = false
     private val tsxFactories = IdentityHashMap<Function, String>()
 
     init { ComposeJsErrors.installLocalizer(scope, platform::errorMessage) }
@@ -64,18 +67,22 @@ class Compose internal constructor(
             "ref" to { args -> composeArguments(args, 0, name = "ref"); ComposeRef(scope) },
             "batch" to { args -> composeArguments(args, 1, name = "batch"); batch(composeFunction(args[0], "batch")) },
             "mount" to { args -> mount(args).js },
+            "attach" to { args ->
+                composeArguments(args, 2, 3, "attach")
+                mount(args.drop(1).toTypedArray(), container = platform.container(args[0])).js
+            },
             "floaty" to { args -> mount(args, floating = true).floatingWindow() },
             "post" to { args -> post(args); Undefined.instance },
             "theme" to { args -> theme(args) },
         )
-        ComponentCatalog.V1.components.filter { it.invocation == ComponentInvocation.NODE }.forEach { spec ->
+        AndroidViewInteropV1.catalog.components.filter { it.invocation == ComponentInvocation.NODE }.forEach { spec ->
             functions[spec.name] = { args -> create(spec.name, args).js }
         }
         functions.map { (name, action) ->
             name to RhinoUtils.newBaseFunction(scope, name, { args ->
                 if (name == "post") guardError { action(args) } else guarded { action(args) }
             }, RhinoUtils.NOT_CONSTRUCTABLE).also { function ->
-                if (ComponentCatalog.V1.component(name)?.invocation == ComponentInvocation.NODE) tsxFactories[function] = name
+                if (AndroidViewInteropV1.catalog.component(name)?.invocation == ComponentInvocation.NODE) tsxFactories[function] = name
             }
         } + ("ComposeError" to ComposeJsErrors.constructor(scope))
     }
@@ -83,7 +90,7 @@ class Compose internal constructor(
     override fun invoke(vararg args: Any?): Any? = guarded { mount(args).js }
 
     internal fun isTsxType(type: Any?): Boolean = type is Function ||
-        type is String && (type.startsWith("compose:") || ComponentCatalog.V1.component(type) != null)
+        type is String && (type.startsWith("compose:") || AndroidViewInteropV1.catalog.component(type) != null)
 
     internal fun createTsx(type: Any?, props: Any?, children: List<Any?>): Any = guarded {
         val name = when (type) {
@@ -96,38 +103,49 @@ class Compose internal constructor(
 
     private fun create(type: String, args: Array<out Any?>): ComposeNode {
         val first = args.firstOrNull()
-        val isProps = composeNullish(first) || first is Map<*, *> ||
+        // NativeObject implements Map. Preserve genuine (including foreign) node identity before
+        // deciding whether the first argument is a property bag or the first positional child.
+        val rawFirst = ComposeScriptValues.unwrap(first)
+        val isNode = rawFirst is ComposeNode || rawFirst is ComposeNodeNativeObject
+        val isProps = !isNode && (composeNullish(first) || first is Map<*, *> ||
             first is Scriptable && first !is NativeArray && first !is Function && graph.node(first) == null &&
-            ComposeScriptValues.unwrap(first) !is TypeScriptTsxFragment
+            rawFirst !is TypeScriptTsxFragment)
         val props = if (isProps) first else null
         val children = if (isProps) args.drop(1) else args.toList()
         return graph.create(type, props, children.takeIf { it.isNotEmpty() })
     }
 
-    private fun mount(args: Array<out Any?>, floating: Boolean = false): ComposeScriptSession {
+    private fun mount(args: Array<out Any?>, floating: Boolean = false, container: Any? = null): ComposeScriptSession {
         usable()
-        if (reactive.isRendering) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
-            "A render callback cannot create another Compose mount")
-        val method = if (floating) "floaty" else "mount"
+        if (reactive.isRendering || preparingView || mountInProgress) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+            "Cannot create a Compose mount during rendering, View preparation or another mount")
+        mountInProgress = true
+        return try { openMount(args, floating, container) } finally { mountInProgress = false }
+    }
+
+    private fun openMount(args: Array<out Any?>, floating: Boolean, container: Any?): ComposeScriptSession {
+        val method = if (floating) "floaty" else if (container != null) "attach" else "mount"
         composeArguments(args, 1, 2, method)
         val options = values.objectProperties(args.getOrNull(1), method)
         val floatingOptions = if (floating) ComposeFloatyOptions.parse(args.getOrNull(1)) else null
         if (!floating && options.keys.any { it != "theme" }) throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_PROP,
             prop = options.keys.first { it != "theme" })
-        val previousUi = if (floating) emptyList() else live.filter { !it.isFloaty && !it.isClosed }
+        val previousUi = if (floating) emptyList() else live.filter {
+            !it.isClosed && if (container != null) it.container === container else it.isUiRoot
+        }
         if (live.count { !it.isClosed } - previousUi.size >= ComposeUiLimits.MAX_SESSIONS_PER_ENGINE || nextSessionId > Int.MAX_VALUE) {
             throw ComposeUiContractException(ComposeUiErrorCodes.LIMIT_EXCEEDED)
         }
         val source = args[0].let { value -> if (value is Function) value else graph.root(value)
             ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, "mount requires a node or render function") }
         val theme = options["theme"]?.let(values::theme) ?: defaultTheme
-        val session = ComposeScriptSession(this, (nextSessionId++).toInt(), theme, floatingOptions, previousUi.firstOrNull())
+        val session = ComposeScriptSession(this, (nextSessionId++).toInt(), theme, floatingOptions, previousUi.firstOrNull(), container)
         try {
             session.open(source)
             // The new content is valid and its renderer opened; replacing UI now closes prior mounts.
             previousUi.forEach { it.close() }
             live += session
-            if (floating) platform.post(0) {
+            if (floating || container != null) platform.post(0) {
                 // A callback/batch may still be validating its graph when floaty returns. Never
                 // attach a native window for a mount that the surrounding transaction rolled back.
                 if (!session.isClosed) {
@@ -147,6 +165,17 @@ class Compose internal constructor(
             if (org.mozilla.javascript.ScriptRuntime.hasTopCall(context)) function.call(context, scope, receiver, args)
             else org.mozilla.javascript.ScriptRuntime.doTopCall(function, context, scope, receiver, args, false)
         }
+
+    private fun prepareNativeView(value: Any?): android.view.View {
+        if (preparingView) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, prop = "view")
+        preparingView = true
+        return try {
+            platform.prepareView(value) { function, context ->
+                try { call(function, Undefined.SCRIPTABLE_UNDEFINED, arrayOf(RhinoUtils.toJsValue(scope, context))) }
+                catch (failure: Throwable) { throw renderFailure(failure) }
+            }
+        } finally { preparingView = false }
+    }
 
     internal fun batch(function: Function): Any? = graph.transaction { reactive.batch { call(function) } }
 
@@ -179,12 +208,18 @@ class Compose internal constructor(
 
     /** Called by the existing ui.setContentView path, including ui.layout and layoutFile. */
     fun beforeSetContentView(view: Any) {
-        live.filter { !it.isFloaty && it.mountedView != null && it.mountedView !== view }.toList().forEach {
+        live.filter { it.isUiRoot && it.mountedView != null && it.mountedView !== view }.toList().forEach {
             platform.warn("Compose UI session closed because ui content was replaced")
             it.close()
         }
     }
     internal fun ended(session: ComposeScriptSession) { live.remove(session) }
+    internal fun validateNativeViews(session: ComposeScriptSession, views: List<org.autojs.plugin.compose.api.interop.AndroidViewBindingV1>) {
+        if (views.isEmpty()) return
+        val elsewhere = live.filter { it !== session && !it.isClosed }.flatMap { it.nativeViews() }
+        if (views.any { binding -> elsewhere.any { it === binding.view } }) throw ComposeUiContractException(
+            ComposeUiErrorCodes.INVALID_ARGUMENT, "A View cannot belong to two Compose sessions", prop = "view")
+    }
     internal fun checkThread() {
         if (Thread.currentThread() !== origin) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
             "Compose mutations require the owning script dispatcher; use compose.post")

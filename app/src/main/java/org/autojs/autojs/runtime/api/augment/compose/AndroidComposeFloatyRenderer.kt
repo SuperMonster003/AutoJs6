@@ -93,6 +93,13 @@ internal class AndroidComposeFloatyRenderer(
         generation = batch.generation
         afterFrameChange()
     }
+    override fun apply(batch: UiPatchBatch, views: List<org.autojs.plugin.compose.api.interop.AndroidViewBindingV1>) {
+        usable()
+        requireNotNull(delegate).apply(batch, views)
+        generation = batch.generation
+        afterFrameChange()
+    }
+    override fun validateViews(views: List<org.autojs.plugin.compose.api.interop.AndroidViewBindingV1>) = requireNotNull(delegate).validateViews(views)
 
     override fun execute(command: UiCommand) {
         usable()

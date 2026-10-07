@@ -28,6 +28,12 @@ internal interface ComposeScriptPlatform : Closeable {
     val mainExecutor: Executor
     fun version(): Map<String, Any>?
     fun createRenderer(sessionId: Int, beforeMount: (Any) -> Unit, onDestroyed: () -> Unit): Opened
+    fun container(value: Any?): Any = throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
+    fun createContainerRenderer(sessionId: Int, container: Any, beforeMount: (Any) -> Unit, onDestroyed: () -> Unit): Opened =
+        throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
+    fun prepareView(value: Any?, factory: (org.mozilla.javascript.Function, Any) -> Any?): View =
+        throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, prop = "view")
+    fun validateViews(views: List<org.autojs.plugin.compose.api.interop.AndroidViewBindingV1>, container: Any?, renderer: ComposeSessionRenderer) = Unit
     fun createFloatyRenderer(sessionId: Int, options: ComposeFloatyOptions, beforeMount: (Any) -> Unit,
         onDestroyed: () -> Unit, onFailure: (Throwable) -> Unit): Opened =
         throw ComposeUiContractException(ComposeUiErrorCodes.PLUGIN_UNAVAILABLE)
@@ -76,6 +82,64 @@ internal class AndroidComposeScriptPlatform(private val runtime: ScriptRuntime) 
         }, activity, onDestroyed = onDestroyed)
         return ComposeScriptPlatform.Opened(renderer, loaded.components,
             watchInvalidation = { invalidated -> host.watch(loaded.identity, invalidated) })
+    }
+
+    override fun container(value: Any?): Any {
+        val target = ComposeScriptValues.unwrap(value) as? org.autojs.autojs.core.ui.widget.ComposeContainerView
+        if (target == null || !target.belongsTo(runtime)) throw ComposeUiContractException(
+            ComposeUiErrorCodes.INVALID_ARGUMENT, "attach requires this runtime's XML compose container")
+        return target
+    }
+
+    override fun createContainerRenderer(sessionId: Int, container: Any, beforeMount: (Any) -> Unit, onDestroyed: () -> Unit): ComposeScriptPlatform.Opened {
+        val loaded = plugin()
+        val target = container as org.autojs.autojs.core.ui.widget.ComposeContainerView
+        val token = runtime.loopers.waitWhenIdleToken()
+        val lifetime = Closeable { token.release() }
+        try {
+            return ComposeScriptPlatform.Opened(AndroidComposeContainerRenderer(target, loaded, sessionId, beforeMount, onDestroyed),
+                loaded.components, lifetime = lifetime, watchInvalidation = { invalidated -> host.watch(loaded.identity, invalidated) })
+        } catch (failure: Throwable) { lifetime.close(); throw failure }
+    }
+
+    override fun prepareView(value: Any?, factory: (org.mozilla.javascript.Function, Any) -> Any?): View = onMain {
+        val raw = ComposeScriptValues.unwrap(value)
+        val resolved = if (raw is org.mozilla.javascript.Function) factory(raw,
+            activity() ?: android.view.ContextThemeWrapper(GlobalAppContext.get(), R.style.ScriptTheme)) else raw
+        ComposeScriptValues.unwrap(resolved) as? View ?: throw ComposeUiContractException(
+            ComposeUiErrorCodes.INVALID_ARGUMENT, "AndroidView requires a View or a factory returning a View", prop = "view")
+    }
+
+    override fun validateViews(views: List<org.autojs.plugin.compose.api.interop.AndroidViewBindingV1>, container: Any?, renderer: ComposeSessionRenderer) {
+        if (views.isEmpty()) return
+        onMain {
+            renderer.validateViews(views)
+            views.forEach { binding ->
+                var ancestor = container as? View
+                while (ancestor != null) {
+                    if (ancestor === binding.view) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+                        "An AndroidView cannot contain its Compose container", binding.nodeId, "view")
+                    ancestor = ancestor.parent as? View
+                }
+            }
+        }
+    }
+
+    /** Only the calling script waits. Main never calls back into, or waits for, its dispatcher. */
+    private fun <T> onMain(action: () -> T): T {
+        if (Looper.myLooper() == Looper.getMainLooper()) return action()
+        val done = runtime.threads.disposable()
+        var result: T? = null
+        var failure: Throwable? = null
+        runtime.uiHandler.post {
+            try { if (!closed.get()) result = action() else throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED) }
+            catch (error: Throwable) { failure = error }
+            finally { done.setAndNotify(true) }
+        }
+        done.blockedGet()
+        failure?.let { throw it }
+        @Suppress("UNCHECKED_CAST")
+        return result as T
     }
 
     override fun createFloatyRenderer(sessionId: Int, options: ComposeFloatyOptions, beforeMount: (Any) -> Unit,

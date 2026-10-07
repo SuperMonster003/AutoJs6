@@ -277,7 +277,9 @@
         "La catégorie Compose UI des exemples intégrés propose un compteur, la validation de formulaire, une liste de 1000 éléments, un HUD flottant et des thèmes, avec les prérequis de plugin et d'autorisations pour chaque script",
         "Référence API complète de Compose UI avec complétion de types Ace Editor et contenu local Offline Docs pour les composants, noeuds, états, modificateurs, thèmes, sessions et fenêtres flottantes",
         "Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur",
-        "TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML"
+        "TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML",
+        "Les conteneurs XML `<compose>` et compose.attach intègrent des sessions Compose indépendantes dans les pages UI ou les fenêtres flottantes existantes; compose.AndroidView affiche une View Android existante ou renvoyée par une fabrique synchrone",
+        "ui.inflate accepte les layouts XML TSX compilés et lie leurs rappels onClick"
       ],
       "fix": [
         "Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans \"Copier en tant que sélecteur\" de l'inspecteur de disposition et la représentation textuelle des sélecteurs",
@@ -523,7 +525,8 @@
         "Absence du fond circulaire des icônes dans les détails du centre de plugins et bordures des icônes en cache non actualisées lors du changement de thème",
         "Les couleurs Material choisies dans l'ancienne disposition ne pouvaient pas être retrouvées avec \"Localiser la couleur du thème actuel\" après un changement de disposition, et la page des couleurs Material n'affichait pas le résumé de la couleur actuelle",
         "La fermeture occasionnelle des scripts UI empaquetés après l'affichage d'une page vide au démarrage",
-        "Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin"
+        "Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin",
+        "Les fabriques de composants traitaient le premier noeud comme un objet de propriétés lorsque plusieurs noeuds étaient passés en arguments"
       ],
       "improvement": [
         "Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués",

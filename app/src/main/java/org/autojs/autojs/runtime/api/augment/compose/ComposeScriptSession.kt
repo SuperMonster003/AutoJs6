@@ -6,6 +6,7 @@ import org.autojs.autojs.core.plugin.compose.ScriptUiDispatcher
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.model.*
+import org.autojs.plugin.compose.api.interop.AndroidViewBindingV1
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Undefined
@@ -17,10 +18,14 @@ import java.util.concurrent.atomic.AtomicReference
 
 /** One script-visible mount, binding stable handles to the core's acknowledged transaction stream. */
 internal class ComposeScriptSession(private val owner: Compose, val id: Int, private val initialTheme: ThemeSpec?,
-    private val floatyOptions: ComposeFloatyOptions? = null, private var replacingUi: ComposeNodeBinding? = null) : ComposeNodeBinding, Closeable {
+    private val floatyOptions: ComposeFloatyOptions? = null, private var replacingUi: ComposeNodeBinding? = null,
+    container: Any? = null) : ComposeNodeBinding, Closeable {
+    var container: Any? = container
+        private set
     private val closed = AtomicBoolean()
     override val isClosed get() = closed.get()
     val isFloaty get() = floatyOptions != null
+    val isUiRoot get() = !isFloaty && container == null
     private var window: ComposeFloatyControl? = null
     private var windowFacade: ComposeFloatyWindow? = null
     private val lifetime = AtomicReference<Closeable?>()
@@ -32,6 +37,12 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
     private var root: ComposeNode? = null
     private var accepted: ComposeNodeSnapshot? = null
     private var pending: ComposeNodeSnapshot? = null
+    private var renderer: org.autojs.autojs.core.plugin.compose.ComposeSessionRenderer? = null
+    private val submitted = java.util.Collections.newSetFromMap(java.util.IdentityHashMap<ComposeNodeSnapshot, Boolean>())
+    internal fun nativeViews(): Set<android.view.View> = (submitted.toList() + listOfNotNull(accepted))
+        .flatMap { it.states.values.mapNotNull { state -> state.nativeView?.view } }.toSet()
+    internal fun nativeLease(node: ComposeNode, view: android.view.View): ComposeNativeViewLease? =
+        (listOfNotNull(accepted) + submitted).asSequence().mapNotNull { it.states[node]?.nativeView }.firstOrNull { it.view === view }
     private val callbacks = HashMap<Int, Int>()
     private data class PendingCommand(val command: UiCommand, val action: Function? = null, val dismiss: Function? = null) {
         val callbackCount get() = (if (action == null) 0 else 1) + (if (dismiss == null || dismiss === action) 0 else 1)
@@ -67,12 +78,15 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
     }
 
     fun open(source: Any?) {
-        val opened = if (floatyOptions == null) owner.platform.createRenderer(id, { mountedView = it }, ::close)
+        val targetContainer = container
+        val opened = if (targetContainer != null) owner.platform.createContainerRenderer(id, targetContainer, { mountedView = it }, ::close)
+        else if (floatyOptions == null) owner.platform.createRenderer(id, { mountedView = it }, ::close)
         else owner.platform.createFloatyRenderer(id, floatyOptions, { mountedView = it }, ::close) { failure ->
             startupFailure.compareAndSet(null, failure)
             if (::core.isInitialized) startupFailure.getAndSet(null)?.let(core::failInitialization)
         }
         window = opened.window
+        renderer = opened.renderer
         lifetime.set(opened.lifetime)
         if (isClosed) {
             lifetime.getAndSet(null)?.close()
@@ -146,7 +160,12 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
             })
             pending = snapshot
             root = snapshot.root
-            core.submitStableTree(tree) { result ->
+            val views = snapshot.states.mapNotNull { (node, state) -> state.nativeView?.let { AndroidViewBindingV1(node.stableId, it.id, it.view) } }
+            owner.validateNativeViews(this, views)
+            owner.platform.validateViews(views, container, requireNotNull(renderer))
+            submitted += snapshot
+            core.submitStableTree(tree, views) { result ->
+                submitted.remove(snapshot)
                 when (result) {
                     is ComposeSession.CommitResult.Accepted -> if (!isClosed) {
                         accepted = snapshot
@@ -167,6 +186,7 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
             core.discardUnusedCallbacks()
             pruneCallbacks()
         } catch (failure: Throwable) {
+            submitted.remove(snapshot)
             pending = previous
             root = previousRoot
             core.discardUnusedCallbacks(); pruneCallbacks()
@@ -274,7 +294,7 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
         replacingUi = null
         reaction?.close(); reaction = null
         owner.graph.unmount(this)
-        root = null; pending = null; accepted = null; callbacks.clear(); commands.clear(); notificationCallbacks.clear(); mountedView = null
+        root = null; pending = null; accepted = null; submitted.clear(); renderer = null; container = null; callbacks.clear(); commands.clear(); notificationCallbacks.clear(); mountedView = null
         owner.ended(this)
         val listeners = closeListeners.toList().also { closeListeners.clear() }
         try {

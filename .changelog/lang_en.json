@@ -277,7 +277,9 @@
         "The Compose UI category of built-in samples provides counter, form validation, 1000-item list, floating HUD, and theme scripts, each with plugin and permission prerequisites",
         "Complete Compose UI API reference with companion Ace Editor type completion and local Offline Docs content for components, nodes, state, modifiers, themes, sessions and floating windows",
         "Plugin Center recognizes and manages installed Compose UI development preview plugins, requiring host 6.8.0 / 5316 or later",
-        "TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes"
+        "TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes",
+        "XML `<compose>` containers and compose.attach embed independent Compose sessions in UI pages or legacy floating windows; compose.AndroidView embeds an existing Android View or one returned by a synchronous factory",
+        "ui.inflate accepts compiled XML TSX layouts and binds their onClick callbacks"
       ],
       "fix": [
         "Package information becoming inaccessible from the file manager when APK Inspector hides the information button",
@@ -523,7 +525,8 @@
         "Missing circular icon backgrounds in Plugin Center details dialogs and stale themed borders when cached artwork is reused",
         "Material colors chosen in the legacy layout could not be found with \"Locate current theme color\" after switching layouts, and the Material colors page did not show the current color summary",
         "Packaged UI scripts occasionally displaying a blank page and exiting during startup",
-        "Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates"
+        "Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates",
+        "Component factories treated the first positional node as a property object when several node arguments were supplied"
       ],
       "improvement": [
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",

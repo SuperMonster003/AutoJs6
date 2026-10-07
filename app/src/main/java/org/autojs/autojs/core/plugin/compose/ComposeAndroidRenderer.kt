@@ -9,6 +9,9 @@ import android.os.Bundle
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.loading.*
 import org.autojs.plugin.compose.api.model.*
+import org.autojs.plugin.compose.api.interop.AndroidViewBindingV1
+import org.autojs.plugin.compose.api.interop.AndroidViewRendererV1
+import org.autojs.plugin.compose.api.interop.AndroidViewClaimsV1
 import java.io.Closeable
 
 /** Main-thread adapter. Script code owns the session; Activity/window owners own attachment. */
@@ -48,13 +51,18 @@ class ComposeAndroidRenderer(
             override val initialTheme = theme.snapshot()
             override val sessionId = this@ComposeAndroidRenderer.sessionId
         }
-        try { renderer = loaded.factory.create(environment) } catch (error: Throwable) { dispose(); throw error }
+        try { renderer = loaded.androidViewFactory?.create(environment) ?: loaded.factory.create(environment) } catch (error: Throwable) { dispose(); throw error }
     }
 
     override fun attach() {
         val view = requireNotNull(renderer).view()
         if (view.parent != null) return
-        insetsLease = (context as? ComposeInsetsHost)?.acquireComposeInsets()
+        var insetContext = context
+        val seen = java.util.Collections.newSetFromMap(java.util.IdentityHashMap<Context, Boolean>())
+        while (insetContext != null && seen.add(insetContext)) {
+            if (insetContext is ComposeInsetsHost) { insetsLease = insetContext.acquireComposeInsets(); break }
+            insetContext = (insetContext as? android.content.ContextWrapper)?.baseContext
+        }
         try {
             floatyOwners?.attach(view)
             requireNotNull(mount).invoke(view)
@@ -68,6 +76,31 @@ class ComposeAndroidRenderer(
         finally { insetsLease?.close(); insetsLease = null }
     }
     override fun apply(batch: UiPatchBatch) { requireNotNull(renderer).apply(batch); generation = batch.generation }
+    override fun apply(batch: UiPatchBatch, views: List<AndroidViewBindingV1>) {
+        val target = requireNotNull(renderer)
+        if (target is AndroidViewRendererV1) target.applyWithViews(batch, views)
+        else {
+            if (views.isNotEmpty()) throw ComposeUiContractException(ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE)
+            target.apply(batch)
+        }
+        generation = batch.generation
+    }
+    override fun validateViews(views: List<AndroidViewBindingV1>) {
+        val target = requireNotNull(renderer)
+        if (views.isNotEmpty() && target !is AndroidViewRendererV1) throw ComposeUiContractException(ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE)
+        views.forEach { binding ->
+            val claimed = AndroidViewClaimsV1.isClaimed(binding.view)
+            if (claimed && !AndroidViewClaimsV1.isOwnedBy(target, binding.view, binding.nodeId, binding.leaseId) ||
+                !claimed && binding.view.parent != null) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+                "An AndroidView already belongs to another parent or session", binding.nodeId, "view")
+            var ancestor: View? = target.view()
+            while (ancestor != null) {
+                if (ancestor === binding.view) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+                    "An AndroidView cannot contain its renderer", binding.nodeId, "view")
+                ancestor = ancestor.parent as? View
+            }
+        }
+    }
     override fun execute(command: UiCommand) = requireNotNull(renderer).execute(command)
     override fun setTheme(theme: ThemeSpec) {
         overrideTheme = theme

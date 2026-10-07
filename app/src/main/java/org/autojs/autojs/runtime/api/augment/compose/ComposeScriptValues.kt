@@ -38,7 +38,7 @@ class ComposeScriptValues(
         val retainedImages: List<Any> = emptyList(),
     )
 
-    private val catalog = ComponentCatalog.V1
+    private val catalog = org.autojs.plugin.compose.api.interop.AndroidViewInteropV1.catalog
 
     fun objectProperties(value: Any?, component: String): Map<String, Any?> {
         val raw = unwrap(value)

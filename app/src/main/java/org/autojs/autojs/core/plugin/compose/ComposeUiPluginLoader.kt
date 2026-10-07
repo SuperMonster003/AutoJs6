@@ -9,6 +9,8 @@ import org.autojs.plugin.compose.api.ComposeUiContract
 import org.autojs.plugin.compose.api.ComposeUiErrorCodes
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.loading.ComposeUiRendererFactory
+import org.autojs.plugin.compose.api.interop.AndroidViewInteropV1
+import org.autojs.plugin.compose.api.interop.AndroidViewRendererFactoryV1
 import java.util.zip.ZipFile
 
 class ComposeUiPluginLoader {
@@ -20,6 +22,7 @@ class ComposeUiPluginLoader {
         val pluginContext: Context,
         val nativePath: String,
         val components: Set<String>,
+        val androidViewFactory: AndroidViewRendererFactoryV1? = null,
     ) {
         fun context(base: Context) = ComposeHostContext(base, pluginContext, loader)
     }
@@ -51,7 +54,16 @@ class ComposeUiPluginLoader {
                 capabilities.getStringArrayList(ComposeUiCapabilityKeys.FEATURES) == null) {
                 throw ComposeUiError.selection(context, SelectionFailure.CONTRACT)
             }
-            return Loaded(identity, factory, loader, context.createPackageContext(identity.name, 0), nativePath, components)
+            val interop = if (AndroidViewInteropV1.FEATURE in capabilities.getStringArrayList(ComposeUiCapabilityKeys.FEATURES)!!) {
+                val name = capabilities.getString(AndroidViewInteropV1.FACTORY_CLASS_KEY)
+                    ?: throw ComposeUiError.selection(context, SelectionFailure.CONTRACT)
+                val extension = Class.forName(name, true, loader).getDeclaredConstructor().newInstance() as? AndroidViewRendererFactoryV1
+                    ?: throw ComposeUiError.selection(context, SelectionFailure.CONTRACT)
+                if (extension.extensionVersion() != AndroidViewInteropV1.VERSION) throw ComposeUiError.selection(context, SelectionFailure.CONTRACT)
+                extension
+            } else null
+            return Loaded(identity, factory, loader, context.createPackageContext(identity.name, 0), nativePath,
+                if (interop == null) components else components + AndroidViewInteropV1.COMPONENT, interop)
         } catch (error: ComposeUiError) { throw error }
         catch (error: Exception) { throw ComposeUiError(ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE,
             ComposeUiError.selection(context, SelectionFailure.CONTRACT).message!!, cause = error) }

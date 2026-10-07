@@ -316,6 +316,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Compose UI 完整 API 参考及配套 Ace Editor 类型补全, Offline Docs 本地文档, 覆盖组件, 节点, 状态, 修饰链, 主题, 会话和悬浮窗
 * `新增` 插件中心支持识别与管理已安装的 Compose UI 开发预览插件, 需要宿主 6.8.0 / 5316 或更高版本
 * `新增` TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点
+* `新增` XML `<compose>` 容器与 compose.attach 可在 UI 页面或旧悬浮窗内嵌入独立 Compose 会话; compose.AndroidView 可承载现有 Android View 或同步工厂返回的 View
+* `新增` ui.inflate 支持编译后的 XML TSX 布局及其 onClick 回调绑定
 * `修复` 启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题
 * `修复` Three Stove Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
 * `修复` assistant 合并工具选项时, 空 tools 对象导致默认关闭的工具组被启用的问题
@@ -484,6 +486,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 在传统布局中选择的材料设计颜色, 切换布局后无法通过 "定位当前主题色" 找到, 且材料设计颜色页面不显示当前颜色摘要的问题
 * `修复` 打包的 UI 脚本启动时偶发显示空白页面后退出的问题
 * `修复` Compose UI 在渲染回调中拒绝再次挂载页面或悬浮窗并保留当前页面, 支持插件更新后重新挂载页面
+* `修复` 组件工厂接收多个位置节点参数时将首个节点误判为属性对象的问题
 * `优化` Three Stove Agent 模型载荷在 Android 7-10 上通过公开 API 读取, 保留文件偏移与停滞管道取消能力
 * `优化` 宿主 lint 检查按路径排除 AutoJs4 兼容类和资源, 其余宿主代码继续检查
 * `优化` 应用及打包应用适配 Android 17, 完善本地网络授权, 高级保护及后台音频限制的提示
