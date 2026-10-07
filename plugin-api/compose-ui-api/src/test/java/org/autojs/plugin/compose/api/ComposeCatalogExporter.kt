@@ -20,14 +20,14 @@ object ComposeCatalogExporter {
         println("Exported ${ComponentCatalog.V1.components.size} components to ${target.absolutePath}; external declarations/docs have not been checked.")
     }
 
-    fun document(): Map<String, Any?> = linkedMapOf(
+    fun document(catalog: ComponentCatalog = ComponentCatalog.V1, version: Int = 1, source: String = SOURCE): Map<String, Any?> = linkedMapOf(
         "schemaVersion" to SCHEMA_VERSION,
-        "contractVersion" to ComposeUiContract.CONTRACT_VERSION,
-        "source" to SOURCE,
-        "componentCount" to ComponentCatalog.V1.components.size,
-        "propertyCount" to ComponentCatalog.V1.components.sumOf { it.props.size },
+        "contractVersion" to version,
+        "source" to source,
+        "componentCount" to catalog.components.size,
+        "propertyCount" to catalog.components.sumOf { it.props.size },
         "valueKinds" to ValueKind.entries.map { it.name }.sorted(),
-        "components" to ComponentCatalog.V1.components.sortedBy { it.name }.map { component ->
+        "components" to catalog.components.sortedBy { it.name }.map { component ->
             linkedMapOf(
                 "name" to component.name,
                 "invocation" to component.invocation.name,

@@ -30,7 +30,7 @@ class ComposeNodeGraph(
     private val prepareView: (Any?) -> android.view.View = { throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, prop = "view") },
 ) : AutoCloseable {
     internal val tsxOwner = Any()
-    private val catalog = AndroidViewInteropV1.catalog
+    private val catalog = org.autojs.plugin.compose.api.v2.ComposeUiV2.interopCatalog
     private val roots = IdentityHashMap<ComposeNodeBinding, ComposeNode>()
     private val accepted = IdentityHashMap<ComposeNodeBinding, ComposeNodeSnapshot>()
     private val published = IdentityHashMap<ComposeNodeBinding, ComposeNodeSnapshot>()
@@ -306,7 +306,8 @@ class ComposeNodeGraph(
         val canonical = prop?.name ?: name
         if (prop == null && catalog.shortcuts.none { it.name == name }) fail(ComposeUiErrorCodes.UNKNOWN_PROP, node, name)
         if (isField(node) && canonical == P.TEXT) return node.editor!!.text
-        return (node.state.source[canonical] ?: prop?.defaultValue)?.let { values.toRaw(it, scope) } ?: Undefined.instance
+        val value = node.state.source[canonical] ?: prop?.defaultValue ?: return Undefined.instance
+        return values.toRaw(value, scope)
     }
 
     private fun updateProperties(node: ComposeNode, raw: Map<String, Any?>, creating: Boolean = false) {
@@ -472,7 +473,8 @@ class ComposeNodeGraph(
         val supported = name in catalog.requireComponent(node.type).commands || node.state.modifier.any { name in catalog.modifier(it.name)!!.commands }
         if (!supported) fail(ComposeUiErrorCodes.INVALID_ARGUMENT, node)
         if (command is UiCommand.ScrollTo && command.index != null &&
-            (node.type !in setOf(C.LAZY_COLUMN, C.LAZY_ROW) || command.index!! >= node.children.size)) {
+            (node.type !in setOf(C.LAZY_COLUMN, C.LAZY_ROW, org.autojs.plugin.compose.api.v2.ComposeUiV2.Components.HORIZONTAL_PAGER,
+                org.autojs.plugin.compose.api.v2.ComposeUiV2.Components.LAZY_VERTICAL_GRID) || command.index!! >= node.children.size)) {
             fail(ComposeUiErrorCodes.INVALID_ARGUMENT, node)
         }
         if (command is UiCommand.Edit) {
@@ -579,7 +581,9 @@ class ComposeNodeGraph(
             children.forEach { if (it.parent !== node) fail(ComposeUiErrorCodes.INVALID_ARGUMENT, it) }
             children.asReversed().forEach { pending.add(it to depth + 1) }
         }
-        return ComposeNodeSnapshot(root, UiTree(root.stableId, output), callbacks.toMap(), retained.toList(), references.toMap(), functionCount,
+        val tree = UiTree(root.stableId, output)
+        org.autojs.plugin.compose.api.v2.ComposeUiV2.validateTree(tree, allowDetachedRoot = !strictRoot)
+        return ComposeNodeSnapshot(root, tree, callbacks.toMap(), retained.toList(), references.toMap(), functionCount,
             states.toMap(), states.keys.associateWith { it.editor })
     }
 

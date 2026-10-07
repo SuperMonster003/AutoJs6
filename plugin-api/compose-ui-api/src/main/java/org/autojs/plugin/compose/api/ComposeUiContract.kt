@@ -14,7 +14,7 @@ object ComposeUiIds {
 }
 
 object ComposeUiContract {
-    const val CONTRACT_VERSION = 1
+    const val CONTRACT_VERSION = 2
     const val MIN_SUPPORTED = 1
     const val META_RENDERER_FACTORY = "org.autojs.plugin.compose.RENDERER_FACTORY"
     const val META_REQUIRES_HOST_VERSION = PluginCapabilityKeys.REQUIRES_HOST_VERSION

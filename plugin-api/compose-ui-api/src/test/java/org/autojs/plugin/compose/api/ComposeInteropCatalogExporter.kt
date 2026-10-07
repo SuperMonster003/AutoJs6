@@ -17,7 +17,7 @@ object ComposeInteropCatalogExporter {
     fun document(): Map<String, Any?> {
         val component = AndroidViewInteropV1.component
         return linkedMapOf(
-            "schemaVersion" to 1, "contractVersion" to ComposeUiContract.CONTRACT_VERSION,
+            "schemaVersion" to 1, "contractVersion" to 1,
             "extensionVersion" to AndroidViewInteropV1.VERSION, "feature" to AndroidViewInteropV1.FEATURE,
             "source" to SOURCE, "componentCount" to 1, "propertyCount" to component.props.size,
             "valueKinds" to ValueKind.entries.map { it.name }.sorted(),

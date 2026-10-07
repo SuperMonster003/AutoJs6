@@ -9,7 +9,7 @@ class ComposeCatalogExporterTest {
     @Test fun exportContainsEveryFrozenComponentAndItsCanonicalProperties() {
         val exported = ComposeCatalogExporter.document()
         val components = exported["components"] as List<Map<String, Any?>>
-        assertEquals(ComposeUiContract.CONTRACT_VERSION, exported["contractVersion"])
+        assertEquals(1, exported["contractVersion"])
         assertEquals(ComponentCatalog.V1.components.map { it.name }.sorted(), components.map { it["name"] })
         for (component in components) {
             val actual = ComponentCatalog.V1.requireComponent(component["name"] as String)

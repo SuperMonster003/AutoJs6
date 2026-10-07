@@ -49,7 +49,10 @@ class ComposeSession(
     private val initializationFailed = AtomicBoolean()
     private val scriptCleanupFinished = AtomicBoolean()
     private val callbacks = CallbackRegistry()
-    private val catalog = if (AndroidViewInteropV1.COMPONENT in components) AndroidViewInteropV1.catalog
+    private val catalog = if (components.any { it in org.autojs.plugin.compose.api.v2.ComposeUiV2.componentNames }) {
+        if (AndroidViewInteropV1.COMPONENT in components) org.autojs.plugin.compose.api.v2.ComposeUiV2.interopCatalog
+        else org.autojs.plugin.compose.api.v2.ComposeUiV2.catalog
+    } else if (AndroidViewInteropV1.COMPONENT in components) AndroidViewInteropV1.catalog
         else org.autojs.plugin.compose.api.catalog.ComponentCatalog.V1
     private val reconciler = TreeReconciler(catalog) { warn("Compose UI session $sessionId: list children have no key") }
     private val eventLock = Any()

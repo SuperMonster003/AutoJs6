@@ -13,6 +13,7 @@ import androidx.core.view.OneShotPreDrawListener
 import org.autojs.autojs.core.floaty.BaseResizableFloatyWindow
 import org.autojs.autojs.core.plugin.compose.ComposeAndroidRenderer
 import org.autojs.autojs.core.plugin.compose.ComposeFloatyOwners
+import org.autojs.autojs.core.plugin.compose.ComposeFloatyBackView
 import org.autojs.autojs.core.plugin.compose.ComposeSessionRenderer
 import org.autojs.autojs.core.plugin.compose.ComposeUiError
 import org.autojs.autojs.core.plugin.compose.ComposeUiPluginLoader
@@ -71,7 +72,7 @@ internal class AndroidComposeFloatyRenderer(
             }
             content = view
             mountCallback?.invoke(view)
-            control.attach(view)
+            control.attach(view, owners)
             afterFrameChange()
         }, floatyOwners = owners, onDestroyed = ::windowClosed, rendererFactory = rendererFactory,
             useActivityInsets = !compositionAnchor).also { delegate = it }
@@ -232,7 +233,7 @@ internal class AndroidComposeFloatyRenderer(
             if (disposed) { reservation = null; registered.close() }
         }
 
-        fun attach(view: View) {
+        fun attach(view: View, owners: ComposeFloatyOwners) {
             if (disposed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)
             if (native != null) return
             handler.postDelayed(startupTimeout, 10000)
@@ -240,7 +241,10 @@ internal class AndroidComposeFloatyRenderer(
                 object : BaseResizableFloatyWindow.ViewSupplier {
                     override fun inflate(context: Context, parent: ViewGroup?): View {
                         if (disposed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)
-                        requireNotNull(parent).addView(view, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                        val target = if (compositionAnchor) requireNotNull(parent) else ComposeFloatyBackView(context, owners).also {
+                            requireNotNull(parent).addView(it, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                        }
+                        target.addView(view, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
                         return view
                     }
                 }, { window, failure ->

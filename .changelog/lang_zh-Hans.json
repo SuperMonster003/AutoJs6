@@ -12,7 +12,8 @@
         "contains 系列选择器的字符串参数恢复为字面子串匹配, 正则匹配需传入正则表达式参数",
         "文件日志改用内置实现, 保留已文档化的配置选项及部分 PatternLayout 格式, 其他 Log4j API 不再提供",
         "屏幕取色插件更名为 3-Color Picker 2.0, 使用新包名并需重新安装和启用, 旧版可保留并存但设置不自动迁移; 主页抽屉的 \"屏幕取色\" 文案保持不变",
-        "独立弹窗需要配套 AutoJs6 6.8.0 / 5321 与支持 dialog-v1 的 Compose UI; TSX 还需要 TypeScript Engine 0.6.6. 非 UI 脚本需要宿主悬浮窗权限"
+        "独立弹窗需要配套 AutoJs6 6.8.0 / 5321 与支持 dialog-v1 的 Compose UI; TSX 还需要 TypeScript Engine 0.6.6. 非 UI 脚本需要宿主悬浮窗权限",
+        "本构建使用 Compose UI 契约 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用旧 V1 渲染器的原有组件, 宽集组件需要 V2 渲染器"
       ],
       "feature": [
         "界面动作将确认绑定到宿主检查的节点, 支持文字追加与有界滚动, 并报告执行结果和窗口变化",
@@ -157,7 +158,8 @@
         "TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点",
         "XML `<compose>` 容器与 compose.attach 可在 UI 页面或旧悬浮窗内嵌入独立 Compose 会话; compose.AndroidView 可承载现有 Android View 或同步工厂返回的 View",
         "ui.inflate 支持编译后的 XML TSX 布局及其 onClick 回调绑定",
-        "compose.dialog 返回可更新和关闭的会话, 支持普通对话框与模态底部弹层, 可在 UI 或普通脚本中使用"
+        "compose.dialog 返回可更新和关闭的会话, 支持普通对话框与模态底部弹层, 可在 UI 或普通脚本中使用",
+        "Material 3 扩展组件: 导航栏与抽屉, 标签页, 底部弹层与菜单, 日期与时间选择器, 分页与网格, 芯片, 徽标, 分段按钮, 悬浮按钮, 搜索栏, 提示与下拉刷新"
       ],
       "fix": [
         "启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题",
@@ -328,7 +330,8 @@
         "在传统布局中选择的材料设计颜色, 切换布局后无法通过 \"定位当前主题色\" 找到, 且材料设计颜色页面不显示当前颜色摘要的问题",
         "打包的 UI 脚本启动时偶发显示空白页面后退出的问题",
         "Compose UI 在渲染回调中拒绝再次挂载页面或悬浮窗并保留当前页面, 支持插件更新后重新挂载页面",
-        "组件工厂接收多个位置节点参数时将首个节点误判为属性对象的问题"
+        "组件工厂接收多个位置节点参数时将首个节点误判为属性对象的问题",
+        "修复 Compose 节点属性读取将 null 错误返回为 undefined 的问题, 包括默认进度及清空的 DatePicker 日期"
       ],
       "improvement": [
         "Three Stove Agent 模型载荷在 Android 7-10 上通过公开 API 读取, 保留文件偏移与停滞管道取消能力",

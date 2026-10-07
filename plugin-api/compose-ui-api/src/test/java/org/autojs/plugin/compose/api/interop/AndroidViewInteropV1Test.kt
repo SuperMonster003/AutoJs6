@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference
 
 class AndroidViewInteropV1Test {
     @Test fun independentCatalogAddsOnlyOneProjectedComponentAndNeverMutatesV1() {
-        assertEquals(1, ComposeUiContract.CONTRACT_VERSION)
+        assertTrue(ComposeUiContract.supports(1))
         assertEquals(30, ComponentCatalog.V1.components.size)
         assertNull(ComponentCatalog.V1.component(AndroidViewInteropV1.COMPONENT))
         assertEquals(31, AndroidViewInteropV1.catalog.components.size)

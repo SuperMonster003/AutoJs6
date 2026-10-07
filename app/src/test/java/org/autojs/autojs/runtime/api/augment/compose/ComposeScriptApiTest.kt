@@ -64,8 +64,8 @@ class ComposeScriptApiTest {
         assertTrue(module is Function)
         assertSame(module, evaluate("\$compose"))
         assertTrue(jsBoolean("ComposeError === compose.ComposeError && new ComposeError('test') instanceof Error"))
-        val names = ComponentCatalog.V1.components.filter { it.invocation == ComponentInvocation.NODE }.map { it.name }.toSet()
-        assertEquals(29, names.size)
+        val names = org.autojs.plugin.compose.api.v2.ComposeUiV2.catalog.components.filter { it.invocation == ComponentInvocation.NODE }.map { it.name }.toSet()
+        assertEquals(54, names.size)
         val factories = module.ids.filterIsInstance<String>().filter { it.firstOrNull()?.isUpperCase() == true && it != "ComposeError" }.toSet()
         assertEquals(names + "AndroidView", factories)
         names.forEach { assertTrue("Factory $it is missing", module.get(it, module) is Function) }

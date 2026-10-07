@@ -90,6 +90,35 @@ class ComposeTsxDeviceTest {
         }
     }
 
+    @Test fun realCompilerRunsV2NavigationPagingAndChipCallbacksInsideMixedDialogTrees() {
+        Running("wide-components", ui = true).use { running ->
+            assertTrue(running.javaScript.contains("__autojs6Tsx(compose.NavigationBarItem"))
+            assertTrue(running.javaScript.contains("__autojs6Tsx(compose.HorizontalPager"))
+            running.await("V2 TSX uses the installed compiler's current declarations") {
+                text("tsx-v2-status") == "Page: 0, selected: false"
+            }
+            clickNode(requireNotNull(node { it.text?.toString() == "Second TSX page" }))
+            running.await("A controlled navigation click repositions the native pager") {
+                text("tsx-v2-status") == "Page: 1, selected: false" &&
+                    node { it.text?.toString() == "TSX V2 second body" && it.isVisibleToUser } != null && running.property("page") == "1"
+            }
+            clickTag("tsx-v2-chip")
+            running.await("V2 callback arguments and receiver cross the real compiler boundary") {
+                text("tsx-v2-status") == "Page: 1, selected: true" && running.property("selected") == "true"
+            }
+            clickTag("tsx-v2-dialog")
+            running.await("V2 nodes compose with the retained F2 and F3 protocols") {
+                node { it.text?.toString() == "V2 dialog chip" } != null && node { it.text?.toString() == "V2 dialog native text" } != null
+            }
+            clickNode(requireNotNull(node { it.text?.toString() == "V2 dialog chip" }))
+            running.await("The chip callback from a mixed dialog returns to its script") { running.property("dialogChip") == "true" }
+            clickNode(requireNotNull(node { it.text?.toString() == "Close V2 TSX dialog" }))
+            running.await("Closing restores the still-live V2 page") {
+                running.property("dialogClosed") == "true" && text("tsx-v2-status") == "Page: 1, selected: true"
+            }
+        }
+    }
+
     @Test fun realCompilerBridgesXmlComposeContainersAndInflatedTsxAndroidViews() {
         Running("interop", ui = true).use { running ->
             assertTrue(running.javaScript.contains("__autojs6Tsx(compose.AndroidView"))

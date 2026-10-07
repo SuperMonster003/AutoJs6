@@ -18,7 +18,7 @@ class ComposeNodeNativeObject internal constructor(val node: ComposeNode) : Nati
         defineProperty("nodeId", { node.nodeId }, null, READONLY or PERMANENT)
         defineProperty("parent", { node.parent?.js }, null, READONLY or PERMANENT)
         defineProperty("children", { RhinoUtils.newNativeArray(node.graph.scope, node.children.map { it.js as Any? }.toTypedArray()) }, null, READONLY or PERMANENT)
-        val catalog = org.autojs.plugin.compose.api.interop.AndroidViewInteropV1.catalog
+        val catalog = org.autojs.plugin.compose.api.v2.ComposeUiV2.interopCatalog
         val spec = catalog.requireComponent(node.type)
         val properties = (spec.props.flatMap { listOf(it.name) + it.aliases } + catalog.shortcuts.map { it.name } + "modifier").distinct()
         properties.forEach { name ->

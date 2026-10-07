@@ -60,6 +60,10 @@ class TreeReconciler(private val catalog: ComponentCatalog = ComponentCatalog.V1
 
     companion object {
         fun validate(tree: UiTree, catalog: ComponentCatalog = ComponentCatalog.V1) {
+            if (catalog.component(org.autojs.plugin.compose.api.v2.ComposeUiV2.Components.TIME_PICKER) != null) {
+                org.autojs.plugin.compose.api.v2.ComposeUiV2.validateTree(tree)
+                return
+            }
             val nodes = tree.nodes.associateBy { it.nodeId }
             val parents = HashMap<Int, String>()
             tree.nodes.forEach { node -> (node.children + node.slots.values).forEach { parents[it] = node.type } }

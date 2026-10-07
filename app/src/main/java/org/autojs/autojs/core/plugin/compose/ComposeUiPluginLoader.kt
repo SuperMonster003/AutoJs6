@@ -52,7 +52,7 @@ class ComposeUiPluginLoader {
                 ?.let { throw ComposeUiError.selection(context, it) }
             val components = capabilities.getStringArrayList(ComposeUiCapabilityKeys.COMPONENTS)?.toSet()
                 ?: throw ComposeUiError.selection(context, SelectionFailure.CONTRACT)
-            if (components.isEmpty() || components.any { ComponentCatalog.V1.component(it) == null } ||
+            if (!validComponents(factory.contractVersion(), components) ||
                 capabilities.getString(ComposeUiCapabilityKeys.COMPOSE_VERSION).isNullOrBlank() ||
                 capabilities.getStringArrayList(ComposeUiCapabilityKeys.FEATURES) == null) {
                 throw ComposeUiError.selection(context, SelectionFailure.CONTRACT)
@@ -83,6 +83,15 @@ class ComposeUiPluginLoader {
     }
 
     companion object {
+        /** A V1 provider may only advertise V1 nodes; newer hosts still load its original subset. */
+        internal fun validComponents(version: Int, components: Set<String>): Boolean {
+            val catalog = when (version) {
+                1 -> ComponentCatalog.V1
+                org.autojs.plugin.compose.api.v2.ComposeUiV2.VERSION -> org.autojs.plugin.compose.api.v2.ComposeUiV2.catalog
+                else -> return false
+            }
+            return components.isNotEmpty() && components.all { catalog.component(it) != null }
+        }
         private val codeCache = HashMap<Package, Loaded>()
 
         // JNI libraries belong to one ClassLoader. A caller may have read an old PackageManager

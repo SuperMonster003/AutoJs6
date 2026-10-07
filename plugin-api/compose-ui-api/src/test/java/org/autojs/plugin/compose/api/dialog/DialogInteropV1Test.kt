@@ -11,7 +11,7 @@ import org.junit.Test
 
 class DialogInteropV1Test {
     @Test fun presentationNegotiationDoesNotChangeEitherFrozenCatalog() {
-        assertEquals(1, ComposeUiContract.CONTRACT_VERSION)
+        assertTrue(ComposeUiContract.supports(1))
         assertEquals(30, ComponentCatalog.V1.components.size)
         assertEquals(31, AndroidViewInteropV1.catalog.components.size)
         assertEquals("dialog-v1", DialogInteropV1.FEATURE)

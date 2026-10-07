@@ -54,3 +54,17 @@ tasks.register<JavaExec>("exportComposeUiInteropCatalog") {
     outputs.file(target)
     args(target.get().asFile.absolutePath)
 }
+
+tasks.register<JavaExec>("exportComposeUiV2Catalog") {
+    group = "documentation"
+    description = "Export the append-only V2 catalog and its retained V1 entries."
+    dependsOn("testDebugUnitTest")
+    classpath = files(provider {
+        val unitTests = tasks.named<Test>("testDebugUnitTest").get()
+        unitTests.classpath + unitTests.testClassesDirs
+    })
+    mainClass.set("org.autojs.plugin.compose.api.ComposeV2CatalogExporter")
+    val target = layout.buildDirectory.file("reports/compose-ui/component-catalog-v2.json")
+    outputs.file(target)
+    args(target.get().asFile.absolutePath)
+}

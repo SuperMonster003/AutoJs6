@@ -49,6 +49,25 @@ def interop_fixture():
             "scriptProjection": {"AndroidView.view": copy.deepcopy(tool.VIEW_PROJECTION)}}
 
 
+def v2_fixture():
+    result = fixture()
+    date = component("DatePicker", [
+        prop("selectedDateMillis", value_type("NUMBER", "NULL"), default={"kind": "NULL", "value": None}),
+        prop("displayMode", value_type("ENUM", enum=["picker", "input"]), default={"kind": "ENUM", "value": "picker"}),
+    ])
+    date["events"] = [
+        {"name": "dateChange", "payload": [{"name": "selectedDateMillis", "type": "LONG", "required": False}]},
+        {"name": "displayModeChange", "payload": [{"name": "displayMode", "type": "STRING", "required": True}]},
+    ]
+    chip = component("AssistChip", [prop("enabled", value_type("BOOLEAN"), default={"kind": "BOOLEAN", "value": True})])
+    chip["slots"] = [{"name": "label", "required": True}]
+    result.update(contractVersion=2, source=tool.V2_SOURCE)
+    result["components"] += [date, chip]
+    result["componentCount"] += 2
+    result["propertyCount"] += 3
+    return result
+
+
 class CatalogGateTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="compose-catalog-test-")
@@ -241,6 +260,61 @@ class CatalogGateTest(unittest.TestCase):
         broken["components"][0]["properties"][0]["type"]["kinds"] = ["UNREVIEWED_KIND"]
         with self.assertRaisesRegex(tool.CatalogError, "unsupported value kind"):
             tool.validate_catalog(broken)
+
+    def test_v2_retains_v1_and_projects_only_appended_components_with_precise_events_and_slots(self):
+        before = [tool.render_dts(self.catalog), tool.render_docs(self.catalog), tool.render_jsx(self.catalog)]
+        v2 = tool.validate_v2_catalog(v2_fixture(), self.catalog)
+        dts, jsx = tool.render_v2_dts(v2, self.catalog), tool.render_v2_jsx(v2, self.catalog)
+        self.assertIn('"selectedDateMillis"?: null | number;', dts)
+        self.assertIn('"dateChange": (this: ComposeNode<"DatePicker">, selectedDateMillis: number | null) => void;', dts)
+        self.assertIn('displayMode: "input" | "picker"', dts)
+        self.assertIn('type ComposeV2RequiredPropsName = "AssistChip";', dts)
+        self.assertIn('get "selectedDateMillis"(): null | number;', dts)
+        self.assertIn('"compose:DatePicker": Internal.ComposeProps<"DatePicker">;', jsx)
+        self.assertNotIn('"compose:TextField"', jsx)
+        self.assertNotIn('interface Element', jsx)
+        self.assertNotIn('any', jsx)
+        self.assertEqual(before, [tool.render_dts(self.catalog), tool.render_docs(self.catalog), tool.render_jsx(self.catalog)])
+
+    def test_v2_rejects_removed_changed_or_replaced_frozen_v1_entries(self):
+        for kind in ["removed", "property", "event", "interop", "source", "contract"]:
+            broken = v2_fixture()
+            if kind == "removed":
+                broken["components"].pop(0)
+                broken["componentCount"] -= 1
+                broken["propertyCount"] -= 1
+            elif kind == "property":
+                broken["components"][0]["properties"][0]["default"]["value"] = True
+            elif kind == "event":
+                broken["components"][0]["events"].append({"name": "extra", "payload": []})
+            elif kind == "interop":
+                broken["components"].append(component("AndroidView"))
+                broken["componentCount"] += 1
+            elif kind == "source":
+                broken["source"] = tool.SOURCE
+            else:
+                broken["contractVersion"] = 1
+            with self.subTest(kind=kind), self.assertRaises(tool.CatalogError):
+                tool.validate_v2_catalog(broken, self.catalog)
+
+    def test_v2_check_requires_all_three_regions_and_detects_callback_and_accessor_drift(self):
+        v2 = tool.validate_v2_catalog(v2_fixture(), self.catalog)
+        v2_file, jsx = self.root / "v2.json", self.root / "jsx.d.ts"
+        v2_file.write_text(json.dumps(v2), encoding="utf-8")
+        expected = tool.render_dts(self.catalog) + tool.render_v2_dts(v2, self.catalog)
+        self.dts.write_text(expected, encoding="utf-8")
+        self.docs.write_text(tool.render_docs(self.catalog) + tool.render_v2_docs(v2, self.catalog), encoding="utf-8")
+        jsx.write_text(tool.render_jsx(self.catalog) + tool.render_v2_jsx(v2, self.catalog), encoding="utf-8")
+        args = ["check", "--catalog", str(self.catalog_file), "--v2-catalog", str(v2_file),
+                "--dts", str(self.dts), "--docs", str(self.docs)]
+        self.assertEqual(1, self.run_cli(*args)[0])
+        self.assertEqual(0, self.run_cli(*args, "--jsx", str(jsx))[0])
+        for before, after in [('selectedDateMillis: number | null', 'selectedDateMillis: number'),
+                              ('get "selectedDateMillis"(): null | number;', 'get "selectedDateMillis"(): string;')]:
+            self.dts.write_text(expected.replace(before, after), encoding="utf-8")
+            status, output, _ = self.run_cli(*args, "--jsx", str(jsx))
+            self.assertEqual(1, status)
+            self.assertNotIn("OK:", output)
 
     def test_markdown_union_types_and_default_pipes_do_not_create_extra_table_columns(self):
         catalog = copy.deepcopy(self.catalog)

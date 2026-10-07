@@ -283,7 +283,8 @@
         "TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML",
         "Les conteneurs XML `<compose>` et compose.attach intègrent des sessions Compose indépendantes dans les pages UI ou les fenêtres flottantes existantes; compose.AndroidView affiche une View Android existante ou renvoyée par une fabrique synchrone",
         "ui.inflate accepte les layouts XML TSX compilés et lie leurs rappels onClick",
-        "compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires"
+        "compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires",
+        "Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement"
       ],
       "fix": [
         "Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans \"Copier en tant que sélecteur\" de l'inspecteur de disposition et la représentation textuelle des sélecteurs",
@@ -530,7 +531,8 @@
         "Les couleurs Material choisies dans l'ancienne disposition ne pouvaient pas être retrouvées avec \"Localiser la couleur du thème actuel\" après un changement de disposition, et la page des couleurs Material n'affichait pas le résumé de la couleur actuelle",
         "La fermeture occasionnelle des scripts UI empaquetés après l'affichage d'une page vide au démarrage",
         "Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin",
-        "Les fabriques de composants traitaient le premier noeud comme un objet de propriétés lorsque plusieurs noeuds étaient passés en arguments"
+        "Les fabriques de composants traitaient le premier noeud comme un objet de propriétés lorsque plusieurs noeuds étaient passés en arguments",
+        "Les accesseurs des propriétés Compose conservent null au lieu de renvoyer undefined, y compris la progression par défaut et les dates DatePicker effacées"
       ],
       "improvement": [
         "Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués",
@@ -785,7 +787,8 @@
       "hint": [
         "Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé",
         "Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement",
-        "Les dialogues indépendants nécessitent AutoJs6 6.8.0 / 5321 et Compose UI avec dialog-v1; TSX nécessite aussi TypeScript Engine 0.6.6. Les scripts hors UI nécessitent la permission de superposition de l'hôte"
+        "Les dialogues indépendants nécessitent AutoJs6 6.8.0 / 5321 et Compose UI avec dialog-v1; TSX nécessite aussi TypeScript Engine 0.6.6. Les scripts hors UI nécessitent la permission de superposition de l'hôte",
+        "Cette version utilise le contrat Compose UI V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2"
       ]
     },
     "v6.7.0": {

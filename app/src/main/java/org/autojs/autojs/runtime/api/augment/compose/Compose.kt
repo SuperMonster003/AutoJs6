@@ -76,14 +76,14 @@ class Compose internal constructor(
             "post" to { args -> post(args); Undefined.instance },
             "theme" to { args -> theme(args) },
         )
-        AndroidViewInteropV1.catalog.components.filter { it.invocation == ComponentInvocation.NODE }.forEach { spec ->
+        org.autojs.plugin.compose.api.v2.ComposeUiV2.interopCatalog.components.filter { it.invocation == ComponentInvocation.NODE }.forEach { spec ->
             functions[spec.name] = { args -> create(spec.name, args).js }
         }
         functions.map { (name, action) ->
             name to RhinoUtils.newBaseFunction(scope, name, { args ->
                 if (name == "post") guardError { action(args) } else guarded { action(args) }
             }, RhinoUtils.NOT_CONSTRUCTABLE).also { function ->
-                if (AndroidViewInteropV1.catalog.component(name)?.invocation == ComponentInvocation.NODE) tsxFactories[function] = name
+                if (org.autojs.plugin.compose.api.v2.ComposeUiV2.interopCatalog.component(name)?.invocation == ComponentInvocation.NODE) tsxFactories[function] = name
             }
         } + ("ComposeError" to ComposeJsErrors.constructor(scope))
     }
@@ -91,7 +91,7 @@ class Compose internal constructor(
     override fun invoke(vararg args: Any?): Any? = guarded { mount(args).js }
 
     internal fun isTsxType(type: Any?): Boolean = type is Function ||
-        type is String && (type.startsWith("compose:") || AndroidViewInteropV1.catalog.component(type) != null)
+        type is String && (type.startsWith("compose:") || org.autojs.plugin.compose.api.v2.ComposeUiV2.interopCatalog.component(type) != null)
 
     internal fun createTsx(type: Any?, props: Any?, children: List<Any?>): Any = guarded {
         val name = when (type) {
@@ -248,7 +248,7 @@ class Compose internal constructor(
             } else arrayOf(payload.getDouble(ComposeUiEventFields.VALUE))
             ComposeUiEvents.SCROLL -> arrayOf(payload.takeIf { it.containsKey(ComposeUiEventFields.FIRST_VISIBLE_INDEX) }?.getInt(ComposeUiEventFields.FIRST_VISIBLE_INDEX),
                 payload.getInt(ComposeUiEventFields.OFFSET))
-            else -> emptyArray()
+            else -> ComposeV2Callbacks.arguments(event.type, payload.keySet().associateWith { payload.get(it) }) ?: emptyArray()
         }
         graph.transaction { reactive.batch { call(function, node.js, args) } }
     }
