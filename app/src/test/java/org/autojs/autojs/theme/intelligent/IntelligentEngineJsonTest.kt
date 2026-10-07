@@ -60,4 +60,27 @@ class IntelligentEngineJsonTest {
         assertEquals(listOf(IntelligentGroup(id = 3, states = mapOf(StateKeys.DEFAULT to StateColors(0xFF00FF00.toInt())))), decoded.groups)
     }
 
+    @Test
+    fun malformedPartsAreSkippedAndGroupsAreFoundById() {
+        val decoded = IntelligentEngineJson.decodeSnapshot(
+            """{"libraryId":5,"config":"broken","groups":[1,{"id":2,"states":{"day":{"primary":1},"night":"x"}}]}""",
+        )!!
+        assertEquals(IntelligentConfig(), decoded.config)
+        assertEquals(IntelligentGroup(id = 2, states = mapOf(StateKeys.DAY to StateColors(1))), decoded.groups.single())
+        assertEquals(decoded.groups.single(), decoded.group(2))
+        assertNull(decoded.group(null))
+        assertNull(decoded.group(3))
+        assertEquals(emptyList<IntelligentGroup>(), IntelligentEngineJson.decodeSnapshot("""{"libraryId":5,"groups":{}}""")!!.groups)
+    }
+
+    @Test
+    fun dailyDueTimeRoundTripsAndMistypedFieldsAreIgnored() {
+        val daily = IntelligentRuntimeState(currentGroupId = 1, dailyDueAt = 1_790_010_000_000)
+        assertEquals(daily, IntelligentEngineJson.decodeRuntime(IntelligentEngineJson.encodeRuntime(daily)))
+        assertEquals(
+            IntelligentRuntimeState(lastStateKey = StateKeys.DAY),
+            IntelligentEngineJson.decodeRuntime("""{"currentGroupId":"x","lastStateKey":"day","dailyDueAt":true,"nextDueAt":{}}"""),
+        )
+    }
+
 }

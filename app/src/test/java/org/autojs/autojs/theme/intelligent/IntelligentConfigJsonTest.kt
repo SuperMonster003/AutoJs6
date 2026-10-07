@@ -187,4 +187,48 @@ class IntelligentConfigJsonTest {
         assertEquals(StateSource.Seasons(null), source("""{"type":"season","hemisphere":"east"}"""))
     }
 
+    @Test
+    fun unknownStateSourcesRoundTripAndMalformedEntriesAreSkipped() {
+        val config = IntelligentConfigJson.decode(
+            """{"stateSource":{"type":"moonPhase","phases":8},
+               "rotation":["stateChange",{"type":"interval","unit":"minute"},{"type":"interval","every":2,"unit":"second","anchor":"nextHour"}],
+               "overrides":[7,{"group":3},{"when":{"type":"dateRange","from":"12-24","to":"12-26"}},
+                            {"when":{"type":"dateRange","from":"02-30","to":"03-01"},"group":1},
+                            {"when":{"type":"dateRange","from":"02-29","to":"3-1"},"group":2},
+                            {"when":{"type":"dateRange","from":"1224","to":"12-26"},"group":4}]}""",
+        )
+        assertEquals("moonPhase", (config.stateSource as StateSource.Unsupported).type)
+        val encoded = JsonParser.parseString(IntelligentConfigJson.encode(config)).asJsonObject["stateSource"].asJsonObject
+        assertEquals(8, encoded["phases"].asInt)
+        // The bare string "stateChange" is skipped; a missing count defaults to 1; seconds are clamped to the 5 second minimum (D19).
+        // zh-CN: 字符串形式的 "stateChange" 被跳过; 缺失的数量默认为 1; 秒钳制到最短 5 秒 (D19).
+        assertEquals(
+            listOf(RotationTrigger.Interval(1, IntervalUnit.MINUTE, IntervalAnchor.NOW), RotationTrigger.Interval(5, IntervalUnit.SECOND, IntervalAnchor.NEXT_HOUR)),
+            config.rotation,
+        )
+        // Overrides without a group or a condition are dropped; invalid dates become unsupported (February 30, "1224").
+        // zh-CN: 缺少组或条件的覆盖层被丢弃; 无效日期 (2 月 30 日, "1224") 成为不受支持的条件.
+        assertEquals(listOf(1L, 2L, 4L), config.overrides.map { it.groupId })
+        assertTrue(config.overrides[0].condition is DateCondition.Unsupported)
+        assertEquals(DateCondition.DateRange(2, 29, 3, 1), config.overrides[1].condition)
+        assertTrue(config.overrides[2].condition is DateCondition.Unsupported)
+    }
+
+    @Test
+    fun timesCoordinatesAndThresholdsMustBeWellFormed() {
+        fun source(json: String) = IntelligentConfigJson.decode("""{"stateSource":$json}""").stateSource
+        assertEquals(
+            StateSource.TimePeriods(listOf(360, 1080)),
+            source("""{"type":"timePeriods","starts":["06:00","24:00","7:5x","18:00",5,"18:00:00","12:60"]}"""),
+        )
+        assertEquals(StateSource.SunriseSunset(), source("""{"type":"sunriseSunset"}"""))
+        assertEquals(StateSource.SunriseSunset(GeoLocation(31.2, 121.5)), source("""{"type":"sunriseSunset","latitude":31.2,"longitude":121.5}"""))
+        assertTrue(source("""{"type":"sunriseSunset","latitude":31.2}""") is StateSource.Unsupported)
+        assertEquals(StateSource.Battery(listOf(30)), source("""{"type":"battery","thresholds":[30,30.5,"40"]}"""))
+        assertTrue(source("""{"type":"battery"}""") is StateSource.Unsupported)
+        assertTrue(source("""{"type":"scriptStates","names":["only",1]}""") is StateSource.Unsupported)
+        assertEquals(StateSource.None, source("{}"))
+        assertTrue(IntelligentConfigJson.decode("""{"rotation":[{"type":"daily","times":["25:00"]}]}""").rotation.single() is RotationTrigger.Unsupported)
+    }
+
 }

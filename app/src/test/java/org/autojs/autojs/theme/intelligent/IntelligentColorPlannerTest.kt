@@ -303,4 +303,118 @@ class IntelligentColorPlannerTest {
         assertTrue(result.runtime.earliestDueAt!! > at(16, 0, 1))
     }
 
+    @Test
+    fun overridesPointingToColorlessOrUnknownGroupsAreIgnored() {
+        val config = IntelligentConfig()
+        val groups = listOf(single(1, red), single(2, green), IntelligentGroup(3, position = 3))
+        val activated = plan(config, groups, ACTIVATE)
+        for (target in listOf(3L, 99L)) {
+            val result = plan(config, groups, EVALUATE, activated.runtime, override = target)
+            assertEquals(1L, result.groupId)
+            assertEquals(red, result.color?.primary)
+            assertNull(result.runtime.overrideGroupId)
+        }
+    }
+
+    @Test
+    fun aCurrentGroupDeletedDuringAnOverrideContinuesFromTheNextAvailable() {
+        val config = IntelligentConfig(rotation = listOf(RotationTrigger.AppStart))
+        val activated = plan(config, listOf(single(1, red), single(2, green), single(3, blue, enabled = false)), ACTIVATE)
+        // Group 1 is deleted while the disabled group 3 is shown by an override (D4: overrides may use disabled groups).
+        // zh-CN: 覆盖层显示已禁用的组 3 期间, 组 1 被删除 (D4: 覆盖层可以引用禁用组).
+        val remaining = listOf(single(2, green), single(3, blue, enabled = false))
+        val during = plan(config, remaining, EVALUATE, activated.runtime, override = 3)
+        assertEquals(3L, during.groupId)
+        assertEquals(blue, during.color?.primary)
+        assertEquals(2L, during.runtime.currentGroupId)
+        // Triggers stay suspended while the override is shown. zh-CN: 覆盖层显示期间换组时机保持暂停.
+        assertEquals(3L, plan(config, remaining, APP_START, during.runtime, override = 3).groupId)
+        val after = plan(config, remaining, EVALUATE, during.runtime)
+        assertEquals(2L, after.groupId)
+        assertFalse(after.rotated)
+    }
+
+    @Test
+    fun rotationWithoutAvailableGroupsReportsNoRotation() {
+        val enabled = listOf(single(1, red), single(2, green))
+        val disabled = listOf(single(1, red, enabled = false), single(2, green, enabled = false))
+        for (config in listOf(IntelligentConfig(), IntelligentConfig(order = GroupOrder.Random))) {
+            val activated = plan(config, enabled, ACTIVATE)
+            val next = plan(config, disabled, SCRIPT_NEXT, activated.runtime)
+            assertFalse(next.rotated)
+            assertNull(next.groupId)
+            assertNull(next.color)
+        }
+    }
+
+    @Test
+    fun randomOrderWithASingleAvailableGroupStaysOnIt() {
+        val config = IntelligentConfig(order = GroupOrder.Random)
+        val groups = listOf(single(1, red), single(2, green, enabled = false))
+        val next = plan(config, groups, SCRIPT_NEXT, plan(config, groups, ACTIVATE).runtime)
+        assertEquals(1L, next.groupId)
+        assertEquals(red, next.color?.primary)
+    }
+
+    @Test
+    fun colorSortKeysReadTheReferenceState() {
+        val dark = 0xFF202020.toInt()
+        val light = 0xFFE0E0E0.toInt()
+        val groups = listOf(dayNight(1, day = dark, night = light), dayNight(2, day = light, night = dark), IntelligentGroup(3, position = 0))
+        fun order(reference: String?) = planner.orderedGroups(
+            IntelligentConfig(StateSource.NightMode, order = GroupOrder.Sequential(SortKey.LIGHTNESS, referenceState = reference)),
+            groups,
+        ).map { it.id }
+        assertEquals(listOf(1L, 2L, 3L), order(DAY))
+        assertEquals(listOf(2L, 1L, 3L), order(NIGHT))
+        // Unknown or missing references use the first state; colorless groups sort last.
+        // zh-CN: 未知或缺失的参照状态取首个状态; 无色组排在最后.
+        assertEquals(listOf(1L, 2L, 3L), order("season:summer"))
+        assertEquals(listOf(1L, 2L, 3L), order(null))
+    }
+
+    @Test
+    fun nameOrderFallsBackToTheHexValueOrNothing() {
+        val groups = listOf(
+            single(1, 0xFF00AA00.toInt(), name = "b"),
+            single(2, 0xFF000001.toInt(), name = null),
+            single(3, red, name = "  "),
+            IntelligentGroup(4, position = 4),
+        )
+        val order = planner.orderedGroups(IntelligentConfig(order = GroupOrder.Sequential(SortKey.NAME)), groups).map { it.id }
+        // "" (colorless and nameless) < "#000001" < "#FF0000" (blank name) < "b".
+        assertEquals(listOf(4L, 2L, 3L, 1L), order)
+    }
+
+    @Test
+    fun incompleteIntervalRuntimeReArmsWithoutRotating() {
+        val config = IntelligentConfig(rotation = listOf(RotationTrigger.Interval(1, IntervalUnit.MINUTE, IntervalAnchor.NEXT_MINUTE)))
+        val groups = listOf(single(1, red), single(2, green))
+        val activated = plan(config, groups, ACTIVATE)
+        // A runtime saved without the due time (e.g. by an older build) arms a fresh grid instead of rotating.
+        // zh-CN: 缺少到期时间的运行状态 (例如旧版本保存的) 会重新建立计时网格, 而不是换组.
+        for (incomplete in listOf(activated.runtime.copy(nextDueAt = null), activated.runtime.copy(intervalAnchorAt = null))) {
+            val result = plan(config, groups, EVALUATE, incomplete, now = at(16, 30, 10))
+            assertFalse(result.rotated)
+            assertEquals(1L, result.groupId)
+            assertEquals(at(16, 31), result.runtime.nextDueAt)
+        }
+        // The same holds for a daily trigger without a saved due time. zh-CN: 没有保存到期时间的每日定时同样如此.
+        val daily = IntelligentConfig(rotation = listOf(RotationTrigger.Daily(listOf(20 * 60))))
+        val armed = plan(daily, groups, EVALUATE, IntelligentRuntimeState(currentGroupId = 1, lastStateKey = DEFAULT), now = at(21, 0))
+        assertFalse(armed.rotated)
+        assertEquals(ZonedDateTime.of(2026, 10, 7, 20, 0, 0, 0, zone).toInstant().toEpochMilli(), armed.runtime.dailyDueAt)
+    }
+
+    @Test
+    fun reactivationIgnoresAnOverdueDailyTime() {
+        val config = IntelligentConfig(rotation = listOf(RotationTrigger.Daily(listOf(8 * 60))))
+        val groups = listOf(single(1, red), single(2, green))
+        val overdue = IntelligentRuntimeState(currentGroupId = 1, lastStateKey = DEFAULT, dailyDueAt = at(8, 0))
+        val activated = plan(config, groups, ACTIVATE, overdue, start = 1L)
+        assertFalse(activated.rotated)
+        assertEquals(1L, activated.groupId)
+        assertEquals(ZonedDateTime.of(2026, 10, 7, 8, 0, 0, 0, zone).toInstant().toEpochMilli(), activated.runtime.dailyDueAt)
+    }
+
 }

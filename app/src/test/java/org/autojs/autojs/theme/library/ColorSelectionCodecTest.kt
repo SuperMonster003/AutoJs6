@@ -11,6 +11,7 @@ import org.autojs.autojs.theme.library.ColorLibraryIds.SELECT_NONE
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -94,6 +95,45 @@ class ColorSelectionCodecTest {
     @Test(expected = IllegalArgumentException::class)
     fun rowIdsBeyondTheSegmentAreRejected() {
         ColorLibraryIds.ofUserLibrary(ColorLibraryIds.USER_ROW_ID_LIMIT, intelligent = false)
+    }
+
+    @Test
+    fun favoritesDecodeAndRoundTrip() {
+        assertEquals(ColorSelection.Favorite(8), decode(ColorLibraryIds.FAVORITES, 8))
+        assertEquals(ColorSelection.Favorite(null), decode(ColorLibraryIds.FAVORITES))
+        for (selection in listOf(ColorSelection.Favorite(8), ColorSelection.Favorite(null))) {
+            val (libraryId, itemId) = ColorSelectionCodec.encode(selection)
+            assertEquals(selection, decode(libraryId, itemId))
+        }
+        // Recommendations apply as the item they come from and are never stored (roadmap P5.4).
+        // zh-CN: 推荐条目按其来源条目应用, 不会被保存为选中状态 (Roadmap P5.4).
+        assertEquals(ColorSelection.Unknown(ColorLibraryIds.RECOMMENDED, 1), decode(ColorLibraryIds.RECOMMENDED, 1))
+    }
+
+    @Test
+    fun segmentBoundaries() {
+        assertFalse(ColorLibraryIds.isPreset(0))
+        assertFalse(ColorLibraryIds.isPresetIntelligent(ColorLibraryIds.PRESET_INTELLIGENT_LAST + 1))
+        assertFalse(ColorLibraryIds.isUserPlain(ColorLibraryIds.USER_PLAIN_BASE - 1))
+        assertFalse(ColorLibraryIds.isUserPlain(ColorLibraryIds.USER_INTELLIGENT_BASE))
+        assertTrue(ColorLibraryIds.isUserIntelligent(ColorLibraryIds.USER_INTELLIGENT_BASE + ColorLibraryIds.USER_ROW_ID_LIMIT.toInt() - 1))
+        assertFalse(ColorLibraryIds.isUserIntelligent(ColorLibraryIds.USER_INTELLIGENT_BASE + ColorLibraryIds.USER_ROW_ID_LIMIT.toInt()))
+        assertNull(ColorLibraryIds.userRowIdOf(0x100))
+        val beyond = ColorLibraryIds.USER_INTELLIGENT_BASE + ColorLibraryIds.USER_ROW_ID_LIMIT.toInt()
+        assertEquals(ColorSelection.Unknown(beyond, 1), decode(beyond, 1))
+    }
+
+    @Test
+    fun invalidRowIdsAreRejected() {
+        assertThrows(IllegalArgumentException::class.java) { ColorLibraryIds.ofUserLibrary(0, intelligent = true) }
+        assertThrows(IllegalArgumentException::class.java) { ColorSelectionCodec.encode(ColorSelection.UserColor(1, Int.MAX_VALUE + 1L)) }
+        assertThrows(IllegalArgumentException::class.java) { ColorSelectionCodec.encode(ColorSelection.Favorite(-2)) }
+        assertEquals(ColorLibraryIds.FAVORITES to Int.MAX_VALUE, ColorSelectionCodec.encode(ColorSelection.Favorite(Int.MAX_VALUE.toLong())))
+    }
+
+    @Test
+    fun negativeLegacyIndicesOtherThanNoneAreUnknown() {
+        assertEquals(ColorSelection.Unknown(SELECT_NONE, -5), decode(SELECT_NONE, legacyIndex = -5))
     }
 
 }

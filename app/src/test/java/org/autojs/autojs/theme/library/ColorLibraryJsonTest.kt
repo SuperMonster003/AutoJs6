@@ -224,4 +224,24 @@ class ColorLibraryJsonTest {
         }
     }
 
+    @Test
+    fun schemaVersionZeroIsRejectedAndIncompleteMetadataIsTolerated() {
+        assertRejected(Reason.NOT_A_COLOR_LIBRARY, file("""[{"type":"plain","name":"A"}]""", schemaVersion = 0))
+
+        val noMetadata = ColorLibraryJson.decode(
+            """{"format":"autojs6.color-library","schemaVersion":1,"exportedAt":"yesterday","app":{"versionCode":5319},
+                "libraries":[{"type":"plain","name":"A"}]}""",
+        )
+        assertEquals(null, noMetadata.exportedAt)
+        assertEquals(null, noMetadata.app)
+
+        // UTC timestamps and a missing version code are accepted. zh-CN: 接受 UTC 时间戳与缺失的版本号.
+        val utc = ColorLibraryJson.decode(
+            """{"format":"autojs6.color-library","schemaVersion":1,"exportedAt":"2026-10-06T07:52:00Z","app":{"versionName":"6.8.0"},
+                "libraries":[{"type":"plain","name":"A"}]}""",
+        )
+        assertEquals(exported, utc.exportedAt)
+        assertEquals(ColorLibraryJson.AppInfo("6.8.0", 0), utc.app)
+    }
+
 }
