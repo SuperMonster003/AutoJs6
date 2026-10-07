@@ -591,6 +591,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 编辑器菜单 "跳转" 增加 "跳转到上一个光标位置" (原为 TAB 键长按功能), 可记录到动作收藏
 * `优化` Ace 编辑器参数提示的重载切换支持硬件键盘 Alt+Up / Alt+Down, 多功能键盘上下键 (参数提示显示多个重载时, 可在设置中关闭) 及提示窗口右上角的上下按钮
 * `优化` Ace 编辑器参数提示在点按编辑区后恢复显示 (滚动后不恢复), ESC 键同时隐藏参数提示与符号文档
+* `优化` Ace 编辑器参数提示在 LSP 关闭或语义服务不可用时同样支持重载方法: 静态索引收录 146 个声明重载 (如 app.startActivity), 内置 ECMAScript 签名增加 splice / replace / JSON.stringify / Array.from 等重载, Python / Lua 文件的参数提示保留全部签名
+* `优化` Ace 编辑器悬停文档框支持触屏滚动与选择文本, 智能提示在 Python / Lua 文件中等待异步参数提示而不再误弹补全
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

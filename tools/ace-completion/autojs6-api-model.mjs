@@ -308,7 +308,8 @@ function parseTypeMembers(body, owner, filteredEntries) {
       members.push(member);
     }
   }
-  return mergeMembers([], members);
+  // Primary position: repeated declaration-backed names are overloads, not duplicates.
+  return mergeMembers(members);
 }
 
 function parseMemberDeclaration(rawDeclaration) {
@@ -448,7 +449,7 @@ function mergeSourceModules(baseModules, declarationModules) {
       doc: moduleSpec.doc || moduleDoc(moduleName, ""),
       ...(moduleSpec.instanceOnly ? { instanceOnly: true } : {}),
       score: moduleSpec.score,
-      members: mergeMembers([], moduleSpec.members || []),
+      members: mergeMembers(moduleSpec.members || []),
     });
   }
 
@@ -489,21 +490,44 @@ function sanitizeGlobalMembers(globalMembers, modules) {
 }
 
 function mergeMembers(primaryMembers, fallbackMembers = []) {
-  const seen = new Set();
+  const byName = new Map();
   const members = [];
-  for (const rawMember of [...primaryMembers, ...fallbackMembers]) {
+  const append = (rawMember, collectOverloads) => {
     const member = normalizeMember(rawMember);
-    if (!isPublicCompletionName(member.name) || seen.has(member.name)) {
-      continue;
+    if (!isPublicCompletionName(member.name)) {
+      return;
     }
-    seen.add(member.name);
-    members.push({
+    const existing = byName.get(member.name);
+    if (existing) {
+      // Declaration-backed overloads arrive as repeated function members with the same name;
+      // keep every distinct signature so signature help can cycle through them.
+      if (collectOverloads && member.signature && (member.kind || "function") === "function" &&
+        existing.kind === "function" && existing.signature && member.signature !== existing.signature) {
+        existing.signatures = existing.signatures || [existing.signature];
+        if (!existing.signatures.includes(member.signature)) {
+          existing.signatures.push(member.signature);
+        }
+      }
+      return;
+    }
+    const merged = {
       name: member.name,
       kind: member.kind || "function",
       doc: member.doc || "",
       ...(member.signature ? { signature: member.signature } : {}),
+      ...(Array.isArray(member.signatures) && member.signatures.length > 1
+        ? { signatures: member.signatures.slice() }
+        : {}),
       ...(member.score ? { score: member.score } : {}),
-    });
+    };
+    byName.set(member.name, merged);
+    members.push(merged);
+  };
+  for (const rawMember of primaryMembers) {
+    append(rawMember, true);
+  }
+  for (const rawMember of fallbackMembers) {
+    append(rawMember, false);
   }
   return members;
 }
@@ -567,6 +591,11 @@ function validateModelModule(moduleSpec, errors, seenModules) {
     }
     if (member.signature != null && typeof member.signature !== "string") {
       errors.push(`api model module ${moduleSpec.name}.${member.name} signature must be a string`);
+    }
+    if (member.signatures != null && (!Array.isArray(member.signatures) || member.signatures.length < 2 ||
+      member.signatures[0] !== member.signature ||
+      member.signatures.some((signature) => typeof signature !== "string" || !signature))) {
+      errors.push(`api model module ${moduleSpec.name}.${member.name} signatures must list the first signature plus more overloads`);
     }
     if (seenMembers.has(member.name)) {
       errors.push(`api model module ${moduleSpec.name} has duplicate member: ${member.name}`);

@@ -878,6 +878,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` El menú "Salta a" del editor incorpora "Saltar al cursor anterior" (antes la pulsación larga de TAB), que puede registrarse en las acciones favoritas
 * `Mejora` Las sugerencias de parámetros del editor Ace cambian de sobrecarga con Alt+Arriba / Alt+Abajo en teclado físico, las teclas Arriba y Abajo de la barra de teclas (cuando se muestran varias sobrecargas; se puede desactivar en los ajustes) y los botones arriba / abajo de la esquina superior derecha de la ventana de sugerencias
 * `Mejora` Las sugerencias de parámetros del editor Ace reaparecen tras tocar el área de edición (no tras desplazarse), y ESC oculta tanto las sugerencias de parámetros como la documentación del símbolo
+* `Mejora` Las sugerencias de parámetros del editor Ace admiten métodos sobrecargados incluso con el LSP desactivado o el servicio semántico no disponible: el índice estático incluye 146 sobrecargas declaradas (como app.startActivity), las firmas ECMAScript integradas incorporan sobrecargas para splice / replace / JSON.stringify / Array.from y más, y las sugerencias de parámetros de Python / Lua conservan todas las firmas
+* `Mejora` La documentación emergente del editor Ace se puede desplazar y seleccionar en pantallas táctiles, y las sugerencias inteligentes esperan las sugerencias de parámetros asíncronas en archivos Python / Lua en lugar de recurrir al autocompletado
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

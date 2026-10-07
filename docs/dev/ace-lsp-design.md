@@ -40,8 +40,12 @@ Supported default suffixes are `.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.tsx`,
 `.d.ts`, `.json`, `.auto.js`, and `.node.js`. An untitled buffer uses the synthetic
 `file:///autojs6/editor/current.js` document URI.
 
-The bundled TypeScript 4.2.4 runtime provides a TypeScript 4.2 syntax baseline
-and local, single-file semantics. Project-wide module resolution is not part of
+The bundled TypeScript runtime (6.0.3 as of 2026-10-07; the version is pinned
+by the plugin's `verifyAutoJs6LspRuntime` gate, the 4.2.4 baseline named by
+earlier revisions of this document has been replaced) provides the syntax
+baseline and local, single-file semantics. Signature help keeps every
+overload (`signatures[]`, `activeSignature`, `parameterDocs`) with the
+top-level fields mirroring the active one. Project-wide module resolution is not part of
 this release; unreliable module-not-found diagnostics are suppressed rather
 than presenting missing in-memory project files as editor errors. Modern
 NodeNext/`.mts`/`.cts` module semantics are not claimed by this scope.

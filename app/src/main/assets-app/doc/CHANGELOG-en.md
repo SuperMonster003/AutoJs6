@@ -716,6 +716,8 @@
 * `Improvement` Editor menu "Jump" gains "Jump to previous cursor" (formerly the TAB long-press action), which can be recorded in action favorites
 * `Improvement` Ace editor parameter hints can switch overloads with the hardware Alt+Up / Alt+Down, the keyboard bar's Up and Down keys (while several overloads are shown; can be turned off in settings) and the up / down buttons at the top right of the hint window
 * `Improvement` Ace editor parameter hints reappear after tapping the editor (not after scrolling), and ESC hides both parameter hints and symbol documentation
+* `Improvement` Ace editor parameter hints support overloaded methods even when LSP is off or the semantic service is unavailable: the static index carries 146 declared overloads (such as app.startActivity), the built-in ECMAScript signatures gain overloads for splice / replace / JSON.stringify / Array.from and more, and Python / Lua parameter hints keep every signature
+* `Improvement` Ace editor hover documentation can be scrolled and selected on touch screens, and smart hints wait for asynchronous parameter hints in Python / Lua files instead of falling back to completion
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
