@@ -785,11 +785,14 @@
     <string name="summary_retention_policies">버전 기록, 휴지통, 긴급 초안의 보관 일수 및 용량 상한</string>
     <string name="summary_setup_wizard_welcome_reset">다음 실행 시 홈에서 설정 마법사 환영 안내를 다시 표시합니다</string>
     <string name="summary_setup_wizards">자주 쓰는 권한 부여 및 공식 플러그인 설치</string>
+    <string name="text_add_all_to_color_library">모두 색상 라이브러리에 추가</string>
     <string name="text_add_colors">색상 추가</string>
     <string name="text_add_group">그룹 추가</string>
     <string name="text_add_override">재정의 추가</string>
     <string name="text_add_time">시각 추가</string>
+    <string name="text_add_to_color_library">색상 라이브러리에 추가</string>
     <string name="text_and_n_more">... 외 %d개</string>
+    <string name="text_apply_as_theme_color">테마 색상으로 적용</string>
     <string name="text_auto_reconnect">자동 재연결</string>
     <string name="text_background_color_dark">어두운 색</string>
     <string name="text_background_color_follow">자동</string>
@@ -1182,6 +1185,9 @@
     <string name="text_color_library_name">색상 라이브러리 이름</string>
     <string name="text_color_name_optional">색상 이름 (선택 사항)</string>
     <string name="text_color_palette">색상 팔레트</string>
+    <string name="text_color_tools">배색 도구</string>
+    <string name="text_color_tools_of">배색 도구: %1$s</string>
+    <string name="text_color_vision">색각 시뮬레이션</string>
     <string name="text_command_already_copied_to_clip">클립 보드에 복사 된 명령</string>
     <string name="text_comment">논평</string>
     <string name="text_committing_archive_extraction">압축 풀기를 완료하는 중</string>
@@ -1218,6 +1224,10 @@
     <string name="text_content_opacity">콘텐츠 불투명도</string>
     <string name="text_continue">계속하다</string>
     <string name="text_continue_with_plugin_template">플러그인 템플릿으로 계속</string>
+    <string name="text_contrast">대비</string>
+    <string name="text_contrast_below">%1$s 미만</string>
+    <string name="text_contrast_meets">%1$s 충족</string>
+    <string name="text_contrast_nearest_hint">색상 오른쪽은 해당 배경과의 대비가 3:1 이상인 가장 가까운 색상입니다</string>
     <string name="text_control">제어</string>
     <string name="text_copy">복사</string>
     <string name="text_copy_ace_diagnostics">Ace 진단 정보 복사</string>
@@ -1309,6 +1319,7 @@
     <string name="text_destination">대상</string>
     <string name="text_details">세부</string>
     <string name="text_detected_ocr_plugins">감지된 OCR 플러그인: %1$s.</string>
+    <string name="text_deuteranopia">녹색맹</string>
     <string name="text_developer_details_under_development">개발자 세부 사항이 개발 중입니다</string>
     <string name="text_developer_options">개발자 옵션</string>
     <string name="text_dex_compiler">DEX 컴파일러</string>
@@ -1545,6 +1556,12 @@
     <string name="text_groups">그룹</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d개 그룹</string>
     <string name="text_guard_mode">가드 모드</string>
+    <string name="text_harmony_analogous">유사색</string>
+    <string name="text_harmony_colors">조화 색상</string>
+    <string name="text_harmony_complementary">보색</string>
+    <string name="text_harmony_split_complementary">분할 보색</string>
+    <string name="text_harmony_tetradic">사각</string>
+    <string name="text_harmony_triadic">삼각</string>
     <string name="text_help">돕다</string>
     <string name="text_hemisphere">반구</string>
     <string name="text_hemisphere_north">북반구</string>
@@ -2204,6 +2221,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protanopia">적색맹</string>
     <string name="text_protocol_version">프로토콜 버전</string>
     <string name="text_pruning">가지치기 중</string>
     <string name="text_pruning_native_libraries">네이티브 라이브러리 정리 중</string>
@@ -2548,6 +2566,8 @@
     <string name="text_title_bar_opacity">제목 표시줄 불투명도</string>
     <string name="text_to_be_chosen">선택 대기</string>
     <string name="text_toggle_all">전체 전환</string>
+    <string name="text_tones">색조 단계</string>
+    <string name="text_tones_light_to_dark">밝은 색에서 어두운 색으로</string>
     <string name="text_tools">도구</string>
     <string name="text_total_size_colon_value">크기: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">투명 배경 런처 아이콘은 시스템에 의해 자동으로 마스킹되거나 배경이 추가될 수 있어 장치마다 실제 효과가 다를 수 있습니다</string>
@@ -2558,6 +2578,7 @@
     <string name="text_trash_max_total_bytes">휴지통 용량 상한</string>
     <string name="text_trash_quota_exceeded_prompt">이동할 항목의 크기(%1$s)가 휴지통 용량 상한(%2$s)을 초과합니다. 계속하면 공간을 확보하기 위해 휴지통의 오래된 항목이 제거되며, 이 항목들은 새 항목이 들어오면 먼저 제거됩니다.</string>
     <string name="text_trash_restore_partial">아카이브 항목 %1$d개를 복원했습니다. %2$d개는 아카이브 손상으로 읽을 수 없었습니다. 이 항목은 휴지통에 남아 있습니다</string>
+    <string name="text_tritanopia">청색맹</string>
     <string name="text_tutorial">지도 시간</string>
     <string name="text_type">유형</string>
     <string name="text_type_file">파일</string>

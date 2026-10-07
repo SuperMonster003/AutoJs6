@@ -86,6 +86,13 @@
         <item quantity="other">%d цвета</item>
     </plurals>
 
+    <plurals name="text_n_colors_added">
+        <item quantity="one">Добавлен %d цвет</item>
+        <item quantity="few">Добавлено %d цвета</item>
+        <item quantity="many">Добавлено %d цветов</item>
+        <item quantity="other">Добавлено %d цвета</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="one">%d группа</item>
         <item quantity="few">%d группы</item>

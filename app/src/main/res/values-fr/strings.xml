@@ -783,11 +783,14 @@
     <string name="summary_retention_policies">Jours de conservation et limites de taille de l\'historique des versions, de la corbeille et des brouillons d\'urgence</string>
     <string name="summary_setup_wizard_welcome_reset">Afficher à nouveau le message de bienvenue des assistants de configuration sur la page d\'accueil au prochain lancement</string>
     <string name="summary_setup_wizards">Accorder les permissions courantes et installer les plugins officiels</string>
+    <string name="text_add_all_to_color_library">Tout ajouter à une bibliothèque de couleurs</string>
     <string name="text_add_colors">Ajouter des couleurs</string>
     <string name="text_add_group">Ajouter un groupe</string>
     <string name="text_add_override">Ajouter un remplacement</string>
     <string name="text_add_time">Ajouter une heure</string>
+    <string name="text_add_to_color_library">Ajouter à une bibliothèque de couleurs</string>
     <string name="text_and_n_more">... et %d de plus</string>
+    <string name="text_apply_as_theme_color">Appliquer comme couleur du thème</string>
     <string name="text_auto_reconnect">Reconnexion automatique</string>
     <string name="text_background_color_dark">Sombre</string>
     <string name="text_background_color_follow">Automatique</string>
@@ -1180,6 +1183,9 @@
     <string name="text_color_library_name">Nom de la bibliothèque de couleurs</string>
     <string name="text_color_name_optional">Nom de la couleur (facultatif)</string>
     <string name="text_color_palette">Palette de couleurs</string>
+    <string name="text_color_tools">Outils de couleur</string>
+    <string name="text_color_tools_of">Outils de couleur : %1$s</string>
+    <string name="text_color_vision">Vision des couleurs</string>
     <string name="text_command_already_copied_to_clip">Commande copiée dans le presse-papiers</string>
     <string name="text_comment">Commentaire</string>
     <string name="text_committing_archive_extraction">Finalisation de l\'extraction de l\'archive</string>
@@ -1216,6 +1222,10 @@
     <string name="text_content_opacity">Opacité du contenu</string>
     <string name="text_continue">Continuer</string>
     <string name="text_continue_with_plugin_template">Continuer avec le modèle du plugin</string>
+    <string name="text_contrast">Contraste</string>
+    <string name="text_contrast_below">sous %1$s</string>
+    <string name="text_contrast_meets">atteint %1$s</string>
+    <string name="text_contrast_nearest_hint">À côté de la couleur : la couleur la plus proche avec au moins 3:1 sur cet arrière-plan</string>
     <string name="text_control">Contrôle</string>
     <string name="text_copy">Copie</string>
     <string name="text_copy_ace_diagnostics">Copier les diagnostics Ace</string>
@@ -1307,6 +1317,7 @@
     <string name="text_destination">Destination</string>
     <string name="text_details">Détails</string>
     <string name="text_detected_ocr_plugins">Plugins OCR détectés: %1$s.</string>
+    <string name="text_deuteranopia">Deutéranopie (vert)</string>
     <string name="text_developer_details_under_development">Les détails du développeur sont en cours de développement</string>
     <string name="text_developer_options">Les options du développeur</string>
     <string name="text_dex_compiler">Compilateur DEX</string>
@@ -1543,6 +1554,12 @@
     <string name="text_groups">Groupes</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d groupes</string>
     <string name="text_guard_mode">Mode garde</string>
+    <string name="text_harmony_analogous">Analogue</string>
+    <string name="text_harmony_colors">Harmonies</string>
+    <string name="text_harmony_complementary">Complémentaire</string>
+    <string name="text_harmony_split_complementary">Complémentaire adjacent</string>
+    <string name="text_harmony_tetradic">Carrée</string>
+    <string name="text_harmony_triadic">Triadique</string>
     <string name="text_help">Aide</string>
     <string name="text_hemisphere">Hémisphère</string>
     <string name="text_hemisphere_north">Hémisphère nord</string>
@@ -2202,6 +2219,7 @@
     <string name="text_property_colon_value">%1$s : %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s : %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s : %2$d%3$s</string>
+    <string name="text_protanopia">Protanopie (rouge)</string>
     <string name="text_protocol_version">Version du protocole</string>
     <string name="text_pruning">Elagage</string>
     <string name="text_pruning_native_libraries">Suppression des bibliothèques natives inutiles</string>
@@ -2546,6 +2564,8 @@
     <string name="text_title_bar_opacity">Opacité de la barre de titre</string>
     <string name="text_to_be_chosen">A choisir</string>
     <string name="text_toggle_all">Basculer tout</string>
+    <string name="text_tones">Nuances</string>
+    <string name="text_tones_light_to_dark">Du clair au foncé</string>
     <string name="text_tools">Outils</string>
     <string name="text_total_size_colon_value">Taille: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">L\'icône du lanceur à fond transparent peut être automatiquement masquée ou recevoir un fond par le système, de sorte que l\'effet réel peut varier selon les appareils</string>
@@ -2556,6 +2576,7 @@
     <string name="text_trash_max_total_bytes">Taille maximale de la corbeille</string>
     <string name="text_trash_quota_exceeded_prompt">La taille des éléments à déplacer (%1$s) dépasse la limite de taille de la corbeille (%2$s). Si vous continuez, les éléments plus anciens de la corbeille seront supprimés pour faire de la place, et ces éléments seront supprimés en premier dès l\'arrivée d\'éléments plus récents.</string>
     <string name="text_trash_restore_partial">%1$d entrées de l\'archive restaurées ; %2$d n\'ont pas pu être lues car l\'archive est endommagée. L\'élément reste dans la corbeille</string>
+    <string name="text_tritanopia">Tritanopie (bleu)</string>
     <string name="text_tutorial">Tutoriel</string>
     <string name="text_type">Type</string>
     <string name="text_type_file">Fichier</string>

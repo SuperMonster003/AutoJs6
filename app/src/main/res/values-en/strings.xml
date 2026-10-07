@@ -780,11 +780,14 @@
     <string name="summary_retention_policies">Retention days and size limits for version history, trash and emergency drafts</string>
     <string name="summary_setup_wizard_welcome_reset">Show the welcome prompt of the setup wizards on the home page again on the next launch</string>
     <string name="summary_setup_wizards">Grant common permissions and install official plugins</string>
+    <string name="text_add_all_to_color_library">Add all to a color library</string>
     <string name="text_add_colors">Add colors</string>
     <string name="text_add_group">Add group</string>
     <string name="text_add_override">Add override</string>
     <string name="text_add_time">Add time</string>
+    <string name="text_add_to_color_library">Add to a color library</string>
     <string name="text_and_n_more">... and %d more</string>
+    <string name="text_apply_as_theme_color">Apply as theme color</string>
     <string name="text_auto_reconnect">Auto reconnect</string>
     <string name="text_background_color_dark">Dark</string>
     <string name="text_background_color_follow">Auto</string>
@@ -1177,6 +1180,9 @@
     <string name="text_color_library_name">Color library name</string>
     <string name="text_color_name_optional">Color name (optional)</string>
     <string name="text_color_palette">Color palette</string>
+    <string name="text_color_tools">Color tools</string>
+    <string name="text_color_tools_of">Color tools: %1$s</string>
+    <string name="text_color_vision">Color vision</string>
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
     <string name="text_comment">Comment</string>
     <string name="text_committing_archive_extraction">Finishing archive extraction</string>
@@ -1213,6 +1219,10 @@
     <string name="text_content_opacity">Content opacity</string>
     <string name="text_continue">Continue</string>
     <string name="text_continue_with_plugin_template">Continue with plugin template</string>
+    <string name="text_contrast">Contrast</string>
+    <string name="text_contrast_below">below %1$s</string>
+    <string name="text_contrast_meets">meets %1$s</string>
+    <string name="text_contrast_nearest_hint">Next to the color: the nearest color with at least 3:1 against that background</string>
     <string name="text_control">Control</string>
     <string name="text_copy">Copy</string>
     <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
@@ -1304,6 +1314,7 @@
     <string name="text_destination">Destination</string>
     <string name="text_details">Details</string>
     <string name="text_detected_ocr_plugins">Detected OCR plugins: %1$s.</string>
+    <string name="text_deuteranopia">Deuteranopia (green-blind)</string>
     <string name="text_developer_details_under_development">Developer details is under development</string>
     <string name="text_developer_options">Developer options</string>
     <string name="text_dex_compiler">DEX compiler</string>
@@ -1540,6 +1551,12 @@
     <string name="text_groups">Groups</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d groups</string>
     <string name="text_guard_mode">Guard mode</string>
+    <string name="text_harmony_analogous">Analogous</string>
+    <string name="text_harmony_colors">Harmonies</string>
+    <string name="text_harmony_complementary">Complementary</string>
+    <string name="text_harmony_split_complementary">Split complementary</string>
+    <string name="text_harmony_tetradic">Square</string>
+    <string name="text_harmony_triadic">Triadic</string>
     <string name="text_help">Help</string>
     <string name="text_hemisphere">Hemisphere</string>
     <string name="text_hemisphere_north">Northern hemisphere</string>
@@ -2199,6 +2216,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protanopia">Protanopia (red-blind)</string>
     <string name="text_protocol_version">Protocol version</string>
     <string name="text_pruning">Pruning</string>
     <string name="text_pruning_native_libraries">Pruning native libraries</string>
@@ -2543,6 +2561,8 @@
     <string name="text_title_bar_opacity">Title bar opacity</string>
     <string name="text_to_be_chosen">To be chosen</string>
     <string name="text_toggle_all">Toggle all</string>
+    <string name="text_tones">Tones</string>
+    <string name="text_tones_light_to_dark">Light to dark</string>
     <string name="text_tools">Tools</string>
     <string name="text_total_size_colon_value">Size: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>
@@ -2553,6 +2573,7 @@
     <string name="text_trash_max_total_bytes">Max trash size</string>
     <string name="text_trash_quota_exceeded_prompt">The items to move (%1$s) exceed the trash size limit (%2$s). If you continue, older trash items will be removed to make room, and these items will be removed first once newer items arrive.</string>
     <string name="text_trash_restore_partial">Restored %1$d archive entries; %2$d could not be read because the archive is damaged. The item stays in the trash</string>
+    <string name="text_tritanopia">Tritanopia (blue-blind)</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Type</string>
     <string name="text_type_file">File</string>

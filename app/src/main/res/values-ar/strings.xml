@@ -785,11 +785,14 @@
     <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
     <string name="summary_setup_wizard_welcome_reset">إظهار رسالة ترحيب معالجات الإعداد في الصفحة الرئيسية مرة أخرى عند التشغيل التالي</string>
     <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
+    <string name="text_add_all_to_color_library">إضافة الكل إلى مكتبة ألوان</string>
     <string name="text_add_colors">إضافة ألوان</string>
     <string name="text_add_group">إضافة مجموعة</string>
     <string name="text_add_override">إضافة استثناء</string>
     <string name="text_add_time">إضافة وقت</string>
+    <string name="text_add_to_color_library">إضافة إلى مكتبة ألوان</string>
     <string name="text_and_n_more">... و %d اخرى</string>
+    <string name="text_apply_as_theme_color">تطبيق كلون للموضوع</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
     <string name="text_background_color_dark">داكن</string>
     <string name="text_background_color_follow">تلقائي</string>
@@ -1182,6 +1185,9 @@
     <string name="text_color_library_name">اسم مكتبة الألوان</string>
     <string name="text_color_name_optional">اسم اللون (اختياري)</string>
     <string name="text_color_palette">لوحة الألوان</string>
+    <string name="text_color_tools">أدوات الألوان</string>
+    <string name="text_color_tools_of">أدوات الألوان: %1$s</string>
+    <string name="text_color_vision">محاكاة رؤية الألوان</string>
     <string name="text_command_already_copied_to_clip">تم نسخ الأمر إلى الحافظة</string>
     <string name="text_comment">تعليق</string>
     <string name="text_committing_archive_extraction">جار إنهاء استخراج الأرشيف</string>
@@ -1218,6 +1224,10 @@
     <string name="text_content_opacity">عتامة المحتوى</string>
     <string name="text_continue">يكمل</string>
     <string name="text_continue_with_plugin_template">المتابعة باستخدام قالب المكون الإضافي</string>
+    <string name="text_contrast">التباين</string>
+    <string name="text_contrast_below">أقل من %1$s</string>
+    <string name="text_contrast_meets">يحقق %1$s</string>
+    <string name="text_contrast_nearest_hint">بجانب اللون: أقرب لون بتباين 3:1 على الأقل مع تلك الخلفية</string>
     <string name="text_control">التحكم</string>
     <string name="text_copy">ينسخ</string>
     <string name="text_copy_ace_diagnostics">نسخ تشخيصات Ace</string>
@@ -1309,6 +1319,7 @@
     <string name="text_destination">الوجهة</string>
     <string name="text_details">تفاصيل</string>
     <string name="text_detected_ocr_plugins">اضافات OCR المكتشفة: %1$s.</string>
+    <string name="text_deuteranopia">عمى الأخضر</string>
     <string name="text_developer_details_under_development">تفاصيل المطور قيد التطوير</string>
     <string name="text_developer_options">خيارات للمطور</string>
     <string name="text_dex_compiler">مترجم DEX</string>
@@ -1545,6 +1556,12 @@
     <string name="text_groups">المجموعات</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d مجموعات</string>
     <string name="text_guard_mode">وضع الحرس</string>
+    <string name="text_harmony_analogous">متجاور</string>
+    <string name="text_harmony_colors">التناسقات</string>
+    <string name="text_harmony_complementary">متكامل</string>
+    <string name="text_harmony_split_complementary">متكامل منقسم</string>
+    <string name="text_harmony_tetradic">رباعي</string>
+    <string name="text_harmony_triadic">ثلاثي</string>
     <string name="text_help">مساعدة</string>
     <string name="text_hemisphere">نصف الكرة</string>
     <string name="text_hemisphere_north">نصف الكرة الشمالي</string>
@@ -2204,6 +2221,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protanopia">عمى الأحمر</string>
     <string name="text_protocol_version">إصدار البروتوكول</string>
     <string name="text_pruning">جارٍ التقليم</string>
     <string name="text_pruning_native_libraries">جار استبعاد المكتبات الأصلية</string>
@@ -2548,6 +2566,8 @@
     <string name="text_title_bar_opacity">عتامة شريط العنوان</string>
     <string name="text_to_be_chosen">قيد الاختيار</string>
     <string name="text_toggle_all">تبديل الكل</string>
+    <string name="text_tones">الدرجات</string>
+    <string name="text_tones_light_to_dark">من الفاتح إلى الداكن</string>
     <string name="text_tools">أدوات</string>
     <string name="text_total_size_colon_value">الحجم: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">قد يتم تلقائيًا إخفاء رمز المشغّل بخلفية شفافة أو إضافة خلفية إليه بواسطة النظام, لذلك قد يختلف التأثير الفعلي بين الأجهزة المختلفة</string>
@@ -2558,6 +2578,7 @@
     <string name="text_trash_max_total_bytes">الحد الاقصى لحجم سلة المحذوفات</string>
     <string name="text_trash_quota_exceeded_prompt">حجم العناصر المراد نقلها (%1$s) يتجاوز حد حجم سلة المحذوفات (%2$s). اذا تابعت, ستتم ازالة العناصر الاقدم من سلة المحذوفات لتوفير مساحة, وستتم ازالة هذه العناصر اولا عند وصول عناصر احدث.</string>
     <string name="text_trash_restore_partial">تمت استعادة %1$d من عناصر الارشيف; تعذرت قراءة %2$d بسبب تلف الارشيف. يبقى العنصر في سلة المحذوفات</string>
+    <string name="text_tritanopia">عمى الأزرق</string>
     <string name="text_tutorial">الدورة التعليمية</string>
     <string name="text_type">يكتب</string>
     <string name="text_type_file">ملف</string>

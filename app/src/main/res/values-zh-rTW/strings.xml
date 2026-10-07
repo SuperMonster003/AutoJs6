@@ -780,11 +780,14 @@
     <string name="summary_retention_policies">版本歷史, 回收站與緊急草稿的保留天數與容量上限</string>
     <string name="summary_setup_wizard_welcome_reset">下次啟動時在主頁再次顯示設定精靈的歡迎提示</string>
     <string name="summary_setup_wizards">授予常用許可權及安裝官方外掛</string>
+    <string name="text_add_all_to_color_library">全部加入顏色庫</string>
     <string name="text_add_colors">新增顏色</string>
     <string name="text_add_group">新增群組</string>
     <string name="text_add_override">新增覆蓋</string>
     <string name="text_add_time">新增時刻</string>
+    <string name="text_add_to_color_library">加入顏色庫</string>
     <string name="text_and_n_more">... 及其他 %d 項</string>
+    <string name="text_apply_as_theme_color">套用為主題色</string>
     <string name="text_auto_reconnect">自動重連</string>
     <string name="text_background_color_dark">暗色</string>
     <string name="text_background_color_follow">自動跟隨</string>
@@ -1177,6 +1180,9 @@
     <string name="text_color_library_name">顏色庫名稱</string>
     <string name="text_color_name_optional">顏色名稱 (選填)</string>
     <string name="text_color_palette">調色盤</string>
+    <string name="text_color_tools">配色工具</string>
+    <string name="text_color_tools_of">配色工具: %1$s</string>
+    <string name="text_color_vision">色覺模擬</string>
     <string name="text_command_already_copied_to_clip">指令已複製到剪貼簿</string>
     <string name="text_comment">註釋</string>
     <string name="text_committing_archive_extraction">正在完成檔案解壓縮</string>
@@ -1213,6 +1219,10 @@
     <string name="text_content_opacity">內容區不透明度</string>
     <string name="text_continue">繼續</string>
     <string name="text_continue_with_plugin_template">繼續使用外掛範本</string>
+    <string name="text_contrast">對比度</string>
+    <string name="text_contrast_below">低於 %1$s</string>
+    <string name="text_contrast_meets">達到 %1$s</string>
+    <string name="text_contrast_nearest_hint">顏色右側為與該背景對比度不低於 3:1 的最近顏色</string>
     <string name="text_control">控制</string>
     <string name="text_copy">複製</string>
     <string name="text_copy_ace_diagnostics">複製 Ace 診斷資訊</string>
@@ -1304,6 +1314,7 @@
     <string name="text_destination">目標</string>
     <string name="text_details">詳情</string>
     <string name="text_detected_ocr_plugins">已偵測到的 OCR 外掛: %1$s.</string>
+    <string name="text_deuteranopia">綠色盲</string>
     <string name="text_developer_details_under_development">\"開發者詳情\" 正在開發中</string>
     <string name="text_developer_options">開發者選項</string>
     <string name="text_dex_compiler">DEX 編譯器</string>
@@ -1540,6 +1551,12 @@
     <string name="text_groups">群組</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d 個群組</string>
     <string name="text_guard_mode">保護模式</string>
+    <string name="text_harmony_analogous">類比</string>
+    <string name="text_harmony_colors">和諧色</string>
+    <string name="text_harmony_complementary">互補</string>
+    <string name="text_harmony_split_complementary">分裂互補</string>
+    <string name="text_harmony_tetradic">四方</string>
+    <string name="text_harmony_triadic">三角</string>
     <string name="text_help">幫助</string>
     <string name="text_hemisphere">半球</string>
     <string name="text_hemisphere_north">北半球</string>
@@ -2199,6 +2216,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protanopia">紅色盲</string>
     <string name="text_protocol_version">協定版本</string>
     <string name="text_pruning">正在修剪</string>
     <string name="text_pruning_native_libraries">正在移除不需要的原生程式庫</string>
@@ -2543,6 +2561,8 @@
     <string name="text_title_bar_opacity">標題列不透明度</string>
     <string name="text_to_be_chosen">待選擇</string>
     <string name="text_toggle_all">全選切換</string>
+    <string name="text_tones">色階</string>
+    <string name="text_tones_light_to_dark">由淺到深</string>
     <string name="text_tools">工具</string>
     <string name="text_total_size_colon_value">大小: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景啟動器圖示可能被系統自動新增遮罩或背景, 因此不同裝置的實際效果與預期可能不完全一致</string>
@@ -2553,6 +2573,7 @@
     <string name="text_trash_max_total_bytes">回收站容量上限</string>
     <string name="text_trash_quota_exceeded_prompt">待移入條目的大小 (%1$s) 超過回收站容量上限 (%2$s). 繼續移入將清理回收站中更早的條目以騰出空間, 且這些條目會在更新的條目移入後被優先清理.</string>
     <string name="text_trash_restore_partial">已還原 %1$d 個封存項目, %2$d 個因封存損壞無法讀取, 該項目仍保留在回收站</string>
+    <string name="text_tritanopia">藍色盲</string>
     <string name="text_tutorial">教程</string>
     <string name="text_type">型別</string>
     <string name="text_type_file">檔案</string>

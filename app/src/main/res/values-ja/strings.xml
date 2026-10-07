@@ -784,11 +784,14 @@
     <string name="summary_retention_policies">バージョン履歴, ゴミ箱, 緊急下書きの保持日数とサイズ上限</string>
     <string name="summary_setup_wizard_welcome_reset">次回起動時にホームでセットアップウィザードのウェルカム表示を再表示します</string>
     <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
+    <string name="text_add_all_to_color_library">すべてカラーライブラリに追加</string>
     <string name="text_add_colors">色を追加</string>
     <string name="text_add_group">グループを追加</string>
     <string name="text_add_override">上書きを追加</string>
     <string name="text_add_time">時刻を追加</string>
+    <string name="text_add_to_color_library">カラーライブラリに追加</string>
     <string name="text_and_n_more">... 他 %d 件</string>
+    <string name="text_apply_as_theme_color">テーマカラーに適用</string>
     <string name="text_auto_reconnect">自動再接続</string>
     <string name="text_background_color_dark">ダーク</string>
     <string name="text_background_color_follow">自動</string>
@@ -1181,6 +1184,9 @@
     <string name="text_color_library_name">カラーライブラリ名</string>
     <string name="text_color_name_optional">色の名前 (任意)</string>
     <string name="text_color_palette">カラーパレット</string>
+    <string name="text_color_tools">配色ツール</string>
+    <string name="text_color_tools_of">配色ツール: %1$s</string>
+    <string name="text_color_vision">色覚シミュレーション</string>
     <string name="text_command_already_copied_to_clip">クリップボードにコピーされたコマンド</string>
     <string name="text_comment">コメント</string>
     <string name="text_committing_archive_extraction">アーカイブの展開を完了中</string>
@@ -1217,6 +1223,10 @@
     <string name="text_content_opacity">コンテンツの不透明度</string>
     <string name="text_continue">続行</string>
     <string name="text_continue_with_plugin_template">プラグインテンプレートで続行</string>
+    <string name="text_contrast">コントラスト</string>
+    <string name="text_contrast_below">%1$s 未満</string>
+    <string name="text_contrast_meets">%1$s 以上</string>
+    <string name="text_contrast_nearest_hint">色の右側は, その背景とのコントラストが 3:1 以上となる最も近い色です</string>
     <string name="text_control">制御</string>
     <string name="text_copy">コピー</string>
     <string name="text_copy_ace_diagnostics">Ace 診断情報をコピー</string>
@@ -1308,6 +1318,7 @@
     <string name="text_destination">宛先</string>
     <string name="text_details">詳細</string>
     <string name="text_detected_ocr_plugins">検出された OCR プラグイン: %1$s.</string>
+    <string name="text_deuteranopia">2 型色覚 (D 型)</string>
     <string name="text_developer_details_under_development">デベロッパーの詳細については, 現在開発中です</string>
     <string name="text_developer_options">デベロッパーオプション</string>
     <string name="text_dex_compiler">DEX コンパイラ</string>
@@ -1544,6 +1555,12 @@
     <string name="text_groups">グループ</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d グループ</string>
     <string name="text_guard_mode">ガードモード</string>
+    <string name="text_harmony_analogous">類似色</string>
+    <string name="text_harmony_colors">調和色</string>
+    <string name="text_harmony_complementary">補色</string>
+    <string name="text_harmony_split_complementary">分裂補色</string>
+    <string name="text_harmony_tetradic">テトラード</string>
+    <string name="text_harmony_triadic">トライアド</string>
     <string name="text_help">ヘルプ</string>
     <string name="text_hemisphere">半球</string>
     <string name="text_hemisphere_north">北半球</string>
@@ -2203,6 +2220,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protanopia">1 型色覚 (P 型)</string>
     <string name="text_protocol_version">プロトコルバージョン</string>
     <string name="text_pruning">剪定中</string>
     <string name="text_pruning_native_libraries">ネイティブライブラリを除外しています</string>
@@ -2547,6 +2565,8 @@
     <string name="text_title_bar_opacity">タイトルバーの不透明度</string>
     <string name="text_to_be_chosen">未選択</string>
     <string name="text_toggle_all">全て切替</string>
+    <string name="text_tones">トーン</string>
+    <string name="text_tones_light_to_dark">明るい順</string>
     <string name="text_tools">ツール</string>
     <string name="text_total_size_colon_value">サイズ: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透過背景ランチャーアイコンはシステムによって自動的にマスクされたり背景が追加されたりする場合があるため, 実際の効果はデバイスによって異なる場合があります</string>
@@ -2557,6 +2577,7 @@
     <string name="text_trash_max_total_bytes">ゴミ箱のサイズ上限</string>
     <string name="text_trash_quota_exceeded_prompt">移動する項目のサイズ (%1$s) がゴミ箱のサイズ上限 (%2$s) を超えています. 続行すると空きを作るためにゴミ箱内の古い項目が削除され, これらの項目は新しい項目が入ると最初に削除されます.</string>
     <string name="text_trash_restore_partial">%1$d 件のアーカイブ項目を復元しました. %2$d 件はアーカイブの破損により読み取れませんでした. この項目はゴミ箱に残ります</string>
+    <string name="text_tritanopia">3 型色覚 (T 型)</string>
     <string name="text_tutorial">チュートリアル</string>
     <string name="text_type">種類</string>
     <string name="text_type_file">ファイル</string>

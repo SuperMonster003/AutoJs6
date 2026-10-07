@@ -48,6 +48,10 @@
         <item quantity="other">%d 色</item>
     </plurals>
 
+    <plurals name="text_n_colors_added">
+        <item quantity="other">%d 色を追加しました</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="other">%d グループ</item>
     </plurals>

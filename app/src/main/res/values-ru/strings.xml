@@ -783,11 +783,14 @@
     <string name="summary_retention_policies">Сроки хранения и ограничения размера для истории версий, корзины и аварийных черновиков</string>
     <string name="summary_setup_wizard_welcome_reset">Снова показать приветствие мастеров настройки на главной странице при следующем запуске</string>
     <string name="summary_setup_wizards">Предоставление основных разрешений и установка официальных плагинов</string>
+    <string name="text_add_all_to_color_library">Добавить все в цветовую библиотеку</string>
     <string name="text_add_colors">Добавить цвета</string>
     <string name="text_add_group">Добавить группу</string>
     <string name="text_add_override">Добавить замену</string>
     <string name="text_add_time">Добавить время</string>
+    <string name="text_add_to_color_library">Добавить в цветовую библиотеку</string>
     <string name="text_and_n_more">... и еще %d</string>
+    <string name="text_apply_as_theme_color">Применить как цвет темы</string>
     <string name="text_auto_reconnect">Автоматическое переподключение</string>
     <string name="text_background_color_dark">Тёмный</string>
     <string name="text_background_color_follow">Автоматически</string>
@@ -1180,6 +1183,9 @@
     <string name="text_color_library_name">Название цветовой библиотеки</string>
     <string name="text_color_name_optional">Название цвета (необязательно)</string>
     <string name="text_color_palette">Цветовая палитра</string>
+    <string name="text_color_tools">Инструменты цвета</string>
+    <string name="text_color_tools_of">Инструменты цвета: %1$s</string>
+    <string name="text_color_vision">Цветовое зрение</string>
     <string name="text_command_already_copied_to_clip">Команда скопирована в буфер обмена</string>
     <string name="text_comment">Комментарий</string>
     <string name="text_committing_archive_extraction">Завершение извлечения архива</string>
@@ -1216,6 +1222,10 @@
     <string name="text_content_opacity">Непрозрачность содержимого</string>
     <string name="text_continue">Продолжить</string>
     <string name="text_continue_with_plugin_template">Продолжить с шаблоном плагина</string>
+    <string name="text_contrast">Контраст</string>
+    <string name="text_contrast_below">ниже %1$s</string>
+    <string name="text_contrast_meets">не ниже %1$s</string>
+    <string name="text_contrast_nearest_hint">Рядом с цветом: ближайший цвет с контрастом не ниже 3:1 к этому фону</string>
     <string name="text_control">Управление</string>
     <string name="text_copy">Скопировать</string>
     <string name="text_copy_ace_diagnostics">Копировать диагностические данные Ace</string>
@@ -1307,6 +1317,7 @@
     <string name="text_destination">Назначение</string>
     <string name="text_details">Детали</string>
     <string name="text_detected_ocr_plugins">Обнаруженные плагины OCR: %1$s.</string>
+    <string name="text_deuteranopia">Дейтеранопия (зелёный)</string>
     <string name="text_developer_details_under_development">Детали разработчика находятся в стадии разработки</string>
     <string name="text_developer_options">Параметры разработчика</string>
     <string name="text_dex_compiler">Компилятор DEX</string>
@@ -1543,6 +1554,12 @@
     <string name="text_groups">Группы</string>
     <string name="text_groups_enabled_of_total">Групп: %1$d/%2$d</string>
     <string name="text_guard_mode">Режим охраны</string>
+    <string name="text_harmony_analogous">Аналоговая</string>
+    <string name="text_harmony_colors">Гармонии</string>
+    <string name="text_harmony_complementary">Комплементарная</string>
+    <string name="text_harmony_split_complementary">Расщеплённая комплементарная</string>
+    <string name="text_harmony_tetradic">Квадрат</string>
+    <string name="text_harmony_triadic">Триада</string>
     <string name="text_help">Справка</string>
     <string name="text_hemisphere">Полушарие</string>
     <string name="text_hemisphere_north">Северное полушарие</string>
@@ -2202,6 +2219,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protanopia">Протанопия (красный)</string>
     <string name="text_protocol_version">Версия протокола</string>
     <string name="text_pruning">Обрезка</string>
     <string name="text_pruning_native_libraries">Удаление ненужных нативных библиотек</string>
@@ -2546,6 +2564,8 @@
     <string name="text_title_bar_opacity">Непрозрачность заголовка</string>
     <string name="text_to_be_chosen">Выбрать</string>
     <string name="text_toggle_all">Переключить все</string>
+    <string name="text_tones">Тона</string>
+    <string name="text_tones_light_to_dark">От светлого к тёмному</string>
     <string name="text_tools">Инструменты</string>
     <string name="text_total_size_colon_value">Размер: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">Значок запуска с прозрачным фоном может быть автоматически замаскирован системой или получить фон, поэтому фактический результат может отличаться на разных устройствах</string>
@@ -2556,6 +2576,7 @@
     <string name="text_trash_max_total_bytes">Максимальный размер корзины</string>
     <string name="text_trash_quota_exceeded_prompt">Размер перемещаемых элементов (%1$s) превышает ограничение размера корзины (%2$s). Если продолжить, более старые элементы корзины будут удалены, чтобы освободить место, а эти элементы будут удалены первыми при поступлении новых.</string>
     <string name="text_trash_restore_partial">Восстановлено записей архива: %1$d; не удалось прочитать %2$d из-за повреждения архива. Элемент остается в корзине</string>
+    <string name="text_tritanopia">Тританопия (синий)</string>
     <string name="text_tutorial">Учебник</string>
     <string name="text_type">Тип</string>
     <string name="text_type_file">Файл</string>

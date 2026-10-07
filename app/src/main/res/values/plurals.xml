@@ -60,6 +60,11 @@
         <item quantity="other">%d colors</item>
     </plurals>
 
+    <plurals name="text_n_colors_added">
+        <item quantity="one">Added %d color</item>
+        <item quantity="other">Added %d colors</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="one">%d group</item>
         <item quantity="other">%d groups</item>

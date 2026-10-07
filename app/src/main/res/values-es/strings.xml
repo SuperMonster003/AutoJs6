@@ -783,11 +783,14 @@
     <string name="summary_retention_policies">Días de retención y límites de tamaño del historial de versiones, la papelera y los borradores de emergencia</string>
     <string name="summary_setup_wizard_welcome_reset">Volver a mostrar el aviso de bienvenida de los asistentes de configuración en la página de inicio en el próximo inicio</string>
     <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
+    <string name="text_add_all_to_color_library">Añadir todos a una biblioteca de colores</string>
     <string name="text_add_colors">Agregar colores</string>
     <string name="text_add_group">Agregar grupo</string>
     <string name="text_add_override">Añadir excepción</string>
     <string name="text_add_time">Añadir hora</string>
+    <string name="text_add_to_color_library">Añadir a una biblioteca de colores</string>
     <string name="text_and_n_more">... y %d más</string>
+    <string name="text_apply_as_theme_color">Aplicar como color del tema</string>
     <string name="text_auto_reconnect">Reconexión automática</string>
     <string name="text_background_color_dark">Oscuro</string>
     <string name="text_background_color_follow">Automático</string>
@@ -1180,6 +1183,9 @@
     <string name="text_color_library_name">Nombre de la biblioteca de colores</string>
     <string name="text_color_name_optional">Nombre del color (opcional)</string>
     <string name="text_color_palette">Paleta de colores</string>
+    <string name="text_color_tools">Herramientas de color</string>
+    <string name="text_color_tools_of">Herramientas de color: %1$s</string>
+    <string name="text_color_vision">Visión del color</string>
     <string name="text_command_already_copied_to_clip">Comando copiado en el portapapeles</string>
     <string name="text_comment">Comente</string>
     <string name="text_committing_archive_extraction">Finalizando la extracción del archivo</string>
@@ -1216,6 +1222,10 @@
     <string name="text_content_opacity">Opacidad del contenido</string>
     <string name="text_continue">Continuar</string>
     <string name="text_continue_with_plugin_template">Continuar con la plantilla del complemento</string>
+    <string name="text_contrast">Contraste</string>
+    <string name="text_contrast_below">por debajo de %1$s</string>
+    <string name="text_contrast_meets">cumple %1$s</string>
+    <string name="text_contrast_nearest_hint">Junto al color: el color más cercano con al menos 3:1 sobre ese fondo</string>
     <string name="text_control">Control</string>
     <string name="text_copy">Copiar</string>
     <string name="text_copy_ace_diagnostics">Copiar diagnóstico de Ace</string>
@@ -1307,6 +1317,7 @@
     <string name="text_destination">Destino</string>
     <string name="text_details">Detalles</string>
     <string name="text_detected_ocr_plugins">Plugins OCR detectados: %1$s.</string>
+    <string name="text_deuteranopia">Deuteranopía (verde)</string>
     <string name="text_developer_details_under_development">Los detalles del desarrollador están en desarrollo</string>
     <string name="text_developer_options">Opciones del desarrollador</string>
     <string name="text_dex_compiler">Compilador DEX</string>
@@ -1543,6 +1554,12 @@
     <string name="text_groups">Grupos</string>
     <string name="text_groups_enabled_of_total">%1$d/%2$d grupos</string>
     <string name="text_guard_mode">Modo de protección</string>
+    <string name="text_harmony_analogous">Análoga</string>
+    <string name="text_harmony_colors">Armonías</string>
+    <string name="text_harmony_complementary">Complementaria</string>
+    <string name="text_harmony_split_complementary">Complementaria dividida</string>
+    <string name="text_harmony_tetradic">Cuadrada</string>
+    <string name="text_harmony_triadic">Triádica</string>
     <string name="text_help">Ayuda</string>
     <string name="text_hemisphere">Hemisferio</string>
     <string name="text_hemisphere_north">Hemisferio norte</string>
@@ -2202,6 +2219,7 @@
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_protanopia">Protanopía (rojo)</string>
     <string name="text_protocol_version">Versión del protocolo</string>
     <string name="text_pruning">Recortando</string>
     <string name="text_pruning_native_libraries">Eliminando bibliotecas nativas innecesarias</string>
@@ -2546,6 +2564,8 @@
     <string name="text_title_bar_opacity">Opacidad de la barra de título</string>
     <string name="text_to_be_chosen">Por elegir</string>
     <string name="text_toggle_all">Alternar todo</string>
+    <string name="text_tones">Tonos</string>
+    <string name="text_tones_light_to_dark">De claro a oscuro</string>
     <string name="text_tools">Herramientas</string>
     <string name="text_total_size_colon_value">Tamano: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">El ícono de iniciador con fondo transparente puede ser enmascarado automáticamente o recibir un fondo por parte del sistema, por lo que el efecto real puede variar entre dispositivos</string>
@@ -2556,6 +2576,7 @@
     <string name="text_trash_max_total_bytes">Tamaño máximo de la papelera</string>
     <string name="text_trash_quota_exceeded_prompt">El tamaño de los elementos a mover (%1$s) supera el límite de tamaño de la papelera (%2$s). Si continúa, se eliminarán los elementos más antiguos de la papelera para hacer espacio, y estos elementos se eliminarán primero cuando lleguen otros más nuevos.</string>
     <string name="text_trash_restore_partial">Se restauraron %1$d entradas del archivo; %2$d no se pudieron leer porque el archivo está dañado. El elemento permanece en la papelera</string>
+    <string name="text_tritanopia">Tritanopía (azul)</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Tipo</string>
     <string name="text_type_file">Archivo</string>

@@ -114,6 +114,15 @@
         <item quantity="other">%d لون</item>
     </plurals>
 
+    <plurals name="text_n_colors_added">
+        <item quantity="zero">تمت إضافة %d لون</item>
+        <item quantity="one">تمت إضافة لون واحد</item>
+        <item quantity="two">تمت إضافة لونين</item>
+        <item quantity="few">تمت إضافة %d ألوان</item>
+        <item quantity="many">تمت إضافة %d لونا</item>
+        <item quantity="other">تمت إضافة %d لون</item>
+    </plurals>
+
     <plurals name="text_n_groups">
         <item quantity="zero">%d مجموعة</item>
         <item quantity="one">%d مجموعة</item>

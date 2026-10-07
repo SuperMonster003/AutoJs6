@@ -49,6 +49,7 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorL
 import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
 import org.autojs.autojs.theme.intelligent.IntelligentSnapshot
 import org.autojs.autojs.theme.library.ColorLibraryIds
+import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
 import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.ColorSelection
 import org.autojs.autojs.theme.library.ColorSelectionCodec
@@ -642,7 +643,50 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 }
             }
         )
-        ColorInfoDialogManager.showColorInfoDialog(this, color, title, customNeutral)
+        val colorTools = ColorInfoDialogManager.CustomColorInfoDialogNeutral(
+            textRes = R.string.text_color_tools,
+            colorRes = R.color.dialog_button_attraction,
+            onNeutralCallback = object : NeutralButtonCallback {
+                override fun onClick(dialog: MaterialDialog, which: DialogAction, color: Int) {
+                    ColorDerivationDialog.show(
+                        this@ColorSelectBaseActivity, color,
+                        onApply = { onColorPickerConfirmed(it) },
+                        onAddToLibrary = { addColorsToUserLibrary(it) },
+                    )
+                }
+            }
+        )
+        ColorInfoDialogManager.showColorInfoDialog(this, color, title, customNeutral, colorTools)
+    }
+
+    /**
+     * Adds [colors] to a user color library chosen by the user, or to a new one (roadmap P4.3).
+     * zh-CN: 将 [colors] 加入用户选择的颜色库, 或新建的颜色库 (Roadmap P4.3).
+     */
+    protected fun addColorsToUserLibrary(colors: List<Int>) {
+        if (colors.isEmpty()) return
+        val repository = ColorLibraryRepository.get(this)
+        val newColors = colors.map { ColorLibraryRepository.NewColor(it) }
+        fun added() = ViewUtils.showToast(this, resources.getQuantityString(R.plurals.text_n_colors_added, colors.size, colors.size))
+        lifecycleScope.launch {
+            val libraries = withContext(Dispatchers.IO) { repository.listPlainLibraries() }.map { it.library }
+            val labels = listOf(getString(R.string.text_new_color_library)) + libraries.map { it.name }
+            ColorLibraryDialogs.showSingleChoice(this@ColorSelectBaseActivity, R.string.text_add_to_color_library, labels) { which ->
+                when (which) {
+                    0 -> ColorLibraryDialogs.showNameInput(this@ColorSelectBaseActivity, R.string.text_new_color_library, null) { name ->
+                        name ?: return@showNameInput
+                        lifecycleScope.launch {
+                            withContext(Dispatchers.IO) { repository.createPlainLibrary(name, ColorLibrary.Kind.CREATED, colors = newColors) }
+                            added()
+                        }
+                    }
+                    else -> lifecycleScope.launch {
+                        withContext(Dispatchers.IO) { repository.addColors(libraries[which - 1].id, newColors) }
+                        added()
+                    }
+                }
+            }
+        }
     }
 
     protected fun showThemeColorDetails() {
