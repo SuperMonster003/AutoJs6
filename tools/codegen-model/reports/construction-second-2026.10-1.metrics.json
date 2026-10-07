@@ -1,0 +1,2286 @@
+{
+  "assessment": {
+    "constructionBudget": {
+      "maxActionScores": 12000,
+      "maxAnchors": 128,
+      "maxAttempts": 2000,
+      "maxCapturedNodes": 10000,
+      "maxDepth": 48,
+      "maxExpandedStates": 2000,
+      "maxFrontier": 64,
+      "maxMillis": 800,
+      "maxPathSteps": 4,
+      "maxVerified": 200
+    },
+    "datasetId": "cg-ds-2026.10-1-construction-pilot",
+    "fixedRankerSha256": "9ab137a6e184f52246768a905ea98a09a03cf4da97f221526d70e7b6f32afc17",
+    "format": 1,
+    "groups": 76,
+    "hardDeadlineMillis": 1000,
+    "pairwise": [
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "cohort": "captured-construction-unseen",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "groups": 28,
+        "method": "fair_model",
+        "reference": "legacy_model",
+        "split": "test",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 8,
+          "meanDifference": 0.14285714285714285,
+          "tied": 20,
+          "worsened": 0
+        },
+        "cohort": "captured-construction-unseen",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "groups": 28,
+        "method": "fair_model",
+        "reference": "fair_heuristic",
+        "split": "test",
+        "top1Survival": {
+          "improved": 20,
+          "meanDifference": 0.44642857142857145,
+          "tied": 8,
+          "worsened": 0
+        },
+        "top3BestSurvival": {
+          "improved": 8,
+          "meanDifference": 0.14285714285714285,
+          "tied": 20,
+          "worsened": 0
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.05357142857142857,
+          "tied": 25,
+          "worsened": 3
+        },
+        "cohort": "captured-construction-unseen",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "groups": 28,
+        "method": "fair_model",
+        "reference": "baseline",
+        "split": "test",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        },
+        "cohort": "seen-synthetic-regression",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 24,
+          "worsened": 0
+        },
+        "groups": 24,
+        "method": "fair_model",
+        "reference": "legacy_model",
+        "split": "regression",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 24,
+          "worsened": 0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        },
+        "cohort": "seen-synthetic-regression",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        },
+        "groups": 24,
+        "method": "fair_model",
+        "reference": "fair_heuristic",
+        "split": "regression",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.25,
+          "tied": 18,
+          "worsened": 6
+        },
+        "cohort": "seen-synthetic-regression",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        },
+        "groups": 24,
+        "method": "fair_model",
+        "reference": "baseline",
+        "split": "regression",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.125,
+          "tied": 21,
+          "worsened": 3
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 3,
+          "meanDifference": 0.125,
+          "tied": 21,
+          "worsened": 0
+        },
+        "cohort": "synthetic-holdout",
+        "coverage": {
+          "improved": 3,
+          "meanDifference": 0.125,
+          "tied": 21,
+          "worsened": 0
+        },
+        "groups": 24,
+        "method": "fair_model",
+        "reference": "legacy_model",
+        "split": "test",
+        "top1Survival": {
+          "improved": 3,
+          "meanDifference": 0.125,
+          "tied": 21,
+          "worsened": 0
+        },
+        "top3BestSurvival": {
+          "improved": 3,
+          "meanDifference": 0.125,
+          "tied": 21,
+          "worsened": 0
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.625,
+          "tied": 6,
+          "worsened": 18
+        },
+        "cohort": "synthetic-holdout",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": -0.375,
+          "tied": 15,
+          "worsened": 9
+        },
+        "groups": 24,
+        "method": "fair_model",
+        "reference": "fair_heuristic",
+        "split": "test",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": -0.625,
+          "tied": 6,
+          "worsened": 18
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.625,
+          "tied": 6,
+          "worsened": 18
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.8125,
+          "tied": 3,
+          "worsened": 21
+        },
+        "cohort": "synthetic-holdout",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": -0.375,
+          "tied": 15,
+          "worsened": 9
+        },
+        "groups": 24,
+        "method": "fair_model",
+        "reference": "baseline",
+        "split": "test",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": -0.5,
+          "tied": 9,
+          "worsened": 15
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.6875,
+          "tied": 6,
+          "worsened": 18
+        }
+      }
+    ],
+    "phase": "holdout",
+    "policyFileBytes": 84454,
+    "policyLoadMillis": 38.6072,
+    "policySha256": "ecb04d2f7086b6c1065ff949b821be3d5e37a06ca2e5c5deca63b478acaffa62",
+    "policyStorageBytes": 18467,
+    "policyTrees": 59,
+    "protocolSha256": "6ab228dc2a9e6e548708bd275e265cd854e8a052bbb881979fe1d3e160adda06",
+    "realApplicationGroups": 0,
+    "resultsSha256": "e65de1a93c7e0c5076187b960afc6c274cef46828530fac0a22bf2d9fe48121a",
+    "selectionSha256": "11e9919216847af981e8968f7a3a23dd7b7ca3c37491ebe8d5ff4f60083bc7c2",
+    "sourceSha256": {
+      "app/src/main/java/org/autojs/autojs/core/accessibility/NodeInfoSnapshot.kt": "8c8f63808bc15ae34924fbd448b5d5278414178129e37bf244e28dd2148bae61",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CancellationSignal.kt": "e835012696c188496be69baebec762469f30d5017ad12d3ec8294a8db89fd41b",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CodeGenEngine.kt": "c7d272b42235afcbb0cee9b4c8b92d804eadc98923bded7805fb8c0b9432f78c",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CodeGenRequest.kt": "3e1047de093886cf9e024e358f190e5306070f182af197c3352bb9047a5ef21b",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/NodeTree.kt": "ce1ff669bf5909eaf8c707c43fdafcf2b9733d07af79f58d7f2c206c509da65c",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/SnapshotNode.kt": "ad42e04dd5084685852cb8e721450fa8cb19ab84640e5e53e0979ebcd79193dc",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/TargetSets.kt": "b83f24dc7d9c241b157dbd63749ad18b09d54c34015e9762df24e0d1a0647435",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/dataset/TaskGroup.kt": "e0981023a22b8b61635042479c8c1130558827b46b19cffc5f936635e2afba7a",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/features/CandidateFeatures.kt": "b9aa2a3f1d075e1349ca7fd3c8cc10544a7c7a2d3d12eb6b03577f54afad8a04",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/features/FeatureSchema.kt": "48bfbf95955502be80944d759e6b407240c45c08dc42d6994cecc437eb412411",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ModelPackage.kt": "588497f95bf0561e92b0027a167cba16e8e50760445aeed20fb128c77434c8cc",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ModelPackageReader.kt": "8b84f1740c7224dfb937dafd2389e64953e5550ded1a140788fbd81295fecb18",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ObliviousTreeModel.kt": "1c4e5dc04985e3155fd5d97f7b49d6acdf56119a8e3fced0cc8ebd96f86f1faa",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/plan/LocatePlan.kt": "4bc6ee98b8bef80ab5d85e32015d824f8d88f0a52f7645a3aab1ca28ab32b0fb",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/plan/SelectorText.kt": "63b2ea4a269e82b192d1f8b753afdf68fdf40c89e7e97ed08664419475a3bc48",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/Explanation.kt": "f51c9bc83236d11c8ed477f9ce5d0ab62eac4fa7710c4bc62f3183ef35d47fe9",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/ModelRanker.kt": "92b824f49e3a432b4352d35a3c3c42b5567d32729423abf319e6d6d470a6f3a8",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/ModelScoreOrder.kt": "da00e1f0962a1acfdaa02689ed1fe19c569ffd9a257bb9704d9b80c5aecd9875",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/Ranker.kt": "73fec3ca261de971fb02595ed20e514e3eeacaf774d54d16e5ed13d85c247e5c",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/RankerUnavailable.kt": "eacf575ca0d93342992e14bbebad8e41a76d5f7bf61aabca5bd3bb5e06162247",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/RuleRanker.kt": "31d51fc0cf8a160e4962e58a86761a59d69d15bb8961d12f52006f21c2e62e31",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/ClassicRenderer.kt": "6729426b191c7f5fb67e66b5d1ac36abdeaebf1f0f9e908eb01b6dc180690b58",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/FlowRenderer.kt": "ea2aacc92c27fb9a89f6c745d0749ce3ccfad9435bd89ef6a915cc53518e0d2d",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/RenderSupport.kt": "8f74f2b682b5b5074dd8d40570f65668af768dbbff8b152c9e180d5a28066933",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/search/CandidateSearch.kt": "a3fef8c8b0af506539e780d18760b927da51881741e61b2c4de5a2a9ac10cddf",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/verify/PlanVerifier.kt": "54acd2136237463b0fef09f7c3deb969b66c7e3c7a71675a2620aab1a02c67d3",
+      "app/src/main/java/org/autojs/autojs/core/automator/UiNode.kt": "34b2b649b8100d78c596313fdc1e174a2138f4380cde6ecf693b6ebc5bb1243d",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionBottleneckFixtures.kt": "1824f9d146cd940e9d44951e37076e38210f308bdca2d22a07d2ce0dbf27bde8",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionFeatures.kt": "02c98c02c74d68aae447059cc341934ceeac1aa20f5b9602dc2e1622b8d6342d",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionGeneralizationFixtures.kt": "73818feb25956eea483c7eb3ba957e46137e67c74fe7e5c9b132a83bcb66b927",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionGrammar.kt": "71b31555e045e86dd503ac6c3ccded0167ad41bbf7423d72ebc147a066cb9313",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionPolicyModel.kt": "c0d3fbe9164d56d5c5e2617913699e3069fac378c56cbdfabada0f1dd6404d80",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionSearch.kt": "9d9a83cc9fb065eea8df08ee4934cecbfc44837f1309259a901b68f6c1d722ff",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionSecondExperimentTask.kt": "bbe270a20449e558508805a61ee15d97755d689181145004186448a4e525b5d5",
+      "tools/codegen-model/construction/select_frontier.py": "ec1ec84c5db54d7561f6db3c147ea9e5c14f0e227450ed61d1bad25e0df4fed1"
+    },
+    "summary": [
+      {
+        "baselineRuleTop1Survival": 0.375,
+        "bestSurvival": 0.9285714285714286,
+        "candidates": 38.714285714285715,
+        "cohort": "captured-construction-unseen",
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 25.6624,
+        "elapsedP50Millis": 10.9757,
+        "elapsedP95Millis": 23.8353,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "method": "baseline",
+        "novelCandidates": 0,
+        "split": "test",
+        "stopReasons": {
+          "COUNTER_BUDGET": 28
+        },
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875
+      },
+      {
+        "baselineRuleTop1Survival": 0.375,
+        "bestSurvival": 0.7321428571428571,
+        "candidates": 3.6785714285714284,
+        "cohort": "captured-construction-unseen",
+        "commonRegret": 0.5,
+        "commonTop3Recall": 0.6071428571428571,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 345.8888,
+        "elapsedP50Millis": 85.5729,
+        "elapsedP95Millis": 221.6508,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 5,
+        "method": "fair_heuristic",
+        "novelCandidates": 5,
+        "split": "test",
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "top1Survival": 0.42857142857142855,
+        "top3BestSurvival": 0.7321428571428571
+      },
+      {
+        "baselineRuleTop1Survival": 0.375,
+        "bestSurvival": 0.875,
+        "candidates": 3.607142857142857,
+        "cohort": "captured-construction-unseen",
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 215.566,
+        "elapsedP50Millis": 71.8218,
+        "elapsedP95Millis": 155.6268,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "method": "fair_model",
+        "novelCandidates": 5,
+        "split": "test",
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875
+      },
+      {
+        "baselineRuleTop1Survival": 0.375,
+        "bestSurvival": 0.5714285714285714,
+        "candidates": 1.7857142857142858,
+        "cohort": "captured-construction-unseen",
+        "commonRegret": 0.35714285714285715,
+        "commonTop3Recall": 0.35714285714285715,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 303.3833,
+        "elapsedP50Millis": 109.571,
+        "elapsedP95Millis": 276.4256,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "method": "legacy_heuristic",
+        "novelCandidates": 0,
+        "split": "test",
+        "stopReasons": {
+          "EXHAUSTED": 28
+        },
+        "top1Survival": 0.5714285714285714,
+        "top3BestSurvival": 0.5714285714285714
+      },
+      {
+        "baselineRuleTop1Survival": 0.375,
+        "bestSurvival": 0.875,
+        "candidates": 1.7857142857142858,
+        "cohort": "captured-construction-unseen",
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 268.7042,
+        "elapsedP50Millis": 134.7301,
+        "elapsedP95Millis": 161.8172,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "method": "legacy_model",
+        "novelCandidates": 0,
+        "split": "test",
+        "stopReasons": {
+          "EXHAUSTED": 28
+        },
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875
+      },
+      {
+        "baselineRuleTop1Survival": 0.25,
+        "bestSurvival": 0.5,
+        "candidates": 23.708333333333332,
+        "cohort": "seen-synthetic-regression",
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "coverage": 0.625,
+        "elapsedMaxMillis": 418.213,
+        "elapsedP50Millis": 10.4653,
+        "elapsedP95Millis": 184.0704,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "method": "baseline",
+        "novelCandidates": 0,
+        "split": "regression",
+        "stopReasons": {
+          "COUNTER_BUDGET": 24
+        },
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375
+      },
+      {
+        "baselineRuleTop1Survival": 0.25,
+        "bestSurvival": 0.375,
+        "candidates": 2.4583333333333335,
+        "cohort": "seen-synthetic-regression",
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "coverage": 0.625,
+        "elapsedMaxMillis": 384.4023,
+        "elapsedP50Millis": 110.6831,
+        "elapsedP95Millis": 202.624,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "method": "fair_heuristic",
+        "novelCandidates": 0,
+        "split": "regression",
+        "stopReasons": {
+          "ACTION_SCORE_BUDGET": 1,
+          "EXHAUSTED": 23
+        },
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375
+      },
+      {
+        "baselineRuleTop1Survival": 0.25,
+        "bestSurvival": 0.25,
+        "candidates": 1.75,
+        "cohort": "seen-synthetic-regression",
+        "commonRegret": 0.375,
+        "commonTop3Recall": 0.375,
+        "coverage": 0.5,
+        "elapsedMaxMillis": 369.7218,
+        "elapsedP50Millis": 88.8004,
+        "elapsedP95Millis": 217.5592,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "method": "fair_model",
+        "novelCandidates": 0,
+        "split": "regression",
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "top1Survival": 0.125,
+        "top3BestSurvival": 0.25
+      },
+      {
+        "baselineRuleTop1Survival": 0.25,
+        "bestSurvival": 0.25,
+        "candidates": 2.125,
+        "cohort": "seen-synthetic-regression",
+        "commonRegret": 0.375,
+        "commonTop3Recall": 0.375,
+        "coverage": 0.5,
+        "elapsedMaxMillis": 270.3627,
+        "elapsedP50Millis": 121.9966,
+        "elapsedP95Millis": 258.8719,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "method": "legacy_heuristic",
+        "novelCandidates": 23,
+        "split": "regression",
+        "stopReasons": {
+          "ACTION_SCORE_BUDGET": 1,
+          "EXHAUSTED": 23
+        },
+        "top1Survival": 0.125,
+        "top3BestSurvival": 0.25
+      },
+      {
+        "baselineRuleTop1Survival": 0.25,
+        "bestSurvival": 0.375,
+        "candidates": 1.2916666666666667,
+        "cohort": "seen-synthetic-regression",
+        "commonRegret": 0.375,
+        "commonTop3Recall": 0.5,
+        "coverage": 0.5,
+        "elapsedMaxMillis": 224.3832,
+        "elapsedP50Millis": 102.4518,
+        "elapsedP95Millis": 194.2122,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "method": "legacy_model",
+        "novelCandidates": 3,
+        "split": "regression",
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "top1Survival": 0.125,
+        "top3BestSurvival": 0.375
+      },
+      {
+        "baselineRuleTop1Survival": 0.875,
+        "bestSurvival": 1.0,
+        "candidates": 17.875,
+        "cohort": "synthetic-holdout",
+        "commonRegret": 0.3125,
+        "commonTop3Recall": 0.7916666666666666,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 18.3375,
+        "elapsedP50Millis": 9.743,
+        "elapsedP95Millis": 15.8474,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 9,
+        "method": "baseline",
+        "novelCandidates": 0,
+        "split": "test",
+        "stopReasons": {
+          "COUNTER_BUDGET": 24
+        },
+        "top1Survival": 0.6875,
+        "top3BestSurvival": 0.875
+      },
+      {
+        "baselineRuleTop1Survival": 0.875,
+        "bestSurvival": 0.8125,
+        "candidates": 2.25,
+        "cohort": "synthetic-holdout",
+        "commonRegret": 0.1875,
+        "commonTop3Recall": 0.625,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 230.1273,
+        "elapsedP50Millis": 126.8007,
+        "elapsedP95Millis": 205.0861,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "method": "fair_heuristic",
+        "novelCandidates": 0,
+        "split": "test",
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "top1Survival": 0.8125,
+        "top3BestSurvival": 0.8125
+      },
+      {
+        "baselineRuleTop1Survival": 0.875,
+        "bestSurvival": 0.1875,
+        "candidates": 1.5833333333333333,
+        "cohort": "synthetic-holdout",
+        "commonRegret": 0.8125,
+        "commonTop3Recall": 0.125,
+        "coverage": 0.625,
+        "elapsedMaxMillis": 191.0224,
+        "elapsedP50Millis": 89.2126,
+        "elapsedP95Millis": 139.5868,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 21,
+        "method": "fair_model",
+        "novelCandidates": 0,
+        "split": "test",
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "top1Survival": 0.1875,
+        "top3BestSurvival": 0.1875
+      },
+      {
+        "baselineRuleTop1Survival": 0.875,
+        "bestSurvival": 0.0625,
+        "candidates": 0.625,
+        "cohort": "synthetic-holdout",
+        "commonRegret": 0.9375,
+        "commonTop3Recall": 0.0,
+        "coverage": 0.5,
+        "elapsedMaxMillis": 185.8432,
+        "elapsedP50Millis": 137.5292,
+        "elapsedP95Millis": 172.6682,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 24,
+        "method": "legacy_heuristic",
+        "novelCandidates": 0,
+        "split": "test",
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "top1Survival": 0.0625,
+        "top3BestSurvival": 0.0625
+      },
+      {
+        "baselineRuleTop1Survival": 0.875,
+        "bestSurvival": 0.0625,
+        "candidates": 1.0,
+        "cohort": "synthetic-holdout",
+        "commonRegret": 0.9375,
+        "commonTop3Recall": 0.0,
+        "coverage": 0.5,
+        "elapsedMaxMillis": 250.5816,
+        "elapsedP50Millis": 121.224,
+        "elapsedP95Millis": 170.0005,
+        "errors": 0,
+        "groups": 24,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 24,
+        "method": "legacy_model",
+        "novelCandidates": 0,
+        "split": "test",
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "top1Survival": 0.0625,
+        "top3BestSurvival": 0.0625
+      }
+    ]
+  },
+  "comparisonRunCount": 1360,
+  "counterMaxima": {
+    "fair_heuristic": {
+      "actionScores": 12000,
+      "attemptedCount": 2000,
+      "expandedStates": 1021,
+      "maximumDepth": 26,
+      "peakFairCursorAnchors": 24,
+      "peakFrontier": 64,
+      "peakPendingPrefixes": 1501,
+      "policyCalls": 12000,
+      "traceReferences": 6936
+    },
+    "fair_model": {
+      "actionScores": 6478,
+      "attemptedCount": 2000,
+      "expandedStates": 791,
+      "maximumDepth": 24,
+      "peakFairCursorAnchors": 24,
+      "peakFrontier": 64,
+      "peakPendingPrefixes": 1501,
+      "policyCalls": 6478,
+      "traceReferences": 8124
+    },
+    "legacy_heuristic": {
+      "actionScores": 12000,
+      "attemptedCount": 942,
+      "expandedStates": 1126,
+      "maximumDepth": 20,
+      "peakFairCursorAnchors": 0,
+      "peakFrontier": 64,
+      "peakPendingPrefixes": 1501,
+      "policyCalls": 12000,
+      "traceReferences": 7032
+    },
+    "legacy_model": {
+      "actionScores": 5356,
+      "attemptedCount": 2000,
+      "expandedStates": 1340,
+      "maximumDepth": 24,
+      "peakFairCursorAnchors": 0,
+      "peakFrontier": 64,
+      "peakPendingPrefixes": 128,
+      "policyCalls": 5356,
+      "traceReferences": 15996
+    }
+  },
+  "date": "2026-10-07",
+  "development": {
+    "constructionBudget": {
+      "maxActionScores": 12000,
+      "maxAnchors": 128,
+      "maxAttempts": 2000,
+      "maxCapturedNodes": 10000,
+      "maxDepth": 48,
+      "maxExpandedStates": 2000,
+      "maxFrontier": 64,
+      "maxMillis": 800,
+      "maxPathSteps": 4,
+      "maxVerified": 200
+    },
+    "datasetId": "cg-ds-2026.10-1-construction-pilot",
+    "fixedRankerSha256": "9ab137a6e184f52246768a905ea98a09a03cf4da97f221526d70e7b6f32afc17",
+    "format": 1,
+    "groups": 196,
+    "hardDeadlineMillis": 1000,
+    "pairwise": [
+      {
+        "bestSurvival": {
+          "improved": 10,
+          "meanDifference": 0.02976190476190476,
+          "tied": 158,
+          "worsened": 0
+        },
+        "cohort": "captured-development",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 168,
+          "worsened": 0
+        },
+        "groups": 168,
+        "method": "fair_model",
+        "reference": "legacy_model",
+        "split": "train",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 168,
+          "worsened": 0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 168,
+          "worsened": 0
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 35,
+          "meanDifference": 0.10416666666666667,
+          "tied": 133,
+          "worsened": 0
+        },
+        "cohort": "captured-development",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 168,
+          "worsened": 0
+        },
+        "groups": 168,
+        "method": "fair_model",
+        "reference": "fair_heuristic",
+        "split": "train",
+        "top1Survival": {
+          "improved": 64,
+          "meanDifference": 0.18452380952380953,
+          "tied": 100,
+          "worsened": 4
+        },
+        "top3BestSurvival": {
+          "improved": 66,
+          "meanDifference": 0.19940476190476192,
+          "tied": 101,
+          "worsened": 1
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.017857142857142856,
+          "tied": 162,
+          "worsened": 6
+        },
+        "cohort": "captured-development",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 168,
+          "worsened": 0
+        },
+        "groups": 168,
+        "method": "fair_model",
+        "reference": "baseline",
+        "split": "train",
+        "top1Survival": {
+          "improved": 12,
+          "meanDifference": 0.005952380952380952,
+          "tied": 146,
+          "worsened": 10
+        },
+        "top3BestSurvival": {
+          "improved": 14,
+          "meanDifference": 0.008928571428571428,
+          "tied": 143,
+          "worsened": 11
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 4,
+          "meanDifference": 0.07142857142857142,
+          "tied": 24,
+          "worsened": 0
+        },
+        "cohort": "captured-development",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "groups": 28,
+        "method": "fair_model",
+        "reference": "legacy_model",
+        "split": "valid",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 6,
+          "meanDifference": 0.10714285714285714,
+          "tied": 22,
+          "worsened": 0
+        },
+        "cohort": "captured-development",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "groups": 28,
+        "method": "fair_model",
+        "reference": "fair_heuristic",
+        "split": "valid",
+        "top1Survival": {
+          "improved": 8,
+          "meanDifference": 0.10714285714285714,
+          "tied": 18,
+          "worsened": 2
+        },
+        "top3BestSurvival": {
+          "improved": 8,
+          "meanDifference": 0.14285714285714285,
+          "tied": 20,
+          "worsened": 0
+        }
+      },
+      {
+        "bestSurvival": {
+          "improved": 0,
+          "meanDifference": -0.03571428571428571,
+          "tied": 26,
+          "worsened": 2
+        },
+        "cohort": "captured-development",
+        "coverage": {
+          "improved": 0,
+          "meanDifference": 0.0,
+          "tied": 28,
+          "worsened": 0
+        },
+        "groups": 28,
+        "method": "fair_model",
+        "reference": "baseline",
+        "split": "valid",
+        "top1Survival": {
+          "improved": 0,
+          "meanDifference": -0.08928571428571429,
+          "tied": 23,
+          "worsened": 5
+        },
+        "top3BestSurvival": {
+          "improved": 2,
+          "meanDifference": -0.05357142857142857,
+          "tied": 21,
+          "worsened": 5
+        }
+      }
+    ],
+    "phase": "develop",
+    "policyFileBytes": 84454,
+    "policyLoadMillis": 27.88,
+    "policySha256": "ecb04d2f7086b6c1065ff949b821be3d5e37a06ca2e5c5deca63b478acaffa62",
+    "policyStorageBytes": 18467,
+    "policyTrees": 59,
+    "protocolSha256": "6ab228dc2a9e6e548708bd275e265cd854e8a052bbb881979fe1d3e160adda06",
+    "realApplicationGroups": 0,
+    "resultsSha256": "de491c32ad264886a83c7e61426443acc6478f20e539e314e22ac3a160109d71",
+    "sourceSha256": {
+      "app/src/main/java/org/autojs/autojs/core/accessibility/NodeInfoSnapshot.kt": "8c8f63808bc15ae34924fbd448b5d5278414178129e37bf244e28dd2148bae61",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CancellationSignal.kt": "e835012696c188496be69baebec762469f30d5017ad12d3ec8294a8db89fd41b",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CodeGenEngine.kt": "c7d272b42235afcbb0cee9b4c8b92d804eadc98923bded7805fb8c0b9432f78c",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CodeGenRequest.kt": "3e1047de093886cf9e024e358f190e5306070f182af197c3352bb9047a5ef21b",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/NodeTree.kt": "ce1ff669bf5909eaf8c707c43fdafcf2b9733d07af79f58d7f2c206c509da65c",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/SnapshotNode.kt": "ad42e04dd5084685852cb8e721450fa8cb19ab84640e5e53e0979ebcd79193dc",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/TargetSets.kt": "b83f24dc7d9c241b157dbd63749ad18b09d54c34015e9762df24e0d1a0647435",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/dataset/TaskGroup.kt": "e0981023a22b8b61635042479c8c1130558827b46b19cffc5f936635e2afba7a",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/features/CandidateFeatures.kt": "b9aa2a3f1d075e1349ca7fd3c8cc10544a7c7a2d3d12eb6b03577f54afad8a04",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/features/FeatureSchema.kt": "48bfbf95955502be80944d759e6b407240c45c08dc42d6994cecc437eb412411",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ModelPackage.kt": "588497f95bf0561e92b0027a167cba16e8e50760445aeed20fb128c77434c8cc",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ModelPackageReader.kt": "8b84f1740c7224dfb937dafd2389e64953e5550ded1a140788fbd81295fecb18",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ObliviousTreeModel.kt": "1c4e5dc04985e3155fd5d97f7b49d6acdf56119a8e3fced0cc8ebd96f86f1faa",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/plan/LocatePlan.kt": "4bc6ee98b8bef80ab5d85e32015d824f8d88f0a52f7645a3aab1ca28ab32b0fb",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/plan/SelectorText.kt": "63b2ea4a269e82b192d1f8b753afdf68fdf40c89e7e97ed08664419475a3bc48",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/Explanation.kt": "f51c9bc83236d11c8ed477f9ce5d0ab62eac4fa7710c4bc62f3183ef35d47fe9",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/ModelRanker.kt": "92b824f49e3a432b4352d35a3c3c42b5567d32729423abf319e6d6d470a6f3a8",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/ModelScoreOrder.kt": "da00e1f0962a1acfdaa02689ed1fe19c569ffd9a257bb9704d9b80c5aecd9875",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/Ranker.kt": "73fec3ca261de971fb02595ed20e514e3eeacaf774d54d16e5ed13d85c247e5c",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/RankerUnavailable.kt": "eacf575ca0d93342992e14bbebad8e41a76d5f7bf61aabca5bd3bb5e06162247",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/RuleRanker.kt": "31d51fc0cf8a160e4962e58a86761a59d69d15bb8961d12f52006f21c2e62e31",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/ClassicRenderer.kt": "6729426b191c7f5fb67e66b5d1ac36abdeaebf1f0f9e908eb01b6dc180690b58",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/FlowRenderer.kt": "ea2aacc92c27fb9a89f6c745d0749ce3ccfad9435bd89ef6a915cc53518e0d2d",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/RenderSupport.kt": "8f74f2b682b5b5074dd8d40570f65668af768dbbff8b152c9e180d5a28066933",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/search/CandidateSearch.kt": "a3fef8c8b0af506539e780d18760b927da51881741e61b2c4de5a2a9ac10cddf",
+      "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/verify/PlanVerifier.kt": "54acd2136237463b0fef09f7c3deb969b66c7e3c7a71675a2620aab1a02c67d3",
+      "app/src/main/java/org/autojs/autojs/core/automator/UiNode.kt": "34b2b649b8100d78c596313fdc1e174a2138f4380cde6ecf693b6ebc5bb1243d",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionBottleneckFixtures.kt": "1824f9d146cd940e9d44951e37076e38210f308bdca2d22a07d2ce0dbf27bde8",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionFeatures.kt": "02c98c02c74d68aae447059cc341934ceeac1aa20f5b9602dc2e1622b8d6342d",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionGeneralizationFixtures.kt": "73818feb25956eea483c7eb3ba957e46137e67c74fe7e5c9b132a83bcb66b927",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionGrammar.kt": "71b31555e045e86dd503ac6c3ccded0167ad41bbf7423d72ebc147a066cb9313",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionPolicyModel.kt": "c0d3fbe9164d56d5c5e2617913699e3069fac378c56cbdfabada0f1dd6404d80",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionSearch.kt": "9d9a83cc9fb065eea8df08ee4934cecbfc44837f1309259a901b68f6c1d722ff",
+      "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionSecondExperimentTask.kt": "bbe270a20449e558508805a61ee15d97755d689181145004186448a4e525b5d5",
+      "tools/codegen-model/construction/select_frontier.py": "ec1ec84c5db54d7561f6db3c147ea9e5c14f0e227450ed61d1bad25e0df4fed1"
+    },
+    "summary": [
+      {
+        "baselineRuleTop1Survival": 0.7380952380952381,
+        "bestSurvival": 0.9791666666666666,
+        "candidates": 50.36309523809524,
+        "cohort": "captured-development",
+        "commonRegret": 0.07142857142857142,
+        "commonTop3Recall": 0.8809523809523809,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 24.5583,
+        "elapsedP50Millis": 7.8356,
+        "elapsedP95Millis": 12.2774,
+        "errors": 0,
+        "groups": 168,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 11,
+        "method": "baseline",
+        "novelCandidates": 0,
+        "split": "train",
+        "stopReasons": {
+          "COUNTER_BUDGET": 168
+        },
+        "top1Survival": 0.9077380952380952,
+        "top3BestSurvival": 0.9196428571428571
+      },
+      {
+        "baselineRuleTop1Survival": 0.7380952380952381,
+        "bestSurvival": 0.8571428571428571,
+        "candidates": 11.892857142857142,
+        "cohort": "captured-development",
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5119047619047619,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 211.4266,
+        "elapsedP50Millis": 109.8294,
+        "elapsedP95Millis": 154.2172,
+        "errors": 0,
+        "groups": 168,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "method": "fair_heuristic",
+        "novelCandidates": 552,
+        "split": "train",
+        "stopReasons": {
+          "EXHAUSTED": 160,
+          "VERIFICATION_BUDGET": 8
+        },
+        "top1Survival": 0.7291666666666666,
+        "top3BestSurvival": 0.7291666666666666
+      },
+      {
+        "baselineRuleTop1Survival": 0.7380952380952381,
+        "bestSurvival": 0.9613095238095238,
+        "candidates": 9.410714285714286,
+        "cohort": "captured-development",
+        "commonRegret": 0.06547619047619048,
+        "commonTop3Recall": 0.8988095238095238,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 172.7436,
+        "elapsedP50Millis": 83.7542,
+        "elapsedP95Millis": 121.4973,
+        "errors": 0,
+        "groups": 168,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 4,
+        "method": "fair_model",
+        "novelCandidates": 715,
+        "split": "train",
+        "stopReasons": {
+          "EXHAUSTED": 154,
+          "VERIFICATION_BUDGET": 14
+        },
+        "top1Survival": 0.9136904761904762,
+        "top3BestSurvival": 0.9285714285714286
+      },
+      {
+        "baselineRuleTop1Survival": 0.7380952380952381,
+        "bestSurvival": 0.7440476190476191,
+        "candidates": 3.857142857142857,
+        "cohort": "captured-development",
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5119047619047619,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 163.0149,
+        "elapsedP50Millis": 98.5665,
+        "elapsedP95Millis": 137.7863,
+        "errors": 0,
+        "groups": 168,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "method": "legacy_heuristic",
+        "novelCandidates": 194,
+        "split": "train",
+        "stopReasons": {
+          "EXHAUSTED": 168
+        },
+        "top1Survival": 0.7291666666666666,
+        "top3BestSurvival": 0.7291666666666666
+      },
+      {
+        "baselineRuleTop1Survival": 0.7380952380952381,
+        "bestSurvival": 0.9315476190476191,
+        "candidates": 3.2797619047619047,
+        "cohort": "captured-development",
+        "commonRegret": 0.06547619047619048,
+        "commonTop3Recall": 0.8988095238095238,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 357.0412,
+        "elapsedP50Millis": 102.1137,
+        "elapsedP95Millis": 245.6471,
+        "errors": 0,
+        "groups": 168,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 4,
+        "method": "legacy_model",
+        "novelCandidates": 167,
+        "split": "train",
+        "stopReasons": {
+          "EXHAUSTED": 154,
+          "VERIFICATION_BUDGET": 14
+        },
+        "top1Survival": 0.9136904761904762,
+        "top3BestSurvival": 0.9285714285714286
+      },
+      {
+        "baselineRuleTop1Survival": 0.7142857142857143,
+        "bestSurvival": 0.9642857142857143,
+        "candidates": 50.857142857142854,
+        "cohort": "captured-development",
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 9.6761,
+        "elapsedP50Millis": 7.2668,
+        "elapsedP95Millis": 9.2425,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 2,
+        "method": "baseline",
+        "novelCandidates": 0,
+        "split": "valid",
+        "stopReasons": {
+          "COUNTER_BUDGET": 28
+        },
+        "top1Survival": 0.9107142857142857,
+        "top3BestSurvival": 0.9107142857142857
+      },
+      {
+        "baselineRuleTop1Survival": 0.7142857142857143,
+        "bestSurvival": 0.8214285714285714,
+        "candidates": 11.464285714285714,
+        "cohort": "captured-development",
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 145.7704,
+        "elapsedP50Millis": 116.6589,
+        "elapsedP95Millis": 128.8228,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "method": "fair_heuristic",
+        "novelCandidates": 91,
+        "split": "valid",
+        "stopReasons": {
+          "EXHAUSTED": 28
+        },
+        "top1Survival": 0.7142857142857143,
+        "top3BestSurvival": 0.7142857142857143
+      },
+      {
+        "baselineRuleTop1Survival": 0.7142857142857143,
+        "bestSurvival": 0.9285714285714286,
+        "candidates": 9.642857142857142,
+        "cohort": "captured-development",
+        "commonRegret": 0.14285714285714285,
+        "commonTop3Recall": 0.7857142857142857,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 116.1331,
+        "elapsedP50Millis": 91.7309,
+        "elapsedP95Millis": 104.0563,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 2,
+        "method": "fair_model",
+        "novelCandidates": 119,
+        "split": "valid",
+        "stopReasons": {
+          "EXHAUSTED": 28
+        },
+        "top1Survival": 0.8214285714285714,
+        "top3BestSurvival": 0.8571428571428571
+      },
+      {
+        "baselineRuleTop1Survival": 0.7142857142857143,
+        "bestSurvival": 0.7142857142857143,
+        "candidates": 2.8214285714285716,
+        "cohort": "captured-development",
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 123.6138,
+        "elapsedP50Millis": 92.8363,
+        "elapsedP95Millis": 107.518,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "method": "legacy_heuristic",
+        "novelCandidates": 23,
+        "split": "valid",
+        "stopReasons": {
+          "EXHAUSTED": 28
+        },
+        "top1Survival": 0.7142857142857143,
+        "top3BestSurvival": 0.7142857142857143
+      },
+      {
+        "baselineRuleTop1Survival": 0.7142857142857143,
+        "bestSurvival": 0.8571428571428571,
+        "candidates": 2.8214285714285716,
+        "cohort": "captured-development",
+        "commonRegret": 0.14285714285714285,
+        "commonTop3Recall": 0.7857142857142857,
+        "coverage": 1.0,
+        "elapsedMaxMillis": 118.9776,
+        "elapsedP50Millis": 99.7486,
+        "elapsedP95Millis": 110.0574,
+        "errors": 0,
+        "groups": 28,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 2,
+        "method": "legacy_model",
+        "novelCandidates": 23,
+        "split": "valid",
+        "stopReasons": {
+          "EXHAUSTED": 28
+        },
+        "top1Survival": 0.8214285714285714,
+        "top3BestSurvival": 0.8571428571428571
+      }
+    ]
+  },
+  "diagnostic": {
+    "candidateSetsExactlyReproduced": 18,
+    "classifications": {
+      "RETAINED_POSSIBLY_VIA_SIMPLIFICATION": 9,
+      "WITHIN_ANCHOR_PHASE_PRUNED": 9
+    },
+    "familySlots": [
+      32
+    ],
+    "fileSha256": "607f3b8e976aafdb00f403cced56d2c214fd2fe6578304fd4fa2227c48fbb74e",
+    "firstMissingPhaseCounts": {
+      "OUTER": 9
+    },
+    "format": 1,
+    "groups": 9,
+    "holdoutMetricsSha256": "d806d691b4c6c638c79c1eefacdc88ef3bd9a33dc06c52c85e4d67badecaa611",
+    "holdoutResultsSha256": "e65de1a93c7e0c5076187b960afc6c274cef46828530fac0a22bf2d9fe48121a",
+    "incomingOperationCounts": {
+      "OUTER:id": 9
+    },
+    "maximumFamilyBucketUpperBound": 13,
+    "modelScoreCounts": {
+      "0.31874065364536364": 6,
+      "0.3241989442904014": 3
+    },
+    "policySha256": "ecb04d2f7086b6c1065ff949b821be3d5e37a06ca2e5c5deca63b478acaffa62",
+    "protocolSha256": "6ab228dc2a9e6e548708bd275e265cd854e8a052bbb881979fe1d3e160adda06",
+    "referencePlans": 9,
+    "replays": 18,
+    "role": "posthoc-second-construction-coverage-diagnostic",
+    "timing": "Zero clock; unchanged counter budgets; diagnostic repetition, not a benchmark"
+  },
+  "experiment": "construction-second-2026.10-1",
+  "failedOrDeadlineRuns": 0,
+  "familySummary": [
+    {
+      "bestSurvival": 0.9285714285714286,
+      "cohort": "captured-construction-unseen",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "baseline",
+      "screenFamily": "list",
+      "split": "test",
+      "top1Survival": 0.875,
+      "top3BestSurvival": 0.875
+    },
+    {
+      "bestSurvival": 0.7321428571428571,
+      "cohort": "captured-construction-unseen",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_heuristic",
+      "screenFamily": "list",
+      "split": "test",
+      "top1Survival": 0.42857142857142855,
+      "top3BestSurvival": 0.7321428571428571
+    },
+    {
+      "bestSurvival": 0.875,
+      "cohort": "captured-construction-unseen",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_model",
+      "screenFamily": "list",
+      "split": "test",
+      "top1Survival": 0.875,
+      "top3BestSurvival": 0.875
+    },
+    {
+      "bestSurvival": 0.5714285714285714,
+      "cohort": "captured-construction-unseen",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_heuristic",
+      "screenFamily": "list",
+      "split": "test",
+      "top1Survival": 0.5714285714285714,
+      "top3BestSurvival": 0.5714285714285714
+    },
+    {
+      "bestSurvival": 0.875,
+      "cohort": "captured-construction-unseen",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_model",
+      "screenFamily": "list",
+      "split": "test",
+      "top1Survival": 0.875,
+      "top3BestSurvival": 0.875
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "baseline",
+      "screenFamily": "dialog",
+      "split": "train",
+      "top1Survival": 0.9285714285714286,
+      "top3BestSurvival": 0.9642857142857143
+    },
+    {
+      "bestSurvival": 0.8035714285714286,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_heuristic",
+      "screenFamily": "dialog",
+      "split": "train",
+      "top1Survival": 0.6785714285714286,
+      "top3BestSurvival": 0.6785714285714286
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_model",
+      "screenFamily": "dialog",
+      "split": "train",
+      "top1Survival": 0.9821428571428571,
+      "top3BestSurvival": 0.9821428571428571
+    },
+    {
+      "bestSurvival": 0.7678571428571429,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_heuristic",
+      "screenFamily": "dialog",
+      "split": "train",
+      "top1Survival": 0.6785714285714286,
+      "top3BestSurvival": 0.6785714285714286
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_model",
+      "screenFamily": "dialog",
+      "split": "train",
+      "top1Survival": 0.9821428571428571,
+      "top3BestSurvival": 0.9821428571428571
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "baseline",
+      "screenFamily": "grid",
+      "split": "train",
+      "top1Survival": 0.9464285714285714,
+      "top3BestSurvival": 0.9464285714285714
+    },
+    {
+      "bestSurvival": 0.9107142857142857,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_heuristic",
+      "screenFamily": "grid",
+      "split": "train",
+      "top1Survival": 0.6785714285714286,
+      "top3BestSurvival": 0.6785714285714286
+    },
+    {
+      "bestSurvival": 0.9642857142857143,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_model",
+      "screenFamily": "grid",
+      "split": "train",
+      "top1Survival": 0.9285714285714286,
+      "top3BestSurvival": 0.9464285714285714
+    },
+    {
+      "bestSurvival": 0.6785714285714286,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_heuristic",
+      "screenFamily": "grid",
+      "split": "train",
+      "top1Survival": 0.6785714285714286,
+      "top3BestSurvival": 0.6785714285714286
+    },
+    {
+      "bestSurvival": 0.9464285714285714,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_model",
+      "screenFamily": "grid",
+      "split": "train",
+      "top1Survival": 0.9285714285714286,
+      "top3BestSurvival": 0.9464285714285714
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "baseline",
+      "screenFamily": "login",
+      "split": "train",
+      "top1Survival": 0.8928571428571429,
+      "top3BestSurvival": 0.8928571428571429
+    },
+    {
+      "bestSurvival": 0.7678571428571429,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_heuristic",
+      "screenFamily": "login",
+      "split": "train",
+      "top1Survival": 0.6785714285714286,
+      "top3BestSurvival": 0.6785714285714286
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_model",
+      "screenFamily": "login",
+      "split": "train",
+      "top1Survival": 0.8928571428571429,
+      "top3BestSurvival": 0.9285714285714286
+    },
+    {
+      "bestSurvival": 0.6785714285714286,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_heuristic",
+      "screenFamily": "login",
+      "split": "train",
+      "top1Survival": 0.6785714285714286,
+      "top3BestSurvival": 0.6785714285714286
+    },
+    {
+      "bestSurvival": 0.9285714285714286,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_model",
+      "screenFamily": "login",
+      "split": "train",
+      "top1Survival": 0.8928571428571429,
+      "top3BestSurvival": 0.9285714285714286
+    },
+    {
+      "bestSurvival": 0.9642857142857143,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "baseline",
+      "screenFamily": "nested-scroll",
+      "split": "train",
+      "top1Survival": 0.875,
+      "top3BestSurvival": 0.8928571428571429
+    },
+    {
+      "bestSurvival": 0.9285714285714286,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_heuristic",
+      "screenFamily": "nested-scroll",
+      "split": "train",
+      "top1Survival": 0.8392857142857143,
+      "top3BestSurvival": 0.8392857142857143
+    },
+    {
+      "bestSurvival": 0.9285714285714286,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_model",
+      "screenFamily": "nested-scroll",
+      "split": "train",
+      "top1Survival": 0.8392857142857143,
+      "top3BestSurvival": 0.8392857142857143
+    },
+    {
+      "bestSurvival": 0.8392857142857143,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_heuristic",
+      "screenFamily": "nested-scroll",
+      "split": "train",
+      "top1Survival": 0.8392857142857143,
+      "top3BestSurvival": 0.8392857142857143
+    },
+    {
+      "bestSurvival": 0.8392857142857143,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_model",
+      "screenFamily": "nested-scroll",
+      "split": "train",
+      "top1Survival": 0.8392857142857143,
+      "top3BestSurvival": 0.8392857142857143
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "baseline",
+      "screenFamily": "no-id",
+      "split": "train",
+      "top1Survival": 0.9107142857142857,
+      "top3BestSurvival": 0.9285714285714286
+    },
+    {
+      "bestSurvival": 0.8214285714285714,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_heuristic",
+      "screenFamily": "no-id",
+      "split": "train",
+      "top1Survival": 0.7321428571428571,
+      "top3BestSurvival": 0.7321428571428571
+    },
+    {
+      "bestSurvival": 0.9464285714285714,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_model",
+      "screenFamily": "no-id",
+      "split": "train",
+      "top1Survival": 0.9107142857142857,
+      "top3BestSurvival": 0.9464285714285714
+    },
+    {
+      "bestSurvival": 0.7321428571428571,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_heuristic",
+      "screenFamily": "no-id",
+      "split": "train",
+      "top1Survival": 0.7321428571428571,
+      "top3BestSurvival": 0.7321428571428571
+    },
+    {
+      "bestSurvival": 0.9464285714285714,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_model",
+      "screenFamily": "no-id",
+      "split": "train",
+      "top1Survival": 0.9107142857142857,
+      "top3BestSurvival": 0.9464285714285714
+    },
+    {
+      "bestSurvival": 0.9464285714285714,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "baseline",
+      "screenFamily": "tabs",
+      "split": "train",
+      "top1Survival": 0.8928571428571429,
+      "top3BestSurvival": 0.8928571428571429
+    },
+    {
+      "bestSurvival": 0.9107142857142857,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_heuristic",
+      "screenFamily": "tabs",
+      "split": "train",
+      "top1Survival": 0.7678571428571429,
+      "top3BestSurvival": 0.7678571428571429
+    },
+    {
+      "bestSurvival": 0.9464285714285714,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_model",
+      "screenFamily": "tabs",
+      "split": "train",
+      "top1Survival": 0.9285714285714286,
+      "top3BestSurvival": 0.9285714285714286
+    },
+    {
+      "bestSurvival": 0.7678571428571429,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_heuristic",
+      "screenFamily": "tabs",
+      "split": "train",
+      "top1Survival": 0.7678571428571429,
+      "top3BestSurvival": 0.7678571428571429
+    },
+    {
+      "bestSurvival": 0.9464285714285714,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_model",
+      "screenFamily": "tabs",
+      "split": "train",
+      "top1Survival": 0.9285714285714286,
+      "top3BestSurvival": 0.9285714285714286
+    },
+    {
+      "bestSurvival": 0.9642857142857143,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "baseline",
+      "screenFamily": "settings",
+      "split": "valid",
+      "top1Survival": 0.9107142857142857,
+      "top3BestSurvival": 0.9107142857142857
+    },
+    {
+      "bestSurvival": 0.8214285714285714,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_heuristic",
+      "screenFamily": "settings",
+      "split": "valid",
+      "top1Survival": 0.7142857142857143,
+      "top3BestSurvival": 0.7142857142857143
+    },
+    {
+      "bestSurvival": 0.9285714285714286,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "fair_model",
+      "screenFamily": "settings",
+      "split": "valid",
+      "top1Survival": 0.8214285714285714,
+      "top3BestSurvival": 0.8571428571428571
+    },
+    {
+      "bestSurvival": 0.7142857142857143,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_heuristic",
+      "screenFamily": "settings",
+      "split": "valid",
+      "top1Survival": 0.7142857142857143,
+      "top3BestSurvival": 0.7142857142857143
+    },
+    {
+      "bestSurvival": 0.8571428571428571,
+      "cohort": "captured-development",
+      "coverage": 1.0,
+      "groups": 28,
+      "method": "legacy_model",
+      "screenFamily": "settings",
+      "split": "valid",
+      "top1Survival": 0.8214285714285714,
+      "top3BestSurvival": 0.8571428571428571
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "baseline",
+      "screenFamily": "construction-bottleneck/dynamic-attributes",
+      "split": "regression",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "fair_heuristic",
+      "screenFamily": "construction-bottleneck/dynamic-attributes",
+      "split": "regression",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_model",
+      "screenFamily": "construction-bottleneck/dynamic-attributes",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_heuristic",
+      "screenFamily": "construction-bottleneck/dynamic-attributes",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_model",
+      "screenFamily": "construction-bottleneck/dynamic-attributes",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "baseline",
+      "screenFamily": "construction-bottleneck/head-insertion",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_heuristic",
+      "screenFamily": "construction-bottleneck/head-insertion",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_model",
+      "screenFamily": "construction-bottleneck/head-insertion",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_heuristic",
+      "screenFamily": "construction-bottleneck/head-insertion",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_model",
+      "screenFamily": "construction-bottleneck/head-insertion",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "baseline",
+      "screenFamily": "construction-bottleneck/nearby-anchor",
+      "split": "regression",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_heuristic",
+      "screenFamily": "construction-bottleneck/nearby-anchor",
+      "split": "regression",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_model",
+      "screenFamily": "construction-bottleneck/nearby-anchor",
+      "split": "regression",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_heuristic",
+      "screenFamily": "construction-bottleneck/nearby-anchor",
+      "split": "regression",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_model",
+      "screenFamily": "construction-bottleneck/nearby-anchor",
+      "split": "regression",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "baseline",
+      "screenFamily": "construction-bottleneck/nested-containers",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_heuristic",
+      "screenFamily": "construction-bottleneck/nested-containers",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_model",
+      "screenFamily": "construction-bottleneck/nested-containers",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_heuristic",
+      "screenFamily": "construction-bottleneck/nested-containers",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "seen-synthetic-regression",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_model",
+      "screenFamily": "construction-bottleneck/nested-containers",
+      "split": "regression",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "baseline",
+      "screenFamily": "construction-generalization/localized-toolbar",
+      "split": "test",
+      "top1Survival": 1.0,
+      "top3BestSurvival": 1.0
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "fair_heuristic",
+      "screenFamily": "construction-generalization/localized-toolbar",
+      "split": "test",
+      "top1Survival": 1.0,
+      "top3BestSurvival": 1.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_model",
+      "screenFamily": "construction-generalization/localized-toolbar",
+      "split": "test",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_heuristic",
+      "screenFamily": "construction-generalization/localized-toolbar",
+      "split": "test",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_model",
+      "screenFamily": "construction-generalization/localized-toolbar",
+      "split": "test",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "baseline",
+      "screenFamily": "construction-generalization/media-receiver",
+      "split": "test",
+      "top1Survival": 0.75,
+      "top3BestSurvival": 1.0
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "fair_heuristic",
+      "screenFamily": "construction-generalization/media-receiver",
+      "split": "test",
+      "top1Survival": 1.0,
+      "top3BestSurvival": 1.0
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "fair_model",
+      "screenFamily": "construction-generalization/media-receiver",
+      "split": "test",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_heuristic",
+      "screenFamily": "construction-generalization/media-receiver",
+      "split": "test",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_model",
+      "screenFamily": "construction-generalization/media-receiver",
+      "split": "test",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "baseline",
+      "screenFamily": "construction-generalization/permission-state",
+      "split": "test",
+      "top1Survival": 0.75,
+      "top3BestSurvival": 0.8333333333333334
+    },
+    {
+      "bestSurvival": 0.75,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "fair_heuristic",
+      "screenFamily": "construction-generalization/permission-state",
+      "split": "test",
+      "top1Survival": 0.75,
+      "top3BestSurvival": 0.75
+    },
+    {
+      "bestSurvival": 0.25,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_model",
+      "screenFamily": "construction-generalization/permission-state",
+      "split": "test",
+      "top1Survival": 0.25,
+      "top3BestSurvival": 0.25
+    },
+    {
+      "bestSurvival": 0.25,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_heuristic",
+      "screenFamily": "construction-generalization/permission-state",
+      "split": "test",
+      "top1Survival": 0.25,
+      "top3BestSurvival": 0.25
+    },
+    {
+      "bestSurvival": 0.25,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_model",
+      "screenFamily": "construction-generalization/permission-state",
+      "split": "test",
+      "top1Survival": 0.25,
+      "top3BestSurvival": 0.25
+    },
+    {
+      "bestSurvival": 1.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "baseline",
+      "screenFamily": "construction-generalization/validated-editor",
+      "split": "test",
+      "top1Survival": 0.25,
+      "top3BestSurvival": 0.6666666666666666
+    },
+    {
+      "bestSurvival": 0.5,
+      "cohort": "synthetic-holdout",
+      "coverage": 1.0,
+      "groups": 6,
+      "method": "fair_heuristic",
+      "screenFamily": "construction-generalization/validated-editor",
+      "split": "test",
+      "top1Survival": 0.5,
+      "top3BestSurvival": 0.5
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "fair_model",
+      "screenFamily": "construction-generalization/validated-editor",
+      "split": "test",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_heuristic",
+      "screenFamily": "construction-generalization/validated-editor",
+      "split": "test",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    },
+    {
+      "bestSurvival": 0.0,
+      "cohort": "synthetic-holdout",
+      "coverage": 0.5,
+      "groups": 6,
+      "method": "legacy_model",
+      "screenFamily": "construction-generalization/validated-editor",
+      "split": "test",
+      "top1Survival": 0.0,
+      "top3BestSurvival": 0.0
+    }
+  ],
+  "firstExperimentReproduction": {
+    "canonicalCandidateSurvivalAndRankDifferences": 0,
+    "sharedRuns": 660
+  },
+  "fixedRankerSha256": "9ab137a6e184f52246768a905ea98a09a03cf4da97f221526d70e7b6f32afc17",
+  "format": 1,
+  "maxElapsedMillis": 418.213,
+  "policySha256": "ecb04d2f7086b6c1065ff949b821be3d5e37a06ca2e5c5deca63b478acaffa62",
+  "productDecision": {
+    "modelOrInterfaceRelease": false,
+    "passed": false,
+    "promoteFairControllerToDefault": false,
+    "reasons": [
+      "Fresh synthetic coverage falls to 15/24 under learned policy versus 24/24 with the same controller and fixed heuristic",
+      "Fresh synthetic top1 survival is 0.1875 versus 0.8125 for fair heuristic and 0.875 for the complete pure-rule pipeline",
+      "No assessed task exceeds the original search candidate quality ceiling",
+      "Three already-seen regression tasks lose their best candidate quality versus the legacy learned controller"
+    ]
+  },
+  "protocolSha256": "6ab228dc2a9e6e548708bd275e265cd854e8a052bbb881979fe1d3e160adda06",
+  "realApplicationGroups": 0,
+  "scope": "Offline frozen-controller experiment; not a released or trained new model",
+  "selection": {
+    "chosenMethod": "fair_model",
+    "comparison": [
+      {
+        "bestSurvival": 0.9315476190476191,
+        "coverage": 1.0,
+        "method": "legacy_model",
+        "split": "train",
+        "top1Survival": 0.9136904761904762
+      },
+      {
+        "bestSurvival": 0.9613095238095238,
+        "coverage": 1.0,
+        "method": "fair_model",
+        "split": "train",
+        "top1Survival": 0.9136904761904762
+      },
+      {
+        "bestSurvival": 0.8571428571428571,
+        "coverage": 1.0,
+        "method": "legacy_model",
+        "split": "valid",
+        "top1Survival": 0.8214285714285714
+      },
+      {
+        "bestSurvival": 0.9285714285714286,
+        "coverage": 1.0,
+        "method": "fair_model",
+        "split": "valid",
+        "top1Survival": 0.8214285714285714
+      }
+    ],
+    "passed": true,
+    "reasons": [],
+    "scope": "Admission to a fresh held-out experiment only; not a publication decision"
+  },
+  "selectionSha256": "11e9919216847af981e8968f7a3a23dd7b7ca3c37491ebe8d5ff4f60083bc7c2",
+  "sourceSha256": {
+    "app/src/main/java/org/autojs/autojs/core/accessibility/NodeInfoSnapshot.kt": "8c8f63808bc15ae34924fbd448b5d5278414178129e37bf244e28dd2148bae61",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CancellationSignal.kt": "e835012696c188496be69baebec762469f30d5017ad12d3ec8294a8db89fd41b",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CodeGenEngine.kt": "c7d272b42235afcbb0cee9b4c8b92d804eadc98923bded7805fb8c0b9432f78c",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/CodeGenRequest.kt": "3e1047de093886cf9e024e358f190e5306070f182af197c3352bb9047a5ef21b",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/NodeTree.kt": "ce1ff669bf5909eaf8c707c43fdafcf2b9733d07af79f58d7f2c206c509da65c",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/SnapshotNode.kt": "ad42e04dd5084685852cb8e721450fa8cb19ab84640e5e53e0979ebcd79193dc",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/TargetSets.kt": "b83f24dc7d9c241b157dbd63749ad18b09d54c34015e9762df24e0d1a0647435",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/dataset/TaskGroup.kt": "e0981023a22b8b61635042479c8c1130558827b46b19cffc5f936635e2afba7a",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/features/CandidateFeatures.kt": "b9aa2a3f1d075e1349ca7fd3c8cc10544a7c7a2d3d12eb6b03577f54afad8a04",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/features/FeatureSchema.kt": "48bfbf95955502be80944d759e6b407240c45c08dc42d6994cecc437eb412411",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ModelPackage.kt": "588497f95bf0561e92b0027a167cba16e8e50760445aeed20fb128c77434c8cc",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ModelPackageReader.kt": "8b84f1740c7224dfb937dafd2389e64953e5550ded1a140788fbd81295fecb18",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/model/ObliviousTreeModel.kt": "1c4e5dc04985e3155fd5d97f7b49d6acdf56119a8e3fced0cc8ebd96f86f1faa",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/plan/LocatePlan.kt": "4bc6ee98b8bef80ab5d85e32015d824f8d88f0a52f7645a3aab1ca28ab32b0fb",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/plan/SelectorText.kt": "63b2ea4a269e82b192d1f8b753afdf68fdf40c89e7e97ed08664419475a3bc48",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/Explanation.kt": "f51c9bc83236d11c8ed477f9ce5d0ab62eac4fa7710c4bc62f3183ef35d47fe9",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/ModelRanker.kt": "92b824f49e3a432b4352d35a3c3c42b5567d32729423abf319e6d6d470a6f3a8",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/ModelScoreOrder.kt": "da00e1f0962a1acfdaa02689ed1fe19c569ffd9a257bb9704d9b80c5aecd9875",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/Ranker.kt": "73fec3ca261de971fb02595ed20e514e3eeacaf774d54d16e5ed13d85c247e5c",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/RankerUnavailable.kt": "eacf575ca0d93342992e14bbebad8e41a76d5f7bf61aabca5bd3bb5e06162247",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/rank/RuleRanker.kt": "31d51fc0cf8a160e4962e58a86761a59d69d15bb8961d12f52006f21c2e62e31",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/ClassicRenderer.kt": "6729426b191c7f5fb67e66b5d1ac36abdeaebf1f0f9e908eb01b6dc180690b58",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/FlowRenderer.kt": "ea2aacc92c27fb9a89f6c745d0749ce3ccfad9435bd89ef6a915cc53518e0d2d",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/render/RenderSupport.kt": "8f74f2b682b5b5074dd8d40570f65668af768dbbff8b152c9e180d5a28066933",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/search/CandidateSearch.kt": "a3fef8c8b0af506539e780d18760b927da51881741e61b2c4de5a2a9ac10cddf",
+    "app/src/main/java/org/autojs/autojs/core/accessibility/codegen/verify/PlanVerifier.kt": "54acd2136237463b0fef09f7c3deb969b66c7e3c7a71675a2620aab1a02c67d3",
+    "app/src/main/java/org/autojs/autojs/core/automator/UiNode.kt": "34b2b649b8100d78c596313fdc1e174a2138f4380cde6ecf693b6ebc5bb1243d",
+    "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionBottleneckFixtures.kt": "1824f9d146cd940e9d44951e37076e38210f308bdca2d22a07d2ce0dbf27bde8",
+    "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionFeatures.kt": "02c98c02c74d68aae447059cc341934ceeac1aa20f5b9602dc2e1622b8d6342d",
+    "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionGeneralizationFixtures.kt": "73818feb25956eea483c7eb3ba957e46137e67c74fe7e5c9b132a83bcb66b927",
+    "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionGrammar.kt": "71b31555e045e86dd503ac6c3ccded0167ad41bbf7423d72ebc147a066cb9313",
+    "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionPolicyModel.kt": "c0d3fbe9164d56d5c5e2617913699e3069fac378c56cbdfabada0f1dd6404d80",
+    "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionSearch.kt": "9d9a83cc9fb065eea8df08ee4934cecbfc44837f1309259a901b68f6c1d722ff",
+    "app/src/test/java/org/autojs/autojs/core/accessibility/codegen/construction/ConstructionSecondExperimentTask.kt": "bbe270a20449e558508805a61ee15d97755d689181145004186448a4e525b5d5",
+    "tools/codegen-model/construction/select_frontier.py": "ec1ec84c5db54d7561f6db3c147ea9e5c14f0e227450ed61d1bad25e0df4fed1"
+  },
+  "validation": {
+    "constructionParityVectors": 5000,
+    "diagnosticCandidateSetReproductions": 18,
+    "jvmConditionalSkips": 10,
+    "jvmErrors": 0,
+    "jvmFailures": 0,
+    "jvmPassed": 484,
+    "jvmTests": 494,
+    "pythonPassed": 23,
+    "pythonSkipped": 0,
+    "pythonTests": 23
+  },
+  "warmupRunsExcluded": 30
+}
