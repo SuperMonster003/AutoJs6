@@ -660,6 +660,7 @@
     <string name="plugin_item_info_author">Автор</string>
     <string name="plugin_item_info_collaborators">Соавторы</string>
     <string name="plugin_item_info_first_install_time">Перв. устан.</string>
+    <string name="plugin_item_info_installed_abis">Установленные ABI</string>
     <string name="plugin_item_info_installed_version">Уст. вер.</string>
     <string name="plugin_item_info_last_install_time">Посл. устан.</string>
     <string name="plugin_item_info_last_uninstall_time">Посл. удал.</string>

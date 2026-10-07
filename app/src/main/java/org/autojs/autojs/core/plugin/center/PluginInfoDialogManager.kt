@@ -139,6 +139,10 @@ object PluginInfoDialogManager {
             addItem(R.string.text_description, id = "description").maxLines = 20
             addItem(R.string.plugin_item_info_package_size, id = "pluginItemInfoPackageSize")
             addItem(R.string.plugin_item_info_supported_abis, id = "pluginItemInfoSupportedAbis").maxLines = 3
+            addItem(R.string.plugin_item_info_installed_abis, id = "pluginItemInfoInstalledAbis").apply {
+                maxLines = 3
+                isVisible = false
+            }
             addItem(R.string.plugin_item_info_first_install_time, id = "pluginItemInfoFirstInstallTime").isVisible = false
             addItem(R.string.plugin_item_info_last_update_time, id = "pluginItemInfoLastUpdateTime").isVisible = false
             addItem(R.string.plugin_item_info_last_install_time, id = "pluginItemInfoLastInstallTime").isVisible = false
@@ -181,6 +185,15 @@ object PluginInfoDialogManager {
                 context.getString(R.string.text_all),
             ),
         )
+        // Installed ABIs come from the installed package itself; the row stays hidden for
+        // uninstalled plugins and for packages without native code.
+        // zh-CN: "已安装 ABI" 取自已安装包本身; 未安装或无原生代码时不显示该行.
+        info.installedAbis?.takeIf { it.isNotEmpty() }?.let { installedAbis ->
+            items["pluginItemInfoInstalledAbis"].apply {
+                setValueIfAbsent(PluginAbiUtils.formatAbiListOrFallback(installedAbis, context.getString(R.string.text_unknown)))
+                isVisible = true
+            }
+        }
         bindDialogIcon(context, dialog, info)
 
         // If the index does not provide size, try to HEAD request to get it, update display after success.
@@ -615,6 +628,7 @@ object PluginInfoDialogManager {
         val description: String? get() = item.description
         val packageSize: Long
         val supportedAbis: List<String>? get() = item.supportedAbis
+        val installedAbis: List<String>? get() = item.installedAbis
         val apkUrl: String? get() = item.installableApkUrl
         val sha256: String? get() = item.installableApkSha256
         val changelogUrl: String? get() = null

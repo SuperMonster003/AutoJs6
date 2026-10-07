@@ -719,6 +719,7 @@
 * `Mejora` Las sugerencias de parámetros del editor Ace reaparecen tras tocar el área de edición (no tras desplazarse), y ESC oculta tanto las sugerencias de parámetros como la documentación del símbolo
 * `Mejora` Las sugerencias de parámetros del editor Ace admiten métodos sobrecargados incluso con el LSP desactivado o el servicio semántico no disponible: el índice estático incluye 146 sobrecargas declaradas (como app.startActivity), las firmas ECMAScript integradas incorporan sobrecargas para splice / replace / JSON.stringify / Array.from y más, y las sugerencias de parámetros de Python / Lua conservan todas las firmas
 * `Mejora` La documentación emergente del editor Ace se puede desplazar y seleccionar en pantallas táctiles, y las sugerencias inteligentes esperan las sugerencias de parámetros asíncronas en archivos Python / Lua en lugar de recurrir al autocompletado
+* `Mejora` El diálogo de información del centro de plugins distingue "ABI compatibles" de "ABI instaladas": la primera prefiere la meta-data de manifiesto org.autojs.plugin.contract.SUPPORTED_ABIS escrita por la compilación del plugin, luego el servicio INFO del plugin y el índice; la segunda lista las ABI realmente empaquetadas en los APK instalados (splits incluidos)
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

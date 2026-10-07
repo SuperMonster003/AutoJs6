@@ -86,6 +86,10 @@ class InstalledPluginRepository {
         val isStopped: Boolean,
         val resolvedMetadata: InstalledPluginMetadataStore.Entry?,
         val nativePageAlignment: Long? = null,
+
+        // ABIs whose native libraries are packaged in the installed APKs (base + splits).
+        // zh-CN: 已安装 APK (base + splits) 内实际打包的 ABI.
+        val installedAbis: List<String>? = null,
     )
 
     private data class Discovery(
@@ -411,10 +415,21 @@ class InstalledPluginRepository {
             hasLiveInfo -> PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo.capabilities)
             else -> cachedExact?.requiresHostVersion
         }
-        val supportedAbis = when {
+        // The manifest meta-data written by the plugin build describes every ABI the plugin is
+        // built for and wins over the INFO binder, whose value some plugins derive from the
+        // installed split. The installed set is read from the installed package itself.
+        // zh-CN: 构建期写入清单的 meta-data 描述插件构建支持的全部 ABI, 优先于 INFO Binder 的取值
+        // (部分插件的 INFO 取值来自已安装分包). 已安装集合直接取自已安装的包.
+        val declaredAbis = PluginAbiUtils.resolveSupportedAbisFromValue(
+            appInfo.metaData?.getString(org.autojs.plugin.common.api.PluginCapabilityKeys.SUPPORTED_ABIS),
+        )
+        val supportedAbis = declaredAbis ?: when {
             hasLiveInfo -> pluginInfo.supportedAbis?.toList()?.let(PluginAbiUtils::resolveSupportedAbisFromValue)
             else -> cachedExact?.supportedAbis
         }
+        val installedAbis = PluginAbiUtils.parseInstalledApkSupportedAbis(
+            listOfNotNull(appInfo.sourceDir) + appInfo.splitSourceDirs.orEmpty(),
+        )
 
         val resolvedMetadata = when {
             hasLiveInfo -> InstalledPluginMetadataStore.Entry(
@@ -453,6 +468,7 @@ class InstalledPluginRepository {
             versionDate = if (hasLiveInfo) pluginInfo.versionDate else cachedExact?.versionDate,
             requiresHostVersion = requiresHostVersion,
             supportedAbis = supportedAbis,
+            installedAbis = installedAbis,
             nativePageAlignment = nativePageAlignment,
             packageSize = packageSize,
             firstInstallTime = pkgInfo?.firstInstallTime,

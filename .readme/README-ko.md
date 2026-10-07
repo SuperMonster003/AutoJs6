@@ -881,6 +881,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Ace 편집기 매개 변수 힌트가 편집 영역을 탭한 뒤 다시 표시되며 (스크롤 후에는 표시되지 않음), ESC 키가 매개 변수 힌트와 심볼 문서를 함께 숨김
 * `개선` Ace 편집기 매개 변수 힌트가 LSP 가 꺼져 있거나 시맨틱 서비스를 사용할 수 없을 때도 오버로드된 메서드를 지원: 정적 인덱스에 146 개의 선언 오버로드 (app.startActivity 등) 수록, 내장 ECMAScript 시그니처에 splice / replace / JSON.stringify / Array.from 등의 오버로드 추가, Python / Lua 파일의 매개 변수 힌트는 모든 시그니처를 유지
 * `개선` Ace 편집기 호버 문서 상자가 터치 화면에서 스크롤과 텍스트 선택을 지원하고, Python / Lua 파일에서는 스마트 힌트가 비동기 매개 변수 힌트를 기다려 완성으로 잘못 전환되지 않음
+* `개선` 플러그인 센터의 플러그인 정보 대화상자가 "지원 ABI" 와 "설치된 ABI" 를 구분, 전자는 플러그인 빌드가 기록한 매니페스트 meta-data org.autojs.plugin.contract.SUPPORTED_ABIS 를 우선하고 이어서 플러그인 INFO 서비스 반환값과 인덱스를 참조하며, 후자는 설치된 APK (split 포함) 에 실제로 패키징된 ABI
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

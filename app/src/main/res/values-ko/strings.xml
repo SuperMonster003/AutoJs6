@@ -662,6 +662,7 @@
     <string name="plugin_item_info_author">제작자</string>
     <string name="plugin_item_info_collaborators">협력자</string>
     <string name="plugin_item_info_first_install_time">최초 설치</string>
+    <string name="plugin_item_info_installed_abis">설치된 ABI</string>
     <string name="plugin_item_info_installed_version">설치 버전</string>
     <string name="plugin_item_info_last_install_time">마지막 설치</string>
     <string name="plugin_item_info_last_uninstall_time">마지막 제거</string>

@@ -662,6 +662,7 @@
     <string name="plugin_item_info_author">المؤلف</string>
     <string name="plugin_item_info_collaborators">المتعاونون</string>
     <string name="plugin_item_info_first_install_time">أول تثبيت</string>
+    <string name="plugin_item_info_installed_abis">وحدات ABI المثبتة</string>
     <string name="plugin_item_info_installed_version">الإصدار المثبّت</string>
     <string name="plugin_item_info_last_install_time">آخر تثبيت</string>
     <string name="plugin_item_info_last_uninstall_time">آخر إزالة</string>

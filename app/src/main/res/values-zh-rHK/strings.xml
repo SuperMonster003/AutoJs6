@@ -657,6 +657,7 @@
     <string name="plugin_item_info_author">開發者</string>
     <string name="plugin_item_info_collaborators">合作者</string>
     <string name="plugin_item_info_first_install_time">首次安裝</string>
+    <string name="plugin_item_info_installed_abis">已安裝 ABI</string>
     <string name="plugin_item_info_installed_version">已安裝版本</string>
     <string name="plugin_item_info_last_install_time">最近安裝</string>
     <string name="plugin_item_info_last_uninstall_time">最近卸載</string>

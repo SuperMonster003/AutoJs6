@@ -719,6 +719,7 @@
 * `優化` Ace 編輯器參數提示在點按編輯區後恢復顯示 (捲動後不恢復), ESC 鍵同時隱藏參數提示與符號文件
 * `優化` Ace 編輯器參數提示在 LSP 關閉或語義服務不可用時同樣支援重載方法: 靜態索引收錄 146 個宣告重載 (如 app.startActivity), 內建 ECMAScript 簽章增加 splice / replace / JSON.stringify / Array.from 等重載, Python / Lua 檔案的參數提示保留全部簽章
 * `優化` Ace 編輯器懸停文件框支援觸控捲動與選取文字, 智慧提示在 Python / Lua 檔案中等待非同步參數提示而不再誤彈補全
+* `優化` 插件中心的插件資訊對話框區分 "支持 ABI" 與 "已安裝 ABI": 前者優先讀取插件清單中由構建寫入的 org.autojs.plugin.contract.SUPPORTED_ABIS meta-data, 其次為插件 INFO 服務回傳值與索引, 後者為已安裝 APK (含分包) 內實際打包的 ABI
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer

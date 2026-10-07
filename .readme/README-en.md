@@ -881,6 +881,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Ace editor parameter hints reappear after tapping the editor (not after scrolling), and ESC hides both parameter hints and symbol documentation
 * `Improvement` Ace editor parameter hints support overloaded methods even when LSP is off or the semantic service is unavailable: the static index carries 146 declared overloads (such as app.startActivity), the built-in ECMAScript signatures gain overloads for splice / replace / JSON.stringify / Array.from and more, and Python / Lua parameter hints keep every signature
 * `Improvement` Ace editor hover documentation can be scrolled and selected on touch screens, and smart hints wait for asynchronous parameter hints in Python / Lua files instead of falling back to completion
+* `Improvement` The plugin info dialog of Plugin Center tells "Supported ABIs" from "Installed ABIs": the former prefers the org.autojs.plugin.contract.SUPPORTED_ABIS manifest meta-data written by the plugin build, then the plugin INFO service and the index; the latter lists the ABIs actually packaged in the installed APKs (splits included)
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

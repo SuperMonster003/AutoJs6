@@ -881,6 +881,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` Ace エディターのパラメーターヒントは編集領域のタップ後に再表示され (スクロール後は再表示しない), ESC キーでパラメーターヒントとシンボルのドキュメントを同時に非表示
 * `改善` Ace エディターのパラメーターヒントが LSP オフ時やセマンティックサービス利用不可時でもオーバーロードに対応: 静的インデックスに 146 件の宣言オーバーロード (app.startActivity など) を収録, 組み込み ECMAScript シグネチャに splice / replace / JSON.stringify / Array.from などのオーバーロードを追加, Python / Lua ファイルのパラメーターヒントは全シグネチャを保持
 * `改善` Ace エディターのホバードキュメントがタッチ画面でスクロールと文字選択に対応, Python / Lua ファイルではスマートヒントが非同期のパラメーターヒントを待ち, 補完へ誤って切り替わらない
+* `改善` プラグインセンターのプラグイン情報ダイアログで "対応 ABI" と "インストール済み ABI" を区別, 前者はプラグインのビルドが書き込むマニフェスト meta-data org.autojs.plugin.contract.SUPPORTED_ABIS を優先し, 次にプラグイン INFO サービスの返り値とインデックスを参照, 後者はインストール済み APK (split を含む) に実際にパッケージされた ABI
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

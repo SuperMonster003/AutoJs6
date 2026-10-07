@@ -661,6 +661,7 @@
     <string name="plugin_item_info_author">作者</string>
     <string name="plugin_item_info_collaborators">協力者</string>
     <string name="plugin_item_info_first_install_time">初回インストール</string>
+    <string name="plugin_item_info_installed_abis">インストール済み ABI</string>
     <string name="plugin_item_info_installed_version">インストール済み Ver.</string>
     <string name="plugin_item_info_last_install_time">最終インストール</string>
     <string name="plugin_item_info_last_uninstall_time">最終アンインストール</string>

@@ -657,6 +657,7 @@
     <string name="plugin_item_info_author">Author</string>
     <string name="plugin_item_info_collaborators">Collaborators</string>
     <string name="plugin_item_info_first_install_time">First install</string>
+    <string name="plugin_item_info_installed_abis">Installed ABIs</string>
     <string name="plugin_item_info_installed_version">Installed ver.</string>
     <string name="plugin_item_info_last_install_time">Last install</string>
     <string name="plugin_item_info_last_uninstall_time">Last uninstall</string>

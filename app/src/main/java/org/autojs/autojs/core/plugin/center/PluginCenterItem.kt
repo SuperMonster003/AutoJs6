@@ -42,6 +42,11 @@ data class PluginCenterItem(
     val installableApkSha256: String? = null,
     val installableApkSizeBytes: Long? = null,
     val supportedAbis: List<String>? = null,
+
+    // ABIs whose native libraries are packaged in the installed APKs (base + splits);
+    // null for uninstalled plugins, empty for packages without native code.
+    // zh-CN: 已安装 APK (base + splits) 内实际打包的 ABI; 未安装为 null, 无原生代码为空列表.
+    val installedAbis: List<String>? = null,
     val remoteIconUrl: String? = null,
     val remoteNightIconUrl: String? = null,
     val forceIgnoreLocalIcon: Boolean = false,

@@ -660,6 +660,7 @@
     <string name="plugin_item_info_author">Auteur</string>
     <string name="plugin_item_info_collaborators">Collaborateurs</string>
     <string name="plugin_item_info_first_install_time">1re inst.</string>
+    <string name="plugin_item_info_installed_abis">ABI installées</string>
     <string name="plugin_item_info_installed_version">Ver. installée</string>
     <string name="plugin_item_info_last_install_time">Dern. inst.</string>
     <string name="plugin_item_info_last_uninstall_time">Dern. désinst.</string>

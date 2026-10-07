@@ -593,6 +593,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` Ace 编辑器参数提示在点按编辑区后恢复显示 (滚动后不恢复), ESC 键同时隐藏参数提示与符号文档
 * `优化` Ace 编辑器参数提示在 LSP 关闭或语义服务不可用时同样支持重载方法: 静态索引收录 146 个声明重载 (如 app.startActivity), 内置 ECMAScript 签名增加 splice / replace / JSON.stringify / Array.from 等重载, Python / Lua 文件的参数提示保留全部签名
 * `优化` Ace 编辑器悬停文档框支持触屏滚动与选择文本, 智能提示在 Python / Lua 文件中等待异步参数提示而不再误弹补全
+* `优化` 插件中心的插件信息对话框区分 "支持 ABI" 与 "已安装 ABI": 前者优先读取插件清单中由构建写入的 org.autojs.plugin.contract.SUPPORTED_ABIS meta-data, 其次为插件 INFO 服务返回值与索引, 后者为已安装 APK (含分包) 内实际打包的 ABI
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
