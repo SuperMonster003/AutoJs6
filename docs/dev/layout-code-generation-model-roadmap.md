@@ -262,7 +262,7 @@ py -3.12 tools/codegen-model-distribution/prepare_bootstrap.py --catalog codegen
   - 目录获取失败时显示原因与重试, 已安装模型照常可用.
 
   页面逻辑抽成 `CodeGenModelsViewModel` (纯 Kotlin 状态: 分组, 行状态, 操作可用性), 单测 `CodeGenModelsStateTest`. 界面文字 11 个 `strings.xml`. 证据 (E1/E3, 2026-10-07): 管理 Activity 与无障碍服务分类入口完成; CodeGenModelsStateTest 15 项、CodegenModelOperationsTest 8 项通过, 含来源判定、相同内容、100 MiB 截止、取消清理、篡改 staging/模型卡拒绝. 35 项文案同步 11 个 strings.xml, 10 语言 changelog 与 22 个生成 Markdown 同步. 两设备通过 4 项实际管理流程, 覆盖单字节坏包、自定义多版本、实际 GitHub 升级、提交跨 Activity 重建; API 24 系统文件选择器导入及两设备飞机模式/重试/已安装当前模型保留另行验收. 提供程序 CancellationSignal 与后台中断、持久提交后的共享变更通知、取消下载终止清理等待已接入.
-- [ ] P6.8 阶段收尾: 编译与 `codegen.*` 单测通过; 在 AVD (API 24) 与 Redmi 22120RN86C (API 33) 上用 `tiny-test` 包与 P5.4 测试仓库目录执行附录 B 第 7-10 项 (导入, 重复, 更新, 管理页操作与离线), 记录 (E3). 每个子条目一个提交.
+- [x] P6.8 阶段收尾: 编译与 `codegen.*` 单测通过; 在 AVD (API 24) 与 Redmi 22120RN86C (API 33) 上用 `tiny-test` 包与 P5.4 测试仓库目录执行附录 B 第 7-10 项 (导入, 重复, 更新, 管理页操作与离线), 记录 (E3). 每个子条目一个提交. 证据 (E1/E2/E3, 2026-10-07): 默认正式源 APK 与最终 JVM 回归通过, 351 项中 345 通过、6 项既有条件跳过 (4 项 opt-in 导出/外部评估、2 项 Windows 符号链接权限). API 24 与 Redmi API 33 各通过 4 项 CodeGenModelsDeviceTest 和 7 项 ModelDialogsDeviceTest; 最终对比测试以普通/悬浮窗口检查完整文字可达、字体 2.0、RTL 与表宽上限. API 24 SAF 真实导入、两台飞机模式检查更新失败/重试/已安装当前模型保留通过. v2 由维护者签名并 dispatch, 公开工作流 37570326238 成功 (63 项分发测试), v1/v2 六项发布文件回读 hash 一致. 本轮实现提交 P6.5=41c6c4ec53、P6.6=3bfe1fdb61、P6.7=234ad66f16; 详细记录见 tools/codegen-model/reports/p6-management-2026.10-1.md. 调试源开关、设备安装包与网络设置均恢复, 测试模型清理, 宿主仅本地提交.
 
 ### P7 对话框集成 (模型开关, 按需下载, 回退)
 
