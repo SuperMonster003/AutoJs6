@@ -95,6 +95,7 @@
     <string name="description_ace_lsp_enabled_preference">LSP 智能补全默认开启. 编辑器会使用内置的 TypeScript 语言服务提供补全, 悬停提示, 参数提示和语法诊断, 并保留静态补全作为后备方案. 此功能可随时关闭.</string>
     <string name="description_ace_lsp_file_types_preference">LSP 仅会针对文件名符合所选后缀的文件启动. 使用默认值会恢复 JavaScript, TypeScript, JSON, Auto.js 与 Node.js 相关后缀.</string>
     <string name="description_ace_print_margin_enabled_preference">显示或隐藏 Ace 编辑器右侧的打印参考线. 此设置只改变代码的显示方式.</string>
+    <string name="description_ace_smart_hint_preference">智能提示始终可以手动唤出: 长按多功能键盘的 TAB 键, 或在硬件键盘上按 Ctrl+Space, 即可按光标上下文显示代码补全, 参数提示或符号文档. Ctrl+Shift+Space 显示或切换参数提示, Ctrl+Q 显示符号文档, 参数提示显示时 Alt+Up / Alt+Down 切换重载.</string>
     <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式. 此设置不会修改文件内容.</string>
     <string name="description_ai_settings_preference">打开 3-Stone AI, 管理全局 ai 模块使用的本地模型, 在线服务及默认目标.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有文件\" (或 \"所有文件访问\") 权限允许 AutoJs6 在共享存储空间中通过常规文件路径直接 [ 创建 / 读取 / 修改 / 删除 ] 文件, 使脚本可以访问 \"内部存储 (Internal Storage)\", 使文件管理器可以正常显示及管理文件.\n\n在 Android 11+ 设备上, 这是实现全盘文件读写能力的主要方式.</string>
@@ -250,6 +251,12 @@
     <string name="editable_file_info_line_break_label">换行</string>
     <string name="editable_file_info_line_count_label">总行数</string>
     <string name="entry_ace_editor_font_system_monospace">Android 系统默认等宽字体</string>
+    <string name="entry_ace_smart_hint_completion_delay_0">无延迟</string>
+    <string name="entry_ace_smart_hint_completion_trigger_dot">仅输入 \".\" 后</string>
+    <string name="entry_ace_smart_hint_completion_trigger_identifier">输入标识符时</string>
+    <string name="entry_ace_smart_hint_signature_trigger_cursor">光标进入调用时</string>
+    <string name="entry_ace_smart_hint_signature_trigger_typing">仅输入 \"(\" 或 \",\" 时</string>
+    <string name="entry_ace_smart_hint_trigger_off">关闭</string>
     <string name="entry_app_language_auto">跟随系统</string>
     <string name="entry_documentation_source_local">本地文档</string>
     <string name="entry_documentation_source_online">在线文档</string>
@@ -728,6 +735,11 @@
     <string name="summary_ace_lsp_enabled">启用 LSP 驱动的编辑辅助</string>
     <string name="summary_ace_lsp_file_types">选择可启用 LSP 功能的文件类型</string>
     <string name="summary_ace_print_margin_enabled">显示编辑器右侧的列数限制参考线</string>
+    <string name="summary_ace_smart_hint_arrow_overload_cycling">参数提示显示多个重载时, 多功能键盘的上下键切换重载而非移动光标</string>
+    <string name="summary_ace_smart_hint_completion_delay">停止输入后多久自动弹出补全列表</string>
+    <string name="summary_ace_smart_hint_completion_min_chars">输入多少个字符后自动弹出补全列表</string>
+    <string name="summary_ace_smart_hint_completion_trigger">补全列表自动弹出的时机</string>
+    <string name="summary_ace_smart_hint_signature_trigger">参数提示自动显示的时机</string>
     <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行</string>
     <string name="summary_all_files_access">允许 AutoJs6 访问所有文件, 包括外部存储</string>
     <string name="summary_all_files_access_inrt">允许应用访问所有文件, 包括外部存储</string>
@@ -784,6 +796,11 @@
     <string name="summary_setup_wizards">授予常用权限及安装官方插件</string>
     <string name="text_accent_and_dark">强调色 / 深色</string>
     <string name="text_accent_color">强调色</string>
+    <string name="text_ace_smart_hint_arrow_overload_cycling">方向键切换重载</string>
+    <string name="text_ace_smart_hint_completion_delay">补全触发延迟</string>
+    <string name="text_ace_smart_hint_completion_min_chars">补全最少触发字符数</string>
+    <string name="text_ace_smart_hint_completion_trigger">自动补全</string>
+    <string name="text_ace_smart_hint_signature_trigger">参数提示</string>
     <string name="text_add_all_to_color_library">全部加入颜色库</string>
     <string name="text_add_colors">添加颜色</string>
     <string name="text_add_favorite_from_palette">从调色盘收藏</string>

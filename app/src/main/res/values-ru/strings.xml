@@ -99,6 +99,7 @@
     <string name="description_ace_lsp_enabled_preference">Интеллектуальное автодополнение LSP включено по умолчанию. Редактор использует встроенную языковую службу TypeScript для автодополнения, всплывающих подсказок, сведений о сигнатурах и диагностики, сохраняя статическое автодополнение в качестве резервного варианта. Эту функцию можно отключить в любое время.</string>
     <string name="description_ace_lsp_file_types_preference">LSP запускается только для файлов, имена которых заканчиваются одним из выбранных суффиксов. Значение по умолчанию восстанавливает набор суффиксов JavaScript, TypeScript, JSON, Auto.js и Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Показывает или скрывает линию границы печати в правой части редактора Ace. Изменяется только отображение кода.</string>
+    <string name="description_ace_smart_hint_preference">Умные подсказки всегда можно вызвать вручную: долгое нажатие TAB на панели клавиш или Ctrl+Space на аппаратной клавиатуре показывает автодополнение, подсказку параметров или документацию символа в зависимости от контекста курсора. Ctrl+Shift+Space показывает или переключает подсказку параметров, Ctrl+Q показывает документацию символа, а Alt+Up / Alt+Down переключают перегрузки при видимой подсказке параметров.</string>
     <string name="description_ace_word_wrap_enabled_preference">Включает перенос длинных строк в редакторе. Содержимое файла не изменяется.</string>
     <string name="description_ai_settings_preference">Откройте 3-Stone AI для управления локальными моделями, онлайн-сервисами и целью по умолчанию глобального модуля ai.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">Разрешение \"управление всеми файлами\" (или \"доступ ко всем файлам\") позволяет AutoJs6 напрямую [ создавать / читать / изменять / удалять ] файлы в общем хранилище через обычные пути файлов, чтобы скрипты могли получать доступ к \"Internal Storage\", а файловый менеджер мог корректно отображать и управлять файлами.\n\nНа устройствах Android 11+ это основной способ обеспечить полный доступ к чтению/записи файлов.</string>
@@ -254,6 +255,12 @@
     <string name="editable_file_info_line_break_label">Перенос</string>
     <string name="editable_file_info_line_count_label">Строки</string>
     <string name="entry_ace_editor_font_system_monospace">Системный моноширинный шрифт Android</string>
+    <string name="entry_ace_smart_hint_completion_delay_0">Без задержки</string>
+    <string name="entry_ace_smart_hint_completion_trigger_dot">Только после ввода \".\"</string>
+    <string name="entry_ace_smart_hint_completion_trigger_identifier">При вводе идентификаторов</string>
+    <string name="entry_ace_smart_hint_signature_trigger_cursor">Когда курсор входит в вызов</string>
+    <string name="entry_ace_smart_hint_signature_trigger_typing">Только после ввода \"(\" или \",\"</string>
+    <string name="entry_ace_smart_hint_trigger_off">Выключено</string>
     <string name="entry_app_language_auto">Следовать за системой</string>
     <string name="entry_documentation_source_local">Локальные документы</string>
     <string name="entry_documentation_source_online">Онлайн-документы</string>
@@ -732,6 +739,11 @@
     <string name="summary_ace_lsp_enabled">Включить интеллектуальную помощь редактора на основе LSP</string>
     <string name="summary_ace_lsp_file_types">Выбрать типы файлов, для которых доступны функции LSP</string>
     <string name="summary_ace_print_margin_enabled">Показывать справа линию ограничения ширины строки</string>
+    <string name="summary_ace_smart_hint_arrow_overload_cycling">Когда подсказка параметров показывает несколько перегрузок, клавиши вверх и вниз на панели клавиш переключают перегрузки вместо перемещения курсора</string>
+    <string name="summary_ace_smart_hint_completion_delay">Пауза после ввода до появления списка дополнения</string>
+    <string name="summary_ace_smart_hint_completion_min_chars">Сколько символов ввести до появления списка дополнения</string>
+    <string name="summary_ace_smart_hint_completion_trigger">Когда список дополнения открывается автоматически</string>
+    <string name="summary_ace_smart_hint_signature_trigger">Когда подсказки параметров появляются автоматически</string>
     <string name="summary_ace_word_wrap_enabled">Переносить длинные строки в пределах области редактора</string>
     <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
@@ -788,6 +800,11 @@
     <string name="summary_setup_wizards">Предоставление основных разрешений и установка официальных плагинов</string>
     <string name="text_accent_and_dark">Акцент / тёмный</string>
     <string name="text_accent_color">Акцент</string>
+    <string name="text_ace_smart_hint_arrow_overload_cycling">Переключение перегрузок стрелками</string>
+    <string name="text_ace_smart_hint_completion_delay">Задержка дополнения</string>
+    <string name="text_ace_smart_hint_completion_min_chars">Минимум символов для дополнения</string>
+    <string name="text_ace_smart_hint_completion_trigger">Автодополнение</string>
+    <string name="text_ace_smart_hint_signature_trigger">Подсказки параметров</string>
     <string name="text_add_all_to_color_library">Добавить все в цветовую библиотеку</string>
     <string name="text_add_colors">Добавить цвета</string>
     <string name="text_add_favorite_from_palette">Добавить из палитры</string>

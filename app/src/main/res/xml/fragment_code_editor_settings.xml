@@ -176,6 +176,56 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_smart_hint">
+
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_smart_hint_completion_trigger"
+            app:title="@string/text_ace_smart_hint_completion_trigger"
+            app:itemKeys="@array/keys_ace_smart_hint_completion_trigger"
+            app:itemValues="@array/values_ace_smart_hint_completion_trigger"
+            app:itemDefaultKey="@string/default_key_ace_smart_hint_completion_trigger"
+            app:longClickPrompt="@string/description_ace_smart_hint_preference" />
+
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_smart_hint_completion_min_chars"
+            app:title="@string/text_ace_smart_hint_completion_min_chars"
+            app:itemKeys="@array/keys_ace_smart_hint_completion_min_chars"
+            app:itemValues="@array/values_ace_smart_hint_completion_min_chars"
+            app:itemDefaultKey="@string/default_key_ace_smart_hint_completion_min_chars"
+            app:longClickPrompt="@string/description_ace_smart_hint_preference" />
+
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_smart_hint_completion_delay"
+            app:title="@string/text_ace_smart_hint_completion_delay"
+            app:itemKeys="@array/keys_ace_smart_hint_completion_delay"
+            app:itemValues="@array/values_ace_smart_hint_completion_delay"
+            app:itemDefaultKey="@string/default_key_ace_smart_hint_completion_delay"
+            app:longClickPrompt="@string/description_ace_smart_hint_preference" />
+
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_smart_hint_signature_trigger"
+            app:title="@string/text_ace_smart_hint_signature_trigger"
+            app:itemKeys="@array/keys_ace_smart_hint_signature_trigger"
+            app:itemValues="@array/values_ace_smart_hint_signature_trigger"
+            app:itemDefaultKey="@string/default_key_ace_smart_hint_signature_trigger"
+            app:longClickPrompt="@string/description_ace_smart_hint_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_smart_hint_arrow_overload_cycling"
+            app:defaultValue="@bool/pref_ace_smart_hint_arrow_overload_cycling"
+            app:title="@string/text_ace_smart_hint_arrow_overload_cycling"
+            app:summary="@string/summary_ace_smart_hint_arrow_overload_cycling"
+            app:longClickPrompt="@string/description_ace_smart_hint_preference" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_editor_gestures">
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference

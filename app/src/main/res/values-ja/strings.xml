@@ -100,6 +100,7 @@
     <string name="description_ace_lsp_enabled_preference">LSP スマート補完はデフォルトで有効です. エディターは内蔵の TypeScript 言語サービスを使用して補完, ホバー情報, シグネチャヘルプ, 診断を提供し, 静的補完をフォールバックとして維持します. この機能はいつでも無効にできます.</string>
     <string name="description_ace_lsp_file_types_preference">LSP は, ファイル名が選択した接尾辞のいずれかで終わる場合にのみ起動します. \"デフォルトを使用\" を選ぶと, JavaScript, TypeScript, JSON, Auto.js, Node.js の接尾辞セットに戻ります.</string>
     <string name="description_ace_print_margin_enabled_preference">Ace エディターのプリントマージンガイドを表示または非表示にします. これは右側の列制限線であり, 変更されるのはコードの表示だけです.</string>
+    <string name="description_ace_smart_hint_preference">スマートヒントはいつでも手動で呼び出せます: キーボードバーの TAB キーを長押しするか, ハードウェアキーボードで Ctrl+Space を押すと, カーソルの文脈に応じてコード補完, パラメーターヒント, シンボルのドキュメントを表示します. Ctrl+Shift+Space はパラメーターヒントの表示 / 切り替え, Ctrl+Q はシンボルのドキュメント表示, パラメーターヒント表示中の Alt+Up / Alt+Down はオーバーロードの切り替えです.</string>
     <string name="description_ace_word_wrap_enabled_preference">長い行に対するエディターの折り返しモードを有効にします. ファイルの内容は変更されません.</string>
     <string name="description_ai_settings_preference">3-Stone AI を開き, グローバル ai モジュールで使用するローカルモデル, オンラインサービス, デフォルトターゲットを管理します.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"すべてのファイルを管理\" (または \"すべてのファイルへのアクセス\") 権限により, AutoJs6 は共有ストレージ上で通常のファイルパスを使って直接 [ 作成 / 読み取り / 変更 / 削除 ] を行えます. これによりスクリプトは \"Internal Storage\" にアクセスでき, ファイルマネージャーもファイルを正常に表示および管理できます.\n\nAndroid 11+ では, フルストレージの読み書きを実現する主要な方法です.</string>
@@ -255,6 +256,12 @@
     <string name="editable_file_info_line_break_label">改行</string>
     <string name="editable_file_info_line_count_label">行数</string>
     <string name="entry_ace_editor_font_system_monospace">Android システム等幅フォント</string>
+    <string name="entry_ace_smart_hint_completion_delay_0">遅延なし</string>
+    <string name="entry_ace_smart_hint_completion_trigger_dot">\".\" の入力後のみ</string>
+    <string name="entry_ace_smart_hint_completion_trigger_identifier">識別子の入力中</string>
+    <string name="entry_ace_smart_hint_signature_trigger_cursor">カーソルが呼び出しに入ったとき</string>
+    <string name="entry_ace_smart_hint_signature_trigger_typing">\"(\" または \",\" の入力後のみ</string>
+    <string name="entry_ace_smart_hint_trigger_off">オフ</string>
     <string name="entry_app_language_auto">システムに従ってください</string>
     <string name="entry_documentation_source_local">ローカルドキュメント</string>
     <string name="entry_documentation_source_online">オンラインドキュメント</string>
@@ -733,6 +740,11 @@
     <string name="summary_ace_lsp_enabled">LSP によるエディター支援を有効化</string>
     <string name="summary_ace_lsp_file_types">LSP 機能を使用できるファイル形式を選択</string>
     <string name="summary_ace_print_margin_enabled">右側の列制限ガイドを表示</string>
+    <string name="summary_ace_smart_hint_arrow_overload_cycling">パラメーターヒントに複数のオーバーロードがあるとき, キーボードバーの上下キーでカーソル移動の代わりにオーバーロードを切り替える</string>
+    <string name="summary_ace_smart_hint_completion_delay">入力停止後, 補完リストを表示するまでの待ち時間</string>
+    <string name="summary_ace_smart_hint_completion_min_chars">補完リストを表示するまでに入力する文字数</string>
+    <string name="summary_ace_smart_hint_completion_trigger">補完リストを自動表示するタイミング</string>
+    <string name="summary_ace_smart_hint_signature_trigger">パラメーターヒントを自動表示するタイミング</string>
     <string name="summary_ace_word_wrap_enabled">エディターのビューポート内で長い行を折り返す</string>
     <string name="summary_all_files_access">AutoJs6 が外部ストレージを含むすべてのファイルにアクセスすることを許可します</string>
     <string name="summary_all_files_access_inrt">アプリが外部ストレージを含むすべてのファイルにアクセスすることを許可する</string>
@@ -789,6 +801,11 @@
     <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
     <string name="text_accent_and_dark">アクセント / ダーク</string>
     <string name="text_accent_color">アクセント</string>
+    <string name="text_ace_smart_hint_arrow_overload_cycling">矢印キーでオーバーロードを切り替え</string>
+    <string name="text_ace_smart_hint_completion_delay">補完の遅延</string>
+    <string name="text_ace_smart_hint_completion_min_chars">補完の最小文字数</string>
+    <string name="text_ace_smart_hint_completion_trigger">自動補完</string>
+    <string name="text_ace_smart_hint_signature_trigger">パラメーターヒント</string>
     <string name="text_add_all_to_color_library">すべてカラーライブラリに追加</string>
     <string name="text_add_colors">色を追加</string>
     <string name="text_add_favorite_from_palette">カラーパレットから追加</string>

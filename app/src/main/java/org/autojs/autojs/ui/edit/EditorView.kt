@@ -879,6 +879,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         EditorDisplayPreferences.KEY_GUTTER_WIDTH_MODE,
         EditorDisplayPreferences.KEY_FONT_LIGATURES_ENABLED,
         EditorDisplayPreferences.KEY_FONT_STYLES_ENABLED,
+        EditorDisplayPreferences.KEY_SMART_HINT_COMPLETION_TRIGGER,
+        EditorDisplayPreferences.KEY_SMART_HINT_COMPLETION_MIN_CHARS,
+        EditorDisplayPreferences.KEY_SMART_HINT_COMPLETION_DELAY,
+        EditorDisplayPreferences.KEY_SMART_HINT_SIGNATURE_TRIGGER,
+        EditorDisplayPreferences.KEY_SMART_HINT_ARROW_OVERLOAD_CYCLING,
     )
 
     private val mEditorPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->

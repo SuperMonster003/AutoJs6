@@ -96,6 +96,7 @@
     <string name="description_ace_lsp_enabled_preference">LSP smart completion is enabled by default. The editor uses the bundled TypeScript language service for completion, hover, signature help, and diagnostics, with static completion kept as a fallback. You can turn it off at any time.</string>
     <string name="description_ace_lsp_file_types_preference">LSP is only started for files whose names end with one of the selected suffixes. Use default restores the JavaScript, TypeScript, JSON, Auto.js, and Node.js suffix set.</string>
     <string name="description_ace_print_margin_enabled_preference">Show or hide the Ace editor print margin guide. This is the right-side column limit line and only changes how code is displayed.</string>
+    <string name="description_ace_smart_hint_preference">Smart hints can always be requested manually: long-press TAB on the keyboard bar, or press Ctrl+Space on a hardware keyboard, to get code completion, parameter hints or symbol documentation for the cursor context. Ctrl+Shift+Space shows or cycles parameter hints, Ctrl+Q shows symbol documentation, and Alt+Up / Alt+Down switch overloads while parameter hints are visible.</string>
     <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
     <string name="description_ai_settings_preference">Open 3-Stone AI to manage local models, online services, and the default target used by the global ai module.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">The \"manage all files\" (or \"all files access\") permission allows AutoJs6 to directly [ create / read / modify / delete ] files in shared storage via normal file paths, allowing scripts to access \"Internal Storage\" and enabling the file manager to display and manage files properly.\n\nOn Android 11+ devices, this is the primary way to achieve full file read/write access.</string>
@@ -251,6 +252,12 @@
     <string name="editable_file_info_line_break_label">EOL</string>
     <string name="editable_file_info_line_count_label">Lines</string>
     <string name="entry_ace_editor_font_system_monospace">Android system monospace</string>
+    <string name="entry_ace_smart_hint_completion_delay_0">No delay</string>
+    <string name="entry_ace_smart_hint_completion_trigger_dot">Only after typing \".\"</string>
+    <string name="entry_ace_smart_hint_completion_trigger_identifier">While typing identifiers</string>
+    <string name="entry_ace_smart_hint_signature_trigger_cursor">When the cursor enters a call</string>
+    <string name="entry_ace_smart_hint_signature_trigger_typing">Only after typing \"(\" or \",\"</string>
+    <string name="entry_ace_smart_hint_trigger_off">Off</string>
     <string name="entry_app_language_auto">Follow system</string>
     <string name="entry_documentation_source_local">Local docs</string>
     <string name="entry_documentation_source_online">Online docs</string>
@@ -729,6 +736,11 @@
     <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance</string>
     <string name="summary_ace_lsp_file_types">Choose file types that can use LSP features</string>
     <string name="summary_ace_print_margin_enabled">Show the right-side column limit guide</string>
+    <string name="summary_ace_smart_hint_arrow_overload_cycling">While parameter hints show several overloads, the keyboard bar\'s Up and Down keys switch overloads instead of moving the cursor</string>
+    <string name="summary_ace_smart_hint_completion_delay">Pause after typing before the completion popup opens</string>
+    <string name="summary_ace_smart_hint_completion_min_chars">Characters to type before the completion popup opens</string>
+    <string name="summary_ace_smart_hint_completion_trigger">When the completion popup opens on its own</string>
+    <string name="summary_ace_smart_hint_signature_trigger">When parameter hints appear on their own</string>
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
     <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
@@ -785,6 +797,11 @@
     <string name="summary_setup_wizards">Grant common permissions and install official plugins</string>
     <string name="text_accent_and_dark">Accent / dark</string>
     <string name="text_accent_color">Accent</string>
+    <string name="text_ace_smart_hint_arrow_overload_cycling">Switch overloads with arrow keys</string>
+    <string name="text_ace_smart_hint_completion_delay">Completion delay</string>
+    <string name="text_ace_smart_hint_completion_min_chars">Minimum characters for completion</string>
+    <string name="text_ace_smart_hint_completion_trigger">Automatic completion</string>
+    <string name="text_ace_smart_hint_signature_trigger">Parameter hints</string>
     <string name="text_add_all_to_color_library">Add all to a color library</string>
     <string name="text_add_colors">Add colors</string>
     <string name="text_add_favorite_from_palette">Add from the color palette</string>

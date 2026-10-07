@@ -23,11 +23,16 @@
 | D1 | 统一的 "智能提示" 触发动作, 由光标上下文分派 | 分派顺序: (1) 光标前有标识符前缀或处于 `xxx.` 之后且光标不在单词内部 -> 代码补全 (若同时位于调用括号内则一并显示参数提示); (2) 参数提示已显示且重载数 > 1 -> 切换到下一重载; (3) 光标在标识符内部 (只读模式下也含标识符末尾) -> 符号文档 (悬停信息); (4) 光标处于调用括号内 -> 参数提示 (强制显示, 忽略自动策略); (5) 其他 -> 代码补全 (全局符号 / 片段). 任一步骤无结果则落到下一步; 只读模式跳过补全分支. |
 | D2 | TAB 键标签与点按行为不变, 长按 = 智能提示 | 不新增按键, 不做随上下文变化标签的动态按键. TAB 点按仍为 "接受补全 / 缩进"; 原长按功能 "跳转到上一个光标位置" 移入编辑器菜单 "跳转" 分组 (Ace 引擎可见, 无返回点时禁用), 并继续可被 ☆ 动作收藏记录与重放. |
 | D3 | 硬件快捷键 | Ctrl+Space / Alt+Space = 智能提示 (覆盖 Ace 默认 `startAutocomplete` 绑定, 使其遵循 D1); Ctrl+Shift+Space = 参数提示 (已显示且有多重载时切换到下一重载, 与 VS Code 一致); Ctrl+Q = 符号文档. 不占用 Alt+Up / Alt+Down (Ace 默认为移动行). |
-| D4 | 参数提示的重载数据与交互 | 数据层返回 `signatures[]` + `activeSignature` + `activeParameter` (+ `parameterDocs`, `isVariadic`, `applicableSpanStart`), 顶层同时保留当前签名的 `caption / signature / parameters / activeParameter / docText` 以兼容既有消费者与测试; 单签名来源 (静态索引, 内置签名, Python, Lua) 由 `normalizeSignatureHelp` 包装. UI 在重载数 > 1 时显示 `‹ i/n ›` 可点按切换; 手动选择在同一调用内保持 (键为 `applicableSpanStart`, 否则为被调用者名称), 调用位置变化后重置; 实参超出形参数时高亮末位 rest 参数; 摘要优先显示当前参数的文档. |
+| D4 | 参数提示的重载数据与交互 | 数据层返回 `signatures[]` + `activeSignature` + `activeParameter` (+ `parameterDocs`, `isVariadic`, `applicableSpanStart`), 顶层同时保留当前签名的 `caption / signature / parameters / activeParameter / docText` 以兼容既有消费者与测试; 单签名来源 (静态索引, 内置签名, Python, Lua) 由 `normalizeSignatureHelp` 包装. UI 在重载数 > 1 时于提示窗口右上角显示 `▴ i/n ▾` 可点按切换 (P1 为 `‹ i/n ›`, 按 D13 改为上下按钮); 手动选择在同一调用内保持 (键为 `applicableSpanStart`, 否则为被调用者名称), 调用位置变化后重置; 实参超出形参数时高亮末位 rest 参数; 摘要优先显示当前参数的文档. |
 | D5 | Ace 保持 1.4.12 | 新增实现只使用 Ace 公开 API (`execCommand("startAutocomplete")`, `completer.detach / goTo / insertMatch`, `commands.addCommand`), 不新增对 Ace 内部结构的依赖; 升级评估单列 P5, 不阻塞其他阶段. |
 | D6 | 编辑器契约 5 -> 6, 宿主按契约门控 | `EditorPluginSession.triggerSmartHint()` 为契约 6 新增方法. 宿主 `AceScriptEditorEngine` 记录已加载插件的契约版本, `supportsSmartHint` 为 false 时 TAB 长按退回旧行为 (跳转到上一个光标位置), 不调用新方法; 收藏中的 "智能提示" 动作在旧插件上视为未处理. 插件 `AceEditorMetadata.CONTRACT_VERSION` 与清单 meta-data 同步为 6. |
 | D7 | 自动出现策略做成设置项, 默认值与现状一致 | P2 在 "代码编辑器设置 > 编辑辅助" 下新增 "智能提示" 分组: 自动补全触发 (输入标识符时 [默认] / 仅输入 "." 后 / 关闭), 最少触发字符数 (1 [默认] / 2 / 3), 触发延迟 (0 [默认] / 100 / 250 ms), 参数提示触发 (光标进入调用时 [默认] / 仅输入 "(" "," 时 / 关闭). 插件直接读取宿主默认 SharedPreferences (沿用 `AceEditorDisplayPreferences` 模式), 通过 `invokeAce("setSmartHintOptions", json)` 热更新; 手动触发 (D1) 不受自动策略限制. |
-| D8 | 资源, 日志与仓库约定 | 字符串遵循 `AGENTS.md` (11 个 `strings.xml`, `values` 与 `values-en` 一致, 按 name 升序); 用户可见变化同步 10 个 `.changelog/lang_*.json` 并按 memory 中的离线方式重新生成 markdown (回退 README 被重盖的日期行); 两个仓库均仅本地提交, 不推送远端; 插件仓库中与本 roadmap 无关的未提交 `.d.ts` 改动不纳入本 roadmap 的提交. |
+| D8 | 资源, 日志与仓库约定 | 字符串遵循 `AGENTS.md` (11 个 `strings.xml`, `values` 与 `values-en` 一致, 按 name 升序); 用户可见变化同步 10 个 `.changelog/lang_*.json` 并按 memory 中的离线方式重新生成 markdown (回退 README 被重盖的日期行); 插件仓库同样维护 10 个 `.changelog/lang_*.json` 并按插件版本登记; 两个仓库均仅本地提交, 不推送远端. |
+| D9 | P2 默认最少触发字符数保持 1 (Q1, 2026-10-07 拍板) | 与现状一致, 由设置项开放 1 / 2 / 3. |
+| D10 | 参数提示在滚动后不自动恢复 (Q2, 2026-10-07 拍板) | 滚动即隐藏; 恢复只靠光标变化, 点按 (touchend 且期间未滚动) 或手动触发. |
+| D11 | Native 引擎不提供智能提示能力 (Q3, 2026-10-07 拍板) | 所有智能提示设置与动作仅在 Ace 引擎下可见可用. |
+| D12 | fx 键保留 (Q4, 2026-10-07 拍板) | Ace 模式下多功能键盘区布局不变. |
+| D13 | 重载切换的三条通路 (Q5, 2026-10-07 拍板) | (1) 硬件键盘 Alt+Up / Alt+Down: 参数提示可见且重载数 > 1 时切换重载, 否则沿用 Ace 默认的上下移动行; (2) 多功能键盘的 Up / Down 键: 补全弹窗未打开, 参数提示可见且重载数 > 1 时切换重载而非移动光标, 可在 "智能提示" 设置中关闭 (默认开启); (3) 提示窗口右上角显示上 / 下两个按钮 (仅重载数 > 1 时显示, 附当前序号 i/n). D1 中 "再次触发智能提示 = 切换重载" 保留. |
 
 ---
 
@@ -63,7 +68,7 @@
 提交: 宿主 `f9094f9b35` (roadmap), `36584f5088` (功能), 本节日志提交 (见 git log); 插件 `77fd25b` (`feat(editor): smart hint trigger and signature help overloads`, 1.24.0, 契约 6).
 
 - [x] P1.1 插件 `autojs6_ts_language_service.js` 返回全部重载 (`signatures[]`, `activeSignature`, `parameterDocs`, `isVariadic`, `applicableSpanStart`), 顶层兼容字段镜像当前签名 (D4). (证据: 插件 `tools/ace-lsp/verify-runtime.mjs` 新增 `Array#splice` 重载断言, Gradle `:app:verifyAutoJs6LspRuntime`)
-- [x] P1.2 插件 `autojs6_signature_help.js`: `normalizeSignatureHelp`, `isInsideCallArguments`, 控制器的 `‹ i/n ›` 导航行 (点按切换, 阻止焦点转移), `cycleSignature`, `isVisible`, `getSignatureCount`, 手动选择在同一调用内保持, rest 参数高亮, 当前参数文档优先; `autojs6.css` 导航行样式 (点按目标 32px). (证据: 宿主 `tools/ace-signature/test-signature-help.mjs` 新增重载用例, 2026-10-07 通过)
+- [x] P1.2 插件 `autojs6_signature_help.js`: `normalizeSignatureHelp`, `isInsideCallArguments`, 控制器的 `‹ i/n ›` 导航行 (点按切换, 阻止焦点转移; P2 按 D13 改为 `▴ i/n ▾`), `cycleSignature`, `isVisible`, `getSignatureCount`, 手动选择在同一调用内保持, rest 参数高亮, 当前参数文档优先; `autojs6.css` 导航行样式 (点按目标 32px). (证据: 宿主 `tools/ace-signature/test-signature-help.mjs` 新增重载用例, 2026-10-07 通过)
 - [x] P1.3 插件 `autojs6_ace_bridge.js`: `triggerSmartHint` 按 D1 分派, `triggerSignatureHelp`, `triggerSymbolDocumentation`; 命令 `autojs6SmartHint` (Ctrl-Space|Alt-Space), `autojs6SignatureHelp` (Ctrl-Shift-Space), `autojs6ShowHover` (Ctrl-Q); 状态 JSON 增加 `signatureHelpVisible` / `signatureCount`; `window.AutoJsAce` 增加 `triggerSmartHint`, `triggerSignatureHelp`, `triggerSymbolDocumentation`, `cycleSignatureHelp`. (证据: `test-signature-help.mjs` 的桥接层字符串断言; 设备手测见 P1.8)
 - [x] P1.4 宿主 `plugin-api/editor-api`: `EditorPluginSession.triggerSmartHint()`, `EditorPluginContract.VERSION = 6`, `EditorPluginSmartHintContractTest`; 重新构建 `editor-api-release.aar` 并交付到插件 `libs/editor-api.aar`. (证据: `:plugin-api:editor-api:assembleRelease :plugin-api:editor-api:testDebugUnitTest` 于 2026-10-07 通过)
 - [x] P1.5 插件 Kotlin: `AceCodeEditor.triggerSmartHint()`, `AceEditorPluginSession.triggerSmartHint()`, `AceEditorMetadata.CONTRACT_VERSION = 6`, 清单 meta-data 6, `VERSION_NAME` 1.23.0 -> 1.24.0. (证据: 插件 `:app:testDebugUnitTest` 含 `AceEditorMetadataTest`)
@@ -78,15 +83,19 @@
 - [x] 参数提示框在 TS 返回多重载时显示序号与可点按箭头, 单签名来源不显示导航行.
 - [x] 契约 5 插件在契约 6 宿主上不会调用 `triggerSmartHint` (`supportsSmartHint` 门控).
 
-### P2 自动出现策略与 "智能提示" 设置组
+### P2 自动出现策略与 "智能提示" 设置组 (2026-10-07 落地)
 
-- [ ] P2.1 宿主 `fragment_code_editor_settings.xml` "编辑辅助" 分类新增 "智能提示" 设置: 自动补全触发 / 最少触发字符数 / 触发延迟 / 参数提示触发 (D7), 条目 key 入 `strings_donottranslate.xml`, 默认值入 `bools.xml` / `integers.xml` 或 `strings_donottranslate.xml`; 11 个 `strings.xml` 补齐标题, 摘要与长按说明 (说明中写明 TAB 长按与硬件快捷键). 设置项仅在 Ace 引擎下可见 (沿用 UX-0 的隐藏规则), 并登记到 `EditorSettingActionRegistry` 以便收藏记录.
-- [ ] P2.2 插件新增 `AceEditorSmartHintPreferences` 读取宿主偏好, `AceBridge.getSmartHintOptions()` 提供初始值, `AceCodeEditor.notifyDisplayPreferencesChanged()` 增加 `invokeAce("setSmartHintOptions", json)`; 宿主 `EditorPluginSession.notifyDisplayPreferencesChanged()` 路径不变.
-- [ ] P2.3 桥接层按选项关闭 `enableLiveAutocompletion`, 自行安装 afterExec 处理: 模式 (标识符 / 仅 "." / 关闭), 最少字符数, 延迟防抖; "." 触发沿用 `scheduleMemberCompletionAfterDot`; 手动触发 (D1) 不受限制; 长行安全模式仍整体关闭自动补全.
-- [ ] P2.4 参数提示控制器按模式决定自动 `schedule` (`showAtPosition(pos, { force: true })` 绕过策略); 修正 touchstart 隐藏后同一位置点按不恢复的问题 (touchend 后重新 schedule); ESC (`handleEscapeKey`) 同时隐藏参数提示与悬停框.
-- [ ] P2.5 Node 用例: 阈值 / 延迟 / 模式组合, touchend 恢复, ESC 隐藏; 日志 feature 条目; 设备手测各模式.
+- [x] P2.1 宿主 `fragment_code_editor_settings.xml` 新增 "智能提示" 分类 (标题复用 `text_smart_hint`): 自动补全 (输入标识符时 / 仅输入 "." 后 / 关闭), 补全最少触发字符数 (1 / 2 / 3), 补全触发延迟 (无延迟 / 100 ms / 250 ms), 参数提示 (光标进入调用时 / 仅输入 "(" 或 "," 时 / 关闭), 方向键切换重载 (开关, D13). 键与默认值入 `strings_donottranslate.xml` / `bools.xml`, 数组入 `arrays.xml`, 11 个 `strings.xml` 补齐标题 / 摘要 / 条目 / 长按说明 (说明写明 TAB 长按, Ctrl+Space, Ctrl+Shift+Space, Ctrl+Q, Alt+Up / Alt+Down). `CodeEditorSettingsFragment.syncEditorEnginePreferenceAvailability` 在 Native 下标记为不可用 (D11), `EditorSettingActionRegistry` 登记 5 个键, `EditorView.mEditorDisplayPreferenceKeys` 纳入 5 个键以触发 `notifyDisplayPreferencesChanged`. (证据: 宿主 `:app:assembleAppDebug`; 设备手测见 P2.6)
+- [x] P2.2 插件 `core/AceEditorSmartHintPreferences.kt` 读取宿主偏好并序列化为 JSON, `AceBridge.getSmartHintOptions()` 提供初始值, `AceCodeEditor.notifyDisplayPreferencesChanged()` 追加 `invokeAce("setSmartHintOptions", json)`; 桥接层 `applySmartHintOptions` 归一化非法值并热更新. (证据: 插件 `:app:testDebugUnitTest`)
+- [x] P2.3 桥接层固定 `enableLiveAutocompletion: false` (含长行安全模式切换路径), 由 `scheduleLiveCompletion` 在 afterExec `insertstring` 后按模式 / 最少字符数 (`ace/autocomplete/util.getCompletionPrefix`) / 延迟调度 `startAutocomplete`, backspace 清空前缀时关闭弹窗; "." 触发在 "关闭" 模式下不再重启补全; 手动触发 (D1) 不受限制. (证据: `test-signature-help.mjs` 桥接层字符串断言; 设备手测见 P2.6)
+- [x] P2.4 参数提示控制器 `autoTrigger` (cursor / typing / off): cursor 模式沿用现状; typing 模式仅在输入 "(" "," 后自动显示, 显示期间仍跟随光标; off 模式只响应强制显示. touchend 且期间未滚动时重新评估光标位置 (同一位置点按可恢复), 滚动后不恢复 (D10); ESC (`handleEscapeKey`) 同时隐藏参数提示与悬停框. (证据: `test-signature-help.mjs` 新增策略与触控用例, 2026-10-07 通过)
+- [x] P2.5 重载切换三条通路 (D13): `autojs6OverloadUp` / `autojs6OverloadDown` (Alt-Up / Alt-Down, 无多重载提示时执行 Ace 的 `movelinesup` / `movelinesdown`); `moveCompletionSelectionOrCursor` 在补全弹窗未打开, 参数提示可见且重载数 > 1 时切换重载 (受 `arrowOverloadCycling` 开关控制); 提示窗口右上角 `▴ i/n ▾`. (证据: `test-signature-help.mjs` 导航按钮断言; 设备手测见 P2.6)
+- [x] P2.6 设备手测 (2026-10-07, Xiaomi 968e9f18 / API 35, 宿主 6.8.0 build 5319 + 插件 1.26.0): 编辑器内设置对话框出现 "Smart hints" 分类及 5 个条目 (默认值 While typing identifiers / 1 / No delay / When the cursor enters a call / 开关开启); 通过默认 SharedPreferences 写入 `key_$_ace_smart_hint_completion_trigger = off` 后 (宿主监听 -> `notifyDisplayPreferencesChanged` -> `setSmartHintOptions`) 在 `Obj` 后输入 e 不弹窗, TAB 长按仍弹出 Object 补全; 提示窗口右上角显示 `▴ 1/2 ▾`, 多功能键盘 "向下" 键切到 `2/2` 且光标不动, 关闭 "方向键切换重载" 后 "向下" 键改为移动光标 (2:12 -> 3:13); 同一位置再次点按后参数提示恢复并保留 `2/2`; ESC 隐藏参数提示; 参数提示 "typing" 模式下点按进入 `splice(` 不显示, 输入 "," 后显示 (deleteCount 加粗); 测试结束后已移除写入的偏好键. 未覆盖: 最少字符数 2 / 延迟 100 ms 的设备表现 (逻辑与 "关闭" 共用 `scheduleLiveCompletion`), Alt+Up / Alt+Down (无外接键盘), 设置对话框内通过列表项修改并持久化的路径 (adb 点按列表项未命中, 需人工复核), Native 引擎下的不可用标记.
 
-验收: 默认值下行为与 P1 完成时逐项一致; 关闭自动补全后仅 TAB 长按 / Ctrl+Space 可弹出; 参数提示 "仅输入 ( , 时" 模式下移动光标不再自动弹出但手动触发可用.
+验收:
+
+- [x] 默认值下行为与 P1 完成时逐项一致 (Node 层: cursor 模式用例; 设备层: 默认值下 `1/2` 自动显示, 点按恢复, ESC 隐藏).
+- [x] 关闭自动补全后仅 TAB 长按 / Ctrl+Space 可弹出 (设备层验证 TAB 长按); 参数提示 "仅输入 ( , 时" 模式下点按进入调用不再自动弹出, 输入 "," 后显示 (设备层验证).
 
 ### P3 触控下的文档阅读
 
@@ -117,11 +126,15 @@
 
 ## 附录 A: 待决事项
 
-- Q1 P2 的默认最少触发字符数是否改为 2 (减少单字符时的弹窗抖动). 当前倾向: 保持 1 (与现状一致), 由设置项开放.
-- Q2 参数提示是否在滚动结束后自动恢复显示 (当前滚动即隐藏, 需光标变化或手动触发才恢复).
-- Q3 Native 引擎是否需要任何对应能力. 当前倾向: 否, 智能提示为 Ace 专属.
-- Q4 fx (函数键盘) 键在 Ace 模式下的去留: LSP 补全覆盖了模块 / 属性插入, 但 fx 面板仍提供文档入口 (长按条目).
-- Q5 D1 中 "参数提示已显示且重载数 > 1 时再次触发 = 切换重载" 是否需要在设置中可关闭.
+2026-10-07 已全部拍板并回填为 D9 ~ D13:
+
+- Q1 P2 的默认最少触发字符数: 保持 1 (D9).
+- Q2 参数提示是否在滚动结束后自动恢复: 否 (D10).
+- Q3 Native 引擎是否需要对应能力: 否 (D11).
+- Q4 fx 键在 Ace 模式下的去留: 保留 (D12).
+- Q5 重载切换: 需要. Alt+Up / Alt+Down, 多功能键盘 Up / Down (可在设置中关闭), 提示窗口右上角上下按钮 (D13).
+
+当前无待决事项.
 
 ## 附录 B: 证据等级
 

@@ -374,6 +374,8 @@ const signatureElement = tooltipElement.children[1];
 const summaryElement = tooltipElement.children[2];
 const navElement = headerElement.children[1];
 const navCounter = navElement.children[1];
+assert(navElement.children[0].textContent === "▴", "Overload nav should start with an up button");
+assert(navElement.children[2].textContent === "▾", "Overload nav should end with a down button");
 let overloadState = overloadController.getState();
 assert(overloadState.signatureCount === 2, `Unexpected signatureCount: ${overloadState.signatureCount}`);
 assert(overloadState.activeSignature === 1, `Unexpected activeSignature: ${overloadState.activeSignature}`);
@@ -411,6 +413,115 @@ overloadController.hide();
 assert(overloadController.isVisible() === false && overloadController.getSignatureCount() === 0, "Hidden controller should report no signatures");
 overloadController.destroy();
 
+// Auto-trigger policy (cursor / typing / off) and touch restore (tap restores, scroll does not).
+function createDomEmitter() {
+  const handlers = new Map();
+  return {
+    addEventListener(name, callback) {
+      handlers.set(name, [...(handlers.get(name) || []), callback]);
+    },
+    removeEventListener(name, callback) {
+      handlers.set(name, (handlers.get(name) || []).filter((it) => it !== callback));
+    },
+    emit(name, event) {
+      for (const callback of handlers.get(name) || []) {
+        callback({ type: name, target: null, ...(event || {}) });
+      }
+    },
+    listenerCount(name) {
+      return (handlers.get(name) || []).length;
+    },
+  };
+}
+const policySession = Object.assign(createEmitter(), {
+  getValue() {
+    return "foo(bar, baz);";
+  },
+  doc: {
+    positionToIndex(pos) {
+      return pos.column;
+    },
+  },
+});
+const policySelection = createEmitter();
+const policyCommands = createEmitter();
+const policyContainer = createDomEmitter();
+const policyEditor = {
+  session: policySession,
+  commands: policyCommands,
+  container: policyContainer,
+  renderer: {
+    lineHeight: 20,
+    textToScreenCoordinates(row, column) {
+      return { pageX: 16 + column * 8, pageY: 40 + row * 20 };
+    },
+  },
+  selection: policySelection,
+  on() {},
+  getCursorPosition() {
+    return { row: 0, column: 4 };
+  },
+};
+const policyHelp = { caption: "foo", callee: "foo", signature: "foo(a, b)", parameters: ["a", "b"], activeParameter: 0 };
+const policyController = api.createController({
+  editor: policyEditor,
+  session: policySession,
+  delayMs: 1,
+  autoTrigger: "off",
+  getSignatureHelp(pos, callback) {
+    callback(null, policyHelp);
+  },
+});
+assert(policyController.getAutoTrigger() === "off", "Controller should accept the initial auto-trigger mode");
+assert(policyContainer.listenerCount("touchend") === 1, "Controller should listen for touchend");
+policySelection.emit("changeCursor");
+await wait(5);
+assert(policyController.isVisible() === false, "off: cursor changes must not show the box");
+assert(policyController.showAtPosition({ row: 0, column: 4 }, { force: true }) === true, "off: explicit triggers still show the box");
+policyController.hide();
+assert(policyController.setAutoTrigger("typing") === "typing", "setAutoTrigger should return the normalized mode");
+policySelection.emit("changeCursor");
+await wait(5);
+assert(policyController.isVisible() === false, "typing: cursor changes must not show the box while hidden");
+policyCommands.emit("afterExec", { command: { name: "backspace" } });
+await wait(5);
+assert(policyController.isVisible() === false, "typing: backspace is not a trigger character");
+policyCommands.emit("afterExec", { command: { name: "insertstring" }, args: "(" });
+await wait(5);
+assert(policyController.isVisible() === true, "typing: a trigger character shows the box");
+policySelection.emit("changeCursor");
+await wait(5);
+assert(policyController.isVisible() === true, "typing: the visible box keeps following the caret");
+policyController.hide();
+assert(policyController.setAutoTrigger("bogus") === "cursor", "Unknown modes fall back to cursor");
+policySelection.emit("changeCursor");
+await wait(5);
+assert(policyController.isVisible() === true, "cursor: cursor changes show the box");
+policyContainer.emit("touchstart");
+assert(policyController.isVisible() === false, "touchstart hides the box");
+policyContainer.emit("touchend");
+await wait(5);
+assert(policyController.isVisible() === true, "A tap without scrolling restores the box");
+policyContainer.emit("touchstart");
+policySession.emit("changeScrollTop");
+policyContainer.emit("touchend");
+await wait(5);
+assert(policyController.isVisible() === false, "A scrolling touch must not restore the box");
+policySelection.emit("changeCursor");
+await wait(5);
+assert(policyController.isVisible() === true, "The next cursor change shows the box again");
+policyContainer.emit("touchstart");
+policyContainer.emit("touchcancel");
+await wait(5);
+assert(policyController.isVisible() === false, "touchcancel keeps the box hidden");
+assert(policyController.getState().autoTrigger === "cursor", "State should expose the auto-trigger mode");
+assert(policyController.setAutoTrigger("off") === "off", "Switching to off should succeed");
+policyController.showAtPosition({ row: 0, column: 4 }, { force: true });
+assert(policyController.isVisible() === true, "Forced show works in off mode");
+policyController.setAutoTrigger("off");
+policyController.destroy();
+assert(policyContainer.listenerCount("touchend") === 0, "Controller should remove the touchend listener");
+
 const html = fs.readFileSync(HTML_PATH, "utf8");
 assert(
   html.indexOf("autojs6_signature_help.js") > html.indexOf("autojs6_tooltip.js") &&
@@ -441,6 +552,14 @@ for (const expected of [
   'name: "autojs6ShowHover"',
   "signatureHelpVisible: isSignatureHelpVisible(),",
   "signatureCount: getSignatureHelpCount(),",
+  "setSmartHintOptions: function(options)",
+  "getSmartHintOptions: function()",
+  'name: "autojs6OverloadUp"',
+  'name: "autojs6OverloadDown"',
+  "function scheduleLiveCompletion()",
+  "enableLiveAutocompletion: false,",
+  "arrowOverloadCycling",
+  "signatureHelpController.setAutoTrigger(smartHintOptions.signatureTrigger)",
 ]) {
   assert(bridge.includes(expected), `Bridge is missing ${expected}`);
 }

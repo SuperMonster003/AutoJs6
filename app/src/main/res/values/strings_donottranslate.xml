@@ -19,6 +19,10 @@
     <string name="default_build_apk_version_code" translatable="false">1</string>
     <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
     <string name="default_key_ace_editor_font" translatable="false">@string/key_ace_editor_font_iosevka</string>
+    <string name="default_key_ace_smart_hint_completion_delay" translatable="false">@string/key_ace_smart_hint_completion_delay_0</string>
+    <string name="default_key_ace_smart_hint_completion_min_chars" translatable="false">@string/key_ace_smart_hint_completion_min_chars_1</string>
+    <string name="default_key_ace_smart_hint_completion_trigger" translatable="false">@string/key_ace_smart_hint_completion_trigger_identifier</string>
+    <string name="default_key_ace_smart_hint_signature_trigger" translatable="false">@string/key_ace_smart_hint_signature_trigger_cursor</string>
     <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
     <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
     <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_native</string>
@@ -52,6 +56,8 @@
     <string name="entry_ace_editor_font_iosevka_slab" translatable="false">Iosevka Slab</string>
     <string name="entry_ace_editor_font_jetbrains_mono" translatable="false">JetBrains Mono</string>
     <string name="entry_ace_editor_font_source_code_pro" translatable="false">Source Code Pro</string>
+    <string name="entry_ace_smart_hint_completion_delay_100" translatable="false">100 ms</string>
+    <string name="entry_ace_smart_hint_completion_delay_250" translatable="false">250 ms</string>
     <string name="entry_app_language_ar" translatable="false">العربية</string>
     <string name="entry_app_language_en" translatable="false">English</string>
     <string name="entry_app_language_es" translatable="false">Español</string>
@@ -97,6 +103,23 @@
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
     <string name="key_ace_lsp_file_types" translatable="false">key_$_ace_lsp_file_types</string>
     <string name="key_ace_print_margin_enabled" translatable="false">key_$_ace_print_margin_enabled</string>
+    <string name="key_ace_smart_hint_arrow_overload_cycling" translatable="false">key_$_ace_smart_hint_arrow_overload_cycling</string>
+    <string name="key_ace_smart_hint_completion_delay" translatable="false">key_$_ace_smart_hint_completion_delay</string>
+    <string name="key_ace_smart_hint_completion_delay_0" translatable="false">0</string>
+    <string name="key_ace_smart_hint_completion_delay_100" translatable="false">100</string>
+    <string name="key_ace_smart_hint_completion_delay_250" translatable="false">250</string>
+    <string name="key_ace_smart_hint_completion_min_chars" translatable="false">key_$_ace_smart_hint_completion_min_chars</string>
+    <string name="key_ace_smart_hint_completion_min_chars_1" translatable="false">1</string>
+    <string name="key_ace_smart_hint_completion_min_chars_2" translatable="false">2</string>
+    <string name="key_ace_smart_hint_completion_min_chars_3" translatable="false">3</string>
+    <string name="key_ace_smart_hint_completion_trigger" translatable="false">key_$_ace_smart_hint_completion_trigger</string>
+    <string name="key_ace_smart_hint_completion_trigger_dot" translatable="false">dot</string>
+    <string name="key_ace_smart_hint_completion_trigger_identifier" translatable="false">identifier</string>
+    <string name="key_ace_smart_hint_completion_trigger_off" translatable="false">off</string>
+    <string name="key_ace_smart_hint_signature_trigger" translatable="false">key_$_ace_smart_hint_signature_trigger</string>
+    <string name="key_ace_smart_hint_signature_trigger_cursor" translatable="false">cursor</string>
+    <string name="key_ace_smart_hint_signature_trigger_off" translatable="false">off</string>
+    <string name="key_ace_smart_hint_signature_trigger_typing" translatable="false">typing</string>
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
     <string name="key_ai_settings" translatable="false">key_$_ai_settings</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>

@@ -253,6 +253,11 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         syncWordWrapIndentPreferenceVisibility(aceSelected)
         setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected, R.string.summary_editor_gutter_width_mode)
         setPreferenceAvailable(R.string.key_editor_fold_markers_enabled, aceSelected, R.string.summary_editor_fold_markers_enabled)
+        setPreferenceAvailable(R.string.key_ace_smart_hint_completion_trigger, aceSelected, R.string.summary_ace_smart_hint_completion_trigger)
+        setPreferenceAvailable(R.string.key_ace_smart_hint_completion_min_chars, aceSelected, R.string.summary_ace_smart_hint_completion_min_chars)
+        setPreferenceAvailable(R.string.key_ace_smart_hint_completion_delay, aceSelected, R.string.summary_ace_smart_hint_completion_delay)
+        setPreferenceAvailable(R.string.key_ace_smart_hint_signature_trigger, aceSelected, R.string.summary_ace_smart_hint_signature_trigger)
+        setPreferenceAvailable(R.string.key_ace_smart_hint_arrow_overload_cycling, aceSelected, R.string.summary_ace_smart_hint_arrow_overload_cycling)
         setPreferenceAvailable(R.string.key_editor_code_highlight_threshold_bytes, nativeSelected)
         setPreferenceAvailable(R.string.key_editor_large_file_mode_threshold_bytes, nativeSelected)
     }

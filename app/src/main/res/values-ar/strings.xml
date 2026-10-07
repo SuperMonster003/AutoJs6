@@ -101,6 +101,7 @@
     <string name="description_ace_lsp_enabled_preference">إكمال LSP الذكي مفعّل افتراضيا. يستخدم المحرر خدمة لغة TypeScript المضمنة للإكمال ومعلومات التحويم ومساعدة التوقيع والتشخيصات, مع إبقاء الإكمال الثابت خيارا احتياطيا. يمكن تعطيل هذه الميزة في أي وقت.</string>
     <string name="description_ace_lsp_file_types_preference">لا يبدأ LSP إلا للملفات التي تنتهي أسماؤها بإحدى اللواحق المحددة. يعيد خيار \"استخدام الافتراضي\" مجموعة لواحق JavaScript و TypeScript و JSON و Auto.js و Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">أظهر دليل هامش الطباعة في محرر Ace أو أخفه. هذا هو خط حد العمود على الجانب الأيمن, وهو يغير طريقة عرض الشفرة فقط.</string>
+    <string name="description_ace_smart_hint_preference">يمكن دائما استدعاء التلميحات الذكية يدويا: اضغط مطولا على TAB في شريط المفاتيح, أو اضغط Ctrl+Space على لوحة مفاتيح فعلية, لعرض إكمال الكود أو تلميحات المعاملات أو توثيق الرمز بحسب سياق المؤشر. يعرض Ctrl+Shift+Space تلميحات المعاملات أو يبدل بينها, ويعرض Ctrl+Q توثيق الرمز, ويبدل Alt+Up / Alt+Down بين التحميلات الزائدة عند ظهور تلميحات المعاملات.</string>
     <string name="description_ace_word_wrap_enabled_preference">فعّل التفاف الأسطر الطويلة في المحرر. لا يؤدي هذا إلى تعديل محتويات الملف.</string>
     <string name="description_ai_settings_preference">افتح 3-Stone AI لإدارة النماذج المحلية والخدمات عبر الإنترنت والهدف الافتراضي الذي تستخدمه وحدة ai العامة.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">يسمح إذن \"إدارة جميع الملفات\" (أو \"الوصول إلى جميع الملفات\") لـ AutoJs6 بـ [ إنشاء / قراءة / تعديل / حذف ] الملفات مباشرةً عبر مسارات الملفات العادية ضمن مساحة التخزين المشتركة، مما يتيح للسكربتات الوصول إلى \"Internal Storage\" ويُمكّن مدير الملفات من عرض الملفات وإدارتها بشكل صحيح.\n\nعلى أجهزة Android 11+، تُعد هذه الطريقة الأساسية لتحقيق قدرة القراءة والكتابة على كامل التخزين.</string>
@@ -256,6 +257,12 @@
     <string name="editable_file_info_line_break_label">سطر</string>
     <string name="editable_file_info_line_count_label">أسطر</string>
     <string name="entry_ace_editor_font_system_monospace">خط Android أحادي المسافة</string>
+    <string name="entry_ace_smart_hint_completion_delay_0">بدون تأخير</string>
+    <string name="entry_ace_smart_hint_completion_trigger_dot">فقط بعد كتابة \".\"</string>
+    <string name="entry_ace_smart_hint_completion_trigger_identifier">أثناء كتابة المعرفات</string>
+    <string name="entry_ace_smart_hint_signature_trigger_cursor">عند دخول المؤشر إلى استدعاء</string>
+    <string name="entry_ace_smart_hint_signature_trigger_typing">فقط بعد كتابة \"(\" أو \",\"</string>
+    <string name="entry_ace_smart_hint_trigger_off">إيقاف</string>
     <string name="entry_app_language_auto">اتبع النظام</string>
     <string name="entry_documentation_source_local">مستندات محلية</string>
     <string name="entry_documentation_source_online">مستندات عبر الإنترنت</string>
@@ -734,6 +741,11 @@
     <string name="summary_ace_lsp_enabled">تمكين مساعدة المحرر المدعومة من LSP</string>
     <string name="summary_ace_lsp_file_types">اختيار أنواع الملفات التي يمكنها استخدام ميزات LSP</string>
     <string name="summary_ace_print_margin_enabled">إظهار دليل حد العمود على الجانب الأيمن</string>
+    <string name="summary_ace_smart_hint_arrow_overload_cycling">عندما تعرض تلميحات المعاملات عدة تحميلات زائدة, يبدل مفتاحا الأعلى والأسفل في شريط المفاتيح بين التحميلات بدلا من تحريك المؤشر</string>
+    <string name="summary_ace_smart_hint_completion_delay">فترة التوقف بعد الكتابة قبل ظهور قائمة الإكمال</string>
+    <string name="summary_ace_smart_hint_completion_min_chars">عدد الأحرف المكتوبة قبل ظهور قائمة الإكمال</string>
+    <string name="summary_ace_smart_hint_completion_trigger">متى تظهر قائمة الإكمال تلقائيا</string>
+    <string name="summary_ace_smart_hint_signature_trigger">متى تظهر تلميحات المعاملات تلقائيا</string>
     <string name="summary_ace_word_wrap_enabled">التفاف الأسطر الطويلة داخل إطار عرض المحرر</string>
     <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
@@ -790,6 +802,11 @@
     <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
     <string name="text_accent_and_dark">التمييز / الداكن</string>
     <string name="text_accent_color">لون التمييز</string>
+    <string name="text_ace_smart_hint_arrow_overload_cycling">تبديل التحميلات الزائدة بمفاتيح الأسهم</string>
+    <string name="text_ace_smart_hint_completion_delay">تأخير الإكمال</string>
+    <string name="text_ace_smart_hint_completion_min_chars">الحد الأدنى من الأحرف للإكمال</string>
+    <string name="text_ace_smart_hint_completion_trigger">الإكمال التلقائي</string>
+    <string name="text_ace_smart_hint_signature_trigger">تلميحات المعاملات</string>
     <string name="text_add_all_to_color_library">إضافة الكل إلى مكتبة ألوان</string>
     <string name="text_add_colors">إضافة ألوان</string>
     <string name="text_add_favorite_from_palette">إضافة من لوحة الألوان</string>
