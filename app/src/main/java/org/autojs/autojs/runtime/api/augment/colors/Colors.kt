@@ -45,6 +45,17 @@ import java.util.function.Supplier
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import android.graphics.Color as AndroidColor
+import kotlin.math.ceil
+import kotlin.math.sqrt
+import org.autojs.autojs.core.image.ImageWrapper
+import org.autojs.autojs.runtime.api.augment.images.Images
+import org.autojs.autojs.theme.color.ColorHarmony
+import org.autojs.autojs.theme.color.ColorQuantizer
+import org.autojs.autojs.theme.color.ColorVisionSimulation
+import org.autojs.autojs.theme.color.OkColor
+import org.autojs.autojs.theme.color.OkLab
+import org.autojs.autojs.theme.color.OkLch
+import org.autojs.autojs.theme.color.ThemeColorDerivation
 
 @Suppress("unused", "UNUSED_PARAMETER")
 object Colors : Augmentable() {
@@ -56,6 +67,16 @@ object Colors : Augmentable() {
     @JvmField
     @Suppress("MayBeConstant")
     val DEFAULT_COLOR_ALGORITHM = "diff"
+
+    private const val DEFAULT_CONTRAST_RATIO = 4.5
+    private const val DEFAULT_TONE_COUNT = 10
+    private const val MAX_TONE_COUNT = 20
+    private const val DEFAULT_EXTRACT_COUNT = 5
+
+    /** Default number of pixels sampled by `colors.extract`. zh-CN: `colors.extract` 默认采样的像素数. */
+    private const val EXTRACT_SAMPLES = 65536.0
+
+    private const val OPAQUE = 0xFF shl 24
 
     internal val colorTables = listOf(
         ColorTable.Android,
@@ -148,6 +169,17 @@ object Colors : Augmentable() {
         ::luminance.name,
         ::build.name,
         ::summary.name,
+        ::toOklab.name,
+        ::oklab.name,
+        ::toOklch.name,
+        ::oklch.name,
+        ::ensureContrast.name,
+        ::harmony.name,
+        ::tones.name,
+        ::derive.name,
+        ::nightVariant.name,
+        ::simulate.name,
+        ::extract.name,
     )
 
     override val selfAssignmentProperties = colorTables.map { table ->
@@ -1432,6 +1464,304 @@ object Colors : Augmentable() {
     fun summaryRhino(color: Any?): String = when (alphaDoubleRhino(color)) {
         1.0 -> "Color { ${toHexRhino(color)} | ${toRgbStringRhino(color)} | ${toHslStringRhino(color)} | ${toHsvStringRhino(color)} | int(${toIntRhino(color)}) }"
         else -> "Color { ${toHexRhino(color)} | ${toRgbaString(arrayOf(color))} | ${toHslaString(arrayOf(color))} | ${toHsvaString(arrayOf(color))} | int(${toIntRhino(color)}) }"
+    }
+
+    // Perceptual color functions (roadmap P6.1). zh-CN: 感知色彩函数 (Roadmap P6.1).
+
+    /**
+     * OKLab components `[L, a, b]` of a color: L in 0..1, a and b about -0.4..0.4.
+     * zh-CN: 颜色的 OKLab 分量 `[L, a, b]`: L 取值 0..1, a 与 b 约为 -0.4..0.4.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toOklab(args: Array<out Any?>): NativeArray = ensureArgumentsOnlyOne(args) {
+        toOklabRhino(it).toNativeArray()
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toOklabRhino(color: Any?): List<Double> = OkColor.toOkLab(toIntRhino(color)).let { listOf(it.l, it.a, it.b) }
+
+    /**
+     * A color from OKLab components (or one array of them), with an optional alpha. Values outside sRGB keep their
+     * lightness and hue and lose chroma.
+     * zh-CN: 由 OKLab 分量 (或分量数组) 及可选的 alpha 构造颜色. 超出 sRGB 的值保持亮度与色相, 降低彩度.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun oklab(args: Array<out Any?>): Int = ensureArgumentsLengthInRange(args, 1..4) {
+        val (l, a, b, alpha) = perceptualComponents(it, "colors.oklab")
+        oklabRhino(l, a, b, alpha)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    @RhinoFunctionBody
+    fun oklabRhino(l: Any?, a: Any?, b: Any?, alpha: Any? = null): Int {
+        val lab = OkLab(parseLightness(l, "colors.oklab"), parseFinite(a, "a", "colors.oklab"), parseFinite(b, "b", "colors.oklab"))
+        val color = if (OkColor.isInGamut(lab)) OkColor.fromOkLab(lab) else OkColor.fromOkLch(OkColor.toOkLch(lab))
+        return withAlphaComponent(color, alpha)
+    }
+
+    /**
+     * OKLCH components `[L, C, h]` of a color: L in 0..1, chroma C from 0 (about 0.37 at most in sRGB), hue h in degrees.
+     * zh-CN: 颜色的 OKLCH 分量 `[L, C, h]`: L 取值 0..1, 彩度 C 不小于 0 (sRGB 中至多约 0.37), 色相 h 以度为单位.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toOklch(args: Array<out Any?>): NativeArray = ensureArgumentsOnlyOne(args) {
+        toOklchRhino(it).toNativeArray()
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toOklchRhino(color: Any?): List<Double> = OkColor.toOkLch(toIntRhino(color)).let { listOf(it.l, it.c, it.h) }
+
+    /**
+     * A color from OKLCH components (or one array of them), with an optional alpha; chroma is reduced into sRGB.
+     * zh-CN: 由 OKLCH 分量 (或分量数组) 及可选的 alpha 构造颜色; 彩度会降低到 sRGB 范围内.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun oklch(args: Array<out Any?>): Int = ensureArgumentsLengthInRange(args, 1..4) {
+        val (l, c, h, alpha) = perceptualComponents(it, "colors.oklch")
+        oklchRhino(l, c, h, alpha)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    @RhinoFunctionBody
+    fun oklchRhino(l: Any?, c: Any?, h: Any?, alpha: Any? = null): Int {
+        val chroma = parseFinite(c, "C", "colors.oklch").also {
+            require(it >= 0.0) { "Argument \"C\" ${c.jsBrief()} for colors.oklch must not be negative" }
+        }
+        val lch = OkLch(parseLightness(l, "colors.oklch"), chroma, OkColor.normalizeHue(parseFinite(h, "h", "colors.oklch")))
+        return withAlphaComponent(OkColor.fromOkLch(lch), alpha)
+    }
+
+    /**
+     * The color nearest to [color] in lightness (same hue) that reaches the contrast [ratio] against an opaque
+     * background; the default ratio 4.5 is WCAG AA for text. The alpha of [color] is kept.
+     * zh-CN: 与 [color] 同色相, 亮度最接近且与不透明背景的对比度达到 [ratio] 的颜色; 默认 4.5 为 WCAG AA 文本标准. 保留 [color] 的 alpha.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun ensureContrast(args: Array<out Any?>): Int = ensureArgumentsLengthInRange(args, 2..3) {
+        val (color, background, ratio) = it
+        ensureContrastRhino(color, background, ratio)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    @RhinoFunctionBody
+    fun ensureContrastRhino(color: Any?, background: Any?, ratio: Any? = null): Int = ensureContrastOf(toIntRhino(color), toIntRhino(background), ratio)
+
+    internal fun ensureContrastOf(color: Int, background: Int, ratio: Any? = null): Int {
+        require(background ushr 24 == 0xFF) {
+            "Argument \"background\" ${String.format("#%08X", background)} for colors.ensureContrast must be an opaque color"
+        }
+        val target = when {
+            ratio.isJsNullish() -> DEFAULT_CONTRAST_RATIO
+            else -> parseFinite(ratio, "ratio", "colors.ensureContrast").also {
+                require(it in 1.0..21.0) { "Argument \"ratio\" ${ratio.jsBrief()} for colors.ensureContrast must be in range 1..21" }
+            }
+        }
+        val result = ThemeColorDerivation.ensureContrast(color or OPAQUE, background, target)
+        return (result and 0xFFFFFF) or (color and OPAQUE)
+    }
+
+    /**
+     * Harmony colors of [type] (`complementary`, `analogous`, `triadic`, `splitComplementary` or `tetradic`), the
+     * color itself first, by rotating the OKLCH hue.
+     * zh-CN: [type] 类型 (`complementary`, `analogous`, `triadic`, `splitComplementary` 或 `tetradic`) 的和谐色,
+     * 首个为颜色本身, 通过旋转 OKLCH 色相得到.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun harmony(args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 2) {
+        val (color, type) = it
+        harmonyRhino(color, type).toNativeArray()
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun harmonyRhino(color: Any?, type: Any?): List<Int> = harmonyOf(toIntRhino(color), type)
+
+    internal fun harmonyOf(color: Int, type: Any?): List<Int> {
+        val harmony = ColorHarmony.Type.of(if (type.isJsNullish()) null else Context.toString(type))
+            ?: throw WrappedIllegalArgumentException(
+                "Argument \"type\" ${type.jsBrief()} for colors.harmony must be one of: ${ColorHarmony.Type.entries.joinToString(", ") { it.key }}"
+            )
+        return ColorHarmony.harmony(color, harmony)
+    }
+
+    /**
+     * [count] tones of the color's hue from light to dark (10 by default, 2..20).
+     * zh-CN: 与颜色同色相的 [count] 级色阶, 由浅到深 (默认 10 级, 2..20).
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun tones(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..2) {
+        val (color, count) = it
+        tonesRhino(color, count).toNativeArray()
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    @RhinoFunctionBody
+    fun tonesRhino(color: Any?, count: Any? = null): List<Int> = tonesOf(toIntRhino(color), count)
+
+    internal fun tonesOf(color: Int, count: Any? = null): List<Int> {
+        val n = when {
+            count.isJsNullish() -> DEFAULT_TONE_COUNT
+            else -> parseFinite(count, "count", "colors.tones").let { value ->
+                value.roundToInt().also {
+                    require(value == it.toDouble() && it in 2..MAX_TONE_COUNT) { "Argument \"count\" ${count.jsBrief()} for colors.tones must be an integer in range 2..$MAX_TONE_COUNT" }
+                }
+            }
+        }
+        return ColorHarmony.tones(color, n)
+    }
+
+    /**
+     * `{ primary, accent, dark }` derived from a primary color, as the "Derived colors" setting of the theme color does
+     * on "Auto": the accent keeps 3:1 against both window backgrounds, the dark is darker in the same hue.
+     * zh-CN: 由主色推导的 `{ primary, accent, dark }`, 与主题色 "派生配色" 设为 "自动" 时一致:
+     * 强调色与日 / 夜窗口背景的对比度均不低于 3:1, 深色为同色相的更深颜色.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun derive(args: Array<out Any?>): NativeObject = ensureArgumentsOnlyOne(args) {
+        deriveRhino(it)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun deriveRhino(color: Any?): NativeObject {
+        val primary = toIntRhino(color) or OPAQUE
+        val (accent, dark) = ThemeColorDerivation.accentAndDark(primary, null, null, derive = true)
+        return newNativeObject().also {
+            it.put("primary", it, primary)
+            it.put("accent", it, accent)
+            it.put("dark", it, dark)
+        }
+    }
+
+    /**
+     * The night counterpart of a day color: lightness pulled to about 0.25..0.5 with the hue kept.
+     * zh-CN: 日间颜色在夜间的对应色: 亮度收拢到约 0.25..0.5, 保持色相.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun nightVariant(args: Array<out Any?>): Int = ensureArgumentsOnlyOne(args) {
+        nightVariantRhino(it)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun nightVariantRhino(color: Any?): Int = ThemeColorDerivation.nightVariant(toIntRhino(color) or OPAQUE)
+
+    /**
+     * How a color looks with a color vision [deficiency] (`protanopia`, `deuteranopia` or `tritanopia`, Machado 2009).
+     * zh-CN: 颜色在色觉缺陷 [deficiency] (`protanopia`, `deuteranopia` 或 `tritanopia`, Machado 2009) 下的样子.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun simulate(args: Array<out Any?>): Int = ensureArgumentsLength(args, 2) {
+        val (color, deficiency) = it
+        simulateRhino(color, deficiency)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun simulateRhino(color: Any?, deficiency: Any?): Int = simulateOf(toIntRhino(color), deficiency)
+
+    internal fun simulateOf(color: Int, deficiency: Any?): Int {
+        val key = if (deficiency.isJsNullish()) null else Context.toString(deficiency)
+        val type = ColorVisionSimulation.Deficiency.entries.firstOrNull { it.key == key }
+            ?: throw WrappedIllegalArgumentException(
+                "Argument \"deficiency\" ${deficiency.jsBrief()} for colors.simulate must be one of: ${ColorVisionSimulation.Deficiency.entries.joinToString(", ") { it.key }}"
+            )
+        return ColorVisionSimulation.simulate(color, type)
+    }
+
+    /**
+     * Dominant colors of an image, the most frequent first. Options: `count` (1..16, default 5), `region`
+     * (as in images.findColor) and `step` (sample every n pixels in both directions; by default about 65536 samples).
+     * Pixels with alpha below 128 are ignored.
+     * zh-CN: 图像的主要颜色, 出现最多者在前. 选项: `count` (1..16, 默认 5), `region` (与 images.findColor 相同)
+     * 与 `step` (横纵向每隔 n 个像素采样; 默认采样约 65536 个像素). 忽略 alpha 低于 128 的像素.
+     */
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun extract(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..2) {
+        val (image, options) = it
+        extractRhino(image, options).toNativeArray()
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    @RhinoFunctionBody
+    fun extractRhino(image: Any?, options: Any? = null): List<Int> {
+        require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for colors.extract must be an ImageWrapper" }
+        require(options.isJsNullish() || options is NativeObject) { "Argument \"options\" ${options.jsBrief()} for colors.extract must be an object" }
+        val opt = options as? NativeObject
+        val count = opt?.inquire("count") { value ->
+            parseFinite(value, "count", "colors.extract").let { number ->
+                number.roundToInt().also { require(number == it.toDouble() && it in 1..ColorQuantizer.MAX_COLORS) { "Option \"count\" ${value.jsBrief()} for colors.extract must be an integer in range 1..${ColorQuantizer.MAX_COLORS}" } }
+            }
+        } ?: DEFAULT_EXTRACT_COUNT
+        try {
+            val region = Images.buildRegionInternal(image, opt?.prop("region"))
+            val step = opt?.inquire("step") { value ->
+                parseFinite(value, "step", "colors.extract").let { number ->
+                    number.roundToInt().also { require(number == it.toDouble() && it >= 1) { "Option \"step\" ${value.jsBrief()} for colors.extract must be a positive integer" } }
+                }
+            } ?: ceil(sqrt(region.width.toDouble() * region.height / EXTRACT_SAMPLES)).toInt().coerceAtLeast(1)
+            val bitmap = image.bitmap
+            val row = IntArray(region.width)
+            val samples = ArrayList<Int>()
+            var y = region.y
+            while (y < region.y + region.height) {
+                bitmap.getPixels(row, 0, region.width, region.x, y, region.width, 1)
+                var x = 0
+                while (x < region.width) {
+                    samples += row[x]
+                    x += step
+                }
+                y += step
+            }
+            return ColorQuantizer.quantize(samples.toIntArray(), count).map { it.color }
+        } finally {
+            image.shoot()
+        }
+    }
+
+    /** `[c1, c2, c3]` or `[c1, c2, c3, alpha]`, given as one array or as separate arguments. zh-CN: 以单个数组或分别给出的 `[c1, c2, c3]` 或 `[c1, c2, c3, alpha]`. */
+    private fun perceptualComponents(args: Array<out Any?>, name: String): List<Any?> {
+        val components: List<Any?> = when (args.size) {
+            1 -> (args[0] as? NativeArray)?.toList()
+                ?: throw WrappedIllegalArgumentException("Components argument ${args[0].jsBrief()} for $name must be a JavaScript Array")
+            else -> args.toList()
+        }
+        require(components.size in 3..4) { "$name needs 3 components and an optional alpha instead of ${components.size} values" }
+        return components + listOf(null)
+    }
+
+    private fun parseFinite(value: Any?, label: String, name: String): Double {
+        val number = Numberx.parseAnyRhino(value)
+        require(!number.isNaN() && !number.isInfinite()) { "Argument \"$label\" ${value.jsBrief()} for $name must be a finite number" }
+        return number
+    }
+
+    /** Lightness in 0..1, also given as a percentage such as "50%". zh-CN: 0..1 的亮度, 也可写作 "50%" 这样的百分比. */
+    private fun parseLightness(value: Any?, name: String): Double = parseFinite(value, "L", name).also {
+        require(it in 0.0..1.0) { "Argument \"L\" ${value.jsBrief()} for $name must be in range 0..1" }
+    }
+
+    private fun withAlphaComponent(color: Int, alpha: Any?): Int = when {
+        alpha.isJsNullish() -> color or OPAQUE
+        else -> (color and 0xFFFFFF) or (parseDoubleComponent(alpha) shl 24)
     }
 
     internal fun parseRelativePercentage(percentage: Any?): Double {
