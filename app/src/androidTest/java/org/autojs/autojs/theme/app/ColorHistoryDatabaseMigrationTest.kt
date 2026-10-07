@@ -131,9 +131,14 @@ class ColorHistoryDatabaseMigrationTest {
         }
     }
 
+    // SQLiteOpenHelper implements AutoCloseable only from API 29, so it is closed explicitly (found on API 28, roadmap P7.2).
+    // zh-CN: SQLiteOpenHelper 自 API 29 起才实现 AutoCloseable, 因此显式关闭 (在 API 28 上发现, Roadmap P7.2).
     private fun createLegacy(populate: (SQLiteDatabase) -> Unit) {
-        LegacyOpenHelper(context, dbName, 1, SCHEMA_V1).use { helper ->
+        val helper = LegacyOpenHelper(context, dbName, 1, SCHEMA_V1)
+        try {
             helper.writableDatabase.use { db -> populate(db) }
+        } finally {
+            helper.close()
         }
     }
 
