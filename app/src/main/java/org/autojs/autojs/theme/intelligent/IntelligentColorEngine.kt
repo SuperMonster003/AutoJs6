@@ -9,6 +9,8 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,10 +20,15 @@ import org.autojs.autojs.theme.ThemeColorCoordinator
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
-import org.autojs.autojs.theme.library.ColorSelection
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_ITEM_NAME
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_NAME
+import org.autojs.autojs.theme.library.ColorLibraryIds
 import java.text.Collator
 import java.time.Instant
 import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.concurrent.FutureTask
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
@@ -49,6 +56,8 @@ import org.autojs.autojs.script.ScriptSource
  */
 object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.Listener {
 
+    private const val LOG_TAG = "IntelligentColorEngine"
+
     private const val KEY_SNAPSHOT = "INTELLIGENT_COLOR_ACTIVE_SNAPSHOT"
     private const val KEY_RUNTIME = "INTELLIGENT_COLOR_RUNTIME_STATE"
     private const val KEY_SCRIPT_STATE = "INTELLIGENT_COLOR_SCRIPT_STATE"
@@ -57,8 +66,10 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
 
     private val handler by lazy { Handler(Looper.getMainLooper()) }
 
+    /** Created on the first name comparison only, since creating a collator is slow (roadmap P7.4). zh-CN: 仅在首次按名称比较时创建, 因为创建排序器较慢 (Roadmap P7.4). */
+    private val collator by lazy { Collator.getInstance() }
+
     private val planner by lazy {
-        val collator = Collator.getInstance()
         IntelligentColorPlanner(nameComparator = Comparator { a, b -> collator.compare(a, b) })
     }
 
@@ -110,18 +121,74 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         override fun onActivityDestroyed(activity: Activity) = Unit
     }
 
+    private var preloaded: FutureTask<Pair<IntelligentSnapshot?, IntelligentRuntimeState>>? = null
+
+    /**
+     * Decodes the saved library on a background thread while the rest of `App.onCreate` runs, and warms up the planner
+     * with a dry run, so that [init] finds the data ready and the classes loaded (roadmap P7.4).
+     * zh-CN: 在 `App.onCreate` 的其余部分运行期间, 于后台线程解码保存的库, 并空跑一次规划器以完成预热,
+     * 使 [init] 时数据已就绪且相关类已加载 (Roadmap P7.4).
+     */
+    fun preload() {
+        if (preloaded != null) return
+        val task = FutureTask {
+            val saved = decodeSaved()
+            saved.first?.let { active ->
+                runCatching {
+                    val input = dryRunInput(active, saved.second)
+                    planner.plan(input)
+                    // Pure calls that load the state classes as well; nothing is registered here.
+                    // zh-CN: 同时加载状态相关类的纯调用; 此处不注册任何监听.
+                    DeviceStateMonitor.factsFor(active.config.stateSource)
+                    StateResolver.resolve(active.config.stateSource, input.now, input.zone, DeviceFacts(), saved.second.lastStateKey)
+                }
+            }
+            saved
+        }
+        preloaded = task
+        Thread(task, "IntelligentColorEnginePreload").start()
+    }
+
+    private fun decodeSaved(): Pair<IntelligentSnapshot?, IntelligentRuntimeState> {
+        return IntelligentEngineJson.decodeSnapshot(Pref.getStringOrNull(KEY_SNAPSHOT)) to IntelligentEngineJson.decodeRuntime(Pref.getStringOrNull(KEY_RUNTIME))
+    }
+
+    /** A planner input without side effects; its result is discarded. zh-CN: 不产生副作用的规划器输入; 结果会被丢弃. */
+    private fun dryRunInput(active: IntelligentSnapshot, runtime: IntelligentRuntimeState) = PlannerInput(
+        config = active.config,
+        groups = active.groups,
+        stateKey = runtime.lastStateKey ?: active.config.stateKeys.first(),
+        now = System.currentTimeMillis(),
+        event = IntelligentEvent.EVALUATE,
+        runtime = runtime,
+        zone = zoneOf(active.config),
+    )
+
     /**
      * Called once from `App.onCreate`, after the theme color and night mode are initialized.
      * zh-CN: 在 `App.onCreate` 中主题色与夜间模式初始化之后调用一次.
      */
     fun init(application: Application) {
+        // Timing for performance checks (roadmap P7.4), off unless `adb shell setprop log.tag.IntelligentColorEngine DEBUG`.
+        // zh-CN: 用于性能检查的计时 (Roadmap P7.4), 默认关闭, 可经 `adb shell setprop log.tag.IntelligentColorEngine DEBUG` 开启.
+        val startedAt = if (Log.isLoggable(LOG_TAG, Log.DEBUG)) SystemClock.elapsedRealtimeNanos() else 0L
         appContext = application.applicationContext
         ThemeColorCoordinator.listener = this
         NightModeState.addListener(this)
         application.registerActivityLifecycleCallbacks(foregroundCallbacks)
-        snapshot = IntelligentEngineJson.decodeSnapshot(Pref.getStringOrNull(KEY_SNAPSHOT))?.let(::refreshPreset)
-        runtime = IntelligentEngineJson.decodeRuntime(Pref.getStringOrNull(KEY_RUNTIME))
+        val (savedSnapshot, savedRuntime) = preloaded?.let { task -> runCatching { task.get() }.getOrNull() } ?: decodeSaved()
+        preloaded = null
+        snapshot = savedSnapshot
+        runtime = savedRuntime
+        val decodedAt = if (startedAt != 0L) SystemClock.elapsedRealtimeNanos() else 0L
         if (snapshot != null) evaluate(IntelligentEvent.APP_START)
+        // The saved preset snapshot was built by the previous run; rebuilding it is deferred past the first frame (roadmap P7.4).
+        // zh-CN: 保存的预设快照由上次运行构建; 重建推迟到首帧之后 (Roadmap P7.4).
+        if (snapshot?.libraryId?.let(ColorLibraryIds::isPresetIntelligent) == true) handler.post(::refreshActivePreset)
+        if (startedAt != 0L) {
+            val endedAt = SystemClock.elapsedRealtimeNanos()
+            Log.d(LOG_TAG, "init: snapshot ${snapshot?.libraryId}, decode ${(decodedAt - startedAt) / 1000} us, evaluate ${(endedAt - decodedAt) / 1000} us, total ${(endedAt - startedAt) / 1000} us")
+        }
     }
 
     /**
@@ -282,7 +349,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      */
     fun reapply(): Boolean {
         val active = snapshot ?: return false
-        val stateKey = runtime.lastStateKey ?: resolveState(active.config, System.currentTimeMillis()).stateKey
+        val stateKey = runtime.lastStateKey ?: resolveState(active.config, System.currentTimeMillis(), zoneOf(active.config)).stateKey
         val themeColor = expectedThemeColor(active, stateKey) ?: return false
         ThemeColorCoordinator.apply(themeColor, ThemeColorSource.RESTORE)
         return true
@@ -297,7 +364,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         val active = snapshot ?: return
         val now = System.currentTimeMillis()
         val due = listOfNotNull(runtime.earliestDueAt, nextStateChangeAt).any { now >= it }
-        val state = resolveState(active.config, now)
+        val state = resolveState(active.config, now, zoneOf(active.config))
         val stateChanged = runtime.lastStateKey != state.stateKey
         val overrideChanged = runtime.overrideGroupId != overrideGroupOf(active.config, now)
         val colorDrifted = ThemeColorManager.currentThemeColor != expectedThemeColor(active, state.stateKey)
@@ -307,11 +374,11 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
     private fun plan(event: IntelligentEvent, startGroupId: Long?, source: ThemeColorSource) {
         val active = snapshot ?: return
         val now = System.currentTimeMillis()
-        val zone = ZoneId.systemDefault()
+        val zone = zoneOf(active.config)
         watchDeviceFacts(active.config)
         watchWallpaper(active)
         watchScriptStarts(active.config)
-        val state = resolveState(active.config, now)
+        val state = resolveState(active.config, now, zone)
         nextStateChangeAt = state.nextChangeAt
         val result = planner.plan(
             PlannerInput(
@@ -326,9 +393,11 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
                 zone = zone,
             )
         )
-        runtime = result.runtime
-        Pref.putString(KEY_RUNTIME, IntelligentEngineJson.encodeRuntime(runtime))
-        ColorSelectBaseActivity.savePrefsForSelectionNames(active.name, active.group(result.groupId)?.let(::groupDisplayName))
+        if (result.runtime != runtime) {
+            runtime = result.runtime
+            Pref.putString(KEY_RUNTIME, IntelligentEngineJson.encodeRuntime(runtime))
+        }
+        saveSelectionNames(active.name, active.group(result.groupId)?.let(::groupDisplayName))
         result.color?.let { color ->
             val themeColor = ThemeColorManager.resolve(color.primary, color.accent, color.dark)
             if (source == ThemeColorSource.ACTIVATION || themeColor != ThemeColorManager.currentThemeColor) {
@@ -344,9 +413,20 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      * The current state of the active source, read from night mode and the watched device facts (roadmap P3.1 to P3.3).
      * zh-CN: 激活库状态源的当前状态, 取自夜间模式与所监听的设备状态 (Roadmap P3.1 至 P3.3).
      */
-    private fun resolveState(config: IntelligentConfig, now: Long): StateResolution {
+    private fun resolveState(config: IntelligentConfig, now: Long, zone: ZoneId): StateResolution {
         val facts = DeviceStateMonitor.read(appContext, DeviceStateMonitor.factsFor(config.stateSource)).copy(isNight = NightModeState.isNight, scriptState = scriptState)
-        return StateResolver.resolve(config.stateSource, now, ZoneId.systemDefault(), facts, runtime.lastStateKey)
+        return StateResolver.resolve(config.stateSource, now, zone, facts, runtime.lastStateKey)
+    }
+
+    /**
+     * The system zone for configurations that depend on local time, UTC otherwise: the first lookup of the system zone
+     * loads the time zone data, which is costly on a cold start (roadmap P7.4).
+     * zh-CN: 依赖本地时间的配置使用系统时区, 其他配置使用 UTC: 首次获取系统时区会加载时区数据, 在冷启动时开销较大 (Roadmap P7.4).
+     */
+    private fun zoneOf(config: IntelligentConfig): ZoneId = when {
+        config.interval != null || config.daily != null || config.overrides.isNotEmpty() -> ZoneId.systemDefault()
+        config.stateSource.let { it is StateSource.TimePeriods || it is StateSource.SunriseSunset || it is StateSource.Weekday || it is StateSource.Seasons } -> ZoneId.systemDefault()
+        else -> ZoneOffset.UTC
     }
 
     /** The group of the first matching date override today (roadmap P3.5). zh-CN: 今天第一个命中的日期覆盖层的组 (Roadmap P3.5). */
@@ -400,6 +480,16 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         return fresh
     }
 
+    /** Rebuilds the active preset after the cold start evaluation and evaluates again when it changed. zh-CN: 在冷启动评估之后重建激活的预设, 有变化时再次评估. */
+    private fun refreshActivePreset() {
+        val active = snapshot ?: return
+        val fresh = refreshPreset(active)
+        if (fresh == active) return
+        snapshot = fresh
+        _changes.postValue(Unit)
+        evaluate(IntelligentEvent.EVALUATE)
+    }
+
     private fun expectedThemeColor(active: IntelligentSnapshot, stateKey: String): ThemeColor? {
         val color = active.group(shownGroupId)?.resolve(stateKey, active.config.stateKeys) ?: return null
         return ThemeColorManager.resolve(color.primary, color.accent, color.dark)
@@ -433,8 +523,19 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         timeReceiverRegistered = needed
     }
 
+    /**
+     * Intelligent library ids have segments of their own (D9), so the stored library id alone tells whether the
+     * selection is [active]; reading it directly keeps the selection pages' classes off the cold start (roadmap P7.4).
+     * zh-CN: 智能库 id 有独立的分段 (D9), 因此仅凭保存的库 id 即可判断选中项是否为 [active]; 直接读取可避免冷启动时加载选择页面的类 (Roadmap P7.4).
+     */
     private fun isSelectionOf(active: IntelligentSnapshot): Boolean {
-        return (ColorSelectBaseActivity.currentColorSelection() as? ColorSelection.Intelligent)?.libraryId == active.libraryId
+        return Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, ColorLibraryIds.SELECT_NONE) == active.libraryId
+    }
+
+    /** Writes the names shown in the theme color summary when they changed. zh-CN: 主题色摘要中显示的名称有变化时写入. */
+    private fun saveSelectionNames(libraryName: String?, itemName: String?) {
+        if (Pref.getStringOrNull(KEY_SELECTED_COLOR_LIBRARY_NAME) != libraryName) Pref.putString(KEY_SELECTED_COLOR_LIBRARY_NAME, libraryName)
+        if (Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME) != itemName) Pref.putString(KEY_SELECTED_COLOR_ITEM_NAME, itemName)
     }
 
     fun groupDisplayName(group: IntelligentGroup): String? = group.name?.takeIf { it.isNotBlank() }

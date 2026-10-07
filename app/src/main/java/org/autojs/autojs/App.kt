@@ -109,6 +109,11 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 setUpDefaultNightMode()
             }
             else /* Main process. */ -> {
+                if (getProcessNameCompat() == applicationInfo.processName && !AbstractAutoJs.isInrt) {
+                    // Decodes the active intelligent library while the rest of onCreate runs (roadmap P7.4).
+                    // zh-CN: 在 onCreate 其余部分运行期间解码激活的智能库 (Roadmap P7.4).
+                    IntelligentColorEngine.preload()
+                }
                 OCRPredictorNative.installOpenCvRuntimeLoader {
                     OpenCvPluginHost.ensureLoaded(applicationContext)
                 }
