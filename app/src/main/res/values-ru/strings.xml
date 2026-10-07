@@ -44,14 +44,17 @@
     <string name="color_library_android_colors">Цветовая библиотека Android</string>
     <string name="color_library_css_colors">Цветовая библиотека CSS</string>
     <string name="color_library_default_colors">Стандартная цветовая библиотека</string>
+    <string name="color_library_favorites">Избранное</string>
     <string name="color_library_identifier_created">Создано</string>
     <string name="color_library_identifier_custom">@string/mt_custom</string>
     <string name="color_library_identifier_default_colors">@string/text_default</string>
+    <string name="color_library_identifier_favorites">Избранное</string>
     <string name="color_library_identifier_intelligent_colors">Intell.</string>
     <string name="color_library_identifier_material_design_colors">Material</string>
     <string name="color_library_identifier_palette">Палитра</string>
     <string name="color_library_intelligent_colors">Интеллектуальная цветовая библиотека</string>
     <string name="color_library_material_design_colors">Цветовая библиотека Material Design</string>
+    <string name="color_library_recommended">Частые и рекомендуемые</string>
     <string name="color_library_title_android_colors">Цвета Android</string>
     <string name="color_library_title_css_colors">Цвета CSS</string>
     <string name="color_library_title_default_colors">Стандартные цвета</string>
@@ -787,10 +790,13 @@
     <string name="text_accent_color">Акцент</string>
     <string name="text_add_all_to_color_library">Добавить все в цветовую библиотеку</string>
     <string name="text_add_colors">Добавить цвета</string>
+    <string name="text_add_favorite_from_palette">Добавить из палитры</string>
     <string name="text_add_group">Добавить группу</string>
     <string name="text_add_override">Добавить замену</string>
     <string name="text_add_time">Добавить время</string>
     <string name="text_add_to_color_library">Добавить в цветовую библиотеку</string>
+    <string name="text_add_to_favorites">Добавить в избранное</string>
+    <string name="text_added_to_favorites">Добавлено в избранное</string>
     <string name="text_and_n_more">... и еще %d</string>
     <string name="text_apply_as_theme_color">Применить как цвет темы</string>
     <string name="text_auto_fill">Заполнить остальные состояния</string>
@@ -1269,6 +1275,8 @@
     <string name="text_country_code">Код страны (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
     <string name="text_create">Создать</string>
+    <string name="text_create_intelligent_library_from_favorites" tools:ignore="TypographyEllipsis">Создать интеллектуальную библиотеку из избранного...</string>
+    <string name="text_create_intelligent_library_from_recommendations" tools:ignore="TypographyEllipsis">Создать интеллектуальную библиотеку из этих цветов...</string>
     <string name="text_create_snapshot">Создать снимок</string>
     <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
     <string name="text_current">Текущая</string>
@@ -1503,6 +1511,8 @@
     <string name="text_failed_to_update">Не удалось обновить</string>
     <string name="text_failed_to_write_file">Не удалось записать файл</string>
     <string name="text_falling_back_to_local_build">Переход к локальной сборке</string>
+    <string name="text_favorite">Избранное</string>
+    <string name="text_favorite_pinned">Закреплено</string>
     <string name="text_file">Файл</string>
     <string name="text_file_colon_value">Файл: %1$s</string>
     <string name="text_file_details">Сведения о файле</string>
@@ -1851,6 +1861,7 @@
     <string name="text_manage_key_store">Управление хранилищем ключей</string>
     <string name="text_maximize">Развернуть</string>
     <string name="text_mcp_server">Сервер MCP</string>
+    <string name="text_merge_similar_colors">Объединять похожие цвета</string>
     <string name="text_min_version">Минимальная версия</string>
     <string name="text_min_version_of_vscode_vsc_ext">Минимальная версия расширения VSCode</string>
     <string name="text_minimize">Свернуть</string>
@@ -1913,6 +1924,7 @@
     <string name="text_no_data">Нет данных</string>
     <string name="text_no_differences">Различий нет</string>
     <string name="text_no_exif_information">Нет информации EXIF</string>
+    <string name="text_no_favorites">Избранного пока нет. Нажмите и удерживайте цвет или отметьте \"Избранное\" в его сведениях</string>
     <string name="text_no_groups_for_override">Сначала добавьте группу</string>
     <string name="text_no_hidden_plugins">Нет скрытых плагинов</string>
     <string name="text_no_history">Истории нет</string>
@@ -1924,6 +1936,7 @@
     <string name="text_no_log_entries_to_export">Нет записей журнала для экспорта</string>
     <string name="text_no_log_entries_to_send">Нет записей журнала для отправки</string>
     <string name="text_no_plugins_installed_hint">В настоящее время плагины не установлены.\nНажмите кнопку \"+\" чтобы установить плагины.</string>
+    <string name="text_no_recommendations">Рекомендаций пока нет. Здесь появятся использованные и избранные цвета</string>
     <string name="text_no_release_notes">Нет примечаний к выпуску</string>
     <string name="text_no_root">Не root</string>
     <string name="text_no_root_access">Нет root-доступа</string>
@@ -2104,6 +2117,7 @@
     <string name="text_permissions_list">Разрешения</string>
     <string name="text_pin">Закрепить</string>
     <string name="text_pin_shortcut_not_unsupported">Закрепление ярлыков в пусковой установке не поддерживается</string>
+    <string name="text_pin_to_top">Закрепить вверху</string>
     <string name="text_pinch_to_zoom">Уменьшение масштаба</string>
     <string name="text_pinned">Закреплено</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">Закреплено, не подлежит очистке на уровне файла</string>
@@ -2280,9 +2294,11 @@
     <string name="text_remove_all_breakpoints">Удалить все точки останова</string>
     <string name="text_remove_broken_items">Удалить поврежденные элементы</string>
     <string name="text_remove_broken_items_confirm">Удалить поврежденные элементы (%1$d) с отсутствующими данными? Их нельзя восстановить.</string>
+    <string name="text_remove_from_favorites">Убрать из избранного</string>
     <string name="text_remove_from_trash">Убрать из корзины</string>
     <string name="text_remove_from_trash_confirm">Удалить этот элемент из корзины навсегда?</string>
     <string name="text_remove_selected_from_trash_confirm">Удалить %d выбранных элементов из корзины навсегда?</string>
+    <string name="text_removed_from_favorites">Убрано из избранного</string>
     <string name="text_rename">Переименовать</string>
     <string name="text_rename_color_library">Переименовать цветовую библиотеку</string>
     <string name="text_reorder_color_libraries">Изменить порядок цветовых библиотек</string>
@@ -2396,6 +2412,7 @@
     <string name="text_season_winter">Зима</string>
     <string name="text_seed_color">Исходный</string>
     <string name="text_seed_current_theme_color">Текущий цвет темы %1$s</string>
+    <string name="text_seed_favorite_color">Избранное %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">Из цветовой палитры...</string>
     <string name="text_seed_state_night_mode">Ночной режим (ночные цвета заполнены)</string>
     <string name="text_seed_wallpaper_color">Цвет обоев %1$s</string>
@@ -2460,6 +2477,7 @@
     <string name="text_some_items_exported">Экспортировано %d элементов</string>
     <string name="text_sort">Сортировать</string>
     <string name="text_sort_ascending">По возрастанию</string>
+    <string name="text_sort_by">Сортировка</string>
     <string name="text_sort_by_name_asc">Имя (A-Z)</string>
     <string name="text_sort_by_name_desc">Имя (Z-A)</string>
     <string name="text_sort_by_path_asc">Путь (A-Z)</string>
@@ -2468,7 +2486,10 @@
     <string name="text_sort_by_time_asc">Время (сначала старые)</string>
     <string name="text_sort_by_time_desc">Время (сначала новые)</string>
     <string name="text_sort_descending">По убыванию</string>
+    <string name="text_sort_favorited_time">Время добавления</string>
+    <string name="text_sort_favorites" tools:ignore="TypographyEllipsis">Сортировка...</string>
     <string name="text_sort_field">Поле сортировки</string>
+    <string name="text_sort_hue">Оттенок</string>
     <string name="text_sort_key_chroma">Насыщенность</string>
     <string name="text_sort_key_created">Время создания</string>
     <string name="text_sort_key_hue">Оттенок</string>
@@ -2476,6 +2497,8 @@
     <string name="text_sort_key_manual">Вручную</string>
     <string name="text_sort_key_modified">Время изменения</string>
     <string name="text_sort_key_name">Имя</string>
+    <string name="text_sort_lightness">Светлота</string>
+    <string name="text_sort_manual">Вручную</string>
     <string name="text_sort_order">Порядок сортировки</string>
     <string name="text_sort_secondary">Вторичная сортировка</string>
     <string name="text_sort_strategy_author">Разработчик</string>
@@ -2629,6 +2652,7 @@
     <string name="text_unlimited">Без ограничений</string>
     <string name="text_unnamed_color_library">Безымянная цветовая библиотека</string>
     <string name="text_unpin">Открепить</string>
+    <string name="text_unpin_favorite">Открепить</string>
     <string name="text_unsaved_changes">Несохраненные изменения</string>
     <string name="text_unsigned_apk_created">Неподписанный APK создан</string>
     <string name="text_unsupported">Не поддерживается</string>

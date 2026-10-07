@@ -114,6 +114,13 @@
         <item quantity="other">%d замены</item>
     </plurals>
 
+    <plurals name="text_n_similar_colors_merged">
+        <item quantity="one">+%d похожий</item>
+        <item quantity="few">+%d похожих</item>
+        <item quantity="many">+%d похожих</item>
+        <item quantity="other">+%d похожих</item>
+    </plurals>
+
     <plurals name="text_n_times_a_day">
         <item quantity="one">%d раз в день</item>
         <item quantity="few">%d раза в день</item>
@@ -126,6 +133,13 @@
         <item quantity="few">%d цветовые библиотеки неизвестного типа будут пропущены</item>
         <item quantity="many">%d цветовых библиотек неизвестного типа будут пропущены</item>
         <item quantity="other">%d цветовой библиотеки неизвестного типа будут пропущены</item>
+    </plurals>
+
+    <plurals name="text_used_n_times">
+        <item quantity="one">Использован %d раз</item>
+        <item quantity="few">Использован %d раза</item>
+        <item quantity="many">Использован %d раз</item>
+        <item quantity="other">Использован %d раза</item>
     </plurals>
 
 </resources>

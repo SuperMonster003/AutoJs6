@@ -46,14 +46,17 @@
     <string name="color_library_android_colors">مكتبة ألوان Android</string>
     <string name="color_library_css_colors">مكتبة ألوان CSS</string>
     <string name="color_library_default_colors">مكتبة الألوان الافتراضية</string>
+    <string name="color_library_favorites">المفضلة</string>
     <string name="color_library_identifier_created">تم الإنشاء</string>
     <string name="color_library_identifier_custom">@string/mt_custom</string>
     <string name="color_library_identifier_default_colors">@string/text_default</string>
+    <string name="color_library_identifier_favorites">المفضلة</string>
     <string name="color_library_identifier_intelligent_colors">ذكي</string>
     <string name="color_library_identifier_material_design_colors">المواد</string>
     <string name="color_library_identifier_palette">لوحة</string>
     <string name="color_library_intelligent_colors">مكتبة الألوان الذكية</string>
     <string name="color_library_material_design_colors">مكتبة ألوان تصميم المواد</string>
+    <string name="color_library_recommended">المستخدمة كثيرا والمقترحة</string>
     <string name="color_library_title_android_colors">ألوان Android</string>
     <string name="color_library_title_css_colors">ألوان CSS</string>
     <string name="color_library_title_default_colors">الألوان الافتراضية</string>
@@ -789,10 +792,13 @@
     <string name="text_accent_color">لون التمييز</string>
     <string name="text_add_all_to_color_library">إضافة الكل إلى مكتبة ألوان</string>
     <string name="text_add_colors">إضافة ألوان</string>
+    <string name="text_add_favorite_from_palette">إضافة من لوحة الألوان</string>
     <string name="text_add_group">إضافة مجموعة</string>
     <string name="text_add_override">إضافة استثناء</string>
     <string name="text_add_time">إضافة وقت</string>
     <string name="text_add_to_color_library">إضافة إلى مكتبة ألوان</string>
+    <string name="text_add_to_favorites">إضافة إلى المفضلة</string>
+    <string name="text_added_to_favorites">تمت الإضافة إلى المفضلة</string>
     <string name="text_and_n_more">... و %d اخرى</string>
     <string name="text_apply_as_theme_color">تطبيق كلون للموضوع</string>
     <string name="text_auto_fill">تعبئة الحالات الأخرى تلقائيا</string>
@@ -1271,6 +1277,8 @@
     <string name="text_country_code">رمز الدولة (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">رمز الدولة يجب أن يكون حرفين كبيرين</string>
     <string name="text_create">إنشاء</string>
+    <string name="text_create_intelligent_library_from_favorites" tools:ignore="TypographyEllipsis">إنشاء مكتبة ذكية من المفضلة...</string>
+    <string name="text_create_intelligent_library_from_recommendations" tools:ignore="TypographyEllipsis">إنشاء مكتبة ذكية من هذه الألوان...</string>
     <string name="text_create_snapshot">انشاء لقطة</string>
     <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
     <string name="text_current">الحالي</string>
@@ -1505,6 +1513,8 @@
     <string name="text_failed_to_update">فشل التحديث</string>
     <string name="text_failed_to_write_file">فشل في كتابة الملف</string>
     <string name="text_falling_back_to_local_build">جار الرجوع إلى البناء المحلي</string>
+    <string name="text_favorite">مفضل</string>
+    <string name="text_favorite_pinned">مثبت</string>
     <string name="text_file">ملف</string>
     <string name="text_file_colon_value">الملف: %1$s</string>
     <string name="text_file_details">تفاصيل الملف</string>
@@ -1853,6 +1863,7 @@
     <string name="text_manage_key_store">إدارة مخزن المفاتيح</string>
     <string name="text_maximize">تكبير</string>
     <string name="text_mcp_server">خادم MCP</string>
+    <string name="text_merge_similar_colors">دمج الألوان المتشابهة</string>
     <string name="text_min_version">الإصدار الأدنى</string>
     <string name="text_min_version_of_vscode_vsc_ext">أدنى إصدار من امتداد VSCode</string>
     <string name="text_minimize">تصغير</string>
@@ -1915,6 +1926,7 @@
     <string name="text_no_data">لا توجد بيانات</string>
     <string name="text_no_differences">لا توجد اختلافات</string>
     <string name="text_no_exif_information">لا توجد معلومات EXIF</string>
+    <string name="text_no_favorites">لا توجد ألوان مفضلة بعد. اضغط مطولا على لون أو حدد \"مفضل\" في تفاصيله</string>
     <string name="text_no_groups_for_override">أضف مجموعة أولا</string>
     <string name="text_no_hidden_plugins">لا توجد مكونات إضافية مخفية</string>
     <string name="text_no_history">لا يوجد سجل</string>
@@ -1926,6 +1938,7 @@
     <string name="text_no_log_entries_to_export">لا توجد إدخالات سجل للتصدير</string>
     <string name="text_no_log_entries_to_send">لا توجد إدخالات سجل لإرسالها</string>
     <string name="text_no_plugins_installed_hint">لا توجد حاليًا أي مكونات إضافية مثبتة.\nانقر على زر \"+\" لتثبيت المكونات الإضافية.</string>
+    <string name="text_no_recommendations">لا توجد اقتراحات بعد. تظهر هنا الألوان المستخدمة والمفضلة</string>
     <string name="text_no_release_notes">لا توجد ملاحظات اصدار</string>
     <string name="text_no_root">غير الجذر</string>
     <string name="text_no_root_access">لا الوصول إلى الجذر</string>
@@ -2106,6 +2119,7 @@
     <string name="text_permissions_list">الأذونات</string>
     <string name="text_pin">تثبيت</string>
     <string name="text_pin_shortcut_not_unsupported">تثبيت الاختصارات على المشغل غير مدعوم</string>
+    <string name="text_pin_to_top">تثبيت في الأعلى</string>
     <string name="text_pinch_to_zoom">قرصة للتكبير</string>
     <string name="text_pinned">مثبت</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">مثبت, مستثنى من التنظيف على مستوى الملف</string>
@@ -2282,9 +2296,11 @@
     <string name="text_remove_all_breakpoints">إزالة جميع نقاط التوقف</string>
     <string name="text_remove_broken_items">ازالة العناصر التالفة</string>
     <string name="text_remove_broken_items_confirm">هل تريد ازالة %1$d من العناصر التالفة التي فُقدت بياناتها؟ لا يمكن استعادتها.</string>
+    <string name="text_remove_from_favorites">إزالة من المفضلة</string>
     <string name="text_remove_from_trash">ازالة من سلة المحذوفات</string>
     <string name="text_remove_from_trash_confirm">هل تريد حذف هذا العنصر من سلة المحذوفات نهائيا?</string>
     <string name="text_remove_selected_from_trash_confirm">ازالة %d من العناصر المحددة من سلة المحذوفات نهائيا؟</string>
+    <string name="text_removed_from_favorites">تمت الإزالة من المفضلة</string>
     <string name="text_rename">إعادة تسمية</string>
     <string name="text_rename_color_library">إعادة تسمية مكتبة الألوان</string>
     <string name="text_reorder_color_libraries">إعادة ترتيب مكتبات الألوان</string>
@@ -2398,6 +2414,7 @@
     <string name="text_season_winter">الشتاء</string>
     <string name="text_seed_color">الأساسي</string>
     <string name="text_seed_current_theme_color">لون الموضوع الحالي %1$s</string>
+    <string name="text_seed_favorite_color">مفضل %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">من لوحة الألوان...</string>
     <string name="text_seed_state_night_mode">وضع الليل (تعبئة ألوان الليل)</string>
     <string name="text_seed_wallpaper_color">لون الخلفية %1$s</string>
@@ -2462,6 +2479,7 @@
     <string name="text_some_items_exported">تم تصدير %d من العناصر</string>
     <string name="text_sort">فرز</string>
     <string name="text_sort_ascending">تصاعدي</string>
+    <string name="text_sort_by">الترتيب حسب</string>
     <string name="text_sort_by_name_asc">الاسم (A-Z)</string>
     <string name="text_sort_by_name_desc">الاسم (Z-A)</string>
     <string name="text_sort_by_path_asc">المسار (A-Z)</string>
@@ -2470,7 +2488,10 @@
     <string name="text_sort_by_time_asc">الوقت (الاقدم اولا)</string>
     <string name="text_sort_by_time_desc">الوقت (الاحدث اولا)</string>
     <string name="text_sort_descending">تنازلي</string>
+    <string name="text_sort_favorited_time">وقت الإضافة</string>
+    <string name="text_sort_favorites" tools:ignore="TypographyEllipsis">الترتيب حسب...</string>
     <string name="text_sort_field">حقل الفرز</string>
+    <string name="text_sort_hue">تدرج اللون</string>
     <string name="text_sort_key_chroma">التشبع</string>
     <string name="text_sort_key_created">وقت الإنشاء</string>
     <string name="text_sort_key_hue">درجة اللون</string>
@@ -2478,6 +2499,8 @@
     <string name="text_sort_key_manual">يدوي</string>
     <string name="text_sort_key_modified">وقت التعديل</string>
     <string name="text_sort_key_name">الاسم</string>
+    <string name="text_sort_lightness">السطوع</string>
+    <string name="text_sort_manual">يدوي</string>
     <string name="text_sort_order">ترتيب الفرز</string>
     <string name="text_sort_secondary">فرز ثانوي</string>
     <string name="text_sort_strategy_author">المطور</string>
@@ -2631,6 +2654,7 @@
     <string name="text_unlimited">بلا حدود</string>
     <string name="text_unnamed_color_library">مكتبة ألوان بلا اسم</string>
     <string name="text_unpin">الغاء التثبيت</string>
+    <string name="text_unpin_favorite">إلغاء التثبيت</string>
     <string name="text_unsaved_changes">تغييرات غير محفوظة</string>
     <string name="text_unsigned_apk_created">تم انشاء APK غير موقّع</string>
     <string name="text_unsupported">غير مدعوم</string>

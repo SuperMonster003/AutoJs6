@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewAnimationUtils
+import android.widget.LinearLayout
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.DialogFragment
@@ -36,6 +37,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorEntities.ColorHistory
 import org.autojs.autojs.theme.app.ColorEntities.ColorInfo
+import org.autojs.autojs.theme.app.ColorEntities.HistorySource
 import org.autojs.autojs.theme.app.ColorEntities.LibraryColor
 import org.autojs.autojs.theme.app.ColorEntities.PaletteHistory
 import org.autojs.autojs.theme.app.ColorHistoryItemViewHolder.Companion.ColorHistoryItem
@@ -70,6 +72,14 @@ import java.util.Locale
 import kotlin.math.absoluteValue
 import kotlin.math.hypot
 import kotlin.properties.Delegates
+import org.autojs.autojs.theme.app.ColorEntities.FavoriteColor
+import org.autojs.autojs.theme.usage.ColorClusterer
+import org.autojs.autojs.theme.usage.ColorRecommender
+import org.autojs.autojs.theme.usage.FavoriteEntry
+import org.autojs.autojs.theme.usage.HistoryEntry
+import org.autojs.autojs.theme.usage.Recommendation
+import org.autojs.autojs.theme.widget.ThemeColorCheckBox
+import org.autojs.autojs.ui.dialog.InfoDialog
 
 /**
  * Created by Stardust on Mar 5, 2017.
@@ -228,6 +238,10 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             }
             is ColorSelection.Intelligent -> {
                 IntelligentLibraryActivity.launch(this, selection.libraryId)
+                return null
+            }
+            is ColorSelection.Favorite -> {
+                VirtualColorLibraryActivity.launch(this, ColorLibraryIds.FAVORITES, scrollToFavoriteId = selection.favoriteId)
                 return null
             }
             else -> Unit
@@ -489,6 +503,15 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 historyDialog?.dismiss()
                 onHistorySelected(selectedHistoryItem)
             }
+            var allHistoryItems: List<ColorHistoryItem> = emptyList()
+            // "Merge similar colors" keeps the newest of similar entries (roadmap P5.3). zh-CN: "合并相似颜色" 保留相似条目中最新的一条 (Roadmap P5.3).
+            fun showHistoryItems() = adapter.updateData(
+                when {
+                    Pref.getBoolean(KEY_HISTORY_MERGE_SIMILAR, false) -> ColorClusterer.cluster(allHistoryItems, { it.colorInt })
+                        .map { it.representative.copy(mergedCount = it.merged) }
+                    else -> allHistoryItems
+                }
+            )
             launch(Dispatchers.Main) {
                 val context = this@ColorSelectBaseActivity
                 val recyclerView = ThemeColorRecyclerView(context).also {
@@ -496,9 +519,25 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     it.layoutManager = LinearLayoutManager(context)
                     it.addItemDecoration(DividerItemDecoration(context, VERTICAL))
                 }
+                val mergeCheck = ThemeColorCheckBox(context).apply {
+                    text = getString(R.string.text_merge_similar_colors)
+                    isChecked = Pref.getBoolean(KEY_HISTORY_MERGE_SIMILAR, false)
+                    val padding = (16 * resources.displayMetrics.density).toInt()
+                    setPadding(paddingLeft, padding / 2, paddingRight, padding / 2)
+                    setOnCheckedChangeListener { _, checked ->
+                        Pref.putBoolean(KEY_HISTORY_MERGE_SIMILAR, checked)
+                        showHistoryItems()
+                    }
+                }
+                val content = LinearLayout(context).apply {
+                    orientation = LinearLayout.VERTICAL
+                    val padding = (20 * resources.displayMetrics.density).toInt()
+                    addView(mergeCheck, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { marginStart = padding })
+                    addView(recyclerView, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+                }
                 historyDialog = MaterialDialog.Builder(context)
                     .title(R.string.text_history)
-                    .customView(recyclerView, false)
+                    .customView(content, false)
                     .neutralText(R.string.dialog_button_clear_items)
                     .neutralColorRes(R.color.dialog_button_warn)
                     .onNeutral { parentDialog, _ ->
@@ -547,10 +586,10 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     .show()
             }
 
-            val historyItems = loadColorHistoryItems(libraryId)
+            allHistoryItems = loadColorHistoryItems(libraryId)
 
             launch(Dispatchers.Main) {
-                adapter.updateData(historyItems)
+                showHistoryItems()
             }
         }
     }
@@ -581,6 +620,14 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             }
         }
 
+        // Favorites, keyed by row id (roadmap P5.1). zh-CN: 收藏, 按行 id 索引 (Roadmap P5.1).
+        val favorites = withContext(Dispatchers.IO) {
+            when {
+                colorHistory.none { it.libraryId == ColorLibraryIds.FAVORITES } -> emptyMap()
+                else -> database.colorLibraryDao().listFavorites().associateBy { it.id }
+            }
+        }
+
         val historyItems = colorHistory.mapNotNull { history ->
             var colorInt: Int? = null
             var colorName: String? = null
@@ -604,10 +651,17 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         colorLibraryIdentifier = libraryName ?: getString(R.string.color_library_identifier_created)
                     }
                 }
+            } else if (history.libraryId == ColorLibraryIds.FAVORITES) {
+                favorites[history.itemId.toLong()]?.let { favorite ->
+                    colorInt = favorite.color
+                    if (isShowAllHistoryEntries) {
+                        colorLibraryIdentifier = getString(R.string.color_library_identifier_favorites)
+                    }
+                }
             }
 
             if (colorInt != null) {
-                return@mapNotNull ColorHistoryItem(history.lastUsedTime, colorInt!!, colorName, colorLibraryIdentifier, history.libraryId, history.itemId)
+                return@mapNotNull ColorHistoryItem(history.lastUsedTime, colorInt!!, colorName, colorLibraryIdentifier, history.libraryId, history.itemId, history.useCount)
             }
             // TODO by SuperMonster003 on Apr 8 ,2025.
             //  ! Obsolete data should be removed from database.
@@ -623,12 +677,56 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     lastUsedTime = history.lastUsedTime,
                     colorInt = history.colorInfo.colorInt,
                     colorName = null,
-                    colorLibraryIdentifier = paletteIdentifier
+                    colorLibraryIdentifier = paletteIdentifier,
+                    useCount = history.useCount,
                 )
             }
         }
 
         return historyItems.sortedByDescending { it.lastUsedTime }
+    }
+
+    /**
+     * "Frequent and recommended" (roadmap P5.4): favorites first, then the history of every library and the palette
+     * ranked by use, with similar colors merged; at most [ColorRecommender.MAX_ITEMS].
+     * zh-CN: "常用与推荐" (Roadmap P5.4): 收藏在前, 然后是按使用情况排序的全部颜色库与调色板历史, 相似颜色已合并; 至多 [ColorRecommender.MAX_ITEMS] 项.
+     */
+    protected suspend fun loadRecommendations(): List<Recommendation<ColorHistoryItem>> {
+        val favorites = withContext(Dispatchers.IO) { ColorLibraryRepository.get(this@ColorSelectBaseActivity).listFavorites() }.map(::favoriteEntryOf)
+        val history = loadColorHistoryItems(null).map { HistoryEntry(it, it.colorInt, it.useCount, it.lastUsedTime) }
+        return withContext(Dispatchers.Default) { ColorRecommender.recommend(favorites, history, System.currentTimeMillis()) }
+    }
+
+    /**
+     * Applies a history entry the way it was chosen: a library item, a favorite or a palette color.
+     * zh-CN: 按历史条目当初的选择方式应用: 颜色库条目, 收藏或调色板颜色.
+     */
+    protected fun applyHistoryItem(item: ColorHistoryItem) {
+        val libraryId = item.libraryId
+        val itemId = item.itemId
+        val repository = ColorLibraryRepository.get(this)
+        when {
+            libraryId != null && itemId != null && ColorLibraryIds.isUserPlain(libraryId) -> lifecycleScope.launch {
+                val color = withContext(Dispatchers.IO) { repository.findColor(itemId.toLong()) }
+                val library = color?.let { withContext(Dispatchers.IO) { repository.findLibrary(it.libraryId) } }
+                when {
+                    color == null || library == null -> ViewUtils.showToast(this@ColorSelectBaseActivity, R.string.error_failed_to_apply_current_color_history, true)
+                    else -> applyUserLibraryColor(library.name, color)
+                }
+            }
+            libraryId == ColorLibraryIds.FAVORITES && itemId != null -> lifecycleScope.launch {
+                // A favorite removed meanwhile still applies its color as a palette color. zh-CN: 期间已被取消的收藏仍以调色板颜色应用.
+                when (val favorite = withContext(Dispatchers.IO) { repository.findFavoriteById(itemId.toLong()) }) {
+                    null -> onColorPickerConfirmed(item.colorInt)
+                    else -> applyFavorite(favorite)
+                }
+            }
+            libraryId != null && itemId != null -> {
+                presetColorLibraries.find { it.id == libraryId }?.colors?.find { it.itemId == itemId }?.let { applyPresetItem(it) }
+                    ?: ViewUtils.showToast(this, R.string.error_failed_to_apply_current_color_history, true)
+            }
+            else -> onColorPickerConfirmed(item.colorInt)
+        }
     }
 
     protected fun showColorDetails(color: Int?, title: String? = null, parentDialog: DialogFragment? = null) {
@@ -652,11 +750,112 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         this@ColorSelectBaseActivity, color,
                         onApply = { onColorPickerConfirmed(it) },
                         onAddToLibrary = { addColorsToUserLibrary(it) },
+                        onFavorite = { setFavorite(it, true) },
                     )
                 }
             }
         )
-        ColorInfoDialogManager.showColorInfoDialog(this, color, title, customNeutral, colorTools)
+        val infoDialog = ColorInfoDialogManager.showColorInfoDialog(this, color, title, customNeutral, colorTools)
+        if (infoDialog != null && color != null) addFavoriteControls(infoDialog, color)
+    }
+
+    /**
+     * "Favorite" and "Pinned" checkboxes under the values of the color details (roadmap P5.1).
+     * zh-CN: 颜色详情数值下方的 "收藏" 与 "置顶" 复选框 (Roadmap P5.1).
+     */
+    private fun addFavoriteControls(infoDialog: InfoDialog, color: Int) {
+        val favoriteCheck = ThemeColorCheckBox(this).apply { text = getString(R.string.text_favorite) }
+        val pinnedCheck = ThemeColorCheckBox(this).apply { text = getString(R.string.text_favorite_pinned) }
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(favoriteCheck)
+            addView(pinnedCheck, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                marginStart = (16 * resources.displayMetrics.density).toInt()
+            })
+        }
+        infoDialog.items.addSeparator()
+        infoDialog.items.addCustom(row)
+        infoDialog.scope.launch {
+            val favorite = withContext(Dispatchers.IO) { ColorLibraryRepository.get(this@ColorSelectBaseActivity).findFavorite(color) }
+            favoriteCheck.isChecked = favorite != null
+            pinnedCheck.isChecked = favorite?.pinned == true
+            pinnedCheck.isEnabled = favorite != null
+            favoriteCheck.setOnCheckedChangeListener { _, checked ->
+                pinnedCheck.isEnabled = checked
+                if (!checked) pinnedCheck.isChecked = false
+                setFavorite(color, checked)
+            }
+            pinnedCheck.setOnCheckedChangeListener { _, checked ->
+                if (favoriteCheck.isChecked) setFavoritePinned(color, checked)
+            }
+        }
+    }
+
+    /**
+     * Applies a favorite as the theme color; the selection and the history name the favorites library (roadmap P5.1).
+     * zh-CN: 将收藏应用为主题色; 选中状态与历史记录均归于收藏库 (Roadmap P5.1).
+     */
+    protected fun applyFavorite(favorite: FavoriteColor) {
+        savePrefsForLibraries(ColorLibraryIds.FAVORITES, favorite.id.toInt())
+        savePrefsForLegacyPalette(favorite.color)
+        savePrefsForSelectionNames(getString(R.string.color_library_favorites), null)
+        saveDatabaseForColorHistory(lifecycleScope, applicationContext, ColorLibraryIds.FAVORITES, favorite.id.toInt())
+        isForciblyEnableAppBarColorTransition = true
+        ThemeColorCoordinator.apply(favorite.color, ThemeColorSource.USER)
+    }
+
+    /**
+     * Adds [color] to the favorites or removes it. Removing the favorite in use keeps the color as a palette color.
+     * zh-CN: 收藏或取消收藏 [color]. 取消收藏正在使用的收藏时, 该颜色保留为调色板颜色.
+     */
+    protected fun setFavorite(color: Int, favorite: Boolean, then: () -> Unit = {}) {
+        val repository = ColorLibraryRepository.get(this)
+        lifecycleScope.launch {
+            when {
+                favorite -> withContext(Dispatchers.IO) { repository.addFavorite(color) }
+                else -> {
+                    val removed = withContext(Dispatchers.IO) { repository.findFavorite(color)?.also { repository.removeFavorite(color) } }
+                    if (removed != null && (currentColorSelection() as? ColorSelection.Favorite)?.favoriteId == removed.id) {
+                        fallBackToPaletteSelection(this@ColorSelectBaseActivity)
+                    }
+                }
+            }
+            ViewUtils.showToast(this@ColorSelectBaseActivity, if (favorite) R.string.text_added_to_favorites else R.string.text_removed_from_favorites)
+            onFavoritesChanged()
+            then()
+        }
+    }
+
+    protected fun setFavoritePinned(color: Int, pinned: Boolean, then: () -> Unit = {}) {
+        val repository = ColorLibraryRepository.get(this)
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) { repository.setFavoritePinned(color, pinned) }
+            onFavoritesChanged()
+            then()
+        }
+    }
+
+    /** Called after any favorite changed. zh-CN: 任一收藏变化后调用. */
+    protected open fun onFavoritesChanged() = Unit
+
+    /**
+     * Long press actions of a color: [extra] first, then favorite / pin actions and the details (roadmap P5.1).
+     * zh-CN: 颜色的长按操作: 先是 [extra], 然后是收藏 / 置顶操作与颜色详情 (Roadmap P5.1).
+     */
+    protected fun showColorActions(color: Int, title: String, extra: List<Pair<String, () -> Unit>> = emptyList()) {
+        lifecycleScope.launch {
+            val favorite = withContext(Dispatchers.IO) { ColorLibraryRepository.get(this@ColorSelectBaseActivity).findFavorite(color) }
+            val actions = extra + favoriteActions(color, favorite) + (getString(R.string.dialog_title_color_details) to { showColorDetails(color, title) })
+            ColorLibraryDialogs.showActions(this@ColorSelectBaseActivity, title, actions)
+        }
+    }
+
+    protected fun favoriteActions(color: Int, favorite: FavoriteColor?): List<Pair<String, () -> Unit>> = when (favorite) {
+        null -> listOf(getString(R.string.text_add_to_favorites) to { setFavorite(color, true) })
+        else -> listOf(
+            getString(if (favorite.pinned) R.string.text_unpin_favorite else R.string.text_pin_to_top) to { setFavoritePinned(color, !favorite.pinned) },
+            getString(R.string.text_remove_from_favorites) to { setFavorite(color, false) },
+        )
     }
 
     /**
@@ -814,6 +1013,11 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         const val KEY_SELECTED_COLOR_LIBRARY_NAME = "SELECTED_COLOR_LIBRARY_NAME"
         const val KEY_SELECTED_COLOR_ITEM_NAME = "SELECTED_COLOR_LIBRARY_ITEM_NAME"
 
+        /** "Merge similar colors" of the history list (roadmap P5.3). zh-CN: 历史列表的 "合并相似颜色" (Roadmap P5.3). */
+        const val KEY_HISTORY_MERGE_SIMILAR = "COLOR_HISTORY_MERGE_SIMILAR"
+
+        fun favoriteEntryOf(favorite: FavoriteColor) = FavoriteEntry(favorite.id, favorite.color, favorite.pinned, favorite.position, favorite.createdTime)
+
         private const val LIBRARY_NAME_SUMMARY_LENGTH = 12
 
         const val INTENT_IDENTIFIER_LIBRARY_ID = "LIBRARY_ID"
@@ -912,6 +1116,9 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         identifier = selectionLibraryNameForSummary() ?: context.getString(R.string.color_library_identifier_created)
                         colorName = Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME)
                     }
+                    is ColorSelection.Favorite -> {
+                        identifier = context.getString(R.string.color_library_identifier_favorites)
+                    }
                     is ColorSelection.Intelligent -> {
                         identifier = selectionLibraryNameForSummary() ?: context.getString(R.string.color_library_identifier_intelligent_colors)
                         colorName = Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME)
@@ -984,19 +1191,23 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             }
         }
 
+        /**
+         * Records one use of a palette color; [source] is [HistorySource.USER] or [HistorySource.SCRIPT] (roadmap P5.2).
+         * zh-CN: 记录调色板颜色的一次使用; [source] 为 [HistorySource.USER] 或 [HistorySource.SCRIPT] (Roadmap P5.2).
+         */
         @JvmStatic
-        fun saveDatabaseForPaletteHistory(dispatcherScope: CoroutineScope? = null, applicationContext: Context, color: Int) {
+        fun saveDatabaseForPaletteHistory(dispatcherScope: CoroutineScope? = null, applicationContext: Context, color: Int, source: String = HistorySource.USER) {
             saveHistory(dispatcherScope) {
                 var itemId by Delegates.notNull<Int>()
-                savePaletteHistory(applicationContext, color).also { itemId = it }
-                saveColorHistory(applicationContext, COLOR_LIBRARY_ID_PALETTE, itemId)
+                savePaletteHistory(applicationContext, color, source).also { itemId = it }
+                saveColorHistory(applicationContext, COLOR_LIBRARY_ID_PALETTE, itemId, source)
             }
         }
 
         @JvmStatic
-        fun saveDatabaseForColorHistory(dispatcherScope: CoroutineScope? = null, applicationContext: Context, libraryId: Int, itemId: Int) {
+        fun saveDatabaseForColorHistory(dispatcherScope: CoroutineScope? = null, applicationContext: Context, libraryId: Int, itemId: Int, source: String = HistorySource.USER) {
             saveHistory(dispatcherScope) {
-                saveColorHistory(applicationContext, libraryId, itemId)
+                saveColorHistory(applicationContext, libraryId, itemId, source)
             }
         }
 
@@ -1010,15 +1221,15 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             }
         }
 
-        private suspend fun savePaletteHistory(applicationContext: Context, color: Int): Int {
+        private suspend fun savePaletteHistory(applicationContext: Context, color: Int, source: String): Int {
             val dao = ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
             val colorInfo = ColorInfo(ColorUtils.toHex(color, 6))
-            return dao.upsert(PaletteHistory(colorInfo = colorInfo).apply { setLastUsedTimeCurrent() }).toInt()
+            return dao.upsert(PaletteHistory(colorInfo = colorInfo, source = source).apply { setLastUsedTimeCurrent() }).toInt()
         }
 
-        private suspend fun saveColorHistory(applicationContext: Context, libraryId: Int, itemId: Int) {
+        private suspend fun saveColorHistory(applicationContext: Context, libraryId: Int, itemId: Int, source: String) {
             val dao = ColorHistoryDatabase.getInstance(applicationContext).colorHistoryDao()
-            dao.upsert(ColorHistory(libraryId = libraryId, itemId = itemId).apply { setLastUsedTimeCurrent() })
+            dao.upsert(ColorHistory(libraryId = libraryId, itemId = itemId, source = source).apply { setLastUsedTimeCurrent() })
         }
 
         @JvmStatic

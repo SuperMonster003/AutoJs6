@@ -24,6 +24,15 @@ object ColorLibraryIds {
     const val PRESET_INTELLIGENT_FIRST = 0x100
     const val PRESET_INTELLIGENT_LAST = 0x1FF
 
+    /**
+     * Virtual libraries next to the palette (0x21) and the intelligent entry (0x22) (roadmap P5.1, P5.4). Favorites
+     * are selectable: their item id is the favorite row id; recommendations apply as the item they come from.
+     * zh-CN: 与调色板 (0x21) 和智能库入口 (0x22) 并列的虚拟库 (Roadmap P5.1, P5.4). 收藏可被选中, 其条目 id 为收藏行 id;
+     * 推荐条目按其来源条目应用.
+     */
+    const val FAVORITES = 0x23
+    const val RECOMMENDED = 0x24
+
     const val USER_PLAIN_BASE = 0x0100_0000
     const val USER_INTELLIGENT_BASE = 0x0200_0000
 
@@ -65,6 +74,9 @@ sealed interface ColorSelection {
 
     data class UserColor(val libraryRowId: Long, val colorRowId: Long?) : ColorSelection
 
+    /** A favorite color (roadmap P5.1). zh-CN: 收藏的颜色 (Roadmap P5.1). */
+    data class Favorite(val favoriteId: Long?) : ColorSelection
+
     /** An active intelligent library and its starting group. zh-CN: 激活的智能库及其起始组. */
     data class Intelligent(val libraryId: Int, val groupId: Long?) : ColorSelection {
         val isPreset: Boolean
@@ -104,6 +116,7 @@ object ColorSelectionCodec {
         return when {
             libraryId == ColorLibraryIds.SELECT_NONE -> decodeLegacy(legacyIndex, materialColorCount)
             libraryId == COLOR_LIBRARY_ID_PALETTE -> ColorSelection.Palette
+            libraryId == ColorLibraryIds.FAVORITES -> ColorSelection.Favorite(item?.toLong())
             ColorLibraryIds.isPresetIntelligent(libraryId) || ColorLibraryIds.isUserIntelligent(libraryId) -> {
                 ColorSelection.Intelligent(libraryId, item?.toLong())
             }
@@ -123,6 +136,7 @@ object ColorSelectionCodec {
         is ColorSelection.Preset -> selection.libraryId to (selection.itemId ?: ColorLibraryIds.SELECT_NONE)
         ColorSelection.Palette -> COLOR_LIBRARY_ID_PALETTE to 0
         is ColorSelection.UserColor -> ColorLibraryIds.ofUserLibrary(selection.libraryRowId, intelligent = false) to rowIdToItemId(selection.colorRowId)
+        is ColorSelection.Favorite -> ColorLibraryIds.FAVORITES to rowIdToItemId(selection.favoriteId)
         is ColorSelection.Intelligent -> selection.libraryId to rowIdToItemId(selection.groupId)
         is ColorSelection.Unknown -> selection.libraryId to selection.itemId
     }

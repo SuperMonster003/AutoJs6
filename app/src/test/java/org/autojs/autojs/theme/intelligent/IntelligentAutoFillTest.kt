@@ -55,6 +55,17 @@ class IntelligentAutoFillTest {
     }
 
     @Test
+    fun colorsBecomeOneGroupEach() {
+        val result = IntelligentSeedGenerator.fromColors(listOf(teal, pink, teal and 0x80FFFFFF.toInt(), pink), nightMode = true, now = 1L, names = listOf("A", "B", "C", "D"))
+        // Repeated opaque colors are dropped, names follow the kept colors. zh-CN: 重复的不透明颜色被去除, 名称跟随保留的颜色.
+        assertEquals(listOf("A", "B"), result.groups.map { it.name })
+        assertEquals(listOf(teal, pink), result.groups.map { it.states[StateKeys.DAY]?.primary })
+        assertEquals(ThemeColorDerivation.dayNightPair(pink).second, result.groups[1].states[StateKeys.NIGHT]?.primary)
+        assertEquals(listOf(-1L, -2L), result.groups.map { it.id })
+        assertEquals(StateSource.None, IntelligentSeedGenerator.fromColors(listOf(teal), nightMode = false).config.stateSource)
+    }
+
+    @Test
     fun nothingToFillFrom() {
         assertNull(IntelligentAutoFill.fill(listOf(StateKeys.DAY, StateKeys.NIGHT), emptyMap()))
         assertEquals(mapOf(StateKeys.DEFAULT to teal), IntelligentAutoFill.fill(listOf(StateKeys.DEFAULT), mapOf(StateKeys.DEFAULT to teal)))

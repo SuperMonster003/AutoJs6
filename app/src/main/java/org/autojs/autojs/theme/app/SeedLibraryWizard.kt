@@ -22,6 +22,7 @@ import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.LibraryNaming
 import org.autojs.autojs6.R
 import java.util.Locale
+import org.autojs.autojs.util.ViewUtils
 
 /**
  * "Generate from a seed color" (roadmap P4.5): seed, scheme, state source, preview with a name, then the library is
@@ -40,12 +41,17 @@ class SeedLibraryWizard(
     fun start() {
         val current = ThemeColorManager.colorPrimary
         val wallpaper = WallpaperColorSource.seeds(activity)
-        val options = buildList<Pair<String, (() -> Unit)>> {
-            add(activity.getString(R.string.text_seed_current_theme_color, hex(current)) to { chooseScheme(current) })
-            add(activity.getString(R.string.text_seed_from_color_palette) to { pickColor(current) { chooseScheme(it) } })
-            wallpaper.forEach { seed -> add(activity.getString(R.string.text_seed_wallpaper_color, hex(seed)) to { chooseScheme(seed) }) }
+        activity.lifecycleScope.launch {
+            val favorites = withContext(Dispatchers.IO) { ColorLibraryRepository.get(activity).listFavorites() }
+            val options = buildList<Pair<String, (() -> Unit)>> {
+                add(activity.getString(R.string.text_seed_current_theme_color, hex(current)) to { chooseScheme(current) })
+                add(activity.getString(R.string.text_seed_from_color_palette) to { pickColor(current) { chooseScheme(it) } })
+                wallpaper.forEach { seed -> add(activity.getString(R.string.text_seed_wallpaper_color, hex(seed)) to { chooseScheme(seed) }) }
+                // Favorites as seeds (roadmap P5.1). zh-CN: 以收藏作为种子色 (Roadmap P5.1).
+                favorites.forEach { favorite -> add(activity.getString(R.string.text_seed_favorite_color, hex(favorite.color)) to { chooseScheme(favorite.color) }) }
+            }
+            ColorLibraryDialogs.showSingleChoice(activity, R.string.text_choose_seed_color, options.map { it.first }) { options[it].second() }
         }
-        ColorLibraryDialogs.showSingleChoice(activity, R.string.text_choose_seed_color, options.map { it.first }) { options[it].second() }
     }
 
     private fun chooseScheme(seed: Int) {
@@ -57,22 +63,37 @@ class SeedLibraryWizard(
             }
             "$name (${activity.resources.getQuantityString(R.plurals.text_n_groups, scheme.colorCount, scheme.colorCount)})"
         }
-        ColorLibraryDialogs.showSingleChoice(activity, R.string.text_choose_scheme, labels) { which -> chooseStateSource(seed, schemes[which], labels[which]) }
-    }
-
-    private fun chooseStateSource(seed: Int, scheme: Scheme, schemeLabel: String) {
-        val labels = listOf(activity.getString(R.string.text_seed_state_night_mode), activity.getString(R.string.text_state_source_none))
-        ColorLibraryDialogs.showSingleChoice(activity, R.string.text_state_source, labels) { which -> preview(seed, scheme, schemeLabel, nightMode = which == 0) }
-    }
-
-    private fun preview(seed: Int, scheme: Scheme, schemeLabel: String, nightMode: Boolean) {
-        val result = IntelligentSeedGenerator.generate(seed, scheme, nightMode) { index, hueOffset ->
-            when (hueOffset) {
-                null -> activity.getString(R.string.text_tone_n, index + 1)
-                0 -> activity.getString(R.string.text_seed_color)
-                else -> String.format(Locale.ROOT, "%+d°", hueOffset)
+        ColorLibraryDialogs.showSingleChoice(activity, R.string.text_choose_scheme, labels) { which ->
+            chooseStateSource("${labels[which].substringBefore(" (")} ${hex(seed)}", origin = hex(seed)) { nightMode ->
+                IntelligentSeedGenerator.generate(seed, schemes[which], nightMode) { index, hueOffset ->
+                    when (hueOffset) {
+                        null -> activity.getString(R.string.text_tone_n, index + 1)
+                        0 -> activity.getString(R.string.text_seed_color)
+                        else -> String.format(Locale.ROOT, "%+d°", hueOffset)
+                    }
+                }
             }
         }
+    }
+
+    /**
+     * Starts from given colors, one group each, skipping the seed and the scheme (roadmap P5.1, P5.4).
+     * zh-CN: 从给定的颜色开始, 每色一组, 跳过种子色与方案 (Roadmap P5.1, P5.4).
+     */
+    fun startFromColors(colors: List<Int>, defaultName: String, names: List<String?> = emptyList()) {
+        if (colors.isEmpty()) {
+            ViewUtils.showToast(activity, R.string.text_no_colors_available)
+            return
+        }
+        chooseStateSource(defaultName, origin = null) { nightMode -> IntelligentSeedGenerator.fromColors(colors, nightMode, names = names) }
+    }
+
+    private fun chooseStateSource(defaultName: String, origin: String?, produce: (nightMode: Boolean) -> IntelligentSeedGenerator.Result) {
+        val labels = listOf(activity.getString(R.string.text_seed_state_night_mode), activity.getString(R.string.text_state_source_none))
+        ColorLibraryDialogs.showSingleChoice(activity, R.string.text_state_source, labels) { which -> preview(produce(which == 0), defaultName, origin) }
+    }
+
+    private fun preview(result: IntelligentSeedGenerator.Result, defaultName: String, origin: String?) {
         val padding = dp(20)
         val content = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
@@ -80,7 +101,7 @@ class SeedLibraryWizard(
         }
         val nameInput = AppCompatEditText(activity).apply {
             hint = activity.getString(R.string.text_color_library_name)
-            setText(LibraryNaming.normalize("${schemeLabel.substringBefore(" (")} ${hex(seed)}"))
+            setText(LibraryNaming.normalize(defaultName))
         }
         val swatches = LinearLayout(activity).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -112,7 +133,7 @@ class SeedLibraryWizard(
                 activity.lifecycleScope.launch {
                     val repository = ColorLibraryRepository.get(activity)
                     val saved = withContext(Dispatchers.IO) {
-                        repository.saveIntelligent(null, name, result.config, result.groups, ColorLibrary.Kind.CREATED, origin = hex(seed))
+                        repository.saveIntelligent(null, name, result.config, result.groups, ColorLibrary.Kind.CREATED, origin = origin)
                     }
                     IntelligentColorEngine.onLibraryChanged(saved)
                     onCreated(saved)

@@ -92,7 +92,11 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
 
         binding.colorItemsRecyclerView.let { it ->
             it.layoutManager = LinearLayoutManager(this)
-            it.adapter = ColorItemAdapter(displayColorsOf(library), onMergedItemClick = { showBackgroundColorDialog() }).also { mAdapter = it }
+            it.adapter = ColorItemAdapter(
+                displayColorsOf(library),
+                onMergedItemClick = { showBackgroundColorDialog() },
+                onItemLongClick = { item -> if (!item.isMerged) showColorActions(getColor(item.colorRes), getString(item.nameRes)) },
+            ).also { mAdapter = it }
 
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
             it.excludePaddingClippableViewFromBottomNavigationBar()

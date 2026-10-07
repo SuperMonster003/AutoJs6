@@ -34,8 +34,7 @@ object IntelligentSeedGenerator {
      * Groups get temporary negative ids, as new groups of the editor do. With night mode, groups rotate on state
      * changes, the editor's default for sources with several states.
      * zh-CN: 各组使用临时的负数 id, 与编辑器中新建的组相同. 使用夜间模式时, 组在状态变化时轮换, 这是编辑器对多状态状态源的默认设置.
-     */
-    /**
+     *
      * @param nameOf names a group from its position in the scheme: the hue offset in degrees for harmonies (0 for the
      * seed), null for tones.
      * zh-CN: 由组在方案中的位置为组命名: 和谐配色传入色相偏移角度 (种子色为 0), 色阶传入 null.
@@ -51,14 +50,30 @@ object IntelligentSeedGenerator {
             is Scheme.Harmony -> ColorHarmony.harmony(seed, scheme.type).zip(scheme.type.offsets.map { it.toInt() })
             is Scheme.Tones -> ColorHarmony.tones(seed, scheme.colorCount).map { it to null }
         }.distinctBy { it.first }
+        return build(colors.map { it.first }, colors.mapIndexed { index, (_, hueOffset) -> nameOf(index, hueOffset) }, nightMode, now)
+    }
+
+    /**
+     * One group per color, in order (roadmap P5.1, P5.4: an intelligent library from favorites or recommendations);
+     * repeated opaque colors are dropped.
+     * zh-CN: 每种颜色一组, 保持顺序 (Roadmap P5.1, P5.4: 由收藏或推荐创建智能库); 重复的不透明颜色会被去除.
+     */
+    fun fromColors(colors: List<Int>, nightMode: Boolean, now: Long = System.currentTimeMillis(), names: List<String?> = emptyList()): Result {
+        val unique = colors.withIndex().distinctBy { it.value or OPAQUE }
+        return build(unique.map { it.value or OPAQUE }, unique.map { names.getOrNull(it.index) }, nightMode, now)
+    }
+
+    private fun build(colors: List<Int>, names: List<String?>, nightMode: Boolean, now: Long): Result {
         val source = if (nightMode) StateSource.NightMode else StateSource.None
         val keys = source.stateKeys
-        val groups = colors.mapIndexed { index, (color, hueOffset) ->
+        val groups = colors.mapIndexed { index, color ->
             val states = IntelligentAutoFill.fill(keys, mapOf(keys.first() to color))!!.mapValues { StateColors(it.value) }
-            IntelligentGroup(id = -(index + 1L), name = nameOf(index, hueOffset), position = index, createdTime = now, modifiedTime = now, states = states)
+            IntelligentGroup(id = -(index + 1L), name = names.getOrNull(index), position = index, createdTime = now, modifiedTime = now, states = states)
         }
         val rotation = if (nightMode) listOf(RotationTrigger.StateChange) else emptyList()
         return Result(IntelligentConfig(stateSource = source, rotation = rotation), groups)
     }
+
+    private const val OPAQUE = 0xFF shl 24
 
 }

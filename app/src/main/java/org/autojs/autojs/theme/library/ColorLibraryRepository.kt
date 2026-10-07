@@ -5,6 +5,7 @@ import androidx.room.withTransaction
 import org.autojs.autojs.theme.app.ColorEntities.ColorGroup
 import org.autojs.autojs.theme.app.ColorEntities.ColorGroupState
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
+import org.autojs.autojs.theme.app.ColorEntities.FavoriteColor
 import org.autojs.autojs.theme.app.ColorEntities.LibraryColor
 import org.autojs.autojs.theme.app.ColorHistoryDatabase
 import org.autojs.autojs.theme.intelligent.IntelligentConfig
@@ -155,6 +156,47 @@ class ColorLibraryRepository(
         val sorted = dao.listLibraries().sortedWith(compareBy<ColorLibrary> { rank[it.id] ?: Int.MAX_VALUE }.thenBy { it.position })
         val changed = sorted.mapIndexedNotNull { index, library -> library.takeIf { it.position != index }?.copy(position = index) }
         if (changed.isNotEmpty()) dao.updateLibraries(changed)
+    }
+
+    // Favorites (roadmap P5.1); colors are stored opaque. zh-CN: 收藏 (Roadmap P5.1); 颜色按不透明值保存.
+
+    suspend fun listFavorites(): List<FavoriteColor> = dao.listFavorites()
+
+    suspend fun findFavorite(color: Int): FavoriteColor? = dao.findFavorite(color or OPAQUE)
+
+    suspend fun findFavoriteById(id: Long): FavoriteColor? = dao.findFavoriteById(id)
+
+    /**
+     * Adds [color] at the end of the manual order, or returns the existing favorite.
+     * zh-CN: 将 [color] 加到手动顺序的末尾; 已收藏时返回已有的收藏.
+     */
+    suspend fun addFavorite(color: Int): FavoriteColor = database.withTransaction {
+        dao.findFavorite(color or OPAQUE) ?: run {
+            val favorite = FavoriteColor(color = color or OPAQUE, position = (dao.maxFavoritePosition() ?: -1) + 1, createdTime = now())
+            favorite.copy(id = dao.insertFavorite(favorite))
+        }
+    }
+
+    suspend fun removeFavorite(color: Int) {
+        dao.findFavorite(color or OPAQUE)?.let { favorite ->
+            dao.deleteFavorite(favorite.color)
+            database.colorHistoryDao().deleteByLibraryIdAndItemIds(ColorLibraryIds.FAVORITES.toLong(), listOf(favorite.id))
+        }
+    }
+
+    suspend fun setFavoritePinned(color: Int, pinned: Boolean) {
+        dao.findFavorite(color or OPAQUE)?.takeIf { it.pinned != pinned }?.let { dao.updateFavorites(listOf(it.copy(pinned = pinned))) }
+    }
+
+    /**
+     * Stores the order of [orderedIds] as positions `0..n-1`; favorites not listed keep their relative order after them.
+     * zh-CN: 按 [orderedIds] 的顺序保存为位置 `0..n-1`; 未列出的收藏保持原相对顺序排在其后.
+     */
+    suspend fun reorderFavorites(orderedIds: List<Long>) {
+        val rank = orderedIds.withIndex().associate { (index, id) -> id to index }
+        val sorted = dao.listFavorites().sortedWith(compareBy<FavoriteColor> { rank[it.id] ?: Int.MAX_VALUE }.thenBy { it.position })
+        val changed = sorted.mapIndexedNotNull { index, favorite -> favorite.takeIf { it.position != index }?.copy(position = index) }
+        if (changed.isNotEmpty()) dao.updateFavorites(changed)
     }
 
     suspend fun listIntelligentLibraries(): List<IntelligentSnapshot> {

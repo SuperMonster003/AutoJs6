@@ -64,12 +64,20 @@
         <item quantity="other">覆盖 %d</item>
     </plurals>
 
+    <plurals name="text_n_similar_colors_merged">
+        <item quantity="other">+%d 相似</item>
+    </plurals>
+
     <plurals name="text_n_times_a_day">
         <item quantity="other">每天 %d 次</item>
     </plurals>
 
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="other">%d 个未知类型的颜色库将被跳过</item>
+    </plurals>
+
+    <plurals name="text_used_n_times">
+        <item quantity="other">使用 %d 次</item>
     </plurals>
 
 </resources>

@@ -153,4 +153,16 @@ interface ColorLibraryDao {
     @Query("SELECT * FROM color_favorite ORDER BY pinned DESC, position, id")
     suspend fun listFavorites(): List<FavoriteColor>
 
+    @Query("SELECT * FROM color_favorite WHERE color = :color LIMIT 1")
+    suspend fun findFavorite(color: Int): FavoriteColor?
+
+    @Query("SELECT * FROM color_favorite WHERE id = :id LIMIT 1")
+    suspend fun findFavoriteById(id: Long): FavoriteColor?
+
+    @Query("SELECT MAX(position) FROM color_favorite")
+    suspend fun maxFavoritePosition(): Int?
+
+    @Update
+    suspend fun updateFavorites(favorites: List<FavoriteColor>)
+
 }

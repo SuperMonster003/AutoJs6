@@ -46,14 +46,17 @@
     <string name="color_library_android_colors">Android 색상 라이브러리</string>
     <string name="color_library_css_colors">CSS 색상 라이브러리</string>
     <string name="color_library_default_colors">기본 색상 라이브러리</string>
+    <string name="color_library_favorites">즐겨찾기</string>
     <string name="color_library_identifier_created">생성됨</string>
     <string name="color_library_identifier_custom">@string/mt_custom</string>
     <string name="color_library_identifier_default_colors">@string/text_default</string>
+    <string name="color_library_identifier_favorites">즐겨찾기</string>
     <string name="color_library_identifier_intelligent_colors">Intell.</string>
     <string name="color_library_identifier_material_design_colors">머티리얼</string>
     <string name="color_library_identifier_palette">팔레트</string>
     <string name="color_library_intelligent_colors">인텔리전트 색상 라이브러리</string>
     <string name="color_library_material_design_colors">머티리얼 디자인 색상 라이브러리</string>
+    <string name="color_library_recommended">자주 사용 및 추천</string>
     <string name="color_library_title_android_colors">Android 색상</string>
     <string name="color_library_title_css_colors">CSS 색상</string>
     <string name="color_library_title_default_colors">기본 색상</string>
@@ -789,10 +792,13 @@
     <string name="text_accent_color">강조 색</string>
     <string name="text_add_all_to_color_library">모두 색상 라이브러리에 추가</string>
     <string name="text_add_colors">색상 추가</string>
+    <string name="text_add_favorite_from_palette">색상 팔레트에서 추가</string>
     <string name="text_add_group">그룹 추가</string>
     <string name="text_add_override">재정의 추가</string>
     <string name="text_add_time">시각 추가</string>
     <string name="text_add_to_color_library">색상 라이브러리에 추가</string>
+    <string name="text_add_to_favorites">즐겨찾기에 추가</string>
+    <string name="text_added_to_favorites">즐겨찾기에 추가했습니다</string>
     <string name="text_and_n_more">... 외 %d개</string>
     <string name="text_apply_as_theme_color">테마 색상으로 적용</string>
     <string name="text_auto_fill">나머지 상태 자동 채우기</string>
@@ -1271,6 +1277,8 @@
     <string name="text_country_code">국가 코드 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
     <string name="text_create">만들기</string>
+    <string name="text_create_intelligent_library_from_favorites" tools:ignore="TypographyEllipsis">즐겨찾기로 인텔리전트 색상 라이브러리 만들기...</string>
+    <string name="text_create_intelligent_library_from_recommendations" tools:ignore="TypographyEllipsis">추천 색상으로 인텔리전트 색상 라이브러리 만들기...</string>
     <string name="text_create_snapshot">스냅샷 만들기</string>
     <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
     <string name="text_current">현재</string>
@@ -1505,6 +1513,8 @@
     <string name="text_failed_to_update">업데이트 실패</string>
     <string name="text_failed_to_write_file">파일을 쓰지 못했습니다</string>
     <string name="text_falling_back_to_local_build">로컬 빌드로 전환 중</string>
+    <string name="text_favorite">즐겨찾기</string>
+    <string name="text_favorite_pinned">고정됨</string>
     <string name="text_file">파일</string>
     <string name="text_file_colon_value">파일: %1$s</string>
     <string name="text_file_details">파일 세부정보</string>
@@ -1853,6 +1863,7 @@
     <string name="text_manage_key_store">키 저장소 관리</string>
     <string name="text_maximize">최대화</string>
     <string name="text_mcp_server">MCP 서버</string>
+    <string name="text_merge_similar_colors">비슷한 색상 합치기</string>
     <string name="text_min_version">최소 버전</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 확장의 최소 버전</string>
     <string name="text_minimize">최소화</string>
@@ -1915,6 +1926,7 @@
     <string name="text_no_data">데이터 없음</string>
     <string name="text_no_differences">차이 없음</string>
     <string name="text_no_exif_information">EXIF 정보가 없습니다</string>
+    <string name="text_no_favorites">아직 즐겨찾기가 없습니다. 색상을 길게 누르거나 색상 상세 정보에서 \"즐겨찾기\"를 선택하세요</string>
     <string name="text_no_groups_for_override">먼저 그룹을 추가하세요</string>
     <string name="text_no_hidden_plugins">숨겨진 플러그인이 없습니다</string>
     <string name="text_no_history">기록 없음</string>
@@ -1926,6 +1938,7 @@
     <string name="text_no_log_entries_to_export">내보낼 로그 항목이 없습니다</string>
     <string name="text_no_log_entries_to_send">보낼 로그 항목이 없습니다</string>
     <string name="text_no_plugins_installed_hint">현재 설치된 플러그인이 없습니다.\n\"+\" 버튼을 눌러 플러그인을 설치하세요.</string>
+    <string name="text_no_recommendations">아직 추천이 없습니다. 사용한 색상과 즐겨찾기가 여기에 표시됩니다</string>
     <string name="text_no_release_notes">릴리스 노트 없음</string>
     <string name="text_no_root">뿌리가 아닌</string>
     <string name="text_no_root_access">루트 액세스가 없습니다</string>
@@ -2106,6 +2119,7 @@
     <string name="text_permissions_list">권한 목록</string>
     <string name="text_pin">고정</string>
     <string name="text_pin_shortcut_not_unsupported">런처에 바로가기를 고정하는 것은 지원되지 않습니다</string>
+    <string name="text_pin_to_top">맨 위에 고정</string>
     <string name="text_pinch_to_zoom">확대하려면 핀치</string>
     <string name="text_pinned">고정됨</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">고정됨, 파일별 정리에서 제외</string>
@@ -2282,9 +2296,11 @@
     <string name="text_remove_all_breakpoints">모든 중단 점을 제거하십시오</string>
     <string name="text_remove_broken_items">손상된 항목 제거</string>
     <string name="text_remove_broken_items_confirm">데이터가 없는 손상된 항목 %1$d개를 제거할까요? 이 항목들은 복원할 수 없습니다.</string>
+    <string name="text_remove_from_favorites">즐겨찾기에서 제거</string>
     <string name="text_remove_from_trash">휴지통에서 제거</string>
     <string name="text_remove_from_trash_confirm">이 항목을 휴지통에서 영구 삭제할까요?</string>
     <string name="text_remove_selected_from_trash_confirm">선택한 %d개 항목을 휴지통에서 영구 삭제할까요?</string>
+    <string name="text_removed_from_favorites">즐겨찾기에서 제거했습니다</string>
     <string name="text_rename">이름 바꾸기</string>
     <string name="text_rename_color_library">색상 라이브러리 이름 바꾸기</string>
     <string name="text_reorder_color_libraries">색상 라이브러리 순서 변경</string>
@@ -2398,6 +2414,7 @@
     <string name="text_season_winter">겨울</string>
     <string name="text_seed_color">시드</string>
     <string name="text_seed_current_theme_color">현재 테마 색상 %1$s</string>
+    <string name="text_seed_favorite_color">즐겨찾기 %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">색상 팔레트에서 선택...</string>
     <string name="text_seed_state_night_mode">야간 모드 (야간 색상 자동 채우기)</string>
     <string name="text_seed_wallpaper_color">배경화면 색상 %1$s</string>
@@ -2462,6 +2479,7 @@
     <string name="text_some_items_exported">내보낸 %d 항목</string>
     <string name="text_sort">정렬</string>
     <string name="text_sort_ascending">오름차순</string>
+    <string name="text_sort_by">정렬 기준</string>
     <string name="text_sort_by_name_asc">이름 (A-Z)</string>
     <string name="text_sort_by_name_desc">이름 (Z-A)</string>
     <string name="text_sort_by_path_asc">경로 (A-Z)</string>
@@ -2470,7 +2488,10 @@
     <string name="text_sort_by_time_asc">시간 (오래된순)</string>
     <string name="text_sort_by_time_desc">시간 (최신순)</string>
     <string name="text_sort_descending">내림차순</string>
+    <string name="text_sort_favorited_time">추가한 시간</string>
+    <string name="text_sort_favorites" tools:ignore="TypographyEllipsis">정렬 기준...</string>
     <string name="text_sort_field">정렬 필드</string>
+    <string name="text_sort_hue">색조</string>
     <string name="text_sort_key_chroma">채도</string>
     <string name="text_sort_key_created">생성 시간</string>
     <string name="text_sort_key_hue">색상환</string>
@@ -2478,6 +2499,8 @@
     <string name="text_sort_key_manual">수동</string>
     <string name="text_sort_key_modified">수정 시간</string>
     <string name="text_sort_key_name">이름</string>
+    <string name="text_sort_lightness">명도</string>
+    <string name="text_sort_manual">수동</string>
     <string name="text_sort_order">정렬 순서</string>
     <string name="text_sort_secondary">2차 정렬</string>
     <string name="text_sort_strategy_author">개발자</string>
@@ -2631,6 +2654,7 @@
     <string name="text_unlimited">제한 없음</string>
     <string name="text_unnamed_color_library">이름 없는 색상 라이브러리</string>
     <string name="text_unpin">고정 해제</string>
+    <string name="text_unpin_favorite">고정 해제</string>
     <string name="text_unsaved_changes">저장되지 않은 변경 사항</string>
     <string name="text_unsigned_apk_created">서명되지 않은 APK가 생성됨</string>
     <string name="text_unsupported">지원되지 않음</string>

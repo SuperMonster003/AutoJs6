@@ -9,12 +9,19 @@ import org.autojs.autojs.theme.library.ColorLibraryRepository.PlainLibrarySummar
 import org.autojs.autojs6.databinding.MtColorLibrariesRecyclerViewItemBinding
 
 /**
- * A row of the color libraries page: a preset library or a user library.
- * zh-CN: 颜色库页面的一行: 预设库或用户库.
+ * A row of the color libraries page: a preset library, a virtual library or a user library.
+ * zh-CN: 颜色库页面的一行: 预设库, 虚拟库或用户库.
  */
 sealed interface LibraryRow {
     /** [description] replaces the default item count when set. zh-CN: 设置 [description] 时替代默认的条目数量描述. */
     data class Preset(val library: PresetColorLibrary, val description: String? = null) : LibraryRow
+
+    /**
+     * "Favorites" or "Frequent and recommended" (roadmap P5.1, P5.4), by [libraryId] of `ColorLibraryIds`.
+     * zh-CN: "收藏" 或 "常用与推荐" (Roadmap P5.1, P5.4), 由 `ColorLibraryIds` 中的 [libraryId] 区分.
+     */
+    data class Virtual(val libraryId: Int, val count: Int) : LibraryRow
+
     data class User(val summary: PlainLibrarySummary) : LibraryRow
 }
 

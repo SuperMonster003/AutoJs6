@@ -44,14 +44,17 @@
     <string name="color_library_android_colors">Bibliothèque de couleurs Android</string>
     <string name="color_library_css_colors">Bibliothèque de couleurs CSS</string>
     <string name="color_library_default_colors">Bibliothèque de couleurs par défaut</string>
+    <string name="color_library_favorites">Favoris</string>
     <string name="color_library_identifier_created">Créé</string>
     <string name="color_library_identifier_custom">@string/mt_custom</string>
     <string name="color_library_identifier_default_colors">@string/text_default</string>
+    <string name="color_library_identifier_favorites">Favoris</string>
     <string name="color_library_identifier_intelligent_colors">Intell.</string>
     <string name="color_library_identifier_material_design_colors">Material</string>
     <string name="color_library_identifier_palette">Palette</string>
     <string name="color_library_intelligent_colors">Bibliothèque de couleurs intelligente</string>
     <string name="color_library_material_design_colors">Bibliothèque de couleurs Material Design</string>
+    <string name="color_library_recommended">Fréquentes et recommandées</string>
     <string name="color_library_title_android_colors">Couleurs Android</string>
     <string name="color_library_title_css_colors">Couleurs CSS</string>
     <string name="color_library_title_default_colors">Couleurs par défaut</string>
@@ -787,10 +790,13 @@
     <string name="text_accent_color">Accent</string>
     <string name="text_add_all_to_color_library">Tout ajouter à une bibliothèque de couleurs</string>
     <string name="text_add_colors">Ajouter des couleurs</string>
+    <string name="text_add_favorite_from_palette">Ajouter depuis la palette</string>
     <string name="text_add_group">Ajouter un groupe</string>
     <string name="text_add_override">Ajouter un remplacement</string>
     <string name="text_add_time">Ajouter une heure</string>
     <string name="text_add_to_color_library">Ajouter à une bibliothèque de couleurs</string>
+    <string name="text_add_to_favorites">Ajouter aux favoris</string>
+    <string name="text_added_to_favorites">Ajoutée aux favoris</string>
     <string name="text_and_n_more">... et %d de plus</string>
     <string name="text_apply_as_theme_color">Appliquer comme couleur du thème</string>
     <string name="text_auto_fill">Remplir automatiquement les autres états</string>
@@ -1269,6 +1275,8 @@
     <string name="text_country_code">Code du pays (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Le code du pays doit être composé de deux lettres majuscules</string>
     <string name="text_create">Créer</string>
+    <string name="text_create_intelligent_library_from_favorites" tools:ignore="TypographyEllipsis">Créer une bibliothèque intelligente à partir des favoris...</string>
+    <string name="text_create_intelligent_library_from_recommendations" tools:ignore="TypographyEllipsis">Créer une bibliothèque intelligente à partir de ces couleurs...</string>
     <string name="text_create_snapshot">Créer un instantané</string>
     <string name="text_creating_unsigned_apk">Creation de l\'APK non signe</string>
     <string name="text_current">Actuel</string>
@@ -1503,6 +1511,8 @@
     <string name="text_failed_to_update">Échec de la mise à jour</string>
     <string name="text_failed_to_write_file">Fail to write file</string>
     <string name="text_falling_back_to_local_build">Retour à la compilation locale</string>
+    <string name="text_favorite">Favori</string>
+    <string name="text_favorite_pinned">Épinglée</string>
     <string name="text_file">Fichier</string>
     <string name="text_file_colon_value">Fichier: %1$s</string>
     <string name="text_file_details">Détails du fichier</string>
@@ -1851,6 +1861,7 @@
     <string name="text_manage_key_store">Gérer le magasin de clés</string>
     <string name="text_maximize">Agrandir</string>
     <string name="text_mcp_server">Serveur MCP</string>
+    <string name="text_merge_similar_colors">Fusionner les couleurs similaires</string>
     <string name="text_min_version">Version minimale</string>
     <string name="text_min_version_of_vscode_vsc_ext">Version minimale de l\'extension VSCode</string>
     <string name="text_minimize">Réduire</string>
@@ -1913,6 +1924,7 @@
     <string name="text_no_data">Aucune donnee</string>
     <string name="text_no_differences">Aucune différence</string>
     <string name="text_no_exif_information">Aucune information EXIF</string>
+    <string name="text_no_favorites">Aucun favori pour l\'instant. Appuyez longuement sur une couleur ou cochez \"Favori\" dans ses détails</string>
     <string name="text_no_groups_for_override">Ajoutez d\'abord un groupe</string>
     <string name="text_no_hidden_plugins">Aucun plugin masqué</string>
     <string name="text_no_history">Aucun historique</string>
@@ -1924,6 +1936,7 @@
     <string name="text_no_log_entries_to_export">Aucune entrée de journal à exporter</string>
     <string name="text_no_log_entries_to_send">Aucune entrée de journal à envoyer</string>
     <string name="text_no_plugins_installed_hint">Aucun plugin n\'est actuellement installé.\nCliquez sur le bouton \"+\" pour installer des plugins.</string>
+    <string name="text_no_recommendations">Rien à recommander pour l\'instant. Les couleurs utilisées et favorites apparaissent ici</string>
     <string name="text_no_release_notes">Aucune note de version</string>
     <string name="text_no_root">Non-root</string>
     <string name="text_no_root_access">Aucun accès root</string>
@@ -2104,6 +2117,7 @@
     <string name="text_permissions_list">Permissions</string>
     <string name="text_pin">Épingler</string>
     <string name="text_pin_shortcut_not_unsupported">L\'épinglage de raccourcis dans le lanceur n\'est pas pris en charge</string>
+    <string name="text_pin_to_top">Épingler en haut</string>
     <string name="text_pinch_to_zoom">Pincez pour zoomer</string>
     <string name="text_pinned">Épinglée</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">Épinglée, exclue du nettoyage par fichier</string>
@@ -2280,9 +2294,11 @@
     <string name="text_remove_all_breakpoints">Supprimer tous les points d\'arrêt</string>
     <string name="text_remove_broken_items">Supprimer les éléments défectueux</string>
     <string name="text_remove_broken_items_confirm">Supprimer %1$d élément(s) défectueux dont les données sont manquantes ? Ils ne peuvent pas être restaurés.</string>
+    <string name="text_remove_from_favorites">Retirer des favoris</string>
     <string name="text_remove_from_trash">Retirer de la corbeille</string>
     <string name="text_remove_from_trash_confirm">Supprimer definitivement cet element de la corbeille?</string>
     <string name="text_remove_selected_from_trash_confirm">Supprimer définitivement de la corbeille les %d éléments sélectionnés ?</string>
+    <string name="text_removed_from_favorites">Retirée des favoris</string>
     <string name="text_rename">Renommer</string>
     <string name="text_rename_color_library">Renommer la bibliothèque de couleurs</string>
     <string name="text_reorder_color_libraries">Réorganiser les bibliothèques de couleurs</string>
@@ -2396,6 +2412,7 @@
     <string name="text_season_winter">Hiver</string>
     <string name="text_seed_color">Départ</string>
     <string name="text_seed_current_theme_color">Couleur du thème actuelle %1$s</string>
+    <string name="text_seed_favorite_color">Favori %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">Depuis la palette de couleurs...</string>
     <string name="text_seed_state_night_mode">Mode nuit (couleurs de nuit remplies)</string>
     <string name="text_seed_wallpaper_color">Couleur du fond d\'écran %1$s</string>
@@ -2460,6 +2477,7 @@
     <string name="text_some_items_exported">%d éléments exportés</string>
     <string name="text_sort">Trier</string>
     <string name="text_sort_ascending">Croissant</string>
+    <string name="text_sort_by">Trier par</string>
     <string name="text_sort_by_name_asc">Nom (A-Z)</string>
     <string name="text_sort_by_name_desc">Nom (Z-A)</string>
     <string name="text_sort_by_path_asc">Chemin (A-Z)</string>
@@ -2468,7 +2486,10 @@
     <string name="text_sort_by_time_asc">Heure (plus ancien d\'abord)</string>
     <string name="text_sort_by_time_desc">Heure (plus recent d\'abord)</string>
     <string name="text_sort_descending">Décroissant</string>
+    <string name="text_sort_favorited_time">Date d\'ajout</string>
+    <string name="text_sort_favorites" tools:ignore="TypographyEllipsis">Trier par...</string>
     <string name="text_sort_field">Champ de tri</string>
+    <string name="text_sort_hue">Teinte</string>
     <string name="text_sort_key_chroma">Chroma</string>
     <string name="text_sort_key_created">Date de création</string>
     <string name="text_sort_key_hue">Teinte</string>
@@ -2476,6 +2497,8 @@
     <string name="text_sort_key_manual">Manuel</string>
     <string name="text_sort_key_modified">Date de modification</string>
     <string name="text_sort_key_name">Nom</string>
+    <string name="text_sort_lightness">Luminosité</string>
+    <string name="text_sort_manual">Manuel</string>
     <string name="text_sort_order">Ordre de tri</string>
     <string name="text_sort_secondary">Tri secondaire</string>
     <string name="text_sort_strategy_author">Développeur</string>
@@ -2629,6 +2652,7 @@
     <string name="text_unlimited">Illimité</string>
     <string name="text_unnamed_color_library">Bibliothèque de couleurs sans nom</string>
     <string name="text_unpin">Désépingler</string>
+    <string name="text_unpin_favorite">Désépingler</string>
     <string name="text_unsaved_changes">Modifications non enregistrées</string>
     <string name="text_unsigned_apk_created">APK non signe cree</string>
     <string name="text_unsupported">Non pris en charge</string>

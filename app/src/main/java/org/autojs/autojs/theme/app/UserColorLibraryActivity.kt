@@ -137,8 +137,8 @@ class UserColorLibraryActivity : ColorSelectBaseActivity() {
 
     private fun onColorLongClick(color: LibraryColor) {
         val title = color.name ?: String.format("#%06X", 0xFFFFFF and color.color)
-        ColorLibraryDialogs.showActions(
-            this, title, listOf(
+        showColorActions(
+            color.color, title, extra = listOf(
                 getString(R.string.text_rename) to { renameColor(color) },
                 getString(R.string.text_change_color_value) to { changeColorValue(color) },
                 getString(R.string.text_delete) to {

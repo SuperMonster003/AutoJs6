@@ -169,9 +169,18 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                 append(resources.getQuantityString(R.plurals.text_items_total_sum_with_colon, intelligentCount, intelligentCount))
                 IntelligentColorEngine.activeSnapshot?.let { append("\n${getString(R.string.text_in_use)}: ${it.name}") }
             }
-            val rows = presetRows.map { row ->
+            val rows: MutableList<LibraryRow> = presetRows.map { row ->
                 if (row.library.isIntelligent) row.copy(description = intelligentDescription) else row
-            }
+            }.toMutableList()
+            // Favorites always show; recommendations hide while there is nothing to recommend (roadmap P5.1, P5.4).
+            // zh-CN: 收藏总是显示; 没有可推荐的颜色时隐藏推荐 (Roadmap P5.1, P5.4).
+            val favoriteCount = withContext(Dispatchers.IO) { repository.listFavorites().size }
+            val recommendationCount = loadRecommendations().size
+            val virtualRows = listOfNotNull(
+                LibraryRow.Virtual(ColorLibraryIds.FAVORITES, favoriteCount),
+                LibraryRow.Virtual(ColorLibraryIds.RECOMMENDED, recommendationCount).takeIf { recommendationCount > 0 },
+            )
+            rows.addAll(rows.indexOfFirst { it is LibraryRow.Preset && it.library.isIntelligent } + 1, virtualRows)
             libraryAdapter.updateData(rows + summaries.map { LibraryRow.User(it) })
         }
     }
@@ -182,6 +191,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                 row.library.isIntelligent -> IntelligentLibrariesActivity.launch(this)
                 else -> startActivity(Intent(this, ColorItemsActivity::class.java).putExtra(INTENT_IDENTIFIER_LIBRARY_ID, row.library.id))
             }
+            is LibraryRow.Virtual -> VirtualColorLibraryActivity.launch(this, row.libraryId)
             is LibraryRow.User -> UserColorLibraryActivity.launch(this, row.summary.library.id)
         }
     }
@@ -197,6 +207,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                     )
                 )
             }
+            is LibraryRow.Virtual -> onLibraryClick(row)
             is LibraryRow.User -> {
                 val library = row.summary.library
                 ColorLibraryDialogs.showActions(
@@ -268,26 +279,6 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                 if (wasSelected) fallBackToPaletteSelection(this@ColorLibrariesActivity)
                 refreshUserLibraries()
             }
-        }
-    }
-
-    private fun applyHistoryItem(item: ColorHistoryItem) {
-        val libraryId = item.libraryId
-        val itemId = item.itemId
-        when {
-            libraryId != null && itemId != null && ColorLibraryIds.isUserPlain(libraryId) -> lifecycleScope.launch {
-                val color = withContext(Dispatchers.IO) { repository.findColor(itemId.toLong()) }
-                val library = color?.let { withContext(Dispatchers.IO) { repository.findLibrary(it.libraryId) } }
-                when {
-                    color == null || library == null -> ViewUtils.showToast(this@ColorLibrariesActivity, R.string.error_failed_to_apply_current_color_history, true)
-                    else -> applyUserLibraryColor(library.name, color)
-                }
-            }
-            libraryId != null && itemId != null -> {
-                presetColorLibraries.find { it.id == libraryId }?.colors?.find { it.itemId == itemId }?.let { applyPresetItem(it) }
-                    ?: ViewUtils.showToast(this, R.string.error_failed_to_apply_current_color_history, true)
-            }
-            else -> onColorPickerConfirmed(item.colorInt)
         }
     }
 

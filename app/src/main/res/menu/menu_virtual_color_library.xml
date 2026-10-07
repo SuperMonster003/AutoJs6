@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_add_favorite_from_palette"
+        android:title="@string/text_add_favorite_from_palette"
+        android:icon="@drawable/ic_add_smaller_48dp"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_locate_current_theme_color"
+        android:title="@string/text_locate_current_theme_color"
+        android:icon="@drawable/ic_locate"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sort_favorites"
+        android:title="@string/text_sort_favorites"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_reorder_favorites"
+        android:title="@string/text_reorder_colors"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_create_intelligent_library_from_colors"
+        android:title="@string/text_create_intelligent_library_from_favorites"
+        app:showAsAction="never" />
+
+</menu>

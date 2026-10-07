@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
+import org.autojs.autojs.theme.library.ColorLibraryIds
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MtColorLibrariesRecyclerViewItemBinding
@@ -23,6 +24,7 @@ class ColorLibraryViewHolder(itemViewBinding: MtColorLibrariesRecyclerViewItemBi
     fun bind(row: LibraryRow) {
         when (row) {
             is LibraryRow.Preset -> bindPreset(row)
+            is LibraryRow.Virtual -> bindVirtual(row)
             is LibraryRow.User -> bindUser(row)
         }
         val adjustedContrastColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), ThemeColorManager.colorPrimary, 2.3)
@@ -40,6 +42,13 @@ class ColorLibraryViewHolder(itemViewBinding: MtColorLibrariesRecyclerViewItemBi
             library.isIntelligent -> colorItemView.setImageResource(R.drawable.ic_color_library_intelligent)
             else -> colorItemView.setImageResource(R.drawable.ic_color_library_preset)
         }
+    }
+
+    private fun bindVirtual(row: LibraryRow.Virtual) {
+        val isFavorites = row.libraryId == ColorLibraryIds.FAVORITES
+        libraryName.text = context.getString(if (isFavorites) R.string.color_library_favorites else R.string.color_library_recommended)
+        description.text = totalSum(row.count)
+        colorItemView.setImageResource(if (isFavorites) R.drawable.ic_color_library_favorites else R.drawable.ic_color_library_recommended)
     }
 
     private fun bindUser(row: LibraryRow.User) {

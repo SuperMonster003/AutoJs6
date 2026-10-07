@@ -150,6 +150,15 @@
         <item quantity="other">%d استثناء</item>
     </plurals>
 
+    <plurals name="text_n_similar_colors_merged">
+        <item quantity="zero">+%d مشابه</item>
+        <item quantity="one">+%d مشابه</item>
+        <item quantity="two">+%d مشابهان</item>
+        <item quantity="few">+%d مشابهة</item>
+        <item quantity="many">+%d مشابها</item>
+        <item quantity="other">+%d مشابه</item>
+    </plurals>
+
     <plurals name="text_n_times_a_day">
         <item quantity="zero">%d مرة يوميا</item>
         <item quantity="one">مرة واحدة يوميا</item>
@@ -166,6 +175,15 @@
         <item quantity="few">سيتم تخطي %d مكتبات ألوان من نوع غير معروف</item>
         <item quantity="many">سيتم تخطي %d مكتبة ألوان من نوع غير معروف</item>
         <item quantity="other">سيتم تخطي %d مكتبة ألوان من نوع غير معروف</item>
+    </plurals>
+
+    <plurals name="text_used_n_times">
+        <item quantity="zero">استخدم %d مرة</item>
+        <item quantity="one">استخدم مرة واحدة</item>
+        <item quantity="two">استخدم مرتين</item>
+        <item quantity="few">استخدم %d مرات</item>
+        <item quantity="many">استخدم %d مرة</item>
+        <item quantity="other">استخدم %d مرة</item>
     </plurals>
 
 </resources>

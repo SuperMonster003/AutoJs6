@@ -31,8 +31,9 @@ object ColorDerivationDialog {
     /**
      * @param onApply applies one color as the theme color. zh-CN: 将一个颜色应用为主题色.
      * @param onAddToLibrary adds colors to a user color library. zh-CN: 将颜色加入用户颜色库.
+     * @param onFavorite adds one color to the favorites (roadmap P5.1). zh-CN: 收藏一个颜色 (Roadmap P5.1).
      */
-    fun show(context: Context, @ColorInt seed: Int, onApply: (Int) -> Unit, onAddToLibrary: (List<Int>) -> Unit) {
+    fun show(context: Context, @ColorInt seed: Int, onApply: (Int) -> Unit, onAddToLibrary: (List<Int>) -> Unit, onFavorite: ((Int) -> Unit)? = null) {
         val color = seed or (0xFF shl 24)
         val padding = dp(context, 20)
         val content = LinearLayout(context).apply {
@@ -51,7 +52,7 @@ object ColorDerivationDialog {
                 }
             })
             val swatches = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
-            colors.forEach { swatches.addView(swatch(context, it) { showColorActions(context, it, onApply, onAddToLibrary) }) }
+            colors.forEach { swatches.addView(swatch(context, it) { showColorActions(context, it, onApply, onAddToLibrary, onFavorite) }) }
             content.addView(HorizontalScrollView(context).apply {
                 isHorizontalScrollBarEnabled = false
                 addView(swatches)
@@ -101,12 +102,13 @@ object ColorDerivationDialog {
             .show()
     }
 
-    private fun showColorActions(context: Context, color: Int, onApply: (Int) -> Unit, onAddToLibrary: (List<Int>) -> Unit) {
+    private fun showColorActions(context: Context, color: Int, onApply: (Int) -> Unit, onAddToLibrary: (List<Int>) -> Unit, onFavorite: ((Int) -> Unit)?) {
         val hex = hex(color)
         ColorLibraryDialogs.showActions(
-            context, hex, listOf(
+            context, hex, listOfNotNull(
                 context.getString(R.string.text_apply_as_theme_color) to { onApply(color) },
                 context.getString(R.string.text_add_to_color_library) to { onAddToLibrary(listOf(color)) },
+                onFavorite?.let { context.getString(R.string.text_add_to_favorites) to { it(color) } },
                 context.getString(R.string.text_copy) to {
                     ClipboardUtils.setClip(context, hex)
                     ViewUtils.showToast(context, R.string.text_already_copied_to_clip)

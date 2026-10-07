@@ -40,14 +40,17 @@
     <string name="color_library_android_colors">Android 颜色库</string>
     <string name="color_library_css_colors">CSS 颜色库</string>
     <string name="color_library_default_colors">默认颜色库</string>
+    <string name="color_library_favorites">收藏</string>
     <string name="color_library_identifier_created">自建</string>
     <string name="color_library_identifier_custom">@string/mt_custom</string>
     <string name="color_library_identifier_default_colors">@string/text_default</string>
+    <string name="color_library_identifier_favorites">收藏</string>
     <string name="color_library_identifier_intelligent_colors">智能</string>
     <string name="color_library_identifier_material_design_colors">材料设计</string>
     <string name="color_library_identifier_palette">调色盘</string>
     <string name="color_library_intelligent_colors">智能颜色库</string>
     <string name="color_library_material_design_colors">材料设计 (Material Design) 颜色库</string>
+    <string name="color_library_recommended">常用与推荐</string>
     <string name="color_library_title_android_colors">Android 颜色</string>
     <string name="color_library_title_css_colors">CSS 颜色</string>
     <string name="color_library_title_default_colors">默认颜色</string>
@@ -783,10 +786,13 @@
     <string name="text_accent_color">强调色</string>
     <string name="text_add_all_to_color_library">全部加入颜色库</string>
     <string name="text_add_colors">添加颜色</string>
+    <string name="text_add_favorite_from_palette">从调色盘收藏</string>
     <string name="text_add_group">添加组</string>
     <string name="text_add_override">添加覆盖</string>
     <string name="text_add_time">添加时刻</string>
     <string name="text_add_to_color_library">加入颜色库</string>
+    <string name="text_add_to_favorites">收藏</string>
+    <string name="text_added_to_favorites">已收藏</string>
     <string name="text_and_n_more">... 及其他 %d 项</string>
     <string name="text_apply_as_theme_color">应用为主题色</string>
     <string name="text_auto_fill">自动填充其余状态</string>
@@ -1266,6 +1272,8 @@
     <string name="text_country_code">国家代码 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国家代码必须为两个大写字母</string>
     <string name="text_create">创建</string>
+    <string name="text_create_intelligent_library_from_favorites" tools:ignore="TypographyEllipsis">从收藏创建智能颜色库...</string>
+    <string name="text_create_intelligent_library_from_recommendations" tools:ignore="TypographyEllipsis">从推荐创建智能颜色库...</string>
     <string name="text_create_snapshot">创建快照</string>
     <string name="text_creating_unsigned_apk">正在创建未签名 APK</string>
     <string name="text_current">当前</string>
@@ -1500,6 +1508,8 @@
     <string name="text_failed_to_update">更新失败</string>
     <string name="text_failed_to_write_file">文件写入失败</string>
     <string name="text_falling_back_to_local_build">正在回退本地构建</string>
+    <string name="text_favorite">收藏</string>
+    <string name="text_favorite_pinned">置顶</string>
     <string name="text_file">文件</string>
     <string name="text_file_colon_value">文件: %1$s</string>
     <string name="text_file_details">文件详情</string>
@@ -1848,6 +1858,7 @@
     <string name="text_manage_key_store">管理密钥库</string>
     <string name="text_maximize">最大化</string>
     <string name="text_mcp_server">MCP 服务器</string>
+    <string name="text_merge_similar_colors">合并相似颜色</string>
     <string name="text_min_version">最低版本</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 插件最低版本</string>
     <string name="text_minimize">最小化</string>
@@ -1910,6 +1921,7 @@
     <string name="text_no_data">无数据</string>
     <string name="text_no_differences">无差异</string>
     <string name="text_no_exif_information">无 EXIF 信息</string>
+    <string name="text_no_favorites">暂无收藏. 可长按颜色, 或在颜色详情中勾选 \"收藏\"</string>
     <string name="text_no_groups_for_override">请先添加组</string>
     <string name="text_no_hidden_plugins">暂无隐藏插件</string>
     <string name="text_no_history">无历史记录</string>
@@ -1921,6 +1933,7 @@
     <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
     <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
     <string name="text_no_plugins_installed_hint">当前没有已安装的插件.\n可点击 \"+\" 按钮安装插件.</string>
+    <string name="text_no_recommendations">暂无推荐. 使用过的颜色与收藏会显示在这里</string>
     <string name="text_no_release_notes">无发行说明</string>
     <string name="text_no_root">免 root</string>
     <string name="text_no_root_access">无 root 权限</string>
@@ -2101,6 +2114,7 @@
     <string name="text_permissions_list">权限列表</string>
     <string name="text_pin">固定</string>
     <string name="text_pin_shortcut_not_unsupported">将快捷方式固定到启动器不被支持</string>
+    <string name="text_pin_to_top">置顶</string>
     <string name="text_pinch_to_zoom">手势缩放</string>
     <string name="text_pinned">已固定</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">已固定, 不参与单文件清理</string>
@@ -2277,9 +2291,11 @@
     <string name="text_remove_all_breakpoints">删除所有断点</string>
     <string name="text_remove_broken_items">移除失效条目</string>
     <string name="text_remove_broken_items_confirm">移除 %1$d 个数据缺失的失效条目? 这些条目无法恢复.</string>
+    <string name="text_remove_from_favorites">取消收藏</string>
     <string name="text_remove_from_trash">从回收站移除</string>
     <string name="text_remove_from_trash_confirm">是否永久删除此项目</string>
     <string name="text_remove_selected_from_trash_confirm">从回收站永久移除选中的 %d 个条目?</string>
+    <string name="text_removed_from_favorites">已取消收藏</string>
     <string name="text_rename">重命名</string>
     <string name="text_rename_color_library">重命名颜色库</string>
     <string name="text_reorder_color_libraries">调整颜色库顺序</string>
@@ -2393,6 +2409,7 @@
     <string name="text_season_winter">冬</string>
     <string name="text_seed_color">种子色</string>
     <string name="text_seed_current_theme_color">当前主题色 %1$s</string>
+    <string name="text_seed_favorite_color">收藏 %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">从调色盘选择...</string>
     <string name="text_seed_state_night_mode">夜间模式 (自动填充夜间颜色)</string>
     <string name="text_seed_wallpaper_color">壁纸颜色 %1$s</string>
@@ -2457,6 +2474,7 @@
     <string name="text_some_items_exported">已导出 %d 个条目</string>
     <string name="text_sort">排序</string>
     <string name="text_sort_ascending">升序</string>
+    <string name="text_sort_by">排序方式</string>
     <string name="text_sort_by_name_asc">名称 (A-Z)</string>
     <string name="text_sort_by_name_desc">名称 (Z-A)</string>
     <string name="text_sort_by_path_asc">路径 (A-Z)</string>
@@ -2465,7 +2483,10 @@
     <string name="text_sort_by_time_asc">时间 (最旧优先)</string>
     <string name="text_sort_by_time_desc">时间 (最新优先)</string>
     <string name="text_sort_descending">降序</string>
+    <string name="text_sort_favorited_time">收藏时间</string>
+    <string name="text_sort_favorites" tools:ignore="TypographyEllipsis">排序方式...</string>
     <string name="text_sort_field">排序字段</string>
+    <string name="text_sort_hue">色相</string>
     <string name="text_sort_key_chroma">彩度</string>
     <string name="text_sort_key_created">创建时间</string>
     <string name="text_sort_key_hue">色相</string>
@@ -2473,6 +2494,8 @@
     <string name="text_sort_key_manual">手动</string>
     <string name="text_sort_key_modified">修改时间</string>
     <string name="text_sort_key_name">名称</string>
+    <string name="text_sort_lightness">亮度</string>
+    <string name="text_sort_manual">手动</string>
     <string name="text_sort_order">排序次序</string>
     <string name="text_sort_secondary">二级排序</string>
     <string name="text_sort_strategy_author">开发者</string>
@@ -2626,6 +2649,7 @@
     <string name="text_unlimited">不限制</string>
     <string name="text_unnamed_color_library">未命名颜色库</string>
     <string name="text_unpin">取消固定</string>
+    <string name="text_unpin_favorite">取消置顶</string>
     <string name="text_unsaved_changes">未保存的更改</string>
     <string name="text_unsigned_apk_created">未签名 APK 已创建</string>
     <string name="text_unsupported">不受支持</string>

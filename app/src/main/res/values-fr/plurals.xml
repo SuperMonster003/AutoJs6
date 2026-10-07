@@ -86,6 +86,11 @@
         <item quantity="other">%d remplacements</item>
     </plurals>
 
+    <plurals name="text_n_similar_colors_merged">
+        <item quantity="one">+%d similaire</item>
+        <item quantity="other">+%d similaires</item>
+    </plurals>
+
     <plurals name="text_n_times_a_day">
         <item quantity="one">%d fois par jour</item>
         <item quantity="other">%d fois par jour</item>
@@ -94,6 +99,11 @@
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="one">%d bibliothèque de couleurs de type inconnu sera ignorée</item>
         <item quantity="other">%d bibliothèques de couleurs de type inconnu seront ignorées</item>
+    </plurals>
+
+    <plurals name="text_used_n_times">
+        <item quantity="one">Utilisée %d fois</item>
+        <item quantity="other">Utilisée %d fois</item>
     </plurals>
 
 </resources>

@@ -45,14 +45,17 @@
     <string name="color_library_android_colors">Androidカラーパレット</string>
     <string name="color_library_css_colors">CSSカラーパレット</string>
     <string name="color_library_default_colors">デフォルトカラーパレット</string>
+    <string name="color_library_favorites">お気に入り</string>
     <string name="color_library_identifier_created">作成済み</string>
     <string name="color_library_identifier_custom">@string/mt_custom</string>
     <string name="color_library_identifier_default_colors">@string/text_default</string>
+    <string name="color_library_identifier_favorites">お気に入り</string>
     <string name="color_library_identifier_intelligent_colors">Intell.</string>
     <string name="color_library_identifier_material_design_colors">マテリアル</string>
     <string name="color_library_identifier_palette">パレット</string>
     <string name="color_library_intelligent_colors">インテリジェントカラーパレット</string>
     <string name="color_library_material_design_colors">マテリアルデザインカラーパレット</string>
+    <string name="color_library_recommended">よく使う色とおすすめ</string>
     <string name="color_library_title_android_colors">Androidカラー</string>
     <string name="color_library_title_css_colors">CSSカラー</string>
     <string name="color_library_title_default_colors">デフォルトカラー</string>
@@ -788,10 +791,13 @@
     <string name="text_accent_color">アクセント</string>
     <string name="text_add_all_to_color_library">すべてカラーライブラリに追加</string>
     <string name="text_add_colors">色を追加</string>
+    <string name="text_add_favorite_from_palette">カラーパレットから追加</string>
     <string name="text_add_group">グループを追加</string>
     <string name="text_add_override">上書きを追加</string>
     <string name="text_add_time">時刻を追加</string>
     <string name="text_add_to_color_library">カラーライブラリに追加</string>
+    <string name="text_add_to_favorites">お気に入りに追加</string>
+    <string name="text_added_to_favorites">お気に入りに追加しました</string>
     <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_apply_as_theme_color">テーマカラーに適用</string>
     <string name="text_auto_fill">他の状態を自動入力</string>
@@ -1270,6 +1276,8 @@
     <string name="text_country_code">国コード (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
     <string name="text_create">作成</string>
+    <string name="text_create_intelligent_library_from_favorites" tools:ignore="TypographyEllipsis">お気に入りからインテリジェントカラーパレットを作成...</string>
+    <string name="text_create_intelligent_library_from_recommendations" tools:ignore="TypographyEllipsis">おすすめからインテリジェントカラーパレットを作成...</string>
     <string name="text_create_snapshot">スナップショットを作成</string>
     <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
     <string name="text_current">現在</string>
@@ -1504,6 +1512,8 @@
     <string name="text_failed_to_update">更新に失敗しました</string>
     <string name="text_failed_to_write_file">ファイルの書き込みに失敗しました</string>
     <string name="text_falling_back_to_local_build">ローカルビルドにフォールバックしています</string>
+    <string name="text_favorite">お気に入り</string>
+    <string name="text_favorite_pinned">固定</string>
     <string name="text_file">ファイル</string>
     <string name="text_file_colon_value">ファイル: %1$s</string>
     <string name="text_file_details">ファイルの詳細</string>
@@ -1852,6 +1862,7 @@
     <string name="text_manage_key_store">キーストアを管理</string>
     <string name="text_maximize">最大化</string>
     <string name="text_mcp_server">MCP サーバー</string>
+    <string name="text_merge_similar_colors">似た色をまとめる</string>
     <string name="text_min_version">最小バージョン</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 拡張機能の最小バージョン</string>
     <string name="text_minimize">最小化</string>
@@ -1914,6 +1925,7 @@
     <string name="text_no_data">データなし</string>
     <string name="text_no_differences">差異はありません</string>
     <string name="text_no_exif_information">EXIF 情報がありません</string>
+    <string name="text_no_favorites">お気に入りはまだありません. 色を長押しするか, 色の詳細で \"お気に入り\" にチェックしてください</string>
     <string name="text_no_groups_for_override">先にグループを追加してください</string>
     <string name="text_no_hidden_plugins">非表示のプラグインはありません</string>
     <string name="text_no_history">履歴なし</string>
@@ -1925,6 +1937,7 @@
     <string name="text_no_log_entries_to_export">エクスポートするログエントリがありません</string>
     <string name="text_no_log_entries_to_send">送信するログエントリがありません</string>
     <string name="text_no_plugins_installed_hint">現在インストールされているプラグインはありません.\n\"+\" ボタンをタップしてプラグインをインストールしてください.</string>
+    <string name="text_no_recommendations">おすすめはまだありません. 使った色とお気に入りがここに表示されます</string>
     <string name="text_no_release_notes">リリースノートなし</string>
     <string name="text_no_root">非ルート</string>
     <string name="text_no_root_access">ルートアクセス不可</string>
@@ -2105,6 +2118,7 @@
     <string name="text_permissions_list">許可リスト</string>
     <string name="text_pin">固定</string>
     <string name="text_pin_shortcut_not_unsupported">ショートカットをランチャーにピン留めすることはサポートされていません</string>
+    <string name="text_pin_to_top">先頭に固定</string>
     <string name="text_pinch_to_zoom">ピンチ操作</string>
     <string name="text_pinned">固定済み</string>
     <string name="text_pinned_exempt_from_per_file_cleanup">固定済み, ファイル単位のクリーンアップの対象外</string>
@@ -2281,9 +2295,11 @@
     <string name="text_remove_all_breakpoints">すべてのブレークポイントを削除する</string>
     <string name="text_remove_broken_items">無効な項目を削除</string>
     <string name="text_remove_broken_items_confirm">データが欠落している %1$d 件の無効な項目を削除しますか? これらは復元できません.</string>
+    <string name="text_remove_from_favorites">お気に入りから削除</string>
     <string name="text_remove_from_trash">ゴミ箱から削除</string>
     <string name="text_remove_from_trash_confirm">この項目をゴミ箱から完全に削除しますか?</string>
     <string name="text_remove_selected_from_trash_confirm">選択した %d 件の項目をゴミ箱から完全に削除しますか?</string>
+    <string name="text_removed_from_favorites">お気に入りから削除しました</string>
     <string name="text_rename">名前の変更</string>
     <string name="text_rename_color_library">カラーライブラリの名前を変更</string>
     <string name="text_reorder_color_libraries">カラーライブラリの並べ替え</string>
@@ -2397,6 +2413,7 @@
     <string name="text_season_winter">冬</string>
     <string name="text_seed_color">シード</string>
     <string name="text_seed_current_theme_color">現在のテーマカラー %1$s</string>
+    <string name="text_seed_favorite_color">お気に入り %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">カラーパレットから選択...</string>
     <string name="text_seed_state_night_mode">夜間モード (夜の色を自動入力)</string>
     <string name="text_seed_wallpaper_color">壁紙の色 %1$s</string>
@@ -2461,6 +2478,7 @@
     <string name="text_some_items_exported">エクスポートされた項目 %d</string>
     <string name="text_sort">並べ替え</string>
     <string name="text_sort_ascending">昇順</string>
+    <string name="text_sort_by">並べ替え</string>
     <string name="text_sort_by_name_asc">名前 (A-Z)</string>
     <string name="text_sort_by_name_desc">名前 (Z-A)</string>
     <string name="text_sort_by_path_asc">パス (A-Z)</string>
@@ -2469,7 +2487,10 @@
     <string name="text_sort_by_time_asc">時間 (古い順)</string>
     <string name="text_sort_by_time_desc">時間 (新しい順)</string>
     <string name="text_sort_descending">降順</string>
+    <string name="text_sort_favorited_time">追加日時</string>
+    <string name="text_sort_favorites" tools:ignore="TypographyEllipsis">並べ替え...</string>
     <string name="text_sort_field">並び替え項目</string>
+    <string name="text_sort_hue">色相</string>
     <string name="text_sort_key_chroma">彩度</string>
     <string name="text_sort_key_created">作成日時</string>
     <string name="text_sort_key_hue">色相</string>
@@ -2477,6 +2498,8 @@
     <string name="text_sort_key_manual">手動</string>
     <string name="text_sort_key_modified">更新日時</string>
     <string name="text_sort_key_name">名前</string>
+    <string name="text_sort_lightness">明度</string>
+    <string name="text_sort_manual">手動</string>
     <string name="text_sort_order">並び順</string>
     <string name="text_sort_secondary">第2ソート</string>
     <string name="text_sort_strategy_author">開発者</string>
@@ -2630,6 +2653,7 @@
     <string name="text_unlimited">無制限</string>
     <string name="text_unnamed_color_library">名前のないカラーライブラリ</string>
     <string name="text_unpin">固定を解除</string>
+    <string name="text_unpin_favorite">固定を解除</string>
     <string name="text_unsaved_changes">未保存の変更</string>
     <string name="text_unsigned_apk_created">未署名 APK を作成しました</string>
     <string name="text_unsupported">非対応</string>

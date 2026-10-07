@@ -64,12 +64,20 @@
         <item quantity="other">上書き %d</item>
     </plurals>
 
+    <plurals name="text_n_similar_colors_merged">
+        <item quantity="other">+%d 件の類似色</item>
+    </plurals>
+
     <plurals name="text_n_times_a_day">
         <item quantity="other">1 日 %d 回</item>
     </plurals>
 
     <plurals name="text_n_unknown_libraries_skipped">
         <item quantity="other">種類が不明な %d 個のカラーライブラリはスキップされます</item>
+    </plurals>
+
+    <plurals name="text_used_n_times">
+        <item quantity="other">%d 回使用</item>
     </plurals>
 
 </resources>

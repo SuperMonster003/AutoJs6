@@ -922,6 +922,10 @@
             android:theme="@style/MtAppTheme.FullScreen" />
 
         <activity
+            android:name="org.autojs.autojs.theme.app.VirtualColorLibraryActivity"
+            android:theme="@style/MtAppTheme.FullScreen" />
+
+        <activity
             android:name="org.autojs.autojs.theme.app.IntelligentLibrariesActivity"
             android:theme="@style/MtAppTheme.FullScreen" />
 

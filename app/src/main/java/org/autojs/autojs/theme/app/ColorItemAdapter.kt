@@ -23,6 +23,8 @@ class ColorItemAdapter(
     private val onItemClick: ((positionOfCurrentSelection: Int) -> Unit)? = null,
     /** Handles merged entries, which have no single color to apply. zh-CN: 处理合并条目, 这类条目没有可直接应用的单一颜色. */
     private val onMergedItemClick: ((PresetColorItem) -> Unit)? = null,
+    /** Long press, e.g. to favorite the color (roadmap P5.1). zh-CN: 长按, 例如收藏该颜色 (Roadmap P5.1). */
+    private val onItemLongClick: ((PresetColorItem) -> Unit)? = null,
 ) : RecyclerView.Adapter<ColorItemViewHolder>() {
 
     var selectedItemId = SELECT_NONE
@@ -50,6 +52,10 @@ class ColorItemAdapter(
 
         itemView.setOnClickListener {
             onItemConfirmed(context, holder.bindingAdapterPosition)
+        }
+        when (onItemLongClick) {
+            null -> itemView.setOnLongClickListener(null)
+            else -> itemView.setOnLongClickListener { true.also { items.getOrNull(holder.bindingAdapterPosition)?.let(onItemLongClick) } }
         }
     }
 
