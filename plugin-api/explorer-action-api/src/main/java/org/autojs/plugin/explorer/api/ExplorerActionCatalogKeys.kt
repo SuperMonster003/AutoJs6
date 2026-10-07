@@ -38,4 +38,13 @@ object ExplorerActionCatalogKeys {
      * suffix to the selected file name. No sibling paths or directory listings are disclosed.
      */
     const val RELATED_FILE_SUFFIXES = "relatedFileSuffixes"
+
+    /**
+     * v23 optional. Valid only for a single-directory, read-only Activity action without output,
+     * matchers or session capabilities. The host then adds the canonical filesystem path of the
+     * directory the user selected under [ExplorerActionTargetKeys.FILESYSTEM_PATH]. Disclosing the
+     * path grants nothing: the plugin can use it only under its own storage permissions, and the
+     * host neither creates a host file session nor discloses any other path for such an action.
+     */
+    const val FILESYSTEM_PATH = "filesystemPath"
 }

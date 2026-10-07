@@ -17,7 +17,6 @@ import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
-import org.autojs.autojs.core.plugin.terminal.TerminalLauncher
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.ExplorerSamplePage
@@ -33,7 +32,6 @@ import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ExplorerDirectoryBinding
-import java.io.File
 
 private const val LOG_TAG = "ExplorerPageView"
 private const val PLUGIN_ACTION_MENU_ORDER_START = 1_000
@@ -158,9 +156,6 @@ internal class ExplorerPageViewHolder(
         if (!explorerPage.path.startsWith(samplePath)) {
             menu.removeItem(R.id.action_reset)
         }
-        if (explorerPage is ArchiveExplorerPage || !File(explorerPage.path).isDirectory) {
-            menu.removeItem(R.id.action_open_in_terminal)
-        }
         val pluginMenuItems = mutableMapOf<Int, ResolvedExplorerAction>()
         runCatching {
             host.pluginActionProvider?.actionsFor(
@@ -234,10 +229,6 @@ internal class ExplorerPageViewHolder(
                 R.id.action_build_apk -> {
                     host.hideHostDialog()
                     BuildActivity.launch(host.context, selectedItem.path)
-                }
-                R.id.action_open_in_terminal -> {
-                    host.hideHostDialog()
-                    TerminalLauncher.open(host.context, selectedItem.path)
                 }
                 R.id.action_reset -> {
                     val o = Explorers.Providers.workspace()

@@ -1,7 +1,7 @@
 package org.autojs.plugin.explorer.api
 
 object ExplorerActionProtocol {
-    const val VERSION = 22
+    const val VERSION = 23
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 
@@ -20,6 +20,8 @@ object ExplorerActionProtocol {
     const val MAX_TARGET_ID_LENGTH = 128
     const val MAX_TARGET_DISPLAY_NAME_LENGTH = 4_096
     const val MAX_PARENT_DISPLAY_PATH_LENGTH = 16_384
+    /** v23. Longest canonical directory path the host discloses under [ExplorerActionTargetKeys.FILESYSTEM_PATH]. */
+    const val MAX_FILESYSTEM_PATH_LENGTH = 4_096
     const val MAX_SESSION_RELATIVE_PATH_LENGTH = 16_384
     const val MAX_SESSION_PAGE_SIZE = 128
     const val MAX_RELATED_FILE_SUFFIXES = 8

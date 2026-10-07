@@ -19,9 +19,12 @@ session events and output pipes, without changing the V1 AIDL or the contract ve
 The terminal is a separate plugin APK with its own UID and processes. The pty, the shell
 sessions, the foreground service, the Node.js toolchain (linked from the Node.js Runtime plugin),
 the npm helpers, the terminal UI, the session manager and the terminal settings live in that
-plugin. The host contributes discovery, a pooled Binder client, the three entry points (drawer
-item, file manager directory menu, project toolbar) with a five-state degradation, a drawer state
-monitor and the cleanup of the data the built-in terminal left behind. Without the plugin the host
+plugin. The host contributes discovery, a pooled Binder client, the entry points (drawer item and
+project toolbar) with a five-state degradation, a drawer state monitor and the cleanup of the data
+the built-in terminal left behind. Since host build 5320 the file manager directory menu shows
+"Open in terminal" only through the plugin's Explorer Action protocol v23 directory action
+(`explorer-action-protocol-v23.md`, 3-Shell Terminal 1.1.0 or later); builds 5304-5319 kept a
+hard-coded menu item routed through `TerminalLauncher`. Without the plugin the host
 has no terminal: every entry routes the user to the Plugin Center, the plugin settings or an
 explanatory dialog (plugin roadmap D3, D10, D25, appendix D Q7).
 
@@ -355,8 +358,9 @@ Package `org.autojs.autojs.core.plugin.terminal` of the host app (2026-10-01):
 - `TerminalLauncher`: `open(directory)`, `openNew(directory)`, `openSession(id)`,
   `openManager()` and `closeAll()`; `launch` validates the request, inspects the package and
   follows the route above, returning `true` only when the plugin UI itself was started. It is the
-  single entry of the drawer item, the file manager directory menu ("Open in terminal") and the
-  project toolbar.
+  single entry of the drawer item and the project toolbar. The directory menu entry comes from the
+  plugin's Explorer Action (protocol v23, the host discloses the selected directory's canonical
+  path) and therefore appears only while a compatible plugin is installed, enabled and authorized.
 - `TerminalPluginStateMonitor` (plugin roadmap D26): application-scoped cache of the inspection
   and the session list for the drawer. While the drawer is visible it registers an
   `ITerminalCallback` and mirrors `onSessionsChanged`; once hidden the idle unbinding releases the

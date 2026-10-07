@@ -24,9 +24,6 @@
         android:id="@+id/action_build_apk"
         android:title="@string/text_build_apk" />
     <item
-        android:id="@+id/action_open_in_terminal"
-        android:title="@string/text_open_in_terminal" />
-    <item
         android:id="@+id/action_reset"
         android:title="@string/text_reset_to_initial_content" />
 

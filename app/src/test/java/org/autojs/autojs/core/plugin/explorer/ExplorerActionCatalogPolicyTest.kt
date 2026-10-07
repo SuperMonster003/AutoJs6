@@ -590,6 +590,66 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV23DisclosesAFilesystemPathOnlyForOneReadOnlyDirectory() {
+        fun directory(
+            protocolVersion: Int = 23,
+            cardinality: Int? = ExplorerActionValues.CARDINALITY_SINGLE,
+            accessMode: Int = ExplorerActionValues.ACCESS_READ_ONLY,
+            placement: Int = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            presentation: Int? = null,
+            mimeTypes: Collection<String>? = emptyList(),
+            targetKind: Int = ExplorerActionValues.TARGET_DIRECTORY,
+            filesystemPath: Boolean? = true,
+        ) = descriptor(
+            protocolVersion = protocolVersion,
+            id = "open-in-terminal",
+            targetKind = targetKind,
+            cardinality = cardinality,
+            accessMode = accessMode,
+            placement = placement,
+            presentation = presentation,
+            mimeTypes = mimeTypes,
+            filesystemPath = filesystemPath,
+        )
+
+        val accepted = directory() ?: error("Expected a valid v23 directory path descriptor")
+        assertTrue(accepted.filesystemPath)
+        assertEquals(ExplorerActionValues.TARGET_DIRECTORY, accepted.targetKind)
+        // Absent or false keeps the action and its pre-v23 meaning.
+        assertFalse(directory(filesystemPath = null)!!.filesystemPath)
+        assertFalse(directory(filesystemPath = false)!!.filesystemPath)
+        assertFalse(directory(protocolVersion = 22, filesystemPath = null)!!.filesystemPath)
+
+        // Every broader shape rejects the action instead of disclosing a path.
+        assertNull(directory(protocolVersion = 22))
+        assertNull(directory(targetKind = ExplorerActionValues.TARGET_FILE, mimeTypes = listOf("text/*")))
+        assertNull(directory(targetKind = ExplorerActionValues.TARGET_MIXED))
+        assertNull(
+            directory(
+                cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+                placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+            ),
+        )
+        assertNull(directory(accessMode = ExplorerActionValues.ACCESS_CREATE_IN_PARENT))
+        assertNull(directory(placement = ExplorerActionValues.PLACEMENT_PRIMARY))
+        assertNull(directory(presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER))
+        assertNull(directory(mimeTypes = listOf("inode/directory")))
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                accepted,
+                ExplorerActionTarget(mimeType = "inode/directory", extension = "", kind = ExplorerActionValues.TARGET_DIRECTORY),
+            ),
+        )
+        assertFalse(
+            ExplorerActionCatalogPolicy.matches(
+                accepted,
+                ExplorerActionTarget(mimeType = "text/plain", extension = "txt", kind = ExplorerActionValues.TARGET_FILE, fileName = "a.txt"),
+            ),
+        )
+        assertEquals(4_096, ExplorerActionProtocol.MAX_FILESYSTEM_PATH_LENGTH)
+    }
+
+    @Test
     fun protocolV17AddsAnOverflowOnlyUnmatchedFileProbe() {
         val probe = descriptor(
             protocolVersion = 17,
@@ -866,6 +926,7 @@ class ExplorerActionCatalogPolicyTest {
         readSiblings: Boolean? = null,
         playbackProgress: Boolean? = null,
         relatedFileSuffixes: Collection<String>? = null,
+        filesystemPath: Boolean? = null,
     ): ExplorerActionDescriptor? {
         return ExplorerActionCatalogPolicy.normalizeDescriptor(
             protocolVersion = protocolVersion,
@@ -887,6 +948,7 @@ class ExplorerActionCatalogPolicyTest {
             readSiblings = readSiblings,
             playbackProgress = playbackProgress,
             relatedFileSuffixes = relatedFileSuffixes,
+            filesystemPath = filesystemPath,
         )
     }
 }

@@ -63,6 +63,7 @@ internal object ExplorerActionCatalogParser {
                 relatedFileSuffixes = action.getStringArrayList(
                     ExplorerActionCatalogKeys.RELATED_FILE_SUFFIXES,
                 ),
+                filesystemPath = action.getBooleanOrNull(ExplorerActionCatalogKeys.FILESYSTEM_PATH),
             ) ?: return@mapNotNull null
             descriptor.takeIf { actionIds.add(it.id) }
         }

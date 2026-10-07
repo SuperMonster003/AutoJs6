@@ -94,7 +94,20 @@ internal object ExplorerActionLauncher {
         val targetUri = targets.first().uri
         val parentUri = AppFileProvider.getUriForFile(context, parent)
         val mimeType = if (targets.size == 1) targets.single().mimeType else Mime.WILDCARD
+        // v23: the canonical path of the one selected directory replaces the host file session,
+        // which such an action never needs; nothing else about the file system is disclosed.
+        // zh-CN: v23: 所选单个目录的规范路径取代宿主文件会话 (此类动作不需要), 不披露文件系统的其它信息.
+        val filesystemPath = if (action.descriptor.filesystemPath) {
+            val directory = targets.single().file
+            require(directory.isDirectory && directory.path.length <= ExplorerActionProtocol.MAX_FILESYSTEM_PATH_LENGTH) {
+                "Explorer Action filesystem path is unavailable for ${targets.single().item.name}"
+            }
+            directory.path
+        } else {
+            null
+        }
         val hostSession = if (
+            filesystemPath == null &&
             action.descriptor.protocolVersion >= MULTI_TARGET_PROTOCOL_VERSION &&
             (
                 action.descriptor.accessMode == ExplorerActionValues.ACCESS_CREATE_IN_PARENT ||
@@ -160,7 +173,13 @@ internal object ExplorerActionLauncher {
                 )
                 putParcelableArrayListExtra(
                     ExplorerActionIntentExtras.TARGETS,
-                    ArrayList(targets.map(ResolvedTarget::toBundle)),
+                    ArrayList(
+                        targets.map { target ->
+                            target.toBundle().apply {
+                                filesystemPath?.let { putString(ExplorerActionTargetKeys.FILESYSTEM_PATH, it) }
+                            }
+                        },
+                    ),
                 )
                 hostSession?.let { session ->
                     putExtra(

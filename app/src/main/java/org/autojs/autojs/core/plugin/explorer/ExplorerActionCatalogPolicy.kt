@@ -43,6 +43,7 @@ internal object ExplorerActionCatalogPolicy {
         readSiblings: Boolean? = null,
         playbackProgress: Boolean? = null,
         relatedFileSuffixes: Collection<String>? = null,
+        filesystemPath: Boolean? = null,
     ): ExplorerActionDescriptor? {
         if (
             protocolVersion !in
@@ -249,6 +250,32 @@ internal object ExplorerActionCatalogPolicy {
             return null
         }
 
+        // v23 path disclosure: one selected directory, read-only, launched as an Activity, with no
+        // output, matcher, probe or session capability, so the path is the whole authority shown.
+        // zh-CN: v23 路径披露仅限单个所选目录, 只读, 以 Activity 启动, 且不带输出, 匹配器, 探测或会话能力.
+        val normalizedFilesystemPath = filesystemPath == true
+        if (
+            normalizedFilesystemPath &&
+            (
+                protocolVersion < FILESYSTEM_PATH_PROTOCOL_VERSION ||
+                    targetKind != ExplorerActionValues.TARGET_DIRECTORY ||
+                    normalizedCardinality != ExplorerActionValues.CARDINALITY_SINGLE ||
+                    accessMode != ExplorerActionValues.ACCESS_READ_ONLY ||
+                    placement != ExplorerActionValues.PLACEMENT_OVERFLOW ||
+                    normalizedPresentation != ExplorerActionValues.PRESENTATION_ACTIVITY ||
+                    normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE ||
+                    normalizedMimeTypes.isNotEmpty() ||
+                    normalizedExtensions.isNotEmpty() ||
+                    normalizedFileNameSuffixes.isNotEmpty() ||
+                    normalizedProbeForActionId != null ||
+                    normalizedReadSiblings ||
+                    normalizedPlaybackProgress ||
+                    normalizedRelatedFileSuffixes.isNotEmpty()
+                )
+        ) {
+            return null
+        }
+
         return ExplorerActionDescriptor(
             protocolVersion = protocolVersion,
             id = normalizedId,
@@ -272,6 +299,7 @@ internal object ExplorerActionCatalogPolicy {
             readSiblings = normalizedReadSiblings,
             playbackProgress = normalizedPlaybackProgress,
             relatedFileSuffixes = normalizedRelatedFileSuffixes,
+            filesystemPath = normalizedFilesystemPath,
         )
     }
 
@@ -475,4 +503,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val COMPOUND_SUFFIX_PROTOCOL_VERSION = 14
     private const val UNMATCHED_FILE_PROBE_PROTOCOL_VERSION = 17
     private const val RELATED_FILE_PROTOCOL_VERSION = 22
+    private const val FILESYSTEM_PATH_PROTOCOL_VERSION = 23
 }

@@ -23,6 +23,8 @@ internal data class ExplorerActionDescriptor(
     val readSiblings: Boolean,
     val playbackProgress: Boolean,
     val relatedFileSuffixes: Set<String>,
+    /** v23: the host discloses the canonical path of the single selected directory. */
+    val filesystemPath: Boolean = false,
 )
 
 internal data class ExplorerActionTarget(
