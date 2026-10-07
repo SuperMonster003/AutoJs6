@@ -12,9 +12,12 @@ internal object PluginIconResourcePolicy {
         "io.github.supermonster003.autojs6.plugin.three.setup.installer" to "ic_launcher",
         "io.github.supermonster003.autojs6.plugin.three.color.picker" to "ic_launcher",
         "io.github.supermonster003.autojs6.plugin.three.stamp.mail" to "ic_launcher",
+        "io.github.supermonster003.autojs6.plugin.three.maple.image" to "ic_launcher",
+        "io.github.supermonster003.autojs6.plugin.three.stack.archive" to "ic_launcher",
+        "io.github.supermonster003.autojs6.plugin.three.hanzi.cc" to "ic_launcher",
         "io.github.supermonster003.autojs6.plugin.opencc" to "ic_launcher_transparent",
         "io.github.supermonster003.autojs6.plugin.r8compiler" to "ic_launcher_transparent",
-        "io.github.supermonster003.autojs6.plugin.readium.epub.reader" to "ic_launcher_transparent",
+        "io.github.supermonster003.autojs6.plugin.three.folio.epub" to "ic_launcher_transparent",
     )
 
     fun candidates(packageName: String): List<String> =

@@ -10,7 +10,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The Readium EPUB Reader package exports an Explorer Action service and an EPUB service
+ * The 3-Folio EPUB package exports an Explorer Action service and an EPUB service
  * (plugin roadmap D10). The plugin center keys its entry by the common info endpoint, so both
  * engines must resolve to their own service action, and both stay enabled by default (D29).
  */

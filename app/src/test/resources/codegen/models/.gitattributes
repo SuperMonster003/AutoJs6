@@ -1,0 +1,3 @@
+*.ajcgm binary
+parity.jsonl text eol=lf
+parity-manifest.json text eol=lf

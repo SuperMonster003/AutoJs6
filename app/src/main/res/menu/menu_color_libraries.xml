@@ -19,6 +19,12 @@
         app:showAsAction="always|collapseActionView" />
 
     <item
+        android:id="@+id/action_undo_script_change"
+        android:title="@string/text_undo_script_change"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_locate_current_theme_color"
         android:title="@string/text_locate_current_theme_color"
         android:icon="@drawable/ic_locate"
@@ -54,9 +60,29 @@
 
     </item>
 
+    <item
+        android:id="@+id/action_export_color_libraries"
+        android:title="@string/text_export_color_libraries"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_reorder_color_libraries"
+        android:title="@string/text_reorder_color_libraries"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete_color_libraries"
+        android:title="@string/text_delete_color_libraries"
+        app:showAsAction="never" />
+
     <item android:title="@string/text_more">
 
         <menu>
+
+            <item
+                android:id="@+id/action_derived_colors"
+                android:title="@string/text_derived_colors_menu"
+                app:showAsAction="never" />
 
             <item
                 android:id="@+id/action_toggle_color_select_layout"

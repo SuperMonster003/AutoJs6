@@ -12,6 +12,8 @@ data class PluginIndexEntry(
     val iconUrl: Uri? = null,
     val nightIconUrl: Uri? = null,
     val forceIgnoreLocalIcon: Boolean = false,
+    val iconBackgroundColor: String? = null,
+    val nightIconBackgroundColor: String? = null,
 
     val title: String,
     val description: String? = null,

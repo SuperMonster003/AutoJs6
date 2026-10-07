@@ -21,10 +21,13 @@ interface PaletteHistoryDao {
     @Query("SELECT * FROM palette_history WHERE hex = :hex LIMIT 1")
     suspend fun getByHex(hex: String): PaletteHistory?
 
+    /**
+     * Records one use; see `ColorHistoryDao.upsert` (roadmap P5.2). zh-CN: 记录一次使用; 见 `ColorHistoryDao.upsert` (Roadmap P5.2).
+     */
     @Transaction
     suspend fun upsert(history: PaletteHistory): Long {
         val existing = getByHex(history.colorInfo.hex) ?: return insert(history)
-        val updated = existing.copy().also {
+        val updated = existing.copy(useCount = existing.useCount + 1, source = history.source, sourceDetail = history.sourceDetail).also {
             it.setLastUsedTimeCurrent()
             update(it)
         }

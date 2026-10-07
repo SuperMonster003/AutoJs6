@@ -2,6 +2,8 @@
 
 La búsqueda de colores admite las siguientes 5 modalidades. Todas las modalidades no distinguen mayúsculas de minúsculas.
 
+En la lista de bibliotecas de colores, la búsqueda abarca las bibliotecas predefinidas, los colores de tus bibliotecas propias y los grupos de las bibliotecas de colores inteligentes (un grupo coincide por su nombre o por cualquiera de sus colores). Cada resultado termina con la biblioteca de colores a la que pertenece.
+
 ### 1. Nombre de color (idioma actual)
 
 Busca utilizando el nombre de color tal como se muestra en el idioma actual.

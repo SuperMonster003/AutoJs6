@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -16,16 +17,23 @@ import de.hdodenhof.circleimageview.CircleImageView
 import org.autojs.autojs.core.plugin.center.PluginIconUrlResolver
 import org.autojs.autojs.core.plugin.center.PluginInstalledIconResolver
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.ui.wizard.WizardProfile
+import org.autojs.autojs.ui.wizard.WizardSelectionPolicy
+import org.autojs.autojs.ui.wizard.WizardSelectionPolicy.CheckBoxState
+import org.autojs.autojs.ui.wizard.WizardUi
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PluginInstallWizardHeaderItemBinding
 import org.autojs.autojs6.databinding.PluginInstallWizardPluginItemBinding
 
 /**
- * Category headers plus checkable plugin rows. Icons load asynchronously through
- * Glide so the list renders immediately with placeholders.
+ * Category headers plus checkable plugin rows. Installed plugins show a disabled, ticked
+ * check box while they belong to the current profile and none otherwise; they can be hidden
+ * altogether. Icons load asynchronously through Glide so the list renders immediately with
+ * placeholders.
  *
- * zh-CN: 分类标题与可勾选的插件行. 图标通过 Glide 异步加载, 列表先以占位图立即渲染.
+ * zh-CN: 分类标题与可勾选的插件行. 已安装插件属于当前配置时显示不可用且已勾选的复选框,
+ * 否则不显示复选框; 已安装插件也可整体隐藏. 图标通过 Glide 异步加载, 列表先以占位图立即渲染.
  */
 class PluginInstallWizardAdapter(
     private val listener: Listener,
@@ -38,6 +46,8 @@ class PluginInstallWizardAdapter(
     private var rows: List<PluginInstallWizardRow> = emptyList()
     private val itemsByPackage = LinkedHashMap<String, PluginInstallWizardItem>()
     private val selected = LinkedHashSet<String>()
+    private var profile: WizardProfile = WizardProfile.STANDARD
+    private var showInstalled = true
 
     val allItems: List<PluginInstallWizardItem>
         get() = itemsByPackage.values.toList()
@@ -54,10 +64,24 @@ class PluginInstallWizardAdapter(
     fun submit(items: List<PluginInstallWizardItem>) {
         itemsByPackage.clear()
         items.forEach { itemsByPackage[it.packageName] = it }
-        rows = PluginInstallWizardRow.build(items)
+        rows = PluginInstallWizardRow.build(items, showInstalled)
         selected.retainAll { itemsByPackage[it]?.isSelectable == true }
         notifyDataSetChanged()
         listener.onSelectionChanged(selectedPackageNames)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setShowInstalled(show: Boolean) {
+        if (showInstalled == show) return
+        showInstalled = show
+        rows = PluginInstallWizardRow.build(itemsByPackage.values.toList(), show)
+        notifyDataSetChanged()
+    }
+
+    /** Makes [profile] the reference of the installed rows and ticks [packageNames]. */
+    fun applyProfile(profile: WizardProfile, packageNames: Collection<String>) {
+        this.profile = profile
+        setSelection(packageNames)
     }
 
     fun setSelection(packageNames: Collection<String>) {
@@ -149,15 +173,20 @@ class PluginInstallWizardAdapter(
         }
 
         fun bindSelection(header: PluginInstallWizardRow.Header) {
-            val members = header.packageNames.mapNotNull { itemsByPackage[it] }
-            val selectable = members.filter { it.isSelectable }
+            val selectable = header.packageNames.mapNotNull { itemsByPackage[it] }.filter { it.isSelectable }
+            val hasSelectable = selectable.isNotEmpty()
             val selectedCount = selectable.count { it.packageName in selected }
-            binding.pluginInstallWizardHeaderCount.text = "$selectedCount/${selectable.size}"
-            binding.pluginInstallWizardHeaderCheckbox.apply {
-                isEnabled = selectable.isNotEmpty()
-                isChecked = selectable.isNotEmpty() && selectedCount == selectable.size
+            // A category without installable plugins needs neither the 0/0 counter nor a check box.
+            // zh-CN: 无可安装插件的分类无需 0/0 计数及复选框.
+            binding.pluginInstallWizardHeaderCount.apply {
+                isVisible = hasSelectable
+                text = "$selectedCount/${selectable.size}"
             }
-            binding.root.isEnabled = selectable.isNotEmpty()
+            binding.pluginInstallWizardHeaderCheckbox.apply {
+                isVisible = hasSelectable
+                isChecked = hasSelectable && selectedCount == selectable.size
+            }
+            binding.root.isEnabled = hasSelectable
         }
 
     }
@@ -185,12 +214,24 @@ class PluginInstallWizardAdapter(
         }
 
         fun bindSelection(item: PluginInstallWizardItem) {
+            val candidate = item.toCandidate()
+            val state = WizardSelectionPolicy.checkBoxState(
+                isDone = item.isInstalled,
+                isSelectable = item.isSelectable,
+                isMemberOfProfile = WizardSelectionPolicy.isMember(profile, candidate),
+            )
             binding.pluginInstallWizardItemCheckbox.apply {
-                isEnabled = item.isSelectable
-                isChecked = item.isSelectable && item.packageName in selected
+                isVisible = state != CheckBoxState.HIDDEN
+                isEnabled = state == CheckBoxState.SELECTABLE
+                alpha = if (state == CheckBoxState.DONE_IN_PROFILE) WizardUi.LOCKED_CHECK_BOX_ALPHA else 1f
+                isChecked = when (state) {
+                    CheckBoxState.DONE_IN_PROFILE -> true
+                    CheckBoxState.SELECTABLE -> item.packageName in selected
+                    else -> false
+                }
             }
-            binding.root.isEnabled = item.isSelectable
-            binding.root.alpha = if (item.isSelectable) 1f else 0.5f
+            binding.root.isEnabled = state == CheckBoxState.SELECTABLE
+            binding.root.alpha = if (state == CheckBoxState.UNAVAILABLE) 0.5f else 1f
         }
 
         fun clearIcon() {
@@ -213,6 +254,10 @@ class PluginInstallWizardAdapter(
         }
 
         private fun loadIcon(iconView: CircleImageView, item: PluginInstallWizardItem) {
+            iconView.circleBackgroundColor = org.autojs.autojs.core.plugin.center.PluginIconBackgroundPolicy.resolve(
+                item.packageName, org.autojs.autojs.util.ViewUtils.isNightModeEnabled, item.iconBackgroundColor,
+                item.nightIconBackgroundColor, item.installedIcon?.let(PluginInstalledIconResolver::backgroundForCurrentMode),
+            )
             item.installedIcon?.let { installedIcon ->
                 clearIcon()
                 iconView.setImageDrawable(PluginInstalledIconResolver.forCurrentMode(installedIcon))

@@ -182,6 +182,7 @@ import org.autojs.autojs.runtime.api.Toaster as ApiToaster
 import org.autojs.autojs.runtime.api.UI as ApiUI
 import org.autojs.autojs.runtime.api.Util as ApiUtil
 import org.autojs.autojs.runtime.api.augment.autojs.Version as AutojsVersion
+import org.autojs.autojs.runtime.api.augment.colors.ColorsTheme
 import org.autojs.autojs.runtime.api.augment.converter.Bytes as BytesCvt
 import org.autojs.autojs.runtime.api.augment.formatter.Bytes as BytesFmt
 import org.autojs.autojs.runtime.api.augment.global.Legacy as GlobalLegacy
@@ -1014,7 +1015,9 @@ class ScriptRuntime private constructor(builder: Builder) {
         Yolo(this).augment(target)
         Threads(this).augment(target, threads)
         UI(this).proxying(target, ui)
-        Colors.augmentWithRuntime(target, this, Colors.colorTables + colors)
+        Colors.augmentWithRuntime(target, this, Colors.colorTables + colors).also { colors ->
+            ColorsTheme(this).augment(colors)
+        }
         Color.augmentWithRuntime(target, this, Colors.colorTables)
         Tasks(this).augment(target)
         WorkManager(this).augment(target)

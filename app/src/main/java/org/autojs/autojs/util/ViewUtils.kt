@@ -73,6 +73,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.intelligent.NightModeState
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import kotlin.math.abs
@@ -924,6 +925,7 @@ object ViewUtils {
 
     fun setDefaultNightMode(mode: MODE) {
         AppCompatDelegate.setDefaultNightMode(toNightMode(mode))
+        NightModeState.notifyChanged()
     }
 
     fun makeBarsAdaptToNightMode(activity: AppCompatActivity) {

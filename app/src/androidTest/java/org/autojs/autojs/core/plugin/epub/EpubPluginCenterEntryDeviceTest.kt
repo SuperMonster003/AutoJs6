@@ -23,7 +23,7 @@ import org.junit.Test
 import java.io.File
 
 /**
- * Plugin roadmap D10 on a device: the Readium EPUB Reader package exports two contract services
+ * Plugin roadmap D10 on a device: the 3-Folio EPUB package exports two contract services
  * (Explorer Action and EPUB) but the plugin center lists it once, with one identity, and the
  * single enable switch of that entry governs the EPUB service too (disabled: `PLUGIN_DISABLED`).
  * Writes the entry as text and a screenshot of the plugin center under

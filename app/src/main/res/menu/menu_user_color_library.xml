@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search_color"
+        android:title="@string/text_search_color"
+        android:icon="@drawable/ic_search_smaller_black_48dp"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
+
+    <item
+        android:id="@+id/action_add_colors"
+        android:title="@string/text_add_colors"
+        android:icon="@drawable/ic_add_smaller_48dp"
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_add_colors_from_palette"
+                android:title="@string/text_from_color_palette" />
+
+            <item
+                android:id="@+id/action_add_colors_from_library"
+                android:title="@string/text_from_color_library" />
+
+            <item
+                android:id="@+id/action_add_colors_from_history"
+                android:title="@string/text_from_color_history" />
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/action_locate_current_theme_color"
+        android:title="@string/text_locate_current_theme_color"
+        android:icon="@drawable/ic_locate"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_reorder_colors"
+        android:title="@string/text_reorder_colors"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete_colors"
+        android:title="@string/text_delete_colors"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_rename_color_library"
+        android:title="@string/text_rename_color_library"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete_color_library"
+        android:title="@string/text_delete"
+        app:showAsAction="never" />
+
+</menu>

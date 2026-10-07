@@ -37,13 +37,13 @@ class PluginInstallWizardCatalogTest {
                 "${prefix}ace.editor",
                 "org.autojs.plugin.apkbuilder.template",
                 "${prefix}apkinspector",
-                "${prefix}archivemanager",
+                "${prefix}three.stack.archive",
                 "${prefix}htmlpreviewer",
                 "${prefix}markdownpreviewer",
                 "${prefix}mediainfo",
                 "${prefix}nodejs",
                 "${prefix}typescript",
-                "${prefix}imageviewer",
+                "${prefix}three.maple.image",
                 "${prefix}mlkitocr",
                 "${prefix}opencv",
                 "${prefix}paddleocr.v5",
@@ -78,11 +78,18 @@ class PluginInstallWizardCatalogTest {
             order,
         )
         assertFalse(PluginInstallWizardCatalog.entries.any { it.category == PluginInstallWizardCategory.OTHERS })
-        assertEquals(48, PluginInstallWizardCatalog.entries.size)
+        assertEquals(47, PluginInstallWizardCatalog.entries.size)
     }
 
     @Test
     fun lookupByPackageName() {
+        val prefix = "io.github.supermonster003.autojs6.plugin."
+        assertEquals("Three Maple Image", PluginInstallWizardCatalog.find(prefix + "three.maple.image")?.fallbackTitle)
+        assertEquals("Three Stack Archive", PluginInstallWizardCatalog.find(prefix + "three.stack.archive")?.fallbackTitle)
+        assertEquals("Three Hanzi CC", PluginInstallWizardCatalog.find(prefix + "three.hanzi.cc")?.fallbackTitle)
+        for (old in listOf("imageviewer", "imagetools", "archivemanager", "opencc")) {
+            assertEquals(null, PluginInstallWizardCatalog.find(prefix + old))
+        }
         val terminal = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.three.shell.terminal")
         assertEquals(PluginInstallWizardCategory.TOOLS, terminal?.category)
         assertEquals("Three Shell Terminal", terminal?.fallbackTitle)

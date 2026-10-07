@@ -1,0 +1,147 @@
+{
+  "format": 1,
+  "scope": "P4 package/Kotlin JVM acceptance; Android device budgets and UI integration remain later stages",
+  "datasetId": "cg-ds-2026.10-1",
+  "packages": [
+    {
+      "file": "local-candidate-v1.ajcgm",
+      "bytes": 6922,
+      "sha256": "712baca7e1a7947eaba45823731873b8a075d52311a52578cd6349b0e0c86d78",
+      "byteIdentical": true
+    },
+    {
+      "file": "tiny-test-v1.ajcgm",
+      "bytes": 23633,
+      "sha256": "9ab137a6e184f52246768a905ea98a09a03cf4da97f221526d70e7b6f32afc17",
+      "byteIdentical": true
+    }
+  ],
+  "fullParity": {
+    "requestedCandidates": 5000,
+    "candidates": 5012,
+    "groups": 130,
+    "maxBinaryScoreDifference": 9.110787901889239e-09,
+    "sameTopChoice": true,
+    "scoreTolerance": 0.0001,
+    "packageSha256": "712baca7e1a7947eaba45823731873b8a075d52311a52578cd6349b0e0c86d78",
+    "paritySha256": "52071592a67d3c5cf7a33d57fdc5ac57911ca857215f936d37705afdb2dee192"
+  },
+  "bundledParity": {
+    "requestedCandidates": 128,
+    "candidates": 152,
+    "groups": 4,
+    "maxBinaryScoreDifference": 9.110787901889239e-09,
+    "sameTopChoice": true,
+    "scoreTolerance": 0.0001,
+    "packageSha256": "9ab137a6e184f52246768a905ea98a09a03cf4da97f221526d70e7b6f32afc17",
+    "paritySha256": "4ef92d020674fe700455b8bb9edf866895e2ccada062d0fe568eb33f845c7a44"
+  },
+  "kotlinParity": {
+    "candidates": 5012,
+    "groups": 130,
+    "maxScoreDifference": 9.110787901889239e-09,
+    "sameTopChoice": true
+  },
+  "tests": {
+    "jvmPassed": 295,
+    "jvmSkippedOfflineP2Jobs": 2,
+    "pythonPassed": 115,
+    "readerMutationCases": 2000
+  },
+  "benchmark": {
+    "format": 1,
+    "environment": "host-jvm",
+    "seed": 20261003,
+    "trees": 1024,
+    "depth": 6,
+    "featureCount": 64,
+    "nodes": 5000,
+    "candidates": 200,
+    "warmupRuns": 3,
+    "measuredRuns": 10,
+    "modelBinaryBytes": 300064,
+    "modelPackageBytes": 279096,
+    "modelArrayStorageBytes": 320512,
+    "firstPackageLoadMillis": 69.3239,
+    "javaVersion": "21.0.1",
+    "osName": "Windows 11",
+    "osArch": "amd64",
+    "availableProcessors": 12,
+    "packageLoad": {
+      "samplesNanos": [
+        8320800,
+        8931600,
+        9853500,
+        8222200,
+        7903400,
+        8181100,
+        8581300,
+        8065400,
+        8672000,
+        9785300
+      ],
+      "p50Millis": 8.3208,
+      "p95Millis": 9.8535
+    },
+    "featureExtraction": {
+      "samplesNanos": [
+        12012200,
+        11669600,
+        11670500,
+        11221500,
+        9686100,
+        12020400,
+        10831500,
+        13801700,
+        12356300,
+        13988300
+      ],
+      "p50Millis": 11.6705,
+      "p95Millis": 13.9883
+    },
+    "score": {
+      "samplesNanos": [
+        17815900,
+        5767200,
+        5459100,
+        4596000,
+        5921700,
+        5532100,
+        5227600,
+        6691100,
+        6522700,
+        5579800
+      ],
+      "p50Millis": 5.5798,
+      "p95Millis": 17.8159
+    },
+    "featuresAndScore": {
+      "samplesNanos": [
+        29828100,
+        17436800,
+        17129600,
+        15817500,
+        15607800,
+        17552500,
+        16059100,
+        20492800,
+        18879000,
+        19568100
+      ],
+      "p50Millis": 17.4368,
+      "p95Millis": 29.8281
+    },
+    "candidateSource": "200 distinct SELF plans verified by PlanVerifier on a synthetic 5000-node tree",
+    "storageDefinition": "Backing-array payload only; JVM object headers, temporary package buffers and feature contexts excluded",
+    "deviceBudgetsVerified": false
+  },
+  "releaseState": {
+    "published": false,
+    "realTestGroups": 0,
+    "officialModelLicenseSelected": false,
+    "candidateLicense": "LicenseRef-LocalEvaluation",
+    "tinyLicense": "MPL-2.0",
+    "androidDeviceBudgetsVerified": false,
+    "generationUiConnected": false
+  }
+}

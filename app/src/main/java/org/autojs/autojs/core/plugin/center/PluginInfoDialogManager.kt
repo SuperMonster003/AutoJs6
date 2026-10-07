@@ -2,11 +2,16 @@ package org.autojs.autojs.core.plugin.center
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.util.LruCache
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
@@ -48,7 +53,7 @@ object PluginInfoDialogManager {
     // zh-CN: 持有当前对话框与包名, 便于 onResume 时刷新.
     private var currentDialog: WeakReference<MaterialDialog>? = null
     private var currentPackageName: String? = null
-    private val remoteDialogIconCache = object : LruCache<String, Drawable.ConstantState>(40) {}
+    private val remoteDialogIconCache = object : LruCache<String, Bitmap>(40) {}
 
     fun refreshIfShowing(context: Context, allItems: List<PluginCenterItem>) {
         val dialog = currentDialog?.get() ?: return
@@ -229,6 +234,14 @@ object PluginInfoDialogManager {
     }
 
     private fun bindDialogIcon(context: Context, dialog: MaterialDialog, info: PluginInfoBase) {
+        val background = PluginIconBackgroundPolicy.resolve(
+            info.packageName, ViewUtils.isNightModeEnabled,
+            info.item.iconBackgroundColor, info.item.nightIconBackgroundColor,
+            info.icon?.let(PluginInstalledIconResolver::backgroundForCurrentMode),
+        )
+        // Keep the surface separate so disabled artwork is desaturated without fading its background.
+        // zh-CN: 背景独立绘制, 禁用图稿灰度化时不降低圆形底色的透明度.
+        dialog.iconView.background = toDialogCircularIcon(context, ColorDrawable(background), Color.TRANSPARENT)
         val initialDialogIcon = resolveInitialDialogIcon(context, info)
         dialog.setIcon(initialDialogIcon)
         dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
@@ -309,7 +322,7 @@ object PluginInfoDialogManager {
                         isFirstResource: Boolean,
                     ): Boolean {
                         val circular = toDialogCircularIcon(context, resource)
-                        cacheRemoteDialogIcon(remoteUrl, circular)
+                        cacheRemoteDialogIcon(remoteUrl, resource)
                         dialog.setIcon(circular)
                         dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
                         return true
@@ -319,10 +332,13 @@ object PluginInfoDialogManager {
     }
 
     private fun getCachedRemoteDialogIcon(context: Context, remoteUrl: String): Drawable? =
-        remoteDialogIconCache.get(remoteUrl)?.newDrawable(context.resources)?.mutate()
+        remoteDialogIconCache.get(remoteUrl)?.let { BitmapDrawable(context.resources, it) }
+            ?.let { toDialogCircularIcon(context, it) }
 
     private fun cacheRemoteDialogIcon(remoteUrl: String, drawable: Drawable) {
-        drawable.constantState?.let { remoteDialogIconCache.put(remoteUrl, it) }
+        // Own the pixels independently of Glide, and apply themed borders only when displayed.
+        // zh-CN: 独立持有像素, 避免 Glide 回收影响缓存; 描边在显示时按当前主题生成.
+        drawable.toBitmap().copy(Bitmap.Config.ARGB_8888, false)?.let { remoteDialogIconCache.put(remoteUrl, it) }
     }
 
     private fun buildDefaultDialogIconDrawable(context: Context): Drawable? =
@@ -334,12 +350,16 @@ object PluginInfoDialogManager {
                 DrawableCompat.setTintMode(d, PorterDuff.Mode.SRC_IN)
             }
 
-    private fun toDialogCircularIcon(context: Context, source: Drawable): Drawable =
+    private fun toDialogCircularIcon(
+        context: Context,
+        source: Drawable,
+        borderColor: Int = context.getColor(R.color.plugin_center_item_icon_border),
+    ): Drawable =
         source.toCircular(
             context = context,
             sizePx = DisplayUtils.dpToPx(48.0F).roundToInt(),
             borderWidthPx = context.resources.getDimensionPixelSize(R.dimen.plugin_center_item_icon_border_width),
-            borderColor = context.getColor(R.color.plugin_center_item_icon_border),
+            borderColor = borderColor,
         )
 
     internal fun showUpdatablePluginInfoDialog(context: Context, info: PluginInfoUpdatable, parentDialog: MaterialDialog? = null) {

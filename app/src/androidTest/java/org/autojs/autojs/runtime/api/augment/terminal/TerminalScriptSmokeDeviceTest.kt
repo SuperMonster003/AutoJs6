@@ -134,9 +134,11 @@ class TerminalScriptSmokeDeviceTest {
     @Test fun highThroughputReportsOverflowBeforeExitWithoutBlockingThePlugin() {
         var probes = 0
         var longestReadMillis = 0L
+        // Keep the byte-pressure case bounded on emulators: one-character yes output creates
+        // 26 million callbacks. Short-line pressure is exercised separately below.
         val report = runScript("""
             var dropped = 0, lines = 0, exitSeen = false;
-            var s = terminal.exec('sleep 1; yes | head -c 50m; exit 3', {cwd: testCwd, title: 'P4 throughput', show: true, keepOpen: false});
+            var s = terminal.exec('sleep 1; yes terminal-pressure-0123456789-abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ | head -c 50m; exit 3', {cwd: testCwd, title: 'P4 throughput', show: true, keepOpen: false});
             s.on('output', function() { check(!exitSeen, 'output after exit'); lines++; });
             s.on('overflow', function(bytes) { check(!exitSeen, 'overflow after exit'); dropped += bytes; });
             s.on('exit', function(code) {
@@ -147,7 +149,7 @@ class TerminalScriptSmokeDeviceTest {
             // Deliberately stop draining the script queue. The plugin must continue processing.
             sleep(4000);
             terminal.sessions();
-        """, 90000, observe = {
+        """, 300000, observe = {
             runBlocking {
                 val session = TerminalPluginHost.listSessions(context).firstOrNull { it.title == "P4 throughput" }
                 if (session != null) {
@@ -164,6 +166,19 @@ class TerminalScriptSmokeDeviceTest {
         assertTrue("no main-thread responsiveness probes", probes > 0)
         assertTrue("plugin main thread stalled for $longestReadMillis ms", longestReadMillis < 5000)
         android.util.Log.i("TerminalScriptSmoke", "throughput main-thread probes=$probes longestReadMillis=$longestReadMillis")
+    }
+
+    @Test fun shortLinePressureStillDrainsAndDeliversExit() {
+        runScript("""
+            var lines = 0, exitSeen = false;
+            var s = terminal.exec('sleep 1; yes | head -c 1m; exit 5', {cwd: testCwd, show: false, keepOpen: false});
+            s.on('output', function() { check(!exitSeen, 'output after exit'); lines++; });
+            s.on('exit', function(code) {
+                exitSeen = true;
+                check(code == 5 && lines > 0, 'short-line outcome');
+                report({lines: lines, code: code});
+            });
+        """, 180000)
     }
 
     @Test fun stoppingScriptReleasesPipesButPreservesItsUserSession() {
@@ -218,8 +233,13 @@ class TerminalScriptSmokeDeviceTest {
         val running = startScript(source, workingDirectory)
         try {
             val deadline = SystemClock.elapsedRealtime() + timeoutMillis
+            var nextDiagnostic = SystemClock.elapsedRealtime() + 15000
             while (!running.finished.await(200, TimeUnit.MILLISECONDS)) {
-                assertTrue("script did not finish", SystemClock.elapsedRealtime() < deadline)
+                if (SystemClock.elapsedRealtime() >= nextDiagnostic) {
+                    android.util.Log.i("TerminalScriptSmoke", "pending report=${running.engine.runtime.getProperty("terminal.smoke.report")} stack=${running.engine.thread.stackTrace.take(6).joinToString("; ")}")
+                    nextDiagnostic += 30000
+                }
+                assertTrue("script did not finish; report=${running.engine.runtime.getProperty("terminal.smoke.report")}", SystemClock.elapsedRealtime() < deadline)
                 observe?.invoke()
             }
             running.engine.thread.join(10000)

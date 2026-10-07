@@ -45,6 +45,8 @@ data class PluginCenterItem(
     val remoteIconUrl: String? = null,
     val remoteNightIconUrl: String? = null,
     val forceIgnoreLocalIcon: Boolean = false,
+    val iconBackgroundColor: String? = null,
+    val nightIconBackgroundColor: String? = null,
 
     val icon: Drawable? = null,
 

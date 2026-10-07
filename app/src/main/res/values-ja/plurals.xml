@@ -16,12 +16,68 @@
         <item quantity="other">%d 個のスクリプトを停止しました</item>
     </plurals>
 
+    <plurals name="text_every_n_hours">
+        <item quantity="other">%d 時間ごと</item>
+    </plurals>
+
+    <plurals name="text_every_n_minutes">
+        <item quantity="other">%d 分ごと</item>
+    </plurals>
+
+    <plurals name="text_every_n_seconds">
+        <item quantity="other">%d 秒ごと</item>
+    </plurals>
+
     <plurals name="text_items_total_sum">
         <item quantity="other">合計 %d 件</item>
     </plurals>
 
     <plurals name="text_items_total_sum_with_colon">
         <item quantity="other">合計: %d 件</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_exported">
+        <item quantity="other">%d 個のカラーライブラリをエクスポートしました</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_imported">
+        <item quantity="other">%d 個のカラーライブラリをインポートしました</item>
+    </plurals>
+
+    <plurals name="text_n_colors">
+        <item quantity="other">%d 色</item>
+    </plurals>
+
+    <plurals name="text_n_colors_added">
+        <item quantity="other">%d 色を追加しました</item>
+    </plurals>
+
+    <plurals name="text_n_groups">
+        <item quantity="other">%d グループ</item>
+    </plurals>
+
+    <plurals name="text_n_invalid_values_skipped">
+        <item quantity="other">%d 個の無効な値はスキップされます</item>
+    </plurals>
+
+    <plurals name="text_n_overrides">
+        <item quantity="other">上書き %d</item>
+    </plurals>
+
+    <plurals name="text_n_similar_colors_merged">
+        <item quantity="other">+%d 件の類似色</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="other">1 日 %d 回</item>
+    </plurals>
+
+    <plurals name="text_n_unknown_libraries_skipped">
+        <item quantity="other">種類が不明な %d 個のカラーライブラリはスキップされます</item>
+    </plurals>
+
+    <plurals name="text_used_n_times">
+        <item quantity="other">%d 回使用</item>
     </plurals>
 
 </resources>

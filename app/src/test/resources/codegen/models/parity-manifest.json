@@ -1,0 +1,20 @@
+{
+  "format": 1,
+  "tool": "export_parity",
+  "datasetId": "cg-ds-2026.10-1",
+  "modelId": "autojs6.codegen.tiny-test",
+  "packageFile": "tiny-test-v1.ajcgm",
+  "packageSha256": "9ab137a6e184f52246768a905ea98a09a03cf4da97f221526d70e7b6f32afc17",
+  "referenceModelSha256": "f680a77ab1da984343bc904cd2ac6aca5269e7a44ce7308d692f5532a0e0484c",
+  "paritySha256": "4ef92d020674fe700455b8bb9edf866895e2ccada062d0fe568eb33f845c7a44",
+  "featuresSha256": "6befb941a13dfffad95fb9bf91a0df67dbd3e98491fcbe12b7a9583874ba3c40",
+  "featureSchemaVersion": 1,
+  "featureNamesHash": "9c6a5d8279ffca0e",
+  "requestedCandidates": 128,
+  "candidates": 152,
+  "groups": 4,
+  "maxBinaryScoreDifference": 9.110787901889239e-09,
+  "sameTopChoice": true,
+  "scoreTolerance": 0.0001,
+  "note": "The first requested candidates plus the rest of the final group; every top-choice check uses a complete group."
+}

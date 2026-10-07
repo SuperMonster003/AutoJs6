@@ -87,9 +87,16 @@ object PackageInstallRouter {
     /**
      * Installs [packageUri] and suspends until [packageName] landed or the attempt ended (plugin
      * roadmap D22): the plugin path awaits the session outcome, the system path awaits the
-     * package broadcast up to [SYSTEM_INSTALL_AWAIT_MILLIS].
+     * package broadcast up to [SYSTEM_INSTALL_AWAIT_MILLIS]. [interaction] applies to the plugin
+     * path; `auto` installs silently when the plugin has a usable privileged authorizer.
      */
-    suspend fun installAndAwait(context: Context, packageUri: Uri, packageName: String, displayName: String? = null): AwaitResult {
+    suspend fun installAndAwait(
+        context: Context,
+        packageUri: Uri,
+        packageName: String,
+        displayName: String? = null,
+        interaction: String = InstallerContract.INTERACTION_DIALOG,
+    ): AwaitResult {
         val name = displayName ?: packageUri.lastPathSegment
         val format = PackageFormat.fromDisplayName(name)
         if (format != null && !format.installable) {
@@ -99,7 +106,7 @@ object PackageInstallRouter {
             val outcome = runCatching {
                 val source = withContext(Dispatchers.IO) { InstallerSource.fromUri(context, packageUri, fallbackName = name) }
                 val handle = try {
-                    InstallerPluginHost.openSession(context, listOf(source), InstallerContract.INTERACTION_DIALOG)
+                    InstallerPluginHost.openSession(context, listOf(source), interaction)
                 } catch (failure: Throwable) {
                     source.close()
                     throw failure

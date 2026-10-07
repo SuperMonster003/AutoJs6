@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <io.codetail.widget.RevealFrameLayout
+        android:id="@+id/appBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            app:theme="@style/MtAppTheme.AppBarOverlay">
+
+            <org.autojs.autojs.ui.widget.AdaptiveTitleToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:contentInsetStartWithNavigation="@dimen/toolbar_content_inset_start_with_navigation"
+                android:theme="@style/ToolBarStyle"
+                app:popupTheme="@style/MtAppTheme.PopupOverlay"
+                tools:title="@string/text_sample_string" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+    </io.codetail.widget.RevealFrameLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+
+            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:hint="@string/text_color_library_name"
+                app:expandedHintEnabled="false">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/name_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:maxLength="64"
+                    android:singleLine="true" />
+
+            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+            <TextView
+                style="@style/IntelligentEditorSectionHeader"
+                android:text="@string/text_state_source" />
+
+            <LinearLayout
+                android:id="@+id/state_source_row"
+                style="@style/IntelligentEditorRow">
+
+                <TextView
+                    style="@style/IntelligentEditorRowTitle"
+                    android:text="@string/text_state_source" />
+
+                <TextView
+                    android:id="@+id/state_source_summary"
+                    style="@style/IntelligentEditorRowSummary"
+                    tools:text="@string/text_night_mode" />
+
+            </LinearLayout>
+
+            <TextView
+                style="@style/IntelligentEditorSectionHeader"
+                android:text="@string/text_rotation_triggers" />
+
+            <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+                android:id="@+id/rotation_state_change"
+                style="@style/IntelligentEditorCheckBox"
+                android:text="@string/text_rotation_state_change" />
+
+            <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+                android:id="@+id/rotation_app_start"
+                style="@style/IntelligentEditorCheckBox"
+                android:text="@string/text_rotation_app_start" />
+
+            <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+                android:id="@+id/rotation_script_start"
+                style="@style/IntelligentEditorCheckBox"
+                android:text="@string/text_rotation_script_start" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+                    android:id="@+id/rotation_interval"
+                    style="@style/IntelligentEditorCheckBox"
+                    android:layout_width="wrap_content"
+                    android:text="@string/text_rotation_interval" />
+
+                <TextView
+                    android:id="@+id/interval_summary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?selectableItemBackground"
+                    android:gravity="end"
+                    android:paddingStart="8dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="10dp"
+                    android:textColor="@color/day_night_alpha_60"
+                    android:textSize="13sp"
+                    tools:text="@string/text_sample_string" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+                    android:id="@+id/rotation_daily"
+                    style="@style/IntelligentEditorCheckBox"
+                    android:layout_width="wrap_content"
+                    android:text="@string/text_rotation_daily" />
+
+                <TextView
+                    android:id="@+id/daily_summary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="?selectableItemBackground"
+                    android:gravity="end"
+                    android:paddingStart="8dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="10dp"
+                    android:textColor="@color/day_night_alpha_60"
+                    android:textSize="13sp"
+                    tools:text="@string/text_sample_string" />
+
+            </LinearLayout>
+
+            <TextView
+                style="@style/IntelligentEditorSectionHeader"
+                android:text="@string/text_group_order" />
+
+            <LinearLayout
+                android:id="@+id/order_row"
+                style="@style/IntelligentEditorRow">
+
+                <TextView
+                    style="@style/IntelligentEditorRowTitle"
+                    android:text="@string/text_group_order" />
+
+                <TextView
+                    android:id="@+id/order_summary"
+                    style="@style/IntelligentEditorRowSummary"
+                    tools:text="@string/text_order_sequential" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/reference_state_row"
+                style="@style/IntelligentEditorRow">
+
+                <TextView
+                    style="@style/IntelligentEditorRowTitle"
+                    android:text="@string/text_reference_state" />
+
+                <TextView
+                    android:id="@+id/reference_state_summary"
+                    style="@style/IntelligentEditorRowSummary"
+                    tools:text="@string/text_state_day" />
+
+            </LinearLayout>
+
+            <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+                android:id="@+id/order_descending"
+                style="@style/IntelligentEditorCheckBox"
+                android:text="@string/text_sort_descending" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/IntelligentEditorSectionHeader"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/text_groups" />
+
+                <TextView
+                    android:id="@+id/add_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="?selectableItemBackground"
+                    android:fontFamily="sans-serif-medium"
+                    android:paddingStart="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/text_add_group"
+                    android:textColor="@color/day_night_full"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.ThemeColorRecyclerView
+                android:id="@+id/groups_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <TextView
+                android:id="@+id/groups_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="@string/text_no_available_groups"
+                android:textColor="@color/day_night_alpha_60"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/IntelligentEditorSectionHeader"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/text_date_overrides" />
+
+                <TextView
+                    android:id="@+id/add_override"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="?selectableItemBackground"
+                    android:fontFamily="sans-serif-medium"
+                    android:paddingStart="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/text_add_override"
+                    android:textColor="@color/day_night_full"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/overrides_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="4dp"
+                android:text="@string/text_date_overrides_hint"
+                android:textColor="@color/day_night_alpha_60"
+                android:textSize="13sp" />
+
+            <androidx.recyclerview.widget.ThemeColorRecyclerView
+                android:id="@+id/overrides_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <TextView
+                android:id="@+id/hints_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="4dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textColor="@color/dialog_button_warn"
+                android:textSize="13sp"
+                android:visibility="gone"
+                tools:text="@string/text_hint_not_intelligent"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

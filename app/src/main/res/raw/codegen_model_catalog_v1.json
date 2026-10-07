@@ -1,0 +1,10 @@
+{
+  "catalogBase64": "ewogICJjYXRhbG9nVmVyc2lvbiI6IDEsCiAgImdlbmVyYXRlZEF0IjogIjIwMjYtMTAtMDNUMTE6MTI6NTFaIiwKICAibW9kZWxzIjogW10sCiAgInJlbGVhc2VUYWciOiAiY29kZWdlbi1tb2RlbHMtdjEiLAogICJyZXBvc2l0b3J5IjogIlN1cGVyTW9uc3RlcjAwMy9BdXRvSnM2LVNoYXJlZC1Bc3NldHMiLAogICJzY2hlbWFWZXJzaW9uIjogMQp9Cg==",
+  "format": 1,
+  "signature": {
+    "algorithm": "ECDSA_P256_SHA256",
+    "catalog": "catalog-v1.json",
+    "keyId": "p256-f1a540e052cf0865",
+    "signature": "MEUCIQDUbv0iTWaJkeZwoMzPLULfu1iIVdEkDYxUXwoeqHH1YAIgIw+XzPFxdMFBsujFsNcPdu0J0aAMzuf/tKoLJsPTZ5w="
+  }
+}

@@ -32,10 +32,6 @@ import org.autojs.autojs.event.BackPressedHandler
 import org.autojs.autojs.event.BackPressedHandler.DoublePressExit
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.model.explorer.Explorers
-import org.autojs.autojs.permission.AbleToUrge
-import org.autojs.autojs.permission.AllFilesAccessPermission
-import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
-import org.autojs.autojs.permission.PostNotificationsPermission
 import org.autojs.autojs.runtime.api.Permissions
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.theme.ThemeColorManager
@@ -50,13 +46,13 @@ import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.OnDrawerClosed
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.OnDrawerOpened
-import org.autojs.autojs.core.plugin.center.wizard.PluginInstallWizardDialog
 import org.autojs.autojs.ui.main.plugin.PluginFragment
 import org.autojs.autojs.ui.main.scripts.ExplorerFragment
 import org.autojs.autojs.ui.main.task.TaskManagerFragment
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
+import org.autojs.autojs.ui.wizard.SetupWizards
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.StringUtils.key
@@ -196,16 +192,10 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
         FloatyWindowManger.refreshCircularMenuIfNeeded(this)
 
-        listOf<AbleToUrge>(
-            PostNotificationsPermission(this),
-            AllFilesAccessPermission(this),
-            DisplayOverOtherAppsPermission(this),
-        ).forEach { it.urgeIfNeeded() }
-
-        // Shown once after a fresh install; the user may skip it and reopen it
-        // later from the Plugins tab fab or the Plugin Center.
-        // zh-CN: 全新安装后仅展示一次; 用户可跳过, 之后可从插件标签页 fab 或插件中心重新打开.
-        PluginInstallWizardDialog.showOnFirstRunIfNeeded(this)
+        // No permission is requested on startup: a welcome snackbar offers the setup wizards
+        // until the user answers it, later launches only remind of missing permissions.
+        // zh-CN: 启动时不主动申请权限: 欢迎 Snackbar 在用户作出选择前提供设置向导, 之后的启动仅提醒缺少的权限.
+        SetupWizards.onHomeCreated(this, savedInstanceState)
         org.autojs.autojs.ui.settings.ThreeStoveAgentGuide(this)
         org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver.handleForegroundRequest(this, intent)
     }

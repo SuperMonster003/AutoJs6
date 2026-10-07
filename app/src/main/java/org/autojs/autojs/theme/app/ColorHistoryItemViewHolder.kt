@@ -6,6 +6,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.util.TimeUtils
+import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MtColorHistoryRecyclerViewItemBinding
 
 class ColorHistoryItemViewHolder(itemViewBinding: MtColorHistoryRecyclerViewItemBinding) : RecyclerView.ViewHolder(itemViewBinding.root) {
@@ -30,8 +31,11 @@ class ColorHistoryItemViewHolder(itemViewBinding: MtColorHistoryRecyclerViewItem
             titleSplitLineView.isVisible = !it.isNullOrBlank()
         }
         lastUsedTimeView.text = historyItem.lastUsedTimeString
-        colorLibraryIdentifierView.text = colorLibraryIdentifier.also {
-            subtitleSplitLineView.isVisible = !it.isNullOrBlank()
+        val merged = historyItem.mergedCount.takeIf { it > 0 }?.let {
+            itemView.resources.getQuantityString(R.plurals.text_n_similar_colors_merged, it, it)
+        }
+        colorLibraryIdentifierView.text = listOfNotNull(colorLibraryIdentifier?.takeIf { it.isNotBlank() }, merged).joinToString(" ").also {
+            subtitleSplitLineView.isVisible = it.isNotBlank()
         }
     }
 
@@ -42,6 +46,13 @@ class ColorHistoryItemViewHolder(itemViewBinding: MtColorHistoryRecyclerViewItem
             val colorInt: Int,
             val colorName: String? = null,
             val colorLibraryIdentifier: String? = null,
+            /** The stored selection ids, when the entry comes from `color_history`. zh-CN: 条目来自 `color_history` 时保存的选中 id. */
+            val libraryId: Int? = null,
+            val itemId: Int? = null,
+            /** Uses recorded for this entry (roadmap P5.2). zh-CN: 该条目记录的使用次数 (Roadmap P5.2). */
+            val useCount: Int = 1,
+            /** Similar entries merged into this one by "merge similar colors" (roadmap P5.3). zh-CN: "合并相似颜色" 并入此条目的相似条目数 (Roadmap P5.3). */
+            val mergedCount: Int = 0,
         ) {
             val lastUsedTimeString = TimeUtils.formatTimestamp(lastUsedTime)
         }

@@ -83,6 +83,12 @@
             app:summary="@string/summary_text_launcher_shortcuts"
             app:longClickPrompt="@string/description_launcher_shortcuts" />
 
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_setup_wizards"
+            app:title="@string/text_setup_wizards"
+            app:summary="@string/summary_setup_wizards" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
@@ -364,12 +370,6 @@
             app:positiveText="@string/dialog_button_dismiss"
             app:positiveColor="@color/dialog_button_default"
             app:longClickPrompt="@string/description_about_app_tips_preference" />
-
-        <org.autojs.autojs.theme.preference.MaterialPreference
-            app:layout="@layout/preference_custom"
-            app:key="process_exit_history"
-            app:title="@string/text_process_exit_history"
-            app:summary="@string/summary_process_exit_history" />
 
         <org.autojs.autojs.ui.settings.AboutAppAndDeveloperPreference
             app:layout="@layout/preference_custom"

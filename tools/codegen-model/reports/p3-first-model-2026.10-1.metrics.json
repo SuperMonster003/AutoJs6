@@ -1,0 +1,335 @@
+{
+  "format": 1,
+  "metricDefinition": "observed-survival-v1",
+  "breakdowns": {
+    "test": {
+      "family": {
+        "SELF": {
+          "groups": 96,
+          "totalGroups": 96,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.921875,
+          "ruleTop1Survival": 0.5885416666666666,
+          "regret": 0.026041666666666668,
+          "perfectRate": 0.84375,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.9479166666666666
+        },
+        "SELF_INDEX": {
+          "groups": 240,
+          "totalGroups": 240,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.8583333333333333,
+          "ruleTop1Survival": 0.225,
+          "regret": 0.058333333333333334,
+          "perfectRate": 0.7166666666666667,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.8833333333333333
+        }
+      },
+      "screenFamily": {
+        "list": {
+          "groups": 336,
+          "totalGroups": 336,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.8764880952380952,
+          "ruleTop1Survival": 0.3288690476190476,
+          "regret": 0.049107142857142856,
+          "perfectRate": 0.7529761904761905,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.9017857142857143
+        }
+      },
+      "source": {
+        "fixture": {
+          "groups": 336,
+          "totalGroups": 336,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.8764880952380952,
+          "ruleTop1Survival": 0.3288690476190476,
+          "regret": 0.049107142857142856,
+          "perfectRate": 0.7529761904761905,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.9017857142857143
+        }
+      },
+      "mutation": {
+        "delete": {
+          "groups": 112,
+          "totalGroups": 112,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.8883928571428571,
+          "ruleTop1Survival": 0.16964285714285715,
+          "regret": 0.11160714285714286,
+          "perfectRate": 0.7767857142857143,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.7767857142857143
+        },
+        "insert": {
+          "groups": 105,
+          "totalGroups": 105,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 1.0,
+          "ruleTop1Survival": 0.38571428571428573,
+          "regret": 0.0,
+          "perfectRate": 1.0,
+          "worseThanRule": 0.0,
+          "top3Recall": 1.0
+        },
+        "locale": {
+          "groups": 112,
+          "totalGroups": 112,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.8571428571428571,
+          "ruleTop1Survival": 0.44642857142857145,
+          "regret": 0.03125,
+          "perfectRate": 0.7142857142857143,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.9375
+        },
+        "rename-ids": {
+          "groups": 112,
+          "totalGroups": 112,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.8883928571428571,
+          "ruleTop1Survival": 0.3482142857142857,
+          "regret": 0.11160714285714286,
+          "perfectRate": 0.7767857142857143,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.7767857142857143
+        },
+        "retext": {
+          "groups": 112,
+          "totalGroups": 112,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.8839285714285714,
+          "ruleTop1Survival": 0.41517857142857145,
+          "regret": 0.004464285714285714,
+          "perfectRate": 0.7678571428571429,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.9910714285714286
+        },
+        "shuffle": {
+          "groups": 112,
+          "totalGroups": 112,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.6294642857142857,
+          "ruleTop1Survival": 0.29464285714285715,
+          "regret": 0.14732142857142858,
+          "perfectRate": 0.25892857142857145,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.7053571428571429
+        },
+        "sibling": {
+          "groups": 112,
+          "totalGroups": 112,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 1.0,
+          "ruleTop1Survival": 0.32142857142857145,
+          "regret": 0.0,
+          "perfectRate": 1.0,
+          "worseThanRule": 0.0,
+          "top3Recall": 1.0
+        },
+        "strip-ids": {
+          "groups": 112,
+          "totalGroups": 112,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.8839285714285714,
+          "ruleTop1Survival": 0.14285714285714285,
+          "regret": 0.004464285714285714,
+          "perfectRate": 0.7678571428571429,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.9910714285714286
+        },
+        "wrap": {
+          "groups": 119,
+          "totalGroups": 119,
+          "groupsWithoutCandidates": 0,
+          "coverage": 1.0,
+          "top1Survival": 0.865546218487395,
+          "ruleTop1Survival": 0.4327731092436975,
+          "regret": 0.029411764705882353,
+          "perfectRate": 0.7310924369747899,
+          "worseThanRule": 0.0,
+          "top3Recall": 0.9411764705882353
+        }
+      }
+    },
+    "realTest": {
+      "family": {},
+      "screenFamily": {},
+      "source": {},
+      "mutation": {}
+    }
+  },
+  "test": {
+    "groups": 336,
+    "totalGroups": 336,
+    "groupsWithoutCandidates": 0,
+    "coverage": 1.0,
+    "top1Survival": 0.8764880952380952,
+    "ruleTop1Survival": 0.3288690476190476,
+    "regret": 0.049107142857142856,
+    "perfectRate": 0.7529761904761905,
+    "worseThanRule": 0.0,
+    "top3Recall": 0.9017857142857143
+  },
+  "realTest": {
+    "groups": 0,
+    "totalGroups": 0,
+    "groupsWithoutCandidates": 0,
+    "coverage": null,
+    "top1Survival": null,
+    "ruleTop1Survival": null,
+    "regret": null,
+    "perfectRate": null,
+    "worseThanRule": null,
+    "top3Recall": null
+  },
+  "failureGroups": 0,
+  "notes": [
+    "groups counts scorable groups; totalGroups/coverage include groups with no valid candidates.",
+    "Empty sets have null metrics, not a success score.",
+    "Family breakdown uses the model's selected plan family; baseline is the original group's rule selection.",
+    "A group appears in each of its evaluation-state mutation buckets; mutation buckets may overlap.",
+    "Scores within 1e-6 of a descending batch maximum share a batch, ordered by rule rank."
+  ],
+  "datasetId": "cg-ds-2026.10-1",
+  "modelSha256": "f680a77ab1da984343bc904cd2ac6aca5269e7a44ce7308d692f5532a0e0484c",
+  "featureSchemaVersion": 1,
+  "featureNamesHash": "9c6a5d8279ffca0e",
+  "datasetHashes": {
+    "manifest": "8617555fde5a4d002cc1e95de1f893c27d4c65498ca6fcd5f12d729a602bc812",
+    "features": "6befb941a13dfffad95fb9bf91a0df67dbd3e98491fcbe12b7a9583874ba3c40",
+    "labels": "17d3798e3a680e0de4c26d5ddf1e85ee7bea00c0555761a86ab381f999bb0ad0",
+    "rules": "54570d23a1bc663332949c4ff6fb0638506381284f1eff3ca47beb8f606ec94f",
+    "splitMap": "247c2c01d2531a264c72af624a43f2be83c6d0dec7227177fef60e8b0c05a5f8",
+    "featureSchema": "1929247897a038e16aa1ac03bac49557826c6d60d0dbc7e037e799f1f68bf6eb",
+    "export": "b52779df525c7e2e350185de8f7f9249810c1f202901a68d027f3992d4c1a71b",
+    "schema": "1929247897a038e16aa1ac03bac49557826c6d60d0dbc7e037e799f1f68bf6eb"
+  },
+  "publicationScope": "aggregate controlled-fixture evaluation; realTest has zero groups",
+  "trainingSummary": {
+    "featureSchemaVersion": 1,
+    "namesHash": "9c6a5d8279ffca0e",
+    "parameters": {
+      "iterations": 1024,
+      "depth": 6,
+      "learning_rate": 0.05,
+      "loss_function": "YetiRank",
+      "eval_metric": "NDCG:top=1",
+      "grow_policy": "SymmetricTree",
+      "boosting_type": "Plain",
+      "random_seed": 20261003,
+      "thread_count": 1,
+      "task_type": "CPU",
+      "use_best_model": true,
+      "od_type": "Iter",
+      "od_wait": 64,
+      "allow_writing_files": false,
+      "logging_level": "Silent"
+    },
+    "treeCount": 6,
+    "maximumTreeDepth": 6,
+    "bestIteration": 5,
+    "versions": {
+      "python": "3.12.5",
+      "catboost": "1.2.10",
+      "numpy": "2.2.6"
+    },
+    "machine": {
+      "system": "Windows",
+      "release": "11",
+      "machine": "AMD64",
+      "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+      "logicalCpuCount": 12
+    },
+    "elapsedSeconds": 14.284951,
+    "generatorCommit": "5a3f74d9a33df3037c55e196979ea4fdde8da76b",
+    "exportGeneratorCommit": "166910c968fe3f95e00a6a49cff4ce617d8feb72",
+    "cpuModel": "12th Gen Intel Core i5-12400 (6 cores / 12 logical processors)"
+  },
+  "reproducibility": {
+    "format": 1,
+    "canonicalJsonByteIdentical": true,
+    "numericModelSectionsIdentical": true,
+    "rawJsonDifferencePaths": [
+      ".model_info.model_guid",
+      ".model_info.train_finish_time"
+    ],
+    "modelJsonSha256": "cf70fe937ff4f087af7eb063ab3dbbbd691cb9e9b0c0bcc7befaa0da2a2df045",
+    "runs": [
+      {
+        "treeCount": 6,
+        "maximumTreeDepth": 6,
+        "bestIteration": 5,
+        "elapsedSeconds": 14.284951,
+        "versions": {
+          "python": "3.12.5",
+          "catboost": "1.2.10",
+          "numpy": "2.2.6"
+        },
+        "machine": {
+          "system": "Windows",
+          "release": "11",
+          "machine": "AMD64",
+          "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+          "logicalCpuCount": 12
+        }
+      },
+      {
+        "treeCount": 6,
+        "maximumTreeDepth": 6,
+        "bestIteration": 5,
+        "elapsedSeconds": 15.420205,
+        "versions": {
+          "python": "3.12.5",
+          "catboost": "1.2.10",
+          "numpy": "2.2.6"
+        },
+        "machine": {
+          "system": "Windows",
+          "release": "11",
+          "machine": "AMD64",
+          "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+          "logicalCpuCount": 12
+        }
+      }
+    ]
+  },
+  "desktopFormatParity": {
+    "format": 1,
+    "modelFormats": [
+      "cbm",
+      "json"
+    ],
+    "candidates": 12960,
+    "groups": 336,
+    "maxScoreDifference": 1.1102230246251565e-16,
+    "sameTopChoice": true,
+    "scope": "CatBoost desktop formats only; Android package parity remains P4.4"
+  },
+  "syntheticQueueSmoke": {
+    "inputGroups": 40,
+    "eligibleDisagreements": 5,
+    "queued": 5,
+    "skipped": {
+      "sameSelection": 11,
+      "scoreGapTooLarge": 24
+    },
+    "note": "Controlled fixture snapshots copied into private synthetic one-state tasks; not real app observations and not used for fitting or evaluation"
+  }
+}

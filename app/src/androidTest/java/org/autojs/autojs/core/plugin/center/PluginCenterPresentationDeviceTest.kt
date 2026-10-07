@@ -22,6 +22,63 @@ import org.junit.Test
 
 class PluginCenterPresentationDeviceTest {
 
+    @Test fun circularBackgroundIsSeparateFromArtworkAndResetsWhenRecycled() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val originalNight = ViewUtils.isNightModeEnabled
+        val originalAutoNight = ViewUtils.isAutoNightModeEnabled
+        try {
+            instrumentation.runOnMainSync {
+                ViewUtils.isAutoNightModeEnabled = false
+                val themed = ContextThemeWrapper(context, context.applicationInfo.theme)
+                val adapter = PluginCenterItemAdapter(object : PluginCenterItemAdapter.Listener {
+                    override fun onInstall(item: PluginCenterItem) = Unit
+                    override fun onToggleEnable(item: PluginCenterItem, enabled: Boolean) = Unit
+                    override fun onUninstall(item: PluginCenterItem) = Unit
+                    override fun onDetails(item: PluginCenterItem) = Unit
+                    override fun onUpdate(item: PluginCenterItem) = Unit
+                    override fun onSettings(item: PluginCenterItem) = Unit
+                })
+                val holder = adapter.onCreateViewHolder(FrameLayout(themed), 0)
+                val glyph = Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888).apply {
+                    android.graphics.Canvas(this).drawRect(24f, 24f, 40f, 40f, android.graphics.Paint().apply { color = Color.BLACK })
+                }
+                val art = BitmapDrawable(context.resources, glyph)
+                val item = PluginCenterItem(title = "Background fixture", packageName = "example.plugin", versionName = "1",
+                    isInstalled = false, icon = art, iconBackgroundColor = "#e4b2ff", nightIconBackgroundColor = "transparent")
+                val icon = holder.itemView.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.icon)
+                fun draw(): Bitmap {
+                    icon.layout(0, 0, 64, 64)
+                    return Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888).also { icon.draw(android.graphics.Canvas(it)) }
+                }
+                try {
+                    for (night in listOf(false, true, false)) {
+                        ViewUtils.isNightModeEnabled = night
+                        holder.bind(item)
+                        val before = draw()
+                        assertEquals(if (night) Color.TRANSPARENT else Color.rgb(228, 178, 255), before.getPixel(8, 32))
+                        assertEquals(Color.TRANSPARENT, before.getPixel(0, 0))
+                        assertEquals(Color.BLACK, before.getPixel(32, 32))
+                        holder.bind(item.copy(isInstalled = true))
+                        val after = draw()
+                        assertTrue("Installation must not change circular artwork", before.sameAs(after))
+                        before.recycle(); after.recycle()
+                    }
+                    holder.bind(item.copy(packageName = "another.plugin", iconBackgroundColor = null, nightIconBackgroundColor = null))
+                    assertEquals(Color.TRANSPARENT, icon.circleBackgroundColor)
+                    holder.bind(item.copy(packageName = "io.github.supermonster003.autojs6.plugin.three.maple.image"))
+                    assertEquals(Color.rgb(250, 250, 250), icon.circleBackgroundColor)
+                    assertEquals(Color.TRANSPARENT, glyph.getPixel(8, 32))
+                } finally { holder.recycle(); glyph.recycle() }
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                Pref.putBooleanSync(R.string.key_night_mode_enabled, originalNight)
+                Pref.putBooleanSync(R.string.key_auto_night_mode_enabled, originalAutoNight)
+            }
+        }
+    }
+
     @Test
     fun retainedDayIconsUseNightArtworkOnTheFirstBind() {
         assertRetainedIconFollowsTheme(initialNight = false)

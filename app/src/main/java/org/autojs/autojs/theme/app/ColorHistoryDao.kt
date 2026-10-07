@@ -18,10 +18,16 @@ interface ColorHistoryDao {
     @Update
     suspend fun update(history: ColorHistory)
 
+    /**
+     * Records one use: a new row, or one more use of the existing row with the latest time and source (roadmap
+     * P5.2). Only user and script choices are recorded; the intelligent engine never writes history (D10).
+     * zh-CN: 记录一次使用: 新增一行, 或为已有行加一次使用并更新为最近的时间与来源 (Roadmap P5.2).
+     * 只记录用户与脚本的选择; 智能引擎从不写入历史 (D10).
+     */
     @Transaction
     suspend fun upsert(history: ColorHistory): Long {
         val existing = getByHistory(history) ?: return insert(history)
-        val updated = existing.copy().also {
+        val updated = existing.copy(useCount = existing.useCount + 1, source = history.source, sourceDetail = history.sourceDetail).also {
             it.setLastUsedTimeCurrent()
             update(it)
         }
@@ -55,5 +61,8 @@ interface ColorHistoryDao {
 
     @Query("DELETE FROM color_history WHERE library_id = :libraryId")
     suspend fun deleteAllByLibraryId(libraryId: Long)
+
+    @Query("DELETE FROM color_history WHERE library_id = :libraryId AND item_id IN (:itemIds)")
+    suspend fun deleteByLibraryIdAndItemIds(libraryId: Long, itemIds: List<Long>)
 
 }

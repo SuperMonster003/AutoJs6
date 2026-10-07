@@ -77,6 +77,10 @@ class PluginCenterItemViewHolder(
 
     fun bind(item: PluginCenterItem) {
         currentItem = item
+        iconView.circleBackgroundColor = PluginIconBackgroundPolicy.resolve(
+            item.packageName, ViewUtils.isNightModeEnabled, item.iconBackgroundColor,
+            item.nightIconBackgroundColor, item.icon?.let(PluginInstalledIconResolver::backgroundForCurrentMode),
+        )
         itemView.findViewById<android.widget.TextView>(R.id.native_alignment_badge).isVisible =
             PluginNativeAlignmentPolicy.needsWarning(item.nativePageAlignment, org.autojs.autojs.core.plugin.nativealign.NativePageSize.current())
         val previousPackageName = lastBoundPackageName

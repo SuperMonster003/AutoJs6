@@ -49,6 +49,8 @@ class PluginCenterItemSemanticsTest {
             "remoteIconUrl" to base.copy(remoteIconUrl = "https://example.com/icon.png"),
             "remoteNightIconUrl" to base.copy(remoteNightIconUrl = "https://example.com/icon-night.png"),
             "forceIgnoreLocalIcon" to base.copy(forceIgnoreLocalIcon = true),
+            "iconBackgroundColor" to base.copy(iconBackgroundColor = "#336699"),
+            "nightIconBackgroundColor" to base.copy(nightIconBackgroundColor = "transparent"),
             "iconSignature" to base.copy(iconSignature = "icon-signature"),
             "isEnabled" to base.copy(isEnabled = false),
             "isInstalled" to base.copy(isInstalled = true),

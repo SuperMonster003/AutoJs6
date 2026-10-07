@@ -2,10 +2,12 @@ package org.autojs.autojs.core.image
 
 import androidx.annotation.ColorInt
 import kotlin.math.abs
+import kotlin.math.cbrt
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
+import org.autojs.autojs.theme.color.OkColor
 
 /**
  * Created by Stardust on May 20, 2017.
@@ -151,6 +153,38 @@ interface ColorDetector {
         }
     }
 
+    /**
+     * Perceptual distance in OKLab (roadmap P6.1, D18): the Euclidean dE_ok, scaled so that black to white is 255.
+     * Allocation free, with a lookup table for the sRGB transfer function, since it runs per pixel when finding colors.
+     *
+     * zh-CN: OKLab 中的感知距离 (Roadmap P6.1, D18): 欧氏距离 dE_ok, 缩放使黑与白的距离为 255.
+     * 由于找色时逐像素调用, 实现不分配内存, 并以查找表计算 sRGB 传递函数.
+     */
+    class OkLabDistanceDetector(color: Int, threshold: Int) : ThresholdColorDetector(color, threshold) {
+
+        private val reference = OkColor.toOkLab(0xFF shl 24 or (colorR shl 16) or (colorG shl 8) or colorB)
+
+        // Same matrices as OkColor.toOkLab, kept in locals so that one detector may serve several threads.
+        // zh-CN: 与 OkColor.toOkLab 相同的矩阵, 只使用局部变量, 使一个检测器可供多个线程使用.
+        override fun distance(r: Int, g: Int, b: Int): Double {
+            val lr = LINEAR[r and 0xFF]
+            val lg = LINEAR[g and 0xFF]
+            val lb = LINEAR[b and 0xFF]
+            val l = cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb)
+            val m = cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb)
+            val s = cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb)
+            val dL = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s - reference.l
+            val dA = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s - reference.a
+            val dB = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s - reference.b
+            return sqrt(dL * dL + dA * dA + dB * dB) * 255
+        }
+
+        companion object {
+            private val LINEAR = DoubleArray(256) { OkColor.srgbToLinear(it / 255.0) }
+        }
+
+    }
+
     companion object {
 
         /**
@@ -182,7 +216,8 @@ interface ColorDetector {
                 "hs" -> HSDistanceDetector(color, threshold)
                 "h" -> HDistanceDetector(color, threshold)
                 "equal" -> EqualityDetector(color)
-                else -> throw IllegalArgumentException("Unknown color detection algorithm \"$name\", expected one of: diff, rgb, rgb+, hs, h, equal")
+                "oklab" -> OkLabDistanceDetector(color, threshold)
+                else -> throw IllegalArgumentException("Unknown color detection algorithm \"$name\", expected one of: diff, rgb, rgb+, hs, h, equal, oklab")
             }
         }
     }

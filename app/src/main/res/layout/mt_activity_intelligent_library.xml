@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <io.codetail.widget.RevealFrameLayout
+        android:id="@+id/appBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            app:theme="@style/MtAppTheme.AppBarOverlay">
+
+            <org.autojs.autojs.ui.widget.AdaptiveTitleToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:contentInsetStartWithNavigation="@dimen/toolbar_content_inset_start_with_navigation"
+                android:theme="@style/ToolBarStyle"
+                app:popupTheme="@style/MtAppTheme.PopupOverlay"
+                tools:title="@string/text_sample_string" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+    </io.codetail.widget.RevealFrameLayout>
+
+    <TextView
+        android:id="@+id/info_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:lineSpacingExtra="2dp"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp"
+        android:textColor="@color/day_night_alpha_60"
+        android:textIsSelectable="true"
+        android:textSize="13sp"
+        tools:text="@string/text_sample_string" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/day_night_alpha_20" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.ThemeColorRecyclerView
+            android:id="@+id/groups_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadeScrollbars="true"
+            android:scrollbarDefaultDelayBeforeFade="600"
+            android:scrollbarFadeDuration="500"
+            android:scrollbars="vertical" />
+
+        <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="32dp"
+            android:text="@string/text_no_available_groups"
+            android:textColor="@color/day_night_alpha_60"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </FrameLayout>
+
+</LinearLayout>

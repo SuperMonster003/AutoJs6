@@ -918,6 +918,27 @@
             android:theme="@style/MtAppTheme.FullScreen" />
 
         <activity
+            android:name="org.autojs.autojs.theme.app.UserColorLibraryActivity"
+            android:theme="@style/MtAppTheme.FullScreen" />
+
+        <activity
+            android:name="org.autojs.autojs.theme.app.VirtualColorLibraryActivity"
+            android:theme="@style/MtAppTheme.FullScreen" />
+
+        <activity
+            android:name="org.autojs.autojs.theme.app.IntelligentLibrariesActivity"
+            android:theme="@style/MtAppTheme.FullScreen" />
+
+        <activity
+            android:name="org.autojs.autojs.theme.app.IntelligentLibraryActivity"
+            android:theme="@style/MtAppTheme.FullScreen" />
+
+        <activity
+            android:name="org.autojs.autojs.theme.app.IntelligentLibraryEditorActivity"
+            android:theme="@style/MtAppTheme.FullScreen"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name="org.autojs.autojs.core.plugin.center.PluginCenterActivity"
             android:theme="@style/AppTheme.Settings" />
 

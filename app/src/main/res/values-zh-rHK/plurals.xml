@@ -16,12 +16,68 @@
         <item quantity="other">已停止運行 %d 個腳本</item>
     </plurals>
 
+    <plurals name="text_every_n_hours">
+        <item quantity="other">每 %d 小時</item>
+    </plurals>
+
+    <plurals name="text_every_n_minutes">
+        <item quantity="other">每 %d 分鐘</item>
+    </plurals>
+
+    <plurals name="text_every_n_seconds">
+        <item quantity="other">每 %d 秒</item>
+    </plurals>
+
     <plurals name="text_items_total_sum">
         <item quantity="other">共計 %d 項</item>
     </plurals>
 
     <plurals name="text_items_total_sum_with_colon">
         <item quantity="other">共計: %d 項</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_exported">
+        <item quantity="other">已導出 %d 個顏色庫</item>
+    </plurals>
+
+    <plurals name="text_n_color_libraries_imported">
+        <item quantity="other">已導入 %d 個顏色庫</item>
+    </plurals>
+
+    <plurals name="text_n_colors">
+        <item quantity="other">%d 色</item>
+    </plurals>
+
+    <plurals name="text_n_colors_added">
+        <item quantity="other">已加入 %d 個顏色</item>
+    </plurals>
+
+    <plurals name="text_n_groups">
+        <item quantity="other">%d 組</item>
+    </plurals>
+
+    <plurals name="text_n_invalid_values_skipped">
+        <item quantity="other">%d 個無效值將被略過</item>
+    </plurals>
+
+    <plurals name="text_n_overrides">
+        <item quantity="other">覆蓋 %d</item>
+    </plurals>
+
+    <plurals name="text_n_similar_colors_merged">
+        <item quantity="other">+%d 相似</item>
+    </plurals>
+
+    <plurals name="text_n_times_a_day">
+        <item quantity="other">每天 %d 次</item>
+    </plurals>
+
+    <plurals name="text_n_unknown_libraries_skipped">
+        <item quantity="other">%d 個未知類型的顏色庫將被略過</item>
+    </plurals>
+
+    <plurals name="text_used_n_times">
+        <item quantity="other">使用 %d 次</item>
     </plurals>
 
 </resources>

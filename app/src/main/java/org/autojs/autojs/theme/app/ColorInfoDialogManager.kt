@@ -21,6 +21,8 @@ object ColorInfoDialogManager {
         @ColorInt color: Int?,
         title: String? = null,
         customNeutral: CustomColorInfoDialogNeutral? = null,
+        /** An extra action on the negative button, such as the color tools (roadmap P4.3). zh-CN: 放在否定按钮上的额外操作, 例如配色工具 (Roadmap P4.3). */
+        customNegative: CustomColorInfoDialogNeutral? = null,
     ): InfoDialog? {
         if (color == null) {
             MaterialDialog.Builder(context)
@@ -49,6 +51,15 @@ object ColorInfoDialogManager {
                 neutral.colorRes?.let(::neutralColorRes)
                 neutral.onNeutralCallback?.let {
                     onNeutral { dialog, which ->
+                        it.onClick(dialog, which, colorWithoutAlpha)
+                    }
+                }
+            }
+            customNegative?.let { negative ->
+                negative.textRes?.let(::negativeText)
+                negative.colorRes?.let(::negativeColorRes)
+                negative.onNeutralCallback?.let {
+                    onNegative { dialog, which ->
                         it.onClick(dialog, which, colorWithoutAlpha)
                     }
                 }

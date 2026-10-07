@@ -94,6 +94,17 @@ class InfoDialogItems(context: Context) : LinearLayout(context) {
         return Entry(id, view).also { insert(it, index) }
     }
 
+    /** A caller-built view, such as a row of options, spaced like the other entries. */
+    @JvmOverloads
+    fun addCustom(view: View, index: Int = size, id: String? = null): Entry {
+        require(index in 0..size) { "Invalid information entry index: $index" }
+        require(id == null || entries.none { it.id == id }) { "Duplicate information entry id: $id" }
+        if (view.layoutParams !is LayoutParams) {
+            view.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        }
+        return Entry(id, view).also { insert(it, index) }
+    }
+
     fun remove(entry: Entry) {
         entries.removeAt(indexOf(entry))
         removeView(entry.view)

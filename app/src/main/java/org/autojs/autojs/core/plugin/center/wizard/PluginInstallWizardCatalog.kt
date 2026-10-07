@@ -76,12 +76,12 @@ object PluginInstallWizardCatalog {
 
         // File manager.
         entry(official("apkinspector"), "APK Inspector", FILE_MANAGER, standard = true),
-        entry(official("archivemanager"), "Archive Manager", FILE_MANAGER, standard = true),
+        entry(official("three.stack.archive"), "Three Stack Archive", FILE_MANAGER, standard = true),
         entry(official("fileinspector"), "File Inspector", FILE_MANAGER),
         entry(official("htmlpreviewer"), "HTML Previewer", FILE_MANAGER, standard = true),
         entry(official("markdownpreviewer"), "Markdown Previewer", FILE_MANAGER, standard = true),
         entry(official("mediainfo"), "MediaInfo", FILE_MANAGER, standard = true),
-        entry(official("readium.epub.reader"), "Readium EPUB Reader", FILE_MANAGER),
+        entry(official("three.folio.epub"), "Three Folio EPUB", FILE_MANAGER),
 
         // Script runtimes.
         entry(official("bun.runtime"), "Bun Runtime", RUNTIME),
@@ -95,8 +95,7 @@ object PluginInstallWizardCatalog {
 
         // Images.
         entry(official("imagequant"), "Image Quantization", IMAGE),
-        entry(official("imagetools"), "Image Tools", IMAGE),
-        entry(official("imageviewer"), "Image Viewer", IMAGE, standard = true),
+        entry(official("three.maple.image"), "Three Maple Image", IMAGE, standard = true),
         entry(official("mlkit.barcode"), "MLKit Barcode", IMAGE),
         entry(official("mlkitocr"), "MLKit OCR", IMAGE, standard = true),
         entry(official("opencv"), "OpenCV", IMAGE, standard = true),
@@ -113,7 +112,7 @@ object PluginInstallWizardCatalog {
         entry(official("r8compiler"), "R8 Compiler", COMPILER),
 
         // Text conversion.
-        entry(official("opencc"), "OpenCC", TEXT_CONVERSION),
+        entry(official("three.hanzi.cc"), "Three Hanzi CC", TEXT_CONVERSION),
         entry(official("pinyin"), "Pinyin", TEXT_CONVERSION),
         entry(official("pinyin4j"), "Pinyin4j", TEXT_CONVERSION),
 

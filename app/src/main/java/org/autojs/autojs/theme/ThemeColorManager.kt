@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.Paint
 import android.view.View
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.theme.color.ThemeColorDerivation
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
 import java.lang.ref.WeakReference
@@ -29,6 +31,30 @@ object ThemeColorManager {
     @JvmStatic
     val colorPrimary: Int
         get() = currentThemeColor.colorPrimary
+
+    private const val KEY_DERIVED_COLORS = "THEME_COLOR_DERIVED_ACCENT_AND_DARK"
+
+    /**
+     * Whether the accent and dark colors are derived from the primary color (D2, roadmap P4.6). Off (the default) keeps
+     * them equal to the primary color, exactly as before.
+     * zh-CN: 强调色与深色是否由主色派生 (D2, Roadmap P4.6). 关闭 (默认) 时二者与主色相同, 与此前完全一致.
+     */
+    @JvmStatic
+    var isDerivationEnabled: Boolean
+        get() = Pref.getBoolean(KEY_DERIVED_COLORS, false)
+        set(value) = Pref.putBoolean(KEY_DERIVED_COLORS, value)
+
+    /**
+     * The theme color for [primary]: explicit [accent] / [dark] win; otherwise they are derived when
+     * [isDerivationEnabled], or equal to [primary].
+     * zh-CN: [primary] 对应的主题色: 显式给出的 [accent] / [dark] 优先; 否则在 [isDerivationEnabled] 时派生, 或与 [primary] 相同.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun resolve(primary: Int, accent: Int? = null, dark: Int? = null): ThemeColor {
+        val (resolvedAccent, resolvedDark) = ThemeColorDerivation.accentAndDark(primary, accent, dark, isDerivationEnabled)
+        return ThemeColor(primary, resolvedDark, resolvedAccent)
+    }
 
     fun init() {
         ThemeColor.fromPreferences()?.let { currentThemeColor = it } ?: setThemeColor(defaultThemeColor)
@@ -60,13 +86,15 @@ object ThemeColorManager {
         saveThemeColorIfNeeded()
         val color = themeColor.colorPrimary
         BackgroundColorManager.setColor(color)
-        StatusBarManager.setColor(color)
+        // The status bar takes the dark color, which equals the primary color unless derived (D2).
+        // zh-CN: 状态栏使用深色; 未启用派生时深色与主色相同 (D2).
+        StatusBarManager.setColor(themeColor.colorPrimaryDark)
         PaintManager.setColor(color)
         ThemeColorMutableManager.setColor(themeColor)
         ThemeColorWidgetReferenceManager.setColor(themeColor)
     }
 
-    fun setThemeColor(color: Int) = setThemeColor(ThemeColor(color))
+    fun setThemeColor(color: Int) = setThemeColor(resolve(color))
 
     private fun saveThemeColorIfNeeded() {
         currentThemeColor.saveIn()
@@ -96,12 +124,21 @@ object ThemeColorManager {
 
     @JvmStatic
     fun setStatusBarBackgroundColor(activity: Activity) {
-        ViewUtils.setStatusBarBackgroundColor(activity, colorPrimary)
+        ViewUtils.setStatusBarBackgroundColor(activity, currentThemeColor.colorPrimaryDark)
     }
 
     @JvmStatic
     fun setStatusBarIconLight(activity: Activity) {
         ViewUtils.setStatusBarIconLight(activity, isLuminanceDark())
+    }
+
+    /**
+     * For pages whose status bar is colored by [setStatusBarBackgroundColor], i.e. with the dark color (D2).
+     * zh-CN: 用于状态栏由 [setStatusBarBackgroundColor] 着色 (即使用深色) 的页面 (D2).
+     */
+    @JvmStatic
+    fun setStatusBarIconLightByDarkColor(activity: Activity) {
+        ViewUtils.setStatusBarIconLight(activity, ViewUtils.isLuminanceDark(currentThemeColor.colorPrimaryDark))
     }
 
     private object BackgroundColorManager {

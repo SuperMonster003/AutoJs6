@@ -1099,7 +1099,7 @@ object FileUtils {
         /** Portable Document Format, widely used for documents that can be read across various systems. */
         PDF("pdf", TypeDataHolder.DOCUMENT),
 
-        /** Electronic Publication, the e-book container opened by the Readium EPUB Reader plugin (binary, not text-editable). */
+        /** Electronic Publication, the e-book container opened by the 3-Folio EPUB plugin (binary, not text-editable). */
         EPUB("epub", TypeDataHolder.EPUB_READER),
 
         /** StarOffice Calc Spreadsheet, used before OpenOffice.org adoption. */
