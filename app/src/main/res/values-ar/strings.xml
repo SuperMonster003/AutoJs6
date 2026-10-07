@@ -793,6 +793,7 @@
     <string name="text_add_to_color_library">إضافة إلى مكتبة ألوان</string>
     <string name="text_and_n_more">... و %d اخرى</string>
     <string name="text_apply_as_theme_color">تطبيق كلون للموضوع</string>
+    <string name="text_auto_fill">تعبئة الحالات الأخرى تلقائيا</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
     <string name="text_background_color_dark">داكن</string>
     <string name="text_background_color_follow">تلقائي</string>
@@ -1061,6 +1062,8 @@
     <string name="text_choose_delete_strategy">اختر طريقة الحذف</string>
     <string name="text_choose_holiday">اختر مناسبة</string>
     <string name="text_choose_restore_path">اختر مسار الاستعادة</string>
+    <string name="text_choose_scheme">اختر نظاما</string>
+    <string name="text_choose_seed_color">اختر لونا أساسيا</string>
     <string name="text_choose_window_background_as_theme_color">استخدام لون خلفية نافذة AutoJs6 كلون للثيم</string>
     <string name="text_city_or_locality">المدينة أو المنطقة</string>
     <string name="text_class_or_package_name">اسم الفئة / الحزمة</string>
@@ -1265,6 +1268,7 @@
     <string name="text_countdown_task">مهمة عد تنازلي</string>
     <string name="text_country_code">رمز الدولة (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">رمز الدولة يجب أن يكون حرفين كبيرين</string>
+    <string name="text_create">إنشاء</string>
     <string name="text_create_snapshot">انشاء لقطة</string>
     <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
     <string name="text_current">الحالي</string>
@@ -1540,6 +1544,7 @@
     <string name="text_general">عام</string>
     <string name="text_generate">يولد</string>
     <string name="text_generate_code">إنشاء التعليمات البرمجية</string>
+    <string name="text_generate_from_seed_color" tools:ignore="TypographyEllipsis">إنشاء من لون أساسي...</string>
     <string name="text_generated_code">رمز تم إنشاؤه</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">تم استخدام عنوان URL للنسخ الاحتياطي</string>
@@ -2382,6 +2387,10 @@
     <string name="text_season_spring">الربيع</string>
     <string name="text_season_summer">الصيف</string>
     <string name="text_season_winter">الشتاء</string>
+    <string name="text_seed_current_theme_color">لون الموضوع الحالي %1$s</string>
+    <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">من لوحة الألوان...</string>
+    <string name="text_seed_state_night_mode">وضع الليل (تعبئة ألوان الليل)</string>
+    <string name="text_seed_wallpaper_color">لون الخلفية %1$s</string>
     <string name="text_select">يختار</string>
     <string name="text_select_a_configuration_template">اختر قالب اعدادات</string>
     <string name="text_select_all">تحديد الكل</string>
@@ -2598,6 +2607,7 @@
     <string name="text_under_development_content">ستكون الميزة جاهزة للاستخدام في التحديثات القليلة التالية</string>
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">الغاء التحميل</string>
+    <string name="text_undo_auto_fill">التراجع عن التعبئة التلقائية</string>
     <string name="text_undo_simplified">ينسحب</string>
     <string name="text_uninstall">الغاء التثبيت</string>
     <string name="text_unit_days">ايام</string>

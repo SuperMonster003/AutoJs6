@@ -787,6 +787,7 @@
     <string name="text_add_to_color_library">加入颜色库</string>
     <string name="text_and_n_more">... 及其他 %d 项</string>
     <string name="text_apply_as_theme_color">应用为主题色</string>
+    <string name="text_auto_fill">自动填充其余状态</string>
     <string name="text_auto_reconnect">自动重连</string>
     <string name="text_background_color_dark">暗色</string>
     <string name="text_background_color_follow">自动跟随</string>
@@ -1055,6 +1056,8 @@
     <string name="text_choose_delete_strategy">选择删除策略</string>
     <string name="text_choose_holiday">选择节日</string>
     <string name="text_choose_restore_path">选择恢复路径</string>
+    <string name="text_choose_scheme">选择方案</string>
+    <string name="text_choose_seed_color">选择种子色</string>
     <string name="text_choose_window_background_as_theme_color">选择一个 AutoJs6 窗口背景色作为主题色</string>
     <string name="text_city_or_locality">城市或区域</string>
     <string name="text_class_or_package_name">类/包名</string>
@@ -1260,6 +1263,7 @@
     <string name="text_countdown_task">倒计时任务</string>
     <string name="text_country_code">国家代码 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国家代码必须为两个大写字母</string>
+    <string name="text_create">创建</string>
     <string name="text_create_snapshot">创建快照</string>
     <string name="text_creating_unsigned_apk">正在创建未签名 APK</string>
     <string name="text_current">当前</string>
@@ -1535,6 +1539,7 @@
     <string name="text_general">常规</string>
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成代码</string>
+    <string name="text_generate_from_seed_color" tools:ignore="TypographyEllipsis">从种子色生成...</string>
     <string name="text_generated_code">已生成代码</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">备用 URL 已使用</string>
@@ -2377,6 +2382,10 @@
     <string name="text_season_spring">春</string>
     <string name="text_season_summer">夏</string>
     <string name="text_season_winter">冬</string>
+    <string name="text_seed_current_theme_color">当前主题色 %1$s</string>
+    <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">从调色盘选择...</string>
+    <string name="text_seed_state_night_mode">夜间模式 (自动填充夜间颜色)</string>
+    <string name="text_seed_wallpaper_color">壁纸颜色 %1$s</string>
     <string name="text_select">选择</string>
     <string name="text_select_a_configuration_template">选择一个配置模版</string>
     <string name="text_select_all">全选</string>
@@ -2593,6 +2602,7 @@
     <string name="text_under_development_content">将在后续版本实现当前功能</string>
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">撤销</string>
+    <string name="text_undo_auto_fill">撤销自动填充</string>
     <string name="text_undo_simplified">撤销</string>
     <string name="text_uninstall">卸载</string>
     <string name="text_unit_days">天</string>

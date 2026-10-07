@@ -793,6 +793,7 @@
     <string name="text_add_to_color_library">색상 라이브러리에 추가</string>
     <string name="text_and_n_more">... 외 %d개</string>
     <string name="text_apply_as_theme_color">테마 색상으로 적용</string>
+    <string name="text_auto_fill">나머지 상태 자동 채우기</string>
     <string name="text_auto_reconnect">자동 재연결</string>
     <string name="text_background_color_dark">어두운 색</string>
     <string name="text_background_color_follow">자동</string>
@@ -1061,6 +1062,8 @@
     <string name="text_choose_delete_strategy">삭제 방식 선택</string>
     <string name="text_choose_holiday">기념일 선택</string>
     <string name="text_choose_restore_path">복원 경로 선택</string>
+    <string name="text_choose_scheme">배색 방식 선택</string>
+    <string name="text_choose_seed_color">시드 색상 선택</string>
     <string name="text_choose_window_background_as_theme_color">AutoJs6 창 배경색을 테마 색상으로 사용</string>
     <string name="text_city_or_locality">시 또는 지역</string>
     <string name="text_class_or_package_name">클래스 / 패키지 이름</string>
@@ -1265,6 +1268,7 @@
     <string name="text_countdown_task">카운트다운 작업</string>
     <string name="text_country_code">국가 코드 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
+    <string name="text_create">만들기</string>
     <string name="text_create_snapshot">스냅샷 만들기</string>
     <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
     <string name="text_current">현재</string>
@@ -1540,6 +1544,7 @@
     <string name="text_general">일반</string>
     <string name="text_generate">생성하다</string>
     <string name="text_generate_code">코드를 생성합니다</string>
+    <string name="text_generate_from_seed_color" tools:ignore="TypographyEllipsis">시드 색상으로 생성...</string>
     <string name="text_generated_code">생성 된 코드</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">백업 URL 이 사용되었습니다</string>
@@ -2382,6 +2387,10 @@
     <string name="text_season_spring">봄</string>
     <string name="text_season_summer">여름</string>
     <string name="text_season_winter">겨울</string>
+    <string name="text_seed_current_theme_color">현재 테마 색상 %1$s</string>
+    <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">색상 팔레트에서 선택...</string>
+    <string name="text_seed_state_night_mode">야간 모드 (야간 색상 자동 채우기)</string>
+    <string name="text_seed_wallpaper_color">배경화면 색상 %1$s</string>
     <string name="text_select">고르다</string>
     <string name="text_select_a_configuration_template">설정 템플릿 선택</string>
     <string name="text_select_all">전체 선택</string>
@@ -2598,6 +2607,7 @@
     <string name="text_under_development_content">기능은 다음 몇 가지 업데이트에서 사용할 준비가됩니다.</string>
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">실행 취소</string>
+    <string name="text_undo_auto_fill">자동 채우기 실행 취소</string>
     <string name="text_undo_simplified">뒤</string>
     <string name="text_uninstall">삭제</string>
     <string name="text_unit_days">일</string>

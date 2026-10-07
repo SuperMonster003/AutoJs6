@@ -791,6 +791,7 @@
     <string name="text_add_to_color_library">Ajouter à une bibliothèque de couleurs</string>
     <string name="text_and_n_more">... et %d de plus</string>
     <string name="text_apply_as_theme_color">Appliquer comme couleur du thème</string>
+    <string name="text_auto_fill">Remplir automatiquement les autres états</string>
     <string name="text_auto_reconnect">Reconnexion automatique</string>
     <string name="text_background_color_dark">Sombre</string>
     <string name="text_background_color_follow">Automatique</string>
@@ -1059,6 +1060,8 @@
     <string name="text_choose_delete_strategy">Choisir la methode de suppression</string>
     <string name="text_choose_holiday">Choisir une fête</string>
     <string name="text_choose_restore_path">Choisir le chemin de restauration</string>
+    <string name="text_choose_scheme">Choisir un schéma</string>
+    <string name="text_choose_seed_color">Choisir une couleur de départ</string>
     <string name="text_choose_window_background_as_theme_color">Utiliser une couleur d\'arrière-plan de fenêtre d\'AutoJs6 comme couleur du thème</string>
     <string name="text_city_or_locality">Ville ou localité</string>
     <string name="text_class_or_package_name">Nom de la classe ou du paquet</string>
@@ -1263,6 +1266,7 @@
     <string name="text_countdown_task">Tâche de compte à rebours</string>
     <string name="text_country_code">Code du pays (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Le code du pays doit être composé de deux lettres majuscules</string>
+    <string name="text_create">Créer</string>
     <string name="text_create_snapshot">Créer un instantané</string>
     <string name="text_creating_unsigned_apk">Creation de l\'APK non signe</string>
     <string name="text_current">Actuel</string>
@@ -1538,6 +1542,7 @@
     <string name="text_general">Général</string>
     <string name="text_generate">Générer</string>
     <string name="text_generate_code">Générer un code</string>
+    <string name="text_generate_from_seed_color" tools:ignore="TypographyEllipsis">Générer à partir d\'une couleur de départ...</string>
     <string name="text_generated_code">Code généré</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">L\'URL de sauvegarde a été utilisée</string>
@@ -2380,6 +2385,10 @@
     <string name="text_season_spring">Printemps</string>
     <string name="text_season_summer">Été</string>
     <string name="text_season_winter">Hiver</string>
+    <string name="text_seed_current_theme_color">Couleur du thème actuelle %1$s</string>
+    <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">Depuis la palette de couleurs...</string>
+    <string name="text_seed_state_night_mode">Mode nuit (couleurs de nuit remplies)</string>
+    <string name="text_seed_wallpaper_color">Couleur du fond d\'écran %1$s</string>
     <string name="text_select">Sélectionner</string>
     <string name="text_select_a_configuration_template">Choisir un modele de config</string>
     <string name="text_select_all">Tout selectionner</string>
@@ -2596,6 +2605,7 @@
     <string name="text_under_development_content">La fonctionnalité sera prête à être utilisée dans les prochaines mises à jour.</string>
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Révoquer</string>
+    <string name="text_undo_auto_fill">Annuler le remplissage automatique</string>
     <string name="text_undo_simplified">Révoq</string>
     <string name="text_uninstall">Desinstaller</string>
     <string name="text_unit_days">Jours</string>

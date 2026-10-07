@@ -791,6 +791,7 @@
     <string name="text_add_to_color_library">Добавить в цветовую библиотеку</string>
     <string name="text_and_n_more">... и еще %d</string>
     <string name="text_apply_as_theme_color">Применить как цвет темы</string>
+    <string name="text_auto_fill">Заполнить остальные состояния</string>
     <string name="text_auto_reconnect">Автоматическое переподключение</string>
     <string name="text_background_color_dark">Тёмный</string>
     <string name="text_background_color_follow">Автоматически</string>
@@ -1059,6 +1060,8 @@
     <string name="text_choose_delete_strategy">Выберите способ удаления</string>
     <string name="text_choose_holiday">Выберите праздник</string>
     <string name="text_choose_restore_path">Выберите путь восстановления</string>
+    <string name="text_choose_scheme">Выберите схему</string>
+    <string name="text_choose_seed_color">Выберите исходный цвет</string>
     <string name="text_choose_window_background_as_theme_color">Использовать цвет фона окна AutoJs6 как цвет темы</string>
     <string name="text_city_or_locality">Город или населенный пункт</string>
     <string name="text_class_or_package_name">Имя класса / пакета</string>
@@ -1263,6 +1266,7 @@
     <string name="text_countdown_task">Задача с обратным отсчётом</string>
     <string name="text_country_code">Код страны (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
+    <string name="text_create">Создать</string>
     <string name="text_create_snapshot">Создать снимок</string>
     <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
     <string name="text_current">Текущая</string>
@@ -1538,6 +1542,7 @@
     <string name="text_general">Общие</string>
     <string name="text_generate">Сгенерировать</string>
     <string name="text_generate_code">Сгенерировать код</string>
+    <string name="text_generate_from_seed_color" tools:ignore="TypographyEllipsis">Создать из исходного цвета...</string>
     <string name="text_generated_code">Сгенерированный код</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">Использован URL-адрес резервной копии</string>
@@ -2380,6 +2385,10 @@
     <string name="text_season_spring">Весна</string>
     <string name="text_season_summer">Лето</string>
     <string name="text_season_winter">Зима</string>
+    <string name="text_seed_current_theme_color">Текущий цвет темы %1$s</string>
+    <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">Из цветовой палитры...</string>
+    <string name="text_seed_state_night_mode">Ночной режим (ночные цвета заполнены)</string>
+    <string name="text_seed_wallpaper_color">Цвет обоев %1$s</string>
     <string name="text_select">Выберите</string>
     <string name="text_select_a_configuration_template">Выберите шаблон конфигурации</string>
     <string name="text_select_all">Выбрать все</string>
@@ -2596,6 +2605,7 @@
     <string name="text_under_development_content">Функция будет готова к использованию в ближайших обновлениях</string>
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Отозвать</string>
+    <string name="text_undo_auto_fill">Отменить заполнение</string>
     <string name="text_undo_simplified">Верни</string>
     <string name="text_uninstall">Удалить</string>
     <string name="text_unit_days">Дней</string>

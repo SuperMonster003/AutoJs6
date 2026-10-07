@@ -38,6 +38,10 @@ class IntelligentLibrariesActivity : ColorSelectBaseActivity() {
 
     private val exchange = ColorLibraryExchange(this) { load() }
 
+    private val seedWizard by lazy {
+        SeedLibraryWizard(this, { initial, onPicked -> showColorPickerFor(initial, onPicked) }) { IntelligentLibraryActivity.launch(this, it.libraryId) }
+    }
+
     private val adapter = IntelligentLibraryAdapter(::openLibrary, ::onLibraryLongClick)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,6 +119,7 @@ class IntelligentLibrariesActivity : ColorSelectBaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_new_intelligent_color_library -> true.also { openEditor(null) }
+        R.id.action_generate_from_seed_color -> true.also { seedWizard.start() }
         R.id.action_locate_current_theme_color -> true.also {
             when (val active = IntelligentColorEngine.activeSnapshot) {
                 null -> checkAndGetTargetInfoForThemeColorLocate()

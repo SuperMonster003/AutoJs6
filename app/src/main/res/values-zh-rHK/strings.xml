@@ -788,6 +788,7 @@
     <string name="text_add_to_color_library">加入顏色庫</string>
     <string name="text_and_n_more">... 及其他 %d 項</string>
     <string name="text_apply_as_theme_color">應用為主題色</string>
+    <string name="text_auto_fill">自動填充其餘狀態</string>
     <string name="text_auto_reconnect">自動重連</string>
     <string name="text_background_color_dark">暗色</string>
     <string name="text_background_color_follow">自動跟隨</string>
@@ -1056,6 +1057,8 @@
     <string name="text_choose_delete_strategy">選擇刪除策略</string>
     <string name="text_choose_holiday">選擇節日</string>
     <string name="text_choose_restore_path">選擇恢復路徑</string>
+    <string name="text_choose_scheme">選擇方案</string>
+    <string name="text_choose_seed_color">選擇種子色</string>
     <string name="text_choose_window_background_as_theme_color">選擇一個 AutoJs6 窗口背景色作為主題色</string>
     <string name="text_city_or_locality">城市或區域</string>
     <string name="text_class_or_package_name">類/包名</string>
@@ -1260,6 +1263,7 @@
     <string name="text_countdown_task">倒數計時任務</string>
     <string name="text_country_code">國家代碼 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">國家代碼必須為兩個大寫字母</string>
+    <string name="text_create">建立</string>
     <string name="text_create_snapshot">建立快照</string>
     <string name="text_creating_unsigned_apk">正在創建未簽名 APK</string>
     <string name="text_current">當前</string>
@@ -1535,6 +1539,7 @@
     <string name="text_general">一般</string>
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成代碼</string>
+    <string name="text_generate_from_seed_color" tools:ignore="TypographyEllipsis">從種子色生成...</string>
     <string name="text_generated_code">已生成代碼</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">備用 URL 已使用</string>
@@ -2377,6 +2382,10 @@
     <string name="text_season_spring">春</string>
     <string name="text_season_summer">夏</string>
     <string name="text_season_winter">冬</string>
+    <string name="text_seed_current_theme_color">當前主題色 %1$s</string>
+    <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">從調色盤選擇...</string>
+    <string name="text_seed_state_night_mode">夜間模式 (自動填充夜間顏色)</string>
+    <string name="text_seed_wallpaper_color">牆紙顏色 %1$s</string>
     <string name="text_select">選擇</string>
     <string name="text_select_a_configuration_template">選擇一個配置模版</string>
     <string name="text_select_all">全選</string>
@@ -2593,6 +2602,7 @@
     <string name="text_under_development_content">將在後續版本實現當前功能</string>
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">撤銷</string>
+    <string name="text_undo_auto_fill">撤銷自動填充</string>
     <string name="text_undo_simplified">撤銷</string>
     <string name="text_uninstall">卸載</string>
     <string name="text_unit_days">天</string>

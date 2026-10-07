@@ -786,6 +786,7 @@
     <string name="text_add_to_color_library">Add to a color library</string>
     <string name="text_and_n_more">... and %d more</string>
     <string name="text_apply_as_theme_color">Apply as theme color</string>
+    <string name="text_auto_fill">Auto fill the other states</string>
     <string name="text_auto_reconnect">Auto reconnect</string>
     <string name="text_background_color_dark">Dark</string>
     <string name="text_background_color_follow">Auto</string>
@@ -1054,6 +1055,8 @@
     <string name="text_choose_delete_strategy">Choose delete strategy</string>
     <string name="text_choose_holiday">Choose a holiday</string>
     <string name="text_choose_restore_path">Choose restore path</string>
+    <string name="text_choose_scheme">Choose a scheme</string>
+    <string name="text_choose_seed_color">Choose a seed color</string>
     <string name="text_choose_window_background_as_theme_color">Use an AutoJs6 window background color as the theme color</string>
     <string name="text_city_or_locality">City or Locality</string>
     <string name="text_class_or_package_name">Class / Package name</string>
@@ -1259,6 +1262,7 @@
     <string name="text_countdown_task">Countdown task</string>
     <string name="text_country_code">Country Code (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
+    <string name="text_create">Create</string>
     <string name="text_create_snapshot">Create snapshot</string>
     <string name="text_creating_unsigned_apk">Creating unsigned APK</string>
     <string name="text_current">Current</string>
@@ -1534,6 +1538,7 @@
     <string name="text_general">General</string>
     <string name="text_generate">Generate</string>
     <string name="text_generate_code">Generate code</string>
+    <string name="text_generate_from_seed_color" tools:ignore="TypographyEllipsis">Generate from a seed color...</string>
     <string name="text_generated_code">Generated code</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">Backup URL has been used</string>
@@ -2376,6 +2381,10 @@
     <string name="text_season_spring">Spring</string>
     <string name="text_season_summer">Summer</string>
     <string name="text_season_winter">Winter</string>
+    <string name="text_seed_current_theme_color">Current theme color %1$s</string>
+    <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">From the color palette...</string>
+    <string name="text_seed_state_night_mode">Night mode (night colors filled in)</string>
+    <string name="text_seed_wallpaper_color">Wallpaper color %1$s</string>
     <string name="text_select">Select</string>
     <string name="text_select_a_configuration_template">Select a configuration template</string>
     <string name="text_select_all">Select all</string>
@@ -2592,6 +2601,7 @@
     <string name="text_under_development_content">The feature will be ready to use in the next few updates</string>
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Undo</string>
+    <string name="text_undo_auto_fill">Undo auto fill</string>
     <string name="text_undo_simplified">Undo</string>
     <string name="text_uninstall">Uninstall</string>
     <string name="text_unit_days">Days</string>

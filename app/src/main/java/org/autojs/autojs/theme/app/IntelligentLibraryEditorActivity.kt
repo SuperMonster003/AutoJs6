@@ -33,6 +33,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.intelligent.DateCondition
 import org.autojs.autojs.theme.intelligent.DateOverride
 import org.autojs.autojs.theme.intelligent.GroupOrder
+import org.autojs.autojs.theme.intelligent.IntelligentAutoFill
 import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
 import org.autojs.autojs.theme.intelligent.IntelligentConfig
 import org.autojs.autojs.theme.intelligent.IntelligentConfigValidator
@@ -499,6 +500,12 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         content.addView(enabledCheck)
 
         val firstLabel = stateLabelForEditor(keys.first())
+        val renders = mutableListOf<() -> Unit>()
+        val sameChecks = mutableMapOf<String, ThemeColorCheckBox>()
+        // Set while the auto fill updates the checkboxes, so their listeners leave the colors alone.
+        // zh-CN: 自动填充更新复选框期间置位, 使其监听器不改动颜色.
+        var updating = false
+        var onManualChange: () -> Unit = {}
         keys.forEachIndexed { position, key ->
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -536,21 +543,69 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
                     colors[key] = picked
                     remembered[key] = picked
                     sameCheck?.isChecked = false
-                    render()
+                    onManualChange()
+                    renders.forEach { it() }
                 }
             }
             swatch.setOnClickListener(pick)
             hex.setOnClickListener(pick)
             sameCheck?.setOnCheckedChangeListener { _, checked ->
+                if (updating) return@setOnCheckedChangeListener
                 colors[key] = if (checked) null else remembered[key] ?: colors[keys.first()]
-                render()
+                onManualChange()
+                renders.forEach { it() }
             }
+            renders += ::render
+            sameCheck?.let { sameChecks[key] = it }
             render()
             row.addView(label)
             row.addView(swatch)
             row.addView(hex)
             content.addView(row)
             sameCheck?.let { content.addView(it) }
+        }
+
+        // Auto fill derives the empty states from the first colored one; tapping again undoes it (roadmap P4.4).
+        // zh-CN: 自动填充由第一个有颜色的状态推导其余空状态; 再次点击可撤销 (Roadmap P4.4).
+        if (keys.size > 1) {
+            var undo: Map<String, Int?>? = null
+            val autoFill = TextView(this).apply {
+                text = getString(R.string.text_auto_fill)
+                setTextColor(getColor(R.color.day_night_full))
+                setPadding(0, dp(12), 0, dp(4))
+            }
+            fun sync() {
+                updating = true
+                sameChecks.forEach { (key, check) -> check.isChecked = colors[key] == null }
+                updating = false
+                renders.forEach { it() }
+            }
+            autoFill.setOnClickListener {
+                when (val previous = undo) {
+                    null -> {
+                        val filled = IntelligentAutoFill.fill(keys, colors) ?: run {
+                            ViewUtils.showToast(this, R.string.text_choose_at_least_one_color)
+                            return@setOnClickListener
+                        }
+                        undo = colors.toMap()
+                        colors.putAll(filled)
+                        remembered.putAll(filled)
+                        autoFill.text = getString(R.string.text_undo_auto_fill)
+                    }
+                    else -> {
+                        colors.clear()
+                        colors.putAll(previous)
+                        undo = null
+                        autoFill.text = getString(R.string.text_auto_fill)
+                    }
+                }
+                sync()
+            }
+            onManualChange = {
+                undo = null
+                autoFill.text = getString(R.string.text_auto_fill)
+            }
+            content.addView(autoFill)
         }
 
         MaterialDialog.Builder(this)

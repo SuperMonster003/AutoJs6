@@ -792,6 +792,7 @@
     <string name="text_add_to_color_library">カラーライブラリに追加</string>
     <string name="text_and_n_more">... 他 %d 件</string>
     <string name="text_apply_as_theme_color">テーマカラーに適用</string>
+    <string name="text_auto_fill">他の状態を自動入力</string>
     <string name="text_auto_reconnect">自動再接続</string>
     <string name="text_background_color_dark">ダーク</string>
     <string name="text_background_color_follow">自動</string>
@@ -1060,6 +1061,8 @@
     <string name="text_choose_delete_strategy">削除方法を選択</string>
     <string name="text_choose_holiday">祝祭日を選択</string>
     <string name="text_choose_restore_path">復元先を選択</string>
+    <string name="text_choose_scheme">配色案を選択</string>
+    <string name="text_choose_seed_color">シードカラーを選択</string>
     <string name="text_choose_window_background_as_theme_color">AutoJs6 のウィンドウ背景色をテーマカラーとして使用</string>
     <string name="text_city_or_locality">市区町村</string>
     <string name="text_class_or_package_name">クラス名/パッケージ名</string>
@@ -1264,6 +1267,7 @@
     <string name="text_countdown_task">カウントダウンタスク</string>
     <string name="text_country_code">国コード (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
+    <string name="text_create">作成</string>
     <string name="text_create_snapshot">スナップショットを作成</string>
     <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
     <string name="text_current">現在</string>
@@ -1539,6 +1543,7 @@
     <string name="text_general">一般</string>
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成されるコード</string>
+    <string name="text_generate_from_seed_color" tools:ignore="TypographyEllipsis">シードカラーから生成...</string>
     <string name="text_generated_code">生成されたコード</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">バックアップ URL を使用しました</string>
@@ -2381,6 +2386,10 @@
     <string name="text_season_spring">春</string>
     <string name="text_season_summer">夏</string>
     <string name="text_season_winter">冬</string>
+    <string name="text_seed_current_theme_color">現在のテーマカラー %1$s</string>
+    <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">カラーパレットから選択...</string>
+    <string name="text_seed_state_night_mode">夜間モード (夜の色を自動入力)</string>
+    <string name="text_seed_wallpaper_color">壁紙の色 %1$s</string>
     <string name="text_select">選択</string>
     <string name="text_select_a_configuration_template">設定テンプレートを選択</string>
     <string name="text_select_all">全て選択</string>
@@ -2597,6 +2606,7 @@
     <string name="text_under_development_content">この機能は, 次の数回のアップデートで使用できるようになる予定です</string>
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">元に戻す</string>
+    <string name="text_undo_auto_fill">自動入力を元に戻す</string>
     <string name="text_undo_simplified">戻る</string>
     <string name="text_uninstall">アンインストール</string>
     <string name="text_unit_days">日</string>
