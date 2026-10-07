@@ -878,6 +878,8 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 編輯器選單 "跳轉" 增加 "跳至上一個游標位置" (原為 TAB 鍵長按功能), 可記錄到動作收藏
 * `優化` Ace 編輯器參數提示的重載切換支援硬件鍵盤 Alt+Up / Alt+Down, 多功能鍵盤上下鍵 (參數提示顯示多個重載時, 可在設定中關閉) 及提示視窗右上角的上下按鈕
 * `優化` Ace 編輯器參數提示在點按編輯區後恢復顯示 (捲動後不恢復), ESC 鍵同時隱藏參數提示與符號文件
+* `優化` Ace 編輯器參數提示在 LSP 關閉或語義服務不可用時同樣支援重載方法: 靜態索引收錄 146 個宣告重載 (如 app.startActivity), 內建 ECMAScript 簽章增加 splice / replace / JSON.stringify / Array.from 等重載, Python / Lua 檔案的參數提示保留全部簽章
+* `優化` Ace 編輯器懸停文件框支援觸控捲動與選取文字, 智慧提示在 Python / Lua 檔案中等待非同步參數提示而不再誤彈補全
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

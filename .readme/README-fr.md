@@ -878,6 +878,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Le menu "Sauter" de l'éditeur gagne "Revenir au curseur précédent" (anciennement l'appui long sur TAB), enregistrable dans les actions favorites
 * `Amélioration` Les indications de paramètres de l'éditeur Ace changent de surcharge avec Alt+Haut / Alt+Bas sur clavier physique, les touches Haut et Bas de la barre de touches (lorsque plusieurs surcharges sont affichées; désactivable dans les paramètres) et les boutons haut / bas en haut à droite de la fenêtre d'indication
 * `Amélioration` Les indications de paramètres de l'éditeur Ace réapparaissent après un appui dans la zone d'édition (pas après un défilement), et ESC masque à la fois les indications de paramètres et la documentation du symbole
+* `Amélioration` Les indications de paramètres de l'éditeur Ace prennent en charge les méthodes surchargées même lorsque le LSP est désactivé ou que le service sémantique est indisponible: l'index statique contient 146 surcharges déclarées (par exemple app.startActivity), les signatures ECMAScript intégrées gagnent des surcharges pour splice / replace / JSON.stringify / Array.from et d'autres, et les indications de paramètres Python / Lua conservent toutes les signatures
+* `Amélioration` La documentation au survol de l'éditeur Ace peut être défilée et sélectionnée sur écran tactile, et les suggestions intelligentes attendent les indications de paramètres asynchrones dans les fichiers Python / Lua au lieu de retomber sur la complétion
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
