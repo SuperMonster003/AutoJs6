@@ -2473,6 +2473,7 @@
     <string name="text_size">Size</string>
     <string name="text_skip">Skip</string>
     <string name="text_skip_conflicting">Skip conflicting</string>
+    <string name="text_smart_hint">Smart hints</string>
     <string name="text_snapshot_created">Snapshot created</string>
     <string name="text_snapshot_label_optional">Label (optional)</string>
     <string name="text_snapshot_requires_internal_storage_file">Snapshots are only available for files under internal storage</string>

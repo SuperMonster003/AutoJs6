@@ -2473,6 +2473,7 @@
     <string name="text_size">大小</string>
     <string name="text_skip">跳過</string>
     <string name="text_skip_conflicting">略過衝突項目</string>
+    <string name="text_smart_hint">智慧提示</string>
     <string name="text_snapshot_created">快照已建立</string>
     <string name="text_snapshot_label_optional">標籤 (可選)</string>
     <string name="text_snapshot_requires_internal_storage_file">僅內部儲存空間中的檔案支援建立快照</string>

@@ -2477,6 +2477,7 @@
     <string name="text_size">サイズ</string>
     <string name="text_skip">スキップ</string>
     <string name="text_skip_conflicting">競合する項目をスキップ</string>
+    <string name="text_smart_hint">スマートヒント</string>
     <string name="text_snapshot_created">スナップショットを作成しました</string>
     <string name="text_snapshot_label_optional">ラベル (任意)</string>
     <string name="text_snapshot_requires_internal_storage_file">スナップショットは内部ストレージ内のファイルでのみ利用できます</string>

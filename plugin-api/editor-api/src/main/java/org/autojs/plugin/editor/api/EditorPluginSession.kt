@@ -54,6 +54,12 @@ interface EditorPluginSession {
     fun moveCompletionSelectionOrCursor(delta: Int)
     fun handleEscapeKey()
 
+    /**
+     * Context-aware smart hint trigger (contract 6+): starts completion, shows or cycles
+     * signature help, or shows the symbol documentation for the current cursor position.
+     */
+    fun triggerSmartHint()
+
     fun copyLine()
     fun deleteLine()
     fun clear()

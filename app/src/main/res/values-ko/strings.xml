@@ -2478,6 +2478,7 @@
     <string name="text_size">크기</string>
     <string name="text_skip">건너뛰기</string>
     <string name="text_skip_conflicting">충돌 항목 건너뛰기</string>
+    <string name="text_smart_hint">스마트 힌트</string>
     <string name="text_snapshot_created">스냅샷을 만들었습니다</string>
     <string name="text_snapshot_label_optional">레이블 (선택 사항)</string>
     <string name="text_snapshot_requires_internal_storage_file">스냅샷은 내부 저장소의 파일에서만 사용할 수 있습니다</string>

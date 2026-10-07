@@ -2478,6 +2478,7 @@
     <string name="text_size">مقاس</string>
     <string name="text_skip">تخطي</string>
     <string name="text_skip_conflicting">تخطي المتعارضة</string>
+    <string name="text_smart_hint">تلميحات ذكية</string>
     <string name="text_snapshot_created">تم انشاء اللقطة</string>
     <string name="text_snapshot_label_optional">التسمية (اختياري)</string>
     <string name="text_snapshot_requires_internal_storage_file">اللقطات متاحة فقط للملفات الموجودة في وحدة التخزين الداخلية</string>

@@ -2476,6 +2476,7 @@
     <string name="text_size">Размер</string>
     <string name="text_skip">Пропустить</string>
     <string name="text_skip_conflicting">Пропустить конфликтующие</string>
+    <string name="text_smart_hint">Умные подсказки</string>
     <string name="text_snapshot_created">Снимок создан</string>
     <string name="text_snapshot_label_optional">Метка (необязательно)</string>
     <string name="text_snapshot_requires_internal_storage_file">Снимки доступны только для файлов во внутреннем хранилище</string>

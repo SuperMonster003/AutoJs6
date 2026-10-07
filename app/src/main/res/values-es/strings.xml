@@ -2476,6 +2476,7 @@
     <string name="text_size">Tamaño</string>
     <string name="text_skip">Omitir</string>
     <string name="text_skip_conflicting">Omitir conflictivos</string>
+    <string name="text_smart_hint">Sugerencias inteligentes</string>
     <string name="text_snapshot_created">Instantánea creada</string>
     <string name="text_snapshot_label_optional">Etiqueta (opcional)</string>
     <string name="text_snapshot_requires_internal_storage_file">Las instantáneas solo están disponibles para archivos del almacenamiento interno</string>
