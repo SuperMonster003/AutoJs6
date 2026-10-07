@@ -519,7 +519,8 @@
         "Package manifest roots and shared UIDs could be misread from comments or spoofed namespaces; duplicate attributes, conflicting resource identities and unverifiable shared UIDs now stop processing",
         "Plugin Center could restore removed or renamed plugins from cache after a successful index refresh",
         "Missing circular icon backgrounds in Plugin Center details dialogs and stale themed borders when cached artwork is reused",
-        "Material colors chosen in the legacy layout could not be found with \"Locate current theme color\" after switching layouts, and the Material colors page did not show the current color summary"
+        "Material colors chosen in the legacy layout could not be found with \"Locate current theme color\" after switching layouts, and the Material colors page did not show the current color summary",
+        "Opening plugin details right after a cold start of the Plugin Center could make the dialog flash because each list refresh rebuilt it"
       ],
       "improvement": [
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",

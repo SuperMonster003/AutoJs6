@@ -519,7 +519,8 @@
         "Contraste insuficiente del texto y los controles de las ventanas flotantes y los diálogos del análisis de diseño con algunos colores de tema o en modo nocturno",
         "El Centro de complementos restauraba desde la caché complementos retirados o renombrados tras actualizar el índice correctamente",
         "Falta del fondo circular de los iconos en los detalles del centro de plugins y bordes en caché que no se actualizaban al cambiar de tema",
-        "Los colores Material elegidos en el diseño antiguo no se podían encontrar con \"Localizar color del tema actual\" tras cambiar de diseño, y la página de colores Material no mostraba el resumen del color actual"
+        "Los colores Material elegidos en el diseño antiguo no se podían encontrar con \"Localizar color del tema actual\" tras cambiar de diseño, y la página de colores Material no mostraba el resumen del color actual",
+        "Abrir los detalles de un complemento justo después de un arranque en frío del centro de complementos podía hacer parpadear el cuadro de diálogo, porque cada actualización de la lista lo reconstruía"
       ],
       "improvement": [
         "Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas",

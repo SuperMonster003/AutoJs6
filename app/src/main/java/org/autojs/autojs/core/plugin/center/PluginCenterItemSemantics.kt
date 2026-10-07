@@ -58,6 +58,7 @@ object PluginCenterItemSemantics {
                 && a.installableApkSha256 == b.installableApkSha256
                 && a.installableApkSizeBytes == b.installableApkSizeBytes
                 && a.supportedAbis == b.supportedAbis
+                && a.installedAbis == b.installedAbis
                 && a.nativePageAlignment == b.nativePageAlignment
                 && a.updatableNativePageAlignment == b.updatableNativePageAlignment
     }

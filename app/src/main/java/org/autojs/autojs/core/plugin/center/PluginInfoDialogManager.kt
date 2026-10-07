@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.center
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -39,6 +40,7 @@ import org.autojs.autojs.ui.dialog.InfoDialogItems
 import org.autojs.autojs.ui.settings.DisplayReleaseHistoryActivity
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
+import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.TimeUtils
@@ -49,65 +51,129 @@ import org.autojs.autojs6.R
 
 object PluginInfoDialogManager {
 
-    // Hold the current dialog and package name for refreshing on onResume.
-    // zh-CN: 持有当前对话框与包名, 便于 onResume 时刷新.
-    private var currentDialog: WeakReference<MaterialDialog>? = null
-    private var currentPackageName: String? = null
+    // The open information dialog and the item it shows, so later plugin lists can refresh it. Weak, so a
+    // dialog its activity dropped is not retained; the dialog itself keeps the entry alive while it shows.
+    // zh-CN: 当前打开的信息对话框及其显示的条目, 供之后的插件列表刷新使用. 使用弱引用, 不保留被 Activity 丢弃的对话框;
+    // 对话框显示期间由其自身保持该条目可达.
+    private var current: WeakReference<ShownInfo>? = null
     private val remoteDialogIconCache = object : LruCache<String, Bitmap>(40) {}
 
+    /** One shown information dialog; [item] follows in-place refreshes. zh-CN: 一个已显示的信息对话框; [item] 随原地刷新更新. */
+    private class ShownInfo(val infoDialog: InfoDialog, var item: PluginCenterItem) {
+        val dialog: MaterialDialog get() = infoDialog.dialog
+    }
+
+    /**
+     * Follows a new plugin list while a dialog is open ([PluginInfoDialogRefreshPolicy]): an
+     * unchanged item keeps the dialog as it is, changed rows are updated in place, and only a
+     * change of the action buttons replaces the dialog. Replacing it for every list published
+     * after a cold start made the dialog flash.
+     *
+     * zh-CN: 对话框打开期间跟随新的插件列表 ([PluginInfoDialogRefreshPolicy]): 条目未变化时保持不动,
+     * 行内容变化时原地更新, 只有操作按钮变化才替换对话框. 此前冷启动后每发布一份列表就替换一次对话框, 造成闪烁.
+     */
     fun refreshIfShowing(context: Context, allItems: List<PluginCenterItem>) {
-        val dialog = currentDialog?.get() ?: return
-        val pkg = currentPackageName ?: return
-        if (!dialog.isShowing) return
-        val target = allItems.firstOrNull { it.packageName == pkg } ?: return
-        showPluginInfoDialog(context, target)
-        dialog.dismiss()
-    }
-
-    @JvmStatic
-    fun showPluginInfoDialog(context: Context, item: PluginCenterItem): InfoDialog {
-        return if (item.isInstalled) {
-            showInstalledPluginInfoDialog(context, item)
-        } else {
-            showInstallablePluginInfoDialog(context, item)
-        }
-    }
-
-    private fun showInstallablePluginInfoDialog(context: Context, item: PluginCenterItem): InfoDialog {
-        val states = listOf(context.getString(R.string.text_installable))
-        val info = PluginInfoInstallable(
-            item = item,
-            states = states,
-            lastInstallTime = item.lastInstallTime,
-            lastUninstallTime = item.lastUninstallTime,
-        )
-        return showPluginInfoDialogInternal(context, info) {
-            neutralText(R.string.text_install)
-            neutralColorRes(R.color.dialog_button_attraction)
-            onNeutral { d, _ ->
-                d.dismiss()
-                val url = info.validateApkUrlAndPrompt(context, d) ?: return@onNeutral
-                PluginInstallCompatibilityPrompt.runBeforeDownload(context, info.item) {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
-                    }
-                }
+        val shown = current?.get() ?: return
+        if (!shown.dialog.isShowing) return
+        val target = allItems.firstOrNull { it.packageName == shown.item.packageName } ?: return
+        when (PluginInfoDialogRefreshPolicy.decide(shown.item, target)) {
+            PluginInfoDialogRefreshPolicy.Refresh.NONE -> Unit
+            PluginInfoDialogRefreshPolicy.Refresh.IN_PLACE -> {
+                val rebindIcon = PluginInfoDialogRefreshPolicy.iconChanged(shown.item, target)
+                shown.item = target
+                bindInfo(context, shown.infoDialog, infoFor(context, target), rebindIcon)
+            }
+            PluginInfoDialogRefreshPolicy.Refresh.REBUILD -> {
+                showPluginInfoDialog(context, target)
+                shown.dialog.dismiss()
             }
         }
     }
 
-    private fun showInstalledPluginInfoDialog(context: Context, item: PluginCenterItem): InfoDialog {
-        val info = PluginInfoInstalled(
+    @JvmStatic
+    fun showPluginInfoDialog(context: Context, item: PluginCenterItem): InfoDialog {
+        val infoDialog = InfoDialog(context)
+        val shown = ShownInfo(infoDialog, item)
+        val info = infoFor(context, item)
+        addRows(infoDialog.items)
+
+        infoDialog.builder
+            .limitIconToDefaultSize()
+            .title(info.title)
+            .negativeText(R.string.dialog_button_dismiss)
+            .onNegative { d, _ -> d.dismiss() }
+            .autoDismiss(false)
+            .apply { applyNeutralAction(context, shown) }
+            // The dismiss listener lives as long as the dialog and keeps [shown] reachable for the weak [current].
+            // zh-CN: 关闭监听与对话框同生命周期, 使 [shown] 对弱引用 [current] 保持可达.
+            .let { infoDialog.show(DialogInterface.OnDismissListener { if (current?.get() === shown) current = null }) }
+
+        current = WeakReference(shown)
+
+        bindInfo(context, infoDialog, info, rebindIcon = true)
+        if (item.isInstalled) {
+            infoDialog.dialog.makeSettingsLaunchable({ it.iconView }, info.packageName)
+        }
+
+        // If the index does not provide size, try to HEAD request to get it, update display after success.
+        // zh-CN: 若索引未给 size, 尝试 HEAD 获取, 成功后更新显示.
+        if (info.packageSize <= 0) {
+            info.apkUrl.takeUnless { it.isNullOrBlank() }?.let { url ->
+                infoDialog.scope.launch {
+                    val size = withContext(Dispatchers.IO) { PluginInstaller.probeContentLength(url) }
+                    if (size != null && size > 0 && current?.get() === shown) {
+                        infoDialog.items["pluginItemInfoPackageSize"].setValueIfAbsent(formatSize(size))
+                    }
+                }
+            }
+        }
+
+        return infoDialog
+    }
+
+    private fun infoFor(context: Context, item: PluginCenterItem): PluginInfoBase = if (item.isInstalled) {
+        PluginInfoInstalled(
             item = item,
             states = parseStates(context, item),
             updatableVersion = item.updatableVersionSummary,
             firstInstallTime = item.firstInstallTime,
             lastUpdateTime = item.lastUpdateTime,
         )
-        return showPluginInfoDialogInternal(context, info) {
-            if (item.isUpdatable) {
+    } else {
+        PluginInfoInstallable(
+            item = item,
+            states = listOf(context.getString(R.string.text_installable)),
+            lastInstallTime = item.lastInstallTime,
+            lastUninstallTime = item.lastUninstallTime,
+        )
+    }
+
+    /**
+     * The neutral button follows [PluginInfoDialogRefreshPolicy.neutralActionOf]; its callback reads the item
+     * the dialog shows at click time, so in-place refreshes never leave it with stale download data.
+     * zh-CN: 中性按钮由 [PluginInfoDialogRefreshPolicy.neutralActionOf] 决定; 回调在点击时读取对话框当前显示的条目,
+     * 原地刷新后不会使用过期的下载信息.
+     */
+    private fun MaterialDialog.Builder.applyNeutralAction(context: Context, shown: ShownInfo) {
+        when (PluginInfoDialogRefreshPolicy.neutralActionOf(shown.item)) {
+            PluginInfoDialogRefreshPolicy.NeutralAction.INSTALL -> {
+                neutralText(R.string.text_install)
+                neutralColorRes(R.color.dialog_button_attraction)
+                onNeutral { d, _ ->
+                    d.dismiss()
+                    val info = infoFor(context, shown.item)
+                    val url = info.validateApkUrlAndPrompt(context, d) ?: return@onNeutral
+                    PluginInstallCompatibilityPrompt.runBeforeDownload(context, info.item) {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                        }
+                    }
+                }
+            }
+            PluginInfoDialogRefreshPolicy.NeutralAction.VIEW_UPDATE,
+            PluginInfoDialogRefreshPolicy.NeutralAction.VIEW_MATCHED_VERSION -> {
                 neutralText(
-                    if (item.requiresDowngradeReinstall) {
+                    if (shown.item.requiresDowngradeReinstall) {
                         R.string.dialog_button_view_matched_version
                     } else {
                         R.string.dialog_button_view_update
@@ -115,70 +181,79 @@ object PluginInfoDialogManager {
                 )
                 neutralColorRes(R.color.dialog_button_attraction)
                 onNeutral { d, _ ->
-                    showUpdatablePluginInfoDialog(context, PluginInfoUpdatable(item), d)
+                    showUpdatablePluginInfoDialog(context, PluginInfoUpdatable(shown.item), d)
                 }
             }
-        }.apply {
-            dialog.makeSettingsLaunchable({ it.iconView }, info.packageName)
+            PluginInfoDialogRefreshPolicy.NeutralAction.NONE -> Unit
         }
     }
 
-    private fun showPluginInfoDialogInternal(context: Context, info: PluginInfoBase, builderApplier: MaterialDialog.Builder.() -> Unit = {}): InfoDialog {
-        val infoDialog = InfoDialog(context)
-        val items = infoDialog.items.apply {
-            addItem(R.string.text_label_state, id = "state").maxLines = 5
-            addItem(R.string.plugin_item_info_mechanism, id = "mechanism")
-            addItem(R.string.text_source, id = "pluginItemInfoSource")
-            addItem(R.string.apk_info_package_name, id = "packageName").maxLines = 5
-            addItem(R.string.text_version, id = "version")
-            addItem(R.string.plugin_item_info_updatable_version, id = "updatableVersion").isVisible = false
-            addItem(R.string.plugin_item_info_author, id = "pluginItemInfoAuthor").maxLines = 5
-            addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsFirst").isVisible = false
-            addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsSecond").isVisible = false
-            addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsThird").isVisible = false
-            addItem(R.string.text_description, id = "description").maxLines = 20
-            addItem(R.string.plugin_item_info_package_size, id = "pluginItemInfoPackageSize")
-            addItem(R.string.plugin_item_info_supported_abis, id = "pluginItemInfoSupportedAbis").maxLines = 3
-            addItem(R.string.plugin_item_info_installed_abis, id = "pluginItemInfoInstalledAbis").apply {
-                maxLines = 3
-                isVisible = false
-            }
-            addItem(R.string.plugin_item_info_first_install_time, id = "pluginItemInfoFirstInstallTime").isVisible = false
-            addItem(R.string.plugin_item_info_last_update_time, id = "pluginItemInfoLastUpdateTime").isVisible = false
-            addItem(R.string.plugin_item_info_last_install_time, id = "pluginItemInfoLastInstallTime").isVisible = false
-            addItem(R.string.plugin_item_info_last_uninstall_time, id = "pluginItemInfoLastUninstallTime").isVisible = false
+    private fun addRows(items: InfoDialogItems) = items.apply {
+        addItem(R.string.text_label_state, id = "state").maxLines = 5
+        addItem(R.string.plugin_item_info_mechanism, id = "mechanism")
+        addItem(R.string.text_source, id = "pluginItemInfoSource")
+        addItem(R.string.apk_info_package_name, id = "packageName").maxLines = 5
+        addItem(R.string.text_version, id = "version")
+        addItem(R.string.plugin_item_info_updatable_version, id = "updatableVersion").isVisible = false
+        addItem(R.string.plugin_item_info_author, id = "pluginItemInfoAuthor").maxLines = 5
+        addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsFirst").isVisible = false
+        addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsSecond").isVisible = false
+        addItem(R.string.plugin_item_info_collaborators, id = "pluginItemInfoCollaboratorsThird").isVisible = false
+        addItem(R.string.text_description, id = "description").maxLines = 20
+        addItem(R.string.plugin_item_info_package_size, id = "pluginItemInfoPackageSize")
+        addItem(R.string.plugin_item_info_supported_abis, id = "pluginItemInfoSupportedAbis").maxLines = 3
+        addItem(R.string.plugin_item_info_installed_abis, id = "pluginItemInfoInstalledAbis").apply {
+            maxLines = 3
+            isVisible = false
+        }
+        addItem(R.string.plugin_item_info_first_install_time, id = "pluginItemInfoFirstInstallTime").isVisible = false
+        addItem(R.string.plugin_item_info_last_update_time, id = "pluginItemInfoLastUpdateTime").isVisible = false
+        addItem(R.string.plugin_item_info_last_install_time, id = "pluginItemInfoLastInstallTime").isVisible = false
+        addItem(R.string.plugin_item_info_last_uninstall_time, id = "pluginItemInfoLastUninstallTime").isVisible = false
+    }
+
+    /**
+     * Writes [info] into the rows of a shown dialog, for the first bind and for in-place refreshes alike.
+     * Optional rows are hidden again first, so a refresh never keeps a row the new item no longer has;
+     * a package size probed over HTTP is kept while the item still has none. The icon is bound again
+     * only when its source changed ([rebindIcon]); otherwise only the enabled tint is reapplied.
+     * zh-CN: 把 [info] 写入已显示对话框的各行, 首次绑定与原地刷新共用. 先重新隐藏可选行, 刷新后不会残留新条目已没有的行;
+     * 条目仍无大小时保留经 HTTP 探测到的安装包大小. 仅当图标来源变化 ([rebindIcon]) 时重新绑定图标, 否则只重新应用启用状态着色.
+     */
+    private fun bindInfo(context: Context, infoDialog: InfoDialog, info: PluginInfoBase, rebindIcon: Boolean) {
+        val items = infoDialog.items
+        val dialog = infoDialog.dialog
+        if (dialog.titleView.text?.toString() != info.title) {
+            dialog.setTitle(info.title)
+            // The copy action captured the previous title text.
+            // zh-CN: 复制动作捕获的是之前的标题文本.
+            dialog.makeTextCopyable { it.titleView }
         }
 
-        val dialog = infoDialog.builder
-            .limitIconToDefaultSize()
-            .title(info.title)
-            .negativeText(R.string.dialog_button_dismiss)
-            .onNegative { d, _ -> d.dismiss() }
-            .autoDismiss(false)
-            .apply(builderApplier)
-            .let { infoDialog.show() }
-
-        // Hold the current dialog and package name for refreshing on onResume.
-        // zh-CN: 记录 "当前对话框" 与包名, 便于 onResume 刷新.
-        currentDialog = WeakReference(dialog)
-        currentPackageName = info.packageName
-
+        items["version"].key = context.getString(R.string.text_version)
+        OPTIONAL_ROWS.forEach { items[it].isVisible = false }
         restoreEssentialViews(items, context, info)
 
         if (info.states.isEmpty()) {
             items["state"].isVisible = false
         } else {
+            items["state"].isVisible = true
             items["state"].setValue(info.states.joinToString(" ${context.getString(R.string.symbol_pipe)} "))
         }
 
-        items["packageName"].setValueIfAbsent(info.packageName)
-        items["mechanism"].setValueIfAbsent(info.mechanism)
-        items["pluginItemInfoSource"].setValueIfAbsent(resolveSourceText(context, info))
-        items["version"].setValueIfAbsent(info.version)
-        items["pluginItemInfoAuthor"].setValueIfAbsent(info.author)
-        items["description"].setValueIfAbsent(info.description)
-        items["pluginItemInfoPackageSize"].setValueIfAbsent(info.packageSize.takeIf { it > 0 }?.let { formatSize(it) })
-        items["pluginItemInfoSupportedAbis"].setValueIfAbsent(
+        items["packageName"].setValue(info.packageName)
+        items["mechanism"].setValue(info.mechanism)
+        items["pluginItemInfoSource"].setValue(resolveSourceText(context, info))
+        items["version"].setValue(info.version)
+        items["pluginItemInfoAuthor"].setValue(info.author)
+        items["description"].setValue(info.description)
+        val packageSize = info.packageSize.takeIf { it > 0 }?.let { formatSize(it) }
+        if (packageSize != null) {
+            items["pluginItemInfoPackageSize"].setValue(packageSize)
+        } else {
+            items["pluginItemInfoPackageSize"].setValueIfAbsent(null)
+        }
+        items["pluginItemInfoSupportedAbis"].setValue(
             PluginAbiUtils.formatSupportedAbisForDisplay(
                 info.supportedAbis,
                 context.getString(R.string.text_unknown),
@@ -190,27 +265,28 @@ object PluginInfoDialogManager {
         // zh-CN: "已安装 ABI" 取自已安装包本身; 未安装或无原生代码时不显示该行.
         info.installedAbis?.takeIf { it.isNotEmpty() }?.let { installedAbis ->
             items["pluginItemInfoInstalledAbis"].apply {
-                setValueIfAbsent(PluginAbiUtils.formatAbiListOrFallback(installedAbis, context.getString(R.string.text_unknown)))
+                setValue(PluginAbiUtils.formatAbiListOrFallback(installedAbis, context.getString(R.string.text_unknown)))
                 isVisible = true
             }
         }
-        bindDialogIcon(context, dialog, info)
-
-        // If the index does not provide size, try to HEAD request to get it, update display after success.
-        // zh-CN: 若索引未给 size, 尝试 HEAD 获取, 成功后更新显示.
-        if (info.packageSize <= 0) {
-            info.apkUrl.takeUnless { it.isNullOrBlank() }?.let { url ->
-                infoDialog.scope.launch {
-                    val size = withContext(Dispatchers.IO) { PluginInstaller.probeContentLength(url) }
-                    if (size != null && size > 0 && currentDialog?.get() === dialog) {
-                        items["pluginItemInfoPackageSize"].setValueIfAbsent(formatSize(size))
-                    }
-                }
-            }
+        if (rebindIcon) {
+            bindDialogIcon(context, dialog, info)
+        } else {
+            dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
         }
-
-        return infoDialog
     }
+
+    private val OPTIONAL_ROWS = listOf(
+        "updatableVersion",
+        "pluginItemInfoCollaboratorsFirst",
+        "pluginItemInfoCollaboratorsSecond",
+        "pluginItemInfoCollaboratorsThird",
+        "pluginItemInfoInstalledAbis",
+        "pluginItemInfoFirstInstallTime",
+        "pluginItemInfoLastUpdateTime",
+        "pluginItemInfoLastInstallTime",
+        "pluginItemInfoLastUninstallTime",
+    )
 
     private fun resolveSourceText(context: Context, info: PluginInfoBase): String {
         val source = info.item.source.takeIf {

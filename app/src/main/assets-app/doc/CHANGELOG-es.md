@@ -524,6 +524,7 @@
 * `Corrección` El Centro de complementos restauraba desde la caché complementos retirados o renombrados tras actualizar el índice correctamente
 * `Corrección` Falta del fondo circular de los iconos en los detalles del centro de plugins y bordes en caché que no se actualizaban al cambiar de tema
 * `Corrección` Los colores Material elegidos en el diseño antiguo no se podían encontrar con "Localizar color del tema actual" tras cambiar de diseño, y la página de colores Material no mostraba el resumen del color actual
+* `Corrección` Abrir los detalles de un complemento justo después de un arranque en frío del centro de complementos podía hacer parpadear el cuadro de diálogo, porque cada actualización de la lista lo reconstruía
 * `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
 * `Mejora` El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado

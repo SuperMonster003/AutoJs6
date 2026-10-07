@@ -46,6 +46,7 @@ class PluginCenterItemSemanticsTest {
             "installableApkSha256" to base.copy(installableApkSha256 = "install-sha"),
             "installableApkSizeBytes" to base.copy(installableApkSizeBytes = 3L),
             "supportedAbis" to base.copy(supportedAbis = listOf("arm64-v8a")),
+            "installedAbis" to base.copy(installedAbis = listOf("arm64-v8a")),
             "remoteIconUrl" to base.copy(remoteIconUrl = "https://example.com/icon.png"),
             "remoteNightIconUrl" to base.copy(remoteNightIconUrl = "https://example.com/icon-night.png"),
             "forceIgnoreLocalIcon" to base.copy(forceIgnoreLocalIcon = true),

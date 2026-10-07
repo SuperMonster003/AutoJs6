@@ -524,6 +524,7 @@
 * `Fix` Plugin Center could restore removed or renamed plugins from cache after a successful index refresh
 * `Fix` Missing circular icon backgrounds in Plugin Center details dialogs and stale themed borders when cached artwork is reused
 * `Fix` Material colors chosen in the legacy layout could not be found with "Locate current theme color" after switching layouts, and the Material colors page did not show the current color summary
+* `Fix` Opening plugin details right after a cold start of the Plugin Center could make the dialog flash because each list refresh rebuilt it
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record
