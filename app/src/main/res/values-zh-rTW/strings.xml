@@ -2537,7 +2537,7 @@
     <string name="text_state_source_charging">充電</string>
     <string name="text_state_source_none">無</string>
     <string name="text_state_source_power_save">省電模式</string>
-    <string name="text_state_source_script_running">腳本執行</string>
+    <string name="text_state_source_script_running">指令碼執行</string>
     <string name="text_state_source_script_states">指令碼狀態</string>
     <string name="text_state_source_seasons">季節</string>
     <string name="text_state_source_sunrise_sunset">日出日落</string>
