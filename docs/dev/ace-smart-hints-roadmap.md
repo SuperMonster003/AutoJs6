@@ -60,6 +60,8 @@
 
 ### P1 手动触发与参数提示重载 (2026-10-07 落地)
 
+提交: 宿主 `f9094f9b35` (roadmap), `36584f5088` (功能), 本节日志提交 (见 git log); 插件 `77fd25b` (`feat(editor): smart hint trigger and signature help overloads`, 1.24.0, 契约 6).
+
 - [x] P1.1 插件 `autojs6_ts_language_service.js` 返回全部重载 (`signatures[]`, `activeSignature`, `parameterDocs`, `isVariadic`, `applicableSpanStart`), 顶层兼容字段镜像当前签名 (D4). (证据: 插件 `tools/ace-lsp/verify-runtime.mjs` 新增 `Array#splice` 重载断言, Gradle `:app:verifyAutoJs6LspRuntime`)
 - [x] P1.2 插件 `autojs6_signature_help.js`: `normalizeSignatureHelp`, `isInsideCallArguments`, 控制器的 `‹ i/n ›` 导航行 (点按切换, 阻止焦点转移), `cycleSignature`, `isVisible`, `getSignatureCount`, 手动选择在同一调用内保持, rest 参数高亮, 当前参数文档优先; `autojs6.css` 导航行样式 (点按目标 32px). (证据: 宿主 `tools/ace-signature/test-signature-help.mjs` 新增重载用例, 2026-10-07 通过)
 - [x] P1.3 插件 `autojs6_ace_bridge.js`: `triggerSmartHint` 按 D1 分派, `triggerSignatureHelp`, `triggerSymbolDocumentation`; 命令 `autojs6SmartHint` (Ctrl-Space|Alt-Space), `autojs6SignatureHelp` (Ctrl-Shift-Space), `autojs6ShowHover` (Ctrl-Q); 状态 JSON 增加 `signatureHelpVisible` / `signatureCount`; `window.AutoJsAce` 增加 `triggerSmartHint`, `triggerSignatureHelp`, `triggerSymbolDocumentation`, `cycleSignatureHelp`. (证据: `test-signature-help.mjs` 的桥接层字符串断言; 设备手测见 P1.8)

@@ -278,6 +278,7 @@
 * `Feature` Virtual library "Frequent and recommended": pinned favorites, other favorites and history colors scored by use count and recency (14 day half-life), with similar colors merged, at most 30 and hidden while empty; entries apply the way they were chosen and can become an intelligent color library; color history now counts uses, and its list can merge similar colors
 * `Feature` Perceptual color functions in the colors module: toOklab / oklab and toOklch / oklch, ensureContrast (WCAG ratio, 4.5 by default), harmony, tones, derive (primary, accent and dark), nightVariant, simulate (protanopia, deuteranopia, tritanopia) and extract (dominant colors of an image with count, region and step options); colors.distance, colors.isSimilar and images.detectColor accept the oklab algorithm
 * `Feature` colors.theme controls the theme color from scripts: get, set (accent and dark options), reset, libraries, activate and deactivate (intelligent color libraries), next (rotates at once), state (switches the "Script states" source) and current; script changes within 500 ms are merged and recorded in the history as "Script: name", and the theme color page offers "Undo script change" to restore the previous selection, including an active intelligent color library
+* `Feature` Long-pressing TAB on the Ace editor shortcut panel triggers smart hints, showing code completion, parameter hints or symbol documentation based on the cursor context and cycling overloads while parameter hints are visible; hardware keyboard Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q map to smart hints / parameter hints / symbol documentation
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
@@ -709,6 +710,8 @@
 * `Improvement` The light and dark window background entries of the default color library are merged into one "Background color" entry offering Light, Dark, Auto and Auto inverted; selections made before the upgrade are kept
 * `Improvement` The theme color summary names the library and color (the current group for intelligent color libraries), and "Locate current theme color" finds colors in user libraries and the active intelligent color library; the legacy layout shows the active intelligent color library by name, and choosing a color there turns it off
 * `Improvement` Search on the color library list also covers the colors of user libraries and the groups of intelligent color libraries (by name or any of their colors); results name their library and apply or activate on tap, and the search help explains the scope
+* `Improvement` Ace editor parameter hints support overloaded methods, showing the overload index with tappable switching and preferring the documentation of the current parameter
+* `Improvement` Editor menu "Jump" gains "Jump to previous cursor" (formerly the TAB long-press action), which can be recorded in action favorites
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
