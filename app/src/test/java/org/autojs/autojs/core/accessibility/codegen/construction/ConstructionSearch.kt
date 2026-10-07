@@ -50,6 +50,11 @@ enum class ConstructionStopReason {
     DEPTH_BUDGET, DEADLINE, POLICY_FAILURE, CAPTURE_LIMIT, TRACE_REFERENCE_BUDGET, INVALID_REQUEST,
 }
 
+/** FAMILY_SCORE preserves the first experiment. ANCHOR_PHASE_FAIR is an opt-in search-controller
+ * experiment; it changes neither the grammar nor the policy feature schema.
+ * zh-CN: FAMILY_SCORE 保留首轮实验; 新模式仅调整可选搜索控制器, 不改变语法或特征协议. */
+enum class ConstructionFrontierMode { FAMILY_SCORE, ANCHOR_PHASE_FAIR }
+
 data class ConstructionDecision(val stateKey: String, val actionKey: String, val features: FloatArray, val score: Double)
 data class ConstructionExpansion(val stateKey: String, val legalActionKeys: List<String>, val scoredActions: List<ConstructionDecision>)
 data class ConstructionCompletion<N : UiNode<N>>(
@@ -75,6 +80,7 @@ data class ConstructionStats(
     val truncatedAnchors: Boolean,
     val traceReferences: Int,
     val hardDeadlineMillis: Long,
+    val peakFairCursorAnchors: Int = 0,
 )
 data class ConstructionResult<N : UiNode<N>>(
     val candidates: List<Verified<N>>,
@@ -87,9 +93,9 @@ data class ConstructionResult<N : UiNode<N>>(
     val policyFailure: String? = null,
 )
 
-/** Best-value search inside each family, with round-robin family expansion. Heuristic and learned
- * runs differ only in [policy]. Prefixes pruned by a budget have no completion/failed label.
- * zh-CN: 族内按价值搜索, 族间轮转. 启发式和学习策略仅 policy 不同; 未完成前缀不标失败. */
+/** Family expansion is round-robin. [frontierMode] controls retention and expansion within a
+ * family, and must be shared by the heuristic/learned comparison. Pruned prefixes have no label.
+ * zh-CN: 族间轮转, frontierMode 控制族内保留及展开且须在启发式/学习对照中一致; 裁剪前缀不标失败. */
 class ConstructionSearch<N : UiNode<N>>(
     root: N,
     private val cancellation: CancellationSignal = CancellationSignal(),
@@ -97,6 +103,7 @@ class ConstructionSearch<N : UiNode<N>>(
     private val policy: ConstructionPolicy = ConstructionHeuristicPolicy,
     private val verifier: PlanVerifier<N> = PlanVerifier(root, cancellation),
     private val nanoTime: () -> Long = System::nanoTime,
+    private val frontierMode: ConstructionFrontierMode = ConstructionFrontierMode.FAMILY_SCORE,
 ) {
     fun search(request: CodeGenRequest<N>): ConstructionResult<N> = Session(request).run()
 
@@ -122,6 +129,7 @@ class ConstructionSearch<N : UiNode<N>>(
         override val actionKey: String get() = decision.actionKey
         fun retain() = Prefix(state, parent.decisions + decision, score, actionKey)
     }
+    private class FairCursor(var anchor: Int? = null, val phases: MutableMap<Int, Int> = HashMap())
 
     private inner class Session(private val request: CodeGenRequest<N>) {
         private val started = nanoTime()
@@ -153,6 +161,11 @@ class ConstructionSearch<N : UiNode<N>>(
         private var stopReason = ConstructionStopReason.EXHAUSTED
         private var policyFailure: String? = null
         private var familyCursor = -1
+        // Cursors cover only live frontier anchors plus the one prefix currently being expanded.
+        // They do not retain a history of all visited anchors or construction states.
+        // zh-CN: 游标仅记录存活锚点及当前展开前缀, 不保存已访问锚点或构造状态的历史.
+        private val fairCursors = HashMap<Int, FairCursor>()
+        private var peakFairCursorAnchors = 0
         private lateinit var grammar: ConstructionGrammar<N>
 
         fun run(): ConstructionResult<N> {
@@ -232,7 +245,7 @@ class ConstructionSearch<N : UiNode<N>>(
                 ConstructionStats(attempts, expanded, scores, policyCalls, peak, peakPending, maxDepth, verificationNanos, featureNanos, policyNanos,
                     (nanoTime() - started).coerceAtLeast(0), pruned, depthPruned,
                     if (::grammar.isInitialized) grammar.truncatedAnchors else false,
-                    traceReferences, budget.maxMillis),
+                    traceReferences, budget.maxMillis, peakFairCursorAnchors),
                 stopReason, closest, rejections.toMap(), policyFailure,
             )
         }
@@ -255,7 +268,10 @@ class ConstructionSearch<N : UiNode<N>>(
                 checkpoint()
                 val existing = frontier.filter { it.state.family == family }
                 val choices: List<ScoredPrefix> = existing + incoming
-                val retained = orderPrefixes(choices).take(quota)
+                val retained = when (frontierMode) {
+                    ConstructionFrontierMode.FAMILY_SCORE -> orderPrefixes(choices).take(quota)
+                    ConstructionFrontierMode.ANCHOR_PHASE_FAIR -> retainFairly(choices, quota)
+                }
                 checkpoint()
                 frontier.removeAll(existing.toSet())
                 frontier += retained.map {
@@ -271,12 +287,83 @@ class ConstructionSearch<N : UiNode<N>>(
         }
 
         private fun takeNext(): Prefix {
+            if (frontierMode == ConstructionFrontierMode.ANCHOR_PHASE_FAIR) trimFairCursors()
             val groups = frontier.map { it.state.family?.ordinal ?: -1 }.distinct().sorted()
             val group = groups.firstOrNull { it > familyCursor } ?: groups.first()
             familyCursor = group
             val candidates = frontier.filter { (it.state.family?.ordinal ?: -1) == group }
-            return orderPrefixes(candidates).first().also { frontier.remove(it) }
+            val next = when (frontierMode) {
+                ConstructionFrontierMode.FAMILY_SCORE -> orderPrefixes(candidates).first()
+                ConstructionFrontierMode.ANCHOR_PHASE_FAIR -> {
+                    orderPrefixes(fairBuckets(candidates).first()).first().also {
+                        fairCursors.getOrPut(group) { FairCursor() }.apply {
+                            anchor = it.state.anchor
+                            phases[it.state.anchor] = it.state.phase.ordinal
+                        }
+                        val cursorAnchors = fairCursors.values.sumOf { cursor -> cursor.phases.size }
+                        check(cursorAnchors <= budget.maxFrontier)
+                        peakFairCursorAnchors = maxOf(peakFairCursorAnchors, cursorAnchors)
+                    }
+                }
+            }
+            return next.also { frontier.remove(it) }
         }
+
+        /** One slot per (anchor, phase) bucket before any bucket receives its second slot. Buckets
+         * interleave anchors first, then phases, starting after each cursor. Thus scores from an
+         * unfinished anchor cannot compete directly with scores from a mature selector. If there
+         * are more buckets than slots, this same deterministic circular order chooses survivors;
+         * no hidden overflow queue keeps pruned prefixes alive. In particular, excess initial
+         * anchors survive by captured-position order, not by their anchor-choice model scores.
+         * The policy still ranks condition/path alternatives within each surviving bucket.
+         * zh-CN: 每个 (锚点, 阶段) 先获一席再分配第二席. 先轮转锚点, 再轮转阶段, 从游标后开始.
+         * 不同阶段分数不直接竞争; 桶多于席位时按相同确定顺序裁剪, 不使用隐藏溢出队列.
+         * 初始锚点过多时按捕获位置保留, 不参考锚点动作分数; 桶内条件与路径仍由模型排序. */
+        private fun retainFairly(choices: List<ScoredPrefix>, quota: Int): List<ScoredPrefix> {
+            val buckets = fairBuckets(choices).map(::orderPrefixes)
+            return buildList {
+                var offset = 0
+                while (size < quota) {
+                    checkpoint()
+                    val before = size
+                    for (bucket in buckets) {
+                        if (size == quota) break
+                        bucket.getOrNull(offset)?.let(::add)
+                    }
+                    if (size == before) break
+                    offset++
+                }
+            }
+        }
+
+        /** Retention and expansion share this order. Every continuously retained anchor receives
+         * a turn, and its retained phases rotate independently, regardless of policy score.
+         * zh-CN: 保留与展开共用顺序. 持续保留的锚点均获轮次, 各锚点的阶段独立轮转, 不受分数影响. */
+        private fun <T : ScoredPrefix> fairBuckets(choices: List<T>): List<List<T>> {
+            val family = choices.first().state.family?.ordinal ?: -1
+            val cursor = fairCursors[family]
+            val anchors = choices.groupBy { it.state.anchor }
+            val ordered = cycleAfter(anchors.keys.sorted(), cursor?.anchor).map { anchor ->
+                val phases = anchors.getValue(anchor).groupBy { it.state.phase.ordinal }
+                cycleAfter(phases.keys.sorted(), cursor?.phases?.get(anchor)).map(phases::getValue)
+            }
+            return buildList {
+                for (offset in 0 until (ordered.maxOfOrNull { it.size } ?: 0)) {
+                    checkpoint()
+                    for (phases in ordered) phases.getOrNull(offset)?.let(::add)
+                }
+            }
+        }
+
+        private fun trimFairCursors() {
+            val live = frontier.groupBy { it.state.family?.ordinal ?: -1 }
+                .mapValues { (_, prefixes) -> prefixes.mapTo(HashSet()) { it.state.anchor } }
+            fairCursors.keys.retainAll(live.keys)
+            for ((family, cursor) in fairCursors) cursor.phases.keys.retainAll(live.getValue(family))
+        }
+
+        private fun cycleAfter(values: List<Int>, cursor: Int?): List<Int> =
+            if (cursor == null) values else values.filter { it > cursor } + values.filter { it <= cursor }
 
         private fun finish(prefix: Prefix) {
             // Bound references retained by audit traces, as well as the verifier's own caches.
