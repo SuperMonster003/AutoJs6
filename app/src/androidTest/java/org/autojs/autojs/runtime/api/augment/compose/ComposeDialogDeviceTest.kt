@@ -107,8 +107,17 @@ class ComposeDialogDeviceTest {
             // focus() requests focus; the public contract does not promise a visible software IME.
             // Use the same actual accessibility click as the existing P2 native input acceptance.
             click("Dialog input")
-            running.await("Clicking the focused dialog editor shows a real keyboard window") {
-                instrumentation.uiAutomation.windows.any { it.type==android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD }
+            val keyboardDeadline = SystemClock.uptimeMillis() + 25000
+            running.await("The focused dialog editor and laid out IME are ready for Back") {
+                if (!visibleKeyboardFor("Dialog input")) false else {
+                    val remaining = keyboardDeadline - SystemClock.uptimeMillis()
+                    if (remaining <= 0) false else try {
+                        // Window registration can precede the IME input view and a queued show.
+                        // Stay within the existing wait budget, then re-read native readiness.
+                        instrumentation.uiAutomation.waitForIdle(100, minOf(500L, remaining))
+                        visibleKeyboardFor("Dialog input")
+                    } catch (_: java.util.concurrent.TimeoutException) { false }
+                }
             }
             back()
             running.await("Back first hides the keyboard in the real dialog window") {
@@ -262,6 +271,32 @@ class ComposeDialogDeviceTest {
     }
 
     private fun back() = assertTrue("Deliver Back through Android",instrumentation.uiAutomation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK))
+    private fun visibleKeyboardFor(editorText: String): Boolean {
+        val editor = node { it.isEditable && it.isFocused && it.isVisibleToUser && it.text?.toString() == editorText }
+            ?: return false
+        if (editor.window?.isFocused != true) return false
+        val editorBounds = android.graphics.Rect().also(editor::getBoundsInScreen)
+        for (window in instrumentation.uiAutomation.windows) {
+            if (window.type != android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD) continue
+            val bounds = android.graphics.Rect().also(window::getBoundsInScreen)
+            if (bounds.isEmpty || editorBounds.isEmpty || android.graphics.Rect.intersects(bounds, editorBounds)) continue
+            val root = window.root ?: continue
+            if (!root.refresh() || !root.isVisibleToUser) continue
+            val pending = java.util.ArrayDeque<AccessibilityNodeInfo>().apply { add(root) }
+            var visited = 0
+            while (pending.isNotEmpty() && visited++ < 512) {
+                val current = pending.removeFirst()
+                if (!current.refresh()) continue
+                val contentBounds = android.graphics.Rect().also(current::getBoundsInScreen)
+                // Key actions are not required: some IMEs expose virtual keys only during
+                // touch exploration. A visible, laid out native input subtree works for both.
+                if (current !== root && current.isVisibleToUser && !contentBounds.isEmpty &&
+                    android.graphics.Rect.intersects(bounds, contentBounds)) return true
+                for (index in 0 until current.childCount) current.getChild(index)?.let(pending::add)
+            }
+        }
+        return false
+    }
     private fun withSoftwareKeyboard(action: () -> Unit) {
         fun command(value: String): String = instrumentation.uiAutomation.executeShellCommand(value).let { descriptor ->
             android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).bufferedReader().use { it.readText().trim() }

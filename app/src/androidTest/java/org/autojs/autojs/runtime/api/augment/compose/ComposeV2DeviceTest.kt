@@ -274,6 +274,106 @@ class ComposeV2DeviceTest {
         }
     }
 
+    @Test fun legacyRawContainersRouteBackWithoutStealingNativeFocusOrRemovingCallerViews() = legacyContainerBack(raw = true)
+    @Test fun legacyResizableContainersRouteBackWithoutStealingNativeFocusOrRemovingCallerViews() = legacyContainerBack(raw = false)
+
+    private fun legacyContainerBack(raw: Boolean) {
+        assertTrue(Settings.canDrawOverlays(context))
+        Running("""
+            var window=floaty.${if (raw) "rawWindow" else "window"}('<vertical bg="#FFFFFFFF"><button id="legacy" text="V2 legacy native callback" textAllCaps="false"/><compose id="first" w="300" h="220"/><compose id="second" w="300" h="220"/></vertical>');
+            window.setPosition(24,80);
+            var nativeClicks=0;
+            window.legacy.on('click',function(){report('legacyClicks',++nativeClicks);});
+            ui.run(function(){window.requestFocus();window.legacy.setFocusableInTouchMode(true);window.legacy.requestFocus();});
+            runtime.putProperty('f4.legacyButton',window.legacy);
+            runtime.putProperty('f4.legacyFirst',window.first);
+            runtime.putProperty('f4.legacySecond',window.second);
+            var search=compose.SearchBar({query:'',expanded:false,placeholder:compose.Text({text:'V2 legacy search'}),
+                onExpandedChange:function(expanded){search.expanded=expanded;report('legacyExpanded',expanded);},
+                onQueryChange:function(text){search.query=text;}},compose.Text({text:'V2 legacy expanded results'}));
+            var first=compose.NavigationDrawer({open:true,
+                drawerContent:compose.Column({padding:8},compose.Text({text:'V2 legacy first drawer'})),
+                onOpenChange:function(open){first.open=open;report('legacyFirstOpen',open);}},compose.Text({text:'V2 legacy first body'}));
+            var second=compose.NavigationDrawer({open:true,
+                drawerContent:compose.Column({padding:8},compose.Text({text:'V2 legacy second drawer'})),
+                onOpenChange:function(open){second.open=open;report('legacySecondOpen',open);}},search);
+            var a=compose.attach(window.first,first),b=compose.attach(window.second,second);
+            a.on('close',function(){report('legacyFirstClosed',true);});
+            b.on('close',function(){report('legacySecondClosed',true);});
+            actions.focusFirst=function(){ui.run(function(){check(window.first.requestFocus(),'first focus failed');report('legacyFocused','first');});};
+            actions.focusSecond=function(){ui.run(function(){check(window.second.requestFocus(),'second focus failed');report('legacyFocused','second');});};
+            actions.expand=function(){search.expanded=true;};
+            actions.closeFirst=function(){a.close();};
+            actions.closeSecond=function(){b.close();};
+            actions.closeWindow=function(){window.close();report('legacyWindowClosed',true);};
+        """, ui = false).use { running ->
+            running.await("Both independently owned Compose containers render in the caller window") {
+                text("V2 legacy first drawer") && text("V2 legacy second drawer")
+            }
+            val button = ComposeScriptValues.unwrap(running.engine.runtime.getProperty("f4.legacyButton")) as View
+            val first = ComposeScriptValues.unwrap(running.engine.runtime.getProperty("f4.legacyFirst")) as ViewGroup
+            val second = ComposeScriptValues.unwrap(running.engine.runtime.getProperty("f4.legacySecond")) as ViewGroup
+            var callerParent: android.view.ViewParent? = null
+            instrumentation.runOnMainSync {
+                callerParent = first.parent
+                assertSame("Attaching active drawers preserves the caller's focused native button", button, button.rootView.findFocus())
+                assertEquals(1, first.childCount)
+                assertEquals(1, second.childCount)
+            }
+            click("V2 legacy native callback")
+            running.await("The original native listener works alongside both containers") { running.property("legacyClicks") == "1" }
+            running.command("focusFirst")
+            running.await("The first container is explicitly chosen in the focused legacy window") {
+                running.property("legacyFocused") == "first" && node { it.text?.toString() == "V2 legacy first drawer" }?.window?.isFocused == true
+            }
+            assertTrue(instrumentation.uiAutomation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK))
+            running.await("Back reaches only the focused first container") { running.property("legacyFirstOpen") == "false" }
+            assertNull("The second open drawer does not consume another container's Back", running.property("legacySecondOpen"))
+            running.command("closeFirst")
+            running.await("Closing the first Compose session leaves the legacy window and second session alive") {
+                running.property("legacyFirstClosed") == "true" && text("V2 legacy second drawer")
+            }
+            instrumentation.runOnMainSync {
+                assertEquals("Only the first owned wrapper was removed", 0, first.childCount)
+                assertEquals(1, second.childCount)
+                assertSame(callerParent, first.parent)
+                assertSame(callerParent, second.parent)
+                assertSame(callerParent, button.parent)
+            }
+            running.command("focusSecond")
+            running.await("The second container can receive native focus after its sibling closes") { running.property("legacyFocused") == "second" }
+            assertTrue(instrumentation.uiAutomation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK))
+            running.await("Back now reaches the remaining container") { running.property("legacySecondOpen") == "false" }
+            running.command("expand")
+            running.await("The surviving legacy container can immediately show expanded SearchBar") {
+                node { it.text?.toString() == "V2 legacy expanded results" && it.isVisibleToUser } != null
+            }
+            if (instrumentation.uiAutomation.windows.any { it.type == android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD }) {
+                assertTrue(instrumentation.uiAutomation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK))
+                running.await("The native IME consumes its own Back first") {
+                    instrumentation.uiAutomation.windows.none { it.type == android.view.accessibility.AccessibilityWindowInfo.TYPE_INPUT_METHOD }
+                }
+            }
+            assertTrue(instrumentation.uiAutomation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK))
+            running.await("Expanded search receives Back through its scoped owner") { running.property("legacyExpanded") == "false" }
+            running.command("closeSecond")
+            running.await("The second session also closes independently") { running.property("legacySecondClosed") == "true" }
+            instrumentation.runOnMainSync {
+                assertEquals(0, first.childCount)
+                assertEquals(0, second.childCount)
+                assertSame(callerParent, first.parent)
+                assertSame(callerParent, second.parent)
+                assertSame(callerParent, button.parent)
+            }
+            click("V2 legacy native callback")
+            running.await("Both Compose cleanups preserve the original native listener") { running.property("legacyClicks") == "2" }
+            running.command("closeWindow")
+            running.await("The caller still owns and closes its original window") {
+                running.property("legacyWindowClosed") == "true" && !text("V2 legacy native callback")
+            }
+        }
+    }
+
     private inner class Running(source: String, ui: Boolean=true, keepAlive: Boolean=true, initialProperties: Map<String, Any> = emptyMap()) : Closeable {
         private val marker="compose-f4-${UUID.randomUUID()}"
         private val started=CountDownLatch(1)

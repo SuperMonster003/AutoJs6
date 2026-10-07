@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.augment.compose
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.view.OneShotPreDrawListener
 import androidx.lifecycle.LifecycleOwner
@@ -21,6 +22,7 @@ internal class AndroidComposeContainerRenderer(
     private var onDestroyed: (() -> Unit)?,
 ) : ComposeSessionRenderer, View.OnAttachStateChangeListener {
     private var delegate: ComposeAndroidRenderer? = null
+    private var backView: ComposeFloatyBackView? = null
     private var attachedOnce = false
     private var disposed = false
     private var mounted = false
@@ -34,12 +36,18 @@ internal class AndroidComposeContainerRenderer(
         this.sink = sink
         val target = requireNotNull(container)
         val owner = contextOwner(target.context)
+        val floatyOwners = if (owner == null) ComposeFloatyOwners() else null
         delegate = ComposeAndroidRenderer(target.context, loaded, sessionId, { view ->
             if (target.childCount != 0) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
                 "Compose container already has content")
             beforeMount?.invoke(view)
-            target.addView(view, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
-        }, owner, if (owner == null) ComposeFloatyOwners() else null, { onDestroyed?.invoke() }).also { it.open(sink) }
+            val child = if (floatyOwners == null) view else ComposeFloatyBackView(target.context, floatyOwners,
+                preserveOutsideFocus = true).also { wrapper ->
+                backView = wrapper
+                wrapper.addView(view, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+            }
+            target.addView(child, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+        }, owner, floatyOwners, { onDestroyed?.invoke() }).also { it.open(sink) }
     }
 
     override fun attach() {
@@ -57,7 +65,7 @@ internal class AndroidComposeContainerRenderer(
     override fun detach() {
         mounted = false; ready = false
         preDraw?.removeListener(); preDraw = null; commands.clear()
-        delegate?.detach()
+        try { delegate?.detach() } finally { removeBackView() }
     }
     override fun apply(batch: UiPatchBatch) { requireNotNull(delegate).apply(batch); changed(batch.generation) }
     override fun apply(batch: UiPatchBatch, views: List<org.autojs.plugin.compose.api.interop.AndroidViewBindingV1>) {
@@ -103,7 +111,12 @@ internal class AndroidComposeContainerRenderer(
         preDraw?.removeListener(); preDraw = null; commands.clear(); sink = null
         container?.removeOnAttachStateChangeListener(this)
         container = null; beforeMount = null; onDestroyed = null
-        try { delegate?.dispose() } finally { delegate = null }
+        try { delegate?.dispose() } finally { removeBackView(); delegate = null }
+    }
+
+    private fun removeBackView() {
+        val owned = backView.also { backView = null } ?: return
+        (owned.parent as? ViewGroup)?.removeView(owned)
     }
 
     private fun contextOwner(context: Context): LifecycleOwner? {

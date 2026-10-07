@@ -146,6 +146,14 @@ an API 33+ callback registration under that policy, its compatibility Back key p
 still reaches the owned View. The fallback focus target is established after actual
 layout/window focus and never focuses an underlying search field by itself.
 
+`compose.attach` in legacy raw/resizable windows uses the same Back integration
+for its owned Compose child. Multiple floating containers keep independent owners:
+the focused subtree receives Back, and attaching or updating another container does
+not take focus from a caller View. Native focus changes update the scoped system
+registration; touching a container can select it. Closing a session removes only
+its owned child and leaves the caller's XML tree, listeners and other containers
+available. Activity-backed containers retain the Activity's existing Back path.
+
 Host device tests cover native navigation/tab/chip/segment interactions, seven
 invalid updates with retained callbacks, popup/tooltip/sheet execution on Activity
 and overlay windows, a sheet inside an overlay dialog with its actual native root

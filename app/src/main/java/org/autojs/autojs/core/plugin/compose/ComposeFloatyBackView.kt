@@ -3,17 +3,22 @@ package org.autojs.autojs.core.plugin.compose
 import android.content.Context
 import android.os.Build
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.Lifecycle
 import java.io.Closeable
 
 /** Back dispatch belongs to this owned overlay, including when a Compose child has native focus. */
-internal class ComposeFloatyBackView(context: Context, private val owners: ComposeFloatyOwners) : FrameLayout(context) {
+internal class ComposeFloatyBackView(context: Context, private val owners: ComposeFloatyOwners,
+    private val preserveOutsideFocus: Boolean = false) : FrameLayout(context) {
     private var callbackObserver: Closeable? = null
     private var systemBack: Closeable? = null
     private var trackingBack = false
+    private var focusObserverTree: ViewTreeObserver? = null
+    private val focusObserver = ViewTreeObserver.OnGlobalFocusChangeListener { _, _ -> refreshBackRegistration() }
 
     init {
         isFocusableInTouchMode = true
@@ -24,10 +29,16 @@ internal class ComposeFloatyBackView(context: Context, private val owners: Compo
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        if (preserveOutsideFocus) viewTreeObserver.also {
+            focusObserverTree = it
+            it.addOnGlobalFocusChangeListener(focusObserver)
+        }
         callbackObserver = owners.observeBackCallbacks(::refreshBackRegistration)
     }
 
     override fun onDetachedFromWindow() {
+        focusObserverTree?.takeIf { it.isAlive }?.removeOnGlobalFocusChangeListener(focusObserver)
+        focusObserverTree = null
         callbackObserver?.close(); callbackObserver = null
         systemBack?.close(); systemBack = null
         trackingBack = false
@@ -48,19 +59,43 @@ internal class ComposeFloatyBackView(context: Context, private val owners: Compo
         owners.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) &&
         owners.onBackPressedDispatcher.hasEnabledCallbacks()
 
-    private fun dispatchBack() { if (canDispatch()) owners.onBackPressedDispatcher.onBackPressed() }
+    private fun dispatchBack() {
+        if (canDispatch() && (!preserveOutsideFocus || containsFocus(rootView.findFocus())))
+            owners.onBackPressedDispatcher.onBackPressed()
+    }
 
     private fun refreshBackRegistration() {
         if (!canDispatch()) {
             systemBack?.close(); systemBack = null
             return
         }
-        if (Build.VERSION.SDK_INT >= 33 && systemBack == null) systemBack = Api33.register(this, ::dispatchBack)
         // Raw windows may have no focused child; adjustable windows may initially focus chrome.
-        // Keep an existing descendant focus, and make only this overlay's Back path reachable.
-        var focused: View? = rootView.findFocus()
-        while (focused != null && focused !== this) focused = focused.parent as? View
-        if (focused !== this) requestFocus()
+        // An embedded container must never take focus from another container or caller View.
+        val focused = rootView.findFocus()
+        if (!containsFocus(focused)) {
+            if (preserveOutsideFocus && focused != null) {
+                systemBack?.close(); systemBack = null
+                return
+            }
+            requestFocus()
+        }
+        if (preserveOutsideFocus && !containsFocus(rootView.findFocus())) {
+            systemBack?.close(); systemBack = null
+            return
+        }
+        if (Build.VERSION.SDK_INT >= 33 && systemBack == null) systemBack = Api33.register(this, ::dispatchBack)
+    }
+
+    private fun containsFocus(view: View?): Boolean {
+        var current = view
+        while (current != null && current !== this) current = current.parent as? View
+        return current === this
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (preserveOutsideFocus && event.actionMasked == MotionEvent.ACTION_DOWN && canDispatch() &&
+            !containsFocus(rootView.findFocus())) requestFocus()
+        return super.dispatchTouchEvent(event)
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {

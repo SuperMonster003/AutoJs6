@@ -143,12 +143,12 @@ class ComposeFloatyScriptDeviceTest {
                     phase = 1;
                     win.setPosition(51, 151); win.setSize(TEST.width - 20, TEST.height + 20);
                     win.setTouchable(true); win.requestFocus(); win.setAdjustEnabled(true);
-                    win.post(function () {
-                        report({phase:'adjusted', x:win.getX(), y:win.getY(), width:win.getWidth(), height:win.getHeight()});
-                    }, 100);
                 } else if (phase === 1 && action === 2) {
                     phase = 2; win.disableFocus(); report({phase:'unfocused'});
                 }
+                // Native layout is asynchronous. Keep reporting actual facade readback until
+                // the observer verifies the requested geometry, instead of freezing a 100 ms sample.
+                if (phase === 1) report({phase:'geometry', x:win.getX(), y:win.getY(), width:win.getWidth(), height:win.getHeight()});
             }, 50);
         """).use { running ->
             running.await("Resizable overlay attaches with the supplied flags") {
@@ -161,7 +161,9 @@ class ComposeFloatyScriptDeviceTest {
             assertTrue(window is BaseResizableFloatyWindow)
             running.action(1)
             running.await("Window commands reach the native resizable bridge") {
-                running.reportOrNull()?.optString("phase") == "adjusted" &&
+                running.reportOrNull()?.let { result -> result.optString("phase") == "geometry" &&
+                    result.optInt("x") == 51 && result.optInt("y") == 151 &&
+                    result.optInt("width") == running.width - 20 && result.optInt("height") == running.height + 20 } == true &&
                     flags(window) and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE == 0 &&
                     flags(window) and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE == 0
             }

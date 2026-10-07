@@ -63,8 +63,8 @@ unchanged and its test permits only the specific version-literal transition.
 | Host 5322 with archived actual V1 renderer 31 | 6 tests passed: new nodes reject with UNKNOWN_COMPONENT while the retained callback and all five original examples work |
 | API 35 first signed V2 candidate, public script scenarios | 5 tests passed in 13.582 s |
 | API 35 final focused overlay Drawer/SearchBar Back case | 1 test passed in 4.987 s after the owner-focus and controlled Drawer fixes |
-| Final signed renderer, API 24 x86 host matrix | 27 pass: seven F.4 cases plus the existing 20 F.2/F.3/floaty regressions |
-| Final signed renderer, API 35 x86_64 host matrix | The same 27 pass |
+| Earlier signed d4f266d2 renderer, API 24 / API 35 | The original 27-case matrices passed before adding the two legacy-container cases |
+| Expanded 29-scenario host coverage, API 24 / API 35 | All scenarios have passing coverage across full runs and the targeted fixture retests below; no claim that the last single full run was entirely green |
 | Actual V2 TSX with installed local Engine 0.6.7 | The new mixed dialog/AndroidView/navigation/pager/chip case passes |
 
 The first API 35 scenarios verify controlled navigation/tab/chip/segment changes,
@@ -94,16 +94,68 @@ from a user change request. The fixture retains that immediate transition and
 does not wait for the drawer animation to hide the defect. Its final focused
 result is in `app/build/compose-f4/host-back-drawer-final-api35.log`.
 
-## Final host gate
+Embedded legacy raw/resizable windows also require this integration. Their
+ownerless Compose containers now wrap only the owned renderer child, keep caller
+and sibling-container focus intact, and route Back only to the focused subtree.
+The two added device cases passed on API 24 and API 35: both containers preserve
+the initially focused native button, Back reaches each explicitly selected
+container, immediate SearchBar expansion remains usable, and independent closes
+leave zero owned children while preserving XML parents and the original native
+click listener. No renderer or shared-API change was needed for this host fix.
 
-The final host matrix ran the signed renderer
-`autojs6-plugin-compose-ui-v1.1.0-d4f266d2.apk` on both owned AVDs. All 27 cases
-passed on each device: seven F.4 cases, six F.2 interop cases, six F.3 dialog
-cases and eight existing floaty cases. API 24 took 67.494 s, API 35 took 71.770 s;
-these are suite durations, not performance benchmarks. Logs are
-`app/build/compose-f4/host-final-api24.log` and `host-final-api35.log`.
-Renderer SHA-256 is
-`957ae7e988d18d5116c39e23986ae442f4813528f3e9dc9c6794977e9a05da35`.
+The expanded API 24 run exposed a pre-existing F.3 IME readiness assumption.
+Checking only for an INPUT_METHOD window could precede the usable input view or
+another queued show request. The test now checks a focused editor and focused
+Dialog window, a visible laid-out IME root/subtree, and editor bounds outside the
+IME area, then waits for public accessibility idle and checks again. Virtual key
+click actions are not required, since LatinIME can expose those only during touch
+exploration. This stays within the original 25 s budget and retains the single
+Back-to-hide assertion, subsequent noncancelable checks and API 24 coverage; no
+extra Back, forced hide or production workaround was added. The fresh test APK
+passed the original case in 11.002 s, recorded in `host-ime-ready-api24.log`.
+The earlier `host-ime-stale-test-apk-attempt.log` used the previous APK before its
+replacement build completed and is excluded from validation.
+
+During this final host rebuild, the shared platform selector automatically moved
+AGP from 9.4.0 to 9.4.1. Gradle 9.7.1, Kotlin 2.4.0 and R8 9.1.29 stayed the same.
+The host's selected 224 JVM tests and debug assembly passed again under AGP 9.4.1.
+This is a build-tool patch observation, not a renderer/Compose-runtime upgrade;
+no version escape hatch or dependency-lock change was introduced.
+
+## Host gate and targeted fixture retests
+
+The earlier signed `autojs6-plugin-compose-ui-v1.1.0-d4f266d2.apk` completed the
+original 27-case matrices on both owned AVDs: seven F.4 cases, six F.2 interop
+cases, six F.3 dialog cases and eight existing floaty cases. API 24 took 67.494 s
+and API 35 took 71.770 s. Adding the two legacy raw/resizable container cases
+expanded the matrix to 29 scenarios. The first expanded API 35 run passed all 29
+in 84.812 s; the API 24 run exposed the IME fixture condition documented above.
+
+The subsequent host runs under AGP 9.4.1 used the signed renderer
+`autojs6-plugin-compose-ui-v1.1.0-02a4b368.apk`. They passed the stronger IME check
+on both APIs but exposed two other fixture issues: a legacy raw-window focus call
+on the script thread on API 35, and a single 100 ms size sample taken before native
+layout completed on API 24. The legacy focus request now runs inside the same
+`ui.run` block as the fixture's native View writes. The resizable-window fixture
+continuously reads the actual public facade geometry on its existing 50 ms timer;
+its existing 20 s await still requires exactly x=51, y=151, width=initial-20 and
+height=initial+20, along with the native touch/focus flags. Original exact-value,
+disableFocus, native chrome close and cleanup assertions remain intact.
+
+After these fixture-only corrections, the three affected scenarios (legacy raw,
+legacy resizable, and exact geometry/chrome) passed together on both devices:
+API 35 in 12.682 s and API 24 in 9.438 s. Thus every scenario in the expanded set
+has passing coverage on each API across the full runs and targeted retests. The
+last single 29-case runs are not represented as entirely green. Suite durations
+here are validation timings, not performance benchmarks. Local logs are
+`host-final-api24.log`, `host-final-api35.log`, `host-complete-api24.log`,
+`host-complete-api35.log`, `host-final-29-api24.log`, `host-final-29-api35.log`,
+`host-final-fixtures-api24.log` and `host-final-fixtures-api35.log`, all under
+`app/build/compose-f4`.
+
+The renderer's final query-echo refinement is validated and identified separately
+in the plugin stage evidence. It does not change the shared API or host production
+sources; the host results above remain attributed to their actual signed APKs.
 
 The final cases include sheet-inside-overlay-popup window inheritance, real Back
 through the owned floating Drawer/SearchBar dispatcher, immediate content changes
