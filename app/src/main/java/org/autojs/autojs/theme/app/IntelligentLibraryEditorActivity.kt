@@ -17,6 +17,7 @@ import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -57,6 +58,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MtActivityIntelligentLibraryEditorBinding
 import org.autojs.autojs6.databinding.MtColorLibraryRecyclerViewItemBinding
 import java.time.ZoneId
+import org.autojs.autojs.theme.color.ThemeColorDerivation
 
 /**
  * Creates or edits a user intelligent library (roadmap P1.3): name, state source, rotation triggers,
@@ -481,6 +483,9 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         if (original == null) colors[keys.first()] = ThemeColorManager.colorPrimary
         // Colors chosen before "same as" was checked, restored when it is unchecked. zh-CN: 勾选 "相同" 之前选择的颜色, 取消勾选时恢复.
         val remembered = colors.filterValues { it != null }.toMutableMap()
+        // Explicit accent / dark per state; null follows the derivation setting (D2). zh-CN: 各状态显式的强调色 / 深色; null 表示跟随派生配色设置 (D2).
+        val accents = keys.associateWith { key -> original?.states?.get(key)?.accent }.toMutableMap()
+        val darks = keys.associateWith { key -> original?.states?.get(key)?.dark }.toMutableMap()
 
         val padding = dp(20)
         val content = LinearLayout(this).apply {
@@ -533,10 +538,32 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
                 text = getString(R.string.text_same_as_state, firstLabel)
                 isChecked = colors[key] == null
             }
+            // Accent and dark of this state, shown on demand (roadmap P4.6). zh-CN: 该状态的强调色与深色, 按需展开 (Roadmap P4.6).
+            val derivedPanel = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(16), 0, 0, dp(4))
+                visibility = if (accents[key] != null || darks[key] != null) View.VISIBLE else View.GONE
+            }
+            val derivedToggle = TextView(this).apply {
+                text = getString(R.string.text_accent_and_dark)
+                textSize = 12f
+                setTextColor(getColor(R.color.day_night_alpha_60))
+                setPadding(dp(8), dp(4), 0, dp(4))
+                setOnClickListener { derivedPanel.visibility = if (derivedPanel.visibility == View.VISIBLE) View.GONE else View.VISIBLE }
+            }
+            val derivedRenders = listOf(
+                addDerivedColorRow(derivedPanel, R.string.text_accent_color, { colors[key] }, accents, key, ThemeColorDerivation::deriveAccent),
+                addDerivedColorRow(derivedPanel, R.string.text_dark_color, { colors[key] }, darks, key, ThemeColorDerivation::deriveDark),
+            )
             fun render() {
                 val color = colors[key] ?: keys.firstNotNullOfOrNull { colors[it] }
                 (swatch.background as GradientDrawable).setColor(color ?: getColor(R.color.window_background))
                 hex.text = color?.let { String.format("#%06X", 0xFFFFFF and it) } ?: "-"
+                // A state without its own primary color shows the first state as a whole. zh-CN: 没有自身主色的状态整体显示第一个状态.
+                val own = colors[key] != null
+                derivedToggle.visibility = if (own) View.VISIBLE else View.GONE
+                if (!own) derivedPanel.visibility = View.GONE
+                derivedRenders.forEach { it() }
             }
             val pick = View.OnClickListener {
                 showColorPickerFor(colors[key] ?: remembered[key] ?: ThemeColorManager.colorPrimary) { picked ->
@@ -561,7 +588,9 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             row.addView(label)
             row.addView(swatch)
             row.addView(hex)
+            row.addView(derivedToggle)
             content.addView(row)
+            content.addView(derivedPanel)
             sameCheck?.let { content.addView(it) }
         }
 
@@ -618,7 +647,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             .positiveText(R.string.dialog_button_confirm)
             .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { dialog, _ ->
-                val states = colors.mapNotNull { (key, color) -> color?.let { key to (original?.states?.get(key)?.copy(primary = it) ?: StateColors(it)) } }.toMap()
+                val states = colors.mapNotNull { (key, color) -> color?.let { key to StateColors(it, accents[key], darks[key]) } }.toMap()
                 if (states.isEmpty()) {
                     ViewUtils.showToast(this, R.string.text_choose_at_least_one_color)
                     return@onPositive
@@ -716,6 +745,72 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
     private fun formatTime(millis: Long): String {
         val flags = DateUtils.FORMAT_SHOW_TIME or (if (DateUtils.isToday(millis)) 0 else DateUtils.FORMAT_SHOW_DATE)
         return DateUtils.formatDateTime(this, millis, flags)
+    }
+
+    /**
+     * Adds the row of a state's accent or dark color to [parent] and returns its render function. A null value
+     * follows the derivation setting and shows the color that setting currently gives (D2).
+     * zh-CN: 向 [parent] 添加某状态强调色或深色的行, 并返回其渲染函数. 值为 null 时跟随派生配色设置, 并显示该设置当前给出的颜色 (D2).
+     */
+    private fun addDerivedColorRow(parent: LinearLayout, @StringRes labelRes: Int, primaryOf: () -> Int?, values: MutableMap<String, Int?>, key: String, derive: (Int) -> Int): () -> Unit {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(2), 0, dp(2))
+        }
+        val label = TextView(this).apply {
+            text = getString(labelRes)
+            minWidth = dp(56)
+            textSize = 13f
+            setTextColor(getColor(R.color.day_night_alpha_60))
+        }
+        val swatch = View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(24), dp(24)).apply { marginEnd = dp(12) }
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setStroke(dp(1), getColor(R.color.day_night_alpha_20))
+            }
+            isClickable = true
+        }
+        val hex = TextView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            textSize = 13f
+            setTextColor(getColor(R.color.day_night_alpha_60))
+        }
+        val reset = TextView(this).apply {
+            text = getString(R.string.text_reset)
+            textSize = 12f
+            setTextColor(getColor(R.color.day_night_full))
+            setPadding(dp(8), dp(4), 0, dp(4))
+        }
+        fun effective(primary: Int) = values[key] ?: if (ThemeColorManager.isDerivationEnabled) derive(primary) else primary
+        fun render() {
+            val primary = primaryOf() ?: return
+            val color = effective(primary)
+            (swatch.background as GradientDrawable).setColor(color)
+            val hexText = String.format("#%06X", 0xFFFFFF and color)
+            hex.text = if (values[key] != null) hexText else getString(R.string.text_follows_derived_colors, hexText)
+            reset.visibility = if (values[key] != null) View.VISIBLE else View.GONE
+        }
+        val pick = View.OnClickListener {
+            val primary = primaryOf() ?: return@OnClickListener
+            showColorPickerFor(effective(primary)) { picked ->
+                values[key] = picked
+                render()
+            }
+        }
+        swatch.setOnClickListener(pick)
+        hex.setOnClickListener(pick)
+        reset.setOnClickListener {
+            values[key] = null
+            render()
+        }
+        row.addView(label)
+        row.addView(swatch)
+        row.addView(hex)
+        row.addView(reset)
+        parent.addView(row)
+        return ::render
     }
 
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()

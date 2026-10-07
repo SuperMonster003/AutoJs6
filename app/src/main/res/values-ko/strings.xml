@@ -785,6 +785,8 @@
     <string name="summary_retention_policies">버전 기록, 휴지통, 긴급 초안의 보관 일수 및 용량 상한</string>
     <string name="summary_setup_wizard_welcome_reset">다음 실행 시 홈에서 설정 마법사 환영 안내를 다시 표시합니다</string>
     <string name="summary_setup_wizards">자주 쓰는 권한 부여 및 공식 플러그인 설치</string>
+    <string name="text_accent_and_dark">강조 / 어두운 색</string>
+    <string name="text_accent_color">강조 색</string>
     <string name="text_add_all_to_color_library">모두 색상 라이브러리에 추가</string>
     <string name="text_add_colors">색상 추가</string>
     <string name="text_add_group">그룹 추가</string>
@@ -1281,6 +1283,7 @@
     <string name="text_custom">사용자 지정</string>
     <string name="text_daily_at">매일 %1$s</string>
     <string name="text_daily_task">일상적인 작업</string>
+    <string name="text_dark_color">어두운 색</string>
     <string name="text_date">날짜</string>
     <string name="text_date_overrides">날짜 재정의</string>
     <string name="text_date_overrides_hint">날짜가 일치하는 동안 지정한 그룹을 표시하고 전환을 멈춥니다. 위에서부터 처음 일치하는 항목이 적용됩니다</string>
@@ -1318,6 +1321,11 @@
     <string name="text_delete_revision_confirm">이 버전을 영구 삭제할까요?</string>
     <string name="text_delete_selected_revisions_confirm">선택한 %d개 버전을 영구 삭제할까요?</string>
     <string name="text_deleting">삭제 중</string>
+    <string name="text_derived_colors">파생 색상</string>
+    <string name="text_derived_colors_auto">자동 (기본 색에서 강조 색과 어두운 색 도출)</string>
+    <string name="text_derived_colors_description">강조 색은 플로팅 버튼에, 어두운 색은 상태 표시줄에 사용되며 플러그인은 세 가지 색을 모두 받습니다. 지능형 라이브러리 그룹에 지정한 강조 색과 어두운 색이 항상 우선합니다.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">파생 색상...</string>
+    <string name="text_derived_colors_off">끄기 (강조 색과 어두운 색을 기본 색과 동일하게)</string>
     <string name="text_description">설명</string>
     <string name="text_deselect_all">전체 해제</string>
     <string name="text_destination">대상</string>
@@ -1533,6 +1541,7 @@
     <string name="text_floating_run">플로팅 실행</string>
     <string name="text_folder">폴더</string>
     <string name="text_folder_colon_value">폴더: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (파생 색상 따르기)</string>
     <string name="text_force_stop">강제 정지</string>
     <string name="text_foreground_service">전경 서비스</string>
     <string name="text_formatting_completed">포맷 완료</string>

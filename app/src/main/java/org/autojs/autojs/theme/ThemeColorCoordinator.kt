@@ -50,7 +50,7 @@ object ThemeColorCoordinator {
         get() = synchronized(policy) { policy.pendingScript } ?: ThemeColorManager.currentThemeColor
 
     @JvmStatic
-    fun apply(color: Int, source: ThemeColorSource) = apply(ThemeColor(color), source)
+    fun apply(color: Int, source: ThemeColorSource) = apply(ThemeColorManager.resolve(color), source)
 
     @JvmStatic
     fun apply(themeColor: ThemeColor, source: ThemeColorSource) {

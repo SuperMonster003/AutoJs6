@@ -399,6 +399,10 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             lifecycleScope.launch { exchange.chooseAndExport(exchange.allChoices()) }
             true
         }
+        R.id.action_derived_colors -> {
+            DerivedColorsSetting.show(this)
+            true
+        }
         R.id.action_reorder_color_libraries -> {
             setReordering(!libraryAdapter.isReordering)
             true

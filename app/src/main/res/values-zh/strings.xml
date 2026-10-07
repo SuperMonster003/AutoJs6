@@ -779,6 +779,8 @@
     <string name="summary_retention_policies">版本历史, 回收站与紧急草稿的保留天数与容量上限</string>
     <string name="summary_setup_wizard_welcome_reset">下次启动时在主页再次显示设置向导的欢迎提示</string>
     <string name="summary_setup_wizards">授予常用权限及安装官方插件</string>
+    <string name="text_accent_and_dark">强调色 / 深色</string>
+    <string name="text_accent_color">强调色</string>
     <string name="text_add_all_to_color_library">全部加入颜色库</string>
     <string name="text_add_colors">添加颜色</string>
     <string name="text_add_group">添加组</string>
@@ -1276,6 +1278,7 @@
     <string name="text_custom">自定义</string>
     <string name="text_daily_at">每天 %1$s</string>
     <string name="text_daily_task">每日任务</string>
+    <string name="text_dark_color">深色</string>
     <string name="text_date">日期</string>
     <string name="text_date_overrides">日期覆盖</string>
     <string name="text_date_overrides_hint">日期命中期间显示指定的组并暂停换组; 自上而下第一个命中者生效</string>
@@ -1313,6 +1316,11 @@
     <string name="text_delete_revision_confirm">是否永久删除此版本记录</string>
     <string name="text_delete_selected_revisions_confirm">永久删除选中的 %d 个版本?</string>
     <string name="text_deleting">正在删除</string>
+    <string name="text_derived_colors">派生配色</string>
+    <string name="text_derived_colors_auto">自动 (由主色推导强调色与深色)</string>
+    <string name="text_derived_colors_description">强调色用于悬浮按钮, 深色用于状态栏, 插件可获取全部三种颜色. 智能库中各组显式填写的强调色与深色始终优先.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">派生配色...</string>
+    <string name="text_derived_colors_off">关 (强调色与深色同主色)</string>
     <string name="text_description">描述</string>
     <string name="text_deselect_all">取消全选</string>
     <string name="text_destination">目标</string>
@@ -1528,6 +1536,7 @@
     <string name="text_floating_run">悬浮运行</string>
     <string name="text_folder">文件夹</string>
     <string name="text_folder_colon_value">文件夹: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (跟随派生配色)</string>
     <string name="text_force_stop">强制停止</string>
     <string name="text_foreground_service">前台服务</string>
     <string name="text_formatting_completed">格式化已完成</string>

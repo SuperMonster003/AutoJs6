@@ -783,6 +783,8 @@
     <string name="summary_retention_policies">Días de retención y límites de tamaño del historial de versiones, la papelera y los borradores de emergencia</string>
     <string name="summary_setup_wizard_welcome_reset">Volver a mostrar el aviso de bienvenida de los asistentes de configuración en la página de inicio en el próximo inicio</string>
     <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
+    <string name="text_accent_and_dark">Acento / oscuro</string>
+    <string name="text_accent_color">Acento</string>
     <string name="text_add_all_to_color_library">Añadir todos a una biblioteca de colores</string>
     <string name="text_add_colors">Agregar colores</string>
     <string name="text_add_group">Agregar grupo</string>
@@ -1279,6 +1281,7 @@
     <string name="text_custom">Personalizado</string>
     <string name="text_daily_at">Cada día a las %1$s</string>
     <string name="text_daily_task">Tarea diaria</string>
+    <string name="text_dark_color">Oscuro</string>
     <string name="text_date">Fecha</string>
     <string name="text_date_overrides">Excepciones por fecha</string>
     <string name="text_date_overrides_hint">Mientras una fecha coincide, se muestra su grupo y la rotación se pausa; gana el primer elemento que coincida</string>
@@ -1316,6 +1319,11 @@
     <string name="text_delete_revision_confirm">¿Eliminar esta revision de forma permanente?</string>
     <string name="text_delete_selected_revisions_confirm">¿Eliminar permanentemente las %d revisiones seleccionadas?</string>
     <string name="text_deleting">Eliminando</string>
+    <string name="text_derived_colors">Colores derivados</string>
+    <string name="text_derived_colors_auto">Automático (derivar acento y oscuro del color principal)</string>
+    <string name="text_derived_colors_description">El color de acento se usa en los botones flotantes y el oscuro en la barra de estado; los complementos reciben los tres colores. Los colores de acento y oscuro definidos en un grupo de biblioteca inteligente siempre tienen prioridad.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">Colores derivados...</string>
+    <string name="text_derived_colors_off">Desactivado (acento y oscuro iguales al color principal)</string>
     <string name="text_description">Descripción</string>
     <string name="text_deselect_all">Deseleccionar todo</string>
     <string name="text_destination">Destino</string>
@@ -1531,6 +1539,7 @@
     <string name="text_floating_run">Ejecución flotante</string>
     <string name="text_folder">Carpeta</string>
     <string name="text_folder_colon_value">Carpeta: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (sigue los colores derivados)</string>
     <string name="text_force_stop">Forzar parada</string>
     <string name="text_foreground_service">Servicio de primer plano</string>
     <string name="text_formatting_completed">Formateo completado</string>

@@ -54,7 +54,7 @@ abstract class BaseActivity : AppCompatActivity() {
             initThemeColors()
             if (handleStatusBarThemeColorAutomatically) {
                 ThemeColorManager.setStatusBarBackgroundColor(this)
-                setUpStatusBarIconLightByThemeColor()
+                ThemeColorManager.setStatusBarIconLightByDarkColor(this)
             }
             if (handleNavigationBarContrastEnforcedAutomatically) {
                 setUpNavigationBarIconLightByNightMode()
@@ -88,7 +88,7 @@ abstract class BaseActivity : AppCompatActivity() {
         initThemeColors()
         if (handleStatusBarThemeColorAutomatically) {
             ThemeColorManager.addActivityStatusBar(this)
-            setUpStatusBarIconLightByThemeColor()
+            ThemeColorManager.setStatusBarIconLightByDarkColor(this)
         }
         if (handleNavigationBarContrastEnforcedAutomatically) {
             setUpNavigationBarIconLightByNightMode()

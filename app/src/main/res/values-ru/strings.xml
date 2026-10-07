@@ -783,6 +783,8 @@
     <string name="summary_retention_policies">Сроки хранения и ограничения размера для истории версий, корзины и аварийных черновиков</string>
     <string name="summary_setup_wizard_welcome_reset">Снова показать приветствие мастеров настройки на главной странице при следующем запуске</string>
     <string name="summary_setup_wizards">Предоставление основных разрешений и установка официальных плагинов</string>
+    <string name="text_accent_and_dark">Акцент / тёмный</string>
+    <string name="text_accent_color">Акцент</string>
     <string name="text_add_all_to_color_library">Добавить все в цветовую библиотеку</string>
     <string name="text_add_colors">Добавить цвета</string>
     <string name="text_add_group">Добавить группу</string>
@@ -1279,6 +1281,7 @@
     <string name="text_custom">Пользовательский</string>
     <string name="text_daily_at">Ежедневно в %1$s</string>
     <string name="text_daily_task">Ежедневная задача</string>
+    <string name="text_dark_color">Тёмный</string>
     <string name="text_date">Дата</string>
     <string name="text_date_overrides">Замены по датам</string>
     <string name="text_date_overrides_hint">Пока дата совпадает, показывается её группа и смена групп приостанавливается; действует первый совпавший пункт</string>
@@ -1316,6 +1319,11 @@
     <string name="text_delete_revision_confirm">Удалить эту ревизию навсегда?</string>
     <string name="text_delete_selected_revisions_confirm">Удалить %d выбранных версий навсегда?</string>
     <string name="text_deleting">Удаление</string>
+    <string name="text_derived_colors">Производные цвета</string>
+    <string name="text_derived_colors_auto">Авто (выводить акцент и тёмный из основного цвета)</string>
+    <string name="text_derived_colors_description">Акцентный цвет используется плавающими кнопками, тёмный — строкой состояния; плагины получают все три цвета. Акцентный и тёмный цвета, заданные в группе интеллектуальной библиотеки, всегда имеют приоритет.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">Производные цвета...</string>
+    <string name="text_derived_colors_off">Выкл. (акцент и тёмный совпадают с основным цветом)</string>
     <string name="text_description">Описание</string>
     <string name="text_deselect_all">Снять выделение</string>
     <string name="text_destination">Назначение</string>
@@ -1531,6 +1539,7 @@
     <string name="text_floating_run">Плавающий запуск</string>
     <string name="text_folder">Папка</string>
     <string name="text_folder_colon_value">Папка: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (по производным цветам)</string>
     <string name="text_force_stop">Принудительная остановка</string>
     <string name="text_foreground_service">Служба переднего плана</string>
     <string name="text_formatting_completed">Форматирование завершено</string>

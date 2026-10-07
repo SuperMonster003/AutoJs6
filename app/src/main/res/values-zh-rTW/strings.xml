@@ -780,6 +780,8 @@
     <string name="summary_retention_policies">版本歷史, 回收站與緊急草稿的保留天數與容量上限</string>
     <string name="summary_setup_wizard_welcome_reset">下次啟動時在主頁再次顯示設定精靈的歡迎提示</string>
     <string name="summary_setup_wizards">授予常用許可權及安裝官方外掛</string>
+    <string name="text_accent_and_dark">強調色 / 深色</string>
+    <string name="text_accent_color">強調色</string>
     <string name="text_add_all_to_color_library">全部加入顏色庫</string>
     <string name="text_add_colors">新增顏色</string>
     <string name="text_add_group">新增群組</string>
@@ -1276,6 +1278,7 @@
     <string name="text_custom">自訂</string>
     <string name="text_daily_at">每天 %1$s</string>
     <string name="text_daily_task">每日任務</string>
+    <string name="text_dark_color">深色</string>
     <string name="text_date">日期</string>
     <string name="text_date_overrides">日期覆蓋</string>
     <string name="text_date_overrides_hint">日期命中期間顯示指定的組並暫停換組; 由上而下第一個命中者生效</string>
@@ -1313,6 +1316,11 @@
     <string name="text_delete_revision_confirm">是否永久刪除此版本記錄</string>
     <string name="text_delete_selected_revisions_confirm">永久刪除選取的 %d 個版本?</string>
     <string name="text_deleting">正在刪除</string>
+    <string name="text_derived_colors">衍生配色</string>
+    <string name="text_derived_colors_auto">自動 (由主色推導強調色與深色)</string>
+    <string name="text_derived_colors_description">強調色用於懸浮按鈕, 深色用於狀態列, 外掛程式可取得全部三種顏色. 智慧庫中各組明確填寫的強調色與深色一律優先.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">衍生配色...</string>
+    <string name="text_derived_colors_off">關閉 (強調色與深色同主色)</string>
     <string name="text_description">描述</string>
     <string name="text_deselect_all">取消全選</string>
     <string name="text_destination">目標</string>
@@ -1528,6 +1536,7 @@
     <string name="text_floating_run">懸浮執行</string>
     <string name="text_folder">資料夾</string>
     <string name="text_folder_colon_value">資料夾: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (跟隨衍生配色)</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">前臺服務</string>
     <string name="text_formatting_completed">格式化已完成</string>

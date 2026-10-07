@@ -58,6 +58,16 @@ object ThemeColorDerivation {
     }
 
     /**
+     * The accent and dark colors of a theme color (D2): explicit values win; otherwise they are derived when [derive],
+     * or equal to [primary], which keeps the result identical to the single color theme of earlier versions.
+     * zh-CN: 主题色的强调色与深色 (D2): 显式值优先; 否则在 [derive] 时派生, 或与 [primary] 相同, 即与此前版本的单色主题完全一致.
+     */
+    fun accentAndDark(primary: Int, accent: Int?, dark: Int?, derive: Boolean): Pair<Int, Int> = Pair(
+        accent ?: if (derive) deriveAccent(primary) else primary,
+        dark ?: if (derive) deriveDark(primary) else primary,
+    )
+
+    /**
      * A more vivid color of the same hue that keeps at least [ratio] against both window backgrounds,
      * suitable for floating action buttons and other accents shown in day and night mode.
      * Near-gray primaries yield a gray accent.

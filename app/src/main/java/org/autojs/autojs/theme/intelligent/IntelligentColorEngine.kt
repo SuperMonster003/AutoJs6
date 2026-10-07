@@ -189,6 +189,21 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
     }
 
     /**
+     * Applies the shown group's color again without rotating, e.g. after the derivation setting changed (D2). Works
+     * while theme color pages are open, since the user asked for it there.
+     * zh-CN: 不换组, 重新应用当前组的颜色, 例如在派生配色设置变化后 (D2). 主题色页面打开期间同样生效, 因为这是用户在该页面上的操作.
+     *
+     * @return false when no intelligent library is active.
+     */
+    fun reapply(): Boolean {
+        val active = snapshot ?: return false
+        val stateKey = runtime.lastStateKey ?: resolveState(active.config, System.currentTimeMillis()).stateKey
+        val themeColor = expectedThemeColor(active, stateKey) ?: return false
+        ThemeColorCoordinator.apply(themeColor, ThemeColorSource.RESTORE)
+        return true
+    }
+
+    /**
      * Evaluates only when a rotation is due, the state or the date override has changed, or the color drifted, so
      * frequent callers (resuming activities, battery broadcasts) stay cheap.
      * zh-CN: 仅在换组到期, 状态或日期覆盖已变化, 或颜色偏离预期时评估, 使频繁调用方 (Activity 恢复, 电池广播) 保持低开销.
@@ -229,7 +244,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         Pref.putString(KEY_RUNTIME, IntelligentEngineJson.encodeRuntime(runtime))
         ColorSelectBaseActivity.savePrefsForSelectionNames(active.name, active.group(result.groupId)?.let(::groupDisplayName))
         result.color?.let { color ->
-            val themeColor = ThemeColor(color.primary, color.dark ?: color.primary, color.accent ?: color.primary)
+            val themeColor = ThemeColorManager.resolve(color.primary, color.accent, color.dark)
             if (source == ThemeColorSource.ACTIVATION || themeColor != ThemeColorManager.currentThemeColor) {
                 ThemeColorCoordinator.apply(themeColor, source)
             }
@@ -301,7 +316,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
 
     private fun expectedThemeColor(active: IntelligentSnapshot, stateKey: String): ThemeColor? {
         val color = active.group(shownGroupId)?.resolve(stateKey, active.config.stateKeys) ?: return null
-        return ThemeColor(color.primary, color.dark ?: color.primary, color.accent ?: color.primary)
+        return ThemeColorManager.resolve(color.primary, color.accent, color.dark)
     }
 
     /**

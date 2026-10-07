@@ -785,6 +785,8 @@
     <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
     <string name="summary_setup_wizard_welcome_reset">إظهار رسالة ترحيب معالجات الإعداد في الصفحة الرئيسية مرة أخرى عند التشغيل التالي</string>
     <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
+    <string name="text_accent_and_dark">التمييز / الداكن</string>
+    <string name="text_accent_color">لون التمييز</string>
     <string name="text_add_all_to_color_library">إضافة الكل إلى مكتبة ألوان</string>
     <string name="text_add_colors">إضافة ألوان</string>
     <string name="text_add_group">إضافة مجموعة</string>
@@ -1281,6 +1283,7 @@
     <string name="text_custom">مخصص</string>
     <string name="text_daily_at">يوميا في %1$s</string>
     <string name="text_daily_task">مهام يومية</string>
+    <string name="text_dark_color">الداكن</string>
     <string name="text_date">تاريخ</string>
     <string name="text_date_overrides">استثناءات حسب التاريخ</string>
     <string name="text_date_overrides_hint">طالما تطابق التاريخ تُعرض مجموعته ويتوقف التبديل مؤقتا، ويسري أول عنصر مطابق</string>
@@ -1318,6 +1321,11 @@
     <string name="text_delete_revision_confirm">هل تريد حذف هذه المراجعة نهائيا?</string>
     <string name="text_delete_selected_revisions_confirm">حذف %d من الاصدارات المحددة نهائيا؟</string>
     <string name="text_deleting">جارٍ الحذف</string>
+    <string name="text_derived_colors">الألوان المشتقة</string>
+    <string name="text_derived_colors_auto">تلقائي (اشتقاق التمييز والداكن من اللون الأساسي)</string>
+    <string name="text_derived_colors_description">يُستخدم لون التمييز في الأزرار العائمة واللون الداكن في شريط الحالة، وتتلقى الإضافات الألوان الثلاثة. ألوان التمييز والداكن المحددة في مجموعة مكتبة ذكية لها الأولوية دائما.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">الألوان المشتقة...</string>
+    <string name="text_derived_colors_off">إيقاف (التمييز والداكن مثل اللون الأساسي)</string>
     <string name="text_description">الوصف</string>
     <string name="text_deselect_all">الغاء التحديد</string>
     <string name="text_destination">الوجهة</string>
@@ -1533,6 +1541,7 @@
     <string name="text_floating_run">تشغيل عائم</string>
     <string name="text_folder">مجلد</string>
     <string name="text_folder_colon_value">المجلد: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (يتبع الألوان المشتقة)</string>
     <string name="text_force_stop">توقف إجباري</string>
     <string name="text_foreground_service">خدمة المقدمة</string>
     <string name="text_formatting_completed">اكتمل التنسيق</string>

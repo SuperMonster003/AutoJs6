@@ -783,6 +783,8 @@
     <string name="summary_retention_policies">Jours de conservation et limites de taille de l\'historique des versions, de la corbeille et des brouillons d\'urgence</string>
     <string name="summary_setup_wizard_welcome_reset">Afficher à nouveau le message de bienvenue des assistants de configuration sur la page d\'accueil au prochain lancement</string>
     <string name="summary_setup_wizards">Accorder les permissions courantes et installer les plugins officiels</string>
+    <string name="text_accent_and_dark">Accent / sombre</string>
+    <string name="text_accent_color">Accent</string>
     <string name="text_add_all_to_color_library">Tout ajouter à une bibliothèque de couleurs</string>
     <string name="text_add_colors">Ajouter des couleurs</string>
     <string name="text_add_group">Ajouter un groupe</string>
@@ -1279,6 +1281,7 @@
     <string name="text_custom">Personnalisé</string>
     <string name="text_daily_at">Chaque jour à %1$s</string>
     <string name="text_daily_task">Tâche quotidienne</string>
+    <string name="text_dark_color">Sombre</string>
     <string name="text_date">Date</string>
     <string name="text_date_overrides">Remplacements par date</string>
     <string name="text_date_overrides_hint">Tant qu\'une date correspond, son groupe est affiché et la rotation est suspendue ; le premier élément correspondant l\'emporte</string>
@@ -1316,6 +1319,11 @@
     <string name="text_delete_revision_confirm">Supprimer definitivement cette revision?</string>
     <string name="text_delete_selected_revisions_confirm">Supprimer définitivement les %d révisions sélectionnées ?</string>
     <string name="text_deleting">Suppression</string>
+    <string name="text_derived_colors">Couleurs dérivées</string>
+    <string name="text_derived_colors_auto">Auto (dériver l\'accent et le sombre de la couleur principale)</string>
+    <string name="text_derived_colors_description">La couleur d\'accent est utilisée par les boutons flottants et la couleur sombre par la barre d\'état; les plugins reçoivent les trois couleurs. Les couleurs d\'accent et sombres définies dans un groupe de bibliothèque intelligente sont toujours prioritaires.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">Couleurs dérivées...</string>
+    <string name="text_derived_colors_off">Désactivé (accent et sombre identiques à la couleur principale)</string>
     <string name="text_description">Description</string>
     <string name="text_deselect_all">Tout deselectionner</string>
     <string name="text_destination">Destination</string>
@@ -1531,6 +1539,7 @@
     <string name="text_floating_run">Exécution flottante</string>
     <string name="text_folder">Dossier</string>
     <string name="text_folder_colon_value">Dossier: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (suit les couleurs dérivées)</string>
     <string name="text_force_stop">Forcer l\'arrêt</string>
     <string name="text_foreground_service">Service d\'avant-plan</string>
     <string name="text_formatting_completed">Formatage terminé</string>

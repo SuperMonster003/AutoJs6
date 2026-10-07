@@ -784,6 +784,8 @@
     <string name="summary_retention_policies">バージョン履歴, ゴミ箱, 緊急下書きの保持日数とサイズ上限</string>
     <string name="summary_setup_wizard_welcome_reset">次回起動時にホームでセットアップウィザードのウェルカム表示を再表示します</string>
     <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
+    <string name="text_accent_and_dark">アクセント / ダーク</string>
+    <string name="text_accent_color">アクセント</string>
     <string name="text_add_all_to_color_library">すべてカラーライブラリに追加</string>
     <string name="text_add_colors">色を追加</string>
     <string name="text_add_group">グループを追加</string>
@@ -1280,6 +1282,7 @@
     <string name="text_custom">カスタム</string>
     <string name="text_daily_at">毎日 %1$s</string>
     <string name="text_daily_task">デイリータスク</string>
+    <string name="text_dark_color">ダーク</string>
     <string name="text_date">日付</string>
     <string name="text_date_overrides">日付による上書き</string>
     <string name="text_date_overrides_hint">日付が一致する間は指定したグループを表示し, 切り替えを一時停止します. 上から最初に一致したものが有効です</string>
@@ -1317,6 +1320,11 @@
     <string name="text_delete_revision_confirm">この履歴を完全に削除しますか?</string>
     <string name="text_delete_selected_revisions_confirm">選択した %d 件のバージョンを完全に削除しますか?</string>
     <string name="text_deleting">削除中</string>
+    <string name="text_derived_colors">派生カラー</string>
+    <string name="text_derived_colors_auto">自動 (メインカラーからアクセントとダークを導出)</string>
+    <string name="text_derived_colors_description">アクセントはフローティングボタンに, ダークはステータスバーに使われ, プラグインは 3 色すべてを取得できます. インテリジェントライブラリのグループで指定したアクセントとダークは常に優先されます.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">派生カラー...</string>
+    <string name="text_derived_colors_off">オフ (アクセントとダークはメインカラーと同じ)</string>
     <string name="text_description">説明</string>
     <string name="text_deselect_all">全て解除</string>
     <string name="text_destination">宛先</string>
@@ -1532,6 +1540,7 @@
     <string name="text_floating_run">フローティング実行</string>
     <string name="text_folder">フォルダー</string>
     <string name="text_folder_colon_value">フォルダー: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (派生カラーに従う)</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">フォアグラウンドサービス</string>
     <string name="text_formatting_completed">フォーマット完了</string>

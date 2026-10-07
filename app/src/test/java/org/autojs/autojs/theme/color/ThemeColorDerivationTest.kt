@@ -177,4 +177,23 @@ class ThemeColorDerivationTest {
         assertEquals(white, ThemeColorDerivation.pickDayShade(listOf(white), ratio = 21.0))
     }
 
+    @Test
+    fun derivationOffKeepsTheSingleColorTheme() {
+        // Off: accent and dark equal the primary color for every sample, as before the upgrade (D2, E3).
+        samples.forEach { primary ->
+            assertEquals(primary to primary, ThemeColorDerivation.accentAndDark(primary, null, null, derive = false))
+        }
+        // Auto: derived values; explicit values win under both settings.
+        samples.forEach { primary ->
+            assertEquals(
+                ThemeColorDerivation.deriveAccent(primary) to ThemeColorDerivation.deriveDark(primary),
+                ThemeColorDerivation.accentAndDark(primary, null, null, derive = true),
+            )
+        }
+        listOf(false, true).forEach { derive ->
+            assertEquals(white to black, ThemeColorDerivation.accentAndDark(yellow.first(), white, black, derive))
+            assertEquals(white, ThemeColorDerivation.accentAndDark(yellow.first(), white, null, derive).first)
+        }
+    }
+
 }

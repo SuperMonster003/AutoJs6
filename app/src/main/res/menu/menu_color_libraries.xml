@@ -74,6 +74,11 @@
         <menu>
 
             <item
+                android:id="@+id/action_derived_colors"
+                android:title="@string/text_derived_colors_menu"
+                app:showAsAction="never" />
+
+            <item
                 android:id="@+id/action_toggle_color_select_layout"
                 android:title="@string/text_switch_to_legacy_layout"
                 app:showAsAction="never" />

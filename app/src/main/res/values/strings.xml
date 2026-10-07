@@ -778,6 +778,8 @@
     <string name="summary_retention_policies">Retention days and size limits for version history, trash and emergency drafts</string>
     <string name="summary_setup_wizard_welcome_reset">Show the welcome prompt of the setup wizards on the home page again on the next launch</string>
     <string name="summary_setup_wizards">Grant common permissions and install official plugins</string>
+    <string name="text_accent_and_dark">Accent / dark</string>
+    <string name="text_accent_color">Accent</string>
     <string name="text_add_all_to_color_library">Add all to a color library</string>
     <string name="text_add_colors">Add colors</string>
     <string name="text_add_group">Add group</string>
@@ -1275,6 +1277,7 @@
     <string name="text_custom">Custom</string>
     <string name="text_daily_at">Daily at %1$s</string>
     <string name="text_daily_task">Daily task</string>
+    <string name="text_dark_color">Dark</string>
     <string name="text_date">Date</string>
     <string name="text_date_overrides">Date overrides</string>
     <string name="text_date_overrides_hint">While a date matches, its group is shown and rotation pauses; the first matching item wins</string>
@@ -1312,6 +1315,11 @@
     <string name="text_delete_revision_confirm">Delete this revision permanently?</string>
     <string name="text_delete_selected_revisions_confirm">Delete the %d selected revisions permanently?</string>
     <string name="text_deleting">Deleting</string>
+    <string name="text_derived_colors">Derived colors</string>
+    <string name="text_derived_colors_auto">Auto (derive accent and dark from the primary color)</string>
+    <string name="text_derived_colors_description">The accent color is used by floating action buttons and the dark color by the status bar; plugins receive all three colors. Accent and dark colors set in an intelligent library group always take precedence.</string>
+    <string name="text_derived_colors_menu" tools:ignore="TypographyEllipsis">Derived colors...</string>
+    <string name="text_derived_colors_off">Off (accent and dark same as the primary color)</string>
     <string name="text_description">Description</string>
     <string name="text_deselect_all">Deselect all</string>
     <string name="text_destination">Destination</string>
@@ -1527,6 +1535,7 @@
     <string name="text_floating_run">Floating run</string>
     <string name="text_folder">Folder</string>
     <string name="text_folder_colon_value">Folder: %1$s</string>
+    <string name="text_follows_derived_colors">%1$s (follows Derived colors)</string>
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Foreground service</string>
     <string name="text_formatting_completed">Formatting completed</string>
