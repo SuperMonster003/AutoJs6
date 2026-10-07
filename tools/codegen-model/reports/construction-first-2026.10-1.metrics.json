@@ -1,0 +1,373 @@
+{
+  "format": 1,
+  "datasetId": "cg-ds-2026.10-1-construction-pilot",
+  "exportManifestSha256": "ea3adc9efb61879051dd01eebcbf11facb5ff6e0b2e4ed404095bf6002455360",
+  "policySha256": "ecb04d2f7086b6c1065ff949b821be3d5e37a06ca2e5c5deca63b478acaffa62",
+  "fixedRankerSha256": "9ab137a6e184f52246768a905ea98a09a03cf4da97f221526d70e7b6f32afc17",
+  "fixedRanker": "P3 tiny v1 unchanged weights for all three constructors",
+  "hardDeadlineMillis": 1000,
+  "constructionBudget": {
+    "maxAttempts": 2000,
+    "maxVerified": 200,
+    "maxFrontier": 64,
+    "maxExpandedStates": 2000,
+    "maxActionScores": 12000,
+    "maxDepth": 48,
+    "maxPathSteps": 4,
+    "maxAnchors": 128,
+    "maxCapturedNodes": 10000,
+    "maxMillis": 800
+  },
+  "realApplicationGroups": 0,
+  "policyLoadMillis": 39.7698,
+  "policyStorageBytes": 18467,
+  "policyTrees": 59,
+  "policyFileBytes": 84454,
+  "summary": [
+    {
+      "cohort": "captured-fixture",
+      "split": "test",
+      "method": "baseline",
+      "groups": 28,
+      "coverage": 1.0,
+      "bestSurvival": 0.9285714285714286,
+      "top1Survival": 0.9107142857142857,
+      "top3BestSurvival": 0.9107142857142857,
+      "commonRegret": 0.017857142857142856,
+      "commonTop3Recall": 0.9642857142857143,
+      "baselineRuleTop1Survival": 0.35714285714285715,
+      "novelCandidates": 0,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 0,
+      "elapsedP50Millis": 8.9825,
+      "elapsedP95Millis": 16.0472,
+      "stopReasons": {
+        "COUNTER_BUDGET": 28
+      }
+    },
+    {
+      "cohort": "captured-fixture",
+      "split": "test",
+      "method": "heuristic",
+      "groups": 28,
+      "coverage": 1.0,
+      "bestSurvival": 0.5714285714285714,
+      "top1Survival": 0.5714285714285714,
+      "top3BestSurvival": 0.5714285714285714,
+      "commonRegret": 0.35714285714285715,
+      "commonTop3Recall": 0.32142857142857145,
+      "baselineRuleTop1Survival": 0.35714285714285715,
+      "novelCandidates": 0,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 0,
+      "elapsedP50Millis": 117.1694,
+      "elapsedP95Millis": 207.1395,
+      "stopReasons": {
+        "EXHAUSTED": 28
+      }
+    },
+    {
+      "cohort": "captured-fixture",
+      "split": "test",
+      "method": "model",
+      "groups": 28,
+      "coverage": 1.0,
+      "bestSurvival": 0.9107142857142857,
+      "top1Survival": 0.9107142857142857,
+      "top3BestSurvival": 0.9107142857142857,
+      "commonRegret": 0.017857142857142856,
+      "commonTop3Recall": 0.9642857142857143,
+      "baselineRuleTop1Survival": 0.35714285714285715,
+      "novelCandidates": 0,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 0,
+      "elapsedP50Millis": 131.6868,
+      "elapsedP95Millis": 158.3201,
+      "stopReasons": {
+        "EXHAUSTED": 28
+      }
+    },
+    {
+      "cohort": "captured-fixture",
+      "split": "train",
+      "method": "baseline",
+      "groups": 168,
+      "coverage": 1.0,
+      "bestSurvival": 0.9791666666666666,
+      "top1Survival": 0.9077380952380952,
+      "top3BestSurvival": 0.9196428571428571,
+      "commonRegret": 0.07142857142857142,
+      "commonTop3Recall": 0.8809523809523809,
+      "baselineRuleTop1Survival": 0.7380952380952381,
+      "novelCandidates": 0,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 11,
+      "elapsedP50Millis": 8.7991,
+      "elapsedP95Millis": 16.1357,
+      "stopReasons": {
+        "COUNTER_BUDGET": 168
+      }
+    },
+    {
+      "cohort": "captured-fixture",
+      "split": "train",
+      "method": "heuristic",
+      "groups": 168,
+      "coverage": 1.0,
+      "bestSurvival": 0.7440476190476191,
+      "top1Survival": 0.7291666666666666,
+      "top3BestSurvival": 0.7291666666666666,
+      "commonRegret": 0.25,
+      "commonTop3Recall": 0.5119047619047619,
+      "baselineRuleTop1Survival": 0.7380952380952381,
+      "novelCandidates": 194,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 3,
+      "elapsedP50Millis": 105.1539,
+      "elapsedP95Millis": 168.1941,
+      "stopReasons": {
+        "EXHAUSTED": 168
+      }
+    },
+    {
+      "cohort": "captured-fixture",
+      "split": "train",
+      "method": "model",
+      "groups": 168,
+      "coverage": 1.0,
+      "bestSurvival": 0.9315476190476191,
+      "top1Survival": 0.9136904761904762,
+      "top3BestSurvival": 0.9285714285714286,
+      "commonRegret": 0.06547619047619048,
+      "commonTop3Recall": 0.8988095238095238,
+      "baselineRuleTop1Survival": 0.7380952380952381,
+      "novelCandidates": 167,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 4,
+      "elapsedP50Millis": 117.8306,
+      "elapsedP95Millis": 273.4073,
+      "stopReasons": {
+        "EXHAUSTED": 154,
+        "VERIFICATION_BUDGET": 14
+      }
+    },
+    {
+      "cohort": "captured-fixture",
+      "split": "valid",
+      "method": "baseline",
+      "groups": 28,
+      "coverage": 1.0,
+      "bestSurvival": 0.9642857142857143,
+      "top1Survival": 0.9107142857142857,
+      "top3BestSurvival": 0.9107142857142857,
+      "commonRegret": 0.05357142857142857,
+      "commonTop3Recall": 0.8928571428571429,
+      "baselineRuleTop1Survival": 0.7142857142857143,
+      "novelCandidates": 0,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 2,
+      "elapsedP50Millis": 8.4074,
+      "elapsedP95Millis": 11.8623,
+      "stopReasons": {
+        "COUNTER_BUDGET": 28
+      }
+    },
+    {
+      "cohort": "captured-fixture",
+      "split": "valid",
+      "method": "heuristic",
+      "groups": 28,
+      "coverage": 1.0,
+      "bestSurvival": 0.7142857142857143,
+      "top1Survival": 0.7142857142857143,
+      "top3BestSurvival": 0.7142857142857143,
+      "commonRegret": 0.25,
+      "commonTop3Recall": 0.5,
+      "baselineRuleTop1Survival": 0.7142857142857143,
+      "novelCandidates": 23,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 0,
+      "elapsedP50Millis": 104.1183,
+      "elapsedP95Millis": 113.6001,
+      "stopReasons": {
+        "EXHAUSTED": 28
+      }
+    },
+    {
+      "cohort": "captured-fixture",
+      "split": "valid",
+      "method": "model",
+      "groups": 28,
+      "coverage": 1.0,
+      "bestSurvival": 0.8571428571428571,
+      "top1Survival": 0.8214285714285714,
+      "top3BestSurvival": 0.8571428571428571,
+      "commonRegret": 0.14285714285714285,
+      "commonTop3Recall": 0.7857142857142857,
+      "baselineRuleTop1Survival": 0.7142857142857143,
+      "novelCandidates": 23,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 2,
+      "elapsedP50Millis": 111.398,
+      "elapsedP95Millis": 138.0945,
+      "stopReasons": {
+        "EXHAUSTED": 28
+      }
+    },
+    {
+      "cohort": "synthetic-bottleneck",
+      "split": "test",
+      "method": "baseline",
+      "groups": 24,
+      "coverage": 0.625,
+      "bestSurvival": 0.5,
+      "top1Survival": 0.25,
+      "top3BestSurvival": 0.375,
+      "commonRegret": 0.25,
+      "commonTop3Recall": 0.5,
+      "baselineRuleTop1Survival": 0.25,
+      "novelCandidates": 0,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 0,
+      "elapsedP50Millis": 17.6598,
+      "elapsedP95Millis": 603.2117,
+      "stopReasons": {
+        "COUNTER_BUDGET": 24
+      }
+    },
+    {
+      "cohort": "synthetic-bottleneck",
+      "split": "test",
+      "method": "heuristic",
+      "groups": 24,
+      "coverage": 0.5,
+      "bestSurvival": 0.25,
+      "top1Survival": 0.125,
+      "top3BestSurvival": 0.25,
+      "commonRegret": 0.375,
+      "commonTop3Recall": 0.375,
+      "baselineRuleTop1Survival": 0.25,
+      "novelCandidates": 23,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 3,
+      "elapsedP50Millis": 205.2078,
+      "elapsedP95Millis": 470.2266,
+      "stopReasons": {
+        "EXHAUSTED": 23,
+        "ACTION_SCORE_BUDGET": 1
+      }
+    },
+    {
+      "cohort": "synthetic-bottleneck",
+      "split": "test",
+      "method": "model",
+      "groups": 24,
+      "coverage": 0.5,
+      "bestSurvival": 0.375,
+      "top1Survival": 0.125,
+      "top3BestSurvival": 0.375,
+      "commonRegret": 0.375,
+      "commonTop3Recall": 0.5,
+      "baselineRuleTop1Survival": 0.25,
+      "novelCandidates": 3,
+      "groupsAboveBaselineBest": 0,
+      "groupsWorseThanBaselineRule": 3,
+      "elapsedP50Millis": 192.1257,
+      "elapsedP95Millis": 349.8841,
+      "stopReasons": {
+        "EXHAUSTED": 24
+      }
+    }
+  ],
+  "resultsSha256": "36b08bb0a3e047ac0cbdd6f86ba1d2a654ecc1c05bb3e248c2d9b678a12ffbd1",
+  "training": {
+    "treeCount": 59,
+    "bestIteration": 58,
+    "elapsedSeconds": 21.703551,
+    "actions": {
+      "train": 915160,
+      "valid": 139228
+    },
+    "groups": {
+      "train": 168,
+      "valid": 28
+    },
+    "versions": {
+      "python": "3.12.5",
+      "catboost": "1.2.10",
+      "numpy": "2.2.6"
+    },
+    "parameters": {
+      "iterations": 256,
+      "depth": 6,
+      "learning_rate": 0.05,
+      "loss_function": "RMSE",
+      "eval_metric": "RMSE",
+      "grow_policy": "SymmetricTree",
+      "boosting_type": "Plain",
+      "random_seed": 20261007,
+      "thread_count": 1,
+      "task_type": "CPU",
+      "use_best_model": true,
+      "od_type": "Iter",
+      "od_wait": 32,
+      "allow_writing_files": false,
+      "logging_level": "Silent"
+    }
+  },
+  "export": {
+    "rows": 1208829,
+    "completedRollouts": 485841,
+    "validCompletedRollouts": 320708,
+    "observedEdges": 1208829,
+    "unknownEdges": 1807589,
+    "sampling": "sha256:construction-pilot-20261007:groupId, first 28 per original family",
+    "teacherRuns": 3,
+    "teacherBudget": {
+      "maxAttempts": 2000,
+      "maxVerified": 200,
+      "maxFrontier": 128,
+      "maxExpandedStates": 4000,
+      "maxActionScores": 24000,
+      "maxDepth": 48,
+      "maxPathSteps": 4,
+      "maxAnchors": 128,
+      "maxCapturedNodes": 10000,
+      "maxMillis": 30000
+    }
+  },
+  "parity": {
+    "vectors": 5000,
+    "observedStates": 2837,
+    "maxAbsoluteDifference": 3.709102247562157e-09,
+    "actionOrdersIdentical": true
+  },
+  "gate": {
+    "constructionMechanismVerified": true,
+    "qualityGatePassed": false,
+    "productionIntegrationReady": false,
+    "reason": "No held-out candidate quality ceiling improvement; three synthetic collection tasks lose valid coverage."
+  },
+  "coverageDiagnosis": {
+    "replays": 18,
+    "legalReplays": 18,
+    "sameCanonicalPlan": 18,
+    "verified": 18,
+    "classification": "BEAM_PRUNED",
+    "affectedScenario": "dynamic-attributes collection",
+    "affectedFamily": "CONTAINER_ITEMS",
+    "familyFrontierSlots": 32,
+    "heuristicFirstMissing": "OUTER after CHOOSE_ANCHOR",
+    "modelFirstMissing": "OUTER after adding id, before END_OUTER",
+    "counterfactualSuffixSeparated": true
+  },
+  "validation": {
+    "jvmTests": 380,
+    "jvmPassed": 372,
+    "jvmSkipped": 8,
+    "jvmFailures": 0,
+    "pythonConstructionTests": 14,
+    "exportsByteIdentical": true,
+    "canonicalModelsByteIdentical": true
+  }
+}
