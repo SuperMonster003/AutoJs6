@@ -251,6 +251,24 @@ fresh output directories, preserve rejected experiments, and never retune on
 the held-out results. The first experiment's exact reproduction requires its
 recorded source revision; its source binding deliberately rejects later changes.
 
+An explicit post-assessment diagnostic explains the nine fresh collection
+coverage losses without changing any frozen experiment or training input:
+
+```powershell
+$env:CODEGEN_CONSTRUCTION_R2_DIAGNOSTICS = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r2-holdout')
+$env:CODEGEN_CONSTRUCTION_R2_DIAGNOSTICS_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r2-diagnostics')
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionSecondDiagnosticsTask'
+Remove-Item Env:CODEGEN_CONSTRUCTION_R2_DIAGNOSTICS
+Remove-Item Env:CODEGEN_CONSTRUCTION_R2_DIAGNOSTICS_OUTPUT
+```
+
+It checks the policy and source/result hashes, reproduces both policies' saved
+candidate sets under unchanged counters, then legally replays the reference
+plans. Its zero clock is for deterministic diagnosis, not a speed measurement.
+Output excludes selector literals and raw plan/state/action keys. The inferred
+first pruned prefix does not turn the forced continuation into a model-produced
+trajectory and must not become a held-out training row.
+
 ## Tests
 
 ```powershell
