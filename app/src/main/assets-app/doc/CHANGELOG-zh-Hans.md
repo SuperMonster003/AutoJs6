@@ -148,6 +148,7 @@
 * `新增` colors 模块新增感知色彩函数: toOklab / oklab 与 toOklch / oklch, ensureContrast (WCAG 对比度, 默认 4.5), harmony, tones, derive (主色, 强调色与深色), nightVariant, simulate (红色盲, 绿色盲, 蓝色盲) 及 extract (图像主要颜色, 支持 count, region 与 step 选项); colors.distance, colors.isSimilar 与 images.detectColor 支持 oklab 算法
 * `新增` colors.theme 由脚本控制主题色: get, set (可指定 accent 与 dark), reset, libraries, activate 与 deactivate (智能颜色库), next (立即换组), state (切换 "脚本状态" 状态源) 及 current; 500 ms 内的脚本修改合并为一次, 历史记录标注 "脚本: 名称", 主题色页面提供 "撤销脚本修改" 以恢复之前的选择 (含激活中的智能颜色库)
 * `新增` Ace 编辑器快捷面板 TAB 键长按用于唤出智能提示, 按光标上下文显示代码补全, 参数提示或符号文档, 参数提示已显示时切换重载方法; 硬件键盘 Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q 分别对应智能提示 / 参数提示 / 符号文档
+* `新增` 代码编辑器设置增加 "智能提示" 分组 (仅 Ace 引擎): 自动补全触发方式 (输入标识符时 / 仅输入 "." 后 / 关闭), 补全最少触发字符数, 补全触发延迟, 参数提示触发方式 (光标进入调用时 / 仅输入 "(" 或 "," 时 / 关闭), 方向键切换重载; 修改后即时生效并可记录到动作收藏 (需要 Ace 编辑器插件 1.26.0)
 * `修复` 启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题
 * `修复` Three Stove Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
 * `修复` assistant 合并工具选项时, 空 tools 对象导致默认关闭的工具组被启用的问题
@@ -425,6 +426,8 @@
 * `优化` 颜色库列表的搜索范围扩展到自建颜色库中的颜色与智能颜色库的组 (组按名称或其任一颜色匹配), 结果末尾标注所属颜色库, 点击即应用或激活; 搜索帮助同步说明
 * `优化` Ace 编辑器参数提示支持重载方法, 显示重载序号并可点按切换, 当前参数的文档优先显示
 * `优化` 编辑器菜单 "跳转" 增加 "跳转到上一个光标位置" (原为 TAB 键长按功能), 可记录到动作收藏
+* `优化` Ace 编辑器参数提示的重载切换支持硬件键盘 Alt+Up / Alt+Down, 多功能键盘上下键 (参数提示显示多个重载时, 可在设置中关闭) 及提示窗口右上角的上下按钮
+* `优化` Ace 编辑器参数提示在点按编辑区后恢复显示 (滚动后不恢复), ESC 键同时隐藏参数提示与符号文档
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

@@ -279,6 +279,7 @@
 * `Feature` Perceptual color functions in the colors module: toOklab / oklab and toOklch / oklch, ensureContrast (WCAG ratio, 4.5 by default), harmony, tones, derive (primary, accent and dark), nightVariant, simulate (protanopia, deuteranopia, tritanopia) and extract (dominant colors of an image with count, region and step options); colors.distance, colors.isSimilar and images.detectColor accept the oklab algorithm
 * `Feature` colors.theme controls the theme color from scripts: get, set (accent and dark options), reset, libraries, activate and deactivate (intelligent color libraries), next (rotates at once), state (switches the "Script states" source) and current; script changes within 500 ms are merged and recorded in the history as "Script: name", and the theme color page offers "Undo script change" to restore the previous selection, including an active intelligent color library
 * `Feature` Long-pressing TAB on the Ace editor shortcut panel triggers smart hints, showing code completion, parameter hints or symbol documentation based on the cursor context and cycling overloads while parameter hints are visible; hardware keyboard Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q map to smart hints / parameter hints / symbol documentation
+* `Feature` Code editor settings gain a "Smart hints" group (Ace engine only): automatic completion trigger (while typing identifiers / only after typing "." / off), minimum characters for completion, completion delay, parameter hints trigger (when the cursor enters a call / only after typing "(" or "," / off) and switching overloads with arrow keys; changes apply immediately and can be recorded in action favorites (requires Ace Editor plugin 1.26.0)
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
@@ -712,6 +713,8 @@
 * `Improvement` Search on the color library list also covers the colors of user libraries and the groups of intelligent color libraries (by name or any of their colors); results name their library and apply or activate on tap, and the search help explains the scope
 * `Improvement` Ace editor parameter hints support overloaded methods, showing the overload index with tappable switching and preferring the documentation of the current parameter
 * `Improvement` Editor menu "Jump" gains "Jump to previous cursor" (formerly the TAB long-press action), which can be recorded in action favorites
+* `Improvement` Ace editor parameter hints can switch overloads with the hardware Alt+Up / Alt+Down, the keyboard bar's Up and Down keys (while several overloads are shown; can be turned off in settings) and the up / down buttons at the top right of the hint window
+* `Improvement` Ace editor parameter hints reappear after tapping the editor (not after scrolling), and ESC hides both parameter hints and symbol documentation
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
