@@ -276,8 +276,8 @@
 * `추가` 테마 색상 "파생 색상" 설정 (기본값 끄기, 이전 버전과 완전히 동일): 자동 시 기본 색상에서 플로팅 버튼용 강조 색과 상태 표시줄용 어두운 색을 도출하며 플러그인도 세 가지 색상을 모두 받음, 인텔리전트 색상 라이브러리 그룹의 각 상태는 강조 색과 어두운 색을 따로 지정할 수 있으며 두 설정 모두에서 우선함
 * `추가` 색상 즐겨찾기: 색상 상세 정보에서 "즐겨찾기" / "고정됨"을 선택하거나 색상 라이브러리의 색상과 배색 도구의 색상 견본을 길게 눌러 추가, 가상 라이브러리 "즐겨찾기"는 수동 (드래그) / 추가한 시간 / 색조 / 명도로 정렬되며 고정된 색상이 항상 앞에 표시됨, 색상 팔레트에서 추가할 수 있고 즐겨찾기로 인텔리전트 색상 라이브러리 (색상당 그룹 하나) 를 만들 수 있음, 즐겨찾기는 "시드 색상으로 생성"의 시드로도 사용 가능
 * `추가` 가상 라이브러리 "자주 사용 및 추천": 고정된 즐겨찾기, 나머지 즐겨찾기, 사용 횟수와 최근성 (반감기 14일) 으로 평가한 기록 색상 순으로 비슷한 색상을 합쳐 최대 30개 표시하며 데이터가 없으면 숨김, 각 항목은 원래 선택 방식대로 적용되고 인텔리전트 색상 라이브러리를 만들 수 있음, 색상 기록은 사용 횟수를 저장하며 기록 목록에서 "비슷한 색상 합치기" 가능
-* `추가` colors 모듈에 지각 기반 색상 함수 추가: toOklab / oklab 및 toOklch / oklch, ensureContrast (WCAG 대비율, 기본 4.5), harmony, tones, derive (기본, 강조, 어두운 색), nightVariant, simulate (제1색맹, 제2색맹, 제3색맹) 및 extract (count, region, step 옵션을 지원하는 이미지 주요 색상), colors.distance, colors.isSimilar 및 images.detectColor가 oklab 알고리즘 지원
-* `추가` colors.theme으로 스크립트에서 테마 색상 제어: get, set (accent와 dark 지정 가능), reset, libraries, activate와 deactivate (인텔리전트 색상 라이브러리), next (즉시 다음 그룹), state ("스크립트 상태" 소스 전환), current 제공, 500 ms 이내의 스크립트 변경은 한 번으로 합쳐지고 기록에 "스크립트: 이름"으로 표시되며, 테마 색상 페이지의 "스크립트 변경 실행 취소"로 이전 선택 (활성 인텔리전트 색상 라이브러리 포함) 을 복원 가능
+* `추가` colors 모듈에 지각 기반 색상 함수 추가: toOklab / oklab 및 toOklch / oklch, ensureContrast (WCAG 대비율, 기본 4.5), harmony, tones, derive (기본, 강조, 어두운 색), nightVariant, simulate (제1색맹, 제2색맹, 제3색맹) 및 extract (count, region, step 옵션을 지원하는 이미지 주요 색상), colors.distance, colors.isSimilar 및 images.detectColor가 oklab 알고리즘 지원 (예제 코드 > 图像与颜色 참조)
+* `추가` colors.theme으로 스크립트에서 테마 색상 제어: get, set (accent와 dark 지정 가능), reset, libraries, activate와 deactivate (인텔리전트 색상 라이브러리), next (즉시 다음 그룹), state ("스크립트 상태" 소스 전환), current 제공, 500 ms 이내의 스크립트 변경은 한 번으로 합쳐지고 기록에 "스크립트: 이름"으로 표시되며, 테마 색상 페이지의 "스크립트 변경 실행 취소"로 이전 선택 (활성 인텔리전트 색상 라이브러리 포함) 을 복원 가능 (예제 코드 > 图像与颜色 참조)
 * `수정` APK Inspector 사용 시 파일 관리자의 정보 버튼이 숨겨져 설치 패키지 정보를 열 수 없는 문제
 * `수정` Three Stove Agent 온라인 모델 호출 실패 시 네트워크, 인증 및 응답 오류 분류가 누락되는 문제 (Provider 플러그인 지원 필요)
 * `수정` assistant 도구 옵션 병합 시 기본 tools 객체가 비어 있으면 기본적으로 꺼진 도구 그룹이 켜지는 문제

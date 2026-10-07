@@ -307,8 +307,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 主题色 "派生配色" 设置 (默认关闭, 与此前版本完全一致): 自动时由主色推导用于悬浮按钮的强调色与用于状态栏的深色, 插件同样获得三种颜色; 智能颜色库各组的每个状态可单独指定强调色与深色, 在两种设置下均优先
 * `新增` 颜色收藏: 在颜色详情中勾选 "收藏" / "置顶", 或长按颜色库中的颜色及配色工具中的色块; 虚拟库 "收藏" 可按手动 (拖动排序) / 收藏时间 / 色相 / 亮度排序, 置顶项始终在前, 可从调色盘收藏, 并可从收藏创建智能颜色库 (每色一组); 收藏也可作为 "从种子色生成" 的种子
 * `新增` 虚拟库 "常用与推荐": 依次为置顶收藏, 其余收藏, 以及按使用次数与近因 (半衰期 14 天) 评分的历史颜色, 相似颜色合并, 至多 30 项, 无数据时隐藏; 条目按原来的选择方式应用, 并可创建智能颜色库; 颜色历史记录使用次数, 历史列表可 "合并相似颜色"
-* `新增` colors 模块新增感知色彩函数: toOklab / oklab 与 toOklch / oklch, ensureContrast (WCAG 对比度, 默认 4.5), harmony, tones, derive (主色, 强调色与深色), nightVariant, simulate (红色盲, 绿色盲, 蓝色盲) 及 extract (图像主要颜色, 支持 count, region 与 step 选项); colors.distance, colors.isSimilar 与 images.detectColor 支持 oklab 算法
-* `新增` colors.theme 由脚本控制主题色: get, set (可指定 accent 与 dark), reset, libraries, activate 与 deactivate (智能颜色库), next (立即换组), state (切换 "脚本状态" 状态源) 及 current; 500 ms 内的脚本修改合并为一次, 历史记录标注 "脚本: 名称", 主题色页面提供 "撤销脚本修改" 以恢复之前的选择 (含激活中的智能颜色库)
+* `新增` colors 模块新增感知色彩函数: toOklab / oklab 与 toOklch / oklch, ensureContrast (WCAG 对比度, 默认 4.5), harmony, tones, derive (主色, 强调色与深色), nightVariant, simulate (红色盲, 绿色盲, 蓝色盲) 及 extract (图像主要颜色, 支持 count, region 与 step 选项); colors.distance, colors.isSimilar 与 images.detectColor 支持 oklab 算法 (参阅 示例代码 > 图像与颜色)
+* `新增` colors.theme 由脚本控制主题色: get, set (可指定 accent 与 dark), reset, libraries, activate 与 deactivate (智能颜色库), next (立即换组), state (切换 "脚本状态" 状态源) 及 current; 500 ms 内的脚本修改合并为一次, 历史记录标注 "脚本: 名称", 主题色页面提供 "撤销脚本修改" 以恢复之前的选择 (含激活中的智能颜色库) (参阅 示例代码 > 图像与颜色)
 * `修复` 启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题
 * `修复` Three Stove Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
 * `修复` assistant 合并工具选项时, 空 tools 对象导致默认关闭的工具组被启用的问题

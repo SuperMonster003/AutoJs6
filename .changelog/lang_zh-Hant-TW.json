@@ -270,8 +270,8 @@
         "主題色 \"衍生配色\" 設定 (預設關閉, 與先前版本完全一致): 自動時由主色推導用於懸浮按鈕的強調色與用於狀態列的深色, 外掛程式同樣取得三種顏色; 智慧顏色庫各組的每個狀態可單獨指定強調色與深色, 在兩種設定下皆優先",
         "顏色收藏: 在顏色詳情中勾選 \"收藏\" / \"置頂\", 或長按顏色庫中的顏色及配色工具中的色塊; 虛擬庫 \"收藏\" 可按手動 (拖曳排序) / 收藏時間 / 色相 / 亮度排序, 置頂項目一律在前, 可從調色盤收藏, 並可從收藏建立智慧顏色庫 (每色一組); 收藏也可作為 \"從種子色產生\" 的種子",
         "虛擬庫 \"常用與推薦\": 依序為置頂收藏, 其餘收藏, 以及按使用次數與近因 (半衰期 14 天) 評分的歷史顏色, 相似顏色合併, 至多 30 項, 無資料時隱藏; 項目按原本的選擇方式套用, 並可建立智慧顏色庫; 顏色歷史記錄使用次數, 歷史清單可 \"合併相似顏色\"",
-        "colors 模組新增感知色彩函式: toOklab / oklab 與 toOklch / oklch, ensureContrast (WCAG 對比度, 預設 4.5), harmony, tones, derive (主色, 強調色與深色), nightVariant, simulate (紅色盲, 綠色盲, 藍色盲) 及 extract (影像主要顏色, 支援 count, region 與 step 選項); colors.distance, colors.isSimilar 與 images.detectColor 支援 oklab 演算法",
-        "colors.theme 由指令碼控制主題色: get, set (可指定 accent 與 dark), reset, libraries, activate 與 deactivate (智慧顏色庫), next (立即換組), state (切換 \"指令碼狀態\" 狀態源) 及 current; 500 ms 內的指令碼修改合併為一次, 歷史記錄標註 \"指令碼: 名稱\", 主題色頁面提供 \"復原指令碼修改\" 以還原先前的選擇 (含啟用中的智慧顏色庫)"
+        "colors 模組新增感知色彩函式: toOklab / oklab 與 toOklch / oklch, ensureContrast (WCAG 對比度, 預設 4.5), harmony, tones, derive (主色, 強調色與深色), nightVariant, simulate (紅色盲, 綠色盲, 藍色盲) 及 extract (影像主要顏色, 支援 count, region 與 step 選項); colors.distance, colors.isSimilar 與 images.detectColor 支援 oklab 演算法 (參閱 範例程式碼 > 图像与颜色)",
+        "colors.theme 由指令碼控制主題色: get, set (可指定 accent 與 dark), reset, libraries, activate 與 deactivate (智慧顏色庫), next (立即換組), state (切換 \"指令碼狀態\" 狀態源) 及 current; 500 ms 內的指令碼修改合併為一次, 歷史記錄標註 \"指令碼: 名稱\", 主題色頁面提供 \"復原指令碼修改\" 以還原先前的選擇 (含啟用中的智慧顏色庫) (參閱 範例程式碼 > 图像与颜色)"
       ],
       "fix": [
         "啟用 APK Inspector 後, 檔案管理器的安裝套件資訊入口被隱藏且無法從更多選單存取的問題",
