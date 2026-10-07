@@ -134,11 +134,12 @@ class IntelligentConfigJsonTest {
             StateSource.PowerSave,
             StateSource.AccessibilityService,
             StateSource.ScriptRunning,
+            StateSource.ScriptStates(listOf("idle", "busy", "error")),
         )
         sources.forEach { source ->
             val config = IntelligentConfig(
                 stateSource = source,
-                rotation = listOf(RotationTrigger.StateChange, RotationTrigger.Daily(listOf(8 * 60, 20 * 60))),
+                rotation = listOf(RotationTrigger.StateChange, RotationTrigger.ScriptStart, RotationTrigger.Daily(listOf(8 * 60, 20 * 60))),
                 overrides = listOf(
                     DateOverride(DateCondition.Holiday("christmas", daysBefore = 1, daysAfter = 1), 3L),
                     DateOverride(DateCondition.Holiday("springFestival"), 2L),
@@ -148,6 +149,17 @@ class IntelligentConfigJsonTest {
         }
         val encoded = JsonParser.parseString(IntelligentConfigJson.encode(IntelligentConfig(StateSource.TimePeriods(listOf(6 * 60, 18 * 60))))).asJsonObject
         assertEquals("""{"type":"timePeriods","starts":["06:00","18:00"]}""", encoded["stateSource"].toString())
+    }
+
+    @Test
+    fun scriptStatesAreNormalized() {
+        val repaired = IntelligentConfigJson.decode("""{"version":1,"stateSource":{"type":"scriptStates","names":[" a ","b","a","",3,"c"]}}""")
+        assertEquals(StateSource.ScriptStates(listOf("a", "b", "c")), repaired.stateSource)
+        assertEquals(listOf("script:0", "script:1", "script:2"), repaired.stateSource.stateKeys)
+        // Fewer than two names keep the raw data. zh-CN: 不足两个名称时保留原始数据.
+        val single = IntelligentConfigJson.decode("""{"version":1,"stateSource":{"type":"scriptStates","names":["only"]}}""")
+        assertTrue(single.stateSource is StateSource.Unsupported)
+        assertEquals(8, StateSource.ScriptStates.normalized((1..10).map { "s$it" })!!.names.size)
     }
 
     @Test

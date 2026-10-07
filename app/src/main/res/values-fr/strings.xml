@@ -1610,6 +1610,7 @@
     <string name="text_history_max_total_bytes">Taille totale maximale de l\'historique</string>
     <string name="text_history_max_total_bytes_per_file">Taille maximale de l\'historique par fichier</string>
     <string name="text_history_max_versions">Nombre maximal de versions par fichier</string>
+    <string name="text_history_source_script">Script : %1$s</string>
     <string name="text_holiday_christmas">Noël</string>
     <string name="text_holiday_double_ninth_festival">Fête du Double Neuf</string>
     <string name="text_holiday_dragon_boat_festival">Fête des bateaux-dragons</string>
@@ -1770,6 +1771,7 @@
     <string name="text_invalid_month_day">Saisissez les dates au format MM-JJ, par exemple 12-24</string>
     <string name="text_invalid_package_name">Nom de paquet non valide</string>
     <string name="text_invalid_project">Projet non valide</string>
+    <string name="text_invalid_script_states">Saisissez 2 à 8 noms différents de 32 caractères au plus</string>
     <string name="text_invert_selection">Inverser</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">L\'adresse IP \"%1$s\" a un usage particulier (loopback/broadcast/multicast/reserved/...), il est donc possible qu\'elle ne puisse pas être utilisée pour se connecter au serveur cible.</string>
     <string name="text_is_latest_version">Pas de version plus récente trouvée</string>
@@ -2356,6 +2358,7 @@
     <string name="text_rotation_app_start">Démarrage de l\'app</string>
     <string name="text_rotation_daily">Heures quotidiennes</string>
     <string name="text_rotation_interval">Intervalle</string>
+    <string name="text_rotation_script_start">Démarrage d\'un script</string>
     <string name="text_rotation_state_change">Changement d\'état</string>
     <string name="text_rotation_triggers">Rotation des groupes</string>
     <string name="text_run">Exécuter</string>
@@ -2399,9 +2402,11 @@
     <string name="text_scheduled_restart_start_delay">Délai de démarrage</string>
     <string name="text_screen_capture_request_delay">Délai de demande d\'autorisation de capture d\'écran</string>
     <string name="text_screen_color_picker">Sélecteur de couleur d\'écran</string>
+    <string name="text_script_change_undone">La couleur du thème d\'avant la modification du script est rétablie</string>
     <string name="text_script_music">Musique du script</string>
     <string name="text_script_record">Enregistrement de scripts</string>
     <string name="text_script_running">Script en cours d\'exécution</string>
+    <string name="text_script_states_hint">%1$d à %2$d noms d\'état séparés par des virgules ; les scripts les changent avec colors.theme.state(name)</string>
     <string name="text_search">Recherche</string>
     <string name="text_search_all_colors">Rechercher toutes les couleurs</string>
     <string name="text_search_color">Rechercher une couleur</string>
@@ -2536,6 +2541,7 @@
     <string name="text_state_source_none">Aucun</string>
     <string name="text_state_source_power_save">Économiseur de batterie</string>
     <string name="text_state_source_script_running">Scripts en cours</string>
+    <string name="text_state_source_script_states">États du script</string>
     <string name="text_state_source_seasons">Saisons</string>
     <string name="text_state_source_sunrise_sunset">Lever et coucher du soleil</string>
     <string name="text_state_source_time_periods">Plages horaires</string>
@@ -2640,6 +2646,7 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Révoquer</string>
     <string name="text_undo_auto_fill">Annuler le remplissage automatique</string>
+    <string name="text_undo_script_change">Annuler la modification du script</string>
     <string name="text_undo_simplified">Révoq</string>
     <string name="text_uninstall">Desinstaller</string>
     <string name="text_unit_days">Jours</string>

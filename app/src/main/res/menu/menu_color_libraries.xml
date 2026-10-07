@@ -19,6 +19,12 @@
         app:showAsAction="always|collapseActionView" />
 
     <item
+        android:id="@+id/action_undo_script_change"
+        android:title="@string/text_undo_script_change"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_locate_current_theme_color"
         android:title="@string/text_locate_current_theme_color"
         android:icon="@drawable/ic_locate"

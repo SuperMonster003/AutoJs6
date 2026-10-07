@@ -58,6 +58,18 @@ class IntelligentColorPlannerTest {
     ) = planner.plan(PlannerInput(config, groups, state, now, event, runtime, override, start, zone))
 
     @Test
+    fun scriptStartsRotateOnlyWithTheirTrigger() {
+        val groups = listOf(single(1, red), single(2, green))
+        val withTrigger = IntelligentConfig(rotation = listOf(RotationTrigger.ScriptStart))
+        val activated = plan(withTrigger, groups, ACTIVATE)
+        assertEquals(2L, plan(withTrigger, groups, IntelligentEvent.SCRIPT_START, activated.runtime).groupId)
+        val without = IntelligentConfig()
+        assertEquals(1L, plan(without, groups, IntelligentEvent.SCRIPT_START, plan(without, groups, ACTIVATE).runtime).groupId)
+        // A script asking for the next group needs no trigger. zh-CN: 脚本请求下一组不需要换组时机.
+        assertEquals(2L, plan(without, groups, IntelligentEvent.SCRIPT_NEXT, plan(without, groups, ACTIVATE).runtime).groupId)
+    }
+
+    @Test
     fun activationUsesTheChosenGroupOrTheFirstAvailable() {
         val config = IntelligentConfig()
         val groups = listOf(single(1, red, enabled = false), single(2, green), single(3, blue))

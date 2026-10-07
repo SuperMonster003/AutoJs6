@@ -1610,6 +1610,7 @@
     <string name="text_history_max_total_bytes">Максимальный общий размер истории</string>
     <string name="text_history_max_total_bytes_per_file">Максимальный размер истории на файл</string>
     <string name="text_history_max_versions">Максимум версий на файл</string>
+    <string name="text_history_source_script">Скрипт: %1$s</string>
     <string name="text_holiday_christmas">Рождество</string>
     <string name="text_holiday_double_ninth_festival">Праздник двойной девятки</string>
     <string name="text_holiday_dragon_boat_festival">Праздник драконьих лодок</string>
@@ -1770,6 +1771,7 @@
     <string name="text_invalid_month_day">Вводите даты в формате ММ-ДД, например 12-24</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>
+    <string name="text_invalid_script_states">Введите от 2 до 8 разных имён длиной не более 32 символов</string>
     <string name="text_invert_selection">Инвертировать</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP-адрес \"%1$s\" имеет специальное назначение (loopback/broadcast/multicast/reserved/...), поэтому он может быть непригоден для подключения к целевому серверу.</string>
     <string name="text_is_latest_version">Более новая версия не найдена</string>
@@ -2356,6 +2358,7 @@
     <string name="text_rotation_app_start">Запуск приложения</string>
     <string name="text_rotation_daily">Ежедневно в заданное время</string>
     <string name="text_rotation_interval">Интервал</string>
+    <string name="text_rotation_script_start">Запуск скрипта</string>
     <string name="text_rotation_state_change">Смена состояния</string>
     <string name="text_rotation_triggers">Смена групп</string>
     <string name="text_run">Запустить</string>
@@ -2399,9 +2402,11 @@
     <string name="text_scheduled_restart_start_delay">Задержка старта</string>
     <string name="text_screen_capture_request_delay">Задержка запроса разрешения на захват экрана</string>
     <string name="text_screen_color_picker">Пипетка цвета экрана</string>
+    <string name="text_script_change_undone">Цвет темы до изменения скриптом восстановлен</string>
     <string name="text_script_music">Музыка скрипта</string>
     <string name="text_script_record">Запись сценария</string>
     <string name="text_script_running">Выполнение сценария</string>
+    <string name="text_script_states_hint">От %1$d до %2$d имён состояний через запятую; скрипты переключают их через colors.theme.state(name)</string>
     <string name="text_search">Поиск</string>
     <string name="text_search_all_colors">Искать все цвета</string>
     <string name="text_search_color">Поиск цвета</string>
@@ -2536,6 +2541,7 @@
     <string name="text_state_source_none">Нет</string>
     <string name="text_state_source_power_save">Режим энергосбережения</string>
     <string name="text_state_source_script_running">Запущенные скрипты</string>
+    <string name="text_state_source_script_states">Состояния скрипта</string>
     <string name="text_state_source_seasons">Времена года</string>
     <string name="text_state_source_sunrise_sunset">Восход и закат</string>
     <string name="text_state_source_time_periods">Периоды суток</string>
@@ -2640,6 +2646,7 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Отозвать</string>
     <string name="text_undo_auto_fill">Отменить заполнение</string>
+    <string name="text_undo_script_change">Отменить изменение скрипта</string>
     <string name="text_undo_simplified">Верни</string>
     <string name="text_uninstall">Удалить</string>
     <string name="text_unit_days">Дней</string>

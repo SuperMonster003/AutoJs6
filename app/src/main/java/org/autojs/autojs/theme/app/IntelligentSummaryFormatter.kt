@@ -68,12 +68,14 @@ object IntelligentSummaryFormatter {
         StateSource.PowerSave -> context.getString(R.string.text_state_source_power_save)
         StateSource.AccessibilityService -> context.getString(R.string.text_state_source_accessibility_service)
         StateSource.ScriptRunning -> context.getString(R.string.text_state_source_script_running)
+        is StateSource.ScriptStates -> context.getString(R.string.text_state_source_script_states)
         is StateSource.Unsupported -> context.getString(R.string.text_unsupported)
     }
 
     fun triggerLabel(context: Context, trigger: RotationTrigger): String = when (trigger) {
         RotationTrigger.StateChange -> context.getString(R.string.text_rotation_state_change)
         RotationTrigger.AppStart -> context.getString(R.string.text_rotation_app_start)
+        RotationTrigger.ScriptStart -> context.getString(R.string.text_rotation_script_start)
         is RotationTrigger.Interval -> intervalLabel(context, trigger.every, trigger.unit)
         is RotationTrigger.Daily -> dailyLabel(context, trigger.times)
         is RotationTrigger.Unsupported -> context.getString(R.string.text_unsupported)
@@ -142,6 +144,7 @@ object IntelligentSummaryFormatter {
                 val to = source.thresholds.getOrNull(index)?.minus(1) ?: 100
                 "$from%-$to%"
             }
+            stateKey.startsWith("script:") && index != null && source is StateSource.ScriptStates -> source.names.getOrNull(index) ?: stateKey
             else -> context.getString(R.string.text_state_color_single)
         }
     }
@@ -167,6 +170,7 @@ object IntelligentSummaryFormatter {
             is StateSource.Seasons -> source.hemisphere?.let { IntelligentConditionDialogs.hemisphereLabel(context, it) }
                 ?: context.getString(R.string.text_location_from_time_zone, IntelligentConditionDialogs.hemisphereLabel(context, inferredHemisphere()))
             is StateSource.Battery -> source.thresholds.joinToString(", ") { "$it%" }
+            is StateSource.ScriptStates -> source.names.joinToString(", ")
             else -> null
         }
         return if (detail == null) label else "$label: $detail"

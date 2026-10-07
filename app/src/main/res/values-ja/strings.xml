@@ -1611,6 +1611,7 @@
     <string name="text_history_max_total_bytes">履歴の合計サイズ上限</string>
     <string name="text_history_max_total_bytes_per_file">ファイルごとの履歴サイズ上限</string>
     <string name="text_history_max_versions">ファイルごとの最大バージョン数</string>
+    <string name="text_history_source_script">スクリプト: %1$s</string>
     <string name="text_holiday_christmas">クリスマス</string>
     <string name="text_holiday_double_ninth_festival">重陽節</string>
     <string name="text_holiday_dragon_boat_festival">端午節</string>
@@ -1771,6 +1772,7 @@
     <string name="text_invalid_month_day">日付は 月-日 の形式で入力してください (例: 12-24)</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>
+    <string name="text_invalid_script_states">32 文字以内の異なる名前を 2~8 個入力してください</string>
     <string name="text_invert_selection">反転</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP アドレス \"%1$s\" は特殊用途 (loopback/broadcast/multicast/reserved/...) のため, 接続先サーバーへの接続に使用できない可能性があります.</string>
     <string name="text_is_latest_version">新しいバージョンが見つかりません</string>
@@ -2357,6 +2359,7 @@
     <string name="text_rotation_app_start">アプリ起動</string>
     <string name="text_rotation_daily">毎日の時刻</string>
     <string name="text_rotation_interval">時間間隔</string>
+    <string name="text_rotation_script_start">スクリプト開始</string>
     <string name="text_rotation_state_change">状態の変化</string>
     <string name="text_rotation_triggers">グループの切り替えタイミング</string>
     <string name="text_run">実行</string>
@@ -2400,9 +2403,11 @@
     <string name="text_scheduled_restart_start_delay">開始遅延</string>
     <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
     <string name="text_screen_color_picker">画面カラーピッカー</string>
+    <string name="text_script_change_undone">スクリプトによる変更前のテーマカラーに戻しました</string>
     <string name="text_script_music">スクリプトの音楽</string>
     <string name="text_script_record">スクリプトの記録</string>
     <string name="text_script_running">スクリプトの実行</string>
+    <string name="text_script_states_hint">カンマ区切りで %1$d~%2$d 個の状態名; スクリプトは colors.theme.state(name) で切り替えます</string>
     <string name="text_search">検索</string>
     <string name="text_search_all_colors">すべての色を検索</string>
     <string name="text_search_color">色を検索</string>
@@ -2537,6 +2542,7 @@
     <string name="text_state_source_none">なし</string>
     <string name="text_state_source_power_save">バッテリーセーバー</string>
     <string name="text_state_source_script_running">スクリプトの実行</string>
+    <string name="text_state_source_script_states">スクリプトの状態</string>
     <string name="text_state_source_seasons">季節</string>
     <string name="text_state_source_sunrise_sunset">日の出と日の入り</string>
     <string name="text_state_source_time_periods">時間帯</string>
@@ -2641,6 +2647,7 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">元に戻す</string>
     <string name="text_undo_auto_fill">自動入力を元に戻す</string>
+    <string name="text_undo_script_change">スクリプトによる変更を元に戻す</string>
     <string name="text_undo_simplified">戻る</string>
     <string name="text_uninstall">アンインストール</string>
     <string name="text_unit_days">日</string>

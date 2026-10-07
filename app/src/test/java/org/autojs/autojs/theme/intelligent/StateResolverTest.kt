@@ -18,6 +18,15 @@ class StateResolverTest {
         StateResolver.resolve(source, now, zone, facts, previous)
 
     @Test
+    fun scriptStatesFollowTheLastNameSet() {
+        val source = StateSource.ScriptStates(listOf("idle", "busy"))
+        assertEquals(StateResolution("script:1", null), resolve(source, 0L, facts = DeviceFacts(scriptState = "busy")))
+        // Unknown or missing names fall back to the first state. zh-CN: 未知或缺失的名称回退到第一个状态.
+        assertEquals(StateResolution("script:0", null), resolve(source, 0L, facts = DeviceFacts(scriptState = "gone")))
+        assertEquals(StateResolution("script:0", null), resolve(source, 0L))
+    }
+
+    @Test
     fun timePeriodsWrapPastMidnight() {
         val source = StateSource.TimePeriods(listOf(6 * 60, 12 * 60, 18 * 60))
         assertEquals(StateResolution("period:2", at("2026-10-07T06:00")), resolve(source, at("2026-10-07T05:00")))

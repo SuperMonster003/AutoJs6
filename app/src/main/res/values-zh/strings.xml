@@ -1607,6 +1607,7 @@
     <string name="text_history_max_total_bytes">版本历史总容量上限</string>
     <string name="text_history_max_total_bytes_per_file">每个文件的历史容量上限</string>
     <string name="text_history_max_versions">每个文件的最大版本数</string>
+    <string name="text_history_source_script">脚本: %1$s</string>
     <string name="text_holiday_christmas">圣诞节</string>
     <string name="text_holiday_double_ninth_festival">重阳节</string>
     <string name="text_holiday_dragon_boat_festival">端午节</string>
@@ -1767,6 +1768,7 @@
     <string name="text_invalid_month_day">请按 月-日 格式输入日期, 例如 12-24</string>
     <string name="text_invalid_package_name">无效包名</string>
     <string name="text_invalid_project">无效项目</string>
+    <string name="text_invalid_script_states">请输入 2 至 8 个互不相同且不超过 32 个字符的名称</string>
     <string name="text_invert_selection">反选</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP 地址 \"%1$s\" 具备特殊用途 (回环/广播/多播/保留/...), 因此可能无法用于连接目标服务器.</string>
     <string name="text_is_latest_version">已是最新版本</string>
@@ -2353,6 +2355,7 @@
     <string name="text_rotation_app_start">应用启动</string>
     <string name="text_rotation_daily">每日定时</string>
     <string name="text_rotation_interval">时间间隔</string>
+    <string name="text_rotation_script_start">脚本启动</string>
     <string name="text_rotation_state_change">状态变化</string>
     <string name="text_rotation_triggers">换组时机</string>
     <string name="text_run">运行</string>
@@ -2396,9 +2399,11 @@
     <string name="text_scheduled_restart_start_delay">启动延迟</string>
     <string name="text_screen_capture_request_delay">屏幕捕获权限申请延迟</string>
     <string name="text_screen_color_picker">屏幕取色</string>
+    <string name="text_script_change_undone">已恢复脚本修改前的主题色</string>
     <string name="text_script_music">脚本音乐</string>
     <string name="text_script_record">录制脚本</string>
     <string name="text_script_running">脚本运行</string>
+    <string name="text_script_states_hint">%1$d 至 %2$d 个以逗号分隔的状态名; 脚本通过 colors.theme.state(name) 切换</string>
     <string name="text_search">搜索</string>
     <string name="text_search_all_colors">搜索全部颜色</string>
     <string name="text_search_color">搜索颜色</string>
@@ -2533,6 +2538,7 @@
     <string name="text_state_source_none">无</string>
     <string name="text_state_source_power_save">省电模式</string>
     <string name="text_state_source_script_running">脚本运行</string>
+    <string name="text_state_source_script_states">脚本状态</string>
     <string name="text_state_source_seasons">季节</string>
     <string name="text_state_source_sunrise_sunset">日出日落</string>
     <string name="text_state_source_time_periods">时段</string>
@@ -2637,6 +2643,7 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">撤销</string>
     <string name="text_undo_auto_fill">撤销自动填充</string>
+    <string name="text_undo_script_change">撤销脚本修改</string>
     <string name="text_undo_simplified">撤销</string>
     <string name="text_uninstall">卸载</string>
     <string name="text_unit_days">天</string>

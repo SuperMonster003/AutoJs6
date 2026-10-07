@@ -97,6 +97,11 @@
                 style="@style/IntelligentEditorCheckBox"
                 android:text="@string/text_rotation_app_start" />
 
+            <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+                android:id="@+id/rotation_script_start"
+                style="@style/IntelligentEditorCheckBox"
+                android:text="@string/text_rotation_script_start" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

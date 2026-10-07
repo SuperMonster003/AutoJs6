@@ -65,6 +65,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     private var searchMenuItem: MenuItem? = null
     private var reorderMenuItem: MenuItem? = null
+    private var undoMenuItem: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +73,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         ThemeChangeNotifier.themeChanged.observe(this) {
             libraryAdapter.notifyDataSetChanged()
             searchAdapter.notifyDataSetChanged()
+            updateUndoMenuItem()
         }
 
         MtActivityColorLibrariesBinding.inflate(layoutInflater).let {
@@ -158,6 +160,24 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        refreshUserLibraries()
+        updateUndoMenuItem()
+    }
+
+    /**
+     * "Undo script change" shows while the latest explicit change came from a script (D11, roadmap P6.3).
+     * zh-CN: 最近一次显式修改来自脚本时显示 "撤销脚本修改" (D11, Roadmap P6.3).
+     */
+    private fun updateUndoMenuItem() {
+        undoMenuItem?.isVisible = ScriptThemeChanges.canUndo && searchMenuItem?.isActionViewExpanded != true
+    }
+
+    private fun undoScriptChange() {
+        if (ScriptThemeChanges.undo()) {
+            isForciblyEnableAppBarColorTransition = true
+            ViewUtils.showToast(this, R.string.text_script_change_undone)
+        }
+        updateUndoMenuItem()
         refreshUserLibraries()
     }
 
@@ -286,6 +306,8 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         menuInflater.inflate(R.menu.menu_color_libraries, menu)
         searchMenuItem = menu.findItem(R.id.action_search_color)
         reorderMenuItem = menu.findItem(R.id.action_reorder_color_libraries)
+        undoMenuItem = menu.findItem(R.id.action_undo_script_change)
+        updateUndoMenuItem()
 
         binding.toolbar.setMenuIconsColorByColorLuminance(this, currentColor)
 
@@ -297,10 +319,12 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                 mRecyclerView.adapter = searchAdapter
                 loadSearchableUserItems()
                 menu.forEach { it.isVisible = it.isVisible.not() }
+                undoMenuItem?.isVisible = false
             },
             onMenuItemActionCollapse = {
                 mRecyclerView.adapter = libraryAdapter
                 menu.forEach { it.isVisible = it.isVisible.not() }
+                updateUndoMenuItem()
             }
         )?.apply { queryHint = getString(R.string.text_search_all_colors) }
 
@@ -392,6 +416,10 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         }
         R.id.action_derived_colors -> {
             DerivedColorsSetting.show(this)
+            true
+        }
+        R.id.action_undo_script_change -> {
+            undoScriptChange()
             true
         }
         R.id.action_reorder_color_libraries -> {

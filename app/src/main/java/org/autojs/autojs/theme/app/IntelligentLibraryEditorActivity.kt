@@ -80,6 +80,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
     private var stateSource: StateSource = StateSource.NightMode
     private var stateChangeChecked = true
     private var appStartChecked = false
+    private var scriptStartChecked = false
     private var intervalChecked = false
     private var interval = RotationTrigger.Interval(1, IntervalUnit.HOUR, IntervalAnchor.NEXT_HOUR)
     private var dailyChecked = false
@@ -144,6 +145,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         binding.addGroup.setOnClickListener { editGroup(null) }
         binding.rotationStateChange.setOnCheckedChangeListener { _, checked -> if (!isBinding) stateChangeChecked = checked.also { refresh() } }
         binding.rotationAppStart.setOnCheckedChangeListener { _, checked -> if (!isBinding) appStartChecked = checked.also { refresh() } }
+        binding.rotationScriptStart.setOnCheckedChangeListener { _, checked -> if (!isBinding) scriptStartChecked = checked.also { refresh() } }
         binding.rotationInterval.setOnCheckedChangeListener { _, checked -> if (!isBinding) intervalChecked = checked.also { refresh() } }
         binding.orderDescending.setOnCheckedChangeListener { _, checked ->
             if (!isBinding) (order as? GroupOrder.Sequential)?.let { order = it.copy(descending = checked).also { refresh() } }
@@ -168,6 +170,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
                 stateSource = config.stateSource
                 stateChangeChecked = RotationTrigger.StateChange in config.rotation
                 appStartChecked = RotationTrigger.AppStart in config.rotation
+                scriptStartChecked = RotationTrigger.ScriptStart in config.rotation
                 config.interval?.let {
                     intervalChecked = true
                     interval = it
@@ -193,6 +196,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         rotation = buildList {
             if (stateChangeChecked && stateKeys.size > 1) add(RotationTrigger.StateChange)
             if (appStartChecked) add(RotationTrigger.AppStart)
+            if (scriptStartChecked) add(RotationTrigger.ScriptStart)
             if (intervalChecked) add(interval)
             if (dailyChecked) add(daily)
             addAll(keptRotation)
@@ -207,6 +211,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         binding.rotationStateChange.isChecked = stateChangeChecked && stateKeys.size > 1
         binding.rotationStateChange.isEnabled = stateKeys.size > 1
         binding.rotationAppStart.isChecked = appStartChecked
+        binding.rotationScriptStart.isChecked = scriptStartChecked
         binding.rotationInterval.isChecked = intervalChecked
         binding.intervalSummary.text = intervalSummary()
         binding.rotationDaily.isChecked = dailyChecked
@@ -261,6 +266,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
         StateSource.PowerSave,
         StateSource.AccessibilityService,
         StateSource.ScriptRunning,
+        stateSource as? StateSource.ScriptStates ?: StateSource.ScriptStates.DEFAULT,
     )
 
     private fun chooseStateSource() {
@@ -291,6 +297,7 @@ class IntelligentLibraryEditorActivity : ColorSelectBaseActivity() {
             is StateSource.SunriseSunset -> IntelligentConditionDialogs.editLocation(this, source.location) { changeStateSource(StateSource.SunriseSunset(it)) }
             is StateSource.Seasons -> IntelligentConditionDialogs.editHemisphere(this, source.hemisphere) { changeStateSource(StateSource.Seasons(it)) }
             is StateSource.Battery -> IntelligentConditionDialogs.editBatteryThresholds(this, source.thresholds) { changeStateSource(StateSource.Battery(it)) }
+            is StateSource.ScriptStates -> IntelligentConditionDialogs.editScriptStates(this, source.names) { changeStateSource(StateSource.ScriptStates(it)) }
             else -> if (source != stateSource) changeStateSource(source)
         }
     }

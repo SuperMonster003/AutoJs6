@@ -38,6 +38,8 @@ object IntelligentConfigJson {
     private const val TYPE_POWER_SAVE = "powerSave"
     private const val TYPE_ACCESSIBILITY_SERVICE = "accessibilityService"
     private const val TYPE_SCRIPT_RUNNING = "scriptRunning"
+    private const val TYPE_SCRIPT_STATES = "scriptStates"
+    private const val TYPE_SCRIPT_START = "scriptStart"
     private const val TYPE_STATE_CHANGE = "stateChange"
     private const val TYPE_APP_START = "appStart"
     private const val TYPE_INTERVAL = "interval"
@@ -95,6 +97,7 @@ object IntelligentConfigJson {
         StateSource.PowerSave -> typed(TYPE_POWER_SAVE)
         StateSource.AccessibilityService -> typed(TYPE_ACCESSIBILITY_SERVICE)
         StateSource.ScriptRunning -> typed(TYPE_SCRIPT_RUNNING)
+        is StateSource.ScriptStates -> typed(TYPE_SCRIPT_STATES).apply { add("names", JsonArray().apply { source.names.forEach { add(it) } }) }
         is StateSource.Unsupported -> raw(source.raw, source.type)
     }
 
@@ -126,6 +129,9 @@ object IntelligentConfigJson {
         TYPE_POWER_SAVE -> StateSource.PowerSave
         TYPE_ACCESSIBILITY_SERVICE -> StateSource.AccessibilityService
         TYPE_SCRIPT_RUNNING -> StateSource.ScriptRunning
+        TYPE_SCRIPT_STATES -> json.arrayOrNull("names")?.mapNotNull { element ->
+            element.takeIf { it.isJsonPrimitive && it.asJsonPrimitive.isString }?.asString
+        }?.let(StateSource.ScriptStates::normalized) ?: StateSource.Unsupported(type, json.toString())
         else -> StateSource.Unsupported(type, json.toString())
     }
 
@@ -144,6 +150,7 @@ object IntelligentConfigJson {
     private fun encodeTrigger(trigger: RotationTrigger): JsonElement = when (trigger) {
         RotationTrigger.StateChange -> typed(TYPE_STATE_CHANGE)
         RotationTrigger.AppStart -> typed(TYPE_APP_START)
+        RotationTrigger.ScriptStart -> typed(TYPE_SCRIPT_START)
         is RotationTrigger.Interval -> typed(TYPE_INTERVAL).apply {
             addProperty("every", trigger.every)
             addProperty("unit", trigger.unit.key)
@@ -158,6 +165,7 @@ object IntelligentConfigJson {
         return when (type) {
             TYPE_STATE_CHANGE -> RotationTrigger.StateChange
             TYPE_APP_START -> RotationTrigger.AppStart
+            TYPE_SCRIPT_START -> RotationTrigger.ScriptStart
             TYPE_INTERVAL -> {
                 val unit = IntervalUnit.of(json.string("unit")) ?: return RotationTrigger.Unsupported(type, json.toString())
                 RotationTrigger.Interval(

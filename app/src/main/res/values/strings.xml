@@ -1606,6 +1606,7 @@
     <string name="text_history_max_total_bytes">Max total history size</string>
     <string name="text_history_max_total_bytes_per_file">Max history size per file</string>
     <string name="text_history_max_versions">Max versions per file</string>
+    <string name="text_history_source_script">Script: %1$s</string>
     <string name="text_holiday_christmas">Christmas</string>
     <string name="text_holiday_double_ninth_festival">Double Ninth Festival</string>
     <string name="text_holiday_dragon_boat_festival">Dragon Boat Festival</string>
@@ -1766,6 +1767,7 @@
     <string name="text_invalid_month_day">Enter dates as MM-DD, such as 12-24</string>
     <string name="text_invalid_package_name">Invalid package name</string>
     <string name="text_invalid_project">Invalid project</string>
+    <string name="text_invalid_script_states">Enter 2 to 8 different names of at most 32 characters</string>
     <string name="text_invert_selection">Invert selection</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP address \"%1$s\" has a special purpose (loopback/broadcast/multicast/reserved/...), so it may not be usable for connecting to the target server.</string>
     <string name="text_is_latest_version">No newer version found</string>
@@ -2352,6 +2354,7 @@
     <string name="text_rotation_app_start">App start</string>
     <string name="text_rotation_daily">Daily times</string>
     <string name="text_rotation_interval">Interval</string>
+    <string name="text_rotation_script_start">Script start</string>
     <string name="text_rotation_state_change">State change</string>
     <string name="text_rotation_triggers">Group rotation</string>
     <string name="text_run">Run</string>
@@ -2395,9 +2398,11 @@
     <string name="text_scheduled_restart_start_delay">Start delay</string>
     <string name="text_screen_capture_request_delay">Screen capture permission request delay</string>
     <string name="text_screen_color_picker">Screen color picker</string>
+    <string name="text_script_change_undone">The theme color before the script change is restored</string>
     <string name="text_script_music">Script music</string>
     <string name="text_script_record">Script recording</string>
     <string name="text_script_running">Script running</string>
+    <string name="text_script_states_hint">%1$d to %2$d state names separated by commas; scripts switch them with colors.theme.state(name)</string>
     <string name="text_search">Search</string>
     <string name="text_search_all_colors">Search all colors</string>
     <string name="text_search_color">Search color</string>
@@ -2532,6 +2537,7 @@
     <string name="text_state_source_none">None</string>
     <string name="text_state_source_power_save">Battery saver</string>
     <string name="text_state_source_script_running">Running scripts</string>
+    <string name="text_state_source_script_states">Script states</string>
     <string name="text_state_source_seasons">Seasons</string>
     <string name="text_state_source_sunrise_sunset">Sunrise and sunset</string>
     <string name="text_state_source_time_periods">Time periods</string>
@@ -2636,6 +2642,7 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Undo</string>
     <string name="text_undo_auto_fill">Undo auto fill</string>
+    <string name="text_undo_script_change">Undo script change</string>
     <string name="text_undo_simplified">Undo</string>
     <string name="text_uninstall">Uninstall</string>
     <string name="text_unit_days">Days</string>

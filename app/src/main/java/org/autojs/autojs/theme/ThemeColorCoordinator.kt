@@ -30,8 +30,27 @@ object ThemeColorCoordinator {
 
     }
 
+    /**
+     * Sees every committed change, before and after it takes effect (roadmap P6.3: script history and undo).
+     * zh-CN: 观察每次生效的修改, 分别在生效前后回调 (Roadmap P6.3: 脚本历史与撤销).
+     */
+    interface CommitObserver {
+
+        fun beforeCommit(themeColor: ThemeColor, source: ThemeColorSource) = Unit
+
+        /** [scriptName] is the script of the last merged request for [ThemeColorSource.SCRIPT]. zh-CN: 对 [ThemeColorSource.SCRIPT] 而言, [scriptName] 为最后一次合并请求所属的脚本. */
+        fun afterCommit(themeColor: ThemeColor, source: ThemeColorSource, scriptName: String?) = Unit
+
+    }
+
     @Volatile
     var listener: Listener? = null
+
+    @Volatile
+    var commitObserver: CommitObserver? = null
+
+    @Volatile
+    private var lastScriptName: String? = null
 
     private val policy = ThemeColorApplyPolicy<ThemeColor>()
 
@@ -61,6 +80,17 @@ object ThemeColorCoordinator {
     }
 
     /**
+     * A change requested by a script through `colors.theme` (D11): merged within the script window and recorded with
+     * [scriptName] when it applies.
+     * zh-CN: 脚本经 `colors.theme` 请求的修改 (D11): 在脚本窗口内合并, 生效时连同 [scriptName] 一起记录.
+     */
+    @JvmStatic
+    fun applyFromScript(themeColor: ThemeColor, scriptName: String?) {
+        lastScriptName = scriptName
+        apply(themeColor, ThemeColorSource.SCRIPT)
+    }
+
+    /**
      * Holds intelligent changes until every token has been released with [resume].
      * zh-CN: 挂起智能修改, 直到每个令牌都经 [resume] 释放.
      */
@@ -82,11 +112,13 @@ object ThemeColorCoordinator {
     }
 
     private fun commit(themeColor: ThemeColor, source: ThemeColorSource) {
+        commitObserver?.beforeCommit(themeColor, source)
         ThemeColorManager.setThemeColor(themeColor)
         ThemeChangeNotifier.notifyThemeChanged()
         if (ThemeColorApplyPolicy.deactivatesIntelligent(source)) {
             listener?.onExplicitColorApplied(source)
         }
+        commitObserver?.afterCommit(themeColor, source, if (source == ThemeColorSource.SCRIPT) lastScriptName else null)
     }
 
     private fun runOnMain(block: () -> Unit) {

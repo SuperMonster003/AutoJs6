@@ -68,6 +68,9 @@ object StateKeys {
     fun season(season: Season) = "season:${season.key}"
 
     fun battery(index: Int) = "battery:$index"
+
+    /** By position, so renaming a script state keeps its colors. zh-CN: 按位置编号, 重命名脚本状态时其颜色保持不变. */
+    fun script(index: Int) = "script:$index"
 }
 
 enum class Season(val key: String) {
@@ -190,6 +193,28 @@ sealed interface StateSource {
         override val stateKeys = listOf(StateKeys.OFF, StateKeys.ON)
     }
 
+    /**
+     * Named states (2 to 8) that scripts switch with `colors.theme.state(name)`; the first one applies until a script
+     * sets another (roadmap P6.2).
+     * zh-CN: 由脚本通过 `colors.theme.state(name)` 切换的命名状态 (2 至 8 个); 脚本设置其他状态之前使用第一个 (Roadmap P6.2).
+     */
+    data class ScriptStates(val names: List<String>) : StateSource {
+        override val stateKeys get() = names.indices.map(StateKeys::script)
+
+        companion object {
+            const val MIN_STATES = 2
+            const val MAX_STATES = 8
+            const val MAX_NAME_LENGTH = 32
+            val DEFAULT = ScriptStates(listOf("idle", "busy"))
+
+            /** Trimmed, distinct and not blank, or null when fewer than 2 remain. zh-CN: 去除首尾空白, 去重且非空; 不足 2 个时返回 null. */
+            fun normalized(names: List<String>): ScriptStates? {
+                val valid = names.map { it.trim() }.filter { it.isNotEmpty() && it.length <= MAX_NAME_LENGTH }.distinct().take(MAX_STATES)
+                return if (valid.size >= MIN_STATES) ScriptStates(valid) else null
+            }
+        }
+    }
+
     data class Unsupported(val type: String, val raw: String) : StateSource {
         override val stateKeys = listOf(StateKeys.DEFAULT)
     }
@@ -205,6 +230,12 @@ sealed interface RotationTrigger {
     data object StateChange : RotationTrigger
 
     data object AppStart : RotationTrigger
+
+    /**
+     * Fires when a script starts running (roadmap P6.2); `colors.theme.next()` rotates without it.
+     * zh-CN: 在脚本开始运行时触发 (Roadmap P6.2); `colors.theme.next()` 不依赖此时机.
+     */
+    data object ScriptStart : RotationTrigger
 
     /**
      * Fires every [every] [unit]s on a grid that starts at [anchor] (see [IntervalSchedule]).

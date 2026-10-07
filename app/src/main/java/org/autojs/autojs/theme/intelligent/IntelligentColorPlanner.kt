@@ -44,6 +44,9 @@ enum class IntelligentEvent {
     /** A script asked for the next group. zh-CN: 脚本请求切换到下一组. */
     SCRIPT_NEXT,
 
+    /** A script started running; rotates with [RotationTrigger.ScriptStart] (roadmap P6.2). zh-CN: 有脚本开始运行; 勾选 [RotationTrigger.ScriptStart] 时换组 (Roadmap P6.2). */
+    SCRIPT_START,
+
 }
 
 /**
@@ -143,6 +146,7 @@ class IntelligentColorPlanner(
         val fired = !activating && (
                 (stateChanged && RotationTrigger.StateChange in config.rotation)
                         || (input.event == IntelligentEvent.APP_START && RotationTrigger.AppStart in config.rotation)
+                        || (input.event == IntelligentEvent.SCRIPT_START && RotationTrigger.ScriptStart in config.rotation)
                         || intervalFired
                         || dailyFired
                         || input.event == IntelligentEvent.SCRIPT_NEXT

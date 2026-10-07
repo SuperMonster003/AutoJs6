@@ -17,6 +17,8 @@ data class DeviceFacts(
     val powerSave: Boolean = false,
     val accessibilityServiceRunning: Boolean = false,
     val scriptRunning: Boolean = false,
+    /** The state name last set by `colors.theme.state` (roadmap P6.2). zh-CN: 最近一次由 `colors.theme.state` 设置的状态名 (Roadmap P6.2). */
+    val scriptState: String? = null,
 )
 
 /**
@@ -48,6 +50,8 @@ object StateResolver {
         StateSource.PowerSave -> onOff(facts.powerSave)
         StateSource.AccessibilityService -> onOff(facts.accessibilityServiceRunning)
         StateSource.ScriptRunning -> onOff(facts.scriptRunning)
+        // An unknown or missing name falls back to the first state. zh-CN: 未知或缺失的状态名回退到第一个状态.
+        is StateSource.ScriptStates -> StateResolution(StateKeys.script(source.names.indexOf(facts.scriptState).coerceAtLeast(0)), null)
     }
 
     private fun onOff(on: Boolean) = StateResolution(if (on) StateKeys.ON else StateKeys.OFF, null)

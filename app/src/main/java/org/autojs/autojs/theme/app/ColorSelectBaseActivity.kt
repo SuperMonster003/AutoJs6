@@ -661,7 +661,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             }
 
             if (colorInt != null) {
-                return@mapNotNull ColorHistoryItem(history.lastUsedTime, colorInt!!, colorName, colorLibraryIdentifier, history.libraryId, history.itemId, history.useCount)
+                return@mapNotNull ColorHistoryItem(history.lastUsedTime, colorInt!!, colorName, withHistorySource(colorLibraryIdentifier, history.source, history.sourceDetail), history.libraryId, history.itemId, history.useCount)
             }
             // TODO by SuperMonster003 on Apr 8 ,2025.
             //  ! Obsolete data should be removed from database.
@@ -677,13 +677,25 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     lastUsedTime = history.lastUsedTime,
                     colorInt = history.colorInfo.colorInt,
                     colorName = null,
-                    colorLibraryIdentifier = paletteIdentifier,
+                    colorLibraryIdentifier = withHistorySource(paletteIdentifier, history.source, history.sourceDetail),
                     useCount = history.useCount,
                 )
             }
         }
 
         return historyItems.sortedByDescending { it.lastUsedTime }
+    }
+
+    /**
+     * Appends "Script: name" to the identifier of entries chosen by scripts (D11, roadmap P6.3).
+     * zh-CN: 为脚本选择的条目在标识后追加 "脚本: 名称" (D11, Roadmap P6.3).
+     */
+    private fun withHistorySource(identifier: String?, source: String, detail: String?): String? = when (source) {
+        HistorySource.SCRIPT -> {
+            val script = getString(R.string.text_history_source_script, detail ?: "-")
+            identifier?.let { "$it · $script" } ?: script
+        }
+        else -> identifier
     }
 
     /**
@@ -1196,11 +1208,11 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
          * zh-CN: 记录调色板颜色的一次使用; [source] 为 [HistorySource.USER] 或 [HistorySource.SCRIPT] (Roadmap P5.2).
          */
         @JvmStatic
-        fun saveDatabaseForPaletteHistory(dispatcherScope: CoroutineScope? = null, applicationContext: Context, color: Int, source: String = HistorySource.USER) {
+        fun saveDatabaseForPaletteHistory(dispatcherScope: CoroutineScope? = null, applicationContext: Context, color: Int, source: String = HistorySource.USER, sourceDetail: String? = null) {
             saveHistory(dispatcherScope) {
                 var itemId by Delegates.notNull<Int>()
-                savePaletteHistory(applicationContext, color, source).also { itemId = it }
-                saveColorHistory(applicationContext, COLOR_LIBRARY_ID_PALETTE, itemId, source)
+                savePaletteHistory(applicationContext, color, source, sourceDetail).also { itemId = it }
+                saveColorHistory(applicationContext, COLOR_LIBRARY_ID_PALETTE, itemId, source, sourceDetail)
             }
         }
 
@@ -1221,15 +1233,15 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             }
         }
 
-        private suspend fun savePaletteHistory(applicationContext: Context, color: Int, source: String): Int {
+        private suspend fun savePaletteHistory(applicationContext: Context, color: Int, source: String, sourceDetail: String? = null): Int {
             val dao = ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
             val colorInfo = ColorInfo(ColorUtils.toHex(color, 6))
-            return dao.upsert(PaletteHistory(colorInfo = colorInfo, source = source).apply { setLastUsedTimeCurrent() }).toInt()
+            return dao.upsert(PaletteHistory(colorInfo = colorInfo, source = source, sourceDetail = sourceDetail).apply { setLastUsedTimeCurrent() }).toInt()
         }
 
-        private suspend fun saveColorHistory(applicationContext: Context, libraryId: Int, itemId: Int, source: String) {
+        private suspend fun saveColorHistory(applicationContext: Context, libraryId: Int, itemId: Int, source: String, sourceDetail: String? = null) {
             val dao = ColorHistoryDatabase.getInstance(applicationContext).colorHistoryDao()
-            dao.upsert(ColorHistory(libraryId = libraryId, itemId = itemId, source = source).apply { setLastUsedTimeCurrent() })
+            dao.upsert(ColorHistory(libraryId = libraryId, itemId = itemId, source = source, sourceDetail = sourceDetail).apply { setLastUsedTimeCurrent() })
         }
 
         @JvmStatic

@@ -241,6 +241,33 @@ object IntelligentConditionDialogs {
     }
 
     /**
+     * Edits the names of script states as comma separated words; scripts use them with `colors.theme.state(name)` (roadmap P6.2).
+     * zh-CN: 以逗号分隔编辑脚本状态的名称; 脚本通过 `colors.theme.state(name)` 使用这些名称 (Roadmap P6.2).
+     */
+    fun editScriptStates(context: Context, current: List<String>, onDone: (List<String>) -> Unit) {
+        MaterialDialog.Builder(context)
+            .title(R.string.text_state_source_script_states)
+            .content(context.getString(R.string.text_script_states_hint, StateSource.ScriptStates.MIN_STATES, StateSource.ScriptStates.MAX_STATES))
+            .input("idle, busy", current.joinToString(", "), false) { dialog, input ->
+                val names = input.split(',', '，').map { it.trim() }.filter { it.isNotEmpty() }
+                val normalized = StateSource.ScriptStates.normalized(names)
+                if (normalized == null || normalized.names.size != names.size) {
+                    ViewUtils.showToast(context, R.string.text_invalid_script_states)
+                } else {
+                    dialog.dismiss()
+                    onDone(normalized.names)
+                }
+            }
+            .autoDismiss(false)
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .onNegative { dialog, _ -> dialog.dismiss() }
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .show()
+    }
+
+    /**
      * Creates or edits a date override: first the kind (for a new one), then its condition and the group to show.
      * zh-CN: 新建或编辑日期覆盖层: 新建时先选择类型, 然后设置条件与要显示的组.
      */

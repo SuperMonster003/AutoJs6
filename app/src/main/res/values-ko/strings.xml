@@ -1612,6 +1612,7 @@
     <string name="text_history_max_total_bytes">버전 기록 총 용량 상한</string>
     <string name="text_history_max_total_bytes_per_file">파일당 기록 용량 상한</string>
     <string name="text_history_max_versions">파일당 최대 버전 수</string>
+    <string name="text_history_source_script">스크립트: %1$s</string>
     <string name="text_holiday_christmas">크리스마스</string>
     <string name="text_holiday_double_ninth_festival">중양절</string>
     <string name="text_holiday_dragon_boat_festival">단오절</string>
@@ -1772,6 +1773,7 @@
     <string name="text_invalid_month_day">날짜를 월-일 형식으로 입력하세요 (예: 12-24)</string>
     <string name="text_invalid_package_name">잘못된 패키지 이름</string>
     <string name="text_invalid_project">잘못된 프로젝트</string>
+    <string name="text_invalid_script_states">32자 이하의 서로 다른 이름을 2~8개 입력하세요</string>
     <string name="text_invert_selection">선택 반전</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP 주소 \"%1$s\" 는 특수 용도 (loopback/broadcast/multicast/reserved/...) 를 가지므로, 대상 서버에 연결하는 데 사용할 수 없을 수도 있습니다.</string>
     <string name="text_is_latest_version">새로운 버전이 발견되지 않았습니다</string>
@@ -2358,6 +2360,7 @@
     <string name="text_rotation_app_start">앱 시작</string>
     <string name="text_rotation_daily">매일 정해진 시각</string>
     <string name="text_rotation_interval">시간 간격</string>
+    <string name="text_rotation_script_start">스크립트 시작</string>
     <string name="text_rotation_state_change">상태 변경</string>
     <string name="text_rotation_triggers">그룹 전환 시점</string>
     <string name="text_run">운영</string>
@@ -2401,9 +2404,11 @@
     <string name="text_scheduled_restart_start_delay">시작 지연</string>
     <string name="text_screen_capture_request_delay">화면 캡처 권한 요청 지연</string>
     <string name="text_screen_color_picker">화면 색상 선택기</string>
+    <string name="text_script_change_undone">스크립트 변경 전의 테마 색상으로 되돌렸습니다</string>
     <string name="text_script_music">스크립트 음악</string>
     <string name="text_script_record">스크립트 녹음</string>
     <string name="text_script_running">스크립트 실행</string>
+    <string name="text_script_states_hint">쉼표로 구분된 상태 이름 %1$d~%2$d개; 스크립트는 colors.theme.state(name)으로 전환합니다</string>
     <string name="text_search">검색</string>
     <string name="text_search_all_colors">모든 색상 검색</string>
     <string name="text_search_color">색상 검색</string>
@@ -2538,6 +2543,7 @@
     <string name="text_state_source_none">없음</string>
     <string name="text_state_source_power_save">절전 모드</string>
     <string name="text_state_source_script_running">스크립트 실행</string>
+    <string name="text_state_source_script_states">스크립트 상태</string>
     <string name="text_state_source_seasons">계절</string>
     <string name="text_state_source_sunrise_sunset">일출과 일몰</string>
     <string name="text_state_source_time_periods">시간대</string>
@@ -2642,6 +2648,7 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">실행 취소</string>
     <string name="text_undo_auto_fill">자동 채우기 실행 취소</string>
+    <string name="text_undo_script_change">스크립트 변경 실행 취소</string>
     <string name="text_undo_simplified">뒤</string>
     <string name="text_uninstall">삭제</string>
     <string name="text_unit_days">일</string>

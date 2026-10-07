@@ -22,6 +22,10 @@ import org.autojs.autojs.theme.library.ColorSelection
 import java.text.Collator
 import java.time.Instant
 import java.time.ZoneId
+import org.autojs.autojs.engine.ScriptEngine
+import org.autojs.autojs.engine.ScriptEngineManager
+import org.autojs.autojs.engine.ScriptEngineService
+import org.autojs.autojs.script.ScriptSource
 
 /**
  * Runs the active intelligent color library while the app process is alive (roadmap P1.4, D5, D6, D9, D10).
@@ -47,6 +51,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
 
     private const val KEY_SNAPSHOT = "INTELLIGENT_COLOR_ACTIVE_SNAPSHOT"
     private const val KEY_RUNTIME = "INTELLIGENT_COLOR_RUNTIME_STATE"
+    private const val KEY_SCRIPT_STATE = "INTELLIGENT_COLOR_SCRIPT_STATE"
 
     private lateinit var appContext: Context
 
@@ -148,6 +153,59 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         }
     }
 
+    /**
+     * The state name last set by `colors.theme.state`, used by [StateSource.ScriptStates] (roadmap P6.2).
+     * zh-CN: 最近一次由 `colors.theme.state` 设置的状态名, 供 [StateSource.ScriptStates] 使用 (Roadmap P6.2).
+     */
+    val scriptState: String?
+        get() = Pref.getStringOrNull(KEY_SCRIPT_STATE)
+
+    /**
+     * Switches the script state of the active library; call on the main thread.
+     * zh-CN: 切换激活库的脚本状态; 在主线程调用.
+     *
+     * @throws IllegalStateException when no active library uses script states.
+     * @throws IllegalArgumentException when [name] is not one of its states.
+     */
+    fun setScriptState(name: String) {
+        val source = snapshot?.config?.stateSource as? StateSource.ScriptStates
+            ?: throw IllegalStateException("No active intelligent color library uses script states")
+        require(name in source.names) { "Unknown script state \"$name\", expected one of: ${source.names.joinToString(", ")}" }
+        Pref.putString(KEY_SCRIPT_STATE, name)
+        evaluate(IntelligentEvent.EVALUATE)
+    }
+
+    /**
+     * Moves the active library to its next group at once, whatever its rotation triggers; call on the main thread.
+     * zh-CN: 立即将激活库切换到下一组, 与其换组时机无关; 在主线程调用.
+     *
+     * @return false when no intelligent library is active.
+     */
+    fun next(): Boolean {
+        if (snapshot == null) return false
+        evaluate(IntelligentEvent.SCRIPT_NEXT)
+        return true
+    }
+
+    /**
+     * The stored snapshot and runtime of the active library, for "Undo script change" (roadmap P6.3); nulls when none is active.
+     * zh-CN: 激活库保存的快照与运行状态, 用于 "撤销脚本修改" (Roadmap P6.3); 未激活时为 null.
+     */
+    fun exportState(): Pair<String?, String?> = when (snapshot) {
+        null -> null to null
+        else -> Pref.getStringOrNull(KEY_SNAPSHOT) to Pref.getStringOrNull(KEY_RUNTIME)
+    }
+
+    /**
+     * Activates the library of [snapshotJson] again from the group of [runtimeJson]; false when the data is unusable.
+     * zh-CN: 按 [runtimeJson] 中的组重新激活 [snapshotJson] 对应的库; 数据不可用时返回 false.
+     */
+    fun restoreState(snapshotJson: String, runtimeJson: String?): Boolean {
+        val restored = IntelligentEngineJson.decodeSnapshot(snapshotJson)?.let(::refreshPreset) ?: return false
+        activate(restored, IntelligentEngineJson.decodeRuntime(runtimeJson).currentGroupId)
+        return true
+    }
+
     fun onLibraryDeleted(libraryId: Int) {
         if (snapshot?.libraryId == libraryId) deactivate()
     }
@@ -166,7 +224,34 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
             WallpaperColorSource.watch(appContext, null)
             watchingWallpaper = false
         }
+        watchScriptStarts(null)
         _changes.postValue(Unit)
+    }
+
+    private var watchingScriptStarts = false
+
+    /** Several scripts started together rotate once. zh-CN: 同时启动的多个脚本只换一次组. */
+    private val scriptStartRunnable = Runnable { evaluate(IntelligentEvent.SCRIPT_START) }
+
+    private val scriptStartCallback = object : ScriptEngineManager.EngineLifecycleCallback {
+        override fun onEngineCreate(engine: ScriptEngine<out ScriptSource>) {
+            handler.removeCallbacks(scriptStartRunnable)
+            handler.post(scriptStartRunnable)
+        }
+
+        override fun onEngineRemove(engine: ScriptEngine<out ScriptSource>) = Unit
+    }
+
+    /**
+     * Listens to script starts only while the active library rotates on them (roadmap P6.2).
+     * zh-CN: 仅当激活库在脚本启动时换组时监听脚本启动 (Roadmap P6.2).
+     */
+    private fun watchScriptStarts(config: IntelligentConfig?) {
+        val needed = config != null && RotationTrigger.ScriptStart in config.rotation
+        if (needed == watchingScriptStarts) return
+        val service = ScriptEngineService.getInstance() ?: return
+        if (needed) service.registerEngineLifecycleCallback(scriptStartCallback) else service.unregisterEngineLifecycleCallback(scriptStartCallback)
+        watchingScriptStarts = needed
     }
 
     override fun onExplicitColorApplied(source: ThemeColorSource) = deactivate()
@@ -225,6 +310,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         val zone = ZoneId.systemDefault()
         watchDeviceFacts(active.config)
         watchWallpaper(active)
+        watchScriptStarts(active.config)
         val state = resolveState(active.config, now)
         nextStateChangeAt = state.nextChangeAt
         val result = planner.plan(
@@ -259,7 +345,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      * zh-CN: 激活库状态源的当前状态, 取自夜间模式与所监听的设备状态 (Roadmap P3.1 至 P3.3).
      */
     private fun resolveState(config: IntelligentConfig, now: Long): StateResolution {
-        val facts = DeviceStateMonitor.read(appContext, DeviceStateMonitor.factsFor(config.stateSource)).copy(isNight = NightModeState.isNight)
+        val facts = DeviceStateMonitor.read(appContext, DeviceStateMonitor.factsFor(config.stateSource)).copy(isNight = NightModeState.isNight, scriptState = scriptState)
         return StateResolver.resolve(config.stateSource, now, ZoneId.systemDefault(), facts, runtime.lastStateKey)
     }
 

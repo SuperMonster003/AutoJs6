@@ -56,6 +56,7 @@ import java.lang.reflect.Method
 import java.util.concurrent.atomic.AtomicBoolean
 import androidx.work.Configuration as WorkManagerConfiguration
 import org.autojs.autojs.inrt.Pref as InrtPref
+import org.autojs.autojs.theme.app.ScriptThemeChanges
 
 /**
  * Created by Stardust on Jan 27, 2017.
@@ -142,6 +143,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                         // Before any Activity draws, so a due change shows no flash (roadmap D9).
                         // zh-CN: 在任何 Activity 绘制之前执行, 使到期的变化不会闪色 (Roadmap D9).
                         IntelligentColorEngine.init(this)
+                        ScriptThemeChanges.init(this)
                         org.autojs.autojs.core.plugin.agent.ThreeStoveAgentConnectionOwner.get(this).refresh()
                     }
                 }

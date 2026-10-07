@@ -1612,6 +1612,7 @@
     <string name="text_history_max_total_bytes">الحد الاقصى لاجمالي حجم السجل</string>
     <string name="text_history_max_total_bytes_per_file">الحد الاقصى لحجم السجل لكل ملف</string>
     <string name="text_history_max_versions">الحد الاقصى للاصدارات لكل ملف</string>
+    <string name="text_history_source_script">برنامج نصي: %1$s</string>
     <string name="text_holiday_christmas">عيد الميلاد</string>
     <string name="text_holiday_double_ninth_festival">مهرجان التاسع المزدوج</string>
     <string name="text_holiday_dragon_boat_festival">مهرجان قوارب التنين</string>
@@ -1772,6 +1773,7 @@
     <string name="text_invalid_month_day">أدخل التواريخ بصيغة شهر-يوم، مثل 12-24</string>
     <string name="text_invalid_package_name">اسم الحزمة غير صالح</string>
     <string name="text_invalid_project">مشروع غير صالح</string>
+    <string name="text_invalid_script_states">أدخل من 2 إلى 8 أسماء مختلفة لا يتجاوز كل منها 32 حرفا</string>
     <string name="text_invert_selection">عكس التحديد</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">عنوان IP \"%1$s\" له استخدام خاص (loopback/broadcast/multicast/reserved/...)، لذلك قد لا يمكن استخدامه للاتصال بالخادم الهدف.</string>
     <string name="text_is_latest_version">لم يتم العثور على نسخة أحدث</string>
@@ -2358,6 +2360,7 @@
     <string name="text_rotation_app_start">بدء التطبيق</string>
     <string name="text_rotation_daily">أوقات يومية</string>
     <string name="text_rotation_interval">فاصل زمني</string>
+    <string name="text_rotation_script_start">بدء برنامج نصي</string>
     <string name="text_rotation_state_change">تغير الحالة</string>
     <string name="text_rotation_triggers">تبديل المجموعات</string>
     <string name="text_run">يجري</string>
@@ -2401,9 +2404,11 @@
     <string name="text_scheduled_restart_start_delay">تأخير البدء</string>
     <string name="text_screen_capture_request_delay">تأخير طلب إذن التقاط الشاشة</string>
     <string name="text_screen_color_picker">منتقي ألوان الشاشة</string>
+    <string name="text_script_change_undone">تمت استعادة لون الموضوع قبل تغيير البرنامج النصي</string>
     <string name="text_script_music">موسيقى البرنامج النصي</string>
     <string name="text_script_record">تسجيل السيناريو</string>
     <string name="text_script_running">البرنامج النصي</string>
+    <string name="text_script_states_hint">من %1$d إلى %2$d من أسماء الحالات مفصولة بفواصل; تبدّل البرامج النصية بينها عبر colors.theme.state(name)</string>
     <string name="text_search">يبحث</string>
     <string name="text_search_all_colors">البحث في كل الألوان</string>
     <string name="text_search_color">البحث عن لون</string>
@@ -2538,6 +2543,7 @@
     <string name="text_state_source_none">لا شيء</string>
     <string name="text_state_source_power_save">توفير البطارية</string>
     <string name="text_state_source_script_running">تشغيل السكربتات</string>
+    <string name="text_state_source_script_states">حالات البرنامج النصي</string>
     <string name="text_state_source_seasons">الفصول</string>
     <string name="text_state_source_sunrise_sunset">الشروق والغروب</string>
     <string name="text_state_source_time_periods">فترات اليوم</string>
@@ -2642,6 +2648,7 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">الغاء التحميل</string>
     <string name="text_undo_auto_fill">التراجع عن التعبئة التلقائية</string>
+    <string name="text_undo_script_change">التراجع عن تغيير البرنامج النصي</string>
     <string name="text_undo_simplified">ينسحب</string>
     <string name="text_uninstall">الغاء التثبيت</string>
     <string name="text_unit_days">ايام</string>
