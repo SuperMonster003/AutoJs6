@@ -488,9 +488,17 @@ script, and answering a prompt while listening to output. Each starts with an av
 guard. Visible execution uses the same Android activity-start rules as `app.startActivity`;
 the system can restrict bringing a screen forward from the background.
 
-Public documentation, TypeScript declarations, Ace completion and the offline documentation
-bundle remain the coordinated P7.1 deliverable in the plugin roadmap. These repositories were
-checked for an existing terminal declaration/page during P4.3; none exists yet.
+The P7 reference pages are `terminal`, `terminalSessionType`, `terminalOpenOptionsType` and
+`terminalErrorType` in AutoJs6-Documentation. They cover the module, both calling forms, session
+events, error codes and the distinction from `shell()`. The same pages are included in the
+Offline Docs asset snapshot. AutoJs6-TypeScript-Declarations 4.32.0 declares `terminal` and
+`$terminal`, their session/event types and the exact Promise result types; its consumer tests
+exercise valid calls and reject twelve invalid call patterns with TypeScript 5.1.3 and 6.0.3.
+Ace consumes that declaration set through its normal generated completion assets.
+
+The complete script API requires a host build containing P4 (6.8.0 / 5315 or later); 5304 is
+the base terminal protocol requirement. A plugin release does not add missing API code to an
+older host. Independent terminal use does not require a running host.
 
 ## Tests
 

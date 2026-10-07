@@ -130,6 +130,14 @@
         "signature": {
           "type": "string"
         },
+        "signatures": {
+          "description": "Every declaration-backed overload; the first one is also `signature`.",
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string"
+          }
+        },
         "score": {
           "type": "integer",
           "minimum": 0

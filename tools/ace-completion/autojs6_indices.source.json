@@ -259,13 +259,21 @@
           "name": "startActivity",
           "kind": "function",
           "doc": "startActivity(o: Intent.CommonWithRoot | string | Intent | android.net.Uri | java.net.URI): void;",
-          "signature": "startActivity(o: Intent.CommonWithRoot | string | Intent | android.net.Uri | java.net.URI): void;"
+          "signature": "startActivity(o: Intent.CommonWithRoot | string | Intent | android.net.Uri | java.net.URI): void;",
+          "signatures": [
+            "startActivity(o: Intent.CommonWithRoot | string | Intent | android.net.Uri | java.net.URI): void;",
+            "startActivity(o: Intent.CommonWithRoot | Intent, options: Intent.CommonWithRoot): void;"
+          ]
         },
         {
           "name": "startDualActivity",
           "kind": "function",
           "doc": "startDualActivity(o: Intent.CommonWithRoot | string | Intent | android.net.Uri | java.net.URI): void;",
-          "signature": "startDualActivity(o: Intent.CommonWithRoot | string | Intent | android.net.Uri | java.net.URI): void;"
+          "signature": "startDualActivity(o: Intent.CommonWithRoot | string | Intent | android.net.Uri | java.net.URI): void;",
+          "signatures": [
+            "startDualActivity(o: Intent.CommonWithRoot | string | Intent | android.net.Uri | java.net.URI): void;",
+            "startDualActivity(o: Intent.CommonWithRoot | Intent, options: Intent.CommonWithRoot): void;"
+          ]
         },
         {
           "name": "sendBroadcast",
@@ -659,13 +667,21 @@
           "name": "registerEvent",
           "kind": "function",
           "doc": "registerEvent(name: string, listener?: Automator.AccessibilityEventListener | null): void;",
-          "signature": "registerEvent(name: string, listener?: Automator.AccessibilityEventListener | null): void;"
+          "signature": "registerEvent(name: string, listener?: Automator.AccessibilityEventListener | null): void;",
+          "signatures": [
+            "registerEvent(name: string, listener?: Automator.AccessibilityEventListener | null): void;",
+            "registerEvent(name: string, listener: Automator.AccessibilityEventListener, options: Automator.RegisterEventOptions): void;"
+          ]
         },
         {
           "name": "registerEvents",
           "kind": "function",
           "doc": "registerEvents(name: string, listener?: Automator.AccessibilityEventListener | null): void;",
-          "signature": "registerEvents(name: string, listener?: Automator.AccessibilityEventListener | null): void;"
+          "signature": "registerEvents(name: string, listener?: Automator.AccessibilityEventListener | null): void;",
+          "signatures": [
+            "registerEvents(name: string, listener?: Automator.AccessibilityEventListener | null): void;",
+            "registerEvents(name: string, listener: Automator.AccessibilityEventListener, options: Automator.RegisterEventOptions): void;"
+          ]
         },
         {
           "name": "removeEvent",
@@ -963,37 +979,92 @@
           "name": "click",
           "kind": "function",
           "doc": "click(x: number, y: number): boolean;",
-          "signature": "click(x: number, y: number): boolean;"
+          "signature": "click(x: number, y: number): boolean;",
+          "signatures": [
+            "click(x: number, y: number): boolean;",
+            "click(point: [x: number, y: number]): boolean;",
+            "click(point: {x: number, y: number}): boolean;",
+            "click(point: android.graphics.Point): boolean;",
+            "click(point: org.opencv.core.Point): boolean;",
+            "click(text: string, index?: number): boolean;",
+            "click(left: number, top: number, right: number, bottom: number): boolean;",
+            "click(widget: UiObject): boolean;",
+            "click(bounds: android.graphics.Rect): boolean;"
+          ]
         },
         {
           "name": "longClick",
           "kind": "function",
           "doc": "longClick(x: number, y: number): boolean;",
-          "signature": "longClick(x: number, y: number): boolean;"
+          "signature": "longClick(x: number, y: number): boolean;",
+          "signatures": [
+            "longClick(x: number, y: number): boolean;",
+            "longClick(point: [x: number, y: number]): boolean;",
+            "longClick(point: {x: number, y: number}): boolean;",
+            "longClick(point: android.graphics.Point): boolean;",
+            "longClick(point: org.opencv.core.Point): boolean;",
+            "longClick(text: string, index?: number): boolean;",
+            "longClick(left: number, top: number, right: number, bottom: number): boolean;",
+            "longClick(widget: UiObject): boolean;",
+            "longClick(bounds: android.graphics.Rect): boolean;"
+          ]
         },
         {
           "name": "press",
           "kind": "function",
           "doc": "press(x: number, y: number, duration?: number): boolean;",
-          "signature": "press(x: number, y: number, duration?: number): boolean;"
+          "signature": "press(x: number, y: number, duration?: number): boolean;",
+          "signatures": [
+            "press(x: number, y: number, duration?: number): boolean;",
+            "press(point: [x: number, y: number], duration?: number): boolean;",
+            "press(duration: number, point: [x: number, y: number]): boolean;"
+          ]
         },
         {
           "name": "swipe",
           "kind": "function",
           "doc": "swipe(x1: number, y1: number, x2: number, y2: number, duration: number): boolean;",
-          "signature": "swipe(x1: number, y1: number, x2: number, y2: number, duration: number): boolean;"
+          "signature": "swipe(x1: number, y1: number, x2: number, y2: number, duration: number): boolean;",
+          "signatures": [
+            "swipe(x1: number, y1: number, x2: number, y2: number, duration: number): boolean;",
+            "swipe(pointA: [x: number, y: number], pointB: [x: number, y: number], duration: number): boolean;",
+            "swipe(pointsGroup: [[x: number, y: number], [x: number, y: number]], duration: number): boolean;",
+            "swipe(points: [x1: number, y1: number, x2: number, y2: number], duration: number): boolean;",
+            "swipe(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number]): boolean;",
+            "swipe(duration: number, pointsGroup: [[x: number, y: number], [x: number, y: number]]): boolean;",
+            "swipe(duration: number, points: [x1: number, y1: number, x2: number, y2: number]): boolean;"
+          ]
         },
         {
           "name": "gesture",
           "kind": "function",
           "doc": "gesture(duration: number, ...point: [x: number, y: number][]): boolean;",
-          "signature": "gesture(duration: number, ...point: [x: number, y: number][]): boolean;"
+          "signature": "gesture(duration: number, ...point: [x: number, y: number][]): boolean;",
+          "signatures": [
+            "gesture(duration: number, ...point: [x: number, y: number][]): boolean;",
+            "gesture(duration: number, pointsGroup: [...[x: number, y: number][]]): boolean;",
+            "gesture(duration: number, points: [...number[]]): boolean;"
+          ]
         },
         {
           "name": "gestureAsync",
           "kind": "function",
           "doc": "gestureAsync(duration: number, point: [x: number, y: number], callback: GestureResultCallbackLike): void;",
-          "signature": "gestureAsync(duration: number, point: [x: number, y: number], callback: GestureResultCallbackLike): void;"
+          "signature": "gestureAsync(duration: number, point: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+          "signatures": [
+            "gestureAsync(duration: number, point: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number], pointC: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number], pointC: [x: number, y: number], pointD: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number], pointC: [x: number, y: number], pointD: [x: number, y: number], pointE: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number], pointC: [x: number, y: number], pointD: [x: number, y: number], pointE: [x: number, y: number], pointF: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number], pointC: [x: number, y: number], pointD: [x: number, y: number], pointE: [x: number, y: number], pointF: [x: number, y: number], pointG: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number], pointC: [x: number, y: number], pointD: [x: number, y: number], pointE: [x: number, y: number], pointF: [x: number, y: number], pointG: [x: number, y: number], pointH: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointA: [x: number, y: number], pointB: [x: number, y: number], pointC: [x: number, y: number], pointD: [x: number, y: number], pointE: [x: number, y: number], pointF: [x: number, y: number], pointG: [x: number, y: number], pointH: [x: number, y: number], pointI: [x: number, y: number], callback: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, pointsGroup: [...[x: number, y: number][]], callback?: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, points: [...number[]], callback?: GestureResultCallbackLike): void;",
+            "gestureAsync(duration: number, ...point: [x: number, y: number][]): void;"
+          ]
         },
         {
           "name": "gestures",
@@ -1005,31 +1076,64 @@
           "name": "gesturesAsync",
           "kind": "function",
           "doc": "gesturesAsync(stroke: StrokeParams, callback: GestureResultCallbackLike): void;",
-          "signature": "gesturesAsync(stroke: StrokeParams, callback: GestureResultCallbackLike): void;"
+          "signature": "gesturesAsync(stroke: StrokeParams, callback: GestureResultCallbackLike): void;",
+          "signatures": [
+            "gesturesAsync(stroke: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokeA: StrokeParams, strokeB: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokeA: StrokeParams, strokeB: StrokeParams, strokeC: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokeA: StrokeParams, strokeB: StrokeParams, strokeC: StrokeParams, strokeD: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokeA: StrokeParams, strokeB: StrokeParams, strokeC: StrokeParams, strokeD: StrokeParams, strokeE: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokeA: StrokeParams, strokeB: StrokeParams, strokeC: StrokeParams, strokeD: StrokeParams, strokeE: StrokeParams, strokeF: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokeA: StrokeParams, strokeB: StrokeParams, strokeC: StrokeParams, strokeD: StrokeParams, strokeE: StrokeParams, strokeF: StrokeParams, strokeG: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokeA: StrokeParams, strokeB: StrokeParams, strokeC: StrokeParams, strokeD: StrokeParams, strokeE: StrokeParams, strokeF: StrokeParams, strokeG: StrokeParams, strokeH: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokeA: StrokeParams, strokeB: StrokeParams, strokeC: StrokeParams, strokeD: StrokeParams, strokeE: StrokeParams, strokeF: StrokeParams, strokeG: StrokeParams, strokeH: StrokeParams, strokeI: StrokeParams, callback: GestureResultCallbackLike): void;",
+            "gesturesAsync(strokesGroup: [...StrokeParams[]], callback?: GestureResultCallbackLike): void;",
+            "gesturesAsync(...stroke: StrokeParams[]): void;"
+          ]
         },
         {
           "name": "scrollDown",
           "kind": "function",
           "doc": "scrollDown(): boolean;",
-          "signature": "scrollDown(): boolean;"
+          "signature": "scrollDown(): boolean;",
+          "signatures": [
+            "scrollDown(): boolean;",
+            "scrollDown(index: number): boolean;",
+            "scrollDown(text: string, index?: number): boolean;",
+            "scrollDown(left: number, top: number, right: number, bottom: number): boolean;"
+          ]
         },
         {
           "name": "scrollUp",
           "kind": "function",
           "doc": "scrollUp(): boolean;",
-          "signature": "scrollUp(): boolean;"
+          "signature": "scrollUp(): boolean;",
+          "signatures": [
+            "scrollUp(): boolean;",
+            "scrollUp(index: number): boolean;",
+            "scrollUp(text: string, index?: number): boolean;",
+            "scrollUp(left: number, top: number, right: number, bottom: number): boolean;"
+          ]
         },
         {
           "name": "setText",
           "kind": "function",
           "doc": "setText(text: string): boolean;",
-          "signature": "setText(text: string): boolean;"
+          "signature": "setText(text: string): boolean;",
+          "signatures": [
+            "setText(text: string): boolean;",
+            "setText(index: number, text: string): boolean;"
+          ]
         },
         {
           "name": "input",
           "kind": "function",
           "doc": "input(text: string): boolean;",
-          "signature": "input(text: string): boolean;"
+          "signature": "input(text: string): boolean;",
+          "signatures": [
+            "input(text: string): boolean;",
+            "input(index: number, text: string): boolean;"
+          ]
         },
         {
           "name": "captureScreen",
@@ -1263,25 +1367,41 @@
           "name": "waitForIdle",
           "kind": "function",
           "doc": "waitForIdle(quietFor?: number): Automator.IdleResult;",
-          "signature": "waitForIdle(quietFor?: number): Automator.IdleResult;"
+          "signature": "waitForIdle(quietFor?: number): Automator.IdleResult;",
+          "signatures": [
+            "waitForIdle(quietFor?: number): Automator.IdleResult;",
+            "waitForIdle(options: Automator.IdleOptions): Automator.IdleResult;"
+          ]
         },
         {
           "name": "waitForEvent",
           "kind": "function",
           "doc": "waitForEvent(type?: string | string[] | null, filter?: Automator.EventFilter | null, timeout?: number): Automator.AccessibilityEvent;",
-          "signature": "waitForEvent(type?: string | string[] | null, filter?: Automator.EventFilter | null, timeout?: number): Automator.AccessibilityEvent;"
+          "signature": "waitForEvent(type?: string | string[] | null, filter?: Automator.EventFilter | null, timeout?: number): Automator.AccessibilityEvent;",
+          "signatures": [
+            "waitForEvent(type?: string | string[] | null, filter?: Automator.EventFilter | null, timeout?: number): Automator.AccessibilityEvent;",
+            "waitForEvent(type: string | string[] | null, timeout: number, filter?: Automator.EventFilter | null): Automator.AccessibilityEvent;"
+          ]
         },
         {
           "name": "waitForToast",
           "kind": "function",
           "doc": "waitForToast(text?: Automator.ToastFilter | null, timeout?: number): Automator.Toast;",
-          "signature": "waitForToast(text?: Automator.ToastFilter | null, timeout?: number): Automator.Toast;"
+          "signature": "waitForToast(text?: Automator.ToastFilter | null, timeout?: number): Automator.Toast;",
+          "signatures": [
+            "waitForToast(text?: Automator.ToastFilter | null, timeout?: number): Automator.Toast;",
+            "waitForToast(timeout: number): Automator.Toast;"
+          ]
         },
         {
           "name": "waitForNotification",
           "kind": "function",
           "doc": "waitForNotification(filter?: Automator.NotificationFilter | null, timeout?: number): org.autojs.autojs.core.notification.Notification;",
-          "signature": "waitForNotification(filter?: Automator.NotificationFilter | null, timeout?: number): org.autojs.autojs.core.notification.Notification;"
+          "signature": "waitForNotification(filter?: Automator.NotificationFilter | null, timeout?: number): org.autojs.autojs.core.notification.Notification;",
+          "signatures": [
+            "waitForNotification(filter?: Automator.NotificationFilter | null, timeout?: number): org.autojs.autojs.core.notification.Notification;",
+            "waitForNotification(timeout: number): org.autojs.autojs.core.notification.Notification;"
+          ]
         }
       ]
     },
@@ -1292,25 +1412,63 @@
           "name": "detect",
           "kind": "function",
           "doc": "detect(options: Barcode.DetectAllOptions): Barcode.Result[];",
-          "signature": "detect(options: Barcode.DetectAllOptions): Barcode.Result[];"
+          "signature": "detect(options: Barcode.DetectAllOptions): Barcode.Result[];",
+          "signatures": [
+            "detect(options: Barcode.DetectAllOptions): Barcode.Result[];",
+            "detect(options: DetectOptions, isAll: true): Barcode.Result[];",
+            "detect(isAll: true): Barcode.Result[];",
+            "detect(img: ImageWrapper | string, options: Barcode.DetectAllOptions): Barcode.Result[];",
+            "detect(img: ImageWrapper | string, isAll: true): Barcode.Result[];",
+            "detect(img: ImageWrapper | string, options: DetectOptions, isAll: true): Barcode.Result[];",
+            "detect(options?: DetectOptions): Barcode.Result | Barcode.Result[] | null;",
+            "detect(options: DetectOptions, isAll: boolean): Barcode.Result | Barcode.Result[] | null;",
+            "detect(isAll: false): Barcode.Result | null;",
+            "detect(isAll: boolean): Barcode.Result | Barcode.Result[] | null;",
+            "detect(img: ImageWrapper | string, options?: DetectOptions): Barcode.Result | Barcode.Result[] | null;",
+            "detect(img: ImageWrapper | string, isAll: boolean): Barcode.Result | Barcode.Result[] | null;",
+            "detect(img: ImageWrapper | string, options: DetectOptions, isAll: boolean): Barcode.Result | Barcode.Result[] | null;"
+          ]
         },
         {
           "name": "detectAll",
           "kind": "function",
           "doc": "detectAll(options?: DetectOptions): Barcode.Result[];",
-          "signature": "detectAll(options?: DetectOptions): Barcode.Result[];"
+          "signature": "detectAll(options?: DetectOptions): Barcode.Result[];",
+          "signatures": [
+            "detectAll(options?: DetectOptions): Barcode.Result[];",
+            "detectAll(img: ImageWrapper | string, options?: DetectOptions): Barcode.Result[];"
+          ]
         },
         {
           "name": "recognizeText",
           "kind": "function",
           "doc": "recognizeText(options: Barcode.DetectAllOptions): string[];",
-          "signature": "recognizeText(options: Barcode.DetectAllOptions): string[];"
+          "signature": "recognizeText(options: Barcode.DetectAllOptions): string[];",
+          "signatures": [
+            "recognizeText(options: Barcode.DetectAllOptions): string[];",
+            "recognizeText(options: DetectOptions, isAll: true): string[];",
+            "recognizeText(isAll: true): string[];",
+            "recognizeText(img: ImageWrapper | string, options: Barcode.DetectAllOptions): string[];",
+            "recognizeText(img: ImageWrapper | string, isAll: true): string[];",
+            "recognizeText(img: ImageWrapper | string, options: DetectOptions, isAll: true): string[];",
+            "recognizeText(options?: DetectOptions): string | string[] | null;",
+            "recognizeText(options: DetectOptions, isAll: boolean): string | string[] | null;",
+            "recognizeText(isAll: false): string | null;",
+            "recognizeText(isAll: boolean): string | string[] | null;",
+            "recognizeText(img: ImageWrapper | string, options?: DetectOptions): string | string[] | null;",
+            "recognizeText(img: ImageWrapper | string, isAll: boolean): string | string[] | null;",
+            "recognizeText(img: ImageWrapper | string, options: DetectOptions, isAll: boolean): string | string[] | null;"
+          ]
         },
         {
           "name": "recognizeTexts",
           "kind": "function",
           "doc": "recognizeTexts(options?: DetectOptions): string[];",
-          "signature": "recognizeTexts(options?: DetectOptions): string[];"
+          "signature": "recognizeTexts(options?: DetectOptions): string[];",
+          "signatures": [
+            "recognizeTexts(options?: DetectOptions): string[];",
+            "recognizeTexts(img: ImageWrapper | string, options?: DetectOptions): string[];"
+          ]
         }
       ]
     },
@@ -1338,7 +1496,11 @@
           "name": "new",
           "kind": "function",
           "doc": "new(color?: OmniColor): Color;",
-          "signature": "new(color?: OmniColor): Color;"
+          "signature": "new(color?: OmniColor): Color;",
+          "signatures": [
+            "new(color?: OmniColor): Color;",
+            "new(r: ColorComponent, g: ColorComponent, b: ColorComponent, a?: ColorComponent): Color;"
+          ]
         },
         {
           "name": "color",
@@ -1356,7 +1518,11 @@
           "name": "toHex",
           "kind": "function",
           "doc": "toHex(alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
-          "signature": "toHex(alpha?: boolean | 'auto' | 'none' | 'keep'): string;"
+          "signature": "toHex(alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
+          "signatures": [
+            "toHex(alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
+            "toHex(length: 8 | 6 | 3): string;"
+          ]
         },
         {
           "name": "toFullHex",
@@ -1542,43 +1708,77 @@
           "name": "setRgb",
           "kind": "function",
           "doc": "setRgb(red: ColorComponent, green: ColorComponent, blue: ColorComponent): this;",
-          "signature": "setRgb(red: ColorComponent, green: ColorComponent, blue: ColorComponent): this;"
+          "signature": "setRgb(red: ColorComponent, green: ColorComponent, blue: ColorComponent): this;",
+          "signatures": [
+            "setRgb(red: ColorComponent, green: ColorComponent, blue: ColorComponent): this;",
+            "setRgb(rgb: [ColorComponent, ColorComponent, ColorComponent]): this;",
+            "setRgb(color: OmniColor): this;"
+          ]
         },
         {
           "name": "setArgb",
           "kind": "function",
           "doc": "setArgb(alpha: ColorComponent, red: ColorComponent, green: ColorComponent, blue: ColorComponent): this;",
-          "signature": "setArgb(alpha: ColorComponent, red: ColorComponent, green: ColorComponent, blue: ColorComponent): this;"
+          "signature": "setArgb(alpha: ColorComponent, red: ColorComponent, green: ColorComponent, blue: ColorComponent): this;",
+          "signatures": [
+            "setArgb(alpha: ColorComponent, red: ColorComponent, green: ColorComponent, blue: ColorComponent): this;",
+            "setArgb(components: ColorComponent[]): this;",
+            "setArgb(colorHex: '#AARRGGBB' | string): this;"
+          ]
         },
         {
           "name": "setRgba",
           "kind": "function",
           "doc": "setRgba(red: ColorComponent, green: ColorComponent, blue: ColorComponent, alpha: ColorComponent): this;",
-          "signature": "setRgba(red: ColorComponent, green: ColorComponent, blue: ColorComponent, alpha: ColorComponent): this;"
+          "signature": "setRgba(red: ColorComponent, green: ColorComponent, blue: ColorComponent, alpha: ColorComponent): this;",
+          "signatures": [
+            "setRgba(red: ColorComponent, green: ColorComponent, blue: ColorComponent, alpha: ColorComponent): this;",
+            "setRgba(rgb: ColorComponent[], alpha: ColorComponent): this;",
+            "setRgba(components: ColorComponent[]): this;",
+            "setRgba(colorHex: '#RRGGBBAA' | string): this;"
+          ]
         },
         {
           "name": "setHsv",
           "kind": "function",
           "doc": "setHsv(h: ColorHueComponent, s: ColorComponent, v: ColorComponent): this;",
-          "signature": "setHsv(h: ColorHueComponent, s: ColorComponent, v: ColorComponent): this;"
+          "signature": "setHsv(h: ColorHueComponent, s: ColorComponent, v: ColorComponent): this;",
+          "signatures": [
+            "setHsv(h: ColorHueComponent, s: ColorComponent, v: ColorComponent): this;",
+            "setHsv(components: (ColorComponent | ColorHueComponent)[]): this;"
+          ]
         },
         {
           "name": "setHsva",
           "kind": "function",
           "doc": "setHsva(h: ColorHueComponent, s: ColorComponent, v: ColorComponent, a: ColorComponent): this;",
-          "signature": "setHsva(h: ColorHueComponent, s: ColorComponent, v: ColorComponent, a: ColorComponent): this;"
+          "signature": "setHsva(h: ColorHueComponent, s: ColorComponent, v: ColorComponent, a: ColorComponent): this;",
+          "signatures": [
+            "setHsva(h: ColorHueComponent, s: ColorComponent, v: ColorComponent, a: ColorComponent): this;",
+            "setHsva(hsv: (ColorHueComponent | ColorComponent)[], a: ColorComponent): this;",
+            "setHsva(components: (ColorComponent | ColorHueComponent)[]): this;"
+          ]
         },
         {
           "name": "setHsl",
           "kind": "function",
           "doc": "setHsl(h: ColorHueComponent, s: ColorComponent, l: ColorComponent): this;",
-          "signature": "setHsl(h: ColorHueComponent, s: ColorComponent, l: ColorComponent): this;"
+          "signature": "setHsl(h: ColorHueComponent, s: ColorComponent, l: ColorComponent): this;",
+          "signatures": [
+            "setHsl(h: ColorHueComponent, s: ColorComponent, l: ColorComponent): this;",
+            "setHsl(components: (ColorComponent | ColorHueComponent)[]): this;"
+          ]
         },
         {
           "name": "setHsla",
           "kind": "function",
           "doc": "setHsla(h: ColorHueComponent, s: ColorComponent, l: ColorComponent, a: ColorComponent): this;",
-          "signature": "setHsla(h: ColorHueComponent, s: ColorComponent, l: ColorComponent, a: ColorComponent): this;"
+          "signature": "setHsla(h: ColorHueComponent, s: ColorComponent, l: ColorComponent, a: ColorComponent): this;",
+          "signatures": [
+            "setHsla(h: ColorHueComponent, s: ColorComponent, l: ColorComponent, a: ColorComponent): this;",
+            "setHsla(hsl: (ColorHueComponent | ColorComponent)[], a: ColorComponent): this;",
+            "setHsla(components: (ColorComponent | ColorHueComponent)[]): this;"
+          ]
         },
         {
           "name": "toRgb",
@@ -1668,7 +1868,11 @@
           "name": "isSimilar",
           "kind": "function",
           "doc": "isSimilar(other: OmniColor, threshold?: number, algorithm?: DetectionAlgorithm): boolean;",
-          "signature": "isSimilar(other: OmniColor, threshold?: number, algorithm?: DetectionAlgorithm): boolean;"
+          "signature": "isSimilar(other: OmniColor, threshold?: number, algorithm?: DetectionAlgorithm): boolean;",
+          "signatures": [
+            "isSimilar(other: OmniColor, threshold?: number, algorithm?: DetectionAlgorithm): boolean;",
+            "isSimilar(other: OmniColor, options: { threshold?: number; similarity?: number; algorithm?: DetectionAlgorithm; }): boolean;"
+          ]
         },
         {
           "name": "isEqual",
@@ -1680,7 +1884,11 @@
           "name": "distance",
           "kind": "function",
           "doc": "distance(other: OmniColor, algorithm?: DetectionAlgorithm): number;",
-          "signature": "distance(other: OmniColor, algorithm?: DetectionAlgorithm): number;"
+          "signature": "distance(other: OmniColor, algorithm?: DetectionAlgorithm): number;",
+          "signatures": [
+            "distance(other: OmniColor, algorithm?: DetectionAlgorithm): number;",
+            "distance(other: OmniColor, options: { algorithm?: DetectionAlgorithm; }): number;"
+          ]
         },
         {
           "name": "invert",
@@ -1764,6 +1972,12 @@
           "kind": "variable",
           "doc": "themeColor: org.autojs.autojs.theme.ThemeColor;",
           "signature": "themeColor: org.autojs.autojs.theme.ThemeColor;"
+        },
+        {
+          "name": "theme",
+          "kind": "variable",
+          "doc": "theme: Colors.Theme;",
+          "signature": "theme: Colors.Theme;"
         },
         {
           "name": "ALICE_BLUE",
@@ -5207,13 +5421,21 @@
           "name": "toHex",
           "kind": "function",
           "doc": "toHex(color: OmniColor, alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
-          "signature": "toHex(color: OmniColor, alpha?: boolean | 'auto' | 'none' | 'keep'): string;"
+          "signature": "toHex(color: OmniColor, alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
+          "signatures": [
+            "toHex(color: OmniColor, alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
+            "toHex(color: OmniColor, length: 8 | 6 | 3): string;"
+          ]
         },
         {
           "name": "toString",
           "kind": "function",
           "doc": "toString(color: OmniColor, alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
-          "signature": "toString(color: OmniColor, alpha?: boolean | 'auto' | 'none' | 'keep'): string;"
+          "signature": "toString(color: OmniColor, alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
+          "signatures": [
+            "toString(color: OmniColor, alpha?: boolean | 'auto' | 'none' | 'keep'): string;",
+            "toString(color: OmniColor, length: 8 | 6 | 3): string;"
+          ]
         },
         {
           "name": "toFullHex",
@@ -5225,43 +5447,77 @@
           "name": "rgb",
           "kind": "function",
           "doc": "rgb(red: ColorComponent, green: ColorComponent, blue: ColorComponent): number;",
-          "signature": "rgb(red: ColorComponent, green: ColorComponent, blue: ColorComponent): number;"
+          "signature": "rgb(red: ColorComponent, green: ColorComponent, blue: ColorComponent): number;",
+          "signatures": [
+            "rgb(red: ColorComponent, green: ColorComponent, blue: ColorComponent): number;",
+            "rgb(rgb: [ColorComponent, ColorComponent, ColorComponent]): number;",
+            "rgb(color: OmniColor): number;"
+          ]
         },
         {
           "name": "argb",
           "kind": "function",
           "doc": "argb(alpha: ColorComponent, red: ColorComponent, green: ColorComponent, blue: ColorComponent): number;",
-          "signature": "argb(alpha: ColorComponent, red: ColorComponent, green: ColorComponent, blue: ColorComponent): number;"
+          "signature": "argb(alpha: ColorComponent, red: ColorComponent, green: ColorComponent, blue: ColorComponent): number;",
+          "signatures": [
+            "argb(alpha: ColorComponent, red: ColorComponent, green: ColorComponent, blue: ColorComponent): number;",
+            "argb(components: ColorComponent[]): number;",
+            "argb(colorHex: '#AARRGGBB' | string): number;"
+          ]
         },
         {
           "name": "rgba",
           "kind": "function",
           "doc": "rgba(red: ColorComponent, green: ColorComponent, blue: ColorComponent, alpha: ColorComponent): number;",
-          "signature": "rgba(red: ColorComponent, green: ColorComponent, blue: ColorComponent, alpha: ColorComponent): number;"
+          "signature": "rgba(red: ColorComponent, green: ColorComponent, blue: ColorComponent, alpha: ColorComponent): number;",
+          "signatures": [
+            "rgba(red: ColorComponent, green: ColorComponent, blue: ColorComponent, alpha: ColorComponent): number;",
+            "rgba(rgb: ColorComponent[], alpha: ColorComponent): number;",
+            "rgba(components: ColorComponent[]): number;",
+            "rgba(colorHex: '#RRGGBBAA' | string): number;"
+          ]
         },
         {
           "name": "hsv",
           "kind": "function",
           "doc": "hsv(h: ColorHueComponent, s: ColorComponent, v: ColorComponent): number;",
-          "signature": "hsv(h: ColorHueComponent, s: ColorComponent, v: ColorComponent): number;"
+          "signature": "hsv(h: ColorHueComponent, s: ColorComponent, v: ColorComponent): number;",
+          "signatures": [
+            "hsv(h: ColorHueComponent, s: ColorComponent, v: ColorComponent): number;",
+            "hsv(components: (ColorComponent | ColorHueComponent)[]): number;"
+          ]
         },
         {
           "name": "hsva",
           "kind": "function",
           "doc": "hsva(h: ColorHueComponent, s: ColorComponent, v: ColorComponent, a: ColorComponent): number;",
-          "signature": "hsva(h: ColorHueComponent, s: ColorComponent, v: ColorComponent, a: ColorComponent): number;"
+          "signature": "hsva(h: ColorHueComponent, s: ColorComponent, v: ColorComponent, a: ColorComponent): number;",
+          "signatures": [
+            "hsva(h: ColorHueComponent, s: ColorComponent, v: ColorComponent, a: ColorComponent): number;",
+            "hsva(hsv: (ColorHueComponent | ColorComponent)[], a: ColorComponent): number;",
+            "hsva(components: (ColorComponent | ColorHueComponent)[]): number;"
+          ]
         },
         {
           "name": "hsl",
           "kind": "function",
           "doc": "hsl(h: ColorHueComponent, s: ColorComponent, l: ColorComponent): number;",
-          "signature": "hsl(h: ColorHueComponent, s: ColorComponent, l: ColorComponent): number;"
+          "signature": "hsl(h: ColorHueComponent, s: ColorComponent, l: ColorComponent): number;",
+          "signatures": [
+            "hsl(h: ColorHueComponent, s: ColorComponent, l: ColorComponent): number;",
+            "hsl(components: (ColorComponent | ColorHueComponent)[]): number;"
+          ]
         },
         {
           "name": "hsla",
           "kind": "function",
           "doc": "hsla(h: ColorHueComponent, s: ColorComponent, l: ColorComponent, a: ColorComponent): number;",
-          "signature": "hsla(h: ColorHueComponent, s: ColorComponent, l: ColorComponent, a: ColorComponent): number;"
+          "signature": "hsla(h: ColorHueComponent, s: ColorComponent, l: ColorComponent, a: ColorComponent): number;",
+          "signatures": [
+            "hsla(h: ColorHueComponent, s: ColorComponent, l: ColorComponent, a: ColorComponent): number;",
+            "hsla(hsl: (ColorHueComponent | ColorComponent)[], a: ColorComponent): number;",
+            "hsla(components: (ColorComponent | ColorHueComponent)[]): number;"
+          ]
         },
         {
           "name": "toRgb",
@@ -5285,31 +5541,57 @@
           "name": "toHsv",
           "kind": "function",
           "doc": "toHsv(color: OmniColor): number[];",
-          "signature": "toHsv(color: OmniColor): number[];"
+          "signature": "toHsv(color: OmniColor): number[];",
+          "signatures": [
+            "toHsv(color: OmniColor): number[];",
+            "toHsv(color: OmniColor, hsvResultContainer: FloatArray): number[];",
+            "toHsv(r: ColorComponent, g: ColorComponent, b: ColorComponent): number[];",
+            "toHsv(r: ColorComponent, g: ColorComponent, b: ColorComponent, hsvResultContainer: FloatArray): number[];"
+          ]
         },
         {
           "name": "toHsva",
           "kind": "function",
           "doc": "toHsva(color: OmniColor): number[];",
-          "signature": "toHsva(color: OmniColor): number[];"
+          "signature": "toHsva(color: OmniColor): number[];",
+          "signatures": [
+            "toHsva(color: OmniColor): number[];",
+            "toHsva(color: OmniColor, hsvaResultContainer: FloatArray): number[];",
+            "toHsva(r: ColorComponent, g: ColorComponent, b: ColorComponent, a: ColorComponent): number[];",
+            "toHsva(r: ColorComponent, g: ColorComponent, b: ColorComponent, a: ColorComponent, hsvaResultContainer: FloatArray): number[];"
+          ]
         },
         {
           "name": "toHsl",
           "kind": "function",
           "doc": "toHsl(color: OmniColor): number[];",
-          "signature": "toHsl(color: OmniColor): number[];"
+          "signature": "toHsl(color: OmniColor): number[];",
+          "signatures": [
+            "toHsl(color: OmniColor): number[];",
+            "toHsl(color: OmniColor, hslResultContainer: FloatArray): number[];",
+            "toHsl(r: ColorComponent, g: ColorComponent, b: ColorComponent): number[];",
+            "toHsl(r: ColorComponent, g: ColorComponent, b: ColorComponent, hslResultContainer: FloatArray): number[];"
+          ]
         },
         {
           "name": "toHsla",
           "kind": "function",
           "doc": "toHsla(color: OmniColor): number[];",
-          "signature": "toHsla(color: OmniColor): number[];"
+          "signature": "toHsla(color: OmniColor): number[];",
+          "signatures": [
+            "toHsla(color: OmniColor): number[];",
+            "toHsla(r: ColorComponent, g: ColorComponent, b: ColorComponent, a: ColorComponent): number[];"
+          ]
         },
         {
           "name": "toRgbString",
           "kind": "function",
           "doc": "toRgbString(color: OmniColor): string;",
-          "signature": "toRgbString(color: OmniColor): string;"
+          "signature": "toRgbString(color: OmniColor): string;",
+          "signatures": [
+            "toRgbString(color: OmniColor): string;",
+            "toRgbString(r: ColorComponent, g: ColorComponent, b: ColorComponent): string;"
+          ]
         },
         {
           "name": "toRgbaString",
@@ -5327,7 +5609,11 @@
           "name": "toHsvString",
           "kind": "function",
           "doc": "toHsvString(color: OmniColor): string;",
-          "signature": "toHsvString(color: OmniColor): string;"
+          "signature": "toHsvString(color: OmniColor): string;",
+          "signatures": [
+            "toHsvString(color: OmniColor): string;",
+            "toHsvString(r: ColorComponent, g: ColorComponent, b: ColorComponent): string;"
+          ]
         },
         {
           "name": "toHsvaString",
@@ -5339,7 +5625,11 @@
           "name": "toHslString",
           "kind": "function",
           "doc": "toHslString(color: OmniColor): string;",
-          "signature": "toHslString(color: OmniColor): string;"
+          "signature": "toHslString(color: OmniColor): string;",
+          "signatures": [
+            "toHslString(color: OmniColor): string;",
+            "toHslString(r: ColorComponent, g: ColorComponent, b: ColorComponent): string;"
+          ]
         },
         {
           "name": "toHslaString",
@@ -5351,7 +5641,11 @@
           "name": "isSimilar",
           "kind": "function",
           "doc": "isSimilar(colorA: OmniColor, colorB: OmniColor, threshold?: number, algorithm?: DetectionAlgorithm): boolean;",
-          "signature": "isSimilar(colorA: OmniColor, colorB: OmniColor, threshold?: number, algorithm?: DetectionAlgorithm): boolean;"
+          "signature": "isSimilar(colorA: OmniColor, colorB: OmniColor, threshold?: number, algorithm?: DetectionAlgorithm): boolean;",
+          "signatures": [
+            "isSimilar(colorA: OmniColor, colorB: OmniColor, threshold?: number, algorithm?: DetectionAlgorithm): boolean;",
+            "isSimilar(colorA: OmniColor, colorB: OmniColor, options: { threshold?: number; similarity?: number; algorithm?: DetectionAlgorithm; }): boolean;"
+          ]
         },
         {
           "name": "isEqual",
@@ -5363,7 +5657,11 @@
           "name": "distance",
           "kind": "function",
           "doc": "distance(colorA: OmniColor, colorB: OmniColor, algorithm?: DetectionAlgorithm): number;",
-          "signature": "distance(colorA: OmniColor, colorB: OmniColor, algorithm?: DetectionAlgorithm): number;"
+          "signature": "distance(colorA: OmniColor, colorB: OmniColor, algorithm?: DetectionAlgorithm): number;",
+          "signatures": [
+            "distance(colorA: OmniColor, colorB: OmniColor, algorithm?: DetectionAlgorithm): number;",
+            "distance(colorA: OmniColor, colorB: OmniColor, options: { algorithm?: DetectionAlgorithm; }): number;"
+          ]
         },
         {
           "name": "invert",
@@ -5382,6 +5680,80 @@
           "kind": "function",
           "doc": "contrast(foreground: OmniColor, background: OmniColor): number;",
           "signature": "contrast(foreground: OmniColor, background: OmniColor): number;"
+        },
+        {
+          "name": "toOklab",
+          "kind": "function",
+          "doc": "toOklab(color: OmniColor): number[];",
+          "signature": "toOklab(color: OmniColor): number[];"
+        },
+        {
+          "name": "oklab",
+          "kind": "function",
+          "doc": "oklab(L: number | PercentString, a: number, b: number, alpha?: number): ColorInt;",
+          "signature": "oklab(L: number | PercentString, a: number, b: number, alpha?: number): ColorInt;",
+          "signatures": [
+            "oklab(L: number | PercentString, a: number, b: number, alpha?: number): ColorInt;",
+            "oklab(components: (number | PercentString)[]): ColorInt;"
+          ]
+        },
+        {
+          "name": "toOklch",
+          "kind": "function",
+          "doc": "toOklch(color: OmniColor): number[];",
+          "signature": "toOklch(color: OmniColor): number[];"
+        },
+        {
+          "name": "oklch",
+          "kind": "function",
+          "doc": "oklch(L: number | PercentString, C: number, h: number, alpha?: number): ColorInt;",
+          "signature": "oklch(L: number | PercentString, C: number, h: number, alpha?: number): ColorInt;",
+          "signatures": [
+            "oklch(L: number | PercentString, C: number, h: number, alpha?: number): ColorInt;",
+            "oklch(components: (number | PercentString)[]): ColorInt;"
+          ]
+        },
+        {
+          "name": "ensureContrast",
+          "kind": "function",
+          "doc": "ensureContrast(color: OmniColor, background: OmniColor, ratio?: number): ColorInt;",
+          "signature": "ensureContrast(color: OmniColor, background: OmniColor, ratio?: number): ColorInt;"
+        },
+        {
+          "name": "harmony",
+          "kind": "function",
+          "doc": "harmony(color: OmniColor, type: Colors.HarmonyType): ColorInt[];",
+          "signature": "harmony(color: OmniColor, type: Colors.HarmonyType): ColorInt[];"
+        },
+        {
+          "name": "tones",
+          "kind": "function",
+          "doc": "tones(color: OmniColor, count?: number): ColorInt[];",
+          "signature": "tones(color: OmniColor, count?: number): ColorInt[];"
+        },
+        {
+          "name": "derive",
+          "kind": "function",
+          "doc": "derive(color: OmniColor): Colors.DerivedColors;",
+          "signature": "derive(color: OmniColor): Colors.DerivedColors;"
+        },
+        {
+          "name": "nightVariant",
+          "kind": "function",
+          "doc": "nightVariant(color: OmniColor): ColorInt;",
+          "signature": "nightVariant(color: OmniColor): ColorInt;"
+        },
+        {
+          "name": "simulate",
+          "kind": "function",
+          "doc": "simulate(color: OmniColor, deficiency: Colors.ColorVisionDeficiency): ColorInt;",
+          "signature": "simulate(color: OmniColor, deficiency: Colors.ColorVisionDeficiency): ColorInt;"
+        },
+        {
+          "name": "extract",
+          "kind": "function",
+          "doc": "extract(image: ImageWrapper, options?: Colors.ExtractOptions): ColorInt[];",
+          "signature": "extract(image: ImageWrapper, options?: Colors.ExtractOptions): ColorInt[];"
         },
         {
           "name": "equals",
@@ -5411,13 +5783,123 @@
           "name": "build",
           "kind": "function",
           "doc": "build(): Color;",
-          "signature": "build(): Color;"
+          "signature": "build(): Color;",
+          "signatures": [
+            "build(): Color;",
+            "build(color: OmniColor): Color;",
+            "build(r: ColorComponent, g: ColorComponent, b: ColorComponent): Color;",
+            "build(r: ColorComponent, g: ColorComponent, b: ColorComponent, a: ColorComponent): Color;"
+          ]
         },
         {
           "name": "summary",
           "kind": "function",
           "doc": "summary(color: OmniColor): string;",
           "signature": "summary(color: OmniColor): string;"
+        }
+      ]
+    },
+    "compose": {
+      "doc": "AutoJs6 Compose API",
+      "members": [
+        {
+          "name": "version",
+          "kind": "variable",
+          "doc": "version: { plugin: string; contract: number; compose: string } | null;",
+          "signature": "version: { plugin: string; contract: number; compose: string } | null;"
+        },
+        {
+          "name": "sessions",
+          "kind": "variable",
+          "doc": "sessions: ReadonlyArray<ComposeSession>;",
+          "signature": "sessions: ReadonlyArray<ComposeSession>;"
+        },
+        {
+          "name": "ComposeError",
+          "kind": "variable",
+          "doc": "ComposeError: ComposeErrorConstructor;",
+          "signature": "ComposeError: ComposeErrorConstructor;"
+        },
+        {
+          "name": "isAvailable",
+          "kind": "function",
+          "doc": "isAvailable(): boolean;",
+          "signature": "isAvailable(): boolean;"
+        },
+        {
+          "name": "createElement",
+          "kind": "function",
+          "doc": "createElement<N extends ComposeCatalogNodeName>(type: N, ...args: ComposeFactoryArguments<N>): ComposeNode<N>;",
+          "signature": "createElement<N extends ComposeCatalogNodeName>(type: N, ...args: ComposeFactoryArguments<N>): ComposeNode<N>;"
+        },
+        {
+          "name": "modifier",
+          "kind": "function",
+          "doc": "modifier(): ComposeModifier;",
+          "signature": "modifier(): ComposeModifier;"
+        },
+        {
+          "name": "state",
+          "kind": "function",
+          "doc": "state<T>(initial: T): ComposeState<T>;",
+          "signature": "state<T>(initial: T): ComposeState<T>;"
+        },
+        {
+          "name": "ref",
+          "kind": "function",
+          "doc": "ref<T extends ComposeNode = ComposeNode>(): ComposeRef<T>;",
+          "signature": "ref<T extends ComposeNode = ComposeNode>(): ComposeRef<T>;"
+        },
+        {
+          "name": "batch",
+          "kind": "function",
+          "doc": "batch<T>(callback: () => T): T;",
+          "signature": "batch<T>(callback: () => T): T;"
+        },
+        {
+          "name": "mount",
+          "kind": "function",
+          "doc": "mount(root: ComposeNode | (() => ComposeNode), options?: ComposeMountOptions | null): ComposeSession;",
+          "signature": "mount(root: ComposeNode | (() => ComposeNode), options?: ComposeMountOptions | null): ComposeSession;"
+        },
+        {
+          "name": "floaty",
+          "kind": "function",
+          "doc": "floaty(root: ComposeNode | (() => ComposeNode), options?: ComposeFloatyOptions | null): ComposeFloatyWindow;",
+          "signature": "floaty(root: ComposeNode | (() => ComposeNode), options?: ComposeFloatyOptions | null): ComposeFloatyWindow;"
+        },
+        {
+          "name": "post",
+          "kind": "function",
+          "doc": "post(callback: () => void, delay?: number): void;",
+          "signature": "post(callback: () => void, delay?: number): void;"
+        },
+        {
+          "name": "theme",
+          "kind": "function",
+          "doc": "theme(): ComposeThemeSnapshot;",
+          "signature": "theme(): ComposeThemeSnapshot;",
+          "signatures": [
+            "theme(): ComposeThemeSnapshot;",
+            "theme(theme: ComposeTheme | null | undefined): ComposeThemeSnapshot;"
+          ]
+        }
+      ]
+    },
+    "ComposeError": {
+      "doc": "AutoJs6 ComposeErrorConstructor API",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "doc": "new(message?: string, code?: ComposeErrorCode | string, nodeId?: number | null, prop?: string | null, cause?: unknown): ComposeError;",
+          "signature": "new(message?: string, code?: ComposeErrorCode | string, nodeId?: number | null, prop?: string | null, cause?: unknown): ComposeError;"
+        },
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: ComposeError;",
+          "signature": "prototype: ComposeError;"
         }
       ]
     },
@@ -5434,7 +5916,11 @@
           "name": "rawInput",
           "kind": "function",
           "doc": "rawInput(): string;",
-          "signature": "rawInput(): string;"
+          "signature": "rawInput(): string;",
+          "signatures": [
+            "rawInput(): string;",
+            "rawInput(data: any, ...args: any[]): string;"
+          ]
         },
         {
           "name": "input",
@@ -5494,7 +5980,11 @@
           "name": "trace",
           "kind": "function",
           "doc": "trace(message: string, ...args): void;",
-          "signature": "trace(message: string, ...args): void;"
+          "signature": "trace(message: string, ...args): void;",
+          "signatures": [
+            "trace(message: string, ...args): void;",
+            "trace(message: string, level: 'verbose' | 'debug' | 'info' | 'warn' | 'error' | number): void;"
+          ]
         },
         {
           "name": "setGlobalLogConfig",
@@ -5626,7 +6116,13 @@
           "name": "setContentTextColor",
           "kind": "function",
           "doc": "setContentTextColor(colors: OmniColor): this;",
-          "signature": "setContentTextColor(colors: OmniColor): this;"
+          "signature": "setContentTextColor(colors: OmniColor): this;",
+          "signatures": [
+            "setContentTextColor(colors: OmniColor): this;",
+            "setContentTextColor(colors: OmniColor[]): this;",
+            "setContentTextColor(colors: { verbose?: OmniColor; log?: OmniColor; info?: OmniColor; warn?: OmniColor; error?: OmniColor; assert?: OmniColor; }): this;",
+            "setContentTextColor(verbose: OmniColor, log?: OmniColor, info?: OmniColor, warn?: OmniColor, error?: OmniColor, assert?: OmniColor): this;"
+          ]
         },
         {
           "name": "setContentBackgroundColor",
@@ -5692,7 +6188,11 @@
           "name": "setExitOnClose",
           "kind": "function",
           "doc": "setExitOnClose(timeout: number): this;",
-          "signature": "setExitOnClose(timeout: number): this;"
+          "signature": "setExitOnClose(timeout: number): this;",
+          "signatures": [
+            "setExitOnClose(timeout: number): this;",
+            "setExitOnClose(exitOnClose?: boolean): this;"
+          ]
         },
         {
           "name": "setTouchable",
@@ -6619,25 +7119,41 @@
           "name": "digest",
           "kind": "function",
           "doc": "digest(message: Crypto.Input, algorithm?: Crypto.DigestAlgorithm, options?: Crypto.DigestOptions): Crypto.Output;",
-          "signature": "digest(message: Crypto.Input, algorithm?: Crypto.DigestAlgorithm, options?: Crypto.DigestOptions): Crypto.Output;"
+          "signature": "digest(message: Crypto.Input, algorithm?: Crypto.DigestAlgorithm, options?: Crypto.DigestOptions): Crypto.Output;",
+          "signatures": [
+            "digest(message: Crypto.Input, algorithm?: Crypto.DigestAlgorithm, options?: Crypto.DigestOptions): Crypto.Output;",
+            "digest(message: Crypto.Input, options: Crypto.DigestOptions): Crypto.Output;"
+          ]
         },
         {
           "name": "encrypt",
           "kind": "function",
           "doc": "encrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options: Crypto.CipherFileOptions, ): void;",
-          "signature": "encrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options: Crypto.CipherFileOptions, ): void;"
+          "signature": "encrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options: Crypto.CipherFileOptions, ): void;",
+          "signatures": [
+            "encrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options: Crypto.CipherFileOptions, ): void;",
+            "encrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options?: Crypto.CipherOptions, ): Crypto.Output;"
+          ]
         },
         {
           "name": "decrypt",
           "kind": "function",
           "doc": "decrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options: Crypto.CipherFileOptions, ): void;",
-          "signature": "decrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options: Crypto.CipherFileOptions, ): void;"
+          "signature": "decrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options: Crypto.CipherFileOptions, ): void;",
+          "signatures": [
+            "decrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options: Crypto.CipherFileOptions, ): void;",
+            "decrypt(data: Crypto.Input, key: Crypto.Key | java.security.Key, transformation: Crypto.CipherTransformation.All, options?: Crypto.CipherOptions, ): Crypto.Output;"
+          ]
         },
         {
           "name": "generateKeyPair",
           "kind": "function",
           "doc": "generateKeyPair(algorithm: Crypto.KeyPairGeneratorAlgorithm): Crypto.KeyPair;",
-          "signature": "generateKeyPair(algorithm: Crypto.KeyPairGeneratorAlgorithm): Crypto.KeyPair;"
+          "signature": "generateKeyPair(algorithm: Crypto.KeyPairGeneratorAlgorithm): Crypto.KeyPair;",
+          "signatures": [
+            "generateKeyPair(algorithm: Crypto.KeyPairGeneratorAlgorithm): Crypto.KeyPair;",
+            "generateKeyPair(algorithm: Crypto.KeyPairGeneratorAlgorithm, length: number): Crypto.KeyPair;"
+          ]
         }
       ]
     },
@@ -6953,19 +7469,31 @@
           "name": "keepAwake",
           "kind": "function",
           "doc": "keepAwake(flags: number): void;",
-          "signature": "keepAwake(flags: number): void;"
+          "signature": "keepAwake(flags: number): void;",
+          "signatures": [
+            "keepAwake(flags: number): void;",
+            "keepAwake(flags: number, timeout: number): void;"
+          ]
         },
         {
           "name": "keepScreenDim",
           "kind": "function",
           "doc": "keepScreenDim(): void;",
-          "signature": "keepScreenDim(): void;"
+          "signature": "keepScreenDim(): void;",
+          "signatures": [
+            "keepScreenDim(): void;",
+            "keepScreenDim(timeout: number): void;"
+          ]
         },
         {
           "name": "keepScreenOn",
           "kind": "function",
           "doc": "keepScreenOn(): void;",
-          "signature": "keepScreenOn(): void;"
+          "signature": "keepScreenOn(): void;",
+          "signatures": [
+            "keepScreenOn(): void;",
+            "keepScreenOn(timeout: number): void;"
+          ]
         },
         {
           "name": "setAlarmVolume",
@@ -7007,7 +7535,12 @@
           "name": "vibrate",
           "kind": "function",
           "doc": "vibrate(pattern: OmniVibrationPattern, delay?: number): void;",
-          "signature": "vibrate(pattern: OmniVibrationPattern, delay?: number): void;"
+          "signature": "vibrate(pattern: OmniVibrationPattern, delay?: number): void;",
+          "signatures": [
+            "vibrate(pattern: OmniVibrationPattern, delay?: number): void;",
+            "vibrate(millis: number): void;",
+            "vibrate(off: number, millis: number): void;"
+          ]
         },
         {
           "name": "wakeUp",
@@ -7143,7 +7676,11 @@
           "name": "select",
           "kind": "function",
           "doc": "select(title: string, items: any[], callback?: (selectedIndex: number) => void): number | Promise<number>;",
-          "signature": "select(title: string, items: any[], callback?: (selectedIndex: number) => void): number | Promise<number>;"
+          "signature": "select(title: string, items: any[], callback?: (selectedIndex: number) => void): number | Promise<number>;",
+          "signatures": [
+            "select(title: string, items: any[], callback?: (selectedIndex: number) => void): number | Promise<number>;",
+            "select(title: string, ...items: any[]): number;"
+          ]
         },
         {
           "name": "singleChoice",
@@ -7155,7 +7692,11 @@
           "name": "multiChoice",
           "kind": "function",
           "doc": "multiChoice(title: string, items: any[], defaultIndices?: number[]): number[] | Promise<number[]>;",
-          "signature": "multiChoice(title: string, items: any[], defaultIndices?: number[]): number[] | Promise<number[]>;"
+          "signature": "multiChoice(title: string, items: any[], defaultIndices?: number[]): number[] | Promise<number[]>;",
+          "signatures": [
+            "multiChoice(title: string, items: any[], defaultIndices?: number[]): number[] | Promise<number[]>;",
+            "multiChoice( title: string, items: any[], defaultIndices: number[] | null | undefined, callback: (selectedIndices: number[]) => void, ): number[] | null;"
+          ]
         },
         {
           "name": "build",
@@ -7279,13 +7820,21 @@
           "name": "cover",
           "kind": "function",
           "doc": "cover(source: Epub.Source): ImageWrapper;",
-          "signature": "cover(source: Epub.Source): ImageWrapper;"
+          "signature": "cover(source: Epub.Source): ImageWrapper;",
+          "signatures": [
+            "cover(source: Epub.Source): ImageWrapper;",
+            "cover(source: Epub.Source, outputPath: string, options?: Epub.ExportOptions): string;"
+          ]
         },
         {
           "name": "coverAsync",
           "kind": "function",
           "doc": "coverAsync(source: Epub.Source): Promise<ImageWrapper>;",
-          "signature": "coverAsync(source: Epub.Source): Promise<ImageWrapper>;"
+          "signature": "coverAsync(source: Epub.Source): Promise<ImageWrapper>;",
+          "signatures": [
+            "coverAsync(source: Epub.Source): Promise<ImageWrapper>;",
+            "coverAsync(source: Epub.Source, outputPath: string, options?: Epub.ExportOptions): Promise<string>;"
+          ]
         },
         {
           "name": "search",
@@ -7356,7 +7905,12 @@
           "name": "emitter",
           "kind": "function",
           "doc": "emitter(): EventEmitter$;",
-          "signature": "emitter(): EventEmitter$;"
+          "signature": "emitter(): EventEmitter$;",
+          "signatures": [
+            "emitter(): EventEmitter$;",
+            "emitter(thread: java.lang.Thread): EventEmitter$;",
+            "emitter(thread: org.autojs.autojs.core.looper.MainThreadProxy): EventEmitter$;"
+          ]
         },
         {
           "name": "setTouchEventTimeout",
@@ -7434,19 +7988,31 @@
           "name": "onNotification",
           "kind": "function",
           "doc": "onNotification(listener: (notification: org.autojs.autojs.core.notification.Notification) => void): org.autojs.autojs.runtime.api.Events;",
-          "signature": "onNotification(listener: (notification: org.autojs.autojs.core.notification.Notification) => void): org.autojs.autojs.runtime.api.Events;"
+          "signature": "onNotification(listener: (notification: org.autojs.autojs.core.notification.Notification) => void): org.autojs.autojs.runtime.api.Events;",
+          "signatures": [
+            "onNotification(listener: (notification: org.autojs.autojs.core.notification.Notification) => void): org.autojs.autojs.runtime.api.Events;",
+            "onNotification(notification: org.autojs.autojs.core.notification.Notification): void;"
+          ]
         },
         {
           "name": "onToast",
           "kind": "function",
           "doc": "onToast(listener: (toast: org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver.Toast) => void): org.autojs.autojs.runtime.api.Events;",
-          "signature": "onToast(listener: (toast: org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver.Toast) => void): org.autojs.autojs.runtime.api.Events;"
+          "signature": "onToast(listener: (toast: org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver.Toast) => void): org.autojs.autojs.runtime.api.Events;",
+          "signatures": [
+            "onToast(listener: (toast: org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver.Toast) => void): org.autojs.autojs.runtime.api.Events;",
+            "onToast(toast: org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver.Toast): void;"
+          ]
         },
         {
           "name": "onTouch",
           "kind": "function",
           "doc": "onTouch(listener: (point: android.graphics.Point) => void): org.autojs.autojs.runtime.api.Events;",
-          "signature": "onTouch(listener: (point: android.graphics.Point) => void): org.autojs.autojs.runtime.api.Events;"
+          "signature": "onTouch(listener: (point: android.graphics.Point) => void): org.autojs.autojs.runtime.api.Events;",
+          "signatures": [
+            "onTouch(listener: (point: android.graphics.Point) => void): org.autojs.autojs.runtime.api.Events;",
+            "onTouch(x: number, y: number): void;"
+          ]
         },
         {
           "name": "removeAllKeyDownListeners",
@@ -7470,7 +8036,11 @@
           "name": "setKeyInterceptionEnabled",
           "kind": "function",
           "doc": "setKeyInterceptionEnabled(interceptionEnabled: boolean): void;",
-          "signature": "setKeyInterceptionEnabled(interceptionEnabled: boolean): void;"
+          "signature": "setKeyInterceptionEnabled(interceptionEnabled: boolean): void;",
+          "signatures": [
+            "setKeyInterceptionEnabled(interceptionEnabled: boolean): void;",
+            "setKeyInterceptionEnabled(keyName: Keys.Name, interceptionEnabled: boolean): void;"
+          ]
         },
         {
           "name": "on",
@@ -7682,7 +8252,11 @@
           "name": "open",
           "kind": "function",
           "doc": "open(path: string, mode?: 'r', encoding?: StandardCharsets, bufferSize?: number): org.autojs.autojs.pio.PReadableTextFile;",
-          "signature": "open(path: string, mode?: 'r', encoding?: StandardCharsets, bufferSize?: number): org.autojs.autojs.pio.PReadableTextFile;"
+          "signature": "open(path: string, mode?: 'r', encoding?: StandardCharsets, bufferSize?: number): org.autojs.autojs.pio.PReadableTextFile;",
+          "signatures": [
+            "open(path: string, mode?: 'r', encoding?: StandardCharsets, bufferSize?: number): org.autojs.autojs.pio.PReadableTextFile;",
+            "open(path: string, mode: 'w' | 'a', encoding?: StandardCharsets, bufferSize?: number): org.autojs.autojs.pio.PWritableTextFile;"
+          ]
         },
         {
           "name": "path",
@@ -7759,13 +8333,21 @@
           "name": "window",
           "kind": "function",
           "doc": "window(layout: org.autojs.autojs.core.floaty.BaseResizableFloatyWindow.ViewSupplier | Xml): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;",
-          "signature": "window(layout: org.autojs.autojs.core.floaty.BaseResizableFloatyWindow.ViewSupplier | Xml): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;"
+          "signature": "window(layout: org.autojs.autojs.core.floaty.BaseResizableFloatyWindow.ViewSupplier | Xml): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;",
+          "signatures": [
+            "window(layout: org.autojs.autojs.core.floaty.BaseResizableFloatyWindow.ViewSupplier | Xml): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;",
+            "window(layout: android.view.View): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;"
+          ]
         },
         {
           "name": "rawWindow",
           "kind": "function",
           "doc": "rawWindow(layout: org.autojs.autojs.core.floaty.RawWindow.RawFloaty | Xml): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;",
-          "signature": "rawWindow(layout: org.autojs.autojs.core.floaty.RawWindow.RawFloaty | Xml): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;"
+          "signature": "rawWindow(layout: org.autojs.autojs.core.floaty.RawWindow.RawFloaty | Xml): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;",
+          "signatures": [
+            "rawWindow(layout: org.autojs.autojs.core.floaty.RawWindow.RawFloaty | Xml): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;",
+            "rawWindow(layout: android.view.View): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;"
+          ]
         },
         {
           "name": "hasPermission",
@@ -7938,13 +8520,21 @@
           "name": "sleep",
           "kind": "function",
           "doc": "sleep(millis: number): Flow<void>;",
-          "signature": "sleep(millis: number): Flow<void>;"
+          "signature": "sleep(millis: number): Flow<void>;",
+          "signatures": [
+            "sleep(millis: number): Flow<void>;",
+            "sleep(millisMin: number, millisMax: number | string): Flow<void>;"
+          ]
         },
         {
           "name": "delay",
           "kind": "function",
           "doc": "delay(millis: number): Flow<void>;",
-          "signature": "delay(millis: number): Flow<void>;"
+          "signature": "delay(millis: number): Flow<void>;",
+          "signatures": [
+            "delay(millis: number): Flow<void>;",
+            "delay(millisMin: number, millisMax: number | string): Flow<void>;"
+          ]
         },
         {
           "name": "run",
@@ -7968,19 +8558,31 @@
           "name": "all",
           "kind": "function",
           "doc": "all(...sources: Flow.Source[]): Flow<any[]>;",
-          "signature": "all(...sources: Flow.Source[]): Flow<any[]>;"
+          "signature": "all(...sources: Flow.Source[]): Flow<any[]>;",
+          "signatures": [
+            "all(...sources: Flow.Source[]): Flow<any[]>;",
+            "all(sources: Flow.Source[]): Flow<any[]>;"
+          ]
         },
         {
           "name": "race",
           "kind": "function",
           "doc": "race(...sources: Flow.Source[]): Flow<any>;",
-          "signature": "race(...sources: Flow.Source[]): Flow<any>;"
+          "signature": "race(...sources: Flow.Source[]): Flow<any>;",
+          "signatures": [
+            "race(...sources: Flow.Source[]): Flow<any>;",
+            "race(sources: Flow.Source[]): Flow<any>;"
+          ]
         },
         {
           "name": "any",
           "kind": "function",
           "doc": "any(...sources: Flow.Source[]): Flow<any>;",
-          "signature": "any(...sources: Flow.Source[]): Flow<any>;"
+          "signature": "any(...sources: Flow.Source[]): Flow<any>;",
+          "signatures": [
+            "any(...sources: Flow.Source[]): Flow<any>;",
+            "any(sources: Flow.Source[]): Flow<any>;"
+          ]
         },
         {
           "name": "cancelAll",
@@ -7992,7 +8594,11 @@
           "name": "defaults",
           "kind": "function",
           "doc": "defaults(): Flow.Defaults;",
-          "signature": "defaults(): Flow.Defaults;"
+          "signature": "defaults(): Flow.Defaults;",
+          "signatures": [
+            "defaults(): Flow.Defaults;",
+            "defaults(options: Flow.DefaultsOptions): Flow.Defaults;"
+          ]
         },
         {
           "name": "trace",
@@ -8040,7 +8646,11 @@
           "name": "whenPresent",
           "kind": "function",
           "doc": "whenPresent(cond: Flow.SelectorCond, handler: (match: UiObject[]) => any, options: Flow.WhenPresentOptions & { resultType: '[]' }): Flow<null>;",
-          "signature": "whenPresent(cond: Flow.SelectorCond, handler: (match: UiObject[]) => any, options: Flow.WhenPresentOptions & { resultType: '[]' }): Flow<null>;"
+          "signature": "whenPresent(cond: Flow.SelectorCond, handler: (match: UiObject[]) => any, options: Flow.WhenPresentOptions & { resultType: '[]' }): Flow<null>;",
+          "signatures": [
+            "whenPresent(cond: Flow.SelectorCond, handler: (match: UiObject[]) => any, options: Flow.WhenPresentOptions & { resultType: '[]' }): Flow<null>;",
+            "whenPresent<R = UiObject>(cond: Flow.Cond<R>, handler: (match: R) => any, options?: Flow.WhenPresentOptions): Flow<null>;"
+          ]
         },
         {
           "name": "repeatUntil",
@@ -8118,25 +8728,41 @@
           "name": "waitForIdle",
           "kind": "function",
           "doc": "waitForIdle(quietFor?: number): Flow<Automator.IdleResult>;",
-          "signature": "waitForIdle(quietFor?: number): Flow<Automator.IdleResult>;"
+          "signature": "waitForIdle(quietFor?: number): Flow<Automator.IdleResult>;",
+          "signatures": [
+            "waitForIdle(quietFor?: number): Flow<Automator.IdleResult>;",
+            "waitForIdle(options: Automator.IdleOptions): Flow<Automator.IdleResult>;"
+          ]
         },
         {
           "name": "waitForEvent",
           "kind": "function",
           "doc": "waitForEvent(type?: string | string[] | null, filter?: Automator.EventFilter | null, timeout?: number): Flow<Automator.AccessibilityEvent>;",
-          "signature": "waitForEvent(type?: string | string[] | null, filter?: Automator.EventFilter | null, timeout?: number): Flow<Automator.AccessibilityEvent>;"
+          "signature": "waitForEvent(type?: string | string[] | null, filter?: Automator.EventFilter | null, timeout?: number): Flow<Automator.AccessibilityEvent>;",
+          "signatures": [
+            "waitForEvent(type?: string | string[] | null, filter?: Automator.EventFilter | null, timeout?: number): Flow<Automator.AccessibilityEvent>;",
+            "waitForEvent(type: string | string[] | null, timeout: number, filter?: Automator.EventFilter | null): Flow<Automator.AccessibilityEvent>;"
+          ]
         },
         {
           "name": "waitForToast",
           "kind": "function",
           "doc": "waitForToast(text?: Automator.ToastFilter | null, timeout?: number): Flow<Automator.Toast>;",
-          "signature": "waitForToast(text?: Automator.ToastFilter | null, timeout?: number): Flow<Automator.Toast>;"
+          "signature": "waitForToast(text?: Automator.ToastFilter | null, timeout?: number): Flow<Automator.Toast>;",
+          "signatures": [
+            "waitForToast(text?: Automator.ToastFilter | null, timeout?: number): Flow<Automator.Toast>;",
+            "waitForToast(timeout: number): Flow<Automator.Toast>;"
+          ]
         },
         {
           "name": "waitForNotification",
           "kind": "function",
           "doc": "waitForNotification(filter?: Automator.NotificationFilter | null, timeout?: number): Flow<org.autojs.autojs.core.notification.Notification>;",
-          "signature": "waitForNotification(filter?: Automator.NotificationFilter | null, timeout?: number): Flow<org.autojs.autojs.core.notification.Notification>;"
+          "signature": "waitForNotification(filter?: Automator.NotificationFilter | null, timeout?: number): Flow<org.autojs.autojs.core.notification.Notification>;",
+          "signatures": [
+            "waitForNotification(filter?: Automator.NotificationFilter | null, timeout?: number): Flow<org.autojs.autojs.core.notification.Notification>;",
+            "waitForNotification(timeout: number): Flow<org.autojs.autojs.core.notification.Notification>;"
+          ]
         }
       ]
     },
@@ -8331,7 +8957,11 @@
           "name": "load",
           "kind": "function",
           "doc": "load(messageSource: object, locale: string): void;",
-          "signature": "load(messageSource: object, locale: string): void;"
+          "signature": "load(messageSource: object, locale: string): void;",
+          "signatures": [
+            "load(messageSource: object, locale: string): void;",
+            "load(messageSource: string, locale?: string): void;"
+          ]
         },
         {
           "name": "loadAll",
@@ -8366,7 +8996,12 @@
           "name": "flip",
           "kind": "function",
           "doc": "flip(image: Images.ImageSource): ImageWrapper;",
-          "signature": "flip(image: Images.ImageSource): ImageWrapper;"
+          "signature": "flip(image: Images.ImageSource): ImageWrapper;",
+          "signatures": [
+            "flip(image: Images.ImageSource): ImageWrapper;",
+            "flip(image: Images.ImageSource, orientation: Images.FlipOrientation): ImageWrapper;",
+            "flip(image: Images.ImageSource, horizontal: boolean, vertical: boolean): ImageWrapper;"
+          ]
         },
         {
           "name": "detectColor",
@@ -8390,13 +9025,21 @@
           "name": "findPointByColor",
           "kind": "function",
           "doc": "findPointByColor( image: Images.ImageSource, color: Color$, options?: Images.ColorSearchOptions, ): OpenCV.Point | null;",
-          "signature": "findPointByColor( image: Images.ImageSource, color: Color$, options?: Images.ColorSearchOptions, ): OpenCV.Point | null;"
+          "signature": "findPointByColor( image: Images.ImageSource, color: Color$, options?: Images.ColorSearchOptions, ): OpenCV.Point | null;",
+          "signatures": [
+            "findPointByColor( image: Images.ImageSource, color: Color$, options?: Images.ColorSearchOptions, ): OpenCV.Point | null;",
+            "findPointByColor( image: Images.ImageSource, color: Color$, x?: X, y?: Y, width?: Width, height?: Height, threshold?: number, ): OpenCV.Point | null;"
+          ]
         },
         {
           "name": "findPointByColorExactly",
           "kind": "function",
           "doc": "findPointByColorExactly( image: Images.ImageSource, color: Color$, options?: Pick<Images.ColorSearchOptions, 'region'>, ): OpenCV.Point | null;",
-          "signature": "findPointByColorExactly( image: Images.ImageSource, color: Color$, options?: Pick<Images.ColorSearchOptions, 'region'>, ): OpenCV.Point | null;"
+          "signature": "findPointByColorExactly( image: Images.ImageSource, color: Color$, options?: Pick<Images.ColorSearchOptions, 'region'>, ): OpenCV.Point | null;",
+          "signatures": [
+            "findPointByColorExactly( image: Images.ImageSource, color: Color$, options?: Pick<Images.ColorSearchOptions, 'region'>, ): OpenCV.Point | null;",
+            "findPointByColorExactly( image: Images.ImageSource, color: Color$, x?: X, y?: Y, width?: Width, height?: Height, ): OpenCV.Point | null;"
+          ]
         },
         {
           "name": "findPointsByColor",
@@ -8432,13 +9075,21 @@
           "name": "findPointByImage",
           "kind": "function",
           "doc": "findPointByImage( image: Images.ImageSource, template: Images.ImageSource, options?: Images.ImageSearchOptions, ): OpenCV.Point | null;",
-          "signature": "findPointByImage( image: Images.ImageSource, template: Images.ImageSource, options?: Images.ImageSearchOptions, ): OpenCV.Point | null;"
+          "signature": "findPointByImage( image: Images.ImageSource, template: Images.ImageSource, options?: Images.ImageSearchOptions, ): OpenCV.Point | null;",
+          "signatures": [
+            "findPointByImage( image: Images.ImageSource, template: Images.ImageSource, options?: Images.ImageSearchOptions, ): OpenCV.Point | null;",
+            "findPointByImage( image: Images.ImageSource, template: Images.ImageSource, x?: X, y?: Y, width?: Width, height?: Height, threshold?: number, ): OpenCV.Point | null;"
+          ]
         },
         {
           "name": "findImage",
           "kind": "function",
           "doc": "findImage( image: Images.ImageSource, template: Images.ImageSource, x?: X, y?: Y, width?: Width, height?: Height, threshold?: number, ): OpenCV.Point | null;",
-          "signature": "findImage( image: Images.ImageSource, template: Images.ImageSource, x?: X, y?: Y, width?: Width, height?: Height, threshold?: number, ): OpenCV.Point | null;"
+          "signature": "findImage( image: Images.ImageSource, template: Images.ImageSource, x?: X, y?: Y, width?: Width, height?: Height, threshold?: number, ): OpenCV.Point | null;",
+          "signatures": [
+            "findImage( image: Images.ImageSource, template: Images.ImageSource, x?: X, y?: Y, width?: Width, height?: Height, threshold?: number, ): OpenCV.Point | null;",
+            "findImage(img: Images.ImageSource, template: Images.ImageSource, options?: { threshold?: number, weakThreshold?: number, level?: number, region?: OmniRegion, }): OpenCV.Point | null;"
+          ]
         },
         {
           "name": "initOpenCvIfNeeded",
@@ -8450,7 +9101,11 @@
           "name": "captureScreen",
           "kind": "function",
           "doc": "captureScreen(): ImageWrapper;",
-          "signature": "captureScreen(): ImageWrapper;"
+          "signature": "captureScreen(): ImageWrapper;",
+          "signatures": [
+            "captureScreen(): ImageWrapper;",
+            "captureScreen(path: string): boolean;"
+          ]
         },
         {
           "name": "read",
@@ -8486,7 +9141,11 @@
           "name": "clip",
           "kind": "function",
           "doc": "clip(image: Images.ImageSource, x: number, y: number, w: number, h: number): ImageWrapper;",
-          "signature": "clip(image: Images.ImageSource, x: number, y: number, w: number, h: number): ImageWrapper;"
+          "signature": "clip(image: Images.ImageSource, x: number, y: number, w: number, h: number): ImageWrapper;",
+          "signatures": [
+            "clip(image: Images.ImageSource, x: number, y: number, w: number, h: number): ImageWrapper;",
+            "clip(image: Images.ImageSource, region: OmniRegion): ImageWrapper;"
+          ]
         },
         {
           "name": "pixel",
@@ -8636,13 +9295,23 @@
           "name": "requestScreenCapture",
           "kind": "function",
           "doc": "requestScreenCapture(landscape?: boolean): boolean;",
-          "signature": "requestScreenCapture(landscape?: boolean): boolean;"
+          "signature": "requestScreenCapture(landscape?: boolean): boolean;",
+          "signatures": [
+            "requestScreenCapture(landscape?: boolean): boolean;",
+            "requestScreenCapture(options: Images.ScreenCaptureOptions): boolean;",
+            "requestScreenCapture(width: number, height: number): boolean;"
+          ]
         },
         {
           "name": "requestScreenCaptureAsync",
           "kind": "function",
           "doc": "requestScreenCaptureAsync(landscape?: boolean): Promise<boolean>;",
-          "signature": "requestScreenCaptureAsync(landscape?: boolean): Promise<boolean>;"
+          "signature": "requestScreenCaptureAsync(landscape?: boolean): Promise<boolean>;",
+          "signatures": [
+            "requestScreenCaptureAsync(landscape?: boolean): Promise<boolean>;",
+            "requestScreenCaptureAsync(options: Images.ScreenCaptureOptions): Promise<boolean>;",
+            "requestScreenCaptureAsync(width: number, height: number): Promise<boolean>;"
+          ]
         },
         {
           "name": "stopScreenCapture",
@@ -8829,6 +9498,122 @@
           "kind": "function",
           "doc": "getSimilarity(imageA: Images.ComparableImageSource, imageB: Images.ComparableImageSource, options?: Images.SimilarityOptions): number;",
           "signature": "getSimilarity(imageA: Images.ComparableImageSource, imageB: Images.ComparableImageSource, options?: Images.SimilarityOptions): number;"
+        }
+      ]
+    },
+    "installer": {
+      "doc": "AutoJs6 Installer API",
+      "members": [
+        {
+          "name": "install",
+          "kind": "function",
+          "doc": "install(source: Installer.InstallSource, options?: Installer.InstallOptions): Installer.InstallResult;",
+          "signature": "install(source: Installer.InstallSource, options?: Installer.InstallOptions): Installer.InstallResult;",
+          "signatures": [
+            "install(source: Installer.InstallSource, options?: Installer.InstallOptions): Installer.InstallResult;",
+            "install(sources: Installer.InstallSource[], options?: Installer.InstallOptions): Installer.InstallResult[];",
+            "install(source: Installer.InstallSource | Installer.InstallSource[], options?: Installer.InstallOptions): Installer.InstallResult | Installer.InstallResult[];"
+          ]
+        },
+        {
+          "name": "installAsync",
+          "kind": "function",
+          "doc": "installAsync(source: Installer.InstallSource, options?: Installer.InstallOptions): Promise<Installer.InstallResult>;",
+          "signature": "installAsync(source: Installer.InstallSource, options?: Installer.InstallOptions): Promise<Installer.InstallResult>;",
+          "signatures": [
+            "installAsync(source: Installer.InstallSource, options?: Installer.InstallOptions): Promise<Installer.InstallResult>;",
+            "installAsync(sources: Installer.InstallSource[], options?: Installer.InstallOptions): Promise<Installer.InstallResult[]>;",
+            "installAsync(source: Installer.InstallSource | Installer.InstallSource[], options?: Installer.InstallOptions): Promise<Installer.InstallResult | Installer.InstallResult[]>;"
+          ]
+        },
+        {
+          "name": "session",
+          "kind": "function",
+          "doc": "session(source: Installer.InstallSource, options?: Installer.InstallOptions): Installer.InstallSession<Installer.InstallResult>;",
+          "signature": "session(source: Installer.InstallSource, options?: Installer.InstallOptions): Installer.InstallSession<Installer.InstallResult>;",
+          "signatures": [
+            "session(source: Installer.InstallSource, options?: Installer.InstallOptions): Installer.InstallSession<Installer.InstallResult>;",
+            "session(sources: Installer.InstallSource[], options?: Installer.InstallOptions): Installer.InstallSession<Installer.InstallResult[]>;",
+            "session(source: Installer.InstallSource | Installer.InstallSource[], options?: Installer.InstallOptions): Installer.InstallSession;"
+          ]
+        },
+        {
+          "name": "uninstall",
+          "kind": "function",
+          "doc": "uninstall(packageName: string, options?: Installer.UninstallOptions): Installer.UninstallResult;",
+          "signature": "uninstall(packageName: string, options?: Installer.UninstallOptions): Installer.UninstallResult;"
+        },
+        {
+          "name": "uninstallAsync",
+          "kind": "function",
+          "doc": "uninstallAsync(packageName: string, options?: Installer.UninstallOptions): Promise<Installer.UninstallResult>;",
+          "signature": "uninstallAsync(packageName: string, options?: Installer.UninstallOptions): Promise<Installer.UninstallResult>;"
+        },
+        {
+          "name": "inspect",
+          "kind": "function",
+          "doc": "inspect(source: Installer.Source): Installer.PackageArchiveInfo;",
+          "signature": "inspect(source: Installer.Source): Installer.PackageArchiveInfo;"
+        },
+        {
+          "name": "inspectAsync",
+          "kind": "function",
+          "doc": "inspectAsync(source: Installer.Source): Promise<Installer.PackageArchiveInfo>;",
+          "signature": "inspectAsync(source: Installer.Source): Promise<Installer.PackageArchiveInfo>;"
+        },
+        {
+          "name": "authorizer",
+          "kind": "variable",
+          "doc": "authorizer: Installer.Authorizers;",
+          "signature": "authorizer: Installer.Authorizers;"
+        },
+        {
+          "name": "isDefault",
+          "kind": "function",
+          "doc": "isDefault(): boolean;",
+          "signature": "isDefault(): boolean;"
+        },
+        {
+          "name": "setDefault",
+          "kind": "function",
+          "doc": "setDefault(enabled?: boolean, options?: Installer.DefaultOptions): boolean;",
+          "signature": "setDefault(enabled?: boolean, options?: Installer.DefaultOptions): boolean;"
+        },
+        {
+          "name": "setDefaultAsync",
+          "kind": "function",
+          "doc": "setDefaultAsync(enabled?: boolean, options?: Installer.DefaultOptions): Promise<boolean>;",
+          "signature": "setDefaultAsync(enabled?: boolean, options?: Installer.DefaultOptions): Promise<boolean>;"
+        },
+        {
+          "name": "users",
+          "kind": "function",
+          "doc": "users(): Installer.DeviceUser[];",
+          "signature": "users(): Installer.DeviceUser[];"
+        },
+        {
+          "name": "usersAsync",
+          "kind": "function",
+          "doc": "usersAsync(): Promise<Installer.DeviceUser[]>;",
+          "signature": "usersAsync(): Promise<Installer.DeviceUser[]>;"
+        },
+        {
+          "name": "isAvailable",
+          "kind": "function",
+          "doc": "isAvailable(): boolean;",
+          "signature": "isAvailable(): boolean;"
+        },
+        {
+          "name": "status",
+          "kind": "variable",
+          "doc": "status: Installer.Status;",
+          "signature": "status: Installer.Status;"
+        },
+        {
+          "name": "InstallerError",
+          "kind": "variable",
+          "doc": "InstallerError: Installer.InstallerErrorConstructor;",
+          "signature": "InstallerError: Installer.InstallerErrorConstructor;"
         }
       ]
     },
@@ -9028,19 +9813,32 @@
           "name": "connect",
           "kind": "function",
           "doc": "connect(options: Mail.AccountOptions): Mail.Client;",
-          "signature": "connect(options: Mail.AccountOptions): Mail.Client;"
+          "signature": "connect(options: Mail.AccountOptions): Mail.Client;",
+          "signatures": [
+            "connect(options: Mail.AccountOptions): Mail.Client;",
+            "connect(alias: string): Mail.Client;"
+          ]
         },
         {
           "name": "connectAsync",
           "kind": "function",
           "doc": "connectAsync(options: Mail.AccountOptions): Promise<Mail.Client>;",
-          "signature": "connectAsync(options: Mail.AccountOptions): Promise<Mail.Client>;"
+          "signature": "connectAsync(options: Mail.AccountOptions): Promise<Mail.Client>;",
+          "signatures": [
+            "connectAsync(options: Mail.AccountOptions): Promise<Mail.Client>;",
+            "connectAsync(alias: string): Promise<Mail.Client>;"
+          ]
         },
         {
           "name": "setDefault",
           "kind": "function",
           "doc": "setDefault(client: Mail.Client): Mail.Client;",
-          "signature": "setDefault(client: Mail.Client): Mail.Client;"
+          "signature": "setDefault(client: Mail.Client): Mail.Client;",
+          "signatures": [
+            "setDefault(client: Mail.Client): Mail.Client;",
+            "setDefault(options: Mail.AccountOptions): Mail.Client;",
+            "setDefault(alias: string): Mail.Client;"
+          ]
         },
         {
           "name": "default",
@@ -9081,61 +9879,103 @@
           "name": "randInt",
           "kind": "function",
           "doc": "randInt(range?: number[]): number;",
-          "signature": "randInt(range?: number[]): number;"
+          "signature": "randInt(range?: number[]): number;",
+          "signatures": [
+            "randInt(range?: number[]): number;",
+            "randInt(stop: number): number;",
+            "randInt(start: number, stop: number): number;",
+            "randInt(...numbers: number[]): number;"
+          ]
         },
         {
           "name": "sum",
           "kind": "function",
           "doc": "sum(num: number[], fraction?: number): number;",
-          "signature": "sum(num: number[], fraction?: number): number;"
+          "signature": "sum(num: number[], fraction?: number): number;",
+          "signatures": [
+            "sum(num: number[], fraction?: number): number;",
+            "sum(...nums: number[]): number;"
+          ]
         },
         {
           "name": "avg",
           "kind": "function",
           "doc": "avg(num: number[], fraction?: number): number;",
-          "signature": "avg(num: number[], fraction?: number): number;"
+          "signature": "avg(num: number[], fraction?: number): number;",
+          "signatures": [
+            "avg(num: number[], fraction?: number): number;",
+            "avg(...nums: number[]): number;"
+          ]
         },
         {
           "name": "median",
           "kind": "function",
           "doc": "median(num?: number[], fraction?: number): number;",
-          "signature": "median(num?: number[], fraction?: number): number;"
+          "signature": "median(num?: number[], fraction?: number): number;",
+          "signatures": [
+            "median(num?: number[], fraction?: number): number;",
+            "median(...nums: number[]): number;"
+          ]
         },
         {
           "name": "var",
           "kind": "function",
           "doc": "var(num: number[], fraction?: number): number;",
-          "signature": "var(num: number[], fraction?: number): number;"
+          "signature": "var(num: number[], fraction?: number): number;",
+          "signatures": [
+            "var(num: number[], fraction?: number): number;",
+            "var(...nums: number[]): number;"
+          ]
         },
         {
           "name": "std",
           "kind": "function",
           "doc": "std(num: number[], fraction?: number): number;",
-          "signature": "std(num: number[], fraction?: number): number;"
+          "signature": "std(num: number[], fraction?: number): number;",
+          "signatures": [
+            "std(num: number[], fraction?: number): number;",
+            "std(...nums: number[]): number;"
+          ]
         },
         {
           "name": "cv",
           "kind": "function",
           "doc": "cv(num: number[], fraction?: number): number;",
-          "signature": "cv(num: number[], fraction?: number): number;"
+          "signature": "cv(num: number[], fraction?: number): number;",
+          "signatures": [
+            "cv(num: number[], fraction?: number): number;",
+            "cv(...nums: number[]): number;"
+          ]
         },
         {
           "name": "max",
           "kind": "function",
           "doc": "max(num: number[], fraction?: number): number;",
-          "signature": "max(num: number[], fraction?: number): number;"
+          "signature": "max(num: number[], fraction?: number): number;",
+          "signatures": [
+            "max(num: number[], fraction?: number): number;",
+            "max(...nums: number[]): number;"
+          ]
         },
         {
           "name": "min",
           "kind": "function",
           "doc": "min(num: number[], fraction?: number): number;",
-          "signature": "min(num: number[], fraction?: number): number;"
+          "signature": "min(num: number[], fraction?: number): number;",
+          "signatures": [
+            "min(num: number[], fraction?: number): number;",
+            "min(...nums: number[]): number;"
+          ]
         },
         {
           "name": "dist",
           "kind": "function",
           "doc": "dist( point1: [number, number] | { x: number, y: number } | org.opencv.core.Point | android.graphics.Rect, point2: [number, number] | { x: number, y: number } | org.opencv.core.Point | android.graphics.Rect, fraction?: number, ): number;",
-          "signature": "dist( point1: [number, number] | { x: number, y: number } | org.opencv.core.Point | android.graphics.Rect, point2: [number, number] | { x: number, y: number } | org.opencv.core.Point | android.graphics.Rect, fraction?: number, ): number;"
+          "signature": "dist( point1: [number, number] | { x: number, y: number } | org.opencv.core.Point | android.graphics.Rect, point2: [number, number] | { x: number, y: number } | org.opencv.core.Point | android.graphics.Rect, fraction?: number, ): number;",
+          "signatures": [
+            "dist( point1: [number, number] | { x: number, y: number } | org.opencv.core.Point | android.graphics.Rect, point2: [number, number] | { x: number, y: number } | org.opencv.core.Point | android.graphics.Rect, fraction?: number, ): number;",
+            "dist(rect: android.graphics.Rect, fraction?: number): number;"
+          ]
         },
         {
           "name": "logMn",
@@ -9268,7 +10108,13 @@
           "name": "snapshot",
           "kind": "function",
           "doc": "snapshot(path: string, options: Mediainfo.SnapshotOptions & { readonly schema: 'autojs6-plugin-mediainfo-snapshot-v1' }): Mediainfo.SnapshotV1;",
-          "signature": "snapshot(path: string, options: Mediainfo.SnapshotOptions & { readonly schema: 'autojs6-plugin-mediainfo-snapshot-v1' }): Mediainfo.SnapshotV1;"
+          "signature": "snapshot(path: string, options: Mediainfo.SnapshotOptions & { readonly schema: 'autojs6-plugin-mediainfo-snapshot-v1' }): Mediainfo.SnapshotV1;",
+          "signatures": [
+            "snapshot(path: string, options: Mediainfo.SnapshotOptions & { readonly schema: 'autojs6-plugin-mediainfo-snapshot-v1' }): Mediainfo.SnapshotV1;",
+            "snapshot(path: string, options: Mediainfo.SnapshotOptions & { readonly schema: 'autojs6-plugin-mediainfo-snapshot-v2' }): Mediainfo.SnapshotV2;",
+            "snapshot(path: string, options?: Mediainfo.DefaultSnapshotOptions): Mediainfo.SnapshotV1;",
+            "snapshot(path: string, options: Mediainfo.SnapshotOptions): Mediainfo.Snapshot;"
+          ]
         },
         {
           "name": "capabilities",
@@ -9285,7 +10131,11 @@
           "name": "getMediaType",
           "kind": "function",
           "doc": "getMediaType(mediaType: string): okhttp3.MediaType;",
-          "signature": "getMediaType(mediaType: string): okhttp3.MediaType;"
+          "signature": "getMediaType(mediaType: string): okhttp3.MediaType;",
+          "signatures": [
+            "getMediaType(mediaType: string): okhttp3.MediaType;",
+            "getMediaType(mimeType: string): string;"
+          ]
         },
         {
           "name": "fromFileOr",
@@ -9327,13 +10177,21 @@
           "name": "addKnownMimeType",
           "kind": "function",
           "doc": "addKnownMimeType(mimeType: eu.medsea.mimeutil.MimeType): void;",
-          "signature": "addKnownMimeType(mimeType: eu.medsea.mimeutil.MimeType): void;"
+          "signature": "addKnownMimeType(mimeType: eu.medsea.mimeutil.MimeType): void;",
+          "signatures": [
+            "addKnownMimeType(mimeType: eu.medsea.mimeutil.MimeType): void;",
+            "addKnownMimeType(mimeType: string): void;"
+          ]
         },
         {
           "name": "getExtension",
           "kind": "function",
           "doc": "getExtension(file: java.io.File): string;",
-          "signature": "getExtension(file: java.io.File): string;"
+          "signature": "getExtension(file: java.io.File): string;",
+          "signatures": [
+            "getExtension(file: java.io.File): string;",
+            "getExtension(fileName: string): string;"
+          ]
         },
         {
           "name": "getFirstMimeType",
@@ -9399,7 +10257,11 @@
           "name": "isMimeTypeKnown",
           "kind": "function",
           "doc": "isMimeTypeKnown(mimeType: eu.medsea.mimeutil.MimeType): boolean;",
-          "signature": "isMimeTypeKnown(mimeType: eu.medsea.mimeutil.MimeType): boolean;"
+          "signature": "isMimeTypeKnown(mimeType: eu.medsea.mimeutil.MimeType): boolean;",
+          "signatures": [
+            "isMimeTypeKnown(mimeType: eu.medsea.mimeutil.MimeType): boolean;",
+            "isMimeTypeKnown(mimeType: string): boolean;"
+          ]
         },
         {
           "name": "isTextMimeType",
@@ -24804,13 +25666,25 @@
           "name": "recognizeText",
           "kind": "function",
           "doc": "recognizeText(options?: DetectOptionsAny): string[];",
-          "signature": "recognizeText(options?: DetectOptionsAny): string[];"
+          "signature": "recognizeText(options?: DetectOptionsAny): string[];",
+          "signatures": [
+            "recognizeText(options?: DetectOptionsAny): string[];",
+            "recognizeText(region: OmniRegion): string[];",
+            "recognizeText(img: ImageWrapper | string, options?: DetectOptionsAny): string[];",
+            "recognizeText(img: ImageWrapper | string, region: OmniRegion): string[];"
+          ]
         },
         {
           "name": "detect",
           "kind": "function",
           "doc": "detect(options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];",
-          "signature": "detect(options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];"
+          "signature": "detect(options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];",
+          "signatures": [
+            "detect(options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(img: ImageWrapper | string, options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(img: ImageWrapper | string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];"
+          ]
         },
         {
           "name": "mode",
@@ -25246,25 +26120,63 @@
           "name": "detect",
           "kind": "function",
           "doc": "detect(options: QrCode.DetectAllOptions): QrCode.Result[];",
-          "signature": "detect(options: QrCode.DetectAllOptions): QrCode.Result[];"
+          "signature": "detect(options: QrCode.DetectAllOptions): QrCode.Result[];",
+          "signatures": [
+            "detect(options: QrCode.DetectAllOptions): QrCode.Result[];",
+            "detect(options: DetectOptions, isAll: true): QrCode.Result[];",
+            "detect(isAll: true): QrCode.Result[];",
+            "detect(img: ImageWrapper | string, options: QrCode.DetectAllOptions): QrCode.Result[];",
+            "detect(img: ImageWrapper | string, isAll: true): QrCode.Result[];",
+            "detect(img: ImageWrapper | string, options: DetectOptions, isAll: true): QrCode.Result[];",
+            "detect(options?: DetectOptions): QrCode.Result | QrCode.Result[] | null;",
+            "detect(options: DetectOptions, isAll: boolean): QrCode.Result | QrCode.Result[] | null;",
+            "detect(isAll: false): QrCode.Result | null;",
+            "detect(isAll: boolean): QrCode.Result | QrCode.Result[] | null;",
+            "detect(img: ImageWrapper | string, options?: DetectOptions): QrCode.Result | QrCode.Result[] | null;",
+            "detect(img: ImageWrapper | string, isAll: boolean): QrCode.Result | QrCode.Result[] | null;",
+            "detect(img: ImageWrapper | string, options: DetectOptions, isAll: boolean): QrCode.Result | QrCode.Result[] | null;"
+          ]
         },
         {
           "name": "detectAll",
           "kind": "function",
           "doc": "detectAll(options?: DetectOptions): QrCode.Result[];",
-          "signature": "detectAll(options?: DetectOptions): QrCode.Result[];"
+          "signature": "detectAll(options?: DetectOptions): QrCode.Result[];",
+          "signatures": [
+            "detectAll(options?: DetectOptions): QrCode.Result[];",
+            "detectAll(img: ImageWrapper | string, options?: DetectOptions): QrCode.Result[];"
+          ]
         },
         {
           "name": "recognizeText",
           "kind": "function",
           "doc": "recognizeText(options: QrCode.DetectAllOptions): string[];",
-          "signature": "recognizeText(options: QrCode.DetectAllOptions): string[];"
+          "signature": "recognizeText(options: QrCode.DetectAllOptions): string[];",
+          "signatures": [
+            "recognizeText(options: QrCode.DetectAllOptions): string[];",
+            "recognizeText(options: DetectOptions, isAll: true): string[];",
+            "recognizeText(isAll: true): string[];",
+            "recognizeText(img: ImageWrapper | string, options: QrCode.DetectAllOptions): string[];",
+            "recognizeText(img: ImageWrapper | string, isAll: true): string[];",
+            "recognizeText(img: ImageWrapper | string, options: DetectOptions, isAll: true): string[];",
+            "recognizeText(options?: DetectOptions): string | string[] | null;",
+            "recognizeText(options: DetectOptions, isAll: boolean): string | string[] | null;",
+            "recognizeText(isAll: false): string | null;",
+            "recognizeText(isAll: boolean): string | string[] | null;",
+            "recognizeText(img: ImageWrapper | string, options?: DetectOptions): string | string[] | null;",
+            "recognizeText(img: ImageWrapper | string, isAll: boolean): string | string[] | null;",
+            "recognizeText(img: ImageWrapper | string, options: DetectOptions, isAll: boolean): string | string[] | null;"
+          ]
         },
         {
           "name": "recognizeTexts",
           "kind": "function",
           "doc": "recognizeTexts(options?: DetectOptions): string[];",
-          "signature": "recognizeTexts(options?: DetectOptions): string[];"
+          "signature": "recognizeTexts(options?: DetectOptions): string[];",
+          "signatures": [
+            "recognizeTexts(options?: DetectOptions): string[];",
+            "recognizeTexts(img: ImageWrapper | string, options?: DetectOptions): string[];"
+          ]
         }
       ]
     },
@@ -25411,7 +26323,11 @@
           "name": "exit",
           "kind": "function",
           "doc": "exit(): void;",
-          "signature": "exit(): void;"
+          "signature": "exit(): void;",
+          "signatures": [
+            "exit(): void;",
+            "exit(e: java.lang.Throwable): void;"
+          ]
         },
         {
           "name": "getClip",
@@ -25447,7 +26363,15 @@
           "name": "loadJarWithR8",
           "kind": "function",
           "doc": "loadJarWithR8(program: string, keepRules: string[]): void;",
-          "signature": "loadJarWithR8(program: string, keepRules: string[]): void;"
+          "signature": "loadJarWithR8(program: string, keepRules: string[]): void;",
+          "signatures": [
+            "loadJarWithR8(program: string, keepRules: string[]): void;",
+            "loadJarWithR8(program: string, keepRules: string[], exportDirectory: string): void;",
+            "loadJarWithR8(program: string, keepRules: string[], orderedClasspath: string[]): void;",
+            "loadJarWithR8(program: string, keepRules: string[], orderedClasspath: string[], exportDirectory: string): void;",
+            "loadJarWithR8(program: string, keepRules: string[], orderedClasspath: string[], consumerRules: string[], consumerRuleClasspathOrdinals: number[]): void;",
+            "loadJarWithR8(program: string, keepRules: string[], orderedClasspath: string[], consumerRules: string[], consumerRuleClasspathOrdinals: number[], exportDirectory: string): void;"
+          ]
         },
         {
           "name": "retraceR8Stack",
@@ -25536,13 +26460,24 @@
           "name": "point",
           "kind": "function",
           "doc": "point(o: { x: number, y: number }): android.graphics.Point;",
-          "signature": "point(o: { x: number, y: number }): android.graphics.Point;"
+          "signature": "point(o: { x: number, y: number }): android.graphics.Point;",
+          "signatures": [
+            "point(o: { x: number, y: number }): android.graphics.Point;",
+            "point(o: android.graphics.Point): android.graphics.Point;",
+            "point(o: org.opencv.core.Point): android.graphics.Point;",
+            "point(o: [number, number]): android.graphics.Point;",
+            "point(x: number, y?: number): android.graphics.Point;"
+          ]
         },
         {
           "name": "time",
           "kind": "function",
           "doc": "time(source: S13n.TimeSourceParam, options: { fromUnit?: S13n.TimeUnitParam; toUnit?: S13n.TimeUnitParam; }): number;",
-          "signature": "time(source: S13n.TimeSourceParam, options: { fromUnit?: S13n.TimeUnitParam; toUnit?: S13n.TimeUnitParam; }): number;"
+          "signature": "time(source: S13n.TimeSourceParam, options: { fromUnit?: S13n.TimeUnitParam; toUnit?: S13n.TimeUnitParam; }): number;",
+          "signatures": [
+            "time(source: S13n.TimeSourceParam, options: { fromUnit?: S13n.TimeUnitParam; toUnit?: S13n.TimeUnitParam; }): number;",
+            "time(source: S13n.TimeSourceParam, fromUnit?: S13n.TimeUnitParam, toUnit?: S13n.TimeUnitParam): number;"
+          ]
         },
         {
           "name": "bytes",
@@ -25800,7 +26735,21 @@
           "name": "register",
           "kind": "function",
           "doc": "register(sensorName: string, delay?: number): org.autojs.autojs.runtime.api.Sensors.SensorEventEmitter;",
-          "signature": "register(sensorName: string, delay?: number): org.autojs.autojs.runtime.api.Sensors.SensorEventEmitter;"
+          "signature": "register(sensorName: string, delay?: number): org.autojs.autojs.runtime.api.Sensors.SensorEventEmitter;",
+          "signatures": [
+            "register(sensorName: string, delay?: number): org.autojs.autojs.runtime.api.Sensors.SensorEventEmitter;",
+            "register(sensorName: 'light', delay?: number): Sensors.Light;",
+            "register(sensorName: 'accelerometer', delay?: number): Sensors.Accelerometer;",
+            "register(sensorName: 'ambient_temperature', delay?: number): Sensors.AmbientTemperature;",
+            "register(sensorName: 'gravity', delay?: number): Sensors.Gravity;",
+            "register(sensorName: 'gyroscope', delay?: number): Sensors.Gyroscope;",
+            "register(sensorName: 'linear_acceleration', delay?: number): Sensors.LinearAcceleration;",
+            "register(sensorName: 'magnetic_field', delay?: number): Sensors.MagneticField;",
+            "register(sensorName: 'orientation', delay?: number): Sensors.Orientation;",
+            "register(sensorName: 'pressure', delay?: number): Sensors.Pressure;",
+            "register(sensorName: 'proximity', delay?: number): Sensors.Proximity;",
+            "register(sensorName: 'relative_humidity', delay?: number): Sensors.RelativeHumidity;"
+          ]
         },
         {
           "name": "unregister",
@@ -25838,13 +26787,25 @@
           "name": "execCommand",
           "kind": "function",
           "doc": "execCommand(command: Shell.Command): AbstractShell.Result;",
-          "signature": "execCommand(command: Shell.Command): AbstractShell.Result;"
+          "signature": "execCommand(command: Shell.Command): AbstractShell.Result;",
+          "signatures": [
+            "execCommand(command: Shell.Command): AbstractShell.Result;",
+            "execCommand(command: Shell.Command, withRoot: boolean | number): AbstractShell.Result;",
+            "execCommand(command: Shell.Command, commandArgument: Shell.CommandArguments): AbstractShell.Result;",
+            "execCommand(command: Shell.Command, commandArgument: Shell.CommandArguments, withRoot: boolean | number): AbstractShell.Result;"
+          ]
         },
         {
           "name": "getCommand",
           "kind": "function",
           "doc": "getCommand(command: Shell.Command): string;",
-          "signature": "getCommand(command: Shell.Command): string;"
+          "signature": "getCommand(command: Shell.Command): string;",
+          "signatures": [
+            "getCommand(command: Shell.Command): string;",
+            "getCommand(command: Shell.Command, withRoot: boolean | number): string;",
+            "getCommand(command: Shell.Command, commandArgument: Shell.CommandArguments): string;",
+            "getCommand(command: Shell.Command, commandArgument: Shell.CommandArguments, withRoot: boolean | number): string;"
+          ]
         },
         {
           "name": "fromIntent",
@@ -25891,13 +26852,25 @@
           "name": "execCommand",
           "kind": "function",
           "doc": "execCommand(command: Shell.Command): AbstractShell.Result;",
-          "signature": "execCommand(command: Shell.Command): AbstractShell.Result;"
+          "signature": "execCommand(command: Shell.Command): AbstractShell.Result;",
+          "signatures": [
+            "execCommand(command: Shell.Command): AbstractShell.Result;",
+            "execCommand(command: Shell.Command, withRoot: boolean | number): AbstractShell.Result;",
+            "execCommand(command: Shell.Command, commandArgument: Shell.CommandArguments): AbstractShell.Result;",
+            "execCommand(command: Shell.Command, commandArgument: Shell.CommandArguments, withRoot: boolean | number): AbstractShell.Result;"
+          ]
         },
         {
           "name": "getCommand",
           "kind": "function",
           "doc": "getCommand(command: Shell.Command): string;",
-          "signature": "getCommand(command: Shell.Command): string;"
+          "signature": "getCommand(command: Shell.Command): string;",
+          "signatures": [
+            "getCommand(command: Shell.Command): string;",
+            "getCommand(command: Shell.Command, withRoot: boolean | number): string;",
+            "getCommand(command: Shell.Command, commandArgument: Shell.CommandArguments): string;",
+            "getCommand(command: Shell.Command, commandArgument: Shell.CommandArguments, withRoot: boolean | number): string;"
+          ]
         },
         {
           "name": "kill",
@@ -25996,7 +26969,12 @@
           "name": "getAll",
           "kind": "function",
           "doc": "getAll(): SysProps.Properties;",
-          "signature": "getAll(): SysProps.Properties;"
+          "signature": "getAll(): SysProps.Properties;",
+          "signatures": [
+            "getAll(): SysProps.Properties;",
+            "getAll(filter: SysProps.Filter | SysProps.FilterOptions): SysProps.Properties;",
+            "getAll(keyFilter: SysProps.Filter, valueFilter: SysProps.Filter): SysProps.Properties;"
+          ]
         }
       ]
     },
@@ -26085,13 +27063,21 @@
           "name": "removeTimedTask",
           "kind": "function",
           "doc": "removeTimedTask(id: number): TimedTask$ | null;",
-          "signature": "removeTimedTask(id: number): TimedTask$ | null;"
+          "signature": "removeTimedTask(id: number): TimedTask$ | null;",
+          "signatures": [
+            "removeTimedTask(id: number): TimedTask$ | null;",
+            "removeTimedTask<TResult = TimedTask$ | null>( id: number, options: Tasks.Fulfillment<TimedTask$ | null, TResult>, ): Tasks.FulfillmentResult<TimedTask$ | null, TResult>;"
+          ]
         },
         {
           "name": "removeIntentTask",
           "kind": "function",
           "doc": "removeIntentTask(id: number): IntentTask$ | null;",
-          "signature": "removeIntentTask(id: number): IntentTask$ | null;"
+          "signature": "removeIntentTask(id: number): IntentTask$ | null;",
+          "signatures": [
+            "removeIntentTask(id: number): IntentTask$ | null;",
+            "removeIntentTask<TResult = IntentTask$ | null>( id: number, options: Tasks.Fulfillment<IntentTask$ | null, TResult>, ): Tasks.FulfillmentResult<IntentTask$ | null, TResult>;"
+          ]
         },
         {
           "name": "updateTask",
@@ -26122,6 +27108,141 @@
           "kind": "function",
           "doc": "daysToTimeFlag(days: number[]): number;",
           "signature": "daysToTimeFlag(days: number[]): number;"
+        }
+      ]
+    },
+    "terminal": {
+      "doc": "AutoJs6 Terminal API",
+      "members": [
+        {
+          "name": "open",
+          "kind": "function",
+          "doc": "open(): Terminal.Session;",
+          "signature": "open(): Terminal.Session;",
+          "signatures": [
+            "open(): Terminal.Session;",
+            "open(directory: string): Terminal.Session;",
+            "open(options: Terminal.OpenOptions): Terminal.Session;"
+          ]
+        },
+        {
+          "name": "openAsync",
+          "kind": "function",
+          "doc": "openAsync(): Promise<Terminal.Session>;",
+          "signature": "openAsync(): Promise<Terminal.Session>;",
+          "signatures": [
+            "openAsync(): Promise<Terminal.Session>;",
+            "openAsync(directory: string): Promise<Terminal.Session>;",
+            "openAsync(options: Terminal.OpenOptions): Promise<Terminal.Session>;"
+          ]
+        },
+        {
+          "name": "sessions",
+          "kind": "function",
+          "doc": "sessions(): Terminal.Session[];",
+          "signature": "sessions(): Terminal.Session[];"
+        },
+        {
+          "name": "sessionsAsync",
+          "kind": "function",
+          "doc": "sessionsAsync(): Promise<Terminal.Session[]>;",
+          "signature": "sessionsAsync(): Promise<Terminal.Session[]>;"
+        },
+        {
+          "name": "session",
+          "kind": "function",
+          "doc": "session(id: string): Terminal.Session | null;",
+          "signature": "session(id: string): Terminal.Session | null;"
+        },
+        {
+          "name": "close",
+          "kind": "function",
+          "doc": "close(id: string): boolean;",
+          "signature": "close(id: string): boolean;"
+        },
+        {
+          "name": "closeAsync",
+          "kind": "function",
+          "doc": "closeAsync(id: string): Promise<boolean>;",
+          "signature": "closeAsync(id: string): Promise<boolean>;"
+        },
+        {
+          "name": "closeAll",
+          "kind": "function",
+          "doc": "closeAll(): number;",
+          "signature": "closeAll(): number;"
+        },
+        {
+          "name": "closeAllAsync",
+          "kind": "function",
+          "doc": "closeAllAsync(): Promise<number>;",
+          "signature": "closeAllAsync(): Promise<number>;"
+        },
+        {
+          "name": "show",
+          "kind": "function",
+          "doc": "show(id?: string): void;",
+          "signature": "show(id?: string): void;"
+        },
+        {
+          "name": "showAsync",
+          "kind": "function",
+          "doc": "showAsync(id?: string): Promise<void>;",
+          "signature": "showAsync(id?: string): Promise<void>;"
+        },
+        {
+          "name": "state",
+          "kind": "function",
+          "doc": "state(): Terminal.PluginState;",
+          "signature": "state(): Terminal.PluginState;"
+        },
+        {
+          "name": "isAvailable",
+          "kind": "function",
+          "doc": "isAvailable(): boolean;",
+          "signature": "isAvailable(): boolean;"
+        },
+        {
+          "name": "isAvailableAsync",
+          "kind": "function",
+          "doc": "isAvailableAsync(): Promise<boolean>;",
+          "signature": "isAvailableAsync(): Promise<boolean>;"
+        },
+        {
+          "name": "exec",
+          "kind": "function",
+          "doc": "exec(command: string, options?: Terminal.ExecOptions): Terminal.Session;",
+          "signature": "exec(command: string, options?: Terminal.ExecOptions): Terminal.Session;"
+        },
+        {
+          "name": "execAsync",
+          "kind": "function",
+          "doc": "execAsync(command: string, options?: Terminal.ExecOptions): Promise<Terminal.Session>;",
+          "signature": "execAsync(command: string, options?: Terminal.ExecOptions): Promise<Terminal.Session>;"
+        },
+        {
+          "name": "env",
+          "kind": "function",
+          "doc": "env(): Terminal.Environment;",
+          "signature": "env(): Terminal.Environment;"
+        },
+        {
+          "name": "envAsync",
+          "kind": "function",
+          "doc": "envAsync(): Promise<Terminal.Environment>;",
+          "signature": "envAsync(): Promise<Terminal.Environment>;"
+        },
+        {
+          "name": "npm",
+          "kind": "variable",
+          "doc": "npm: Terminal.Npm;",
+          "signature": "npm: Terminal.Npm;"
+        },
+        {
+          "name": "TerminalError",
+          "kind": "variable",
+          "doc": "TerminalError: Terminal.ErrorConstructor;",
+          "signature": "TerminalError: Terminal.ErrorConstructor;"
         }
       ]
     },
@@ -27189,25 +28310,41 @@
           "name": "zipFile",
           "kind": "function",
           "doc": "zipFile(filePath: string, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
-          "signature": "zipFile(filePath: string, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;"
+          "signature": "zipFile(filePath: string, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
+          "signatures": [
+            "zipFile(filePath: string, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
+            "zipFile(filePath: string, options: Zip.ZipOptions): Zip.ZipFileHandle;"
+          ]
         },
         {
           "name": "zipDir",
           "kind": "function",
           "doc": "zipDir(dirPath: string, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
-          "signature": "zipDir(dirPath: string, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;"
+          "signature": "zipDir(dirPath: string, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
+          "signatures": [
+            "zipDir(dirPath: string, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
+            "zipDir(dirPath: string, options: Zip.ZipOptions): Zip.ZipFileHandle;"
+          ]
         },
         {
           "name": "zipFiles",
           "kind": "function",
           "doc": "zipFiles(filePathList: Zip.FilePathList, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
-          "signature": "zipFiles(filePathList: Zip.FilePathList, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;"
+          "signature": "zipFiles(filePathList: Zip.FilePathList, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
+          "signatures": [
+            "zipFiles(filePathList: Zip.FilePathList, destZipPath: Zip.DestinationPath, options?: Zip.ZipOptions): Zip.ZipFileHandle;",
+            "zipFiles(filePathList: Zip.FilePathList, options: Zip.ZipOptions): Zip.ZipFileHandle;"
+          ]
         },
         {
           "name": "unzip",
           "kind": "function",
           "doc": "unzip(zipPath: string, destPath: Zip.DestinationPath, options?: Zip.UnzipOptions): Zip.ZipFileHandle;",
-          "signature": "unzip(zipPath: string, destPath: Zip.DestinationPath, options?: Zip.UnzipOptions): Zip.ZipFileHandle;"
+          "signature": "unzip(zipPath: string, destPath: Zip.DestinationPath, options?: Zip.UnzipOptions): Zip.ZipFileHandle;",
+          "signatures": [
+            "unzip(zipPath: string, destPath: Zip.DestinationPath, options?: Zip.UnzipOptions): Zip.ZipFileHandle;",
+            "unzip(zipPath: string, options: Zip.UnzipOptions): Zip.ZipFileHandle;"
+          ]
         }
       ]
     }
@@ -27546,7 +28683,14 @@
     "waitForEvent",
     "waitForToast",
     "waitForNotification",
-    "findIterator"
+    "findIterator",
+    "childCount",
+    "maxChildCount",
+    "maxDepth",
+    "maxIndexInParent",
+    "minChildCount",
+    "minDepth",
+    "minIndexInParent"
   ],
   "variables": [
     "context",

@@ -80,6 +80,11 @@
                 android:id="@+id/action_jump_to_line_end"
                 android:title="@string/text_jump_to_line_end"
                 app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_jump_to_previous_cursor"
+                android:title="@string/text_jump_to_previous_cursor"
+                app:showAsAction="never" />
         </menu>
     </item>
 

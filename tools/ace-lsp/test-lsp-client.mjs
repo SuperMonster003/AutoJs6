@@ -5,7 +5,11 @@ import path from "node:path";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
-const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const HOST_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+// The editor assets live in the separately checked out Ace editor plugin; keep legacy host layouts usable.
+const PROJECT_ROOT = process.env.AUTOJS6_ACE_EDITOR_ROOT
+  ? path.resolve(process.env.AUTOJS6_ACE_EDITOR_ROOT)
+  : HOST_ROOT;
 const ACE_AUTOJS6_ROOT = path.join(
   PROJECT_ROOT,
   "app",

@@ -83,6 +83,9 @@ export function normalizeMember(member) {
     kind: member.kind || "function",
     doc: member.doc || "",
     signature: member.signature,
+    ...(Array.isArray(member.signatures) && member.signatures.length > 1
+      ? { signatures: member.signatures.slice() }
+      : {}),
     score: member.score,
   };
 }
@@ -188,6 +191,14 @@ export function validateSource(source) {
       if (member.signature != null && typeof member.signature !== "string") {
         errors.push(`module ${moduleName}.${member.name} signature must be a string`);
       }
+      if (member.signatures != null) {
+        if (!Array.isArray(member.signatures) || member.signatures.length < 2 ||
+          member.signatures.some((signature) => typeof signature !== "string" || !signature)) {
+          errors.push(`module ${moduleName}.${member.name} signatures must list at least two strings`);
+        } else if (member.signatures[0] !== member.signature) {
+          errors.push(`module ${moduleName}.${member.name} signature must equal the first overload`);
+        }
+      }
       seenMembers.add(member.name);
     }
   }
@@ -252,6 +263,7 @@ export function buildRuntimeIndices(source) {
         type: member.kind,
         doc: member.doc,
         signature: member.signature,
+        signatures: member.signatures,
         score: member.score,
       };
     });
@@ -288,6 +300,7 @@ export function buildRuntimeIndices(source) {
         type: member.kind,
         doc: member.doc,
         signature: member.signature,
+        signatures: member.signatures,
         score: member.score,
       });
     }
@@ -331,7 +344,9 @@ export function renderDts(source) {
     for (const rawMember of moduleSpec.members) {
       const member = normalizeMember(rawMember);
       if (member.signature) {
-        lines.push(`        ${member.signature}`);
+        for (const signature of member.signatures || [member.signature]) {
+          lines.push(`        ${signature}`);
+        }
       } else if (member.kind === "variable") {
         lines.push(`        ${member.name}: any;`);
       } else {
@@ -485,9 +500,15 @@ function renderGlobalMemberDeclaration(member) {
 
 function renderGlobalFunctionDeclaration(member) {
   if (member.signature) {
-    const suffix = member.signature.replace(new RegExp(`^${escapeRegExp(member.name)}\\??\\s*`), "");
-    if (suffix.startsWith("(") || suffix.startsWith("<")) {
-      return `declare function ${member.name}${suffix}`;
+    const declarations = [];
+    for (const signature of member.signatures || [member.signature]) {
+      const suffix = signature.replace(new RegExp(`^${escapeRegExp(member.name)}\\??\\s*`), "");
+      if (suffix.startsWith("(") || suffix.startsWith("<")) {
+        declarations.push(`declare function ${member.name}${suffix}`);
+      }
+    }
+    if (declarations.length) {
+      return declarations.join("\n");
     }
   }
   return `declare function ${member.name}(...args: any[]): any;`;
@@ -519,6 +540,7 @@ function mergeCompletionEntry(existing, candidate) {
     ...primary,
     doc: primary.doc || secondary.doc,
     signature: primary.signature || secondary.signature,
+    signatures: primary.signatures || secondary.signatures,
     score: primary.score ?? secondary.score,
   };
 }

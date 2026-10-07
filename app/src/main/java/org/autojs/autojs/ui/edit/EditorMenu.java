@@ -60,6 +60,11 @@ public class EditorMenu {
             fullscreenItem.setCheckable(true);
             fullscreenItem.setChecked(mEditorView.isFullscreenMode());
         }
+        MenuItem previousCursorItem = menu.findItem(R.id.action_jump_to_previous_cursor);
+        if (previousCursorItem != null) {
+            previousCursorItem.setVisible(mEditorView.supportsPreviousCursorJump());
+            previousCursorItem.setEnabled(mEditorView.hasPreviousCursorPosition());
+        }
     }
 
     private void setReadOnlySensitiveMenuItemsVisible(Menu menu, boolean mutable) {
@@ -171,6 +176,10 @@ public class EditorMenu {
         }
         if (itemId == R.id.action_jump_to_line_end) {
             commandDispatcher().jumpToLineEnd();
+            return true;
+        }
+        if (itemId == R.id.action_jump_to_previous_cursor) {
+            mEditorView.jumpToPreviousCursor();
             return true;
         }
         return false;

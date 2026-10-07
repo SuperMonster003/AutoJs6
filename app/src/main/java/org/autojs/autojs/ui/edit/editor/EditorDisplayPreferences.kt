@@ -15,6 +15,13 @@ object EditorDisplayPreferences {
     const val KEY_FONT_LIGATURES_ENABLED = "key_\$_ace_font_ligatures_enabled"
     const val KEY_FONT_STYLES_ENABLED = "key_\$_ace_font_styles_enabled"
 
+    // Ace smart hint policy keys (read by the Ace plugin; the host only relays changes).
+    const val KEY_SMART_HINT_COMPLETION_TRIGGER = "key_\$_ace_smart_hint_completion_trigger"
+    const val KEY_SMART_HINT_COMPLETION_MIN_CHARS = "key_\$_ace_smart_hint_completion_min_chars"
+    const val KEY_SMART_HINT_COMPLETION_DELAY = "key_\$_ace_smart_hint_completion_delay"
+    const val KEY_SMART_HINT_SIGNATURE_TRIGGER = "key_\$_ace_smart_hint_signature_trigger"
+    const val KEY_SMART_HINT_ARROW_OVERLOAD_CYCLING = "key_\$_ace_smart_hint_arrow_overload_cycling"
+
     const val WORD_WRAP_INDENT_STYLE_CONTINUATION = "continuation"
     const val WORD_WRAP_INDENT_STYLE_CLASSIC = "classic"
     const val GUTTER_WIDTH_MODE_DYNAMIC = "dynamic"

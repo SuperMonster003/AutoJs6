@@ -237,6 +237,11 @@
             app:title="@string/text_stable_mode"
             app:summary="@string/summary_stable_mode" />
 
+        <org.autojs.autojs.ui.settings.codegen.CodeGenModelsPreference
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_codegen_models"
+            app:summary="@string/summary_codegen_models" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
