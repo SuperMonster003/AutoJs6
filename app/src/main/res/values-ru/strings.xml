@@ -1729,6 +1729,7 @@
     <string name="text_integrity_verification_failed">Сбой проверки целостности</string>
     <string name="text_intelligent_mine">Мои</string>
     <string name="text_intelligent_preset_material_day_night">Material день и ночь</string>
+    <string name="text_intelligent_preset_wallpaper">По обоям</string>
     <string name="text_intelligent_presets">Предустановки</string>
     <string name="text_interval_anchor_next_hour">Следующий целый час</string>
     <string name="text_interval_anchor_next_minute">Следующая целая минута</string>
@@ -2355,6 +2356,7 @@
     <string name="text_sample_name">Запуск сервиса</string>
     <string name="text_save">Сохранить</string>
     <string name="text_save_and_exit">Сохранить и выйти</string>
+    <string name="text_save_as_my_intelligent_library">Сохранить как мою интеллектуальную библиотеку</string>
     <string name="text_save_changes_confirm">Сохранить изменения перед выходом?</string>
     <string name="text_save_configuration_as">Сохранить конфигурацию как</string>
     <string name="text_save_layout_to_file">Сохранить компоновку в файл</string>
@@ -2664,6 +2666,11 @@
     <string name="text_vscode_host">Хост VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Ожидание завершения обработки всех данных...</string>
     <string name="text_waiting_for_vscode_approval">Ожидание подтверждения в VSCode...</string>
+    <string name="text_wallpaper_color_primary">Основной</string>
+    <string name="text_wallpaper_color_secondary">Дополнительный</string>
+    <string name="text_wallpaper_color_tertiary">Третий</string>
+    <string name="text_wallpaper_colors_need_android_8_1">Требуется Android 8.1 или новее</string>
+    <string name="text_wallpaper_colors_unavailable">Не удаётся получить цвета текущих обоев</string>
     <string name="text_weekly_task">Недельное задание</string>
     <string name="text_weekly_task_should_check_day_of_week">Должен быть выбран хотя бы один день</string>
     <string name="text_welcome_to_app">Добро пожаловать в %1$s</string>

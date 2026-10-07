@@ -90,8 +90,13 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         }
     }
 
+    private var watchingWallpaper = false
+
     private val foregroundCallbacks = object : Application.ActivityLifecycleCallbacks {
-        override fun onActivityResumed(activity: Activity) = evaluateIfNeeded()
+        override fun onActivityResumed(activity: Activity) {
+            refreshWallpaperIfChanged()
+            evaluateIfNeeded()
+        }
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
         override fun onActivityStarted(activity: Activity) = Unit
         override fun onActivityPaused(activity: Activity) = Unit
@@ -157,6 +162,10 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         nextStateChangeAt = null
         updateTimeReceiver(false)
         DeviceStateMonitor.stopAll()
+        if (watchingWallpaper) {
+            WallpaperColorSource.watch(appContext, null)
+            watchingWallpaper = false
+        }
         _changes.postValue(Unit)
     }
 
@@ -200,6 +209,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         val now = System.currentTimeMillis()
         val zone = ZoneId.systemDefault()
         watchDeviceFacts(active.config)
+        watchWallpaper(active)
         val state = resolveState(active.config, now)
         nextStateChangeAt = state.nextChangeAt
         val result = planner.plan(
@@ -247,6 +257,30 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
 
     private fun usesTime(config: IntelligentConfig): Boolean {
         return config.interval != null || config.daily != null || config.overrides.isNotEmpty() || nextStateChangeAt != null
+    }
+
+    /** Watches wallpaper colors only while the wallpaper preset is active (D5). zh-CN: 仅在跟随壁纸预设激活时监听壁纸颜色 (D5). */
+    private fun watchWallpaper(active: IntelligentSnapshot) {
+        val needed = active.libraryId == IntelligentPresets.ID_WALLPAPER
+        if (needed == watchingWallpaper) return
+        WallpaperColorSource.watch(appContext, if (needed) ({ refreshWallpaperIfChanged() }) else null)
+        watchingWallpaper = needed
+    }
+
+    /**
+     * Rebuilds the active wallpaper preset when the wallpaper colors differ from its groups (roadmap P4.2); called when
+     * the colors change and when an activity resumes, which also covers changes made while the process was dead.
+     * zh-CN: 壁纸颜色与激活中的跟随壁纸预设不一致时重建该预设 (Roadmap P4.2); 在颜色变化时与 Activity 恢复时调用, 后者也覆盖了进程死亡期间的变化.
+     */
+    private fun refreshWallpaperIfChanged() {
+        val active = snapshot ?: return
+        if (active.libraryId != IntelligentPresets.ID_WALLPAPER) return
+        val fresh = IntelligentPresets.wallpaper(appContext)
+        if (fresh == active) return
+        snapshot = fresh
+        Pref.putString(KEY_SNAPSHOT, IntelligentEngineJson.encodeSnapshot(fresh))
+        _changes.postValue(Unit)
+        evaluate(IntelligentEvent.EVALUATE)
     }
 
     private fun watchDeviceFacts(config: IntelligentConfig) {

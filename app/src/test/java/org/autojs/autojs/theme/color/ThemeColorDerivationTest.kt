@@ -154,6 +154,22 @@ class ThemeColorDerivationTest {
     }
 
     @Test
+    fun dayNightPairsMeetContrastAgainstBothBackgrounds() {
+        // A light wallpaper color gets darker for day and stays for night; a dark one the other way round.
+        listOf(0xFFF8BBD0.toInt(), 0xFF1A237E.toInt(), 0xFF00897B.toInt(), 0xFFFFEB3B.toInt()).forEach { seed ->
+            val (day, night) = ThemeColorDerivation.dayNightPair(seed)
+            assertTrue("day of #%06X".format(seed and 0xFFFFFF), ColorMetrics.contrastRatio(day, WINDOW_BACKGROUND_LIGHT) >= 3.0)
+            assertTrue("night of #%06X".format(seed and 0xFFFFFF), ColorMetrics.contrastRatio(night, WINDOW_BACKGROUND_NIGHT) >= 3.0)
+        }
+        val pink = 0xFFF8BBD0.toInt()
+        assertEquals(pink, ThemeColorDerivation.dayNightPair(pink).second)
+        assertTrue(lch(ThemeColorDerivation.dayNightPair(pink).first).l < lch(pink).l)
+        val navy = 0xFF1A237E.toInt()
+        assertEquals(navy, ThemeColorDerivation.dayNightPair(navy).first)
+        assertTrue(lch(ThemeColorDerivation.dayNightPair(navy).second).l > lch(navy).l)
+    }
+
+    @Test
     fun shadeFallsBackToTheMostContrastingOne() {
         // No yellow reaches 3:1 against the light background; 900 contrasts most. At night 900 is the darkest passing shade.
         assertEquals(0xFFF57F17.toInt(), ThemeColorDerivation.pickDayShade(yellow))

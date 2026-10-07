@@ -16,6 +16,7 @@ object IntelligentPresets {
 
     const val ID_MATERIAL_DAY_NIGHT = 0x100
     const val ID_BACKGROUND = 0x101
+    const val ID_WALLPAPER = 0x102
 
     const val BACKGROUND_GROUP_LIGHT = 0L
     const val BACKGROUND_GROUP_DARK = 1L
@@ -53,15 +54,32 @@ object IntelligentPresets {
 
     private val SHADE_SUFFIX = Regex("\\s*\\(\\d+\\)$")
 
-    fun all(context: Context): List<IntelligentSnapshot> = listOf(materialDayNight(context), background(context))
+    fun all(context: Context): List<IntelligentSnapshot> = listOf(materialDayNight(context), background(context), wallpaper(context))
 
     fun find(context: Context, libraryId: Int): IntelligentSnapshot? = when (libraryId) {
         ID_MATERIAL_DAY_NIGHT -> materialDayNight(context)
         ID_BACKGROUND -> background(context)
+        ID_WALLPAPER -> wallpaper(context)
         else -> null
     }
 
-    fun isPreset(libraryId: Int) = libraryId == ID_MATERIAL_DAY_NIGHT || libraryId == ID_BACKGROUND
+    fun isPreset(libraryId: Int) = libraryId in setOf(ID_MATERIAL_DAY_NIGHT, ID_BACKGROUND, ID_WALLPAPER)
+
+    /**
+     * One group per wallpaper seed color (roadmap P4.2), following night mode: day and night are the nearest colors
+     * with at least 3:1 against the day and night window backgrounds, like the shades of D24. Group ids are the seed
+     * positions, so "the k-th group" stays selected when the wallpaper changes. Empty when the colors are unavailable.
+     * zh-CN: 每个壁纸种子色一组 (Roadmap P4.2), 跟随夜间模式: 日 / 夜分别为与日间 / 夜间窗口背景对比度不低于 3:1 的最近颜色,
+     * 与 D24 的色阶规则一致. 组 id 为种子色的位置, 因此壁纸变化后仍选中 "第 k 组". 无法读取颜色时没有组.
+     */
+    fun wallpaper(context: Context): IntelligentSnapshot {
+        val names = listOf(R.string.text_wallpaper_color_primary, R.string.text_wallpaper_color_secondary, R.string.text_wallpaper_color_tertiary)
+        val groups = WallpaperColorSource.seeds(context).take(names.size).mapIndexed { index, seed ->
+            val (day, night) = ThemeColorDerivation.dayNightPair(seed)
+            IntelligentGroup(id = index.toLong(), name = context.getString(names[index]), position = index, states = dayNight(day, night))
+        }
+        return IntelligentSnapshot(ID_WALLPAPER, context.getString(R.string.text_intelligent_preset_wallpaper), IntelligentConfig(StateSource.NightMode), groups)
+    }
 
     /**
      * One group per Material family following night mode; picking a group pins it. The shades are picked by

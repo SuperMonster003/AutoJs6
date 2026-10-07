@@ -5,6 +5,9 @@ import org.autojs.autojs.theme.intelligent.DateCondition
 import org.autojs.autojs.theme.intelligent.GroupOrder
 import org.autojs.autojs.theme.intelligent.IntelligentConfig
 import org.autojs.autojs.theme.intelligent.IntelligentGroup
+import org.autojs.autojs.theme.intelligent.IntelligentPresets
+import org.autojs.autojs.theme.intelligent.IntelligentSnapshot
+import org.autojs.autojs.theme.intelligent.WallpaperColorSource
 import org.autojs.autojs.theme.intelligent.IntervalUnit
 import org.autojs.autojs.theme.intelligent.RotationTrigger
 import org.autojs.autojs.theme.intelligent.Season
@@ -170,6 +173,16 @@ object IntelligentSummaryFormatter {
     }
 
     private fun inferredHemisphere() = TimeZoneLocations.infer(ZoneId.systemDefault()).location.hemisphere
+
+    /**
+     * Why a preset has no groups, if it is the wallpaper preset without colors (roadmap P4.2).
+     * zh-CN: 预设没有组的原因 (适用于没有颜色的跟随壁纸预设, Roadmap P4.2).
+     */
+    fun presetNote(context: Context, snapshot: IntelligentSnapshot): String? = when {
+        snapshot.libraryId != IntelligentPresets.ID_WALLPAPER || snapshot.groups.isNotEmpty() -> null
+        !WallpaperColorSource.isAvailable -> context.getString(R.string.text_wallpaper_colors_need_android_8_1)
+        else -> context.getString(R.string.text_wallpaper_colors_unavailable)
+    }
 
     fun holidayName(context: Context, id: String): String = HOLIDAY_NAMES[id]?.let(context::getString) ?: id
 

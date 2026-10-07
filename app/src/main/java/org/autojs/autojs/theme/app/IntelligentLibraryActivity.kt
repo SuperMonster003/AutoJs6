@@ -114,6 +114,7 @@ class IntelligentLibraryActivity : ColorSelectBaseActivity() {
 
     private fun buildInfo(current: IntelligentSnapshot): String {
         val lines = mutableListOf(IntelligentSummaryFormatter.summary(this, current.config, current.groups))
+        IntelligentSummaryFormatter.presetNote(this, current)?.let { lines += it }
         if (isActive) {
             val runtime = IntelligentColorEngine.runtimeState
             lines += getString(R.string.text_in_use)
@@ -163,6 +164,9 @@ class IntelligentLibraryActivity : ColorSelectBaseActivity() {
         listOf(R.id.action_edit_intelligent_library, R.id.action_rename_intelligent_library, R.id.action_delete_intelligent_library).forEach {
             menu.findItem(it)?.isVisible = !isPreset
         }
+        // Cloning the wallpaper preset keeps the colors of the current wallpaper (roadmap P4.2).
+        // zh-CN: 克隆跟随壁纸预设即保存当前壁纸的颜色 (Roadmap P4.2).
+        if (libraryId == IntelligentPresets.ID_WALLPAPER) menu.findItem(R.id.action_clone_intelligent_library)?.setTitle(R.string.text_save_as_my_intelligent_library)
         return super.onCreateOptionsMenu(menu)
     }
 

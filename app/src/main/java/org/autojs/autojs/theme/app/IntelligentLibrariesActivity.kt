@@ -95,7 +95,8 @@ class IntelligentLibrariesActivity : ColorSelectBaseActivity() {
             add(getString(R.string.text_open) to { openLibrary(row) })
             if (!row.isPreset) add(getString(R.string.text_edit) to { openEditor(snapshot.libraryId) })
             if (!row.isPreset) add(getString(R.string.text_rename) to { operations.rename(snapshot) { load() } })
-            add(getString(R.string.text_clone) to { operations.clone(snapshot) { IntelligentLibraryActivity.launch(this@IntelligentLibrariesActivity, it.libraryId) } })
+            val cloneLabel = if (snapshot.libraryId == IntelligentPresets.ID_WALLPAPER) R.string.text_save_as_my_intelligent_library else R.string.text_clone
+            add(getString(cloneLabel) to { operations.clone(snapshot) { IntelligentLibraryActivity.launch(this@IntelligentLibrariesActivity, it.libraryId) } })
             exportSourceOf(row)?.let { source -> add(getString(R.string.text_export) to { exchange.export(listOf(source)) }) }
             if (!row.isPreset) add(getString(R.string.text_delete) to { operations.delete(snapshot) { load() } })
         }

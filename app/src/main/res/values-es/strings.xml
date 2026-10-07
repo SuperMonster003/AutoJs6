@@ -1729,6 +1729,7 @@
     <string name="text_integrity_verification_failed">La verificación de integridad falló</string>
     <string name="text_intelligent_mine">Mis bibliotecas</string>
     <string name="text_intelligent_preset_material_day_night">Material día y noche</string>
+    <string name="text_intelligent_preset_wallpaper">Seguir el fondo de pantalla</string>
     <string name="text_intelligent_presets">Predefinidos</string>
     <string name="text_interval_anchor_next_hour">Próxima hora en punto</string>
     <string name="text_interval_anchor_next_minute">Próximo minuto exacto</string>
@@ -2355,6 +2356,7 @@
     <string name="text_sample_name">Ejecutar servicio</string>
     <string name="text_save">Guardar</string>
     <string name="text_save_and_exit">Guardar y salir</string>
+    <string name="text_save_as_my_intelligent_library">Guardar como mi biblioteca inteligente</string>
     <string name="text_save_changes_confirm">¿Guardar los cambios antes de salir?</string>
     <string name="text_save_configuration_as">Guardar configuracion como</string>
     <string name="text_save_layout_to_file">Guardar diseño en archivo</string>
@@ -2664,6 +2666,11 @@
     <string name="text_vscode_host">Host de VSCode</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Esperando a que se complete el procesamiento de todos los datos...</string>
     <string name="text_waiting_for_vscode_approval">Esperando la aprobación en VSCode...</string>
+    <string name="text_wallpaper_color_primary">Principal</string>
+    <string name="text_wallpaper_color_secondary">Secundario</string>
+    <string name="text_wallpaper_color_tertiary">Terciario</string>
+    <string name="text_wallpaper_colors_need_android_8_1">Requiere Android 8.1 o posterior</string>
+    <string name="text_wallpaper_colors_unavailable">No se pueden leer los colores del fondo de pantalla actual</string>
     <string name="text_weekly_task">Tarea semanal</string>
     <string name="text_weekly_task_should_check_day_of_week">Debe seleccionarse al menos un día</string>
     <string name="text_welcome_to_app">Te damos la bienvenida a %1$s</string>

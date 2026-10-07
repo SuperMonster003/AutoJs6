@@ -86,7 +86,8 @@ class IntelligentLibraryAdapter(
             binding.libraryItem.imageTintList = null
             binding.libraryItem.setImageDrawable(shownGroup?.let { SegmentedCircleDrawable(IntelligentSummaryFormatter.stateColors(snapshot.config, it)) })
             binding.name.text = snapshot.name
-            val summary = IntelligentSummaryFormatter.summary(context, snapshot.config, snapshot.groups)
+            val summary = IntelligentSummaryFormatter.summary(context, snapshot.config, snapshot.groups) +
+                    IntelligentSummaryFormatter.presetNote(context, snapshot)?.let { "\n$it" }.orEmpty()
             binding.description.text = when {
                 isActive && shownGroup != null -> "$summary\n${context.getString(R.string.text_in_use)}: ${IntelligentSummaryFormatter.groupName(snapshot.config, shownGroup)}"
                 else -> summary

@@ -131,6 +131,15 @@ object ThemeColorDerivation {
     fun pickNightShade(shades: List<Int>, background: Int = WINDOW_BACKGROUND_NIGHT, ratio: Double = UI_COMPONENT_CONTRAST): Int =
         pickShade(shades.sortedBy { ColorMetrics.relativeLuminance(it) }, background, ratio)
 
+    /**
+     * Day and night colors for [seed]: the nearest colors with at least [ratio] against the day and night window
+     * backgrounds (roadmap P4.2, consistent with D24).
+     * zh-CN: [seed] 的日间与夜间颜色: 与日间 / 夜间窗口背景对比度不低于 [ratio] 的最近颜色 (Roadmap P4.2, 与 D24 一致).
+     */
+    @JvmOverloads
+    fun dayNightPair(seed: Int, ratio: Double = UI_COMPONENT_CONTRAST): Pair<Int, Int> =
+        ensureContrast(seed, WINDOW_BACKGROUND_LIGHT, ratio) to ensureContrast(seed, WINDOW_BACKGROUND_NIGHT, ratio)
+
     private fun pickShade(preferred: List<Int>, background: Int, ratio: Double): Int {
         require(preferred.isNotEmpty()) { "No shades to pick from" }
         return preferred.firstOrNull { ColorMetrics.contrastRatio(it, background) >= ratio }
