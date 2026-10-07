@@ -233,7 +233,6 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` runtime.loadJarWithR8/retraceR8Stack 方法, 用于借助 R8 插件加载 JAR 文件及还原混淆堆栈 (实验性, 默认关闭)
 * `新增` images.quantize/quantizeToFile 方法, 用于 PNG 图像量化及文件保存, 并返回图像大小与质量信息 (需要 Image Quantization 插件)
 * `新增` images.countPointsByColor/getMeanColor 方法, 用于统计匹配颜色的像素数量及获取平均颜色
-* `新增` colors.distance/invert/blend/contrast 方法, 用于颜色距离计算, 反色, 混合及对比度计算 (同样适用于 Color 实例)
 * `新增` flow 模块及 waitAsync 全局方法, 用于异步等待与链式操作, 支持分支, 循环, 超时, 重试及取消
 * `新增` smartClick/clickIfExists/clickAny/findAny 等自动化方法, 用于控件查找与点击, 并支持 Flow 链式调用
 * `新增` smartClickBounds/clickBoundsIfExists/clickBoundsAny 方法, 用于按控件区域执行坐标点击
@@ -308,7 +307,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` 主题色 "派生配色" 设置 (默认关闭, 与此前版本完全一致): 自动时由主色推导用于悬浮按钮的强调色与用于状态栏的深色, 插件同样获得三种颜色; 智能颜色库各组的每个状态可单独指定强调色与深色, 在两种设置下均优先
 * `新增` 颜色收藏: 在颜色详情中勾选 "收藏" / "置顶", 或长按颜色库中的颜色及配色工具中的色块; 虚拟库 "收藏" 可按手动 (拖动排序) / 收藏时间 / 色相 / 亮度排序, 置顶项始终在前, 可从调色盘收藏, 并可从收藏创建智能颜色库 (每色一组); 收藏也可作为 "从种子色生成" 的种子
 * `新增` 虚拟库 "常用与推荐": 依次为置顶收藏, 其余收藏, 以及按使用次数与近因 (半衰期 14 天) 评分的历史颜色, 相似颜色合并, 至多 30 项, 无数据时隐藏; 条目按原来的选择方式应用, 并可创建智能颜色库; 颜色历史记录使用次数, 历史列表可 "合并相似颜色"
-* `新增` colors 模块新增感知色彩函数: toOklab / oklab 与 toOklch / oklch, ensureContrast (WCAG 对比度, 默认 4.5), harmony, tones, derive (主色, 强调色与深色), nightVariant, simulate (红色盲, 绿色盲, 蓝色盲) 及 extract (图像主要颜色, 支持 count, region 与 step 选项); colors.distance, colors.isSimilar 与 images.detectColor 支持 oklab 算法 (参阅 示例代码 > 图像与颜色)
+* `新增` colors.distance/invert/blend/contrast 方法, 用于颜色距离计算, 反色, 混合及对比度计算 (同样适用于 Color 实例)
+* `新增` colors 模块的感知色彩函数: toOklab / oklab 与 toOklch / oklch, ensureContrast (WCAG 对比度, 默认 4.5), harmony, tones, derive (主色, 强调色与深色), nightVariant, simulate (红色盲, 绿色盲, 蓝色盲) 及 extract (图像主要颜色, 支持 count, region 与 step 选项); colors.distance, colors.isSimilar 与 images.detectColor 支持 oklab 算法 (参阅 示例代码 > 图像与颜色)
 * `新增` colors.theme 由脚本控制主题色: get, set (可指定 accent 与 dark), reset, libraries, activate 与 deactivate (智能颜色库), next (立即换组), state (切换 "脚本状态" 状态源) 及 current; 500 ms 内的脚本修改合并为一次, 历史记录标注 "脚本: 名称", 主题色页面提供 "撤销脚本修改" 以恢复之前的选择 (含激活中的智能颜色库) (参阅 示例代码 > 图像与颜色)
 * `新增` Ace 编辑器快捷面板 TAB 键长按用于唤出智能提示, 按光标上下文显示代码补全, 参数提示或符号文档, 参数提示已显示时切换重载方法; 硬件键盘 Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q 分别对应智能提示 / 参数提示 / 符号文档
 * `新增` 代码编辑器设置增加 "智能提示" 分组 (仅 Ace 引擎): 自动补全触发方式 (输入标识符时 / 仅输入 "." 后 / 关闭), 补全最少触发字符数, 补全触发延迟, 参数提示触发方式 (光标进入调用时 / 仅输入 "(" 或 "," 时 / 关闭), 方向键切换重载; 修改后即时生效并可记录到动作收藏 (需要 Ace 编辑器插件 1.26.0)

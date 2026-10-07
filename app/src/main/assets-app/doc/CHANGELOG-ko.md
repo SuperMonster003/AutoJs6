@@ -212,7 +212,6 @@
 * `추가` 플러그인 센터에서 공식 인덱스와 설치된 manifest의 페이지 정렬을 읽고, 16 KB 기기에서 호환되지 않는 버전을 설치하거나 활성화하기 전에 경고
 * `추가` MCP 스크린샷 대체 경로: image.captureScreen(options)는 접근성 스크린샷의 자르기, 배율, 형식, 품질 옵션을 받아 파일 디스크립터로 전송하는 인코딩 이미지를 반환합니다. captureScreen()은 이미지 핸들 반환을 유지하며 MediaProjection 승인이 없거나 취소되면 권한 오류를 반환합니다.
 * `추가` `images.countPointsByColor(image, color, options?)`는 OpenCV 마스크로 지정 색상과 일치하는 픽셀 수를 세고, `images.getMeanColor(image, region?)`는 이미지 또는 영역의 평균 색상을 반환합니다
-* `추가` `colors.distance(colorA, colorB, algorithm?)`는 각 검출 알고리즘의 임계값과 같은 척도로 색상 거리를 반환하고, `colors.invert(color)`는 alpha를 유지한 채 RGB를 반전하며, `colors.blend(colorA, colorB, ratio?)`는 두 색상을 혼합하고, `colors.contrast(foreground, background)`는 WCAG 대비율을 계산합니다; 네 메서드 모두 Color 인스턴스에서도 사용할 수 있습니다
 * `추가` `images.readPixels`는 파일 경로 외에 ImageWrapper도 받으며, 전달한 이미지는 계속 사용할 수 있습니다
 * `추가` `images.matchTemplate`와 `images.findPointByImage`가 `scales` 옵션 (단일 배율 또는 배율 배열)을 받아 다른 해상도에서 캡처한 템플릿을 매칭합니다; 각 매치는 `width`, `height`, `scale`, `center`, `rect`를 제공하고 `MatchingResult`에 `size`, `isEmpty()`, `isNotEmpty()`, `filter()`가 추가되었습니다
 * `추가` 파일 관리자 스크립트 메뉴의 "플로팅 실행" 항목, 반투명 플로팅 툴바로 스크립트 시작 / 중지, 편집, 로그 보기가 가능하며 야간 모드와 테마 색상을 따릅니다
@@ -277,7 +276,8 @@
 * `추가` 테마 색상 "파생 색상" 설정 (기본값 끄기, 이전 버전과 완전히 동일): 자동 시 기본 색상에서 플로팅 버튼용 강조 색과 상태 표시줄용 어두운 색을 도출하며 플러그인도 세 가지 색상을 모두 받음, 인텔리전트 색상 라이브러리 그룹의 각 상태는 강조 색과 어두운 색을 따로 지정할 수 있으며 두 설정 모두에서 우선함
 * `추가` 색상 즐겨찾기: 색상 상세 정보에서 "즐겨찾기" / "고정됨"을 선택하거나 색상 라이브러리의 색상과 배색 도구의 색상 견본을 길게 눌러 추가, 가상 라이브러리 "즐겨찾기"는 수동 (드래그) / 추가한 시간 / 색조 / 명도로 정렬되며 고정된 색상이 항상 앞에 표시됨, 색상 팔레트에서 추가할 수 있고 즐겨찾기로 인텔리전트 색상 라이브러리 (색상당 그룹 하나) 를 만들 수 있음, 즐겨찾기는 "시드 색상으로 생성"의 시드로도 사용 가능
 * `추가` 가상 라이브러리 "자주 사용 및 추천": 고정된 즐겨찾기, 나머지 즐겨찾기, 사용 횟수와 최근성 (반감기 14일) 으로 평가한 기록 색상 순으로 비슷한 색상을 합쳐 최대 30개 표시하며 데이터가 없으면 숨김, 각 항목은 원래 선택 방식대로 적용되고 인텔리전트 색상 라이브러리를 만들 수 있음, 색상 기록은 사용 횟수를 저장하며 기록 목록에서 "비슷한 색상 합치기" 가능
-* `추가` colors 모듈에 지각 기반 색상 함수 추가: toOklab / oklab 및 toOklch / oklch, ensureContrast (WCAG 대비율, 기본 4.5), harmony, tones, derive (기본, 강조, 어두운 색), nightVariant, simulate (제1색맹, 제2색맹, 제3색맹) 및 extract (count, region, step 옵션을 지원하는 이미지 주요 색상), colors.distance, colors.isSimilar 및 images.detectColor가 oklab 알고리즘 지원 (예제 코드 > 图像与颜色 참조)
+* `추가` `colors.distance(colorA, colorB, algorithm?)`는 각 검출 알고리즘의 임계값과 같은 척도로 색상 거리를 반환하고, `colors.invert(color)`는 alpha를 유지한 채 RGB를 반전하며, `colors.blend(colorA, colorB, ratio?)`는 두 색상을 혼합하고, `colors.contrast(foreground, background)`는 WCAG 대비율을 계산합니다; 네 메서드 모두 Color 인스턴스에서도 사용할 수 있습니다
+* `추가` colors 모듈의 지각 기반 색상 함수: toOklab / oklab 및 toOklch / oklch, ensureContrast (WCAG 대비율, 기본 4.5), harmony, tones, derive (기본, 강조, 어두운 색), nightVariant, simulate (제1색맹, 제2색맹, 제3색맹) 및 extract (count, region, step 옵션을 지원하는 이미지 주요 색상), colors.distance, colors.isSimilar 및 images.detectColor가 oklab 알고리즘 지원 (예제 코드 > 图像与颜色 참조)
 * `추가` colors.theme으로 스크립트에서 테마 색상 제어: get, set (accent와 dark 지정 가능), reset, libraries, activate와 deactivate (인텔리전트 색상 라이브러리), next (즉시 다음 그룹), state ("스크립트 상태" 소스 전환), current 제공, 500 ms 이내의 스크립트 변경은 한 번으로 합쳐지고 기록에 "스크립트: 이름"으로 표시되며, 테마 색상 페이지의 "스크립트 변경 실행 취소"로 이전 선택 (활성 인텔리전트 색상 라이브러리 포함) 을 복원 가능 (예제 코드 > 图像与颜色 참조)
 * `추가` Ace 편집기 단축 패널에서 TAB 키를 길게 누르면 스마트 힌트를 호출하여 커서 컨텍스트에 따라 코드 완성, 매개 변수 힌트 또는 심볼 문서를 표시하고, 매개 변수 힌트가 표시 중일 때는 오버로드를 전환; 하드웨어 키보드 Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q 는 각각 스마트 힌트 / 매개 변수 힌트 / 심볼 문서에 대응
 * `추가` 코드 편집기 설정에 "스마트 힌트" 그룹 추가 (Ace 엔진 전용): 자동 완성 트리거 (식별자 입력 중 / "." 입력 후에만 / 끄기), 완성 최소 문자 수, 완성 지연, 매개 변수 힌트 트리거 (커서가 호출 안에 들어갈 때 / "(" 또는 "," 입력 후에만 / 끄기), 방향키로 오버로드 전환; 변경 사항은 즉시 적용되며 동작 즐겨찾기에 기록 가능 (Ace Editor 플러그인 1.26.0 필요)

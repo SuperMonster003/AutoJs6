@@ -374,7 +374,6 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 外掛程式中心讀取官方索引與已安裝 manifest 的原生頁面對齊資訊, 在 16 KB 裝置安裝或啟用不相容版本前提示
 * `新增` MCP 螢幕擷取備援: image.captureScreen(options) 接受無障礙螢幕擷取的裁切, 縮放, 格式和品質參數, 傳回經檔案描述元傳輸的編碼圖片一次性負載; captureScreen() 保留圖片控制代碼傳回方式, MediaProjection 授權缺失或撤銷時傳回權限錯誤.
 * `新增` `images.countPointsByColor(image, color, options?)` 透過 OpenCV 遮罩統計與指定顏色相符的像素數量, `images.getMeanColor(image, region?)` 傳回圖片或區域的平均顏色
-* `新增` `colors.distance(colorA, colorB, algorithm?)` 依各顏色偵測演算法的閾值尺度傳回顏色距離, `colors.invert(color)` 反轉 RGB 並保留 alpha, `colors.blend(colorA, colorB, ratio?)` 依權重混合兩個顏色, `colors.contrast(foreground, background)` 計算 WCAG 對比度; 以上四個方法同樣可用於 Color 實例
 * `新增` `images.readPixels` 除檔案路徑外也接受 ImageWrapper 參數, 且傳入的圖片保持可用
 * `新增` `images.matchTemplate` 與 `images.findPointByImage` 支援 `scales` 選項 (單一比例或比例陣列), 用於比對在其他解析度下擷取的範本; 每個比對項新增 `width`, `height`, `scale`, `center` 與 `rect` 屬性, `MatchingResult` 新增 `size`, `isEmpty()`, `isNotEmpty()` 與 `filter()`
 * `新增` 檔案管理器指令碼選單 "懸浮執行" 項, 以半透明懸浮工具列進行指令碼啟停 / 編輯 / 檢視日誌, 跟隨夜間模式與主題色
@@ -439,7 +438,8 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` 主題色 "衍生配色" 設定 (預設關閉, 與先前版本完全一致): 自動時由主色推導用於懸浮按鈕的強調色與用於狀態列的深色, 外掛程式同樣取得三種顏色; 智慧顏色庫各組的每個狀態可單獨指定強調色與深色, 在兩種設定下皆優先
 * `新增` 顏色收藏: 在顏色詳情中勾選 "收藏" / "置頂", 或長按顏色庫中的顏色及配色工具中的色塊; 虛擬庫 "收藏" 可按手動 (拖曳排序) / 收藏時間 / 色相 / 亮度排序, 置頂項目一律在前, 可從調色盤收藏, 並可從收藏建立智慧顏色庫 (每色一組); 收藏也可作為 "從種子色產生" 的種子
 * `新增` 虛擬庫 "常用與推薦": 依序為置頂收藏, 其餘收藏, 以及按使用次數與近因 (半衰期 14 天) 評分的歷史顏色, 相似顏色合併, 至多 30 項, 無資料時隱藏; 項目按原本的選擇方式套用, 並可建立智慧顏色庫; 顏色歷史記錄使用次數, 歷史清單可 "合併相似顏色"
-* `新增` colors 模組新增感知色彩函式: toOklab / oklab 與 toOklch / oklch, ensureContrast (WCAG 對比度, 預設 4.5), harmony, tones, derive (主色, 強調色與深色), nightVariant, simulate (紅色盲, 綠色盲, 藍色盲) 及 extract (影像主要顏色, 支援 count, region 與 step 選項); colors.distance, colors.isSimilar 與 images.detectColor 支援 oklab 演算法 (參閱 範例程式碼 > 图像与颜色)
+* `新增` `colors.distance(colorA, colorB, algorithm?)` 依各顏色偵測演算法的閾值尺度傳回顏色距離, `colors.invert(color)` 反轉 RGB 並保留 alpha, `colors.blend(colorA, colorB, ratio?)` 依權重混合兩個顏色, `colors.contrast(foreground, background)` 計算 WCAG 對比度; 以上四個方法同樣可用於 Color 實例
+* `新增` colors 模組的感知色彩函式: toOklab / oklab 與 toOklch / oklch, ensureContrast (WCAG 對比度, 預設 4.5), harmony, tones, derive (主色, 強調色與深色), nightVariant, simulate (紅色盲, 綠色盲, 藍色盲) 及 extract (影像主要顏色, 支援 count, region 與 step 選項); colors.distance, colors.isSimilar 與 images.detectColor 支援 oklab 演算法 (參閱 範例程式碼 > 图像与颜色)
 * `新增` colors.theme 由指令碼控制主題色: get, set (可指定 accent 與 dark), reset, libraries, activate 與 deactivate (智慧顏色庫), next (立即換組), state (切換 "指令碼狀態" 狀態源) 及 current; 500 ms 內的指令碼修改合併為一次, 歷史記錄標註 "指令碼: 名稱", 主題色頁面提供 "復原指令碼修改" 以還原先前的選擇 (含啟用中的智慧顏色庫) (參閱 範例程式碼 > 图像与颜色)
 * `新增` Ace 編輯器快捷面板 TAB 鍵長按用於喚出智慧提示, 依游標上下文顯示程式碼補全, 參數提示或符號文件, 參數提示已顯示時切換重載方法; 硬體鍵盤 Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q 分別對應智慧提示 / 參數提示 / 符號文件
 * `新增` 程式碼編輯器設定增加 "智慧提示" 分組 (僅 Ace 引擎): 自動補全觸發方式 (輸入識別字時 / 僅輸入 "." 後 / 關閉), 補全最少觸發字元數, 補全觸發延遲, 參數提示觸發方式 (游標進入呼叫時 / 僅輸入 "(" 或 "," 時 / 關閉), 方向鍵切換重載; 修改後即時生效並可記錄到動作收藏 (需要 Ace 編輯器插件 1.26.0)
