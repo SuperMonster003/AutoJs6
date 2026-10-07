@@ -143,6 +143,15 @@ class ModelStore(
         true
     }
 
+    /** Update completion must not overwrite a choice made while the package was downloading. */
+    fun selectIfCurrent(expectedCurrentKey: String, newKey: String): Boolean = withStoreLock {
+        val registry = loadAndReconcileLocked()
+        if (selection.currentKey != expectedCurrentKey || registry.models.none { it.key == expectedCurrentKey } ||
+            registry.models.none { it.key == newKey }) return@withStoreLock false
+        applySelectionChange(Registry(registry.models, SelectionChange(expectedCurrentKey, newKey)).also(::writeRegistryLocked))
+        true
+    }
+
     /** Resolves a registry key, never an arbitrary path, and verifies the bytes on every access. */
     fun installedFile(key: String): File? = withStoreLock {
         val record = loadAndReconcileLocked().models.firstOrNull { it.key == key } ?: return@withStoreLock null

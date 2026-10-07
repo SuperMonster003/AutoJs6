@@ -1175,6 +1175,10 @@
     <string name="text_codegen_matches_single">Éléments correspondants: %1$d</string>
     <string name="text_codegen_model_compatible">Disponible</string>
     <string name="text_codegen_model_current">En cours d\'utilisation</string>
+    <string name="text_codegen_model_delete_old">Supprimer l\'ancienne version</string>
+    <string name="text_codegen_model_download_progress">%1$s / %2$s</string>
+    <string name="text_codegen_model_downloaded">Version v%1$s installée</string>
+    <string name="text_codegen_model_downloading">Téléchargement du modèle</string>
     <string name="text_codegen_model_got_it">Compris</string>
     <string name="text_codegen_model_identical">Le même modèle est déjà installé</string>
     <string name="text_codegen_model_incompatible">Incompatible</string>
@@ -1186,6 +1190,9 @@
     <string name="text_codegen_model_same_name">Un modèle du même nom existe déjà</string>
     <string name="text_codegen_model_source_custom">Personnalisé</string>
     <string name="text_codegen_model_source_official">Officiel</string>
+    <string name="text_codegen_model_transfer_failed">Échec du téléchargement du modèle</string>
+    <string name="text_codegen_model_updated">Mise à jour vers v%1$s effectuée</string>
+    <string name="text_codegen_model_updating">Mise à jour du modèle</string>
     <string name="text_codegen_preferred">Solution recommandée</string>
     <string name="text_codegen_query">Mode de recherche</string>
     <string name="text_codegen_query_check">Vérifier immédiatement</string>

@@ -1175,6 +1175,10 @@
     <string name="text_codegen_matches_single">Найдено элементов: %1$d</string>
     <string name="text_codegen_model_compatible">Доступно</string>
     <string name="text_codegen_model_current">Используется</string>
+    <string name="text_codegen_model_delete_old">Удалить старую версию</string>
+    <string name="text_codegen_model_download_progress">%1$s / %2$s</string>
+    <string name="text_codegen_model_downloaded">Установлена версия v%1$s</string>
+    <string name="text_codegen_model_downloading">Загрузка модели</string>
     <string name="text_codegen_model_got_it">Понятно</string>
     <string name="text_codegen_model_identical">Такая модель уже установлена</string>
     <string name="text_codegen_model_incompatible">Несовместимо</string>
@@ -1186,6 +1190,9 @@
     <string name="text_codegen_model_same_name">Модель с таким именем уже существует</string>
     <string name="text_codegen_model_source_custom">Пользовательский</string>
     <string name="text_codegen_model_source_official">Официальный</string>
+    <string name="text_codegen_model_transfer_failed">Не удалось загрузить модель</string>
+    <string name="text_codegen_model_updated">Обновлено до v%1$s</string>
+    <string name="text_codegen_model_updating">Обновление модели</string>
     <string name="text_codegen_preferred">Рекомендуемый план</string>
     <string name="text_codegen_query">Режим поиска</string>
     <string name="text_codegen_query_check">Проверить сразу</string>

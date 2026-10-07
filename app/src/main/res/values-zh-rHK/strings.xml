@@ -1172,6 +1172,10 @@
     <string name="text_codegen_matches_single">符合 %1$d 個控件</string>
     <string name="text_codegen_model_compatible">可用</string>
     <string name="text_codegen_model_current">目前使用</string>
+    <string name="text_codegen_model_delete_old">刪除舊版本</string>
+    <string name="text_codegen_model_download_progress">%1$s / %2$s</string>
+    <string name="text_codegen_model_downloaded">已安裝 v%1$s</string>
+    <string name="text_codegen_model_downloading">正在下載模型</string>
     <string name="text_codegen_model_got_it">知道了</string>
     <string name="text_codegen_model_identical">已存在相同模型</string>
     <string name="text_codegen_model_incompatible">不兼容</string>
@@ -1183,6 +1187,9 @@
     <string name="text_codegen_model_same_name">已存在同名模型</string>
     <string name="text_codegen_model_source_custom">自訂</string>
     <string name="text_codegen_model_source_official">官方</string>
+    <string name="text_codegen_model_transfer_failed">模型下載失敗</string>
+    <string name="text_codegen_model_updated">已更新至 v%1$s</string>
+    <string name="text_codegen_model_updating">正在更新模型</string>
     <string name="text_codegen_preferred">首選方案</string>
     <string name="text_codegen_query">查詢方式</string>
     <string name="text_codegen_query_check">立即判斷</string>

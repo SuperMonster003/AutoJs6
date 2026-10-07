@@ -1176,6 +1176,10 @@
     <string name="text_codegen_matches_single">一致したウィジェット: %1$d</string>
     <string name="text_codegen_model_compatible">利用可能</string>
     <string name="text_codegen_model_current">現在使用中</string>
+    <string name="text_codegen_model_delete_old">旧バージョンを削除</string>
+    <string name="text_codegen_model_download_progress">%1$s / %2$s</string>
+    <string name="text_codegen_model_downloaded">v%1$s をインストールしました</string>
+    <string name="text_codegen_model_downloading">モデルをダウンロード中</string>
     <string name="text_codegen_model_got_it">了解</string>
     <string name="text_codegen_model_identical">同じモデルがインストール済みです</string>
     <string name="text_codegen_model_incompatible">互換性なし</string>
@@ -1187,6 +1191,9 @@
     <string name="text_codegen_model_same_name">同じ名前のモデルが存在します</string>
     <string name="text_codegen_model_source_custom">カスタム</string>
     <string name="text_codegen_model_source_official">公式</string>
+    <string name="text_codegen_model_transfer_failed">モデルのダウンロードに失敗しました</string>
+    <string name="text_codegen_model_updated">v%1$s に更新しました</string>
+    <string name="text_codegen_model_updating">モデルを更新中</string>
     <string name="text_codegen_preferred">推奨案</string>
     <string name="text_codegen_query">検索方法</string>
     <string name="text_codegen_query_check">すぐに確認</string>

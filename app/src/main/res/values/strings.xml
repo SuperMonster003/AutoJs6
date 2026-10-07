@@ -1171,6 +1171,10 @@
     <string name="text_codegen_matches_single">Matched widgets: %1$d</string>
     <string name="text_codegen_model_compatible">Available</string>
     <string name="text_codegen_model_current">Currently used</string>
+    <string name="text_codegen_model_delete_old">Delete old version</string>
+    <string name="text_codegen_model_download_progress">%1$s / %2$s</string>
+    <string name="text_codegen_model_downloaded">Installed v%1$s</string>
+    <string name="text_codegen_model_downloading">Downloading model</string>
     <string name="text_codegen_model_got_it">Got it</string>
     <string name="text_codegen_model_identical">The same model is already installed</string>
     <string name="text_codegen_model_incompatible">Incompatible</string>
@@ -1182,6 +1186,9 @@
     <string name="text_codegen_model_same_name">Model with the same name already exists</string>
     <string name="text_codegen_model_source_custom">Custom</string>
     <string name="text_codegen_model_source_official">Official</string>
+    <string name="text_codegen_model_transfer_failed">Model download failed</string>
+    <string name="text_codegen_model_updated">Updated to v%1$s</string>
+    <string name="text_codegen_model_updating">Updating model</string>
     <string name="text_codegen_preferred">Preferred plan</string>
     <string name="text_codegen_query">Query</string>
     <string name="text_codegen_query_check">Check immediately</string>

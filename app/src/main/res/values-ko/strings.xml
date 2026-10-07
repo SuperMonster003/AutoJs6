@@ -1177,6 +1177,10 @@
     <string name="text_codegen_matches_single">일치하는 위젯: %1$d</string>
     <string name="text_codegen_model_compatible">사용 가능</string>
     <string name="text_codegen_model_current">현재 사용 중</string>
+    <string name="text_codegen_model_delete_old">이전 버전 삭제</string>
+    <string name="text_codegen_model_download_progress">%1$s / %2$s</string>
+    <string name="text_codegen_model_downloaded">v%1$s 설치 완료</string>
+    <string name="text_codegen_model_downloading">모델 다운로드 중</string>
     <string name="text_codegen_model_got_it">확인</string>
     <string name="text_codegen_model_identical">동일한 모델이 이미 설치되어 있습니다</string>
     <string name="text_codegen_model_incompatible">호환되지 않음</string>
@@ -1188,6 +1192,9 @@
     <string name="text_codegen_model_same_name">같은 이름의 모델이 이미 있습니다</string>
     <string name="text_codegen_model_source_custom">사용자 지정</string>
     <string name="text_codegen_model_source_official">공식</string>
+    <string name="text_codegen_model_transfer_failed">모델 다운로드 실패</string>
+    <string name="text_codegen_model_updated">v%1$s 업데이트 완료</string>
+    <string name="text_codegen_model_updating">모델 업데이트 중</string>
     <string name="text_codegen_preferred">추천 계획</string>
     <string name="text_codegen_query">조회 방식</string>
     <string name="text_codegen_query_check">즉시 확인</string>
