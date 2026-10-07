@@ -2391,6 +2391,7 @@
     <string name="text_season_spring">春</string>
     <string name="text_season_summer">夏</string>
     <string name="text_season_winter">冬</string>
+    <string name="text_seed_color">种子色</string>
     <string name="text_seed_current_theme_color">当前主题色 %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">从调色盘选择...</string>
     <string name="text_seed_state_night_mode">夜间模式 (自动填充夜间颜色)</string>
@@ -2581,6 +2582,7 @@
     <string name="text_title_bar_opacity">标题栏不透明度</string>
     <string name="text_to_be_chosen">待选择</string>
     <string name="text_toggle_all">全选切换</string>
+    <string name="text_tone_n">色阶 %1$d</string>
     <string name="text_tones">色阶</string>
     <string name="text_tones_light_to_dark">由浅到深</string>
     <string name="text_tools">工具</string>

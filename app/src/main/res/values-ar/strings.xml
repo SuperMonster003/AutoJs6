@@ -2396,6 +2396,7 @@
     <string name="text_season_spring">الربيع</string>
     <string name="text_season_summer">الصيف</string>
     <string name="text_season_winter">الشتاء</string>
+    <string name="text_seed_color">الأساسي</string>
     <string name="text_seed_current_theme_color">لون الموضوع الحالي %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">من لوحة الألوان...</string>
     <string name="text_seed_state_night_mode">وضع الليل (تعبئة ألوان الليل)</string>
@@ -2586,6 +2587,7 @@
     <string name="text_title_bar_opacity">عتامة شريط العنوان</string>
     <string name="text_to_be_chosen">قيد الاختيار</string>
     <string name="text_toggle_all">تبديل الكل</string>
+    <string name="text_tone_n">الدرجة %1$d</string>
     <string name="text_tones">الدرجات</string>
     <string name="text_tones_light_to_dark">من الفاتح إلى الداكن</string>
     <string name="text_tools">أدوات</string>

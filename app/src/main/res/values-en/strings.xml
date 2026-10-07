@@ -2391,6 +2391,7 @@
     <string name="text_season_spring">Spring</string>
     <string name="text_season_summer">Summer</string>
     <string name="text_season_winter">Winter</string>
+    <string name="text_seed_color">Seed</string>
     <string name="text_seed_current_theme_color">Current theme color %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">From the color palette...</string>
     <string name="text_seed_state_night_mode">Night mode (night colors filled in)</string>
@@ -2581,6 +2582,7 @@
     <string name="text_title_bar_opacity">Title bar opacity</string>
     <string name="text_to_be_chosen">To be chosen</string>
     <string name="text_toggle_all">Toggle all</string>
+    <string name="text_tone_n">Tone %1$d</string>
     <string name="text_tones">Tones</string>
     <string name="text_tones_light_to_dark">Light to dark</string>
     <string name="text_tools">Tools</string>

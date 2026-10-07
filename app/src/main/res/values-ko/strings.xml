@@ -2396,6 +2396,7 @@
     <string name="text_season_spring">봄</string>
     <string name="text_season_summer">여름</string>
     <string name="text_season_winter">겨울</string>
+    <string name="text_seed_color">시드</string>
     <string name="text_seed_current_theme_color">현재 테마 색상 %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">색상 팔레트에서 선택...</string>
     <string name="text_seed_state_night_mode">야간 모드 (야간 색상 자동 채우기)</string>
@@ -2586,6 +2587,7 @@
     <string name="text_title_bar_opacity">제목 표시줄 불투명도</string>
     <string name="text_to_be_chosen">선택 대기</string>
     <string name="text_toggle_all">전체 전환</string>
+    <string name="text_tone_n">톤 %1$d</string>
     <string name="text_tones">색조 단계</string>
     <string name="text_tones_light_to_dark">밝은 색에서 어두운 색으로</string>
     <string name="text_tools">도구</string>

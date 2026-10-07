@@ -38,7 +38,8 @@ class IntelligentAutoFillTest {
 
     @Test
     fun seedsGenerateLibraries() {
-        val harmony = IntelligentSeedGenerator.generate(teal, IntelligentSeedGenerator.Scheme.Harmony(org.autojs.autojs.theme.color.ColorHarmony.Type.TRIADIC), nightMode = true, now = 1L)
+        val harmony = IntelligentSeedGenerator.generate(teal, IntelligentSeedGenerator.Scheme.Harmony(org.autojs.autojs.theme.color.ColorHarmony.Type.TRIADIC), nightMode = true, now = 1L) { index, hueOffset -> "$index:$hueOffset" }
+        assertEquals(listOf("0:0", "1:120", "2:240"), harmony.groups.map { it.name })
         assertEquals(StateSource.NightMode, harmony.config.stateSource)
         assertEquals(listOf(RotationTrigger.StateChange), harmony.config.rotation)
         assertEquals(listOf(-1L, -2L, -3L), harmony.groups.map { it.id })
@@ -50,7 +51,7 @@ class IntelligentAutoFillTest {
         assertEquals(StateSource.None, tones.config.stateSource)
         assertTrue(tones.config.rotation.isEmpty())
         assertEquals(5, tones.groups.size)
-        assertTrue(tones.groups.all { it.states.keys == setOf(StateKeys.DEFAULT) })
+        assertTrue(tones.groups.all { it.states.keys == setOf(StateKeys.DEFAULT) && it.name == null })
     }
 
     @Test

@@ -2395,6 +2395,7 @@
     <string name="text_season_spring">春</string>
     <string name="text_season_summer">夏</string>
     <string name="text_season_winter">冬</string>
+    <string name="text_seed_color">シード</string>
     <string name="text_seed_current_theme_color">現在のテーマカラー %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">カラーパレットから選択...</string>
     <string name="text_seed_state_night_mode">夜間モード (夜の色を自動入力)</string>
@@ -2585,6 +2586,7 @@
     <string name="text_title_bar_opacity">タイトルバーの不透明度</string>
     <string name="text_to_be_chosen">未選択</string>
     <string name="text_toggle_all">全て切替</string>
+    <string name="text_tone_n">トーン %1$d</string>
     <string name="text_tones">トーン</string>
     <string name="text_tones_light_to_dark">明るい順</string>
     <string name="text_tools">ツール</string>

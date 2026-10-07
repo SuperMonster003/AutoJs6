@@ -2394,6 +2394,7 @@
     <string name="text_season_spring">Весна</string>
     <string name="text_season_summer">Лето</string>
     <string name="text_season_winter">Зима</string>
+    <string name="text_seed_color">Исходный</string>
     <string name="text_seed_current_theme_color">Текущий цвет темы %1$s</string>
     <string name="text_seed_from_color_palette" tools:ignore="TypographyEllipsis">Из цветовой палитры...</string>
     <string name="text_seed_state_night_mode">Ночной режим (ночные цвета заполнены)</string>
@@ -2584,6 +2585,7 @@
     <string name="text_title_bar_opacity">Непрозрачность заголовка</string>
     <string name="text_to_be_chosen">Выбрать</string>
     <string name="text_toggle_all">Переключить все</string>
+    <string name="text_tone_n">Тон %1$d</string>
     <string name="text_tones">Тона</string>
     <string name="text_tones_light_to_dark">От светлого к тёмному</string>
     <string name="text_tools">Инструменты</string>

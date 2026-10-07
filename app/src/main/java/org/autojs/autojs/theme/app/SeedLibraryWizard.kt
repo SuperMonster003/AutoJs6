@@ -21,6 +21,7 @@ import org.autojs.autojs.theme.intelligent.WallpaperColorSource
 import org.autojs.autojs.theme.library.ColorLibraryRepository
 import org.autojs.autojs.theme.library.LibraryNaming
 import org.autojs.autojs6.R
+import java.util.Locale
 
 /**
  * "Generate from a seed color" (roadmap P4.5): seed, scheme, state source, preview with a name, then the library is
@@ -65,7 +66,13 @@ class SeedLibraryWizard(
     }
 
     private fun preview(seed: Int, scheme: Scheme, schemeLabel: String, nightMode: Boolean) {
-        val result = IntelligentSeedGenerator.generate(seed, scheme, nightMode)
+        val result = IntelligentSeedGenerator.generate(seed, scheme, nightMode) { index, hueOffset ->
+            when (hueOffset) {
+                null -> activity.getString(R.string.text_tone_n, index + 1)
+                0 -> activity.getString(R.string.text_seed_color)
+                else -> String.format(Locale.ROOT, "%+d°", hueOffset)
+            }
+        }
         val padding = dp(20)
         val content = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
