@@ -123,7 +123,7 @@ class ComposeInteropTest {
         eval("var original=compose.mount(compose.Text({text:'keep'}));")
         platform.dispatcher.drain()
         assertEquals(ComposeUiErrorCodes.RENDER_FAILED, code("compose.AndroidView({view:function(){throw Error('failed native factory');}})"))
-        for (mount in listOf("compose.mount(compose.Text({text:'bad'}))", "compose.attach('a',compose.Text({text:'bad'}))", "compose.floaty(compose.Text({text:'bad'}))")) {
+        for (mount in listOf("compose.mount(compose.Text({text:'bad'}))", "compose.attach('a',compose.Text({text:'bad'}))", "compose.floaty(compose.Text({text:'bad'}))", "compose.dialog(compose.Text({text:'bad'}))")) {
             assertEquals(ComposeUiErrorCodes.INVALID_ARGUMENT, code("compose.AndroidView({view:function(){ $mount; return viewA;}})"))
         }
         assertTrue(bool("!original.isClosed() && original.root.text==='keep' && compose.sessions.length===1"))

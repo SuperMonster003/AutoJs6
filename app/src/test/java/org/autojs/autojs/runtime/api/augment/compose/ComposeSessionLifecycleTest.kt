@@ -43,6 +43,54 @@ class ComposeSessionLifecycleTest {
         try { if (::compose.isInitialized) compose.close() } finally { Context.exit() }
     }
 
+    @Test fun dialogsAreIndependentOfUiAndFloatiesAndShareTheEightSessionBudget() {
+        evaluate("var page=compose.mount(compose.Text({text:'page'})); var floating=compose.floaty(compose.Text({text:'floaty'})); var dialogs=[];for(var i=0;i<6;i++)dialogs.push(compose.dialog(compose.Text({text:'dialog'}),{type:i%2?'bottomSheet':'alert'}));")
+        platform.dispatcher.drain()
+        assertEquals(8, number("compose.sessions.length"))
+        assertEquals(Codes.LIMIT_EXCEEDED, failureCode("compose.dialog(compose.Text({text:'ninth'}))"))
+        evaluate("var replacement=compose.mount(compose.Text({text:'replacement'}));")
+        platform.dispatcher.drain()
+        assertTrue(boolean("page.isClosed() && !floating.isClosed() && dialogs.every(function(d){return !d.isClosed();})"))
+        compose.beforeSetContentView(Any())
+        assertTrue(boolean("replacement.isClosed() && dialogs.every(function(d){return !d.isClosed();})"))
+        assertEquals(7, platform.leases)
+        assertEquals(6, platform.dialogOptions.size)
+    }
+
+    @Test fun dialogImmediateCloseAndOuterTransactionRollbackNeverAttachOrRetainTheirLease() {
+        evaluate("var closes=0;var immediate=compose.dialog(compose.Text({text:'immediate'}));immediate.on('close',function(){closes++;});immediate.close();var orphan;try{compose.batch(function(){orphan=compose.dialog(compose.Text({text:'orphan'}));throw Error('rollback');});}catch(error){}")
+        platform.dispatcher.drain()
+        assertTrue(boolean("immediate.isClosed() && orphan.isClosed() && closes===1 && compose.sessions.length===0"))
+        assertTrue(platform.entries.all { it.attaches==0 && it.disposals==1 && it.lifetimeCloses==1 })
+        assertEquals(0,platform.leases)
+    }
+
+    @Test fun unsupportedDialogProviderAndNestedDialogRenderingPreserveExistingUi() {
+        evaluate("var page=compose.mount(compose.Text({text:'keep'}));")
+        platform.dispatcher.drain()
+        platform.openFailure=ComposeUiError(Codes.PLUGIN_INCOMPATIBLE)
+        assertEquals(Codes.PLUGIN_INCOMPATIBLE,failureCode("compose.dialog(compose.Text({text:'unsupported'}))"))
+        platform.openFailure=null
+        assertEquals(Codes.INVALID_ARGUMENT,failureCode("compose.dialog(function(){return compose.dialog(compose.Text({text:'nested'}));})"))
+        assertTrue(boolean("!page.isClosed() && page.root.text==='keep' && compose.sessions.length===1"))
+        assertEquals(0,platform.leases)
+    }
+
+    @Test fun dialogUsesTheCommonThemeAndNativeFailureClosesOnlyOnce() {
+        evaluate("compose.theme({dark:true});var closes=0;var dialog=compose.dialog(compose.Text({text:'themed'}));dialog.on('close',function(){closes++;});")
+        platform.dispatcher.drain()
+        val entry=platform.entries.single()
+        assertEquals(true,entry.themes.single().dark)
+        evaluate("compose.theme({dark:false});")
+        assertEquals(false,entry.themes.last().dark)
+        val failure=ComposeUiError(Codes.PERMISSION_REQUIRED)
+        entry.onFailure!!(failure);entry.onFailure!!(failure)
+        platform.dispatcher.drain()
+        assertTrue(boolean("dialog.isClosed() && closes===1"))
+        assertEquals(listOf(failure),platform.errors)
+        assertEquals(1,entry.disposals);assertEquals(1,entry.lifetimeCloses);assertEquals(0,platform.leases)
+    }
+
     @Test fun concurrentFloatingSessionsAreBoundedAndAClosedSlotCanBeReused() {
         evaluate("var windows=[]; for(var i=0;i<8;i++) windows.push(compose.floaty(compose.Text({text:String(i)}),{raw:true}));")
         platform.dispatcher.drain()
@@ -441,12 +489,18 @@ class ComposeSessionLifecycleTest {
         var openFailure: Throwable? = null
         var rendererOpenFailure: Throwable? = null
         var postFailure: Throwable? = null
+        val dialogOptions = ArrayList<ComposeDialogOptions>()
         override fun version() = mapOf<String, Any>("plugin" to "1.0.0", "contract" to 1, "compose" to "1.12.1")
         override fun createRenderer(sessionId: Int, beforeMount: (Any) -> Unit, onDestroyed: () -> Unit): ComposeScriptPlatform.Opened =
             opened(beforeMount, onDestroyed, floating = false)
         override fun createFloatyRenderer(sessionId: Int, options: ComposeFloatyOptions, beforeMount: (Any) -> Unit,
             onDestroyed: () -> Unit, onFailure: (Throwable) -> Unit): ComposeScriptPlatform.Opened =
             opened(beforeMount, onDestroyed, floating = true, onFailure = onFailure)
+        override fun createDialogRenderer(sessionId: Int, options: ComposeDialogOptions, beforeMount: (Any) -> Unit,
+            onDestroyed: () -> Unit, onFailure: (Throwable) -> Unit): ComposeScriptPlatform.Opened {
+            dialogOptions += options
+            return opened(beforeMount,onDestroyed,floating=true,onFailure=onFailure)
+        }
         private fun opened(beforeMount: (Any) -> Unit, onDestroyed: () -> Unit, floating: Boolean,
             onFailure: ((Throwable) -> Unit)? = null): ComposeScriptPlatform.Opened {
             openFailure?.let { throw it }
@@ -467,6 +521,7 @@ class ComposeSessionLifecycleTest {
         private val openFailure: Throwable?) : ComposeSessionRenderer {
         val batches = ArrayList<UiPatchBatch>()
         val commands = ArrayList<UiCommand>()
+        val themes = ArrayList<ThemeSpec>()
         var disposals = 0
         var lifetimeCloses = 0
         var attaches = 0
@@ -475,7 +530,7 @@ class ComposeSessionLifecycleTest {
         override fun detach() = Unit
         override fun apply(batch: UiPatchBatch) { batches += batch }
         override fun execute(command: UiCommand) { commands += command }
-        override fun setTheme(theme: ThemeSpec) = Unit
+        override fun setTheme(theme: ThemeSpec) { themes += theme }
         override fun dispose() { disposals++; control?.close() }
     }
 

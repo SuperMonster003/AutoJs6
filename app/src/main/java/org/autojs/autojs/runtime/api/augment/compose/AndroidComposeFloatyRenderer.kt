@@ -39,6 +39,8 @@ internal class AndroidComposeFloatyRenderer(
     beforeMount: (Any) -> Unit,
     onDestroyed: () -> Unit,
     onFailure: (Throwable) -> Unit,
+    private var rendererFactory: ((org.autojs.plugin.compose.api.loading.ComposeUiHostEnvironment) -> org.autojs.plugin.compose.api.loading.ComposeUiRenderer)? = null,
+    private val compositionAnchor: Boolean = false,
 ) : ComposeSessionRenderer {
     private var context: Context? = ContextThemeWrapper(runtime.uiHandler.applicationContext, R.style.ScriptTheme)
     private var mountCallback: ((Any) -> Unit)? = beforeMount
@@ -53,7 +55,7 @@ internal class AndroidComposeFloatyRenderer(
     private var drawReady = false
     private var preDraw: OneShotPreDrawListener? = null
     private val commands = ArrayDeque<UiCommand>()
-    private val control = NativeControl(runtime.floaty, options, ScriptUiDispatcher.mainExecutor(), ::windowClosed, ::fail)
+    private val control = NativeControl(runtime.floaty, options, ScriptUiDispatcher.mainExecutor(), ::windowClosed, ::fail, compositionAnchor)
     val window: ComposeFloatyControl get() = control
 
     init { control.reserveCloseAll() }
@@ -63,11 +65,16 @@ internal class AndroidComposeFloatyRenderer(
         this.sink = sink
         val owners = ComposeFloatyOwners().also { this.owners = it }
         val renderer = ComposeAndroidRenderer(requireNotNull(context), loaded, sessionId, { view ->
+            if (compositionAnchor) {
+                view.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                view.isFocusable = false; view.isClickable = false
+            }
             content = view
             mountCallback?.invoke(view)
             control.attach(view)
             afterFrameChange()
-        }, floatyOwners = owners, onDestroyed = ::windowClosed).also { delegate = it }
+        }, floatyOwners = owners, onDestroyed = ::windowClosed, rendererFactory = rendererFactory,
+            useActivityInsets = !compositionAnchor).also { delegate = it }
         try { renderer.open(sink) } catch (failure: Throwable) { dispose(); throw failure }
     }
 
@@ -103,7 +110,8 @@ internal class AndroidComposeFloatyRenderer(
 
     override fun execute(command: UiCommand) {
         usable()
-        if (command is UiCommand.Edit || command is UiCommand.ShowSnackbar) {
+        // The real dialog content owns readiness; its invisible anchor's pre-draw is irrelevant.
+        if (compositionAnchor || command is UiCommand.Edit || command is UiCommand.ShowSnackbar) {
             requireNotNull(delegate).execute(command)
             return
         }
@@ -176,6 +184,7 @@ internal class AndroidComposeFloatyRenderer(
                 owners?.destroy()
                 delegate = null; owners = null; content = null; context = null; sink = null
                 mountCallback = null; destroyCallback = null; failureCallback = null
+                rendererFactory = null
             }
         }
     }
@@ -189,6 +198,7 @@ internal class AndroidComposeFloatyRenderer(
         private val main: Executor,
         onClosed: () -> Unit,
         onFailure: (Throwable) -> Unit,
+        private val compositionAnchor: Boolean = false,
     ) : ComposeFloatyControl {
         private data class Desired(val x: Int?, val y: Int?, val width: Int?, val height: Int?,
             val touchable: Boolean, val focusable: Boolean, val adjust: Boolean? = null)
@@ -248,7 +258,11 @@ internal class AndroidComposeFloatyRenderer(
                         handler.removeCallbacks(startupTimeout)
                         closedCallback?.invoke()
                     }
-                })
+                }, rawWindowParameters = if (compositionAnchor) { parameters ->
+                    parameters.width = 1; parameters.height = 1; parameters.alpha = 0f
+                    parameters.flags = parameters.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                } else null)
             reservation?.close(); reservation = null
             if (disposed) created.close(true) else if (native == null) native = created
         }

@@ -19,13 +19,14 @@ import java.util.concurrent.atomic.AtomicReference
 /** One script-visible mount, binding stable handles to the core's acknowledged transaction stream. */
 internal class ComposeScriptSession(private val owner: Compose, val id: Int, private val initialTheme: ThemeSpec?,
     private val floatyOptions: ComposeFloatyOptions? = null, private var replacingUi: ComposeNodeBinding? = null,
-    container: Any? = null) : ComposeNodeBinding, Closeable {
+    container: Any? = null, private val dialogOptions: ComposeDialogOptions? = null) : ComposeNodeBinding, Closeable {
     var container: Any? = container
         private set
     private val closed = AtomicBoolean()
     override val isClosed get() = closed.get()
     val isFloaty get() = floatyOptions != null
-    val isUiRoot get() = !isFloaty && container == null
+    val isDialog get() = dialogOptions != null
+    val isUiRoot get() = !isFloaty && !isDialog && container == null
     private var window: ComposeFloatyControl? = null
     private var windowFacade: ComposeFloatyWindow? = null
     private val lifetime = AtomicReference<Closeable?>()
@@ -79,12 +80,14 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
 
     fun open(source: Any?) {
         val targetContainer = container
-        val opened = if (targetContainer != null) owner.platform.createContainerRenderer(id, targetContainer, { mountedView = it }, ::close)
-        else if (floatyOptions == null) owner.platform.createRenderer(id, { mountedView = it }, ::close)
-        else owner.platform.createFloatyRenderer(id, floatyOptions, { mountedView = it }, ::close) { failure ->
+        val failureHandler: (Throwable) -> Unit = { failure ->
             startupFailure.compareAndSet(null, failure)
             if (::core.isInitialized) startupFailure.getAndSet(null)?.let(core::failInitialization)
         }
+        val opened = if (dialogOptions != null) owner.platform.createDialogRenderer(id, dialogOptions, { mountedView = it }, ::close, failureHandler)
+        else if (targetContainer != null) owner.platform.createContainerRenderer(id, targetContainer, { mountedView = it }, ::close)
+        else if (floatyOptions == null) owner.platform.createRenderer(id, { mountedView = it }, ::close)
+        else owner.platform.createFloatyRenderer(id, floatyOptions, { mountedView = it }, ::close, failureHandler)
         window = opened.window
         renderer = opened.renderer
         lifetime.set(opened.lifetime)
@@ -97,7 +100,8 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
         val dispatcher = object : ScriptUiDispatcher by owner.platform.dispatcher { override fun close() = Unit }
         try {
             core = ComposeSession(id, dispatcher, owner.platform.mainExecutor, opened.renderer, opened.components,
-                { failure -> owner.platform.report(failure) }, owner.platform::warn, ::finish)
+                { failure -> owner.platform.report(failure) }, owner.platform::warn, ::finish,
+                closeEventType = if (isDialog) org.autojs.plugin.compose.api.dialog.DialogInteropV1.DISMISS_REQUEST else null)
         } catch (failure: Throwable) {
             // Native ownership is already provisional when control-channel reservation can fail.
             // No core exists to dispose these resources during the outer session.close().

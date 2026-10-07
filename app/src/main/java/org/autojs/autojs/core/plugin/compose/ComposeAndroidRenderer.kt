@@ -23,6 +23,8 @@ class ComposeAndroidRenderer(
     lifecycleOwner: LifecycleOwner? = null,
     private val floatyOwners: ComposeFloatyOwners? = null,
     onDestroyed: () -> Unit,
+    private var rendererFactory: ((ComposeUiHostEnvironment) -> ComposeUiRenderer)? = null,
+    private val useActivityInsets: Boolean = true,
 ) : ComposeSessionRenderer, DefaultLifecycleObserver {
     private var context: Context? = context
     private var mount: ((View) -> Unit)? = mount
@@ -51,7 +53,8 @@ class ComposeAndroidRenderer(
             override val initialTheme = theme.snapshot()
             override val sessionId = this@ComposeAndroidRenderer.sessionId
         }
-        try { renderer = loaded.androidViewFactory?.create(environment) ?: loaded.factory.create(environment) } catch (error: Throwable) { dispose(); throw error }
+        try { renderer = rendererFactory?.invoke(environment) ?: loaded.androidViewFactory?.create(environment) ?: loaded.factory.create(environment) }
+        catch (error: Throwable) { dispose(); throw error }
     }
 
     override fun attach() {
@@ -59,7 +62,7 @@ class ComposeAndroidRenderer(
         if (view.parent != null) return
         var insetContext = context
         val seen = java.util.Collections.newSetFromMap(java.util.IdentityHashMap<Context, Boolean>())
-        while (insetContext != null && seen.add(insetContext)) {
+        while (useActivityInsets && insetContext != null && seen.add(insetContext)) {
             if (insetContext is ComposeInsetsHost) { insetsLease = insetContext.acquireComposeInsets(); break }
             insetContext = (insetContext as? android.content.ContextWrapper)?.baseContext
         }
@@ -117,7 +120,7 @@ class ComposeAndroidRenderer(
         disposed = true
         bridge?.close(); bridge = null
         lifecycleOwner?.lifecycle?.removeObserver(this)
-        lifecycleOwner = null; context = null; mount = null; onDestroyed = null
+        lifecycleOwner = null; context = null; mount = null; onDestroyed = null; rendererFactory = null
         try { detach() } finally {
             try { renderer?.dispose() } finally { renderer = null; floatyOwners?.destroy() }
         }

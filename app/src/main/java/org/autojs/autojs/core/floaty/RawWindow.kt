@@ -19,9 +19,10 @@ import org.autojs.autojs6.R
  * Modified by SuperMonster003 as of Mar 27, 2022.
  * Transformed by SuperMonster003 on Mar 27, 2022.
  */
-class RawWindow(
+class RawWindow @JvmOverloads constructor(
     private val context: Context,
     private val supplier: BaseResizableFloatyWindow.ViewSupplier,
+    private val configureParameters: ((LayoutParams) -> Unit)? = null,
 ) : FloatyWindow() {
 
     private val mInflateException = VolatileDispose<RuntimeException>()
@@ -74,7 +75,7 @@ class RawWindow(
             WindowTypeCompat.getWindowType(),
             flags,
             PixelFormat.TRANSLUCENT
-        ).apply { gravity = Gravity.TOP or Gravity.START }
+        ).apply { gravity = Gravity.TOP or Gravity.START; configureParameters?.invoke(this) }
     }
 
     fun waitForCreation(): RuntimeException? = mInflateException.blockedGetOrThrow(ScriptInterruptedException::class.java)

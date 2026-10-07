@@ -17,6 +17,7 @@
 * `提示` contains 系列选择器的字符串参数恢复为字面子串匹配, 正则匹配需传入正则表达式参数
 * `提示` 文件日志改用内置实现, 保留已文档化的配置选项及部分 PatternLayout 格式, 其他 Log4j API 不再提供
 * `提示` 屏幕取色插件更名为 3-Color Picker 2.0, 使用新包名并需重新安装和启用, 旧版可保留并存但设置不自动迁移; 主页抽屉的 "屏幕取色" 文案保持不变
+* `提示` 独立弹窗需要配套 AutoJs6 6.8.0 / 5321 与支持 dialog-v1 的 Compose UI; TSX 还需要 TypeScript Engine 0.6.6. 非 UI 脚本需要宿主悬浮窗权限
 * `新增` 界面动作将确认绑定到宿主检查的节点, 支持文字追加与有界滚动, 并报告执行结果和窗口变化
 * `新增` 宿主报告已授权 OCR 插件可用时提供屏幕 OCR, 识别结果合并为带坐标的有界文本行
 * `新增` ai.agent 脚本 API, 支持任务启动, 查询, 事件, 询问回应, 确认, 取消与 detached 后台任务; result/context 提供 @agent 登记脚本结果和上下文, 附三个任务示例
@@ -159,6 +160,7 @@
 * `新增` TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点
 * `新增` XML `<compose>` 容器与 compose.attach 可在 UI 页面或旧悬浮窗内嵌入独立 Compose 会话; compose.AndroidView 可承载现有 Android View 或同步工厂返回的 View
 * `新增` ui.inflate 支持编译后的 XML TSX 布局及其 onClick 回调绑定
+* `新增` compose.dialog 返回可更新和关闭的会话, 支持普通对话框与模态底部弹层, 可在 UI 或普通脚本中使用
 * `修复` 启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题
 * `修复` Three Stove Agent 调用在线模型失败时丢失网络, 鉴权及响应错误类别的问题 (需要 Provider 插件支持)
 * `修复` assistant 合并工具选项时, 空 tools 对象导致默认关闭的工具组被启用的问题
@@ -445,6 +447,7 @@
 * `优化` Ace 编辑器悬停文档框支持触屏滚动与选择文本, 智能提示在 Python / Lua 文件中等待异步参数提示而不再误弹补全
 * `优化` Compose UI 原生文本编辑保留选区与输入法组合状态并支持软键盘避让, Snackbar 操作或关闭结果仅回调一次
 * `优化` ComposeError 提供本地化提示和稳定错误码, 保留节点/属性/原因及脚本堆栈; 单引擎最多 8 个活动会话, 关闭后拒绝句柄操作并清理回调, 引用和待执行工作; 插件更新, 卸载或停用时关闭其活动会话并报告对应错误
+* `优化` cancelable=false 同时禁止返回键, 点击外部和下滑关闭; 主动关闭与脚本退出仍会清理弹窗, 保留已有页面和其他会话
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

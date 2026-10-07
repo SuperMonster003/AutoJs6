@@ -10,6 +10,7 @@
 
 * `提示` 螢幕取色外掛更名為 3-Color Picker 2.0, 使用新套件名稱並需重新安裝和啟用, 舊版可保留並存但設定不自動遷移; 首頁抽屜的螢幕取色文案保持不變
 * `提示` Compose UI 及配套 API 文件, Ace Editor 型別補全和 Offline Docs 內容為本機整合交付, 需要相符的本機宿主建置; 外掛尚未登錄官方索引或正式發行
+* `提示` 獨立彈窗需要配套 AutoJs6 6.8.0 / 5321 與支援 dialog-v1 的 Compose UI; TSX 另需 TypeScript Engine 0.6.6. 非 UI 指令碼需要宿主懸浮視窗權限
 * `新增` 介面動作將確認綁定至宿主檢查的節點, 支援文字追加與有界捲動, 並回報執行結果和視窗變化
 * `新增` 宿主回報已授權 OCR 插件可用時提供螢幕 OCR, 辨識結果合併為帶座標的有界文字行
 * `新增` ai.agent 腳本 API, 支援任務啟動, 查詢, 事件, 詢問回應, 確認, 取消與 detached 背景任務; result/context 提供 @agent 登記腳本結果和上下文, 附三個任務範例
@@ -290,6 +291,7 @@
 * `新增` TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點
 * `新增` XML `<compose>` 容器與 compose.attach 可在 UI 頁面或舊浮動視窗內嵌入獨立 Compose 工作階段; compose.AndroidView 可承載現有 Android View 或同步工廠傳回的 View
 * `新增` ui.inflate 支援編譯後的 XML TSX 配置及其 onClick 回呼繫結
+* `新增` compose.dialog 傳回可更新和關閉的工作階段, 支援一般對話框與模態底部面板, 可在 UI 或一般指令碼中使用
 * `修復` 啟用 APK Inspector 後, 檔案管理器的安裝套件資訊入口被隱藏且無法從更多選單存取的問題
 * `修復` Three Stove Agent 呼叫線上模型失敗時遺失網路, 身分驗證及回應錯誤類別的問題 (需要 Provider 外掛支援)
 * `修復` assistant 合併工具選項時, 空 tools 物件導致預設關閉的工具組被啟用的問題
@@ -732,6 +734,7 @@
 * `最佳化` Ace 編輯器懸停文件框支援觸控捲動與選取文字, 智慧提示在 Python / Lua 檔案中等待非同步參數提示而不再誤彈補全
 * `最佳化` Compose UI 原生文字編輯保留選取範圍與輸入法組合狀態並支援螢幕鍵盤避讓, Snackbar 操作或關閉結果僅回呼一次
 * `最佳化` ComposeError 提供本地化提示和穩定錯誤碼, 保留節點/屬性/原因及指令碼堆疊; 每個引擎最多 8 個作用中工作階段, 關閉後拒絕控制代碼操作並清理回呼, 參照和待執行工作; 外掛更新, 解除安裝或停用時關閉其作用中工作階段並回報對應錯誤
+* `最佳化` cancelable=false 同時禁止返回鍵, 點擊外部和下滑關閉; 主動關閉與指令碼結束仍會清理彈窗, 保留現有頁面和其他工作階段
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

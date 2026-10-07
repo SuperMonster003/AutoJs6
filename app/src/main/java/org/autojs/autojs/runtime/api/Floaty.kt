@@ -197,9 +197,10 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         supplier: BaseResizableFloatyWindow.ViewSupplier,
         onCreated: (ManagedWindow, Throwable?) -> Unit,
         onClosed: () -> Unit,
+        rawWindowParameters: ((WindowManager.LayoutParams) -> Unit)? = null,
     ): ManagedWindow {
         check(isUiThread()) { "Managed floating windows require the main thread" }
-        return ManagedWindow(raw, supplier, onCreated, onClosed).also {
+        return ManagedWindow(raw, supplier, onCreated, onClosed, rawWindowParameters).also {
             addWindow(it)
             it.start()
         }
@@ -211,8 +212,9 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         supplier: BaseResizableFloatyWindow.ViewSupplier,
         onCreated: (ManagedWindow, Throwable?) -> Unit,
         onClosed: () -> Unit,
+        rawWindowParameters: ((WindowManager.LayoutParams) -> Unit)? = null,
     ) : JsWindow {
-        @Volatile private var native: FloatyWindow? = if (raw) RawWindow(mContext, supplier) else BaseResizableFloatyWindow(mContext, supplier)
+        @Volatile private var native: FloatyWindow? = if (raw) RawWindow(mContext, supplier, rawWindowParameters) else BaseResizableFloatyWindow(mContext, supplier)
         @Volatile var isClosed = false
             private set
         private var created = false

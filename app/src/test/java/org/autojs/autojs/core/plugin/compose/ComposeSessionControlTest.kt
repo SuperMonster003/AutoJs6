@@ -7,6 +7,8 @@ import org.autojs.plugin.compose.api.ComposeUiContractException
 import org.autojs.plugin.compose.api.ComposeUiErrorCodes
 import org.autojs.plugin.compose.api.ComposeUiEvents
 import org.autojs.plugin.compose.api.ComposeUiProps
+import org.autojs.plugin.compose.api.ComposeUiLimits
+import org.autojs.plugin.compose.api.dialog.DialogInteropV1
 import org.autojs.plugin.compose.api.loading.ComposeUiEventSink
 import org.autojs.plugin.compose.api.model.*
 import org.junit.Assert.*
@@ -85,7 +87,77 @@ class ComposeSessionControlTest {
         fixture.close()
     }
 
-    private class Fixture(openFailure: Throwable? = null) {
+    @Test fun dialogDismissSurvivesANewerFrameAndBothSaturatedQueuesWithoutCallingFromTheSinkStack() {
+        val fixture = Fixture(closeEventType = DialogInteropV1.DISMISS_REQUEST)
+        fixture.session.submitStableTree(tree("before"))
+        fixture.drainControl(); fixture.runMain(); fixture.drainControl()
+        fixture.session.submitStableTree(tree("after"))
+        fixture.drainControl()
+        fixture.saturateUserPosts()
+        fixture.main.add(Runnable {
+            // Generation zero may have been captured before an animated hide and this new frame.
+            fixture.session.enqueueLifecycle(dismiss(generation = 0), null)
+            repeat(ComposeUiLimits.EVENT_QUEUE_CAPACITY + 1) {
+                fixture.session.enqueue(event(1, 2, 11, ComposeUiEvents.CLICK, 99))
+            }
+            assertEquals(0, fixture.closed)
+        })
+        fixture.runMain()
+        assertEquals(0, fixture.closed)
+        fixture.drainControl(); fixture.runMain()
+        assertEquals(listOf("close"), fixture.notifications)
+        assertEquals(1, fixture.renderer.disposals)
+        assertEquals(0, fixture.userDeliveries)
+        assertNull(fixture.session.tree)
+        fixture.close()
+    }
+
+    @Test fun dialogFatalErrorAndCloseAreOneReservedDeliveryAndUnknownCodesAreNormalized() {
+        val fixture = Fixture(closeEventType = DialogInteropV1.DISMISS_REQUEST)
+        fixture.session.submitStableTree(tree("dialog"))
+        fixture.drainControl(); fixture.runMain(); fixture.drainControl()
+        fixture.saturateUserPosts()
+        fixture.main.add(Runnable {
+            // Bundle decoding has a separate Android gate; exercise the decoded lifecycle policy.
+            fixture.session.enqueueLifecycle(dismiss(), ComposeUiError.presentationFailure("UNRECOGNIZED_PROVIDER_CODE", "window"))
+            fixture.session.enqueueLifecycle(dismiss(), null)
+            repeat(ComposeUiLimits.EVENT_QUEUE_CAPACITY + 1) {
+                fixture.session.enqueue(event(1, 1, 11, ComposeUiEvents.CLICK, 99))
+            }
+            assertTrue(fixture.notifications.isEmpty())
+        })
+        fixture.runMain(); fixture.drainControl(); fixture.runMain()
+        assertEquals(listOf("error", "close"), fixture.notifications)
+        assertEquals(ComposeUiErrorCodes.RENDER_FAILED, fixture.errors.single().code)
+        assertEquals("window", fixture.errors.single().prop)
+        fixture.session.enqueueLifecycle(dismiss(), ComposeUiError.presentationFailure(ComposeUiErrorCodes.PERMISSION_REQUIRED))
+        fixture.drainControl()
+        assertEquals(1, fixture.closed)
+        assertEquals(1, fixture.errors.size)
+        assertEquals(0, fixture.userDeliveries)
+        assertEquals(ComposeUiErrorCodes.PERMISSION_REQUIRED, ComposeUiError.presentationFailure(ComposeUiErrorCodes.PERMISSION_REQUIRED).code)
+        fixture.close()
+    }
+
+    @Test fun dialogControlRequiresTheNegotiatedSessionAndSystemEnvelope() {
+        val fixture = Fixture(closeEventType = DialogInteropV1.DISMISS_REQUEST)
+        fixture.session.enqueueLifecycle(event(2, 0, -1, DialogInteropV1.DISMISS_REQUEST, 0), null)
+        fixture.session.enqueueLifecycle(event(1, 0, 11, DialogInteropV1.DISMISS_REQUEST, 0), null)
+        fixture.session.enqueueLifecycle(event(1, 0, -1, DialogInteropV1.DISMISS_REQUEST, 1), null)
+        fixture.drainControl()
+        assertEquals(0, fixture.closed)
+        fixture.session.enqueueLifecycle(dismiss(), null)
+        assertEquals(0, fixture.closed) // UI dispatch also always queues the lifecycle callback.
+        fixture.drainControl(); fixture.runMain()
+        assertEquals(1, fixture.closed)
+        fixture.close()
+        val plain = Fixture()
+        plain.session.enqueue(dismiss()); plain.drainControl()
+        assertEquals(0, plain.closed)
+        plain.close()
+    }
+
+    private class Fixture(openFailure: Throwable? = null, closeEventType: String? = null) {
         private val origin = Thread.currentThread()
         private val userTimers = ConcurrentLinkedQueue<() -> Unit>()
         private val controlTimers = ConcurrentLinkedQueue<() -> Unit>()
@@ -106,7 +178,7 @@ class ComposeSessionControlTest {
             assertSame(origin, Thread.currentThread()); errors += it; notifications += "error"
         }, onClosed = {
             assertSame(origin, Thread.currentThread()); closed++; notifications += "close"
-        })
+        }, closeEventType = closeEventType)
         init { session.open() }
         fun saturateUserPosts() {
             repeat(512) { dispatcher.post { userDeliveries++ } }
@@ -147,6 +219,22 @@ class ComposeSessionControlTest {
     }
 
     private companion object {
+        fun dismiss(generation: Long = 1) = event(1, generation, -1, DialogInteropV1.DISMISS_REQUEST, 0)
+        /**
+         * The repository's RhinoTestRuntime uses this same JVM allocation seam. Supply only
+         * validated envelope fields here; real Bundle snapshot/decoding belongs to device tests.
+         */
+        fun event(sessionId: Int, generation: Long, nodeId: Int, type: String, callbackId: Int): UiEvent {
+            val unsafe = sun.misc.Unsafe::class.java.getDeclaredField("theUnsafe").run {
+                isAccessible = true; get(null) as sun.misc.Unsafe
+            }
+            val result = unsafe.allocateInstance(UiEvent::class.java) as UiEvent
+            mapOf<String, Any>("sessionId" to sessionId, "generation" to generation, "nodeId" to nodeId,
+                "type" to type, "callbackId" to callbackId, "payloadValues" to emptyMap<String, Any?>()).forEach { (name, value) ->
+                UiEvent::class.java.getDeclaredField(name).run { isAccessible = true; set(result, value) }
+            }
+            return result
+        }
         fun tree(text: String, callback: Int? = null) = UiTree(11, listOf(UiNode(11, ComposeUiComponents.TEXT,
             props = mapOf(ComposeUiProps.TEXT to UiValue.Str(text)),
             callbacks = callback?.let { mapOf(ComposeUiEvents.CLICK to it) }.orEmpty())))

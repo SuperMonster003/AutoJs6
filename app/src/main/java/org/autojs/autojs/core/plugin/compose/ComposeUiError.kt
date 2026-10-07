@@ -34,6 +34,23 @@ class ComposeUiError(
     }
 
     companion object {
+        /** A presentation failure is a lifecycle message; never expose an unnegotiated code. */
+        internal fun presentationFailure(code: String?, prop: String? = null): ComposeUiError {
+            val accepted = when (code) {
+                ComposeUiErrorCodes.PLUGIN_UNAVAILABLE, ComposeUiErrorCodes.PLUGIN_DISABLED,
+                ComposeUiErrorCodes.PLUGIN_UNAUTHORIZED, ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE,
+                ComposeUiErrorCodes.UI_MODE_REQUIRED, ComposeUiErrorCodes.PERMISSION_REQUIRED,
+                ComposeUiErrorCodes.INVALID_ARGUMENT, ComposeUiErrorCodes.UNKNOWN_COMPONENT,
+                ComposeUiErrorCodes.UNKNOWN_PROP, ComposeUiErrorCodes.INVALID_MODIFIER,
+                ComposeUiErrorCodes.SCOPE_MISMATCH, ComposeUiErrorCodes.DUPLICATE_KEY,
+                ComposeUiErrorCodes.LIMIT_EXCEEDED, ComposeUiErrorCodes.RENDER_FAILED,
+                ComposeUiErrorCodes.SESSION_CLOSED, ComposeUiErrorCodes.NODE_DETACHED,
+                ComposeUiErrorCodes.RENDERER_FAILED, ComposeUiErrorCodes.INTERNAL -> requireNotNull(code)
+                else -> ComposeUiErrorCodes.RENDER_FAILED
+            }
+            return ComposeUiError(accepted, prop = prop)
+        }
+
         internal fun messageResource(code: String): Int = when (code) {
             ComposeUiErrorCodes.PLUGIN_UNAVAILABLE -> R.string.error_plugin_not_found_in_installed_apps
             ComposeUiErrorCodes.PLUGIN_DISABLED -> R.string.error_plugin_is_not_enabled_in_plugin_center

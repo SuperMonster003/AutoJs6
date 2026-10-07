@@ -172,6 +172,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 * `提示` 螢幕取色插件更名為 3-Color Picker 2.0, 使用新套件名稱並需重新安裝和啟用, 舊版可保留並存但設定不自動遷移; 主頁抽屜的螢幕取色文案保持不變
 * `提示` Compose UI 及配套 API 文件, Ace Editor 型別補全和 Offline Docs 內容為本地整合交付, 需要匹配的本地宿主構建; 插件尚未登記官方索引或正式發佈
+* `提示` 獨立彈窗需要配套 AutoJs6 6.8.0 / 5321 與支援 dialog-v1 的 Compose UI; TSX 另需 TypeScript Engine 0.6.6. 非 UI 腳本需要宿主懸浮視窗權限
 * `新增` 介面動作將確認綁定至宿主檢查的節點, 支援文字追加與有界捲動, 並回報執行結果和視窗變化
 * `新增` 宿主回報已授權 OCR 插件可用時提供螢幕 OCR, 識別結果合併為帶座標的有界文字行
 * `新增` ai.agent 指令碼 API, 支援任務啟動, 查詢, 事件, 詢問回應, 確認, 取消與 detached 背景任務; result/context 提供 @agent 登記指令碼結果和上下文, 附三個任務範例
@@ -452,6 +453,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點
 * `新增` XML `<compose>` 容器與 compose.attach 可在 UI 頁面或舊懸浮窗內嵌入獨立 Compose 工作階段; compose.AndroidView 可承載現有 Android View 或同步工廠傳回的 View
 * `新增` ui.inflate 支援編譯後的 XML TSX 佈局及其 onClick 回呼綁定
+* `新增` compose.dialog 傳回可更新和關閉的工作階段, 支援一般對話框與模態底部面板, 可在 UI 或一般腳本中使用
 * `修復` 啟用 APK Inspector 後, 檔案管理器的安裝套件資訊入口被隱藏且無法從更多選單存取的問題
 * `修復` Three Stove Agent 呼叫線上模型失敗時遺失網絡, 身份驗證及回應錯誤類別的問題 (需要 Provider 插件支援)
 * `修復` assistant 合併工具選項時, 空 tools 物件導致預設關閉的工具組被啟用的問題
@@ -894,6 +896,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` Ace 編輯器懸停文件框支援觸控捲動與選取文字, 智慧提示在 Python / Lua 檔案中等待非同步參數提示而不再誤彈補全
 * `優化` Compose UI 原生文字編輯保留選取範圍與輸入法組合狀態並支援軟鍵盤避讓, Snackbar 操作或關閉結果僅回呼一次
 * `優化` ComposeError 提供本地化提示和穩定錯誤碼, 保留節點/屬性/原因及腳本堆疊; 每個引擎最多 8 個活動會話, 關閉後拒絕句柄操作並清理回呼, 引用和待執行工作; 插件更新, 解除安裝或停用時關閉其活動會話並報告對應錯誤
+* `優化` cancelable=false 同時禁止返回鍵, 點擊外部和下滑關閉; 主動關閉與腳本結束仍會清理彈窗, 保留現有頁面和其他工作階段
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

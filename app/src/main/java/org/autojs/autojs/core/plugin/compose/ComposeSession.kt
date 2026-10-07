@@ -31,6 +31,7 @@ class ComposeSession(
     private val onError: (ComposeUiError) -> Unit,
     private val warn: (String) -> Unit = {},
     private val onClosed: () -> Unit = {},
+    private val closeEventType: String? = null,
 ) : ComposeUiEventSink, AutoCloseable {
     enum class State { NEW, OPEN, ATTACHED, CLOSED }
     sealed interface CommitResult {
@@ -60,6 +61,8 @@ class ComposeSession(
     // the callback registry; ordinary diagnostic failures share the event queue's count bound.
     private var receipt: Receipt? = null
     private var initializationFailure: Throwable? = null
+    private var requestedClose = false
+    private var requestedCloseFailure: ComposeUiError? = null
     private val nativeFailures = ArrayDeque<Throwable>()
     private val failedCommands = LinkedHashSet<CallbackRegistry.CommandBinding>()
     private var discardFailedCommands = false
@@ -213,7 +216,8 @@ class ComposeSession(
         flight = submission
         main.execute {
             if (!canRender()) return@execute
-            val failure = try { renderer.apply(batch, submission.views); appliedGeneration = batch.generation; null } catch (error: Exception) { error } catch (error: LinkageError) { error }
+            val failure = try { renderer.apply(batch, submission.views); appliedGeneration = batch.generation; null }
+                catch (error: Exception) { error } catch (error: LinkageError) { error }
             synchronized(eventLock) {
                 if (closing.get()) return@execute
                 receipt = Receipt(submission, failure)
@@ -248,6 +252,12 @@ class ComposeSession(
 
     override fun enqueue(event: UiEvent) {
         if (closing.get() || event.sessionId != sessionId) return
+        if (closeEventType != null && event.type == closeEventType) {
+            val failure = if (event.payload.containsKey(ComposeUiEventFields.CODE)) ComposeUiError.presentationFailure(
+                event.payload.getString(ComposeUiEventFields.CODE), event.payload.getString(ComposeUiEventFields.PROP)) else null
+            enqueueLifecycle(event, failure)
+            return
+        }
         synchronized(eventLock) {
             if (closing.get()) return
             if (events.size == ComposeUiLimits.EVENT_QUEUE_CAPACITY) {
@@ -256,6 +266,19 @@ class ComposeSession(
                 overflowWarning = true
             }
             events.addLast(event)
+        }
+        control.request()
+    }
+
+    /** Payload decoding is Android-specific; the ownership/mailbox policy is independently testable. */
+    internal fun enqueueLifecycle(event: UiEvent, failure: ComposeUiError?) {
+        if (closing.get() || closeEventType == null || event.type != closeEventType || event.sessionId != sessionId ||
+            event.nodeId != ComposeUiContract.NO_NODE_ID || event.callbackId != ComposeUiContract.SYSTEM_CALLBACK_ID) return
+        synchronized(eventLock) {
+            if (closing.get()) return
+            // Window lifetime outlives tree generations and must survive ordinary event overflow.
+            requestedClose = true
+            if (requestedCloseFailure == null) requestedCloseFailure = failure
         }
         control.request()
     }
@@ -315,6 +338,10 @@ class ComposeSession(
         val completed = synchronized(eventLock) { receipt.also { receipt = null } }
         completed?.let(::acknowledge)
         if (closing.get()) { finishOnScriptThread(); return }
+        val dismiss = synchronized(eventLock) {
+            (requestedClose to requestedCloseFailure).also { requestedClose = false; requestedCloseFailure = null }
+        }
+        if (dismiss.first) { try { dismiss.second?.let(::report) } finally { close() }; return }
         val failures = synchronized(eventLock) {
             if (discardFailedCommands) callbacks.discardAllCommands()
             else failedCommands.forEach(callbacks::releaseCommand)
@@ -364,7 +391,7 @@ class ComposeSession(
         if (!scriptCleanupFinished.compareAndSet(false, true)) return
         control.close()
         synchronized(eventLock) {
-            events.clear(); droppedCommands.clear(); receipt = null; initializationFailure = null
+            events.clear(); droppedCommands.clear(); receipt = null; initializationFailure = null; requestedClose = false; requestedCloseFailure = null
             nativeFailures.clear(); failedCommands.clear(); discardFailedCommands = false; failureOverflow = false
         }
         val outstanding = listOfNotNull(flight, pending)

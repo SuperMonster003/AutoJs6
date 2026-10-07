@@ -72,6 +72,24 @@ class ComposeTsxDeviceTest {
         }
     }
 
+    @Test fun realCompilerCreatesAnIndependentDialogSessionAndPreservesCallbacks() {
+        Running("dialog", ui = true).use { running ->
+            assertTrue(running.javaScript.contains("compose.dialog"))
+            assertTrue(running.javaScript.contains("__autojs6Tsx(compose.Column"))
+            running.await("A real compiled TSX render opens the Material sheet") {
+                text("tsx-dialog-count") == "TSX dialog count: 0"
+            }
+            clickTag("tsx-dialog-increment")
+            running.await("The dialog uses the usual reactive session and callback path") {
+                text("tsx-dialog-count") == "TSX dialog count: 1" && running.property("count") == "1"
+            }
+            clickTag("tsx-dialog-close")
+            running.await("Normal session.close and its receiver work from compiled TSX") {
+                running.property("closed") == "true" && tag("tsx-dialog-count") == null
+            }
+        }
+    }
+
     @Test fun realCompilerBridgesXmlComposeContainersAndInflatedTsxAndroidViews() {
         Running("interop", ui = true).use { running ->
             assertTrue(running.javaScript.contains("__autojs6Tsx(compose.AndroidView"))

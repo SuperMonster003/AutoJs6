@@ -31,6 +31,9 @@ internal interface ComposeScriptPlatform : Closeable {
     fun container(value: Any?): Any = throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
     fun createContainerRenderer(sessionId: Int, container: Any, beforeMount: (Any) -> Unit, onDestroyed: () -> Unit): Opened =
         throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
+    fun createDialogRenderer(sessionId: Int, options: ComposeDialogOptions, beforeMount: (Any) -> Unit,
+        onDestroyed: () -> Unit, onFailure: (Throwable) -> Unit): Opened =
+        throw ComposeUiContractException(ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE)
     fun prepareView(value: Any?, factory: (org.mozilla.javascript.Function, Any) -> Any?): View =
         throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, prop = "view")
     fun validateViews(views: List<org.autojs.plugin.compose.api.interop.AndroidViewBindingV1>, container: Any?, renderer: ComposeSessionRenderer) = Unit
@@ -46,6 +49,12 @@ internal interface ComposeScriptPlatform : Closeable {
 
 internal class AndroidComposeScriptPlatform(private val runtime: ScriptRuntime) : ComposeScriptPlatform {
     private val closed = java.util.concurrent.atomic.AtomicBoolean()
+    // Captured during engine initialization, before user code can reassign the global alias.
+    private val ownerEngine = runtime.engines.myEngine()
+    private val activityOwner = java.lang.ref.WeakReference(ownerEngine.getTag("activity") as? ScriptExecuteActivity)
+    private val uiMode = activityOwner.get() != null ||
+        (((ownerEngine.source as? org.autojs.autojs.script.JavaScriptSource)?.executionMode ?: 0) and
+            org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_UI != 0)
     private val host by lazy { ComposeUiPluginHost(GlobalAppContext.get()) }
     private var hostCreated = false
     private val delayed = Handler(Looper.getMainLooper())
@@ -55,6 +64,13 @@ internal class AndroidComposeScriptPlatform(private val runtime: ScriptRuntime) 
     override val mainExecutor: Executor get() = ScriptUiDispatcher.mainExecutor()
     private fun plugin(): ComposeUiPluginLoader.Loaded { hostCreated = true; return host.load() }
     private fun activity() = runtime.topLevelScope.prop("activity").jsUnwrapped() as? ScriptExecuteActivity
+    private fun ownedActivity(): ScriptExecuteActivity? {
+        if (!uiMode) return null
+        return activityOwner.get()?.takeIf {
+            ownerEngine.getTag("activity") === it && !it.isFinishing && !it.isDestroyed
+        } ?: throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED,
+            "The owning UI Activity is no longer available")
+    }
 
     @Suppress("DEPRECATION")
     override fun version(): Map<String, Any>? = try {
@@ -102,10 +118,55 @@ internal class AndroidComposeScriptPlatform(private val runtime: ScriptRuntime) 
         } catch (failure: Throwable) { lifetime.close(); throw failure }
     }
 
+    override fun createDialogRenderer(sessionId: Int, options: ComposeDialogOptions, beforeMount: (Any) -> Unit,
+        onDestroyed: () -> Unit, onFailure: (Throwable) -> Unit): ComposeScriptPlatform.Opened {
+        val loaded = plugin()
+        val factory = loaded.dialogFactory ?: throw ComposeUiContractException(ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE,
+            "The installed Compose provider does not support dialog presentation")
+        val activity = ownedActivity()
+        if (activity != null) {
+            if (Looper.myLooper() != Looper.getMainLooper()) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
+            if (activity.isFinishing || activity.isDestroyed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)
+            val renderer = ComposeAndroidRenderer(activity, loaded, sessionId, { anchor ->
+                if (activity.isFinishing || activity.isDestroyed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)
+                anchor.alpha = 0f; anchor.isFocusable = false; anchor.isClickable = false
+                anchor.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                beforeMount(anchor)
+                // ComponentActivity normally installs these from setContentView/addContentView.
+                // A dialog may be the first UI in this Activity; direct decor attachment needs
+                // the same public initialization without replacing the underlying content.
+                activity.initializeViewTreeOwners()
+                // A normal ui.layout replacement must leave this independent dialog alive.
+                (activity.window.decorView as android.view.ViewGroup).addView(anchor, android.view.ViewGroup.LayoutParams(1, 1))
+            }, activity, onDestroyed = onDestroyed, rendererFactory = { environment ->
+                factory.create(environment, org.autojs.plugin.compose.api.dialog.DialogOptionsV1(options.type, options.cancelable,
+                    // Let the Activity-backed WindowManager supply the application token. A
+                    // decor's IWindow binder is not an application-window ownership token.
+                    android.view.WindowManager.LayoutParams.TYPE_APPLICATION, null))
+            }, useActivityInsets = false)
+            return ComposeScriptPlatform.Opened(renderer, loaded.components,
+                watchInvalidation = { invalidated -> host.watch(loaded.identity, invalidated) })
+        }
+        try { runtime.floaty.ensurePermission() }
+        catch (failure: Exception) { throw ComposeUiError(ComposeUiErrorCodes.PERMISSION_REQUIRED, cause = failure) }
+        val token = runtime.loopers.waitWhenIdleToken()
+        val lease = Closeable { token.release() }
+        try {
+            val renderer = AndroidComposeFloatyRenderer(runtime, loaded, sessionId,
+                ComposeFloatyOptions(raw = true, x = 0, y = 0, width = 1, height = 1, touchable = false, focusable = false),
+                beforeMount, onDestroyed, onFailure, rendererFactory = { environment ->
+                    factory.create(environment, org.autojs.plugin.compose.api.dialog.DialogOptionsV1(options.type, options.cancelable,
+                        org.autojs.autojs.ui.enhancedfloaty.util.WindowTypeCompat.getPhoneWindowType(), null))
+                }, compositionAnchor = true)
+            return ComposeScriptPlatform.Opened(renderer, loaded.components, renderer.window, lease,
+                watchInvalidation = { invalidated -> host.watch(loaded.identity, invalidated) })
+        } catch (failure: Throwable) { lease.close(); throw failure }
+    }
+
     override fun prepareView(value: Any?, factory: (org.mozilla.javascript.Function, Any) -> Any?): View = onMain {
         val raw = ComposeScriptValues.unwrap(value)
         val resolved = if (raw is org.mozilla.javascript.Function) factory(raw,
-            activity() ?: android.view.ContextThemeWrapper(GlobalAppContext.get(), R.style.ScriptTheme)) else raw
+            ownedActivity() ?: android.view.ContextThemeWrapper(GlobalAppContext.get(), R.style.ScriptTheme)) else raw
         ComposeScriptValues.unwrap(resolved) as? View ?: throw ComposeUiContractException(
             ComposeUiErrorCodes.INVALID_ARGUMENT, "AndroidView requires a View or a factory returning a View", prop = "view")
     }

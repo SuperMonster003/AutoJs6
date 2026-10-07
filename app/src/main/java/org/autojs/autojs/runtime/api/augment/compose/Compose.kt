@@ -72,6 +72,7 @@ class Compose internal constructor(
                 mount(args.drop(1).toTypedArray(), container = platform.container(args[0])).js
             },
             "floaty" to { args -> mount(args, floating = true).floatingWindow() },
+            "dialog" to { args -> mount(args, dialog = true).js },
             "post" to { args -> post(args); Undefined.instance },
             "theme" to { args -> theme(args) },
         )
@@ -115,22 +116,23 @@ class Compose internal constructor(
         return graph.create(type, props, children.takeIf { it.isNotEmpty() })
     }
 
-    private fun mount(args: Array<out Any?>, floating: Boolean = false, container: Any? = null): ComposeScriptSession {
+    private fun mount(args: Array<out Any?>, floating: Boolean = false, container: Any? = null, dialog: Boolean = false): ComposeScriptSession {
         usable()
         if (reactive.isRendering || preparingView || mountInProgress) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
             "Cannot create a Compose mount during rendering, View preparation or another mount")
         mountInProgress = true
-        return try { openMount(args, floating, container) } finally { mountInProgress = false }
+        return try { openMount(args, floating, container, dialog) } finally { mountInProgress = false }
     }
 
-    private fun openMount(args: Array<out Any?>, floating: Boolean, container: Any?): ComposeScriptSession {
-        val method = if (floating) "floaty" else if (container != null) "attach" else "mount"
+    private fun openMount(args: Array<out Any?>, floating: Boolean, container: Any?, dialog: Boolean): ComposeScriptSession {
+        val method = if (dialog) "dialog" else if (floating) "floaty" else if (container != null) "attach" else "mount"
         composeArguments(args, 1, 2, method)
         val options = values.objectProperties(args.getOrNull(1), method)
         val floatingOptions = if (floating) ComposeFloatyOptions.parse(args.getOrNull(1)) else null
-        if (!floating && options.keys.any { it != "theme" }) throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_PROP,
+        val dialogOptions = if (dialog) ComposeDialogOptions.parse(args.getOrNull(1)) else null
+        if (!floating && !dialog && options.keys.any { it != "theme" }) throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_PROP,
             prop = options.keys.first { it != "theme" })
-        val previousUi = if (floating) emptyList() else live.filter {
+        val previousUi = if (floating || dialog) emptyList() else live.filter {
             !it.isClosed && if (container != null) it.container === container else it.isUiRoot
         }
         if (live.count { !it.isClosed } - previousUi.size >= ComposeUiLimits.MAX_SESSIONS_PER_ENGINE || nextSessionId > Int.MAX_VALUE) {
@@ -139,13 +141,13 @@ class Compose internal constructor(
         val source = args[0].let { value -> if (value is Function) value else graph.root(value)
             ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, "mount requires a node or render function") }
         val theme = options["theme"]?.let(values::theme) ?: defaultTheme
-        val session = ComposeScriptSession(this, (nextSessionId++).toInt(), theme, floatingOptions, previousUi.firstOrNull(), container)
+        val session = ComposeScriptSession(this, (nextSessionId++).toInt(), theme, floatingOptions, previousUi.firstOrNull(), container, dialogOptions)
         try {
             session.open(source)
             // The new content is valid and its renderer opened; replacing UI now closes prior mounts.
             previousUi.forEach { it.close() }
             live += session
-            if (floating || container != null) platform.post(0) {
+            if (floating || container != null || dialog) platform.post(0) {
                 // A callback/batch may still be validating its graph when floaty returns. Never
                 // attach a native window for a mount that the surrounding transaction rolled back.
                 if (!session.isClosed) {
