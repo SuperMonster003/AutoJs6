@@ -2,6 +2,9 @@ package org.autojs.autojs.ui.settings.codegen
 
 import android.content.Context
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import okhttp3.OkHttpClient
 import org.autojs.autojs.core.accessibility.codegen.store.ModelCatalogRepository
 import org.autojs.autojs.core.accessibility.codegen.store.ModelDownloader
@@ -19,6 +22,14 @@ class CodegenModelServices private constructor(context: Context) {
     val store: ModelStore = CodegenModelStoreFactory.create(context, catalog)
     val downloader: ModelDownloader = ModelDownloader(store, catalog, OkHttpFontDownloadSource(client),
         callbackExecutor = ContextCompat.getMainExecutor(context))
+    private val mutableStoreRevision = MutableStateFlow(0L)
+    val storeRevision = mutableStoreRevision.asStateFlow()
+
+    /** Publish after every persistent operation, including failures which may have committed data.
+     * Recreated screens receive the latest revision before reading another local snapshot. */
+    fun notifyStoreChanged() {
+        mutableStoreRevision.update { it + 1 }
+    }
 
     companion object {
         private val instances = ConcurrentHashMap<String, CodegenModelServices>()

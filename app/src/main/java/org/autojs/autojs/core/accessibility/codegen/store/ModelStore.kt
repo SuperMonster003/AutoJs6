@@ -152,6 +152,30 @@ class ModelStore(
         true
     }
 
+    /** Returns bounded plain text from a package whose exact registered bytes are still valid. */
+    fun readModelCard(key: String): String = withStoreLock {
+        val file = installedFile(key) ?: throw java.io.FileNotFoundException("Installed model is missing or changed")
+        java.util.zip.ZipFile(file).use { archive ->
+            val entry = archive.getEntry("MODEL_CARD.md") ?: throw ModelStoreException("Model card is missing")
+            if (entry.size !in 1..MAX_MODEL_CARD_BYTES.toLong()) throw ModelStoreException("Model card exceeds its size limit")
+            val bytes = archive.getInputStream(entry).use { input ->
+                val output = java.io.ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                var count = input.read(buffer)
+                while (count >= 0) {
+                    if (count > 0) {
+                        if (output.size() + count > MAX_MODEL_CARD_BYTES) throw ModelStoreException("Model card exceeds its size limit")
+                        output.write(buffer, 0, count)
+                    }
+                    count = input.read(buffer)
+                }
+                output.toByteArray()
+            }
+            Charsets.UTF_8.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                .decode(java.nio.ByteBuffer.wrap(bytes)).toString()
+        }
+    }
+
     /** Resolves a registry key, never an arbitrary path, and verifies the bytes on every access. */
     fun installedFile(key: String): File? = withStoreLock {
         val record = loadAndReconcileLocked().models.firstOrNull { it.key == key } ?: return@withStoreLock null
@@ -610,6 +634,7 @@ class ModelStore(
     companion object {
         const val DIRECTORY_NAME = "codegen_models"
         const val MAX_PACKAGE_BYTES = 100L * 1024 * 1024
+        private const val MAX_MODEL_CARD_BYTES = 1024 * 1024
         private const val REGISTRY_FILE = "registry.json"
         private const val STAGING_DIRECTORY = "staging"
         private const val PACKAGE_FILE = "model.ajcgm"

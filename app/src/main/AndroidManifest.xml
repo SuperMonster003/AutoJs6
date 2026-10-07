@@ -488,6 +488,12 @@
             android:theme="@style/AppTheme.Settings" />
 
         <activity
+            android:name="org.autojs.autojs.ui.settings.codegen.CodeGenModelsActivity"
+            android:exported="false"
+            android:label="@string/text_codegen_models"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
             android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
             android:theme="@style/AppTheme.Settings" />
 
