@@ -53,6 +53,7 @@ class AceScriptEditorEngine private constructor(
     private val session: EditorPluginSession,
     private val releaseSession: () -> Unit,
     private val callbackRelay: CallbackRelay,
+    private val pluginContractVersion: Int = 0,
     private val persistTextSize: (Int) -> Unit = ::setEditorTextSize,
 ) : ScriptEditorEngine {
 
@@ -346,6 +347,20 @@ class AceScriptEditorEngine private constructor(
 
     fun handleEscapeKey() {
         session.handleEscapeKey()
+    }
+
+    /**
+     * Whether the installed plugin implements editor contract 6 or newer, which added
+     * [triggerSmartHint]. Older plugins are still loaded, so callers must keep a fallback.
+     */
+    val supportsSmartHint: Boolean
+        get() = pluginContractVersion >= SMART_HINT_CONTRACT_VERSION
+
+    fun triggerSmartHint() {
+        if (!supportsSmartHint) {
+            return
+        }
+        session.triggerSmartHint()
     }
 
     fun handleSelectionBackIfNeeded(): Boolean {
@@ -698,6 +713,7 @@ class AceScriptEditorEngine private constructor(
 
     companion object {
         private const val TEXT_SNAPSHOT_TIMEOUT_MS = 750L
+        private const val SMART_HINT_CONTRACT_VERSION = 6
 
         @JvmStatic
         fun create(context: Context): AceScriptEditorEngine {
@@ -719,6 +735,7 @@ class AceScriptEditorEngine private constructor(
                     session = loadedSession.session,
                     releaseSession = loadedSession::destroy,
                     callbackRelay = callbackRelay,
+                    pluginContractVersion = loadedSession.plugin.candidate.contractVersion,
                 )
             } catch (t: Throwable) {
                 loadedSession.destroy()

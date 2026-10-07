@@ -99,6 +99,7 @@
     <string name="description_ace_lsp_enabled_preference">El autocompletado inteligente LSP está activado de forma predeterminada. El editor usa el servicio de lenguaje TypeScript incluido para autocompletado, información al pasar el puntero, ayuda de firmas y diagnósticos; conserva el autocompletado estático como alternativa. Puede desactivarse en cualquier momento.</string>
     <string name="description_ace_lsp_file_types_preference">LSP solo se inicia para archivos cuyos nombres terminan con uno de los sufijos seleccionados. Usar valores predeterminados restaura el conjunto de sufijos de JavaScript, TypeScript, JSON, Auto.js y Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Muestra u oculta la guía del margen de impresión del editor Ace. Es la línea de límite de columna del lado derecho y solo cambia la presentación del código.</string>
+    <string name="description_ace_smart_hint_preference">Las sugerencias inteligentes siempre se pueden solicitar manualmente: una pulsación larga de TAB en la barra de teclas, o Ctrl+Space en un teclado físico, muestra según el contexto del cursor el autocompletado de código, las sugerencias de parámetros o la documentación del símbolo. Ctrl+Shift+Space muestra o recorre las sugerencias de parámetros, Ctrl+Q muestra la documentación del símbolo y Alt+Arriba / Alt+Abajo cambian de sobrecarga mientras las sugerencias de parámetros están visibles.</string>
     <string name="description_ace_word_wrap_enabled_preference">Activa el ajuste de línea del editor para líneas largas. Esto no modifica el contenido del archivo.</string>
     <string name="description_ai_settings_preference">Abre 3-Stone AI para gestionar los modelos locales, los servicios en línea y el objetivo predeterminado del módulo global ai.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">El permiso \"administrar todos los archivos\" (o \"acceso a todos los archivos\") permite que AutoJs6 [ cree / lea / modifique / elimine ] archivos directamente mediante rutas de archivo normales en el almacenamiento compartido, de modo que los scripts puedan acceder al \"Internal Storage\" y el explorador de archivos pueda mostrar y administrar archivos correctamente.\n\nEn dispositivos con Android 11+, esta es la forma principal de lograr acceso de lectura y escritura a todo el almacenamiento.</string>
@@ -254,6 +255,12 @@
     <string name="editable_file_info_line_break_label">Salto</string>
     <string name="editable_file_info_line_count_label">Líneas</string>
     <string name="entry_ace_editor_font_system_monospace">Fuente monoespaciada del sistema Android</string>
+    <string name="entry_ace_smart_hint_completion_delay_0">Sin retraso</string>
+    <string name="entry_ace_smart_hint_completion_trigger_dot">Solo después de escribir \".\"</string>
+    <string name="entry_ace_smart_hint_completion_trigger_identifier">Al escribir identificadores</string>
+    <string name="entry_ace_smart_hint_signature_trigger_cursor">Cuando el cursor entra en una llamada</string>
+    <string name="entry_ace_smart_hint_signature_trigger_typing">Solo después de escribir \"(\" o \",\"</string>
+    <string name="entry_ace_smart_hint_trigger_off">Desactivado</string>
     <string name="entry_app_language_auto">Siga el sistema</string>
     <string name="entry_documentation_source_local">Documentos locales</string>
     <string name="entry_documentation_source_online">Documentos en línea</string>
@@ -732,6 +739,11 @@
     <string name="summary_ace_lsp_enabled">Activar la asistencia del editor mediante LSP</string>
     <string name="summary_ace_lsp_file_types">Elegir los tipos de archivo que pueden usar funciones de LSP</string>
     <string name="summary_ace_print_margin_enabled">Mostrar la guía de límite de columna del lado derecho</string>
+    <string name="summary_ace_smart_hint_arrow_overload_cycling">Cuando las sugerencias de parámetros muestran varias sobrecargas, las teclas Arriba y Abajo de la barra de teclas cambian de sobrecarga en lugar de mover el cursor</string>
+    <string name="summary_ace_smart_hint_completion_delay">Pausa tras escribir antes de que se abra la lista</string>
+    <string name="summary_ace_smart_hint_completion_min_chars">Caracteres que hay que escribir antes de que se abra la lista</string>
+    <string name="summary_ace_smart_hint_completion_trigger">Cuándo se abre automáticamente la lista de autocompletado</string>
+    <string name="summary_ace_smart_hint_signature_trigger">Cuándo aparecen automáticamente las sugerencias de parámetros</string>
     <string name="summary_ace_word_wrap_enabled">Ajustar las líneas largas dentro del área visible del editor</string>
     <string name="summary_all_files_access">Permite que AutoJs6 acceda a todos los archivos, incluidos los del almacenamiento externo</string>
     <string name="summary_all_files_access_inrt">Permitir que la aplicación acceda a todos los archivos, incluido el almacenamiento externo</string>
@@ -789,6 +801,11 @@
     <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
     <string name="text_accent_and_dark">Acento / oscuro</string>
     <string name="text_accent_color">Acento</string>
+    <string name="text_ace_smart_hint_arrow_overload_cycling">Cambiar de sobrecarga con las flechas</string>
+    <string name="text_ace_smart_hint_completion_delay">Retraso del autocompletado</string>
+    <string name="text_ace_smart_hint_completion_min_chars">Caracteres mínimos para el autocompletado</string>
+    <string name="text_ace_smart_hint_completion_trigger">Autocompletado</string>
+    <string name="text_ace_smart_hint_signature_trigger">Sugerencias de parámetros</string>
     <string name="text_add_all_to_color_library">Añadir todos a una biblioteca de colores</string>
     <string name="text_add_colors">Agregar colores</string>
     <string name="text_add_favorite_from_palette">Añadir desde la paleta</string>
@@ -2555,6 +2572,7 @@
     <string name="text_size">Tamaño</string>
     <string name="text_skip">Omitir</string>
     <string name="text_skip_conflicting">Omitir conflictivos</string>
+    <string name="text_smart_hint">Sugerencias inteligentes</string>
     <string name="text_snapshot_created">Instantánea creada</string>
     <string name="text_snapshot_label_optional">Etiqueta (opcional)</string>
     <string name="text_snapshot_requires_internal_storage_file">Las instantáneas solo están disponibles para archivos del almacenamiento interno</string>

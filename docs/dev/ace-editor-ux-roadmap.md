@@ -176,6 +176,11 @@ Acceptance:
 - [x] Favorites ordering rules are deterministic.
 - [x] Repeating the last command handles the no-last-command case with a toast.
 
+Follow-up (2026-10-07): TAB long-press now triggers the unified smart hint
+(completion / signature help / symbol documentation) and "Jump to previous
+cursor" moved to the editor "Jump" menu. Smart hint work continues in
+`ace-smart-hints-roadmap.md`.
+
 ## Gate UX-6: Pinch Zoom
 
 - [x] Implement the existing View zoom strategy or replace it with a better

@@ -879,6 +879,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         EditorDisplayPreferences.KEY_GUTTER_WIDTH_MODE,
         EditorDisplayPreferences.KEY_FONT_LIGATURES_ENABLED,
         EditorDisplayPreferences.KEY_FONT_STYLES_ENABLED,
+        EditorDisplayPreferences.KEY_SMART_HINT_COMPLETION_TRIGGER,
+        EditorDisplayPreferences.KEY_SMART_HINT_COMPLETION_MIN_CHARS,
+        EditorDisplayPreferences.KEY_SMART_HINT_COMPLETION_DELAY,
+        EditorDisplayPreferences.KEY_SMART_HINT_SIGNATURE_TRIGGER,
+        EditorDisplayPreferences.KEY_SMART_HINT_ARROW_OVERLOAD_CYCLING,
     )
 
     private val mEditorPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
@@ -7109,7 +7114,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 jumpWithAceShortcutReturnPoint { editor.jumpToLineEnd() }
             }
             AceShortcutPanel.Command.Tab -> true.also {
-                if (toggleAceShortcutReturnPoint()) {
+                val aceEditor = editor as? AceScriptEditorEngine
+                if (aceEditor?.supportsSmartHint == true) {
+                    recordAceHistoryAction(historyAction(ACTION_SMART_HINT, R.string.text_smart_hint, mutatesText = false))
+                    aceEditor.triggerSmartHint()
+                } else if (toggleAceShortcutReturnPoint()) {
+                    // Plugins older than editor contract 6 keep the previous TAB long-press behavior.
                     recordAceHistoryAction(historyAction(ACTION_JUMP_TO_PREVIOUS_CURSOR, R.string.text_jump_to_previous_cursor, mutatesText = false))
                 }
             }
@@ -7224,6 +7234,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_THEME_PREVIEWER -> true.also { openThemePreviewer(returnToThemeDialog = false) }
             ACTION_EXIT_EDITOR -> true.also { triggerHostBackPress() }
             ACTION_JUMP_TO_PREVIOUS_CURSOR -> toggleAceShortcutReturnPoint()
+            ACTION_SMART_HINT -> (editor as? AceScriptEditorEngine)
+                ?.takeIf { it.supportsSmartHint }
+                ?.let { aceEditor -> true.also { aceEditor.triggerSmartHint() } }
+                ?: false
             else -> executeEditorSettingHistoryAction(action)
         }
         if (handled && record && !isDeferredParameterizedHistoryAction(action.id)) {
@@ -7354,6 +7368,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         R.id.action_jump_to_end -> historyAction(ACTION_JUMP_TO_END, R.string.text_jump_to_end, mutatesText = false)
         R.id.action_jump_to_line_start -> historyAction(ACTION_JUMP_TO_LINE_START, R.string.text_jump_to_line_start, mutatesText = false)
         R.id.action_jump_to_line_end -> historyAction(ACTION_JUMP_TO_LINE_END, R.string.text_jump_to_line_end, mutatesText = false)
+        R.id.action_jump_to_previous_cursor -> historyAction(ACTION_JUMP_TO_PREVIOUS_CURSOR, R.string.text_jump_to_previous_cursor, mutatesText = false)
         R.id.action_breakpoint -> historyAction(ACTION_TOGGLE_BREAKPOINT, R.string.text_set_breakpoint, mutatesText = false)
         R.id.action_launch_debugger -> historyAction(ACTION_DEBUG, R.string.text_launch_debugger, mutatesText = false)
         R.id.action_remove_all_breakpoints -> historyAction(ACTION_REMOVE_ALL_BREAKPOINTS, R.string.text_remove_all_breakpoints, mutatesText = false)
@@ -7568,6 +7583,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         editor.jumpTo(target.startLine, target.startColumn)
         return true
     }
+
+    /** Menu entry point for the Ace-only "jump to previous cursor" toggle. */
+    fun jumpToPreviousCursor(): Boolean = toggleAceShortcutReturnPoint()
+
+    fun supportsPreviousCursorJump(): Boolean = editor.engineType == EditorEngineType.ACE
+
+    fun hasPreviousCursorPosition(): Boolean = supportsPreviousCursorJump() && mAceShortcutReturnSelection != null
 
     private fun rememberAceShortcutReturnPoint() {
         val current = editor.selection
@@ -7938,6 +7960,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_THEME_PREVIEWER = "editor:theme_previewer"
         private const val ACTION_EXIT_EDITOR = "editor:exit"
         private const val ACTION_JUMP_TO_PREVIOUS_CURSOR = "editor:jump_to_previous_cursor"
+        private const val ACTION_SMART_HINT = "editor:smart_hint"
 
         private const val ACE_SHORTCUT_ITEM_WIDTH_DP = 40f
         private const val MIN_IME_OVERLAP_DP = 80F

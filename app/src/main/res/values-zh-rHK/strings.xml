@@ -96,6 +96,7 @@
     <string name="description_ace_lsp_enabled_preference">LSP 智能補全默認啓用. 編輯器會使用內置的 TypeScript 語言服務提供補全, 懸停提示, 簽名提示和診斷, 並保留靜態補全作為後備方案. 此功能可隨時關閉.</string>
     <string name="description_ace_lsp_file_types_preference">LSP 只會針對檔名符合所選後綴的文件啓動. 使用默認值會恢復 JavaScript, TypeScript, JSON, Auto.js 和 Node.js 相關後綴.</string>
     <string name="description_ace_print_margin_enabled_preference">顯示或隱藏 Ace 編輯器右側的打印邊界參考線. 此設置只會改變代碼的顯示方式.</string>
+    <string name="description_ace_smart_hint_preference">智慧提示始終可以手動喚出: 長按多功能鍵盤的 TAB 鍵, 或在硬件鍵盤上按 Ctrl+Space, 即可依游標上下文顯示程式碼補全, 參數提示或符號文件. Ctrl+Shift+Space 顯示或切換參數提示, Ctrl+Q 顯示符號文件, 參數提示顯示時 Alt+Up / Alt+Down 切換重載.</string>
     <string name="description_ace_word_wrap_enabled_preference">為長行啓用編輯器自動換行模式. 此設置不會修改文件內容.</string>
     <string name="description_ai_settings_preference">打開 3-Stone AI, 管理全域 ai 模組使用嘅本地模型, 網上服務及預設目標.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有文件\" (或 \"所有文件訪問\") 權限允許 AutoJs6 在共享存儲空間中通過常規文件路徑直接 [ 創建 / 讀取 / 修改 / 刪除 ] 文件, 使腳本可以訪問 \"內部存儲 (Internal Storage)\", 使文件管理器可以正常顯示及管理文件.\n\n在 Android 11+ 設備上, 這是實現全盤文件讀寫能力的主要方式.</string>
@@ -251,6 +252,12 @@
     <string name="editable_file_info_line_break_label">換行</string>
     <string name="editable_file_info_line_count_label">總行數</string>
     <string name="entry_ace_editor_font_system_monospace">Android 系統默認等寬字體</string>
+    <string name="entry_ace_smart_hint_completion_delay_0">無延遲</string>
+    <string name="entry_ace_smart_hint_completion_trigger_dot">僅輸入 \".\" 後</string>
+    <string name="entry_ace_smart_hint_completion_trigger_identifier">輸入識別字時</string>
+    <string name="entry_ace_smart_hint_signature_trigger_cursor">游標進入呼叫時</string>
+    <string name="entry_ace_smart_hint_signature_trigger_typing">僅輸入 \"(\" 或 \",\" 時</string>
+    <string name="entry_ace_smart_hint_trigger_off">關閉</string>
     <string name="entry_app_language_auto">跟隨系統</string>
     <string name="entry_documentation_source_local">本地文檔</string>
     <string name="entry_documentation_source_online">在線文檔</string>
@@ -729,6 +736,11 @@
     <string name="summary_ace_lsp_enabled">啓用 LSP 驅動的編輯輔助</string>
     <string name="summary_ace_lsp_file_types">選擇可啓用 LSP 功能的文件類型</string>
     <string name="summary_ace_print_margin_enabled">顯示編輯器右側的列數限制參考線</string>
+    <string name="summary_ace_smart_hint_arrow_overload_cycling">參數提示顯示多個重載時, 多功能鍵盤的上下鍵切換重載而非移動游標</string>
+    <string name="summary_ace_smart_hint_completion_delay">停止輸入後多久自動彈出補全清單</string>
+    <string name="summary_ace_smart_hint_completion_min_chars">輸入多少個字元後自動彈出補全清單</string>
+    <string name="summary_ace_smart_hint_completion_trigger">補全清單自動彈出的時機</string>
+    <string name="summary_ace_smart_hint_signature_trigger">參數提示自動顯示的時機</string>
     <string name="summary_ace_word_wrap_enabled">在編輯器可視區域內對長行自動換行</string>
     <string name="summary_all_files_access">允許 AutoJs6 訪問所有文件, 包括外部存儲</string>
     <string name="summary_all_files_access_inrt">允許應用訪問所有文件, 包括外部存儲</string>
@@ -786,6 +798,11 @@
     <string name="summary_setup_wizards">授予常用權限及安裝官方插件</string>
     <string name="text_accent_and_dark">強調色 / 深色</string>
     <string name="text_accent_color">強調色</string>
+    <string name="text_ace_smart_hint_arrow_overload_cycling">方向鍵切換重載</string>
+    <string name="text_ace_smart_hint_completion_delay">補全觸發延遲</string>
+    <string name="text_ace_smart_hint_completion_min_chars">補全最少觸發字元數</string>
+    <string name="text_ace_smart_hint_completion_trigger">自動補全</string>
+    <string name="text_ace_smart_hint_signature_trigger">參數提示</string>
     <string name="text_add_all_to_color_library">全部加入顏色庫</string>
     <string name="text_add_colors">添加顏色</string>
     <string name="text_add_favorite_from_palette">從調色盤收藏</string>
@@ -2552,6 +2569,7 @@
     <string name="text_size">大小</string>
     <string name="text_skip">跳過</string>
     <string name="text_skip_conflicting">略過衝突項目</string>
+    <string name="text_smart_hint">智慧提示</string>
     <string name="text_snapshot_created">快照已建立</string>
     <string name="text_snapshot_label_optional">標籤 (可選)</string>
     <string name="text_snapshot_requires_internal_storage_file">僅內部儲存空間中的文件支援建立快照</string>

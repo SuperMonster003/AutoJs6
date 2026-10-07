@@ -188,6 +188,54 @@
         <item>@string/entry_editor_word_wrap_indent_style_classic</item>
     </string-array>
 
+    <string-array name="keys_ace_smart_hint_completion_trigger">
+        <item>@string/key_ace_smart_hint_completion_trigger_identifier</item>
+        <item>@string/key_ace_smart_hint_completion_trigger_dot</item>
+        <item>@string/key_ace_smart_hint_completion_trigger_off</item>
+    </string-array>
+
+    <string-array name="values_ace_smart_hint_completion_trigger">
+        <item>@string/entry_ace_smart_hint_completion_trigger_identifier</item>
+        <item>@string/entry_ace_smart_hint_completion_trigger_dot</item>
+        <item>@string/entry_ace_smart_hint_trigger_off</item>
+    </string-array>
+
+    <string-array name="keys_ace_smart_hint_completion_min_chars">
+        <item>@string/key_ace_smart_hint_completion_min_chars_1</item>
+        <item>@string/key_ace_smart_hint_completion_min_chars_2</item>
+        <item>@string/key_ace_smart_hint_completion_min_chars_3</item>
+    </string-array>
+
+    <string-array name="values_ace_smart_hint_completion_min_chars">
+        <item>@string/key_ace_smart_hint_completion_min_chars_1</item>
+        <item>@string/key_ace_smart_hint_completion_min_chars_2</item>
+        <item>@string/key_ace_smart_hint_completion_min_chars_3</item>
+    </string-array>
+
+    <string-array name="keys_ace_smart_hint_completion_delay">
+        <item>@string/key_ace_smart_hint_completion_delay_0</item>
+        <item>@string/key_ace_smart_hint_completion_delay_100</item>
+        <item>@string/key_ace_smart_hint_completion_delay_250</item>
+    </string-array>
+
+    <string-array name="values_ace_smart_hint_completion_delay">
+        <item>@string/entry_ace_smart_hint_completion_delay_0</item>
+        <item>@string/entry_ace_smart_hint_completion_delay_100</item>
+        <item>@string/entry_ace_smart_hint_completion_delay_250</item>
+    </string-array>
+
+    <string-array name="keys_ace_smart_hint_signature_trigger">
+        <item>@string/key_ace_smart_hint_signature_trigger_cursor</item>
+        <item>@string/key_ace_smart_hint_signature_trigger_typing</item>
+        <item>@string/key_ace_smart_hint_signature_trigger_off</item>
+    </string-array>
+
+    <string-array name="values_ace_smart_hint_signature_trigger">
+        <item>@string/entry_ace_smart_hint_signature_trigger_cursor</item>
+        <item>@string/entry_ace_smart_hint_signature_trigger_typing</item>
+        <item>@string/entry_ace_smart_hint_trigger_off</item>
+    </string-array>
+
     <string-array name="keys_editor_log_button_behavior">
         <item>@string/key_editor_log_button_behavior_bottom_sheet</item>
         <item>@string/key_editor_log_button_behavior_fullscreen_page</item>
