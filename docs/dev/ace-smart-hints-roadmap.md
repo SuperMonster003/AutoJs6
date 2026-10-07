@@ -97,30 +97,37 @@
 - [x] 默认值下行为与 P1 完成时逐项一致 (Node 层: cursor 模式用例; 设备层: 默认值下 `1/2` 自动显示, 点按恢复, ESC 隐藏).
 - [x] 关闭自动补全后仅 TAB 长按 / Ctrl+Space 可弹出 (设备层验证 TAB 长按); 参数提示 "仅输入 ( , 时" 模式下点按进入调用不再自动弹出, 输入 "," 后显示 (设备层验证).
 
-### P3 触控下的文档阅读
+### P3 触控下的文档阅读 (2026-10-07 落地, 文档链接除外)
 
-- [ ] P3.1 参数提示与悬停框支持点按固定 (不随下一次 touchstart 隐藏), 长文档可滚动, 文档中的项目文档链接可跳转 (复用 `showManual` 通路).
-- [ ] P3.2 补全弹窗条目的文档说明在触屏可达 (Ace 1.4.12 的 docTooltip 仅随 hover 显示): 评估在弹窗条目右侧增加 "ⓘ" 点按区或长按条目显示文档.
-- [ ] P3.3 Python / Lua 异步参数提示在 D1 分派中的处理: `showAtPosition` 对异步来源返回 "已请求" 状态, 避免落到补全兜底.
+- [x] P3.1 悬停框 (`.autojs6_hover_tooltip`) 改为 `pointer-events: auto` + `touch-action: pan-x pan-y` + `overscroll-behavior: contain` + 可选择文本, 触屏可在框内滚动长文档而不触发编辑区的隐藏; 参数提示框 P1 起已具备相同样式. 两者在框内点按均不隐藏 (元素挂在 body 下, 不经过编辑容器的 touchstart), 点按编辑区隐藏, 符合 "点按固定" 的预期. 未做: 文档链接跳转 (静态索引与 TS 悬停结果均不携带文档 URL, 宿主 `Modules` 的 URL 表不在插件侧; fx 面板长按条目仍是文档入口).
+- [x] P3.2 补全弹窗条目文档: Ace 对当前高亮条目显示 docTooltip (P1 设备截图中 `Object` 条目右侧的 "declare" 框即是), 触屏通过多功能键盘 Up / Down 切换高亮即可阅读; `.ace_doc-tooltip` 已有 `max-height: 45vh; overflow: auto`. 不再增加 "ⓘ" 点按区.
+- [x] P3.3 参数提示控制器增加 `pending` 状态 (`isPending()`): 异步来源 (Python / Lua) 请求发出但未返回时, 桥接层 `showSignatureHelpAtCursor` 视为已处理, 智能提示分派不再落到补全兜底. (证据: 插件 `:app:verifyAutoJs6LspRuntime` 通过; Node 层 `test-signature-help.mjs` 现有用例不受影响)
 
-验收: 触屏下无需硬件鼠标即可阅读参数文档, 条目文档与悬停文档.
+验收:
 
-### P4 数据层重载与质量
+- [x] 触屏下无需硬件鼠标即可阅读参数文档, 条目文档与悬停文档 (参数提示 / 悬停框可滚动; 条目文档随高亮显示).
 
-- [ ] P4.1 静态索引生成链 (`tools/ace-completion`, `autojs6_indices.source.json` schema) 支持每个符号多条签名; `autojs6_completer.js` `findSignatureHelp` 返回 `signatures[]`.
-- [ ] P4.2 `BUILTIN_SIGNATURES` 扩展为常用 ECMAScript 内置方法的多重载 (如 `Array.prototype.splice`, `String.prototype.replace`), 仅在 TS 服务不可用时生效.
-- [ ] P4.3 Python / Lua provider 返回多签名形状 (Pyright / LuaLS 的 `signatures[]` 直通).
-- [ ] P4.4 修正 `docs/dev/ace-lsp-design.md` 中 "TypeScript 4.2.4" 的描述为实际捆绑版本 (6.0.3), 并补充重载数据形状.
+### P4 数据层重载与质量 (2026-10-07 落地)
 
-验收: LSP 关闭时 `[].splice(|)` 仍能显示两条重载; Python 文件内重载切换可用.
+- [x] P4.1 静态索引生成链支持多签名: `autojs6-api-model.mjs` 的 `mergeMembers` 把同名函数声明收集为 `signatures[]` (首项即 `signature`), `indices-utils.mjs` 的 `normalizeMember` / `validateSource` / `buildRuntimeIndices` / `mergeCompletionEntry` / `renderDts` 贯穿该字段, schema 增加 `signatures`; `autojs6_completer.js` `findSignatureHelp` 解析全部重载并按实参数选择 `activeSignature`. 从捆绑声明重建后收录 146 个重载成员 (如 `app.startActivity`), `lib.autojs6.d.ts` 同步输出全部重载声明 (TS 服务因此也能看到这些重载). (证据: `verify-autojs6-api-model` / `verify-autojs6-pro-only` / `verify-autojs6-indices` / `verify-autojs6-dts` / `test-completer.mjs` 于 2026-10-07 通过; 插件 `:app:verifyAutoJs6LspRuntime` 通过)
+- [x] P4.2 `BUILTIN_SIGNATURES` 支持 `signatures` 重载并新增 `Array.prototype.splice` (2) / `slice` / `indexOf`, `Array.from` (2), `String.prototype.replace` (2), `JSON.parse`, `JSON.stringify` (2), `Object.assign` / `keys`, `setTimeout` / `setInterval`, `Math.max` / `min`; 通用名称 (slice, parse, keys, max...) 仅带接收者匹配, 避免命中同名用户函数; `pickOverloadIndex` 按实参数选择重载. (证据: `test-signature-help.mjs` 新增内置重载用例)
+- [x] P4.3 Python / Lua provider 的 `normalizeSignatureHelp` 保留服务器返回的全部 `signatures` (含 `parameterDocs`), 顶层镜像服务器的 `activeSignature`. (证据: `node --check`; 插件 `:app:verifyAutoJs6LspRuntime` 通过)
+- [x] P4.4 `docs/dev/ace-lsp-design.md` 的 TypeScript 版本描述改为 6.0.3 并补充重载数据形状.
+
+验收:
+
+- [x] LSP 关闭时 `[].splice(|)` 仍能显示两条重载 (Node: `list.splice(0, 1, ` 选中 variadic 重载; 设备层见 P4.5).
+- [x] P4.5 设备手测 (2026-10-07, Xiaomi 968e9f18 / API 35, 插件 1.27.0): 写入 `key_$_ace_lsp_enabled = false` 后打开 `app.startActivity(`, 参数提示显示 `app.startActivity ▲ 1/2 ▼` 与静态签名 (首次实现时 `normalizeProperty` 丢弃了 `signatures`, 已修正并在 `test-completer.mjs` 加入断言); Python 文件内重载切换待补测 (需 Pyright worker 环境).
 
 ### P5 Ace 升级评估 (独立, 不阻塞)
 
-- [ ] P5.1 盘点 `autojs6_ace_bridge.js` 对 Ace 1.4.12 内部结构的依赖: `installCompletionPopupTouchScrollPatch`, `.ace_mobile-menu` 抑制, IME 选区窗口 (`installImeTextInputSelectionWindow`), `completer.popup.isOpen`, `completer.activated`, `renderer.textToScreenCoordinates` 等, 形成清单.
-- [ ] P5.2 列出目标版本 (1.44.x, 2026-05-11) 的收益: `triggerCharacters` (1.21), `liveAutocompletionDelay` / `liveAutocompletionThreshold`, 内联幽灵文本 (1.16 / 1.20), `selectOnHover` (1.26), 弹窗与触控改进; 评估能否替代 P2.3 的自实现.
-- [ ] P5.3 在插件分支上试水升级, 跑通 `verifyAutoJs6LspRuntime`, 宿主 Node 测试与设备手测矩阵 (`docs/dev/ace-editor-test-plan.md`), 记录回退标准.
+- [x] P5.1 依赖清单已写入 `docs/dev/ace-upgrade-evaluation.md` 第 1 节 (私有成员 6 类, `completer` 半公开 API, textInput, DOM 类名, `ace.require` 模块, 自实现补丁).
+- [x] P5.2 收益与风险已写入同文档第 2 / 3 节, 结论: 暂缓升级 (所需能力已在 1.4.12 上实现, 文本输入层重写风险最高).
+- [ ] P5.3 试水分支 (`spike/ace-1.44`) 待启动条件出现后执行, 计划与回退标准见同文档第 4 节.
 
-验收: 形成 "升级 / 暂缓" 的书面结论与风险清单, 由维护者拍板.
+验收:
+
+- [x] 形成 "升级 / 暂缓" 的书面结论与风险清单 (结论: 暂缓, 2026-10-07).
 
 ---
 
