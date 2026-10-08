@@ -32,6 +32,13 @@ value. `observations` is a positive integer. Unexplored or unfinished actions
 must be omitted, not recorded as zero-survival examples. A task with no observed
 rows remains present in manifest groups and exporter coverage statistics.
 
+A format 2 export (`export-manifest.json` with `format: 2`, written by the third
+experiment) inserts `labelBest` between `label` and `observations`: the maximum
+survival among the completed observed rollouts through that state/action. It is
+an observed lower bound of the best continuation, never an exact optimum, and it
+is never below the mean. Format 1 exports stay readable; only format 2 can fit
+the best-continuation target.
+
 The loader checks checksums, unique schema names, exact CSV column order, finite
 Float32 features, label range, positive observation counts, unique
 `(groupId, stateKey, actionKey)`, and group/split consistency. A screen family must
@@ -54,12 +61,19 @@ Alternatively, run `python -m construction.train` from `tools/codegen-model`.
 The Python API is `construction.train.train(dataset_dir, output_dir, **options)`.
 
 Defaults are `--iterations 256`, `--depth 6`, `--seed 20261007`,
-`--early-stopping-rounds 32`, and `--parity-max-rows 5000`. Iterations are bounded
-to 256 and depth to 6. Training uses CatBoostRegressor, symmetric trees, RMSE,
-CPU, one thread, and a fixed learning rate of 0.05. Only `train` fits the weights;
-only `valid` controls early stopping and best-iteration selection. `test` and
-`real-test` are validated as protocol input but their labels and vectors never
-enter either pool. Do not tune these options from held-out results.
+`--early-stopping-rounds 32`, `--parity-max-rows 5000` and `--label mean`.
+Iterations are bounded to 256 and depth to 6. Training uses CatBoostRegressor,
+symmetric trees, RMSE, CPU, one thread, and a fixed learning rate of 0.05. Only
+`train` fits the weights; only `valid` controls early stopping and best-iteration
+selection. `test` and `real-test` are validated as protocol input but their labels
+and vectors never enter either pool. Do not tune these options from held-out results.
+
+`--label best` fits the best observed continuation of a format 2 export instead of
+the mean; the resulting `policy.json` declares `scoreSemantics:
+"best-observed-continuation-v1"` and `train-log.json` records `labelSelection`
+and `exportFormat`. Both targets are comparable completion values of one state.
+The Kotlin reader accepts either declaration and exposes it; the searcher never
+sums scores across steps under either target.
 
 State/action rows receive **equal weight**. Observation counts describe teacher
 exploration coverage; they do not establish independent samples and are not used
@@ -269,6 +283,93 @@ Output excludes selector literals and raw plan/state/action keys. The inferred
 first pruned prefix does not turn the forced continuation into a model-produced
 trajectory and must not become a held-out training row.
 
+## Third experiment: label semantics and collection coverage
+
+The second experiment's diagnosis located every fresh coverage loss inside one
+anchor/phase bucket: a valid `id` prefix lost to its siblings under the frozen
+policy. Two hypotheses are tested together in the third experiment, both as
+training-data changes with the grammar, features, controller and budgets left
+unchanged:
+
+1. The supervised target. The mean observed return of a prefix is pulled down by
+   its many poor continuations, while search needs to retain prefixes that still
+   have at least one strong continuation. `labelBest` is that observed maximum.
+2. Training coverage. The first export sampled 28 tasks per screen family, so
+   collection intents were one seventh of the data, and only the `FAMILY_SCORE`
+   controller produced trajectories. The third export samples single and
+   collection intents separately and alternates both controllers.
+
+`ConstructionThirdExperimentTask` exports train/valid families only (the test
+family is reserved for holdouts), four teacher runs per task (plain heuristic
+under each controller, then seeded exploration under each), and writes format 2
+rows with both labels. Then two policies are fitted from the same export:
+
+```powershell
+$env:CODEGEN_CONSTRUCTION_R3_MODE = 'export'
+$env:CODEGEN_CONSTRUCTION_DATASET = [IO.Path]::GetFullPath('tools/codegen-model/out/cg-ds-2026.10-1')
+$env:CODEGEN_CONSTRUCTION_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-export')
+$env:CODEGEN_CONSTRUCTION_R3_SINGLE = '28'
+$env:CODEGEN_CONSTRUCTION_R3_COLLECTION = '28'
+$env:CODEGEN_CONSTRUCTION_TEACHER_RUNS = '4'
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionThirdExperimentTask'
+
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/construction/train.py `
+  --dataset-dir $env:CODEGEN_CONSTRUCTION_OUTPUT --output-dir tools/codegen-model/out/construction-r3-fit-mean --label mean
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/construction/train.py `
+  --dataset-dir $env:CODEGEN_CONSTRUCTION_OUTPUT --output-dir tools/codegen-model/out/construction-r3-fit-best --label best
+```
+
+The frozen comparison has five methods under the `ANCHOR_PHASE_FAIR` controller
+and the same tiny-v1 final ranker: the original search, the fixed heuristic, the
+frozen second-round policy (`fair_model_r2`, the reference), and the two new
+policies (`fair_model_mean`, `fair_model_best`). Every row also reports the same
+candidates ordered by `RuleRanker` (`ruleTop1Survival`), a model-free second view
+of whether constructed candidates reach the recommendation.
+
+```powershell
+$env:CODEGEN_CONSTRUCTION_R3_EXPORT = $env:CODEGEN_CONSTRUCTION_OUTPUT
+$env:CODEGEN_CONSTRUCTION_R3_FIT_MEAN = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-fit-mean')
+$env:CODEGEN_CONSTRUCTION_R3_FIT_BEST = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-fit-best')
+$env:CODEGEN_CONSTRUCTION_POLICY_DIR = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-fit-1')
+$env:CODEGEN_CONSTRUCTION_EXPORT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-export-1')
+$env:CODEGEN_CONSTRUCTION_R2_PROTOCOL = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r2-protocol-2')
+$env:CODEGEN_CONSTRUCTION_R3_PROTOCOL = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-protocol')
+$env:CODEGEN_CONSTRUCTION_R3_MODE = 'freeze'
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionThirdExperimentTask'
+
+$env:CODEGEN_CONSTRUCTION_R3_MODE = 'develop'
+$env:CODEGEN_CONSTRUCTION_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-development')
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionThirdExperimentTask'
+
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/construction/select_third.py `
+  --protocol-dir $env:CODEGEN_CONSTRUCTION_R3_PROTOCOL --development-dir $env:CODEGEN_CONSTRUCTION_OUTPUT
+
+$env:CODEGEN_CONSTRUCTION_R3_DEVELOPMENT = $env:CODEGEN_CONSTRUCTION_OUTPUT
+$env:CODEGEN_CONSTRUCTION_R3_MODE = 'holdout'
+$env:CODEGEN_CONSTRUCTION_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-holdout')
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionThirdExperimentTask'
+Remove-Item Env:CODEGEN_CONSTRUCTION_R3_MODE
+```
+
+The freeze binds the export, both fits (their input hashes, declared labels and
+artifacts), the reference policy bytes, the ranker bytes, source identities and all
+task memberships. The selection tool chooses between the two new policies by
+validation `top1Survival`, then `bestSurvival`, then `coverage`, ties preferring
+`fair_model_best`; the preregistered order and tie rule are in the protocol and
+the tool refuses any other criteria. The chosen policy is admitted only when no
+validation measure regresses against `fair_model_r2`, at least one measure
+strictly improves on train or valid, and every development run completes without
+an error or deadline stop. Kotlin rechecks the choice and the admission before any
+held-out task is loaded. A rejected decision remains recorded.
+
+The holdout reports five cohorts: 28 captured tasks whose snapshot clusters were
+unused by every earlier construction experiment, the 24 newly authored
+`ConstructionThirdSyntheticFixtures` tasks, and three regression cohorts (the 24
+first-experiment bottleneck tasks, the 24 second-experiment generalization tasks
+and the 28 second-experiment captured tasks), all previously inspected and never
+used for selection. No cohort may be dropped for zero candidates, errors or late
+results.
+
 ## Tests
 
 ```powershell
@@ -277,11 +378,15 @@ $env:CODEGEN_TEST_TRAINING = '1'
   -s tools/codegen-model/construction -t tools/codegen-model -p test_train.py
 & tools/codegen-model/out/venv-py312/Scripts/python.exe -m unittest discover `
   -s tools/codegen-model/construction -t tools/codegen-model -p test_select_frontier.py
+& tools/codegen-model/out/venv-py312/Scripts/python.exe -m unittest discover `
+  -s tools/codegen-model/construction -t tools/codegen-model -p test_select_third.py
 ```
 
-The opt-in real training test fits twice with unchanged input, then changes only
-held-out rows and fits again. Canonical model JSON, policy JSON, and parity rows
-must remain byte-identical. Protocol tests cover tampering, family leakage,
+The opt-in real training tests fit twice with unchanged input, then change only
+held-out rows and fit again, and separately fit a format 2 fixture with both
+labels. Canonical model JSON, policy JSON, and parity rows must remain
+byte-identical across repeats; the two label targets must differ and declare
+their own score semantics. Protocol tests cover tampering, family leakage,
 unobserved actions, private paths, output protection, Float32 bounds, complete
 parity groups, near ties, and constant-tree conversion. Without the environment
 flag, only the actual CatBoost fit test is skipped.

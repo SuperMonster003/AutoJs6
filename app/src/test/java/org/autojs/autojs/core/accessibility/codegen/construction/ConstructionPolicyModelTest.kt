@@ -177,7 +177,8 @@ class ConstructionPolicyModelTest {
         assumeTrue("Set CODEGEN_CONSTRUCTION_POLICY_DIR for trained construction-policy parity", configured != null)
         val directory = File(requireNotNull(configured)).canonicalFile
         val logFile = File(directory, "train-log.json")
-        require(logFile.length() in 1..(1024 * 1024)) { "Construction training log size is invalid" }
+        // The log embeds the export manifest, which grows with the number of exported tasks.
+        require(logFile.length() in 1..(16L * 1024 * 1024)) { "Construction training log size is invalid" }
         val log = JsonParser.parseString(logFile.readText(Charsets.UTF_8)).asJsonObject
         assertEquals("policy.json", log["modelFile"].asString)
         assertEquals("parity.jsonl", log["parityFile"].asString)
