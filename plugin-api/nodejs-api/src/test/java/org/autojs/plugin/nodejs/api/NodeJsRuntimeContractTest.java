@@ -9,6 +9,14 @@ import static org.junit.Assert.assertTrue;
 
 public class NodeJsRuntimeContractTest {
 
+    @Test public void configurablePoolKeepsPublishedHandshakeAndAdditiveInfoKeys() {
+        assertEquals(2, NodeJsRuntimeContract.CONTRACT_VERSION);
+        assertEquals(3, NodeJsRuntimeContract.MAX_CONTRACT_VERSION);
+        assertEquals("processPoolMaxConcurrentExecutions", NodeJsRuntimeContract.KEY_PROCESS_POOL_MAX_CONCURRENT_EXECUTIONS);
+        assertEquals("queueCapacity", NodeJsRuntimeContract.KEY_QUEUE_CAPACITY);
+        assertEquals("queueUnlimited", NodeJsRuntimeContract.KEY_QUEUE_UNLIMITED);
+    }
+
     @Test
     public void supportedContractRangeIncludesBothBoundsAndCurrentVersion() {
         assertTrue(NodeJsRuntimeContract.MIN_CONTRACT_VERSION

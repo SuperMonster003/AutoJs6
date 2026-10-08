@@ -47,6 +47,11 @@ object NodeJsRuntimeContract {
     const val KEY_EXECUTION_ID = "executionId"
     /** Additive worker index; -1 means the request has not been assigned a process. */
     const val KEY_SLOT_ID = "slotId"
+    /** Actual configured pool capacity, independent of per-process maxConcurrentExecutions=1. */
+    const val KEY_PROCESS_POOL_MAX_CONCURRENT_EXECUTIONS = "processPoolMaxConcurrentExecutions"
+    /** Nonnegative for v2 hosts; Int.MAX_VALUE when queueUnlimited is true. */
+    const val KEY_QUEUE_CAPACITY = "queueCapacity"
+    const val KEY_QUEUE_UNLIMITED = "queueUnlimited"
     const val KEY_SOURCE = "source"
     const val KEY_SOURCE_NAME = "sourceName"
     const val KEY_WORKING_DIRECTORY = "workingDirectory"
