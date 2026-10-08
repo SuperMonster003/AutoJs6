@@ -3,3 +3,5 @@
 *.txt linguist-detectable=false
 
 app/src/main/res/raw/ace_font_catalog_v1.json text eol=lf
+app/src/main/assets-app/indices/compose-examples.json text eol=lf
+app/src/main/assets-app/sample/Compose[[:space:]]UI/*.js text eol=lf

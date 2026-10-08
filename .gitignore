@@ -18,6 +18,7 @@ output.json
 output-metadata.json
 desktop.ini
 AGENTS.md
+CLAUDE.md
 
 .bak/
 .git/
