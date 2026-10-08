@@ -1,0 +1,2580 @@
+{
+  "format": 1,
+  "role": "construction-third-experiment-aggregate",
+  "date": "2026-10-08",
+  "export": {
+    "datasetId": "cg-ds-2026.10-1-construction-third",
+    "format": 2,
+    "groups": 392,
+    "groupsBySplitAndScope": {
+      "train/collection": 168,
+      "train/single": 168,
+      "valid/collection": 28,
+      "valid/single": 28
+    },
+    "screenFamilies": {
+      "dialog": 56,
+      "grid": 56,
+      "login": 56,
+      "nested-scroll": 56,
+      "no-id": 56,
+      "settings": 56,
+      "tabs": 56
+    },
+    "rows": 2626578,
+    "unknownEdges": 3804975,
+    "completedRollouts": 1347459,
+    "validCompletedRollouts": 1039904,
+    "teacherRuns": 4,
+    "teacherControllers": [
+      "FAMILY_SCORE",
+      "ANCHOR_PHASE_FAIR",
+      "FAMILY_SCORE+noise",
+      "ANCHOR_PHASE_FAIR+noise"
+    ],
+    "teacherRunStops": {
+      "EXHAUSTED": 785,
+      "VERIFICATION_BUDGET": 783
+    },
+    "teacherRunCount": 1568,
+    "labelSemantics": {
+      "label": "mean survival of completed observed rollouts through the state/action; unknown edges omitted",
+      "labelBest": "maximum survival among completed observed rollouts through the state/action; an observed lower bound of the best continuation"
+    },
+    "teacherBudget": {
+      "maxAttempts": 2000,
+      "maxVerified": 200,
+      "maxFrontier": 128,
+      "maxExpandedStates": 4000,
+      "maxActionScores": 24000,
+      "maxDepth": 48,
+      "maxPathSteps": 4,
+      "maxAnchors": 128,
+      "maxCapturedNodes": 10000,
+      "maxMillis": 30000
+    },
+    "artifacts": {
+      "features.json": {
+        "bytes": 1872,
+        "sha256": "28c74afb8aa9a95b5211c6c829c2d4e784191aa30435da6a64b463baa9bff954"
+      },
+      "actions.csv": {
+        "bytes": 1229054024,
+        "sha256": "3912823ed955bf5dbd749403a25e6bf06529b71466b8707cae3e4d624971555e"
+      },
+      "teacher-traces.jsonl": {
+        "bytes": 1971299337,
+        "sha256": "d2a25fbb33815735cb634daf3e09895f658b1956e9bbdb0f22114edbb1762a8a"
+      },
+      "export-manifest.json": {
+        "bytes": 1469844,
+        "sha256": "3c8639e2ee8eee4352ec44890be2bb5777dec4398752af78b73a5a963adc8353"
+      }
+    }
+  },
+  "fits": {
+    "mean": {
+      "labelSelection": "mean",
+      "scoreSemantics": "observed-rollout-survival-v1",
+      "treeCount": 144,
+      "bestIteration": 143,
+      "bestScore": {
+        "learn": {
+          "RMSE": 0.18825069106403305
+        },
+        "validation": {
+          "RMSE": 0.23623162758044336
+        }
+      },
+      "elapsedSeconds": 79.917797,
+      "repeatElapsedSeconds": 79.144607,
+      "policyBytes": 217698,
+      "policySha256": "98a09d2fd7f6ebefd47fe278fa1b3b708650a489e5913dc705ccd8d68cea6fc4",
+      "canonicalModelSha256": "8635efbda599392d29b775dd1e8c41c53eff5588c854309072e1587464367b46",
+      "repeatByteIdentical": true,
+      "parityRows": 5000,
+      "parityStates": 2644,
+      "maxPolicyScoreDifference": 5.11190501040204e-09,
+      "actions": {
+        "train": 2268436,
+        "valid": 358142
+      },
+      "groups": {
+        "train": 336,
+        "valid": 56
+      }
+    },
+    "best": {
+      "labelSelection": "best",
+      "scoreSemantics": "best-observed-continuation-v1",
+      "treeCount": 159,
+      "bestIteration": 158,
+      "bestScore": {
+        "learn": {
+          "RMSE": 0.20070951930816622
+        },
+        "validation": {
+          "RMSE": 0.24114339872810261
+        }
+      },
+      "elapsedSeconds": 86.039209,
+      "repeatElapsedSeconds": 81.335827,
+      "policyBytes": 244396,
+      "policySha256": "48f1014a0f850027a18ac46f567262dfe6be63f75b4035947cd6603c285bc1dd",
+      "canonicalModelSha256": "8d4bb66b58754afdb90fb501bf5e7232f736da5378d7199f15a426efcb06e708",
+      "repeatByteIdentical": true,
+      "parityRows": 5000,
+      "parityStates": 2644,
+      "maxPolicyScoreDifference": 7.356212639031412e-09,
+      "actions": {
+        "train": 2268436,
+        "valid": 358142
+      },
+      "groups": {
+        "train": 336,
+        "valid": 56
+      }
+    }
+  },
+  "referencePolicySha256": "ecb04d2f7086b6c1065ff949b821be3d5e37a06ca2e5c5deca63b478acaffa62",
+  "fixedRankerSha256": "9ab137a6e184f52246768a905ea98a09a03cf4da97f221526d70e7b6f32afc17",
+  "protocolSha256": "721aa3519e921c72f13a33c7a10a2bdf80c9fb1d6aa543007adc290dcb306452",
+  "selectionSha256": "324c97f1164c7993cd8acbe96d53eb466691535ac17b229f729cb02e9840d5c5",
+  "selection": {
+    "chosenMethod": "fair_model_best",
+    "candidateOrder": [
+      "fair_model_best",
+      "fair_model_mean"
+    ],
+    "passed": false,
+    "reasons": [
+      "Validation top1Survival regressed against fair_model_r2"
+    ],
+    "referenceMethod": "fair_model_r2"
+  },
+  "selectionComparison": [
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "baseline",
+      "split": "train",
+      "top1Survival": 0.9360119047619048
+    },
+    {
+      "bestSurvival": 0.8958333333333334,
+      "coverage": 1.0,
+      "method": "fair_heuristic",
+      "split": "train",
+      "top1Survival": 0.8407738095238095
+    },
+    {
+      "bestSurvival": 0.9642857142857143,
+      "coverage": 1.0,
+      "method": "fair_model_r2",
+      "split": "train",
+      "top1Survival": 0.9434523809523809
+    },
+    {
+      "bestSurvival": 0.9747023809523809,
+      "coverage": 1.0,
+      "method": "fair_model_mean",
+      "split": "train",
+      "top1Survival": 0.9508928571428571
+    },
+    {
+      "bestSurvival": 0.9702380952380952,
+      "coverage": 1.0,
+      "method": "fair_model_best",
+      "split": "train",
+      "top1Survival": 0.9360119047619048
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "baseline",
+      "split": "valid",
+      "top1Survival": 0.9375
+    },
+    {
+      "bestSurvival": 0.8035714285714286,
+      "coverage": 1.0,
+      "method": "fair_heuristic",
+      "split": "valid",
+      "top1Survival": 0.7321428571428571
+    },
+    {
+      "bestSurvival": 0.9642857142857143,
+      "coverage": 1.0,
+      "method": "fair_model_r2",
+      "split": "valid",
+      "top1Survival": 0.9464285714285714
+    },
+    {
+      "bestSurvival": 0.9732142857142857,
+      "coverage": 1.0,
+      "method": "fair_model_mean",
+      "split": "valid",
+      "top1Survival": 0.9375
+    },
+    {
+      "bestSurvival": 0.9732142857142857,
+      "coverage": 1.0,
+      "method": "fair_model_best",
+      "split": "valid",
+      "top1Survival": 0.9375
+    }
+  ],
+  "development": {
+    "groups": 392,
+    "resultsSha256": "e069ecc5a76a3947eae51d89cecdc72ecdaa714eaab763cfcffa1b62ba9ff7de",
+    "summary": [
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "baseline",
+        "groups": 336,
+        "candidates": 40.5625,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.9360119047619048,
+        "top3BestSurvival": 0.9479166666666666,
+        "ruleTop1Survival": 0.8422619047619048,
+        "ruleTop3BestSurvival": 0.9002976190476191,
+        "commonRegret": 0.046130952380952384,
+        "commonTop3Recall": 0.9315476190476191,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 20,
+        "elapsedP50Millis": 7.853,
+        "elapsedP95Millis": 12.941,
+        "elapsedMaxMillis": 18.654,
+        "stopReasons": {
+          "COUNTER_BUDGET": 336
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_heuristic",
+        "groups": 336,
+        "candidates": 13.339285714285714,
+        "coverage": 1.0,
+        "bestSurvival": 0.8958333333333334,
+        "top1Survival": 0.8407738095238095,
+        "top3BestSurvival": 0.8407738095238095,
+        "ruleTop1Survival": 0.8407738095238095,
+        "ruleTop3BestSurvival": 0.8422619047619048,
+        "commonRegret": 0.14136904761904762,
+        "commonTop3Recall": 0.7261904761904762,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "novelCandidates": 1053,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "elapsedP50Millis": 116.9872,
+        "elapsedP95Millis": 171.3887,
+        "elapsedMaxMillis": 280.4337,
+        "stopReasons": {
+          "EXHAUSTED": 296,
+          "VERIFICATION_BUDGET": 40
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_best",
+        "groups": 336,
+        "candidates": 13.348214285714286,
+        "coverage": 1.0,
+        "bestSurvival": 0.9702380952380952,
+        "top1Survival": 0.9360119047619048,
+        "top3BestSurvival": 0.9404761904761905,
+        "ruleTop1Survival": 0.8913690476190477,
+        "ruleTop3BestSurvival": 0.8928571428571429,
+        "commonRegret": 0.046130952380952384,
+        "commonTop3Recall": 0.9166666666666666,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "novelCandidates": 1066,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 18,
+        "elapsedP50Millis": 113.9109,
+        "elapsedP95Millis": 171.9422,
+        "elapsedMaxMillis": 215.5973,
+        "stopReasons": {
+          "EXHAUSTED": 211,
+          "VERIFICATION_BUDGET": 125
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_mean",
+        "groups": 336,
+        "candidates": 10.797619047619047,
+        "coverage": 1.0,
+        "bestSurvival": 0.9747023809523809,
+        "top1Survival": 0.9508928571428571,
+        "top3BestSurvival": 0.9598214285714286,
+        "ruleTop1Survival": 0.8824404761904762,
+        "ruleTop3BestSurvival": 0.8913690476190477,
+        "commonRegret": 0.03125,
+        "commonTop3Recall": 0.9553571428571429,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "novelCandidates": 1109,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 13,
+        "elapsedP50Millis": 125.9335,
+        "elapsedP95Millis": 173.6527,
+        "elapsedMaxMillis": 363.6596,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 106,
+          "EXHAUSTED": 230
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_r2",
+        "groups": 336,
+        "candidates": 8.982142857142858,
+        "coverage": 1.0,
+        "bestSurvival": 0.9642857142857143,
+        "top1Survival": 0.9434523809523809,
+        "top3BestSurvival": 0.9523809523809523,
+        "ruleTop1Survival": 0.8824404761904762,
+        "ruleTop3BestSurvival": 0.8973214285714286,
+        "commonRegret": 0.03869047619047619,
+        "commonTop3Recall": 0.9404761904761905,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "novelCandidates": 1018,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 7,
+        "elapsedP50Millis": 100.7622,
+        "elapsedP95Millis": 142.1217,
+        "elapsedMaxMillis": 172.8579,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 84,
+          "EXHAUSTED": 252
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "baseline",
+        "groups": 56,
+        "candidates": 48.19642857142857,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.9375,
+        "top3BestSurvival": 0.9464285714285714,
+        "ruleTop1Survival": 0.7321428571428571,
+        "ruleTop3BestSurvival": 0.8839285714285714,
+        "commonRegret": 0.044642857142857144,
+        "commonTop3Recall": 0.9285714285714286,
+        "baselineRuleTop1Survival": 0.7321428571428571,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 4,
+        "elapsedP50Millis": 7.365,
+        "elapsedP95Millis": 11.4874,
+        "elapsedMaxMillis": 11.7937,
+        "stopReasons": {
+          "COUNTER_BUDGET": 56
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_heuristic",
+        "groups": 56,
+        "candidates": 9.482142857142858,
+        "coverage": 1.0,
+        "bestSurvival": 0.8035714285714286,
+        "top1Survival": 0.7321428571428571,
+        "top3BestSurvival": 0.7321428571428571,
+        "ruleTop1Survival": 0.7321428571428571,
+        "ruleTop3BestSurvival": 0.7410714285714286,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.7321428571428571,
+        "novelCandidates": 116,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 125.8195,
+        "elapsedP95Millis": 140.5003,
+        "elapsedMaxMillis": 146.1558,
+        "stopReasons": {
+          "EXHAUSTED": 56
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_best",
+        "groups": 56,
+        "candidates": 17.517857142857142,
+        "coverage": 1.0,
+        "bestSurvival": 0.9732142857142857,
+        "top1Survival": 0.9375,
+        "top3BestSurvival": 0.9464285714285714,
+        "ruleTop1Survival": 0.8839285714285714,
+        "ruleTop3BestSurvival": 0.8839285714285714,
+        "commonRegret": 0.044642857142857144,
+        "commonTop3Recall": 0.9285714285714286,
+        "baselineRuleTop1Survival": 0.7321428571428571,
+        "novelCandidates": 246,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 4,
+        "elapsedP50Millis": 129.3071,
+        "elapsedP95Millis": 202.4171,
+        "elapsedMaxMillis": 290.535,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 37,
+          "EXHAUSTED": 19
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_mean",
+        "groups": 56,
+        "candidates": 11.660714285714286,
+        "coverage": 1.0,
+        "bestSurvival": 0.9732142857142857,
+        "top1Survival": 0.9375,
+        "top3BestSurvival": 0.9642857142857143,
+        "ruleTop1Survival": 0.8839285714285714,
+        "ruleTop3BestSurvival": 0.8839285714285714,
+        "commonRegret": 0.044642857142857144,
+        "commonTop3Recall": 0.9642857142857143,
+        "baselineRuleTop1Survival": 0.7321428571428571,
+        "novelCandidates": 167,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 4,
+        "elapsedP50Millis": 118.8211,
+        "elapsedP95Millis": 144.5931,
+        "elapsedMaxMillis": 146.0804,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 11,
+          "EXHAUSTED": 45
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_r2",
+        "groups": 56,
+        "candidates": 8.642857142857142,
+        "coverage": 1.0,
+        "bestSurvival": 0.9642857142857143,
+        "top1Survival": 0.9464285714285714,
+        "top3BestSurvival": 0.9553571428571429,
+        "ruleTop1Survival": 0.8839285714285714,
+        "ruleTop3BestSurvival": 0.8839285714285714,
+        "commonRegret": 0.03571428571428571,
+        "commonTop3Recall": 0.9464285714285714,
+        "baselineRuleTop1Survival": 0.7321428571428571,
+        "novelCandidates": 166,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 1,
+        "elapsedP50Millis": 93.2492,
+        "elapsedP95Millis": 114.1113,
+        "elapsedMaxMillis": 117.3034,
+        "stopReasons": {
+          "EXHAUSTED": 56
+        },
+        "errors": 0
+      }
+    ],
+    "pairwise": [
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_mean",
+        "reference": "fair_model_r2",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 8,
+          "tied": 327,
+          "worsened": 1,
+          "meanDifference": 0.010416666666666666
+        },
+        "top1Survival": {
+          "improved": 13,
+          "tied": 315,
+          "worsened": 8,
+          "meanDifference": 0.00744047619047619
+        },
+        "top3BestSurvival": {
+          "improved": 13,
+          "tied": 315,
+          "worsened": 8,
+          "meanDifference": 0.00744047619047619
+        },
+        "ruleTop1Survival": {
+          "improved": 9,
+          "tied": 315,
+          "worsened": 12,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_mean",
+        "reference": "fair_heuristic",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 53,
+          "tied": 283,
+          "worsened": 0,
+          "meanDifference": 0.07886904761904762
+        },
+        "top1Survival": {
+          "improved": 84,
+          "tied": 239,
+          "worsened": 13,
+          "meanDifference": 0.11011904761904762
+        },
+        "top3BestSurvival": {
+          "improved": 84,
+          "tied": 245,
+          "worsened": 7,
+          "meanDifference": 0.11904761904761904
+        },
+        "ruleTop1Survival": {
+          "improved": 36,
+          "tied": 292,
+          "worsened": 8,
+          "meanDifference": 0.041666666666666664
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_mean",
+        "reference": "baseline",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 331,
+          "worsened": 5,
+          "meanDifference": -0.00744047619047619
+        },
+        "top1Survival": {
+          "improved": 11,
+          "tied": 324,
+          "worsened": 1,
+          "meanDifference": 0.01488095238095238
+        },
+        "top3BestSurvival": {
+          "improved": 9,
+          "tied": 326,
+          "worsened": 1,
+          "meanDifference": 0.011904761904761904
+        },
+        "ruleTop1Survival": {
+          "improved": 33,
+          "tied": 297,
+          "worsened": 6,
+          "meanDifference": 0.04017857142857143
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_best",
+        "reference": "fair_model_r2",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 5,
+          "tied": 330,
+          "worsened": 1,
+          "meanDifference": 0.005952380952380952
+        },
+        "top1Survival": {
+          "improved": 7,
+          "tied": 317,
+          "worsened": 12,
+          "meanDifference": -0.00744047619047619
+        },
+        "top3BestSurvival": {
+          "improved": 9,
+          "tied": 310,
+          "worsened": 17,
+          "meanDifference": -0.011904761904761904
+        },
+        "ruleTop1Survival": {
+          "improved": 9,
+          "tied": 321,
+          "worsened": 6,
+          "meanDifference": 0.008928571428571428
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_best",
+        "reference": "fair_heuristic",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 50,
+          "tied": 286,
+          "worsened": 0,
+          "meanDifference": 0.0744047619047619
+        },
+        "top1Survival": {
+          "improved": 79,
+          "tied": 239,
+          "worsened": 18,
+          "meanDifference": 0.09523809523809523
+        },
+        "top3BestSurvival": {
+          "improved": 80,
+          "tied": 240,
+          "worsened": 16,
+          "meanDifference": 0.09970238095238096
+        },
+        "ruleTop1Survival": {
+          "improved": 35,
+          "tied": 300,
+          "worsened": 1,
+          "meanDifference": 0.050595238095238096
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "fair_model_best",
+        "reference": "baseline",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 328,
+          "worsened": 8,
+          "meanDifference": -0.011904761904761904
+        },
+        "top1Survival": {
+          "improved": 7,
+          "tied": 322,
+          "worsened": 7,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 1,
+          "tied": 329,
+          "worsened": 6,
+          "meanDifference": -0.00744047619047619
+        },
+        "ruleTop1Survival": {
+          "improved": 34,
+          "tied": 301,
+          "worsened": 1,
+          "meanDifference": 0.049107142857142856
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_mean",
+        "reference": "fair_model_r2",
+        "groups": 56,
+        "coverage": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 1,
+          "tied": 55,
+          "worsened": 0,
+          "meanDifference": 0.008928571428571428
+        },
+        "top1Survival": {
+          "improved": 2,
+          "tied": 51,
+          "worsened": 3,
+          "meanDifference": -0.008928571428571428
+        },
+        "top3BestSurvival": {
+          "improved": 2,
+          "tied": 53,
+          "worsened": 1,
+          "meanDifference": 0.008928571428571428
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_mean",
+        "reference": "fair_heuristic",
+        "groups": 56,
+        "coverage": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 19,
+          "tied": 37,
+          "worsened": 0,
+          "meanDifference": 0.16964285714285715
+        },
+        "top1Survival": {
+          "improved": 27,
+          "tied": 25,
+          "worsened": 4,
+          "meanDifference": 0.20535714285714285
+        },
+        "top3BestSurvival": {
+          "improved": 27,
+          "tied": 28,
+          "worsened": 1,
+          "meanDifference": 0.23214285714285715
+        },
+        "ruleTop1Survival": {
+          "improved": 17,
+          "tied": 39,
+          "worsened": 0,
+          "meanDifference": 0.15178571428571427
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_mean",
+        "reference": "baseline",
+        "groups": 56,
+        "coverage": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 55,
+          "worsened": 1,
+          "meanDifference": -0.008928571428571428
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 3,
+          "tied": 52,
+          "worsened": 1,
+          "meanDifference": 0.017857142857142856
+        },
+        "ruleTop1Survival": {
+          "improved": 17,
+          "tied": 39,
+          "worsened": 0,
+          "meanDifference": 0.15178571428571427
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_best",
+        "reference": "fair_model_r2",
+        "groups": 56,
+        "coverage": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 1,
+          "tied": 55,
+          "worsened": 0,
+          "meanDifference": 0.008928571428571428
+        },
+        "top1Survival": {
+          "improved": 2,
+          "tied": 51,
+          "worsened": 3,
+          "meanDifference": -0.008928571428571428
+        },
+        "top3BestSurvival": {
+          "improved": 2,
+          "tied": 51,
+          "worsened": 3,
+          "meanDifference": -0.008928571428571428
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_best",
+        "reference": "fair_heuristic",
+        "groups": 56,
+        "coverage": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 19,
+          "tied": 37,
+          "worsened": 0,
+          "meanDifference": 0.16964285714285715
+        },
+        "top1Survival": {
+          "improved": 27,
+          "tied": 25,
+          "worsened": 4,
+          "meanDifference": 0.20535714285714285
+        },
+        "top3BestSurvival": {
+          "improved": 27,
+          "tied": 26,
+          "worsened": 3,
+          "meanDifference": 0.21428571428571427
+        },
+        "ruleTop1Survival": {
+          "improved": 17,
+          "tied": 39,
+          "worsened": 0,
+          "meanDifference": 0.15178571428571427
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "fair_model_best",
+        "reference": "baseline",
+        "groups": 56,
+        "coverage": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 55,
+          "worsened": 1,
+          "meanDifference": -0.008928571428571428
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 56,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "ruleTop1Survival": {
+          "improved": 17,
+          "tied": 39,
+          "worsened": 0,
+          "meanDifference": 0.15178571428571427
+        }
+      }
+    ],
+    "validTaskChangesAgainstReference": [
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_mean",
+        "top1Survival": 0.5,
+        "referenceTop1Survival": 1.0,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 1.0,
+        "candidates": 11,
+        "referenceCandidates": 10
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_best",
+        "top1Survival": 0.5,
+        "referenceTop1Survival": 1.0,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 1.0,
+        "candidates": 15,
+        "referenceCandidates": 10
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_mean",
+        "top1Survival": 0.5,
+        "referenceTop1Survival": 1.0,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 1.0,
+        "candidates": 11,
+        "referenceCandidates": 10
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_best",
+        "top1Survival": 0.5,
+        "referenceTop1Survival": 1.0,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 1.0,
+        "candidates": 15,
+        "referenceCandidates": 10
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_mean",
+        "top1Survival": 0.5,
+        "referenceTop1Survival": 1.0,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 1.0,
+        "candidates": 9,
+        "referenceCandidates": 9
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_best",
+        "top1Survival": 0.5,
+        "referenceTop1Survival": 1.0,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 1.0,
+        "candidates": 19,
+        "referenceCandidates": 9
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_mean",
+        "top1Survival": 1.0,
+        "referenceTop1Survival": 0.5,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 1.0,
+        "candidates": 9,
+        "referenceCandidates": 9
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_best",
+        "top1Survival": 1.0,
+        "referenceTop1Survival": 0.5,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 1.0,
+        "candidates": 19,
+        "referenceCandidates": 9
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_mean",
+        "top1Survival": 1.0,
+        "referenceTop1Survival": 0.5,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 0.5,
+        "candidates": 11,
+        "referenceCandidates": 10
+      },
+      {
+        "screenFamily": "settings",
+        "scope": "single",
+        "method": "fair_model_best",
+        "top1Survival": 1.0,
+        "referenceTop1Survival": 0.5,
+        "bestSurvival": 1.0,
+        "referenceBestSurvival": 0.5,
+        "candidates": 16,
+        "referenceCandidates": 10
+      }
+    ],
+    "byScope": {
+      "train": {
+        "single": {
+          "groups": 168,
+          "baseline": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.8720238095238095,
+            "ruleTop1Survival": 0.7351190476190477
+          },
+          "fair_heuristic": {
+            "coverage": 1.0,
+            "bestSurvival": 0.8422619047619048,
+            "top1Survival": 0.7321428571428571,
+            "ruleTop1Survival": 0.7321428571428571
+          },
+          "fair_model_r2": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9285714285714286,
+            "top1Survival": 0.8869047619047619,
+            "ruleTop1Survival": 0.7648809523809523
+          },
+          "fair_model_mean": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9494047619047619,
+            "top1Survival": 0.9017857142857143,
+            "ruleTop1Survival": 0.7648809523809523
+          },
+          "fair_model_best": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9404761904761905,
+            "top1Survival": 0.8720238095238095,
+            "ruleTop1Survival": 0.7827380952380952
+          }
+        },
+        "collection": {
+          "groups": 168,
+          "baseline": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "ruleTop1Survival": 0.9494047619047619
+          },
+          "fair_heuristic": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9494047619047619,
+            "top1Survival": 0.9494047619047619,
+            "ruleTop1Survival": 0.9494047619047619
+          },
+          "fair_model_r2": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "ruleTop1Survival": 1.0
+          },
+          "fair_model_mean": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "ruleTop1Survival": 1.0
+          },
+          "fair_model_best": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "ruleTop1Survival": 1.0
+          }
+        }
+      },
+      "valid": {
+        "single": {
+          "groups": 28,
+          "baseline": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.875,
+            "ruleTop1Survival": 0.7678571428571429
+          },
+          "fair_heuristic": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9107142857142857,
+            "top1Survival": 0.7678571428571429,
+            "ruleTop1Survival": 0.7678571428571429
+          },
+          "fair_model_r2": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9285714285714286,
+            "top1Survival": 0.8928571428571429,
+            "ruleTop1Survival": 0.7678571428571429
+          },
+          "fair_model_mean": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9464285714285714,
+            "top1Survival": 0.875,
+            "ruleTop1Survival": 0.7678571428571429
+          },
+          "fair_model_best": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9464285714285714,
+            "top1Survival": 0.875,
+            "ruleTop1Survival": 0.7678571428571429
+          }
+        },
+        "collection": {
+          "groups": 28,
+          "baseline": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "ruleTop1Survival": 0.6964285714285714
+          },
+          "fair_heuristic": {
+            "coverage": 1.0,
+            "bestSurvival": 0.6964285714285714,
+            "top1Survival": 0.6964285714285714,
+            "ruleTop1Survival": 0.6964285714285714
+          },
+          "fair_model_r2": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "ruleTop1Survival": 1.0
+          },
+          "fair_model_mean": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "ruleTop1Survival": 1.0
+          },
+          "fair_model_best": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "ruleTop1Survival": 1.0
+          }
+        }
+      }
+    }
+  },
+  "regressionDiagnostic": {
+    "groups": 76,
+    "selectionPassed": false,
+    "holdoutOpened": false,
+    "resultsSha256": "522e1194263e04d6b62858803987f93902a862c763299855101d43eb595a28ae",
+    "scope": "Inspected regression cohorts only; not independent generalization evidence, not an admission, and no reserved holdout group was loaded",
+    "summary": [
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "baseline",
+        "groups": 24,
+        "candidates": 23.708333333333332,
+        "coverage": 0.625,
+        "bestSurvival": 0.5,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375,
+        "ruleTop1Survival": 0.25,
+        "ruleTop3BestSurvival": 0.25,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.25,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 16.0441,
+        "elapsedP95Millis": 254.4575,
+        "elapsedMaxMillis": 438.2456,
+        "stopReasons": {
+          "COUNTER_BUDGET": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_heuristic",
+        "groups": 24,
+        "candidates": 2.4583333333333335,
+        "coverage": 0.625,
+        "bestSurvival": 0.375,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375,
+        "ruleTop1Survival": 0.25,
+        "ruleTop3BestSurvival": 0.375,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.25,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 129.4596,
+        "elapsedP95Millis": 258.7079,
+        "elapsedMaxMillis": 391.9341,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "ACTION_SCORE_BUDGET": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "groups": 24,
+        "candidates": 4.208333333333333,
+        "coverage": 0.625,
+        "bestSurvival": 0.375,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.25,
+        "ruleTop1Survival": 0.25,
+        "ruleTop3BestSurvival": 0.25,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.375,
+        "baselineRuleTop1Survival": 0.25,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 155.1187,
+        "elapsedP95Millis": 352.1482,
+        "elapsedMaxMillis": 800.4457,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "DEADLINE": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "groups": 24,
+        "candidates": 2.4583333333333335,
+        "coverage": 0.625,
+        "bestSurvival": 0.375,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375,
+        "ruleTop1Survival": 0.25,
+        "ruleTop3BestSurvival": 0.375,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.25,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 176.3643,
+        "elapsedP95Millis": 344.3061,
+        "elapsedMaxMillis": 759.3502,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "ACTION_SCORE_BUDGET": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_r2",
+        "groups": 24,
+        "candidates": 1.75,
+        "coverage": 0.5,
+        "bestSurvival": 0.25,
+        "top1Survival": 0.125,
+        "top3BestSurvival": 0.25,
+        "ruleTop1Survival": 0.125,
+        "ruleTop3BestSurvival": 0.25,
+        "commonRegret": 0.375,
+        "commonTop3Recall": 0.375,
+        "baselineRuleTop1Survival": 0.25,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "elapsedP50Millis": 103.6856,
+        "elapsedP95Millis": 259.9759,
+        "elapsedMaxMillis": 376.4409,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "baseline",
+        "groups": 28,
+        "candidates": 38.714285714285715,
+        "coverage": 1.0,
+        "bestSurvival": 0.9285714285714286,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "ruleTop1Survival": 0.375,
+        "ruleTop3BestSurvival": 0.6785714285714286,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 7.4721,
+        "elapsedP95Millis": 10.2632,
+        "elapsedMaxMillis": 10.6919,
+        "stopReasons": {
+          "COUNTER_BUDGET": 28
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_heuristic",
+        "groups": 28,
+        "candidates": 3.6785714285714284,
+        "coverage": 1.0,
+        "bestSurvival": 0.7321428571428571,
+        "top1Survival": 0.42857142857142855,
+        "top3BestSurvival": 0.7321428571428571,
+        "ruleTop1Survival": 0.5714285714285714,
+        "ruleTop3BestSurvival": 0.7321428571428571,
+        "commonRegret": 0.5,
+        "commonTop3Recall": 0.6071428571428571,
+        "baselineRuleTop1Survival": 0.375,
+        "novelCandidates": 5,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 5,
+        "elapsedP50Millis": 78.4639,
+        "elapsedP95Millis": 166.7048,
+        "elapsedMaxMillis": 175.9194,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "groups": 28,
+        "candidates": 8.642857142857142,
+        "coverage": 1.0,
+        "bestSurvival": 0.875,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "ruleTop1Survival": 0.8571428571428571,
+        "ruleTop3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "novelCandidates": 21,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 71.4405,
+        "elapsedP95Millis": 169.7361,
+        "elapsedMaxMillis": 176.956,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "groups": 28,
+        "candidates": 5.785714285714286,
+        "coverage": 1.0,
+        "bestSurvival": 0.875,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "ruleTop1Survival": 0.7678571428571429,
+        "ruleTop3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "novelCandidates": 16,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 90.9903,
+        "elapsedP95Millis": 138.7367,
+        "elapsedMaxMillis": 144.3186,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_r2",
+        "groups": 28,
+        "candidates": 3.607142857142857,
+        "coverage": 1.0,
+        "bestSurvival": 0.875,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "ruleTop1Survival": 0.875,
+        "ruleTop3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "novelCandidates": 5,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 63.6897,
+        "elapsedP95Millis": 118.0239,
+        "elapsedMaxMillis": 123.9338,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "baseline",
+        "groups": 24,
+        "candidates": 17.875,
+        "coverage": 1.0,
+        "bestSurvival": 1.0,
+        "top1Survival": 0.6875,
+        "top3BestSurvival": 0.875,
+        "ruleTop1Survival": 0.875,
+        "ruleTop3BestSurvival": 1.0,
+        "commonRegret": 0.3125,
+        "commonTop3Recall": 0.7916666666666666,
+        "baselineRuleTop1Survival": 0.875,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 9,
+        "elapsedP50Millis": 9.3911,
+        "elapsedP95Millis": 16.0402,
+        "elapsedMaxMillis": 16.3097,
+        "stopReasons": {
+          "COUNTER_BUDGET": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_heuristic",
+        "groups": 24,
+        "candidates": 2.25,
+        "coverage": 1.0,
+        "bestSurvival": 0.8125,
+        "top1Survival": 0.8125,
+        "top3BestSurvival": 0.8125,
+        "ruleTop1Survival": 0.8125,
+        "ruleTop3BestSurvival": 0.8125,
+        "commonRegret": 0.1875,
+        "commonTop3Recall": 0.625,
+        "baselineRuleTop1Survival": 0.875,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 3,
+        "elapsedP50Millis": 133.4534,
+        "elapsedP95Millis": 192.4718,
+        "elapsedMaxMillis": 284.6637,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "groups": 24,
+        "candidates": 4.5,
+        "coverage": 1.0,
+        "bestSurvival": 0.875,
+        "top1Survival": 0.625,
+        "top3BestSurvival": 0.7916666666666666,
+        "ruleTop1Survival": 0.6875,
+        "ruleTop3BestSurvival": 0.875,
+        "commonRegret": 0.375,
+        "commonTop3Recall": 0.625,
+        "baselineRuleTop1Survival": 0.875,
+        "novelCandidates": 1,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 9,
+        "elapsedP50Millis": 169.7663,
+        "elapsedP95Millis": 256.7581,
+        "elapsedMaxMillis": 273.9952,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "groups": 24,
+        "candidates": 3.0833333333333335,
+        "coverage": 1.0,
+        "bestSurvival": 0.6875,
+        "top1Survival": 0.5,
+        "top3BestSurvival": 0.6666666666666666,
+        "ruleTop1Survival": 0.625,
+        "ruleTop3BestSurvival": 0.6875,
+        "commonRegret": 0.5,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.875,
+        "novelCandidates": 1,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 12,
+        "elapsedP50Millis": 179.0024,
+        "elapsedP95Millis": 234.7646,
+        "elapsedMaxMillis": 241.5396,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_r2",
+        "groups": 24,
+        "candidates": 1.5833333333333333,
+        "coverage": 0.625,
+        "bestSurvival": 0.1875,
+        "top1Survival": 0.1875,
+        "top3BestSurvival": 0.1875,
+        "ruleTop1Survival": 0.1875,
+        "ruleTop3BestSurvival": 0.1875,
+        "commonRegret": 0.8125,
+        "commonTop3Recall": 0.125,
+        "baselineRuleTop1Survival": 0.875,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 21,
+        "elapsedP50Millis": 101.604,
+        "elapsedP95Millis": 123.5223,
+        "elapsedMaxMillis": 155.2892,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      }
+    ],
+    "pairwise": [
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "fair_model_r2",
+        "groups": 24,
+        "coverage": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "bestSurvival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "top1Survival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "top3BestSurvival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "ruleTop1Survival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "fair_heuristic",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "baseline",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 21,
+          "worsened": 3,
+          "meanDifference": -0.125
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "fair_model_r2",
+        "groups": 24,
+        "coverage": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "bestSurvival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "top1Survival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "top3BestSurvival": {
+          "improved": 3,
+          "tied": 18,
+          "worsened": 3,
+          "meanDifference": 0.0
+        },
+        "ruleTop1Survival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "fair_heuristic",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 21,
+          "worsened": 3,
+          "meanDifference": -0.125
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "baseline",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 21,
+          "worsened": 3,
+          "meanDifference": -0.125
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 21,
+          "worsened": 3,
+          "meanDifference": -0.125
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "fair_model_r2",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 23,
+          "worsened": 5,
+          "meanDifference": -0.10714285714285714
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "fair_heuristic",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 8,
+          "tied": 20,
+          "worsened": 0,
+          "meanDifference": 0.14285714285714285
+        },
+        "top1Survival": {
+          "improved": 20,
+          "tied": 8,
+          "worsened": 0,
+          "meanDifference": 0.44642857142857145
+        },
+        "top3BestSurvival": {
+          "improved": 8,
+          "tied": 20,
+          "worsened": 0,
+          "meanDifference": 0.14285714285714285
+        },
+        "ruleTop1Survival": {
+          "improved": 16,
+          "tied": 8,
+          "worsened": 4,
+          "meanDifference": 0.19642857142857142
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "baseline",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 25,
+          "worsened": 3,
+          "meanDifference": -0.05357142857142857
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "ruleTop1Survival": {
+          "improved": 18,
+          "tied": 9,
+          "worsened": 1,
+          "meanDifference": 0.39285714285714285
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "fair_model_r2",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 27,
+          "worsened": 1,
+          "meanDifference": -0.017857142857142856
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "fair_heuristic",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 8,
+          "tied": 20,
+          "worsened": 0,
+          "meanDifference": 0.14285714285714285
+        },
+        "top1Survival": {
+          "improved": 20,
+          "tied": 8,
+          "worsened": 0,
+          "meanDifference": 0.44642857142857145
+        },
+        "top3BestSurvival": {
+          "improved": 8,
+          "tied": 20,
+          "worsened": 0,
+          "meanDifference": 0.14285714285714285
+        },
+        "ruleTop1Survival": {
+          "improved": 17,
+          "tied": 10,
+          "worsened": 1,
+          "meanDifference": 0.2857142857142857
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "baseline",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 25,
+          "worsened": 3,
+          "meanDifference": -0.05357142857142857
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "ruleTop1Survival": {
+          "improved": 21,
+          "tied": 6,
+          "worsened": 1,
+          "meanDifference": 0.48214285714285715
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "fair_model_r2",
+        "groups": 24,
+        "coverage": {
+          "improved": 9,
+          "tied": 15,
+          "worsened": 0,
+          "meanDifference": 0.375
+        },
+        "bestSurvival": {
+          "improved": 17,
+          "tied": 7,
+          "worsened": 0,
+          "meanDifference": 0.5
+        },
+        "top1Survival": {
+          "improved": 9,
+          "tied": 15,
+          "worsened": 0,
+          "meanDifference": 0.3125
+        },
+        "top3BestSurvival": {
+          "improved": 16,
+          "tied": 8,
+          "worsened": 0,
+          "meanDifference": 0.4791666666666667
+        },
+        "ruleTop1Survival": {
+          "improved": 15,
+          "tied": 9,
+          "worsened": 0,
+          "meanDifference": 0.4375
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "fair_heuristic",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 3,
+          "tied": 16,
+          "worsened": 5,
+          "meanDifference": -0.125
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 15,
+          "worsened": 9,
+          "meanDifference": -0.3125
+        },
+        "top3BestSurvival": {
+          "improved": 2,
+          "tied": 17,
+          "worsened": 5,
+          "meanDifference": -0.14583333333333334
+        },
+        "ruleTop1Survival": {
+          "improved": 3,
+          "tied": 15,
+          "worsened": 6,
+          "meanDifference": -0.1875
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_mean",
+        "reference": "baseline",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 13,
+          "worsened": 11,
+          "meanDifference": -0.3125
+        },
+        "top1Survival": {
+          "improved": 3,
+          "tied": 15,
+          "worsened": 6,
+          "meanDifference": -0.1875
+        },
+        "top3BestSurvival": {
+          "improved": 2,
+          "tied": 14,
+          "worsened": 8,
+          "meanDifference": -0.20833333333333334
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 18,
+          "worsened": 6,
+          "meanDifference": -0.25
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "fair_model_r2",
+        "groups": 24,
+        "coverage": {
+          "improved": 9,
+          "tied": 15,
+          "worsened": 0,
+          "meanDifference": 0.375
+        },
+        "bestSurvival": {
+          "improved": 21,
+          "tied": 3,
+          "worsened": 0,
+          "meanDifference": 0.6875
+        },
+        "top1Survival": {
+          "improved": 12,
+          "tied": 12,
+          "worsened": 0,
+          "meanDifference": 0.4375
+        },
+        "top3BestSurvival": {
+          "improved": 17,
+          "tied": 7,
+          "worsened": 0,
+          "meanDifference": 0.6041666666666666
+        },
+        "ruleTop1Survival": {
+          "improved": 15,
+          "tied": 9,
+          "worsened": 0,
+          "meanDifference": 0.5
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "fair_heuristic",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.0625
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 18,
+          "worsened": 6,
+          "meanDifference": -0.1875
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 23,
+          "worsened": 1,
+          "meanDifference": -0.020833333333333332
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 21,
+          "worsened": 3,
+          "meanDifference": -0.125
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "fair_model_best",
+        "reference": "baseline",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 18,
+          "worsened": 6,
+          "meanDifference": -0.125
+        },
+        "top1Survival": {
+          "improved": 3,
+          "tied": 18,
+          "worsened": 3,
+          "meanDifference": -0.0625
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 20,
+          "worsened": 4,
+          "meanDifference": -0.08333333333333333
+        },
+        "ruleTop1Survival": {
+          "improved": 0,
+          "tied": 18,
+          "worsened": 6,
+          "meanDifference": -0.1875
+        }
+      }
+    ],
+    "secondRoundCollectionLosses": {
+      "localized-toolbar-seed1-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 2,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.0
+        },
+        "fair_model_best": {
+          "candidates": 3,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        }
+      },
+      "localized-toolbar-seed2-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_best": {
+          "candidates": 2,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        }
+      },
+      "localized-toolbar-seed3-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_best": {
+          "candidates": 2,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        }
+      },
+      "media-receiver-seed1-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_best": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        }
+      },
+      "media-receiver-seed2-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_best": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        }
+      },
+      "media-receiver-seed3-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_best": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        }
+      },
+      "permission-state-seed1-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_best": {
+          "candidates": 2,
+          "bestSurvival": 1.0,
+          "top1Survival": 0.0
+        }
+      },
+      "permission-state-seed2-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_best": {
+          "candidates": 2,
+          "bestSurvival": 1.0,
+          "top1Survival": 0.0
+        }
+      },
+      "permission-state-seed3-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 1.0,
+          "top1Survival": 1.0
+        },
+        "fair_model_best": {
+          "candidates": 2,
+          "bestSurvival": 1.0,
+          "top1Survival": 0.0
+        }
+      },
+      "validated-editor-seed1-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        },
+        "fair_model_best": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        }
+      },
+      "validated-editor-seed2-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        },
+        "fair_model_best": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        }
+      },
+      "validated-editor-seed3-collection": {
+        "fair_heuristic": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        },
+        "fair_model_r2": {
+          "candidates": 0,
+          "bestSurvival": 0.0,
+          "top1Survival": 0.0
+        },
+        "fair_model_mean": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        },
+        "fair_model_best": {
+          "candidates": 1,
+          "bestSurvival": 0.5,
+          "top1Survival": 0.5
+        }
+      }
+    }
+  },
+  "holdout": {
+    "opened": false,
+    "reason": "The preregistered admission was rejected; the 28 captured and 24 synthetic reserved tasks remain unopened for a later protocol"
+  },
+  "kotlinParity": {
+    "fair_model_mean": {
+      "vectors": 5000,
+      "states": 2644,
+      "maxScoreDifference": 5.11190501040204e-09,
+      "sameActionOrder": true
+    },
+    "fair_model_best": {
+      "vectors": 5000,
+      "states": 2644,
+      "maxScoreDifference": 7.356212639031412e-09,
+      "sameActionOrder": true
+    }
+  },
+  "validation": {
+    "jvmRegression": {
+      "packages": [
+        "core.accessibility.codegen",
+        "core.automator.filter",
+        "core.accessibility.inspector",
+        "ui.floating.codegen"
+      ],
+      "tests": 481,
+      "passed": 469,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 12,
+      "skippedReason": "opt-in offline export/evaluation/diagnostic/parity/benchmark jobs (10) and two Windows symlink-permission cases"
+    },
+    "pythonConstructionTests": {
+      "tests": 35,
+      "optInRealFits": 2,
+      "failures": 0
+    },
+    "explicitRuns": [
+      "ConstructionThirdExperimentTask export/freeze/develop",
+      "ConstructionThirdRegressionDiagnosticsTask",
+      "ConstructionPolicyModelTest parity for both fits",
+      "ConstructionThirdSyntheticFixturesTest"
+    ]
+  }
+}
