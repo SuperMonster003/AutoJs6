@@ -119,6 +119,23 @@ class ComposeTsxDeviceTest {
         }
     }
 
+    @Test fun realCompilerReusesKeyedMemoFragmentsAndRebuildsOnlyTheEditedRow() {
+        Running("memo", ui = true).use { running ->
+            assertTrue(running.javaScript.contains("compose.memo("))
+            running.await("Compiled memo rows render through the installed renderer") {
+                text("tsx-memo-row-0") == "TSX memo row 0" && running.property("builds") == "50"
+            }
+            clickTag("tsx-memo-bump")
+            running.await("An unrelated state change reaches the page") { text("tsx-memo-clicks") == "TSX memo clicks: 1" }
+            assertEquals("No memoized TSX row is rebuilt by an unrelated render", "50", running.property("builds"))
+            clickTag("tsx-memo-edit")
+            running.await("Only the edited TSX row runs again") {
+                text("tsx-memo-row-0") == "TSX memo edited" && running.property("builds") == "51"
+            }
+            assertEquals("TSX memo row 1", text("tsx-memo-row-1"))
+        }
+    }
+
     @Test fun realCompilerBridgesXmlComposeContainersAndInflatedTsxAndroidViews() {
         Running("interop", ui = true).use { running ->
             assertTrue(running.javaScript.contains("__autojs6Tsx(compose.AndroidView"))

@@ -101,3 +101,15 @@ rebuilds exactly one row, keeps the moved handles and reaches the real renderer.
 JVM: the selected Compose host suite (208) and the contract API suite (29) pass,
 including five `compose.memo` cases for keyed reuse, state tracking, scope and
 literal identity, failed or rejected frames, and argument errors.
+
+## Companion TSX compiler
+
+TypeScript Engine 0.6.8 compiles TSX with `noEmitOnError`, so its hash-locked Compose
+declaration now includes `compose.memo` (declarations 4.36.0). The new
+`compose-tsx/memo.tsx` fixture and
+`ComposeTsxDeviceTest#realCompilerReusesKeyedMemoFragmentsAndRebuildsOnlyTheEditedRow`
+compile 50 keyed memo rows with the installed signed x86_64 compiler and run them
+through the normal launch path. On the owned API35 AVD, with this host at 5323 and
+Compose UI 1.1.0 / 36, all ten TSX scenarios and the five unchanged JavaScript
+examples pass (15 tests, 61.873 s). An unrelated update rebuilds no row; editing one
+row rebuilds exactly that row.
