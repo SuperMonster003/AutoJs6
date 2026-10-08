@@ -10,9 +10,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from construction.data import ActionRow, FeatureSchema, PREFIX, read_dataset, read_schema
-from construction.train import (DEFAULT_SEED, SCORE_SEMANTICS, action_order, export_policy,
-                                fit_dataset, parity_records, select_parity_rows, train, training_parameters)
+from construction.data import ActionRow, FeatureSchema, PREFIX, PREFIX_V2, read_dataset, read_schema
+from construction.train import (BEST_SCORE_SEMANTICS, DEFAULT_SEED, SCORE_SEMANTICS, action_order, export_policy,
+                                fit_dataset, parity_records, row_label, select_parity_rows, train, training_parameters)
 from dataset.task_io import read_json, write_json
 from package.build_package import score_model
 from train.data import sha256
@@ -21,9 +21,10 @@ from train.data import sha256
 class ConstructionFixture:
     """Numeric protocol fixture; it does not invent a Kotlin feature implementation."""
 
-    def __init__(self, root):
+    def __init__(self, root, export_format=1):
         self.root = Path(root)
         self.root.mkdir()
+        self.export_format = export_format
         names = ["test_signal", "test_action_index"]
         self.schema = {"format": 1, "role": "construction-state-action", "grammarVersion": 1,
                        "featureSchemaVersion": 1, "names": names,
@@ -39,21 +40,37 @@ class ConstructionFixture:
         for group in self.groups[:-1]:
             for state in range(2):
                 for action, label in enumerate((0, 1 / 3, 1)):
-                    self.rows.append([group["split"], group["groupId"], "state" + str(state), "action" + str(action),
-                                      label, 1 + action, label, action / 2])
+                    row = [group["split"], group["groupId"], "state" + str(state), "action" + str(action),
+                           label, 1 + action, label, action / 2]
+                    if export_format == 2:
+                        # The best observed continuation is at least the mean: 0 -> 0.5, 1/3 -> 1, 1 -> 1.
+                        row.insert(5, 1.0 if action else 0.5)
+                    self.rows.append(row)
         self.refresh()
+
+    @property
+    def prefix(self):
+        return PREFIX_V2 if self.export_format == 2 else PREFIX
+
+    @property
+    def observations_index(self):
+        return len(self.prefix) - 1
+
+    @property
+    def first_feature_index(self):
+        return len(self.prefix)
 
     def refresh(self):
         write_json(self.root / "features.json", self.schema)
         with (self.root / "actions.csv").open("w", encoding="utf-8", newline="") as stream:
             writer = csv.writer(stream, lineterminator="\n")
-            writer.writerow([*PREFIX, *self.schema["names"]])
+            writer.writerow([*self.prefix, *self.schema["names"]])
             writer.writerows(self.rows)
         self.rehash()
 
     def rehash(self):
         write_json(self.root / "export-manifest.json", {
-            "format": 1, "datasetId": "construction-protocol-test",
+            "format": self.export_format, "datasetId": "construction-protocol-test",
             "featuresSha256": sha256(self.root / "features.json"), "actionsSha256": sha256(self.root / "actions.csv"),
             "groups": self.groups, "coverage": {"note": "Only explicitly observed actions are listed"},
         })
@@ -131,6 +148,50 @@ class ConstructionDataTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "CODEGEN_PRIVATE_DIR"):
                 fit_dataset(dataset, Path(self.temporary.name).parent / "not-private-construction")
 
+    def test_format_two_exposes_best_continuations_and_rejects_inconsistent_labels(self):
+        fixture = ConstructionFixture(Path(self.temporary.name) / "format2", export_format=2)
+        dataset = read_dataset(fixture.root)
+        self.assertEqual(2, dataset.export_format)
+        self.assertEqual((0.0, 0.5), (dataset.rows[0].label, dataset.rows[0].label_best))
+        self.assertAlmostEqual(1 / 3, dataset.rows[1].label)
+        self.assertEqual(1.0, dataset.rows[1].label_best)
+        self.assertEqual(2, dataset.rows[1].observations)
+        self.assertEqual(("f", 4), (dataset.rows[1].values.typecode, dataset.rows[1].values.itemsize))
+        self.assertEqual(0.5, row_label(dataset.rows[0], "best"))
+        self.assertEqual(0.0, row_label(dataset.rows[0], "mean"))
+        with self.assertRaisesRegex(ValueError, "mean or best"):
+            row_label(dataset.rows[0], "max")
+        # Format 1 rows have no best continuation, so the best target cannot be fitted from them.
+        legacy = read_dataset(self.fixture.root)
+        self.assertIsNone(legacy.rows[0].label_best)
+        with self.assertRaisesRegex(ValueError, "format 2"):
+            row_label(legacy.rows[0], "best")
+        with patch("construction.train._dependencies") as dependencies:
+            with self.assertRaisesRegex(ValueError, "format 2"):
+                fit_dataset(legacy, Path(self.temporary.name) / "legacy-best", label="best")
+            dependencies.assert_not_called()
+        original = deepcopy(fixture.rows)
+        for value in ("", "nan", -0.1, 1.1, 0.2):  # 0.2 is below the 1/3 mean of row 1
+            with self.subTest(value=value):
+                fixture.rows = deepcopy(original)
+                fixture.rows[1][5] = value
+                fixture.refresh()
+                with self.assertRaises(ValueError):
+                    read_dataset(fixture.root)
+        fixture.rows = deepcopy(original)
+        fixture.refresh()
+        path = fixture.root / "actions.csv"
+        path.write_text(path.read_text().replace("label,labelBest,observations", "label,observations,labelBest"),
+                        encoding="utf-8")
+        fixture.rehash()
+        with self.assertRaisesRegex(ValueError, "columns differ"):
+            read_dataset(fixture.root)
+        manifest = read_json(fixture.root / "export-manifest.json")
+        manifest["format"] = 3
+        write_json(fixture.root / "export-manifest.json", manifest)
+        with self.assertRaisesRegex(ValueError, "Unsupported"):
+            read_dataset(fixture.root)
+
     def test_group_assignment_duplicate_actions_and_zero_observations_are_rejected(self):
         original = deepcopy(self.fixture.rows)
         for index, value in ((0, "test"), (1, "unknown"), (2, ""), (3, "line\nbreak"),
@@ -184,6 +245,24 @@ class ConstructionDataTest(unittest.TestCase):
             dependencies.assert_not_called()
 
     @unittest.skipUnless(os.environ.get("CODEGEN_TEST_TRAINING") == "1", "set CODEGEN_TEST_TRAINING=1 in Python 3.12 venv")
+    def test_actual_best_label_fit_declares_its_semantics_and_differs_from_the_mean_fit(self):
+        fixture = ConstructionFixture(Path(self.temporary.name) / "format2-fit", export_format=2)
+        options = {"iterations": 24, "depth": 3, "early_stopping_rounds": 5}
+        outputs = [Path(self.temporary.name) / name for name in ("mean-fit", "best-fit", "best-repeat")]
+        mean = train(fixture.root, outputs[0], label="mean", **options)
+        best = train(fixture.root, outputs[1], label="best", **options)
+        train(fixture.root, outputs[2], label="best", **options)
+        self.assertEqual(("mean", SCORE_SEMANTICS, 2), (mean["labelSelection"], mean["scoreSemantics"], mean["exportFormat"]))
+        self.assertEqual(("best", BEST_SCORE_SEMANTICS, 2), (best["labelSelection"], best["scoreSemantics"], best["exportFormat"]))
+        self.assertIn("Maximum survival", best["labelMeaning"])
+        for name in ("model.json", "policy.json", "parity.jsonl"):
+            self.assertEqual((outputs[1] / name).read_bytes(), (outputs[2] / name).read_bytes())
+        self.assertNotEqual((outputs[0] / "model.json").read_bytes(), (outputs[1] / "model.json").read_bytes())
+        self.assertEqual(SCORE_SEMANTICS, read_json(outputs[0] / "policy.json")["scoreSemantics"])
+        self.assertEqual(BEST_SCORE_SEMANTICS, read_json(outputs[1] / "policy.json")["scoreSemantics"])
+        self.assertEqual(mean["inputSha256"], best["inputSha256"])
+
+    @unittest.skipUnless(os.environ.get("CODEGEN_TEST_TRAINING") == "1", "set CODEGEN_TEST_TRAINING=1 in Python 3.12 venv")
     def test_actual_repeat_fit_is_reproducible_and_held_out_changes_cannot_change_weights(self):
         outputs = [Path(self.temporary.name) / name for name in ("first", "repeat", "changed-test")]
         options = {"iterations": 24, "depth": 3, "early_stopping_rounds": 5}
@@ -204,6 +283,7 @@ class ConstructionDataTest(unittest.TestCase):
         self.assertEqual("uniform-state-action-row", first["weightPolicy"])
         self.assertFalse(first["observationsUsedAsWeight"])
         self.assertEqual(SCORE_SEMANTICS, first["scoreSemantics"])
+        self.assertEqual(("mean", 1), (first["labelSelection"], first["exportFormat"]))
         self.assertEqual(DEFAULT_SEED, first["parameters"]["random_seed"])
         self.assertEqual((18, 6), (first["parityRows"], first["parityStates"]))
         self.assertLessEqual(first["maxPolicyScoreDifference"], 1e-4)
@@ -269,6 +349,10 @@ class ConstructionPolicyTest(unittest.TestCase):
         self.assertEqual(original, source)
         self.assertEqual(1, constants)
         self.assertEqual("construction-policy", policy["role"])
+        self.assertEqual(SCORE_SEMANTICS, policy["scoreSemantics"])
+        self.assertEqual(BEST_SCORE_SEMANTICS, export_policy(source, schema, BEST_SCORE_SEMANTICS)[0]["scoreSemantics"])
+        with self.assertRaisesRegex(ValueError, "semantics"):
+            export_policy(source, schema, "sum-of-action-logits")
         self.assertEqual(source["scale_and_bias"][1][0], policy["model"]["bias"])
         self.assertEqual(source["scale_and_bias"][0], policy["model"]["scale"])
         self.assertEqual([1, 1], policy["model"]["depths"])

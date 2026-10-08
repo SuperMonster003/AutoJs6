@@ -63,6 +63,24 @@ class ConstructionPolicyModelTest {
     }
 
     @Test
+    fun acceptsBothDeclaredCompletionValueSemanticsAndExposesThem() {
+        val mean = parse(document())
+        assertEquals(ConstructionPolicyModel.SCORE_SEMANTICS, mean.scoreSemantics)
+        val best = parse(document().apply { addProperty("scoreSemantics", ConstructionPolicyModel.BEST_SCORE_SEMANTICS) })
+        assertEquals(ConstructionPolicyModel.BEST_SCORE_SEMANTICS, best.scoreSemantics)
+        val features = FloatArray(ConstructionFeatures.names.size)
+        // The declared target changes what a score means, never how the trees are evaluated.
+        assertEquals(mean.score(features), best.score(features), 0.0)
+        assertEquals(setOf(ConstructionPolicyModel.SCORE_SEMANTICS, ConstructionPolicyModel.BEST_SCORE_SEMANTICS),
+            ConstructionPolicyModel.SUPPORTED_SCORE_SEMANTICS)
+        for (unsupported in listOf("best-observed-continuation-v2", "mean-and-best", "")) {
+            assertThrows(IllegalArgumentException::class.java) {
+                parse(document().apply { addProperty("scoreSemantics", unsupported) })
+            }
+        }
+    }
+
+    @Test
     fun rejectsWrongRoleGrammarSchemaNamesCountAndScoreMeaning() {
         val changes = listOf<JsonObject.() -> Unit>(
             { addProperty("format", 2) },

@@ -16,6 +16,9 @@ from train.data import sha256
 
 SPLITS = ("train", "valid", "test", "real-test")
 PREFIX = ("split", "groupId", "stateKey", "actionKey", "label", "observations")
+# Format 2 adds the best observed continuation beside the mean; features follow unchanged.
+PREFIX_V2 = ("split", "groupId", "stateKey", "actionKey", "label", "labelBest", "observations")
+PREFIXES = {1: PREFIX, 2: PREFIX_V2}
 FILES = ("features.json", "actions.csv", "export-manifest.json")
 
 
@@ -36,6 +39,8 @@ class ActionRow:
     label: float
     observations: int
     values: Sequence[float]
+    # Maximum survival among the completed observed rollouts through this edge; None in format 1.
+    label_best: float | None = None
 
 
 @dataclass(frozen=True)
@@ -46,6 +51,10 @@ class Dataset:
     groups: dict[str, dict]
     rows: tuple[ActionRow, ...]
     hashes: dict[str, str]
+
+    @property
+    def export_format(self):
+        return self.manifest["format"]
 
     def rows_for(self, *splits):
         if not set(splits) <= set(SPLITS):
@@ -130,16 +139,23 @@ def _groups(manifest):
     return groups
 
 
-def read_rows(path, schema, groups):
+def read_rows(path, schema, groups, export_format=1):
+    prefix = PREFIXES.get(export_format)
+    if prefix is None:
+        raise ValueError("Unsupported construction export format")
     rows, seen = [], set()
     with Path(path).open(encoding="utf-8-sig", newline="") as stream:
         reader = csv.reader(stream)
-        if next(reader, None) != [*PREFIX, *schema.names]:
+        if next(reader, None) != [*prefix, *schema.names]:
             raise ValueError("actions.csv columns differ from the ordered construction schema")
         for line, columns in enumerate(reader, 2):
-            if len(columns) != len(PREFIX) + len(schema.names):
+            if len(columns) != len(prefix) + len(schema.names):
                 raise ValueError(f"Invalid action column count at line {line}")
-            split, group_id, state, action, label_text, observations_text = columns[:len(PREFIX)]
+            if export_format == 1:
+                split, group_id, state, action, label_text, observations_text = columns[:len(prefix)]
+                best_text = None
+            else:
+                split, group_id, state, action, label_text, best_text, observations_text = columns[:len(prefix)]
             for value, name in ((group_id, "groupId"), (state, "stateKey"), (action, "actionKey")):
                 nonempty_string(value, name)
             if group_id not in groups or groups[group_id]["split"] != split:
@@ -151,6 +167,13 @@ def read_rows(path, schema, groups):
             label = _number(label_text, "label")
             if not 0 <= label <= 1:
                 raise ValueError("Observed return labels must be between 0 and 1")
+            label_best = None
+            if best_text is not None:
+                label_best = _number(best_text, "labelBest")
+                if not 0 <= label_best <= 1:
+                    raise ValueError("Best observed continuation labels must be between 0 and 1")
+                if label_best < label:
+                    raise ValueError("labelBest cannot be below the mean observed return")
             if (not re.fullmatch(r"[1-9][0-9]*", observations_text)
                     or len(observations_text) > 10 or int(observations_text) > 2**31 - 1):
                 raise ValueError("observations must be a positive 32-bit integer; unobserved actions have no row")
@@ -158,8 +181,8 @@ def read_rows(path, schema, groups):
             # Float32 payload compact instead of allocating a Python float
             # object and tuple reference for every feature of every action.
             values = array("f", (float32(_number(value, name))
-                                 for value, name in zip(columns[len(PREFIX):], schema.names)))
-            rows.append(ActionRow(split, group_id, state, action, label, int(observations_text), values))
+                                 for value, name in zip(columns[len(prefix):], schema.names)))
+            rows.append(ActionRow(split, group_id, state, action, label, int(observations_text), values, label_best))
     return tuple(rows)
 
 
@@ -171,7 +194,7 @@ def read_dataset(directory):
             raise ValueError("Missing construction export or file escapes its directory: " + name)
     hashes = {name: sha256(root / name) for name in FILES}
     manifest = read_json(root / "export-manifest.json")
-    if not isinstance(manifest, dict) or type(manifest.get("format")) is not int or manifest["format"] != 1:
+    if not isinstance(manifest, dict) or type(manifest.get("format")) is not int or manifest["format"] not in PREFIXES:
         raise ValueError("Unsupported construction export manifest format")
     nonempty_string(manifest.get("datasetId"), "datasetId")
     for field, name in (("featuresSha256", "features.json"), ("actionsSha256", "actions.csv")):
@@ -180,7 +203,7 @@ def read_dataset(directory):
     schema, groups = read_schema(root / "features.json"), _groups(manifest)
     if any(group["source"] == "real" for group in groups.values()):
         private_path(root)
-    rows = read_rows(root / "actions.csv", schema, groups)
+    rows = read_rows(root / "actions.csv", schema, groups, manifest["format"])
     dataset = Dataset(root, schema, manifest, groups, rows, hashes)
     dataset.check_unchanged()
     return dataset

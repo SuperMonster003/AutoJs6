@@ -10,14 +10,21 @@ import java.io.StringReader
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 
-/** Offline prototype only: this reader is not an installable model-package format or an APK asset. */
-class ConstructionPolicyModel private constructor(val model: ObliviousTreeModel) : ConstructionPolicy {
+/** Offline prototype only: this reader is not an installable model-package format or an APK asset.
+ * [scoreSemantics] names the supervised target the policy predicts; both supported targets are
+ * comparable completion values of one state, never sums across construction steps.
+ * zh-CN: 仅离线原型使用. scoreSemantics 声明策略预测的监督目标; 两种目标都是单个状态的完成价值, 不跨步骤累加. */
+class ConstructionPolicyModel private constructor(val model: ObliviousTreeModel, val scoreSemantics: String) : ConstructionPolicy {
     /** Completion-value prediction, without clipping or summing scores from different states. */
     override fun score(features: FloatArray): Double = model.score(features)
 
     companion object {
         const val MAX_FILE_BYTES = 32 * 1024 * 1024
+        /** Mean survival of the completed observed rollouts through a state/action (first and second experiments). */
         const val SCORE_SEMANTICS = "observed-rollout-survival-v1"
+        /** Maximum survival among the completed observed rollouts through a state/action (third experiment). */
+        const val BEST_SCORE_SEMANTICS = "best-observed-continuation-v1"
+        val SUPPORTED_SCORE_SEMANTICS: Set<String> = setOf(SCORE_SEMANTICS, BEST_SCORE_SEMANTICS)
 
         private const val MAX_TREES = 4096
         private const val MAX_DEPTH = 8
@@ -51,7 +58,7 @@ class ConstructionPolicyModel private constructor(val model: ObliviousTreeModel)
                     reader.isLenient = false
                     val document = readDocument(reader)
                     require(reader.peek() == JsonToken.END_DOCUMENT) { "Trailing construction policy content" }
-                    return ConstructionPolicyModel(document.toModel())
+                    return ConstructionPolicyModel(document.toModel(), document.scoreSemantics)
                 }
             } catch (error: IOException) {
                 throw IllegalArgumentException("Invalid construction policy JSON", error)
@@ -75,7 +82,7 @@ class ConstructionPolicyModel private constructor(val model: ObliviousTreeModel)
                 require(featureSchemaVersion == ConstructionFeatures.version) { "Construction feature schema version differs" }
                 require(featureNamesHash == ConstructionFeatures.namesHash) { "Construction feature names hash differs" }
                 require(featureCount == ConstructionFeatures.names.size) { "Construction feature count differs" }
-                require(scoreSemantics == SCORE_SEMANTICS) { "Construction policy score semantics differ" }
+                require(scoreSemantics in SUPPORTED_SCORE_SEMANTICS) { "Construction policy score semantics are not supported" }
                 return ObliviousTreeModel(featureCount, model.depths, model.splitOffsets, model.leafOffsets,
                     model.featureIndices, model.thresholds, model.leafValues, model.bias, model.scale)
             }

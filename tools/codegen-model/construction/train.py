@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Fit an offline numeric construction policy from Kotlin state/action exports.
 
-The target is the observed mean of completed-rollout survival, not the exact
-optimal continuation value. Unknown or unfinished continuations are not zeroes.
-This tool emits an experimental policy; it does not build/sign/publish a ranker
-package or consume held-out labels for fitting, early stopping, or tuning.
+The default target is the observed mean of completed-rollout survival; a format 2
+export also offers the best observed continuation (``--label best``). Neither is
+the exact optimal continuation value, and unknown or unfinished continuations are
+not zeroes. This tool emits an experimental policy; it does not build/sign/publish
+a ranker package or consume held-out labels for fitting, early stopping, or tuning.
 """
 
 import argparse
@@ -34,6 +35,15 @@ from train.train import PINNED_VERSIONS, canonical_model_json
 
 DEFAULT_SEED = 20261007
 SCORE_SEMANTICS = "observed-rollout-survival-v1"
+BEST_SCORE_SEMANTICS = "best-observed-continuation-v1"
+# Label column -> (declared score semantics, meaning recorded in the training log).
+LABELS = {
+    "mean": (SCORE_SEMANTICS,
+             "Mean survival of completed observed rollouts; not an exact optimal value; unknown actions omitted"),
+    "best": (BEST_SCORE_SEMANTICS,
+             "Maximum survival among completed observed rollouts through the state/action; "
+             "an observed lower bound of the best continuation, not an exact optimal value; unknown actions omitted"),
+}
 SCORE_TOLERANCE = 1e-4
 TIE_EPSILON = 1e-6
 
@@ -81,8 +91,10 @@ def _output_path(dataset, output):
     return output
 
 
-def export_policy(canonical, schema):
+def export_policy(canonical, schema, score_semantics=SCORE_SEMANTICS):
     """Reuse the checked numeric tree codec in memory; never label this as an .ajcgm ranker."""
+    if score_semantics not in {semantics for semantics, _ in LABELS.values()}:
+        raise ValueError("Unknown construction score semantics")
     adjusted = deepcopy(canonical)
     trees = adjusted.get("oblivious_trees")
     if not isinstance(trees, list) or not 1 <= len(trees) <= 256:
@@ -116,7 +128,7 @@ def export_policy(canonical, schema):
         model["leafValues"].extend(tree.leaves)
     policy = {"format": 1, "role": "construction-policy", "grammarVersion": schema.grammar_version,
               "featureSchemaVersion": schema.version, "featureNamesHash": schema.names_hash,
-              "featureCount": len(schema.names), "scoreSemantics": SCORE_SEMANTICS, "model": model}
+              "featureCount": len(schema.names), "scoreSemantics": score_semantics, "model": model}
     return policy, decoded, constant_trees
 
 
@@ -175,14 +187,30 @@ def parity_records(rows, scores, decoded):
                      "scoreTolerance": SCORE_TOLERANCE, "tieEpsilon": TIE_EPSILON}
 
 
+def row_label(row, label):
+    if label == "mean":
+        return row.label
+    if label == "best":
+        if row.label_best is None:
+            raise ValueError("The best observed continuation label requires a format 2 construction export")
+        return row.label_best
+    raise ValueError("label must be mean or best")
+
+
 def fit_dataset(dataset, output, *, iterations=256, depth=6, seed=DEFAULT_SEED,
-                early_stopping_rounds=32, parity_max_rows=5000):
+                early_stopping_rounds=32, parity_max_rows=5000, label="mean"):
+    if label not in LABELS:
+        raise ValueError("label must be mean or best")
+    score_semantics, label_meaning = LABELS[label]
     parameters = training_parameters(iterations=iterations, depth=depth, seed=seed,
                                      early_stopping_rounds=early_stopping_rounds)
     output = _output_path(dataset, output)
     train_rows, valid_rows = dataset.rows_for("train"), dataset.rows_for("valid")
     if not train_rows or not valid_rows:
         raise ValueError("Both train and valid must contain observed action rows")
+    # Resolve every fitted label before any dependency is imported or any file is written.
+    for row in (*train_rows, *valid_rows):
+        row_label(row, label)
     if any(dataset.groups[row.group_id]["source"] != "fixture" for row in (*train_rows, *valid_rows)):
         raise ValueError("Real application data cannot participate in fitting or early stopping")
     # Parity uses train/valid vectors only. Even parity sampling cannot expose
@@ -200,7 +228,7 @@ def fit_dataset(dataset, output, *, iterations=256, depth=6, seed=DEFAULT_SEED,
         for index, row in enumerate(rows):
             values[index] = row.values
         return catboost.Pool(values,
-                             label=[row.label for row in rows] if labelled else None,
+                             label=[row_label(row, label) for row in rows] if labelled else None,
                              feature_names=list(dataset.schema.names))
 
     model = catboost.CatBoostRegressor(**parameters)
@@ -219,7 +247,7 @@ def fit_dataset(dataset, output, *, iterations=256, depth=6, seed=DEFAULT_SEED,
         (staging / "model.json").write_text(
             json.dumps(canonical, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n",
             encoding="utf-8", newline="\n")
-        policy, decoded, constant_trees = export_policy(canonical, dataset.schema)
+        policy, decoded, constant_trees = export_policy(canonical, dataset.schema, score_semantics)
         records, parity = parity_records(
             parity_rows, model.predict(pool(parity_rows, labelled=False), prediction_type="RawFormulaVal"), decoded)
         write_json(staging / "policy.json", policy)
@@ -234,11 +262,12 @@ def fit_dataset(dataset, output, *, iterations=256, depth=6, seed=DEFAULT_SEED,
             "format": 1, "role": "construction-policy", "datasetId": dataset.manifest["datasetId"],
             "grammarVersion": dataset.schema.grammar_version, "featureSchemaVersion": dataset.schema.version,
             "featureNamesHash": dataset.schema.names_hash, "featureCount": len(dataset.schema.names),
-            "scoreSemantics": SCORE_SEMANTICS, "parameters": parameters,
+            "scoreSemantics": score_semantics, "labelSelection": label, "exportFormat": dataset.export_format,
+            "parameters": parameters,
             "resolvedParameters": model.get_all_params(), "splitsUsed": ["train", "valid"],
             "paritySplits": ["train", "valid"], "weightPolicy": "uniform-state-action-row",
             "observationsUsedAsWeight": False,
-            "labelMeaning": "Mean survival of completed observed rollouts; not an exact optimal value; unknown actions omitted",
+            "labelMeaning": label_meaning,
             "actions": {split: len(rows) for split, rows in (("train", train_rows), ("valid", valid_rows))},
             "groups": {split: len({row.group_id for row in rows})
                        for split, rows in (("train", train_rows), ("valid", valid_rows))},
@@ -288,13 +317,17 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
     parser.add_argument("--early-stopping-rounds", type=int, default=32)
     parser.add_argument("--parity-max-rows", type=int, default=5000)
+    parser.add_argument("--label", choices=sorted(LABELS), default="mean",
+                        help="supervised target column: mean observed return (default) or best observed continuation (format 2)")
     args = parser.parse_args(argv)
     try:
         log = train(args.dataset_dir, args.output_dir, iterations=args.iterations, depth=args.depth, seed=args.seed,
-                    early_stopping_rounds=args.early_stopping_rounds, parity_max_rows=args.parity_max_rows)
+                    early_stopping_rounds=args.early_stopping_rounds, parity_max_rows=args.parity_max_rows,
+                    label=args.label)
     except (ValueError, OSError, ImportError) as error:
         parser.exit(2, str(error) + "\n")
-    print(json.dumps({key: log[key] for key in ("datasetId", "treeCount", "bestIteration", "elapsedSeconds", "parityRows")},
+    print(json.dumps({key: log[key] for key in ("datasetId", "labelSelection", "scoreSemantics", "treeCount",
+                                                 "bestIteration", "elapsedSeconds", "parityRows")},
                      ensure_ascii=False))
     return 0
 
