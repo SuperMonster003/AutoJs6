@@ -4,6 +4,32 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NodeDeviceControlsInstrumentationTest {
+    @Test fun nestedWorkersReadRealHostDeviceInfoThroughParentBridge() {
+        val result = NodePluginTestHarness.runPluginScript(
+            """
+            (async () => {
+              const assert = require('node:assert/strict'), {Worker} = require('node:worker_threads');
+              const expected = (await require('device').info()).build;
+              const leaf = "const wt=require('node:worker_threads'); require('autojs6:bridge').callAutoJs('device','info',[]).then(info=>wt.parentPort.postMessage(info.build),error=>{setImmediate(()=>{throw error;});});";
+              const parent = "const wt=require('node:worker_threads'); const child=new wt.Worker(" + JSON.stringify(leaf) + ",{eval:true}); child.once('message',value=>wt.parentPort.postMessage(value)); child.once('error',error=>{throw error;});";
+              const worker = new Worker(parent, {eval:true});
+              try {
+                const actual = await new Promise((resolve,reject)=>{worker.once('message',resolve);worker.once('error',reject);});
+                assert.equal(actual.model, expected.model);
+                assert.equal(actual.sdkInt, expected.sdkInt);
+                assert.ok(actual.model.length > 0 && actual.sdkInt > 0);
+                console.log('m23.worker.host.device=PASS');
+              } finally { await worker.terminate(); }
+            })().catch(error=>{console.error(error.stack);process.exitCode=1;});
+            """.trimIndent(), "worker-host-device.cjs", timeoutMs = 20_000,
+            workerThreadsEnabled = true,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("device")).toJson()),
+        )
+        NodePluginTestHarness.assertSucceeded("nested worker host device bridge", result)
+        assertTrue(result.stdout, result.stdout.contains("m23.worker.host.device=PASS"))
+    }
+
     @Test fun readsDeviceFieldsControlsAudioAndKeepsScreenOnForFiveSeconds() {
         val result = NodePluginTestHarness.runPluginScript(
             """
