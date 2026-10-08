@@ -799,6 +799,7 @@
     <string name="summary_guard_mode">Предотвращение действий автоматизации из скриптов, когда AutoJs6 находится на переднем плане</string>
     <string name="summary_lan_discovery">Объявлять это устройство как _autojs6._tcp, чтобы VSCode (расширение 1.1.0+) показывал его при подключении по локальной сети</string>
     <string name="summary_nodejs_doctor_report">Создать диагностический отчёт среды Node со скрытыми конфиденциальными данными для сообщения об ошибке</string>
+    <string name="summary_nodejs_inspector_enabled">Разрешить локальную отладку и профилирование. Подключайте DevTools на компьютере через переадресацию портов ADB.</string>
     <string name="summary_not_showing_main_activity">Выполнять скрипт напрямую, не показывая основную активность</string>
     <string name="summary_notify_client_connection_changes">Показывать уведомление при подключении и отключении VSCode</string>
     <string name="summary_plugin_auto_check_updates">Автоматически проверять обновления плагинов каждые 1 час (потянуть для обновления - проверить немедленно)</string>
@@ -2072,6 +2073,7 @@
     <string name="text_nodejs_doctor_export_text">Текстовый отчёт</string>
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Создание диагностического отчёта Node.js...</string>
     <string name="text_nodejs_doctor_generation_failed">Не удалось создать диагностический отчёт Node.js</string>
+    <string name="text_nodejs_inspector_enabled">Разрешить Inspector для скриптов Node.js</string>
     <string name="text_none">Нет</string>
     <string name="text_not_enough_color_libraries_to_reorder">Для изменения порядка нужно не менее 2 собственных цветовых библиотек</string>
     <string name="text_not_granted">Не предоставляется</string>

@@ -800,6 +800,7 @@
     <string name="summary_guard_mode">AutoJs6 がフォアグラウンドにあるときにスクリプトから自動化アクションが実行されないようにする</string>
     <string name="summary_lan_discovery">このデバイスを _autojs6._tcp として通知し, VSCode (拡張機能 1.1.0+) が LAN 接続時に一覧表示できるようにします</string>
     <string name="summary_nodejs_doctor_report">不具合報告用にプライバシー情報を除去した Node ランタイム診断レポートを生成</string>
+    <string name="summary_nodejs_inspector_enabled">スクリプトのローカルデバッグとプロファイリングを許可します. PC の DevTools は ADB ポート転送で接続します.</string>
     <string name="summary_not_showing_main_activity">メインのアクティビティを表示せずにスクリプトを直接実行</string>
     <string name="summary_notify_client_connection_changes">VSCode の接続時と切断時にトーストを表示します</string>
     <string name="summary_plugin_auto_check_updates">1 時間ごとにプラグイン更新を自動確認します (下に引いて更新すると即時確認します)</string>
@@ -2073,6 +2074,7 @@
     <string name="text_nodejs_doctor_export_text">テキストレポート</string>
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Node.js Doctor レポートを生成しています...</string>
     <string name="text_nodejs_doctor_generation_failed">Node.js Doctor レポートの生成に失敗しました</string>
+    <string name="text_nodejs_inspector_enabled">Node.js スクリプトで Inspector を許可</string>
     <string name="text_none">なし</string>
     <string name="text_not_enough_color_libraries_to_reorder">並べ替えには 2 個以上のユーザーカラーライブラリが必要です</string>
     <string name="text_not_granted">許可されない</string>

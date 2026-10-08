@@ -796,6 +796,7 @@
     <string name="summary_guard_mode">Prevent automation actions from scripts when AutoJs6 is in the foreground</string>
     <string name="summary_lan_discovery">Advertise this device as _autojs6._tcp so VSCode (extension 1.1.0+) lists it when connecting over LAN</string>
     <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
+    <string name="summary_nodejs_inspector_enabled">Allow scripts to use local debugging and profiling. Connect desktop DevTools through ADB port forwarding.</string>
     <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>
     <string name="summary_notify_client_connection_changes">Show a toast when VSCode connects or disconnects</string>
     <string name="summary_plugin_auto_check_updates">Automatically check plugin updates every 1 hour (pull-to-refresh checks immediately)</string>
@@ -2069,6 +2070,7 @@
     <string name="text_nodejs_doctor_export_text">Text report</string>
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Generating Node.js Doctor report...</string>
     <string name="text_nodejs_doctor_generation_failed">Failed to generate Node.js Doctor report</string>
+    <string name="text_nodejs_inspector_enabled">Allow Inspector for Node.js scripts</string>
     <string name="text_none">None</string>
     <string name="text_not_enough_color_libraries_to_reorder">Reordering needs at least 2 color libraries of your own</string>
     <string name="text_not_granted">Not granted</string>

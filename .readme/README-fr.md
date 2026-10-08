@@ -168,7 +168,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/10/07
+###### 2026/10/08
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
 * `Astuce` Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement
@@ -458,6 +458,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires
 * `Fonctionnalité` Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement
 * `Fonctionnalité` compose.memo réutilise les fragments de render dont les valeurs de dépendance et les états lus n'ont pas changé, de sorte qu'une mise à jour partielle d'une grande liste ne reconstruit que les lignes modifiées
+* `Fonctionnalité` Les options de développement proposent "Autoriser Inspector pour les scripts Node.js", désactivé par défaut, pour les points d'arrêt et le profilage CPU/mémoire en Debug et Release avec un plugin Node.js Runtime compatible; DevTools se connecte via la redirection de ports ADB
 * `Correction` Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans "Copier en tant que sélecteur" de l'inspecteur de disposition et la représentation textuelle des sélecteurs
 * `Correction` La génération de code de l'inspecteur de disposition ignorait la saisie de texte et certaines actions de recherche, appliquait les actions à tout le groupe pour une seule cible de liste, utilisait des appels obsolètes, abandonnait silencieusement Flow ou échouait sur les appuis longs, et localisait incorrectement les ID identiques entre paquets
 * `Correction` Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information

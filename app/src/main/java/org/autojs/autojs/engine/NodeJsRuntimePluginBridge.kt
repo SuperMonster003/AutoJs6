@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.os.Process
 import android.os.SystemClock
 import android.util.Log
+import androidx.preference.PreferenceManager
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs6.R
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 import org.autojs.plugin.nodejs.api.INodeJsRuntimeCallback
@@ -66,11 +68,11 @@ object NodeJsRuntimePluginBridge {
         stdinListener: ((ready: Boolean) -> Unit)? = null,
     ): NodePluginScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
-        val requestWithProvider = if (request.executionId.isNullOrBlank()) {
-            request.copy(executionId = UUID.randomUUID().toString())
-        } else {
-            request
-        }.withHostModuleSourceProvider()
+        val requestWithProvider = request.copy(
+            executionId = request.executionId?.takeIf(String::isNotBlank) ?: UUID.randomUUID().toString(),
+            inspectorEnabled = request.inspectorEnabled ?: PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.key_nodejs_inspector_enabled), false),
+        ).withHostModuleSourceProvider()
         val provider = requestWithProvider.moduleSourceProvider
         val executionId = requestWithProvider.executionId.orEmpty()
         val lifecycleRegistered = synchronized(executionLifecycleLock) {
@@ -355,7 +357,7 @@ object NodeJsRuntimePluginBridge {
             rawNodeNetworkModulesEnabled?.let {
                 putBoolean(NodeJsRuntimeContract.KEY_RAW_NODE_NETWORK_MODULES_ENABLED, it)
             }
-            putBoolean(NodeJsRuntimeContract.KEY_INSPECTOR_ENABLED, BuildConfig.DEBUG && inspectorEnabled)
+            putBoolean(NodeJsRuntimeContract.KEY_INSPECTOR_ENABLED, inspectorEnabled == true)
             workerThreadsEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_ENABLED, it) }
             childProcessEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_ENABLED, it) }
             javaInteropEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_ENABLED, it) }

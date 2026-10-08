@@ -168,7 +168,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/10/07
+###### 2026/10/08
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Sugerencia` Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente
@@ -458,6 +458,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales
 * `Nuevo` Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar
 * `Nuevo` compose.memo reutiliza fragmentos de render cuyos valores de dependencia y estados leídos no han cambiado, de modo que una actualización parcial de una lista grande solo reconstruye las filas modificadas
+* `Nuevo` Las opciones de desarrollador incluyen "Permitir Inspector para scripts Node.js", desactivado por defecto, para depuración local y análisis de CPU/memoria en Debug y Release con un plugin Node.js Runtime compatible; DevTools se conecta mediante reenvío de puertos ADB
 * `Corrección` Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información
 * `Corrección` Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
 * `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío

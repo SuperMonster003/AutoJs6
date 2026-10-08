@@ -97,7 +97,7 @@ object NodeJsRuntimeContract {
     const val KEY_ESM_ENABLED = "esmEnabled"
     const val KEY_DYNAMIC_IMPORT_ENABLED = "dynamicImportEnabled"
     const val KEY_RAW_NODE_NETWORK_MODULES_ENABLED = "rawNodeNetworkModulesEnabled"
-    /** Debug builds only. Enables the localhost-only Node inspector facade for this execution. */
+    /** Explicitly allows localhost-only Inspector for this execution in Debug or Release; absent means false. */
     const val KEY_INSPECTOR_ENABLED = "inspectorEnabled"
     const val KEY_WORKER_THREADS_ENABLED = "workerThreadsEnabled"
     const val KEY_CHILD_PROCESS_ENABLED = "childProcessEnabled"

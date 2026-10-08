@@ -799,6 +799,7 @@
     <string name="summary_guard_mode">Prévenir les actions d\'automatisation des scripts lorsque AutoJs6 est au premier plan.</string>
     <string name="summary_lan_discovery">Annoncer cet appareil en tant que _autojs6._tcp pour que VSCode (extension 1.1.0+) le liste lors de la connexion sur le réseau local</string>
     <string name="summary_nodejs_doctor_report">Générer un rapport de diagnostic de l\'environnement Node expurgé des données privées pour signaler des erreurs</string>
+    <string name="summary_nodejs_inspector_enabled">Autoriser le débogage local et le profilage. Connecter DevTools sur ordinateur via la redirection de ports ADB.</string>
     <string name="summary_not_showing_main_activity">Exécutez directement le script sans afficher l\'activité principale.</string>
     <string name="summary_notify_client_connection_changes">Afficher un toast lorsque VSCode se connecte ou se déconnecte</string>
     <string name="summary_plugin_auto_check_updates">Verifier automatiquement les mises a jour des plugins toutes les 1 heure (tirer pour actualiser verifie immediatement)</string>
@@ -2072,6 +2073,7 @@
     <string name="text_nodejs_doctor_export_text">Rapport texte</string>
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Génération du rapport de diagnostic Node.js...</string>
     <string name="text_nodejs_doctor_generation_failed">Échec de la génération du rapport de diagnostic Node.js</string>
+    <string name="text_nodejs_inspector_enabled">Autoriser Inspector pour les scripts Node.js</string>
     <string name="text_none">Aucun</string>
     <string name="text_not_enough_color_libraries_to_reorder">La réorganisation nécessite au moins 2 bibliothèques de couleurs personnelles</string>
     <string name="text_not_granted">Non accordée</string>

@@ -24,8 +24,8 @@ data class NodePluginScriptRequest(
     val esmEnabled: Boolean? = null,
     val dynamicImportEnabled: Boolean? = null,
     val rawNodeNetworkModulesEnabled: Boolean? = null,
-    /** Debug builds only; the plugin also enforces its own native debug-build gate. */
-    val inspectorEnabled: Boolean = false,
+    /** Null follows the host developer preference; true/false explicitly overrides it. */
+    val inspectorEnabled: Boolean? = null,
     val workerThreadsEnabled: Boolean? = null,
     val childProcessEnabled: Boolean? = null,
     val javaInteropEnabled: Boolean? = null,

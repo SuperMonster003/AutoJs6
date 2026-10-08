@@ -796,6 +796,7 @@
     <string name="summary_guard_mode">當 AutoJs6 前置時禁用自動化行為以避免誤操作</string>
     <string name="summary_lan_discovery">以 _autojs6._tcp 廣播本裝置, 使 VSCode (插件 1.1.0+) 建立局域網連接時可直接列出本裝置</string>
     <string name="summary_nodejs_doctor_report">產生已隱去私隱資料的 Node 執行階段診斷報告, 用於提交錯誤報告</string>
+    <string name="summary_nodejs_inspector_enabled">允許腳本進行本機偵錯和效能分析. 桌面 DevTools 透過 ADB 連接埠轉發連接.</string>
     <string name="summary_not_showing_main_activity">啓動應用後直接運行腳本</string>
     <string name="summary_notify_client_connection_changes">VSCode 連線或斷開時顯示提示</string>
     <string name="summary_plugin_auto_check_updates">每小時自動檢查一次插件更新 (下拉刷新立即檢查)</string>
@@ -2069,6 +2070,7 @@
     <string name="text_nodejs_doctor_export_text">文字報告</string>
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">正在產生 Node.js Doctor 報告...</string>
     <string name="text_nodejs_doctor_generation_failed">無法產生 Node.js Doctor 報告</string>
+    <string name="text_nodejs_inspector_enabled">允許 Node.js 腳本使用 Inspector</string>
     <string name="text_none">無</string>
     <string name="text_not_enough_color_libraries_to_reorder">調整順序需要至少 2 個自建顏色庫</string>
     <string name="text_not_granted">未授予</string>

@@ -160,7 +160,8 @@
         "ui.inflate 支持编译后的 XML TSX 布局及其 onClick 回调绑定",
         "compose.dialog 返回可更新和关闭的会话, 支持普通对话框与模态底部弹层, 可在 UI 或普通脚本中使用",
         "Material 3 扩展组件: 导航栏与抽屉, 标签页, 底部弹层与菜单, 日期与时间选择器, 分页与网格, 芯片, 徽标, 分段按钮, 悬浮按钮, 搜索栏, 提示与下拉刷新",
-        "compose.memo 用于在 render 中复用依赖值与读取的 state 均未变化的界面片段, 大型列表局部更新时只重建发生变化的条目"
+        "compose.memo 用于在 render 中复用依赖值与读取的 state 均未变化的界面片段, 大型列表局部更新时只重建发生变化的条目",
+        "开发者选项提供 \"允许 Node.js 脚本使用 Inspector\" 开关, 默认关闭; 配合支持此能力的 Node.js Runtime 插件, Debug 和 Release 均可进行本地断点调试及 CPU/堆分析, 桌面 DevTools 通过 ADB 端口转发连接"
       ],
       "fix": [
         "启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题",

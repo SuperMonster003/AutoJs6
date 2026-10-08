@@ -286,7 +286,8 @@
         "ui.inflate accepte les layouts XML TSX compilés et lie leurs rappels onClick",
         "compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires",
         "Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement",
-        "compose.memo réutilise les fragments de render dont les valeurs de dépendance et les états lus n'ont pas changé, de sorte qu'une mise à jour partielle d'une grande liste ne reconstruit que les lignes modifiées"
+        "compose.memo réutilise les fragments de render dont les valeurs de dépendance et les états lus n'ont pas changé, de sorte qu'une mise à jour partielle d'une grande liste ne reconstruit que les lignes modifiées",
+        "Les options de développement proposent \"Autoriser Inspector pour les scripts Node.js\", désactivé par défaut, pour les points d'arrêt et le profilage CPU/mémoire en Debug et Release avec un plugin Node.js Runtime compatible; DevTools se connecte via la redirection de ports ADB"
       ],
       "fix": [
         "Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans \"Copier en tant que sélecteur\" de l'inspecteur de disposition et la représentation textuelle des sélecteurs",

@@ -801,6 +801,7 @@
     <string name="summary_guard_mode">منع إجراءات الأتمتة من البرامج النصية عندما يكون AutoJs6 في المقدمة</string>
     <string name="summary_lan_discovery">الإعلان عن هذا الجهاز باسم _autojs6._tcp ليعرضه VSCode (الإضافة 1.1.0+) عند الاتصال عبر الشبكة المحلية</string>
     <string name="summary_nodejs_doctor_report">إنشاء تقرير تشخيصي لوقت تشغيل Node منقح للخصوصية لاستخدامه في تقارير الأخطاء</string>
+    <string name="summary_nodejs_inspector_enabled">السماح للنصوص باستخدام التصحيح المحلي وتحليل الأداء. اتصل بأدوات DevTools على الكمبيوتر عبر إعادة توجيه منافذ ADB.</string>
     <string name="summary_not_showing_main_activity">قم بتشغيل البرنامج النصي مباشرة دون إظهار النشاط الرئيسي</string>
     <string name="summary_notify_client_connection_changes">إظهار تنبيه عند اتصال VSCode أو انقطاعه</string>
     <string name="summary_plugin_auto_check_updates">التحقق تلقائيا من تحديثات الاضافات كل 1 ساعة (السحب للتحديث يتحقق فورا)</string>
@@ -2074,6 +2075,7 @@
     <string name="text_nodejs_doctor_export_text">تقرير نصي</string>
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">جار إنشاء تقرير تشخيص Node.js...</string>
     <string name="text_nodejs_doctor_generation_failed">فشل إنشاء تقرير تشخيص Node.js</string>
+    <string name="text_nodejs_inspector_enabled">السماح باستخدام Inspector في نصوص Node.js</string>
     <string name="text_none">لا يوجد</string>
     <string name="text_not_enough_color_libraries_to_reorder">تتطلب إعادة الترتيب مكتبتي ألوان خاصتين على الأقل</string>
     <string name="text_not_granted">لم تمنح</string>

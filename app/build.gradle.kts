@@ -46,6 +46,8 @@ val sdkLintVerification = providers.gradleProperty("autojs.sdk.lint.verify")
 val isInrtAssembleTaskRequested = gradle.startParameter.taskNames.any { taskName ->
     taskName.substringAfterLast(':').startsWith("assemble${flavorNameInrt.uppercaseFirstChar()}", ignoreCase = true)
 }
+val nodeInspectorReleaseAndroidTest = providers.gradleProperty("nodeInspectorReleaseAndroidTest")
+    .map(String::toBoolean).orElse(false)
 val yoloR6ReleaseAndroidTestProperty = "yoloR6ReleaseAndroidTest"
 val yoloR6ReleaseAndroidTest = providers.gradleProperty(yoloR6ReleaseAndroidTestProperty)
     .map { value ->
@@ -989,11 +991,28 @@ android {
         }
     }
 
-    // R6 production-device evidence must exercise the exact release Host while keeping normal
-    // developer builds on the default debug instrumentation target. The controlled producer is
-    // the only caller that enables this property and requires the production signing config.
-    if (yoloR6ReleaseAndroidTest.get()) {
+    // Instrument the signed Release host when requested; normal developer tests stay on Debug.
+    if (yoloR6ReleaseAndroidTest.get() || nodeInspectorReleaseAndroidTest.get()) {
         testBuildType = buildTypeRelease
+    }
+    if (nodeInspectorReleaseAndroidTest.get()) {
+        // Other device suites reference components that exist only in src/debug.
+        // This explicit Release acceptance target compiles the Inspector suite and its harness.
+        val inspectorTestDirectory = layout.buildDirectory.dir("generated/sources/nodeInspectorAndroidTest")
+        val prepareInspectorTests = tasks.register<Sync>("prepareNodeInspectorReleaseAndroidTest") {
+            from("src/androidTest/java") {
+                include("**/NodeInspectorInstrumentationTest.kt", "**/NodePluginTestHarness.kt")
+            }
+            into(inspectorTestDirectory)
+        }
+        sourceSets.getByName("androidTest") {
+            java.setSrcDirs(listOf(inspectorTestDirectory))
+            kotlin.setSrcDirs(listOf(inspectorTestDirectory))
+            manifest.srcFile("src/androidTestInspector/AndroidManifest.xml")
+        }
+        tasks.matching { it.name.endsWith("ReleaseAndroidTestBuild") }.configureEach {
+            dependsOn(prepareInspectorTests)
+        }
     }
 
     flavorDimensions.add(flavorDimension)

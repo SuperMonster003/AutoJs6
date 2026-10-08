@@ -801,6 +801,7 @@
     <string name="summary_guard_mode">AutoJs6 이 전경에있을 때 스크립트의 자동화 조치 방지</string>
     <string name="summary_lan_discovery">이 기기를 _autojs6._tcp 로 알려 VSCode (확장 1.1.0+) 가 LAN 연결 시 목록에 표시하도록 합니다</string>
     <string name="summary_nodejs_doctor_report">버그 보고용으로 개인정보가 제거된 Node 런타임 진단 보고서 생성</string>
+    <string name="summary_nodejs_inspector_enabled">스크립트의 로컬 디버깅 및 프로파일링을 허용합니다. PC DevTools는 ADB 포트 전달로 연결합니다.</string>
     <string name="summary_not_showing_main_activity">주요 활동을 표시하지 않고 직접 스크립트를 실행하십시오</string>
     <string name="summary_notify_client_connection_changes">VSCode가 연결되거나 연결이 끊길 때 토스트를 표시합니다</string>
     <string name="summary_plugin_auto_check_updates">1시간마다 플러그인 업데이트를 자동으로 확인합니다 (당겨서 새로고침하면 즉시 확인)</string>
@@ -2074,6 +2075,7 @@
     <string name="text_nodejs_doctor_export_text">텍스트 보고서</string>
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Node.js Doctor 보고서 생성 중...</string>
     <string name="text_nodejs_doctor_generation_failed">Node.js Doctor 보고서를 생성하지 못했습니다</string>
+    <string name="text_nodejs_inspector_enabled">Node.js 스크립트에서 Inspector 허용</string>
     <string name="text_none">없음</string>
     <string name="text_not_enough_color_libraries_to_reorder">순서를 변경하려면 사용자 색상 라이브러리가 2개 이상 필요합니다</string>
     <string name="text_not_granted">부여되지 않았습니다</string>

@@ -87,6 +87,13 @@
         app:layout="@layout/preference_category_custom"
         app:title="@string/text_nodejs">
 
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="@string/key_nodejs_inspector_enabled"
+            app:layout="@layout/preference_custom"
+            app:defaultValue="false"
+            app:summary="@string/summary_nodejs_inspector_enabled"
+            app:title="@string/text_nodejs_inspector_enabled" />
+
         <org.autojs.autojs.ui.settings.NodeDoctorReportPreference
             app:key="@string/key_nodejs_doctor_report"
             app:layout="@layout/preference_custom"
