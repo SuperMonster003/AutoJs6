@@ -60,6 +60,24 @@ object NodeJsRuntimePluginHost {
     }
     private val connectionPool = LinkedHashMap<ComponentName, PooledConnection>()
     private val executionRegistry = NodeRuntimePluginExecutionRegistry<AcquiredRuntime>()
+    private val launchPrewarmInFlight = java.util.concurrent.atomic.AtomicBoolean()
+
+    /** Start one worker while the host prepares its engine, TypeScript output and workspace. */
+    @JvmStatic
+    fun prepareForExecution(context: Context) {
+        if (!launchPrewarmInFlight.compareAndSet(false, true)) return
+        binderCallExecutor.execute {
+            try {
+                kotlinx.coroutines.runBlocking {
+                    prewarm(context.applicationContext, Bundle().apply {
+                        putInt(NodeJsRuntimeContract.KEY_PREWARM_SLOTS, 1)
+                    })
+                }
+            } catch (_: Exception) {
+                // The actual execution reports discovery/connection errors through its normal path.
+            } finally { launchPrewarmInFlight.set(false) }
+        }
+    }
 
     private var candidateInvalidationGeneration = 0L
     private var candidateDiscoveryInFlightCount = 0
@@ -279,6 +297,7 @@ object NodeJsRuntimePluginHost {
                 dispatchStarted = false,
             )
         }
+        val issuedAt = SystemClock.elapsedRealtime()
         val result = try {
             // From this point onward a failed transaction is not safe to replay:
             // the remote process may have executed user code before Binder died.
@@ -295,6 +314,7 @@ object NodeJsRuntimePluginHost {
                 dispatchStarted = true,
             )
         }
+        result.putLong("hostRunScriptIssuedAtMs", issuedAt)
         return ScriptRunResult(
             result = result,
             runtimeInfo = runtimeInfo,

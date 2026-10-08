@@ -1001,7 +1001,8 @@ android {
         val inspectorTestDirectory = layout.buildDirectory.dir("generated/sources/nodeInspectorAndroidTest")
         val prepareInspectorTests = tasks.register<Sync>("prepareNodeInspectorReleaseAndroidTest") {
             from("src/androidTest/java") {
-                include("**/NodeInspectorInstrumentationTest.kt", "**/NodePluginTestHarness.kt")
+                include("**/NodeInspectorInstrumentationTest.kt", "**/NodePluginTestHarness.kt",
+                    "**/NodeStartupMeasurementInstrumentationTest.kt")
             }
             into(inspectorTestDirectory)
         }
@@ -1012,6 +1013,13 @@ android {
         }
         tasks.matching { it.name.endsWith("ReleaseAndroidTestBuild") }.configureEach {
             dependsOn(prepareInspectorTests)
+        }
+        // The test APK shares a class loader with the host. A test-only, shrunken j$ copy
+        // otherwise shadows DateTimeFormatter methods used by the host's Rhino engine.
+        afterEvaluate {
+            tasks.named<com.android.build.gradle.internal.tasks.L8DexDesugarLibTask>("l8DexDesugarLibAppReleaseAndroidTest").configure {
+                keepRulesConfigurations.add("-keep class j$.** { *; }")
+            }
         }
     }
 

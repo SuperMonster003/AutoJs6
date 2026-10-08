@@ -318,7 +318,9 @@ class App : Application(), WorkManagerConfiguration.Provider {
     private fun prewarmNodePluginIfNeeded() {
         if (!BuildConfig.isInrt) {
             runCatching {
-                runBlocking { NodeJsRuntimePluginHost.prewarm(this@App) }
+                runBlocking { NodeJsRuntimePluginHost.prewarm(this@App, android.os.Bundle().apply {
+                    putInt(org.autojs.plugin.nodejs.api.NodeJsRuntimeContract.KEY_PREWARM_SLOTS, 1)
+                }) }
             }.onFailure { Log.w(TAG, "Failed to prewarm external Node.js runtime plugin.", it) }
         }
     }

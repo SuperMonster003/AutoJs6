@@ -32,10 +32,12 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
 
     public Object execute() {
         try {
+            long compileStartedAt = android.os.SystemClock.elapsedRealtime();
             mExecutionSource = TypeScriptExecutionCompiler.prepare(
                     mScriptEngineManager.getAndroidContext(),
                     getSource()
             );
+            getConfig().nodeTypeScriptPrepareMs = android.os.SystemClock.elapsedRealtime() - compileStartedAt;
             mScriptEngine = mScriptEngineManager.createEngineOfSourceOrThrow(mExecutionSource, getId());
             mScriptEngine.setTag(ExecutionConfig.tag, getConfig());
         } catch (Throwable e) {

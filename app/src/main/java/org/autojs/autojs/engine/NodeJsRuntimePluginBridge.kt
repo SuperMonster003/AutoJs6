@@ -66,8 +66,12 @@ object NodeJsRuntimePluginBridge {
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         outputListener: ((type: String, text: String) -> Unit)? = null,
         stdinListener: ((ready: Boolean) -> Unit)? = null,
+        startupTimings: Map<String, Long> = emptyMap(),
     ): NodePluginScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
+        NodeJsRuntimePluginHost.prepareForExecution(context)
+        val launchStartedAt = startupTimings["launchStartedAtMs"]?.takeIf { it > 0L } ?: startedAt
+        val firstOutputAt = java.util.concurrent.atomic.AtomicLong()
         val requestWithProvider = request.copy(
             executionId = request.executionId?.takeIf(String::isNotBlank) ?: UUID.randomUUID().toString(),
             inspectorEnabled = request.inspectorEnabled ?: PreferenceManager.getDefaultSharedPreferences(context)
@@ -103,6 +107,7 @@ object NodeJsRuntimePluginBridge {
                     requestWithProvider,
                     launchSurface,
                 ).also { hostCapabilityBroker = it }
+                val workspaceStartedAt = SystemClock.elapsedRealtime()
                 val workspaceTransport = try {
                     NodeJsPluginWorkspaceArchiveTransport.create(context, requestWithProvider)
                 } catch (error: Throwable) {
@@ -111,6 +116,7 @@ object NodeJsRuntimePluginBridge {
                         error,
                     )
                 }
+                val workspacePreparedAt = SystemClock.elapsedRealtime()
                 var reservation: NodeRuntimePluginExecutionRegistry.Reservation? = null
                 try {
                     val pluginRequest = requestWithProvider.toPluginBundle(broker).also {
@@ -136,31 +142,30 @@ object NodeJsRuntimePluginBridge {
                         )
                     }
                     val streamedEventCount = java.util.concurrent.atomic.AtomicInteger(0)
-                    val runtimeCallback = if (outputListener != null || stdinListener != null) {
-                        object : INodeJsRuntimeCallback.Stub() {
-                            override fun onEvent(event: Bundle?) {
-                                val type = event?.getString(NodeJsRuntimeContract.KEY_EVENT_TYPE) ?: return
-                                if (type == NodeJsRuntimeContract.EVENT_STDIN_STATE) {
-                                    runCatching { stdinListener?.invoke(event.getString(NodeJsRuntimeContract.KEY_EVENT_TEXT) == "true") }
-                                        .onFailure { Log.w(TAG, "Node.js stdin listener failed.", it) }
-                                    return
-                                }
-                                if (type != NodeJsRuntimeContract.EVENT_STDOUT &&
-                                    type != NodeJsRuntimeContract.EVENT_STDERR
-                                ) {
-                                    return
-                                }
-                                val text = event.getString(NodeJsRuntimeContract.KEY_EVENT_TEXT).orEmpty()
-                                if (text.isEmpty()) {
-                                    return
-                                }
-                                streamedEventCount.incrementAndGet()
-                                runCatching { outputListener?.invoke(type, text) }.onFailure { error ->
-                                    Log.w(TAG, "Node.js runtime plugin output listener failed.", error)
-                                }
+                    val runtimeCallback = object : INodeJsRuntimeCallback.Stub() {
+                        override fun onEvent(event: Bundle?) {
+                            val type = event?.getString(NodeJsRuntimeContract.KEY_EVENT_TYPE) ?: return
+                            if (type == NodeJsRuntimeContract.EVENT_STDIN_STATE) {
+                                runCatching { stdinListener?.invoke(event.getString(NodeJsRuntimeContract.KEY_EVENT_TEXT) == "true") }
+                                    .onFailure { Log.w(TAG, "Node.js stdin listener failed.", it) }
+                                return
+                            }
+                            if (type != NodeJsRuntimeContract.EVENT_STDOUT &&
+                                type != NodeJsRuntimeContract.EVENT_STDERR
+                            ) {
+                                return
+                            }
+                            val text = event.getString(NodeJsRuntimeContract.KEY_EVENT_TEXT).orEmpty()
+                            if (text.isEmpty()) {
+                                return
+                            }
+                            if (type == NodeJsRuntimeContract.EVENT_STDOUT) firstOutputAt.compareAndSet(0L, SystemClock.elapsedRealtime())
+                            streamedEventCount.incrementAndGet()
+                            runCatching { outputListener?.invoke(type, text) }.onFailure { error ->
+                                Log.w(TAG, "Node.js runtime plugin output listener failed.", error)
                             }
                         }
-                    } else null
+                    }
                     val runResult = runBlocking {
                         NodeJsRuntimePluginHost.runScriptWithInfo(
                             context = context,
@@ -195,7 +200,17 @@ object NodeJsRuntimePluginBridge {
                             backendDispatched = true,
                         )
                     } else {
-                        val scriptResult = runResult.toPluginScriptResult(requestWithProvider, startedAt)
+                        val issuedAt = runResult.result.getLong("hostRunScriptIssuedAtMs", workspacePreparedAt)
+                        val timingValues = startupTimings.filterKeys { it != "launchStartedAtMs" }.mapValues { it.value.toString() } + mapOf(
+                            "timing.host.workspace_archive.ms" to (workspacePreparedAt - workspaceStartedAt).toString(),
+                            "timing.host.bridge_prepare.ms" to (workspaceStartedAt - startedAt).toString(),
+                            "timing.host.session_and_dispatch.ms" to (issuedAt - workspacePreparedAt).coerceAtLeast(0L).toString(),
+                            "timing.host.launch_to_dispatch.ms" to (issuedAt - launchStartedAt).coerceAtLeast(0L).toString(),
+                            "timing.host.dispatch_to_first_stdout.ms" to (firstOutputAt.get().takeIf { it > 0 }?.let { it - issuedAt } ?: -1L).toString(),
+                            "timing.host.launch_to_first_stdout.ms" to (firstOutputAt.get().takeIf { it > 0 }?.let { it - launchStartedAt } ?: -1L).toString(),
+                        )
+                        val rawScriptResult = runResult.toPluginScriptResult(requestWithProvider, startedAt)
+                        val scriptResult = rawScriptResult.copy(nativeValues = rawScriptResult.nativeValues + timingValues)
                         if (streamedEventCount.get() > 0) {
                             scriptResult.copy(
                                 nativeValues = scriptResult.nativeValues + mapOf(

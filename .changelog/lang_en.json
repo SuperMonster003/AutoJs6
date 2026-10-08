@@ -737,7 +737,8 @@
         "The plugin info dialog of Plugin Center tells \"Supported ABIs\" from \"Installed ABIs\": the former prefers the org.autojs.plugin.contract.SUPPORTED_ABIS manifest meta-data written by the plugin build, then the plugin INFO service and the index; the latter lists the ABIs actually packaged in the installed APKs (splits included)",
         "Compose UI native text editing preserves selection and IME composition with keyboard avoidance, and reports each Snackbar action or dismissal once",
         "ComposeError provides localized messages and stable codes with node/property/cause and script stack details; each engine permits up to 8 live sessions, rejects operations on closed handles and clears callbacks, refs and pending work; updating, uninstalling or disabling the plugin closes its active sessions with the corresponding error",
-        "cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions"
+        "cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions",
+        "Node.js runtime prewarming overlaps host engine, TypeScript and workspace preparation to reduce launch waiting; startup timings include the first output for interactive and scheduled scripts"
       ],
       "dependency": [
         "Modularized Android AXML",

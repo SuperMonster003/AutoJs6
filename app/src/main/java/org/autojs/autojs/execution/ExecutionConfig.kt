@@ -20,6 +20,10 @@ data class ExecutionConfig(
 
     private val mArguments = HashMap<String, Any>()
 
+    /** Monotonic host launch measurements; neither script arguments nor parcel input. */
+    @JvmField var nodeLaunchStartedAtMs = 0L
+    @JvmField var nodeTypeScriptPrepareMs = 0L
+
     /** Host-owned execution marker; never accepted from script arguments or parceled as input. */
     var agentExecutionState: AgentScriptExecutionState? = null
         internal set

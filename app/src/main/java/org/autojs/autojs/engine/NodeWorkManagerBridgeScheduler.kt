@@ -146,6 +146,7 @@ object NodeWorkManagerBridgeScheduler {
         }
 
         val startedAt = System.currentTimeMillis()
+        val launchStartedAt = android.os.SystemClock.elapsedRealtime()
         val entry = resolveEntry(running)
         if (entry.errorMessage != null || entry.file == null || entry.source == null) {
             markFailed(appContext, id, running, startedAt, entry.errorMessage ?: "work_manager task entry could not be resolved.")
@@ -169,6 +170,10 @@ object NodeWorkManagerBridgeScheduler {
                 ),
             ),
             launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+            startupTimings = mapOf(
+                "launchStartedAtMs" to launchStartedAt,
+                "timing.host.request_prepare.ms" to (android.os.SystemClock.elapsedRealtime() - launchStartedAt),
+            ),
         )
 
         markCompleted(appContext, id, running, startedAt, result)
@@ -362,6 +367,7 @@ object NodeWorkManagerBridgeScheduler {
             NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
         )
         return JSONObject().apply {
+            nativeValues.filterKeys { it.startsWith("timing.") }.forEach { (key, value) -> put(key, value) }
             listOf(
                 "embedded_script.execution_mode",
                 "embedded_script.execution_mode_launch_surface",

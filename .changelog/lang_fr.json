@@ -737,7 +737,8 @@
         "La boîte de dialogue d'informations du centre de plugins distingue \"ABI prises en charge\" et \"ABI installées\" : la première privilégie la meta-data de manifeste org.autojs.plugin.contract.SUPPORTED_ABIS écrite par la compilation du plugin, puis le service INFO du plugin et l'index ; la seconde liste les ABI réellement empaquetées dans les APK installés (splits compris)",
         "La saisie native Compose UI préserve la sélection et la composition IME, évite que le clavier masque le contenu et transmet une seule fois chaque action ou fermeture de Snackbar",
         "ComposeError fournit des messages localisés et des codes stables avec le noeud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions actives, refuse les opérations après fermeture et libère rappels, références et tâches en attente; la mise à jour, désinstallation ou désactivation du plugin ferme ses sessions actives avec l'erreur correspondante",
-        "cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes"
+        "cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes",
+        "Préchauffage de Node.js en parallèle de la préparation du moteur hôte, de TypeScript et des fichiers pour réduire l'attente; mesure des étapes jusqu'à la première sortie pour les scripts interactifs et planifiés"
       ],
       "dependency": [
         "Android AXML modularise",

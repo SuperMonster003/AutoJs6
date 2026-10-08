@@ -46,7 +46,9 @@ object ScriptIntents {
 
     @JvmStatic
     fun handleIntent(context: Context?, intent: Intent) {
+        val launchStartedAt = android.os.SystemClock.elapsedRealtime()
         prepareLaunch(context, intent)?.let {
+            it.config.nodeLaunchStartedAtMs = launchStartedAt
             Scripts.executeLaunch(context ?: GlobalAppContext.get(), it.launch, it.config)
         }
     }

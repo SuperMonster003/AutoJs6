@@ -905,6 +905,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` La saisie native Compose UI préserve la sélection et la composition IME, évite que le clavier masque le contenu et transmet une seule fois chaque action ou fermeture de Snackbar
 * `Amélioration` ComposeError fournit des messages localisés et des codes stables avec le noeud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions actives, refuse les opérations après fermeture et libère rappels, références et tâches en attente; la mise à jour, désinstallation ou désactivation du plugin ferme ses sessions actives avec l'erreur correspondante
 * `Amélioration` cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
+* `Amélioration` Préchauffage de Node.js en parallèle de la préparation du moteur hôte, de TypeScript et des fichiers pour réduire l'attente; mesure des étapes jusqu'à la première sortie pour les scripts interactifs et planifiés
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

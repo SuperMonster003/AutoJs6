@@ -32,6 +32,7 @@ class NodePluginJavaScriptEngine(
         private set
 
     override fun doExecution(source: JavaScriptSource): Any? {
+        val preparingAt = android.os.SystemClock.elapsedRealtime()
         val compiledSource = source as? CompiledTypeScriptSource
         val compiled = compiledSource?.executable?.takeIf { executable ->
             executable.targetProfile == TypeScriptCompilerContract.PROFILE_NODE
@@ -104,6 +105,14 @@ class NodePluginJavaScriptEngine(
             NodeJsRuntimePluginBridge.runScript(
                 context = androidContext,
                 request = request,
+                startupTimings = (getTag(org.autojs.autojs.execution.ExecutionConfig.tag) as? org.autojs.autojs.execution.ExecutionConfig)?.let { config ->
+                    mapOf(
+                        "launchStartedAtMs" to config.nodeLaunchStartedAtMs,
+                        "timing.host.typescript_prepare.ms" to config.nodeTypeScriptPrepareMs,
+                        "timing.host.engine_prepare.ms" to (preparingAt - config.nodeLaunchStartedAtMs - config.nodeTypeScriptPrepareMs).coerceAtLeast(0L),
+                        "timing.host.request_prepare.ms" to (android.os.SystemClock.elapsedRealtime() - preparingAt),
+                    )
+                }.orEmpty(),
                 stdinListener = input::onState,
                 outputListener = { type, text ->
                     printScriptOutput(

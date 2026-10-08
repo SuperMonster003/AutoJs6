@@ -126,13 +126,14 @@ object Scripts {
 
     @JvmStatic
     fun run(context: Context, file: ScriptFile): ScriptExecution? = try {
+        val launchStartedAt = android.os.SystemClock.elapsedRealtime()
         val persisted = ScriptLaunchSourceFactory.capturePersistedLaunchContext(file.path)
         val launch = ScriptLaunchSourceFactory.createPersistedPathLaunch(
             path = file.path,
             sourceKind = persisted.sourceKind,
             projectRoot = persisted.projectRoot,
         )
-        executeLaunch(context, launch)
+        executeLaunch(context, launch, launch.createExecutionConfig().apply { nodeLaunchStartedAtMs = launchStartedAt })
     } catch (e: Exception) {
         e.printStackTrace()
         ViewUtils.showToast(context, e.message, true)
@@ -142,13 +143,14 @@ object Scripts {
     /** Runs a user-selected file and may show the foreground Python plugin availability prompt. */
     @JvmStatic
     fun runInteractive(context: Context, file: ScriptFile): ScriptExecution? = try {
+        val launchStartedAt = android.os.SystemClock.elapsedRealtime()
         val persisted = ScriptLaunchSourceFactory.capturePersistedLaunchContext(file.path)
         val launch = ScriptLaunchSourceFactory.createPersistedPathLaunch(
             path = file.path,
             sourceKind = persisted.sourceKind,
             projectRoot = persisted.projectRoot,
         )
-        executeInteractiveLaunch(context, launch)
+        executeInteractiveLaunch(context, launch, launch.createExecutionConfig().apply { nodeLaunchStartedAtMs = launchStartedAt })
     } catch (e: Exception) {
         e.printStackTrace()
         ViewUtils.showToast(context, e.message, true)
@@ -162,8 +164,9 @@ object Scripts {
 
     @JvmStatic
     fun run(context: Context, source: ScriptSource, workingDirectory: String?): ScriptExecution? = try {
+        val launchStartedAt = android.os.SystemClock.elapsedRealtime()
         val launch = ScriptLaunchSourceFactory.createSourceLaunch(source, workingDirectory)
-        executeLaunch(context, launch)
+        executeLaunch(context, launch, launch.createExecutionConfig().apply { nodeLaunchStartedAtMs = launchStartedAt })
     } catch (e: Exception) {
         e.printStackTrace()
         ViewUtils.showToast(context, e.message, true)
@@ -294,6 +297,7 @@ object Scripts {
         originMimeType: String?,
         interactiveContext: Context?,
     ): ScriptExecution? {
+        val launchStartedAt = android.os.SystemClock.elapsedRealtime()
         val launch = ScriptLaunchSourceFactory.createSemanticFileLaunch(
             sourceFile = file,
             semanticPath = overriddenFullPath,
@@ -321,7 +325,7 @@ object Scripts {
         ) {
             return null
         }
-        val config = launch.createExecutionConfig()
+        val config = launch.createExecutionConfig().apply { nodeLaunchStartedAtMs = launchStartedAt }
         if (interactiveContext != null && launch.engineName == PythonScriptSource.ENGINE) {
             authorizeInteractivePythonExecution(config, interactiveContext)
         }

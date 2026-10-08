@@ -743,6 +743,7 @@
 * `Mejora` La edición de texto nativa de Compose UI conserva selección y composición IME, evita que el teclado cubra el contenido y comunica una sola vez cada acción o cierre de Snackbar
 * `Mejora` ComposeError ofrece mensajes localizados y códigos estables con nodo, propiedad, causa y pila del script; cada motor admite hasta 8 sesiones activas, rechaza operaciones con manejadores cerrados y limpia callbacks, referencias y tareas pendientes; actualizar, desinstalar o desactivar el complemento cierra sus sesiones activas con el error correspondiente
 * `Mejora` cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones
+* `Mejora` Precalentamiento de Node.js en paralelo a la preparación del motor anfitrión, TypeScript y los archivos para reducir la espera; medición de etapas hasta la primera salida de scripts interactivos y programados
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

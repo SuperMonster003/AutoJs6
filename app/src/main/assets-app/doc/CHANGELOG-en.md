@@ -743,6 +743,7 @@
 * `Improvement` Compose UI native text editing preserves selection and IME composition with keyboard avoidance, and reports each Snackbar action or dismissal once
 * `Improvement` ComposeError provides localized messages and stable codes with node/property/cause and script stack details; each engine permits up to 8 live sessions, rejects operations on closed handles and clears callbacks, refs and pending work; updating, uninstalling or disabling the plugin closes its active sessions with the corresponding error
 * `Improvement` cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions
+* `Improvement` Node.js runtime prewarming overlaps host engine, TypeScript and workspace preparation to reduce launch waiting; startup timings include the first output for interactive and scheduled scripts
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

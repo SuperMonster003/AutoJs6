@@ -177,6 +177,9 @@ public class ScriptEngineService {
     }
 
     public ScriptExecution execute(ScriptExecutionTask task) {
+        if (task.getConfig().nodeLaunchStartedAtMs == 0L) {
+            task.getConfig().nodeLaunchStartedAtMs = android.os.SystemClock.elapsedRealtime();
+        }
         if (task.getListener() != null) {
             task.setExecutionListener(new ScriptExecutionObserver.Wrapper(mScriptExecutionObserver, task.getListener()));
         } else {
@@ -184,6 +187,9 @@ public class ScriptEngineService {
         }
         ScriptSource source = task.getSource();
         if (source instanceof JavaScriptSource src) {
+            if (JavaScriptSource.ENGINE_NODEJS.equals(src.getEngineName())) {
+                NodeJsRuntimePluginHost.prepareForExecution(mApplicationContext);
+            }
             int mode = src.getExecutionMode();
             if ((mode & JavaScriptSource.EXECUTION_MODE_UI) != 0
                     && !JavaScriptSource.ENGINE_BUN.equals(src.getEngineName())

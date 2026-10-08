@@ -59,6 +59,8 @@ object NodeJsRuntimeContract {
     const val KEY_TIMEOUT_MS = "timeoutMs"
     /** Exit the dedicated process after this much idle time; absent/nonpositive keeps it resident. */
     const val KEY_IDLE_EXIT_MS = "idleExitMs"
+    /** Prewarm idle slots in the first N positions; absent retains the configured pool size. */
+    const val KEY_PREWARM_SLOTS = "prewarmSlots"
     const val KEY_IDLE_FOR_MS = "idleForMs"
     const val KEY_EXECUTION_MODE = "executionMode"
 

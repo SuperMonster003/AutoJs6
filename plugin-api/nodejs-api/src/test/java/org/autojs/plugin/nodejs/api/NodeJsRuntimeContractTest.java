@@ -15,6 +15,7 @@ public class NodeJsRuntimeContractTest {
         assertEquals("processPoolMaxConcurrentExecutions", NodeJsRuntimeContract.KEY_PROCESS_POOL_MAX_CONCURRENT_EXECUTIONS);
         assertEquals("queueCapacity", NodeJsRuntimeContract.KEY_QUEUE_CAPACITY);
         assertEquals("queueUnlimited", NodeJsRuntimeContract.KEY_QUEUE_UNLIMITED);
+        assertEquals("prewarmSlots", NodeJsRuntimeContract.KEY_PREWARM_SLOTS);
     }
 
     @Test
