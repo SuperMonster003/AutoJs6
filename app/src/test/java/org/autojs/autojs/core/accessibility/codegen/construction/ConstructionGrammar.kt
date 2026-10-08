@@ -16,6 +16,7 @@ import org.autojs.autojs.core.accessibility.codegen.plan.SelectorSpec
 import org.autojs.autojs.core.accessibility.codegen.verify.PlanVerifier
 import org.autojs.autojs.core.accessibility.codegen.verify.RejectionReason
 import org.autojs.autojs.core.automator.UiNode
+import java.util.BitSet
 
 /** Offline prototype only. No complete LocatePlan is created until the FINISH action is chosen.
  * zh-CN: 仅离线原型使用. 只有选中 FINISH 动作后才创建完整 LocatePlan. */
@@ -67,6 +68,16 @@ internal class ConstructionGrammar<N : UiNode<N>>(
 
     val tree = verifier.tree
     val positions = tree.nodes.withIndex().associate { it.value to it.index }
+    /** Exclusive end of each node's subtree in captured pre-order; subtrees are contiguous. */
+    private val subtreeEnd = IntArray(tree.nodes.size)
+    private class ConditionIndex(val positions: IntArray, val bits: BitSet)
+    private val conditionIndexes = HashMap<Condition, ConditionIndex>()
+    private data class MatchKey(val start: Int, val spec: SelectorSpec)
+    private val matchCache = object : LinkedHashMap<MatchKey, List<N>>(64, .75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<MatchKey, List<N>>?): Boolean = size > MAX_CACHED_SPECS
+    }
+    var singleConditionScans = 0
+        private set
     val targets = request.targets.mapNotNull(tree::canonical).distinct()
     val target: N? = targets.firstOrNull()
     val cardinality = if (request.scope == Scope.SINGLE) Cardinality.ONE else Cardinality.ALL
@@ -81,6 +92,11 @@ internal class ConstructionGrammar<N : UiNode<N>>(
     val truncatedAnchors: Boolean
 
     init {
+        for (index in tree.nodes.indices.reversed()) {
+            var end = index + 1
+            for (child in tree.children(tree.nodes[index])) end = maxOf(end, subtreeEnd[positions.getValue(child)])
+            subtreeEnd[index] = end
+        }
         for (node in tree.nodes) {
             checkpoint()
             node.id()?.takeIf { it.isNotEmpty() }?.let { fullId ->
@@ -222,11 +238,60 @@ internal class ConstructionGrammar<N : UiNode<N>>(
         (if (it.inner) targetConditions else outerSource(state))[it.position]
     }
 
+    /**
+     * Exactly the verifier's `match` (DFS pre-order within [within], inclusive), computed from one
+     * verifier scan per distinct single condition instead of one scan per selector. A selector is a
+     * conjunction of per-node predicates, so its matches are the intersection of the single-condition
+     * matches restricted to the contiguous pre-order range of the subtree. Large captures previously
+     * spent most of the search allocation rescanning the tree for every scored prefix.
+     * zh-CN: 与验证器 match 完全一致: 每个单条件只扫描一次, 多条件选择器取交集并限制在子树的连续先序区间内,
+     * 避免大捕获上对每个评分前缀重新扫描整棵树.
+     */
     fun matches(spec: SelectorSpec, within: N = tree.root): List<N> {
         checkpoint()
-        val result = verifier.match(spec, within)
+        if (spec.conditions.isEmpty()) return verifier.match(spec, within)
+        val start = positions[tree.canonical(within)] ?: return emptyList()
+        val key = MatchKey(start, spec)
+        matchCache[key]?.let { return it }
+        val indexes = spec.conditions.map(::conditionIndex)
+        val smallest = indexes.minBy { it.positions.size }
+        val end = subtreeEnd[start]
+        val result = ArrayList<N>()
+        var at = lowerBound(smallest.positions, start)
+        while (at < smallest.positions.size) {
+            val position = smallest.positions[at++]
+            if (position >= end) break
+            if (indexes.all { it === smallest || it.bits.get(position) }) result += tree.nodes[position]
+            if (result.size % 256 == 0) checkpoint()
+        }
         checkpoint()
+        matchCache[key] = result
         return result
+    }
+
+    private fun conditionIndex(condition: Condition): ConditionIndex = conditionIndexes.getOrPut(condition) {
+        singleConditionScans++
+        val found = verifier.match(SelectorSpec(listOf(condition)), tree.root)
+        val bits = BitSet(tree.nodes.size)
+        val positions = IntArray(found.size)
+        found.forEachIndexed { index, node ->
+            val position = this.positions.getValue(node)
+            positions[index] = position
+            bits.set(position)
+        }
+        // The verifier returns pre-order, so positions are already ascending.
+        check(positions.asList().zipWithNext().all { (a, b) -> a < b }) { "Verifier matches must be in pre-order" }
+        ConditionIndex(positions, bits)
+    }
+
+    private fun lowerBound(values: IntArray, target: Int): Int {
+        var low = 0
+        var high = values.size
+        while (low < high) {
+            val middle = (low + high) ushr 1
+            if (values[middle] < target) low = middle + 1 else high = middle
+        }
+        return low
     }
 
     fun distance(a: N, b: N): Int {
@@ -269,6 +334,10 @@ internal class ConstructionGrammar<N : UiNode<N>>(
             up++
         }
         return false
+    }
+
+    companion object {
+        private const val MAX_CACHED_SPECS = 4_096
     }
 
     private fun receiverForTargets(): PlanReceiver? {
