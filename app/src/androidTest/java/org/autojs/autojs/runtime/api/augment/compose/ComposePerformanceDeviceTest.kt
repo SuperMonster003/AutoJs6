@@ -188,6 +188,36 @@ class ComposePerformanceDeviceTest {
         }
     }
 
+    /**
+     * F.6 decision input: one visible state change while a 1000-row list stays mounted.
+     * The render layer rebuilds the whole tree in JavaScript and relies on host snapshot
+     * comparison; the handle layer updates the two observed nodes directly. Both trees
+     * contain the same label, swatch, button and rows, and no row changes in either path.
+     */
+    @Test fun thousandItemListStateUpdates() {
+        for (kind in listOf(Kind.UI_LIST_RENDER_UPDATE, Kind.UI_LIST_HANDLE_UPDATE)) {
+            Running(kind).use { running ->
+                running.observe(0)
+                var value = 0
+                repeat(warmups) { running.click("increment"); running.observe(++value) }
+                repeat(samples) { index ->
+                    val before = running.renders.get()
+                    val clickStarted = now()
+                    running.click("increment")
+                    val clickReturned = now()
+                    val observed = running.observe(++value)
+                    emit(requireNotNull(kind.updateMetric), index, observed.json(running.mutationStarted.get())
+                        .put("surface", kind.surface).put("items", 1000).put("warmups", warmups)
+                        .put("renderCount", running.renders.get() - before)
+                        .put("clickActionNs", clickReturned - clickStarted)
+                        .put("clickToPixelConfirmedNs", observed.confirmedAtNs - clickStarted)
+                        .put("mutationLoopNs", running.mutationFinished.get() - running.mutationStarted.get())
+                        .put("lastRenderBuildNs", running.lastRenderBuildNs.get()))
+                }
+            }
+        }
+    }
+
     @Test fun hostPssAcrossFreshLoaderAndOwnedSessions() {
         requireFreshProcess()
         assertTrue("Grant the isolated host overlay permission before collecting PSS", Settings.canDrawOverlays(context))
@@ -234,7 +264,10 @@ class ComposePerformanceDeviceTest {
         assertTrue("Only one cold or PSS entry is allowed per process", claimedFreshProcess.compareAndSet(false, true))
     }
 
-    private enum class Kind(val surface: String) { UI_COUNTER("ui"), FLOATY_COUNTER("floaty"), UI_LIST("ui"), EMPTY_UI("ui") }
+    private enum class Kind(val surface: String, val updateMetric: String? = null) {
+        UI_COUNTER("ui"), FLOATY_COUNTER("floaty"), UI_LIST("ui"), EMPTY_UI("ui"),
+        UI_LIST_RENDER_UPDATE("ui", "list_render_update"), UI_LIST_HANDLE_UPDATE("ui", "list_handle_update"),
+    }
 
     private inner class Running(private val kind: Kind) : Closeable {
         private val marker = "compose-perf-${UUID.randomUUID()}"
@@ -405,6 +438,7 @@ class ComposePerformanceDeviceTest {
 
     private fun source(kind: Kind, marker: String, palette: Array<String>): String {
         if (kind == Kind.EMPTY_UI) return "'ui';\n// $marker\nui.layout(<frame bg=\"#FFFFFF\"/>);"
+        if (kind == Kind.UI_LIST_HANDLE_UPDATE) return handleListSource(marker, palette)
         val prefix = if (kind == Kind.FLOATY_COUNTER) "" else "'ui';\n"
         val density = context.resources.displayMetrics.density
         val width = (260 * density).roundToInt().coerceAtMost(context.resources.displayMetrics.widthPixels - (32 * density).roundToInt())
@@ -416,6 +450,15 @@ class ComposePerformanceDeviceTest {
             var contents = compose.Column({padding:12,spacing:8,modifier:compose.modifier().fillMaxSize()},
                 label, swatch, compose.LazyColumn({key:'list',testTag:'$marker-list',
                     modifier:compose.modifier().weight(1).fillMaxWidth(),onScroll:function (index) { firstVisible.set(index); }}, rows));
+        """ else if (kind == Kind.UI_LIST_RENDER_UPDATE) """
+            var rows = [];
+            for (var i = 0; i < 1000; i++) rows.push(compose.Text({key:'item-' + i,text:'Item ' + i,
+                modifier:compose.modifier().fillMaxWidth().height(48).padding(8)}));
+            var contents = compose.Column({padding:12,spacing:8,modifier:compose.modifier().fillMaxSize()},
+                label, swatch, compose.Row({key:'controls',spacing:8},
+                    compose.Button({key:'increment',testTag:'$marker-increment',onClick:function () { update(1); }}, 'Update')),
+                compose.LazyColumn({key:'list',testTag:'$marker-list',
+                    modifier:compose.modifier().weight(1).fillMaxWidth()}, rows));
         """ else """
             var contents = compose.Column({padding:16,spacing:8}, label, swatch,
                 compose.Row({key:'controls',spacing:8},
@@ -456,6 +499,41 @@ class ComposePerformanceDeviceTest {
             mountReturned.set(nowNs());
         """.trimIndent()
     }
+
+    /** The same 1000-row tree as [Kind.UI_LIST_RENDER_UPDATE], built once and updated through handles. */
+    private fun handleListSource(marker: String, palette: Array<String>): String = """
+        'ui';
+        // $marker
+        var mountStarted = runtime.getProperty('compose.perf.mountStarted');
+        var mountReturned = runtime.getProperty('compose.perf.mountReturned');
+        var mutationStarted = runtime.getProperty('compose.perf.mutationStarted');
+        var mutationFinished = runtime.getProperty('compose.perf.mutationFinished');
+        function nowNs() { return android.os.SystemClock.elapsedRealtimeNanos(); }
+        var value = 0;
+        var palette = ${JSONArray(palette.toList())};
+        var label = compose.Text({key:'value',testTag:'$marker-value',text:'Value: 0'});
+        var swatch = compose.Box({key:'swatch',testTag:'$marker-swatch',contentDescription:'Frame 0',
+            w:32,h:32,bg:palette[0]});
+        function update(count) {
+            mutationStarted.set(nowNs());
+            value += count;
+            label.set({text:'Value: ' + value});
+            swatch.set({contentDescription:'Frame ' + value,bg:palette[value % palette.length]});
+            mutationFinished.set(nowNs());
+        }
+        var rows = [];
+        for (var i = 0; i < 1000; i++) rows.push(compose.Text({key:'item-' + i,text:'Item ' + i,
+            modifier:compose.modifier().fillMaxWidth().height(48).padding(8)}));
+        var contents = compose.Column({padding:12,spacing:8,modifier:compose.modifier().fillMaxSize()},
+            label, swatch, compose.Row({key:'controls',spacing:8},
+                compose.Button({key:'increment',testTag:'$marker-increment',onClick:function () { update(1); }}, 'Update')),
+            compose.LazyColumn({key:'list',testTag:'$marker-list',
+                modifier:compose.modifier().weight(1).fillMaxWidth()}, rows));
+        var root = compose.Surface({modifier:compose.modifier().fillMaxSize()}, contents);
+        mountStarted.set(nowNs());
+        var session = compose.mount(root);
+        mountReturned.set(nowNs());
+    """.trimIndent()
 
     /** Android's dropCount is lost metric reports, not dropped display frames. */
     private inner class FrameCollector(private val window: Window) : Closeable {

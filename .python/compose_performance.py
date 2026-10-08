@@ -4,12 +4,15 @@
 Examples:
   py .python/compose_performance.py run --serial emulator-5560 --output-dir build/compose-performance/api24
   py .python/compose_performance.py summarize build/compose-performance/api24/*-records.json --output build/compose-performance/summary.json --plugin-apk <release.apk>
+  py .python/compose_performance.py run --serial emulator-5560 --sections list-updates --output-dir build/compose-performance/f6
 
 Install the isolated spike host, its test APK and the matching release plugin first.
 Grant the isolated host overlay permission and unlock the device. The runner stops
 only the explicitly named .compose.spike host before each instrumentation invocation.
 Cold means a fresh host process, not cleared disk/page/dex caches. Warm samples use
 new script engines after same-process warmups. No screenshot images are saved.
+The opt-in list-updates section (roadmap F.6 input) compares one visible state change
+on a mounted 1000-row tree between whole-tree render and direct handle updates.
 
 Visibility numbers include tree queries, two display callbacks and screenshot
 capture. The color swatch is rendered in the same tree as the observed value. This
@@ -48,7 +51,11 @@ METHODS = {
     "updates": "stateUpdatesAndBatchedRenders",
     "list": "thousandItemListFirstFrameAndScrollFrames",
     "memory": "hostPssAcrossFreshLoaderAndOwnedSessions",
+    # F.6 decision input; not part of the default P5.3 baseline sections.
+    "list-updates": "thousandItemListStateUpdates",
 }
+LIST_UPDATE_METRICS = ("list_render_update", "list_handle_update")
+LATENCY_METRICS = {"first_frame", "state_update", "batch_100", "list_first_frame", *LIST_UPDATE_METRICS}
 PSS_STAGES = (
     "instrumented_host_before_script", "empty_native_ui_engine", "after_empty_ui_close",
     "first_compose_ui", "after_compose_ui_close", "warm_compose_floaty", "after_floaty_close",
@@ -87,10 +94,10 @@ def validate_record(record: dict) -> None:
         raise ValueError("Sample indexes and process IDs must be valid integers")
     if not record["host"]["package"].endswith(".compose.spike"):
         raise ValueError("Record does not come from the isolated spike host")
-    if record["metric"] not in {"first_frame", "state_update", "batch_100", "list_first_frame", "list_scroll", "host_pss"}:
+    if record["metric"] not in LATENCY_METRICS | {"list_scroll", "host_pss"}:
         raise ValueError("Unknown performance metric")
     fields = record["fields"]
-    if record["metric"] in {"first_frame", "state_update", "batch_100", "list_first_frame"}:
+    if record["metric"] in LATENCY_METRICS:
         for key in ("toSemanticsNs", "toPixelConfirmedNs", "semanticsQueryNs", "twoDisplayCallbacksNs", "screenshotNs"):
             if not isinstance(fields.get(key), (int, float)) or fields[key] < 0:
                 raise ValueError(f"Missing or invalid timing: {key}")
@@ -138,6 +145,8 @@ def validate_invocation(records: list[dict], section: str, index: int, samples: 
         expected |= {("list_scroll", "", "", "", i) for i in range(samples)}
     elif section == "memory":
         expected = {("host_pss", "", "", stage, i) for stage in PSS_STAGES for i in range(memory_samples)}
+    elif section == "list-updates":
+        expected = {(metric, "ui", "", "", i) for metric in LIST_UPDATE_METRICS for i in range(samples)}
     else:
         raise ValueError(f"Unknown invocation section: {section}")
     actual = [sample_identity(record) for record in records]
@@ -341,7 +350,7 @@ def collect(args) -> Path:
         raise ValueError("Only an explicitly named isolated .compose.spike package may be stopped")
     sections = args.sections.split(",")
     if len(sections) != len(set(sections)) or any(section not in METHODS for section in sections):
-        raise ValueError("Sections must be a unique comma-separated subset of cold,warm,updates,list,memory")
+        raise ValueError("Sections must be a unique comma-separated subset of " + ",".join(METHODS))
     run_id = args.run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", run_id):
         raise ValueError("run-id must be a plain label of at most 80 characters")

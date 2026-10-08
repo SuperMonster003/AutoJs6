@@ -154,6 +154,18 @@ class ComposePerformanceAnalysisTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             perf.validate_invocation([first], "list", 0, 1, 5, "test")
 
+    def test_list_updates_need_both_layers_with_pixel_confirmation(self):
+        records = [record(metric) for metric in perf.LIST_UPDATE_METRICS]
+        perf.validate_invocation(records, "list-updates", 0, 1, 5, "test")
+        for invalid in (records[:1], records + [copy.deepcopy(records[0])]):
+            with self.assertRaises(ValueError):
+                perf.validate_invocation(invalid, "list-updates", 0, 1, 5, "test")
+        unconfirmed = copy.deepcopy(records)
+        unconfirmed[1]["fields"]["pixelConfirmed"] = False
+        with self.assertRaises(ValueError):
+            perf.validate_invocation(unconfirmed, "list-updates", 0, 1, 5, "test")
+        self.assertEqual("thousandItemListStateUpdates", perf.METHODS["list-updates"])
+
     def test_memory_requires_all_nine_stages_and_the_requested_samples(self):
         records = []
         for stage in perf.PSS_STAGES:
