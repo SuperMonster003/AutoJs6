@@ -16,6 +16,9 @@ from dataset.task_io import nonempty_string, parse_json, private_path, read_json
 
 SPLITS = ("train", "valid", "test", "real-test")
 PREFIX = ("split", "groupId", "planKey", "label")
+# Kotlin exporters whose provenance is accepted: the original rule-search candidate export and the
+# merged rule + construction candidate export of the construction experiments (same features/labels).
+EXPORT_TOOLS = ("CodeGenDatasetExportTask", "ConstructionMergedExportTask")
 
 
 def sha256(path):
@@ -273,7 +276,7 @@ def read_dataset(dataset_dir):
     hashes["schema"] = sha256(schema_path)
     exported = read_json(paths["export"])
     if (not isinstance(exported, dict) or type(exported.get("format")) is not int
-            or exported["format"] != 1 or exported.get("tool") != "CodeGenDatasetExportTask"):
+            or exported["format"] != 1 or exported.get("tool") not in EXPORT_TOOLS):
         raise ValueError("Unsupported Kotlin feature export provenance")
     for field, artifact in (("featuresSha256", "features"), ("featureSchemaSha256", "featureSchema"),
                             ("labelsSha256", "labels"), ("rulesSha256", "rules"), ("splitMapSha256", "splitMap")):
