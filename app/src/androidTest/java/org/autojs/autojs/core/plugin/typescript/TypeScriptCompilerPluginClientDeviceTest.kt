@@ -1403,7 +1403,9 @@ class TypeScriptCompilerPluginClientDeviceTest {
                     "42",
                     NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_AMBIGUOUS,
                     "99",
-                    NodeRuntimeErrorCodes.FS_PATH_ESCAPE,
+                    // Native module loading follows Android fs access. This path has
+                    // no compiler output, so it is a snapshot miss rather than an fs denial.
+                    NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND,
                 ).joinToString("|")
                 val consoleMessage = awaitConsoleMessage(marker)
                 assertTrue(
@@ -1429,7 +1431,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
                     ],
                 )
                 assertEquals(
-                    "1",
+                    "2",
                     result.nativeValues[
                         "embedded_script.typescript.dynamic_specifier.rejected_count"
                     ],
@@ -1441,7 +1443,7 @@ class TypeScriptCompilerPluginClientDeviceTest {
                     ],
                 )
                 assertEquals(
-                    "",
+                    NodeRuntimeErrorCodes.TYPESCRIPT_SNAPSHOT_MODULE_NOT_FOUND,
                     result.nativeValues[
                         "embedded_script.typescript.dynamic_specifier.last_error_code"
                     ],
