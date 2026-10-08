@@ -370,6 +370,86 @@ and the 28 second-experiment captured tasks), all previously inspected and never
 used for selection. No cohort may be dropped for zero candidates, errors or late
 results.
 
+## Fourth experiment: the merged pipeline and a refitted final ranker
+
+The third experiment left two gaps: the frozen tiny v1 ranker was fitted on the
+original search's candidate distribution and chose worse first candidates from
+the constructors' larger sets, and one 4,003-node capture exhausted the 800 ms
+search allocation. The fourth experiment addresses both without changing the
+construction policy, the grammar or the features:
+
+- `ConstructionGrammar.matches` now intersects per-condition match lists
+  (one verifier scan per distinct single condition, restricted to the contiguous
+  pre-order range of the subtree). `ConstructionGrammarMatchingTest` proves node
+  for node equality with the verifier and unchanged feature vectors.
+- `ConstructionMergedExportTask` exports the distribution the roadmap pipeline
+  actually ranks: the rule search's verified candidates united with the frozen
+  best-continuation policy's verified candidates, deduplicated by canonical plan,
+  labelled by later-state survival and featurized within the union, for the
+  train/valid families only. The artifacts follow the P3 dataset contract, so
+  `train/train.py` fits the final ranker unchanged; `train/data.py` accepts the
+  exporter's provenance. `construction/export_ranker.py` converts that fit into
+  `ranker.json` (role `candidate-ranker`, host 64-feature schema) with parity rows
+  that `ExperimentRankerModelTest` checks.
+
+```powershell
+$env:CODEGEN_CONSTRUCTION_DATASET = [IO.Path]::GetFullPath('tools/codegen-model/out/cg-ds-2026.10-1')
+$env:CODEGEN_CONSTRUCTION_R3_FIT_BEST = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-fit-best-1')
+$env:CODEGEN_CONSTRUCTION_MERGED_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-merged')
+$env:CODEGEN_GENERATOR_COMMIT = (git rev-parse HEAD)
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionMergedExportTask'
+
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/train/train.py `
+  --dataset $env:CODEGEN_CONSTRUCTION_MERGED_OUTPUT --output tools/codegen-model/out/construction-merged-fit
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/construction/export_ranker.py `
+  --fit-dir tools/codegen-model/out/construction-merged-fit --dataset-dir $env:CODEGEN_CONSTRUCTION_MERGED_OUTPUT `
+  --output-dir tools/codegen-model/out/construction-merged-ranker
+```
+
+`ConstructionFourthExperimentTask` then freezes and runs eight methods per task
+from one rule search, one construction (within the remaining 800 ms allocation)
+and one shared-budget pair: `rule_pipeline`, `baseline_tiny`, `baseline_ranker`,
+`construction_ranker`, `merged_rule`, `merged_tiny`, `merged_ranker` (the
+admission candidate) and the informational `merged_ranker_shared`, which halves
+both searches to 1,000 attempts / 100 retained candidates so the pair stays within
+the D19 total of 2,000 verifications. Development is the third export's 336
+training tasks plus every validation-family task (336); the reserved third
+holdout (28 captured, 24 synthetic) is reused unchanged, and the three inspected
+cohorts are regression only.
+
+```powershell
+$env:CODEGEN_CONSTRUCTION_MERGED = $env:CODEGEN_CONSTRUCTION_MERGED_OUTPUT
+$env:CODEGEN_CONSTRUCTION_RANKER = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-merged-ranker')
+$env:CODEGEN_CONSTRUCTION_R3_PROTOCOL = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-protocol')
+$env:CODEGEN_CONSTRUCTION_R4_PROTOCOL = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r4-protocol')
+$env:CODEGEN_CONSTRUCTION_R4_MODE = 'freeze'
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionFourthExperimentTask'
+
+$env:CODEGEN_CONSTRUCTION_R4_MODE = 'develop'
+$env:CODEGEN_CONSTRUCTION_R3_DEVELOPMENT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r3-development')
+$env:CODEGEN_CONSTRUCTION_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r4-development')
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionFourthExperimentTask'
+
+& tools/codegen-model/out/venv-py312/Scripts/python.exe tools/codegen-model/construction/select_fourth.py `
+  --protocol-dir $env:CODEGEN_CONSTRUCTION_R4_PROTOCOL --development-dir $env:CODEGEN_CONSTRUCTION_OUTPUT
+
+$env:CODEGEN_CONSTRUCTION_R4_DEVELOPMENT = $env:CODEGEN_CONSTRUCTION_OUTPUT
+$env:CODEGEN_CONSTRUCTION_R4_MODE = 'holdout'
+$env:CODEGEN_CONSTRUCTION_OUTPUT = [IO.Path]::GetFullPath('tools/codegen-model/out/construction-r4-holdout')
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionFourthExperimentTask'
+Remove-Item Env:CODEGEN_CONSTRUCTION_R4_MODE
+```
+
+The preregistered admission (`select_fourth.py`, rechecked by Kotlin before any
+held-out task is loaded) requires that `merged_ranker` does not fall below the
+complete rule pipeline, the original search with the tiny ranker, or the original
+search with the refitted ranker on validation top1 survival, that it strictly
+improves top1 or top3 over `baseline_ranker` on train or valid (so construction
+itself contributes), and that every development run of every method completes
+without an error or deadline stop. With `CODEGEN_CONSTRUCTION_R3_DEVELOPMENT`
+set, the development run also reports how many construction candidate sets and
+counters reproduce the third experiment's records after the matcher change.
+
 ## Tests
 
 ```powershell

@@ -110,8 +110,9 @@ def export_ranker(fit_dir, dataset_dir, output_dir, *, parity_max_rows=5000):
     model = catboost.CatBoostRanker()
     model.load_model(str(fit / "model.cbm"))
     values = numpy.asarray([row.values for row in parity_rows], dtype=numpy.float32)
+    # CatBoostRanker.predict returns raw formula values and does not accept prediction_type.
     expected = model.predict(catboost.Pool(values, group_id=[row.group_id for row in parity_rows], feature_names=list(schema.names)),
-                             prediction_type="RawFormulaVal")
+                             thread_count=1)
     binary = [score_model(decoded, row.values) for row in parity_rows]
     difference = max(abs(float(a) - b) for a, b in zip(expected, binary))
     if difference > SCORE_TOLERANCE:

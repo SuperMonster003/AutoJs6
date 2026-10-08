@@ -94,6 +94,21 @@ class TrainingDataTest(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.fixture = DatasetFixture(Path(self.temporary.name) / "dataset")
 
+    def test_merged_construction_export_provenance_is_accepted_but_unknown_tools_are_not(self):
+        manifest = read_json(self.fixture.root / "dataset-manifest.json")
+        for tool, accepted in (("ConstructionMergedExportTask", True), ("CodeGenDatasetExportTask", True), ("SomeOtherExporter", False)):
+            with self.subTest(tool=tool):
+                export = read_json(self.fixture.root / "export-manifest.json")
+                export["tool"] = tool
+                write_json(self.fixture.root / "export-manifest.json", export)
+                manifest["artifacts"]["export"]["sha256"] = sha256(self.fixture.root / "export-manifest.json")
+                write_json(self.fixture.root / "dataset-manifest.json", manifest)
+                if accepted:
+                    self.assertEqual(12, len(read_dataset(self.fixture.root).rows))
+                else:
+                    with self.assertRaisesRegex(ValueError, "provenance"):
+                        read_dataset(self.fixture.root)
+
     def test_dataset_keeps_test_rows_out_of_training_selection(self):
         dataset = read_dataset(self.fixture.root)
         self.assertEqual({"g1", "g2"}, set(dataset.grouped_rows("train")))
