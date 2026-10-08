@@ -108,6 +108,21 @@ class TypeScriptTsxRuntimeTest {
     }
 
     @Test
+    fun neutralFragmentsKeepLegacyNumbersBooleansWhitespaceAndArrayRules() {
+        val values = context.newArray(scope, arrayOf<Any?>("before", 7, true, false, null))
+        val fragment = element(TypeScriptTsxRuntime.FragmentToken, null, values)
+        ScriptableObject.putProperty(values, 0, "after")
+        assertEquals("<text text=\"before7\" />", TypeScriptTsxRuntime.renderOrNull(element("text", null, fragment), messages)?.xml)
+        val whitespace = element(TypeScriptTsxRuntime.FragmentToken, null, " ", element("text", null, "root"))
+        assertEquals("<text text=\"root\" />", TypeScriptTsxRuntime.renderOrNull(whitespace, messages)?.xml)
+        val javaCollection = element(TypeScriptTsxRuntime.FragmentToken, null, listOf("java collection"))
+        assertEquals("<text text=\"java collection\" />", TypeScriptTsxRuntime.renderOrNull(element("text", null, javaCollection), messages)?.xml)
+        val tooWide = element(TypeScriptTsxRuntime.FragmentToken, null, context.newArray(scope, 4097))
+        val failure = assertThrows(IllegalArgumentException::class.java) { element("vertical", null, tooWide) }
+        assertEquals("${R.string.error_typescript_tsx_child_array_too_large}:", failure.message)
+    }
+
+    @Test
     fun validationMessagesAreResourceBackedAcrossEverySupportedLocale() {
         val root = hostRoot()
         val source = root.resolve(
@@ -141,7 +156,7 @@ class TypeScriptTsxRuntimeTest {
         type: Any,
         props: NativeObject?,
         vararg children: Any?,
-    ): TypeScriptTsxRuntime.Value = TypeScriptTsxRuntime.create(
+    ): Any = TypeScriptTsxRuntime.create(
         arrayOf(type, props, *children),
         messages,
     )

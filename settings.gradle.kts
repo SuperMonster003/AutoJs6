@@ -95,6 +95,7 @@ private val libs = listOf(
 )
 
 private val pluginApi = listOf(
+    "compose-ui-api",
     "common-plugin-api",
     "protocol-wire-api",
     "ai-common-api",

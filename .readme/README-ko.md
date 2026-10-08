@@ -71,7 +71,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-데이터 갱신일: 2026 년 10 월 2 일.
+데이터 갱신일: 2026/10/08.
 
 데이터 항목은 `최근 활동` 순으로 내림차순 정렬됩니다.
 
@@ -136,7 +136,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * 테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]
 * 야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]
 * [VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식
-* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026 년 7 월 13 일 업데이트됨)
+* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026/07/13 업데이트됨)
     * 유니코드 [코드 포인트](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 이스케이프 지원 [보조 평면](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 문자
        ```js
        '\u{1D160}'; /* 의 의미 "𝅘𝅥𝅮", 전통적인 방법: '\uD834\uDD60'. */
@@ -171,6 +171,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 ###### 2026/10/07
 
 * `힌트` 화면 색상 추출 플러그인이 새 패키지 ID의 3-Color Picker 2.0으로 변경되어 다시 설치하고 활성화해야 함. 기존 앱과 함께 사용할 수 있지만 설정은 자동 이전되지 않음. 홈 서랍의 문구는 유지
+* `힌트` Compose UI와 API 참조, Ace Editor 타입 완성 및 Offline Docs 콘텐츠는 호환 로컬 호스트 빌드가 필요한 로컬 연동으로 제공되며, 플러그인의 공식 인덱스 등록이나 정식 배포는 아직 진행되지 않았습니다
+* `힌트` 독립 대화상자에는 AutoJs6 6.8.0 / 5321과 dialog-v1을 지원하는 Compose UI가 필요합니다. TSX에는 TypeScript Engine 0.6.6도 필요합니다. UI가 아닌 스크립트에는 호스트의 오버레이 권한이 필요합니다
+* `힌트` 이 빌드는 Compose UI 계약 V2를 사용하며 AutoJs6 6.8.0 / 5322가 필요합니다. TSX에는 TypeScript Engine 0.6.7이 필요합니다. 새 호스트는 기존 V1 렌더러의 구성요소도 지원합니다. 확장 구성요소에는 V2가 필요합니다
 * `추가` 화면 작업 확인을 호스트가 검사한 노드에 연결하고 텍스트 추가와 횟수가 제한된 스크롤을 지원하며 실행 결과와 창 변경을 보고
 * `추가` 호스트가 승인된 OCR 플러그인의 가용성을 알릴 때만 화면 OCR을 제공하고 결과를 좌표가 포함된 제한된 텍스트 줄로 병합
 * `추가` ai.agent 스크립트 API: 작업 시작, 조회, 이벤트, 질문 응답, 확인, 취소 및 detached 백그라운드 작업 지원; result/context로 @agent 등록 스크립트 결과와 컨텍스트 제공, 예제 3개 포함
@@ -444,6 +447,17 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` colors.theme으로 스크립트에서 테마 색상 제어: get, set (accent와 dark 지정 가능), reset, libraries, activate와 deactivate (인텔리전트 색상 라이브러리), next (즉시 다음 그룹), state ("스크립트 상태" 소스 전환), current 제공, 500 ms 이내의 스크립트 변경은 한 번으로 합쳐지고 기록에 "스크립트: 이름"으로 표시되며, 테마 색상 페이지의 "스크립트 변경 실행 취소"로 이전 선택 (활성 인텔리전트 색상 라이브러리 포함) 을 복원 가능 (예제 코드 > 图像与颜色 참조)
 * `추가` Ace 편집기 단축 패널에서 TAB 키를 길게 누르면 스마트 힌트를 호출하여 커서 컨텍스트에 따라 코드 완성, 매개 변수 힌트 또는 심볼 문서를 표시하고, 매개 변수 힌트가 표시 중일 때는 오버로드를 전환; 하드웨어 키보드 Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q 는 각각 스마트 힌트 / 매개 변수 힌트 / 심볼 문서에 대응
 * `추가` 코드 편집기 설정에 "스마트 힌트" 그룹 추가 (Ace 엔진 전용): 자동 완성 트리거 (식별자 입력 중 / "." 입력 후에만 / 끄기), 완성 최소 문자 수, 완성 지연, 매개 변수 힌트 트리거 (커서가 호출 안에 들어갈 때 / "(" 또는 "," 입력 후에만 / 끄기), 방향키로 오버로드 전환; 변경 사항은 즉시 적용되며 동작 즐겨찾기에 기록 가능 (Ace Editor 플러그인 1.26.0 필요)
+* `추가` compose / $compose 스크립트 API는 노드 팩터리 29개, 유지되는 핸들, 반응형 state/render/ref, 일괄 업데이트, 큐 게시, 테마 및 Snackbar 세션 명령을 제공합니다 (Compose UI 플러그인 필요)
+* `추가` compose.mount는 UI 페이지를 마운트하며 compose.floaty는 UI/비 UI 스크립트에서 raw 또는 크기 조절 창, 픽셀 위치/크기, 터치/포커스 제어, compose.post 작업 스레드 업데이트를 지원하고 닫기나 스크립트 종료 시 소유 세션을 정리합니다
+* `추가` 내장 예제의 Compose UI 분류에서 카운터, 폼 검증, 1000개 항목 목록, 플로팅 HUD, 테마 스크립트를 제공하며 각 예제에 플러그인 및 권한 요구 사항을 설명
+* `추가` Compose UI 전체 API 참조와 Ace Editor 타입 완성 및 로컬 Offline Docs 콘텐츠를 제공하며 구성 요소, 노드, 상태, 수정자, 테마, 세션 및 플로팅 창을 설명합니다
+* `추가` 플러그인 센터에서 설치된 Compose UI 개발 미리 보기 플러그인을 인식하고 관리, 호스트 6.8.0 / 5316 이상 필요
+* `추가` TSX는 `<compose.Column>`, `<compose:Text>`, 노드 팩토리 참조, Fragment, 슬롯 및 반응형 콜백을 지원합니다. 하나의 트리에서 Compose와 기존 XML 노드를 혼합할 수 없습니다
+* `추가` XML `<compose>` 컨테이너와 compose.attach로 UI 페이지나 기존 플로팅 창에 독립적인 Compose 세션을 삽입합니다. compose.AndroidView는 기존 Android View 또는 동기 팩토리가 반환하는 View를 표시합니다
+* `추가` ui.inflate는 컴파일된 XML TSX 레이아웃과 onClick 콜백 연결을 지원합니다
+* `추가` compose.dialog는 UI 또는 일반 스크립트에서 대화상자와 모달 하단 시트를 표시하고 업데이트 및 종료 가능한 세션을 반환합니다
+* `추가` Material 3 확장 구성요소: 탐색 및 서랍, 탭, 하단 시트 및 메뉴, 날짜와 시간 선택, 페이징 및 그리드, 칩, 배지, 분할 버튼, 플로팅 버튼, 검색창, 도움말 및 당겨서 새로고침
+* `추가` compose.memo는 의존 값과 읽은 state가 바뀌지 않은 render 내 UI 조각을 재사용하여 큰 목록을 부분 업데이트할 때 변경된 행만 다시 만듭니다
 * `수정` APK Inspector 사용 시 파일 관리자의 정보 버튼이 숨겨져 설치 패키지 정보를 열 수 없는 문제
 * `수정` Three Stove Agent 온라인 모델 호출 실패 시 네트워크, 인증 및 응답 오류 분류가 누락되는 문제 (Provider 플러그인 지원 필요)
 * `수정` assistant 도구 옵션 병합 시 기본 tools 객체가 비어 있으면 기본적으로 꺼진 도구 그룹이 켜지는 문제
@@ -687,6 +701,10 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` 플러그인 센터 상세 대화상자에서 아이콘의 원형 배경이 누락되고 캐시된 아이콘의 테두리가 밝은 테마와 어두운 테마에 맞게 갱신되지 않는 문제
 * `수정` 기존 레이아웃에서 선택한 머티리얼 색상을 레이아웃 전환 후 "현재 테마 색상 찾기"로 찾을 수 없고, 머티리얼 색상 페이지에 현재 색상 요약이 표시되지 않던 문제
 * `수정` 플러그인 센터를 콜드 스타트한 직후 플러그인 세부 정보를 열면 목록이 새로 고쳐질 때마다 대화 상자가 다시 만들어져 깜박이던 문제
+* `수정` 패키징된 UI 스크립트가 시작 시 간헐적으로 빈 페이지를 표시한 뒤 종료되는 문제
+* `수정` Compose UI는 렌더링 콜백에서 페이지나 플로팅 창을 다시 마운트하는 작업을 거부하고 현재 페이지를 유지하며, 플러그인 업데이트 후 페이지를 다시 마운트할 수 있도록 지원
+* `수정` 여러 노드를 위치 인수로 전달하면 컴포넌트 팩토리가 첫 노드를 속성 객체로 처리하던 문제
+* `수정` Compose 노드 속성 조회에서 null 이 undefined 로 바뀌는 문제 수정. 기본 진행률과 초기화한 DatePicker 날짜의 null 값 유지
 * `개선` Android 7-10 에서 Three Stove Agent 모델 데이터를 공개 API 로 읽으며 파일 위치와 정체된 파이프의 취소 동작 유지
 * `개선` 호스트 lint 검사는 경로에 따라 AutoJs4 호환 클래스와 리소스를 제외하고 나머지 호스트 코드를 계속 검사
 * `개선` 플러그인 센터가 호스트와 동일한 공식 인증서로 서명된 기본 비활성 플러그인 (YOLO, MCP Server) 의 신규 설치를 감지하면 명시적 활성화 기록을 기록하고 활성화 탐색을 실행; 신뢰된 서드파티 또는 사용자 승인 서명, adb 설치 및 업데이트는 계속 수동 활성화가 필요하며, 실행 시에는 저장된 기록만 참조
@@ -883,6 +901,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Ace 편집기 매개 변수 힌트가 LSP 가 꺼져 있거나 시맨틱 서비스를 사용할 수 없을 때도 오버로드된 메서드를 지원: 정적 인덱스에 146 개의 선언 오버로드 (app.startActivity 등) 수록, 내장 ECMAScript 시그니처에 splice / replace / JSON.stringify / Array.from 등의 오버로드 추가, Python / Lua 파일의 매개 변수 힌트는 모든 시그니처를 유지
 * `개선` Ace 편집기 호버 문서 상자가 터치 화면에서 스크롤과 텍스트 선택을 지원하고, Python / Lua 파일에서는 스마트 힌트가 비동기 매개 변수 힌트를 기다려 완성으로 잘못 전환되지 않음
 * `개선` 플러그인 센터의 플러그인 정보 대화상자가 "지원 ABI" 와 "설치된 ABI" 를 구분, 전자는 플러그인 빌드가 기록한 매니페스트 meta-data org.autojs.plugin.contract.SUPPORTED_ABIS 를 우선하고 이어서 플러그인 INFO 서비스 반환값과 인덱스를 참조하며, 후자는 설치된 APK (split 포함) 에 실제로 패키징된 ABI
+* `개선` Compose UI 네이티브 텍스트 편집은 선택 범위와 IME 조합을 유지하고 키보드 가림을 방지하며 각 Snackbar 동작이나 닫기 결과를 한 번만 전달합니다
+* `개선` ComposeError는 현지화된 메시지와 안정적인 코드에 노드/속성/원인 및 스크립트 스택을 유지합니다; 엔진마다 최대 8개의 활성 세션을 허용하고 닫힌 핸들 작업을 거부하며 콜백, 참조 및 대기 작업을 정리합니다; 플러그인 업데이트, 제거 또는 비활성화 시 해당 오류와 함께 활성 세션을 닫습니다
+* `개선` cancelable=false는 뒤로 가기, 바깥쪽 클릭, 아래로 밀기를 통한 닫기를 막습니다. 명시적 닫기와 스크립트 종료는 대화상자를 정리하고 기존 페이지와 다른 세션을 유지합니다
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
@@ -1113,7 +1134,7 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> 메모: 상기 버전 출시 날짜는 2026 년 9 월 1 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2026/09/01입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -1164,7 +1185,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `21` 이상을 권장합니다.
 
-2026 년 10 월 2 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
+2026/10/08 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `26` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -1330,7 +1351,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-데이터 갱신일: 2026 년 3 월 18 일.
+데이터 갱신일: 2026/03/18.
 
 데이터 항목은 `최근 제출` 순으로 내림차순 정렬됩니다.
 

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/07",
+      "released_date": "2026/10/08",
       "feature": [
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",
         "OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas",
@@ -275,7 +275,18 @@
         "Funciones de color perceptuales en el módulo colors: toOklab / oklab y toOklch / oklch, ensureContrast (relación WCAG, 4,5 por defecto), harmony, tones, derive (principal, acento y oscuro), nightVariant, simulate (protanopia, deuteranopia, tritanopia) y extract (colores dominantes de una imagen con las opciones count, region y step); colors.distance, colors.isSimilar e images.detectColor aceptan el algoritmo oklab (ver Ejemplos > 图像与颜色)",
         "colors.theme controla el color del tema desde scripts: get, set (opciones accent y dark), reset, libraries, activate y deactivate (bibliotecas de colores inteligentes), next (cambia de grupo al instante), state (cambia la fuente \"Estados del script\") y current; los cambios de un script en menos de 500 ms se combinan y se registran en el historial como \"Script: nombre\", y la página del color del tema ofrece \"Deshacer el cambio del script\" para restaurar la selección anterior, incluida una biblioteca de colores inteligente activa (ver Ejemplos > 图像与颜色)",
         "Mantener pulsado TAB en el panel de atajos del editor Ace activa las sugerencias inteligentes, que según el contexto del cursor muestran el autocompletado de código, las sugerencias de parámetros o la documentación del símbolo, y cambian de sobrecarga cuando las sugerencias de parámetros están visibles; en teclado físico, Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q corresponden a sugerencias inteligentes / sugerencias de parámetros / documentación del símbolo",
-        "Los ajustes del editor de código incorporan un grupo \"Sugerencias inteligentes\" (solo motor Ace): activación del autocompletado (al escribir identificadores / solo después de \".\" / desactivado), caracteres mínimos para el autocompletado, retraso del autocompletado, activación de las sugerencias de parámetros (cuando el cursor entra en una llamada / solo después de \"(\" o \",\" / desactivado) y cambio de sobrecarga con las flechas; los cambios se aplican de inmediato y pueden registrarse en las acciones favoritas (requiere el plugin Ace Editor 1.26.0)"
+        "Los ajustes del editor de código incorporan un grupo \"Sugerencias inteligentes\" (solo motor Ace): activación del autocompletado (al escribir identificadores / solo después de \".\" / desactivado), caracteres mínimos para el autocompletado, retraso del autocompletado, activación de las sugerencias de parámetros (cuando el cursor entra en una llamada / solo después de \"(\" o \",\" / desactivado) y cambio de sobrecarga con las flechas; los cambios se aplican de inmediato y pueden registrarse en las acciones favoritas (requiere el plugin Ace Editor 1.26.0)",
+        "API de scripts compose / $compose con 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, actualizaciones agrupadas, tareas encoladas, temas y comandos de sesión Snackbar (requiere el complemento Compose UI)",
+        "compose.mount aloja páginas UI; compose.floaty admite scripts con o sin UI, ventanas raw o redimensionables, posición/tamaño en píxeles, controles táctiles/de foco y actualizaciones de trabajadores mediante compose.post, con limpieza de las sesiones al cerrar o terminar el script",
+        "La categoría Compose UI de ejemplos integrados ofrece scripts de contador, validación de formularios, lista de 1000 elementos, HUD flotante y temas, cada uno con sus requisitos de complemento y permisos",
+        "Referencia API completa de Compose UI con autocompletado de tipos de Ace Editor y contenido local de Offline Docs para componentes, nodos, estado, modificadores, temas, sesiones y ventanas flotantes",
+        "El Centro de complementos reconoce y administra los complementos instalados de la versión preliminar de desarrollo de Compose UI, con el host 6.8.0 / 5316 o posterior",
+        "TSX admite `<compose.Column>`, `<compose:Text>`, referencias a fábricas de nodos, fragmentos, slots y callbacks reactivos; un mismo árbol no puede mezclar Compose y nodos XML existentes",
+        "Los contenedores XML `<compose>` y compose.attach integran sesiones Compose independientes en páginas UI o ventanas flotantes existentes; compose.AndroidView muestra una View Android existente o devuelta por una fábrica síncrona",
+        "ui.inflate acepta diseños XML TSX compilados y enlaza sus callbacks onClick",
+        "compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales",
+        "Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar",
+        "compose.memo reutiliza fragmentos de render cuyos valores de dependencia y estados leídos no han cambiado, de modo que una actualización parcial de una lista grande solo reconstruye las filas modificadas"
       ],
       "fix": [
         "Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información",
@@ -520,7 +531,11 @@
         "El Centro de complementos restauraba desde la caché complementos retirados o renombrados tras actualizar el índice correctamente",
         "Falta del fondo circular de los iconos en los detalles del centro de plugins y bordes en caché que no se actualizaban al cambiar de tema",
         "Los colores Material elegidos en el diseño antiguo no se podían encontrar con \"Localizar color del tema actual\" tras cambiar de diseño, y la página de colores Material no mostraba el resumen del color actual",
-        "Abrir los detalles de un complemento justo después de un arranque en frío del centro de complementos podía hacer parpadear el cuadro de diálogo, porque cada actualización de la lista lo reconstruía"
+        "Abrir los detalles de un complemento justo después de un arranque en frío del centro de complementos podía hacer parpadear el cuadro de diálogo, porque cada actualización de la lista lo reconstruía",
+        "Los scripts UI empaquetados que a veces mostraban una página en blanco y se cerraban al iniciarse",
+        "Compose UI rechaza volver a montar páginas o ventanas flotantes dentro del callback de renderizado y conserva la página actual; permite volver a montar páginas después de actualizar el plugin",
+        "Las fábricas de componentes trataban el primer nodo como propiedades al recibir varios nodos como argumentos posicionales",
+        "Los lectores de propiedades Compose conservan null en lugar de devolver undefined, incluidos el progreso predeterminado y las fechas borradas de DatePicker"
       ],
       "improvement": [
         "Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas",
@@ -718,7 +733,10 @@
         "Las sugerencias de parámetros del editor Ace reaparecen tras tocar el área de edición (no tras desplazarse), y ESC oculta tanto las sugerencias de parámetros como la documentación del símbolo",
         "Las sugerencias de parámetros del editor Ace admiten métodos sobrecargados incluso con el LSP desactivado o el servicio semántico no disponible: el índice estático incluye 146 sobrecargas declaradas (como app.startActivity), las firmas ECMAScript integradas incorporan sobrecargas para splice / replace / JSON.stringify / Array.from y más, y las sugerencias de parámetros de Python / Lua conservan todas las firmas",
         "La documentación emergente del editor Ace se puede desplazar y seleccionar en pantallas táctiles, y las sugerencias inteligentes esperan las sugerencias de parámetros asíncronas en archivos Python / Lua en lugar de recurrir al autocompletado",
-        "El diálogo de información del centro de plugins distingue \"ABI compatibles\" de \"ABI instaladas\": la primera prefiere la meta-data de manifiesto org.autojs.plugin.contract.SUPPORTED_ABIS escrita por la compilación del plugin, luego el servicio INFO del plugin y el índice; la segunda lista las ABI realmente empaquetadas en los APK instalados (splits incluidos)"
+        "El diálogo de información del centro de plugins distingue \"ABI compatibles\" de \"ABI instaladas\": la primera prefiere la meta-data de manifiesto org.autojs.plugin.contract.SUPPORTED_ABIS escrita por la compilación del plugin, luego el servicio INFO del plugin y el índice; la segunda lista las ABI realmente empaquetadas en los APK instalados (splits incluidos)",
+        "La edición de texto nativa de Compose UI conserva selección y composición IME, evita que el teclado cubra el contenido y comunica una sola vez cada acción o cierre de Snackbar",
+        "ComposeError ofrece mensajes localizados y códigos estables con nodo, propiedad, causa y pila del script; cada motor admite hasta 8 sesiones activas, rechaza operaciones con manejadores cerrados y limpia callbacks, referencias y tareas pendientes; actualizar, desinstalar o desactivar el complemento cierra sus sesiones activas con el error correspondiente",
+        "cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones"
       ],
       "dependency": [
         "Android AXML modularizado",
@@ -763,10 +781,18 @@
         "Anexado AndroidX Test Ext JUnit versión 1.3.0",
         "Añadido Android Hidden API Bypass versión 6.1",
         "Modularizacion de Package Archive Parser",
-        "Modularizacion de Installer API"
+        "Modularizacion de Installer API",
+        "Actualizar AndroidX Lifecycle 2.6.2 -> 2.9.4",
+        "Actualizar AndroidX SavedState 1.2.1 -> 1.3.2",
+        "Actualizar AndroidX Emoji2 1.3.0 -> 1.4.0",
+        "Actualizar AndroidX Window 1.0.0 -> 1.5.0",
+        "Modularizar Compose UI API"
       ],
       "hint": [
-        "El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia"
+        "El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia",
+        "Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente",
+        "Los diálogos independientes requieren AutoJs6 6.8.0 / 5321 y Compose UI con dialog-v1; TSX también requiere TypeScript Engine 0.6.6. Los scripts sin UI necesitan el permiso de superposición del anfitrión",
+        "Esta versión usa el contrato Compose UI V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2"
       ]
     },
     "v6.7.0": {

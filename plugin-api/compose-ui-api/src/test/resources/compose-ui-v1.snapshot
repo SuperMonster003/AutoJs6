@@ -1,0 +1,747 @@
+ComposeUiIds.ENGINE=compose
+ComposeUiIds.HOST_PACKAGE_NAME=org.autojs.autojs6
+ComposeUiIds.PLUGIN_ID=compose-ui
+ComposeUiIds.PLUGIN_PACKAGE_NAME=io.github.supermonster003.autojs6.plugin.compose.ui
+ComposeUiIds.REQUIRED_HOST_VERSION_CODE=5316
+ComposeUiIds.VARIANT=default
+ComposeUiContract.CONTRACT_VERSION=1
+ComposeUiContract.INFO_ACTION=org.autojs.plugin.INFO
+ComposeUiContract.INFO_CATEGORY=compose-ui
+ComposeUiContract.META_RENDERER_FACTORY=org.autojs.plugin.compose.RENDERER_FACTORY
+ComposeUiContract.META_REQUIRES_HOST_VERSION=requiresHostVersion
+ComposeUiContract.MIN_SUPPORTED=1
+ComposeUiContract.NO_NODE_ID=-1
+ComposeUiContract.PLUGIN_PERMISSION=org.autojs.permission.PLUGIN
+ComposeUiContract.SYSTEM_CALLBACK_ID=0
+ComposeUiCapabilityKeys.COMPONENTS=components
+ComposeUiCapabilityKeys.COMPOSE_VERSION=composeVersion
+ComposeUiCapabilityKeys.CONTRACT_VERSION=contractVersion
+ComposeUiCapabilityKeys.FEATURES=features
+ComposeUiCapabilityKeys.SHARED_DEPS_FINGERPRINT=sharedDepsFingerprint
+ComposeUiErrorCodes.DUPLICATE_KEY=DUPLICATE_KEY
+ComposeUiErrorCodes.INTERNAL=INTERNAL
+ComposeUiErrorCodes.INVALID_ARGUMENT=INVALID_ARGUMENT
+ComposeUiErrorCodes.INVALID_MODIFIER=INVALID_MODIFIER
+ComposeUiErrorCodes.LIMIT_EXCEEDED=LIMIT_EXCEEDED
+ComposeUiErrorCodes.NODE_DETACHED=NODE_DETACHED
+ComposeUiErrorCodes.PERMISSION_REQUIRED=PERMISSION_REQUIRED
+ComposeUiErrorCodes.PLUGIN_DISABLED=PLUGIN_DISABLED
+ComposeUiErrorCodes.PLUGIN_INCOMPATIBLE=PLUGIN_INCOMPATIBLE
+ComposeUiErrorCodes.PLUGIN_UNAUTHORIZED=PLUGIN_UNAUTHORIZED
+ComposeUiErrorCodes.PLUGIN_UNAVAILABLE=PLUGIN_UNAVAILABLE
+ComposeUiErrorCodes.RENDERER_FAILED=RENDERER_FAILED
+ComposeUiErrorCodes.RENDER_FAILED=RENDER_FAILED
+ComposeUiErrorCodes.SCOPE_MISMATCH=SCOPE_MISMATCH
+ComposeUiErrorCodes.SESSION_CLOSED=SESSION_CLOSED
+ComposeUiErrorCodes.UI_MODE_REQUIRED=UI_MODE_REQUIRED
+ComposeUiErrorCodes.UNKNOWN_COMPONENT=UNKNOWN_COMPONENT
+ComposeUiErrorCodes.UNKNOWN_PROP=UNKNOWN_PROP
+ComposeUiLimits.EVENT_QUEUE_CAPACITY=1024
+ComposeUiLimits.MAX_BITMAP_PIXELS=32000000
+ComposeUiLimits.MAX_CALLBACKS_PER_SESSION=4096
+ComposeUiLimits.MAX_CHILDREN_PER_NODE=2000
+ComposeUiLimits.MAX_DEPTH=64
+ComposeUiLimits.MAX_EVENT_FIELDS=32
+ComposeUiLimits.MAX_LAZY_CHILDREN_PER_NODE=10000
+ComposeUiLimits.MAX_MODIFIER_OPS=64
+ComposeUiLimits.MAX_NODES_PER_SESSION=5000
+ComposeUiLimits.MAX_PARCEL_BYTES=8388608
+ComposeUiLimits.MAX_PATCHES_PER_BATCH=2000
+ComposeUiLimits.MAX_PROPERTIES_PER_NODE=128
+ComposeUiLimits.MAX_SESSIONS_PER_ENGINE=8
+ComposeUiLimits.MAX_SLOTS_PER_NODE=32
+ComposeUiLimits.MAX_STRING_CHARS=65536
+ComposeUiLimits.MAX_THEME_COLORS=64
+ComposeUiLimits.MAX_VALUE_DEPTH=64
+ComposeUiLimits.MAX_VALUE_ITEMS=2000
+ComposeUiComponents.ALERT_DIALOG=AlertDialog
+ComposeUiComponents.BOX=Box
+ComposeUiComponents.BUTTON=Button
+ComposeUiComponents.CARD=Card
+ComposeUiComponents.CHECKBOX=Checkbox
+ComposeUiComponents.CIRCULAR_PROGRESS_INDICATOR=CircularProgressIndicator
+ComposeUiComponents.COLUMN=Column
+ComposeUiComponents.ELEVATED_BUTTON=ElevatedButton
+ComposeUiComponents.FILLED_TONAL_BUTTON=FilledTonalButton
+ComposeUiComponents.HORIZONTAL_DIVIDER=HorizontalDivider
+ComposeUiComponents.ICON=Icon
+ComposeUiComponents.ICON_BUTTON=IconButton
+ComposeUiComponents.IMAGE=Image
+ComposeUiComponents.LAZY_COLUMN=LazyColumn
+ComposeUiComponents.LAZY_ROW=LazyRow
+ComposeUiComponents.LINEAR_PROGRESS_INDICATOR=LinearProgressIndicator
+ComposeUiComponents.OUTLINED_BUTTON=OutlinedButton
+ComposeUiComponents.OUTLINED_TEXT_FIELD=OutlinedTextField
+ComposeUiComponents.RADIO_BUTTON=RadioButton
+ComposeUiComponents.ROW=Row
+ComposeUiComponents.SCAFFOLD=Scaffold
+ComposeUiComponents.SLIDER=Slider
+ComposeUiComponents.SNACKBAR=Snackbar
+ComposeUiComponents.SPACER=Spacer
+ComposeUiComponents.SURFACE=Surface
+ComposeUiComponents.SWITCH=Switch
+ComposeUiComponents.TEXT=Text
+ComposeUiComponents.TEXT_BUTTON=TextButton
+ComposeUiComponents.TEXT_FIELD=TextField
+ComposeUiComponents.TOP_APP_BAR=TopAppBar
+ComposeUiProps.ACTION_LABEL=actionLabel
+ComposeUiProps.ALIGNMENT=alignment
+ComposeUiProps.ARRANGEMENT=arrangement
+ComposeUiProps.CHECKED=checked
+ComposeUiProps.COLOR=color
+ComposeUiProps.CONTAINER_COLOR=containerColor
+ComposeUiProps.CONTENT_COLOR=contentColor
+ComposeUiProps.CONTENT_PADDING=contentPadding
+ComposeUiProps.CONTENT_SCALE=contentScale
+ComposeUiProps.DURATION=duration
+ComposeUiProps.ELEVATION=elevation
+ComposeUiProps.ENABLED=enabled
+ComposeUiProps.FONT_SIZE=fontSize
+ComposeUiProps.FONT_WEIGHT=fontWeight
+ComposeUiProps.IME_ACTION=imeAction
+ComposeUiProps.IS_ERROR=isError
+ComposeUiProps.KEYBOARD_TYPE=keyboardType
+ComposeUiProps.MAX_LINES=maxLines
+ComposeUiProps.MESSAGE=message
+ComposeUiProps.MIN_LINES=minLines
+ComposeUiProps.NAME=name
+ComposeUiProps.OPEN=open
+ComposeUiProps.OVERFLOW=overflow
+ComposeUiProps.PROGRESS=progress
+ComposeUiProps.RANGE=range
+ComposeUiProps.READ_ONLY=readOnly
+ComposeUiProps.REVERSE_LAYOUT=reverseLayout
+ComposeUiProps.SELECTABLE=selectable
+ComposeUiProps.SHAPE=shape
+ComposeUiProps.SINGLE_LINE=singleLine
+ComposeUiProps.SPACING=spacing
+ComposeUiProps.SRC=src
+ComposeUiProps.STEPS=steps
+ComposeUiProps.STYLE=style
+ComposeUiProps.TEXT=text
+ComposeUiProps.TEXT_ALIGN=textAlign
+ComposeUiProps.THICKNESS=thickness
+ComposeUiProps.TINT=tint
+ComposeUiProps.TONAL_ELEVATION=tonalElevation
+ComposeUiProps.TRACK_COLOR=trackColor
+ComposeUiProps.USER_SCROLL_ENABLED=userScrollEnabled
+ComposeUiProps.VALUE=value
+ComposeUiProps.VISUAL_TRANSFORMATION=visualTransformation
+ComposeUiPropAliases.CONTENT_ALIGNMENT=contentAlignment
+ComposeUiPropAliases.HORIZONTAL_ALIGNMENT=horizontalAlignment
+ComposeUiPropAliases.HORIZONTAL_ARRANGEMENT=horizontalArrangement
+ComposeUiPropAliases.SELECTED=selected
+ComposeUiPropAliases.VERTICAL_ALIGNMENT=verticalAlignment
+ComposeUiPropAliases.VERTICAL_ARRANGEMENT=verticalArrangement
+ComposeUiEvents.ACTION=action
+ComposeUiEvents.CHECKED_CHANGE=checkedChange
+ComposeUiEvents.CLICK=click
+ComposeUiEvents.CLOSE=close
+ComposeUiEvents.DISMISS=dismiss
+ComposeUiEvents.DISMISS_REQUEST=dismissRequest
+ComposeUiEvents.ERROR=error
+ComposeUiEvents.FOCUS_CHANGE=focusChange
+ComposeUiEvents.LONG_CLICK=longClick
+ComposeUiEvents.SCROLL=scroll
+ComposeUiEvents.VALUE_CHANGE=valueChange
+ComposeUiEvents.VALUE_CHANGE_FINISHED=valueChangeFinished
+ComposeUiEventFields.CHECKED=checked
+ComposeUiEventFields.CODE=code
+ComposeUiEventFields.EDIT_SEQ=editSeq
+ComposeUiEventFields.FIRST_VISIBLE_INDEX=firstVisibleIndex
+ComposeUiEventFields.FOCUSED=focused
+ComposeUiEventFields.MESSAGE=message
+ComposeUiEventFields.OFFSET=offset
+ComposeUiEventFields.PROP=prop
+ComposeUiEventFields.SELECTION_END=selectionEnd
+ComposeUiEventFields.SELECTION_START=selectionStart
+ComposeUiEventFields.TEXT=text
+ComposeUiEventFields.VALUE=value
+ComposeUiSlots.ACTIONS=actions
+ComposeUiSlots.CONFIRM=confirm
+ComposeUiSlots.CONTENT=content
+ComposeUiSlots.DISMISS=dismiss
+ComposeUiSlots.ICON=icon
+ComposeUiSlots.LABEL=label
+ComposeUiSlots.LEADING_ICON=leadingIcon
+ComposeUiSlots.NAVIGATION_ICON=navigationIcon
+ComposeUiSlots.PLACEHOLDER=placeholder
+ComposeUiSlots.SNACKBAR_HOST=snackbarHost
+ComposeUiSlots.SUPPORTING_TEXT=supportingText
+ComposeUiSlots.TEXT=text
+ComposeUiSlots.TITLE=title
+ComposeUiSlots.TOP_BAR=topBar
+ComposeUiSlots.TRAILING_ICON=trailingIcon
+ComposeUiModifiers.ALIGN=align
+ComposeUiModifiers.ALPHA=alpha
+ComposeUiModifiers.ASPECT_RATIO=aspectRatio
+ComposeUiModifiers.BACKGROUND=background
+ComposeUiModifiers.BORDER=border
+ComposeUiModifiers.CLICKABLE=clickable
+ComposeUiModifiers.CLIP=clip
+ComposeUiModifiers.FILL_MAX_HEIGHT=fillMaxHeight
+ComposeUiModifiers.FILL_MAX_SIZE=fillMaxSize
+ComposeUiModifiers.FILL_MAX_WIDTH=fillMaxWidth
+ComposeUiModifiers.HEIGHT=height
+ComposeUiModifiers.HORIZONTAL_SCROLL=horizontalScroll
+ComposeUiModifiers.OFFSET=offset
+ComposeUiModifiers.PADDING=padding
+ComposeUiModifiers.SEMANTICS=semantics
+ComposeUiModifiers.SIZE=size
+ComposeUiModifiers.TEST_TAG=testTag
+ComposeUiModifiers.VERTICAL_SCROLL=verticalScroll
+ComposeUiModifiers.WEIGHT=weight
+ComposeUiModifiers.WIDTH=width
+ComposeUiShortcuts.ALPHA=alpha
+ComposeUiShortcuts.BG=bg
+ComposeUiShortcuts.CONTENT_DESCRIPTION=contentDescription
+ComposeUiShortcuts.H=h
+ComposeUiShortcuts.PADDING=padding
+ComposeUiShortcuts.TEST_TAG=testTag
+ComposeUiShortcuts.W=w
+ComposeUiShortcuts.WEIGHT=weight
+ComposeUiCommands.BLUR=blur
+ComposeUiCommands.EDIT=edit
+ComposeUiCommands.FOCUS=focus
+ComposeUiCommands.SCROLL_TO=scrollTo
+ComposeUiCommands.SHOW_SNACKBAR=showSnackbar
+ComposeUiThemeColors.BACKGROUND=background
+ComposeUiThemeColors.ERROR=error
+ComposeUiThemeColors.ERROR_CONTAINER=errorContainer
+ComposeUiThemeColors.INVERSE_ON_SURFACE=inverseOnSurface
+ComposeUiThemeColors.INVERSE_PRIMARY=inversePrimary
+ComposeUiThemeColors.INVERSE_SURFACE=inverseSurface
+ComposeUiThemeColors.ON_BACKGROUND=onBackground
+ComposeUiThemeColors.ON_ERROR=onError
+ComposeUiThemeColors.ON_ERROR_CONTAINER=onErrorContainer
+ComposeUiThemeColors.ON_PRIMARY=onPrimary
+ComposeUiThemeColors.ON_PRIMARY_CONTAINER=onPrimaryContainer
+ComposeUiThemeColors.ON_PRIMARY_FIXED=onPrimaryFixed
+ComposeUiThemeColors.ON_PRIMARY_FIXED_VARIANT=onPrimaryFixedVariant
+ComposeUiThemeColors.ON_SECONDARY=onSecondary
+ComposeUiThemeColors.ON_SECONDARY_CONTAINER=onSecondaryContainer
+ComposeUiThemeColors.ON_SECONDARY_FIXED=onSecondaryFixed
+ComposeUiThemeColors.ON_SECONDARY_FIXED_VARIANT=onSecondaryFixedVariant
+ComposeUiThemeColors.ON_SURFACE=onSurface
+ComposeUiThemeColors.ON_SURFACE_VARIANT=onSurfaceVariant
+ComposeUiThemeColors.ON_TERTIARY=onTertiary
+ComposeUiThemeColors.ON_TERTIARY_CONTAINER=onTertiaryContainer
+ComposeUiThemeColors.ON_TERTIARY_FIXED=onTertiaryFixed
+ComposeUiThemeColors.ON_TERTIARY_FIXED_VARIANT=onTertiaryFixedVariant
+ComposeUiThemeColors.OUTLINE=outline
+ComposeUiThemeColors.OUTLINE_VARIANT=outlineVariant
+ComposeUiThemeColors.PRIMARY=primary
+ComposeUiThemeColors.PRIMARY_CONTAINER=primaryContainer
+ComposeUiThemeColors.PRIMARY_FIXED=primaryFixed
+ComposeUiThemeColors.PRIMARY_FIXED_DIM=primaryFixedDim
+ComposeUiThemeColors.SCRIM=scrim
+ComposeUiThemeColors.SECONDARY=secondary
+ComposeUiThemeColors.SECONDARY_CONTAINER=secondaryContainer
+ComposeUiThemeColors.SECONDARY_FIXED=secondaryFixed
+ComposeUiThemeColors.SECONDARY_FIXED_DIM=secondaryFixedDim
+ComposeUiThemeColors.SURFACE=surface
+ComposeUiThemeColors.SURFACE_BRIGHT=surfaceBright
+ComposeUiThemeColors.SURFACE_CONTAINER=surfaceContainer
+ComposeUiThemeColors.SURFACE_CONTAINER_HIGH=surfaceContainerHigh
+ComposeUiThemeColors.SURFACE_CONTAINER_HIGHEST=surfaceContainerHighest
+ComposeUiThemeColors.SURFACE_CONTAINER_LOW=surfaceContainerLow
+ComposeUiThemeColors.SURFACE_CONTAINER_LOWEST=surfaceContainerLowest
+ComposeUiThemeColors.SURFACE_DIM=surfaceDim
+ComposeUiThemeColors.SURFACE_TINT=surfaceTint
+ComposeUiThemeColors.SURFACE_VARIANT=surfaceVariant
+ComposeUiThemeColors.TERTIARY=tertiary
+ComposeUiThemeColors.TERTIARY_CONTAINER=tertiaryContainer
+ComposeUiThemeColors.TERTIARY_FIXED=tertiaryFixed
+ComposeUiThemeColors.TERTIARY_FIXED_DIM=tertiaryFixedDim
+enum ValueKind=STRING, NUMBER, BOOLEAN, COLOR, DP, SP, ENUM, TEXT_STYLE, BITMAP, ICON_NAME, SHAPE, LIST, NULL
+enum ShapeKind=RECTANGLE, ROUNDED, CIRCLE
+enum ScopeKind=ANY, COLUMN_ROW, BOX
+enum SnackbarDuration=SHORT, LONG, INDEFINITE
+enum ChildrenPolicy=NONE, SINGLE, MANY, LAZY_ITEMS
+enum ComponentInvocation=NODE, COMMAND
+enum PropertyUpdate=SET_PROPS, EDIT_COMMAND
+enum PayloadType=STRING, BOOLEAN, INTEGER, LONG, NUMBER
+interface ComposeUiRendererFactory.capabilities():android.os.Bundle
+interface ComposeUiRendererFactory.contractVersion():int
+interface ComposeUiRendererFactory.create(org.autojs.plugin.compose.api.loading.ComposeUiHostEnvironment):org.autojs.plugin.compose.api.loading.ComposeUiRenderer
+interface ComposeUiHostEnvironment.getEventSink():org.autojs.plugin.compose.api.loading.ComposeUiEventSink
+interface ComposeUiHostEnvironment.getHostContext():android.content.Context
+interface ComposeUiHostEnvironment.getInitialTheme():org.autojs.plugin.compose.api.model.ThemeSpec
+interface ComposeUiHostEnvironment.getMainExecutor():java.util.concurrent.Executor
+interface ComposeUiHostEnvironment.getSessionId():int
+interface ComposeUiRenderer.apply(org.autojs.plugin.compose.api.model.UiPatchBatch):void
+interface ComposeUiRenderer.dispose():void
+interface ComposeUiRenderer.execute(org.autojs.plugin.compose.api.model.UiCommand):void
+interface ComposeUiRenderer.setTheme(org.autojs.plugin.compose.api.model.ThemeSpec):void
+interface ComposeUiRenderer.view():android.view.View
+interface ComposeUiEventSink.enqueue(org.autojs.plugin.compose.api.model.UiEvent):void
+model org.autojs.plugin.compose.api.model.ComposeParcelable.describeContents():int
+model org.autojs.plugin.compose.api.model.ComposeParcelable.equals(java.lang.Object):boolean
+model org.autojs.plugin.compose.api.model.ComposeParcelable.hashCode():int
+model org.autojs.plugin.compose.api.model.ComposeParcelable.toString():java.lang.String
+model org.autojs.plugin.compose.api.model.ComposeParcelable.writeToParcel(android.os.Parcel, int):void
+model org.autojs.plugin.compose.api.model.UiValue.getKind():org.autojs.plugin.compose.api.model.ValueKind
+model org.autojs.plugin.compose.api.model.UiValue$Str(java.lang.String)
+model org.autojs.plugin.compose.api.model.UiValue$Str.getValue():java.lang.String
+model org.autojs.plugin.compose.api.model.UiValue$Num(double)
+model org.autojs.plugin.compose.api.model.UiValue$Num.getValue():double
+model org.autojs.plugin.compose.api.model.UiValue$Bool(boolean)
+model org.autojs.plugin.compose.api.model.UiValue$Bool.getValue():boolean
+model org.autojs.plugin.compose.api.model.UiValue$Color(int)
+model org.autojs.plugin.compose.api.model.UiValue$Color.getArgb():int
+model org.autojs.plugin.compose.api.model.UiValue$Dp(double)
+model org.autojs.plugin.compose.api.model.UiValue$Dp.getValue():double
+model org.autojs.plugin.compose.api.model.UiValue$Sp(double)
+model org.autojs.plugin.compose.api.model.UiValue$Sp.getValue():double
+model org.autojs.plugin.compose.api.model.UiValue$Enum(java.lang.String)
+model org.autojs.plugin.compose.api.model.UiValue$Enum.getValue():java.lang.String
+model org.autojs.plugin.compose.api.model.UiValue$TextStyle()
+model org.autojs.plugin.compose.api.model.UiValue$TextStyle(java.lang.String, java.lang.Double, java.lang.Integer, java.lang.Boolean, java.lang.Double, java.lang.Double)
+model org.autojs.plugin.compose.api.model.UiValue$TextStyle.getFontFamily():java.lang.String
+model org.autojs.plugin.compose.api.model.UiValue$TextStyle.getFontSize():java.lang.Double
+model org.autojs.plugin.compose.api.model.UiValue$TextStyle.getFontWeight():java.lang.Integer
+model org.autojs.plugin.compose.api.model.UiValue$TextStyle.getItalic():java.lang.Boolean
+model org.autojs.plugin.compose.api.model.UiValue$TextStyle.getLetterSpacing():java.lang.Double
+model org.autojs.plugin.compose.api.model.UiValue$TextStyle.getLineHeight():java.lang.Double
+model org.autojs.plugin.compose.api.model.UiValue$BitmapRef(android.graphics.Bitmap)
+model org.autojs.plugin.compose.api.model.UiValue$BitmapRef.get():android.graphics.Bitmap
+model org.autojs.plugin.compose.api.model.UiValue$IconName(java.lang.String)
+model org.autojs.plugin.compose.api.model.UiValue$IconName.getValue():java.lang.String
+model org.autojs.plugin.compose.api.model.UiValue$Shape(org.autojs.plugin.compose.api.model.ShapeKind, double)
+model org.autojs.plugin.compose.api.model.UiValue$Shape.getRadius():double
+model org.autojs.plugin.compose.api.model.UiValue$Shape.getShape():org.autojs.plugin.compose.api.model.ShapeKind
+model org.autojs.plugin.compose.api.model.UiValue$ListOf(java.util.List<? extends org.autojs.plugin.compose.api.model.UiValue>)
+model org.autojs.plugin.compose.api.model.UiValue$ListOf.getValues():java.util.List<org.autojs.plugin.compose.api.model.UiValue>
+model org.autojs.plugin.compose.api.model.ModifierOp(java.lang.String, java.util.List<? extends org.autojs.plugin.compose.api.model.UiValue>, org.autojs.plugin.compose.api.model.ScopeKind)
+model org.autojs.plugin.compose.api.model.ModifierOp.getArgs():java.util.List<org.autojs.plugin.compose.api.model.UiValue>
+model org.autojs.plugin.compose.api.model.ModifierOp.getName():java.lang.String
+model org.autojs.plugin.compose.api.model.ModifierOp.getScope():org.autojs.plugin.compose.api.model.ScopeKind
+model org.autojs.plugin.compose.api.model.UiNode(int, java.lang.String, java.lang.String, java.util.Map<java.lang.String, ? extends org.autojs.plugin.compose.api.model.UiValue>, java.util.List<org.autojs.plugin.compose.api.model.ModifierOp>, java.util.List<java.lang.Integer>, java.util.Map<java.lang.String, java.lang.Integer>, java.util.Map<java.lang.String, java.lang.Integer>)
+model org.autojs.plugin.compose.api.model.UiNode.getCallbacks():java.util.Map<java.lang.String, java.lang.Integer>
+model org.autojs.plugin.compose.api.model.UiNode.getChildren():java.util.List<java.lang.Integer>
+model org.autojs.plugin.compose.api.model.UiNode.getKey():java.lang.String
+model org.autojs.plugin.compose.api.model.UiNode.getModifier():java.util.List<org.autojs.plugin.compose.api.model.ModifierOp>
+model org.autojs.plugin.compose.api.model.UiNode.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiNode.getProps():java.util.Map<java.lang.String, org.autojs.plugin.compose.api.model.UiValue>
+model org.autojs.plugin.compose.api.model.UiNode.getSlots():java.util.Map<java.lang.String, java.lang.Integer>
+model org.autojs.plugin.compose.api.model.UiNode.getType():java.lang.String
+model org.autojs.plugin.compose.api.model.UiTree(int, java.util.List<org.autojs.plugin.compose.api.model.UiNode>)
+model org.autojs.plugin.compose.api.model.UiTree.getNodes():java.util.List<org.autojs.plugin.compose.api.model.UiNode>
+model org.autojs.plugin.compose.api.model.UiTree.getRootId():int
+model org.autojs.plugin.compose.api.model.ThemeSpec()
+model org.autojs.plugin.compose.api.model.ThemeSpec(java.lang.Integer, java.util.Map<java.lang.String, java.lang.Integer>, java.lang.Boolean, boolean, java.lang.String, java.lang.Double)
+model org.autojs.plugin.compose.api.model.ThemeSpec.getColorOverrides():java.util.Map<java.lang.String, java.lang.Integer>
+model org.autojs.plugin.compose.api.model.ThemeSpec.getDark():java.lang.Boolean
+model org.autojs.plugin.compose.api.model.ThemeSpec.getDynamicColor():boolean
+model org.autojs.plugin.compose.api.model.ThemeSpec.getFontFamily():java.lang.String
+model org.autojs.plugin.compose.api.model.ThemeSpec.getFontScale():java.lang.Double
+model org.autojs.plugin.compose.api.model.ThemeSpec.getSeedArgb():java.lang.Integer
+model org.autojs.plugin.compose.api.model.UiPatch$SetProps(int, java.util.Map<java.lang.String, ? extends org.autojs.plugin.compose.api.model.UiValue>, java.util.List<org.autojs.plugin.compose.api.model.ModifierOp>, java.util.Map<java.lang.String, java.lang.Integer>)
+model org.autojs.plugin.compose.api.model.UiPatch$SetProps.getCallbacks():java.util.Map<java.lang.String, java.lang.Integer>
+model org.autojs.plugin.compose.api.model.UiPatch$SetProps.getModifier():java.util.List<org.autojs.plugin.compose.api.model.ModifierOp>
+model org.autojs.plugin.compose.api.model.UiPatch$SetProps.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiPatch$SetProps.getProps():java.util.Map<java.lang.String, org.autojs.plugin.compose.api.model.UiValue>
+model org.autojs.plugin.compose.api.model.UiPatch$Insert(int, int, org.autojs.plugin.compose.api.model.UiTree)
+model org.autojs.plugin.compose.api.model.UiPatch$Insert.getIndex():int
+model org.autojs.plugin.compose.api.model.UiPatch$Insert.getParentId():int
+model org.autojs.plugin.compose.api.model.UiPatch$Insert.getSubtree():org.autojs.plugin.compose.api.model.UiTree
+model org.autojs.plugin.compose.api.model.UiPatch$Remove(int, int)
+model org.autojs.plugin.compose.api.model.UiPatch$Remove.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiPatch$Remove.getParentId():int
+model org.autojs.plugin.compose.api.model.UiPatch$Move(int, int, int)
+model org.autojs.plugin.compose.api.model.UiPatch$Move.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiPatch$Move.getParentId():int
+model org.autojs.plugin.compose.api.model.UiPatch$Move.getToIndex():int
+model org.autojs.plugin.compose.api.model.UiPatch$ReplaceSlot(int, java.lang.String, org.autojs.plugin.compose.api.model.UiTree)
+model org.autojs.plugin.compose.api.model.UiPatch$ReplaceSlot.getParentId():int
+model org.autojs.plugin.compose.api.model.UiPatch$ReplaceSlot.getSlot():java.lang.String
+model org.autojs.plugin.compose.api.model.UiPatch$ReplaceSlot.getSubtree():org.autojs.plugin.compose.api.model.UiTree
+model org.autojs.plugin.compose.api.model.UiPatch$SetRoot(org.autojs.plugin.compose.api.model.UiTree)
+model org.autojs.plugin.compose.api.model.UiPatch$SetRoot.getTree():org.autojs.plugin.compose.api.model.UiTree
+model org.autojs.plugin.compose.api.model.UiPatchBatch(int, long, java.util.List<? extends org.autojs.plugin.compose.api.model.UiPatch>)
+model org.autojs.plugin.compose.api.model.UiPatchBatch.getGeneration():long
+model org.autojs.plugin.compose.api.model.UiPatchBatch.getPatches():java.util.List<org.autojs.plugin.compose.api.model.UiPatch>
+model org.autojs.plugin.compose.api.model.UiPatchBatch.getSessionId():int
+model org.autojs.plugin.compose.api.model.UiEvent(int, long, int, java.lang.String, int, android.os.Bundle)
+model org.autojs.plugin.compose.api.model.UiEvent.getCallbackId():int
+model org.autojs.plugin.compose.api.model.UiEvent.getGeneration():long
+model org.autojs.plugin.compose.api.model.UiEvent.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiEvent.getPayload():android.os.Bundle
+model org.autojs.plugin.compose.api.model.UiEvent.getSessionId():int
+model org.autojs.plugin.compose.api.model.UiEvent.getType():java.lang.String
+model org.autojs.plugin.compose.api.model.TextSelection(int, int)
+model org.autojs.plugin.compose.api.model.TextSelection.getEnd():int
+model org.autojs.plugin.compose.api.model.TextSelection.getStart():int
+model org.autojs.plugin.compose.api.model.UiCommand$Focus(int)
+model org.autojs.plugin.compose.api.model.UiCommand$Focus.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiCommand$Blur(int)
+model org.autojs.plugin.compose.api.model.UiCommand$Blur.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiCommand$ScrollTo(int, java.lang.Integer, java.lang.Integer)
+model org.autojs.plugin.compose.api.model.UiCommand$ScrollTo.getIndex():java.lang.Integer
+model org.autojs.plugin.compose.api.model.UiCommand$ScrollTo.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiCommand$ScrollTo.getOffset():java.lang.Integer
+model org.autojs.plugin.compose.api.model.UiCommand$Edit(int, java.lang.String, org.autojs.plugin.compose.api.model.TextSelection, long)
+model org.autojs.plugin.compose.api.model.UiCommand$Edit.getEditSeq():long
+model org.autojs.plugin.compose.api.model.UiCommand$Edit.getNodeId():int
+model org.autojs.plugin.compose.api.model.UiCommand$Edit.getSelection():org.autojs.plugin.compose.api.model.TextSelection
+model org.autojs.plugin.compose.api.model.UiCommand$Edit.getText():java.lang.String
+model org.autojs.plugin.compose.api.model.UiCommand$ShowSnackbar(java.lang.String, java.lang.String, org.autojs.plugin.compose.api.model.SnackbarDuration, java.lang.Integer)
+model org.autojs.plugin.compose.api.model.UiCommand$ShowSnackbar.getActionLabel():java.lang.String
+model org.autojs.plugin.compose.api.model.UiCommand$ShowSnackbar.getCallbackId():java.lang.Integer
+model org.autojs.plugin.compose.api.model.UiCommand$ShowSnackbar.getDuration():org.autojs.plugin.compose.api.model.SnackbarDuration
+model org.autojs.plugin.compose.api.model.UiCommand$ShowSnackbar.getMessage():java.lang.String
+component Column NODE children=MANY scope=COLUMN_ROW commands=
+  prop arrangement kinds=ENUM enum=top, center, bottom, spaceBetween, spaceAround, spaceEvenly min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[top] aliases=verticalArrangement update=SET_PROPS
+  prop alignment kinds=ENUM enum=start, center, end min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[start] aliases=horizontalAlignment update=SET_PROPS
+  prop spacing kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000 required=false default=DP[0.0] aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Row NODE children=MANY scope=COLUMN_ROW commands=
+  prop arrangement kinds=ENUM enum=start, center, end, spaceBetween, spaceAround, spaceEvenly min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[start] aliases=horizontalArrangement update=SET_PROPS
+  prop alignment kinds=ENUM enum=top, center, bottom min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[top] aliases=verticalAlignment update=SET_PROPS
+  prop spacing kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000 required=false default=DP[0.0] aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Box NODE children=MANY scope=BOX commands=
+  prop alignment kinds=ENUM enum=topStart, topCenter, topEnd, centerStart, center, centerEnd, bottomStart, bottomCenter, bottomEnd min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[topStart] aliases=contentAlignment update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Spacer NODE children=NONE scope=ANY commands=
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component LazyColumn NODE children=LAZY_ITEMS scope=ANY commands=scrollTo
+  prop arrangement kinds=ENUM enum=top, center, bottom, spaceBetween, spaceAround, spaceEvenly min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[top] aliases=verticalArrangement update=SET_PROPS
+  prop alignment kinds=ENUM enum=start, center, end min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[start] aliases=horizontalAlignment update=SET_PROPS
+  prop spacing kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000 required=false default=DP[0.0] aliases= update=SET_PROPS
+  prop contentPadding kinds=DP, LIST enum= min=null max=null exclusive=false integer=false list=DP:1..4 required=false default=DP[0.0] aliases= update=SET_PROPS
+  prop reverseLayout kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop userScrollEnabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component LazyRow NODE children=LAZY_ITEMS scope=ANY commands=scrollTo
+  prop arrangement kinds=ENUM enum=start, center, end, spaceBetween, spaceAround, spaceEvenly min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[start] aliases=horizontalArrangement update=SET_PROPS
+  prop alignment kinds=ENUM enum=top, center, bottom min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[top] aliases=verticalAlignment update=SET_PROPS
+  prop spacing kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000 required=false default=DP[0.0] aliases= update=SET_PROPS
+  prop contentPadding kinds=DP, LIST enum= min=null max=null exclusive=false integer=false list=DP:1..4 required=false default=DP[0.0] aliases= update=SET_PROPS
+  prop reverseLayout kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop userScrollEnabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Scaffold NODE children=SINGLE scope=ANY commands=showSnackbar
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot content required=false
+  slot topBar required=false
+  slot snackbarHost required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Surface NODE children=SINGLE scope=ANY commands=
+  prop color kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop tonalElevation kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000 required=false default=DP[0.0] aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=SHAPE[RECTANGLE, 0.0] aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Card NODE children=MANY scope=ANY commands=
+  prop color kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop elevation kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component HorizontalDivider NODE children=NONE scope=ANY commands=
+  prop color kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop thickness kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000 required=false default=DP[1.0] aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component TopAppBar NODE children=NONE scope=ANY commands=
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot title required=false
+  slot navigationIcon required=false
+  slot actions required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Text NODE children=NONE scope=ANY commands=
+  prop text kinds=STRING enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=STRING[] aliases= update=SET_PROPS
+  prop style kinds=ENUM, TEXT_STYLE enum=displayLarge, displayMedium, displaySmall, headlineLarge, headlineMedium, headlineSmall, titleLarge, titleMedium, titleSmall, bodyLarge, bodyMedium, bodySmall, labelLarge, labelMedium, labelSmall min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop color kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop fontSize kinds=SP enum= min=0.0 max=null exclusive=true integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop fontWeight kinds=NUMBER enum= min=1.0 max=1000.0 exclusive=false integer=true list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop textAlign kinds=ENUM enum=start, end, left, right, center, justify min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[start] aliases= update=SET_PROPS
+  prop maxLines kinds=NUMBER enum= min=1.0 max=2.147483647E9 exclusive=false integer=true list=:0..2000 required=false default=NUMBER[2.147483647E9] aliases= update=SET_PROPS
+  prop overflow kinds=ENUM enum=clip, ellipsis, visible min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[clip] aliases= update=SET_PROPS
+  prop selectable kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Icon NODE children=NONE scope=ANY commands=
+  prop name kinds=ICON_NAME enum= min=null max=null exclusive=false integer=false list=:0..2000 required=true default=<unspecified> aliases= update=SET_PROPS
+  prop tint kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Image NODE children=NONE scope=ANY commands=
+  prop src kinds=BITMAP enum= min=null max=null exclusive=false integer=false list=:0..2000 required=true default=<unspecified> aliases= update=SET_PROPS
+  prop contentScale kinds=ENUM enum=fit, crop, fillBounds, fillWidth, fillHeight, inside, none min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[fit] aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Button NODE children=MANY scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component ElevatedButton NODE children=MANY scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component FilledTonalButton NODE children=MANY scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component OutlinedButton NODE children=MANY scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component TextButton NODE children=MANY scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component IconButton NODE children=MANY scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop contentColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot content required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component Switch NODE children=NONE scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop checked kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+  event checkedChange(checked:BOOLEAN:true)
+component Checkbox NODE children=NONE scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop checked kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+  event checkedChange(checked:BOOLEAN:true)
+component RadioButton NODE children=NONE scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop checked kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases=selected update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+  event checkedChange(checked:BOOLEAN:true)
+component Slider NODE children=NONE scope=ANY commands=focus, blur
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop value kinds=NUMBER enum= min=-3.4028234663852886E38 max=3.4028234663852886E38 exclusive=false integer=false list=:0..2000 required=false default=NUMBER[0.0] aliases= update=SET_PROPS
+  prop range kinds=LIST enum= min=null max=null exclusive=false integer=false list=NUMBER:2..2 required=false default=LIST[NUMBER[0.0], NUMBER[1.0]] aliases= update=SET_PROPS
+  prop steps kinds=NUMBER enum= min=0.0 max=2.147483647E9 exclusive=false integer=true list=:0..2000 required=false default=NUMBER[0.0] aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+  event valueChange(value:NUMBER:true)
+  event valueChangeFinished()
+component TextField NODE children=NONE scope=ANY commands=focus, blur, edit
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop text kinds=STRING enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=STRING[] aliases=value update=EDIT_COMMAND
+  prop style kinds=ENUM, TEXT_STYLE enum=displayLarge, displayMedium, displaySmall, headlineLarge, headlineMedium, headlineSmall, titleLarge, titleMedium, titleSmall, bodyLarge, bodyMedium, bodySmall, labelLarge, labelMedium, labelSmall min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop singleLine kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop minLines kinds=NUMBER enum= min=1.0 max=2.147483647E9 exclusive=false integer=true list=:0..2000 required=false default=NUMBER[1.0] aliases= update=SET_PROPS
+  prop maxLines kinds=NUMBER enum= min=1.0 max=2.147483647E9 exclusive=false integer=true list=:0..2000 required=false default=NUMBER[2.147483647E9] aliases= update=SET_PROPS
+  prop keyboardType kinds=ENUM enum=text, ascii, number, phone, uri, email, password, numberPassword, decimal min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[text] aliases= update=SET_PROPS
+  prop imeAction kinds=ENUM enum=default, none, go, search, send, previous, next, done min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[default] aliases= update=SET_PROPS
+  prop isError kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop readOnly kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop visualTransformation kinds=ENUM enum=none, password min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[none] aliases= update=SET_PROPS
+  slot label required=false
+  slot placeholder required=false
+  slot leadingIcon required=false
+  slot trailingIcon required=false
+  slot supportingText required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+  event valueChange(text:STRING:true, selectionStart:INTEGER:true, selectionEnd:INTEGER:true, editSeq:LONG:true)
+component OutlinedTextField NODE children=NONE scope=ANY commands=focus, blur, edit
+  prop enabled kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[true] aliases= update=SET_PROPS
+  prop text kinds=STRING enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=STRING[] aliases=value update=EDIT_COMMAND
+  prop style kinds=ENUM, TEXT_STYLE enum=displayLarge, displayMedium, displaySmall, headlineLarge, headlineMedium, headlineSmall, titleLarge, titleMedium, titleSmall, bodyLarge, bodyMedium, bodySmall, labelLarge, labelMedium, labelSmall min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop singleLine kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop minLines kinds=NUMBER enum= min=1.0 max=2.147483647E9 exclusive=false integer=true list=:0..2000 required=false default=NUMBER[1.0] aliases= update=SET_PROPS
+  prop maxLines kinds=NUMBER enum= min=1.0 max=2.147483647E9 exclusive=false integer=true list=:0..2000 required=false default=NUMBER[2.147483647E9] aliases= update=SET_PROPS
+  prop keyboardType kinds=ENUM enum=text, ascii, number, phone, uri, email, password, numberPassword, decimal min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[text] aliases= update=SET_PROPS
+  prop imeAction kinds=ENUM enum=default, none, go, search, send, previous, next, done min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[default] aliases= update=SET_PROPS
+  prop isError kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop readOnly kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop visualTransformation kinds=ENUM enum=none, password min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[none] aliases= update=SET_PROPS
+  slot label required=false
+  slot placeholder required=false
+  slot leadingIcon required=false
+  slot trailingIcon required=false
+  slot supportingText required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+  event valueChange(text:STRING:true, selectionStart:INTEGER:true, selectionEnd:INTEGER:true, editSeq:LONG:true)
+component CircularProgressIndicator NODE children=NONE scope=ANY commands=
+  prop progress kinds=NUMBER, NULL enum= min=0.0 max=1.0 exclusive=false integer=false list=:0..2000 required=false default=NULL[] aliases= update=SET_PROPS
+  prop color kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop trackColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component LinearProgressIndicator NODE children=NONE scope=ANY commands=
+  prop progress kinds=NUMBER, NULL enum= min=0.0 max=1.0 exclusive=false integer=false list=:0..2000 required=false default=NULL[] aliases= update=SET_PROPS
+  prop color kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop trackColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+component AlertDialog NODE children=NONE scope=ANY commands=
+  prop open kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=BOOLEAN[false] aliases= update=SET_PROPS
+  prop containerColor kinds=COLOR, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  prop shape kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=<unspecified> aliases= update=SET_PROPS
+  slot icon required=false
+  slot title required=false
+  slot text required=false
+  slot confirm required=true
+  slot dismiss required=false
+  event click()
+  event longClick()
+  event focusChange(focused:BOOLEAN:true)
+  event scroll(firstVisibleIndex:INTEGER:false, offset:INTEGER:true)
+  event dismissRequest()
+component Snackbar COMMAND children=NONE scope=ANY commands=showSnackbar
+  prop message kinds=STRING enum= min=null max=null exclusive=false integer=false list=:0..2000 required=true default=<unspecified> aliases= update=SET_PROPS
+  prop actionLabel kinds=STRING, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000 required=false default=NULL[] aliases= update=SET_PROPS
+  prop duration kinds=ENUM enum=short, long, indefinite min=null max=null exclusive=false integer=false list=:0..2000 required=false default=ENUM[short] aliases= update=SET_PROPS
+  event action()
+  event dismiss()
+modifier padding scope=ANY parents= commands=
+  (all:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+  (horizontal:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, vertical:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+  (start:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, top:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, end:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, bottom:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier size scope=ANY parents= commands=
+  (size:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+  (width:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, height:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier width scope=ANY parents= commands=
+  (width:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier height scope=ANY parents= commands=
+  (height:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier fillMaxWidth scope=ANY parents= commands=
+  (fraction:kinds=NUMBER enum= min=0.0 max=1.0 exclusive=false integer=false list=:0..2000=NUMBER[1.0] callback=false)
+modifier fillMaxHeight scope=ANY parents= commands=
+  (fraction:kinds=NUMBER enum= min=0.0 max=1.0 exclusive=false integer=false list=:0..2000=NUMBER[1.0] callback=false)
+modifier fillMaxSize scope=ANY parents= commands=
+  (fraction:kinds=NUMBER enum= min=0.0 max=1.0 exclusive=false integer=false list=:0..2000=NUMBER[1.0] callback=false)
+modifier weight scope=COLUMN_ROW parents=Column, Row commands=
+  (weight:kinds=NUMBER enum= min=1.401298464324817E-45 max=3.4028234663852886E38 exclusive=false integer=false list=:0..2000=<unspecified> callback=false, fill:kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000=BOOLEAN[true] callback=false)
+modifier align scope=BOX parents=Box commands=
+  (alignment:kinds=ENUM enum=topStart, topCenter, topEnd, centerStart, center, centerEnd, bottomStart, bottomCenter, bottomEnd min=null max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier background scope=ANY parents= commands=
+  (color:kinds=COLOR enum= min=null max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, shape:kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000=SHAPE[RECTANGLE, 0.0] callback=false)
+modifier border scope=ANY parents= commands=
+  (width:kinds=DP enum= min=0.0 max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, color:kinds=COLOR enum= min=null max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, shape:kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000=SHAPE[RECTANGLE, 0.0] callback=false)
+modifier clip scope=ANY parents= commands=
+  (shape:kinds=SHAPE enum= min=null max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier alpha scope=ANY parents= commands=
+  (alpha:kinds=NUMBER enum= min=0.0 max=1.0 exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier clickable scope=ANY parents= commands=focus, blur
+  (callbackId:kinds=NUMBER enum= min=1.0 max=2.147483647E9 exclusive=false integer=true list=:0..2000=<unspecified> callback=true, enabled:kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000=BOOLEAN[true] callback=false)
+modifier verticalScroll scope=ANY parents= commands=scrollTo
+  (enabled:kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000=BOOLEAN[true] callback=false)
+modifier horizontalScroll scope=ANY parents= commands=scrollTo
+  (enabled:kinds=BOOLEAN enum= min=null max=null exclusive=false integer=false list=:0..2000=BOOLEAN[true] callback=false)
+modifier offset scope=ANY parents= commands=
+  (x:kinds=DP enum= min=null max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false, y:kinds=DP enum= min=null max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier aspectRatio scope=ANY parents= commands=
+  (ratio:kinds=NUMBER enum= min=1.401298464324817E-45 max=3.4028234663852886E38 exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier testTag scope=ANY parents= commands=
+  (tag:kinds=STRING enum= min=null max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+modifier semantics scope=ANY parents= commands=
+  (contentDescription:kinds=STRING, NULL enum= min=null max=null exclusive=false integer=false list=:0..2000=<unspecified> callback=false)
+shortcut w->width expandList=false
+shortcut h->height expandList=false
+shortcut padding->padding expandList=true
+shortcut bg->background expandList=false
+shortcut weight->weight expandList=false
+shortcut alpha->alpha expandList=false
+shortcut testTag->testTag expandList=false
+shortcut contentDescription->semantics expandList=false
+system event error(code:STRING:true, message:STRING:true, prop:STRING:false)
+system event close()

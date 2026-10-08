@@ -22,6 +22,14 @@ plugins {
 }
 
 val globalApplicationId = "org.autojs.autojs6"
+apply(from = "compose-shared-classpath.gradle.kts")
+if (providers.gradleProperty("composeUiSpike").orNull == "true") {
+    android.buildTypes.named("debug") {
+        applicationIdSuffix = ".compose.spike"
+        manifestPlaceholders["authorities"] = "org.autojs.autojs6.compose.spike.fileprovider"
+        manifestPlaceholders["appName"] = "Compose spike host"
+    }
+}
 
 val flavorDimension = "channel"
 val flavorNameApp = "app"
@@ -509,6 +517,16 @@ dependencies /* Unclassified */ {
     // AndroidX Activity
     implementation(libs.activity.ktx)
 
+    // Compose UI Q1(b): shared AndroidX versions are the same in app/inrt and debug/release.
+    // The renderer remains external; no Compose runtime is added to the host.
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.viewmodel.savedstate)
+    implementation(libs.savedstate.ktx)
+    implementation(libs.emoji2)
+    implementation(libs.window)
+    // V1 contract is provided by the host parent loader. Rendering remains in the separate plugin APK.
+    implementation(project(":plugin-api:compose-ui-api"))
+
     // LeakCanary
     if (leakCanaryEnabled) {
         debugImplementation(libs.leakcanary)
@@ -951,6 +969,12 @@ android {
 
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
+        val composeSharedRecords = rootProject.file("locks/host-shared-deps.lock").readLines()
+            .filter { it.isNotBlank() && !it.startsWith('#') }.sortedBy { it.substringBefore('=') }
+        val composeSharedFingerprint = MessageDigest.getInstance("SHA-256")
+            .digest(composeSharedRecords.joinToString("\n", postfix = "\n").toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+        buildConfigField("String", "COMPOSE_UI_SHARED_FINGERPRINT", "\"$composeSharedFingerprint\"")
         buildConfigField("boolean", "APK_BUILDER_BUILT_IN_TEMPLATE_INCLUDED", apkBuilderIncludeBuiltInTemplate.get().toString())
         buildConfigField("boolean", "JVM_SOURCE_EXPERIMENTAL_ENABLED", jvmSourceExperimentalEnabled.get().toString())
         buildConfigField("boolean", buildConfigFieldNameIsInrt, "false")

@@ -5,6 +5,8 @@ import android.content.Intent
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import kotlinx.coroutines.Runnable
 import org.autojs.autojs.annotation.ScriptInterface
@@ -19,6 +21,7 @@ import org.autojs.autojs.runtime.api.augment.ui.UI
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
+import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.RhinoUtils.isUiThread
@@ -28,6 +31,8 @@ import org.autojs.autojs6.R
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.io.Closeable
 
 /**
  * Created by Stardust on Dec 5, 2017.
@@ -66,12 +71,10 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         override fun inflate(context: Context, parent: ViewGroup?) = view
     })
 
-    @Synchronized
     private fun addWindow(window: JsWindow) {
         mWindows.add(window)
     }
 
-    @Synchronized
     private fun removeWindow(window: JsWindow): Boolean {
         return mWindows.remove(window)
     }
@@ -89,7 +92,6 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         }
     }
 
-    @Synchronized
     fun closeAll() {
 
         // Close windows synchronously on UI thread.
@@ -111,7 +113,7 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         // zh-CN: 快速路径: 已处于 UI 线程.
         if (isUiThread()) {
             snapshot.forEach { runCatching { it.close(false) } }
-            mWindows.clear()
+            mWindows.removeAll(snapshot.toSet())
             return
         }
 
@@ -121,7 +123,7 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         uiHandler.post {
             try {
                 snapshot.forEach { runCatching { it.close(false) } }
-                mWindows.clear()
+                mWindows.removeAll(snapshot.toSet())
             } finally {
                 latch.countDown()
             }
@@ -168,6 +170,182 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
 
     interface JsWindow {
         fun close(removeFromWindows: Boolean)
+    }
+    private data class ManagedGeometry(val x: Int = -1, val y: Int = -1, val width: Int = 0, val height: Int = 0)
+
+    /** Register ownership before any main-thread view creation, without blocking its script caller. */
+    internal fun reserveManagedClose(onClosed: () -> Unit): Closeable {
+        val notified = AtomicBoolean()
+        val pending = object : JsWindow {
+            override fun close(removeFromWindows: Boolean) {
+                if (removeFromWindows) removeWindow(this)
+                if (notified.compareAndSet(false, true)) onClosed()
+            }
+        }
+        addWindow(pending)
+        // A closeAll snapshot already containing this entry must still deliver its close after
+        // promotion to a real window. Removing the registry entry does not invalidate that snapshot.
+        return Closeable { removeWindow(pending) }
+    }
+
+    /**
+     * Main-thread, nonblocking window creation for an in-process renderer. Native windows stay in
+     * the same registry as legacy JS windows, including while FloatyService is still starting.
+     */
+    internal fun createManagedWindow(
+        raw: Boolean,
+        supplier: BaseResizableFloatyWindow.ViewSupplier,
+        onCreated: (ManagedWindow, Throwable?) -> Unit,
+        onClosed: () -> Unit,
+        rawWindowParameters: ((WindowManager.LayoutParams) -> Unit)? = null,
+    ): ManagedWindow {
+        check(isUiThread()) { "Managed floating windows require the main thread" }
+        return ManagedWindow(raw, supplier, onCreated, onClosed, rawWindowParameters).also {
+            addWindow(it)
+            it.start()
+        }
+    }
+
+    /** No script callbacks run here. Owners marshal notifications back to their script dispatcher. */
+    internal inner class ManagedWindow(
+        val raw: Boolean,
+        supplier: BaseResizableFloatyWindow.ViewSupplier,
+        onCreated: (ManagedWindow, Throwable?) -> Unit,
+        onClosed: () -> Unit,
+        rawWindowParameters: ((WindowManager.LayoutParams) -> Unit)? = null,
+    ) : JsWindow {
+        @Volatile private var native: FloatyWindow? = if (raw) RawWindow(mContext, supplier, rawWindowParameters) else BaseResizableFloatyWindow(mContext, supplier)
+        @Volatile var isClosed = false
+            private set
+        private var created = false
+        @Volatile private var geometry = ManagedGeometry()
+        private var observedView: View? = null
+        private val layoutListener = ViewTreeObserver.OnGlobalLayoutListener { updateGeometry() }
+        private var creationCallback: ((ManagedWindow, Throwable?) -> Unit)? = onCreated
+        private var closeCallback: (() -> Unit)? = onClosed
+
+        init {
+            when (val window = native) {
+                is RawWindow -> {
+                    window.creationObserver = ::creationResult
+                    window.closeObserver = ::nativeClosed
+                }
+                is BaseResizableFloatyWindow -> {
+                    window.creationObserver = ::creationResult
+                    window.closeObserver = ::nativeClosed
+                    window.setOnCloseButtonClickListener { close(true) }
+                }
+            }
+        }
+
+        val x get() = geometry.x
+        val y get() = geometry.y
+        val width get() = geometry.width
+        val height get() = geometry.height
+        internal fun start() {
+            check(isUiThread())
+            if (isClosed) return
+            try {
+                val context = uiHandler.applicationContext
+                checkNotNull(context.startService(Intent(context, FloatyService::class.java))) { "Floating window service did not start" }
+                native?.let(FloatyService::addWindow)
+            } catch (failure: Exception) { creationResult(failure) }
+            catch (failure: LinkageError) { creationResult(failure) }
+        }
+
+        private fun creationResult(failure: Throwable?) {
+            if (isClosed || created) return
+            created = true
+            if (failure == null) {
+                observedView = native?.windowView
+                observedView?.viewTreeObserver?.addOnGlobalLayoutListener(layoutListener)
+                updateGeometry()
+            }
+            val callback = creationCallback.also { creationCallback = null }
+            try { callback?.invoke(this, failure) }
+            finally { if (failure != null) close(true) }
+        }
+
+        fun setPosition(x: Int, y: Int) {
+            check(isUiThread())
+            val window = native ?: return
+            val bridge = window.windowBridge ?: return
+            val params = window.windowLayoutParams
+            // Preserve the existing resizable content offset, but do not swallow WM rejections.
+            params.x = x - (bridge.x - params.x)
+            params.y = y - (bridge.y - params.y)
+            window.updateWindowLayoutParams(params)
+            updateGeometry()
+        }
+        fun setSize(width: Int, height: Int) {
+            check(isUiThread())
+            native?.windowBridge?.updateMeasure(width, height)
+            measureView()?.let { setViewMeasure(it, width, height) }
+            updateGeometry()
+        }
+        fun setTouchable(touchable: Boolean) {
+            check(isUiThread())
+            val window = native ?: return
+            val params = window.windowLayoutParams
+            params.flags = if (touchable) params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+            else params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            window.updateWindowLayoutParams(params)
+        }
+        fun requestFocus() {
+            check(isUiThread())
+            when (val window = native) {
+                is RawWindow -> window.requestWindowFocus()
+                is BaseResizableFloatyWindow -> window.requestWindowFocus()
+            }
+        }
+        fun disableFocus() {
+            check(isUiThread())
+            when (val window = native) {
+                is RawWindow -> window.disableWindowFocus()
+                is BaseResizableFloatyWindow -> window.disableWindowFocus()
+            }
+        }
+        fun setAdjustEnabled(enabled: Boolean) {
+            check(isUiThread())
+            val window = native as? BaseResizableFloatyWindow ?: throw IllegalArgumentException("Raw windows have no adjustment controls")
+            window.isAdjustEnabled = enabled
+        }
+        private fun measureView(): View? = when (val window = native) {
+            is BaseResizableFloatyWindow -> window.rootView
+            else -> window?.windowView
+        }
+        private fun updateGeometry() {
+            val window = native ?: return
+            val measured = measureView()
+            geometry = ManagedGeometry(window.windowBridge?.x ?: -1, window.windowBridge?.y ?: -1,
+                measured?.width ?: 0, measured?.height ?: 0)
+        }
+        private fun stopObserving() {
+            observedView?.viewTreeObserver?.takeIf { it.isAlive }?.removeOnGlobalLayoutListener(layoutListener)
+            observedView = null
+            geometry = ManagedGeometry()
+        }
+        private fun nativeClosed() {
+            if (isClosed) return
+            isClosed = true
+            stopObserving()
+            native = null
+            creationCallback = null
+            removeWindow(this)
+            closeCallback.also { closeCallback = null }?.invoke()
+        }
+
+        override fun close(removeFromWindows: Boolean) {
+            check(isUiThread())
+            if (isClosed) return
+            isClosed = true
+            stopObserving()
+            if (removeFromWindows) removeWindow(this)
+            val window = native.also { native = null }
+            creationCallback = null
+            try { window?.close() }
+            finally { closeCallback.also { closeCallback = null }?.invoke() }
+        }
     }
 
     inner class JsRawWindow(supplier: BaseResizableFloatyWindow.ViewSupplier) : JsWindow {

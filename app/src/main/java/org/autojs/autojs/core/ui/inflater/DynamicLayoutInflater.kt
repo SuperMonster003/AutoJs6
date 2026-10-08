@@ -48,6 +48,7 @@ import org.autojs.autojs.core.ui.inflater.inflaters.JsDrawerLayoutInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsEditTextInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsFloatingActionButtonInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsFrameLayoutInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.ComposeContainerInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsGridViewInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsImageButtonInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsImageSwitcherInflater
@@ -306,6 +307,7 @@ open class DynamicLayoutInflater {
         registerViewAttrSetter(JsEditText::class.java, JsEditTextInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsFloatingActionButton::class.java, JsFloatingActionButtonInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsFrameLayout::class.java, JsFrameLayoutInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(org.autojs.autojs.core.ui.widget.ComposeContainerView::class.java, ComposeContainerInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsGridView::class.java, JsGridViewInflater<JsGridView>(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsImageButton::class.java, JsImageButtonInflater(scriptRuntime, resourceParser))
         registerViewAttrSetter(JsImageView::class.java, JsImageViewInflater(scriptRuntime, resourceParser))

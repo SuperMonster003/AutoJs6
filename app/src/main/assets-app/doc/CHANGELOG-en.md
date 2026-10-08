@@ -6,9 +6,12 @@
 
 # v6.8.0
 
-###### 2026/10/07
+###### 2026/10/08
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
+* `Hint` Compose UI and its API reference, Ace Editor type completion and Offline Docs content are delivered as a local integration requiring a matching local host build; the plugin is not listed in the official index or formally released
+* `Hint` Independent dialogs require AutoJs6 6.8.0 / 5321 and Compose UI with dialog-v1 support; TSX also requires TypeScript Engine 0.6.6. Non-UI scripts need the host overlay permission
+* `Hint` This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
 * `Feature` ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples
@@ -282,6 +285,17 @@
 * `Feature` colors.theme controls the theme color from scripts: get, set (accent and dark options), reset, libraries, activate and deactivate (intelligent color libraries), next (rotates at once), state (switches the "Script states" source) and current; script changes within 500 ms are merged and recorded in the history as "Script: name", and the theme color page offers "Undo script change" to restore the previous selection, including an active intelligent color library (see Sample Code > 图像与颜色)
 * `Feature` Long-pressing TAB on the Ace editor shortcut panel triggers smart hints, showing code completion, parameter hints or symbol documentation based on the cursor context and cycling overloads while parameter hints are visible; hardware keyboard Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q map to smart hints / parameter hints / symbol documentation
 * `Feature` Code editor settings gain a "Smart hints" group (Ace engine only): automatic completion trigger (while typing identifiers / only after typing "." / off), minimum characters for completion, completion delay, parameter hints trigger (when the cursor enters a call / only after typing "(" or "," / off) and switching overloads with arrow keys; changes apply immediately and can be recorded in action favorites (requires Ace Editor plugin 1.26.0)
+* `Feature` compose / $compose script API with 29 node factories, retained handles, reactive state/render/ref, batched updates, queued posts, themes and Snackbar session commands (requires the Compose UI plugin)
+* `Feature` compose.mount hosts UI pages; compose.floaty supports UI and non-UI scripts with raw or resizable windows, pixel position/size, touch/focus controls and worker updates through compose.post, with owned session cleanup on close or script termination
+* `Feature` The Compose UI category of built-in samples provides counter, form validation, 1000-item list, floating HUD, and theme scripts, each with plugin and permission prerequisites
+* `Feature` Complete Compose UI API reference with companion Ace Editor type completion and local Offline Docs content for components, nodes, state, modifiers, themes, sessions and floating windows
+* `Feature` Plugin Center recognizes and manages installed Compose UI development preview plugins, requiring host 6.8.0 / 5316 or later
+* `Feature` TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes
+* `Feature` XML `<compose>` containers and compose.attach embed independent Compose sessions in UI pages or legacy floating windows; compose.AndroidView embeds an existing Android View or one returned by a synchronous factory
+* `Feature` ui.inflate accepts compiled XML TSX layouts and binds their onClick callbacks
+* `Feature` compose.dialog returns an updatable, closable session for dialogs and modal bottom sheets in UI or ordinary scripts
+* `Feature` Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh
+* `Feature` compose.memo reuses render fragments whose dependency values and read states are unchanged, so a partial update of a large list rebuilds only the changed rows
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
@@ -525,6 +539,10 @@
 * `Fix` Missing circular icon backgrounds in Plugin Center details dialogs and stale themed borders when cached artwork is reused
 * `Fix` Material colors chosen in the legacy layout could not be found with "Locate current theme color" after switching layouts, and the Material colors page did not show the current color summary
 * `Fix` Opening plugin details right after a cold start of the Plugin Center could make the dialog flash because each list refresh rebuilt it
+* `Fix` Packaged UI scripts occasionally displaying a blank page and exiting during startup
+* `Fix` Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates
+* `Fix` Component factories treated the first positional node as a property object when several node arguments were supplied
+* `Fix` Compose node property getters preserve null values, including default progress and cleared DatePicker selections, instead of returning undefined
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record
@@ -721,6 +739,9 @@
 * `Improvement` Ace editor parameter hints support overloaded methods even when LSP is off or the semantic service is unavailable: the static index carries 146 declared overloads (such as app.startActivity), the built-in ECMAScript signatures gain overloads for splice / replace / JSON.stringify / Array.from and more, and Python / Lua parameter hints keep every signature
 * `Improvement` Ace editor hover documentation can be scrolled and selected on touch screens, and smart hints wait for asynchronous parameter hints in Python / Lua files instead of falling back to completion
 * `Improvement` The plugin info dialog of Plugin Center tells "Supported ABIs" from "Installed ABIs": the former prefers the org.autojs.plugin.contract.SUPPORTED_ABIS manifest meta-data written by the plugin build, then the plugin INFO service and the index; the latter lists the ABIs actually packaged in the installed APKs (splits included)
+* `Improvement` Compose UI native text editing preserves selection and IME composition with keyboard avoidance, and reports each Snackbar action or dismissal once
+* `Improvement` ComposeError provides localized messages and stable codes with node/property/cause and script stack details; each engine permits up to 8 live sessions, rejects operations on closed handles and clears callbacks, refs and pending work; updating, uninstalling or disabling the plugin closes its active sessions with the corresponding error
+* `Improvement` cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
@@ -764,6 +785,11 @@
 * `Dependency` Added Android Hidden API Bypass version 6.1
 * `Dependency` Modularize Package Archive Parser
 * `Dependency` Modularize Installer API
+* `Dependency` Upgrade AndroidX Lifecycle from 2.6.2 to 2.9.4
+* `Dependency` Upgrade AndroidX SavedState from 1.2.1 to 1.3.2
+* `Dependency` Upgrade AndroidX Emoji2 from 1.3.0 to 1.4.0
+* `Dependency` Upgrade AndroidX Window from 1.0.0 to 1.5.0
+* `Dependency` Modularize Compose UI API
 
 # v6.7.0
 

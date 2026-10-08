@@ -29,6 +29,9 @@ import org.autojs.autojs6.databinding.FloatyWindowBinding
 class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier) : ResizableFloatyWindow(BaseResizableFloaty(context, viewSupplier)) {
 
     private val mInflateException = VolatileDispose<RuntimeException>()
+    internal var creationObserver: ((Throwable?) -> Unit)? = null
+    internal var closeObserver: (() -> Unit)? = null
+    private var managedClosed = false
     private val mOffset = context.resources.getDimensionPixelSize(R.dimen.floaty_window_offset)
 
     private val mFloaty by lazy { floaty as BaseResizableFloaty }
@@ -65,13 +68,27 @@ class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier) : 
     }
 
     override fun onCreate(service: FloatyService, manager: WindowManager) {
+        if (managedClosed) return
         try {
             super.onCreate(service, manager)
         } catch (e: RuntimeException) {
             mInflateException.setAndNotify(e)
+            creationObserver?.invoke(e)
+            return
+        } catch (e: LinkageError) {
+            if (creationObserver == null) throw e
+            mInflateException.setAndNotify(IllegalStateException("Floating window creation failed", e))
+            creationObserver?.invoke(e)
             return
         }
         mInflateException.setAndNotify(Exceptions.NO_EXCEPTION)
+        creationObserver?.invoke(null)
+    }
+
+    override fun close() {
+        if (creationObserver != null || closeObserver != null) managedClosed = true
+        val observer = closeObserver.also { closeObserver = null; creationObserver = null }
+        try { super.close() } finally { observer?.invoke() }
     }
 
     override fun onViewCreated(view: View?) {

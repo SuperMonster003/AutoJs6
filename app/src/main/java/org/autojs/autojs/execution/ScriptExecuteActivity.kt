@@ -19,14 +19,14 @@ import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isNotEmpty
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.eventloop.SimpleEvent
+import org.autojs.autojs.core.plugin.compose.ComposeActivityInsets
+import org.autojs.autojs.core.plugin.compose.ComposeInsetsHost
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
@@ -43,12 +43,13 @@ import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.mozilla.javascript.ContinuationPending
+import java.io.Closeable
 
 /**
  * Created by Stardust on Feb 5, 2017.
  * Modified by SuperMonster003 as of Jan 20, 2026.
  */
-class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.DelegateHost {
+class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.DelegateHost, ComposeInsetsHost {
 
     private val mOnBackPressedCallback = object : OnBackPressedCallback(true) {
 
@@ -78,6 +79,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
     private var mResult: Any? = null
     private var mPreparationThread: ThreadCompat? = null
     private var mIsResumed = false
+    private lateinit var mComposeInsets: ComposeActivityInsets
 
     private val mMediator = OnActivityResultDelegate.Mediator()
 
@@ -119,11 +121,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
 
         @Suppress("DEPRECATION")
         ViewUtils.appendSystemUiVisibility(this, SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
-            val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, sysBars.top, 0, sysBars.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        mComposeInsets = ComposeActivityInsets(window, findViewById(android.R.id.content))
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             ViewUtils.setNavigationBarBackgroundColor(this, getColor(R.color.black_alpha_44))
         }
@@ -275,6 +273,8 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         }
     }
 
+    override fun acquireComposeInsets(): Closeable = mComposeInsets.acquire()
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt(EXTRA_EXECUTION_ID, mScriptExecution.id)
@@ -380,16 +380,16 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         private val EXTRA_EXECUTION_ID = ScriptExecuteActivity::class.java.name + ".execution_id"
 
         @JvmStatic
-        fun execute(context: Context, manager: ScriptEngineManager, task: ScriptExecutionTask): ActivityScriptExecution {
-            val execution = ActivityScriptExecution(manager, task)
+        fun start(context: Context, execution: ActivityScriptExecution): Boolean {
+            // ScriptEngineService publishes this execution before Android can run onCreate.
             val started = Intent(context, ScriptExecuteActivity::class.java)
                 .putExtra(EXTRA_EXECUTION_ID, execution.id)
-                .addFlags(task.config.intentFlags)
+                .addFlags(execution.config.intentFlags)
                 .startSafely(context)
             if (started) {
                 execution.markActivityStarted()
             }
-            return execution
+            return started
         }
     }
 }

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "category": "Compose UI",
+  "hostSamplePath": "sample/Compose UI",
+  "pluginPackage": "io.github.supermonster003.autojs6.plugin.compose.ui",
+  "minHostVersionCode": 5316,
+  "examples": [
+    {
+      "id": "counter",
+      "file": "counter.js",
+      "title": "Counter",
+      "mode": "ui",
+      "requiresOverlay": false,
+      "features": ["state", "render", "events"]
+    },
+    {
+      "id": "form",
+      "file": "form.js",
+      "title": "Form and validation",
+      "mode": "ui",
+      "requiresOverlay": false,
+      "features": ["node handles", "TextField", "Switch", "Slider", "validation"]
+    },
+    {
+      "id": "list",
+      "file": "list.js",
+      "title": "1000 keyed items",
+      "mode": "ui",
+      "requiresOverlay": false,
+      "features": ["LazyColumn", "key", "reorder", "ref", "scrollTo"]
+    },
+    {
+      "id": "floaty-hud",
+      "file": "floaty-hud.js",
+      "title": "Floating HUD",
+      "mode": "normal",
+      "requiresOverlay": true,
+      "features": ["floaty", "worker", "post", "close"]
+    },
+    {
+      "id": "theme",
+      "file": "theme.js",
+      "title": "Theme colors",
+      "mode": "ui",
+      "requiresOverlay": false,
+      "features": ["seed", "dark", "dynamicColor"]
+    }
+  ]
+}

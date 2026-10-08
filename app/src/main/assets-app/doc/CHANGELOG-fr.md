@@ -6,9 +6,12 @@
 
 # v6.8.0
 
-###### 2026/10/07
+###### 2026/10/08
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
+* `Astuce` Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement
+* `Astuce` Les dialogues indépendants nécessitent AutoJs6 6.8.0 / 5321 et Compose UI avec dialog-v1; TSX nécessite aussi TypeScript Engine 0.6.6. Les scripts hors UI nécessitent la permission de superposition de l'hôte
+* `Astuce` Cette version utilise le contrat Compose UI V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2
 * `Fonctionnalité` La fonction "Générer du code" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition
 * `Fonctionnalité` Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre
 * `Fonctionnalité` OCR d'écran proposé uniquement si l'hôte signale un plugin OCR autorisé disponible, avec fusion en lignes bornées et coordonnées
@@ -282,6 +285,17 @@
 * `Fonctionnalité` colors.theme contrôle la couleur du thème depuis les scripts : get, set (options accent et dark), reset, libraries, activate et deactivate (bibliothèques de couleurs intelligentes), next (change de groupe aussitôt), state (change la source "États du script") et current ; les modifications d'un script en moins de 500 ms sont fusionnées et notées "Script : nom" dans l'historique, et la page de couleur du thème propose "Annuler la modification du script" pour rétablir la sélection précédente, y compris une bibliothèque de couleurs intelligente active (voir Exemples > 图像与颜色)
 * `Fonctionnalité` Un appui long sur TAB dans le panneau de raccourcis de l'éditeur Ace déclenche les suggestions intelligentes, qui affichent selon le contexte du curseur la complétion de code, les indications de paramètres ou la documentation du symbole, et passent à la surcharge suivante lorsque les indications de paramètres sont visibles; sur clavier physique, Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q correspondent aux suggestions intelligentes / indications de paramètres / documentation du symbole
 * `Fonctionnalité` Les paramètres de l'éditeur de code gagnent un groupe "Suggestions intelligentes" (moteur Ace uniquement): déclenchement de la complétion automatique (pendant la saisie d'identifiants / seulement après "." / désactivé), caractères minimum pour la complétion, délai de complétion, déclenchement des indications de paramètres (quand le curseur entre dans un appel / seulement après "(" ou "," / désactivé) et changement de surcharge avec les flèches; les modifications s'appliquent immédiatement et peuvent être enregistrées dans les actions favorites (nécessite le plugin Ace Editor 1.26.0)
+* `Fonctionnalité` API de scripts compose / $compose avec 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, mises à jour groupées, publications en file, thèmes et commandes de session Snackbar (nécessite le plugin Compose UI)
+* `Fonctionnalité` compose.mount héberge les pages UI; compose.floaty propose aux scripts UI ou hors UI des fenêtres raw ou redimensionnables, position/taille en pixels, contrôle du toucher/focus et mises à jour depuis les workers via compose.post, avec libération des sessions à la fermeture ou à l'arrêt du script
+* `Fonctionnalité` La catégorie Compose UI des exemples intégrés propose un compteur, la validation de formulaire, une liste de 1000 éléments, un HUD flottant et des thèmes, avec les prérequis de plugin et d'autorisations pour chaque script
+* `Fonctionnalité` Référence API complète de Compose UI avec complétion de types Ace Editor et contenu local Offline Docs pour les composants, noeuds, états, modificateurs, thèmes, sessions et fenêtres flottantes
+* `Fonctionnalité` Le Centre des plugins reconnaît et gère les plugins Compose UI installés en aperçu de développement, avec un hôte 6.8.0 / 5316 ou ultérieur
+* `Fonctionnalité` TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML
+* `Fonctionnalité` Les conteneurs XML `<compose>` et compose.attach intègrent des sessions Compose indépendantes dans les pages UI ou les fenêtres flottantes existantes; compose.AndroidView affiche une View Android existante ou renvoyée par une fabrique synchrone
+* `Fonctionnalité` ui.inflate accepte les layouts XML TSX compilés et lie leurs rappels onClick
+* `Fonctionnalité` compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires
+* `Fonctionnalité` Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement
+* `Fonctionnalité` compose.memo réutilise les fragments de render dont les valeurs de dépendance et les états lus n'ont pas changé, de sorte qu'une mise à jour partielle d'une grande liste ne reconstruit que les lignes modifiées
 * `Correction` Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans "Copier en tant que sélecteur" de l'inspecteur de disposition et la représentation textuelle des sélecteurs
 * `Correction` La génération de code de l'inspecteur de disposition ignorait la saisie de texte et certaines actions de recherche, appliquait les actions à tout le groupe pour une seule cible de liste, utilisait des appels obsolètes, abandonnait silencieusement Flow ou échouait sur les appuis longs, et localisait incorrectement les ID identiques entre paquets
 * `Correction` Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information
@@ -525,6 +539,10 @@
 * `Correction` Absence du fond circulaire des icônes dans les détails du centre de plugins et bordures des icônes en cache non actualisées lors du changement de thème
 * `Correction` Les couleurs Material choisies dans l'ancienne disposition ne pouvaient pas être retrouvées avec "Localiser la couleur du thème actuel" après un changement de disposition, et la page des couleurs Material n'affichait pas le résumé de la couleur actuelle
 * `Correction` L'ouverture des détails d'un plugin juste après un démarrage à froid du centre de plugins pouvait faire clignoter la boîte de dialogue, car chaque actualisation de la liste la reconstruisait
+* `Correction` La fermeture occasionnelle des scripts UI empaquetés après l'affichage d'une page vide au démarrage
+* `Correction` Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin
+* `Correction` Les fabriques de composants traitaient le premier noeud comme un objet de propriétés lorsque plusieurs noeuds étaient passés en arguments
+* `Correction` Les accesseurs des propriétés Compose conservent null au lieu de renvoyer undefined, y compris la progression par défaut et les dates DatePicker effacées
 * `Amélioration` Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués
 * `Amélioration` Les vérifications lint de l'hôte excluent par chemin les classes et ressources de compatibilité AutoJs4 et continuent à vérifier le reste de l'hôte
 * `Amélioration` Le centre des plugins écrit un enregistrement d'activation explicite et exécute le sondage d'activation après avoir observé une nouvelle installation d'un plugin désactivé par défaut (YOLO, MCP Server) signé avec le certificat officiel de l'hôte; les signataires tiers de confiance ou autorisés par l'utilisateur, les installations via adb et les mises à jour exigent toujours une activation manuelle, et les consommateurs à l'exécution continuent de lire uniquement l'enregistrement sauvegardé
@@ -721,6 +739,9 @@
 * `Amélioration` Les indications de paramètres de l'éditeur Ace prennent en charge les méthodes surchargées même lorsque le LSP est désactivé ou que le service sémantique est indisponible: l'index statique contient 146 surcharges déclarées (par exemple app.startActivity), les signatures ECMAScript intégrées gagnent des surcharges pour splice / replace / JSON.stringify / Array.from et d'autres, et les indications de paramètres Python / Lua conservent toutes les signatures
 * `Amélioration` La documentation au survol de l'éditeur Ace peut être défilée et sélectionnée sur écran tactile, et les suggestions intelligentes attendent les indications de paramètres asynchrones dans les fichiers Python / Lua au lieu de retomber sur la complétion
 * `Amélioration` La boîte de dialogue d'informations du centre de plugins distingue "ABI prises en charge" et "ABI installées" : la première privilégie la meta-data de manifeste org.autojs.plugin.contract.SUPPORTED_ABIS écrite par la compilation du plugin, puis le service INFO du plugin et l'index ; la seconde liste les ABI réellement empaquetées dans les APK installés (splits compris)
+* `Amélioration` La saisie native Compose UI préserve la sélection et la composition IME, évite que le clavier masque le contenu et transmet une seule fois chaque action ou fermeture de Snackbar
+* `Amélioration` ComposeError fournit des messages localisés et des codes stables avec le noeud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions actives, refuse les opérations après fermeture et libère rappels, références et tâches en attente; la mise à jour, désinstallation ou désactivation du plugin ferme ses sessions actives avec l'erreur correspondante
+* `Amélioration` cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
 * `Dépendance` APK Signer modularise
@@ -764,6 +785,11 @@
 * `Dépendance` Ajout de Android Hidden API Bypass version 6.1
 * `Dépendance` Modularisation de Package Archive Parser
 * `Dépendance` Modularisation d'Installer API
+* `Dépendance` Mise à niveau de AndroidX Lifecycle 2.6.2 -> 2.9.4
+* `Dépendance` Mise à niveau de AndroidX SavedState 1.2.1 -> 1.3.2
+* `Dépendance` Mise à niveau de AndroidX Emoji2 1.3.0 -> 1.4.0
+* `Dépendance` Mise à niveau de AndroidX Window 1.0.0 -> 1.5.0
+* `Dépendance` Modularisation de Compose UI API
 
 # v6.7.0
 

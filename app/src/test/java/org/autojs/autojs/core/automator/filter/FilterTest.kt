@@ -180,6 +180,19 @@ class FilterTest {
     }
 
     @Test
+    fun composeTestTagsRemainRawIdsForExactSubstringAndWholePatternMatching() {
+        val button = FakeUiNode.root { id = "start_button" }
+        assertTrue(IdFilter.equals("start_button").accepts(button))
+        assertTrue(IdFilter.startsWith("start_").accepts(button))
+        assertFalse(IdFilter.equals("com.example:id/start_button").accepts(button))
+        assertTrue(StringPropertyFilter(StringProperty.ID, StringMatcher.contains("start_")).accepts(button))
+        assertFalse(StringPropertyFilter(StringProperty.ID, StringMatcher.contains(":id/start_button")).accepts(button))
+        assertTrue(StringPropertyFilter(StringProperty.ID, StringMatcher.matches("start_button")).accepts(button))
+        assertTrue(StringPropertyFilter(StringProperty.ID, StringMatcher.matches("^start_button$")).accepts(button))
+        assertFalse(StringPropertyFilter(StringProperty.ID, StringMatcher.matches("start")).accepts(button))
+    }
+
+    @Test
     fun classNameFiltersExpandBareWidgetNames() {
         assertTrue(ClassNameFilter.equals("Button").accepts(login))
         assertTrue(ClassNameFilter.equals("android.widget.Button").accepts(login))

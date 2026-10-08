@@ -29,11 +29,14 @@ import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODES;
 
@@ -56,7 +59,7 @@ public class ScriptEngineService {
         }
     };
     private final ScriptExecutionObserver mScriptExecutionObserver = new ScriptExecutionObserver();
-    private final LinkedHashMap<Integer, ScriptExecution> mScriptExecutions = new LinkedHashMap<>();
+    private final Map<Integer, ScriptExecution> mScriptExecutions = Collections.synchronizedMap(new LinkedHashMap<>());
 
     ScriptEngineService(ScriptEngineServiceBuilder builder) {
         mApplicationContext = builder.uiHandler.getApplicationContext();
@@ -82,6 +85,10 @@ public class ScriptEngineService {
 
             private void onFinish(ScriptExecution execution) {
                 var engine = execution.getEngine();
+                // Preparation may fail before any engine exists to emit onEngineRemove.
+                if (engine == null) {
+                    removeExecutionIfSame(mScriptExecutions, execution);
+                }
                 emitEngineEvent("finish", engine);
                 emitEngineEvent("exit", engine);
                 emitEngineEvent("stop", engine);
@@ -170,19 +177,6 @@ public class ScriptEngineService {
     }
 
     public ScriptExecution execute(ScriptExecutionTask task) {
-        ScriptExecution execution = executeInternal(task);
-        if (shouldTrackExecution(execution)) {
-            mScriptExecutions.put(execution.getId(), execution);
-        }
-        return execution;
-    }
-
-    private boolean shouldTrackExecution(ScriptExecution execution) {
-        return !(execution instanceof ScriptExecuteActivity.ActivityScriptExecution activityExecution)
-               || activityExecution.isActivityStarted();
-    }
-
-    private ScriptExecution executeInternal(ScriptExecutionTask task) {
         if (task.getListener() != null) {
             task.setExecutionListener(new ScriptExecutionObserver.Wrapper(mScriptExecutionObserver, task.getListener()));
         } else {
@@ -194,7 +188,9 @@ public class ScriptEngineService {
             if ((mode & JavaScriptSource.EXECUTION_MODE_UI) != 0
                     && !JavaScriptSource.ENGINE_BUN.equals(src.getEngineName())
                     && !JavaScriptSource.ENGINE_QUICKJS.equals(src.getEngineName())) {
-                return ScriptExecuteActivity.execute(mApplicationContext, mScriptEngineManager, task);
+                var execution = new ScriptExecuteActivity.ActivityScriptExecution(mScriptEngineManager, task);
+                return startRegisteredExecution(mScriptExecutions, execution,
+                        () -> ScriptExecuteActivity.start(mApplicationContext, execution));
             }
         }
         RunnableScriptExecution r;
@@ -205,8 +201,37 @@ public class ScriptEngineService {
             Log.d(TAG, "JavaScriptSource: false");
             r = new RunnableScriptExecution(mScriptEngineManager, task);
         }
-        new ThreadCompat(r).start();
-        return r;
+        return startRegisteredExecution(mScriptExecutions, r, () -> {
+            new ThreadCompat(r).start();
+            return true;
+        });
+    }
+
+    /** Publish before a launched Activity or worker can observe its ID; never hold the table lock while starting. */
+    static <T extends ScriptExecution> T startRegisteredExecution(
+            Map<Integer, ScriptExecution> executions, T execution, BooleanSupplier start) {
+        int id = execution.getId();
+        synchronized (executions) {
+            executions.put(id, execution);
+        }
+        boolean started = false;
+        try {
+            started = start.getAsBoolean();
+            return execution;
+        } finally {
+            if (!started) {
+                removeExecutionIfSame(executions, execution);
+            }
+        }
+    }
+
+    private static void removeExecutionIfSame(Map<Integer, ScriptExecution> executions, ScriptExecution execution) {
+        int id = execution.getId();
+        synchronized (executions) {
+            if (executions.get(id) == execution) {
+                executions.remove(id);
+            }
+        }
     }
 
     @Nullable
@@ -243,7 +268,9 @@ public class ScriptEngineService {
     }
 
     public Collection<ScriptExecution> getScriptExecutions() {
-        return mScriptExecutions.values();
+        synchronized (mScriptExecutions) {
+            return new ArrayList<>(mScriptExecutions.values());
+        }
     }
 
     @Nullable

@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-07",
+  "previousAarSha256": "0aaff93a27d405e8db7a513172ba1a2ebe60a3b8a09d4f27d8c9eaa03544d4a3",
+  "currentAarSha256": "e3a4f2003bb0336338e229cfc9220c2296a5de462957fd540a20c37d86996fe8",
+  "retainedClassCount": 206,
+  "changedRetainedClasses": [],
+  "removedClasses": [],
+  "addedDialogClasses": [
+    "org/autojs/plugin/compose/api/dialog/DialogInteropV1.class",
+    "org/autojs/plugin/compose/api/dialog/DialogOptionsV1.class",
+    "org/autojs/plugin/compose/api/dialog/DialogRendererFactoryV1.class"
+  ]
+}

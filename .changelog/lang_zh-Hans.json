@@ -1,16 +1,19 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/07",
+      "released_date": "2026/10/08",
       "hint": [
         "部分内置功能改由独立插件提供, 使用前需在插件中心安装并启用对应插件",
+        "Compose UI 及配套 API 文档, Ace Editor 类型补全和 Offline Docs 内容为本地集成交付, 需要匹配的本地宿主构建; 插件尚未登记官方索引或正式发布",
         "终端改由 3-Shell Terminal 插件提供, 使用前需在插件中心安装并启用; 宿主内置终端的数据及设置不迁移, 升级后首次启动时自动清理",
         "AI Agent 插件更名为 Three Stove Agent, 插件 ID, 服务 action 及契约包名一并变更, 已安装的 AI Agent 不再被识别, 需卸载后安装 Three Stove Agent",
         "打包应用的目标 SDK 版本由 29 调整为 37, 共享存储及本地网络访问需按系统要求授权",
         "console 控件及控制台浮动窗口改为显示当前脚本日志, 全局日志可通过 globalconsole 控件或日志页面查看",
         "contains 系列选择器的字符串参数恢复为字面子串匹配, 正则匹配需传入正则表达式参数",
         "文件日志改用内置实现, 保留已文档化的配置选项及部分 PatternLayout 格式, 其他 Log4j API 不再提供",
-        "屏幕取色插件更名为 3-Color Picker 2.0, 使用新包名并需重新安装和启用, 旧版可保留并存但设置不自动迁移; 主页抽屉的 \"屏幕取色\" 文案保持不变"
+        "屏幕取色插件更名为 3-Color Picker 2.0, 使用新包名并需重新安装和启用, 旧版可保留并存但设置不自动迁移; 主页抽屉的 \"屏幕取色\" 文案保持不变",
+        "独立弹窗需要配套 AutoJs6 6.8.0 / 5321 与支持 dialog-v1 的 Compose UI; TSX 还需要 TypeScript Engine 0.6.6. 非 UI 脚本需要宿主悬浮窗权限",
+        "本构建使用 Compose UI 契约 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用旧 V1 渲染器的原有组件, 宽集组件需要 V2 渲染器"
       ],
       "feature": [
         "界面动作将确认绑定到宿主检查的节点, 支持文字追加与有界滚动, 并报告执行结果和窗口变化",
@@ -146,7 +149,18 @@
         "colors 模块的感知色彩函数: toOklab / oklab 与 toOklch / oklch, ensureContrast (WCAG 对比度, 默认 4.5), harmony, tones, derive (主色, 强调色与深色), nightVariant, simulate (红色盲, 绿色盲, 蓝色盲) 及 extract (图像主要颜色, 支持 count, region 与 step 选项); colors.distance, colors.isSimilar 与 images.detectColor 支持 oklab 算法 (参阅 示例代码 > 图像与颜色)",
         "colors.theme 由脚本控制主题色: get, set (可指定 accent 与 dark), reset, libraries, activate 与 deactivate (智能颜色库), next (立即换组), state (切换 \"脚本状态\" 状态源) 及 current; 500 ms 内的脚本修改合并为一次, 历史记录标注 \"脚本: 名称\", 主题色页面提供 \"撤销脚本修改\" 以恢复之前的选择 (含激活中的智能颜色库) (参阅 示例代码 > 图像与颜色)",
         "Ace 编辑器快捷面板 TAB 键长按用于唤出智能提示, 按光标上下文显示代码补全, 参数提示或符号文档, 参数提示已显示时切换重载方法; 硬件键盘 Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q 分别对应智能提示 / 参数提示 / 符号文档",
-        "代码编辑器设置增加 \"智能提示\" 分组 (仅 Ace 引擎): 自动补全触发方式 (输入标识符时 / 仅输入 \".\" 后 / 关闭), 补全最少触发字符数, 补全触发延迟, 参数提示触发方式 (光标进入调用时 / 仅输入 \"(\" 或 \",\" 时 / 关闭), 方向键切换重载; 修改后即时生效并可记录到动作收藏 (需要 Ace 编辑器插件 1.26.0)"
+        "代码编辑器设置增加 \"智能提示\" 分组 (仅 Ace 引擎): 自动补全触发方式 (输入标识符时 / 仅输入 \".\" 后 / 关闭), 补全最少触发字符数, 补全触发延迟, 参数提示触发方式 (光标进入调用时 / 仅输入 \"(\" 或 \",\" 时 / 关闭), 方向键切换重载; 修改后即时生效并可记录到动作收藏 (需要 Ace 编辑器插件 1.26.0)",
+        "compose / $compose 脚本模块提供 29 个节点工厂, 长期节点句柄, 响应式 state/render/ref, 批量更新, 排队调度, 主题与 Snackbar 会话命令 (需要 Compose UI 插件)",
+        "compose.mount 挂载 UI 页面, compose.floaty 支持 UI/非 UI 脚本的 raw 或可调整悬浮窗, 提供像素位置/尺寸, 触摸/焦点控制及 compose.post 工作线程更新, 关闭或停止脚本时清理所属会话",
+        "内置示例的 Compose UI 分类提供计数器, 表单校验, 1000 项列表, 悬浮 HUD 与主题五个脚本, 每例说明插件与权限前提",
+        "Compose UI 完整 API 参考及配套 Ace Editor 类型补全, Offline Docs 本地文档, 覆盖组件, 节点, 状态, 修饰链, 主题, 会话和悬浮窗",
+        "插件中心支持识别与管理已安装的 Compose UI 开发预览插件, 需要宿主 6.8.0 / 5316 或更高版本",
+        "TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点",
+        "XML `<compose>` 容器与 compose.attach 可在 UI 页面或旧悬浮窗内嵌入独立 Compose 会话; compose.AndroidView 可承载现有 Android View 或同步工厂返回的 View",
+        "ui.inflate 支持编译后的 XML TSX 布局及其 onClick 回调绑定",
+        "compose.dialog 返回可更新和关闭的会话, 支持普通对话框与模态底部弹层, 可在 UI 或普通脚本中使用",
+        "Material 3 扩展组件: 导航栏与抽屉, 标签页, 底部弹层与菜单, 日期与时间选择器, 分页与网格, 芯片, 徽标, 分段按钮, 悬浮按钮, 搜索栏, 提示与下拉刷新",
+        "compose.memo 用于在 render 中复用依赖值与读取的 state 均未变化的界面片段, 大型列表局部更新时只重建发生变化的条目"
       ],
       "fix": [
         "启用 APK Inspector 后, 文件管理器的安装包信息入口被隐藏且无法从更多菜单访问的问题",
@@ -315,7 +329,11 @@
         "插件中心刷新索引成功后仍从缓存恢复已移除或更名的旧插件的问题",
         "插件中心详情对话框图标缺少圆形底色, 以及缓存图标描边未随亮暗主题更新的问题",
         "在传统布局中选择的材料设计颜色, 切换布局后无法通过 \"定位当前主题色\" 找到, 且材料设计颜色页面不显示当前颜色摘要的问题",
-        "插件中心冷启动后立即打开插件详情时, 对话框随列表刷新被整体重建而闪烁的问题"
+        "插件中心冷启动后立即打开插件详情时, 对话框随列表刷新被整体重建而闪烁的问题",
+        "打包的 UI 脚本启动时偶发显示空白页面后退出的问题",
+        "Compose UI 在渲染回调中拒绝再次挂载页面或悬浮窗并保留当前页面, 支持插件更新后重新挂载页面",
+        "组件工厂接收多个位置节点参数时将首个节点误判为属性对象的问题",
+        "修复 Compose 节点属性读取将 null 错误返回为 undefined 的问题, 包括默认进度及清空的 DatePicker 日期"
       ],
       "improvement": [
         "Three Stove Agent 模型载荷在 Android 7-10 上通过公开 API 读取, 保留文件偏移与停滞管道取消能力",
@@ -433,7 +451,10 @@
         "Ace 编辑器参数提示在点按编辑区后恢复显示 (滚动后不恢复), ESC 键同时隐藏参数提示与符号文档",
         "Ace 编辑器参数提示在 LSP 关闭或语义服务不可用时同样支持重载方法: 静态索引收录 146 个声明重载 (如 app.startActivity), 内置 ECMAScript 签名增加 splice / replace / JSON.stringify / Array.from 等重载, Python / Lua 文件的参数提示保留全部签名",
         "Ace 编辑器悬停文档框支持触屏滚动与选择文本, 智能提示在 Python / Lua 文件中等待异步参数提示而不再误弹补全",
-        "插件中心的插件信息对话框区分 \"支持 ABI\" 与 \"已安装 ABI\": 前者优先读取插件清单中由构建写入的 org.autojs.plugin.contract.SUPPORTED_ABIS meta-data, 其次为插件 INFO 服务返回值与索引, 后者为已安装 APK (含分包) 内实际打包的 ABI"
+        "插件中心的插件信息对话框区分 \"支持 ABI\" 与 \"已安装 ABI\": 前者优先读取插件清单中由构建写入的 org.autojs.plugin.contract.SUPPORTED_ABIS meta-data, 其次为插件 INFO 服务返回值与索引, 后者为已安装 APK (含分包) 内实际打包的 ABI",
+        "Compose UI 原生文本编辑保留选区与输入法组合状态并支持软键盘避让, Snackbar 操作或关闭结果仅回调一次",
+        "ComposeError 提供本地化提示和稳定错误码, 保留节点/属性/原因及脚本堆栈; 单引擎最多 8 个活动会话, 关闭后拒绝句柄操作并清理回调, 引用和待执行工作; 插件更新, 卸载或停用时关闭其活动会话并报告对应错误",
+        "cancelable=false 同时禁止返回键, 点击外部和下滑关闭; 主动关闭与脚本退出仍会清理弹窗, 保留已有页面和其他会话"
       ],
       "dependency": [
         "模块化 Android AXML",
@@ -479,7 +500,12 @@
         "移除 Android Logging Log4j 版本 1.0.3",
         "移除 AndroidX AppCompat (Legacy) 版本 1.0.2",
         "模块化 Package Archive Parser",
-        "模块化 Installer API"
+        "模块化 Installer API",
+        "升级 AndroidX Lifecycle 版本 2.6.2 -> 2.9.4",
+        "升级 AndroidX SavedState 版本 1.2.1 -> 1.3.2",
+        "升级 AndroidX Emoji2 版本 1.3.0 -> 1.4.0",
+        "升级 AndroidX Window 版本 1.0.0 -> 1.5.0",
+        "模块化 Compose UI API"
       ]
     },
     "v6.7.0": {
