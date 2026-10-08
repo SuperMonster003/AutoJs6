@@ -1134,7 +1134,7 @@ Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
 - [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
 - [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
 
-> Note: The release date for the above version is Sept 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
