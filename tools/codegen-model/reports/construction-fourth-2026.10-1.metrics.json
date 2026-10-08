@@ -1,0 +1,2926 @@
+{
+  "format": 1,
+  "role": "construction-fourth-experiment-aggregate",
+  "date": "2026-10-08",
+  "mergedExport": {
+    "datasetId": "cg-ds-2026.10-1-merged",
+    "groups": 2352,
+    "candidates": 130768,
+    "candidateSources": {
+      "rule": 97360,
+      "construction": 10024,
+      "both": 23384
+    },
+    "groupsWithConstructionOnlyCandidates": 2328,
+    "baselineAttempts": 4704000,
+    "constructionAttempts": 3219232,
+    "constructionStops": {
+      "VERIFICATION_BUDGET": 472,
+      "EXHAUSTED": 1880
+    },
+    "constructionPolicySha256": "48f1014a0f850027a18ac46f567262dfe6be63f75b4035947cd6603c285bc1dd",
+    "splits": {
+      "train": {
+        "groups": 2016,
+        "candidates": 112400,
+        "groupsWithoutCandidates": 0
+      },
+      "valid": {
+        "groups": 336,
+        "candidates": 18368,
+        "groupsWithoutCandidates": 0
+      },
+      "test": {
+        "groups": 0,
+        "candidates": 0,
+        "groupsWithoutCandidates": 0
+      },
+      "real-test": {
+        "groups": 0,
+        "candidates": 0,
+        "groupsWithoutCandidates": 0
+      }
+    },
+    "artifacts": {
+      "features.csv": {
+        "bytes": 59896574,
+        "sha256": "2ab774125be49773cbcac111425ab1dcaaf83179c930611a80ed0257dfafea85"
+      },
+      "labels.jsonl": {
+        "bytes": 44332180,
+        "sha256": "f327f42d495fe0294a0ebd2c736d86ba2cfde8190fa6844d39f8bd319c167f57"
+      },
+      "rules.jsonl": {
+        "bytes": 1187825,
+        "sha256": "893176f8122bb1837563bc9958708b16aed3149fb6a89b0e81d1678b04cae23d"
+      },
+      "features.json": {
+        "bytes": 1268,
+        "sha256": "1929247897a038e16aa1ac03bac49557826c6d60d0dbc7e037e799f1f68bf6eb"
+      },
+      "split-map.json": {
+        "bytes": 726804,
+        "sha256": "6d3a7867c7c5dfdad142d361c402b0a777077575100bb5ec5cb2af6aa7503007"
+      },
+      "export-manifest.json": {
+        "bytes": 397251,
+        "sha256": "f2608a1ef66cb2ad8c7aefd439edfd29046a2f76f993dc86c169c8d268bcade4"
+      },
+      "dataset-manifest.json": {
+        "bytes": 1528,
+        "sha256": "b66fa0fa0c219f20e1425607b35d88fc45476a7cd993f996caf07d54918b36ca"
+      }
+    }
+  },
+  "rankerFit": {
+    "treeCount": 10,
+    "bestIteration": 9,
+    "elapsedSeconds": 18.794046,
+    "repeatElapsedSeconds": 16.939257,
+    "candidates": {
+      "train": 112400,
+      "valid": 18368
+    },
+    "groups": {
+      "train": 2016,
+      "valid": 336
+    },
+    "gradeCounts": {
+      "train": {
+        "0": 25677,
+        "1": 51322,
+        "2": 35401
+      },
+      "valid": {
+        "0": 2466,
+        "1": 9010,
+        "2": 6892
+      }
+    },
+    "parameters": {
+      "loss_function": "YetiRank",
+      "eval_metric": "NDCG:top=1",
+      "depth": 6,
+      "iterations": 1024,
+      "learning_rate": 0.05,
+      "random_seed": 20261003
+    },
+    "repeatByteIdentical": true,
+    "modelJsonSha256": "45b7481fb69cf739deb91375fa9b64a67eb395507ba830eaa6e2f667b7be2d77",
+    "modelCbmBytes": 26200,
+    "exportedRanker": {
+      "role": "candidate-ranker",
+      "scoreSemantics": "yetirank-raw-v1",
+      "parityRows": 4985,
+      "parityGroups": 82,
+      "maxRankerScoreDifference": 7.124361434129867e-09,
+      "modelSha256": "172bf423b469b98852613437993bd4f634941d7c6785198dcc45d617b5101e7f",
+      "constantTreesExpandedToIdenticalLeaves": 0
+    },
+    "rankerJsonBytes": 12623
+  },
+  "protocolSha256": "53c035b90c0984e567f2cbf2017051f4daf04ac76c1cff45ce921f56e118ca4c",
+  "selectionSha256": "175f33af8e25fb5906b61e21889604cc38ceac73165af13d45c7375ec995d7f1",
+  "selection": {
+    "chosenMethod": "merged_ranker",
+    "noRegressionAgainst": [
+      "rule_pipeline",
+      "baseline_tiny",
+      "baseline_ranker"
+    ],
+    "strictGainAgainst": "baseline_ranker",
+    "passed": false,
+    "reasons": [
+      "No strict top1/top3 improvement over baseline_ranker in train or valid"
+    ]
+  },
+  "selectionComparison": [
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "rule_pipeline",
+      "split": "train",
+      "top1Survival": 0.8422619047619048,
+      "top3BestSurvival": 0.9002976190476191
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "baseline_tiny",
+      "split": "train",
+      "top1Survival": 0.9360119047619048,
+      "top3BestSurvival": 0.9479166666666666
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "baseline_ranker",
+      "split": "train",
+      "top1Survival": 0.9360119047619048,
+      "top3BestSurvival": 0.9479166666666666
+    },
+    {
+      "bestSurvival": 0.9702380952380952,
+      "coverage": 1.0,
+      "method": "construction_ranker",
+      "split": "train",
+      "top1Survival": 0.9375,
+      "top3BestSurvival": 0.9404761904761905
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "merged_rule",
+      "split": "train",
+      "top1Survival": 0.8422619047619048,
+      "top3BestSurvival": 0.9002976190476191
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "merged_tiny",
+      "split": "train",
+      "top1Survival": 0.9345238095238095,
+      "top3BestSurvival": 0.9479166666666666
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "merged_ranker",
+      "split": "train",
+      "top1Survival": 0.9360119047619048,
+      "top3BestSurvival": 0.9479166666666666
+    },
+    {
+      "bestSurvival": 0.9821428571428571,
+      "coverage": 1.0,
+      "method": "merged_ranker_shared",
+      "split": "train",
+      "top1Survival": 0.9360119047619048,
+      "top3BestSurvival": 0.9479166666666666
+    },
+    {
+      "bestSurvival": 0.9598214285714286,
+      "coverage": 1.0,
+      "method": "rule_pipeline",
+      "split": "valid",
+      "top1Survival": 0.7202380952380952,
+      "top3BestSurvival": 0.7678571428571429
+    },
+    {
+      "bestSurvival": 0.9598214285714286,
+      "coverage": 1.0,
+      "method": "baseline_tiny",
+      "split": "valid",
+      "top1Survival": 0.8705357142857143,
+      "top3BestSurvival": 0.8854166666666666
+    },
+    {
+      "bestSurvival": 0.9598214285714286,
+      "coverage": 1.0,
+      "method": "baseline_ranker",
+      "split": "valid",
+      "top1Survival": 0.8705357142857143,
+      "top3BestSurvival": 0.8854166666666666
+    },
+    {
+      "bestSurvival": 0.9449404761904762,
+      "coverage": 1.0,
+      "method": "construction_ranker",
+      "split": "valid",
+      "top1Survival": 0.8705357142857143,
+      "top3BestSurvival": 0.8854166666666666
+    },
+    {
+      "bestSurvival": 0.9598214285714286,
+      "coverage": 1.0,
+      "method": "merged_rule",
+      "split": "valid",
+      "top1Survival": 0.7202380952380952,
+      "top3BestSurvival": 0.7678571428571429
+    },
+    {
+      "bestSurvival": 0.9598214285714286,
+      "coverage": 1.0,
+      "method": "merged_tiny",
+      "split": "valid",
+      "top1Survival": 0.8705357142857143,
+      "top3BestSurvival": 0.8854166666666666
+    },
+    {
+      "bestSurvival": 0.9598214285714286,
+      "coverage": 1.0,
+      "method": "merged_ranker",
+      "split": "valid",
+      "top1Survival": 0.8705357142857143,
+      "top3BestSurvival": 0.8854166666666666
+    },
+    {
+      "bestSurvival": 0.9598214285714286,
+      "coverage": 1.0,
+      "method": "merged_ranker_shared",
+      "split": "valid",
+      "top1Survival": 0.8705357142857143,
+      "top3BestSurvival": 0.8854166666666666
+    }
+  ],
+  "development": {
+    "groups": 672,
+    "resultsSha256": "5738a3acf0b159bf61ee8eb51a4b81fed1da7239186aa5736e1e7f0175bffbd7",
+    "summary": [
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "baseline_ranker",
+        "groups": 336,
+        "candidates": 40.5625,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.9360119047619048,
+        "top3BestSurvival": 0.9479166666666666,
+        "commonRegret": 0.046130952380952384,
+        "commonTop3Recall": 0.9315476190476191,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 20,
+        "elapsedP50Millis": 7.9159,
+        "elapsedP95Millis": 13.013900000000001,
+        "elapsedMaxMillis": 25.5296,
+        "stopReasons": {
+          "COUNTER_BUDGET": 336
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "baseline_tiny",
+        "groups": 336,
+        "candidates": 40.5625,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.9360119047619048,
+        "top3BestSurvival": 0.9479166666666666,
+        "commonRegret": 0.046130952380952384,
+        "commonTop3Recall": 0.9315476190476191,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 20,
+        "elapsedP50Millis": 8.036,
+        "elapsedP95Millis": 13.652000000000001,
+        "elapsedMaxMillis": 25.3341,
+        "stopReasons": {
+          "COUNTER_BUDGET": 336
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "construction_ranker",
+        "groups": 336,
+        "candidates": 13.348214285714286,
+        "coverage": 1.0,
+        "bestSurvival": 0.9702380952380952,
+        "top1Survival": 0.9375,
+        "top3BestSurvival": 0.9404761904761905,
+        "commonRegret": 0.044642857142857144,
+        "commonTop3Recall": 0.9166666666666666,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "attemptedCount": 1612.1279761904761,
+        "novelCandidates": 1066,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 17,
+        "elapsedP50Millis": 116.1259,
+        "elapsedP95Millis": 181.4247,
+        "elapsedMaxMillis": 258.6897,
+        "stopReasons": {
+          "EXHAUSTED": 211,
+          "VERIFICATION_BUDGET": 125
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker",
+        "groups": 336,
+        "candidates": 43.73511904761905,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.9360119047619048,
+        "top3BestSurvival": 0.9479166666666666,
+        "commonRegret": 0.046130952380952384,
+        "commonTop3Recall": 0.9315476190476191,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "attemptedCount": 3612.127976190476,
+        "novelCandidates": 1066,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 20,
+        "elapsedP50Millis": 116.1517,
+        "elapsedP95Millis": 181.5657,
+        "elapsedMaxMillis": 258.7729,
+        "stopReasons": {
+          "EXHAUSTED": 211,
+          "VERIFICATION_BUDGET": 125
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker_shared",
+        "groups": 336,
+        "candidates": 40.101190476190474,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.9360119047619048,
+        "top3BestSurvival": 0.9479166666666666,
+        "commonRegret": 0.046130952380952384,
+        "commonTop3Recall": 0.9315476190476191,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "attemptedCount": 1972.0119047619048,
+        "novelCandidates": 1282,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 20,
+        "elapsedP50Millis": 91.4738,
+        "elapsedP95Millis": 144.66689999999997,
+        "elapsedMaxMillis": 224.04519999999997,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 258,
+          "EXHAUSTED": 78
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_rule",
+        "groups": 336,
+        "candidates": 43.73511904761905,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.8422619047619048,
+        "top3BestSurvival": 0.9002976190476191,
+        "commonRegret": 0.13988095238095238,
+        "commonTop3Recall": 0.8452380952380952,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "attemptedCount": 3612.127976190476,
+        "novelCandidates": 1066,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 116.05669999999999,
+        "elapsedP95Millis": 181.3697,
+        "elapsedMaxMillis": 258.6167,
+        "stopReasons": {
+          "EXHAUSTED": 211,
+          "VERIFICATION_BUDGET": 125
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_tiny",
+        "groups": 336,
+        "candidates": 43.73511904761905,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.9345238095238095,
+        "top3BestSurvival": 0.9479166666666666,
+        "commonRegret": 0.047619047619047616,
+        "commonTop3Recall": 0.9315476190476191,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "attemptedCount": 3612.127976190476,
+        "novelCandidates": 1066,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 21,
+        "elapsedP50Millis": 116.1585,
+        "elapsedP95Millis": 181.6577,
+        "elapsedMaxMillis": 258.7801,
+        "stopReasons": {
+          "EXHAUSTED": 211,
+          "VERIFICATION_BUDGET": 125
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "rule_pipeline",
+        "groups": 336,
+        "candidates": 40.5625,
+        "coverage": 1.0,
+        "bestSurvival": 0.9821428571428571,
+        "top1Survival": 0.8422619047619048,
+        "top3BestSurvival": 0.9002976190476191,
+        "commonRegret": 0.13988095238095238,
+        "commonTop3Recall": 0.8452380952380952,
+        "baselineRuleTop1Survival": 0.8422619047619048,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 7.8086,
+        "elapsedP95Millis": 12.876000000000001,
+        "elapsedMaxMillis": 24.5266,
+        "stopReasons": {
+          "COUNTER_BUDGET": 336
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "baseline_ranker",
+        "groups": 336,
+        "candidates": 49.857142857142854,
+        "coverage": 1.0,
+        "bestSurvival": 0.9598214285714286,
+        "top1Survival": 0.8705357142857143,
+        "top3BestSurvival": 0.8854166666666666,
+        "commonRegret": 0.08928571428571429,
+        "commonTop3Recall": 0.8511904761904762,
+        "baselineRuleTop1Survival": 0.7202380952380952,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 41,
+        "elapsedP50Millis": 7.6143,
+        "elapsedP95Millis": 14.6334,
+        "elapsedMaxMillis": 30.085,
+        "stopReasons": {
+          "COUNTER_BUDGET": 336
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "baseline_tiny",
+        "groups": 336,
+        "candidates": 49.857142857142854,
+        "coverage": 1.0,
+        "bestSurvival": 0.9598214285714286,
+        "top1Survival": 0.8705357142857143,
+        "top3BestSurvival": 0.8854166666666666,
+        "commonRegret": 0.08928571428571429,
+        "commonTop3Recall": 0.8511904761904762,
+        "baselineRuleTop1Survival": 0.7202380952380952,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 41,
+        "elapsedP50Millis": 7.666399999999999,
+        "elapsedP95Millis": 14.685599999999999,
+        "elapsedMaxMillis": 30.1223,
+        "stopReasons": {
+          "COUNTER_BUDGET": 336
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "construction_ranker",
+        "groups": 336,
+        "candidates": 16.88095238095238,
+        "coverage": 1.0,
+        "bestSurvival": 0.9449404761904762,
+        "top1Survival": 0.8705357142857143,
+        "top3BestSurvival": 0.8854166666666666,
+        "commonRegret": 0.08928571428571429,
+        "commonTop3Recall": 0.8511904761904762,
+        "baselineRuleTop1Survival": 0.7202380952380952,
+        "attemptedCount": 1454.095238095238,
+        "novelCandidates": 1616,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 41,
+        "elapsedP50Millis": 123.8649,
+        "elapsedP95Millis": 255.3605,
+        "elapsedMaxMillis": 635.1889,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 176,
+          "EXHAUSTED": 160
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker",
+        "groups": 336,
+        "candidates": 54.666666666666664,
+        "coverage": 1.0,
+        "bestSurvival": 0.9598214285714286,
+        "top1Survival": 0.8705357142857143,
+        "top3BestSurvival": 0.8854166666666666,
+        "commonRegret": 0.08928571428571429,
+        "commonTop3Recall": 0.8511904761904762,
+        "baselineRuleTop1Survival": 0.7202380952380952,
+        "attemptedCount": 3454.095238095238,
+        "novelCandidates": 1616,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 41,
+        "elapsedP50Millis": 124.0324,
+        "elapsedP95Millis": 255.5024,
+        "elapsedMaxMillis": 635.3838,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 176,
+          "EXHAUSTED": 160
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker_shared",
+        "groups": 336,
+        "candidates": 46.785714285714285,
+        "coverage": 1.0,
+        "bestSurvival": 0.9598214285714286,
+        "top1Survival": 0.8705357142857143,
+        "top3BestSurvival": 0.8854166666666666,
+        "commonRegret": 0.08928571428571429,
+        "commonTop3Recall": 0.8511904761904762,
+        "baselineRuleTop1Survival": 0.7202380952380952,
+        "attemptedCount": 1930.2857142857142,
+        "novelCandidates": 1616,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 41,
+        "elapsedP50Millis": 101.56329999999998,
+        "elapsedP95Millis": 198.8218,
+        "elapsedMaxMillis": 360.43719999999996,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 176,
+          "EXHAUSTED": 160
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_rule",
+        "groups": 336,
+        "candidates": 54.666666666666664,
+        "coverage": 1.0,
+        "bestSurvival": 0.9598214285714286,
+        "top1Survival": 0.7202380952380952,
+        "top3BestSurvival": 0.7678571428571429,
+        "commonRegret": 0.23958333333333334,
+        "commonTop3Recall": 0.6160714285714286,
+        "baselineRuleTop1Survival": 0.7202380952380952,
+        "attemptedCount": 3454.095238095238,
+        "novelCandidates": 1616,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 123.86880000000001,
+        "elapsedP95Millis": 255.3691,
+        "elapsedMaxMillis": 635.154,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 176,
+          "EXHAUSTED": 160
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_tiny",
+        "groups": 336,
+        "candidates": 54.666666666666664,
+        "coverage": 1.0,
+        "bestSurvival": 0.9598214285714286,
+        "top1Survival": 0.8705357142857143,
+        "top3BestSurvival": 0.8854166666666666,
+        "commonRegret": 0.08928571428571429,
+        "commonTop3Recall": 0.8511904761904762,
+        "baselineRuleTop1Survival": 0.7202380952380952,
+        "attemptedCount": 3454.095238095238,
+        "novelCandidates": 1616,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 41,
+        "elapsedP50Millis": 124.0364,
+        "elapsedP95Millis": 255.5457,
+        "elapsedMaxMillis": 635.4526999999999,
+        "stopReasons": {
+          "VERIFICATION_BUDGET": 176,
+          "EXHAUSTED": 160
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "rule_pipeline",
+        "groups": 336,
+        "candidates": 49.857142857142854,
+        "coverage": 1.0,
+        "bestSurvival": 0.9598214285714286,
+        "top1Survival": 0.7202380952380952,
+        "top3BestSurvival": 0.7678571428571429,
+        "commonRegret": 0.23958333333333334,
+        "commonTop3Recall": 0.6160714285714286,
+        "baselineRuleTop1Survival": 0.7202380952380952,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 7.4716000000000005,
+        "elapsedP95Millis": 14.410699999999999,
+        "elapsedMaxMillis": 29.7826,
+        "stopReasons": {
+          "COUNTER_BUDGET": 336
+        },
+        "errors": 0
+      }
+    ],
+    "pairwise": [
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker",
+        "reference": "rule_pipeline",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 80,
+          "tied": 236,
+          "worsened": 20,
+          "meanDifference": 0.09375
+        },
+        "top3BestSurvival": {
+          "improved": 46,
+          "tied": 273,
+          "worsened": 17,
+          "meanDifference": 0.047619047619047616
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker",
+        "reference": "baseline_tiny",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker",
+        "reference": "baseline_ranker",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker",
+        "reference": "construction_ranker",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 8,
+          "tied": 328,
+          "worsened": 0,
+          "meanDifference": 0.011904761904761904
+        },
+        "top1Survival": {
+          "improved": 6,
+          "tied": 323,
+          "worsened": 7,
+          "meanDifference": -0.001488095238095238
+        },
+        "top3BestSurvival": {
+          "improved": 6,
+          "tied": 329,
+          "worsened": 1,
+          "meanDifference": 0.00744047619047619
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker",
+        "reference": "merged_rule",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 80,
+          "tied": 236,
+          "worsened": 20,
+          "meanDifference": 0.09375
+        },
+        "top3BestSurvival": {
+          "improved": 46,
+          "tied": 273,
+          "worsened": 17,
+          "meanDifference": 0.047619047619047616
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker",
+        "reference": "merged_tiny",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 1,
+          "tied": 335,
+          "worsened": 0,
+          "meanDifference": 0.001488095238095238
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "train",
+        "method": "merged_ranker",
+        "reference": "merged_ranker_shared",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker",
+        "reference": "rule_pipeline",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 142,
+          "tied": 153,
+          "worsened": 41,
+          "meanDifference": 0.15029761904761904
+        },
+        "top3BestSurvival": {
+          "improved": 117,
+          "tied": 181,
+          "worsened": 38,
+          "meanDifference": 0.11755952380952381
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker",
+        "reference": "baseline_tiny",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker",
+        "reference": "baseline_ranker",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker",
+        "reference": "construction_ranker",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 10,
+          "tied": 326,
+          "worsened": 0,
+          "meanDifference": 0.01488095238095238
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker",
+        "reference": "merged_rule",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 142,
+          "tied": 153,
+          "worsened": 41,
+          "meanDifference": 0.15029761904761904
+        },
+        "top3BestSurvival": {
+          "improved": 117,
+          "tied": 181,
+          "worsened": 38,
+          "meanDifference": 0.11755952380952381
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker",
+        "reference": "merged_tiny",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "captured-development",
+        "split": "valid",
+        "method": "merged_ranker",
+        "reference": "merged_ranker_shared",
+        "groups": 336,
+        "coverage": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 336,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      }
+    ],
+    "constructionReproducesThird": {
+      "compared": 392,
+      "identicalCandidateSets": 392,
+      "identicalCounters": 392
+    },
+    "byScope": {
+      "valid": {
+        "single": {
+          "groups": 288,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 0.953125,
+            "top1Survival": 0.7291666666666666,
+            "top3BestSurvival": 0.7291666666666666
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 0.953125,
+            "top1Survival": 0.8489583333333334,
+            "top3BestSurvival": 0.8663194444444444
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.953125,
+            "top1Survival": 0.8489583333333334,
+            "top3BestSurvival": 0.8663194444444444
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9357638888888888,
+            "top1Survival": 0.8489583333333334,
+            "top3BestSurvival": 0.8663194444444444
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 0.953125,
+            "top1Survival": 0.7291666666666666,
+            "top3BestSurvival": 0.7291666666666666
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 0.953125,
+            "top1Survival": 0.8489583333333334,
+            "top3BestSurvival": 0.8663194444444444
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.953125,
+            "top1Survival": 0.8489583333333334,
+            "top3BestSurvival": 0.8663194444444444
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 0.953125,
+            "top1Survival": 0.8489583333333334,
+            "top3BestSurvival": 0.8663194444444444
+          }
+        },
+        "collection": {
+          "groups": 48,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.6666666666666666,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.6666666666666666,
+            "top3BestSurvival": 1.0
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          }
+        }
+      },
+      "train": {
+        "single": {
+          "groups": 168,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.7351190476190477,
+            "top3BestSurvival": 0.8005952380952381
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.8720238095238095,
+            "top3BestSurvival": 0.8958333333333334
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.8720238095238095,
+            "top3BestSurvival": 0.8958333333333334
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9404761904761905,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 0.8809523809523809
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.7351190476190477,
+            "top3BestSurvival": 0.8005952380952381
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.8690476190476191,
+            "top3BestSurvival": 0.8958333333333334
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.8720238095238095,
+            "top3BestSurvival": 0.8958333333333334
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9642857142857143,
+            "top1Survival": 0.8720238095238095,
+            "top3BestSurvival": 0.8958333333333334
+          }
+        },
+        "collection": {
+          "groups": 168,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.9494047619047619,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.9494047619047619,
+            "top3BestSurvival": 1.0
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          }
+        }
+      }
+    }
+  },
+  "regressionDiagnostic": {
+    "groups": 76,
+    "selectionPassed": false,
+    "holdoutOpened": false,
+    "resultsSha256": "ab60384e3619dd2be0572b156c8127dda9c1099360e3116c6d4be5a0fe2015f0",
+    "scope": "Inspected regression cohorts only; not independent generalization evidence, not an admission, and no reserved holdout group was loaded",
+    "summary": [
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "baseline_ranker",
+        "groups": 24,
+        "candidates": 23.708333333333332,
+        "coverage": 0.625,
+        "bestSurvival": 0.5,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.25,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 14.2061,
+        "elapsedP95Millis": 243.17919999999998,
+        "elapsedMaxMillis": 426.7835,
+        "stopReasons": {
+          "COUNTER_BUDGET": 23,
+          "HARD_DEADLINE": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "baseline_tiny",
+        "groups": 24,
+        "candidates": 23.708333333333332,
+        "coverage": 0.625,
+        "bestSurvival": 0.5,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.25,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 14.026399999999999,
+        "elapsedP95Millis": 244.999,
+        "elapsedMaxMillis": 426.7835,
+        "stopReasons": {
+          "COUNTER_BUDGET": 23,
+          "HARD_DEADLINE": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "construction_ranker",
+        "groups": 24,
+        "candidates": 4.208333333333333,
+        "coverage": 0.625,
+        "bestSurvival": 0.375,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.25,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.375,
+        "baselineRuleTop1Survival": 0.25,
+        "attemptedCount": 665.875,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 170.5938,
+        "elapsedP95Millis": 413.0022,
+        "elapsedMaxMillis": 426.7835,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "HARD_DEADLINE": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "groups": 24,
+        "candidates": 23.708333333333332,
+        "coverage": 0.625,
+        "bestSurvival": 0.5,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.25,
+        "attemptedCount": 2665.875,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 170.59349999999998,
+        "elapsedP95Millis": 413.0021,
+        "elapsedMaxMillis": 426.7835,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "HARD_DEADLINE": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker_shared",
+        "groups": 24,
+        "candidates": 20.5,
+        "coverage": 0.625,
+        "bestSurvival": 0.5,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.25,
+        "attemptedCount": 1527.2916666666667,
+        "novelCandidates": 7,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 152.41039999999998,
+        "elapsedP95Millis": 383.6656,
+        "elapsedMaxMillis": 426.7835,
+        "stopReasons": {
+          "EXHAUSTED": 17,
+          "HARD_DEADLINE": 1,
+          "VERIFICATION_BUDGET": 6
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_rule",
+        "groups": 24,
+        "candidates": 23.708333333333332,
+        "coverage": 0.625,
+        "bestSurvival": 0.5,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.25,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.375,
+        "baselineRuleTop1Survival": 0.25,
+        "attemptedCount": 2665.875,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 170.59369999999998,
+        "elapsedP95Millis": 413.0282,
+        "elapsedMaxMillis": 426.7835,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "HARD_DEADLINE": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_tiny",
+        "groups": 24,
+        "candidates": 23.708333333333332,
+        "coverage": 0.625,
+        "bestSurvival": 0.5,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.375,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.5,
+        "baselineRuleTop1Survival": 0.25,
+        "attemptedCount": 2665.875,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 170.59449999999998,
+        "elapsedP95Millis": 413.0024,
+        "elapsedMaxMillis": 426.7835,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "HARD_DEADLINE": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "rule_pipeline",
+        "groups": 24,
+        "candidates": 23.708333333333332,
+        "coverage": 0.625,
+        "bestSurvival": 0.5,
+        "top1Survival": 0.25,
+        "top3BestSurvival": 0.25,
+        "commonRegret": 0.25,
+        "commonTop3Recall": 0.375,
+        "baselineRuleTop1Survival": 0.25,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 13.4423,
+        "elapsedP95Millis": 233.815,
+        "elapsedMaxMillis": 426.7835,
+        "stopReasons": {
+          "COUNTER_BUDGET": 23,
+          "HARD_DEADLINE": 1
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "baseline_ranker",
+        "groups": 28,
+        "candidates": 38.714285714285715,
+        "coverage": 1.0,
+        "bestSurvival": 0.9285714285714286,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 8.4735,
+        "elapsedP95Millis": 14.0326,
+        "elapsedMaxMillis": 14.1437,
+        "stopReasons": {
+          "COUNTER_BUDGET": 28
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "baseline_tiny",
+        "groups": 28,
+        "candidates": 38.714285714285715,
+        "coverage": 1.0,
+        "bestSurvival": 0.9285714285714286,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 8.5785,
+        "elapsedP95Millis": 14.233,
+        "elapsedMaxMillis": 14.7886,
+        "stopReasons": {
+          "COUNTER_BUDGET": 28
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "construction_ranker",
+        "groups": 28,
+        "candidates": 8.642857142857142,
+        "coverage": 1.0,
+        "bestSurvival": 0.875,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "attemptedCount": 712.1785714285714,
+        "novelCandidates": 21,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 86.74980000000001,
+        "elapsedP95Millis": 196.29340000000002,
+        "elapsedMaxMillis": 237.101,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "groups": 28,
+        "candidates": 39.464285714285715,
+        "coverage": 1.0,
+        "bestSurvival": 0.9285714285714286,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "attemptedCount": 2712.1785714285716,
+        "novelCandidates": 21,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 86.8369,
+        "elapsedP95Millis": 196.4927,
+        "elapsedMaxMillis": 237.4554,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker_shared",
+        "groups": 28,
+        "candidates": 33.857142857142854,
+        "coverage": 1.0,
+        "bestSurvival": 0.9285714285714286,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "attemptedCount": 1533.607142857143,
+        "novelCandidates": 16,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 80.52480000000001,
+        "elapsedP95Millis": 130.2005,
+        "elapsedMaxMillis": 156.71539999999996,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_rule",
+        "groups": 28,
+        "candidates": 39.464285714285715,
+        "coverage": 1.0,
+        "bestSurvival": 0.9285714285714286,
+        "top1Survival": 0.375,
+        "top3BestSurvival": 0.6785714285714286,
+        "commonRegret": 0.5535714285714286,
+        "commonTop3Recall": 0.5357142857142857,
+        "baselineRuleTop1Survival": 0.375,
+        "attemptedCount": 2712.1785714285716,
+        "novelCandidates": 21,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 86.7415,
+        "elapsedP95Millis": 196.22480000000002,
+        "elapsedMaxMillis": 236.9099,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_tiny",
+        "groups": 28,
+        "candidates": 39.464285714285715,
+        "coverage": 1.0,
+        "bestSurvival": 0.9285714285714286,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 0.875,
+        "commonRegret": 0.05357142857142857,
+        "commonTop3Recall": 0.8928571428571429,
+        "baselineRuleTop1Survival": 0.375,
+        "attemptedCount": 2712.1785714285716,
+        "novelCandidates": 21,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 86.8437,
+        "elapsedP95Millis": 196.5124,
+        "elapsedMaxMillis": 237.48250000000002,
+        "stopReasons": {
+          "EXHAUSTED": 23,
+          "VERIFICATION_BUDGET": 5
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "rule_pipeline",
+        "groups": 28,
+        "candidates": 38.714285714285715,
+        "coverage": 1.0,
+        "bestSurvival": 0.9285714285714286,
+        "top1Survival": 0.375,
+        "top3BestSurvival": 0.6785714285714286,
+        "commonRegret": 0.5535714285714286,
+        "commonTop3Recall": 0.5357142857142857,
+        "baselineRuleTop1Survival": 0.375,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 8.1246,
+        "elapsedP95Millis": 13.9511,
+        "elapsedMaxMillis": 14.031600000000001,
+        "stopReasons": {
+          "COUNTER_BUDGET": 28
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "baseline_ranker",
+        "groups": 24,
+        "candidates": 17.875,
+        "coverage": 1.0,
+        "bestSurvival": 1.0,
+        "top1Survival": 0.5625,
+        "top3BestSurvival": 0.8333333333333334,
+        "commonRegret": 0.4375,
+        "commonTop3Recall": 0.7916666666666666,
+        "baselineRuleTop1Survival": 0.875,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 12,
+        "elapsedP50Millis": 10.204799999999999,
+        "elapsedP95Millis": 17.8634,
+        "elapsedMaxMillis": 20.4847,
+        "stopReasons": {
+          "COUNTER_BUDGET": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "baseline_tiny",
+        "groups": 24,
+        "candidates": 17.875,
+        "coverage": 1.0,
+        "bestSurvival": 1.0,
+        "top1Survival": 0.6875,
+        "top3BestSurvival": 0.875,
+        "commonRegret": 0.3125,
+        "commonTop3Recall": 0.7916666666666666,
+        "baselineRuleTop1Survival": 0.875,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 9,
+        "elapsedP50Millis": 10.8118,
+        "elapsedP95Millis": 18.481199999999998,
+        "elapsedMaxMillis": 20.6472,
+        "stopReasons": {
+          "COUNTER_BUDGET": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "construction_ranker",
+        "groups": 24,
+        "candidates": 4.5,
+        "coverage": 1.0,
+        "bestSurvival": 0.875,
+        "top1Survival": 0.375,
+        "top3BestSurvival": 0.7916666666666666,
+        "commonRegret": 0.625,
+        "commonTop3Recall": 0.625,
+        "baselineRuleTop1Survival": 0.875,
+        "attemptedCount": 679.1666666666666,
+        "novelCandidates": 1,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 15,
+        "elapsedP50Millis": 161.76080000000002,
+        "elapsedP95Millis": 331.9282,
+        "elapsedMaxMillis": 441.51439999999997,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "groups": 24,
+        "candidates": 17.916666666666668,
+        "coverage": 1.0,
+        "bestSurvival": 1.0,
+        "top1Survival": 0.5625,
+        "top3BestSurvival": 0.8333333333333334,
+        "commonRegret": 0.4375,
+        "commonTop3Recall": 0.7916666666666666,
+        "baselineRuleTop1Survival": 0.875,
+        "attemptedCount": 2679.1666666666665,
+        "novelCandidates": 1,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 12,
+        "elapsedP50Millis": 161.9206,
+        "elapsedP95Millis": 332.1559,
+        "elapsedMaxMillis": 441.3471,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker_shared",
+        "groups": 24,
+        "candidates": 16.833333333333332,
+        "coverage": 1.0,
+        "bestSurvival": 1.0,
+        "top1Survival": 0.5625,
+        "top3BestSurvival": 0.8333333333333334,
+        "commonRegret": 0.4375,
+        "commonTop3Recall": 0.7916666666666666,
+        "baselineRuleTop1Survival": 0.875,
+        "attemptedCount": 1667.9583333333333,
+        "novelCandidates": 2,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 12,
+        "elapsedP50Millis": 134.94799999999998,
+        "elapsedP95Millis": 275.28720000000004,
+        "elapsedMaxMillis": 280.0896,
+        "stopReasons": {
+          "EXHAUSTED": 21,
+          "VERIFICATION_BUDGET": 3
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_rule",
+        "groups": 24,
+        "candidates": 17.916666666666668,
+        "coverage": 1.0,
+        "bestSurvival": 1.0,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 1.0,
+        "commonRegret": 0.125,
+        "commonTop3Recall": 1.0,
+        "baselineRuleTop1Survival": 0.875,
+        "attemptedCount": 2679.1666666666665,
+        "novelCandidates": 1,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 161.6467,
+        "elapsedP95Millis": 331.6762,
+        "elapsedMaxMillis": 441.1999,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_tiny",
+        "groups": 24,
+        "candidates": 17.916666666666668,
+        "coverage": 1.0,
+        "bestSurvival": 1.0,
+        "top1Survival": 0.6875,
+        "top3BestSurvival": 0.875,
+        "commonRegret": 0.3125,
+        "commonTop3Recall": 0.7916666666666666,
+        "baselineRuleTop1Survival": 0.875,
+        "attemptedCount": 2679.1666666666665,
+        "novelCandidates": 1,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 9,
+        "elapsedP50Millis": 161.9348,
+        "elapsedP95Millis": 331.9834,
+        "elapsedMaxMillis": 441.5015,
+        "stopReasons": {
+          "EXHAUSTED": 24
+        },
+        "errors": 0
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "rule_pipeline",
+        "groups": 24,
+        "candidates": 17.875,
+        "coverage": 1.0,
+        "bestSurvival": 1.0,
+        "top1Survival": 0.875,
+        "top3BestSurvival": 1.0,
+        "commonRegret": 0.125,
+        "commonTop3Recall": 1.0,
+        "baselineRuleTop1Survival": 0.875,
+        "attemptedCount": 2000.0,
+        "novelCandidates": 0,
+        "groupsAboveBaselineBest": 0,
+        "groupsWorseThanBaselineRule": 0,
+        "elapsedP50Millis": 10.117199999999999,
+        "elapsedP95Millis": 17.976599999999998,
+        "elapsedMaxMillis": 20.287100000000002,
+        "stopReasons": {
+          "COUNTER_BUDGET": 24
+        },
+        "errors": 0
+      }
+    ],
+    "pairwise": [
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "rule_pipeline",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "baseline_tiny",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "baseline_ranker",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "construction_ranker",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_rule",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 3,
+          "tied": 21,
+          "worsened": 0,
+          "meanDifference": 0.125
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_tiny",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-bottleneck-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_ranker_shared",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "rule_pipeline",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 21,
+          "tied": 7,
+          "worsened": 0,
+          "meanDifference": 0.5
+        },
+        "top3BestSurvival": {
+          "improved": 10,
+          "tied": 18,
+          "worsened": 0,
+          "meanDifference": 0.19642857142857142
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "baseline_tiny",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "baseline_ranker",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "construction_ranker",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 3,
+          "tied": 25,
+          "worsened": 0,
+          "meanDifference": 0.05357142857142857
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_rule",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 21,
+          "tied": 7,
+          "worsened": 0,
+          "meanDifference": 0.5
+        },
+        "top3BestSurvival": {
+          "improved": 10,
+          "tied": 18,
+          "worsened": 0,
+          "meanDifference": 0.19642857142857142
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_tiny",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-captured-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_ranker_shared",
+        "groups": 28,
+        "coverage": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 28,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "rule_pipeline",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 12,
+          "worsened": 12,
+          "meanDifference": -0.3125
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 19,
+          "worsened": 5,
+          "meanDifference": -0.16666666666666666
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "baseline_tiny",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 21,
+          "worsened": 3,
+          "meanDifference": -0.125
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 22,
+          "worsened": 2,
+          "meanDifference": -0.041666666666666664
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "baseline_ranker",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "construction_ranker",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 6,
+          "tied": 18,
+          "worsened": 0,
+          "meanDifference": 0.125
+        },
+        "top1Survival": {
+          "improved": 6,
+          "tied": 18,
+          "worsened": 0,
+          "meanDifference": 0.1875
+        },
+        "top3BestSurvival": {
+          "improved": 4,
+          "tied": 18,
+          "worsened": 2,
+          "meanDifference": 0.041666666666666664
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_rule",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 12,
+          "worsened": 12,
+          "meanDifference": -0.3125
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 19,
+          "worsened": 5,
+          "meanDifference": -0.16666666666666666
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_tiny",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 21,
+          "worsened": 3,
+          "meanDifference": -0.125
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 22,
+          "worsened": 2,
+          "meanDifference": -0.041666666666666664
+        }
+      },
+      {
+        "cohort": "seen-generalization-regression",
+        "split": "regression",
+        "method": "merged_ranker",
+        "reference": "merged_ranker_shared",
+        "groups": 24,
+        "coverage": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "bestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top1Survival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        },
+        "top3BestSurvival": {
+          "improved": 0,
+          "tied": 24,
+          "worsened": 0,
+          "meanDifference": 0.0
+        }
+      }
+    ],
+    "byScope": {
+      "seen-generalization-regression": {
+        "single": {
+          "groups": 12,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.5,
+            "top3BestSurvival": 0.75
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.6666666666666666
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.875,
+            "top1Survival": 0.125,
+            "top3BestSurvival": 0.7083333333333334
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.5,
+            "top3BestSurvival": 0.75
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.6666666666666666
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.6666666666666666
+          }
+        },
+        "collection": {
+          "groups": 12,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.875,
+            "top1Survival": 0.625,
+            "top3BestSurvival": 0.875
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.875,
+            "top3BestSurvival": 1.0
+          }
+        }
+      },
+      "seen-bottleneck-regression": {
+        "single": {
+          "groups": 12,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 0.75,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 0.75,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.5
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.75,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.5
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.5,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 0.75,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 0.75,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.5
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.75,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.5
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 0.75,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.5
+          }
+        },
+        "collection": {
+          "groups": 12,
+          "rule_pipeline": {
+            "coverage": 0.25,
+            "bestSurvival": 0.25,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "baseline_tiny": {
+            "coverage": 0.25,
+            "bestSurvival": 0.25,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "baseline_ranker": {
+            "coverage": 0.25,
+            "bestSurvival": 0.25,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "construction_ranker": {
+            "coverage": 0.25,
+            "bestSurvival": 0.25,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "merged_rule": {
+            "coverage": 0.25,
+            "bestSurvival": 0.25,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "merged_tiny": {
+            "coverage": 0.25,
+            "bestSurvival": 0.25,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "merged_ranker": {
+            "coverage": 0.25,
+            "bestSurvival": 0.25,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          },
+          "merged_ranker_shared": {
+            "coverage": 0.25,
+            "bestSurvival": 0.25,
+            "top1Survival": 0.25,
+            "top3BestSurvival": 0.25
+          }
+        }
+      },
+      "seen-captured-regression": {
+        "single": {
+          "groups": 23,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9130434782608695,
+            "top1Survival": 0.2826086956521739,
+            "top3BestSurvival": 0.6086956521739131
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9130434782608695,
+            "top1Survival": 0.8478260869565217,
+            "top3BestSurvival": 0.8478260869565217
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9130434782608695,
+            "top1Survival": 0.8478260869565217,
+            "top3BestSurvival": 0.8478260869565217
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.8478260869565217,
+            "top1Survival": 0.8478260869565217,
+            "top3BestSurvival": 0.8478260869565217
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9130434782608695,
+            "top1Survival": 0.2826086956521739,
+            "top3BestSurvival": 0.6086956521739131
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9130434782608695,
+            "top1Survival": 0.8478260869565217,
+            "top3BestSurvival": 0.8478260869565217
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9130434782608695,
+            "top1Survival": 0.8478260869565217,
+            "top3BestSurvival": 0.8478260869565217
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 0.9130434782608695,
+            "top1Survival": 0.8478260869565217,
+            "top3BestSurvival": 0.8478260869565217
+          }
+        },
+        "collection": {
+          "groups": 5,
+          "rule_pipeline": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.8,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "baseline_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "construction_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_rule": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 0.8,
+            "top3BestSurvival": 1.0
+          },
+          "merged_tiny": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_ranker": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          },
+          "merged_ranker_shared": {
+            "coverage": 1.0,
+            "bestSurvival": 1.0,
+            "top1Survival": 1.0,
+            "top3BestSurvival": 1.0
+          }
+        }
+      }
+    }
+  },
+  "holdout": null
+}
