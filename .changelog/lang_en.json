@@ -284,7 +284,8 @@
         "XML `<compose>` containers and compose.attach embed independent Compose sessions in UI pages or legacy floating windows; compose.AndroidView embeds an existing Android View or one returned by a synchronous factory",
         "ui.inflate accepts compiled XML TSX layouts and binds their onClick callbacks",
         "compose.dialog returns an updatable, closable session for dialogs and modal bottom sheets in UI or ordinary scripts",
-        "Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh"
+        "Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh",
+        "compose.memo reuses render fragments whose dependency values and read states are unchanged, so a partial update of a large list rebuilds only the changed rows"
       ],
       "fix": [
         "Package information becoming inaccessible from the file manager when APK Inspector hides the information button",

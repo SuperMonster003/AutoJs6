@@ -133,8 +133,11 @@ class ComposeNodeGraph(
         } finally { mutation = null }
     }
 
-    /** Render-created objects are drafts. Objects created before this call keep their identity. */
-    fun render(previousRoot: ComposeNode?, build: () -> ComposeNode): ComposeNode = transaction {
+    /**
+     * Render-created objects are drafts. Objects created before this call keep their identity.
+     * [resolved] receives each reconciled draft and the retained node that now represents it.
+     */
+    fun render(previousRoot: ComposeNode?, resolved: MutableMap<ComposeNode, ComposeNode>? = null, build: () -> ComposeNode): ComposeNode = transaction {
         val work = mutation!!
         val binding = previousRoot?.let(::binding)
         val priorCreated = work.created.toSet()
@@ -143,7 +146,7 @@ class ComposeNodeGraph(
         try {
             val draft = build().also(::usable)
             val drafts = work.created - priorCreated
-            val result = reconcileImpl(previousRoot, draft, drafts)
+            val result = reconcileImpl(previousRoot, draft, drafts, resolved)
             if (binding != null) { roots[binding] = result; work.dirty += binding }
             result
         } finally { work.rendering = wasRendering }
@@ -156,7 +159,8 @@ class ComposeNodeGraph(
         result
     }
 
-    private fun reconcileImpl(previous: ComposeNode?, draft: ComposeNode, drafts: Set<ComposeNode>): ComposeNode {
+    private fun reconcileImpl(previous: ComposeNode?, draft: ComposeNode, drafts: Set<ComposeNode>,
+                              resolved: MutableMap<ComposeNode, ComposeNode>? = null): ComposeNode {
         val draftSnapshot = buildSnapshot(draft, strictRoot = true)
         val owner = previous?.let(::binding)
         val warned = if (owner != null) owner in warnedBindings else previous != null && previous in warnedRoots
@@ -168,6 +172,7 @@ class ComposeNodeGraph(
             if (input !in drafts) { used += input; return input }
             val target = candidate?.takeIf { it.type == input.type && it.key == input.key && it !in reserved && it !in used } ?: input
             used += target
+            resolved?.put(input, target)
             val source = input.state
             val prior = if (target === input) null else old(target)
             val nativeView = source.nativeView?.let { nativeLease(target, it.view) ?: it }
@@ -671,6 +676,9 @@ class ComposeNodeGraph(
     }
 
     internal fun isMounted(node: ComposeNode) = !closed && binding(node)?.isClosed == false
+    /** A memo fragment may be reused only while its node is still inside the session's previous tree. */
+    internal fun retainedIn(node: ComposeNode, root: ComposeNode?): Boolean =
+        !closed && root != null && node.graph === this && node.affinity?.isClosed != true && top(node) === root
     internal fun errorNodeId(node: ComposeNode): Int? = node.stableId.takeIf { node.mountedOnce }
     private fun hasAcceptedEditor(node: ComposeNode) = node.affinity?.let { accepted[it]?.states?.containsKey(node) } == true
 

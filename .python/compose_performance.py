@@ -11,8 +11,8 @@ Grant the isolated host overlay permission and unlock the device. The runner sto
 only the explicitly named .compose.spike host before each instrumentation invocation.
 Cold means a fresh host process, not cleared disk/page/dex caches. Warm samples use
 new script engines after same-process warmups. No screenshot images are saved.
-The opt-in list-updates section (roadmap F.6 input) compares one visible state change
-on a mounted 1000-row tree between whole-tree render and direct handle updates.
+The opt-in list-updates section (roadmap F.6) compares one visible state change on a
+mounted 1000-row tree between whole-tree render, keyed compose.memo rows and direct handles.
 
 Visibility numbers include tree queries, two display callbacks and screenshot
 capture. The color swatch is rendered in the same tree as the observed value. This
@@ -54,7 +54,7 @@ METHODS = {
     # F.6 decision input; not part of the default P5.3 baseline sections.
     "list-updates": "thousandItemListStateUpdates",
 }
-LIST_UPDATE_METRICS = ("list_render_update", "list_handle_update")
+LIST_UPDATE_METRICS = ("list_render_update", "list_memo_update", "list_handle_update")
 LATENCY_METRICS = {"first_frame", "state_update", "batch_100", "list_first_frame", *LIST_UPDATE_METRICS}
 PSS_STAGES = (
     "instrumented_host_before_script", "empty_native_ui_engine", "after_empty_ui_close",

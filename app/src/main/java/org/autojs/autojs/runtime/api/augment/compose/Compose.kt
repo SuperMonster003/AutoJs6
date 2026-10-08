@@ -41,6 +41,8 @@ class Compose internal constructor(
     @Volatile private var preparingView = false
     private var mountInProgress = false
     private val tsxFactories = IdentityHashMap<Function, String>()
+    /** The render currently allowed to call compose.memo; set only by a session's render reaction. */
+    internal var memoFrame: ComposeMemoCache.Frame? = null
 
     init { ComposeJsErrors.installLocalizer(scope, platform::errorMessage) }
 
@@ -66,6 +68,7 @@ class Compose internal constructor(
             "state" to { args -> composeArguments(args, 1, name = "state"); reactive.state(args[0]) },
             "ref" to { args -> composeArguments(args, 0, name = "ref"); ComposeRef(scope) },
             "batch" to { args -> composeArguments(args, 1, name = "batch"); batch(composeFunction(args[0], "batch")) },
+            "memo" to { args -> memo(args) },
             "mount" to { args -> mount(args).js },
             "attach" to { args ->
                 composeArguments(args, 2, 3, "attach")
@@ -180,6 +183,44 @@ class Compose internal constructor(
     }
 
     internal fun batch(function: Function): Any? = graph.transaction { reactive.batch { call(function) } }
+
+    /** compose.memo(fn, deps, options?): reuse an unchanged render fragment instead of rebuilding it. */
+    private fun memo(args: Array<out Any?>): Any? {
+        composeArguments(args, 2, 3, "memo")
+        val frame = memoFrame ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+            "memo can only be called while a render function runs")
+        val function = composeFunction(args[0], "memo")
+        val dependencies = ComposeMemoCache.dependencies(args[1])
+        val options = values.objectProperties(args.getOrNull(2), "memo")
+        options.keys.firstOrNull { it != "key" }?.let { throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_PROP, prop = it) }
+        val key = ComposeMemoCache.key(options["key"])
+        if (++frame.calls > ComposeUiLimits.MAX_NODES_PER_SESSION) throw ComposeUiContractException(ComposeUiErrorCodes.LIMIT_EXCEEDED,
+            "Too many memo fragments in one render")
+        val level = frame.current
+        val previous = if (key != null) {
+            if (!level.keys.add(key)) throw ComposeUiContractException(ComposeUiErrorCodes.DUPLICATE_KEY, "Duplicate memo key: $key", prop = "key")
+            level.previous?.keyed?.get(key)
+        } else level.previous?.ordered?.getOrNull(level.ordinal++)
+        val identity = ComposeMemoCache.identity(function)
+        val candidate = previous?.takeIf { it.identity === identity }
+        if (candidate != null && ComposeMemoCache.same(candidate.dependencies, dependencies) && reactive.isCurrent(candidate.reads) &&
+            candidate.node !in frame.used && graph.retainedIn(candidate.node, frame.previousRoot)) {
+            frame.used += candidate.node
+            reactive.replay(candidate.reads)
+            level.next.add(key, candidate)
+            return candidate.node.js
+        }
+        val children = ComposeMemoCache.Scope()
+        val (result, reads) = frame.nested(candidate?.children, children) { reactive.record { call(function) } }
+        val node = graph.root(result) ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+            "memo must return one ComposeNode")
+        frame.used += node
+        ComposeMemoCache.Entry(identity, dependencies, reads, node, children).also { entry ->
+            frame.created += entry
+            level.next.add(key, entry)
+        }
+        return node.js
+    }
 
     internal fun post(args: Array<out Any?>, session: ComposeScriptSession? = null) {
         if (closed.get() || session?.isClosed == true) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)

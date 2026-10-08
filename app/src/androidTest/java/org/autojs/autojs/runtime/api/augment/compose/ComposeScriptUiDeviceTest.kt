@@ -206,6 +206,60 @@ class ComposeScriptUiDeviceTest {
         }
     }
 
+    @Test fun memoizedKeyedRowsSkipUnrelatedRendersAndRebuildOnlyTheEditedRow() {
+        launch("""
+            var initial = [];
+            for (var index = 0; index < 300; index++) initial.push({id: 'm' + index, title: 'Memo ' + index});
+            var items = compose.state(initial), tick = compose.state(0), list = compose.ref();
+            var builds = 0, firstHandle = null;
+            var session = compose.mount(function () {
+                var rows = items.value.map(function (item) {
+                    return compose.memo(function () {
+                        builds++;
+                        return compose.Text({key: item.id, testTag: 'compose-p3-' + item.id, text: item.title,
+                            modifier: compose.modifier().height(32).fillMaxWidth()});
+                    }, [item.id, item.title], {key: item.id});
+                });
+                return compose.Column({modifier: compose.modifier().fillMaxSize()},
+                    compose.Text({key: 'tick', testTag: 'compose-p3-tick', text: 'Tick ' + tick.value}),
+                    compose.Row({key: 'controls'},
+                        compose.Button({key: 'bump', testTag: 'compose-p3-bump', onClick: function () { tick.value++; }}, 'Tick'),
+                        compose.Button({key: 'edit', testTag: 'compose-p3-edit', onClick: function () {
+                            var next = items.value.slice().reverse();
+                            next[0] = {id: next[0].id, title: 'Edited ' + next[0].id};
+                            items.value = next;
+                        }}, 'Edit'),
+                        compose.Button({key: 'inspect', testTag: 'compose-p3-inspect', onClick: function () {
+                            var children = list.current.children;
+                            if (firstHandle === null) firstHandle = children[0];
+                            report({builds: builds, tick: tick.value, count: children.length, first: children[0].key,
+                                firstText: children[0].text, originalLast: children[children.length - 1] === firstHandle});
+                        }}, 'Inspect')),
+                    compose.LazyColumn({key: 'list', ref: list, testTag: 'compose-p3-memo-list',
+                        modifier: compose.modifier().weight(1).fillMaxWidth()}, rows));
+            });
+        """).use { running ->
+            running.await("Memoized rows render") { node("m0")?.text?.toString() == "Memo 0" && node("inspect") != null }
+            click("inspect")
+            running.await("Initial memo report") { running.reportOrNull()?.optInt("builds") == 300 }
+            click("bump")
+            running.await("Unrelated state reaches the real renderer") { node("tick")?.text?.toString() == "Tick 1" }
+            click("inspect")
+            running.await("Report after the unrelated render") { running.reportOrNull()?.optInt("tick") == 1 }
+            assertEquals("An unrelated render reuses every row", 300, running.report().getInt("builds"))
+            click("edit")
+            running.await("Reordered and edited row is visible") { node("m299")?.text?.toString() == "Edited m299" }
+            assertEquals("Memo 298", node("m298")?.text?.toString())
+            click("inspect")
+            running.await("Report after the edit") { running.reportOrNull()?.optString("first") == "m299" }
+            val report = running.report()
+            assertEquals("Only the edited row is rebuilt", 301, report.getInt("builds"))
+            assertEquals(300, report.getInt("count"))
+            assertEquals("Edited m299", report.getString("firstText"))
+            assertTrue("A moved row keeps its handle", report.getBoolean("originalLast"))
+        }
+    }
+
     @Test fun twentyRealMountCloseCyclesReleaseViewsRefsAndCloseCallbacks() {
         launch("""
             var cycles = 0;

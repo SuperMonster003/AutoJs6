@@ -53,3 +53,51 @@ side by letting render skip unchanged fragments (`compose.memo`).
 Raw records and per-invocation logs remain in the host's ignored
 `build/compose-performance/f6-api35/` directory. They contain synthetic benchmark
 labels and timings, not user script text or screenshots.
+
+## compose.memo implementation
+
+`compose.memo(fn, deps, options?)` is valid only while a session's render function
+runs. A slot is identified by its scope (the render, or the enclosing memo fragment),
+by `options.key` or call order within that scope, and by the function literal
+(Rhino `JSFunction.getDescriptor()`, so closures of one literal share it). The
+previous node is reused when every dependency is unchanged (`Object.is` for
+primitives, identity for objects), no `compose.state` read while the fragment was
+built has been written since, and the node is still in the session's previous tree.
+A reused fragment replays its state reads, so the render stays subscribed to them.
+Otherwise the fragment runs again and reconciles like ordinary render output.
+
+The cache is per session. It is committed only after the render and its publication
+succeed, kept unchanged by a failed render, cleared when the renderer rejects a
+frame, and released on close. Limits: 256 dependencies per call and 5000 fragments
+per render; duplicate keys in one scope raise `DUPLICATE_KEY`.
+
+The host contract, renderer protocol and plugin APK are unchanged. The script API
+needs the host build 6.8.0 / 5323.
+
+## Result
+
+The same `list-updates` section ran with a third workload whose 1000 rows are keyed
+`compose.memo` fragments with the row index as dependency. Measured source: the memo
+implementation in the working tree of the feature commit, built before the version
+bump (APK versionCode 5322), on the same owned API35 AVD, plugin 1.1.0 / 36,
+2 warmups and 10 samples per layer.
+
+| Measure | Render layer | Memo rows | Handle layer |
+| --- | --- | --- | --- |
+| State write to pixel confirmation | 752.78 / 791.42 | 307.22 / 322.22 | 155.81 / 173.66 |
+| State write to semantics text | 692.60 / 729.37 | 247.74 / 255.48 | 99.28 / 112.53 |
+| Render callback construction | 489.53 / 554.89 | 99.94 / 107.55 | not applicable |
+
+Memo rows cut the visible update by about 59% and render construction by about 80%
+against the whole-tree render in the same run. The remaining difference to the handle
+layer is the JavaScript loop of 1000 memo calls and host traversal of the retained
+rows. One fragment around a whole unchanged subtree would also skip that loop; that
+layout was not measured here.
+
+Functional device coverage: `ComposeScriptUiDeviceTest` (8/8 on the same AVD,
+including `memoizedKeyedRowsSkipUnrelatedRendersAndRebuildOnlyTheEditedRow`) shows that
+an unrelated render rebuilds none of 300 keyed rows, and a reverse plus single-row edit
+rebuilds exactly one row, keeps the moved handles and reaches the real renderer.
+JVM: the selected Compose host suite (208) and the contract API suite (29) pass,
+including five `compose.memo` cases for keyed reuse, state tracking, scope and
+literal identity, failed or rejected frames, and argument errors.

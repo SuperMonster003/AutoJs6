@@ -189,13 +189,14 @@ class ComposePerformanceDeviceTest {
     }
 
     /**
-     * F.6 decision input: one visible state change while a 1000-row list stays mounted.
+     * F.6 evidence: one visible state change while a 1000-row list stays mounted.
      * The render layer rebuilds the whole tree in JavaScript and relies on host snapshot
-     * comparison; the handle layer updates the two observed nodes directly. Both trees
-     * contain the same label, swatch, button and rows, and no row changes in either path.
+     * comparison; the memo layer renders the same rows through keyed compose.memo fragments;
+     * the handle layer updates the two observed nodes directly. All trees contain the same
+     * label, swatch, button and rows, and no row changes in any path.
      */
     @Test fun thousandItemListStateUpdates() {
-        for (kind in listOf(Kind.UI_LIST_RENDER_UPDATE, Kind.UI_LIST_HANDLE_UPDATE)) {
+        for (kind in listOf(Kind.UI_LIST_RENDER_UPDATE, Kind.UI_LIST_MEMO_UPDATE, Kind.UI_LIST_HANDLE_UPDATE)) {
             Running(kind).use { running ->
                 running.observe(0)
                 var value = 0
@@ -266,7 +267,8 @@ class ComposePerformanceDeviceTest {
 
     private enum class Kind(val surface: String, val updateMetric: String? = null) {
         UI_COUNTER("ui"), FLOATY_COUNTER("floaty"), UI_LIST("ui"), EMPTY_UI("ui"),
-        UI_LIST_RENDER_UPDATE("ui", "list_render_update"), UI_LIST_HANDLE_UPDATE("ui", "list_handle_update"),
+        UI_LIST_RENDER_UPDATE("ui", "list_render_update"), UI_LIST_MEMO_UPDATE("ui", "list_memo_update"),
+        UI_LIST_HANDLE_UPDATE("ui", "list_handle_update"),
     }
 
     private inner class Running(private val kind: Kind) : Closeable {
@@ -450,10 +452,9 @@ class ComposePerformanceDeviceTest {
             var contents = compose.Column({padding:12,spacing:8,modifier:compose.modifier().fillMaxSize()},
                 label, swatch, compose.LazyColumn({key:'list',testTag:'$marker-list',
                     modifier:compose.modifier().weight(1).fillMaxWidth(),onScroll:function (index) { firstVisible.set(index); }}, rows));
-        """ else if (kind == Kind.UI_LIST_RENDER_UPDATE) """
+        """ else if (kind == Kind.UI_LIST_RENDER_UPDATE || kind == Kind.UI_LIST_MEMO_UPDATE) """
             var rows = [];
-            for (var i = 0; i < 1000; i++) rows.push(compose.Text({key:'item-' + i,text:'Item ' + i,
-                modifier:compose.modifier().fillMaxWidth().height(48).padding(8)}));
+            ${if (kind == Kind.UI_LIST_MEMO_UPDATE) MEMO_ROWS else PLAIN_ROWS}
             var contents = compose.Column({padding:12,spacing:8,modifier:compose.modifier().fillMaxSize()},
                 label, swatch, compose.Row({key:'controls',spacing:8},
                     compose.Button({key:'increment',testTag:'$marker-increment',onClick:function () { update(1); }}, 'Update')),
@@ -671,6 +672,12 @@ class ComposePerformanceDeviceTest {
     companion object {
         private val claimedFreshProcess = AtomicBoolean()
         private val PALETTE = arrayOf("#B3261E", "#006C4C", "#005AC1", "#7D5260", "#625B71", "#9A4523", "#006874")
+        private const val PLAIN_ROWS = "for (var i = 0; i < 1000; i++) rows.push(compose.Text({key:'item-' + i,text:'Item ' + i," +
+            "modifier:compose.modifier().fillMaxWidth().height(48).padding(8)}));"
+        // The fragment runs synchronously inside memo, so it reads the current loop index.
+        private const val MEMO_ROWS = "for (var i = 0; i < 1000; i++) rows.push(compose.memo(function () {" +
+            " return compose.Text({key:'item-' + i,text:'Item ' + i,modifier:compose.modifier().fillMaxWidth().height(48).padding(8)});" +
+            " }, [i], {key:'item-' + i}));"
         private fun now() = SystemClock.elapsedRealtimeNanos()
     }
 }

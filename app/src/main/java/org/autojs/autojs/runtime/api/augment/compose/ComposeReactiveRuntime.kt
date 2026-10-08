@@ -17,6 +17,8 @@ internal class ComposeReactiveRuntime(
     private val effects = LinkedHashSet<Reaction>()
     private val dirty = LinkedHashSet<Reaction>()
     private var collecting: Reaction? = null
+    // compose.memo fragments record the first-read version of every state they read.
+    private val recorders = ArrayList<LinkedHashMap<State, Long>>()
     private var scheduled = false
     private var batchDepth = 0
     private var closed = false
@@ -25,6 +27,9 @@ internal class ComposeReactiveRuntime(
     inner class State(initial: Any?) : NativeObject() {
         private var stored = initial
         internal val subscribers = LinkedHashSet<Reaction>()
+        /** Incremented by every effective write; memo fragments compare it instead of values. */
+        internal var version = 0L
+            private set
         init {
             RhinoUtils.initNativeObjectPrototype(scope, this)
             defineProperty("value", { ComposeJsErrors.guard(scope) { read() } },
@@ -34,12 +39,14 @@ internal class ComposeReactiveRuntime(
         fun read(): Any? {
             usable()
             collecting?.reads?.add(this)
+            recorders.lastOrNull()?.putIfAbsent(this, version)
             return stored
         }
         fun write(next: Any?) {
             usable()
             if (same(stored, next)) return
             stored = next
+            version++
             subscribers.toList().forEach(Reaction::invalidate)
             collecting?.takeIf { this in it.reads }?.invalidate()
         }
@@ -86,6 +93,26 @@ internal class ComposeReactiveRuntime(
 
     fun state(initial: Any?): State { usable(); return State(initial) }
     fun reaction(action: () -> Unit): Reaction { usable(); return Reaction(action).also(effects::add) }
+    /** Run a memo fragment and return the states it read, nested reads included in the outer fragment. */
+    fun <T> record(action: () -> T): Pair<T, Map<State, Long>> {
+        usable()
+        val reads = LinkedHashMap<State, Long>()
+        recorders += reads
+        try {
+            return action() to reads
+        } finally {
+            recorders.removeAt(recorders.lastIndex)
+            recorders.lastOrNull()?.let { outer -> reads.forEach { (state, version) -> outer.putIfAbsent(state, version) } }
+        }
+    }
+    /** True when no state read by a recorded fragment has been written since it was recorded. */
+    fun isCurrent(reads: Map<State, Long>): Boolean = reads.all { (state, version) -> state.version == version }
+    /** A reused fragment still depends on its states, so the running render and outer fragments subscribe to them. */
+    fun replay(reads: Map<State, Long>) {
+        usable()
+        collecting?.reads?.addAll(reads.keys)
+        recorders.lastOrNull()?.let { outer -> reads.forEach { (state, version) -> outer.putIfAbsent(state, version) } }
+    }
     fun <T> batch(action: () -> T): T {
         usable(); batchDepth++
         try { return action() } finally { batchDepth--; schedule() }
@@ -114,7 +141,7 @@ internal class ComposeReactiveRuntime(
         if (closed) return
         closed = true
         effects.toList().forEach(Reaction::close)
-        dirty.clear(); collecting = null
+        dirty.clear(); collecting = null; recorders.clear()
     }
     private fun same(a: Any?, b: Any?): Boolean = when {
         a is Number && b is Number -> a.toDouble().toBits() == b.toDouble().toBits()

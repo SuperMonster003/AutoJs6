@@ -422,6 +422,168 @@ class ComposeScriptApiTest {
         assertEquals(2, renderer.themes.size)
     }
 
+    @Test
+    fun memoReusesUnchangedKeyedFragmentsAndRebuildsOnlyChangedRows() {
+        evaluate("""
+            var items = compose.state([{id:'a', title:'A'}, {id:'b', title:'B'}]), tick = compose.state(0), builds = {}, renders = 0;
+            var session = compose.mount(function() {
+                renders++;
+                var rows = items.value.map(function(item) {
+                    return compose.memo(function() {
+                        builds[item.id] = (builds[item.id] || 0) + 1;
+                        return compose.Text({key:item.id, text:item.title});
+                    }, [item.id, item.title], {key:item.id});
+                });
+                return compose.Column({key:'root'}, [compose.Text({key:'tick', text:String(tick.value)})].concat(rows));
+            });
+        """.trimIndent())
+        platform.dispatcher.drain()
+        val renderer = platform.renderers.single()
+        val rowA = evaluate("session.root.children[1]")
+        val rowB = evaluate("session.root.children[2]")
+        val idA = jsInt("session.root.children[1].nodeId")
+        val tickId = jsInt("session.root.children[0].nodeId")
+
+        evaluate("tick.value = 1;")
+        platform.dispatcher.drain()
+        assertEquals(2, jsInt("renders"))
+        assertTrue(jsBoolean("builds.a === 1 && builds.b === 1"))
+        assertSame(rowA, evaluate("session.root.children[1]"))
+        assertSame(rowB, evaluate("session.root.children[2]"))
+        val patches = renderer.batches.last().patches
+        assertTrue("Only the tick text changes: $patches", patches.all { it is UiPatch.SetProps && it.nodeId == tickId })
+        assertEquals("1", renderer.text(tickId))
+
+        evaluate("items.value = [{id:'b', title:'B'}, {id:'a', title:'A2'}];")
+        platform.dispatcher.drain()
+        assertTrue(jsBoolean("builds.a === 2 && builds.b === 1"))
+        assertSame(rowB, evaluate("session.root.children[1]"))
+        assertEquals(idA, jsInt("session.root.children[2].nodeId"))
+        assertEquals("A2", renderer.text(idA))
+        assertTrue(platform.errors.isEmpty())
+    }
+
+    @Test
+    fun memoTracksStatesReadInsideTheFragmentEvenAfterItIsReused() {
+        evaluate("""
+            var label = compose.state('x'), other = compose.state(0), builds = 0;
+            var session = compose.mount(function() {
+                var fragment = compose.memo(function() { builds++; return compose.Text({key:'label', text:label.value}); }, []);
+                return compose.Column({key:'root'}, [fragment, compose.Text({key:'other', text:String(other.value)})]);
+            });
+        """.trimIndent())
+        platform.dispatcher.drain()
+        val renderer = platform.renderers.single()
+        val labelId = jsInt("session.root.children[0].nodeId")
+        evaluate("other.value = 1;")
+        platform.dispatcher.drain()
+        assertEquals(1, jsInt("builds"))
+        evaluate("label.value = 'y';")
+        platform.dispatcher.drain()
+        assertEquals("A reused fragment still subscribes the render to its state", 2, jsInt("builds"))
+        assertEquals("y", renderer.text(labelId))
+        assertEquals(labelId, jsInt("session.root.children[0].nodeId"))
+        evaluate("other.value = 2;")
+        platform.dispatcher.drain()
+        assertEquals(2, jsInt("builds"))
+        assertEquals("2", renderer.text(jsInt("session.root.children[1].nodeId")))
+    }
+
+    @Test
+    fun memoScopesSlotsByCallOrderFunctionLiteralAndEnclosingFragment() {
+        evaluate("""
+            var showFirst = compose.state(true), outerDep = compose.state(0), tick = compose.state(0);
+            var firstBuilds = 0, secondBuilds = 0, outerBuilds = 0, innerBuilds = 0;
+            var session = compose.mount(function() {
+                var parts = [];
+                if (showFirst.value) parts.push(compose.memo(function() { firstBuilds++; return compose.Text({key:'first', text:'first'}); }, []));
+                parts.push(compose.memo(function() { secondBuilds++; return compose.Text({key:'second', text:'second'}); }, []));
+                parts.push(compose.memo(function() {
+                    outerBuilds++;
+                    var inner = compose.memo(function() { innerBuilds++; return compose.Text({key:'inner', text:'inner'}); }, []);
+                    return compose.Column({key:'outer'}, [compose.Text({key:'outer-dep', text:String(outerDep.value)}), inner]);
+                }, [outerDep.value]));
+                parts.push(compose.Text({key:'tick', text:String(tick.value)}));
+                return compose.Column({key:'root'}, parts);
+            });
+        """.trimIndent())
+        platform.dispatcher.drain()
+        val renderer = platform.renderers.single()
+        evaluate("outerDep.value = 1;")
+        platform.dispatcher.drain()
+        assertEquals(2, jsInt("outerBuilds"))
+        assertEquals("The inner fragment is scoped to its unchanged enclosing slot", 1, jsInt("innerBuilds"))
+        assertEquals("1", renderer.text(jsInt("session.root.children[2].children[0].nodeId")))
+        evaluate("tick.value = 1;")
+        platform.dispatcher.drain()
+        assertTrue(jsBoolean("firstBuilds === 1 && secondBuilds === 1 && outerBuilds === 2 && innerBuilds === 1"))
+
+        evaluate("showFirst.value = false;")
+        platform.dispatcher.drain()
+        assertTrue("A different function literal never takes over another slot",
+            jsBoolean("session.root.children[0].key === 'second' && session.root.children[0].text === 'second'"))
+        assertTrue(jsBoolean("session.root.children[1].key === 'outer' && session.root.children[1].children[1].text === 'inner'"))
+        assertEquals("The shifted call order rebuilds instead of reusing the first slot", 2, jsInt("secondBuilds"))
+        assertEquals(1, jsInt("firstBuilds"))
+        assertTrue(platform.errors.isEmpty())
+    }
+
+    @Test
+    fun memoKeepsTheCommittedCacheAfterFailedOrRejectedFrames() {
+        evaluate("""
+            var fail = compose.state(false), value = compose.state(0), builds = 0;
+            var session = compose.mount(function() {
+                var row = compose.memo(function() { builds++; return compose.Text({key:'row', text:'row'}); }, []);
+                var label = compose.Text({key:'value', text:String(value.value)});
+                if (fail.value) throw new Error('planned render failure');
+                return compose.Column({key:'root'}, [row, label]);
+            });
+        """.trimIndent())
+        platform.dispatcher.drain()
+        val renderer = platform.renderers.single()
+        val row = evaluate("session.root.children[0]")
+        evaluate("fail.value = true;")
+        platform.dispatcher.drain()
+        evaluate("fail.value = false;")
+        platform.dispatcher.drain()
+        assertEquals(1, jsInt("builds"))
+        assertSame(row, evaluate("session.root.children[0]"))
+        assertEquals(ComposeUiErrorCodes.RENDER_FAILED, (platform.errors.single() as ComposeUiError).code)
+
+        renderer.rejectNext = true
+        evaluate("value.value = 1;")
+        platform.dispatcher.drain()
+        assertEquals(1, jsInt("builds"))
+        evaluate("value.value = 2;")
+        platform.dispatcher.drain()
+        assertEquals("A rejected frame invalidates every fragment", 2, jsInt("builds"))
+        assertEquals("2", renderer.text(jsInt("session.root.children[1].nodeId")))
+    }
+
+    @Test
+    fun memoRejectsUseOutsideRenderAndInvalidArguments() {
+        fun code(source: String): Any? = evaluate("""
+            (function() {
+                try { $source; return 'none'; }
+                catch (error) { return error instanceof ComposeError ? error.code + ':' + error.prop : String(error); }
+            })()
+        """.trimIndent())
+        assertEquals("INVALID_ARGUMENT:null", code("compose.memo(function() { return compose.Text('a'); }, [])"))
+        assertEquals("INVALID_ARGUMENT:null", code("compose.memo(function() { return compose.Text('a'); })"))
+        fun inRender(body: String) = code("compose.mount(function() { $body })")
+        assertEquals("INVALID_ARGUMENT:deps", inRender("return compose.memo(function() { return compose.Text('a'); }, 1);"))
+        assertEquals("UNKNOWN_PROP:keys", inRender("return compose.memo(function() { return compose.Text('a'); }, [], {keys:'a'});"))
+        assertEquals("INVALID_ARGUMENT:key", inRender("return compose.memo(function() { return compose.Text('a'); }, [], {key:{}});"))
+        assertEquals("DUPLICATE_KEY:key", inRender("""
+            var a = compose.memo(function() { return compose.Text('a'); }, [], {key:'k'});
+            var b = compose.memo(function() { return compose.Text('b'); }, [], {key:'k'});
+            return compose.Column([a, b]);
+        """.trimIndent()))
+        assertEquals("INVALID_ARGUMENT:null", inRender("return compose.memo(function() { return 1; }, []);"))
+        assertEquals("LIMIT_EXCEEDED:deps", inRender("return compose.memo(function() { return compose.Text('a'); }, new Array(257));"))
+        assertEquals(0, jsInt("compose.sessions.length"))
+    }
+
     private fun evaluate(source: String): Any? = context.evaluateString(scope, source, "compose-script-api", 1, null)
     private fun jsBoolean(source: String): Boolean = Context.toBoolean(evaluate(source))
     private fun jsInt(source: String): Int = Context.toNumber(evaluate(source)).toInt()

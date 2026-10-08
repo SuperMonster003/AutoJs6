@@ -35,6 +35,7 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
     @Volatile private lateinit var core: ComposeSession
     private val startupFailure = AtomicReference<Throwable?>()
     private var reaction: ComposeReactiveRuntime.Reaction? = null
+    private val memo = ComposeMemoCache()
     private var root: ComposeNode? = null
     private var accepted: ComposeNodeSnapshot? = null
     private var pending: ComposeNodeSnapshot? = null
@@ -123,10 +124,18 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
         if (source is Function) {
             val render = owner.reactive.reaction {
                 try {
-                    root = owner.graph.render(root) {
-                        owner.graph.root(owner.call(source)) ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
-                            "render must return one ComposeNode")
-                    }
+                    val frame = memo.begin(root)
+                    val resolved = java.util.IdentityHashMap<ComposeNode, ComposeNode>()
+                    val outer = owner.memoFrame
+                    owner.memoFrame = frame
+                    try {
+                        root = owner.graph.render(root, resolved) {
+                            owner.graph.root(owner.call(source)) ?: throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT,
+                                "render must return one ComposeNode")
+                        }
+                    } finally { owner.memoFrame = outer }
+                    // Fragments are committed only with a reconciled tree; a failed render keeps the old cache.
+                    memo.commit(frame, resolved)
                 } catch (failure: Throwable) {
                     throw owner.renderFailure(failure)
                 }
@@ -182,6 +191,8 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
                         if (pending === snapshot) pending = null
                         owner.graph.reject(this, snapshot)
                         root = accepted?.root ?: root
+                        // Restored nodes no longer match the dependencies recorded for the rejected frame.
+                        memo.clear()
                         commands.clear(); pruneCallbacks()
                     }
                     ComposeSession.CommitResult.Superseded -> Unit
@@ -297,6 +308,7 @@ internal class ComposeScriptSession(private val owner: Compose, val id: Int, pri
         startupFailure.set(null)
         replacingUi = null
         reaction?.close(); reaction = null
+        memo.clear()
         owner.graph.unmount(this)
         root = null; pending = null; accepted = null; submitted.clear(); renderer = null; container = null; callbacks.clear(); commands.clear(); notificationCallbacks.clear(); mountedView = null
         owner.ended(this)
