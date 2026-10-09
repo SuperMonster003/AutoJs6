@@ -164,6 +164,30 @@ stay private. The initial automated dataset contains controlled fixture data onl
 this annotation tool does not mean the roadmap's suggested real-app evaluation sample has been
 collected. Real application groups belong exclusively in `real-test` at this stage.
 
+### Diagnose labelled real groups offline
+
+`RealGroupDiagnosticsTask` runs the fourth experiment's frozen rule search, construction policy
+and final rankers on every `.cgtask.json` below a private directory, records each candidate's
+observed survival in the later states, and verifies optional hand-written probe plans. It is
+reading evidence only: real groups stay in `real-test` and nothing is admitted or promoted.
+
+```powershell
+$env:CODEGEN_PRIVATE_DIR = 'D:\codegen-private'
+$env:CODEGEN_REAL_DIAGNOSTICS_TASKS = 'D:\codegen-private\tasks'
+$env:CODEGEN_REAL_DIAGNOSTICS_OUTPUT = 'D:\codegen-private\diagnostics\real-1'
+$env:CODEGEN_REAL_DIAGNOSTICS_PROBES = 'D:\codegen-private\probes\aurora-probes.json'
+$env:CODEGEN_CONSTRUCTION_R3_FIT_BEST = (Resolve-Path 'tools/codegen-model/out/construction-r3-fit-best-1').Path
+$env:CODEGEN_CONSTRUCTION_RANKER = (Resolve-Path 'tools/codegen-model/out/construction-merged-ranker-1').Path
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.RealGroupDiagnosticsTask'
+```
+
+The optional probe file maps a `groupId` to plans such as
+`{"name": "row-icon", "family": "ANCHOR_PATH", "selector": [["text", "Google"]], "steps": [["up", 1], ["child", 0], ["child", -1]]}`;
+step kinds are `up`, `child`, `index` and `search`, and the receiver follows the group's candidates.
+`results.json` lists each method's first five rendered plans with their survival, the candidates that
+survive every later state, per-source survival counts, and each probe's outcome per state and rank
+per method. It contains private UI text, so it stays inside `CODEGEN_PRIVATE_DIR`.
+
 ## Freeze splits and write the manifest
 
 After collection finishes, run from `tools/codegen-model`:
