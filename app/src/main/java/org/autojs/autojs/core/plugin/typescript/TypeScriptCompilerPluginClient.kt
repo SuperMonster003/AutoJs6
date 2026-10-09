@@ -48,6 +48,9 @@ internal class TypeScriptCompilerPluginClient(
         moduleLabel = MODULE_LABEL,
         proxyFactory = ITypeScriptCompilerPlugin.Stub::asInterface,
         infoReader = { compiler -> compiler.compilerInfo.toPluginInfo() },
+        // Selection only needs the compiler's static authority fingerprints; reusing them for an
+        // unchanged installed plugin keeps the compiler process out of the cache-hit path.
+        cacheDiscovery = true,
     )
 
     suspend fun isAvailable(): Boolean = host.select(

@@ -42,6 +42,12 @@ class AidlPluginHost<I : IInterface>(
     private val defaultEnabled: Boolean = true,
     private val allowActivityStarts: Boolean = false,
     private val preBindValidator: ((Context, ServiceInfo) -> Unit)? = null,
+    /**
+     * Reuse the advertised [PluginInfo] of an unchanged installed package instead of binding the
+     * service for `getInfo` on every discovery. Only for hosts whose selection relies on static
+     * capabilities; [probe] always reads fresh.
+     */
+    private val cacheDiscovery: Boolean = false,
 ) {
 
     private val defaultBindTimeoutMs = 60_000L
@@ -70,9 +76,25 @@ class AidlPluginHost<I : IInterface>(
         val services = queryServices(context, packageName)
         Log.i(tag, "discover: services=${services.size}")
         return services.map { service ->
+            val identity = if (cacheDiscovery) {
+                PluginDiscoveryCache.installedPackageIdentity(context, service.packageName)
+            } else {
+                null
+            }
+            if (cacheDiscovery) {
+                PluginDiscoveryCache.shared.lookup(identity, action, category, service.packageName, service.name)?.let { cached ->
+                    Log.i(tag, "discover: ${service.packageName}/${service.name} (cached info)")
+                    return@map Discovered(service, cached, null)
+                }
+            }
             Log.i(tag, "discover: ${service.packageName}/${service.name}")
             val result = runCatching { withService(context, service, defaultBindTimeoutMs) { infoReader(it) } }
             result.exceptionOrNull()?.let { Log.w(tag, "getInfo failed: ${it.message}") }
+            if (cacheDiscovery) {
+                result.getOrNull()?.let { info ->
+                    PluginDiscoveryCache.shared.store(identity, action, category, service.packageName, service.name, info)
+                }
+            }
             Discovered(service, result.getOrNull(), result.exceptionOrNull())
         }
     }
