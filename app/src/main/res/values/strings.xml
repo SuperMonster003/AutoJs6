@@ -2746,6 +2746,8 @@
     <string name="text_type">Type</string>
     <string name="text_type_file">File</string>
     <string name="text_type_folder">Folder</string>
+    <string name="text_typescript_compilation_finished">TypeScript compilation finished in %1$d ms</string>
+    <string name="text_typescript_compiling" tools:ignore="TypographyEllipsis">Compiling TypeScript...</string>
     <string name="text_typescript_console">TypeScript console</string>
     <string name="text_typescript_console_hint">Enter a TypeScript expression or statement</string>
     <string name="text_typescript_project_rename">Rename project symbol</string>

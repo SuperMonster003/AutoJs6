@@ -2747,6 +2747,8 @@
     <string name="text_type">型別</string>
     <string name="text_type_file">檔案</string>
     <string name="text_type_folder">資料夾</string>
+    <string name="text_typescript_compilation_finished">TypeScript 編譯完成, 用時 %1$d ms</string>
+    <string name="text_typescript_compiling" tools:ignore="TypographyEllipsis">正在編譯 TypeScript...</string>
     <string name="text_typescript_console">TypeScript 控制檯</string>
     <string name="text_typescript_console_hint">輸入 TypeScript 運算式或陳述式</string>
     <string name="text_typescript_project_rename">重新命名專案符號</string>

@@ -2747,6 +2747,8 @@
     <string name="text_type">类型</string>
     <string name="text_type_file">文件</string>
     <string name="text_type_folder">文件夹</string>
+    <string name="text_typescript_compilation_finished">TypeScript 编译完成, 用时 %1$d ms</string>
+    <string name="text_typescript_compiling" tools:ignore="TypographyEllipsis">正在编译 TypeScript...</string>
     <string name="text_typescript_console">TypeScript 控制台</string>
     <string name="text_typescript_console_hint">输入 TypeScript 表达式或语句</string>
     <string name="text_typescript_project_rename">重命名项目符号</string>

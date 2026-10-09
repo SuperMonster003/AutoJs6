@@ -385,6 +385,9 @@ internal class TypeScriptCompilerPluginClient(
                     return@withLock cached
                 }
 
+                // From here on the script thread waits for the plugin; tell the user once.
+                val progressNotice =
+                    TypeScriptCompilationProgressNotices.compilationStarted(appContext)
                 val warmBindingGeneration =
                     TypeScriptCompilerStartupPrewarm.generationToken()
                 val bindAndPrewarmStartedAt = performance.checkpoint()
@@ -517,6 +520,10 @@ internal class TypeScriptCompilerPluginClient(
                         } finally {
                             performance.recordCachePublishSince(cachePublishStartedAt)
                         }
+                        TypeScriptCompilationProgressNotices.compilationFinished(
+                            appContext,
+                            progressNotice,
+                        )
                         read
                     }
 
