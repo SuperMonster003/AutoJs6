@@ -1,6 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <activity android:name="org.autojs.autojs.core.plugin.center.LauncherIconFixtureActivity"
+            android:exported="true" />
+        <activity-alias android:name="${applicationId}.launcher.Auto"
+            android:targetActivity="org.autojs.autojs.core.plugin.center.LauncherIconFixtureActivity"
+            android:enabled="true" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name="${applicationId}.launcher.Light"
+            android:targetActivity="org.autojs.autojs.core.plugin.center.LauncherIconFixtureActivity"
+            android:enabled="false" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name="${applicationId}.launcher.Dark"
+            android:targetActivity="org.autojs.autojs.core.plugin.center.LauncherIconFixtureActivity"
+            android:enabled="false" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
         <provider
             android:name="org.autojs.autojs.runtime.api.augment.installer.InstallerSmokePipeProvider"
             android:authorities="${applicationId}.installer.smoke.pipe"

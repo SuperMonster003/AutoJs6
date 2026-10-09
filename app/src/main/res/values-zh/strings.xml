@@ -490,6 +490,8 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">获取 %1$s 插件索引失败: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">插件 \"%1$s\" 未在插件中心获得授权</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">插件 \"%1$s\" 未在插件中心启用</string>
+    <string name="error_plugin_launcher_icon_not_applied">未能应用启动器图标设置</string>
+    <string name="error_plugin_launcher_icon_permission">更改此插件的启动器图标需要 Root 权限, 或已授权且以 Root 方式运行的 Shizuku</string>
     <string name="error_plugin_native_page_alignment_unsupported">插件 %1$s 包含按 %2$d 字节对齐的原生库, 无法在页大小为 %3$d 字节的设备上运行. 请升级插件.</string>
     <string name="error_plugin_not_found_in_installed_apps">已安装应用中未找到插件 \"%1$s\"</string>
     <string name="error_plugin_returned_empty_info">%1$s 插件返回的 info 为空.</string>
@@ -592,7 +594,6 @@
     <string name="hint_archive_password">档案密码</string>
     <string name="hint_find_with_regex">支持正则表达式搜索, 可使用 \"$1\" - \"$9\" 表示分组捕获</string>
     <string name="hint_github_token">粘贴 GitHub Personal Access Token</string>
-    <string name="hint_installer_plugin_recommended">提示: %1$s 插件支持通过 Shizuku 或 Root 静默安装以及分包安装, 可在插件中心获取.</string>
     <string name="hint_long_click_run_to_debug">长按 \"运行\" 图标可启动调试</string>
     <string name="hint_loop_delay">开始循环前的延迟</string>
     <string name="hint_loop_times">0 表示无限循环</string>
@@ -807,6 +808,8 @@
     <string name="summary_plugin_ignored_versions_count">共忽略 %1$d 个版本</string>
     <string name="summary_plugin_instruction_view">查看此插件的使用示例与说明</string>
     <string name="summary_plugin_jump_to_launch_page">打开此插件的启动 Activity</string>
+    <string name="summary_plugin_launcher_icon_hidden">在启动器中隐藏此插件</string>
+    <string name="summary_plugin_launcher_icon_shown">允许此插件显示在启动器中</string>
     <string name="summary_plugin_no_launch_page">当前插件没有启动页</string>
     <string name="summary_reconnect_client">\"重新连接\" 断开此连接并由 VSCode 自动重新建立 (需插件 1.1.0+); \"断开连接\" 关闭连接且不再自动重连</string>
     <string name="summary_reconnect_on_network_change">重连期间, 网络恢复可用时立即重试</string>
@@ -2291,10 +2294,12 @@
     <string name="text_plugin_install_wizard_installing_plugins">正在安装插件</string>
     <string name="text_plugin_install_wizard_installing_with_progress">正在安装 (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">缓存空间不足: 约需 %1$s, 可用 %2$s</string>
+    <string name="text_plugin_install_wizard_launcher_icons_not_applied">以下插件已安装, 但未能应用启动器图标设置:</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">正在加载插件索引...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">索引中没有可安装的插件</string>
     <string name="text_plugin_install_wizard_no_selection">未选择任何插件</string>
     <string name="text_plugin_install_wizard_show_installed">显示已安装插件</string>
+    <string name="text_plugin_install_wizard_show_launcher_icons">显示本次安装插件的启动器图标</string>
     <string name="text_plugin_install_wizard_summary_cancelled">已取消: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">失败: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">已安装: %1$d</string>
@@ -2314,6 +2319,7 @@
     <string name="text_plugin_native_page_alignment_incompatible">不兼容 16 KB</string>
     <string name="text_plugin_official">官方</string>
     <string name="text_plugin_online_source">在线插件来源</string>
+    <string name="text_plugin_show_launcher_icon">显示启动器图标</string>
     <string name="text_plugin_show_official_plugins">显示官方可在线安装插件</string>
     <string name="text_plugin_show_third_party_plugins">显示第三方可在线安装插件</string>
     <string name="text_plugin_third_party">第三方</string>

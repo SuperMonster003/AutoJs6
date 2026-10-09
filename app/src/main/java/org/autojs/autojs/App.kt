@@ -149,6 +149,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                         // zh-CN: 在任何 Activity 绘制之前执行, 使到期的变化不会闪色 (Roadmap D9).
                         IntelligentColorEngine.init(this)
                         ScriptThemeChanges.init(this)
+                        org.autojs.autojs.core.plugin.center.PluginLauncherIconController.initialize(this)
                         org.autojs.autojs.core.plugin.agent.ThreeStoveAgentConnectionOwner.get(this).refresh()
                     }
                 }

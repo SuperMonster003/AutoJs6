@@ -43,6 +43,7 @@ class PluginInstallWizardCatalogTest {
                 "${prefix}mediainfo",
                 "${prefix}nodejs",
                 "${prefix}typescript",
+                "${prefix}three.setup.installer",
                 "${prefix}three.maple.image",
                 "${prefix}mlkitocr",
                 "${prefix}opencv",
@@ -107,7 +108,7 @@ class PluginInstallWizardCatalogTest {
         val installer = PluginInstallWizardCatalog.find("io.github.supermonster003.autojs6.plugin.three.setup.installer")
         assertEquals(PluginInstallWizardCategory.TOOLS, installer?.category)
         assertEquals("Three Setup Installer", installer?.fallbackTitle)
-        assertEquals(false, installer?.inStandard)
+        assertEquals(true, installer?.inStandard)
         assertEquals(false, installer?.inMinimal)
         assertFalse(PluginInstallWizardCatalog.contains("io.github.supermonster003.autojs6.plugin.videoplayer"))
         assertFalse(PluginInstallWizardCatalog.contains("com.example.unknown"))

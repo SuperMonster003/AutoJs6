@@ -3,6 +3,8 @@
     "v6.8.0": {
       "released_date": "2026/10/09",
       "feature": [
+        "A \"Show launcher icon\" switch in plugin settings, enabled by default, hides and restores the original icon variant for official and third-party plugins (requires Root or authorized Shizuku running as Root)",
+        "A launcher-icon option in the installation wizard applies only to plugins newly installed by that batch, defaults to showing icons and leaves already installed plugins unchanged",
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
         "Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates",
         "ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples",
@@ -291,6 +293,7 @@
         "Layout Inspector \"Generate code\" supports relative locating plans that identify the target through a nearby widget's text / desc / id and a fixed compass relation (for example an icon in a list row located by the row title), generating filter and compass calls"
       ],
       "fix": [
+        "Plugin search filters remaining active after closing search or switching home tabs",
         "A host crash when intelligent theme colors refresh on returning to the foreground or recreating a screen and widget callbacks register additional theme targets",
         "Plugin Center showing Unknown ABIs for official plugins verified to contain no native code, and losing indexed native compatibility metadata after a restart",
         "The plugin installation wizard waiting for a timeout after a failed or cancelled installation when installing consecutive plugins through the system installer",
@@ -544,6 +547,7 @@
         "Compose node property getters preserve null values, including default progress and cleared DatePicker selections, instead of returning undefined"
       ],
       "improvement": [
+        "The Standard plugin installation profile includes 3-Setup Installer, and system APK installation no longer displays the installer-plugin recommendation tip",
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",
         "Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host",
         "Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record",

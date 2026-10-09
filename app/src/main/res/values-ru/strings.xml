@@ -494,6 +494,8 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">Не удалось получить индекс плагинов из источника %1$s: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">Плагин \"%1$s\" не авторизован в Центре плагинов</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">Плагин \"%1$s\" не включен в Центре плагинов</string>
+    <string name="error_plugin_launcher_icon_not_applied">Не удалось применить настройку значка</string>
+    <string name="error_plugin_launcher_icon_permission">Для изменения значка требуется Root или авторизованный Shizuku, запущенный с Root</string>
     <string name="error_plugin_native_page_alignment_unsupported">Плагин %1$s содержит нативную библиотеку с выравниванием %2$d байт, несовместимую со страницами размером %3$d байт. Обновите плагин.</string>
     <string name="error_plugin_not_found_in_installed_apps">Плагин \"%1$s\" не найден среди установленных приложений</string>
     <string name="error_plugin_returned_empty_info">Плагин %1$s вернул пустую информацию.</string>
@@ -596,7 +598,6 @@
     <string name="hint_archive_password">Пароль архива</string>
     <string name="hint_find_with_regex">Поддерживается регекс. Используйте \"$1\" - \"$9\" для захваченных групп.</string>
     <string name="hint_github_token">Вставьте персональный токен доступа GitHub</string>
-    <string name="hint_installer_plugin_recommended">Совет: плагин %1$s добавляет тихую установку через Shizuku или Root и поддержку разделенных пакетов. Его можно найти в Центре плагинов.</string>
     <string name="hint_long_click_run_to_debug">Длительное нажатие кнопки \"Выполнить\" для отладки</string>
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
@@ -811,6 +812,8 @@
     <string name="summary_plugin_ignored_versions_count">Игнорировано версий: %1$d</string>
     <string name="summary_plugin_instruction_view">Показать примеры использования и описание этого плагина</string>
     <string name="summary_plugin_jump_to_launch_page">Открыть Activity запуска этого плагина</string>
+    <string name="summary_plugin_launcher_icon_hidden">Скрыть плагин из лаунчера</string>
+    <string name="summary_plugin_launcher_icon_shown">Разрешить отображение плагина в лаунчере</string>
     <string name="summary_plugin_no_launch_page">У текущего плагина нет страницы запуска</string>
     <string name="summary_reconnect_client">\"Переподключить\" разрывает это соединение и позволяет VSCode восстановить его автоматически (расширение 1.1.0+); \"Отключить\" закрывает его без автоматического переподключения</string>
     <string name="summary_reconnect_on_network_change">Во время переподключения повторять попытку сразу, как только сеть станет доступна</string>
@@ -2294,10 +2297,12 @@
     <string name="text_plugin_install_wizard_installing_plugins">Установка плагинов</string>
     <string name="text_plugin_install_wizard_installing_with_progress">Установка (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">Недостаточно места в кэше: требуется около %1$s, доступно %2$s</string>
+    <string name="text_plugin_install_wizard_launcher_icons_not_applied">Плагины установлены, но настройка значков не применена:</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">Загрузка индекса плагинов...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">В индексе нет плагинов, доступных для установки</string>
     <string name="text_plugin_install_wizard_no_selection">Плагины не выбраны</string>
     <string name="text_plugin_install_wizard_show_installed">Показывать установленные плагины</string>
+    <string name="text_plugin_install_wizard_show_launcher_icons">Показывать значки новых плагинов</string>
     <string name="text_plugin_install_wizard_summary_cancelled">Отменено: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">Не удалось: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">Установлено: %1$d</string>
@@ -2317,6 +2322,7 @@
     <string name="text_plugin_native_page_alignment_incompatible">Несовместимо с 16 KB</string>
     <string name="text_plugin_official">Официальный</string>
     <string name="text_plugin_online_source">Источник онлайн-плагинов</string>
+    <string name="text_plugin_show_launcher_icon">Показывать значок в лаунчере</string>
     <string name="text_plugin_show_official_plugins">Показывать официальные онлайн-устанавливаемые плагины</string>
     <string name="text_plugin_show_third_party_plugins">Показывать сторонние онлайн-устанавливаемые плагины</string>
     <string name="text_plugin_third_party">Сторонний</string>

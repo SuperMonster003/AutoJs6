@@ -489,6 +489,8 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">Plugin \"%1$s\" is not authorized in Plugin Center</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">Plugin \"%1$s\" is not enabled in Plugin Center</string>
+    <string name="error_plugin_launcher_icon_not_applied">Could not apply the launcher icon setting</string>
+    <string name="error_plugin_launcher_icon_permission">Root permission or authorized Shizuku running as Root is required to change this plugin\'s launcher icon</string>
     <string name="error_plugin_native_page_alignment_unsupported">Plugin %1$s contains a native library aligned to %2$d bytes, which cannot run with %3$d byte pages. Please update the plugin.</string>
     <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" not found in installed apps</string>
     <string name="error_plugin_returned_empty_info">%1$s plugin returned empty info.</string>
@@ -591,7 +593,6 @@
     <string name="hint_archive_password">Archive password</string>
     <string name="hint_find_with_regex">Regex is supported. Use \"$1\" - \"$9\" for captured groups.</string>
     <string name="hint_github_token">Paste a GitHub personal access token</string>
-    <string name="hint_installer_plugin_recommended">Tip: the %1$s plugin adds silent installation through Shizuku or Root and support for split packages. Find it in Plugin Center.</string>
     <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
     <string name="hint_loop_delay">Delay before loop</string>
     <string name="hint_loop_times">0 for infinite loop</string>
@@ -806,6 +807,8 @@
     <string name="summary_plugin_ignored_versions_count">%1$d ignored versions</string>
     <string name="summary_plugin_instruction_view">Show usage examples and notes for this plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Open this plugin launch activity</string>
+    <string name="summary_plugin_launcher_icon_hidden">Hide this plugin from the launcher</string>
+    <string name="summary_plugin_launcher_icon_shown">Allow this plugin to appear in the launcher</string>
     <string name="summary_plugin_no_launch_page">No launch page for current plugin</string>
     <string name="summary_reconnect_client">Reconnect drops this connection and lets VSCode re-establish it automatically (extension 1.1.0+); Disconnect closes it without automatic reconnection</string>
     <string name="summary_reconnect_on_network_change">While reconnecting, retry immediately when a network becomes available</string>
@@ -2290,10 +2293,12 @@
     <string name="text_plugin_install_wizard_installing_plugins">Installing plugins</string>
     <string name="text_plugin_install_wizard_installing_with_progress">Installing (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">Insufficient cache space: about %1$s is needed, %2$s available</string>
+    <string name="text_plugin_install_wizard_launcher_icons_not_applied">Installed, but launcher icon settings were not applied:</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">Loading the plugin index...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">The index contains no installable plugin</string>
     <string name="text_plugin_install_wizard_no_selection">No plugin is selected</string>
     <string name="text_plugin_install_wizard_show_installed">Show installed plugins</string>
+    <string name="text_plugin_install_wizard_show_launcher_icons">Show launcher icons for new plugins</string>
     <string name="text_plugin_install_wizard_summary_cancelled">Cancelled: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">Failed: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">Installed: %1$d</string>
@@ -2313,6 +2318,7 @@
     <string name="text_plugin_native_page_alignment_incompatible">16 KB incompatible</string>
     <string name="text_plugin_official">Official</string>
     <string name="text_plugin_online_source">Online plugin source</string>
+    <string name="text_plugin_show_launcher_icon">Show launcher icon</string>
     <string name="text_plugin_show_official_plugins">Show official online-installable plugins</string>
     <string name="text_plugin_show_third_party_plugins">Show third-party online-installable plugins</string>
     <string name="text_plugin_third_party">Third-party</string>

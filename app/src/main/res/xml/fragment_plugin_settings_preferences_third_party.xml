@@ -19,6 +19,13 @@
         app:title="@string/text_show">
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_launcher_icon"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:defaultValue="true"
+            app:title="@string/text_plugin_show_launcher_icon" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_visibility"
             app:layout="@layout/preference_custom"
             app:title="@string/text_hide_plugin"

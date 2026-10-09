@@ -495,6 +495,8 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">%1$s プラグインインデックスの取得に失敗しました: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで許可されていません</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで有効になっていません</string>
+    <string name="error_plugin_launcher_icon_not_applied">ランチャーアイコン設定を適用できませんでした</string>
+    <string name="error_plugin_launcher_icon_permission">このアイコンの変更には Root 権限, または Root モードで実行し許可された Shizuku が必要です</string>
     <string name="error_plugin_native_page_alignment_unsupported">プラグイン %1$s のネイティブライブラリは %2$d バイト境界に配置されているため, ページサイズが %3$d バイトの端末では実行できません. プラグインを更新してください.</string>
     <string name="error_plugin_not_found_in_installed_apps">インストール済みアプリにプラグイン \"%1$s\" が見つかりません</string>
     <string name="error_plugin_returned_empty_info">%1$s プラグインが空の info を返しました.</string>
@@ -597,7 +599,6 @@
     <string name="hint_archive_password">アーカイブのパスワード</string>
     <string name="hint_find_with_regex">正規表現に対応しています. キャプチャしたグループには, \"$1\" から \"$9\" を使用します.</string>
     <string name="hint_github_token">GitHub パーソナルアクセストークンを貼り付けます</string>
-    <string name="hint_installer_plugin_recommended">ヒント: %1$s プラグインを使うと Shizuku または Root によるサイレントインストールと分割パッケージに対応できます. プラグインセンターで入手できます.</string>
     <string name="hint_long_click_run_to_debug">実行 ボタン長押しでデバッグ</string>
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
@@ -812,6 +813,8 @@
     <string name="summary_plugin_ignored_versions_count">無視したバージョン数: %1$d</string>
     <string name="summary_plugin_instruction_view">このプラグインの使用例と説明を表示します</string>
     <string name="summary_plugin_jump_to_launch_page">このプラグインの起動 Activity を開きます</string>
+    <string name="summary_plugin_launcher_icon_hidden">このプラグインをランチャーから非表示にする</string>
+    <string name="summary_plugin_launcher_icon_shown">このプラグインをランチャーに表示する</string>
     <string name="summary_plugin_no_launch_page">現在のプラグインには起動ページがありません</string>
     <string name="summary_reconnect_client">\"再接続\" はこの接続を切断し, VSCode に自動的に再確立させます (拡張機能 1.1.0+); \"切断\" は自動再接続なしで接続を閉じます</string>
     <string name="summary_reconnect_on_network_change">再接続中にネットワークが利用可能になったら直ちに再試行します</string>
@@ -2295,10 +2298,12 @@
     <string name="text_plugin_install_wizard_installing_plugins">プラグインをインストール中</string>
     <string name="text_plugin_install_wizard_installing_with_progress">インストール中 (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">キャッシュ領域が不足しています: 約 %1$s が必要, 利用可能 %2$s</string>
+    <string name="text_plugin_install_wizard_launcher_icons_not_applied">以下のプラグインはインストール済みですが, アイコン設定を適用できませんでした:</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">プラグインインデックスを読み込み中...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">インデックスにインストール可能なプラグインがありません</string>
     <string name="text_plugin_install_wizard_no_selection">プラグインが選択されていません</string>
     <string name="text_plugin_install_wizard_show_installed">インストール済みプラグインを表示</string>
+    <string name="text_plugin_install_wizard_show_launcher_icons">今回インストールするプラグインのアイコンを表示</string>
     <string name="text_plugin_install_wizard_summary_cancelled">キャンセル: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">失敗: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">インストール済み: %1$d</string>
@@ -2318,6 +2323,7 @@
     <string name="text_plugin_native_page_alignment_incompatible">16 KB 非対応</string>
     <string name="text_plugin_official">公式</string>
     <string name="text_plugin_online_source">オンラインプラグインソース</string>
+    <string name="text_plugin_show_launcher_icon">ランチャーアイコンを表示</string>
     <string name="text_plugin_show_official_plugins">公式のオンラインインストール可能プラグインを表示</string>
     <string name="text_plugin_show_third_party_plugins">サードパーティ製のオンラインインストール可能プラグインを表示</string>
     <string name="text_plugin_third_party">サードパーティ</string>

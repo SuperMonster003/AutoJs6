@@ -491,6 +491,8 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">取得 %1$s 外掛索引失敗: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">外掛 \"%1$s\" 未在外掛中心獲得授權</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">外掛 \"%1$s\" 未在外掛中心啟用</string>
+    <string name="error_plugin_launcher_icon_not_applied">無法套用啟動器圖示設定</string>
+    <string name="error_plugin_launcher_icon_permission">變更此插件的啟動器圖示需要 Root 權限, 或已授權且以 Root 方式執行的 Shizuku</string>
     <string name="error_plugin_native_page_alignment_unsupported">外掛程式 %1$s 包含按 %2$d 位元組對齊的原生程式庫, 無法在頁面大小為 %3$d 位元組的裝置上執行. 請升級外掛程式.</string>
     <string name="error_plugin_not_found_in_installed_apps">已安裝應用中未找到外掛 \"%1$s\"</string>
     <string name="error_plugin_returned_empty_info">%1$s 外掛返回的 info 為空.</string>
@@ -593,7 +595,6 @@
     <string name="hint_archive_password">壓縮檔密碼</string>
     <string name="hint_find_with_regex">支援正則表示式搜尋, 可使用 \"$1\" - \"$9\" 表示分組捕獲</string>
     <string name="hint_github_token">貼上 GitHub Personal Access Token</string>
-    <string name="hint_installer_plugin_recommended">提示: %1$s 外掛支援透過 Shizuku 或 Root 靜默安裝以及分包安裝, 可在外掛中心取得.</string>
     <string name="hint_long_click_run_to_debug">長按 \"執行\" 圖示可啟動除錯</string>
     <string name="hint_loop_delay">開始迴圈前的延遲</string>
     <string name="hint_loop_times">0 表示無限迴圈</string>
@@ -808,6 +809,8 @@
     <string name="summary_plugin_ignored_versions_count">共忽略 %1$d 個版本</string>
     <string name="summary_plugin_instruction_view">檢視此外掛的使用示例與說明</string>
     <string name="summary_plugin_jump_to_launch_page">開啟此外掛的啟動 Activity</string>
+    <string name="summary_plugin_launcher_icon_hidden">在啟動器中隱藏此插件</string>
+    <string name="summary_plugin_launcher_icon_shown">允許此插件顯示在啟動器中</string>
     <string name="summary_plugin_no_launch_page">當前外掛沒有啟動頁</string>
     <string name="summary_reconnect_client">\"重新連接\" 斷開此連接並由 VSCode 自動重新建立 (需插件 1.1.0+); \"斷開連接\" 關閉連接且不再自動重連</string>
     <string name="summary_reconnect_on_network_change">重連期間, 網路恢復可用時立即重試</string>
@@ -2291,10 +2294,12 @@
     <string name="text_plugin_install_wizard_installing_plugins">正在安裝外掛</string>
     <string name="text_plugin_install_wizard_installing_with_progress">正在安裝 (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">快取空間不足: 約需 %1$s, 可用 %2$s</string>
+    <string name="text_plugin_install_wizard_launcher_icons_not_applied">以下插件已安裝, 但無法套用啟動器圖示設定:</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">正在載入外掛索引...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">索引中沒有可安裝的外掛</string>
     <string name="text_plugin_install_wizard_no_selection">未選擇任何外掛</string>
     <string name="text_plugin_install_wizard_show_installed">顯示已安裝外掛</string>
+    <string name="text_plugin_install_wizard_show_launcher_icons">顯示本次安裝插件的啟動器圖示</string>
     <string name="text_plugin_install_wizard_summary_cancelled">已取消: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">失敗: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">已安裝: %1$d</string>
@@ -2314,6 +2319,7 @@
     <string name="text_plugin_native_page_alignment_incompatible">不相容 16 KB</string>
     <string name="text_plugin_official">官方</string>
     <string name="text_plugin_online_source">線上外掛來源</string>
+    <string name="text_plugin_show_launcher_icon">顯示啟動器圖示</string>
     <string name="text_plugin_show_official_plugins">顯示官方可線上安裝外掛</string>
     <string name="text_plugin_show_third_party_plugins">顯示第三方可線上安裝外掛</string>
     <string name="text_plugin_third_party">第三方</string>

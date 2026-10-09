@@ -155,6 +155,7 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     override fun onPageHide() {
         super.onPageHide()
+        clearSearch()
         mFloatingActionMenu?.let { if (it.isExpanded) it.collapse() }
         fab.setOnLongClickListener(null)
         mIsCurrentPagePlugins = false
@@ -171,16 +172,18 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     @Subscribe
     fun onQuerySummit(event: QueryEvent) {
+        // Tab selection can hide this page before the toolbar sends its collapse event.
+        // zh-CN: 标签切换可能先隐藏本页, 再由工具栏发送搜索收起事件.
+        if (event === QueryEvent.CLEAR) {
+            clearSearch()
+            return
+        }
         if (!isShown) {
             return
         }
 
         val child = childFragmentManager.findFragmentByTag(TAG_PLUGIN_CENTER) as? PluginCenterFragment ?: return
 
-        if (event === QueryEvent.CLEAR) {
-            child.setQuery(null)
-            return
-        }
         if (event === QueryEvent.FIND_FORWARD) {
             return
         }
@@ -189,6 +192,10 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
         }
 
         child.setQuery(event.query)
+    }
+
+    private fun clearSearch() {
+        (childFragmentManager.findFragmentByTag(TAG_PLUGIN_CENTER) as? PluginCenterFragment)?.setQuery(null)
     }
 
     override fun onStart() {

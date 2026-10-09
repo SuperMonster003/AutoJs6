@@ -60,6 +60,11 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
 
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
+        if (mSearchView != null) {
+            mSearchView.setOnQueryTextListener(null);
+            mSearchView.setQuery("", false);
+            mSearchView.setOnQueryTextListener(this);
+        }
         if (mQueryCallback == null) {
             return true;
         }

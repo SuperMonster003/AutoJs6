@@ -14,8 +14,10 @@ import android.widget.Space
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import kotlinx.coroutines.launch
 import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
 import org.autojs.autojs.core.accessibility.AdvancedProtectionNotice
 import org.autojs.autojs.network.UpdateIgnoreStore
@@ -59,6 +61,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
 
     private lateinit var launchPagePreference: MaterialPreference
     private lateinit var visibilityPreference: ThemeColorSwitchPreference
+    private lateinit var launcherIconPreference: ThemeColorSwitchPreference
     private lateinit var autoCheckPreference: ThemeColorSwitchPreference
     private lateinit var ignoredVersionsPreference: MaterialPreference
     private lateinit var instructionPreference: MaterialPreference
@@ -189,6 +192,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private fun bindPreferences() {
         launchPagePreference = requireNotNull(findPreference(KEY_PLUGIN_LAUNCH_PAGE))
         visibilityPreference = requireNotNull(findPreference(KEY_PLUGIN_VISIBILITY))
+        launcherIconPreference = requireNotNull(findPreference(KEY_PLUGIN_LAUNCHER_ICON))
         autoCheckPreference = requireNotNull(findPreference(KEY_PLUGIN_AUTO_CHECK))
         ignoredVersionsPreference = requireNotNull(findPreference(KEY_PLUGIN_IGNORED_VERSIONS))
         instructionPreference = requireNotNull(findPreference(KEY_PLUGIN_INSTRUCTION_VIEW))
@@ -196,6 +200,22 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunHostInfoGrantPreference = findPreference(KEY_PLUGIN_BUN_HOST_INFO_GRANT)
         bunUiToastGrantPreference = findPreference(KEY_PLUGIN_BUN_UI_TOAST_GRANT)
         bunDeviceInfoGrantPreference = findPreference(KEY_PLUGIN_BUN_DEVICE_INFO_GRANT)
+
+        launcherIconPreference.setOnPreferenceChangeListener { _, value ->
+            val context = requireContext().applicationContext
+            val show = value as? Boolean ?: true
+            launcherIconPreference.isEnabled = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val result = PluginLauncherIconController.setShown(context, packageName, show)
+                    if (!result.success) ViewUtils.showToast(context, result.message.orEmpty(), true)
+                    if (isAdded) refreshAllSummaries()
+                } finally {
+                    if (isAdded) launcherIconPreference.isEnabled = true
+                }
+            }
+            false
+        }
 
         launchPagePreference.setOnPreferenceClickListener {
             val launchIntent = requireContext().packageManager.getLaunchIntentForPackage(packageName)
@@ -306,6 +326,12 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         }
 
         refreshVisibilitySummary()
+
+        launcherIconPreference.isChecked = PluginLauncherIconController.isShown(context, packageName)
+        launcherIconPreference.setSummary(
+            if (launcherIconPreference.isChecked) R.string.summary_plugin_launcher_icon_shown
+            else R.string.summary_plugin_launcher_icon_hidden,
+        )
 
         val globalAutoCheckEnabled = PluginOnlineSettingsStore.isAutoCheckUpdatesEnabled()
         autoCheckPreference.isChecked = PluginUpdateCheckStore.isEnabled(packageName, defaultEnabled = true)
@@ -849,6 +875,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     companion object {
         private const val KEY_PLUGIN_LAUNCH_PAGE = "plugin_launch_page"
         private const val KEY_PLUGIN_VISIBILITY = "plugin_visibility"
+        private const val KEY_PLUGIN_LAUNCHER_ICON = "plugin_launcher_icon"
         private const val KEY_PLUGIN_AUTO_CHECK = "plugin_auto_check_updates"
         private const val KEY_PLUGIN_IGNORED_VERSIONS = "plugin_ignored_versions"
         private const val KEY_CATEGORY_VARIANT_PRIORITY = "category_variant_priority"

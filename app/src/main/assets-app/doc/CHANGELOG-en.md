@@ -12,6 +12,8 @@
 * `Hint` Compose UI and its API reference, Ace Editor type completion and Offline Docs content are delivered as a local integration requiring a matching local host build; the plugin is not listed in the official index or formally released
 * `Hint` Independent dialogs require AutoJs6 6.8.0 / 5321 and Compose UI with dialog-v1 support; TSX also requires TypeScript Engine 0.6.6. Non-UI scripts need the host overlay permission
 * `Hint` This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer
+* `Feature` A "Show launcher icon" switch in plugin settings, enabled by default, hides and restores the original icon variant for official and third-party plugins (requires Root or authorized Shizuku running as Root)
+* `Feature` A launcher-icon option in the installation wizard applies only to plugins newly installed by that batch, defaults to showing icons and leaves already installed plugins unchanged
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
 * `Feature` Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates
 * `Feature` ai.agent script API for task creation, queries, events, input, confirmation, cancellation and detached background tasks; result/context expose @agent registered-script results and context, with three task examples
@@ -298,6 +300,7 @@
 * `Feature` compose.memo reuses render fragments whose dependency values and read states are unchanged, so a partial update of a large list rebuilds only the changed rows
 * `Feature` Developer options include "Allow Inspector for Node.js scripts", disabled by default, for local breakpoints and CPU/heap profiling in Debug and Release with a compatible Node.js Runtime plugin; desktop DevTools connects through ADB port forwarding
 * `Feature` Layout Inspector "Generate code" supports relative locating plans that identify the target through a nearby widget's text / desc / id and a fixed compass relation (for example an icon in a list row located by the row title), generating filter and compass calls
+* `Fix` Plugin search filters remaining active after closing search or switching home tabs
 * `Fix` A host crash when intelligent theme colors refresh on returning to the foreground or recreating a screen and widget callbacks register additional theme targets
 * `Fix` Plugin Center showing Unknown ABIs for official plugins verified to contain no native code, and losing indexed native compatibility metadata after a restart
 * `Fix` The plugin installation wizard waiting for a timeout after a failed or cancelled installation when installing consecutive plugins through the system installer
@@ -549,6 +552,7 @@
 * `Fix` Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates
 * `Fix` Component factories treated the first positional node as a property object when several node arguments were supplied
 * `Fix` Compose node property getters preserve null values, including default progress and cleared DatePicker selections, instead of returning undefined
+* `Improvement` The Standard plugin installation profile includes 3-Setup Installer, and system APK installation no longer displays the installer-plugin recommendation tip
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
 * `Improvement` Plugin Center writes an explicit enable record and runs the enable probe after observing a fresh installation of a default-off plugin (YOLO, MCP Server) signed with the host's official certificate; trusted third-party or user-granted signers, adb sideloads and updates still require manual enabling, and runtime consumers keep reading only the saved record

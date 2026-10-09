@@ -494,6 +494,8 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">No se pudo obtener el índice de complementos de %1$s: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">El plugin \"%1$s\" no esta autorizado en el Centro de plugins</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">El plugin \"%1$s\" no esta habilitado en el Centro de plugins</string>
+    <string name="error_plugin_launcher_icon_not_applied">No se pudo aplicar el ajuste del icono</string>
+    <string name="error_plugin_launcher_icon_permission">Para cambiar este icono se necesita Root o Shizuku autorizado y ejecutado como Root</string>
     <string name="error_plugin_native_page_alignment_unsupported">El plugin %1$s contiene una biblioteca nativa alineada a %2$d bytes, incompatible con páginas de %3$d bytes. Actualice el plugin.</string>
     <string name="error_plugin_not_found_in_installed_apps">No se encontro el plugin \"%1$s\" en las apps instaladas</string>
     <string name="error_plugin_returned_empty_info">El plugin %1$s devolvió información vacía.</string>
@@ -596,7 +598,6 @@
     <string name="hint_archive_password">Contraseña del archivo</string>
     <string name="hint_find_with_regex">Se admite Regex. Utilice \"$1\" - \"$9\" para los grupos capturados.</string>
     <string name="hint_github_token">Pega un token de acceso personal de GitHub</string>
-    <string name="hint_installer_plugin_recommended">Consejo: el plugin %1$s permite la instalacion silenciosa mediante Shizuku o Root y admite paquetes divididos. Lo encontraras en el Centro de plugins.</string>
     <string name="hint_long_click_run_to_debug">Haga un clic largo en el botón \"Ejecutar\" para depurar</string>
     <string name="hint_loop_delay">Retraso antes del bucle</string>
     <string name="hint_loop_times">0 para bucle infinito</string>
@@ -811,6 +812,8 @@
     <string name="summary_plugin_ignored_versions_count">%1$d versiones ignoradas</string>
     <string name="summary_plugin_instruction_view">Mostrar ejemplos de uso y notas de este plugin</string>
     <string name="summary_plugin_jump_to_launch_page">Abrir la Activity de inicio de este plugin</string>
+    <string name="summary_plugin_launcher_icon_hidden">Ocultar este plugin en el lanzador</string>
+    <string name="summary_plugin_launcher_icon_shown">Permitir que este plugin aparezca en el lanzador</string>
     <string name="summary_plugin_no_launch_page">El plugin actual no tiene página de inicio</string>
     <string name="summary_reconnect_client">\"Reconectar\" cierra esta conexión y deja que VSCode la restablezca automáticamente (extensión 1.1.0+); \"Desconectar\" la cierra sin reconexión automática</string>
     <string name="summary_reconnect_on_network_change">Durante la reconexión, reintentar de inmediato cuando haya una red disponible</string>
@@ -2294,10 +2297,12 @@
     <string name="text_plugin_install_wizard_installing_plugins">Instalando plugins</string>
     <string name="text_plugin_install_wizard_installing_with_progress">Instalando (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">Espacio de caché insuficiente: se necesitan unos %1$s, disponibles %2$s</string>
+    <string name="text_plugin_install_wizard_launcher_icons_not_applied">Plugins instalados, pero no se aplicó el ajuste de los iconos:</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">Cargando el índice de plugins...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">El índice no contiene ningún plugin instalable</string>
     <string name="text_plugin_install_wizard_no_selection">No se ha seleccionado ningún plugin</string>
     <string name="text_plugin_install_wizard_show_installed">Mostrar plugins instalados</string>
+    <string name="text_plugin_install_wizard_show_launcher_icons">Mostrar iconos de los nuevos plugins</string>
     <string name="text_plugin_install_wizard_summary_cancelled">Cancelados: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">Fallidos: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">Instalados: %1$d</string>
@@ -2317,6 +2322,7 @@
     <string name="text_plugin_native_page_alignment_incompatible">Incompatible con 16 KB</string>
     <string name="text_plugin_official">Oficial</string>
     <string name="text_plugin_online_source">Fuente de plugins en línea</string>
+    <string name="text_plugin_show_launcher_icon">Mostrar icono en el lanzador</string>
     <string name="text_plugin_show_official_plugins">Mostrar plugins oficiales instalables en línea</string>
     <string name="text_plugin_show_third_party_plugins">Mostrar plugins de terceros instalables en línea</string>
     <string name="text_plugin_third_party">De terceros</string>

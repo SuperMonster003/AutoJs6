@@ -496,6 +496,8 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">تعذر جلب فهرس إضافات %1$s: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">الاضافة \"%1$s\" غير مُفوّضة في مركز الاضافات</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">الاضافة \"%1$s\" غير مُمكّنة في مركز الاضافات</string>
+    <string name="error_plugin_launcher_icon_not_applied">تعذر تطبيق إعداد أيقونة المشغل</string>
+    <string name="error_plugin_launcher_icon_permission">يتطلب تغيير هذه الأيقونة صلاحية Root أو Shizuku مفوضا ويعمل بوضع Root</string>
     <string name="error_plugin_native_page_alignment_unsupported">تحتوي الإضافة %1$s على مكتبة أصلية بمحاذاة %2$d بايت, ولا يمكن تشغيلها مع صفحات بحجم %3$d بايت. يرجى تحديث الإضافة.</string>
     <string name="error_plugin_not_found_in_installed_apps">لم يتم العثور على الاضافة \"%1$s\" ضمن التطبيقات المثبتة</string>
     <string name="error_plugin_returned_empty_info">أعاد المكوّن الإضافي %1$s معلومات فارغة.</string>
@@ -598,7 +600,6 @@
     <string name="hint_archive_password">كلمة مرور الأرشيف</string>
     <string name="hint_find_with_regex">Regex مدعوم. استخدم \"$1\" - \"$9\" للمجموعات التي تم التقاطها.</string>
     <string name="hint_github_token">ألصق رمز وصول شخصي إلى GitHub</string>
-    <string name="hint_installer_plugin_recommended">تلميح: تضيف الاضافة %1$s التثبيت الصامت عبر Shizuku أو Root ودعم الحزم المقسمة. تجدها في مركز الاضافات.</string>
     <string name="hint_long_click_run_to_debug">انقر الطويل على زر \"تشغيل\" لتصحيح الأخطاء</string>
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
@@ -813,6 +814,8 @@
     <string name="summary_plugin_ignored_versions_count">تم تجاهل %1$d من الاصدارات</string>
     <string name="summary_plugin_instruction_view">عرض امثلة الاستخدام والملاحظات الخاصة بهذه الاضافة</string>
     <string name="summary_plugin_jump_to_launch_page">فتح Activity تشغيل هذه الاضافة</string>
+    <string name="summary_plugin_launcher_icon_hidden">إخفاء هذه الإضافة من المشغل</string>
+    <string name="summary_plugin_launcher_icon_shown">السماح بظهور هذه الإضافة في المشغل</string>
     <string name="summary_plugin_no_launch_page">لا توجد صفحة تشغيل للاضافة الحالية</string>
     <string name="summary_reconnect_client">\"إعادة الاتصال\" تقطع هذا الاتصال وتترك VSCode يعيد إنشاءه تلقائيًا (الإضافة 1.1.0+); \"قطع الاتصال\" يغلقه دون إعادة اتصال تلقائية</string>
     <string name="summary_reconnect_on_network_change">أثناء إعادة الاتصال, إعادة المحاولة فورا عند توفر شبكة</string>
@@ -2296,10 +2299,12 @@
     <string name="text_plugin_install_wizard_installing_plugins">جارٍ تثبيت الإضافات</string>
     <string name="text_plugin_install_wizard_installing_with_progress">جارٍ التثبيت (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">مساحة ذاكرة التخزين المؤقت غير كافية: مطلوب حوالي %1$s، المتاح %2$s</string>
+    <string name="text_plugin_install_wizard_launcher_icons_not_applied">تم تثبيت الإضافات التالية, لكن تعذر تطبيق إعداد الأيقونات:</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">جارٍ تحميل فهرس الإضافات...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">لا يحتوي الفهرس على أي إضافة قابلة للتثبيت</string>
     <string name="text_plugin_install_wizard_no_selection">لم يتم تحديد أي إضافة</string>
     <string name="text_plugin_install_wizard_show_installed">عرض الإضافات المثبتة</string>
+    <string name="text_plugin_install_wizard_show_launcher_icons">إظهار أيقونات الإضافات الجديدة</string>
     <string name="text_plugin_install_wizard_summary_cancelled">تم الإلغاء: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">فشل: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">تم التثبيت: %1$d</string>
@@ -2319,6 +2324,7 @@
     <string name="text_plugin_native_page_alignment_incompatible">غير متوافق مع 16 KB</string>
     <string name="text_plugin_official">رسمي</string>
     <string name="text_plugin_online_source">مصدر الاضافات عبر الانترنت</string>
+    <string name="text_plugin_show_launcher_icon">إظهار أيقونة المشغل</string>
     <string name="text_plugin_show_official_plugins">اظهار الاضافات الرسمية القابلة للتثبيت عبر الانترنت</string>
     <string name="text_plugin_show_third_party_plugins">اظهار اضافات الجهات الخارجية القابلة للتثبيت عبر الانترنت</string>
     <string name="text_plugin_third_party">تابع لجهة خارجية</string>

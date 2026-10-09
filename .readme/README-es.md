@@ -174,6 +174,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Sugerencia` Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente
 * `Sugerencia` Los diálogos independientes requieren AutoJs6 6.8.0 / 5321 y Compose UI con dialog-v1; TSX también requiere TypeScript Engine 0.6.6. Los scripts sin UI necesitan el permiso de superposición del anfitrión
 * `Sugerencia` Esta versión usa el contrato Compose UI V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
+* `Nuevo` El interruptor Mostrar icono en el lanzador, activado por defecto, oculta y restaura el estilo original en plugins oficiales y de terceros (requiere Root o Shizuku autorizado en modo Root)
+* `Nuevo` Una opción del asistente controla los iconos solo para los plugins nuevos del lote, los muestra por defecto y no cambia los plugins ya instalados
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
 * `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
 * `Nuevo` API ai.agent para iniciar y consultar tareas, eventos, respuestas, confirmaciones, cancelación y tareas detached en segundo plano; result/context exponen resultados y contexto de scripts registrados con @agent, con tres ejemplos
@@ -460,6 +462,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` compose.memo reutiliza fragmentos de render cuyos valores de dependencia y estados leídos no han cambiado, de modo que una actualización parcial de una lista grande solo reconstruye las filas modificadas
 * `Nuevo` Las opciones de desarrollador incluyen "Permitir Inspector para scripts Node.js", desactivado por defecto, para depuración local y análisis de CPU/memoria en Debug y Release con un plugin Node.js Runtime compatible; DevTools se conecta mediante reenvío de puertos ADB
 * `Nuevo` La función "Generar código" del inspector de diseño admite planes de localización relativa que identifican el destino mediante el text / desc / id de un elemento cercano y una relación fija de brújula (por ejemplo, el icono de una fila de lista localizado por el título de la fila), generando llamadas a filter y compass
+* `Corrección` El filtro de plugins permanecía activo al cerrar la búsqueda o cambiar de pestaña
 * `Corrección` Un cierre inesperado del anfitrión al actualizar los colores inteligentes al volver al primer plano o recrear una pantalla, cuando los callbacks registraban nuevos elementos del tema
 * `Corrección` El centro de plugins mostraba Unknown para las ABI de plugins oficiales verificados sin código nativo y perdía los metadatos de compatibilidad nativa del índice al reiniciar
 * `Corrección` El asistente de instalación de plugins esperaba al tiempo límite tras un fallo o cancelación al instalar plugins consecutivos con el instalador del sistema
@@ -711,6 +714,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Compose UI rechaza volver a montar páginas o ventanas flotantes dentro del callback de renderizado y conserva la página actual; permite volver a montar páginas después de actualizar el plugin
 * `Corrección` Las fábricas de componentes trataban el primer nodo como propiedades al recibir varios nodos como argumentos posicionales
 * `Corrección` Los lectores de propiedades Compose conservan null en lugar de devolver undefined, incluidos el progreso predeterminado y las fechas borradas de DatePicker
+* `Mejora` El perfil Estándar incluye 3-Setup Installer; la instalación de APK con el instalador del sistema ya no muestra la recomendación de este plugin
 * `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
 * `Mejora` El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado

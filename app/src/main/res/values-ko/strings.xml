@@ -496,6 +496,8 @@
     <string name="error_plugin_index_source_fetch_failed_with_reason">%1$s 플러그인 인덱스를 가져오지 못했습니다: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">플러그인 \"%1$s\" 이 (가) 플러그인 센터에서 권한이 부여되지 않았습니다</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">플러그인 \"%1$s\" 이(가) 플러그인 센터에서 활성화되어 있지 않습니다</string>
+    <string name="error_plugin_launcher_icon_not_applied">런처 아이콘 설정을 적용하지 못했습니다</string>
+    <string name="error_plugin_launcher_icon_permission">이 아이콘을 변경하려면 Root 권한 또는 Root 모드로 실행되고 승인된 Shizuku가 필요합니다</string>
     <string name="error_plugin_native_page_alignment_unsupported">플러그인 %1$s의 네이티브 라이브러리는 %2$d바이트로 정렬되어 있어 페이지 크기가 %3$d바이트인 기기에서 실행할 수 없습니다. 플러그인을 업데이트하세요.</string>
     <string name="error_plugin_not_found_in_installed_apps">설치된 앱에서 플러그인 \"%1$s\" 을 (를) 찾을 수 없습니다</string>
     <string name="error_plugin_returned_empty_info">%1$s 플러그인이 빈 info를 반환했습니다.</string>
@@ -598,7 +600,6 @@
     <string name="hint_archive_password">압축 파일 비밀번호</string>
     <string name="hint_find_with_regex">Regex 가 지원됩니다. 캡처 된 그룹에는 \"$1\" - \"$9\" 를 사용하십시오.</string>
     <string name="hint_github_token">GitHub 개인용 액세스 토큰을 붙여넣으세요</string>
-    <string name="hint_installer_plugin_recommended">팁: %1$s 플러그인을 사용하면 Shizuku 또는 Root를 통한 자동 설치와 분할 패키지를 지원합니다. 플러그인 센터에서 찾을 수 있습니다.</string>
     <string name="hint_long_click_run_to_debug">\"실행\" 버튼을 긴 클릭하여 디버그를 클릭하십시오</string>
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
@@ -813,6 +814,8 @@
     <string name="summary_plugin_ignored_versions_count">무시된 버전 수: %1$d</string>
     <string name="summary_plugin_instruction_view">이 플러그인의 사용 예시와 설명을 표시합니다</string>
     <string name="summary_plugin_jump_to_launch_page">이 플러그인의 실행 Activity 를 엽니다</string>
+    <string name="summary_plugin_launcher_icon_hidden">런처에서 이 플러그인 숨기기</string>
+    <string name="summary_plugin_launcher_icon_shown">이 플러그인이 런처에 표시되도록 허용</string>
     <string name="summary_plugin_no_launch_page">현재 플러그인에는 시작 페이지가 없습니다</string>
     <string name="summary_reconnect_client">\"다시 연결\"은 이 연결을 끊고 VSCode가 자동으로 다시 연결하도록 합니다 (확장 1.1.0+); \"연결 끊기\"는 자동 재연결 없이 연결을 닫습니다</string>
     <string name="summary_reconnect_on_network_change">재연결 중 네트워크를 사용할 수 있게 되면 즉시 재시도합니다</string>
@@ -2296,10 +2299,12 @@
     <string name="text_plugin_install_wizard_installing_plugins">플러그인 설치 중</string>
     <string name="text_plugin_install_wizard_installing_with_progress">설치 중 (%1$d/%2$d)</string>
     <string name="text_plugin_install_wizard_insufficient_space">캐시 공간이 부족합니다: 약 %1$s 필요, %2$s 사용 가능</string>
+    <string name="text_plugin_install_wizard_launcher_icons_not_applied">다음 플러그인은 설치되었지만 아이콘 설정을 적용하지 못했습니다:</string>
     <string name="text_plugin_install_wizard_loading_index" tools:ignore="TypographyEllipsis">플러그인 인덱스를 불러오는 중...</string>
     <string name="text_plugin_install_wizard_no_plugins_available">인덱스에 설치할 수 있는 플러그인이 없습니다</string>
     <string name="text_plugin_install_wizard_no_selection">선택한 플러그인이 없습니다</string>
     <string name="text_plugin_install_wizard_show_installed">설치된 플러그인 표시</string>
+    <string name="text_plugin_install_wizard_show_launcher_icons">새로 설치할 플러그인의 아이콘 표시</string>
     <string name="text_plugin_install_wizard_summary_cancelled">취소됨: %1$d</string>
     <string name="text_plugin_install_wizard_summary_failed">실패: %1$d</string>
     <string name="text_plugin_install_wizard_summary_installed">설치됨: %1$d</string>
@@ -2319,6 +2324,7 @@
     <string name="text_plugin_native_page_alignment_incompatible">16 KB 호환되지 않음</string>
     <string name="text_plugin_official">공식</string>
     <string name="text_plugin_online_source">온라인 플러그인 소스</string>
+    <string name="text_plugin_show_launcher_icon">런처 아이콘 표시</string>
     <string name="text_plugin_show_official_plugins">공식 온라인 설치 가능 플러그인 표시</string>
     <string name="text_plugin_show_third_party_plugins">서드파티 온라인 설치 가능 플러그인 표시</string>
     <string name="text_plugin_third_party">서드파티</string>

@@ -24,7 +24,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.center.PluginCenterProcessLogger
 import org.autojs.autojs.core.plugin.center.PluginInstaller
+import org.autojs.autojs.core.plugin.center.PluginLauncherIconController
+import org.autojs.autojs.core.plugin.center.PluginLauncherIconPolicy
 import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
+import org.autojs.autojs.core.plugin.installer.PackageChangeObserver
 import org.autojs.autojs.ui.wizard.WizardUi
 import org.autojs.autojs.ui.wizard.WizardUi.showAndAwait
 import org.autojs.autojs.util.ContextUtils.findActivity
@@ -60,22 +63,25 @@ object PluginInstallWizardInstaller {
 
     private enum class State { INSTALLED, FAILED, CANCELLED }
 
-    private class Outcome(val item: PluginInstallWizardItem, val state: State, val detail: String? = null)
+    private class Outcome(val item: PluginInstallWizardItem, val state: State, val detail: String? = null, val launcherWarning: String? = null)
 
     private class Downloaded(val index: Int, val item: PluginInstallWizardItem, val uri: Uri, val file: File?)
 
     /** Starts the installation of the selectable [items]; [onFinished] runs once everything has ended. */
-    fun start(context: Context, scope: CoroutineScope, items: List<PluginInstallWizardItem>, onFinished: () -> Unit = {}) {
+    fun start(context: Context, scope: CoroutineScope, items: List<PluginInstallWizardItem>, showLauncherIcons: Boolean = true, onFinished: () -> Unit = {}) {
+        // Snapshot at the click, including packages installed since the selection list was built.
+        val installedAtStart = items.filter { PackageChangeObserver.isPackageInstalled(context, it.packageName) }
+            .mapTo(HashSet()) { it.packageName }
         scope.launch(Dispatchers.Main) {
             try {
-                run(context, items.filter { it.isSelectable })
+                run(context, items.filter { it.isSelectable }, showLauncherIcons, installedAtStart)
             } finally {
                 onFinished()
             }
         }
     }
 
-    private suspend fun run(context: Context, targets: List<PluginInstallWizardItem>) {
+    private suspend fun run(context: Context, targets: List<PluginInstallWizardItem>, showLauncherIcons: Boolean, installedAtStart: Set<String>) {
         if (targets.isEmpty()) {
             ViewUtils.showToast(context, R.string.text_plugin_install_wizard_no_selection)
             return
@@ -87,7 +93,7 @@ object PluginInstallWizardInstaller {
         if (viaSystemInstaller) ensureUnknownAppsAllowed(context)
 
         PluginCenterProcessLogger.i("Plugin install wizard starts: ${targets.size} plugin(s), systemInstaller=$viaSystemInstaller.")
-        val outcomes = downloadAndInstall(context, targets, viaSystemInstaller)
+        val outcomes = downloadAndInstall(context, targets, viaSystemInstaller, showLauncherIcons, installedAtStart)
         PluginCenterProcessLogger.i(
             "Plugin install wizard finished: " +
                     "installed=${outcomes.count { it.state == State.INSTALLED }}, " +
@@ -158,6 +164,8 @@ object PluginInstallWizardInstaller {
         context: Context,
         targets: List<PluginInstallWizardItem>,
         viaSystemInstaller: Boolean,
+        showLauncherIcons: Boolean,
+        installedAtStart: Set<String>,
     ): List<Outcome> = coroutineScope {
         val cancelFlag = AtomicBoolean(false)
         var currentInstall: Job? = null
@@ -203,13 +211,24 @@ object PluginInstallWizardInstaller {
                     entry.file?.delete()
                     continue
                 }
-                progress.onInstallStarted(entry.index, entry.item)
+                // 3-Setup Installer can become available during this batch.
+                val currentViaSystemInstaller = !InstallerPluginHost.isAvailable(context)
+                if (currentViaSystemInstaller) ensureUnknownAppsAllowed(context)
+                progress.onInstallStarted(entry.index, entry.item, currentViaSystemInstaller)
                 PluginCenterProcessLogger.i("Plugin install wizard installs ${entry.item.packageName} (${entry.index + 1}/${targets.size}).")
-                val outcome = try {
-                    install(context, entry, viaSystemInstaller) { job -> currentInstall = job }
+                val installedBeforeAttempt = PackageChangeObserver.isPackageInstalled(context, entry.item.packageName)
+                var outcome = try {
+                    if (installedBeforeAttempt) Outcome(entry.item, State.INSTALLED)
+                    else install(context, entry, currentViaSystemInstaller) { job -> currentInstall = job }
                 } finally {
                     currentInstall = null
                     entry.file?.delete()
+                }
+                if (PluginLauncherIconPolicy.appliesToNewInstall(
+                        entry.item.packageName in installedAtStart, installedBeforeAttempt, outcome.state == State.INSTALLED,
+                    )) {
+                    val result = PluginLauncherIconController.setShown(context, entry.item.packageName, showLauncherIcons)
+                    if (!result.success) outcome = Outcome(entry.item, State.INSTALLED, launcherWarning = result.message)
                 }
                 outcomes += outcome
                 progress.onInstallFinished(outcomes.count { it.state != State.CANCELLED })
@@ -286,8 +305,9 @@ object PluginInstallWizardInstaller {
         val installed = ordered.filter { it.state == State.INSTALLED }
         val failed = ordered.filter { it.state == State.FAILED }
         val cancelled = ordered.filter { it.state == State.CANCELLED }
+        val launcherWarnings = ordered.filter { it.launcherWarning != null }
 
-        if (failed.isEmpty() && cancelled.isEmpty()) {
+        if (failed.isEmpty() && cancelled.isEmpty() && launcherWarnings.isEmpty()) {
             WizardUi.showSnack(context, context.getString(R.string.text_plugin_install_wizard_all_installed, installed.size))
             return
         }
@@ -295,6 +315,11 @@ object PluginInstallWizardInstaller {
         val content = buildString {
             appendLine(context.getString(R.string.text_plugin_install_wizard_summary_installed, installed.size))
             installed.forEach { appendLine("- ${it.item.title}") }
+            if (launcherWarnings.isNotEmpty()) {
+                appendLine()
+                appendLine(context.getString(R.string.text_plugin_install_wizard_launcher_icons_not_applied))
+                launcherWarnings.forEach { appendLine("- ${it.item.title}: ${it.launcherWarning}") }
+            }
             if (failed.isNotEmpty()) {
                 appendLine()
                 appendLine(context.getString(R.string.text_plugin_install_wizard_summary_failed, failed.size))
@@ -326,7 +351,7 @@ object PluginInstallWizardInstaller {
     private class Progress(
         private val context: Context,
         private val total: Int,
-        private val viaSystemInstaller: Boolean,
+        private var viaSystemInstaller: Boolean,
         onCancel: () -> Unit,
     ) {
 
@@ -375,7 +400,8 @@ object PluginInstallWizardInstaller {
             render()
         }
 
-        fun onInstallStarted(index: Int, item: PluginInstallWizardItem) {
+        fun onInstallStarted(index: Int, item: PluginInstallWizardItem, usesSystemInstaller: Boolean) {
+            viaSystemInstaller = usesSystemInstaller
             installing = true
             installLine = "${context.getString(R.string.text_plugin_install_wizard_installing_with_progress, index + 1, total)}: ${item.title}"
             render()

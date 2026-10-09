@@ -57,6 +57,7 @@ object PluginInstallWizardDialog {
         private val options = ArrayList<MaterialDialog.OptionMenuItemSpec>()
 
         private var showInstalled = store.isShowDone(context)
+        private var showLauncherIcons = PluginInstallWizardProfileStore.showLauncherIcons(context)
         private var loadJob: Job? = null
         private var dialog: MaterialDialog? = null
 
@@ -171,6 +172,15 @@ object PluginInstallWizardDialog {
                 showInstalled,
             )
             options += MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_select_all)) { adapter.selectAll() }
+            options += MaterialDialog.OptionMenuItemSpec(
+                context.getString(R.string.text_plugin_install_wizard_show_launcher_icons),
+                {
+                    showLauncherIcons = !showLauncherIcons
+                    PluginInstallWizardProfileStore.setShowLauncherIcons(context, showLauncherIcons)
+                    rebuildOptions()
+                },
+                showLauncherIcons,
+            )
             options += MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_deselect_all)) { adapter.clearSelection() }
             options += profiles.options()
         }
@@ -202,7 +212,7 @@ object PluginInstallWizardDialog {
             }
             handedOver = true
             d.dismiss()
-            PluginInstallWizardInstaller.start(context, scope, items, onFinished)
+            PluginInstallWizardInstaller.start(context, scope, items, showLauncherIcons, onFinished)
         }
 
     }

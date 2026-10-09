@@ -3,6 +3,8 @@
     "v6.8.0": {
       "released_date": "2026/10/09",
       "feature": [
+        "El interruptor Mostrar icono en el lanzador, activado por defecto, oculta y restaura el estilo original en plugins oficiales y de terceros (requiere Root o Shizuku autorizado en modo Root)",
+        "Una opción del asistente controla los iconos solo para los plugins nuevos del lote, los muestra por defecto y no cambia los plugins ya instalados",
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",
         "OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas",
         "API ai.agent para iniciar y consultar tareas, eventos, respuestas, confirmaciones, cancelación y tareas detached en segundo plano; result/context exponen resultados y contexto de scripts registrados con @agent, con tres ejemplos",
@@ -291,6 +293,7 @@
         "La función \"Generar código\" del inspector de diseño admite planes de localización relativa que identifican el destino mediante el text / desc / id de un elemento cercano y una relación fija de brújula (por ejemplo, el icono de una fila de lista localizado por el título de la fila), generando llamadas a filter y compass"
       ],
       "fix": [
+        "El filtro de plugins permanecía activo al cerrar la búsqueda o cambiar de pestaña",
         "Un cierre inesperado del anfitrión al actualizar los colores inteligentes al volver al primer plano o recrear una pantalla, cuando los callbacks registraban nuevos elementos del tema",
         "El centro de plugins mostraba Unknown para las ABI de plugins oficiales verificados sin código nativo y perdía los metadatos de compatibilidad nativa del índice al reiniciar",
         "El asistente de instalación de plugins esperaba al tiempo límite tras un fallo o cancelación al instalar plugins consecutivos con el instalador del sistema",
@@ -544,6 +547,7 @@
         "Los lectores de propiedades Compose conservan null en lugar de devolver undefined, incluidos el progreso predeterminado y las fechas borradas de DatePicker"
       ],
       "improvement": [
+        "El perfil Estándar incluye 3-Setup Installer; la instalación de APK con el instalador del sistema ya no muestra la recomendación de este plugin",
         "Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas",
         "Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión",
         "El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado",

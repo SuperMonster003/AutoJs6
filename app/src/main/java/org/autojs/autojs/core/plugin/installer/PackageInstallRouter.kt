@@ -23,7 +23,6 @@ import org.autojs.plugin.installer.api.InstallerContract
 import org.autojs.plugin.installer.api.InstallerErrorCodes
 import java.io.File
 import java.util.Locale
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The single entry every host installation goes through (plugin roadmap D21, D3, D4).
@@ -69,7 +68,6 @@ object PackageInstallRouter {
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    private val hintShown = AtomicBoolean(false)
 
     /** Installs a file the host owns (a build output, a download, a file-manager item). Returns false only when nothing could be started. */
     @JvmStatic
@@ -211,7 +209,7 @@ object PackageInstallRouter {
         }
     }
 
-    /** Hands an APK to the system installer; the one-time hint names the plugin that would do more. */
+    /** Hands an APK to the system installer. */
     fun launchSystemInstaller(context: Context, packageUri: Uri): Boolean {
         val launched = Intent(Intent.ACTION_VIEW)
             .setDataAndType(packageUri, Mime.APPLICATION_VND_ANDROID_PACKAGE_ARCHIVE)
@@ -219,9 +217,6 @@ object PackageInstallRouter {
             .startSafely(context, true) {
                 Toast.makeText(context, R.string.error_no_applications_available_for_installing_this_file, Toast.LENGTH_LONG).show()
             }
-        if (launched && hintShown.compareAndSet(false, true) && !PackageChangeObserver.isPackageInstalled(context, ThreeSetupInstallerOfficialPlugin.PACKAGE_NAME)) {
-            Toast.makeText(context, context.getString(R.string.hint_installer_plugin_recommended, ThreeSetupInstallerOfficialPlugin.DISPLAY_NAME), Toast.LENGTH_LONG).show()
-        }
         return launched
     }
 }
