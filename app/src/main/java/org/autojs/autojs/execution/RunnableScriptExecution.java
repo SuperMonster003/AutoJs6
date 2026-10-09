@@ -3,6 +3,7 @@ package org.autojs.autojs.execution;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler;
+import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionPerformance;
 import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.engine.ScriptEngineManager;
 import org.autojs.autojs.lang.ThreadCompat;
@@ -32,14 +33,24 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
 
     public Object execute() {
         try {
+            boolean typeScriptPreparation = TypeScriptExecutionCompiler.requiresPreparation(getSource());
             long compileStartedAt = android.os.SystemClock.elapsedRealtime();
             mExecutionSource = TypeScriptExecutionCompiler.prepare(
                     mScriptEngineManager.getAndroidContext(),
                     getSource()
             );
-            getConfig().nodeTypeScriptPrepareMs = android.os.SystemClock.elapsedRealtime() - compileStartedAt;
+            long prepareMs = android.os.SystemClock.elapsedRealtime() - compileStartedAt;
+            getConfig().nodeTypeScriptPrepareMs = prepareMs;
+            long engineCreateStartedAt = android.os.SystemClock.elapsedRealtime();
             mScriptEngine = mScriptEngineManager.createEngineOfSourceOrThrow(mExecutionSource, getId());
             mScriptEngine.setTag(ExecutionConfig.tag, getConfig());
+            if (typeScriptPreparation) {
+                TypeScriptExecutionPerformance.report(
+                        TypeScriptExecutionPerformance.ENTRY_THREAD,
+                        prepareMs,
+                        android.os.SystemClock.elapsedRealtime() - engineCreateStartedAt
+                );
+            }
         } catch (Throwable e) {
             if (mScriptEngine != null) {
                 mScriptEngine.destroy();

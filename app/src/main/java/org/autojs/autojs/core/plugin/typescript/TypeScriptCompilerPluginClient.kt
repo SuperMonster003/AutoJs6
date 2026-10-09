@@ -342,7 +342,10 @@ internal class TypeScriptCompilerPluginClient(
         var terminalReceived = false
 
         return try {
+            val awaitPrewarmStartedAt = performance.checkpoint()
             TypeScriptCompilerStartupPrewarm.awaitPendingPrewarm()
+            performance.recordAwaitPrewarmSince(awaitPrewarmStartedAt)
+            val discoveryStartedAt = performance.checkpoint()
             val target = host.selectOrThrow(
                 context = appContext,
                 engineId = TypeScriptPluginIds.ID,
@@ -358,8 +361,11 @@ internal class TypeScriptCompilerPluginClient(
                 sourceName = entrySourceName,
                 requireReady = false,
             )
+            performance.recordDiscoverySince(discoveryStartedAt)
+            val prepareStartedAt = performance.checkpoint()
             var prepared = prepare(requestId, advertisedAuthority, inputFile)
-            performance.recordPrepared(
+            performance.recordPreparedSince(
+                startedAtNanos = prepareStartedAt,
                 inputArchiveBytes = prepared.archiveFile.length(),
                 sourceFileCount = prepared.sourceFiles.size,
             )
@@ -491,19 +497,24 @@ internal class TypeScriptCompilerPluginClient(
                     TypeScriptCompilerContract.OUTCOME_DIAGNOSTICS,
                     -> {
                         val outputProcessingStartedAt = performance.checkpoint()
-                        try {
+                        val read = try {
                             TypeScriptCompilationOutputReader.read(
                                 outputFile = outputFile,
                                 prepared = prepared,
                                 terminal = terminal,
-                            ).also {
-                                publishCached(cache, cacheKey, prepared, terminal, outputFile)
-                            }
+                            )
                         } finally {
                             performance.recordOutputProcessingSince(
                                 outputProcessingStartedAt,
                             )
                         }
+                        val cachePublishStartedAt = performance.checkpoint()
+                        try {
+                            publishCached(cache, cacheKey, prepared, terminal, outputFile)
+                        } finally {
+                            performance.recordCachePublishSince(cachePublishStartedAt)
+                        }
+                        read
                     }
 
                     else -> throw TypeScriptCompilerException(

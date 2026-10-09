@@ -25,8 +25,22 @@ class TypeScriptCompilationPerformanceTest {
             usedHeapKiB = { heapKiB },
         )
 
-        clock.advanceMillis(12)
-        recorder.recordPrepared(inputArchiveBytes = 4_096L, sourceFileCount = 3)
+        recorder.checkpoint().also { startedAt ->
+            clock.advanceMillis(3)
+            recorder.recordAwaitPrewarmSince(startedAt)
+        }
+        recorder.checkpoint().also { startedAt ->
+            clock.advanceMillis(9)
+            recorder.recordDiscoverySince(startedAt)
+        }
+        recorder.checkpoint().also { startedAt ->
+            clock.advanceMillis(12)
+            recorder.recordPreparedSince(
+                startedAtNanos = startedAt,
+                inputArchiveBytes = 4_096L,
+                sourceFileCount = 3,
+            )
+        }
         recorder.recordCacheAvailability(available = true)
         recorder.checkpoint().also { startedAt ->
             clock.advanceMillis(2)
@@ -101,6 +115,10 @@ class TypeScriptCompilationPerformanceTest {
             clock.advanceMillis(4)
             recorder.recordOutputProcessingSince(startedAt)
         }
+        recorder.checkpoint().also { startedAt ->
+            clock.advanceMillis(6)
+            recorder.recordCachePublishSince(startedAt)
+        }
         recorder.recordSuccess(TypeScriptCompilationOutput.Diagnostics(emptyList()))
         heapKiB = 10_750L
         recorder.finish()
@@ -111,7 +129,9 @@ class TypeScriptCompilationPerformanceTest {
         assertEquals(TypeScriptCompilerContract.PROFILE_RHINO, report.targetProfile)
         assertEquals(TypeScriptCompilerContract.OUTCOME_DIAGNOSTICS, report.outcome)
         assertEquals(TypeScriptCompilationPerformanceSnapshot.CACHE_MISS, report.cacheStatus)
-        assertEquals(233L, report.totalElapsedMs)
+        assertEquals(251L, report.totalElapsedMs)
+        assertEquals(3L, report.awaitPrewarmElapsedMs)
+        assertEquals(9L, report.discoveryElapsedMs)
         assertEquals(12L, report.prepareElapsedMs)
         assertEquals(2L, report.cacheLookupElapsedMs)
         assertEquals(140L, report.bindAndPrewarmElapsedMs)
@@ -125,11 +145,14 @@ class TypeScriptCompilationPerformanceTest {
         assertEquals(17L, report.compilerEmitElapsedMs)
         assertEquals(3L, report.compilerAfterEmitElapsedMs)
         assertEquals(4L, report.outputProcessingElapsedMs)
+        assertEquals(6L, report.cachePublishElapsedMs)
         assertEquals(4_096L, report.inputArchiveBytes)
         assertEquals(3, report.sourceFileCount)
         assertEquals(750L, report.hostHeapDeltaKiB)
         val line = report.toLogLine()
-        assertTrue(line.startsWith("typescript-compile-perf schema=2"))
+        assertTrue(line.startsWith("typescript-compile-perf schema=3"))
+        assertTrue(line.contains(" awaitPrewarmMs=3 discoveryMs=9 prepareMs=12 "))
+        assertTrue(line.contains(" outputMs=4 cachePublishMs=6 "))
         assertTrue(line.contains("bindPrewarmMs=140"))
         assertTrue(line.contains("compilerMs=68"))
         assertTrue(line.contains("compilerSemanticMs=21"))
@@ -149,8 +172,14 @@ class TypeScriptCompilationPerformanceTest {
             usedHeapKiB = { 2_048L },
         )
 
-        clock.advanceMillis(3)
-        recorder.recordPrepared(inputArchiveBytes = 512L, sourceFileCount = 1)
+        recorder.checkpoint().also { startedAt ->
+            clock.advanceMillis(3)
+            recorder.recordPreparedSince(
+                startedAtNanos = startedAt,
+                inputArchiveBytes = 512L,
+                sourceFileCount = 1,
+            )
+        }
         recorder.recordCacheAvailability(available = true)
         recorder.checkpoint().also { startedAt ->
             clock.advanceMillis(1)
@@ -163,6 +192,10 @@ class TypeScriptCompilationPerformanceTest {
         val report = reports.single()
         assertEquals(TypeScriptCompilationPerformanceSnapshot.CACHE_HIT, report.cacheStatus)
         assertEquals(4L, report.totalElapsedMs)
+        assertEquals(0L, report.awaitPrewarmElapsedMs)
+        assertEquals(0L, report.discoveryElapsedMs)
+        assertEquals(3L, report.prepareElapsedMs)
+        assertEquals(0L, report.cachePublishElapsedMs)
         assertNull(report.bindAndPrewarmElapsedMs)
         assertNull(report.remoteRoundTripElapsedMs)
         assertNull(report.compilerElapsedMs)

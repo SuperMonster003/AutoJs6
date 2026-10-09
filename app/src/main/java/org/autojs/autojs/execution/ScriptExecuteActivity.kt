@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
@@ -28,6 +29,7 @@ import org.autojs.autojs.core.eventloop.SimpleEvent
 import org.autojs.autojs.core.plugin.compose.ComposeActivityInsets
 import org.autojs.autojs.core.plugin.compose.ComposeInsetsHost
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
+import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionPerformance
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine.ExecuteCallback
@@ -78,6 +80,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
     private var mScriptSource: ScriptSource? = null
     private var mResult: Any? = null
     private var mPreparationThread: ThreadCompat? = null
+    private var mTypeScriptPreparationTiming: TypeScriptPreparationTiming? = null
     private var mIsResumed = false
     private lateinit var mComposeInsets: ComposeActivityInsets
 
@@ -153,10 +156,16 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         mPreparationThread = ThreadCompat(
             Runnable {
                 try {
+                    val prepareStartedAt = SystemClock.elapsedRealtime()
                     val prepared = TypeScriptExecutionCompiler.prepare(applicationContext, source)
+                    val preparedAt = SystemClock.elapsedRealtime()
                     runOnUiThread {
                         mPreparationThread = null
                         if (!isFinishing && !isDestroyed) {
+                            mTypeScriptPreparationTiming = TypeScriptPreparationTiming(
+                                prepareMs = preparedAt - prepareStartedAt,
+                                dispatchMs = SystemClock.elapsedRealtime() - preparedAt,
+                            )
                             initializeAndRun(prepared, savedInstanceState)
                         }
                     }
@@ -176,7 +185,17 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
     private fun initializeAndRun(source: ScriptSource, savedInstanceState: Bundle?) {
         try {
             mScriptSource = source
+            val engineCreateStartedAt = SystemClock.elapsedRealtime()
             mScriptEngine = mScriptExecution.createEngine(this, source)
+            mTypeScriptPreparationTiming?.let { timing ->
+                mTypeScriptPreparationTiming = null
+                TypeScriptExecutionPerformance.report(
+                    TypeScriptExecutionPerformance.ENTRY_ACTIVITY,
+                    timing.prepareMs,
+                    SystemClock.elapsedRealtime() - engineCreateStartedAt,
+                    timing.dispatchMs,
+                )
+            }
             mRuntime = (mScriptEngine as JavaScriptEngine?)!!.runtime.also { runtime ->
                 eventEmitter = EventEmitter(runtime.bridges)
             }
@@ -393,3 +412,9 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         }
     }
 }
+
+/** Timing captured by the TypeScript preparation thread for the execution performance line. */
+private class TypeScriptPreparationTiming(
+    val prepareMs: Long,
+    val dispatchMs: Long,
+)

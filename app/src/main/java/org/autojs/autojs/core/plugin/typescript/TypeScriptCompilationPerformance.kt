@@ -24,6 +24,8 @@ internal data class TypeScriptCompilationPerformanceSnapshot(
     val errorCode: String?,
     val cacheStatus: String,
     val totalElapsedMs: Long,
+    val awaitPrewarmElapsedMs: Long,
+    val discoveryElapsedMs: Long,
     val prepareElapsedMs: Long,
     val cacheLookupElapsedMs: Long,
     val bindAndPrewarmElapsedMs: Long?,
@@ -37,6 +39,7 @@ internal data class TypeScriptCompilationPerformanceSnapshot(
     val compilerEmitElapsedMs: Long?,
     val compilerAfterEmitElapsedMs: Long?,
     val outputProcessingElapsedMs: Long,
+    val cachePublishElapsedMs: Long,
     val inputArchiveBytes: Long,
     val sourceFileCount: Int,
     val hostHeapUsedStartKiB: Long,
@@ -48,6 +51,8 @@ internal data class TypeScriptCompilationPerformanceSnapshot(
         require(outcome.isNotBlank())
         require(cacheStatus in CACHE_STATUSES)
         require(totalElapsedMs >= 0L)
+        require(awaitPrewarmElapsedMs >= 0L)
+        require(discoveryElapsedMs >= 0L)
         require(prepareElapsedMs >= 0L)
         require(cacheLookupElapsedMs >= 0L)
         require(bindAndPrewarmElapsedMs == null || bindAndPrewarmElapsedMs >= 0L)
@@ -63,6 +68,7 @@ internal data class TypeScriptCompilationPerformanceSnapshot(
         require(compilerEmitElapsedMs == null || compilerEmitElapsedMs >= 0L)
         require(compilerAfterEmitElapsedMs == null || compilerAfterEmitElapsedMs >= 0L)
         require(outputProcessingElapsedMs >= 0L)
+        require(cachePublishElapsedMs >= 0L)
         require(inputArchiveBytes >= 0L)
         require(sourceFileCount >= 0)
         require(hostHeapUsedStartKiB >= 0L)
@@ -80,6 +86,8 @@ internal data class TypeScriptCompilationPerformanceSnapshot(
         append(" error=").append(errorCode ?: "none")
         append(" cache=").append(cacheStatus)
         append(" totalMs=").append(totalElapsedMs)
+        append(" awaitPrewarmMs=").append(awaitPrewarmElapsedMs)
+        append(" discoveryMs=").append(discoveryElapsedMs)
         append(" prepareMs=").append(prepareElapsedMs)
         append(" cacheLookupMs=").append(cacheLookupElapsedMs)
         append(" bindPrewarmMs=").append(bindAndPrewarmElapsedMs.asLogValue())
@@ -95,6 +103,7 @@ internal data class TypeScriptCompilationPerformanceSnapshot(
         append(" compilerEmitMs=").append(compilerEmitElapsedMs.asLogValue())
         append(" compilerAfterEmitMs=").append(compilerAfterEmitElapsedMs.asLogValue())
         append(" outputMs=").append(outputProcessingElapsedMs)
+        append(" cachePublishMs=").append(cachePublishElapsedMs)
         append(" inputBytes=").append(inputArchiveBytes)
         append(" sourceFiles=").append(sourceFileCount)
         append(" hostHeapStartKiB=").append(hostHeapUsedStartKiB)
@@ -103,7 +112,13 @@ internal data class TypeScriptCompilationPerformanceSnapshot(
     }
 
     companion object {
-        const val SCHEMA_REVISION = 2
+        /**
+         * Revision 3 adds `awaitPrewarmMs`, `discoveryMs` and `cachePublishMs`, and narrows
+         * `prepareMs` to archive preparation only (revision 2 counted everything before the
+         * cache lookup, including plugin discovery). `outputMs` no longer includes the
+         * persistent cache publish.
+         */
+        const val SCHEMA_REVISION = 3
         const val LOG_TAG = "TypeScriptCompiler"
         const val CACHE_DISABLED = "disabled"
         const val CACHE_NOT_CHECKED = "not_checked"
@@ -130,8 +145,11 @@ internal class TypeScriptCompilationPerformanceRecorder(
 
     private val startedAtNanos = monotonicNanos()
     private val hostHeapUsedStartKiB = usedHeapKiB().coerceAtLeast(0L)
+    private var awaitPrewarmElapsedMs = 0L
+    private var discoveryElapsedMs = 0L
     private var prepareElapsedMs = 0L
     private var cacheLookupElapsedMs = 0L
+    private var cachePublishElapsedMs = 0L
     private var bindAndPrewarmElapsedMs: Long? = null
     private var remoteRoundTripElapsedMs: Long? = null
     private var compilerElapsedMs: Long? = null
@@ -157,7 +175,21 @@ internal class TypeScriptCompilationPerformanceRecorder(
     fun checkpoint(): Long = monotonicNanos()
 
     @Synchronized
-    fun recordPrepared(inputArchiveBytes: Long, sourceFileCount: Int) {
+    fun recordAwaitPrewarmSince(startedAtNanos: Long) {
+        awaitPrewarmElapsedMs += elapsedSince(startedAtNanos)
+    }
+
+    @Synchronized
+    fun recordDiscoverySince(startedAtNanos: Long) {
+        discoveryElapsedMs += elapsedSince(startedAtNanos)
+    }
+
+    @Synchronized
+    fun recordPreparedSince(
+        startedAtNanos: Long,
+        inputArchiveBytes: Long,
+        sourceFileCount: Int,
+    ) {
         require(inputArchiveBytes >= 0L)
         require(sourceFileCount >= 0)
         this.inputArchiveBytes = inputArchiveBytes
@@ -272,6 +304,11 @@ internal class TypeScriptCompilationPerformanceRecorder(
     }
 
     @Synchronized
+    fun recordCachePublishSince(startedAtNanos: Long) {
+        cachePublishElapsedMs += elapsedSince(startedAtNanos)
+    }
+
+    @Synchronized
     fun recordSuccess(output: TypeScriptCompilationOutput) {
         outcome = when (output) {
             is TypeScriptCompilationOutput.Emitted -> TypeScriptCompilerContract.OUTCOME_EMITTED
@@ -304,6 +341,8 @@ internal class TypeScriptCompilationPerformanceRecorder(
             errorCode = errorCode,
             cacheStatus = cacheStatus,
             totalElapsedMs = elapsedSince(startedAtNanos),
+            awaitPrewarmElapsedMs = awaitPrewarmElapsedMs,
+            discoveryElapsedMs = discoveryElapsedMs,
             prepareElapsedMs = prepareElapsedMs,
             cacheLookupElapsedMs = cacheLookupElapsedMs,
             bindAndPrewarmElapsedMs = bindAndPrewarmElapsedMs,
@@ -317,6 +356,7 @@ internal class TypeScriptCompilationPerformanceRecorder(
             compilerEmitElapsedMs = phaseTimings.emitElapsedMs,
             compilerAfterEmitElapsedMs = phaseTimings.afterEmitElapsedMs,
             outputProcessingElapsedMs = outputProcessingElapsedMs,
+            cachePublishElapsedMs = cachePublishElapsedMs,
             inputArchiveBytes = inputArchiveBytes,
             sourceFileCount = sourceFileCount,
             hostHeapUsedStartKiB = hostHeapUsedStartKiB,
