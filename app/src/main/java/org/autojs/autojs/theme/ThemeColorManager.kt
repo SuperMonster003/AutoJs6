@@ -10,7 +10,6 @@ import org.autojs.autojs.theme.color.ThemeColorDerivation
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
 import java.lang.ref.WeakReference
-import java.util.*
 
 /**
  * Created by Stardust on May 10, 2016.
@@ -143,23 +142,21 @@ object ThemeColorManager {
 
     private object BackgroundColorManager {
 
-        private val views: MutableList<WeakReference<View>> = LinkedList()
+        private val views = ThemeColorTargetRegistry<WeakReference<View>> { it.get() != null }
 
         fun add(view: View) {
             views.add(WeakReference(view))
             view.setBackgroundColor(currentThemeColor.colorPrimary)
         }
 
-        fun setColor(color: Int) = views.iterator().let {
-            while (it.hasNext()) {
-                it.next().get()?.apply { setBackgroundColor(color) } ?: it.remove()
-            }
+        fun setColor(color: Int) = views.forEach {
+            it.get()?.setBackgroundColor(color)
         }
     }
 
     private object StatusBarManager {
 
-        private val activityRefs = Vector<WeakReference<Activity>>()
+        private val activityRefs = ThemeColorTargetRegistry<WeakReference<Activity>> { it.get() != null }
 
         fun add(activity: Activity) {
             activityRefs.add(WeakReference(activity))
@@ -167,18 +164,17 @@ object ThemeColorManager {
         }
 
         fun setColor(color: Int) {
-            val iterator = activityRefs.iterator()
-            while (iterator.hasNext()) {
-                iterator.next().get()?.also { activity ->
+            activityRefs.forEach { reference ->
+                reference.get()?.also { activity ->
                     ViewUtils.setStatusBarBackgroundColor(activity, color)
-                } ?: iterator.remove()
+                }
             }
         }
     }
 
     private object PaintManager {
 
-        private val paints: MutableList<WeakReference<Paint>> = LinkedList()
+        private val paints = ThemeColorTargetRegistry<WeakReference<Paint>> { it.get() != null }
 
         fun add(paint: Paint) {
             paint.color = currentThemeColor.colorPrimary
@@ -186,17 +182,15 @@ object ThemeColorManager {
         }
 
         fun setColor(color: Int) {
-            paints.iterator().let {
-                while (it.hasNext()) {
-                    it.next().get()?.apply { this.color = color } ?: it.remove()
-                }
+            paints.forEach {
+                it.get()?.color = color
             }
         }
     }
 
     private object ThemeColorWidgetReferenceManager {
 
-        private val widgets: MutableList<ThemeColorMutableReference> = LinkedList()
+        private val widgets = ThemeColorTargetRegistry<ThemeColorMutableReference> { !it.isNull }
 
         fun add(widget: ThemeColorMutableReference) {
             widget.setThemeColor(currentThemeColor)
@@ -204,17 +198,15 @@ object ThemeColorManager {
         }
 
         fun setColor(color: ThemeColor?) {
-            widgets.iterator().let { i ->
-                while (i.hasNext()) {
-                    i.next().takeUnless { it.isNull }?.apply { setThemeColor(color) } ?: i.remove()
-                }
+            widgets.forEach {
+                if (!it.isNull) it.setThemeColor(color)
             }
         }
     }
 
     private object ThemeColorMutableManager {
 
-        private val widgets: MutableList<WeakReference<ThemeColorMutable>> = LinkedList()
+        private val widgets = ThemeColorTargetRegistry<WeakReference<ThemeColorMutable>> { it.get() != null }
 
         fun add(widget: ThemeColorMutable) {
             widget.setThemeColor(currentThemeColor)
@@ -222,10 +214,8 @@ object ThemeColorManager {
         }
 
         fun setColor(color: ThemeColor?) {
-            widgets.iterator().let {
-                while (it.hasNext()) {
-                    it.next().get()?.apply { setThemeColor(color) } ?: it.remove()
-                }
+            widgets.forEach {
+                it.get()?.setThemeColor(color)
             }
         }
     }

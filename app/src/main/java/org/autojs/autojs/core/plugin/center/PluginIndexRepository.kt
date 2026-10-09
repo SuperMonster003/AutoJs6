@@ -29,7 +29,7 @@ class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
-        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v10.json"
+        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v11.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
         private const val OFFICIAL_INDEX_REPO = "AutoJs6-Official-Plugins-Index"
@@ -609,6 +609,8 @@ class PluginIndexRepository {
                 }
                 obj.put("tags", JSONArray(entry.tags))
                 obj.put("requiresHostVersion", entry.requiresHostVersion)
+                obj.put("nativePageAlignment", entry.nativePageAlignment)
+                obj.put("nativePageAlignmentSource", entry.nativePageAlignmentSource)
                 obj.put("source", entry.source.name)
 
                 val releaseArr = JSONArray()
@@ -623,6 +625,8 @@ class PluginIndexRepository {
                     rel.put("changelogUrl", release.changelogUrl)
                     rel.put("changelogText", release.changelogText)
                     rel.put("compatibilityMatrixMatched", release.compatibilityMatrixMatched)
+                    rel.put("nativePageAlignment", release.nativePageAlignment)
+                    rel.put("nativePageAlignmentSource", release.nativePageAlignmentSource)
                     releaseArr.put(rel)
                 }
                 obj.put("releases", releaseArr)
@@ -763,12 +767,20 @@ class PluginIndexRepository {
                 List(ja.length()) { idx -> ja.optString(idx) }.filter { it.isNotBlank() }
             } ?: emptyList()
             val releaseArray = obj.optJSONArray("releases")
-            val supportedAbisFromAssets = releaseArray?.firstReleaseAssetsOrNull()
+            val latestRelease = releaseArray?.latestReleaseOrNull()
+            val supportedAbisFromAssets = latestRelease?.optJSONArray("assets")
                 ?.let(::parseSupportedAbisFromReleaseAssets)
+            // Older official indexes use null for ABI-independent plugins. Only a measured
+            // absence of native code confirms unrestricted ABIs; a universal filename cannot.
+            // zh-CN: 旧官方索引对无 ABI 限制的插件使用 null. 仅实测无原生代码可确认不受限制,
+            // 不能仅凭 universal 文件名推断, 也不能沿用旧发行版的结果.
+            val alignmentMetadata = latestRelease ?: obj
+            val hasNoNativeCode = PluginNativeAlignmentPolicy.parse(alignmentMetadata.opt("nativePageAlignment")) == 0L &&
+                    alignmentMetadata.optString("nativePageAlignmentSource") == "measured"
             val supportedAbis = when {
                 !obj.has("supportedAbis") || obj.isNull("supportedAbis") -> null
                 else -> PluginAbiUtils.resolveSupportedAbisFromValue(obj.opt("supportedAbis"))
-            } ?: supportedAbisFromAssets
+            } ?: supportedAbisFromAssets ?: emptyList<String>().takeIf { hasNoNativeCode }
             val tags = obj.optJSONArray("tags")?.let { ja ->
                 List(ja.length()) { idx -> ja.optString(idx) }.filter { it.isNotBlank() }
             } ?: emptyList()
@@ -869,13 +881,8 @@ class PluginIndexRepository {
             .takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }
     }
 
-    private fun JSONArray.firstReleaseAssetsOrNull(): JSONArray? {
-        for (i in 0 until length()) {
-            val assets = optJSONObject(i)?.optJSONArray("assets") ?: continue
-            if (assets.length() > 0) return assets
-        }
-        return null
-    }
+    private fun JSONArray.latestReleaseOrNull(): JSONObject? =
+        (0 until length()).mapNotNull { optJSONObject(it) }.maxByOrNull { it.optLong("versionCode", 0L) }
 
     private fun normalizeLanguageTag(tag: String?): String? {
         return tag

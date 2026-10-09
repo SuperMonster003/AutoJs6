@@ -297,6 +297,8 @@
 * `Feature` Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh
 * `Feature` compose.memo reuses render fragments whose dependency values and read states are unchanged, so a partial update of a large list rebuilds only the changed rows
 * `Feature` Developer options include "Allow Inspector for Node.js scripts", disabled by default, for local breakpoints and CPU/heap profiling in Debug and Release with a compatible Node.js Runtime plugin; desktop DevTools connects through ADB port forwarding
+* `Fix` A host crash when intelligent theme colors refresh on returning to the foreground or recreating a screen and widget callbacks register additional theme targets
+* `Fix` Plugin Center showing Unknown ABIs for official plugins verified to contain no native code, and losing indexed native compatibility metadata after a restart
 * `Fix` The plugin installation wizard waiting for a timeout after a failed or cancelled installation when installing consecutive plugins through the system installer
 * `Fix` Plugin Center selecting an x86_64 APK on an x86 device despite an available x86 APK
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button

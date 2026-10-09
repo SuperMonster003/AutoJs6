@@ -459,6 +459,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar
 * `Nuevo` compose.memo reutiliza fragmentos de render cuyos valores de dependencia y estados leídos no han cambiado, de modo que una actualización parcial de una lista grande solo reconstruye las filas modificadas
 * `Nuevo` Las opciones de desarrollador incluyen "Permitir Inspector para scripts Node.js", desactivado por defecto, para depuración local y análisis de CPU/memoria en Debug y Release con un plugin Node.js Runtime compatible; DevTools se conecta mediante reenvío de puertos ADB
+* `Corrección` Un cierre inesperado del anfitrión al actualizar los colores inteligentes al volver al primer plano o recrear una pantalla, cuando los callbacks registraban nuevos elementos del tema
+* `Corrección` El centro de plugins mostraba Unknown para las ABI de plugins oficiales verificados sin código nativo y perdía los metadatos de compatibilidad nativa del índice al reiniciar
 * `Corrección` El asistente de instalación de plugins esperaba al tiempo límite tras un fallo o cancelación al instalar plugins consecutivos con el instalador del sistema
 * `Corrección` El centro de plugins seleccionaba un APK x86_64 en un dispositivo x86 aunque había un APK x86 disponible
 * `Corrección` Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información

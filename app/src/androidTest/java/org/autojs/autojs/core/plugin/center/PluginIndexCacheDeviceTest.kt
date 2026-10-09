@@ -18,6 +18,74 @@ class PluginIndexCacheDeviceTest {
     private fun field(snapshot: Any, name: String): Any? = snapshot.javaClass.getDeclaredField(name)
         .apply { isAccessible = true }.get(snapshot)
 
+    private fun entries(json: String): List<PluginIndexEntry> {
+        @Suppress("UNCHECKED_CAST")
+        return field(parse(json), "entries") as List<PluginIndexEntry>
+    }
+
+    @Test fun measuredAbsenceOfNativeCodeResolvesAnUninstalledPluginAsAllAbis() {
+        val entry = entries("""{"items":[{"packageName":"example.noarch","supportedAbis":null,
+            "releases":[{"versionCode":1,"nativePageAlignment":0,"nativePageAlignmentSource":"measured"}]}]}""").single()
+        assertEquals(emptyList<String>(), entry.supportedAbis)
+        assertEquals("All", PluginAbiUtils.formatSupportedAbisForDisplay(entry.supportedAbis, "Unknown", "All"))
+    }
+
+    @Test fun aUniversalFilenameOrUnverifiedZeroDoesNotClaimAllAbis() {
+        for (metadata in listOf("", "\"nativePageAlignment\":0,\"nativePageAlignmentSource\":\"declared\",",
+            "\"nativePageAlignment\":16384,\"nativePageAlignmentSource\":\"measured\",")) {
+            val entry = entries("""{"items":[{"packageName":"example.unknown","releases":[{$metadata
+                "assets":[{"name":"plugin-universal.apk","downloadUrl":"https://example.test/plugin.apk"}]}]}]}""").single()
+            assertNull(entry.supportedAbis)
+        }
+    }
+
+    @Test fun explicitAndNativeAssetAbisKeepTheirRestrictions() {
+        val entries = entries("""{"items":[
+            {"packageName":"example.declared","supportedAbis":["arm64-v8a","x86_64"],
+             "releases":[{"nativePageAlignment":0,"nativePageAlignmentSource":"measured"}]},
+            {"packageName":"example.native","releases":[{"nativePageAlignment":16384,"nativePageAlignmentSource":"measured",
+             "assets":[{"name":"plugin-x86_64.apk","downloadUrl":"https://example.test/plugin.apk"}]}]}]}""")
+        assertEquals(listOf("arm64-v8a", "x86_64"), entries[0].supportedAbis)
+        assertEquals(listOf("x86_64"), entries[1].supportedAbis)
+    }
+
+    @Test fun olderReleasesCannotSupplyMissingAbiEvidenceForTheLatestRelease() {
+        val entry = entries("""{"items":[{"packageName":"example.changed","releases":[
+            {"versionCode":1,"nativePageAlignment":0,"nativePageAlignmentSource":"measured",
+             "assets":[{"name":"old-x86.apk","downloadUrl":"https://example.test/old.apk"}]},
+            {"versionCode":2,"assets":[{"name":"new-universal.apk","downloadUrl":"https://example.test/new.apk"}]}]}]}""").single()
+        assertNull(entry.supportedAbis)
+    }
+
+    @Test fun diskRoundTripPreservesAbiAndNativeAlignmentEvidence() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val file = File.createTempFile("plugin-index-abi-", ".json", context.cacheDir)
+        val input = listOf(
+            PluginIndexEntry(packageName = "example.noarch", title = "No native code", supportedAbis = emptyList(),
+                nativePageAlignment = 0L, nativePageAlignmentSource = "measured",
+                releases = listOf(PluginIndexRelease("1", 1, nativePageAlignment = 0L, nativePageAlignmentSource = "measured"))),
+            PluginIndexEntry(packageName = "example.native", title = "Native code", supportedAbis = listOf("x86_64"),
+                nativePageAlignment = 16384L, nativePageAlignmentSource = "declared",
+                releases = listOf(PluginIndexRelease("2", 2, nativePageAlignment = 16384L, nativePageAlignmentSource = "measured"))),
+            PluginIndexEntry(packageName = "example.unknown", title = "Unknown"),
+        )
+        val writer = PluginIndexRepository::class.java.getDeclaredMethod("writeCache",
+            File::class.java, List::class.java, Set::class.java, String::class.java, Map::class.java)
+            .apply { isAccessible = true }
+        try {
+            writer.invoke(repository, file, input, setOf(PluginIndexSource.OFFICIAL), "en", emptyMap<PluginIndexSource, Long>())
+            val restored = entries(file.readText())
+            input.zip(restored).forEach { (before, after) ->
+                assertEquals(before.supportedAbis, after.supportedAbis)
+                assertEquals(before.nativePageAlignment, after.nativePageAlignment)
+                assertEquals(before.nativePageAlignmentSource, after.nativePageAlignmentSource)
+                assertEquals(before.releases, after.releases)
+            }
+        } finally {
+            AtomicFile(file).delete()
+        }
+    }
+
     @Test fun legacySnapshotsAreReadableButHaveNoFreshnessClaim() {
         val snapshot = parse("""{"items":[{"packageName":"old.mail","title":"Old mail"}],"fetchedSources":["OFFICIAL"]}""")
         assertEquals(emptyMap<PluginIndexSource, Long>(), field(snapshot, "fetchedAtMs"))

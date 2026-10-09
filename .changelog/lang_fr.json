@@ -290,6 +290,8 @@
         "Les options de développement proposent \"Autoriser Inspector pour les scripts Node.js\", désactivé par défaut, pour les points d'arrêt et le profilage CPU/mémoire en Debug et Release avec un plugin Node.js Runtime compatible; DevTools se connecte via la redirection de ports ADB"
       ],
       "fix": [
+        "Un plantage de l'hôte lors du rafraîchissement des couleurs intelligentes au retour au premier plan ou à la recréation d'une page, quand les rappels des composants enregistrent de nouvelles cibles de thème",
+        "Le centre de plugins affichait Unknown pour les ABI des plugins officiels vérifiés sans code natif, et perdait les métadonnées de compatibilité native de l'index après un redémarrage",
         "L'assistant d'installation des plugins attendait un délai après un échec ou une annulation lors d'installations successives via l'installateur système",
         "Le centre de plugins sélectionnait un APK x86_64 sur un appareil x86 malgré la présence d'un APK x86",
         "Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans \"Copier en tant que sélecteur\" de l'inspecteur de disposition et la représentation textuelle des sélecteurs",
