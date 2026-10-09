@@ -2,7 +2,7 @@
 
 This tool learns a numeric score for a **construction state and one legal next
 action**, before a complete locate plan exists. It is independent of the existing
-64-feature candidate ranker. `policy.json` is an offline experiment artifact, not
+candidate ranker of the host feature schema. `policy.json` is an offline experiment artifact, not
 an installable `.ajcgm` package; training does not sign, publish, or replace models.
 
 ## Kotlin export contract
@@ -389,7 +389,7 @@ construction policy, the grammar or the features:
   train/valid families only. The artifacts follow the P3 dataset contract, so
   `train/train.py` fits the final ranker unchanged; `train/data.py` accepts the
   exporter's provenance. `construction/export_ranker.py` converts that fit into
-  `ranker.json` (role `candidate-ranker`, host 64-feature schema) with parity rows
+  `ranker.json` (role `candidate-ranker`, host feature schema, 64 columns for schema 1 and 75 for schema 2) with parity rows
   that `ExperimentRankerModelTest` checks.
 
 ```powershell

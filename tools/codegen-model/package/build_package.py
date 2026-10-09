@@ -85,7 +85,7 @@ def _float32(value, name):
 def _schema_check(schema):
     if not isinstance(schema, FeatureSchema):
         raise ValueError("Expected a validated numeric FeatureSchema")
-    _integer(schema.version, "featureSchemaVersion", 1, 1)
+    _integer(schema.version, "featureSchemaVersion", 1, 2)
     _integer(len(schema.names), "feature count", 1, MAX_FEATURES)
     if (len(set(schema.names)) != len(schema.names)
             or any(not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_]*", name) for name in schema.names)

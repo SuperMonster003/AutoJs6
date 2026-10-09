@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 import re
 
+from dataset.split import SUPPORTED_FEATURE_SCHEMAS
 from dataset.task_io import nonempty_string, parse_json, private_path, read_json, require_fields
 
 
@@ -76,7 +77,7 @@ def read_schema(path):
                    description="feature schema")
     if type(schema["format"]) is not int or schema["format"] != 1:
         raise ValueError("Unsupported feature schema format")
-    if type(schema["featureSchemaVersion"]) is not int or schema["featureSchemaVersion"] != 1:
+    if type(schema["featureSchemaVersion"]) is not int or schema["featureSchemaVersion"] not in SUPPORTED_FEATURE_SCHEMAS:
         raise ValueError("Unsupported featureSchemaVersion")
     names = schema["names"]
     if (not isinstance(names, list) or not names

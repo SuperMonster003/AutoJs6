@@ -26,7 +26,9 @@ from dataset.task_io import load_group, nonempty_string, parse_json, private_pat
 
 SPLITS = ("train", "valid", "test", "real-test")
 RATIOS = (0.70, 0.15, 0.15)
-FAMILIES = ("SELF", "SELF_INDEX", "ANCHOR_PATH", "ANCHOR_SEARCH", "CONTAINER_ITEMS")
+FAMILIES = ("SELF", "SELF_INDEX", "ANCHOR_PATH", "ANCHOR_SEARCH", "CONTAINER_ITEMS", "SELF_RELATIVE")
+# Feature schemas the host can extract or project; schema 2 added the relative family (roadmap D22).
+SUPPORTED_FEATURE_SCHEMAS = (1, 2)
 HASH_NAMESPACE = "autojs6.codegen.family-split.v1"
 
 
@@ -194,7 +196,7 @@ def validate_feature_schema(path):
     schema = read_json(path)
     if (not isinstance(schema, dict) or set(schema) != {"format", "featureSchemaVersion", "names", "namesHash"}
             or type(schema["format"]) is not int or schema["format"] != 1
-            or type(schema["featureSchemaVersion"]) is not int or schema["featureSchemaVersion"] != 1):
+            or type(schema["featureSchemaVersion"]) is not int or schema["featureSchemaVersion"] not in SUPPORTED_FEATURE_SCHEMAS):
         raise ValueError("Unsupported feature schema")
     names = schema["names"]
     if (not isinstance(names, list) or not names or any(not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_]*", name) for name in names)
