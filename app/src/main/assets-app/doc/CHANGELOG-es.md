@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/08
+###### 2026/10/09
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Sugerencia` Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente
@@ -297,6 +297,8 @@
 * `Nuevo` Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar
 * `Nuevo` compose.memo reutiliza fragmentos de render cuyos valores de dependencia y estados leídos no han cambiado, de modo que una actualización parcial de una lista grande solo reconstruye las filas modificadas
 * `Nuevo` Las opciones de desarrollador incluyen "Permitir Inspector para scripts Node.js", desactivado por defecto, para depuración local y análisis de CPU/memoria en Debug y Release con un plugin Node.js Runtime compatible; DevTools se conecta mediante reenvío de puertos ADB
+* `Corrección` El asistente de instalación de plugins esperaba al tiempo límite tras un fallo o cancelación al instalar plugins consecutivos con el instalador del sistema
+* `Corrección` El centro de plugins seleccionaba un APK x86_64 en un dispositivo x86 aunque había un APK x86 disponible
 * `Corrección` Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información
 * `Corrección` Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
 * `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío
@@ -739,7 +741,7 @@
 * `Mejora` Las sugerencias de parámetros del editor Ace reaparecen tras tocar el área de edición (no tras desplazarse), y ESC oculta tanto las sugerencias de parámetros como la documentación del símbolo
 * `Mejora` Las sugerencias de parámetros del editor Ace admiten métodos sobrecargados incluso con el LSP desactivado o el servicio semántico no disponible: el índice estático incluye 146 sobrecargas declaradas (como app.startActivity), las firmas ECMAScript integradas incorporan sobrecargas para splice / replace / JSON.stringify / Array.from y más, y las sugerencias de parámetros de Python / Lua conservan todas las firmas
 * `Mejora` La documentación emergente del editor Ace se puede desplazar y seleccionar en pantallas táctiles, y las sugerencias inteligentes esperan las sugerencias de parámetros asíncronas en archivos Python / Lua en lugar de recurrir al autocompletado
-* `Mejora` El diálogo de información del centro de plugins distingue "ABI compatibles" de "ABI instaladas": la primera prefiere la meta-data de manifiesto org.autojs.plugin.contract.SUPPORTED_ABIS escrita por la compilación del plugin, luego el servicio INFO del plugin y el índice; la segunda lista las ABI realmente empaquetadas en los APK instalados (splits incluidos)
+* `Mejora` El diálogo distingue todas las "ABI compatibles" de las "ABI instaladas" en los APK actuales, incluidos los splits; prioriza la declaración del manifiesto, luego el índice y finalmente INFO, para que plugins como Ace Editor no muestren solo la ABI del paquete instalado
 * `Mejora` La edición de texto nativa de Compose UI conserva selección y composición IME, evita que el teclado cubra el contenido y comunica una sola vez cada acción o cierre de Snackbar
 * `Mejora` ComposeError ofrece mensajes localizados y códigos estables con nodo, propiedad, causa y pila del script; cada motor admite hasta 8 sesiones activas, rechaza operaciones con manejadores cerrados y limpia callbacks, referencias y tareas pendientes; actualizar, desinstalar o desactivar el complemento cierra sus sesiones activas con el error correspondiente
 * `Mejora` cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones

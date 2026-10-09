@@ -29,7 +29,7 @@ class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
-        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v9.json"
+        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v10.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
         private const val OFFICIAL_INDEX_REPO = "AutoJs6-Official-Plugins-Index"
@@ -412,7 +412,7 @@ class PluginIndexRepository {
 
         val deviceAbis = AndroidUtils.deviceFilteredAbiList
         deviceAbis.forEach { abi ->
-            assets.firstOrNull { it.name.contains(abi, ignoreCase = true) }?.let { return it }
+            assets.firstOrNull { PluginAbiUtils.assetMatchesAbi(it.name, abi) }?.let { return it }
         }
 
         assets.firstOrNull { it.name.contains("universal", ignoreCase = true) }?.let { return it }

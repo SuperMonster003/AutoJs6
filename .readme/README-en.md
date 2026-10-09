@@ -168,7 +168,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/10/08
+###### 2026/10/09
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Hint` Compose UI and its API reference, Ace Editor type completion and Offline Docs content are delivered as a local integration requiring a matching local host build; the plugin is not listed in the official index or formally released
@@ -459,6 +459,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh
 * `Feature` compose.memo reuses render fragments whose dependency values and read states are unchanged, so a partial update of a large list rebuilds only the changed rows
 * `Feature` Developer options include "Allow Inspector for Node.js scripts", disabled by default, for local breakpoints and CPU/heap profiling in Debug and Release with a compatible Node.js Runtime plugin; desktop DevTools connects through ADB port forwarding
+* `Fix` The plugin installation wizard waiting for a timeout after a failed or cancelled installation when installing consecutive plugins through the system installer
+* `Fix` Plugin Center selecting an x86_64 APK on an x86 device despite an available x86 APK
 * `Fix` Package information becoming inaccessible from the file manager when APK Inspector hides the information button
 * `Fix` Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)
 * `Fix` Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty
@@ -901,7 +903,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Ace editor parameter hints reappear after tapping the editor (not after scrolling), and ESC hides both parameter hints and symbol documentation
 * `Improvement` Ace editor parameter hints support overloaded methods even when LSP is off or the semantic service is unavailable: the static index carries 146 declared overloads (such as app.startActivity), the built-in ECMAScript signatures gain overloads for splice / replace / JSON.stringify / Array.from and more, and Python / Lua parameter hints keep every signature
 * `Improvement` Ace editor hover documentation can be scrolled and selected on touch screens, and smart hints wait for asynchronous parameter hints in Python / Lua files instead of falling back to completion
-* `Improvement` The plugin info dialog of Plugin Center tells "Supported ABIs" from "Installed ABIs": the former prefers the org.autojs.plugin.contract.SUPPORTED_ABIS manifest meta-data written by the plugin build, then the plugin INFO service and the index; the latter lists the ABIs actually packaged in the installed APKs (splits included)
+* `Improvement` The plugin info dialog shows the full "Supported ABIs" separately from the "Installed ABIs" in the current APKs, including splits; support declarations in the plugin manifest take priority, followed by the index and then plugin INFO, so plugins such as Ace Editor no longer report only the installed APK ABI
 * `Improvement` Compose UI native text editing preserves selection and IME composition with keyboard avoidance, and reports each Snackbar action or dismissal once
 * `Improvement` ComposeError provides localized messages and stable codes with node/property/cause and script stack details; each engine permits up to 8 live sessions, rejects operations on closed handles and clears callbacks, refs and pending work; updating, uninstalling or disabling the plugin closes its active sessions with the corresponding error
 * `Improvement` cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions

@@ -159,6 +159,17 @@ object PluginAbiUtils {
 
     fun formatAbiList(abis: Collection<String>): String = normalizeAbiList(abis).joinToString(", ")
 
+    /** The index describes the full distribution; legacy INFO may describe only the installed APK. */
+    fun resolveSupportedAbisForDisplay(
+        declaredAbis: List<String>?,
+        indexAbis: List<String>?,
+        localAbis: List<String>?,
+    ): List<String>? = declaredAbis ?: indexAbis ?: localAbis
+
+    /** Match complete ABI tokens, so an x86 APK never selects an x86_64 asset by substring. */
+    fun assetMatchesAbi(assetName: String, abi: String): Boolean =
+        normalizeAbi(abi)?.let { it in parseSupportedAbisFromText(assetName) } == true
+
     fun formatAbiListOrFallback(abis: Collection<String>, fallback: String): String {
         val text = formatAbiList(abis)
         return text.ifBlank { fallback }

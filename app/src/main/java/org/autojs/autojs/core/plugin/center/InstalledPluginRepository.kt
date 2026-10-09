@@ -90,6 +90,9 @@ class InstalledPluginRepository {
         // ABIs whose native libraries are packaged in the installed APKs (base + splits).
         // zh-CN: 已安装 APK (base + splits) 内实际打包的 ABI.
         val installedAbis: List<String>? = null,
+
+        // The explicit build-wide declaration, separate from legacy INFO values for one APK.
+        val declaredSupportedAbis: List<String>? = null,
     )
 
     private data class Discovery(
@@ -469,6 +472,7 @@ class InstalledPluginRepository {
             requiresHostVersion = requiresHostVersion,
             supportedAbis = supportedAbis,
             installedAbis = installedAbis,
+            declaredSupportedAbis = declaredAbis,
             nativePageAlignment = nativePageAlignment,
             packageSize = packageSize,
             firstInstallTime = pkgInfo?.firstInstallTime,

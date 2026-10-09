@@ -84,8 +84,13 @@ object WizardUi {
         activity: ComponentActivity,
         leaveTimeoutMillis: Long = LEAVE_TIMEOUT_MILLIS,
         launch: () -> Boolean,
+    ): ReturnResult = launchAndAwaitReturn(activity.lifecycle, leaveTimeoutMillis, launch)
+
+    internal suspend fun launchAndAwaitReturn(
+        lifecycle: Lifecycle,
+        leaveTimeoutMillis: Long = LEAVE_TIMEOUT_MILLIS,
+        launch: () -> Boolean,
     ): ReturnResult {
-        val lifecycle = activity.lifecycle
         val left = CompletableDeferred<Unit>()
         val returned = CompletableDeferred<ReturnResult>()
         val observer = object : DefaultLifecycleObserver {
@@ -103,6 +108,14 @@ object WizardUi {
             }
         }
         if (lifecycle.currentState == Lifecycle.State.DESTROYED) return ReturnResult.DESTROYED
+        // A preceding installer may still cover the host when its package broadcast arrives.
+        // Such an activity will resume without delivering another onPause to this observer.
+        // zh-CN: 上一安装器的包广播到来时可能仍覆盖宿主, 此时只会收到恢复事件, 不会再收到暂停事件.
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED) &&
+            !lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+        ) {
+            left.complete(Unit)
+        }
         lifecycle.addObserver(observer)
         try {
             if (!runCatching(launch).getOrDefault(false)) return ReturnResult.LAUNCH_FAILED

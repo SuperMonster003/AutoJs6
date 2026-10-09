@@ -244,10 +244,12 @@ object PluginInstallWizardInstaller {
             launch(start = CoroutineStart.UNDISPATCHED) {
                 try {
                     val result = WizardUi.launchAndAwaitReturn(activity, SYSTEM_INSTALLER_LEAVE_TIMEOUT_MILLIS) { installJob.start(); true }
-                    if (result == WizardUi.ReturnResult.RETURNED) {
+                    if (result == WizardUi.ReturnResult.RETURNED && !installJob.isCompleted) {
                         delay(SYSTEM_INSTALLER_RETURN_GRACE_MILLIS)
-                        notConfirmed = true
-                        installJob.cancel()
+                        if (!installJob.isCompleted) {
+                            notConfirmed = true
+                            installJob.cancel()
+                        }
                     }
                 } finally {
                     installJob.start()
@@ -258,7 +260,12 @@ object PluginInstallWizardInstaller {
             null
         }
         try {
-            when (val result = installJob.await()) {
+            val result = installJob.await()
+            // A successful broadcast can precede the installer result screen's dismissal.
+            // Wait for that screen to close before starting another system installation.
+            // zh-CN: 成功广播可能早于安装结果页面的关闭, 需等待返回后再启动下一次系统安装.
+            if (result is PluginInstallWizardInstallAwaiter.Result.Success) watcher?.join()
+            when (result) {
                 is PluginInstallWizardInstallAwaiter.Result.Success -> Outcome(entry.item, State.INSTALLED)
                 is PluginInstallWizardInstallAwaiter.Result.Failure -> Outcome(entry.item, State.FAILED, result.detail)
             }

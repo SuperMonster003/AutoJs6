@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/08",
+      "released_date": "2026/10/09",
       "feature": [
         "La fonction \"Générer du code\" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition",
         "Actions liées aux noeuds inspectés par l'hôte, avec ajout de texte, défilement borné et retour du résultat et des changements de fenêtre",
@@ -290,6 +290,8 @@
         "Les options de développement proposent \"Autoriser Inspector pour les scripts Node.js\", désactivé par défaut, pour les points d'arrêt et le profilage CPU/mémoire en Debug et Release avec un plugin Node.js Runtime compatible; DevTools se connecte via la redirection de ports ADB"
       ],
       "fix": [
+        "L'assistant d'installation des plugins attendait un délai après un échec ou une annulation lors d'installations successives via l'installateur système",
+        "Le centre de plugins sélectionnait un APK x86_64 sur un appareil x86 malgré la présence d'un APK x86",
         "Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans \"Copier en tant que sélecteur\" de l'inspecteur de disposition et la représentation textuelle des sélecteurs",
         "La génération de code de l'inspecteur de disposition ignorait la saisie de texte et certaines actions de recherche, appliquait les actions à tout le groupe pour une seule cible de liste, utilisait des appels obsolètes, abandonnait silencieusement Flow ou échouait sur les appuis longs, et localisait incorrectement les ID identiques entre paquets",
         "Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information",
@@ -734,7 +736,7 @@
         "Les indications de paramètres de l'éditeur Ace réapparaissent après un appui dans la zone d'édition (pas après un défilement), et ESC masque à la fois les indications de paramètres et la documentation du symbole",
         "Les indications de paramètres de l'éditeur Ace prennent en charge les méthodes surchargées même lorsque le LSP est désactivé ou que le service sémantique est indisponible: l'index statique contient 146 surcharges déclarées (par exemple app.startActivity), les signatures ECMAScript intégrées gagnent des surcharges pour splice / replace / JSON.stringify / Array.from et d'autres, et les indications de paramètres Python / Lua conservent toutes les signatures",
         "La documentation au survol de l'éditeur Ace peut être défilée et sélectionnée sur écran tactile, et les suggestions intelligentes attendent les indications de paramètres asynchrones dans les fichiers Python / Lua au lieu de retomber sur la complétion",
-        "La boîte de dialogue d'informations du centre de plugins distingue \"ABI prises en charge\" et \"ABI installées\" : la première privilégie la meta-data de manifeste org.autojs.plugin.contract.SUPPORTED_ABIS écrite par la compilation du plugin, puis le service INFO du plugin et l'index ; la seconde liste les ABI réellement empaquetées dans les APK installés (splits compris)",
+        "La boîte de dialogue distingue toutes les \"ABI prises en charge\" des \"ABI installées\" dans les APK actuels, splits inclus; le manifeste du plugin est prioritaire, puis l'index et enfin INFO, pour éviter que des plugins comme Ace Editor affichent uniquement l'ABI du paquet installé",
         "La saisie native Compose UI préserve la sélection et la composition IME, évite que le clavier masque le contenu et transmet une seule fois chaque action ou fermeture de Snackbar",
         "ComposeError fournit des messages localisés et des codes stables avec le noeud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions actives, refuse les opérations après fermeture et libère rappels, références et tâches en attente; la mise à jour, désinstallation ou désactivation du plugin ferme ses sessions actives avec l'erreur correspondante",
         "cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes",

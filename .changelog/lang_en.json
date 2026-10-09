@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/08",
+      "released_date": "2026/10/09",
       "feature": [
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",
         "Screen OCR is offered only when the host reports an available authorized OCR plugin; text is merged into bounded lines with coordinates",
@@ -290,6 +290,8 @@
         "Developer options include \"Allow Inspector for Node.js scripts\", disabled by default, for local breakpoints and CPU/heap profiling in Debug and Release with a compatible Node.js Runtime plugin; desktop DevTools connects through ADB port forwarding"
       ],
       "fix": [
+        "The plugin installation wizard waiting for a timeout after a failed or cancelled installation when installing consecutive plugins through the system installer",
+        "Plugin Center selecting an x86_64 APK on an x86 device despite an available x86 APK",
         "Package information becoming inaccessible from the file manager when APK Inspector hides the information button",
         "Three Stove Agent model-call failures lost network, authentication and response error categories (requires Provider plugin support)",
         "Assistant tool-option merging no longer enables default-off tool groups when the base tools object is empty",
@@ -734,7 +736,7 @@
         "Ace editor parameter hints reappear after tapping the editor (not after scrolling), and ESC hides both parameter hints and symbol documentation",
         "Ace editor parameter hints support overloaded methods even when LSP is off or the semantic service is unavailable: the static index carries 146 declared overloads (such as app.startActivity), the built-in ECMAScript signatures gain overloads for splice / replace / JSON.stringify / Array.from and more, and Python / Lua parameter hints keep every signature",
         "Ace editor hover documentation can be scrolled and selected on touch screens, and smart hints wait for asynchronous parameter hints in Python / Lua files instead of falling back to completion",
-        "The plugin info dialog of Plugin Center tells \"Supported ABIs\" from \"Installed ABIs\": the former prefers the org.autojs.plugin.contract.SUPPORTED_ABIS manifest meta-data written by the plugin build, then the plugin INFO service and the index; the latter lists the ABIs actually packaged in the installed APKs (splits included)",
+        "The plugin info dialog shows the full \"Supported ABIs\" separately from the \"Installed ABIs\" in the current APKs, including splits; support declarations in the plugin manifest take priority, followed by the index and then plugin INFO, so plugins such as Ace Editor no longer report only the installed APK ABI",
         "Compose UI native text editing preserves selection and IME composition with keyboard avoidance, and reports each Snackbar action or dismissal once",
         "ComposeError provides localized messages and stable codes with node/property/cause and script stack details; each engine permits up to 8 live sessions, rejects operations on closed handles and clears callbacks, refs and pending work; updating, uninstalling or disabling the plugin closes its active sessions with the corresponding error",
         "cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions",

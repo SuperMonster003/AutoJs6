@@ -585,7 +585,7 @@ class PluginCenterViewModel : ViewModel() {
             installableApkUrl = latestRelease?.apkUrl,
             installableApkSha256 = latestRelease?.apkSha256,
             installableApkSizeBytes = latestRelease?.apkSizeBytes,
-            supportedAbis = local?.supportedAbis ?: index?.supportedAbis,
+            supportedAbis = PluginAbiUtils.resolveSupportedAbisForDisplay(local?.declaredSupportedAbis, index?.supportedAbis, local?.supportedAbis),
             installedAbis = local?.installedAbis,
             remoteIconUrl = index?.iconUrl?.toString(),
             remoteNightIconUrl = index?.nightIconUrl?.toString(),
@@ -704,7 +704,7 @@ class PluginCenterViewModel : ViewModel() {
         val author = local?.author ?: index?.author
         val collaborators = index?.collaborators ?: emptyList()
         val source = index?.source ?: PluginIndexSource.OFFICIAL
-        val supportedAbis = local?.supportedAbis ?: index?.supportedAbis
+        val supportedAbis = PluginAbiUtils.resolveSupportedAbisForDisplay(local?.declaredSupportedAbis, index?.supportedAbis, local?.supportedAbis)
         val engine = local?.engine ?: index?.engine
         val variant = local?.variant ?: index?.variant
         val engineId = local?.engineId ?: index?.engineId

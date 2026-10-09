@@ -5,10 +5,14 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -113,6 +117,7 @@ object PackageInstallRouter {
                 }
                 handle.use { awaitAndCleanOwnedSources(it, listOf(source)) }
             }.getOrElse { failure ->
+                if (failure is CancellationException) throw failure
                 val error = InstallerErrorMapper.fromThrowable(failure, InstallerErrorMapper.Phase.OPEN)
                 if (error.code != InstallerErrorCodes.PLUGIN_UNAVAILABLE) return AwaitResult.Failure(error.message)
                 Log.w(TAG, "installer plugin unavailable while awaiting $packageName, using the system installer", failure)
@@ -128,10 +133,23 @@ object PackageInstallRouter {
             withContext(Dispatchers.Main) { InstallerPluginUi.showUnavailableDialog(context, format) }
             return AwaitResult.Failure(context.getString(R.string.error_installer_plugin_required_for_package_format, format.extension.uppercase(Locale.ROOT), ThreeSetupInstallerOfficialPlugin.DISPLAY_NAME))
         }
-        val launched = withContext(Dispatchers.Main) { launchSystemInstaller(context, packageUri) }
-        if (!launched) return AwaitResult.Failure(context.getString(R.string.error_no_applications_available_for_installing_this_file))
-        val installed = PackageChangeObserver.awaitInstalled(context, packageName, SYSTEM_INSTALL_AWAIT_MILLIS)
-        return if (installed) AwaitResult.Success else AwaitResult.Failure(context.getString(R.string.text_plugin_install_wizard_install_not_started))
+        return coroutineScope {
+            // Register before launching so a fast install cannot outrun its receiver.
+            // zh-CN: 启动前先注册接收器, 避免快速安装的广播早于监听注册.
+            val installed = async(start = CoroutineStart.UNDISPATCHED) {
+                PackageChangeObserver.awaitInstalled(context, packageName, SYSTEM_INSTALL_AWAIT_MILLIS)
+            }
+            try {
+                val launched = withContext(Dispatchers.Main) { launchSystemInstaller(context, packageUri) }
+                when {
+                    !launched -> AwaitResult.Failure(context.getString(R.string.error_no_applications_available_for_installing_this_file))
+                    installed.await() -> AwaitResult.Success
+                    else -> AwaitResult.Failure(context.getString(R.string.text_plugin_install_wizard_install_not_started))
+                }
+            } finally {
+                installed.cancel()
+            }
+        }
     }
 
     private suspend fun route(

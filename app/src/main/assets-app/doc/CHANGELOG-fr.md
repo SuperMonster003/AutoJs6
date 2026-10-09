@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/08
+###### 2026/10/09
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
 * `Astuce` Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement
@@ -297,6 +297,8 @@
 * `Fonctionnalité` Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement
 * `Fonctionnalité` compose.memo réutilise les fragments de render dont les valeurs de dépendance et les états lus n'ont pas changé, de sorte qu'une mise à jour partielle d'une grande liste ne reconstruit que les lignes modifiées
 * `Fonctionnalité` Les options de développement proposent "Autoriser Inspector pour les scripts Node.js", désactivé par défaut, pour les points d'arrêt et le profilage CPU/mémoire en Debug et Release avec un plugin Node.js Runtime compatible; DevTools se connecte via la redirection de ports ADB
+* `Correction` L'assistant d'installation des plugins attendait un délai après un échec ou une annulation lors d'installations successives via l'installateur système
+* `Correction` Le centre de plugins sélectionnait un APK x86_64 sur un appareil x86 malgré la présence d'un APK x86
 * `Correction` Échappement incomplet des guillemets, barres obliques inverses et caractères de contrôle dans "Copier en tant que sélecteur" de l'inspecteur de disposition et la représentation textuelle des sélecteurs
 * `Correction` La génération de code de l'inspecteur de disposition ignorait la saisie de texte et certaines actions de recherche, appliquait les actions à tout le groupe pour une seule cible de liste, utilisait des appels obsolètes, abandonnait silencieusement Flow ou échouait sur les appuis longs, et localisait incorrectement les ID identiques entre paquets
 * `Correction` Informations des paquets inaccessibles dans le gestionnaire de fichiers lorsque APK Inspector masque le bouton d'information
@@ -739,7 +741,7 @@
 * `Amélioration` Les indications de paramètres de l'éditeur Ace réapparaissent après un appui dans la zone d'édition (pas après un défilement), et ESC masque à la fois les indications de paramètres et la documentation du symbole
 * `Amélioration` Les indications de paramètres de l'éditeur Ace prennent en charge les méthodes surchargées même lorsque le LSP est désactivé ou que le service sémantique est indisponible: l'index statique contient 146 surcharges déclarées (par exemple app.startActivity), les signatures ECMAScript intégrées gagnent des surcharges pour splice / replace / JSON.stringify / Array.from et d'autres, et les indications de paramètres Python / Lua conservent toutes les signatures
 * `Amélioration` La documentation au survol de l'éditeur Ace peut être défilée et sélectionnée sur écran tactile, et les suggestions intelligentes attendent les indications de paramètres asynchrones dans les fichiers Python / Lua au lieu de retomber sur la complétion
-* `Amélioration` La boîte de dialogue d'informations du centre de plugins distingue "ABI prises en charge" et "ABI installées" : la première privilégie la meta-data de manifeste org.autojs.plugin.contract.SUPPORTED_ABIS écrite par la compilation du plugin, puis le service INFO du plugin et l'index ; la seconde liste les ABI réellement empaquetées dans les APK installés (splits compris)
+* `Amélioration` La boîte de dialogue distingue toutes les "ABI prises en charge" des "ABI installées" dans les APK actuels, splits inclus; le manifeste du plugin est prioritaire, puis l'index et enfin INFO, pour éviter que des plugins comme Ace Editor affichent uniquement l'ABI du paquet installé
 * `Amélioration` La saisie native Compose UI préserve la sélection et la composition IME, évite que le clavier masque le contenu et transmet une seule fois chaque action ou fermeture de Snackbar
 * `Amélioration` ComposeError fournit des messages localisés et des codes stables avec le noeud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions actives, refuse les opérations après fermeture et libère rappels, références et tâches en attente; la mise à jour, désinstallation ou désactivation du plugin ferme ses sessions actives avec l'erreur correspondante
 * `Amélioration` cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
