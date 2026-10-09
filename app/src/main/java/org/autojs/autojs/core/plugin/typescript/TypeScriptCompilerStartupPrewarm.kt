@@ -9,9 +9,20 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.core.plugin.ServiceBindingLease
 
+/**
+ * One retained compiler binding: the dedicated bindService lease plus the Binder it produced.
+ *
+ * Liveness must not rely on [IBinder.isBinderAlive] alone. That flag only turns false after a
+ * death notification, and the lease unlinks its recipient when the binding is reported dead
+ * ([android.content.ServiceConnection.onBindingDied] can arrive before the kernel reports the
+ * process death), after which a dead proxy keeps reporting itself alive for the rest of the
+ * host process. A binding whose lease has already been released is dead by definition, and
+ * [IBinder.pingBinder] settles the remaining cases with one round trip.
+ */
 internal class TypeScriptCompilerWarmBinding(
-    private val bindingLease: Closeable,
+    private val bindingLease: ServiceBindingLease,
     private val binder: IBinder,
     val projectSessionRevision: Int?,
 ) : Closeable {
@@ -19,7 +30,10 @@ internal class TypeScriptCompilerWarmBinding(
     private val closed = AtomicBoolean(false)
 
     val isAlive: Boolean
-        get() = !closed.get() && binder.isBinderAlive
+        get() = !closed.get() &&
+            !bindingLease.isClosed &&
+            binder.isBinderAlive &&
+            runCatching { binder.pingBinder() }.getOrDefault(false)
 
     override fun close() {
         if (closed.compareAndSet(false, true)) bindingLease.close()
@@ -109,7 +123,17 @@ internal object TypeScriptCompilerStartupPrewarm {
         binding: TypeScriptCompilerWarmBinding,
         expectedGeneration: Long,
     ) {
-        retention.offer(binding, expectedGeneration)
+        val generationBefore = retention.generationToken()
+        val candidateAlive = binding.isAlive
+        val retained = retention.offer(binding, expectedGeneration)
+        // Observational (startup-latency L2): why a compilation binding was or was not kept.
+        Log.i(
+            LOG_TAG,
+            "typescript-warm-binding schema=1 event=offer retained=$retained " +
+                "candidateAlive=$candidateAlive expectedGeneration=$expectedGeneration " +
+                "generationBefore=$generationBefore " +
+                "projectSessionRevision=${binding.projectSessionRevision ?: "legacy"}",
+        )
     }
 
     fun release(reason: String) {

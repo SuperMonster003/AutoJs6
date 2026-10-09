@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.util.UUID
@@ -19,6 +18,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.autojs.autojs.App
 import org.autojs.autojs.core.plugin.AidlPluginHost
+import org.autojs.autojs.core.plugin.ServiceBindingLease
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.typescript.api.ITypeScriptCompilationCallback
 import org.autojs.plugin.typescript.api.ITypeScriptCompilerPlugin
@@ -340,7 +340,7 @@ internal class TypeScriptCompilerPluginClient(
         val temporaryArchives = TypeScriptCompilerTemporaryArchives.create(appContext.cacheDir)
         val inputFile = temporaryArchives.inputFile
         val outputFile = temporaryArchives.outputFile
-        var bindingLease: Closeable? = null
+        var bindingLease: ServiceBindingLease? = null
         var started: StartedCompilation? = null
         var terminalReceived = false
 

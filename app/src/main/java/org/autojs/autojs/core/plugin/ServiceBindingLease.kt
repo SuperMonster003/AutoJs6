@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * zh-CN: 持有一次 Context.bindService 注册并确保只释放一次.
  * 取消可能先于 bindService 返回; 此时后续成功注册会在 [markRegistered] 时立即释放.
  */
-internal class ServiceBindingLease(
+class ServiceBindingLease(
     private val onUnbind: () -> Unit,
 ) : Closeable {
 

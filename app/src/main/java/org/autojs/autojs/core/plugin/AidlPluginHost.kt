@@ -69,7 +69,7 @@ class AidlPluginHost<I : IInterface>(
 
     data class LeasedCall<T>(
         val value: T,
-        val bindingLease: Closeable,
+        val bindingLease: ServiceBindingLease,
     )
 
     suspend fun discover(context: Context, packageName: String? = null): List<Discovered> {
@@ -526,6 +526,8 @@ class AidlPluginHost<I : IInterface>(
                 if (!continuation.isCompleted) {
                     continuation.resumeWithException(error)
                 }
+            } else if (!lease.isClosed) {
+                Log.w(tag, "Dedicated plugin binding lost after use: ${error.message}")
             }
             lease.close()
         }
@@ -950,7 +952,7 @@ class AidlPluginHost<I : IInterface>(
 
     private data class DedicatedBinding<T : IInterface>(
         val proxy: T,
-        val lease: Closeable,
+        val lease: ServiceBindingLease,
     )
 
     private class TimeoutException(message: String) : RuntimeException(message)
