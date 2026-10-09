@@ -27,10 +27,14 @@ fun interface ConstructionPolicy {
 object ConstructionFeatures {
     const val version = 1
     const val grammarVersion = 1
+
+    /** The families the construction grammar can build; SELF_RELATIVE is outside the frozen grammar.
+     * zh-CN: 构造语法可构建的计划族; SELF_RELATIVE 在冻结的语法之外. */
+    val GRAMMAR_FAMILIES: List<Family> = listOf(Family.SELF, Family.SELF_INDEX, Family.ANCHOR_PATH, Family.ANCHOR_SEARCH, Family.CONTAINER_ITEMS)
     val names: List<String> = buildList {
         addAll(Phase.entries.filter { it != Phase.DONE }.map { "phase_${it.name.lowercase()}" })
         addAll(listOf("family", "anchor", "outer", "inner", "end_outer", "index", "up", "child", "finish").map { "operation_$it" })
-        addAll(Family.entries.map { "family_${it.name.lowercase()}" })
+        addAll(GRAMMAR_FAMILIES.map { "family_${it.name.lowercase()}" })
         addAll(listOf(
             "prefix_depth", "outer_count", "inner_count", "prefix_id", "prefix_text", "prefix_desc",
             "prefix_class", "prefix_package", "prefix_boolean", "prefix_depth_condition", "prefix_dynamic_text",

@@ -34,6 +34,8 @@ internal object RendererTestSupport {
         LocatePlan(Family.ANCHOR_PATH, SelectorSpec(Condition("id", "example:id/label")), listOf(PlanStep.Up(1), PlanStep.Child(-1))),
         LocatePlan(Family.ANCHOR_SEARCH, SelectorSpec(Condition("id", "example:id/row2")), listOf(PlanStep.Search(item))),
         LocatePlan(Family.CONTAINER_ITEMS, SelectorSpec(Condition("id", "example:id/root")), listOf(PlanStep.Search(item)), Cardinality.ALL),
+        LocatePlan(Family.SELF_RELATIVE, item, listOf(PlanStep.Sibling(-1), PlanStep.Match(SelectorSpec(Condition("id", "example:id/label"))))),
+        LocatePlan(Family.SELF_RELATIVE, item, listOf(PlanStep.Up(1), PlanStep.Match(item)), Cardinality.ALL),
     )
 
     fun withReceiver(plan: LocatePlan, receiver: PlanReceiver) = LocatePlan(plan.family, plan.selector, plan.steps, plan.cardinality, receiver)
@@ -115,10 +117,20 @@ internal object RendererTestSupport {
                 return p;
             };
             n.compass = function (path) {
-                var parts = path.match(/[pc]-?[0-9]+/g), p = this;
+                var parts = path.match(/p-?[0-9]+|c-?[0-9]+|s[<>][0-9]+/g), p = this;
                 for (var i = 0; i < parts.length && p; i++) {
+                    if (parts[i][0] === 's') {
+                        var siblings = p.parentNode ? p.parentNode.children : [], at = siblings.indexOf(p) + Number(parts[i].slice(2)) * (parts[i][1] === '>' ? 1 : -1);
+                        p = at >= 0 && at < siblings.length ? siblings[at] : null;
+                        continue;
+                    }
                     var index = Number(parts[i].slice(1));
-                    p = parts[i][0] === 'p' ? p.parent(index) : p.children[index < 0 ? p.children.length + index : index] || null;
+                    if (parts[i][0] === 'p') {
+                        // A compass walk reads the tree directly; only action receivers go through parent().
+                        for (var k = 0; k < index && p; k++) p = p.parentNode || null;
+                        continue;
+                    }
+                    p = p.children[index < 0 ? p.children.length + index : index] || null;
                 }
                 return p;
             };
@@ -137,11 +149,12 @@ internal object RendererTestSupport {
             ['id', 'text', 'desc', 'className'].forEach(function (attr) {
                 s[attr] = function (value) { this.predicates.push([attr, value]); return this; };
             });
+            s.filter = function (fn) { this.predicates.push(['filter', fn]); return this; };
             s.search = function (root) {
                 var found = [], sel = this;
                 function walk(n) {
                     var hidden = hiddenTargets && n.id === 'example:id/item' || hiddenAnchors && n.id !== 'example:id/item';
-                    if (!hidden && sel.predicates.every(p => n[p[0]] === p[1])) found.push(n);
+                    if (!hidden && sel.predicates.every(p => p[0] === 'filter' ? p[1](n) === true : n[p[0]] === p[1])) found.push(n);
                     n.children.forEach(walk);
                 }
                 walk(root);
@@ -172,7 +185,9 @@ internal object RendererTestSupport {
             if (typeof cond === 'function') { var value = cond(); return satisfied(value) ? value : null; }
             var result = options.resultType === 'widgets' ? cond.find() : cond.findOnce();
             if (Array.isArray(result) && result.length === 0) return null;
-            return result && options.compass ? result.compass(options.compass) : result;
+            // The compass option names the action receiver, so it goes through parent() like the classic receiver.
+            var receiver = options.compass && options.compass.match(/^p([0-9]+)$/);
+            return result && options.compass ? (receiver ? result.parent(Number(receiver[1])) : result.compass(options.compass)) : result;
         }
         function waitAsync(cond, options) {
             var value = probe(cond, options), chain = {};

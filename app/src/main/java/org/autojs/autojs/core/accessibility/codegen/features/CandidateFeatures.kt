@@ -105,6 +105,7 @@ object CandidateFeatures {
             val anchorSpec = if (anchored) plan.selector else null
             selectorFeatures(selfSpec).forEach(::add)
             selectorFeatures(anchorSpec).forEach(::add)
+            selectorFeatures(plan.relativeMatch).forEach(::add)
 
             val conditions = RuleRanker.conditions(plan)
             val ids = stringValues(conditions) { it == "id" }.map(::entryId).distinct()
@@ -124,6 +125,13 @@ object CandidateFeatures {
             add(facts.index?.let { flag(it < 0) } ?: MISSING)
             add(facts.resolvedIndex?.takeIf { facts.selectorMatchCount > 0 }?.let { it.toFloat() / facts.selectorMatchCount } ?: MISSING)
             add(count(facts.selectorMatchCount))
+            if (plan.family == LocatePlan.Family.SELF_RELATIVE && facts.relativeMatchCount >= 0) {
+                add(count(facts.relativeMatchCount))
+                add(if (facts.selectorMatchCount > 0) facts.relativeMatchCount.toFloat() / facts.selectorMatchCount else MISSING)
+            } else {
+                add(MISSING)
+                add(MISSING)
+            }
             add(count(facts.pathSteps))
             add(count(facts.pathUpLevels))
             add(count(facts.pathChildSteps))
@@ -265,5 +273,5 @@ object CandidateFeatures {
     private fun count(value: Long): Float = count(value.toDouble())
     private fun count(value: Double): Float = if (value < 0) MISSING else ln1p(value).toFloat()
     private const val MISSING = -1f
-    private val SELF_FAMILIES = setOf(LocatePlan.Family.SELF, LocatePlan.Family.SELF_INDEX)
+    private val SELF_FAMILIES = setOf(LocatePlan.Family.SELF, LocatePlan.Family.SELF_INDEX, LocatePlan.Family.SELF_RELATIVE)
 }

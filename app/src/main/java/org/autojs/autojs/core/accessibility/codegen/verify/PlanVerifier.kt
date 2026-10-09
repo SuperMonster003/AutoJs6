@@ -33,7 +33,8 @@ class Verified<N : UiNode<N>> internal constructor(
 }
 
 /** Counts concern the complete search, even when script semantics take only its first result.
- * zh-CN: 计数对应完整搜索, 即使脚本语义只取首个结果. */
+ * [relativeMatchCount] is the number of entry matches a SELF_RELATIVE plan keeps, -1 for other families.
+ * zh-CN: 计数对应完整搜索, 即使脚本语义只取首个结果. [relativeMatchCount] 为 SELF_RELATIVE 保留的入口匹配数, 其它族为 -1. */
 data class VerificationFacts(
     val selectorMatchCount: Int,
     val anchorMatchCount: Int = 0,
@@ -50,6 +51,7 @@ data class VerificationFacts(
     val dynamicDesc: Boolean = false,
     val conditionCount: Int = 0,
     val containerItemCount: Int = 0,
+    val relativeMatchCount: Int = -1,
 )
 
 enum class RejectionReason {
@@ -145,7 +147,13 @@ class PlanVerifier<N : UiNode<N>>(
         val expectedCardinality = if (request.scope == CodeGenRequest.Scope.SINGLE) Cardinality.ONE else Cardinality.ALL
         if (plan.cardinality != expectedCardinality) return Rejected(RejectionReason.CARDINALITY_MISMATCH)
 
-        val conditions = plan.selector.conditions + plan.steps.filterIsInstance<PlanStep.Search>().flatMap { it.selector.conditions }
+        val conditions = plan.selector.conditions + plan.steps.flatMap { step ->
+            when (step) {
+                is PlanStep.Search -> step.selector.conditions
+                is PlanStep.Match -> step.selector.conditions
+                else -> emptyList()
+            }
+        }
         conditions.firstOrNull { !allowed(it, request.attributes) }?.let {
             return Rejected(RejectionReason.FORBIDDEN_ATTRIBUTE, detail = it.attr)
         }
@@ -167,6 +175,7 @@ class PlanVerifier<N : UiNode<N>>(
         var index: Int? = null
         var resolvedIndex: Int? = null
         var anchor: N? = null
+        var relativeMatchCount = -1
         val resolved: List<N> = when (plan.family) {
             Family.SELF -> if (plan.cardinality == Cardinality.ONE) entryMatches.take(1) else entryMatches
             Family.SELF_INDEX -> {
@@ -178,6 +187,22 @@ class PlanVerifier<N : UiNode<N>>(
                 resolvedIndex = actual.toInt()
                 listOf(entryMatches[resolvedIndex])
             }
+            Family.SELF_RELATIVE -> {
+                if (entryMatches.isEmpty()) return Rejected(RejectionReason.EMPTY_RESULT, missingCount = targets.toSet().size)
+                val relation = plan.relation
+                val relative = requireNotNull(plan.relativeMatch)
+                // The relative match is one capture-wide search, then a pre-order range test per entry match.
+                // zh-CN: 相对匹配只做一次整窗搜索, 之后对每个入口匹配项做先序区间判断.
+                val positions = match(relative).map(tree::position).filter { it >= 0 }.sorted()
+                val kept = ArrayList<N>()
+                for (candidate in entryMatches) {
+                    cancellation.throwIfCancelled()
+                    val reached = navigate(candidate, relation) ?: continue
+                    if (containsAny(positions, tree.position(reached), tree.subtreeEnd(reached))) kept += candidate
+                }
+                relativeMatchCount = kept.size
+                if (plan.cardinality == Cardinality.ONE) kept.take(1) else kept
+            }
             Family.ANCHOR_PATH, Family.ANCHOR_SEARCH, Family.CONTAINER_ITEMS -> {
                 anchorMatchCount = entryMatches.size
                 if (entryMatches.isEmpty()) return Rejected(RejectionReason.ANCHOR_NOT_FOUND)
@@ -185,20 +210,7 @@ class PlanVerifier<N : UiNode<N>>(
                 val locatedAnchor = entryMatches.single()
                 anchor = locatedAnchor
                 if (plan.family == Family.ANCHOR_PATH) {
-                    var current: N = locatedAnchor
-                    for (step in plan.steps) {
-                        cancellation.throwIfCancelled()
-                        val navigation = when (step) {
-                            is PlanStep.Up -> {
-                                if (step.levels > tree.depth(current)) return Rejected(RejectionReason.UNREACHABLE_PATH)
-                                CompassStep.Up(step.levels)
-                            }
-                            is PlanStep.Child -> CompassStep.Children(listOf(step.index))
-                            else -> error("Invalid path step")
-                        }
-                        current = Compass.navigate(current, listOf(navigation))?.let(::canonical)
-                            ?: return Rejected(RejectionReason.UNREACHABLE_PATH)
-                    }
+                    val current = navigate(locatedAnchor, plan.steps) ?: return Rejected(RejectionReason.UNREACHABLE_PATH)
                     selectorMatchCount = 1
                     listOf(current)
                 } else {
@@ -240,18 +252,62 @@ class PlanVerifier<N : UiNode<N>>(
             anchorMatchCount = anchorMatchCount,
             index = index,
             resolvedIndex = resolvedIndex,
-            pathSteps = plan.steps.count { it is PlanStep.Up || it is PlanStep.Child },
+            pathSteps = plan.steps.count(PlanStep::isRelation),
             pathUpLevels = plan.steps.filterIsInstance<PlanStep.Up>().sumOf { it.levels },
             pathChildSteps = plan.steps.count { it is PlanStep.Child },
-            pathMaxChildIndex = plan.steps.filterIsInstance<PlanStep.Child>().maxOfOrNull { kotlin.math.abs(it.index.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt() } ?: 0,
+            pathSiblingSteps = plan.steps.count { it is PlanStep.Sibling },
+            pathMaxChildIndex = plan.steps.maxOfOrNull { step ->
+                val ordinal = when (step) {
+                    is PlanStep.Child -> step.index
+                    is PlanStep.Sibling -> step.offset
+                    else -> 0
+                }
+                kotlin.math.abs(ordinal.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+            } ?: 0,
             anchorDistance = anchor?.let { distance(it, resolved.first()) } ?: 0,
             receiverUpLevels = receiverLevels,
             dynamicText = conditions.any { it.attr.startsWith("text") && dynamic(it.value) },
             dynamicDesc = conditions.any { it.attr.startsWith("desc") && dynamic(it.value) },
             conditionCount = conditions.size,
             containerItemCount = if (plan.family == Family.CONTAINER_ITEMS) resolved.size else 0,
+            relativeMatchCount = relativeMatchCount,
         )
         return Verified(plan, resolved, facts)
+    }
+
+    /** Follows relation steps with the script compass; null when a step is unreachable.
+     * zh-CN: 以脚本罗盘执行关系步骤, 步骤无法到达时返回 null. */
+    private fun navigate(start: N, steps: List<PlanStep>): N? {
+        var current = start
+        for (step in steps) {
+            cancellation.throwIfCancelled()
+            val navigation = when (step) {
+                is PlanStep.Up -> {
+                    if (step.levels > tree.depth(current)) return null
+                    CompassStep.Up(step.levels)
+                }
+                is PlanStep.Child -> CompassStep.Children(listOf(step.index))
+                is PlanStep.Sibling -> CompassStep.Sibling(
+                    if (step.offset > 0) CompassStep.Sibling.Mode.FORWARD else CompassStep.Sibling.Mode.BACKWARD,
+                    kotlin.math.abs(step.offset),
+                )
+                else -> error("Invalid path step")
+            }
+            current = Compass.navigate(current, listOf(navigation))?.let(::canonical) ?: return null
+        }
+        return current
+    }
+
+    /** Whether any sorted position lies in [start]..[end]. zh-CN: 有序位置中是否有落在 [start]..[end] 内的. */
+    private fun containsAny(positions: List<Int>, start: Int, end: Int): Boolean {
+        if (start < 0 || positions.isEmpty()) return false
+        var low = 0
+        var high = positions.size
+        while (low < high) {
+            val middle = (low + high) ushr 1
+            if (positions[middle] < start) low = middle + 1 else high = middle
+        }
+        return low < positions.size && positions[low] <= end
     }
 
     private fun distance(from: N, to: N): Int {

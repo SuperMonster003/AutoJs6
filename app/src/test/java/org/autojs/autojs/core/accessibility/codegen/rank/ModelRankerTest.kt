@@ -7,6 +7,7 @@ import org.autojs.autojs.core.accessibility.codegen.features.FeatureSchema
 import org.autojs.autojs.core.accessibility.codegen.model.ObliviousTreeModel
 import org.autojs.autojs.core.accessibility.codegen.plan.Condition
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan
+import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
 import org.autojs.autojs.core.accessibility.codegen.plan.SelectorSpec
 import org.autojs.autojs.core.accessibility.codegen.search.CandidateSearch
 import org.autojs.autojs.core.accessibility.codegen.verify.PlanVerifier
@@ -152,6 +153,41 @@ class ModelRankerTest {
         } finally {
             Thread.interrupted()
         }
+    }
+
+    @Test
+    fun legacySchemaModelsReceiveProjectedVectorsAndNeverScoreUnseenFamilies() {
+        val (request, candidates) = example()
+        val legacyRuleIndex = FeatureSchema.names(1).indexOf("rule_rank_norm")
+        val legacy = ModelRanker(model(FeatureSchema.names(1).size), RuleRanker(), 150L, { 0L }, { vector ->
+            assertEquals(FeatureSchema.names(1).size, vector.size)
+            -vector[legacyRuleIndex].toDouble()
+        }, featureSchemaVersion = 1)
+        assertEquals(RuleRanker().rank(request, candidates).map { it.plan.planKey }, legacy.rank(request, candidates).map { it.plan.planKey })
+        assertEquals(RankerUnavailable.Reason.INCOMPATIBLE_FEATURES,
+            assertThrows(RankerUnavailable::class.java) { ModelRanker(model(), featureSchemaVersion = 1).rank(request, candidates) }.reason)
+        assertThrows(IllegalArgumentException::class.java) { ModelRanker(model(), featureSchemaVersion = 3) }
+
+        val root = FakeUiNode.root {
+            repeat(2) { index ->
+                child("row$index") {
+                    child("icon$index") { id = "app:id/icon" }
+                    child("title$index") { text = "Title $index" }
+                }
+            }
+        }
+        val relativeRequest = CodeGenRequest(listOf(root.find("icon1")))
+        val verifier = PlanVerifier(root)
+        val plans = listOf(
+            LocatePlan(LocatePlan.Family.SELF_RELATIVE, SelectorSpec(Condition("id", "app:id/icon")),
+                listOf(PlanStep.Up(1), PlanStep.Match(SelectorSpec(Condition("text", "Title 1"))))),
+            LocatePlan(LocatePlan.Family.SELF_INDEX, SelectorSpec(Condition("id", "app:id/icon")), listOf(PlanStep.Index(1))),
+        )
+        val mixed = plans.map { verifier.verify(relativeRequest, it) as Verified<FakeUiNode> }
+        assertEquals(RankerUnavailable.Reason.INCOMPATIBLE_FEATURES,
+            assertThrows(RankerUnavailable::class.java) { legacy.rank(relativeRequest, mixed) }.reason)
+        assertEquals(2, ModelRanker(model(), budgetMs = 60_000).rank(relativeRequest, mixed).size)
+        assertEquals(1, legacy.rank(relativeRequest, mixed.drop(1)).size)
     }
 
     @Test

@@ -88,11 +88,15 @@ class CodeGenText(private val context: Context) {
             Explanation.Key.ANCHOR_SEARCH_UNIQUE -> R.string.text_codegen_explanation_anchor_search_unique
             Explanation.Key.ANCHOR_SEARCH_FIRST_MATCH -> R.string.text_codegen_explanation_anchor_search_first_match
             Explanation.Key.CONTAINER_ITEMS -> R.string.text_codegen_explanation_container_items
+            Explanation.Key.RELATIVE_UNIQUE -> R.string.text_codegen_explanation_relative_unique
+            Explanation.Key.RELATIVE_FIRST_MATCH -> R.string.text_codegen_explanation_relative_first_match
+            Explanation.Key.RELATIVE_COLLECTION -> R.string.text_codegen_explanation_relative_collection
             Explanation.Key.ORDER_DEPENDENT -> R.string.text_codegen_explanation_order_dependent
             Explanation.Key.DYNAMIC_TEXT -> R.string.text_codegen_explanation_dynamic_text
             Explanation.Key.DYNAMIC_DESCRIPTION -> R.string.text_codegen_explanation_dynamic_description
             Explanation.Key.STRUCTURAL_CONDITIONS -> R.string.text_codegen_explanation_structural_conditions
             Explanation.Key.FIXED_PATH -> R.string.text_codegen_explanation_fixed_path
+            Explanation.Key.FIXED_RELATION -> R.string.text_codegen_explanation_fixed_relation
             Explanation.Key.LONG_PATH -> R.string.text_codegen_explanation_long_path
             Explanation.Key.LARGE_INDEX -> R.string.text_codegen_explanation_large_index
             Explanation.Key.RECEIVER_ANCESTOR -> R.string.text_codegen_explanation_receiver_ancestor
@@ -106,6 +110,7 @@ class CodeGenText(private val context: Context) {
         LocatePlan.Family.ANCHOR_PATH -> R.string.text_codegen_family_anchor_path
         LocatePlan.Family.ANCHOR_SEARCH -> R.string.text_codegen_family_anchor_search
         LocatePlan.Family.CONTAINER_ITEMS -> R.string.text_codegen_family_container_items
+        LocatePlan.Family.SELF_RELATIVE -> R.string.text_codegen_family_self_relative
     })
 
     fun candidateSummary(plan: LocatePlan): String {
@@ -116,7 +121,9 @@ class CodeGenText(private val context: Context) {
                     is PlanStep.Index -> append(".findOnce(").append(step.index).append(')')
                     is PlanStep.Up -> append(" > parent(").append(step.levels).append(')')
                     is PlanStep.Child -> append(" > child(").append(step.index).append(')')
+                    is PlanStep.Sibling -> append(" > sibling(").append(if (step.offset > 0) "+" else "").append(step.offset).append(')')
                     is PlanStep.Search -> append(" > ").append(SelectorText.render(step.selector))
+                    is PlanStep.Match -> append(" ~ ").append(SelectorText.render(step.selector))
                 }
             }
             (plan.receiver as? PlanReceiver.Up)?.let {

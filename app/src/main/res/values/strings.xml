@@ -1182,12 +1182,16 @@
     <string name="text_codegen_explanation_dynamic_description">Depends on a description containing digits, which may change</string>
     <string name="text_codegen_explanation_dynamic_text">Depends on text containing digits, which may change</string>
     <string name="text_codegen_explanation_fixed_path">Depends on a fixed parent/child structure</string>
+    <string name="text_codegen_explanation_fixed_relation">Depends on a fixed relation to a nearby widget</string>
     <string name="text_codegen_explanation_indexed_match">Use match %2$s out of %1$s</string>
     <string name="text_codegen_explanation_indexed_match_from_end">Use match %2$s from the end out of %1$s</string>
     <string name="text_codegen_explanation_large_index">Depends on a large fixed index</string>
     <string name="text_codegen_explanation_long_path">Uses a long parent/child path (%1$s steps)</string>
     <string name="text_codegen_explanation_order_dependent">Depends on match order and may fail if the order changes</string>
     <string name="text_codegen_explanation_receiver_ancestor">The action is received by the target\'s ancestor %1$s levels up</string>
+    <string name="text_codegen_explanation_relative_collection">Use %1$s to locate the selected %2$s widgets that have %4$s at compass %3$s</string>
+    <string name="text_codegen_explanation_relative_first_match">Use %1$s to match %2$s widgets, %5$s of which have %4$s at compass %3$s, using the first as the target</string>
+    <string name="text_codegen_explanation_relative_unique">Use %1$s to match %2$s widgets, of which only the target has %4$s at compass %3$s</string>
     <string name="text_codegen_explanation_self_collection">Use %1$s to locate the selected %2$s widgets</string>
     <string name="text_codegen_explanation_self_first_match">Use %1$s to match %2$s widgets, using the first as the target</string>
     <string name="text_codegen_explanation_self_unique">Use %1$s to uniquely locate the target in this snapshot</string>
@@ -1202,6 +1206,7 @@
     <string name="text_codegen_family_container_items">Collection within a container</string>
     <string name="text_codegen_family_self">Widget attributes</string>
     <string name="text_codegen_family_self_index">Attributes and match index</string>
+    <string name="text_codegen_family_self_relative">Attributes and a nearby widget</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">Generating...</string>
     <string name="text_codegen_generation_error">Could not generate code. Please try again</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">Finding collections...</string>

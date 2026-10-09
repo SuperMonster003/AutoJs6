@@ -41,9 +41,24 @@ sealed interface PlanStep {
     /** child(i); negative indices count from the end. zh-CN: child(i), 负序号自末尾计. */
     data class Child(val index: Int) : PlanStep
 
+    /** A sibling at a relative offset, `s>n` for a positive and `s<n` for a negative [offset].
+     * zh-CN: 相对偏移的兄弟节点, 正 [offset] 为 `s>n`, 负为 `s<n`. */
+    data class Sibling(val offset: Int) : PlanStep {
+        init { require(offset != 0) { "Sibling offset must not be zero" } }
+    }
+
     /** Searches the anchor and its descendants. Cardinality decides first/all results.
      * zh-CN: 搜索锚点自身及后代, 基数决定取首个或全部结果. */
     data class Search(val selector: SelectorSpec) : PlanStep
+
+    /** The node reached by the relation steps, or one of its descendants, must match [selector].
+     * zh-CN: 关系步骤到达的节点或其后代必须匹配 [selector]. */
+    data class Match(val selector: SelectorSpec) : PlanStep
+
+    companion object {
+        /** Steps that move through the captured tree. zh-CN: 在捕获树中移动的步骤. */
+        fun isRelation(step: PlanStep): Boolean = step is Up || step is Child || step is Sibling
+    }
 }
 
 sealed interface PlanReceiver {
@@ -55,9 +70,12 @@ sealed interface PlanReceiver {
 
 /**
  * A declarative location, independent of query timing, actions and code style. The entry selector
- * describes the target for SELF/SELF_INDEX and the anchor for the other families.
- * zh-CN: 独立于查询时机, 动作与代码风格的声明式定位. 入口选择器在 SELF/SELF_INDEX 中描述目标,
- * 在其它族中描述锚点.
+ * describes the target for SELF/SELF_INDEX/SELF_RELATIVE and the anchor for the other families.
+ * SELF_RELATIVE keeps the entry matches whose relation steps reach a node whose subtree matches the
+ * final [PlanStep.Match]; it identifies a target through the content of a nearby control.
+ * zh-CN: 独立于查询时机, 动作与代码风格的声明式定位. 入口选择器在 SELF/SELF_INDEX/SELF_RELATIVE 中描述目标,
+ * 在其它族中描述锚点. SELF_RELATIVE 保留 "关系步骤到达的节点子树匹配末尾 [PlanStep.Match]" 的入口匹配项,
+ * 即通过邻近控件的内容确定目标.
  */
 class LocatePlan(
     val family: Family,
@@ -66,7 +84,7 @@ class LocatePlan(
     val cardinality: Cardinality = Cardinality.ONE,
     val receiver: PlanReceiver = PlanReceiver.Self,
 ) {
-    enum class Family { SELF, SELF_INDEX, ANCHOR_PATH, ANCHOR_SEARCH, CONTAINER_ITEMS }
+    enum class Family { SELF, SELF_INDEX, ANCHOR_PATH, ANCHOR_SEARCH, CONTAINER_ITEMS, SELF_RELATIVE }
     enum class Cardinality { ONE, ALL }
 
     val steps: List<PlanStep> = Collections.unmodifiableList(ArrayList(steps))
@@ -78,9 +96,21 @@ class LocatePlan(
             Family.ANCHOR_PATH -> cardinality == Cardinality.ONE && steps.isNotEmpty() && steps.all { it is PlanStep.Up || it is PlanStep.Child }
             Family.ANCHOR_SEARCH -> cardinality == Cardinality.ONE && steps.size == 1 && steps.single() is PlanStep.Search
             Family.CONTAINER_ITEMS -> cardinality == Cardinality.ALL && steps.size == 1 && steps.single() is PlanStep.Search
+            // An empty relative match would keep every entry match, which is a SELF plan in disguise.
+            // zh-CN: 空的相对匹配会保留全部入口匹配项, 等于伪装的 SELF 计划.
+            Family.SELF_RELATIVE -> steps.size in 2..MAX_RELATION_STEPS + 1 &&
+                (steps.last() as? PlanStep.Match)?.selector?.conditions?.isNotEmpty() == true &&
+                steps.dropLast(1).all { PlanStep.isRelation(it) }
         }
         require(validShape) { "Steps/cardinality do not fit plan family: " + family }
     }
+
+    /** The movement steps of a SELF_RELATIVE plan; empty for other families.
+     * zh-CN: SELF_RELATIVE 计划的移动步骤, 其它族为空. */
+    val relation: List<PlanStep> get() = if (family == Family.SELF_RELATIVE) steps.dropLast(1) else emptyList()
+
+    /** The nested selector of a SELF_RELATIVE plan. zh-CN: SELF_RELATIVE 计划的嵌套选择器. */
+    val relativeMatch: SelectorSpec? get() = (steps.lastOrNull() as? PlanStep.Match)?.selector
 
     /** Versioned, length-prefixed fields keep keys unambiguous even for delimiter-rich text.
      * zh-CN: 带版本的长度前缀字段, 即使文本含分隔符也不会造成键歧义. */
@@ -96,7 +126,9 @@ class LocatePlan(
                 is PlanStep.Index -> { field("index"); field(step.index.toString()) }
                 is PlanStep.Up -> { field("up"); field(step.levels.toString()) }
                 is PlanStep.Child -> { field("child"); field(step.index.toString()) }
+                is PlanStep.Sibling -> { field("sibling"); field(step.offset.toString()) }
                 is PlanStep.Search -> { field("search"); field(SelectorText.render(step.selector)) }
+                is PlanStep.Match -> { field("match"); field(SelectorText.render(step.selector)) }
             }
         }
         when (receiver) {
@@ -108,4 +140,9 @@ class LocatePlan(
     override fun equals(other: Any?): Boolean = other is LocatePlan && planKey == other.planKey
     override fun hashCode(): Int = planKey.hashCode()
     override fun toString(): String = planKey
+
+    companion object {
+        /** Relation steps a SELF_RELATIVE plan may take before its match. zh-CN: SELF_RELATIVE 匹配前至多的关系步数. */
+        const val MAX_RELATION_STEPS = 4
+    }
 }

@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.accessibility.codegen.store
 
+import java.time.Instant
+import org.autojs.autojs.core.accessibility.codegen.features.FeatureSchema
 import org.autojs.autojs.core.accessibility.codegen.store.ModelComparisonTestFixtures.HOST_VERSION
 import org.autojs.autojs.core.accessibility.codegen.store.ModelComparisonTestFixtures.PACKAGE_SHA
 import org.autojs.autojs.core.accessibility.codegen.store.ModelComparisonTestFixtures.catalog
@@ -12,7 +14,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.Instant
 
 class VersionComparisonTest {
     private val formatter = ModelComparisonTestFixtures.Formatter()
@@ -32,7 +33,7 @@ class VersionComparisonTest {
         assertEquals("Custom", rows.field(Field.SOURCE).oldText)
         assertEquals("aaaaaaaaaaaa", rows.field(Field.CONTENT).oldText)
         assertEquals("4.0 KiB", rows.field(Field.SIZE).oldText)
-        assertEquals("1 (Compatible)", rows.field(Field.COMPATIBILITY).oldText)
+        assertEquals("${FeatureSchema.featureSchemaVersion} (Compatible)", rows.field(Field.COMPATIBILITY).oldText)
         assertEquals("test-fixture (2026-10-01)", rows.field(Field.DATASET).oldText)
         assertEquals("90.0% (+10.0 pp)", rows.field(Field.METRICS).oldText)
         assertEquals("2026-10-02T00:00:00Z", rows.field(Field.RELEASED_AT).oldText)
@@ -175,7 +176,7 @@ class VersionComparisonTest {
         assertEquals(ModelCatalogCompatibility.INCOMPATIBLE, compatibility(base.copy(featureSchemaVersion = 99)))
         assertEquals(ModelCatalogCompatibility.INCOMPATIBLE, compatibility(base.copy(featureNamesHash = "0".repeat(16))))
         val customized = ModelVersionInfo.fromManifest(base.copy(featureSchemaVersion = 99, featureNamesHash = "0".repeat(16)),
-            PACKAGE_SHA, 4096, ModelSource.CUSTOM, HOST_VERSION, 99..99, "0".repeat(16))
+            PACKAGE_SHA, 4096, ModelSource.CUSTOM, HOST_VERSION, 99..99) { "0".repeat(16) }
         assertEquals(ModelCatalogCompatibility.COMPATIBLE, customized.compatibility)
     }
 
@@ -199,7 +200,7 @@ class VersionComparisonTest {
         assertEquals("VERSION|1.0.0|number:1", rows.field(Field.VERSION).oldText)
         assertEquals("source:CUSTOM", rows.field(Field.SOURCE).oldText)
         assertEquals("bytes:4096", rows.field(Field.SIZE).oldText)
-        assertEquals("COMPATIBILITY|number:1|compatibility:COMPATIBLE", rows.field(Field.COMPATIBILITY).oldText)
+        assertEquals("COMPATIBILITY|number:${FeatureSchema.featureSchemaVersion}|compatibility:COMPATIBLE", rows.field(Field.COMPATIBILITY).oldText)
         assertEquals("DATASET|test-fixture|date:2026-10-01T00:00:00Z", rows.field(Field.DATASET).oldText)
         assertEquals("METRICS|percent:0.9|points:10.0", rows.field(Field.METRICS).oldText)
         assertEquals("time:2026-10-02T00:00:00Z", rows.field(Field.RELEASED_AT).oldText)

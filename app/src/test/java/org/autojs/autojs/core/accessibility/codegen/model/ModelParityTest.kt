@@ -47,8 +47,10 @@ class ModelParityTest {
 
     private fun verify(manifest: JsonObject, bytes: ByteArray, parity: ByteArray, model: ModelPackage, label: String) {
         assertEquals(1, manifest["format"].asInt)
-        assertEquals(FeatureSchema.featureSchemaVersion, manifest["featureSchemaVersion"].asInt)
-        assertEquals(FeatureSchema.namesHash, manifest["featureNamesHash"].asString)
+        val schema = manifest["featureSchemaVersion"].asInt
+        assertTrue("Parity schema must be supported by the host", schema in FeatureSchema.SUPPORTED_SCHEMA)
+        assertEquals(model.manifest.featureSchemaVersion, schema)
+        assertEquals(FeatureSchema.namesHash(schema), manifest["featureNamesHash"].asString)
         assertEquals(sha256(bytes), manifest["packageSha256"].asString)
         assertEquals(sha256(parity), manifest["paritySha256"].asString)
         assertEquals(1e-4, manifest["scoreTolerance"].asDouble, 0.0)
@@ -59,7 +61,7 @@ class ModelParityTest {
             val record = JsonParser.parseString(line).asJsonObject
             assertEquals(1, record["format"].asInt)
             val features = record.getAsJsonArray("features").map { it.asFloat }.toFloatArray()
-            assertEquals(FeatureSchema.names.size, features.size)
+            assertEquals(FeatureSchema.names(schema).size, features.size)
             assertTrue(features.all(Float::isFinite))
             val expected = record["expectedScore"].asDouble
             assertTrue(expected.isFinite())

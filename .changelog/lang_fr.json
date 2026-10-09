@@ -287,7 +287,8 @@
         "compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires",
         "Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement",
         "compose.memo réutilise les fragments de render dont les valeurs de dépendance et les états lus n'ont pas changé, de sorte qu'une mise à jour partielle d'une grande liste ne reconstruit que les lignes modifiées",
-        "Les options de développement proposent \"Autoriser Inspector pour les scripts Node.js\", désactivé par défaut, pour les points d'arrêt et le profilage CPU/mémoire en Debug et Release avec un plugin Node.js Runtime compatible; DevTools se connecte via la redirection de ports ADB"
+        "Les options de développement proposent \"Autoriser Inspector pour les scripts Node.js\", désactivé par défaut, pour les points d'arrêt et le profilage CPU/mémoire en Debug et Release avec un plugin Node.js Runtime compatible; DevTools se connecte via la redirection de ports ADB",
+        "La fonction \"Générer du code\" de l'inspecteur de disposition prend en charge les plans de localisation relative qui identifient la cible par le text / desc / id d'un élément voisin et une relation de boussole fixe (par exemple l'icône d'une ligne de liste localisée par le titre de la ligne), en générant des appels filter et compass"
       ],
       "fix": [
         "Un plantage de l'hôte lors du rafraîchissement des couleurs intelligentes au retour au premier plan ou à la recréation d'une page, quand les rappels des composants enregistrent de nouvelles cibles de thème",

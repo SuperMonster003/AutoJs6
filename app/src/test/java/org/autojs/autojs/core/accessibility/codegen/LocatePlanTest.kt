@@ -52,8 +52,32 @@ class LocatePlanTest {
             LocatePlan(Family.ANCHOR_SEARCH, spec, listOf(PlanStep.Search(SelectorSpec(Condition("text", "x"))))),
             LocatePlan(Family.ANCHOR_SEARCH, spec, listOf(PlanStep.Search(SelectorSpec(Condition("text", "y"))))),
             LocatePlan(Family.CONTAINER_ITEMS, spec, listOf(PlanStep.Search(SelectorSpec(Condition("text", "x")))), Cardinality.ALL),
+            LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Up(1), PlanStep.Match(SelectorSpec(Condition("text", "x"))))),
+            LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Up(1), PlanStep.Match(SelectorSpec(Condition("text", "y"))))),
+            LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Sibling(1), PlanStep.Match(SelectorSpec(Condition("text", "x"))))),
+            LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Sibling(-1), PlanStep.Match(SelectorSpec(Condition("text", "x"))))),
+            LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Up(1), PlanStep.Child(0), PlanStep.Match(SelectorSpec(Condition("text", "x"))))),
+            LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Up(1), PlanStep.Match(SelectorSpec(Condition("text", "x")))), Cardinality.ALL),
         )
         assertEquals(plans.size, plans.map { it.planKey }.toSet().size)
+    }
+
+    @Test
+    fun relativePlansNeedRelationStepsAndANonEmptyMatch() {
+        val match = PlanStep.Match(SelectorSpec(Condition("text", "x")))
+        val plan = LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Up(2), PlanStep.Sibling(-1), match))
+        assertEquals(listOf(PlanStep.Up(2), PlanStep.Sibling(-1)), plan.relation)
+        assertEquals(match.selector, plan.relativeMatch)
+        assertTrue(LocatePlan(Family.SELF, spec).relation.isEmpty())
+        assertEquals(null, LocatePlan(Family.SELF, spec).relativeMatch)
+        assertThrows(IllegalArgumentException::class.java) { PlanStep.Sibling(0) }
+        assertThrows(IllegalArgumentException::class.java) { LocatePlan(Family.SELF_RELATIVE, spec, listOf(match)) }
+        assertThrows(IllegalArgumentException::class.java) { LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Up(1))) }
+        assertThrows(IllegalArgumentException::class.java) { LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Up(1), PlanStep.Match(SelectorSpec()))) }
+        assertThrows(IllegalArgumentException::class.java) { LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Up(1), PlanStep.Search(spec))) }
+        assertThrows(IllegalArgumentException::class.java) { LocatePlan(Family.SELF_RELATIVE, spec, listOf(PlanStep.Index(0), match)) }
+        assertThrows(IllegalArgumentException::class.java) { LocatePlan(Family.SELF_RELATIVE, spec, List(5) { PlanStep.Up(1) } + match) }
+        assertThrows(IllegalArgumentException::class.java) { LocatePlan(Family.ANCHOR_PATH, spec, listOf(PlanStep.Sibling(1))) }
     }
 
     @Test

@@ -10,6 +10,7 @@ import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest
 import org.autojs.autojs.core.accessibility.codegen.SnapshotNode
 import org.autojs.autojs.core.accessibility.codegen.dataset.FeatureExport
 import org.autojs.autojs.core.accessibility.codegen.dataset.TaskGroup
+import org.autojs.autojs.core.accessibility.codegen.features.FeatureSchema
 import org.autojs.autojs.core.accessibility.codegen.model.ModelPackage
 import org.autojs.autojs.core.accessibility.codegen.model.ModelPackageReader
 import org.autojs.autojs.core.accessibility.codegen.model.ObliviousTreeModel
@@ -76,13 +77,18 @@ internal object RealGroupDiagnostics {
 
     private class Probe(val name: String, val plan: LocatePlan)
 
+    /** A ranking model with the feature schema it was trained on. zh-CN: 排序模型及其训练时的特征 schema. */
+    private class Model(val model: ObliviousTreeModel, val featureSchemaVersion: Int)
+
     fun run(tasks: File, policy: File, ranker: File, output: File, probes: File?) {
         FeatureExport.requirePrivate(tasks)
         FeatureExport.requirePrivate(output)
         probes?.let(FeatureExport::requirePrivate)
         val policyModel = ConstructionPolicyModel.read(File(policy, "policy.json"))
-        val refitted = ExperimentRankerModel.read(File(ranker, "ranker.json")).model
-        val tiny = (ModelPackageReader().read(tinyBytes().inputStream()) as ModelPackage).model
+        val refittedModel = ExperimentRankerModel.read(File(ranker, "ranker.json"))
+        val tinyPackage = ModelPackageReader().read(tinyBytes().inputStream()) as ModelPackage
+        val refitted = Model(refittedModel.model, refittedModel.featureSchemaVersion)
+        val tiny = Model(tinyPackage.model, tinyPackage.manifest.featureSchemaVersion)
         val probeJson = probes?.let { JsonParser.parseString(it.readText(Charsets.UTF_8)).asJsonObject }
         val files = tasks.walkTopDown().filter { it.isFile && it.name.endsWith(".cgtask.json") }.sortedBy { it.name }.toList()
         require(files.isNotEmpty()) { "No .cgtask.json under $tasks" }
@@ -98,7 +104,10 @@ internal object RealGroupDiagnostics {
             addProperty("role", "real-group-diagnostics")
             addProperty("constructionPolicySha256", hash(File(policy, "policy.json").readBytes()))
             addProperty("rankerSha256", hash(File(ranker, "ranker.json").readBytes()))
+            addProperty("rankerFeatureSchemaVersion", refitted.featureSchemaVersion)
             addProperty("tinyRankerSha256", hash(tinyBytes()))
+            addProperty("tinyFeatureSchemaVersion", tiny.featureSchemaVersion)
+            addProperty("hostFeatureSchemaVersion", FeatureSchema.featureSchemaVersion)
             add("constructionBudget", gson.toJsonTree(constructionBudget))
             add("methods", gson.toJsonTree(methods))
             add("groups", groups)
@@ -110,7 +119,7 @@ internal object RealGroupDiagnostics {
 
     private fun evaluate(
         group: TaskGroup, file: File, root: File, policy: ConstructionPolicyModel,
-        refitted: ObliviousTreeModel, tiny: ObliviousTreeModel, probeJson: JsonArray?,
+        refitted: Model, tiny: Model, probeJson: JsonArray?,
     ): JsonObject {
         val capture = group.states[group.captureState]
         val request = group.request.forState(capture)
@@ -169,8 +178,8 @@ internal object RealGroupDiagnostics {
             val ordered: List<Scored>? = try {
                 val ranked = when (ranker) {
                     "rule" -> RuleRanker().rank(request, set.map { it.candidate })
-                    "tiny" -> ModelRanker(tiny, budgetMs = 150).rank(request, set.map { it.candidate })
-                    else -> ModelRanker(refitted, budgetMs = 150).rank(request, set.map { it.candidate })
+                    "tiny" -> ModelRanker(tiny.model, budgetMs = 150, featureSchemaVersion = tiny.featureSchemaVersion).rank(request, set.map { it.candidate })
+                    else -> ModelRanker(refitted.model, budgetMs = 150, featureSchemaVersion = refitted.featureSchemaVersion).rank(request, set.map { it.candidate })
                 }
                 ranked.map { byKey.getValue(ConstructionSearch.canonicalKey(it.plan)) }
             } catch (failure: Exception) {

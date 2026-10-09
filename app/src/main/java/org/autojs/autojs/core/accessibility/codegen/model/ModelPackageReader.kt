@@ -335,14 +335,14 @@ class ModelPackageReader(
         val schema = json.integer("featureSchemaVersion")
         enforce(schema in FeatureSchema.SUPPORTED_SCHEMA, INCOMPATIBLE_SCHEMA, "Unsupported feature schema")
         val hash = json.text("featureNamesHash")
-        enforce(hash == FeatureSchema.namesHash, FEATURE_MISMATCH, "Feature names hash differs from host")
+        enforce(hash == FeatureSchema.namesHash(schema), FEATURE_MISMATCH, "Feature names hash differs from host")
         val model = json.obj("model").apply { fields("file", "size", "sha256", "trees", "depth", "features") }
         enforce(model.text("file") == "model.bin", INVALID_MANIFEST, "Model file must be model.bin")
         val modelHash = model.text("sha256")
         enforce(HEX64.matches(modelHash), INVALID_MANIFEST, "Invalid model SHA-256")
         val metadata = ModelBinaryMetadata("model.bin", model.integer("size", 32, MAX_MODEL_BYTES).toLong(), modelHash,
             model.integer("trees", 1, 4096), model.integer("depth", 1, 8), model.integer("features", 1, 65535))
-        enforce(metadata.features == FeatureSchema.names.size, FEATURE_MISMATCH, "Feature count differs from host")
+        enforce(metadata.features == FeatureSchema.names(schema).size, FEATURE_MISMATCH, "Feature count differs from host")
         val dataset = json.obj("dataset").apply { fields("datasetId", "groups", "createdAt") }
         val metrics = json.obj("metrics").apply { fields("test", "realTest") }
         val training = json.obj("training").apply { fields("catboostVersion", "pythonVersion", "hostCommit", "trainedAt") }
@@ -385,7 +385,7 @@ class ModelPackageReader(
             it.asString
         }
         val hash = json.text("namesHash")
-        enforce(names == FeatureSchema.names && hash == FeatureSchema.namesHash, FEATURE_MISMATCH, "Feature names/order/hash differs from host")
+        enforce(names == FeatureSchema.names(schema) && hash == FeatureSchema.namesHash(schema), FEATURE_MISMATCH, "Feature names/order/hash differs from host")
         return ModelFeatures(1, schema, Collections.unmodifiableList(names), hash)
     }
 

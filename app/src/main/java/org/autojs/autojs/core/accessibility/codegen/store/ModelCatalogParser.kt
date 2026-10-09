@@ -20,7 +20,7 @@ import java.util.Collections
 class ModelCatalogParser(
     private val hostVersionCode: Int,
     private val supportedSchemas: IntRange = FeatureSchema.SUPPORTED_SCHEMA,
-    private val expectedNamesHash: String = FeatureSchema.namesHash,
+    private val expectedNamesHash: (Int) -> String? = FeatureSchema::namesHashOrNull,
     private val expectedRepository: String = OFFICIAL_REPOSITORY,
 ) {
     private val gson = GsonBuilder().serializeNulls().create()
@@ -98,7 +98,7 @@ class ModelCatalogParser(
         val fingerprint = ModelCatalogJson.digest(gson.toJson(immutable).toByteArray(Charsets.UTF_8))
         val compatibility = when {
             minHost > hostVersionCode -> ModelCatalogCompatibility.NEEDS_HOST_UPDATE
-            schema !in supportedSchemas || namesHash != expectedNamesHash -> ModelCatalogCompatibility.INCOMPATIBLE
+            schema !in supportedSchemas || namesHash != expectedNamesHash(schema) -> ModelCatalogCompatibility.INCOMPATIBLE
             else -> ModelCatalogCompatibility.COMPATIBLE
         }
         return CatalogModelVersion(code, name, schema, namesHash, minHost, artifact, released, dataset, metrics, license,

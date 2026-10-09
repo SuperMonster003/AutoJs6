@@ -154,6 +154,54 @@ class PlanVerifierTest {
     }
 
     @Test
+    fun relativePlansKeepEntryMatchesWhoseNeighbourSubtreeContainsTheMatch() {
+        val root = listTree()
+        val verifier = PlanVerifier(root)
+        val request = CodeGenRequest(listOf(root.find("button1")))
+        val byRow = LocatePlan(Family.SELF_RELATIVE, spec("text" to "Delete"), listOf(PlanStep.Up(1), PlanStep.Match(spec("text" to "Item 1"))))
+        val result = verified(verifier.verify(request, byRow))
+        assertSame(root.find("button1"), result.resolved.single())
+        assertEquals(3, result.facts.selectorMatchCount)
+        assertEquals(1, result.facts.relativeMatchCount)
+        assertEquals(1, result.facts.pathSteps)
+        assertEquals(1, result.facts.pathUpLevels)
+        assertEquals(0, result.facts.pathSiblingSteps)
+        assertEquals(0, result.facts.anchorMatchCount)
+        val bySibling = LocatePlan(Family.SELF_RELATIVE, spec("text" to "Delete"), listOf(PlanStep.Sibling(-1), PlanStep.Match(spec("text" to "Item 1"))))
+        val sibling = verified(verifier.verify(request, bySibling))
+        assertSame(root.find("button1"), sibling.resolved.single())
+        assertEquals(1, sibling.facts.pathSiblingSteps)
+        assertEquals(1, sibling.facts.pathMaxChildIndex)
+        // A match every neighbour satisfies keeps all entries and takes the first in pre-order.
+        val broad = LocatePlan(Family.SELF_RELATIVE, spec("text" to "Delete"), listOf(PlanStep.Up(1), PlanStep.Match(spec("text" to "Delete"))))
+        rejected(verifier.verify(request, broad), RejectionReason.WRONG_TARGET)
+        assertEquals(3, verified(verifier.verify(CodeGenRequest(listOf(root.find("button0"))), broad)).facts.relativeMatchCount)
+        // Unreachable relations skip the entry instead of failing the plan; nothing kept is an empty result.
+        val unreachable = LocatePlan(Family.SELF_RELATIVE, spec("text" to "Delete"), listOf(PlanStep.Up(5), PlanStep.Match(spec("text" to "Item 1"))))
+        rejected(verifier.verify(request, unreachable), RejectionReason.EMPTY_RESULT)
+        val forward = LocatePlan(Family.SELF_RELATIVE, spec("text" to "Delete"), listOf(PlanStep.Sibling(1), PlanStep.Match(spec("text" to "Item 1"))))
+        rejected(verifier.verify(request, forward), RejectionReason.EMPTY_RESULT)
+        rejected(verifier.verify(request, LocatePlan(Family.SELF_RELATIVE, spec("text" to "Nothing"), byRow.steps)), RejectionReason.EMPTY_RESULT)
+        assertEquals(listOf(PlanStep.Up(1)), byRow.relation)
+        assertEquals(spec("text" to "Item 1"), byRow.relativeMatch)
+        assertFalse(root.descendantsAndSelf().any { it.isRecycled })
+    }
+
+    @Test
+    fun relativeCollectionsKeepEveryAcceptedEntryInPreorder() {
+        val root = listTree()
+        val verifier = PlanVerifier(root)
+        val all = CodeGenRequest(listOf(root.find("button2"), root.find("button0"), root.find("button1")), Scope.COLLECTION)
+        val everyRow = LocatePlan(Family.SELF_RELATIVE, spec("text" to "Delete"), listOf(PlanStep.Up(1), PlanStep.Match(spec("text" to "Delete"))), Cardinality.ALL)
+        val result = verified(verifier.verify(all, everyRow))
+        assertEquals(listOf(root.find("button0"), root.find("button1"), root.find("button2")), result.resolved)
+        assertEquals(3, result.facts.relativeMatchCount)
+        val oneRow = LocatePlan(Family.SELF_RELATIVE, spec("text" to "Delete"), listOf(PlanStep.Up(1), PlanStep.Match(spec("text" to "Item 0"))), Cardinality.ALL)
+        rejected(verifier.verify(all, oneRow), RejectionReason.MISSING_TARGETS)
+        rejected(verifier.verify(all, LocatePlan(Family.SELF_RELATIVE, spec("text" to "Delete"), oneRow.steps)), RejectionReason.CARDINALITY_MISMATCH)
+    }
+
+    @Test
     fun navigationNeverEscapesTheCapturedRootEvenIfTheSourceHasAParent() {
         val outside = listTree()
         val captured = outside.find("row0")

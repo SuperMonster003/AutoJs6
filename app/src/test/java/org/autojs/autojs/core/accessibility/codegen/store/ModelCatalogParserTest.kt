@@ -2,6 +2,7 @@ package org.autojs.autojs.core.accessibility.codegen.store
 
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
+import org.autojs.autojs.core.accessibility.codegen.features.FeatureSchema
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -35,7 +36,7 @@ class ModelCatalogParserTest {
     fun hostAndFeatureCompatibilityDisableDownloadsWithoutDroppingVersions() {
         val changes = listOf<Pair<(JsonObject) -> Unit, ModelCatalogCompatibility>>(
             ({ value: JsonObject -> value.addProperty("minHostVersionCode", 101) }) to ModelCatalogCompatibility.NEEDS_HOST_UPDATE,
-            ({ value: JsonObject -> value.addProperty("featureSchemaVersion", 2) }) to ModelCatalogCompatibility.INCOMPATIBLE,
+            ({ value: JsonObject -> value.addProperty("featureSchemaVersion", FeatureSchema.SUPPORTED_SCHEMA.last + 1) }) to ModelCatalogCompatibility.INCOMPATIBLE,
             ({ value: JsonObject -> value.addProperty("featureNamesHash", "0".repeat(16)) }) to ModelCatalogCompatibility.INCOMPATIBLE,
         )
         for ((change, compatibility) in changes) {

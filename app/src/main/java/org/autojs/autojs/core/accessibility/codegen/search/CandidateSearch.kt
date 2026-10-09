@@ -30,6 +30,10 @@ data class SearchBudget(val maxAttempts: Int = 2_000, val maxVerified: Int = 200
     }
 }
 
+/** A relation from the target to a nearby node whose content may identify it; [excluded] is the branch holding the target.
+ * zh-CN: 从目标到某邻近节点的关系, 该节点的内容可能标识目标; [excluded] 为包含目标的分支. */
+private class Relation<N>(val steps: List<PlanStep>, val reached: N, val excluded: N?)
+
 data class SearchResult<N : UiNode<N>>(
     val candidates: List<Verified<N>>,
     val attemptedCount: Int,
@@ -40,10 +44,10 @@ data class SearchResult<N : UiNode<N>>(
 )
 
 /**
- * Deterministic enumeration and simplification of the five plan families. Families and anchors
+ * Deterministic enumeration and simplification of the six plan families. Families and anchors
  * take turns so a large property combination space cannot consume the entire budget first.
  * All retained plans have passed the same verifier used by dataset evaluation.
- * zh-CN: 确定性枚举并精简五类计划. 各计划族与锚点轮流枚举, 避免属性组合先耗尽全部预算.
+ * zh-CN: 确定性枚举并精简六类计划. 各计划族与锚点轮流枚举, 避免属性组合先耗尽全部预算.
  * 保留的计划均经过与数据集评估共用的验证器.
  */
 class CandidateSearch<N : UiNode<N>>(
@@ -110,6 +114,7 @@ class CandidateSearch<N : UiNode<N>>(
                 indexPlans(targetSpecs),
                 anchorPaths(),
                 ancestorSearches(targetSpecs),
+                relativePlans(targetSpecs),
             )
             val iterator = interleave(families).iterator()
             while (iterator.hasNext()) {
@@ -195,14 +200,33 @@ class CandidateSearch<N : UiNode<N>>(
                 if (reduced is Verified) current = reduced
                 if (limited) return current
             }
-            val search = current.plan.steps.singleOrNull() as? PlanStep.Search ?: return current
-            for (i in search.selector.conditions.indices.reversed()) {
-                val inner = (current.plan.steps.single() as PlanStep.Search).selector.conditions.toMutableList().apply { removeAt(i) }
-                val reduced = checkPlan(copy(current.plan, steps = listOf(PlanStep.Search(SelectorSpec(inner)))))
+            val nested = when (val last = current.plan.steps.lastOrNull()) {
+                is PlanStep.Search -> last.selector
+                is PlanStep.Match -> last.selector
+                else -> return current
+            }
+            for (i in nested.conditions.indices.reversed()) {
+                val remaining = nestedSelector(current.plan).conditions.toMutableList().apply { removeAt(i) }
+                // A relative match keeps at least one condition; an empty one would keep every entry match.
+                // zh-CN: 相对匹配至少保留一个条件, 空条件会保留全部入口匹配项.
+                if (remaining.isEmpty() && current.plan.family == Family.SELF_RELATIVE) continue
+                val reduced = checkPlan(copy(current.plan, steps = withNestedSelector(current.plan, SelectorSpec(remaining))))
                 if (reduced is Verified) current = reduced
                 if (limited) return current
             }
             return current
+        }
+
+        private fun nestedSelector(plan: LocatePlan): SelectorSpec = when (val last = plan.steps.last()) {
+            is PlanStep.Search -> last.selector
+            is PlanStep.Match -> last.selector
+            else -> error("No nested selector")
+        }
+
+        private fun withNestedSelector(plan: LocatePlan, selector: SelectorSpec): List<PlanStep> = plan.steps.dropLast(1) + when (plan.steps.last()) {
+            is PlanStep.Search -> PlanStep.Search(selector)
+            is PlanStep.Match -> PlanStep.Match(selector)
+            else -> error("No nested selector")
         }
 
         private fun copy(plan: LocatePlan, selector: SelectorSpec = plan.selector, steps: List<PlanStep> = plan.steps) =
@@ -306,6 +330,88 @@ class CandidateSearch<N : UiNode<N>>(
             return index in start..subtreeEnds[start]
         }
 
+        /**
+         * Relative plans identify the target through the content of a nearby control: the entry
+         * selector may match many nodes, and the relation (each ancestor within reach, or a sibling of
+         * the target or of one of its ancestors) must lead to a node whose subtree contains the content.
+         * Content comes from the nearest nodes with id, description or text, outside the target's own branch.
+         * zh-CN: 相对计划通过邻近控件的内容确定目标: 入口选择器可匹配多个节点, 关系 (可达范围内的各级祖先,
+         * 或目标及其祖先的兄弟) 须到达一个子树包含该内容的节点. 内容取自目标自身分支之外最近的带 id, 描述或文本的节点.
+         */
+        private fun relativePlans(targetSpecs: List<SelectorSpec>): Sequence<LocatePlan> {
+            val origin = target ?: return emptySequence()
+            val chain = ArrayList<N>().apply { add(origin) }
+            val relations = ArrayList<Relation<N>>()
+            for (level in 1..LocatePlan.MAX_RELATION_STEPS) {
+                val ancestor = tree.parent(chain.last()) ?: break
+                chain += ancestor
+                relations += Relation(listOf(PlanStep.Up(level)), ancestor, chain[level - 1])
+            }
+            for (level in 0 until minOf(chain.size, LocatePlan.MAX_RELATION_STEPS)) {
+                val node = chain[level]
+                val parent = tree.parent(node) ?: break
+                val index = tree.childIndex(node)
+                for (distance in 1..SIBLING_RADIUS) for (sign in intArrayOf(1, -1)) {
+                    cancellation.throwIfCancelled()
+                    // A negative position is not a sibling; child(-n) would count from the end instead.
+                    // zh-CN: 负位置不是兄弟节点; child(-n) 会改为从末尾计数.
+                    val at = index + sign * distance
+                    if (at < 0) continue
+                    val sibling = tree.child(parent, at) ?: continue
+                    val steps = buildList { if (level > 0) add(PlanStep.Up(level)); add(PlanStep.Sibling(sign * distance)) }
+                    relations += Relation(steps, sibling, null)
+                }
+            }
+            val sources = relations.map { relation ->
+                sequence {
+                    val relativeSpecs = contentNodes(relation.reached, relation.excluded)
+                        .flatMap { content -> specs(contentConditions(content)).filter { it.conditions.isNotEmpty() }.toList() }.distinct()
+                    for (sum in 0 until relativeSpecs.size + targetSpecs.size - 1) {
+                        for (i in maxOf(0, sum - targetSpecs.lastIndex)..minOf(sum, relativeSpecs.lastIndex)) {
+                            cancellation.throwIfCancelled()
+                            yield(LocatePlan(Family.SELF_RELATIVE, targetSpecs[sum - i], relation.steps + PlanStep.Match(relativeSpecs[i]), cardinality, receiver!!))
+                        }
+                    }
+                }
+            }
+            return interleave(sources)
+        }
+
+        /** Nearest content-bearing nodes in the subtree of [root], skipping the subtree of [excluded].
+         * zh-CN: [root] 子树中最近的带内容节点, 跳过 [excluded] 的子树. */
+        private fun contentNodes(root: N, excluded: N?): List<N> {
+            val start = positions[root] ?: return emptyList()
+            val skipStart = excluded?.let { positions[it] } ?: -1
+            val skipEnd = if (skipStart >= 0) subtreeEnds[skipStart] else -1
+            val found = ArrayList<Pair<N, Int>>()
+            var index = start
+            while (index <= subtreeEnds[start]) {
+                cancellation.throwIfCancelled()
+                if (index == skipStart) {
+                    index = skipEnd + 1
+                    continue
+                }
+                val node = tree.nodes[index]
+                if (contentConditions(node).isNotEmpty()) found += node to distance(node)
+                index++
+            }
+            return found.sortedWith(compareBy({ it.second }, { positions.getValue(it.first) })).take(CONTENT_LIMIT).map { it.first }
+        }
+
+        private fun distance(node: N): Int {
+            var a = node
+            var b = target!!
+            var distance = 0
+            while (a != b) {
+                cancellation.throwIfCancelled()
+                if (tree.depth(a) >= tree.depth(b)) a = tree.parent(a) ?: break else b = tree.parent(b) ?: break
+                distance++
+            }
+            return distance
+        }
+
+        private fun contentConditions(node: N): List<Condition> = conditions(node).filter { it.attr in CONTENT_ATTRS }
+
         private fun receiverForTargets(): PlanReceiver? {
             if (request.receiver == Receiver.SELF || request.action == Action.NONE) return PlanReceiver.Self
             val levels = request.targets.map { target ->
@@ -386,5 +492,10 @@ class CandidateSearch<N : UiNode<N>>(
 
     companion object {
         private const val MAX_CACHED_REFERENCES = 200_000
+        /** Sibling offsets tried on each side of the target and its ancestors. zh-CN: 目标及其祖先两侧各尝试的兄弟偏移数. */
+        internal const val SIBLING_RADIUS = 3
+        /** Content nodes considered per relation. zh-CN: 每个关系考虑的内容节点数. */
+        internal const val CONTENT_LIMIT = 8
+        private val CONTENT_ATTRS = setOf("id", "desc", "text")
     }
 }

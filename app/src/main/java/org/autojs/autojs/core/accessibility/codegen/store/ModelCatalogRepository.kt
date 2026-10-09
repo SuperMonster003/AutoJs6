@@ -33,7 +33,7 @@ class ModelCatalogRepository(
     private val clock: () -> Long = System::currentTimeMillis,
     private val expectedRepository: String = ModelCatalogParser.OFFICIAL_REPOSITORY,
     supportedSchemas: IntRange = FeatureSchema.SUPPORTED_SCHEMA,
-    expectedNamesHash: String = FeatureSchema.namesHash,
+    expectedNamesHash: (Int) -> String? = FeatureSchema::namesHashOrNull,
 ) {
     private val parser = ModelCatalogParser(hostVersionCode, supportedSchemas, expectedNamesHash, expectedRepository)
     private val cacheFile = File(directory, CACHE_FILE_NAME)

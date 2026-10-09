@@ -4,6 +4,7 @@ import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest
 import org.autojs.autojs.core.accessibility.codegen.plan.Condition
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
+import org.autojs.autojs.core.accessibility.codegen.verify.VerificationFacts
 import org.autojs.autojs.core.accessibility.codegen.verify.Verified
 import org.autojs.autojs.core.automator.UiNode
 import java.util.Collections
@@ -28,20 +29,26 @@ class RuleRanker : Ranker {
         val familyCost = when (plan.family) {
             LocatePlan.Family.SELF -> 0L
             LocatePlan.Family.ANCHOR_SEARCH -> 40L
+            LocatePlan.Family.SELF_RELATIVE -> 60L
             LocatePlan.Family.ANCHOR_PATH -> 80L
             LocatePlan.Family.CONTAINER_ITEMS -> 120L
             LocatePlan.Family.SELF_INDEX -> 160L
         }
         val conditionCost = conditions(plan).sumOf(::conditionCost)
         val dynamicCost = (if (facts.dynamicText) 32L else 0L) + (if (facts.dynamicDesc) 32L else 0L)
-        val pathLength = facts.pathUpLevels.toLong() + facts.pathChildSteps + facts.receiverUpLevels
-        val pathCost = pathLength * 2L + max(0L, pathLength - LONG_PATH_THRESHOLD) * 6L
+        val pathLength = pathLength(facts)
+        // Sibling offsets assume the order of neighbours, so they cost slightly more than levels.
+        // zh-CN: 兄弟偏移假定邻居的顺序, 因而比层级步骤略贵.
+        val pathCost = pathLength * 2L + facts.pathSiblingSteps + max(0L, pathLength - LONG_PATH_THRESHOLD) * 6L
         val ordinalCost = ordinalDistance(plan) * 2L
-        // A first-of-many SELF is valid, but more sensitive to order than a unique selector.
-        // zh-CN: SELF 取多个匹配中的首项虽然有效, 但比唯一选择器更依赖顺序.
+        // A first-of-many SELF is valid, but more sensitive to order than a unique selector. A relative
+        // plan is judged by the matches its relation keeps, not by its deliberately broad entry selector.
+        // zh-CN: SELF 取多个匹配中的首项虽然有效, 但比唯一选择器更依赖顺序. 相对计划按关系保留的匹配数判断,
+        // 而非按其刻意宽泛的入口选择器.
+        val effectiveMatches = if (plan.family == LocatePlan.Family.SELF_RELATIVE) facts.relativeMatchCount else facts.selectorMatchCount
         val firstMatchCost = if (plan.cardinality == LocatePlan.Cardinality.ONE &&
-            plan.family != LocatePlan.Family.SELF_INDEX && facts.selectorMatchCount > 1
-        ) 64L + (facts.selectorMatchCount - 1).toLong().coerceAtMost(100L) else 0L
+            plan.family != LocatePlan.Family.SELF_INDEX && effectiveMatches > 1
+        ) 64L + (effectiveMatches - 1).toLong().coerceAtMost(100L) else 0L
         return familyCost + conditionCost + dynamicCost + pathCost + ordinalCost + firstMatchCost
     }
 
@@ -49,8 +56,17 @@ class RuleRanker : Ranker {
         internal const val LONG_PATH_THRESHOLD = 2L
         internal const val LARGE_INDEX_THRESHOLD = 8L
 
-        internal fun conditions(plan: LocatePlan): List<Condition> =
-            plan.selector.conditions + plan.steps.filterIsInstance<PlanStep.Search>().flatMap { it.selector.conditions }
+        internal fun conditions(plan: LocatePlan): List<Condition> = plan.selector.conditions + plan.steps.flatMap { step ->
+            when (step) {
+                is PlanStep.Search -> step.selector.conditions
+                is PlanStep.Match -> step.selector.conditions
+                else -> emptyList()
+            }
+        }
+
+        /** Verified relation steps plus the receiver ascent. zh-CN: 已验证的关系步数加动作接收者的上行层数. */
+        internal fun pathLength(facts: VerificationFacts): Long =
+            facts.pathUpLevels.toLong() + facts.pathChildSteps + facts.pathSiblingSteps + facts.receiverUpLevels
 
         internal fun isStructural(condition: Condition): Boolean =
             condition.attr !in setOf("id", "desc", "text", "className", "packageName")
@@ -76,6 +92,9 @@ class RuleRanker : Ranker {
             val index = when (step) {
                 is PlanStep.Index -> step.index
                 is PlanStep.Child -> step.index
+                // A sibling offset of 1 is the nearest neighbour in either direction.
+                // zh-CN: 兄弟偏移 1 即任一方向上最近的邻居.
+                is PlanStep.Sibling -> return@sumOf kotlin.math.abs(step.offset.toLong()) - 1L
                 else -> return@sumOf 0L
             }
             if (index >= 0) index.toLong() else -index.toLong() - 1L

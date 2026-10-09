@@ -169,6 +169,7 @@ class ConstructionCoverageDiagnosticsTask {
                     if (!perform(operation)) return failed("PATH_STEP_NOT_LEGAL")
                 }
             }
+            Family.SELF_RELATIVE -> return failed("FAMILY_OUTSIDE_GRAMMAR")
             Family.ANCHOR_SEARCH, Family.CONTAINER_ITEMS -> {
                 if (!perform(Operation.EndOuter)) return failed("END_OUTER")
                 if (!addConditions((plan.steps.single() as PlanStep.Search).selector.conditions, true)) return failed("INNER_CONDITION_NOT_LEGAL")

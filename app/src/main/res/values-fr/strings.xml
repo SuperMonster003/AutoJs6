@@ -1186,12 +1186,16 @@
     <string name="text_codegen_explanation_dynamic_description">Dépend d\'une description contenant des chiffres, susceptible de changer</string>
     <string name="text_codegen_explanation_dynamic_text">Dépend d\'un texte contenant des chiffres, susceptible de changer</string>
     <string name="text_codegen_explanation_fixed_path">Dépend d\'une structure parent/enfant fixe</string>
+    <string name="text_codegen_explanation_fixed_relation">Dépend d\'une relation fixe avec un élément voisin</string>
     <string name="text_codegen_explanation_indexed_match">Utilise la correspondance %2$s sur %1$s</string>
     <string name="text_codegen_explanation_indexed_match_from_end">Utilise la correspondance %2$s depuis la fin sur %1$s</string>
     <string name="text_codegen_explanation_large_index">Dépend d\'un indice fixe élevé</string>
     <string name="text_codegen_explanation_long_path">Chemin parent/enfant long (%1$s étapes)</string>
     <string name="text_codegen_explanation_order_dependent">Dépend de l\'ordre des correspondances et peut échouer si cet ordre change</string>
     <string name="text_codegen_explanation_receiver_ancestor">L\'action est reçue par l\'ancêtre situé %1$s niveaux au-dessus de la cible</string>
+    <string name="text_codegen_explanation_relative_collection">Utilise %1$s pour localiser les %2$s éléments sélectionnés qui possèdent %4$s à la boussole %3$s</string>
+    <string name="text_codegen_explanation_relative_first_match">Utilise %1$s pour %2$s correspondances, dont %5$s possèdent %4$s à la boussole %3$s, la première étant la cible</string>
+    <string name="text_codegen_explanation_relative_unique">Utilise %1$s pour %2$s correspondances, dont seule la cible possède %4$s à la boussole %3$s</string>
     <string name="text_codegen_explanation_self_collection">Utilise %1$s pour localiser les %2$s éléments sélectionnés</string>
     <string name="text_codegen_explanation_self_first_match">%1$s correspond à %2$s éléments, le premier sert de cible</string>
     <string name="text_codegen_explanation_self_unique">Utilise %1$s pour localiser uniquement la cible dans cet instantané</string>
@@ -1206,6 +1210,7 @@
     <string name="text_codegen_family_container_items">Ensemble dans un conteneur</string>
     <string name="text_codegen_family_self">Attributs de l\'élément</string>
     <string name="text_codegen_family_self_index">Attributs et indice de correspondance</string>
+    <string name="text_codegen_family_self_relative">Attributs et élément voisin</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">Génération...</string>
     <string name="text_codegen_generation_error">Impossible de générer le code. Réessayez</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">Recherche d\'ensembles...</string>

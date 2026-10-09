@@ -40,7 +40,7 @@ class FlowRendererTest {
             if (plan.cardinality == Cardinality.ALL) assertEquals("widgets", cases.evaluate(source, expression = "observedResultType"))
             count++
         }
-        assertEquals(216, count)
+        assertEquals(288, count)
     }
 
     @Test

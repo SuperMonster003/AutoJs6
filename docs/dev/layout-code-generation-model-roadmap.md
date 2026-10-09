@@ -16,6 +16,8 @@
 
 2026-10-09 真实应用首组诊断 (E1): 维护者选定方向 (a). 在 QV770340J7 上用布局分析 "保存布局为文件" 采集 Aurora Store 更新列表的 3 个状态 (s1 点击目标行 Update 后在图标前插入进度条, s2 上方一行更新完成后被移除), 用 `label_real.py` 标注首个真实任务组 (目标为 Google 行的 `img_icon`, 单个, 点击); 标注工具的相对位置推荐在 s2 指向错位后的 Google Drive 图标, 需按先序序号显式改选. 新增显式离线诊断 `RealGroupDiagnosticsTask` (输入输出均限于 `CODEGEN_PRIVATE_DIR`, 可验证手写探针计划): 规则搜索 18 个候选 (2,000 次预算用尽), 冻结最佳策略构造 6 个, 启发式策略 2 个, 全部为 `SELF_INDEX` / `ANCHOR_PATH`, 没有任何候选同时在 s1 与 s2 存活 (候选上限 0.5); 规则流水线首选 `text("Google").findOnce().compass("p1c0c0")` 存活 0/2, tiny 与重训排序器首选 `className("android.widget.ImageView").depth(14).findOnce(3)` 存活 1/2. 维护者期望的 `text("Google").findOnce().compass("p1c0c-1")` 经验证器在三个状态全部通过, 但当前没有任何生成器能产生它: `CandidateSearch.path()` 只输出非负子序号, `ConstructionGrammar` 仅在负序号更靠近末尾时才输出负序号 (独生或首个子节点永不输出), 五个计划族也无法表达 "兄弟文本锚点 -> 向上 -> 后代搜索". 结论: 首个真实任务组的瓶颈在候选空间 (P1.2 契约) 而非排序. 待维护者决定是否以新的 P1 契约版本扩展候选空间 (末位子节点总是同时输出负序号; 新增 "锚点向上后搜索" 族), 该决定会重开数据导出与冻结协议; 真实采集按 Q8 继续.
 
+2026-10-09 相对定位族 (E1): 维护者选定方案 2 并要求更好的通用性 (列表项常需借邻近控件的 text / desc / id 的唯一性反向确定自身). 新增计划族 `SELF_RELATIVE` (D22): IR 增加 `PlanStep.Sibling` / `PlanStep.Match`, 验证器以一次整窗匹配加先序区间判断实现, 经典 / Flow 渲染为 `filter` + `compass` + `findOne`, 规则搜索新增关系枚举 (各级祖先与两侧兄弟, 最近 8 个内容节点), 规则排序族代价 60 (介于锚点内查找与锚点路径之间) 并按关系保留数计首项惩罚, 理由文字与对话框字符串 (11 种语言) 同步. 候选特征升为 schema 2 (75 列), 宿主兼容 schema 1 模型包 (按列名投影, 遇新族报告不可用并回退规则). 构造语法与策略特征保持冻结 (五族), 新族暂由规则搜索独占. 第二个真实任务组 (FastHub 动态列表, 两条同文本描述仅标题不同) 已标注. 用新规则搜索重跑 `RealGroupDiagnosticsTask`: Aurora 组规则候选 18 -> 39 个 (相对族 21 个), 5 个候选同时在 s1 与 s2 存活且全为相对族, 规则流水线首选变为 `id("img_icon")` + 罗盘 `p2` 子树含 `text("Google")` 的相对方案 (存活 2/2, 此前 0/2); FastHub 组规则候选 133 个 (相对族 87 个), 69 个全存活, 首选为 id 自身的首个匹配 (存活 2/2). schema 1 的 tiny 与重训排序器在两组上均按设计报告 `INCOMPATIBLE_FEATURES`, 在训练出 schema 2 排序器前规则流水线是唯一排序. codegen / codegen UI / inspector / automator 四个包 931 项 JVM 测试通过 (18 项为需环境变量的离线任务), Python 工具 158 项通过.
+
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取一个或多个未完成条目. P0-P1 不依赖模型, 单独落地即有价值, 必须先做; 之后分两条可并行的线: 数据与模型 (P2-P4), 分发与管理 (P5-P6); 两线在 P7 (对话框集成) 与 P8 (评估与发布) 汇合.
@@ -54,6 +56,7 @@ D1-D6 来自 2026-10-03 的需求原文, 为硬性要求; D7 按维护者 2026-1
 | D19 | 性能预算 | 生成 (构造/搜索 + 验证 + 特征 + 排序 + 渲染) 在工作线程执行, 可取消; 5,000 节点树上 P95 <= 1 s (Redmi 22120RN86C, API 33), 超过 300 ms 显示 "正在生成"; 每次生成至多进行 2,000 次候选验证 (包括精简后的重验), 规则/模型分支合计保留至多 200 个通过验证的候选. 构造前缀数、动作评分数、深度与临时缓存也必须有界, 具体预算由原型实测确定. 模型、规则及失败回退共享本次总计数/时限, 不在回退时重置; 给规则分支及最终排序/渲染预留预算, 复用已有合格结果; 耗尽预算且无合格候选时明确失败. P95 目标不替代单次请求硬截止, 后者须在原型中确定. 模型首次加载 <= 200 ms, 之后常驻缓存直到切换模型. |
 | D20 | 完整规则流程是基线与回退 | 开关关闭时完全使用规则构造 + RuleRanker. 构造策略缺失、不兼容、损坏、失败或超时, 按明确能力/原因保留规则分支; 排序失败则用 RuleRanker 重排当前合格候选, 不重新搜索. 结果区区分候选来源与排序来源, 旧排序包不得标为支持构造. 用户取消生成立即终止, 不自动回退; 仅取消下载时按 P7.2 等待用户决定是否继续规则生成. 新模型版本须通过 P8.1 的构造贡献、端到端效果与不劣于规则基线的验收后发布. |
 | D21 | Roadmap 位于 `docs/dev/`; 训练工具位于宿主仓库 | 采集, 标注, 特征导出, 训练, 导出, 一致性校验工具位于 `tools/codegen-model/` (与 Kotlin 特征 / 推理在同一仓库, 一致性测试可同时运行); Shared-Assets 只接收构建好的模型包, 模型卡与数据集 manifest (Q5). |
+| D22 | 相对定位族 `SELF_RELATIVE` 与特征 schema 2 (2026-10-09 维护者决定) | 入口选择器可匹配多个节点, 以至多 4 步罗盘关系 (向上 / 子节点序号 / 兄弟偏移) 到达邻近节点, 其子树须含嵌套选择器 (text / desc / id 等) 的匹配, 借此通过邻近控件的内容反向确定目标; 规则搜索按 "各级祖先 + 目标及祖先的兄弟" 枚举关系, 内容取目标分支之外最近的节点. 渲染为 `S.filter(w => { let r = w.compass("c"); return r !== null && r.findOne(T) !== null; }).findOnce()`. 候选特征升为 `featureSchemaVersion = 2` (75 列: 六族独热, `relative_*` 选择器组, `relative_match_count` / `relative_match_ratio`); 宿主仍可加载 schema 1 的模型包并按列名投影, 但遇到含该族的候选组时报告 `INCOMPATIBLE_FEATURES` 回退规则排序. 构造语法与 87 维构造特征暂不含该族 (保持冻结策略可加载), 待后续轮次扩展. |
 
 ---
 
@@ -138,6 +141,7 @@ D1-D6 来自 2026-10-03 的需求原文, 为硬性要求; D7 按维护者 2026-1
   - `SELF_INDEX`: 选择器 + `findOnce(i)`, `i` 为目标在先序匹配中的位置, 末尾附近时另给负序号; 只用于单目标.
   - `ANCHOR_PATH`: 锚点为目标 6 级以内的祖先, 祖先的兄弟, 或近祖先的后代中自身选择器唯一的节点, 路径为至多 4 步的罗盘步骤 (向上, 子节点序号, 兄弟).
   - `ANCHOR_SEARCH`: 唯一定位的祖先锚点 + 子树内 `findOne(spec)`.
+  - `SELF_RELATIVE` (D22, 2026-10-09): 目标选择器 (可多匹配) + 至多 4 步关系 (向上 / 子节点序号 / 兄弟偏移) + 相对节点子树内的嵌套选择器; 枚举各级祖先 (关系 `Up(k)`) 与目标及其祖先两侧各 3 个兄弟 (`Up(k-1)` + `Sibling(±n)`), 内容条件取目标分支之外最近的 8 个带 text / desc / id 的节点, 与目标条件对角交替; 精简时嵌套选择器至少保留一个条件. 单个与集合均可.
   - `CONTAINER_ITEMS`: 只用于集合, 唯一定位的容器 + `find(spec)`.
 
   预算按 D19: 至多尝试 2,000 个, 保留 200 个通过验证的; 可由 `CancellationSignal` 中途取消. 单测 `CandidateSearchTest`: 每个族至少 1 个夹具命中, 精简后不含冗余条件, 预算截断后仍确定 (同一输入两次结果相同), 跨包重名时输出完整 id. 证据 (E1, 2026-10-03): CandidateSearchTest 12 项通过, 覆盖五族, 正负序号, 精简/去重, 跨包完整 id, 属性开关, 确定性预算与取消. 候选族/锚点交替枚举; 验证尝试含精简且不超过 2,000, 保留不超过 200; 中间结果缓存限 200,000 个节点引用. AUTO 集合的最近接收者层数不一致时, 按现有统一 Up(n) IR 报告策略不匹配, 不擅自选更远祖先. 本条依赖 P1.3, 因此验证器先提交.
@@ -388,6 +392,7 @@ py -3.12 tools/codegen-model-distribution/prepare_bootstrap.py --catalog codegen
 | `ANCHOR_PATH` | 唯一锚点 + 罗盘路径 | 单个 | `function locate() { let a = A.findOnce(); return a && a.compass("c"); }` |
 | `ANCHOR_SEARCH` | 唯一祖先锚点 + 子树内首个匹配 (含锚点自身) | 单个 | `function locate() { let a = A.findOnce(); return a && a.findOne(T); }` |
 | `CONTAINER_ITEMS` | 唯一容器 + 子树内全部匹配 | 集合 | `function locate() { let a = A.findOnce(); let ws = a && a.find(T); return ws && ws.nonEmpty() ? ws : null; }` |
+| `SELF_RELATIVE` | 目标选择器 + 罗盘关系 `c` 到达的邻近节点子树含 `T` | 单个, 集合 | `function locate() { return S.filter(w => { let r = w.compass("c"); return r !== null && r.findOne(T) !== null; }).findOnce(); }` / 集合以 `.find()` 收集并排除空集合 |
 
 `locate()` 在集合为空时也返回 `null`: 全局 `wait` 与 Flow 的函数条件都把空集合视为 "已满足" (`Global.kt` 的 `isWaitConditionSatisfied`), 必须由函数自己排除.
 
@@ -464,7 +469,7 @@ Flow 风格 (`FlowRenderer`). 条件 `C`: `SELF` 族为 `S` (单个且接收者�
 
 目录 (`catalog-v1.json`) 的每个版本项字段见 P5.2; 其中 `featureSchemaVersion`, `featureNamesHash`, `minHostVersionCode`, `datasetId`, `metrics`, `license` 与包内 manifest 必须一致 (`prepare_catalog.py` 校验), 使下载前即可做重复检测与版本对比 (P6.4).
 
-### E.3 候选特征 (`featureSchemaVersion = 1`)
+### E.3 候选特征 (`featureSchemaVersion = 2`)
 
 此处为完整候选的终局排序特征. 构造状态/动作特征另有独立定义与 schema/hash, 不对下表缺失字段补零来代替, 具体字段由构造原型验证后落实到原 P3 条目.
 
@@ -473,17 +478,17 @@ Flow 风格 (`FlowRenderer`). 条件 `C`: `SELF` 族为 `S` (单个且接收者�
 | 分组 | 特征 | 来源 |
 | --- | --- | --- |
 | 请求 | `scope_collection`, `action_*` (6 个独热), `attr_id` / `attr_text` / `attr_desc` 开关 | `CodeGenRequest` |
-| 族 | `family_*` (5 个独热), `receiver_up_levels` | `LocatePlan` |
-| 选择器 | `cond_count`, `has_full_id`, `has_entry_id`, `has_text`, `has_desc`, `has_class`, `has_package`, `structural_cond_count` | `SelectorSpec` (锚点与目标各一组, 前缀 `self_` / `anchor_`) |
+| 族 | `family_*` (6 个独热, 含 `family_self_relative`), `receiver_up_levels` | `LocatePlan` |
+| 选择器 | `cond_count`, `has_full_id`, `has_entry_id`, `has_text`, `has_desc`, `has_class`, `has_package`, `structural_cond_count` | `SelectorSpec` (目标, 锚点与相对匹配各一组, 前缀 `self_` / `anchor_` / `relative_`) |
 | id 质量 | `id_entry_len`, `id_looks_obfuscated` (条目名 <= 2 字符或无元音的随机串), `id_cross_package_dup` | 条件值, 窗口统计 |
 | 文本质量 | `text_len`, `text_digit_ratio`, `text_dynamic` (数字 / 时间 / 计数模式), `text_cjk_ratio`, `desc_len`, `desc_dynamic` | 条件值, `facts` |
-| 序号 | `index_abs`, `index_negative`, `index_rel` (i / 匹配数), `selector_match_count` | `PlanStep.Index`, `facts` |
+| 序号 | `index_abs`, `index_negative`, `index_rel` (i / 匹配数), `selector_match_count`, `relative_match_count`, `relative_match_ratio` (关系保留的入口匹配数及其占比, 仅 `SELF_RELATIVE`) | `PlanStep.Index`, `facts` |
 | 路径 | `path_steps`, `path_up_levels`, `path_child_steps`, `path_sibling_steps`, `path_max_child_index`, `anchor_distance` | `PlanStep` |
 | 容器 | `container_item_count`, `container_item_uniform` (项结构签名一致比例) | `facts` |
 | 目标 | `target_depth`, `target_has_id`, `target_has_text`, `target_clickable`, `target_in_list` (有可滚动且子节点重复的祖先), `target_same_class_siblings`, `target_set_size` | 目标节点 |
 | 组内相对 | `rule_rank_norm` (规则名次 / 组大小), `rule_cost_gap` (与组内最优的代价差), `group_size`, `family_rank_in_group` | 同组 `Verified` |
 
-特征名称以表中顺序展开 (独热按枚举顺序), 完整列表以 `FeatureSchema.names` 为准, 本表只是分组说明; 修改任何特征 (增删, 改顺序, 改编码) 都必须升 `featureSchemaVersion` (P3.1).
+特征名称以表中顺序展开 (独热按枚举顺序), 完整列表以 `FeatureSchema.names` 为准, 本表只是分组说明; 修改任何特征 (增删, 改顺序, 改编码) 都必须升 `featureSchemaVersion` (P3.1). schema 1 (64 列, 名称哈希 `9c6a5d8279ffca0e`) 是 schema 2 (75 列, `a2b899bcc46125ba`) 的子集: 宿主按 schema 2 提取, 对 schema 1 的模型按列名投影, 且不为其未见过的族排序 (D22).
 
 ### E.4 评估指标与发布门槛
 

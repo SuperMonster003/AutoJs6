@@ -1186,12 +1186,16 @@
     <string name="text_codegen_explanation_dynamic_description">Зависит от описания с цифрами, которое может измениться</string>
     <string name="text_codegen_explanation_dynamic_text">Зависит от текста с цифрами, который может измениться</string>
     <string name="text_codegen_explanation_fixed_path">Зависит от фиксированной иерархии элементов</string>
+    <string name="text_codegen_explanation_fixed_relation">Зависит от фиксированного отношения к соседнему элементу</string>
     <string name="text_codegen_explanation_indexed_match">Выбран элемент %2$s из %1$s совпадений</string>
     <string name="text_codegen_explanation_indexed_match_from_end">Выбран элемент %2$s с конца из %1$s совпадений</string>
     <string name="text_codegen_explanation_large_index">Зависит от большого фиксированного индекса</string>
     <string name="text_codegen_explanation_long_path">Длинный путь по иерархии (%1$s переходов)</string>
     <string name="text_codegen_explanation_order_dependent">Зависит от порядка совпадений и может перестать работать при его изменении</string>
     <string name="text_codegen_explanation_receiver_ancestor">Действие получает предок цели на %1$s уровней выше</string>
+    <string name="text_codegen_explanation_relative_collection">Поиск выбранных %2$s элементов по %1$s, у которых по компасу %3$s есть %4$s</string>
+    <string name="text_codegen_explanation_relative_first_match">По %1$s найдено %2$s элементов, у %5$s из них по компасу %3$s есть %4$s, используется первый</string>
+    <string name="text_codegen_explanation_relative_unique">По %1$s найдено %2$s элементов, и только у цели по компасу %3$s есть %4$s</string>
     <string name="text_codegen_explanation_self_collection">Поиск выбранных %2$s элементов по %1$s</string>
     <string name="text_codegen_explanation_self_first_match">По %1$s найдено %2$s элементов, выбран первый</string>
     <string name="text_codegen_explanation_self_unique">Однозначный поиск цели по %1$s в текущем снимке</string>
@@ -1206,6 +1210,7 @@
     <string name="text_codegen_family_container_items">Группа внутри контейнера</string>
     <string name="text_codegen_family_self">Свойства элемента</string>
     <string name="text_codegen_family_self_index">Свойства и индекс совпадения</string>
+    <string name="text_codegen_family_self_relative">Свойства и соседний элемент</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">Генерация...</string>
     <string name="text_codegen_generation_error">Не удалось сгенерировать код. Повторите попытку</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">Поиск групп...</string>

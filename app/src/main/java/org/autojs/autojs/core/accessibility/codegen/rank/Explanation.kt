@@ -1,9 +1,11 @@
 package org.autojs.autojs.core.accessibility.codegen.rank
 
 import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest
+import org.autojs.autojs.core.accessibility.codegen.plan.CompassText
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanReceiver
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
+import org.autojs.autojs.core.accessibility.codegen.plan.SelectorSpec
 import org.autojs.autojs.core.accessibility.codegen.verify.Verified
 import org.autojs.autojs.core.automator.UiNode
 import java.util.Collections
@@ -18,8 +20,9 @@ object Explanation {
     enum class Key {
         SELF_UNIQUE, SELF_FIRST_MATCH, SELF_COLLECTION, INDEXED_MATCH, INDEXED_MATCH_FROM_END,
         ANCHOR_PATH, ANCHOR_SEARCH_UNIQUE, ANCHOR_SEARCH_FIRST_MATCH, CONTAINER_ITEMS,
+        RELATIVE_UNIQUE, RELATIVE_FIRST_MATCH, RELATIVE_COLLECTION,
         ORDER_DEPENDENT, DYNAMIC_TEXT, DYNAMIC_DESCRIPTION, STRUCTURAL_CONDITIONS,
-        FIXED_PATH, LONG_PATH, LARGE_INDEX, RECEIVER_ANCESTOR, ACTIVE_WINDOW_ONLY,
+        FIXED_PATH, FIXED_RELATION, LONG_PATH, LARGE_INDEX, RECEIVER_ANCESTOR, ACTIVE_WINDOW_ONLY,
     }
 
     class Message internal constructor(val key: Key, arguments: List<String> = emptyList()) {
@@ -35,11 +38,15 @@ object Explanation {
             Key.ANCHOR_SEARCH_UNIQUE -> "在唯一锚点的子树中唯一定位目标"
             Key.ANCHOR_SEARCH_FIRST_MATCH -> "在唯一锚点的子树中匹配 ${arguments[0]} 个控件, 取首个作为目标"
             Key.CONTAINER_ITEMS -> "在唯一容器的子树中定位所选的 ${arguments[0]} 个控件"
+            Key.RELATIVE_UNIQUE -> "以 ${arguments[0]} 匹配 ${arguments[1]} 个控件, 其中罗盘 ${arguments[2]} 处含 ${arguments[3]} 的只有目标"
+            Key.RELATIVE_FIRST_MATCH -> "以 ${arguments[0]} 匹配 ${arguments[1]} 个控件, 罗盘 ${arguments[2]} 处含 ${arguments[3]} 的有 ${arguments[4]} 个, 取首个作为目标"
+            Key.RELATIVE_COLLECTION -> "以 ${arguments[0]} 定位罗盘 ${arguments[2]} 处含 ${arguments[3]} 的 ${arguments[1]} 个控件"
             Key.ORDER_DEPENDENT -> "依赖匹配顺序, 顺序变化时可能失效"
             Key.DYNAMIC_TEXT -> "依赖含数字的文本, 内容变化时可能失效"
             Key.DYNAMIC_DESCRIPTION -> "依赖含数字的描述, 内容变化时可能失效"
             Key.STRUCTURAL_CONDITIONS -> "依赖固定层级或控件状态"
             Key.FIXED_PATH -> "依赖固定父子结构"
+            Key.FIXED_RELATION -> "依赖与邻近控件的固定相对关系"
             Key.LONG_PATH -> "父子关系路径较长 (${arguments[0]} 步)"
             Key.LARGE_INDEX -> "依赖较大的固定序号"
             Key.RECEIVER_ANCESTOR -> "动作由目标的第 ${arguments[0]} 层父节点接收"
@@ -56,7 +63,8 @@ object Explanation {
         val plan = candidate.plan
         val facts = candidate.facts
         fun message(key: Key, vararg arguments: Any) = Message(key, arguments.map { it.toString() })
-        val selectorLabel = plan.selector.conditions.map { it.attr }.distinct().joinToString(" + ").ifEmpty { "selector()" }
+        fun label(selector: SelectorSpec) = selector.conditions.map { it.attr }.distinct().joinToString(" + ").ifEmpty { "selector()" }
+        val selectorLabel = label(plan.selector)
         val summary = when (plan.family) {
             LocatePlan.Family.SELF -> when {
                 plan.cardinality == LocatePlan.Cardinality.ALL -> message(Key.SELF_COLLECTION, selectorLabel, candidate.resolved.size)
@@ -72,16 +80,27 @@ object Explanation {
             LocatePlan.Family.ANCHOR_SEARCH -> if (facts.selectorMatchCount == 1) message(Key.ANCHOR_SEARCH_UNIQUE)
             else message(Key.ANCHOR_SEARCH_FIRST_MATCH, facts.selectorMatchCount)
             LocatePlan.Family.CONTAINER_ITEMS -> message(Key.CONTAINER_ITEMS, candidate.resolved.size)
+            LocatePlan.Family.SELF_RELATIVE -> {
+                val compass = CompassText.render(plan.relation)
+                val relativeLabel = label(requireNotNull(plan.relativeMatch))
+                when {
+                    plan.cardinality == LocatePlan.Cardinality.ALL -> message(Key.RELATIVE_COLLECTION, selectorLabel, candidate.resolved.size, compass, relativeLabel)
+                    facts.relativeMatchCount == 1 -> message(Key.RELATIVE_UNIQUE, selectorLabel, facts.selectorMatchCount, compass, relativeLabel)
+                    else -> message(Key.RELATIVE_FIRST_MATCH, selectorLabel, facts.selectorMatchCount, compass, relativeLabel, facts.relativeMatchCount)
+                }
+            }
         }
         val risks = ArrayList<Message>()
+        val effectiveMatches = if (plan.family == LocatePlan.Family.SELF_RELATIVE) facts.relativeMatchCount else facts.selectorMatchCount
         if (plan.family == LocatePlan.Family.SELF_INDEX ||
-            plan.cardinality == LocatePlan.Cardinality.ONE && facts.selectorMatchCount > 1
+            plan.cardinality == LocatePlan.Cardinality.ONE && effectiveMatches > 1
         ) risks += message(Key.ORDER_DEPENDENT)
         if (facts.dynamicText) risks += message(Key.DYNAMIC_TEXT)
         if (facts.dynamicDesc) risks += message(Key.DYNAMIC_DESCRIPTION)
         if (RuleRanker.conditions(plan).any(RuleRanker::isStructural)) risks += message(Key.STRUCTURAL_CONDITIONS)
         if (plan.family == LocatePlan.Family.ANCHOR_PATH) risks += message(Key.FIXED_PATH)
-        val pathLength = facts.pathUpLevels.toLong() + facts.pathChildSteps + facts.receiverUpLevels
+        if (plan.family == LocatePlan.Family.SELF_RELATIVE) risks += message(Key.FIXED_RELATION)
+        val pathLength = RuleRanker.pathLength(facts)
         if (pathLength > RuleRanker.LONG_PATH_THRESHOLD) risks += message(Key.LONG_PATH, pathLength)
         if (RuleRanker.ordinalDistance(plan) >= RuleRanker.LARGE_INDEX_THRESHOLD) risks += message(Key.LARGE_INDEX)
         if (request.action != CodeGenRequest.Action.NONE && plan.receiver is PlanReceiver.Up) {

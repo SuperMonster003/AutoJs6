@@ -13,18 +13,24 @@ import java.util.concurrent.CancellationException
 /** Reorders the original verified objects, using one shared feature context for the group.
  * Near-score ties use disjoint batches anchored at each descending batch maximum, matching
  * tools/codegen-model/train/data.py. Pairwise epsilon comparison would not be transitive.
- * zh-CN: 使用整组共用特征上下文重排原始已验证对象; 近似同分以各批最高分为锚点分组, 与 Python 一致. */
+ * A model of an earlier feature schema receives projected vectors and is unavailable for any
+ * group containing a family that schema has not seen.
+ * zh-CN: 使用整组共用特征上下文重排原始已验证对象; 近似同分以各批最高分为锚点分组, 与 Python 一致.
+ * 旧 schema 的模型接收投影后的向量, 遇到其 schema 未见过的计划族时整组不可用. */
 class ModelRanker internal constructor(
     private val model: ObliviousTreeModel,
     private val ruleRanker: RuleRanker,
     budgetMs: Long,
     private val nowNanos: () -> Long,
     private val inference: (FloatArray) -> Double,
+    private val featureSchemaVersion: Int = FeatureSchema.featureSchemaVersion,
 ) : Ranker {
-    constructor(model: ObliviousTreeModel, ruleRanker: RuleRanker = RuleRanker(), budgetMs: Long = 150) :
-        this(model, ruleRanker, budgetMs, System::nanoTime, model::score)
+    constructor(model: ObliviousTreeModel, ruleRanker: RuleRanker = RuleRanker(), budgetMs: Long = 150, featureSchemaVersion: Int = FeatureSchema.featureSchemaVersion) :
+        this(model, ruleRanker, budgetMs, System::nanoTime, model::score, featureSchemaVersion)
 
     private val budgetNanos = budgetMs.also { require(it in 1..Long.MAX_VALUE / 1_000_000L) { "Invalid model ranking budget" } } * 1_000_000L
+    private val schemaNames = FeatureSchema.names(featureSchemaVersion)
+    private val knownFamilies = FeatureSchema.families(featureSchemaVersion)
 
     override fun <N : UiNode<N>> rank(request: CodeGenRequest<N>, verified: List<Verified<N>>): List<Ranked<N>> {
         if (verified.isEmpty()) return emptyList()
@@ -36,7 +42,8 @@ class ModelRanker internal constructor(
                 if (nowNanos() - started > budgetNanos) throw RankerUnavailable(RankerUnavailable.Reason.TIMEOUT)
             }
             checkBudget()
-            if (model.featureCount != FeatureSchema.names.size) throw RankerUnavailable(RankerUnavailable.Reason.INCOMPATIBLE_FEATURES)
+            if (model.featureCount != schemaNames.size) throw RankerUnavailable(RankerUnavailable.Reason.INCOMPATIBLE_FEATURES)
+            if (verified.any { it.plan.family !in knownFamilies }) throw RankerUnavailable(RankerUnavailable.Reason.INCOMPATIBLE_FEATURES)
             val candidates = ArrayList(verified)
             val features = CandidateFeatures.prepare(request, candidates)
             checkBudget()
@@ -46,7 +53,7 @@ class ModelRanker internal constructor(
             val ruleRanks = IntArray(candidates.size)
             for ((index, candidate) in candidates.withIndex()) {
                 failure = RankerUnavailable.Reason.FEATURE_EXTRACTION_FAILED
-                val vector = features.extract(candidate)
+                val vector = FeatureSchema.project(features.extract(candidate), featureSchemaVersion)
                 checkBudget()
                 failure = RankerUnavailable.Reason.SCORING_FAILED
                 val score = inference(vector)

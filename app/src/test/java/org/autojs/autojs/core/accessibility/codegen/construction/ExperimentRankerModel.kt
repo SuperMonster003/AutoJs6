@@ -20,7 +20,7 @@ import kotlin.math.abs
  * candidate feature schema. It is not an installable `.ajcgm` package and is never signed.
  * zh-CN: 离线实验用的候选排序器读取器, 与构造策略共用扁平对称树 JSON, 但按宿主完整候选特征 schema 校验.
  */
-class ExperimentRankerModel private constructor(val model: ObliviousTreeModel, val scoreSemantics: String) {
+class ExperimentRankerModel private constructor(val model: ObliviousTreeModel, val scoreSemantics: String, val featureSchemaVersion: Int) {
     companion object {
         const val ROLE = "candidate-ranker"
         const val SCORE_SEMANTICS = "yetirank-raw-v1"
@@ -36,9 +36,10 @@ class ExperimentRankerModel private constructor(val model: ObliviousTreeModel, v
             }
             require(document["format"].asInt == 1) { "Unsupported ranker format" }
             require(document["role"].asString == ROLE) { "Model does not declare the candidate-ranker role" }
-            require(document["featureSchemaVersion"].asInt == FeatureSchema.featureSchemaVersion) { "Ranker feature schema version differs" }
-            require(document["featureNamesHash"].asString == FeatureSchema.namesHash) { "Ranker feature names hash differs" }
-            require(document["featureCount"].asInt == FeatureSchema.names.size) { "Ranker feature count differs" }
+            val version = document["featureSchemaVersion"].asInt
+            require(version in FeatureSchema.SUPPORTED_SCHEMA) { "Ranker feature schema version is not supported" }
+            require(document["featureNamesHash"].asString == FeatureSchema.namesHash(version)) { "Ranker feature names hash differs" }
+            require(document["featureCount"].asInt == FeatureSchema.names(version).size) { "Ranker feature count differs" }
             require(document["scoreSemantics"].asString == SCORE_SEMANTICS) { "Ranker score semantics are not supported" }
             val model = document.getAsJsonObject("model")
             require(model.keySet() == setOf("depths", "splitOffsets", "leafOffsets", "featureIndices", "thresholds", "leafValues", "bias", "scale"))
@@ -48,8 +49,8 @@ class ExperimentRankerModel private constructor(val model: ObliviousTreeModel, v
             val bias = model["bias"].asDouble
             val scale = model["scale"].asDouble
             require(bias.isFinite() && scale.isFinite())
-            return ExperimentRankerModel(ObliviousTreeModel(FeatureSchema.names.size, depths, ints("splitOffsets"), ints("leafOffsets"),
-                ints("featureIndices"), floats("thresholds"), floats("leafValues"), bias, scale), SCORE_SEMANTICS)
+            return ExperimentRankerModel(ObliviousTreeModel(FeatureSchema.names(version).size, depths, ints("splitOffsets"), ints("leafOffsets"),
+                ints("featureIndices"), floats("thresholds"), floats("leafValues"), bias, scale), SCORE_SEMANTICS, version)
         }
     }
 }
@@ -58,10 +59,10 @@ class ExperimentRankerModelTest {
     @Test
     fun rejectsConstructionPolicyRoleAndForeignSchemas() {
         val policy = File.createTempFile("policy", ".json").apply { deleteOnExit() }
-        policy.writeText("""{"format":1,"role":"construction-policy","featureSchemaVersion":1,"featureNamesHash":"${FeatureSchema.namesHash}","featureCount":${FeatureSchema.names.size},"scoreSemantics":"yetirank-raw-v1","model":{"depths":[1],"splitOffsets":[0],"leafOffsets":[0],"featureIndices":[0],"thresholds":[0.0],"leafValues":[1.0,2.0],"bias":0.0,"scale":1.0}}""")
+        policy.writeText("""{"format":1,"role":"construction-policy","featureSchemaVersion":${FeatureSchema.featureSchemaVersion},"featureNamesHash":"${FeatureSchema.namesHash}","featureCount":${FeatureSchema.names.size},"scoreSemantics":"yetirank-raw-v1","model":{"depths":[1],"splitOffsets":[0],"leafOffsets":[0],"featureIndices":[0],"thresholds":[0.0],"leafValues":[1.0,2.0],"bias":0.0,"scale":1.0}}""")
         assertThrows(IllegalArgumentException::class.java) { ExperimentRankerModel.read(policy) }
         val ranker = File.createTempFile("ranker", ".json").apply { deleteOnExit() }
-        ranker.writeText("""{"format":1,"role":"candidate-ranker","featureSchemaVersion":1,"featureNamesHash":"${FeatureSchema.namesHash}","featureCount":${FeatureSchema.names.size},"scoreSemantics":"yetirank-raw-v1","model":{"depths":[1],"splitOffsets":[0],"leafOffsets":[0],"featureIndices":[0],"thresholds":[0.0],"leafValues":[1.0,2.0],"bias":0.5,"scale":2.0}}""")
+        ranker.writeText("""{"format":1,"role":"candidate-ranker","featureSchemaVersion":${FeatureSchema.featureSchemaVersion},"featureNamesHash":"${FeatureSchema.namesHash}","featureCount":${FeatureSchema.names.size},"scoreSemantics":"yetirank-raw-v1","model":{"depths":[1],"splitOffsets":[0],"leafOffsets":[0],"featureIndices":[0],"thresholds":[0.0],"leafValues":[1.0,2.0],"bias":0.5,"scale":2.0}}""")
         val model = ExperimentRankerModel.read(ranker)
         assertEquals(0.5 + 2.0 * 2.0, model.model.score(FloatArray(FeatureSchema.names.size).also { it[0] = 1f }), 0.0)
         assertEquals(0.5 + 2.0 * 1.0, model.model.score(FloatArray(FeatureSchema.names.size)), 0.0)

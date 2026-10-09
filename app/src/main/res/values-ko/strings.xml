@@ -1188,12 +1188,16 @@
     <string name="text_codegen_explanation_dynamic_description">숫자가 포함된 설명에 의존하므로 내용이 바뀌면 실패할 수 있습니다</string>
     <string name="text_codegen_explanation_dynamic_text">숫자가 포함된 텍스트에 의존하므로 내용이 바뀌면 실패할 수 있습니다</string>
     <string name="text_codegen_explanation_fixed_path">고정된 부모/자식 구조에 의존</string>
+    <string name="text_codegen_explanation_fixed_relation">근처 위젯과의 고정된 상대 관계에 의존</string>
     <string name="text_codegen_explanation_indexed_match">%1$s개 일치 항목 중 %2$s번째 사용</string>
     <string name="text_codegen_explanation_indexed_match_from_end">%1$s개 일치 항목 중 뒤에서 %2$s번째 사용</string>
     <string name="text_codegen_explanation_large_index">큰 고정 인덱스에 의존</string>
     <string name="text_codegen_explanation_long_path">부모/자식 경로가 깁니다 (%1$s단계)</string>
     <string name="text_codegen_explanation_order_dependent">일치 순서에 의존하므로 순서가 바뀌면 실패할 수 있습니다</string>
     <string name="text_codegen_explanation_receiver_ancestor">대상보다 %1$s단계 위의 상위 노드가 동작을 받습니다</string>
+    <string name="text_codegen_explanation_relative_collection">%1$s(으)로 나침반 %3$s 위치에 %4$s이(가) 있는 선택한 %2$s개 위젯 찾기</string>
+    <string name="text_codegen_explanation_relative_first_match">%1$s(으)로 %2$s개 위젯과 일치하며 그중 %5$s개가 나침반 %3$s 위치에 %4$s을(를) 가지므로 첫 번째를 대상으로 사용</string>
+    <string name="text_codegen_explanation_relative_unique">%1$s(으)로 %2$s개 위젯과 일치하며 나침반 %3$s 위치에 %4$s이(가) 있는 것은 대상뿐입니다</string>
     <string name="text_codegen_explanation_self_collection">%1$s(으)로 선택한 %2$s개 위젯 찾기</string>
     <string name="text_codegen_explanation_self_first_match">%1$s(으)로 %2$s개 위젯이 일치하며 첫 번째를 대상으로 사용</string>
     <string name="text_codegen_explanation_self_unique">%1$s(으)로 현재 스냅샷에서 대상을 유일하게 찾기</string>
@@ -1208,6 +1212,7 @@
     <string name="text_codegen_family_container_items">컨테이너 내부 모음</string>
     <string name="text_codegen_family_self">위젯 속성</string>
     <string name="text_codegen_family_self_index">속성과 일치 인덱스</string>
+    <string name="text_codegen_family_self_relative">속성과 근처 위젯</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">생성 중...</string>
     <string name="text_codegen_generation_error">코드를 생성하지 못했습니다. 다시 시도하세요</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">모음 찾는 중...</string>

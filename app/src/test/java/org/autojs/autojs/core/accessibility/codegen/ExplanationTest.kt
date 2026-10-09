@@ -55,8 +55,24 @@ class ExplanationTest {
             LocatePlan(LocatePlan.Family.ANCHOR_SEARCH, spec("id", "app:id/list"), listOf(PlanStep.Search(spec("text", "Buy 3")))) to Key.ANCHOR_SEARCH_UNIQUE,
             LocatePlan(LocatePlan.Family.CONTAINER_ITEMS, spec("id", "app:id/list"), listOf(PlanStep.Search(spec("id", "app:id/button"))), LocatePlan.Cardinality.ALL) to Key.CONTAINER_ITEMS,
             LocatePlan(LocatePlan.Family.SELF, spec("id", "app:id/button"), cardinality = LocatePlan.Cardinality.ALL) to Key.SELF_COLLECTION,
+            LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id", "app:id/button"), listOf(PlanStep.Sibling(1), PlanStep.Match(spec("text", "Buy 4")))) to Key.RELATIVE_UNIQUE,
+            LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id", "app:id/button"), listOf(PlanStep.Up(1), PlanStep.Match(spec("id", "app:id/list"))), LocatePlan.Cardinality.ALL) to Key.RELATIVE_COLLECTION,
         )
         cases.forEach { (plan, key) -> assertEquals(key, explain(plan).first().messages.single().key) }
+    }
+
+    @Test
+    fun relativePlansDiscloseTheirRelationAndOrderRiskOnlyWhenSeveralEntriesSurvive() {
+        val unique = explain(LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id", "app:id/button"), listOf(PlanStep.Sibling(1), PlanStep.Match(spec("text", "Buy 4")))))
+        assertEquals(Key.RELATIVE_UNIQUE, unique.first().messages.single().key)
+        assertEquals(listOf("id", "10", "s>1", "text"), unique.first().messages.single().arguments)
+        assertTrue(Key.FIXED_RELATION in keys(unique))
+        assertFalse(Key.ORDER_DEPENDENT in keys(unique))
+        val several = explain(LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id", "app:id/button"), listOf(PlanStep.Up(1), PlanStep.Match(spec("id", "app:id/list")))), targetIndex = 0)
+        assertEquals(Key.RELATIVE_FIRST_MATCH, several.first().messages.single().key)
+        assertEquals(listOf("id", "10", "p1", "id", "10"), several.first().messages.single().arguments)
+        assertTrue(Key.ORDER_DEPENDENT in keys(several))
+        assertTrue(unique.first().renderChinese().contains("s>1"))
     }
 
     @Test

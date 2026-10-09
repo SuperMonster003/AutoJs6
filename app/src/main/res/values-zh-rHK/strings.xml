@@ -1183,12 +1183,16 @@
     <string name="text_codegen_explanation_dynamic_description">依賴含數字的描述, 內容變化時可能失效</string>
     <string name="text_codegen_explanation_dynamic_text">依賴含數字的文字, 內容變化時可能失效</string>
     <string name="text_codegen_explanation_fixed_path">依賴固定父子結構</string>
+    <string name="text_codegen_explanation_fixed_relation">依賴與鄰近控件的固定相對關係</string>
     <string name="text_codegen_explanation_indexed_match">在 %1$s 個符合項中取第 %2$s 個</string>
     <string name="text_codegen_explanation_indexed_match_from_end">在 %1$s 個符合項中取倒數第 %2$s 個</string>
     <string name="text_codegen_explanation_large_index">依賴較大的固定序號</string>
     <string name="text_codegen_explanation_long_path">父子關係路徑較長 (%1$s 步)</string>
     <string name="text_codegen_explanation_order_dependent">依賴符合順序, 順序變化時可能失效</string>
     <string name="text_codegen_explanation_receiver_ancestor">動作由目標的第 %1$s 層父節點接收</string>
+    <string name="text_codegen_explanation_relative_collection">以 %1$s 定位羅盤 %3$s 處含 %4$s 的 %2$s 個控件</string>
+    <string name="text_codegen_explanation_relative_first_match">以 %1$s 符合 %2$s 個控件, 羅盤 %3$s 處含 %4$s 的有 %5$s 個, 取首個作為目標</string>
+    <string name="text_codegen_explanation_relative_unique">以 %1$s 符合 %2$s 個控件, 其中羅盤 %3$s 處含 %4$s 的只有目標</string>
     <string name="text_codegen_explanation_self_collection">以 %1$s 定位所選的 %2$s 個控件</string>
     <string name="text_codegen_explanation_self_first_match">以 %1$s 符合 %2$s 個控件, 取首個作為目標</string>
     <string name="text_codegen_explanation_self_unique">以 %1$s 在目前快照中唯一定位</string>
@@ -1203,6 +1207,7 @@
     <string name="text_codegen_family_container_items">容器內集合</string>
     <string name="text_codegen_family_self">控件自身屬性</string>
     <string name="text_codegen_family_self_index">屬性與符合序號</string>
+    <string name="text_codegen_family_self_relative">屬性與鄰近控件</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">正在產生...</string>
     <string name="text_codegen_generation_error">無法產生程式碼, 請重試</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">正在查找集合...</string>

@@ -4,6 +4,7 @@ import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest
 import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest.Action
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan.Cardinality
+import org.autojs.autojs.core.accessibility.codegen.plan.CompassText
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan.Family
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanReceiver
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
@@ -30,22 +31,25 @@ internal object RenderSupport {
 
     fun block(prefix: String, body: String, suffix: String = "}"): String = "$prefix {\n${indent(body)}\n$suffix"
 
-    /** Each relation path is one compass call, including negative child indices.
-     * zh-CN: 每条关系路径统一为一次罗盘调用, 包含负子节点序号. */
-    private fun compass(plan: LocatePlan): String = plan.steps.joinToString("") {
-        when (it) {
-            is PlanStep.Up -> "p${it.levels}"
-            is PlanStep.Child -> "c${it.index}"
-            else -> error("Not a compass step")
-        }
-    }
+    /** Each relation path is one compass call, including negative child indices and sibling offsets.
+     * zh-CN: 每条关系路径统一为一次罗盘调用, 包含负子节点序号与兄弟偏移. */
+    private fun compass(steps: List<PlanStep>): String = JsLiteral.quote(CompassText.render(steps))
 
     fun locate(plan: LocatePlan): String {
         val selector = SelectorText.render(plan.selector)
         val body = when (plan.family) {
             Family.SELF -> error("SELF is rendered with the selector API")
             Family.SELF_INDEX -> "return $selector.findOnce(${(plan.steps.single() as PlanStep.Index).index});"
-            Family.ANCHOR_PATH -> "let a = $selector.findOnce();\nreturn a && a.compass(${JsLiteral.quote(compass(plan))});"
+            Family.ANCHOR_PATH -> "let a = $selector.findOnce();\nreturn a && a.compass(${compass(plan.steps)});"
+            Family.SELF_RELATIVE -> {
+                val relative = SelectorText.render(requireNotNull(plan.relativeMatch))
+                // The filter keeps entry matches whose compass neighbour, or its subtree, matches the nested selector.
+                // zh-CN: 过滤器保留 "罗盘邻居或其子树匹配嵌套选择器" 的入口匹配项.
+                val predicate = "let r = w.compass(${compass(plan.relation)});\nreturn r !== null && r.findOne($relative) !== null;"
+                val filtered = "$selector.filter(w => {\n${indent(predicate)}\n})"
+                if (plan.cardinality == Cardinality.ONE) "return $filtered.findOnce();"
+                else "let ws = $filtered.find();\nreturn ws.nonEmpty() ? ws : null;"
+            }
             Family.ANCHOR_SEARCH -> {
                 val target = SelectorText.render((plan.steps.single() as PlanStep.Search).selector)
                 "let a = $selector.findOnce();\nreturn a && a.findOne($target);"

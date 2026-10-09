@@ -227,6 +227,7 @@ internal class ConstructionGrammar<N : UiNode<N>>(
             Family.SELF_INDEX -> listOf(PlanStep.Index(requireNotNull(state.index)))
             Family.ANCHOR_PATH -> state.path
             Family.ANCHOR_SEARCH, Family.CONTAINER_ITEMS -> listOf(PlanStep.Search(innerSpec(state)))
+            Family.SELF_RELATIVE -> error("SELF_RELATIVE is outside the construction grammar")
         }
         return LocatePlan(family, outerSpec(state), steps, cardinality, requireNotNull(receiver))
     }

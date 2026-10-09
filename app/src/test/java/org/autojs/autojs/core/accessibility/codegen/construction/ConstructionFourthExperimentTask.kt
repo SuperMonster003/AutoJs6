@@ -360,8 +360,8 @@ internal object ConstructionFourthExperiment {
             return try {
                 val order = when (ranker) {
                     "rule" -> RuleRanker().rank(request, candidates)
-                    "tiny" -> ModelRanker(tiny, budgetMs = 150).rank(request, candidates)
-                    else -> ModelRanker(refitted, budgetMs = 150).rank(request, candidates)
+                    "tiny" -> ModelRanker(tiny, budgetMs = 150, featureSchemaVersion = 1).rank(request, candidates)
+                    else -> ModelRanker(refitted, budgetMs = 150, featureSchemaVersion = 1).rank(request, candidates)
                 }.map { ConstructionSearch.canonicalKey(it.plan) }
                 val byKey = candidates.associateBy { ConstructionSearch.canonicalKey(it.plan) }
                 order.take(10).forEach { key -> ClassicRenderer().render(request, byKey.getValue(key).plan) }

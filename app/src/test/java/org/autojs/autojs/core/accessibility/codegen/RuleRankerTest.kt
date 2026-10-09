@@ -68,17 +68,48 @@ class RuleRankerTest {
         val verifier = PlanVerifier(root)
         val direct = self("id", "app:id/target")
         val scoped = LocatePlan(LocatePlan.Family.ANCHOR_SEARCH, spec("id", "app:id/root"), listOf(PlanStep.Search(spec("id", "app:id/target"))))
+        val relative = LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id", "app:id/target"), listOf(PlanStep.Child(0), PlanStep.Match(spec("id", "app:id/label"))))
         val path = LocatePlan(LocatePlan.Family.ANCHOR_PATH, spec("id", "app:id/label"), listOf(PlanStep.Up(1)))
         val index = LocatePlan(LocatePlan.Family.SELF_INDEX, spec("id", "app:id/target"), listOf(PlanStep.Index(0)))
-        val plans = listOf(direct, scoped, path, index)
+        val plans = listOf(direct, scoped, relative, path, index)
         val ranked = ranker.rank(request, plans.reversed().map { verified(verifier, request, it) })
         assertEquals(plans, ranked.map { it.plan })
         val collectionRequest = request.copy(scope = CodeGenRequest.Scope.COLLECTION)
         val collection = LocatePlan(LocatePlan.Family.CONTAINER_ITEMS, spec("id", "app:id/root"),
             listOf(PlanStep.Search(spec("id", "app:id/target"))), LocatePlan.Cardinality.ALL)
         val collectionScore = ranker.rank(collectionRequest, listOf(verified(verifier, collectionRequest, collection))).single().score
-        assertTrue(ranked[2].score > collectionScore)
-        assertTrue(collectionScore > ranked[3].score)
+        assertTrue(ranked[3].score > collectionScore)
+        assertTrue(collectionScore > ranked[4].score)
+    }
+
+    @Test
+    fun relativePlansAreJudgedByKeptMatchesAndSiblingStepsCostSlightlyMore() {
+        val root = FakeUiNode.root {
+            repeat(3) { index ->
+                child("row$index") {
+                    child("icon$index") { id = "app:id/icon" }
+                    child("title$index") { id = "app:id/title"; text = "Title $index" }
+                }
+            }
+        }
+        val request = CodeGenRequest(listOf(root.find("icon1")))
+        val verifier = PlanVerifier(root)
+        val byRow = LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id", "app:id/icon"), listOf(PlanStep.Up(1), PlanStep.Match(spec("text", "Title 1"))))
+        val bySibling = LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id", "app:id/icon"), listOf(PlanStep.Sibling(1), PlanStep.Match(spec("text", "Title 1"))))
+        val index = LocatePlan(LocatePlan.Family.SELF_INDEX, spec("id", "app:id/icon"), listOf(PlanStep.Index(1)))
+        val ranked = ranker.rank(request, listOf(index, bySibling, byRow).map { verified(verifier, request, it) })
+        assertEquals(listOf(byRow, bySibling, index), ranked.map { it.plan })
+        // The broad entry selector matches three icons, but only one survives the relation, so no first-of-many penalty applies.
+        val unique = verified(verifier, request, byRow)
+        assertEquals(3, unique.facts.selectorMatchCount)
+        assertEquals(1, unique.facts.relativeMatchCount)
+        val first = CodeGenRequest(listOf(root.find("icon0")))
+        val broad = verified(verifier, first, LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id", "app:id/icon"), listOf(PlanStep.Up(1), PlanStep.Match(spec("id", "app:id/title")))))
+        assertEquals(3, broad.facts.relativeMatchCount)
+        // unique: family 60 + full id 1 + text 6 + dynamic text 32 + one up level 2; broad: 60 + 1 + 1 + 2 + first-of-three 66.
+        assertEquals(101L, ranker.cost(unique))
+        assertEquals(130L, ranker.cost(broad))
+        assertEquals(102L, ranker.cost(verified(verifier, request, bySibling)))
     }
 
     @Test

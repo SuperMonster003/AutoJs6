@@ -20,6 +20,8 @@ class NodeTree<N : UiNode<N>>(
 
     private val entries = HashMap<N, Entry<N>>()
     val nodes: List<N>
+    private val positions: Map<N, Int>
+    private val subtreeEnds: IntArray
 
     init {
         val ordered = ArrayList<N>()
@@ -41,6 +43,27 @@ class NodeTree<N : UiNode<N>>(
             }
         }
         nodes = Collections.unmodifiableList(ordered)
+        positions = HashMap<N, Int>(ordered.size * 2).also { map -> ordered.forEachIndexed { index, node -> map[node] = index } }
+        subtreeEnds = IntArray(ordered.size) { it }
+        for (index in ordered.indices.reversed()) {
+            cancellation.throwIfCancelled()
+            val parent = entries.getValue(ordered[index]).parent ?: continue
+            val parentIndex = positions.getValue(parent)
+            if (subtreeEnds[index] > subtreeEnds[parentIndex]) subtreeEnds[parentIndex] = subtreeEnds[index]
+        }
+    }
+
+    /** The pre-order position of [node], or -1 outside the capture. zh-CN: [node] 的先序位置, 不在捕获中为 -1. */
+    fun position(node: N): Int = positions[node] ?: -1
+
+    /** The last pre-order position inside the subtree of [node]. zh-CN: [node] 子树内的最后一个先序位置. */
+    fun subtreeEnd(node: N): Int = positions[node]?.let { subtreeEnds[it] } ?: -1
+
+    /** Whether [node] is [ancestor] or one of its descendants. zh-CN: [node] 是否为 [ancestor] 自身或其后代. */
+    fun isWithin(node: N, ancestor: N): Boolean {
+        val index = positions[node] ?: return false
+        val start = positions[ancestor] ?: return false
+        return index in start..subtreeEnds[start]
     }
 
     fun canonical(node: N): N? = entries[node]?.node

@@ -294,13 +294,13 @@ class ModelPackageReaderTest {
 
     @Test
     fun schemaNamesHashFeatureOrderAndHostCompatibilityAreChecked() {
-        rejected(manifest { it.addProperty("featureSchemaVersion", 2) }, INCOMPATIBLE_SCHEMA)
+        rejected(manifest { it.addProperty("featureSchemaVersion", 3) }, INCOMPATIBLE_SCHEMA)
         rejected(manifest { it.addProperty("featureNamesHash", "0".repeat(16)) }, FEATURE_MISMATCH)
         rejected(manifest { it.getAsJsonObject("model").addProperty("features", FeatureSchema.names.size - 1) }, FEATURE_MISMATCH)
         val features = ModelPackageTestFixtures.features()
         features.getAsJsonArray("names").set(0, features.getAsJsonArray("names")[1])
         rejected(textEntry("features.json", features.toString()), FEATURE_MISMATCH)
-        features.addProperty("featureSchemaVersion", 2)
+        features.addProperty("featureSchemaVersion", 3)
         rejected(textEntry("features.json", features.toString()), INCOMPATIBLE_SCHEMA)
         val result = ModelPackageReader(1).read(manifest { it.addProperty("minHostVersionCode", 2) }.inputStream())
         assertEquals(HOST_TOO_OLD, (result as Rejected).reason)
@@ -324,7 +324,7 @@ class ModelPackageReaderTest {
         rejected(binary { it.putInt(8, 0) }, MODEL_METADATA_MISMATCH)
         rejected(binary { it.putInt(8, 4097) }, MODEL_METADATA_MISMATCH)
         for (depth in listOf(0, 9)) rejected(binary { it.put(28, depth.toByte()) }, INVALID_MODEL)
-        rejected(binary { it.putShort(29, 64) }, INVALID_MODEL)
+        rejected(binary { it.putShort(29, FeatureSchema.names.size.toShort()) }, INVALID_MODEL)
         for (number in listOf(Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY)) {
             rejected(binary { it.putFloat(31, number) }, INVALID_MODEL)
             rejected(binary { it.putFloat(35, number) }, INVALID_MODEL)

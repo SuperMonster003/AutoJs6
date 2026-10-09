@@ -1188,12 +1188,16 @@
     <string name="text_codegen_explanation_dynamic_description">يعتمد على وصف يحتوي على أرقام وقد يتغير</string>
     <string name="text_codegen_explanation_dynamic_text">يعتمد على نص يحتوي على أرقام وقد يتغير</string>
     <string name="text_codegen_explanation_fixed_path">يعتمد على بنية ثابتة للأصول والفروع</string>
+    <string name="text_codegen_explanation_fixed_relation">يعتمد على علاقة ثابتة مع عنصر مجاور</string>
     <string name="text_codegen_explanation_indexed_match">استخدام المطابقة رقم %2$s من أصل %1$s</string>
     <string name="text_codegen_explanation_indexed_match_from_end">استخدام المطابقة رقم %2$s من النهاية من أصل %1$s</string>
     <string name="text_codegen_explanation_large_index">يعتمد على فهرس ثابت ذي قيمة كبيرة</string>
     <string name="text_codegen_explanation_long_path">يستخدم مسارا طويلا للأصول والفروع (%1$s خطوات)</string>
     <string name="text_codegen_explanation_order_dependent">يعتمد على ترتيب المطابقات وقد يفشل إذا تغير الترتيب</string>
     <string name="text_codegen_explanation_receiver_ancestor">يتلقى الإجراء سلف الهدف على ارتفاع %1$s مستويات</string>
+    <string name="text_codegen_explanation_relative_collection">استخدام %1$s لتحديد العناصر المختارة وعددها %2$s التي لديها %4$s عند البوصلة %3$s</string>
+    <string name="text_codegen_explanation_relative_first_match">استخدام %1$s لمطابقة %2$s عناصر، منها %5$s لديها %4$s عند البوصلة %3$s، ويُستخدم الأول كهدف</string>
+    <string name="text_codegen_explanation_relative_unique">استخدام %1$s لمطابقة %2$s عناصر، والهدف وحده لديه %4$s عند البوصلة %3$s</string>
     <string name="text_codegen_explanation_self_collection">استخدام %1$s لتحديد العناصر المختارة وعددها %2$s</string>
     <string name="text_codegen_explanation_self_first_match">يطابق %1$s عدد %2$s من العناصر مع استخدام الأول كهدف</string>
     <string name="text_codegen_explanation_self_unique">استخدام %1$s لتحديد الهدف بشكل فريد في هذه اللقطة</string>
@@ -1208,6 +1212,7 @@
     <string name="text_codegen_family_container_items">مجموعة ضمن حاوية</string>
     <string name="text_codegen_family_self">خصائص العنصر</string>
     <string name="text_codegen_family_self_index">الخصائص وفهرس المطابقة</string>
+    <string name="text_codegen_family_self_relative">الخصائص وعنصر مجاور</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">جار الإنشاء...</string>
     <string name="text_codegen_generation_error">تعذر إنشاء الكود. يرجى المحاولة مجددا</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">جار البحث عن مجموعات...</string>

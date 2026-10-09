@@ -1186,12 +1186,16 @@
     <string name="text_codegen_explanation_dynamic_description">Depende de una descripción con dígitos que puede cambiar</string>
     <string name="text_codegen_explanation_dynamic_text">Depende de texto con dígitos que puede cambiar</string>
     <string name="text_codegen_explanation_fixed_path">Depende de una estructura fija de padre/hijo</string>
+    <string name="text_codegen_explanation_fixed_relation">Depende de una relación fija con un elemento cercano</string>
     <string name="text_codegen_explanation_indexed_match">Usa la coincidencia %2$s de %1$s</string>
     <string name="text_codegen_explanation_indexed_match_from_end">Usa la coincidencia %2$s desde el final de %1$s</string>
     <string name="text_codegen_explanation_large_index">Depende de un índice fijo elevado</string>
     <string name="text_codegen_explanation_long_path">Ruta larga de padre/hijo (%1$s pasos)</string>
     <string name="text_codegen_explanation_order_dependent">Depende del orden de las coincidencias y puede fallar si cambia</string>
     <string name="text_codegen_explanation_receiver_ancestor">La acción la recibe el ancestro situado %1$s niveles por encima del destino</string>
+    <string name="text_codegen_explanation_relative_collection">Usa %1$s para localizar los %2$s elementos seleccionados que tienen %4$s en la brújula %3$s</string>
+    <string name="text_codegen_explanation_relative_first_match">Usa %1$s para coincidir con %2$s elementos, %5$s de los cuales tienen %4$s en la brújula %3$s, usando el primero como destino</string>
+    <string name="text_codegen_explanation_relative_unique">Usa %1$s para coincidir con %2$s elementos, de los cuales solo el destino tiene %4$s en la brújula %3$s</string>
     <string name="text_codegen_explanation_self_collection">Usa %1$s para localizar los %2$s elementos seleccionados</string>
     <string name="text_codegen_explanation_self_first_match">%1$s coincide con %2$s elementos, usando el primero como destino</string>
     <string name="text_codegen_explanation_self_unique">Usa %1$s para localizar únicamente el destino en esta captura</string>
@@ -1206,6 +1210,7 @@
     <string name="text_codegen_family_container_items">Colección dentro de un contenedor</string>
     <string name="text_codegen_family_self">Atributos del elemento</string>
     <string name="text_codegen_family_self_index">Atributos e índice de coincidencia</string>
+    <string name="text_codegen_family_self_relative">Atributos y un elemento cercano</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">Generando...</string>
     <string name="text_codegen_generation_error">No se pudo generar el código. Inténtelo de nuevo</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">Buscando colecciones...</string>

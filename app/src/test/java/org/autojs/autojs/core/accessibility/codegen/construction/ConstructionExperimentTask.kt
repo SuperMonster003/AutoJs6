@@ -346,7 +346,7 @@ internal object ConstructionExperiment {
             val ruleKey = RuleRanker().rank(request, unique).firstOrNull()?.plan?.let { ConstructionSearch.canonicalKey(it) }
             cancellation.throwIfCancelled()
             val remainingRankingMillis = (DEADLINE_MS - (System.nanoTime() - started) / 1_000_000).coerceAtLeast(1)
-            val order = ModelRanker(rankingModel, budgetMs = remainingRankingMillis).rank(request, unique).map { ConstructionSearch.canonicalKey(it.plan) }
+            val order = ModelRanker(rankingModel, budgetMs = remainingRankingMillis, featureSchemaVersion = 1).rank(request, unique).map { ConstructionSearch.canonicalKey(it.plan) }
             unique.associateBy { ConstructionSearch.canonicalKey(it.plan) }.let { byKey ->
                 order.take(10).forEach { key -> ClassicRenderer().render(request, byKey.getValue(key).plan) }
             }

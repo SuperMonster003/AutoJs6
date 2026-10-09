@@ -59,7 +59,7 @@ data class ModelVersionInfo(
             source: ModelSource,
             hostVersionCode: Int,
             supportedSchemas: IntRange = FeatureSchema.SUPPORTED_SCHEMA,
-            expectedNamesHash: String = FeatureSchema.namesHash,
+            expectedNamesHash: (Int) -> String? = FeatureSchema::namesHashOrNull,
         ): ModelVersionInfo = ModelVersionInfo(
             modelId = manifest.modelId,
             displayName = freezeNames(manifest.displayName),
@@ -71,7 +71,7 @@ data class ModelVersionInfo(
             featureSchemaVersion = manifest.featureSchemaVersion,
             compatibility = when {
                 manifest.minHostVersionCode > hostVersionCode -> ModelCatalogCompatibility.NEEDS_HOST_UPDATE
-                manifest.featureSchemaVersion !in supportedSchemas || manifest.featureNamesHash != expectedNamesHash -> ModelCatalogCompatibility.INCOMPATIBLE
+                manifest.featureSchemaVersion !in supportedSchemas || manifest.featureNamesHash != expectedNamesHash(manifest.featureSchemaVersion) -> ModelCatalogCompatibility.INCOMPATIBLE
                 else -> ModelCatalogCompatibility.COMPATIBLE
             },
             datasetId = manifest.dataset.datasetId,
@@ -88,7 +88,7 @@ data class ModelVersionInfo(
             currentKey: String? = null,
             catalog: ModelCatalog? = null,
             supportedSchemas: IntRange = FeatureSchema.SUPPORTED_SCHEMA,
-            expectedNamesHash: String = FeatureSchema.namesHash,
+            expectedNamesHash: (Int) -> String? = FeatureSchema::namesHashOrNull,
         ): ModelVersionInfo {
             // A custom package with the same model/version is not the catalog artifact.
             val catalogVersion = catalog?.find(installed.modelId)?.versions?.firstOrNull {

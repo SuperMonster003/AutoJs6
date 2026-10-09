@@ -13,11 +13,16 @@ object ModelCatalogTestFixtures {
     const val MODEL_ID = "autojs6.codegen.ranker"
     const val REPOSITORY = ModelCatalogParser.OFFICIAL_REPOSITORY
 
+    /** The bundled tiny package was trained on feature schema 1; catalog versions describe that package.
+     * zh-CN: 内置 tiny 模型包按特征 schema 1 训练, 目录版本条目描述的就是该包. */
+    const val PACKAGE_SCHEMA = 1
+    const val PACKAGE_NAMES_HASH = "9c6a5d8279ffca0e"
+
     fun version(code: Int = 1, digest: String = "a".repeat(64), revoked: Boolean = false, deprecated: Boolean = false): JsonObject = JsonObject().apply {
         addProperty("versionCode", code)
         addProperty("versionName", "$code.0.0")
-        addProperty("featureSchemaVersion", FeatureSchema.featureSchemaVersion)
-        addProperty("featureNamesHash", FeatureSchema.namesHash)
+        addProperty("featureSchemaVersion", PACKAGE_SCHEMA)
+        addProperty("featureNamesHash", PACKAGE_NAMES_HASH)
         addProperty("minHostVersionCode", 100)
         val filename = "autojs6-codegen-$MODEL_ID-v$code-${digest.take(8)}.ajcgm"
         val url = "https://github.com/$REPOSITORY/releases/download/codegen-models-v1/$filename"

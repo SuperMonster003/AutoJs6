@@ -75,26 +75,90 @@ class CandidateFeaturesTest {
     }
 
     @Test
-    fun versionOneHasPinnedNamesAndHash() {
-        assertEquals(1, FeatureSchema.featureSchemaVersion)
-        assertEquals(1..1, FeatureSchema.SUPPORTED_SCHEMA)
-        assertEquals(64, FeatureSchema.names.size)
+    fun versionTwoHasPinnedNamesAndHashAndVersionOneStaysProjectable() {
+        assertEquals(2, FeatureSchema.featureSchemaVersion)
+        assertEquals(1..2, FeatureSchema.SUPPORTED_SCHEMA)
+        assertEquals(75, FeatureSchema.names.size)
         assertEquals(FeatureSchema.names.size, FeatureSchema.names.distinct().size)
-        assertEquals("9c6a5d8279ffca0e", FeatureSchema.namesHash)
-        val snapshots = JsonParser.parseReader(requireNotNull(javaClass.getResourceAsStream("/codegen/features/v1-vectors.json")).reader()).asJsonObject
+        assertEquals("a2b899bcc46125ba", FeatureSchema.namesHash)
+        assertEquals(FeatureSchema.names, FeatureSchema.names(2))
+        assertEquals(64, FeatureSchema.names(1).size)
+        assertEquals("9c6a5d8279ffca0e", FeatureSchema.namesHash(1))
+        assertEquals(FeatureSchema.names(1), FeatureSchema.projection(1).map { FeatureSchema.names[it] })
+        assertEquals(LocatePlan.Family.entries.toSet() - LocatePlan.Family.SELF_RELATIVE, FeatureSchema.families(1))
+        assertEquals(LocatePlan.Family.entries.toSet(), FeatureSchema.families(2))
+        assertThrows(IllegalArgumentException::class.java) { FeatureSchema.names(3) }
+        assertThrows(IllegalArgumentException::class.java) { FeatureSchema.project(FloatArray(64), 1) }
+        val snapshots = JsonParser.parseReader(requireNotNull(javaClass.getResourceAsStream("/codegen/features/v2-vectors.json")).reader()).asJsonObject
         assertEquals(FeatureSchema.names, snapshots.getAsJsonArray("names").map { it.asString })
+        assertEquals(FeatureSchema.namesHash, snapshots["namesHash"].asString)
     }
 
     @Test
-    fun threeFixtureVectorsMatchIndependentSnapshots() {
-        val snapshots = JsonParser.parseReader(requireNotNull(javaClass.getResourceAsStream("/codegen/features/v1-vectors.json")).reader()).asJsonObject
+    fun threeFixtureVectorsMatchIndependentSnapshotsAndProjectOntoTheVersionOneSnapshot() {
+        val snapshots = JsonParser.parseReader(requireNotNull(javaClass.getResourceAsStream("/codegen/features/v2-vectors.json")).reader()).asJsonObject
+        val legacy = JsonParser.parseReader(requireNotNull(javaClass.getResourceAsStream("/codegen/features/v1-vectors.json")).reader()).asJsonObject
+        assertEquals(FeatureSchema.names(1), legacy.getAsJsonArray("names").map { it.asString })
         for (name in FIXTURES) {
             val (request, verifier, candidates) = example(name)
             val vectors = CandidateFeatures.prepare(request, candidates, verifier.tree).extractAll()
             val expected = snapshots.getAsJsonObject("fixtures").getAsJsonArray(name)
+            val expectedLegacy = legacy.getAsJsonObject("fixtures").getAsJsonArray(name)
             assertEquals(expected.size(), vectors.size)
-            for (i in vectors.indices) assertArrayEquals("$name candidate $i", expected[i].asJsonArray.map { it.asFloat }.toFloatArray(), vectors[i], 1e-6f)
+            for (i in vectors.indices) {
+                assertArrayEquals("$name candidate $i", expected[i].asJsonArray.map { it.asFloat }.toFloatArray(), vectors[i], 1e-6f)
+                assertArrayEquals("$name candidate $i (schema 1)", expectedLegacy[i].asJsonArray.map { it.asFloat }.toFloatArray(), FeatureSchema.project(vectors[i], 1), 1e-6f)
+            }
         }
+    }
+
+    @Test
+    fun relativePlansReportTheirMatchSelectorAndKeptEntryCounts() {
+        val root = FakeUiNode.root {
+            repeat(3) { index ->
+                child("row$index", clickable = true) {
+                    child("icon$index") { id = "app:id/icon"; className = "android.widget.ImageView" }
+                    child("title$index") { id = "app:id/title"; text = "Title $index" }
+                }
+            }
+        }
+        val request = CodeGenRequest(listOf(root.find("icon1")), action = CodeGenRequest.Action.CLICK)
+        val verifier = PlanVerifier(root)
+        val relative = LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id" to "app:id/icon"),
+            listOf(PlanStep.Up(1), PlanStep.Match(spec("text" to "Title 1"))), receiver = PlanReceiver.Up(1))
+        val sibling = LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("id" to "app:id/icon"),
+            listOf(PlanStep.Sibling(1), PlanStep.Match(spec("id" to "app:id/title", "text" to "Title 1"))), receiver = PlanReceiver.Up(1))
+        val index = LocatePlan(LocatePlan.Family.SELF_INDEX, spec("id" to "app:id/icon"), listOf(PlanStep.Index(1)), receiver = PlanReceiver.Up(1))
+        val candidates = listOf(relative, sibling, index).map { verified(verifier, request, it) }
+        val vectors = CandidateFeatures.prepare(request, candidates, verifier.tree).extractAll()
+        val (byRow, bySibling, byIndex) = vectors
+        assertEquals(1f, byRow.feature("family_self_relative"))
+        assertEquals(0f, byRow.feature("family_self_index"))
+        assertEquals(1f, byRow.feature("self_has_full_id"))
+        assertEquals(-1f, byRow.feature("anchor_cond_count"))
+        assertEquals(logged(1.0), byRow.feature("relative_cond_count"))
+        assertEquals(1f, byRow.feature("relative_has_text"))
+        assertEquals(0f, byRow.feature("relative_has_full_id"))
+        assertEquals(logged(3.0), byRow.feature("selector_match_count"))
+        assertEquals(logged(1.0), byRow.feature("relative_match_count"))
+        assertEquals(1f / 3f, byRow.feature("relative_match_ratio"), 1e-6f)
+        assertEquals(logged(1.0), byRow.feature("path_steps"))
+        assertEquals(logged(1.0), byRow.feature("path_up_levels"))
+        assertEquals(0f, byRow.feature("path_sibling_steps"))
+        assertEquals(-1f, byRow.feature("anchor_distance"))
+        assertEquals(logged(7.0), byRow.feature("text_len"))
+        assertEquals(1f, byRow.feature("text_dynamic"))
+        assertEquals(logged(1.0), byRow.feature("receiver_up_levels"))
+        assertEquals(1f, bySibling.feature("relative_has_full_id"))
+        assertEquals(logged(2.0), bySibling.feature("relative_cond_count"))
+        assertEquals(logged(1.0), bySibling.feature("path_sibling_steps"))
+        assertEquals(0f, bySibling.feature("path_up_levels"))
+        assertEquals(logged(1.0), bySibling.feature("path_max_child_index"))
+        assertEquals(0f, byIndex.feature("family_self_relative"))
+        assertEquals(-1f, byIndex.feature("relative_cond_count"))
+        assertEquals(-1f, byIndex.feature("relative_match_count"))
+        assertEquals(-1f, byIndex.feature("relative_match_ratio"))
+        assertTrue(vectors.all { it.all(Float::isFinite) && it.size == FeatureSchema.names.size })
     }
 
     @Test

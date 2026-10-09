@@ -287,7 +287,8 @@
         "compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales",
         "Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar",
         "compose.memo reutiliza fragmentos de render cuyos valores de dependencia y estados leídos no han cambiado, de modo que una actualización parcial de una lista grande solo reconstruye las filas modificadas",
-        "Las opciones de desarrollador incluyen \"Permitir Inspector para scripts Node.js\", desactivado por defecto, para depuración local y análisis de CPU/memoria en Debug y Release con un plugin Node.js Runtime compatible; DevTools se conecta mediante reenvío de puertos ADB"
+        "Las opciones de desarrollador incluyen \"Permitir Inspector para scripts Node.js\", desactivado por defecto, para depuración local y análisis de CPU/memoria en Debug y Release con un plugin Node.js Runtime compatible; DevTools se conecta mediante reenvío de puertos ADB",
+        "La función \"Generar código\" del inspector de diseño admite planes de localización relativa que identifican el destino mediante el text / desc / id de un elemento cercano y una relación fija de brújula (por ejemplo, el icono de una fila de lista localizado por el título de la fila), generando llamadas a filter y compass"
       ],
       "fix": [
         "Un cierre inesperado del anfitrión al actualizar los colores inteligentes al volver al primer plano o recrear una pantalla, cuando los callbacks registraban nuevos elementos del tema",

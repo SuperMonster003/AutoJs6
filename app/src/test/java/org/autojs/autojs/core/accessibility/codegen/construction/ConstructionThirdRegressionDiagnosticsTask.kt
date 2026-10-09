@@ -225,7 +225,7 @@ class ConstructionThirdRegressionDiagnosticsTask {
             val ruleOrder = RuleRanker().rank(request, unique).map { ConstructionSearch.canonicalKey(it.plan) }
             cancellation.throwIfCancelled()
             val remaining = (deadlineMillis - (System.nanoTime() - started) / 1_000_000).coerceAtLeast(1)
-            val order = ModelRanker(rankingModel, budgetMs = remaining).rank(request, unique).map { ConstructionSearch.canonicalKey(it.plan) }
+            val order = ModelRanker(rankingModel, budgetMs = remaining, featureSchemaVersion = 1).rank(request, unique).map { ConstructionSearch.canonicalKey(it.plan) }
             unique.associateBy { ConstructionSearch.canonicalKey(it.plan) }.let { byKey ->
                 order.take(10).forEach { key -> ClassicRenderer().render(request, byKey.getValue(key).plan) }
             }

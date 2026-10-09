@@ -128,9 +128,11 @@ the input and all exported artifacts inside `CODEGEN_PRIVATE_DIR`, outside Git w
 the exported groups, preserve complete fixture families, and put every real group in `real-test`.
 
 The exporter writes deterministic `labels.jsonl`, `rules.jsonl`, `features.csv`, `features.json`,
-and `export-manifest.json`. The CSV columns are `split,groupId,planKey,label` followed by the 64
-ordered names in [FEATURES.md](FEATURES.md). The schema version is 1 and its name hash is
-`9c6a5d8279ffca0e`. Metadata fields are CSV-quoted; every feature is a finite Kotlin `Float`.
+and `export-manifest.json`. The CSV columns are `split,groupId,planKey,label` followed by the 75
+ordered names in [FEATURES.md](FEATURES.md). The schema version is 2 and its name hash is
+`a2b899bcc46125ba`; schema 1 (64 names, `9c6a5d8279ffca0e`) is its by-name subset and stays
+loadable for packages trained before the relative family existed. Metadata fields are CSV-quoted;
+every feature is a finite Kotlin `Float`.
 Python reads these vectors directly and does not reconstruct features from layouts or labels.
 It generates candidates only on `captureState`, then verifies those unchanged plans in each
 other state. Survival is the observed fraction of successful future states. `rules.jsonl`

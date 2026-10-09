@@ -1183,12 +1183,16 @@
     <string name="text_codegen_explanation_dynamic_description">依赖含数字的描述, 内容变化时可能失效</string>
     <string name="text_codegen_explanation_dynamic_text">依赖含数字的文本, 内容变化时可能失效</string>
     <string name="text_codegen_explanation_fixed_path">依赖固定父子结构</string>
+    <string name="text_codegen_explanation_fixed_relation">依赖与邻近控件的固定相对关系</string>
     <string name="text_codegen_explanation_indexed_match">在 %1$s 个匹配项中取第 %2$s 个</string>
     <string name="text_codegen_explanation_indexed_match_from_end">在 %1$s 个匹配项中取倒数第 %2$s 个</string>
     <string name="text_codegen_explanation_large_index">依赖较大的固定序号</string>
     <string name="text_codegen_explanation_long_path">父子关系路径较长 (%1$s 步)</string>
     <string name="text_codegen_explanation_order_dependent">依赖匹配顺序, 顺序变化时可能失效</string>
     <string name="text_codegen_explanation_receiver_ancestor">动作由目标的第 %1$s 层父节点接收</string>
+    <string name="text_codegen_explanation_relative_collection">以 %1$s 定位罗盘 %3$s 处含 %4$s 的 %2$s 个控件</string>
+    <string name="text_codegen_explanation_relative_first_match">以 %1$s 匹配 %2$s 个控件, 罗盘 %3$s 处含 %4$s 的有 %5$s 个, 取首个作为目标</string>
+    <string name="text_codegen_explanation_relative_unique">以 %1$s 匹配 %2$s 个控件, 其中罗盘 %3$s 处含 %4$s 的只有目标</string>
     <string name="text_codegen_explanation_self_collection">以 %1$s 定位所选的 %2$s 个控件</string>
     <string name="text_codegen_explanation_self_first_match">以 %1$s 匹配 %2$s 个控件, 取首个作为目标</string>
     <string name="text_codegen_explanation_self_unique">以 %1$s 在当前快照中唯一定位</string>
@@ -1203,6 +1207,7 @@
     <string name="text_codegen_family_container_items">容器内集合</string>
     <string name="text_codegen_family_self">控件自身属性</string>
     <string name="text_codegen_family_self_index">属性与匹配序号</string>
+    <string name="text_codegen_family_self_relative">属性与邻近控件</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">正在生成...</string>
     <string name="text_codegen_generation_error">无法生成代码, 请重试</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">正在查找集合...</string>

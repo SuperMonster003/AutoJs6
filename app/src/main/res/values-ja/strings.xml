@@ -1187,12 +1187,16 @@
     <string name="text_codegen_explanation_dynamic_description">数字を含む説明に依存し, 内容の変更で失敗する可能性があります</string>
     <string name="text_codegen_explanation_dynamic_text">数字を含むテキストに依存し, 内容の変更で失敗する可能性があります</string>
     <string name="text_codegen_explanation_fixed_path">固定の親子構造に依存</string>
+    <string name="text_codegen_explanation_fixed_relation">近くのウィジェットとの固定の相対関係に依存</string>
     <string name="text_codegen_explanation_indexed_match">%1$s 個の一致項目から %2$s 番目を使用</string>
     <string name="text_codegen_explanation_indexed_match_from_end">%1$s 個の一致項目から末尾より %2$s 番目を使用</string>
     <string name="text_codegen_explanation_large_index">大きい固定インデックスに依存</string>
     <string name="text_codegen_explanation_long_path">親子関係の経路が長くなっています (%1$s ステップ)</string>
     <string name="text_codegen_explanation_order_dependent">一致順に依存し, 順序の変更で失敗する可能性があります</string>
     <string name="text_codegen_explanation_receiver_ancestor">対象から %1$s 階層上の親ノードが動作を受け取ります</string>
+    <string name="text_codegen_explanation_relative_collection">%1$s で, コンパス %3$s に %4$s を持つ選択した %2$s 個のウィジェットを特定</string>
+    <string name="text_codegen_explanation_relative_first_match">%1$s で %2$s 個のウィジェットに一致し, そのうち %5$s 個がコンパス %3$s に %4$s を持つため, 先頭を対象として使用</string>
+    <string name="text_codegen_explanation_relative_unique">%1$s で %2$s 個のウィジェットに一致し, コンパス %3$s に %4$s を持つのは対象のみ</string>
     <string name="text_codegen_explanation_self_collection">%1$s で選択した %2$s 個のウィジェットを特定</string>
     <string name="text_codegen_explanation_self_first_match">%1$s で %2$s 個が一致し, 最初のウィジェットを対象に使用</string>
     <string name="text_codegen_explanation_self_unique">%1$s で現在のスナップショット内の対象を一意に特定</string>
@@ -1207,6 +1211,7 @@
     <string name="text_codegen_family_container_items">コンテナー内の集合</string>
     <string name="text_codegen_family_self">ウィジェットの属性</string>
     <string name="text_codegen_family_self_index">属性と一致インデックス</string>
+    <string name="text_codegen_family_self_relative">属性と近くのウィジェット</string>
     <string name="text_codegen_generating" tools:ignore="TypographyEllipsis">生成中...</string>
     <string name="text_codegen_generation_error">コードを生成できませんでした. 再試行してください</string>
     <string name="text_codegen_loading_collections" tools:ignore="TypographyEllipsis">集合を検索中...</string>

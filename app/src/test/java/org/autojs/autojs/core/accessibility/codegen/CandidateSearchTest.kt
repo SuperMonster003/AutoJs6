@@ -2,6 +2,7 @@ package org.autojs.autojs.core.accessibility.codegen
 
 import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest.Action
 import org.autojs.autojs.core.accessibility.codegen.CodeGenRequest.Scope
+import org.autojs.autojs.core.accessibility.codegen.plan.Condition
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan
 import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan.Family
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanReceiver
@@ -25,11 +26,11 @@ class CandidateSearchTest {
     private fun fixture(name: String) = SnapshotNode.load(File(requireNotNull(javaClass.getResource("/codegen/" + name + ".layout.json")).toURI()))
 
     @Test
-    fun singleTargetSearchProducesAllFourApplicableFamilies() {
+    fun singleTargetSearchProducesAllFiveApplicableFamilies() {
         val root = fixture("login")
         val request = CodeGenRequest(listOf(root.child(2)!!), action = Action.CLICK)
         val result = CandidateSearch(root).search(request)
-        assertEquals(setOf(Family.SELF, Family.SELF_INDEX, Family.ANCHOR_PATH, Family.ANCHOR_SEARCH), result.candidates.map { it.plan.family }.toSet())
+        assertEquals(setOf(Family.SELF, Family.SELF_INDEX, Family.ANCHOR_PATH, Family.ANCHOR_SEARCH, Family.SELF_RELATIVE), result.candidates.map { it.plan.family }.toSet())
         assertTrue(result.attemptedCount <= 2_000)
         assertTrue(result.candidates.size <= 200)
         assertTrue(result.candidates.all { it.resolved == request.targets })
@@ -41,7 +42,7 @@ class CandidateSearchTest {
         val targets = (0 until 20).map { root.child(it)!!.child(1)!! }
         val request = CodeGenRequest(targets, Scope.COLLECTION, action = Action.CLICK)
         val result = CandidateSearch(root).search(request)
-        assertEquals(setOf(Family.SELF, Family.CONTAINER_ITEMS), result.candidates.map { it.plan.family }.toSet())
+        assertEquals(setOf(Family.SELF, Family.CONTAINER_ITEMS, Family.SELF_RELATIVE), result.candidates.map { it.plan.family }.toSet())
         assertTrue(result.candidates.all { it.resolved.toSet() == targets.toSet() })
     }
 
@@ -146,6 +147,34 @@ class CandidateSearchTest {
         assertTrue(result.candidates.isEmpty())
         assertNotNull(result.closestRejection)
         assertEquals(RejectionReason.UNSUPPORTED_ACTION, result.closestRejection!!.reason)
+    }
+
+    @Test
+    fun repeatedRowsWithIdenticalTargetsAreDistinguishedByANearbyControl() {
+        val root = FakeUiNode.root {
+            id = "app:id/list"
+            scrollable = true
+            repeat(3) { index ->
+                child("row$index", clickable = true) {
+                    child("icon$index") { id = "app:id/icon"; className = "android.widget.ImageView" }
+                    child("title$index") { id = "app:id/title"; text = "Title $index"; className = "android.widget.TextView" }
+                }
+            }
+        }
+        val target = root.find("icon1")
+        val result = CandidateSearch(root).search(CodeGenRequest(listOf(target), action = Action.CLICK))
+        val relative = result.candidates.filter { it.plan.family == Family.SELF_RELATIVE }
+        assertTrue(relative.isNotEmpty())
+        assertTrue(relative.all { it.resolved.single() === target && it.plan.receiver == PlanReceiver.Up(1) })
+        // The row title is the nearest content, reachable one level up or one sibling forward.
+        val steps = relative.map { it.plan.steps }
+        val title = PlanStep.Match(SelectorSpec(Condition("text", "Title 1")))
+        assertTrue(steps.toString(), listOf(PlanStep.Up(1), title) in steps)
+        assertTrue(steps.toString(), listOf(PlanStep.Sibling(1), title) in steps)
+        // Simplification never collapses the relative match to selector(), and the entry selector stays specific.
+        assertTrue(relative.all { (it.plan.steps.last() as PlanStep.Match).selector.conditions.isNotEmpty() })
+        assertTrue(relative.any { it.plan.selector.conditions == listOf(Condition("id", "icon")) })
+        assertEquals(result.candidates.size, result.candidates.map { it.plan.planKey }.toSet().size)
     }
 
     @Test

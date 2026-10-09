@@ -31,7 +31,7 @@ class ClassicRendererTest {
             assertEquals(source, cases.expectedActions(plan, action), cases.evaluate(source))
             count++
         }
-        assertEquals(216, count)
+        assertEquals(288, count)
     }
 
     @Test
@@ -99,6 +99,31 @@ class ClassicRendererTest {
 
             let ws = wait(locate, Infinity, 200, { then: ws => ws });
         """.trimIndent(), renderer.render(cases.request(collection, Mode.WAIT), collection))
+
+        val relative = cases.plans.single { it.family == Family.SELF_RELATIVE && it.cardinality == Cardinality.ONE }
+        assertEquals("""
+            function locate() {
+                return id("example:id/item").filter(w => {
+                    let r = w.compass("s<1");
+                    return r !== null && r.findOne(id("example:id/label")) !== null;
+                }).findOnce();
+            }
+
+            let w = locate();
+        """.trimIndent(), renderer.render(cases.request(relative, Mode.CHECK), relative))
+
+        val relativeCollection = cases.plans.single { it.family == Family.SELF_RELATIVE && it.cardinality == Cardinality.ALL }
+        assertEquals("""
+            function locate() {
+                let ws = id("example:id/item").filter(w => {
+                    let r = w.compass("p1");
+                    return r !== null && r.findOne(id("example:id/item")) !== null;
+                }).find();
+                return ws.nonEmpty() ? ws : null;
+            }
+
+            let ws = wait(locate, Infinity, 200, { then: ws => ws });
+        """.trimIndent(), renderer.render(cases.request(relativeCollection, Mode.WAIT), relativeCollection))
     }
 
     @Test
