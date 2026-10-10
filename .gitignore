@@ -57,6 +57,9 @@ CLAUDE.md
 !/tools/16kb/
 !/tools/16kb/**
 /tools/16kb/__pycache__/
+!/tools/opencv-ocr/
+!/tools/opencv-ocr/**
+/tools/opencv-ocr/__pycache__/
 !/tools/sdk37/
 !/tools/sdk37/**
 /tools/sdk37/__pycache__/
