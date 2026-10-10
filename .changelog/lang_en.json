@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/10",
+      "released_date": "2026/10/11",
       "feature": [
         "A \"Show launcher icon\" switch in plugin settings, enabled by default, hides and restores the original icon variant for official and third-party plugins (requires Root or authorized Shizuku running as Root)",
         "A launcher-icon option in the installation wizard applies only to plugins newly installed by that batch, defaults to showing icons and leaves already installed plugins unchanged",
@@ -481,7 +481,7 @@
         "Decimals in the string form of selectors (`selector().toString()`, error messages) showed up as `boundsLeft(0,5)` under UI languages whose decimal separator is a comma (French, Russian, ...); a dot is used everywhere now",
         "Java exceptions thrown by the global function form of selector methods (`algorithm('xyz')`, `textMatch('(')`, ...) could not be caught by the script's `try / catch` and terminated the script; they are thrown as catchable script errors now",
         "With the `findOnUiThread` flag set, a search posted to the UI thread could hang forever when its wake-up was lost (the UI thread finished the search before the script thread started waiting), and `findOne(timeout)` never timed out while the UI thread was blocked; the wait is now bounded by the query's timeout and cannot miss the wake-up",
-        "`UiObject.clickBounds()` prepared a Looper on the script thread and called `quit()` once the gesture finished, which quit the script thread's own event loop: `setTimeout` and other callbacks never ran afterwards and the script ended early; nodes obtained from a query now tap through the script's gesture dispatcher (the servant Looper), nodes from other sources keep the old path",
+        "`UiObject.clickBounds()` prepared a Looper on the script thread and called `quit()` once the gesture finished, which quit the script thread's own event loop: `setTimeout` and other callbacks never ran afterwards and the script ended early; nodes obtained from a query now tap through the script's gesture dispatcher (the servant Looper), and nodes from other sources (such as the `source` of an `auto.registerEvent` callback) wait for the result on a shared callback thread without touching the calling thread's Looper; on the main thread (for example in a `\"ui\"` script) the call failed because the main Looper may not quit",
         "The `pickup` / `detect` result type `['compass', 'p']` always failed with \"unknown result type\" because `compass` was listed with a `String` parameter in the interceptor table while its signature takes `CharSequence`; it works now",
         "When the layout inspector generated code for a child of a collection widget without an action selected, the generated `forEach` block contained the invalid statement `target.;`; the line is omitted now",
         "Text and controls in layout inspector floating windows and dialogs had insufficient contrast with some theme colors or in night mode",

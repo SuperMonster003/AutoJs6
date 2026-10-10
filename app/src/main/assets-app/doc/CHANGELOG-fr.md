@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/10
+###### 2026/10/11
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
 * `Astuce` Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement
@@ -491,7 +491,7 @@
 * `Correction` Les décimales dans la forme texte des sélecteurs (`selector().toString()`, messages d'erreur) apparaissaient comme `boundsLeft(0,5)` avec les langues d'interface dont le séparateur décimal est la virgule (français, russe, ...) ; le point est désormais utilisé partout
 * `Correction` Les exceptions Java levées par la forme fonction globale des méthodes de sélecteur (`algorithm('xyz')`, `textMatch('(')`, ...) ne pouvaient pas être interceptées par le `try / catch` du script et terminaient le script ; elles sont désormais levées comme des erreurs de script interceptables
 * `Correction` Avec l'indicateur `findOnUiThread` actif, une recherche envoyée au thread d'interface pouvait rester bloquée indéfiniment si son réveil était perdu (le thread d'interface terminait la recherche avant que le thread du script ne commence à attendre), et `findOne(timeout)` n'expirait jamais tant que le thread d'interface était bloqué ; l'attente est désormais bornée par le délai de la requête et ne peut plus manquer le réveil
-* `Correction` `UiObject.clickBounds()` préparait un Looper sur le thread du script et appelait `quit()` une fois le geste terminé, ce qui quittait la boucle d'événements du thread du script lui-même : `setTimeout` et les autres rappels ne s'exécutaient plus ensuite et le script se terminait prématurément ; les nœuds issus d'une requête tapent désormais via le répartiteur de gestes du script (le Looper servant), les nœuds d'autres origines conservent l'ancien chemin
+* `Correction` `UiObject.clickBounds()` préparait un Looper sur le thread du script et appelait `quit()` une fois le geste terminé, ce qui quittait la boucle d'événements du thread du script lui-même : `setTimeout` et les autres rappels ne s'exécutaient plus ensuite et le script se terminait prématurément ; les nœuds issus d'une requête tapent désormais via le répartiteur de gestes du script (le Looper servant), et les nœuds d'autres origines (comme le `source` d'un rappel `auto.registerEvent`) attendent le résultat sur un thread de rappel partagé sans toucher au Looper du thread appelant ; sur le thread principal (par exemple dans un script `"ui"`) l'appel échouait car le Looper principal ne peut pas être quitté
 * `Correction` Le type de résultat `['compass', 'p']` de `pickup` / `detect` échouait toujours avec "type de résultat inconnu" parce que `compass` figurait avec un paramètre `String` dans la table de l'intercepteur alors que sa signature prend un `CharSequence` ; il fonctionne désormais
 * `Correction` Lorsque l'inspecteur de mise en page générait du code pour un enfant d'un contrôle de collection sans action sélectionnée, le bloc `forEach` généré contenait l'instruction invalide `target.;` ; la ligne est désormais omise
 * `Correction` Contraste insuffisant du texte et des commandes des fenêtres flottantes et des dialogues de l'analyse de mise en page avec certaines couleurs de thème ou en mode nuit

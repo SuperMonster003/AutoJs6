@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/10
+###### 2026/10/11
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Sugerencia` Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente
@@ -489,7 +489,7 @@
 * `Corrección` Los decimales en la forma de cadena de los selectores (`selector().toString()`, mensajes de error) aparecían como `boundsLeft(0,5)` con idiomas de interfaz cuyo separador decimal es la coma (francés, ruso, ...); ahora se usa siempre el punto
 * `Corrección` Las excepciones Java lanzadas por la forma de función global de los métodos de selector (`algorithm('xyz')`, `textMatch('(')`, ...) no podían capturarse con el `try / catch` del script y terminaban el script; ahora se lanzan como errores de script capturables
 * `Corrección` Con el indicador `findOnUiThread` activo, una búsqueda enviada al hilo de la interfaz podía colgarse para siempre si se perdía su señal de despertar (el hilo de la interfaz terminaba la búsqueda antes de que el hilo del script empezara a esperar), y `findOne(timeout)` nunca vencía mientras el hilo de la interfaz estaba bloqueado; ahora la espera está limitada por el tiempo límite de la consulta y no puede perder la señal
-* `Corrección` `UiObject.clickBounds()` preparaba un Looper en el hilo del script y llamaba a `quit()` al terminar el gesto, lo que cerraba el propio bucle de eventos del hilo del script: `setTimeout` y otros callbacks ya no se ejecutaban y el script terminaba antes de tiempo; los nodos obtenidos de una consulta ahora pulsan mediante el despachador de gestos del script (el Looper servant), los nodos de otras fuentes mantienen la ruta anterior
+* `Corrección` `UiObject.clickBounds()` preparaba un Looper en el hilo del script y llamaba a `quit()` al terminar el gesto, lo que cerraba el propio bucle de eventos del hilo del script: `setTimeout` y otros callbacks ya no se ejecutaban y el script terminaba antes de tiempo; los nodos obtenidos de una consulta ahora pulsan mediante el despachador de gestos del script (el Looper servant), y los nodos de otras fuentes (como el `source` de un callback de `auto.registerEvent`) esperan el resultado en un hilo de callbacks compartido sin tocar el Looper del hilo que llama; en el hilo principal (por ejemplo en un script `"ui"`) la llamada fallaba porque el Looper principal no puede terminar
 * `Corrección` El tipo de resultado `['compass', 'p']` de `pickup` / `detect` fallaba siempre con "tipo de resultado desconocido" porque `compass` figuraba con un parámetro `String` en la tabla del interceptor mientras que su firma recibe `CharSequence`; ahora funciona
 * `Corrección` Cuando el inspector de diseño generaba código para un hijo de un control de colección sin ninguna acción seleccionada, el bloque `forEach` generado contenía la sentencia inválida `target.;`; ahora se omite esa línea
 * `Corrección` Escape incompleto de comillas, barras invertidas y caracteres de control en "Copiar como selector" del inspector de diseño y en la representación textual de los selectores

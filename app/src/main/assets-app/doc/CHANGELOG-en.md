@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/10
+###### 2026/10/11
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Hint` Compose UI and its API reference, Ace Editor type completion and Offline Docs content are delivered as a local integration requiring a matching local host build; the plugin is not listed in the official index or formally released
@@ -489,7 +489,7 @@
 * `Fix` Decimals in the string form of selectors (`selector().toString()`, error messages) showed up as `boundsLeft(0,5)` under UI languages whose decimal separator is a comma (French, Russian, ...); a dot is used everywhere now
 * `Fix` Java exceptions thrown by the global function form of selector methods (`algorithm('xyz')`, `textMatch('(')`, ...) could not be caught by the script's `try / catch` and terminated the script; they are thrown as catchable script errors now
 * `Fix` With the `findOnUiThread` flag set, a search posted to the UI thread could hang forever when its wake-up was lost (the UI thread finished the search before the script thread started waiting), and `findOne(timeout)` never timed out while the UI thread was blocked; the wait is now bounded by the query's timeout and cannot miss the wake-up
-* `Fix` `UiObject.clickBounds()` prepared a Looper on the script thread and called `quit()` once the gesture finished, which quit the script thread's own event loop: `setTimeout` and other callbacks never ran afterwards and the script ended early; nodes obtained from a query now tap through the script's gesture dispatcher (the servant Looper), nodes from other sources keep the old path
+* `Fix` `UiObject.clickBounds()` prepared a Looper on the script thread and called `quit()` once the gesture finished, which quit the script thread's own event loop: `setTimeout` and other callbacks never ran afterwards and the script ended early; nodes obtained from a query now tap through the script's gesture dispatcher (the servant Looper), and nodes from other sources (such as the `source` of an `auto.registerEvent` callback) wait for the result on a shared callback thread without touching the calling thread's Looper; on the main thread (for example in a `"ui"` script) the call failed because the main Looper may not quit
 * `Fix` The `pickup` / `detect` result type `['compass', 'p']` always failed with "unknown result type" because `compass` was listed with a `String` parameter in the interceptor table while its signature takes `CharSequence`; it works now
 * `Fix` When the layout inspector generated code for a child of a collection widget without an action selected, the generated `forEach` block contained the invalid statement `target.;`; the line is omitted now
 * `Fix` Text and controls in layout inspector floating windows and dialogs had insufficient contrast with some theme colors or in night mode

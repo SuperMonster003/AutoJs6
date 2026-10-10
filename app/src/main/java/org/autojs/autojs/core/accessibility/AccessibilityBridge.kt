@@ -59,9 +59,9 @@ abstract class AccessibilityBridge(
     /**
      * The owning script's gesture dispatcher, installed by `SimpleActionAutomator`; the nodes a
      * query of this bridge finds use it for `UiObject.clickBounds()`, so that the tap goes through
-     * the script's servant Looper instead of a Looper improvised on the calling thread.
+     * the script's servant Looper; other nodes use a standalone automator.
      * zh-CN: 所属脚本的手势派发器, 由 `SimpleActionAutomator` 安装; 本 bridge 的查询找到的节点以它执行
-     * `UiObject.clickBounds()`, 使点按经脚本的 servant Looper 派发, 而非在调用线程上临时准备的 Looper.
+     * `UiObject.clickBounds()`, 使点按经脚本的 servant Looper 派发; 其它节点使用独立的 automator.
      */
     @Volatile
     var tap: Tap? = null

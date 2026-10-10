@@ -8,11 +8,10 @@ import android.content.Context
 import android.graphics.Path
 import android.os.Build
 import android.os.Handler
-import android.os.Looper
+import android.os.HandlerThread
 import android.util.Log
 import android.view.ViewConfiguration
 
-import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.concurrent.VolatileDispose
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs6.R
@@ -21,7 +20,28 @@ import org.autojs.autojs6.R
  * Created by Stardust on May 16, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
-class GlobalActionAutomator(private val context: Context, private val handler: Handler?, private val serviceProvider: () -> AccessibilityService?) {
+class GlobalActionAutomator internal constructor(
+    private val context: Context,
+    private val handler: Handler?,
+    private val gestureDispatcher: GestureDispatcher,
+    private val serviceProvider: () -> AccessibilityService?,
+) {
+
+    constructor(context: Context, handler: Handler?, serviceProvider: () -> AccessibilityService?) :
+            this(context, handler, GestureDispatcher.SYSTEM, serviceProvider)
+
+    /**
+     * Hands a gesture to the system. Instrumentation tests supply their own, since
+     * [AccessibilityService.dispatchGesture] is final and needs a connected service.
+     * zh-CN: 把手势交给系统. Instrumentation 测试自行提供, 因为 [AccessibilityService.dispatchGesture] 是 final 且需要已连接的服务.
+     */
+    internal fun interface GestureDispatcher {
+        fun dispatch(service: AccessibilityService, gesture: GestureDescription, callback: GestureResultCallback, handler: Handler): Boolean
+
+        companion object {
+            val SYSTEM = GestureDispatcher { service, gesture, callback, handler -> service.dispatchGesture(gesture, callback, handler) }
+        }
+    }
 
     private val service: AccessibilityService?
         get() = serviceProvider()
@@ -138,14 +158,14 @@ class GlobalActionAutomator(private val context: Context, private val handler: H
 
     fun gestures(vararg strokes: GestureDescription.StrokeDescription) = GestureDescription.Builder().let { builder ->
         val built = strokes.forEach { builder.addStroke(it) }.let { builder.build() }
-        handler?.let { gesturesWithHandler(it, built) } ?: gesturesWithoutHandler(built)
+        gesturesWithHandler(handler ?: callbackHandler, built)
     }
 
     private fun gesturesWithHandler(handler: Handler, description: GestureDescription): Boolean {
         val service = service ?: return false
         val result = VolatileDispose<Boolean>()
         val dispatchGesture = runCatching {
-            service.dispatchGesture(description, object : GestureResultCallback() {
+            gestureDispatcher.dispatch(service, description, object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription) {
                     result.setAndNotify(true)
                 }
@@ -164,34 +184,6 @@ class GlobalActionAutomator(private val context: Context, private val handler: H
         return result.blockedGet(128_000) ?: false
     }
 
-    private fun gesturesWithoutHandler(description: GestureDescription): Boolean {
-        val service = service ?: return false
-        prepareLooperIfNeeded()
-        val result = VolatileBox(false)
-        val dispatchGesture = Looper.myLooper()?.let { myLooper ->
-            runCatching {
-                service.dispatchGesture(description, object : GestureResultCallback() {
-                    override fun onCompleted(gestureDescription: GestureDescription) {
-                        result.set(true)
-                        quitLoop()
-                    }
-
-                    override fun onCancelled(gestureDescription: GestureDescription) {
-                        result.set(false)
-                        quitLoop()
-                    }
-                }, Handler(myLooper))
-            }.onFailure {
-                Log.w(TAG, "Failed to dispatch gesture", it)
-            }.getOrDefault(false)
-        } ?: false
-        if (!dispatchGesture) {
-            return false
-        }
-        Looper.loop()
-        return result.get()
-    }
-
     fun gesturesAsync(strokes: Array<out GestureDescription.StrokeDescription>, callback: GestureResultCallback? = null) {
         val service = service ?: return
         GestureDescription.Builder().let { builder ->
@@ -202,14 +194,6 @@ class GlobalActionAutomator(private val context: Context, private val handler: H
                 Log.w(TAG, "Failed to dispatch async gesture", it)
             }
         }
-    }
-
-    private fun quitLoop() {
-        Looper.myLooper()?.quit()
-    }
-
-    private fun prepareLooperIfNeeded() {
-        Looper.myLooper() ?: Looper.prepare()
     }
 
     fun click(x: Int, y: Int) = gesture(0, (ViewConfiguration.getTapTimeout() /* 100 */ * 1.25).toLong(), "click", intArrayOf(x, y))
@@ -227,6 +211,20 @@ class GlobalActionAutomator(private val context: Context, private val handler: H
     companion object {
 
         private val TAG: String? = GlobalActionAutomator::class.java.simpleName
+
+        /**
+         * Receives the gesture results of automators built without a handler, while the calling thread
+         * waits for them. The calling thread's own Looper must not be used: a Looper prepared and looped
+         * there for one gesture had to be quit afterwards, which ended a script thread's Looper (its
+         * timers and event callbacks stopped, and queued callbacks ran in the middle of the gesture),
+         * and on the main thread the quit threw, since the main Looper may not quit.
+         * zh-CN: 接收未指定 handler 的 automator 的手势结果, 调用线程在此期间等待. 不能使用调用线程自己的 Looper: 为一次
+         * 手势在该线程上准备并运行的 Looper 事后必须退出, 这会结束脚本线程的 Looper (其定时器与事件回调停止, 排队的回调在手势
+         * 中途执行); 在主线程上退出则会抛出异常, 因为主 Looper 不允许退出.
+         */
+        private val callbackHandler: Handler by lazy {
+            Handler(HandlerThread("GlobalActionAutomator-gestures").apply { start() }.looper)
+        }
 
     }
 

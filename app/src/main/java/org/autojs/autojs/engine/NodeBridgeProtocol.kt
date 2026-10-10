@@ -1910,12 +1910,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun accessibilityGestureAutomator(
         service: AutoJsAccessibilityService,
     ): GlobalActionAutomator {
-        // The main-looper handler, as PythonHostCapabilityBroker does. Without a
-        // handler the automator prepares a Looper on the calling thread and quits
-        // it once the first gesture completes, so a reused broker dispatch thread
-        // answers the next gesture at once with "cancelled" and the real result
-        // lands on a dead handler. With the handler the dispatch thread (never
-        // the main thread) blocks until the system reports the gesture result.
+        // The main-looper handler, as PythonHostCapabilityBroker does: the dispatch
+        // thread (never the main thread) blocks until the system reports the
+        // gesture result on the main Looper.
         return GlobalActionAutomator(appContext, mainHandler) { service }
     }
 

@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/10/10
+###### 2026/10/11
 
 * `提示` 螢幕取色插件更名為 3-Color Picker 2.0, 使用新套件名稱並需重新安裝和啟用, 舊版可保留並存但設定不自動遷移; 主頁抽屜的螢幕取色文案保持不變
 * `提示` Compose UI 及配套 API 文件, Ace Editor 型別補全和 Offline Docs 內容為本地整合交付, 需要匹配的本地宿主構建; 插件尚未登記官方索引或正式發佈
@@ -651,7 +651,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 選擇器字符串形式 (如 `selector().toString()` 與錯誤信息) 中的小數在以逗號為小數點的界面語言下 (如法語, 俄語) 顯示為 `boundsLeft(0,5)`; 現在一律使用點號
 * `修復` 全局函數形式的選擇器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 拋出的 Java 異常無法被腳本的 `try / catch` 捕獲, 並會直接終止腳本; 現在作為可捕獲的腳本錯誤拋出
 * `修復` 設置 `findOnUiThread` 標誌時, 投遞到 UI 線程的查找可能因喚醒信號丟失 (UI 線程先於腳本線程進入等待完成查找) 而永久掛起, 且 UI 線程阻塞時 `findOne(timeout)` 不會超時; 現在以查詢超時為上限等待, 喚醒不再丟失
-* `修復` `UiObject.clickBounds()` 在腳本線程上臨時準備 Looper 並在手勢完成後 `quit()`, 實際退出的是腳本線程自身的事件循環, 此後 `setTimeout` 等回調不再執行且腳本提前結束; 現在由查詢得到的節點經腳本的手勢派發器 (servant Looper) 點按, 其它來源的節點保持原路徑
+* `修復` `UiObject.clickBounds()` 在腳本線程上臨時準備 Looper 並在手勢完成後 `quit()`, 實際退出的是腳本線程自身的事件循環, 此後 `setTimeout` 等回調不再執行且腳本提前結束; 現在由查詢得到的節點經腳本的手勢派發器 (servant Looper) 點按, 其它來源的節點 (如 `auto.registerEvent` 回調的 `source`) 在共用的回調線程上等待結果, 不再觸碰調用線程的 Looper; 在主線程上 (例如 `"ui"` 腳本) 調用曾因主 Looper 不允許退出而失敗
 * `修復` `pickup` / `detect` 的結果類型 `['compass', 'p']` 一律報 "未知結果類型", 因 `compass` 在攔截表中登記為 `String` 參數而其簽名為 `CharSequence`; 現在可用
 * `修復` 佈局分析器為集合控件的子項生成代碼且未選擇動作時, 生成的 `forEach` 代碼塊含無效語句 `target.;`; 現在省略該行
 * `修復` 佈局分析浮動視窗及其對話框的文字/控制項在部分主題色或夜間模式下對比度不足的問題
@@ -665,6 +665,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 拖曳控制台浮動視窗標題欄移動視窗偶爾失效 (拖曳手勢在視窗附着前綁定, 並與按鈕點擊及視窗關閉競爭); 現在標題欄拖曳在視窗附着後建立, 移動範圍限制在屏幕內並在拖曳結束後記錄位置
 * `修復` 控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到屏幕邊緣; 現已移除留白, 位置座標預設從狀態欄下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在屏幕範圍內
 * `修復` MCP Server 會話控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到插件已經透過回調送達的 `running` 狀態之上, 導致 `status` 始終不報告監聽器已運行; 現在拉取的快照只在拉取期間沒有回調狀態到達時才發佈
+* `修復` 安裝, 啟用或更新外掛後, 抽屜仍顯示 MCP Server 過時的提示 (例如 "未安裝"), 直到重新啟動 AutoJs6 的問題
 * `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
 * `修復` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 插件的座標手勢) 在被重用的 broker 派發線程上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在調用線程上準備 Looper 並在首個手勢完成後退出它, 該線程上的下一次調用立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主循環 handler 交給 automator
 * `修復` OpenCV 與 ImageQuant 插件策略將以 NDK r28c (28.2.13676358) 構建的原生庫判定為原生 NDK 版本不匹配, 導致重編後的 OpenCV 插件 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 構建

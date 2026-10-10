@@ -168,7 +168,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.8.0
 
-###### 2026/10/10
+###### 2026/10/11
 
 * `提示` 螢幕取色外掛更名為 3-Color Picker 2.0, 使用新套件名稱並需重新安裝和啟用, 舊版可保留並存但設定不自動遷移; 首頁抽屜的螢幕取色文案保持不變
 * `提示` Compose UI 及配套 API 文件, Ace Editor 型別補全和 Offline Docs 內容為本機整合交付, 需要相符的本機宿主建置; 外掛尚未登錄官方索引或正式發行
@@ -654,7 +654,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 選擇器字串形式 (如 `selector().toString()` 與錯誤訊息) 中的小數在以逗號為小數點的介面語言下 (如法語, 俄語) 顯示為 `boundsLeft(0,5)`; 現在一律使用點號
 * `修復` 全域函式形式的選擇器方法 (如 `algorithm('xyz')`, `textMatch('(')`) 擲出的 Java 例外無法被指令碼的 `try / catch` 捕捉, 並會直接終止指令碼; 現在作為可捕捉的指令碼錯誤擲出
 * `修復` 設定 `findOnUiThread` 旗標時, 投遞到 UI 執行緒的查詢可能因喚醒訊號遺失 (UI 執行緒先於指令碼執行緒進入等待完成查詢) 而永久停滯, 且 UI 執行緒阻塞時 `findOne(timeout)` 不會逾時; 現在以查詢逾時為上限等待, 喚醒不再遺失
-* `修復` `UiObject.clickBounds()` 在指令碼執行緒上臨時準備 Looper 並在手勢完成後 `quit()`, 實際結束的是指令碼執行緒自身的事件迴圈, 此後 `setTimeout` 等回呼不再執行且指令碼提前結束; 現在由查詢得到的節點經指令碼的手勢派發器 (servant Looper) 點按, 其它來源的節點保持原路徑
+* `修復` `UiObject.clickBounds()` 在指令碼執行緒上臨時準備 Looper 並在手勢完成後 `quit()`, 實際結束的是指令碼執行緒自身的事件迴圈, 此後 `setTimeout` 等回呼不再執行且指令碼提前結束; 現在由查詢得到的節點經指令碼的手勢派發器 (servant Looper) 點按, 其它來源的節點 (如 `auto.registerEvent` 回呼的 `source`) 在共用的回呼執行緒上等待結果, 不再觸碰呼叫執行緒的 Looper; 在主執行緒上 (例如 `"ui"` 指令碼) 呼叫曾因主 Looper 不允許結束而失敗
 * `修復` `pickup` / `detect` 的結果型別 `['compass', 'p']` 一律回報 "未知結果型別", 因 `compass` 在攔截表中登記為 `String` 參數而其簽章為 `CharSequence`; 現在可用
 * `修復` 版面配置分析器為集合控制項的子項產生程式碼且未選擇動作時, 產生的 `forEach` 程式碼區塊含無效敘述 `target.;`; 現在省略該行
 * `修復` 控制項集合陣列上同名的多個多載只保留最後一個 (如 `performAction(action)` 與 `performAction(action, ...args)`), 以另一種參數個數呼叫會回報參數不符; 現在按名稱繫結全部多載
@@ -665,6 +665,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` 拖曳控制台浮動視窗標題列移動視窗偶爾失效 (拖曳手勢在視窗附著前綁定, 並與按鈕點擊及視窗關閉競爭); 現在標題列拖曳在視窗附著後建立, 移動範圍限制在螢幕內並在拖曳結束後記錄位置
 * `修復` 控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到螢幕邊緣; 現已移除留白, 位置座標預設從狀態列下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在螢幕範圍內
 * `修復` MCP Server 工作階段控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到外掛已經透過回呼送達的 `running` 狀態之上, 導致 `status` 始終不回報監聽器已執行; 現在拉取的快照只在拉取期間沒有回呼狀態到達時才發布
+* `修復` 安裝, 啟用或更新外掛後, 抽屜仍顯示 MCP Server 過時的提示 (例如 "未安裝"), 直到重新啟動 AutoJs6 的問題
 * `修復` MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱
 * `修復` Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 外掛的座標手勢) 在被重複使用的 broker 派發執行緒上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在呼叫執行緒上準備 Looper 並在首個手勢完成後退出它, 該執行緒上的下一次呼叫立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主迴圈 handler 交給 automator
 * `修復` OpenCV 與 ImageQuant 外掛策略將以 NDK r28c (28.2.13676358) 建置的原生程式庫判定為原生 NDK 版本不符, 導致重新建置後的 OpenCV 外掛 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 建置

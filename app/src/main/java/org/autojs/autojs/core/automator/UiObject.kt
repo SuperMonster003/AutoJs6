@@ -256,8 +256,9 @@ open class UiObject private constructor(
         val x = centerX() + toRoundIntX(offsetX, false)
         val y = centerY() + toRoundIntY(offsetY, false)
         bridge?.tap?.let { return it.tap(x, y) }
-        // Without a script's dispatcher: a standalone one on the calling thread's Looper.
-        // zh-CN: 没有脚本的派发器时: 在调用线程的 Looper 上的独立派发器.
+        // Without a script's dispatcher: a standalone one; the calling thread waits while the result
+        // arrives on the automator's shared callback thread, so its own Looper is left alone.
+        // zh-CN: 没有脚本的派发器时: 独立派发器; 调用线程等待, 结果经 automator 共享的回调线程送达, 不触碰调用线程自己的 Looper.
         val automatorTmp = GlobalActionAutomator(ScriptRuntime.applicationContext, null) {
             standaloneBridge.ensureServiceStarted()
             standaloneBridge.service
