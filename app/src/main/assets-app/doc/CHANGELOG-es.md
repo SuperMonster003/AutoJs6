@@ -6,12 +6,13 @@
 
 # v6.8.0
 
-###### 2026/10/09
+###### 2026/10/10
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Sugerencia` Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente
 * `Sugerencia` Los diálogos independientes requieren AutoJs6 6.8.0 / 5321 y Compose UI con dialog-v1; TSX también requiere TypeScript Engine 0.6.6. Los scripts sin UI necesitan el permiso de superposición del anfitrión
 * `Sugerencia` Esta versión usa el contrato Compose UI V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
+* `Sugerencia` Las aplicaciones empaquetadas necesitan OpenCV seleccionado al empaquetar para images y otras funciones de OpenCV; ya no se usa un runtime con el mismo nombre aportado por un plugin de OCR
 * `Nuevo` El interruptor Mostrar icono en el lanzador, activado por defecto, oculta y restaura el estilo original en plugins oficiales y de terceros (requiere Root o Shizuku autorizado en modo Root)
 * `Nuevo` Una opción del asistente controla los iconos solo para los plugins nuevos del lote, los muestra por defecto y no cambia los plugins ya instalados
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
@@ -552,6 +553,8 @@
 * `Corrección` Compose UI rechaza volver a montar páginas o ventanas flotantes dentro del callback de renderizado y conserva la página actual; permite volver a montar páginas después de actualizar el plugin
 * `Corrección` Las fábricas de componentes trataban el primer nodo como propiedades al recibir varios nodos como argumentos posicionales
 * `Corrección` Los lectores de propiedades Compose conservan null en lugar de devolver undefined, incluidos el progreso predeterminado y las fechas borradas de DatePicker
+* `Corrección` Con Paddle OCR v3 y un plugin v4/v5/v6 habilitados a la vez, el empaquetado elegía este último y Paddle OCR no funcionaba en la aplicación empaquetada; ahora las aplicaciones empaquetadas solo aceptan el plugin PP-OCRv3 y no copian los modelos ni las bibliotecas nativas de v4-v6 que no pueden ejecutar
+* `Corrección` El empaquetado de APK conservaba en silencio una de dos bibliotecas nativas con el mismo nombre y distinto contenido; ahora se detiene e indica ambos orígenes
 * `Mejora` El perfil Estándar incluye 3-Setup Installer; la instalación de APK con el instalador del sistema ya no muestra la recomendación de este plugin
 * `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
@@ -753,6 +756,8 @@
 * `Mejora` ComposeError ofrece mensajes localizados y códigos estables con nodo, propiedad, causa y pila del script; cada motor admite hasta 8 sesiones activas, rechaza operaciones con manejadores cerrados y limpia callbacks, referencias y tareas pendientes; actualizar, desinstalar o desactivar el complemento cierra sus sesiones activas con el error correspondiente
 * `Mejora` cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones
 * `Mejora` Precalentamiento de Node.js en paralelo a la preparación del motor anfitrión, TypeScript y los archivos para reducir la espera; medición de etapas hasta la primera salida de scripts interactivos y programados
+* `Mejora` En las aplicaciones empaquetadas, el runtime del plugin OpenCV y el OpenCV privado de los plugins de OCR son independientes: images y ocr funcionan juntos incluso con versiones distintas de OpenCV, y OCR por sí solo ya no necesita OpenCV (requiere versiones de plugins de OCR que enlacen OpenCV de forma privada)
+* `Mejora` El empaquetado de APK usa la libc++_shared.so más reciente entre el host y los plugins, y se detiene si una biblioteca nativa necesita símbolos del runtime de C++ que faltan
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
 * `Dependencia` APK Signer modularizado

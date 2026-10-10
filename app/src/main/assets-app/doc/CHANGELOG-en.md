@@ -6,12 +6,13 @@
 
 # v6.8.0
 
-###### 2026/10/09
+###### 2026/10/10
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Hint` Compose UI and its API reference, Ace Editor type completion and Offline Docs content are delivered as a local integration requiring a matching local host build; the plugin is not listed in the official index or formally released
 * `Hint` Independent dialogs require AutoJs6 6.8.0 / 5321 and Compose UI with dialog-v1 support; TSX also requires TypeScript Engine 0.6.6. Non-UI scripts need the host overlay permission
 * `Hint` This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer
+* `Hint` Packaged apps need OpenCV selected at packaging time for images and other OpenCV features; a same-named runtime brought in by an OCR plugin is no longer used
 * `Feature` A "Show launcher icon" switch in plugin settings, enabled by default, hides and restores the original icon variant for official and third-party plugins (requires Root or authorized Shizuku running as Root)
 * `Feature` A launcher-icon option in the installation wizard applies only to plugins newly installed by that batch, defaults to showing icons and leaves already installed plugins unchanged
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes
@@ -552,6 +553,8 @@
 * `Fix` Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates
 * `Fix` Component factories treated the first positional node as a property object when several node arguments were supplied
 * `Fix` Compose node property getters preserve null values, including default progress and cleared DatePicker selections, instead of returning undefined
+* `Fix` With Paddle OCR v3 and a v4/v5/v6 plugin both enabled, packaging selected the latter and Paddle OCR did not work in the packaged app; packaged apps now accept only the PP-OCRv3 plugin and no longer copy the v4-v6 models and native libraries they cannot run
+* `Fix` APK packaging silently kept one of two same-named native libraries with different content; it now stops and names both sources
 * `Improvement` The Standard plugin installation profile includes 3-Setup Installer, and system APK installation no longer displays the installer-plugin recommendation tip
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
@@ -753,6 +756,8 @@
 * `Improvement` ComposeError provides localized messages and stable codes with node/property/cause and script stack details; each engine permits up to 8 live sessions, rejects operations on closed handles and clears callbacks, refs and pending work; updating, uninstalling or disabling the plugin closes its active sessions with the corresponding error
 * `Improvement` cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions
 * `Improvement` Node.js runtime prewarming overlaps host engine, TypeScript and workspace preparation to reduce launch waiting; startup timings include the first output for interactive and scheduled scripts
+* `Improvement` In packaged apps the OpenCV plugin runtime and the private OpenCV of OCR plugins are independent: images and ocr work together even with different OpenCV versions, and OCR alone no longer needs OpenCV (requires OCR plugin releases that link OpenCV privately)
+* `Improvement` APK packaging uses the newest libc++_shared.so among the host and the plugins, and stops when a native library needs C++ runtime symbols that it lacks
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

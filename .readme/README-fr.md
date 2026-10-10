@@ -168,12 +168,13 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/10/09
+###### 2026/10/10
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
 * `Astuce` Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement
 * `Astuce` Les dialogues indépendants nécessitent AutoJs6 6.8.0 / 5321 et Compose UI avec dialog-v1; TSX nécessite aussi TypeScript Engine 0.6.6. Les scripts hors UI nécessitent la permission de superposition de l'hôte
 * `Astuce` Cette version utilise le contrat Compose UI V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2
+* `Astuce` Les applications empaquetées doivent sélectionner OpenCV lors de l'empaquetage pour images et les autres fonctions OpenCV ; un runtime de même nom apporté par un plugin OCR n'est plus utilisé
 * `Fonctionnalité` L'option Afficher l'icône du lanceur, activée par défaut dans les réglages des plugins officiels et tiers, masque et restaure le style d'icône initial (Root ou Shizuku autorisé en mode Root requis)
 * `Fonctionnalité` Une option du guide d'installation contrôle les icônes uniquement pour les nouveaux plugins du lot, les affiche par défaut et ne modifie pas les plugins déjà installés
 * `Fonctionnalité` La fonction "Générer du code" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition
@@ -714,6 +715,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin
 * `Correction` Les fabriques de composants traitaient le premier noeud comme un objet de propriétés lorsque plusieurs noeuds étaient passés en arguments
 * `Correction` Les accesseurs des propriétés Compose conservent null au lieu de renvoyer undefined, y compris la progression par défaut et les dates DatePicker effacées
+* `Correction` Avec Paddle OCR v3 et un plugin v4/v5/v6 activés en même temps, l'empaquetage choisissait ce dernier et Paddle OCR ne fonctionnait pas dans l'application empaquetée ; les applications empaquetées n'acceptent désormais que le plugin PP-OCRv3 et ne copient plus les modèles et bibliothèques natives v4-v6 qu'elles ne peuvent pas exécuter
+* `Correction` L'empaquetage APK conservait silencieusement l'une de deux bibliothèques natives de même nom au contenu différent ; il s'arrête désormais en indiquant les deux sources
 * `Amélioration` Le profil Standard inclut 3-Setup Installer; l'installation système des APK n'affiche plus le conseil recommandant ce plugin
 * `Amélioration` Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués
 * `Amélioration` Les vérifications lint de l'hôte excluent par chemin les classes et ressources de compatibilité AutoJs4 et continuent à vérifier le reste de l'hôte
@@ -915,6 +918,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` ComposeError fournit des messages localisés et des codes stables avec le noeud, la propriété, la cause et la pile du script; chaque moteur accepte jusqu'à 8 sessions actives, refuse les opérations après fermeture et libère rappels, références et tâches en attente; la mise à jour, désinstallation ou désactivation du plugin ferme ses sessions actives avec l'erreur correspondante
 * `Amélioration` cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
 * `Amélioration` Préchauffage de Node.js en parallèle de la préparation du moteur hôte, de TypeScript et des fichiers pour réduire l'attente; mesure des étapes jusqu'à la première sortie pour les scripts interactifs et planifiés
+* `Amélioration` Dans les applications empaquetées, le runtime du plugin OpenCV et l'OpenCV privé des plugins OCR sont indépendants : images et ocr fonctionnent ensemble même avec des versions d'OpenCV différentes, et l'OCR seul n'a plus besoin d'OpenCV (nécessite des versions de plugins OCR liant OpenCV de manière privée)
+* `Amélioration` L'empaquetage APK utilise la libc++_shared.so la plus récente de l'hôte et des plugins, et s'arrête si une bibliothèque native a besoin de symboles du runtime C++ manquants
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

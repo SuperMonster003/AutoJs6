@@ -3,6 +3,7 @@
 本文是 OpenCV 插件与 OCR 插件 (Paddle OCR / Rapid OCR) 之间 OpenCV 运行时解耦的可执行状态表.
 以 2026-10-10 的本地代码快照为起点: 宿主 `master@94406ccc08` (`VERSION_NAME=6.8.0`, `VERSION_BUILD=5328`), `AutoJs6-Plugin-OpenCV` 1.1.5 (`76a3034cfa`), Paddle OCR PP-OCRv3 1.0.5 / PP-OCRv4 1.0.4 / PP-OCRv5 1.0.4 / PP-OCRv6 1.0.4, Rapid OCR PP-OCRv3 1.0.6 / PP-OCRv6 1.0.6.
 每个条目均可独立 Check 并落地, 后续会话按阶段逐步推进.
+2026-10-10 各插件仓库重写过本地历史 (去除 AGENTS.md / CLAUDE.md), 上述插件哈希已变化, 例如 OpenCV 插件 `76a3034cfa` -> `db42815f26`; 对照表位于 `D:/idea-projects/_repo-reset-backups/agents-claude-history-20261010/`.
 
 设计输入: 维护者 2026-10-10 的问答结论. OpenCV 插件转为只服务宿主的运行时提供方, 与其他插件完全隔离; 其他插件完全独立管理自己的 OpenCV, 与 OpenCV 插件无关. OpenCV 插件升级到新版本时, 不应牵动任何 OCR 插件, 反之亦然.
 
@@ -111,40 +112,40 @@
 
 ### P1 宿主打包器 (关键路径)
 
-- [ ] P1.1 同名原生库冲突检测: 两个来源提供相同的 `lib/<abi>/<name>` 时比较 SHA-256. 相同则保留一份; 不同则以可操作的错误终止打包, 错误信息列出两个来源插件. `libc++_shared.so` 按 P1.2 处理.
-- [ ] P1.2 `libc++_shared.so` 选择规则: 读取各来源 ELF 的 Android ident 中的 NDK 版本, 选择最新的一份; 若任一待打包原生库的构建 NDK 新于所选运行时, 终止打包 (D5).
-- [ ] P1.3 移除 "OpenCV 插件为唯一所有者" 的替换逻辑 (C3). 已声明私有 OpenCV 的 OCR 插件 (附录 A Q4) 不再提供 `libopencv_java4.so`; 未声明的旧版插件按附录 A Q1 的结论处理.
-- [ ] P1.4 `ApkBuildLibraryCatalog`: 按 P1.3 的声明区分新旧插件, 对新插件从 Paddle OCR v3 的 `libsToInclude` 与 Rapid OCR 的 `optionalLibsToInclude` 中移除 `libopencv_java4.so`. Paddle OCR v4-v6 条目按附录 A Q2 调整.
-- [ ] P1.5 打包 OpenCV 来源标记: 打包器把 OpenCV 插件的包名, 版本与逐 ABI SHA-256 写入打包 APK 的构建元数据; `OpenCvPluginHost.tryLoadBundledRuntime` 加载前核对哈希, 拒绝来源不明的同名库 (C8). 行为变化: 未勾选 OpenCV 的打包 APK 不再能借用 OCR 带入的副本执行 images 的 OpenCV 功能, 需在更新日志中说明.
-- [ ] P1.6 单元测试覆盖冲突检测, libc++ 选择, 新旧 OCR 插件分流与来源标记校验 (`ApkBuilderLibPolicyTest` 或新测试类).
+- [x] P1.1 同名原生库冲突检测: 两个来源提供相同的 `lib/<abi>/<name>` 时比较 SHA-256. 相同则保留一份; 不同则以可操作的错误终止打包, 错误信息列出两个来源插件. `libc++_shared.so` 按 P1.2 处理. (证据: 宿主 `7d8f853a3b`, `PackagedNativeLibraryPolicy`; [P1-P4 证据](evidence/opencv-ocr-p1-p4-20261010.md))
+- [x] P1.2 `libc++_shared.so` 选择规则: 候选来自宿主与列出它的插件, 取其自身 Android ident 构建号最新的一份, 相同时优先宿主; 每个 NEEDED 它的待打包库, 其未定义的 `std::__ndk1` 符号必须能在所选运行时 (或同 ABI 的其他待打包库) 中找到, 否则终止打包 (D5). 实施时发现 NDK r28c 自带的 `libc++_shared.so` ident 为 `r27-beta1` / 11883388, 与用 r28c 构建的库无法按 NDK 版本直接比较, 因此改为符号级校验. (证据: 同上, `ElfDynamicInfo` 与单元测试)
+- [x] P1.3 移除 "OpenCV 插件为唯一所有者" 的替换逻辑 (C3). 按 D12 不新增声明: 新版 OCR 插件不携带 `libopencv_java4.so`; 旧版插件的副本按 D9 与 OpenCV 插件比对字节. (证据: 同上; P4.4)
+- [x] P1.4 `ApkBuildLibraryCatalog`: Paddle OCR v3 与 Rapid OCR 的 `libopencv_java4.so` 改为 `neededOnlyLibsToInclude`, 只在该插件的待打包库 DT_NEEDED 它时复制 (D12); Paddle OCR 只保留 v3 变体 (D10). (证据: 同上; 场景 C / D)
+- [x] P1.5 打包 OpenCV 来源标记: 勾选 OpenCV 时打包器写入 `assets/opencv-runtime.properties` (插件包名, 版本与逐 ABI SHA-256); `OpenCvPluginHost.tryLoadBundledRuntime` 加载前核对哈希, 拒绝来源不明的同名库 (C8). 行为变化已写入宿主更新日志的提示. (证据: 同上; 场景 B 与 P4.4)
+- [x] P1.6 单元测试覆盖冲突检测, libc++ 选择, 新旧 OCR 插件分流与来源标记校验. (证据: `PackagedNativeLibraryPolicyTest`, `ElfDynamicInfoTest`, `BundledOpenCvRuntimeTest`, `ApkBuilderLibPolicyTest`)
 
 验收: OpenCV 插件发布任意兼容版本后, 与已解耦的 OCR 插件同时勾选时可以成功打包, 且产物中的 `libopencv_java4.so` 只来自 OpenCV 插件; 同名库的内容冲突不再被静默吞掉.
 
 ### P2 宿主内置 OCR 引擎
 
-- [ ] P2.1 移除 `App.kt` 中的 `OCRPredictorNative.installOpenCvRuntimeLoader` 与 `PaddleOcrEmbeddedEngine.getEngine` 中的 `OpenCvPluginHost.ensureLoaded`; `plugin-api/paddle-ocr-engine` 删除 `OpenCVLoader.initDebug()` 回退与 `org.opencv.BuildConfig` 引用 (C7). 前提: 所选 Paddle OCR v3 插件的 `libNative.so` 不依赖 `libopencv_java4.so` (1.0.4 已满足, 见附录 B).
-- [ ] P2.2 `plugin-api/rapid-ocr-engine`: 在 P3.1 落地后确认 `libRapidOcr.so` 可以在不含 `libopencv_java4.so` 的打包 APK 中加载; 旧版 Rapid OCR 插件的兼容按附录 A Q1.
-- [ ] P2.3 审计 `runtime/api/augment/ocr/`: 图像与区域参数在宿主侧转为 Bitmap 与整数后才进入引擎, 不向引擎传递 `Mat` (D3).
+- [x] P2.1 移除 `App.kt` 中的 `OCRPredictorNative.installOpenCvRuntimeLoader` 与 `PaddleOcrEmbeddedEngine.getEngine` 中的 `OpenCvPluginHost.ensureLoaded`; `plugin-api/paddle-ocr-engine` 删除 `OpenCVLoader.initDebug()` 回退与 `org.opencv.BuildConfig` 引用 (C7). 前提: 所选 Paddle OCR v3 插件的 `libNative.so` 不依赖 `libopencv_java4.so` (1.0.4 已满足, 见附录 B). (证据: 宿主 `4528568bc5`; 场景 B, P4.4 中旧版 1.0.5 同样通过)
+- [x] P2.2 `plugin-api/rapid-ocr-engine`: 在 P3.1 落地后确认 `libRapidOcr.so` 可以在不含 `libopencv_java4.so` 的打包 APK 中加载; 旧版 Rapid OCR 插件的兼容按附录 A Q1. (证据: 场景 B; 旧版见 P4.4, 引擎模块无需改动)
+- [x] P2.3 审计 `runtime/api/augment/ocr/`: 图像与区域参数在宿主侧转为 Bitmap 与整数后才进入引擎, 不向引擎传递 `Mat` (D3). (结论: `Ocr.kt` 把区域换算为 `org.opencv.core.Rect` 这一纯 Java 值类型, 再由基于 Bitmap 的 `images.clip` 裁剪; Paddle / Rapid 内置引擎只接收 Bitmap 与基本类型, 不调用 OpenCV native 方法)
 
 验收: 打包 APK 只勾选 OCR 而不勾选 OpenCV 时, ocr 可用且产物中没有 `libopencv_java4.so`.
 
 ### P3 OCR 插件私有化 OpenCV (各仓库独立, 可并行)
 
-- [ ] P3.1 Rapid OCR PP-OCRv3 / PP-OCRv6: 改为静态链接 OpenCV (core, imgproc 等实际用到的模块以及 TBB). 编译选项加 `-fvisibility=hidden -fvisibility-inlines-hidden`, 链接选项加 `-Wl,--exclude-libs,ALL -Wl,--gc-sections`, 并用版本脚本只导出 `JNI_OnLoad` 与 `Java_*`. 并行后端保持 TBB 或 pthreads (D4). APK 不再携带 `libopencv_java4.so`. 验收: `llvm-readelf -d` 不含该 NEEDED, `--dyn-syms` 中 `cv::` 符号为 0.
-- [ ] P3.2 Paddle OCR PP-OCRv3: 为 `libNative.so` 增加 `-Wl,--exclude-libs,ALL` 与版本脚本, 使导出的 `cv::` 符号从 1034 降为 0. 插件 Java 代码不使用 `org.opencv` (2026-10-10 检索为空), 因此在 P2.1 落地后停止携带 `libopencv_java4.so` 与 OpenCV AAR 依赖.
-- [ ] P3.3 Paddle OCR PP-OCRv4 / v5 / v6: 保留插件进程内的 Java API 用法 (D6), 按附录 A Q2 的结论决定是否需要打包支持. 若需要, 把预处理与后处理中的 OpenCV 调用下沉到私有原生库, 去除打包路径上的 `org.opencv` 依赖.
-- [ ] P3.4 六个 OCR 仓库的来源清单改为直接记录 OpenCV 上游 (D7), 各自保留可复现的构建脚本 (存放位置见附录 A Q3), 并更新 Rapid OCR `docs/16kb.md` 等文档中的供体描述.
-- [ ] P3.5 各 OCR 插件声明私有 OpenCV (附录 A Q4), 提升版本并同步 10 种语言的更新日志.
-- [ ] P3.6 宿主退役 `tools/16kb/refresh_paddle_opencv.py` 与 `tools/16kb/refresh_rapid_opencv.py` (C2), 其职责迁入各 OCR 仓库; `tools/16kb/refresh_libcxx.py` 保留 (D5).
+- [x] P3.1 Rapid OCR PP-OCRv3 / PP-OCRv6: 改为静态链接 OpenCV (core, imgproc 等实际用到的模块以及 TBB). 编译选项加 `-fvisibility=hidden -fvisibility-inlines-hidden`, 链接选项加 `-Wl,--exclude-libs,ALL -Wl,--gc-sections`, 并用版本脚本只导出 `JNI_OnLoad` 与 `Java_*`. 并行后端保持 TBB 或 pthreads (D4). APK 不再携带 `libopencv_java4.so`. 验收: `llvm-readelf -d` 不含该 NEEDED, `--dyn-syms` 中 `cv::` 符号为 0. (证据: v6 `97ca8c3`, v3 `756f0a8`, 四个 ABI 均满足; [P1-P4 证据](evidence/opencv-ocr-p1-p4-20261010.md))
+- [x] P3.2 Paddle OCR PP-OCRv3: 为 `libNative.so` 增加 `-Wl,--exclude-libs,ALL` 与版本脚本, 使导出的 `cv::` 符号从 1034 降为 0. 插件 Java 代码不使用 `org.opencv` (2026-10-10 检索为空), 因此在 P2.1 落地后停止携带 `libopencv_java4.so` 与 OpenCV AAR 依赖. (证据: `4efab64`, 两个 ABI 的导出 `cv::` 符号均为 0)
+- [x] P3.3 Paddle OCR PP-OCRv4 / v5 / v6: 保留插件进程内的 Java API 用法 (D6), 按附录 A Q2 的结论决定是否需要打包支持. 若需要, 把预处理与后处理中的 OpenCV 调用下沉到私有原生库, 去除打包路径上的 `org.opencv` 依赖. (结论: D10 不支持打包, 无需下沉, 运行时代码不变)
+- [x] P3.4 六个 OCR 仓库的来源清单改为直接记录 OpenCV 上游 (D7), 各自保留可复现的构建脚本 (存放位置见附录 A Q3), 并更新 Rapid OCR `docs/16kb.md` 等文档中的供体描述. (证据: Rapid v3 / v6 与 Paddle v3 的 `libs/opencv-android-sdk-4.8.0.provenance.json` 与 `tools/opencv/opencv_sdk_provenance.py`; Paddle v4-v6 的 `libs/org-opencv-4_8_0/opencv-4.8.0.provenance.json`, `tools/opencv/opencv_java_aar.py` 与 `tools/opencv/build_opencv_java.ps1`)
+- [x] P3.5 各 OCR 插件声明私有 OpenCV (附录 A Q4), 提升版本并同步 10 种语言的更新日志. (结论: D12 不新增声明. Rapid v3 / v6 归入未发布的 1.0.6, Paddle v3 升至 1.0.6 并提示打包需 AutoJs6 6.8.0; Paddle v4-v6 运行时未变, 不升版本)
+- [x] P3.6 宿主退役 `tools/16kb/refresh_paddle_opencv.py` 与 `tools/16kb/refresh_rapid_opencv.py` (C2), 其职责迁入各 OCR 仓库; `tools/16kb/refresh_libcxx.py` 保留 (D5). (证据: 宿主 `6733cbf4be`)
 
 验收: 任一 OCR 仓库更换 OpenCV 版本时, 不需要 OpenCV 插件仓库或宿主契约的任何改动; 反之亦然.
 
 ### P4 文档与设备验证
 
-- [ ] P4.1 更新 `docs/dev/opencv-plugin-integration.md` 的 "APK Builder behavior" 一节: OpenCV 插件只拥有宿主的 OpenCV 运行时, OCR 引擎携带私有 OpenCV, 并引用本文第 2 节.
-- [ ] P4.2 版本差异共存验证: 构建一个私有 OpenCV 版本与 OpenCV 插件不同的 Rapid OCR 测试包 (例如私有 4.10.0, OpenCV 插件 4.8.0), 打包同时勾选 OpenCV, Rapid OCR 与 Paddle OCR v3 的 APK. 交替及并发调用 `images.findImage` / `images.matchTemplate` 与 `ocr.detect`, 确认 `/proc/self/maps` 中两份 OpenCV 同时映射, 无崩溃, 结果与单独运行一致, 线程数在可接受范围内. 覆盖 arm64-v8a 与 x86_64, 以及 16 KB 页大小设备.
-- [ ] P4.3 宿主应用回归: images 与经 Binder 调用的 OCR 插件在 OpenCV 版本不同时同时工作.
-- [ ] P4.4 旧版兼容回归: 未解耦的旧 OCR 插件与新宿主组合时, 打包结果符合附录 A Q1 的预期.
+- [x] P4.1 更新 `docs/dev/opencv-plugin-integration.md` 的 "APK Builder behavior" 一节: OpenCV 插件只拥有宿主的 OpenCV 运行时, OCR 引擎携带私有 OpenCV, 并引用本文第 2 节. (证据: 宿主 `6733cbf4be`)
+- [x] P4.2 版本差异共存验证: 构建一个私有 OpenCV 版本与 OpenCV 插件不同的 Rapid OCR 测试包 (例如私有 4.10.0, OpenCV 插件 4.8.0), 打包同时勾选 OpenCV, Rapid OCR 与 Paddle OCR v3 的 APK. 交替及并发调用 `images.findImage` / `images.matchTemplate` 与 `ocr.detect`, 确认 `/proc/self/maps` 中两份 OpenCV 同时映射, 无崩溃, 结果与单独运行一致, 线程数在可接受范围内. 覆盖 arm64-v8a 与 x86_64, 以及 16 KB 页大小设备. (证据: [P1-P4 证据](evidence/opencv-ocr-p1-p4-20261010.md); 私有 OpenCV 4.12.0 的 Rapid v6 测试包, Xiaomi API 35 arm64 4 KB 与 AVD API 37 x86_64 16 KB; 16 KB arm64 实机未覆盖)
+- [x] P4.3 宿主应用回归: images 与经 Binder 调用的 OCR 插件在 OpenCV 版本不同时同时工作. (证据: [P1-P4 证据](evidence/opencv-ocr-p1-p4-20261010.md), Xiaomi API 35)
+- [x] P4.4 旧版兼容回归: 未解耦的旧 OCR 插件与新宿主组合时, 打包结果符合附录 A Q1 的预期. (证据: [P1-P4 证据](evidence/opencv-ocr-p1-p4-20261010.md), Redmi API 33)
 
 ---
 
