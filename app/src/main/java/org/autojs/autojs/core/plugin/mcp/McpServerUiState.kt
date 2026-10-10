@@ -47,4 +47,19 @@ object McpServerUiPolicy {
     fun progress(state: McpServerUiState): Boolean = state in setOf(
         McpServerUiState.CHECKING, McpServerUiState.STARTING, McpServerUiState.STOPPING,
     )
+
+    /** Guidance left by a refused switch attempt; it goes stale when the plugin package or its plugin state changes. */
+    fun guidance(state: McpServerUiState): Boolean = state in setOf(
+        McpServerUiState.NOT_INSTALLED, McpServerUiState.APPLICATION_DISABLED, McpServerUiState.ACTIVATION_REQUIRED,
+        McpServerUiState.PLUGIN_DISABLED, McpServerUiState.AUTHORIZATION_REQUIRED, McpServerUiState.TRUST_CONFIRMATION_REQUIRED,
+        McpServerUiState.INCOMPATIBLE,
+    )
+
+    /** State to show after the plugin changed while the switch is off; null keeps the current state. */
+    fun refreshedGuidance(current: McpServerUiState, inspected: McpServerUiState): McpServerUiState? = when {
+        !guidance(current) -> null
+        inspected == McpServerUiState.AVAILABLE -> McpServerUiState.STOPPED
+        inspected == current || !guidance(inspected) -> null
+        else -> inspected
+    }
 }

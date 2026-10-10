@@ -191,9 +191,10 @@ private class McpServerOwner(context: Context) {
 
     init {
         PluginStateChangeRegistry.addListener { packageName ->
-            if (packageName == McpServerIds.DEFAULT_PACKAGE_NAME) scope.launch { validateActivePlugin() }
+            if (packageName == McpServerIds.DEFAULT_PACKAGE_NAME) scope.launch { onPluginChanged() }
         }
         val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_ADDED)
             addAction(Intent.ACTION_PACKAGE_REMOVED)
             addAction(Intent.ACTION_PACKAGE_CHANGED)
             addAction(Intent.ACTION_PACKAGE_REPLACED)
@@ -201,15 +202,25 @@ private class McpServerOwner(context: Context) {
         }
         ContextCompat.registerReceiver(this.context, object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.data?.schemeSpecificPart == McpServerIds.DEFAULT_PACKAGE_NAME) scope.launch { validateActivePlugin() }
+                if (intent?.data?.schemeSpecificPart == McpServerIds.DEFAULT_PACKAGE_NAME) scope.launch { onPluginChanged() }
             }
         }, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
+
+    private suspend fun onPluginChanged() = if (wanted) validateActivePlugin() else refreshGuidance()
 
     private suspend fun validateActivePlugin() {
         if (!wanted) return
         val inspection = withContext(Dispatchers.IO) { runCatching { McpServerPluginInspector.inspect(context) }.getOrNull() }
         if (inspection?.state != McpServerUiState.AVAILABLE) disconnect()
+    }
+
+    /** A plugin installed, enabled or updated after a refused attempt clears the drawer guidance without a host restart. */
+    private suspend fun refreshGuidance() {
+        if (!McpServerUiPolicy.guidance(mutableState.value.state)) return
+        val inspection = withContext(Dispatchers.IO) { runCatching { McpServerPluginInspector.inspect(context) }.getOrNull() } ?: return
+        if (wanted) return
+        McpServerUiPolicy.refreshedGuidance(mutableState.value.state, inspection.state)?.let { mutableState.value = McpServerToolState(it) }
     }
 
     fun showAvailability(state: McpServerUiState) {

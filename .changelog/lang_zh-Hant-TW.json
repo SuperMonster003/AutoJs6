@@ -495,6 +495,7 @@
         "拖曳控制台浮動視窗標題列移動視窗偶爾失效 (拖曳手勢在視窗附著前綁定, 並與按鈕點擊及視窗關閉競爭); 現在標題列拖曳在視窗附著後建立, 移動範圍限制在螢幕內並在拖曳結束後記錄位置",
         "控制台浮動視窗四周存在 12dp 的留白, `console.setPosition(0, 0)` 無法貼到螢幕邊緣; 現已移除留白, 位置座標預設從狀態列下方開始計算 (可用 `setAvoidStatusBar(false)` 關閉), 視窗位置與尺寸均限制在螢幕範圍內",
         "MCP Server 工作階段控制器可能把 `openServer` 之後拉取的 `starting` 快照覆蓋到外掛已經透過回呼送達的 `running` 狀態之上, 導致 `status` 始終不回報監聽器已執行; 現在拉取的快照只在拉取期間沒有回呼狀態到達時才發布",
+        "安裝, 啟用或更新外掛後, 抽屜仍顯示 MCP Server 過時的提示 (例如 \"未安裝\"), 直到重新啟動 AutoJs6 的問題",
         "MediaInfo 詳情與快照的 Complete name 顯示原始檔案路徑, 避免顯示私有快取或描述符路徑, 同時保留快照的顯示檔案名稱",
         "Node bridge 的 `accessibility.swipe` / `accessibility.gesture` (MCP Server 與 Node 外掛的座標手勢) 在被重複使用的 broker 派發執行緒上從第二次手勢起總是回應 `false` (取消): 無 handler 的手勢 automator 會在呼叫執行緒上準備 Looper 並在首個手勢完成後退出它, 該執行緒上的下一次呼叫立即返回, 真正的結果被投遞到已結束的 handler; bridge 現在與 Python 宿主 broker 一樣把主迴圈 handler 交給 automator",
         "OpenCV 與 ImageQuant 外掛策略將以 NDK r28c (28.2.13676358) 建置的原生程式庫判定為原生 NDK 版本不符, 導致重新建置後的 OpenCV 外掛 v1.1.2 無法載入; 現同時接受 r26b 與 r28c 建置",
