@@ -72,7 +72,7 @@ class ThreeStoveAgentPeerConformanceTest {
                     val api = IThreeStoveAgentPlugin.Stub.asInterface(checkNotNull(binding.value.get()).plugin)
                     assertNull(api.asBinder().queryLocalInterface("org.autojs.plugin.three.stove.agent.api.IThreeStoveAgentPlugin"))
                     val index = brokers.size; brokers += owned
-                    AidlPluginHost.LeasedCall(api.attach(config, owned.modelBroker, owned.capabilityBroker, callback), Closeable { released += index; binding.close() })
+                    AidlPluginHost.LeasedCall(api.attach(config, owned.modelBroker, owned.capabilityBroker, callback), org.autojs.autojs.core.plugin.ServiceBindingLease { released += index; binding.close() }.apply { markRegistered() })
                 } catch (failure: Throwable) { binding.close(); throw failure }
             })
         fun send(operation: String, generation: Int = 0, data: Bundle = Bundle()) = driver.control(operation, generation, data)

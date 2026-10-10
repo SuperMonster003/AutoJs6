@@ -73,7 +73,7 @@ class ThreeStoveAgentPublicApiTest {
         try {
             assertTrue(ready.await(15,TimeUnit.SECONDS))
             controller=ThreeStoveAgentLinkController(context,available={true},uid={context.packageManager.getApplicationInfo(pkg,0).uid},
-                attachLink={config,brokers,callback -> AidlPluginHost.LeasedCall(api!!.attach(config,model,brokers.capabilityBroker,callback),Closeable {}) })
+                attachLink={config,brokers,callback -> AidlPluginHost.LeasedCall(api!!.attach(config,model,brokers.capabilityBroker,callback),org.autojs.autojs.core.plugin.ServiceBindingLease {}.apply { markRegistered() }) })
             singleton.set(null,controller)
             runBlocking { controller.attach() }
             action(controller,work)

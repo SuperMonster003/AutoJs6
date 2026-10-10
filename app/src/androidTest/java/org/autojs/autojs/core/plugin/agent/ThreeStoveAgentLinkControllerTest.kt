@@ -226,7 +226,7 @@ class ThreeStoveAgentLinkControllerTest {
                 val call = Call(config, brokers, callback)
                 calls += call
                 check(!failAttach) { "fixture attach failure" }
-                AidlPluginHost.LeasedCall(call.link, Closeable { call.closed.incrementAndGet() })
+                AidlPluginHost.LeasedCall(call.link, org.autojs.autojs.core.plugin.ServiceBindingLease { call.closed.incrementAndGet() }.apply { markRegistered() })
             },
         )
     }

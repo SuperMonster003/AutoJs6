@@ -164,7 +164,7 @@ class ThreeStoveAgentConnectionOwnerTest {
                     }
                     override fun updateConfig(config: Bundle?) { configurations.add(config!!.getString(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_LINK_CONFIG_JSON)!!) }
                     override fun detach(reason: Bundle?) = Unit
-                }, Closeable { closed.incrementAndGet() })
+                }, org.autojs.autojs.core.plugin.ServiceBindingLease { closed.incrementAndGet() }.apply { markRegistered() })
             })
         val owner: ThreeStoveAgentConnectionOwner = ThreeStoveAgentConnectionOwner(context, controller, scope, { inspection }, observePluginChanges = false,
             readRootConfiguration = { savedRoots }, saveRootConfiguration = { savedRoots = it })
