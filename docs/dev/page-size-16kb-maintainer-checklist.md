@@ -114,9 +114,9 @@ Q1-Q4 已经实现, 没有代码停在等待选择的状态. 维持现状即可�
 3. **APK Builder 测试开关与签名.** 此前验收使用可信签名且显式开启 remote build 的测试包. 生产默认关闭的开关保持原语义; 16 KB 适配不自动开放远程打包. 要发布可用的该功能需遵守原功能的启用流程. Lua 同样不能靠降低签名检查通过验收.
 4. **压缩与解压契约.** 宿主 / inrt / 用户 APK 继续压缩 `.so` 并使用 `extractNativeLibs=true`. 不可只把 ZIP 写入改成 STORED 而不做 16 KB 数据偏移对齐. Builder 回归测试同时覆盖 manifest 的两种输入值, 不代表最终用户模板可以任意改成 false.
 5. **宿主 libc++ 所有权.** OpenCV 有意由宿主提供进程内 C++ runtime, 不要删宿主的 `libc++_shared.so`. 改 OpenCV / Image-Quantization 工具链后复核运行库兼容性.
-6. **Rapid 依赖变化与体积.** ORT 1.21.1 + OpenCV 4.8.0 共享 TBB 是为解决 Paddle 后加载 Rapid 的真实崩溃. 不恢复静态 OpenMP, 不用 `KMP_DUPLICATE_LIB_OK` 绕过. 共享 OpenCV 增加插件体积, 用户 APK 同时选择独立 OpenCV 时应去重; 没选时仍必须带上 Rapid 的 optional payload.
-7. **Paddle provenance.** v3 原始 Paddle-Lite 版本 / 下载 URL 未记录, 现有收据如实保留来源未知及 SHA. LLD 修复仅改 `.dynsym sh_info`, PT_LOAD 逐字节未变. 重新解压旧 SDK 后运行 `tools/16kb/refresh_paddle_opencv.py`, 避免把休眠的旧 x86_64 OpenCV 库带回来.
-8. **donor / lock 更新联动.** OpenCV 预编译库更换时, 同步 OpenCV 自身, 两个 Rapid AAR, 四个 Paddle AAR, 来源与 SHA lock 及实际 APK 的证据; 不只改版本字符串. LuaLS / Node / Bun 也要检查实际 exec 的 ELF, Python 要保留归档内扫描. 2026-09-12 已按此联动更新到 r28c donor, SHA 见第 0 节.
+6. **Rapid 依赖变化与体积.** ORT 1.21.1 + OpenCV 4.8.0 共享 TBB 是为解决 Paddle 后加载 Rapid 的真实崩溃. 不恢复静态 OpenMP, 不用 `KMP_DUPLICATE_LIB_OK` 绕过. 共享 OpenCV 增加插件体积, 用户 APK 同时选择独立 OpenCV 时应去重; 没选时仍必须带上 Rapid 的 optional payload. 2026-10-10 起由 [OpenCV / OCR 解耦](opencv-ocr-runtime-decoupling-roadmap.md) 取代: Rapid 静态链接官方 OpenCV SDK 并隐藏符号 (TBB, 无 OpenMP), 不再携带 `libopencv_java4.so`; 打包器只在旧版 `libRapidOcr.so` 的 DT_NEEDED 需要时复制其副本, 同名不同内容时终止打包.
+7. **Paddle provenance.** v3 原始 Paddle-Lite 版本 / 下载 URL 未记录, 现有收据如实保留来源未知及 SHA. LLD 修复仅改 `.dynsym sh_info`, PT_LOAD 逐字节未变. 重新解压旧 SDK 后运行 `tools/16kb/refresh_paddle_opencv.py`, 避免把休眠的旧 x86_64 OpenCV 库带回来. 2026-10-10: 该脚本已退役 (解耦 P3.6). Paddle v3 静态链接官方 OpenCV SDK, 不再携带 OpenCV AAR; v4-v6 的 OpenCV 由各自仓库的来源清单维护.
+8. **donor / lock 更新联动.** OpenCV 预编译库更换时, 同步 OpenCV 自身, 两个 Rapid AAR, 四个 Paddle AAR, 来源与 SHA lock 及实际 APK 的证据; 不只改版本字符串. LuaLS / Node / Bun 也要检查实际 exec 的 ELF, Python 要保留归档内扫描. 2026-09-12 已按此联动更新到 r28c donor, SHA 见第 0 节. 2026-10-10 起 OCR 插件不再以 OpenCV 插件为供体 (解耦 D7), OpenCV 插件更换预编译库时只联动宿主契约与证据.
 9. **官方索引仍有旧记录.** 当前生成文件中 6 个 4096 条目是 APK Builder, MediaInfo, Node, Paddle v3, Rapid v3/v6; Python 为未知. 它们反映现有公开资产, 不是本地修复失败. 新版发布后逐项重新测量. `0` 与未知不可互换, `declared` 也不可称为实测.
 10. **产物报告字段.** 部署表原有 R8 的 `None` 是采集器漏读版本. 已对原 SHA 对应的 APK 复核并更正为 `0.2.0-provider-dev` / build 1; JSON 保留更正依据. 发布记录仍应读最终 APK 的 metadata, 不靠构建后可能自增的属性文件反推.
 11. **保留既有工作.** 不能为清理发布工作区执行全仓库 reset / clean; 特别保留 R8 原有暂存新增但工作区删除的 drawable 状态, 以及 Three-Stone-AI / Python 等其它会话修改. 整合后以最终源码重新生成有受影响内容的产物.
@@ -139,7 +139,7 @@ B4 的无用 CMake / Ninja CI 安装步骤清理已完成, 不属于剩余事项
 - 静态巡检: `python tools/16kb/scan_alignment.py`; 发布构建中的 `verifyNativePageAlignment` 不得跳过.
 - 设备状态: `tools/16kb/verify_device.sh SERIAL PACKAGE inspect`; 兼容模式开关按系统权限执行并读回. 本轮 Samsung 已成功关闭兼容模式. 不设 `android:pageSizeCompat` 隐藏系统提示.
 - 本轮结束时两个兼容模式属性, 三个临时禁用的 Paddle flavor 与宿主临时存储 AppOp 均已恢复原值; 测试包保留. 开始新一轮严格验收时重新执行兼容模式设置并读回.
-- 用户 APK: `python tools/16kb/verify_user_apk.py SERIAL --adb E:/.android/sdk/platform-tools/adb.exe --rapid-version 3 --out <目录>`; 对 v6 重复, 再用 `--without-opencv-plugin` 覆盖可选库路径. 前置条件是配套宿主 / 测试 APK, 可信且已启用 remote build 的 APK Builder, 所需插件. 脚本当前选择 Paddle v3; v4-v6 需单独验收, 不能从此收据推断.
+- 用户 APK: `python tools/16kb/verify_user_apk.py SERIAL --adb E:/.android/sdk/platform-tools/adb.exe --rapid-version 3 --out <目录>`; 对 v6 重复, 再用 `--without-opencv-plugin` 覆盖不含 OpenCV 插件的产物 (新版 Rapid 使用私有 OpenCV, 旧版按 DT_NEEDED 带入其 OpenCV). 两份 OpenCV 版本不同的共存验证使用 `tools/opencv-ocr/verify_packaged_ocr.py`. 前置条件是配套宿主 / 测试 APK, 可信且已启用 remote build 的 APK Builder, 所需插件. 脚本当前选择 Paddle v3; v4-v6 需单独验收, 不能从此收据推断.
 - 全部完成后回填主 Roadmap 的 P6; 不提前把当前清单全部勾选.
 
 ## 9. R1 所涉及的 30 个既有未提交工作区

@@ -89,12 +89,21 @@ Plugin Center and user-facing messages must describe the restart requirement rat
 
 Generated applications must be self-contained. They retain the compatible OpenCV Java classes in the template and receive the selected native libraries while being built. A generated APK must not contact Plugin Center and must not require the OpenCV plugin to be installed on its target device.
 
-At runtime, an INRT application first attempts to load its bundled JNI library. If it is absent or cannot be loaded, initialization fails with a packaging error; INRT never discovers or loads an OpenCV plugin installed on the device.
+The OpenCV plugin owns only the OpenCV runtime of the host and of generated APKs: the `org.opencv` Java API and the `libopencv_java4.so` that images and other modules load. OCR plugins link their own private OpenCV into their engine libraries and never supply this runtime ([OpenCV / OCR runtime decoupling roadmap](opencv-ocr-runtime-decoupling-roadmap.md), section 2).
 
-Release verification must cover each supported ABI and confirm both conditions:
+The builder records the SHA-256 of every packaged `libopencv_java4.so` in `assets/opencv-runtime.properties` (`BundledOpenCvRuntime`) when OpenCV is selected. At runtime, an INRT application loads its bundled JNI library only if the library matches that record. Without the record, or with a same-named library from another plugin, initialization fails with a packaging error; INRT never discovers or loads an OpenCV plugin installed on the device.
+
+Native libraries from the host and from every selected plugin are staged and resolved by content (`PackagedNativeLibraryPolicy`):
+
+- Identical bytes under one `lib/<abi>/<name>` are packaged once. Different bytes stop the build with both sources named, so an older OCR plugin that still ships a different `libopencv_java4.so` must be updated.
+- `libc++_shared.so` is the newest copy among the host and the plugins, ordered by its Android ident build number. Every packaged library that needs it must find its `std::__ndk1` symbols there, otherwise the build stops.
+- An OCR plugin's `libopencv_java4.so` is copied only when one of its packaged libraries lists it in `DT_NEEDED`, which applies to OCR plugins released before the decoupling.
+
+Release verification must cover each supported ABI and confirm these conditions:
 
 - The AutoJs6 host APK does not bundle the OpenCV JNI payload.
 - A generated APK that includes OpenCV runs on a device without the plugin installed.
+- A generated APK that includes OpenCV and OCR keeps working when the private OpenCV of an OCR engine has another version (`tools/opencv-ocr/verify_packaged_ocr.py`).
 
 ## Future isolated runtime
 

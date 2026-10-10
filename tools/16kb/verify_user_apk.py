@@ -19,7 +19,7 @@ def main():
     parser.add_argument("serial")
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--out", type=Path, default=Path("build/tmp-16kb/user-apk"))
-    parser.add_argument("--without-opencv-plugin", action="store_true", help="Exercise Rapid's own optional OpenCV payload")
+    parser.add_argument("--without-opencv-plugin", action="store_true", help="Package without the OpenCV plugin; OCR engines must not need its runtime")
     parser.add_argument("--rapid-version", choices=("3", "6"), default="3")
     parser.add_argument("--runtime-timeout", type=int, default=360, help="Seconds allowed for first model initialization and inference")
     args = parser.parse_args()
