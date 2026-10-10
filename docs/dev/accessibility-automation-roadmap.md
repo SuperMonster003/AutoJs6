@@ -62,6 +62,7 @@
 - `RootAutomator` (`core/inputevent/RootAutomator.java`), 基于 `/dev/input` 而非无障碍服务, 仅同名.
 - 布局分析器 UI (`ui/floating/layoutinspector/**`) 与代码生成器 UI (`ui/floating/CodeGenerateDialog.java`). 其依赖的 `LayoutInspector` / `NodeInfo` / `Capture` 保留原接口.
 - Python Host (`core/plugin/python/PythonHostSelector.kt` 等) 与 Node Bridge (`engine/NodeBridgeProtocol.kt`) 各自独立实现的选择器与动作层. 它们是 "消费方", 在 P5 中作为可选项改为复用新核心, 不在 P1/P2 中同步改造.
+  - 后续消费方 (2026-10-10 补记): MCP Server 插件 (`AutoJs6-Plugin-MCP-Server`, MCP 路线图 P1.3 起) 经宿主签发的 `McpHostCapabilityBroker` 复用 Node Bridge 的 `accessibility.*` 数据面 (`NodeBridgeAccessibilityDiagnostics` / `BridgeNodeDump` / `BridgeSelector`), 不另建选择器或动作层; 明细见 `docs/dev/accessibility-architecture.md` 的跨运行时消费方表与 `docs/dev/mcp-server-protocol-v1.md`.
 - `com.stardust.**` 兼容包 (见第 1 节).
 
 ---
