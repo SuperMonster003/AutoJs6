@@ -7,7 +7,6 @@ import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
 import androidx.preference.PreferenceManager;
-import org.opencv.BuildConfig;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -104,7 +103,8 @@ public class Predictor {
     /** Use OpenCL backend (if available). [zh-CN: 是否启用 OpenCL 后端 (若可用)]. */
     public boolean useOpenCL = DEFAULT_USE_OPENCL;
     /** Validate initialization with a preset image. [zh-CN: 是否通过预设图片校验初始化]. */
-    public boolean checkModelLoaded = BuildConfig.DEBUG;
+    /** Runs a recognition self-check after loading; OpenCV's release BuildConfig.DEBUG kept it off. */
+    public boolean checkModelLoaded = false;
 
     /** Enable classification (cls). [zh-CN: 启用方向分类 (cls)]. */
     public boolean isClassificationEnabled = false;

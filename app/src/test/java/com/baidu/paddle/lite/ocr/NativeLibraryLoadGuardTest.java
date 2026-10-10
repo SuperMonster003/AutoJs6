@@ -8,7 +8,6 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -17,25 +16,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NativeLibraryLoadGuardTest {
 
     @Test
-    public void loadsDependencyBeforeNativeLibraryOnlyOnce() throws Throwable {
+    public void loadsNativeLibraryOnlyOnce() throws Throwable {
         NativeLibraryLoadGuard guard = new NativeLibraryLoadGuard();
-        List<String> calls = new ArrayList<>();
+        AtomicInteger nativeLoads = new AtomicInteger();
 
-        guard.load(() -> calls.add("opencv"), () -> calls.add("native"));
-        guard.load(() -> fail("dependency reloaded"), () -> fail("native library reloaded"));
+        guard.load(nativeLoads::incrementAndGet);
+        guard.load(() -> fail("native library reloaded"));
 
-        assertEquals(Arrays.asList("opencv", "native"), calls);
+        assertEquals(1, nativeLoads.get());
         assertTrue(guard.isLoaded());
     }
 
     @Test
     public void failedLoadCanBeRetried() throws Throwable {
         NativeLibraryLoadGuard guard = new NativeLibraryLoadGuard();
-        AtomicInteger dependencyLoads = new AtomicInteger();
         AtomicInteger nativeLoads = new AtomicInteger();
 
         try {
-            guard.load(dependencyLoads::incrementAndGet, () -> {
+            guard.load(() -> {
                 nativeLoads.incrementAndGet();
                 throw new UnsatisfiedLinkError("first attempt");
             });
@@ -45,9 +43,8 @@ public class NativeLibraryLoadGuardTest {
         }
 
         assertFalse(guard.isLoaded());
-        guard.load(dependencyLoads::incrementAndGet, nativeLoads::incrementAndGet);
+        guard.load(nativeLoads::incrementAndGet);
 
-        assertEquals(2, dependencyLoads.get());
         assertEquals(2, nativeLoads.get());
         assertTrue(guard.isLoaded());
     }
@@ -55,21 +52,20 @@ public class NativeLibraryLoadGuardTest {
     @Test
     public void concurrentCallWaitsForPublishedSuccess() throws Throwable {
         NativeLibraryLoadGuard guard = new NativeLibraryLoadGuard();
-        AtomicInteger dependencyLoads = new AtomicInteger();
         AtomicInteger nativeLoads = new AtomicInteger();
-        CountDownLatch dependencyEntered = new CountDownLatch(1);
-        CountDownLatch allowDependencyToFinish = new CountDownLatch(1);
+        CountDownLatch loadEntered = new CountDownLatch(1);
+        CountDownLatch allowLoadToFinish = new CountDownLatch(1);
         List<Throwable> failures = new ArrayList<>();
 
         Runnable load = () -> {
             try {
                 guard.load(() -> {
-                    dependencyLoads.incrementAndGet();
-                    dependencyEntered.countDown();
-                    if (!allowDependencyToFinish.await(5, TimeUnit.SECONDS)) {
-                        throw new AssertionError("Timed out waiting to finish dependency load");
+                    nativeLoads.incrementAndGet();
+                    loadEntered.countDown();
+                    if (!allowLoadToFinish.await(5, TimeUnit.SECONDS)) {
+                        throw new AssertionError("Timed out waiting to finish the native load");
                     }
-                }, nativeLoads::incrementAndGet);
+                });
             } catch (Throwable error) {
                 synchronized (failures) {
                     failures.add(error);
@@ -80,16 +76,15 @@ public class NativeLibraryLoadGuardTest {
         Thread first = new Thread(load, "native-load-first");
         Thread second = new Thread(load, "native-load-second");
         first.start();
-        assertTrue(dependencyEntered.await(5, TimeUnit.SECONDS));
+        assertTrue(loadEntered.await(5, TimeUnit.SECONDS));
         second.start();
-        allowDependencyToFinish.countDown();
+        allowLoadToFinish.countDown();
         first.join(5_000);
         second.join(5_000);
 
         assertFalse(first.isAlive());
         assertFalse(second.isAlive());
         assertTrue(failures.toString(), failures.isEmpty());
-        assertEquals(1, dependencyLoads.get());
         assertEquals(1, nativeLoads.get());
         assertTrue(guard.isLoaded());
     }

@@ -2,7 +2,7 @@ package com.baidu.paddle.lite.ocr;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-/** Serializes dependency/native loading and only publishes success after both loads finish. */
+/** Serializes native loading and only publishes success after the load finishes. */
 final class NativeLibraryLoadGuard {
 
     @FunctionalInterface
@@ -13,7 +13,7 @@ final class NativeLibraryLoadGuard {
     private final ReentrantLock lock = new ReentrantLock();
     private volatile boolean loaded;
 
-    void load(Loader dependencyLoader, Loader nativeLibraryLoader) throws Throwable {
+    void load(Loader nativeLibraryLoader) throws Throwable {
         if (loaded) {
             return;
         }
@@ -22,7 +22,6 @@ final class NativeLibraryLoadGuard {
             if (loaded) {
                 return;
             }
-            dependencyLoader.load();
             nativeLibraryLoader.load();
             loaded = true;
         } finally {

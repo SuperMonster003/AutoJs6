@@ -18,7 +18,6 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.transition.Transition
-import com.baidu.paddle.lite.ocr.OCRPredictorNative
 import com.hjq.toast.Toaster
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.runBlocking
@@ -113,9 +112,6 @@ class App : Application(), WorkManagerConfiguration.Provider {
                     // Decodes the active intelligent library while the rest of onCreate runs (roadmap P7.4).
                     // zh-CN: 在 onCreate 其余部分运行期间解码激活的智能库 (Roadmap P7.4).
                     IntelligentColorEngine.preload()
-                }
-                OCRPredictorNative.installOpenCvRuntimeLoader {
-                    OpenCvPluginHost.ensureLoaded(applicationContext)
                 }
                 if (AbstractAutoJs.isInrt) {
                     InrtPref.syncLaunchConfigWithBuild()

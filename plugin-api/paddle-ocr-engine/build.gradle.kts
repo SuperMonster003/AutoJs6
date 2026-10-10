@@ -30,10 +30,6 @@ dependencies {
     // zh-CN: 依赖 AIDL api 类型 (OcrOptions/OcrResult), 以保持宿主/插件 DTO 统一.
     implementation(projects.pluginApi.paddleOcrApi)
 
-    // OpenCV is required at compile time because OCRPredictorNative references OpenCVLoader.
-    // zh-CN: OCRPredictorNative 引用了 OpenCVLoader, 因此需要 OpenCV 编译期依赖.
-    compileOnly(projects.libs.orgOpencvJava480)
-
     implementation(libs.core.ktx)
     implementation(libs.preference.ktx)
 }

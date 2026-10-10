@@ -3,10 +3,7 @@ package com.baidu.paddle.lite.ocr;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import org.opencv.android.OpenCVLoader;
-
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -16,50 +13,22 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class OCRPredictorNative {
 
-    @FunctionalInterface
-    public interface OpenCvRuntimeLoader {
-        void ensureLoaded();
-    }
-
     private static final NativeLibraryLoadGuard libraryLoadGuard = new NativeLibraryLoadGuard();
     private static final ReentrantLock lock = new ReentrantLock();
-    private static volatile OpenCvRuntimeLoader openCvRuntimeLoader;
 
     /**
-     * Installs the host's OpenCV runtime loader before OCR can initialize.
-     * Standalone Paddle OCR plugins may omit this and keep using their bundled OpenCV runtime.
+     * Loads libNative.so. It links a private OpenCV and does not use the org.opencv Java API, so no
+     * OpenCV runtime is loaded first (docs/dev/opencv-ocr-runtime-decoupling-roadmap.md, P2.1).
+     * Older plugin builds that still list libopencv_java4.so in DT_NEEDED resolve it from the
+     * same native library directory through the dynamic linker.
      */
-    public static synchronized void installOpenCvRuntimeLoader(OpenCvRuntimeLoader loader) {
-        Objects.requireNonNull(loader, "loader");
-        if (openCvRuntimeLoader != null) {
-            throw new IllegalStateException("The OpenCV runtime loader has already been installed");
-        }
-        openCvRuntimeLoader = loader;
-    }
-
     public static void loadLibrary() throws RuntimeException {
         try {
-            libraryLoadGuard.load(
-                    OCRPredictorNative::ensureOpenCvRuntimeLoaded,
-                    () -> System.loadLibrary("Native")
-            );
+            libraryLoadGuard.load(() -> System.loadLibrary("Native"));
         } catch (RuntimeException e) {
-            // Preserve actionable host errors, such as a missing or incompatible OpenCV plugin.
             throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(
-                    "Load OCR native runtime failed, please check OpenCV and libNative.so.", e);
-        }
-    }
-
-    private static void ensureOpenCvRuntimeLoaded() {
-        OpenCvRuntimeLoader loader = openCvRuntimeLoader;
-        if (loader != null) {
-            loader.ensureLoaded();
-            return;
-        }
-        if (!OpenCVLoader.initDebug()) {
-            throw new UnsatisfiedLinkError("OpenCVLoader.initDebug() returned false");
+            throw new RuntimeException("Load OCR native runtime failed, please check libNative.so.", e);
         }
     }
 
