@@ -77,6 +77,10 @@
 | D6 | Paddle OCR v4-v6 可在插件进程内保留 Java API 用法 | 这些插件在自身进程中运行, 可继续通过 `org.opencv` Java API 使用自带 OpenCV. 只要它们的 OpenCV 不进入打包 APK (附录 A Q2), 就与 OpenCV 插件无关. |
 | D7 | 来源记录不再引用 OpenCV 插件 | OCR 仓库的来源清单直接记录 OpenCV 上游标签与提交, NDK 版本, 构建选项与逐 ABI 哈希. 历史更新日志中 "来源: AutoJs6-Plugin-OpenCV" 等条目作为历史事实保留. |
 | D8 | OpenCV 插件仓库无需改代码 | 本 Roadmap 不修改 OpenCV 插件的发现契约, 原生库或发布流程. |
+| D9 | 旧版 OCR 插件按字节比对 (附录 A Q1 -> a) | 未解耦的旧版 OCR 插件与 OpenCV 同时勾选时, 两份 `libopencv_java4.so` 字节相同则只保留一份; 内容不同则终止打包, 错误信息列出两个来源并提示升级 OCR 插件. 由 P1.1 的通用同名冲突检测实现. |
+| D10 | 打包 APK 不支持 Paddle OCR v4-v6 (附录 A Q2 -> a) | 打包器的 Paddle OCR 只接受 v3 插件, 不再复制 v4-v6 的模型, ONNX Runtime 与 OpenCV. 只装有 v4-v6 时给出可操作的错误. v4-v6 继续在宿主应用中经 Binder 使用 (D6). |
+| D11 | 私有 OpenCV 取自官方 SDK 静态库 (附录 A Q3 -> a) | OCR 引擎库静态链接 OpenCV 官方 Android SDK 发布包中的静态库 (TBB 并行后端, 无 OpenMP 引用). 各 OCR 仓库自带下载与 SHA-256 校验步骤, 来源清单记录上游版本, 下载地址与哈希. |
+| D12 | 不新增私有 OpenCV 声明 (附录 A Q4 -> 按产物判断) | 打包器直接依据插件 APK 的实际内容区分新旧插件: 是否携带 `libopencv_java4.so`, 引擎库是否 NEEDED 它. 插件端无需新增 meta-data 或 capability. |
 
 ---
 
@@ -100,8 +104,8 @@
 ### P0 基线与证据
 
 - [x] P0.1 记录耦合点 C1-C9 与 Rapid OCR 的 OpenMP 历史. (证据: 本文第 1 节与附录 B, 2026-10-10 代码与 APK 核对)
-- [ ] P0.2 实测 Paddle OCR v4 / v5 / v6 在打包 APK 中的可用性: 分别勾选后检查 ocr 可选引擎与实际识别结果, 确认 C9. 结论回填附录 A Q2.
-- [ ] P0.3 为打包器补充基线测试: 同时勾选 OpenCV 与 Paddle OCR / Rapid OCR 时, 记录产物中 `lib/<abi>/` 条目及其来源, 作为 P1 改动前后的对照.
+- [x] P0.2 实测 Paddle OCR v4 / v5 / v6 在打包 APK 中的可用性: 分别勾选后检查 ocr 可选引擎与实际识别结果, 确认 C9. 结论回填附录 A Q2. (证据: [P0 基线](evidence/opencv-ocr-p0-baseline-20261010.md), Xiaomi 23046RP50C API 35. 三者打包成功但 Paddle OCR 均报 "未找到内置 Paddle OCR 资源"; v3 与 v6 同时启用时打包器选中 v6, 由 D10 一并修复)
+- [x] P0.3 为打包器补充基线测试: 同时勾选 OpenCV 与 Paddle OCR / Rapid OCR 时, 记录产物中 `lib/<abi>/` 条目及其来源, 作为 P1 改动前后的对照. (证据: 同上; 设备测试 `OpenCvOcrPackagingDeviceTest` 与 `tools/opencv-ocr/verify_packaged_ocr.py`, 按字节比对每个条目的来源插件)
 
 验收: C9 有设备证据; P1 前后的打包产物差异可由测试说明.
 
@@ -154,6 +158,8 @@
 ---
 
 ## 附录 A: 待决事项
+
+维护者已于 2026-10-10 拍板: Q1 -> (a), Q2 -> (a), Q3 -> 官方 SDK 静态库且各仓库自带, Q4 -> 不新增声明, 按产物判断. 结论见第 3 节 D9-D12.
 
 | 编号 | 问题 | 选项 | 建议 |
 | --- | --- | --- | --- |
