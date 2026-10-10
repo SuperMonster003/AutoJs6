@@ -63,44 +63,47 @@ class ApkBuilderLibPolicyTest {
             assertTrue(variant.assetsToInclude.first.all { it.startsWith("assets/models/") })
             assertTrue(variant.assetsToInclude.second.isEmpty())
         }
+        // Older releases link the shared OpenCV runtime; it is copied only when libRapidOcr.so needs it.
+        ApkBuildLibrary.RAPID_OCR.requirePlugin().variants.forEach { variant ->
+            assertTrue(variant.optionalLibsToInclude.isEmpty())
+            assertEquals(listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME), variant.neededOnlyLibsToInclude)
+        }
     }
 
     @Test
-    fun paddleOcrUsesPluginVariantsForPackaging() {
+    fun paddleOcrPackagesOnlyTheEmbeddedPpOcrV3Engine() {
         val paddleOcr = ApkBuilder.Lib.PADDLE_OCR
         assertTrue(paddleOcr.isPlugin)
         assertTrue(paddleOcr.libsToInclude.isEmpty())
         assertTrue(paddleOcr.assetDirsToInclude.isEmpty())
 
-        val variants = paddleOcr.toPluginPair().second.variants
-        assertEquals(listOf("v3", "v4", "v5", "v6"), variants.map { it.variant })
-
-        val v3 = variants.first { it.variant == "v3" }
+        // PP-OCRv4 / v5 / v6 plugins run ONNX pipelines in their own processes (roadmap D10).
+        val v3 = paddleOcr.toPluginPair().second.variants.single()
+        assertEquals("v3", v3.variant)
         assertEquals(
             listOf(
                 "libc++_shared.so",
                 "libpaddle_light_api_shared.so",
                 "libNative.so",
-                "libopencv_java4.so",
             ),
             v3.libsToInclude,
         )
         assertEquals(listOf("assets/labels/ppocr_keys_v1.txt", "assets/models/ocr_v3_for_cpu/"), v3.assetsToInclude.first)
         assertEquals(listOf("assets/models/ocr_v3_for_cpu(slim)/"), v3.assetsToInclude.second)
+        assertEquals(
+            listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
+            ApkBuildLibrary.PADDLE_OCR.requirePlugin().variants.single().neededOnlyLibsToInclude,
+        )
+    }
 
-        variants.filter { it.variant in setOf("v4", "v5", "v6") }.forEach { variant ->
-            assertEquals(
-                listOf(
-                    "libc++_shared.so",
-                    "libonnxruntime.so",
-                    "libonnxruntime4j_jni.so",
-                    "libopencv_java4.so",
-                ),
-                variant.libsToInclude,
-            )
-            assertEquals(listOf("assets/models/"), variant.assetsToInclude.first)
-            assertTrue(variant.assetsToInclude.second.isEmpty())
-        }
+    @Test
+    fun paddleOcrPluginSelectionIgnoresNewerUnsupportedVariants() {
+        val supported = ApkBuildLibrary.PADDLE_OCR.requirePlugin().variants
+        val v3 = supported.single()
+        val v6 = ApkPluginLibraryVariant(variant = "v6")
+        // Only matched variants reach the selector; an unmatched v6 can no longer outrank v3.
+        assertEquals("v3-plugin" to v3, ApkBuildLibraryCatalog.selectBestPluginVariantCandidate(listOf("v3-plugin" to v3), supported))
+        assertEquals("v3-plugin", ApkBuildLibraryCatalog.selectBestPluginVariantCandidate(listOf("v6-plugin" to v6, "v3-plugin" to v3), supported)?.first)
     }
 
     @Test

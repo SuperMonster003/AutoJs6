@@ -312,6 +312,10 @@
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">لا يعلن مكوّن APK Builder الإضافي المثبت عن قدرة متوافقة على إنشاء APK. ثبّت إصدارًا من المكوّن الإضافي يطابق إصدار AutoJs6 هذا.</string>
     <string name="error_apk_builder_template_host_version_outside_range">يدعم ملحق APK Builder المثبت رموز versionCode لمضيف AutoJs6 من %1$d إلى %2$d, لكن المضيف الحالي هو %3$d. ثبّت إصدار الملحق المطابق.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">ملحق APK Builder المثبت غير موقع بشهادة رسمية موثوقة, لذلك تم حظر البناء. الحزمة: %1$s. SHA-256: %2$s</string>
+    <string name="error_apk_native_cxx_runtime_too_old">تحتاج %1$s من %2$s إلى بيئة تشغيل C++ أحدث من libc++_shared.so المقدمة من %3$s. عدد الرموز المفقودة %4$d, مثل %5$s. يرجى تحديث الإضافة التي توفر بيئة التشغيل الأقدم.</string>
+    <string name="error_apk_native_library_conflict">تختلف المكتبة الأصلية %1$s بين %2$s و%3$s. يمكن أن يحتوي ملف APK المحزّم على نسخة واحدة فقط. يرجى تحديث إحدى الإضافات أو إلغاء تحديد إحدى المكتبات.</string>
+    <string name="error_apk_native_opencv_runtime_conflict">يأتي %2$s بنسخته الخاصة من %1$s, وهي تختلف عن نسخة إضافة OpenCV. يرجى تحديث %2$s إلى إصدار يربط OpenCV بشكل خاص, أو إلغاء تحديد إحدى المكتبات.</string>
+    <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">تدعم التطبيقات المحزّمة إضافة Paddle OCR (PP-OCRv3) فقط. لا يمكن استخدام إضافات PP-OCRv4 / PP-OCRv5 / PP-OCRv6 إلا داخل AutoJs6 نفسه. يرجى تثبيت إضافة PP-OCRv3 وتفعيلها ثم المحاولة مرة أخرى.</string>
     <string name="error_app_not_installed">التطبيق غير مثبت</string>
     <string name="error_app_not_installed_with_name">التطبيق غير مثبت: \"%s\"</string>
     <string name="error_archive_extraction_failed">تعذر استخراج الأرشيف: %1$s</string>

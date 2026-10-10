@@ -307,6 +307,10 @@
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">已安裝的 APK Builder 插件未宣告相容的 APK 建置能力. 請安裝與當前 AutoJs6 版本匹配的插件建置.</string>
     <string name="error_apk_builder_template_host_version_outside_range">已安裝的 APK 建置器外掛程式支援 AutoJs6 宿主 versionCode %1$d-%2$d, 目前宿主為 %3$d. 請安裝配套的外掛程式版本.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">已安裝的 APK 建置器外掛程式未使用受信任的官方憑證簽署, 已阻止建置. 套件: %1$s. SHA-256: %2$s</string>
+    <string name="error_apk_native_cxx_runtime_too_old">%1$s (來自 %2$s) 需要比 %3$s 提供的 libc++_shared.so 更新的 C++ 運行時. 缺少 %4$d 個符號, 例如 %5$s. 請升級提供舊版運行時的插件.</string>
+    <string name="error_apk_native_library_conflict">原生程式庫 %1$s 在 %2$s 與 %3$s 中的內容不同. 打包 APK 只能包含其中一份. 請升級其中一個插件, 或取消勾選其中一個庫.</string>
+    <string name="error_apk_native_opencv_runtime_conflict">%2$s 自帶的 %1$s 與 OpenCV 插件提供的不同. 請將 %2$s 升級到私有連結 OpenCV 的版本, 或取消勾選其中一個庫.</string>
+    <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">打包應用僅支援 Paddle OCR (PP-OCRv3) 插件. PP-OCRv4 / PP-OCRv5 / PP-OCRv6 插件只能在 AutoJs6 中使用. 請安裝並啓用 PP-OCRv3 插件後重試.</string>
     <string name="error_app_not_installed">應用未安裝</string>
     <string name="error_app_not_installed_with_name">應用未安裝: \"%s\"</string>
     <string name="error_archive_extraction_failed">無法解壓縮檔案: %1$s</string>

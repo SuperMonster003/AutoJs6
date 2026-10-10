@@ -173,15 +173,24 @@ class OpenCvOcrPackagingDeviceTest {
                     step("rapid", function () { return texts(ocr.recognizeText(img, { mode: "rapid" })); });
                     step("auto", function () { return texts(ocr.recognizeText(img)); });
                     step("opencv", function () { return findTemplate(img); });
-                    step("opencvVersion", function () { return String(org.opencv.core.Core.getVersionString()); });
+                    // Rhino cannot catch UnsatisfiedLinkError, so query the version only after OpenCV loaded.
+                    if (result.steps.opencv.ok) {
+                        step("opencvVersion", function () { return String(org.opencv.core.Core.getVersionString()); });
+                    }
+                    // Alternating and concurrent rounds only use the engines that worked on their own.
+                    var available = {
+                        image: result.steps.opencv.ok,
+                        rapid: result.steps.rapid.ok,
+                        paddle: result.steps.paddle.ok,
+                    };
                     step("alternating", function () {
                         var rounds = [];
                         for (var i = 0; i < 3; i++) {
-                            rounds.push({
-                                image: findTemplate(img),
-                                rapid: texts(ocr.recognizeText(img, { mode: "rapid" })).length,
-                                paddle: texts(ocr.recognizeText(img, { mode: "paddle" })).length,
-                            });
+                            var round = {};
+                            if (available.image) round.image = findTemplate(img);
+                            if (available.rapid) round.rapid = texts(ocr.recognizeText(img, { mode: "rapid" }));
+                            if (available.paddle) round.paddle = texts(ocr.recognizeText(img, { mode: "paddle" }));
+                            rounds.push(round);
                         }
                         return rounds;
                     });
@@ -195,11 +204,10 @@ class OpenCvOcrPackagingDeviceTest {
                                 }
                             });
                         }
-                        var workers = [
-                            loop("image", function () { findTemplate(img); }),
-                            loop("rapid", function () { ocr.recognizeText(img, { mode: "rapid" }); }),
-                            loop("paddle", function () { ocr.recognizeText(img, { mode: "paddle" }); }),
-                        ];
+                        var workers = [];
+                        if (available.image) workers.push(loop("image", function () { findTemplate(img); }));
+                        if (available.rapid) workers.push(loop("rapid", function () { ocr.recognizeText(img, { mode: "rapid" }); }));
+                        if (available.paddle) workers.push(loop("paddle", function () { ocr.recognizeText(img, { mode: "paddle" }); }));
                         workers.forEach(function (worker) { worker.join(300000); });
                         var list = [];
                         for (var i = 0; i < errors.size(); i++) list.push(String(errors.get(i)));

@@ -310,6 +310,10 @@
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">Установленный плагин APK Builder не объявляет совместимую возможность сборки APK. Установите сборку плагина, соответствующую этой версии AutoJs6.</string>
     <string name="error_apk_builder_template_host_version_outside_range">Установленный плагин APK Builder поддерживает versionCode хоста AutoJs6 %1$d-%2$d, но текущий хост имеет код %3$d. Установите соответствующую версию плагина.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">Установленный плагин APK Builder не подписан доверенным официальным сертификатом, поэтому сборка заблокирована. Пакет: %1$s. SHA-256: %2$s</string>
+    <string name="error_apk_native_cxx_runtime_too_old">%1$s из %2$s требует более новой среды выполнения C++, чем libc++_shared.so из %3$s. Отсутствует символов: %4$d, например %5$s. Обновите плагин, который предоставляет более старую среду выполнения.</string>
+    <string name="error_apk_native_library_conflict">Нативная библиотека %1$s различается в %2$s и %3$s. Упакованный APK может содержать только одну копию. Обновите один из плагинов или снимите выбор с одной из библиотек.</string>
+    <string name="error_apk_native_opencv_runtime_conflict">%2$s содержит собственную %1$s, которая отличается от копии плагина OpenCV. Обновите %2$s до версии с приватно связанной OpenCV или снимите выбор с одной из библиотек.</string>
+    <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">Упакованные приложения поддерживают только плагин Paddle OCR (PP-OCRv3). Плагины PP-OCRv4 / PP-OCRv5 / PP-OCRv6 можно использовать только в самом AutoJs6. Установите и включите плагин PP-OCRv3 и повторите попытку.</string>
     <string name="error_app_not_installed">Приложение не установлено</string>
     <string name="error_app_not_installed_with_name">Приложение не установлено: \"%s\"</string>
     <string name="error_archive_extraction_failed">Не удалось извлечь архив: %1$s</string>

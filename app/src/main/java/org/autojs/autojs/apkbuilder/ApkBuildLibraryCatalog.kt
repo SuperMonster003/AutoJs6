@@ -105,6 +105,8 @@ enum class ApkBuildLibrary(
             onServiceConnected = { binder: IBinder ->
                 IOcrPlugin.Stub.asInterface(binder).info
             },
+            // Packaged applications run the embedded Paddle Lite engine only. PP-OCRv4 / v5 / v6
+            // plugins use ONNX pipelines that exist in their own processes, so they are not packaged.
             variants = listOf(
                 ApkPluginLibraryVariant(
                     variant = "v3",
@@ -118,38 +120,8 @@ enum class ApkBuildLibrary(
                         "libc++_shared.so",
                         "libpaddle_light_api_shared.so",
                         "libNative.so",
-                        "libopencv_java4.so",
                     ),
-                ),
-                ApkPluginLibraryVariant(
-                    variant = "v4",
-                    assetsToInclude = listOf("assets/models/") to emptyList(),
-                    libsToInclude = listOf(
-                        "libc++_shared.so",
-                        "libonnxruntime.so",
-                        "libonnxruntime4j_jni.so",
-                        "libopencv_java4.so",
-                    ),
-                ),
-                ApkPluginLibraryVariant(
-                    variant = "v5",
-                    assetsToInclude = listOf("assets/models/") to emptyList(),
-                    libsToInclude = listOf(
-                        "libc++_shared.so",
-                        "libonnxruntime.so",
-                        "libonnxruntime4j_jni.so",
-                        "libopencv_java4.so",
-                    ),
-                ),
-                ApkPluginLibraryVariant(
-                    variant = "v6",
-                    assetsToInclude = listOf("assets/models/") to emptyList(),
-                    libsToInclude = listOf(
-                        "libc++_shared.so",
-                        "libonnxruntime.so",
-                        "libonnxruntime4j_jni.so",
-                        "libopencv_java4.so",
-                    ),
+                    neededOnlyLibsToInclude = listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
                 ),
             ),
         ),
@@ -177,7 +149,7 @@ enum class ApkBuildLibrary(
                         "libRapidOcr.so",
                         "libonnxruntime.so",
                     ),
-                    optionalLibsToInclude = listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
+                    neededOnlyLibsToInclude = listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
                 ),
                 ApkPluginLibraryVariant(
                     variant = "pp-ocrv6",
@@ -191,7 +163,7 @@ enum class ApkBuildLibrary(
                         "libRapidOcr.so",
                         "libonnxruntime.so",
                     ),
-                    optionalLibsToInclude = listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
+                    neededOnlyLibsToInclude = listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
                 ),
             ),
         ),
@@ -331,6 +303,12 @@ data class ApkPluginLibraryVariant(
     val libsToInclude: List<String> = emptyList(),
     /** Present in newer plugin releases; older releases remain valid without these payloads. */
     val optionalLibsToInclude: List<String> = emptyList(),
+    /**
+     * Copied only when another library packaged from the same plugin lists it in DT_NEEDED.
+     * Older OCR plugins link the shared OpenCV runtime this way; decoupled releases link a
+     * private static OpenCV and need no such file (opencv-ocr-runtime-decoupling-roadmap.md, D12).
+     */
+    val neededOnlyLibsToInclude: List<String> = emptyList(),
 )
 
 object ApkBuildLibraryCatalog {

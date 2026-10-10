@@ -6,16 +6,20 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import androidx.core.content.pm.PackageInfoCompat
 import com.google.gson.GsonBuilder
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost
+import org.autojs.autojs.core.plugin.nativealign.ElfDynamicInfo
+import org.autojs.autojs.core.plugin.opencv.BundledOpenCvRuntime
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.plugin.typescript.TypeScriptApkBuildCompiler
 import org.autojs.autojs.core.plugin.typescript.TypeScriptApkBuildPlan
@@ -66,11 +70,12 @@ object RemoteApkBuildRequestPreparer {
     private val remoteConfigGson = GsonBuilder()
         .setPrettyPrinting()
         .create()
+    private const val HOST_SOURCE_LABEL = "AutoJs6"
     private val NATIVE_LIBRARY_ENTRY_ROOTS = listOf("lib", "libs")
-    private val PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES = setOf("libc++_shared.so")
     private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
 
     private data class SelectedPluginArtifact(
+        val library: ApkBuildLibrary,
         val serviceInfo: ServiceInfo,
         val variant: ApkPluginLibraryVariant,
     )
@@ -628,44 +633,64 @@ object RemoteApkBuildRequestPreparer {
             return null
         }
 
-        val appInfo = getApplicationInfoCompat(context.packageManager, context.packageName)
-        val apkPaths = buildList {
-            add(appInfo.sourceDir)
-            appInfo.splitSourceDirs?.forEach { add(it) }
-        }.distinct()
-        val nativeLibraryDir = File(appInfo.nativeLibraryDir.orEmpty()).takeIf { it.isDirectory }
+        val host = installedCode(
+            context,
+            context.packageName,
+            PackagedNativeLibraryPolicy.Source(
+                label = HOST_SOURCE_LABEL,
+                packageName = context.packageName,
+                versionName = BuildConfig.VERSION_NAME,
+                isHost = true,
+            ),
+        )
         val archiveFile = File(cacheDir, "native-libraries-${System.nanoTime()}.zip")
-        var wroteAny = false
-        val writtenEntries = linkedSetOf<String>()
-
         try {
-            writeZipFile(archiveFile, Deflater.BEST_SPEED) { zip ->
+            NativeStaging(File(cacheDir, "native-staging-${System.nanoTime()}")).use { staging ->
                 targetAbis.forEach { abi ->
-                    ensureNotCancelled(cancelSignal)
-                    val abiCandidates = abiCandidates(abi)
                     requiredLibs.forEach { soName ->
                         ensureNotCancelled(cancelSignal)
-                        val entryName = "lib/$abi/$soName"
-                        if (copyFirstMatchedSoToZip(zip, writtenEntries, entryName, apkPaths, nativeLibraryDir, abiCandidates, soName, cancelSignal, progressListener)) {
-                            wroteAny = true
-                        }
+                        stageNativeLibrary(staging, host, abi, soName, cancelSignal, progressListener)
                     }
                 }
                 pluginArtifacts.forEach { artifact ->
-                    ensureNotCancelled(cancelSignal)
-                    if (copyPluginArtifactToZip(zip, writtenEntries, context, targetAbis, apkPaths, nativeLibraryDir, artifact, cancelSignal, progressListener)) {
+                    stagePluginNativeLibraries(context, staging, host, artifact, targetAbis, cancelSignal, progressListener)
+                }
+                stageHostCxxRuntimeForConsumers(staging, host, targetAbis, cancelSignal, progressListener)
+
+                notifyProgress(progressListener, "Checking native libraries", null)
+                val selected = try {
+                    PackagedNativeLibraryPolicy.resolve(staging.candidates, staging::dynamicInfo)
+                } catch (failure: PackagedNativeLibraryPolicy.Failure) {
+                    throw IOException(describeNativeLibraryFailure(context, failure), failure)
+                }
+
+                var wroteAny = false
+                writeZipFile(archiveFile, Deflater.BEST_SPEED) { zip ->
+                    selected.forEach { library ->
+                        ensureNotCancelled(cancelSignal)
+                        notifyProgress(progressListener, "Copying native libraries", library.entryName)
+                        addFile(zip, library.file, library.entryName, cancelSignal)
                         wroteAny = true
                     }
+                    val writtenAssets = linkedSetOf<String>()
+                    pluginArtifacts.forEach { artifact ->
+                        ensureNotCancelled(cancelSignal)
+                        if (copyPluginArtifactAssetsToZip(zip, writtenAssets, context, artifact, cancelSignal, progressListener)) {
+                            wroteAny = true
+                        }
+                    }
+                    bundledOpenCvRuntimeRecord(context, pluginArtifacts, selected)?.let { record ->
+                        addBytes(zip, BundledOpenCvRuntime.encode(record), "assets/${BundledOpenCvRuntime.ASSET_PATH}")
+                    }
+                }
+                return archiveFile.takeIf { wroteAny && it.length() > 0L } ?: run {
+                    deletePreparedFile(archiveFile)
+                    null
                 }
             }
         } catch (error: Throwable) {
             deletePreparedFile(archiveFile)
             throw error
-        }
-
-        return archiveFile.takeIf { wroteAny && it.length() > 0L } ?: run {
-            deletePreparedFile(archiveFile)
-            null
         }
     }
 
@@ -677,136 +702,248 @@ object RemoteApkBuildRequestPreparer {
             .distinct()
     }
 
-    private fun copyFirstMatchedSoToZip(
-        zip: ZipOutputStream,
-        writtenEntries: MutableSet<String>,
-        entryName: String,
-        apkPaths: List<String>,
-        nativeLibraryDir: File?,
-        abiCandidates: List<String>,
+    /** Native libraries of an installed package: APK entries first, then the extracted directory. */
+    private class InstalledCode(
+        val source: PackagedNativeLibraryPolicy.Source,
+        val apkPaths: List<String>,
+        val nativeLibraryDir: File?,
+    )
+
+    /** Staged copies of every candidate library; deleted once the archive is written. */
+    private class NativeStaging(private val root: File) : Closeable {
+        private var sequence = 0
+        private val dynamicInfoCache = HashMap<File, ElfDynamicInfo?>()
+        val candidates = mutableListOf<PackagedNativeLibraryPolicy.Candidate>()
+
+        init {
+            if (!root.isDirectory && !root.mkdirs()) {
+                throw IOException("Failed to create native library staging directory: ${root.path}")
+            }
+        }
+
+        fun newFile(): File = File(root, "${sequence++}.so")
+
+        /** Unreadable or non-ELF files yield null and are not checked against the C++ runtime. */
+        fun dynamicInfo(file: File): ElfDynamicInfo? = dynamicInfoCache.getOrPut(file) {
+            runCatching { ElfDynamicInfo.read(file) }.getOrNull()
+        }
+
+        fun hasCandidate(abi: String, name: String, source: PackagedNativeLibraryPolicy.Source? = null): Boolean =
+            candidates.any { it.abi == abi && it.name == name && (source == null || it.source == source) }
+
+        override fun close() {
+            root.deleteRecursively()
+        }
+    }
+
+    private fun installedCode(
+        context: Context,
+        packageName: String,
+        source: PackagedNativeLibraryPolicy.Source,
+    ): InstalledCode {
+        val appInfo = getApplicationInfoCompat(context.packageManager, packageName)
+        return InstalledCode(
+            source = source,
+            apkPaths = buildList {
+                add(appInfo.sourceDir)
+                appInfo.splitSourceDirs?.forEach { add(it) }
+            }.distinct(),
+            nativeLibraryDir = File(appInfo.nativeLibraryDir.orEmpty()).takeIf { it.isDirectory },
+        )
+    }
+
+    /** Copies [soName] for [abi] from [code] into the staging directory; returns false when absent. */
+    private fun stageNativeLibrary(
+        staging: NativeStaging,
+        code: InstalledCode,
+        abi: String,
         soName: String,
         cancelSignal: AtomicBoolean?,
         progressListener: ((ApkBuildProgress) -> Unit)?,
     ): Boolean {
-        if (entryName in writtenEntries) {
+        if (staging.hasCandidate(abi, soName, code.source)) {
             return true
         }
-        apkPaths.forEach { apkPath ->
+        val abiCandidates = abiCandidates(abi)
+        val target = staging.newFile()
+        val sha256 = code.apkPaths.firstNotNullOfOrNull { apkPath ->
             ensureNotCancelled(cancelSignal)
-            val copied = try {
+            try {
                 ZipFile(apkPath).use { apk ->
-                    abiCandidates.firstNotNullOfOrNull { abi ->
-                        ensureNotCancelled(cancelSignal)
-                        findNativeLibraryEntry(apk, abi, soName)
-                    }?.let { entry ->
-                        notifyProgress(progressListener, "Copying native libraries", entryName)
-                        zip.putNextEntry(ZipEntry(entryName))
-                        apk.getInputStream(entry).use { input -> copyStreamWithCancel(input, zip, cancelSignal) }
-                        zip.closeEntry()
-                        writtenEntries += entryName
-                        true
-                    } ?: false
+                    abiCandidates.firstNotNullOfOrNull { candidate -> findNativeLibraryEntry(apk, candidate, soName) }
+                        ?.let { entry -> apk.getInputStream(entry).use { input -> copyAndHash(input, target, cancelSignal) } }
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Throwable) {
-                false
+                null
             }
-            if (copied) {
-                return true
-            }
-        }
-
-        val nativeFile = nativeLibraryDir
+        } ?: code.nativeLibraryDir
             ?.takeIf { nativeDirMatchesAbi(it, abiCandidates) }
             ?.resolve(soName)
             ?.takeIf { it.isFile }
-            ?: return false
-
-        notifyProgress(progressListener, "Copying native libraries", entryName)
-        zip.putNextEntry(ZipEntry(entryName))
-        FileInputStream(nativeFile).use { input -> copyStreamWithCancel(input, zip, cancelSignal) }
-        zip.closeEntry()
-        writtenEntries += entryName
+            ?.let { file -> FileInputStream(file).use { input -> copyAndHash(input, target, cancelSignal) } }
+        if (sha256 == null) {
+            target.delete()
+            return false
+        }
+        notifyProgress(progressListener, "Staging native libraries", "${code.source.label}: lib/$abi/$soName")
+        staging.candidates += PackagedNativeLibraryPolicy.Candidate(abi, soName, code.source, sha256, target)
         return true
     }
 
-    private fun copyPluginArtifactToZip(
+    private fun stagePluginNativeLibraries(
+        context: Context,
+        staging: NativeStaging,
+        host: InstalledCode,
+        artifact: SelectedPluginArtifact,
+        targetAbis: List<String>,
+        cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
+    ) {
+        val packageName = artifact.serviceInfo.packageName
+        val plugin = installedCode(
+            context,
+            packageName,
+            PackagedNativeLibraryPolicy.Source(
+                label = artifact.library.label,
+                packageName = packageName,
+                versionName = getPackageVersionName(context.packageManager, packageName),
+            ),
+        )
+        val variant = artifact.variant
+        val missingNativeLibraries = mutableListOf<String>()
+        targetAbis.forEach { abi ->
+            ensureNotCancelled(cancelSignal)
+            val stagedFromPlugin = mutableListOf<File>()
+            (variant.libsToInclude + variant.optionalLibsToInclude).distinct().forEach { soName ->
+                ensureNotCancelled(cancelSignal)
+                val stagedPluginCopy = stageNativeLibrary(staging, plugin, abi, soName, cancelSignal, progressListener)
+                if (stagedPluginCopy) {
+                    stagedFromPlugin += staging.candidates.last { it.abi == abi && it.name == soName && it.source == plugin.source }.file
+                }
+                if (soName == PackagedNativeLibraryPolicy.CXX_SHARED) {
+                    // The host runtime is always a candidate; the newest one is packaged (D5).
+                    val stagedHostCopy = stageNativeLibrary(staging, host, abi, soName, cancelSignal, progressListener)
+                    if (!stagedPluginCopy && !stagedHostCopy) {
+                        missingNativeLibraries += "$abi/$soName"
+                    }
+                } else if (!stagedPluginCopy && soName in variant.libsToInclude) {
+                    missingNativeLibraries += "$abi/$soName"
+                }
+            }
+            variant.neededOnlyLibsToInclude.forEach { soName ->
+                ensureNotCancelled(cancelSignal)
+                val needed = stagedFromPlugin.any { file -> soName in staging.dynamicInfo(file)?.needed.orEmpty() }
+                if (needed && !stageNativeLibrary(staging, plugin, abi, soName, cancelSignal, progressListener)) {
+                    missingNativeLibraries += "$abi/$soName"
+                }
+            }
+        }
+        if (missingNativeLibraries.isNotEmpty()) {
+            throw IOException(
+                context.getString(
+                    R.string.error_plugin_apk_does_not_contain_required_native_libraries,
+                    missingNativeLibraries.joinToString(", "),
+                )
+            )
+        }
+    }
+
+    /**
+     * Packages the host C++ runtime for ABIs whose libraries need one but whose plugins do not
+     * list it, so the runtime check covers every packaged library.
+     */
+    private fun stageHostCxxRuntimeForConsumers(
+        staging: NativeStaging,
+        host: InstalledCode,
+        targetAbis: List<String>,
+        cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
+    ) {
+        targetAbis.forEach { abi ->
+            ensureNotCancelled(cancelSignal)
+            if (staging.hasCandidate(abi, PackagedNativeLibraryPolicy.CXX_SHARED)) return@forEach
+            val needsRuntime = staging.candidates.filter { it.abi == abi }.any { candidate ->
+                PackagedNativeLibraryPolicy.CXX_SHARED in staging.dynamicInfo(candidate.file)?.needed.orEmpty()
+            }
+            if (needsRuntime) {
+                stageNativeLibrary(staging, host, abi, PackagedNativeLibraryPolicy.CXX_SHARED, cancelSignal, progressListener)
+            }
+        }
+    }
+
+    private fun describeNativeLibraryFailure(context: Context, failure: PackagedNativeLibraryPolicy.Failure): String =
+        when (failure) {
+            is PackagedNativeLibraryPolicy.Failure.Conflict -> {
+                val otherThanOpenCv = listOf(failure.first, failure.second)
+                    .singleOrNull { it.packageName != OpenCvPluginContract.DEFAULT_PACKAGE_NAME }
+                if (failure.entryName.endsWith("/${OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME}") && otherThanOpenCv != null) {
+                    // D9: an older OCR plugin still ships the shared OpenCV runtime with different bytes.
+                    context.getString(
+                        R.string.error_apk_native_opencv_runtime_conflict,
+                        failure.entryName,
+                        otherThanOpenCv.description,
+                    )
+                } else {
+                    context.getString(
+                        R.string.error_apk_native_library_conflict,
+                        failure.entryName,
+                        failure.first.description,
+                        failure.second.description,
+                    )
+                }
+            }
+            is PackagedNativeLibraryPolicy.Failure.CxxRuntimeTooOld -> context.getString(
+                R.string.error_apk_native_cxx_runtime_too_old,
+                failure.library.entryName,
+                failure.library.sources.first().description,
+                failure.runtime.sources.first().description,
+                failure.missingSymbols.size,
+                failure.missingSymbols.first(),
+            )
+        }
+
+    /** P1.5: records the OpenCV plugin's runtime so packaged apps reject same-named copies. */
+    private fun bundledOpenCvRuntimeRecord(
+        context: Context,
+        pluginArtifacts: List<SelectedPluginArtifact>,
+        selected: List<PackagedNativeLibraryPolicy.Selected>,
+    ): BundledOpenCvRuntime.Record? {
+        val artifact = pluginArtifacts.firstOrNull { it.library == ApkBuildLibrary.OPENCV } ?: return null
+        val packageName = artifact.serviceInfo.packageName
+        val hashes = selected
+            .filter { library ->
+                library.name == OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME &&
+                        library.sources.any { it.packageName == packageName }
+            }
+            .associate { it.abi to it.sha256 }
+            .takeIf { it.isNotEmpty() }
+            ?: return null
+        val packageInfo = runCatching { getPackageInfoCompat(context.packageManager, packageName) }.getOrNull()
+        return BundledOpenCvRuntime.Record(
+            library = OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME,
+            packageName = packageName,
+            versionName = packageInfo?.versionName,
+            versionCode = packageInfo?.let(PackageInfoCompat::getLongVersionCode),
+            sha256ByAbi = hashes,
+        )
+    }
+
+    private fun copyPluginArtifactAssetsToZip(
         zip: ZipOutputStream,
         writtenEntries: MutableSet<String>,
         context: Context,
-        targetAbis: List<String>,
-        hostApkPaths: List<String>,
-        hostNativeLibraryDir: File?,
         artifact: SelectedPluginArtifact,
         cancelSignal: AtomicBoolean?,
         progressListener: ((ApkBuildProgress) -> Unit)?,
     ): Boolean {
-        val appInfo = getApplicationInfoCompat(context.packageManager, artifact.serviceInfo.packageName)
-        val pluginApkPaths = buildList {
-            add(appInfo.sourceDir)
-            appInfo.splitSourceDirs?.forEach { add(it) }
-        }.distinct()
-        val pluginNativeLibraryDir = File(appInfo.nativeLibraryDir.orEmpty()).takeIf { it.isDirectory }
+        val pluginApkPaths = installedCode(
+            context,
+            artifact.serviceInfo.packageName,
+            PackagedNativeLibraryPolicy.Source(artifact.library.label, artifact.serviceInfo.packageName),
+        ).apkPaths
         var wroteAny = false
-
-        val missingNativeLibraries = mutableListOf<Pair<String, String>>()
-        targetAbis.forEach { abi ->
-            ensureNotCancelled(cancelSignal)
-            val abiCandidates = abiCandidates(abi)
-            (artifact.variant.libsToInclude + artifact.variant.optionalLibsToInclude).distinct().forEach { soName ->
-                ensureNotCancelled(cancelSignal)
-                val entryName = "lib/$abi/$soName"
-                // Keep local and remote builds on the template's single libc++ runtime. Use a
-                // plugin copy only if the template does not provide the requested ABI.
-                val copied = if (soName in PLUGIN_HOST_PREFERRED_NATIVE_LIB_NAMES) {
-                    copyFirstMatchedSoToZip(
-                        zip = zip,
-                        writtenEntries = writtenEntries,
-                        entryName = entryName,
-                        apkPaths = hostApkPaths,
-                        nativeLibraryDir = hostNativeLibraryDir,
-                        abiCandidates = abiCandidates,
-                        soName = soName,
-                        cancelSignal = cancelSignal,
-                        progressListener = progressListener,
-                    ) || copyFirstMatchedSoToZip(
-                        zip = zip,
-                        writtenEntries = writtenEntries,
-                        entryName = entryName,
-                        apkPaths = pluginApkPaths,
-                        nativeLibraryDir = pluginNativeLibraryDir,
-                        abiCandidates = abiCandidates,
-                        soName = soName,
-                        cancelSignal = cancelSignal,
-                        progressListener = progressListener,
-                    )
-                } else {
-                    copyFirstMatchedSoToZip(
-                        zip = zip,
-                        writtenEntries = writtenEntries,
-                        entryName = entryName,
-                        apkPaths = pluginApkPaths,
-                        nativeLibraryDir = pluginNativeLibraryDir,
-                        abiCandidates = abiCandidates,
-                        soName = soName,
-                        cancelSignal = cancelSignal,
-                        progressListener = progressListener,
-                    )
-                }
-                if (copied) {
-                    wroteAny = true
-                } else if (soName in artifact.variant.libsToInclude) {
-                    missingNativeLibraries += abi to soName
-                }
-            }
-        }
-
-        if (missingNativeLibraries.isNotEmpty()) {
-            val detail = missingNativeLibraries.joinToString(", ") { (abi, soName) -> "$abi/$soName" }
-            throw IOException(context.getString(R.string.error_plugin_apk_does_not_contain_required_native_libraries, detail))
-        }
-
         val (requiredAssets, optionalAssets) = artifact.variant.assetsToInclude
         val missingRequiredAssets = mutableListOf<String>()
         requiredAssets.forEach { prefix ->
@@ -895,23 +1032,8 @@ object RemoteApkBuildRequestPreparer {
             notifyProgress(progressListener, "Resolving plugin artifacts", lib.label)
             val (serviceInfo, variant) = selectPluginServiceOrThrow(context, lib, lib.requirePlugin(), cancelSignal, progressListener)
             notifyProgress(progressListener, "Selected plugin", "${lib.label}: ${serviceInfo.packageName} (${variant.variant.orEmpty()})")
-            val packagedVariant = if (
-                lib != ApkBuildLibrary.OPENCV &&
-                ApkBuildLibrary.OPENCV.label in selectedLabels
-            ) {
-                // The dedicated OpenCV plugin is the single owner of this JNI runtime.
-                variant.copy(
-                    libsToInclude = variant.libsToInclude.filterNot {
-                        it == OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME
-                    },
-                    optionalLibsToInclude = variant.optionalLibsToInclude.filterNot {
-                        it == OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME
-                    },
-                )
-            } else {
-                variant
-            }
-            SelectedPluginArtifact(serviceInfo, packagedVariant)
+            // Every plugin keeps its own payload; same-named libraries are resolved by content (P1.1).
+            SelectedPluginArtifact(lib, serviceInfo, variant)
         }
     }
 
@@ -951,6 +1073,10 @@ object RemoteApkBuildRequestPreparer {
             }
         }
 
+        if (lib == ApkBuildLibrary.PADDLE_OCR) {
+            // D10: packaged applications only run the embedded PP-OCRv3 (Paddle Lite) engine.
+            throw IOException(context.getString(R.string.error_apk_paddle_ocr_requires_pp_ocrv3_plugin))
+        }
         val variantList = plugin.variants.joinToString("/") { it.variant.orEmpty() }
         throw IOException(context.getString(R.string.error_no_available_enabled_plugin_variants_found, lib.label, variantList))
     }
@@ -1174,6 +1300,33 @@ object RemoteApkBuildRequestPreparer {
             add(abi)
             ABI_ALIASES[abi]?.let(::add)
         }.distinct()
+    }
+
+    private fun getPackageInfoCompat(pm: PackageManager, packageName: String): PackageInfo =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            pm.getPackageInfo(packageName, 0)
+        }
+
+    private fun getPackageVersionName(pm: PackageManager, packageName: String): String? =
+        runCatching { getPackageInfoCompat(pm, packageName).versionName }.getOrNull()
+
+    /** Copies [input] to [target] and returns its SHA-256. */
+    private fun copyAndHash(input: InputStream, target: File, cancelSignal: AtomicBoolean?): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        FileOutputStream(target, false).use { output ->
+            val buffer = ByteArray(BUFFER_SIZE)
+            while (true) {
+                ensureNotCancelled(cancelSignal)
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+                output.write(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
 
     private fun getApplicationInfoCompat(pm: PackageManager, packageName: String): ApplicationInfo {

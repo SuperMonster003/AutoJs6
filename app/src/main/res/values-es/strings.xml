@@ -310,6 +310,10 @@
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">El complemento APK Builder instalado no declara una capacidad de compilación de APK compatible. Instala una compilación del complemento que coincida con esta versión de AutoJs6.</string>
     <string name="error_apk_builder_template_host_version_outside_range">El complemento APK Builder instalado admite los versionCode de host de AutoJs6 %1$d-%2$d, pero el host actual es %3$d. Instala la versión de complemento correspondiente.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">El complemento APK Builder instalado no está firmado con un certificado oficial de confianza, por lo que se bloqueó la compilación. Paquete: %1$s. SHA-256: %2$s</string>
+    <string name="error_apk_native_cxx_runtime_too_old">%1$s de %2$s necesita un entorno de ejecución de C++ más reciente que libc++_shared.so de %3$s. Faltan %4$d símbolos, como %5$s. Actualice el plugin que proporciona el entorno de ejecución más antiguo.</string>
+    <string name="error_apk_native_library_conflict">La biblioteca nativa %1$s difiere entre %2$s y %3$s. Un APK empaquetado solo puede contener una copia. Actualice uno de los plugins o desmarque una de las bibliotecas.</string>
+    <string name="error_apk_native_opencv_runtime_conflict">%2$s incluye su propio %1$s, que difiere de la copia del plugin OpenCV. Actualice %2$s a una versión que enlace OpenCV de forma privada, o desmarque una de las bibliotecas.</string>
+    <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">Las aplicaciones empaquetadas solo admiten el plugin Paddle OCR (PP-OCRv3). Los plugins PP-OCRv4 / PP-OCRv5 / PP-OCRv6 solo se pueden usar en AutoJs6. Instale y habilite el plugin PP-OCRv3 e inténtelo de nuevo.</string>
     <string name="error_app_not_installed">La aplicación no está instalada</string>
     <string name="error_app_not_installed_with_name">La aplicación no está instalada: \"%s\"</string>
     <string name="error_archive_extraction_failed">No se pudo extraer el archivo: %1$s</string>

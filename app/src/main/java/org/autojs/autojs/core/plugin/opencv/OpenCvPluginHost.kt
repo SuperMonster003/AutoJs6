@@ -22,7 +22,9 @@ import org.autojs.autojs6.R
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import org.opencv.core.Core
 import java.io.File
+import java.io.IOException
 import java.util.concurrent.Executors
+import java.util.zip.ZipFile
 import java.util.concurrent.atomic.AtomicBoolean
 
 /** Loads the version-locked OpenCV JNI runtime supplied by the official plugin. */
@@ -267,7 +269,20 @@ object OpenCvPluginHost {
         }
     }
 
+    /**
+     * Loads the OpenCV runtime of a packaged APK only when the APK builder recorded it as the
+     * OpenCV plugin's copy. A same-named library that another plugin brought in is ignored.
+     */
     private fun tryLoadBundledRuntime(context: Context): LoadedRuntime? {
+        val record = readBundledRuntimeRecord(context) ?: return null
+        val actualSha256 = bundledLibrarySha256(context) ?: return null
+        if (!record.matches(actualSha256)) {
+            throw OpenCvPluginLoadException(
+                OpenCvPluginLoadError.BUNDLED_RUNTIME_UNVERIFIED,
+                "Bundled ${OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME} (SHA-256 $actualSha256) does not match " +
+                        "the OpenCV runtime packaged from ${record.packageName} ${record.versionName.orEmpty()}".trim(),
+            )
+        }
         val library = File(context.applicationInfo.nativeLibraryDir, OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME)
         val nativeMinLoadAlign = library.takeIf(File::isFile)?.let { validateNativeAlignment(context, it, context.packageName) }
         try {
@@ -285,6 +300,34 @@ object OpenCvPluginHost {
         return LoadedRuntime(Origin.BUNDLED, actualVersion, nativeMinLoadAlign = nativeMinLoadAlign).also {
             Log.i(TAG, "Loaded bundled OpenCV ${it.openCvVersion}")
         }
+    }
+
+    private fun readBundledRuntimeRecord(context: Context): BundledOpenCvRuntime.Record? = try {
+        context.assets.open(BundledOpenCvRuntime.ASSET_PATH).use { BundledOpenCvRuntime.decode(it.readBytes()) }
+    } catch (_: IOException) {
+        null
+    }
+
+    /** Hashes the library that System.loadLibrary resolves: the extracted file or the APK entry. */
+    private fun bundledLibrarySha256(context: Context): String? {
+        val name = OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME
+        File(context.applicationInfo.nativeLibraryDir, name).takeIf(File::isFile)?.let { extracted ->
+            return extracted.inputStream().use(BundledOpenCvRuntime::sha256)
+        }
+        val apkPaths = buildList {
+            context.applicationInfo.sourceDir?.let(::add)
+            context.applicationInfo.splitSourceDirs?.let(::addAll)
+        }
+        processSupportedAbis().forEach { abi ->
+            apkPaths.forEach { apkPath ->
+                runCatching {
+                    ZipFile(apkPath).use { apk ->
+                        apk.getEntry("lib/$abi/$name")?.let { entry -> apk.getInputStream(entry).use(BundledOpenCvRuntime::sha256) }
+                    }
+                }.getOrNull()?.let { return it }
+            }
+        }
+        return null
     }
 
     private fun validateNativeAlignment(context: Context, file: File, packageName: String): Long = try {
@@ -515,6 +558,7 @@ enum class OpenCvPluginLoadError {
     NATIVE_LIBRARY_PAGE_ALIGNMENT_UNSUPPORTED,
     RUNTIME_VERSION_MISMATCH,
     BUNDLED_RUNTIME_MISSING,
+    BUNDLED_RUNTIME_UNVERIFIED,
 }
 
 class OpenCvPluginLoadException(

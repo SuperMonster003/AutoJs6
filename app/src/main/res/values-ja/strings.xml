@@ -311,6 +311,10 @@
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">インストール済みの APK Builder プラグインは, 互換性のある APK ビルド機能を宣言していません. この AutoJs6 バージョンに対応するプラグインビルドをインストールしてください.</string>
     <string name="error_apk_builder_template_host_version_outside_range">インストール済みの APK Builder プラグインが対応する AutoJs6 ホスト versionCode は %1$d-%2$d ですが, 現在のホストは %3$d です. 対応するプラグイン版をインストールしてください.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">インストール済みの APK Builder プラグインは信頼された公式証明書で署名されていないため, ビルドをブロックしました. パッケージ: %1$s. SHA-256: %2$s</string>
+    <string name="error_apk_native_cxx_runtime_too_old">%2$s の %1$s には %3$s の libc++_shared.so より新しい C++ ランタイムが必要です. %4$d 個のシンボルが見つかりません (例: %5$s). 古いランタイムを提供するプラグインを更新してください.</string>
+    <string name="error_apk_native_library_conflict">ネイティブライブラリ %1$s の内容が %2$s と %3$s で異なります. パッケージ化された APK に含められるのは 1 つだけです. いずれかのプラグインを更新するか, いずれかのライブラリの選択を解除してください.</string>
+    <string name="error_apk_native_opencv_runtime_conflict">%2$s に含まれる %1$s は OpenCV プラグインのものと異なります. %2$s を OpenCV を内部にリンクするバージョンに更新するか, いずれかのライブラリの選択を解除してください.</string>
+    <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">パッケージ化されたアプリは Paddle OCR (PP-OCRv3) プラグインのみに対応しています. PP-OCRv4 / PP-OCRv5 / PP-OCRv6 プラグインは AutoJs6 本体でのみ使用できます. PP-OCRv3 プラグインをインストールして有効化してから再試行してください.</string>
     <string name="error_app_not_installed">アプリがインストールされていません</string>
     <string name="error_app_not_installed_with_name">\"%s\" アプリがインストールされていません</string>
     <string name="error_archive_extraction_failed">アーカイブを展開できませんでした: %1$s</string>

@@ -310,6 +310,10 @@
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">Le plug-in APK Builder installé n\'annonce pas de capacité de construction d\'APK compatible. Installez une version du plug-in correspondant à cette version d\'AutoJs6.</string>
     <string name="error_apk_builder_template_host_version_outside_range">Le plugin APK Builder installé prend en charge les versionCode d\'hôte AutoJs6 %1$d-%2$d, mais l\'hôte actuel est %3$d. Installez la version correspondante du plugin.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">Le plugin APK Builder installé n\'est pas signé avec un certificat officiel approuvé, la construction est donc bloquée. Package: %1$s. SHA-256: %2$s</string>
+    <string name="error_apk_native_cxx_runtime_too_old">%1$s de %2$s nécessite un environnement d\'exécution C++ plus récent que libc++_shared.so de %3$s. %4$d symboles sont manquants, par exemple %5$s. Mettez à jour le plugin qui fournit l\'environnement d\'exécution le plus ancien.</string>
+    <string name="error_apk_native_library_conflict">La bibliothèque native %1$s diffère entre %2$s et %3$s. Un APK empaqueté ne peut contenir qu\'une seule copie. Mettez à jour l\'un des plugins ou désélectionnez l\'une des bibliothèques.</string>
+    <string name="error_apk_native_opencv_runtime_conflict">%2$s fournit son propre %1$s, différent de la copie du plugin OpenCV. Mettez à jour %2$s vers une version qui lie OpenCV de manière privée, ou désélectionnez l\'une des bibliothèques.</string>
+    <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">Les applications empaquetées ne prennent en charge que le plugin Paddle OCR (PP-OCRv3). Les plugins PP-OCRv4 / PP-OCRv5 / PP-OCRv6 ne fonctionnent que dans AutoJs6. Installez et activez le plugin PP-OCRv3, puis réessayez.</string>
     <string name="error_app_not_installed">L\'application n\'est pas installée</string>
     <string name="error_app_not_installed_with_name">L\'application n\'est pas installée : \"%s\"</string>
     <string name="error_archive_extraction_failed">Impossible d\'extraire l\'archive : %1$s</string>

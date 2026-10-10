@@ -305,6 +305,10 @@
     <string name="error_apk_builder_remote_build_not_supported_by_plugin">The installed APK Builder plugin does not declare a compatible APK build capability. Install a plugin build that matches this AutoJs6 version.</string>
     <string name="error_apk_builder_template_host_version_outside_range">The installed APK Builder plugin supports AutoJs6 host versionCode %1$d-%2$d, but the current host is %3$d. Install the matching plugin version.</string>
     <string name="error_apk_builder_template_untrusted_signing_certificate">The installed APK Builder plugin is not signed with a trusted official certificate, so building was blocked. Package: %1$s. SHA-256: %2$s</string>
+    <string name="error_apk_native_cxx_runtime_too_old">%1$s from %2$s needs a newer C++ runtime than libc++_shared.so from %3$s. %4$d symbols are missing, such as %5$s. Update the plugin that provides the older runtime.</string>
+    <string name="error_apk_native_library_conflict">Native library %1$s differs between %2$s and %3$s. A packaged APK can contain only one copy. Update one of the plugins or deselect one of the libraries.</string>
+    <string name="error_apk_native_opencv_runtime_conflict">%2$s ships its own %1$s, which differs from the copy of the OpenCV plugin. Update %2$s to a version that links OpenCV privately, or deselect one of the libraries.</string>
+    <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">Packaged applications support only the Paddle OCR (PP-OCRv3) plugin. PP-OCRv4 / PP-OCRv5 / PP-OCRv6 plugins can only be used in AutoJs6 itself. Install and enable the PP-OCRv3 plugin and try again.</string>
     <string name="error_app_not_installed">App is not installed</string>
     <string name="error_app_not_installed_with_name">App is not installed: \"%s\"</string>
     <string name="error_archive_extraction_failed">Could not extract archive: %1$s</string>

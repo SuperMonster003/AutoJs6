@@ -60,7 +60,12 @@ class NativePageAlignmentApkProducerDeviceTest {
             assertTrue(outcome.errors.toString(), outcome.errors.isEmpty())
             ZipFile(output).use { zip ->
                 val libraries = zip.entries().asSequence().filter { it.name.startsWith("lib/") && it.name.endsWith(".so") }.toList()
-                assertTrue("Expected terminal, image, OpenCV and OCR libraries", libraries.size >= 7)
+                // OCR engines link a private OpenCV, so libopencv_java4.so is expected only with the OpenCV plugin.
+                val names = libraries.map { it.name.substringAfterLast('/') }.toSet()
+                val expected = listOf("libjackpal-androidterm5.so", "libjackpal-termexec2.so", "libRapidOcr.so", "libonnxruntime.so") +
+                    (if (includeOpenCv) listOf("libopencv_java4.so") else emptyList()) +
+                    (if (includePaddle) listOf("libNative.so", "libpaddle_light_api_shared.so") else emptyList())
+                assertTrue("Missing ${expected - names} in $names", names.containsAll(expected))
                 for (entry in libraries) {
                     assertEquals(entry.name, ZipEntry.DEFLATED, entry.method)
                     val alignment = zip.getInputStream(entry).use { input ->
