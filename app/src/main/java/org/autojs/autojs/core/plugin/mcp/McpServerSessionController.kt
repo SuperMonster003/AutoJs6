@@ -33,6 +33,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  * does a plugin that is no longer available after its death ([pluginAvailable] is false once the
  * user force-stopped, disabled or uninstalled it): an explicit rebind would start a force-stopped
  * package again against the user's decision (roadmap P6 lifecycle matrix).
+ *
+ * [openServer], [linkDeath] / [unlinkDeath] and [sleep] default to the real plugin binding, the
+ * session binder's death notification and [delay]; instrumentation tests replace them to drive the
+ * rebind schedule with a fake plugin (a local binder never reports its death by itself).
+ * zh-CN: [openServer], [linkDeath] / [unlinkDeath] 与 [sleep] 默认为真实的插件绑定, 会话 binder 的死亡通知与
+ * [delay]; instrumentation 测试替换它们, 以假插件驱动重绑计划 (本地 binder 自身从不报告死亡).
  */
 class McpServerSessionController(
     context: Context,
@@ -44,6 +50,11 @@ class McpServerSessionController(
     private val pluginAvailable: () -> Boolean = {
         McpServerPluginInspector.inspect(context.applicationContext).state == McpServerUiState.AVAILABLE
     },
+    private val openServer: suspend (Context, McpServerConfig, IMcpHostCapabilityBroker, IMcpServerCallback) -> AidlPluginHost.LeasedCall<IMcpServerSession> =
+        McpServerPluginHost::openServer,
+    private val linkDeath: (IBinder, IBinder.DeathRecipient) -> Unit = { binder, recipient -> binder.linkToDeath(recipient, 0) },
+    private val unlinkDeath: (IBinder, IBinder.DeathRecipient) -> Unit = { binder, recipient -> binder.unlinkToDeath(recipient, 0) },
+    private val sleep: suspend (Long) -> Unit = { delay(it) },
 ) {
 
     interface Listener {
@@ -138,7 +149,7 @@ class McpServerSessionController(
         val callback = SessionCallback(sessionId)
         publish(McpServerStatus.starting(config))
         val leased = try {
-            McpServerPluginHost.openServer(appContext, config, broker, callback)
+            openServer(appContext, config, broker, callback)
         } catch (error: Throwable) {
             runCatching { broker.destroy(McpServerBundles.reasonBundle(McpServerContract.ERROR_INTERNAL, error.message)) }
             currentSessionId = null
@@ -148,7 +159,7 @@ class McpServerSessionController(
         val deathRecipient = IBinder.DeathRecipient { onSessionDied(sessionId) }
         val binder = leased.value.asBinder()
         try {
-            binder.linkToDeath(deathRecipient, 0)
+            linkDeath(binder, deathRecipient)
         } catch (error: RemoteException) {
             runCatching { leased.bindingLease.close() }
             runCatching { broker.destroy(McpServerBundles.reasonBundle(McpServerContract.REASON_PLUGIN_DIED, error.message)) }
@@ -184,7 +195,7 @@ class McpServerSessionController(
     }
 
     private fun releaseLocked(current: Active, reasonCode: String, message: String?) {
-        runCatching { current.leased.value.asBinder().unlinkToDeath(current.deathRecipient, 0) }
+        runCatching { unlinkDeath(current.leased.value.asBinder(), current.deathRecipient) }
         runCatching { current.leased.bindingLease.close() }
         runCatching { current.broker.destroy(McpServerBundles.reasonBundle(reasonCode, message)) }
         if (active === current) {
@@ -254,7 +265,7 @@ class McpServerSessionController(
         )
         rebindJob?.cancel()
         rebindJob = scope.launch {
-            delay(delayMs)
+            sleep(delayMs)
             mutex.withLock {
                 if (closedByUser.get() || active != null) {
                     return@withLock
