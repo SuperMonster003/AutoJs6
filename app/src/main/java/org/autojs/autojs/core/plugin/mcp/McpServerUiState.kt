@@ -55,8 +55,17 @@ object McpServerUiPolicy {
         McpServerUiState.INCOMPATIBLE,
     )
 
+    /**
+     * Guidance shown while the switch is off without a refused attempt: an installed plugin that
+     * Android has not activated yet (a new install stays stopped until something starts it) needs
+     * one step from the user, so the drawer names it before the switch is touched. Missing or
+     * disabled plugins keep waiting for a switch attempt, so users without the plugin see nothing.
+     */
+    val idleGuidance: Set<McpServerUiState> = setOf(McpServerUiState.ACTIVATION_REQUIRED)
+
     /** State to show after the plugin changed while the switch is off; null keeps the current state. */
     fun refreshedGuidance(current: McpServerUiState, inspected: McpServerUiState): McpServerUiState? = when {
+        current == McpServerUiState.STOPPED -> inspected.takeIf { it in idleGuidance }
         !guidance(current) -> null
         inspected == McpServerUiState.AVAILABLE -> McpServerUiState.STOPPED
         inspected == current || !guidance(inspected) -> null

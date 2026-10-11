@@ -205,6 +205,8 @@ private class McpServerOwner(context: Context) {
                 if (intent?.data?.schemeSpecificPart == McpServerIds.DEFAULT_PACKAGE_NAME) scope.launch { onPluginChanged() }
             }
         }, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        // A plugin installed before AutoJs6 started but never activated gets its hint without a switch attempt.
+        scope.launch { refreshGuidance() }
     }
 
     private suspend fun onPluginChanged() = if (wanted) validateActivePlugin() else refreshGuidance()
@@ -215,9 +217,13 @@ private class McpServerOwner(context: Context) {
         if (inspection?.state != McpServerUiState.AVAILABLE) disconnect()
     }
 
-    /** A plugin installed, enabled or updated after a refused attempt clears the drawer guidance without a host restart. */
+    /**
+     * A plugin installed, enabled or updated after a refused attempt clears the drawer guidance without a host restart,
+     * and an installed plugin that still needs activation shows that while the switch is off ([McpServerUiPolicy.idleGuidance]).
+     */
     private suspend fun refreshGuidance() {
-        if (!McpServerUiPolicy.guidance(mutableState.value.state)) return
+        val current = mutableState.value.state
+        if (!McpServerUiPolicy.guidance(current) && current != McpServerUiState.STOPPED) return
         val inspection = withContext(Dispatchers.IO) { runCatching { McpServerPluginInspector.inspect(context) }.getOrNull() } ?: return
         if (wanted) return
         McpServerUiPolicy.refreshedGuidance(mutableState.value.state, inspection.state)?.let { mutableState.value = McpServerToolState(it) }

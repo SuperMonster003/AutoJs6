@@ -39,6 +39,20 @@ class McpServerUiPolicyTest {
         assertTrue(McpServerUiPolicy.progress(McpServerUiPolicy.state(McpServerStatus.starting(McpServerConfig()))))
     }
 
+    @Test fun `an idle switch names only an installed plugin that still needs activation`() {
+        assertEquals(McpServerUiState.ACTIVATION_REQUIRED, McpServerUiPolicy.refreshedGuidance(McpServerUiState.STOPPED, McpServerUiState.ACTIVATION_REQUIRED))
+        listOf(
+            McpServerUiState.NOT_INSTALLED, McpServerUiState.APPLICATION_DISABLED, McpServerUiState.PLUGIN_DISABLED,
+            McpServerUiState.AUTHORIZATION_REQUIRED, McpServerUiState.TRUST_CONFIRMATION_REQUIRED, McpServerUiState.INCOMPATIBLE,
+            McpServerUiState.AVAILABLE, McpServerUiState.FAILED,
+        ).forEach { assertNull(it.name, McpServerUiPolicy.refreshedGuidance(McpServerUiState.STOPPED, it)) }
+        // Once activated, the hint clears like any other stale guidance.
+        assertEquals(McpServerUiState.STOPPED, McpServerUiPolicy.refreshedGuidance(McpServerUiState.ACTIVATION_REQUIRED, McpServerUiState.AVAILABLE))
+        listOf(McpServerUiState.RUNNING, McpServerUiState.STARTING, McpServerUiState.CHECKING, McpServerUiState.STOPPING).forEach {
+            assertNull(it.name, McpServerUiPolicy.refreshedGuidance(it, McpServerUiState.ACTIVATION_REQUIRED))
+        }
+    }
+
     @Test fun `a plugin change refreshes only stale guidance while the switch is off`() {
         assertEquals(McpServerUiState.STOPPED, McpServerUiPolicy.refreshedGuidance(McpServerUiState.NOT_INSTALLED, McpServerUiState.AVAILABLE))
         assertEquals(McpServerUiState.ACTIVATION_REQUIRED,
@@ -46,7 +60,7 @@ class McpServerUiPolicyTest {
         assertEquals(McpServerUiState.STOPPED, McpServerUiPolicy.refreshedGuidance(McpServerUiState.PLUGIN_DISABLED, McpServerUiState.AVAILABLE))
         assertEquals(McpServerUiState.NOT_INSTALLED, McpServerUiPolicy.refreshedGuidance(McpServerUiState.INCOMPATIBLE, McpServerUiState.NOT_INSTALLED))
         assertNull(McpServerUiPolicy.refreshedGuidance(McpServerUiState.NOT_INSTALLED, McpServerUiState.NOT_INSTALLED))
-        // Discovery failures never replace guidance, and states without guidance are never touched.
+        // Discovery failures never replace guidance; states without guidance only take idle guidance (above).
         assertNull(McpServerUiPolicy.refreshedGuidance(McpServerUiState.NOT_INSTALLED, McpServerUiState.FAILED))
         listOf(McpServerUiState.STOPPED, McpServerUiState.FAILED, McpServerUiState.RUNNING, McpServerUiState.CHECKING).forEach {
             assertFalse(McpServerUiPolicy.guidance(it))

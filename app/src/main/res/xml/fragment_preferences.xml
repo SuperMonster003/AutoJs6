@@ -384,10 +384,4 @@
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
-    <org.autojs.autojs.theme.preference.LocalNetworkPermissionSwitchPreference
-        app:layout="@layout/preference_custom"
-        app:key="@string/key_local_network_permission"
-        app:summary="@string/description_local_network_permission"
-        app:title="@string/text_local_network_permission" />
-
 </PreferenceScreen>
