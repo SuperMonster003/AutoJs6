@@ -42,6 +42,10 @@ object McpServerPluginHost {
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
         defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE),
         preBindValidator = ::validateService,
+        // The plugin owns the pairing confirmation a computer requests. Since Android 14 a bound service may start
+        // it only with this opt-in, and only while AutoJs6 is visible; otherwise the plugin's notification remains.
+        // zh-CN: 插件负责电脑发起的配对确认界面. Android 14 起被绑定的服务只有在此选项下, 且仅在 AutoJs6 可见时才能启动该界面; 否则仍由插件通知承担.
+        allowActivityStarts = true,
     )
 
     suspend fun discover(context: Context) = withContext(Dispatchers.IO) {
