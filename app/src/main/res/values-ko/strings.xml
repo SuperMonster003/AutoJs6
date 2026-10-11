@@ -223,6 +223,7 @@
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">가져오기</string>
     <string name="dialog_button_retry">다시 해 보다</string>
+    <string name="dialog_button_revoke_and_exit">해제 후 종료</string>
     <string name="dialog_button_save">구하다</string>
     <string name="dialog_button_save_and_continue">저장 후 계속</string>
     <string name="dialog_button_save_and_reload">저장 후 다시 로드</string>
@@ -1958,6 +1959,8 @@
     <string name="text_loading_completed">로딩 완료</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">로딩 중...</string>
     <string name="text_local_network_permission">로컬 네트워크 권한</string>
+    <string name="text_local_network_permission_revoke">Android 에서는 앱이 이미 허용된 권한을 즉시 끌 수 없습니다. AutoJs6 은 종료할 때 로컬 네트워크 접근을 해제할 수 있으며, 이때 실행 중인 스크립트가 중지됩니다. 시스템 설정의 앱 권한에서 근처 기기를 끌 수도 있습니다.</string>
+    <string name="text_local_network_permission_revoke_exiting">로컬 네트워크 접근을 해제하기 위해 AutoJs6 이 곧 종료됩니다</string>
     <string name="text_local_network_permission_settings">로컬 네트워크 접근이 허용되지 않았습니다. 시스템 설정의 앱 권한에서 근처 기기를 허용한 후 돌아와 다시 시도하세요.</string>
     <string name="text_locate_current_theme_color">현재 테마 색상 찾기</string>
     <string name="text_location">위치</string>

@@ -218,6 +218,7 @@
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">獲取</string>
     <string name="dialog_button_retry">重試</string>
+    <string name="dialog_button_revoke_and_exit">撤銷並退出</string>
     <string name="dialog_button_save">保存</string>
     <string name="dialog_button_save_and_continue">保存並繼續</string>
     <string name="dialog_button_save_and_reload">保存並重新加載</string>
@@ -1953,6 +1954,8 @@
     <string name="text_loading_completed">加載完畢</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">加載中...</string>
     <string name="text_local_network_permission">本地網絡權限</string>
+    <string name="text_local_network_permission_revoke">Android 不允許應用程式立即關閉已授予的權限. AutoJs6 可在退出時放棄本地網絡存取, 退出會停止正在運行的腳本. 也可在系統設定的應用程式權限中關閉附近的裝置.</string>
+    <string name="text_local_network_permission_revoke_exiting">AutoJs6 即將退出以放棄本地網絡存取</string>
     <string name="text_local_network_permission_settings">本地網絡存取未獲授權. 可在系統設定的應用程式權限中允許附近的裝置, 然後返回並重試.</string>
     <string name="text_locate_current_theme_color">定位當前主題色</string>
     <string name="text_location">位置</string>

@@ -221,6 +221,7 @@
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Obtener</string>
     <string name="dialog_button_retry">Reintentar</string>
+    <string name="dialog_button_revoke_and_exit">Revocar y salir</string>
     <string name="dialog_button_save">Guardar</string>
     <string name="dialog_button_save_and_continue">Guardar y continuar</string>
     <string name="dialog_button_save_and_reload">Guardar y recargar</string>
@@ -1956,6 +1957,8 @@
     <string name="text_loading_completed">Carga completada</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Cargando...</string>
     <string name="text_local_network_permission">Permiso de red local</string>
+    <string name="text_local_network_permission_revoke">Android no permite que una aplicación desactive al instante un permiso concedido. AutoJs6 puede renunciar al acceso a la red local al salir, lo que detiene los scripts en ejecución. También puedes desactivar los dispositivos cercanos en los permisos de la aplicación en la configuración del sistema.</string>
+    <string name="text_local_network_permission_revoke_exiting">AutoJs6 se cerrará en un momento para renunciar al acceso a la red local</string>
     <string name="text_local_network_permission_settings">El acceso a la red local está desactivado. Permite los dispositivos cercanos en los permisos de la aplicación, vuelve e inténtalo de nuevo.</string>
     <string name="text_locate_current_theme_color">Localizar color del tema actual</string>
     <string name="text_location">Ubicación</string>

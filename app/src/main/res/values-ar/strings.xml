@@ -223,6 +223,7 @@
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">جلب</string>
     <string name="dialog_button_retry">إعادة المحاولة</string>
+    <string name="dialog_button_revoke_and_exit">إلغاء الإذن والخروج</string>
     <string name="dialog_button_save">يحفظ</string>
     <string name="dialog_button_save_and_continue">حفظ ومتابعة</string>
     <string name="dialog_button_save_and_reload">حفظ وإعادة التحميل</string>
@@ -1958,6 +1959,8 @@
     <string name="text_loading_completed">اكتمل التحميل</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">جار التحميل...</string>
     <string name="text_local_network_permission">إذن الشبكة المحلية</string>
+    <string name="text_local_network_permission_revoke">لا يسمح Android للتطبيق بإيقاف إذن ممنوح على الفور. يمكن لـ AutoJs6 التخلي عن الوصول إلى الشبكة المحلية عند الخروج, وهذا يوقف البرامج النصية قيد التشغيل. يمكنك أيضا إيقاف الأجهزة القريبة ضمن أذونات التطبيق في إعدادات النظام.</string>
+    <string name="text_local_network_permission_revoke_exiting">سيخرج AutoJs6 بعد لحظات للتخلي عن الوصول إلى الشبكة المحلية</string>
     <string name="text_local_network_permission_settings">الوصول إلى الشبكة المحلية غير مسموح. اسمح بالأجهزة القريبة ضمن أذونات التطبيق في إعدادات النظام, ثم عد وحاول مجددا.</string>
     <string name="text_locate_current_theme_color">تحديد لون الثيم الحالي</string>
     <string name="text_location">الموقع</string>

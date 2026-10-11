@@ -222,6 +222,7 @@
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">取得</string>
     <string name="dialog_button_retry">再試行</string>
+    <string name="dialog_button_revoke_and_exit">取り消して終了</string>
     <string name="dialog_button_save">保存する</string>
     <string name="dialog_button_save_and_continue">保存して続行</string>
     <string name="dialog_button_save_and_reload">保存して再読み込み</string>
@@ -1957,6 +1958,8 @@
     <string name="text_loading_completed">読み込み完了</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">読み込み中...</string>
     <string name="text_local_network_permission">ローカルネットワーク権限</string>
+    <string name="text_local_network_permission_revoke">Android では, 許可済みの権限をアプリがすぐに取り消すことはできません. AutoJs6 は終了時にローカルネットワークへのアクセスを放棄でき, その際に実行中のスクリプトは停止します. システム設定のアプリ権限で付近のデバイスをオフにすることもできます.</string>
+    <string name="text_local_network_permission_revoke_exiting">ローカルネットワークへのアクセスを放棄するため, AutoJs6 はまもなく終了します</string>
     <string name="text_local_network_permission_settings">ローカルネットワークへのアクセスが許可されていません. システム設定のアプリ権限で付近のデバイスを許可し, 戻って再試行してください.</string>
     <string name="text_locate_current_theme_color">現在のテーマカラーを特定</string>
     <string name="text_location">位置</string>

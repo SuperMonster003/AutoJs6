@@ -221,6 +221,7 @@
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Получить</string>
     <string name="dialog_button_retry">Повторная попытка</string>
+    <string name="dialog_button_revoke_and_exit">Отозвать и выйти</string>
     <string name="dialog_button_save">Сохранить</string>
     <string name="dialog_button_save_and_continue">Сохранить и продолжить</string>
     <string name="dialog_button_save_and_reload">Сохранить и перезагрузить</string>
@@ -1956,6 +1957,8 @@
     <string name="text_loading_completed">Загрузка завершена</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Загрузка...</string>
     <string name="text_local_network_permission">Разрешение доступа к локальной сети</string>
+    <string name="text_local_network_permission_revoke">Android не позволяет приложению сразу отключить выданное разрешение. AutoJs6 может отказаться от доступа к локальной сети при выходе, при этом запущенные скрипты остановятся. Также можно отключить доступ к устройствам поблизости в разрешениях приложения в системных настройках.</string>
+    <string name="text_local_network_permission_revoke_exiting">AutoJs6 скоро закроется, чтобы отказаться от доступа к локальной сети</string>
     <string name="text_local_network_permission_settings">Доступ к локальной сети запрещен. Разрешите доступ к устройствам поблизости в разрешениях приложения, затем вернитесь и повторите попытку.</string>
     <string name="text_locate_current_theme_color">Найти текущий цвет темы</string>
     <string name="text_location">Местоположение</string>

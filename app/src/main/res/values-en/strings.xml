@@ -218,6 +218,7 @@
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Retrieve</string>
     <string name="dialog_button_retry">Retry</string>
+    <string name="dialog_button_revoke_and_exit">Revoke and Exit</string>
     <string name="dialog_button_save">Save</string>
     <string name="dialog_button_save_and_continue">Save and continue</string>
     <string name="dialog_button_save_and_reload">Save and Reload</string>
@@ -1953,6 +1954,8 @@
     <string name="text_loading_completed">Loading completed</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
     <string name="text_local_network_permission">Local network permission</string>
+    <string name="text_local_network_permission_revoke">Android does not let an app switch off a granted permission right away. AutoJs6 can give up local network access as it exits, which stops running scripts. You can also switch off Nearby devices in the app permissions in system settings.</string>
+    <string name="text_local_network_permission_revoke_exiting">AutoJs6 exits in a moment to give up local network access</string>
     <string name="text_local_network_permission_settings">Local network access is disabled. You can allow Nearby devices in the app permissions in system settings, then return and retry.</string>
     <string name="text_locate_current_theme_color">Locate current theme color</string>
     <string name="text_location">Location</string>

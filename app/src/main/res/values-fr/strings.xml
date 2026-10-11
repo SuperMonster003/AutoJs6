@@ -221,6 +221,7 @@
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Récupérer</string>
     <string name="dialog_button_retry">Retourner</string>
+    <string name="dialog_button_revoke_and_exit">Révoquer et quitter</string>
     <string name="dialog_button_save">Enregistrer</string>
     <string name="dialog_button_save_and_continue">Enregistrer et continuer</string>
     <string name="dialog_button_save_and_reload">Enregistrer et recharger</string>
@@ -1956,6 +1957,8 @@
     <string name="text_loading_completed">Chargement termine</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Chargement...</string>
     <string name="text_local_network_permission">Autorisation du réseau local</string>
+    <string name="text_local_network_permission_revoke">Android ne permet pas à une application de désactiver immédiatement une autorisation accordée. AutoJs6 peut renoncer à l\'accès au réseau local en quittant, ce qui arrête les scripts en cours. Vous pouvez aussi désactiver les appareils à proximité dans les autorisations de l\'application, dans les paramètres du système.</string>
+    <string name="text_local_network_permission_revoke_exiting">AutoJs6 va se fermer dans un instant pour renoncer à l\'accès au réseau local</string>
     <string name="text_local_network_permission_settings">L\'accès au réseau local est désactivé. Autorisez les appareils à proximité dans les autorisations de l\'application, puis revenez et réessayez.</string>
     <string name="text_locate_current_theme_color">Localiser la couleur du thème actuel</string>
     <string name="text_location">Emplacement</string>
