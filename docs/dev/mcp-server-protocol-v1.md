@@ -461,16 +461,20 @@ The plugin repository migrated in its 1.1.0 line (2026-10-11): it stages the
 common/shared/MCP AARs of host build 5329 under its hash lock, implements both
 `openServer` and `openServerV2`, and declares version 2 only to installed hosts
 from build 5283 on. Older 6.8.0 builds reject version 2 in `validatePluginInfo`,
-so the plugin declares version 1 to them and keeps its required host version.
+so the plugin declares version 1 to them; since the line also requires build 5298
+(node references, below), such hosts can read its metadata and show that requirement.
 Released plugin APKs up to 1.0.3 declare version 1 and stay on the legacy path.
 Device evidence: a 5329 host opened the listener through `openServerV2` and a
 5282 host through `openServer`, both with tool calls through the selected broker.
 
 Three Stove Agent's complete P1 integration declares host build 5285 (AutoJs6 6.8.0).
 That family-specific requirement does not raise the minimum for existing MCP V1
-plugins or make Three Stove Agent depend on an installed MCP server. Host compact dumps
-and nodeRef handling are now available for a future MCP migration; the current
-MCP plugin's own formatter/reference strategy is unchanged. The host's installed
+plugins or make Three Stove Agent depend on an installed MCP server. The MCP plugin's
+1.1.0 line uses the host compact dumps and nodeRef handling instead of its own
+formatter and references: `ui_dump` returns the host's compact text and `snapshotId`,
+and its action tools pass `{nodeRef, snapshotId}` to the host, which relocates the node
+or answers `NODE_REF_STALE`. That line requires host build 5298, the first build after
+the relocation fixes of 5290 - 5297. The host's installed
 V1 startup/stop regression and local V1/V2 transaction-selection checks pass
 alongside the Agent entry tests; see
 [P1.5 evidence](evidence/ai-agent-p15-20260923.md).
