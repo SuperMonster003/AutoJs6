@@ -456,10 +456,15 @@ than 64 KiB into an `application/json` descriptor. Its inline `result` is then a
 This conversion is shared by V1 and V2; changing the Binder descriptor does not
 change how clients decode that payload.
 
-This host extension does not migrate a separately installed MCP plugin. That
-repository must stage the matching common/shared/MCP AARs, update its hash lock,
-implement `openServerV2`, and declare version 2 in its own migration session.
-Until then the current version 1 APK remains on the tested legacy path.
+This host extension does not migrate a separately installed MCP plugin by itself.
+The plugin repository migrated in its 1.1.0 line (2026-10-11): it stages the
+common/shared/MCP AARs of host build 5329 under its hash lock, implements both
+`openServer` and `openServerV2`, and declares version 2 only to installed hosts
+from build 5283 on. Older 6.8.0 builds reject version 2 in `validatePluginInfo`,
+so the plugin declares version 1 to them and keeps its required host version.
+Released plugin APKs up to 1.0.3 declare version 1 and stay on the legacy path.
+Device evidence: a 5329 host opened the listener through `openServerV2` and a
+5282 host through `openServer`, both with tool calls through the selected broker.
 
 Three Stove Agent's complete P1 integration declares host build 5285 (AutoJs6 6.8.0).
 That family-specific requirement does not raise the minimum for existing MCP V1
