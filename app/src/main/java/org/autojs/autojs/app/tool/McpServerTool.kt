@@ -97,6 +97,9 @@ class McpServerTool(override val context: Context) : SocketItemHelper {
                     McpServerUiState.APPLICATION_DISABLED -> IntentUtils.launchAppDetailsSettings(context, McpServerIds.DEFAULT_PACKAGE_NAME)
                     McpServerUiState.ACTIVATION_REQUIRED -> {
                         if (PluginWakeManager.buildWakeIntent(context, McpServerIds.DEFAULT_PACKAGE_NAME)?.startSafely(context, true) == true) {
+                            // A plugin suspended while it was unreachable is wanted again once the user activates it.
+                            // zh-CN: 因无法连接而被挂起的插件, 在用户激活后视为重新需要.
+                            PluginEnableStore.restoreIfSuspended(context, McpServerIds.DEFAULT_PACKAGE_NAME)
                             scope.launch { delay(500); requestConnect(false) }
                         }
                     }

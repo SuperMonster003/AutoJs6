@@ -713,6 +713,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Absence du fond circulaire des icônes dans les détails du centre de plugins et bordures des icônes en cache non actualisées lors du changement de thème
 * `Correction` Les couleurs Material choisies dans l'ancienne disposition ne pouvaient pas être retrouvées avec "Localiser la couleur du thème actuel" après un changement de disposition, et la page des couleurs Material n'affichait pas le résumé de la couleur actuelle
 * `Correction` L'ouverture des détails d'un plugin juste après un démarrage à froid du centre de plugins pouvait faire clignoter la boîte de dialogue, car chaque actualisation de la liste la reconstruisait
+* `Correction` Le Centre de plugins laissait un plugin désactivé après une actualisation qui ne pouvait temporairement pas le joindre (par exemple pendant une mise à jour ou lorsque le système bloquait la liaison); le plugin est désormais réactivé dès qu'il redevient joignable, et les plugins désactivés manuellement restent désactivés
 * `Correction` La fermeture occasionnelle des scripts UI empaquetés après l'affichage d'une page vide au démarrage
 * `Correction` Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin
 * `Correction` Les fabriques de composants traitaient le premier noeud comme un objet de propriétés lorsque plusieurs noeuds étaient passés en arguments

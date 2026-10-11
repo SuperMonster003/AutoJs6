@@ -543,6 +543,7 @@
         "Missing circular icon backgrounds in Plugin Center details dialogs and stale themed borders when cached artwork is reused",
         "Material colors chosen in the legacy layout could not be found with \"Locate current theme color\" after switching layouts, and the Material colors page did not show the current color summary",
         "Opening plugin details right after a cold start of the Plugin Center could make the dialog flash because each list refresh rebuilt it",
+        "Plugin Center kept a plugin disabled after a refresh found it temporarily unreachable (for example during an update or while the system blocked binding); the plugin is now switched back on once it can be reached again, while plugins switched off by hand stay off",
         "Packaged UI scripts occasionally displaying a blank page and exiting during startup",
         "Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates",
         "Component factories treated the first positional node as a property object when several node arguments were supplied",

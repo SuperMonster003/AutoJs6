@@ -551,6 +551,7 @@
 * `Corrección` Falta del fondo circular de los iconos en los detalles del centro de plugins y bordes en caché que no se actualizaban al cambiar de tema
 * `Corrección` Los colores Material elegidos en el diseño antiguo no se podían encontrar con "Localizar color del tema actual" tras cambiar de diseño, y la página de colores Material no mostraba el resumen del color actual
 * `Corrección` Abrir los detalles de un complemento justo después de un arranque en frío del centro de complementos podía hacer parpadear el cuadro de diálogo, porque cada actualización de la lista lo reconstruía
+* `Corrección` El Centro de plugins dejaba un plugin desactivado tras una actualización de la lista en la que no se pudo contactar temporalmente (por ejemplo, durante una actualización o mientras el sistema bloqueaba la vinculación); ahora el plugin se vuelve a activar en cuanto se puede contactar de nuevo, y los plugins desactivados a mano siguen desactivados
 * `Corrección` Los scripts UI empaquetados que a veces mostraban una página en blanco y se cerraban al iniciarse
 * `Corrección` Compose UI rechaza volver a montar páginas o ventanas flotantes dentro del callback de renderizado y conserva la página actual; permite volver a montar páginas después de actualizar el plugin
 * `Corrección` Las fábricas de componentes trataban el primer nodo como propiedades al recibir varios nodos como argumentos posicionales

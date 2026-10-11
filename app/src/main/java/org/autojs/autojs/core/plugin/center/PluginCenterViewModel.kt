@@ -514,7 +514,9 @@ class PluginCenterViewModel : ViewModel() {
         PluginCenterProcessLogger.i(
             "Failed to build legacy Plugin Center item for ${local.packageName}: ${error.message ?: error.javaClass.simpleName}.",
         )
-        enableStore.setEnabled(context, local.packageName, false)
+        // Suspended, not disabled: the next item that builds again restores the user's switch.
+        // zh-CN: 挂起而非禁用: 下次条目重新构建成功时恢复用户原来的开关状态.
+        enableStore.suspend(context, local.packageName, defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(index?.engine))
         val mappedError = PluginErrorMapper.fromThrowable(error)
         val trustInfo = runCatching {
             PluginTrustManager.resolveTrustInfo(context, local.packageName)
@@ -565,10 +567,13 @@ class PluginCenterViewModel : ViewModel() {
         val trustInfo = if (isInstalled) {
             runCatching { PluginTrustManager.resolveTrustInfo(context, packageName) }.getOrNull()
         } else null
-        if (isInstalled) {
-            enableStore.setEnabled(context, packageName, false)
-        }
         val engine = local?.engine ?: index?.engine
+        if (isInstalled) {
+            // Suspended, not disabled: the next item that builds again restores the user's switch.
+            // zh-CN: 挂起而非禁用: 下次条目重新构建成功时恢复用户原来的开关状态.
+            val defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(engine, trustInfo?.authorizedState ?: PluginAuthorizedState.REQUIRED)
+            enableStore.suspend(context, packageName, defaultEnabled)
+        }
         return PluginCenterItem(
             title = local?.title?.takeIf { it.isNotBlank() } ?: index?.title ?: packageName,
             nativePageAlignment = if (local != null) PluginNativeAlignmentPolicy.installedAlignment(local.nativePageAlignment, local.versionCode, index?.releases.orEmpty()) else latestRelease?.nativePageAlignment ?: index?.nativePageAlignment,
@@ -789,14 +794,19 @@ class PluginCenterViewModel : ViewModel() {
                 trustInfo.authorizedState != PluginAuthorizedState.REQUIRED &&
                 hostVersionError == null
         if (shouldSurfaceDiscoveryError && enabled) {
-            // A plugin that could not complete discovery must not remain logically enabled.
-            // A later user-initiated enable always probes it again before restoring READY.
-            // zh-CN: 无法完成发现的插件不得继续保持逻辑启用状态.
-            // 用户后续主动启用时会再次实时探测, 成功后才恢复 READY.
-            // Agent availability checks still reject this build, but a transient install/probe
-            // failure must not become a permanent user opt-out from automatic availability.
-            if (engine != ThreeStoveAgentIds.ENGINE) enableStore.setEnabled(context, packageName, false)
+            // A plugin that could not complete discovery must not remain logically enabled, but a
+            // transient install/probe failure must not become a permanent opt-out either: the plugin
+            // is suspended, and the next discovery that reaches it switches it back on (below).
+            // Agent availability checks reject this build without touching the stored state.
+            // zh-CN: 无法完成发现的插件不得继续保持逻辑启用状态, 但临时的安装/探测失败也不应变成永久退出:
+            // 插件被挂起, 下一次连上它的发现会恢复启用 (见下方). Agent 可用性检查直接拒绝此构建, 不改动存储的状态.
+            if (engine != ThreeStoveAgentIds.ENGINE) enableStore.suspend(context, packageName, defaultEnabled)
             enabled = false
+        }
+        if (!enabled && isInstalled && mappedError == null && authError == null && hostVersionError == null &&
+            enableStore.restoreIfSuspended(context, packageName)
+        ) {
+            enabled = true
         }
         val lastError = authError ?: hostVersionError ?: mappedError
         val enabledState = when {
@@ -943,6 +953,11 @@ class PluginCenterViewModel : ViewModel() {
             )
         } else null
         val authError = if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED) PluginError(PluginErrorCode.NOT_AUTHORIZED) else null
+        // The item built, so a plugin suspended by an earlier failure is reachable again.
+        // zh-CN: 条目已构建成功, 之前因故障被挂起的插件已可再次连接.
+        if (!enabled && authError == null && hostVersionError == null && enableStore.restoreIfSuspended(context, packageName)) {
+            enabled = true
+        }
         val enabledState = when {
             hostVersionError != null -> PluginEnabledState.ERROR(hostVersionError)
             enabled -> PluginEnabledState.READY
