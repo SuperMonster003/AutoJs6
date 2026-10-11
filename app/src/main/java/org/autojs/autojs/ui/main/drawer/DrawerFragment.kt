@@ -451,7 +451,7 @@ open class DrawerFragment : Fragment() {
 
         mLocalNetworkPermissionItem = DrawerMenuToggleableItem(
             helper = LocalNetworkPermission(mContext),
-            icon = R.drawable.ic_cast_connected_black_48dp,
+            icon = R.drawable.ic_lan_black_48dp,
             title = R.string.text_local_network_permission,
             descriptionRes = R.string.description_local_network_permission,
         ).also { item ->
@@ -1058,8 +1058,8 @@ open class DrawerFragment : Fragment() {
                 SetupWizards.showPermissionWizard(mActivity)
             },
             mNotificationPostItem,
-            mLocalNetworkPermissionItem,
             mNotificationAccessItem,
+            mLocalNetworkPermissionItem,
             mAllFilesAccessPermissionItem,
             mUsageStatsPermissionItem,
             mIgnoreBatteryOptimizationsItem,
@@ -1113,8 +1113,8 @@ open class DrawerFragment : Fragment() {
         mServerModeItem,
         mMcpServerItem,
         mNotificationPostItem,
-        mLocalNetworkPermissionItem,
         mNotificationAccessItem,
+        mLocalNetworkPermissionItem,
         mAllFilesAccessPermissionItem,
         mUsageStatsPermissionItem,
         mIgnoreBatteryOptimizationsItem,

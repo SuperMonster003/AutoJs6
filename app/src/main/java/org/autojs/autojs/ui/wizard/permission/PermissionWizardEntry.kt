@@ -24,13 +24,13 @@ enum class PermissionWizardEntry(
         "post_notifications", R.string.text_post_notifications_permission,
         R.drawable.ic_ali_notification, R.string.description_post_notifications, inStandard = true,
     ),
-    LOCAL_NETWORK(
-        "local_network", R.string.text_local_network_permission,
-        R.drawable.ic_cast_connected_black_48dp, R.string.description_local_network_permission,
-    ),
     NOTIFICATION_ACCESS(
         "notification_access", R.string.text_notification_access_permission,
         R.drawable.ic_ali_notification, R.string.description_notification_access,
+    ),
+    LOCAL_NETWORK(
+        "local_network", R.string.text_local_network_permission,
+        R.drawable.ic_lan_black_48dp, R.string.description_local_network_permission,
     ),
     ALL_FILES_ACCESS(
         "all_files_access", R.string.text_all_files_access,
