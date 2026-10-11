@@ -2091,6 +2091,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Node.js Doctor 보고서 생성 중...</string>
     <string name="text_nodejs_doctor_generation_failed">Node.js Doctor 보고서를 생성하지 못했습니다</string>
     <string name="text_nodejs_inspector_enabled">Node.js 스크립트에서 Inspector 허용</string>
+    <string name="text_nodejs_runtime_required_for_packaged_app">AutoJs6 Node.js Runtime을 설치하거나 업데이트한 후 이 앱을 다시 실행하세요.</string>
     <string name="text_none">없음</string>
     <string name="text_not_enough_color_libraries_to_reorder">순서를 변경하려면 사용자 색상 라이브러리가 2개 이상 필요합니다</string>
     <string name="text_not_granted">부여되지 않았습니다</string>

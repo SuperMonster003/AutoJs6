@@ -32,9 +32,18 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
+    <uses-permission android:name="org.autojs.plugin.nodejs.permission.RUNTIME" />
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
 
     <queries>
+        <intent>
+            <action android:name="org.autojs.plugin.nodejs.PACKAGED_WAKE" />
+            <category android:name="android.intent.category.DEFAULT" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.nodejs.PACKAGED_RUNTIME" />
+            <category android:name="nodejs" />
+        </intent>
         <package android:name="io.github.supermonster003.autojs6.plugin.python.runtime" />
         <package android:name="io.github.supermonster003.autojs6.plugin.three.color.picker" />
         <package android:name="io.github.supermonster003.autojs6.plugin.three.amber.player" />

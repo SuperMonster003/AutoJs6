@@ -88,7 +88,7 @@ object NodeDoctorReportGenerator {
     private fun runtimeJson() = JSONObject().apply {
         put("owner", "external-plugin")
         put("hostEmbeddedRuntimePresent", false)
-        put("backend", if (BuildConfig.isInrt) "disabled" else "plugin")
+        put("backend", "plugin")
         put("runtimeDefaultsOwner", "external-plugin")
         put("deviceSupportedAbis", JSONArray(Build.SUPPORTED_ABIS.toList()))
         put("androidSdk", Build.VERSION.SDK_INT)

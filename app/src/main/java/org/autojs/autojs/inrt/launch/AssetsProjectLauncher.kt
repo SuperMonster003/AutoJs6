@@ -4,6 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.net.Uri
+import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.engine.NodeJsRuntimePluginHost
+import org.autojs.autojs6.R
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
@@ -64,7 +68,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             // 如果不隐藏日志界面
             // 如果当前已经是日志界面则直接运行脚本
             if (activity is LogActivity) {
-                runScript(null)
+                runScript(activity, finishActivity = false)
             } else {
                 createMainScriptLaunch()
                 // 否则显示日志界面并在日志界面中运行脚本
@@ -82,7 +86,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         runScript(null)
     }
 
-    private fun runScript(activity: Activity?) {
+    private fun runScript(activity: Activity?, finishActivity: Boolean = true) {
         if (mProjectConfig.launchConfig.requiresSharedStorage && !InrtStorageAccess.has(mActivity)) {
             val message = InrtStorageAccess.explanation(mActivity)
             Log.w(TAG, message)
@@ -99,6 +103,14 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             val launch = createMainScriptLaunch()
             val source = launch.source as JavaScriptSource
             val config = launch.createExecutionConfig()
+            if (source.engineName == JavaScriptSource.ENGINE_NODEJS &&
+                !NodeJsRuntimePluginHost.isPackagedRuntimeAvailable(mActivity)) {
+                showNodeRuntimeRequired(activity)
+                return
+            }
+            if (source.engineName == JavaScriptSource.ENGINE_NODEJS && activity != null) {
+                NodeJsRuntimePluginHost.activatePackagedRuntimeIfNeeded(activity)
+            }
             check(source.engineName != JavaScriptSource.ENGINE_BUN) {
                 "Packaged apps do not support the external Bun Runtime plugin."
             }
@@ -111,12 +123,30 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
                 if (source.engineName == JavaScriptSource.ENGINE_NODEJS) {
                     InrtToastVisibilityGuard.holdForPotentialNodeBridgeToast()
                 }
-                finishHostActivity(activity)
+                if (finishActivity) finishHostActivity(activity)
             }
             mScriptExecution = AutoJs.instance.scriptEngineService.execute(source, config)
         } catch (e: Exception) {
             AutoJs.instance.globalConsole.error(e)
         }
+    }
+
+    private fun showNodeRuntimeRequired(activity: Activity?) {
+        val message = mActivity.getString(R.string.text_nodejs_runtime_required_for_packaged_app)
+        AutoJs.instance.globalConsole.error(message)
+        if (activity == null || activity.isFinishing || activity.isDestroyed) return
+        MaterialDialog.Builder(activity)
+            .title("AutoJs6 Node.js Runtime")
+            .content(message)
+            .positiveText(R.string.text_download)
+            .negativeText(R.string.text_exit)
+            .onPositive { _, _ ->
+                Intent(Intent.ACTION_VIEW, Uri.parse(
+                    "https://github.com/SuperMonster003/AutoJs6-Plugin-NodeJs-Runtime/releases/latest"
+                )).startSafely(activity)
+            }
+            .onNegative { _, _ -> activity.finish() }
+            .show()
     }
 
     private fun finishHostActivity(activity: Activity?) {

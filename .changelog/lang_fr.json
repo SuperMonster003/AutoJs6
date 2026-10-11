@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/10/11",
       "feature": [
+        "Les projets et scripts Node.js peuvent être empaquetés en applications signées indépendamment, exécutées par le plugin externe Node.js Runtime, avec une aide à l'installation si le runtime est indisponible",
         "L'option Afficher l'icône du lanceur, activée par défaut dans les réglages des plugins officiels et tiers, masque et restaure le style d'icône initial (Root ou Shizuku autorisé en mode Root requis)",
         "Une option du guide d'installation contrôle les icônes uniquement pour les nouveaux plugins du lot, les affiche par défaut et ne modifie pas les plugins déjà installés",
         "La fonction \"Générer du code\" de l'inspecteur de disposition prend en charge les portées élément unique/ensemble, l'attente de détection/avec délai limite et la vérification immédiate, les destinataires d'actions et paramètres de texte, les styles Classique/Flow, les solutions alternatives et explications de localisation, avec aperçu des correspondances dans la disposition",

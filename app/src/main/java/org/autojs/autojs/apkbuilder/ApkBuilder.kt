@@ -306,6 +306,7 @@ constructor(
     enum class Lib(private val delegate: ApkBuildLibrary) {
         TERMINAL_EMULATOR(ApkBuildLibrary.TERMINAL_EMULATOR),
         EMBEDDED_NODE_JS(ApkBuildLibrary.EMBEDDED_NODE_JS),
+        NODEJS_RUNTIME(ApkBuildLibrary.NODEJS_RUNTIME),
         OPENCV(ApkBuildLibrary.OPENCV),
         MLKIT_OCR(ApkBuildLibrary.MLKIT_OCR),
         PADDLE_OCR(ApkBuildLibrary.PADDLE_OCR),

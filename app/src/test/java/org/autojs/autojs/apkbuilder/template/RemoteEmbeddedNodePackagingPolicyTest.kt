@@ -20,13 +20,15 @@ class RemoteEmbeddedNodePackagingPolicyTest {
         selections.forEach { selection ->
             assertTrue(
                 "Embedded Node selection was not detected: $selection",
-                requests(selectedLibraries = listOf(selection)),
+                RemoteApkBuildRequestPreparer.hasLegacyEmbeddedNodeLibrary(listOf(selection)),
             )
         }
     }
 
     @Test
     fun everyNodeProjectSignalIsDetected() {
+        assertTrue(requests(selectedLibraries = listOf(ApkBuildLibrary.NODEJS_RUNTIME.label)))
+        assertTrue(requests(selectedLibraries = listOf("nodejs")))
         assertTrue(requests(projectType = " NoDe "))
         assertTrue(requests(hasNodeConfig = true))
         listOf("main.mjs", "main.cjs", "main.mts", "main.cts", "main.node.js").forEach { name ->
@@ -58,7 +60,7 @@ class RemoteEmbeddedNodePackagingPolicyTest {
         configuredEntryName: String? = null,
         sourceName: String? = null,
         entryExecutionMode: Int? = null,
-    ) = RemoteApkBuildRequestPreparer.requestsEmbeddedNodePackaging(
+    ) = RemoteApkBuildRequestPreparer.requiresNodeRuntime(
         selectedLibraries = selectedLibraries,
         projectType = projectType,
         hasNodeConfig = hasNodeConfig,

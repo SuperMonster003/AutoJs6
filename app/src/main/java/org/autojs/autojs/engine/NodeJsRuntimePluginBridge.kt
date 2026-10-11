@@ -8,7 +8,6 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs6.R
-import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 import org.autojs.plugin.nodejs.api.INodeJsRuntimeCallback
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
@@ -56,9 +55,9 @@ object NodeJsRuntimePluginBridge {
         return FailureClassification(fallbackSafe, failureKind, errorCode)
     }
 
-    fun isRequested(): Boolean = !BuildConfig.isInrt
+    fun isRequested(): Boolean = true
 
-    fun isRequired(): Boolean = !BuildConfig.isInrt
+    fun isRequired(): Boolean = true
 
     fun runScript(
         context: Context,

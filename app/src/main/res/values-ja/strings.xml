@@ -2090,6 +2090,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Node.js Doctor レポートを生成しています...</string>
     <string name="text_nodejs_doctor_generation_failed">Node.js Doctor レポートの生成に失敗しました</string>
     <string name="text_nodejs_inspector_enabled">Node.js スクリプトで Inspector を許可</string>
+    <string name="text_nodejs_runtime_required_for_packaged_app">AutoJs6 Node.js Runtime をインストールまたは更新してから, このアプリを再実行してください.</string>
     <string name="text_none">なし</string>
     <string name="text_not_enough_color_libraries_to_reorder">並べ替えには 2 個以上のユーザーカラーライブラリが必要です</string>
     <string name="text_not_granted">許可されない</string>

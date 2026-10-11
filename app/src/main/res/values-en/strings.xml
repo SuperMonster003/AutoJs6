@@ -2086,6 +2086,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Generating Node.js Doctor report...</string>
     <string name="text_nodejs_doctor_generation_failed">Failed to generate Node.js Doctor report</string>
     <string name="text_nodejs_inspector_enabled">Allow Inspector for Node.js scripts</string>
+    <string name="text_nodejs_runtime_required_for_packaged_app">Install or update AutoJs6 Node.js Runtime, then run this app again.</string>
     <string name="text_none">None</string>
     <string name="text_not_enough_color_libraries_to_reorder">Reordering needs at least 2 color libraries of your own</string>
     <string name="text_not_granted">Not granted</string>

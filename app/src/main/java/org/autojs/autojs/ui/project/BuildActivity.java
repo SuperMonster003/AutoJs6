@@ -41,6 +41,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import org.autojs.autojs.apkbuilder.ApkBuildLibrary;
+import org.autojs.autojs.apkbuilder.template.RemoteApkBuildRequestPreparer;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.apkbuilder.template.RemoteApkBuildClient;
 import org.autojs.autojs.apkbuilder.template.RemoteProjectConfigUpdater;
@@ -844,6 +845,7 @@ public class BuildActivity extends BaseActivity {
     }
 
     private void onBuildUiControlChanged() {
+        syncRequiredNodeRuntime();
         if (!canTrackBuildStateChanges()) {
             return;
         }
@@ -1843,6 +1845,7 @@ public class BuildActivity extends BaseActivity {
     }
 
     private void syncLibsCheckedStates() {
+        syncRequiredNodeRuntime();
         mInvalidLibs.clear();
         if (mProjectConfig == null) return;
 
@@ -1865,6 +1868,27 @@ public class BuildActivity extends BaseActivity {
         }
 
         mInvalidLibs.addAll(candidates);
+        syncRequiredNodeRuntime();
+    }
+
+    private void syncRequiredNodeRuntime() {
+        if (mFlexboxLibsView == null || mSourcePathView == null) return;
+        String path = mSourcePathView.getText().toString();
+        boolean required = false;
+        try {
+            required = !path.isBlank() && RemoteApkBuildRequestPreparer.requiresNodeRuntime(
+                    mProjectConfig, new File(path), false);
+        } catch (Exception ignored) {
+            // Build preparation reports unreadable or invalid source files.
+        }
+        for (int i = 0; i < mFlexboxLibsView.getChildCount(); i++) {
+            View view = mFlexboxLibsView.getChildAt(i);
+            if (view instanceof RoundCheckboxWithText checkbox
+                    && ApkBuildLibrary.NODEJS_RUNTIME.label.contentEquals(checkbox.getText())) {
+                checkbox.setEnabled(!required);
+                if (required && !checkbox.isChecked()) checkbox.setChecked(true);
+            }
+        }
     }
 
     private void initSignatureSchemeSpinner() {

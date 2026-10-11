@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/10/11",
       "feature": [
+        "Los proyectos y scripts Node.js se empaquetan como aplicaciones con firma independiente, usan el plugin externo Node.js Runtime y muestran instrucciones de instalación cuando no está disponible",
         "El interruptor Mostrar icono en el lanzador, activado por defecto, oculta y restaura el estilo original en plugins oficiales y de terceros (requiere Root o Shizuku autorizado en modo Root)",
         "Una opción del asistente controla los iconos solo para los plugins nuevos del lote, los muestra por defecto y no cambia los plugins ya instalados",
         "Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana",

@@ -13,6 +13,7 @@
 * `Sugerencia` Los diálogos independientes requieren AutoJs6 6.8.0 / 5321 y Compose UI con dialog-v1; TSX también requiere TypeScript Engine 0.6.6. Los scripts sin UI necesitan el permiso de superposición del anfitrión
 * `Sugerencia` Esta versión usa el contrato Compose UI V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
 * `Sugerencia` Las aplicaciones empaquetadas necesitan OpenCV seleccionado al empaquetar para images y otras funciones de OpenCV; ya no se usa un runtime con el mismo nombre aportado por un plugin de OCR
+* `Nuevo` Los proyectos y scripts Node.js se empaquetan como aplicaciones con firma independiente, usan el plugin externo Node.js Runtime y muestran instrucciones de instalación cuando no está disponible
 * `Nuevo` El interruptor Mostrar icono en el lanzador, activado por defecto, oculta y restaura el estilo original en plugins oficiales y de terceros (requiere Root o Shizuku autorizado en modo Root)
 * `Nuevo` Una opción del asistente controla los iconos solo para los plugins nuevos del lote, los muestra por defecto y no cambia los plugins ya instalados
 * `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana

@@ -2091,6 +2091,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">جار إنشاء تقرير تشخيص Node.js...</string>
     <string name="text_nodejs_doctor_generation_failed">فشل إنشاء تقرير تشخيص Node.js</string>
     <string name="text_nodejs_inspector_enabled">السماح باستخدام Inspector في نصوص Node.js</string>
+    <string name="text_nodejs_runtime_required_for_packaged_app">ثبّت AutoJs6 Node.js Runtime أو حدّثه, ثم شغّل هذا التطبيق مجددا.</string>
     <string name="text_none">لا يوجد</string>
     <string name="text_not_enough_color_libraries_to_reorder">تتطلب إعادة الترتيب مكتبتي ألوان خاصتين على الأقل</string>
     <string name="text_not_granted">لم تمنح</string>

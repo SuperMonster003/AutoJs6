@@ -15,6 +15,7 @@ import org.autojs.plugin.mediainfo.api.IMediainfoPlugin
 import org.autojs.plugin.mediainfo.api.MediainfoPluginIds
 import org.autojs.plugin.mlkit.barcode.api.IBarcodePlugin
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
+import org.autojs.plugin.nodejs.api.NodeJsPluginActions
 import org.autojs.plugin.opencc.api.IOpenccPlugin
 import org.autojs.plugin.opencc.api.OpenccPluginIds
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
@@ -35,6 +36,7 @@ enum class ApkBuildLibrary(
     @JvmField val enumerable: Boolean = true,
     internal val plugin: ApkPluginLibrary? = null,
     internal val libsToInclude: List<String> = emptyList(),
+    val externalRuntimeAction: String? = null,
 ) {
 
     TERMINAL_EMULATOR(
@@ -49,8 +51,14 @@ enum class ApkBuildLibrary(
     // Retained only so legacy project configs can receive an explicit migration error.
     EMBEDDED_NODE_JS(
         label = "Embedded Node.js",
-        aliases = listOf("node", "nodejs", "node.js", "embedded-node", "embedded-nodejs", "embedded_nodejs"),
+        aliases = listOf("embedded-node", "embedded-nodejs", "embedded_nodejs"),
         enumerable = false,
+    ),
+
+    NODEJS_RUNTIME(
+        label = "Node.js Runtime",
+        aliases = listOf("node", "nodejs", "node.js", "node-runtime", "nodejs-runtime"),
+        externalRuntimeAction = NodeJsPluginActions.PACKAGED_RUNTIME,
     ),
 
     OPENCV(

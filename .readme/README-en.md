@@ -175,6 +175,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Hint` Independent dialogs require AutoJs6 6.8.0 / 5321 and Compose UI with dialog-v1 support; TSX also requires TypeScript Engine 0.6.6. Non-UI scripts need the host overlay permission
 * `Hint` This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer
 * `Hint` Packaged apps need OpenCV selected at packaging time for images and other OpenCV features; a same-named runtime brought in by an OCR plugin is no longer used
+* `Feature` Packaged Node.js projects and scripts use the external Node.js Runtime plugin, support independently signed applications, and show installation guidance when the runtime is unavailable
 * `Feature` A "Show launcher icon" switch in plugin settings, enabled by default, hides and restores the original icon variant for official and third-party plugins (requires Root or authorized Shizuku running as Root)
 * `Feature` A launcher-icon option in the installation wizard applies only to plugins newly installed by that batch, defaults to showing icons and leaves already installed plugins unchanged
 * `Feature` Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes

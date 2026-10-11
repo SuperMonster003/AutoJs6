@@ -46,7 +46,9 @@ class Versions @JvmOverloads constructor(
     val sdkVersionTarget = sdkTargetOverride ?: bp.requireInt("TARGET_SDK_VERSION")
     val sdkVersionTargetInrt = sdkTargetOverride ?: bp.requireInt("TARGET_SDK_VERSION_INRT")
     val appVersionName = bp.requireString("VERSION_NAME")
-    val appVersionCode = bp.requireInt("VERSION_BUILD")
+    private val appVersionBuild = bp.requireInt("VERSION_BUILD")
+    private val appVersionCodeOffset = bp.getIntOrNull("VERSION_CODE_OFFSET") ?: 0
+    val appVersionCode = appVersionBuild + appVersionCodeOffset
     val vscodeExtRequiredVersion = bp.requireString("VSCODE_EXT_REQUIRED_VERSION")
 
     val javaVersion: JavaVersion
@@ -132,7 +134,7 @@ class Versions @JvmOverloads constructor(
                 it.contains(Regex("^(:?app:)?assemble(app|inrt)release", IGNORE_CASE))
             }
             if (!isBuildAppRelease) {
-                props["VERSION_BUILD"] = "${appVersionCode + 1}"
+                props["VERSION_BUILD"] = "${appVersionBuild + 1}"
                 wasBuildNumberAutoIncremented = true
                 hasChanged = true
             }

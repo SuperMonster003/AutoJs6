@@ -6,6 +6,8 @@ object NodeJsPluginCapabilityKeys {
     const val NATIVE_LIBRARY_NAME = "nativeLibraryName"
     const val RUNTIME_CONTRACT_VERSION = "runtimeContractVersion"
     const val RUNTIME_SERVICE_ACTION = "runtimeServiceAction"
+    const val PACKAGED_RUNTIME_SERVICE_ACTION = "packagedRuntimeServiceAction"
+    const val PACKAGED_RUNTIME_PERMISSION = "packagedRuntimePermission"
 
     /**
      * Terminal launcher contract declared as `<meta-data>` on the RUNTIME service (schema 1).

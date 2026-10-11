@@ -3,6 +3,7 @@
     "v6.8.0": {
       "released_date": "2026/10/11",
       "feature": [
+        "Packaged Node.js projects and scripts use the external Node.js Runtime plugin, support independently signed applications, and show installation guidance when the runtime is unavailable",
         "A \"Show launcher icon\" switch in plugin settings, enabled by default, hides and restores the original icon variant for official and third-party plugins (requires Root or authorized Shizuku running as Root)",
         "A launcher-icon option in the installation wizard applies only to plugins newly installed by that batch, defaults to showing icons and leaves already installed plugins unchanged",
         "Screen actions bind confirmation to inspected host nodes, support text append and bounded scrolling, and report action results and window changes",

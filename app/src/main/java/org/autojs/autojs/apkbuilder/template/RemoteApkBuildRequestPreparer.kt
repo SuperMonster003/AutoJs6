@@ -42,6 +42,7 @@ import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
 import org.autojs.plugin.apkbuilder.template.TypeScriptBuildStagingCipher
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
+import org.autojs.plugin.nodejs.api.NodeJsPluginActions
 import java.io.Closeable
 import java.io.File
 import java.io.FileInputStream
@@ -193,6 +194,10 @@ object RemoteApkBuildRequestPreparer {
         try {
             notifyProgress(progressListener, "Preparing remote build config", projectConfig.packageName)
             val remoteConfig = cloneForRemoteRequest(projectConfig)
+            if (requiresNodeRuntime(projectConfig, source)) {
+                remoteConfig.setLibs((remoteConfig.libs + ApkBuildLibrary.NODEJS_RUNTIME.label).distinct())
+                remoteConfig.setPermissions((remoteConfig.permissions + NodeJsPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
+            }
             typeScriptPlan = TypeScriptApkBuildCompiler.prepare(
                 context = appContext,
                 projectConfig = projectConfig,
@@ -422,21 +427,38 @@ object RemoteApkBuildRequestPreparer {
                     "in a packaged APK. Run Bun scripts from the AutoJs6 host with the Bun Runtime plugin installed."
             )
         }
-        if (!requestsEmbeddedNodePackaging(
-                selectedLibraries = projectConfig.libs,
-                projectType = projectConfig.projectType,
-                hasNodeConfig = projectConfig.nodeConfig != null,
-                configuredEntryName = projectConfig.mainScriptFileName,
-                sourceName = source.name,
-                entryExecutionMode = entryExecutionMode,
+        if (hasLegacyEmbeddedNodeLibrary(projectConfig.libs)) {
+            throw IOException(
+                "Embedded Node.js packaging was retired. Select Node.js Runtime to use the installed external plugin."
             )
-        ) {
-            return
         }
-        throw IOException(
-            "Embedded Node.js packaging was retired because the runtime is owned by the external plugin. " +
-                    "Remove the Embedded Node.js library from this packaged project; run Node.js scripts " +
-                    "from the AutoJs6 host with the runtime plugin installed."
+    }
+
+    internal fun hasLegacyEmbeddedNodeLibrary(libraries: List<String>): Boolean = libraries.any { selected ->
+        val normalized = selected.trim()
+        normalized.equals(ApkBuildLibrary.EMBEDDED_NODE_JS.label, ignoreCase = true) ||
+            ApkBuildLibrary.EMBEDDED_NODE_JS.aliases.any { normalized.equals(it, ignoreCase = true) }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun requiresNodeRuntime(projectConfig: ProjectConfig?, source: File, includeSelectedLibraries: Boolean = true): Boolean {
+        val config = projectConfig ?: ProjectConfig()
+        val entry = resolveProjectEntry(source, config.mainScriptFileName)?.takeIf(File::isFile)
+        val mode = entry?.let {
+            val flags = EncryptedScriptFileHeader.getHeaderFlags(it)
+            if (flags == EncryptedScriptFileHeader.FLAG_INVALID_FILE) {
+                ScriptFileEncoding.openReader(it).use(JavaScriptSource::parseExecutionMode).mode
+            } else flags.toInt()
+        }
+        if ((mode ?: 0) and (JavaScriptSource.EXECUTION_MODE_QUICKJS or JavaScriptSource.EXECUTION_MODE_BUN) != 0) return false
+        return requiresNodeRuntime(
+            selectedLibraries = if (includeSelectedLibraries) config.libs else emptyList(),
+            projectType = config.projectType,
+            hasNodeConfig = config.nodeConfig != null,
+            configuredEntryName = config.mainScriptFileName,
+            sourceName = source.name,
+            entryExecutionMode = mode,
         )
     }
 
@@ -462,7 +484,7 @@ object RemoteApkBuildRequestPreparer {
             JavaScriptSource.isBunFileName(sourceName) ||
             (entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_BUN != 0
 
-    internal fun requestsEmbeddedNodePackaging(
+    internal fun requiresNodeRuntime(
         selectedLibraries: List<String>,
         projectType: String?,
         hasNodeConfig: Boolean,
@@ -470,18 +492,14 @@ object RemoteApkBuildRequestPreparer {
         sourceName: String?,
         entryExecutionMode: Int?,
     ): Boolean {
-        val embeddedNode = ApkBuildLibrary.EMBEDDED_NODE_JS
-        val selectedAsLibrary = selectedLibraries.any { selected ->
-            val normalized = selected.trim()
-            normalized.equals(embeddedNode.label, ignoreCase = true) ||
-                    embeddedNode.aliases.any { alias -> normalized.equals(alias, ignoreCase = true) }
-        }
-        return selectedAsLibrary ||
-                projectType?.trim()?.equals("node", ignoreCase = true) == true ||
-                hasNodeConfig ||
-                JavaScriptSource.isNodeJsFileName(configuredEntryName) ||
-                JavaScriptSource.isNodeJsFileName(sourceName) ||
-                (entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_NODEJS != 0
+        val runtime = ApkBuildLibrary.NODEJS_RUNTIME
+        return selectedLibraries.any { selected ->
+            selected.trim().equals(runtime.label, ignoreCase = true) ||
+                runtime.aliases.any { selected.trim().equals(it, ignoreCase = true) }
+        } || projectType?.trim()?.equals("node", ignoreCase = true) == true || hasNodeConfig ||
+            JavaScriptSource.isNodeJsFileName(configuredEntryName) ||
+            JavaScriptSource.isNodeJsFileName(sourceName) ||
+            (entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_NODEJS != 0
     }
 
     internal fun resolveProjectEntry(source: File, configuredEntryName: String): File? {

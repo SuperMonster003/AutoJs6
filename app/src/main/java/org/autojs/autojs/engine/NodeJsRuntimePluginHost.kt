@@ -561,17 +561,41 @@ object NodeJsRuntimePluginHost {
         )
     }
 
+    @JvmStatic
+    fun isPackagedRuntimeAvailable(context: Context): Boolean =
+        queryAuthorizedRuntimeCandidates(context).isNotEmpty()
+
+    /** Called only by an interactive packaged-app launch, before runtime binding. */
+    fun activatePackagedRuntimeIfNeeded(activity: android.app.Activity) {
+        val candidate = queryAuthorizedRuntimeCandidates(activity).firstOrNull() ?: return
+        if (candidate.serviceInfo.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_STOPPED == 0) return
+        val intent = Intent(NodeJsPluginActions.PACKAGED_WAKE)
+            .setPackage(candidate.serviceInfo.packageName)
+            .addCategory(Intent.CATEGORY_DEFAULT)
+            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+        val component = intent.resolveActivity(activity.packageManager) ?: return
+        activity.startActivity(intent.setComponent(component))
+    }
+
+    private fun runtimeAction(): String = if (BuildConfig.isInrt) {
+        NodeJsPluginActions.PACKAGED_RUNTIME
+    } else NodeJsPluginActions.RUNTIME
+
+    private fun runtimePermission(): String = if (BuildConfig.isInrt) {
+        NodeJsPluginActions.PACKAGED_RUNTIME_PERMISSION
+    } else PLUGIN_PERMISSION
+
     private fun queryAuthorizedRuntimeCandidates(context: Context): List<Candidate> {
         return queryRuntimeServices(context)
             .asSequence()
             .filter { it.exported && it.enabled && it.applicationInfo.enabled }
-            .filter { it.permission == PLUGIN_PERMISSION }
+            .filter { it.permission == runtimePermission() }
             .filter {
-                context.packageManager.checkPermission(PLUGIN_PERMISSION, context.packageName) ==
+                context.packageManager.checkPermission(runtimePermission(), context.packageName) ==
                         PackageManager.PERMISSION_GRANTED
             }
-            .filter { PluginEnableStore.isEnabled(context, it.packageName, true) }
-            .filter(::isHostVersionCompatible)
+            .filter { BuildConfig.isInrt || PluginEnableStore.isEnabled(context, it.packageName, true) }
+            .filter { BuildConfig.isInrt || isHostVersionCompatible(it) }
             .mapNotNull { serviceInfo ->
                 val trustInfo = PluginTrustManager.resolveTrustInfo(context, serviceInfo.packageName)
                 if (trustInfo.authorizedState !in AUTHORIZED_STATES) {
@@ -597,7 +621,7 @@ object NodeJsRuntimePluginHost {
     }
 
     private fun queryRuntimeServices(context: Context, packageName: String? = null): List<ServiceInfo> {
-        val intent = Intent(NodeJsPluginActions.RUNTIME).apply {
+        val intent = Intent(runtimeAction()).apply {
             addCategory(NodeJsPluginIds.ENGINE)
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             packageName?.let(::setPackage)
@@ -861,7 +885,8 @@ object NodeJsRuntimePluginHost {
     }
 
     private fun startBind(entry: PooledConnection, binding: BindingAttempt) {
-        val intent = Intent().setComponent(entry.component)
+        val intent = Intent(runtimeAction()).setComponent(entry.component)
+            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
         val bound = try {
             entry.appContext.bindService(intent, binding.connection, Context.BIND_AUTO_CREATE)
         } catch (error: SecurityException) {

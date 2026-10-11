@@ -2089,6 +2089,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Generando el informe de diagnóstico de Node.js...</string>
     <string name="text_nodejs_doctor_generation_failed">No se pudo generar el informe de diagnóstico de Node.js</string>
     <string name="text_nodejs_inspector_enabled">Permitir Inspector para scripts Node.js</string>
+    <string name="text_nodejs_runtime_required_for_packaged_app">Instala o actualiza AutoJs6 Node.js Runtime y vuelve a ejecutar esta aplicación.</string>
     <string name="text_none">Ninguno</string>
     <string name="text_not_enough_color_libraries_to_reorder">Para reordenar se necesitan al menos 2 bibliotecas de colores propias</string>
     <string name="text_not_granted">No se concede</string>

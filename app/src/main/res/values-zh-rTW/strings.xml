@@ -2086,6 +2086,7 @@
     <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">正在產生 Node.js Doctor 報告...</string>
     <string name="text_nodejs_doctor_generation_failed">無法產生 Node.js Doctor 報告</string>
     <string name="text_nodejs_inspector_enabled">允許 Node.js 腳本使用 Inspector</string>
+    <string name="text_nodejs_runtime_required_for_packaged_app">請安裝或更新 AutoJs6 Node.js Runtime 外掛程式, 然後重新執行此應用程式.</string>
     <string name="text_none">無</string>
     <string name="text_not_enough_color_libraries_to_reorder">調整順序需要至少 2 個自建顏色庫</string>
     <string name="text_not_granted">未授予</string>
