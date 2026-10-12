@@ -19,6 +19,7 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import ezy.assist.compat.SettingsCompat;
+import org.autojs.autojs.deviceid.AndroidIdReader;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
@@ -121,9 +122,12 @@ public class Device {
         return serial;
     }
 
-    @SuppressLint("HardwareIds")
     public String getAndroidId() {
-        return Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+        return getAndroidId(false);
+    }
+
+    public String getAndroidId(boolean useSystemId) {
+        return AndroidIdReader.getAndroidId(mContext, useSystemId);
     }
 
     public int getBrightness() throws Settings.SettingNotFoundException {

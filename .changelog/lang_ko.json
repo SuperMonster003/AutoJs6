@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/11",
+      "released_date": "2026/10/12",
       "feature": [
         "Node.js 프로젝트와 스크립트를 독립적으로 서명된 앱으로 패키징하고 외부 Node.js Runtime 플러그인으로 실행하며, 런타임을 사용할 수 없으면 설치 안내를 표시",
         "플러그인 설정에 기본 켜짐인 런처 아이콘 표시 스위치를 추가하여 공식 및 타사 플러그인의 아이콘을 숨기고 원래 스타일로 복원 (Root 또는 승인된 Root 모드 Shizuku 필요)",
@@ -582,6 +582,7 @@
         "Node bridge 접근성 모듈에 dump (400 노드, 32 단계, 256 KiB 를 상한으로 하는 텍스트, JSON 또는 XML 창 스냅샷), explain (선택자 서술자의 필터별 일치 수), screenshot (Android 11 이상의 접근성 스크린샷, 배율, 영역, 형식, 품질 옵션과 함께 일회성 캐시 파일 또는 작업 공간 파일로 전달) 을 추가하고, app 모듈에 currentWindow (현재 패키지, 액티비티, 창 목록) 를 추가",
         "Node bridge 에 작업 디렉터리를 루트로 하는 files 모듈 (list, stat, read, write, mkdir, rename, delete) 을 추가: 경로는 정규화된 상대 경로여야 하고, 심볼릭 링크로 외부에 나갈 수 없으며, 읽기와 쓰기는 UTF-8 또는 base64 내용으로 1 MiB 까지, 목록은 2000 항목까지이고, 쓰기와 삭제에는 전용 files.write 와 files.delete 능력 토큰이 필요하며, 변경 후 작업 공간 파일 관리자가 새로 고쳐짐",
         "Node bridge 에 console 모듈 추가 (console.tail 은 전역 콘솔의 최신 항목을 lines 최대 500, sinceId, level 과 256 KiB 예산으로 읽음), engines.execScript 와 execScriptFile 에 captureConsole 과 waitMs 옵션 추가 (스크립트 종료를 기다려 해당 id 창 안의 콘솔 출력을 수집, captureMode 는 global-window), 콘솔은 최대 4096 개의 로그를 보관 (초과분은 가장 오래된 것부터 삭제, 콘솔 뷰는 항목 id 로 갱신), ConsoleImpl 이 addLogListener 와 removeLogListener 를 공개",
+        "device.getAndroidId가 useSystemId 불리언 매개변수를 지원하며, Android 8.0+에서 Shizuku/Root로 앱이 실행되는 Android 사용자의 시스템 값을 읽음. 권한 또는 읽기 실패 시 예외를 발생시키고 이전 시스템에서는 매개변수를 무시",
         "Node bridge 에 engines.list 와 engines.stop(id) 및 scope 가 host 인 engines.stopAll 의 호스트 프로세스 의미를 추가 (호스트 ScriptEngineService 의 실행을 나열하고 중지, 기존 engines.all / stopAll 의미는 변경 없음), device.info (기기 모델과 시스템 버전, 화면 크기 / 밀도 / 방향, 배터리, 호스트 버전, 접근성 서비스 상태), 그리고 읽기 전용 app.listSamples / app.readSample (내장 샘플 스크립트의 열거와 읽기, 경로는 샘플 루트 안으로 제한, 1 회 읽기 최대 1 MiB)",
         "`TypeScript 콘솔`은 기본적으로 접힌 상태를 유지하고 컴파일러 플러그인을 사용할 수 있을 때만 전체 로그 페이지 또는 편집기 로그 패널의 더보기 메뉴에서 필요에 따라 표시되며 표시 상태를 각각 기억함; 스니펫 실행 중에는 녹색 실행 동작이 빨간색 중지 동작으로 전환되고 전체 로그 페이지에 실제 작업 디렉터리가 표시되며 편집기 로그 패널의 더보기 메뉴에 복사, 보내기 및 내보내기도 통합됨",
         "TypeScript TSX 런타임 검증 메시지가 하드코딩된 영어 대신 지원되는 10개 언어 모두에서 앱 언어를 따르도록 개선",

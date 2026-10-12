@@ -189,7 +189,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 
 # v6.8.0
 
-###### 2026/10/11
+###### 2026/10/12
 
 * `提示` 螢幕取色插件更名為 3-Color Picker 2.0, 使用新套件名稱並需重新安裝和啟用, 舊版可保留並存但設定不自動遷移; 主頁抽屜的螢幕取色文案保持不變
 * `提示` Compose UI 及配套 API 文件, Ace Editor 型別補全和 Offline Docs 內容為本地整合交付, 需要匹配的本地宿主構建; 插件尚未登記官方索引或正式發佈
@@ -770,6 +770,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `優化` Node bridge 無障礙模組新增 dump (文本, JSON 或 XML 窗口快照, 上限 400 節點, 32 層與 256 KiB), explain (選擇器描述符的逐過濾器命中數) 與 screenshot (Android 11+ 的無障礙截圖, 支援縮放, 區域, 格式與質量選項, 以一次性緩存文件或工作目錄文件交付), app 模組新增 currentWindow (當前包名, 活動與窗口列表)
 * `優化` Node bridge 新增 files 模組 (list, stat, read, write, mkdir, rename, delete), 以工作目錄為根: 路徑須為規範化的相對路徑, 符號連結無法逃逸, 讀寫上限 1 MiB 且內容為 UTF-8 或 base64, 列表上限 2000 項, 寫入與刪除分別需要專用的 files.write 與 files.delete 能力令牌, 變更後刷新工作區文件管理器
 * `優化` Node bridge 新增 console 模組 (console.tail 讀取全局控制台的最新條目, 支援 lines 上限 500, sinceId, level 與 256 KiB 預算), engines.execScript 與 execScriptFile 新增 captureConsole 與 waitMs 選項 (等待腳本結束並歸集其 id 窗口內的控制台輸出, captureMode 為 global-window), 控制台最多保留 4096 條日誌 (超出丟棄最舊, 控制台視圖按條目 id 刷新), ConsoleImpl 公開 addLogListener 與 removeLogListener
+* `優化` device.getAndroidId 支援 useSystemId 布林參數, 在 Android 8.0+ 上透過 Shizuku/Root 取得執行應用所屬 Android 使用者的系統值, 權限或讀取失敗時拋出異常, 舊系統忽略此參數
 * `優化` Node bridge 新增 engines.list 與 engines.stop(id) 以及 scope 為 host 的 engines.stopAll 的宿主進程語義 (列出與停止宿主 ScriptEngineService 中的執行, 既有 engines.all / stopAll 語義不變), device.info (機型與系統版本, 屏幕尺寸 / 密度 / 方向, 電量, 宿主版本, 無障礙服務狀態), 以及只讀的 app.listSamples / app.readSample (枚舉與讀取內置示例腳本, 路徑限制在示例根內, 單次讀取上限 1 MiB)
 * `優化` `TypeScript 控制枱` 現在預設保持收起, 僅在編譯插件可用時透過完整日誌頁或編輯器日誌面板的更多選單按需顯示並分別記憶狀態; 片段執行期間綠色運行圖示會切換為可停止的紅色圖示, 完整日誌頁同步顯示實際工作路徑, 編輯器日誌面板的更多選單亦集中提供複製, 傳送及匯出操作
 * `優化` TypeScript TSX 運行時校驗提示現在會跟隨應用語言, 已補齊全部 10 種支援語言, 不再顯示硬編碼英文
