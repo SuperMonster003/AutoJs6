@@ -185,7 +185,7 @@ py E:/.cache/user-temp/claude/.../scratchpad/stardust_inventory.py   # 本次使
 | `autojs.core.util.Shell` | `runtime.api.Shell` | 60 | 58 | 0 | 0 | 2 -> 0 (宿主补构造器 `(Context, boolean, boolean)` 与 `isRoot()`, 见下) | 启用 |
 | `autojs.runtime.api.Images` | `runtime.api.Images` | 28 | 22 | 0 | 5 | 1 -> 0 (宿主补静态 `concat(img, img, dir)`, 见下) | 启用 |
 | `autojs.core.image.Colors` | `core.image.Colors` | 21 | 8 | 0 | 1 | 12 -> 0 (宿主补 12 个静态颜色常量, 见下) | 启用 |
-| `autojs.runtime.api.Device` | `runtime.api.Device` | 52 | 50 | 0 | 0 | 2 (静态字段 `width` / `height`) | 保留副本 (维护者 2026-10-12 决定不补) |
+| `autojs.runtime.api.Device` | `runtime.api.Device` | 52 | 50 | 0 | 0 | 2 -> 0 (宿主补静态 `width` / `height`, 见下) | 启用 (维护者 2026-10-12 先决定不补, 当晚改为补齐) |
 
 - 为启用上述类对宿主做的加法 (维护者 2026-10-12 确认, 都不改既有行为):
   - `org.autojs.autojs.pio.PFiles`: `readBytes(InputStream)`, `copyRaw`, `write(OutputStream, String, String?)`, `writeBytes(OutputStream, ByteArray?)`, `copyAsset`, `renameWithoutExtensionAndReturnNewPath`, `generateNotExistingPath`, `copyAssetToTmpFile` 补 `@JvmStatic` (此前只能经 `PFiles.INSTANCE` 调用); 新增 `getSdcardPath()` 与 `getSimplifiedPath(path)` (Auto.js 4 同名方法的语义, 基于 `EnvironmentUtils.externalStoragePath`).
@@ -193,5 +193,6 @@ py E:/.cache/user-temp/claude/.../scratchpad/stardust_inventory.py   # 本次使
   - `org.autojs.autojs.runtime.api.Shell`: 新增构造器 `Shell(Context, boolean root, boolean shouldReadOutput)`, 委托给两参构造器; Auto.js 4 只保存而从未读取 `shouldReadOutput`.
   - `org.autojs.autojs.runtime.api.Images`: 新增静态 `concat(ImageWrapper, ImageWrapper, int)`, 运行时取自第一张图片 (为此 `ImageWrapper` 增加只读属性 `scriptRuntime`), Auto.js 4 的方向 `Gravity.LEFT` / `RIGHT` 按 `START` / `END` 处理.
   - `org.autojs.autojs.core.image.Colors`: companion 常量 `BLACK`, `DKGRAY`, `GRAY`, `LTGRAY`, `WHITE`, `RED`, `GREEN`, `BLUE`, `YELLOW`, `CYAN`, `MAGENTA`, `TRANSPARENT` (与 `android.graphics.Color` 相同).
-- `Device` 保留副本: 维护者决定不为兼容加静态 `width` / `height`; 脚本写 `com.stardust.autojs.runtime.api.Device` 时仍得到兼容副本.
+  - `org.autojs.autojs.runtime.api.Device`: 公开静态字段 `width` / `height` (类加载时取 `ScreenMetrics` 的设备尺寸, 每次构造 `Device` 时刷新; 兼容副本是 `static final`, 且因兼容包的 `ScreenMetrics` 从未初始化而恒为 0).
+- 至此 16 个候选全部启用, 没有保留副本的类.
 - `--all` 普查: 304 个有类比路径或同名宿主类的 `com.stardust` 类中 201 个按规则无阻止项 (多数是引擎内部类或接口, 脚本不会直接引用); 其中与脚本相关且可作为下一批候选的有 `autojs.core.eventloop.EventEmitter`, `autojs.core.image.ColorFinder`, `autojs.core.storage.LocalStorage`, `autojs.core.util.ScriptPromiseAdapter`, `util.IntentExtras`, `util.BiMaps`, `util.MapBuilder`, `util.SimpleCache`, `util.StateObserver`, `pio.PReadableBinaryFile`, `pio.PRandomAccessBinaryFile`, `pio.PFileInterface`, `automator.simple_action.*`. 复现: `py tools/stardust/compare_alias_signatures.py --all`.

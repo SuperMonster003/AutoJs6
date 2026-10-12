@@ -47,7 +47,7 @@ class StardustClassAliasesTest {
             StardustClassAliases.resolve("com.stardust.autojs.runtime.api.Dialogs\$NonUiDialogs"),
         )
         assertNull(StardustClassAliases.resolve("com.stardust.pio.PFilesX"))
-        assertNull(StardustClassAliases.resolve("com.stardust.autojs.runtime.api.Device"))
+        assertNull(StardustClassAliases.resolve("com.stardust.autojs.runtime.api.Floaty"))
         assertNull(StardustClassAliases.resolve("org.autojs.autojs.pio.PFiles"))
         assertNull(StardustClassAliases.resolve("com.stardust"))
     }
@@ -83,8 +83,8 @@ class StardustClassAliasesTest {
             load("org.autojs.autojs.runtime.api.Dialogs\$NonUiDialogs"),
             Kit.classOrNull(classLoader, "com.stardust.autojs.runtime.api.Dialogs\$NonUiDialogs"),
         )
-        // Classes outside the table keep their copies (Device: the maintainer declined its static width / height).
-        assertSame(load("com.stardust.autojs.runtime.api.Device"), Kit.classOrNull(classLoader, "com.stardust.autojs.runtime.api.Device"))
+        // Classes outside the table keep their copies.
+        assertSame(load("com.stardust.autojs.runtime.api.Floaty"), Kit.classOrNull(classLoader, "com.stardust.autojs.runtime.api.Floaty"))
         assertSame(load("com.stardust.util.ScreenMetrics"), Kit.classOrNull(classLoader, "com.stardust.util.ScreenMetrics"))
     }
 

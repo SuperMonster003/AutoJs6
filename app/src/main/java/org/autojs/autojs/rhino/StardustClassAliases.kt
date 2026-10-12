@@ -30,6 +30,7 @@ object StardustClassAliases {
     val TABLE: Map<String, String> = linkedMapOf(
         "com.stardust.autojs.runtime.api.AbstractConsole" to "org.autojs.autojs.runtime.api.AbstractConsole",
         "com.stardust.autojs.runtime.api.AbstractShell" to "org.autojs.autojs.runtime.api.AbstractShell",
+        "com.stardust.autojs.runtime.api.Device" to "org.autojs.autojs.runtime.api.Device",
         "com.stardust.autojs.runtime.api.Dialogs" to "org.autojs.autojs.runtime.api.Dialogs",
         "com.stardust.autojs.runtime.api.Engines" to "org.autojs.autojs.runtime.api.Engines",
         "com.stardust.autojs.runtime.api.Events" to "org.autojs.autojs.runtime.api.Events",

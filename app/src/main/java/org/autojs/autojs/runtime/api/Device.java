@@ -52,6 +52,18 @@ public class Device {
         return ScreenMetrics.getDeviceScreenHeight();
     }
 
+    /**
+     * The static screen size fields of Auto.js 4's {@code com.stardust.autojs.runtime.api.Device}, kept because that
+     * class name resolves to this class through {@link org.autojs.autojs.rhino.StardustClassAliases} (roadmap P7.3);
+     * refreshed whenever a runtime creates its {@code device} object.
+     * zh-CN: Auto.js 4 {@code com.stardust.autojs.runtime.api.Device} 的静态屏幕尺寸字段, 因该类名经
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} 解析到本类而保留 (roadmap P7.3); 每次运行时创建 {@code device}
+     * 对象时刷新.
+     */
+    public static int width = getWidth();
+
+    public static int height = getHeight();
+
     public static final String buildId = Build.DISPLAY;
 
     public static final String buildDisplay = Build.DISPLAY;
@@ -105,6 +117,8 @@ public class Device {
 
     public Device(Context context) {
         mContext = context;
+        width = getWidth();
+        height = getHeight();
         manufacturers = new Manufacturers();
         roms = RomUtils.INSTANCE;
         brands = Brand.INSTANCE;
