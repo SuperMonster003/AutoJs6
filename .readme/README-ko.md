@@ -99,6 +99,7 @@ AutoJs4 는 동시에 AutoJs6 의 동작 기준입니다. 일부 특정한 경�
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | Auto.js `4.1.1 Alpha2` 의 클론 프로젝트, 원본 소스 코드를 보존하고 AutoJs6 의 동작 기준이 됨 | <span style="word-break:keep-all;white-space:nowrap">[문서 프로젝트](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Documentation](http://docs-project.autojs6.com)</span> | AutoJs6 애플리케이션 문서, 온라인 사이트와 오프라인 문서 플러그인이 동일한 콘텐츠 소스를 공유 | <span style="word-break:keep-all;white-space:nowrap">[애플리케이션 프로젝트](http://project.autojs6.com) / [온라인으로 읽기](https://docs.autojs6.com)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4-Documentation](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> | Auto.js `4.1.0` 문서의 클론 프로젝트, 원본 문서를 보존하고 AutoJs6 문서의 참조 기준이 됨 | <span style="word-break:keep-all;white-space:nowrap">[애플리케이션 프로젝트](https://github.com/SuperMonster003/AutoJs4)</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Plugin-AutoJs4-Runtime](https://github.com/SuperMonster003/AutoJs6-Plugin-AutoJs4-Runtime)</span> | AutoJs4 엔진을 내장한 AutoJs6 플러그인, 원본 엔진으로 스크립트를 실행하고 AutoJs6와 결과를 비교 | <span style="word-break:keep-all;white-space:nowrap">[애플리케이션 프로젝트](http://project.autojs6.com) / [AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> |
 
 ******
 

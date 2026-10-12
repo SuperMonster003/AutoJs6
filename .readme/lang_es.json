@@ -143,6 +143,7 @@
   "li_related_projects_autojs4_description": "Clon de Auto.js `4.1.1 Alpha2`, que conserva el código fuente original y sirve como referencia de comportamiento de AutoJs6",
   "li_related_projects_autojs6_documentation_description": "Documentación de la aplicación AutoJs6; el sitio en línea y el plugin de documentación sin conexión comparten la misma fuente de contenido",
   "li_related_projects_autojs4_documentation_description": "Clon de la documentación de Auto.js `4.1.0`, que conserva los documentos originales y sirve como referencia de la documentación de AutoJs6",
+  "li_related_projects_autojs4_runtime_description": "Complemento de AutoJs6 con el motor AutoJs4 integrado para ejecutar scripts con el motor original y comparar los resultados con AutoJs6",
   "p_jdk_preparation_add_existing_jdk": "También puedes seleccionar `Add JDK (Añadir JDK)` para agregar un JDK local existente, ubica su directorio y completa la adición del JDK",
   "p_jdk_preparation_download_jdk": "Puedes descargar el JDK directamente desde la IDE, o desde el [sitio web de Oracle](https://www.oracle.com/java/technologies/downloads/)",
   "p_jdk_preparation_download_new_jdk": "De lo contrario, puedes seleccionar `Download JDK (Descargar JDK)` para descargar el JDK adecuado, haz clic en el botón `Download (Descargar)` y espera a que se complete la descarga",

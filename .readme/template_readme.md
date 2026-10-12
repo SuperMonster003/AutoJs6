@@ -77,6 +77,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | {{ li_related_projects_autojs4_description }} | <span style="word-break:keep-all;white-space:nowrap">[{{ text_related_projects_link_documentation }}](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Documentation](http://docs-project.autojs6.com)</span> | {{ li_related_projects_autojs6_documentation_description }} | <span style="word-break:keep-all;white-space:nowrap">[{{ text_related_projects_link_application }}](http://project.autojs6.com) / [{{ text_related_projects_link_read_online }}](https://docs.autojs6.com)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4-Documentation](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> | {{ li_related_projects_autojs4_documentation_description }} | <span style="word-break:keep-all;white-space:nowrap">[{{ text_related_projects_link_application }}](https://github.com/SuperMonster003/AutoJs4)</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Plugin-AutoJs4-Runtime](https://github.com/SuperMonster003/AutoJs6-Plugin-AutoJs4-Runtime)</span> | {{ li_related_projects_autojs4_runtime_description }} | <span style="word-break:keep-all;white-space:nowrap">[{{ text_related_projects_link_application }}](http://project.autojs6.com) / [AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> |
 
 ******
 

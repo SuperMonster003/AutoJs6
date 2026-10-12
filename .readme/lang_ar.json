@@ -143,6 +143,7 @@
   "li_related_projects_autojs4_description": "نسخة مستنسخة من Auto.js `4.1.1 Alpha2`, تحتفظ بالشيفرة المصدرية الأصلية وتعد المرجع السلوكي لـ AutoJs6",
   "li_related_projects_autojs6_documentation_description": "وثائق تطبيق AutoJs6, يشترك الموقع الإلكتروني وملحق الوثائق دون اتصال في نفس مصدر المحتوى",
   "li_related_projects_autojs4_documentation_description": "نسخة مستنسخة من وثائق Auto.js `4.1.0`, تحتفظ بالوثائق الأصلية وتعد المرجع لوثائق AutoJs6",
+  "li_related_projects_autojs4_runtime_description": "إضافة لـ AutoJs6 تضم محرك AutoJs4 لتشغيل السكربتات بالمحرك الأصلي ومقارنة النتائج مع AutoJs6",
   "p_jdk_preparation_add_existing_jdk": "يمكنك أيضًا اختيار `Add JDK (إضافة JDK)` لإضافة JDK موجود محليًا، وتحديد مساره وإكمال الإضافة",
   "p_jdk_preparation_download_jdk": "يمكن تنزيل JDK مباشرةً باستخدام IDE، أو زيارة [موقع Oracle](https://www.oracle.com/java/technologies/downloads/) لتنزيله",
   "p_jdk_preparation_download_new_jdk": "يمكنك اختيار `Download JDK (تنزيل JDK)` لتنزيل JDK المناسب، انقر على زر `Download (تنزيل)` وانتظر حتى يكتمل التنزيل",

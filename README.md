@@ -99,6 +99,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | Auto.js `4.1.1 Alpha2` 的克隆项目, 保留原始源码并作为 AutoJs6 的行为基准 | <span style="word-break:keep-all;white-space:nowrap">[文档项目](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Documentation](http://docs-project.autojs6.com)</span> | AutoJs6 应用文档, 在线站点与离线文档插件共用同一内容源 | <span style="word-break:keep-all;white-space:nowrap">[应用项目](http://project.autojs6.com) / [在线阅读](https://docs.autojs6.com)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4-Documentation](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> | Auto.js `4.1.0` 文档的克隆项目, 保留原始文档并作为 AutoJs6 文档的参考基准 | <span style="word-break:keep-all;white-space:nowrap">[应用项目](https://github.com/SuperMonster003/AutoJs4)</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Plugin-AutoJs4-Runtime](https://github.com/SuperMonster003/AutoJs6-Plugin-AutoJs4-Runtime)</span> | AutoJs6 插件, 内嵌 AutoJs4 引擎, 用于以原版引擎运行脚本并与 AutoJs6 对照结果 | <span style="word-break:keep-all;white-space:nowrap">[应用项目](http://project.autojs6.com) / [AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> |
 
 ******
 

@@ -143,6 +143,7 @@
   "li_related_projects_autojs4_description": "Клон Auto.js `4.1.1 Alpha2`, сохраняющий исходный код и служащий эталоном поведения для AutoJs6",
   "li_related_projects_autojs6_documentation_description": "Документация приложения AutoJs6; онлайн-сайт и плагин офлайн-документации используют один источник содержимого",
   "li_related_projects_autojs4_documentation_description": "Клон документации Auto.js `4.1.0`, сохраняющий исходные документы и служащий эталоном для документации AutoJs6",
+  "li_related_projects_autojs4_runtime_description": "Плагин AutoJs6 со встроенным движком AutoJs4 для запуска скриптов на оригинальном движке и сравнения результатов с AutoJs6",
   "p_jdk_preparation_add_existing_jdk": "Вы также можете выбрать `Add JDK` и добавить уже установленный JDK, указав его путь, для завершения добавления JDK",
   "p_jdk_preparation_download_jdk": "JDK можно скачать непосредственно через IDE или на [сайте Oracle](https://www.oracle.com/java/technologies/downloads/)",
   "p_jdk_preparation_download_new_jdk": "Либо можно выбрать `Download JDK` для загрузки соответствующего JDK, нажмите кнопку `Download` и дождитесь завершения загрузки",

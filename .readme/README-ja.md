@@ -99,6 +99,7 @@ AutoJs4 は AutoJs6 の動作基準でもあります. 一部の特定の場合�
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | Auto.js `4.1.1 Alpha2` のクローンプロジェクト, 元のソースコードを保存し AutoJs6 の動作基準となる | <span style="word-break:keep-all;white-space:nowrap">[ドキュメントプロジェクト](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Documentation](http://docs-project.autojs6.com)</span> | AutoJs6 アプリケーションドキュメント, オンラインサイトとオフラインドキュメントプラグインは同じコンテンツソースを共有 | <span style="word-break:keep-all;white-space:nowrap">[アプリケーションプロジェクト](http://project.autojs6.com) / [オンラインで読む](https://docs.autojs6.com)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4-Documentation](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> | Auto.js `4.1.0` ドキュメントのクローンプロジェクト, 元のドキュメントを保存し AutoJs6 ドキュメントの参照基準となる | <span style="word-break:keep-all;white-space:nowrap">[アプリケーションプロジェクト](https://github.com/SuperMonster003/AutoJs4)</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Plugin-AutoJs4-Runtime](https://github.com/SuperMonster003/AutoJs6-Plugin-AutoJs4-Runtime)</span> | AutoJs4 エンジンを内蔵した AutoJs6 プラグイン, オリジナルのエンジンでスクリプトを実行し AutoJs6 と結果を比較 | <span style="word-break:keep-all;white-space:nowrap">[アプリケーションプロジェクト](http://project.autojs6.com) / [AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> |
 
 ******
 

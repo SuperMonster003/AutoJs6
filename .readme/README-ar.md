@@ -99,6 +99,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | نسخة مستنسخة من Auto.js `4.1.1 Alpha2`, تحتفظ بالشيفرة المصدرية الأصلية وتعد المرجع السلوكي لـ AutoJs6 | <span style="word-break:keep-all;white-space:nowrap">[مشروع الوثائق](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Documentation](http://docs-project.autojs6.com)</span> | وثائق تطبيق AutoJs6, يشترك الموقع الإلكتروني وملحق الوثائق دون اتصال في نفس مصدر المحتوى | <span style="word-break:keep-all;white-space:nowrap">[مشروع التطبيق](http://project.autojs6.com) / [القراءة عبر الإنترنت](https://docs.autojs6.com)</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4-Documentation](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> | نسخة مستنسخة من وثائق Auto.js `4.1.0`, تحتفظ بالوثائق الأصلية وتعد المرجع لوثائق AutoJs6 | <span style="word-break:keep-all;white-space:nowrap">[مشروع التطبيق](https://github.com/SuperMonster003/AutoJs4)</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Plugin-AutoJs4-Runtime](https://github.com/SuperMonster003/AutoJs6-Plugin-AutoJs4-Runtime)</span> | إضافة لـ AutoJs6 تضم محرك AutoJs4 لتشغيل السكربتات بالمحرك الأصلي ومقارنة النتائج مع AutoJs6 | <span style="word-break:keep-all;white-space:nowrap">[مشروع التطبيق](http://project.autojs6.com) / [AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> |
 
 ******
 

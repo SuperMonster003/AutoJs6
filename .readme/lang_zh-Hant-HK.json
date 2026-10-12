@@ -143,6 +143,7 @@
   "li_related_projects_autojs4_description": "Auto.js `4.1.1 Alpha2` 的克隆項目, 保留原始源碼並作為 AutoJs6 的行為基準",
   "li_related_projects_autojs6_documentation_description": "AutoJs6 應用文檔, 在線站點與離線文檔插件共用同一內容源",
   "li_related_projects_autojs4_documentation_description": "Auto.js `4.1.0` 文檔的克隆項目, 保留原始文檔並作為 AutoJs6 文檔的參考基準",
+  "li_related_projects_autojs4_runtime_description": "AutoJs6 插件, 內嵌 AutoJs4 引擎, 用於以原版引擎執行腳本並與 AutoJs6 對照結果",
   "p_jdk_preparation_add_existing_jdk": "也可以選擇 `Add JDK (添加 JDK)` 添加已存在的本地 JDK, 定位其目錄並完成 JDK 添加",
   "p_jdk_preparation_download_jdk": "JDK 可使用 IDE 直接下載, 或訪問 [Oracle 網站](https://www.oracle.com/java/technologies/downloads/) 下載",
   "p_jdk_preparation_download_new_jdk": "否則可以選擇 `Download JDK (下載 JDK)` 下載合適的 JDK, 點擊 `Download (下載)` 按鈕並等待下載完成",

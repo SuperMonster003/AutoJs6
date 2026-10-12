@@ -143,6 +143,7 @@
   "li_related_projects_autojs4_description": "Auto.js `4.1.1 Alpha2` 의 클론 프로젝트, 원본 소스 코드를 보존하고 AutoJs6 의 동작 기준이 됨",
   "li_related_projects_autojs6_documentation_description": "AutoJs6 애플리케이션 문서, 온라인 사이트와 오프라인 문서 플러그인이 동일한 콘텐츠 소스를 공유",
   "li_related_projects_autojs4_documentation_description": "Auto.js `4.1.0` 문서의 클론 프로젝트, 원본 문서를 보존하고 AutoJs6 문서의 참조 기준이 됨",
+  "li_related_projects_autojs4_runtime_description": "AutoJs4 엔진을 내장한 AutoJs6 플러그인, 원본 엔진으로 스크립트를 실행하고 AutoJs6와 결과를 비교",
   "p_jdk_preparation_add_existing_jdk": "`Add JDK (JDK 추가)` 를 선택하여 이미 존재하는 로컬 JDK를 추가하고 디렉토리를 지정하여 JDK 추가를 완료할 수 있습니다",
   "p_jdk_preparation_download_jdk": "JDK는 IDE에서 직접 다운로드하거나 [Oracle 웹사이트](https://www.oracle.com/java/technologies/downloads/) 에서 다운로드할 수 있습니다",
   "p_jdk_preparation_download_new_jdk": "그렇지 않으면 `Download JDK (JDK 다운로드)` 를 선택하여 적절한 JDK를 다운로드하고, `Download (다운로드)` 버튼을 클릭하여 완료될 때까지 기다립니다",

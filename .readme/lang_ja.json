@@ -143,6 +143,7 @@
   "li_related_projects_autojs4_description": "Auto.js `4.1.1 Alpha2` のクローンプロジェクト, 元のソースコードを保存し AutoJs6 の動作基準となる",
   "li_related_projects_autojs6_documentation_description": "AutoJs6 アプリケーションドキュメント, オンラインサイトとオフラインドキュメントプラグインは同じコンテンツソースを共有",
   "li_related_projects_autojs4_documentation_description": "Auto.js `4.1.0` ドキュメントのクローンプロジェクト, 元のドキュメントを保存し AutoJs6 ドキュメントの参照基準となる",
+  "li_related_projects_autojs4_runtime_description": "AutoJs4 エンジンを内蔵した AutoJs6 プラグイン, オリジナルのエンジンでスクリプトを実行し AutoJs6 と結果を比較",
   "p_jdk_preparation_add_existing_jdk": "`Add JDK (JDK を追加)` を選択して既存のローカル JDK を追加し, そのディレクトリを指定して JDK を追加することも可能です",
   "p_jdk_preparation_download_jdk": "JDK は IDE から直接ダウンロードするか, [Oracle サイト](https://www.oracle.com/java/technologies/downloads/) にアクセスしてダウンロードできます",
   "p_jdk_preparation_download_new_jdk": "または, `Download JDK (JDK をダウンロード)` を選択して適切な JDK をダウンロードし, `Download (ダウンロード)` ボタンをクリックしてダウンロードが完了するのを待ちます",
