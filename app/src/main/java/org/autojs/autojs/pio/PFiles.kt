@@ -128,6 +128,7 @@ object PFiles {
         }
     }
 
+    @JvmStatic
     fun readBytes(stream: InputStream): ByteArray {
         return try {
             ByteArray(stream.available()).also { stream.read(it) }
@@ -138,6 +139,7 @@ object PFiles {
         }
     }
 
+    @JvmStatic
     fun copyRaw(context: Context, rawId: Int, path: String): Boolean {
         val stream = context.resources.openRawResource(rawId)
         return copyStream(stream, path)
@@ -202,6 +204,7 @@ object PFiles {
     @JvmStatic
     fun write(fileOutputStream: OutputStream, text: String) = write(fileOutputStream, text, DEFAULT_ENCODING)
 
+    @JvmStatic
     fun write(outputStream: OutputStream, text: String, encoding: String?) {
         try {
             outputStream.write(text.toByteArray(encoding?.let { charset(it) } ?: Charset.defaultCharset()))
@@ -232,6 +235,7 @@ object PFiles {
         }
     }
 
+    @JvmStatic
     fun writeBytes(outputStream: OutputStream, bytes: ByteArray?) {
         try {
             outputStream.write(bytes)
@@ -270,6 +274,7 @@ object PFiles {
         }
     }
 
+    @JvmStatic
     fun copyAsset(context: Context, assetFile: String?, path: String): Boolean {
         return try {
             copyStream(context.assets.open(assetFile!!), path)
@@ -305,6 +310,7 @@ object PFiles {
         manager.open(assetFile).use { stream -> copyStream(stream, toPath) }
     }
 
+    @JvmStatic
     fun renameWithoutExtensionAndReturnNewPath(path: String, newName: String): String {
         val file = File(path)
         val newFile = File(file.parent, newName + "." + getExtension(file.name))
@@ -334,6 +340,7 @@ object PFiles {
     @JvmStatic
     fun getExtension(fileName: String): String = FileUtils.getExtension(fileName)
 
+    @JvmStatic
     fun generateNotExistingPath(path: String, extension: String): String {
         if (!File(path + extension).exists()) {
             return path + extension
@@ -361,6 +368,7 @@ object PFiles {
         return fileName.take(b)
     }
 
+    @JvmStatic
     fun copyAssetToTmpFile(context: Context, path: String): File {
         val extension = "." + getExtension(path)
         var name = getNameWithoutExtension(path)
@@ -587,5 +595,24 @@ object PFiles {
     @JvmStatic
     fun closeSilently(closeable: Closeable?) {
         runCatching { closeable?.close() }
+    }
+
+    /**
+     * The external storage root, as `com.stardust.pio.PFiles.getSdcardPath()` of Auto.js 4; that name resolves to
+     * this class through `StardustClassAliases` (roadmap P7.3).
+     * zh-CN: 外部存储根目录, 对应 Auto.js 4 的 `com.stardust.pio.PFiles.getSdcardPath()`; 该名字经 `StardustClassAliases`
+     * 解析到本类 (roadmap P7.3).
+     */
+    @JvmStatic
+    fun getSdcardPath(): String = EnvironmentUtils.externalStoragePath
+
+    /**
+     * [path] without the external storage root prefix, as `com.stardust.pio.PFiles.getSimplifiedPath()` of Auto.js 4.
+     * zh-CN: 去掉外部存储根目录前缀的 [path], 对应 Auto.js 4 的 `com.stardust.pio.PFiles.getSimplifiedPath()`.
+     */
+    @JvmStatic
+    fun getSimplifiedPath(path: String): String {
+        val sdcardPath = EnvironmentUtils.externalStoragePath
+        return if (path.startsWith(sdcardPath)) path.substring(sdcardPath.length) else path
     }
 }

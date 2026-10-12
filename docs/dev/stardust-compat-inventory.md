@@ -145,4 +145,48 @@ py E:/.cache/user-temp/claude/.../scratchpad/stardust_inventory.py   # 本次使
 | `com.stardust.util.NetworkUtils` | `org.autojs.autojs.util.NetworkUtils` | 1 / 1 / 10 | compat |
 
 - 覆盖率低且核心的类 (不适合别名, 需保留兼容副本): `UiObject` (42/69, 宿主 107), `UiSelector` (9/41), `UiObjectCollection` (9/36), `ScriptRuntime` (25/39), `ConsoleImpl` (13/17 对 91), `ProjectConfig` (25/30 对 65), `DynamicLayoutInflater` (9/22) 等.
-- 建议: 若实施方案 2, 第一批只做 `runtime.api.*` (Files, Device, Images, Events, Threads, Timers, Dialogs, Engines, AbstractShell, AbstractConsole), `core.util.Shell`, `pio.PFiles` / `PFile` / `PWritableTextFile` / `PReadableTextFile` 与 `core.image.Colors` 这 ~18 个类, 每条别名附编译期签名对照测试 (参数与返回类型, 不只是方法名); `automator.*` 与 UI 膨胀相关类不做.
+- 建议: 若实施方案 2, 第一批只做 `runtime.api.*` (Files, Device, Images, Events, Threads, Timers, Dialogs, Engines, AbstractShell, AbstractConsole), `core.util.Shell`, `pio.PFiles` / `PFile` / `PWritableTextFile` / `PReadableTextFile` 与 `core.image.Colors` 这 ~18 个类, 每条别名附编译期签名对照测试 (参数与返回类型, 不只是方法名); `automator.*` 与 UI 膨胀相关类不做. (维护者 2026-10-12 确认按此实施, 结果见第 10 节.)
+
+## 10. 方案 2 (别名表) 第一批实施 (2026-10-12)
+
+### 10.1 机制
+
+- 别名表 `app/src/main/java/org/autojs/autojs/rhino/StardustClassAliases.kt` (`TABLE`: `com.stardust` 类名 -> 宿主类名, 嵌套类随外部类映射), 由 `AndroidClassLoader.loadClass` 在查找自身 DEX 与父加载器之前查询. `AndroidClassLoader` 是 Rhino 的 application class loader, `Packages.com.stardust.*`, 顶层 `com.stardust.*`, `importClass` 与 `importPackage` 的类名查找都经它完成, 因此脚本写 `com.stardust.pio.PFile` 时拿到的是 `org.autojs.autojs.pio.PFile` 的 `NativeJavaClass`, `instanceof`, `new`, 静态调用与嵌套类访问都落在宿主类上.
+- 别名对 Java 层不可见: `AndroidClassLoader.loadClass` 只在调用栈显示查找由 Rhino 自身发起 (`org.mozilla.javascript.*` 帧, 即 `Kit.classOrNull`) 时才应用别名. VM 链接类 (Rhino 生成的 JavaAdapter 类, 以 `AndroidClassLoader` 为父加载器) 时上方没有 Java 帧, 脚本调用 `java.lang.Class.forName("com.stardust...")` 时调用方是 `java.lang.Class`, 两者都拿到所请求的副本; 这是必需的, 因为 ART 拒绝加载器返回名字不同的类 (`Initiating class loader ... returned class ... instead of ...`). XQ-AT72 (宿主 debug 5351) 实测: `Packages.com.stardust.pio.PFiles`, `importClass`, `importPackage`, `new com.stardust.pio.PFile(...)`, `new com.stardust.autojs.runtime.api.Files(runtime)` 与 `Kit.classOrNull(applicationClassLoader, ...)` 均得到宿主类, `runtime.files` / `runtime.dialogs` / `runtime.timers` / `runtime.events` 对相应 `com.stardust` 名字的 `instanceof` 为 true; 而 `java.lang.Class.forName(name, true, applicationClassLoader)` 与 `applicationClassLoader.loadClass(name)` 仍返回 `com.stardust.pio.PFiles` 副本; 表外的 `Shell` / `Colors` / `Device` / `ScreenMetrics` 名字不受影响. 另注意脚本中单参数的 `java.lang.Class.forName(name)` 对任何应用类 (宿主类与兼容类都一样) 都报 `ClassNotFoundException`, 因为经反射调用时 ART 取到的调用方加载器是 boot loader, 与别名无关. `runtime.loadDex` / `loadJar` 创建的 `DexClassLoader` 以应用类加载器 (而非 `AndroidClassLoader`) 为父加载器, 用户 DEX 按 JVM 类名链接到的本来就是兼容副本.
+- 不能挂在类加载器以外的层 (如替换 `NativeJavaPackage`) 的原因: Rhino 2.0.0 的 `NativeJavaPackage.getPkgProperty` 与 `forcePackage` 为包私有, `importPackage` 直接调用它们, 子类无法拦截; 而 `ClassLoader` 层对所有入口一致.
+- 副本保留: 兼容包自身的引擎栈 (`com.stardust.autojs.runtime.ScriptRuntime` 构造 `Files` / `Device` / `Images` / `Events` / `Threads` / `Timers` / `Dialogs` / `Engines`, `ConsoleImpl` 继承 `AbstractConsole`, `PFiles.open` 返回 `PWritableTextFile` / `PReadableTextFile`) 仍以类型引用这些类, 删除副本就要把兼容 `ScriptRuntime` 等核心类改写为宿主类型, 等同于方案 3 的范围; 加上用户 DEX 的 JVM 链接, 本批不删除任何副本, 别名只改变脚本按名字解析到的类. roadmap P7.3 "删除 (a) 类的副本" 因此留待方案 3 由维护者另行决定.
+
+### 10.2 启用规则 (工具与测试一致)
+
+别名只改变名字解析到的类, 脚本已持有的对象 (`files`, `dialogs` 等) 不受影响, 因此只有脚本能 "通过类名" 触及的成员才可能回退:
+
+- 阻止启用: 兼容类的 public 静态方法 / 静态字段在宿主类上缺失, 参数不兼容或不是静态 (含只在 Kotlin companion 上); 脚本可调用的 public 构造器 (参数不含 `com.stardust.autojs.*` 引擎类型) 在宿主类上缺失; 可构造或可继承 (抽象类 / 接口) 的类的实例成员缺失; 嵌套 public 类缺失.
+- 视为兼容 (对 Rhino 脚本无差别): 数值类型互换 (`int` / `long` / `double` / 装箱类型), `Object` 对 Rhino 值类型 (`Callable`, `Scriptable`, `NativeObject` 等), `String` 对 `CharSequence`, 宿主参数为 `Object`; 返回类型差异一律不检查.
+- 仅记录: 需要引擎内部类型的构造器 (脚本从未能调用), 纯静态工具类缺少的无参构造器, 不可构造类的实例成员差异.
+
+工具 `tools/stardust/split_stardust_compat.py` 同目录的 `compare_alias_signatures.py` 用 `javap -public` 读取 `:app` 与 `:compat:stardust` 的编译产物按上述规则逐类报告 (默认核对别名表, `--all` 普查全部类比路径候选, `--details` 列出每个成员); 单元测试 `app/src/test/java/org/autojs/autojs/rhino/StardustClassAliasesTest.kt` 对已启用的每一项用反射重做同样的核对 (另校验简单名一致, 两侧可加载, 表与工具的 `ALIASES` 一致, 以及 `AndroidClassLoader` 对别名返回宿主类而对表外类名返回副本), 宿主日后删掉脚本可触及的成员时测试失败而不是脚本静默报错. 2026-10-12 `:app:testAppDebugUnitTest --tests "*StardustClassAliasesTest"` 5 个用例通过; 工具的 `ALIASES` 保留全部 16 个候选 (含 5 个保留副本的类), 以便宿主补齐缺口后报告直接显示为 "alias".
+
+### 10.3 核对结果与启用清单
+
+| `com.stardust` 类 | 宿主类 | 成员 | 一致 | 宽松兼容 | 仅记录 | 阻止 | 结论 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `autojs.runtime.api.AbstractConsole` | `runtime.api.AbstractConsole` | 22 | 22 | 0 | 0 | 0 | 启用 |
+| `autojs.runtime.api.Dialogs` (+ `NonUiDialogs`) | `runtime.api.Dialogs` | 17 | 3 | 13 (`Object` -> `Callable`) | 1 | 0 | 启用 |
+| `autojs.runtime.api.Engines` | `runtime.api.Engines` | 9 | 6 | 0 | 3 | 0 | 启用 |
+| `autojs.runtime.api.Events` | `runtime.api.Events` | 51 | 37 | 13 (`Object` -> `Callable`) | 1 (`observeGesture` 实例方法, 不可构造) | 0 | 启用 |
+| `autojs.runtime.api.Files` | `runtime.api.Files` | 41 | 37 | 1 | 3 | 0 | 启用 |
+| `autojs.runtime.api.Threads` | `runtime.api.Threads` | 11 | 9 | 0 | 2 | 0 | 启用 |
+| `autojs.runtime.api.Timers` | `runtime.api.Timers` | 12 | 6 | 6 (`int` -> `double`) | 0 | 0 | 启用 |
+| `pio.PFiles` | `pio.PFiles` | 59 | 44 | 1 | 4 | 10 -> 0 (宿主补齐, 见下) | 启用 |
+| `pio.PFile` | `pio.PFile` | 18 | 14 | 0 | 4 (返回 `PFile[]` 而非 `File[]`) | 0 | 启用 |
+| `pio.PWritableTextFile` | `pio.PWritableTextFile` | 19 | 19 | 0 | 0 | 0 | 启用 |
+| `pio.PReadableTextFile` | `pio.PReadableTextFile` | 10 | 10 | 0 | 0 | 0 | 启用 |
+| `autojs.runtime.api.AbstractShell` | `runtime.api.AbstractShell` | 41 | 40 | 0 | 0 | 1 (`isRoot()`, 宿主为 `isExecWithRoot()`) | 保留副本 |
+| `autojs.core.util.Shell` | `runtime.api.Shell` | 60 | 58 | 0 | 0 | 2 (构造器 `(Context, boolean, boolean)`, `isRoot()`) | 保留副本 |
+| `autojs.runtime.api.Device` | `runtime.api.Device` | 52 | 50 | 0 | 0 | 2 (静态字段 `width` / `height`) | 保留副本 |
+| `autojs.runtime.api.Images` | `runtime.api.Images` | 28 | 22 | 0 | 5 | 1 (静态 `concat(img, img, dir)`, 宿主多一个 `ScriptRuntime` 参数) | 保留副本 |
+| `autojs.core.image.Colors` | `core.image.Colors` | 21 | 8 | 0 | 1 | 12 (静态颜色常量 `BLACK` ... `TRANSPARENT`) | 保留副本 |
+
+- 为启用 `PFiles` 对宿主 `org.autojs.autojs.pio.PFiles` 做的加法 (不改既有行为): `readBytes(InputStream)`, `copyRaw`, `write(OutputStream, String, String?)`, `writeBytes(OutputStream, ByteArray?)`, `copyAsset`, `renameWithoutExtensionAndReturnNewPath`, `generateNotExistingPath`, `copyAssetToTmpFile` 补 `@JvmStatic` (此前只能经 `PFiles.INSTANCE` 调用); 新增 `getSdcardPath()` 与 `getSimplifiedPath(path)` (Auto.js 4 同名方法的语义, 基于 `EnvironmentUtils.externalStoragePath`).
+- 5 个保留副本的类若要启用, 需要宿主补: `AbstractShell.isRoot()` 与 `Shell(Context, boolean, boolean)` 构造器; `Device` 的静态 `width` / `height`; `Images.concat(ImageWrapper, ImageWrapper, int)` 重载; `Colors` 的 12 个静态颜色常量. 这些属于宿主 API 的增补, 由维护者决定.
+- `--all` 普查: 304 个有类比路径或同名宿主类的 `com.stardust` 类中 201 个按规则无阻止项 (多数是引擎内部类或接口, 脚本不会直接引用); 其中与脚本相关且可作为下一批候选的有 `autojs.core.eventloop.EventEmitter`, `autojs.core.image.ColorFinder`, `autojs.core.storage.LocalStorage`, `autojs.core.util.ScriptPromiseAdapter`, `util.IntentExtras`, `util.BiMaps`, `util.MapBuilder`, `util.SimpleCache`, `util.StateObserver`, `pio.PReadableBinaryFile`, `pio.PRandomAccessBinaryFile`, `pio.PFileInterface`, `automator.simple_action.*`. 复现: `py tools/stardust/compare_alias_signatures.py --all`.

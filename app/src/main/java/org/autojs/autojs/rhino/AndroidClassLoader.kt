@@ -570,6 +570,14 @@ class AndroidClassLoader internal constructor(
      */
     @Throws(ClassNotFoundException::class)
     public override fun loadClass(name: String, resolve: Boolean): Class<*> {
+        // Rhino's own name lookups of the aliased com.stardust names receive the host classes (roadmap P7.3,
+        // StardustClassAliases); the VM and java.lang.Class.forName keep getting the class they asked for, because
+        // ART rejects a loader that returns a class of a different name.
+        // zh-CN: Rhino 自身查找别名表中的 com.stardust 类名时得到宿主类 (roadmap P7.3, StardustClassAliases); VM 与
+        // java.lang.Class.forName 仍拿到所请求的类, 因为 ART 拒绝加载器返回名字不同的类.
+        StardustClassAliases.resolve(name)?.let { target ->
+            if (isRhinoLookup()) return parent.loadClass(target)
+        }
         findLoadedClass(name)?.let { return it }
         for (dex in mDexClassLoaders.values) try {
             dex.loadClass(name)?.let { return it }
@@ -578,6 +586,25 @@ class AndroidClassLoader internal constructor(
             continue
         }
         return parent.loadClass(name)
+    }
+
+    /**
+     * True when the running [loadClass] call was issued by Rhino itself (`Kit.classOrNull` behind `Packages`,
+     * `importClass`, `importPackage` and the other LiveConnect lookups). The VM links classes through this loader
+     * without a Java frame above it and `java.lang.Class.forName` shows `java.lang.Class` as the caller; neither may
+     * be answered with an aliased class. Only evaluated for the few names in [StardustClassAliases].
+     * zh-CN: 当前 [loadClass] 调用是否由 Rhino 自身发起 (`Packages`, `importClass`, `importPackage` 等 LiveConnect 查找背后的
+     * `Kit.classOrNull`). VM 链接类时上方没有 Java 栈帧, `java.lang.Class.forName` 的调用方显示为 `java.lang.Class`,
+     * 两者都不能返回别名类. 只对 [StardustClassAliases] 中的少数名字求值.
+     */
+    private fun isRhinoLookup(): Boolean {
+        for (frame in Thread.currentThread().stackTrace) {
+            when (frame.className) {
+                "dalvik.system.VMStack", "java.lang.Thread", "java.lang.ClassLoader", javaClass.name -> continue
+                else -> return frame.className.startsWith("org.mozilla.javascript.")
+            }
+        }
+        return false
     }
 
     /**
