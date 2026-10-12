@@ -110,7 +110,8 @@ class FlowDiagnosticsTest {
         val value = FlowJsErrors.toJs(cx, scope, error)
         val message = FlowJsErrors.formatConsole(arrayOf(value, "context"))
         assertTrue(message, message.contains("failed %s"))
-        assertTrue(message, message.endsWith(" context"))
+        // A string after a non-string first argument is inspected, hence quoted (Auto.js 4 / Node.js util.format).
+        assertTrue(message, message.endsWith(" 'context'"))
         val formatted = FlowJsErrors.formatConsole(arrayOf("failure: %s", value))
         assertTrue(formatted, formatted.startsWith("failure: Error:"))
         assertTrue(formatted, formatted.contains("reservation.js:3"))

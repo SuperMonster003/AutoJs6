@@ -46,7 +46,7 @@ class InspectArrayTest {
         val summary = "... 499880 more items ..."
         assertEquals(100, Regex("\\bHello\\b").findAll(result.substringBefore(summary)).count())
         assertTrue(result.contains(summary))
-        assertTrue(result.contains("extra: custom"))
+        assertTrue(result.contains("extra: 'custom'"))
         assertEquals(20, Regex("\\bHello\\b").findAll(result.substringAfter(summary)).count())
     }
 
@@ -61,7 +61,7 @@ class InspectArrayTest {
         )
         val options = evaluate("({ showHidden: true })")
 
-        assertTrue(Inspect.inspectRhino(value, options).contains("[hidden]: secret"))
+        assertTrue(Inspect.inspectRhino(value, options).contains("[hidden]: 'secret'"))
     }
 
     @Test

@@ -707,9 +707,16 @@ object Inspect : Augmentable(), Invokable {
             //  ! zh-CN:
             //  ! 我认为将字符串用单引号包裹起来并不是一个好主意.
             //  !
-            //  # ctx.stylize("'$content'", "string")
+            //  # ctx.stylize(content, "string")
+            //
+            // @Decision by SuperMonster003 on Oct 12, 2026 (AutoJs4 runtime comparison, principle A).
+            //  ! Strings are quoted with single quotation marks again, exactly like Auto.js 4 (Node.js util.inspect):
+            //  ! console.log('obj = ', { name: 'Auto.js' }) prints "obj =  { name: 'Auto.js' }" on both engines.
+            //  ! zh-CN:
+            //  ! 字符串重新用单引号包裹, 与 Auto.js 4 (Node.js util.inspect) 一致:
+            //  ! console.log('obj = ', { name: 'Auto.js' }) 在两个引擎上都输出 "obj =  { name: 'Auto.js' }".
 
-            ctx.stylize(content, "string")
+            ctx.stylize("'$content'", "string")
         }
         value is Number -> {
             ctx.stylize(Context.toString(value), "number")
