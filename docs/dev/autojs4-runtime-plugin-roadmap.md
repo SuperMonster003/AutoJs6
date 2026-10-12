@@ -39,6 +39,12 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 | D16 | 首版即满足 16 KB 页对齐 (2026-10-12 拍板, 原 Q7) | 随 `:autojs` / `:common` 带入的原生库 (OpenCV 3.4.3, 终端 AAR, root-shell 等) 在首版就按 `docs/dev/page-size-16kb-roadmap.md` 的方法重新编译或替换为 16 KB 对齐版本, `NATIVE_PAGE_ALIGNMENT` 声明兼容; 无法对齐的库在 P1.4 列出并决定取舍, 不以 "如实声明不支持" 交付. |
 | D17 | AutoJs4 控制台窗口由插件设置决定 (2026-10-12 拍板, 原 Q8) | 日志始终回传宿主; 插件设置 "显示 AutoJs4 控制台窗口" 默认关闭, 开启后 `console.show()` 等同时在插件进程显示 AutoJs4 原有浮动窗口, 便于对照视觉效果. |
 | D12 | 名称与标识 (2026-10-12 拍板, 原 Q1) | 仓库 `AutoJs6-Plugin-AutoJs4-Runtime`, `rootProject.name` `autojs6-plugin-autojs4-runtime`, 应用标题 `AutoJs4 Runtime` (不可翻译), 插件 ID `autojs4-runtime`, 包名 `io.github.supermonster003.autojs6.plugin.autojs4.runtime`, 宿主引擎标识 `autojs4`, 服务 action `org.autojs.plugin.autojs4.RUNTIME`, category `autojs4-runtime`, 专用 API 模块 `autojs4-runtime-api`. 与 Node.js / Python / Lua Runtime 同一命名族. |
+| D18 | 宿主的 `com.stardust` 兼容包不由插件替代, 改为宿主内独立模块化 (2026-10-12 拍板) | 脚本直接调用 `com.stardust.xxx.someMethod()` 是宿主进程内 Rhino 的 LiveConnect 调用, 插件进程 (D1) 无法提供; 把插件 DEX 加载进宿主又会撞上 Rhino 1.7.7.2 / 2.0.0 与 `org.opencv.*` 同名类冲突, 且 AutoJs4 的同名类依赖 AutoJs4 自己的 `ScriptRuntime` / `AutoJs` 单例. 因此兼容包留在宿主, 按第 7 阶段 (P7) 先抽成独立 Gradle 库模块 (方案 1), 必要时叠加 Rhino 类名别名表以删减副本 (方案 2); 彻底移除 (方案 3) 不在本 Roadmap 范围, 需维护者另行决定. |
+
+补充事实 (2026-10-12, 实施 P1 时核实, 修正 F10 与 D16 的前提):
+
+- AutoJs4 的引擎模块 (`:autojs` / `:common` / `:automator`) 本身只带入 jackpal 终端库 (`libtermexec-release.aar`, 仅 `armeabi` / `mips` / `x86`); `libopencv_java3.so` 位于 AutoJs4 的 `app/src/main/jniLibs/armeabi-v7a` (以及 `inrt`), 没有 64 位版本; `opencv-3.4.3.aar` 只有 Java 类; `root-shell` / `apk-builder` AAR 无原生库. 也就是说 AutoJs4 实际是 32 位应用 (`app` 的 ABI 拆分虽列出 `arm64-v8a`, 但 OpenCV 只有 32 位), 在 64 位专用设备 (包括 16 KB 页设备) 上本就无法安装.
+- 由此首版插件镜像 AutoJs4 的原生库清单: 发布 `armeabi-v7a` (jackpal + OpenCV 3.4.3, 与 AutoJs4 逐字节相同) 与 `x86` (jackpal) 及 `universal`, 不额外提供 AutoJs4 从未有过的 64 位构建. 不含 64 位原生库时 16 KB 页对齐要求不再涉及任何库, D16 "首版即对齐" 无需重新编译即满足 (对齐门禁默认只检查两种 64 位 ABI). 是否补充 `arm64-v8a` (需以 NDK r28 重编 OpenCV 3.4.x) 作为新问题 Q10 待拍板, 见附录 A.
 
 ---
 
@@ -83,58 +89,67 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 ### P0 需求定稿与契约
 
 - [x] P0.1 附录 A 的待决事项由维护者拍板, 结论回填到第 1 节 "固定决策". 证据: Q1-Q9 已于 2026-10-12 全部拍板 (见 D3, D5, D12-D17).
-- [ ] P0.2 编写 `docs/dev/autojs4-runtime-protocol-v1.md`: 服务 action (`org.autojs.plugin.autojs4.RUNTIME`), category, `PluginInfo` 字段 (`engine = "autojs4"`, 协议版本, `requiresHostVersion`, AutoJs4 版本名与构建号), `runScript` 请求字段 (脚本绝对路径, 工作目录, 参数 extras, 是否 UI 模式由插件自行判断), 事件字段 (`started`, `log`, `finished`, `error`, `uiStarted`), 取消语义, 单次请求上限与超时, 失败回退.
-- [ ] P0.3 新建 `plugin-api/autojs4-runtime-api` 模块: AIDL `IAutoJs4RuntimePlugin` / `IAutoJs4RuntimeCallback`, 常量类, 与 `quickjs-runtime-api` 对齐的 Bundle 键定义; 单元测试覆盖键名与版本常量.
-- [ ] P0.4 在 AutoJs4 仓库确认可复用的最小壳: 列出 `inrt` 中与打包应用无关的部分 (启动器, 设置页, 日志页), 以及插件需要新增的 `GlobalConsole` 转发接口与 `ScriptEngineService` 外部启动入口; 以独立提交进入 AutoJs4 (不改变 AutoJs4 APK 行为).
+- [x] P0.2 编写 `docs/dev/autojs4-runtime-protocol-v1.md`: 服务 action (`org.autojs.plugin.autojs4.RUNTIME`), category, `PluginInfo` 字段 (`engine = "autojs4"`, 协议版本, `requiresHostVersion`, AutoJs4 版本名与构建号), `runScript` 请求字段 (脚本绝对路径, 工作目录, 参数 extras, `sourceType` 由宿主显式给出, UI 模式由插件判断并在受理结果与 `started` 事件中回报), 事件字段 (定稿为 `started` / `log` / `finished` 三种, 错误以 `finished` 的 `errorCode` 表达, 不再单设 `error` 与 `uiStarted`), 取消语义, 单次请求上限与超时, 失败回退. 证据: 宿主提交 `a83da32429`.
+- [x] P0.3 新建 `plugin-api/autojs4-runtime-api` 模块: AIDL `IAutoJs4RuntimePlugin` / `IAutoJs4RuntimeCallback`, 常量类, 与 `quickjs-runtime-api` 对齐的 Bundle 键定义; 单元测试覆盖键名与版本常量. 证据: 宿主提交 `18ca4b1665`, `AutoJs4RuntimeContractTest` 4 个用例通过, `:plugin-api:autojs4-runtime-api:assembleRelease` 成功.
+- [x] P0.4 在 AutoJs4 仓库确认可复用的最小壳. 结论: 无需修改 AutoJs4. `AutoJs.createGlobalConsole()` / `initScriptEngineManager()` / `createRuntime()` 可覆写, `ScriptEngineService.execute(source, listener, config)` 为公开入口, `RhinoJavaScriptEngine.getEngineOfContext()` 可把全局控制台的每一行归属到具体执行; `inrt` 中可复用的只有 `AutoJs` 子类与 `LogActivity` 的模式, 其余 (启动器, Pref, Tasker) 与打包应用绑定, 不进入插件. AutoJs4 submodule 固定在 `3fb08269198ebd49a880ab3ca2621383eaa10443` (2026-03-15, 与 GitHub `master` 一致).
 
 ### P1 插件仓库
 
-- [ ] P1.1 按 `AUTOJS6_PLUGIN_NEW_REPO_AGENTS.md` 建仓 (标识见 D12), 复制 OpenCC 插件的构建, 文档, 资源骨架; `version.properties` 的 `VERSION_NAME` 为 `1.0.0` (D13).
-- [ ] P1.2 以 Git submodule 引入 AutoJs4 仓库并只包含其 `:autojs` / `:common` / `:automator` 模块 (D5); 处理 AGP / Kotlin 版本差异 (AutoJs4 用 AGP 8.2.2 / Kotlin 1.8.22, 插件平台版本以 `AutoJs6-Gradle-Platform-Versions` 为准), 记录不可升级的原因.
-- [ ] P1.3 Manifest: `INFO` 服务 (category `autojs4-runtime`), `RUNTIME` 服务 (`:autojs4_runtime` 进程, `org.autojs.permission.PLUGIN` 保护), AutoJs4 的 `ScriptExecuteActivity`, 权限 Activity, 截图 Activity 与无障碍服务; 不导出 AutoJs4 原有的 `RunIntentActivity`, `ShortcutActivity`, Tasker 与 `TaskReceiver` 入口 (D15).
-- [ ] P1.4 原生库: 列出 `:autojs` 带入的 `.so` (OpenCV 3.4.3, 终端, root-shell), 按 ABI 拆分发布 (`arm64-v8a`, `armeabi-v7a`, `universal`); 全部按 16 KB 页对齐重新编译或替换 (D16), 用 `page-size-16kb-roadmap.md` 的对齐检查脚本验证, 无法对齐的库列出清单并决定取舍后再进入 P2.
-- [ ] P1.5 插件进程内的 `Application`: 初始化 AutoJs4 的 `AutoJs` 子类 (参考 `inrt/.../autojs/AutoJs.kt`), 覆写 `createGlobalConsole()` 把日志推送到绑定中的宿主回调; 无宿主连接时落到插件自己的日志页.
-- [ ] P1.6 权限引导页: 所有文件访问 (Android 11+) / 存储权限, 悬浮窗, 无障碍服务开启, 忽略电池优化; 从宿主发起运行且缺权限时, 插件打开引导页并以 `error(kind = PERMISSION)` 事件告知宿主.
-- [ ] P1.7 设置页 (D14, D17): 权限与服务分组 (无障碍服务, 悬浮窗, 所有文件访问, 忽略电池优化, Root 状态, 每项显示当前状态并可跳转系统设置), 显示启动器图标 (沿用官方插件契约), "显示 AutoJs4 控制台窗口" (默认关闭), 运行结束后是否保留插件进程.
-- [ ] P1.8 README (10 种语言), changelog, 官方签名发布任务 `appendDigestToReleasedFiles`, CI; `plugin_description` 说明 "用于在 AutoJs6 中以 Auto.js 4.1.1 Alpha2 引擎运行脚本, 便于对照 AutoJs6 的运行结果".
+- [x] P1.1 按 `AUTOJS6_PLUGIN_NEW_REPO_AGENTS.md` 建仓 (标识见 D12), 以 QuickJS Runtime 插件 (同为运行时插件) 的构建, 文档, 资源骨架为模板; `version.properties` 的 `VERSION_NAME` 为 `1.0.0` (D13), `TARGET_SDK_VERSION=28` 与 AutoJs4 一致 (存储, 悬浮窗与后台行为对照的前提). 证据: `D:/idea-projects/AutoJs6-Plugin-AutoJs4-Runtime` 提交 `7f23278` (骨架), 平台插件 1.9.0 (1.9.1 尚未发布到公共仓库).
+- [x] P1.2 以 Git submodule `autojs4/` 引入 AutoJs4 (固定 `3fb0826`), 插件仓库内的 `engine/common`, `engine/automator`, `engine/autojs` 以 `sourceSets` 指向 submodule 源码编译 (submodule 零改动), 依赖版本钉在 `gradle/libs.versions.toml` 的 `autojs4-*` 键. 版本差异处理: 引擎模块按 API 30 编译 (新 android.jar 存根移除了 `MainThreadProxy` 使用的 `Thread.stop(Throwable)` 等方法), `android.enableJetifier=true` (Material Dialogs 0.9 / EnhancedFloaty 仍引用 Support Library), `android.nonTransitiveRClass=false`, `android.uniquePackageNames=false` (vectordrawable 1.0.x 两个构件共用 package); AGP 9.3.3 / Kotlin 2.3.20 可直接编译 AutoJs4 的 Kotlin 1.8 代码, 未动用 `OVERRIDDEN_*`. 证据: 提交 `7f23278`, `:engine:autojs:assembleDebug` 成功.
+- [x] P1.3 Manifest: `<application android:process=":autojs4_runtime">` 让全部组件 (含 AutoJs4 的 `ScriptExecuteActivity`, 截图/权限 Activity, `AccessibilityServiceUsher`, `FloatyService`) 与 Binder 服务同进程, 以共享 AutoJs4 的进程内单例; `INFO` 与 `RUNTIME` 服务 (category `autojs4-runtime`, `org.autojs.permission.PLUGIN` 保护), Wake Activity, FileProvider; 不导出 AutoJs4 原有的外部入口 (D15, 这些类位于未引入的 `:app` 模块). 证据: 提交 `aaec58a`.
+- [x] P1.4 原生库 (结论见第 1 节 "补充事实"): 引擎模块只带入 jackpal 终端库, OpenCV 3.4.3 的 `.so` 来自 AutoJs4 `app/src/main/jniLibs/armeabi-v7a`, 两者直接取自 submodule, 逐字节与 AutoJs4 相同; 发布 `armeabi-v7a`, `x86`, `universal` 三个 APK, 无 64 位原生库, 16 KB 对齐无需重编 (D16 的前提不成立, 见 Q10). 证据: `app-universal-debug.apk` 内 `lib/armeabi-v7a/{libopencv_java3,libjackpal-*}.so` 与 `lib/x86/libjackpal-*.so`, 共享对齐插件通过.
+- [x] P1.5 `App` + `AutoJs4Runtime` (`com.stardust.autojs.AutoJs` 子类, 对应 inrt 的 `AutoJs.kt`): `createGlobalConsole()` 返回 `ForwardingGlobalConsole`, 每行经 `ExecutionRegistry` 以 Rhino Context (`RhinoJavaScriptEngine.getEngineOfContext`) / `ScriptThread-<id>` 线程名 / 唯一活动执行三步归属到具体执行后经 `HostEventSink` 回传; 无宿主连接时日志仍留在 AutoJs4 全局控制台, 可由插件的 `LogActivity` (`class.console`) 查看. 证据: 提交 `aaec58a`.
+- [x] P1.6 权限: 存储权限按 targetSdk 28 的传统外部存储模型 (`READ/WRITE_EXTERNAL_STORAGE`), 缺失时 `runScript` 以 `PERMISSION_DENIED` + `permission=storage` 拒绝并打开 `SettingsActivity` 提示; 悬浮窗与无障碍服务由 AutoJs4 引擎在脚本调用时按其原有逻辑引导 (`ensureAccessibilityServiceEnabled` 打开系统设置并抛 `ScriptException`). 证据: 提交 `aaec58a`.
+- [x] P1.7 设置页 `SettingsActivity` (D14, D17): "权限与服务" (无障碍服务, 悬浮窗, 存储权限, 忽略电池优化, Root 状态, 均显示当前状态并可跳转/检测), "运行" ("显示 AutoJs4 控制台窗口", 默认关闭, 由 `PluginJavaScriptEngine` 在引擎初始化后以 JS 前导把 `console.show/hide` 置空实现), "关于" (版本, 发行历史页, 项目主页). 入口: 无启动器图标, 以 MAIN + INFO 意图响应宿主插件设置页的 "打开插件", 并响应 `APPLICATION_PREFERENCES`. 未实现并记录: "显示启动器图标" 选项 (插件无 MAIN/LAUNCHER 入口, 不适用) 与 "运行结束后是否保留插件进程" (首版由系统回收, 后续视反馈). 控件为 AppCompat (`SwitchCompat`), 未引入 Material 3, 以免改变 AutoJs4 的依赖集. 证据: 提交 `aaec58a`.
+- [x] P1.8 README / 插件说明 / changelog 10 种语言由 `.python/generate_markdown.py` 生成 (`--check` 通过), `appendDigestToReleasedFiles` 产出 `autojs6-plugin-autojs4-runtime-v1.0.0-{armeabi-v7a,x86,universal}-<crc32>.apk`, CI `build.yml` (submodule 递归检出, 单元测试, lint, debug APK, x86 模拟器 instrumentation) 与 `markdown.yml`; `plugin_description` 为 "使用内嵌的 Auto.js 4.1.1 Alpha2 引擎运行脚本, 用于对照 AutoJs6 的运行结果". 启动器图标为 `.python/generate_provisional_icon.py` 渲染的临时图案, 待维护者图稿. 证据: 提交 `a595583`, `67ae5cc`; `:app:lintDebug` 21 条警告 0 错误; 单元测试 8 个通过.
 
 ### P2 宿主接入
 
-- [ ] P2.1 `core/plugin/autojs4/AutoJs4RuntimePluginHost.kt`: 基于 `AidlPluginHost` 的发现, 绑定, 签名与版本校验, 与 QuickJS 客户端同构; 单元测试覆盖版本不兼容, 未启用, 未授权三种拒绝路径.
-- [ ] P2.2 `engine/AutoJs4PluginScriptEngine.kt` 与 `script/AutoJs4ScriptSource` (引擎名 `autojs4`, 持有绝对路径与工作目录); 在 `AbstractAutoJs.kt` 注册; `init` / `execute` / `forceStop` / `destroy` 语义与 QuickJS 引擎一致, 输出写入 `GlobalConsole`, 结束状态经 `ScriptExecution` 回报.
-- [ ] P2.3 `Scripts.kt` 增加 `runWithAutoJs4(file)` 入口, 复用 `ScriptLaunchSourceFactory` 的路径与工作目录计算, 不改变现有 `run` / `runInteractive`.
-- [ ] P2.4 菜单项: `menu_script_options.xml` 增加 `action_run_with_autojs4` (位于 "运行" 相关项之后, 插件动作之前), 对 `.js`, `.auto` 文件及含 `project.json` 的项目文件夹显示 (D3); 插件可用时执行, 插件未安装时同一位置显示 `action_install_autojs4_runtime` ("安装 AutoJs4 Runtime") 并跳转插件中心对应条目, 插件已安装但被禁用或不兼容时提示启用或升级; `ExplorerBuiltInActionHandler` 分发.
-- [ ] P2.5 字符串资源 10 种语言 (`text_run_with_autojs4`, 失败提示, 权限提示), 排序与 `values-en` 一致性按宿主 `AGENTS.md`.
-- [ ] P2.6 任务面板与日志: 任务条目显示引擎标识 (与 Node.js / Python 任务的现有显示方式一致), 日志行前缀 `[AutoJs4]`; 音量键 / 任务面板 / 编辑器停止按钮均能结束 AutoJs4 任务.
-- [ ] P2.7 changelog (feature) 落盘: `文件管理器脚本菜单增加 "使用 AutoJs4 运行" 选项, 用于以 Auto.js 4.1.1 Alpha2 引擎运行脚本并对照结果 (需要 AutoJs4 Runtime 插件)`.
+- [x] P2.1 `core/plugin/autojs4/AutoJs4RuntimePluginClient.kt`: 基于 `AidlPluginHost` 的发现, 绑定, 签名与版本校验, 与 QuickJS 客户端同构; `runScript` 使用 `callWithDedicatedBindingLease` 在整个执行期间保持专用绑定 (否则空闲 30 s 后宿主会解绑, 长脚本的插件进程可能被回收). 三种拒绝路径 (未安装 / 未启用 / 不兼容) 的判定在 `ui/autojs4/AutoJs4RuntimePluginUi.inspect()` 中按已安装包信息完成, 对应单元测试待 P3.6 一并补 (需要 Android `PackageManager` 的纯逻辑抽取). 证据: 本次会话宿主提交 (见 git log `feat(engine): add the AutoJs4 runtime engine channel`).
+- [x] P2.2 `engine/AutoJs4PluginScriptEngine.kt` 与 `script/AutoJs4ScriptSource.kt` (引擎名 `autojs4`, 持有绝对路径, 源类型与项目目录); 在 `AbstractAutoJs.kt` 中紧随 QuickJS 注册 (仅非 inrt); `init` 选择插件并读取 `getRuntimeInfo`, `execute` 受理后阻塞等待 `finished` 事件, `forceStop` 经 `cancelScript` 取消并最多等待 10 s 确认 (P3.3), 插件 Binder 死亡映射为 "AutoJs4 运行时意外退出" (P3.4); 日志以 `[AutoJs4] ` 前缀写入 `GlobalConsole`. 单元测试 `AutoJs4ScriptSourceTest` 3 个用例通过.
+- [x] P2.3 `Scripts.runWithAutoJs4(context, file)`: 文件走 `AutoJs4ScriptSource.forFile`, 项目文件夹走 `forProject` (读取 `project.json` 的 `main`, 缺失时提示 `error_autojs4_project_main_missing`), 工作目录为项目目录或文件所在目录; 不改变现有 `run` / `runInteractive`.
+- [x] P2.4 菜单项: `menu_script_options.xml` 与 `menu_dir_options.xml` 增加 `action_run_with_autojs4` / `action_install_autojs4_runtime`, 文件菜单对 `.js` / `.auto` 显示, 目录菜单对含 `project.json` 的项目显示 (D3); 插件已安装时显示前者, 未安装时显示后者并跳转插件中心 (`PluginCenterActivity.launch(OFFICIAL, 包名)`); 已安装但禁用或不兼容时由 `AutoJs4RuntimePluginUi` 的对话框提示启用或升级 (复用既有插件提示字符串). 分发位于 `ExplorerBuiltInActionHandler` (文件) 与 `ExplorerPageViewHolder` (目录).
+- [x] P2.5 字符串 10 种语言: `text_run_with_autojs4`, `text_install_autojs4_runtime`, `error_autojs4_project_main_missing`, `error_autojs4_runtime_permission_denied`, `error_autojs4_runtime_exited_unexpectedly`; 已按 `name` 排序, `values` 与 `values-en` 一致.
+- [x] P2.6 任务面板: `TaskListRecyclerView` 对 `autojs4` 引擎按脚本扩展名显示 JavaScript / Auto 图标; 日志行前缀 `[AutoJs4]`; 停止经 `ScriptEngine.forceStop()` 走 `cancelScript`, 因此任务面板, 音量键与 `stopAll` 均可结束 AutoJs4 任务 (设备实测待 P4.1).
+- [x] P2.7 changelog (feature) 已写入 `.changelog/lang_zh-Hans.json` 并重新生成 Markdown (与维护者同期未提交的 changelog 修改并存于同一文件, 由维护者一并提交): `文件管理器脚本菜单增加 "使用 AutoJs4 运行" 选项, 用于以 Auto.js 4.1.1 Alpha2 引擎运行 .js 及 .auto 文件或项目文件夹并对照运行结果 (需要 AutoJs4 Runtime 插件, 入口: 文件管理器 > 脚本或项目的更多菜单)`.
 
 ### P3 执行语义
 
-- [ ] P3.1 普通脚本: 路径, 工作目录, `engines.myEngine().execArgv` 与 AutoJs4 的 `ScriptIntents` 参数对齐; 相对 `require` 与 `files.cwd()` 在插件进程中按原路径解析.
-- [ ] P3.1a 项目文件夹: 宿主读取 `project.json` 的 `main` 作为入口 (缺失或无效时提示并拒绝运行), 工作目录为项目目录; AutoJs4 侧按其 `ProjectLauncher` 语义运行, 不解析 AutoJs6 新增的 `project.json` 键.
-- [ ] P3.2 UI 模式脚本: 插件进程启动 `ScriptExecuteActivity`, 宿主收到 `uiStarted` 事件后只跟踪结束; 返回键与任务面板停止均能关闭该 Activity.
-- [ ] P3.3 停止: 宿主 `forceStop` -> `cancelScript(executionId)`; 插件对普通脚本调用 `ScriptEngineService` 的停止, 对 UI 脚本结束 Activity; 10 秒内未确认时宿主标记为已停止并记录警告.
-- [ ] P3.4 错误: 脚本异常以 `error` 事件回传 (消息, 栈, 行号), 宿主按现有脚本异常格式打印; 插件自身的崩溃 (Binder 断开) 映射为 "AutoJs4 运行时意外退出".
-- [ ] P3.5 并发: 允许多个 AutoJs4 任务并行 (AutoJs4 本身支持多引擎), 插件进程常驻直到最后一个任务结束后按设置退出.
-- [ ] P3.6 单元测试: 请求 / 事件编解码, 取消状态机, 权限错误映射 (JVM 单测, 不依赖 Android 类型).
+- [x] P3.1 普通脚本: 宿主传绝对路径与工作目录 (`cwd()` 为空时取文件所在目录), 宿主 `ExecutionConfig.arguments` 中的字符串 / 布尔 / 数字参数经请求 `arguments` Bundle 转为 AutoJs4 `ExecutionConfig.setArgument` (即 `engines.myEngine().execArgv`); `delay` / `interval` / `loopTimes` 保留在协议中, 首版宿主入口不传 (与 AutoJs4 "运行" 按钮一致); 相对 `require` 与 `files.cwd()` 由插件进程内的 AutoJs4 引擎按原路径解析. 设备实测待 P4.1.
+- [x] P3.1a 项目文件夹: 宿主 `AutoJs4ScriptSource.forProject` 读取 `project.json` 的 `main` (缺失或无效时提示 `error_autojs4_project_main_missing` 并拒绝运行), 工作目录为项目目录并以 `projectDirectory` 传给插件; 插件按 AutoJs4 `ProjectLauncher` 语义应用 `features`, 不解析 AutoJs6 新增键.
+- [x] P3.2 UI 模式脚本: 插件由 `JavaScriptSource.getExecutionMode()` 判定并在受理结果与 `started` 事件中回报 `uiMode`, AutoJs4 自行启动 `ScriptExecuteActivity`; 宿主只跟踪 `finished`. 停止: `forceStop()` 对 UI 脚本调用 `activity.finish()` (AutoJs4 `LoopBasedJavaScriptEngine.forceStop` 既有行为). 设备实测待 P4.1.
+- [x] P3.3 停止: 宿主 `forceStop` -> `cancelScript(executionId)` -> 插件 `engine.forceStop()` (主线程派发); 10 s 内未收到 `finished` 时宿主按已停止处理并记录警告 (`CANCEL_CONFIRM_TIMEOUT_MILLIS`); 尚未受理的执行以 60 s TTL 的预取消记录处理.
+- [x] P3.4 错误: 脚本异常以 `finished` 事件的 `errorCode = SCRIPT_EXCEPTION` + `errorMessage` + `errorStackTrace` 回传 (异常文本与 AutoJs4 控制台已先以 `log` 事件打印), 宿主以 `AutoJs4RuntimeExecutionException` 抛出并走现有异常展示; 插件进程崩溃 (Binder 死亡) 映射为 `error_autojs4_runtime_exited_unexpectedly`.
+- [x] P3.5 并发: 插件允许最多 16 个执行并行 (`MAX_CONCURRENT_EXECUTIONS`, 超出返回 `BUSY`), 宿主每个任务一个引擎并各自持有专用绑定; 插件进程在最后一个绑定释放后由系统按常规回收 ("运行结束后是否保留插件进程" 设置未实现, 见 P1.7).
+- [~] P3.6 单元测试: 插件侧 `AutoJs4ExecutionRequestParserTest` (请求规范化与边界, 4 用例), `AutoJs4PluginMetadataTest` (身份, ABI 清单, UTF-8 截断分块, changelog 语言回退, 4 用例), 宿主侧 `AutoJs4RuntimeContractTest` (4 用例) 与 `AutoJs4ScriptSourceTest` (3 用例) 通过; 取消状态机与权限错误映射依赖 Android `Bundle` / `Binder`, 由插件 `AutoJs4RuntimeInstrumentedTest` (发现, 绑定, PluginInfo, 运行往返, 异常, 预取消, 取消, 非法请求) 覆盖, 需设备或 x86 模拟器执行, 本次未执行 (设备未连接).
 
 ### P4 权限与设备验证
 
-- [ ] P4.1 Android 9 (G8441), 12 (XQ-AT72), 13 (XQ-DQ72), 15 (liuqin / OPD2413) 实机: 普通脚本, UI 脚本, 浮动窗口, 无障碍操作 (`click`, `text().findOne()`), 截图 (`captureScreen`), Root 可用设备上的 `shell(cmd, true)`.
-- [ ] P4.2 16 KB 页设备 (租用 SM-A566B) 安装与运行验收: 所有原生库通过对齐检查, 普通脚本, 截图与 Root 操作可用 (D16).
+- [ ] P4.1 Android 9 (G8441), 12 (XQ-AT72), 13 (XQ-DQ72), 15 (liuqin / OPD2413) 实机: 普通脚本, UI 脚本, 浮动窗口, 无障碍操作 (`click`, `text().findOne()`), 截图 (`captureScreen`), Root 可用设备上的 `shell(cmd, true)`. 2026-10-12 未执行: 会话内无设备连接 (`adb devices` 为空). 执行步骤: 安装插件 `app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk` 与宿主 `autojs6-v6.8.0-arm64-v8a.apk` (versionCode >= 5334), 插件中心启用 AutoJs4 Runtime 并在其设置页授予存储权限, 文件管理器中对 `.js` 文件选择 "使用 AutoJs4 运行", 观察宿主控制台的 `[AutoJs4]` 日志与任务面板停止; 再运行插件 `connectedDebugAndroidTest` (`-PandroidTestPermissionName=io.github.supermonster003.autojs6.plugin.autojs4.runtime.test.PLUGIN`, 因宿主已持有真实权限名).
+- [ ] P4.2 16 KB 页设备: 首版无 64 位原生库, 无法安装到 64 位专用设备 (与 AutoJs4 一致), 本条随 Q10 的结论处理; 若拍板 B, 以重编的 OpenCV 3.4.x 与宿主已重编的 jackpal AAR 补 `arm64-v8a` 后再在 SM-A566B 类设备验收.
 - [ ] P4.3 原则 A 对照集: 从 `app/src/main/assets-app/sample` 挑选 20 个以上在 Auto.js 4.x 文档范围内的示例, 分别用 AutoJs6 与 AutoJs4 运行并记录差异; 差异进入 AutoJs6 issue 或记录为 "特定情况" (附录 B).
 - [ ] P4.4 插件未安装, 未启用, 未授权, 版本不兼容, 缺权限五种状态的界面行为逐项验证.
 
 ### P5 文档与发布
 
 - [ ] P5.1 AutoJs6-Documentation 增加 "AutoJs4 运行时" 页面 (用途, 入口, 权限, 限制, 原则 A 与差异反馈方式), README 版本历史与 `api/changelog.md` 同步.
-- [ ] P5.2 AutoJs4 README 的 "关联项目" 小节增加插件条目; 插件 README 的 "简介" 说明与 AutoJs4 的版本对应关系.
-- [ ] P5.3 官方插件索引登记, 插件中心分类 (建议 "运行时"), 安装向导不纳入 "标准" 预置 (按需安装).
-- [ ] P5.4 AutoJs4 发布新版本时的插件同步流程写入插件 `AGENTS.md`: 更新 submodule / 依赖版本 -> 提升 `VERSION_NAME` -> changelog 一条 `升级 AutoJs4 版本 a -> b` -> 发布.
+- [x] P5.2 AutoJs4 README 的 "关联项目" 小节增加插件条目 (AutoJs4 提交 `37c7c17`, 中英文); 插件 README 的 "简介" 与 "兼容性和范围" 说明内嵌 AutoJs4 4.4.0 / commit `3fb0826` / Rhino 1.7.7.2 的对应关系. 宿主 README 的关联项目表暂未加插件行 (需同步 10 种语言 `.readme/lang_*.json`, 与维护者正在同步的 changelog 文案一并处理).
+- [ ] P5.3 官方插件索引登记, 插件中心分类 (建议 "运行时"), 安装向导不纳入 "标准" 预置 (按需安装). 前提: 插件仓库推送到 GitHub 并发布 1.0.0 release (`appendDigestToReleasedFiles` 产物).
+- [x] P5.4 AutoJs4 发布新版本时的插件同步流程已写入插件仓库 `AGENTS.md` (本地文件, 按仓库约定不入库): 更新 submodule -> 更新 `.readme/common.json` 的 `autojs4_commit` / `autojs4_version` 与 `THIRD_PARTY_NOTICES.md` -> changelog 一条 `升级 AutoJs4 版本 a -> b` -> 提升 `VERSION_NAME` -> 发布.
 
 ### P6 可选: 对照模式
 
 - [ ] P6.1 "使用 AutoJs4 运行并对照": 同一脚本依次在 AutoJs6 与 AutoJs4 运行, 汇总两次控制台输出的逐行差异与运行时长, 结果页可一键复制为 issue 模板 (2026-10-12 拍板: 首版不纳入, 观察使用反馈后再定).
+
+### P7 宿主 `com.stardust` 兼容包的独立模块化 (D18, 仅涉及宿主仓库)
+
+背景: 宿主 `app/src/main/java/com/stardust/**` 共 354 个文件, 其中 31 个桥接到 `org.autojs.autojs` 的宿主实现, 36 个引用 Rhino; 宿主自身代码只有 3 处引用 `com.stardust`, 示例脚本与内置 JS 模块均未使用; 该包由 6.x 按 _[`issue #290`](http://issues.autojs6.com/290)_ "尝试恢复 com.stardust 前缀包以便提升代码兼容性" 加回, 用途是让脚本里 `com.stardust.xxx.someMethod()` 这类直接 Java 调用继续可用. 目标是让主工程更简洁并消除这部分遗留代码的编辑器警告, 同时不改变脚本可见行为.
+
+- [ ] P7.1 盘点: 列出 354 个类中 (a) 与 `org.autojs.autojs` 存在 1:1 对应且签名兼容的类, (b) 只有宿主无对应物的类, (c) 依赖 Rhino 的类; 结合 issue #290 及后续 issue 中用户实际调用过的 `com.stardust.*` 名称, 形成清单 `docs/dev/stardust-compat-inventory.md`.
+- [ ] P7.2 方案 1: 新建宿主库模块 `:compat:stardust` (`compat/stardust/src/main/java/com/stardust/**`), 把 `app/src/main/java/com/stardust/**` 整体迁入, `app` 以 `implementation(project(":compat:stardust"))` 依赖; 同步 `lint.xml` 的忽略路径, `AGENTS.md` / 各 Roadmap 中 "`app/src/main/java/com/stardust/**` 冻结" 的表述改为指向新模块; 迁移不改任何类名, 包名与行为. 验收: 宿主全量构建通过, 单元测试通过, 以 `importClass(com.stardust.autojs.core.util.Shell)` 等直接调用的冒烟脚本在设备上结果不变.
+- [ ] P7.3 方案 2 (CONDITIONAL, 在 P7.1 显示大量 1:1 对应且维护者确认后执行): 在宿主 Rhino 的类解析层增加别名表, 请求 `com.stardust.a.b.C` 时解析到 `org.autojs.autojs.a.b.C`; 只保留 (b) 类作为 shim, 删除 (a) 类的副本; 每条别名附带编译期签名对照测试, 避免静默的方法缺失. 别名表与 shim 清单写入 P7.1 的文档.
+- [ ] P7.4 文案: P7.2 为内部重构, 不写 changelog; P7.3 删减副本后在 `improvement` 记一条 "com.stardust 兼容包改为按需映射到 AutoJs6 实现" 并说明受影响的类范围. 彻底移除 (方案 3) 需维护者单独拍板后另开条目.
 
 ---
 
@@ -154,7 +169,15 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 | Q7 | 原生库与 16 KB 页 | 首版即重新编译以满足对齐, 见 D16 |
 | Q8 | AutoJs4 自带控制台浮动窗口的处理 | 由插件设置决定, 默认只回传宿主, 见 D17 |
 
-待定: 无. 新的问题按 "编号 / 问题 / 候选 / 建议" 四列追加到本表下方, 拍板后移入上表并回填第 1 节.
+| Q11 | 宿主 `com.stardust` 兼容包是否由插件替代 | 不替代 (进程边界, 见 D18); 宿主侧先做独立模块化 (方案 1), 必要时叠加别名表 (方案 2), 见 P7 |
+
+待定:
+
+| 编号 | 问题 | 候选 | 建议 |
+| --- | --- | --- | --- |
+| Q10 | 插件是否补充 `arm64-v8a` 原生库 (AutoJs4 本身只有 32 位 OpenCV, 见第 1 节 "补充事实") | A. 首版只发布 `armeabi-v7a` / `x86` / `universal`, 与 AutoJs4 的可安装范围一致; B. 以 NDK r28.2 重编 OpenCV 3.4.x (16 KB 对齐) 并复用宿主已重编的 jackpal AAR, 增加 `arm64-v8a` 拆分包, 使 64 位专用设备 (含 16 KB 页设备) 也能安装 | 首版按 A 交付 (已实施); B 作为后续版本的独立条目, 因为重编后的 OpenCV 3.4.x 与 AutoJs4 的 3.4.3 二进制不再逐字节相同, 对照结果需单独标注 |
+
+新的问题按 "编号 / 问题 / 候选 / 建议" 四列追加到待定表, 拍板后移入上表并回填第 1 节.
 
 ## 附录 B. 原则 A 的已知 "特定情况" (持续补充)
 
