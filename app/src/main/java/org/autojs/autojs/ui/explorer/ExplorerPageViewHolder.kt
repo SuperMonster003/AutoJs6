@@ -24,13 +24,16 @@ import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.explorer.WorkspaceFileProvider
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.pio.PFile
+import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.ui.autojs4.AutoJs4RuntimePluginUi
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import java.io.File
 import org.autojs.autojs6.databinding.ExplorerDirectoryBinding
 
 private const val LOG_TAG = "ExplorerPageView"
@@ -145,6 +148,12 @@ internal class ExplorerPageViewHolder(
         }
         if (!host.isProjectRecognitionEnabled || !ProjectConfig.isProject(explorerPage)) {
             menu.removeItem(R.id.action_timed_task)
+            menu.removeItem(R.id.action_run_with_autojs4)
+            menu.removeItem(R.id.action_install_autojs4_runtime)
+        } else if (AutoJs4RuntimePluginUi.isInstalled(host.context)) {
+            menu.removeItem(R.id.action_install_autojs4_runtime)
+        } else {
+            menu.removeItem(R.id.action_run_with_autojs4)
         }
         if (!explorerPage.canSetAsWorkingDir()) {
             menu.removeItem(R.id.action_set_as_working_dir)
@@ -226,6 +235,15 @@ internal class ExplorerPageViewHolder(
                 R.id.action_set_as_working_dir ->
                     ScriptOperations(host.context, explorerView, host.currentPage)
                         .setAsWorkingDir(selectedItem.toScriptFile())
+                R.id.action_run_with_autojs4 -> {
+                    host.hideHostDialog()
+                    Scripts.runWithAutoJs4(host.context, File(selectedItem.path))
+                    host.notifyItemOperated(explorerPage)
+                }
+                R.id.action_install_autojs4_runtime -> {
+                    host.hideHostDialog()
+                    AutoJs4RuntimePluginUi.openPluginCenter(host.context)
+                }
                 R.id.action_build_apk -> {
                     host.hideHostDialog()
                     BuildActivity.launch(host.context, selectedItem.path)

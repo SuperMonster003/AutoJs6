@@ -326,6 +326,9 @@
     <string name="error_arguments_cannot_be_empty">引数を空にできません</string>
     <string name="error_arguments_must_be_empty">引数は空でなければなりません</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">少なくとも 1 つの ABI を選択する必要がある</string>
+    <string name="error_autojs4_project_main_missing">プロジェクトの project.json に実行可能な main スクリプトがありません</string>
+    <string name="error_autojs4_runtime_exited_unexpectedly">AutoJs4 ランタイムが予期せず終了しました</string>
+    <string name="error_autojs4_runtime_permission_denied">AutoJs4 Runtime に権限 \"%1$s\" がありません. プラグイン設定で許可してください</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 のバージョンは %1$s 未満であってはなりません</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 のバージョン番号は %1$s 未満であってはなりません</string>
     <string name="error_both_bitmap_and_mat_are_null">ビットマップとマットの両方が null です</string>
@@ -1874,6 +1877,7 @@
     <string name="text_inspector_tri_yes">はい</string>
     <string name="text_inspector_view_matches">一致項目を一覧で表示</string>
     <string name="text_install">インストール</string>
+    <string name="text_install_autojs4_runtime">AutoJs4 Runtime をインストール</string>
     <string name="text_install_from_local_file">\"ローカルファイル\" からインストール</string>
     <string name="text_install_from_official_plugin_library">\"公式プラグインライブラリ\" からインストール</string>
     <string name="text_install_from_third_party_plugin_library">\"サードパーティープラグインライブラリ\" からインストール</string>
@@ -2519,6 +2523,7 @@
     <string name="text_run_repeatedly">繰り返し実行</string>
     <string name="text_run_script">スクリプトの実行</string>
     <string name="text_run_simplified">実行</string>
+    <string name="text_run_with_autojs4">AutoJs4 で実行</string>
     <string name="text_running_task">タスクの実行</string>
     <string name="text_same_as_current_file">現在のファイルと同一</string>
     <string name="text_same_as_state">%1$s と同じ</string>

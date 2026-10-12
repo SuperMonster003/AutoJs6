@@ -325,6 +325,9 @@
     <string name="error_arguments_cannot_be_empty">Les arguments ne peuvent pas être vides</string>
     <string name="error_arguments_must_be_empty">Les arguments doivent être vides</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">Au moins un ABI doit être sélectionné</string>
+    <string name="error_autojs4_project_main_missing">Le project.json du projet ne contient aucun script main exécutable</string>
+    <string name="error_autojs4_runtime_exited_unexpectedly">Le runtime AutoJs4 s\'est arrêté de façon inattendue</string>
+    <string name="error_autojs4_runtime_permission_denied">AutoJs4 Runtime n\'a pas la permission \"%1$s\", accordez-la dans les paramètres du plugin</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">La version d\'AutoJs6 ne doit pas être inférieure à %1$s</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">Le numéro de version d\'AutoJs6 ne doit pas être inférieur à %1$s</string>
     <string name="error_both_bitmap_and_mat_are_null">Le bitmap et le mat sont tous deux nuls</string>
@@ -1873,6 +1876,7 @@
     <string name="text_inspector_tri_yes">Oui</string>
     <string name="text_inspector_view_matches">Afficher les correspondances sous forme de liste</string>
     <string name="text_install">Installation</string>
+    <string name="text_install_autojs4_runtime">Installer AutoJs4 Runtime</string>
     <string name="text_install_from_local_file">Installer depuis \"Fichier local\"</string>
     <string name="text_install_from_official_plugin_library">Installer depuis la \"Bibliotheque officielle de plugins\"</string>
     <string name="text_install_from_third_party_plugin_library">Installer depuis la \"Bibliotheque de plugins tierce\"</string>
@@ -2518,6 +2522,7 @@
     <string name="text_run_repeatedly">Fonctionne à plusieurs reprises</string>
     <string name="text_run_script">Exécuter un script</string>
     <string name="text_run_simplified">Exéc</string>
+    <string name="text_run_with_autojs4">Exécuter avec AutoJs4</string>
     <string name="text_running_task">Exécution d\'une tâche</string>
     <string name="text_same_as_current_file">Identique au fichier actuel</string>
     <string name="text_same_as_state">Identique à %1$s</string>

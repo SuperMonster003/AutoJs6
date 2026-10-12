@@ -327,6 +327,9 @@
     <string name="error_arguments_cannot_be_empty">인수를 비울 수 없습니다</string>
     <string name="error_arguments_must_be_empty">인수는 비어 있어야 합니다</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">하나 이상의 ABI 를 선택해야 합니다.</string>
+    <string name="error_autojs4_project_main_missing">프로젝트의 project.json에 실행할 수 있는 main 스크립트가 없습니다</string>
+    <string name="error_autojs4_runtime_exited_unexpectedly">AutoJs4 런타임이 예기치 않게 종료되었습니다</string>
+    <string name="error_autojs4_runtime_permission_denied">AutoJs4 Runtime에 \"%1$s\" 권한이 없습니다. 플러그인 설정에서 허용하세요</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 버전은 %1$s보다 낮아서는 안 됩니다</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 버전 번호는 %1$s보다 낮아서는 안 됩니다</string>
     <string name="error_both_bitmap_and_mat_are_null">비트 맵과 매트는 모두 null 입니다</string>
@@ -1875,6 +1878,7 @@
     <string name="text_inspector_tri_yes">예</string>
     <string name="text_inspector_view_matches">일치 항목을 목록으로 보기</string>
     <string name="text_install">설치</string>
+    <string name="text_install_autojs4_runtime">AutoJs4 Runtime 설치</string>
     <string name="text_install_from_local_file">\"로컬 파일\"에서 설치</string>
     <string name="text_install_from_official_plugin_library">\"공식 플러그인 라이브러리\" 에서 설치</string>
     <string name="text_install_from_third_party_plugin_library">\"서드파티 플러그인 라이브러리\" 에서 설치</string>
@@ -2520,6 +2524,7 @@
     <string name="text_run_repeatedly">반복적으로 실행하십시오</string>
     <string name="text_run_script">스크립트를 실행하십시오</string>
     <string name="text_run_simplified">운영</string>
+    <string name="text_run_with_autojs4">AutoJs4로 실행</string>
     <string name="text_running_task">실행 작업</string>
     <string name="text_same_as_current_file">현재 파일과 동일</string>
     <string name="text_same_as_state">%1$s과(와) 동일</string>

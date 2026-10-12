@@ -14,8 +14,10 @@ import org.autojs.autojs.ui.common.ScriptLoopDialog
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.floating.controller.FloatingControllerManager
 import org.autojs.autojs.ui.project.BuildActivity
+import org.autojs.autojs.ui.autojs4.AutoJs4RuntimePluginUi
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs6.R
+import java.io.File
 
 internal interface ExplorerBuiltInActionHost {
     val context: Context
@@ -103,6 +105,16 @@ internal class ExplorerBuiltInActionHandler(
                 BuildActivity.launch(host.context, host.selectedItem!!.path)
                 host.notifyItemOperated()
                 host.hideHostDialog()
+            }
+            R.id.action_run_with_autojs4 -> {
+                val selected = host.selectedItem ?: return false
+                host.hideHostDialog()
+                Scripts.runWithAutoJs4(host.context, File(selected.path))
+                host.notifyItemOperated()
+            }
+            R.id.action_install_autojs4_runtime -> {
+                host.hideHostDialog()
+                AutoJs4RuntimePluginUi.openPluginCenter(host.context)
             }
             R.id.action_reset -> {
                 val reset = Explorers.Providers.workspace().resetSample(host.selectedItem!!.toScriptFile())

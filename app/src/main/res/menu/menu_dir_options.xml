@@ -18,6 +18,12 @@
         android:id="@+id/action_timed_task"
         android:title="@string/text_timed_task" />
     <item
+        android:id="@+id/action_run_with_autojs4"
+        android:title="@string/text_run_with_autojs4" />
+    <item
+        android:id="@+id/action_install_autojs4_runtime"
+        android:title="@string/text_install_autojs4_runtime" />
+    <item
         android:id="@+id/action_set_as_working_dir"
         android:title="@string/text_set_as_working_dir" />
     <item

@@ -20,10 +20,12 @@ import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.JvmFileSource
+import org.autojs.autojs.script.AutoJs4ScriptSource
 import org.autojs.autojs.script.PythonScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
+import org.autojs.autojs.ui.autojs4.AutoJs4RuntimePluginUi
 import org.autojs.autojs.ui.jvm.JvmSourcePluginUi
 import org.autojs.autojs.ui.python.PythonRuntimePluginUi
 import org.autojs.autojs.util.IntentUtils
@@ -155,6 +157,34 @@ object Scripts {
         e.printStackTrace()
         ViewUtils.showToast(context, e.message, true)
         null
+    }
+
+    /**
+     * Explicit "Run with AutoJs4" entry: the file or project folder is executed by the AutoJs4
+     * Runtime plugin through the `autojs4` engine. Never used by the default run paths.
+     *
+     * zh-CN: 显式的 "使用 AutoJs4 运行" 入口: 文件或项目文件夹经 `autojs4` 引擎由 AutoJs4 Runtime 插件
+     * 执行, 默认运行路径不会使用它.
+     */
+    @JvmStatic
+    fun runWithAutoJs4(context: Context, target: File): ScriptExecution? {
+        if (!AutoJs4RuntimePluginUi.ensureAvailableForInteractiveLaunch(context)) {
+            return null
+        }
+        return try {
+            val source = if (target.isDirectory) {
+                AutoJs4ScriptSource.forProject(target)
+                    ?: throw IllegalArgumentException(context.getString(R.string.error_autojs4_project_main_missing))
+            } else {
+                AutoJs4ScriptSource.forFile(target)
+            }
+            val config = ExecutionConfig(workingDirectory = source.workingDirectory)
+            AutoJs.instance.scriptEngineService.execute(source, config)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ViewUtils.showToast(context, e.message, true)
+            null
+        }
     }
 
     @JvmStatic

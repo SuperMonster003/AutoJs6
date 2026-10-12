@@ -47,5 +47,11 @@
     <item
         android:id="@+id/action_floating_run"
         android:title="@string/text_floating_run" />
+    <item
+        android:id="@+id/action_run_with_autojs4"
+        android:title="@string/text_run_with_autojs4" />
+    <item
+        android:id="@+id/action_install_autojs4_runtime"
+        android:title="@string/text_install_autojs4_runtime" />
 
 </menu>

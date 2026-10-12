@@ -325,6 +325,9 @@
     <string name="error_arguments_cannot_be_empty">Los argumentos no pueden estar vacíos</string>
     <string name="error_arguments_must_be_empty">Los argumentos deben estar vacíos</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">Es necesario seleccionar al menos un ABI</string>
+    <string name="error_autojs4_project_main_missing">El project.json del proyecto no tiene un script main ejecutable</string>
+    <string name="error_autojs4_runtime_exited_unexpectedly">El runtime de AutoJs4 se cerró de forma inesperada</string>
+    <string name="error_autojs4_runtime_permission_denied">AutoJs4 Runtime no tiene el permiso \"%1$s\", concédelo en los ajustes del complemento</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">La versión de AutoJs6 no debe ser inferior a %1$s</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">El número de versión de AutoJs6 no debe ser inferior a %1$s</string>
     <string name="error_both_bitmap_and_mat_are_null">Tanto el mapa de bits como el tapete son nulos</string>
@@ -1873,6 +1876,7 @@
     <string name="text_inspector_tri_yes">Sí</string>
     <string name="text_inspector_view_matches">Ver coincidencias como lista</string>
     <string name="text_install">Instalar</string>
+    <string name="text_install_autojs4_runtime">Instalar AutoJs4 Runtime</string>
     <string name="text_install_from_local_file">Instalar desde \"Archivo local\"</string>
     <string name="text_install_from_official_plugin_library">Instalar desde \"Biblioteca oficial de plugins\"</string>
     <string name="text_install_from_third_party_plugin_library">Instalar desde \"Biblioteca de plugins de terceros\"</string>
@@ -2518,6 +2522,7 @@
     <string name="text_run_repeatedly">Ejecutar repetidamente</string>
     <string name="text_run_script">Ejecutar script</string>
     <string name="text_run_simplified">Ejec</string>
+    <string name="text_run_with_autojs4">Ejecutar con AutoJs4</string>
     <string name="text_running_task">Ejecutar tarea</string>
     <string name="text_same_as_current_file">Igual que el archivo actual</string>
     <string name="text_same_as_state">Igual que %1$s</string>

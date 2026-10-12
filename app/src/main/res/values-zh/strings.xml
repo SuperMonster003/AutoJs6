@@ -321,6 +321,9 @@
     <string name="error_arguments_cannot_be_empty">参数列表不可为空</string>
     <string name="error_arguments_must_be_empty">参数列表需为空</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">需要至少选择一个 ABI</string>
+    <string name="error_autojs4_project_main_missing">项目的 project.json 缺少可运行的 main 入口脚本</string>
+    <string name="error_autojs4_runtime_exited_unexpectedly">AutoJs4 运行时意外退出</string>
+    <string name="error_autojs4_runtime_permission_denied">AutoJs4 Runtime 缺少权限 \"%1$s\", 请在插件设置中授予</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 应用版本需不低于 %1$s</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 应用版本号需不低于 %1$s</string>
     <string name="error_both_bitmap_and_mat_are_null">Bitmap 与 Mat 不能同时为 null</string>
@@ -1870,6 +1873,7 @@
     <string name="text_inspector_tri_yes">是</string>
     <string name="text_inspector_view_matches">以列表查看匹配结果</string>
     <string name="text_install">安装</string>
+    <string name="text_install_autojs4_runtime">安装 AutoJs4 Runtime</string>
     <string name="text_install_from_local_file">从 \"本地文件\" 安装</string>
     <string name="text_install_from_official_plugin_library">从 \"官方插件库\" 安装</string>
     <string name="text_install_from_third_party_plugin_library">从 \"第三方插件库\" 安装</string>
@@ -2515,6 +2519,7 @@
     <string name="text_run_repeatedly">循环运行</string>
     <string name="text_run_script">运行脚本</string>
     <string name="text_run_simplified">运行</string>
+    <string name="text_run_with_autojs4">使用 AutoJs4 运行</string>
     <string name="text_running_task">运行中任务</string>
     <string name="text_same_as_current_file">与当前文件一致</string>
     <string name="text_same_as_state">与 %1$s 相同</string>

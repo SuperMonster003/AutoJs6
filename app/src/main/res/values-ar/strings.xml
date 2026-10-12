@@ -327,6 +327,9 @@
     <string name="error_arguments_cannot_be_empty">لا يمكن أن تكون الوسائط فارغة</string>
     <string name="error_arguments_must_be_empty">يجب أن تكون الوسائط فارغة</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">يجب تحديد ABI واحد على الأقل</string>
+    <string name="error_autojs4_project_main_missing">لا يحتوي project.json الخاص بالمشروع على سكربت main قابل للتشغيل</string>
+    <string name="error_autojs4_runtime_exited_unexpectedly">انتهى تشغيل AutoJs4 بشكل غير متوقع</string>
+    <string name="error_autojs4_runtime_permission_denied">لا تملك AutoJs4 Runtime الإذن \"%1$s\", امنحه من إعدادات الإضافة</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">يجب ألا يكون إصدار AutoJs6 أقل من %1$s</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">يجب ألا يكون رقم إصدار AutoJs6 أقل من %1$s</string>
     <string name="error_both_bitmap_and_mat_are_null">كلا النقطات والحصيرة فارغة</string>
@@ -1875,6 +1878,7 @@
     <string name="text_inspector_tri_yes">نعم</string>
     <string name="text_inspector_view_matches">عرض التطابقات كقائمة</string>
     <string name="text_install">تثبيت</string>
+    <string name="text_install_autojs4_runtime">تثبيت AutoJs4 Runtime</string>
     <string name="text_install_from_local_file">التثبيت من \"ملف محلي\"</string>
     <string name="text_install_from_official_plugin_library">التثبيت من \"مكتبة الاضافات الرسمية\"</string>
     <string name="text_install_from_third_party_plugin_library">التثبيت من \"مكتبة اضافات الطرف الثالث\"</string>
@@ -2520,6 +2524,7 @@
     <string name="text_run_repeatedly">ركض مرارا وتكرارا</string>
     <string name="text_run_script">النصي تشغيل</string>
     <string name="text_run_simplified">يجري</string>
+    <string name="text_run_with_autojs4">تشغيل باستخدام AutoJs4</string>
     <string name="text_running_task">تشغيل المهمة</string>
     <string name="text_same_as_current_file">مطابق للملف الحالي</string>
     <string name="text_same_as_state">مثل %1$s</string>

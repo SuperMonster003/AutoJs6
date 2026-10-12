@@ -29,9 +29,11 @@ import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.WorkspaceFileProvider
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.model.script.Scripts
+import org.autojs.autojs.script.AutoJs4ScriptSource
 import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.theme.ThemeColorManagerCompat
+import org.autojs.autojs.ui.autojs4.AutoJs4RuntimePluginUi
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutSnapshotViewer
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.ImageInfoDialogManager
@@ -676,6 +678,16 @@ internal class ExplorerItemViewHolder(
         val samplePath = PFile(host.context.filesDir, WorkspaceFileProvider.SAMPLE_PATH).path
         if (!mExplorerItem.path.startsWith(samplePath)) {
             menu.removeItem(R.id.action_reset)
+        }
+        // "Run with AutoJs4" is offered only for the files AutoJs4 can execute (.js and .auto);
+        // when the plugin is missing, the same slot shows the install guidance instead.
+        if (!AutoJs4ScriptSource.isAutoJs4FileType(mExplorerItem.type)) {
+            menu.removeItem(R.id.action_run_with_autojs4)
+            menu.removeItem(R.id.action_install_autojs4_runtime)
+        } else if (AutoJs4RuntimePluginUi.isInstalled(host.context)) {
+            menu.removeItem(R.id.action_install_autojs4_runtime)
+        } else {
+            menu.removeItem(R.id.action_run_with_autojs4)
         }
         val pluginMenuItems = mutableMapOf<Int, org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction>()
         runCatching {
