@@ -1,12 +1,32 @@
 # -*- coding: utf-8 -*-
-import locale
+"""Generate README and release history from committed sources.
 
-# 设置语言环境为 UTF-8
-locale.setlocale(locale.LC_ALL, '')
-encoding = locale.getpreferredencoding()
-if encoding.lower() != 'utf-8':
-    # 强制使用 UTF-8 编码
-    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+python .python/generate_markdown.py                 # offline generation
+python .python/generate_markdown.py --check         # offline, read-only CI check
+python .python/generate_markdown.py --refresh-metadata  # explicitly query GitHub
+
+Dates in .readme/common.json are explicit YYYY/MM/DD source values. Network
+refresh is opt-in; ordinary generation and checks never read credentials or
+rewrite templates, metadata caches, or source JSON files.
+"""
+import argparse
+import sys
+from pathlib import Path
+
+
+def parse_arguments(argv=None):
+    parser = argparse.ArgumentParser(description="Generate localized documentation from committed sources")
+    parser.add_argument('--check', action='store_true', help='compare generated files without writes or network access')
+    parser.add_argument('--refresh-metadata', action='store_true', help='explicitly refresh the cached GitHub project metadata before generation')
+    args = parser.parse_args(argv)
+    if args.check and args.refresh_metadata:
+        parser.error('--check cannot be combined with --refresh-metadata')
+    return args
+
+
+arguments = parse_arguments() if __name__ == '__main__' else argparse.Namespace(check=False, refresh_metadata=False)
+REFRESH_METADATA = arguments.refresh_metadata
+GENERATED = {}
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from collections import defaultdict
@@ -75,8 +95,8 @@ readme_root_dir = os.path.join(project_root_dir, '.readme')
 utils_env_path = os.path.join(project_root_dir, '.utils', '.env')
 
 # Prefer the repository-local token, then fall back to the process environment (for example, in CI).
-github_token_from_dotenv = load_dotenv_value(utils_env_path, 'GITHUB_TOKEN')
-github_token = github_token_from_dotenv or os.environ.get('GITHUB_TOKEN', '').strip()
+github_token_from_dotenv = load_dotenv_value(utils_env_path, 'GITHUB_TOKEN') if REFRESH_METADATA else ''
+github_token = (github_token_from_dotenv or os.environ.get('GITHUB_TOKEN', '').strip()) if REFRESH_METADATA else ''
 
 log(f'Starting markdown generation in {project_root_dir}')
 if github_token:
@@ -271,23 +291,9 @@ _intellij_idea_min_supported = _version_props.get('MIN_SUPPORTED_INTELLIJ_IDEA_I
 
 # 在加载模板前, 先更新模板中的 Android Studio 与 IntelliJ IDEA Badge 版本
 def update_readme_badge_versions():
-    """
-    读取 .readme/template_readme.md, 将 Android Studio 与 IntelliJ IDEA 的徽标版本替换为
-    version.properties 中的最小支持版本:
-      - MIN_SUPPORTED_ANDROID_STUDIO_IDE_VERSION
-      - MIN_SUPPORTED_INTELLIJ_IDEA_IDE_VERSION
-    """
-    template_path = os.path.join(readme_root_dir, 'template_readme.md')
-    try:
-        with open(template_path, 'r', encoding='utf-8') as f:
-            data = f.read()
-    except FileNotFoundError:
-        log(f'[warn] template_readme.md not found at {template_path}, skip badge update')
-        return
-    except Exception as e:
-        log(f'[warn] Failed to read template_readme.md: {e}')
-        return
-
+    """Render version badges in memory; templates are never rewritten."""
+    template_path = Path(readme_root_dir) / 'template_readme.md'
+    data = template_path.read_text(encoding='utf-8')
     # 与原逻辑等价的正则片段
     prefix = r'<img\s[^>]*?src="https://img\.shields\.io/badge/'
     android_fragment = r'android(?:%20|\s)studio'
@@ -316,25 +322,11 @@ def update_readme_badge_versions():
             return m.group(0)
         data = re_idea.sub(_repl_idea, data)
 
-    if data == original:
-        return
+    return data
 
-    try:
-        with open(template_path, 'w', encoding='utf-8') as f:
-            f.write(data)
-            log(f'Updated badge(s) in {template_path}')
-    except Exception as e:
-        log(f'[warn] Failed to write template_readme.md: {e}')
-
-# 执行模板内徽标版本更新, 并清空 Jinja2 缓存后再获取模板
-update_readme_badge_versions()
-try:
-    env.cache.clear()  # 确保重新读取更新后的模板文件
-except Exception:
-    pass
 
 # 读取模板文件 (在更新徽标版本之后)
-template_readme = env.get_template('template_readme.md')
+template_readme = env.from_string(update_readme_badge_versions())
 template_changelog = env.get_template('template_changelog.md')
 
 language_content_map = {}
@@ -356,13 +348,15 @@ for key, value in common_data.items():
 
 def format_date(date_str, lang_code):
     if date_str == "%CURRENT_DATE%":
-        # 获取当前日期并格式化为 YYYY/MM/DD
-        date_str = datetime.now().strftime("%Y/%m/%d")
+        raise ValueError("Use a committed YYYY/MM/DD date instead of %CURRENT_DATE%")
 
     if lang_code in date_formats:
         try:
             date_obj = datetime.strptime(date_str, "%Y/%m/%d")
-            formatted_date = date_obj.strftime(date_formats[lang_code])
+            months = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')
+            formatted_date = date_formats[lang_code]
+            for token, value in {'%Y': str(date_obj.year), '%m': f'{date_obj.month:02d}', '%d': f'{date_obj.day:02d}', '%B': months[date_obj.month - 1], '%b': months[date_obj.month - 1][:3]}.items():
+                formatted_date = formatted_date.replace(token, value)
 
             # 在 formatted_date 中每个非字母和非数字字符前后增加空格 (如果没有空格)
             formatted_date_with_spaces = re.sub(r'(\d+)', r' \1 ', formatted_date).strip()
@@ -389,6 +383,8 @@ def parse_github_repo_path(repo_url: str):
 
 
 def request_github_json(url: str, description: str = ''):
+    if not REFRESH_METADATA:
+        return None, {}
     request_label = description or url
     started_at = datetime.now()
     log(f"Fetching GitHub data: {request_label}")
@@ -455,6 +451,8 @@ def describe_github_commit_lookup(owner: str, repo: str, oldest: bool = False, s
 
 
 def fetch_github_commit(repo_url: str, oldest: bool = False, since_date: str = '', until_date: str = '') -> dict:
+    if not REFRESH_METADATA:
+        return {}
     repo_path = parse_github_repo_path(repo_url)
     if not repo_path:
         return {}
@@ -483,6 +481,8 @@ def fetch_github_commit(repo_url: str, oldest: bool = False, since_date: str = '
 
 
 def fetch_github_commit_by_sha(repo_url: str, commit_sha: str):
+    if not REFRESH_METADATA:
+        return None
     repo_path = parse_github_repo_path(repo_url)
     if not repo_path or not commit_sha:
         return {}
@@ -513,6 +513,8 @@ def resolve_cached_commit_for_date(date_data: dict, cache_key: str, repo_url: st
 
 
 def persist_related_autojs_project_dates():
+    if not REFRESH_METADATA:
+        raise RuntimeError('Metadata updates require --refresh-metadata')
     source_path = os.path.abspath(__file__)
     try:
         with open(source_path, 'r', encoding='utf-8') as f:
@@ -610,7 +612,6 @@ def describe_related_project(project_key: str, repo_url: str) -> str:
 
 def build_related_autojs_project_data() -> dict:
     changed = False
-    current_date = datetime.now().strftime('%Y/%m/%d')
     rendered_data = {}
     table_records = []
     total_projects = len(RELATED_AUTOJS_PROJECT_DATES)
@@ -673,7 +674,9 @@ def build_related_autojs_project_data() -> dict:
                     date_data['recent_active_commit_cached'] = recent_active_commit
                     changed = True
             else:
-                recent_active_date = date_data.get('recent_active_cached') or current_date
+                recent_active_date = date_data.get('recent_active_cached', '')
+                if not recent_active_date:
+                    raise ValueError(f'Missing committed recent activity date: {project_key}')
                 log(f'Using cached recent active date for {project_key}: {recent_active_date}')
                 if not recent_active_commit:
                     recent_active_commit, cache_changed = resolve_cached_commit_for_date(
@@ -720,6 +723,11 @@ def build_related_autojs_project_data() -> dict:
 
 
 related_autojs_project_data = build_related_autojs_project_data()
+if REFRESH_METADATA:
+    common_data['var_date_introduction_related_autojs_table_data_updated'] = datetime.now(timezone.utc).strftime('%Y/%m/%d')
+    Path(readme_root_dir, 'common.json').write_text(
+        json.dumps(common_data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n'
+    )
 
 
 def init_languages():
@@ -777,8 +785,7 @@ def extract_latest_versions(lang_code, lang_content, num_versions=3):
     file_path = os.path.abspath(os.path.join(changelog_files_source_dir, f"CHANGELOG-{lang_code}.md"))
     changelog_content = changelog_content_map[lang_code]
 
-    with open(file_path, 'r', encoding='utf-8') as file:
-        data = file.read()
+    data = GENERATED[Path(file_path)]
 
     # 正则模式匹配版本号及其更新内容
     pattern = re.compile(r'(# v(\d+)\.(\d+)\.(\d+).*?)(?=# v|$)', re.DOTALL)
@@ -873,16 +880,12 @@ def generate_changelog_files():
         output_file = f'CHANGELOG-{lang_code}.md'
         output_path = os.path.join(changelog_files_source_dir, output_file)
 
-        with open(output_path, 'w', encoding='utf-8') as file:
-            file.write(output)
-            log(f'Generated {output_file} at {output_path}')
+        GENERATED[Path(output_path)] = output
 
         if lang_code == language_code_default:
             default_output_file = 'CHANGELOG.md'
             default_output_path = os.path.join(changelog_files_source_dir, default_output_file)
-            with open(default_output_path, 'w', encoding='utf-8') as file:
-                file.write(output)
-                log(f'Generated {default_output_file} at {default_output_path}')
+            GENERATED[Path(default_output_path)] = output
     log('Changelog files generated')
 
 
@@ -894,20 +897,37 @@ def generate_readme_files():
         output_file = f'README-{lang_code}.md'
         output_path = os.path.join(project_root_dir, '.readme', output_file)
 
-        with open(output_path, 'w', encoding='utf-8') as file:
-            file.write(output)
-            log(f'Generated {output_file} at {output_path}')
+        GENERATED[Path(output_path)] = output
 
         if lang_code == language_code_default:
             default_output_file = 'README.md'
             default_output_path = os.path.join(project_root_dir, default_output_file)
-            with open(default_output_path, 'w', encoding='utf-8') as file:
-                file.write(output)
-                log(f'Generated {default_output_file} at {default_output_path}')
+            GENERATED[Path(default_output_path)] = output
     log('README files generated')
 
 
-init_languages()
-generate_changelog_files()
-generate_readme_files()
-log('Markdown generation complete')
+def main():
+    init_languages()
+    generate_changelog_files()
+    generate_readme_files()
+    root = Path(project_root_dir)
+    actual = {path for pattern in ('README.md', 'README-*.md', 'CHANGELOG*.md', '.readme/README-*.md', 'app/src/main/assets-app/doc/CHANGELOG*.md') for path in root.glob(pattern)}
+    orphans = sorted(actual - set(GENERATED))
+    if orphans:
+        raise ValueError('Unexpected generated files: ' + ', '.join(str(p.relative_to(root)) for p in orphans))
+    if arguments.check:
+        drift = [str(path.relative_to(root)) for path, expected in GENERATED.items()
+                 if not path.is_file() or path.read_text(encoding='utf-8') != expected]
+        if drift:
+            print('MARKDOWN_ERROR stale or missing: ' + ', '.join(drift), file=sys.stderr)
+            return 1
+    else:
+        for path, content in GENERATED.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding='utf-8', newline='\n')
+    print(f"MARKDOWN_OK languages={len(language_codes)} artifacts={len(GENERATED)} mode={'check' if arguments.check else 'write'}")
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -1,6 +1,6 @@
 @ECHO OFF
 :RUN
-py "generate_markdown.py"
+py "%~dp0generate_markdown.py" %*
 ECHO.
 
 ECHO Press [R] to rerun the script, or [ESC]/[Enter]/[Space] to exit...

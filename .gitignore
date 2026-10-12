@@ -81,3 +81,5 @@ CLAUDE.md
 
 **/assets-app/declarations/
 **/assets-app/sample/declarations/
+
+__pycache__/

@@ -1,0 +1,36 @@
+name: Markdown integrity
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    name: Documentation on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install documentation dependencies
+        run: python -m pip install -r .python/requirements-markdown.txt
+
+      - name: Check generated documentation
+        run: python .python/generate_markdown.py --check
+
+      - name: Test documentation validation
+        run: python -m unittest discover -s .python -p "test_markdown*.py"
