@@ -2657,6 +2657,7 @@
     <string name="text_sort_strategy_package_name">パッケージ名</string>
     <string name="text_sort_strategy_package_size">パッケージサイズ</string>
     <string name="text_sort_strategy_source">提供元 (公式/サードパーティ)</string>
+    <string name="text_sort_strategy_status">状態</string>
     <string name="text_sort_strategy_version_code">バージョンコード</string>
     <string name="text_sort_strategy_version_release_time">バージョン公開日時</string>
     <string name="text_source">ソース</string>

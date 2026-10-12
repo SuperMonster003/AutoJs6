@@ -2656,6 +2656,7 @@
     <string name="text_sort_strategy_package_name">Nombre del paquete</string>
     <string name="text_sort_strategy_package_size">Tamaño del paquete</string>
     <string name="text_sort_strategy_source">Origen (oficial/de terceros)</string>
+    <string name="text_sort_strategy_status">Estado</string>
     <string name="text_sort_strategy_version_code">Código de versión</string>
     <string name="text_sort_strategy_version_release_time">Fecha de publicación de la versión</string>
     <string name="text_source">Origen</string>

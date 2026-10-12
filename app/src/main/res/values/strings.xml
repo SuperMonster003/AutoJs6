@@ -2652,6 +2652,7 @@
     <string name="text_sort_strategy_package_name">Package name</string>
     <string name="text_sort_strategy_package_size">Package size</string>
     <string name="text_sort_strategy_source">Source (Official/Third-party)</string>
+    <string name="text_sort_strategy_status">Status</string>
     <string name="text_sort_strategy_version_code">Version code</string>
     <string name="text_sort_strategy_version_release_time">Version release time</string>
     <string name="text_source">Source</string>

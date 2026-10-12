@@ -2658,6 +2658,7 @@
     <string name="text_sort_strategy_package_name">اسم الحزمة</string>
     <string name="text_sort_strategy_package_size">حجم الحزمة</string>
     <string name="text_sort_strategy_source">المصدر (رسمي/تابع لجهة خارجية)</string>
+    <string name="text_sort_strategy_status">الحالة</string>
     <string name="text_sort_strategy_version_code">رمز الإصدار</string>
     <string name="text_sort_strategy_version_release_time">وقت إصدار النسخة</string>
     <string name="text_source">المصدر</string>

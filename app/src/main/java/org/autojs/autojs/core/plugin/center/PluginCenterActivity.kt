@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -201,8 +202,14 @@ class PluginCenterActivity : BaseActivity() {
         val sortDescendingButton = binding.pluginCenterSortOrderDescendingRadio.apply {
             buttonTintList = themeColorStateList
         }
-        val secondaryContainer = binding.pluginCenterSortSecondaryContainer
         val secondarySpinner = binding.pluginCenterSortSecondarySpinner
+        val secondaryOrderGroup = binding.pluginCenterSortSecondaryOrderGroup
+        val secondaryAscendingButton = binding.pluginCenterSortSecondaryOrderAscendingRadio.apply {
+            buttonTintList = themeColorStateList
+        }
+        val secondaryDescendingButton = binding.pluginCenterSortSecondaryOrderDescendingRadio.apply {
+            buttonTintList = themeColorStateList
+        }
         var currentSecondaryCandidates: List<PluginCenterFragment.Sort> = emptyList()
         val radioIdToSort = linkedMapOf<Int, PluginCenterFragment.Sort>()
         val sortFieldButtons = mutableListOf<RadioButton>()
@@ -215,15 +222,24 @@ class PluginCenterActivity : BaseActivity() {
         val radioTextSizeSp = 15f
         var refreshDirectionAndSecondary: (PluginCenterFragment.Sort) -> Unit = {}
 
-        sortAscendingButton.apply {
-            minHeight = controlMinHeight
-            setPaddingRelative(0, controlVerticalPadding, 0, controlVerticalPadding)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, radioTextSizeSp)
+        listOf(sortAscendingButton, sortDescendingButton, secondaryAscendingButton, secondaryDescendingButton).forEach { button ->
+            button.minHeight = controlMinHeight
+            button.setPaddingRelative(0, controlVerticalPadding, 0, controlVerticalPadding)
+            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, radioTextSizeSp)
         }
-        sortDescendingButton.apply {
-            minHeight = controlMinHeight
-            setPaddingRelative(0, controlVerticalPadding, 0, controlVerticalPadding)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, radioTextSizeSp)
+
+        fun refreshSecondaryDirection(sort: PluginCenterFragment.Sort) {
+            secondaryOrderGroup.check(
+                if (loadPersistedSortAscending(sort)) secondaryAscendingButton.id else secondaryDescendingButton.id,
+            )
+        }
+
+        secondarySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                currentSecondaryCandidates.getOrNull(position)?.let(::refreshSecondaryDirection)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
         }
 
         fun secondarySpinnerAdapter(labels: List<String>): ArrayAdapter<String> =
@@ -373,20 +389,6 @@ class PluginCenterActivity : BaseActivity() {
             }
         }
 
-        fun loadPersistedSecondarySort(primarySort: PluginCenterFragment.Sort): PluginCenterFragment.Sort = when (primarySort) {
-            PluginCenterFragment.Sort.MECHANISM -> loadPersistedMechanismSecondarySort()
-            PluginCenterFragment.Sort.SOURCE -> loadPersistedSourceSecondarySort()
-            else -> primarySort.defaultSecondarySort()
-        }
-
-        fun savePersistedSecondarySort(primarySort: PluginCenterFragment.Sort, secondarySort: PluginCenterFragment.Sort) {
-            when (primarySort) {
-                PluginCenterFragment.Sort.MECHANISM -> savePersistedMechanismSecondarySort(secondarySort)
-                PluginCenterFragment.Sort.SOURCE -> savePersistedSourceSecondarySort(secondarySort)
-                else -> Unit
-            }
-        }
-
         refreshDirectionAndSecondary = { sort ->
             val isSortAscending = loadPersistedSortAscending(sort)
             if (isSortAscending) {
@@ -395,23 +397,15 @@ class PluginCenterActivity : BaseActivity() {
                 sortOrderGroup.check(sortDescendingButton.id)
             }
 
-            if (!sort.supportsSecondarySort()) {
-                currentSecondaryCandidates = emptyList()
-                secondaryContainer.isVisible = false
-            } else {
-                currentSecondaryCandidates = PluginCenterFragment.Sort.secondaryCandidatesFor(sort)
-                val labels = currentSecondaryCandidates.map { getString(it.titleRes) }
-                secondarySpinner.adapter = secondarySpinnerAdapter(labels)
-                val persistedSecondary = loadPersistedSecondarySort(sort)
-                    .takeUnless { it == sort }
-                    ?: sort.defaultSecondarySort()
-                val defaultSecondary = sort.defaultSecondarySort()
-                val secondaryIndex = currentSecondaryCandidates.indexOf(persistedSecondary)
-                    .takeIf { it >= 0 }
-                    ?: currentSecondaryCandidates.indexOf(defaultSecondary).coerceAtLeast(0)
-                secondarySpinner.setSelection(secondaryIndex, false)
-                secondaryContainer.isVisible = true
-            }
+            currentSecondaryCandidates = PluginCenterFragment.Sort.secondaryCandidatesFor(sort)
+            val labels = currentSecondaryCandidates.map { getString(it.titleRes) }
+            secondarySpinner.adapter = secondarySpinnerAdapter(labels)
+            val persistedSecondary = loadPersistedSecondarySort(sort)
+            val secondaryIndex = currentSecondaryCandidates.indexOf(persistedSecondary)
+                .takeIf { it >= 0 }
+                ?: currentSecondaryCandidates.indexOf(sort.defaultSecondarySort()).coerceAtLeast(0)
+            secondarySpinner.setSelection(secondaryIndex, false)
+            refreshSecondaryDirection(currentSecondaryCandidates[secondaryIndex])
         }
 
         val initialRadioId = radioIdToSort.entries
@@ -449,13 +443,11 @@ class PluginCenterActivity : BaseActivity() {
                 val selectedSort = selectedPrimarySort()
                 savePersistedSort(selectedSort)
                 savePersistedSortAscending(selectedSort, sortAscendingButton.isChecked)
-                if (selectedSort.supportsSecondarySort()) {
-                    val selectedSecondarySort = currentSecondaryCandidates
-                        .getOrNull(secondarySpinner.selectedItemPosition)
-                        ?.takeUnless { it == selectedSort }
-                        ?: selectedSort.defaultSecondarySort()
-                    savePersistedSecondarySort(selectedSort, selectedSecondarySort)
-                }
+                val selectedSecondarySort = currentSecondaryCandidates
+                    .getOrNull(secondarySpinner.selectedItemPosition)
+                    ?: selectedSort.defaultSecondarySort()
+                savePersistedSecondarySort(selectedSort, selectedSecondarySort)
+                savePersistedSortAscending(selectedSecondarySort, secondaryAscendingButton.isChecked)
                 center.setSort(selectedSort)
             }
             .show()
@@ -473,16 +465,10 @@ class PluginCenterActivity : BaseActivity() {
         null -> PluginSortStore.getAscending(this, sort)
     }
 
-    private fun loadPersistedMechanismSecondarySort(): PluginCenterFragment.Sort = when (sourceScope) {
-        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getMechanismSecondarySort(this)
-        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getMechanismSecondarySort(this)
-        null -> PluginSortStore.getMechanismSecondarySort(this)
-    }
-
-    private fun loadPersistedSourceSecondarySort(): PluginCenterFragment.Sort = when (sourceScope) {
-        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getSourceSecondarySort(this)
-        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getSourceSecondarySort(this)
-        null -> PluginSortStore.getSourceSecondarySort(this)
+    private fun loadPersistedSecondarySort(primary: PluginCenterFragment.Sort): PluginCenterFragment.Sort = when (sourceScope) {
+        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getSecondarySort(this, primary)
+        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getSecondarySort(this, primary)
+        null -> PluginSortStore.getSecondarySort(this, primary)
     }
 
     private fun savePersistedSort(sort: PluginCenterFragment.Sort) {
@@ -501,19 +487,11 @@ class PluginCenterActivity : BaseActivity() {
         }
     }
 
-    private fun savePersistedMechanismSecondarySort(sort: PluginCenterFragment.Sort) {
+    private fun savePersistedSecondarySort(primary: PluginCenterFragment.Sort, secondary: PluginCenterFragment.Sort) {
         when (sourceScope) {
-            PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.setMechanismSecondarySort(this, sort)
-            PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.setMechanismSecondarySort(this, sort)
-            null -> PluginSortStore.setMechanismSecondarySort(this, sort)
-        }
-    }
-
-    private fun savePersistedSourceSecondarySort(sort: PluginCenterFragment.Sort) {
-        when (sourceScope) {
-            PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.setSourceSecondarySort(this, sort)
-            PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.setSourceSecondarySort(this, sort)
-            null -> PluginSortStore.setSourceSecondarySort(this, sort)
+            PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.setSecondarySort(this, primary, secondary)
+            PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.setSecondarySort(this, primary, secondary)
+            null -> PluginSortStore.setSecondarySort(this, primary, secondary)
         }
     }
 

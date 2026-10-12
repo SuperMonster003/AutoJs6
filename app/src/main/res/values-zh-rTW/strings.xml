@@ -2653,6 +2653,7 @@
     <string name="text_sort_strategy_package_name">包名</string>
     <string name="text_sort_strategy_package_size">安裝包大小</string>
     <string name="text_sort_strategy_source">來源 (官方/第三方)</string>
+    <string name="text_sort_strategy_status">狀態</string>
     <string name="text_sort_strategy_version_code">版本號</string>
     <string name="text_sort_strategy_version_release_time">版本釋出時間</string>
     <string name="text_source">來源</string>

@@ -52,8 +52,6 @@ import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
 import org.autojs.plugin.yolo.api.YoloContract
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
@@ -100,7 +98,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     private lateinit var currentSort: Sort
     private var currentFilterState = PluginFilterStore.defaultFilterState()
-    private val versionDateEpochCache = mutableMapOf<String, Long?>()
+    private val sortPolicy = PluginCenterSortPolicy()
 
     private val sortPrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
         if (!isAdded || _binding == null) return@OnSharedPreferenceChangeListener
@@ -395,16 +393,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         null -> PluginSortStore.getAscending(context, sort)
     }
 
-    private fun loadPersistedMechanismSecondarySort(context: Context): Sort = when (sourceScope) {
-        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getMechanismSecondarySort(context)
-        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getMechanismSecondarySort(context)
-        null -> PluginSortStore.getMechanismSecondarySort(context)
-    }
-
-    private fun loadPersistedSourceSecondarySort(context: Context): Sort = when (sourceScope) {
-        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getSourceSecondarySort(context)
-        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getSourceSecondarySort(context)
-        null -> PluginSortStore.getSourceSecondarySort(context)
+    private fun loadPersistedSecondarySort(context: Context, primary: Sort): Sort = when (sourceScope) {
+        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getSecondarySort(context, primary)
+        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getSecondarySort(context, primary)
+        null -> PluginSortStore.getSecondarySort(context, primary)
     }
 
     private fun registerSortPrefListener(context: Context) {
@@ -424,113 +416,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private fun buildSortComparator(): Comparator<PluginCenterItem> {
-        val primaryAscending = loadPersistedSortAscending(contextRef, currentSort)
-        var comparator = comparatorForSortField(currentSort, primaryAscending)
-
-        val usedSorts = linkedSetOf(currentSort)
-        if (currentSort.supportsSecondarySort()) {
-            val secondary = when (currentSort) {
-                Sort.MECHANISM -> loadPersistedMechanismSecondarySort(contextRef)
-                Sort.SOURCE -> loadPersistedSourceSecondarySort(contextRef)
-                else -> null
-            }?.takeUnless { it == currentSort }
-                ?: currentSort.defaultSecondarySort()
-            val secondaryAscending = loadPersistedSortAscending(contextRef, secondary)
-            comparator = comparator.thenComparing(comparatorForSortField(secondary, secondaryAscending))
-            usedSorts += secondary
-        }
-
-        SORT_FALLBACK_CHAIN.forEach { fallback ->
-            if (fallback in usedSorts) return@forEach
-            comparator = comparator.thenComparing(comparatorForSortField(fallback, fallback.defaultAscending))
-            usedSorts += fallback
-        }
-        return comparator
-    }
-
-    private fun comparatorForSortField(
-        sort: Sort,
-        ascending: Boolean,
-    ): Comparator<PluginCenterItem> {
-        val base: Comparator<PluginCenterItem> = when (sort) {
-            Sort.TITLE_ASC ->
-                compareBy { normalizeText(it.title) }
-            Sort.LAST_UPDATE_DESC ->
-                compareBy { resolveLastUpdateSortValue(it) }
-            Sort.PACKAGE_SIZE_DESC ->
-                compareBy { resolvePackageSizeSortValue(it) }
-            Sort.MECHANISM ->
-                compareBy {
-                    when (it.mechanism) {
-                        PluginMechanism.AIDL -> 0
-                        PluginMechanism.SDK -> 1
-                    }
-                }
-            Sort.VERSION_CODE_DESC ->
-                compareBy { resolveVersionSortValue(it) }
-            Sort.VERSION_RELEASE_TIME_DESC ->
-                compareBy { resolveVersionReleaseTimeSortValue(it) }
-            Sort.FIRST_INSTALL_TIME_DESC ->
-                compareBy { resolveFirstInstallSortValue(it) }
-            Sort.PACKAGE_NAME_ASC ->
-                compareBy { normalizeText(it.packageName) }
-            Sort.AUTHOR_ASC ->
-                compareBy { normalizeText(it.author) }
-            Sort.SOURCE ->
-                compareBy {
-                    when (it.source) {
-                        PluginIndexSource.OFFICIAL -> 0
-                        PluginIndexSource.THIRD_PARTY -> 1
-                    }
-                }
-        }
-        return if (ascending) base else base.reversed()
-    }
-
-    private fun resolveVersionSortValue(item: PluginCenterItem): Long =
-        item.versionCode?.takeIf { it > 0 } ?: Long.MIN_VALUE
-
-    private fun resolveVersionReleaseTimeSortValue(item: PluginCenterItem): Long =
-        parseVersionDateToEpochMillis(item.versionDate) ?: 0L
-
-    private fun resolvePackageSizeSortValue(item: PluginCenterItem): Long = when {
-        item.packageSize > 0 -> item.packageSize
-        (item.installableApkSizeBytes ?: 0L) > 0L -> item.installableApkSizeBytes ?: 0L
-        (item.updatableApkSizeBytes ?: 0L) > 0L -> item.updatableApkSizeBytes ?: 0L
-        else -> 0L
-    }
-
-    private fun resolveFirstInstallSortValue(item: PluginCenterItem): Long =
-        item.firstInstallTime?.takeIf { it > 0L }
-            ?: item.lastInstallTime?.takeIf { it > 0L }
-            ?: 0L
-
-    private fun resolveLastUpdateSortValue(item: PluginCenterItem): Long =
-        item.lastUpdateTime?.takeIf { it > 0L }
-            ?: parseVersionDateToEpochMillis(item.versionDate)
-            ?: item.versionCode?.takeIf { it > 0L }
-            ?: 0L
-
-    private fun normalizeText(value: String?): String =
-        value?.trim()
-            ?.takeIf { it.isNotEmpty() }
-            ?.lowercase(Locale.ROOT)
-            ?: ""
-
-    private fun parseVersionDateToEpochMillis(versionDate: String?): Long? {
-        val normalized = versionDate?.trim()?.takeIf { it.isNotEmpty() } ?: return null
-        if (versionDateEpochCache.containsKey(normalized)) {
-            return versionDateEpochCache[normalized]
-        }
-
-        val parsed = DATE_PATTERNS.firstNotNullOfOrNull { pattern ->
-            val locale = if (pattern.contains("MMM")) Locale.ENGLISH else Locale.US
-            runCatching {
-                SimpleDateFormat(pattern, locale).apply { isLenient = false }.parse(normalized)?.time
-            }.getOrNull()
-        }
-        versionDateEpochCache[normalized] = parsed
-        return parsed
+        val secondary = loadPersistedSecondarySort(contextRef, currentSort)
+        return sortPolicy.comparator(
+            primary = currentSort,
+            primaryAscending = loadPersistedSortAscending(contextRef, currentSort),
+            secondary = secondary,
+            secondaryAscending = loadPersistedSortAscending(contextRef, secondary),
+        )
     }
 
     private fun renderList() {
@@ -1244,19 +1136,21 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         AUTHOR_ASC(R.string.text_sort_strategy_author, true),
         SOURCE(R.string.text_sort_strategy_source, true),
         VERSION_RELEASE_TIME_DESC(R.string.text_sort_strategy_version_release_time, false),
+        // Append new values to preserve saved sort ordinals.
+        // zh-CN: 新值追加在末尾, 保留已存储的排序序号.
+        STATUS(R.string.text_sort_strategy_status, true),
         ;
 
-        fun supportsSecondarySort(): Boolean = this == MECHANISM || this == SOURCE
-
         fun defaultSecondarySort(): Sort = when (this) {
-            MECHANISM, SOURCE -> LAST_UPDATE_DESC
-            else -> defaultPrimarySort()
+            LAST_UPDATE_DESC -> TITLE_ASC
+            else -> LAST_UPDATE_DESC
         }
 
         companion object {
-            fun defaultPrimarySort(): Sort = LAST_UPDATE_DESC
+            fun defaultPrimarySort(): Sort = STATUS
 
             fun primarySortDisplayOrder(): List<Sort> = listOf(
+                STATUS,
                 TITLE_ASC,
                 LAST_UPDATE_DESC,
                 PACKAGE_SIZE_DESC,
@@ -1289,28 +1183,6 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             PluginErrorCode.HANDSHAKE_TIMEOUT,
             PluginErrorCode.DEAD_OBJECT,
         )
-        private val DATE_PATTERNS = arrayOf(
-            "yyyy-MM-dd",
-            "yyyy/MM/dd",
-            "dd/MM/yyyy",
-            "MM/dd/yyyy",
-            "yyyy.MM.dd",
-            "dd.MM.yyyy",
-            "yyyyMMdd",
-            "yyyy-MM-dd HH:mm:ss",
-            "yyyy/MM/dd HH:mm:ss",
-            "MMM dd, yyyy",
-            "dd MMM yyyy",
-            "MMM dd yyyy",
-        )
-        private val SORT_FALLBACK_CHAIN = listOf(
-            Sort.LAST_UPDATE_DESC,
-            Sort.VERSION_RELEASE_TIME_DESC,
-            Sort.VERSION_CODE_DESC,
-            Sort.TITLE_ASC,
-            Sort.PACKAGE_NAME_ASC,
-        )
-
         fun newInstance(
             sourceScope: PluginIndexSource?,
             variantDisplayMode: PluginVariantDisplayMode = PluginVariantDisplayMode.STANDARD,

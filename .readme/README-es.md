@@ -742,6 +742,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Los lectores de propiedades Compose conservan null en lugar de devolver undefined, incluidos el progreso predeterminado y las fechas borradas de DatePicker
 * `Corrección` Con Paddle OCR v3 y un plugin v4/v5/v6 habilitados a la vez, el empaquetado elegía este último y Paddle OCR no funcionaba en la aplicación empaquetada; ahora las aplicaciones empaquetadas solo aceptan el plugin PP-OCRv3 y no copian los modelos ni las bibliotecas nativas de v4-v6 que no pueden ejecutar
 * `Corrección` El empaquetado de APK conservaba en silencio una de dos bibliotecas nativas con el mismo nombre y distinto contenido; ahora se detiene e indica ambos orígenes
+* `Mejora` El Centro de plugins admite dos niveles de ordenación con direcciones independientes, por defecto instalados > deshabilitados > no instalados, y luego por última actualización en orden descendente dentro de cada estado
 * `Mejora` El perfil Estándar incluye 3-Setup Installer; la instalación de APK con el instalador del sistema ya no muestra la recomendación de este plugin
 * `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
 * `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión

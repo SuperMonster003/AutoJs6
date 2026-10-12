@@ -559,6 +559,7 @@
 * `Correction` Les accesseurs des propriétés Compose conservent null au lieu de renvoyer undefined, y compris la progression par défaut et les dates DatePicker effacées
 * `Correction` Avec Paddle OCR v3 et un plugin v4/v5/v6 activés en même temps, l'empaquetage choisissait ce dernier et Paddle OCR ne fonctionnait pas dans l'application empaquetée ; les applications empaquetées n'acceptent désormais que le plugin PP-OCRv3 et ne copient plus les modèles et bibliothèques natives v4-v6 qu'elles ne peuvent pas exécuter
 * `Correction` L'empaquetage APK conservait silencieusement l'une de deux bibliothèques natives de même nom au contenu différent ; il s'arrête désormais en indiquant les deux sources
+* `Amélioration` Le Centre des plugins prend en charge deux niveaux de tri avec des sens indépendants, par défaut installés > désactivés > non installés, puis par dernière mise à jour décroissante dans chaque état
 * `Amélioration` Le profil Standard inclut 3-Setup Installer; l'installation système des APK n'affiche plus le conseil recommandant ce plugin
 * `Amélioration` Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués
 * `Amélioration` Les vérifications lint de l'hôte excluent par chemin les classes et ressources de compatibilité AutoJs4 et continuent à vérifier le reste de l'hôte

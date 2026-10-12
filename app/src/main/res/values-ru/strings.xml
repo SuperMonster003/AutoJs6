@@ -2656,6 +2656,7 @@
     <string name="text_sort_strategy_package_name">Имя пакета</string>
     <string name="text_sort_strategy_package_size">Размер пакета</string>
     <string name="text_sort_strategy_source">Источник (официальный/сторонний)</string>
+    <string name="text_sort_strategy_status">Состояние</string>
     <string name="text_sort_strategy_version_code">Код версии</string>
     <string name="text_sort_strategy_version_release_time">Дата выпуска версии</string>
     <string name="text_source">Источник</string>

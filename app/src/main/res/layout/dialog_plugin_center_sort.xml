@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -70,9 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/plugin_center_sort_secondary_label"
@@ -87,6 +84,35 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:minHeight="36dp" />
+
+            <RadioGroup
+                android:id="@+id/plugin_center_sort_secondary_order_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/plugin_center_sort_secondary_order_ascending_radio"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:minHeight="36dp"
+                    android:paddingVertical="6dp"
+                    android:text="@string/text_sort_ascending"
+                    android:textSize="15sp" />
+
+                <RadioButton
+                    android:id="@+id/plugin_center_sort_secondary_order_descending_radio"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="36dp"
+                    android:paddingVertical="6dp"
+                    android:text="@string/text_sort_descending"
+                    android:textSize="15sp" />
+            </RadioGroup>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

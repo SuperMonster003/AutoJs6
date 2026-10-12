@@ -553,6 +553,7 @@
         "El empaquetado de APK conservaba en silencio una de dos bibliotecas nativas con el mismo nombre y distinto contenido; ahora se detiene e indica ambos orígenes"
       ],
       "improvement": [
+        "El Centro de plugins admite dos niveles de ordenación con direcciones independientes, por defecto instalados > deshabilitados > no instalados, y luego por última actualización en orden descendente dentro de cada estado",
         "El perfil Estándar incluye 3-Setup Installer; la instalación de APK con el instalador del sistema ya no muestra la recomendación de este plugin",
         "Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas",
         "Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión",

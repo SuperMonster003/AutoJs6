@@ -13,6 +13,7 @@ object PluginSortStoreOfficial {
     private const val SP_NAME = "plugin_center_sort_state"
     private const val KEY = "key_\$_plugin_center_sort_state_official"
     private const val KEY_ASC_PREFIX = "key_\$_plugin_center_sort_state_official_ascending_"
+    private const val KEY_SECONDARY_PREFIX = "key_\$_plugin_center_sort_state_official_secondary_"
     private const val KEY_MECHANISM_SECONDARY = "key_\$_plugin_center_sort_state_official_mechanism_secondary"
     private const val KEY_SOURCE_SECONDARY = "key_\$_plugin_center_sort_state_official_source_secondary"
 
@@ -51,34 +52,24 @@ object PluginSortStoreOfficial {
         sp.edit { putBoolean("$KEY_ASC_PREFIX${sort.name}", ascending) }
     }
 
-    fun getMechanismSecondarySort(
-        context: Context,
-        defaultSort: Sort = Sort.LAST_UPDATE_DESC,
-    ): Sort {
-        val ordinal = sp(context).getInt(KEY_MECHANISM_SECONDARY, defaultSort.ordinal)
+    fun getSecondarySort(context: Context, primary: Sort): Sort {
+        val defaultSort = primary.defaultSecondarySort()
+        val ordinal = sp(context).getInt(secondaryKey(primary), defaultSort.ordinal)
         val resolved = sortByOrdinalOrDefault(ordinal, defaultSort.ordinal)
-        return if (resolved == Sort.MECHANISM) defaultSort else resolved
+        return if (resolved == primary) defaultSort else resolved
     }
 
-    fun setMechanismSecondarySort(context: Context, sort: Sort) {
-        if (sort == Sort.MECHANISM) return
-        val sp = sp(context)
-        sp.edit { putInt(KEY_MECHANISM_SECONDARY, sort.ordinal) }
+    fun setSecondarySort(context: Context, primary: Sort, secondary: Sort) {
+        if (secondary == primary) return
+        sp(context).edit { putInt(secondaryKey(primary), secondary.ordinal) }
     }
 
-    fun getSourceSecondarySort(
-        context: Context,
-        defaultSort: Sort = Sort.LAST_UPDATE_DESC,
-    ): Sort {
-        val ordinal = sp(context).getInt(KEY_SOURCE_SECONDARY, defaultSort.ordinal)
-        val resolved = sortByOrdinalOrDefault(ordinal, defaultSort.ordinal)
-        return if (resolved == Sort.SOURCE) defaultSort else resolved
-    }
-
-    fun setSourceSecondarySort(context: Context, sort: Sort) {
-        if (sort == Sort.SOURCE) return
-        val sp = sp(context)
-        sp.edit { putInt(KEY_SOURCE_SECONDARY, sort.ordinal) }
+    // Retain the existing preference keys for mechanism and source sorting.
+    // zh-CN: 保留机制与来源排序的既有偏好键.
+    private fun secondaryKey(primary: Sort): String = when (primary) {
+        Sort.MECHANISM -> KEY_MECHANISM_SECONDARY
+        Sort.SOURCE -> KEY_SOURCE_SECONDARY
+        else -> "$KEY_SECONDARY_PREFIX${primary.name}"
     }
 
     fun clearAllSortMemory(context: Context) {
@@ -89,6 +80,7 @@ object PluginSortStoreOfficial {
             remove(KEY_SOURCE_SECONDARY)
             Sort.values().forEach { sort ->
                 remove("$KEY_ASC_PREFIX${sort.name}")
+                remove(secondaryKey(sort))
             }
         }
     }
