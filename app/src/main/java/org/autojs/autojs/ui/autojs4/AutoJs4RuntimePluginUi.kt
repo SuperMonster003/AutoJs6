@@ -7,6 +7,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginIndexSource
+import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs6.R
 import org.autojs.plugin.autojs4.runtime.api.AutoJs4PluginActions
@@ -30,6 +31,7 @@ object AutoJs4RuntimePluginUi {
         READY,
         MISSING,
         DISABLED,
+        UNAUTHORIZED,
         INCOMPATIBLE,
     }
 
@@ -46,6 +48,10 @@ object AutoJs4RuntimePluginUi {
         val androidEnabled = service.enabled && service.applicationInfo.enabled
         val logicallyEnabled = PluginEnableStore.isEnabled(appContext, service.packageName)
         if (!androidEnabled || !logicallyEnabled) return Availability.DISABLED
+        // A package the Plugin Center has not authorized (an untrusted signer) is invisible to the engine's
+        // discovery, which would otherwise report it as missing although it is installed (roadmap P4.4).
+        // zh-CN: 插件中心未授权 (签名不受信任) 的包对引擎发现不可见, 否则会被报告为 "未安装" (roadmap P4.4).
+        if (!PluginTrustManager.isAuthorized(appContext, service.packageName)) return Availability.UNAUTHORIZED
         val contractEligible = service.exported && service.permission == AutoJs4RuntimeContract.PLUGIN_PERMISSION
         return if (contractEligible) Availability.READY else Availability.INCOMPATIBLE
     }
@@ -76,6 +82,7 @@ object AutoJs4RuntimePluginUi {
         val content = when (availability) {
             Availability.MISSING -> context.getString(R.string.error_plugin_not_found_in_installed_apps, DISPLAY_NAME)
             Availability.DISABLED -> context.getString(R.string.error_plugin_is_not_enabled_in_plugin_center, DISPLAY_NAME)
+            Availability.UNAUTHORIZED -> context.getString(R.string.error_plugin_is_not_authorized_in_plugin_center, DISPLAY_NAME)
             Availability.INCOMPATIBLE -> context.getString(R.string.hint_plugin_upgrade_required_due_to_protocol_mismatch)
             Availability.READY -> {
                 dialogShowing.set(false)
