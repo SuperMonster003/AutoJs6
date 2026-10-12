@@ -76,3 +76,73 @@ py E:/.cache/user-temp/claude/.../scratchpad/stardust_inventory.py   # 本次使
 - 校正后的分布: 桥接 30, 受污染 145 (两个 `BuildConfig` typealias 把 `com.stardust.automator` 整包与 `view.accessibility` 的 4 个 Kotlin 文件拖回 `app`), 独立 179 (Java 153, Kotlin 26) 迁入 `compat/stardust`; `app/src/main/java/com/stardust` 余 175 个文件. `:compat:stardust:assembleDebug` 独立编译通过 (仅 deprecation 提示), `:app:assembleAppDebug` 通过; `:app:testAppDebugUnitTest` 4262 个用例中仅 `SelectorGlobalsTest.exportedNamesMatchTheSnapshot` 失败 (选择器新增 minDepth / maxDepth / minIndexInParent / maxIndexInParent 全局函数后 `selector-global-functions.txt` 快照未更新, 属维护者选择器工作, 与本次拆分无关).
 - 设备: XQ-DQ72 (Android 13) 上 `stardust_smoke.js` (直接调用 `com.stardust.pio.PFiles`, `util.ScreenMetrics`, `util.ClipboardUtil`, `util.UiHandler`, `autojs.annotation.ScriptInterface`, `util.Func1`, `util.MapBuilder` 等模块侧类, 以及 `autojs.core.util.Shell`, `automator.filter.IdFilter`, `automator.UiGlobalSelector`, `autojs.core.opencv.OpenCVHelper`, `autojs.AutoJs` 等留在 app 的类) 在拆分前 (5350) 与拆分后 (同版本号的本地构建) 的控制台输出逐行一致, 仅用时不同 (0.032 s 与 0.036 s).
 - 后续: 第 5 节步骤 6 的文案已同步 (`accessibility-architecture.md`, `accessibility-automation-roadmap.md`, `android-sdk-37-roadmap.md`, `page-size-16kb-roadmap.md`, `autojs4-runtime-plugin-roadmap.md` D1); `app/lint.xml` 的忽略路径与 `proguard-rules.pro` 保持不变. 方案 2 (别名表) 仍按第 6 节的前提另行评估.
+
+## 9. 方案 2 (别名表) 候选清单 (2026-10-12, 静态分析)
+
+工具: `tools/stardust/split_stardust_compat.py` 同目录下的一次性脚本 (按 `com.stardust.<path>` -> `org.autojs.autojs.<path>` 的类比路径或同名类匹配宿主类, 并比较 public 方法名集合). 数字只反映方法名重合, 不反映参数与返回类型, 因此是别名表的 "上限", 不是可直接启用的清单.
+
+- 354 个 `com.stardust` 类中 305 个在宿主有同名类, 其中 241 个位于类比路径. 方法名完全被宿主覆盖的 173 个, 覆盖率 >= 80% 的 23 个, 覆盖率不足 80% 的 70 个, 另有 39 个没有 public 方法 (接口, 注解, 数据类).
+- 宿主侧已由 `:compat:stardust` 承载的 179 个独立文件不需要别名 (类本身仍在), 别名只对留在 `app` 的 175 个桥接 / 受污染文件有意义, 且只有脚本会直接引用的类值得做.
+- 脚本可能直接引用的候选 (runtime.api, core.util, pio, automator, core.image, core.accessibility, util; 列出方法名覆盖率 >= 80% 的):
+
+| `com.stardust` 类 | 宿主类 | 重合 / 兼容包方法数 / 宿主方法数 | 当前位置 |
+| --- | --- | --- | --- |
+| `com.stardust.pio.PFiles` | `org.autojs.autojs.pio.PFiles` | 38 / 41 / 45 | compat |
+| `com.stardust.autojs.core.accessibility.SimpleActionAutomator` | `org.autojs.autojs.core.accessibility.SimpleActionAutomator` | 31 / 31 / 49 | app |
+| `com.stardust.autojs.runtime.api.AbstractShell` | `org.autojs.autojs.runtime.api.AbstractShell` | 31 / 32 / 35 | app |
+| `com.stardust.autojs.runtime.api.Files` | `org.autojs.autojs.runtime.api.Files` | 31 / 32 / 33 | app |
+| `com.stardust.autojs.runtime.api.Device` | `org.autojs.autojs.runtime.api.Device` | 30 / 30 / 61 | app |
+| `com.stardust.util.BiMaps` | `org.autojs.autojs.core.ui.BiMaps` | 30 / 30 / 30 | compat |
+| `com.stardust.autojs.runtime.api.Images` | `org.autojs.autojs.runtime.api.Images` | 21 / 21 / 41 | app |
+| `com.stardust.autojs.runtime.api.Events` | `org.autojs.autojs.runtime.api.Events` | 21 / 22 / 23 | app |
+| `com.stardust.automator.GlobalActionAutomator` | `org.autojs.autojs.core.automator.GlobalActionAutomator` | 18 / 18 / 27 | compat |
+| `com.stardust.autojs.core.util.Shell` | `org.autojs.autojs.runtime.api.Shell` | 14 / 14 / 14 | app |
+| `com.stardust.util.IntentExtras` | `org.autojs.autojs.tool.IntentExtras` | 11 / 11 / 11 | compat |
+| `com.stardust.autojs.core.image.Colors` | `org.autojs.autojs.core.image.Colors` | 9 / 9 / 9 | compat |
+| `com.stardust.autojs.runtime.api.AbstractConsole` | `org.autojs.autojs.runtime.api.AbstractConsole` | 9 / 10 / 9 | compat |
+| `com.stardust.autojs.runtime.api.Threads` | `org.autojs.autojs.runtime.api.Threads` | 9 / 10 / 16 | app |
+| `com.stardust.autojs.runtime.api.Timers` | `org.autojs.autojs.runtime.api.Timers` | 9 / 11 / 11 | app |
+| `com.stardust.autojs.runtime.api.Dialogs` | `org.autojs.autojs.runtime.api.Dialogs` | 8 / 8 / 8 | app |
+| `com.stardust.autojs.runtime.api.Engines` | `org.autojs.autojs.runtime.api.Engines` | 8 / 8 / 10 | app |
+| `com.stardust.pio.PFile` | `org.autojs.autojs.pio.PFile` | 8 / 8 / 10 | compat |
+| `com.stardust.util.DeveloperUtils` | `org.autojs.autojs.util.DeveloperUtils` | 8 / 9 / 8 | compat |
+| `com.stardust.automator.simple_action.ActionFactory` | `org.autojs.autojs.core.automator.action.ActionFactory` | 7 / 7 / 7 | app |
+| `com.stardust.pio.PWritableTextFile` | `org.autojs.autojs.pio.PWritableTextFile` | 7 / 7 / 7 | compat |
+| `com.stardust.autojs.core.util.ScriptPromiseAdapter` | `org.autojs.autojs.runtime.api.ScriptPromiseAdapter` | 5 / 5 / 5 | compat |
+| `com.stardust.pio.PReadableTextFile` | `org.autojs.autojs.pio.PReadableTextFile` | 5 / 5 / 5 | compat |
+| `com.stardust.util.BackPressedHandler` | `org.autojs.autojs.event.BackPressedHandler` | 5 / 5 / 5 | compat |
+| `com.stardust.autojs.core.image.ColorFinder` | `org.autojs.autojs.core.image.ColorFinder` | 4 / 4 / 14 | app |
+| `com.stardust.automator.simple_action.FilterAction` | `org.autojs.autojs.core.automator.action.FilterAction` | 4 / 4 / 4 | app |
+| `com.stardust.util.ArrayUtils` | `org.autojs.autojs.util.ArrayUtils` | 4 / 4 / 4 | compat |
+| `com.stardust.util.SimpleCache` | `org.autojs.autojs.tool.SimpleCache` | 4 / 4 / 4 | compat |
+| `com.stardust.automator.filter.BooleanFilter` | `org.autojs.autojs.core.automator.filter.BooleanFilter` | 3 / 3 / 3 | app |
+| `com.stardust.automator.filter.Selector` | `org.autojs.autojs.core.automator.filter.Selector` | 3 / 3 / 4 | app |
+| `com.stardust.automator.simple_action.SearchTargetAction` | `org.autojs.autojs.core.automator.action.SearchTargetAction` | 3 / 3 / 3 | app |
+| `com.stardust.util.MapBuilder` | `org.autojs.autojs.tool.MapBuilder` | 3 / 3 / 3 | compat |
+| `com.stardust.util.StateObserver` | `org.autojs.autojs.tool.StateObserver` | 3 / 3 / 3 | compat |
+| `com.stardust.autojs.core.image.TemplateMatching` | `org.autojs.autojs.core.image.TemplateMatching` | 2 / 2 / 13 | app |
+| `com.stardust.autojs.runtime.api.Plugins` | `org.autojs.autojs.runtime.api.Plugins` | 2 / 2 / 10 | app |
+| `com.stardust.automator.filter.BoundsFilter` | `org.autojs.autojs.core.automator.filter.BoundsFilter` | 2 / 2 / 5 | app |
+| `com.stardust.automator.simple_action.SearchUpTargetAction` | `org.autojs.autojs.core.automator.action.SearchUpTargetAction` | 2 / 2 / 2 | app |
+| `com.stardust.util.AdvancedEncryptionStandard` | `org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard` | 2 / 2 / 2 | compat |
+| `com.stardust.util.MD5` | `org.autojs.autojs.inrt.launch.MD5` | 2 / 2 / 2 | compat |
+| `com.stardust.util.Objects` | `org.autojs.autojs.util.Objects` | 2 / 2 / 2 | compat |
+| `com.stardust.util.SparseArrayEntries` | `org.autojs.autojs.tool.SparseArrayEntries` | 2 / 2 / 2 | compat |
+| `com.stardust.autojs.core.accessibility.AccessibilityServiceUsher` | `org.autojs.autojs.core.accessibility.AccessibilityServiceUsher` | 1 / 1 / 2 | compat |
+| `com.stardust.automator.ActionArgument` | `org.autojs.autojs.core.automator.ActionArgument` | 1 / 1 / 1 | compat |
+| `com.stardust.automator.filter.Filter` | `org.autojs.autojs.core.automator.filter.Filter` | 1 / 1 / 1 | app |
+| `com.stardust.automator.simple_action.Able` | `org.autojs.autojs.core.automator.action.Able` | 1 / 1 / 1 | app |
+| `com.stardust.automator.simple_action.ActionTarget` | `org.autojs.autojs.core.automator.action.ActionTarget` | 1 / 1 / 1 | app |
+| `com.stardust.automator.simple_action.DepthFirstSearchTargetAction` | `org.autojs.autojs.core.automator.action.DepthFirstSearchTargetAction` | 1 / 1 / 1 | app |
+| `com.stardust.automator.simple_action.ScrollAction` | `org.autojs.autojs.core.automator.action.ScrollAction` | 1 / 1 / 1 | app |
+| `com.stardust.automator.simple_action.ScrollMaxAction` | `org.autojs.autojs.core.automator.action.ScrollMaxAction` | 1 / 1 / 1 | app |
+| `com.stardust.pio.PRandomAccessBinaryFile` | `org.autojs.autojs.pio.PRandomAccessBinaryFile` | 1 / 1 / 1 | compat |
+| `com.stardust.pio.PReadableBinaryFile` | `org.autojs.autojs.pio.PReadableBinaryFile` | 1 / 1 / 1 | compat |
+| `com.stardust.pio.UncheckedIOException` | `org.autojs.autojs.pio.UncheckedIOException` | 1 / 1 / 1 | compat |
+| `com.stardust.util.AssetsCache` | `org.autojs.autojs.util.AssetsCache` | 1 / 1 / 1 | compat |
+| `com.stardust.util.DrawerAutoClose` | `org.autojs.autojs.ui.widget.DrawerAutoClose` | 1 / 1 / 1 | compat |
+| `com.stardust.util.LimitedHashMap` | `org.autojs.autojs.tool.LimitedHashMap` | 1 / 1 / 1 | compat |
+| `com.stardust.util.NetworkUtils` | `org.autojs.autojs.util.NetworkUtils` | 1 / 1 / 10 | compat |
+
+- 覆盖率低且核心的类 (不适合别名, 需保留兼容副本): `UiObject` (42/69, 宿主 107), `UiSelector` (9/41), `UiObjectCollection` (9/36), `ScriptRuntime` (25/39), `ConsoleImpl` (13/17 对 91), `ProjectConfig` (25/30 对 65), `DynamicLayoutInflater` (9/22) 等.
+- 建议: 若实施方案 2, 第一批只做 `runtime.api.*` (Files, Device, Images, Events, Threads, Timers, Dialogs, Engines, AbstractShell, AbstractConsole), `core.util.Shell`, `pio.PFiles` / `PFile` / `PWritableTextFile` / `PReadableTextFile` 与 `core.image.Colors` 这 ~18 个类, 每条别名附编译期签名对照测试 (参数与返回类型, 不只是方法名); `automator.*` 与 UI 膨胀相关类不做.
