@@ -560,6 +560,7 @@
 * `Fix` With Paddle OCR v3 and a v4/v5/v6 plugin both enabled, packaging selected the latter and Paddle OCR did not work in the packaged app; packaged apps now accept only the PP-OCRv3 plugin and no longer copy the v4-v6 models and native libraries they cannot run
 * `Fix` APK packaging silently kept one of two same-named native libraries with different content; it now stops and names both sources
 * `Improvement` Plugin Center supports primary and secondary sorting with separate directions, defaulting to installed > disabled > not installed, then last update time in descending order within each status
+* `Improvement` Plugin Center keeps operated plugins in place while updating their state and continuing background refreshes; pulling to refresh or changing sorting or filters restores the normal order
 * `Improvement` The Standard plugin installation profile includes 3-Setup Installer, and system APK installation no longer displays the installer-plugin recommendation tip
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host

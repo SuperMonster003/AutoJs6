@@ -59,7 +59,11 @@ object PluginInfoDialogManager {
     private val remoteDialogIconCache = object : LruCache<String, Bitmap>(40) {}
 
     /** One shown information dialog; [item] follows in-place refreshes. zh-CN: 一个已显示的信息对话框; [item] 随原地刷新更新. */
-    private class ShownInfo(val infoDialog: InfoDialog, var item: PluginCenterItem) {
+    private class ShownInfo(
+        val infoDialog: InfoDialog,
+        var item: PluginCenterItem,
+        val onUserAction: ((PluginCenterItem) -> Unit)?,
+    ) {
         val dialog: MaterialDialog get() = infoDialog.dialog
     }
 
@@ -84,16 +88,21 @@ object PluginInfoDialogManager {
                 bindInfo(context, shown.infoDialog, infoFor(context, target), rebindIcon)
             }
             PluginInfoDialogRefreshPolicy.Refresh.REBUILD -> {
-                showPluginInfoDialog(context, target)
+                showPluginInfoDialog(context, target, shown.onUserAction)
                 shown.dialog.dismiss()
             }
         }
     }
 
     @JvmStatic
-    fun showPluginInfoDialog(context: Context, item: PluginCenterItem): InfoDialog {
+    @JvmOverloads
+    fun showPluginInfoDialog(
+        context: Context,
+        item: PluginCenterItem,
+        onUserAction: ((PluginCenterItem) -> Unit)? = null,
+    ): InfoDialog {
         val infoDialog = InfoDialog(context)
-        val shown = ShownInfo(infoDialog, item)
+        val shown = ShownInfo(infoDialog, item, onUserAction)
         val info = infoFor(context, item)
         addRows(infoDialog.items)
 
@@ -163,6 +172,7 @@ object PluginInfoDialogManager {
                     d.dismiss()
                     val info = infoFor(context, shown.item)
                     val url = info.validateApkUrlAndPrompt(context, d) ?: return@onNeutral
+                    shown.onUserAction?.invoke(info.item)
                     PluginInstallCompatibilityPrompt.runBeforeDownload(context, info.item) {
                         CoroutineScope(Dispatchers.Main).launch {
                             PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
@@ -181,7 +191,7 @@ object PluginInfoDialogManager {
                 )
                 neutralColorRes(R.color.dialog_button_attraction)
                 onNeutral { d, _ ->
-                    showUpdatablePluginInfoDialog(context, PluginInfoUpdatable(shown.item), d)
+                    showUpdatablePluginInfoDialog(context, PluginInfoUpdatable(shown.item), d, shown.onUserAction)
                 }
             }
             PluginInfoDialogRefreshPolicy.NeutralAction.NONE -> Unit
@@ -451,7 +461,12 @@ object PluginInfoDialogManager {
             borderColor = borderColor,
         )
 
-    internal fun showUpdatablePluginInfoDialog(context: Context, info: PluginInfoUpdatable, parentDialog: MaterialDialog? = null) {
+    internal fun showUpdatablePluginInfoDialog(
+        context: Context,
+        info: PluginInfoUpdatable,
+        parentDialog: MaterialDialog? = null,
+        onUserAction: ((PluginCenterItem) -> Unit)? = null,
+    ) {
         val url = info.validateApkUrlAndPrompt(context, parentDialog) ?: return
         parentDialog?.dismiss()
 
@@ -463,6 +478,7 @@ object PluginInfoDialogManager {
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive { _, _ ->
+                    onUserAction?.invoke(info.item)
                     info.versionCode?.takeIf { it > 0 }?.let {
                         UpdateIgnoreStore.ignoreVersion(info.packageName, it, info.item.versionName)
                     }
@@ -516,6 +532,7 @@ object PluginInfoDialogManager {
             .positiveColor(context.getColor(R.color.dialog_button_attraction))
             .onPositive { d, _ ->
                 d.dismiss()
+                onUserAction?.invoke(info.item)
                 PluginInstallCompatibilityPrompt.runBeforeDownload(context, info.item) {
                     CoroutineScope(Dispatchers.Main).launch {
                         PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)

@@ -99,6 +99,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     private lateinit var currentSort: Sort
     private var currentFilterState = PluginFilterStore.defaultFilterState()
     private val sortPolicy = PluginCenterSortPolicy()
+    private val actionPositionPolicy = PluginCenterActionPositionPolicy()
+    private var renderedSortSelection: SortSelection? = null
 
     private val sortPrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
         if (!isAdded || _binding == null) return@OnSharedPreferenceChangeListener
@@ -164,6 +166,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     ViewUtils.showToast(contextRef, getString(R.string.text_unavailable), true)
                     return
                 }
+                retainActionPosition(item)
                 PluginInstallCompatibilityPrompt.runBeforeDownload(contextRef, item) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         PluginInstaller.installFromUrlWithPrompt(contextRef, url, item.installableApkSha256)
@@ -172,6 +175,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
 
             override fun onToggleEnable(item: PluginCenterItem, enabled: Boolean) {
+                retainActionPosition(item)
                 if (!enabled) {
                     vm.setEnabled(contextRef, item.packageName, false)
                     item.isEnabled = false
@@ -221,6 +225,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     .positiveText(R.string.dialog_button_confirm)
                     .positiveColorRes(R.color.dialog_button_caution)
                     .onPositive { _, _ ->
+                        retainActionPosition(item)
                         val uri = "package:${item.packageName}".toUri()
                         val intent = Intent(Intent.ACTION_DELETE, uri)
                         startActivity(intent)
@@ -229,11 +234,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
 
             override fun onDetails(item: PluginCenterItem) {
-                PluginInfoDialogManager.showPluginInfoDialog(contextRef, item)
+                PluginInfoDialogManager.showPluginInfoDialog(contextRef, item, ::retainActionPosition)
             }
 
             override fun onUpdate(item: PluginCenterItem) {
-                PluginInfoDialogManager.showUpdatablePluginInfoDialog(contextRef, PluginInfoDialogManager.PluginInfoUpdatable(item))
+                PluginInfoDialogManager.showUpdatablePluginInfoDialog(
+                    contextRef, PluginInfoDialogManager.PluginInfoUpdatable(item), onUserAction = ::retainActionPosition,
+                )
             }
 
             override fun onSettings(item: PluginCenterItem) {
@@ -299,6 +306,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         // Pull-to-refresh: force refresh index every time (still respects backoff window).
         // zh-CN: 下拉刷新: 每次都强制刷新索引 (仍遵守退避窗口).
         binding.pluginCenterSwipeRefresh.setOnRefreshListener {
+            actionPositionPolicy.clear()
+            renderList()
             scheduleSwipeRefreshIndicatorTimeout()
             vm.load(contextRef, forceRefreshIndex = true, sourceScope = sourceScope, showRefreshErrors = true)
         }
@@ -350,6 +359,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
      * zh-CN: 更新用于过滤当前列表的查询串.
      */
     fun setQuery(query: String?) {
+        actionPositionPolicy.clear()
         currentQuery = query?.takeIf { it.isNotBlank() }
         renderList()
     }
@@ -363,6 +373,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
      * zh-CN: 更新当前列表渲染的排序策略.
      */
     fun setSort(sort: Sort) {
+        actionPositionPolicy.clear()
         currentSort = sort
         renderList()
     }
@@ -372,6 +383,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
      * zh-CN: 更新当前列表渲染的筛选策略.
      */
     fun setFilterState(state: PluginFilterStore.FilterState) {
+        actionPositionPolicy.clear()
         currentFilterState = state
         renderList()
     }
@@ -415,27 +427,49 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    private fun retainActionPosition(item: PluginCenterItem) {
+        if (_binding == null || !::adapter.isInitialized) return
+        actionPositionPolicy.retain(item.packageName, adapter.items())
+    }
+
+    private data class SortSelection(
+        val primary: Sort,
+        val primaryAscending: Boolean,
+        val secondary: Sort,
+        val secondaryAscending: Boolean,
+    )
+
     private fun buildSortComparator(): Comparator<PluginCenterItem> {
         val secondary = loadPersistedSecondarySort(contextRef, currentSort)
-        return sortPolicy.comparator(
+        val selection = SortSelection(
             primary = currentSort,
             primaryAscending = loadPersistedSortAscending(contextRef, currentSort),
             secondary = secondary,
             secondaryAscending = loadPersistedSortAscending(contextRef, secondary),
         )
+        if (renderedSortSelection != null && renderedSortSelection != selection) {
+            actionPositionPolicy.clear()
+        }
+        renderedSortSelection = selection
+        return sortPolicy.comparator(selection.primary, selection.primaryAscending, selection.secondary, selection.secondaryAscending)
     }
 
     private fun renderList() {
+        val comparator = buildSortComparator()
         val q = currentQuery
         val visibleItems = latestFullItems
             .filterNot { PluginVisibilityStore.isHidden(contextRef, it.packageName) }
-            .let { PluginVariantDisplayPolicy.apply(it, variantDisplayMode) }
+            .filter {
+                actionPositionPolicy.isRetained(it.packageName) ||
+                        PluginVariantDisplayPolicy.shouldDisplay(it.isFeatured, it.isInstalled, variantDisplayMode)
+            }
 
         val filteredByQuery = if (q.isNullOrBlank()) {
             visibleItems
         } else {
             // @formatter:off
             visibleItems.filter { item ->
+                actionPositionPolicy.isRetained(item.packageName) ||
                 item.title.contains(q, ignoreCase = true) ||
                 item.packageName.contains(q, ignoreCase = true) ||
                 item.author?.contains(q, ignoreCase = true) == true ||
@@ -444,9 +478,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             // @formatter:on
         }
 
-        val filtered = filteredByQuery.filter(::matchesCurrentFilter)
+        val filtered = filteredByQuery.filter { actionPositionPolicy.isRetained(it.packageName) || matchesCurrentFilter(it) }
 
-        val sorted = filtered.sortedWith(buildSortComparator())
+        val sorted = actionPositionPolicy.apply(filtered.sortedWith(comparator))
 
         if (sorted.isEmpty() || isInitialViewportReady) {
             pendingInitialRenderItems = null
@@ -977,8 +1011,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
             // Sync with latest persisted state (e.g., changed while fragment was stopped).
             // zh-CN: 同步最新的持久化状态 (如在 Fragment 停止期间被修改).
-            setSort(loadPersistedSort(contextRef))
-            setFilterState(loadFilterState(contextRef))
+            // Returning from the installer must keep action positions when preferences are unchanged.
+            // zh-CN: 从安装器返回且偏好未变化时, 应继续保留操作位置.
+            currentSort = loadPersistedSort(contextRef)
+            val filterState = loadFilterState(contextRef)
+            if (filterState != currentFilterState) actionPositionPolicy.clear()
+            currentFilterState = filterState
+            renderList()
         }
 
         pkgReceiver ?: run registerPackageReceiver@{
@@ -1097,6 +1136,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        actionPositionPolicy.clear()
+        renderedSortSelection = null
         if (::listSubmitter.isInitialized) {
             listSubmitter.cancel()
         }

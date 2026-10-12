@@ -554,6 +554,7 @@
       ],
       "improvement": [
         "Plugin Center supports primary and secondary sorting with separate directions, defaulting to installed > disabled > not installed, then last update time in descending order within each status",
+        "Plugin Center keeps operated plugins in place while updating their state and continuing background refreshes; pulling to refresh or changing sorting or filters restores the normal order",
         "The Standard plugin installation profile includes 3-Setup Installer, and system APK installation no longer displays the installer-plugin recommendation tip",
         "Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes",
         "Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host",
