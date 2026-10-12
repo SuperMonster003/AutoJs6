@@ -33,6 +33,11 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 | D9 | 不修改 AutoJs4 的行为 | 插件只做壳, 权限引导与通信, 不修补 AutoJs4 引擎的脚本语义; 发现的差异回到原则 A 的对照流程处理 (修 AutoJs6, 或记录为 "特定情况"). 需要在 AutoJs4 仓库做的最小改动 (如暴露日志钩子, 提取壳代码) 作为独立提交进入 AutoJs4. |
 | D10 | 契约版本化 | 契约 `autojs4-runtime-protocol-v1`, 请求与事件以 Bundle 传递 (与 QuickJS 一致), 插件 `PluginInfo.capabilities` 声明 `requiresHostVersion` 与协议版本, 宿主只接受协议主版本相同的插件. |
 | D11 | Roadmap 位于 `docs/dev/` | 与仓库内既有 roadmap 的位置与风格一致. |
+| D13 | 版本号 (2026-10-12 拍板, 原 Q2) | 插件使用独立的语义化版本 (首版 `1.0.0`), 内嵌的 AutoJs4 版本名与构建号写入 `PluginInfo.capabilities` 与 README "简介"; AutoJs4 更新时插件至少提升次版本号, changelog 记 `升级 AutoJs4 版本 a -> b`. |
+| D14 | 无障碍服务独立, 插件设置页集中管理权限开关 (2026-10-12 拍板, 原 Q5) | 插件的无障碍服务不接入宿主伴生契约, 由用户单独开启; 插件设置页提供无障碍服务, 悬浮窗, 所有文件访问, 忽略电池优化, Root 状态等重要开关与状态项, 每项可直接跳转系统设置并显示当前状态. |
+| D15 | 不导出 AutoJs4 原有外部入口 (2026-10-12 拍板, 原 Q6) | `RunIntentActivity`, `ShortcutActivity`, Tasker 插件入口与 `TaskReceiver` 均不进入插件 Manifest, 插件只接受宿主经 `org.autojs.permission.PLUGIN` 保护的 Binder 调用. |
+| D16 | 首版即满足 16 KB 页对齐 (2026-10-12 拍板, 原 Q7) | 随 `:autojs` / `:common` 带入的原生库 (OpenCV 3.4.3, 终端 AAR, root-shell 等) 在首版就按 `docs/dev/page-size-16kb-roadmap.md` 的方法重新编译或替换为 16 KB 对齐版本, `NATIVE_PAGE_ALIGNMENT` 声明兼容; 无法对齐的库在 P1.4 列出并决定取舍, 不以 "如实声明不支持" 交付. |
+| D17 | AutoJs4 控制台窗口由插件设置决定 (2026-10-12 拍板, 原 Q8) | 日志始终回传宿主; 插件设置 "显示 AutoJs4 控制台窗口" 默认关闭, 开启后 `console.show()` 等同时在插件进程显示 AutoJs4 原有浮动窗口, 便于对照视觉效果. |
 | D12 | 名称与标识 (2026-10-12 拍板, 原 Q1) | 仓库 `AutoJs6-Plugin-AutoJs4-Runtime`, `rootProject.name` `autojs6-plugin-autojs4-runtime`, 应用标题 `AutoJs4 Runtime` (不可翻译), 插件 ID `autojs4-runtime`, 包名 `io.github.supermonster003.autojs6.plugin.autojs4.runtime`, 宿主引擎标识 `autojs4`, 服务 action `org.autojs.plugin.autojs4.RUNTIME`, category `autojs4-runtime`, 专用 API 模块 `autojs4-runtime-api`. 与 Node.js / Python / Lua Runtime 同一命名族. |
 
 ---
@@ -77,20 +82,20 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 
 ### P0 需求定稿与契约
 
-- [ ] P0.1 附录 A 的待决事项由维护者拍板, 结论回填到第 1 节 "固定决策". 进展: Q1, Q3, Q4, Q9 已于 2026-10-12 拍板 (见 D3, D5, D12); Q2, Q5, Q6, Q7, Q8 待定.
+- [x] P0.1 附录 A 的待决事项由维护者拍板, 结论回填到第 1 节 "固定决策". 证据: Q1-Q9 已于 2026-10-12 全部拍板 (见 D3, D5, D12-D17).
 - [ ] P0.2 编写 `docs/dev/autojs4-runtime-protocol-v1.md`: 服务 action (`org.autojs.plugin.autojs4.RUNTIME`), category, `PluginInfo` 字段 (`engine = "autojs4"`, 协议版本, `requiresHostVersion`, AutoJs4 版本名与构建号), `runScript` 请求字段 (脚本绝对路径, 工作目录, 参数 extras, 是否 UI 模式由插件自行判断), 事件字段 (`started`, `log`, `finished`, `error`, `uiStarted`), 取消语义, 单次请求上限与超时, 失败回退.
 - [ ] P0.3 新建 `plugin-api/autojs4-runtime-api` 模块: AIDL `IAutoJs4RuntimePlugin` / `IAutoJs4RuntimeCallback`, 常量类, 与 `quickjs-runtime-api` 对齐的 Bundle 键定义; 单元测试覆盖键名与版本常量.
 - [ ] P0.4 在 AutoJs4 仓库确认可复用的最小壳: 列出 `inrt` 中与打包应用无关的部分 (启动器, 设置页, 日志页), 以及插件需要新增的 `GlobalConsole` 转发接口与 `ScriptEngineService` 外部启动入口; 以独立提交进入 AutoJs4 (不改变 AutoJs4 APK 行为).
 
 ### P1 插件仓库
 
-- [ ] P1.1 按 `AUTOJS6_PLUGIN_NEW_REPO_AGENTS.md` 建仓 (标识见 D12), 复制 OpenCC 插件的构建, 文档, 资源骨架; `version.properties` 的 `VERSION_NAME` 表示法按 Q2 的结论.
+- [ ] P1.1 按 `AUTOJS6_PLUGIN_NEW_REPO_AGENTS.md` 建仓 (标识见 D12), 复制 OpenCC 插件的构建, 文档, 资源骨架; `version.properties` 的 `VERSION_NAME` 为 `1.0.0` (D13).
 - [ ] P1.2 以 Git submodule 引入 AutoJs4 仓库并只包含其 `:autojs` / `:common` / `:automator` 模块 (D5); 处理 AGP / Kotlin 版本差异 (AutoJs4 用 AGP 8.2.2 / Kotlin 1.8.22, 插件平台版本以 `AutoJs6-Gradle-Platform-Versions` 为准), 记录不可升级的原因.
-- [ ] P1.3 Manifest: `INFO` 服务 (category `autojs4-runtime`), `RUNTIME` 服务 (`:autojs4_runtime` 进程, `org.autojs.permission.PLUGIN` 保护), AutoJs4 的 `ScriptExecuteActivity`, 权限 Activity, 截图 Activity 与无障碍服务; 不导出 AutoJs4 原有的 `RunIntentActivity`, `ShortcutActivity`, Tasker 与 `TaskReceiver` 入口 (Q6).
-- [ ] P1.4 原生库: 列出 `:autojs` 带入的 `.so` (OpenCV 3.4.3, 终端, root-shell), 按 ABI 拆分发布 (`arm64-v8a`, `armeabi-v7a`, `universal`); 对 16 KB 页对齐做评估, 不满足时在 `NATIVE_PAGE_ALIGNMENT` 元数据中如实声明, 让插件中心在 16 KB 设备上提示 (Q7).
+- [ ] P1.3 Manifest: `INFO` 服务 (category `autojs4-runtime`), `RUNTIME` 服务 (`:autojs4_runtime` 进程, `org.autojs.permission.PLUGIN` 保护), AutoJs4 的 `ScriptExecuteActivity`, 权限 Activity, 截图 Activity 与无障碍服务; 不导出 AutoJs4 原有的 `RunIntentActivity`, `ShortcutActivity`, Tasker 与 `TaskReceiver` 入口 (D15).
+- [ ] P1.4 原生库: 列出 `:autojs` 带入的 `.so` (OpenCV 3.4.3, 终端, root-shell), 按 ABI 拆分发布 (`arm64-v8a`, `armeabi-v7a`, `universal`); 全部按 16 KB 页对齐重新编译或替换 (D16), 用 `page-size-16kb-roadmap.md` 的对齐检查脚本验证, 无法对齐的库列出清单并决定取舍后再进入 P2.
 - [ ] P1.5 插件进程内的 `Application`: 初始化 AutoJs4 的 `AutoJs` 子类 (参考 `inrt/.../autojs/AutoJs.kt`), 覆写 `createGlobalConsole()` 把日志推送到绑定中的宿主回调; 无宿主连接时落到插件自己的日志页.
 - [ ] P1.6 权限引导页: 所有文件访问 (Android 11+) / 存储权限, 悬浮窗, 无障碍服务开启, 忽略电池优化; 从宿主发起运行且缺权限时, 插件打开引导页并以 `error(kind = PERMISSION)` 事件告知宿主.
-- [ ] P1.7 设置页: 显示启动器图标 (沿用官方插件契约), 日志是否同时显示 AutoJs4 自带控制台窗口 (Q8), 运行结束后是否保留插件进程.
+- [ ] P1.7 设置页 (D14, D17): 权限与服务分组 (无障碍服务, 悬浮窗, 所有文件访问, 忽略电池优化, Root 状态, 每项显示当前状态并可跳转系统设置), 显示启动器图标 (沿用官方插件契约), "显示 AutoJs4 控制台窗口" (默认关闭), 运行结束后是否保留插件进程.
 - [ ] P1.8 README (10 种语言), changelog, 官方签名发布任务 `appendDigestToReleasedFiles`, CI; `plugin_description` 说明 "用于在 AutoJs6 中以 Auto.js 4.1.1 Alpha2 引擎运行脚本, 便于对照 AutoJs6 的运行结果".
 
 ### P2 宿主接入
@@ -116,7 +121,7 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 ### P4 权限与设备验证
 
 - [ ] P4.1 Android 9 (G8441), 12 (XQ-AT72), 13 (XQ-DQ72), 15 (liuqin / OPD2413) 实机: 普通脚本, UI 脚本, 浮动窗口, 无障碍操作 (`click`, `text().findOne()`), 截图 (`captureScreen`), Root 可用设备上的 `shell(cmd, true)`.
-- [ ] P4.2 16 KB 页设备 (租用 SM-A566B) 安装与运行结论, 回填 P1.4.
+- [ ] P4.2 16 KB 页设备 (租用 SM-A566B) 安装与运行验收: 所有原生库通过对齐检查, 普通脚本, 截图与 Root 操作可用 (D16).
 - [ ] P4.3 原则 A 对照集: 从 `app/src/main/assets-app/sample` 挑选 20 个以上在 Auto.js 4.x 文档范围内的示例, 分别用 AutoJs6 与 AutoJs4 运行并记录差异; 差异进入 AutoJs6 issue 或记录为 "特定情况" (附录 B).
 - [ ] P4.4 插件未安装, 未启用, 未授权, 版本不兼容, 缺权限五种状态的界面行为逐项验证.
 
@@ -143,16 +148,13 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 | Q3 | 引擎源码引用方式 | Git submodule 指向 AutoJs4 仓库, 见 D5 |
 | Q4 | 菜单项覆盖的文件类型 | `.js`, `.auto` 及含 `project.json` 的项目文件夹, 见 D3 与 P3.1a |
 | Q9 | 首版范围 | 运行 + 插件缺失时的 "安装 AutoJs4 Runtime" 引导项; 对照模式 (P6) 不纳入首版 |
+| Q2 | 插件版本号表示法 | 独立语义化版本, 首版 `1.0.0`, 见 D13 |
+| Q5 | 无障碍服务开关是否跟随宿主 | 独立开启, 并在插件设置页集中提供无障碍服务等重要开关, 见 D14 |
+| Q6 | 是否保留 AutoJs4 原有的外部入口 | 全部不导出, 见 D15 |
+| Q7 | 原生库与 16 KB 页 | 首版即重新编译以满足对齐, 见 D16 |
+| Q8 | AutoJs4 自带控制台浮动窗口的处理 | 由插件设置决定, 默认只回传宿主, 见 D17 |
 
-待定:
-
-| 编号 | 问题 | 候选 | 建议 |
-| --- | --- | --- | --- |
-| Q2 | 插件版本号表示法 | A. 跟随 AutoJs4 版本 (`4.4.0`, 插件修订用第四位或构建号); B. 独立语义化版本 (`1.0.0`), README 标注内嵌 AutoJs4 版本 | B. 符合插件规范 5.3 节的语义化版本, 内嵌版本写进 `PluginInfo` 与 README |
-| Q5 | 无障碍服务开关是否跟随宿主 | A. 独立, 用户在系统设置单独开启插件的无障碍服务; B. 接入伴生契约, 宿主开关同步控制 | A. 先独立, 避免两个无障碍服务同时抢事件的干扰; 伴生同步作为后续优化 |
-| Q6 | 是否保留 AutoJs4 原有的外部入口 (Tasker, 快捷方式, `RunIntentActivity`) | A. 全部不导出; B. 保留但加 `org.autojs.permission.PLUGIN` 保护 | A. 插件只服务于宿主, 减少攻击面 |
-| Q7 | 原生库与 16 KB 页 | A. 首版如实声明不支持 16 KB, 插件中心提示; B. 首版即重新编译 OpenCV 3.4.3 等库以满足对齐 | A. 先交付, 再按 `page-size-16kb-roadmap.md` 的方法补齐 |
-| Q8 | AutoJs4 自带控制台浮动窗口的处理 | A. 日志只回传宿主, 不显示 AutoJs4 窗口; B. 两处都显示; C. 由插件设置决定 (默认 A) | C. 对照 `console.show()` 的视觉效果时需要 B |
+待定: 无. 新的问题按 "编号 / 问题 / 候选 / 建议" 四列追加到本表下方, 拍板后移入上表并回填第 1 节.
 
 ## 附录 B. 原则 A 的已知 "特定情况" (持续补充)
 
