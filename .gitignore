@@ -64,6 +64,10 @@ CLAUDE.md
 !/tools/stardust/
 !/tools/stardust/**
 /tools/stardust/__pycache__/
+!/tools/autojs4/
+!/tools/autojs4/**
+/tools/autojs4/__pycache__/
+/tools/autojs4/compare/
 !/tools/sdk37/
 !/tools/sdk37/**
 /tools/sdk37/__pycache__/

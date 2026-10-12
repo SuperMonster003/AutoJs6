@@ -128,8 +128,8 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 
 - [~] P4.1 Android 9 (G8441), 12 (XQ-AT72), 13 (XQ-DQ72), 15 (liuqin / OPD2413) 实机: 普通脚本, UI 脚本, 浮动窗口, 无障碍操作 (`click`, `text().findOne()`), 截图 (`captureScreen`), Root 可用设备上的 `shell(cmd, true)`. 2026-10-12 已在 XQ-DQ72 (Android 13, 宿主 debug 5334 + 插件 1.0.0 armeabi-v7a) 验证: (1) 插件未安装时文件菜单显示 "安装 AutoJs4 Runtime" 并跳转插件中心官方库; (2) 安装后菜单显示 "使用 AutoJs4 运行", 宿主发现, 绑定插件并受理; (3) 缺少存储权限时插件返回 `PERMISSION_DENIED` / `storage`, 宿主控制台打印 "AutoJs4 Runtime 缺少权限 \"storage\", 请在插件设置中授予", 插件自动打开设置页, 在设置页点击 "Storage access" 弹出系统权限对话框并授予成功; (4) `hello.js` 在插件进程 (`:autojs4_runtime`, 32 位) 中由 AutoJs4 引擎运行, `console.log` / `console.warn` 以原级别加 `[AutoJs4]` 前缀出现在宿主控制台, `files.cwd()` 为脚本目录, 宿主打印 "运行结束 (用时 0.318 秒)"; (5) `loop.js` 无限循环的日志每 5 s 回传, 在宿主 "任务" 面板点击停止后插件 `RhinoJavaScriptEngine.forceStop` 中断脚本线程, 宿主以 `ScriptInterruptedException` 正常结束任务 (用时 16.2 s), 任务列表清空; (6) 插件 `connectedDebugAndroidTest` 3 个用例通过 (`-PandroidTestPermissionName=...test.PLUGIN`); (7) 2026-10-12 插件以 `arm64-v8a` 安装 (`primaryCpuAbi=arm64-v8a`, 进程 `os.arch` 为 `aarch64`) 后, `opencv_test.js` (`images.read` / `pixel` / `grayscale` / `findColor` / `findColorEquals` / `findImage` / `matchTemplate` / `Core.getBuildInformation()`) 经 "使用 AutoJs4 运行" 执行, logcat `OpenCV/StaticHelper` 显示 `opencv_java3 loaded`, 构建信息为 clang 19.0.1 / NDK 28.2 / `Version control: 3.4.3`; 换装 `armeabi-v7a` 包 (AutoJs4 原版库, GCC 4.8 / NDK r10e) 重跑同一脚本, 全部结果逐行一致 (含 `images.pixel` 对灰度图抛出的 `ArrayIndexOutOfBoundsException: length=1; index=3`, 见附录 B), 证明重编库与原版行为一致且不依赖 32 位进程. 未验证: UI 模式脚本, 浮动窗口, 无障碍操作, 截图, Root, 以及 Android 9 / 12 / 15 设备; 另注意 `connectedDebugAndroidTest` 结束后 Gradle 会卸载插件, 之后需重新安装.
 - [~] P4.2 16 KB 页设备: D19 之后插件具备 64 位原生库, 可安装到 64 位专用设备. 静态证据: `opencv.lock.json` 记录两份 64 位库 `minLoadAlign=16384`, jackpal AAR 的 8 个 `.so` 由宿主按 16 KB 重编, `NATIVE_PAGE_ALIGNMENT` 声明兼容, 共享对齐插件构建期通过; 动态证据: XQ-DQ72 (arm64, 4 KB 页) 上 64 位进程加载重编 OpenCV 并与原版结果一致 (P4.1 第 7 项). 待办: 在 16 KB 页设备或 API 35+ 的 16 KB 模拟器 (`-PrequiredApiLevel` 对应镜像) 上安装 `arm64-v8a` / `x86_64` 包并重跑 `opencv_test.js`.
-- [ ] P4.3 原则 A 对照集: 从 `app/src/main/assets-app/sample` 挑选 20 个以上在 Auto.js 4.x 文档范围内的示例, 分别用 AutoJs6 与 AutoJs4 运行并记录差异; 差异进入 AutoJs6 issue 或记录为 "特定情况" (附录 B).
-- [ ] P4.4 插件未安装, 未启用, 未授权, 版本不兼容, 缺权限五种状态的界面行为逐项验证.
+- [x] P4.3 原则 A 对照集 (2026-10-12, XQ-DQ72, 宿主 5350 + 插件 1.0.0 (7) arm64-v8a; 驱动脚本 `tools/autojs4/compare_samples.py`, 从 `assets-app/sample` 选 20 个不需要交互的示例, 每个分别用运行按钮与 "使用 AutoJs4 运行" 执行, 对照宿主控制台逐行输出): 13 个完全一致 (HelloWorld, 数字, liveConnect, 格式化输出, 调整控制台大小位置, 写入/读取/读写文本文件, 文件编码转换, 保存整数等简单数据, 原子变量, 线程启动与关闭, 循环执行, 保存日志); 4 个差异属已知类别: 打印不同级别 与 获取网页 在 AutoJs4 以 `illegal character` 失败 (模板字符串, ES6 语法), 产生随机数 仅随机值不同, 多线程简单示例 仅并发日志次序不同; E4X 示例在 AutoJs4 (Rhino 1.7.7.2) 中子节点/属性访问返回空值且命名空间序列化不同, AutoJs6 输出正确 (AutoJs4 缺陷, 记入附录 B); 1 个真实差异待维护者判定: 保存数组和复杂对象 中 `log('obj = ', obj)` 的对象格式, AutoJs4 为 `{ name: 'Auto.js', url: 'www.autojs.org' }` (字符串带引号), AutoJs6 为 `{ name: Auto.js, url: www.autojs.org }`. 需要交互 (对话框, 浮动窗口, 无障碍) 或依赖 OpenCV 插件 (宿主侧) 的示例未纳入.
+- [~] P4.4 五种状态 (2026-10-12 XQ-DQ72): 未安装 -> 菜单显示 "安装 AutoJs4 Runtime" 并跳转插件中心 (P4.1 第 1 项); 未启用 -> 在插件中心关闭开关后点击 "使用 AutoJs4 运行" 弹出 "插件中心" 对话框, 内容 `插件 "AutoJs4 Runtime" 未在插件中心启用`, 按钮 取消 / 插件中心, 重新开启后恢复; 缺权限 -> `PERMISSION_DENIED` / storage 提示并自动打开插件设置页 (P4.1 第 3 项). 未授权 (未信任签名) 与版本不兼容需要特制插件包, 未验证. 附带修正: 插件中心列表曾把插件显示为 "Auto.js", 原因是 AutoJs4 引擎库的 `values-en/app_name` = "Auto.js" 覆盖了插件默认语言的 `app_name`; 插件改用独立的 `plugin_name` 资源作为 Manifest label 与 `PluginInfo.name` (插件提交 `2a5e366`), 列表现显示 "AutoJs4 Runtime".
 
 ### P5 文档与发布
 
@@ -177,11 +177,12 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 ## 附录 B. 原则 A 的已知 "特定情况" (持续补充)
 
 - 包名: AutoJs4 为 `org.autojs.autojs4`, AutoJs6 为 `org.autojs.autojs6`; 依赖包名的脚本行为必然不同.
-- Rhino 版本差异带来的语法与内置对象差异 (ES6+ 特性在 AutoJs4 不可用).
+- Rhino 版本差异带来的语法与内置对象差异 (ES6+ 特性在 AutoJs4 不可用). 已确认: 模板字符串在 AutoJs4 中以 `illegal character` 解析失败 (示例 控制台/打印不同级别.js, HTTP/获取网页.js).
 - 已在 AutoJs6 中被明确移除或替换的功能 (如 AutoJs4 的打包插件机制).
 - `.auto` 文件 (Root 录制回放) 在两者中均由同一个 `root_automator` 可执行文件 (32 位 ARM) 回放, 不属于差异; 64 位专用设备上两者同样无法回放.
 - 系统限制导致的差异 (targetSdk 28 与 37 的存储, 后台与权限模型不同).
-- AutoJs4 自身的缺陷在 AutoJs6 中已修复, 属于 "AutoJs4 异常而 AutoJs6 正常", 不构成差异. 已确认的例子: AutoJs4 的 `ImageWrapper.pixel()` 对单通道 (灰度) Mat 读取 `channels[3]`, 因此 `images.pixel(images.grayscale(img), x, y)` 抛出 `ArrayIndexOutOfBoundsException: length=1; index=3` (2026-10-12 在 armeabi-v7a 原版库与 arm64-v8a 重编库上结果一致).
+- AutoJs4 自身的缺陷在 AutoJs6 中已修复, 属于 "AutoJs4 异常而 AutoJs6 正常", 不构成差异. 已确认的例子: (1) AutoJs4 的 `ImageWrapper.pixel()` 对单通道 (灰度) Mat 读取 `channels[3]`, 因此 `images.pixel(images.grayscale(img), x, y)` 抛出 `ArrayIndexOutOfBoundsException: length=1; index=3` (2026-10-12 在 armeabi-v7a 原版库与 arm64-v8a 重编库上结果一致); (2) Rhino 1.7.7.2 的 E4X: `order.customer.firstname` 等子节点与 `@id` 属性访问返回空值, 带前缀命名空间序列化为 `e4x_0:` 或丢失前缀 (示例 JavaScript/E4X.js, AutoJs6 的 Rhino 2.0.0-SNAPSHOT 输出正确).
+- 宿主侧 OpenCV 功能 (`images.findColor` / `findImage` / `matchTemplate` / `grayscale` 等) 依赖 OpenCV 插件, 未安装时以 `OpenCvPluginLoadException` 提示安装; AutoJs4 内置 OpenCV 3.4.3. 对照时先在宿主安装 OpenCV 插件, 否则该类差异只反映插件缺失.
 
 ## 附录 C. 参考
 
