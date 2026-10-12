@@ -165,6 +165,9 @@ a host release.
 
 ## Host behaviour summary
 
+- Package visibility: the host manifest declares `org.autojs.plugin.autojs4.RUNTIME` with
+  category `autojs4-runtime` inside `<queries>`; without it Android 11+ hides the plugin
+  service and the menu falls back to the install guidance although the plugin is installed.
 - Engine registration: `AutoJs4PluginScriptEngine` under `AutoJs4ScriptSource.ENGINE`
   (`autojs4`), created only for the explicit menu action; no extension or directive routes to it.
 - Logs are written to the host `GlobalConsole` with the original level and the prefix

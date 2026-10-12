@@ -64,6 +64,10 @@
             <category android:name="quickjs" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.autojs4.RUNTIME" />
+            <category android:name="autojs4-runtime" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.SCREEN_COLOR_PICKER" />
             <category android:name="screen-color-picker" />
         </intent>
