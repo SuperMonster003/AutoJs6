@@ -19,6 +19,7 @@ import org.autojs.autojs.core.plugin.jvm.RemoteJvmSourceHost
 import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
+import org.autojs.autojs.engine.AutoJs4PluginScriptEngine
 import org.autojs.autojs.engine.LuaPluginScriptEngine
 import org.autojs.autojs.engine.BunPluginScriptEngine
 import org.autojs.autojs.engine.NodeJavaScriptEngineFactory
@@ -37,6 +38,7 @@ import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.Shell
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.script.AutoFileSource
+import org.autojs.autojs.script.AutoJs4ScriptSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.script.LuaScriptSource
@@ -91,6 +93,9 @@ abstract class AbstractAutoJs protected constructor(val application: Application
             }
             scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_QUICKJS) {
                 QuickJsPluginScriptEngine(applicationContext, globalConsole)
+            }
+            scriptEngineManager.registerEngine(AutoJs4ScriptSource.ENGINE) {
+                AutoJs4PluginScriptEngine(applicationContext, globalConsole)
             }
         }
         scriptEngineManager.registerEngine(LuaScriptSource.ENGINE) {
