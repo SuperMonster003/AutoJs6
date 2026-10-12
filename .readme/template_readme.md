@@ -59,6 +59,27 @@
 
 ******
 
+### {{ h3_related_projects }}
+
+******
+
+{{ p_related_projects_autojs4_intro }}.
+
+{{ p_related_projects_baseline_principle }}.
+
+{{ p_related_projects_documentation_relationship }}.
+
+{{ p_related_projects_table_announce }}:
+
+| <span style="word-break:keep-all;white-space:nowrap">{{ table_header_related_projects_project }}</span> | <span style="word-break:keep-all;white-space:nowrap">{{ table_header_related_projects_description }}</span> | <span style="word-break:keep-all;white-space:nowrap">{{ table_header_related_projects_links }}</span> |
+|:------:|:------|:------:|
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](http://project.autojs6.com)</span> | {{ li_related_projects_autojs6_description }} ({{ text_related_projects_current }}) | <span style="word-break:keep-all;white-space:nowrap">[{{ text_related_projects_link_documentation }}](http://docs-project.autojs6.com) / [{{ text_related_projects_link_read_online }}](https://docs.autojs6.com)</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | {{ li_related_projects_autojs4_description }} | <span style="word-break:keep-all;white-space:nowrap">[{{ text_related_projects_link_documentation }}](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6-Documentation](http://docs-project.autojs6.com)</span> | {{ li_related_projects_autojs6_documentation_description }} | <span style="word-break:keep-all;white-space:nowrap">[{{ text_related_projects_link_application }}](http://project.autojs6.com) / [{{ text_related_projects_link_read_online }}](https://docs.autojs6.com)</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs4-Documentation](https://github.com/SuperMonster003/AutoJs4-Documentation)</span> | {{ li_related_projects_autojs4_documentation_description }} | <span style="word-break:keep-all;white-space:nowrap">[{{ text_related_projects_link_application }}](https://github.com/SuperMonster003/AutoJs4)</span> |
+
+******
+
 ### {{ h3_functions }}
 
 ******
