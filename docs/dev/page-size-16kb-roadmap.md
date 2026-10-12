@@ -37,7 +37,7 @@
 
 - `app/src/main/jniLibs/*/libc++_shared.so` 必须保留: 宿主在加载 OpenCV 插件运行时之前先 `System.loadLibrary("c++_shared")` (`core/plugin/opencv/OpenCvPluginHost.kt:219`), OpenCV 插件的 AAR 有意不携带 libc++ (`AutoJs6-Plugin-OpenCV/NATIVE_BUILD.md`), 由宿主提供进程级唯一的 C++ 运行时. 因此宿主的 libc++ 版本必须不低于所有被宿主进程加载的插件所用的 NDK (P1.1 后为 r28.2, 高于 OpenCV 的 r26b 与 Image-Quantization 升级后的 r28.2).
 - APK-Builder-Template 的 zip 写入逻辑 (`RemoteApkLightweightBuilder.kt:490-518`) 不得改为 STORED: 在 D1 的压缩打包前提下, 未压缩但未按 16 KB 对齐的 `.so` 反而会触发系统兼容模式. P1.6 为此增加回归守卫.
-- `com/stardust/**` 兼容包全程冻结 (与 a11y Roadmap 相同; 2026-10-12 起分布在 `compat/stardust/` 与 `app/` 两处).
+- `com/stardust/**` 兼容包全程冻结 (与 a11y Roadmap 相同; 2026-10-12 起分布在 `compat/stardust/` 与 `app/` 两处). (2026-10-13 更新: 兼容包副本已按 autojs4-runtime-plugin-roadmap P7.3 方案 3 移除, `com.stardust` 类名改由 `rhino/StardustClassAliases` 映射到宿主类)
 
 ---
 

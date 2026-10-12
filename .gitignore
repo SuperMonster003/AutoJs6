@@ -36,7 +36,6 @@ CLAUDE.md
 /libs/**/build/
 /modules/**/build/
 /plugin-api/**/build/
-/compat/**/build/
 /plugins/**/build/
 /test-apps/**/build/
 /captures/
@@ -61,9 +60,6 @@ CLAUDE.md
 !/tools/opencv-ocr/
 !/tools/opencv-ocr/**
 /tools/opencv-ocr/__pycache__/
-!/tools/stardust/
-!/tools/stardust/**
-/tools/stardust/__pycache__/
 !/tools/autojs4/
 !/tools/autojs4/**
 /tools/autojs4/__pycache__/

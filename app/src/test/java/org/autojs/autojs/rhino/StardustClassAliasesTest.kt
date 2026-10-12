@@ -1,36 +1,34 @@
 package org.autojs.autojs.rhino
 
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.mozilla.javascript.Kit
-import java.io.File
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
 /**
- * Guards the alias table of [StardustClassAliases] (roadmap P7.3). For every aliased `com.stardust` class the host
- * class must still offer each member a script could reach through the name, otherwise the alias would turn a
- * working call into a silent "method not found". The rules mirror `tools/stardust/compare_alias_signatures.py`:
+ * Guards the alias tables of [StardustClassAliases] (roadmap P7.3, scheme 3). The `com.stardust` copies are gone, so
+ * the script-reachable API of every fully covered alias is read from `stardust-alias-snapshot.json` (recorded from
+ * the compiled copies before their removal, with `com.stardust` types already mapped to host types) and each host
+ * class must still offer those members, otherwise the alias would turn a working call into a silent "method not
+ * found". The rules: static members, constructors a script could call and, for constructible or extensible types,
+ * the instance members must exist on the host with script-compatible parameters (Java numbers are JS numbers,
+ * `Object` accepts anything, a JS function satisfies `Object` and the Rhino value types, a parameter also accepts
+ * subtypes); return types are never checked.
  *
- * - an alias only changes what the name resolves to, so the reachable members are the public static methods and
- *   fields, the public constructors a script could call (no parameter of the compat engine stack,
- *   `com.stardust.autojs.*`) and, for classes a script can construct or extend (abstract types), the public
- *   instance members;
- * - `com.stardust` parameter types are mapped to the host class at the analogous path (or the alias target);
- * - Rhino scripts cannot tell Java numbers, `Object` versus a JS function or `String` versus `CharSequence` apart,
- *   so such parameter differences count as compatible; return types are never checked.
- *
- * zh-CN: 守护 [StardustClassAliases] 的别名表 (roadmap P7.3). 每个别名类的宿主类必须仍提供脚本能通过类名触及的成员,
- * 否则别名会把原本可用的调用变成静默的 "方法不存在". 规则与 `tools/stardust/compare_alias_signatures.py` 一致: 只核对
- * public 静态成员, 脚本可调用的构造器 (参数不含 `com.stardust.autojs.*` 引擎类型) 以及可构造或可继承类的实例成员;
- * `com.stardust` 参数类型按类比路径或别名表映射到宿主类; 数值类型, Object 与 JS 函数, String 与 CharSequence 的差别对
- * Rhino 脚本不可见, 视为兼容; 不比较返回类型.
+ * zh-CN: 守护 [StardustClassAliases] 的别名表 (roadmap P7.3, 方案 3). `com.stardust` 副本已移除, 每个完整覆盖别名的脚本可触及
+ * API 从 `stardust-alias-snapshot.json` 读取 (移除前由编译产物记录, `com.stardust` 类型已映射为宿主类型), 宿主类必须仍提供这些
+ * 成员. 规则: 静态成员, 脚本可调用的构造器, 可构造或可继承类的实例成员须在宿主上有脚本可见兼容的对应项 (数值互换, Object 接受
+ * 任何值, JS 函数满足 Object 与 Rhino 值类型, 参数接受子类型); 不比较返回类型.
  */
 class StardustClassAliasesTest {
 
@@ -39,6 +37,12 @@ class StardustClassAliasesTest {
 
     private val loader: ClassLoader = StardustClassAliasesTest::class.java.classLoader!!
 
+    private val snapshot: JsonObject by lazy {
+        val stream = StardustClassAliasesTest::class.java.getResourceAsStream("/stardust-alias-snapshot.json")
+            ?: throw AssertionError("stardust-alias-snapshot.json is missing from the test resources")
+        JsonParser.parseString(stream.bufferedReader().use { it.readText() }).asJsonObject
+    }
+
     @Test
     fun `resolve maps aliased names and their nested classes only`() {
         assertEquals("org.autojs.autojs.pio.PFiles", StardustClassAliases.resolve("com.stardust.pio.PFiles"))
@@ -46,31 +50,34 @@ class StardustClassAliasesTest {
             "org.autojs.autojs.runtime.api.Dialogs\$NonUiDialogs",
             StardustClassAliases.resolve("com.stardust.autojs.runtime.api.Dialogs\$NonUiDialogs"),
         )
+        assertEquals("org.autojs.autojs.core.automator.UiObject", StardustClassAliases.resolve("com.stardust.automator.UiObject"))
+        assertEquals("org.autojs.autojs.util.ClipboardUtils", StardustClassAliases.resolve("com.stardust.util.ClipboardUtil"))
         assertNull(StardustClassAliases.resolve("com.stardust.pio.PFilesX"))
-        assertNull(StardustClassAliases.resolve("com.stardust.autojs.runtime.api.Floaty"))
+        assertNull(StardustClassAliases.resolve("com.stardust.util.Nath"))
         assertNull(StardustClassAliases.resolve("org.autojs.autojs.pio.PFiles"))
         assertNull(StardustClassAliases.resolve("com.stardust"))
     }
 
     @Test
-    fun `every alias pairs a compat class with a host class of the same simple name`() {
-        for ((compat, host) in StardustClassAliases.TABLE) {
+    fun `every alias names a loadable host class and the tiers do not overlap`() {
+        for ((compat, host) in StardustClassAliases.TABLE + StardustClassAliases.BEST_EFFORT) {
             assertTrue(compat, compat.startsWith("com.stardust."))
             assertTrue(host, host.startsWith("org.autojs.autojs."))
-            assertEquals("$compat -> $host", compat.substringAfterLast('.'), host.substringAfterLast('.'))
-            load(compat)
             load(host)
         }
+        for ((compat, host) in StardustClassAliases.TABLE) {
+            assertEquals("$compat -> $host", compat.substringAfterLast('.'), host.substringAfterLast('.'))
+        }
+        val overlap = StardustClassAliases.TABLE.keys intersect StardustClassAliases.BEST_EFFORT.keys
+        assertTrue("overlapping entries: $overlap", overlap.isEmpty())
     }
 
     @Test
-    fun `alias table matches the survey script`() {
-        val script = File("../tools/stardust/compare_alias_signatures.py")
-        assertTrue(script.path, script.isFile)
-        val block = script.readText().substringAfter("ALIASES = {").substringBefore("\n}")
-        val surveyed = Regex(""""([\w.]+)":\s*"([\w.]+)"""").findAll(block).associate { it.groupValues[1] to it.groupValues[2] }
+    fun `the snapshot covers exactly the fully covered tier`() {
+        val recorded = snapshot.getAsJsonObject("aliases")
+        assertEquals(StardustClassAliases.TABLE.keys, recorded.keySet())
         for ((compat, host) in StardustClassAliases.TABLE) {
-            assertEquals("$compat is not surveyed by compare_alias_signatures.py", host, surveyed[compat])
+            assertEquals(compat, host, recorded.get(compat).asString)
         }
     }
 
@@ -83,24 +90,31 @@ class StardustClassAliasesTest {
             load("org.autojs.autojs.runtime.api.Dialogs\$NonUiDialogs"),
             Kit.classOrNull(classLoader, "com.stardust.autojs.runtime.api.Dialogs\$NonUiDialogs"),
         )
-        // Classes outside the table keep their copies.
-        assertSame(load("com.stardust.autojs.runtime.api.Floaty"), Kit.classOrNull(classLoader, "com.stardust.autojs.runtime.api.Floaty"))
-        assertSame(load("com.stardust.util.ClipboardUtil"), Kit.classOrNull(classLoader, "com.stardust.util.ClipboardUtil"))
+        assertSame(load("org.autojs.autojs.core.automator.UiObject"), Kit.classOrNull(classLoader, "com.stardust.automator.UiObject"))
+        // Names outside both tables no longer resolve at all: the copies are gone.
+        assertNull(Kit.classOrNull(classLoader, "com.stardust.util.Nath"))
     }
 
     @Test
-    fun `android class loader keeps the copy for callers other than Rhino`() {
+    fun `android class loader never aliases for callers other than Rhino`() {
         val classLoader = AndroidClassLoader(loader, temporaryFolder.newFolder("classes"))
-        // A plain loadClass (what the VM and java.lang.Class.forName do) must return the class that was asked for.
-        assertSame(load("com.stardust.pio.PFile"), classLoader.loadClass("com.stardust.pio.PFile"))
-        assertSame(load("com.stardust.pio.PFile"), Class.forName("com.stardust.pio.PFile", false, classLoader))
+        // A plain loadClass (what the VM and java.lang.Class.forName do) asks for the class by its JVM name, which
+        // no longer exists; the alias must not leak into that path.
+        assertThrows(ClassNotFoundException::class.java) { classLoader.loadClass("com.stardust.pio.PFile") }
+        assertThrows(ClassNotFoundException::class.java) { Class.forName("com.stardust.pio.PFile", false, classLoader) }
     }
 
     @Test
-    fun `host classes cover every member a script could reach through an alias`() {
+    fun `host classes cover every member recorded for the fully covered tier`() {
         val problems = ArrayList<String>()
+        val classes = snapshot.getAsJsonObject("classes")
         for ((compat, host) in StardustClassAliases.TABLE) {
-            compareClasses(load(compat), load(host), problems)
+            val recorded = classes.getAsJsonObject(compat)
+            if (recorded == null) {
+                problems += "$compat: not recorded in the snapshot"
+                continue
+            }
+            compareClass(compat, recorded, load(host), problems)
         }
         if (problems.isNotEmpty()) {
             fail(problems.joinToString("\n", prefix = "${problems.size} member(s) reachable through an alias are not covered by the host:\n"))
@@ -109,102 +123,82 @@ class StardustClassAliasesTest {
 
     private fun load(name: String): Class<*> = Class.forName(name, false, loader)
 
-    private fun exists(name: String): Boolean = runCatching { load(name) }.isSuccess
-
-    private fun compareClasses(compat: Class<*>, host: Class<*>, problems: MutableList<String>) {
-        val where = compat.name
-        val compatConstructors = compat.constructors.filter { Modifier.isPublic(it.modifiers) }
-        val scriptConstructors = compatConstructors.filter { ctor -> ctor.parameterTypes.none { it.name.startsWith(ENGINE_INTERNAL_PREFIX) } }
-        val extensible = compat.isInterface || Modifier.isAbstract(compat.modifiers)
-        val constructible = scriptConstructors.isNotEmpty() || extensible
-        val compatMethods = publicMethods(compat)
-        val compatFields = compat.fields.filter { Modifier.isPublic(it.modifiers) }
-        val staticOnly = compatMethods.all { Modifier.isStatic(it.modifiers) } && compatFields.all { Modifier.isStatic(it.modifiers) }
+    private fun compareClass(where: String, recorded: JsonObject, host: Class<*>, problems: MutableList<String>) {
+        val constructible = recorded.get("constructible").asBoolean
+        val staticOnly = recorded.get("staticOnly").asBoolean
         val hostConstructors = host.constructors.filter { Modifier.isPublic(it.modifiers) }
         val hostMethods = publicMethods(host)
         val hostFields = host.fields.filter { Modifier.isPublic(it.modifiers) }
-        val companionMethods = host.declaredClasses.firstOrNull { it.simpleName == "Companion" }?.let(::publicMethods).orEmpty()
-
-        for (constructor in compatConstructors) {
-            val mapped = constructor.parameterTypes.map(::mapType)
-            if (hostConstructors.any { compatibleParameters(mapped, it.parameterTypes.map(::typeName)) }) continue
-            if (constructor.parameterTypes.any { it.name.startsWith(ENGINE_INTERNAL_PREFIX) }) continue
-            if (staticOnly && mapped.isEmpty()) continue
-            problems += "$where: constructor (${mapped.joinToString()}) has no host constructor"
-        }
-        for (method in compatMethods) {
-            val isStatic = Modifier.isStatic(method.modifiers)
-            if (!isStatic && !constructible) continue
-            val mapped = method.parameterTypes.map(::mapType)
-            val match = hostMethods.firstOrNull { it.name == method.name && compatibleParameters(mapped, it.parameterTypes.map(::typeName)) }
-            when {
-                match == null -> {
-                    val companion = companionMethods.any { it.name == method.name && compatibleParameters(mapped, it.parameterTypes.map(::typeName)) }
-                    problems += "$where: ${method.name}(${mapped.joinToString()}) is " +
-                        if (companion) "only on the host companion (add @JvmStatic)" else "missing on the host"
+        for (element in recorded.getAsJsonArray("members")) {
+            val member = element.asJsonObject
+            val kind = member.get("kind").asString
+            val name = member.get("name").asString
+            val isStatic = member.get("static").asBoolean
+            val params = member.getAsJsonArray("params").map { it.asString }
+            // Rhino's PropHolder overloads are engine internals, never called from a script.
+            if (params.any { it.startsWith("org.mozilla.javascript.PropHolder") }) continue
+            val shown = "$name(${params.joinToString()})"
+            when (kind) {
+                "ctor" -> {
+                    if (hostConstructors.any { compatibleParameters(params, it.parameterTypes.map(::typeName)) }) continue
+                    if (staticOnly && params.isEmpty()) continue
+                    problems += "$where: constructor (${params.joinToString()}) has no host constructor"
                 }
-                isStatic && !Modifier.isStatic(match.modifiers) -> {
-                    problems += "$where: ${method.name}(${mapped.joinToString()}) is static on the copy but not on the host"
+                "method" -> {
+                    if (!isStatic && !constructible) continue
+                    val match = hostMethods.firstOrNull { it.name == name && compatibleParameters(params, it.parameterTypes.map(::typeName)) }
+                    when {
+                        match == null -> problems += "$where: $shown is missing on the host"
+                        isStatic && !Modifier.isStatic(match.modifiers) -> problems += "$where: $shown is static on the copy but not on the host"
+                    }
+                }
+                "field" -> {
+                    if (!isStatic && !constructible) continue
+                    val match = hostFields.firstOrNull { it.name == name }
+                    when {
+                        match == null -> problems += "$where: field $name is missing on the host"
+                        isStatic && !Modifier.isStatic(match.modifiers) -> problems += "$where: field $name is static on the copy but not on the host"
+                    }
                 }
             }
         }
-        for (field in compatFields) {
-            val isStatic = Modifier.isStatic(field.modifiers)
-            if (!isStatic && !constructible) continue
-            val match = hostFields.firstOrNull { it.name == field.name }
-            when {
-                match == null -> problems += "$where: field ${field.name} is missing on the host"
-                isStatic && !Modifier.isStatic(match.modifiers) -> problems += "$where: field ${field.name} is static on the copy but not on the host"
+        val nested = recorded.getAsJsonObject("nested")
+        for (path in nested.keySet()) {
+            // Nested classes of nested classes are recorded with `$`-joined names below the aliased class.
+            val segments = path.split('$')
+            if (segments.any { it in KOTLIN_SYNTHETIC_NESTED }) continue
+            var hostNested: Class<*>? = host
+            for (segment in segments) {
+                hostNested = hostNested?.declaredClasses?.firstOrNull { it.simpleName == segment }
             }
-        }
-        for (nested in compat.declaredClasses.filter { Modifier.isPublic(it.modifiers) && !it.isAnonymousClass && !it.isSynthetic }) {
-            val hostNested = host.declaredClasses.firstOrNull { it.simpleName == nested.simpleName }
             if (hostNested == null) {
-                problems += "$where: nested class ${nested.simpleName} is missing on the host"
+                problems += "$where: nested class $path is missing on the host"
                 continue
             }
-            compareClasses(nested, hostNested, problems)
+            compareClass("$where\$$path", nested.getAsJsonObject(path), hostNested, problems)
         }
     }
 
+    /** Bridge methods stay in: the erased `execute(ScriptSource)` of a generic engine is what a script reaches. */
     private fun publicMethods(type: Class<*>): List<Method> = type.methods.filter {
-        Modifier.isPublic(it.modifiers) && it.declaringClass != Any::class.java && !it.isSynthetic && !it.isBridge &&
-            '$' !in it.name && it.name !in OBJECT_METHODS
+        Modifier.isPublic(it.modifiers) && it.declaringClass != Any::class.java && '$' !in it.name && it.name !in OBJECT_METHODS
     }
 
     private fun typeName(type: Class<*>): String = if (type.isArray) typeName(type.componentType) + "[]" else type.name
 
-    /** Maps a `com.stardust` type to the host type a script would hold (alias target, analogous path or known move). */
-    private fun mapType(type: Class<*>): String {
-        if (type.isArray) return mapType(type.componentType) + "[]"
-        val name = type.name
-        if (!name.startsWith("com.stardust.")) return name
-        val outer = name.substringBefore('$')
-        val rest = name.substring(outer.length)
-        val target = StardustClassAliases.TABLE[outer] ?: analogous(outer) ?: KNOWN_MOVES[outer] ?: return name
-        return target + rest
+    private fun compatibleParameters(recorded: List<String>, host: List<String>): Boolean {
+        return recorded.size == host.size && recorded.indices.all { compatibleParameter(recorded[it], host[it]) }
     }
 
-    private fun analogous(outer: String): String? {
-        val suffix = when {
-            outer.startsWith("com.stardust.autojs.") -> outer.removePrefix("com.stardust.autojs.")
-            else -> outer.removePrefix("com.stardust.")
-        }
-        val candidate = "org.autojs.autojs.$suffix"
-        return candidate.takeIf(::exists)
-    }
-
-    private fun compatibleParameters(compat: List<String>, host: List<String>): Boolean {
-        return compat.size == host.size && compat.indices.all { compatibleParameter(compat[it], host[it]) }
-    }
-
-    private fun compatibleParameter(compat: String, host: String): Boolean = when {
-        compat == host || host == "java.lang.Object" -> true
-        compat in NUMERIC_TYPES && host in NUMERIC_TYPES -> true
-        compat in BOOLEAN_TYPES && host in BOOLEAN_TYPES -> true
-        compat in TEXT_TYPES && host in TEXT_TYPES -> true
-        compat == "java.lang.Object" && host in JS_VALUE_TYPES -> true
-        else -> isSubtype(compat, host)
+    private fun compatibleParameter(recorded: String, host: String): Boolean = when {
+        recorded == host || host == "java.lang.Object" -> true
+        // A generic type variable of the copy (javap prints it as `T` or `T[]`) matched anything of the same shape.
+        TYPE_VARIABLE.matches(recorded) && recorded.count { it == '[' } == host.count { it == '[' } -> true
+        recorded in NUMERIC_TYPES && host in NUMERIC_TYPES -> true
+        recorded in BOOLEAN_TYPES && host in BOOLEAN_TYPES -> true
+        recorded in TEXT_TYPES && host in TEXT_TYPES -> true
+        recorded == "java.lang.Object" && host in JS_VALUE_TYPES -> true
+        else -> isSubtype(recorded, host)
     }
 
     /** A host parameter also accepts every subtype of its type (e.g. `core.opencv.Mat` for `org.opencv.core.Mat`). */
@@ -215,9 +209,11 @@ class StardustClassAliasesTest {
 
     companion object {
 
-        private const val ENGINE_INTERNAL_PREFIX = "com.stardust.autojs."
-
         private val OBJECT_METHODS = setOf("equals", "hashCode", "toString", "getClass", "notify", "notifyAll", "wait", "finalize", "clone")
+
+        private val KOTLIN_SYNTHETIC_NESTED = setOf("Companion", "DefaultImpls", "WhenMappings")
+
+        private val TYPE_VARIABLE = Regex("""^[A-Z]\d?(\[\])*$""")
 
         private val NUMERIC_TYPES = setOf(
             "byte", "short", "int", "long", "float", "double", "char",
@@ -233,17 +229,6 @@ class StardustClassAliasesTest {
             "org.mozilla.javascript.Callable", "org.mozilla.javascript.Function", "org.mozilla.javascript.BaseFunction",
             "org.mozilla.javascript.NativeFunction", "org.mozilla.javascript.Scriptable", "org.mozilla.javascript.ScriptableObject",
             "org.mozilla.javascript.NativeObject", "org.mozilla.javascript.NativeArray",
-        )
-
-        /** Compat types whose host counterpart lives at a different path than the analogous one. */
-        private val KNOWN_MOVES = mapOf(
-            "com.stardust.autojs.ScriptEngineService" to "org.autojs.autojs.engine.ScriptEngineService",
-            "com.stardust.autojs.core.boardcast.BroadcastEmitter" to "org.autojs.autojs.core.broadcast.BroadcastEmitter",
-            "com.stardust.autojs.core.util.ScriptPromiseAdapter" to "org.autojs.autojs.runtime.api.ScriptPromiseAdapter",
-            "com.stardust.notification.Notification" to "org.autojs.autojs.core.notification.Notification",
-            "com.stardust.util.Func1" to "org.autojs.autojs.tool.Func1",
-            "com.stardust.util.ScreenMetrics" to "org.autojs.autojs.runtime.api.ScreenMetrics",
-            "com.stardust.view.accessibility.AccessibilityNotificationObserver" to "org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver",
         )
     }
 }

@@ -459,7 +459,6 @@ idea {
     module {
         excludeDirs.addAll(
             listOf(
-                file("$rootDir/app/src/main/java/com/stardust/"),
                 file("$rootDir/app/src/main/assets/modules/obsolete/"),
                 file("$rootDir/app/src/main/assets-app/js-beautify/"),
             )
@@ -633,11 +632,6 @@ dependencies /* Unclassified */ {
     // zh-CN: 编译使用完整 jar (IDE 解析, 测试编译), 打包与运行使用去掉 JVM 专用组件的派生 jar (见上方 slimRhinoJar).
     compileOnly(files(rhinoJar))
     runtimeOnly(files(slimRhinoJar.map { it.archiveFile }))
-
-    // Frozen com.stardust compatibility package, standalone part (docs/dev/autojs4-runtime-plugin-roadmap.md P7.2);
-    // the bridging and tainted files stay in app/src/main/java/com/stardust.
-    // zh-CN: 冻结的 com.stardust 兼容包的独立部分 (P7.2); 桥接与受污染文件仍在 app/src/main/java/com/stardust.
-    implementation(project(":compat:stardust"))
 
     // Tasker Plugin
     implementation(project(":libs:android-spackle-9_0_0"))

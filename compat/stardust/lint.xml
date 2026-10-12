@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<lint>
-    <!-- Frozen com.stardust compatibility copy; findings are not acted upon (same policy as app/lint.xml). -->
-    <issue id="all" severity="ignore" />
-</lint>

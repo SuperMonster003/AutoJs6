@@ -54,15 +54,10 @@
 -keep class org.autojs.autojs.core.automator.** { *; }
 -keep class org.autojs.autojs.** { *; }
 
--keep class com.stardust.automator.** { *; }
--keep class com.stardust.autojs.** { *; }
--dontwarn com.stardust.**
-
 -keepattributes *Annotation*,SourceFile,LineNumberTable
 
 -keepclassmembers class ** {
     @org.autojs.autojs.annotation.ScriptInterface <methods>;
-    @com.stardust.autojs.annotation.ScriptInterface <methods>;
 }
 
 # Event bus
