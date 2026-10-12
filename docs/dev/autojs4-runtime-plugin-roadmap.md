@@ -44,7 +44,7 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 补充事实 (2026-10-12, 实施 P1 时核实, 修正 F10 与 D16 的前提):
 
 - AutoJs4 的引擎模块 (`:autojs` / `:common` / `:automator`) 本身只带入 jackpal 终端库 (`libtermexec-release.aar`, 仅 `armeabi` / `mips` / `x86`); `libopencv_java3.so` 位于 AutoJs4 的 `app/src/main/jniLibs/armeabi-v7a` (以及 `inrt`), 没有 64 位版本; `opencv-3.4.3.aar` 只有 Java 类; `root-shell` / `apk-builder` AAR 无原生库. 也就是说 AutoJs4 实际是 32 位应用 (`app` 的 ABI 拆分虽列出 `arm64-v8a`, 但 OpenCV 只有 32 位), 在 64 位专用设备 (包括 16 KB 页设备) 上本就无法安装.
-- 由此首版插件镜像 AutoJs4 的原生库清单: 发布 `armeabi-v7a` (jackpal + OpenCV 3.4.3, 与 AutoJs4 逐字节相同) 与 `x86` (jackpal) 及 `universal`, 不额外提供 AutoJs4 从未有过的 64 位构建. 不含 64 位原生库时 16 KB 页对齐要求不再涉及任何库, D16 "首版即对齐" 无需重新编译即满足 (对齐门禁默认只检查两种 64 位 ABI). 是否补充 `arm64-v8a` (需以 NDK r28 重编 OpenCV 3.4.x) 作为新问题 Q10 待拍板, 见附录 A.
+- 由此首版插件先镜像了 AutoJs4 的原生库清单 (`armeabi-v7a` + `x86`), 并把是否补充 64 位构建列为 Q10. 2026-10-12 维护者拍板 Q10 = B (记为 D19): `armeabi-v7a` 继续逐字节使用 AutoJs4 原版 `libopencv_java3.so`; `arm64-v8a` 与 `x86_64` 以同一 OpenCV 3.4.3 源码 (归档 SHA-256 固定) 用 NDK 28.2 重编并 16 KB 对齐, 构建脚本 `tools/opencv/build_opencv_android.py` 校验 ELF PT_LOAD 对齐与原库 2039 个 JNI 符号的完整覆盖 (未改动的 `opencv-3.4.3.aar` Java 类因此继续可用); jackpal 终端库四个 ABI 复用宿主已重编的 AAR; `x86` 与 AutoJs4 一样不含 OpenCV. 对照结果中 64 位设备的 OpenCV 为重编版本, 与 AutoJs4 的 32 位原版二进制不同, 需在差异判定时注意.
 
 ---
 
@@ -98,11 +98,11 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 - [x] P1.1 按 `AUTOJS6_PLUGIN_NEW_REPO_AGENTS.md` 建仓 (标识见 D12), 以 QuickJS Runtime 插件 (同为运行时插件) 的构建, 文档, 资源骨架为模板; `version.properties` 的 `VERSION_NAME` 为 `1.0.0` (D13), `TARGET_SDK_VERSION=28` 与 AutoJs4 一致 (存储, 悬浮窗与后台行为对照的前提). 证据: `D:/idea-projects/AutoJs6-Plugin-AutoJs4-Runtime` 提交 `7f23278` (骨架), 平台插件 1.9.0 (1.9.1 尚未发布到公共仓库).
 - [x] P1.2 以 Git submodule `autojs4/` 引入 AutoJs4 (固定 `3fb0826`), 插件仓库内的 `engine/common`, `engine/automator`, `engine/autojs` 以 `sourceSets` 指向 submodule 源码编译 (submodule 零改动), 依赖版本钉在 `gradle/libs.versions.toml` 的 `autojs4-*` 键. 版本差异处理: 引擎模块按 API 30 编译 (新 android.jar 存根移除了 `MainThreadProxy` 使用的 `Thread.stop(Throwable)` 等方法), `android.enableJetifier=true` (Material Dialogs 0.9 / EnhancedFloaty 仍引用 Support Library), `android.nonTransitiveRClass=false`, `android.uniquePackageNames=false` (vectordrawable 1.0.x 两个构件共用 package); AGP 9.3.3 / Kotlin 2.3.20 可直接编译 AutoJs4 的 Kotlin 1.8 代码, 未动用 `OVERRIDDEN_*`. 证据: 提交 `7f23278`, `:engine:autojs:assembleDebug` 成功.
 - [x] P1.3 Manifest: `<application android:process=":autojs4_runtime">` 让全部组件 (含 AutoJs4 的 `ScriptExecuteActivity`, 截图/权限 Activity, `AccessibilityServiceUsher`, `FloatyService`) 与 Binder 服务同进程, 以共享 AutoJs4 的进程内单例; `INFO` 与 `RUNTIME` 服务 (category `autojs4-runtime`, `org.autojs.permission.PLUGIN` 保护), Wake Activity, FileProvider; 不导出 AutoJs4 原有的外部入口 (D15, 这些类位于未引入的 `:app` 模块). 证据: 提交 `aaec58a`.
-- [x] P1.4 原生库 (结论见第 1 节 "补充事实"): 引擎模块只带入 jackpal 终端库, OpenCV 3.4.3 的 `.so` 来自 AutoJs4 `app/src/main/jniLibs/armeabi-v7a`, 两者直接取自 submodule, 逐字节与 AutoJs4 相同; 发布 `armeabi-v7a`, `x86`, `universal` 三个 APK, 无 64 位原生库, 16 KB 对齐无需重编 (D16 的前提不成立, 见 Q10). 证据: `app-universal-debug.apk` 内 `lib/armeabi-v7a/{libopencv_java3,libjackpal-*}.so` 与 `lib/x86/libjackpal-*.so`, 共享对齐插件通过.
+- [x] P1.4 原生库 (D19, 结论见第 1 节 "补充事实"): `armeabi-v7a` 的 `libopencv_java3.so` 直接取自 submodule `autojs4/app/src/main/jniLibs/armeabi-v7a`, 逐字节与 AutoJs4 相同; `arm64-v8a` 与 `x86_64` 由 `tools/opencv/build_opencv_android.py` 以官方 `opencv-3.4.3.zip` (SHA-256 固定) + NDK 28.2.13676358 重编并 16 KB 对齐 (`-DOPENCV_VCSVERSION=3.4.3` 使 `Core.getBuildInformation()` 报告 `Version control: 3.4.3`), 产物与 SHA-256 / PT_LOAD 对齐 / 2039 个 JNI 符号覆盖记录在 `native/opencv/opencv.lock.json`, `--check` 在 CI 中按 SHA-256 复核; jackpal 终端库四个 ABI 复用宿主重编的 `libs/jackpal-androidterm-libtermexec-1_0/libtermexec-release.aar`; `x86` 与 AutoJs4 一样不含 OpenCV. 每 ABI 的 OpenCV 由 `StageOpenCvJniLibsTask` 暂存并经 `androidComponents.onVariants` 的 `sources.jniLibs.addGeneratedSourceDirectory` 接入 (AGP 9 不接受 `sourceSets` 里的 Provider). 证据: `assembleDebug` 产出 `arm64-v8a` / `armeabi-v7a` / `x86_64` / `x86` / `universal` 五个 APK, `lib/arm64-v8a/libopencv_java3.so` 16,256,784 字节, `lib/x86_64/libopencv_java3.so` 17,457,936 字节, `lib/armeabi-v7a/libopencv_java3.so` 11,194,476 字节 (原版), 共享对齐插件通过; 设备验证见 P4.2.
 - [x] P1.5 `App` + `AutoJs4Runtime` (`com.stardust.autojs.AutoJs` 子类, 对应 inrt 的 `AutoJs.kt`): `createGlobalConsole()` 返回 `ForwardingGlobalConsole`, 每行经 `ExecutionRegistry` 以 Rhino Context (`RhinoJavaScriptEngine.getEngineOfContext`) / `ScriptThread-<id>` 线程名 / 唯一活动执行三步归属到具体执行后经 `HostEventSink` 回传; 无宿主连接时日志仍留在 AutoJs4 全局控制台, 可由插件的 `LogActivity` (`class.console`) 查看. 证据: 提交 `aaec58a`.
 - [x] P1.6 权限: 存储权限按 targetSdk 28 的传统外部存储模型 (`READ/WRITE_EXTERNAL_STORAGE`), 缺失时 `runScript` 以 `PERMISSION_DENIED` + `permission=storage` 拒绝并打开 `SettingsActivity` 提示; 悬浮窗与无障碍服务由 AutoJs4 引擎在脚本调用时按其原有逻辑引导 (`ensureAccessibilityServiceEnabled` 打开系统设置并抛 `ScriptException`). 证据: 提交 `aaec58a`.
 - [x] P1.7 设置页 `SettingsActivity` (D14, D17): "权限与服务" (无障碍服务, 悬浮窗, 存储权限, 忽略电池优化, Root 状态, 均显示当前状态并可跳转/检测), "运行" ("显示 AutoJs4 控制台窗口", 默认关闭, 由 `PluginJavaScriptEngine` 在引擎初始化后以 JS 前导把 `console.show/hide` 置空实现), "关于" (版本, 发行历史页, 项目主页). 入口: 无启动器图标, 以 MAIN + INFO 意图响应宿主插件设置页的 "打开插件", 并响应 `APPLICATION_PREFERENCES`. 未实现并记录: "显示启动器图标" 选项 (插件无 MAIN/LAUNCHER 入口, 不适用) 与 "运行结束后是否保留插件进程" (首版由系统回收, 后续视反馈). 控件为 AppCompat (`SwitchCompat`), 未引入 Material 3, 以免改变 AutoJs4 的依赖集. 证据: 提交 `aaec58a`.
-- [x] P1.8 README / 插件说明 / changelog 10 种语言由 `.python/generate_markdown.py` 生成 (`--check` 通过), `appendDigestToReleasedFiles` 产出 `autojs6-plugin-autojs4-runtime-v1.0.0-{armeabi-v7a,x86,universal}-<crc32>.apk`, CI `build.yml` (submodule 递归检出, 单元测试, lint, debug APK, x86 模拟器 instrumentation) 与 `markdown.yml`; `plugin_description` 为 "使用内嵌的 Auto.js 4.1.1 Alpha2 引擎运行脚本, 用于对照 AutoJs6 的运行结果". 启动器图标为 `.python/generate_provisional_icon.py` 渲染的临时图案, 待维护者图稿. 证据: 提交 `a595583`, `67ae5cc`; `:app:lintDebug` 21 条警告 0 错误; 单元测试 8 个通过.
+- [x] P1.8 README / 插件说明 / changelog 10 种语言由 `.python/generate_markdown.py` 生成 (`--check` 通过), `appendDigestToReleasedFiles` 产出 `autojs6-plugin-autojs4-runtime-v1.0.0-{arm64-v8a,armeabi-v7a,x86_64,x86,universal}-<crc32>.apk`, CI `build.yml` (submodule 递归检出, 单元测试, lint, debug APK, OpenCV 锁文件 `--check`, 模拟器 instrumentation: API 24 x86 无 OpenCV, API 30 x86_64 加载重编 OpenCV) 与 `markdown.yml`; `plugin_description` 为 "使用内嵌的 Auto.js 4.1.1 Alpha2 引擎运行脚本, 用于对照 AutoJs6 的运行结果". 启动器图标为 `.python/generate_provisional_icon.py` 渲染的临时图案, 待维护者图稿. 证据: 提交 `a595583`, `67ae5cc`; `:app:lintDebug` 21 条警告 0 错误; 单元测试 8 个通过.
 
 ### P2 宿主接入
 
@@ -126,14 +126,14 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 
 ### P4 权限与设备验证
 
-- [~] P4.1 Android 9 (G8441), 12 (XQ-AT72), 13 (XQ-DQ72), 15 (liuqin / OPD2413) 实机: 普通脚本, UI 脚本, 浮动窗口, 无障碍操作 (`click`, `text().findOne()`), 截图 (`captureScreen`), Root 可用设备上的 `shell(cmd, true)`. 2026-10-12 已在 XQ-DQ72 (Android 13, 宿主 debug 5334 + 插件 1.0.0 armeabi-v7a) 验证: (1) 插件未安装时文件菜单显示 "安装 AutoJs4 Runtime" 并跳转插件中心官方库; (2) 安装后菜单显示 "使用 AutoJs4 运行", 宿主发现, 绑定插件并受理; (3) 缺少存储权限时插件返回 `PERMISSION_DENIED` / `storage`, 宿主控制台打印 "AutoJs4 Runtime 缺少权限 \"storage\", 请在插件设置中授予", 插件自动打开设置页, 在设置页点击 "Storage access" 弹出系统权限对话框并授予成功; (4) `hello.js` 在插件进程 (`:autojs4_runtime`, 32 位) 中由 AutoJs4 引擎运行, `console.log` / `console.warn` 以原级别加 `[AutoJs4]` 前缀出现在宿主控制台, `files.cwd()` 为脚本目录, 宿主打印 "运行结束 (用时 0.318 秒)"; (5) `loop.js` 无限循环的日志每 5 s 回传, 在宿主 "任务" 面板点击停止后插件 `RhinoJavaScriptEngine.forceStop` 中断脚本线程, 宿主以 `ScriptInterruptedException` 正常结束任务 (用时 16.2 s), 任务列表清空; (6) 插件 `connectedDebugAndroidTest` 3 个用例通过 (`-PandroidTestPermissionName=...test.PLUGIN`). 未验证: UI 模式脚本, 浮动窗口, 无障碍操作, 截图, Root, 以及 Android 9 / 12 / 15 设备; 另注意 `connectedDebugAndroidTest` 结束后 Gradle 会卸载插件, 之后需重新安装.
-- [ ] P4.2 16 KB 页设备: 首版无 64 位原生库, 无法安装到 64 位专用设备 (与 AutoJs4 一致), 本条随 Q10 的结论处理; 若拍板 B, 以重编的 OpenCV 3.4.x 与宿主已重编的 jackpal AAR 补 `arm64-v8a` 后再在 SM-A566B 类设备验收.
+- [~] P4.1 Android 9 (G8441), 12 (XQ-AT72), 13 (XQ-DQ72), 15 (liuqin / OPD2413) 实机: 普通脚本, UI 脚本, 浮动窗口, 无障碍操作 (`click`, `text().findOne()`), 截图 (`captureScreen`), Root 可用设备上的 `shell(cmd, true)`. 2026-10-12 已在 XQ-DQ72 (Android 13, 宿主 debug 5334 + 插件 1.0.0 armeabi-v7a) 验证: (1) 插件未安装时文件菜单显示 "安装 AutoJs4 Runtime" 并跳转插件中心官方库; (2) 安装后菜单显示 "使用 AutoJs4 运行", 宿主发现, 绑定插件并受理; (3) 缺少存储权限时插件返回 `PERMISSION_DENIED` / `storage`, 宿主控制台打印 "AutoJs4 Runtime 缺少权限 \"storage\", 请在插件设置中授予", 插件自动打开设置页, 在设置页点击 "Storage access" 弹出系统权限对话框并授予成功; (4) `hello.js` 在插件进程 (`:autojs4_runtime`, 32 位) 中由 AutoJs4 引擎运行, `console.log` / `console.warn` 以原级别加 `[AutoJs4]` 前缀出现在宿主控制台, `files.cwd()` 为脚本目录, 宿主打印 "运行结束 (用时 0.318 秒)"; (5) `loop.js` 无限循环的日志每 5 s 回传, 在宿主 "任务" 面板点击停止后插件 `RhinoJavaScriptEngine.forceStop` 中断脚本线程, 宿主以 `ScriptInterruptedException` 正常结束任务 (用时 16.2 s), 任务列表清空; (6) 插件 `connectedDebugAndroidTest` 3 个用例通过 (`-PandroidTestPermissionName=...test.PLUGIN`); (7) 2026-10-12 插件以 `arm64-v8a` 安装 (`primaryCpuAbi=arm64-v8a`, 进程 `os.arch` 为 `aarch64`) 后, `opencv_test.js` (`images.read` / `pixel` / `grayscale` / `findColor` / `findColorEquals` / `findImage` / `matchTemplate` / `Core.getBuildInformation()`) 经 "使用 AutoJs4 运行" 执行, logcat `OpenCV/StaticHelper` 显示 `opencv_java3 loaded`, 构建信息为 clang 19.0.1 / NDK 28.2 / `Version control: 3.4.3`; 换装 `armeabi-v7a` 包 (AutoJs4 原版库, GCC 4.8 / NDK r10e) 重跑同一脚本, 全部结果逐行一致 (含 `images.pixel` 对灰度图抛出的 `ArrayIndexOutOfBoundsException: length=1; index=3`, 见附录 B), 证明重编库与原版行为一致且不依赖 32 位进程. 未验证: UI 模式脚本, 浮动窗口, 无障碍操作, 截图, Root, 以及 Android 9 / 12 / 15 设备; 另注意 `connectedDebugAndroidTest` 结束后 Gradle 会卸载插件, 之后需重新安装.
+- [~] P4.2 16 KB 页设备: D19 之后插件具备 64 位原生库, 可安装到 64 位专用设备. 静态证据: `opencv.lock.json` 记录两份 64 位库 `minLoadAlign=16384`, jackpal AAR 的 8 个 `.so` 由宿主按 16 KB 重编, `NATIVE_PAGE_ALIGNMENT` 声明兼容, 共享对齐插件构建期通过; 动态证据: XQ-DQ72 (arm64, 4 KB 页) 上 64 位进程加载重编 OpenCV 并与原版结果一致 (P4.1 第 7 项). 待办: 在 16 KB 页设备或 API 35+ 的 16 KB 模拟器 (`-PrequiredApiLevel` 对应镜像) 上安装 `arm64-v8a` / `x86_64` 包并重跑 `opencv_test.js`.
 - [ ] P4.3 原则 A 对照集: 从 `app/src/main/assets-app/sample` 挑选 20 个以上在 Auto.js 4.x 文档范围内的示例, 分别用 AutoJs6 与 AutoJs4 运行并记录差异; 差异进入 AutoJs6 issue 或记录为 "特定情况" (附录 B).
 - [ ] P4.4 插件未安装, 未启用, 未授权, 版本不兼容, 缺权限五种状态的界面行为逐项验证.
 
 ### P5 文档与发布
 
-- [ ] P5.1 AutoJs6-Documentation 增加 "AutoJs4 运行时" 页面 (用途, 入口, 权限, 限制, 原则 A 与差异反馈方式), README 版本历史与 `api/changelog.md` 同步.
+- [x] P5.1 AutoJs6-Documentation 新增 `api/autojs4Runtime.md` ("AutoJs4 运行时 (AutoJs4 Runtime)", `type=misc`: 用途, 安装与启用, 入口, 运行方式, 限制, 差异反馈, 相关链接; 明确 "本页面不是脚本 API"), 登记到 `api/sidebar.md` / `api/toc.md` (AutoJs6 条目之前), `api/progress.md` 2026-10-12 条目, `api/changelog.md` 与 README 版本历史 v6.8.0 各一条 `新增`; 校验器 `generator/normalize-markdown.py` 与离线插件 `.python/normalize_offline_docs.py` 的 "裸写 AutoJs" 规则放行 `AutoJs4` 项目名. 全站生成并同步到 AutoJs6-Plugin-Offline-Docs (`auto-generate-for-autojs6.bat --verify-offline`), 两仓库各自提交.
 - [x] P5.2 AutoJs4 README 的 "关联项目" 小节增加插件条目 (AutoJs4 提交 `37c7c17`, 中英文); 插件 README 的 "简介" 与 "兼容性和范围" 说明内嵌 AutoJs4 4.4.0 / commit `3fb0826` / Rhino 1.7.7.2 的对应关系. 宿主 README 的关联项目表暂未加插件行 (需同步 10 种语言 `.readme/lang_*.json`, 与维护者正在同步的 changelog 文案一并处理).
 - [ ] P5.3 官方插件索引登记, 插件中心分类 (建议 "运行时"), 安装向导不纳入 "标准" 预置 (按需安装). 前提: 插件仓库推送到 GitHub 并发布 1.0.0 release (`appendDigestToReleasedFiles` 产物).
 - [x] P5.4 AutoJs4 发布新版本时的插件同步流程已写入插件仓库 `AGENTS.md` (本地文件, 按仓库约定不入库): 更新 submodule -> 更新 `.readme/common.json` 的 `autojs4_commit` / `autojs4_version` 与 `THIRD_PARTY_NOTICES.md` -> changelog 一条 `升级 AutoJs4 版本 a -> b` -> 提升 `VERSION_NAME` -> 发布.
@@ -170,14 +170,9 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 | Q8 | AutoJs4 自带控制台浮动窗口的处理 | 由插件设置决定, 默认只回传宿主, 见 D17 |
 
 | Q11 | 宿主 `com.stardust` 兼容包是否由插件替代 | 不替代 (进程边界, 见 D18); 宿主侧先做独立模块化 (方案 1), 必要时叠加别名表 (方案 2), 见 P7 |
+| Q10 | 插件是否补充 `arm64-v8a` 原生库 (AutoJs4 本身只有 32 位 OpenCV) | B: 以 NDK 28.2 重编 OpenCV 3.4.3 (16 KB 对齐) 并复用宿主已重编的 jackpal AAR, 增加 `arm64-v8a` 与 `x86_64` 拆分包 (2026-10-12 拍板, 记为 D19, 见第 1 节 "补充事实") |
 
-待定:
-
-| 编号 | 问题 | 候选 | 建议 |
-| --- | --- | --- | --- |
-| Q10 | 插件是否补充 `arm64-v8a` 原生库 (AutoJs4 本身只有 32 位 OpenCV, 见第 1 节 "补充事实") | A. 首版只发布 `armeabi-v7a` / `x86` / `universal`, 与 AutoJs4 的可安装范围一致; B. 以 NDK r28.2 重编 OpenCV 3.4.x (16 KB 对齐) 并复用宿主已重编的 jackpal AAR, 增加 `arm64-v8a` 拆分包, 使 64 位专用设备 (含 16 KB 页设备) 也能安装 | 首版按 A 交付 (已实施); B 作为后续版本的独立条目, 因为重编后的 OpenCV 3.4.x 与 AutoJs4 的 3.4.3 二进制不再逐字节相同, 对照结果需单独标注 |
-
-新的问题按 "编号 / 问题 / 候选 / 建议" 四列追加到待定表, 拍板后移入上表并回填第 1 节.
+待定: 无. 新的问题按 "编号 / 问题 / 候选 / 建议" 四列追加到本表下方, 拍板后移入上表并回填第 1 节.
 
 ## 附录 B. 原则 A 的已知 "特定情况" (持续补充)
 
@@ -186,6 +181,7 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 - 已在 AutoJs6 中被明确移除或替换的功能 (如 AutoJs4 的打包插件机制).
 - `.auto` 文件 (Root 录制回放) 在两者中均由同一个 `root_automator` 可执行文件 (32 位 ARM) 回放, 不属于差异; 64 位专用设备上两者同样无法回放.
 - 系统限制导致的差异 (targetSdk 28 与 37 的存储, 后台与权限模型不同).
+- AutoJs4 自身的缺陷在 AutoJs6 中已修复, 属于 "AutoJs4 异常而 AutoJs6 正常", 不构成差异. 已确认的例子: AutoJs4 的 `ImageWrapper.pixel()` 对单通道 (灰度) Mat 读取 `channels[3]`, 因此 `images.pixel(images.grayscale(img), x, y)` 抛出 `ArrayIndexOutOfBoundsException: length=1; index=3` (2026-10-12 在 armeabi-v7a 原版库与 arm64-v8a 重编库上结果一致).
 
 ## 附录 C. 参考
 
