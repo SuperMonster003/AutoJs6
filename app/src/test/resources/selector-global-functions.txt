@@ -106,7 +106,9 @@ maxBottom
 maxCenterX
 maxCenterY
 maxChildCount
+maxDepth
 maxHeight
+maxIndexInParent
 maxLeft
 maxRight
 maxTop
@@ -115,7 +117,9 @@ minBottom
 minCenterX
 minCenterY
 minChildCount
+minDepth
 minHeight
+minIndexInParent
 minLeft
 minRight
 minTop
