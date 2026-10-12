@@ -43,6 +43,10 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
     private var mScriptRuntime: ScriptRuntime
 
+    /** The runtime this image belongs to (used by the Auto.js 4 shaped `Images.concat(imgA, imgB, direction)`). */
+    val scriptRuntime: ScriptRuntime
+        get() = mScriptRuntime
+
     private var mMat: Mat? = null
     private var mBgrMat: Mat? = null
     private var mBitmap: Bitmap? = null

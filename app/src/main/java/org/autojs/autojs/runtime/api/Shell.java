@@ -73,6 +73,19 @@ public class Shell extends AbstractShell {
         super(context, root);
     }
 
+    /**
+     * The Auto.js 4 signature of {@code com.stardust.autojs.core.util.Shell}, which resolves to this class through
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} (roadmap P7.3). {@code shouldReadOutput} was stored but
+     * never read by Auto.js 4, so it has no effect here either.
+     * zh-CN: Auto.js 4 的 {@code com.stardust.autojs.core.util.Shell} 构造器签名, 该类名经
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} 解析到本类 (roadmap P7.3); Auto.js 4 只保存而从未读取
+     * {@code shouldReadOutput}, 这里同样不产生作用.
+     */
+    @SuppressWarnings("unused")
+    public Shell(Context context, boolean root, boolean shouldReadOutput) {
+        this(context, root);
+    }
+
     public Shell(Context context) {
         this(context, false);
     }

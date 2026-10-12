@@ -198,6 +198,20 @@ public class Images {
         }
     }
 
+    /**
+     * The Auto.js 4 signature of {@code com.stardust.autojs.runtime.api.Images.concat}, which resolves to this class
+     * through {@link org.autojs.autojs.rhino.StardustClassAliases} (roadmap P7.3): the runtime is taken from the
+     * first image and the Auto.js 4 directions {@link Gravity#LEFT} / {@link Gravity#RIGHT} are accepted as
+     * {@link Gravity#START} / {@link Gravity#END}.
+     * zh-CN: Auto.js 4 的 {@code com.stardust.autojs.runtime.api.Images.concat} 签名, 该类名经
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} 解析到本类 (roadmap P7.3); 运行时取自第一张图片, Auto.js 4 的
+     * 方向 {@link Gravity#LEFT} / {@link Gravity#RIGHT} 按 {@link Gravity#START} / {@link Gravity#END} 处理.
+     */
+    public static ImageWrapper concat(ImageWrapper imgA, ImageWrapper imgB, int direction) {
+        int niceDirection = direction == Gravity.LEFT ? Gravity.START : direction == Gravity.RIGHT ? Gravity.END : direction;
+        return concat(imgA.getScriptRuntime(), imgA, imgB, niceDirection);
+    }
+
     private static ImageWrapper concatInternal(ScriptRuntime scriptRuntime, ImageWrapper imgA, ImageWrapper imgB, int direction) {
         if (!Arrays.asList(Gravity.START, Gravity.END, Gravity.TOP, Gravity.BOTTOM).contains(direction)) {
             throw new IllegalArgumentException(str(R.string.error_illegal_argument, "direction", direction));

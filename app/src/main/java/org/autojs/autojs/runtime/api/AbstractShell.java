@@ -133,6 +133,17 @@ public abstract class AbstractShell {
         return mIsExecWithRoot;
     }
 
+    /**
+     * Same as {@link #isExecWithRoot()} under the name Auto.js 4 used; kept because
+     * {@code com.stardust.autojs.runtime.api.AbstractShell} resolves to this class through
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} (roadmap P7.3).
+     * zh-CN: 与 {@link #isExecWithRoot()} 相同, 保留 Auto.js 4 的方法名; 该 com.stardust 类名经
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} 解析到本类 (roadmap P7.3).
+     */
+    public boolean isRoot() {
+        return mIsExecWithRoot;
+    }
+
     protected abstract void init(String initialCommand);
 
     public abstract void exec(String command);

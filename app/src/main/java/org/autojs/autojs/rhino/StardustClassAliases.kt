@@ -29,12 +29,16 @@ object StardustClassAliases {
     @JvmField
     val TABLE: Map<String, String> = linkedMapOf(
         "com.stardust.autojs.runtime.api.AbstractConsole" to "org.autojs.autojs.runtime.api.AbstractConsole",
+        "com.stardust.autojs.runtime.api.AbstractShell" to "org.autojs.autojs.runtime.api.AbstractShell",
         "com.stardust.autojs.runtime.api.Dialogs" to "org.autojs.autojs.runtime.api.Dialogs",
         "com.stardust.autojs.runtime.api.Engines" to "org.autojs.autojs.runtime.api.Engines",
         "com.stardust.autojs.runtime.api.Events" to "org.autojs.autojs.runtime.api.Events",
         "com.stardust.autojs.runtime.api.Files" to "org.autojs.autojs.runtime.api.Files",
+        "com.stardust.autojs.runtime.api.Images" to "org.autojs.autojs.runtime.api.Images",
         "com.stardust.autojs.runtime.api.Threads" to "org.autojs.autojs.runtime.api.Threads",
         "com.stardust.autojs.runtime.api.Timers" to "org.autojs.autojs.runtime.api.Timers",
+        "com.stardust.autojs.core.util.Shell" to "org.autojs.autojs.runtime.api.Shell",
+        "com.stardust.autojs.core.image.Colors" to "org.autojs.autojs.core.image.Colors",
         "com.stardust.pio.PFiles" to "org.autojs.autojs.pio.PFiles",
         "com.stardust.pio.PFile" to "org.autojs.autojs.pio.PFile",
         "com.stardust.pio.PWritableTextFile" to "org.autojs.autojs.pio.PWritableTextFile",

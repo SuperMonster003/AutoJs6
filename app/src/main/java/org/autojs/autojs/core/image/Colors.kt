@@ -11,6 +11,28 @@ import org.autojs.autojs.util.ColorUtils
 @Suppress("FunctionName")
 class Colors {
 
+    /**
+     * The color constants of Auto.js 4's `com.stardust.autojs.core.image.Colors` (values of `android.graphics.Color`);
+     * that class name resolves to this class through `StardustClassAliases` (roadmap P7.3), so scripts can keep
+     * reading them as static fields.
+     * zh-CN: Auto.js 4 `com.stardust.autojs.core.image.Colors` 的颜色常量 (与 `android.graphics.Color` 相同); 该类名经
+     * `StardustClassAliases` 解析到本类 (roadmap P7.3), 脚本仍可按静态字段读取.
+     */
+    companion object {
+        const val BLACK = 0xFF000000.toInt()
+        const val DKGRAY = 0xFF444444.toInt()
+        const val GRAY = 0xFF888888.toInt()
+        const val LTGRAY = 0xFFCCCCCC.toInt()
+        const val WHITE = 0xFFFFFFFF.toInt()
+        const val RED = 0xFFFF0000.toInt()
+        const val GREEN = 0xFF00FF00.toInt()
+        const val BLUE = 0xFF0000FF.toInt()
+        const val YELLOW = 0xFFFFFF00.toInt()
+        const val CYAN = 0xFF00FFFF.toInt()
+        const val MAGENTA = 0xFFFF00FF.toInt()
+        const val TRANSPARENT = 0
+    }
+
     @ScriptInterface
     fun rgb(red: Int, green: Int, blue: Int) = ColorUtils.rgb(red, green, blue)
 
