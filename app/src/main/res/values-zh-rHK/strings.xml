@@ -847,6 +847,13 @@
     <string name="text_apply_as_theme_color">應用為主題色</string>
     <string name="text_auto_fill">自動填充其餘狀態</string>
     <string name="text_auto_reconnect">自動重連</string>
+    <string name="text_autojs4_comparison">AutoJs4 對照結果</string>
+    <string name="text_autojs4_comparison_different">控制台輸出存在 %1$d 處差異</string>
+    <string name="text_autojs4_comparison_duration">用時: AutoJs6 %1$s, AutoJs4 %2$s</string>
+    <string name="text_autojs4_comparison_failed">%1$s 執行失敗: %2$s</string>
+    <string name="text_autojs4_comparison_identical">兩次控制台輸出一致</string>
+    <string name="text_autojs4_comparison_running_with" tools:ignore="TypographyEllipsis">正在使用 %1$s 執行...</string>
+    <string name="text_autojs4_comparison_timed_out">%1$s 執行超過 %2$d 秒, 已停止</string>
     <string name="text_background_color_dark">暗色</string>
     <string name="text_background_color_follow">自動跟隨</string>
     <string name="text_background_color_inverse">自動反色</string>
@@ -1330,6 +1337,7 @@
     <string name="text_comment">註釋</string>
     <string name="text_committing_archive_extraction">正在完成檔案解壓縮</string>
     <string name="text_compare_selected">比較選取項目</string>
+    <string name="text_compare_with_autojs4">使用 AutoJs4 執行並對照</string>
     <string name="text_compare_with_current_file">與目前文件比較</string>
     <string name="text_compatibility">兼容性</string>
     <string name="text_confidence_level">置信度</string>
@@ -1371,6 +1379,7 @@
     <string name="text_copy_ace_diagnostics">複製 Ace 診斷資料</string>
     <string name="text_copy_address">複製位址</string>
     <string name="text_copy_all">複製全部</string>
+    <string name="text_copy_as_issue_template">複製為 issue 模板</string>
     <string name="text_copy_info">複製信息</string>
     <string name="text_copy_all_files_to_new_directory">複製原目錄文件到新目錄</string>
     <string name="text_copy_chained_selector">複製鏈式選擇器</string>

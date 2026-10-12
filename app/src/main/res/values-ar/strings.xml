@@ -852,6 +852,13 @@
     <string name="text_apply_as_theme_color">تطبيق كلون للموضوع</string>
     <string name="text_auto_fill">تعبئة الحالات الأخرى تلقائيا</string>
     <string name="text_auto_reconnect">إعادة الاتصال تلقائيا</string>
+    <string name="text_autojs4_comparison">مقارنة AutoJs4</string>
+    <string name="text_autojs4_comparison_different">%1$d اختلافات في مخرجات وحدة التحكم</string>
+    <string name="text_autojs4_comparison_duration">المدة: AutoJs6 %1$s, AutoJs4 %2$s</string>
+    <string name="text_autojs4_comparison_failed">فشل %1$s: %2$s</string>
+    <string name="text_autojs4_comparison_identical">مخرجات وحدة التحكم متطابقة</string>
+    <string name="text_autojs4_comparison_running_with" tools:ignore="TypographyEllipsis">جارٍ التشغيل باستخدام %1$s...</string>
+    <string name="text_autojs4_comparison_timed_out">تجاوز تشغيل %1$s %2$d ثانية وتم إيقافه</string>
     <string name="text_background_color_dark">داكن</string>
     <string name="text_background_color_follow">تلقائي</string>
     <string name="text_background_color_inverse">تلقائي (معكوس)</string>
@@ -1335,6 +1342,7 @@
     <string name="text_comment">تعليق</string>
     <string name="text_committing_archive_extraction">جار إنهاء استخراج الأرشيف</string>
     <string name="text_compare_selected">مقارنة المحدد</string>
+    <string name="text_compare_with_autojs4">التشغيل باستخدام AutoJs4 والمقارنة</string>
     <string name="text_compare_with_current_file">مقارنة مع الملف الحالي</string>
     <string name="text_compatibility">التوافق</string>
     <string name="text_confidence_level">ثقة</string>
@@ -1376,6 +1384,7 @@
     <string name="text_copy_ace_diagnostics">نسخ تشخيصات Ace</string>
     <string name="text_copy_address">نسخ العنوان</string>
     <string name="text_copy_all">نسخ جميع</string>
+    <string name="text_copy_as_issue_template">نسخ كقالب issue</string>
     <string name="text_copy_info">نسخ المعلومات</string>
     <string name="text_copy_all_files_to_new_directory">انسخ جميع الملفات إلى دليل جديد</string>
     <string name="text_copy_chained_selector">نسخ المحدد المتسلسل</string>

@@ -845,6 +845,13 @@
     <string name="text_apply_as_theme_color">Apply as theme color</string>
     <string name="text_auto_fill">Auto fill the other states</string>
     <string name="text_auto_reconnect">Auto reconnect</string>
+    <string name="text_autojs4_comparison">AutoJs4 comparison</string>
+    <string name="text_autojs4_comparison_different">%1$d differences in console output</string>
+    <string name="text_autojs4_comparison_duration">Duration: AutoJs6 %1$s, AutoJs4 %2$s</string>
+    <string name="text_autojs4_comparison_failed">%1$s failed: %2$s</string>
+    <string name="text_autojs4_comparison_identical">Console output is identical</string>
+    <string name="text_autojs4_comparison_running_with" tools:ignore="TypographyEllipsis">Running with %1$s...</string>
+    <string name="text_autojs4_comparison_timed_out">%1$s ran longer than %2$d seconds and was stopped</string>
     <string name="text_background_color_dark">Dark</string>
     <string name="text_background_color_follow">Auto</string>
     <string name="text_background_color_inverse">Auto inverted</string>
@@ -1329,6 +1336,7 @@
     <string name="text_comment">Comment</string>
     <string name="text_committing_archive_extraction">Finishing archive extraction</string>
     <string name="text_compare_selected">Compare selected</string>
+    <string name="text_compare_with_autojs4">Run with AutoJs4 and compare</string>
     <string name="text_compare_with_current_file">Compare with current file</string>
     <string name="text_compatibility">Compatibility</string>
     <string name="text_confidence_level">Confidence</string>
@@ -1370,6 +1378,7 @@
     <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
     <string name="text_copy_address">Copy address</string>
     <string name="text_copy_all">Copy all</string>
+    <string name="text_copy_as_issue_template">Copy as issue template</string>
     <string name="text_copy_info">Copy information</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_chained_selector">Copy chained selector</string>

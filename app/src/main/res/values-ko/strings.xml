@@ -852,6 +852,13 @@
     <string name="text_apply_as_theme_color">테마 색상으로 적용</string>
     <string name="text_auto_fill">나머지 상태 자동 채우기</string>
     <string name="text_auto_reconnect">자동 재연결</string>
+    <string name="text_autojs4_comparison">AutoJs4 비교 결과</string>
+    <string name="text_autojs4_comparison_different">콘솔 출력에 %1$d개의 차이가 있습니다</string>
+    <string name="text_autojs4_comparison_duration">소요 시간: AutoJs6 %1$s, AutoJs4 %2$s</string>
+    <string name="text_autojs4_comparison_failed">%1$s 실행 실패: %2$s</string>
+    <string name="text_autojs4_comparison_identical">콘솔 출력이 일치합니다</string>
+    <string name="text_autojs4_comparison_running_with" tools:ignore="TypographyEllipsis">%1$s(으)로 실행 중...</string>
+    <string name="text_autojs4_comparison_timed_out">%1$s 실행이 %2$d초를 초과하여 중지되었습니다</string>
     <string name="text_background_color_dark">어두운 색</string>
     <string name="text_background_color_follow">자동</string>
     <string name="text_background_color_inverse">자동 (반전)</string>
@@ -1335,6 +1342,7 @@
     <string name="text_comment">논평</string>
     <string name="text_committing_archive_extraction">압축 풀기를 완료하는 중</string>
     <string name="text_compare_selected">선택 항목 비교</string>
+    <string name="text_compare_with_autojs4">AutoJs4로 실행하고 비교</string>
     <string name="text_compare_with_current_file">현재 파일과 비교</string>
     <string name="text_compatibility">호환성</string>
     <string name="text_confidence_level">신뢰도</string>
@@ -1376,6 +1384,7 @@
     <string name="text_copy_ace_diagnostics">Ace 진단 정보 복사</string>
     <string name="text_copy_address">주소 복사</string>
     <string name="text_copy_all">모두 복사하십시오</string>
+    <string name="text_copy_as_issue_template">issue 템플릿으로 복사</string>
     <string name="text_copy_info">정보 복사</string>
     <string name="text_copy_all_files_to_new_directory">모든 파일을 새 디렉토리로 복사하십시오</string>
     <string name="text_copy_chained_selector">체인 선택자 복사</string>

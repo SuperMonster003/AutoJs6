@@ -149,11 +149,13 @@ internal class ExplorerPageViewHolder(
         if (!host.isProjectRecognitionEnabled || !ProjectConfig.isProject(explorerPage)) {
             menu.removeItem(R.id.action_timed_task)
             menu.removeItem(R.id.action_run_with_autojs4)
+            menu.removeItem(R.id.action_compare_with_autojs4)
             menu.removeItem(R.id.action_install_autojs4_runtime)
         } else if (AutoJs4RuntimePluginUi.isInstalled(host.context)) {
             menu.removeItem(R.id.action_install_autojs4_runtime)
         } else {
             menu.removeItem(R.id.action_run_with_autojs4)
+            menu.removeItem(R.id.action_compare_with_autojs4)
         }
         if (!explorerPage.canSetAsWorkingDir()) {
             menu.removeItem(R.id.action_set_as_working_dir)

@@ -14,6 +14,7 @@ import org.autojs.autojs.ui.common.ScriptLoopDialog
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.floating.controller.FloatingControllerManager
 import org.autojs.autojs.ui.project.BuildActivity
+import org.autojs.autojs.core.plugin.autojs4.AutoJs4Comparison
 import org.autojs.autojs.ui.autojs4.AutoJs4RuntimePluginUi
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs6.R
@@ -110,6 +111,12 @@ internal class ExplorerBuiltInActionHandler(
                 val selected = host.selectedItem ?: return false
                 host.hideHostDialog()
                 Scripts.runWithAutoJs4(host.context, File(selected.path))
+                host.notifyItemOperated()
+            }
+            R.id.action_compare_with_autojs4 -> {
+                val selected = host.selectedItem ?: return false
+                host.hideHostDialog()
+                AutoJs4Comparison.start(host.context, File(selected.path))
                 host.notifyItemOperated()
             }
             R.id.action_install_autojs4_runtime -> {

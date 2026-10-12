@@ -487,6 +487,11 @@
             android:theme="@style/AppTheme.Settings" />
 
         <activity
+            android:name="org.autojs.autojs.ui.autojs4.AutoJs4ComparisonActivity"
+            android:exported="false"
+            android:label="@string/text_autojs4_comparison" />
+
+        <activity
             android:name="org.autojs.autojs.ui.settings.PreferencesActivity"
             android:exported="true"
             android:label="@string/text_app_shortcut_settings_long_label"

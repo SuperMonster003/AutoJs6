@@ -851,6 +851,13 @@
     <string name="text_apply_as_theme_color">テーマカラーに適用</string>
     <string name="text_auto_fill">他の状態を自動入力</string>
     <string name="text_auto_reconnect">自動再接続</string>
+    <string name="text_autojs4_comparison">AutoJs4 比較結果</string>
+    <string name="text_autojs4_comparison_different">コンソール出力に %1$d 箇所の差異があります</string>
+    <string name="text_autojs4_comparison_duration">所要時間: AutoJs6 %1$s, AutoJs4 %2$s</string>
+    <string name="text_autojs4_comparison_failed">%1$s の実行に失敗しました: %2$s</string>
+    <string name="text_autojs4_comparison_identical">コンソール出力は一致しています</string>
+    <string name="text_autojs4_comparison_running_with" tools:ignore="TypographyEllipsis">%1$s で実行中...</string>
+    <string name="text_autojs4_comparison_timed_out">%1$s の実行が %2$d 秒を超えたため停止しました</string>
     <string name="text_background_color_dark">ダーク</string>
     <string name="text_background_color_follow">自動</string>
     <string name="text_background_color_inverse">自動 (反転)</string>
@@ -1334,6 +1341,7 @@
     <string name="text_comment">コメント</string>
     <string name="text_committing_archive_extraction">アーカイブの展開を完了中</string>
     <string name="text_compare_selected">選択項目を比較</string>
+    <string name="text_compare_with_autojs4">AutoJs4 で実行して比較</string>
     <string name="text_compare_with_current_file">現在のファイルと比較</string>
     <string name="text_compatibility">互換性</string>
     <string name="text_confidence_level">信頼度</string>
@@ -1375,6 +1383,7 @@
     <string name="text_copy_ace_diagnostics">Ace 診断情報をコピー</string>
     <string name="text_copy_address">アドレスをコピー</string>
     <string name="text_copy_all">すべてコピー</string>
+    <string name="text_copy_as_issue_template">issue テンプレートとしてコピー</string>
     <string name="text_copy_info">情報をコピー</string>
     <string name="text_copy_all_files_to_new_directory">すべてのファイルを新しいディレクトリにコピーします</string>
     <string name="text_copy_chained_selector">チェーン形式セレクタをコピー</string>

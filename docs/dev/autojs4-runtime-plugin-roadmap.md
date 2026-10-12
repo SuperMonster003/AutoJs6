@@ -140,7 +140,7 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 
 ### P6 可选: 对照模式
 
-- [ ] P6.1 "使用 AutoJs4 运行并对照": 同一脚本依次在 AutoJs6 与 AutoJs4 运行, 汇总两次控制台输出的逐行差异与运行时长, 结果页可一键复制为 issue 模板 (2026-10-12 拍板: 首版不纳入, 观察使用反馈后再定).
+- [x] P6.1 "使用 AutoJs4 运行并对照" (2026-10-12 实现, 维护者同日拍板纳入): 文件管理器脚本与项目菜单新增 `action_compare_with_autojs4` (可见性与 "使用 AutoJs4 运行" 相同); `core/plugin/autojs4/AutoJs4Comparison` 先用 AutoJs6 引擎 (`ScriptLaunchSourceFactory.createPersistedPathLaunch`) 再用 `AutoJs4ScriptSource` 运行目标, 以 `GlobalConsole.addLogListener` 采集两次运行的控制台行, 去掉宿主起止行, `[AutoJs4] ` 前缀, AutoJs4 的 `Script Running[...]` 与宿主 `runtime-init-*` 计时行后做 LCS 逐行 diff (超过 4e6 单元退化为按位置对比), 每次运行最多 120 秒, 超时 `forceStop`; `ui/autojs4/AutoJs4ComparisonActivity` 显示摘要 (路径, 是否一致与差异行数, 两次用时, 失败/超时提示), `-`/`+` 标记的差异, "复制为 issue 模板" (脚本, 宿主与插件版本, 设备, 两次完整输出, diff). 字符串 9 条 x 11 文件. 验证: XQ-AT72 上对 本地存储/保存数组和复杂对象.js 对照得到 "Console output is identical" (AutoJs6 0.016 s, AutoJs4 0.217 s); 文档页 "对照模式" 小节已同步到在线与离线文档.
 
 ### P7 宿主 `com.stardust` 兼容包的独立模块化 (D18, 仅涉及宿主仓库)
 

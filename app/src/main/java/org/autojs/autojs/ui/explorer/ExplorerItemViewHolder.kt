@@ -683,11 +683,13 @@ internal class ExplorerItemViewHolder(
         // when the plugin is missing, the same slot shows the install guidance instead.
         if (!AutoJs4ScriptSource.isAutoJs4FileType(mExplorerItem.type)) {
             menu.removeItem(R.id.action_run_with_autojs4)
+            menu.removeItem(R.id.action_compare_with_autojs4)
             menu.removeItem(R.id.action_install_autojs4_runtime)
         } else if (AutoJs4RuntimePluginUi.isInstalled(host.context)) {
             menu.removeItem(R.id.action_install_autojs4_runtime)
         } else {
             menu.removeItem(R.id.action_run_with_autojs4)
+            menu.removeItem(R.id.action_compare_with_autojs4)
         }
         val pluginMenuItems = mutableMapOf<Int, org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction>()
         runCatching {

@@ -850,6 +850,13 @@
     <string name="text_apply_as_theme_color">Aplicar como color del tema</string>
     <string name="text_auto_fill">Rellenar automáticamente los demás estados</string>
     <string name="text_auto_reconnect">Reconexión automática</string>
+    <string name="text_autojs4_comparison">Comparación con AutoJs4</string>
+    <string name="text_autojs4_comparison_different">%1$d diferencias en la salida de consola</string>
+    <string name="text_autojs4_comparison_duration">Duración: AutoJs6 %1$s, AutoJs4 %2$s</string>
+    <string name="text_autojs4_comparison_failed">Error en %1$s: %2$s</string>
+    <string name="text_autojs4_comparison_identical">La salida de consola es idéntica</string>
+    <string name="text_autojs4_comparison_running_with" tools:ignore="TypographyEllipsis">Ejecutando con %1$s...</string>
+    <string name="text_autojs4_comparison_timed_out">%1$s se ejecutó más de %2$d segundos y se detuvo</string>
     <string name="text_background_color_dark">Oscuro</string>
     <string name="text_background_color_follow">Automático</string>
     <string name="text_background_color_inverse">Automático (invertido)</string>
@@ -1333,6 +1340,7 @@
     <string name="text_comment">Comente</string>
     <string name="text_committing_archive_extraction">Finalizando la extracción del archivo</string>
     <string name="text_compare_selected">Comparar seleccionados</string>
+    <string name="text_compare_with_autojs4">Ejecutar con AutoJs4 y comparar</string>
     <string name="text_compare_with_current_file">Comparar con el archivo actual</string>
     <string name="text_compatibility">Compatibilidad</string>
     <string name="text_confidence_level">Confianza</string>
@@ -1374,6 +1382,7 @@
     <string name="text_copy_ace_diagnostics">Copiar diagnóstico de Ace</string>
     <string name="text_copy_address">Copiar dirección</string>
     <string name="text_copy_all">Copiar todo</string>
+    <string name="text_copy_as_issue_template">Copiar como plantilla de issue</string>
     <string name="text_copy_info">Copiar información</string>
     <string name="text_copy_all_files_to_new_directory">Copiar todos los archivos en el nuevo directorio</string>
     <string name="text_copy_chained_selector">Copiar selector encadenado</string>

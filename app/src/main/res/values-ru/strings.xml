@@ -850,6 +850,13 @@
     <string name="text_apply_as_theme_color">Применить как цвет темы</string>
     <string name="text_auto_fill">Заполнить остальные состояния</string>
     <string name="text_auto_reconnect">Автоматическое переподключение</string>
+    <string name="text_autojs4_comparison">Сравнение с AutoJs4</string>
+    <string name="text_autojs4_comparison_different">Различий в выводе консоли: %1$d</string>
+    <string name="text_autojs4_comparison_duration">Время: AutoJs6 %1$s, AutoJs4 %2$s</string>
+    <string name="text_autojs4_comparison_failed">Сбой %1$s: %2$s</string>
+    <string name="text_autojs4_comparison_identical">Вывод консоли совпадает</string>
+    <string name="text_autojs4_comparison_running_with" tools:ignore="TypographyEllipsis">Выполняется в %1$s...</string>
+    <string name="text_autojs4_comparison_timed_out">%1$s выполнялся дольше %2$d с и был остановлен</string>
     <string name="text_background_color_dark">Тёмный</string>
     <string name="text_background_color_follow">Автоматически</string>
     <string name="text_background_color_inverse">Автоматически (инверсия)</string>
@@ -1333,6 +1340,7 @@
     <string name="text_comment">Комментарий</string>
     <string name="text_committing_archive_extraction">Завершение извлечения архива</string>
     <string name="text_compare_selected">Сравнить выбранные</string>
+    <string name="text_compare_with_autojs4">Запустить в AutoJs4 и сравнить</string>
     <string name="text_compare_with_current_file">Сравнить с текущим файлом</string>
     <string name="text_compatibility">Совместимость</string>
     <string name="text_confidence_level">Доверие</string>
@@ -1374,6 +1382,7 @@
     <string name="text_copy_ace_diagnostics">Копировать диагностические данные Ace</string>
     <string name="text_copy_address">Копировать адрес</string>
     <string name="text_copy_all">Скопировать все</string>
+    <string name="text_copy_as_issue_template">Копировать как шаблон issue</string>
     <string name="text_copy_info">Копировать информацию</string>
     <string name="text_copy_all_files_to_new_directory">Скопировать все файлы в новый каталог</string>
     <string name="text_copy_chained_selector">Копировать цепочечный селектор</string>

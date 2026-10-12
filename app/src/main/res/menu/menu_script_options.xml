@@ -51,6 +51,9 @@
         android:id="@+id/action_run_with_autojs4"
         android:title="@string/text_run_with_autojs4" />
     <item
+        android:id="@+id/action_compare_with_autojs4"
+        android:title="@string/text_compare_with_autojs4" />
+    <item
         android:id="@+id/action_install_autojs4_runtime"
         android:title="@string/text_install_autojs4_runtime" />
 
