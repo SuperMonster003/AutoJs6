@@ -288,6 +288,24 @@ public class TemplateMatching {
      * @param template 模板图片
      * @param options  选项
      */
+    /**
+     * The Auto.js 4 signatures of {@code com.stardust.autojs.core.image.TemplateMatching.fastTemplateMatching}; that
+     * class name resolves to this class through {@link org.autojs.autojs.rhino.StardustClassAliases} (roadmap P7.3).
+     * The six-argument form returns the best match point (or null), the seven-argument form up to {@code limit} matches.
+     * zh-CN: Auto.js 4 {@code com.stardust.autojs.core.image.TemplateMatching.fastTemplateMatching} 的签名; 该类名经
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} 解析到本类 (roadmap P7.3). 六参数形式返回最佳匹配点 (或 null),
+     * 七参数形式最多返回 {@code limit} 个匹配.
+     */
+    @Nullable
+    public static Point fastTemplateMatching(Mat img, Mat template, int matchMethod, float weakThreshold, float strictThreshold, int maxLevel) {
+        List<Match> result = fastTemplateMatching(img, template, matchMethod, weakThreshold, strictThreshold, maxLevel, 1);
+        return result.isEmpty() ? null : result.get(0).point;
+    }
+
+    public static List<Match> fastTemplateMatching(Mat img, Mat template, int matchMethod, float weakThreshold, float strictThreshold, int maxLevel, int limit) {
+        return fastTemplateMatching(img, template, new Options(matchMethod, weakThreshold, strictThreshold, maxLevel, false, limit));
+    }
+
     public static List<Match> fastTemplateMatching(Mat img, Mat template, Options options) {
         int limit = options.getLimit();
         if (img == null || template == null || img.empty() || template.empty() || limit <= 0) {

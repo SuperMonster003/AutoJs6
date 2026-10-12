@@ -22,6 +22,46 @@ object TextUtils {
     @JvmStatic
     fun markdownToHtml(markdown: String): String = mMarkdownParser.parse(markdown).let { mHtmlRender.render(it) }
 
+    // The six helpers of Auto.js 4's com.stardust.util.TextUtils, kept because that class name resolves to this object
+    // through StardustClassAliases (roadmap P7.3). Unlike the Auto.js 4 copies, the String fast paths honour fromIndex.
+    // zh-CN: Auto.js 4 com.stardust.util.TextUtils 的 6 个方法, 因该类名经 StardustClassAliases 解析到本对象而保留
+    // (roadmap P7.3). 与 Auto.js 4 的副本不同, String 快速路径同样遵守 fromIndex.
+
+    @JvmStatic
+    fun join(delimiter: CharSequence, vararg tokens: Any?): String = android.text.TextUtils.join(delimiter, tokens)
+
+    @JvmStatic
+    fun toEmptyIfNull(message: String?): String = message ?: ""
+
+    @JvmStatic
+    fun indexOf(text: CharSequence, ch: Char, fromIndex: Int): Int = when (text) {
+        is String -> text.indexOf(ch, fromIndex)
+        else -> android.text.TextUtils.indexOf(text, ch, fromIndex)
+    }
+
+    @JvmStatic
+    fun lastIndexOf(text: CharSequence, ch: Char, fromIndex: Int): Int = when (text) {
+        is String -> text.lastIndexOf(ch, fromIndex)
+        else -> android.text.TextUtils.lastIndexOf(text, ch, fromIndex)
+    }
+
+    @JvmStatic
+    fun indexOf(source: CharSequence, target: CharSequence, fromIndex: Int): Int = when {
+        source is String && target is String -> source.indexOf(target, fromIndex)
+        else -> android.text.TextUtils.indexOf(source, target, fromIndex)
+    }
+
+    @JvmStatic
+    fun lastIndexOf(source: CharSequence, target: CharSequence, fromIndex: Int): Int {
+        if (source is String && target is String) return source.lastIndexOf(target, fromIndex)
+        var index = minOf(fromIndex, source.length - target.length)
+        while (index >= 0) {
+            if (android.text.TextUtils.regionMatches(source, index, target, 0, target.length)) return index
+            index--
+        }
+        return -1
+    }
+
     @JvmStatic
     @JvmOverloads
     fun splitSpanned(spanned: Spanned, delimiter: String = "\n"): List<Spanned> {

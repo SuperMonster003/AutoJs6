@@ -135,6 +135,26 @@ public class ProcessShell extends AbstractShell {
         return mSuccessOutput;
     }
 
+    /**
+     * The Auto.js 4 names of {@link #readSuccessOutput()}, {@link #getSuccessOutput()} and {@link #getSuccessReader()};
+     * kept because {@code com.stardust.autojs.core.util.ProcessShell} resolves to this class through
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} (roadmap P7.3).
+     * zh-CN: {@link #readSuccessOutput()}, {@link #getSuccessOutput()} 与 {@link #getSuccessReader()} 的 Auto.js 4 名称;
+     * 因 {@code com.stardust.autojs.core.util.ProcessShell} 经 {@link org.autojs.autojs.rhino.StardustClassAliases}
+     * 解析到本类而保留 (roadmap P7.3).
+     */
+    public ProcessShell readSucceedOutput() {
+        return readSuccessOutput();
+    }
+
+    public StringBuilder getSucceedOutput() {
+        return getSuccessOutput();
+    }
+
+    public BufferedReader getSucceedReader() {
+        return getSuccessReader();
+    }
+
     public StringBuilder getErrorOutput() {
         return mErrorOutput;
     }

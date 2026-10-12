@@ -99,6 +99,19 @@ ALIASES = {
     "com.stardust.util.SparseArrayEntries": "org.autojs.autojs.tool.SparseArrayEntries",
     "com.stardust.util.StateObserver": "org.autojs.autojs.tool.StateObserver",
     "com.stardust.util.Supplier": "org.autojs.autojs.tool.Supplier",
+    # Third batch (2026-10-12).
+    "com.stardust.autojs.core.image.ColorDetector": "org.autojs.autojs.core.image.ColorDetector",
+    "com.stardust.autojs.core.image.ImageWrapper": "org.autojs.autojs.core.image.ImageWrapper",
+    "com.stardust.autojs.core.image.TemplateMatching": "org.autojs.autojs.core.image.TemplateMatching",
+    "com.stardust.autojs.core.util.ProcessShell": "org.autojs.autojs.runtime.api.ProcessShell",
+    "com.stardust.concurrent.VolatileBox": "org.autojs.autojs.concurrent.VolatileBox",
+    "com.stardust.io.Zip": "org.autojs.autojs.io.Zip",
+    "com.stardust.util.DeveloperUtils": "org.autojs.autojs.util.DeveloperUtils",
+    "com.stardust.util.NetworkUtils": "org.autojs.autojs.util.NetworkUtils",
+    "com.stardust.util.ScreenMetrics": "org.autojs.autojs.runtime.api.ScreenMetrics",
+    "com.stardust.util.TextUtils": "org.autojs.autojs.util.TextUtils",
+    "com.stardust.util.UiHandler": "org.autojs.autojs.tool.UiHandler",
+    "com.stardust.util.ViewUtils": "org.autojs.autojs.util.ViewUtils",
 }
 
 OBJECT_METHODS = {"equals", "hashCode", "toString", "getClass", "notify", "notifyAll", "wait", "finalize", "clone"}
@@ -124,8 +137,10 @@ JS_VALUE_TYPES = {
 ENGINE_INTERNAL_PREFIX = "com.stardust.autojs."
 
 
-def js_compatible_param(compat_type: str, host_type: str) -> bool:
+def js_compatible_param(compat_type: str, host_type: str, index=None) -> bool:
     if compat_type == host_type or host_type == "java.lang.Object":
+        return True
+    if index is not None and index.is_subtype(compat_type, host_type):
         return True
     if compat_type in NUMERIC_TYPES and host_type in NUMERIC_TYPES:
         return True
@@ -138,8 +153,8 @@ def js_compatible_param(compat_type: str, host_type: str) -> bool:
     return False
 
 
-def js_compatible_params(compat_params, host_params) -> bool:
-    return len(compat_params) == len(host_params) and all(js_compatible_param(c, h) for c, h in zip(compat_params, host_params))
+def js_compatible_params(compat_params, host_params, index=None) -> bool:
+    return len(compat_params) == len(host_params) and all(js_compatible_param(c, h, index) for c, h in zip(compat_params, host_params))
 
 CLASS_LINE = re.compile(
     r"^(?:[\w ]*?\b)?(class|interface|enum)\s+([\w.$]+)(?:<[^{]*?>)?"
@@ -211,6 +226,26 @@ class ClassIndex:
 
     def exists(self, fqcn: str) -> bool:
         return fqcn in self.files
+
+    def is_subtype(self, name: str, target: str) -> bool:
+        """True when `name` extends or implements `target` (walking the supertypes that live in the roots)."""
+        if name.endswith("[]") or target.endswith("[]"):
+            return False
+        seen = set()
+        queue = [name]
+        while queue:
+            current = queue.pop(0)
+            if current in seen:
+                continue
+            seen.add(current)
+            info = self.get(current) if current in self.files else None
+            if info is None:
+                continue
+            for sup in info.supers:
+                if sup == target:
+                    return True
+                queue.append(sup)
+        return False
 
     def nested_of(self, fqcn: str):
         prefix = fqcn + "$"
@@ -390,7 +425,7 @@ def compare(index: ClassIndex, mapper: TypeMapper, compat: str, host: str, detai
             continue
         if member.kind == "ctor":
             exact = [h for h in host_members if h.kind == "ctor" and h.params == mapped]
-            relaxed = [h for h in host_members if h.kind == "ctor" and js_compatible_params(mapped, h.params)]
+            relaxed = [h for h in host_members if h.kind == "ctor" and js_compatible_params(mapped, h.params, index)]
             if exact:
                 record("ok", f"`{shown}`")
             elif relaxed:
@@ -405,11 +440,11 @@ def compare(index: ClassIndex, mapper: TypeMapper, compat: str, host: str, detai
             continue
         same_name = [h for h in host_members if h.kind == "method" and h.name == member.name]
         exact = [h for h in same_name if h.params == mapped]
-        relaxed = [h for h in same_name if js_compatible_params(mapped, h.params)]
+        relaxed = [h for h in same_name if js_compatible_params(mapped, h.params, index)]
         match = (exact or relaxed or [None])[0]
         reachable = member.static or constructible
         if match is None:
-            companion = [h for h in companion_members if h.kind == "method" and h.name == member.name and js_compatible_params(mapped, h.params)]
+            companion = [h for h in companion_members if h.kind == "method" and h.name == member.name and js_compatible_params(mapped, h.params, index)]
             if companion:
                 record("blocking" if member.static else "info", f"companion only (not static on the host class) `{shown}`")
             elif same_name:

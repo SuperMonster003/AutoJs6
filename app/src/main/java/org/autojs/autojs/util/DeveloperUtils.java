@@ -173,6 +173,19 @@ public class DeveloperUtils {
         }
     }
 
+    /**
+     * The Auto.js 4 signature of {@code com.stardust.util.DeveloperUtils.verifyApk}, which resolves to this class
+     * through {@link org.autojs.autojs.rhino.StardustClassAliases} (roadmap P7.3). Auto.js 4 never used
+     * {@code crcRes} (its CRC check is commented out), so this is the signature check of {@link #verifyApk(Activity)}.
+     * zh-CN: Auto.js 4 {@code com.stardust.util.DeveloperUtils.verifyApk} 的签名, 该类名经
+     * {@link org.autojs.autojs.rhino.StardustClassAliases} 解析到本类 (roadmap P7.3). Auto.js 4 从未使用 {@code crcRes}
+     * (其 CRC 校验已被注释), 因此等同于 {@link #verifyApk(Activity)} 的签名校验.
+     */
+    @SuppressWarnings("unused")
+    public static void verifyApk(Activity activity, int crcRes) {
+        verifyApk(activity);
+    }
+
     public static void verifyApk(Activity activity) {
         final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         sExecutor.execute(() -> {

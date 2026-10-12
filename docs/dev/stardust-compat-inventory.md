@@ -208,4 +208,19 @@ py E:/.cache/user-temp/claude/.../scratchpad/stardust_inventory.py   # 本次使
 
 别名表现共 52 项; 单测 6 个用例通过; XQ-AT72 抽样 (IntentExtras, LocalStorage 读写, EventEmitter on/emit, MapBuilder, Func1 适配器, InputEventCodes 常量, ScriptPromiseAdapter, ThreadCompat, PFileInterface) 均解析到宿主类并正常工作.
 
-脚本可见包里仍为副本的类及其阻止项 (需要宿主增补时由维护者决定, 补齐后普查会直接显示为 alias): `autojs.core.image.ImageWrapper` (静态 `ofBitmap` / `ofMat` / `ofImage` 与构造器 `(int, int)` 在宿主都多一个 `ScriptRuntime` 参数, `toBitmap(Image)` 只在 companion 上); `util.ScreenMetrics` (静态 `scaleX` / `scaleY` / `rescaleX` / `rescaleY` 在宿主是实例方法, 缺 `initIfNeeded(Activity)`, 构造器 `(int, int)`, `setDesignWidth` / `setDesignHeight`); `util.UiHandler` (缺 `getContext()`, `toast(String)`, `toast(int)`); `autojs.core.util.ProcessShell` (缺 `readSucceedOutput()`, `getSucceedOutput()`, `getSucceedReader()`); `util.TextUtils` (缺静态 `join`, `toEmptyIfNull`, `indexOf` x2, `lastIndexOf` x2); `autojs.core.image.ColorDetector` (嵌套类缺 `detectsColor(int, int, int)`); `autojs.core.image.TemplateMatching` (`fastTemplateMatching` 参数为 `core.opencv.Mat` 而宿主为 `org.opencv.core.Mat`); `concurrent.VolatileBox` (缺 `setAndNotify`); `io.Zip` (`unzip` 缺 `@JvmStatic`); `util.NetworkUtils` (`isWifiAvailable(Context)`); `util.DeveloperUtils` (`verifyApk(Activity, int)`); `util.ViewUtils` (`findParentById`, `pxToSp`). `util.ClipboardUtil` 没有同名宿主类 (宿主为 `ClipboardUtils`), 按 "简单名一致" 规则不是候选.
+脚本可见包里当时仍为副本的 12 个类 (`ImageWrapper`, `ScreenMetrics`, `UiHandler`, `ProcessShell`, `TextUtils`, `ColorDetector`, `TemplateMatching`, `VolatileBox`, `Zip`, `NetworkUtils`, `DeveloperUtils`, `ViewUtils`) 在维护者确认 "全部可做" 后于第三批补齐, 见 10.5 节. `util.ClipboardUtil` 没有同名宿主类 (宿主为 `ClipboardUtils`), 按 "简单名一致" 规则不是候选.
+
+### 10.5 第三批 (2026-10-13, 维护者确认为副本类补齐宿主成员)
+
+宿主做的加法 (只增不改, 除 `ScreenMetrics` 一处形态调整):
+
+- `core.image.ImageWrapper`: companion 增加 `currentScriptRuntime()` (取当前 Rhino `AutoJsContext.rhinoJavaScriptEngine.runtime`, 无脚本上下文时抛 `IllegalStateException`), 以及不带运行时的 `ofBitmap(Bitmap)` / `ofMat(Mat)` / `ofImage(Image)` 与构造器 `(width, height)`; `toBitmap(Image)` 补 `@JvmStatic`.
+- `runtime.api.ScreenMetrics`: 双参数 `scaleX` / `scaleY` / `rescaleX` / `rescaleY` 改为 companion 静态方法 (与 Auto.js 4 一致, JVM 不允许同签名的静态与实例方法并存), 实例保留单参数形式 (取本对象的设计尺寸; 宿主代码只用单参数形式, Rhino 中经实例调用静态方法仍可用); 新增构造器 `(designWidth, designHeight)`, `setDesignWidth` / `setDesignHeight`, `initIfNeeded(Activity)` (只初始化一次, `init` 仍会重置缓存).
+- `tool.UiHandler`: `context` 属性 (`getContext()`), `toast(String)` / `toast(Int)` (主线程 `ViewUtils.showToast`).
+- `runtime.api.ProcessShell`: `readSucceedOutput()` / `getSucceedOutput()` / `getSucceedReader()` 委托给 `*Success*` 版本.
+- `util.TextUtils`: `join`, `toEmptyIfNull`, `indexOf` / `lastIndexOf` 的 `(CharSequence, char, int)` 与 `(CharSequence, CharSequence, int)` 形式 (String 快速路径遵守 fromIndex, 兼容副本的 String 路径忽略它).
+- `core.image.ColorDetector`: 接口默认方法 `detectsColor(r, g, b)` (`AbstractColorDetector` 亦实现) 与 Auto.js 4 的 `RDistanceDetector` (只比较红色通道).
+- `core.image.TemplateMatching`: Auto.js 4 形式的 `fastTemplateMatching(img, template, matchMethod, weak, strict, maxLevel[, limit])` (六参数返回最佳点或 null, 七参数返回最多 limit 个匹配), 委托给 `Options`; 另外工具与单测增加 "宿主参数类型是兼容类型映射后的父类型即兼容" 规则 (`core.opencv.Mat` 对 `org.opencv.core.Mat`).
+- `concurrent.VolatileBox.setAndNotify`; `io.Zip` 的 `unzip(File, File)` / `unzip(File, File, String)` 补 `@JvmStatic`; `util.NetworkUtils.isWifiAvailable(Context)`; `util.DeveloperUtils.verifyApk(Activity, int)` (Auto.js 4 的 CRC 部分本就被注释, 等同单参数版本); `util.ViewUtils.findParentById` / `pxToSp`.
+
+别名表共 64 项 (16 + 36 + 12), 普查 64 项全部为 alias, 单测 6 个用例通过.

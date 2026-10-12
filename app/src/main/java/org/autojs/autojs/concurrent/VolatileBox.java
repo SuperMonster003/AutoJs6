@@ -24,6 +24,19 @@ public class VolatileBox<T> {
         mValue = value;
     }
 
+    /**
+     * Sets the value and wakes one blocked reader, as {@code com.stardust.concurrent.VolatileBox.setAndNotify} of
+     * Auto.js 4; that class name resolves to this class through {@link org.autojs.autojs.rhino.StardustClassAliases}.
+     * zh-CN: 设置值并唤醒一个阻塞的读取方, 对应 Auto.js 4 的 {@code com.stardust.concurrent.VolatileBox.setAndNotify};
+     * 该类名经 {@link org.autojs.autojs.rhino.StardustClassAliases} 解析到本类.
+     */
+    public void setAndNotify(T value) {
+        mValue = value;
+        synchronized (this) {
+            notify();
+        }
+    }
+
     public boolean isNull() {
         return mValue == null;
     }

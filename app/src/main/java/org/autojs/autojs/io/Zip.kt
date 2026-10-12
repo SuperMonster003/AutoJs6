@@ -26,6 +26,7 @@ object Zip {
         }
     }
 
+    @JvmStatic
     @Throws(IOException::class)
     fun unzip(zipFile: File, dir: File) {
         FileInputStream(zipFile).use { fis -> unzip(fis, dir) }
@@ -33,6 +34,7 @@ object Zip {
 
     // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
     //  ! https://github.com/kkevsekk1/AutoX/blob/f197c5928f37345bffe7dbe9e5d41ab8f4f9424d/app/src/main/java/org/autojs/autojs/tool/ZipTool.kt#L7
+    @JvmStatic
     fun unzip(fromFile: File, newDir: File, unzipPath: String) {
         val niceUnzipPath = when {
             unzipPath.endsWith(File.separator) -> unzipPath

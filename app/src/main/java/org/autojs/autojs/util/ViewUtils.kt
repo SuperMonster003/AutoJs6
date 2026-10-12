@@ -94,6 +94,22 @@ object ViewUtils {
     private const val STATUS_BAR_SCRIM_TAG = "autojs6:status_bar_scrim"
     private const val NAV_BAR_SCRIM_TAG = "autojs6:nav_bar_scrim"
 
+    /**
+     * The nearest ancestor of [view] whose id is [id], or null; the Auto.js 4 `com.stardust.util.ViewUtils` method,
+     * kept because that class name resolves to this object through `StardustClassAliases` (roadmap P7.3).
+     * zh-CN: [view] 最近的 id 为 [id] 的祖先, 没有则为 null; Auto.js 4 `com.stardust.util.ViewUtils` 的方法, 因该类名经
+     * `StardustClassAliases` 解析到本对象而保留 (roadmap P7.3).
+     */
+    @JvmStatic
+    fun findParentById(view: View, id: Int): View? {
+        val parent = view.parent as? View ?: return null
+        return if (parent.id == id) parent else findParentById(parent, id)
+    }
+
+    /** Pixels to scaled pixels (sp) with the display metrics of [context]; the Auto.js 4 `com.stardust.util.ViewUtils` method. */
+    @JvmStatic
+    fun pxToSp(context: Context, px: Float): Float = px / context.resources.displayMetrics.scaledDensity
+
     @JvmStatic
     var isKeepScreenOnWhenInForegroundEnabled
         get() = Pref.getBoolean(R.string.key_keep_screen_on_when_in_foreground_enabled, false)

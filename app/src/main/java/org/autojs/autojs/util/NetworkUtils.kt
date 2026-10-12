@@ -43,6 +43,18 @@ object NetworkUtils {
     @JvmStatic
     fun isWifiAvailable() = getNetworkInfo()?.type == ConnectivityManager.TYPE_WIFI
 
+    /**
+     * The Auto.js 4 signature of `com.stardust.util.NetworkUtils.isWifiAvailable`, which resolves to this object
+     * through `StardustClassAliases` (roadmap P7.3); the connectivity service of [context] is consulted.
+     * zh-CN: Auto.js 4 `com.stardust.util.NetworkUtils.isWifiAvailable` 的签名, 该类名经 `StardustClassAliases` 解析到本对象
+     * (roadmap P7.3); 查询 [context] 的连接服务.
+     */
+    @JvmStatic
+    fun isWifiAvailable(context: Context): Boolean {
+        val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+        return manager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
+    }
+
     @JvmStatic
     fun getGatewayAddress() = try {
         InetAddress.getByAddress(getIpAddressByte()).hostAddress

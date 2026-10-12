@@ -85,7 +85,7 @@ class StardustClassAliasesTest {
         )
         // Classes outside the table keep their copies.
         assertSame(load("com.stardust.autojs.runtime.api.Floaty"), Kit.classOrNull(classLoader, "com.stardust.autojs.runtime.api.Floaty"))
-        assertSame(load("com.stardust.util.ScreenMetrics"), Kit.classOrNull(classLoader, "com.stardust.util.ScreenMetrics"))
+        assertSame(load("com.stardust.util.ClipboardUtil"), Kit.classOrNull(classLoader, "com.stardust.util.ClipboardUtil"))
     }
 
     @Test
@@ -204,7 +204,13 @@ class StardustClassAliasesTest {
         compat in BOOLEAN_TYPES && host in BOOLEAN_TYPES -> true
         compat in TEXT_TYPES && host in TEXT_TYPES -> true
         compat == "java.lang.Object" && host in JS_VALUE_TYPES -> true
-        else -> false
+        else -> isSubtype(compat, host)
+    }
+
+    /** A host parameter also accepts every subtype of its type (e.g. `core.opencv.Mat` for `org.opencv.core.Mat`). */
+    private fun isSubtype(type: String, superType: String): Boolean {
+        if (type.endsWith("[]") || superType.endsWith("[]")) return false
+        return runCatching { load(superType).isAssignableFrom(load(type)) }.getOrDefault(false)
     }
 
     companion object {

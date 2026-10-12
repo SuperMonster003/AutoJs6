@@ -82,6 +82,20 @@ object StardustClassAliases {
         "com.stardust.util.SparseArrayEntries" to "org.autojs.autojs.tool.SparseArrayEntries",
         "com.stardust.util.StateObserver" to "org.autojs.autojs.tool.StateObserver",
         "com.stardust.util.Supplier" to "org.autojs.autojs.tool.Supplier",
+        // Third batch (2026-10-12): script-facing classes the host gained the missing members for.
+        // zh-CN: 第三批 (2026-10-12): 宿主补齐所缺成员后的脚本可见类.
+        "com.stardust.autojs.core.image.ColorDetector" to "org.autojs.autojs.core.image.ColorDetector",
+        "com.stardust.autojs.core.image.ImageWrapper" to "org.autojs.autojs.core.image.ImageWrapper",
+        "com.stardust.autojs.core.image.TemplateMatching" to "org.autojs.autojs.core.image.TemplateMatching",
+        "com.stardust.autojs.core.util.ProcessShell" to "org.autojs.autojs.runtime.api.ProcessShell",
+        "com.stardust.concurrent.VolatileBox" to "org.autojs.autojs.concurrent.VolatileBox",
+        "com.stardust.io.Zip" to "org.autojs.autojs.io.Zip",
+        "com.stardust.util.DeveloperUtils" to "org.autojs.autojs.util.DeveloperUtils",
+        "com.stardust.util.NetworkUtils" to "org.autojs.autojs.util.NetworkUtils",
+        "com.stardust.util.ScreenMetrics" to "org.autojs.autojs.runtime.api.ScreenMetrics",
+        "com.stardust.util.TextUtils" to "org.autojs.autojs.util.TextUtils",
+        "com.stardust.util.UiHandler" to "org.autojs.autojs.tool.UiHandler",
+        "com.stardust.util.ViewUtils" to "org.autojs.autojs.util.ViewUtils",
     )
 
     /**

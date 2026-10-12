@@ -27,36 +27,72 @@ class ScreenMetrics {
     private var mDesignWidth = 0
     private var mDesignHeight = 0
 
+    constructor()
+
+    /**
+     * The Auto.js 4 constructor of `com.stardust.util.ScreenMetrics` (a design size); that class name resolves to
+     * this class through `StardustClassAliases` (roadmap P7.3), which is also why the two-argument scale helpers
+     * below are static like Auto.js 4's and the instance forms take the design size from this object.
+     * zh-CN: Auto.js 4 `com.stardust.util.ScreenMetrics` 的构造器 (设计尺寸); 该类名经 `StardustClassAliases` 解析到本类
+     * (roadmap P7.3), 因此下面的双参数缩放方法与 Auto.js 4 一样是静态的, 实例形式从本对象取设计尺寸.
+     */
+    constructor(designWidth: Int, designHeight: Int) {
+        mDesignWidth = designWidth
+        mDesignHeight = designHeight
+    }
+
     fun setScreenMetrics(width: Int, height: Int) {
         mDesignWidth = width
         mDesignHeight = height
     }
 
-    @JvmOverloads
-    fun scaleX(x: Int, width: Int = mDesignWidth) = when {
-        width == 0 || !mIsInitialized -> x
-        else -> x * deviceScreenWidth / width
+    fun setDesignWidth(designWidth: Int) {
+        mDesignWidth = designWidth
     }
 
-    @JvmOverloads
-    fun scaleY(y: Int, height: Int = mDesignHeight) = when {
-        height == 0 || !mIsInitialized -> y
-        else -> y * deviceScreenHeight / height
+    fun setDesignHeight(designHeight: Int) {
+        mDesignHeight = designHeight
     }
 
-    @JvmOverloads
-    fun rescaleX(x: Int, width: Int = mDesignWidth) = when {
-        width == 0 || !mIsInitialized -> x
-        else -> x * width / deviceScreenWidth
-    }
+    fun scaleX(x: Int) = scaleX(x, mDesignWidth)
 
-    @JvmOverloads
-    fun rescaleY(y: Int, height: Int = mDesignHeight) = when {
-        height == 0 || !mIsInitialized -> y
-        else -> y * height / deviceScreenHeight
-    }
+    fun scaleY(y: Int) = scaleY(y, mDesignHeight)
+
+    fun rescaleX(x: Int) = rescaleX(x, mDesignWidth)
+
+    fun rescaleY(y: Int) = rescaleY(y, mDesignHeight)
 
     companion object {
+
+        @JvmStatic
+        fun scaleX(x: Int, width: Int) = when {
+            width == 0 || !mIsInitialized -> x
+            else -> x * deviceScreenWidth / width
+        }
+
+        @JvmStatic
+        fun scaleY(y: Int, height: Int) = when {
+            height == 0 || !mIsInitialized -> y
+            else -> y * deviceScreenHeight / height
+        }
+
+        @JvmStatic
+        fun rescaleX(x: Int, width: Int) = when {
+            width == 0 || !mIsInitialized -> x
+            else -> x * width / deviceScreenWidth
+        }
+
+        @JvmStatic
+        fun rescaleY(y: Int, height: Int) = when {
+            height == 0 || !mIsInitialized -> y
+            else -> y * height / deviceScreenHeight
+        }
+
+        /** Initializes once, as Auto.js 4's `initIfNeeded`; [init] re-initializes and resets the cached sides. */
+        @JvmStatic
+        fun initIfNeeded(activity: Activity) {
+            if (!mIsInitialized) init(activity)
+        }
 
         val resources: Resources?
             get() = mActivityRef.get()?.resources

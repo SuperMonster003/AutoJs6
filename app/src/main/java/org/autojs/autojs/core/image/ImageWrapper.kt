@@ -9,6 +9,7 @@ import androidx.core.graphics.get
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.opencv.Mat
 import org.autojs.autojs.core.opencv.OpenCVHelper
+import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.rhino.extension.AnyExtensions.toRuntimePath
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -135,6 +136,9 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         get() = mPlane ?: mMediaImage?.planes?.get(0)
 
     constructor(scriptRuntime: ScriptRuntime, width: Int, height: Int) : this(scriptRuntime, createBitmap(width, height))
+
+    /** The Auto.js 4 constructor (no runtime): bound to the script running on the calling thread. */
+    constructor(width: Int, height: Int) : this(currentScriptRuntime(), width, height)
 
     constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap) {
         mScriptRuntime = scriptRuntime
@@ -393,6 +397,30 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         @JvmStatic
         fun ofBitmap(scriptRuntime: ScriptRuntime, bitmap: Bitmap) = ImageWrapper(scriptRuntime, bitmap)
 
+        /**
+         * The runtime of the script running on the calling thread, for the Auto.js 4 shaped factories below:
+         * `com.stardust.autojs.core.image.ImageWrapper` resolves to this class through `StardustClassAliases`
+         * (roadmap P7.3) and its factories take no runtime.
+         * zh-CN: 调用线程上正在运行的脚本的运行时, 供下面 Auto.js 4 形式的工厂方法使用: `com.stardust.autojs.core.image.ImageWrapper`
+         * 经 `StardustClassAliases` 解析到本类 (roadmap P7.3), 其工厂方法不带运行时参数.
+         */
+        @JvmStatic
+        fun currentScriptRuntime(): ScriptRuntime {
+            val context = org.mozilla.javascript.Context.getCurrentContext() as? AutoJsContext
+            return context?.rhinoJavaScriptEngine?.runtime
+                ?: throw IllegalStateException("No script runtime is bound to the calling thread")
+        }
+
+        @JvmStatic
+        fun ofImage(image: Image) = ofImage(currentScriptRuntime(), image)
+
+        @JvmStatic
+        fun ofMat(mat: Mat) = ofMat(currentScriptRuntime(), mat)
+
+        @JvmStatic
+        fun ofBitmap(bitmap: Bitmap) = ofBitmap(currentScriptRuntime(), bitmap)
+
+        @JvmStatic
         @ScriptInterface
         fun toBitmap(image: Image): Bitmap {
             val plane = image.planes[0]

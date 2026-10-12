@@ -30,6 +30,14 @@ interface ColorDetector {
     fun detectColor(r: Int, g: Int, b: Int): Boolean
 
     /**
+     * The Auto.js 4 name of [detectColor]; kept because `com.stardust.autojs.core.image.ColorDetector` resolves to
+     * this interface through `StardustClassAliases` (roadmap P7.3).
+     * zh-CN: [detectColor] 的 Auto.js 4 名称; 因 `com.stardust.autojs.core.image.ColorDetector` 经 `StardustClassAliases`
+     * 解析到本接口而保留 (roadmap P7.3).
+     */
+    fun detectsColor(r: Int, g: Int, b: Int): Boolean = detectColor(r, g, b)
+
+    /**
      * Distance between the reference color and (r, g, b) on the 0..255 scale used by thresholds.
      *
      * zh-CN: 参考颜色与 (r, g, b) 的距离, 量纲与阈值一致 (0..255).
@@ -40,6 +48,8 @@ interface ColorDetector {
         protected val colorR: Int = color shr 16 and 0xFF
         protected val colorG: Int = color shr 8 and 0xFF
         protected val colorB: Int = color and 0xFF
+
+        override fun detectsColor(r: Int, g: Int, b: Int): Boolean = detectColor(r, g, b)
     }
 
     abstract class ThresholdColorDetector(color: Int, protected val threshold: Int) : AbstractColorDetector(color) {
@@ -61,6 +71,16 @@ interface ColorDetector {
         override fun distance(r: Int, g: Int, b: Int): Double {
             return (abs(r - colorR) + abs(g - colorG) + abs(b - colorB)) / 3.0
         }
+    }
+
+    /**
+     * Red channel distance only; the Auto.js 4 detector of `com.stardust.autojs.core.image.ColorDetector`, kept because
+     * that interface resolves to this one through `StardustClassAliases` (roadmap P7.3).
+     * zh-CN: 只比较红色通道的距离; Auto.js 4 `com.stardust.autojs.core.image.ColorDetector` 的检测器, 因该接口经
+     * `StardustClassAliases` 解析到本接口而保留 (roadmap P7.3).
+     */
+    class RDistanceDetector(color: Int, threshold: Int) : ThresholdColorDetector(color, threshold) {
+        override fun distance(r: Int, g: Int, b: Int): Double = abs(r - colorR).toDouble()
     }
 
     class RGBDistanceDetector(color: Int, threshold: Int) : ThresholdColorDetector(color, threshold) {
