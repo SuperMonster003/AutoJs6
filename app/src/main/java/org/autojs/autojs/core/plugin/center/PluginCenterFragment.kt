@@ -244,6 +244,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
 
             override fun onSettings(item: PluginCenterItem) {
+                retainActionPosition(item)
+                resumeRefreshPolicy.onPluginSettingsOpened()
                 if (item.packageName == ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME) {
                     org.autojs.autojs.ui.settings.ThreeStoveAgentLauncher.launch(contextRef)
                     return
@@ -1011,8 +1013,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
             // Sync with latest persisted state (e.g., changed while fragment was stopped).
             // zh-CN: 同步最新的持久化状态 (如在 Fragment 停止期间被修改).
-            // Returning from the installer must keep action positions when preferences are unchanged.
-            // zh-CN: 从安装器返回且偏好未变化时, 应继续保留操作位置.
+            // Returning from an installer or plugin settings must keep action positions when list preferences are unchanged.
+            // zh-CN: 从安装器或插件设置返回且列表偏好未变化时, 应继续保留操作位置.
             currentSort = loadPersistedSort(contextRef)
             val filterState = loadFilterState(contextRef)
             if (filterState != currentFilterState) actionPositionPolicy.clear()

@@ -10,7 +10,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.center.PluginCenterFragment.Sort
+import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
 import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -60,6 +62,66 @@ class PluginCenterActionPositionDeviceTest {
         fixture.awaitOrder("first", "second", "third")
         fixture.awaitItems { rows -> rows.firstOrNull()?.description == "fresh after return" }
         fixture.onMain { assertEquals("fresh after return", it.adapter.items().first().description) }
+    }
+
+    @Test
+    fun returningFromPluginSettingsRetainsPositionAndRefreshesChangedState() = withCenter { fixture ->
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(PluginSettingsActivity::class.java.name, null, false)
+        val updateCheckKey = "key_\$_plugin_update_check_\$_${PACKAGE_PREFIX}first"
+        val savedUpdateCheck = Pref.get().all[updateCheckKey] as? Boolean
+        var settings: PluginSettingsActivity? = null
+        try {
+            var generation = 0L
+            var snapshot = emptyList<PluginCenterItem>()
+            fixture.onMain {
+                generation = it.generation()
+                snapshot = it.current()
+                it.openFirstSettings()
+            }
+            val opened = instrumentation.waitForMonitorWithTimeout(monitor, 10_000) as? PluginSettingsActivity
+                ?: throw AssertionError("Plugin settings did not open")
+            settings = opened
+            instrumentation.waitForIdleSync()
+            instrumentation.runOnMainSync {
+                assertEquals("${PACKAGE_PREFIX}first", opened.intent.getStringExtra(PluginSettingsActivity.EXTRA_PACKAGE_NAME))
+                opened.supportFragmentManager.executePendingTransactions()
+                val settingsFragment = opened.supportFragmentManager.findFragmentById(R.id.fragment_plugin_settings) as PluginSettingsFragment
+                val autoCheck = requireNotNull(settingsFragment.findPreference<ThemeColorSwitchPreference>("plugin_auto_check_updates"))
+                assertTrue(autoCheck.callChangeListener(false))
+                assertFalse(PluginUpdateCheckStore.isEnabled("${PACKAGE_PREFIX}first"))
+                opened.finish()
+            }
+            instrumentation.waitForIdleSync()
+            val refreshDeadline = SystemClock.uptimeMillis() + 5_000L
+            var refreshed = false
+            do {
+                fixture.onMain { refreshed = it.generation() > generation }
+                if (!refreshed) SystemClock.sleep(50L)
+            } while (!refreshed && SystemClock.uptimeMillis() < refreshDeadline)
+            assertTrue("Returning from settings must still trigger discovery", refreshed)
+            fixture.onMain {
+                it.stopDiscovery()
+                // A fresh discovery may also change enablement or metadata after settings were edited.
+                // zh-CN: 修改设置后的重新发现也可能更新启用状态或元数据.
+                it.publish(snapshot.map { row ->
+                    if (row.title == "first") row.copy(isEnabled = false, description = "refreshed after settings") else row
+                })
+            }
+            fixture.awaitItems { rows -> rows.firstOrNull()?.description == "refreshed after settings" }
+            fixture.awaitOrder("first", "second", "third")
+            fixture.onMain {
+                assertFalse(it.adapter.items().first().isEnabled)
+                it.fragment.setSort(Sort.STATUS)
+            }
+            fixture.awaitOrder("second", "third", "first")
+        } finally {
+            instrumentation.runOnMainSync { settings?.takeUnless { it.isFinishing || it.isDestroyed }?.finish() }
+            instrumentation.removeMonitor(monitor)
+            Pref.get().edit().apply {
+                if (savedUpdateCheck == null) remove(updateCheckKey) else putBoolean(updateCheckKey, savedUpdateCheck)
+            }.commit()
+        }
     }
 
     @Test
@@ -152,6 +214,11 @@ class PluginCenterActionPositionDeviceTest {
         fun disableFirst() {
             val listener = field(adapter, "listener") as PluginCenterItemAdapter.Listener
             listener.onToggleEnable(adapter.items().first { it.title == "first" }, false)
+        }
+
+        fun openFirstSettings() {
+            val listener = field(adapter, "listener") as PluginCenterItemAdapter.Listener
+            listener.onSettings(adapter.items().first { it.title == "first" })
         }
 
         fun awaitOrder(vararg expected: String) {

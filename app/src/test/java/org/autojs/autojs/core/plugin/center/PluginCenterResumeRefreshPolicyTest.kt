@@ -31,4 +31,25 @@ class PluginCenterResumeRefreshPolicyTest {
         assertTrue(policy.consumeRefreshOnResume(nightModeChanged = true))
         assertFalse(policy.consumeRefreshOnResume(nightModeChanged = false))
     }
+
+    @Test
+    fun returningFromPluginSettingsRequestsOneRefreshEvenWithoutStop() {
+        val policy = PluginCenterResumeRefreshPolicy()
+
+        policy.onPluginSettingsOpened()
+
+        assertTrue(policy.consumeRefreshOnResume(nightModeChanged = false))
+        assertFalse(policy.consumeRefreshOnResume(nightModeChanged = false))
+    }
+
+    @Test
+    fun settingsAndLifecycleRefreshRequestsAreConsumedTogether() {
+        val policy = PluginCenterResumeRefreshPolicy()
+
+        policy.onPluginSettingsOpened()
+        policy.onStopped()
+
+        assertTrue(policy.consumeRefreshOnResume(nightModeChanged = true))
+        assertFalse(policy.consumeRefreshOnResume(nightModeChanged = false))
+    }
 }
