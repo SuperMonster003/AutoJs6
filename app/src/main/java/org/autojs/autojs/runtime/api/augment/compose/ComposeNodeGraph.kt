@@ -214,7 +214,7 @@ class ComposeNodeGraph(
             // The reconciled root is a root even if constructing a draft temporarily reparented it.
             detach(result)
             mutation!!.discarded += drafts - collect(result)
-            if (missingKeys && !warned) warn("Compose UI render: list children have no key")
+            if (missingKeys && !warned) warn("3-Block Compose render: list children have no key")
             if (warned || missingKeys) {
                 if (owner != null) warnedBindings += owner else warnedRoots += result
             }

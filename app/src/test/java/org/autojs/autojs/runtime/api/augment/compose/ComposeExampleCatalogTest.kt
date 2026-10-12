@@ -26,14 +26,14 @@ class ComposeExampleCatalogTest {
     @Test fun theExistingSampleCatalogFindsEveryIndexedExampleWithoutAStaticCategoryRegistry() {
         assertEquals(1, manifest["schemaVersion"].asInt)
         assertEquals(ComposeUiIds.PLUGIN_PACKAGE_NAME, manifest["pluginPackage"].asString)
-        assertEquals("sample/Compose UI", manifest["hostSamplePath"].asString)
-        assertEquals("Compose UI", manifest["category"].asString)
+        assertEquals("sample/3-Block Compose", manifest["hostSamplePath"].asString)
+        assertEquals("3-Block Compose", manifest["category"].asString)
         assertEquals(5, entries.size)
         val files = entries.map { it["file"].asString }
         assertEquals(files.size, files.toSet().size)
         assertEquals(entries.size, entries.map { it["id"].asString }.toSet().size)
-        assertTrue(catalog.list().entries.any { it.name == "Compose UI" && it.isDirectory })
-        val samples = catalog.list("Compose UI").entries
+        assertTrue(catalog.list().entries.any { it.name == "3-Block Compose" && it.isDirectory })
+        val samples = catalog.list("3-Block Compose").entries
         assertEquals(files.sorted(), samples.map { it.name })
         assertTrue(samples.none { it.isDirectory })
         assertTrue("Keep the catalog manifest out of the executable sample directory", samples.all { it.name.endsWith(".js") })
@@ -44,14 +44,14 @@ class ComposeExampleCatalogTest {
         entries.forEach { entry ->
             val file = entry["file"].asString
             assertTrue("$file must be a simple relative JS name", Regex("[a-z][a-z0-9-]*\\.js").matches(file))
-            val sample = catalog.read("Compose UI/$file")
+            val sample = catalog.read("3-Block Compose/$file")
             assertFalse("The browser must read the entire runnable example", sample.truncated)
             Parser(CompilerEnvirons().apply { languageVersion = Context.VERSION_ES6 }).parse(sample.content, file, 1)
             val mode = entry["mode"].asString
             assertTrue(mode in setOf("ui", "normal"))
             assertEquals("$file mode and leading directive", mode == "ui", uiDirective.containsMatchIn(sample.content))
             assertEquals("Only the normal floating HUD needs overlay permission", mode == "normal", entry["requiresOverlay"].asBoolean)
-            assertTrue("$file states its plugin prerequisite", sample.content.contains("Compose UI 1.0.0 installed and enabled"))
+            assertTrue("$file states its plugin prerequisite", sample.content.contains("3-Block Compose 1.2.0 installed and enabled"))
             assertTrue("$file states its host prerequisite", sample.content.contains("versionCode >= ${manifest["minHostVersionCode"].asInt}"))
         }
     }

@@ -2,7 +2,7 @@
 
 /*
  * Requires a matching AutoJs6 6.8.0 local build (versionCode >= 5316) and
- * Compose UI 1.0.0 installed and enabled in the plugin center.
+ * 3-Block Compose 1.2.0 installed and enabled in the plugin center.
  * Run as a UI script. No accessibility or overlay permission is required.
  * Dynamic wallpaper colors are available on Android 12+; older versions use
  * the seed palette. Turn dynamic color off to compare the three seed colors.

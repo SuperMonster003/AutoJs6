@@ -54,7 +54,7 @@ class ComposeSession(
         else org.autojs.plugin.compose.api.v2.ComposeUiV2.catalog
     } else if (AndroidViewInteropV1.COMPONENT in components) AndroidViewInteropV1.catalog
         else org.autojs.plugin.compose.api.catalog.ComponentCatalog.V1
-    private val reconciler = TreeReconciler(catalog) { warn("Compose UI session $sessionId: list children have no key") }
+    private val reconciler = TreeReconciler(catalog) { warn("3-Block Compose session $sessionId: list children have no key") }
     private val eventLock = Any()
     private val events = ArrayDeque<UiEvent>()
     private val droppedCommands = CommandResultEvictions()
@@ -291,7 +291,7 @@ class ComposeSession(
             droppedCommands.drain(callbacks)
             (events.toList() to overflowWarning).also { events.clear(); overflowWarning = false }
         }
-        if (overflow) warn("Compose UI session $sessionId: event queue overflow")
+        if (overflow) warn("3-Block Compose session $sessionId: event queue overflow")
         for (event in batch) {
             if (closing.get()) return
             if (event.callbackId == ComposeUiContract.SYSTEM_CALLBACK_ID && event.type == ComposeUiEvents.ERROR) {
@@ -352,7 +352,7 @@ class ComposeSession(
             val overflow = failureOverflow.also { failureOverflow = false }
             nativeFailures.toList().also { nativeFailures.clear() } to overflow
         }
-        if (failures.second) warn("Compose UI session $sessionId: native error queue overflow")
+        if (failures.second) warn("3-Block Compose session $sessionId: native error queue overflow")
         failures.first.forEach(::report)
         drainEvents()
         flush()
@@ -404,7 +404,7 @@ class ComposeSession(
         try { onClosed() } finally { script.close() }
     }
 
-    private fun confined() { check(script.isDispatchThread()) { "Compose UI mutations require the script dispatcher" } }
+    private fun confined() { check(script.isDispatchThread()) { "3-Block Compose mutations require the script dispatcher" } }
     private fun usable() {
         confined()
         if (closing.get()) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED)

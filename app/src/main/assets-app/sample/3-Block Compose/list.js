@@ -2,7 +2,7 @@
 
 /*
  * Requires a matching AutoJs6 6.8.0 local build (versionCode >= 5316) and
- * Compose UI 1.0.0 installed and enabled in the plugin center.
+ * 3-Block Compose 1.2.0 installed and enabled in the plugin center.
  * Run as a UI script. No accessibility or overlay permission is required.
  * Stable keys identify all 1000 items across reordering. Only visible items
  * are composed. A ref exposes the current list handle after a frame is accepted.

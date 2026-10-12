@@ -13,7 +13,7 @@ class PluginCenterComposeUiRegistrationTest {
 
     @Test fun officialPackageIsAnOptionalUiPlugin() {
         val entry = requireNotNull(PluginInstallWizardCatalog.find(ComposeUiIds.PLUGIN_PACKAGE_NAME))
-        assertEquals("Compose UI", entry.fallbackTitle)
+        assertEquals("Three Block Compose", entry.fallbackTitle)
         assertEquals(PluginInstallWizardCategory.UI, entry.category)
         assertFalse(entry.inStandard)
         assertFalse(entry.inMinimal)

@@ -16,7 +16,7 @@ def record(metric="state_update", value=10_000_000):
         "schemaVersion": 1, "suite": "compose-ui-p5.3", "metric": metric,
         "sample": 0, "runId": "test", "pid": 100, "api": 24, "device": "fixture",
         "host": {"package": "org.autojs.autojs6.compose.spike", "versionCode": 5318},
-        "plugin": {"package": "io.github.supermonster003.autojs6.plugin.compose.ui", "versionCode": 18},
+        "plugin": {"package": "io.github.supermonster003.autojs6.plugin.three.block.compose", "versionCode": 18},
         "fields": {"surface": "ui", "toSemanticsNs": value, "toPixelConfirmedNs": value + 50_000_000,
                    "semanticsQueryNs": 2_000_000, "twoDisplayCallbacksNs": 30_000_000,
                    "screenshotNs": 20_000_000, "pixelConfirmed": True, "renderCount": 1},

@@ -390,12 +390,12 @@ class ComposeRobustnessDeviceTest {
         fun overlayViews(): List<View> { var result = emptyList<View>(); instrumentation.runOnMainSync { result = ownedWindows().mapNotNull { it.windowView } }; return result }
         fun reportOrNull(): JSONObject? = engine.runtime.getProperty("compose.robustness.report")?.toString()?.let(::JSONObject)
         fun report() = requireNotNull(reportOrNull()) { "Script did not report a result" }
-        fun expectedErrors() = logs.filter { it.lineSequence().firstOrNull() == "Compose UI: $expectedError" }
+        fun expectedErrors() = logs.filter { it.lineSequence().firstOrNull() == "3-Block Compose: $expectedError" }
         fun assertHealthy() {
             failure.get()?.let { throw AssertionError("Owned robustness script failed", it) }
             if (stopping.get()) return
-            val errors = logs.filter { it.startsWith("Compose UI: ") }
-            errors.firstOrNull { expectedError == null || it.lineSequence().firstOrNull() != "Compose UI: $expectedError" }?.let { throw AssertionError(it) }
+            val errors = logs.filter { it.startsWith("3-Block Compose: ") }
+            errors.firstOrNull { expectedError == null || it.lineSequence().firstOrNull() != "3-Block Compose: $expectedError" }?.let { throw AssertionError(it) }
             if (errors.size > 1) throw AssertionError(errors.joinToString("\n"))
         }
         fun await(message: String, timeout: Long = 20000, condition: () -> Boolean) {

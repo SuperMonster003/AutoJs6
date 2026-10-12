@@ -246,7 +246,7 @@ Host adapter disposal additionally releases Activity, mount closure and lifecycl
 
 ## P1.3 Plugin Center registration
 
-Compose UI is an optional entry in the install wizard's UI category, alongside ImGui. Both are
+3-Block Compose (plugin ID `three-block-compose`) is an optional entry in the install wizard's UI category, alongside ImGui. Both are
 INFO-only plugins: neither is assigned a Binder capability service action. Compose additionally
 uses the application-level renderer factory metadata and the in-process V1 loading API; ImGui's
 renderer registration mechanism is not reused. Generic INFO package visibility already covers
@@ -505,7 +505,7 @@ The plugin packages five indexed scripts in `assets/examples/`: counter (state/r
 (retained handles, native input, Switch/Slider and validation), list (1000 stable keys and scrollTo),
 floaty-hud (non-UI worker updates and owned cleanup), and theme (seed/dark/dynamic colors).
 `.python/sync_examples.py --host <checkout> [--check]` maintains byte-identical host copies in
-`app/src/main/assets-app/sample/Compose UI/` and the manifest in `assets-app/indices/`.
+`app/src/main/assets-app/sample/3-Block Compose/` and the manifest in `assets-app/indices/`.
 The existing host browser discovers the category dynamically; it needs no separate category registry.
 Host device tests execute those actual packaged assets and check their equality with the installed
 plugin, including against a minified release plugin.

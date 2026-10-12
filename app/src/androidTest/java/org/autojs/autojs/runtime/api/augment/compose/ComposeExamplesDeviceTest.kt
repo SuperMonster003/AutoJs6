@@ -71,11 +71,11 @@ class ComposeExamplesDeviceTest {
             opener = { path -> runCatching { context.assets.open(path) }.getOrNull() },
         )
         assertEquals("The existing sample catalog discovers the Compose category", expected,
-            catalog.list("Compose UI").entries.map { it.name })
+            catalog.list("3-Block Compose").entries.map { it.name })
         expected.forEach { file ->
             assertArrayEquals("The executed sample matches the installed plugin: $file",
                 plugin.assets.open("examples/$file").use { it.readBytes() },
-                context.assets.open("sample/Compose UI/$file").use { it.readBytes() })
+                context.assets.open("sample/3-Block Compose/$file").use { it.readBytes() })
         }
         previousEnabled = PluginEnableStore.isEnabled(context, ComposeUiIds.PLUGIN_PACKAGE_NAME)
         PluginEnableStore.setEnabled(context, ComposeUiIds.PLUGIN_PACKAGE_NAME, true)
@@ -263,7 +263,7 @@ class ComposeExamplesDeviceTest {
 
         fun assertHealthy() {
             failure.get()?.let { throw AssertionError("Packaged example failed", it) }
-            logs.firstOrNull { it.startsWith("Compose UI: ") }?.let { throw AssertionError(it) }
+            logs.firstOrNull { it.startsWith("3-Block Compose: ") }?.let { throw AssertionError(it) }
         }
         fun await(message: String, diagnostics: (() -> String)? = null, condition: () -> Boolean) {
             val deadline = SystemClock.uptimeMillis() + 25000

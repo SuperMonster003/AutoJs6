@@ -311,7 +311,7 @@ class ComposeScriptUiDeviceTest {
             assertEquals(0, running.report().getInt("sessions"))
             assertEquals(0, (running.engine.runtime.getProperty("compose.p3.afterClose") as Number).toInt())
             assertTrue("Content replacement warns through the script console", running.logs.any {
-                it.contains("Compose UI session closed") && it.contains("ui content was replaced")
+                it.contains("3-Block Compose session closed") && it.contains("ui content was replaced")
             })
             assertNull(node("replace"))
         }
@@ -401,11 +401,11 @@ class ComposeScriptUiDeviceTest {
 
         fun reportOrNull(): JSONObject? = engine.runtime.getProperty("compose.p3.report")?.toString()?.let(::JSONObject)
         fun report(): JSONObject = requireNotNull(reportOrNull()) { "Script did not report a result" }
-        fun renderFailures(): List<String> = logs.filter { it.lineSequence().firstOrNull() == "Compose UI: RENDER_FAILED" }
+        fun renderFailures(): List<String> = logs.filter { it.lineSequence().firstOrNull() == "3-Block Compose: RENDER_FAILED" }
         fun assertHealthy() {
             failure.get()?.let { throw AssertionError("Owned UI script failed", it) }
-            val composeErrors = logs.filter { it.startsWith("Compose UI: ") }
-            composeErrors.firstOrNull { it.lineSequence().firstOrNull() != "Compose UI: RENDER_FAILED" }?.let { throw AssertionError(it) }
+            val composeErrors = logs.filter { it.startsWith("3-Block Compose: ") }
+            composeErrors.firstOrNull { it.lineSequence().firstOrNull() != "3-Block Compose: RENDER_FAILED" }?.let { throw AssertionError(it) }
             if (composeErrors.size > expectedRenderFailures) throw AssertionError(composeErrors.joinToString("\n"))
         }
         fun await(message: String, timeout: Long = 20000, condition: () -> Boolean) {

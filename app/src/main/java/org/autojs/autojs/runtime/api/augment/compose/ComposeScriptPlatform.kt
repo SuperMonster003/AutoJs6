@@ -267,7 +267,7 @@ internal class AndroidComposeScriptPlatform(private val runtime: ScriptRuntime) 
         val code = (error as? ComposeUiError)?.code ?: (error as? ComposeUiContractException)?.code ?: scriptCode ?: ComposeUiErrorCodes.RENDER_FAILED
         val scriptFailure = generateSequence(error) { it.cause }.filterIsInstance<org.mozilla.javascript.RhinoException>().firstOrNull()
         val stack = scriptFailure?.scriptStackTrace?.takeIf { it.isNotBlank() }
-        runtime.console.error("Compose UI: $code" + (stack?.let { "\n$it" } ?: ""))
+        runtime.console.error("3-Block Compose: $code" + (stack?.let { "\n$it" } ?: ""))
     }
     override fun close() {
         if (!closed.compareAndSet(false, true)) return

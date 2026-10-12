@@ -1,6 +1,6 @@
 /*
  * Requires a matching AutoJs6 6.8.0 local build (versionCode >= 5316) and
- * Compose UI 1.0.0 installed and enabled in the plugin center.
+ * 3-Block Compose 1.2.0 installed and enabled in the plugin center.
  * Run as a normal script, without the 'ui' directive. Grant AutoJs6 permission
  * to display over other apps before running. On HyperOS, return to the desktop.
  * Window position and size use physical pixels; component dimensions use dp.

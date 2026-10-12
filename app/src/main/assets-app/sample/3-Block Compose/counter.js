@@ -2,7 +2,7 @@
 
 /*
  * Requires a matching AutoJs6 6.8.0 local build (versionCode >= 5316) and
- * Compose UI 1.0.0 installed and enabled in the plugin center.
+ * 3-Block Compose 1.2.0 installed and enabled in the plugin center.
  * Run as a UI script. No accessibility or overlay permission is required.
  * Change state in an event callback; the render function updates the page.
  */

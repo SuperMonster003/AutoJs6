@@ -68,7 +68,7 @@ object PluginInstallWizardCatalog {
         entry(official("ace.editor"), "Ace Editor", EDITOR, minimal = true),
 
         // UI.
-        entry(official("compose.ui"), "Compose UI", UI),
+        entry(official("three.block.compose"), "Three Block Compose", UI),
         entry(official("imgui"), "ImGui", UI),
 
         // APK builder.

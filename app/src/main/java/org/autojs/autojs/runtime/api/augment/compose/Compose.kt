@@ -252,7 +252,7 @@ class Compose internal constructor(
     /** Called by the existing ui.setContentView path, including ui.layout and layoutFile. */
     fun beforeSetContentView(view: Any) {
         live.filter { it.isUiRoot && it.mountedView != null && it.mountedView !== view }.toList().forEach {
-            platform.warn("Compose UI session closed because ui content was replaced")
+            platform.warn("3-Block Compose session closed because ui content was replaced")
             it.close()
         }
     }

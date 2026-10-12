@@ -4,9 +4,9 @@ import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginCapabilityKeys
 
 object ComposeUiIds {
-    const val PLUGIN_PACKAGE_NAME = "io.github.supermonster003.autojs6.plugin.compose.ui"
+    const val PLUGIN_PACKAGE_NAME = "io.github.supermonster003.autojs6.plugin.three.block.compose"
     const val HOST_PACKAGE_NAME = "org.autojs.autojs6"
-    const val PLUGIN_ID = "compose-ui"
+    const val PLUGIN_ID = "three-block-compose"
     const val ENGINE = "compose"
     const val VARIANT = "default"
     /** First host build containing the V1 loader, session core and Plugin Center registration. */

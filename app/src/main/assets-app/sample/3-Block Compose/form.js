@@ -2,7 +2,7 @@
 
 /*
  * Requires a matching AutoJs6 6.8.0 local build (versionCode >= 5316) and
- * Compose UI 1.0.0 installed and enabled in the plugin center.
+ * 3-Block Compose 1.2.0 installed and enabled in the plugin center.
  * Run as a UI script with a system keyboard. No overlay permission is required.
  * This example keeps node handles and updates them without a render function.
  */

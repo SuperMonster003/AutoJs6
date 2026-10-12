@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "category": "Compose UI",
-  "hostSamplePath": "sample/Compose UI",
-  "pluginPackage": "io.github.supermonster003.autojs6.plugin.compose.ui",
+  "category": "3-Block Compose",
+  "hostSamplePath": "sample/3-Block Compose",
+  "pluginPackage": "io.github.supermonster003.autojs6.plugin.three.block.compose",
   "minHostVersionCode": 5316,
   "examples": [
     {

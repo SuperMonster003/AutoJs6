@@ -55,7 +55,7 @@ class ComposeJsErrorsTest {
         assertEquals("Text does not support missing", property(value, "message"))
         assertFalse(property(value, "retryable") as Boolean)
 
-        val message = "请先在插件中心授权 Compose UI"
+        val message = "请先在插件中心授权 3-Block Compose"
         val unavailable = converted(ComposeUiError(Codes.PLUGIN_UNAUTHORIZED, message))
         assertEquals(message, property(unavailable, "message"))
         assertTrue(property(unavailable, "retryable") as Boolean)
@@ -132,7 +132,7 @@ class ComposeJsErrorsTest {
         assertEquals(Codes.UNKNOWN_PROP, property(localized, "code"))
         assertEquals("Text.missing: Unknown property", failure.message)
 
-        val prefix = "请先在插件中心授权 Compose UI"
+        val prefix = "请先在插件中心授权 3-Block Compose"
         assertEquals(prefix, property(converted(ComposeUiError(Codes.PLUGIN_UNAUTHORIZED, prefix)), "message"))
         val otherScope = TopLevelScope().apply { initStandardObjects(context, false) }
         val independent = (ComposeJsErrors.exception(otherScope, failure) as JavaScriptException).value as Scriptable

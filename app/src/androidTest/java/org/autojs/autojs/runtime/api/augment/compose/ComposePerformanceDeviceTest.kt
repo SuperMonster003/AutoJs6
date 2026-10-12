@@ -347,7 +347,7 @@ class ComposePerformanceDeviceTest {
         }
         fun healthy() {
             failure.get()?.let { throw AssertionError("Benchmark script failed", it) }
-            logs.firstOrNull { it.startsWith("Compose UI: ") }?.let { throw AssertionError(it) }
+            logs.firstOrNull { it.startsWith("3-Block Compose: ") }?.let { throw AssertionError(it) }
         }
         fun await(message: String, condition: () -> Boolean) {
             val deadline = SystemClock.uptimeMillis() + 45000

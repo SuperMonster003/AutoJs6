@@ -293,7 +293,7 @@ class ComposeInteropDeviceTest {
         }
         fun property(name:String)=engine.runtime.getProperty("f2.$name")?.toString()
         fun command(name:String){engine.runtime.putProperty("f2.command",name)}
-        private fun healthy(){failure.get()?.let{throw AssertionError("Interop script failed; logs=${logs.joinToString(" | ")}",it)};logs.firstOrNull{it.startsWith("Compose UI: ")}?.let{throw AssertionError(it)}}
+        private fun healthy(){failure.get()?.let{throw AssertionError("Interop script failed; logs=${logs.joinToString(" | ")}",it)};logs.firstOrNull{it.startsWith("3-Block Compose: ")}?.let{throw AssertionError(it)}}
         fun await(message:String,condition:()->Boolean){val end=SystemClock.uptimeMillis()+25000;do{healthy();if(condition())return;SystemClock.sleep(50)}while(SystemClock.uptimeMillis()<end);healthy();fail("$message; logs=${logs.joinToString(" | ")}; ${diagnostics()}")}
         private fun diagnostics(): String {
             val native = ArrayList<String>()

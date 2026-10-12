@@ -361,7 +361,7 @@ def collect(args) -> Path:
         raise ValueError(f"Refusing to overwrite an existing run: {record_path}")
     if adb(args, "get-state").strip() != "device":
         raise RuntimeError("The explicitly selected device is not ready")
-    for name in (args.host_package, args.host_package + ".test", "io.github.supermonster003.autojs6.plugin.compose.ui"):
+    for name in (args.host_package, args.host_package + ".test", "io.github.supermonster003.autojs6.plugin.three.block.compose"):
         if not adb(args, "shell", "pm", "path", name).strip().startswith("package:"):
             raise RuntimeError(f"Required package is not installed: {name}")
     metadata = {"serial": args.serial, "runId": run_id, "hostPackage": args.host_package,

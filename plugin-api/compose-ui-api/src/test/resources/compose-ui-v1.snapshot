@@ -1,12 +1,12 @@
 ComposeUiIds.ENGINE=compose
 ComposeUiIds.HOST_PACKAGE_NAME=org.autojs.autojs6
-ComposeUiIds.PLUGIN_ID=compose-ui
-ComposeUiIds.PLUGIN_PACKAGE_NAME=io.github.supermonster003.autojs6.plugin.compose.ui
+ComposeUiIds.PLUGIN_ID=three-block-compose
+ComposeUiIds.PLUGIN_PACKAGE_NAME=io.github.supermonster003.autojs6.plugin.three.block.compose
 ComposeUiIds.REQUIRED_HOST_VERSION_CODE=5316
 ComposeUiIds.VARIANT=default
 ComposeUiContract.CONTRACT_VERSION=1
 ComposeUiContract.INFO_ACTION=org.autojs.plugin.INFO
-ComposeUiContract.INFO_CATEGORY=compose-ui
+ComposeUiContract.INFO_CATEGORY=three-block-compose
 ComposeUiContract.META_RENDERER_FACTORY=org.autojs.plugin.compose.RENDERER_FACTORY
 ComposeUiContract.META_REQUIRES_HOST_VERSION=requiresHostVersion
 ComposeUiContract.MIN_SUPPORTED=1

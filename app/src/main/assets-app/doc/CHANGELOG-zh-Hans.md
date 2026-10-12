@@ -35,7 +35,7 @@
 * `新增` ai.agent 脚本 API, 用于启动, 查询, 回应, 确认及取消 Three Stove Agent 任务, 支持 detached 后台任务 (需要 Three Stove Agent 插件) (参阅 示例代码 > agent)
 * `新增` ai.agent.run/create 方法支持 plan 选项参数, 用于让 Three Stove Agent 以计划模式先提出步骤计划再执行
 * `新增` 脚本可通过 project.json 或 @agent 头注释登记为 Three Stove Agent 可调用的脚本, 支持参数校验, 超时停止及结构化结果回传
-* `新增` compose 模块, 用于以 Jetpack Compose 构建界面, 提供节点工厂, 长期节点句柄, 响应式 state/render/ref 及主题控制 (需要 Compose UI 插件) (参阅 示例代码 > Compose UI)
+* `新增` compose 模块, 用于以 Jetpack Compose 构建界面, 提供节点工厂, 长期节点句柄, 响应式 state/render/ref 及主题控制 (需要 3-Block Compose 插件) (参阅 示例代码 > 3-Block Compose)
 * `新增` compose.mount/floaty 方法, 用于挂载 UI 页面或创建悬浮窗 (悬浮窗同时支持 UI 与非 UI 脚本), 脚本停止时自动清理所属会话
 * `新增` compose.dialog 方法, 用于创建可更新和关闭的对话框及模态底部弹层会话, 可在 UI 或普通脚本中使用
 * `新增` XML <compose> 容器及 compose.attach 方法, 用于在 UI 页面或悬浮窗内嵌入 Compose 会话; compose.AndroidView 可承载现有 Android View
@@ -293,8 +293,8 @@
 * `优化` 恢复 console.rawInput/input 方法, 支持通过控制台输入栏读取文本或求值表达式
 * `优化` 各控制台分别记忆时间显示及格式, 同名脚本重新运行时替换原有浮动窗口
 * `优化` media.playMusic 方法支持前台播放, 音频焦点及通知栏控制, 并在脚本结束时清理播放资源
-* `优化` 以 com.stardust 前缀引用部分兼容类时直接使用 AutoJs6 同名实现, 使 new 与 instanceof 等按类名的用法与 runtime 对象一致
-* `优化` 示例代码增加 Compose UI, 自动化流程, 控制台交互及电子书操作示例, 并完善屏幕 OCR 示例
+* `优化` 移除内置的 com.stardust 兼容类副本, 脚本以 com.stardust 前缀引用的类名改为映射到 AutoJs6 的同名实现 (218 个类完整映射, 90 个类部分映射, 其余 46 个无对应物的类不再提供), 使 new 与 instanceof 等按类名的用法与 runtime 对象一致 (参阅 项目文档 > [AutoJs4 运行时](https://docs.autojs6.com/#/autojs4Runtime))
+* `优化` 示例代码增加 3-Block Compose, 自动化流程, 控制台交互及电子书操作示例, 并完善屏幕 OCR 示例
 * `优化` 控制台浮动窗口增加统一操作菜单, 支持调整大小及配置时间, 着色, 字号与透明度
 * `优化` 代码编辑器统一主题配色及菜单布局, 并完善字体, 只读模式与文本选择体验
 * `优化` 代码编辑器运行脚本后将运行按钮切换为停止按钮

@@ -535,7 +535,7 @@ class ComposeFloatyScriptDeviceTest {
         }
         fun assertHealthy() {
             failure.get()?.let { throw AssertionError("Owned non-UI floaty script failed", it) }
-            logs.firstOrNull { it.startsWith("Compose UI: ") }?.let { throw AssertionError(it) }
+            logs.firstOrNull { it.startsWith("3-Block Compose: ") }?.let { throw AssertionError(it) }
         }
         fun await(message: String, timeout: Long = 20000, condition: () -> Boolean) {
             val deadline = SystemClock.uptimeMillis() + timeout
