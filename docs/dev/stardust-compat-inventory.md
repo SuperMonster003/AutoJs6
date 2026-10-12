@@ -1,13 +1,13 @@
 # `com.stardust` 兼容包盘点 (Roadmap P7.1)
 
-日期: 2026-10-12. 对象: 宿主 `app/src/main/java/com/stardust/**` (354 个文件, Java 282, Kotlin 72). 盘点脚本按 import 与同包简单类名引用计算依赖闭包, 结论用于决定 `autojs4-runtime-plugin-roadmap.md` 第 7 阶段 (D18) 的做法. 数字为脚本结果, 同包引用按类名匹配, 可能略高估 "受污染" 集合, 不会低估.
+日期: 2026-10-12. 对象: 宿主 `app/src/main/java/com/stardust/**` (354 个文件, Java 282, Kotlin 72; P7.2 实施后分布在 `compat/stardust/src/main/java` 与 `app/src/main/java` 两处, 见第 8 节). 盘点脚本按 import 与同包简单类名引用计算依赖闭包, 结论用于决定 `autojs4-runtime-plugin-roadmap.md` 第 7 阶段 (D18) 的做法. 数字为脚本结果, 同包引用按类名匹配, 可能略高估 "受污染" 集合, 不会低估.
 
 ## 1. 结论
 
 - 宿主代码 (`org.autojs.**`) 没有任何 `import com.stardust.*`, 仅 3 处注释提到来源. 兼容包是只被脚本 (Rhino LiveConnect) 使用的叶子.
 - 兼容包反向依赖宿主: 25 个文件直接 `import org.autojs.*` (下称 "桥接文件"), 另有 99 个文件直接或间接引用桥接文件 (下称 "受污染文件"). 这 124 个文件不能移出 `:app`, 否则形成 `:app` 与新模块的循环依赖.
 - 其余 230 个文件只依赖 Android / AndroidX / Rhino / OpenCV / 第三方库以及彼此, 可以整体迁入独立库模块 (方案 1 的可行范围).
-- 因此 "独立 Gradle 库模块" 的准确形态是: `:compat:stardust` 承载 230 个独立文件; 124 个桥接与受污染文件留在 `:app` 的 `com.stardust` 包内 (包名不变), 它们编译时依赖新模块. 两部分都不改类名与包名, 脚本可见行为不变.
+- 因此 "独立 Gradle 库模块" 的准确形态是: `:compat:stardust` 承载独立文件; 桥接与受污染文件留在 `:app` 的 `com.stardust` 包内 (包名不变), 它们编译时依赖新模块. 两部分都不改类名与包名, 脚本可见行为不变. (本节 25 / 99 / 230 是 P7.1 的静态估计; P7.2 以编译结果校正为 30 / 145 / 179, 见第 8 节.)
 
 ## 2. 桥接文件 (25) 及其宿主依赖
 
@@ -61,10 +61,18 @@
 
 方案 2 只对 "宿主存在 1:1 对应类且签名兼容" 的类有意义. 第 3 节的 99 个受污染文件多数在宿主有同名对应 (`org.autojs.autojs.engine.*`, `execution.*`, `runtime.api.*`), 但构造器与方法签名随 AutoJs6 演进已不同, 别名映射会把脚本的旧调用导向签名不同的新类, 需要逐类对照. 建议在 P7.2 完成后, 从脚本实际调用过的名称 (issue #290 及后续反馈) 出发小范围试点, 不整体替换.
 
-## 7. 复现盘点
+## 7. 复现盘点 (P7.1 的一次性脚本)
 
 ```powershell
 py E:/.cache/user-temp/claude/.../scratchpad/stardust_inventory.py   # 本次使用的一次性脚本
 ```
 
 脚本逻辑: 遍历 `app/src/main/java/com/stardust/**/*.{java,kt}`, 读取 `import`; 桥接 = 含 `import org.autojs.`; 受污染 = 经 `com.stardust.*` import 或同包类名引用可达桥接文件 (迭代至不动点); 其余为独立. 正式实施 P7.2 时把脚本收入 `tools/` 并以编译结果校正.
+
+## 8. P7.2 实施结果 (2026-10-12)
+
+- 模块: `compat/stardust` (`com.android.library`, namespace `com.stardust.compat`, 无资源, `lint.xml` 全部忽略, `consumer-rules.pro` 复制 `app/proguard-rules.pro` 的 `com.stardust` keep 规则), `settings.gradle.kts` 以 `compat` 列表注册 `:compat:stardust`, `:app` 以 `implementation(project(":compat:stardust"))` 依赖. 依赖只声明独立文件实际 import 的库: Rhino (`compileOnly`, 运行时由宿主的精简 jar 提供), `annotation`, `core-ktx`, `appcompat`, `recyclerview`, `material`, `gson`, `okhttp`, `eventbus`.
+- 分类脚本收入 `tools/stardust/split_stardust_compat.py` (报告模式检查两处文件是否放对, `--apply` 用 `git mv` 纠正), 比 P7.1 脚本多识别三类宿主依赖: 代码中的内联 `org.autojs.` 引用 (`typealias BuildConfig = org.autojs.autojs6.BuildConfig` 两处, `TokenStream extends org.autojs.autojs.rhino.TokenStream`, `Dim`, `OpenCVHelper`), 宿主本地非 `org.autojs` 包 (`ezy.assist.compat`), 以及字符串字面量的排除 (`"org.autojs.autojs4"` 等不算引用).
+- 校正后的分布: 桥接 30, 受污染 145 (两个 `BuildConfig` typealias 把 `com.stardust.automator` 整包与 `view.accessibility` 的 4 个 Kotlin 文件拖回 `app`), 独立 179 (Java 153, Kotlin 26) 迁入 `compat/stardust`; `app/src/main/java/com/stardust` 余 175 个文件. `:compat:stardust:assembleDebug` 独立编译通过 (仅 deprecation 提示), `:app:assembleAppDebug` 通过; `:app:testAppDebugUnitTest` 4262 个用例中仅 `SelectorGlobalsTest.exportedNamesMatchTheSnapshot` 失败 (选择器新增 minDepth / maxDepth / minIndexInParent / maxIndexInParent 全局函数后 `selector-global-functions.txt` 快照未更新, 属维护者选择器工作, 与本次拆分无关).
+- 设备: XQ-DQ72 (Android 13) 上 `stardust_smoke.js` (直接调用 `com.stardust.pio.PFiles`, `util.ScreenMetrics`, `util.ClipboardUtil`, `util.UiHandler`, `autojs.annotation.ScriptInterface`, `util.Func1`, `util.MapBuilder` 等模块侧类, 以及 `autojs.core.util.Shell`, `automator.filter.IdFilter`, `automator.UiGlobalSelector`, `autojs.core.opencv.OpenCVHelper`, `autojs.AutoJs` 等留在 app 的类) 在拆分前 (5350) 与拆分后 (同版本号的本地构建) 的控制台输出逐行一致, 仅用时不同 (0.032 s 与 0.036 s).
+- 后续: 第 5 节步骤 6 的文案已同步 (`accessibility-architecture.md`, `accessibility-automation-roadmap.md`, `android-sdk-37-roadmap.md`, `page-size-16kb-roadmap.md`, `autojs4-runtime-plugin-roadmap.md` D1); `app/lint.xml` 的忽略路径与 `proguard-rules.pro` 保持不变. 方案 2 (别名表) 仍按第 6 节的前提另行评估.

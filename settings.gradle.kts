@@ -94,6 +94,12 @@ private val libs = listOf(
     "r8-compiler-api-0_2_0",
 )
 
+// Frozen com.stardust compatibility package split out of :app (docs/dev/autojs4-runtime-plugin-roadmap.md P7.2).
+// zh-CN: 从 :app 拆出的冻结 com.stardust 兼容包 (P7.2).
+private val compat = listOf(
+    "stardust",
+)
+
 private val pluginApi = listOf(
     "compose-ui-api",
     "common-plugin-api",
@@ -159,6 +165,7 @@ include(
     *modules.map { ":modules:$it" }.toTypedArray(),
     *libs.map { ":libs:$it" }.toTypedArray(),
     *pluginApi.map { ":plugin-api:$it" }.toTypedArray(),
+    *compat.map { ":compat:$it" }.toTypedArray(),
     *plugins.map { ":plugins:$it" }.toTypedArray(),
     *pluginConformanceTestApps.map { ":test-apps:$it" }.toTypedArray(),
     *codegenFixtureApps.map { ":test-apps:$it" }.toTypedArray(),
@@ -170,6 +177,10 @@ modules.forEach {
 
 pluginApi.forEach {
     project(":plugin-api:$it").projectDir = File("plugin-api", it)
+}
+
+compat.forEach {
+    project(":compat:$it").projectDir = File("compat", it)
 }
 
 plugins.forEach {

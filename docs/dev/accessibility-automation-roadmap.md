@@ -40,7 +40,7 @@
 
 - 由 `runtime/api/augment/global/Classes.kt` 暴露给 JS 的 Java 类 (`AccessibilityBridge`, `UiSelector`, `UiObject`, `UiObjectCollection`, `GestureResultCallback`) 的全限定类名不可变更, 因为脚本可能通过 `importClass` / `Packages.*` 引用.
 - `runtime/api/augment/selector/Selector.kt:45-95` 会反射 `UiSelector` 的全部 public 方法并注册为全局函数, 因此 `UiSelector` 新增的任何 public 方法都会自动成为全局函数. 重构期间新增的内部方法必须为 `internal` / `private`, 或改为显式注册表 (见 P2).
-- `app/src/main/java/com/stardust/**` 是 2025-01-15 (`8b0c731d9`) 有意恢复的二进制兼容包, 与本 Roadmap 无关, 全程冻结, 不修改, 不引用, 不删除.
+- `com/stardust/**` (2026-10-12 起分两处: `compat/stardust/src/main/java` 与 `app/src/main/java`, 见 `stardust-compat-inventory.md`) 是 2025-01-15 (`8b0c731d9`) 有意恢复的二进制兼容包, 与本 Roadmap 无关, 全程冻结, 不修改, 不引用, 不删除.
 
 ---
 

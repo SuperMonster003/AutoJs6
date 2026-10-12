@@ -634,6 +634,11 @@ dependencies /* Unclassified */ {
     compileOnly(files(rhinoJar))
     runtimeOnly(files(slimRhinoJar.map { it.archiveFile }))
 
+    // Frozen com.stardust compatibility package, standalone part (docs/dev/autojs4-runtime-plugin-roadmap.md P7.2);
+    // the bridging and tainted files stay in app/src/main/java/com/stardust.
+    // zh-CN: 冻结的 com.stardust 兼容包的独立部分 (P7.2); 桥接与受污染文件仍在 app/src/main/java/com/stardust.
+    implementation(project(":compat:stardust"))
+
     // Tasker Plugin
     implementation(project(":libs:android-spackle-9_0_0"))
     implementation(project(":libs:android-assertion-9_0_0"))
