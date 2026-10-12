@@ -683,6 +683,22 @@ object ScriptLaunchSourceFactory {
                     ?: defaultWorkingDirectory,
             )
         }
+        if (AutoFileSource.isAutoFileName(File(path).name)) {
+            // Auto files are binary input-event recordings replayed by RootAutomatorEngine.
+            // They must never be wrapped as JavaScript sources.
+            // zh-CN: .auto 文件是由 RootAutomatorEngine 回放的二进制输入事件录制, 不能被包装为 JavaScript 源.
+            require(preExecuteScript == null) {
+                "Auto file launch source does not support JavaScript preExecuteScript"
+            }
+            val autoFile = File(path).normalizedFile()
+            PythonLaunchBoundaryPolicy.enforceDefaultOff(autoFile.path)
+            return Launch(
+                source = AutoFileSource(autoFile),
+                workingDirectory = workingDirectory
+                    ?: autoFile.parent
+                    ?: defaultWorkingDirectory,
+            )
+        }
         val fileSource = NodeProjectScriptSourceFactory.create(path)
         PythonLaunchBoundaryPolicy.enforceDefaultOff(fileSource.file.path)
         val source = if (preExecuteScript == null) {
