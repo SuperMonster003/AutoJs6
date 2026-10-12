@@ -716,6 +716,9 @@ dependencies /* Unclassified */ {
     // Plugin API: QuickJS Runtime API
     implementation(project(":plugin-api:quickjs-runtime-api"))
 
+    // Plugin API: AutoJs4 Runtime API
+    implementation(project(":plugin-api:autojs4-runtime-api"))
+
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
 
