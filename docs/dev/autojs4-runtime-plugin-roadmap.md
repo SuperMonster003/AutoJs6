@@ -160,7 +160,8 @@ AutoJs6 文件管理器中的 AutoJs4 可运行脚本 (如 `*.js`, `*.auto`) 将
 
 - 包名: AutoJs4 为 `org.autojs.autojs4`, AutoJs6 为 `org.autojs.autojs6`; 依赖包名的脚本行为必然不同.
 - Rhino 版本差异带来的语法与内置对象差异 (ES6+ 特性在 AutoJs4 不可用).
-- 已在 AutoJs6 中被明确移除或替换的功能 (如 AutoJs4 的打包插件机制, `.auto` 录制回放).
+- 已在 AutoJs6 中被明确移除或替换的功能 (如 AutoJs4 的打包插件机制).
+- `.auto` 文件 (Root 录制回放) 在两者中均由同一个 `root_automator` 可执行文件 (32 位 ARM) 回放, 不属于差异; 64 位专用设备上两者同样无法回放.
 - 系统限制导致的差异 (targetSdk 28 与 37 的存储, 后台与权限模型不同).
 
 ## 附录 C. 参考
