@@ -51,6 +51,12 @@ public class EditorMenu {
         }
         prepareReadOnlyMenu(menu);
         setReadOnlySensitiveMenuItemsVisible(menu, !mEditorView.isReadOnly());
+        MenuItem foldingItem = menu.findItem(R.id.action_code_folding);
+        if (foldingItem != null) {
+            ScriptEditorEngine editor = currentEditor();
+            foldingItem.setVisible(editor.getSupportsCodeFolding());
+            foldingItem.setEnabled(editor.isReady() && !editor.isLoadingText());
+        }
         MenuItem encodingItem = menu.findItem(R.id.action_file_encoding);
         if (encodingItem != null) {
             encodingItem.setEnabled(mEditorView.canChangeFileEncoding());
@@ -331,6 +337,12 @@ public class EditorMenu {
         }
         if (itemId == R.id.action_beautify) {
             return tryDoing(() -> commandDispatcher().beautifyCode());
+        }
+        if (itemId == R.id.action_unfold_all) {
+            return commandDispatcher().unfoldAll();
+        }
+        if (itemId == R.id.action_fold_all) {
+            return commandDispatcher().foldAll();
         }
         return false;
     }

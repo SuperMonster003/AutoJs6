@@ -58,6 +58,10 @@ interface ScriptEditorEngine {
     fun toggleComment()
     fun beautifyCode()
 
+    val supportsCodeFolding: Boolean get() = false
+    fun foldAll() = Unit
+    fun unfoldAll() = Unit
+
     fun undo()
     fun redo()
     fun setRedoUndoEnabled(enabled: Boolean)

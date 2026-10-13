@@ -1162,6 +1162,7 @@
     <string name="text_code_beautify">格式化程式碼</string>
     <string name="text_code_editor">程式碼編輯器</string>
     <string name="text_code_editor_settings">程式碼編輯器設定</string>
+    <string name="text_code_folding">摺疊</string>
     <string name="text_codegen_action_none">無動作</string>
     <string name="text_codegen_alternatives">備選方案</string>
     <string name="text_codegen_collection_error">請選擇可用的目標集合</string>
@@ -1685,6 +1686,7 @@
     <string name="text_first_rotation_at">首次換組: %1$s</string>
     <string name="text_floating_button">浮動按鈕</string>
     <string name="text_floating_run">懸浮執行</string>
+    <string name="text_fold_all">全部摺疊</string>
     <string name="text_folder">資料夾</string>
     <string name="text_folder_colon_value">資料夾: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (跟隨衍生配色)</string>
@@ -2802,6 +2804,7 @@
     <string name="text_undo_auto_fill">復原自動填入</string>
     <string name="text_undo_script_change">復原指令碼修改</string>
     <string name="text_undo_simplified">撤銷</string>
+    <string name="text_unfold_all">全部展開</string>
     <string name="text_uninstall">解除安裝</string>
     <string name="text_unit_days">天</string>
     <string name="text_unit_versions">版本</string>

@@ -1162,6 +1162,7 @@
     <string name="text_code_beautify">Beautify code</string>
     <string name="text_code_editor">Code editor</string>
     <string name="text_code_editor_settings">Code editor settings</string>
+    <string name="text_code_folding">Folding</string>
     <string name="text_codegen_action_none">No action</string>
     <string name="text_codegen_alternatives">Alternative plans</string>
     <string name="text_codegen_collection_error">Select an available collection</string>
@@ -1685,6 +1686,7 @@
     <string name="text_first_rotation_at">First change: %1$s</string>
     <string name="text_floating_button">Floating button</string>
     <string name="text_floating_run">Floating run</string>
+    <string name="text_fold_all">Fold all</string>
     <string name="text_folder">Folder</string>
     <string name="text_folder_colon_value">Folder: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (follows Derived colors)</string>
@@ -2802,6 +2804,7 @@
     <string name="text_undo_auto_fill">Undo auto fill</string>
     <string name="text_undo_script_change">Undo script change</string>
     <string name="text_undo_simplified">Undo</string>
+    <string name="text_unfold_all">Unfold all</string>
     <string name="text_uninstall">Uninstall</string>
     <string name="text_unit_days">Days</string>
     <string name="text_unit_versions">Versions</string>

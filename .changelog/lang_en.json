@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/12",
+      "released_date": "2026/10/13",
       "feature": [
         "Packaged Node.js projects and scripts use the external Node.js Runtime plugin, support independently signed applications, and show installation guidance when the runtime is unavailable",
         "A \"Show launcher icon\" switch in plugin settings, enabled by default, hides and restores the original icon variant for official and third-party plugins (requires Root or authorized Shizuku running as Root)",
@@ -161,6 +161,7 @@
         "Ace editor now enables its bundled local TypeScript smart completion by default, with AutoJs6 API completion, signature help, hover information, and diagnostics; it can be disabled in settings",
         "Ace editor settings support selectively loading the android/libraries/resources/main-app AutoJs6 TypeScript declaration groups; dependencies are loaded automatically, while all optional groups are disabled by default to reduce language-service startup time and memory use",
         "Ace editor supports a shortcut panel/action history/action favorites/mobile text selection/pinch zoom and more",
+        "Ace editor supports unfolding or folding all code blocks (requires an updated Ace Editor plugin) (entry: Edit > Folding > Unfold all/Fold all)",
         "Code editor supports reloading or converting files with a selected encoding, optional BOM, encoding risk indicators, and undo/redo",
         "Code editor information bar below the toolbar shows the file name, the cursor's line and column in real time, and the file encoding; the three items can be tapped to view file details, jump to a line, or change the encoding, respectively",
         "Code editor system status bar, ActionBar, button icons and text, overflow and nested menus, in-editor dialogs, and native-editor cursor, handles, and selection controls dynamically follow the current editor theme; status-bar icons automatically maintain light/dark contrast for a visually unified surface from the top of the screen through the code area",

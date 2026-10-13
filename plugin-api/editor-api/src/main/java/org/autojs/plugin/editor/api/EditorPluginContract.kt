@@ -8,7 +8,7 @@ import org.autojs.plugin.common.api.PluginCapabilityKeys
  */
 object EditorPluginContract {
 
-    const val VERSION = 6
+    const val VERSION = 7
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 

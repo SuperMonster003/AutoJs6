@@ -1165,6 +1165,7 @@
     <string name="text_code_beautify">Beautifier le code</string>
     <string name="text_code_editor">Editeur de code</string>
     <string name="text_code_editor_settings">Paramètres de l\'éditeur de code</string>
+    <string name="text_code_folding">Pliage</string>
     <string name="text_codegen_action_none">Aucune action</string>
     <string name="text_codegen_alternatives">Autres solutions</string>
     <string name="text_codegen_collection_error">Sélectionnez un ensemble disponible</string>
@@ -1688,6 +1689,7 @@
     <string name="text_first_rotation_at">Premier changement : %1$s</string>
     <string name="text_floating_button">Bouton flottant</string>
     <string name="text_floating_run">Exécution flottante</string>
+    <string name="text_fold_all">Tout plier</string>
     <string name="text_folder">Dossier</string>
     <string name="text_folder_colon_value">Dossier: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (suit les couleurs dérivées)</string>
@@ -2803,6 +2805,7 @@
     <string name="text_undo_auto_fill">Annuler le remplissage automatique</string>
     <string name="text_undo_script_change">Annuler la modification du script</string>
     <string name="text_undo_simplified">Révoq</string>
+    <string name="text_unfold_all">Tout déplier</string>
     <string name="text_uninstall">Desinstaller</string>
     <string name="text_unit_days">Jours</string>
     <string name="text_unit_versions">Versions</string>

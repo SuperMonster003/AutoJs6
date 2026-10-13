@@ -41,6 +41,18 @@ class EditorCommandDispatcher(
         currentMutableEditor()?.beautifyCode()
     }
 
+    fun foldAll(): Boolean {
+        val editor = currentFoldingEditor() ?: return false
+        editor.foldAll()
+        return true
+    }
+
+    fun unfoldAll(): Boolean {
+        val editor = currentFoldingEditor() ?: return false
+        editor.unfoldAll()
+        return true
+    }
+
     fun undo() {
         currentMutableEditor()?.undo()
     }
@@ -128,5 +140,9 @@ class EditorCommandDispatcher(
 
     private fun currentMutableEditor(): ScriptEditorEngine? {
         return currentEditor().takeUnless { it.isReadOnly }
+    }
+
+    private fun currentFoldingEditor(): ScriptEditorEngine? {
+        return currentEditor().takeIf { it.supportsCodeFolding && it.isReady && !it.isLoadingText }
     }
 }

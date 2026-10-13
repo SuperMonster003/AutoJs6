@@ -14,6 +14,7 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorDefinitionTargetResolver
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectSnapshotProvider
 import org.autojs.autojs.ui.edit.EditActivity
+import org.autojs.autojs.ui.edit.EditorMenu
 import org.autojs.autojs.ui.edit.EditorView
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
@@ -257,6 +258,92 @@ class AceEditorPluginHostDeviceTest {
                 AceEditorPluginStateMonitor.refresh(
                     AceEditorPluginStateMonitor.Cause.PLUGIN_STATE_CHANGED,
                 )
+            }
+            restoreEnginePreferences(enginePreference, selectionModePreference)
+            document.delete()
+        }
+    }
+
+    @Test
+    fun foldingMenuWorksThroughPluginContractInReadOnlyMode() {
+        assumeTrue("Ace editor plugin is not installed", isPluginInstalled())
+        val enginePreference = captureStringPreference(EditorEnginePreferences.KEY_EDITOR_ENGINE)
+        val selectionModePreference = captureStringPreference(EditorEnginePreferences.KEY_EDITOR_ENGINE_SELECTION_MODE)
+        val originalPluginEnabled = PluginEnableStore.isEnabled(
+            context, EditorPluginContract.DEFAULT_PACKAGE_NAME, defaultEnabled = true,
+        )
+        val sourceText = """
+            function first() {
+                if (true) {
+                    return 1;
+                }
+            }
+            function second() {
+                return 2;
+            }
+        """.trimIndent()
+        val document = File(context.cacheDir, "ace-folding-${SystemClock.uptimeMillis()}.js")
+            .apply { writeText(sourceText) }
+        var activity: EditActivity? = null
+        try {
+            setPluginEnabled(true)
+            runOnMainSync { EditorEnginePreferences.selectByUser(context, EditorEngineType.ACE) }
+            val launchedActivity = launchEditActivity(document).also { activity = it }
+            val editorView = runOnMainSync {
+                checkNotNull(launchedActivity.findViewById<EditorView>(R.id.editor_view))
+            }
+            waitUntil("Ace did not load the folding fixture", 20_000L) {
+                runOnMainSync {
+                    editorView.editor.engineType == EditorEngineType.ACE &&
+                        editorView.editor.isReady && editorView.editor.textSnapshot == sourceText &&
+                        !editorView.editor.isLoadingText
+                }
+            }
+            val webView = runOnMainSync { editorView.editor.inputView as WebView }
+            val foldingStateScript = """
+                JSON.stringify({
+                    mode: window.editor.session.getMode().${'$'}id,
+                    style: window.editor.session.getFoldStyle(),
+                    text: window.editor.getValue(),
+                    folds: window.editor.session.getAllFolds().map(function(f) { return f.range.toString(); }),
+                    widget: window.editor.session.getFoldWidget(0)
+                })
+            """.trimIndent()
+            val menu = runOnMainSync {
+                assertTrue("Update the Ace plugin to contract 7", editorView.editor.supportsCodeFolding)
+                editorView.toggleReadOnlyMode()
+                assertTrue(editorView.isReadOnly())
+                androidx.appcompat.widget.PopupMenu(launchedActivity, editorView).apply {
+                    inflate(R.menu.menu_editor)
+                }.menu.also { EditorMenu(editorView).prepareOptionsMenu(it) }
+            }
+            runOnMainSync {
+                val folding = menu.findItem(R.id.action_code_folding)
+                assertTrue(folding.isVisible && folding.isEnabled)
+                assertEquals(R.id.action_unfold_all, folding.subMenu!!.getItem(0).itemId)
+                assertEquals(R.id.action_fold_all, folding.subMenu!!.getItem(1).itemId)
+                assertTrue(EditorMenu(editorView).onOptionsItemSelected(menu.findItem(R.id.action_fold_all)))
+            }
+            println("Host folding state: " + evaluateJavascript(webView, foldingStateScript))
+            waitUntil("Fold all did not reach the plugin") {
+                evaluateJavascript(webView, "window.editor.session.getAllFolds().length") == "2"
+            }
+            runOnMainSync {
+                assertTrue(EditorMenu(editorView).onOptionsItemSelected(menu.findItem(R.id.action_unfold_all)))
+            }
+            waitUntil("Unfold all did not reach the plugin") {
+                evaluateJavascript(webView, "window.editor.session.getAllFolds().length") == "0"
+            }
+            runOnMainSync {
+                assertEquals(sourceText, editorView.editor.textSnapshot)
+                assertFalse(editorView.editor.isTextChanged)
+                assertFalse(editorView.editor.canUndo)
+            }
+        } finally {
+            activity?.let(::finishHostActivity)
+            runOnMainSync {
+                PluginEnableStore.setEnabled(context, EditorPluginContract.DEFAULT_PACKAGE_NAME, originalPluginEnabled)
+                AceEditorPluginStateMonitor.refresh(AceEditorPluginStateMonitor.Cause.PLUGIN_STATE_CHANGED)
             }
             restoreEnginePreferences(enginePreference, selectionModePreference)
             document.delete()

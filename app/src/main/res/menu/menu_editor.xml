@@ -48,6 +48,23 @@
                 android:id="@+id/action_beautify"
                 android:title="@string/text_code_beautify"
                 app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_code_folding"
+                android:title="@string/text_code_folding"
+                app:showAsAction="never">
+                <menu>
+                    <item
+                        android:id="@+id/action_unfold_all"
+                        android:title="@string/text_unfold_all"
+                        app:showAsAction="never" />
+
+                    <item
+                        android:id="@+id/action_fold_all"
+                        android:title="@string/text_fold_all"
+                        app:showAsAction="never" />
+                </menu>
+            </item>
         </menu>
     </item>
 

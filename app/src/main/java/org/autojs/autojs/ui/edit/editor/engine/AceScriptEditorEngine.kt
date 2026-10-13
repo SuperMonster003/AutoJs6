@@ -466,6 +466,17 @@ class AceScriptEditorEngine private constructor(
 
     override fun beautifyCode() = session.beautifyCode()
 
+    override val supportsCodeFolding: Boolean
+        get() = pluginContractVersion >= CODE_FOLDING_CONTRACT_VERSION
+
+    override fun foldAll() {
+        if (supportsCodeFolding) session.foldAll()
+    }
+
+    override fun unfoldAll() {
+        if (supportsCodeFolding) session.unfoldAll()
+    }
+
     override fun undo() = session.undo()
 
     override fun redo() = session.redo()
@@ -714,6 +725,7 @@ class AceScriptEditorEngine private constructor(
     companion object {
         private const val TEXT_SNAPSHOT_TIMEOUT_MS = 750L
         private const val SMART_HINT_CONTRACT_VERSION = 6
+        private const val CODE_FOLDING_CONTRACT_VERSION = 7
 
         @JvmStatic
         fun create(context: Context): AceScriptEditorEngine {

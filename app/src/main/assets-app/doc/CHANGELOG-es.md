@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/12
+###### 2026/10/13
 
 * `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
 * `Sugerencia` Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente
@@ -171,6 +171,7 @@
 * `Nuevo` El editor Ace activa por defecto como función estable el completado inteligente local de TypeScript integrado, con completado de la API AutoJs6, ayuda de firmas, información al pasar el cursor y diagnósticos; se puede desactivar en los ajustes
 * `Nuevo` Los ajustes del editor Ace permiten cargar de forma selectiva los grupos de declaraciones TypeScript de AutoJs6 android/libraries/resources/main-app; las dependencias se cargan automáticamente y todos los grupos opcionales están desactivados de forma predeterminada para reducir el tiempo de inicio del servicio de lenguaje y el uso de memoria
 * `Nuevo` El editor Ace admite un panel de accesos directos/historial de acciones/acciones favoritas/selección de texto en dispositivos móviles/zoom con pellizco y más
+* `Nuevo` Ace permite desplegar o plegar todos los bloques de código (requiere actualizar el complemento Ace Editor) (acceso: Editar > Plegado > Desplegar todo/Plegar todo)
 * `Nuevo` El editor de código permite recargar o convertir archivos con una codificación seleccionada, BOM opcional, indicadores de riesgo de codificación y deshacer/rehacer
 * `Nuevo` La barra de información del editor de código situada debajo de la barra de herramientas muestra el nombre del archivo, la línea y la columna del cursor en tiempo real y la codificación del archivo; los tres elementos se pueden pulsar para ver los detalles del archivo, saltar a una línea o cambiar la codificación, respectivamente
 * `Nuevo` La barra de estado del sistema, la ActionBar, los iconos y textos de los botones, los menús de desbordamiento y anidados, los diálogos internos y el cursor, los tiradores y los controles de selección del editor nativo siguen dinámicamente el tema actual del editor; los iconos de la barra de estado mantienen automáticamente el contraste claro/oscuro para unificar visualmente la interfaz desde la parte superior hasta el área de código

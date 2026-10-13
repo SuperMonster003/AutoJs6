@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/12",
+      "released_date": "2026/10/13",
       "feature": [
         "Los proyectos y scripts Node.js se empaquetan como aplicaciones con firma independiente, usan el plugin externo Node.js Runtime y muestran instrucciones de instalación cuando no está disponible",
         "El interruptor Mostrar icono en el lanzador, activado por defecto, oculta y restaura el estilo original en plugins oficiales y de terceros (requiere Root o Shizuku autorizado en modo Root)",
@@ -161,6 +161,7 @@
         "El editor Ace activa por defecto como función estable el completado inteligente local de TypeScript integrado, con completado de la API AutoJs6, ayuda de firmas, información al pasar el cursor y diagnósticos; se puede desactivar en los ajustes",
         "Los ajustes del editor Ace permiten cargar de forma selectiva los grupos de declaraciones TypeScript de AutoJs6 android/libraries/resources/main-app; las dependencias se cargan automáticamente y todos los grupos opcionales están desactivados de forma predeterminada para reducir el tiempo de inicio del servicio de lenguaje y el uso de memoria",
         "El editor Ace admite un panel de accesos directos/historial de acciones/acciones favoritas/selección de texto en dispositivos móviles/zoom con pellizco y más",
+        "Ace permite desplegar o plegar todos los bloques de código (requiere actualizar el complemento Ace Editor) (acceso: Editar > Plegado > Desplegar todo/Plegar todo)",
         "El editor de código permite recargar o convertir archivos con una codificación seleccionada, BOM opcional, indicadores de riesgo de codificación y deshacer/rehacer",
         "La barra de información del editor de código situada debajo de la barra de herramientas muestra el nombre del archivo, la línea y la columna del cursor en tiempo real y la codificación del archivo; los tres elementos se pueden pulsar para ver los detalles del archivo, saltar a una línea o cambiar la codificación, respectivamente",
         "La barra de estado del sistema, la ActionBar, los iconos y textos de los botones, los menús de desbordamiento y anidados, los diálogos internos y el cursor, los tiradores y los controles de selección del editor nativo siguen dinámicamente el tema actual del editor; los iconos de la barra de estado mantienen automáticamente el contraste claro/oscuro para unificar visualmente la interfaz desde la parte superior hasta el área de código",

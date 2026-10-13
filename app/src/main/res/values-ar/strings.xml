@@ -1167,6 +1167,7 @@
     <string name="text_code_beautify">رمز تجميل</string>
     <string name="text_code_editor">محرر الشفرة</string>
     <string name="text_code_editor_settings">إعدادات محرر الشفرة</string>
+    <string name="text_code_folding">طي</string>
     <string name="text_codegen_action_none">بلا إجراء</string>
     <string name="text_codegen_alternatives">خطط بديلة</string>
     <string name="text_codegen_collection_error">اختر مجموعة متاحة</string>
@@ -1690,6 +1691,7 @@
     <string name="text_first_rotation_at">أول تغيير: %1$s</string>
     <string name="text_floating_button">زر عائم</string>
     <string name="text_floating_run">تشغيل عائم</string>
+    <string name="text_fold_all">طي الكل</string>
     <string name="text_folder">مجلد</string>
     <string name="text_folder_colon_value">المجلد: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (يتبع الألوان المشتقة)</string>
@@ -2805,6 +2807,7 @@
     <string name="text_undo_auto_fill">التراجع عن التعبئة التلقائية</string>
     <string name="text_undo_script_change">التراجع عن تغيير البرنامج النصي</string>
     <string name="text_undo_simplified">ينسحب</string>
+    <string name="text_unfold_all">توسيع الكل</string>
     <string name="text_uninstall">الغاء التثبيت</string>
     <string name="text_unit_days">ايام</string>
     <string name="text_unit_versions">اصدارات</string>

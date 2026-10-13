@@ -1167,6 +1167,7 @@
     <string name="text_code_beautify">코드를 아름답게하십시오</string>
     <string name="text_code_editor">코드 편집기</string>
     <string name="text_code_editor_settings">코드 편집기 설정</string>
+    <string name="text_code_folding">접기</string>
     <string name="text_codegen_action_none">동작 없음</string>
     <string name="text_codegen_alternatives">대안</string>
     <string name="text_codegen_collection_error">사용 가능한 대상 모음을 선택하세요</string>
@@ -1690,6 +1691,7 @@
     <string name="text_first_rotation_at">첫 전환: %1$s</string>
     <string name="text_floating_button">플로팅 버튼</string>
     <string name="text_floating_run">플로팅 실행</string>
+    <string name="text_fold_all">모두 접기</string>
     <string name="text_folder">폴더</string>
     <string name="text_folder_colon_value">폴더: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (파생 색상 따르기)</string>
@@ -2805,6 +2807,7 @@
     <string name="text_undo_auto_fill">자동 채우기 실행 취소</string>
     <string name="text_undo_script_change">스크립트 변경 실행 취소</string>
     <string name="text_undo_simplified">뒤</string>
+    <string name="text_unfold_all">모두 펼치기</string>
     <string name="text_uninstall">삭제</string>
     <string name="text_unit_days">일</string>
     <string name="text_unit_versions">버전</string>

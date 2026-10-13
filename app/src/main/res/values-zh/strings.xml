@@ -1162,6 +1162,7 @@
     <string name="text_code_beautify">格式化代码</string>
     <string name="text_code_editor">代码编辑器</string>
     <string name="text_code_editor_settings">代码编辑器设置</string>
+    <string name="text_code_folding">折叠</string>
     <string name="text_codegen_action_none">无动作</string>
     <string name="text_codegen_alternatives">备选方案</string>
     <string name="text_codegen_collection_error">请选择可用的目标集合</string>
@@ -1685,6 +1686,7 @@
     <string name="text_first_rotation_at">首次换组: %1$s</string>
     <string name="text_floating_button">浮动按钮</string>
     <string name="text_floating_run">悬浮运行</string>
+    <string name="text_fold_all">全部折叠</string>
     <string name="text_folder">文件夹</string>
     <string name="text_folder_colon_value">文件夹: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (跟随派生配色)</string>
@@ -2802,6 +2804,7 @@
     <string name="text_undo_auto_fill">撤销自动填充</string>
     <string name="text_undo_script_change">撤销脚本修改</string>
     <string name="text_undo_simplified">撤销</string>
+    <string name="text_unfold_all">全部展开</string>
     <string name="text_uninstall">卸载</string>
     <string name="text_unit_days">天</string>
     <string name="text_unit_versions">版本</string>

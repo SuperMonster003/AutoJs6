@@ -9,6 +9,7 @@ This document tracks the current AutoJs6 ACE editor deployment state. The defaul
 - Explicitly selecting an available ACE engine restores `AUTO_ACE` mode. Selecting ACE while the plugin is unavailable does not change either the selection mode or effective engine.
 - ACE opens when the host discovers an enabled plugin with an accepted signer or trust state and compatible Editor API, host-version, and binary ABI metadata. Any discovery or load failure falls back to Native.
 - The host APK contains the typed Editor API, secure loader, engine adapter, preferences, and diagnostics integration. The Ace WebView runtime, JavaScript bridge, language services, IME implementation, and static assets live in the plugin APK.
+- Editor API 7 adds whole-document folding through `Edit -> Folding -> Unfold all / Fold all` (Ace Editor plugin 1.32.0+, host versionCode 5352+). Older plugin contracts remain loadable but do not expose this submenu; Native does not expose it either. Folding remains available in read-only mode, does not change document text or undo history, and is replayable from Action favorites. Unfold all removes nested folds in one operation. Loading documents temporarily disable the submenu.
 - Ordinary large files stay on ACE. The old progressive large-file path remains Native-only.
 - Runtime ACE failures fall back to Native through the editor engine switch path.
 - Fallback snapshots preserve text, dirty state, cursor, selection, breakpoints, debug line, read-only state, theme, and font size as far as each engine supports them.

@@ -7290,6 +7290,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_CLEAR -> true.also { mCommandDispatcher.clear() }
             ACTION_TOGGLE_COMMENT -> true.also { mCommandDispatcher.toggleComment() }
             ACTION_BEAUTIFY -> true.also { mCommandDispatcher.beautifyCode() }
+            ACTION_UNFOLD_ALL -> mCommandDispatcher.unfoldAll()
+            ACTION_FOLD_ALL -> mCommandDispatcher.foldAll()
             ACTION_JUMP_TO_LINE -> true.also { showJumpToLineDialog(action.payloadInt(PAYLOAD_LINE)) }
             ACTION_JUMP_TO_START -> true.also { mCommandDispatcher.jumpToStart() }
             ACTION_JUMP_TO_END -> true.also { mCommandDispatcher.jumpToEnd() }
@@ -7447,6 +7449,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         R.id.action_clear -> historyAction(ACTION_CLEAR, R.string.text_clear, mutatesText = true)
         R.id.action_comment -> historyAction(ACTION_TOGGLE_COMMENT, R.string.text_comment, mutatesText = true)
         R.id.action_beautify -> historyAction(ACTION_BEAUTIFY, R.string.text_code_beautify, mutatesText = true)
+        R.id.action_unfold_all -> historyAction(ACTION_UNFOLD_ALL, R.string.text_unfold_all, mutatesText = false)
+        R.id.action_fold_all -> historyAction(ACTION_FOLD_ALL, R.string.text_fold_all, mutatesText = false)
         R.id.action_jump_to_line -> historyAction(ACTION_JUMP_TO_LINE, R.string.text_jump_to_line, mutatesText = false)
         R.id.action_jump_to_start -> historyAction(ACTION_JUMP_TO_START, R.string.text_jump_to_start, mutatesText = false)
         R.id.action_jump_to_end -> historyAction(ACTION_JUMP_TO_END, R.string.text_jump_to_end, mutatesText = false)
@@ -8021,6 +8025,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_CLEAR = "editor:clear"
         private const val ACTION_TOGGLE_COMMENT = "editor:toggle_comment"
         private const val ACTION_BEAUTIFY = "editor:beautify"
+        private const val ACTION_UNFOLD_ALL = "editor:unfold_all"
+        private const val ACTION_FOLD_ALL = "editor:fold_all"
         private const val ACTION_JUMP_TO_LINE = "editor:jump_to_line"
         private const val ACTION_JUMP_TO_START = "editor:jump_to_start"
         private const val ACTION_JUMP_TO_END = "editor:jump_to_end"

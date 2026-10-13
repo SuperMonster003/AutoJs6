@@ -1166,6 +1166,7 @@
     <string name="text_code_beautify">コードの美化</string>
     <string name="text_code_editor">コードエディタ</string>
     <string name="text_code_editor_settings">コードエディター設定</string>
+    <string name="text_code_folding">折りたたみ</string>
     <string name="text_codegen_action_none">動作なし</string>
     <string name="text_codegen_alternatives">代替案</string>
     <string name="text_codegen_collection_error">利用可能な対象集合を選択してください</string>
@@ -1689,6 +1690,7 @@
     <string name="text_first_rotation_at">最初の切り替え: %1$s</string>
     <string name="text_floating_button">フローティングボタン</string>
     <string name="text_floating_run">フローティング実行</string>
+    <string name="text_fold_all">すべて折りたたむ</string>
     <string name="text_folder">フォルダー</string>
     <string name="text_folder_colon_value">フォルダー: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (派生カラーに従う)</string>
@@ -2804,6 +2806,7 @@
     <string name="text_undo_auto_fill">自動入力を元に戻す</string>
     <string name="text_undo_script_change">スクリプトによる変更を元に戻す</string>
     <string name="text_undo_simplified">戻る</string>
+    <string name="text_unfold_all">すべて展開</string>
     <string name="text_uninstall">アンインストール</string>
     <string name="text_unit_days">日</string>
     <string name="text_unit_versions">バージョン</string>

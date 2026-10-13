@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/12
+###### 2026/10/13
 
 * `Astuce` Le plugin de sélection de couleur devient 3-Color Picker 2.0 avec un nouvel identifiant; installez-le et activez-le à nouveau. L'ancienne application peut rester installée, sans migration automatique des réglages. Le libellé du tiroir reste inchangé
 * `Astuce` Compose UI, sa référence API, la complétion de types Ace Editor et le contenu Offline Docs sont fournis comme intégration locale nécessitant une compilation locale correspondante du host; le plugin ne figure pas dans l'index officiel et n'est pas publié officiellement
@@ -172,6 +172,7 @@
 * `Fonctionnalité` L'éditeur Ace active désormais par défaut sa complétion intelligente TypeScript locale intégrée, avec complétion de l'API AutoJs6, aide aux signatures, informations au survol et diagnostics ; elle peut être désactivée dans les paramètres
 * `Fonctionnalité` Les paramètres de l'éditeur Ace permettent de charger sélectivement les groupes de déclarations TypeScript AutoJs6 android/libraries/resources/main-app; les dépendances sont chargées automatiquement et tous les groupes facultatifs sont désactivés par défaut afin de réduire le temps de démarrage du service de langage et l'utilisation de la mémoire
 * `Fonctionnalité` L'éditeur Ace prend en charge un panneau de raccourcis/l'historique des actions/les actions favorites/la sélection de texte sur mobile/le zoom par pincement et plus encore
+* `Fonctionnalité` L'éditeur Ace permet de déplier ou de plier tous les blocs de code (nécessite une mise à jour du plugin Ace Editor) (accès: Editer > Pliage > Tout déplier/Tout plier)
 * `Fonctionnalité` L'éditeur de code prend en charge le rechargement ou la conversion des fichiers avec un encodage sélectionné, un BOM facultatif, des indicateurs de risque d'encodage et l'annulation/rétablissement
 * `Fonctionnalité` La barre d'informations de l'éditeur de code située sous la barre d'outils affiche le nom du fichier, la ligne et la colonne du curseur en temps réel ainsi que l'encodage du fichier ; un appui sur chacun des trois éléments permet respectivement d'afficher les détails du fichier, d'accéder à une ligne ou de modifier l'encodage
 * `Fonctionnalité` La barre d'état système, l'ActionBar, les icônes et textes des boutons, les menus de débordement et imbriqués, les boîtes de dialogue intégrées à l'éditeur ainsi que le curseur, les poignées et les contrôles de sélection de l'éditeur natif suivent dynamiquement le thème actuel de l'éditeur; les icônes de la barre d'état conservent automatiquement un contraste clair/sombre pour un rendu visuel unifié du haut de l'écran jusqu'à la zone de code

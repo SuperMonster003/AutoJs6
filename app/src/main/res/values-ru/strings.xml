@@ -1165,6 +1165,7 @@
     <string name="text_code_beautify">Улучшить код</string>
     <string name="text_code_editor">Редактор кода</string>
     <string name="text_code_editor_settings">Настройки редактора кода</string>
+    <string name="text_code_folding">Сворачивание</string>
     <string name="text_codegen_action_none">Без действия</string>
     <string name="text_codegen_alternatives">Альтернативы</string>
     <string name="text_codegen_collection_error">Выберите доступную группу элементов</string>
@@ -1688,6 +1689,7 @@
     <string name="text_first_rotation_at">Первая смена: %1$s</string>
     <string name="text_floating_button">Плавающая кнопка</string>
     <string name="text_floating_run">Плавающий запуск</string>
+    <string name="text_fold_all">Свернуть всё</string>
     <string name="text_folder">Папка</string>
     <string name="text_folder_colon_value">Папка: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (по производным цветам)</string>
@@ -2803,6 +2805,7 @@
     <string name="text_undo_auto_fill">Отменить заполнение</string>
     <string name="text_undo_script_change">Отменить изменение скрипта</string>
     <string name="text_undo_simplified">Верни</string>
+    <string name="text_unfold_all">Развернуть всё</string>
     <string name="text_uninstall">Удалить</string>
     <string name="text_unit_days">Дней</string>
     <string name="text_unit_versions">Версий</string>

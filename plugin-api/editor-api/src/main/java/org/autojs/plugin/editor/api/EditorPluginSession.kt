@@ -66,6 +66,12 @@ interface EditorPluginSession {
     fun toggleComment()
     fun beautifyCode()
 
+    /** Folds all code blocks in the document, including in read-only mode (contract 7+). */
+    fun foldAll()
+
+    /** Removes all document folds, including nested folds, in read-only mode too (contract 7+). */
+    fun unfoldAll()
+
     fun undo()
     fun redo()
     fun setRedoUndoEnabled(enabled: Boolean)

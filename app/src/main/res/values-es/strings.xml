@@ -1165,6 +1165,7 @@
     <string name="text_code_beautify">Embellecer el código</string>
     <string name="text_code_editor">Editor de codigo</string>
     <string name="text_code_editor_settings">Ajustes del editor de código</string>
+    <string name="text_code_folding">Plegado</string>
     <string name="text_codegen_action_none">Sin acción</string>
     <string name="text_codegen_alternatives">Planes alternativos</string>
     <string name="text_codegen_collection_error">Seleccione una colección disponible</string>
@@ -1688,6 +1689,7 @@
     <string name="text_first_rotation_at">Primer cambio: %1$s</string>
     <string name="text_floating_button">Botón flotante</string>
     <string name="text_floating_run">Ejecución flotante</string>
+    <string name="text_fold_all">Plegar todo</string>
     <string name="text_folder">Carpeta</string>
     <string name="text_folder_colon_value">Carpeta: %1$s</string>
     <string name="text_follows_derived_colors">%1$s (sigue los colores derivados)</string>
@@ -2803,6 +2805,7 @@
     <string name="text_undo_auto_fill">Deshacer el relleno automático</string>
     <string name="text_undo_script_change">Deshacer el cambio del script</string>
     <string name="text_undo_simplified">Revoc</string>
+    <string name="text_unfold_all">Desplegar todo</string>
     <string name="text_uninstall">Desinstalar</string>
     <string name="text_unit_days">Días</string>
     <string name="text_unit_versions">Versiones</string>

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/12
+###### 2026/10/13
 
 * `Hint` The screen color picker plugin is now 3-Color Picker 2.0 with a new package ID; install and enable it again. The old app can remain installed, but settings are not migrated automatically. The home drawer label is unchanged
 * `Hint` Compose UI and its API reference, Ace Editor type completion and Offline Docs content are delivered as a local integration requiring a matching local host build; the plugin is not listed in the official index or formally released
@@ -171,6 +171,7 @@
 * `Feature` Ace editor now enables its bundled local TypeScript smart completion by default, with AutoJs6 API completion, signature help, hover information, and diagnostics; it can be disabled in settings
 * `Feature` Ace editor settings support selectively loading the android/libraries/resources/main-app AutoJs6 TypeScript declaration groups; dependencies are loaded automatically, while all optional groups are disabled by default to reduce language-service startup time and memory use
 * `Feature` Ace editor supports a shortcut panel/action history/action favorites/mobile text selection/pinch zoom and more
+* `Feature` Ace editor supports unfolding or folding all code blocks (requires an updated Ace Editor plugin) (entry: Edit > Folding > Unfold all/Fold all)
 * `Feature` Code editor supports reloading or converting files with a selected encoding, optional BOM, encoding risk indicators, and undo/redo
 * `Feature` Code editor information bar below the toolbar shows the file name, the cursor's line and column in real time, and the file encoding; the three items can be tapped to view file details, jump to a line, or change the encoding, respectively
 * `Feature` Code editor system status bar, ActionBar, button icons and text, overflow and nested menus, in-editor dialogs, and native-editor cursor, handles, and selection controls dynamically follow the current editor theme; status-bar icons automatically maintain light/dark contrast for a visually unified surface from the top of the screen through the code area
