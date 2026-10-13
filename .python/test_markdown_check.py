@@ -1,5 +1,6 @@
 """Verify that documentation checks stay offline and never change source or output files."""
 import hashlib
+import json
 import os
 from pathlib import Path
 import shutil
@@ -77,6 +78,22 @@ with patch('urllib.request.urlopen', side_effect=AssertionError('Documentation c
         result = self.run_check()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("CHANGELOG.md", result.stdout + result.stderr)
+        self.assertEqual(before, self.snapshot())
+
+    def test_translation_drift_is_rejected_even_after_regenerating_outputs(self):
+        path = self.root / ".changelog/lang_en.json"
+        document = json.loads(path.read_text(encoding="utf-8"))
+        version = next(iter(document["$data"].values()))
+        version["feature"].pop()
+        path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        # Rendering remains available for an explicitly requested Chinese-only draft.
+        result = subprocess.run([sys.executable, "-B", str(self.root / ".python/generate_markdown.py")],
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        before = self.snapshot()
+        result = self.run_check()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("CHANGELOG_TRANSLATIONS_ERROR", result.stderr)
         self.assertEqual(before, self.snapshot())
 
     def test_check_rejects_online_refresh_without_touching_files(self):
