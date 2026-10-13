@@ -2126,6 +2126,9 @@
     <string name="text_only_latest_few_items_will_be_sent">سيتم إرسال أحدث %d من العناصر فقط</string>
     <string name="text_open">فتح</string>
     <string name="text_open_by_other_apps">افتح من قبل التطبيقات الأخرى</string>
+    <string name="text_open_in_three_block_compose_designer">فتح في مصمم 3-Block Compose</string>
+    <string name="text_designer_changed_file_title">تم تعديل الملف بواسطة المصمم</string>
+    <string name="description_designer_changed_file_reload_or_keep">حفظ 3-Block Compose هذا الملف. إعادة التحميل تستبدل نص المحرر بالملف المحفوظ وتتجاهل التغييرات غير المحفوظة هنا; الإلغاء يحتفظ بنص المحرر.</string>
     <string name="text_open_in_terminal">فتح في الطرفية</string>
     <string name="text_open_main_activity">فتح النشاط الرئيسي</string>
     <string name="text_open_with">مفتوحة مع</string>

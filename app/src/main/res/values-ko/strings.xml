@@ -2126,6 +2126,9 @@
     <string name="text_only_latest_few_items_will_be_sent">최신 %d 항목만 전송됩니다</string>
     <string name="text_open">열려 있는</string>
     <string name="text_open_by_other_apps">다른 앱으로 열립니다</string>
+    <string name="text_open_in_three_block_compose_designer">3-Block Compose 디자이너에서 열기</string>
+    <string name="text_designer_changed_file_title">파일이 디자이너에서 변경되었습니다</string>
+    <string name="description_designer_changed_file_reload_or_keep">3-Block Compose 가 이 파일을 저장했습니다. 다시 불러오면 저장된 파일로 편집기 내용을 바꾸고 여기서 저장하지 않은 변경 내용은 사라집니다. 취소하면 편집기 내용을 유지합니다.</string>
     <string name="text_open_in_terminal">터미널에서 열기</string>
     <string name="text_open_main_activity">열린 주요 활동</string>
     <string name="text_open_with">함께 열립니다</string>

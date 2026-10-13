@@ -65,6 +65,8 @@ public class EditorMenu {
             previousCursorItem.setVisible(mEditorView.supportsPreviousCursorJump());
             previousCursorItem.setEnabled(mEditorView.hasPreviousCursorPosition());
         }
+        // Offered only while the installed 3-Block Compose plugin ships the visual designer (1.2.0+).
+        setMenuItemVisible(menu, R.id.action_open_in_three_block_compose_designer, mEditorView.isThreeBlockComposeDesignerAvailable());
     }
 
     private void setReadOnlySensitiveMenuItemsVisible(Menu menu, boolean mutable) {
@@ -205,6 +207,9 @@ public class EditorMenu {
         }
         if (itemId == R.id.action_open_by_other_apps) {
             return tryDoing(mEditorView::openByOtherApps);
+        }
+        if (itemId == R.id.action_open_in_three_block_compose_designer) {
+            return tryDoing(mEditorView::openInThreeBlockComposeDesigner);
         }
         if (itemId == R.id.action_file_details) {
             return tryDoing(mEditorView::showFileDetailsDialog);

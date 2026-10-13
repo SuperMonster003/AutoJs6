@@ -2121,6 +2121,9 @@
     <string name="text_only_latest_few_items_will_be_sent">Only latest %d items will be sent</string>
     <string name="text_open">Open</string>
     <string name="text_open_by_other_apps">Open by other apps</string>
+    <string name="text_open_in_three_block_compose_designer">Open in 3-Block Compose designer</string>
+    <string name="text_designer_changed_file_title">File changed by the designer</string>
+    <string name="description_designer_changed_file_reload_or_keep">3-Block Compose saved this file. Reloading replaces the editor text with the saved file and discards the unsaved changes made here; cancel keeps the editor text.</string>
     <string name="text_open_in_terminal">Open in terminal</string>
     <string name="text_open_main_activity">Open main activity</string>
     <string name="text_open_with">Open with</string>

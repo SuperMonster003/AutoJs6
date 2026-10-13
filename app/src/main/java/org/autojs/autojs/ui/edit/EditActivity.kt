@@ -710,6 +710,7 @@ open class EditActivity :
     override fun onResume() {
         super.onResume()
         mEditorView.syncPrimaryMenuState()
+        mEditorView.reloadAfterDesignerIfChanged()
         runCatching { mEditorView.refreshSymbolsBar() }
         mEditorView.reapplyFullscreenModeIfNeeded()
     }

@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.edit
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
+import android.content.ContentResolver
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -163,6 +164,7 @@ import org.autojs.autojs.ui.settings.AceEditorPluginUi
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.core.plugin.compose.ThreeBlockComposeDesigner
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
@@ -170,6 +172,7 @@ import org.autojs.autojs.util.DocsUtils.INDEX_URL_SUFFIX
 import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ScriptOriginResolver
 import org.autojs.autojs.util.StringUtils
@@ -5611,6 +5614,87 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
         }
     }
+
+    // region 3-Block Compose designer hand-over (plugin roadmap P8.4 / D39 / Q10)
+
+    private var mDesignerHandoff: DesignerHandoff? = null
+
+    private class DesignerHandoff(val uri: Uri, val fingerprint: String?)
+
+    fun isThreeBlockComposeDesignerAvailable(): Boolean = ThreeBlockComposeDesigner.isAvailable(context)
+
+    /** Saves the current file when needed, then opens it in the plugin's designer with a read / write grant. */
+    fun openInThreeBlockComposeDesigner() {
+        val currentUri = uri ?: run {
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_unable_to_open_with_other_apps_as_current_file_path_is_unknown)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .build()
+            }
+            return
+        }
+        if (!mReadOnly && (isTextChanged || saveStickyDirty)) {
+            save()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ handOverToDesigner(currentUri) }) { e: Throwable ->
+                    e.printStackTrace()
+                    showSnack(this, e.message, true)
+                }
+        } else {
+            handOverToDesigner(currentUri)
+        }
+    }
+
+    private fun handOverToDesigner(currentUri: Uri) {
+        val shared = if (currentUri.scheme == ContentResolver.SCHEME_FILE) {
+            IntentUtils.getUriOfFile(context, currentUri.path)
+        } else {
+            currentUri
+        }
+        mDesignerHandoff = DesignerHandoff(currentUri, designerFingerprint(currentUri))
+        val started = ThreeBlockComposeDesigner.openIntent(shared, writable = !mReadOnly).startSafely(context, true)
+        if (!started) {
+            mDesignerHandoff = null
+            showToast(context, R.string.error_no_applications_available_for_editing_this_file, true)
+        }
+    }
+
+    private fun designerFingerprint(currentUri: Uri): String? = try {
+        ThreeBlockComposeDesigner.fingerprint(context.contentResolver.openInputStream(currentUri))
+    } catch (e: Exception) {
+        null
+    }
+
+    /**
+     * Called when the editor returns to the foreground after a designer hand-over: a file the designer wrote
+     * back is reloaded through the existing encoding-preserving reload; unsaved edits here are asked about first.
+     */
+    fun reloadAfterDesignerIfChanged() {
+        val handoff = mDesignerHandoff ?: return
+        mDesignerHandoff = null
+        val currentUri = uri ?: return
+        if (currentUri != handoff.uri) return
+        val now = designerFingerprint(currentUri)
+        if (now == null || now == handoff.fingerprint) return
+        if (!isTextChanged && !saveStickyDirty) {
+            reloadWithEncoding(currentUri, mCurrentCharset)
+            return
+        }
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_designer_changed_file_title)
+                .content(R.string.description_designer_changed_file_reload_or_keep)
+                .positiveText(R.string.dialog_button_reload)
+                .negativeText(R.string.dialog_button_cancel)
+                .onPositive { _, _ -> reloadWithEncoding(currentUri, mCurrentCharset) }
+                .build()
+        }
+    }
+
+    // endregion
 
     fun showFindOrReplaceDialog() {
         showFindOrReplaceDialog(null)

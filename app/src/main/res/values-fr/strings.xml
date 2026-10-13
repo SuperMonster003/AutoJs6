@@ -2124,6 +2124,9 @@
     <string name="text_only_latest_few_items_will_be_sent">Seuls les derniers %d éléments seront envoyés</string>
     <string name="text_open">Ouvrir</string>
     <string name="text_open_by_other_apps">Ouvrir par d\'autres apps</string>
+    <string name="text_open_in_three_block_compose_designer">Ouvrir dans le concepteur 3-Block Compose</string>
+    <string name="text_designer_changed_file_title">Fichier modifié par le concepteur</string>
+    <string name="description_designer_changed_file_reload_or_keep">3-Block Compose a enregistré ce fichier. Recharger remplace le texte de l\'éditeur par le fichier enregistré et supprime les modifications non enregistrées faites ici; annuler conserve le texte de l\'éditeur.</string>
     <string name="text_open_in_terminal">Ouvrir dans le terminal</string>
     <string name="text_open_main_activity">Ouvrir l\'activité principale</string>
     <string name="text_open_with">Ouvrir avec</string>

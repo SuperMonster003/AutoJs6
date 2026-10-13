@@ -220,6 +220,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` ai.agent.run/create 方法支持 plan 选项参数, 用于让 Three Stove Agent 以计划模式先提出步骤计划再执行
 * `新增` 脚本可通过 project.json 或 @agent 头注释登记为 Three Stove Agent 可调用的脚本, 支持参数校验, 超时停止及结构化结果回传
 * `新增` compose 模块, 用于以 Jetpack Compose 构建界面, 提供节点工厂, 长期节点句柄, 响应式 state/render/ref 及主题控制 (需要 3-Block Compose 插件) (参阅 示例代码 > 3-Block Compose)
+* `新增` 编辑器菜单新增 "在 3-Block Compose 设计器中打开": 保存当前文件后交给 3-Block Compose 插件 (1.2.0 及以上) 的可视化设计器编辑, 回到编辑器时自动重新加载设计器保存的内容 (有未保存修改时先询问) (参阅 示例代码 > 3-Block Compose)
 * `新增` compose.mount/floaty 方法, 用于挂载 UI 页面或创建悬浮窗 (悬浮窗同时支持 UI 与非 UI 脚本), 脚本停止时自动清理所属会话
 * `新增` compose.dialog 方法, 用于创建可更新和关闭的对话框及模态底部弹层会话, 可在 UI 或普通脚本中使用
 * `新增` XML <compose> 容器及 compose.attach 方法, 用于在 UI 页面或悬浮窗内嵌入 Compose 会话; compose.AndroidView 可承载现有 Android View

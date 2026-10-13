@@ -2124,6 +2124,9 @@
     <string name="text_only_latest_few_items_will_be_sent">Будут отправлены только последние %d элементов</string>
     <string name="text_open">Открыть</string>
     <string name="text_open_by_other_apps">Открыто другими приложениями</string>
+    <string name="text_open_in_three_block_compose_designer">Открыть в дизайнере 3-Block Compose</string>
+    <string name="text_designer_changed_file_title">Файл изменен дизайнером</string>
+    <string name="description_designer_changed_file_reload_or_keep">3-Block Compose сохранил этот файл. Перезагрузка заменит текст редактора сохраненным файлом и отбросит несохраненные здесь изменения; отмена сохранит текст редактора.</string>
     <string name="text_open_in_terminal">Открыть в терминале</string>
     <string name="text_open_main_activity">Открыть основную деятельность</string>
     <string name="text_open_with">Открыть с</string>

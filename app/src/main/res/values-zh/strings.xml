@@ -2121,6 +2121,9 @@
     <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
     <string name="text_open">打开</string>
     <string name="text_open_by_other_apps">用其他应用打开</string>
+    <string name="text_open_in_three_block_compose_designer">在 3-Block Compose 设计器中打开</string>
+    <string name="text_designer_changed_file_title">文件已被设计器修改</string>
+    <string name="description_designer_changed_file_reload_or_keep">3-Block Compose 已保存该文件. 重新加载会用保存后的文件替换编辑器内容并丢弃这里未保存的修改; 取消则保留编辑器内容.</string>
     <string name="text_open_in_terminal">在终端中打开</string>
     <string name="text_open_main_activity">打开主界面</string>
     <string name="text_open_with">打开方式</string>
