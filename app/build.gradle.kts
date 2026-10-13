@@ -22,11 +22,19 @@ plugins {
 }
 
 val globalApplicationId = "org.autojs.autojs6"
+
+// The FileProvider authority of each build goes into the manifest placeholder "authorities" and into this
+// BuildConfig field from the same value, so AppFileProvider builds Uris for the provider the app declares.
+val buildConfigFieldNameFileProviderAuthority = "FILE_PROVIDER_AUTHORITY"
+
 apply(from = "compose-shared-classpath.gradle.kts")
 if (providers.gradleProperty("composeUiSpike").orNull == "true") {
     android.buildTypes.named("debug") {
+        val authorities = "org.autojs.autojs6.compose.spike.fileprovider"
         applicationIdSuffix = ".compose.spike"
-        manifestPlaceholders["authorities"] = "org.autojs.autojs6.compose.spike.fileprovider"
+        manifestPlaceholders["authorities"] = authorities
+        // AppFileProvider.AUTHORITY reads this field; a build type field overrides the flavor's one.
+        buildConfigField("String", buildConfigFieldNameFileProviderAuthority, "\"$authorities\"")
         manifestPlaceholders["appName"] = "Compose spike host"
     }
 }
@@ -1035,13 +1043,15 @@ android {
             versionName = versions.appVersionName
             buildConfigField("String", "CHANNEL", "\"$flavorNameApp\"")
             buildConfigField("boolean", buildConfigFieldNameIsInrt, "false")
+            val authorities = "org.autojs.autojs6.fileprovider"
+            buildConfigField("String", buildConfigFieldNameFileProviderAuthority, "\"$authorities\"")
             manifestPlaceholders.putAll(
                 mapOf(
                     "CHANNEL" to flavorNameApp,
                     "appName" to "@string/app_name",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
-                    "authorities" to "org.autojs.autojs6.fileprovider",
+                    "authorities" to authorities,
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
                 )
             )
@@ -1058,6 +1068,8 @@ android {
 
             buildConfigField("String", "CHANNEL", "\"$flavorNameInrt\"")
             buildConfigField("boolean", buildConfigFieldNameIsInrt, "true")
+            val authorities = "org.autojs.autojs6.$flavorNameInrt.fileprovider"
+            buildConfigField("String", buildConfigFieldNameFileProviderAuthority, "\"$authorities\"")
 
             manifestPlaceholders.putAll(
                 mapOf(
@@ -1065,7 +1077,7 @@ android {
                     "appName" to "AutoJs6.$flavorNameInrt",
                     "intentCategory" to "android.intent.category.DEFAULT",
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
-                    "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
+                    "authorities" to authorities,
                     "icon" to "@mipmap/ic_launcher",
                 )
             )
