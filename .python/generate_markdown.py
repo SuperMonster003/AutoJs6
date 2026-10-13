@@ -907,6 +907,14 @@ def generate_readme_files():
 
 
 def main():
+    if arguments.check:
+        # Keep local helper imports read-only too, including Python bytecode.
+        sys.dont_write_bytecode = True
+        from check_translations import check_translations
+        errors = check_translations(project_root_dir)
+        if errors:
+            print('CHANGELOG_TRANSLATIONS_ERROR\n' + '\n'.join(errors), file=sys.stderr)
+            return 1
     init_languages()
     generate_changelog_files()
     generate_readme_files()

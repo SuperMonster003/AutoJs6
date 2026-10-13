@@ -6,828 +6,386 @@
 
 # v6.8.0
 
-###### 2026/10/12
+###### 2026/10/13 - Algunas funciones pasan a complementos; actualiza con precaución
 
-* `Sugerencia` El plugin de selección de color pasa a ser 3-Color Picker 2.0 con un nuevo ID; instálalo y actívalo de nuevo. La aplicación anterior puede permanecer instalada, sin migración automática de ajustes. La etiqueta del panel no cambia
-* `Sugerencia` Compose UI, su referencia API, el autocompletado de tipos de Ace Editor y el contenido de Offline Docs se entregan como integración local que requiere una compilación local correspondiente del host; el complemento no figura en el índice oficial ni se ha publicado formalmente
-* `Sugerencia` Los diálogos independientes requieren AutoJs6 6.8.0 / 5321 y Compose UI con dialog-v1; TSX también requiere TypeScript Engine 0.6.6. Los scripts sin UI necesitan el permiso de superposición del anfitrión
-* `Sugerencia` Esta versión usa el contrato Compose UI V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
-* `Sugerencia` Las aplicaciones empaquetadas necesitan OpenCV seleccionado al empaquetar para images y otras funciones de OpenCV; ya no se usa un runtime con el mismo nombre aportado por un plugin de OCR
-* `Nuevo` Los proyectos y scripts Node.js se empaquetan como aplicaciones con firma independiente, usan el plugin externo Node.js Runtime y muestran instrucciones de instalación cuando no está disponible
-* `Nuevo` El interruptor Mostrar icono en el lanzador, activado por defecto, oculta y restaura el estilo original en plugins oficiales y de terceros (requiere Root o Shizuku autorizado en modo Root)
-* `Nuevo` Una opción del asistente controla los iconos solo para los plugins nuevos del lote, los muestra por defecto y no cambia los plugins ya instalados
-* `Nuevo` Acciones vinculadas a nodos inspeccionados por el anfitrión, con adición de texto, desplazamiento limitado y resultados con cambios de ventana
-* `Nuevo` OCR de pantalla disponible solo cuando el anfitrión confirma un plugin OCR autorizado, con texto agrupado en líneas limitadas y coordenadas
-* `Nuevo` API ai.agent para iniciar y consultar tareas, eventos, respuestas, confirmaciones, cancelación y tareas detached en segundo plano; result/context exponen resultados y contexto de scripts registrados con @agent, con tres ejemplos
-* `Nuevo` Las opciones de ai.agent.run y ai.agent.create aceptan un booleano plan: con true, Three Stove Agent entra en modo de plan, donde el modelo propone primero de 1 a 8 pasos que se revisan mediante un evento input de kind plan antes de ejecutar la primera herramienta; si se omite, se aplica el interruptor de modo de plan del preajuste
-* `Nuevo` Three Stove Agent ejecuta JavaScript generado tras la confirmación, detiene su script al cancelar o agotar el tiempo y devuelve resultados estructurados y la salida de consola; el script usa los permisos del anfitrión, sin aislamiento del acceso a archivos
-* `Nuevo` ai.agent: Herramientas MCP de servidores locales o externos seleccionados, con riesgo por servidor y el grupo mcp desactivado inicialmente
-* `Nuevo` El intermediario de modelos de Three Stove Agent admite imágenes de entrada y en los resultados de herramientas para modelos visuales compatibles (requiere soporte de los plugins)
-* `Nuevo` Controles del permiso de red local de Android 17 en el panel, los ajustes de las apps empaquetadas y las conexiones VS Code iniciadas por el usuario, con declaración según el targetSdk real; al desactivarlo se puede salir de AutoJs6 para que Android revoque el permiso, o abrir la configuración del sistema
-* `Nuevo` Historial de salidas de procesos en las opciones del desarrollador desde Android 11, con motivos recientes del sistema para varios procesos, identificación del limitador de memoria e informes que se pueden copiar (entrada: mantener pulsado el icono de la aplicación en la página "Sobre la aplicación y el desarrollador")
-* `Nuevo` Interruptor MCP Server con guías de instalación, activación, autorización y compatibilidad; sincronización con Detener en la notificación; ajustes conservados al reconectar; acceso verificado a la misma página desde el panel y el Centro de complementos. Restaura el servidor al abrir AutoJs6 salvo que el usuario lo detuviera sin el anfitrión; no arranca con el dispositivo.
-* `Nuevo` Las capacidades MCP incorporan consultas de aplicaciones Android, posiciones del editor, activación de accesibilidad mediante las estrategias configuradas, salida Shell limitada y descriptores de solo lectura para resultados JSON grandes; root usa un permiso shell.root y un ajuste del teléfono independientes
-* `Nuevo` Motor de plugin QuickJS Runtime independiente para JavaScript local de un solo archivo y módulos ES, enrutado mediante la directiva "quickjs"/"qjs" o los marcadores `.quickjs.js/.quickjs.mjs`, sin recurrir a Rhino, Node.js ni Bun
-* `Nuevo` Propiedad de solo lectura `device.pageSize` que devuelve el tamaño de página de memoria del sistema en bytes, para identificar entornos de 4 KB / 16 KB
-* `Nuevo` Motor de plugin Bun Runtime independiente para archivos locales individuales de JavaScript y TypeScript, enrutados mediante la directiva "bun" o los marcadores `.bun.js/.bun.ts/.bun.tsx`, sin recurrir a Rhino ni Node.js
-* `Nuevo` La sección Herramientas del cajón lateral añade ahora el complemento opcional Selector de color de pantalla como tercera herramienta, desactivada de forma predeterminada, después de Botón flotante y Posición del puntero; la instalación, la habilitación, el estado de ejecución y la eliminación se actualizan automáticamente sin bloquear la interfaz
-* `Nuevo` Modulo de contrato del plugin MCP Server (plugin-api/mcp-server-api): superficie AIDL congelada, un cliente de host estricto que vincula el plugin oficial con un arrendamiento de vinculacion dedicado y vuelve a vincularlo hasta tres veces tras la muerte del proceso del plugin, un intermediario de capacidades del host restringido por grant que enruta las solicitudes del plugin a traves del Node bridge provider, y registro en el Centro de plugins como plugin desactivado por defecto
-* `Nuevo` Administrador para la entrada "Servicio de accesibilidad" del cajón lateral (un diálogo, abierto con el botón "Administrador" del diálogo de descripción o con una pulsación larga sobre la entrada): la sección de estado muestra el estado del servicio, los ajustes del sistema, la instancia en el proceso, el tiempo activo, el recuento de eventos y el último evento, las ventanas y la raíz de la ventana activa, el último paquete y actividad, la configuración del servicio, la disponibilidad de root y ajustes seguros y el número de oyentes; la sección de control ofrece iniciar, detener, reiniciar, limpiar la caché de nodos, autocomprobación (cuenta raíces de ventana y nodos y luego espera un evento) y un monitor de eventos (lista en vivo de los últimos eventos de accesibilidad con sus intervalos; pausar, limpiar, solo cambios de estado de ventana y copiar); la sección de ajustes contiene los interruptores de habilitación automática con root y ajustes seguros; el texto de diagnóstico completo se puede copiar de una vez; los encabezados de estado y control llevan botones para actualizar y para bajar o subir el nivel de detalle (estado: 4 niveles, campos básicos por defecto, el título muestra el estado del servicio como "Estado [Operativo]" cuando todas las filas están ocultas; control: 3 niveles, las filas iniciar / detener / reiniciar por defecto, esos tres botones pasan al encabezado cuando todas las filas están ocultas) y los niveles elegidos se recuerdan
-* `Nuevo` Las filas de permisos del gestor de accesibilidad abren candidatas de gestión root con caché y adición manual, autorización ADB para ajustes seguros y autorización o ajustes de Shizuku; modo estable en ajustes y fila de estado con orientación para activar / desactivar
-* `Nuevo` Se agregaron APIs `snapshot`/`capabilities` versionadas y constantes de schema v1/v2 a `mediainfo`; Rhino conserva los resultados `read` heredados, Node.js mantiene v1 del host por defecto, y v2 del plugin junto con metadatos breves del motor solo se exponen tras el anuncio explícito de capacidad
-* `Nuevo` Al pulsar un archivo dentro de un comprimido se extrae en una carpeta temporal privada para ejecutarlo o abrirlo conservando los sufijos del motor; APK/APKS/XAPK/APKM/APKZ/AAB permiten consultar y extraer desde los menús de archivos y del diálogo de información sin sustituir los botones existentes
-* `Nuevo` La capacidad v1 de información de archivos del host de Explorer Action permite que plugins de solo lectura y de confianza añadan un resumen localizado, acotado y vinculado a SHA-256 al diálogo existente de información APK; si el plugin falta, está desactivado, es incompatible o falla, sus campos originales, las acciones de instalación/manifiesto y el tratamiento de errores no cambian
-* `Nuevo` Objeto global `pangu` con pangu.js 10.1.0 integrado, que ofrece `spaceText` para espaciar texto mixto CJK y `hasProperSpacing` para comprobarlo, con declaraciones TypeScript y documentación
-* `Nuevo` `pinyin` añade lecturas `customDictionary` válidas solo para cada llamada, completa `compare` y `compact`, y expone el mismo proveedor del plugin externo a Node.js mediante `autojs6:bridge.callAutoJs` con la capacidad explícita `pinyin`
-* `Nuevo` `pinyin4j` añade una matriz `readings` negociada por capacidad para todas las lecturas en Hanyu, Tongyong, Wade-Giles, MPS2, Yale y Gwoyeu Romatzyh; los plugins antiguos recurren de forma segura solo para Hanyu, mientras el mismo proveedor del plugin externo se expone a Node.js mediante `autojs6:bridge.callAutoJs` con la capacidad explícita `pinyin4j`
-* `Nuevo` El contrato de complemento OpenCC versión 2 incorpora descubrimiento dinámico de tipos de conversión, lotes de hasta 1024 textos y cadenas de hasta 32 etapas; los 16 métodos compuestos pasan de hasta 3 idas y vueltas de Binder a 1 con un complemento nuevo, mientras que los antiguos vuelven de forma transparente a las llamadas originales por elemento o etapa
-* `Nuevo` Las opciones de Image Quantization anaden `maxPixels` y `maxMemoryBytes` mediante `OPTIONS_API_VERSION>=4`, con limites predeterminados de 16000000 pixeles y 256 MiB de memoria de trabajo adicional; el exceso de presupuesto falla con detalles tipados del recurso, los resultados informan la memoria maxima contabilizada y detener un script cancela su cuantizacion nativa activa
-* `Nuevo` `images.quantizeToFile` transmite un PNG indexado directamente al disco con tamano y metricas de calidad; las opciones de Image Quantization ahora admiten `preserveAlpha`, configuraciones Bitmap comunes, entrada de hardware y entrada de gama amplia normalizada a sRGB mediante `OPTIONS_API_VERSION>=3`
-* `Nuevo` `images.quantize` ahora devuelve los bytes PNG, el tamano, la calidad alcanzada y el error de cuantizacion; si se omite la calidad minima se usa el mejor esfuerzo (`minQuality=0`), mientras que un limite inferior explicito que no pueda cumplirse lanza `PngQuantBridge.QualityTooLowException` con el codigo `PNG_QUANTIZATION_QUALITY_TOO_LOW`; la API de resultados requiere `OPTIONS_API_VERSION>=2`
-* `Nuevo` `images.save`, `images.saveImage`, `images.compress` y `images.compressToBytes` ahora aceptan opciones con nombre para cuantizacion PNG: tamano de paleta, velocidad, limites de calidad independientes, tramado y posterize; el `quality` numerico sigue siendo compatible y las opciones requieren un plugin Image Quantization con `OPTIONS_API_VERSION>=1`
-* `Nuevo` Ejecución inmediata de TypeScript en memoria mediante `engines.execScript`: los nombres `.ts/.tsx/.mts/.cts` usan el compilador independiente con diagnósticos y mapeo de pila Source Map equivalentes a los archivos, Rhino devuelve el valor de la expresión final y la página Log completa junto con el panel Log del editor evalúan fragmentos de una línea de forma interactiva
-* `Nuevo` Los proyectos Node TypeScript respaldados por el compilador ahora pueden compilar bajo demanda archivos `.ts/.mts/.cts` creados durante la ejecución: Node transfiere la fuente mediante un PFD acotado por bytes y SHA-256, el host reutiliza la sesión residente del proyecto, se conservan los diagnósticos de tipos y el mapeo de pila con Source Map, y siguen rechazados el escape de ruta, los enlaces simbólicos y los destinos ambiguos
-* `Nuevo` Ace ahora actualiza de forma incremental su servicio de lenguaje TypeScript residente después de guardar y cancela el trabajo obsoleto con un debounce de inactividad de 450 ms y un retraso de programación de diagnósticos de 50 ms; en el dispositivo de aceptación, TS2322 se actualizó 201 ms después de guardar un proyecto de 20 archivos sin bloquear la entrada
-* `Nuevo` El contrato 5 del editor añade el cambio de nombre de símbolos TypeScript en todo el proyecto: Ace envía ediciones acotadas por archivo con identidades exactas, mientras el Host revalida una instantánea limpia, muestra una vista previa, congela el búfer activo y prepara, publica o revierte atómicamente todos los archivos antes de actualizar los diagnósticos
-* `Nuevo` El contrato de editor 4 añade importación automática y correcciones ortográficas de TypeScript autorizadas por el host para el búfer activo: las solicitudes solo pueden incluir ediciones UTF-16 acotadas y ordenadas y valores SHA-256 exactos de base y resultado, mientras el host las reproduce de forma independiente y rechaza acciones de solo lectura, obsoletas, malformadas, superpuestas o manipuladas antes de una aprobación de un solo uso
-* `Nuevo` El contrato de editor 3 añade navegación a definiciones TypeScript autorizada por la instantánea del proyecto: Ace puede solicitar ubicaciones en fuentes del proyecto y declaraciones de dependencias congeladas, mientras el host vuelve a validar de forma independiente la raíz, la ruta relativa canónica, la huella del inventario de fuentes o dependencias, el SHA-256 del contenido y el rango antes de abrir y posicionar el destino; se rechazan enlaces simbólicos, instantáneas obsoletas y contenido sin guardar que no coincida
-* `Nuevo` El contrato de editor 2 proporciona ahora a Ace la misma instantánea acotada de fuentes del proyecto TypeScript que usa la compilación previa a la ejecución, permitiendo diagnósticos en vivo entre archivos para rutas de importación incorrectas y manteniendo la compatibilidad con plugins de editor de contrato 1
-* `Nuevo` Las instantáneas de dependencias TypeScript ahora rechazan señales de addons nativos (`.node`, `binding.gyp` y `gypfile`) y hooks del ciclo de instalación (`preinstall`, `install` y `postinstall`) con códigos de error estables y orientación hacia JavaScript puro/WASM; los scripts ordinarios del paquete siguen siendo metadatos inertes
-* `Nuevo` Se alineó el contrato de dependencias TypeScript del host con la revisión 3 de la política del resolver y se añadieron pruebas de manifiestos de versiones reales para dayjs, lodash, zod, uuid y nanoid, fijando la selección de entradas CommonJS de Rhino y los errores ESM-only estables
-* `Nuevo` La compilacion de proyectos TypeScript y Ace comparten ahora una misma capa congelada de tipos `node_modules`: `types`/`typings`, `typesVersions` de TypeScript 6, declaraciones anidadas y `@types` instalados producen el mismo completado de dayjs, hover y diagnostico strict TS2322 en Rhino y Node
-* `Nuevo` Las capacidades Host de Lua Runtime ahora ofrecen almacenamiento persistente clave/valor aislado por archivo de script y Toast: `autojs.storage.get/put/remove/clear` usa un espacio de nombres privado de la aplicación, acotado y confirmado de forma síncrona, mientras `autojs.ui.toast` se despacha una sola vez en el hilo principal del Host
-* `Nuevo` Los tipos de archivo predeterminados de Ace LSP ahora incluyen .mts/.cts y sus variantes de declaración, lo que permite al editor Ace externo seleccionar el mismo perfil de ejecución TypeScript Rhino/Node; las selecciones predeterminadas antiguas se migran y los conjuntos de sufijos personalizados explícitos no cambian
-* `Nuevo` APK Builder ahora compila proyectos Rhino TypeScript durante el empaquetado; los APK finales solo contienen JavaScript cifrado y Source Maps opcionales sin código fuente incrustado, nunca fuentes TypeScript ni el compilador; los proyectos cifrados usan staging AES-256-GCM de un solo uso, con el texto claro solo en memoria y borrado tras volver a cifrar
-* `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
-* `Nuevo` La interoperabilidad Java de Node.js utiliza una lista de permitidos declarativa del host para Math, UUID, Rect, Point, Color, Locale, Build, Build.VERSION y TimeUnit, con `java.policy` y lectura de campos estáticos disponibles para el plugin
-* `Nuevo` Compatibilidad del host Node.js con sesiones de reproducción y la biblioteca media_store, con pausa, reanudación, búsqueda temporal, estado y limpieza, además de consulta, importación, cambio de nombre, exportación, escaneo y eliminación en MediaStore; media.playback, media.library y media.library.mutate siguen siendo capacidades independientes
-* `Nuevo` ESM, dynamic import(), red y WebSocket, módulos de red nativos, worker_threads, child_process e interoperabilidad con Java de Node.js son funciones estables habilitadas de forma predeterminada, mientras se mantienen las declaraciones de permisos, listas de permitidos, aislamiento y presupuestos de recursos
-* `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
-* `Nuevo` El entorno de ejecución Node.js admite un proveedor bajo demanda de código fuente de módulos cifrados para cada ejecución, que inspecciona y descifra solo los candidatos seleccionados realmente por el mecanismo de resolución de módulos
-* `Nuevo` El entorno de ejecución Node.js admite módulos puente controlados de AutoJs6 y adopta la política de seguridad Safe Node Profile
-* `Nuevo` El entorno de ejecución Node.js admite un proceso de servicio persistente y la reutilización de la plataforma Node/V8 en el ámbito del proceso, y crea un isolate y un Environment nuevos para cada ejecución de script
-* `Nuevo` El entorno de ejecución persistente de Node.js admite la finalización por inactividad o presión de memoria, el cierre explícito y el aislamiento y reconstrucción de procesos en mal estado
-* `Nuevo` Backend de plugin de runtime Node.js externo con modo `plugin` obligatorio y modo `pluginOptional` con fallback, sesiones Binder persistentes y runtime de proceso, validación de confianza/contrato/ABI y contrapresión sin cola para una sola ejecución activa
-* `Nuevo` El backend del plugin de runtime Node.js externo admite el transporte de archivo de espacio de trabajo v2 por solicitud, con mapeo explícito de entradas, escritura de resultados y manifiesto tombstone de eliminación, sin escanear el sandbox del host
-* `Nuevo` Las compilaciones de depuración de Node.js Runtime permiten activar explícitamente por ejecución una sesión Inspector/CDP limitada al host local, mientras que las compilaciones release, la escucha remota y las esperas bloqueantes siguen prohibidas
-* `Nuevo` La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias
-* `Nuevo` Cliente independiente del plugin compilador TypeScript con validación del contrato congelado de archivos AIDL/R2, compilación Rhino de archivos únicos UTF-8, diagnósticos acotados y salida Source Map obligatoria
-* `Nuevo` Los scripts .ts locales de un solo archivo y los scripts .tsx destinados a Rhino pasan por el plugin compilador independiente antes de ejecutarse en Rhino, conservan la identidad UTF-8 del origen y la salida Source Map, rechazan errores de tipo antes de la ejecución y nunca recurren al plugin Node.js ni a TypeScript sin compilar; los archivos de declaración no compatibles y un compilador no disponible devuelven errores localizados explícitos
-* `Nuevo` Los scripts .ts y .tsx locales de un solo archivo con la directiva "ui" admiten, tras la compilación, la ejecución en una Activity Rhino con diseños XML en forma de cadena y diseños TSX nativos, etiquetas intrínsecas controladas, Fragment, atributos escalares, búsqueda de vistas, callbacks de clic, actualización de texto y cierre explícito de la UI
-* `Nuevo` Los diagnósticos del compilador TypeScript se exponen como registros ScriptCompilationException del host con archivo de origen, línea y columna basadas en 1, gravedad y código de error TS; Console y el panel de registro inferior del editor muestran ubicaciones limpias y pulsables que saltan a la posición de origen correspondiente
-* `Nuevo` Las excepciones de ejecución TypeScript en Rhino consumen el Source Map v3 del compilador, reasignan los frames JavaScript generados al archivo .ts y la línea originales sin inventar columnas no disponibles, y mantienen pulsables las posiciones asignadas en Console y el panel de registro del editor
-* `Nuevo` Los scripts .mts/.cts locales de un solo archivo se compilan a .mjs/.cjs mediante el perfil Node del plugin compilador TypeScript independiente antes de ejecutarse con el plugin Node.js Runtime, conservan los nombres de archivo UTF-8 y omiten la eliminación heredada de TypeScript mediante expresiones regulares; los archivos Node .ts únicos se rechazan explícitamente hasta que se admitan los metadatos package del proyecto
-* `Nuevo` Los fallos de ejecución de Node TypeScript consumen el Source Map v3 del compilador para reasignar los frames V8 a la línea y columna exactas del archivo .mts/.cts original, con posiciones reasignadas pulsables en Console y el panel de registro del editor
-* `Nuevo` Los proyectos TypeScript ahora compilan una instantánea acotada del proyecto como un único programa para Rhino o Node, conservando imports relativos, dependencias CommonJS circulares, archivos JSON de runtime, el contexto `type` de package, diagnósticos de módulos importados y mapeo de stack Source Map por módulo; los metadatos package siguen siendo estrictos y se rechazan los lifecycle scripts
-* `Nuevo` Los resultados de compilación TypeScript se almacenan entre ejecuciones mediante una clave semántica que incluye el grafo de fuentes, las huellas del compilador y las declaraciones, las revisiones de profile y policy, y los metadatos package; los scripts sin cambios omiten el prewarm del compilador y la compilación Worker, mientras los archivos de salida autenticados se vuelven a validar antes de reutilizarse y las entradas dañadas o fuera de cuota vuelven a la compilación normal
-* `Nuevo` Los proyectos TypeScript usan el mismo snapshot exacto y read-only de `node_modules` desde la compilacion hasta la ejecucion; Rhino carga CommonJS/JSON y ramas `require` de paquetes duales con errores ESM-only estables, mientras Node recibe un workspace overlay privado e inmutable y ejecuta paquetes ESM/CJS/duales sin escribir cambios en las dependencias
-* `Nuevo` Las tareas programadas, tareas de broadcast, atajos y Tasker/Run Intents locales ahora comparten la misma canalización de preparación TypeScript que los inicios en primer plano; el JavaScript previo a la ejecución de Tasker conserva su orden antes de la salida Rhino/Node compilada y su prefijo se incluye en el desplazamiento de líneas del Source Map, en vez de omitir la compilación y ejecutar TypeScript sin compilar
-* `Nuevo` Las carpetas de proyecto permiten crear directamente tareas programadas y de broadcast; al activarse, la tarea vuelve a resolver la entrada Rhino/Node.js/Python desde project.json y restaura el directorio de trabajo del proyecto y la configuración useFeatures
-* `Nuevo` Backend de plugin Python Runtime independiente, compatible con la ejecución de archivos .py locales y proyectos de scripts declarados con `type: python` mediante un proceso de plugin CPython separado, con validación de componente fijo/firma/protocolo/ABI, conexión en caliente y sin fallback a JavaScript
-* `Nuevo` La integración de inicio de Python abarca el administrador de archivos/editor/Run Intent local/Import Intent de archivo único/nuevos atajos/tareas programadas/tareas de broadcast y conserva un contexto estricto de archivo único o proyecto; los proyectos admiten imports internos, acceso relativo a archivos y API `autojs6.app/device/execution/project` de solo lectura
-* `Nuevo` La ejecución de Python Runtime admite instantáneas stdin opcionales, acotadas y predefinidas mediante la clave ExecutionConfig `autojs6.python.stdinSnapshot`, con admisión estricta de ByteArray/texto UTF-8, negociación de capacidad/tamaño del proveedor, transporte PFD privado de solo lectura y limpieza
-* `Nuevo` El protocolo 1.4 de Python Runtime negocia por ejecución resultados JSON estrictos explícitos y artefactos opcionales, con límites de cantidad, ruta normalizada, tamaño por archivo/total, referencias PFD exactas y SHA-256; el Host solo consume resultados tipados y nunca los infiere desde stdout
-* `Nuevo` El protocolo 1.5 de Python Runtime añade un broker síncrono de capacidades Host limitado a cada ejecución, con verificación del UID fijo del plugin, JSON estricto y acotado, cuotas de llamadas, protección contra repeticiones y uso fuera del ciclo de vida; la primera entrega completa de bajo riesgo expone toast, portapapeles, apertura de aplicaciones o URL, información dinámica de batería/pantalla/brillo/volumen, consola Host con niveles y notificaciones sensibles a permisos a los scripts Python
-* `Nuevo` El broker Host de Python Runtime 1.5 permite lectura/escritura acotada de texto UTF-8, comprobaciones de existencia/tipo y listados directos ordenados dentro de la raíz del proyecto actual o del directorio del script individual; rutas relativas normalizadas y límites estables impiden escapar de la raíz de ejecución
-* `Nuevo` El broker Host de Python Runtime 1.5 expone diálogos acotados alert/confirm/prompt/select solo a inicios en primer plano autorizados por el usuario; los inicios en segundo plano fallan con INTERACTIVE_NOT_ALLOWED, y la cancelación o limpieza terminal cierra la interfaz de diálogo activa
-* `Nuevo` El broker Host de Python Runtime 1.5 expone metadatos seguros del motor actual sin rutas absolutas, detención propia determinista y hasta 16 lanzamientos secundarios asíncronos y acotados de scripts Host que no sean Python; las sesiones Python anidadas fallan con NESTED_PYTHON_NOT_ALLOWED mientras el provider sigue siendo de sesión única
-* `Nuevo` El broker Host de Python Runtime 1.5 expone acciones de accesibilidad acotadas de clic, clic prolongado, pulsación temporizada, deslizamiento, Atrás e Inicio; las coordenadas y duraciones se validan estrictamente, y un servicio de accesibilidad no disponible falla de forma determinista con ACCESSIBILITY_UNAVAILABLE
-* `Nuevo` El broker Host de Python Runtime 1.5 expone instantáneas acotadas del árbol de accesibilidad por ejecución y consultas selector compuestas con AND, con referencias de nodo opacas para acciones explícitas de clic y asignación de texto; las instantáneas, búsquedas, cadenas, nodos retenidos y respuestas tienen límites fijos, mientras que la accesibilidad no disponible, las búsquedas incompletas y los nodos obsoletos fallan con errores tipados estables
-* `Nuevo` El broker Host de Python Runtime 1.5 expone capturas de accesibilidad de Android 11+ como bytes PNG/JPEG por ejecución, con una sola imagen retenida, bloques ordenados de 32 KiB, un límite codificado de 4 MiB, metadatos SHA-256, liberación explícita y borrado de bytes al terminar; no abre UI de permisos, y la accesibilidad no disponible, el fallo de captura, los handles de imagen obsoletos y los excesos de límite fallan con errores tipados estables
-* `Nuevo` El broker Host de Python Runtime 1.5 busca un color RGB acotado en una captura de accesibilidad nueva de Android 11+, con región opcional y umbral por canal, y devuelve la primera coordenada por filas o una ausencia determinista sin transferir ni retener bytes de imagen
-* `Nuevo` El broker Host de Python Runtime 1.5 acepta una plantilla PNG/JPEG por ejecución mediante bloques ordenados de 24 KiB, con límite codificado de 1 MiB y verificación SHA-256, decodifica como máximo 2048 píxeles por lado y un millón de píxeles, y busca en una captura de accesibilidad nueva de Android 11+ en orden determinista por filas usando píxeles opacos de la plantilla y un umbral RGB; los límites de ciclo de vida, región y comparaciones fallan de forma cerrada sin depender de OpenCV, mientras que el intervalo obligatorio de 333 ms de Android solo se reintenta para el error exacto de intervalo demasiado corto tras 350 ms y dentro del plazo existente
-* `Nuevo` Los resultados JSON estrictos explícitos de Python Runtime se escriben en la consola Host con el prefijo `[result]` al terminar el script, mientras que los artefactos verificados se publican atómicamente en un directorio específico de la ejecución bajo `.python-artifacts` dentro del directorio del proyecto o script y se imprimen sus rutas absolutas; este directorio reservado se excluye de instantáneas posteriores del proyecto
-* `Nuevo` Backend de plugin Lua Runtime independiente para ejecutar archivos .lua locales en un proceso de plugin PUC Lua 5.4.8 separado, con validación de componente fijo/firma/protocolo/ABI, ejecución acotada y sin fallback a JavaScript
-* `Nuevo` Backends independientes de plugins JVM Source Runtime para Java y Kotlin, que compilan y ejecutan scripts .java/.kt de un solo archivo en procesos aislados, con package/import, salida de consola en tiempo real, sleep cancelable, toast del host y negociación explícita de capacidades
-* `Nuevo` El alcance de JVM Source Runtime es Java 8 de un solo archivo (plugin Java, API mínima 24) y Kotlin 2.3 (plugin Kotlin, API mínima 26); esta versión solo se probó en un dispositivo API 31/arm64-v8a y no afirma compatibilidad con niveles API no probados
-* `Nuevo` La ejecución explícita de JVM Source Runtime admite argumentos JSON acotados, acceso al portapapeles autorizado por separado, paquetes fuente Java de varios archivos y clases de entrada elegidas, ubicaciones seguras de excepciones y observaciones de ejecución mediante Protocol 1.6 / Entry API 4; los plugins Protocol 1.1 / Entry API 2 mantienen la compatibilidad con la ejecución de un archivo
-* `Nuevo` `ocr` selecciona automáticamente el motor disponible en orden ML Kit/Paddle/Rapid; `ocr.mode` devuelve el motor elegido o una cadena vacía, los modos explícitos permanecen fijos y `auto`, una cadena vacía o un valor nullish restauran la selección automática mediante `mode` o `tap`
-* `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/conversión de texto/información multimedia y más
-* `Nuevo` El sistema de plugins ofrece transporte TaggedWire versionado y paquetes de protocolo de desarrollo v1 para compilación DEX y generación de texto AI Provider, con aplicaciones de prueba de conformidad dedicadas y escenarios hostiles
-* `Nuevo` Los plugins oficiales de AutoJs6 pueden leer una instantánea versionada y de solo lectura de la apariencia del host para los colores del tema, la política del modo oscuro y el idioma mediante el contrato de configuración protegido por firma
-* `Nuevo` El sistema de plugins admite una interfaz de extensión para la documentación del proyecto sin conexión
-* `Nuevo` El explorador de archivos admite extensiones de plugin Explorer Action de solo lectura para un archivo y carga dinámicamente sus acciones en el menú adicional de la página principal de archivos
-* `Nuevo` El explorador de archivos admite acciones principales de Explorer Action con el protocolo v2 para ofrecer visualización de imágenes, reproducción de audio y reproducción de video mediante tres plugins independientes
-* `Nuevo` El administrador de archivos admite transacciones de salida del protocolo Explorer Action v3 con URI de contenido de solo escritura y límites definidos, validación de salida, recuperación tras fallos y publicación atómica de archivos en el mismo directorio
-* `Nuevo` El protocolo Explorer Action v4 del administrador de archivos admite objetivos ordenados de archivos/carpetas/mixtos y selecciones con el mismo directorio padre, muestra la compresión de plugins en menús de carpetas y en una barra vertical de cinco acciones, y ofrece sesiones de archivos del host para lecturas controladas y salida atómica en el mismo directorio
-* `Nuevo` El protocolo Explorer Action v5 del administrador de archivos permite que plugins fiables, limitados a un archivo de solo lectura, presenten directorios de archivos paginados en la lista Explorer nativa, la barra de ruta, el tema y la pila Atrás mediante sesiones Binder vinculadas al UID
-* `Nuevo` El protocolo Explorer Action v6 del administrador de archivos muestra vistas previas de entradas legibles de documentos, imágenes, audio y vídeo mediante los visores existentes del host
-* `Nuevo` Los protocolos Explorer Action v7 a v10 del administrador de archivos añaden la relectura obligatoria de archivos pendientes, el reemplazo atómico de objetivos, transacciones de salida de directorios propiedad del host con recuperación tras la muerte del cliente o un reinicio, y extracción nativa de la carpeta actual o de entradas seleccionadas con progreso acotado y cancelación, lo que permite a los plugins de archivos modificar un ZIP seleccionado y publicar salidas verificadas sin permiso de almacenamiento
-* `Nuevo` El protocolo Explorer Action v11 del administrador de archivos añade recuperación de contraseña nativa y acotada al abrir o extraer un archivo; los reintentos conservan la ruta y la selección, y limpian los búferes transitorios después de cada solicitud
-* `Nuevo` El protocolo Explorer Action v12 del administrador de archivos añade una fuente acotada de volúmenes hermanos vinculada a cada sesión de archivo; los plugins solo abren volúmenes ZIP y RAR aprobados por el host mediante IDs opacos y descriptores de solo lectura, sin recibir un directorio ni una ruta del sistema de archivos
-* `Nuevo` El protocolo Explorer Action v13 del administrador de archivos permite que los plugins compatibles reconstruyan la decodificación de nombres en la misma sesión de solo lectura; la barra de ruta nativa elige una codificación ZIP y conserva la ruta interna disponible más profunda y los elementos seleccionados que aún existen
-* `Nuevo` El protocolo Explorer Action v14 del administrador de archivos añade coincidencia acotada de sufijos compuestos; los plugins pueden registrar primeros volúmenes `.zip.001` y `.7z.001` exactos y reutilizar la fuente v12 ligada a la sesión sin coincidir con archivos `.001` arbitrarios ni recibir una ruta de directorio
-* `Nuevo` El protocolo Explorer Action v15 del administrador de archivos añade lotes recuperables de salida de varios archivos; los plugins publican juntos solo después de verificar todos los archivos pendientes, mientras el host registra de forma duradera el directorio padre y la identidad de los archivos y revierte solo los miembros coincidentes tras un fallo o reinicio
-* `Nuevo` El protocolo Explorer Action v16 del administrador de archivos añade una entrega de fuentes a la papelera controlada por el host y limitada a la selección original exacta y todas las salidas confirmadas; el host persiste una copia recuperable antes de retirar fuentes sin conceder rutas arbitrarias ni autoridad de borrado
-* `Nuevo` El protocolo Explorer Action v17 del administrador de archivos añade Abrir como archivo comprimido... de solo lectura únicamente cuando no coincide la acción principal; una sesión existente detecta la estructura y puede indicar el formato real en la barra de ruta sin análisis de menú en segundo plano ni permisos nuevos
-* `Nuevo` El protocolo Explorer Action v18 del administrador de archivos conserva la versión anterior en almacenamiento privado persistente del host antes de un reemplazo gestionado, expone solo metadatos opacos y acotados y permite una restauración únicamente si el archivo actual sigue coincidiendo exactamente con el reemplazo confirmado; nunca sobrescribe cambios externos y conserva la evidencia de recuperación interrumpida
-* `Nuevo` El protocolo Explorer Action v19 del administrador de archivos permite que las sesiones de archivo escribibles expongan Renombrar y Eliminar nativos para las entradas compatibles; las reescrituras se publican mediante reemplazo atómico verificado propiedad del host, conservan la versión anterior recuperable y reconstruyen la misma sesión preservando las rutas y selecciones restantes
-* `Nuevo` El protocolo Explorer Action v20 del administrador de archivos permite que las páginas nativas de archivos modificables creen carpetas vacías y añadan una selección mixta explícita de archivos y árboles de carpetas completos mediante una concesión de entrada congelada y sin rutas; se conservan las carpetas vacías y las raíces con el mismo nombre mediante numeración segura, mientras que un cambio de origen o cualquier elemento fallido revierte todo el reemplazo del archivo
-* `Nuevo` El protocolo Explorer Action v21 del administrador de archivos proporciona lotes duraderos del origen a la Papelera, administrados por el host, con historial opaco, resultados por elemento y restauración de mejor esfuerzo entre sesiones; nunca se sobrescriben nombres existentes, restaurar los orígenes no elimina los archivos creados y la evidencia de recuperación interrumpida permanece privada del host
-* `Nuevo` El protocolo Explorer Action v22 del administrador de archivos permite que una acción de solo lectura para un archivo declare sufijos acotados de archivos relacionados; el host inmoviliza solo los candidatos exactos `<nombre seleccionado><sufijo>` y los abre con descriptores de solo lectura sin exponer listas del directorio padre, rutas ni archivos hermanos arbitrarios
-* `Nuevo` El protocolo Explorer Action v23 del administrador de archivos permite que una acción de menú de solo lectura sobre un único directorio declare filesystemPath; el host pasa entonces solo la ruta canónica del directorio seleccionado, sin crear una sesión de archivos del host ni conceder acceso adicional
-* `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
-* `Nuevo` El metadato `instruction` del complemento admite recursos de instrucciones `@raw/...` localizados, y el resolutor compartido ahora puede leer referencias `@string/...` y `@raw/...` locales o calificadas por paquete
-* `Nuevo` El Centro de plugins admite el montaje automático de plugins SDK
-* `Nuevo` El Centro de plugins admite la ordenación por prioridad de múltiples variantes
-* `Nuevo` El Centro de plugins permite instalar y actualizar plugins en línea
-* `Nuevo` El Centro de plugins permite abrir la página de inicio de un plugin y ocultar plugins
-* `Nuevo` El Centro de plugins permite detectar la intersección de ABI disponibles y mostrar avisos
-* `Nuevo` El Centro de plugins resuelve las versiones oficiales de APK Builder Template mediante la matriz de compatibilidad del host, selecciona el artefacto ABI exacto del dispositivo con respaldo universal, conserva el canal existente de índice de releases/etiquetas y guía la desinstalación/reinstalación cuando la versión emparejada es inferior al plugin instalado
-* `Nuevo` Los Runtime Kits de APK Builder pueden declarar un intervalo cerrado de parches del host autorizado y verificado explícitamente; el host exacto de compilación continúa sin aviso, otros hosts dentro del intervalo reciben una advertencia localizada y las declaraciones fuera del intervalo o incorrectas se bloquean antes de transferir la plantilla
-* `Nuevo` Las opciones de desarrollador añaden un interruptor R1 desactivado de forma predeterminada para la compilación remota experimental de APK; el estado desactivado bloquea el descubrimiento del provider y la apertura de sesiones, los fallos detienen la compilación actual sin reserva local automática, la salida existente queda protegida mediante publicación atómica y los diagnósticos del proceso solo conservan campos enum y numéricos limitados
-* `Nuevo` El Centro de plugins admite plugins APK Builder Template, permitiendo instalar y actualizar bajo demanda las plantillas necesarias para empaquetar aplicaciones
-* `Nuevo` Una pulsación prolongada del botón flotante de la pestaña Plugins de la página de inicio abre el Centro de plugins
-* `Nuevo` Asistentes de configuración para ejecutar uno tras otro el asistente de permisos y el asistente de instalación de plugins, ofrecidos por un aviso de bienvenida en la página de inicio tras el primer inicio (entrada: Ajustes > Configuración > Asistentes de configuración)
-* `Nuevo` Asistente de permisos para marcar los permisos del menú lateral de la página de inicio y solicitarlos uno tras otro, con los perfiles integrados "Estándar" / "Mínimo" / "Todos" y perfiles personalizados; los permisos concedidos se pueden ocultar desde el menú (entradas: Asistentes de configuración / botón del título del grupo "Permisos" en el menú lateral de la página de inicio)
-* `Nuevo` Asistente de instalación de plugins para marcar plugins oficiales por categoría e instalarlos en un solo lote, con los perfiles integrados "Estándar" / "Mínimo" / "Todos" y perfiles personalizados que se pueden guardar, renombrar y eliminar; los plugins instalados se pueden ocultar desde el menú (entradas: Asistentes de configuración / menú del botón flotante de la pestaña Plugins de la página de inicio / menú "+" del Centro de plugins)
-* `Nuevo` El asistente de instalación de plugins instala mientras descarga, instala en silencio mediante el plugin 3-Setup Installer cuando hay una autorización Shizuku / Root / Dhizuku utilizable y comprueba el permiso para instalar apps desconocidas antes de descargar cuando se usa el instalador del sistema
-* `Nuevo` Método runtime.loadAar, para cargar archivos AAR dinámicamente
-* `Nuevo` Entrada explícita runtime.loadJarWithR8 con selección de componente exacto desactivada de forma predeterminada, fijación de identidad con la misma firma, transporte R8 acotado de cinco artefactos, adopción de caché aislada y cierre seguro sin fallback a D8/dx
-* `Nuevo` ui.useAndroidLayout admite controles de diseño nativos de Android, include/merge, referencias res del proyecto de scripts y archivos Drawable XML como shape/selector/layer-list
-* `Nuevo` Los módulos JavaScript (Rhino) admiten interfaces compatibles con power/settings/work_manager y el contenedor AppInfo, y completan determinadas API de Base64/Crypto/WebSocket/ByteString/automator/images/timers de Auto.js Pro 9.3.11
-* `Nuevo` El ai global de JavaScript (Rhino) enruta cada solicitud local y online mediante un destino de plugin AI Provider; las opciones de desarrollador abren la configuración confiable de 3-Stone AI o una guía exacta de instalación/activación/actualización, mientras el host deja de guardar perfiles o credenciales de AI y de incluir transporte HTTP de proveedores
-* `Nuevo` La API global JavaScript (Rhino) `ai.catalog` expone un catálogo unificado de destinos locales y online del plugin; omitir `plugin` y `target` selecciona el destino predeterminado declarado por el plugin oficial, `target` selecciona un destino exacto y `plugin` un componente externo exacto; las respuestas incluyen reasoning, usage y duración completos, finish reason, profile y metadata del destino resuelto, y los errores estables nunca cambian la ruta en silencio
-* `Nuevo` La API global `ai.session` de JavaScript (Rhino) crea una Conversation persistente del plugin AI provider, fija destino/proveedor/modelo/controles de generación y solo envía el nuevo prompt de usuario en los turnos posteriores de `ask`/`chat`/`stream`; la finalización normal conserva el contexto, mientras que cancelación, timeout, fallo de protocolo o cierre explícito liberan toda la sesión
-* `Nuevo` Las rutas de AI provider `ai.ask`/`ai.chat`/`ai.stream` y la sesión persistente `ai.session` admiten `structuredJson` y el objeto JSON `responseSchema`; un schema activa la decodificación nativa restringida por JSON Schema de LiteRT-LM, la sesión fija el mismo schema en cada turno y el JSON final se valida estrictamente
-* `Nuevo` Los destinos locales de AI Provider V2 exponen perfiles backend explícitos `cpu`, `gpu` y `npu` como controles opcionales del destino; la disponibilidad depende del dispositivo, un perfil no disponible falla sin fallback a CPU, una sesión fija un backend, GPU requiere OpenCL del sistema y NPU permanece no disponible porque su runtime EAP no está empaquetado
-* `Nuevo` El módulo global yolo de JavaScript (Rhino) ofrece una ruta desactivada por defecto a un componente exacto del proveedor YOLO, con transporte Binder/PFD versionado, carga de modelos NCNN basada en manifiesto, detección de objetos, cancelación y limpieza explícitas, sin conmutación silenciosa a otro proveedor
-* `Nuevo` El módulo global tts de JavaScript (Rhino) ofrece síntesis de voz del sistema, segmentación inteligente de textos largos, colas lógicas, detección de voces e idiomas con filtrado de voces sin conexión, tareas observables y eventos de audio, inserción de silencios y síntesis en archivos con publicación atómica; también incluye tiempos de espera, contrapresión, limpieza en tiempo de ejecución y protección contra el uso de un motor alternativo cuando se solicita uno específico
-* `Nuevo` Método device.getMarketName, para obtener el "nombre comercial" del dispositivo _[`issue #513`](http://issues.autojs6.com/513)_
-* `Nuevo` Las tareas programadas admiten tareas mensuales/anuales/con cuenta atrás y condiciones para finalizar la repetición _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
-* `Nuevo` El administrador de archivos admite selección múltiple y operaciones por lotes de copia/movimiento/eliminación
-* `Nuevo` El administrador de archivos admite la vista previa segura de archivos Markdown y HTML, con renderizado GFM, varios temas, CSS personalizado y carga controlada de recursos del mismo directorio
-* `Nuevo` Las vistas previas de Markdown y HTML admiten el modo de pantalla completa, con una opción "Iniciar en modo de pantalla completa" desactivada de forma predeterminada
-* `Nuevo` El administrador de archivos admite acciones con iconos en el extremo izquierdo para previsualizar Markdown/HTML, ver imágenes y reproducir audio/video; la aplicación puede actuar como visor multimedia del sistema, con reproducción de audio en segundo plano y controles de notificación
-* `Nuevo` El administrador de archivos reconoce los libros electrónicos `.epub` como un tipo de documento previsualizable y los abre con el plugin Readium EPUB Reader mediante el contrato Explorer Action; los libros abiertos directamente desde un archivo comprimido tienen un límite dedicado de 256 MiB
-* `Nuevo` Barra de ruta fijada en la parte superior del administrador de archivos con visualización de la ruta actual, resaltado del directorio actual, acceso directo a directorios superiores, desplazamiento automático al final de rutas largas, exploración horizontal, colores de directorio superior/actual iguales a los rótulos de categoría/nombres de archivo y centrado óptico de distintos sistemas de escritura y chevrones separadores según el centroide alfa de los glifos
-* `Nuevo` El administrador de archivos admite información de imágenes y visualización detallada de EXIF
-* `Nuevo` La edición de imágenes y la conversión de formatos se proporcionan mediante el plugin independiente Image Tools; cuando el plugin no está disponible, solo se ocultan las acciones correspondientes, mientras la visualización de imágenes, la información de imágenes y los datos EXIF siguen disponibles
-* `Nuevo` El visor de imágenes detecta automáticamente todas las imágenes del mismo directorio y admite zoom por pellizco sincronizado con el punto focal, navegación por deslizamiento y botones anterior/siguiente de la barra de herramientas, una barra compacta de información de tres filas para posición/resolución/tamaño/formato/fecha de modificación/EXIF, modo de pantalla completa, una opción para iniciar en pantalla completa y un color de fondo configurable con historial, mientras ActionBar, las barras del sistema y los iconos adaptan sus colores y contraste al fondo
-* `Nuevo` El administrador de archivos admite detalles del paquete y visualización del manifiesto para archivos APK/APKS/XAPK/APKM/APKZ/AAB
-* `Nuevo` El instalador de paquetes admite APK y conjuntos de APK divididos compatibles desde contenedores APKS/XAPK/APKM/APKZ, con selección de divisiones para el dispositivo y comprobaciones de coherencia de los certificados de firma
-* `Nuevo` El editor de código admite cargar Ace desde un plugin externo, con validación del firmante y la confianza, comprobaciones del contrato Editor API/la versión del anfitrión/la compatibilidad ABI binaria y retorno automático al editor nativo cuando el plugin no está disponible
-* `Nuevo` El editor de código admite el intercambio en caliente en tiempo de ejecución del plugin Ace externo y cambia automáticamente de motor según el estado de instalación o activación del plugin
-* `Nuevo` El editor Ace activa por defecto como función estable el completado inteligente local de TypeScript integrado, con completado de la API AutoJs6, ayuda de firmas, información al pasar el cursor y diagnósticos; se puede desactivar en los ajustes
-* `Nuevo` Los ajustes del editor Ace permiten cargar de forma selectiva los grupos de declaraciones TypeScript de AutoJs6 android/libraries/resources/main-app; las dependencias se cargan automáticamente y todos los grupos opcionales están desactivados de forma predeterminada para reducir el tiempo de inicio del servicio de lenguaje y el uso de memoria
-* `Nuevo` El editor Ace admite un panel de accesos directos/historial de acciones/acciones favoritas/selección de texto en dispositivos móviles/zoom con pellizco y más
-* `Nuevo` El editor de código permite recargar o convertir archivos con una codificación seleccionada, BOM opcional, indicadores de riesgo de codificación y deshacer/rehacer
-* `Nuevo` La barra de información del editor de código situada debajo de la barra de herramientas muestra el nombre del archivo, la línea y la columna del cursor en tiempo real y la codificación del archivo; los tres elementos se pueden pulsar para ver los detalles del archivo, saltar a una línea o cambiar la codificación, respectivamente
-* `Nuevo` La barra de estado del sistema, la ActionBar, los iconos y textos de los botones, los menús de desbordamiento y anidados, los diálogos internos y el cursor, los tiradores y los controles de selección del editor nativo siguen dinámicamente el tema actual del editor; los iconos de la barra de estado mantienen automáticamente el contraste claro/oscuro para unificar visualmente la interfaz desde la parte superior hasta el área de código
-* `Nuevo` El editor de código admite un modo de pantalla completa inmersivo, con la preferencia persistente y disponible tanto en el menú como en Configuración; se puede deslizar desde un borde para mostrar temporalmente las barras del sistema, mientras que Atrás sale primero de la pantalla completa antes de abandonar el editor
-* `Nuevo` El editor de código admite un panel de registro inferior (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
-* `Nuevo` El panel de registro inferior del editor de código permite saltar desde marcos de pila al código fuente (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
-* `Nuevo` El panel de registro inferior del editor de código ofrece un botón "Ejecutar/Detener" para iniciar y detener scripts rápidamente
-* `Nuevo` El editor de código admite una página de configuración dedicada y un diálogo dentro del editor, con vista previa de temas/configuraciones independientes para los modos claro y oscuro/fuentes/margen de números de línea/ajuste automático de línea y otras opciones de visualización
-* `Nuevo` La página Configuración ofrece opciones del editor de código como "Mostrar automáticamente el panel inferior de registros tras ejecutar" y "Umbral de resaltado de código"
-* `Nuevo` La configuración de aplicaciones empaquetadas permite mostrar u ocultar los accesos directos del iniciador "Registro" y "Configuración" _[`issue #550`](http://issues.autojs6.com/550)_
-* `Nuevo` El empaquetado de aplicaciones admite compilaciones remotas mediante plugins APK Builder Template
-* `Nuevo` Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins
-* `Nuevo` La integración R8 de JavaScript global (Rhino) añade tres sobrecargas de `runtime.loadJarWithR8` para exportación verificada y `runtime.retraceR8Stack` del protocolo 1.1; mapping/seeds/usage/retrace metadata se publican atómicamente, retrace vincula la procedencia del mapping y un proveedor ausente o inválido falla sin fallback D8/dx ni local
-* `Nuevo` Los ajustes del editor de código muestran ahora la matriz de lenguajes de Ace y los interruptores semánticos para TypeScript/JavaScript, Python, Lua y Java; Kotlin permanece visible como P2+ sin proveedor, y los tipos de archivo actúan claramente como lista de permitidos antes del enrutamiento en vez de reclasificar el lenguaje
-* `Nuevo` Los diálogos de actualización pueden mostrar en la aplicación el historial de versiones del complemento correspondiente
-* `Nuevo` `auto.registerEvent(name, listener, options?)` incorpora deduplicación y antirrebote opcionales: `{ distinct: 'window' | 'source' | true | (event) => key, within?: 500 }` descarta los eventos repetidos con la misma clave dentro de la ventana (como los varios `WINDOW_STATE_CHANGED` de una misma transición de ventana), `{ debounce: ms }` entrega solo el último evento de una ráfaga una vez que ha estado en silencio ese tiempo; ambos desactivados por defecto
-* `Nuevo` Shizuku se suma a root y al permiso de ajustes seguros como forma desatendida de habilitar el servicio de accesibilidad (se usa cuando ninguna de las otras dos está disponible, escribiendo el ajuste del sistema a través del servicio de usuario de Shizuku): nuevo interruptor "Habilitar el servicio de accesibilidad con Shizuku automáticamente" (activado por defecto) en la página de ajustes y en la sección de ajustes del administrador del servicio de accesibilidad, más una fila "Acceso a Shizuku" en la sección de estado del administrador
-* `Nuevo` Nuevo indicador `appWindowsFallback` de `auto.setFlags()`: mientras el sistema aún no proporciona la raíz de la ventana activa (justo después de vincularse el servicio de accesibilidad; en Android 8.0 posiblemente hasta el siguiente cambio de ventana), los selectores y `auto.root` / `auto.rootInActiveWindow` / `auto.windowRoots` recurren a las raíces de las ventanas de aplicación de la lista de ventanas (primero la ventana con foco); desactivado por defecto
-* `Nuevo` Nuevos métodos de `UiObject`: `contentInvalid()` / `contextClickable()` / `multiLine()` / `dismissable()` (al estilo de `clickable()` y los demás métodos de propiedades booleanas, reflejando los accesores compat existentes `isContentInvalid`, etc.)
-* `Nuevo` Nuevos métodos en las colecciones de controles (los arrays devueltos por `find()` / `untilFind()` / `children()` / `siblings()` y similares): `at(i)` (negativo cuenta desde el final, null fuera de rango), `first()` / `last()` (null si está vacía), `nonNull()` (descarta las entradas null), `slice(start?, end?)` (reglas de índice de `Array.prototype.slice`, el resultado conserva los métodos de la colección), y las variantes por nodo `performActionEach(action, ...args)` / `clickEach()` / `longClickEach()` / `scrollForwardEach()` / `scrollBackwardEach()` / `setTextEach(text)` (un array de booleanos, se intenta con cada nodo; la semántica de AND booleano de `performAction` / `click()` etc. existentes no cambia); `filter` / `map` / `forEach` / `some` / `every` / `indexOf` / `for...of` son operaciones propias del array y siguen funcionando como antes
-* `Nuevo` API de clic por coordenadas smartClickBounds / clickBoundsIfExists / clickBoundsAny, pasos Flow clickBounds con espera o retardo y sus alias
-* `Nuevo` Pasos encadenados clickIfExists / clickAny / findAny en instancias Flow, ramas opcionales whenPresent y bucles asíncronos limitados repeatUntil
-* `Nuevo` Nueva API de espera asíncrona encadenable: `waitAsync(cond, timeout?, interval?)` (alias `wait.async` / `auto.wait` / `flow.wait`) devuelve un objeto `Flow` en lugar de bloquear el script; la condición puede ser un selector (cadena / expresión regular / `UiSelector` / objeto / arreglo), una función, un `UiObject`, un `Flow` o una `Promise`; la cadena puede continuar con acciones de nodo (`click` / `longClick` / `setText` / `scrollForward`, etc.), acciones globales (`back` / `home` / `swipe`, etc.), `sleep` / `timeout` / `retry` / `scope` y las devoluciones de llamada `then` / `catch` (`else`) / `finally` / `map` / `filter` / `peek` / `run`, entrega su resultado mediante `sync()` / `await()` / `toPromise()` y se cancela con `cancel()`; puntos de entrada globales `waitThenClick` (`clickWait`), `waitForStable`, `waitForStableThenClick` (`clickWhenStable`), `clickWhenStableAfter`, `waitForVisible`, `waitForHidden` (`waitForGone`), y en el espacio de nombres `flow` (`$flow`) además `waitUntil` / `waitWhile` / `waitForActivity` / `waitForPackage` / `waitThenLongClick` / `sleep` (`delay`) / `run` / `of` / `all` / `race` / `any` / `cancelAll` / `Flow` / `pending`; los pasos bloqueantes se ejecutan en un grupo de hilos de trabajo propio del script (hilos `flow-<id>-<n>`, un carril en serie por cadena, de modo que las cadenas independientes se ejecutan en paralelo) y las devoluciones de llamada vuelven al hilo del script que creó la cadena (utilizable en modo UI, aunque `sync()` está prohibido en el hilo de UI), y al salir el script se cancelan todas las cadenas pendientes y se detiene el grupo de hilos; los fallos se rechazan con un `FlowError` (un `Error` con `code` / `step` / `selector` / `elapsed` / `attempts` / `reason`) cuyo código es `TIMEOUT` / `ACTION_FAILED` / `CANCELLED` / `A11Y_UNAVAILABLE` / `INVALID_TARGET`; `flow.defaults({ timeout, interval, stableFor, strictActions, trace })` establece los valores predeterminados por script (una lectura sin argumentos) y `flow.trace(true)` registra en la consola el inicio / fin / duración / resultado de cada paso; los pasos de conveniencia `clickAfter(min, max?)` / `longClickAfter` / `clickWhenStableAfter` y `sleep(min, max?)` aceptan una cadena `"±delta"` como el `sleep` global; el `wait()` síncrono no cambia
-* `Nuevo` Herramientas de automatización de alto nivel tanto en el módulo `automator` como en el ámbito global: `smartClick(target, options?)` (sube a un ancestro clicable cuando el objetivo no lo es, recurre a un gesto de toque cuando nada lo es y opcionalmente verifica una condición tras el clic), `clickIfExists` / `clickAny` / `findAny`, `scrollUntil(target, options?)` (desplaza un contenedor hasta que aparece el objetivo, mediante acciones de accesibilidad o gestos, tratando el contenido repetidamente sin cambios como el final), `typeInto(target, text, options?)` (un selector / un índice / el campo con foco; reemplazar o añadir; verificación por relectura y envío), `dismissPopups(targets, options?)` (cierra uno / todos los popups, o con `watch: true` devuelve un guardián en segundo plano impulsado por eventos de cambio de ventana), `collectList(container, item, options?)` (desplaza y recopila elementos, deduplicados por contenido), `launchAndWait` / `backUntil` / `backToApp`, `toggle(target, checked)` (hace clic solo cuando el estado difiere y luego verifica) y `retry(fn, options?)`; Flow incorpora los pasos correspondientes `.smartClick()` / `.scrollUntil()` / `.typeInto()` / `.dismissPopups()` / `.collectList()` / `.launchAndWait()` / `.backUntil()` / `.backToApp()` / `.toggle()` y las raíces `flow.*`; todo fallo es un `FlowError` (`code` / `step` / `selector` / `reason`); `flow.defaults({ humanize: { offset, delay } })` da a los pasos de acción de Flow y a las herramientas un desplazamiento aleatorio del toque y una pausa antes de cada acción, de aspecto humano
-* `Nuevo` Diagnóstico de accesibilidad: `auto.explain(selector, root?)` contabiliza un selector filtro a filtro (coincidencias de cada filtro por separado y lo que queda al aplicar los anteriores, el filtro que no deja nada, los nodos que casi coinciden al pasar todos los pasos previos), siendo el `toString()` del resultado el informe de texto; `auto.dump(options?)` genera una instantánea legible de las raíces de ventana (o de `root`) (texto indentado / JSON / XML al estilo uiautomator, con `maxDepth`, `properties`, `visibleOnly` y `maxNodes`); `UiObject.toJSON()` (para que `JSON.stringify(node)` funcione) y `UiObject.dumpSubtree(options?)`; `auto.stats` recoge los tiempos de búsqueda / consulta con sondeo / selector más lento / pasos de Flow del script (`reset()` los borra, `toString()` es el informe de texto); el generador de código del inspector de diseño incorpora la opción "Estilo de código" que emite fragmentos al estilo Flow (como `waitThenClick(selector).sync()`)
-* `Nuevo` La función "Generar código" del inspector de diseño admite alcances de un elemento/colección, espera hasta encontrar/espera con tiempo límite/comprobación inmediata, receptores de acciones y parámetros de texto, estilos Clásico/Flow, planes alternativos y explicaciones de localización, con vista previa de las coincidencias en el diseño
-* `Nuevo` Esperas dirigidas por eventos: `waitForIdle(quietFor? | { quietFor?, timeout?, eventTypes? })` devuelve `{ quietFor, elapsed, events }` cuando no llega ningún evento de estado / contenido / lista de ventanas durante `quietFor` ms, sustituyendo el "dormir un rato y luego buscar"; `waitForEvent(type?, filter?, timeout?)` espera el siguiente evento de accesibilidad (el tipo un nombre, un array de nombres o `"*"`; el filtro una función o `{ packageName, className, text }` con cadenas / regex); `waitForToast(text?, timeout?)` y `waitForNotification(filter?, timeout?)` esperan un toast de otra app o una notificación (filtros por subcadena / regex / función / objeto); los cuatro existen como raíces de Flow (`flow.waitForIdle(...)` etc.) y pasos encadenados (un `waitForIdle` encadenado deja pasar el valor), y el tiempo agotado lanza / rechaza con un `FlowError` (`code` `TIMEOUT`); `auto.setFlags(["eventAssistedPolling"])` hace que las consultas de selector con sondeo (`findOne(timeout)` / `untilFind()` y similares) y las esperas de Flow reintenten en cuanto llega un evento de accesibilidad, subiendo a 200 ms el intervalo de respaldo de las consultas cuando nada cambia
-* `Nuevo` Capacidades de selector y de nodo: la sintaxis de selector en cadena `select("text=Login clickable")` (`key=value` / `key~=regex` o `key=/regex/flags` / `key` / `!key` separados por espacios, comillas alrededor de un valor con espacios, un valor sin comillas con comas dividido en varios argumentos cuando hace falta como en `bounds=0,0,100,200`, las claves las del registro de selectores; `UiSelector.select(String)` añade los filtros y se devuelve a sí mismo, por lo que se encadena con los builders; una cadena mal formada lanza con la posición del carácter, el término erróneo y claves candidatas; `select()` sin argumento sigue siendo la acción del nodo); `UiObject.isStale()` / `waitUntilGone(timeout?, interval?)` / `waitForStable(stableFor?, timeout?, interval?)` para comprobaciones de estado y esperas a nivel de nodo (tiempo límite por defecto 10 s, intervalo 50 ms; despertadas antes por eventos de accesibilidad con el flag `eventAssistedPolling`; rechazadas en el hilo de UI); `findIterator()` para búsquedas perezosas (buscadas en el orden de `find()` conforme avanza la iteración, el resto del árbol sin recorrer tras un `break` en `for...of` o `close()`, `collect()` para los nodos restantes, contadores `visited` / `produced`); objetos de filtro de ventana `{ type, packageName, title, displayId, active, focused, id, layer }` para `auto.setWindowFilter(...)` y los nuevos `auto.findWindows(options?)` / `auto.findWindowRoots(options?)` (nombres de tipo como `application` / `inputMethod` / `system` / `accessibilityOverlay`, nombre de paquete y título como cadena o regex, las ventanas anteriores a API 30 contadas en la pantalla predeterminada)
-* `Nuevo` Robustez (roadmap P5.5): un `waitForEvent` / `waitForIdle` / `waitForToast` / `waitForNotification` pendiente (forma síncrona o Flow) termina de inmediato con `A11Y_UNAVAILABLE` en lugar de agotar el tiempo cuando el servicio de accesibilidad se desvincula mientras tanto; las esperas de Flow ganan la opción `recoverService` (también como predeterminado mediante `flow.defaults({ recoverService: true })`): una sonda que encuentra una interrupción del servicio espera entonces en silencio al servicio, de segundo en segundo dentro del tiempo límite restante (un servicio habilitado pero no vinculado se vuelve a habilitar mediante las estrategias de inicio, la página de ajustes nunca se abre y al usuario se le pregunta como mucho una vez), la espera continúa con su objetivo cuando el servicio vuelve a tiempo y en caso contrario se rechaza con un `A11Y_UNAVAILABLE` que lleva `elapsed` / `attempts`; cuando la plataforma omite `onServiceConnected`, el registro adopta la instancia a partir de su primer evento y anota el flag `adoptedByEvent` (`auto.state.adoptedByEvent`, una nota en la línea de instancia en el proceso del diagnóstico del gestor de servicios), y las preferencias de la información del servicio (modo estable, observación de gestos) se aplican a partir de ese primer evento
-* `Nuevo` Ejemplos de accesibilidad (roadmap P6.4): seis scripts añadidos al directorio de ejemplos integrado "无障碍服务" (esperas asíncronas y acciones encadenadas con Flow, relleno de formularios y cierre de ventanas emergentes con el kit de herramientas, desplazamiento y recopilación de listas con el kit de herramientas, selectores de cadena e iteración perezosa, diagnóstico de selectores y volcado del árbol de nodos, esperas dirigidas por eventos), cada uno dirigido a la ventana flotante del propio script, sin necesidad de otra aplicación
-* `Nuevo` Los tres botones de la barra de título de la consola flotante (minimizar, configuración de posición, cerrar) se fusionan en un único botón "Más" cuyo menú ofrece Minimizar, Redimensionar, Barra de entrada, Limpiar, Copiar, Ajustes y Cerrar; "Redimensionar" activa un modo de cambio de tamaño (el contenido se oscurece y muestra el tamaño actual, arrastre el borde derecho o inferior o la esquina inferior derecha para redimensionar, toque en otro lugar para salir); el diálogo "Ajustes" permite alternar el prefijo de hora, el formato de hora (preajustes o patrón personalizado), el coloreado del registro, el tamaño del texto, la evitación de la barra de estado y la opacidad de la barra de título y del contenido
-* `Nuevo` La consola añade `setTimeVisible` / `setTimeFormat` / `setColorful` / `setAvoidStatusBar` / `setInputVisible` y las opciones correspondientes de `console.build` (`timeVisible` / `timeFormat` / `colorful` / `avoidStatusBar` / `inputVisible`), que reflejan las opciones del diálogo de ajustes de la ventana flotante; los menús "más" de la página de registro y del panel de registro del editor añaden "Ajustes" (prefijo de hora, formato de hora, coloreado del registro, tamaño del texto) y un interruptor "Barra de entrada", cada uno recordado por separado; nuevos ejemplos "Consola/Ajustes de hora y coloreado" y "Consola/Ajustes independientes del orden"
-* `Nuevo` Restaura `console.rawInput(prompt?, ...args)` y `console.input(prompt?, ...args)` (abandonados desde 6.3.1): bloquean el hilo del script hasta que el usuario envía una línea en la barra de entrada de la consola, e `input` evalúa la línea como expresión JavaScript; la barra de entrada está oculta por defecto y solo aparece mientras un script espera entrada (la ventana flotante se muestra y toma el foco si nada muestra la consola, y sube para evitar el teclado), o permanece visible mediante `console.setInputVisible(true)` o el elemento "Barra de entrada" del menú "más" de cada consola; el texto enviado se repite con el prefijo `> ` y la entrada pendiente se cancela al terminar el script; nuevo ejemplo "Consola/Entrada interactiva"
-* `Nuevo` El modo UI añade un elemento `<globalconsole>` que muestra la consola global, mientras que `<console>` ahora muestra la consola del propio script (como en Auto.js 4); ninguno muestra prefijo de hora por defecto; `<console global="true">` y la forma de atributo sin valor `<console global>` equivalen a `<globalconsole>` (el XML de diseño acepta atributos sin valor, tratados como `"true"`); los atributos del elemento cubren los métodos `console.setXxx` (`title` / `titleTextSize` / `titleTextColor` / `titleBackgroundColor` / `titleBackgroundTint` / `titleBackgroundAlpha` / `titleIconsTint` / `contentTextSize` / `contentTextColor` / `contentBackgroundColor` / `contentBackgroundTint` / `contentBackgroundAlpha` / `textSize` / `textColor` / `backgroundColor` / `backgroundTint` / `backgroundAlpha` / `timeVisible` / `timeFormat` / `colorful` / `inputVisible` y más), y establecer `title` muestra una barra de título con un menú "Más"; nuevo ejemplo "Diseño/Elemento consola"
-* `Nuevo` Las suscripciones del puente Node.js envían eventos de sensores, WebSocket, interfaz, ventanas flotantes y entrada mediante callbacks existentes, con on/once/off, colas limitadas y compatibilidad con drainEvents
-* `Nuevo` Opción idleExitMs para cerrar el proceso Node.js inactivo y reconectar el siguiente script, con diagnóstico idleForMs y permanencia en memoria por defecto
-* `Nuevo` Entrada de consola con process.stdin / readline y mensajes JSON por ejecución mediante autojs6:host; postMessage v3 compatible con anfitriones anteriores
-* `Nuevo` Las sesiones de captura de Node.js usan el consentimiento de Android y el servicio en primer plano existente, con identificadores de imagen, guardado PNG/JPEG/WebP y limpieza al detenerse o terminar el script
-* `Nuevo` Los identificadores de imagen de Node.js admiten recorte, redimensionado, escala de grises, umbralización y búsqueda de plantillas o colores mediante el motor anfitrión, con imágenes independientes y limpieza al terminar
-* `Nuevo` Node.js image.toBytes transfiere píxeles PNG o RGBA mediante descriptores de archivo a Buffer nativos, por JNI o el puente de archivos, y libera los adjuntos tras su uso, al vencer el plazo o al terminar
-* `Nuevo` Las API Node device ofrecen información actual del sistema, pantalla, batería y memoria, control de brillo y pantalla encendida por tiempo limitado; media permite ajustar el volumen según los permisos de Android
-* `Nuevo` autojs6:events observa notificaciones Android, Toast externos, teclas de accesibilidad y eventos de pantalla o batería mediante callbacks, con permisos explícitos y limpieza automática; events nativo de Node mantiene su compatibilidad
-* `Nuevo` Node app admite servicios Android, broadcasts y consultas de aplicaciones instaladas; dialogs ofrece entrada de texto, selección y ventanas de progreso que se cierran al terminar el script, y keys incorpora acciones del sistema de accesibilidad
-* `Nuevo` Node recorder admite grabación AAC con permiso de micrófono, notificación, límite de duración y limpieza al terminar el script; ui.overlay admite cambios de propiedades, arrastre y envío de eventos
-* `Nuevo` Los scripts Node pueden ejecutarse en dos procesos independientes con una cola FIFO compartida y cancelación y entrada dirigidas a cada ejecución
-* `Nuevo` Las consultas MediaInfo admiten streamNumber desde 0, countGet e infoKind para unidades, descripciones y nombres legibles; Rhino y Node mantienen TEXT del primer flujo por defecto y negocian las capacidades del plugin
-* `Nuevo` Comprobacion de la alineacion ELF antes de cargar complementos OpenCV e Image Quantization, con un error claro si el tamano de pagina no es compatible
-* `Nuevo` El Centro de complementos lee la alineacion del indice oficial y del manifest instalado, y avisa antes de instalar o activar versiones incompatibles en dispositivos de 16 KB
-* `Nuevo` Alternativa de captura MCP: image.captureScreen(options) acepta las opciones de recorte, escala, formato y calidad de las capturas de accesibilidad y devuelve una imagen codificada de un solo uso mediante descriptor de archivo. captureScreen() mantiene el identificador de imagen; la autorización MediaProjection ausente o revocada devuelve un error de permisos.
-* `Nuevo` `images.countPointsByColor(image, color, options?)` cuenta los píxeles que coinciden con un color mediante una máscara de OpenCV, e `images.getMeanColor(image, region?)` devuelve el color medio de una imagen o región
-* `Nuevo` `images.readPixels` acepta un ImageWrapper además de una ruta de archivo, y la imagen pasada sigue siendo utilizable
-* `Nuevo` `images.matchTemplate` e `images.findPointByImage` aceptan la opción `scales` (un factor o una lista) para buscar plantillas capturadas en otras resoluciones; cada coincidencia expone ahora `width`, `height`, `scale`, `center` y `rect`, y `MatchingResult` incorpora `size`, `isEmpty()`, `isNotEmpty()` y `filter()`
-* `Nuevo` Entrada "Ejecución flotante" en el menú de script del explorador de archivos, con una barra flotante translúcida para iniciar / detener, editar y ver el registro del script, que sigue el modo nocturno y el color del tema
-* `Nuevo` Análisis de diseño: mantén pulsado un atributo en el diálogo de información del nodo para marcar varios y copiarlos como un selector encadenado (id('x').text('y')) o un selector de objeto aceptado por pickup() / detect(); "Guardar diseño en archivo" escribe el árbol de nodos capturado en <directorio de trabajo>/layouts/<hora>.layout.json, y tocar ese archivo en el explorador de archivos lo analiza sin conexión
-* `Nuevo` Integración del complemento 3-Shell Terminal: la entrada del menú lateral y la barra del proyecto abren la terminal del complemento, "Abrir en la terminal" del menú de directorio lo proporciona el complemento (1.1.0 o posterior), el interruptor del menú lateral sigue las sesiones del complemento, y un complemento ausente, desactivado o incompatible lleva al centro de complementos, a sus ajustes o a un aviso de actualización
-* `Nuevo` Objeto global de scripts terminal: gestión de sesiones, ejecución visible y eventos de salida, con espera de salida y códigos de finalización (requiere el plugin 3-Shell Terminal) (ver Ejemplos > 终端)
-* `Nuevo` `images.matchFeatures` acepta una imagen o una ruta en cualquiera de sus dos argumentos y detecta las características al vuelo; nuevas opciones `ransacThreshold`, `minInliers` y `maxFeatures`, `ObjectFrame` expone `width`, `height`, `angle`, `bounds`, `points`, `matches` e `inliers`, e `ImageFeatures` expone `count` y `method`
-* `Nuevo` Contrato de complemento de accesibilidad para complementos oficiales: los complementos que publican una política de servicio `follow-host` se habilitan y deshabilitan junto con el servicio de accesibilidad de AutoJs6 mediante las estrategias configuradas de root, ajustes seguros o Shizuku, y reciben la difusión de estado del servicio anfitrión
-* `Nuevo` Ejecución de proyectos con el plugin Bun Runtime: un script situado bajo un directorio con `project.json` o `package.json` se empaqueta en un archivo de espacio de trabajo acotado (como máximo 16384 entradas y 64 MiB, solo archivos regulares y directorios) para un plugin que declare `SUPPORTS_WORKSPACE_ARCHIVE`, de modo que las importaciones relativas dentro del proyecto se resuelven; el archivo de entrada lleva la fuente actual del editor, los enlaces simbólicos y archivos especiales abortan la ejecución, y los scripts sueltos o los plugins antiguos conservan la ruta de fuente única
-* `Nuevo` Instantánea de información del host para el plugin Bun Runtime: cuando el plugin declara `SUPPORTS_HOST_INFO` y la autorización `host_info` está activa (por defecto), las solicitudes `runScript` llevan `hostInfoVersion = 1` y un Bundle `hostInfo` con el nombre del paquete del host, `BuildConfig.VERSION_DATE` y la etiqueta de idioma preferida, de modo que los scripts Bun pueden leer mediante la variable de entorno `AUTOJS6_HOST_INFO_FILE` la instantánea de host/plugin/ejecución que el plugin verifica y escribe; el host nunca envía su propia versión (el plugin la resuelve mediante PackageManager), la autorización puede revocarse en cada ejecución (`BunHostCapabilityGrants`) y los plugins sin esta capacidad reciben exactamente la solicitud anterior
-* `Nuevo` Puente de capacidades para llamadas dinámicas del plugin Bun Runtime con las dos primeras capacidades `ui.toast` / `device.info`: cuando el plugin declara `SUPPORTS_HOST_CAPABILITY_BRIDGE` y al menos una de las autorizaciones `ui_toast` / `device_info` está activa (por defecto), las solicitudes `runScript` llevan `hostCapabilityBridgeVersion = 1`, un binder `IBunHostCapabilityBroker` fijado al UID del plugin y a esta ejecución, y los ID de capacidad autorizados; los scripts Bun llaman `GET /v1/info` y `POST /v1/<capacidad>` a través del socket unix del plugin, el host reenvía el JSON sin interpretarlo (solicitudes de 64 KiB, resultados de 256 KiB, 1024 llamadas por ejecución, 4 en curso, 10 s cada una) y responde mediante `IBunHostCapabilityCallback`. `ui.toast` muestra como máximo cuatro toasts por ejecución desde el hilo principal, `device.info` devuelve solo campos de `android.os.Build`; ambos interruptores están en la página del plugin del Centro de plugins, y los plugins sin esta capacidad reciben exactamente la solicitud anterior
-* `Nuevo` Categoría de ajustes "Papelera e historial de versiones": una subpágina de políticas de retención permite editar el historial de versiones (días de retención, versiones por archivo, tamaño por archivo, tamaño total, tamaño máximo de archivo a rastrear), la papelera (días de retención, límite de tamaño) y los borradores de emergencia (días de retención, límite de tamaño), donde 0 significa sin límite y un cambio ejecuta una limpieza de inmediato; además de un interruptor "Borrar también el historial de versiones al eliminar permanentemente"
-* `Nuevo` Entradas "Limpiar ahora" y "Ajustes" en los menús de las páginas de papelera e historial de versiones, y una pulsación larga en cualquiera de los dos elementos del cajón abre los ajustes de políticas de retención
-* `Nuevo` El cuadro de dirección del modo cliente puede escanear el código QR mostrado por la extensión de VSCode (1.1.0+) para conectarse sin escribir la dirección
-* `Nuevo` Protocolo v2 de la extensión de VSCode con mensajes de solicitud/respuesta y métodos de gestión remota de archivos (explorar, leer, escribir, renombrar y eliminar archivos del dispositivo, ejecutar scripts del dispositivo) para la extensión de VSCode 1.1.0+
-* `Nuevo` Página de lista del historial de versiones: las entradas del editor y del explorador ahora abren una lista dedicada que muestra hora, tamaño, operación y codificación de cada revisión y marca la que coincide con el archivo actual; tocar para previsualizar, restaurar o eliminar, mantener pulsado para selección múltiple y eliminación, ordenación por hora o tamaño
-* `Nuevo` Vista de diferencias del historial de versiones: compara una revisión con el archivo actual o selecciona dos revisiones y compáralas; las líneas añadidas y eliminadas se colorean línea por línea, los tramos sin cambios se pliegan y pueden expandirse, y las líneas se pueden buscar por texto; el contenido demasiado grande muestra solo estadísticas de líneas y tamaño
-* `Nuevo` Instantáneas manuales y fijación en el historial de versiones: el menú del editor incorpora "Crear instantánea" (etiqueta opcional) y las instantáneas se fijan de forma predeterminada; cualquier revisión puede fijarse, dejar de fijarse o cambiar de etiqueta desde la lista de revisiones, las revisiones fijadas quedan exentas de la limpieza por días / cantidad / tamaño por archivo, y la limpieza por tamaño global elimina primero las revisiones no fijadas
-* `Nuevo` Exportación del historial de versiones: el diálogo de detalles de la revisión incorpora "Exportar", que tras elegir un directorio y confirmar el nombre del archivo (por defecto el nombre original con la marca de tiempo de la revisión) escribe la revisión byte a byte conservando la codificación original y el BOM; al sobrescribir un archivo rastreado se conserva antes su contenido actual
-* `Nuevo` Al abrir el historial de versiones desde el editor, el diálogo de detalles de la revisión ofrece "Restaurar y guardar": tras confirmar la sobrescritura, la revisión se carga en el editor y se guarda en disco de inmediato (la opción "Restaurar" predeterminada sigue cambiando solo el contenido del editor)
-* `Nuevo` Selección múltiple en la papelera: mantén pulsado un elemento para empezar a seleccionar, con seleccionar todo / deseleccionar todo, restauración por lotes (a la ruta original de cada elemento o a un directorio elegido; si hay nombres en conflicto se elige omitir / sobrescribir / renombrar automáticamente para todo el lote, y los elementos con el mismo nombre dentro del lote siempre se renombran; el diálogo de progreso puede abortarse y al final se muestra un resumen de restaurados / omitidos / fallidos) y eliminación por lotes de la papelera
-* `Nuevo` Vista previa del contenido de la papelera: el diálogo del elemento incorpora "Vista previa", que abre los archivos de texto en el editor de solo lectura, lista los archivos dentro de un directorio de la papelera (ruta relativa, tamaño, número de archivos y carpetas) e informa del contenido binario en lugar de abrirlo
-* `Nuevo` Detalles del elemento de la papelera: el diálogo del elemento incorpora "Detalles", que muestra nombre, tipo, ruta original, hora de envío a la papelera, tamaño, SHA-256 y la caducidad prevista (con días y horas restantes) como texto seleccionable que se puede copiar al portapapeles con un toque
-* `Nuevo` Tras mover un archivo o directorio a la papelera desde el explorador, la barra de aviso ofrece "Deshacer", que restaura cada elemento a su ruta original solo mientras esa ruta siga libre (sin sobrescribir nunca); los elementos que ya no están en la papelera o cuya ruta está ocupada se indican como omitidos en el resumen
-* `Nuevo` La papelera detecta elementos dañados cuyo archivo de datos falta: la lista los marca como "Datos ausentes" con un color destacado, al tocarlos solo se ofrecen detalles y eliminación, y una nueva acción de menú "Eliminar elementos dañados" los limpia de una vez; la limpieza periódica solo registra su número y nunca los elimina automáticamente
-* `Nuevo` Conexión de la extensión de VSCode: el modo cliente y el modo servidor incorporan un diálogo "Administrador" (botón "Administrador" de la entrada del cajón o pulsación larga) con estado en vivo (estado de la conexión, dirección del servidor o de escucha, host remoto, versiones de la extensión y del protocolo, duración de la conexión, última actividad, sesión de reconexión, último error; cada fila se puede copiar), acciones (conectar, desconectar, reconectar ahora, dejar de reconectar, iniciar, detener, reiniciar, desconectar todos los clientes, copiar dirección) e interruptores (reconexión automática, reintento al cambiar de red, restaurar la conexión o iniciar el servidor al arrancar, notificar cambios de clientes); el administrador del modo servidor incorpora una sección "Clientes" que lista cada VSCode conectado, con detalles, desconexión y reconexión por cliente
-* `Nuevo` Conexión de la extensión de VSCode: el modo cliente se reconecta automáticamente tras una desconexión inesperada (fallo de la extensión, reinicio de VSCode, corte de red) con retroceso exponencial, reintento inmediato al haber red disponible y restauración al iniciar la aplicación; ambas partes anuncian los cierres intencionados con un mensaje bye, por lo que una desconexión explícita de cualquiera de ellas nunca va seguida de una reconexión automática
-* `Nuevo` Conexión de la extensión de VSCode: confirmación de emparejamiento - un dispositivo desconocido que se conecta en modo cliente debe permitirse primero en VSCode (opcionalmente recordado), mientras que los dispositivos que escanearon el código QR se confían automáticamente; requiere extensión 1.1.0+
-* `Nuevo` Modo servidor: descubrimiento en la LAN (mDNS) - al activarlo, la extensión de VSCode (1.1.0+) lista este dispositivo en su selector de conexión LAN sin escribir la dirección
-* `Nuevo` Archivos remotos de VSCode: transferencia por fragmentos - los archivos grandes se leen y escriben en fragmentos de 1 MiB con progreso mostrado en VSCode; requiere extensión 1.1.0+; fs.list puede devolver el md5 de los archivos bajo demanda para que la extensión compare archivos al traer cambios del proyecto desde el dispositivo
-* `Nuevo` Administrador del modo cliente: una entrada "Historial" en la sección de control muestra las direcciones de servidor usadas anteriormente; toque para conectar, mantenga pulsado para eliminar o borre todas
-* `Nuevo` Modulo de contrato del plugin Mail (plugin-api/mail-api): superficie AIDL congelada, un cliente de host que abre sesiones de cuenta con un arrendamiento de vinculacion dedicado, las reabre tras la muerte del proceso del plugin, reintenta una vez tras renovar el token XOAUTH2 y transmite los adjuntos al disco mediante tuberias, y registro en el Centro de plugins como plugin activado por defecto
-* `Nuevo` API de script `mail` del plugin Mail (hoja de ruta Mail P3.1 y P3.2): `mail.connect(opciones o alias)` con preajustes de proveedores y un `tokenProvider` para XOAUTH2, `MailClient` con `test`, `send` (adjuntos desde rutas del script mediante descriptores de solo lectura), `folders` / `folder(path)` / `createFolder` / `deleteFolder` / `renameFolder`, `fetch`, `search` con un marcador de respaldo del lado del cliente, `get` / `fetchBody`, `download` y `raw` que transmiten al directorio de trabajo con `onProgress`, `setFlags` con `markRead` / `markUnread` / `flag` / `unflag`, `move`, `copy`, `delete`, `expunge`, `append` y `close`, cada uno con una forma `Async` cuya Promise se resuelve en el hilo del script; los mensajes resultantes llevan campos `Date`, direcciones imprimibles y metodos enlazados `load` / `download`, los fallos son objetos `MailError` con `code` y `retryable`, y el global expone `mail.providers`, `mail.accounts`, `mail.setDefault` y el reenvio de cada metodo del cliente
-* `Nuevo` API de scripts `mail.watch` del plugin de correo (hoja de ruta de correo P5): `client.watch(folder?, {mode?, pollIntervalMs?, fetchBody?, reconnect?})` y `mail.watch` devuelven un emisor `MailWatch` cuyos eventos `message(message, watch)`, `mode`, `resync`, `error` y el único `close(reason)` llegan al hilo del script y lo mantienen vivo hasta `stop()`; el plugin vigila con IMAP IDLE (con sondeo de respaldo, POP3 por UIDL), el anfitrión descarta generaciones caducadas y entregas fuera de orden, la muerte del plugin se informa como `PLUGIN_UNAVAILABLE` y por defecto va seguida de una nueva vigilancia en la sesión reabierta con un `resync`, y cerrar el cliente o salir del script detiene sus vigilancias
-* `Nuevo` Contrato del plugin de correo versión 2 con vigilancias en segundo plano (hoja de ruta de correo P8): los `IMailPlugin.openTrigger` / `listTriggers` añadidos y las interfaces `IMailTrigger` / `IMailTriggerCallback` se suscriben a las vigilancias que el plugin mantiene en su propio servicio en primer plano, y la nueva tarea por intent "Al llegar un correo" (`org.autojs.autojs6.action.MAIL_TRIGGER`, recibida tras el permiso de firma del host) lanza un script por cada correo nuevo de la vigilancia elegida, con filtro opcional por remitente y asunto y el documento del evento en `engines.myEngine().execArgv.mail`; las entregas repetidas se descartan y las ráfagas se limitan a un lanzamiento por tarea cada 3 s; un plugin de versión 1 nunca ve las nuevas llamadas
-* `Nuevo` Módulo de contrato del complemento EPUB (plugin-api/epub-api) con una superficie AIDL congelada para la extracción de libros (metadatos, índice, orden de lectura, texto de capítulos, recursos, búsqueda) y sesiones de lectura basadas en token, el envoltorio de descubrimiento del anfitrión para el motor `epub`, y el registro en el Centro de complementos del paquete Readium EPUB Reader, cuyos servicios Explorer Action y EPUB comparten una sola entrada
-* `Nuevo` Cliente anfitrión del complemento EPUB (core/plugin/epub, hoja de ruta del complemento P5.4): `EpubPluginHost.openBook` valida la ruta, la abre en solo lectura y entrega un cliente de libro (metadatos, índice, orden de lectura, texto de capítulos paginado como texto plano o Markdown, exportación de recursos mediante una tubería en cola, búsqueda, posiciones) sobre un arrendamiento de enlace dedicado con aviso de muerte; `openReader` abre una sesión de lectura, lee su token de un solo uso e inicia por sí mismo la Activity del lector del complemento (lanzamiento en dos pasos), puentea los eventos de la sesión (open, progress, bookmark, error, close) con comprobación de generación y secuencia, y reenvía goTo, navigate, setPreferences, getBookmarks y getState; cada fallo se traduce a los códigos de error del contrato
-* `Nuevo` API de script `epub` del complemento Readium EPUB Reader (hoja de ruta del complemento P6.1): `epub.open(ruta u opciones)` devuelve un `EpubBook` con `metadata`, `toc` (un árbol `{ title, href, children }`), `readingOrder`, `positions`, `text(target?, options?)` (un href, un índice del orden de lectura, una entrada del índice o el libro completo, paginado con `offset` / `maxChars` y `format` text o markdown), `textAll`, `cover` (una `Image` o un archivo), `resource`, `search` y `close`; la capa de conveniencia `epub.metadata` / `toc` / `readingOrder` / `text` / `cover` / `search` abre y cierra el libro en cada llamada, `epub.isAvailable()` sondea el complemento, cada método tiene una forma `Async` con Promise resuelta en el hilo del script, las rutas siguen el directorio de trabajo del script y rechazan URI, los fallos son objetos `EpubError` con `code`, el aviso de complemento no disponible está localizado y la salida del script cierra los libros que dejó abiertos
-* `Nuevo` Control del lector en la API de script `epub` (hoja de ruta del complemento P6.2): `epub.read(path, options?)` abre el lector del complemento Readium EPUB Reader y devuelve un emisor de eventos `EpubReaderSession` cuyos eventos `open`, `progress`, `bookmark`, `error` y `close` llegan en el hilo del script, con `goTo(href | progression | locator)`, `next` / `prev` / `nextChapter` / `prevChapter`, `setPreferences(partial)`, `bookmarks()`, `close({ finish? })` y las propiedades `locator`, `progress`, `title`, `chapterTitle`, `href`, `positions`, `state`, `reason`, `isOpen` / `isClosed`; la posición inicial proviene de `href`, `progression` o `locator` con `preferences` opcionales, un script que deja de consumir sus eventos recibe `error(LIMIT_EXCEEDED)` y `close(overflow)`, y la salida del script termina la sesión mientras el lector permanece abierto para el usuario
-* `Nuevo` Ejemplos de EPUB (hoja de ruta del complemento P6.3): tres scripts añadidos al nuevo directorio de ejemplos integrado "电子书" (EPUB 元数据与目录: metadatos, índice, orden de lectura y posiciones de un libro hallado en Download o Books; 导出章节文本: exportación del texto de un capítulo o del libro entero como texto plano o Markdown, exportación de la portada y búsqueda de texto completo; 打开阅读器并监听进度: una sesión del lector con oyentes `open` / `progress` / `bookmark` / `error` / `close`, preferencias iniciales, un cambio de capítulo y `close()` que deja el lector al usuario); cada script comprueba primero `epub.isAvailable()` y explica cómo instalar el complemento Readium EPUB Reader
-* `Nuevo` Versión 2 del contrato EPUB con resaltados y notas (hoja de ruta del plugin P9.4): el `IEpubBook.getAnnotations` anexado (paginado, en orden de lectura) y el evento `highlight` de la sesión del lector llevan los resaltados y notas del lector como un documento `annotations` (id, style, color, note, quote, título del capítulo, locator, createdAt, updatedAt); el host negocia la versión a partir del `epubMaxContractVersion` del plugin y la marca en cada petición, así que los plugins de la versión 1 nunca ven la nueva llamada; la API de script `epub` gana `book.annotations()` y `epub.annotations(path)` con sus formas `Async`, y `EpubReaderSession` emite `highlight({ action, id, style, color, note, quote, title, locator, createdAt, updatedAt })` con `action` added, updated o removed
-* `Nuevo` Contrato e intermediarios del anfitrión para Three Stove Agent con acceso limitado al dispositivo, cuotas de llamadas a modelos y liberación de recursos al perder la conexión; el intermediario del modelo admite llamadas nativas a herramientas y su continuación, con control de cuota en cada ronda
-* `Nuevo` Registro y ejecución limitada de scripts Agent mediante project.json / cabeceras @agent, con validación de parámetros, parada por tiempo límite y resultados estructurados
-* `Nuevo` Gestión de Three Stove Agent en el centro de complementos con ayuda de instalación, activación, autorización y compatibilidad; entrada opcional en Herramientas del asistente de instalación cuando el APK publicado figure en el índice oficial
-* `Nuevo` El plugin Three Stove Agent permite proponer carpetas de scripts adicionales que el anfitrión valida, guarda y restaura al reconectar; las carpetas no válidas conservan la configuración aceptada
-* `Nuevo` Módulo installer para instalar, actualizar y desinstalar aplicaciones, con operaciones silenciosas Shizuku / Root y comprobación de capacidades para Dhizuku, la instalación notification y la opción mode: 'persistent' de setDefault; Dhizuku sigue sujeto a las políticas del propietario del dispositivo o del perfil (requiere el plugin 3-Setup Installer) (véase Documentación del proyecto > [Installer](https://docs.autojs6.com/#/installer))
-* `Nuevo` Barra de búsqueda en la parte superior de las ventanas de análisis de jerarquía y de límites de diseño, que filtra nodos por palabra clave o expresión regular sobre text / desc / id / className: la ventana de jerarquía conserva solo los nodos coincidentes y sus ancestros y resalta la coincidencia, la ventana de límites dibuja solo los nodos coincidentes, las coincidencias se recorren hacia adelante y atrás, la barra se contrae en una píldora arrastrable y la consulta se mantiene al cambiar entre ambas ventanas
-* `Nuevo` En la barra de búsqueda del análisis de diseño, tocar el contador de coincidencias abre un diálogo con la lista de resultados (resumen del nodo, ruta, profundidad y límites; tocar para saltar y seleccionar el nodo, mantener pulsado para ver su información; explicación cuando no hay coincidencias), y la barra conserva un historial de consultas (registrado al pulsar Intro o navegar, hasta 20 entradas, mostrado como lista desplegable cuando el campo está vacío, mantener pulsado para eliminar, se puede vaciar, se conserva entre sesiones)
-* `Nuevo` Perfiles de filtro en la barra de búsqueda del análisis de diseño: filtrar nodos por atributos booleanos de tres estados (14, como clickable / scrollable / enabled), presencia de id / text / desc, preajustes de clase (botones / texto / campos de entrada / imágenes / casillas e interruptores / listas y desplazamiento / contenedores), rangos de depth / childCount / indexInParent, anchura y altura mínimas, solo en pantalla, nombres de paquete y acciones; un perfil predeterminado integrado de solo lectura, cambios aplicados al instante y guardables como perfiles de usuario (guardar como / renombrar / eliminar), con el perfil seleccionado recordado entre sesiones
-* `Nuevo` Selección de región en la ventana de límites de diseño: elija "Seleccionar región" en los perfiles de filtro y arrastre un rectángulo para conservar solo los nodos contenidos por completo en él; la región sigue vigente al cambiar a la ventana de jerarquía
-* `Nuevo` Modo campo en la barra de búsqueda del análisis de diseño: toque el conmutador de modo (Aa / k=v) para introducir varias condiciones con la sintaxis de cadena de los selectores de script (por ejemplo text=OK clickable, id~=btn_.*, !enabled, minDepth=3); mientras el campo tiene el foco se muestra una guía rápida de la sintaxis, los errores de sintaxis muestran la posición, el término y los nombres candidatos en una franja de ayuda, y el modo de consulta se recuerda entre sesiones
-* `Nuevo` "Copiar como selector" en el análisis de diseño: toque "Copiar como selector" en el diálogo de resultados o mantenga pulsado el contador para copiar al portapapeles la palabra clave (como llamada Contains / Match de la propiedad text / desc / id / className acertada por la coincidencia actual), las condiciones de campo, el perfil de filtro y la región seleccionada como un selector de script encadenado; las condiciones que no pueden expresarse se añaden como comentarios
-* `Nuevo` Métodos de selector minDepth / maxDepth / minIndexInParent / maxIndexInParent (inclusivos, como minChildCount / maxChildCount), utilizables también en la sintaxis de cadena de los selectores (por ejemplo minDepth=3)
-* `Nuevo` Modo selector en la barra de búsqueda del análisis de diseño: cuando el conmutador de modo llega a "$()", escriba una expresión de selector encadenada como en un script (por ejemplo text("OK").clickable().depth(3) o textMatch(/ok|cancelar/i); el prefijo selector() / $() es opcional); sus literales de cadena / número / booleano / regex llegan al registro de selectores con la semántica de los scripts, una expresión a medio escribir muestra "Expresión sin terminar" en lugar de un error, los errores de sintaxis muestran la posición, la llamada y los nombres de método candidatos, y "Copiar como selector" produce la expresión normalizada
-* `Nuevo` La página de modelos de generación de código permite importar archivos locales, descargar modelos cuando se necesitan, gestionar y comparar varias versiones, y actualizar modelos oficiales (Configuración > Servicio de accesibilidad > Modelos de generación de código)
-* `Nuevo` Bibliotecas de colores propias para el color del tema: crear o clonar una biblioteca, añadir colores desde la paleta, otra biblioteca o el historial, y renombrar, cambiar valores, reordenar arrastrando o eliminar por lotes; las propias bibliotecas también se pueden reordenar arrastrando y eliminar por lotes
-* `Nuevo` Biblioteca de colores inteligente: cada grupo toma su color según el estado actual de una fuente de estado, que puede ser el modo nocturno, franjas horarias, la salida y puesta del sol (ubicación según la zona horaria o coordenadas introducidas), el día de la semana o días laborables y fin de semana, las estaciones, rangos de batería, la carga, el ahorro de batería, el servicio de accesibilidad, scripts en ejecución o estados de script (cambiados con colors.theme.state); los grupos rotan en secuencia o al azar con cada cambio de estado, al iniciar la app, al iniciar un script, a intervalos (primer cambio ahora, en el próximo minuto exacto o en la próxima hora en punto, mínimo 5 segundos) o a horas diarias; las excepciones por fecha muestran un grupo elegido en intervalos de fechas o festividades (incluidas fiestas del calendario lunar chino como la Fiesta de la Primavera y el Festival del Medio Otoño, con días antes o después opcionales); la rotación se pausa mientras las páginas del color del tema están abiertas
-* `Nuevo` Bibliotecas de colores inteligentes predefinidas "Material día y noche" (19 familias Material, con tonos de día y de noche elegidos por contraste con los fondos de ventana), "Color de fondo" y "Seguir el fondo de pantalla" (colores principal, secundario y terciario del fondo de pantalla, Android 8.1 o posterior, actualizados al cambiar el fondo); clona una predefinida, crea una nueva biblioteca o genérala a partir de un color base (el color del tema, la paleta o un color del fondo, con una armonía o tonos, colores de noche rellenados para el modo nocturno) y ajusta en el editor la fuente de estado, la rotación de grupos, el orden y los colores de cada grupo; el editor de grupos puede rellenar los demás estados a partir del primero (se puede deshacer)
-* `Nuevo` Importación y exportación de bibliotecas de colores en formato JSON de AutoJs6: exporta una biblioteca desde su menú de pulsación larga o varias con "Exportar bibliotecas de colores..." (las predefinidas como instantáneas); la importación muestra las bibliotecas del archivo con su número de colores o grupos, siempre crea bibliotecas nuevas, numera los nombres duplicados y explica por qué un archivo no se puede importar
-* `Nuevo` "Herramientas de color" en los detalles del color: armonías complementaria, análoga, triádica, complementaria dividida y cuadrada, escala de tonos de claro a oscuro, contraste con los fondos de ventana de día y de noche (con el color más cercano que alcanza 3:1 cuando no llega) y simulación de protanopia, deuteranopia y tritanopia; cada color puede aplicarse como color del tema, añadirse a una biblioteca de colores o copiarse
-* `Nuevo` Ajuste "Colores derivados" del color del tema (desactivado por defecto, idéntico a versiones anteriores): en Automático, el color de acento de los botones flotantes y el color oscuro de la barra de estado se derivan del color principal, y los complementos reciben los tres colores; cada estado de un grupo de biblioteca de colores inteligente puede definir sus propios colores de acento y oscuro, que tienen prioridad con ambos ajustes
-* `Nuevo` Colores favoritos: marca "Favorito" o "Fijado" en los detalles del color, o mantén pulsado un color de biblioteca o una muestra de las herramientas de color; la biblioteca virtual "Favoritos" se ordena manualmente (arrastrando), por fecha de adición, tono o luminosidad con los fijados primero, añade colores desde la paleta y crea una biblioteca de colores inteligente con un grupo por favorito; los favoritos también sirven de color base en "Generar a partir de un color base"
-* `Nuevo` Biblioteca virtual "Frecuentes y recomendados": favoritos fijados, demás favoritos y colores del historial puntuados por número de usos y antigüedad (vida media de 14 días), con colores similares combinados, 30 como máximo y oculta mientras esté vacía; las entradas se aplican tal como se eligieron y pueden convertirse en una biblioteca de colores inteligente; el historial de colores ahora cuenta los usos y su lista puede combinar colores similares
-* `Nuevo` `colors.distance(colorA, colorB, algorithm?)` devuelve la distancia de color en la escala de umbral de cada algoritmo de detección, `colors.invert(color)` invierte RGB conservando alpha, `colors.blend(colorA, colorB, ratio?)` mezcla dos colores y `colors.contrast(foreground, background)` calcula la relación de contraste WCAG; los cuatro métodos también están disponibles en las instancias de Color
-* `Nuevo` Funciones de color perceptuales en el módulo colors: toOklab / oklab y toOklch / oklch, ensureContrast (relación WCAG, 4,5 por defecto), harmony, tones, derive (principal, acento y oscuro), nightVariant, simulate (protanopia, deuteranopia, tritanopia) y extract (colores dominantes de una imagen con las opciones count, region y step); colors.distance, colors.isSimilar e images.detectColor aceptan el algoritmo oklab (ver Ejemplos > 图像与颜色)
-* `Nuevo` colors.theme controla el color del tema desde scripts: get, set (opciones accent y dark), reset, libraries, activate y deactivate (bibliotecas de colores inteligentes), next (cambia de grupo al instante), state (cambia la fuente "Estados del script") y current; los cambios de un script en menos de 500 ms se combinan y se registran en el historial como "Script: nombre", y la página del color del tema ofrece "Deshacer el cambio del script" para restaurar la selección anterior, incluida una biblioteca de colores inteligente activa (ver Ejemplos > 图像与颜色)
-* `Nuevo` Mantener pulsado TAB en el panel de atajos del editor Ace activa las sugerencias inteligentes, que según el contexto del cursor muestran el autocompletado de código, las sugerencias de parámetros o la documentación del símbolo, y cambian de sobrecarga cuando las sugerencias de parámetros están visibles; en teclado físico, Ctrl+Space / Ctrl+Shift+Space / Ctrl+Q corresponden a sugerencias inteligentes / sugerencias de parámetros / documentación del símbolo
-* `Nuevo` Los ajustes del editor de código incorporan un grupo "Sugerencias inteligentes" (solo motor Ace): activación del autocompletado (al escribir identificadores / solo después de "." / desactivado), caracteres mínimos para el autocompletado, retraso del autocompletado, activación de las sugerencias de parámetros (cuando el cursor entra en una llamada / solo después de "(" o "," / desactivado) y cambio de sobrecarga con las flechas; los cambios se aplican de inmediato y pueden registrarse en las acciones favoritas (requiere el plugin Ace Editor 1.26.0)
-* `Nuevo` API de scripts compose / $compose con 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, actualizaciones agrupadas, tareas encoladas, temas y comandos de sesión Snackbar (requiere el complemento Compose UI)
-* `Nuevo` compose.mount aloja páginas UI; compose.floaty admite scripts con o sin UI, ventanas raw o redimensionables, posición/tamaño en píxeles, controles táctiles/de foco y actualizaciones de trabajadores mediante compose.post, con limpieza de las sesiones al cerrar o terminar el script
-* `Nuevo` La categoría Compose UI de ejemplos integrados ofrece scripts de contador, validación de formularios, lista de 1000 elementos, HUD flotante y temas, cada uno con sus requisitos de complemento y permisos
-* `Nuevo` Referencia API completa de Compose UI con autocompletado de tipos de Ace Editor y contenido local de Offline Docs para componentes, nodos, estado, modificadores, temas, sesiones y ventanas flotantes
-* `Nuevo` El Centro de complementos reconoce y administra los complementos instalados de la versión preliminar de desarrollo de Compose UI, con el host 6.8.0 / 5316 o posterior
-* `Nuevo` TSX admite `<compose.Column>`, `<compose:Text>`, referencias a fábricas de nodos, fragmentos, slots y callbacks reactivos; un mismo árbol no puede mezclar Compose y nodos XML existentes
-* `Nuevo` Los contenedores XML `<compose>` y compose.attach integran sesiones Compose independientes en páginas UI o ventanas flotantes existentes; compose.AndroidView muestra una View Android existente o devuelta por una fábrica síncrona
-* `Nuevo` ui.inflate acepta diseños XML TSX compilados y enlaza sus callbacks onClick
-* `Nuevo` compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales
-* `Nuevo` Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar
-* `Nuevo` compose.memo reutiliza fragmentos de render cuyos valores de dependencia y estados leídos no han cambiado, de modo que una actualización parcial de una lista grande solo reconstruye las filas modificadas
-* `Nuevo` Las opciones de desarrollador incluyen "Permitir Inspector para scripts Node.js", desactivado por defecto, para depuración local y análisis de CPU/memoria en Debug y Release con un plugin Node.js Runtime compatible; DevTools se conecta mediante reenvío de puertos ADB
-* `Nuevo` La función "Generar código" del inspector de diseño admite planes de localización relativa que identifican el destino mediante el text / desc / id de un elemento cercano y una relación fija de brújula (por ejemplo, el icono de una fila de lista localizado por el título de la fila), generando llamadas a filter y compass
-* `Corrección` El filtro de plugins permanecía activo al cerrar la búsqueda o cambiar de pestaña
-* `Corrección` Un cierre inesperado del anfitrión al actualizar los colores inteligentes al volver al primer plano o recrear una pantalla, cuando los callbacks registraban nuevos elementos del tema
-* `Corrección` El centro de plugins mostraba Unknown para las ABI de plugins oficiales verificados sin código nativo y perdía los metadatos de compatibilidad nativa del índice al reiniciar
-* `Corrección` El asistente de instalación de plugins esperaba al tiempo límite tras un fallo o cancelación al instalar plugins consecutivos con el instalador del sistema
-* `Corrección` El centro de plugins seleccionaba un APK x86_64 en un dispositivo x86 aunque había un APK x86 disponible
-* `Corrección` Información de los paquetes inaccesible desde el gestor de archivos cuando APK Inspector oculta el botón de información
-* `Corrección` Los fallos de llamadas a modelos en línea de Three Stove Agent perdían las categorías de errores de red, autenticación y respuesta (requiere compatibilidad del complemento Provider)
-* `Corrección` La combinación de opciones de herramientas de un assistant ya no activa grupos desactivados por defecto cuando el objeto tools base está vacío
-* `Corrección` Los árboles compactos de accesibilidad abreviaban los ID de recursos e impedían que los selectores literales encontraran los elementos mostrados
-* `Corrección` Compatibilidad de las instantáneas de archivos de plugins, la instalación de paquetes Node.js y las operaciones con archivos de proyectos TypeScript en Android 7/8.0
-* `Corrección` Los receptores de solicitudes de permisos de Shizuku permanecían registrados después de su destrucción
-* `Corrección` Traducciones ausentes en las notificaciones de tareas de Python de larga duración y textos en inglés ausentes en los ajustes del compilador DEX
-* `Corrección` La lectura de la apariencia por plugins oficiales durante el arranque podía bloquear la inicialización de preferencias antes de disponer del contexto
-* `Corrección` Three Stove Agent continuaba observando y actuando con la pantalla apagada o bloqueada en lugar de devolver SCREEN_LOCKED
-* `Corrección` El intermediario de capacidades de plugins escribía el texto de los toasts en el registro del anfitrión al solicitar su registro
-* `Corrección` Agent rechazaba referencias de nodos validas y mostraba un nombre de aplicacion desactualizado al cerrar la ventana de confirmacion
-* `Corrección` Las acciones sobre nodos admiten interfaces profundamente anidadas y distinguen límites y capacidades de acción de los contenedores al identificar un objetivo
-* `Corrección` Activar el plugin YOLO desde el centro de plugins fallaba porque el handshake de sondeo exigía que el plugin ya estuviera activado; el sondeo ahora solo exige autorización y el handshake del componente exacto, mientras que las entradas de ejecución siguen exigiendo el registro de activación guardado
-* `Corrección` MCP Server instalado mediante adb podía aparecer activado en el centro de complementos mientras las comprobaciones de ejecución lo consideraban desactivado si no había una preferencia guardada; ambos usan ahora el estado desactivado por defecto y conservan las elecciones explícitas del usuario
-* `Corrección` Líneas vacías innecesarias bajo estados breves del gestor de accesibilidad, como Sin enlazar y Ninguno
-* `Corrección` Las respuestas Fetch controladas de Node.js enviadas en línea que superaban el límite de tamaño de transacción de Binder se perdían silenciosamente, dejando los scripts a la espera del tiempo límite del puente
-* `Corrección` La destrucción del proveedor WebSocket de Node.js cancelaba las conexiones antes de que los pares recibieran las tramas de cierre normal
-* `Corrección` Proyectos Node.js ejecutables sin metadatos de empaquetado APK, como host-events, no reconocidos en la lista de archivos y barra de proyecto
-* `Corrección` Los registros de inicio y fin de proyectos Node.js mostraban main.js sin ruta en lugar de la ruta completa y la extensión real del archivo de entrada, como main.cjs
-* `Corrección` El botón de ajustes del selector de color abre la página principal del plugin y el subtítulo de MCP Server se oculta al detenerse
-* `Corrección` Fuga de descriptores de archivo al transferir espacios de trabajo y cargar módulos Node.js, que ralentizaba los scripts posteriores y el reinicio de la aplicación tras ejecutar proyectos con muchos archivos
-* `Corrección` La sincronización de proyectos Node.js ya no reemplaza archivos sin cambios, evitando lentitud al finalizar scripts y en la respuesta de la aplicación con muchas dependencias
-* `Corrección` El ejemplo Flow de reserva devuelve false en vez de null cuando no puede analizar una fila de médico, evitando errores de conversión booleana
-* `Corrección` Los resultados de autorización del plugin se transmiten correctamente desde la pantalla principal para completar la activación pendiente tras conceder el permiso
-* `Corrección` La opción HTTP isInsecure / insecure podía mantener desactivada la verificación de certificados y nombres de host en solicitudes posteriores; ahora solo se aplica a la solicitud actual
-* `Corrección` La configuración de seguridad de red podía bloquear solicitudes HTTP en las versiones de distribución del host y de las aplicaciones empaquetadas; la política de tráfico sin cifrar ahora coincide con las versiones de depuración y mantiene los dominios de recursos de GitHub restringidos a HTTPS
-* `Corrección` Las instalaciones de APK en segundo plano no podían continuar si el sistema bloqueaba la confirmación; ahora se guarda el estado por sesión y se puede continuar desde una notificación o al volver a la aplicación, incluso tras denegar las notificaciones o recrear el proceso
-* `Corrección` Los widgets de scripts podían perder las rutas de sus scripts y las asociaciones de clic al actualizarse por lotes si sus identificadores tenían varios dígitos
-* `Corrección` La lectura binaria de ejemplos integrados mediante el bridge usa el codificador base64 Okio existente en Android 7.0 / 7.1, evitando un método Java exclusivo de API 26 y permitiendo los recursos MCP de ejemplos
-* `Corrección` Las operaciones de archivos MCP y Shell funcionan en Android 24 / 25 sin métodos Java recientes; el borrado recursivo elimina enlaces simbólicos sin borrar sus destinos
-* `Corrección` La comprobación CI del complemento de editor exigía la versión 1 del contrato y rechazaba hosts compatibles con versiones más recientes
-* `Corrección` Un cierre inesperado al usar Paddle OCR y Rapid OCR consecutivamente en la misma aplicación empaquetada
-* `Corrección` Las rutas de MediaInfo e imágenes admiten rutas absolutas, directorios superiores y nombres válidos; las grabaciones siguen las mismas reglas de acceso de Android con el anfitrión actualizado
-* `Corrección` La ejecución directa desde el administrador de archivos no respetaba la codificación UTF-8, UTF-16 o UTF-32 indicada por el BOM Unicode, por lo que scripts que se ejecutaban con normalidad en el editor fallaban con `Carácter no válido`
-* `Corrección` La información de descarga de Android Studio dejó de escribirse automáticamente en los datos comunes del README tras la migración de los scrapers
-* `Corrección` Se alineó la numeración de compilaciones remotas experimentales de un solo archivo con el compilador heredado y se añadió una comprobación previa y cerrada ante fallos del espacio de trabajo, basada en tamaños expandidos verificados, un límite de expansión de plantilla validado al compilar y una reserva de 256 MiB
-* `Corrección` La WebView de Ace podía mostrar brevemente una página totalmente blanca antes de aplicar el tema del host y el documento inicial, lo que producía un destello evidente con temas oscuros; la primera presentación ahora espera señales explícitas de tema aplicado, documento enviado y renderizado estable en lugar de un retraso fijo
-* `Corrección` El selector de archivos WebView de los scripts UI podía no abrirse cuando el context de la raíz del diseño perdía su asociación con la Activity
-* `Corrección` Los scripts de interfaz de usuario podían cerrarse inesperadamente al entrar en pantalla dividida o redimensionar una ventana porque la recreación de Activity descartaba el script en ejecución
-* `Corrección` Los editores nativo y Ace podían perder la posición del cursor y la selección tras recrear la Activity, y los documentos grandes abiertos sin ruta de archivo podían perder el texto sin guardar
-* `Corrección` El área de texto del editor podía reducirse a una altura de cero en horizontal con el teclado abierto, y el campo de entrada del registro podía quedar cubierto por el teclado
-* `Corrección` La consulta y el estado expandido del campo de búsqueda de la página principal podían perderse cuando los cambios de pantalla dividida recreaban la Activity
-* `Corrección` Ace podía volver al motor heredado al abrir por primera vez un archivo Lua cuando la comprobación síncrona del runtime nativo de LuaLS retrasaba la primera presentación
-* `Corrección` El acceso simultáneo al almacén de fuentes compartido por el host AutoJs6 y el plugin Ace podía lanzar una OverlappingFileLockException de la JVM y cerrar la aplicación de forma inesperada durante la vista previa de fuentes
-* `Corrección` APK Builder ahora conserva en el iniciador generado la directiva de modo de ejecución de Rhino de la entrada TypeScript/TSX (incluido `ui`), para que los proyectos de interfaz compilados se inicien en el modo Activity correcto
-* `Corrección` Las solicitudes de empaquetado APK con Node.js integrado ahora fallan antes de preparar datos o abrir una sesión remota, con orientación para migrar al complemento Runtime externo; el análisis del modo de ejecución ya no registra tokens del código fuente ni detalles de excepciones
-* `Corrección` Cancelar una compilación APK remota antes o durante el inicio de la sesión podía notificarse como fallo; ahora la cancelación converge en un único resultado terminal `STATUS_CANCELLED`, conserva el artefacto anterior y completa la limpieza
-* `Corrección` En Android 9–11, la API moderna de archivos podía no mostrar firmantes para un APK remoto V2/V3 válido y rechazarlo antes de publicarlo; el host ahora usa la vista heredada de firmantes validados solo como respaldo de plataforma y mantiene obligatoria la verificación criptográfica con `apksig`
-* `Corrección` Un APK remoto criptográficamente válido con el paquete y la versión solicitados, pero con un certificado de firma diferente, podía superar la validación de salida del host; ahora el host vincula el único firmante verificado a la identidad de firma predeterminada o personalizada elegida antes de abrir la sesión Binder y rechaza las discrepancias antes de sustituir el artefacto anterior
-* `Corrección` Tras la muerte de un proceso de complemento, varias devoluciones de llamada terminales de Binder podían permitir que una desvinculación tardía cancelara la vinculación de servicio recién creada, bloqueando el redescubrimiento del complemento hasta el tiempo de espera de vinculación de 60 segundos
-* `Corrección` Cuando se activaba el interruptor de desarrollador R1 pero el complemento APK Builder instalado declaraba explícitamente `supportsRemoteBuild=false`, el descubrimiento del proveedor podía detenerse sin una indicación práctica; ahora el host lo rechaza antes de la preparación y explica cómo instalar una compilación compatible o desactivar el interruptor
-* `Corrección` Al activar la fila de comandos TypeScript en la página completa de Registro y en el panel inferior de Registro del editor, un separador de la barra de navegación con wrap-content podía consumir toda la altura restante y reducir la lista de registros a cero; ahora la fila queda sobre un área de registros visible y el FAB de la página de Registro recupera su desplazamiento inferior original
-* `Corrección` Las acciones Renombrar y Eliminar de entradas de archivo no respetaban las capacidades de modificación declaradas por la sesión actual, por lo que sesiones de solo lectura o no compatibles podían mostrar operaciones que el proveedor no podía completar
-* `Corrección` Las acciones Explorer del administrador de archivos podían conservar caché o referencias de fila obsoletas después de activar, volver a autorizar o actualizar un plugin, por lo que los archivos reconocidos volvían al selector de aplicaciones del sistema hasta reiniciar AutoJs6
-* `Corrección` Los botones de video del administrador de archivos podían abrir el selector de aplicaciones del sistema para formatos ya clasificados como video; ahora todos los tipos de video reconocidos usan primero el plugin oficial Video Player y, si falta, está desactivado, no está autorizado, es incompatible, no está disponible o no se inicia, el host muestra instrucciones de recuperación con la opción explícita "Abrir con otras aplicaciones"
-* `Corrección` Las filas M3U podían mostrar a la vez las acciones de plugin, reproducción y edición; la reproducción ahora prioriza 3-Amber y después 3-Terra, con enlaces al Centro de plugins para instalar, activar o autorizar un reproductor si no hay ninguno disponible
-* `Corrección` Iconos de complemento redundantes para listas .m3u8/.pls/.wax/.wvx/.asx en el gestor de archivos; conservar Reproducir y Editar junto con el reproductor asociado
-* `Corrección` La consulta de información de APK ordinarios con muchos recursos podía fallar por el límite de entradas del archivo; ahora se lee directamente el manifiesto con un límite de tamaño, manteniendo la validación del recorrido para contenedores de varios APK
-* `Corrección` El require de Rhino CommonJS en aplicaciones empaquetadas no podía descifrar módulos JavaScript dependientes, por lo que la salida TypeScript multifichero compilada durante el empaquetado fallaba con "Cannot read file"
-* `Corrección` Los identificadores de UI de Node.js podían permanecer activos tras destruirse su Activity de Android, permitiendo actualizaciones tardías y reteniendo recursos del proveedor hasta finalizar la ejecución
-* `Corrección` La ejecución mediante el complemento Node.js podía rechazar grandes grafos de dependencias en texto plano y espacios de trabajo node_modules reales debido a presupuestos insuficientes para sondeos de módulos y archivos del espacio de trabajo
-* `Corrección` Los scripts vacíos y simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos
-* `Corrección` El proceso persistente de Node.js se retiraba incorrectamente cuando se ocultaba la interfaz temporal del iniciador de scripts
-* `Corrección` La notificación esperada de desconexión Binder del proceso persistente de Node.js tras detener correctamente una tarea interactiva de larga duración en una aplicación empaquetada podía sobrescribir el estado stopped con failed
-* `Corrección` Node.js console.assert lanzaba incorrectamente una excepción AssertionError cuando fallaba una aserción en lugar de limitarse a escribir el mensaje de fallo en stderr
-* `Corrección` La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución
-* `Corrección` La cancelación de una ejecución Node.js activa podía eliminar el registro de ejecución antes de poner en cuarentena el proceso en mal estado, bloqueando la espera de finalización y retrasando la recuperación
-* `Corrección` El fallback automático tras perder una respuesta Binder del runtime Node.js externo podía ejecutar dos veces el mismo script
-* `Corrección` Las ejecuciones de proyectos TypeScript de Node.js mediante el archivo del espacio de trabajo podían sincronizar salidas del compilador exclusivas del runtime junto a los archivos fuente, provocando conflictos en ejecuciones posteriores
-* `Corrección` Los alias /data/user/0 y /data/data de los directorios privados de Android no se normalizaban ni se volvían a escribir en las solicitudes del plugin, lo que hacía que un workingDirectory válido de Node.js se rechazara incorrectamente por exceder sandboxRoot
-* `Corrección` Las compilaciones nodePlugin sin un runtime Node en el host excluían incorrectamente las bibliotecas JNI/AAR de todas las ABI, lo que provocaba un cierre inesperado al inicializar Rhino Shell por la ausencia de libjackpal-termexec2.so
-* `Corrección` La recopilación y verificación de evidencias de Node.js R6 rechazaban las identidades de firma de APK informadas por Android Build Tools 37 porque apksigner cambió el formato de salida del resumen del certificado
-* `Corrección` La ejecución directa del proyecto desde IntelliJ IDEA fallaba al verificar la alineación de páginas de las bibliotecas nativas porque la búsqueda de APK no utilizaba el directorio de artefactos de la compilación actual
-* `Corrección` Las compilaciones de módulos Android en IntelliJ IDEA fallaban debido a una coincidencia ambigua de la tarea compileJava
-* `Corrección` Memoria insuficiente durante la compilación Kotlin de múltiples variantes
-* `Corrección` Advertencias de lectura de SDK XML v4 con AGP 9.1 y comprobaciones de alineación nativa de APK activadas por error al ensamblar pruebas unitarias JVM, mediante los plugins de compilación compartidos 1.8.3
-* `Corrección` Las compilaciones del proyecto completo en IntelliJ IDEA fallaban tras Clean porque los AAR distribuidos de la API de Python Runtime se resolvían antes de generarse y los fixtures de conformidad carecían de los métodos AIDL añadidos
-* `Corrección` Error de Lint RemoveWorkManagerInitializer durante la compilación por un conflicto entre el inicializador predeterminado de WorkManager y la inicialización bajo demanda
-* `Corrección` La compilación de APK Builder Template fallaba después de `clean` porque el directorio predeterminado de Runtime Kit omitía el sufijo de variante `universal`
-* `Corrección` La evidencia soak de Node.js R6 podía rechazar un runtime persistente en buen estado cuando Android informaba cero bytes asignados actualmente al heap nativo
-* `Corrección` La evidencia de APK empaquetado de Node.js R6 se omitía o quedaba vinculada a arm64 porque el recopilador no preparaba una plantilla Inrt nueva ni pasaba la ABI de destino
-* `Corrección` El inicio de proyectos Node.js ignoraba node.timeoutMs en project.json, por lo que los scripts configurados para esperar más tiempo agotaban su plazo tras unos 5 segundos
-* `Corrección` El empaquetado de aplicaciones entre ABI podía copiar bibliotecas nativas del proceso host instalado a un directorio de otra ABI, lo que hacía que las aplicaciones empaquetadas de 32 bits cargaran bibliotecas nativas de shell de 64 bits y se cerraran inesperadamente
-* `Corrección` Cuando un script TypeScript UI fallaba al compilarse antes de crear el motor, el listener global de ejecución podía desreferenciar un motor inexistente y cerrar inesperadamente el host mientras se informaban los diagnósticos
-* `Corrección` Los enlaces de marcos de pila y diagnósticos del compilador trataban las columnas de origen basadas en 1 como desplazamientos del editor basados en 0, moviendo el cursor un carácter de más
-* `Corrección` La ruta host experimental del compilador DEX podía aceptar versiones DEX incompatibles con el minApi solicitado, rechazar erróneamente el límite válido de 65 536 identificadores field/method y recrear un artefacto parcial revertido cuando un drain de pipe en cola comenzaba tarde
-* `Corrección` runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java
-* `Corrección` app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_
-* `Corrección` Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root
-* `Corrección` Los resultados de selección múltiple devueltos por dialogs.multiChoice se convertían incorrectamente en cadenas _[`issue #518`](http://issues.autojs6.com/518)_
-* `Corrección` La aplicación podía cerrarse inesperadamente al cerrar un diálogo de script mientras el Looper de su hilo estaba terminando porque no se podía programar un callback de timer
-* `Corrección` Los scripts podían seguir ejecutándose tras cancelar temporizadores o detener hilos de trabajo porque los plazos obsoletos de las llamadas de retorno impedían que Looper terminara
-* `Corrección` El módulo selector podía elegir una firma de método incorrecta al invocar métodos sobrecargados mediante reflexión
-* `Corrección` La búsqueda de controles con el algoritmo BFS devolvía un resultado más que el máximo solicitado, `find(0)` devolvía un resultado en lugar de una colección vacía, y los nodos ya obtenidos al alcanzar el máximo no se reciclaban
-* `Corrección` Los segmentos de brújula de padre o clicable de varios tramos (como `p4ppp12p` o `k2k3`) pasados a `UiObject.compass` solo contaban el primer tramo
-* `Corrección` El segmento `k` de `UiObject.compass` devolvía el propio nodo en lugar de `null` cuando no existía ningún nodo clicable dentro del rango
-* `Corrección` El cálculo del índice del padre del nodo `source` de un callback de `auto.registerEvent` podía entrar en un bucle infinito o lanzar una excepción fuera de rango y bloquear el servicio de accesibilidad cuando el árbol de nodos había cambiado
-* `Corrección` Tras reiniciar el servicio de accesibilidad, `pickup` sin nodo raíz y los selectores creados con `new UiSelector()` podían seguir devolviendo `null` o una colección vacía hasta que se creara un nuevo runtime de script
-* `Corrección` `auto.stateListener` era una única ranura global, por lo que los listeners establecidos por varios scripts se sobrescribían entre sí y no se eliminaban al finalizar el script
-* `Corrección` Los métodos de espera como `auto.waitFor` no podían despertarse y podían esperar hasta el tiempo límite cuando el servicio de accesibilidad ya entregaba eventos pero el sistema nunca invocaba `onServiceConnected`
-* `Corrección` Detener el servicio de accesibilidad con root no hacía nada de forma silenciosa pero informaba éxito cuando AutoJs6 era el único servicio de accesibilidad habilitado, por lo que el servicio no podía detenerse o parecía "reiniciarse automáticamente" de inmediato
-* `Corrección` Al crear una pantalla de la aplicación se volvía a habilitar automáticamente (mediante root o ajustes seguros) un servicio de accesibilidad que el usuario había detenido explícitamente; ahora solo se restaura un servicio habilitado en los ajustes del sistema pero no en ejecución, y el resto se inicia bajo demanda desde scripts, el inspector de diseño y otros puntos de entrada
-* `Corrección` `auto.start` y `auto.enable` volvían a habilitar el servicio de accesibilidad mediante root o ajustes seguros aunque ya estuviera en ejecución, reiniciándolo innecesariamente
-* `Corrección` Al reiniciar el servicio de accesibilidad se volvía a habilitar antes de que el sistema desvinculara la instancia anterior, lo que algunos sistemas (p. ej. Android 8.0) fusionaban en "sigue habilitado", de modo que en realidad no se producía ningún reinicio
-* `Corrección` `auto.windowRoots` devolvía un array con un nodo nulo en lugar de un array vacío mientras el sistema aún no había determinado la ventana activa (p. ej. justo después de volver a vincular el servicio de accesibilidad), por lo que llamar a métodos de su elemento lanzaba una excepción
-* `Corrección` `automator.isServiceRunning()` solo comprobaba si existía una instancia del servicio de accesibilidad en el proceso, lo que no coincidía con la noción de "en ejecución" de `auto.isRunning()` y del interruptor del cajón lateral (habilitado en los ajustes del sistema y vinculado en el proceso)
-* `Corrección` Puntos de entrada como `auto()` lanzaban "habilitado pero no en ejecución" cuando el servicio de accesibilidad no estaba habilitado, y "el servicio está deshabilitado" cuando estaba habilitado pero no en ejecución, es decir, los dos mensajes estaban intercambiados (el motivo ahora es uno de no habilitado / habilitado pero no vinculado / vinculado pero aún no operativo)
-* `Corrección` `auto.services` siempre devolvía un array vacío a menos que estuviera configurada la habilitación automática mediante root o ajustes seguros (leer la lista de servicios habilitados no necesita ninguna de las dos)
-* `Corrección` El interruptor del servicio de accesibilidad del cajón lateral mostraba como activado un servicio "habilitado pero no en ejecución" (ahora aparece desactivado con el subtítulo "con fallos", y activarlo vuelve a habilitar el servicio)
-* `Corrección` "Inspeccionar los límites del diseño" / "Inspeccionar la jerarquía del diseño" del botón flotante debían activarse dos veces cuando el servicio de accesibilidad no estaba habilitado pero podía iniciarse automáticamente (root o ajustes seguros): el primer toque solo iniciaba el servicio y el segundo inspeccionaba (ahora la inspección continúa justo después de iniciarse el servicio, igual que los mosaicos de ajustes rápidos y las difusiones de inspección de diseño, y el inicio ya no bloquea el hilo principal)
-* `Corrección` Las devoluciones de llamada registradas con `auto.registerEvent` y los oyentes de teclas de `events.observeKey()` se perdían por completo cuando el servicio de accesibilidad se reiniciaba (incluida una nueva vinculación después de que el sistema lo desvinculara); las suscripciones ahora viven en un bus de eventos a nivel de proceso y sobreviven a la instancia del servicio
-* `Corrección` Una regresión de compatibilidad de la API de ámbitos tras actualizar el motor Rhino provocaba fallos en algunas funciones auxiliares del entorno de ejecución
-* `Corrección` El puente de módulos Rhino procesaba incorrectamente null/undefined, Callable, constructores, prototipos, realms y valores de retorno de Kotlin, lo que podía causar objetos entre realms, pérdida de callbacks o excepciones en tiempo de ejecución
-* `Corrección` Las funciones envueltas en Proxy no podían usarse como callbacks en módulos heredados como dialogs, events, timers, UI, selector y automator, y los argumentos de callback de TimerThread podían pasarse como un array anidado
-* `Corrección` Las sobrecargas de compatibilidad Callable y BaseFunction hacían ambiguos los tipos de parámetros cuando funciones JavaScript normales llamaban a métodos Java como EventEmitter.on
-* `Corrección` Los callbacks registrados con EventEmitter.once podían invocarse más de una vez durante el despacho recursivo de eventos o si un callback lanzaba una excepción
-* `Corrección` Las acciones globales como automator.home podían lanzar una excepción de puntero nulo cuando se interrumpía la inicialización del Looper auxiliar en el primer uso, y las coordenadas Y de los gestos podían usar incorrectamente la escala horizontal
-* `Corrección` La distribución de argumentos, los valores de retorno, los límites numéricos, las coordenadas de imagen y el ciclo de vida de recursos temporales de la migración inicial de módulos JavaScript no coincidían con la implementación original
-* `Corrección` La aplicación podía cerrarse inesperadamente al solicitar permiso de captura de pantalla en Android 14+ debido a un inicio anómalo del servicio en primer plano de proyección multimedia _[`issue #516`](http://issues.autojs6.com/516)_
-* `Corrección` Las llamadas repetidas a OCR desde varios hilos o archivos podían solicitar repetidamente permiso de captura de pantalla _[`issue #551`](http://issues.autojs6.com/551)_
-* `Corrección` Los errores de selección de plugins OCR podían indicar un motor incorrecto, omitir los ID de motor/variantes requeridos y los plugins detectados, o informar de una instalación ausente cuando fallaba la detección
-* `Corrección` El servicio del plugin Paddle OCR podía desconectarse tras ejecutarse durante mucho tiempo y no recuperarse automáticamente _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
-* `Corrección` El plugin Paddle OCR no podía activarse automáticamente cuando no estaba en ejecución, lo que hacía fallar llamadas a funciones o el empaquetado de proyectos _[`issue #517`](http://issues.autojs6.com/517)_
-* `Corrección` Las llamadas incorrectas a `images.resize(ImageWrapper, width, height)` podían pasar la altura a OpenCV como valor de interpolación, mientras que un desenrollado incompatible de excepciones nativas podía bloquear la aplicación en vez de informar una excepción del script
-* `Corrección` Los detalles multimedia del administrador de archivos podían permanecer en "..." o provocar el cierre inesperado de la aplicación cuando la biblioteca MediaInfo del plugin no estaba disponible o fallaba una llamada Binder, sin recurrir a los metadatos de Android
-* `Corrección` Los diálogos de detalles de vídeo del administrador de archivos mostraban incorrectamente campos de formato y metadatos del audio integrado
-* `Corrección` El interceptor de solicitudes rechazaba incorrectamente el documento principal de las vistas previas de Markdown y HTML en algunas versiones de WebView y dispositivos físicos
-* `Corrección` El zoom por pellizco del visor de imágenes no seguía de cerca el movimiento de los dedos, dificultaba volver al tamaño original al reducir la imagen y podía conservar breve o continuamente el color del tema en ActionBar al abrirse por primera vez
-* `Corrección` ImageViewer podía cerrarse inesperadamente al destruirse porque Glide intentaba iniciar la carga de una imagen para una Activity ya destruida
-* `Corrección` El servicio de accesibilidad podía interrumpirse inesperadamente al ejecutar operaciones consecutivas como back _[`issue #527`](http://issues.autojs6.com/527)_
-* `Corrección` El uso de memoria podía seguir aumentando tras ejecutar scripts repetidamente (intento de corrección) _[`issue #548`](http://issues.autojs6.com/548)_
-* `Corrección` La ruta original podía no conservarse al ejecutar scripts mediante URI externos o en segundo plano, lo que provocaba una resolución incorrecta de rutas relativas _[`issue #545`](http://issues.autojs6.com/545)_
+* `Sugerencia` Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas
+* `Sugerencia` El SDK de destino de las aplicaciones empaquetadas cambia de 29 a 37; el acceso al almacenamiento compartido y a la red local requiere los permisos exigidos por el sistema
+* `Sugerencia` Al usar images u otras funciones que dependen de OpenCV en aplicaciones empaquetadas, selecciona el complemento OpenCV al empaquetar
+* `Sugerencia` El control console y la consola flotante muestran los registros del script actual; los registros globales se consultan mediante globalconsole o la página de registros
+* `Sugerencia` Los registros en archivos utilizan una implementación integrada que conserva las opciones documentadas y los formatos PatternLayout habituales; las demás API de Log4j dejan de estar disponibles
+* `Nuevo` Asistente de configuración para ejecutar sucesivamente los asistentes de permisos e instalación de complementos, accesible desde el mensaje de bienvenida tras el primer inicio (acceso: Ajustes > Configuración > Asistente de configuración)
+* `Nuevo` Asistente de permisos para seleccionar los permisos del panel lateral y solicitarlos sucesivamente, con perfiles "Estándar"/"Mínimo"/"Todos" y perfiles personalizados; los permisos concedidos pueden ocultarse desde el menú (acceso: Asistente de configuración/botón del encabezado "Permisos" del panel lateral)
+* `Nuevo` Asistente de instalación de complementos para seleccionar por categorías e instalar en lotes complementos oficiales, con perfiles "Estándar"/"Mínimo"/"Todos" y guardado, cambio de nombre y eliminación de perfiles personalizados (acceso: Asistente de configuración/menú del botón flotante de la pestaña de complementos/menú "+" del Centro de complementos)
+* `Nuevo` El asistente permite instalar mientras se descarga e instalar silenciosamente mediante 3-Setup Installer con autorización Shizuku/Root/Dhizuku; al usar el instalador del sistema comprueba el permiso para instalar aplicaciones desconocidas antes de descargar
+* `Nuevo` Interruptor "Mostrar icono en el lanzador" en los ajustes de complementos (activado por defecto); el asistente permite configurarlo para todos los complementos nuevos de la instalación actual (modificar componentes requiere Root o Shizuku)
+* `Nuevo` Administrador del servicio de accesibilidad con inicio y parada, limpieza de caché, autodiagnóstico, supervisión de eventos y copia de diagnósticos (acceso: entrada del servicio de accesibilidad en el panel lateral)
+* `Nuevo` La página de opciones de desarrollador permite consultar el historial de finalización de procesos y copiar diagnósticos (Android 11+) (acceso: mantener pulsado el icono de la aplicación en Acerca de la aplicación y el desarrollador)
+* `Nuevo` Interruptor "Permitir Inspector en scripts Node.js" en las opciones de desarrollador (desactivado por defecto), para depuración con puntos de interrupción y análisis de CPU/montón mediante Node.js Runtime
+* `Nuevo` Página de gestión de modelos de generación de código con importación local, descargas bajo demanda, gestión y comparación de versiones y actualizaciones de modelos oficiales (acceso: Ajustes > Servicio de accesibilidad > Modelos de generación de código)
+* `Nuevo` Complemento MCP Server para acceder a scripts, archivos y operaciones del dispositivo de AutoJs6 mediante clientes MCP (acceso: panel lateral/Centro de complementos)
+* `Nuevo` Complemento 3-Shell Terminal que proporciona funciones de terminal (acceso: panel lateral, barra de herramientas de proyectos, menú de directorios del administrador de archivos)
+* `Nuevo` Complemento Node.js Runtime para ejecutar archivos y proyectos Node.js (admite el parámetro de modo "nodejs" y archivos .node.js/.cjs/.mjs)
+* `Nuevo` Complemento Python Runtime para ejecutar archivos y proyectos Python, con entradas de módulo, límites de tiempo de ejecución y entrada estándar predefinida
+* `Nuevo` Complemento Lua Runtime para ejecutar scripts Lua
+* `Nuevo` Complementos Java Runtime y Kotlin Runtime para compilar y ejecutar código Java/Kotlin (Java requiere Android 7+, Kotlin requiere Android 8+)
+* `Nuevo` Complemento QuickJS Runtime para ejecutar archivos JavaScript y ES module (admite los parámetros de modo "quickjs"/"qjs" y archivos .quickjs.js/.quickjs.mjs)
+* `Nuevo` Complemento Bun Runtime para ejecutar archivos y proyectos JavaScript/TypeScript (admite el parámetro de modo "bun" y archivos .bun.js/.bun.ts/.bun.tsx)
+* `Nuevo` Complemento TypeScript Engine para compilar archivos y proyectos TypeScript de Rhino/Node.js, con comprobación de tipos y Source Map
+* `Nuevo` Módulo ai para invocar modelos locales o en línea mediante complementos AI Provider (como Three Stone AI), con salida progresiva, sesiones persistentes y resultados JSON estructurados (consulta: Ejemplos > ai)
+* `Nuevo` API de scripts ai.agent para iniciar, consultar, responder, confirmar y cancelar tareas de Three Stove Agent, con tareas en segundo plano detached (requiere Three Stove Agent) (consulta: Ejemplos > agent)
+* `Nuevo` Los métodos ai.agent.run/create admiten la opción plan para que Three Stove Agent proponga un plan de pasos antes de ejecutarlo en modo de planificación
+* `Nuevo` Los scripts pueden registrarse mediante project.json o un comentario de cabecera @agent para que Three Stove Agent los invoque, con validación de parámetros, parada por tiempo excedido y devolución de resultados estructurados
+* `Nuevo` Módulo compose para construir interfaces con Jetpack Compose, con fábricas de nodos, referencias duraderas a nodos, state/render/ref reactivos y control del tema (requiere 3-Block Compose) (consulta: Ejemplos > 3-Block Compose)
+* `Nuevo` Opción "Abrir en el diseñador de 3-Block Compose" en el menú del editor: guarda el archivo actual y lo abre en el diseñador visual de 3-Block Compose (1.2.0 o posterior); al regresar al editor se recarga automáticamente lo guardado en el diseñador (pregunta antes si hay cambios sin guardar) (consulta: Ejemplos > 3-Block Compose)
+* `Nuevo` Métodos compose.mount/floaty para montar páginas UI o crear ventanas flotantes (admitidas en scripts UI y normales), con limpieza automática de las sesiones del script al detenerlo
+* `Nuevo` Método compose.dialog para crear sesiones de diálogo y panel inferior modal que pueden actualizarse y cerrarse, disponible en scripts UI y normales
+* `Nuevo` Contenedor XML <compose> y método compose.attach para integrar sesiones Compose en páginas UI o ventanas flotantes; compose.AndroidView puede alojar Android View existentes
+* `Nuevo` Los diseños TSX admiten componentes Compose como <compose.Column> y <compose:Text>, referencias a fábricas de nodos, ranuras y callbacks reactivos (requiere TypeScript Engine)
+* `Nuevo` ui.inflate admite diseños XML TSX compilados y la vinculación de sus callbacks onClick
+* `Nuevo` Módulo flow y método global waitAsync para esperas asíncronas y operaciones encadenadas, con bifurcaciones, bucles, límites de tiempo, reintentos y cancelación (consulta: Documentación del proyecto > [Flujo](https://docs.autojs6.com/#/flow))
+* `Nuevo` Objeto global terminal para gestionar sesiones de terminal, ejecución visible y escucha de salida, con espera de salida y códigos de finalización (requiere 3-Shell Terminal) (consulta: Ejemplos > Terminal)
+* `Nuevo` Módulo installer para instalar, actualizar y desinstalar aplicaciones, con operaciones silenciosas Shizuku/Root/Dhizuku y opciones como instalación mediante notificaciones (requiere 3-Setup Installer) (consulta: Documentación del proyecto > [Instalador](https://docs.autojs6.com/#/installer))
+* `Nuevo` Módulo mail para enviar, recibir y consultar correo, descargar adjuntos y gestionar carpetas, con llamadas síncronas y asíncronas (requiere 3-Stamp Mail) (consulta: Documentación del proyecto > [Correo](https://docs.autojs6.com/#/mail))
+* `Nuevo` Método mail.watch para escuchar nuevos correos, con reconexión tras perder la conexión
+* `Nuevo` Módulo epub para leer metadatos, índice, texto de capítulos y portada de libros electrónicos, con exportación de recursos y búsqueda de texto completo (requiere 3-Folio EPUB) (consulta: Documentación del proyecto > [Libros electrónicos](https://docs.autojs6.com/#/epub))
+* `Nuevo` Método epub.read para abrir el lector de libros electrónicos y controlar la posición de lectura, los marcadores y las preferencias
+* `Nuevo` Métodos epub.annotations/annotationsAsync para leer resaltados y notas; las sesiones del lector permiten escuchar cambios en las anotaciones
+* `Nuevo` Módulo yolo para cargar modelos y detectar objetos mediante el complemento YOLO (consulta: Documentación del proyecto > [YOLO](https://docs.autojs6.com/#/yolo))
+* `Nuevo` Módulo tts para convertir texto en voz (consulta: Documentación del proyecto > [Texto a voz](https://docs.autojs6.com/#/tts))
+* `Nuevo` Módulo settings para leer y modificar los ajustes de la aplicación (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (consulta: Documentación del proyecto > [Ajustes](https://docs.autojs6.com/#/settings))
+* `Nuevo` Módulo work_manager para gestionar tareas programadas y tareas de difusión (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (consulta: Documentación del proyecto > [Work Manager](https://docs.autojs6.com/#/workManager))
+* `Nuevo` Módulo power_manager para consultar y solicitar la exclusión de la optimización de batería (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (consulta: Documentación del proyecto > [Power Manager](https://docs.autojs6.com/#/powerManager))
+* `Nuevo` Objeto global pangu para ajustar y comprobar el espaciado entre texto chino y occidental (consulta: Documentación del proyecto > [Espaciado de texto](https://docs.autojs6.com/#/pangu))
+* `Nuevo` Propiedad device.pageSize (getter) para obtener el tamaño de página de memoria del sistema
+* `Nuevo` Método device.getMarketName para obtener el nombre comercial del dispositivo _[`issue #513`](http://issues.autojs6.com/513)_
+* `Nuevo` Método ui.useAndroidLayout para activar los controles de diseño nativos de Android
+* `Nuevo` Método runtime.loadAar para cargar archivos AAR dinámicamente
+* `Nuevo` Métodos runtime.loadJarWithR8/retraceR8Stack para cargar archivos JAR y reconstruir trazas ofuscadas mediante R8 Compiler (experimental)
+* `Nuevo` Métodos images.quantize/quantizeToFile para cuantizar imágenes PNG y guardarlas en archivos, devolviendo información de tamaño y calidad (requiere Image Quantization)
+* `Nuevo` Métodos images.countPointsByColor/getMeanColor para contar píxeles del color indicado y obtener el color medio
+* `Nuevo` Métodos colors.distance/invert/blend/contrast para calcular distancia de color, inversión, mezcla y contraste (también disponibles en instancias Color)
+* `Nuevo` Métodos colors.toOklab/oklab/toOklch/oklch para convertir entre espacios de color OKLab y OKLCH; colors.distance/isSimilar e images.detectColor admiten el algoritmo oklab
+* `Nuevo` Métodos colors.ensureContrast/harmony/tones/derive/nightVariant/simulate/extract para ajustar contraste, generar armonías, tonos, paletas derivadas y colores nocturnos, simular deficiencias de visión cromática y extraer colores dominantes de imágenes (consulta: Ejemplos > Imágenes y colores)
+* `Nuevo` Objeto colors.theme para leer, modificar y restablecer colores del tema y controlar bibliotecas inteligentes mediante scripts; la página de colores del tema permite deshacer los cambios de scripts (consulta: Ejemplos > Imágenes y colores)
+* `Nuevo` Métodos console.setTimeVisible/setTimeFormat/setColorful/setAvoidStatusBar/setInputVisible y sus opciones correspondientes en console.build
+* `Nuevo` El modo UI admite scripts TypeScript y diseños TSX (requiere TypeScript Engine)
+* `Nuevo` Control globalconsole en modo UI para mostrar registros globales; los controles console admiten configuración de título, estilo y campo de entrada
+* `Nuevo` Métodos de automatización smartClick/clickIfExists/clickAny/findAny y otros para buscar y pulsar controles, con llamadas encadenadas Flow
+* `Nuevo` Métodos smartClickBounds/clickBoundsIfExists/clickBoundsAny para pulsar coordenadas dentro de los límites de controles
+* `Nuevo` Métodos scrollUntil/typeInto/dismissPopups/collectList y otros para buscar mediante desplazamiento, introducir texto, gestionar ventanas emergentes y recopilar listas
+* `Nuevo` Métodos launchAndWait/backUntil/backToApp/toggle/retry y otros para cambiar de aplicación, establecer estados y reintentar operaciones
+* `Nuevo` Métodos waitForIdle/waitForEvent/waitForToast/waitForNotification para esperar inactividad de la interfaz, eventos de accesibilidad, mensajes flotantes y notificaciones
+* `Nuevo` select admite sintaxis de selectores de cadena para combinar atributos, expresiones regulares y condiciones booleanas
+* `Nuevo` Selectores UiSelector#minDepth/maxDepth/minIndexInParent/maxIndexInParent para filtrar por profundidad del nodo e índice en el padre, también disponibles en la sintaxis de selectores de cadena
+* `Nuevo` Método UiSelector#findIterator para recorrer controles coincidentes de forma diferida
+* `Nuevo` Métodos UiObject#isStale/waitUntilGone/waitForStable para detectar nodos obsoletos y esperar su desaparición o estabilidad
+* `Nuevo` Métodos UiObject#contentInvalid/contextClickable/multiLine/dismissable para obtener atributos booleanos de controles
+* `Nuevo` Métodos UiObject#toJSON/dumpSubtree/fingerprint para serializar nodos, exportar subárboles y calcular huellas del estado
+* `Nuevo` Las colecciones de controles admiten at/first/last/nonNull/slice y operaciones sobre cada control como clickEach/setTextEach
+* `Nuevo` Métodos auto.findWindows/findWindowRoots para obtener ventanas y nodos raíz según tipo de ventana, paquete, título, pantalla y otros criterios
+* `Nuevo` Métodos auto.explain/dump y objeto auto.stats para diagnosticar selectores, exportar árboles de nodos y recopilar tiempos de consulta
+* `Nuevo` auto.registerEvent admite opciones de deduplicación y debounce de eventos (desactivadas por defecto)
+* `Nuevo` auto.setFlags admite appWindowsFallback para usar la raíz de una ventana de aplicación cuando la raíz de la ventana activa no está disponible (desactivado por defecto)
+* `Nuevo` El administrador de archivos admite selección múltiple y copia/movimiento/eliminación por lotes
+* `Nuevo` Barra de ruta en el administrador de archivos, con acceso a directorios superiores mediante pulsación y navegación por desplazamiento horizontal
+* `Nuevo` Opción "Ejecutar en ventana flotante" en el menú de scripts del administrador de archivos, con barra flotante para iniciar/detener scripts, editar archivos y consultar registros
+* `Nuevo` Opción "Ejecutar con AutoJs4" en el menú de scripts del administrador de archivos para ejecutar scripts o proyectos con el motor AutoJs4 y comparar resultados (requiere AutoJs4 Runtime)
+* `Nuevo` Opción "Ejecutar con AutoJs4 y comparar" en el menú de scripts para ejecutar sucesivamente el mismo script o proyecto con AutoJs6 y AutoJs4 y comparar diferencias (requiere AutoJs4 Runtime)
+* `Nuevo` El administrador de archivos permite explorar, previsualizar, comprimir y extraer archivos mediante 3-Stack Archive, con contraseñas, volúmenes y apertura o ejecución directa de archivos internos
+* `Nuevo` El administrador de archivos previsualiza Markdown/HTML mediante Markdown Previewer/HTML Previewer, con temas, CSS personalizado y pantalla completa
+* `Nuevo` El administrador de archivos permite ver imágenes, reproducir audio y vídeo y abrir EPUB mediante sus complementos; el audio admite reproducción en segundo plano y controles en notificaciones
+* `Nuevo` El visor de imágenes permite cambiar entre imágenes del mismo directorio, ampliar con dos dedos, mostrar EXIF y usar pantalla completa, además de editar y convertir imágenes mediante 3-Maple Image
+* `Nuevo` El administrador de archivos permite consultar información y manifiestos de paquetes APK/APKS/XAPK/APKM/APKZ/AAB e instalar APK y contenedores de APK divididos
+* `Nuevo` El editor de código permite cargar Ace mediante Ace Editor y seleccionar el motor en los ajustes; ofrece acceso al Centro de complementos si el complemento no está disponible
+* `Nuevo` Ace admite completado, pistas de parámetros, documentación flotante y diagnósticos; los proyectos TypeScript admiten salto a definición, renombrado de símbolos e importación automática (requiere TypeScript Engine)
+* `Nuevo` Ace admite un panel de atajos, historial de acciones y acciones favoritas
+* `Nuevo` Ace permite desplegar o plegar todos los bloques de código (requiere actualizar el complemento Ace Editor) (acceso: Editar > Plegado > Desplegar todo/Plegar todo)
+* `Nuevo` Grupo "Sugerencias inteligentes" en los ajustes del editor (solo Ace), para configurar los desencadenantes y retardos del completado y las pistas de parámetros
+* `Nuevo` El editor admite conversión de codificación y recarga de archivos, y muestra nombre de archivo, posición del cursor y codificación en la barra de información
+* `Nuevo` El editor admite modo inmersivo de pantalla completa
+* `Nuevo` El editor admite un panel inferior de registros, inicio/parada de scripts y salto al código fuente de marcos de pila (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Nuevo` Página de ajustes independiente del editor, con tema, fuente, números de línea, ajuste de líneas, umbral de resaltado y visibilidad del panel de registros
+* `Nuevo` La página de registros y el panel inferior del editor permiten ejecutar fragmentos TypeScript (requiere TypeScript Engine)
+* `Nuevo` Herramienta "Selector de color de pantalla" en el panel lateral (requiere 3-Color Picker)
+* `Nuevo` Las tareas programadas admiten programación mensual/anual/cuenta atrás y condiciones de finalización de repeticiones _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
+* `Nuevo` Las carpetas de proyecto permiten crear tareas programadas y de difusión
+* `Nuevo` Tipo de tarea de difusión "Al llegar un correo", con filtros por remitente y asunto; los datos se obtienen mediante engines.myEngine().execArgv.mail (requiere 3-Stamp Mail)
+* `Nuevo` El inspector de diseño permite copiar selectores con varios atributos, guardar árboles de nodos y analizarlos sin conexión
+* `Nuevo` Barra de búsqueda en el inspector para text/desc/id/className mediante palabras clave o expresiones regulares; la vista jerárquica conserva coincidencias y ancestros, y la vista de límites solo dibuja coincidencias, con lista de resultados, navegación e historial
+* `Nuevo` La barra de búsqueda del inspector admite filtros (atributos booleanos, clases predefinidas, intervalos de profundidad y tamaño), selección rectangular, modo de campos (`k=v`) y modo selector (`$()`); conserva la configuración y el modo entre sesiones
+* `Nuevo` El inspector permite "Copiar como selector" para convertir palabras clave, condiciones de campos, filtros y selección rectangular en selectores encadenados
+* `Nuevo` "Generar código" en el inspector admite alcance individual/colección, estrategias de espera, parámetros de acciones, estilo clásico/Flow, posicionamiento relativo y alternativas, con previsualización de coincidencias en el diseño
+* `Nuevo` Los colores del tema admiten bibliotecas propias que pueden crearse o clonarse, añadir colores desde la paleta, otras bibliotecas o el historial, renombrar, modificar valores, reordenar arrastrando y eliminar por lotes
+* `Nuevo` Bibliotecas de colores inteligentes que cambian grupos según modo nocturno, hora, amanecer/atardecer, batería y estado del script, con cambios programados o aleatorios y excepciones por fecha; incluyen "Parejas día/noche de Material Design", "Color de fondo" y "Seguir fondo de pantalla", y generación desde un color semilla
+* `Nuevo` Las bibliotecas de colores admiten importación y exportación JSON (con exportación múltiple e instantáneas de preajustes)
+* `Nuevo` "Herramientas de color" en los detalles (armonías, tonos, contraste y simulación de deficiencias de visión cromática), con colores favoritos y fijados y biblioteca virtual "Frecuentes y recomendados"
+* `Nuevo` Ajuste "Colores derivados" del tema (desactivado por defecto), para deducir automáticamente colores de acento y oscuros a partir del color principal
+* `Nuevo` Políticas de conservación de papelera, historial de versiones y borradores de emergencia en los ajustes, con limpieza por días, cantidad y capacidad
+* `Nuevo` El historial de versiones admite lista independiente, vista previa y comparación de diferencias, con búsqueda, ordenación y eliminación por lotes
+* `Nuevo` El historial de versiones admite instantáneas manuales, fijación de versiones, edición de etiquetas, exportación y guardado directo tras restaurar
+* `Nuevo` La papelera admite restauración por lotes, vista previa, detalles, avisos de caducidad y deshacer el traslado, además de detectar y limpiar entradas inválidas
+* `Nuevo` Las aplicaciones empaquetadas admiten proyectos y scripts Node.js; requieren Node.js Runtime durante la ejecución (muestran instrucciones de instalación si falta)
+* `Nuevo` Las aplicaciones empaquetadas permiten compilar proyectos Rhino TypeScript durante la construcción, cifrar los resultados compilados y adjuntar Source Map
+* `Nuevo` La configuración de aplicaciones empaquetadas permite mostrar u ocultar registros y configurar accesos directos del lanzador _[`issue #550`](http://issues.autojs6.com/550)_
+* `Nuevo` La conexión del complemento VSCode admite escaneo QR, confirmación de emparejamiento y detección en la red local (requiere el complemento VSCode 1.1.0+)
+* `Nuevo` El complemento VSCode admite gestión remota de archivos y ejecución de scripts del dispositivo, con progreso en transferencias grandes (requiere el complemento VSCode 1.1.0+)
+* `Nuevo` Administrador de conexiones en los modos cliente y servidor para consultar estados, gestionar clientes y acceder al historial de direcciones
+* `Nuevo` El modo cliente admite reconexión automática tras desconexiones inesperadas, reintentos al recuperarse la red y restauración de conexiones al iniciar la aplicación
+* `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
+* `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
+* `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
+* `Corrección` Las funciones envueltas en Proxy y algunos callbacks JavaScript podían rechazarse en módulos integrados o provocar parámetros anidados y ambigüedad de sobrecargas
+* `Corrección` Los listeners EventEmitter#once podían ejecutarse repetidamente al despachar eventos recursivamente o lanzar excepciones desde callbacks
+* `Corrección` app.isInstalled/kill y otros métodos no podían utilizar correctamente parámetros de nombre de paquete _[`issue #495`](http://issues.autojs6.com/495)_
+* `Corrección` Las llamadas shell podían bloquearse aparentemente en dispositivos sin Root
+* `Corrección` dialogs.multiChoice convertía incorrectamente los resultados de selección múltiple en cadenas _[`issue #518`](http://issues.autojs6.com/518)_
+* `Corrección` Cerrar diálogos de scripts al terminar un hilo podía bloquear la aplicación
+* `Corrección` Tras cancelar temporizadores o detener subhilos, callbacks caducados podían impedir la finalización automática del script
+* `Corrección` Los métodos de enfoque de floaty.window/rawWindow podían provocar excepciones de hilo al invocarse desde el hilo del script
+* `Corrección` Los resultados de console.setPosition/setSize/setGravity dependían del orden de llamada o del momento en que se mostraba la ventana
+* `Corrección` El arrastre de la barra de título de la consola flotante podía fallar y la ventana no podía acercarse a los bordes de la pantalla
+* `Corrección` console.log/util.format omitían comillas simples en los valores de cadena de objetos o matrices, con un formato distinto de util.inspect en Auto.js 4
+* `Corrección` Las opciones inseguras de solicitudes http podían hacer que solicitudes posteriores siguieran omitiendo la validación del certificado y del nombre del servidor
+* `Corrección` La configuración de seguridad de red podía bloquear inesperadamente solicitudes HTTP de versiones oficiales y aplicaciones empaquetadas
+* `Corrección` El selector de archivos del control WebView en modo UI no se abría correctamente
+* `Corrección` Los scripts UI podían terminar inesperadamente al entrar en pantalla dividida o cambiar el tamaño de la ventana
+* `Corrección` Los parámetros de expresión regular no funcionaban correctamente en sobrecargas de selectores, el método global filter y selectores de colecciones
+* `Corrección` Los selectores contains interpretaban incorrectamente cadenas normales como expresiones regulares
+* `Corrección` Las búsquedas con límite de resultados podían devolver resultados de más o no liberar los nodos restantes
+* `Corrección` Errores al analizar parámetros de brújula y devolver resultados en UiObject#compass y pickup/detect
+* `Corrección` UiObject#child/parent podían entrar en recursión infinita
+* `Corrección` Nombres de atributos incorrectos en la representación textual de selectores y formato decimal anómalo en algunos idiomas
+* `Corrección` Las excepciones de métodos selectores globales no podían capturarse con try/catch
+* `Corrección` Con findOnUiThread, las búsquedas podían esperar indefinidamente o no agotar el tiempo a tiempo
+* `Corrección` UiObject#clickBounds podía finalizar inesperadamente el bucle de eventos e invalidar callbacks posteriores, o lanzar excepciones al invocarse en el hilo principal (como en scripts de modo "ui")
+* `Corrección` El nodo source de callbacks auto.registerEvent podía entrar en bucle infinito o provocar errores de límites al cambiar el árbol de nodos
+* `Corrección` Tras reiniciar el servicio de accesibilidad, pickup y las consultas UiSelector podían devolver siempre resultados vacíos
+* `Corrección` auto.stateListener se sobrescribía entre scripts y no se eliminaba al finalizar el script
+* `Corrección` auto.waitFor podía esperar hasta agotar el tiempo aunque el servicio de accesibilidad ya enviara eventos
+* `Corrección` Desactivar o reiniciar el servicio de accesibilidad con Root podía no surtir efecto
+* `Corrección` Crear páginas de la aplicación podía reactivar el servicio de accesibilidad desactivado manualmente por el usuario
+* `Corrección` auto.start/enable reiniciaban repetidamente el servicio de accesibilidad aunque ya estuviera activo
+* `Corrección` auto.windowRoots podía devolver nodos vacíos cuando la ventana activa no estaba disponible
+* `Corrección` El estado consultado y los mensajes de error del servicio de accesibilidad no coincidían con el interruptor del panel lateral
+* `Corrección` auto.services no podía leer la lista de servicios activos si no se había configurado un método de activación automática
+* `Corrección` El inspector de diseño requería activarse otra vez después de habilitar automáticamente la accesibilidad
+* `Corrección` Los callbacks de eventos registrados y listeners de teclas dejaban de funcionar tras reiniciar la accesibilidad
+* `Corrección` La primera llamada a operaciones globales automator podía lanzar una excepción de puntero nulo y el escalado vertical de gestos era incorrecto
+* `Corrección` El servicio de accesibilidad podía interrumpirse inesperadamente al ejecutar repetidamente operaciones como back _[`issue #527`](http://issues.autojs6.com/527)_
+* `Corrección` El observador de notificaciones confundía notificaciones del sistema con mensajes flotantes y omitía eventos de notificación
+* `Corrección` En Android 14+, solicitar captura de pantalla podía bloquear la aplicación por errores al iniciar el servicio en primer plano _[`issue #516`](http://issues.autojs6.com/516)_
+* `Corrección` Invocar OCR repetidamente desde varios hilos o archivos podía solicitar una y otra vez el permiso de captura _[`issue #551`](http://issues.autojs6.com/551)_
+* `Corrección` Al fallar la selección de un complemento OCR, los errores no coincidían con el motor real y su estado de instalación
+* `Corrección` El servicio Paddle OCR no se recuperaba tras desconectarse ni se iniciaba automáticamente si no estaba en ejecución _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_ _[`issue #517`](http://issues.autojs6.com/517)_
+* `Corrección` Usar Paddle OCR y luego Rapid OCR en aplicaciones empaquetadas podía bloquearlas
+* `Corrección` Paddle OCR no funcionaba en aplicaciones empaquetadas al seleccionar simultáneamente los complementos v3 y v4/v5/v6 (las aplicaciones empaquetadas solo admiten PP-OCRv3)
+* `Corrección` images.resize podía bloquear la aplicación al recibir parámetros incorrectos
+* `Corrección` Algunos métodos images podían liberar imágenes prematuramente, filtrar memoria nativa o liberar imágenes de otros scripts
+* `Corrección` Resultados incorrectos del algoritmo hs en colors.isSimilar/images.detectColor y manejo incorrecto de componentes decimales o porcentuales en colors.rgb/rgba
+* `Corrección` Errores en resultados de comparación y procesamiento de imágenes grises o RGBA en images.isEqual/mse/ncc/isGrayscale
+* `Corrección` Pérdida de transparencia en images.invert, canales rojo y azul invertidos en ImageWrapper#saveTo y manejo incorrecto de regiones fuera de límites en images.clip
+* `Corrección` images.load y otros métodos podían no cerrar conexiones o liberar imágenes temporales
+* `Corrección` Errores de coincidencia en bordes, precisión de coordenadas, ordenación y límite de resultados en images.findImage/matchTemplate
+* `Corrección` images.matchTemplate no manejaba correctamente imágenes con distintos canales, plantillas uniformes o máscaras transparentes; MatchingResult#sortBy rechazaba resultados decimales de comparación
+* `Corrección` images.matchFeatures devolvía bordes que no correspondían a la posición real, con errores al detectar características en imágenes pequeñas, dibujar coincidencias y liberar recursos
+* `Corrección` El consumo de memoria podía crecer continuamente tras ejecutar scripts repetidas veces (corrección tentativa) _[`issue #548`](http://issues.autojs6.com/548)_
+* `Corrección` Al ejecutar scripts mediante URI externos o en segundo plano podían perderse la ruta original o la extensión _[`issue #545`](http://issues.autojs6.com/545)_
 * `Corrección` Tasker no podía invocar y ejecutar scripts correctamente _[`issue #501`](http://issues.autojs6.com/501)_
-* `Corrección` La pestaña Documentos de la página principal podía provocar el cierre inesperado de la aplicación cuando ViewPager recibía una secuencia multitáctil anómala con un índice de puntero no válido
-* `Corrección` Diversos problemas de interacción del editor Ace relacionados con IME/selección de texto/plegado de código/zoom con pellizco/navegación de pila y otros escenarios
-* `Corrección` Los títulos principales de los ajustes del editor de código, el panel de funciones fx, el cajón de documentación fijado a la izquierda y la barra de herramientas de selección de texto de Ace podían seguir usando los colores de la aplicación AutoJs6 en lugar del tema actual del editor, y las acciones de línea de Ace podían aparecer duplicadas
-* `Corrección` En el modo de edición a pantalla completa, el teclado virtual podía cubrir la barra de teclas multifunción y el área de la barra de navegación situada bajo el Snackbar de aviso podía quedar transparente
-* `Corrección` La barra lateral de documentación del editor de código podía mostrar únicamente el fondo del tema sin contenido, y los ajustes del editor carecían de colores jerárquicos estables derivados del fondo del editor, lo que podía hacer desaparecer los colores de títulos, subtítulos, categorías y controles tras desplazar y reutilizar los elementos de la lista
-* `Corrección` El teclado virtual podía cubrir la barra de teclas multifunción fuera del modo de pantalla completa
-* `Corrección` La barra de información del editor de código podía omitir las extensiones de archivo o mostrar brevemente una posición temporal del cursor al final del archivo al abrir un documento, y podía aparecer un espacio claro entre la barra de teclas multifunción y el teclado en pantalla cuando los temas de la aplicación y del editor tenían distinta luminosidad
-* `Corrección` El editor Ace podía dejar de responder durante mucho tiempo y volver al editor nativo cuando al recargar un archivo grande con una codificación incompatible se generaba una línea de texto extremadamente larga
-* `Corrección` Desactivar o desinstalar el plugin Ace externo mientras el editor o su interfaz de ajustes estaba en uso podía provocar la pérdida de cambios sin guardar o dejar la interfaz en un estado no válido
-* `Corrección` Los iconos de los botones del Centro de plugins quedaban demasiado alejados de sus etiquetas tras simplificar el diseño de las filas
-* `Corrección` El Centro de plugins conservaba fechas de septiembre como `Sept 13, 2026` en lugar de normalizarlas a `yyyy-MM-dd`
-* `Corrección` El Centro de plugins podía mostrar un icono remoto obsoleto en lugar del icono instalado actualmente cuando un plugin no tenía una URL de icono en línea
-* `Corrección` Al cambiar entre los modos claro y oscuro del Centro de plugins podía aparecer brevemente un icono instalado del tema anterior; ambas variantes se preparan en segundo plano y se selecciona el tema actual desde la primera presentación
-* `Corrección` La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos
-* `Corrección` El fallo del proceso de un solo plugin local podía dejar completamente vacía la lista del Centro de plugins
-* `Corrección` Al volver al Centro de plugins desde otra pantalla o desde segundo plano, la actualización concurrente podía eliminar temporalmente los plugins SDK heredados instalados o sustituirlos por entradas de índice desactivadas, reordenando filas, reenlazando interruptores y cambiando la posición de desplazamiento
-* `Corrección` Los iconos de los plugins instalados en la pestaña Plugins de la página de inicio no cambiaban dinámicamente al alternar el modo nocturno
-* `Corrección` El Centro de plugins podía instalar el APK de una variante incorrecta cuando una versión del plugin contenía varias variantes
-* `Corrección` Los plugins APK Builder Template podían aparecer duplicados o notificar actualizaciones incorrectamente
-* `Corrección` La verificación de integridad de la documentación del proyecto sin conexión podía reutilizar contenido obsoleto almacenado en caché mientras se actualizaba el plugin
-* `Corrección` Faltaban el botón Manifest y el contenido completo en varias líneas en los detalles de APK del administrador de archivos
-* `Corrección` El administrador de archivos ignoraba por error las diferencias entre mayúsculas y minúsculas en los nombres de las entradas ZIP al analizar APK, por lo que entradas que solo diferían en el uso de mayúsculas y minúsculas se consideraban duplicadas en algunos paquetes válidos e impedían verlos o instalarlos
-* `Corrección` Las importaciones en caché desde URI externos confiaban en los nombres de archivo proporcionados por el proveedor de contenido, lo que podía permitir el cruce de rutas o la sobrescritura de archivos con el mismo nombre
-* `Corrección` La posición de desplazamiento de la lista del administrador de archivos se restablecía tras eliminar archivos de la Papelera
-* `Corrección` Los campos de búsqueda podían conservar el cursor azul predeterminado en lugar del color de primer plano adecuado para el tema, y sus indicaciones podían permanecer en el idioma de reserva en vez de seguir el idioma actual de la aplicación
-* `Corrección` El área táctil efectiva de los interruptores del cajón de inicio era demasiado pequeña
-* `Corrección` Los interruptores del cajón de inicio podían quedar recortados y los botones inferiores ocultos en pantallas estrechas como 360x640 o tras cambiar el tamaño de la ventana
-* `Corrección` Cerrar o recrear la pantalla principal podía bloquear la aplicación cuando la limpieza de los listeners del cajón lateral accedía a un contexto liberado
-* `Corrección` Los nombres de paquete y la información de Activity de las aplicaciones recientes mostrados en el menú del botón flotante eran incorrectos _[`issue #529`](http://issues.autojs6.com/529)_
-* `Corrección` El diálogo "Ejecutar script" del botón flotante podía no restaurarse tras minimizarlo (intento de corrección) _[`issue #500`](http://issues.autojs6.com/500)_
-* `Corrección` El fondo de la pantalla de inicio no se extendía al área de recorte del borde corto
-* `Corrección` El gestor de archivos podía no actualizar una nueva salida adyacente confirmada por Explorer Action o mostrar un directorio de salida confirmado como archivo
-* `Corrección` Al salir de una página nativa de archivo en Android 7, la aplicación podía fallar al limpiar la caché de vistas previas porque la ruta de limpieza llamaba a una API File NIO más reciente
-* `Corrección` Al volver de un reproductor Explorer Action podían ejecutarse hasta dos reenlaces completos de la lista, causando parpadeos intensos aunque se conservaran la carpeta y la posición de desplazamiento
-* `Corrección` Al pulsar Archivo desde otra pestaña de inicio no se mostraba la animación de transición de ViewPager
-* `Corrección` Al volver de una página de plugin en horizontal como el reproductor de vídeo, el cambio de configuración reconstruía toda la interfaz principal, haciendo que el administrador de archivos parpadeara con intensidad e incluso dos veces seguidas
-* `Corrección` Al abrir por primera vez la pestaña Plugins de inicio o el Centro de plugins independiente, o al volver a cualquier pestaña de inicio tras visitar Plugins, los gestos inmediatos podían quedar bloqueados durante cerca de medio segundo
-* `Corrección` Las animaciones al cambiar a Plugins de inicio y al deslizar para actualizar en el Centro de plugins podían congelarse a mitad mientras se descubrían los metadatos de servicios y se creaban filas densas en frío; el Centro de plugins independiente también podía restaurar el servicio de accesibilidad mediante root/settings durante la creación de la Activity
-* `Corrección` El icono de rompecabezas de Explorer Action para ZIP/JAR y otros archivos gestionados por plugins llenaba toda la celda de acción y parecía demasiado grande
-* `Corrección` El gestor de archivos no distinguía de forma fiable las fuentes y declaraciones TypeScript `.ts/.mts` de los vídeos MPEG-2 TS con los mismos sufijos, ni trataba siempre `.d.ts/.d.mts/.d.cts` como declaraciones
-* `Corrección` Los archivos fuente `.py/.ts/.java/.kt` compatibles con plugins no mostraban de forma coherente un icono de fuente ejecutable y la acción Ejecutar
-* `Corrección` Al ejecutar archivos `.ts/.tsx` mediante Intent y otros puntos de entrada, la consola del host podía mostrar una extensión `.js` incorrecta y perder la ruta del archivo original
-* `Corrección` Los proyectos de script mínimos sin metadatos de empaquetado APK recurrían a `main.js` en lugar de iniciar la entrada `main` declarada en `project.json`
-* `Corrección` Las entradas de activación podían resolverse de forma incorrecta en variantes con sufijo del ID de aplicación, y el éxito del despertar podía anunciarse antes de que el servicio estuviera disponible
-* `Corrección` Llamar a los accesores compat `getChild()` / `getParent()` etc. en un `UiObject` con asignador de nodos recurría sin fin (el asignador volvía a llamar a los accesores del propio envoltorio); ahora el asignador trabaja sobre el nodo bruto y registra por identidad de objeto y no por igualdad de nodos (dos instancias de la misma vista ya no se liberan como una sola). Sigue sin integrarse en los tiempos de ejecución de script: por debajo de Android 13 los nodos se agrupan por proceso, por lo que una liberación en lote al salir podría reciclar una instancia ya reutilizada por otro script
-* `Corrección` La condición de selector `contextClickable()` aparecía como `checkable` en la forma de cadena del selector (`selector().toString()`, mensajes de error)
-* `Corrección` La forma de función global `filter(fn)` fallaba con "Invalid arguments", y se rechazaba una expresión regular dentro de un array de selector de mapa (`pickup({text: [/regex/]})`)
-* `Corrección` Los decimales en la forma de cadena de los selectores (`selector().toString()`, mensajes de error) aparecían como `boundsLeft(0,5)` con idiomas de interfaz cuyo separador decimal es la coma (francés, ruso, ...); ahora se usa siempre el punto
-* `Corrección` Las excepciones Java lanzadas por la forma de función global de los métodos de selector (`algorithm('xyz')`, `textMatch('(')`, ...) no podían capturarse con el `try / catch` del script y terminaban el script; ahora se lanzan como errores de script capturables
-* `Corrección` Con el indicador `findOnUiThread` activo, una búsqueda enviada al hilo de la interfaz podía colgarse para siempre si se perdía su señal de despertar (el hilo de la interfaz terminaba la búsqueda antes de que el hilo del script empezara a esperar), y `findOne(timeout)` nunca vencía mientras el hilo de la interfaz estaba bloqueado; ahora la espera está limitada por el tiempo límite de la consulta y no puede perder la señal
-* `Corrección` `UiObject.clickBounds()` preparaba un Looper en el hilo del script y llamaba a `quit()` al terminar el gesto, lo que cerraba el propio bucle de eventos del hilo del script: `setTimeout` y otros callbacks ya no se ejecutaban y el script terminaba antes de tiempo; los nodos obtenidos de una consulta ahora pulsan mediante el despachador de gestos del script (el Looper servant), y los nodos de otras fuentes (como el `source` de un callback de `auto.registerEvent`) esperan el resultado en un hilo de callbacks compartido sin tocar el Looper del hilo que llama; en el hilo principal (por ejemplo en un script `"ui"`) la llamada fallaba porque el Looper principal no puede terminar
-* `Corrección` El tipo de resultado `['compass', 'p']` de `pickup` / `detect` fallaba siempre con "tipo de resultado desconocido" porque `compass` figuraba con un parámetro `String` en la tabla del interceptor mientras que su firma recibe `CharSequence`; ahora funciona
-* `Corrección` Cuando el inspector de diseño generaba código para un hijo de un control de colección sin ninguna acción seleccionada, el bloque `forEach` generado contenía la sentencia inválida `target.;`; ahora se omite esa línea
-* `Corrección` Escape incompleto de comillas, barras invertidas y caracteres de control en "Copiar como selector" del inspector de diseño y en la representación textual de los selectores
-* `Corrección` La generación de código del inspector de diseño ignoraba el texto y algunas acciones de consulta, actuaba sobre todo el grupo para un solo destino de lista, usaba consultas obsoletas, abandonaba Flow sin avisar o fallaba en pulsaciones largas, y localizaba incorrectamente ID iguales entre paquetes
-* `Corrección` De varias sobrecargas con el mismo nombre en un array de colección de controles solo sobrevivía la última (por ejemplo `performAction(action)` junto a `performAction(action, ...args)`), por lo que llamarla con el otro número de argumentos fallaba por parámetros no coincidentes; ahora se vinculan todas las sobrecargas por nombre
-* `Corrección` Desde 6.7.0 Alpha13, una cadena normal pasada a la familia de selectores `contains` (`textContains` / `descContains` / `contentContains` / `idContains` / `classNameContains` / `packageNameContains`, etc.) se compilaba como patrón de expresión regular (`textContains(".")` coincidía con cualquier texto no vacío, `textContains("1+1")` coincidía con "11", `textContains("(")` lanzaba un error); vuelve a ser una subcadena literal, en línea con `text(s)` / `textStartsWith` / `textEndsWith`; para patrones pase una expresión regular (`textContains(/re/i)`) o use `textMatch` / `textMatches`, y una cadena con la forma "/re/flags" ya no se trata como expresión regular en `contains`
-* `Corrección` `requestFocus()` / `disableFocus()` de las ventanas flotantes (`floaty.rawWindow` / `floaty.window`) actualizaban el diseño de la ventana adjunta directamente en el hilo del script y lanzaban ocasionalmente `CalledFromWrongThreadException`; ahora se ejecutan en el hilo de la interfaz (como `setSize` / `setPosition`)
-* `Corrección` El observador de notificaciones de accesibilidad (detrás de `events.observeToast()` y similares) trataba cada notificación del sistema como un toast de otra app (su comprobación nombraba la subclase propia de esta app, que nunca coincide), así que las notificaciones nunca llegaban a sus oyentes y las de otras apps se reportaban como toasts; ahora comprueba `android.app.Notification` del framework
-* `Corrección` El orden de llamada de `console.setPosition` / `setSize` / `setGravity` y `console.show()` afectaba al resultado (por ejemplo `console.show(); console.setPosition(500, 400)` necesitaba un `sleep` entre ambos, y el orden inverso podía perder el ajuste); ahora los ajustes se registran y se aplican cuando la ventana queda adjunta, por lo que el orden y el momento ya no importan
-* `Corrección` Arrastrar la consola flotante por su barra de título fallaba ocasionalmente (el gesto de arrastre se vinculaba antes de adjuntar la ventana y competía con los clics de botones y el cierre de la ventana); ahora el arrastre se configura tras adjuntar la ventana, el movimiento se limita a la pantalla y la posición se registra al terminar el arrastre
-* `Corrección` La consola flotante tenía un margen de 12dp en cada lado, por lo que `console.setPosition(0, 0)` no alcanzaba el borde de la pantalla; se elimina el margen, la coordenada Y parte por defecto de debajo de la barra de estado (desactivable con `setAvoidStatusBar(false)`) y tanto la posición como el tamaño se limitan a la pantalla
-* `Corrección` El controlador de sesion de MCP Server podia publicar la instantanea `starting` obtenida justo despues de `openServer` encima de un estado `running` que el plugin ya habia entregado por su callback, por lo que `status` nunca informaba que el oyente estaba en marcha; ahora la instantanea obtenida solo se publica cuando no llego ningun estado por callback mientras se solicitaba
-* `Corrección` El cajón lateral seguía mostrando indicaciones obsoletas de MCP Server, como "no instalado", después de instalar, activar o actualizar el plugin, hasta reiniciar AutoJs6; un plugin instalado que Android aún no ha activado muestra ahora "Se requiere activación" antes de usar el interruptor
-* `Corrección` Complete name muestra la ruta original en los detalles y las instantáneas MediaInfo en lugar de la caché privada o del descriptor, conservando el nombre de archivo de la instantánea
-* `Corrección` `accessibility.swipe` / `accessibility.gesture` del Node bridge (los gestos por coordenadas de los plugins MCP Server y Node) respondian `false` (cancelado) a cada gesto posterior al primero en un hilo de despacho del broker reutilizado: el automata de gestos sin handler preparaba un Looper en el hilo llamador y lo cerraba al completarse el primer gesto, por lo que la siguiente llamada en ese hilo volvia de inmediato y su resultado real iba a un handler muerto; el bridge ahora entrega al automata el handler del bucle principal, como hace el broker Python del host
-* `Corrección` Las políticas de los plugins OpenCV e ImageQuant rechazaban las bibliotecas nativas compiladas con NDK r28c (28.2.13676358) por discrepancia de versión del NDK, lo que bloqueaba el plugin OpenCV v1.1.2 reconstruido; ahora se aceptan tanto las compilaciones r26b como r28c
-* `Corrección` Los cargadores de los complementos OpenCV e Image Quantization continuaban tras fallar la protección de la caché de solo lectura; los archivos nativos ahora se verifican antes de cargarse para garantizar la compatibilidad con Android 17
-* `Corrección` runtime.loadDex en Android 7.0 / 7.1 podía sobrescribir el DEX en caché con la salida optimizada de ART, provocando errores al cargar clases
-* `Corrección` Los compiladores Kotlin cargados dinámicamente fallaban por restricciones de las operaciones atómicas de Unsafe o por la falta del entorno de reflexión
-* `Corrección` Las API antiguas de reflexión de ámbitos de Rhino impedían que las bibliotecas externas registraran automáticamente clases Java/Kotlin
-* `Corrección` Las capturas del puente MediaProjection reintentan hasta seis veces si falta un fotograma temporalmente, permitiendo capturas consecutivas tras renovar el flujo sin volver a solicitar consentimiento
-* `Corrección` Las matrices de OpenCV detrás de `images.imread`, `images.matToImage` y las imágenes basadas en Mat nunca se liberaban o compartían el encabezado nativo con una fuente que podía ser recolectada, causando fugas de memoria nativa y punteros colgantes
-* `Corrección` Un script al finalizar reciclaba las imágenes de todos los demás scripts en ejecución; ahora las imágenes se registran y reciclan por entorno de ejecución de script
-* `Corrección` `colors.isSimilar` e `images.detectColor` con el algoritmo `hs` coincidían con cualquier color, y `colors.rgb` / `colors.rgba` trataban los componentes fraccionarios o porcentuales como enteros
-* `Corrección` `images.isEqual` devolvía true para imágenes que difieren en un solo canal, `images.mse` se saturaba en `255`, e `images.ncc` / `images.isGrayscale` manejaban mal las entradas en escala de grises o RGBA
-* `Corrección` `images.invert` perdía el canal alpha, `ImageWrapper.saveTo` guardaba las imágenes basadas en Mat con los canales rojo y azul intercambiados, e `images.clip` devolvía silenciosamente resultados erróneos para regiones fuera de la imagen
-* `Corrección` Las imágenes pasadas por ruta a `images.clip`, `images.findCircles` e `images.readPixels` podían reciclarse antes de usarse, e `images.findImage` / `images.matchTemplate` podían lanzar excepciones o devolver coincidencias erróneas con plantillas cerca del borde de la imagen o mayores que la región de búsqueda
-* `Corrección` `images.load` aplica un tiempo de espera de 30 segundos y cierra la conexión, e `images.saveBitmap`, la coincidencia de características y la comparación de histogramas liberan sus flujos y matrices temporales
-* `Corrección` La búsqueda de plantillas devolvía coordenadas redondeadas a un nivel grueso de la pirámide (con hasta varios píxeles de error) cuando una coincidencia alcanzaba el umbral antes de tiempo, podía devolver dos veces la misma posición para candidatos vecinos, y los resultados no se ordenaban por similitud ni respetaban `max`
-* `Corrección` `images.matchTemplate` lanzaba una excepción con una imagen y una plantilla de distinto número de canales, nunca encontraba una plantilla de color uniforme, y `useTransparentMask` enmascaraba solo el canal alpha en lugar de los píxeles transparentes; `MatchingResult.sortBy(compareFn)` fallaba cuando el comparador devolvía un número no entero
-* `Corrección` `images.matchFeatures` devolvía un marco de tamaño incorrecto cuando las características del objeto se calculaban con un `scale` distinto de 1, reordenaba las esquinas de modo que un objeto rotado perdía la correspondencia con sus propias esquinas, podía devolver un marco distorsionado a partir de una homografía poco fiable, dibujaba la imagen de `drawMatches` a partir de las matrices de descriptores en lugar de las imágenes, y lanzaba un error de OpenCV con imágenes sin puntos clave
-* `Corrección` `images.detectAndComputeFeatures` no liberaba sus matrices intermedias, y ORB no encontraba ningún punto clave en imágenes menores de 63 px y solo unos pocos en objetos pequeños a causa del borde predeterminado de 31 px
-* `Corrección` El controlador de sesión de MCP Server volvía a vincular el plugin alrededor de un segundo después de que el usuario lo detuviera forzosamente en los ajustes del sistema, lo que lo iniciaba de nuevo en contra de esa decisión; un plugin que ya no está disponible tras la muerte de su proceso (detenido, deshabilitado o desinstalado) ya no se vuelve a vincular, el interruptor del panel lateral se cierra y su subtítulo muestra la guía de activación como en una instalación nueva
-* `Corrección` En Android 14 y posteriores, el plugin MCP Server no podía abrir la confirmación de emparejamiento solicitada por un ordenador aunque AutoJs6 estuviera en primer plano (mientras AutoJs6 está en segundo plano, siguen encargándose la notificación y la página de ajustes del plugin)
-* `Corrección` El historial de versiones ahora registra la huella del contenido después de guardar, de modo que el siguiente guardado de un archivo renombrado o movido se vuelve a asociar a su historial; la reasociación por huella solo ocurre cuando la ruta antigua ya no existe, así que una copia idéntica ya no se apropia del historial del archivo original
-* `Corrección` La papelera y el historial de versiones resuelven la raíz del almacenamiento interno a partir de la ruta real del usuario actual en lugar de un /storage/emulated/0 fijo, por lo que funcionan en entornos multiusuario y perfiles de trabajo
-* `Corrección` Antes de restaurar una versión al disco o restaurar un archivo desde la papelera con sobrescritura, el contenido actual del destino se registra primero como una revisión RESTORE_PRE; la restauración con sobrescritura desde la papelera escribe en un archivo temporal y luego reemplaza el destino, así que una cancelación o un fallo ya no deja un archivo a medio escribir
-* `Corrección` El renombrado automático ante un conflicto de restauración desde la papelera decide los directorios por el tipo de elemento, así que un directorio con un punto en el nombre (como my.project) ya no pierde parte del nombre como extensión
-* `Corrección` El diálogo del historial de versiones lista todas las revisiones conservadas (antes como máximo 20), ofrece Vista previa también desde el editor y mantiene su modo tras eliminar una revisión y recargar la lista
-* `Corrección` La limpieza de blobs huérfanos del historial de versiones protege los blobs de menos de 30 minutos, así que una instantánea reciente cuya fila en la base de datos aún está pendiente ya no se elimina
-* `Corrección` Los archivos eliminados en el PC permanecían en el dispositivo tras guardar un proyecto desde la extensión de VSCode, y los archivos obsoletos del directorio de caché reaparecían _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
-* `Corrección` Al recibir un archivo de proyecto desde la extensión de VSCode se convertía todo el arreglo de bytes en cadena para el registro, lo que podía provocar un fallo por OOM _[`issue #523`](http://issues.autojs6.com/523)_
-* `Corrección` Una sola conexión medio muerta de la extensión de VSCode bloqueaba el hilo de escritura de registros, de modo que las nuevas conexiones no recibían registros _[`issue #385`](http://issues.autojs6.com/385)_
-* `Corrección` El historial de versiones permanecía en la ruta antigua tras renombrar o mover un archivo o directorio en el explorador; ahora sigue la nueva ruta (los directorios reescriben todas las rutas rastreadas que contienen), y cuando un movimiento sobrescribe un archivo rastreado ambos historiales se fusionan en la ruta de destino
-* `Corrección` Restaurar un único elemento de la papelera indicaba "hecho" incluso cuando la restauración había fallado porque el diálogo de progreso se tragaba la excepción; ahora se muestra el error real
-* `Corrección` Los mensajes de operación del explorador mostrados desde el hilo principal (como "Movido a la papelera") aparecían dos veces
-* `Corrección` Al restaurar un directorio desde la papelera, los nombres de las entradas del archivo se validan contra la ruta canónica del destino, por lo que las entradas con ".." o rutas absolutas ya no pueden escribirse fuera del destino (dichas entradas se omiten y se registran)
-* `Corrección` Los scripts enviados por la extensión de VSCode (TypeScript, Lua, Node.js, Bun, QuickJS, Python) se ejecutaban todos como JavaScript de Rhino; ahora se enrutan al motor correspondiente al nombre del archivo
-* `Corrección` Los diálogos de rechazo del handshake o de fallo de conexión de la extensión de VSCode podían comportarse mal tras destruirse la Activity (cambio de idioma o de modo oscuro); ahora recurren a un aviso
-* `Corrección` El historial de direcciones de servidor del modo cliente solo se escribía cuando fallaba el handshake y nunca en una conexión correcta, por lo que el "Historial" del diálogo de dirección permanecía vacío
-* `Corrección` Al elegir el APK de una actualización, una versión sin paquete para la primera ABI preferida podía elegir un paquete posterior de menor prioridad de la lista (como el universal) en lugar del paquete de la siguiente ABI preferida
-* `Corrección` El instalador de paquetes integrado podía rechazar APK firmados con V2/V3 en Android 9-11 con "Base APK has no verifiable signer" porque el analizador de archivos de la plataforma dejaba vacía la información de firma; ahora se consulta como alternativa la vista de firma de archivo obsoleta
-* `Corrección` Los cinco complementos Three usan iconos transparentes en el centro de complementos que siguen el tema claro u oscuro del anfitrión, sin fondos del lanzador
-* `Corrección` La inspeccion de paquetes reconoce conjuntos de APK divididos en archivos ZIP normales, incluso sin una extension de paquete conocida
-* `Corrección` La pantalla de confirmación de 3-Setup Installer no se abría en Android 14 y versiones posteriores al iniciar una instalación con AutoJs6 en primer plano
-* `Corrección` La raíz del manifiesto y los UID compartidos podían interpretarse desde comentarios o espacios de nombres falsos; los atributos duplicados, recursos contradictorios y UID no verificables detienen el procesamiento
-* `Corrección` Contraste insuficiente del texto y los controles de las ventanas flotantes y los diálogos del análisis de diseño con algunos colores de tema o en modo nocturno
-* `Corrección` El Centro de complementos restauraba desde la caché complementos retirados o renombrados tras actualizar el índice correctamente
-* `Corrección` Falta del fondo circular de los iconos en los detalles del centro de plugins y bordes en caché que no se actualizaban al cambiar de tema
-* `Corrección` Los colores Material elegidos en el diseño antiguo no se podían encontrar con "Localizar color del tema actual" tras cambiar de diseño, y la página de colores Material no mostraba el resumen del color actual
-* `Corrección` Abrir los detalles de un complemento justo después de un arranque en frío del centro de complementos podía hacer parpadear el cuadro de diálogo, porque cada actualización de la lista lo reconstruía
-* `Corrección` El Centro de plugins dejaba un plugin desactivado tras una actualización de la lista en la que no se pudo contactar temporalmente (por ejemplo, durante una actualización o mientras el sistema bloqueaba la vinculación); ahora el plugin se vuelve a activar en cuanto se puede contactar de nuevo, y los plugins desactivados a mano siguen desactivados
-* `Corrección` Los scripts UI empaquetados que a veces mostraban una página en blanco y se cerraban al iniciarse
-* `Corrección` Compose UI rechaza volver a montar páginas o ventanas flotantes dentro del callback de renderizado y conserva la página actual; permite volver a montar páginas después de actualizar el plugin
-* `Corrección` Las fábricas de componentes trataban el primer nodo como propiedades al recibir varios nodos como argumentos posicionales
-* `Corrección` Los lectores de propiedades Compose conservan null en lugar de devolver undefined, incluidos el progreso predeterminado y las fechas borradas de DatePicker
-* `Corrección` Con Paddle OCR v3 y un plugin v4/v5/v6 habilitados a la vez, el empaquetado elegía este último y Paddle OCR no funcionaba en la aplicación empaquetada; ahora las aplicaciones empaquetadas solo aceptan el plugin PP-OCRv3 y no copian los modelos ni las bibliotecas nativas de v4-v6 que no pueden ejecutar
-* `Corrección` El empaquetado de APK conservaba en silencio una de dos bibliotecas nativas con el mismo nombre y distinto contenido; ahora se detiene e indica ambos orígenes
-* `Mejora` El Centro de plugins admite dos niveles de ordenación con direcciones independientes, por defecto instalados > deshabilitados > no instalados, y luego por última actualización en orden descendente dentro de cada estado
-* `Mejora` El Centro de plugins mantiene los plugins en su posición tras una acción o al volver de su configuración, mientras actualiza su estado y continúa las actualizaciones en segundo plano; actualizar manualmente o cambiar la ordenación o los filtros restaura el orden normal
-* `Mejora` El perfil Estándar incluye 3-Setup Installer; la instalación de APK con el instalador del sistema ya no muestra la recomendación de este plugin
-* `Mejora` Lectura de datos de modelos de Three Stove Agent en Android 7-10 mediante API públicas, conservando posiciones de archivo y cancelación de tuberías bloqueadas
-* `Mejora` Las comprobaciones lint del anfitrión excluyen por ruta las clases y los recursos de compatibilidad con AutoJs4 y siguen comprobando el resto del anfitrión
-* `Mejora` El centro de plugins escribe un registro de activación explícito y ejecuta el sondeo de activación tras observar una instalación nueva de un plugin desactivado por defecto (YOLO, MCP Server) firmado con el certificado oficial del host; los firmantes de terceros de confianza o autorizados por el usuario, las instalaciones por adb y las actualizaciones siguen requiriendo activación manual, y los consumidores de ejecución siguen leyendo solo el registro guardado
-* `Mejora` Los gestores de accesibilidad, cliente y servidor comparten botones de expansión y separadores; los ajustes contraídos se abren en un diálogo independiente con el engranaje y los controles del cliente contraídos incluyen el historial; los controles del servidor contraídos también ofrecen Desconectar todos los clientes
-* `Mejora` La visibilidad y el formato de la hora se recuerdan por separado para el panel de registro, la actividad de registro, los elementos globalconsole y console y la consola flotante; la hora se muestra por defecto en los dos primeros y se oculta en los otros tres
-* `Mejora` Las tareas y los registros de inicio/fin abrevian los directorios conocidos con $cwd, $sdcard, $sample, $files, $cache y $data, conservando nombres y extensiones reales; se respetan los límites de componentes y los separadores finales
-* `Mejora` La entrada MCP Server del panel lateral usa el icono del protocolo MCP con trazos ligeramente más gruesos, con tamaño y color coherentes con las demás entradas
-* `Mejora` Los errores Flow conservan métodos, archivos de script y números de línea de tareas asíncronas en flowStack y stack, y console.error muestra la pila automáticamente
-* `Mejora` maxAttempts de Flow repeatUntil usa 0 de forma predeterminada para intentos ilimitados dentro del tiempo total
-* `Mejora` Comparación de colecciones ordenadas de nodos y proyecciones snapshot inmutables, con plazos y cancelación de subflujos
-* `Mejora` Autorización de red local de Android 17 integrada en la activación y los ajustes del plugin, sin página de permisos en el lanzador; sin permiso, el plugin permanece desactivado y se omite el inicio automático sin avisos
-* `Mejora` Explicación de la protección avanzada en el anfitrión y el complemento, diferenciando el modo global de la disponibilidad real del servicio y el control de ajustes seguros
-* `Mejora` Las apps empaquetadas solicitan almacenamiento según las rutas compartidas del proyecto; la denegación, el regreso de ajustes, la recuperación del acceso de inicio y el arranque comprueban el acceso real
-* `Mejora` media.playMusic utiliza un servicio de música en primer plano con foco de audio, controles de notificación, propiedad de reproducción del script y limpieza al finalizar
-* `Mejora` La ayuda del servicio en primer plano explica las restricciones de audio en segundo plano de Android 17 y cómo reiniciar el servicio desde la aplicación visible antes de reintentar la reproducción
-* `Mejora` Explicitar la delegación de inicio de Activity del complemento Selector de color de pantalla, con opciones del emisor vinculadas a la visibilidad del anfitrión en Android 16 y posteriores
-* `Mejora` Indicaciones para recuperar conexiones LAN HTTP, WebSocket y del puente de red controlado de Node, conservando los errores originales y explicando el reintento tras la autorización; conversión de permisos independiente del idioma del sistema
-* `Mejora` Renombrar el grupo del cajón de inicio de "Conectar al PC" a "Conexiones remotas" para incluir los modos cliente y servidor y MCP Server
-* `Mejora` Actualización del compileSdk del proyecto a 37 (Android 17) y mejoras en las compilaciones de depuración y la verificación lint para la migración del SDK
-* `Mejora` Actualización del targetSdk de la aplicación y de las aplicaciones empaquetadas (inrt) a 37 (Android 17); las aplicaciones empaquetadas pasan del targetSdk 29 al 37, el permiso de red local se solicita bajo demanda en Android 17 y las aplicaciones empaquetadas guían el acceso al almacenamiento compartido cuando es necesario
-* `Mejora` Unificar la inspección de paquetes en 262144 entradas y ampliar los presupuestos de paquetes, análisis anidados, manifiestos y metadatos para archivos APK/AAB/APKS grandes
-* `Mejora` Los diálogos de información comparten un componente reutilizable que permite insertar entradas key:value en cualquier posición, alinear automáticamente las claves y cancelar las lecturas asíncronas al cerrarse
-* `Mejora` La información de componentes APK/APKS/XAPK/APKM/APKZ/AAB se traslada al diálogo "Más información" del menú superior derecho, con el mismo estilo del diálogo principal y actualización al cargar los metadatos
-* `Mejora` El resumen detallado de APK Inspector en los diálogos de información de APK y otros paquetes pasa al menú superior derecho, encima de "Más información"
-* `Mejora` El Centro de plugins comprueba las clases de servicio OCR antes del inicio y muestra rápidamente los errores de activación, con un límite de negociación de 5 segundos y cancelación de las conexiones abandonadas
-* `Mejora` El modulo de accesibilidad del puente Node agrega dump (instantaneas de ventana en texto, JSON o XML limitadas a 400 nodos, 32 niveles y 256 KiB), explain (recuento de coincidencias por filtro de un descriptor de selector) y screenshot (captura de pantalla por accesibilidad en Android 11+ con opciones de escala, region, formato y calidad, entregada como archivo de cache de un solo uso o archivo del espacio de trabajo), y el modulo app agrega currentWindow (paquete, actividad y lista de ventanas actuales)
-* `Mejora` El puente Node agrega un modulo files (list, stat, read, write, mkdir, rename, delete) con raiz en el directorio de trabajo: las rutas deben ser rutas relativas normalizadas, los enlaces simbolicos no pueden salir, las lecturas y escrituras se limitan a 1 MiB con contenido UTF-8 o base64, los listados a 2000 entradas, escribir y eliminar requieren los tokens de capacidad dedicados files.write y files.delete, y el administrador de archivos del espacio de trabajo se actualiza tras los cambios
-* `Mejora` El puente Node agrega un modulo console (console.tail lee las entradas mas recientes de la consola global con lines hasta 500, sinceId, level y un presupuesto de 256 KiB), engines.execScript y execScriptFile aceptan las opciones captureConsole y waitMs (esperar a que el script termine y recopilar la salida de consola de su ventana de id, captureMode global-window), la consola conserva como maximo 4096 entradas de registro (se descartan las mas antiguas y la vista de consola se actualiza por id de entrada), y ConsoleImpl expone addLogListener y removeLogListener
-* `Mejora` device.getAndroidId acepta el booleano useSystemId para leer el valor del sistema del usuario Android de la aplicación mediante Shizuku/Root en Android 8.0+, lanza una excepción si falla el permiso o la lectura e ignora el parámetro en sistemas anteriores
-* `Mejora` El puente Node agrega la semantica de proceso anfitrion para engines.list, engines.stop(id) y engines.stopAll con scope host (listar y detener ejecuciones del ScriptEngineService del anfitrion sin cambiar la semantica existente de engines.all / stopAll), device.info (modelo y version del sistema, tamano / densidad / orientacion de pantalla, bateria, version del anfitrion, estado del servicio de accesibilidad), y los metodos de solo lectura app.listSamples / app.readSample (enumerar y leer los scripts de ejemplo integrados, rutas limitadas a la raiz de ejemplos, 1 MiB por lectura)
-* `Mejora` La `consola TypeScript` permanece contraída de forma predeterminada y solo puede mostrarse bajo demanda desde el menú de opciones de la página de registro completa o del panel de registro del editor cuando está disponible el plugin compilador, con estados recordados por separado; mientras se ejecuta un fragmento, la acción verde Ejecutar se convierte en la acción roja Detener, la página de registro completa muestra el directorio de trabajo real y el menú del panel también reúne Copiar, Enviar y Exportar
-* `Mejora` Los mensajes de validación del runtime TypeScript TSX ahora siguen el idioma de la aplicación en los 10 idiomas compatibles en lugar de mostrar inglés codificado de forma fija
-* `Mejora` La vista previa de fuentes de Ace ahora muestra sobre el teclado multifunción un aviso de descarga mientras la fuente seleccionada no está disponible, y lo oculta tras descargarla o cambiar a una fuente disponible
-* `Mejora` El diálogo Ir a la línea del editor de código ahora sustituye inmediatamente cualquier valor superior a la última línea del documento por ese máximo
-* `Mejora` Los cuerpos de solicitudes y respuestas Fetch controladas de Node.js y los mensajes WebSocket salientes admiten transporte mediante descriptores de archivo, reduciendo el coste de transferir grandes datos binarios por Binder
-* `Mejora` Se eliminó la obsoleta opción de solicitud de eliminación heredada de TypeScript de Node.js Runtime; TypeScript sin compilar sigue requiriendo el compilador y el runtime nunca lo borra mediante expresiones regulares
-* `Mejora` Se eliminaron del host los conmutadores Gradle de Node.js y las copias de ejemplos, declaraciones de tipos, asistente de proyectos y scripts de verificación; los valores predeterminados del runtime y los recursos de desarrollo ahora pertenecen al plugin Node.js Runtime
-* `Mejora` Los diagnósticos del compilador DEX ahora conservan, dentro del límite existente, detalles INFO/WARNING/ERROR redactados y metadatos opcionales de origen lógico, entrada del archivo y posición; las opciones para desarrolladores muestran la última ruta de carga de JAR guardada solo en la memoria del proceso y avisos localizados de BUSY, tiempo de espera agotado y reserva
-* `Mejora` La compilación de TypeScript ahora registra observaciones por solicitud que preservan la privacidad sobre preparación, consulta de caché, enlace/precalentamiento del compilador, compilación remota, procesamiento de salida, latencia total, tamaño del archivo, cantidad de fuentes y variación del heap del host, y desglosa el tiempo del compilador en intervalos antes de ingress, ingress, entre fases, parse, semantic, emit y después de emit; se ignoran los callbacks progress malformados o fuera de orden y estas observaciones no imponen umbrales de rendimiento
-* `Mejora` Mejorada la compatibilidad de argumentos de los métodos KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
-* `Mejora` Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku
-* `Mejora` Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación
-* `Mejora` La aplicación ya no muestra diálogos de solicitud de permisos al iniciarse; cuando falta el acceso a todos los archivos, la página de inicio muestra un recordatorio que permite concederlo directamente
-* `Mejora` Almacenados en caché los resultados de compilación de los recursos Rhino integrados y los metadatos de las funciones de extensión del entorno de ejecución para mejorar el rendimiento de inicialización de scripts
-* `Mejora` Sincronización del motor Rhino con el proyecto original, con soporte para new.target y mejoras de compatibilidad de ámbitos, TypedArray y depurador
-* `Mejora` Mejorado el rendimiento del formateo de arrays de gran tamaño en la consola Rhino
-* `Mejora` Refactorizada la arquitectura de extensión de módulos Kotlin con especificaciones de montaje declarativas que admiten varios alias y un control independiente del prefijo `$` para cada nombre, vinculación explícita de realms de Rhino, separación semántica de tasks y work_manager, y más pruebas de regresión semántica y compatibilidad
-* `Mejora` Reutilizados el proceso persistente de Node.js y el entorno de ejecución en el ámbito del proceso para mejorar el rendimiento del arranque en caliente de scripts
-* `Mejora` Incorporados tiempos por fase para el inicio de Node.js e informes fiables de rendimiento en frío y con el runtime caliente
-* `Mejora` Almacenada en caché la resolución de bibliotecas nativas integradas de Node.js para evitar el descubrimiento repetido de plugins
-* `Mejora` Almacenados en caché los candidatos autorizados del runtime Node.js externo y las sesiones Binder persistentes, con invalidación de estado y reconexión atómica para reducir el coste de descubrimiento y enlace
-* `Mejora` Eliminado el escaneo de módulos cifrados de todo el proyecto de la ruta de ejecución predeterminada de Node.js para mejorar el rendimiento de inicio de scripts no triviales y proyectos grandes
-* `Mejora` Añadida una regresión real de cambio de motor Rhino/Node con varias rondas de ejecución, que cubre reutilización/recuperación/cierre limpio de la sesión persistente del plugin externo
-* `Mejora` Añadidas pruebas soak del runtime persistente del plugin externo y puertas de evidencia de producción de Node.js que cubren matriz de dispositivos/ABI, ciclo de vida del runtime, métricas de recursos y estabilidad de 8 h/24 h
-* `Mejora` La verificación nativa de Node.js ahora resuelve y valida las raíces de código fuente y compilación del plugin de runtime externo
-* `Mejora` Las puertas de integración final y lanzamiento de Node.js aplican fail-closed cuando faltan o están obsoletos los informes requeridos, las evidencias de las fuentes actuales o los artefactos de aceptación de producción
-* `Mejora` Desactivado de forma predeterminada el stripping de TypeScript heredado basado en expresiones regulares para entradas Node.js directas y dinámicas, exigiendo la salida del compilador salvo que se active explícitamente una opción temporal de compatibilidad por solicitud
-* `Mejora` Los especificadores calculados de import() de TypeScript para Node.js se asignan de .ts/.mts/.cts a sus módulos .js/.mjs/.cjs precompilados dentro del snapshot de compilación cerrado, con errores estables para destinos ausentes, ambiguos o fuera de límites y sin fallback a fuentes TypeScript añadidas durante la ejecución
-* `Mejora` Los scripts Python independientes ahora añaden a la consola una sugerencia segura ante un ModuleNotFoundError exacto, orientando la importación de módulos hermanos/locales a un proyecto Python explícito con `project.json` y `type: python`, sin exponer rutas privadas
-* `Mejora` Los chunks de salida de Python Runtime se escriben en la consola Host al llegar, con decodificación UTF-8 incremental independiente para stdout/stderr que conserva los puntos de código divididos entre chunks y un límite de salida integral de 16 MiB
-* `Mejora` El project.json de los proyectos Python admite un timeout entero positivo en milisegundos, con 5 minutos por defecto, un máximo de 30 minutos y siempre limitado por el plugin Runtime
-* `Mejora` El project.json de los proyectos Python admite una entrada de módulo explícita mediante "entryMode": "module" y un nombre main punteado normalizado, lo que permite importaciones relativas de paquete con la semántica estándar de módulos Python
-* `Mejora` Elevar los límites del workspace de proyectos Python a 64 MiB comprimidos, 8192 archivos y 128 MiB extraídos, y comparar antes del envío las tres dimensiones reales del snapshot con las capacidades del Runtime Provider para admitir dependencias Python puras locales al proyecto
-* `Mejora` El project.json de los proyectos Python admite instantáneas stdin finitas como texto en línea o un archivo explícito relativo al proyecto, lo que permite a sys.stdin.read() consumir entradas predefinidas sin avisos interactivos
-* `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo
-* `Mejora` Consolidadas las consultas de detalles multimedia del administrador de archivos en una única instantánea de MediaInfo para reducir las llamadas Binder y el tiempo de espera
-* `Mejora` Limitadas las alternativas de visualización y reproducción externas a permisos URI de solo lectura
-* `Mejora` Unificadas las acciones de plugins del administrador de archivos para clic predeterminado, botón principal, reproducción desde detalles multimedia y menú overflow bajo una política explícita de la página principal de archivos con un único fallback determinista
-* `Mejora` Las filas de archivos comprimidos usan iconos de vista e información, se retiran las acciones a la derecha de la ruta durante la consulta, la extracción permite elegir destino y los menús contextuales omiten el prefijo del nombre del plugin
-* `Mejora` Explorer Action v7 permite que los plugins de archivos reabran en modo de solo lectura una salida pendiente oculta y la verifiquen antes de publicarla, manteniendo la compatibilidad de confirmación directa para clientes v4
-* `Mejora` Explorer Action v12 verifica el UID del llamador, la identidad del archivo normal, el tamaño, la fecha de modificación, el estado de enlace simbólico y la vida de la sesión antes de abrir cada volumen hermano, con límites fijos para nombres, catálogo y solicitudes de apertura
-* `Mejora` La selección nativa de archivos ahora solo muestra Salir y Extraer, integra progreso acotado y cancelación, y mantiene legible la barra de cinco acciones en pantallas estrechas al centrar las etiquetas bajo los iconos
-* `Mejora` Conservada la geometría compacta tradicional de la barra de ruta, la lista y la barra de selección de cinco acciones, manteniendo las etiquetas de accesibilidad, los roles de botón, el estado de selección y los avisos de TalkBack; el inicio del plugin también valida en modo fail-closed el tamaño de las solicitudes Explorer Action
-* `Mejora` Trasladados los proveedores de conformidad de texto AI y compilador DEX del directorio de producción `plugins` al grupo de compilación dedicado `test-apps`, conservando la cobertura de regresión Binder hostil y separando el límite de publicación de los plugins de producción independientes
-* `Mejora` La ruta experimental del host para el compilador DEX permanece desactivada por defecto y exige un componente explícito, con fijación del UID del componente exacto y del conjunto completo de firmantes, fallback de despacho único, procedencia semántica de caché, entrada de callbacks acotada, plazos Binder aislados, validación estructural del ZIP DEX, drenaje acotado de reliable pipe con errores del par comprobados en EOF, publicación única con rollback protegida por digests de origen y destino, y arbitraje atómico entre señales de terminación asíncronas y el punto de commit de publicación que fuerza rollback si la cancelación, el timeout o Binder death prevalecen antes del commit
-* `Mejora` DEX Compiler R1.1 mantiene el experimento desactivado de forma predeterminada y permite que los JAR sin procesar de runtime.loadJar prefieran un provider de componente exacto seleccionado explícitamente y con la misma firma que el host, con un único retorno a D8/dx integrado ante fallos, sin retorno al cancelar y con la carga de AAR en la ruta integrada
-* `Mejora` DEX Compiler R1 está cerrado y mantiene la ruta desactivada por defecto con opt-in de exact component: R1.1 production 7/7, R1.2 automatización 4/4, R1.3 matriz del provider real 7/7 y condiciones de salida 3/3. API 34 production routing pasó 8/8; host DEX 16 suites/149 tests, wire 4/24, fake-provider 5/25 y plugin 48 tests pasaron, con lint 0 errores. La campaña canónica f3c2b1af-be93-41e7-b541-f167f90e5cc1 pasó API 24/25 mediante D8 CLI, API 26/28/34/36 mediante D8Command en x86_64 y API 31 en el dispositivo QV arm64 multiusuario; se conservan las campañas anteriores fallidas o terminadas intencionalmente. La cancelación cooperativa del último waiter y la recuperación más amplia siguen como trabajo R2 sin marcar
-* `Mejora` Las pruebas experimentales de conformidad del compilador DEX ahora cubren el transporte Binder Android real y el almacenamiento de artefactos, componentes firmados exactos, escenarios hostiles de callback/salida/timeout, validación DEX según la API de destino y ejecución mediante DexClassLoader
-* `Mejora` La política pura del host de texto IA, desactivada por defecto, proporciona selección de confianza determinista, fijación y revalidación exactas de identidad, intersección de capacidades host/proveedor, rechazo de candidatos ambiguos, aislamiento de credenciales gestionadas por el plugin, diagnósticos sin contenido sensible, control determinista de carreras de cancelación/terminales de sesión, validación de herramientas y JSON por descriptor vinculada a la solicitud, control agregado de longitud/SHA-256/cuota del streaming, rechazo de claves JSON duplicadas tras decodificación, `toString` resumido para modelos con datos sensibles y una clave de caché con separación de dominio para colecciones de capacidades
-* `Mejora` La ruta conectada del host AI Provider V2 combina el descubrimiento PackageManager por componente exacto y la negociación metadata Binder con coordinación paginada `listTargets`, reinspección de identidad antes de cada dispatch/callback, tokens de catálogo de un solo uso, un plan de destino inmutable sin credenciales, transporte session/PFD acotado, créditos de streaming, fusible de proceso, un único propietario terminal y cleanup idempotente para rutas explícitas del plugin `ai.*`
-* `Mejora` Modularizados como plugin instalable por separado el runtime WebView de Ace/el bridge JavaScript/los servicios de lenguaje integrados/los recursos estáticos, reduciendo el acoplamiento con el APK anfitrión y permitiendo actualizaciones independientes
-* `Mejora` Modularizada la documentación del proyecto sin conexión como plugin, reduciendo el tamaño del APK anfitrión y permitiendo su instalación y actualización independientes
-* `Mejora` Trasladados el análisis del inventario y la verificación SHA-256 completa de la documentación del proyecto sin conexión durante la primera carga a un hilo en segundo plano para evitar bloquear la interfaz
-* `Mejora` Trasladada al plugin APK Builder Template toda la cadena de herramientas AXML/ARSC/análisis/firma/almacén de claves/criptografía necesaria para compilar APK, con una inspección ligera de APK en el host
-* `Mejora` La detección del plugin APK Builder valida el SHA-256 del certificado instalado antes de cualquier conexión Binder, bloquea firmas no confiables mostrando el paquete y la huella observada, y mantiene sin cambios la ruta de firma oficial
-* `Mejora` Las aplicaciones empaquetadas siempre se compilan con el complemento APK Builder en el dispositivo; se eliminan el interruptor de desarrollador de compilación remota experimental y el indicador de compilación del complemento
-* `Mejora` Mueve el índice completo de autocompletado de AutoJs6 de aproximadamente 1.3 MiB fuera de la ruta síncrona de la primera presentación de Ace, lo carga durante el tiempo de inactividad posterior al primer fotograma de código visible y sustituye sin interrupciones el índice inicial; los cinco entornos Android 9-15 restauraron 400 elementos globales y 80 módulos
-* `Mejora` La selección del motor del editor respeta las elecciones explícitas del usuario y ofrece acceso al Centro de plugins cuando Ace no está disponible
-* `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
-* `Mejora` Reorganizadas la barra de acciones y la jerarquía de menús del editor de código, con Registro como acción permanente y una ubicación más clara para Codificación de archivo y Modo de solo lectura
-* `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más
-* `Mejora` Mejoradas la detección de codificación y la seguridad de guardado del editor de código; las conversiones de codificación solo se escriben en disco cuando el usuario guarda el archivo
-* `Mejora` Reducidas aún más la altura y el espaciado horizontal de la barra de información del editor de código para liberar más espacio para el área de código
-* `Mejora` El panel de registro inferior permite saltar al código fuente pulsando marcos de pila en la página de registro independiente
-* `Mejora` El cambio de la fuente de documentación del proyecto surte efecto inmediatamente
-* `Mejora` El administrador de archivos decodifica y formatea el AndroidManifest.xml binario completo en segundo plano solo después de pulsar el botón Manifest, con mejor rendimiento al desplazar textos grandes y usar zoom con dos dedos
-* `Mejora` Los detalles de APK muestran el SDK máximo solo cuando se declara explícitamente en el manifiesto y cambian el nombre de Instalación a Excepción, visible solo cuando existe una excepción
-* `Mejora` Mejoradas las vistas previas de Markdown del administrador de archivos con HTML sin procesar utilizado habitualmente en GitHub y sanitizado de forma segura, imágenes remotas HTTPS, desplazamiento de tablas en pantallas estrechas y compatibilidad con comentarios ocultos de formato antiguo
-* `Mejora` Mejorados el estilo y las funciones de los diálogos "Ordenar" y "Filtrar" del Centro de plugins
-* `Mejora` El Centro de plugins muestra las variantes comunes de forma predeterminada y ofrece una página independiente para las demás variantes
-* `Mejora` Mejorados los registros de cambios multilingües/caché de idiomas/verificación oficial/carga de índices y otras funciones del Centro de plugins
-* `Mejora` El Centro de plugins muestra primero una instantánea local ligera y el índice almacenado en caché, y después actualiza en paralelo los metadatos de los plugins y el índice en línea; los plugins anómalos permanecen desactivados y, al intentar activarlos, muestran el error real y una guía de recuperación
-* `Mejora` Normalizados los recursos de cadenas del proyecto con traducciones multilingües completas/clasificación por archivos/orden por nombre/puntuación ASCII
-* `Mejora` Limitados los recursos de idioma del APK a las 10 configuraciones regionales admitidas por el proyecto para reducir el tamaño del paquete
-* `Mejora` El sistema de compilación permite seleccionar dinámicamente versiones compatibles de Kotlin/KSP/AGP/R8 y reduce la presión de memoria al iniciar Gradle
-* `Mejora` Eliminación de advertencias de compilación de Kotlin por valores de retorno Java que admiten null, expresiones redundantes y API de Android obsoletas, manteniendo la compatibilidad con versiones anteriores de Kotlin
-* `Mejora` Consolidado el plugin oficial de IA no publicado como 3-Stone AI y reemplazado su contrato entre procesos por `ai-provider-api`, `org.autojs.plugin.ai.provider.api`, `org.autojs.plugin.AI_PROVIDER`, nuevos descriptores Binder, el dominio schema AP y fixtures de conformidad renombrados; no se conservan alias de identidad
-* `Mejora` El descubrimiento paginado de destinos de AI Provider V2 se implementó directamente: cada destino incluye identidades target/provider/model estables, locality, estados de configuración y disponibilidad, capacidades, límites, controles y orígenes HTTPS permitidos; REMOTE/HYBRID y las credenciales gestionadas por el plugin se admiten sin pasar bytes de credenciales por Binder y no se conservan alias wire sustituidos
-* `Mejora` La actualización de directorios del administrador de archivos aplica diferencias mínimas de lista, mantiene enlazadas las filas sin cambios y conserva la posición de desplazamiento durante las actualizaciones en el mismo lugar
-* `Mejora` Refactorización del administrador de archivos mediante componentes explícitos para el diseño de listas, la presentación de elementos, la barra de selección, el flujo de archivos comprimidos, las capacidades de entrada, la reserva de salidas y la recuperación, reduciendo las clases de vista y sesión sobredimensionadas y permitiendo probar por separado la navegación, los límites de seguridad y las políticas de acciones
-* `Mejora` El enlace y el arranque del compilador TypeScript ahora se realizan durante un precalentamiento acotado al iniciar, en vez de durante la primera compilación del usuario; las sesiones de proyecto revision 1 conservan un enlace activo tras abrir el editor o compilar, mientras que el vencimiento por inactividad inicial, la presión de memoria, los fallos y la salida de la aplicación vuelven de forma segura a la compilación en frío
-* `Mejora` La suite de scrapers recupera 9 tareas de versión independientes y 5 tareas exclusivas del host, más 1 tarea de sincronización entre repositorios; AutoJs6-Gradle-Platform-Versions exporta de forma centralizada metadatos JSON de la versión estable de Android Studio validados con los mapas de versiones
-* `Mejora` Actualización de Gradle 9 Wrapper versión 9.6.1 -> 9.7.1
-* `Mejora` Los datos de compatibilidad de la plataforma Gradle y sus tareas de actualización se trasladaron a AutoJs6-Gradle-Platform-Versions; AutoJs6 ahora consume directamente la versión 1.5.0 desde Maven Local, sin datos locales que la sobrescriban, scrapers duplicados ni la dependencia anterior de Puppeteer
-* `Mejora` Las vistas previas de HTML y Markdown se delegan en complementos Previewer específicos; la aplicación principal conserva la entrada y guía la instalación o activación si el complemento falta, está desactivado o no está disponible
-* `Mejora` Unificación de todas las llamadas Pinyin mediante el complemento correspondiente y eliminación del diccionario integrado y la implementación de conversión sin uso
-* `Mejora` Iniciar o detener el servicio de accesibilidad mediante root o ajustes seguros ya no escribe el valor `accessibility_enabled` del sistema (que el propio sistema mantiene a partir de los servicios vinculados desde Android 7.0), por lo que detener este servicio ya no deja un 0 obsoleto mientras otros servicios de accesibilidad siguen habilitados
-* `Mejora` Las ventanas flotantes como el botón flotante con sus diálogos y el inspector de diseño ahora siguen los ajustes de idioma y modo nocturno de AutoJs6 en lugar de los del sistema
-* `Mejora` El menú "Más" del botón flotante se muestra sin esperar las consultas sobre la aplicación en primer plano, carga la información en segundo plano y actualiza solo los subtítulos afectados; el nombre del paquete y la Activity comparten una consulta, y al cerrar el menú se cancelan las cargas pendientes y se descartan los resultados tardíos
-* `Mejora` El `source` del objeto de evento que reciben las devoluciones de llamada de `auto.registerEvent` ahora se resuelve en el primer acceso (antes cada evento recorría la cadena de padres de forma anticipada para obtener su profundidad e índice), lo que reduce el coste de las devoluciones que nunca lo leen; por debajo de la API 33 un `source` no leído durante la devolución es null después
-* `Mejora` La resolución de la raíz de las ventanas de accesibilidad tiene ahora una única implementación (`AccessibilityBridge` reescrito en Kotlin, sus tres rutas de código duplicadas unificadas en `WindowRootPolicy` / `WindowRootProvider`, que el inspector de diseño usa también para sus ventanas): con un filtro de ventanas establecido, `auto.root` pasa a la siguiente ventana cuando la primera que supera el filtro no tiene raíz (antes devolvía `null` de inmediato); `auto.windowRoots` y las acciones sobre nodos ya no pueden encontrarse con una raíz `null`; el hecho de que `auto.rootInActiveWindow` ignore el filtro de ventanas queda ahora explícito en el código fuente
-* `Mejora` El reciclaje de nodos de accesibilidad se decide ahora en un solo lugar, `NodeLifecycle` / `NodeRecyclePolicy` (desde Android 13 los nodos no necesitan reciclarse, por lo que ya no se llama al `recycle()` sin efecto para cada uno; el reciclaje en línea que antes estaba repartido entre los algoritmos de búsqueda, las acciones de desplazamiento, la raíz en caché del servicio y el asignador pasa todo por ahí, y un reciclaje fallido se registra en lugar de abortar una búsqueda)
-* `Mejora` Las capturas de pantalla de accesibilidad (`automator.captureScreen()`) las toma el nuevo `A11yScreenshotter`: el búfer de hardware de una captura ahora se cierra siempre (antes solo se reciclaba el mapa de bits envolvente), y el reintento ante el error de limitación de frecuencia del sistema se limita a 60 intentos (3 s), tras los cuales la promesa se resuelve con `null` como en cualquier otro fallo (antes nunca se resolvía mientras el sistema seguía limitando)
-* `Mejora` Los filtros de selector, los algoritmos de búsqueda (DFS / BFS) y la navegación por brújula (`compass`) trabajan ahora sobre la interfaz `UiNode`, independiente de Android (implementada por `UiObject`), de modo que los tres quedan cubiertos por pruebas unitarias JVM sobre un árbol de nodos en memoria; la API visible para los scripts y su comportamiento no cambian
-* `Mejora` Las propiedades de selector se describen ahora una sola vez en el registro declarativo `SelectorRegistry`: los métodos builder de `UiSelector` se generan a partir de él, los selectores de mapa (`pickup({...})`, etc.) se analizan con él en lugar de por reflexión, y las funciones globales de selector se exportan a partir de él más una lista blanca explícita (`toStringReadable` y los nombres decorados de los miembros `internal` ya no se exponen como globales); los argumentos numéricos de las funciones globales y de los selectores de mapa se redondean uniformemente a enteros (los selectores de mapa antes truncaban)
-* `Mejora` Filtros de selector desduplicados: las propiedades de cadena (text / desc / content / id / className / packageName y sus variantes) comparten `StringPropertyFilter`, las métricas de límites (left / boundsLeft / minLeft / maxLeft, etc.) comparten `MetricsFilter`, las propiedades enteras comparten `IntFilter`; los filtros relativos a la pantalla (bounds / métricas / screenCenter / screenCoverage) se evalúan contra un tamaño de pantalla inyectable y están cubiertos por pruebas unitarias JVM; un selector evalúa una instantánea de su lista de filtros, por lo que compartir un selector entre hilos es seguro; la API visible para los scripts y su comportamiento no cambian
-* `Mejora` Las consultas de selector (`findOne(timeout)` / `untilFind` / `untilFindOne` / `exists` / `find(max)` y las obsoletas `findOne()` / `waitFor()`) se ejecutan como un plan de sondeo (`PollPolicy`: tiempo límite, intervalo, veces, retroceso) con valores predeterminados sin cambios (intervalo de 50 ms, un tiempo límite de 0 o menos espera indefinidamente); los métodos que esperan sin límite llevan la nota "puede bloquear para siempre" en su KDoc; con el indicador `findOnUiThread` activo, una búsqueda enviada al hilo de la interfaz espera como máximo el tiempo límite de la consulta y falla con un error legible al superarlo (`findOne(timeout)`), mientras que las consultas sin límite (`untilFind`, etc.) esperan de forma interrumpible, de modo que detener el script las termina
-* `Mejora` `UiObject` dividido: la tabla de alias de los tipos de resultado de `pickup` / `detect`, el selector de resultados y el interceptor que llama a métodos del nodo por nombre pasan a `core/automator/pick` (`PickResultType` / `Picker` / `Detector` / `Invoker`), `summary()` / `toString()` / `isSimilar()` a `UiObjectSummary`; nuevo `UiObject.fingerprint()` (un hash de límites, texto, descripción, nombre de clase, número de hijos y las propiedades booleanas clave, sin visitar hermanos ni hijos); `indexInParent()` de un nodo alcanzado mediante `parent()` se calcula en el primer uso; el generador de código del inspector de diseño (`CodeGenerator` / `ReadOnlyUiObject`) convertido a Kotlin, el segundo ahora es una vista de instantánea que implementa `UiNode` directamente; la API visible para los scripts y su comportamiento no cambian
-* `Mejora` Reutilización entre runtimes (roadmap P5.4): las capacidades de selector del host de Python (`selector.snapshot` / `selector.find` / `selector.click` / `selector.set_text`) y el módulo `accessibility` del Node Bridge (`findOne` / `findAll` / `click` / `longClick` / `setText` / `scrollForward` / `scrollBackward` / `findByText` / `clickText`) consumen ahora el núcleo de accesibilidad del runtime de scripts (el recorrido de `UiNode`, los filtros de selector, el proveedor de raíces de ventana, el ciclo de vida de nodos), y ambos protocolos JSON permanecen idénticos campo por campo; las búsquedas del Node Bridge ya no filtran los nodos visitados por el camino en versiones anteriores a Android 13; las capturas de pantalla de accesibilidad del host de Python realizan cada intento a través del `A11yScreenshotter` compartido (conservando el reintento acotado y el plazo de 4 segundos del host)
-* `Mejora` Cada entorno de ejecución de script tiene ahora su propia consola (sus propias entradas de registro y ventana flotante, con cada línea reenviada a la consola global); la ventana flotante solo muestra la salida del script actual (como en Auto.js 4) y volver a ejecutar un script con el mismo título reemplaza la ventana flotante dejada por la ejecución anterior; las entradas de registro guardan el contenido sin formato y una marca de tiempo, y cada vista renderiza el prefijo de hora bajo demanda (oculto por defecto en la ventana flotante, activable en los ajustes de la página de registro); las entradas `console.tail` del Node bridge ganan un campo `time` (milisegundos epoch) mientras `text` conserva su prefijo de hora
-* `Mejora` Los ejemplos OCR solicitan el consentimiento de Android y reconocen imágenes reales; los plugins OCR o de códigos de barras no disponibles devuelven un error unavailable legible, y los fallos de reconocimiento siguen siendo errores
-* `Mejora` Los scripts de Node admiten inicio asíncrono negociado, liberan los hilos Binder durante ejecuciones prolongadas y devuelven los cambios del espacio de trabajo al finalizar, con compatibilidad para hosts síncronos anteriores
-* `Mejora` Los nodos JSON de `accessibility.dump` del Node bridge llevan los indicadores de estado `scrollable`, `checkable`, `checked`, `editable`, `focused`, `selected` y `longClickable` junto a los siete campos del descriptor; la concesion de sesion de MCP Server incluye las acciones globales `keys.notifications` / `quickSettings` / `powerDialog` / `lockScreen` para la herramienta `ui_press_key` del plugin, y una llamada `keys.*` sin el servicio de accesibilidad ahora responde con la categoria `unavailable` como el modulo `accessibility`; un `accessibility.swipe` de longitud cero (puntos inicial y final iguales) se envia como una pulsacion de `durationMs`, de la que dependen las formas por coordenadas de `ui_click` / `ui_long_click` de MCP
-* `Mejora` Alineacion de 16 KB para bibliotecas nativas del anfitrion y runtime-kit, con jackpal JNI recompilado, libc++ de NDK r28.2, registros de procedencia y verificacion de compilacion compartida
-* `Mejora` El generador APK informa sobre bibliotecas nativas incompatibles durante la compilacion y en los resultados, registra su alineacion en metadatos locales y mantiene el empaquetado comprimido
-* `Mejora` Los resúmenes de versión del Centro de plugins también normalizan cadenas de fecha y hora ISO 8601 como `2026-09-11T14:30:00+08:00` a `yyyy-MM-dd`, conservando la fecha de calendario del desfase horario de la propia cadena
-* `Mejora` La búsqueda multicolor (`images.findPointByColors`, `images.findPointsByColors`) prefiltra los candidatos con máscaras vectorizadas de OpenCV, siendo decenas de veces más rápida en imágenes densas con resultados idénticos
-* `Mejora` Los detectores de color exponen un método `distance` compartido por `colors.isSimilar`, `images.detectColor` y la búsqueda multicolor; el algoritmo `hs` usa la distancia circular de tono y los nombres de algoritmo desconocidos lanzan un error descriptivo
-* `Mejora` El estado del capturador de pantalla se lee sin bloqueo, e `images.releaseScreenCapturer` ya no bloquea las llamadas de imagen concurrentes durante la liberación
-* `Mejora` Los niveles de la pirámide de búsqueda de plantillas usan interpolación por área, la búsqueda con máscara conserva el coeficiente de correlación normalizado, y los valores pequeños de `max` siguen refinando varios candidatos para no perder la mejor coincidencia en los niveles gruesos
-* `Mejora` Ventana de jerarquía de diseño: las filas resumen id / text / desc / clickable y otros indicadores, el nodo seleccionado y todos sus ancestros se resaltan en el árbol y se enmarcan en pantalla, el árbol se desplaza horizontalmente, el elemento de menú "Seleccionar nodo padre" sube la selección nivel a nivel, y un aviso único explica cómo salir con la tecla de bajar volumen
-* `Mejora` La búsqueda por características conserva solo los inliers de RANSAC y valida el cuadrilátero proyectado, corrige un matcher incompatible con el tipo de descriptor en lugar de lanzar una excepción, admite `scale` mayor que 1 para ampliar objetos pequeños, y ORB detecta hasta 20000 puntos clave de forma predeterminada para que las escenas con mucha textura no desplacen los puntos de la región del objeto
-* `Mejora` Node bridge añade los métodos de solo lectura app.listDocs / app.readDoc (enumerar y leer los recursos verificados de documentación sin conexión del AutoJs6-Plugin-Offline-Docs instalado, con rutas limitadas a la raíz de documentación, 1 MiB por lectura y available: false sin un plugin elegible) para que el plugin MCP Server pueda exponer recursos autojs6://docs/
-* `Mejora` Los límites de retención del historial de versiones y la papelera (días, versiones, bytes por archivo, bytes totales, tamaño de archivo rastreado) tratan de forma uniforme cero o valores negativos como ilimitado y comparten un único objeto de política
-* `Mejora` El historial de versiones omite una instantánea cuyo contenido es idéntico a la revisión más reciente almacenada, evitando almacenamiento duplicado
-* `Mejora` Mover elementos a la papelera comprueba primero el límite de tamaño y, cuando los elementos lo superan, ofrece mover de todos modos, eliminar permanentemente o cancelar; las entradas más antiguas se eliminan justo después del movimiento, y el límite de tamaño siempre conserva la entrada más reciente
-* `Mejora` La limpieza periódica aplica la política de retención completa (días, versiones, tamaño por archivo y total para el historial de versiones; días y tamaño para la papelera) y descarta las entradas de archivo sin revisiones; los límites de los borradores de emergencia también tratan 0 como sin límite
-* `Mejora` Las conexiones de la extensión de VSCode incorporan un latido a nivel de aplicación (ping/pong) y un límite de longitud de trama, liberando conexiones muertas con rapidez y evitando asignaciones enormes en caso de desincronización _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
-* `Mejora` Los archivos guardados desde la extensión de VSCode pueden conservar su estructura de directorios relativa dentro del directorio de trabajo _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
-* `Mejora` El explorador registra el contenido actual de un archivo como una revisión OVERWRITE_PRE antes de que una copia o un movimiento lo reemplace; al sobrescribir un directorio, los archivos rastreados que contiene reciben instantáneas
-* `Mejora` Cada elemento de la lista de la papelera muestra una cuenta atrás hasta su caducidad (derivada de los días de retención de la papelera, oculta si es ilimitada), y los elementos que caducan en menos de 24 horas se resaltan
-* `Mejora` Cuando un elemento de la papelera no se puede previsualizar ni restaurar porque su archivo de datos falta o está dañado, se muestra un mensaje localizado en lugar del texto de la excepción
-* `Mejora` Cuando un elemento de la papelera se restaura en una ubicación distinta de su ruta original, el historial de versiones del archivo (o de todos los archivos del directorio) lo sigue a la nueva ruta; al mover un archivo a la papelera se registra la entrada del historial de versiones a la que estaba vinculado en ese momento
-* `Mejora` Un archivo de directorio dañado en la papelera ya no aborta toda la restauración: las entradas legibles se restauran con normalidad, las dañadas se registran y se omiten (los archivos a medio escribir se eliminan), al final se informa el número de entradas restauradas / fallidas y el elemento permanece en la papelera
-* `Mejora` La lista de archivos del historial de versiones muestra los mismos iconos de tipo de archivo que el explorador; las listas del historial de versiones y de la papelera ahora se actualizan de forma incremental por diferencias, por lo que los cambios de estadísticas / cuenta atrás / selección ya no redibujan toda la lista
-* `Mejora` Escanear código QR para conectar: la cámara usa enfoque continuo con medición y la decodificación usa TRY_HARDER, lo que facilita mucho apuntar a un código en pantalla
-* `Mejora` Diálogo de dirección del modo cliente: "Escanear código QR" pasa del icono al final del campo al menú "Más" de la barra de título; la página de escaneo ya no tiene botón de linterna (el código se muestra en una pantalla, que se ilumina sola)
-* `Mejora` Administradores de los modos cliente y servidor: las secciones de estado y control se despliegan y repliegan por niveles como en el administrador del servicio de accesibilidad (3 niveles cada una, el nivel elegido se recuerda; totalmente replegada, el título de estado muestra el estado de la conexión y las acciones principales pasan al encabezado de control); el botón "Copiar" de los tres administradores pasa al menú "Más" de la barra de título como "Copiar información", y el botón "Sistema" del administrador del servicio de accesibilidad igualmente como "Ajustes del sistema"
-* `Mejora` APK más pequeño: se eliminan la ruta HTML a Markdown en desuso y las dependencias sin usar, JUnit ya no entra en el DEX de producción a través de CommonMark y Spongy Castle, y el runtime de Rhino ya no incluye la biblioteca de terminal JLine
-* `Mejora` La comprobación de actualizaciones ahora llama directamente a la GitHub REST API (OkHttp + Gson) para obtener la última versión y su lista de APK, y las notas de la versión de respaldo se renderizan localmente en lugar de usar el servicio de renderizado de Markdown de GitHub
-* `Mejora` La escritura del registro global en archivo (console.setGlobalLogConfig / resetGlobalLogConfig y las clases globales LogConfigurator / Level / LogManager) usa un registrador de archivos rotativo integrado en lugar de Log4j; se conservan las opciones documentadas y el subconjunto de PatternLayout (%d / %p / %c / %C / %m / %n / %t / %r con modificadores de ancho), y el resto de la API de Log4j deja de estar disponible
-* `Mejora` El motor Rhino ahora omite los metodos Java cuyos tipos de parametros no existen en el sistema en ejecucion (como AppCompatTextView.setTextClassifier en Android 7.x) en lugar de fallar la reflexion de toda la clase; el elemento text del modo UI usa el AppCompatTextView actual en Android 7.x y la biblioteca heredada appcompat 1.0.2 ya no es necesaria
-* `Mejora` La aplicacion solo incluye el historial de versiones en chino simplificado e ingles; los demas idiomas se descargan y se almacenan en cache, y sin conexion se muestra la copia en cache del idioma actual y, en su defecto, la version en ingles incluida
-* `Mejora` Los mapas de bits PNG del directorio de recursos se convierten a WebP sin pérdidas (excepto los iconos del lanzador) y se eliminan algunos recursos sin uso para reducir el tamaño del APK
-* `Mejora` Reducir las advertencias de Manifest, Java y Kotlin en las aplicaciones de conformidad de plugins y las pruebas del anfitrión, conservando el empaquetado de bibliotecas nativas y la compatibilidad con Android
-* `Mejora` Formato compact y referencias nodeRef para accessibility.dump, con reubicación de nodos y rechazo de referencias caducadas
-* `Mejora` accessibility.readScreenText devuelve texto y posiciones con límites a partir de capturas y complementos OCR autorizados
-* `Mejora` Los permisos de Three Stove Agent permiten abrir notificaciones y ajustes rápidos; las demás acciones de teclas no autorizadas siguen bloqueadas
-* `Mejora` El método respond de los objetos de tarea de ai.agent acepta un arreglo de 1 a 8 cadenas no vacías para responder a una solicitud de revisión de plan de Three Stove Agent en modo de plan (eventos input con kind plan); las respuestas de texto y booleanas no cambian
-* `Mejora` Cuando el propio Provider rechaza o interrumpe una solicitud (solicitud inválida, violación de protocolo, problemas de descriptores o de cuota, etc.), el intermediario de modelos de Three Stove Agent informa la etapa con una razón cerrada PROVIDER_* en lugar de reducir todo a un PROVIDER_FAILED sin razón; la razón se deriva solo de AiErrorCode y no contiene texto del Provider
-* `Mejora` El intermediario de modelos de Three Stove Agent vuelve a fijar el plazo con el timeoutMs de la solicitud tras cada lote aceptado de resultados de herramientas nativas, de modo que cada ronda de continuación dispone del tiempo límite completo y el turno entero queda limitado por el presupuesto de tarea del plugin y el tope de rondas; la espera sin enviar resultados sigue caducando en el plazo original. Antes, las tareas nativas de varias rondas compartían el plazo de la primera solicitud y terminaban con MODEL_TIMEOUT a los 5 minutos
-* `Mejora` Three Stove Agent se activa y desactiva solo en el centro de complementos; se elimina el interruptor del panel y los scripts y la interfaz se conectan bajo demanda; las instalaciones oficiales se activan por defecto y se respeta la desactivación elegida por el usuario
-* `Mejora` Renombrar el reproductor de vídeo 3-Ember Player a 3-Amber Player; adaptar la guía de instalación, la prioridad M3U y los iconos transparentes al nuevo identificador de aplicación
-* `Mejora` El instalador de paquetes se traslada al plugin 3-Setup Installer: las entradas de instalacion del administrador de archivos, el Centro de plugins, una compilacion terminada y la actualizacion automatica entregan el paquete al dialogo de instalacion del plugin cuando esta disponible y al instalador del sistema en caso contrario, con un aviso para instalar el plugin; el host ya no registra la entrada del sistema "abrir APK con AutoJs6", y los contenedores apks / xapk / apkm / apkz requieren el plugin
-* `Mejora` El historial distingue las instalaciones iniciadas desde AutoJs6 de las iniciadas por scripts installer, sin cambiar el uso de la API de scripts (requiere una versión de 3-Setup Installer con historial de instalación)
-* `Mejora` installer y las entradas de instalación del anfitrión pueden usar perfiles del plugin por origen/prefijo de paquete; las opciones explícitas tienen prioridad y null restablece installer/installReason/packageSource heredados; la eliminación exige una instalación correcta y conserva archivos compartidos con elementos retenidos o no completados del lote (requiere perfiles en 3-Setup Installer)
-* `Mejora` Las opciones de instalación de installer aceptan grantAllRequestedPermissions, requestUpdateOwnership, dexopt, installReason y packageSource según las capacidades del plugin elegido; omitirlas conserva el comportamiento anterior y false/none explícito también requiere compatibilidad
-* `Mejora` El intermediario de modelos de Three Stove Agent funde un componente Provider cuando una llamada al modelo agota el tiempo mientras su transacción Binder síncrona aún no ha vuelto; antes el fusible duraba hasta reiniciar AutoJs6 y las tareas posteriores fallaban de inmediato con RATE_LIMITED: FUSED. Ahora se levanta automáticamente cuando esa transacción vuelve y la ejecución se liquida, de modo que las tareas posteriores se admiten de nuevo sin reiniciar
-* `Mejora` Las filas del análisis de jerarquía eliminan las barras de nivel de colores de la izquierda (la sangría se mantiene) y colocan la marca de expandir / contraer junto al texto del nodo: chevrón derecho para filas contraídas, chevrón abajo para filas expandidas y un pequeño círculo hueco para filas sin descendientes, los tres con un mismo tono ligeramente más oscuro
-* `Mejora` La selección múltiple de atributos usa fondos con el color del tema sin cambiar la altura de las filas; los botones son Ajustes / Volver / Copiar, y el comportamiento de copia se recuerda entre sesiones: Preguntar siempre (predeterminado), Copiar selector de objeto o Copiar selector encadenado
-* `Mejora` Símbolos más grandes para el modo de consulta, filtros, regex y navegación en la barra de búsqueda del análisis de diseño; el conmutador de regex usa un icono ".*" sencillo
-* `Mejora` Los ajustes de cuentas de correo y el Centro de plugins reconocen el nuevo nombre y paquete de 3-Stamp Mail
-* `Mejora` El Centro de complementos prioriza iconos monocromos transparentes para complementos independientes, sigue el tema claro u oscuro del anfitrión y mantiene compatibilidad con versiones anteriores
-* `Mejora` Los iconos del catálogo oficial mantienen la misma fuente, tamaño y estilo antes y después de instalar, con tonos grises neutros
-* `Mejora` Integración con la nueva identidad de 3-Folio EPUB conservando las API epub y las acciones del administrador de archivos
-* `Mejora` El asistente del centro de plugins usa las nuevas identidades de 3-Maple Image, 3-Stack Archive y 3-Hanzi CC, con una sola recomendación para ver y editar imágenes
-* `Mejora` El centro de plugins y su asistente admiten fondos circulares claros y oscuros independientes, con colores neutros fijos para la serie Three y el mismo diseño antes y después de instalar
-* `Mejora` Las entradas de fondo de ventana claro y oscuro de la biblioteca de colores predeterminada se combinan en una sola entrada "Color de fondo" con las opciones Claro, Oscuro, Automático y Automático (invertido); las selecciones anteriores a la actualización se conservan
-* `Mejora` El resumen del color del tema indica la biblioteca y el nombre del color (el grupo actual en las bibliotecas inteligentes), y "Localizar color del tema actual" encuentra colores de bibliotecas propias y la biblioteca inteligente activa; el diseño antiguo muestra el nombre de la biblioteca inteligente activa y elegir un color en él la desactiva
-* `Mejora` La búsqueda en la lista de bibliotecas de colores también abarca los colores de las bibliotecas propias y los grupos de las bibliotecas inteligentes (por nombre o por cualquiera de sus colores); los resultados indican su biblioteca y se aplican o activan al tocarlos, y la ayuda de búsqueda explica el alcance
-* `Mejora` Las sugerencias de parámetros del editor Ace admiten métodos sobrecargados, muestran el número de sobrecarga con cambio al tocar y dan prioridad a la documentación del parámetro actual
-* `Mejora` El menú "Salta a" del editor incorpora "Saltar al cursor anterior" (antes la pulsación larga de TAB), que puede registrarse en las acciones favoritas
-* `Mejora` Las sugerencias de parámetros del editor Ace cambian de sobrecarga con Alt+Arriba / Alt+Abajo en teclado físico, las teclas Arriba y Abajo de la barra de teclas (cuando se muestran varias sobrecargas; se puede desactivar en los ajustes) y los botones arriba / abajo de la esquina superior derecha de la ventana de sugerencias
-* `Mejora` Las sugerencias de parámetros del editor Ace reaparecen tras tocar el área de edición (no tras desplazarse), y ESC oculta tanto las sugerencias de parámetros como la documentación del símbolo
-* `Mejora` Las sugerencias de parámetros del editor Ace admiten métodos sobrecargados incluso con el LSP desactivado o el servicio semántico no disponible: el índice estático incluye 146 sobrecargas declaradas (como app.startActivity), las firmas ECMAScript integradas incorporan sobrecargas para splice / replace / JSON.stringify / Array.from y más, y las sugerencias de parámetros de Python / Lua conservan todas las firmas
-* `Mejora` La documentación emergente del editor Ace se puede desplazar y seleccionar en pantallas táctiles, y las sugerencias inteligentes esperan las sugerencias de parámetros asíncronas en archivos Python / Lua en lugar de recurrir al autocompletado
-* `Mejora` El diálogo distingue todas las "ABI compatibles" de las "ABI instaladas" en los APK actuales, incluidos los splits; prioriza la declaración del manifiesto, luego el índice y finalmente INFO, para que plugins como Ace Editor no muestren solo la ABI del paquete instalado
-* `Mejora` La edición de texto nativa de Compose UI conserva selección y composición IME, evita que el teclado cubra el contenido y comunica una sola vez cada acción o cierre de Snackbar
-* `Mejora` ComposeError ofrece mensajes localizados y códigos estables con nodo, propiedad, causa y pila del script; cada motor admite hasta 8 sesiones activas, rechaza operaciones con manejadores cerrados y limpia callbacks, referencias y tareas pendientes; actualizar, desinstalar o desactivar el complemento cierra sus sesiones activas con el error correspondiente
-* `Mejora` cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones
-* `Mejora` Precalentamiento de Node.js en paralelo a la preparación del motor anfitrión, TypeScript y los archivos para reducir la espera; medición de etapas hasta la primera salida de scripts interactivos y programados
-* `Mejora` En las aplicaciones empaquetadas, el runtime del plugin OpenCV y el OpenCV privado de los plugins de OCR son independientes: images y ocr funcionan juntos incluso con versiones distintas de OpenCV, y OCR por sí solo ya no necesita OpenCV (requiere versiones de plugins de OCR que enlacen OpenCV de forma privada)
-* `Mejora` El empaquetado de APK usa la libc++_shared.so más reciente entre el host y los plugins, y se detiene si una biblioteca nativa necesita símbolos del runtime de C++ que faltan
-* `Dependencia` Android AXML modularizado
-* `Dependencia` Android ARSC Editor modularizado
-* `Dependencia` APK Signer modularizado
-* `Dependencia` APK Verifier modularizado
-* `Dependencia` ARSCLib modularizado version 1.3.8
-* `Dependencia` Image Quantization modularizado version 2.17.0
-* `Dependencia` OpenCV modularizado version 4.8.0
-* `Dependencia` Se agrega juniversalchardet version 2.0.4
-* `Dependencia` Se agrega AndroidX AsyncLayoutInflater version 1.1.0
-* `Dependencia` Se elimina Android Annotations version 4.8.0
-* `Dependencia` Se elimina el módulo local APK Parser
-* `Dependencia` Se elimina Glide KSP version 5.0.5
-* `Dependencia` Se elimina ICU4J version 77.1
-* `Dependencia` Se elimina Jaredrummler Android Device Names version 2.1.1
-* `Dependencia` Se elimina JCIP Annotations version 1.0
-* `Dependencia` Se elimina Junit Jupiter version 5.13.4
-* `Dependencia` Se elimina Retrofit2 Converter Gson version 3.0.0
-* `Dependencia` Se elimina Retrofit2 Kotlin Coroutines Adapter version 0.9.2
-* `Dependencia` Se elimina Tiny Sign version 0.9
-* `Dependencia` Se elimina la declaración redundante de AndroidX Room KTX version 2.8.1 del módulo app
-* `Dependencia` Se elimina AndroidX MultiDex version 2.0.1
-* `Dependencia` Se elimina MLKit Barcode Scanning version 17.3.0
-* `Dependencia` Se elimina MLKit Text Recognition Chinese version 16.0.1
-* `Dependencia` Se elimina OpenCC version 1.2.2
-* `Dependencia` Se elimina Pinyin4j version 2.5.1
-* `Dependencia` Se elimina Jieba Analysis version 1.0.3-SNAPSHOT (modificada)
-* `Dependencia` Se elimina la biblioteca local Rapid OCR
-* `Dependencia` Se elimina Flexmark Java HTML to Markdown version 0.64.8
-* `Dependencia` Se elimina la biblioteca local JavaMail for Android
-* `Dependencia` Se elimina GitHub API version 1.306
-* `Dependencia` Se elimina Jackson DataBind version 2.13.4.2
-* `Dependencia` Se elimina Commons IO version 2.8.0
-* `Dependencia` Se elimina Apache Commons Lang3 version 3.18.0
-* `Dependencia` Se elimina Spongy Castle Prov version 1.58.0.0
-* `Dependencia` Se elimina Android dx version 1.14
-* `Dependencia` Se elimina Log4j version 1.2.17
-* `Dependencia` Se elimina Android Logging Log4j version 1.0.3
-* `Dependencia` Se elimina la biblioteca local AndroidX AppCompat 1.0.2
-* `Dependencia` Anexado ZXing Android Embedded versión 4.3.0
-* `Dependencia` Anexado AndroidX Test Ext JUnit versión 1.3.0
+* `Corrección` La actualización en lote de widgets podía borrar por error rutas de scripts y asignaciones de pulsación
+* `Corrección` El administrador de archivos no leía con la codificación real los scripts con BOM al ejecutarlos directamente
+* `Corrección` Los proyectos sin datos de empaquetado no se reconocían correctamente o no utilizaban la entrada indicada en project.json
+* `Corrección` Los archivos auto se ejecutaban como JavaScript desde el administrador de archivos, tareas programadas o intents externos
+* `Corrección` El administrador de archivos no mostraba información de algunos APK o carecía del acceso al manifiesto
+* `Corrección` Importar URI externos podía escribir fuera del directorio de destino o sobrescribir archivos homónimos por tratamiento incorrecto del nombre
+* `Corrección` El administrador de archivos podía parpadear o reiniciar el desplazamiento al volver a la página o eliminar entradas de la papelera
+* `Corrección` El administrador no distinguía correctamente archivos TypeScript de vídeos con la misma extensión y algunos archivos fuente carecían de opción de ejecución
+* `Corrección` Los mensajes de operaciones del administrador de archivos podían mostrarse repetidamente
+* `Corrección` Errores al resolver rutas multimedia e imágenes y visualización de rutas de caché en detalles de MediaInfo
+* `Corrección` Las consultas fallidas de detalles multimedia podían bloquear la aplicación y algunos campos de metadatos de vídeo se mostraban incorrectamente
+* `Corrección` El historial de versiones no seguía los cambios de ruta tras mover o renombrar archivos, o se asociaba incorrectamente a copias de contenido idéntico
+* `Corrección` La papelera y el historial no accedían correctamente al almacenamiento interno en entornos multiusuario o perfiles de trabajo
+* `Corrección` Restaurar sobrescribiendo archivos desde la papelera o el historial podía perder el contenido anterior o dejar archivos incompletos
+* `Corrección` Renombrado automático incorrecto de directorios con puntos al restaurarlos desde la papelera
+* `Corrección` El historial no mostraba todas las versiones conservadas y el modo de visualización fallaba al cambiar de operación
+* `Corrección` La limpieza del historial podía eliminar instantáneas nuevas cuyo registro aún no había terminado
+* `Corrección` La papelera notificaba la finalización aunque la restauración fallara
+* `Corrección` Al restaurar directorios, la papelera podía escribir entradas de archivo anómalas fuera del destino
+* `Corrección` El editor podía perder cursor, selección o contenido sin guardar al recrearse la página
+* `Corrección` El contenido del editor y la página de registros podía quedar oculto o comprimido al mostrar el teclado o campo de entrada
+* `Corrección` Errores al guardar el estado, colorear el cursor y elegir el idioma de las sugerencias del cuadro de búsqueda principal
+* `Corrección` Los eventos multitáctiles anómalos en la pestaña de documentación podían bloquear la aplicación
+* `Corrección` Faltaba la animación de transición al cambiar a la pestaña de archivos
+* `Corrección` En pantallas estrechas, el panel lateral recortaba controles, omitía botones inferiores y ofrecía áreas de pulsación demasiado pequeñas en interruptores
+* `Corrección` Al cerrar o recrear la página principal, el listener de limpieza del panel accedía a un contexto liberado y bloqueaba la aplicación
+* `Corrección` El fondo de inicio no cubría la zona del borde corto en pantallas con muesca
+* `Corrección` Información incorrecta del paquete de la aplicación reciente y su Activity en el menú flotante _[`issue #529`](http://issues.autojs6.com/529)_
+* `Corrección` El diálogo "Ejecutar script" del botón flotante podía no restaurarse después de minimizarlo (corrección tentativa) _[`issue #500`](http://issues.autojs6.com/500)_
+* `Corrección` El inspector podía generar instrucciones inválidas para colecciones de controles
+* `Corrección` Contraste insuficiente de textos y controles de las ventanas y diálogos del inspector con algunos colores del tema o modo nocturno
+* `Corrección` Los colores Material Design elegidos en el diseño tradicional no se encontraban con "Localizar color actual del tema" tras cambiar de diseño, y la página de colores Material Design no mostraba el resumen del color actual
+* `Corrección` La pestaña de complementos y el Centro conservaban filtros al cerrar la búsqueda o cambiar de pestaña
+* `Corrección` El Centro de complementos elegía paquetes x86_64 en dispositivos x86
+* `Corrección` No se podía completar la activación de un complemento tras autorizarlo correctamente
+* `Corrección` El Centro de complementos no interpretaba correctamente algunas fechas con meses abreviados
+* `Corrección` Errores en caché de iconos, cambio de modo nocturno y estado de actualización por arrastre del Centro de complementos
+* `Corrección` Actualizar el Centro podía omitir complementos instalados, mostrar listas vacías o restablecer el desplazamiento
+* `Corrección` El Centro podía instalar variantes incorrectas o duplicar plantillas de empaquetado y avisos de actualización
+* `Corrección` Tras actualizar correctamente el índice, el Centro recuperaba de caché complementos antiguos eliminados o renombrados
+* `Corrección` Abrir los detalles de un complemento inmediatamente tras un inicio en frío provocaba parpadeos al reconstruirse todo el diálogo durante la actualización de la lista
+* `Corrección` El Centro mantenía desactivado un complemento después de una indisponibilidad temporal (por ejemplo durante una actualización)
+* `Corrección` El listener de solicitudes de permiso Shizuku no se eliminaba correctamente al destruirse
+* `Corrección` No se podía continuar confirmando la instalación de APK en segundo plano
+* `Corrección` Cancelar el empaquetado APK podía notificarse como fallo de construcción
+* `Corrección` Errores de validación de consistencia del certificado de firma de APK empaquetados y reconocimiento de firmas en Android 9-11
+* `Corrección` Si faltaban componentes de ejecución en la aplicación anfitriona o empaquetada, la biblioteca nativa shell podía faltar o usar una ABI incorrecta y bloquear la aplicación
+* `Corrección` Al empaquetar APK se conservaba silenciosamente una sola biblioteca nativa entre archivos homónimos con contenido distinto (ahora se detiene el empaquetado y se enumeran los orígenes)
+* `Corrección` Los scripts UI empaquetados a veces mostraban una página vacía y terminaban al iniciarse
+* `Corrección` Al guardar proyectos mediante VSCode, archivos eliminados permanecían en el dispositivo o en directorios de caché _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
+* `Corrección` Recibir archivos de proyecto desde VSCode podía agotar la memoria por el tratamiento de registros _[`issue #523`](http://issues.autojs6.com/523)_
+* `Corrección` Las conexiones caducadas de VSCode bloqueaban el envío de registros e impedían que las conexiones nuevas los recibieran _[`issue #385`](http://issues.autojs6.com/385)_
+* `Corrección` Mostrar diálogos en páginas destruidas al fallar la conexión VSCode podía provocar excepciones
+* `Corrección` Las direcciones conectadas correctamente en modo cliente no se guardaban en el historial
+* `Corrección` La búsqueda de actualizaciones no seleccionaba paquetes según la prioridad ABI del dispositivo
+* `Corrección` Al construir con IntelliJ IDEA podía fallar la resolución de dependencias, la selección de tareas de compilación o la localización del APK actual
+* `Corrección` Memoria insuficiente de la compilación Kotlin al construir varias variantes
+* `Corrección` Errores al resolver el SDK y las rutas de plantillas de empaquetado durante la construcción Gradle
+* `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
+* `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
+* `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano
+* `Mejora` Compatibilidad con páginas de memoria de 16 KB en la aplicación y aplicaciones empaquetadas, con avisos de bibliotecas nativas incompatibles al instalar, cargar y empaquetar complementos
+* `Mejora` Mejoras de los textos multilingües de la interfaz y los mensajes de excepción
+* `Mejora` Reducción de dependencias, recursos de idiomas e imágenes del instalador para disminuir su tamaño
+* `Mejora` La búsqueda de actualizaciones obtiene versiones y paquetes mediante GitHub REST API, con representación local de las notas
+* `Mejora` La aplicación incluye historial de versiones en chino simplificado e inglés; otros idiomas se descargan y almacenan en caché (sin conexión se prefiere la caché y, si no existe, el inglés)
+* `Mejora` Documentación sin conexión convertida en complemento Offline Docs, con instalación y actualización independientes y cambio inmediato del origen de documentos
+* `Mejora` Plantilla de empaquetado convertida en APK Builder Template, con comprobación de firma del complemento, versión anfitriona y compatibilidad de plantilla al empaquetar
+* `Mejora` Funciones ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization convertidas en complementos
+* `Mejora` Funciones OpenCC/Pinyin/Pinyin4j/MediaInfo convertidas en complementos
+* `Mejora` Los complementos oficiales pueden seguir los colores del tema, modo nocturno e idioma del anfitrión
+* `Mejora` Mejoras de instalación y actualización en línea, elección de variantes, ajustes, instrucciones e historial del Centro de complementos
+* `Mejora` Los iconos del Centro de complementos responden a toques/pulsaciones largas según su estado de instalación: los instalados abren los detalles del sistema/su página de inicio independiente (con un aviso si no existe), y los no instalados abren los detalles del complemento/inician su instalación
+* `Mejora` El menú FAB de la pestaña Complementos del inicio prioriza el asistente de instalación, los repositorios oficiales y de terceros y el Centro de complementos; la instalación por URL/archivo local y las acciones de gestión se agrupan en "Más"
+* `Mejora` El Centro admite dos niveles de ordenación y dirección independiente; por defecto ordena instalados > desactivados > no instalados y, dentro de cada estado, por actualización más reciente
+* `Mejora` Tras operaciones explícitas o cambios de ajustes, las entradas del Centro conservan su posición y actualizan el estado; continúa la actualización automática en segundo plano y se restaura el orden al actualizar por arrastre o cambiar orden/filtros
+* `Mejora` El Centro admite montaje automático de complementos SDK y detección de ABI disponibles
+* `Mejora` El Centro permite activar automáticamente complementos oficiales recién instalados; instalaciones externas y sobreinstalaciones conservan la política anterior
+* `Mejora` Caché y carga asíncrona para mejorar la fluidez de listas y actualizaciones del Centro, con instrucciones de recuperación si falla la activación
+* `Mejora` Mantener pulsado el botón flotante de la pestaña de complementos abre el Centro
+* `Mejora` El diálogo de información distingue las ABI compatibles con el complemento de las del paquete instalado
+* `Mejora` Caché de inicialización Rhino para acelerar los scripts, mayor eficiencia al imprimir matrices grandes y mejor compatibilidad de reflexión Java en Android antiguo
+* `Mejora` Sincronización de Rhino con el proyecto original, soporte de new.target y mejoras de ámbitos, TypedArray y depurador
+* `Mejora` runtime.loadJar puede cargar JAR mediante DEX Compiler, con diagnósticos de compilación y alternativa ante fallos (experimental, desactivado por defecto)
+* `Mejora` Tareas programadas, tareas de difusión, accesos directos y Tasker pueden ejecutar TypeScript (requiere TypeScript Engine)
+* `Mejora` pinyin admite diccionarios de pronunciación personalizados por llamada y mejora compare/compact
+* `Mejora` pinyin4j admite distintos sistemas de romanización y consultas completas de pronunciación
+* `Mejora` opencc admite consulta de tipos de conversión, conversión por lotes y conversiones encadenadas
+* `Mejora` ocr selecciona motores disponibles en orden ML Kit/Paddle/Rapid por defecto y permite elegir explícitamente o volver a la selección automática
+* `Mejora` images.save/saveImage/compress/compressToBytes admiten cuantización PNG (conservando transparencia) y límites de píxeles y memoria (requiere Image Quantization)
+* `Mejora` images.readPixels admite parámetros ImageWrapper
+* `Mejora` images.matchTemplate/findPointByImage admiten scales; los resultados incluyen tamaño, escala y región
+* `Mejora` images.matchFeatures admite imágenes o rutas y más opciones de coincidencia, con información adicional de características y resultados
+* `Mejora` Mayor eficiencia y precisión de búsqueda multicolor, coincidencia de plantillas y características
+* `Mejora` La captura de pantalla reintenta cuando temporalmente no hay fotogramas y reduce el impacto de liberar recursos en operaciones de imagen concurrentes
+* `Mejora` mediainfo admite snapshot/capabilities y conteo de flujos multimedia, reduciendo el tiempo de consulta de detalles
+* `Mejora` KeyCode mejora la compatibilidad de parámetros y permite enviar códigos de tecla con Shizuku _[`issue #492`](http://issues.autojs6.com/492)_
+* `Mejora` La accesibilidad puede activarse automáticamente mediante Shizuku y sincronizar su inicio/parada con el complemento acompañante oficial
+* `Mejora` El nodo source de callbacks auto.registerEvent se resuelve bajo demanda (en versiones anteriores a Android 13 debe leerse dentro del callback)
+* `Mejora` Las consultas de ventanas omiten raíces no disponibles y mejoran la liberación de nodos entre versiones Android
+* `Mejora` automator.captureScreen mejora la liberación de recursos y los reintentos ante límites del sistema para evitar solicitudes sin terminar durante demasiado tiempo
+* `Mejora` Los parámetros enteros de selectores globales y de colecciones se redondean uniformemente al entero más cercano, con consultas multihilo e interrupciones por tiempo más estables
+* `Mejora` Los selectores y esperas Flow admiten sondeo asistido por eventos, reintentando antes cuando llega un evento de accesibilidad (se activa con eventAssistedPolling en auto.setFlags)
+* `Mejora` Restaurados console.rawInput/input para leer texto o evaluar expresiones desde el campo de entrada de la consola
+* `Mejora` Cada consola conserva su visibilidad y formato de hora; volver a ejecutar un script homónimo sustituye su ventana flotante anterior
+* `Mejora` media.playMusic admite reproducción en primer plano, foco de audio y controles de notificaciones, y libera recursos al finalizar el script
+* `Mejora` Eliminadas las copias integradas de compatibilidad com.stardust; las clases con el prefijo com.stardust se asignan a implementaciones homónimas de AutoJs6 (218 clases completas, 90 parciales y 46 sin equivalente ya no disponibles), unificando usos por nombre como new e instanceof con los objetos runtime (consulta: Documentación del proyecto > [Entorno de ejecución AutoJs4](https://docs.autojs6.com/#/autojs4Runtime))
+* `Mejora` Ejemplos de 3-Block Compose, flujos de automatización, interacción con la consola y libros electrónicos, con mejoras del ejemplo OCR de pantalla
+* `Mejora` Menú de operaciones unificado en la consola flotante para tamaño, hora, colores, fuente y transparencia
+* `Mejora` Colores del tema y distribución de menús unificados en el editor, con mejoras de fuentes, modo de solo lectura y selección de texto
+* `Mejora` El botón de ejecución del editor cambia a parada tras iniciar un script
+* `Mejora` Mejoras de avisos de descarga de fuentes, corrección de números de línea de destino y detección y guardado de codificación
+* `Mejora` Información de instaladores cargada bajo demanda en el administrador, con mejor presentación de paquetes grandes y manifiestos
+* `Mejora` Accesos de previsualización y operaciones de complementos unificados; actualización diferencial de listas conservando el desplazamiento
+* `Mejora` El historial evita instantáneas duplicadas, conserva el contenido antes de sobrescribir y migra la historia al restaurar la papelera a otra ruta
+* `Mejora` Mejores avisos de capacidad, restauración de entradas dañadas y mensajes de error de la papelera, con actualización diferencial
+* `Mejora` El inspector jerárquico admite resúmenes de atributos, resaltado de padres, desplazamiento horizontal y selección ascendente de padres
+* `Mejora` El inspector jerárquico elimina las líneas verticales de colores y mueve el indicador de expansión a la izquierda del texto, diferenciando contraído, expandido y sin hijos
+* `Mejora` El diálogo de nodos resalta selecciones múltiples con el color del tema; copia mediante "Preguntar siempre/Copiar selector de objeto/Copiar selector encadenado", conservando la elección entre sesiones
+* `Mejora` Diseño agrupado unificado de accesibilidad y administradores de conexión, con expansión/contracción por niveles y ajustes independientes
+* `Mejora` Las listas de tareas y registros usan rutas abreviadas como el directorio de trabajo, conservando nombre y extensión reales del archivo de entrada
+* `Mejora` El botón flotante y sus ventanas siguen el idioma y modo nocturno, con carga de información del menú en segundo plano
+* `Mejora` El grupo "Conectar al ordenador" del panel lateral pasa a llamarse "Conexiones remotas"
+* `Mejora` Los fondos claro y oscuro de la biblioteca predeterminada se unifican en "Color de fondo", con opciones claro, oscuro, seguimiento automático e inversión automática; se conservan elecciones anteriores
+* `Mejora` Los ajustes de colores permiten localizar colores propios y la biblioteca inteligente actual; la búsqueda incluye colores de bibliotecas propias y grupos inteligentes
+* `Mejora` La instalación APK utiliza diálogos de 3-Setup Installer; si falta se usa el instalador del sistema y se sugiere instalar el complemento; los contenedores apks/xapk/apkm/apkz lo requieren
+* `Mejora` La conexión VSCode incorpora comprobación de actividad y longitud de datos para que conexiones caducadas y datos anómalos no afecten la comunicación _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
+* `Mejora` Al guardar archivos desde VSCode se conserva la estructura relativa de directorios dentro del directorio de trabajo _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
+* `Mejora` La conexión QR en modo cliente mejora el reconocimiento y traslada su acceso al menú del diálogo de direcciones
+* `Mejora` Gradle permite emparejar dinámicamente versiones compatibles Kotlin/KSP/AGP/R8, reduce la memoria de inicio y elimina advertencias de compilación
+* `Mejora` Datos de compatibilidad de plataformas Gradle y tareas de actualización trasladados a AutoJs6-Gradle-Platform-Versions; Scrapers permite sincronizar entre repositorios
+* `Mejora` device.getAndroidId admite useSystemId booleano para obtener en Android 8.0+ el valor del sistema del usuario Android que ejecuta la aplicación mediante Shizuku/Root; lanza excepciones si fallan permisos o lectura y los sistemas anteriores ignoran el parámetro
+* `Dependencia` Modularizado Android AXML
+* `Dependencia` Modularizado Android ARSC Editor
+* `Dependencia` Modularizado APK Signer
+* `Dependencia` Modularizado APK Verifier
+* `Dependencia` Modularizado ARSCLib versión 1.3.8
+* `Dependencia` Modularizado Image Quantization versión 2.17.0
+* `Dependencia` Modularizado OpenCV versión 4.8.0
+* `Dependencia` Añadido juniversalchardet versión 2.0.4
+* `Dependencia` Añadido AndroidX AsyncLayoutInflater versión 1.1.0
+* `Dependencia` Añadido AndroidX Test Ext JUnit versión 1.3.0
+* `Dependencia` Añadido ZXing Android Embedded versión 4.3.0
 * `Dependencia` Añadido Android Hidden API Bypass versión 6.1
-* `Dependencia` Modularizacion de Package Archive Parser
-* `Dependencia` Modularizacion de Installer API
-* `Dependencia` Actualizar AndroidX Lifecycle 2.6.2 -> 2.9.4
-* `Dependencia` Actualizar AndroidX SavedState 1.2.1 -> 1.3.2
-* `Dependencia` Actualizar AndroidX Emoji2 1.3.0 -> 1.4.0
-* `Dependencia` Actualizar AndroidX Window 1.0.0 -> 1.5.0
-* `Dependencia` Modularizar Compose UI API
+* `Dependencia` Actualizado Android SDK versión 36 -> 37
+* `Dependencia` Actualizado Gradle 9 versión 9.4.0 -> 9.7.1
+* `Dependencia` Actualizado AndroidX Lifecycle versión 2.6.2 -> 2.9.4
+* `Dependencia` Actualizado AndroidX SavedState versión 1.2.1 -> 1.3.2
+* `Dependencia` Actualizado AndroidX Emoji2 versión 1.3.0 -> 1.4.0
+* `Dependencia` Actualizado AndroidX Window versión 1.0.0 -> 1.5.0
+* `Dependencia` Eliminado Android Annotations versión 4.8.0
+* `Dependencia` Eliminado Android dx versión 1.14
+* `Dependencia` Eliminado AndroidX AppCompat (Legacy) versión 1.0.2
+* `Dependencia` Eliminado AndroidX MultiDex versión 2.0.1
+* `Dependencia` Eliminado Apache Commons Lang3 versión 3.18.0
+* `Dependencia` Eliminado APK Parser (módulo local)
+* `Dependencia` Eliminado Commons IO versión 2.8.0
+* `Dependencia` Eliminado Flexmark Java HTML to Markdown versión 0.64.8
+* `Dependencia` Eliminado GitHub API versión 1.306
+* `Dependencia` Eliminado Glide KSP versión 5.0.5
+* `Dependencia` Eliminado ICU4J versión 77.1
+* `Dependencia` Eliminado Jackson DataBind versión 2.13.4.2
+* `Dependencia` Eliminado Jaredrummler Android Device Names versión 2.1.1
+* `Dependencia` Eliminado JavaMail for Android (biblioteca local)
+* `Dependencia` Eliminado JCIP Annotations versión 1.0
+* `Dependencia` Eliminado Jieba Analysis versión 1.0.3-SNAPSHOT (modified)
+* `Dependencia` Eliminado JUnit Jupiter versión 5.13.4
+* `Dependencia` Eliminado Log4j versión 1.2.17
+* `Dependencia` Eliminado Android Logging Log4j versión 1.0.3
+* `Dependencia` Eliminado MLKit Barcode Scanning versión 17.3.0
+* `Dependencia` Eliminado MLKit Text Recognition Chinese versión 16.0.1
+* `Dependencia` Eliminado OpenCC versión 1.2.2
+* `Dependencia` Eliminado Pinyin4j versión 2.5.1
+* `Dependencia` Eliminado Rapid OCR (biblioteca local)
+* `Dependencia` Eliminado Retrofit2 Converter Gson versión 3.0.0
+* `Dependencia` Eliminado Retrofit2 Kotlin Coroutines Adapter versión 0.9.2
+* `Dependencia` Eliminado Spongy Castle Prov versión 1.58.0.0
+* `Dependencia` Eliminado Tiny Sign versión 0.9
 
 # v6.7.0
 
 ###### 2026/03/14
 
 * `Nuevo` Funcion Centro de plugins, compatible con operaciones como instalar/desinstalar/actualizar plugins (entrada: boton del cajon de inicio/pestana de inicio)
+* `Nuevo` Los accesos directos del lanzador en la pagina de configuracion agregan la opcion "Plugins", para saltar a la pagina del Centro de plugins mediante un acceso directo
 * `Nuevo` Funcion Historial de versiones, compatible con ver/restaurar versiones historicas de archivos editables (entrada: boton del cajon de inicio/menu del administrador de archivos/menu del editor de codigo)
+* `Nuevo` Menú "Teclado multifunción" > "Ajustes de símbolos" en el editor, con edición de símbolos y creación/importación/exportación por nivel de configuración
 * `Nuevo` Funcion Papelera, compatible con ver/restaurar archivos/carpetas eliminados (entrada: boton del cajon de inicio)
 * `Nuevo` Plugin Paddle OCR (PP-OCRv5), para reconocimiento optico de caracteres
 * `Nuevo` Modulo cvt, para conversion de unidades de datos (consulte Documentacion del proyecto > [Conversion de unidades](https://docs.autojs6.com/#/cvt))
+* `Nuevo` Metodo cvt.bytes, para conversion de unidades de datos de bytes (consulte Documentacion del proyecto > [Conversion de unidades](https://docs.autojs6.com/#/cvt))
 * `Nuevo` Modulo fmt, para formateo de datos (consulte Documentacion del proyecto > [Formateo](https://docs.autojs6.com/#/fmt))
+* `Nuevo` Metodo fmt.bytes, para formateo de datos de bytes (consulte Documentacion del proyecto > [Formateo](https://docs.autojs6.com/#/fmt))
 * `Nuevo` Modulo zip, para operaciones de compresion y descompresion de archivos (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (consulte Documentacion del proyecto > [Zip](https://docs.autojs6.com/#/zip))
 * `Nuevo` Modulo mediainfo, para ver informacion detallada de archivos multimedia (consulte Documentacion del proyecto > [Informacion multimedia](https://docs.autojs6.com/#/mediainfo))
-* `Nuevo` Metodo cvt.bytes, para conversion de unidades de datos de bytes (consulte Documentacion del proyecto > [Conversion de unidades](https://docs.autojs6.com/#/cvt))
-* `Nuevo` Metodo fmt.bytes, para formateo de datos de bytes (consulte Documentacion del proyecto > [Formateo](https://docs.autojs6.com/#/fmt))
 * `Nuevo` Metodo s13n.bytes, para estandarizar datos de bytes (consulte Documentacion del proyecto > [Estandarizacion](https://docs.autojs6.com/#/s13n))
 * `Nuevo` Metodo app.isDualInstalled, para detectar si una aplicacion dual esta instalada (requiere permisos de Shizuku o Root) _[`issue #450`](http://issues.autojs6.com/450)_
 * `Nuevo` Metodo device.getSharedDeviceId, para obtener un ID de dispositivo compartido y unificado entre aplicaciones _[`issue #455`](http://issues.autojs6.com/455)_
@@ -835,40 +393,38 @@
 * `Nuevo` El metodo dialogs.build admite parametros de opcion textAllCaps/(positive/negative/neutral)TextAllCaps, para controlar si el texto de los botones se muestra completamente en mayusculas
 * `Nuevo` Metodo images.loadAsync, para obtener recursos de imagen de red de forma asincrona _[`issue #327`](http://issues.autojs6.com/327)_
 * `Nuevo` Metodo ui.getNavigationBarHeight/propiedad navigationBarHeight (getter), para obtener la altura de la barra de navegacion _[`issue #456`](http://issues.autojs6.com/456)_
-* `Nuevo` Metodo ui.getVisible(Status/Navigation)BarHeight/propiedad visible(Status/Navigation)BarHeight (getter), para obtener rapidamente la altura visible de la barra de estado o de navegacion _[`issue #456`](http://issues.autojs6.com/456)_
-* `Nuevo` Metodos http.put/del(ete)/head, para enviar solicitudes de red usando distintos metodos HTTP
+* `Nuevo` Método ui.getVisible(Status/Navigation)BarHeight/propiedad visible(Status/Navigation)BarHeight (getter) para obtener la altura visible de las barras de estado o navegación _[`issue #456`](http://issues.autojs6.com/456)_
+* `Nuevo` Métodos http.put/del(ete)/head para enviar distintos tipos de solicitudes HTTP
 * `Nuevo` Metodos como http.getAsync/postAsync/requestAsync, para enviar solicitudes de red de forma asincrona _[`issue #423`](http://issues.autojs6.com/423)_
 * `Nuevo` El objeto body obtenido por los metodos relacionados con solicitudes del modulo http agrega metodos como stream/saveToFile/close _[`issue #452`](http://issues.autojs6.com/452)_
 * `Nuevo` Los metodos relacionados con solicitudes del modulo http admiten parametros de opcion de control de cache (cacheBody/bodyCacheThresholdBytes)
 * `Nuevo` Los metodos relacionados con solicitudes del modulo http admiten parametros de opcion inseguros (isInsecure/insecure), para ignorar excepciones relacionadas con certificados _[`issue #417`](http://issues.autojs6.com/417)_
 * `Nuevo` Los metodos relacionados con solicitudes del modulo http admiten la opcion options.client, para configurar OkHttpClient.Builder (como followRedirects, etc.) _[`issue #454`](http://issues.autojs6.com/454)_
 * `Nuevo` Propiedad auto.state (getter) y propiedad shizuku.state (getter), para obtener el estado del servicio de accesibilidad y del servicio Shizuku
-* `Nuevo` Metodos runtime.(set/is)JavaPrimitiveWrap, para establecer u obtener la estrategia de envoltura de tipos primitivos de Java _[`issue #435`](http://issues.autojs6.com/435)_
-* `Nuevo` Metodos autojs.(restart/exit), para reiniciar o salir de la aplicacion AutoJs6, y compatibles con ejecutar automaticamente un script especificado al reiniciar la aplicacion _[`issue #460`](http://issues.autojs6.com/460)_
 * `Nuevo` Metodo UiObject#isShifted, para detectar cambios de posicion de controles _[`issue #469`](http://issues.autojs6.com/469)_
 * `Nuevo` Metodo UiObject#snapshot, para capturar el estado actual de un control _[`issue #469`](http://issues.autojs6.com/469)_
+* `Nuevo` Los selectores de la serie equivalente (UiSelector#id/text/...) y de la serie contiene (UiSelector#xxxContains) admiten parametros de expresion regular
+* `Nuevo` Los parametros de expresion regular de los selectores admiten banderas (i, m, s, u)
+* `Nuevo` Metodos runtime.(set/is)JavaPrimitiveWrap, para establecer u obtener la estrategia de envoltura de tipos primitivos de Java _[`issue #435`](http://issues.autojs6.com/435)_
+* `Nuevo` Métodos autojs.restart/exit para reiniciar o salir de AutoJs6 y ejecutar un script indicado tras reiniciar _[`issue #460`](http://issues.autojs6.com/460)_
 * `Nuevo` Metodo engines.myEngine().getStartTime(), para obtener la marca de tiempo de inicio del motor de scripts _[`issue #449`](http://issues.autojs6.com/449)_
 * `Nuevo` Metodo global crash, para probar la pagina de informe de fallos
 * `Nuevo` Metodo global structuredClone, para copia profunda de objetos JavaScript (consulte [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
-* `Nuevo` Los selectores de la serie equivalente (UiSelector#id/text/...) y de la serie contiene (UiSelector#xxxContains) admiten parametros de expresion regular
-* `Nuevo` Los parametros de expresion regular de los selectores admiten banderas (i, m, s, u)
 * `Nuevo` Las expresiones regulares admiten sintaxis de lookbehind _[`issue #464`](http://issues.autojs6.com/464)_
 * `Nuevo` El administrador de archivos agrega elementos de menu "Mover a" y "Copiar a", con soporte para abortar operaciones y mostrar estado de progreso
-* `Nuevo` El editor de codigo agrega el elemento de menu "Teclado multifuncion" - "Configuracion de simbolos", con soporte para editar simbolos y crear/importar/exportar simbolos por nivel de perfil
 * `Nuevo` El cajon de inicio agrega la herramienta "Ubicacion del puntero"
 * `Nuevo` El cajon de inicio agrega el interruptor "Acceso a todos los archivos"
-* `Nuevo` El cajon de inicio agrega el interruptor "Mostrar interfaz desde segundo plano" (para dispositivos [Xiaomi/Vivo])
+* `Nuevo` Interruptor "Mostrar interfaz desde segundo plano" en el panel lateral (para dispositivos Xiaomi/Vivo)
 * `Nuevo` La pagina de configuracion agrega la opcion "Envoltura de tipos primitivos de Java" _[`issue #435`](http://issues.autojs6.com/435)_
 * `Nuevo` La pagina de configuracion agrega la opcion "Motor de programacion de tareas", con soporte para AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #434`](http://issues.autojs6.com/434)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #378`](http://issues.autojs6.com/378)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_
 * `Nuevo` La pagina de configuracion agrega la opcion "Icono del lanzador de aplicaciones", con soporte para iconos adaptativos/iconos con fondo transparente _[`issue #405`](http://issues.autojs6.com/405)_
-* `Nuevo` La pagina de configuracion agrega la opcion "Estrategia de reinicio", para configurar si el boton de reinicio del cajon de inicio usa la estrategia de reinicio rapido
+* `Nuevo` Opción "Estrategia de reinicio" en los ajustes para configurar si el botón del panel lateral utiliza reinicio rápido
 * `Nuevo` La pagina de configuracion agrega la opcion "Retraso en la solicitud de permiso de captura de pantalla", para evitar que la ventana de solicitud de permiso bloquee la pantalla
-* `Nuevo` Los accesos directos del lanzador en la pagina de configuracion agregan la opcion "Plugins", para saltar a la pagina del Centro de plugins mediante un acceso directo
 * `Nuevo` Las aplicaciones empaquetadas admiten inicio automatico al arrancar y agregan un interruptor en la pagina de configuracion
 * `Nuevo` Las aplicaciones empaquetadas admiten accesos directos de aplicacion (pagina de registros/pagina de configuracion)
 * `Nuevo` La pagina de configuracion de empaquetado agrega botones de deshacer/rehacer/guardar
-* `Nuevo` La pagina de configuracion de empaquetado agrega un mecanismo de perfiles, con soporte para crear/modificar/eliminar/importar/exportar perfiles _[`issue #483`](http://issues.autojs6.com/483)_
-* `Nuevo` Herramienta Scrapers (run-scrapers.mjs), para actualizar automaticamente datos estructurados de scripts de compilacion Gradle/datos comunes del README/datos de plantilla README, etc.
+* `Nuevo` La configuración de aplicaciones empaquetadas admite creación/modificación/eliminación/importación/exportación de perfiles _[`issue #483`](http://issues.autojs6.com/483)_
+* `Nuevo` Herramienta Scrapers (run-scrapers.mjs) para actualizar automáticamente datos de construcción Gradle y datos comunes y plantillas README
 * `Nuevo` Herramienta Gradle Wrapper switcher (gradle-wrapper-switcher), para cambiar la version principal local de Gradle (como Gradle 8.x y Gradle 9.x)
 * `Corrección` Error en la restriccion de cantidad y tipos de parametros del metodo notice _[`issue #462`](http://issues.autojs6.com/462)_
 * `Corrección` Problema por el que la propiedad ui.R (getter) no podia usarse correctamente
@@ -883,9 +439,10 @@
 * `Corrección` Problema por el que el objeto devuelto por threads.disposable() podia ser encapsulado inesperadamente al acceder a datos _[`issue #435`](http://issues.autojs6.com/435)_
 * `Corrección` Problema por el que, al llamar varias veces al metodo console.build, las opciones de estilo de la ventana flotante de registros no se restablecian correctamente
 * `Corrección` Problema por el que las opciones (title/content)BackgroundColor del metodo console.build sobrescribian opciones de transparencia o tintado _[`issue #458`](http://issues.autojs6.com/458)_
+* `Corrección` En modo servidor, recrear la Activity al girar la pantalla o cambiar el idioma impedía mostrar registros en la consola VSCode _[`issue #385`](http://issues.autojs6.com/385)_
 * `Corrección` Problema por el que metodos como console/toast podian perder ceros finales al mostrar Java Double
 * `Corrección` Problema por el que no era posible usar metodos como console/toast para mostrar el tipo de datos BigInt
-* `Corrección` Problema por el que el metodo toast podia provocar fugas de memoria al mantener una referencia fuerte a la instancia Toast
+* `Corrección` toast podía causar fugas de memoria al mantener una referencia fuerte a Toast
 * `Corrección` Problema por el que algunos objetos globales podian perder propiedades y metodos del prototipo de JavaScript
 * `Corrección` Problema por el que el objeto this podia apuntar incorrectamente al usar expresiones JavaScript como valores de atributos en sintaxis XML
 * `Corrección` Problema por el que el parametro de opcion linkify del metodo dialogs.build no funcionaba
@@ -896,29 +453,31 @@
 * `Corrección` Problema por el que las capturas obtenidas por el metodo images.captureScreen podian tener orientacion incorrecta o relleno de bordes negros _[`issue #337`](http://issues.autojs6.com/337)_
 * `Corrección` Problema por el que el valor 1 se interpretaba erroneamente como porcentaje al usar parametros de region en algunos metodos de images
 * `Corrección` Problema por el que la funcion de la marca oneShot fallaba cuando ocurrian excepciones en algunos metodos relacionados con images _[`issue #372`](http://issues.autojs6.com/372)_
-* `Corrección` Problema por el que algunos metodos relacionados con images podian provocar fugas de memoria _[`issue #372`](http://issues.autojs6.com/372)_
+* `Corrección` Algunos métodos images podían provocar fugas de memoria _[`issue #372`](http://issues.autojs6.com/372)_
 * `Corrección` Problema por el que images.save y el metodo ImageWrapper#saveTo no podian escribir correctamente archivos cuando la ruta proporcionada no existia
 * `Corrección` Problema por el que el metodo ImageWrapper#recycle no reciclaba correctamente recursos de imagen
 * `Corrección` Problema por el que algunos metodos sobrecargados de ocr podian no funcionar correctamente
 * `Corrección` Problema por el que los resultados obtenidos por el metodo ocr.detect podian no coincidir con ocr.mode _[`issue #468`](http://issues.autojs6.com/468)_
+* `Corrección` ML Kit OCR no se inicializaba correctamente en algunos dispositivos (corrección tentativa) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
 * `Corrección` Problema por el que los eventos del servicio de accesibilidad registrados con auto.registerEvent podian ser eliminados por error por otros scripts _[`issue #466`](http://issues.autojs6.com/466)_ _[`issue #343`](http://issues.autojs6.com/343#issuecomment-3263953918)_
 * `Corrección` Problema por el que el metodo UiObject#child podia lanzar ArrayIndexOutOfBoundsException en Android 10 _[`issue #416`](http://issues.autojs6.com/416)_
-* `Corrección` Problema por el que al llamar metodos de modulos integrados podia haber inconsistencia en el contexto Rhino
+* `Corrección` El contexto Rhino podía ser inconsistente al llamar a métodos de módulos integrados
 * `Corrección` Problema por el que, tras crear muchas ventanas flotantes en un script, podian quedar ventanas residuales al salir del script
 * `Corrección` Problema por el que los parametros de configuracion de project.json no se analizaban correctamente al ejecutar un proyecto
 * `Corrección` Problema por el que el parametro excludedDirs de project.json podia hacer fallar el analisis del archivo de configuracion al empaquetar un proyecto _[`issue #428`](http://issues.autojs6.com/428)_
+* `Corrección` Problema por el que las aplicaciones empaquetadas no podian usar correctamente las funciones Paddle OCR y Rapid OCR
+* `Corrección` Problema por el que el valor de la clave key en el archivo de configuracion project.json de aplicaciones empaquetadas podia modificarse inesperadamente
+* `Corrección` Problema por el que al desplazarse por la lista de "Permisos requeridos" en la pagina de configuracion de empaquetado podia parpadear el icono de las casillas
 * `Corrección` Problema por el que la funcion de empaquetado podia no funcionar correctamente en Android 7.x
 * `Corrección` Problema por el que los nombres originales de las claves podian modificarse al guardar el archivo de configuracion de un proyecto de script
 * `Corrección` Problema por el que numeros grandes en version de compilacion o tiempo de compilacion dentro del archivo de configuracion del proyecto de script podian provocar un fallo de la aplicacion
 * `Corrección` Problema por el que obtener o reconstruir ImageReader con frecuencia podia provocar un fallo de la aplicacion al no haber fotogramas disponibles temporalmente en el buffer
 * `Corrección` Problema por el que el observador de eventos de entrada InputEventObserver podia causar una ralentizacion evidente al iniciar la aplicacion
 * `Corrección` Problema por el que el proceso de servicio de usuario Shizuku no terminaba correctamente y se acumulaban procesos _[`issue #474`](http://issues.autojs6.com/474)_
-* `Corrección` Problema por el que las aplicaciones empaquetadas no podian usar correctamente las funciones Paddle OCR y Rapid OCR
-* `Corrección` Problema por el que el valor de la clave key en el archivo de configuracion project.json de aplicaciones empaquetadas podia modificarse inesperadamente
-* `Corrección` Problema por el que al desplazarse por la lista de "Permisos requeridos" en la pagina de configuracion de empaquetado podia parpadear el icono de las casillas
 * `Corrección` Problema por el que, en la pagina de historial de versiones, algunos sistemas mostraban datos estadisticos incompletos debido a diferencias de fuente
-* `Corrección` Problema por el que MLKit Google OCR no podia inicializarse correctamente en algunos dispositivos (correccion tentativa) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
 * `Corrección` Problema por el que, en algunos dispositivos, los botones funcionales del administrador de archivos no activaban correctamente los eventos de clic (correccion tentativa) _[`issue #465`](http://issues.autojs6.com/465)_
+* `Corrección` Problema por el que la aplicacion podia fallar al pulsar el boton atras o cambiar de pestana despues de mostrar resultados de busqueda del administrador de archivos
+* `Corrección` Problema por el que la interfaz no se actualizaba automaticamente tras eliminar carpetas de proyecto en el administrador de archivos
 * `Corrección` Problema por el que las lineas en blanco del editor de codigo mostraban caracteres de cuadro en algunos dispositivos (correccion tentativa)
 * `Corrección` Problema por el que el teclado virtual podia tapar el contenido de texto en el editor de codigo
 * `Corrección` Problema por el que el editor de codigo seguia permitiendo editar contenido en modo de solo lectura
@@ -931,39 +490,36 @@
 * `Corrección` Tipos de parametros aceptados incorrectos en el constructor Canvas _[`issue #402`](http://issues.autojs6.com/402)_
 * `Corrección` Problema por el que la funcion de copiar informacion detallada no funcionaba en la pagina de informe de fallos
 * `Corrección` Problema por el que la logica personalizada de retroceso dejaba de funcionar en Android 16+, causando un comportamiento anomalo del boton atras
-* `Corrección` Problema por el que la aplicacion podia fallar al pulsar el boton atras o cambiar de pestana despues de mostrar resultados de busqueda del administrador de archivos
-* `Corrección` Problema por el que la interfaz no se actualizaba automaticamente tras eliminar carpetas de proyecto en el administrador de archivos
 * `Corrección` Problema por el que la aplicacion podia fallar cuando los elementos de la lista del panel de tareas cambiaban con frecuencia
 * `Corrección` Problema por el que el color del primer plano de la barra de navegacion podia comportarse de forma anomala con el modo nocturno al usar navegacion gestual de "tres botones"
 * `Corrección` Problema por el que el cuadro de dialogo de informacion de tipo de archivo APK podia no obtener el nombre de la aplicacion ni la informacion del SDK
 * `Corrección` Problema por el que, en modo cliente, al desconectar y volver a conectar en poco tiempo tras una conexion, aparecia un tiempo de espera de handshake y resultaba dificil reconectar
 * `Corrección` Problema por el que, en modo cliente, operaciones como rotar la pantalla o cambiar el idioma, que recreaban la Activity, hacian que AutoJs6 reconstruyera siempre la conexion
-* `Corrección` Problema por el que, en modo servidor, operaciones como rotar la pantalla o cambiar el idioma, que recreaban la Activity, hacian que la consola de VSCode dejara de mostrar registros _[`issue #385`](http://issues.autojs6.com/385)_
 * `Corrección` Problema por el que, al conectarse al plugin de VSCode de varias formas al mismo tiempo, la cantidad de registros impresos podia multiplicarse
 * `Corrección` Problema por el que la generacion de codigo en la pagina de analisis de diseño podia fallar con controles de coleccion (correccion tentativa) _[`issue #328`](http://issues.autojs6.com/328)_
 * `Corrección` Problema por el que el interruptor "Usar la tecla 'Bajar volumen' para controlar la grabacion" no funcionaba en la pagina de configuracion _[`issue #480`](http://issues.autojs6.com/480)_
-* `Corrección` Problema por el que los valores de coordenadas en archivos de codigo generados por la grabacion de scripts podian no coincidir con los pixeles reales de la pantalla _[`issue #480`](http://issues.autojs6.com/480)_
+* `Corrección` Problema por el que el interruptor "Mostrar sobre otras aplicaciones" en dispositivos Xiaomi podia abrir una pagina de configuracion incorrecta
+* `Corrección` Las coordenadas del código generado al grabar scripts podían no coincidir con los píxeles reales de la pantalla _[`issue #480`](http://issues.autojs6.com/480)_
 * `Corrección` Problema por el que la primera accion en los archivos de codigo generados por grabacion de scripts (como tocar o deslizar) siempre era ignorada
 * `Corrección` Problema por el que operar archivos en segundo plano desde el dialogo flotante "Ejecutar script" podia provocar un fallo de la aplicacion
 * `Corrección` Problema por el que el estado del boton flotante podia restablecerse al volver a entrar en la pagina principal tras finalizar el ciclo de vida de la Activity principal
-* `Corrección` Problema por el que el interruptor "Mostrar sobre otras aplicaciones" en dispositivos Xiaomi podia abrir una pagina de configuracion incorrecta
 * `Corrección` Problema por el que, despues de cancelar el proceso de descarga de actualizaciones, los paquetes de red seguian descargandose en segundo plano (correccion tentativa)
 * `Corrección` Problema por el que la tarea Rebuild Project no podia completarse correctamente cuando se habilitaba la opcion isCleanup[Paddle/Rapid]Ocr en las herramientas de compilacion
 * `Mejora` Funciones relacionadas con Paddle OCR (PP-OCRv3) modularizado _[`issue #334`](http://issues.autojs6.com/334)_ _[`issue #331`](http://issues.autojs6.com/331)_ _[`issue #325`](http://issues.autojs6.com/325)_
 * `Mejora` Mejora de compatibilidad del metodo runtime.loadJar (by [LYS86](https://github.com/LYS86)) _[`pr #475`](http://pr.autojs6.com/475)_
 * `Mejora` Mejora de cierta compatibilidad del metodo ui.getStatusBarHeight/propiedad statusBarHeight (getter)
 * `Mejora` Metodos como console.log admiten mostrar informacion detallada al imprimir objetos globales (images, app, ocr, etc.)
+* `Mejora` Los métodos de consola omiten parte de los datos gigantes según los límites para reducir el tiempo de impresión
+* `Mejora` El valor inicial de la cuenta atrás de la consola flotante aumenta de 6 a 9 segundos
+* `Mejora` La implementación de la consola flotante utiliza procesamiento sin bloqueos y colas para mejorar la eficiencia y el éxito de la configuración
+* `Mejora` Las API de color de fondo de la consola flotante (transparencia/tinte/color base) se ajustan mejor a las pautas Android _[`issue #458`](http://issues.autojs6.com/458)_
 * `Mejora` El metodo dialogs.build admite parametros de opcion nativos de MaterialDialog.Builder
 * `Mejora` El metodo dialogs.build admite coincidencia flexible de cadenas para los parametros de opcion animation/linkify
-* `Mejora` Mejora de estabilidad y coherencia al obtener orientacion de pantalla y datos de ancho/alto mediante device.rotation/rotation/width/height
+* `Mejora` Mejoradas la estabilidad y coherencia de las propiedades device.rotation/orientation/width/height al obtener orientación y dimensiones de pantalla
 * `Mejora` Mejora de eficiencia de ejecucion y compatibilidad de metodos como app.launchDual/startDualActivity
 * `Mejora` android.graphics.Paint#setColor admite analizar correctamente parametros de color como ColorInt/ColorHex/ColorName
 * `Mejora` Los mensajes de excepcion de tipos de argumentos en metodos relacionados con modulos integrados agregan informacion resumida de tipos
-* `Mejora` Los modulos integrados (dayjs/cheerio/dayjs/i18n) dejan de usar modo de ejecucion de script y adoptan carga diferida global
-* `Mejora` Al imprimir datos enormes con metodos relacionados con la consola, se omite adecuadamente parte del contenido segun limites superiores para reducir el tiempo de impresion
-* `Mejora` El valor inicial de la cuenta regresiva de la ventana flotante de consola aumenta de 6 a 9 segundos
-* `Mejora` La implementacion interna de la ventana flotante de consola adopta procesamiento sin bloqueos y en cola para mejorar la eficiencia y la tasa de exito al establecer parametros
-* `Mejora` Las API relacionadas con el color de fondo de la ventana flotante de consola (transparencia/tinte/color base) se ajustan mejor a las normas de diseño de Android _[`issue #458`](http://issues.autojs6.com/458)_
+* `Mejora` Los módulos integrados (dayjs/cheerio/i18n) utilizan carga diferida global en lugar de ejecución como scripts
 * `Mejora` Se optimiza el momento de cierre del menu al tocar elementos tras expandir el boton flotante del administrador de archivos
 * `Mejora` El administrador de archivos/panel de tareas admite mostrar informacion estadistica de cantidad de archivos/tareas
 * `Mejora` Cuando falla el guardado en el editor de codigo, se guarda automaticamente como borrador y admite guardar como archivo nuevo
@@ -1006,7 +562,7 @@
 * `Mejora` Uso de [Toolchain](https://docs.gradle.org/current/userguide/toolchains.html) en lugar de sourceCompatibility/targetCompatibility para reducir diferencias del entorno de compilacion
 * `Dependencia` Expandable Layout modularizado version 1.6.0
 * `Dependencia` Expandable RecyclerView modularizado version 3.0.0-RC1
-* `Dependencia` Recyclerview Flexible Divider modularizado version 1.4.0
+* `Dependencia` Modularizado RecyclerView Flexible Divider versión 1.4.0
 * `Dependencia` Root Shell localizado version 1.6
 * `Dependencia` Se agrega AndroidX Activity (KTX) version 1.12.2
 * `Dependencia` Se agrega AndroidX Core (KTX) version 1.15.0
@@ -1023,7 +579,7 @@
 * `Dependencia` Actualizacion de AndroidX Room version 2.7.1 -> 2.7.2
 * `Dependencia` Actualizacion de AndroidX WebKit version 1.13.0 -> 1.14.0
 * `Dependencia` Actualizacion de Material Progressbar version 1.4.2 -> 1.6.1
-* `Dependencia` Actualizacion de Apache Commons version 3.16.0 -> 3.18.0
+* `Dependencia` Actualizado Apache Commons Lang3 versión 3.16.0 -> 3.18.0
 * `Dependencia` Actualizacion de Retrofit2 Retrofit version 2.11.0 -> 2.12.0
 * `Dependencia` Actualizacion de Retrofit2 Converter Gson version 2.11.0 -> 2.12.0
 * `Dependencia` Actualizacion de Retrofit2 RxJava2 version 2.11.0 -> 2.12.0
@@ -1031,7 +587,7 @@
 * `Dependencia` Actualizacion de Gson version 2.11.0 -> 2.13.1
 * `Dependencia` Actualizacion de ARSCLib version 1.3.1 -> 1.3.5
 * `Dependencia` Actualizacion de Jsoup version 1.19.1 -> 1.20.1
-* `Dependencia` Actualizacion de Junit Jupiter version 5.10.3 -> 5.13.0
+* `Dependencia` Actualizado JUnit Jupiter versión 5.10.3 -> 5.13.0
 * `Dependencia` Actualizacion de OpenCC version 1.2.0 -> 1.2.2
 * `Dependencia` Se elimina Android Support Annotation v7 version 28.0.0
 * `Dependencia` Se elimina Android Support AppCompat v7 version 28.0.0
@@ -1047,36 +603,36 @@
 * `Corrección` Parte del contenido de algunas páginas oculto por la barra de navegación lateral al rotar la pantalla a horizontal
 * `Corrección` Área de coloreado de fondo de la barra de estado incompleta en algunas páginas bajo Android 15 _[`issue #398`](http://issues.autojs6.com/398)_
 * `Corrección` El editor de código podría escribir archivos con una codificación de confianza insuficiente causando errores de decodificación (arreglo tentativa)
-* `Mejora` Mejorada la adaptabilidad de diseño en las páginas de Aplicación y Desarrollador y eliminadas categorías de diseño innecesarias
-* `Mejora` En README.md, sección de compilación, añadidas varias formas para facilitar la localización de la página de configuración del objetivo _[`issue #404`](http://issues.autojs6.com/404)_
+* `Mejora` Mejorada la adaptación del diseño de Acerca de la aplicación y el desarrollador, eliminando categorías innecesarias
+* `Mejora` La sección de compilación de README.md incluye cómo localizar la página de ajustes _[`issue #404`](http://issues.autojs6.com/404)_
 * `Dependencia` Añadido AndroidX ConstraintLayout versión 2.2.1
 
 # v6.6.3
 
 ###### 2025/05/27
 
-* `Nuevo` Función de historial de versiones: ver registros de cambios multilingües y estadísticas
+* `Nuevo` Historial de versiones para consultar registros multilingües y estadísticas
 * `Nuevo` Método timers.keepAlive (ahora global) para mantener activo el script
 * `Nuevo` Métodos de escucha de eventos como engines.on('start/stop/error', callback) para eventos globales del motor
 * `Nuevo` Método images.detectMultiColors para verificación de colores multipunto _[`issue #374`](http://issues.autojs6.com/374)_
 * `Nuevo` Métodos images.matchFeatures/detectAndComputeFeatures: búsqueda de imágenes a resolución completa (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
 * `Nuevo` Método images.compressToBytes para comprimir una imagen y generar un arreglo de bytes
-* `Nuevo` Método images.downsample para submuestreo de píxeles y creación de un nuevo ImageWrapper
+* `Nuevo` Método images.downsample para reducir la resolución y devolver un nuevo objeto ImageWrapper
 * `Nuevo` Método ui.keepScreenOn para mantener la pantalla encendida cuando la página UI está en foco
 * `Nuevo` Propiedad ui.root (getter) para obtener el nodo "contenedor raíz del contenido de la ventana" del layout UI
-* `Nuevo` El elemento webview admite diseños de páginas web basados en JsBridge (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) [ver Código de ejemplo > Diseño > HTML interactivo / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Nuevo` El elemento webview admite diseños web basados en JsBridge (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (consulta: Ejemplos > Diseño > HTML interactivo/Vue2 + Vant (SFC)) _[`issue #281`](http://issues.autojs6.com/281)_
 * `Nuevo` El inspector de diseño permite ocultar controles (por [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `Corrección` El contenido de la documentación en línea en la pestaña Documentos y la actividad Documentos podía quedar cubierto por la barra de navegación del sistema
 * `Corrección` En algunas páginas, al pulsar botones de la Toolbar se podía activar por error el evento de clic en el título
 * `Corrección` En algunos dispositivos, las líneas en blanco del editor de código mostraban cuadros; corrección provisional
 * `Corrección` El cuadro de diálogo del selector de colores en los ajustes de color de tema podía apilarse infinitamente
+* `Corrección` El color de fondo de la barra de estado en algunas páginas de Android 15 no seguía el color de tema de forma dinámica
 * `Corrección` La tecla de subir volumen no detenía todos los scripts cuando el servicio de accesibilidad estaba desactivado
 * `Corrección` Superposición del teclado IME al editar contenido de difusión personalizado en la página de tareas programadas
 * `Corrección` Los controles dentro de elementos webview no podían activar correctamente el teclado en pantalla
 * `Corrección` El diálogo de información de APK podía no obtener el nombre de la app ni la información del SDK
 * `Corrección` El ejemplo del administrador de archivos podía no cargar automáticamente el contenido de subcarpetas al acceder a un directorio de proyecto
 * `Corrección` El contenido superior en modo UI de Android 15 quedaba cubierto por la barra de estado
-* `Corrección` El color de fondo de la barra de estado en algunas páginas de Android 15 no seguía el color de tema de forma dinámica
 * `Corrección` El módulo dialogs no podía usar la propiedad customView _[`issue #364`](http://issues.autojs6.com/364)_
 * `Corrección` El parámetro de expresión de dialogs.input podía no devolver el resultado de ejecución
 * `Corrección` El uso de JavaAdapter provocaba desbordamiento de pila de ClassLoader _[`issue #376`](http://issues.autojs6.com/376)_
@@ -1095,8 +651,9 @@
 * `Mejora` Nuevos diseños horizontal y de pantalla pequeña para las páginas Acerca de la app y Desarrollador
 * `Mejora` Las páginas de ajustes ofrecen la opción "Usar valor predeterminado" en los diálogos
 * `Mejora` El botón flotante del administrador de archivos se oculta automáticamente al pulsar fuera
+* `Mejora` La carga asíncrona mejora la fluidez de la lista en el administrador de archivos
 * `Mejora` El formateador de código admite operadores `??`, `?.`, `??=`
-* `Mejora` El editor de código admite la lectura y escritura de archivos con codificaciones GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc
+* `Mejora` El editor permite leer y escribir archivos GB18030, UTF-16 (LE/BE), Shift_JIS y otras codificaciones
 * `Mejora` El editor de código ahora muestra información detallada del archivo (ruta/codificación/salto de línea/total de bytes y caracteres, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
 * `Mejora` Se añaden mensajes de error para acciones de intent (editar / ver / instalar / enviar / reproducir, etc.)
 * `Mejora` El atributo url de webview admite rutas relativas
@@ -1104,7 +661,6 @@
 * `Mejora` images.save permite comprimir archivos PNG al usar el parámetro quality _[`issue #367`](http://issues.autojs6.com/367)_
 * `Mejora` Se permite limpiar registros de actualizaciones ignoradas y direcciones de conexión en modo cliente
 * `Mejora` La información de actualización de versión se muestra en varios idiomas según el idioma actual
-* `Mejora` La carga asíncrona mejora la fluidez de la lista en el administrador de archivos
 * `Mejora` Mejorado el contenido y formato de los mensajes de excepción de scripts en la consola
 * `Mejora` El código de ejemplo puede restablecer carpetas a su contenido inicial
 * `Mejora` Mayor eficiencia al comprobar la firma de APK
@@ -1125,11 +681,11 @@
 
 ###### 2025/04/16
 
-* `Nuevo` Métodos como ui.statusBarAppearanceLight, statusBarAppearanceLightBy y navigationBarColor, etc
+* `Nuevo` Métodos ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor y otros para configurar estilos de las barras de estado y navegación
 * `Nuevo` Atributo ui.statusBarHeight (getter), utilizado para obtener la altura de la barra de estado _[`issue #357`](http://issues.autojs6.com/357)_
 * `Nuevo` Método images.flip para voltear imágenes _[`issue #349`](http://issues.autojs6.com/349)_
 * `Nuevo` Se añadió la opción 'extensión de archivo' en la página de configuración
-* `Nuevo` La página de configuración del color del tema añade soporte para nuevos diseños (agrupación, posicionamiento, búsqueda, historial, mejora del selector de color, etc.)
+* `Nuevo` La página de colores del tema admite agrupación, localización, búsqueda, historial y mejoras de la paleta
 * `Corrección` Problema en el que el color de fondo de la barra de estado de Android 15 no coincide con el color del tema
 * `Corrección` Problema en el que el método plugins.load no carga correctamente los plugins _[`issue #290`](http://issues.autojs6.com/290)_
 * `Corrección` Problema en el que la biblioteca dx no funciona correctamente en Android 7.x _[`issue #293`](http://issues.autojs6.com/293)_
@@ -1139,10 +695,10 @@
 * `Corrección` Problema en el que el método colors.pixel no acepta parámetros con imágenes de un solo canal _[`issue #350`](http://issues.autojs6.com/350)_
 * `Corrección` Problema en el que los métodos engines.execScript / execScriptFile asignan de forma anómala el directorio de trabajo predeterminado al ejecutar scripts _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
 * `Corrección` Problema en el que floaty.window / floaty.rawWindow no puede ejecutarse en subprocesos
-* `Corrección` Problema en el que floaty.getClip puede no obtener correctamente el contenido del portapapeles _[`issue #341`](http://issues.autojs6.com/341)_
+* `Corrección` floaty.getClip podía no obtener correctamente el contenido del portapapeles _[`issue #341`](http://issues.autojs6.com/341)_
 * `Corrección` Problema en el que el retorno de ui.inflate pierde métodos de prototipo como attr, on y click
 * `Corrección` Problema en el que se produce un enlace incorrecto del contexto de ámbito al utilizar la sintaxis XML para usar una expresión JavaScript como valor de atributo _[`issue #319`](http://issues.autojs6.com/319)_
-* `Corrección` Problema en el que algunas llamadas a métodos, al producir excepciones, no son capturadas por bloques try..catch _[`issue #345`](http://issues.autojs6.com/345)_
+* `Corrección` Las excepciones de algunos métodos no podían capturarse con bloques try/catch _[`issue #345`](http://issues.autojs6.com/345)_
 * `Corrección` Problema en el que la generación de código en la página de análisis de layouts puede provocar que la aplicación se bloquee _[`issue #288`](http://issues.autojs6.com/288)_
 * `Corrección` Problema en el que las aplicaciones empaquetadas no pueden utilizar correctamente el módulo shizuku _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
 * `Corrección` Problema en el que el editor de código, al saltar al final de una línea, puede mover el cursor al inicio de la siguiente línea
@@ -1176,7 +732,7 @@
 * `Dependencia` Actualizado la versión de Android SDK de 34 a 35
 * `Dependencia` Actualizado Gradle de 8.12 a 8.14-rc-1
 * `Dependencia` Actualizado Rhino de 1.8.0-SNAPSHOT a 1.8.1-SNAPSHOT
-* `Dependencia` Actualizado AndroidX Recyclerview de 1.3.2 a 1.4.0
+* `Dependencia` Actualizado AndroidX RecyclerView versión 1.3.2 -> 1.4.0
 * `Dependencia` Actualizado AndroidX Room de 2.6.1 a 2.7.0
 * `Dependencia` Actualizado AndroidX WebKit de 1.12.1 a 1.13.0
 * `Dependencia` Actualizado Pinyin4j de 2.5.0 a 2.5.1
@@ -1187,8 +743,8 @@
 
 * `Nuevo` Módulo Pinyin para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin))
 * `Nuevo` Módulo Pinyin4j para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin4j))
-* `Nuevo` Métodos UiObject#isSimilar y UiObjectCollection#isSimilar para determinar si un control o una colección de controles son similares
-* `Nuevo` Método global "currentComponent", utilizado para obtener el nombre del componente activo actual
+* `Nuevo` Métodos UiObject#isSimilar y UiObjectCollection#isSimilar para comprobar similitud de controles o colecciones
+* `Nuevo` Método global currentComponent para obtener el nombre del componente activo
 * `Corrección` Problema donde no se podía compilar correctamente el proyecto en determinados entornos debido a una reversión a una versión anterior
 * `Corrección` Excepción de "valor no primitivo" que puede ocurrir al llamar a métodos inexistentes
 * `Corrección` Problema donde los accesos directos de scripts no se podían agregar correctamente en algunos dispositivos (arreglo tentativa) _[`issue #221`](http://issues.autojs6.com/221)_
@@ -1196,14 +752,14 @@
 * `Corrección` Problema donde los selectores no admitían parámetros del tipo ConsString _[`issue #277`](http://issues.autojs6.com/277)_
 * `Corrección` Problema donde las instancias de UiObjectCollection carecían de métodos y propiedades propios
 * `Mejora` La pagina de configuracion de empaquetado ahora admite configuracion de firma, gestion de keystore y ajustes de permisos (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
+* `Mejora` Convertir automáticamente chino simplificado a Pinyin (incluyendo caracteres con múltiples tonos) para los sufijos de nombres de paquetes generados al empaquetar archivos individuales
 * `Mejora` Mejorada la precisión en la identificación del nombre del paquete y de la actividad actual de la ventana flotante (Prioridad: Shizuku > Root > A11Y)
 * `Mejora` Mejorada la precisión en la identificación de currentPackage y currentActivity (Prioridad: Shizuku > Root > A11Y)
-* `Mejora` Restaurar la capacidad de seleccionar el contenido del texto de entradas individuales en la ventana de actividad del registro mediante doble clic o pulsación larga _[`issue #280`](http://issues.autojs6.com/280)_
+* `Mejora` Restaurada la selección de texto de entradas individuales del registro mediante doble pulsación o pulsación prolongada _[`issue #280`](http://issues.autojs6.com/280)_
 * `Mejora` Recuperar la mayor cantidad de información crítica posible para proyectos de scripts cuando el archivo project.json está dañado
-* `Mejora` Convertir automáticamente chino simplificado a Pinyin (incluyendo caracteres con múltiples tonos) para los sufijos de nombres de paquetes generados al empaquetar archivos individuales
 * `Mejora` Soporte para argumentos negativos en los métodos UiSelector#findOnce y UiSelector#find
-* `Mejora` Se mejoró la adaptabilidad de los métodos app.startActivity/startDualActivity
 * `Mejora` Mayor soporte para formas abreviadas de prefijos de nombres de paquetes en selectores relacionados con elementos UI y className (por ejemplo, RecyclerView, Snackbar, etc.)
+* `Mejora` Se mejoró la adaptabilidad de los métodos app.startActivity/startDualActivity
 * `Mejora` Sincronizar el código más reciente del upstream del motor Rhino y adaptarlo al proyecto existente
 * `Dependencia` Agregado Pinyin4j versión 2.5.0
 * `Dependencia` Agregado Jieba Analysis versión 1.0.3-SNAPSHOT (modificada)
@@ -1215,35 +771,39 @@
 
 * `Sugerencia` Los módulos integrados se reescriben en Kotlin para mejorar la eficiencia de ejecución del script, pero se necesitan mejoras iterativas
 * `Sugerencia` El archivo init.js integrado está vacío por defecto, lo que permite a los desarrolladores ampliar los módulos integrados o montar módulos externos.
-* `Nuevo` Módulo Axios / Módulo Cheerio (Ref a [AutoX](https://github.com/kkevsekk1/AutoX))
-* `Nuevo` Módulo SQLite para operaciones simples en bases de datos SQLite (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) (Consulte la documentación del proyecto > [SQLite](https://docs.autojs6.com/#/sqlite))
+* `Nuevo` Módulos axios/cheerio para solicitudes de red y análisis HTML (Ref to [AutoX](https://github.com/kkevsekk1/AutoX))
+* `Nuevo` Módulo sqlite para operar bases de datos SQLite (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (consulta: Documentación del proyecto > [SQLite](https://docs.autojs6.com/#/sqlite))
 * `Nuevo` Módulo MIME para procesamiento y análisis de cadenas de tipos MIME (Consulte la documentación del proyecto > [MIME](https://docs.autojs6.com/#/mime))
-* `Nuevo` Módulo Nanoid para generación de ID de cadenas (Ref a [ai/nanoid](https://github.com/ai/nanoid))
+* `Nuevo` Módulo nanoid para generar identificadores de cadena (Ref to [ai/nanoid](https://github.com/ai/nanoid))
 * `Nuevo` Módulo Sysprops para obtener datos de configuración del entorno de ejecución (Consulte la documentación del proyecto > [Propiedades del sistema](https://docs.autojs6.com/#/sysprops))
 * `Nuevo` El módulo OCR admite el motor [Rapid OCR](https://github.com/RapidAI/RapidOCR)
 * `Nuevo` El análisis de diseño admite el cambio de ventanas (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método auto.clearCache admite la limpieza de cachés de control (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método threads.pool admite la aplicación simple de grupos de hilos (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método images.matchTemplate admite el parámetro de opción useTransparentMask, compatible con la búsqueda de imágenes con transparencia (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método images.requestScreenCaptureAsync se usa para solicitar permisos de captura de pantalla de manera asíncrona en el modo UI (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método images.requestScreenCapture admite el parámetro de opción isAsync, compatible con la captura de pantalla de forma asíncrona (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` images.on('screen_capture', callback) y otros métodos de escucha de eventos admiten la escucha de eventos de disponibilidad de captura de pantalla (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método images.stopScreenCapture soporta la liberación activa de recursos relacionados con la aplicación de captura de pantalla (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` Los métodos Images.psnr/mse/ssim/mssim/hist/ncc y images.getSimilarity se utilizan para obtener métricas de similitud de imágenes
+* `Nuevo` Método auto.clearCache para limpiar la caché de controles (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Nuevo` Método threads.pool para crear y utilizar grupos de hilos (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Nuevo` images.matchTemplate admite useTransparentMask para buscar imágenes con transparencia (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Nuevo` Método images.requestScreenCaptureAsync para solicitar captura asíncronamente en modo UI (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Nuevo` images.requestScreenCapture admite isAsync para obtener capturas de pantalla asíncronamente (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Nuevo` images.on('screen_capture', callback) y otros métodos permiten escuchar la disponibilidad de capturas de pantalla (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Nuevo` Método images.stopScreenCapture para liberar explícitamente recursos de la solicitud de captura (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Nuevo` Los métodos images.psnr/mse/ssim/mssim/hist/ncc y images.getSimilarity se utilizan para obtener métricas de similitud de imágenes
 * `Nuevo` El método images.isGrayscale se utiliza para determinar si una imagen es en escala de grises
-* `Nuevo` El método images.invert se utiliza para la conversión de imagen en negativo
+* `Nuevo` Método images.invert para invertir los colores de imágenes
 * `Nuevo` Los métodos s13n.point/time se utilizan para estandarizar objetos de punto y objetos de duración (Consulte la documentación del proyecto > [Normalización](https://docs.autojs6.com/#/s13n))
-* `Nuevo` Los métodos gravity, touchThrough, backgroundTint del módulo console (Consulte la documentación del proyecto > [Consola](https://docs.autojs6.com/#/console))
-* `Nuevo` Los métodos Mathx.randomInt/Mathx.randomFloat se utilizan para devolver enteros aleatorios o números de coma flotante aleatorios dentro de un rango especificado
+* `Nuevo` Métodos de console relacionados con gravity (alineación), touchThrough (pulsación a través) y backgroundTint (tinte del fondo) (consulta: Documentación del proyecto > [Consola](https://docs.autojs6.com/#/console))
+* `Nuevo` Métodos Mathx.randomInt/randomFloat para obtener enteros o números flotantes aleatorios dentro del intervalo indicado
 * `Nuevo` Los métodos app.launchDual/startDualActivity se utilizan para manejar el lanzamiento dual de aplicaciones (Requiere permisos de Shizuku o Root) (Experimental)
 * `Nuevo` El método app.kill se utiliza para detener forzosamente una aplicación (Requiere permisos de Shizuku o Root)
-* `Nuevo` El método floaty.getClip se utiliza para obtener indirectamente el contenido del portapapeles mediante una ventana flotante
+* `Nuevo` Método floaty.getClip para obtener el portapapeles mediante el enfoque de una ventana flotante
 * `Corrección` Fuga de memoria en el View Binding de subclases de Fragment (por ejemplo, [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48))
 * `Corrección` Fuga de memoria de instancia en clases como [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21)
 * `Corrección` Problema que causa que la aplicación se bloquee al solicitar permisos de captura de pantalla en Android 14 (por [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
 * `Corrección` Problema que causa que la aplicación se bloquee al iniciar el servicio en primer plano en Android 14
 * `Corrección` Problema con el botón de ejecución en el editor de código que no se enciende correctamente en Android 14
+* `Corrección` Excepción 'FAILED ASSERTION' en la función de depuración del editor de código
+* `Corrección` Problema con la imposibilidad de volver a depurar adecuadamente después de cerrar el editor durante el proceso de depuración del editor de código
+* `Corrección` Problema de omisión potencial de caracteres finales al saltar al final de la línea en el editor de código
 * `Corrección` La aplicación puede no funcionar correctamente después de empaquetar debido a la falta de archivos de biblioteca necesarios _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
+* `Corrección` Problema con la aplicación empaquetada que no puede utilizar adecuadamente el módulo opencc
 * `Corrección` Bloqueo de la aplicación cuando se edita el proyecto debido a recursos de icono especificados que faltan _[`issue #203`](http://issues.autojs6.com/203)_
 * `Corrección` Incapacidad para usar parámetros adecuadamente para obtener recursos de captura de pantalla de orientación de pantalla especificada al solicitar permisos de captura de pantalla
 * `Corrección` Problema con algunos dispositivos que no pueden agregar accesos directos de script correctamente (Reparación de prueba) _[`issue #221`](http://issues.autojs6.com/221)_
@@ -1252,61 +812,57 @@
 * `Corrección` El método random(min, max) puede tener resultados fuera de límites
 * `Corrección` Problema donde el tipo de parámetro de resultado de los métodos pickup no puede pasar adecuadamente matrices vacías
 * `Corrección` Problema donde el rectángulo de control obtenido por UiObject#bounds() puede ser modificado inadvertidamente, rompiendo su inmutabilidad
+* `Corrección` El inicio automático del servicio de accesibilidad puede encontrar problemas de servicio anormales (Reparación de prueba)
 * `Corrección` Problema con elementos de texto/botón/entrada donde el texto que contiene comillas dobles de ancho medio no puede ser analizado correctamente
 * `Corrección` Problema con elementos de text/textswitcher donde la funcionalidad del atributo autoLink falla
 * `Corrección` Problema con diferentes scripts que comparten erróneamente el mismo objeto ScriptRuntime
-* `Corrección` Problema con variables globales HEIGHT y WIDTH perdiendo propiedades Getter generadas dinámicamente
+* `Corrección` Las variables globales HEIGHT y WIDTH perdían sus propiedades getter dinámicas
 * `Corrección` Problema con un alto tiempo de inicio potencial causado por la carga de RootShell al iniciar un script
-* `Corrección` Problema con la configuración del color de fondo de la ventana flotante de la consola que conduce a la pérdida del estilo de redondeo rectangular
-* `Corrección` El inicio automático del servicio de accesibilidad puede encontrar problemas de servicio anormales (Reparación de prueba)
+* `Corrección` Configurar el color de fondo de la consola flotante eliminaba el estilo rectangular con esquinas redondeadas
+* `Corrección` Abrir la página de registros desde la actividad principal podía producir parpadeos
 * `Corrección` Problema con el desencadenante de ViewPager al deslizar el control WebView a la izquierda o derecha en la página de documentos de la página principal
 * `Corrección` Problema donde el administrador de archivos no puede reconocer extensiones de archivo que contienen letras mayúsculas
 * `Corrección` El administrador de archivos puede no reconocer automáticamente el proyecto al ingresar por primera vez al directorio del proyecto
 * `Corrección` Problema donde la página del administrador de archivos no puede refrescarse automáticamente después de eliminar la carpeta
 * `Corrección` Problema con la clasificación de archivos y carpetas en el administrador de archivos donde los nombres de letra inicial ASCII se colocan detrás
-* `Corrección` Excepción 'FAILED ASSERTION' en la función de depuración del editor de código
-* `Corrección` Problema con la imposibilidad de volver a depurar adecuadamente después de cerrar el editor durante el proceso de depuración del editor de código
-* `Corrección` Problema de omisión potencial de caracteres finales al saltar al final de la línea en el editor de código
-* `Corrección` Problema con la pantalla parpadeante al iniciar la página de actividad de registro en la página de actividad principal
-* `Corrección` Problema con la aplicación empaquetada que no puede utilizar adecuadamente el módulo opencc
 * `Mejora` Se mejoro la experiencia del aviso al tocar el control "ABI no disponible" en la pagina de configuracion de empaquetado
+* `Mejora` Al empaquetar un archivo individual se completa automáticamente un nombre de paquete normalizado y se avisa del filtrado de caracteres inválidos
+* `Mejora` El paquete de archivo único admite la configuración automática del ícono y el incremento automático del número de versión y del nombre de versión basado en la misma aplicación de nombre de paquete instalada
+* `Mejora` El archivo de configuración del paquete admite la opción abis/libs para especificar la arquitectura ABI incluidos por defecto y las bibliotecas
+* `Mejora` Admite avisos de mensajes relevantes cuando las opciones abis/libs del archivo de configuración del paquete son inválidas o no están disponibles
 * `Mejora` Admite el uso de Shizuku para controlar el interruptor de visualización 'Ubicación del puntero'
 * `Mejora` Admite el uso de Shizuku para controlar los interruptores de permisos 'Medios de proyección' y 'Modificar configuraciones seguras'
-* `Mejora` Automator.gestureAsync/gesturesAsync admite parámetros de función de devolución de llamada
+* `Mejora` automator.gestureAsync/gesturesAsync admite parámetros de función de devolución de llamada
 * `Mejora` El módulo tasks utiliza una forma síncrona para las operaciones de base de datos para evitar inconsistencias potenciales de acceso a datos
 * `Mejora` El modo de ejecución de script admite parámetros de separación de modo con símbolo de tubería (por ejemplo, comenzando con `"ui|auto";`)
 * `Mejora` El modo de ejecución de script admite comillas simples y comillas invertidas y permite omitir puntos y comas (por ejemplo, comenzando con `'ui';` o `'ui'`)
 * `Mejora` El modo de ejecución de script admite la importación rápida de módulos de extensión integrados como axios, cheerio y dayjs (por ejemplo, comenzando con `"axios";`)
 * `Mejora` El modo de ejecución de script admite parámetros de modo x o jsox para habilitar rápidamente los módulos de extensión de objetos integrados de JavaScript (por ejemplo, comenzando con `"x";`)
-* `Mejora` Los atributos src y path del elemento img admiten rutas relativas locales (por ejemplo, `<img src="a.png"` />)
+* `Mejora` Los atributos src y path de img admiten rutas relativas locales (por ejemplo, `<img src="a.png" />`)
 * `Mejora` El editor de código admite la determinación inteligente de la ubicación de inserción al importar clases Java y nombres de paquetes
 * `Mejora` El módulo images admite el uso de rutas directamente como parámetros de imagen
 * `Mejora` importPackage admite parámetros de cadena
-* `Mejora` En el modo cliente, la dirección IP admite la importación desde el portapapeles con reconocimiento inteligente y permite la conversión inteligente de la tecla de espacio
+* `Mejora` La dirección IP en modo cliente admite detección inteligente al importar del portapapeles y conversión inteligente de la tecla de espacio
 * `Mejora` El administrador de archivos admite la selección de prefijos predeterminados al crear nuevos archivos y genera automáticamente el sufijo numérico apropiado
 * `Mejora` El administrador de archivos informa específicamente sobre el mensaje de excepción al ejecutar el proyecto _[`issue #268`](http://issues.autojs6.com/268)_
 * `Mejora` El administrador de archivos admite más tipos y muestra símbolos de icono correspondientes (admite más de 800 tipos de archivos)
 * `Mejora` Los tipos de archivos editables (jpg/doc/pdf/...) en el administrador de archivos han añadido botones de edición
 * `Mejora` Los archivos APK en el administrador de archivos admiten la visualización de información básica, información de Manifesto y lista de permisos
 * `Mejora` Los archivos de medios de audio/video en el administrador de archivos admiten la visualización de información básica e información de MediaInfo
-* `Mejora` El paquete de archivo único admite el autocompletado de nombre de paquete estandarizado apropiado y el aviso de filtro de caracteres no válidos
-* `Mejora` El paquete de archivo único admite la configuración automática del ícono y el incremento automático del número de versión y del nombre de versión basado en la misma aplicación de nombre de paquete instalada
-* `Mejora` El archivo de configuración del paquete admite la opción abis/libs para especificar la arquitectura ABI incluidos por defecto y las bibliotecas
-* `Mejora` Admite avisos de mensajes relevantes cuando las opciones abis/libs del archivo de configuración del paquete son inválidas o no están disponibles
-* `Mejora` LeakCanary se excluye de la versión oficial para evitar un crecimiento innecesario
+* `Mejora` LeakCanary excluido de las versiones oficiales para reducir el tamaño del instalador
 * `Mejora` Todos los comentarios en inglés en el código fuente del proyecto vienen acompañados de traducciones al chino simplificado para mejorar la legibilidad
 * `Mejora` README y CHANGELOG admiten varios idiomas (Generado automáticamente por el script)
 * `Mejora` Mejorar la adaptabilidad de la versión del script de construcción de Gradle
 * `Dependencia` Incluir la versión 2.3.1 de MIME Util
 * `Dependencia` Incluir la versión 12.6 de Toaster
-* `Dependencia` Incluir la versión 10.3 de EasyWindow (para Toaster)
+* `Dependencia` Añadido EasyWindow (for Toaster) versión 10.3
 * `Dependencia` Actualización de versión de Gradle de 8.5 a 8.11.1
 * `Dependencia` Actualizar la versión 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT
 * `Dependencia` Actualizar la versión 1.10.0 de Android Material -> 1.12.0
 * `Dependencia` Actualizar la versión 1.7.0 de AndroidX Annotation -> 1.9.1
 * `Dependencia` Actualizar la versión 1.6.1 de AndroidX AppCompat -> 1.7.0
 * `Dependencia` Actualizar la versión 1.8.0 de AndroidX WebKit -> 1.12.1
-* `Dependencia` Actualizar la versión 3.13.0 de Apache Commons -> 3.16.0
+* `Dependencia` Actualizado Apache Commons Lang3 versión 3.13.0 -> 3.16.0
 * `Dependencia` Actualizar la versión 1.2.4 de ARSCLib -> 1.3.1
 * `Dependencia` Actualizar la versión 2.10.1 de Gson -> 2.11.0
 * `Dependencia` Actualizar la versión 2.13.3 de Jackson DataBind -> 2.13.4.2
@@ -1318,34 +874,34 @@
 * `Dependencia` Actualizar la versión 2.9.0 de Retrofit2 Retrofit -> 2.11.0
 * `Dependencia` Actualizar la versión 2.0.3 de Desugar JDK Libs -> 2.0.4
 * `Dependencia` Actualizar la versión 1.5.2 de Test Runner -> 1.6.2
-* `Dependencia` Actualizar la versión 5.10.0 de Junit Jupiter -> 5.10.3
+* `Dependencia` Actualizado JUnit Jupiter versión 5.10.0 -> 5.10.3
 * `Dependencia` Degradar la versión 5.0.0-alpha.11 de OkHttp3 -> 4.12.0
 
 # v6.5.0
 
 ###### 2023/12/02
 
-* `Nuevo` Módulo opencc (Consulte Documentación del proyecto > [Conversión China](https://docs.autojs6.com/#/opencc)) (Ref a [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
+* `Nuevo` Módulo opencc para convertir chino simplificado/tradicional y vocabulario regional (consulta: Documentación del proyecto > [Conversión de chino](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
 * `Nuevo` Métodos [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) y [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) agregados a UiSelector _[`issue #115`](http://issues.autojs6.com/115)_
 * `Nuevo` La pagina de configuracion de empaquetado ahora admite filtrado de ABI y bibliotecas (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
 * `Corrección` Problema de tamaño anormalmente grande del archivo empaquetado (Ref a [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
 * `Corrección` Problema en el que el paquete de la aplicación no muestra o imprime ciertos mensajes de error
 * `Corrección` Se corrigio un problema por el que podia mostrarse un icono vacio tras seleccionar el icono de la app en la pagina de configuracion de empaquetado
-* `Corrección` Problema de excepción de contexto no inicializado al incluir la biblioteca OCR de Google MLKit en el paquete
+* `Corrección` Excepción de contexto sin inicializar al incluir ML Kit OCR en aplicaciones empaquetadas
 * `Corrección` Problema de métodos inoperativos ocr.recognizeText/detect
 * `Corrección` Problema en el que algunos textos (como la página de registros) no coinciden con el idioma de configuración de la aplicación
 * `Corrección` Problema de desbordamiento de texto en el interruptor del cajón de la página de inicio en ciertos idiomas
 * `Corrección` Problema de servicios de accesibilidad que se cierran inmediatamente sin ningún mensaje en ciertos dispositivos _[`issue #181`](http://issues.autojs6.com/181)_
 * `Corrección` Problema de cierres inesperados al usar botones físicos en ciertos dispositivos después de activar el servicio de accesibilidad (solución tentativa) _[`issue #183`](http://issues.autojs6.com/183)_ _[`issue #186`](http://issues.autojs6.com/186#issuecomment-1817307790)_
 * `Corrección` Problema de funcionalidad anormal de pickup después de reiniciar el servicio de accesibilidad con auto(true) (solución tentativa) _[`issue #184`](http://issues.autojs6.com/184)_
+* `Corrección` Problema de uso inoperativo del servicio de accesibilidad en Android 7.x
 * `Corrección` Problema de cierre inesperado de la aplicación al arrastrar la ventana flotante creada por el módulo floaty (solución tentativa)
 * `Corrección` Problema de uso de parámetros abreviados en app.startActivity _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
 * `Corrección` Problema de conflicto de nombres con importClass que causa una excepción _[`issue #185`](http://issues.autojs6.com/185)_
-* `Corrección` Problema de uso inoperativo del servicio de accesibilidad en Android 7.x
 * `Corrección` Problema de uso inoperativo de runtime.loadJar/loadDex en Android 14 (solución tentativa)
 * `Corrección` Problema de inoperatibilidad de "análisis de rango de diseño" y "análisis de jerarquía de diseño" en el panel de configuraciones rápidas de Android _[`issue #193`](http://issues.autojs6.com/193)_
-* `Corrección` Problema de potencial ANR causado por la función de comprobación automática de actualizaciones (solución tentativa) _[`issue #186`](http://issues.autojs6.com/186)_
-* `Corrección` Problema en el gestor de archivos al regresar a la página de ruta de trabajo después de hacer clic en "hacia arriba" en la carpeta de ejemplo
+* `Corrección` Problema de potencial [ANR](https://developer.android.com/topic/performance/vitals/anr) causado por la función de comprobación automática de actualizaciones (solución tentativa) _[`issue #186`](http://issues.autojs6.com/186)_
+* `Corrección` Problema en el gestor de archivos al regresar a la página de ruta de trabajo después de hacer clic en "hacia arriba" en la carpeta de ejemplo _[`issue #129`](http://issues.autojs6.com/129)_
 * `Corrección` Problema de botón de reemplazo no visible en el editor de código al usar la función de reemplazo
 * `Corrección` Problema de cierre inesperado de la aplicación al mantener presionado el botón de borrar en el editor de código (solución tentativa)
 * `Corrección` Problema de panel de funciones rápidas del módulo que no se muestra correctamente al hacer clic en el botón fx en el editor de código
@@ -1355,10 +911,10 @@
 * `Mejora` La pagina de configuracion de empaquetado ahora admite usar la tecla ENTER del teclado virtual para mover el foco del cursor
 * `Mejora` La pagina de configuracion de empaquetado ahora admite tocar los titulos de ABI y de bibliotecas para alternar el estado de seleccionar todo
 * `Mejora` La pagina de configuracion de empaquetado ahora usa una seleccion predeterminada de ABI mas inteligente y agrega avisos para opciones no disponibles
-* `Mejora` El administrador de archivos ajusta la visualización de los elementos del menú según el tipo y las características de los archivos y carpetas
 * `Mejora` El menú de clic derecho en carpetas del administrador de archivos añade una opción para empaquetar aplicaciones
+* `Mejora` El administrador ajusta los menús según el tipo y las características de archivos y carpetas
 * `Mejora` Cuando los servicios de accesibilidad están habilitados pero funcionan incorrectamente, se refleja un estado de anomalía en el interruptor del cajón de la página de inicio de AutoJs6
-* `Mejora` La consola incluye información detallada de la pila al imprimir mensajes de error.
+* `Mejora` La consola adjunta trazas detalladas al imprimir errores
 * `Dependencia` Versión ARSCLib 1.2.4 adjunta
 * `Dependencia` Versión Flexbox 3.0.0 adjunta
 * `Dependencia` Versión OpenCC para Android 1.2.0 adjunta
@@ -1369,13 +925,13 @@
 ###### 2023/11/15
 
 * `Nuevo` El método dialogs.build admite el parámetro de opción inputSingleLine
-* `Nuevo` Método console.setTouchable _[`issue #122`](http://issues.autojs6.com/122)_
-* `Corrección` Problema de parámetros de área de no reconocimiento en ciertos métodos del módulo ocr _[`issue #162`](http://issues.autojs6.com/162)_ _[`issue #175`](http://issues.autojs6.com/175)_
+* `Nuevo` Método console.setTouchable para configurar si la consola flotante acepta toques _[`issue #122`](http://issues.autojs6.com/122)_
+* `Corrección` Algunos métodos ocr no reconocían el parámetro de región _[`issue #162`](http://issues.autojs6.com/162)_ _[`issue #175`](http://issues.autojs6.com/175)_
 * `Corrección` Problema de no obtención de detalles de versión al encontrar una nueva versión en Android 7.x
 * `Corrección` Problema de cierre inesperado de la aplicación al solicitar permisos de captura de pantalla en Android 14
 * `Corrección` Problema de cierre inesperado de la aplicación al alternar rápidamente el interruptor de "botón flotante" en el cajón de la página principal
 * `Corrección` Problema de botón flotante que todavía aparece después de reiniciar la aplicación tras cerrarlo con el menú
-* `Corrección` Problema de no efectividad para cambiar el idioma de AutoJs6 desde la página de configuraciones del sistema en Android 13 y superior
+* `Corrección` En Android 13+, el cambio de idioma de AutoJs6 desde los ajustes no surtía efecto
 * `Corrección` Problema de despliegue no automático de recursos de OpenCV al construir herramientas por primera vez
 * `Mejora` Uso del módulo bridges nativo para mejorar la eficiencia de ejecución de scripts (Ref a [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
 * `Mejora` Reestructuración del código relacionado con el servicio de accesibilidad para mejorar su estabilidad (experimental) _[`issue #167`](http://issues.autojs6.com/167)_
@@ -1400,7 +956,7 @@
 * `Corrección` Problema de uso de parámetros abreviados en app.sendBroadcast y app.startActivity
 * `Corrección` Problema de comportamiento anómalo en primeras invocaciones de métodos JsWindow#setPosition y similares del módulo floaty
 * `Mejora` Permisos relacionados con Termux añadidos para soportar llamada de Intent para ejecutar comandos ADB _[`issue #136`](http://issues.autojs6.com/136)_
-* `Mejora` Capacidad de reutilización de métodos body.string() y body.bytes() en objeto de respuesta del módulo http
+* `Mejora` Los objetos de respuesta http permiten llamar repetidamente a body.string/bytes
 * `Mejora` Soporte de empaquetado automático con GitHub Actions (por [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #158`](http://pr.autojs6.com/158)_
 * `Mejora` Adaptación del entorno de construcción a la plataforma Temurin
 * `Dependencia` Actualización de versión de Gradle de 8.4-rc-3 a 8.4
@@ -1412,36 +968,36 @@
 
 * `Nuevo` Soporte para Paddle Lite Engine en el módulo ocr (por [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
 * `Nuevo` Soporte de empaquetado de aplicaciones con plugins embebidos y externos (por [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
-* `Nuevo` Módulo WebSocket (Consulte Documentación del proyecto > [WebSocket](https://docs.autojs6.com/#/webSocketType))
-* `Nuevo` Módulos barcode y qrcode (Consulte Documentación del proyecto > [Código de Barras](https://docs.autojs6.com/#/barcode) / [Código QR](https://docs.autojs6.com/#/qrcode))
+* `Nuevo` Módulo WebSocket para comunicación WebSocket (consulta: Documentación del proyecto > [WebSocket](https://docs.autojs6.com/#/webSocketType))
+* `Nuevo` Módulos barcode/qrcode para reconocer códigos de barras y QR (consulta: Documentación del proyecto > [Códigos de barras](https://docs.autojs6.com/#/barcode) / [Códigos QR](https://docs.autojs6.com/#/qrcode))
 * `Nuevo` Módulo shizuku (Consulte Documentación del proyecto > [Shizuku](https://docs.autojs6.com/#/shizuku)) y permisos en el cajón de la página principal
-* `Nuevo` Métodos device.rotation / device.orientation, entre otros
+* `Nuevo` Propiedades device.rotation/orientation y otras para obtener la orientación de pantalla
 * `Nuevo` Soporte para acceso a propiedades estáticas en clases Java internas
-* `Nuevo` Soporte para selección y cambio de idioma de aplicaciones desde la página de configuraciones del sistema en Android 13 y superior
-* `Nuevo` Atajos de aplicación activables desde la página de configuración o manteniendo presionado el ícono de la aplicación [Documentación del desarrollador de Android](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn)
+* `Nuevo` Los ajustes del sistema Android permiten cambiar el idioma de la aplicación (Android 13+)
+* `Nuevo` [Accesos directos de la aplicación](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn) que pueden añadirse en los ajustes o activarse manteniendo pulsado el icono, para abrir documentación, ajustes y otras páginas
 * `Corrección` Reintegración de ciertos PR (por [aiselp](https://github.com/aiselp)) para resolver problemas de cierre anómalo de scripts _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
 * `Corrección` Problema de uso inoperativo de nuevas API de AutoJs6 en el paquete de la aplicación (por [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_ _[`issue #149`](http://issues.autojs6.com/149)_
 * `Corrección` Problema de estilo anómalo del paquete de la aplicación en modo noche del sistema
 * `Corrección` Problema de pérdida de extensión de archivo al guardar archivo localmente con el plugin VSCode
 * `Corrección` Problema de cierre inesperado al usar características de coroutines en el proyecto
 * `Corrección` Problema de no registro del estado de posición del botón flotante al reiniciar o salir de la aplicación
+* `Corrección` Problema de desbordamiento de botón flotante al rotar la pantalla múltiples veces _[`issue #90`](http://issues.autojs6.com/90)_
+* `Corrección` Tras varias rotaciones no se recuperaban las coordenadas y el lado de pantalla del botón flotante
 * `Corrección` Problema de no obtención de información de configuración actualizada del dispositivo al cambiar la orientación de pantalla _[`issue #153`](http://issues.autojs6.com/153)_
 * `Corrección` Problema de fuente pequeña del título de la toolbar al rotar la pantalla a modo horizontal
 * `Corrección` Problema de disposición apretada de pestañas en la página principal en modo horizontal
-* `Corrección` Problema de desbordamiento de botón flotante al rotar la pantalla múltiples veces _[`issue #90`](http://issues.autojs6.com/90)_
-* `Corrección` Problema de que, tras múltiples rotaciones de pantalla, no se restauran las coordenadas del botón flotante ni la orientación del borde de la pantalla
 * `Corrección` Problema de visualización faltante o repetida de mensajes en el marco flotante en ciertos dispositivos
 * `Corrección` Problema de mensajes flotantes ocultos cuando múltiples scripts se ejecutan simultáneamente _[`issue #67`](http://issues.autojs6.com/67)_
 * `Corrección` Problema de cierre inesperado de la aplicación al hacer clic en el menú de análisis de diseño con broadcast
 * `Corrección` Problema de segunda instancia y posteriores de WebSocket sin activar adecuadamente los listeners
 * `Corrección` Reversión de redireccionamiento global de importPackage para evitar excepciones en algunos ámbitos específicos _[`issue #88`](http://issues.autojs6.com/88)_
-* `Corrección` Problema de cierre inesperado de la aplicación al usar la función de copiar o exportar en la página de logs
-* `Mejora` Renombrado de la función de exportar en la página de logs a enviar, y reimplementación de exportar acorde a su significado real
-* `Mejora` Soporte de recorte automático de entradas al enviar si son demasiado grandes en la página de logs
-* `Mejora` Compabilidad de módulo ocr con motores Google MLKit y Paddle Lite (Consulte Documentación del proyecto > [OCR](https://docs.autojs6.com/#/ocr?id=p-mode))
+* `Corrección` Copiar o exportar desde la página de registros podía bloquear la aplicación
+* `Mejora` La exportación de registros pasa a llamarse Enviar y se implementa una verdadera función de exportación
+* `Mejora` El envío de registros recorta automáticamente listas excesivas y muestra un aviso
+* `Mejora` ocr es compatible con ML Kit y Paddle Lite (consulta: Documentación del proyecto > [Reconocimiento óptico de caracteres](https://docs.autojs6.com/#/ocr?id=p-mode))
 * `Mejora` Mejorada la probabilidad de éxito de arranque automático del servicio de accesibilidad
 * `Mejora` Migración de anotaciones de procesamiento de Kotlin desde kapt a KSP
-* `Mejora` Soporte de herramientas de construcción para versiones EAP de IntelliJ Idea
+* `Mejora` Las herramientas de construcción admiten IntelliJ IDEA EAP
 * `Mejora` Adaptación de herramientas de construcción a la versión de Java para evitar problemas de "versión inválida"
 * `Mejora` Optimización de lógica de downgrade de versión de IDE y plugins relacionados en herramientas de construcción, y aumento de capacidad de predicción de versiones
 * `Mejora` Compatibilidad con plugin VSCode 1.0.7
@@ -1456,7 +1012,7 @@
 * `Dependencia` Actualización de versión de AndroidX WebKit de 1.7.0 a 1.8.0
 * `Dependencia` Actualización de versión de AndroidX Preference de 1.2.0 a 1.2.1
 * `Dependencia` Actualización de versión de AndroidX Annotation de 1.6.0 a 1.7.0
-* `Dependencia` Actualización de versión de AndroidX Recyclerview de 1.3.0 a 1.3.2
+* `Dependencia` Actualizado AndroidX RecyclerView versión 1.3.0 -> 1.3.2
 * `Dependencia` Actualización de versión de Android Material de 1.9.0 a 1.10.0
 * `Dependencia` Actualización de versión de AndroidX AppCompat de 1.4.2 a 1.6.1
 * `Dependencia` Actualización de versión de Commons IO de 2.8.0 a 2.14.0
@@ -1467,11 +1023,11 @@
 
 ###### 2023/07/21
 
-* `Nuevo` Funcionalidad de comentarios en el código del editor de código (por [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
-* `Nuevo` auto.stateListener para escuchar el estado de la conexión en servicios de accesibilidad (por [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
-* `Nuevo` Adición de métodos nextSibling / lastChild / offset al tipo UiObject (ver Documentos del Proyecto > [Nodos de Control](https://docs.autojs6.com/#/uiObjectType))
+* `Nuevo` El editor de código admite comentarios (by [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
+* `Nuevo` Propiedad auto.stateListener para escuchar el estado de conexión del servicio de accesibilidad (by [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
+* `Nuevo` Métodos UiObject#nextSibling/lastChild/offset y otros para navegar entre controles (consulta: Documentación del proyecto > [Nodos de controles](https://docs.autojs6.com/#/uiObjectType))
 * `Corrección` Problema con el plugin de VSCode que no puede analizar datos cuando el total de caracteres del script supera los cuatro dígitos decimales _[`issue #91`](http://issues.autojs6.com/91)_ _[`issue #93`](http://issues.autojs6.com/93)_ _[`issue #100`](http://issues.autojs6.com/100)_ _[`issue #109`](http://issues.autojs6.com/109)_
-* `Corrección` Problema con el plugin de VSCode que no puede guardar archivos correctamente _[`issue #92`](http://issues.autojs6.com/91)_ _[`issue #94`](http://issues.autojs6.com/93)_
+* `Corrección` El complemento VSCode no guardaba archivos correctamente _[`issue #92`](http://issues.autojs6.com/92)_ _[`issue #94`](http://issues.autojs6.com/94)_
 * `Corrección` El problema de que el menú de botones flotantes "Gestionar servicios de accesibilidad" no redirige a la página correcta al hacer clic
 * `Corrección` El problema de que el método runtime.requestPermissions se pierde _[`issue #104`](http://issues.autojs6.com/104)_
 * `Corrección` El problema de que events.emitter no soporta parámetros de MainThreadProxy _[`issue #103`](http://issues.autojs6.com/103)_
@@ -1489,9 +1045,9 @@
 
 ###### 2023/07/06
 
-* `Nuevo` Módulo crypto (ver Documentos del Proyecto > [Cifrado](https://docs.autojs6.com/#/crypto)) _[`issue #70`](http://issues.autojs6.com/70)_
-* `Nuevo` Adición de controles como textswitcher / viewswitcher / viewflipper / numberpicker / video / search en el modo UI
-* `Nuevo` Adición de funcionalidades de copiar y exportar en la página de actividades del registro _[`issue #76`](http://issues.autojs6.com/76)_
+* `Nuevo` Módulo crypto para cifrar y descifrar datos (consulta: Documentación del proyecto > [Criptografía](https://docs.autojs6.com/#/crypto)) _[`issue #70`](http://issues.autojs6.com/70)_
+* `Nuevo` Controles textswitcher/viewswitcher/viewflipper/numberpicker/video/search y otros en modo UI
+* `Nuevo` Funciones para copiar y exportar registros en la página de registros _[`issue #76`](http://issues.autojs6.com/76)_
 * `Nuevo` Adición de la funcionalidad de historial de direcciones IP en el modo cliente
 * `Corrección` El problema de que la dirección IP no se muestra después de la conexión automática en modo cliente o la activación automática en modo servidor
 * `Corrección` El problema de desconexión y la imposibilidad de volver a conectar después de cambiar el idioma o el modo nocturno en modo cliente y servidor
@@ -1504,16 +1060,16 @@
 * `Corrección` El problema de que sólo el primer archivo es efectivo al cargar múltiples archivos con runtime.loadDex/loadJar _[`issue #88`](http://issues.autojs6.com/88)_
 * `Corrección` El problema de que solo se muestra el icono de documentos en el lanzador en ciertos dispositivos después de instalar la aplicación (intento de reparación) _[`issue #85`](http://issues.autojs6.com/85)_
 * `Mejora` Compatibilidad con el plugin de VSCode 1.0.5
-* `Mejora` Soporte para el módulo cheerio (Ref a [aiselp](https://github.com/aiselp/AutoX/commit/7176f5ad52d6904383024fb700bf19af75e22903)) _[`issue #65`](http://issues.autojs6.com/65)_
-* `Mejora` El soporte de instancias de JsWebSocket para usar el método rebuild y reconectar _[`issue #69`](http://issues.autojs6.com/69)_
-* `Mejora` El soporte del módulo base64 para codificar y decodificar matrices numéricas y matrices de bytes Java
-* `Mejora` Soporte para JavaMail for Android _[`issue #71`](http://issues.autojs6.com/71)_
-* `Mejora` Uso del tipo de datos Blob para mejorar la adaptabilidad en entornos de red sin proxy al obtener información de actualización de versión
 * `Mejora` Muestra la dirección IP objetivo en la subtítulo del cajón principal durante la conexión en modo cliente
 * `Mejora` Soporte para mostrar advertencias de entradas inválidas al ingresar la dirección de destino en el modo cliente
 * `Mejora` Soporte para usar la tecla Enter del teclado suave para establecer la conexión en modo cliente
 * `Mejora` Mantenimiento del estado activo del modo servidor después de activarlo a menos que sea cerrado manualmente o termine el proceso de la aplicación _[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
 * `Mejora` Implementación de detección de versión bidireccional entre AutoJs6 y el plugin de VSCode con alertas de resultados anómalos _[`issue #89`](http://issues.autojs6.com/89)_
+* `Mejora` Soporte para el módulo cheerio (Ref a [aiselp](https://github.com/aiselp/AutoX/commit/7176f5ad52d6904383024fb700bf19af75e22903)) _[`issue #65`](http://issues.autojs6.com/65)_
+* `Mejora` Las instancias JsWebSocket permiten reconstruirse y conectarse mediante rebuild _[`issue #69`](http://issues.autojs6.com/69)_
+* `Mejora` El soporte del módulo base64 para codificar y decodificar matrices numéricas y matrices de bytes Java
+* `Mejora` Soporte para JavaMail for Android _[`issue #71`](http://issues.autojs6.com/71)_
+* `Mejora` Uso del tipo de datos Blob para mejorar la adaptabilidad en entornos de red sin proxy al obtener información de actualización de versión
 * `Mejora` Adición de permiso de lectura de SMS (android.permission.READ_SMS) (deshabilitado por defecto)
 * `Mejora` Implementación del método findMultiColors internamente (por [LYS86](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
 * `Mejora` El soporte para runtime.loadDex/loadJar/load para cargar múltiples archivos o directorios a nivel del directorio
@@ -1527,13 +1083,13 @@
 
 * `Nuevo` Permiso de notificación de publicación y conmutador en el cajón principal _[`issue #55`](http://issues.autojs6.com/55)_
 * `Nuevo` El soporte para el análisis de diseño simple de Android en el modo UI (ver Código de Ejemplo > Diseño > Diseño simple de Android)
-* `Nuevo` Adición de controles como console / imagebutton / ratingbar / switch / textclock / togglebutton en el modo UI
+* `Nuevo` Controles console/imagebutton/ratingbar/switch/textclock/togglebutton y otros en modo UI
 * `Nuevo` El soporte para el tipo de color [OmniColor](https://docs.autojs6.com/#/omniTypes?id=omnicolor) en los controles del modo UI (por ejemplo, color="orange")
 * `Nuevo` El soporte total del método attr para establecer propiedades de controles en el modo UI (por ejemplo, ui.text.attr('color', 'blue'))
 * `Nuevo` Soporte para valores de tipo booleano en atributos de control del modo UI de forma abreviada (por ejemplo, clickable="true" se puede abrevinar como clickable o isClickable)
 * `Nuevo` Soporte para los atributos booleanos isColored y isBorderless de controles button
-* `Nuevo` Método console.resetGlobalLogConfig para restablecer la configuración global del registro
-* `Nuevo` Método web.newWebSocket para crear una instancia de Web Socket (ver Documentos del Proyecto > [World Wide Web](https://docs.autojs6.com/#/web?id=m-newwebsocket))
+* `Nuevo` Método console.resetGlobalLogConfig para restablecer la configuración global de registros
+* `Nuevo` Método web.newWebSocket para crear instancias WebSocket (consulta: Documentación del proyecto > [Web](https://docs.autojs6.com/#/web?id=m-newwebsocket))
 * `Corrección` Problema de ordenación de carpetas en el gestor de archivos
 * `Corrección` El problema de no poder ajustar el estilo y la posición del cuadro flotante construido con el módulo floaty _[`issue #60`](http://issues.autojs6.com/60)_
 * `Corrección` El problema de la superposición del cuadro flotante construido con el módulo floaty con la barra de estado del sistema
@@ -1561,50 +1117,50 @@
 
 ###### 2023/04/29
 
-* `Nuevo` Módulo ocr (ver Documentos del Proyecto > [Reconocimiento Óptico de Caracteres](https://docs.autojs6.com/#/ocr)) _[`issue #8`](http://issues.autojs6.com/8)_
-* `Nuevo` Módulo notice (ver Documentos del Proyecto > [Notificaciones](https://docs.autojs6.com/#/notice))
-* `Nuevo` Módulo s13n (ver Documentos del Proyecto > [Estandarización](https://docs.autojs6.com/#/s13n))
-* `Nuevo` Módulo Color (ver Documentos del Proyecto > [Clase de Color](https://docs.autojs6.com/#/colorType))
-* `Nuevo` colors.setColorPaint método, para establecer el color del pincel android.graphics.Paint (consulte la documentación del proyecto > [Color Type](https://docs.autojs6.com/#/colorType?id=m-setpaintcolor))
-* `Nuevo` Funcionalidad de mantener la pantalla despierta en primer plano y opciones de configuración
-* `Nuevo` Lanzador de documentos adicional para una lectura independiente de la aplicación de documentos (opción para ocultar o mostrar en la configuración)
+* `Nuevo` Módulo ocr para reconocimiento óptico de caracteres (consulta: Documentación del proyecto > [Reconocimiento óptico de caracteres](https://docs.autojs6.com/#/ocr)) _[`issue #8`](http://issues.autojs6.com/8)_
+* `Nuevo` Módulo notice para enviar notificaciones (consulta: Documentación del proyecto > [Notificaciones](https://docs.autojs6.com/#/notice))
+* `Nuevo` Módulo s13n para normalizar datos (consulta: Documentación del proyecto > [Normalización](https://docs.autojs6.com/#/s13n))
+* `Nuevo` Clase Color para crear y manipular objetos de color (consulta: Documentación del proyecto > [Clase Color](https://docs.autojs6.com/#/colorType))
+* `Nuevo` Método colors.setPaintColor para configurar el color de android.graphics.Paint (consulta: Documentación del proyecto > [Colores](https://docs.autojs6.com/#/color?id=m-setpaintcolor))
+* `Nuevo` Función y ajuste para mantener la pantalla encendida mientras la aplicación está en primer plano
+* `Nuevo` Lanzador independiente de documentación para leer la documentación de la aplicación (puede mostrarse u ocultarse en los ajustes)
 * `Corrección` Problemas con la funcionalidad del método colors.toString
+* `Corrección` Problemas de asignación incorrecta de los valores de color de colors.material
 * `Corrección` Problemas con la funcionalidad de agregar automáticamente el prefijo de protocolo en el método app.openUrl
 * `Corrección` Comportamiento anómalo de los métodos app.viewFile/editFile al no existir el archivo correspondiente en los parámetros
 * `Corrección` Problema de que el callback de pickup no se llama
-* `Corrección` Problema donde los valores negativos en la propiedad bounds mostrados en el análisis de diseño son reemplazados por comas
 * `Corrección` Problemas con los selectores bounds/boundsInside/boundsContains al filtrar rectángulos nulos (por ejemplo, rectángulos con límites invertidos) _[`issue #49`](http://issues.autojs6.com/49)_
+* `Corrección` Problema de que el servicio de accesibilidad tiende a fallar o tener errores de servicio (intento de reparación)
+* `Corrección` Problema donde los valores negativos en la propiedad bounds mostrados en el análisis de diseño son reemplazados por comas
 * `Corrección` Problema de que al cambiar el tema o el idioma al hacer clic o mantener presionado el tab de documentos de la página principal causa que la aplicación se bloquee
 * `Corrección` Problema de temblor al ajustar el tamaño de la fuente con pellizco de dos dedos en el editor de texto
 * `Corrección` Problemas para descargar algunas fuentes de dependencias en el script de construcción (integradas) _[`issue #40`](http://issues.autojs6.com/40)_
 * `Corrección` Problema de que Tasker no puede agregar el plugin de acción de AutoJs6 (intento de reparación) _[`issue #41`](http://issues.autojs6.com/41)_
 * `Corrección` Problema de que las anotaciones de ButterKnife no pueden resolver los ID de recursos en proyectos compilados con versiones JDK más altas _[`issue #48`](http://issues.autojs6.com/48)_
-* `Corrección` Problema de que el servicio de accesibilidad tiende a fallar o tener errores de servicio (intento de reparación)
 * `Corrección` Problemas con el uso del parámetro size en images.medianBlur según la documentación
 * `Corrección` Problema de que al mostrar el nombre completo del script en el módulo engines se pierde el punto entre el nombre del archivo y su extensión
 * `Corrección` Posibles errores de cálculo en la implementación interna del algoritmo de detección de distancia RGB ponderada (intento de reparación)
 * `Corrección` Problemas con los métodos relacionados al flotante del módulo console antes de llamar al método show
 * `Corrección` Problemas con la efectividad de los métodos como console.setSize _[`issue #50`](http://issues.autojs6.com/50)_
-* `Corrección` Problemas de asignación incorrecta de los valores de color de colors.material
 * `Corrección` Problemas de análisis del formato de fechas en los atributos minDate y maxDate de los controles de selección de fecha en el modo UI
 * `Corrección` Problema de que aparecen dos tareas ejecutándose en el tab de "Tareas" de la página principal después de ejecutar un script rápidamente
-* `Corrección` Problemas con el estado reseteado de la página de gestión de archivos al volver desde otras páginas _[`issue #52`](http://issues.autojs6.com/52)_
-* `Corrección` Problemas de sincronización del estado de clasificación con el estado de iconos en la página de gestión de archivos
-* `Mejora` Añadir la visualización de la fecha de modificación de archivos y carpetas en la página de gestión de archivos
-* `Mejora` Soporte para recordar el tipo de clasificación en la página de gestión de archivos
+* `Corrección` El estado del administrador de archivos podía restablecerse al volver desde otras páginas _[`issue #52`](http://issues.autojs6.com/52)_
+* `Corrección` El estado de ordenación del administrador no coincidía con sus iconos
+* `Mejora` El administrador muestra las fechas de modificación de archivos y carpetas
+* `Mejora` El administrador recuerda el tipo de ordenación
 * `Mejora` Añadir secciones de construcción del proyecto y ayuda para el desarrollo de scripts en el README.md _[`issue #33`](http://issues.autojs6.com/33)_
+* `Mejora` Soporte para degradar la versión de JDK en el script de construcción de Gradle (fallback)
+* `Mejora` Soporte para seleccionar automáticamente la versión adecuada de las herramientas de construcción según el tipo de plataforma y versión (limitado en cierto grado)
 * `Mejora` Soporte para múltiples formas de pasar el parámetro de región en los métodos relacionados del módulo images (ver Documentos del Proyecto > [Tipos Omni](https://docs.autojs6.com/#/omniTypes?id=omniregion))
 * `Mejora` Soporte para abreviaciones como pref/homepage/docs/about en los parámetros del método app.startActivity
 * `Mejora` Montar métodos globales del módulo web dentro del mismo para mejorar la usabilidad (ver Documentos del Proyecto > [World Wide Web](https://docs.autojs6.com/#/web))
 * `Mejora` Implementación predeterminada de algunas configuraciones comunes de WebView en el método web.newInjectableWebView
 * `Mejora` Añadir métodos de conversión y herramientas en el módulo colors, junto con más constantes estáticas y nombres de colores utilizables directamente como parámetros
-* `Mejora` Añadir varias configuraciones de estilo para la ventana flotante del módulo console, además de un constructor build para configuraciones unificadas
-* `Mejora` Soporte de arrastrar el área del título para mover la posición de la ventana flotante del console
-* `Mejora` Soporte para cierre automático de la ventana flotante del console después de un retraso tras terminar el script
-* `Mejora` Soporte para suavizar la fuente en la ventana de la actividad de la consola y en su ventana flotante
+* `Mejora` console incorpora métodos de estilo para ventanas flotantes y configuración unificada mediante el constructor build
+* `Mejora` La consola flotante permite mover la ventana arrastrando el título
+* `Mejora` La consola flotante admite cierre automático con retardo al finalizar el script
+* `Mejora` La consola flotante y su ventana Activity permiten ajustar el tamaño de fuente con dos dedos
 * `Mejora` Soporte para parámetros de tiempo de espera (timeout) en los métodos relacionados con el módulo http
-* `Mejora` Soporte para degradar la versión de JDK en el script de construcción de Gradle (fallback)
-* `Mejora` Soporte para seleccionar automáticamente la versión adecuada de las herramientas de construcción según el tipo de plataforma y versión (limitado en cierto grado)
 * `Dependencia` Versión localizada de Auto.js APK Builder 1.0.3
 * `Dependencia` Versión localizada de MultiLevelListView 1.1
 * `Dependencia` Versión localizada de Settings Compat 1.1.5
@@ -1616,9 +1172,9 @@
 * `Dependencia` Actualización de Joda Time 2.12.2 -> 2.12.5
 * `Dependencia` Actualización de Android Analytics 14.0.0 -> 14.2.0
 * `Dependencia` Actualización de AndroidX WebKit 1.5.0 -> 1.6.1
-* `Dependencia` Actualización de AndroidX Recyclerview 1.2.1 -> 1.3.0
+* `Dependencia` Actualizado AndroidX RecyclerView versión 1.2.1 -> 1.3.0
 * `Dependencia` Actualización de Zip4j 2.11.2 -> 2.11.5
-* `Dependencia` Actualización de Junit Jupiter 5.9.2 -> 5.9.3
+* `Dependencia` Actualizado JUnit Jupiter versión 5.9.2 -> 5.9.3
 * `Dependencia` Actualización de AndroidX Annotation 1.5.0 -> 1.6.0
 * `Dependencia` Actualización de Jackson DataBind 2.14.1 -> 2.14.2
 * `Dependencia` Actualización de Desugar JDK Libs 2.0.0 -> 2.0.3
@@ -1628,22 +1184,22 @@
 ###### 2023/01/21
 
 * `Nuevo` Rediseño y reescritura de la documentación del proyecto (parcialmente completado)
-* `Nuevo` Adaptación multilingüe para español/francés/ruso/árabe/japonés/coreano/inglés/chino tradicional, etc
+* `Nuevo` Adaptación a español, francés, ruso, árabe, japonés, coreano, inglés, chino tradicional y otros idiomas
 * `Nuevo` Opciones de configuración de la ruta de trabajo con selección de ruta/historial de rutas/sugerencias inteligentes de valores predeterminados
-* `Nuevo` El administrador de archivos soporta la navegación al directorio superior (hasta el directorio 'Almacenamiento interno')
+* `Nuevo` El administrador permite ascender directorios sucesivamente hasta "Almacenamiento interno"
 * `Nuevo` El administrador de archivos permite establecer cualquier directorio como ruta de trabajo rápidamente
-* `Nuevo` Función de actualización de software y gestión de actualizaciones ignoradas
+* `Nuevo` Las actualizaciones pueden ignorarse y se gestionan los registros ignorados
 * `Nuevo` El editor de texto admite ajuste de tamaño de fuente a través de pinch zoom
-* `Nuevo` Selector idHex (UiSelector#idHex) (ver Documentos del Proyecto > [Selectores](https://docs.autojs6.com/#/uiSelectorType))
-* `Nuevo` Selector de acción (UiSelector#action) (ver Documentos del Proyecto > [Selectores](https://docs.autojs6.com/#/uiSelectorType))
-* `Nuevo` Selector Match series (UiSelector#xxxMatch) (ver Documentos del Proyecto > [Selectores](https://docs.autojs6.com/#/uiSelectorType))
-* `Nuevo` Selector de recolección (UiSelector#pickup) (ver Documentos del Proyecto > [Selectores](https://docs.autojs6.com/#/uiSelectorType)) _[`issue #22`](http://issues.autojs6.com/22)_
-* `Nuevo` Detección de control (UiObject#detect) (ver Documentos del Proyecto > [Nodo de Control](https://docs.autojs6.com/#/uiObjectType))
-* `Nuevo` Brújula de control (UiObject#compass) (ver Documentos del Proyecto > [Nodo de Control](https://docs.autojs6.com/#/uiObjectType)) _[`issue #23`](http://issues.autojs6.com/23)_
-* `Nuevo` Método de espera global wait (ver Documentos del Proyecto > [Objeto Global](https://docs.autojs6.com/#/global?id=m-wait))
-* `Nuevo` Métodos globales de escalado cX/cY/cYx (ver Documentos del Proyecto > [Objeto Global](https://docs.autojs6.com/#/global?id=m-wait))
-* `Nuevo` Tipo de aplicación global App (ver Documentos del Proyecto > [Enumeraciones de Aplicación](https://docs.autojs6.com/#/appType))
-* `Nuevo` Módulo i18n (solución multilingüe basada en banana-i18n para JavaScript) (ver Documentos del Proyecto > Internacionalización)
+* `Nuevo` Selector UiSelector#idHex para filtrar por ID hexadecimal de controles (consulta: Documentación del proyecto > [Selectores](https://docs.autojs6.com/#/uiSelectorType))
+* `Nuevo` Selector UiSelector#action para filtrar por acciones admitidas por controles (consulta: Documentación del proyecto > [Selectores](https://docs.autojs6.com/#/uiSelectorType))
+* `Nuevo` Selectores Match como UiSelector#xxxMatch para coincidencias mediante expresiones regulares (consulta: Documentación del proyecto > [Selectores](https://docs.autojs6.com/#/uiSelectorType))
+* `Nuevo` Selector UiSelector#pickup para obtener controles combinando condiciones (consulta: Documentación del proyecto > [Selectores](https://docs.autojs6.com/#/uiSelectorType)) _[`issue #22`](http://issues.autojs6.com/22)_
+* `Nuevo` Método UiObject#detect para explorar controles (consulta: Documentación del proyecto > [Nodos de controles](https://docs.autojs6.com/#/uiObjectType))
+* `Nuevo` Método UiObject#compass para navegar entre controles (consulta: Documentación del proyecto > [Nodos de controles](https://docs.autojs6.com/#/uiObjectType)) _[`issue #23`](http://issues.autojs6.com/23)_
+* `Nuevo` Método global wait para esperar condiciones (consulta: Documentación del proyecto > [Objeto global](https://docs.autojs6.com/#/global?id=m-wait))
+* `Nuevo` Métodos globales cX/cY/cYx para escalar coordenadas (consulta: Documentación del proyecto > [Objeto global](https://docs.autojs6.com/#/global?id=m-cx))
+* `Nuevo` Tipo global App para enumerar aplicaciones (consulta: Documentación del proyecto > [Clase de enumeración de aplicaciones](https://docs.autojs6.com/#/appType))
+* `Nuevo` Módulo i18n para gestionar varios idiomas en JavaScript (basado en banana-i18n) (consulta: Documentación del proyecto > Internacionalización)
 * `Corrección` Problemas con el cambio de idioma de la aplicación que provocan parpadeo de texto y fallos de botones en algunas páginas
 * `Corrección` Problema donde la barra de herramientas del proyecto no se mostraba al iniciar la aplicación con una ruta de trabajo establecida
 * `Corrección` Problema donde la ruta de trabajo podría cambiar automáticamente al cambiar el idioma _[`issue #19`](http://issues.autojs6.com/19)_
@@ -1651,7 +1207,7 @@
 * `Corrección` Problema donde los módulos internos no funcionaban correctamente debido a la declaración de nombres de módulos JavaScript sobreescritos _[`issue #29`](http://issues.autojs6.com/29)_
 * `Corrección` Problema en sistemas Android más recientes donde los iconos del panel de configuración rápida no se cerraban automáticamente al ser tocados (intento de solución) _[`issue #7`](http://issues.autojs6.com/7)_
 * `Corrección` Problema de superposición de algunas páginas con la barra de notificaciones en sistemas Android más recientes
-* `Corrección` Problema donde el código de ejemplo que configura el color del pincel no funcionaba correctamente en Android 10 y versiones superiores
+* `Corrección` En Android 10+ no funcionaban correctamente los ejemplos de configuración de color del pincel
 * `Corrección` Corrección del nombre del archivo y funcionalidad de 'File Manager' en el ejemplo 'Music Manager'
 * `Corrección` Problemas de desplazamiento al refrescar hacia abajo en el administrador de archivos
 * `Corrección` Problemas con el módulo ui que ocasionaban errores de acceso a propiedades de componentes en scripts basados en UI
@@ -1663,6 +1219,7 @@
 * `Corrección` Problemas con el modo nocturno habilitado que causaba apertura forzada del modo nocturno al iniciar la aplicación
 * `Corrección` Problema donde el color de tema predeterminado no aplicaba correctamente en modo nocturno
 * `Corrección` Problema donde algunos textos en la configuración eran ilegibles en modo nocturno debido al color de fondo coincidente
+* `Corrección` Problemas de reconocimiento de botones en la barra de navegación en sistemas Android 7.x con el modo nocturno deshabilitado
 * `Corrección` Problemas con la longitud del texto del botón en la página 'Acerca de'
 * `Corrección` Problemas con la superposición del texto y botones en el cajón de la página principal
 * `Corrección` Problemas de sincronización en el cajón de la página principal después de cerrar los diálogos de permiso
@@ -1674,7 +1231,6 @@
 * `Corrección` Problemas con la incapacidad de mostrar la duración de ejecución en el registro de logs al finalizar el script en algunos sistemas Android
 * `Corrección` Problemas con el botón de flotación que permanecía visible después de reiniciar la aplicación incluso después de cerrarlo
 * `Corrección` Problemas con menúes desbordando la pantalla al mantener presionada una lista en el análisis de jerarquía de capas
-* `Corrección` Problemas de reconocimiento de botones en la barra de navegación en sistemas Android 7.x con el modo nocturno deshabilitado
 * `Corrección` Problema de excepciones no cerradas en métodos como http.post
 * `Corrección` Problema donde la información del canal Alpha se perdía en colores con canal Alpha de 0 en el método colors.toString
 * `Mejora` Redireccionar clases públicas de Auto.js 4.x para lograr la máxima compatibilidad descendente posible (limitada)
@@ -1683,17 +1239,20 @@
 * `Mejora` Agregar soporte multilingüe para mensajes de excepción de Rhino
 * `Mejora` El interruptor de permisos del cajón de la página principal solo muestra mensajes cuando está activado
 * `Mejora` La disposición del cajón de la página principal se adhiere directamente debajo de la barra de estado para evitar incompatibilidades de la barra de color en la parte superior
+* `Mejora` Mostrar la dirección IP del dispositivo correspondiente en el cajón de la página principal después de que el cliente y servidor se conecten
 * `Mejora` Compatibilidad de funciones de comprobación de actualizaciones, descarga y aviso de actualización con el sistema Android 7.x
 * `Mejora` Rediseñar la página de configuración (migración a AndroidX)
 * `Mejora` La página de configuración admite la presión prolongada sobre las opciones de configuración para obtener información detallada
-* `Mejora` Adición de la opción "Seguir sistema" para el modo nocturno (Android 9+)
+* `Mejora` Opción "Seguir el sistema" en el modo nocturno (Android 9+)
 * `Mejora` Compatibilidad de la pantalla de inicio de la aplicación con el modo nocturno
-* `Mejora` Agregar identificadores numéricos a los iconos de la aplicación para mejorar la experiencia del usuario con múltiples versiones de código abierto coexistentes
 * `Mejora` Agregar más opciones de colores Material Design al tema de la aplicación
-* `Mejora` Aligerar y adaptar los iconos de elementos de lista en el gestor de archivos/panel de tareas al color del tema
 * `Mejora` Compatibilidad del color del texto de sugerencia en la caja de búsqueda de la página principal con el modo nocturno
-* `Mejora` Compatibilidad de componentes como diálogos/textos/Fab/AppBar/elementos de lista con el modo nocturno
+* `Mejora` Adaptación de diálogos/texto/FAB/AppBar/elementos de listas al modo nocturno
+* `Mejora` Agregar identificadores numéricos a los iconos de la aplicación para mejorar la experiencia del usuario con múltiples versiones de código abierto coexistentes
+* `Mejora` Aligerar y adaptar los iconos de elementos de lista en el gestor de archivos/panel de tareas al color del tema
 * `Mejora` Compatibilidad de páginas como documentos/configuración/sobre/colores del tema/análisis de diseño y menús de botones flotantes con el modo nocturno
+* `Mejora` Hacer clic en el botón de análisis de diseño del botón flotante realiza directamente el análisis de rango de diseño
+* `Mejora` El tema de análisis de diseño es adaptable (la ventana flotante sigue el tema de la aplicación, el panel de configuración rápida sigue el tema del sistema)
 * `Mejora` Compatibilidad del diseño de páginas con la disposición RTL (Right-To-Left) en la medida de lo posible
 * `Mejora` Agregar efectos de animación de iconos a la página sobre
 * `Mejora` Actualización automática del año en el texto de la declaración de derechos de autor en la página sobre
@@ -1703,28 +1262,24 @@
 * `Mejora` Abreviar el texto de los botones del editor de texto para evitar desbordamiento del contenido
 * `Mejora` Soporte para restaurar el tamaño de fuente predeterminado en la configuración del editor de textos
 * `Mejora` Mejorar la velocidad de respuesta al hacer clic en el botón flotante
-* `Mejora` Hacer clic en el botón de análisis de diseño del botón flotante realiza directamente el análisis de rango de diseño
-* `Mejora` El tema de análisis de diseño es adaptable (la ventana flotante sigue el tema de la aplicación, el panel de configuración rápida sigue el tema del sistema)
 * `Mejora` Reordenar la lista de información de control de diseño según la posible frecuencia de uso
 * `Mejora` Optimizar el formato de salida automáticamente al hacer clic y copiar sobre información de control de diseño según el tipo de selector
+* `Mejora` ui.R y auto.R pueden obtener cómodamente el ID de recursos de AutoJs6
 * `Mejora` Al seleccionar archivos usando la ventana flotante, presionar la tecla de retorno lleva al directorio superior en lugar de cerrar directamente la ventana
 * `Mejora` Soporte para detección de validez numérica y conversión automática de símbolos punteados mientras se ingresa una dirección en modo cliente conectándose a la computadora
-* `Mejora` Mostrar la dirección IP del dispositivo correspondiente en el cajón de la página principal después de que el cliente y servidor se conecten
 * `Mejora` Agregar protección contra sobrescritura a ciertos objetos globales y módulos integrados (consultar documentos del proyecto > Objetos globales > [Protección contra sobrescritura](https://docs.autojs6.com/#/global?id=%e8%a6%86%e5%86%99%e4%bf%9d%e6%8a%a4))
 * `Mejora` importClass e importPackage admiten parámetros de cadena y parámetros de longitud variable
 * `Mejora` ui.run admite la impresión de información de seguimiento de pila en caso de excepción
-* `Mejora` ui.R y auto.R pueden obtener cómodamente el ID de recursos de AutoJs6
 * `Mejora` Los métodos relacionados con el uso de aplicaciones en el módulo app admiten parámetros de tipo App y parámetros de alias de aplicación
-* `Mejora` Los métodos relacionados con la devolución de llamada asincrónica en el módulo dialogs admiten la omisión de parámetros pre-rellenos
 * `Mejora` app.startActivity y otros admiten parámetros de opción de URL (ver código de ejemplo > Aplicaciones > Intención)
+* `Mejora` Los métodos relacionados con la devolución de llamada asincrónica en el módulo dialogs admiten la omisión de parámetros pre-rellenos
 * `Mejora` El módulo device devuelve null en lugar de lanzar una excepción cuando la obtención de IMEI o número de serie de hardware falla
 * `Mejora` Aumentar el brillo del texto en el log de ventana flotante que muestra console.show para mejorar la legibilidad del contenido
 * `Mejora` ImageWrapper#saveTo admite guardar archivos de imagen en rutas relativas
-* `Mejora` Rediseñar el objeto global colors e incluir el soporte de modos de color HSV / HSL (consultar documentos del proyecto > [Colores](https://docs.autojs6.com/#/color)).
+* `Mejora` Objeto global colors rediseñado con modos HSV/HSL y otros (consulta: Documentación del proyecto > [Colores](https://docs.autojs6.com/#/color))
 * `Dependencia` Localización de la versión 1.4.3 de Android Job
-* `Dependencia` Localización del Plugin SDK para Locale versión 9.0.0 de Android
+* `Dependencia` Localizado Android Plugin Client SDK For Locale versión 9.0.0
 * `Dependencia` Localización de GitHub API versión 1.306
-* `Dependencia` Actualización de Android SDK versión 32 a 33
 * `Dependencia` Añadida la versión 1.0 de JCIP Annotations
 * `Dependencia` Añadida la versión 1.5.0 de AndroidX WebKit
 * `Dependencia` Añadida la versión 2.8.0 de Commons IO
@@ -1733,6 +1288,7 @@
 * `Dependencia` Añadida la versión 2.1.0 de Jaredrummler Android Device Names
 * `Dependencia` Añadida la versión 1.0.6 de Jaredrummler Animated SVG View
 * `Dependencia` Sustitución de ColorPicker versión 2.1.7 de Jrummyapps por ColorPicker versión 1.1.0 de Jaredrummler
+* `Dependencia` Actualización de Android SDK versión 32 a 33
 * `Dependencia` Actualización de la versión de Gradle de 7.5-rc-1 a 8.0-rc-1
 * `Dependencia` Actualización de la versión de las herramientas de construcción de Gradle de 7.4.0-alpha02 a 8.0.0-alpha09
 * `Dependencia` Actualización de la versión de Kotlin Gradle Plugin de 1.6.10 a 1.8.0-RC2
@@ -1746,7 +1302,7 @@
 * `Dependencia` Actualización de la versión de OkHttp3 de 3.10.0 a 5.0.0-alpha.7 -> 5.0.0-alpha.9
 * `Dependencia` Actualización de la versión de Zip4j de 2.10.0 a 2.11.2
 * `Dependencia` Actualización de la versión de Glide de 4.13.2 a 4.14.2
-* `Dependencia` Actualización de la versión de Junit Jupiter de 5.9.0 a 5.9.1
+* `Dependencia` Actualizado JUnit Jupiter versión 5.9.0 -> 5.9.1
 
 # v6.1.1
 
@@ -1754,12 +1310,12 @@
 
 * `Nuevo` Función de actualización de software (ver página de configuración) (no compatible con Android 7.x por el momento)
 * `Corrección` Problema de lectura y escritura en almacenamiento externo en Android 10 _[`issue #17`](http://issues.autojs6.com/17)_
-* `Corrección` Problema que causaba que la aplicación se cerrara al mantener presionado en la página del editor _[`issue #18`](http://issues.autojs6.com/18)_
-* `Corrección` Problemas con las funciones de 'Eliminar línea' y 'Copiar línea' al mantener presionado en la página del editor
-* `Corrección` Función 'Pegar' faltante en el menú de opciones en la página del editor
-* `Mejora` Recursos de cadena de mensajes de error parcial traducidos (en / zh)
+* `Corrección` Mantener pulsado en el editor podía bloquear la aplicación _[`issue #18`](http://issues.autojs6.com/18)_
+* `Corrección` "Eliminar línea" y "Copiar línea" del menú de pulsación prolongada no funcionaban
+* `Corrección` Faltaba "Pegar" en el menú de opciones del editor
+* `Mejora` Algunos mensajes de excepción convertidos en recursos de cadena (en/zh)
 * `Mejora` Ajuste de los botones y adición de diferenciación de color en el diálogo de contenido no guardado
-* `Dependencia` Añadida la versión 1.306 de github-api
+* `Dependencia` Añadido GitHub API versión 1.306
 * `Dependencia` Sustitución de retrofit2-rxjava2-adapter versión 1.0.0 por adapter-rxjava2 versión 2.9.0
 
 # v6.1.0
@@ -1767,29 +1323,29 @@
 ###### 2022/05/26 - Cambio de nombre de paquete, actualiza con precaución
 
 * `Sugerencia` Cambio del nombre del paquete de la aplicación a org.autojs.autojs6 para evitar conflictos con el nombre del paquete de la aplicación Auto.js de código abierto
-* `Nuevo` Añadido el interruptor de permiso de proyección de medios en el cajón de la página principal (vía Root / ADB) (detección de estado del interruptor experimental)
-* `Nuevo` El administrador de archivos soporta mostrar archivos y carpetas ocultos (ver Configuración)
-* `Nuevo` Inclusión de una función de verificación de Root (ver página de configuración y código de ejemplo)
-* `Nuevo` Módulo autojs (ver Código de Ejemplo > AutoJs6)
-* `Nuevo` Módulo tasks (ver Código de Ejemplo > Tareas)
-* `Nuevo` Método console.launch() para lanzar la página de la actividad de log
-* `Nuevo` Utilidad util.morseCode (ver Código de Ejemplo > Herramientas > Código Morse)
-* `Nuevo` Utilidad util.versionCodes (ver Código de Ejemplo > Herramientas > Información de versión de Android)
-* `Nuevo` Métodos util.getClass() y similares (ver Código de Ejemplo > Herramientas > Obtener clase y nombre de clase)
-* `Nuevo` Método timers.setIntervalExt() (ver Código de Ejemplo > Temporizadores > Ejecución periódica condicionada)
-* `Nuevo` Métodos colors.toInt() y rgba() (ver Código de Ejemplo > Imágenes y Colores > Conversión básica de colores)
-* `Nuevo` Método automator.isServiceRunning() / ensureService()
-* `Nuevo` Métodos automator.lockScreen() y similares (ver Código de Ejemplo > Servicios de Accesibilidad > Nuevo en Android 9)
-* `Nuevo` Métodos automator.headsethook() y similares (ver Código de Ejemplo > Servicios de Accesibilidad > Nuevo en Android 11)
-* `Nuevo` Método automator.captureScreen() (ver Código de Ejemplo > Servicios de Accesibilidad > Captura de Pantalla)
+* `Nuevo` Interruptor "Permiso de proyección multimedia" en el panel lateral (Root/ADB) (detección de estado experimental)
+* `Nuevo` El administrador permite mostrar archivos y carpetas ocultos (consulta: Ajustes)
+* `Nuevo` Función de comprobación forzada de Root (consulta: Ajustes y ejemplos)
+* `Nuevo` Módulo autojs para obtener y manipular información de AutoJs6 (consulta: Ejemplos > AutoJs6)
+* `Nuevo` Módulo tasks para gestionar tareas programadas (consulta: Ejemplos > Tareas)
+* `Nuevo` Método console.launch para abrir la página de registros
+* `Nuevo` Herramienta util.morseCode para procesar código Morse (consulta: Ejemplos > Herramientas > Código Morse)
+* `Nuevo` Herramienta util.versionCodes para consultar versiones Android (consulta: Ejemplos > Herramientas > Consulta de versiones Android)
+* `Nuevo` Métodos util.getClass y otros para obtener clases Java y sus nombres (consulta: Ejemplos > Herramientas > Obtener clases y nombres)
+* `Nuevo` Método timers.setIntervalExt para ejecución periódica condicional (consulta: Ejemplos > Temporizadores > Ejecución periódica condicional)
+* `Nuevo` Métodos colors.toInt/rgba y otros para convertir colores (consulta: Ejemplos > Imágenes y colores > Conversión básica de colores)
+* `Nuevo` Métodos automator.isServiceRunning/ensureService para comprobar y garantizar la disponibilidad de la accesibilidad
+* `Nuevo` Métodos automator.lockScreen y otros para las operaciones de accesibilidad incorporadas en Android 9 (consulta: Ejemplos > Accesibilidad > Novedades de Android 9)
+* `Nuevo` Métodos automator.headsethook y otros para las operaciones de accesibilidad incorporadas en Android 11 (consulta: Ejemplos > Accesibilidad > Novedades de Android 11)
+* `Nuevo` Método automator.captureScreen para obtener capturas mediante accesibilidad (consulta: Ejemplos > Accesibilidad > Obtener capturas de pantalla)
 * `Nuevo` El método dialogs.build admite parámetros de opción como animation, linkify, etc. (ver Código de Ejemplo > Cuadros de diálogo > Personalización del cuadro de diálogo)
 * `Corrección` Los parámetros de opción inputHint, itemsSelectedIndex, etc. de dialogs.build presentan un comportamiento anómalo
 * `Corrección` Solución a problemas con el parámetro de callback de JsDialog#on('multi_choice')
 * `Corrección` Corrección del problema donde UiObject#parent().indexInParent() siempre devolvía -1 _[`issue #16`](http://issues.autojs6.com/16)_
 * `Corrección` Resolución del problema donde las promesas Thenable de Promise.resolve() podrían no ser llamadas cerca del final del script
-* `Corrección` Corrección de posibles errores ortográficos en nombres de paquetes o clases (boardcast -> broadcast / auojs -> autojs)
-* `Corrección` Solución al problema que causaba que images.requestScreenCapture() provocara un fallo de la aplicación en versiones recientes de Android (API >= 31)
-* `Corrección` Solución al problema donde múltiples instancias de scripts solicitando images.requestScreenCapture() simultáneamente podrían causar un fallo de la aplicación
+* `Corrección` Posibles errores ortográficos en nombres de paquetes o clases (boardcast -> broadcast/auojs -> autojs)
+* `Corrección` images.requestScreenCapture podía bloquear la aplicación en versiones nuevas de Android (API >= 31)
+* `Corrección` Llamadas simultáneas a images.requestScreenCapture desde varias instancias de scripts podían bloquear la aplicación
 * `Corrección` Solución al problema de posible congelación al llamar a new RootAutomator()
 * `Mejora` RootAutomator no podrá ser instanciado sin permisos de Root
 * `Mejora` Rediseño de la página 'Sobre la Aplicación y el Desarrollador'
@@ -1797,14 +1353,14 @@
 * `Mejora` Refactorización de todos los scripts de construcción de Gradle y adición de un script de configuración común (config.gradle)
 * `Mejora` Soporte de las herramientas de construcción de Gradle para gestión automática de versiones y nombrado automático de archivos de construcción
 * `Mejora` Las herramientas de construcción de Gradle ahora incluyen la tarea de agregar CRC32 al nombre de los archivos de construcción (appendDigestToReleasedFiles)
-* `Mejora` Las llamadas a shell() ahora escribirán excepciones en el resultado en lugar de lanzarlas directamente (sin necesidad de try/catch)
+* `Mejora` shell incluye las excepciones de llamada en el resultado en lugar de lanzarlas directamente (no requiere try/catch)
 * `Mejora` Reemplazo del módulo json2 por JSON integrado de Rhino
-* `Mejora` El método auto.waitFor() ahora soporta un parámetro de timeout
-* `Mejora` El método threads.start() ahora soporta parámetros de funciones de flecha
-* `Mejora` El método console.trace() ahora soporta niveles de log (ver Código de Ejemplo > Consola > Trazar la pila de llamadas)
-* `Mejora` El método device.vibrate() ahora soporta modos de vibración y vibración de código Morse (ver Código de Ejemplo > Dispositivo > Modo de vibración / Vibración de código Morse)
+* `Mejora` auto.waitFor admite un parámetro de tiempo límite
+* `Mejora` threads.start admite funciones flecha como parámetro
+* `Mejora` console.trace admite un parámetro de nivel de registro (consulta: Ejemplos > Consola > Imprimir pila de llamadas)
+* `Mejora` La fuente de la consola utiliza Material Color para mejorar la legibilidad en temas normales y nocturnos
+* `Mejora` device.vibrate admite patrones y código Morse (consulta: Ejemplos > Dispositivo > Vibración por patrones/código Morse)
 * `Mejora` Adaptación de permisos de lectura/escritura en almacenamiento externo para versiones recientes de Android (API >= 30)
-* `Mejora` Fuente de la consola usa Material Color para mejorar la legibilidad en temas normales y nocturnos
 * `Mejora` Guardar todas las instancias de ImageWrapper como referencias débiles y recolectarlas automáticamente al finalizar el script (experimental)
 * `Dependencia` Añadida la versión 3.1.0 de CircleImageView
 * `Dependencia` Actualización de Android Analytics de la versión 13.1.0 a 13.3.0
@@ -1828,15 +1384,15 @@
 ###### 2022/03/19
 
 * `Nuevo` Soporte para cambio de idioma (aún en desarrollo)
-* `Nuevo` Módulo recorder (ver Código de Ejemplo > Temporizadores)
-* `Nuevo` Uso del permiso "Modificar configuración de seguridad" para activar servicios de accesibilidad y configuración de interruptores automáticamente
+* `Nuevo` Módulo recorder para medir tiempos (consulta: Ejemplos > Cronómetro)
+* `Nuevo` La accesibilidad puede activarse automáticamente mediante "Modificar ajustes seguros", con el interruptor correspondiente en los ajustes
 * `Corrección` Solución al problema del panel de configuración rápida que no se retraía automáticamente tras tocar los iconos relevantes (intento de solución) _[`issue #7`](http://issues.autojs6.com/7)_
 * `Corrección` Solución al posible fallo de AutoJs6 al usar parámetros de "mostrar con fuerza" en toast
 * `Corrección` Solución al posible fallo de AutoJs6 debido a información incompleta en los encabezados de datos de transmisión por Socket
 * `Mejora` Activar automáticamente el servicio de accesibilidad según configuración al iniciar o reiniciar AutoJs6
 * `Mejora` Intentar activar automáticamente el servicio de accesibilidad al activar el botón flotante
 * `Mejora` Completar elementos de traducción al inglés en todos los archivos de recursos
-* `Mejora` Ajustes menores en el diseño del cajón de la página principal para reducir el espacio entre elementos del proyecto
+* `Mejora` Ajustado el diseño del panel lateral y reducido el espacio entre entradas
 * `Mejora` Añadido interruptor de estado del servicio en primer plano en el cajón de la página principal
 * `Mejora` Sincronizar automáticamente el estado del interruptor cuando el cajón de la página principal se despliega
 * `Mejora` Detección de estado y notificación de resultados al mostrar la posición del cursor
@@ -1845,28 +1401,28 @@
 * `Mejora` Detección y aviso al intentar reasignar contenido de archivos de ejemplos de código
 * `Mejora` Cambio de dirección de descarga de plugins empaquetados de GitHub a JsDelivr
 * `Dependencia` Añadida la versión 1.5.1 de Zeugma Solutions LocaleHelper
-* `Dependencia` Degradación de la versión de Android Material de 1.6.0-alpha02 a 1.5.0
 * `Dependencia` Actualización de las herramientas de Android SDK de la versión 31 a 32
 * `Dependencia` Actualización de Kotlinx Coroutines de la versión 1.6.0-native-mt a 1.6.0
 * `Dependencia` Actualización de OpenCV de la versión 3.4.3 a 4.5.4 y a 4.5.5 (gracias a [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `Dependencia` Actualización de OkHttp3 de la versión 3.10.0 a 5.0.0-alpha.4 y a 5.0.0-alpha.6
 * `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 7.2.0-beta01 a 7.3.0-alpha06
 * `Dependencia` Actualización de Auto.js-ApkBuilder de la versión 1.0.1 a 1.0.3
-* `Dependencia` Actualización del compilador de Glide de la versión 4.12.0 a 4.13.1
-* `Dependencia` Actualización de Gradle de la versión 7.4-rc-2 a 7.4.1
+* `Dependencia` Actualizado Glide Compiler versión 4.12.0 -> 4.13.1
+* `Dependencia` Actualizado Gradle versión 7.4-rc-2 -> 7.4.1
 * `Dependencia` Actualización de Gson de la versión 2.8.9 a 2.9.0
+* `Dependencia` Degradación de la versión de Android Material de 1.6.0-alpha02 a 1.5.0
 
 # v6.0.2
 
 ###### 2022/02/05
 
-* `Nuevo` Método images.bilateralFilter() para procesamiento de imágenes mediante filtro bilateral
+* `Nuevo` Método images.bilateralFilter para filtrado bilateral de imágenes
 * `Corrección` Corrección del problema donde múltiples llamadas a toast solo aplicaban el último llamado
-* `Corrección` Corrección del posible fallo de toast.dismiss()
+* `Corrección` toast.dismiss podía no funcionar
 * `Corrección` Solución al problema donde los interruptores de modo cliente y servidor podrían no funcionar correctamente
 * `Corrección` Solución al problema donde el estado de los interruptores de modo cliente y servidor no se actualizaba correctamente
 * `Corrección` Corrección de la excepción de análisis del elemento text en el modo UI en Android 7.x (gracias a [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`issue #9`](http://issues.autojs6.com/9)_
-* `Mejora` Ignorar ScriptInterruptedException en sleep()
+* `Mejora` Se ignoran excepciones ScriptInterruptedException lanzadas por sleep
 * `Dependencia` Añadida compatibilidad con AndroidX AppCompat (Legacy) versión 1.0.2
 * `Dependencia` Actualización de AndroidX AppCompat de la versión 1.4.0 a 1.4.1
 * `Dependencia` Actualización de AndroidX Preference de la versión 1.1.1 a 1.2.0
@@ -1874,32 +1430,32 @@
 * `Dependencia` Actualización de OkHttp3 de la versión 3.10.0 a 5.0.0-alpha.3 y a 5.0.0-alpha.4
 * `Dependencia` Actualización de Android Material de la versión 1.6.0-alpha01 a 1.6.0-alpha02
 * `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 7.2.0-alpha06 a 7.2.0-beta01
-* `Dependencia` Actualización de Gradle de la versión 7.3.3 a 7.4-rc-2
+* `Dependencia` Actualizado Gradle versión 7.3.3 -> 7.4-rc-2
 
 # v6.0.1
 
 ###### 2022/01/01
 
 * `Nuevo` Soporte del complemento VSCode para clientes (LAN) y servidores (LAN/ADB) (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` Módulo base64 (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` Añadidos los métodos globales isInteger/isNullish/isObject/isPrimitive/isReference
-* `Nuevo` Añadido polyfill (Object.getOwnPropertyDescriptors)
-* `Nuevo` Añadido polyfill (Array.prototype.flat)
-* `Mejora` Extensión de global.sleep para soportar rangos aleatorios/compatibilidad con números negativos
-* `Mejora` Extensión de global.toast para soportar control de duración/control de reemplazo forzado/dismiss
+* `Nuevo` Módulo base64 para codificar y descodificar Base64 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Nuevo` Métodos globales isInteger/isNullish/isObject/isPrimitive/isReference para comprobar tipos
+* `Nuevo` Implementación de compatibilidad (polyfill) de Object.getOwnPropertyDescriptors
+* `Nuevo` Implementación de compatibilidad (polyfill) de Array.prototype.flat
+* `Mejora` global.sleep admite intervalos aleatorios y parámetros negativos
+* `Mejora` global.toast admite duración, sustitución forzada y dismiss
 * `Mejora` Globalización de objetos de paquetes (okhttp3/androidx/de)
 * `Dependencia` Actualización de Android Material de la versión 1.5.0-beta01 -> 1.6.0-alpha01
 * `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 7.2.0-alpha04 -> 7.2.0-alpha06
 * `Dependencia` Actualización de Kotlinx Coroutines de la versión 1.5.2-native-mt -> 1.6.0-native-mt
 * `Dependencia` Actualización del plugin de Gradle de Kotlin de la versión 1.6.0 -> 1.6.10
-* `Dependencia` Actualización de Gradle de la versión 7.3 -> 7.3.3
+* `Dependencia` Actualizado Gradle versión 7.3 -> 7.3.3
 
 # v6.0.0
 
 ###### 2021/12/01
 
 * `Nuevo` Añadido botón de reinicio de la aplicación en la parte inferior del cajón de la página principal
-* `Nuevo` Añadidos interruptores para ignorar optimización de batería/mostrar sobre otras aplicaciones en el cajón de la página principal
+* `Nuevo` Interruptores "Ignorar optimización de batería"/"Mostrar sobre otras aplicaciones" y otros en el panel lateral
 * `Corrección` Corrección de problemas de renderizado del tema en algunos áreas después de la instalación inicial de la aplicación
 * `Corrección` Corrección del problema que impide la construcción del proyecto cuando el archivo sign.property no existe
 * `Corrección` Corrección de errores de almacenamiento de meses en tareas programadas únicas
@@ -1907,11 +1463,9 @@
 * `Corrección` Corrección de problemas de reconocimiento del plugin de empaquetado y la URL de descarga del plugin
 * `Corrección` Corrección del problema de sincronización del estado del interruptor de "ver permisos de uso" en el cajón de la página principal
 * `Corrección` Corrección de fugas de memoria potenciales en TemplateMatching.fastTemplateMatching relacionadas con Mat
-* `Mejora` Actualización de la versión del motor Rhino de 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
-* `Mejora` Actualización de OpenCV de 3.4.3 -> 4.5.4
 * `Mejora` Mejora de la compatibilidad de ViewUtil.getStatusBarHeight
 * `Mejora` Eliminación del módulo de inicio de sesión de usuario del cajón de la página principal y eliminación del espacio ocupado en el diseño
-* `Mejora` Eliminación de las etiquetas de comunidad y mercado de la página principal y optimización del diseño
+* `Mejora` Eliminadas las pestañas Comunidad y Mercado y mejorada la alineación de la página principal
 * `Mejora` Modificación del estado predeterminado de algunas opciones de configuración
 * `Mejora` Añadido SinceDate en la página Sobre y optimización de la visualización de Copyright
 * `Mejora` Actualización del módulo JSON a la versión del 12/06/2017 e integración con cycle.js
@@ -1923,7 +1477,7 @@
 * `Dependencia` Localización de CrashReport versión 2.6.6
 * `Dependencia` Localización de MutableTheme versión 1.0.0
 * `Dependencia` Añadida AndroidX Preference versión 1.1.1
-* `Dependencia` Añadido SwipeRefreshLayout versión 1.1.0
+* `Dependencia` Añadido AndroidX SwipeRefreshLayout versión 1.1.0
 * `Dependencia` Actualización de Android SDK de la versión 28 -> 30 -> 31
 * `Dependencia` Actualización de Android Analytics de la versión 7.0.0 -> 13.1.0
 * `Dependencia` Actualización de Android Annotations de la versión 4.5.2 -> 4.8.0
@@ -1932,27 +1486,29 @@
 * `Dependencia` Actualización de Android Material de la versión 1.1.0-alpha01 -> 1.5.0-beta01
 * `Dependencia` Actualización de AndroidX MultiDex de la versión 2.0.0 -> 2.0.1
 * `Dependencia` Actualización de Apache Commons Lang3 de la versión 3.6 -> 3.12.0
-* `Dependencia` Actualización de Appcompat de la versión 1.0.2 -> 1.4.0
+* `Dependencia` Actualizado AndroidX AppCompat versión 1.0.2 -> 1.4.0
 * `Dependencia` Actualización del plugin de Gradle de ButterKnife de la versión 9.0.0-rc2 -> 10.2.1 -> 10.2.3
 * `Dependencia` Actualización de ColorPicker de la versión 2.1.5 -> 2.1.7
 * `Dependencia` Actualización de Espresso Core de la versión 3.1.1-alpha01 -> 3.5.0-alpha03
-* `Dependencia` Actualización de Eventbus de la versión 3.0.0 -> 3.2.0
-* `Dependencia` Actualización del compilador de Glide de la versión 4.8.0 -> 4.12.0
-* `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 29.0.2 -> 30.0.2
-* `Dependencia` Actualización de Gradle de la versión 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
+* `Dependencia` Actualizado EventBus versión 3.0.0 -> 3.2.0
+* `Dependencia` Actualizado Glide Compiler versión 4.8.0 -> 4.12.0
+* `Dependencia` Actualizado Gradle Build Tool versión 29.0.2 -> 30.0.2
+* `Dependencia` Actualizado Gradle versión 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
 * `Dependencia` Actualización del plugin Groovy-Json de la versión 3.0.7 -> 3.0.8
 * `Dependencia` Actualización de Gson de la versión 2.8.2 -> 2.8.9
 * `Dependencia` Actualización de la versión de Java de 8 -> 11 -> 16
 * `Dependencia` Actualización de Joda Time de la versión 2.9.9 -> 2.10.13
-* `Dependencia` Actualización de Junit de la versión 4.12 -> 4.13.2
+* `Dependencia` Actualizado JUnit versión 4.12 -> 4.13.2
 * `Dependencia` Actualización del plugin de Gradle de Kotlin de la versión 1.3.10 -> 1.4.10 -> 1.6.0
 * `Dependencia` Actualización de Kotlinx Coroutines de la versión 1.0.1 -> 1.5.2-native-mt
 * `Dependencia` Actualización de LeakCanary de la versión 1.6.1 -> 2.7
 * `Dependencia` Actualización de LicensesDialog de la versión 1.8.1 -> 2.2.0
 * `Dependencia` Actualización de Material Dialogs de la versión 0.9.2.3 -> 0.9.6.0
 * `Dependencia` Actualización de OkHttp3 de la versión 3.10.0 -> 5.0.0-alpha.2 -> 5.0.0-alpha.3
-* `Dependencia` Actualización de Reactivex RxJava2 RxAndroid de la versión 2.0.1 -> 2.1.1
-* `Dependencia` Actualización de Reactivex RxJava2 de la versión 2.1.2 -> 2.2.21
+* `Dependencia` Actualizado ReactiveX RxJava2 RxAndroid versión 2.0.1 -> 2.1.1
+* `Dependencia` Actualizado ReactiveX RxJava2 versión 2.1.2 -> 2.2.21
 * `Dependencia` Actualización de Retrofit2 Converter Gson de la versión 2.3.0 -> 2.9.0
 * `Dependencia` Actualización de Retrofit2 Retrofit de la versión 2.3.0 -> 2.9.0
 * `Dependencia` Actualización de Zip4j de la versión 1.3.2 -> 2.9.1
+* `Dependencia` Actualización de la versión del motor Rhino de 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
+* `Dependencia` Actualización de OpenCV de 3.4.3 -> 4.5.4

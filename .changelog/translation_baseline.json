@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "source_language": "zh-Hans",
+  "reviewed_content_sha256": {
+    "zh-Hans": "1281ebed558b464806577e3e679f8d2c036271ef8582f881035ed13123ae0a03",
+    "zh-Hant-HK": "0913acd95520b7d5e6fb60c3dff90a0c01e9a6f714cad9bd469b592e5b18b9e1",
+    "zh-Hant-TW": "00b669704eb9b1a1ae2d2892f6bf52c5ae38ccc0b13621c96040977472d2d274",
+    "en": "cdddc1f25d3d87dab8579ceb48e4662beb4a9bdafec94b4f55fcab1e3cdfbe09",
+    "fr": "c1ec9a82d64110a77be2ebda4a1e8928b39e0b083d0c252a148d457f24457af0",
+    "es": "413522fe8268e8ec293297d1e5e760ea0b4a089b210973b7b2a5714c49bc0037",
+    "ja": "2aa9a6144348da4d57cd45de642f8ec27c37a8167b9fe9dcc05f77479954953c",
+    "ko": "47df560d0e7a83f563ac344b86d9ffd75af141a592fabd82c12ee4bc36c6bc94",
+    "ru": "ce4d4086f2beb48a8db056fc412372f8fe30b677a78c009bf767114c40b62db2",
+    "ar": "01b1b98b4d3e68c66bf2c21e3c6dbca4962967da83be76031b57f32052a84b3a"
+  }
+}
