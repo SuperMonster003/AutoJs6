@@ -40,6 +40,7 @@ import org.json.JSONTokener
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Assume.assumeTrue
@@ -119,6 +120,20 @@ class AceEditorPluginHostDeviceTest {
             }
             finishHostActivity(activity)
         }
+    }
+
+    // Opening the plugin's dex files for every editor took about 270 ms of the editor start (manual test B18).
+    // zh-CN: 每个编辑器都重新打开插件的 dex 约占编辑器启动时间中的 270 ms (手测 B18).
+    @Test
+    fun repeatedLoadsReuseThePluginCode() {
+        assumeTrue("Ace editor plugin is not installed", isPluginInstalled())
+
+        val first = AceEditorPluginHost.load(context)
+        val second = AceEditorPluginHost.load(context)
+        assertSame(first.classLoader, second.classLoader)
+        assertSame(first.entrypoint, second.entrypoint)
+        assertNotSame("plugin contexts follow the current configuration", first.pluginContext, second.pluginContext)
+        assertSame(second.classLoader, second.pluginContext.classLoader)
     }
 
     @Test

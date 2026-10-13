@@ -51,6 +51,37 @@ object AceEditorPluginHost {
         val error: EditorPluginLoadException?,
     )
 
+    /**
+     * The plugin code a class loader was created for. Installing or updating the plugin changes its version, update
+     * time or APK paths.
+     *
+     * zh-CN: 类加载器所对应的插件代码. 安装或更新插件会改变其版本, 更新时间或 APK 路径.
+     */
+    private data class CodeIdentity(
+        val packageName: String,
+        val versionCode: Long,
+        val lastUpdateTime: Long,
+        val codePaths: List<String>,
+        val nativeLibraryDir: String?,
+        val entrypointClassName: String,
+    )
+
+    private class LoadedCode(
+        val identity: CodeIdentity,
+        val classLoader: ClassLoader,
+        val entrypoint: EditorPluginEntrypoint,
+    )
+
+    // The code of the last loaded plugin, reused while its identity stays the same; eligibility and package state are
+    // still checked on every load. A new PathClassLoader for every editor opened the plugin's dex files again each
+    // time: the plugin's compiled code does not match the host's class loader context, so ART extracted the dex from
+    // the APK and verified the plugin classes again, about 270 ms of a 900 ms editor start on a Helio G85.
+    // zh-CN: 最近一次加载的插件代码, 标识不变时复用; 每次加载仍会检查插件的资格与包状态. 每个编辑器都新建 PathClassLoader 时,
+    // 插件的 dex 每次都要重新打开: 插件的预编译代码与宿主的类加载器上下文不匹配, ART 从 APK 中解压 dex 并重新校验插件类,
+    // 在 Helio G85 上约占 900 ms 编辑器启动时间中的 270 ms.
+    @Volatile
+    private var loadedCode: LoadedCode? = null
+
     class LoadedPlugin internal constructor(
         val candidate: Candidate,
         val packageContext: Context,
@@ -314,48 +345,20 @@ object AceEditorPluginHost {
                 "The editor plugin APK path is missing or invalid.",
             )
         }
-        val parent = EditorPluginEntrypoint::class.java.classLoader
-            ?: context.classLoader
-            ?: ClassLoader.getSystemClassLoader()
-        val classLoader = try {
-            PathClassLoader(
-                codePaths.joinToString(File.pathSeparator),
-                candidate.applicationInfo.nativeLibraryDir,
-                parent,
-            )
-        } catch (e: RuntimeException) {
-            throw EditorPluginLoadException(
-                EditorPluginLoadError.CLASS_LOADER_FAILED,
-                packageName,
-                "Unable to create the editor plugin classloader.",
-                e,
-            )
+        val identity = CodeIdentity(
+            packageName = packageName,
+            versionCode = candidate.packageVersionCode,
+            lastUpdateTime = candidate.packageLastUpdateTime,
+            codePaths = codePaths,
+            nativeLibraryDir = candidate.applicationInfo.nativeLibraryDir,
+            entrypointClassName = candidate.entrypointClassName,
+        )
+        val code = synchronized(this) {
+            loadedCode?.takeIf { it.identity == identity }
+                ?: loadCode(context, identity).also { loadedCode = it }
         }
-        val entrypointClass = try {
-            Class.forName(candidate.entrypointClassName, true, classLoader)
-        } catch (e: ClassNotFoundException) {
-            throw EditorPluginLoadException(
-                EditorPluginLoadError.ENTRYPOINT_CLASS_NOT_FOUND,
-                packageName,
-                "Editor plugin entrypoint was not found: ${candidate.entrypointClassName}.",
-                e,
-            )
-        } catch (e: LinkageError) {
-            throw EditorPluginLoadException(
-                EditorPluginLoadError.ENTRYPOINT_LINKAGE_FAILED,
-                packageName,
-                "Editor plugin entrypoint has an incompatible binary dependency.",
-                e,
-            )
-        }
-        if (!EditorPluginEntrypoint::class.java.isAssignableFrom(entrypointClass)) {
-            throw EditorPluginLoadException(
-                EditorPluginLoadError.ENTRYPOINT_TYPE_MISMATCH,
-                packageName,
-                "Entrypoint must implement EditorPluginEntrypoint and package editor-api as compileOnly.",
-            )
-        }
-        val entrypoint = instantiateEntrypoint(entrypointClass, packageName)
+        val classLoader = code.classLoader
+        val entrypoint = code.entrypoint
         if (entrypoint.contractVersion != candidate.contractVersion ||
             entrypoint.contractVersion !in EditorPluginContract.MIN_SUPPORTED_VERSION..
                 EditorPluginContract.MAX_SUPPORTED_VERSION
@@ -373,6 +376,52 @@ object AceEditorPluginHost {
         )
         val pluginContext = PluginResourceContext(localizedPackageContext, classLoader)
         return LoadedPlugin(candidate, packageContext, pluginContext, classLoader, entrypoint)
+    }
+
+    private fun loadCode(context: Context, identity: CodeIdentity): LoadedCode {
+        val packageName = identity.packageName
+        val parent = EditorPluginEntrypoint::class.java.classLoader
+            ?: context.classLoader
+            ?: ClassLoader.getSystemClassLoader()
+        val classLoader = try {
+            PathClassLoader(
+                identity.codePaths.joinToString(File.pathSeparator),
+                identity.nativeLibraryDir,
+                parent,
+            )
+        } catch (e: RuntimeException) {
+            throw EditorPluginLoadException(
+                EditorPluginLoadError.CLASS_LOADER_FAILED,
+                packageName,
+                "Unable to create the editor plugin classloader.",
+                e,
+            )
+        }
+        val entrypointClass = try {
+            Class.forName(identity.entrypointClassName, true, classLoader)
+        } catch (e: ClassNotFoundException) {
+            throw EditorPluginLoadException(
+                EditorPluginLoadError.ENTRYPOINT_CLASS_NOT_FOUND,
+                packageName,
+                "Editor plugin entrypoint was not found: ${identity.entrypointClassName}.",
+                e,
+            )
+        } catch (e: LinkageError) {
+            throw EditorPluginLoadException(
+                EditorPluginLoadError.ENTRYPOINT_LINKAGE_FAILED,
+                packageName,
+                "Editor plugin entrypoint has an incompatible binary dependency.",
+                e,
+            )
+        }
+        if (!EditorPluginEntrypoint::class.java.isAssignableFrom(entrypointClass)) {
+            throw EditorPluginLoadException(
+                EditorPluginLoadError.ENTRYPOINT_TYPE_MISMATCH,
+                packageName,
+                "Entrypoint must implement EditorPluginEntrypoint and package editor-api as compileOnly.",
+            )
+        }
+        return LoadedCode(identity, classLoader, instantiateEntrypoint(entrypointClass, packageName))
     }
 
     private fun instantiateEntrypoint(
