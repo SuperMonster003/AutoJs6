@@ -219,6 +219,9 @@
         <item name="android:textColorSecondary">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
         <item name="actionOverflowMenuStyle">@style/EditorOverflowMenu</item>
+        <!-- PopupMenu (dialog options menus of EditorMaterialDialogThemeDelegate) reads popupMenuStyle, not the overflow style. -->
+        <!-- zh-CN: PopupMenu (EditorMaterialDialogThemeDelegate 中对话框的选项菜单) 读取的是 popupMenuStyle, 而非溢出菜单样式. -->
+        <item name="popupMenuStyle">@style/EditorPopupMenu</item>
         <item name="listMenuViewStyle">@style/EditorListMenuView</item>
         <item name="android:checkboxStyle">@style/EditorPopupCheckbox</item>
         <item name="android:radioButtonStyle">@style/EditorPopupRadioButton</item>
@@ -230,6 +233,10 @@
         <item name="android:windowDisablePreview">true</item>
         <item name="overlapAnchor">false</item>
         <item name="android:dropDownVerticalOffset">5dp</item>
+    </style>
+
+    <style name="EditorPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/editor_popup_background</item>
     </style>
 
     <style name="EditorListMenuView" parent="Widget.AppCompat.ListMenuView">
