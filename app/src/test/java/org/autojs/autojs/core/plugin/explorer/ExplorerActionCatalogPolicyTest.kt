@@ -231,6 +231,45 @@ class ExplorerActionCatalogPolicyTest {
         )
     }
 
+    /** 3-Maple Image 3.0.0 "View as album": a read-only, single-directory overflow action without matchers. */
+    @Test
+    fun protocolV12AcceptsAReadOnlyDirectoryOverflowActionWithoutMatchers() {
+        val browse = descriptor(
+            protocolVersion = 12,
+            id = "browse-directory",
+            targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            accessMode = ExplorerActionValues.ACCESS_READ_ONLY,
+            placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            mimeTypes = emptyList(),
+            extensions = emptyList(),
+        ) ?: error("Expected the directory browsing descriptor to be accepted")
+        assertEquals(ExplorerActionValues.TARGET_DIRECTORY, browse.targetKind)
+        assertTrue(
+            ExplorerActionCatalogPolicy.matches(
+                browse,
+                ExplorerActionTarget(
+                    mimeType = "inode/directory",
+                    extension = "",
+                    kind = ExplorerActionValues.TARGET_DIRECTORY,
+                ),
+            ),
+        )
+        assertFalse(ExplorerActionCatalogPolicy.matches(browse, ExplorerActionTarget("image/png", "png")))
+        // A selection-toolbar placement needs multiple cardinality, so the same declaration there is rejected.
+        assertNull(
+            descriptor(
+                protocolVersion = 12,
+                id = "browse-directory",
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+                mimeTypes = emptyList(),
+                extensions = emptyList(),
+            ),
+        )
+    }
+
     @Test
     fun protocolV4SupportsDirectoryAndOrderedMixedTargets() {
         val directoryAction = descriptor(
