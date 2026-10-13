@@ -130,7 +130,7 @@ class ComposeUiLoaderTest {
     @Test fun loaderCachesByIdentityButRechecksEnablementAndSharesParentClasses() {
         val first = host.load()
         assertSame(first, host.load())
-        assertEquals(1, first.factory.contractVersion())
+        assertEquals(ComposeUiContract.CONTRACT_VERSION, first.factory.contractVersion())
         listOf("androidx.lifecycle.Lifecycle", "androidx.savedstate.SavedStateRegistry", "androidx.core.view.ViewCompat",
             "androidx.activity.ComponentActivity", "androidx.appcompat.app.AppCompatActivity", "kotlin.Unit", "kotlinx.coroutines.Job",
             ComposeUiRendererFactory::class.java.name).forEach { name -> assertSame(name, context.classLoader.loadClass(name), first.loader.loadClass(name)) }
