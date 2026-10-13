@@ -13,6 +13,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.marginBottom
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -21,7 +22,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
+import org.autojs.autojs.core.plugin.center.PluginCenterDialogs
 import org.autojs.autojs.core.plugin.center.PluginCenterFragment
+import org.autojs.autojs.core.plugin.center.PluginCenterSettingsActivity
 import org.autojs.autojs.core.plugin.center.PluginIndexSource
 import org.autojs.autojs.core.plugin.center.PluginInstallActions
 import org.autojs.autojs.core.plugin.center.PluginInstaller
@@ -294,13 +297,44 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
                 PluginCenterActivity.launch(context, PluginIndexSource.THIRD_PARTY)
             }
             1 -> {
-                PluginInstallActions.showInstallFromUrlDialog(context, lifecycleScope)
+                PluginCenterActivity.launch(context)
             }
             0 -> {
-                PluginInstallActions.installFromLocalFile(mPickApkLauncher)
+                showMoreActions()
             }
             else -> Unit
         }
+    }
+
+    private fun showMoreActions() {
+        val context = requireContext()
+        val actions = listOf(
+            R.string.text_install_from_url,
+            R.string.text_install_from_local_file,
+            R.string.text_sort,
+            R.string.text_filter,
+            R.string.text_plugin_additional_variants,
+            R.string.text_process_log,
+            R.string.text_global_settings,
+        )
+        MaterialDialog.Builder(context)
+            .title(R.string.text_more)
+            .items(actions.map(::getString))
+            .itemsCallback { dialog, _, which, _ ->
+                dialog.dismiss()
+                when (actions[which]) {
+                    R.string.text_install_from_url -> PluginInstallActions.showInstallFromUrlDialog(context, lifecycleScope)
+                    R.string.text_install_from_local_file -> PluginInstallActions.installFromLocalFile(mPickApkLauncher)
+                    R.string.text_sort -> PluginCenterDialogs(requireActivity()).showSortDialog(findPluginCenterFragment())
+                    R.string.text_filter -> PluginCenterDialogs(requireActivity()).showFilterDialog(findPluginCenterFragment())
+                    R.string.text_plugin_additional_variants -> PluginCenterActivity.launchAdditionalVariants(context)
+                    R.string.text_process_log -> PluginCenterDialogs(requireActivity()).showProcessLogs()
+                    R.string.text_global_settings -> PluginCenterSettingsActivity.launch(context)
+                }
+            }
+            .negativeText(R.string.dialog_button_dismiss)
+            .negativeColorRes(R.color.dialog_button_default)
+            .show()
     }
 
     companion object {

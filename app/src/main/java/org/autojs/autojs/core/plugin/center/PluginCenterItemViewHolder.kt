@@ -24,6 +24,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
 import org.autojs.autojs6.R
@@ -129,9 +130,26 @@ class PluginCenterItemViewHolder(
         }
 
         iconView.setOnClickListener {
-            if (item.isInstalled) {
-                IntentUtils.launchAppDetailsSettings(context, item.packageName)
+            if (currentItem.isInstalled) {
+                IntentUtils.launchAppDetailsSettings(context, currentItem.packageName)
+            } else {
+                listener.onDetails(currentItem)
             }
+        }
+        iconView.setOnLongClickListener {
+            if (currentItem.isInstalled) {
+                val launchIntent = context.packageManager.getLaunchIntentForPackage(currentItem.packageName)
+                if (launchIntent == null) {
+                    ViewUtils.showToast(context, R.string.summary_plugin_no_launch_page, true)
+                } else {
+                    launchIntent.startSafely(context, true) { error ->
+                        ViewUtils.showToast(context, error.message ?: context.getString(R.string.text_unavailable), true)
+                    }
+                }
+            } else {
+                listener.onInstall(currentItem)
+            }
+            true
         }
 
         switchView.setOnCheckedChangeListener(null)
