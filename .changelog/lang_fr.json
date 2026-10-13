@@ -556,6 +556,8 @@
       "improvement": [
         "Le Centre des plugins prend en charge deux niveaux de tri avec des sens indépendants, par défaut installés > désactivés > non installés, puis par dernière mise à jour décroissante dans chaque état",
         "Le Centre des plugins conserve la position des plugins après une action ou au retour de leurs paramètres tout en actualisant leur état et les données en arrière-plan; une actualisation manuelle ou un changement de tri ou de filtre rétablit l'ordre normal",
+        "Les icônes du centre de plugins réagissent aux appuis courts/longs selon leur installation: les plugins installés ouvrent les détails système de l'application/leur page de lancement autonome (avec un message si aucune page n'existe), les autres ouvrent les détails du plugin/lancent son installation",
+        "Le menu FAB de l'onglet Plugins de l'accueil donne la priorité à l'assistant d'installation, aux dépôts officiels et tiers et au centre de plugins; l'installation par URL/fichier local et les actions de gestion sont regroupées sous \"Plus\"",
         "Le profil Standard inclut 3-Setup Installer; l'installation système des APK n'affiche plus le conseil recommandant ce plugin",
         "Lecture des données de modèle Three Stove Agent sur Android 7-10 via les API publiques, avec conservation des positions de fichier et annulation des tubes bloqués",
         "Les vérifications lint de l'hôte excluent par chemin les classes et ressources de compatibilité AutoJs4 et continuent à vérifier le reste de l'hôte",

@@ -746,6 +746,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` APK packaging silently kept one of two same-named native libraries with different content; it now stops and names both sources
 * `Improvement` Plugin Center supports primary and secondary sorting with separate directions, defaulting to installed > disabled > not installed, then last update time in descending order within each status
 * `Improvement` Plugin Center keeps plugins in place after actions or returning from plugin settings, while updating their state and continuing background refreshes; pulling to refresh or changing sorting or filters restores the normal order
+* `Improvement` Plugin Center list icons respond to taps/long presses according to installation status: installed plugins open system app details/their standalone launch page (with a message when no launch page exists), while uninstalled plugins open plugin details/start installation
+* `Improvement` The home Plugins tab FAB menu prioritizes the installation wizard, official and third-party repositories, and Plugin Center, with URL/local file installation and management actions grouped under "More"
 * `Improvement` The Standard plugin installation profile includes 3-Setup Installer, and system APK installation no longer displays the installer-plugin recommendation tip
 * `Improvement` Three Stove Agent model payload reading on Android 7-10 uses public APIs while preserving file offsets and cancellation of stalled pipes
 * `Improvement` Host lint checks exclude AutoJs4 compatibility classes and resources by path while continuing to check the rest of the host
