@@ -113,6 +113,7 @@ private val pluginApi = listOf(
     "nodejs-api",
     "python-runtime-api",
     "typescript-api",
+    "typescript-parser-api",
     "apk-builder-template",
     "opencc-api",
     "pinyin-api",
