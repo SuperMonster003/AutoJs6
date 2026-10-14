@@ -12,6 +12,7 @@ import android.view.View.VISIBLE
 import android.widget.PopupMenu
 import androidx.core.widget.ImageViewCompat
 import io.reactivex.android.schedulers.AndroidSchedulers
+import org.autojs.autojs.core.plugin.autojs4.AutoJs4Comparison
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionEntryPoint
 import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
@@ -247,6 +248,11 @@ internal class ExplorerPageViewHolder(
                 R.id.action_run_with_autojs4 -> {
                     host.hideHostDialog()
                     Scripts.runWithAutoJs4(host.context, File(selectedItem.path))
+                    host.notifyItemOperated(explorerPage)
+                }
+                R.id.action_compare_with_autojs4 -> {
+                    host.hideHostDialog()
+                    AutoJs4Comparison.start(host.context, File(selectedItem.path))
                     host.notifyItemOperated(explorerPage)
                 }
                 R.id.action_install_autojs4_runtime -> {
