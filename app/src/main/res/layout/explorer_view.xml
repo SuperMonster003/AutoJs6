@@ -176,129 +176,11 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/selection_copy"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?selectableItemBackground"
-                android:clickable="true"
-                android:contentDescription="@string/text_copy_to"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingHorizontal="2dp"
-                android:paddingVertical="5dp">
-
-                <ImageView
-                    android:id="@+id/selection_copy_icon"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:padding="1dp"
-                    android:layout_marginBottom="2dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_content_copy_black_24dp"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/selection_copy_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:importantForAccessibility="no"
-                    android:maxLines="1"
-                    android:text="@string/text_copy_to"
-                    android:textSize="11sp" />
-
-            </LinearLayout>
+            <!-- Primary actions are inserted here by ExplorerSelectionToolbarController;
+                 "More" lists the secondary actions and those without a free slot. -->
 
             <LinearLayout
-                android:id="@+id/selection_move"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?selectableItemBackground"
-                android:clickable="true"
-                android:contentDescription="@string/text_move_to"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingHorizontal="2dp"
-                android:paddingVertical="5dp">
-
-                <ImageView
-                    android:id="@+id/selection_move_icon"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:padding="1.5dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="2dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_move_to"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/selection_move_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:importantForAccessibility="no"
-                    android:maxLines="1"
-                    android:text="@string/text_move_to"
-                    android:textSize="11sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/selection_plugin"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingHorizontal="2dp"
-                android:paddingVertical="5dp"
-                android:visibility="gone"
-                tools:contentDescription="Compress..."
-                tools:ignore="TypographyEllipsis"
-                tools:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/selection_plugin_icon"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="2dp"
-                    android:importantForAccessibility="no"
-                    android:padding="1dp"
-                    android:src="@drawable/ic_archive_black_48dp"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/selection_plugin_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:importantForAccessibility="no"
-                    android:maxLines="1"
-                    android:textSize="11sp"
-                    tools:ignore="TypographyEllipsis"
-                    tools:text="Compress..." />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/selection_plugin_more"
+                android:id="@+id/selection_more"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -314,7 +196,7 @@
                 tools:visibility="visible">
 
                 <ImageView
-                    android:id="@+id/selection_plugin_more_icon"
+                    android:id="@+id/selection_more_icon"
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:layout_gravity="center"
@@ -324,7 +206,7 @@
                     tools:ignore="ContentDescription" />
 
                 <TextView
-                    android:id="@+id/selection_plugin_more_text"
+                    android:id="@+id/selection_more_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -333,44 +215,6 @@
                     android:importantForAccessibility="no"
                     android:maxLines="1"
                     android:text="@string/text_more"
-                    android:textSize="11sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/selection_delete"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?selectableItemBackground"
-                android:clickable="true"
-                android:contentDescription="@string/text_delete"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingHorizontal="2dp"
-                android:paddingVertical="5dp">
-
-                <ImageView
-                    android:id="@+id/selection_delete_icon"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="2dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_delete_black_24dp"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/selection_delete_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:importantForAccessibility="no"
-                    android:maxLines="1"
-                    android:text="@string/text_delete"
                     android:textSize="11sp" />
 
             </LinearLayout>

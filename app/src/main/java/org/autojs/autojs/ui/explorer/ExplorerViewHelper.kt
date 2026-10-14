@@ -66,12 +66,14 @@ object ExplorerViewHelper {
     }
 
     /**
-     * Copies the absolute path of a file or directory to the clipboard, like "Copy as path" in Windows Explorer.
-     * zh-CN: 将文件或目录的绝对路径复制到剪贴板, 类似 Windows 资源管理器的 "复制为路径".
+     * Copies the absolute paths of files or directories to the clipboard, one per line in the given order,
+     * like "Copy as path" in Windows Explorer.
+     * zh-CN: 将文件或目录的绝对路径按给定顺序逐行复制到剪贴板, 类似 Windows 资源管理器的 "复制为路径".
      */
     @JvmStatic
-    fun copyPath(context: Context, item: ExplorerItem) {
-        ClipboardUtils.setClip(context, item.path)
+    fun copyPaths(context: Context, items: List<ExplorerItem>) {
+        if (items.isEmpty()) return
+        ClipboardUtils.setClip(context, items.joinToString("\n") { it.path })
         ViewUtils.showToast(context, R.string.text_already_copied_to_clip)
     }
 

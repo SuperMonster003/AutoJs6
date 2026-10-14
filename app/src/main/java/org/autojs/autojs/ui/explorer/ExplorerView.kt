@@ -6,7 +6,6 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -169,11 +168,6 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             }
         })
     }
-    private var mSelectionPluginAction: ResolvedExplorerAction? = null
-
-    /** The selection toolbar plugin actions after [mSelectionPluginAction], offered by the "More" button. */
-    private var mSelectionMorePluginActions: List<ResolvedExplorerAction> = emptyList()
-    private var mSelectionArchiveExtraction = false
     private var mArchiveNavigationState: ArchiveNavigationState? = null
     private val mArchiveCoordinator by lazy(LazyThreadSafetyMode.NONE) {
         ExplorerArchiveCoordinator(
@@ -562,21 +556,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                 isSelectionActive = { isInSelectionMode },
                 setRefreshEnabled = { enabled -> isEnabled = enabled },
                 onClose = { clearSelection() },
-                onCopy = ::copySelectedItems,
-                onMove = ::moveSelectedItems,
-                onPluginAction = ::launchSelectedPluginAction,
-                onMorePluginActions = ::showMoreSelectedPluginActions,
-                onDelete = ::deleteSelectedItems,
                 onShownChanged = { shown ->
                     mOnSelectionToolbarStateChangeListener?.onSelectionToolbarStateChanged(shown)
                 },
             )
-            binding.selectionPlugin.setOnLongClickListener {
-                if (mSelectionArchiveExtraction) {
-                    launchSelectedPluginAction()
-                    true
-                } else false
-            }
         }
         restoreSortConfig()
         setOnRefreshListener(this)
@@ -823,32 +806,94 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                 Log.w(LOG_TAG, "Failed to resolve Explorer selection plugin action", error)
             }.getOrDefault(emptyList())
         }
-        val pluginAction = pluginActions.firstOrNull()
-        mSelectionPluginAction = pluginAction
-        mSelectionMorePluginActions = pluginActions.drop(1)
-        mSelectionArchiveExtraction = archiveExtraction
+        val deleteEnabled = if (archiveSelection) {
+            archiveDeletion && !mArchiveCoordinator.isMutating
+        } else {
+            selectedItems.all { it.canDelete() }
+        }
+        val actions = buildList {
+            if (archiveExtraction) {
+                add(
+                    ExplorerSelectionAction(
+                        key = SELECTION_ACTION_EXTRACT,
+                        label = context.getString(R.string.text_extract),
+                        iconRes = R.drawable.ic_unarchive_black_48dp,
+                        level = ExplorerSelectionActionLevel.PRIMARY,
+                        enabled = !mArchiveCoordinator.isExtracting && !mArchiveCoordinator.isMutating,
+                        onLongClick = { extractSelectedArchiveEntries(); true },
+                        onClick = ::extractSelectedArchiveEntries,
+                    ),
+                )
+            }
+            if (!archiveSelection) {
+                add(
+                    ExplorerSelectionAction(
+                        key = SELECTION_ACTION_COPY,
+                        label = context.getString(R.string.text_copy_to),
+                        iconRes = R.drawable.ic_content_copy_black_24dp,
+                        iconPaddingDp = 1F,
+                        level = ExplorerSelectionActionLevel.PRIMARY,
+                        enabled = selectedItems.all { it.canCopy() },
+                        onClick = ::copySelectedItems,
+                    ),
+                )
+                add(
+                    ExplorerSelectionAction(
+                        key = SELECTION_ACTION_MOVE,
+                        label = context.getString(R.string.text_move_to),
+                        iconRes = R.drawable.ic_move_to,
+                        iconPaddingDp = 1.5F,
+                        level = ExplorerSelectionActionLevel.PRIMARY,
+                        enabled = selectedItems.all { it.canMove() },
+                        onClick = ::moveSelectedItems,
+                    ),
+                )
+            }
+            pluginActions.forEachIndexed { index, action ->
+                add(
+                    ExplorerSelectionAction(
+                        key = "$SELECTION_ACTION_PLUGIN_PREFIX${action.packageName}/${action.descriptor.id}",
+                        label = if (index == 0) action.actionLabel else action.menuTitle,
+                        iconRes = R.drawable.ic_archive_black_48dp,
+                        iconPaddingDp = 1F,
+                        level = if (index == 0) {
+                            ExplorerSelectionActionLevel.PRIMARY
+                        } else {
+                            ExplorerSelectionActionLevel.SECONDARY
+                        },
+                        group = ExplorerSelectionActionGroup.PLUGIN,
+                        onClick = { launchPluginActionOnSelection(action) },
+                    ),
+                )
+            }
+            if (!archiveSelection || deleteEnabled) {
+                add(
+                    ExplorerSelectionAction(
+                        key = SELECTION_ACTION_DELETE,
+                        label = context.getString(R.string.text_delete),
+                        iconRes = R.drawable.ic_delete_black_24dp,
+                        level = ExplorerSelectionActionLevel.PRIMARY,
+                        enabled = deleteEnabled,
+                        onClick = ::deleteSelectedItems,
+                    ),
+                )
+            }
+            // Archive entries only have synthetic paths, which are of no use outside the archive view.
+            // zh-CN: 压缩包条目只有合成路径, 离开压缩包视图后没有意义.
+            if (!archiveSelection) {
+                add(
+                    ExplorerSelectionAction(
+                        key = SELECTION_ACTION_COPY_PATH,
+                        label = context.getString(R.string.text_copy_path),
+                        iconRes = null,
+                        level = ExplorerSelectionActionLevel.SECONDARY,
+                        onClick = ::copySelectedPaths,
+                    ),
+                )
+            }
+        }
         if (::mSelectionToolbar.isInitialized) {
-            mSelectionToolbar.render(
-                ExplorerSelectionToolbarState(
-                    selectedCount = selectedItems.size,
-                    archiveSelection = archiveSelection,
-                    archiveExtraction = archiveExtraction,
-                    copyEnabled = !archiveSelection && selectedItems.all { it.canCopy() },
-                    moveEnabled = !archiveSelection && selectedItems.all { it.canMove() },
-                    deleteEnabled = if (archiveSelection) {
-                        archiveDeletion && !mArchiveCoordinator.isMutating
-                    } else {
-                        selectedItems.all { it.canDelete() }
-                    },
-                    pluginLabel = pluginAction?.actionLabel,
-                    pluginEnabled = if (archiveExtraction) {
-                        !mArchiveCoordinator.isExtracting && !mArchiveCoordinator.isMutating
-                    } else {
-                        pluginAction != null
-                    },
-                    morePluginActions = mSelectionMorePluginActions.isNotEmpty(),
-                ),
-            )
+            mSelectionToolbar.render(ExplorerSelectionToolbarState(selectedItems.size, actions))
         }
         updateArchiveExtractionAction()
         updateProjectToolbarVisibility()
@@ -868,6 +913,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         ScriptOperations(context, this@ExplorerView, currentPage)
             .move(selectedFiles)
             .subscribe({ clearSelection() }, { showErrorDialog(it, R.string.error_failed_to_move) })
+    }
+
+    private fun copySelectedPaths() {
+        val selectedItems = mSelection.items
+        if (selectedItems.isEmpty()) return
+        ExplorerViewHelper.copyPaths(context, selectedItems)
+        clearSelection()
     }
 
     private fun deleteSelectedItems() {
@@ -969,31 +1021,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         mExplorer!!.registerChangeListener(this)
     }
 
-    private fun launchSelectedPluginAction() {
-        if (mSelectionArchiveExtraction) {
-            val selectedItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem }
-            if (selectedItems.size == mSelection.size && selectedItems.isNotEmpty()) {
-                startArchiveExtraction(selectedItems)
-            }
-            return
+    private fun extractSelectedArchiveEntries() {
+        val selectedItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem }
+        if (selectedItems.size == mSelection.size && selectedItems.isNotEmpty()) {
+            startArchiveExtraction(selectedItems)
         }
-        launchPluginActionOnSelection(mSelectionPluginAction ?: return)
-    }
-
-    /** Lists the selection toolbar plugin actions after the first one; choosing one runs it on the selection. */
-    private fun showMoreSelectedPluginActions() {
-        val actions = mSelectionMorePluginActions
-        if (actions.isEmpty()) return
-        val anchor = binding?.selectionPluginMore ?: return
-        val popupMenu = PopupMenu(context, anchor)
-        actions.forEachIndexed { index, action ->
-            popupMenu.menu.add(Menu.NONE, index, index, action.menuTitle)
-        }
-        popupMenu.setOnMenuItemClickListener { item ->
-            actions.getOrNull(item.itemId)?.let(::launchPluginActionOnSelection)
-            true
-        }
-        popupMenu.show()
     }
 
     private fun launchPluginActionOnSelection(action: ResolvedExplorerAction) {
@@ -1750,6 +1782,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     companion object {
         private const val LOG_TAG = "ExplorerView"
         private const val PLUGIN_ACTION_MENU_ORDER_START = 1_000
+
+        private const val SELECTION_ACTION_COPY = "copy"
+        private const val SELECTION_ACTION_MOVE = "move"
+        private const val SELECTION_ACTION_DELETE = "delete"
+        private const val SELECTION_ACTION_EXTRACT = "extract"
+        private const val SELECTION_ACTION_COPY_PATH = "copy-path"
+        private const val SELECTION_ACTION_PLUGIN_PREFIX = "plugin:"
+
         // Upper bound for diff-based refresh dispatching; larger snapshots fall back to
         // a full rebind to keep the main-thread diff cost negligible.
         // zh-CN: 差量刷新的行数上限, 超出时回退全量重绑定, 确保主线程差量计算开销可忽略.

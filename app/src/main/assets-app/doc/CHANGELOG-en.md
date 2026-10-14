@@ -91,7 +91,7 @@
 * `Feature` "Floating run" option in the file manager script menu, for running/stopping scripts, editing files and viewing logs through a floating toolbar
 * `Feature` "Run with AutoJs4" option in the file manager script menu, for running scripts or projects with the AutoJs4 engine and comparing results (requires the AutoJs4 Runtime plugin)
 * `Feature` "Run with AutoJs4 and compare" option in the file manager script menu, for running the same script or project with the AutoJs6 and AutoJs4 engines in sequence to compare differences (requires the AutoJs4 Runtime plugin)
-* `Feature` "Copy path" option in the file manager file and directory menus, for copying the absolute path to the clipboard
+* `Feature` "Copy path" option in the file manager file and directory menus, for copying absolute paths to the clipboard, with batch copying (one path per line) under "More" in the selection bar
 * `Feature` File manager supports browsing, previewing, compressing and extracting archives through the 3-Stack Archive plugin, with passwords, split archives and directly opening or running files within archives
 * `Feature` File manager supports previewing Markdown/HTML files through the Markdown Previewer/HTML Previewer plugins, with themes, custom CSS and full-screen mode
 * `Feature` File manager supports viewing images, playing audio/video and opening EPUB ebooks through the corresponding plugins, with background audio playback and notification controls

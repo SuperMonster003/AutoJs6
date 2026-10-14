@@ -5,13 +5,18 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.PopupMenu
+import androidx.annotation.VisibleForTesting
 import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.MenuCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
@@ -24,21 +29,15 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ExplorerSelectionActionBinding
 import org.autojs.autojs6.databinding.ExplorerViewBinding
 import kotlin.math.roundToInt
 
 /** Everything needed to render the current multi-selection actions. */
 internal data class ExplorerSelectionToolbarState(
     val selectedCount: Int,
-    val archiveSelection: Boolean,
-    val archiveExtraction: Boolean,
-    val copyEnabled: Boolean,
-    val moveEnabled: Boolean,
-    val deleteEnabled: Boolean,
-    val pluginLabel: String?,
-    val pluginEnabled: Boolean,
-    /** More than one plugin action matches: the plugin button runs the first, "More" lists the others. */
-    val morePluginActions: Boolean = false,
+    /** In display order; [ExplorerSelectionAction.level] decides between a button and "More". */
+    val actions: List<ExplorerSelectionAction>,
 )
 
 /**
@@ -46,6 +45,12 @@ internal data class ExplorerSelectionToolbarState(
  *
  * Selection semantics remain in [ExplorerSelectionController], while [ExplorerView] resolves the
  * actions. This class is deliberately limited to UI state and window integration.
+ *
+ * The toolbar is "Exit", up to [MAX_ACTION_BUTTONS] primary actions as labeled buttons, and "More"
+ * whenever secondary actions (or primary actions without a free slot) remain, so new batch actions
+ * only need a level instead of a new layout slot.
+ * zh-CN: 工具栏依次为 "退出", 最多 [MAX_ACTION_BUTTONS] 个带文字的主要操作按钮, 以及在仍有次要操作
+ * (或没有空余按钮位的主要操作) 时出现的 "更多". 因此新增批量操作只需指定级别, 无需新增布局按钮位.
  */
 internal class ExplorerSelectionToolbarController(
     private val context: Context,
@@ -54,11 +59,6 @@ internal class ExplorerSelectionToolbarController(
     private val isSelectionActive: () -> Boolean,
     private val setRefreshEnabled: (Boolean) -> Unit,
     private val onClose: () -> Unit,
-    private val onCopy: () -> Unit,
-    private val onMove: () -> Unit,
-    private val onPluginAction: () -> Unit,
-    private val onMorePluginActions: () -> Unit,
-    private val onDelete: () -> Unit,
     private val onShownChanged: (Boolean) -> Unit,
 ) {
 
@@ -68,6 +68,10 @@ internal class ExplorerSelectionToolbarController(
     private var navigationBarInsetBottom = 0
     private var extraListPaddingBottom = 0
     private var listClipToPadding = false
+    private var foregroundColor = Color.BLACK
+
+    private val actionButtons = LinkedHashMap<String, ExplorerSelectionActionBinding>()
+    private var overflowActions: List<ExplorerSelectionAction> = emptyList()
 
     init {
         setupActions()
@@ -76,29 +80,80 @@ internal class ExplorerSelectionToolbarController(
     }
 
     fun render(state: ExplorerSelectionToolbarState) {
-        binding.selectionCount.text = context.getString(R.string.text_selected_items, state.selectedCount)
-        binding.selectionCopy.isVisible = !state.archiveSelection
-        binding.selectionMove.isVisible = !state.archiveSelection
-        binding.selectionDelete.isVisible = !state.archiveSelection || state.deleteEnabled
-        updateActionState(binding.selectionCopy, state.copyEnabled)
-        updateActionState(binding.selectionMove, state.moveEnabled)
-        updateActionState(binding.selectionDelete, state.deleteEnabled)
-        binding.selectionPlugin.isVisible = state.archiveExtraction || state.pluginLabel != null
-        if (state.archiveExtraction) {
-            val label = context.getString(R.string.text_extract)
-            binding.selectionPluginText.text = label
-            binding.selectionPlugin.contentDescription = label
-            binding.selectionPluginIcon.setImageResource(R.drawable.ic_unarchive_black_48dp)
-        } else {
-            binding.selectionPluginIcon.setImageResource(R.drawable.ic_archive_black_48dp)
-            state.pluginLabel?.let { label ->
-                binding.selectionPluginText.text = label
-                binding.selectionPlugin.contentDescription = label
+        // An empty selection keeps the last buttons, so the row does not reflow while the toolbar slides away.
+        // zh-CN: 选择为空时保留上一次的按钮, 避免工具栏滑出期间按钮行重新排布.
+        if (state.selectedCount > 0) {
+            binding.selectionCount.text = context.getString(R.string.text_selected_items, state.selectedCount)
+            val layout = ExplorerSelectionActionLayout.of(state.actions, MAX_ACTION_BUTTONS)
+            renderButtons(layout.buttons)
+            overflowActions = layout.overflow
+            binding.selectionMore.isVisible = overflowActions.isNotEmpty()
+        }
+        setShown(state.selectedCount > 0)
+    }
+
+    /** Buttons that currently show primary actions, in display order. */
+    @VisibleForTesting
+    internal val actionButtonViews: List<View>
+        get() = actionButtons.values.map { it.root }
+
+    private fun renderButtons(actions: List<ExplorerSelectionAction>) {
+        val container = binding.selectionActions
+        val keys = actions.map { it.key }
+        if (keys != actionButtons.keys.toList()) {
+            // Reattach in the new order; buttons whose keys remain keep their views (and accessibility focus).
+            // zh-CN: 按新顺序重新挂载; 仍然存在的按键沿用原视图 (及无障碍焦点).
+            val previous = LinkedHashMap(actionButtons)
+            actionButtons.clear()
+            previous.values.forEach { container.removeView(it.root) }
+            val insertAt = container.indexOfChild(binding.selectionClose) + 1
+            keys.forEachIndexed { index, key ->
+                val button = previous[key] ?: createActionButton(container)
+                actionButtons[key] = button
+                container.addView(button.root, insertAt + index)
             }
         }
-        updateActionState(binding.selectionPlugin, state.pluginEnabled)
-        binding.selectionPluginMore.isVisible = !state.archiveSelection && state.morePluginActions
-        setShown(state.selectedCount > 0)
+        actions.forEach { action -> bindActionButton(actionButtons.getValue(action.key), action) }
+    }
+
+    private fun createActionButton(container: ViewGroup): ExplorerSelectionActionBinding {
+        return ExplorerSelectionActionBinding.inflate(LayoutInflater.from(context), container, false).also { button ->
+            applyButtonAccessibilityRole(button.root)
+            button.selectionActionText.setTextColor(foregroundColor)
+            ImageViewCompat.setImageTintList(button.selectionActionIcon, ColorStateList.valueOf(foregroundColor))
+        }
+    }
+
+    private fun bindActionButton(button: ExplorerSelectionActionBinding, action: ExplorerSelectionAction) {
+        button.selectionActionIcon.setImageResource(checkNotNull(action.iconRes))
+        val iconPadding = DisplayUtils.dpToPx(action.iconPaddingDp).roundToInt()
+        button.selectionActionIcon.setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
+        button.selectionActionText.text = action.label
+        button.root.contentDescription = action.label
+        button.root.setOnClickListener { action.onClick() }
+        val onLongClick = action.onLongClick
+        if (onLongClick != null) {
+            button.root.setOnLongClickListener { onLongClick() }
+        } else {
+            button.root.setOnLongClickListener(null)
+            button.root.isLongClickable = false
+        }
+        updateActionState(button.root, action.enabled)
+    }
+
+    private fun showOverflowActions() {
+        val actions = overflowActions
+        if (actions.isEmpty()) return
+        val popupMenu = PopupMenu(context, binding.selectionMore)
+        actions.forEachIndexed { index, action ->
+            popupMenu.menu.add(action.group.ordinal, index, index, action.label).isEnabled = action.enabled
+        }
+        MenuCompat.setGroupDividerEnabled(popupMenu.menu, true)
+        popupMenu.setOnMenuItemClickListener { item ->
+            actions.getOrNull(item.itemId)?.takeIf { it.enabled }?.onClick?.invoke()
+            true
+        }
+        popupMenu.show()
     }
 
     fun configureListBottomPadding(extraPaddingBottomDp: Float, clipToPadding: Boolean) {
@@ -134,24 +189,21 @@ internal class ExplorerSelectionToolbarController(
         val backgroundColor = themeColor.colorPrimary
         val foregroundColor = ViewUtils.getDayOrNightColorByLuminance(context, backgroundColor)
         val foregroundTint = ColorStateList.valueOf(foregroundColor)
+        this.foregroundColor = foregroundColor
         binding.selectionToolbar.setBackgroundColor(backgroundColor)
         listOf(
             binding.selectionCount,
             binding.selectionCloseText,
-            binding.selectionCopyText,
-            binding.selectionMoveText,
-            binding.selectionPluginText,
-            binding.selectionPluginMoreText,
-            binding.selectionDeleteText,
+            binding.selectionMoreText,
         ).forEach { it.setTextColor(foregroundColor) }
         listOf<ImageView>(
             binding.selectionCloseIcon,
-            binding.selectionCopyIcon,
-            binding.selectionMoveIcon,
-            binding.selectionPluginIcon,
-            binding.selectionPluginMoreIcon,
-            binding.selectionDeleteIcon,
+            binding.selectionMoreIcon,
         ).forEach { ImageViewCompat.setImageTintList(it, foregroundTint) }
+        actionButtons.values.forEach { button ->
+            button.selectionActionText.setTextColor(foregroundColor)
+            ImageViewCompat.setImageTintList(button.selectionActionIcon, foregroundTint)
+        }
         if (shown) applyNavigationBarColor(themeColor)
     }
 
@@ -163,19 +215,11 @@ internal class ExplorerSelectionToolbarController(
     private fun setupActions() {
         listOf(
             binding.selectionClose,
-            binding.selectionCopy,
-            binding.selectionMove,
-            binding.selectionPlugin,
-            binding.selectionPluginMore,
-            binding.selectionDelete,
+            binding.selectionMore,
         ).forEach(::applyButtonAccessibilityRole)
         ViewCompat.setAccessibilityHeading(binding.selectionCount, true)
         binding.selectionClose.setOnClickListener { onClose() }
-        binding.selectionCopy.setOnClickListener { onCopy() }
-        binding.selectionMove.setOnClickListener { onMove() }
-        binding.selectionPlugin.setOnClickListener { onPluginAction() }
-        binding.selectionPluginMore.setOnClickListener { onMorePluginActions() }
-        binding.selectionDelete.setOnClickListener { onDelete() }
+        binding.selectionMore.setOnClickListener { showOverflowActions() }
     }
 
     private fun setupTouchBlocker() {
@@ -301,7 +345,13 @@ internal class ExplorerSelectionToolbarController(
         else -> null
     }
 
-    private companion object {
+    internal companion object {
+        /**
+         * Primary buttons between "Exit" and "More": six slots of at least 53dp fit a 320dp screen.
+         * zh-CN: "退出" 与 "更多" 之间的主要操作按钮数: 六个不小于 53dp 的按钮位可放入 320dp 宽的屏幕.
+         */
+        const val MAX_ACTION_BUTTONS = 4
+
         private const val CONTENT_HEIGHT_DP = 81F
         private const val SHOW_DURATION = 120L
         private const val HIDE_DURATION = 90L

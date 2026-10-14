@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A primary button of the Explorer selection toolbar; see ExplorerSelectionToolbarController. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingHorizontal="2dp"
+    android:paddingVertical="5dp">
+
+    <ImageView
+        android:id="@+id/selection_action_icon"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="2dp"
+        android:importantForAccessibility="no"
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/ic_content_copy_black_24dp" />
+
+    <TextView
+        android:id="@+id/selection_action_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:maxLines="1"
+        android:textSize="11sp"
+        tools:text="@string/text_copy_to" />
+
+</LinearLayout>

@@ -222,7 +222,7 @@ internal class ExplorerPageViewHolder(
                         .ignoreElements()
                         .subscribe({}, { host.showErrorDialog(it, R.string.error_failed_to_copy) })
                 R.id.action_copy_path ->
-                    ExplorerViewHelper.copyPath(host.context, selectedItem)
+                    ExplorerViewHelper.copyPaths(host.context, listOf(selectedItem))
                 R.id.action_move_to ->
                     ScriptOperations(host.context, explorerView, host.currentPage)
                         .move(selectedItem.toScriptFile())

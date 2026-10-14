@@ -54,7 +54,7 @@ internal class ExplorerBuiltInActionHandler(
             }
             R.id.action_copy_path -> {
                 val selected = host.selectedItem ?: return false
-                ExplorerViewHelper.copyPath(host.context, selected)
+                ExplorerViewHelper.copyPaths(host.context, listOf(selected))
             }
             R.id.action_rename -> {
                 ScriptOperations(host.context, host.explorerView, host.currentPage)

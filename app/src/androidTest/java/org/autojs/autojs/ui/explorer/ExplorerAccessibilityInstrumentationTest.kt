@@ -5,10 +5,12 @@ import android.content.res.Configuration
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.text.TextUtilsCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.children
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -16,6 +18,7 @@ import org.autojs.autojs.core.accessibility.node.NodeLifecycle
 import org.autojs.autojs.core.accessibility.node.default
 import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ExplorerViewBinding
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -32,7 +35,7 @@ class ExplorerAccessibilityInstrumentationTest {
     private val targetContext = instrumentation.targetContext
 
     @Test
-    fun fiveSelectionActionsRemainUsableAcrossWidthsFontScaleLandscapeAndRtl() {
+    fun sixSelectionActionsRemainUsableAcrossWidthsFontScaleLandscapeAndRtl() {
         val specifications = listOf(
             LayoutSpecification(320, 568, 1.5F, Locale.ENGLISH),
             LayoutSpecification(360, 640, 1.5F, Locale.SIMPLIFIED_CHINESE),
@@ -53,17 +56,14 @@ class ExplorerAccessibilityInstrumentationTest {
                 explorer.findViewById<View>(R.id.explorer_item_list).visibility = View.GONE
                 val toolbar = explorer.findViewById<View>(R.id.selection_toolbar)
                 val actionsContainer = explorer.findViewById<View>(R.id.selection_actions)
-                val plugin = explorer.findViewById<View>(R.id.selection_plugin)
                 val count = explorer.findViewById<TextView>(R.id.selection_count)
-                plugin.visibility = View.VISIBLE
-                plugin.contentDescription = "Compress..."
-                explorer.findViewById<TextView>(R.id.selection_plugin_text).text = "Compress..."
-                count.text = "128 selected"
-                toolbar.visibility = View.VISIBLE
+                val controller = renderSelectionToolbar(context, explorer)
                 measureAndLayout(explorer, specification.widthDp, specification.heightDp, context)
 
-                val actions = selectionActions(explorer)
-                assertEquals(5, actions.size)
+                // "Exit", four primary buttons and "More" for the secondary "Copy path".
+                // zh-CN: "退出", 四个主要操作按钮, 以及承载次要操作 "复制路径" 的 "更多".
+                val actions = selectionActions(explorer, controller)
+                assertEquals(6, actions.size)
                 assertHeight(context, count, 32F)
                 assertHeight(context, actionsContainer, 64F)
                 actions.forEach { action ->
@@ -85,7 +85,7 @@ class ExplorerAccessibilityInstrumentationTest {
                     actionsContainer.layoutDirection,
                 )
 
-                selectionLabels(explorer).forEach { label ->
+                selectionLabels(actions).forEach { label ->
                     val textLayout = checkNotNull(label.layout)
                     assertEquals(1, textLayout.lineCount)
                     assertTrue(textLayout.height <= label.height - label.paddingTop - label.paddingBottom)
@@ -160,21 +160,53 @@ class ExplorerAccessibilityInstrumentationTest {
         }
     }
 
-    private fun selectionActions(root: View): List<View> = listOf(
-        R.id.selection_close,
-        R.id.selection_copy,
-        R.id.selection_move,
-        R.id.selection_plugin,
-        R.id.selection_delete,
-    ).map(root::findViewById)
+    /** Renders the actions of a typical file selection with one plugin action through a toolbar controller. */
+    private fun renderSelectionToolbar(context: Context, explorer: ExplorerView): ExplorerSelectionToolbarController {
+        val root = explorer.findViewById<View>(R.id.selection_toolbar).parent as View
+        val binding = ExplorerViewBinding.bind(root)
+        val controller = ExplorerSelectionToolbarController(
+            context = context,
+            binding = binding,
+            recyclerView = binding.explorerItemList,
+            isSelectionActive = { true },
+            setRefreshEnabled = {},
+            onClose = {},
+            onShownChanged = {},
+        )
+        fun primary(key: String, label: CharSequence, iconRes: Int) = ExplorerSelectionAction(
+            key = key,
+            label = label,
+            iconRes = iconRes,
+            level = ExplorerSelectionActionLevel.PRIMARY,
+        ) {}
+        controller.render(
+            ExplorerSelectionToolbarState(
+                selectedCount = 128,
+                actions = listOf(
+                    primary("copy", context.getString(R.string.text_copy_to), R.drawable.ic_content_copy_black_24dp),
+                    primary("move", context.getString(R.string.text_move_to), R.drawable.ic_move_to),
+                    primary("plugin", "Compress...", R.drawable.ic_archive_black_48dp),
+                    primary("delete", context.getString(R.string.text_delete), R.drawable.ic_delete_black_24dp),
+                    ExplorerSelectionAction(
+                        key = "copy-path",
+                        label = context.getString(R.string.text_copy_path),
+                        iconRes = null,
+                        level = ExplorerSelectionActionLevel.SECONDARY,
+                    ) {},
+                ),
+            ),
+        )
+        return controller
+    }
 
-    private fun selectionLabels(root: View): List<TextView> = listOf(
-        R.id.selection_close_text,
-        R.id.selection_copy_text,
-        R.id.selection_move_text,
-        R.id.selection_plugin_text,
-        R.id.selection_delete_text,
-    ).map(root::findViewById)
+    private fun selectionActions(root: View, controller: ExplorerSelectionToolbarController): List<View> =
+        listOf(root.findViewById<View>(R.id.selection_close)) +
+            controller.actionButtonViews +
+            root.findViewById<View>(R.id.selection_more)
+
+    private fun selectionLabels(actions: List<View>): List<TextView> = actions.map { action ->
+        (action as ViewGroup).children.filterIsInstance<TextView>().single()
+    }
 
     private fun assertSizes(
         context: Context,

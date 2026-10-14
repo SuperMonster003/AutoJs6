@@ -89,7 +89,7 @@
         "Option \"Exécution flottante\" dans le menu des scripts du gestionnaire de fichiers, pour exécuter/arrêter les scripts, modifier les fichiers et consulter les journaux via une barre d'outils flottante",
         "Option \"Exécuter avec AutoJs4\" dans le menu des scripts du gestionnaire de fichiers, pour exécuter un script ou projet avec le moteur AutoJs4 et examiner ses résultats (nécessite le plugin AutoJs4 Runtime)",
         "Option \"Exécuter avec AutoJs4 et comparer\" dans le menu des scripts du gestionnaire de fichiers, pour exécuter successivement le même script ou projet avec AutoJs6 et AutoJs4 et comparer les différences (nécessite le plugin AutoJs4 Runtime)",
-        "Option \"Copier le chemin\" dans les menus des fichiers et dossiers du gestionnaire de fichiers, pour copier le chemin absolu dans le presse-papiers",
+        "Option \"Copier le chemin\" dans les menus des fichiers et dossiers du gestionnaire de fichiers, pour copier des chemins absolus dans le presse-papiers, avec copie par lot (un chemin par ligne) sous \"Plus\" dans la barre de sélection",
         "Le gestionnaire de fichiers permet de parcourir, prévisualiser, compresser et extraire des archives via le plugin 3-Stack Archive, avec mots de passe, volumes multiples et ouverture ou exécution directe des fichiers archivés",
         "Le gestionnaire de fichiers permet de prévisualiser les fichiers Markdown/HTML via les plugins Markdown Previewer/HTML Previewer, avec thèmes, CSS personnalisé et mode plein écran",
         "Le gestionnaire de fichiers permet d'afficher des images, de lire des contenus audio/vidéo et d'ouvrir des livres EPUB via les plugins correspondants, avec lecture audio en arrière-plan et commandes dans les notifications",

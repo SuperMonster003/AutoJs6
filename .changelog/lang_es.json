@@ -89,7 +89,7 @@
         "Opción \"Ejecutar en ventana flotante\" en el menú de scripts del administrador de archivos, con barra flotante para iniciar/detener scripts, editar archivos y consultar registros",
         "Opción \"Ejecutar con AutoJs4\" en el menú de scripts del administrador de archivos para ejecutar scripts o proyectos con el motor AutoJs4 y comparar resultados (requiere AutoJs4 Runtime)",
         "Opción \"Ejecutar con AutoJs4 y comparar\" en el menú de scripts para ejecutar sucesivamente el mismo script o proyecto con AutoJs6 y AutoJs4 y comparar diferencias (requiere AutoJs4 Runtime)",
-        "Opción \"Copiar ruta\" en los menús de archivos y directorios del administrador de archivos, para copiar la ruta absoluta al portapapeles",
+        "Opción \"Copiar ruta\" en los menús de archivos y directorios del administrador de archivos, para copiar rutas absolutas al portapapeles, con copia por lotes (una ruta por línea) en \"Más\" de la barra de selección",
         "El administrador de archivos permite explorar, previsualizar, comprimir y extraer archivos mediante 3-Stack Archive, con contraseñas, volúmenes y apertura o ejecución directa de archivos internos",
         "El administrador de archivos previsualiza Markdown/HTML mediante Markdown Previewer/HTML Previewer, con temas, CSS personalizado y pantalla completa",
         "El administrador de archivos permite ver imágenes, reproducir audio y vídeo y abrir EPUB mediante sus complementos; el audio admite reproducción en segundo plano y controles en notificaciones",
