@@ -3,7 +3,6 @@ package org.autojs.autojs.ui.doc
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
@@ -17,6 +16,7 @@ import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.widget.ImageViewCompat
+import com.afollestad.materialdialogs.R as MaterialDialogR
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorMutable
@@ -95,9 +95,6 @@ class OfflineDocsUnavailableView @JvmOverloads constructor(
             foreground = paletteForeground ?: context.getColor(R.color.text_color_primary),
             accent = themeColor?.colorAccent ?: context.getColor(R.color.colorPrimary),
         )
-        val cornerRadius = resources.getDimension(R.dimen.offline_docs_unavailable_action_corner_radius)
-        val strokeWidth = resources.getDimensionPixelSize(R.dimen.offline_docs_unavailable_action_stroke_width)
-
         setBackgroundColor(palette.background)
 
         icon.background = GradientDrawable().apply {
@@ -109,35 +106,41 @@ class OfflineDocsUnavailableView @JvmOverloads constructor(
         title.setTextColor(palette.title)
         prompt.setTextColor(palette.body)
 
+        // Raised and flat buttons with the shape of the MaterialDialog action buttons used across the app.
+        // zh-CN: 凸起按钮与扁平按钮, 形状与应用内 MaterialDialog 的操作按钮一致.
         primaryAction.setTextColor(palette.onPrimaryContainer)
         primaryAction.background = actionBackground(
-            content = roundedRect(cornerRadius) { setColor(palette.primaryContainer) },
-            cornerRadius = cornerRadius,
+            fill = palette.primaryContainer,
             ripple = ColorUtils.applyAlpha(palette.onPrimaryContainer, PRIMARY_RIPPLE_ALPHA),
         )
 
         secondaryAction.setTextColor(palette.secondaryContent)
         secondaryAction.background = actionBackground(
-            content = roundedRect(cornerRadius) {
-                setColor(Color.TRANSPARENT)
-                setStroke(strokeWidth, palette.secondaryOutline)
-            },
-            cornerRadius = cornerRadius,
-            ripple = ColorUtils.applyAlpha(palette.secondaryContent, SECONDARY_RIPPLE_ALPHA),
+            fill = null,
+            ripple = ColorUtils.applyAlpha(palette.title, SECONDARY_RIPPLE_ALPHA),
         )
     }
 
-    private fun roundedRect(cornerRadius: Float, block: GradientDrawable.() -> Unit) = GradientDrawable().apply {
+    private fun actionShape(@ColorInt color: Int) = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
-        this.cornerRadius = cornerRadius
-        block()
+        cornerRadius = resources.getDimension(MaterialDialogR.dimen.md_action_corner_radius)
+        setColor(color)
     }
 
-    private fun actionBackground(content: Drawable, cornerRadius: Float, @ColorInt ripple: Int) = RippleDrawable(
-        ColorStateList.valueOf(ripple),
-        content,
-        roundedRect(cornerRadius) { setColor(Color.WHITE) },
-    )
+    /**
+     * The touch target keeps the full view while the visible shape is inset like a dialog action button.
+     * Layer insets are used instead of InsetDrawable, whose padding would replace the padding of the view
+     * and would be applied twice to the ripple mask.
+     * zh-CN: 触摸区域保持整个视图, 可见形状像对话框操作按钮一样内缩.
+     * 使用图层内缩而非 InsetDrawable, 因为后者的内边距会替换视图自身的内边距, 并会对涟漪遮罩重复内缩.
+     */
+    private fun actionBackground(@ColorInt fill: Int?, @ColorInt ripple: Int): RippleDrawable {
+        val horizontal = resources.getDimensionPixelSize(MaterialDialogR.dimen.md_button_inset_horizontal)
+        val vertical = resources.getDimensionPixelSize(MaterialDialogR.dimen.md_button_inset_vertical)
+        return RippleDrawable(ColorStateList.valueOf(ripple), fill?.let(::actionShape), actionShape(Color.WHITE)).apply {
+            for (index in 0 until numberOfLayers) setLayerInset(index, horizontal, vertical, horizontal, vertical)
+        }
+    }
 
     private object ButtonRoleDelegate : AccessibilityDelegateCompat() {
         override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {

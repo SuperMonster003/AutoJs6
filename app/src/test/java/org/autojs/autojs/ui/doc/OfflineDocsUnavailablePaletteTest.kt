@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui.doc
 
 import org.autojs.autojs.theme.color.ColorMetrics
-import org.autojs.autojs.theme.color.ThemeColorDerivation
 import org.autojs.autojs.ui.doc.OfflineDocsUnavailablePalette.Companion.PRIMARY_CONTAINER_CONTRAST_ON_DARK
 import org.autojs.autojs.ui.doc.OfflineDocsUnavailablePalette.Companion.TEXT_CONTRAST
 import org.junit.Assert.assertEquals
@@ -39,7 +38,7 @@ class OfflineDocsUnavailablePaletteTest {
     }
 
     @Test
-    fun everyTextAndOutlineIsReadable() {
+    fun everyTextIsReadable() {
         for (surface in surfaces) for (accent in accents) {
             val palette = OfflineDocsUnavailablePalette.derive(surface.background, surface.foreground, accent)
             val label = "%s, accent #%06X".format(surface.name, accent and 0xFFFFFF)
@@ -48,7 +47,6 @@ class OfflineDocsUnavailablePaletteTest {
             assertContrast("$label, icon", palette.icon, palette.iconContainer, TEXT_CONTRAST)
             assertContrast("$label, primary action", palette.onPrimaryContainer, palette.primaryContainer, TEXT_CONTRAST)
             assertContrast("$label, secondary action", palette.secondaryContent, palette.background, TEXT_CONTRAST)
-            assertContrast("$label, secondary outline", palette.secondaryOutline, palette.background, ThemeColorDerivation.UI_COMPONENT_CONTRAST)
         }
     }
 
@@ -57,7 +55,7 @@ class OfflineDocsUnavailablePaletteTest {
         val palette = OfflineDocsUnavailablePalette.derive(0x00FAFAFA, 0x80212121.toInt(), 0x00FFDEAD)
         listOf(
             palette.background, palette.title, palette.body, palette.iconContainer, palette.icon,
-            palette.primaryContainer, palette.onPrimaryContainer, palette.secondaryContent, palette.secondaryOutline,
+            palette.primaryContainer, palette.onPrimaryContainer, palette.secondaryContent,
         ).forEach { assertEquals(0xFF, it ushr 24) }
     }
 

@@ -9,10 +9,9 @@ import kotlin.math.roundToInt
  * zh-CN: [OfflineDocsUnavailableView] 的配色, 由界面背景 / 前景色与主题强调色推导得到.
  *
  * The theme color can be any color, and the editor supplies its own surface palette, so no fixed resource color
- * works everywhere. Every text color meets [TEXT_CONTRAST] against what it is drawn on, and the outline of the
- * secondary action meets [ThemeColorDerivation.UI_COMPONENT_CONTRAST] against the surface.
+ * works everywhere. Every text color meets [TEXT_CONTRAST] against what it is drawn on.
  * zh-CN: 主题色可为任意颜色, 编辑器也会提供自己的界面配色, 因此固定的资源颜色无法适配所有情况.
- * 所有文字颜色与其底色的对比度均不低于 [TEXT_CONTRAST], 次要操作的描边与背景的对比度不低于 [ThemeColorDerivation.UI_COMPONENT_CONTRAST].
+ * 所有文字颜色与其底色的对比度均不低于 [TEXT_CONTRAST].
  *
  * All colors are opaque. zh-CN: 所有颜色均不透明.
  */
@@ -25,7 +24,6 @@ data class OfflineDocsUnavailablePalette(
     val primaryContainer: Int,
     val onPrimaryContainer: Int,
     val secondaryContent: Int,
-    val secondaryOutline: Int,
 ) {
 
     companion object {
@@ -90,25 +88,7 @@ data class OfflineDocsUnavailablePalette(
                 primaryContainer = primaryContainer,
                 onPrimaryContainer = onPrimaryContainer,
                 secondaryContent = secondaryContent,
-                secondaryOutline = blendForContrast(secondaryContent, surface, ThemeColorDerivation.UI_COMPONENT_CONTRAST),
             )
-        }
-
-        /**
-         * The lightest mix of [color] over [background] that still meets [ratio], so the outline stays as quiet as
-         * accessibility allows; [color] itself when even the full color does not meet it.
-         * zh-CN: [color] 叠加在 [background] 上且仍满足 [ratio] 的最浅混合色, 使描边在满足可访问性的前提下尽量柔和;
-         * [color] 本身也不满足时直接返回 [color].
-         */
-        private fun blendForContrast(color: Int, background: Int, ratio: Double): Int {
-            if (ColorMetrics.contrastRatio(color, background) < ratio) return color
-            var failing = 0.0
-            var passing = 1.0
-            repeat(20) {
-                val middle = (failing + passing) / 2
-                if (ColorMetrics.contrastRatio(blend(color, background, middle), background) >= ratio) passing = middle else failing = middle
-            }
-            return blend(color, background, passing)
         }
 
         private fun composite(color: Int, background: Int): Int = blend(color, background, ((color ushr 24) and 0xFF) / 255.0)

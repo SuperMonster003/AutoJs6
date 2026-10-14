@@ -66,37 +66,42 @@
 
                 <TextView
                     android:id="@+id/offline_docs_plugin_center"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="22dp"
                     android:clickable="true"
                     android:focusable="true"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center"
+                    android:minWidth="88dp"
                     android:minHeight="48dp"
-                    android:paddingStart="24dp"
-                    android:paddingTop="12dp"
-                    android:paddingEnd="24dp"
-                    android:paddingBottom="12dp"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="14dp"
+                    android:stateListAnimator="@anim/button_state_list_anim_material"
                     android:text="@string/text_plugin_center"
-                    android:textSize="15sp" />
+                    android:textAllCaps="true"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/offline_docs_switch_online"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="4dp"
                     android:clickable="true"
                     android:focusable="true"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center"
+                    android:minWidth="88dp"
                     android:minHeight="48dp"
-                    android:paddingStart="24dp"
-                    android:paddingTop="12dp"
-                    android:paddingEnd="24dp"
-                    android:paddingBottom="12dp"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="14dp"
                     android:text="@string/text_switch_to_online_documentation"
-                    android:textSize="15sp" />
+                    android:textAllCaps="true"
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
