@@ -162,7 +162,9 @@ object AceEditorLspPreferences {
         LanguageSupport(
             id = "tsx",
             fileTypes = listOf(".tsx"),
-            syntax = SyntaxSupport.PARTIAL,
+            // Ace Editor plugin 2.0.0 (Ace 1.44.0) highlights TSX with Ace's official tsx mode.
+            // zh-CN: Ace Editor 插件 2.0.0 (Ace 1.44.0) 使用 Ace 官方的 tsx mode 高亮 TSX.
+            syntax = SyntaxSupport.FULL,
             keywordCompletion = true,
             snippets = true,
             localCompletion = LocalCompletionSupport.SUPPORTED,

@@ -90,6 +90,10 @@ class AceEditorLspPreferencesTest {
             matrix.map { it.id },
         )
         assertEquals(
+            AceEditorLspPreferences.SyntaxSupport.FULL,
+            matrix.single { it.id == "tsx" }.syntax,
+        )
+        assertEquals(
             AceEditorLspPreferences.LocalCompletionSupport.P2_PLUS,
             matrix.single { it.id == "kotlin" }.localCompletion,
         )
