@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/13 - Algunas funciones pasan a complementos; actualiza con precaución
+###### 2026/10/14 - Algunas funciones pasan a complementos; actualiza con precaución
 
 * `Sugerencia` Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas
 * `Sugerencia` El SDK de destino de las aplicaciones empaquetadas cambia de 29 a 37; el acceso al almacenamiento compartido y a la red local requiere los permisos exigidos por el sistema
@@ -91,6 +91,7 @@
 * `Nuevo` Opción "Ejecutar en ventana flotante" en el menú de scripts del administrador de archivos, con barra flotante para iniciar/detener scripts, editar archivos y consultar registros
 * `Nuevo` Opción "Ejecutar con AutoJs4" en el menú de scripts del administrador de archivos para ejecutar scripts o proyectos con el motor AutoJs4 y comparar resultados (requiere AutoJs4 Runtime)
 * `Nuevo` Opción "Ejecutar con AutoJs4 y comparar" en el menú de scripts para ejecutar sucesivamente el mismo script o proyecto con AutoJs6 y AutoJs4 y comparar diferencias (requiere AutoJs4 Runtime)
+* `Nuevo` Opción "Copiar ruta" en los menús de archivos y directorios del administrador de archivos, para copiar la ruta absoluta al portapapeles
 * `Nuevo` El administrador de archivos permite explorar, previsualizar, comprimir y extraer archivos mediante 3-Stack Archive, con contraseñas, volúmenes y apertura o ejecución directa de archivos internos
 * `Nuevo` El administrador de archivos previsualiza Markdown/HTML mediante Markdown Previewer/HTML Previewer, con temas, CSS personalizado y pantalla completa
 * `Nuevo` El administrador de archivos permite ver imágenes, reproducir audio y vídeo y abrir EPUB mediante sus complementos; el audio admite reproducción en segundo plano y controles en notificaciones
@@ -202,6 +203,8 @@
 * `Corrección` El administrador de archivos podía parpadear o reiniciar el desplazamiento al volver a la página o eliminar entradas de la papelera
 * `Corrección` El administrador no distinguía correctamente archivos TypeScript de vídeos con la misma extensión y algunos archivos fuente carecían de opción de ejecución
 * `Corrección` Los mensajes de operaciones del administrador de archivos podían mostrarse repetidamente
+* `Corrección` Los elementos de listas como el administrador de archivos podían conservar un fondo gris tras abrir otra página y volver, en algunas pantallas táctiles
+* `Corrección` El número de "Ejecutar tarea" en la lista de tareas no coincidía con los elementos mostrados, y los scripts UI ya cerrados seguían apareciendo como en ejecución
 * `Corrección` Errores al resolver rutas multimedia e imágenes y visualización de rutas de caché en detalles de MediaInfo
 * `Corrección` Las consultas fallidas de detalles multimedia podían bloquear la aplicación y algunos campos de metadatos de vídeo se mostraban incorrectamente
 * `Corrección` El historial de versiones no seguía los cambios de ruta tras mover o renombrar archivos, o se asociaba incorrectamente a copias de contenido idéntico

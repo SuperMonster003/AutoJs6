@@ -190,7 +190,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/10/13 - Certaines fonctions passent par des plugins, mise à niveau avec prudence
+###### 2026/10/14 - Certaines fonctions passent par des plugins, mise à niveau avec prudence
 
 * `Astuce` Certaines fonctions intégrées sont désormais fournies par des plugins indépendants (OCR, reconnaissance de codes-barres, OpenCV, OpenCC, pinyin, MediaInfo, terminal et documentation hors ligne du projet); installez et activez les plugins correspondants dans le centre de plugins avant utilisation
 * `Astuce` Le SDK cible des applications empaquetées passe de 29 à 37; l'accès au stockage partagé et au réseau local nécessite les autorisations requises par le système
@@ -275,6 +275,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Option "Exécution flottante" dans le menu des scripts du gestionnaire de fichiers, pour exécuter/arrêter les scripts, modifier les fichiers et consulter les journaux via une barre d'outils flottante
 * `Fonctionnalité` Option "Exécuter avec AutoJs4" dans le menu des scripts du gestionnaire de fichiers, pour exécuter un script ou projet avec le moteur AutoJs4 et examiner ses résultats (nécessite le plugin AutoJs4 Runtime)
 * `Fonctionnalité` Option "Exécuter avec AutoJs4 et comparer" dans le menu des scripts du gestionnaire de fichiers, pour exécuter successivement le même script ou projet avec AutoJs6 et AutoJs4 et comparer les différences (nécessite le plugin AutoJs4 Runtime)
+* `Fonctionnalité` Option "Copier le chemin" dans les menus des fichiers et dossiers du gestionnaire de fichiers, pour copier le chemin absolu dans le presse-papiers
 * `Fonctionnalité` Le gestionnaire de fichiers permet de parcourir, prévisualiser, compresser et extraire des archives via le plugin 3-Stack Archive, avec mots de passe, volumes multiples et ouverture ou exécution directe des fichiers archivés
 * `Fonctionnalité` Le gestionnaire de fichiers permet de prévisualiser les fichiers Markdown/HTML via les plugins Markdown Previewer/HTML Previewer, avec thèmes, CSS personnalisé et mode plein écran
 * `Fonctionnalité` Le gestionnaire de fichiers permet d'afficher des images, de lire des contenus audio/vidéo et d'ouvrir des livres EPUB via les plugins correspondants, avec lecture audio en arrière-plan et commandes dans les notifications
@@ -386,6 +387,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Le gestionnaire de fichiers pouvait clignoter ou réinitialiser le défilement après retour à la page ou suppression d'une entrée de corbeille
 * `Correction` Le gestionnaire de fichiers distinguait mal les fichiers TypeScript des vidéos de même extension, et certains fichiers source n'avaient pas d'option d'exécution
 * `Correction` Les messages d'action du gestionnaire de fichiers pouvaient s'afficher plusieurs fois
+* `Correction` Les éléments de listes comme le gestionnaire de fichiers pouvaient garder un fond gris après l'ouverture d'une autre page puis le retour, sur certains écrans tactiles
+* `Correction` Le nombre de "Exécution d'une tâche" dans la liste des tâches ne correspondait pas aux éléments affichés, et les scripts UI déjà quittés restaient listés comme en cours
 * `Correction` Résolution incorrecte des chemins de fichiers multimédias et d'images, et affichage des chemins de cache dans les détails MediaInfo
 * `Correction` Un échec de consultation des détails multimédias pouvait faire planter l'application, et certains champs de métadonnées vidéo étaient mal affichés
 * `Correction` L'historique des versions ne suivait pas les déplacements ou renommages de fichiers, ou était associé à tort à une copie de contenu identique

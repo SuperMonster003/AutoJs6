@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/13 - Some features moved to plugins; upgrade with care
+###### 2026/10/14 - Some features moved to plugins; upgrade with care
 
 * `Hint` Some built-in features are now provided by independent plugins (such as OCR, barcode recognition, OpenCV, OpenCC, Pinyin, MediaInfo, the terminal and offline project documentation); install and enable the corresponding plugins in the Plugin Center before use
 * `Hint` The target SDK of packaged apps changes from 29 to 37; shared storage and local network access require permissions according to system requirements
@@ -91,6 +91,7 @@
 * `Feature` "Floating run" option in the file manager script menu, for running/stopping scripts, editing files and viewing logs through a floating toolbar
 * `Feature` "Run with AutoJs4" option in the file manager script menu, for running scripts or projects with the AutoJs4 engine and comparing results (requires the AutoJs4 Runtime plugin)
 * `Feature` "Run with AutoJs4 and compare" option in the file manager script menu, for running the same script or project with the AutoJs6 and AutoJs4 engines in sequence to compare differences (requires the AutoJs4 Runtime plugin)
+* `Feature` "Copy path" option in the file manager file and directory menus, for copying the absolute path to the clipboard
 * `Feature` File manager supports browsing, previewing, compressing and extracting archives through the 3-Stack Archive plugin, with passwords, split archives and directly opening or running files within archives
 * `Feature` File manager supports previewing Markdown/HTML files through the Markdown Previewer/HTML Previewer plugins, with themes, custom CSS and full-screen mode
 * `Feature` File manager supports viewing images, playing audio/video and opening EPUB ebooks through the corresponding plugins, with background audio playback and notification controls
@@ -202,6 +203,8 @@
 * `Fix` Issue where the file manager could flicker or reset its scroll position when returning to the page or deleting recycle bin entries
 * `Fix` Issue where the file manager could not distinguish TypeScript files from videos with the same extension, and some source files lacked a run action
 * `Fix` Issue where file manager operation messages could appear repeatedly
+* `Fix` Issue where list items such as those in the file manager could keep a gray background after opening another page and returning, on some touch screens
+* `Fix` Issue where the count of "Running task" in the task list did not match the items shown, and UI scripts that had exited were still listed as running
 * `Fix` Incorrect resolution of media and image file paths, and cache paths displayed in MediaInfo details
 * `Fix` Issue where failed media detail queries could crash the app, and incorrect video metadata fields
 * `Fix` Issue where version history did not follow file moves or renames, or was incorrectly associated with copies having identical content
