@@ -36,18 +36,17 @@
 
                 <ImageView
                     android:id="@+id/offline_docs_unavailable_icon"
-                    android:layout_width="88dp"
-                    android:layout_height="88dp"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
                     android:contentDescription="@null"
                     android:importantForAccessibility="no"
-                    android:padding="22dp"
                     android:src="@drawable/ic_menu_book_black_48dp" />
 
                 <TextView
                     android:id="@+id/offline_docs_unavailable_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="16dp"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center"
                     android:text="@string/text_offline_docs_unavailable"

@@ -9,9 +9,10 @@ import kotlin.math.roundToInt
  * zh-CN: [OfflineDocsUnavailableView] 的配色, 由界面背景 / 前景色与主题强调色推导得到.
  *
  * The theme color can be any color, and the editor supplies its own surface palette, so no fixed resource color
- * works everywhere. Every text color meets [TEXT_CONTRAST] against what it is drawn on.
+ * works everywhere. Every text color meets [TEXT_CONTRAST] against what it is drawn on, and the decorative icon
+ * is a faded accent that still meets [ICON_CONTRAST] against the surface.
  * zh-CN: 主题色可为任意颜色, 编辑器也会提供自己的界面配色, 因此固定的资源颜色无法适配所有情况.
- * 所有文字颜色与其底色的对比度均不低于 [TEXT_CONTRAST].
+ * 所有文字颜色与其底色的对比度均不低于 [TEXT_CONTRAST]; 装饰图标为淡化的强调色, 与背景的对比度仍不低于 [ICON_CONTRAST].
  *
  * All colors are opaque. zh-CN: 所有颜色均不透明.
  */
@@ -19,7 +20,6 @@ data class OfflineDocsUnavailablePalette(
     val background: Int,
     val title: Int,
     val body: Int,
-    val iconContainer: Int,
     val icon: Int,
     val primaryContainer: Int,
     val onPrimaryContainer: Int,
@@ -30,6 +30,9 @@ data class OfflineDocsUnavailablePalette(
 
         /** WCAG AA minimum for normal text. zh-CN: WCAG AA 对普通文字的最低对比度. */
         const val TEXT_CONTRAST = 4.5
+
+        /** WCAG 1.4.11 minimum for graphical objects. zh-CN: WCAG 1.4.11 对图形对象的最低对比度. */
+        const val ICON_CONTRAST = ThemeColorDerivation.UI_COMPONENT_CONTRAST
 
         /**
          * Minimum contrast between the filled primary action and a light surface, the same as the floating action button.
@@ -46,7 +49,6 @@ data class OfflineDocsUnavailablePalette(
         const val PRIMARY_CONTAINER_CONTRAST_ON_DARK = 1.6
 
         private const val BODY_WEIGHT = 0.72
-        private const val ICON_CONTAINER_WEIGHT = 0.14
 
         /** Luminance threshold of `ColorUtils.isLuminanceLight`. zh-CN: 与 `ColorUtils.isLuminanceLight` 的亮度阈值一致. */
         private const val LIGHT_LUMINANCE_THRESHOLD = 0.179
@@ -68,8 +70,7 @@ data class OfflineDocsUnavailablePalette(
             val body = ThemeColorDerivation.ensureContrast(blend(title, surface, BODY_WEIGHT), surface, TEXT_CONTRAST)
 
             val secondaryContent = ThemeColorDerivation.ensureContrast(reference, surface, TEXT_CONTRAST)
-            val iconContainer = blend(secondaryContent, surface, ICON_CONTAINER_WEIGHT)
-            val icon = ThemeColorDerivation.ensureContrast(reference, iconContainer, TEXT_CONTRAST)
+            val icon = fadeTowardContrast(secondaryContent, surface, ICON_CONTRAST)
 
             val primaryContainerContrast = when {
                 ColorMetrics.relativeLuminance(surface) < LIGHT_LUMINANCE_THRESHOLD -> PRIMARY_CONTAINER_CONTRAST_ON_DARK
@@ -83,12 +84,27 @@ data class OfflineDocsUnavailablePalette(
                 background = surface,
                 title = title,
                 body = body,
-                iconContainer = iconContainer,
                 icon = icon,
                 primaryContainer = primaryContainer,
                 onPrimaryContainer = onPrimaryContainer,
                 secondaryContent = secondaryContent,
             )
+        }
+
+        /**
+         * The mix of [color] over [background] that is as faint as possible while still meeting [ratio];
+         * [color] itself when it does not meet [ratio].
+         * zh-CN: [color] 叠加在 [background] 上, 在仍满足 [ratio] 的前提下尽量淡的混合色; [color] 本身不满足 [ratio] 时直接返回 [color].
+         */
+        private fun fadeTowardContrast(color: Int, background: Int, ratio: Double): Int {
+            if (ColorMetrics.contrastRatio(color, background) < ratio) return color
+            var failing = 0.0
+            var passing = 1.0
+            repeat(20) {
+                val middle = (failing + passing) / 2
+                if (ColorMetrics.contrastRatio(blend(color, background, middle), background) >= ratio) passing = middle else failing = middle
+            }
+            return blend(color, background, passing)
         }
 
         private fun composite(color: Int, background: Int): Int = blend(color, background, ((color ushr 24) and 0xFF) / 255.0)

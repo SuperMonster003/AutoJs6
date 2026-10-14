@@ -97,10 +97,6 @@ class OfflineDocsUnavailableView @JvmOverloads constructor(
         )
         setBackgroundColor(palette.background)
 
-        icon.background = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
-            setColor(palette.iconContainer)
-        }
         ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(palette.icon))
 
         title.setTextColor(palette.title)
