@@ -21,7 +21,6 @@ import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.service.EditorCurrentDocumentCodeActionAuthorizer
-import org.autojs.autojs.ui.edit.theme.Themes
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -144,7 +143,17 @@ class AceEditorPluginHostDeviceTest {
         val selectionModePreference = captureStringPreference(
             EditorEnginePreferences.KEY_EDITOR_ENGINE_SELECTION_MODE,
         )
-        val originalAceTheme = Themes.getCurrentThemeName(context, EditorEngineType.ACE)
+        // The editor resolves its theme with the night mode of its activity, which follows AutoJs6's own night mode
+        // setting and can differ from the application context (for example AutoJs6 "always off" on a phone in dark
+        // mode), so the test sets the unified theme and both separate light / dark themes.
+        // zh-CN: 编辑器按其 Activity 的夜间模式解析主题, 它跟随 AutoJs6 自身的夜间模式设置, 可能与应用 context 不同
+        // (如手机处于深色模式而 AutoJs6 设为 "始终关闭"), 因此测试同时设置统一主题与亮色 / 暗色两个分开的主题.
+        val themeKeys = listOf(
+            R.string.key_editor_theme,
+            R.string.key_editor_theme_light,
+            R.string.key_editor_theme_dark,
+        ).map { context.getString(it) }
+        val originalThemes = themeKeys.associateWith { captureStringPreference(it) }
         val originalPluginEnabled = PluginEnableStore.isEnabled(
             context,
             EditorPluginContract.DEFAULT_PACKAGE_NAME,
@@ -164,7 +173,7 @@ class AceEditorPluginHostDeviceTest {
                 runOnMainSync { AceEditorPluginStateMonitor.current(context).available },
             )
             val selection = runOnMainSync {
-                Themes.setCurrent(context, "Tomorrow Night")
+                Pref.get().edit().apply { themeKeys.forEach { putString(it, "Tomorrow Night") } }.commit()
                 EditorEnginePreferences.selectByUser(context, EditorEngineType.ACE)
             }
             assertEquals(EditorEngineType.ACE, selection.effectiveType)
@@ -264,7 +273,9 @@ class AceEditorPluginHostDeviceTest {
         } finally {
             activity?.let(::finishHostActivity)
             runOnMainSync {
-                Themes.setCurrent(context, originalAceTheme)
+                Pref.get().edit().apply {
+                    originalThemes.forEach { (key, stored) -> stored.restore(this, key) }
+                }.commit()
                 PluginEnableStore.setEnabled(
                     context,
                     EditorPluginContract.DEFAULT_PACKAGE_NAME,
@@ -315,14 +326,24 @@ class AceEditorPluginHostDeviceTest {
                 }
             }
             val webView = runOnMainSync { editorView.editor.inputView as WebView }
+            // An uncaught error in an evaluated script reaches the page's window.onerror as a fatal "Script error.", and
+            // the host then falls back to the native editor, so this diagnostic must never throw.
+            // zh-CN: 注入脚本中未捕获的错误会以致命的 "Script error." 到达页面的 window.onerror, 宿主随即退回原生编辑器,
+            // 因此这段诊断脚本不能抛出异常.
             val foldingStateScript = """
-                JSON.stringify({
-                    mode: window.editor.session.getMode().${'$'}id,
-                    style: window.editor.session.getFoldStyle(),
-                    text: window.editor.getValue(),
-                    folds: window.editor.session.getAllFolds().map(function(f) { return f.range.toString(); }),
-                    widget: window.editor.session.getFoldWidget(0)
-                })
+                (function() {
+                    try {
+                        return JSON.stringify({
+                            mode: window.editor.session.getMode().${'$'}id,
+                            style: window.editor.session.${'$'}foldStyle,
+                            text: window.editor.getValue(),
+                            folds: window.editor.session.getAllFolds().map(function(f) { return f.range.toString(); }),
+                            widget: typeof window.editor.session.getFoldWidget === "function" ? window.editor.session.getFoldWidget(0) : null
+                        });
+                    } catch (error) {
+                        return "error: " + error;
+                    }
+                })()
             """.trimIndent()
             val menu = runOnMainSync {
                 assertTrue("Update the Ace plugin to contract 7", editorView.editor.supportsCodeFolding)
@@ -463,7 +484,7 @@ class AceEditorPluginHostDeviceTest {
                 fail("Ace editor plugin failed: ${failure.type}: ${failure.message}")
             }
             runOnMainSync {
-                assertEquals(5, loaded.get().plugin.entrypoint.contractVersion)
+                assertEquals(EditorPluginContract.VERSION, loaded.get().plugin.entrypoint.contractVersion)
                 loaded.get().session.setInitialText(sourceText)
             }
 
