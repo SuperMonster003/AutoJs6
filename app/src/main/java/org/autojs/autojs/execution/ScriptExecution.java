@@ -22,6 +22,15 @@ public interface ScriptExecution {
 
     int getId();
 
+    /**
+     * True once the execution has reported its result, even if its engine is still being torn down
+     * (a UI script keeps its execution registered until its Activity is destroyed).
+     * zh-CN: 执行已报告结果后即为 true, 即使其引擎仍在销毁过程中 (UI 脚本的执行会保持注册, 直到其 Activity 被销毁).
+     */
+    default boolean isFinished() {
+        return false;
+    }
+
     /** Null for an ordinary execution. Agent context is host-owned, separate from execArgv. */
     default AgentScriptExecutionState getAgentContext() {
         return getConfig().getAgentExecutionState();
@@ -59,10 +68,20 @@ public interface ScriptExecution {
 
         protected ScriptExecutionTask mScriptExecutionTask;
         protected int mId;
+        private volatile boolean mFinished;
 
         public AbstractScriptExecution(ScriptExecutionTask task) {
             mScriptExecutionTask = task;
             mId = sMaxId.getAndIncrement();
+        }
+
+        @Override
+        public boolean isFinished() {
+            return mFinished;
+        }
+
+        public void markFinished() {
+            mFinished = true;
         }
 
         @Override

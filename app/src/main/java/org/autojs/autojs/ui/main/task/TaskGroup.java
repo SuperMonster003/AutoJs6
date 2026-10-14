@@ -134,7 +134,14 @@ public abstract class TaskGroup implements Parent<Task> {
         @Override
         public void refresh() {
             mTasks.clear();
-            AutoJs.getInstance().getScriptEngineService().getScriptExecutions().forEach(this::addTask);
+            // A finished UI script stays registered until its Activity is destroyed,
+            // and no further event arrives when it is finally unregistered.
+            // zh-CN: 已结束的 UI 脚本会保持注册直到其 Activity 被销毁, 而最终注销时不会再有事件通知.
+            for (ScriptExecution execution : AutoJs.getInstance().getScriptEngineService().getScriptExecutions()) {
+                if (!execution.isFinished()) {
+                    addTask(execution);
+                }
+            }
         }
 
         public int addTask(ScriptExecution engine) {

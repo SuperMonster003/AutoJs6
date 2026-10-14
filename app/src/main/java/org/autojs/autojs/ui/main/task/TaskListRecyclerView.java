@@ -157,13 +157,15 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
     }
 
     public void refresh() {
-        mAdapter = new Adapter(mTaskGroups);
-        setAdapter(mAdapter);
+        // The adapter snapshots child lists when constructed, so the groups must be refreshed first.
+        // Otherwise, the rows lag one refresh behind the counts in the group titles.
+        // zh-CN: 适配器在构造时会快照子列表, 因此必须先刷新分组.
+        // 否则列表条目会比分组标题中的数量滞后一次刷新.
         for (TaskGroup group : mTaskGroups) {
             group.refresh();
         }
-        // notifyDataSetChanged doesn't work?
-        // mAdapter.notifyDataSetChanged();
+        mAdapter = new Adapter(mTaskGroups);
+        setAdapter(mAdapter);
     }
 
     @Override

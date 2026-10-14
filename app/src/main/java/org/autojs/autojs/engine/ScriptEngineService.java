@@ -84,6 +84,11 @@ public class ScriptEngineService {
             }
 
             private void onFinish(ScriptExecution execution) {
+                // Registered first, so the flag is set before global listeners such as the task list hear of the end.
+                // zh-CN: 此监听器最先注册, 因此在任务列表等全局监听器得知结束之前, 标记已经设置.
+                if (execution instanceof ScriptExecution.AbstractScriptExecution abstractExecution) {
+                    abstractExecution.markFinished();
+                }
                 var engine = execution.getEngine();
                 // Preparation may fail before any engine exists to emit onEngineRemove.
                 if (engine == null) {
