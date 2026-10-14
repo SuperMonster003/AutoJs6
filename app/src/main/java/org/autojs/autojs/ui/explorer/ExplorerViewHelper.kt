@@ -8,7 +8,9 @@ import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.ExplorerProjectPage
 import org.autojs.autojs.model.explorer.ExplorerSamplePage
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.FileUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.util.*
 
@@ -61,6 +63,16 @@ object ExplorerViewHelper {
         is ExplorerSamplePage -> R.drawable.ic_sample_dir
         is ExplorerProjectPage -> R.drawable.ic_project
         else -> R.drawable.ic_folder_yellow_100px
+    }
+
+    /**
+     * Copies the absolute path of a file or directory to the clipboard, like "Copy as path" in Windows Explorer.
+     * zh-CN: 将文件或目录的绝对路径复制到剪贴板, 类似 Windows 资源管理器的 "复制为路径".
+     */
+    @JvmStatic
+    fun copyPath(context: Context, item: ExplorerItem) {
+        ClipboardUtils.setClip(context, item.path)
+        ViewUtils.showToast(context, R.string.text_already_copied_to_clip)
     }
 
 }

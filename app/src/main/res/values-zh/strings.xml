@@ -1414,6 +1414,7 @@
     <string name="text_copy_folder">复制文件夹</string>
     <string name="text_copy_line">复制行</string>
     <string name="text_copy_object_selector">复制对象选择器</string>
+    <string name="text_copy_path">复制路径</string>
     <string name="text_copy_same_path_confirm">源路径与目标路径相同, 是否继续复制.\n\n新名称: \"%1$s\"</string>
     <string name="text_copy_to">复制到</string>
     <string name="text_copy_to_clip">复制到剪贴板</string>

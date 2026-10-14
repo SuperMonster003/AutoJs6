@@ -140,6 +140,11 @@ internal class ExplorerPageViewHolder(
         if (!explorerPage.canCopy()) {
             menu.removeItem(R.id.action_copy_to)
         }
+        // Archive entries only have synthetic paths, which are of no use outside the archive view.
+        // zh-CN: 压缩包条目只有合成路径, 离开压缩包视图后没有意义.
+        if (explorerPage is ArchiveExplorerPage) {
+            menu.removeItem(R.id.action_copy_path)
+        }
         if (!explorerPage.canRename()) {
             menu.removeItem(R.id.action_rename)
         }
@@ -215,6 +220,8 @@ internal class ExplorerPageViewHolder(
                         .copy(selectedItem.toScriptFile())
                         .ignoreElements()
                         .subscribe({}, { host.showErrorDialog(it, R.string.error_failed_to_copy) })
+                R.id.action_copy_path ->
+                    ExplorerViewHelper.copyPath(host.context, selectedItem)
                 R.id.action_move_to ->
                     ScriptOperations(host.context, explorerView, host.currentPage)
                         .move(selectedItem.toScriptFile())

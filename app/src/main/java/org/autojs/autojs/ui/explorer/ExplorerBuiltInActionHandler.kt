@@ -52,6 +52,10 @@ internal class ExplorerBuiltInActionHandler(
                     .ignoreElements()
                     .subscribe({}, { host.showError(it, R.string.error_failed_to_copy) })
             }
+            R.id.action_copy_path -> {
+                val selected = host.selectedItem ?: return false
+                ExplorerViewHelper.copyPath(host.context, selected)
+            }
             R.id.action_rename -> {
                 ScriptOperations(host.context, host.explorerView, host.currentPage)
                     .rename(host.selectedItem as ExplorerFileItem?)

@@ -1414,6 +1414,7 @@
     <string name="text_copy_folder">Copy folder</string>
     <string name="text_copy_line">Copy line</string>
     <string name="text_copy_object_selector">Copy object selector</string>
+    <string name="text_copy_path">Copy path</string>
     <string name="text_copy_same_path_confirm">Source path is the same as destination path. Continue copying?\n\nNew name: \"%1$s\".</string>
     <string name="text_copy_to">Copy to</string>
     <string name="text_copy_to_clip">Copy to clipboard</string>

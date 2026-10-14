@@ -1419,6 +1419,7 @@
     <string name="text_copy_folder">폴더 복사</string>
     <string name="text_copy_line">사본 라인</string>
     <string name="text_copy_object_selector">객체 선택자 복사</string>
+    <string name="text_copy_path">경로 복사</string>
     <string name="text_copy_same_path_confirm">원본 경로와 대상 경로가 같습니다. 계속 복사하시겠습니까?\n\n새 이름: \"%1$s\".</string>
     <string name="text_copy_to">복사 위치</string>
     <string name="text_copy_to_clip">클립 보드에 복사</string>
