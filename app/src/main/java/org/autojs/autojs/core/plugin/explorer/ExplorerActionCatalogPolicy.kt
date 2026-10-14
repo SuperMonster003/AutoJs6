@@ -44,6 +44,7 @@ internal object ExplorerActionCatalogPolicy {
         playbackProgress: Boolean? = null,
         relatedFileSuffixes: Collection<String>? = null,
         filesystemPath: Boolean? = null,
+        targetTrash: Boolean? = null,
     ): ExplorerActionDescriptor? {
         if (
             protocolVersion !in
@@ -276,6 +277,25 @@ internal object ExplorerActionCatalogPolicy {
             return null
         }
 
+        // v24 target Trash: request files of a read-only Activity action without output, so the
+        // only new authority is moving those exact files into the host Trash, which stays undoable.
+        // zh-CN: v24 目标回收仅限只读, 以 Activity 启动且不带输出的文件动作, 新增的权限只是把这些请求文件移入宿主回收站 (可撤销).
+        val normalizedTargetTrash = targetTrash == true
+        if (
+            normalizedTargetTrash &&
+            (
+                protocolVersion < TARGET_TRASH_PROTOCOL_VERSION ||
+                    targetKind != ExplorerActionValues.TARGET_FILE ||
+                    accessMode != ExplorerActionValues.ACCESS_READ_ONLY ||
+                    normalizedPresentation != ExplorerActionValues.PRESENTATION_ACTIVITY ||
+                    normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE ||
+                    normalizedProbeForActionId != null ||
+                    normalizedFilesystemPath
+                )
+        ) {
+            return null
+        }
+
         return ExplorerActionDescriptor(
             protocolVersion = protocolVersion,
             id = normalizedId,
@@ -300,6 +320,7 @@ internal object ExplorerActionCatalogPolicy {
             playbackProgress = normalizedPlaybackProgress,
             relatedFileSuffixes = normalizedRelatedFileSuffixes,
             filesystemPath = normalizedFilesystemPath,
+            targetTrash = normalizedTargetTrash,
         )
     }
 
@@ -504,4 +525,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val UNMATCHED_FILE_PROBE_PROTOCOL_VERSION = 17
     private const val RELATED_FILE_PROTOCOL_VERSION = 22
     private const val FILESYSTEM_PATH_PROTOCOL_VERSION = 23
+    private const val TARGET_TRASH_PROTOCOL_VERSION = 24
 }

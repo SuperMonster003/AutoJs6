@@ -9,7 +9,7 @@ class ExplorerActionHostFileInfoPolicyTest {
 
     @Test
     fun hostFileInfoCapabilityDoesNotRenumberTheBaseProtocol() {
-        assertEquals(23, ExplorerActionProtocol.VERSION)
+        assertEquals(24, ExplorerActionProtocol.VERSION)
         assertEquals(1, ExplorerActionProtocol.HOST_FILE_INFO_VERSION)
     }
 

@@ -64,6 +64,7 @@ internal object ExplorerActionCatalogParser {
                     ExplorerActionCatalogKeys.RELATED_FILE_SUFFIXES,
                 ),
                 filesystemPath = action.getBooleanOrNull(ExplorerActionCatalogKeys.FILESYSTEM_PATH),
+                targetTrash = action.getBooleanOrNull(ExplorerActionCatalogKeys.TARGET_TRASH),
             ) ?: return@mapNotNull null
             descriptor.takeIf { actionIds.add(it.id) }
         }

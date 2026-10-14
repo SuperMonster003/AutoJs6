@@ -93,6 +93,7 @@
         "File manager supports previewing Markdown/HTML files through the Markdown Previewer/HTML Previewer plugins, with themes, custom CSS and full-screen mode",
         "File manager supports viewing images, playing audio/video and opening EPUB ebooks through the corresponding plugins, with background audio playback and notification controls",
         "Image viewer supports switching between images in the same directory, pinch zoom, EXIF information and full-screen mode, with image editing and format conversion through the 3-Maple Image plugin",
+        "Files opened in a plugin from the file manager can be moved to the recycle bin from within the plugin and restored with undo (requires plugin support)",
         "File manager supports viewing information and manifests of APK/APKS/XAPK/APKM/APKZ/AAB packages, and installing APKs and split APK containers",
         "Code editor supports loading Ace through the Ace Editor plugin, with editor engine selection in Settings and a Plugin Center entry when the plugin is unavailable",
         "Ace editor supports code completion, parameter hints, hover documentation and diagnostics; TypeScript projects support go to definition, symbol renaming and automatic imports (requires the TypeScript Engine plugin)",

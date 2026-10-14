@@ -689,6 +689,95 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV24TargetTrashIsLimitedToReadOnlyFileActivities() {
+        fun viewer(
+            protocolVersion: Int = 24,
+            cardinality: Int? = ExplorerActionValues.CARDINALITY_SINGLE,
+            accessMode: Int = ExplorerActionValues.ACCESS_READ_ONLY,
+            placement: Int = ExplorerActionValues.PLACEMENT_PRIMARY,
+            presentation: Int? = null,
+            targetKind: Int = ExplorerActionValues.TARGET_FILE,
+            mimeTypes: Collection<String>? = listOf("image/*"),
+            readSiblings: Boolean? = null,
+            filesystemPath: Boolean? = null,
+            targetTrash: Boolean? = true,
+        ) = descriptor(
+            protocolVersion = protocolVersion,
+            id = "view-image",
+            targetKind = targetKind,
+            cardinality = cardinality,
+            accessMode = accessMode,
+            placement = placement,
+            presentation = presentation,
+            mimeTypes = mimeTypes,
+            readSiblings = readSiblings,
+            filesystemPath = filesystemPath,
+            targetTrash = targetTrash,
+        )
+
+        val single = viewer() ?: error("Expected a valid v24 single-file viewer")
+        assertTrue(single.targetTrash)
+        // The single-file viewer keeps its v12 sibling paging next to target Trash.
+        assertTrue(viewer(readSiblings = true)!!.let { it.targetTrash && it.readSiblings })
+        assertTrue(
+            viewer(
+                cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE,
+                placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+            )!!.targetTrash,
+        )
+        assertTrue(viewer(placement = ExplorerActionValues.PLACEMENT_OVERFLOW)!!.targetTrash)
+        // Absent or false keeps the pre-v24 meaning of the action.
+        assertFalse(viewer(targetTrash = null)!!.targetTrash)
+        assertFalse(viewer(targetTrash = false)!!.targetTrash)
+        assertFalse(viewer(protocolVersion = 23, targetTrash = null)!!.targetTrash)
+
+        // Every broader shape rejects the action instead of granting Trash access.
+        assertNull(viewer(protocolVersion = 23))
+        assertNull(viewer(targetKind = ExplorerActionValues.TARGET_DIRECTORY, mimeTypes = emptyList()))
+        assertNull(viewer(targetKind = ExplorerActionValues.TARGET_MIXED))
+        assertNull(
+            viewer(
+                accessMode = ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            ),
+        )
+        assertNull(
+            viewer(
+                accessMode = ExplorerActionValues.ACCESS_REPLACE_TARGET,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            ),
+        )
+        assertNull(
+            viewer(
+                accessMode = ExplorerActionValues.ACCESS_MANAGE_TARGET,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            ),
+        )
+        assertNull(viewer(presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER))
+        assertNull(
+            viewer(
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+                mimeTypes = emptyList(),
+                filesystemPath = true,
+            ),
+        )
+        fun converter(targetTrash: Boolean?) = descriptor(
+            protocolVersion = 24,
+            id = "convert-image",
+            mimeTypes = listOf("image/*"),
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            outputMode = ExplorerActionValues.OUTPUT_CREATE_SIBLING,
+            outputMimeTypes = listOf("image/png"),
+            outputNameSuffix = ".converted.png",
+            maxOutputBytes = 1024L,
+            targetTrash = targetTrash,
+        )
+        assertTrue(converter(targetTrash = null) != null)
+        assertNull(converter(targetTrash = true))
+    }
+
+    @Test
     fun protocolV17AddsAnOverflowOnlyUnmatchedFileProbe() {
         val probe = descriptor(
             protocolVersion = 17,
@@ -966,6 +1055,11 @@ class ExplorerActionCatalogPolicyTest {
         playbackProgress: Boolean? = null,
         relatedFileSuffixes: Collection<String>? = null,
         filesystemPath: Boolean? = null,
+        targetTrash: Boolean? = null,
+        outputMode: Int? = null,
+        outputMimeTypes: Collection<String>? = null,
+        outputNameSuffix: String? = null,
+        maxOutputBytes: Long? = null,
     ): ExplorerActionDescriptor? {
         return ExplorerActionCatalogPolicy.normalizeDescriptor(
             protocolVersion = protocolVersion,
@@ -988,6 +1082,11 @@ class ExplorerActionCatalogPolicyTest {
             playbackProgress = playbackProgress,
             relatedFileSuffixes = relatedFileSuffixes,
             filesystemPath = filesystemPath,
+            targetTrash = targetTrash,
+            outputMode = outputMode,
+            outputMimeTypes = outputMimeTypes,
+            outputNameSuffix = outputNameSuffix,
+            maxOutputBytes = maxOutputBytes,
         )
     }
 }

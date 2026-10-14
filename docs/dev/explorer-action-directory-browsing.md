@@ -22,6 +22,8 @@ own viewer. The host code did not change for it.
   targets);
 - `readSiblings`, `playbackProgress`, related-file suffixes and `filesystemPath` are not needed.
   `filesystemPath` (v23) in particular replaces the session with a path and must stay unset here.
+- `targetTrash` (v24) is not available: it covers request files only, so the files a directory
+  session lists can be browsed but not moved into the host Trash.
 
 `ExplorerActionCatalogPolicyTest.protocolV12AcceptsAReadOnlyDirectoryOverflowActionWithoutMatchers`
 pins this shape.

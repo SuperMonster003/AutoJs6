@@ -51,6 +51,7 @@ internal class ExplorerActionHostSession private constructor(
     private val allowCreateOutput: Boolean,
     private val allowReplaceTarget: Boolean,
     private val allowReplacementUndo: Boolean,
+    private val allowTargetTrash: Boolean,
     allowReadSiblings: Boolean,
     allowPlaybackProgress: Boolean,
     relatedFileSuffixes: Set<String>,
@@ -85,6 +86,8 @@ internal class ExplorerActionHostSession private constructor(
     private val committedCreateOutputs = LinkedHashMap<String, CommittedCreateOutput>()
     private val outputBatches = LinkedHashMap<String, ExplorerActionOutputBatchRecord>()
     private var targetTrashResult: Bundle? = null
+    private var targetTrashRequest: List<String> = emptyList()
+    private val trashedTargetIds = HashSet<String>()
     private var targetTrashRunning = false
     private var clientLease: ClientLease? = null
     private var closed = false
@@ -618,6 +621,10 @@ internal class ExplorerActionHostSession private constructor(
         val repository = TrashRepository(applicationContext)
         val plan = synchronized(lock) {
             checkOpen()
+            if (allowTargetTrash) {
+                return@synchronized prepareSelectedTargetTrash(requestedTargetIds, requestedOutputIds, repository)
+                    ?: return Bundle(requireNotNull(targetTrashResult))
+            }
             targetTrashResult?.let { return Bundle(it) }
             check(!targetTrashRunning) { "Explorer Action target Trash operation is already running" }
             require(requestedTargetIds == targetsById.keys.toList()) {
@@ -648,6 +655,7 @@ internal class ExplorerActionHostSession private constructor(
             )
             targetTrashRunning = true
             TargetTrashPlan(
+                targetIds = orderedTargets.map { entry -> entry.key },
                 targets = orderedTargets.map { entry -> entry.value },
                 batch = batch,
             )
@@ -741,6 +749,8 @@ internal class ExplorerActionHostSession private constructor(
             )
             synchronized(lock) {
                 targetTrashResult = Bundle(result)
+                targetTrashRequest = plan.targetIds
+                (movedIndices + recoveryIndices).forEach { index -> trashedTargetIds += plan.targetIds[index] }
             }
             if (movedCount > 0 || recoveryCount > 0) runCatching(onSourcesTrashed)
             return result
@@ -777,7 +787,7 @@ internal class ExplorerActionHostSession private constructor(
         require(isCanonicalUuid(targetTrashBatchId)) {
             "Explorer Action target Trash batch ID is invalid"
         }
-        check(allowCreateOutput) {
+        check(allowCreateOutput || allowTargetTrash) {
             "Explorer Action does not have target Trash history access"
         }
         return synchronized(lock) {
@@ -796,7 +806,7 @@ internal class ExplorerActionHostSession private constructor(
     override fun listTargetTrashBatches(): Bundle {
         enforceCaller()
         check(selectedOutputDirectory == null) { "Extraction sessions cannot access source Trash history" }
-        check(allowCreateOutput) {
+        check(allowCreateOutput || allowTargetTrash) {
             "Explorer Action does not have target Trash history access"
         }
         return synchronized(lock) {
@@ -823,7 +833,7 @@ internal class ExplorerActionHostSession private constructor(
         require(isCanonicalUuid(targetTrashBatchId)) {
             "Explorer Action target Trash batch ID is invalid"
         }
-        check(allowCreateOutput) {
+        check(allowCreateOutput || allowTargetTrash) {
             "Explorer Action does not have target Trash history access"
         }
         val before = synchronized(lock) {
@@ -851,6 +861,7 @@ internal class ExplorerActionHostSession private constructor(
                 batchId = targetTrashBatchId,
                 repository = repository,
             )
+            if (allowTargetTrash) adoptRestoredTargets(before, restored)
             if (restored.restoredCount > before.restoredCount) runCatching(onSourcesTrashed)
             targetTrashBatchBundle(restored, restored.id)
         } finally {
@@ -1574,6 +1585,87 @@ internal class ExplorerActionHostSession private constructor(
         }
     }
 
+    /**
+     * v24: validates one deletion of a `targetTrash` action and reserves its batch. Returns null
+     * when the request repeats the previous call and that call moved one of its targets, so the
+     * stored result answers a client whose response was lost. A failed or since restored target
+     * can be requested again. Must be called while holding [lock].
+     */
+    private fun prepareSelectedTargetTrash(
+        requestedTargetIds: List<String>,
+        requestedOutputIds: List<String>,
+        repository: TrashRepository,
+    ): TargetTrashPlan? {
+        if (
+            targetTrashResult != null &&
+            requestedTargetIds == targetTrashRequest &&
+            requestedTargetIds.any(trashedTargetIds::contains)
+        ) {
+            return null
+        }
+        check(!targetTrashRunning) { "Explorer Action target Trash operation is already running" }
+        require(requestedOutputIds.isEmpty()) {
+            "Explorer Action read-only target Trash does not take output proof"
+        }
+        val requestOrder = targetsById.keys.toList()
+        val positions = requestedTargetIds.map(requestOrder::indexOf)
+        require(
+            requestedTargetIds.isNotEmpty() &&
+                positions.none { position -> position < 0 } &&
+                positions.zipWithNext().all { (previous, next) -> previous < next },
+        ) {
+            "Explorer Action target Trash must name distinct request targets in request order"
+        }
+        check(requestedTargetIds.none(trashedTargetIds::contains)) {
+            "Explorer Action target was already moved to Trash"
+        }
+        val selected = requestedTargetIds.map { targetId -> targetId to targetsById.getValue(targetId) }
+        selected.forEach { (_, target) -> requireTargetIdentity(target) }
+        val batch = targetTrashBatchStore.prepare(
+            pluginUid = expectedUid,
+            parent = parent,
+            sources = selected.map { (targetId, target) ->
+                ExplorerActionTargetTrashBatchSource(
+                    targetId = targetId,
+                    file = target.file,
+                    identity = target.identity,
+                )
+            },
+            repository = repository,
+            kind = ExplorerActionTargetTrashBatchKind.SELECTED_TARGETS,
+        )
+        targetTrashRunning = true
+        return TargetTrashPlan(
+            targetIds = requestedTargetIds,
+            targets = selected.map { (_, target) -> target },
+            batch = batch,
+        )
+    }
+
+    /**
+     * v24: a target the host restored to its own original path becomes deletable again in this
+     * session, under the identity of the restored file.
+     */
+    private fun adoptRestoredTargets(
+        before: ExplorerActionTargetTrashBatchRecord,
+        after: ExplorerActionTargetTrashBatchRecord,
+    ) = synchronized(lock) {
+        after.items.forEachIndexed { index, item ->
+            if (
+                item.state != ExplorerActionTargetTrashItemState.RESTORED ||
+                before.items.getOrNull(index)?.state == ExplorerActionTargetTrashItemState.RESTORED
+            ) {
+                return@forEachIndexed
+            }
+            val target = targetsById[item.targetId] ?: return@forEachIndexed
+            if (target.file.path != item.originalPath) return@forEachIndexed
+            runCatching { ExplorerActionFileIdentity.capture(target.file) }.onSuccess { identity ->
+                target.identity = identity
+                trashedTargetIds -= item.targetId
+            }
+        }
+    }
+
     private fun requireTargetIdentity(target: TargetState) {
         inputAccess.requireCurrentIdentity(
             target,
@@ -1744,6 +1836,7 @@ internal class ExplorerActionHostSession private constructor(
     )
 
     private data class TargetTrashPlan(
+        val targetIds: List<String>,
         val targets: List<TargetState>,
         val batch: ExplorerActionTargetTrashBatchRecord,
     )
@@ -1813,6 +1906,7 @@ internal class ExplorerActionHostSession private constructor(
             selectedOutputDirectory: File? = null,
             allowReplaceTarget: Boolean = false,
             allowReplacementUndo: Boolean = false,
+            allowTargetTrash: Boolean = false,
             allowReadSiblings: Boolean = false,
             allowPlaybackProgress: Boolean = false,
             relatedFileSuffixes: Set<String> = emptySet(),
@@ -1830,6 +1924,12 @@ internal class ExplorerActionHostSession private constructor(
             ) {
                 "Explorer Action replacement history requires one replaceable target"
             }
+            require(
+                !allowTargetTrash ||
+                    (!allowCreateOutput && !allowReplaceTarget && selectedOutputDirectory == null),
+            ) {
+                "Explorer Action target Trash is available only to read-only sessions"
+            }
             val canonicalParent = commonParent.canonicalFile
             val outputDirectory = selectedOutputDirectory?.canonicalFile
             require(outputDirectory == null || (
@@ -1846,7 +1946,7 @@ internal class ExplorerActionHostSession private constructor(
                 applicationContext,
                 clock,
             )
-            if (allowCreateOutput) {
+            if (allowCreateOutput || allowTargetTrash) {
                 targetTrashBatchStore.recover(TrashRepository(applicationContext))
             }
             val replacementHistoryStore = ExplorerActionReplacementHistoryStore(
@@ -1865,6 +1965,7 @@ internal class ExplorerActionHostSession private constructor(
                 allowCreateOutput = allowCreateOutput,
                 allowReplaceTarget = allowReplaceTarget,
                 allowReplacementUndo = allowReplacementUndo,
+                allowTargetTrash = allowTargetTrash,
                 allowReadSiblings = allowReadSiblings,
                 allowPlaybackProgress = allowPlaybackProgress,
                 relatedFileSuffixes = relatedFileSuffixes,

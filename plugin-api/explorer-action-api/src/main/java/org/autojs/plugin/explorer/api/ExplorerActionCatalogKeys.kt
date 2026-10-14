@@ -47,4 +47,12 @@ object ExplorerActionCatalogKeys {
      * host neither creates a host file session nor discloses any other path for such an action.
      */
     const val FILESYSTEM_PATH = "filesystemPath"
+
+    /**
+     * v24 optional. Valid only for a read-only file Activity action without output. The host
+     * session then lets the plugin move any of the request targets into the host Trash, one
+     * user deletion at a time and without output proof, and restore them through the v21 batch
+     * history. Directories, siblings and other files below the parent stay out of reach.
+     */
+    const val TARGET_TRASH = "targetTrash"
 }

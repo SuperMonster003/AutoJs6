@@ -25,6 +25,8 @@ internal data class ExplorerActionDescriptor(
     val relatedFileSuffixes: Set<String>,
     /** v23: the host discloses the canonical path of the single selected directory. */
     val filesystemPath: Boolean = false,
+    /** v24: the host session may move request targets into the host Trash without output proof. */
+    val targetTrash: Boolean = false,
 )
 
 internal data class ExplorerActionTarget(

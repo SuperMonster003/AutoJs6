@@ -23,6 +23,15 @@ internal enum class ExplorerActionTargetTrashItemState {
     RECOVERY_REQUIRED,
 }
 
+/** Which protocol path created a batch; older records without a kind are v21 archive batches. */
+internal enum class ExplorerActionTargetTrashBatchKind {
+    /** v16 / v21: the complete selection after its archive outputs were committed. */
+    ARCHIVE_SOURCES,
+
+    /** v24: request targets a read-only action moved one user deletion at a time. */
+    SELECTED_TARGETS,
+}
+
 internal data class ExplorerActionTargetTrashBatchSource(
     val targetId: String,
     val file: File,
@@ -77,6 +86,7 @@ internal data class ExplorerActionTargetTrashBatchRecord(
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
     val items: List<ExplorerActionTargetTrashItemRecord>,
+    val kind: ExplorerActionTargetTrashBatchKind = ExplorerActionTargetTrashBatchKind.ARCHIVE_SOURCES,
 ) {
     init {
         require(isCanonicalTargetTrashUuid(id))
@@ -138,14 +148,25 @@ internal data class ExplorerActionTargetTrashBatchRecord(
             protocolState != ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_RECOVERY_REQUIRED
 
     val canBeEvictedForCapacity: Boolean
-        get() = !canUndo && (
+        get() = if (canUndo) {
+            // v24: undoing a viewer deletion is a short-lived convenience. Dropping its record keeps
+            // every moved item in host Trash, where the Trash page still restores it, so such a
+            // record may make room as long as no item needs recovery.
+            // zh-CN: v24 查看器删除的撤销只是短时便利. 丢弃其记录时已移动的条目仍在宿主回收站中可恢复, 因此在没有待恢复条目时可让出空间.
+            kind == ExplorerActionTargetTrashBatchKind.SELECTED_TARGETS && items.none { item ->
+                item.state == ExplorerActionTargetTrashItemState.PENDING ||
+                    item.state == ExplorerActionTargetTrashItemState.MOVING ||
+                    item.state == ExplorerActionTargetTrashItemState.RESTORING ||
+                    item.state == ExplorerActionTargetTrashItemState.RECOVERY_REQUIRED
+            }
+        } else {
             protocolState == ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_RESTORED ||
                 protocolState == ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_STALE ||
                 protocolState == ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_FAILED
-            )
+        }
 }
 
-/** Durable host-private v21 history for one archive-creation source-to-Trash operation. */
+/** Durable host-private v21 / v24 history for one source-to-Trash operation. */
 internal class ExplorerActionTargetTrashBatchStore(
     context: Context,
     private val clock: () -> Long = System::currentTimeMillis,
@@ -170,6 +191,7 @@ internal class ExplorerActionTargetTrashBatchStore(
         parent: File,
         sources: List<ExplorerActionTargetTrashBatchSource>,
         repository: TrashRepository,
+        kind: ExplorerActionTargetTrashBatchKind = ExplorerActionTargetTrashBatchKind.ARCHIVE_SOURCES,
     ): ExplorerActionTargetTrashBatchRecord = synchronized(PROCESS_LOCK) {
         require(pluginUid >= 0)
         require(sources.size in 1..ExplorerActionProtocol.MAX_TARGET_TRASH_ITEM_RESULTS)
@@ -204,6 +226,7 @@ internal class ExplorerActionTargetTrashBatchStore(
                     state = ExplorerActionTargetTrashItemState.PENDING,
                 )
             },
+            kind = kind,
         )
         writeLocked(record)
         check(ACTIVE_BATCH_IDS.add(record.id)) {
@@ -428,8 +451,14 @@ internal class ExplorerActionTargetTrashBatchStore(
         var records = listRecordsLocked()
         if (records.size < MAX_HISTORY_RECORDS) return
         records.asSequence()
+            .filterNot { record -> record.id in ACTIVE_BATCH_IDS }
             .filter(ExplorerActionTargetTrashBatchRecord::canBeEvictedForCapacity)
-            .sortedBy(ExplorerActionTargetTrashBatchRecord::updatedAtMillis)
+            .sortedWith(
+                compareBy(
+                    ExplorerActionTargetTrashBatchRecord::canUndo,
+                    ExplorerActionTargetTrashBatchRecord::updatedAtMillis,
+                ),
+            )
             .take(records.size - MAX_HISTORY_RECORDS + 1)
             .forEach { record -> remove(record.id) }
         records = listRecordsLocked()
@@ -522,6 +551,7 @@ internal class ExplorerActionTargetTrashBatchStore(
         put(KEY_PARENT_INODE, parentInode)
         put(KEY_CREATED_AT, createdAtMillis)
         put(KEY_UPDATED_AT, updatedAtMillis)
+        put(KEY_KIND, kind.name)
         put(
             KEY_ITEMS,
             JSONArray().apply {
@@ -573,6 +603,9 @@ internal class ExplorerActionTargetTrashBatchStore(
             createdAtMillis = json.getLong(KEY_CREATED_AT),
             updatedAtMillis = json.getLong(KEY_UPDATED_AT),
             items = items,
+            kind = json.optString(KEY_KIND).takeIf(String::isNotEmpty)
+                ?.let(ExplorerActionTargetTrashBatchKind::valueOf)
+                ?: ExplorerActionTargetTrashBatchKind.ARCHIVE_SOURCES,
         )
     }
 
@@ -600,6 +633,7 @@ internal class ExplorerActionTargetTrashBatchStore(
         const val KEY_PARENT_INODE = "parentInode"
         const val KEY_CREATED_AT = "createdAtMillis"
         const val KEY_UPDATED_AT = "updatedAtMillis"
+        const val KEY_KIND = "kind"
         const val KEY_ITEMS = "items"
         const val KEY_TARGET_ID = "targetId"
         const val KEY_DISPLAY_NAME = "displayName"

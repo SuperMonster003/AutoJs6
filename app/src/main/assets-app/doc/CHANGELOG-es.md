@@ -95,6 +95,7 @@
 * `Nuevo` El administrador de archivos previsualiza Markdown/HTML mediante Markdown Previewer/HTML Previewer, con temas, CSS personalizado y pantalla completa
 * `Nuevo` El administrador de archivos permite ver imágenes, reproducir audio y vídeo y abrir EPUB mediante sus complementos; el audio admite reproducción en segundo plano y controles en notificaciones
 * `Nuevo` El visor de imágenes permite cambiar entre imágenes del mismo directorio, ampliar con dos dedos, mostrar EXIF y usar pantalla completa, además de editar y convertir imágenes mediante 3-Maple Image
+* `Nuevo` Los archivos abiertos en un complemento desde el administrador de archivos se pueden mover a la papelera desde el complemento y recuperar con deshacer (requiere compatibilidad del complemento)
 * `Nuevo` El administrador de archivos permite consultar información y manifiestos de paquetes APK/APKS/XAPK/APKM/APKZ/AAB e instalar APK y contenedores de APK divididos
 * `Nuevo` El editor de código permite cargar Ace mediante Ace Editor y seleccionar el motor en los ajustes; ofrece acceso al Centro de complementos si el complemento no está disponible
 * `Nuevo` Ace admite completado, pistas de parámetros, documentación flotante y diagnósticos; los proyectos TypeScript admiten salto a definición, renombrado de símbolos e importación automática (requiere TypeScript Engine)
