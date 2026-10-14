@@ -84,6 +84,7 @@
     <string name="key_a11y_service_manager_status_level" translatable="false">key_$_a11y_service_manager_status_level</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
+    <string name="key_ace_custom_scrollbar_enabled" translatable="false">key_$_ace_custom_scrollbar_enabled</string>
     <string name="key_ace_editor_font" translatable="false">key_$_ace_editor_font</string>
     <string name="key_ace_editor_font_cascadia_code" translatable="false">cascadia_code</string>
     <string name="key_ace_editor_font_fira_code" translatable="false">fira_code</string>
@@ -97,12 +98,15 @@
     <string name="key_ace_editor_font_system_monospace" translatable="false">system_monospace</string>
     <string name="key_ace_font_ligatures_enabled" translatable="false">key_$_ace_font_ligatures_enabled</string>
     <string name="key_ace_font_styles_enabled" translatable="false">key_$_ace_font_styles_enabled</string>
+    <string name="key_ace_highlight_indent_guides_enabled" translatable="false">key_$_ace_highlight_indent_guides_enabled</string>
     <string name="key_ace_indent_guides_enabled" translatable="false">key_$_ace_indent_guides_enabled</string>
+    <string name="key_ace_inline_completion_preview_enabled" translatable="false">key_$_ace_inline_completion_preview_enabled</string>
     <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
     <string name="key_ace_lsp_declaration_groups" translatable="false">key_$_ace_lsp_declaration_groups</string>
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
     <string name="key_ace_lsp_file_types" translatable="false">key_$_ace_lsp_file_types</string>
     <string name="key_ace_print_margin_enabled" translatable="false">key_$_ace_print_margin_enabled</string>
+    <string name="key_ace_scrollbar_auto_hide_enabled" translatable="false">key_$_ace_scrollbar_auto_hide_enabled</string>
     <string name="key_ace_smart_hint_arrow_overload_cycling" translatable="false">key_$_ace_smart_hint_arrow_overload_cycling</string>
     <string name="key_ace_smart_hint_completion_delay" translatable="false">key_$_ace_smart_hint_completion_delay</string>
     <string name="key_ace_smart_hint_completion_delay_0" translatable="false">0</string>
@@ -120,6 +124,10 @@
     <string name="key_ace_smart_hint_signature_trigger_cursor" translatable="false">cursor</string>
     <string name="key_ace_smart_hint_signature_trigger_off" translatable="false">off</string>
     <string name="key_ace_smart_hint_signature_trigger_typing" translatable="false">typing</string>
+    <string name="key_ace_svg_gutter_icons_enabled" translatable="false">key_$_ace_svg_gutter_icons_enabled</string>
+    <string name="key_ace_symbol_highlight_enabled" translatable="false">key_$_ace_symbol_highlight_enabled</string>
+    <string name="key_ace_touch_magnifier_enabled" translatable="false">key_$_ace_touch_magnifier_enabled</string>
+    <string name="key_ace_whitespaces_in_selection_enabled" translatable="false">key_$_ace_whitespaces_in_selection_enabled</string>
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
     <string name="key_ai_settings" translatable="false">key_$_ai_settings</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>

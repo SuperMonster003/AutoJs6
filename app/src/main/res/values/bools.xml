@@ -9,6 +9,14 @@
     <bool name="pref_ace_lsp_enabled">true</bool>
     <bool name="pref_ace_print_margin_enabled">false</bool>
     <bool name="pref_ace_indent_guides_enabled">true</bool>
+    <bool name="pref_ace_highlight_indent_guides_enabled">true</bool>
+    <bool name="pref_ace_svg_gutter_icons_enabled">true</bool>
+    <bool name="pref_ace_custom_scrollbar_enabled">true</bool>
+    <bool name="pref_ace_scrollbar_auto_hide_enabled">true</bool>
+    <bool name="pref_ace_whitespaces_in_selection_enabled">true</bool>
+    <bool name="pref_ace_touch_magnifier_enabled">false</bool>
+    <bool name="pref_ace_symbol_highlight_enabled">true</bool>
+    <bool name="pref_ace_inline_completion_preview_enabled">false</bool>
     <bool name="pref_ace_smart_hint_arrow_overload_cycling">true</bool>
     <bool name="pref_ace_word_wrap_enabled">false</bool>
     <bool name="pref_auto_check_for_updates">true</bool>

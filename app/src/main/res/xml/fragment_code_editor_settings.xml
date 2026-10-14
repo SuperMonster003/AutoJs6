@@ -87,6 +87,14 @@
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_highlight_indent_guides_enabled"
+            app:defaultValue="@bool/pref_ace_highlight_indent_guides_enabled"
+            app:title="@string/text_ace_highlight_indent_guides_enabled"
+            app:summary="@string/summary_ace_highlight_indent_guides_enabled"
+            app:longClickPrompt="@string/description_ace_highlight_indent_guides_enabled_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
             app:key="@string/key_ace_word_wrap_enabled"
             app:defaultValue="@bool/pref_ace_word_wrap_enabled"
             app:title="@string/text_ace_word_wrap_enabled"
@@ -101,6 +109,30 @@
             app:itemValues="@array/values_editor_word_wrap_indent_style"
             app:itemDefaultKey="@string/default_key_editor_word_wrap_indent_style"
             app:longClickPrompt="@string/description_editor_word_wrap_indent_style_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_whitespaces_in_selection_enabled"
+            app:defaultValue="@bool/pref_ace_whitespaces_in_selection_enabled"
+            app:title="@string/text_ace_whitespaces_in_selection_enabled"
+            app:summary="@string/summary_ace_whitespaces_in_selection_enabled"
+            app:longClickPrompt="@string/description_ace_whitespaces_in_selection_enabled_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_custom_scrollbar_enabled"
+            app:defaultValue="@bool/pref_ace_custom_scrollbar_enabled"
+            app:title="@string/text_ace_custom_scrollbar_enabled"
+            app:summary="@string/summary_ace_custom_scrollbar_enabled"
+            app:longClickPrompt="@string/description_ace_custom_scrollbar_enabled_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_scrollbar_auto_hide_enabled"
+            app:defaultValue="@bool/pref_ace_scrollbar_auto_hide_enabled"
+            app:title="@string/text_ace_scrollbar_auto_hide_enabled"
+            app:summary="@string/summary_ace_scrollbar_auto_hide_enabled"
+            app:longClickPrompt="@string/description_ace_scrollbar_auto_hide_enabled_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
@@ -222,6 +254,22 @@
             app:summary="@string/summary_ace_smart_hint_arrow_overload_cycling"
             app:longClickPrompt="@string/description_ace_smart_hint_preference" />
 
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_symbol_highlight_enabled"
+            app:defaultValue="@bool/pref_ace_symbol_highlight_enabled"
+            app:title="@string/text_ace_symbol_highlight_enabled"
+            app:summary="@string/summary_ace_symbol_highlight_enabled"
+            app:longClickPrompt="@string/description_ace_symbol_highlight_enabled_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_inline_completion_preview_enabled"
+            app:defaultValue="@bool/pref_ace_inline_completion_preview_enabled"
+            app:title="@string/text_ace_inline_completion_preview_enabled"
+            app:summary="@string/summary_ace_inline_completion_preview_enabled"
+            app:longClickPrompt="@string/description_ace_inline_completion_preview_enabled_preference" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
@@ -234,6 +282,14 @@
             app:defaultValue="@bool/pref_editor_pinch_to_zoom_change_text_size_enabled"
             app:title="@string/text_editor_pinch_to_zoom_change_text_size_enabled"
             app:summary="@string/summary_editor_pinch_to_zoom_change_text_size_enabled" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_touch_magnifier_enabled"
+            app:defaultValue="@bool/pref_ace_touch_magnifier_enabled"
+            app:title="@string/text_ace_touch_magnifier_enabled"
+            app:summary="@string/summary_ace_touch_magnifier_enabled"
+            app:longClickPrompt="@string/description_ace_touch_magnifier_enabled_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
@@ -273,6 +329,14 @@
             app:title="@string/text_editor_fold_markers_enabled"
             app:summary="@string/summary_editor_fold_markers_enabled"
             app:longClickPrompt="@string/description_editor_fold_markers_enabled_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_svg_gutter_icons_enabled"
+            app:defaultValue="@bool/pref_ace_svg_gutter_icons_enabled"
+            app:title="@string/text_ace_svg_gutter_icons_enabled"
+            app:summary="@string/summary_ace_svg_gutter_icons_enabled"
+            app:longClickPrompt="@string/description_ace_svg_gutter_icons_enabled_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
