@@ -9,14 +9,14 @@
         android:id="@+id/action_copy_to"
         android:title="@string/text_copy_to" />
     <item
-        android:id="@+id/action_copy_path"
-        android:title="@string/text_copy_path" />
-    <item
         android:id="@+id/action_rename"
         android:title="@string/text_rename" />
     <item
         android:id="@+id/action_delete"
         android:title="@string/text_delete" />
+    <item
+        android:id="@+id/action_copy_path"
+        android:title="@string/text_copy_path" />
     <item
         android:id="@+id/action_timed_task"
         android:title="@string/text_timed_task" />
