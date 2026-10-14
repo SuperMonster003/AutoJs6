@@ -5,6 +5,9 @@ package org.autojs.autojs.ui
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
+import android.view.InputDevice
+import android.view.MotionEvent
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -98,6 +101,31 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         LocaleUtils.syncPrefWithCurrentStateIfNeeded(this)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        clearStaleHoverState()
+    }
+
+    /**
+     * Some touch screens report a lifting finger as a hovering pointer, and the matching HOVER_EXIT
+     * may never reach this window once the tap has opened another one, so the tapped list row keeps
+     * its hover highlight. A synthetic exit, like the one ViewGroup sends to a removed hovered child,
+     * clears every hovered view of this window; a real hovering pointer re-enters on its next move.
+     * zh-CN: 部分触摸屏会把抬起中的手指上报为悬停指针, 而点击打开其他窗口后, 与之对应的 HOVER_EXIT
+     * 可能不会再送达本窗口, 导致被点击的列表条目一直保留悬停高亮. 此处模拟 ViewGroup 对被移除的悬停子视图
+     * 发送的退出事件, 清除本窗口内所有视图的悬停状态; 真实的悬停指针在下一次移动时会重新进入.
+     */
+    private fun clearStaleHoverState() {
+        val now = SystemClock.uptimeMillis()
+        val event = MotionEvent.obtain(now, now, MotionEvent.ACTION_HOVER_EXIT, 0f, 0f, 0)
+        event.source = InputDevice.SOURCE_TOUCHSCREEN
+        try {
+            window.superDispatchGenericMotionEvent(event)
+        } finally {
+            event.recycle()
+        }
     }
 
     open fun initThemeColors() {
