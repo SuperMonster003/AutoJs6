@@ -9,6 +9,8 @@
 
 关联文档: [OpenCV plugin integration](opencv-plugin-integration.md), [16 KB 页大小 Roadmap](page-size-16kb-roadmap.md), OpenCV 插件仓库 `ROADMAP.md` 的 M4 (OpenCV 新变体).
 
+关联迁移记录 (2026-10-15, MCP Server 插件路线图 D41): 插件自描述工具契约 (MCP Server 插件路线图 `D:/idea-projects/AutoJs6-Plugin-MCP-Server/ROADMAP.md` 的 P12) 计划在以后把找图找色迁移为 OpenCV 插件自己声明的工具. 为此 OpenCV 插件将新增一个在自身进程运行的工具服务 (宿主经描述符传入图片, 插件用自带的 OpenCV 计算). 这是本文 D1 (OpenCV 插件只服务宿主), D8 (OpenCV 插件仓库无需改代码) 以及非目标 "OpenCV 运行时的 AIDL 进程隔离" 的有意例外, 由维护者 2026-10-15 决定; 宿主 images 模块与打包 APK 仍按本文第 2 节使用 OpenCV 插件提供的运行时, 本文已完成的条目不受影响.
+
 使用方式:
 
 1. 每次会话开始时, 从 "阶段总览" 选取未完成条目. P1 是解除 OpenCV 插件独立升级阻碍的关键路径, 优先推进; P3 的各 OCR 仓库可以并行.
