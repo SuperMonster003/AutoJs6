@@ -1,7 +1,9 @@
 package org.autojs.autojs.core.plugin.explorer.session
 
 import android.content.Context
+import android.os.Looper
 import android.util.AtomicFile
+import android.util.Log
 import org.autojs.autojs.storage.history.TrashRepository
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionValues
@@ -11,6 +13,7 @@ import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.util.UUID
+import java.util.concurrent.Executors
 
 internal enum class ExplorerActionTargetTrashItemState {
     PENDING,
@@ -176,6 +179,20 @@ internal class ExplorerActionTargetTrashBatchStore(
 
     fun recover(repository: TrashRepository) = synchronized(PROCESS_LOCK) {
         recoverLocked(repository)
+    }
+
+    /**
+     * [recover] for a new session. The file manager creates sessions on the main thread, where Room refuses the
+     * Trash database that recovery reads, so there it runs in the background; every later store operation recovers
+     * again first, so nothing has to wait for it.
+     */
+    fun recoverForNewSession(repository: TrashRepository) {
+        if (Looper.myLooper() != Looper.getMainLooper()) return recover(repository)
+        RECOVERY_EXECUTOR.execute {
+            runCatching { recover(repository) }.onFailure { error ->
+                Log.w(TAG, "Explorer Action target Trash history recovery failed", error)
+            }
+        }
     }
 
     private fun recoverLocked(repository: TrashRepository) {
@@ -620,6 +637,10 @@ internal class ExplorerActionTargetTrashBatchStore(
     private companion object {
         private val PROCESS_LOCK = Any()
         private val ACTIVE_BATCH_IDS = HashSet<String>()
+        private val RECOVERY_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
+            Thread(runnable, "ExplorerActionTargetTrashRecovery").apply { isDaemon = true }
+        }
+        const val TAG = "ExplorerActionTrash"
         const val ROOT_DIRECTORY_NAME = "explorer-action-target-trash-batches"
         const val RECORD_EXTENSION = "json"
         const val ATOMIC_BACKUP_SUFFIX = ".bak"

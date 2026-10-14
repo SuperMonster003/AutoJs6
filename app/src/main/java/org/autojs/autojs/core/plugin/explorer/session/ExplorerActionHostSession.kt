@@ -1947,7 +1947,7 @@ internal class ExplorerActionHostSession private constructor(
                 clock,
             )
             if (allowCreateOutput || allowTargetTrash) {
-                targetTrashBatchStore.recover(TrashRepository(applicationContext))
+                targetTrashBatchStore.recoverForNewSession(TrashRepository(applicationContext))
             }
             val replacementHistoryStore = ExplorerActionReplacementHistoryStore(
                 applicationContext,

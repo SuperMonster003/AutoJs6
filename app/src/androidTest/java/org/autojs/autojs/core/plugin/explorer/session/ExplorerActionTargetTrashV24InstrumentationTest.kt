@@ -216,6 +216,45 @@ class ExplorerActionTargetTrashV24InstrumentationTest {
         }
     }
 
+    @Test
+    fun theFileManagerCanCreateSessionsOnTheMainThreadOnceTrashHistoryExists() {
+        // Recovering the history reads the Trash database, which Room refuses on the main thread; a real host
+        // failed every plugin action launch after the first viewer deletion (2026-10-15).
+        val testRoot = newRoot("main-thread")
+        val bytes = listOf("first image", "second image").map(String::encodeToByteArray)
+        val files = listOf("a.png", "b.png").mapIndexed { index, name ->
+            File(testRoot, name).apply { writeBytes(bytes[index]) }
+        }
+        val first = viewerSession(testRoot, files)
+        val trashIds = ArrayList<String>()
+        val batchIds = ArrayList<String>()
+        var second: ExplorerActionHostSession? = null
+        try {
+            committedBatch(first.moveTargetsToTrash(mutableListOf("a"), mutableListOf()), 1, trashIds, batchIds)
+
+            var failure: Throwable? = null
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                runCatching { viewerSession(testRoot, listOf(files[1])) }
+                    .onSuccess { second = it }
+                    .onFailure { failure = it }
+            }
+            failure?.let { throw AssertionError("Session creation on the main thread failed", it) }
+
+            // The deferred recovery holds nothing up: the new session deletes and restores at once.
+            val session = requireNotNull(second)
+            val moved = session.moveTargetsToTrash(mutableListOf("b"), mutableListOf())
+            val batchId = committedBatch(moved, 1, trashIds, batchIds)
+            assertEquals(
+                ExplorerActionHostSessionValues.TARGET_TRASH_BATCH_STATE_RESTORED,
+                session.undoTargetTrashBatch(batchId).getInt(ExplorerActionHostSessionKeys.TARGET_TRASH_BATCH_STATE),
+            )
+            assertArrayEquals(bytes[1], files[1].readBytes())
+        } finally {
+            second?.let { runCatching { it.close() } }
+            cleanUp(first, testRoot, trashIds, batchIds)
+        }
+    }
+
     private fun newRoot(name: String): File =
         File(context.cacheDir, "explorer-action-v24-$name-${System.nanoTime()}").apply { assertTrue(mkdirs()) }
 
