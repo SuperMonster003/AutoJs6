@@ -298,6 +298,46 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/selection_plugin_more"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="@string/text_more"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="5dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/selection_plugin_more_icon"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="2dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_more_vert_24dp"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/selection_plugin_more_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:importantForAccessibility="no"
+                    android:maxLines="1"
+                    android:text="@string/text_more"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/selection_delete"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

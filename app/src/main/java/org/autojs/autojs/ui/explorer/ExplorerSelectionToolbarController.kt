@@ -37,6 +37,8 @@ internal data class ExplorerSelectionToolbarState(
     val deleteEnabled: Boolean,
     val pluginLabel: String?,
     val pluginEnabled: Boolean,
+    /** More than one plugin action matches: the plugin button runs the first, "More" lists the others. */
+    val morePluginActions: Boolean = false,
 )
 
 /**
@@ -55,6 +57,7 @@ internal class ExplorerSelectionToolbarController(
     private val onCopy: () -> Unit,
     private val onMove: () -> Unit,
     private val onPluginAction: () -> Unit,
+    private val onMorePluginActions: () -> Unit,
     private val onDelete: () -> Unit,
     private val onShownChanged: (Boolean) -> Unit,
 ) {
@@ -94,6 +97,7 @@ internal class ExplorerSelectionToolbarController(
             }
         }
         updateActionState(binding.selectionPlugin, state.pluginEnabled)
+        binding.selectionPluginMore.isVisible = !state.archiveSelection && state.morePluginActions
         setShown(state.selectedCount > 0)
     }
 
@@ -137,6 +141,7 @@ internal class ExplorerSelectionToolbarController(
             binding.selectionCopyText,
             binding.selectionMoveText,
             binding.selectionPluginText,
+            binding.selectionPluginMoreText,
             binding.selectionDeleteText,
         ).forEach { it.setTextColor(foregroundColor) }
         listOf<ImageView>(
@@ -144,6 +149,7 @@ internal class ExplorerSelectionToolbarController(
             binding.selectionCopyIcon,
             binding.selectionMoveIcon,
             binding.selectionPluginIcon,
+            binding.selectionPluginMoreIcon,
             binding.selectionDeleteIcon,
         ).forEach { ImageViewCompat.setImageTintList(it, foregroundTint) }
         if (shown) applyNavigationBarColor(themeColor)
@@ -160,6 +166,7 @@ internal class ExplorerSelectionToolbarController(
             binding.selectionCopy,
             binding.selectionMove,
             binding.selectionPlugin,
+            binding.selectionPluginMore,
             binding.selectionDelete,
         ).forEach(::applyButtonAccessibilityRole)
         ViewCompat.setAccessibilityHeading(binding.selectionCount, true)
@@ -167,6 +174,7 @@ internal class ExplorerSelectionToolbarController(
         binding.selectionCopy.setOnClickListener { onCopy() }
         binding.selectionMove.setOnClickListener { onMove() }
         binding.selectionPlugin.setOnClickListener { onPluginAction() }
+        binding.selectionPluginMore.setOnClickListener { onMorePluginActions() }
         binding.selectionDelete.setOnClickListener { onDelete() }
     }
 

@@ -94,6 +94,7 @@
         "Le gestionnaire de fichiers permet d'afficher des images, de lire des contenus audio/vidéo et d'ouvrir des livres EPUB via les plugins correspondants, avec lecture audio en arrière-plan et commandes dans les notifications",
         "La visionneuse d'images permet de changer d'image dans le même dossier, de zoomer avec deux doigts, d'afficher les données EXIF et de passer en plein écran, avec modification et conversion de format via le plugin 3-Maple Image",
         "Les fichiers ouverts dans un plugin depuis le gestionnaire de fichiers peuvent être placés dans la corbeille depuis le plugin et récupérés par annulation (nécessite la prise en charge par le plugin)",
+        "Lorsque plusieurs actions de plugins conviennent aux fichiers sélectionnés dans le gestionnaire de fichiers, la barre de sélection propose les autres sous \"Plus\" (par exemple la conversion d'images par lot avec 3-Maple Image)",
         "Le gestionnaire de fichiers permet de consulter les informations et manifestes des paquets APK/APKS/XAPK/APKM/APKZ/AAB, et d'installer des APK et conteneurs d'APK fractionnés",
         "L'éditeur de code peut charger Ace via le plugin Ace Editor, avec choix du moteur dans les paramètres et accès au centre de plugins si le plugin est indisponible",
         "L'éditeur Ace propose complétion, indications de paramètres, documentation au survol et diagnostics; les projets TypeScript permettent l'accès aux définitions, le renommage des symboles et les importations automatiques (nécessite le plugin TypeScript Engine)",

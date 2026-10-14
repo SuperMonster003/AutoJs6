@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -169,6 +170,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         })
     }
     private var mSelectionPluginAction: ResolvedExplorerAction? = null
+
+    /** The selection toolbar plugin actions after [mSelectionPluginAction], offered by the "More" button. */
+    private var mSelectionMorePluginActions: List<ResolvedExplorerAction> = emptyList()
     private var mSelectionArchiveExtraction = false
     private var mArchiveNavigationState: ArchiveNavigationState? = null
     private val mArchiveCoordinator by lazy(LazyThreadSafetyMode.NONE) {
@@ -561,6 +565,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                 onCopy = ::copySelectedItems,
                 onMove = ::moveSelectedItems,
                 onPluginAction = ::launchSelectedPluginAction,
+                onMorePluginActions = ::showMoreSelectedPluginActions,
                 onDelete = ::deleteSelectedItems,
                 onShownChanged = { shown ->
                     mOnSelectionToolbarStateChangeListener?.onSelectionToolbarStateChanged(shown)
@@ -802,20 +807,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         val archiveDeletion = archiveSelection &&
             selectedItems.all { (it as ArchiveExplorerItem).canDeleteEntry } &&
             mArchiveNavigationState?.provider?.canDeleteEntries == true
-        val pluginAction = if (selectedItems.isEmpty() || archiveSelection) {
-            null
+        // The plugin button runs the highest-priority action and "More" offers the others, so a second
+        // plugin for the same files (an image converter next to an image viewer) stays reachable.
+        // zh-CN: 插件按钮执行优先级最高的动作, "更多" 列出其余动作, 同类文件的第二个插件 (如图片查看器旁的图片转换) 也能用到.
+        val pluginActions = if (selectedItems.isEmpty() || archiveSelection) {
+            emptyList()
         } else {
             runCatching {
                 mPluginActions.provider?.actionsFor(
                     mPluginActions.surface,
                     ExplorerActionEntryPoint.SELECTION_TOOLBAR,
                     selectedItems,
-                )?.firstOrNull()
+                ).orEmpty()
             }.onFailure { error ->
                 Log.w(LOG_TAG, "Failed to resolve Explorer selection plugin action", error)
-            }.getOrNull()
+            }.getOrDefault(emptyList())
         }
+        val pluginAction = pluginActions.firstOrNull()
         mSelectionPluginAction = pluginAction
+        mSelectionMorePluginActions = pluginActions.drop(1)
         mSelectionArchiveExtraction = archiveExtraction
         if (::mSelectionToolbar.isInitialized) {
             mSelectionToolbar.render(
@@ -836,6 +846,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                     } else {
                         pluginAction != null
                     },
+                    morePluginActions = mSelectionMorePluginActions.isNotEmpty(),
                 ),
             )
         }
@@ -966,7 +977,26 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             }
             return
         }
-        val action = mSelectionPluginAction ?: return
+        launchPluginActionOnSelection(mSelectionPluginAction ?: return)
+    }
+
+    /** Lists the selection toolbar plugin actions after the first one; choosing one runs it on the selection. */
+    private fun showMoreSelectedPluginActions() {
+        val actions = mSelectionMorePluginActions
+        if (actions.isEmpty()) return
+        val anchor = binding?.selectionPluginMore ?: return
+        val popupMenu = PopupMenu(context, anchor)
+        actions.forEachIndexed { index, action ->
+            popupMenu.menu.add(Menu.NONE, index, index, action.menuTitle)
+        }
+        popupMenu.setOnMenuItemClickListener { item ->
+            actions.getOrNull(item.itemId)?.let(::launchPluginActionOnSelection)
+            true
+        }
+        popupMenu.show()
+    }
+
+    private fun launchPluginActionOnSelection(action: ResolvedExplorerAction) {
         val selectedItems = mSelection.items
         if (selectedItems.isEmpty()) return
         if (mPluginActions.provider == null) return

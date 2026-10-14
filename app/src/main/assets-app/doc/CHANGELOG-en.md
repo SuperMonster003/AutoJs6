@@ -96,6 +96,7 @@
 * `Feature` File manager supports viewing images, playing audio/video and opening EPUB ebooks through the corresponding plugins, with background audio playback and notification controls
 * `Feature` Image viewer supports switching between images in the same directory, pinch zoom, EXIF information and full-screen mode, with image editing and format conversion through the 3-Maple Image plugin
 * `Feature` Files opened in a plugin from the file manager can be moved to the recycle bin from within the plugin and restored with undo (requires plugin support)
+* `Feature` When several plugin actions fit the files selected in the file manager, the selection bar offers the others under "More" (such as batch converting images with 3-Maple Image)
 * `Feature` File manager supports viewing information and manifests of APK/APKS/XAPK/APKM/APKZ/AAB packages, and installing APKs and split APK containers
 * `Feature` Code editor supports loading Ace through the Ace Editor plugin, with editor engine selection in Settings and a Plugin Center entry when the plugin is unavailable
 * `Feature` Ace editor supports code completion, parameter hints, hover documentation and diagnostics; TypeScript projects support go to definition, symbol renaming and automatic imports (requires the TypeScript Engine plugin)
