@@ -202,4 +202,16 @@
     <color name="diff_line_inserted_bg">#DDF4DD</color>
     <color name="diff_line_deleted_bg">#F9DEDE</color>
     <color name="trash_expiring_soon">#D84315</color>
+
+    <!-- Offline docs unavailable page colors (light mode) -->
+    <color name="offline_docs_unavailable_card_bg">#FFFFFF</color>
+    <color name="offline_docs_unavailable_card_stroke">#E8E8E8</color>
+    <color name="offline_docs_unavailable_icon_bg">#FFF8F0</color>
+    <color name="offline_docs_unavailable_icon_tint">@color/colorPrimary</color>
+    <color name="offline_docs_unavailable_title">@color/day</color>
+    <color name="offline_docs_unavailable_body">@color/text_color_secondary</color>
+    <color name="offline_docs_unavailable_primary_button_bg">@color/colorPrimary</color>
+    <color name="offline_docs_unavailable_secondary_button_text">@color/colorPrimary</color>
+    <color name="offline_docs_unavailable_secondary_button_stroke">@color/colorPrimary</color>
+
 </resources>
