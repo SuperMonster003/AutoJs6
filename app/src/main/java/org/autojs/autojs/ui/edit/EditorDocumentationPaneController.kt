@@ -10,7 +10,7 @@ import android.widget.ProgressBar
 import androidx.annotation.ColorInt
 import androidx.drawerlayout.widget.DrawerLayout
 import org.autojs.autojs.ui.doc.DocumentationPageController
-import org.autojs.autojs.ui.edit.theme.EditorDialogViewThemeApplier
+import org.autojs.autojs.ui.doc.OfflineDocsUnavailableView
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DocsUtils
@@ -30,7 +30,7 @@ internal class EditorDocumentationPaneController(
     private val eWebView: EWebView,
 ) {
 
-    private val unavailableView: View = root.findViewById(R.id.offline_docs_unavailable)
+    private val unavailableView: OfflineDocsUnavailableView = root.findViewById(R.id.offline_docs_unavailable)
     private val paneContainer: View? = eWebView.parent as? View
     private val drawerLayout: DrawerLayout? = root.findViewById(R.id.drawer_layout)
     private var pageController: DocumentationPageController? = null
@@ -102,7 +102,6 @@ internal class EditorDocumentationPaneController(
         contentCheckGeneration++
         eWebView.removeOnPageFinishedListener(pageFinishedListener)
         drawerLayout?.removeDrawerListener(drawerListener)
-        EditorDialogViewThemeApplier.detach(unavailableView)
     }
 
     fun applyPalette(
@@ -192,13 +191,7 @@ internal class EditorDocumentationPaneController(
             )
         }
 
-        unavailableView.setBackgroundColor(background)
-        EditorDialogViewThemeApplier.apply(
-            root = unavailableView,
-            background = background,
-            foreground = foreground,
-            control = foreground,
-        )
+        unavailableView.setPalette(background, foreground)
     }
 
     /**

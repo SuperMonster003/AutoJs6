@@ -23,6 +23,8 @@
     <dimen name="layout_hierarchy_view_indent_step">5dp</dimen>
     <dimen name="layout_hierarchy_view_row_icon_margin_end">4dp</dimen>
     <dimen name="layout_hierarchy_view_row_icon_size">12dp</dimen>
+    <dimen name="offline_docs_unavailable_action_corner_radius">24dp</dimen>
+    <dimen name="offline_docs_unavailable_action_stroke_width">1dp</dimen>
     <dimen name="padding_circular_menu_normal">5dp</dimen>
     <dimen name="padding_circular_menu_recording">8dp</dimen>
     <dimen name="script_and_folder_list_divider_left_margin">0dp</dimen>

@@ -105,15 +105,4 @@
     <color name="diff_line_deleted_bg">#4A2222</color>
     <color name="trash_expiring_soon">#FF8A65</color>
 
-    <!-- Offline docs unavailable page colors (dark mode) -->
-    <color name="offline_docs_unavailable_card_bg">#1E1E1E</color>
-    <color name="offline_docs_unavailable_card_stroke">#3A3A3A</color>
-    <color name="offline_docs_unavailable_icon_bg">#2A2520</color>
-    <color name="offline_docs_unavailable_icon_tint">@color/colorPrimary</color>
-    <color name="offline_docs_unavailable_title">@color/dusk</color>
-    <color name="offline_docs_unavailable_body">@color/text_color_secondary</color>
-    <color name="offline_docs_unavailable_primary_button_bg">@color/colorPrimary</color>
-    <color name="offline_docs_unavailable_secondary_button_text">@color/colorPrimary</color>
-    <color name="offline_docs_unavailable_secondary_button_stroke">@color/colorPrimary</color>
-
 </resources>

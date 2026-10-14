@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.autojs.autojs.ui.doc.OfflineDocsUnavailableView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/offline_docs_unavailable"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@color/window_background"
     android:clickable="true"
     android:focusable="true"
     android:visibility="gone">
@@ -17,107 +17,91 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="24dp">
+            android:paddingStart="32dp"
+            android:paddingTop="40dp"
+            android:paddingEnd="32dp"
+            android:paddingBottom="40dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/content_card"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                app:cardBackgroundColor="@color/offline_docs_unavailable_card_bg"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_max="480dp"
-                app:strokeColor="@color/offline_docs_unavailable_card_stroke"
-                app:strokeWidth="1dp">
+                app:layout_constraintVertical_bias="0.42"
+                app:layout_constraintWidth_max="360dp">
 
-                <LinearLayout
+                <ImageView
+                    android:id="@+id/offline_docs_unavailable_icon"
+                    android:layout_width="88dp"
+                    android:layout_height="88dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
+                    android:padding="22dp"
+                    android:src="@drawable/ic_menu_book_black_48dp" />
+
+                <TextView
+                    android:id="@+id/offline_docs_unavailable_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:text="@string/text_offline_docs_unavailable"
+                    android:textColor="@color/text_color_primary"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/offline_docs_unavailable_prompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:lineSpacingExtra="4dp"
+                    android:text="@string/text_offline_docs_unavailable_prompt"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/offline_docs_plugin_center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
                     android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="40dp">
+                    android:minHeight="48dp"
+                    android:paddingStart="24dp"
+                    android:paddingTop="12dp"
+                    android:paddingEnd="24dp"
+                    android:paddingBottom="12dp"
+                    android:text="@string/text_plugin_center"
+                    android:textSize="15sp" />
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="96dp"
-                        android:layout_height="96dp"
-                        app:cardBackgroundColor="@color/offline_docs_unavailable_icon_bg"
-                        app:cardCornerRadius="48dp"
-                        app:cardElevation="0dp">
+                <TextView
+                    android:id="@+id/offline_docs_switch_online"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:minHeight="48dp"
+                    android:paddingStart="24dp"
+                    android:paddingTop="12dp"
+                    android:paddingEnd="24dp"
+                    android:paddingBottom="12dp"
+                    android:text="@string/text_switch_to_online_documentation"
+                    android:textSize="15sp" />
 
-                        <ImageView
-                            android:layout_width="56dp"
-                            android:layout_height="56dp"
-                            android:layout_gravity="center"
-                            android:alpha="0.88"
-                            android:contentDescription="@null"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_docs_app"
-                            app:tint="@color/offline_docs_unavailable_icon_tint" />
-
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="28dp"
-                        android:fontFamily="sans-serif-medium"
-                        android:gravity="center"
-                        android:text="@string/text_offline_docs_unavailable"
-                        android:textColor="@color/offline_docs_unavailable_title"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center"
-                        android:lineSpacingExtra="4dp"
-                        android:text="@string/text_offline_docs_unavailable_prompt"
-                        android:textColor="@color/offline_docs_unavailable_body"
-                        android:textSize="15sp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/offline_docs_plugin_center"
-                        style="@style/Widget.MaterialComponents.Button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="56dp"
-                        android:layout_marginTop="32dp"
-                        android:minWidth="200dp"
-                        android:paddingStart="32dp"
-                        android:paddingEnd="32dp"
-                        android:text="@string/text_plugin_center"
-                        android:textSize="15sp"
-                        app:backgroundTint="@color/offline_docs_unavailable_primary_button_bg"
-                        app:cornerRadius="8dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/offline_docs_switch_online"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="56dp"
-                        android:layout_marginTop="12dp"
-                        android:minWidth="200dp"
-                        android:paddingStart="32dp"
-                        android:paddingEnd="32dp"
-                        android:text="@string/text_switch_to_online_documentation"
-                        android:textColor="@color/offline_docs_unavailable_secondary_button_text"
-                        android:textSize="15sp"
-                        app:cornerRadius="8dp"
-                        app:strokeColor="@color/offline_docs_unavailable_secondary_button_stroke"
-                        app:strokeWidth="1dp" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
 
-</FrameLayout>
+</org.autojs.autojs.ui.doc.OfflineDocsUnavailableView>

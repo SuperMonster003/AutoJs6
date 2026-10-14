@@ -79,8 +79,8 @@ class ManualDialog(
             ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(foreground))
         }
         mBinding.divider.setBackgroundColor(ColorUtils.applyAlpha(foreground, 0.18))
-        mBinding.root.findViewById<View>(R.id.offline_docs_unavailable)
-            .setBackgroundColor(background)
+        mBinding.root.findViewById<OfflineDocsUnavailableView>(R.id.offline_docs_unavailable)
+            .setPalette(background, foreground)
         mEWebView.setBackgroundColor(background)
         mEWebView.webView.setBackgroundColor(background)
     }
