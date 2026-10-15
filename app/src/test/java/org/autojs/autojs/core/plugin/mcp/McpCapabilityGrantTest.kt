@@ -42,6 +42,26 @@ class McpCapabilityGrantTest {
     }
 
     @Test
+    fun defaultGrantCoversThePluginFamilyToolsOfP11() {
+        listOf("ocr.recognize", "ocr.recognizeText", "ocr.detectTextBounds", "barcode.detect", "barcode.detectAll",
+            "pinyin.convert", "pinyin4j.of", "mediainfo.read", "mediainfo.capabilities",
+            "image.readImage", "image.findImage", "image.matchTemplate", "image.findColor", "image.findMultiColors",
+            "accessibility.readScreenText", "accessibility.captureScreenImage", "app.pluginCapabilities").forEach { key ->
+            assertTrue("$key must be in the default grant", key in grant.allowedMethods)
+        }
+        listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.BARCODE, NodeBridgePermissionManifest.PINYIN,
+            NodeBridgePermissionManifest.PINYIN4J, NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_METADATA,
+            NodeBridgePermissionManifest.FILES_SHARED_READ).forEach { token ->
+            assertTrue("$token must be in the default permissions", token in grant.permissions)
+        }
+        // Writes and raw pixel export stay outside: tools return handles and paths, never pixels.
+        assertFalse(grant.allowsMethod("image", "saveImage"))
+        assertFalse(grant.allowsMethod("image", "toBytes"))
+        assertFalse(grant.allowsMethod("media_store", "query"))
+        assertFalse(NodeBridgePermissionManifest.MEDIA_LIBRARY in grant.permissions)
+    }
+
+    @Test
     fun evaluateDeniesUnknownMethodsBeforeLookingAtPermissions() {
         val decision = grant.evaluate("rhino", "eval", emptyList(), 10)
         assertTrue(decision is HostCapabilityGrant.Decision.Denied)

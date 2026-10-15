@@ -222,20 +222,29 @@ Results larger than 512 KiB of inline JSON are replaced by a `resource-limit`
 failure telling the caller to use a descriptor-carrying method.
 
 The default grant (`McpCapabilityGrant.DEFAULT`) allows the roadmap A.6 method
-set: `accessibility.{isEnabled, ensureEnabled, dump, explain, screenshot, findOne, findAll, findByText, click, longClick, setText, scrollForward, scrollBackward, swipe, gesture, back, home, recentApps}`,
+set: `accessibility.{isEnabled, ensureEnabled, dump, explain, screenshot, findOne, findAll, findByText, click, longClick, setText, scrollForward, scrollBackward, swipe, gesture, back, home, recentApps, readScreenText, captureScreenImage}`,
 `engines.{execScript, execScriptFile, list, stop, stopAll}`, `console.tail`,
 `files.{list, stat, read, write, mkdir, rename, delete}`,
-`app.{launchPackage, launchApp, isInstalled, editFile, currentWindow, listSamples, readSample, listDocs, readDoc}`,
-`package_manager.{list, verify}`, `clipboard.{getText, setText, hasText}`,
+`app.{launchPackage, launchApp, isInstalled, editFile, currentWindow, listSamples, readSample, listDocs, readDoc, pluginCapabilities}`,
+`package_manager.{list, verify, listApps}`, `clipboard.{getText, setText, hasText}`,
 `device.{info, isScreenOn, wakeUp, isIgnoringBatteryOptimizations}`,
-`media_projection.{requestScreenCapture, stop}`, `image.{captureScreen, recycle}`,
+`media_projection.{requestScreenCapture, stop}`,
+`image.{captureScreen, recycle, readImage, findImage, matchTemplate, findColor, findMultiColors}`,
+`ocr.{recognize, recognizeText, detectTextBounds}`, `barcode.{detect, detectAll, recognizeText, recognizeTexts}`,
+`pinyin.{convert, simple, compare, compact, fromCodePoint, fromPhrase}`, `pinyin4j.{of, as, readings}`,
+`mediainfo.{read, get, countGet, capabilities}`,
 `shell.exec` and `toast.{toast, showToast}`, plus the global actions
 `keys.{notifications, quickSettings, powerDialog, lockScreen}` behind the plugin's
 `ui_press_key` (roadmap P3.2; `keys.takeScreenshot` and `keys.splitScreen` stay
 outside), with the tokens `accessibility`, `accessibility.gesture`, `keys`,
 `engines`, `engines.exec`, `screen_capture`, `image`, `app`, `app.launch`,
 `app.query`, `app.activity`, `clipboard`, `device`, `device.power`, `shell`,
-`toast`, `package_manager`, `files`, `files.write`, `files.delete` and `console`.
+`toast`, `package_manager`, `files`, `files.write`, `files.delete`, `files.shared_read`, `console`,
+`ocr`, `barcode`, `pinyin`, `pinyin4j`, `media` and `media.metadata`. The plugin-family
+methods (MCP roadmap P11 D28) are only usable while the corresponding plugin is installed and
+enabled; `app.pluginCapabilities` reports that live, and `getBrokerInfo().availableOptionalMethods`
+lists the ones available when the session opened. Writes (`image.saveImage`) and raw pixel export
+(`image.toBytes`) stay outside the grant: tools return handles and paths, never pixels.
 A `keys.*` call without a running accessibility service fails with the
 `unavailable` category, as the `accessibility` module does.
 

@@ -117,18 +117,26 @@ data class HostCapabilityGrant(
                     "findOne", "findAll", "findByText",
                     "click", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture",
                     "back", "home", "recentApps",
+                    // Plugin capability tools (MCP roadmap P11 D23 / D28): screen text via an OCR plugin, screen as an image handle.
+                    "readScreenText", "captureScreenImage",
                 ),
             )
             addAll(methodsOf("keys", "notifications", "quickSettings", "powerDialog", "lockScreen"))
             addAll(methodsOf("engines", "execScript", "execScriptFile", "list", "stop", "stopAll"))
             addAll(methodsOf("console", "tail"))
             addAll(methodsOf("files", "list", "stat", "read", "write", "mkdir", "rename", "delete"))
-            addAll(methodsOf("app", "launchPackage", "launchApp", "isInstalled", "editFile", "currentWindow", "listSamples", "readSample", "listDocs", "readDoc"))
+            addAll(methodsOf("app", "launchPackage", "launchApp", "isInstalled", "editFile", "currentWindow", "listSamples", "readSample", "listDocs", "readDoc", "pluginCapabilities"))
             addAll(methodsOf("package_manager", "list", "verify", "listApps"))
             addAll(methodsOf("clipboard", "getText", "setText", "hasText"))
             addAll(methodsOf("device", "info", "isScreenOn", "wakeUp", "isIgnoringBatteryOptimizations"))
             addAll(methodsOf("media_projection", "requestScreenCapture", "stop"))
-            addAll(methodsOf("image", "captureScreen", "recycle"))
+            // Image handles for the plugin families below: files read within the path policy, matching through the OpenCV plugin.
+            addAll(methodsOf("image", "captureScreen", "recycle", "readImage", "findImage", "matchTemplate", "findColor", "findMultiColors"))
+            addAll(methodsOf("ocr", "recognize", "recognizeText", "detectTextBounds"))
+            addAll(methodsOf("barcode", "detect", "detectAll", "recognizeText", "recognizeTexts"))
+            addAll(methodsOf("pinyin", "convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase"))
+            addAll(methodsOf("pinyin4j", "of", "as", "readings"))
+            addAll(methodsOf("mediainfo", "read", "get", "countGet", "capabilities"))
             addAll(methodsOf("shell", "exec"))
             addAll(methodsOf("toast", "toast", "showToast"))
         }
@@ -157,7 +165,15 @@ data class HostCapabilityGrant(
             TOKEN_FILES,
             TOKEN_FILES_WRITE,
             TOKEN_FILES_DELETE,
+            TOKEN_FILES_SHARED_READ,
             TOKEN_CONSOLE,
+            // Plugin families (MCP roadmap P11 D28); `media` pairs with `media.metadata` for the MediaInfo module.
+            NodeBridgePermissionManifest.OCR,
+            NodeBridgePermissionManifest.BARCODE,
+            NodeBridgePermissionManifest.PINYIN,
+            NodeBridgePermissionManifest.PINYIN4J,
+            NodeBridgePermissionManifest.MEDIA,
+            NodeBridgePermissionManifest.MEDIA_METADATA,
         )
 
         @JvmField
