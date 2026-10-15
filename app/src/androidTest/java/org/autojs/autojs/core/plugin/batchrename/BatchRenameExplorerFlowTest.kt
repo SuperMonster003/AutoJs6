@@ -17,7 +17,11 @@ import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.junit.After
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.ui.explorer.ExplorerRenameDialogMenu
+import org.autojs.autojs.ui.explorer.ExplorerRenameDialogMenuEntry
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -110,6 +114,51 @@ class BatchRenameExplorerFlowTest {
         waitUntil("undo restored the item") { notes.isFile }
     }
 
+    @Test
+    fun anItemRemovedAfterThePreviewIsReportedAndTheOthersAreRenamed() {
+        val first = File(root, "IMG_1.jpg").apply { writeText("one") }
+        val second = File(root, "IMG_2.jpg").apply { writeText("two") }
+        launch("batch-rename-selection", ExplorerActionEntryPoint.SELECTION_TOOLBAR, listOf(ExplorerFileItem(first, null), ExplorerFileItem(second, null)))
+        setText(SEARCH, "IMG_")
+        setText(REPLACE, "Photo_")
+        waitUntil("the preview never showed Photo_2.jpg") { previewShows("Photo_2.jpg") }
+        assertTrue(second.delete())
+        assertTrue(waitFor(APPLY) { it.isEnabled }.performAction(AccessibilityNodeInfo.ACTION_CLICK))
+        waitUntil("the remaining item was renamed") { File(root, "Photo_1.jpg").isFile }
+        assertFalse(File(root, "Photo_2.jpg").exists())
+        // The failure list names the entry the host could not rename. zh-CN: 失败列表列出宿主未能改名的条目.
+        waitUntil("the failure list never showed Photo_2.jpg") { pluginNodes().any { it.text?.startsWith("Photo_2.jpg - ") == true } }
+        automation.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+        undoInPlugin()
+        waitUntil("undo restored the remaining item") { first.isFile }
+    }
+
+    @Test
+    fun aDisabledPluginOffersNoActionAndTheRenameDialogKeepsItsGuidance() {
+        val notes = File(root, "notes.txt").apply { writeText("notes") }
+        val folder = File(root, "album").apply { mkdirs() }
+        val file = listOf<ExplorerItem>(ExplorerFileItem(notes, null))
+        try {
+            PluginEnableStore.setEnabled(context, PLUGIN_PACKAGE, false)
+            runBlocking { ExplorerActionRegistry.refresh(context) }
+            listOf(
+                ExplorerActionEntryPoint.SELECTION_TOOLBAR to file,
+                ExplorerActionEntryPoint.OVERFLOW_MENU to listOf<ExplorerItem>(ExplorerDirPage(folder, null)),
+                ExplorerActionEntryPoint.RENAME_DIALOG to file,
+            ).forEach { (entryPoint, items) ->
+                val offered = ExplorerActionRegistry.actionsFor(ExplorerSurface.MAIN_FILES, entryPoint, items).filter { it.packageName == PLUGIN_PACKAGE }
+                assertTrue("a disabled plugin offers $offered at $entryPoint", offered.isEmpty())
+            }
+            val dialogActions = ExplorerRenameDialogMenu.resolveActions(ExplorerActionRegistry, ExplorerSurface.MAIN_FILES, file.single())
+            assertEquals(listOf(ExplorerRenameDialogMenuEntry.BatchRenameGuidance), ExplorerRenameDialogMenu.entries(ExplorerSurface.MAIN_FILES, dialogActions))
+        } finally {
+            PluginEnableStore.setEnabled(context, PLUGIN_PACKAGE, true)
+            runBlocking { ExplorerActionRegistry.refresh(context) }
+        }
+        val dialogActions = ExplorerRenameDialogMenu.resolveActions(ExplorerActionRegistry, ExplorerSurface.MAIN_FILES, file.single())
+        assertTrue(ExplorerRenameDialogMenu.entries(ExplorerSurface.MAIN_FILES, dialogActions).any { it is ExplorerRenameDialogMenuEntry.PluginAction })
+    }
+
     private fun launch(actionId: String, entryPoint: ExplorerActionEntryPoint, items: List<ExplorerItem>) {
         val action = ExplorerActionRegistry.actionsFor(ExplorerSurface.MAIN_FILES, entryPoint, items)
             .singleOrNull { it.descriptor.id == actionId }
@@ -163,7 +212,17 @@ class BatchRenameExplorerFlowTest {
         return found!!
     }
 
-    private fun previewShows(name: String): Boolean = pluginNodes().any { it.text?.toString() == name }
+    /**
+     * Whether a preview row shows [name]; on small screens the rows sit below the options, so the list scrolls
+     * forward one page per call until they come into view.
+     * zh-CN: 预览行是否显示 [name]; 小屏上预览行位于选项之下, 每次调用时列表向下滚动一页直到其出现.
+     */
+    private fun previewShows(name: String): Boolean {
+        val nodes = pluginNodes()
+        if (nodes.any { it.text?.toString() == name }) return true
+        nodes.firstOrNull { it.viewIdResourceName == LIST }?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+        return false
+    }
 
     /** Resource IDs and texts of the plugin's visible nodes, for failure messages. */
     private fun visibleIds(): String = pluginNodes()
@@ -209,6 +268,7 @@ class BatchRenameExplorerFlowTest {
         const val APPLY = "batchRename.apply"
         const val UNDO = "batchRename.undo"
         const val SUMMARY = "batchRename.summary"
+        const val LIST = "batchRename.list"
         const val ROW_PREFIX = "batchRename.row:"
         const val TIMEOUT_MILLIS = 60_000L
     }
