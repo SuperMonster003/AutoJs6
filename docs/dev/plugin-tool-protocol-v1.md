@@ -32,10 +32,18 @@ released it only grows by appended keys, values and transactions (D43).
 | Capability | `PluginInfo.capabilities[pluginToolContractVersion]` (Int, `PluginToolCapabilityKeys.CONTRACT_VERSION`), the highest version the provider speaks |
 | Wake | the plugin's `WakeActivity`, as for every plugin (the host wakes a stopped package before binding) |
 
-The host only lists providers whose package is enabled and authorized in the plugin center and
-whose `requiresHostVersion` the host meets; it records the trust level (OFFICIAL, TRUSTED,
-USER_GRANTED) of each. A plugin keeps its existing family services; the provider service is an
-addition.
+The host only lists providers whose package is enabled and authorized in the plugin center, whose
+`requiresHostVersion` the host meets and whose `pluginToolContractVersion` it supports; it records
+the trust level (OFFICIAL, TRUSTED, USER_GRANTED) of each. A plugin keeps its existing family
+services; the provider service is an addition. One provider per package: when a package exports
+several provider services, the host uses the first by class name.
+
+`PluginToolRegistry` (host) keeps the providers and their catalogs. Before each use it takes a
+PackageManager-only fingerprint of the provider services (package, versionCode, update time, plugin
+center enable and authorization state) and rebuilds its snapshot only when the fingerprint changed,
+so installing, updating, removing, enabling or authorizing a provider shows up on the next call while
+an unchanged set binds nothing. A provider is reported as `AVAILABLE`, `DISABLED`, `UNAUTHORIZED`,
+`INCOMPATIBLE`, `FAILED` or `REFUSED` with a detail.
 
 ## Binder interface
 
@@ -114,9 +122,19 @@ The document (`PluginToolCatalogJson`):
 | `maxConcurrency` | optional, default 1, at most 4 |
 | `outputs` | optional binary outputs `{name, mimeType, description?}`, at most 8 |
 
-The whole document is at most 256 KiB of UTF-8. A document that is not JSON, breaks a limit, uses an
-invalid or reserved short name, or repeats a tool name is refused as a whole; a tool whose schema
-breaks the subset is dropped alone. The host reports the reasons as diagnostics of the provider.
+The whole document is at most 256 KiB of UTF-8. A document that is not a JSON object, breaks a limit,
+uses an invalid or reserved short name, declares a shared family it may not use, or repeats a tool
+name is refused as a whole; a tool with an invalid name, field or schema is dropped alone, and a
+document left without a usable tool is refused. Fields this version does not know are ignored, so
+providers may append them; JSON null counts as absent for optional fields. The host reports the
+reasons as the provider's detail and diagnostics.
+
+Short names are unique across providers. When several providers claim one, the claim of the highest
+trust level keeps it and the others are refused; claims that tie at the highest level are all
+refused, so a less trusted plugin can never take over the tool names of a more trusted one. A shared
+family is accepted only on the host's allow list (version 1: `ocr`) and only from OFFICIAL providers;
+version 1 hosts keep listing such tools under the provider's short name until provider selection
+exists (MCP roadmap D44).
 
 ### Schema subset
 
@@ -232,7 +250,7 @@ phone per call. Scripts written by the user may call every tool of an authorized
 | Part | State |
 | --- | --- |
 | Contract module, frozen literals and transactions | done (P12 host item 1) |
-| Discovery and catalog cache, short name checks | planned (P12 host item 2) |
+| Discovery and catalog cache, short name checks | done (P12 host item 2: `PluginToolRegistry`, `PluginToolCatalogParser`, `PluginToolShortNames`; fake provider `test-apps/plugin-tool-provider-conformance`) |
 | Schema validation | planned (P12 host item 3) |
 | Bridge module `plugin_tools`, grants and tokens | planned (P12 host item 4) |
 | Script API `plugins.tools` | planned (P12 host item 5) |

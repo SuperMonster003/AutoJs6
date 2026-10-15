@@ -1,0 +1,28 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <queries>
+        <package android:name="org.autojs.autojs6" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:label="AutoJs6 Plugin Tool Conformance"
+        android:supportsRtl="true"
+        android:testOnly="true"
+        android:usesCleartextTraffic="false">
+
+        <!-- Test-only provider of the plugin tool contract (docs/dev/plugin-tool-protocol-v1.md). -->
+        <service
+            android:name=".service.FakePluginToolProviderService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":provider">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.TOOL_PROVIDER" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

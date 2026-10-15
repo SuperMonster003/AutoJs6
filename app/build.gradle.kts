@@ -798,6 +798,10 @@ dependencies /* Unclassified */ {
     // zh-CN: 批量重命名插件契约 (files.batchRename 与文件管理器重命名动作)
     implementation(project(":plugin-api:batch-rename-api"))
     implementation(project(":plugin-api:gallery-api"))
+
+    // Plugin API: self-described plugin tools (MCP Server roadmap P12, docs/dev/plugin-tool-protocol-v1.md)
+    // zh-CN: 插件自描述工具契约 (MCP Server 路线图 P12)
+    implementation(project(":plugin-api:plugin-tool-api"))
 }
 
 dependencies /* MIME */ {

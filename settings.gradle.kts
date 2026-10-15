@@ -153,6 +153,7 @@ private val pluginConformanceTestApps = listOf(
     "python-runtime-conformance",
     "python-runtime-api-consumer",
     "yolo-provider-conformance",
+    "plugin-tool-provider-conformance",
 )
 
 private val codegenFixtureApps = listOf(
