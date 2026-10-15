@@ -133,12 +133,13 @@ never replaces another item of the batch. Items that keep their names keep occup
 other items conflict as well.
 
 `twoPhase` marks a case-only change in a case-insensitive directory and every rename whose new name another
-renamed item of the batch still holds (chains, swaps and cycles). The executor moves all `twoPhase` items to
-temporary names first, so it never depends on the order of the remaining renames.
+renamed item of the batch still holds (chains, swaps and cycles). The host executor
+(`core/plugin/batchrename/BatchRenameExecutor`) works the same classification out again from the file system when it
+runs, moves those items to temporary names first and never depends on the order of the remaining renames; the flag
+tells callers which renames take that detour.
 
 Every regular expression evaluation (compile, test or replace) gets one second and a whole plan thirty seconds;
-running out answers `LIMIT_EXCEEDED`, which stops catastrophic backtracking. On Android 7.x (API 24 / 25) the
-Rhino build cannot parse Unicode property escapes (`\p{...}`) and answers `INVALID_OPTIONS`.
+running out answers `LIMIT_EXCEEDED`, which stops catastrophic backtracking.
 
 ## Limits
 

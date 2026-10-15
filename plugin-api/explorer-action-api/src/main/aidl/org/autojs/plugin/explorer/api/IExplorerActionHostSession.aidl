@@ -164,16 +164,20 @@ interface IExplorerActionHostSession {
      */
     Bundle renameEntries(in Bundle request);
 
-    /** v25. Returns one rename batch this plugin created through renameEntries. */
+    /**
+     * v25. Returns one rename batch this plugin created through renameEntries in a session on the
+     * same parent directory; any other ID answers the unknown state.
+     */
     Bundle queryRenameBatch(String renameBatchId);
 
-    /** v25. Lists bounded recent rename batches this plugin created below the session targets. */
+    /** v25. Lists, newest first, bounded recent rename batches of this plugin on the same parent. */
     Bundle listRenameBatches();
 
     /**
-     * v25. Restores the old names of one batch, newest entry first, for every entry that still has
-     * the name and identity the batch gave it; restored targets of the overwrite policy return from
-     * the host Trash. Best-effort per entry; occupied old names are never overwritten.
+     * v25. Restores the old names of one batch, shallowest entry first, for every entry that still
+     * has the kind (and, for a file, the modification time and size) the batch gave it; entries the
+     * overwrite replaced return from the host Trash. Best-effort per entry; occupied old names are
+     * never overwritten.
      */
     Bundle undoRenameBatch(String renameBatchId);
 }

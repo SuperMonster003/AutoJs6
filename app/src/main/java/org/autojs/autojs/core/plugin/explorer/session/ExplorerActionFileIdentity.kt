@@ -48,10 +48,15 @@ internal data class ExplorerActionFileIdentity(
     }
 }
 
-/** A launch target paired with the identity captured when its capability was created. */
+/**
+ * A launch target paired with the identity captured when its capability was created. A protocol v25 rename of the
+ * target itself moves [file] to the new path; [directory] keeps the kind seen at launch.
+ * zh-CN: 启动目标及创建能力时捕获的身份. 协议 v25 对目标本身改名时 [file] 随之更新为新路径; [directory] 保留启动时的类型.
+ */
 internal data class ExplorerActionHostTargetState(
-    val file: File,
-    var identity: ExplorerActionFileIdentity,
+    @Volatile var file: File,
+    @Volatile var identity: ExplorerActionFileIdentity,
+    val directory: Boolean = file.isDirectory,
 )
 
 /** Local transaction vocabulary retained inside the session state machine. */

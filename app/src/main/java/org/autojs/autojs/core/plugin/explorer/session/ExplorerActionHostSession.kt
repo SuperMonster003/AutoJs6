@@ -12,6 +12,17 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import androidx.core.os.BundleCompat
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameBatchState
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameEntryState
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameExecutor
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameHostServices
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalEntry
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalRecord
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameOperation
+import org.autojs.autojs.core.plugin.batchrename.BatchRenamePathMap
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameSource
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameVolumeTraits
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionCatalogPolicy
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
@@ -23,11 +34,13 @@ import org.autojs.autojs.util.DialogUtils
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionKeys
 import org.autojs.plugin.explorer.api.ExplorerActionHostSessionValues
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
+import org.autojs.plugin.explorer.api.ExplorerActionValues
 import org.autojs.plugin.explorer.api.IExplorerActionHostSession
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.ArrayDeque
+import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.Executors
 
@@ -67,6 +80,7 @@ internal class ExplorerActionHostSession private constructor(
     private val clock: () -> Long,
     private val afterBatchMemberPublished: (Int) -> Unit,
     private val afterReplacementPublished: () -> Unit,
+    private val renameExecutor: () -> BatchRenameExecutor,
 ) : IExplorerActionHostSession.Stub() {
 
     private val lock = Any()
@@ -78,6 +92,7 @@ internal class ExplorerActionHostSession private constructor(
         relatedFileSuffixes = relatedFileSuffixes,
         playbackHistoryStore = playbackHistoryStore,
         requireSessionOpen = { synchronized(lock) { checkOpen() } },
+        recordListings = allowTargetRename,
     )
     private val parent: File = selectedOutputDirectory ?: inputAccess.parent
     private val targetsById: Map<String, ExplorerActionHostTargetState>
@@ -92,6 +107,10 @@ internal class ExplorerActionHostSession private constructor(
     private var targetTrashRunning = false
     private var clientLease: ClientLease? = null
     private var closed = false
+    private var renameRunning = false
+
+    @Volatile
+    private var renameVolumeTraits: BatchRenameVolumeTraits? = null
 
     override fun listChildren(targetId: String, relativePath: String, offset: Int, limit: Int): Bundle {
         enforceCaller()
@@ -782,40 +801,264 @@ internal class ExplorerActionHostSession private constructor(
         return inputAccess.openRelatedFile(targetId, suffix)
     }
 
-    // v25 target rename (docs/dev/explorer-action-protocol-v25.md). The transactions and their access
-    // rule exist now; the executor and the undo journal they delegate to arrive with Batch Rename
-    // roadmap P3.1, and until then every call fails instead of guessing.
-    // zh-CN: v25 目标重命名. 事务与访问规则已就位; 其委托的执行器与撤销日志随 Batch Rename 路线图 P3.1 落地, 在此之前每次调用都直接失败.
+    // v25 target rename (docs/dev/explorer-action-protocol-v25.md). The plugin names entries and new names only; the
+    // shared Batch Rename executor (core/plugin/batchrename) performs, journals and undoes every rename, and refreshes
+    // the file manager afterwards.
+    // zh-CN: v25 目标重命名. 插件只指定条目与新名称; 由共用的 Batch Rename 执行器 (core/plugin/batchrename) 完成改名, 记录日志与撤销,
+    // 并在之后刷新文件管理器.
 
     override fun listRenameParent(offset: Int, limit: Int): Bundle {
         enforceTargetRenameAccess()
-        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+        require(offset >= 0) { "Explorer Action rename parent offset is invalid" }
+        require(limit in 1..ExplorerActionProtocol.MAX_SESSION_PAGE_SIZE) {
+            "Explorer Action rename parent page size is invalid"
+        }
+        val directory = inputAccess.parent
+        val children = directory.listFiles()
+            ?.sortedWith(compareBy<File>({ it.name.lowercase(Locale.ROOT) }, File::getName))
+            ?: throw IOException("Explorer Action session cannot list the rename parent")
+        require(offset <= children.size) { "Explorer Action rename parent offset exceeds the directory size" }
+        val traits = renameVolumeTraits
+            ?: BatchRenameVolumeTraits.of(directory, children.map(File::getName)).also { renameVolumeTraits = it }
+        val page = children.drop(offset).take(limit)
+        val nextOffset = offset + page.size
+        return Bundle().apply {
+            putParcelableArrayList(
+                ExplorerActionHostSessionKeys.ITEMS,
+                ArrayList(page.map { child ->
+                    Bundle().apply {
+                        putString(
+                            ExplorerActionHostSessionKeys.DISPLAY_NAME,
+                            child.name.take(ExplorerActionProtocol.MAX_TARGET_DISPLAY_NAME_LENGTH),
+                        )
+                        putInt(
+                            ExplorerActionHostSessionKeys.KIND,
+                            if (child.isDirectory) ExplorerActionValues.TARGET_DIRECTORY else ExplorerActionValues.TARGET_FILE,
+                        )
+                    }
+                }),
+            )
+            putInt(ExplorerActionHostSessionKeys.NEXT_OFFSET, nextOffset)
+            putBoolean(ExplorerActionHostSessionKeys.COMPLETE, nextOffset >= children.size)
+            putBoolean(ExplorerActionHostSessionKeys.RENAME_CASE_INSENSITIVE, traits.caseInsensitive)
+            putBoolean(ExplorerActionHostSessionKeys.RENAME_RESTRICTED_CHARACTERS, traits.restrictedCharacters)
+        }
     }
 
     override fun renameEntries(request: Bundle): Bundle {
         enforceTargetRenameAccess()
-        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+        val executor = renameExecutor()
+        beginRename()
+        try {
+            val record = executor.execute(
+                operations = renameOperations(request),
+                source = BatchRenameSource.EXPLORER,
+                pluginUid = expectedUid,
+                allOrNothing = request.getBoolean(ExplorerActionHostSessionKeys.RENAME_ALL_OR_NOTHING, false),
+                scope = inputAccess.parent,
+            )
+            if (record.renamedCount > 0) inputAccess.followRenames { path -> record.relocate(path).path }
+            return renameBatchBundle(record, withEntries = true)
+        } finally {
+            endRename()
+        }
     }
 
     override fun queryRenameBatch(renameBatchId: String): Bundle {
         enforceTargetRenameAccess()
-        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+        requireRenameBatchId(renameBatchId)
+        val record = renameExecutor().journal.load(renameBatchId)?.takeIf(::belongsToRenameScope)
+        return record?.let { renameBatchBundle(it, withEntries = true) } ?: unknownRenameBatchBundle(renameBatchId)
     }
 
     override fun listRenameBatches(): Bundle {
         enforceTargetRenameAccess()
-        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+        val records = renameExecutor().journal.list()
+            .filter(::belongsToRenameScope)
+            .take(ExplorerActionProtocol.MAX_RENAME_BATCH_RESULTS)
+        return Bundle().apply {
+            putParcelableArrayList(
+                ExplorerActionHostSessionKeys.RENAME_BATCHES,
+                ArrayList(records.map { renameBatchBundle(it, withEntries = false) }),
+            )
+        }
     }
 
     override fun undoRenameBatch(renameBatchId: String): Bundle {
         enforceTargetRenameAccess()
-        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+        requireRenameBatchId(renameBatchId)
+        val executor = renameExecutor()
+        beginRename()
+        try {
+            var accepted: BatchRenameJournalRecord? = null
+            val after = executor.undo(renameBatchId) { record ->
+                belongsToRenameScope(record).also { if (it) accepted = record }
+            } ?: return unknownRenameBatchBundle(renameBatchId)
+            val before = requireNotNull(accepted)
+            // Entries undo gave their old names back, as moves in the coordinates before the undo.
+            // zh-CN: 撤销恢复了原名的条目, 以撤销之前的坐标表示为移动.
+            val restored = before.entries.zip(after.entries)
+                .filter { (old, new) -> old.applied && !new.applied }
+                .associate { (old, _) ->
+                    val location = before.locationOf(old)
+                    location.path to File(location.parentFile, File(old.oldPath).name).path
+                }
+            if (restored.isNotEmpty()) inputAccess.followRenames(BatchRenamePathMap(restored)::apply)
+            return renameBatchBundle(after, withEntries = true)
+        } finally {
+            endRename()
+        }
     }
 
     private fun enforceTargetRenameAccess() {
         enforceCaller()
         check(allowTargetRename) { "Explorer Action does not have target rename access" }
         synchronized(lock) { checkOpen() }
+    }
+
+    private fun beginRename() = synchronized(lock) {
+        checkOpen()
+        check(!renameRunning) { "Explorer Action rename operation is already running" }
+        renameRunning = true
+    }
+
+    private fun endRename() = synchronized(lock) { renameRunning = false }
+
+    /**
+     * Resolves the request entries: a target itself (checked against its launch identity) or a descendant this session
+     * listed (checked against what listChildren returned). Names are validated by the executor, which reports an
+     * invalid one as not renamed.
+     * zh-CN: 解析请求条目: 目标本身 (按启动时的身份复核) 或本会话列出过的后代 (按 listChildren 返回的内容复核). 名称由执行器校验,
+     * 非法名称报告为未改名.
+     */
+    private fun renameOperations(request: Bundle): List<BatchRenameOperation> {
+        val entries = BundleCompat.getParcelableArrayList(
+            request,
+            ExplorerActionHostSessionKeys.RENAME_ENTRIES,
+            Bundle::class.java,
+        )
+        require(entries != null && entries.size in 1..ExplorerActionProtocol.MAX_RENAME_ENTRIES_PER_REQUEST) {
+            "Explorer Action rename request must have 1 to ${ExplorerActionProtocol.MAX_RENAME_ENTRIES_PER_REQUEST} entries"
+        }
+        val seen = HashSet<Pair<String, String>>()
+        return entries.map { entry ->
+            val targetId = requireNotNull(entry.getString(ExplorerActionHostSessionKeys.RENAME_TARGET_ID)) {
+                "Explorer Action rename entry has no target ID"
+            }
+            val relativePath = ExplorerActionInputPathPolicy.normalizeRelativePath(
+                entry.getString(ExplorerActionHostSessionKeys.RELATIVE_PATH).orEmpty(),
+            )
+            val newName = requireNotNull(entry.getString(ExplorerActionHostSessionKeys.RENAME_NEW_NAME)) {
+                "Explorer Action rename entry has no new name"
+            }
+            val overwrite = entry.getBoolean(ExplorerActionHostSessionKeys.RENAME_OVERWRITE, false)
+            require(seen.add(targetId to relativePath)) { "Explorer Action rename request names an entry twice" }
+            val target = inputAccess.targetState(targetId)
+            if (relativePath.isEmpty()) {
+                BatchRenameOperation(
+                    source = target.file,
+                    newName = newName,
+                    directory = target.directory,
+                    expectedLastModified = target.identity.lastModifiedMillis.takeUnless { target.directory },
+                    expectedLength = target.identity.size.takeUnless { target.directory },
+                    overwrite = overwrite,
+                    targetId = targetId,
+                    relativePath = relativePath,
+                )
+            } else {
+                require(target.directory) { "Explorer Action file target cannot have a relative path" }
+                val listed = requireNotNull(inputAccess.listedEntry(targetId, relativePath)) {
+                    "Explorer Action rename entry was not listed in this session"
+                }
+                BatchRenameOperation(
+                    source = ExplorerActionInputPathPolicy.resolve(target.file, relativePath),
+                    newName = newName,
+                    directory = listed.directory,
+                    expectedLastModified = listed.lastModified.takeUnless { listed.directory },
+                    expectedLength = listed.length.takeUnless { listed.directory },
+                    overwrite = overwrite,
+                    targetId = targetId,
+                    relativePath = relativePath,
+                )
+            }
+        }
+    }
+
+    /** Batches this plugin made through sessions on the same parent. zh-CN: 本插件经同一父目录的会话创建的批次. */
+    private fun belongsToRenameScope(record: BatchRenameJournalRecord): Boolean =
+        record.source == BatchRenameSource.EXPLORER &&
+            record.pluginUid == expectedUid &&
+            record.scope == inputAccess.parent.path
+
+    private fun requireRenameBatchId(renameBatchId: String) {
+        require(renameBatchId.isNotEmpty() && renameBatchId.length <= ExplorerActionProtocol.MAX_RENAME_BATCH_ID_LENGTH) {
+            "Explorer Action rename batch ID is invalid"
+        }
+    }
+
+    private fun unknownRenameBatchBundle(renameBatchId: String): Bundle = Bundle().apply {
+        putString(ExplorerActionHostSessionKeys.RENAME_BATCH_ID, renameBatchId)
+        putInt(ExplorerActionHostSessionKeys.RENAME_BATCH_STATE, ExplorerActionHostSessionValues.RENAME_BATCH_STATE_UNKNOWN)
+    }
+
+    /**
+     * A batch as the protocol reports it. Entries come in request order with their state and the relative path they
+     * have now, below where their request target is now; the plugin pairs them with its request by position.
+     * zh-CN: 按协议报告的批次. 条目按请求顺序排列, 带有状态与当前的相对路径 (相对于请求目标当前的位置); 插件按位置与其请求对应.
+     */
+    private fun renameBatchBundle(record: BatchRenameJournalRecord, withEntries: Boolean): Bundle = Bundle().apply {
+        putString(ExplorerActionHostSessionKeys.RENAME_BATCH_ID, record.batchId)
+        putInt(
+            ExplorerActionHostSessionKeys.RENAME_BATCH_STATE,
+            when (record.state) {
+                BatchRenameBatchState.COMMITTED -> ExplorerActionHostSessionValues.RENAME_BATCH_STATE_COMMITTED
+                BatchRenameBatchState.PARTIAL -> ExplorerActionHostSessionValues.RENAME_BATCH_STATE_PARTIAL
+                BatchRenameBatchState.REJECTED -> ExplorerActionHostSessionValues.RENAME_BATCH_STATE_REJECTED
+                BatchRenameBatchState.RESTORED -> ExplorerActionHostSessionValues.RENAME_BATCH_STATE_RESTORED
+                BatchRenameBatchState.RECOVERY_REQUIRED -> ExplorerActionHostSessionValues.RENAME_BATCH_STATE_RECOVERY_REQUIRED
+            },
+        )
+        putLong(ExplorerActionHostSessionKeys.RENAME_BATCH_CREATED_AT, record.createdAt)
+        putLong(ExplorerActionHostSessionKeys.RENAME_BATCH_UPDATED_AT, record.updatedAt)
+        putInt(ExplorerActionHostSessionKeys.RENAME_RENAMED_COUNT, record.renamedCount)
+        putInt(ExplorerActionHostSessionKeys.RENAME_NOT_RENAMED_COUNT, record.entries.size - record.renamedCount)
+        putInt(ExplorerActionHostSessionKeys.RENAME_RESTORED_COUNT, record.restoredCount)
+        if (!withEntries) return@apply
+        putParcelableArrayList(
+            ExplorerActionHostSessionKeys.RENAME_ENTRIES,
+            ArrayList(record.entries.map { entry ->
+                Bundle().apply {
+                    putInt(
+                        ExplorerActionHostSessionKeys.RENAME_ITEM_STATE,
+                        when (entry.state) {
+                            BatchRenameEntryState.RENAMED -> ExplorerActionHostSessionValues.RENAME_ITEM_STATE_RENAMED
+                            BatchRenameEntryState.NOT_RENAMED -> ExplorerActionHostSessionValues.RENAME_ITEM_STATE_NOT_RENAMED
+                            BatchRenameEntryState.STALE -> ExplorerActionHostSessionValues.RENAME_ITEM_STATE_STALE
+                            BatchRenameEntryState.RESTORED -> ExplorerActionHostSessionValues.RENAME_ITEM_STATE_RESTORED
+                            BatchRenameEntryState.RECOVERY_REQUIRED -> ExplorerActionHostSessionValues.RENAME_ITEM_STATE_RECOVERY_REQUIRED
+                        },
+                    )
+                    putString(ExplorerActionHostSessionKeys.RENAME_NEW_RELATIVE_PATH, currentRelativePath(record, entry))
+                }
+            }),
+        )
+    }
+
+    /** The entry's relative path now, below where its request target is now. zh-CN: 条目当前的相对路径. */
+    private fun currentRelativePath(record: BatchRenameJournalRecord, entry: BatchRenameJournalEntry): String {
+        val relativePath = entry.relativePath ?: return ""
+        val oldRoot = if (relativePath.isEmpty()) {
+            entry.oldPath
+        } else {
+            entry.oldPath.removeSuffix(File.separator + relativePath.replace('/', File.separatorChar))
+        }
+        val root = record.relocate(oldRoot).path
+        val location = record.locationOf(entry).path
+        return if (location.startsWith(root + File.separator)) {
+            location.removePrefix(root + File.separator).replace(File.separatorChar, '/')
+        } else {
+            ""
+        }
     }
 
     override fun queryTargetTrashBatch(targetTrashBatchId: String): Bundle {
@@ -1928,8 +2171,6 @@ internal class ExplorerActionHostSession private constructor(
 
     companion object {
         private const val DIRECTORY_MIME_TYPE = "inode/directory"
-        private const val TARGET_RENAME_UNAVAILABLE =
-            "Explorer Action target rename is not available in this AutoJs6 build yet"
         private const val OUTPUT_TREE_MARKER_PREFIX = ExplorerActionOutputPathPolicy.OUTPUT_TREE_MARKER_PREFIX
         private val PROCESS_INSTANCE_ID = UUID.randomUUID().toString()
         private val CLIENT_DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
@@ -1957,6 +2198,7 @@ internal class ExplorerActionHostSession private constructor(
             afterBatchMemberPublished: (Int) -> Unit = {},
             afterReplacementPublished: () -> Unit = {},
             afterReplacementRestored: () -> Unit = {},
+            renameExecutor: (Context) -> BatchRenameExecutor = BatchRenameHostServices::executor,
         ): ExplorerActionHostSession {
             require(
                 !allowReplacementUndo ||
@@ -2027,6 +2269,7 @@ internal class ExplorerActionHostSession private constructor(
                 clock = clock,
                 afterBatchMemberPublished = afterBatchMemberPublished,
                 afterReplacementPublished = afterReplacementPublished,
+                renameExecutor = { renameExecutor(applicationContext) },
             )
         }
 

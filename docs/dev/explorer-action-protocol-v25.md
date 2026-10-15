@@ -16,12 +16,10 @@ another directory and cannot touch an entry it did not list through the session.
 
 ## Status
 
-The catalog key, the placement, the entry point, the rename dialog "More" menu, the transactions and
-their access rule are in place. The rename executor and the undo journal behind `listRenameParent`, `renameEntries`,
-`queryRenameBatch`, `listRenameBatches` and `undoRenameBatch` arrive with Batch Rename roadmap P3.1;
-until then those calls fail with `UnsupportedOperationException` for an action that declared
-`targetRename`, and with the usual access error for any other action. Do not ship a host between the
-two steps.
+Complete. The catalog key, the placement, the entry point, the rename dialog "More" menu and the five
+transactions are in place. The transactions delegate to the host's Batch Rename executor and journal
+(`core/plugin/batchrename`, Batch Rename roadmap P3.1), which the `files.batchRename` script API shares. Any action
+that did not declare `targetRename` gets the usual access error (`IllegalStateException`) from all five.
 
 ## Binary compatibility
 
@@ -76,6 +74,9 @@ The Batch Rename catalog uses three shapes (roadmap D23):
   `RENAME_CASE_INSENSITIVE` (names differing only in case collide) and `RENAME_RESTRICTED_CHARACTERS`
   (the file system rejects `\ : * ? " < > |`). Neither the parent's other entries nor their contents
   become reachable through `openFile`.
+- A session that may rename remembers what `listChildren` returned below its directory targets (kind,
+  modification time and size); those records are what `renameEntries` checks a descendant against. They follow
+  renames and undos made through the session.
 
 ## Renaming
 
@@ -88,27 +89,58 @@ The Batch Rename catalog uses three shapes (roadmap D23):
   and optional `RENAME_OVERWRITE`;
 - optional `RENAME_ALL_OR_NOTHING`: revalidate every entry first and rename nothing when one fails.
 
-The host revalidates each entry (it still exists with the kind and modification time the plugin
-listed, the new name is valid and free or `RENAME_OVERWRITE` was requested), orders the renames so
-that children go before their parents, uses a temporary name for case-only changes, swaps and
-cycles, moves a replaced entry into its Trash first, and records the call as one batch. The result
-carries `RENAME_BATCH_ID`, `RENAME_BATCH_STATE` (`COMMITTED`, `PARTIAL`, `REJECTED`), the counts
-`RENAME_RENAMED_COUNT` / `RENAME_NOT_RENAMED_COUNT` and one item per entry in request order with
-`RENAME_TARGET_ID`, `RELATIVE_PATH`, `RENAME_NEW_RELATIVE_PATH` and `RENAME_ITEM_STATE` (`RENAMED`,
-`NOT_RENAMED`, `STALE`). Entries that were not renamed keep their names; renamed entries stay renamed
-when a later entry fails (use undo to revert them).
+A malformed request is rejected as a whole with `IllegalArgumentException` and renames nothing: no or
+too many entries, an entry without target ID or new name, an unknown target ID, an entry named twice, a
+relative path on a file target or one that fails the `listChildren` path rules (absolute, `.` / `..`
+segments, symbolic links), or a descendant the session has not listed. Symbolic links listed by
+`listChildren` (`SYMBOLIC_LINK`) cannot be renamed; leave them out. Only one rename or undo runs per
+session at a time; a second call meanwhile fails with `IllegalStateException`.
 
-When a request target itself is renamed, the session adopts the new path for that target ID.
+The host revalidates each entry (it still exists with the kind the plugin listed, and a file still has
+the modification time and size the plugin listed; a request target is checked against what the host
+captured when it launched the action), checks the new name (one segment of at most 255 UTF-8 bytes, not
+equal to the old name) and that it is free or `RENAME_OVERWRITE` was requested. It renames deeper entries
+first, so a directory is renamed after everything below it; within one directory it moves case-only
+changes and names another entry of the batch still holds (chains, swaps, cycles) to a temporary name
+first, so the request order does not matter. An overwritten entry goes to the host Trash first; an entry
+of the same batch is never overwritten. The call is recorded as one batch and the file manager is
+refreshed.
+
+The result carries `RENAME_BATCH_ID`, `RENAME_BATCH_STATE` (`COMMITTED`, `PARTIAL`, `REJECTED`),
+`RENAME_BATCH_CREATED_AT` / `RENAME_BATCH_UPDATED_AT`, the counts `RENAME_RENAMED_COUNT` /
+`RENAME_NOT_RENAMED_COUNT` / `RENAME_RESTORED_COUNT` and `RENAME_ENTRIES`: one item per request entry, in
+request order, with `RENAME_ITEM_STATE` (`RENAMED`, `NOT_RENAMED`, `STALE`) and
+`RENAME_NEW_RELATIVE_PATH`, the entry's relative path now below where its request target is now (`""` for
+the target itself). The items do not repeat the target ID and relative path; the plugin pairs them with its
+request by position, which keeps a 2000-entry answer small. Entries that were not renamed keep their names;
+renamed entries stay renamed when another entry fails (use undo to revert them).
+
+The session follows its renames: a renamed request target keeps its target ID at the new path, and listed
+descendants keep their records under their new relative paths.
+
+A request travels in one Binder transaction. With 64-character target IDs an entry costs roughly 350 bytes
+of Parcel data, so a client that sends the maximum of 2000 entries comes close to the 1 MB transaction
+buffer; a client should measure its request (`Parcel.dataSize()`) and split a large selection into several
+requests, each of which becomes its own batch.
 
 ## History and undo
 
-`queryRenameBatch`, `listRenameBatches` and `undoRenameBatch` are scoped to the calling plugin UID
-and to batches below the session targets. The host keeps at most `MAX_RENAME_BATCH_RESULTS` (20)
-rename batches per plugin, shared with the `files.batchRename` script API, and evicts the oldest
-finished ones first. Undo restores the old names newest entry first for every entry that still has
-the name, kind and modification time the batch gave it, returns replaced entries from the host
-Trash, never overwrites an occupied old name, and reports `RESTORED`, `STALE` or
-`RECOVERY_REQUIRED` per entry.
+`queryRenameBatch`, `listRenameBatches` and `undoRenameBatch` see the batches the calling plugin made through
+sessions whose common parent is this session's parent. Any other batch ID, including one of another plugin, of a
+script or of another directory, answers `RENAME_BATCH_STATE_UNKNOWN` and is left alone. Batches survive a restart
+of the host. The journal (`noBackupFilesDir/batch-rename/journals`, shared with the `files.batchRename` script
+API) keeps the newest `MAX_RENAME_BATCH_RESULTS` (20) batches of each plugin and of scripts, and evicts the oldest
+first.
+
+`listRenameBatches` returns the batches newest first as summaries (ID, state, timestamps and counts, no
+`RENAME_ENTRIES`); `queryRenameBatch` and `undoRenameBatch` return the full batch like `renameEntries`.
+
+Undo gives the old names back shallowest entry first (a directory before the entries below it) with the same
+temporary-name rules, for every entry that still has the kind the batch gave it and, for a file, the
+modification time and size; others become `STALE`. It never overwrites an occupied old name
+(`RECOVERY_REQUIRED`), returns an overwritten entry from the host Trash, and refreshes the file manager. A batch
+whose undo hit an obstacle stays `RECOVERY_REQUIRED` and can be undone again once the obstacle is gone; a
+`RESTORED` batch stays restored.
 
 ## Client responsibilities
 
@@ -128,5 +160,11 @@ placement (single target and `targetRename` required, matching files and folders
 the rename dialog entry point on the main file manager) and the rejection of writable,
 host-explorer, output, `filesystemPath`, `targetTrash` and media-session combinations.
 `ExplorerActionAidlOrderTest` (module `plugin-api/explorer-action-api`) freezes the transaction
-order of the plugin and host session interfaces, including the five appended calls. Session
-instrumentation for listing, renaming and undo arrives with roadmap P3.1.
+order of the plugin and host session interfaces, including the five appended calls.
+`BatchRenameExecutorTest` (JVM) covers the executor and its journal: swaps, cycles, chains, case-only changes,
+directories with renamed children (also swapped directories), partial failures, stale entries, all-or-nothing,
+overwrite through the Trash, repeated undo, progress and eviction per owner.
+`ExplorerActionRenameV25InstrumentationTest` covers the session: parent paging and traits, listed descendants,
+targets that follow their renames, outcomes per entry, malformed requests, overwrite and undo through the real
+Trash, history scoped to plugin and parent across a new journal instance, sessions without `targetRename` and
+the default wiring to the host journal.

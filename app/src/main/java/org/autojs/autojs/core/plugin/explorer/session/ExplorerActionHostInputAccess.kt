@@ -31,7 +31,15 @@ internal class ExplorerActionHostInputAccess(
     relatedFileSuffixes: Set<String>,
     private val playbackHistoryStore: ExplorerPlaybackHistoryStore,
     private val requireSessionOpen: () -> Unit,
+    /** Remember what listChildren returned below directory targets (protocol v25 `targetRename`). */
+    private val recordListings: Boolean = false,
 ) {
+
+    /** A descendant as listChildren returned it. zh-CN: listChildren 返回时的后代条目. */
+    data class ListedEntry(val directory: Boolean, val lastModified: Long, val length: Long)
+
+    private val listedEntries = HashMap<String, HashMap<String, ListedEntry>>()
+    private var listedEntryCount = 0
 
     val parent: File = commonParent.canonicalFile
 
@@ -105,6 +113,7 @@ internal class ExplorerActionHostInputAccess(
             }
             val metadataRoot = if (root.isFile) directory else root
             items += childMetadata(metadataRoot, child, childRelativePath)
+            if (recordListings && root.isDirectory) recordListing(targetId, childRelativePath, child)
         }
         val nextOffset = offset + page.size
         return Bundle().apply {
@@ -187,6 +196,53 @@ internal class ExplorerActionHostInputAccess(
         playbackHistoryStore.report(file, positionMillis, durationMillis, completed)
     }
 
+    /**
+     * What listChildren returned for [relativePath] below the directory target [targetId], or null when this session
+     * never listed it.
+     * zh-CN: listChildren 为目录目标 [targetId] 下的 [relativePath] 返回的内容; 本会话从未列出时为 null.
+     */
+    fun listedEntry(targetId: String, relativePath: String): ListedEntry? = synchronized(listedEntries) {
+        listedEntries[targetId]?.get(relativePath)
+    }
+
+    /**
+     * Follows renames: [relocate] maps an absolute path as it was before to where it is now. Targets adopt their new
+     * paths and identities, and listing records move with their entries; a record whose entry left its target is
+     * dropped, and where two records meet the moved one wins (it replaced the other).
+     * zh-CN: 跟随改名: [relocate] 把此前的绝对路径映射到当前位置. 目标采用新路径与新身份, 列出记录随条目移动; 条目离开所属目标的
+     * 记录被丢弃, 两条记录重合时保留移动过来的一条 (它替换了另一条).
+     */
+    fun followRenames(relocate: (String) -> String) = synchronized(listedEntries) {
+        targetsById.forEach { (targetId, target) ->
+            val oldRoot = target.file
+            val newRoot = File(relocate(oldRoot.path))
+            if (newRoot != oldRoot) {
+                target.file = newRoot
+                runCatching { ExplorerActionFileIdentity.capture(newRoot) }.onSuccess { target.identity = it }
+            }
+            val entries = listedEntries[targetId] ?: return@forEach
+            val prefix = newRoot.path + File.separator
+            val moved = HashMap<String, ListedEntry>(entries.size)
+            entries.forEach { (relativePath, entry) ->
+                val before = oldRoot.path + File.separator + relativePath.replace('/', File.separatorChar)
+                val now = relocate(before)
+                if (!now.startsWith(prefix)) return@forEach
+                val key = now.removePrefix(prefix).replace(File.separatorChar, '/')
+                if (key == relativePath) moved.putIfAbsent(key, entry) else moved[key] = entry
+            }
+            listedEntries[targetId] = moved
+        }
+        listedEntryCount = listedEntries.values.sumOf { it.size }
+    }
+
+    private fun recordListing(targetId: String, relativePath: String, child: File) = synchronized(listedEntries) {
+        val entries = listedEntries.getOrPut(targetId) { HashMap() }
+        if (relativePath !in entries && listedEntryCount >= MAX_RECORDED_LISTINGS) return@synchronized
+        if (entries.put(relativePath, ListedEntry(child.isDirectory, child.lastModified(), if (child.isDirectory) -1L else child.length())) == null) {
+            listedEntryCount++
+        }
+    }
+
     fun targetState(targetId: String): ExplorerActionHostTargetState {
         return targetsById[targetId]
             ?: throw IllegalArgumentException("Explorer Action host session target is unknown")
@@ -241,6 +297,9 @@ internal class ExplorerActionHostInputAccess(
     private companion object {
         private const val DIRECTORY_MIME_TYPE = "inode/directory"
         private const val SIZE_UNKNOWN = -1L
+
+        /** Listed descendants a session remembers for renames; later ones cannot be renamed. */
+        private const val MAX_RECORDED_LISTINGS = 50_000
 
         private fun captureRelatedFile(parent: File, displayName: String): RelatedFileCandidate? {
             val unresolved = File(parent, displayName).absoluteFile
