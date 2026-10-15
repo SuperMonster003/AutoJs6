@@ -78,6 +78,17 @@ internal object NodePluginTestHarness {
         assertTrue("$label timed out\n${describeResult(label, result)}", !result.timedOut)
     }
 
+    /**
+     * Asserts that every [expected] line is present in the script's stdout and prints the whole result
+     * when one is missing, so a runtime plugin that changes an observable (for example what
+     * `require.resolve("ocr")` returns) stays diagnosable from the failure message alone.
+     */
+    fun assertStdoutContains(label: String, result: NodePluginScriptResult, vararg expected: String) {
+        expected.forEach { line ->
+            assertTrue("$label: stdout does not contain \"$line\"\n${describeResult(label, result)}", result.stdout.contains(line))
+        }
+    }
+
     fun describeResult(label: String, result: NodePluginScriptResult): String = buildString {
         appendLine(label)
         appendLine("succeeded=${result.succeeded}")

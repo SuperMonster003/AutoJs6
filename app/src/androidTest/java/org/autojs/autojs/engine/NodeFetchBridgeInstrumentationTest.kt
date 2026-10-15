@@ -292,7 +292,7 @@ class NodeFetchBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("fetch fake bridge", result)
-        assertTrue(result.stdout, result.stdout.contains("fetch.resolve=fetch"))
+        assertTrue(result.stdout, result.stdout.contains("fetch.resolve=autojs6:fetch"))
         assertTrue(result.stdout, result.stdout.contains("fetch.shadow=false"))
         assertTrue(result.stdout, result.stdout.contains("fetch.frozen=true"))
         assertTrue(result.stdout, result.stdout.contains("fetch.aliases=function|function|true|true"))
@@ -304,7 +304,9 @@ class NodeFetchBridgeInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("fetch.timeout=ERR_AUTOJS6_NETWORK_TIMEOUT"))
         assertTrue(result.stdout, result.stdout.contains("fetch.abort=ERR_AUTOJS6_NETWORK_ABORTED"))
         assertTrue(result.stdout, result.stdout.contains("fetch.large=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"))
-        assertTrue(result.stdout, result.stdout.contains("fetch.raw_net=ERR_AUTOJS6_NETWORK_DISABLED"))
+        // Node runtime 1.6.0+ gates the raw network builtins at resolve time with ERR_AUTOJS6_BUILTIN_DISABLED when
+        // rawNodeNetworkModulesEnabled=false; the restricted facade that answered ERR_AUTOJS6_NETWORK_DISABLED is gone.
+        assertTrue(result.stdout, result.stdout.contains("fetch.raw_net=ERR_AUTOJS6_BUILTIN_DISABLED"))
         assertTrue(result.stdout, result.stdout.contains("fetch.pending=0"))
     }
 
@@ -548,7 +550,7 @@ class NodeFetchBridgeInstrumentationTest {
         assertTrue(
             result.stdout,
             result.stdout.contains(
-                "fetch.surface.denials=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_PERMISSION_DENIED|ERR_AUTOJS6_NETWORK_ABORTED|false|ERR_AUTOJS6_NETWORK_DISABLED",
+                "fetch.surface.denials=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_PERMISSION_DENIED|ERR_AUTOJS6_NETWORK_ABORTED|false|ERR_AUTOJS6_BUILTIN_DISABLED",
             ),
         )
         assertTrue(result.stdout, result.stdout.contains("fetch.surface.requests=POST:string|POST:uint8|GET:array|GET:manual|GET:error-redirect|GET:get-body"))
@@ -774,7 +776,7 @@ class NodeFetchBridgeInstrumentationTest {
         assertTrue(
             resultDetails,
             result.stdout.contains(
-                "fetch.harden.codes=ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_ABORTED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
+                "fetch.harden.codes=ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_ABORTED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_BUILTIN_DISABLED|ERR_AUTOJS6_BUILTIN_DISABLED",
             ),
         )
         assertTrue(
@@ -793,13 +795,12 @@ class NodeFetchBridgeInstrumentationTest {
     fun jsAxiosCompatibilityLayerUsesControlledFetchOnly() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node axios controlled fetch compatibility regression")
 
-        val workDir = File(context.cacheDir, "node-bridge-axios-shadow").apply {
+        // No node_modules/axios here: axios is one of the shims that yield to an installed npm package of the
+        // same name (see jsAxiosShimYieldsToInstalledNpmPackage), so a planted package would replace the shim.
+        val workDir = File(context.cacheDir, "node-bridge-axios-controlled").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create axios bridge working directory: $absolutePath" }
         }
-        File(workDir, "node_modules/axios").apply {
-            check(mkdirs()) { "Failed to create axios shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -1009,7 +1010,7 @@ class NodeFetchBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("axios controlled fetch", result)
-        assertTrue(result.stdout, result.stdout.contains("axios.resolve=axios"))
+        assertTrue(result.stdout, result.stdout.contains("axios.resolve=autojs6:axios"))
         assertTrue(result.stdout, result.stdout.contains("axios.shadow=false"))
         assertTrue(result.stdout, result.stdout.contains("axios.surface=function|function|function|function|true|true|autojs6-controlled-fetch"))
         assertTrue(
@@ -1035,8 +1036,42 @@ class NodeFetchBridgeInstrumentationTest {
             ),
         )
         assertTrue(result.stdout, result.stdout.contains("axios.permissions=true"))
-        assertTrue(result.stdout, result.stdout.contains("axios.raw_net=ERR_AUTOJS6_NETWORK_DISABLED"))
+        assertTrue(result.stdout, result.stdout.contains("axios.raw_net=ERR_AUTOJS6_BUILTIN_DISABLED"))
         assertTrue(result.stdout, result.stdout.contains("axios.pending=0"))
+    }
+
+    @Test
+    fun jsAxiosShimYieldsToInstalledNpmPackage() {
+        NodePluginTestHarness.assumePluginRuntimeAvailable("Node axios npm precedence regression")
+
+        // Desktop Node semantics for the shims that stand in for npm packages (axios, colors, mime, nanoid, opencc,
+        // undici): an installed package of the same name wins over the runtime shim for require and require.resolve.
+        // A bare working directory only ships its explicit inputs (entry, env paths, module-source overlays) to the
+        // plugin, so the package travels as a module-source overlay under node_modules.
+        val workDir = File(context.cacheDir, "node-bridge-axios-npm-shadow").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create axios npm precedence working directory: $absolutePath" }
+        }
+
+        val result = NodePluginTestHarness.runPluginScript(
+            """
+            "nodejs";
+            const axios = require("axios");
+            const resolved = require.resolve("axios");
+            console.log("axios.npm.shadow=" + (axios.shadow === true));
+            console.log("axios.npm.resolve=" + (resolved.indexOf("/node_modules/axios/") >= 0));
+            console.log("axios.npm.resolved=" + resolved);
+            """.trimIndent(),
+            "<embedded-autojs-axios-npm-shadow.js>",
+            workingDirectory = workDir,
+            moduleSources = mapOf(
+                "node_modules/axios/package.json" to """{"name":"axios","version":"0.0.0-test","main":"index.js"}""",
+                "node_modules/axios/index.js" to """module.exports = { shadow: true };""",
+            ),
+        )
+
+        NodePluginTestHarness.assertSucceeded("axios npm precedence", result)
+        NodePluginTestHarness.assertStdoutContains("axios npm precedence", result, "axios.npm.shadow=true", "axios.npm.resolve=true")
     }
 
     @Test

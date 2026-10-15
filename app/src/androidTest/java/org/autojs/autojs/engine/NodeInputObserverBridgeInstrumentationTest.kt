@@ -309,17 +309,17 @@ class NodeInputObserverBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("input_observer fake bridge", result)
-        assertTrue(result.stdout.contains("input_observer.resolve=input_observer"))
-        assertTrue(result.stdout.contains("input_observer.shadow=false"))
-        assertTrue(result.stdout.contains("input_observer.frozen=true"))
-        assertTrue(result.stdout.contains("input_observer.sources=fake:true:false,accessibility:false:true|true"))
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.resolve=autojs6:input_observer")
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.shadow=false")
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.frozen=true")
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.sources=fake:true:false,accessibility:false:true|true")
         assertTrue(result.stdout, result.stdout.contains("input_observer.sub=input-observer-fake-1|key|fake|true|true|true"))
-        assertTrue(result.stdout.contains("input_observer.events=volume_up|24|down|true|true"))
-        assertTrue(result.stdout.contains("input_observer.close=true|false|true"))
-        assertTrue(result.stdout.contains("input_observer.invalid=${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}"))
-        assertTrue(result.stdout.contains("input_observer.requests=input_observer.getAvailableSources|input_observer.observeKeys|input_observer.drainEvents|input_observer.close"))
-        assertTrue(result.stdout.contains("input_observer.permissions=input_observer|input_observer+input_observer.keys|input_observer+input_observer.keys|input_observer+input_observer.keys"))
-        assertTrue(result.stdout.contains("input_observer.pending=0"))
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.events=volume_up|24|down|true|true")
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.close=true|false|true")
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.invalid=${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}")
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.requests=input_observer.getAvailableSources|input_observer.observeKeys|input_observer.drainEvents|input_observer.close")
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.permissions=input_observer|input_observer+input_observer.keys|input_observer+input_observer.keys|input_observer+input_observer.keys")
+        NodePluginTestHarness.assertStdoutContains("input_observer fake bridge", result, "input_observer.pending=0")
     }
 
     @Test

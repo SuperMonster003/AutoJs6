@@ -121,14 +121,14 @@ class NodeStorageBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("storage fake bridge", result)
-        assertTrue(result.stdout.contains("storage.resolve=storage|storages"))
-        assertTrue(result.stdout.contains("storage.shadow=false|false"))
-        assertTrue(result.stdout.contains("storage.frozen=true|true|true"))
-        assertTrue(result.stdout.contains("storage.methods=function|function|function|function|function"))
-        assertTrue(result.stdout.contains("storage.value=dark|2|fallback|true|theme|false"))
-        assertTrue(result.stdout.contains("storage.requests=storage.clear|storage.put|storages.get|storage.get|storage.contains|storage.keys|storage.remove|storages.contains"))
-        assertTrue(result.stdout.contains("storage.permissions=storage"))
-        assertTrue(result.stdout.contains("storage.pending=0"))
+        NodePluginTestHarness.assertStdoutContains("storage fake bridge", result, "storage.resolve=autojs6:storage|autojs6:storages")
+        NodePluginTestHarness.assertStdoutContains("storage fake bridge", result, "storage.shadow=false|false")
+        NodePluginTestHarness.assertStdoutContains("storage fake bridge", result, "storage.frozen=true|true|true")
+        NodePluginTestHarness.assertStdoutContains("storage fake bridge", result, "storage.methods=function|function|function|function|function")
+        NodePluginTestHarness.assertStdoutContains("storage fake bridge", result, "storage.value=dark|2|fallback|true|theme|false")
+        NodePluginTestHarness.assertStdoutContains("storage fake bridge", result, "storage.requests=storage.clear|storage.put|storages.get|storage.get|storage.contains|storage.keys|storage.remove|storages.contains")
+        NodePluginTestHarness.assertStdoutContains("storage fake bridge", result, "storage.permissions=storage")
+        NodePluginTestHarness.assertStdoutContains("storage fake bridge", result, "storage.pending=0")
     }
 
     @Test

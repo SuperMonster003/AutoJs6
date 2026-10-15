@@ -267,12 +267,12 @@ class NodeJavaInteropBridgeInstrumentationTest {
             function codeOf(error) {
               return String(error && (error.autojs6Code || error.code || error.name || ""));
             }
-            let resolveCode = "";
+            let resolveOutcome = "";
             let requireCode = "";
             try {
-              require.resolve("java");
+              resolveOutcome = require.resolve("java");
             } catch (error) {
-              resolveCode = codeOf(error);
+              resolveOutcome = codeOf(error);
             }
             try {
               require("java");
@@ -285,7 +285,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
               profile.featureFlags.java_interop.gradleProperty,
               profile.featureStates.javaInterop
             ].join("|"));
-            console.log("java.disabled=" + resolveCode + "|" + requireCode);
+            console.log("java.disabled=" + resolveOutcome + "|" + requireCode);
             """.trimIndent(),
             "<node-java-interop-disabled.js>",
             workingDirectory = workDir,
@@ -295,7 +295,9 @@ class NodeJavaInteropBridgeInstrumentationTest {
 
         NodePluginTestHarness.assertSucceeded("Java interop disabled gate", result)
         assertTrue(result.stdout, result.stdout.contains("java.profile=false|stable||false"))
-        assertTrue(result.stdout, result.stdout.contains("java.disabled=ERR_AUTOJS6_JAVA_INTEROP_DISABLED|ERR_AUTOJS6_JAVA_INTEROP_DISABLED"))
+        // Node runtime 1.6.0+: require.resolve only maps the name to its canonical "autojs6:java" url; the interop
+        // gate fires when the module is loaded.
+        assertTrue(result.stdout, result.stdout.contains("java.disabled=autojs6:java|ERR_AUTOJS6_JAVA_INTEROP_DISABLED"))
     }
 
     @Test
@@ -598,7 +600,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("Java interop stable fake bridge", result)
-        assertTrue(result.stdout, result.stdout.contains("java.resolve=java"))
+        assertTrue(result.stdout, result.stdout.contains("java.resolve=autojs6:java"))
         assertTrue(result.stdout, result.stdout.contains("java.frozen=true"))
         assertTrue(result.stdout, result.stdout.contains("java.rect_frozen=true"))
         assertTrue(result.stdout, result.stdout.contains("java.profile=true|stable|true"))

@@ -100,9 +100,13 @@ class NodeOcrBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create OCR bridge working directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, recognize: () => "shadow" };"""
         File(workDir, "node_modules/ocr").apply {
             check(mkdirs()) { "Failed to create OCR shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true, recognize: () => "shadow" };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -169,22 +173,27 @@ class NodeOcrBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-ocr-fake.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/ocr/index.js" to shadowPackageSource),
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
                 .fromDeclaredCapabilities(listOf("image", "ocr")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("OCR fake bridge", result)
-        assertTrue(result.stdout.contains("ocr.resolve=ocr"))
-        assertTrue(result.stdout.contains("ocr.shadow=false"))
-        assertTrue(result.stdout.contains("ocr.frozen=true"))
-        assertTrue(result.stdout.contains("ocr.methods=function|function|function|undefined"))
-        assertTrue(result.stdout.contains("ocr.result.frozen=true|true|true"))
-        assertTrue(result.stdout.contains("ocr.result.value=hello|0.91|1|4"))
-        assertTrue(result.stdout.contains("ocr.aliases=hello,world|hello|4"))
-        assertTrue(result.stdout.contains("ocr.request=ocr|recognize|image-1|auto|1234"))
-        assertTrue(result.stdout.contains("ocr.requests=recognize|recognizeText|detectTextBounds"))
-        assertTrue(result.stdout.contains("ocr.permissions=ocr|image"))
-        assertTrue(result.stdout.contains("ocr.pending=0"))
+        // Node runtime 1.6.0+ serves runtime modules through Node's own loader hooks: require.resolve returns the
+        // canonical "autojs6:<name>" url (the require.cache key), and a workspace node_modules package only shadows
+        // the shims that stand in for npm packages (axios, colors, mime, nanoid, opencc, undici), never a capability
+        // facade such as ocr.
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.resolve=autojs6:ocr")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.shadow=false")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.frozen=true")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.methods=function|function|function|undefined")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.result.frozen=true|true|true")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.result.value=hello|0.91|1|4")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.aliases=hello,world|hello|4")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.request=ocr|recognize|image-1|auto|1234")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.requests=recognize|recognizeText|detectTextBounds")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.permissions=ocr|image")
+        NodePluginTestHarness.assertStdoutContains("OCR fake bridge", result, "ocr.pending=0")
     }
 
     @Test

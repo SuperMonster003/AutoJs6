@@ -302,18 +302,18 @@ class NodeMediaBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("media fake bridge", result)
-        assertTrue(result.stdout.contains("media.resolve=media|mediainfo|recorder"))
-        assertTrue(result.stdout.contains("media.shadow=false|false|false"))
-        assertTrue(result.stdout.contains("media.frozen=true|true|true|true|true|true"))
-        assertTrue(result.stdout.contains("media.methods=function|function|function|function|function|function|function"))
+        NodePluginTestHarness.assertStdoutContains("media fake bridge", result, "media.resolve=autojs6:media|autojs6:mediainfo|autojs6:recorder")
+        NodePluginTestHarness.assertStdoutContains("media fake bridge", result, "media.shadow=false|false|false")
+        NodePluginTestHarness.assertStdoutContains("media fake bridge", result, "media.frozen=true|true|true|true|true|true")
+        NodePluginTestHarness.assertStdoutContains("media fake bridge", result, "media.methods=function|function|function|function|function|function|function")
         assertTrue(
             result.stdout.contains(
                 "media.values=3|15|autojs6-node-media-audio-stream-v1|autojs6-node-media-audio-stream-v1|autojs6-node-mediainfo-snapshot-v1|autojs6-plugin-mediainfo-snapshot-v2|MPEG Audio|autojs6-node-mediainfo-capabilities-v1|MediaInfoLib - v26.05|autojs6-node-mediainfo-snapshot-v1|MPEG Audio|autojs6-node-mediainfo-snapshot-v1|autojs6-node-recorder-status-v1|autojs6-node-recorder-status-v1|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}",
             ),
         )
-        assertTrue(result.stdout.contains("media.requests=media.getAudioStreamVolume|media.getAudioStreamMaxVolume|media.getAudioStreamInfo|media.getAudioStreamInfo|mediainfo.read|mediainfo.read|mediainfo.capabilities|mediainfo.read|mediainfo.get|mediainfo.read|recorder.getStatus|recorder.getStatus|recorder.start"))
-        assertTrue(result.stdout.contains("media.permissions=true|true|true"))
-        assertTrue(result.stdout.contains("media.pending=0"))
+        NodePluginTestHarness.assertStdoutContains("media fake bridge", result, "media.requests=media.getAudioStreamVolume|media.getAudioStreamMaxVolume|media.getAudioStreamInfo|media.getAudioStreamInfo|mediainfo.read|mediainfo.read|mediainfo.capabilities|mediainfo.read|mediainfo.get|mediainfo.read|recorder.getStatus|recorder.getStatus|recorder.start")
+        NodePluginTestHarness.assertStdoutContains("media fake bridge", result, "media.permissions=true|true|true")
+        NodePluginTestHarness.assertStdoutContains("media fake bridge", result, "media.pending=0")
     }
 
     @Test

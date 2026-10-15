@@ -89,11 +89,11 @@ class NodeDatabaseBridgeInstrumentationTest {
 
               const database = require("database");
               const sqlite = require("sqlite");
-              let nodeSqliteDenied = "";
+              let nodeSqliteNative = "";
               try {
-                require("node:sqlite");
+                nodeSqliteNative = typeof require("node:sqlite").DatabaseSync;
               } catch (error) {
-                nodeSqliteDenied = String(error && (error.autojs6Code || error.code || ""));
+                nodeSqliteNative = String(error && (error.autojs6Code || error.code || ""));
               }
               const db = await database.open("settings", { timeoutMs: 1000 });
               await db.exec("CREATE TABLE items(name TEXT, value INTEGER)", [], { timeoutMs: 1000 });
@@ -110,7 +110,7 @@ class NodeDatabaseBridgeInstrumentationTest {
 
               console.log("database.resolve=" + [require.resolve("database"), require.resolve("sqlite")].join("|"));
               console.log("database.shadow=" + [database.shadow === true, sqlite.shadow === true].join("|"));
-              console.log("database.node_sqlite=" + nodeSqliteDenied);
+              console.log("database.node_sqlite=" + nodeSqliteNative);
               console.log("database.frozen=" + [Object.isFrozen(database), Object.isFrozen(sqlite), Object.isFrozen(db)].join("|"));
               console.log("database.methods=" + [typeof database.open, typeof db.exec, typeof db.run, typeof db.transaction, typeof db.close].join("|"));
               console.log("database.value=" + [db.name, run.rowsAffected, one.count, all.length, tx[1].rowsAffected, closed, alias.name].join("|"));
@@ -124,15 +124,16 @@ class NodeDatabaseBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("database fake bridge", result)
-        assertTrue(result.stdout.contains("database.resolve=database|sqlite"))
-        assertTrue(result.stdout.contains("database.shadow=false|false"))
-        assertTrue(result.stdout.contains("database.node_sqlite=${NodeRuntimeErrorCodes.BUILTIN_DISABLED}"))
-        assertTrue(result.stdout.contains("database.frozen=true|true|true"))
-        assertTrue(result.stdout.contains("database.methods=function|function|function|function|function"))
-        assertTrue(result.stdout.contains("database.value=settings|1|2|2|1|true|alias"))
-        assertTrue(result.stdout.contains("database.requests=database.open|database.exec|database.run|database.get|database.all|database.transaction|database.close|sqlite.open|sqlite.close"))
-        assertTrue(result.stdout.contains("database.permissions=database"))
-        assertTrue(result.stdout.contains("database.pending=0"))
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.resolve=autojs6:database|autojs6:sqlite")
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.shadow=false|false")
+        // Node runtime 1.6.0+ serves node:sqlite as Node's native module next to the bridge-backed database facade.
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.node_sqlite=function")
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.frozen=true|true|true")
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.methods=function|function|function|function|function")
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.value=settings|1|2|2|1|true|alias")
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.requests=database.open|database.exec|database.run|database.get|database.all|database.transaction|database.close|sqlite.open|sqlite.close")
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.permissions=database")
+        NodePluginTestHarness.assertStdoutContains("database fake bridge", result, "database.pending=0")
     }
 
     @Test

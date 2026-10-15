@@ -164,10 +164,10 @@ class NodeUtilityBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("jsox mathx utility facade", result)
-        assertTrue(result.stdout.contains("jsox.resolve=jsox|jsox.mathx|jsox.arrayx|jsox.numberx"))
-        assertTrue(result.stdout.contains("jsox.shadow=false|false|false|false"))
-        assertTrue(result.stdout.contains("jsox.frozen=true|true|true|true|true|true|true|true|true|true|true|true"))
-        assertTrue(result.stdout.contains("jsox.methods=function|function|function|function|function|function|function|function|number"))
+        NodePluginTestHarness.assertStdoutContains("jsox mathx utility facade", result, "jsox.resolve=autojs6:jsox|autojs6:jsox.mathx|autojs6:jsox.arrayx|autojs6:jsox.numberx")
+        NodePluginTestHarness.assertStdoutContains("jsox mathx utility facade", result, "jsox.shadow=false|false|false|false")
+        NodePluginTestHarness.assertStdoutContains("jsox mathx utility facade", result, "jsox.frozen=true|true|true|true|true|true|true|true|true|true|true|true")
+        NodePluginTestHarness.assertStdoutContains("jsox mathx utility facade", result, "jsox.methods=function|function|function|function|function|function|function|function|number")
         assertTrue(
             result.stdout.contains(
                 "jsox.values=6|2.5|2.5|2.5|0.666666666667|2|0.4|3|5|5|3|3|4|3|8|16|8|7|7|1|1|6|6|5|2|1,2,3|a,bb|1,2,3|2,3|1,3|1,3,4|9,70,80|3,2,1|b,cc,aaa|aaa,cc,b|1,2,10|3,2,1|1,2|10|1,2|1,2|1,3|996|true|20|10|30|123.46|05|50|0.5|0.0002|2|255|0.2|1,0.02|3|05|1.5|true|true|ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN|ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED|true",

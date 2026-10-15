@@ -352,7 +352,7 @@ class NodeWebSocketBridgeInstrumentationTest {
 
             NodePluginTestHarness.assertSucceeded("websocket bridge MVP", result)
             assertTrue(result.stdout, result.stdout.contains("websocket.profile=true|true|stable|true"))
-            assertTrue(result.stdout, result.stdout.contains("websocket.resolve=websocket"))
+            assertTrue(result.stdout, result.stdout.contains("websocket.resolve=autojs6:websocket"))
             assertTrue(result.stdout, result.stdout.contains("websocket.shadow=false"))
             assertTrue(result.stdout, result.stdout.contains("websocket.frozen=true"))
             assertTrue(result.stdout, result.stdout.contains("websocket.policy=10000|undefined|undefined"))
@@ -364,10 +364,12 @@ class NodeWebSocketBridgeInstrumentationTest {
                     "websocket.events=prop,listener|text:server-ready,text:echo:hello,binary:AQID|AQID|ERR_FAKE_WS|ERR_FAKE_WS|prop:1000:done,listener:1000:done|0",
                 ),
             )
+            // Node runtime 1.6.0+ gates node:net / node:tls at resolve time with ERR_AUTOJS6_BUILTIN_DISABLED when raw
+            // network modules are disabled; the restricted facade that answered ERR_AUTOJS6_NETWORK_DISABLED is gone.
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "websocket.codes=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
+                    "websocket.codes=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_BUILTIN_DISABLED|ERR_AUTOJS6_BUILTIN_DISABLED|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
                 ),
             )
             assertTrue(result.stdout, result.stdout.contains("websocket.diagnostics=0|3|1|3"))
@@ -589,7 +591,7 @@ class NodeWebSocketBridgeInstrumentationTest {
             assertTrue(
                 resultDetails,
                 result.stdout.contains(
-                    "live.websocket.codes=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
+                    "live.websocket.codes=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_BUILTIN_DISABLED|ERR_AUTOJS6_BUILTIN_DISABLED",
                 ),
             )
             assertTrue(resultDetails, result.stdout.contains("live.websocket.diagnostics=0|3|1|0"))
