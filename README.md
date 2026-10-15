@@ -324,6 +324,8 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题
 * `修复` Object.fromEntries 使用数字或数字字符串作为键时, 生成的属性无法正常访问且控制台显示不完整的问题 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
+* `修复` 正则表达式在 Android 7.x 上使用 Unicode 属性转义 (如 `\p{L}`) 时抛出 UnsupportedOperationException 的问题
+* `修复` 部分本地化的脚本错误消息丢失参数或触发 MessageFormat 异常的问题
 * `修复` Proxy 包装函数及部分 JavaScript 回调可能无法传入内置模块, 或出现参数嵌套与重载歧义的问题
 * `修复` EventEmitter#once 监听器在递归派发事件或回调抛出异常时可能被重复调用的问题
 * `修复` app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_
@@ -472,6 +474,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `优化` 插件信息对话框分别显示插件支持的 ABI 及当前安装包的 ABI
 * `优化` 缓存 Rhino 运行时初始化数据以提升脚本启动效率, 并提升大型数组打印效率及低版本安卓系统的 Java 反射兼容性
 * `优化` Rhino 引擎同步上游, 支持 new.target, 并改进作用域, TypedArray 与调试器兼容性
+* `优化` ArrayBuffer, DataView, TypedArray, 正则表达式及解构等 28 条引擎错误消息补齐 9 种语言的翻译
 * `优化` runtime.loadJar 方法支持借助 DEX Compiler 插件加载 JAR 文件, 并提供编译诊断与失败回退 (实验性, 默认关闭)
 * `优化` 定时任务, 广播任务, 快捷方式及 Tasker 支持执行 TypeScript 脚本 (需要 TypeScript Engine 插件)
 * `优化` pinyin 模块支持调用级自定义读音词典, 并完善 compare/compact 方法
