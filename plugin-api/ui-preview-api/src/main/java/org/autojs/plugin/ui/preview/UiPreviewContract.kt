@@ -20,10 +20,19 @@ package org.autojs.plugin.ui.preview
  */
 object UiPreviewContract {
 
-    const val VERSION = 1
+    /**
+     * The current contract: v2 appends `runScript` / `stopScript` and the console / error / exit callbacks
+     * (interactive preview, 3-Block Compose 1.7.0). `getContractVersion()` and `getContractHash()` keep
+     * answering for the frozen v1 base ([BASE_VERSION] / [HASH_V1]) so that v1 clients keep working against a
+     * v2 host; a v2 client reads [KEY_CONTRACT_VERSION] and [KEY_CONTRACT_HASH] of `getPreviewInfo()` (the
+     * current [VERSION] / [HASH]) and [KEY_SCRIPT_RUN_SUPPORTED] before it uses the v2 transactions.
+     */
+    const val VERSION = 2
+    /** The frozen v1 surface every host answers through `getContractVersion()`. */
+    const val BASE_VERSION = 1
     const val ACTION = "org.autojs.plugin.ui.PREVIEW"
     const val PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN"
-    const val HASH_INPUT =
+    const val HASH_INPUT_V1 =
         "autojs6.ui.preview.v1|" +
             "getContractVersion()->int|getContractHash()->String|getPreviewInfo()->Bundle|" +
             "createSession(Bundle,IUiPreviewCallback)->Bundle|" +
@@ -32,7 +41,19 @@ object UiPreviewContract {
             "setPointerMode(String,int)->Bundle|setHighlight(String,int)->Bundle|" +
             "callback:onBounds(String,Bundle)|onLayoutFailed(String,Bundle)|onSessionLost(String,Bundle)|onTap(String,Bundle)|" +
             "bundle:primitive-surface-package-binder|snapshot:argb8888-rowmajor|bounds:json-inline"
-    const val HASH = "680f41b5459648ff07bd1d3d9684c5279d9398b78f61c0307862f50f8dcac0b6"
+    const val HASH_V1 = "680f41b5459648ff07bd1d3d9684c5279d9398b78f61c0307862f50f8dcac0b6"
+    const val HASH_INPUT =
+        "autojs6.ui.preview.v2|" +
+            "getContractVersion()->int|getContractHash()->String|getPreviewInfo()->Bundle|" +
+            "createSession(Bundle,IUiPreviewCallback)->Bundle|" +
+            "setLayout(String,Bundle,ParcelFileDescriptor)->Bundle|" +
+            "resize(String,int,int)->Bundle|release(String)->void|reattach(String)->Bundle|" +
+            "setPointerMode(String,int)->Bundle|setHighlight(String,int)->Bundle|" +
+            "runScript(String,Bundle)->Bundle|stopScript(String)->Bundle|" +
+            "callback:onBounds(String,Bundle)|onLayoutFailed(String,Bundle)|onSessionLost(String,Bundle)|onTap(String,Bundle)|" +
+            "onConsole(String,Bundle)|onScriptError(String,Bundle)|onScriptExit(String,Bundle)|" +
+            "bundle:primitive-surface-package-binder|snapshot:argb8888-rowmajor|bounds:json-inline|script:text-inline"
+    const val HASH = "81f7fe8d2338eed197dcc21e3cff7007a681ea89d080b42d1ae132c94688f1bb"
 
     // -------------------------------------------------------------------------------------------- modes
 
@@ -206,8 +227,45 @@ object UiPreviewContract {
     const val MIN_FONT_SCALE = 0.5f
     const val MAX_FONT_SCALE = 3.0f
 
+    // ------------------------------------------------------------------- v2: interactive preview (1.7.0)
+
+    /** `getPreviewInfo()`: true when `runScript` is available (embedded sessions on API 33+). */
+    const val KEY_SCRIPT_RUN_SUPPORTED = "scriptRunSupported"
+    /** `runScript` request: the whole `"ui"` mode script text. */
+    const val KEY_SCRIPT_TEXT = "scriptText"
+    /** `runScript` request: the name shown in the host's running list and in error messages (<= [MAX_LABEL_CHARS]). */
+    const val KEY_SCRIPT_NAME = "scriptName"
+    /** `runScript` response and the v2 callbacks: identifies one run of the session. */
+    const val KEY_RUN_ID = "runId"
+    /** `onConsole`: an `android.util.Log` priority (2 verbose, 3 debug, 4 info, 5 warn, 6 error, 7 assert). */
+    const val KEY_LEVEL = "level"
+    /** `onConsole`: the entry text. */
+    const val KEY_TEXT = "text"
+
+    /** The script called `exit()` or its runtime ended on its own. */
+    const val EXIT_SCRIPT = "exit"
+    /** `stopScript`, or the host stopped the run from its task list. */
+    const val EXIT_STOPPED = "stopped"
+    /** An uncaught error ended the run; `onScriptError` came first. */
+    const val EXIT_ERROR = "error"
+    /** A new `runScript` of the same session replaced the run. */
+    const val EXIT_REPLACED = "replaced"
+    /** The session was released while the script ran. */
+    const val EXIT_RELEASED = "released"
+
+    /** The script could not start (not a `"ui"` mode script, engine creation failed); the message says why. */
+    const val ERROR_SCRIPT_FAILED = "ERR_AUTOJS6_UI_PREVIEW_SCRIPT_FAILED"
+
+    /** UTF-16 chars of one `runScript` text. */
+    const val MAX_SCRIPT_CHARS = 512 * 1024
+    /** Covers the creation of the script's engine and the start of its body. */
+    const val SCRIPT_START_TIMEOUT_MS = 15_000L
+
     val MODES
         get() = arrayOf(MODE_EMBEDDED, MODE_SNAPSHOT)
+
+    val EXIT_REASONS
+        get() = arrayOf(EXIT_SCRIPT, EXIT_STOPPED, EXIT_ERROR, EXIT_REPLACED, EXIT_RELEASED)
 
     val TERMINAL_OUTCOMES
         get() = arrayOf(OUTCOME_APPLIED, OUTCOME_FAILED, OUTCOME_TIMED_OUT)

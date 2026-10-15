@@ -1,7 +1,9 @@
-# ui-mode layout preview contract V1
+# ui-mode layout preview contract V1 / V2
 
 Status: V1, added 2026-10-15 for the 3-Block Compose designer's `"ui"` mode (XML / E4X) projects (plugin
-roadmap P10.2, decisions D46 - D50). The host owns `plugin-api/ui-preview-api` (package
+roadmap P10.2, decisions D46 - D50); V2, appended the same day for the interactive preview (plugin roadmap
+P10.6, 3-Block Compose 1.7.0): `runScript` / `stopScript` and the `onConsole` / `onScriptError` /
+`onScriptExit` callbacks, see "Script runs (V2)". The host owns `plugin-api/ui-preview-api` (package
 `org.autojs.plugin.ui.preview`) and provides the service (`UiPreviewService`, action
 `org.autojs.plugin.ui.PREVIEW`, permission `org.autojs.permission.PLUGIN`); the 3-Block Compose plugin
 packages the module and is the first client.
@@ -14,8 +16,9 @@ widgets. A copy in the plugin would be large and never exact, so the preview is 
 with the real inflater inside a real runtime, and shown in the designer either embedded through
 `SurfaceControlViewHost` (API 30+, D46) or as an offscreen snapshot (API 24 - 29, D48). Level 1 of D47 is the
 only level in V1: the runtime executes the constant script `"ui";` and every layout is applied from Kotlin, so
-no user code runs and no request content ever becomes source text. Level 2 (running the whole script) is
-reserved for an append-only V2.
+no user code runs and no request content ever becomes source text. Level 2 (running the whole script) is the
+append-only V2: `runScript` starts a normal host script execution whose `ui.layout` content goes into the same
+embedded root (see "Script runs (V2)").
 
 ## Binder surface
 
@@ -31,17 +34,28 @@ interface IUiPreviewService {
     Bundle reattach(String sessionId);
     Bundle setPointerMode(String sessionId, int mode);
     Bundle setHighlight(String sessionId, int elementIndex);
+    // V2
+    Bundle runScript(String sessionId, in Bundle request);
+    Bundle stopScript(String sessionId);
 }
 oneway interface IUiPreviewCallback {
     void onBounds(String sessionId, in Bundle bounds);
     void onLayoutFailed(String sessionId, in Bundle failure);
     void onSessionLost(String sessionId, in Bundle reason);
     void onTap(String sessionId, in Bundle tap);
+    // V2
+    void onConsole(String sessionId, in Bundle entry);
+    void onScriptError(String sessionId, in Bundle error);
+    void onScriptExit(String sessionId, in Bundle exit);
 }
 ```
 
 - `UiPreviewContract.HASH` is the SHA-256 of `HASH_INPUT`, which lists both interfaces' transactions in order.
   Transactions are append-only; reordering or changing one requires a new contract version.
+- Versioning: `getContractVersion()` and `getContractHash()` keep answering for the frozen V1 base
+  (`BASE_VERSION` = 1, `HASH_V1`), so a V1 client (3-Block Compose 1.6.0) works unchanged against a V2 host;
+  `createSession` accepts `contractVersion` 1 or 2. A V2 client reads `contractVersion` (2), `contractHash`
+  (`HASH`, the V2 digest) and `scriptRunSupported` from `getPreviewInfo()` before it uses the V2 transactions.
 - Bundles carry primitives, strings and string arrays, plus the `SurfacePackage` Parcelable, the
   `InputTransferToken` Parcelable and the host token Binder named below.
 - Every call checks `org.autojs.permission.PLUGIN` (signature level); the Manifest entry blocks binding for
@@ -56,7 +70,8 @@ oneway interface IUiPreviewCallback {
 `hostVersionName`, `modes` (string array: `embedded` on API 30+, `snapshot` always),
 `interactivePointerSupported` (API 33+), `imeSupported` (API 35+), `maxSessionsPerClient` (2), `maxWidthPx` /
 `maxHeightPx` (4096), `maxXmlChars` (262144), `maxBindingsChars` (65536), `maxBoundsEntries` (5000),
-`maxSnapshotPixels` (16777216) and `layoutTimeoutMs` (5000).
+`maxSnapshotPixels` (16777216) and `layoutTimeoutMs` (5000). V2 adds `scriptRunSupported` (API 33+): whether
+`runScript` is available on this device; `contractVersion` / `contractHash` here are the current V2 values.
 
 ## Sessions
 
@@ -134,6 +149,36 @@ to one), `c` the view's class name, `d` the `id` attribute without `@+id/` (abse
 instance (0 for the element's first view, item instances count up), `s` `View.getVisibility()`. Entries are
 sorted by `i` then `n`; beyond 5000 entries the list is cut and `boundsTruncated` is true (a oneway callback
 has no caller-owned descriptor to fall back to, and 5000 entries stay far below the Binder buffer).
+
+## Script runs (V2)
+
+`runScript(sessionId, request)` runs the whole script (`scriptText`, at most `MAX_SCRIPT_CHARS` = 524288 UTF-16
+chars, which must start with the `"ui"` directive; `scriptName`, sanitized like the session label) as a normal
+host script execution: it is created through `ScriptEngineService.execute` like any script, so it is listed in
+the host's running tasks under `scriptName` and can be stopped there; its `ExecutionConfig.uiContentHost` is a
+per-run `UiContentHost` (`UiPreviewScriptRun`) that delegates the root to the session, so the script's
+`ui.layout` content replaces whatever the layout preview showed and its `{{ }}` bindings, event handlers,
+timers and modules run with the script's real semantics and side effects (files, network, accessibility,
+floating windows, all under the host's script permission model). Only embedded sessions on API 33+ accept
+runs (`UNSUPPORTED_MODE` otherwise, decision D50: popup windows of the embedded tree crash the host below
+API 33); the client sets `setPointerMode(1)` so touches reach the views. The working directory of a run is
+`<host cache>/ui-preview/<sessionId>` (`files.*` relative paths resolve there; the directory is removed with
+the session). The call returns `outcome` = `applied` and `runId` once the engine started (bounded by
+`SCRIPT_START_TIMEOUT_MS` = 15000), `SCRIPT_FAILED` when the engine could not start or the text is not a
+`"ui"` script. A second `runScript` on the same session stops the previous run first (`onScriptExit` with
+`replaced`).
+
+- `onConsole(sessionId, { runId, level, text })` forwards every entry of the run's console (`console.*`,
+  `log`, `print`, the runtime's own warnings and errors); `level` is an `android.util.Log` priority.
+- `onScriptError(sessionId, { runId, errorMessage, line })` reports an uncaught error of the run (line is
+  -1 when unknown); `onScriptExit` with `error` follows.
+- `onScriptExit(sessionId, { runId, reason })` ends every run exactly once: `exit` (the script called
+  `exit()` or its runtime ended), `stopped` (`stopScript`, or the host task list), `error`, `replaced`, or
+  `released` (the session was released while the script ran).
+- `stopScript(sessionId)` stops the running script, if any, and returns `applied` (with the stopped
+  `runId`); the layout-preview runtime and the root stay, so the client can send `setLayout` again.
+- The layout-preview runtime (`"ui";`) of the session keeps running beside a script run; the session's
+  `setLayout` during a run replaces the root content as well, so a client should not interleave them.
 
 ## Residual differences from running the script
 

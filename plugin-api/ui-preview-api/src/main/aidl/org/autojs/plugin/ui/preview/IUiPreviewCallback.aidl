@@ -22,4 +22,13 @@ oneway interface IUiPreviewCallback {
     // Edit pointer mode only: a tap on the embedded root with x, y (root pixels), the deepest hit
     // element's index (-1 when none) and its class name.
     void onTap(String sessionId, in Bundle tap);
+
+    // v2: one console entry of the running script: runId, level (android.util.Log priority) and text.
+    void onConsole(String sessionId, in Bundle entry);
+
+    // v2: an uncaught error of the running script: runId, errorMessage and line (-1 when unknown).
+    void onScriptError(String sessionId, in Bundle error);
+
+    // v2: the running script ended: runId and reason (exit, stopped, error, replaced, released).
+    void onScriptExit(String sessionId, in Bundle exit);
 }

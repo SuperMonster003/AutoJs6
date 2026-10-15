@@ -43,4 +43,13 @@ interface IUiPreviewService {
 
     // Draws a highlight frame around the view of elementIndex on the host root; -1 clears it.
     Bundle setHighlight(String sessionId, int elementIndex);
+
+    // v2 (interactive preview, 3-Block Compose 1.7.0): runs a whole "ui" mode script (scriptText, scriptName) as a
+    // normal host script execution whose ui.layout content goes into the session's embedded root. A run that is
+    // still going is stopped first. Embedded sessions on API 33+ only. The result carries runId; console lines,
+    // errors and the end of the run arrive through the v2 callbacks.
+    Bundle runScript(String sessionId, in Bundle request);
+
+    // v2: stops the running script of the session, if any; the layout preview runtime stays.
+    Bundle stopScript(String sessionId);
 }

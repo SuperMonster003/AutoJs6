@@ -11,14 +11,26 @@ class UiPreviewContractTest {
 
     @Test
     fun contractHashMatchesItsInput() {
-        assertEquals(1, UiPreviewContract.VERSION)
-        assertEquals(
-            UiPreviewContract.HASH,
-            MessageDigest.getInstance("SHA-256")
-                .digest(UiPreviewContract.HASH_INPUT.toByteArray(Charsets.UTF_8))
-                .joinToString("") { "%02x".format(it) },
-        )
+        assertEquals(2, UiPreviewContract.VERSION)
+        assertEquals(1, UiPreviewContract.BASE_VERSION)
+        assertEquals(UiPreviewContract.HASH, sha256(UiPreviewContract.HASH_INPUT))
+        assertEquals(UiPreviewContract.HASH_V1, sha256(UiPreviewContract.HASH_INPUT_V1))
+        assertEquals("680f41b5459648ff07bd1d3d9684c5279d9398b78f61c0307862f50f8dcac0b6", UiPreviewContract.HASH_V1)
+        // v2 only appends: every v1 transaction keeps its code, so a v1 client works against a v2 host.
+        val v1Service = UiPreviewContract.HASH_INPUT_V1.split('|').drop(1).takeWhile { !it.startsWith("callback:") }
+        val v2Service = UiPreviewContract.HASH_INPUT.split('|').drop(1).takeWhile { !it.startsWith("callback:") }
+        assertEquals(v1Service, v2Service.take(v1Service.size))
+        val v1Callbacks = callbacksOf(UiPreviewContract.HASH_INPUT_V1)
+        assertEquals(v1Callbacks, callbacksOf(UiPreviewContract.HASH_INPUT).take(v1Callbacks.size))
     }
+
+    private fun sha256(text: String): String =
+        MessageDigest.getInstance("SHA-256").digest(text.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+
+    private fun callbacksOf(input: String): List<String> = input.split('|')
+        .dropWhile { !it.startsWith("callback:") }
+        .takeWhile { !it.startsWith("bundle:") }
+        .map { it.removePrefix("callback:").substringBefore('(') }
 
     @Test
     fun serviceTransactionsAreFrozenInOrder() {
@@ -34,6 +46,8 @@ class UiPreviewContractTest {
             "reattach(String)->Bundle",
             "setPointerMode(String,int)->Bundle",
             "setHighlight(String,int)->Bundle",
+            "runScript(String,Bundle)->Bundle",
+            "stopScript(String)->Bundle",
         )
         val described = UiPreviewContract.HASH_INPUT.split('|').drop(1).takeWhile { !it.startsWith("callback:") }
         assertEquals(expected, described)
@@ -42,12 +56,8 @@ class UiPreviewContractTest {
 
     @Test
     fun callbackTransactionsAreFrozenInOrder() {
-        val expected = listOf("onBounds", "onLayoutFailed", "onSessionLost", "onTap")
-        val described = UiPreviewContract.HASH_INPUT.split('|')
-            .dropWhile { !it.startsWith("callback:") }
-            .takeWhile { !it.startsWith("bundle:") }
-            .map { it.removePrefix("callback:").substringBefore('(') }
-        assertEquals(expected, described)
+        val expected = listOf("onBounds", "onLayoutFailed", "onSessionLost", "onTap", "onConsole", "onScriptError", "onScriptExit")
+        assertEquals(expected, callbacksOf(UiPreviewContract.HASH_INPUT))
         assertEquals(expected, declaredMethods("IUiPreviewCallback"))
         val aidl = File("src/main/aidl/org/autojs/plugin/ui/preview/IUiPreviewCallback.aidl").readText()
         assertTrue("callbacks must be oneway so the host never waits for the client", aidl.contains("oneway interface IUiPreviewCallback"))
@@ -63,7 +73,7 @@ class UiPreviewContractTest {
             UiPreviewContract.ERROR_SESSION_NOT_FOUND, UiPreviewContract.ERROR_XML_INVALID,
             UiPreviewContract.ERROR_INFLATE_FAILED, UiPreviewContract.ERROR_BINDING_FAILED,
             UiPreviewContract.ERROR_TIMEOUT, UiPreviewContract.ERROR_OUTPUT_TRANSPORT,
-            UiPreviewContract.ERROR_UNAVAILABLE,
+            UiPreviewContract.ERROR_UNAVAILABLE, UiPreviewContract.ERROR_SCRIPT_FAILED,
         )
         assertEquals(errors.size, errors.toSet().size)
         errors.forEach { assertTrue(it, it.startsWith("ERR_AUTOJS6_UI_PREVIEW_")) }
@@ -92,6 +102,10 @@ class UiPreviewContractTest {
             assertTrue(MAX_BOUNDS_ENTRIES > 0 && MAX_LABEL_CHARS > 0 && MAX_ERROR_MESSAGE_CHARS > 0)
             assertEquals(3, TERMINAL_OUTCOMES.toSet().size)
             assertEquals(4, SNAPSHOT_BYTES_PER_PIXEL)
+            // v2: one runScript text stays within the 1 MiB Binder buffer, and a start waits no longer than a session creation.
+            assertTrue(MAX_SCRIPT_CHARS * 2L <= 1024L * 1024L)
+            assertTrue(SCRIPT_START_TIMEOUT_MS in LAYOUT_TIMEOUT_MS..SESSION_CREATE_TIMEOUT_MS)
+            assertEquals(5, EXIT_REASONS.toSet().size)
         }
     }
 
@@ -118,6 +132,7 @@ class UiPreviewContractTest {
                 KEY_CONTRACT_HASH, KEY_HOST_VERSION_CODE, KEY_HOST_VERSION_NAME, KEY_STATUS, KEY_MODES,
                 KEY_INTERACTIVE_POINTER_SUPPORTED, KEY_IME_SUPPORTED, KEY_MAX_SESSIONS_PER_CLIENT, KEY_MAX_WIDTH_PX, KEY_MAX_HEIGHT_PX,
                 KEY_MAX_XML_CHARS, KEY_MAX_BINDINGS_CHARS, KEY_MAX_BOUNDS_ENTRIES, KEY_MAX_SNAPSHOT_PIXELS, KEY_LAYOUT_TIMEOUT_MS,
+                KEY_SCRIPT_RUN_SUPPORTED, KEY_SCRIPT_TEXT, KEY_SCRIPT_NAME, KEY_RUN_ID, KEY_LEVEL, KEY_TEXT,
             )
         }
         assertEquals(keys.size, keys.toSet().size)
