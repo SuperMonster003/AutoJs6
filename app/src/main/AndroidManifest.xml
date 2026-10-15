@@ -106,6 +106,10 @@
             <category android:name="batch-rename" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.GALLERY" />
+            <category android:name="gallery" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.typescript.COMPILER" />
         </intent>
         <intent>

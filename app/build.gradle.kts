@@ -797,6 +797,7 @@ dependencies /* Unclassified */ {
     // Plugin API: Batch Rename (files.batchRename and the file manager rename actions)
     // zh-CN: 批量重命名插件契约 (files.batchRename 与文件管理器重命名动作)
     implementation(project(":plugin-api:batch-rename-api"))
+    implementation(project(":plugin-api:gallery-api"))
 }
 
 dependencies /* MIME */ {

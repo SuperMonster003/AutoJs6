@@ -220,7 +220,22 @@ through `requiresHostVersion`; the host refuses plugins that declare less than
 - Outputs are written by the host into staging files and published only after they read back as
   the reported image.
 
+## Host Client
+
+`GalleryPluginHost` selects the plugin through `AidlPluginHost` (engine `gallery`, variant
+`default`), refuses packages whose service is not exported, enabled, protected by the plugin
+permission and declared with the action and category, and agrees the contract version and
+features per call (`GalleryPeer`); a call whose feature the plugin does not list fails with
+`PLUGIN_INCOMPATIBLE`. An interactive call opens the session on a dedicated binding lease, reads
+the token from `getState`, starts the session Activity (`GalleryActivityLauncher`) and feeds the
+callback through `GallerySessionBridge`, which applies the generation and sequence rules above;
+the death of the plugin process closes the session locally. `GallerySources` validates and opens
+the script's files, `GalleryPickPolicy` filters the picker's items, and `GalleryOutput` stages,
+reads back and publishes outputs (`GalleryEditorClient.publish` for the editor, inside `convert`
+for the converter) and asks the media scanner to list them. The Plugin Center discovers and
+probes the service and enables the engine by default; 3-Maple Image keeps one entry, keyed by its
+Explorer Action service.
+
 ## Open Items
 
-- The host client and the script object (roadmap 10.1, items 2 and 3) are described here once
-  implemented.
+- The script object (roadmap 10.1, item 3) is described here once implemented.

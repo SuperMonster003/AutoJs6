@@ -21,11 +21,13 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.batchrename.BatchRenamePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
+import org.autojs.autojs.core.plugin.gallery.GalleryPluginHost
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentPluginHost
+import org.autojs.plugin.gallery.api.GalleryActions
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentActions
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
 import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
@@ -241,6 +243,9 @@ class InstalledPluginRepository {
         BatchRenamePluginHost.ACTION_BATCH_RENAME -> BatchRenamePluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = BatchRenamePluginHost.ACTION_BATCH_RENAME)
         }
+        GalleryPluginHost.ACTION_GALLERY -> GalleryPluginHost.discover(context, packageName).map {
+            Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = GalleryPluginHost.ACTION_GALLERY)
+        }
         else -> listOf(preferred)
     }
 
@@ -288,6 +293,10 @@ class InstalledPluginRepository {
             ServiceQuery(
                 action = BatchRenamePluginHost.ACTION_BATCH_RENAME,
                 category = BatchRenamePluginActions.SERVICE_CATEGORY,
+            ),
+            ServiceQuery(
+                action = GalleryPluginHost.ACTION_GALLERY,
+                category = GalleryActions.SERVICE_CATEGORY,
             ),
         )
         return specs.flatMap { spec ->

@@ -30,6 +30,7 @@ import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginHost
 import org.autojs.autojs.core.plugin.terminal.ThreeShellTerminalOfficialPlugin
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
+import org.autojs.autojs.core.plugin.gallery.GalleryPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentPluginHost
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentActions
@@ -946,6 +947,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             EpubPluginHost.ACTION_EPUB -> EpubPluginHost.probe(contextRef, item.packageName)
             TerminalPluginHost.ACTION_TERMINAL -> TerminalPluginHost.probe(contextRef, item.packageName)
             BatchRenamePluginHost.ACTION_BATCH_RENAME -> BatchRenamePluginHost.probe(contextRef, item.packageName)
+            GalleryPluginHost.ACTION_GALLERY -> GalleryPluginHost.probe(contextRef, item.packageName)
             ImageQuantPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
             OfflineDocsPluginContract.ACTION -> withContext(Dispatchers.IO) {
                 OfflineDocsPluginHost.probe(contextRef, item.packageName)

@@ -22,11 +22,13 @@ import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.batchrename.BatchRenamePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
+import org.autojs.autojs.core.plugin.gallery.GalleryPluginHost
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentPluginHost
+import org.autojs.plugin.gallery.api.GalleryIds
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentActions
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
 import org.autojs.autojs.core.plugin.mcp.McpServerPluginHost
@@ -1090,6 +1092,7 @@ class PluginCenterViewModel : ViewModel() {
             EpubIds.ENGINE to EpubPluginHost.ACTION_EPUB,
             TerminalIds.ENGINE to TerminalPluginHost.ACTION_TERMINAL,
             BatchRenamePluginIds.ENGINE to BatchRenamePluginHost.ACTION_BATCH_RENAME,
+            GalleryIds.ENGINE to GalleryPluginHost.ACTION_GALLERY,
             YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
             QuickJsPluginIds.ENGINE to QuickJsPluginActions.RUNTIME,
