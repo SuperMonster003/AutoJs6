@@ -65,3 +65,35 @@ The `Script API coverage` workflow checks related repository heads by default.
 Its manual inputs can select coordinated branch names or commits when reviewing
 a change spanning all four repositories. A pass against one set of revisions
 does not certify a different set of published artifacts.
+
+## Physical-device checks
+
+Build and install matching current host and instrumentation APKs with `adb install
+-r -t`, plus the current Ace plugin APK. Select APKs using `output-metadata.json`
+and record their hashes; an unchanged version name does not prove the installed
+bytes match the current checkout. Do not clear application data.
+
+The existing device runner checks every selected test's completion identity and
+rejects failures, skips and missing results even when `am instrument` exits zero:
+
+```text
+python tools/sdk37/physical_device.py instrument --serial SERIAL --suite coordinate-api --expected-target 37 --output build/reports/device-coordinates
+python tools/sdk37/physical_device.py instrument --serial SERIAL --suite ace-api --expected-target 37 --output build/reports/device-ace-api
+```
+
+Each output directory must be new. Coordinate tests temporarily rotate an owned
+UI script through 0/90/180/270/0, measure Android's actual display independently,
+and restore the original rotation settings. They use a fresh Rhino runtime per
+base configuration and also retain one UI runtime throughout the rotations.
+Setter failure recovery and the established integer-conversion behavior are
+separate cases. Detailed results are written to the host's external-files
+`coordinate-scale-device.json`.
+
+The host Ace test loads the installed plugin through the production ABI, restores
+the previous settings after testing the genuine defaults, and queries the public
+LSP completer with its normal budgets. It checks returned-object completion and
+JSOX activation/removal, saving `ace-api-host-device.json` in the same directory.
+The plugin's `AceApiCoverageDeviceTest` additionally checks actual popup geometry
+and captures screenshots, so a correct candidate list cannot hide an overlapping
+documentation tooltip. These are physical-device results only when run on an
+identified physical serial; desktop jsdom checks are complementary.

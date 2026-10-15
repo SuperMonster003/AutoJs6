@@ -10,7 +10,6 @@ import android.hardware.display.DisplayManager
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Display
-import android.view.Surface
 import android.view.Surface.ROTATION_0
 import android.view.WindowManager
 import org.autojs.autojs.app.GlobalAppContext
@@ -125,17 +124,11 @@ class ScreenMetrics {
                 return mWindowManager.defaultDisplay?.rotation ?: ROTATION_0
             }
 
-        // Cache stable long/short sides to avoid inconsistent width/height on some ROMs.
-        // zh-CN: 缓存稳定的长边/短边, 避免部分 ROM 在多次运行脚本/跨应用切换后出现宽高读数不一致.
-        @Volatile
-        private var sStableLongSide: Int = 0
+        // Hold a local immutable pair while querying rotation: Activity initialization may
+        // invalidate the cache between measurement and orientation lookup.
+        private val stableSides = ScreenMetricsCache(::measureStableSides) { rotation }
 
-        @Volatile
-        private var sStableShortSide: Int = 0
-
-        private fun ensureStableSides() {
-            if (sStableLongSide > 0 && sStableShortSide > 0) return
-
+        private fun measureStableSides(): ScreenMetricsCache.Sides {
             // Prefer WindowMetrics on Android R+.
             // zh-CN: 在 Android R+ 优先使用 WindowMetrics.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -143,9 +136,7 @@ class ScreenMetrics {
                 val w = bounds.width().absoluteValue
                 val h = bounds.height().absoluteValue
                 if (w > 0 && h > 0) {
-                    sStableLongSide = maxOf(w, h)
-                    sStableShortSide = minOf(w, h)
-                    return
+                    return ScreenMetricsCache.Sides(minOf(w, h), maxOf(w, h))
                 }
             }
 
@@ -158,29 +149,19 @@ class ScreenMetrics {
                 val w = metricsLegacy.widthPixels
                 val h = metricsLegacy.heightPixels
                 if (w > 0 && h > 0) {
-                    sStableLongSide = maxOf(w, h)
-                    sStableShortSide = minOf(w, h)
+                    return ScreenMetricsCache.Sides(minOf(w, h), maxOf(w, h))
                 }
             }
+            throw IllegalStateException("Cannot determine positive screen dimensions")
         }
 
         @JvmStatic
         val deviceScreenWidth: Int
-            get() {
-                ensureStableSides()
-                val rot = rotation
-                val isLandscape = rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270
-                return if (isLandscape) sStableLongSide else sStableShortSide
-            }
+            get() = stableSides.width
 
         @JvmStatic
         val deviceScreenHeight: Int
-            get() {
-                ensureStableSides()
-                val rot = rotation
-                val isLandscape = rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270
-                return if (isLandscape) sStableShortSide else sStableLongSide
-            }
+            get() = stableSides.height
 
         @JvmStatic
         val orientation: Int
@@ -210,8 +191,7 @@ class ScreenMetrics {
 
             // Reset stable cache when Activity is (re)initialized.
             // zh-CN: Activity 初始化/重建时重置稳定缓存, 以适配可能的显示模式变化.
-            sStableLongSide = 0
-            sStableShortSide = 0
+            stableSides.invalidate()
         }
 
         private fun toOriAwarePoint(a: Int, b: Int) = arrayOf(minOf(a, b), maxOf(a, b))
@@ -222,9 +202,9 @@ class ScreenMetrics {
         fun getOrientationAwareScreenWidth(orientation: Int): Int {
             // Use stable sides instead of querying deviceScreenWidth/Height multiple times.
             // zh-CN: 使用稳定长边/短边, 避免重复查询导致的不一致.
-            ensureStableSides()
-            val longSide = sStableLongSide
-            val shortSide = sStableShortSide
+            val sides = stableSides.snapshot()
+            val longSide = sides.long
+            val shortSide = sides.short
             return when (orientation) {
                 ORIENTATION_LANDSCAPE -> longSide
                 else -> shortSide
@@ -235,9 +215,9 @@ class ScreenMetrics {
         fun getOrientationAwareScreenHeight(orientation: Int): Int {
             // Use stable sides instead of querying deviceScreenWidth/Height multiple times.
             // zh-CN: 使用稳定长边/短边, 避免重复查询导致的不一致.
-            ensureStableSides()
-            val longSide = sStableLongSide
-            val shortSide = sStableShortSide
+            val sides = stableSides.snapshot()
+            val longSide = sides.long
+            val shortSide = sides.short
             return when (orientation) {
                 ORIENTATION_LANDSCAPE -> shortSide
                 else -> longSide

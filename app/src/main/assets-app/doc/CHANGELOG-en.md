@@ -261,6 +261,8 @@
 * `Fix` Insufficient memory for Kotlin compilation during multi-variant builds
 * `Fix` Incorrect SDK resolution and packaging template path resolution during Gradle builds
 * `Fix` cXy/cYx ignoring absolute coordinate mode when false is specified, reversing landscape aspect ratios, and rejecting some calls after setting only one scale base
+* `Fix` setScaleBases changing the other axis and consuming its one-time assignment when the second argument is invalid or a scale base has already been set
+* `Fix` device.width/height and coordinate conversions reading zero dimensions when an activity is recreated concurrently with a script screen-size read
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions

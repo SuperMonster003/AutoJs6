@@ -260,7 +260,9 @@
         "Al construir con IntelliJ IDEA podía fallar la resolución de dependencias, la selección de tareas de compilación o la localización del APK actual",
         "Memoria insuficiente de la compilación Kotlin al construir varias variantes",
         "Errores al resolver el SDK y las rutas de plantillas de empaquetado durante la construcción Gradle",
-        "cXy/cYx ignoraban el modo de coordenadas absolutas con false, invertían la relación de aspecto horizontal y rechazaban algunas llamadas al cambiar una sola base"
+        "cXy/cYx ignoraban el modo de coordenadas absolutas con false, invertían la relación de aspecto horizontal y rechazaban algunas llamadas al cambiar una sola base",
+        "setScaleBases modificaba el otro eje y consumía su única asignación cuando el segundo argumento era inválido o una base ya estaba establecida",
+        "device.width/height y las conversiones de coordenadas leían dimensiones nulas al recrearse una actividad durante la lectura del tamaño por un script"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",

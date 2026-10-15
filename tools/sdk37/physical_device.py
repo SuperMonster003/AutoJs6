@@ -1,7 +1,8 @@
 """Physical-device inventory, read-only snapshots, checklist export and selected instrumentation.
 
-Only the instrument subcommand starts tests (and consequently restarts the selected app).
-No subcommand installs APKs, changes permissions/settings, reboots or clears application data.
+Only instrument starts tests and consequently restarts the selected app. Coordinate
+and Ace suites temporarily change rotation/preferences and restore them in cleanup.
+The runner never installs APKs, reboots devices or clears application data.
 """
 import argparse
 import csv
@@ -19,6 +20,12 @@ ROOT = Path(__file__).resolve().parents[2]
 CHECKLIST = ROOT / "docs/dev/android-sdk-37-physical-device-tests.md"
 PREFIX = "org.autojs.autojs."
 SUITES = {
+    "coordinate-api": [PREFIX + "runtime.api.augment.global.CoordinateScaleDeviceTest#" + method for method in (
+        "publicFunctionsTrackRealRotationAndIndependentBaseConfigurations",
+        "invalidPairDoesNotPartiallyConsumeBases",
+        "scaleSettersKeepIntegerCoercionAndRejectTruncatedZeroBeforeMutation",
+    )],
+    "ace-api": [PREFIX + "core.plugin.editor.AceEditorPluginHostDeviceTest#defaultDeclarationsAndJsoxWorkThroughTheInstalledHostSession"],
     "cleartext": [PREFIX + "core.http.CleartextTrafficDeviceTest#" + method for method in (
         "installedPolicyAllowsScriptEndpointsAndKeepsGithubHttpsOnly",
         "httpToAnOrdinaryHostnameReceivesTheFixtureResponse",

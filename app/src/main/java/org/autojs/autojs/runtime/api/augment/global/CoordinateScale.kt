@@ -56,8 +56,7 @@ internal object CoordinateScale {
                 base.isJsNullish() -> {
                     // Only the implicit aspect ratio needs a coherent pair.
                     // An explicit base or ratio is independent of that pair.
-                    scale.ensureBasesConsistent()
-                    scale.baseX.toDouble() / scale.baseY.toDouble()
+                    scale.defaultAspectRatio()
                 }
                 base is Number -> base.toDouble().also { requirePositiveRatio(it, name) }
                 else -> throw IllegalArgumentException("Aspect ratio for $name must be a number or width:height")

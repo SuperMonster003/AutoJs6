@@ -260,7 +260,9 @@
         "Les constructions dans IntelliJ IDEA pouvaient échouer à résoudre les dépendances de modules, sélectionner les tâches de compilation ou localiser l'APK courant",
         "Mémoire insuffisante pour la compilation Kotlin lors de constructions multivariantes",
         "Erreurs de résolution du SDK et du chemin des modèles d'empaquetage dans les constructions Gradle",
-        "cXy/cYx ignoraient le mode de coordonnées absolues avec false, inversaient les rapports largeur/hauteur en paysage et rejetaient certains appels après la modification d'une seule base"
+        "cXy/cYx ignoraient le mode de coordonnées absolues avec false, inversaient les rapports largeur/hauteur en paysage et rejetaient certains appels après la modification d'une seule base",
+        "setScaleBases modifiant l'autre axe et consommant son unique affectation lorsque le second argument est invalide ou qu'une base est déjà définie",
+        "device.width/height et les conversions de coordonnées lisant des dimensions nulles lorsqu'une activité est recréée pendant la lecture des dimensions par un script"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",

@@ -57,6 +57,119 @@ class AceEditorPluginHostDeviceTest {
     private val context = instrumentation.targetContext
 
     @Test
+    fun defaultDeclarationsAndJsoxWorkThroughTheInstalledHostSession() {
+        assertTrue("Install the current Ace plugin before this test", isPluginInstalled())
+        val keys = listOf(
+            AceEditorLspPreferences.KEY_ACE_LSP_ENABLED,
+            AceEditorLspPreferences.KEY_ACE_LSP_FILE_TYPES,
+            AceEditorLspPreferences.KEY_ACE_LSP_FILE_TYPES_REVISION,
+            AceEditorLspPreferences.KEY_ACE_LSP_DECLARATION_GROUPS,
+            AceEditorLspPreferences.KEY_ACE_SEMANTIC_TYPESCRIPT_ENABLED,
+        )
+        val preferences = Pref.get()
+        val saved = preferences.all.filterKeys { it in keys }
+        val wasEnabled = PluginEnableStore.isEnabled(context, EditorPluginContract.DEFAULT_PACKAGE_NAME, true)
+        val ready = CountDownLatch(1)
+        val fatal = AtomicReference<EditorPluginFailure>()
+        val loaded = AtomicReference<AceEditorPluginHost.LoadedSession>()
+        val document = File(context.cacheDir, "ace-api-probe-${SystemClock.uptimeMillis()}.js").apply { writeText("") }
+        var activity: Activity? = null
+        val evidence = JSONArray()
+        try {
+            runOnMainSync {
+                assertTrue(preferences.edit().apply { keys.forEach(::remove) }.commit())
+                assertTrue(AceEditorLspPreferences.getDeclarationGroups().isEmpty())
+            }
+            setPluginEnabled(true)
+            val hostActivity = launchHostActivity().also { activity = it }
+            runOnMainSync {
+                loaded.set(AceEditorPluginHost.createSession(hostActivity, EditorPluginSessionConfig(
+                    hostPackageName = context.packageName,
+                    hostVersionName = BuildConfig.VERSION_NAME,
+                    hostVersionCode = BuildConfig.VERSION_CODE.toLong(),
+                    storageDirectoryPath = File(context.cacheDir, "ace-api-probe-fonts").absolutePath,
+                    documentPath = document.absolutePath,
+                ), object : EditorPluginCallback {
+                    override fun onReady(state: org.autojs.plugin.editor.api.EditorPluginState) { ready.countDown() }
+                    override fun onFailure(failure: EditorPluginFailure) {
+                        if (failure.fatal) { fatal.set(failure); ready.countDown() }
+                    }
+                }))
+                hostActivity.setContentView(loaded.get().session.view)
+            }
+            assertTrue("Host Ace session did not become ready", ready.await(40, TimeUnit.SECONDS))
+            fatal.get()?.let { fail("Host Ace failed: ${it.type}: ${it.message}") }
+            val webView = runOnMainSync { loaded.get().session.inputView as WebView }
+            waitUntil("Default TypeScript provider did not initialize", 45_000) {
+                readLspState(webView).optString("completionProvider") == "typescript-language-service"
+            }
+            val initial = readLspState(webView)
+            assertEquals(initial.toString(), 0, initial.getJSONArray("declarationGroups").length())
+            assertEquals(initial.toString(), 0, initial.getJSONArray("effectiveDeclarationGroups").length())
+            val cases = listOf(
+                Triple("selector().findOne().cl", "click", true),
+                Triple("${'$'}media.pl", "playMusic", true),
+                Triple("threads.disposable().blockedG", "blockedGet", true),
+                Triple("Math.su", "sum", false),
+                Triple("jsox.extendAll(); Math.su", "sum", true),
+                Triple("Math.su", "sum", false),
+                Triple("${'$'}jsox('Array'); [1,2,2].di", "distinct", true),
+                Triple("[1,2,2].di", "distinct", false),
+            )
+            for ((text, expected, present) in cases) {
+                evaluateJavascript(webView, """
+                    window.AutoJsAce.setText(${JSONObject.quote(text)});
+                    window.editor.clearSelection();
+                    window.editor.navigateFileEnd();
+                """.trimIndent())
+                SystemClock.sleep(350)
+                val prefix = text.substringAfterLast('.')
+                evaluateJavascript(webView, """
+                    (function() {
+                        var e = window.editor;
+                        var c = e.completers.filter(function(item) { return item.autojs6Lsp === true; })[0];
+                        window.__hostApiProbe = {done:false};
+                        if (!c) { window.__hostApiProbe = {done:true,error:'No public LSP completer'}; return; }
+                        c.getCompletions(e, e.getSession(), e.getCursorPosition(), ${JSONObject.quote(prefix)}, function(error, items) {
+                            window.__hostApiProbe = {done:true,error:error ? String(error) : '',
+                                items:(items || []).map(function(item) { return {caption:item.caption,ts:item.autojs6Ts === true}; }),
+                                state:window.AutoJsAce.getLspState()};
+                        });
+                    })();
+                """.trimIndent())
+                waitUntil("Host completion timed out: $text", 20_000) {
+                    evaluateJavascript(webView, "Boolean(window.__hostApiProbe && window.__hostApiProbe.done)") == "true"
+                }
+                val actual = decodeJavascriptObject(evaluateJavascript(webView, "JSON.stringify(window.__hostApiProbe)"))
+                actual.put("input", text).put("expected", expected).put("present", present)
+                evidence.put(actual)
+                assertEquals(actual.toString(), "", actual.optString("error"))
+                val state = actual.getJSONObject("state")
+                assertTrue(actual.toString(), state.getJSONObject("semanticProvider").getBoolean("healthy"))
+                val items = actual.getJSONArray("items")
+                val matches = (0 until items.length()).map(items::getJSONObject).filter { it.optString("caption") == expected }
+                assertEquals(actual.toString(), present, matches.isNotEmpty())
+                if (present) assertTrue(actual.toString(), matches.any { it.optBoolean("ts") })
+            }
+        } finally {
+            File(context.getExternalFilesDir(null), "ace-api-host-device.json").writeText(evidence.toString(2))
+            runOnMainSync {
+                loaded.get()?.destroy()
+                val editor = preferences.edit().apply { keys.forEach(::remove) }
+                saved.forEach { (key, value) -> when (value) {
+                    is Boolean -> editor.putBoolean(key, value)
+                    is Int -> editor.putInt(key, value)
+                    is String -> editor.putString(key, value)
+                } }
+                assertTrue("Restore host LSP preferences", editor.commit())
+            }
+            setPluginEnabled(wasEnabled)
+            activity?.let(::finishHostActivity)
+            document.delete()
+        }
+    }
+
+    @Test
     fun installedAceEditorPluginLoadsAndRunsThroughHostAbi() {
         assumeTrue("Ace editor plugin is not installed", isPluginInstalled())
 

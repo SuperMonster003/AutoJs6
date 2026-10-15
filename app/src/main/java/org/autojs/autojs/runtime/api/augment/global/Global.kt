@@ -600,9 +600,10 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getScaleBases(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsIsEmpty(args) {
+            val (baseX, baseY) = scriptRuntime.scale.snapshotBases()
             newNativeObject(scriptRuntime.topLevelScope).also { o ->
-                o.defineProp("x", scriptRuntime.scale.baseX)
-                o.defineProp("y", scriptRuntime.scale.baseY)
+                o.defineProp("x", baseX)
+                o.defineProp("y", baseY)
             }
         }
 
@@ -622,10 +623,9 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @RhinoRuntimeFunctionInterface
         fun setScaleBases(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsLength(args, 2) {
             val (baseX, baseY) = it
-            undefined {
-                setScaleBaseX(scriptRuntime, arrayOf(coerceIntNumber(baseX)))
-                setScaleBaseY(scriptRuntime, arrayOf(coerceIntNumber(baseY)))
-            }
+            val convertedBaseX = coerceIntNumber(baseX)
+            val convertedBaseY = coerceIntNumber(baseY)
+            undefined { scriptRuntime.scale.setBases(convertedBaseX, convertedBaseY) }
         }
 
         @JvmStatic

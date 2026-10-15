@@ -261,6 +261,8 @@
 * `Correction` Mémoire insuffisante pour la compilation Kotlin lors de constructions multivariantes
 * `Correction` Erreurs de résolution du SDK et du chemin des modèles d'empaquetage dans les constructions Gradle
 * `Correction` cXy/cYx ignoraient le mode de coordonnées absolues avec false, inversaient les rapports largeur/hauteur en paysage et rejetaient certains appels après la modification d'une seule base
+* `Correction` setScaleBases modifiant l'autre axe et consommant son unique affectation lorsque le second argument est invalide ou qu'une base est déjà définie
+* `Correction` device.width/height et les conversions de coordonnées lisant des dimensions nulles lorsqu'une activité est recréée pendant la lecture des dimensions par un script
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan
