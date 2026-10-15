@@ -288,6 +288,7 @@
         "opencc 모듈의 변환 유형 조회, 일괄 변환 및 연쇄 변환 지원",
         "ocr 모듈이 기본적으로 ML Kit/Paddle/Rapid 순으로 사용 가능한 엔진을 선택하며 명시 지정 및 자동 선택 복원 지원",
         "호스트 브리지를 통해 호출되는 ocr 모듈 (Node.js 플러그인 등 플러그인 세션) 이 engine 미지정 시 ML Kit/Paddle/Rapid 순으로 활성화된 엔진을 자동 선택하며 더 이상 ML Kit OCR 플러그인을 필수로 요구하지 않음",
+        "호스트 브리지 accessibility 모듈에 captureScreenImage 를 추가하여 접근성 스크린샷 (사용할 수 없으면 화면 캡처로 대체) 을 세션 내 이미지 핸들로 반환하고, MCP Server 등 플러그인 세션이 바코드 인식과 이미지 / 색상 찾기에 바로 사용할 수 있도록 함; 플러그인 세션이 동시에 보유할 수 있는 이미지 핸들 수를 4 에서 동시 호출 수의 2 배로 상향",
         "images.save/saveImage/compress/compressToBytes가 PNG 양자화 (투명도 유지), 픽셀 및 메모리 제한 지원 (Image Quantization 플러그인 필요)",
         "images.readPixels 메서드의 ImageWrapper 인수 지원",
         "images.matchTemplate/findPointByImage의 scales 옵션 지원, 결과에 크기, 비율 및 영역 정보 추가",

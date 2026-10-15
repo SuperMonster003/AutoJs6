@@ -743,6 +743,7 @@ object NodeBridgeModules {
         "screenshot",
         "readScreenText",
         "inspectNode",
+        "captureScreenImage",
     )
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
@@ -1748,6 +1749,10 @@ class AndroidNodeBridgeCapabilityProvider(
             dispatchAccessibilityScreenshot(request, callback)
             return
         }
+        if (request.method == "captureScreenImage") {
+            dispatchCaptureScreenImage(request, callback)
+            return
+        }
         if (request.method == "readScreenText") {
             dispatchScreenText(request, callback)
             return
@@ -1783,6 +1788,26 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
         accessibilityDiagnostics.screenshot(request, service, callback)
+    }
+
+    /**
+     * One screen capture registered as a provider-owned image handle (MCP roadmap P11 D23): the
+     * accessibility screenshot when it can serve, otherwise the session's MediaProjection capture.
+     * Barcode and image-matching consumers get a handle plus `captureSource`, never pixels.
+     */
+    private fun dispatchCaptureScreenImage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val timeoutMs = request.timeoutMs.coerceIn(1L, MAX_TIMEOUT_MS)
+        imageOperation(request, callback) {
+            if (imageHandles.size >= bridgeLimits.maxImageHandles) {
+                // Refuse before taking a screenshot nobody could keep; registerImage rechecks under the same lock.
+                bridgeResourceLimitRejections.incrementAndGet()
+                throw ImageHandleLimitException("Image bridge exceeded ${bridgeLimits.maxImageHandles} active handles.")
+            }
+            val captured = NodeBridgeScreenCapture.capture(timeoutMs) { screenCapture.capture() }
+            registerImage(captured.bitmap, "screen-${captured.source}").toJson()
+                .put("captureSource", captured.source)
+                .toString()
+        }
     }
 
     private fun accessibilityBridgeOperational(): Boolean {

@@ -473,6 +473,7 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.ACCESSIBILITY -> when (method) {
                 "swipe", "gesture" -> listOf(ACCESSIBILITY, ACCESSIBILITY_GESTURE)
                 "screenshot" -> listOf(ACCESSIBILITY, SCREEN_CAPTURE)
+                "captureScreenImage" -> listOf(ACCESSIBILITY, SCREEN_CAPTURE, IMAGE)
                 "readScreenText" -> listOf(ACCESSIBILITY, SCREEN_CAPTURE, OCR)
                 else -> listOf(ACCESSIBILITY)
             }

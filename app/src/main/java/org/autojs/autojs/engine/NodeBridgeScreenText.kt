@@ -4,8 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
-import org.autojs.autojs.core.accessibility.A11yScreenshotter
-import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
@@ -15,7 +13,6 @@ import org.json.JSONObject
 import kotlinx.coroutines.runBlocking
 import java.io.Closeable
 import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.FutureTask
 import java.util.concurrent.ScheduledFuture
@@ -134,32 +131,8 @@ internal class NodeBridgeScreenText(
         }
     }
 
-    private fun capture(timeoutMs: Long): Bitmap {
-        val service = AccessibilityService.instance
-        if (Build.VERSION.SDK_INT < 30 || service == null || !AccessibilityService.registry.isOperational) return fallbackCapture()
-        val monitor = Any()
-        val ready = CountDownLatch(1)
-        var accepting = true
-        var bitmap: Bitmap? = null
-        try {
-            A11yScreenshotter(service).takeWithRetry(maxAttempts = 3) { result ->
-                synchronized(monitor) {
-                    if (result is A11yScreenshotter.Result.Success) {
-                        if (accepting && bitmap == null) bitmap = result.bitmap else result.bitmap.recycle()
-                    }
-                    ready.countDown()
-                }
-            }
-            if (!ready.await(timeoutMs, TimeUnit.MILLISECONDS)) throw TimeoutException()
-            synchronized(monitor) {
-                accepting = false
-                bitmap?.let { bitmap = null; return it }
-            }
-            return fallbackCapture()
-        } finally {
-            synchronized(monitor) { accepting = false; bitmap?.recycle(); bitmap = null }
-        }
-    }
+    // Keeps the three attempts this observation always had; captureScreenImage uses the longer default.
+    private fun capture(timeoutMs: Long): Bitmap = NodeBridgeScreenCapture.capture(timeoutMs, maxAttempts = 3, fallback = fallbackCapture).bitmap
 
     private fun region(options: JSONObject, bitmap: Bitmap): IntArray? {
         val raw = options.opt("region") ?: return null

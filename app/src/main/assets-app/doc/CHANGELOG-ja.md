@@ -286,6 +286,7 @@
 * `改善` opencc モジュールで変換種別の照会, 一括変換と連鎖変換に対応
 * `改善` ocr モジュールは既定で ML Kit/Paddle/Rapid 順に利用可能なエンジンを選び, 明示指定と自動選択への復帰に対応
 * `改善` ホストブリッジ経由で呼び出す ocr モジュール (Node.js プラグインなどのプラグインセッション) は engine 未指定時に ML Kit/Paddle/Rapid の順で有効なエンジンを自動選択し, ML Kit OCR プラグインを必須としない
+* `改善` ホストブリッジの accessibility モジュールに captureScreenImage を追加し, ユーザー補助のスクリーンショット (利用できない場合は画面キャプチャにフォールバック) をセッション内の画像ハンドルとして返し, MCP Server などのプラグインセッションがバーコード認識や画像 / 色検索に直接使えるようにした; プラグインセッションが同時に保持できる画像ハンドル数を 4 から同時呼び出し数の 2 倍に引き上げ
 * `改善` images.save/saveImage/compress/compressToBytes で PNG 量子化 (透明度維持), 画素数とメモリ制限に対応 (Image Quantization プラグインが必要)
 * `改善` images.readPixels メソッドで ImageWrapper 引数に対応
 * `改善` images.matchTemplate/findPointByImage で scales オプションに対応し, 結果にサイズ, 比率と領域情報を追加

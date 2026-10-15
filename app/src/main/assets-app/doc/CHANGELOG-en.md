@@ -286,6 +286,7 @@
 * `Improvement` opencc supports conversion type queries, batch conversion and chained conversion
 * `Improvement` ocr automatically selects available engines in ML Kit/Paddle/Rapid order, with explicit engine selection and restoration of automatic selection
 * `Improvement` The ocr module reached through the host bridge (Node.js plugin and other plugin sessions) selects an enabled engine in ML Kit/Paddle/Rapid order when no engine is specified, instead of always requiring the ML Kit OCR plugin
+* `Improvement` The host bridge accessibility module adds captureScreenImage, which turns an accessibility screenshot (falling back to screen capture when unavailable) into a session image handle that plugin sessions such as MCP Server use directly for barcode recognition and image or color search; plugin sessions may now hold twice their concurrent-call count of image handles instead of 4
 * `Improvement` images.save/saveImage/compress/compressToBytes support PNG quantization options (preserving transparency) and pixel/memory limits (requires the Image Quantization plugin)
 * `Improvement` images.readPixels supports ImageWrapper arguments
 * `Improvement` images.matchTemplate/findPointByImage support the scales option, with size, scale and region information in matching results

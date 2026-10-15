@@ -470,6 +470,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` opencc admite consulta de tipos de conversión, conversión por lotes y conversiones encadenadas
 * `Mejora` ocr selecciona motores disponibles en orden ML Kit/Paddle/Rapid por defecto y permite elegir explícitamente o volver a la selección automática
 * `Mejora` El módulo ocr invocado a través del puente del host (plugin Node.js y otras sesiones de plugins) selecciona un motor habilitado en orden ML Kit/Paddle/Rapid cuando no se indica ninguno, en lugar de exigir siempre el plugin ML Kit OCR
+* `Mejora` El módulo accessibility del puente del host añade captureScreenImage, que convierte una captura de pantalla de accesibilidad (con reserva a la captura de pantalla cuando no está disponible) en un identificador de imagen de sesión que las sesiones de plugins como MCP Server usan directamente para el reconocimiento de códigos de barras y la búsqueda de imágenes o colores; las sesiones de plugins ahora pueden mantener el doble de su número de llamadas concurrentes en identificadores de imagen en lugar de 4
 * `Mejora` images.save/saveImage/compress/compressToBytes admiten cuantización PNG (conservando transparencia) y límites de píxeles y memoria (requiere Image Quantization)
 * `Mejora` images.readPixels admite parámetros ImageWrapper
 * `Mejora` images.matchTemplate/findPointByImage admiten scales; los resultados incluyen tamaño, escala y región

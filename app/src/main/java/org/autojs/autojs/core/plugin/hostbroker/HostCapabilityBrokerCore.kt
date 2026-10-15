@@ -64,7 +64,8 @@ class HostCapabilityBrokerCore(
         javaInteropEnabled = false,
         bridgeLimits = NodeBridgeLimits.Policy(
             maxPendingBridgeCalls = grant.maxConcurrentCalls,
-            maxImageHandles = 4,
+            // Image matching holds the screen and the template at once, so two handles per call (MCP roadmap P11 D23).
+            maxImageHandles = 2 * grant.maxConcurrentCalls,
             maxShellCommands = 1,
             maxNetworkRequests = 0,
             maxWebSocketConnections = 0,

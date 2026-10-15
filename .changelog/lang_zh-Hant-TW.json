@@ -288,6 +288,7 @@
         "opencc 模組支援轉換型別查詢, 批次轉換及鏈式轉換",
         "ocr 模組預設按 ML Kit/Paddle/Rapid 順序選擇可用引擎, 並支援顯式指定或恢復自動選擇",
         "Node.js 外掛程式等經宿主橋接呼叫的 ocr 模組在未指定 engine 時依 ML Kit/Paddle/Rapid 順序自動選擇已啟用的引擎, 不再固定要求 ML Kit OCR 外掛程式",
+        "宿主橋接層 accessibility 模組增加 captureScreenImage 方法, 以無障礙截圖 (不可用時回退螢幕擷取) 產生工作階段內圖像控制代碼, 供 MCP Server 等外掛程式工作階段直接用於條碼辨識與找圖找色; 外掛程式工作階段可同時持有的圖像控制代碼數由 4 提高為並行呼叫數的兩倍",
         "images.save/saveImage/compress/compressToBytes 方法支援 PNG 量化選項 (保留透明度) 及畫素與記憶體限制 (需要 Image Quantization 外掛)",
         "images.readPixels 方法支援 ImageWrapper 參數",
         "images.matchTemplate/findPointByImage 方法支援 scales 選項, 匹配結果增加尺寸, 比例及區域資訊",
