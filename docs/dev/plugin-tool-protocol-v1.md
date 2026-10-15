@@ -151,9 +151,18 @@ is a `oneOf` of such nodes. Allowed keywords:
 | choice | `oneOf` (2 or more nodes) |
 
 Unknown keywords make the tool invalid, so that a host never silently ignores a constraint the author
-relied on. Objects and arrays nest at most 8 levels, an object has at most 64 properties. The host
-validates the schema when it loads the catalog and the arguments on every call, before the provider
-sees them.
+relied on. Objects and arrays nest at most 8 levels, an object has at most 64 properties, property
+names have 1 to 64 characters, `enum` holds distinct values that match the node, and a `default`
+must itself match the node. The host validates the schema when it loads the catalog and the
+arguments on every call, before the provider sees them: string lengths count Unicode code points, an
+`integer` has no fraction, a `oneOf` value must match exactly one branch, unknown properties are
+refused, and JSON null counts as an absent property. Absent properties that declare a `default` get
+it before the call.
+
+The host implements the subset itself (`PluginToolSchema`, JVM-tested) rather than through a general
+JSON Schema library: the libraries bring Jackson or a second org.json and need R8 rules for reflection,
+and the subset's own rules (closed objects, top-level-only special types, unknown keywords) would still
+need code around them.
 
 ### Images and files
 
@@ -251,7 +260,7 @@ phone per call. Scripts written by the user may call every tool of an authorized
 | --- | --- |
 | Contract module, frozen literals and transactions | done (P12 host item 1) |
 | Discovery and catalog cache, short name checks | done (P12 host item 2: `PluginToolRegistry`, `PluginToolCatalogParser`, `PluginToolShortNames`; fake provider `test-apps/plugin-tool-provider-conformance`) |
-| Schema validation | planned (P12 host item 3) |
+| Schema validation | done (P12 host item 3: `PluginToolSchema` checks schemas when catalogs load; argument validation and defaults are ready for the bridge) |
 | Bridge module `plugin_tools`, grants and tokens | planned (P12 host item 4) |
 | Script API `plugins.tools` | planned (P12 host item 5) |
 | Pilots | OpenCC (part of the 6.8.0 release gate), YOLO, Image Quantization, Stack Archive |

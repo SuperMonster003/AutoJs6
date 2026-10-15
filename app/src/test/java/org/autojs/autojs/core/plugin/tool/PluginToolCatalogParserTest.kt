@@ -100,12 +100,12 @@ class PluginToolCatalogParserTest {
     fun unknownFieldsAreIgnoredAndTheSchemaHookDecides() {
         val catalog = accepted(catalog(tool("a", extra = """"futureField": {"x": 1}"""), extraRoot = """"futureRoot": true,"""))
         assertEquals(1, catalog.tools.size)
-        val selective = PluginToolCatalogParser.parse(catalog(tool("a"), tool("b", schema = """{"type": "object", "additionalProperties": false, "title": "marked"}""")), official = false) { schema ->
+        val selective = PluginToolCatalogParser.parse(catalog(tool("a"), tool("b", schema = """{"type": "object", "additionalProperties": false, "title": "marked"}""")), official = false, schemaCheck = { schema ->
             if (schema.has("title")) "rejected by the hook" else null
-        }
+        })
         assertEquals(listOf("opencc_a"), (selective as PluginToolCatalogParse.Accepted).catalog.tools.map { it.fullName })
         assertTrue(selective.catalog.diagnostics.single().contains("inputSchema: rejected by the hook"))
-        val rejecting = PluginToolCatalogParser.parse(catalog(tool("a")), official = false) { "rejected by the hook" }
+        val rejecting = PluginToolCatalogParser.parse(catalog(tool("a")), official = false, schemaCheck = { "rejected by the hook" })
         assertTrue((rejecting as PluginToolCatalogParse.Refused).reason.contains("rejected by the hook"))
     }
 

@@ -13,7 +13,10 @@ import org.autojs.plugin.tool.api.PluginToolValues
 /** One binary output a tool declares (docs/dev/plugin-tool-protocol-v1.md). */
 data class PluginToolOutput(val name: String, val mimeType: String, val description: String?)
 
-/** One usable tool of an accepted catalog; [fullName] is what consumers see. */
+/**
+ * One usable tool of an accepted catalog; [fullName] is what consumers see, [specialParameters] maps the image and file
+ * parameters the host resolves to their special type (PluginToolSchema.specialParameters).
+ */
 data class PluginToolDefinition(
     val name: String,
     val fullName: String,
@@ -25,6 +28,7 @@ data class PluginToolDefinition(
     val timeoutMs: Long,
     val maxConcurrency: Int,
     val outputs: List<PluginToolOutput>,
+    val specialParameters: Map<String, String> = emptyMap(),
 )
 
 /** An accepted catalog: the usable tools and why the others were dropped. */
@@ -62,10 +66,15 @@ object PluginToolCatalogParser {
 
     /**
      * @param official whether the provider is OFFICIAL (the only level that may declare a shared family).
-     * @param schemaCheck the reason a tool's input or output schema is unusable, or null; P12 host item 3 supplies the
-     * full subset check.
+     * @param schemaCheck the reason a tool's input schema is unusable, or null (the subset of D31 by default).
+     * @param outputSchemaCheck the same for an output schema.
      */
-    fun parse(json: String, official: Boolean, schemaCheck: (JsonObject) -> String? = ::closedObjectCheck): PluginToolCatalogParse {
+    fun parse(
+        json: String,
+        official: Boolean,
+        schemaCheck: (JsonObject) -> String? = PluginToolSchema::checkInput,
+        outputSchemaCheck: (JsonObject) -> String? = PluginToolSchema::checkOutput,
+    ): PluginToolCatalogParse {
         val bytes = json.toByteArray(Charsets.UTF_8).size
         if (bytes > PluginToolLimits.MAX_CATALOG_BYTES) {
             return refused("the catalog has $bytes bytes, more than ${PluginToolLimits.MAX_CATALOG_BYTES}")
@@ -100,7 +109,7 @@ object PluginToolCatalogParser {
 
         val diagnostics = mutableListOf<String>()
         val tools = entries.mapIndexedNotNull { index, entry ->
-            when (val tool = parseTool(shortName, entry, schemaCheck)) {
+            when (val tool = parseTool(shortName, entry, schemaCheck, outputSchemaCheck)) {
                 is ToolParse.Usable -> tool.definition
                 is ToolParse.Dropped -> null.also { diagnostics += "tool #$index${tool.name?.let { " ($it)" }.orEmpty()} dropped: ${tool.reason}" }
             }
@@ -109,20 +118,12 @@ object PluginToolCatalogParser {
         return PluginToolCatalogParse.Accepted(PluginToolCatalog(shortName, sharedFamily, tools, diagnostics))
     }
 
-    /** The check of P12 host item 2: an object schema that is closed (`additionalProperties: false`). */
-    fun closedObjectCheck(schema: JsonObject): String? {
-        if (schema.string("type") != "object") return "the schema is not of type object"
-        val additional = schema.get("additionalProperties")
-        if (additional !is JsonPrimitive || !additional.isBoolean || additional.asBoolean) return "the schema object is not closed (additionalProperties: false)"
-        return null
-    }
-
     private sealed class ToolParse {
         data class Usable(val definition: PluginToolDefinition) : ToolParse()
         data class Dropped(val name: String?, val reason: String) : ToolParse()
     }
 
-    private fun parseTool(shortName: String, entry: JsonElement, schemaCheck: (JsonObject) -> String?): ToolParse {
+    private fun parseTool(shortName: String, entry: JsonElement, schemaCheck: (JsonObject) -> String?, outputSchemaCheck: (JsonObject) -> String?): ToolParse {
         val tool = entry as? JsonObject ?: return ToolParse.Dropped(null, "not an object")
         val name = tool.string(PluginToolCatalogJson.NAME) ?: return ToolParse.Dropped(null, "name is missing")
         fun drop(reason: String) = ToolParse.Dropped(name, reason)
@@ -142,7 +143,7 @@ object PluginToolCatalogParser {
         schemaCheck(inputSchema)?.let { return drop("inputSchema: $it") }
         val outputSchema = when (val value = tool.opt(PluginToolCatalogJson.OUTPUT_SCHEMA)) {
             null -> null
-            is JsonObject -> value.also { schema -> schemaCheck(schema)?.let { return drop("outputSchema: $it") } }
+            is JsonObject -> value.also { schema -> outputSchemaCheck(schema)?.let { return drop("outputSchema: $it") } }
             else -> return drop("outputSchema is not an object")
         }
 
@@ -161,7 +162,10 @@ object PluginToolCatalogParser {
             else -> return drop("outputs is not an array")
         }
         return ToolParse.Usable(
-            PluginToolDefinition(name, fullName, title, description, inputSchema, outputSchema, risk, timeoutMs, maxConcurrency.toInt(), outputs),
+            PluginToolDefinition(
+                name, fullName, title, description, inputSchema, outputSchema, risk, timeoutMs, maxConcurrency.toInt(), outputs,
+                PluginToolSchema.specialParameters(inputSchema),
+            ),
         )
     }
 
