@@ -291,6 +291,7 @@
         "ホストブリッジの accessibility モジュールに captureScreenImage を追加し, ユーザー補助のスクリーンショット (利用できない場合は画面キャプチャにフォールバック) をセッション内の画像ハンドルとして返し, MCP Server などのプラグインセッションがバーコード認識や画像 / 色検索に直接使えるようにした; プラグインセッションが同時に保持できる画像ハンドル数を 4 から同時呼び出し数の 2 倍に引き上げ",
         "MCP Server や 3-Stove Agent などモデル向けのプラグインセッションがブリッジ経由で画像を読み込む (image.readImage) 際, 長辺が 4096 px を超える画像は 2 のべき乗でダウンサンプリングして復号し, 結果に scale と元のサイズを付けるようにして, ギャラリーの大きな写真でホストのメモリを使い切らないようにした; Node.js プラグインのスクリプトには影響しない",
         "MCP Server や 3-Stove Agent などモデル向けのプラグインセッションがブリッジ経由でパス指定の画像やメディア情報を読む (image.readImage, mediainfo) 際は作業ディレクトリ内に限定し, 書き込み (image.saveImage) も作業ディレクトリ内に限る; リクエストが files.shared_read を宣言し AutoJs6 がすべてのファイルへのアクセス権限を持つ場合は共有ストレージを読み取り専用で参照でき (Android/data と Android/obb を除く), files.list と files.stat も同じトークンで共有ストレージを一覧できる; Node.js プラグインのスクリプトには影響しない",
+        "ホストブリッジの app モジュールに pluginCapabilities を追加し, OCR, バーコード, Pinyin, Pinyin4j, MediaInfo, OpenCV, オフラインドキュメントの各プラグインファミリーの状態 (available / not_installed / disabled / incompatible), インストール済みプラグインのバージョンと有効化 / 認可状況, 対応するブリッジメソッド, プラグインセンターの入口をリアルタイムに返すようにし, MCP Server などのプラグインセッションがインストール状況に応じてツールを表示しインストールを案内できるようにした; プラグインセッション開始時の省略可能メソッド一覧も同じロジックで利用可能なファミリーのメソッドを補う",
         "images.save/saveImage/compress/compressToBytes で PNG 量子化 (透明度維持), 画素数とメモリ制限に対応 (Image Quantization プラグインが必要)",
         "images.readPixels メソッドで ImageWrapper 引数に対応",
         "images.matchTemplate/findPointByImage で scales オプションに対応し, 結果にサイズ, 比率と領域情報を追加",

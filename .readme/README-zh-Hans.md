@@ -477,6 +477,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `优化` 宿主桥接层 accessibility 模块增加 captureScreenImage 方法, 以无障碍截图 (不可用时回退屏幕捕获) 生成会话内图像句柄, 供 MCP Server 等插件会话直接用于条码识别与找图找色; 插件会话可同时持有的图像句柄数由 4 提高为并发调用数的两倍
 * `优化` MCP Server 与 3-Stove Agent 等面向模型的插件会话经桥接读取图片 (image.readImage) 时, 最长边超过 4096 px 的图片按 2 的幂降采样解码, 结果附 scale 与原图尺寸, 避免相册大图耗尽宿主内存; Node.js 插件脚本不受影响
 * `优化` MCP Server 与 3-Stove Agent 等面向模型的插件会话经桥接按路径读取图片与媒体信息 (image.readImage, mediainfo) 时限制在工作目录内, 写入 (image.saveImage) 同样只限工作目录; 请求声明 files.shared_read 且 AutoJs6 持有所有文件访问权限时可只读访问共享存储 (不含 Android/data 与 Android/obb), files.list 与 files.stat 也可按同一令牌列出共享存储; Node.js 插件脚本不受影响
+* `优化` 宿主桥接层 app 模块增加 pluginCapabilities 方法, 实时返回 OCR, 条码, 拼音, Pinyin4j, MediaInfo, OpenCV 与离线文档各插件家族的状态 (available / not_installed / disabled / incompatible), 已安装插件的版本, 启用与授权情况, 对应的桥接方法以及插件中心入口, 供 MCP Server 等插件会话按安装情况显示工具并提示用户安装; 插件会话打开时的可选方法列表也按同一逻辑补充已可用家族的方法
 * `优化` images.save/saveImage/compress/compressToBytes 方法支持 PNG 量化选项 (保留透明度) 及像素与内存限制 (需要 Image Quantization 插件)
 * `优化` images.readPixels 方法支持 ImageWrapper 参数
 * `优化` images.matchTemplate/findPointByImage 方法支持 scales 选项, 匹配结果增加尺寸, 比例及区域信息

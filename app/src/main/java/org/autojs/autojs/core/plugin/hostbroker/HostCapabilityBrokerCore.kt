@@ -13,6 +13,7 @@ import org.autojs.autojs.engine.NodeBridgeError
 import org.autojs.autojs.engine.NodeBridgeErrorCategory
 import org.autojs.autojs.engine.NodeBridgeLimits
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
+import org.autojs.autojs.engine.NodeBridgePluginFamilyStatus
 import org.autojs.autojs.engine.NodeBridgeRequest
 import org.autojs.autojs.engine.NodeBridgeResponse
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
@@ -100,6 +101,14 @@ class HostCapabilityBrokerCore(
                 if (engineInfo.engineName == ThreeStoveAgentIds.ENGINE && provider is AndroidNodeBridgeCapabilityProvider &&
                     grant.allowedMethods.containsAll(listOf("engines.execScript", "engines.stop")) &&
                     grant.permissions.containsAll(listOf("engines", "engines.exec"))) add("engines.execScript")
+                // Plugin families present when the session opens (MCP roadmap P11 D27); `app.pluginCapabilities` is the live
+                // view. readScreenText keeps its dedicated branch above (its OCR check is injectable for tests).
+                runCatching { NodeBridgePluginFamilyStatus.availableMethods(appContext) }.getOrDefault(emptySet()).forEach { key ->
+                    val module = key.substringBefore('.')
+                    val method = key.substringAfter('.')
+                    if (key != "accessibility.readScreenText" && key in grant.allowedMethods && key !in this &&
+                        grant.permissions.containsAll(NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method))) add(key)
+                }
             }
         }.toTypedArray())
         putStringArray(HostCapabilityContract.KEY_GRANT_METHODS, grant.allowedMethods.toTypedArray())

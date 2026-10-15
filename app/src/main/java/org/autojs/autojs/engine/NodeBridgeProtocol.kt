@@ -713,6 +713,7 @@ object NodeBridgeModules {
         "readSample",
         "listDocs",
         "readDoc",
+        "pluginCapabilities",
         "startService",
         "sendBroadcast",
         "getInstalledApps",
@@ -5041,6 +5042,18 @@ class AndroidNodeBridgeCapabilityProvider(
         if (request.method in NodeBridgeSamplesBridge.METHODS) {
             // Sample and offline documentation asset reads stay off the main thread (MCP roadmap P1.3 / P3.5, D20).
             callback(samplesBridge.dispatch(request))
+            return
+        }
+        if (request.method == "pluginCapabilities") {
+            // Package manager and plugin store reads for every family; keep them off the main thread (MCP roadmap P11 D27).
+            thread(name = "AutoJs6NodePluginCapabilities-${request.id}", isDaemon = true) {
+                callback(
+                    runCatching { NodeBridgeResponse.success(request.id, NodeBridgePluginFamilyStatus.report(appContext).toString()) }
+                        .getOrElse { error ->
+                            NodeBridgeResponse.failure(request.id, NodeBridgeError.providerFailed(error.message ?: error.javaClass.name, request.module, request.method))
+                        },
+                )
+            }
             return
         }
         dispatchOnMain(request, callback) {

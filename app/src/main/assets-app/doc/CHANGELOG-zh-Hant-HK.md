@@ -289,6 +289,7 @@
 * `優化` 宿主橋接層 accessibility 模塊增加 captureScreenImage 方法, 以無障礙截圖 (不可用時回退屏幕捕獲) 生成會話內圖像句柄, 供 MCP Server 等插件會話直接用於條碼識別與找圖找色; 插件會話可同時持有的圖像句柄數由 4 提高為並發調用數的兩倍
 * `優化` MCP Server 與 3-Stove Agent 等面向模型的插件會話經橋接讀取圖片 (image.readImage) 時, 最長邊超過 4096 px 的圖片按 2 的冪降採樣解碼, 結果附 scale 與原圖尺寸, 避免相冊大圖耗盡宿主內存; Node.js 插件腳本不受影響
 * `優化` MCP Server 與 3-Stove Agent 等面向模型的插件會話經橋接按路徑讀取圖片與媒體信息 (image.readImage, mediainfo) 時限制在工作目錄內, 寫入 (image.saveImage) 同樣只限工作目錄; 請求聲明 files.shared_read 且 AutoJs6 持有所有文件訪問權限時可只讀訪問共享存儲 (不含 Android/data 與 Android/obb), files.list 與 files.stat 也可按同一令牌列出共享存儲; Node.js 插件腳本不受影響
+* `優化` 宿主橋接層 app 模塊增加 pluginCapabilities 方法, 實時返回 OCR, 條碼, 拼音, Pinyin4j, MediaInfo, OpenCV 與離線文檔各插件家族的狀態 (available / not_installed / disabled / incompatible), 已安裝插件的版本, 啟用與授權情況, 對應的橋接方法以及插件中心入口, 供 MCP Server 等插件會話按安裝情況顯示工具並提示用戶安裝; 插件會話打開時的可選方法列表也按同一邏輯補充已可用家族的方法
 * `優化` images.save/saveImage/compress/compressToBytes 方法支持 PNG 量化選項 (保留透明度) 及像素與內存限制 (需要 Image Quantization 插件)
 * `優化` images.readPixels 方法支持 ImageWrapper 參數
 * `優化` images.matchTemplate/findPointByImage 方法支持 scales 選項, 匹配結果增加尺寸, 比例及區域信息
