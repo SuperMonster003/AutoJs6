@@ -429,6 +429,7 @@
     <string name="error_find_on_ui_thread_timeout">UI 스레드에 게시한 검색 (플래그 \"findOnUiThread\") 이 %1$d ms 안에 완료되지 않았습니다. UI 스레드가 차단되었을 수 있습니다</string>
     <string name="error_function_called_in_ui_thread">UI 스레드는 차단할 수 없습니다. 하위 스레드 또는 하위 스크립트에서 %s() 를 실행하십시오</string>
     <string name="error_function_called_more_than_once">%s() 가 두 번 이상 호출됩니다</string>
+    <string name="error_gallery_plugin_unavailable">3-Maple Image 플러그인을 사용할 수 없습니다. 플러그인 센터에서 설치, 활성화 또는 업데이트한 후 다시 시도하세요.</string>
     <string name="error_get_github_latest_release">최신 GitHub 릴리스를 얻을 수 없습니다</string>
     <string name="error_handshake_timed_out">핸드 셰이크는 %d ms 이후에 시간을 초과합니다</string>
     <string name="error_illegal_argument" formatted="false">불법 인수 %s: %s</string>

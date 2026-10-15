@@ -422,6 +422,7 @@
     <string name="error_find_on_ui_thread_timeout">The search posted to the UI thread (flag \"findOnUiThread\") did not finish within %1$d ms. The UI thread may be blocked</string>
     <string name="error_function_called_in_ui_thread">UI thread cannot be blocked. Try running %s() in sub-thread or sub-script</string>
     <string name="error_function_called_more_than_once">%s() called more than once</string>
+    <string name="error_gallery_plugin_unavailable">3-Maple Image plugin is unavailable. Install, enable or update it in Plugin Center, then try again.</string>
     <string name="error_get_github_latest_release">Cannot get latest GitHub release</string>
     <string name="error_handshake_timed_out">Handshake timed out after %d ms</string>
     <string name="error_illegal_argument" formatted="false">Illegal argument %s: %s</string>

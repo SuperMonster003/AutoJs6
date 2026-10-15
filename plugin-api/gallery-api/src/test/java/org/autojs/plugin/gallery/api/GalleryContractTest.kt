@@ -24,7 +24,7 @@ class GalleryContractTest {
         assertEquals("gallery", GalleryIds.ENGINE)
         assertEquals("default", GalleryIds.VARIANT_DEFAULT)
         assertEquals("io.github.supermonster003.autojs6.plugin.three.maple.image", GalleryIds.DEFAULT_PACKAGE_NAME)
-        assertEquals(5436L, GalleryIds.REQUIRED_HOST_VERSION_CODE)
+        assertEquals(5439L, GalleryIds.REQUIRED_HOST_VERSION_CODE)
 
         assertEquals(PluginCapabilityKeys.REQUIRES_HOST_VERSION, GalleryCapabilityKeys.REQUIRES_HOST_VERSION)
         assertEquals("galleryContractVersion", GalleryCapabilityKeys.CONTRACT_VERSION)

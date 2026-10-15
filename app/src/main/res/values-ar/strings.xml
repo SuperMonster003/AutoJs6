@@ -429,6 +429,7 @@
     <string name="error_find_on_ui_thread_timeout">لم يكتمل البحث المرسل إلى مؤشر ترابط واجهة المستخدم (العلامة \"findOnUiThread\") خلال %1$d مللي ثانية. قد يكون مؤشر ترابط واجهة المستخدم محظورا</string>
     <string name="error_function_called_in_ui_thread">لا يمكن حظر مؤشر ترابط واجهة المستخدم. حاول تشغيل %s() في الخيط الفرعي أو النصف الفرعي</string>
     <string name="error_function_called_more_than_once">%s() دعا أكثر من مرة</string>
+    <string name="error_gallery_plugin_unavailable">ملحق 3-Maple Image غير متاح. ثبته أو مكّنه أو حدّثه في مركز الملحقات ثم أعد المحاولة.</string>
     <string name="error_get_github_latest_release">لا يمكن الحصول على أحدث إصدار من GitHub</string>
     <string name="error_handshake_timed_out">تم توقيت المصافحة بعد %d MS</string>
     <string name="error_illegal_argument" formatted="false">حجة غير قانونية %s: %s</string>

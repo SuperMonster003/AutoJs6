@@ -52,6 +52,7 @@
 * `新增` epub.read 方法, 用于打开电子书阅读器并控制阅读位置, 书签及阅读偏好
 * `新增` epub.annotations/annotationsAsync 方法, 用于读取高亮与笔记, 阅读器会话支持监听标注变更
 * `新增` files.batchRename 方法, 用于按查找与替换, 正则表达式, 计数器及日期变量批量重命名文件与文件夹, 支持预览方案, 冲突处理策略, 进度回调及撤销 (需要 Batch Rename 插件) (参阅 项目文档 > [文件](https://docs.autojs6.com/#/files))
+* `新增` gallery 模块, 用于通过 3-Maple Image 插件选择, 查看, 编辑及转换图片, 读取与写入的文件限于脚本自身可访问的路径 (需要 3-Maple Image 插件 3.4.0 及以上) (参阅 项目文档 > [相册](https://docs.autojs6.com/#/gallery))
 * `新增` yolo 模块, 用于通过 YOLO 插件加载模型并进行目标检测 (参阅 项目文档 > [YOLO](https://docs.autojs6.com/#/yolo))
 * `新增` tts 模块, 用于文本转语音 (参阅 项目文档 > [文本转语音](https://docs.autojs6.com/#/tts))
 * `新增` settings 模块, 用于读取及修改应用设置 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [设置](https://docs.autojs6.com/#/settings))

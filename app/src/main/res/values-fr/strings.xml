@@ -427,6 +427,7 @@
     <string name="error_find_on_ui_thread_timeout">La recherche envoyée au thread d\'interface utilisateur (indicateur \"findOnUiThread\") ne s\'est pas terminée en %1$d ms. Le thread d\'interface utilisateur est peut-être bloqué</string>
     <string name="error_function_called_in_ui_thread">Le thread d\'interface utilisateur ne peut pas être bloqué. Essayez d\'exécuter %s() dans un thread secondaire ou un sous-script.</string>
     <string name="error_function_called_more_than_once">%s() appelé plus d\'une fois</string>
+    <string name="error_gallery_plugin_unavailable">Le plugin 3-Maple Image n\'est pas disponible. Installez-le, activez-le ou mettez-le à jour dans le Centre des plugins, puis réessayez.</string>
     <string name="error_get_github_latest_release">Impossible d\'obtenir la dernière version GitHub</string>
     <string name="error_handshake_timed_out">Délai d\'établissement de liaison dépassé après %d ms</string>
     <string name="error_illegal_argument" formatted="false">Argument illégal %s : %s</string>

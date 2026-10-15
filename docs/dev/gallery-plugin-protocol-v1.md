@@ -236,6 +236,37 @@ for the converter) and asks the media scanner to list them. The Plugin Center di
 probes the service and enables the engine by default; 3-Maple Image keeps one entry, keyed by its
 Explorer Action service.
 
-## Open Items
+## Script Object
 
-- The script object (roadmap 10.1, item 3) is described here once implemented.
+The global `gallery` (`org.autojs.autojs.runtime.api.augment.gallery.Gallery`, one
+`GalleryService` per script) maps the contract onto script calls; every method has an `Async`
+form that returns a Promise:
+
+| Script call | Answer |
+| --- | --- |
+| `pick(options?)` (`multiple`, `maxCount`, `mimeTypes`, `title`) | array of picked images, `null` when cancelled |
+| `view(paths, options?)` (`index`) | `GalleryViewSession` once launched (`viewAsync`: once shown) |
+| `edit(path, options?)` (`output`, `overwrite`, `format`, `quality`, `keepExif`, `keepLocation`) | output path, `null` when the user left without saving |
+| `convert(path, options?)` (the `edit` options plus `lossless`, `targetBytes`, `sizeMode`, `percent`, `longEdge`, `width`, `height`, `keepAspectRatio`, `background`) | `{ path, name, mimeType, width, height, size }` |
+| `isAvailable()` | whether a usable plugin answers; never throws |
+
+- Arguments are checked before anything reaches the plugin (`GalleryScriptArguments`): unknown
+  option keys, out-of-range values and URIs instead of paths fail with `INVALID_ARGUMENT`;
+  `sizeMode` is inferred from `percent`, `longEdge` or `width` / `height` when absent;
+  `targetBytes` excludes `quality`, PNG and lossless WebP; `background` is an ARGB number or a
+  `#RGB`, `#RRGGBB` or `#AARRGGBB` string. Paths resolve against the script's working directory.
+- The synchronous `pick`, `edit` and `convert` refuse to block the UI thread
+  (`INVALID_ARGUMENT`); their `Async` forms work there.
+- A picker or editor session that closes without `result` answers `null` for the reasons
+  `user`, `done` and `host`; `timeout`, `replaced` and `error` (or a reported `error` event) fail
+  with the matching code.
+- `GalleryViewSession` is an `EventEmitter` with `open({ count })`, `page({ index, path })`,
+  `error(GalleryError)` and the terminal `close({ reason })`, the properties `paths`, `count`,
+  `index`, `path`, `state`, `reason`, `isOpen` and `isClosed`, and `close(options?)`, which
+  finishes the viewer unless `{ finish: false }`. The session keeps the script alive until it
+  closed; a script that stops draining its events gets `error(LIMIT_EXCEEDED)` and
+  `close(overflow)`.
+- Script exit finishes waiting pickers and editors (their staged outputs are deleted) and ends
+  followed viewers without closing them (`close` reason `script-exit`, not delivered).
+- Failures are instances of `gallery.GalleryError` (`name`, `code`, `message`); the plugin
+  availability codes carry the localized Plugin Center hint in front of the technical message.

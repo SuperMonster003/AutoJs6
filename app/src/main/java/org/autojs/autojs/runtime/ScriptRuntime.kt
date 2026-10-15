@@ -38,6 +38,7 @@ import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.ai.AiService
 import org.autojs.autojs.runtime.api.epub.EpubService
+import org.autojs.autojs.runtime.api.gallery.GalleryService
 import org.autojs.autojs.runtime.api.terminal.TerminalService
 import org.autojs.autojs.runtime.api.mail.MailService
 import org.autojs.autojs.runtime.api.installer.InstallerService
@@ -80,6 +81,7 @@ import org.autojs.autojs.runtime.api.augment.jsox.Mathx
 import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.api.augment.media.Media
 import org.autojs.autojs.runtime.api.augment.epub.Epub
+import org.autojs.autojs.runtime.api.augment.gallery.Gallery
 import org.autojs.autojs.runtime.api.augment.terminal.Terminal
 import org.autojs.autojs.runtime.api.augment.mail.Mail
 import org.autojs.autojs.runtime.api.augment.installer.Installer
@@ -305,6 +307,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     private val mail: MailService
     private val installer: InstallerService
     private val epub: EpubService
+    private val gallery: GalleryService
     private val terminal: TerminalService
     private var compose: Compose? = null
 
@@ -506,6 +509,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         mail = MailService(mUiHandlerAppContext, this)
         installer = InstallerService(mUiHandlerAppContext, this)
         epub = EpubService(mUiHandlerAppContext, this)
+        gallery = GalleryService(mUiHandlerAppContext, this)
         terminal = TerminalService(mUiHandlerAppContext, this)
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()
@@ -836,6 +840,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         ignoresException { mail.close() }
         ignoresException { installer.close() }
         ignoresException { epub.close() }
+        ignoresException { gallery.close() }
         ignoresException { terminal.close() }
         ignoresException { ai.close() }
         ignoresException { tts.close() }
@@ -1072,6 +1077,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Mail(this, mail).augment(target)
         Installer(this, installer).augment(target)
         Epub(this, epub).augment(target)
+        Gallery(this, gallery).augment(target)
         Terminal(this, terminal).augment(target)
         Compose(this).also { compose = it }.augment(target)
 

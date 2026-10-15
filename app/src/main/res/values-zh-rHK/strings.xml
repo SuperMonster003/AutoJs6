@@ -424,6 +424,7 @@
     <string name="error_find_on_ui_thread_timeout">投遞到 UI 線程的查找 (標誌 \"findOnUiThread\") 未在 %1$d 毫秒內完成. UI 線程可能已阻塞</string>
     <string name="error_function_called_in_ui_thread">UI 線程內無法執行阻塞操作. 可嘗試在子線程或子腳本中執行 %s()</string>
     <string name="error_function_called_more_than_once">%s() 調用不能超過一次</string>
+    <string name="error_gallery_plugin_unavailable">3-Maple Image 插件不可用. 請在插件中心安裝, 啓用或更新後重試.</string>
     <string name="error_get_github_latest_release">無法獲取最新的 GitHub 發行版</string>
     <string name="error_handshake_timed_out">握手超時 (%d 毫秒)</string>
     <string name="error_illegal_argument" formatted="false">不合法的參數 %s: %s</string>

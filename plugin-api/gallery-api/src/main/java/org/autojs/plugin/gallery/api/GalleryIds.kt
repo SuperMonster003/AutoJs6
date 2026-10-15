@@ -18,8 +18,8 @@ object GalleryIds {
 
     /**
      * Smallest host `versionCode` the plugin may declare through
-     * `PluginCapabilityKeys.REQUIRES_HOST_VERSION`: the 6.8.0 host build that ships the gallery
-     * contract module (plugin roadmap M6, 10.1).
+     * `PluginCapabilityKeys.REQUIRES_HOST_VERSION`: the 6.8.0 host build that ships the script
+     * object `gallery` on top of this contract (plugin roadmap M6, 10.1).
      */
-    const val REQUIRED_HOST_VERSION_CODE = 5436L
+    const val REQUIRED_HOST_VERSION_CODE = 5439L
 }

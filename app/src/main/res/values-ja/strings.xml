@@ -428,6 +428,7 @@
     <string name="error_find_on_ui_thread_timeout">UI スレッドに投入した検索 (フラグ \"findOnUiThread\") が %1$d ミリ秒以内に完了しませんでした. UI スレッドがブロックされている可能性があります</string>
     <string name="error_function_called_in_ui_thread">\"UI スレッドをブロックできません. サブスレッドまたはサブスクリプトで %s() を実行してみてください</string>
     <string name="error_function_called_more_than_once">%s() が複数回呼び出されました</string>
+    <string name="error_gallery_plugin_unavailable">3-Maple Image プラグインを利用できません. プラグインセンターでインストール, 有効化または更新してから再試行してください.</string>
     <string name="error_get_github_latest_release">最新の GitHub リリースを取得できません</string>
     <string name="error_handshake_timed_out">ハンドシェイクは %d ms 後にタイムアウトしました</string>
     <string name="error_illegal_argument" formatted="false">不正な引数 %s: %s</string>
