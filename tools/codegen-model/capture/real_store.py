@@ -22,6 +22,7 @@ PACKAGE = re.compile(r"[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)+\Z")
 IDENTITY = re.compile(r"real-[a-f0-9]{32}\Z")
 MAX_SNAPSHOT_BYTES = 32 * 1024 * 1024
 NOTE_HISTORY_LIMIT = 20
+SEARCH_HISTORY_LIMIT = 20
 
 
 def now():
@@ -112,26 +113,38 @@ class CollectionStore:
         preferences.update(changes)
         private_write_json(self.root / "collector" / "preferences.json", preferences)
 
-    def note_history(self):
-        values = self.preferences().get("noteHistory", [])
+    def _history(self, key, label, limit):
+        values = self.preferences().get(key, [])
         if not isinstance(values, list):
-            raise ValueError("变化说明历史格式无效。")
+            raise ValueError(label + "历史格式无效。")
         history = []
         for value in values:
             if isinstance(value, str) and value.strip():
-                value = nonempty_string(value.strip(), "变化说明")
+                value = nonempty_string(value.strip(), label)
                 if value not in history:
                     history.append(value)
-        return history[:NOTE_HISTORY_LIMIT]
+        return history[:limit]
+
+    def _remember_history(self, key, text, label, limit):
+        text = text.strip()
+        history = self._history(key, label, limit)
+        if text:
+            nonempty_string(text, label)
+            history = [text] + [value for value in history if value != text]
+            self.update_preferences(**{key: history[:limit]})
+        return history[:limit]
+
+    def note_history(self):
+        return self._history("noteHistory", "变化说明", NOTE_HISTORY_LIMIT)
 
     def remember_note(self, note):
-        note = note.strip()
-        history = self.note_history()
-        if note:
-            nonempty_string(note, "变化说明")
-            history = [note] + [value for value in history if value != note]
-            self.update_preferences(noteHistory=history[:NOTE_HISTORY_LIMIT])
-        return history[:NOTE_HISTORY_LIMIT]
+        return self._remember_history("noteHistory", note, "变化说明", NOTE_HISTORY_LIMIT)
+
+    def search_history(self):
+        return self._history("searchHistory", "搜索", SEARCH_HISTORY_LIMIT)
+
+    def remember_search(self, query):
+        return self._remember_history("searchHistory", query, "搜索", SEARCH_HISTORY_LIMIT)
 
     @staticmethod
     def next_state_number(session):

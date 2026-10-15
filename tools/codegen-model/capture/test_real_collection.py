@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from capture.real_device import PrivateAdb, RealCaptureWorker, list_devices
-from capture.real_store import (CollectionStore, NOTE_HISTORY_LIMIT, WorkspaceLock,
+from capture.real_store import (CollectionStore, NOTE_HISTORY_LIMIT, SEARCH_HISTORY_LIMIT, WorkspaceLock,
                                 inspect_snapshot, private_write_json)
 from dataset.task_io import load_group, read_json, write_json
 
@@ -164,6 +164,25 @@ class RealCollectionTest(PrivateCollectionCase):
         self.assertTrue(resumed.preferences()["anotherPreference"])
         resumed.update_preferences(serial="another device")
         self.assertEqual(expected, resumed.note_history())
+
+    def test_search_history_rolls_over_and_persists_without_overwriting_other_preferences(self):
+        self.store.update_preferences(serial="Sony", otherPreference=True)
+        self.store.remember_note("列表重排")
+        for i in range(SEARCH_HISTORY_LIMIT + 4):
+            self.store.remember_search(f"条目 {i}")
+        expected = [f"条目 {i}" for i in range(SEARCH_HISTORY_LIMIT + 3, 3, -1)]
+        self.assertEqual(expected, self.store.search_history())
+        self.store.remember_search("  条目 8  ")
+        self.store.remember_search("  ")
+        expected.remove("条目 8")
+        expected.insert(0, "条目 8")
+        self.store.update_preferences(serial="second device")
+        self.store.remember_note("进度条出现")
+        resumed = CollectionStore(self.root)
+        self.assertEqual(expected, resumed.search_history())
+        self.assertEqual(["进度条出现", "列表重排"], resumed.note_history())
+        self.assertEqual("second device", resumed.preferences()["serial"])
+        self.assertTrue(resumed.preferences()["otherPreference"])
 
     def test_resume_keeps_unconfirmed_states_and_never_exports_a_proposal(self):
         self.add()
@@ -466,6 +485,143 @@ class RealCollectorGuiTest(PrivateCollectionCase):
         self.assertFalse(app.busy)
         window.update()
 
+    def test_preview_refresh_reapplies_search_to_new_nodes_and_return_restores_task_query(self):
+        window, app = self.create_app()
+        self.add()
+        app.open_session(self.gid)
+        app.query.set("Item B")
+        app.apply_search()
+        adb = Mock()
+        adb.foreground_package.return_value = APP
+        app.selected_adb = Mock(return_value=adb)
+        app.read_phone_layout = Mock(side_effect=[(snapshot(("B", "A", "C")), {}),
+                                                 (snapshot(("C", "B", "A")), {})])
+        app.preview_current()
+        self.wait_job(window, app)
+        self.assertEqual("Item B", app.query.get())
+        self.assertEqual({1}, app.visible)
+        app.query.set("Item A")
+        app.apply_search()
+        self.assertEqual({2}, app.visible)
+        app.preview_current()
+        self.wait_job(window, app)
+        self.assertEqual("Item A", app.query.get())
+        self.assertEqual({3}, app.visible)
+        self.assertEqual(set(), app.selected)
+        app.return_to_task()
+        window.update()
+        self.assertEqual("Item B", app.query.get())
+        self.assertEqual({2}, app.visible)
+        self.assertEqual(1, len(self.store.load(self.gid)["states"]))
+
+    def test_capture_import_state_switch_and_confirmation_keep_search_applied(self):
+        window, app = self.create_app()
+        self.add()
+        self.store.confirm(self.gid, 0, [1], "")
+        app.open_session(self.gid)
+        app.query.set("Item A")
+        app.apply_search()
+        app.selected_adb = Mock(return_value=Mock())
+        app.read_phone_layout = Mock(return_value=(snapshot(("B", "A", "C")), {}))
+        app.capture()
+        self.wait_job(window, app)
+        self.assertEqual("Item A", app.query.get())
+        self.assertEqual({2}, app.visible)
+        self.assertEqual({2}, app.selected)
+        app.note.set("重排")
+        app.confirm()
+        window.update()
+        self.assertEqual({2}, app.visible)
+        imported = self.root / "next.layout.json"
+        imported.write_bytes(snapshot(("C", "B", "A")))
+        with patch("capture.real_gui.filedialog.askopenfilenames", return_value=(str(imported),)):
+            app.import_layout()
+        self.wait_job(window, app)
+        self.assertEqual("Item A", app.query.get())
+        self.assertEqual({3}, app.visible)
+        app.show_state(0)
+        window.update()
+        self.assertEqual({1}, app.visible)
+        self.assertEqual("Item A", app.query.get())
+
+    def test_search_history_dropdown_applies_immediately_and_preserves_unsubmitted_input(self):
+        self.store.remember_search("Item B")
+        window, app = self.create_app()
+        self.add()
+        self.add(("B", "A", "C"))
+        app.open_session(self.gid, 0)
+        self.assertEqual(("Item B",), app.search_entry["values"])
+        app.search_entry.current(0)
+        app.search_entry.event_generate("<<ComboboxSelected>>")
+        window.update()
+        self.assertEqual({2}, app.visible)
+        app.query.set("Item C")
+        app.show_state(1)
+        window.update()
+        self.assertEqual({3}, app.visible)
+        self.assertEqual(["Item C", "Item B"], CollectionStore(self.root).search_history())
+        self.assertIsNone(self.store.load(self.gid)["states"][1]["confirmedAt"])
+
+    def test_show_all_reveals_first_highlight_in_a_long_layout_every_time(self):
+        window, app = self.create_app()
+        self.gid = self.store.create(app=APP, title="long collection", scope="collection")["groupId"]
+        self.add(tuple(f"row-{i:03}" for i in range(150)))
+        self.store.confirm(self.gid, 0, [89, 125], "")
+        app.open_session(self.gid)
+        window.deiconify()
+        window.update()
+        app.query.set("Item row-088")
+        app.apply_search()
+        window.update()
+        self.assertEqual({89}, app.visible)
+        app.clear_search()
+        window.update()
+        self.assertEqual("", app.query.get())
+        self.assertEqual("89", app.table.focus())
+        self.assertTrue(app.table.bbox("89"))
+        self.assertEqual({89, 125}, app.selected)
+        app.navigate_highlight(1)
+        window.update()
+        self.assertEqual("125", app.table.focus())
+        self.assertTrue(app.table.bbox("125"))
+        app.clear_search()
+        window.update()
+        self.assertEqual("89", app.table.focus())
+        self.assertTrue(app.table.bbox("89"))
+        self.assertIn("Item row-088", self.store.search_history())
+
+    def test_highlight_navigation_wraps_without_changing_targets_or_search(self):
+        window, app = self.create_app()
+        self.add()
+        app.open_session(self.gid)
+        app.selected = {1, 3}
+        app.query.set("Item")
+        app.apply_search()
+        window.update()
+        before = (self.store.folder(self.gid) / "session.json").read_bytes()
+        for direction, expected in ((1, 1), (1, 3), (1, 1), (-1, 3), (-1, 1)):
+            app.navigate_highlight(direction)
+            window.update()
+            self.assertEqual(str(expected), app.table.focus())
+            self.assertTrue(app.details.get("1.0", "end").startswith(f"[{expected}]"))
+            self.assertEqual({1, 3}, app.selected)
+            self.assertEqual({"1", "3"}, set(app.table.selection()))
+            self.assertEqual("Item", app.query.get())
+        app.query.set("missing item")
+        app.apply_search()
+        window.update()
+        self.assertTrue(app.next_highlight_button.instate(["disabled"]))
+        self.assertTrue(app.previous_highlight_button.instate(["disabled"]))
+        self.assertEqual({1, 3}, app.selected)
+        app.clear_search()
+        window.update()
+        self.assertEqual("1", app.table.focus())
+        app.clear_selection()
+        window.update()
+        app.navigate_highlight(1)
+        self.assertTrue(app.next_highlight_button.instate(["disabled"]))
+        self.assertEqual(before, (self.store.folder(self.gid) / "session.json").read_bytes())
+
     def test_preview_without_task_never_creates_a_group_and_disables_task_actions(self):
         window, app = self.create_app()
         before = {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
@@ -627,7 +783,8 @@ class RealCollectorGuiTest(PrivateCollectionCase):
             window.geometry(size)
             window.update()
             for button in (app.confirm_button, app.preview_button, app.return_button,
-                           app.delete_draft_button, app.delete_state_button):
+                           app.delete_draft_button, app.delete_state_button,
+                           app.previous_highlight_button, app.next_highlight_button):
                 self.assertTrue(button.winfo_ismapped())
                 self.assertLessEqual(button.winfo_rooty() + button.winfo_height(),
                                      window.winfo_rooty() + window.winfo_height())

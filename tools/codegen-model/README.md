@@ -149,9 +149,11 @@ For guided collection, double-click `collect-real.cmd` on Windows, or run
 from the repository root. The desktop assistant captures the selected phone's current app,
 shows searchable nodes and a layout preview, recommends targets for explicit confirmation,
 resumes drafts, and exports compatible format-1 tasks after three distinct confirmed states.
-It also supports deleting drafts/states, a persistent 20-entry recent-change history, and a
-task-independent current-layout preview that keeps the layout in memory and restores pending
-edits when returning to the task. It audits existing real tasks toward the 30-app / 150-group collection target. Only Python's
+It also supports deleting drafts/states, separate persistent 20-entry change-note and search
+histories, retaining the current search when refreshing layouts, and cycling through highlighted
+targets without changing the selection. Show all automatically reveals the first highlighted target.
+A task-independent current-layout preview keeps the layout in memory and restores pending edits
+when returning to the task. It audits existing real tasks toward the 30-app / 150-group collection target. Only Python's
 standard library (including Tk) and ADB are required. See the
 [Chinese collection guide](capture/REAL-COLLECTION.md) for the complete workflow and data locations.
 

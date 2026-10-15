@@ -43,6 +43,9 @@ class CollectorApp:
         self.preview_return = None
         self.note_dirty = False
         self.loading_note = False
+        self.query_dirty = False
+        self.loading_query = False
+        self.highlight_index = None
         self.nodes, self.raw_nodes, self.selected, self.visible = [], {}, set(), set()
         self.group_ids = []
         self.canvas_transform = None
@@ -66,6 +69,7 @@ class CollectorApp:
         self.progress = tk.StringVar(value="正在检查已有采集数据...")
         self.device = tk.StringVar()
         self.query = tk.StringVar()
+        self.query.trace_add("write", self.query_changed)
         self.note = tk.StringVar()
         self.note.trace_add("write", self.note_changed)
         self.selection_text = tk.StringVar(value="尚未选择目标")
@@ -153,11 +157,13 @@ class CollectorApp:
         search = ttk.Frame(main)
         search.grid(row=2, column=0, sticky="ew")
         ttk.Label(search, text="搜索文字 / ID / 描述 / 类名 / 序号: ").pack(side="left")
-        entry = ttk.Entry(search, textvariable=self.query)
-        entry.pack(side="left", fill="x", expand=True)
-        self.controls.append(entry)
-        entry.bind("<Return>", lambda _: self.guard(self.render_nodes))
-        self.button(search, "搜索", self.render_nodes, side="left", padx=4)
+        self.search_entry = ttk.Combobox(search, textvariable=self.query, values=self.store.search_history(), height=10)
+        self.search_entry.pack(side="left", fill="x", expand=True)
+        self.controls.append(self.search_entry)
+        self.search_entry.bind("<Return>", lambda _: self.guard(self.apply_search))
+        self.search_entry.bind("<<ComboboxSelected>>", lambda _: self.guard(self.apply_search))
+        self.search_entry.bind("<FocusOut>", lambda _: self.guard(self.remember_current_search))
+        self.button(search, "搜索", self.apply_search, side="left", padx=4)
         self.button(search, "显示全部", self.clear_search, side="left")
         inspect = ttk.Panedwindow(main, orient="horizontal")
         inspect.grid(row=3, column=0, sticky="nsew", pady=7)
@@ -188,10 +194,15 @@ class CollectorApp:
         self.canvas.bind("<Button-1>", self.canvas_selected)
         selection_bar = ttk.Frame(main)
         selection_bar.grid(row=4, column=0, sticky="ew")
-        ttk.Label(selection_bar, textvariable=self.selection_text, wraplength=600).pack(side="left", fill="x", expand=True)
-        self.button(selection_bar, "选父节点", self.select_parent, side="right")
-        self.button(selection_bar, "清空选择", self.clear_selection, side="right", padx=4)
+        parent_button = self.button(selection_bar, "选父节点", self.select_parent, side="right")
+        clear_button = self.button(selection_bar, "清空选择", self.clear_selection, side="right", padx=4)
         self.proposal_button = self.button(selection_bar, "重新推荐", self.use_proposal, side="right")
+        self.next_highlight_button = self.button(selection_bar, "下一个高亮", lambda: self.navigate_highlight(1), side="right", padx=4)
+        self.previous_highlight_button = self.button(selection_bar, "上一个高亮", lambda: self.navigate_highlight(-1), side="right")
+        for button in (parent_button, clear_button, self.proposal_button,
+                       self.next_highlight_button, self.previous_highlight_button):
+            button.configure(width=0)
+        ttk.Label(selection_bar, textvariable=self.selection_text, wraplength=280).pack(side="left", fill="x", expand=True)
         details_frame = ttk.Frame(main)
         details_frame.grid(row=5, column=0, sticky="ew", pady=6)
         self.details = tk.Text(details_frame, height=5, wrap="word", state="disabled", font=("Microsoft YaHei UI", 10))
@@ -229,6 +240,7 @@ class CollectorApp:
             return
         if not self.closing:
             self.remember_current_note()
+            self.remember_current_search()
         self.busy = True
         self.status.set(message)
         for control in self.controls:
@@ -287,7 +299,9 @@ class CollectorApp:
                                 (self.export_button, task), (self.delete_draft_button, draft),
                                 (self.delete_state_button, draft and state), (self.exclude_button, draft and state),
                                 (self.proposal_button, draft and included), (self.confirm_button, draft and included),
-                                (self.note_entry, draft and included), (self.return_button, self.preview_return is not None)):
+                                (self.note_entry, draft and included), (self.return_button, self.preview_return is not None),
+                                (self.previous_highlight_button, bool(self.selected & self.visible)),
+                                (self.next_highlight_button, bool(self.selected & self.visible))):
             widget.state(["!disabled"] if enabled and not self.busy else ["disabled"])
 
     def note_changed(self, *_):
@@ -306,6 +320,27 @@ class CollectorApp:
         if self.preview_return is None and (force or self.note_dirty):
             self.note_entry["values"] = self.store.remember_note(self.note.get())
             self.note_dirty = False
+
+    def query_changed(self, *_):
+        if not self.loading_query:
+            self.query_dirty = True
+
+    def set_query(self, value):
+        self.loading_query = True
+        try:
+            self.query.set(value)
+        finally:
+            self.loading_query = False
+            self.query_dirty = False
+
+    def remember_current_search(self, force=False):
+        if force or self.query_dirty:
+            self.search_entry["values"] = self.store.remember_search(self.query.get())
+            self.query_dirty = False
+
+    def apply_search(self):
+        self.remember_current_search(force=True)
+        self.render_nodes()
 
     def executable(self):
         return find_adb(self.adb_option)
@@ -358,6 +393,7 @@ class CollectorApp:
 
     def open_session(self, group_id, index=None):
         self.remember_current_note()
+        self.remember_current_search()
         self.session = self.store.load(group_id)
         self.preview_return = None
         self.refresh_sessions(group_id)
@@ -373,8 +409,8 @@ class CollectorApp:
                                  + ("已导出并冻结, 可查看。" if frozen else "草稿可继续采集与修改标注。"))
         self.state_index = None
         self.nodes, self.raw_nodes, self.selected = [], {}, set()
+        self.highlight_index = None
         self.set_note("")
-        self.query.set("")
         if self.session["states"]:
             self.show_state(len(self.session["states"]) - 1 if index is None else index)
         else:
@@ -383,12 +419,14 @@ class CollectorApp:
         self.sync_controls()
 
     def clear_task(self):
+        self.remember_current_search()
         self.session, self.state_index, self.preview_return = None, None, None
         self.states.delete(0, "end")
         self.groups.selection_clear(0, "end")
         self.nodes, self.raw_nodes, self.selected = [], {}, set()
+        self.highlight_index = None
         self.set_note("")
-        self.query.set("")
+        self.set_query("")
         self.task_info.configure(text="请选择任务, 或用查看当前布局临时检查手机页面。")
         self.state_text.set("尚未打开状态")
         self.render_nodes()
@@ -404,6 +442,7 @@ class CollectorApp:
 
     def show_state(self, index):
         self.remember_current_note()
+        self.remember_current_search()
         self.preview_return = None
         self.state_index = index
         state = self.session["states"][index]
@@ -411,7 +450,7 @@ class CollectorApp:
         self.raw_nodes = {n.index: resolve_target(root, list(n.path)) for n in self.nodes}
         self.states.selection_clear(0, "end")
         self.states.selection_set(index)
-        self.query.set("")
+        self.highlight_index = None
         self.set_note(state["note"])
         if state["targets"]:
             targets = {tuple(p) for p in state["targets"]}
@@ -545,6 +584,7 @@ class CollectorApp:
 
     def show_preview(self, result):
         app, root, nodes = result
+        self.remember_current_search()
         if self.preview_return is None:
             self.remember_current_note()
             self.preview_return = {"groupId": self.session["groupId"] if self.session else None,
@@ -554,10 +594,10 @@ class CollectorApp:
         self.nodes = nodes
         self.raw_nodes = {n.index: resolve_target(root, list(n.path)) for n in nodes}
         self.selected = set()
+        self.highlight_index = None
         self.groups.selection_clear(0, "end")
         self.states.selection_clear(0, "end")
         self.set_note("")
-        self.query.set("")
         self.task_info.configure(text=f"临时查看\n{app}\n本次布局仅在内存中查看。\n返回任务可继续之前的标注。")
         self.state_text.set(f"临时查看 · {app} · {len(nodes)} 个节点 · 未关联任务")
         self.render_nodes()
@@ -567,6 +607,7 @@ class CollectorApp:
     def return_to_task(self):
         if self.preview_return is None:
             return
+        self.remember_current_search()
         previous, self.preview_return = self.preview_return, None
         if previous["groupId"] is None:
             self.clear_task()
@@ -574,7 +615,7 @@ class CollectorApp:
             self.open_session(previous["groupId"], previous["index"])
             self.selected = previous["selected"]
             self.set_note(previous["note"])
-            self.query.set(previous["query"])
+            self.set_query(previous["query"])
             self.state_text.set(previous["stateText"])
             self.render_nodes()
         self.sync_controls()
@@ -604,8 +645,12 @@ class CollectorApp:
         self.run_job(work, done, "正在校验并导入布局...")
 
     def clear_search(self):
-        self.query.set("")
+        self.remember_current_search(force=True)
+        self.set_query("")
         self.render_nodes()
+        highlights = sorted(self.selected & self.visible)
+        if highlights:
+            self.focus_highlight(highlights[0])
 
     def render_nodes(self):
         self.table.delete(*self.table.get_children())
@@ -621,13 +666,41 @@ class CollectorApp:
             values = (node.index, node.class_name.rsplit(".", 1)[-1], node.full_id or node.entry_id, node.text, desc)
             self.table.insert("", "end", iid=str(node.index), values=values)
         self.table.selection_set([str(i) for i in sorted(self.selected & self.visible)])
+        if self.highlight_index in self.selected & self.visible:
+            self.table.focus(str(self.highlight_index))
+        else:
+            self.highlight_index = None
         self.update_selection()
 
     def node_selected(self, _=None):
         if self.busy:
             return
         self.selected = (self.selected - self.visible) | {int(i) for i in self.table.selection()}
+        focused = self.table.focus()
+        if focused and int(focused) in self.selected & self.visible:
+            self.highlight_index = int(focused)
         self.update_selection()
+
+    def focus_highlight(self, index):
+        highlights = sorted(self.selected & self.visible)
+        if index not in highlights:
+            return
+        self.highlight_index = index
+        # Focus/scroll only: selection_set would silently change collection ground truth.
+        self.table.focus(str(index))
+        self.table.see(str(index))
+        self.update_selection()
+        self.status.set(f"已定位第 {highlights.index(index) + 1}/{len(highlights)} 个高亮条目: 序号 {index}。")
+
+    def navigate_highlight(self, direction):
+        highlights = sorted(self.selected & self.visible)
+        if not highlights:
+            return
+        if self.highlight_index in highlights:
+            position = (highlights.index(self.highlight_index) + direction) % len(highlights)
+        else:
+            position = 0 if direction > 0 else len(highlights) - 1
+        self.focus_highlight(highlights[position])
 
     def clear_selection(self):
         self.selected.clear()
@@ -643,12 +716,19 @@ class CollectorApp:
         self.clear_search()
 
     def update_selection(self):
+        highlights = self.selected & self.visible
+        if self.highlight_index not in highlights:
+            self.highlight_index = None
+        for button in (self.previous_highlight_button, self.next_highlight_button):
+            button.state(["!disabled"] if highlights and not self.busy else ["disabled"])
         ids = sorted(self.selected)
         hidden = len(self.selected - self.visible)
         self.selection_text.set(f"已选 {len(ids)} 个目标: {', '.join(map(str, ids[:24]))}"
                                 + (f" (含 {hidden} 个搜索结果外的节点)" if hidden else ""))
         lines = []
-        for index in ids[:3]:
+        detail_ids = ([self.highlight_index] + [i for i in ids if i != self.highlight_index]
+                      if self.highlight_index in highlights else ids)
+        for index in detail_ids[:3]:
             node, raw = self.nodes[index], self.raw_nodes[index]
             lines.append(f"[{index}] 路径 {list(node.path)} | {node.class_name}\n"
                          f"ID: {node.full_id or node.entry_id!r} | 文字: {node.text!r} | 描述: {raw.get('desc')!r}\n"
@@ -716,7 +796,7 @@ class CollectorApp:
             else:
                 self.selected = {index}
             self.clear_search()
-            self.table.see(str(index))
+            self.focus_highlight(index)
 
     def select_parent(self):
         if len(self.selected) != 1:
@@ -847,6 +927,7 @@ class CollectorApp:
     def close(self):
         try:
             self.remember_current_note()
+            self.remember_current_search()
         except Exception as error:
             self.close_error = error
         self.closing = True
