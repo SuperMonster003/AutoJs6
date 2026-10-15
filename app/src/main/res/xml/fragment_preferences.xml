@@ -83,6 +83,11 @@
             app:summary="@string/summary_text_launcher_shortcuts"
             app:longClickPrompt="@string/description_launcher_shortcuts" />
 
+        <org.autojs.autojs.ui.shortcut.ShortcutBackupPreference
+            app:layout="@layout/preference_custom"
+            app:title="@string/shortcut_backup_title"
+            app:summary="@string/shortcut_backup_summary" />
+
         <org.autojs.autojs.theme.preference.MaterialPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_setup_wizards"

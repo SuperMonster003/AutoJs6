@@ -14,7 +14,6 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.fileprovider.AppFileProvider
-import org.autojs.autojs.external.shortcut.Shortcut
 import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory
 import org.autojs.autojs.runtime.api.Mime
@@ -109,11 +108,14 @@ object Scripts {
             ScriptShortcutIntentFactory.create(scriptFile.path),
             scriptFile.path,
         )
-        Shortcut(context).name(scriptFile.simplifiedName)
-            .targetClass(ShortcutActivity::class.java)
-            .iconRes(R.drawable.ic_node_js_black)
-            .extras(extras)
-            .send()
+        org.autojs.autojs.util.ShortcutUtils.requestPinShortcut(
+            context,
+            "autojs6.script.${java.util.UUID.randomUUID()}",
+            extras.setClass(context, ShortcutActivity::class.java).setAction(Intent.ACTION_MAIN),
+            scriptFile.simplifiedName,
+            scriptFile.simplifiedName,
+            R.drawable.ic_node_js_black,
+        )
     }
 
     @JvmStatic

@@ -50,6 +50,7 @@ import org.autojs.autojs.ui.main.plugin.PluginFragment
 import org.autojs.autojs.ui.main.scripts.ExplorerFragment
 import org.autojs.autojs.ui.main.task.TaskManagerFragment
 import org.autojs.autojs.ui.settings.PreferencesActivity
+import org.autojs.autojs.ui.shortcut.ShortcutRecoveryPrompt
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.ui.wizard.SetupWizards
@@ -129,6 +130,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private var mSearchViewItem: SearchViewItem? = null
     private var mPendingSearchState: Bundle? = null
     private val mA11yTool = AccessibilityTool(this)
+    private val shortcutRecovery = ShortcutRecoveryPrompt(this)
 
     private val isCurrentPageDocs: Boolean
         get() {
@@ -211,6 +213,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         UpdateUtils.autoCheckForUpdatesIfNeededWithSnackbar(this)
         IntentUtils.App.runAfterRestartIfNeeded(this)
         super.onPostResume()
+        shortcutRecovery.check()
     }
 
     override fun onStart() {
@@ -539,6 +542,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     override fun onDestroy() {
+        shortcutRecovery.dismiss()
         super.onDestroy()
         mSearchViewItem = null
     }

@@ -11,6 +11,7 @@
         "File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available"
       ],
       "feature": [
+        "Desktop shortcuts automatically save settings and icons, support backup export/import and batch restoration, and offer recovery after unfreezing; recognized manual removals are not prompted again, and multiple shortcuts for the same script are saved separately (automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)",
         "Setup wizard, for running the permission wizard and plugin installation wizard in sequence, with an entry in the home page welcome prompt after first launch (entry: Settings > Configuration > Setup wizard)",
         "Permission wizard, for selecting permissions from the home drawer and requesting them in sequence, with built-in \"Standard\"/\"Minimal\"/\"All\" profiles and custom profiles; granted permissions can be hidden through the menu (entry: Setup wizard/the button in the home drawer's \"Permissions\" group heading)",
         "Plugin installation wizard, for selecting official plugins by category and installing them in batches, with built-in \"Standard\"/\"Minimal\"/\"All\" profiles and support for saving, renaming and deleting custom profiles (entry: Setup wizard/the floating button menu on the home Plugins tab/the Plugin Center's \"+\" menu)",

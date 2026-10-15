@@ -596,6 +596,15 @@
 
         <activity android:name="org.autojs.autojs.ui.shortcut.AppsIconSelectActivity" />
 
+        <activity
+            android:name="org.autojs.autojs.ui.shortcut.ShortcutBackupActivity"
+            android:label="@string/shortcut_backup_title"
+            android:exported="false" />
+
+        <receiver
+            android:name="org.autojs.autojs.external.shortcut.ShortcutPinnedReceiver"
+            android:exported="false" />
+
         <activity android:name="org.autojs.autojs.ui.timing.TimedTaskSettingActivity" />
 
         <activity

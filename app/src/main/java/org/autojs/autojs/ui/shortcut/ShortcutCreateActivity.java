@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,15 +15,14 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.drawable.IconCompat;
 import com.afollestad.materialdialogs.MaterialDialog;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import org.autojs.autojs.external.ScriptIntents;
-import org.autojs.autojs.external.shortcut.Shortcut;
 import org.autojs.autojs.external.shortcut.ShortcutActivity;
 import org.autojs.autojs.external.shortcut.ScriptShortcutIntentFactory;
 import org.autojs.autojs.model.script.ScriptFile;
@@ -35,6 +33,7 @@ import org.autojs.autojs.util.ShortcutUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ShortcutCreateDialogBinding;
+import java.util.UUID;
 
 /**
  * Created by Stardust on Oct 25, 2017.
@@ -80,11 +79,8 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     }
 
     private void showDialog(View view) {
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
-            mUseAndroidNShortcut.setVisibility(View.VISIBLE);
-        } else {
-            mUseAndroidNShortcut.setVisibility(View.GONE);
-        }
+        // ShortcutManagerCompat selects the supported platform path; both paths are archived.
+        mUseAndroidNShortcut.setVisibility(View.GONE);
         mName.setText(mScriptFile.getSimplifiedName());
         new MaterialDialog.Builder(this)
                 .customView(view, false)
@@ -96,7 +92,6 @@ public class ShortcutCreateActivity extends AppCompatActivity {
                 .onPositive((dialog, which) -> {
                     try {
                         createShortcut();
-                        finish();
                     } catch (RuntimeException error) {
                         ViewUtils.showToast(this, error.getMessage(), true);
                     }
@@ -106,28 +101,9 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     }
 
     private void createShortcut() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createShortcutByShortcutManager();
-            return;
-        }
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1 && mUseAndroidNShortcut.isChecked()) {
-            createShortcutByShortcutManager();
-            return;
-        }
-        Shortcut shortcut = new Shortcut(this);
-        if (mIsDefaultIcon) {
-            shortcut.iconRes(R.drawable.ic_node_js_black);
-        } else {
-            Bitmap bitmap = BitmapUtils.drawableToBitmap(mIcon.getDrawable());
-            shortcut.icon(bitmap);
-        }
-        shortcut.name(mName.getText().toString())
-                .targetClass(ShortcutActivity.class)
-                .extras(createLaunchExtras())
-                .send();
+        createShortcutByShortcutManager();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N_MR1)
     private void createShortcutByShortcutManager() {
 
         // @Caution by SuperMonster003 on Dec 7, 2024.
@@ -153,15 +129,15 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         String name = mName.getText().toString();
 
         /* To make each script be able to have its own individual icon. */
-        String id = ShortcutActivity.class.getName() + "$" + name + "@" + System.currentTimeMillis();
+        String id = "autojs6.script." + UUID.randomUUID();
         Intent intent = createLaunchExtras()
                 .setClass(this, ShortcutActivity.class)
                 .setAction(Intent.ACTION_MAIN);
-        if (mIsDefaultIcon) {
-            ShortcutUtils.requestPinShortcut(this, id, intent, name, name, R.drawable.ic_file_type_js_dark_green);
-        } else {
-            ShortcutUtils.requestPinShortcut(this, id, intent, name, name, mIcon.getDrawable());
-        }
+        IconCompat icon = mIsDefaultIcon
+                ? IconCompat.createWithResource(this, R.drawable.ic_file_type_js_dark_green)
+                : IconCompat.createWithBitmap(BitmapUtils.drawableToBitmap(mIcon.getDrawable()));
+        // Keep this Activity in the foreground until the asynchronous pin request is sent.
+        ShortcutUtils.requestPinShortcut(this, id, intent, name, name, icon, this::finish);
     }
 
     private Intent createLaunchExtras() {

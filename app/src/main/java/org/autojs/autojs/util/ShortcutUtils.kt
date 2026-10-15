@@ -1,6 +1,5 @@
 package org.autojs.autojs.util
 
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
@@ -10,11 +9,13 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.core.content.getSystemService
-import androidx.core.content.pm.ShortcutInfoCompat
-import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.afollestad.materialdialogs.MaterialDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.external.ScriptIntents
+import org.autojs.autojs.external.shortcut.ShortcutBackupRepository
 import org.autojs.autojs6.R
 
 /**
@@ -53,29 +54,21 @@ object ShortcutUtils {
     }
 
     @JvmStatic
-    fun requestPinShortcut(context: Context, id: String, intent: Intent, longLabel: CharSequence, shortLabel: CharSequence, icon: IconCompat?) {
-        // The shortcut must be enabled.
-        // The "id" for ShortcutInfoCompat.Builder must contain stable, constant strings.
-        val pinShortcutInfo = ShortcutInfoCompat.Builder(context, id)
-            .setIntent(intent.apply { action = action ?: Intent.ACTION_VIEW })
-            .setLongLabel(longLabel)
-            .setShortLabel(shortLabel)
-            .setIcon(icon)
-            .setAlwaysBadged()
-            .build()
-
-        // Create the PendingIntent object only if your app needs to be notified
-        // that the user allowed the shortcut to be pinned.
-        // Note that if the pinning operation fails, your app isn't notified.
-        // We assume here that the app has implemented a method called createShortcutResultIntent()
-        // that returns a broadcast intent.
-        val pinnedShortcutCallbackIntent = ShortcutManagerCompat.createShortcutResultIntent(context, pinShortcutInfo)
-
-        // Configure the intent so that your app's broadcast receiver gets
-        // the callback successfully.For details, see PendingIntent.getBroadcast().
-        val successCallback = PendingIntent.getBroadcast(context, 0, pinnedShortcutCallbackIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        ShortcutManagerCompat.requestPinShortcut(context, pinShortcutInfo, successCallback.intentSender)
+    @JvmOverloads
+    fun requestPinShortcut(context: Context, id: String, intent: Intent, longLabel: CharSequence, shortLabel: CharSequence, icon: IconCompat?, onRequested: Runnable? = null) {
+        ShortcutBackupRepository.scope.launch {
+            val failure = runCatching {
+                val repository = ShortcutBackupRepository.get(context)
+                repository.capture(id, intent, shortLabel, longLabel, icon)
+                check(repository.requestPin(id)) { context.getString(R.string.text_pin_shortcut_not_unsupported) }
+            }.exceptionOrNull()
+            withContext(Dispatchers.Main) {
+                if (failure != null) {
+                    ViewUtils.showToast(context, context.getString(R.string.shortcut_backup_error, failure.message.orEmpty()), true)
+                }
+                onRequested?.run()
+            }
+        }
     }
 
     @JvmStatic
