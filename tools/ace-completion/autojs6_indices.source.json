@@ -9814,10 +9814,86 @@
           "signature": "toFile(path: string): java.io.File;"
         },
         {
+          "name": "batchRename",
+          "kind": "variable",
+          "doc": "batchRename: FilesBatchRename;",
+          "signature": "batchRename: FilesBatchRename;"
+        },
+        {
           "name": "formatSizeWithUnit",
           "kind": "function",
           "doc": "formatSizeWithUnit(bytes: number): string;",
           "signature": "formatSizeWithUnit(bytes: number): string;"
+        }
+      ]
+    },
+    "files.batchRename": {
+      "doc": "AutoJs6 files.batchRename API",
+      "members": [
+        {
+          "name": "plan",
+          "kind": "function",
+          "doc": "plan(paths: string | string[], options: FilesBatchRename.Options): FilesBatchRename.Plan;",
+          "signature": "plan(paths: string | string[], options: FilesBatchRename.Options): FilesBatchRename.Plan;"
+        },
+        {
+          "name": "apply",
+          "kind": "function",
+          "doc": "apply(plan: FilesBatchRename.Plan, options?: FilesBatchRename.ApplyOptions): FilesBatchRename.Result;",
+          "signature": "apply(plan: FilesBatchRename.Plan, options?: FilesBatchRename.ApplyOptions): FilesBatchRename.Result;"
+        },
+        {
+          "name": "undo",
+          "kind": "function",
+          "doc": "undo(target: FilesBatchRename.Result | string): FilesBatchRename.UndoResult;",
+          "signature": "undo(target: FilesBatchRename.Result | string): FilesBatchRename.UndoResult;"
+        },
+        {
+          "name": "history",
+          "kind": "function",
+          "doc": "history(limit?: number): FilesBatchRename.HistoryEntry[];",
+          "signature": "history(limit?: number): FilesBatchRename.HistoryEntry[];"
+        },
+        {
+          "name": "isAvailable",
+          "kind": "function",
+          "doc": "isAvailable(): boolean;",
+          "signature": "isAvailable(): boolean;"
+        },
+        {
+          "name": "planAsync",
+          "kind": "function",
+          "doc": "planAsync(paths: string | string[], options: FilesBatchRename.Options): Promise<FilesBatchRename.Plan>;",
+          "signature": "planAsync(paths: string | string[], options: FilesBatchRename.Options): Promise<FilesBatchRename.Plan>;"
+        },
+        {
+          "name": "applyAsync",
+          "kind": "function",
+          "doc": "applyAsync(plan: FilesBatchRename.Plan, options?: FilesBatchRename.ApplyOptions): Promise<FilesBatchRename.Result>;",
+          "signature": "applyAsync(plan: FilesBatchRename.Plan, options?: FilesBatchRename.ApplyOptions): Promise<FilesBatchRename.Result>;"
+        },
+        {
+          "name": "undoAsync",
+          "kind": "function",
+          "doc": "undoAsync(target: FilesBatchRename.Result | string): Promise<FilesBatchRename.UndoResult>;",
+          "signature": "undoAsync(target: FilesBatchRename.Result | string): Promise<FilesBatchRename.UndoResult>;"
+        },
+        {
+          "name": "BatchRenameError",
+          "kind": "function",
+          "doc": "BatchRenameError(message: string, code?: FilesBatchRename.ErrorCode | string): FilesBatchRename.BatchRenameError;",
+          "signature": "BatchRenameError(message: string, code?: FilesBatchRename.ErrorCode | string): FilesBatchRename.BatchRenameError;"
+        }
+      ]
+    },
+    "files.batchRename.BatchRenameError": {
+      "doc": "AutoJs6 files.batchRename.BatchRenameError API",
+      "members": [
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: BatchRenameError;",
+          "signature": "prototype: BatchRenameError;"
         }
       ]
     },
