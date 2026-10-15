@@ -2814,6 +2814,8 @@
     <string name="text_type">Tipo</string>
     <string name="text_type_file">Archivo</string>
     <string name="text_type_folder">Carpeta</string>
+    <string name="text_typescript_compilation_finished">Compilación de TypeScript completada en %1$d ms</string>
+    <string name="text_typescript_compiling" tools:ignore="TypographyEllipsis">Compilando TypeScript...</string>
     <string name="text_typescript_console">Consola TypeScript</string>
     <string name="text_typescript_console_hint">Introduzca una expresión o sentencia TypeScript</string>
     <string name="text_typescript_project_rename">Cambiar nombre de símbolo del proyecto</string>

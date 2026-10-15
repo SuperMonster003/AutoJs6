@@ -2816,6 +2816,8 @@
     <string name="text_type">유형</string>
     <string name="text_type_file">파일</string>
     <string name="text_type_folder">폴더</string>
+    <string name="text_typescript_compilation_finished">TypeScript 컴파일 완료, 소요 시간 %1$d ms</string>
+    <string name="text_typescript_compiling" tools:ignore="TypographyEllipsis">TypeScript 컴파일 중...</string>
     <string name="text_typescript_console">TypeScript 콘솔</string>
     <string name="text_typescript_console_hint">TypeScript 식 또는 문 입력</string>
     <string name="text_typescript_project_rename">프로젝트 기호 이름 바꾸기</string>

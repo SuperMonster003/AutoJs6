@@ -2816,6 +2816,8 @@
     <string name="text_type">يكتب</string>
     <string name="text_type_file">ملف</string>
     <string name="text_type_folder">مجلد</string>
+    <string name="text_typescript_compilation_finished">اكتملت ترجمة TypeScript في %1$d ms</string>
+    <string name="text_typescript_compiling" tools:ignore="TypographyEllipsis">جار ترجمة TypeScript...</string>
     <string name="text_typescript_console">وحدة تحكم TypeScript</string>
     <string name="text_typescript_console_hint">أدخل تعبير TypeScript أو عبارة</string>
     <string name="text_typescript_project_rename">إعادة تسمية رمز المشروع</string>

@@ -2814,6 +2814,8 @@
     <string name="text_type">Тип</string>
     <string name="text_type_file">Файл</string>
     <string name="text_type_folder">Папка</string>
+    <string name="text_typescript_compilation_finished">Компиляция TypeScript завершена за %1$d мс</string>
+    <string name="text_typescript_compiling" tools:ignore="TypographyEllipsis">Компиляция TypeScript...</string>
     <string name="text_typescript_console">Консоль TypeScript</string>
     <string name="text_typescript_console_hint">Введите выражение или инструкцию TypeScript</string>
     <string name="text_typescript_project_rename">Переименовать символ проекта</string>

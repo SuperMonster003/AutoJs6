@@ -2815,6 +2815,8 @@
     <string name="text_type">種類</string>
     <string name="text_type_file">ファイル</string>
     <string name="text_type_folder">フォルダー</string>
+    <string name="text_typescript_compilation_finished">TypeScript のコンパイルが %1$d ms で完了しました</string>
+    <string name="text_typescript_compiling" tools:ignore="TypographyEllipsis">TypeScript をコンパイル中...</string>
     <string name="text_typescript_console">TypeScript コンソール</string>
     <string name="text_typescript_console_hint">TypeScript の式または文を入力</string>
     <string name="text_typescript_project_rename">プロジェクトシンボルの名前を変更</string>
