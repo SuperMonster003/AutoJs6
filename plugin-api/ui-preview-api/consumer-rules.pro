@@ -1,0 +1,1 @@
+-keep class org.autojs.plugin.ui.preview.** { *; }

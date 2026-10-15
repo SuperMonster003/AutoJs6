@@ -69,6 +69,7 @@ jobs:
             :plugin-api:ai-provider-api:testDebugUnitTest \
             :plugin-api:dex-compiler-api:testDebugUnitTest \
             :plugin-api:lua-runtime-api:testDebugUnitTest \
+            :plugin-api:ui-preview-api:testDebugUnitTest \
             :plugin-api:lua-runtime-api:assembleDebug \
             :test-apps:ai-provider-conformance:testDebugUnitTest \
             :test-apps:dex-compiler-conformance:testDebugUnitTest \

@@ -789,6 +789,10 @@ dependencies /* Unclassified */ {
 
     // Plugin API: Terminal API (3-Shell Terminal)
     implementation(project(":plugin-api:terminal-api"))
+
+    // Plugin API: ui-mode layout preview for the 3-Block Compose designer (roadmap P10.2)
+    // zh-CN: 供 3-Block Compose 设计器使用的 ui 模式布局预览契约 (路线图 P10.2)
+    implementation(project(":plugin-api:ui-preview-api"))
 }
 
 dependencies /* MIME */ {
