@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.batchrename.BatchRenamePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
@@ -43,6 +44,7 @@ import org.autojs.plugin.ai.provider.api.AiProviderProtocol
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.autojs.plugin.quickjs.runtime.api.QuickJsPluginActions
 import org.autojs.plugin.quickjs.runtime.api.QuickJsPluginIds
+import org.autojs.plugin.batchrename.api.BatchRenamePluginIds
 import org.autojs.plugin.epub.api.EpubIds
 import org.autojs.plugin.terminal.api.TerminalIds
 import org.autojs.plugin.explorer.api.ExplorerActionPluginIds
@@ -1087,6 +1089,7 @@ class PluginCenterViewModel : ViewModel() {
             InstallerIds.ENGINE to InstallerPluginHost.ACTION_INSTALLER,
             EpubIds.ENGINE to EpubPluginHost.ACTION_EPUB,
             TerminalIds.ENGINE to TerminalPluginHost.ACTION_TERMINAL,
+            BatchRenamePluginIds.ENGINE to BatchRenamePluginHost.ACTION_BATCH_RENAME,
             YoloContract.ENGINE_ID to YoloContract.SERVICE_ACTION,
             ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
             QuickJsPluginIds.ENGINE to QuickJsPluginActions.RUNTIME,

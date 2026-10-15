@@ -19,6 +19,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.batchrename.BatchRenamePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
@@ -39,6 +40,7 @@ import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.batchrename.api.BatchRenamePluginActions
 import org.autojs.plugin.epub.api.EpubActions
 import org.autojs.plugin.terminal.api.TerminalActions
 import org.autojs.plugin.installer.api.InstallerActions
@@ -236,6 +238,9 @@ class InstalledPluginRepository {
         TerminalPluginHost.ACTION_TERMINAL -> TerminalPluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = TerminalPluginHost.ACTION_TERMINAL)
         }
+        BatchRenamePluginHost.ACTION_BATCH_RENAME -> BatchRenamePluginHost.discover(context, packageName).map {
+            Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = BatchRenamePluginHost.ACTION_BATCH_RENAME)
+        }
         else -> listOf(preferred)
     }
 
@@ -279,6 +284,10 @@ class InstalledPluginRepository {
             ServiceQuery(
                 action = TerminalPluginHost.ACTION_TERMINAL,
                 category = TerminalActions.SERVICE_CATEGORY,
+            ),
+            ServiceQuery(
+                action = BatchRenamePluginHost.ACTION_BATCH_RENAME,
+                category = BatchRenamePluginActions.SERVICE_CATEGORY,
             ),
         )
         return specs.flatMap { spec ->

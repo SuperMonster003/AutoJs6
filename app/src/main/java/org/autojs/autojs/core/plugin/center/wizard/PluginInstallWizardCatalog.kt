@@ -82,6 +82,7 @@ object PluginInstallWizardCatalog {
         entry(official("markdownpreviewer"), "Markdown Previewer", FILE_MANAGER, standard = true),
         entry(official("mediainfo"), "MediaInfo", FILE_MANAGER, standard = true),
         entry(official("three.folio.epub"), "Three Folio EPUB", FILE_MANAGER),
+        entry(official("batch.rename"), "Batch Rename", FILE_MANAGER),
 
         // Script runtimes.
         entry(official("bun.runtime"), "Bun Runtime", RUNTIME),

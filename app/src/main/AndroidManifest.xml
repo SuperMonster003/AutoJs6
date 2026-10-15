@@ -102,6 +102,10 @@
             <action android:name="org.autojs.plugin.TERMINAL_SETTINGS" />
         </intent>
         <intent>
+            <action android:name="org.autojs.plugin.BATCH_RENAME" />
+            <category android:name="batch-rename" />
+        </intent>
+        <intent>
             <action android:name="org.autojs.plugin.typescript.COMPILER" />
         </intent>
         <intent>

@@ -79,7 +79,7 @@ class PluginInstallWizardCatalogTest {
             order,
         )
         assertFalse(PluginInstallWizardCatalog.entries.any { it.category == PluginInstallWizardCategory.OTHERS })
-        assertEquals(47, PluginInstallWizardCatalog.entries.size)
+        assertEquals(48, PluginInstallWizardCatalog.entries.size)
     }
 
     @Test
