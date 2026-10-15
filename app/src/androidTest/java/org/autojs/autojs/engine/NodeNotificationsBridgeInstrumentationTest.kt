@@ -63,9 +63,13 @@ class NodeNotificationsBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create notifications bridge working directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, notify: () => "shadow" };"""
         File(workDir, "node_modules/notifications").apply {
             check(mkdirs()) { "Failed to create notifications shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true, notify: () => "shadow" };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -150,6 +154,7 @@ class NodeNotificationsBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-notifications-fake.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/notifications/index.js" to shadowPackageSource),
         )
 
         NodePluginTestHarness.assertSucceeded("notifications fake bridge", result)

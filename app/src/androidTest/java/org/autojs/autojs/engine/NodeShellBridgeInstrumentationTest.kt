@@ -83,9 +83,13 @@ class NodeShellBridgeInstrumentationTest {
         File(workDir, "scripts").apply {
             check(mkdirs()) { "Failed to create shell bridge scripts directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, exec: () => "shadow" };"""
         File(workDir, "node_modules/shell").apply {
             check(mkdirs()) { "Failed to create shell shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true, exec: () => "shadow" };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -184,6 +188,7 @@ class NodeShellBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-shell-fake-source.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/shell/index.js" to shadowPackageSource),
         )
 
         NodePluginTestHarness.assertSucceeded("shell fake bridge", result)

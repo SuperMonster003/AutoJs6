@@ -47,10 +47,15 @@ class NodeDatabaseBridgeInstrumentationTest {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Node database bridge fake transport regression")
 
         val workDir = databaseWorkDir("node-bridge-database-shadow")
-        listOf("database", "sqlite").forEach { module ->
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted packages also travel as module-source overlays; otherwise the plugin never
+        // sees them and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, open: () => "shadow" };"""
+        val shadowModules = listOf("database", "sqlite")
+        shadowModules.forEach { module ->
             File(workDir, "node_modules/$module").apply {
                 check(mkdirs()) { "Failed to create database shadow module directory: $absolutePath" }
-            }.resolve("index.js").writeText("""module.exports = { shadow: true, open: () => "shadow" };""")
+            }.resolve("index.js").writeText(shadowPackageSource)
         }
 
         val result = NodePluginTestHarness.runPluginScript(
@@ -121,6 +126,7 @@ class NodeDatabaseBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-database-fake.js>",
             workingDirectory = workDir,
+            moduleSources = shadowModules.associate { "node_modules/$it/index.js" to shadowPackageSource },
         )
 
         NodePluginTestHarness.assertSucceeded("database fake bridge", result)

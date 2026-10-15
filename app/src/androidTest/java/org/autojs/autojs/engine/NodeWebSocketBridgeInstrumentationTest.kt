@@ -50,10 +50,14 @@ class NodeWebSocketBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create websocket bridge work dir: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadowed: true };""" + "\n"
         File(workDir, "node_modules/websocket").apply {
             mkdirs()
             File(this, "index.js").writeText(
-                """module.exports = { shadowed: true };""" + "\n",
+                shadowPackageSource,
                 StandardCharsets.UTF_8,
             )
         }
@@ -346,6 +350,7 @@ class NodeWebSocketBridgeInstrumentationTest {
                 """.trimIndent(),
                 sourceName = "<node-websocket-bridge-mvp.js>",
                 workingDirectory = workDir,
+                moduleSources = mapOf("node_modules/websocket/index.js" to shadowPackageSource),
                 timeoutMs = 10_000L,
                 rawNodeNetworkModulesEnabled = false,
             )

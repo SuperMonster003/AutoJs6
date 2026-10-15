@@ -85,9 +85,13 @@ class NodeDeviceBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create device bridge working directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, imei: "shadow" };"""
         File(workDir, "node_modules/device").apply {
             check(mkdirs()) { "Failed to create device shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true, imei: "shadow" };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -183,6 +187,7 @@ class NodeDeviceBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-device-fake-source.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/device/index.js" to shadowPackageSource),
         )
 
         NodePluginTestHarness.assertSucceeded("device fake bridge", result)

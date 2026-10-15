@@ -112,9 +112,13 @@ class NodeWorkManagerBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create work_manager bridge working directory: $absolutePath" }
         }
         File(workDir, "main.cjs").writeText("""console.log("scheduled");""")
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true };"""
         File(workDir, "node_modules/work_manager").apply {
             check(mkdirs()) { "Failed to create work_manager shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("work_manager"))
         val result = NodePluginTestHarness.runPluginScript(
@@ -327,6 +331,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-work-manager-fake-source.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/work_manager/index.js" to shadowPackageSource),
             timeoutMs = 10_000L,
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )

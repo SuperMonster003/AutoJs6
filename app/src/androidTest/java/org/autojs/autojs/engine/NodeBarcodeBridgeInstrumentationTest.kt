@@ -87,9 +87,13 @@ class NodeBarcodeBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create barcode bridge working directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, detect: () => "shadow" };"""
         File(workDir, "node_modules/barcode").apply {
             check(mkdirs()) { "Failed to create barcode shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true, detect: () => "shadow" };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -190,6 +194,7 @@ class NodeBarcodeBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-barcode-fake.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/barcode/index.js" to shadowPackageSource),
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
                 .fromDeclaredCapabilities(listOf("image", "barcode", "screen_capture")).toJson()),
         )

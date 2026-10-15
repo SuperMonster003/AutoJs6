@@ -177,9 +177,13 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create accessibility selector working directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, text: () => ({ shadow: true }) };"""
         File(workDir, "node_modules/accessibility").apply {
             check(mkdirs()) { "Failed to create accessibility shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true, text: () => ({ shadow: true }) };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -330,6 +334,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-accessibility-selector-fake.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/accessibility/index.js" to shadowPackageSource),
         )
 
         NodePluginTestHarness.assertSucceeded("accessibility selector fake bridge", result)

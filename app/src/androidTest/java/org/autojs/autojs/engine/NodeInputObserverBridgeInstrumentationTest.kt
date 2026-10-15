@@ -215,9 +215,13 @@ class NodeInputObserverBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create input_observer bridge working directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, observeKeys: () => "shadow" };"""
         File(workDir, "node_modules/input_observer").apply {
             check(mkdirs()) { "Failed to create input_observer shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true, observeKeys: () => "shadow" };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -303,6 +307,7 @@ class NodeInputObserverBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-input-observer-fake.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/input_observer/index.js" to shadowPackageSource),
             timeoutMs = 30_000L,
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
                 .fromDeclaredCapabilities(listOf("input_observer", "input_observer.keys")).toJson()),

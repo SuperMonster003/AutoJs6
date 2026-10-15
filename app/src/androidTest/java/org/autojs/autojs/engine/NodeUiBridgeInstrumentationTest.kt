@@ -152,9 +152,13 @@ class NodeUiBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create ui bridge working directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, showLayout: () => "shadow" };"""
         File(workDir, "node_modules/ui").apply {
             check(mkdirs()) { "Failed to create ui shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true, showLayout: () => "shadow" };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("ui"))
         val result = NodePluginTestHarness.runPluginScript(
@@ -280,6 +284,7 @@ class NodeUiBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-ui-fake.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/ui/index.js" to shadowPackageSource),
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
             timeoutMs = 30_000L,
         )

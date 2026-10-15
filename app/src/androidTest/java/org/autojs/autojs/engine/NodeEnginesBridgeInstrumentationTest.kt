@@ -45,9 +45,13 @@ class NodeEnginesBridgeInstrumentationTest {
         File(workDir, "sub").apply {
             check(mkdirs()) { "Failed to create engines exec fake sub directory: $absolutePath" }
         }
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
+        // sees it and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true };"""
         File(workDir, "node_modules/engines").apply {
             check(mkdirs()) { "Failed to create engines shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
+        }.resolve("index.js").writeText(shadowPackageSource)
 
         val result = NodePluginTestHarness.runPluginScript(
             """
@@ -127,6 +131,7 @@ class NodeEnginesBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-engines-exec-fake.js>",
             workingDirectory = workDir,
+            moduleSources = mapOf("node_modules/engines/index.js" to shadowPackageSource),
         )
 
         NodePluginTestHarness.assertSucceeded("engines exec fake bridge", result)

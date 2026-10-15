@@ -49,10 +49,15 @@ class NodeStorageBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create storage bridge working directory: $absolutePath" }
         }
-        listOf("storage", "storages").forEach { module ->
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted packages also travel as module-source overlays; otherwise the plugin never
+        // sees them and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true, create: () => "shadow" };"""
+        val shadowModules = listOf("storage", "storages")
+        shadowModules.forEach { module ->
             File(workDir, "node_modules/$module").apply {
                 check(mkdirs()) { "Failed to create storage shadow module directory: $absolutePath" }
-            }.resolve("index.js").writeText("""module.exports = { shadow: true, create: () => "shadow" };""")
+            }.resolve("index.js").writeText(shadowPackageSource)
         }
 
         val result = NodePluginTestHarness.runPluginScript(
@@ -118,6 +123,7 @@ class NodeStorageBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-storage-fake.js>",
             workingDirectory = workDir,
+            moduleSources = shadowModules.associate { "node_modules/$it/index.js" to shadowPackageSource },
         )
 
         NodePluginTestHarness.assertSucceeded("storage fake bridge", result)

@@ -28,10 +28,15 @@ class NodeUtilityBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create utility bridge working directory: $absolutePath" }
         }
-        listOf("jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx").forEach { name ->
+        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
+        // overlays), so the planted packages also travel as module-source overlays; otherwise the plugin never
+        // sees them and the shadow check would be vacuous.
+        val shadowPackageSource = """module.exports = { shadow: true };"""
+        val shadowModules = listOf("jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx")
+        shadowModules.forEach { name ->
             File(workDir, "node_modules/$name").apply {
                 check(mkdirs()) { "Failed to create $name shadow module directory: $absolutePath" }
-            }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
+            }.resolve("index.js").writeText(shadowPackageSource)
         }
 
         val result = NodePluginTestHarness.runPluginScript(
@@ -161,6 +166,7 @@ class NodeUtilityBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-utility-jsox.js>",
             workingDirectory = workDir,
+            moduleSources = shadowModules.associate { "node_modules/$it/index.js" to shadowPackageSource },
         )
 
         NodePluginTestHarness.assertSucceeded("jsox mathx utility facade", result)

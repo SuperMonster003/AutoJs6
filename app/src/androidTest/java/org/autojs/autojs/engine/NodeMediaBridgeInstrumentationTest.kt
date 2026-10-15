@@ -205,6 +205,10 @@ class NodeMediaBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create media bridge working directory: $absolutePath" }
         }
+        // Nothing is planted on disk here: the shadow packages travel as module-source overlays so the shadow
+        // check actually reaches the plugin instead of passing vacuously.
+        val shadowPackageSource = """module.exports = { shadow: true };"""
+        val shadowModules = listOf("media", "mediainfo", "recorder")
         File(workDir, "project.json").writeText(
             """
             {
@@ -299,6 +303,7 @@ class NodeMediaBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-media-fake.js>",
             workingDirectory = workDir,
+            moduleSources = shadowModules.associate { "node_modules/$it/index.js" to shadowPackageSource },
         )
 
         NodePluginTestHarness.assertSucceeded("media fake bridge", result)
