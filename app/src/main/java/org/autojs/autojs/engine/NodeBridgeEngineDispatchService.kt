@@ -150,8 +150,11 @@ class NodeBridgeEngineDispatchService : Service() {
             ?: return policyFailure(request, "engines.execScript requires a non-empty script name without NUL bytes.")
         val script = args.optString(1)
         val options = args.optJSONObject(2) ?: JSONObject()
-        val config = buildExecutionConfig(request, options)
-            ?: return policyFailure(request, "engines.execScript requires scoped cwd, positive timeoutMs, and allowed spawn depth.")
+        val config = try {
+            buildExecutionConfig(request, options)
+        } catch (denied: ExecutionDenied) {
+            return NodeBridgeResponse.failure(request.id, denied.error)
+        }
         val source = StringScriptSource(name, script).apply { prefix = "\$engine/" }
         if (source.engineName == JavaScriptSource.ENGINE_NODEJS) {
             return policyFailure(request, "engines.execScript cannot start nested Node.js plugin executions yet.")
@@ -164,8 +167,11 @@ class NodeBridgeEngineDispatchService : Service() {
         val path = args.optString(0).takeIf { it.isNotBlank() && !it.contains('\u0000') }
             ?: return policyFailure(request, "engines.execScriptFile requires a non-empty scoped path without NUL bytes.")
         val options = args.optJSONObject(1) ?: JSONObject()
-        val config = buildExecutionConfig(request, options)
-            ?: return policyFailure(request, "engines.execScriptFile requires scoped cwd, positive timeoutMs, and allowed spawn depth.")
+        val config = try {
+            buildExecutionConfig(request, options)
+        } catch (denied: ExecutionDenied) {
+            return NodeBridgeResponse.failure(request.id, denied.error)
+        }
         val scriptFile = resolveScopedFile(config.workingDirectory, path)
             ?.takeIf { it.isFile }
             ?: return policyFailure(request, "engines.execScriptFile path must stay inside the scoped working directory.")
@@ -324,23 +330,39 @@ class NodeBridgeEngineDispatchService : Service() {
         }
     }
 
-    private fun buildExecutionConfig(request: NodeBridgeRequest, options: JSONObject): ExecutionConfig? {
+    /** A start request the policy refuses, with the one reason that applies. */
+    private class ExecutionDenied(val error: NodeBridgeError) : RuntimeException(error.message)
+
+    /**
+     * The execution config of a start request, or [ExecutionDenied] naming the one rule it breaks: a
+     * missing or out-of-range `timeoutMs`, the spawn depth, an unusable working directory (its own code,
+     * see NodeBridgeWorkingDirectory), or a `cwd` outside it.
+     * zh-CN: 启动请求的执行配置, 或抛出 [ExecutionDenied] 并指明违反的那一条规则: `timeoutMs` 缺失或越界, 派生深度, 工作目录不可用
+     * (使用专用错误码, 见 NodeBridgeWorkingDirectory), 或 `cwd` 超出工作目录.
+     */
+    private fun buildExecutionConfig(request: NodeBridgeRequest, options: JSONObject): ExecutionConfig {
+        val label = "${request.module}.${request.method}"
+        fun deny(message: String): Nothing = throw ExecutionDenied(NodeBridgeError.permissionDenied("$label $message", request.module, request.method))
         if (!options.has("timeoutMs") || options.isNull("timeoutMs")) {
-            return null
+            deny("requires options.timeoutMs between 1 and $MAX_EXEC_START_TIMEOUT_MS ms.")
         }
         val timeoutMs = options.optLong("timeoutMs", 0L)
         if (timeoutMs <= 0L || timeoutMs > MAX_EXEC_START_TIMEOUT_MS) {
-            return null
+            deny("options.timeoutMs must be between 1 and $MAX_EXEC_START_TIMEOUT_MS ms.")
         }
         val parentSpawnDepth = options.optInt(INTERNAL_PARENT_SPAWN_DEPTH, 0)
             .coerceAtLeast(0)
         if (parentSpawnDepth >= NodeBridgeEngineInfo.MAX_SPAWN_DEPTH) {
-            return null
+            deny("cannot start a script from a script more than ${NodeBridgeEngineInfo.MAX_SPAWN_DEPTH} level(s) deep.")
         }
-        val baseCwd = options.optString(INTERNAL_BASE_CWD).takeIf { it.isNotBlank() }
-            ?: return null
-        val cwd = resolveScopedCwd(baseCwd, options.optString("cwd", "."))
-            ?: return null
+        val baseCwd = options.optString(INTERNAL_BASE_CWD)
+        val base = baseCwd.takeIf { it.isNotBlank() && !it.contains('\u0000') }
+            ?.let { runCatching { File(it).canonicalFile }.getOrNull() }
+            ?.takeIf { it.isDirectory }
+            ?: throw ExecutionDenied(NodeBridgeWorkingDirectory.error(baseCwd, request.module, request.method)
+                ?: NodeBridgeError.permissionDenied("$label requires the scoped AutoJs6 working directory.", request.module, request.method))
+        val cwd = resolveScopedCwd(base.path, options.optString("cwd", "."))
+            ?: deny("options.cwd must name an existing directory inside the working directory ${base.path} (a relative path without .. segments).")
         return ExecutionConfig(
             workingDirectory = cwd.absolutePath,
             delay = options.optLong("delay", 0L).coerceAtLeast(0L),

@@ -76,6 +76,7 @@ class NodeBridgeRhinoExecutionService : Service() {
                 NodeBridgeError.bridgeUnavailable(request.module, request.method),
             )
         }
+        workingDirectoryError(request)?.let { return NodeBridgeResponse.failure(request.id, it) }
         val descriptor = RhinoRunDescriptor.fromRequest(request)
             ?: return NodeBridgeResponse.failure(
                 request.id,
@@ -86,6 +87,13 @@ class NodeBridgeRhinoExecutionService : Service() {
                 ),
             )
         return executeRhino(request, descriptor)
+    }
+
+    /** The reason the session's working directory cannot host the run (NodeBridgeWorkingDirectory), checked before the generic request rules. */
+    private fun workingDirectoryError(request: NodeBridgeRequest): NodeBridgeError? {
+        val options = runCatching { JSONArray(request.argsJson.ifBlank { "[]" }) }.getOrNull()?.optJSONObject(0) ?: return null
+        val baseCwd = options.optString(INTERNAL_BASE_CWD).takeIf { it.isNotBlank() } ?: return null
+        return NodeBridgeWorkingDirectory.error(baseCwd, request.module, request.method)
     }
 
     private fun executeRhino(request: NodeBridgeRequest, descriptor: RhinoRunDescriptor): NodeBridgeResponse {

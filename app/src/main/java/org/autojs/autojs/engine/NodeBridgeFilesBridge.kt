@@ -46,7 +46,7 @@ internal class NodeBridgeFilesBridge(
                     else -> stat(request, scope, args, path = shared.relativePath)
                 }
             }
-            val scope = NodeBridgeFileScope(rootProvider(), legacyFileApi)
+            val scope = workingDirectoryScope(rootProvider(), legacyFileApi)
             when (request.method) {
                 "list" -> list(request, scope, args)
                 "stat" -> stat(request, scope, args)
@@ -57,6 +57,13 @@ internal class NodeBridgeFilesBridge(
                 "delete" -> delete(request, scope, args)
                 else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
             }
+        } catch (error: WorkingDirectoryUnavailableException) {
+            NodeBridgeResponse.failure(request.id, NodeBridgeWorkingDirectory.error(error.path, request.module, request.method) ?: NodeBridgeError.providerFailed(
+                message = "files.${request.method}: the AutoJs6 working directory ${error.path} is not available",
+                module = request.module,
+                method = request.method,
+                code = NodeRuntimeErrorCodes.WORKING_DIRECTORY_UNAVAILABLE,
+            ))
         } catch (error: NodeBridgeFileScopeException) {
             failure(request, error)
         } catch (error: SecurityException) {
@@ -79,6 +86,14 @@ internal class NodeBridgeFilesBridge(
 
     private class SharedStorageTarget(val root: File, val relativePath: String, val hidden: (File) -> Boolean)
 
+    private class WorkingDirectoryUnavailableException(val path: String) : RuntimeException(path)
+
+    /** The scope of the working directory; a missing or unusable one fails with the reason (NodeBridgeWorkingDirectory). */
+    private fun workingDirectoryScope(root: File, legacyFileApi: Boolean = false): NodeBridgeFileScope {
+        if (!root.isDirectory) throw WorkingDirectoryUnavailableException(root.path)
+        return NodeBridgeFileScope(root, legacyFileApi)
+    }
+
     /**
      * An absolute `list` / `stat` path from a model-facing session resolves through the policy: inside the
      * working directory it stays on the working-directory scope (as a relative path); inside shared storage it
@@ -93,7 +108,7 @@ internal class NodeBridgeFilesBridge(
         return when (resolved.location) {
             NodeBridgeModelPathPolicy.Location.WORKING_DIRECTORY -> {
                 val root = policy.workingRoot
-                SharedStorageTarget(root, NodeBridgeFileScope(root).relativePathOf(resolved.file)) { false }
+                SharedStorageTarget(root, workingDirectoryScope(root).relativePathOf(resolved.file)) { false }
             }
             NodeBridgeModelPathPolicy.Location.SHARED_STORAGE -> SharedStorageTarget(
                 checkNotNull(policy.sharedRoot),
