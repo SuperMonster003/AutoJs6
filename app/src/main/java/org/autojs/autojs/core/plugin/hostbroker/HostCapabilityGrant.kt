@@ -97,6 +97,8 @@ data class HostCapabilityGrant(
         const val TOKEN_FILES = "files"
         const val TOKEN_FILES_WRITE = "files.write"
         const val TOKEN_FILES_DELETE = "files.delete"
+        /** Read-only shared storage for model-facing sessions (MCP roadmap P11 D26); joins the MCP default in the P11 grant item. */
+        const val TOKEN_FILES_SHARED_READ = "files.shared_read"
         const val TOKEN_CONSOLE = "console"
 
         private fun methodsOf(module: String, vararg methods: String): List<String> = methods.map { key(module, it) }

@@ -288,6 +288,7 @@
 * `개선` 호스트 브리지를 통해 호출되는 ocr 모듈 (Node.js 플러그인 등 플러그인 세션) 이 engine 미지정 시 ML Kit/Paddle/Rapid 순으로 활성화된 엔진을 자동 선택하며 더 이상 ML Kit OCR 플러그인을 필수로 요구하지 않음
 * `개선` 호스트 브리지 accessibility 모듈에 captureScreenImage 를 추가하여 접근성 스크린샷 (사용할 수 없으면 화면 캡처로 대체) 을 세션 내 이미지 핸들로 반환하고, MCP Server 등 플러그인 세션이 바코드 인식과 이미지 / 색상 찾기에 바로 사용할 수 있도록 함; 플러그인 세션이 동시에 보유할 수 있는 이미지 핸들 수를 4 에서 동시 호출 수의 2 배로 상향
 * `개선` MCP Server, 3-Stove Agent 등 모델 대상 플러그인 세션이 브리지로 이미지를 읽을 때 (image.readImage) 가장 긴 변이 4096 px 를 넘는 이미지는 2 의 거듭제곱으로 다운샘플링하여 디코딩하고 결과에 scale 과 원본 크기를 포함하여 갤러리의 큰 사진이 호스트 메모리를 소진하지 않도록 함; Node.js 플러그인 스크립트는 영향 없음
+* `개선` MCP Server, 3-Stove Agent 등 모델 대상 플러그인 세션이 브리지로 경로를 지정해 이미지나 미디어 정보를 읽을 때 (image.readImage, mediainfo) 작업 디렉터리 안으로 제한하고, 쓰기 (image.saveImage) 도 작업 디렉터리 안으로 제한; 요청이 files.shared_read 를 선언하고 AutoJs6 가 모든 파일 접근 권한을 가진 경우 공유 저장소를 읽기 전용으로 접근할 수 있으며 (Android/data 와 Android/obb 제외), files.list 와 files.stat 도 같은 토큰으로 공유 저장소를 나열할 수 있음; Node.js 플러그인 스크립트는 영향 없음
 * `개선` images.save/saveImage/compress/compressToBytes가 PNG 양자화 (투명도 유지), 픽셀 및 메모리 제한 지원 (Image Quantization 플러그인 필요)
 * `개선` images.readPixels 메서드의 ImageWrapper 인수 지원
 * `개선` images.matchTemplate/findPointByImage의 scales 옵션 지원, 결과에 크기, 비율 및 영역 정보 추가

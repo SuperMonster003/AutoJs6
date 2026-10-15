@@ -909,6 +909,13 @@ class AndroidNodeBridgeCapabilityProvider(
      */
     private val modelFacingPluginSession: Boolean =
         engineInfo.backend == "plugin" && engineInfo.engineName in MODEL_FACING_ENGINES
+    /** Path policy of model-facing sessions (MCP roadmap P11 D26); null means script behaviour. */
+    @Suppress("DEPRECATION")
+    private val modelPathPolicy: NodeBridgeModelPathPolicy? = if (!modelFacingPluginSession) null else NodeBridgeModelPathPolicy(
+        workingDirectory = File(engineInfo.cwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath),
+        sharedStorageRoot = android.os.Environment.getExternalStorageDirectory(),
+        hasStorageAccess = { org.autojs.autojs.permission.AllFilesAccessPermission(appContext).has() },
+    )
     private val imageLock = Any()
     private val imageDestroyed = AtomicBoolean(false)
     private val imageExecutor = Executors.newSingleThreadExecutor { task ->
@@ -962,7 +969,12 @@ class AndroidNodeBridgeCapabilityProvider(
     private val bridgeRateLimitedRejections = AtomicInteger(0)
     private val accessibilityRateLimiter = NodeBridgeRateLimiter()
     private val accessibilityDiagnostics by lazy { NodeBridgeAccessibilityDiagnostics(appContext, engineInfo.cwd) }
-    private val filesBridge by lazy { NodeBridgeFilesBridge(appContext) }
+    private val filesBridge by lazy {
+        // Model-facing sessions root `files` at the session's working directory (the host working directory in production).
+        val policy = modelPathPolicy
+        if (policy == null) NodeBridgeFilesBridge(appContext)
+        else NodeBridgeFilesBridge(appContext, rootProvider = { policy.workingRoot }, modelPathPolicy = policy)
+    }
     private val consoleBridge by lazy { NodeBridgeConsoleBridge() }
     private val hostEnginesBridge by lazy { NodeBridgeHostEnginesBridge() }
     private val samplesBridge by lazy { NodeBridgeSamplesBridge(appContext) }
@@ -2255,7 +2267,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun saveImage(request: NodeBridgeRequest): String {
         val args = request.argsArray()
         val image = imageArgument(args, 0)
-        val file = resolveAndroidFile(args.optString(1))
+        val file = resolveWritableFile(request, args.optString(1))
             ?: throw SecurityException("Image output path must be a non-empty file path without NUL bytes.")
         val options = args.optJSONObject(2) ?: JSONObject()
         // Preserve legacy WEBP behavior, including lossless output at quality 100 on API 29+.
@@ -2629,7 +2641,7 @@ class AndroidNodeBridgeCapabilityProvider(
             }
             val args = request.argsArray()
             val rawPath = args.optString(0, "")
-            val file = resolveAndroidFile(rawPath)
+            val file = resolveReadableFile(request, rawPath)
                 ?: return callback(
                     NodeBridgeResponse.failure(
                         request.id,
@@ -2684,7 +2696,9 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(
                 NodeBridgeResponse.failure(
                     request.id,
-                    if (error is IllegalStateException && MediainfoPluginHost.queryServiceCount(appContext) == 0) {
+                    if (error is SecurityException) {
+                        NodeBridgeError.permissionDenied(error.message ?: "AutoJs6 mediainfo path is not allowed.", request.module, request.method)
+                    } else if (error is IllegalStateException && MediainfoPluginHost.queryServiceCount(appContext) == 0) {
                         NodeBridgeError.capabilityProviderMissing(request.module, request.method, "an installed MediaInfo plugin")
                             .copy(message = error.message ?: "Install the MediaInfo plugin to inspect audio files.")
                     } else NodeBridgeError.invalidRequest(
@@ -2819,7 +2833,11 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchImageRead(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val args = request.argsArray()
         val path = args.optString(0, "")
-        val file = resolveAndroidFile(path)
+        val file = try {
+            resolveReadableFile(request, path)
+        } catch (error: SecurityException) {
+            return callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.permissionDenied(error.message ?: "Path is not allowed.", request.module, request.method)))
+        }
             ?: return callback(
                 NodeBridgeResponse.failure(
                     request.id,
@@ -2921,6 +2939,23 @@ class AndroidNodeBridgeCapabilityProvider(
             handle.resource.close("recycle")
         }
         callback(NodeBridgeResponse.success(request.id, "true"))
+    }
+
+    /**
+     * Read targets by path: scripts resolve freely through [resolveAndroidFile]; model-facing plugin sessions
+     * go through [modelPathPolicy] (MCP roadmap P11 D26), which throws [SecurityException] with the reason.
+     */
+    private fun resolveReadableFile(request: NodeBridgeRequest, rawPath: String): File? {
+        val policy = modelPathPolicy ?: return resolveAndroidFile(rawPath)
+        if (rawPath.isEmpty() || rawPath.indexOf('\u0000') >= 0) return null
+        return policy.resolveRead(rawPath, request.permissions, "${request.module}.${request.method}").file
+    }
+
+    /** Write targets by path; model-facing plugin sessions may only write inside the working directory. */
+    private fun resolveWritableFile(request: NodeBridgeRequest, rawPath: String): File? {
+        val policy = modelPathPolicy ?: return resolveAndroidFile(rawPath)
+        if (rawPath.isEmpty() || rawPath.indexOf('\u0000') >= 0) return null
+        return policy.resolveWrite(rawPath, "${request.module}.${request.method}").file
     }
 
     private fun resolveAndroidFile(rawPath: String): File? {

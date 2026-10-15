@@ -70,6 +70,8 @@ object NodeBridgePermissionManifest {
     const val FILES = "files"
     const val FILES_WRITE = "files.write"
     const val FILES_DELETE = "files.delete"
+    // Read-only shared storage for model-facing plugin sessions (MCP roadmap P11 D26); never implied by `files`.
+    const val FILES_SHARED_READ = "files.shared_read"
     const val CONSOLE = "console"
     const val EVENTS = "events"
     const val EVENTS_NOTIFICATION = "events.notification"
@@ -154,6 +156,7 @@ object NodeBridgePermissionManifest {
         FILES,
         FILES_WRITE,
         FILES_DELETE,
+        FILES_SHARED_READ,
         CONSOLE,
         EVENTS,
         EVENTS_NOTIFICATION,

@@ -26,6 +26,8 @@ import java.io.File
 internal class NodeBridgeFilesBridge(
     context: Context,
     private val rootProvider: () -> File = { File(WorkingDirectoryUtils.path) },
+    /** Present for model-facing plugin sessions: lets `list` / `stat` read shared storage (MCP roadmap P11 D26). */
+    private val modelPathPolicy: NodeBridgeModelPathPolicy? = null,
 ) {
 
     @Suppress("unused")
@@ -35,7 +37,16 @@ internal class NodeBridgeFilesBridge(
     fun dispatch(request: NodeBridgeRequest): NodeBridgeResponse {
         val args = runCatching { JSONArray(request.argsJson) }.getOrDefault(JSONArray())
         return try {
-            val scope = NodeBridgeFileScope(rootProvider(), legacyFileApi = Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            val legacyFileApi = Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+            val shared = sharedStorageTarget(request, args)
+            if (shared != null) {
+                val scope = NodeBridgeFileScope(shared.root, legacyFileApi)
+                return when (request.method) {
+                    "list" -> list(request, scope, args, path = shared.relativePath, hidden = shared.hidden)
+                    else -> stat(request, scope, args, path = shared.relativePath)
+                }
+            }
+            val scope = NodeBridgeFileScope(rootProvider(), legacyFileApi)
             when (request.method) {
                 "list" -> list(request, scope, args)
                 "stat" -> stat(request, scope, args)
@@ -48,6 +59,11 @@ internal class NodeBridgeFilesBridge(
             }
         } catch (error: NodeBridgeFileScopeException) {
             failure(request, error)
+        } catch (error: SecurityException) {
+            NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.permissionDenied(error.message ?: "files.${request.method} path is not allowed", request.module, request.method),
+            )
         } catch (error: Throwable) {
             NodeBridgeResponse.failure(
                 request.id,
@@ -61,13 +77,45 @@ internal class NodeBridgeFilesBridge(
         }
     }
 
-    private fun list(request: NodeBridgeRequest, scope: NodeBridgeFileScope, args: JSONArray): NodeBridgeResponse {
-        val path = pathArg(args, 0, NodeBridgeFileScope.ROOT_PATH)
+    private class SharedStorageTarget(val root: File, val relativePath: String, val hidden: (File) -> Boolean)
+
+    /**
+     * An absolute `list` / `stat` path from a model-facing session resolves through the policy: inside the
+     * working directory it stays on the working-directory scope (as a relative path); inside shared storage it
+     * moves to a read-only scope rooted at the shared storage root, with `Android/data` and `Android/obb` hidden.
+     */
+    private fun sharedStorageTarget(request: NodeBridgeRequest, args: JSONArray): SharedStorageTarget? {
+        val policy = modelPathPolicy ?: return null
+        if (request.method != "list" && request.method != "stat") return null
+        val rawPath = args.opt(0) as? String ?: return null
+        if (!File(rawPath).isAbsolute) return null
+        val resolved = policy.resolveRead(rawPath, request.permissions, "files.${request.method}")
+        return when (resolved.location) {
+            NodeBridgeModelPathPolicy.Location.WORKING_DIRECTORY -> {
+                val root = policy.workingRoot
+                SharedStorageTarget(root, NodeBridgeFileScope(root).relativePathOf(resolved.file)) { false }
+            }
+            NodeBridgeModelPathPolicy.Location.SHARED_STORAGE -> SharedStorageTarget(
+                checkNotNull(policy.sharedRoot),
+                policy.sharedRelativePath(resolved.file),
+                policy::isHiddenInShared,
+            )
+        }
+    }
+
+    private fun list(
+        request: NodeBridgeRequest,
+        scope: NodeBridgeFileScope,
+        args: JSONArray,
+        path: String = pathArg(args, 0, NodeBridgeFileScope.ROOT_PATH),
+        hidden: (File) -> Boolean = { false },
+    ): NodeBridgeResponse {
         val options = optionsArg(request, args, 1, LIST_KEYS)
         val result = scope.list(
             path = path,
             recursive = booleanOf(options, "recursive", false),
             maxEntries = intOf(options, "maxEntries", NodeBridgeFileScope.MAX_LIST_ENTRIES),
+            hidden = hidden,
         )
         val entries = JSONArray()
         result.entries.forEach { entry ->
@@ -93,12 +141,13 @@ internal class NodeBridgeFilesBridge(
         )
     }
 
-    private fun stat(request: NodeBridgeRequest, scope: NodeBridgeFileScope, args: JSONArray): NodeBridgeResponse {
-        val stat = scope.stat(pathArg(args, 0))
+    private fun stat(request: NodeBridgeRequest, scope: NodeBridgeFileScope, args: JSONArray, path: String = pathArg(args, 0)): NodeBridgeResponse {
+        val stat = scope.stat(path)
         return success(
             request,
             JSONObject()
                 .put("schema", schema("stat"))
+                .put("root", scope.rootDirectory.absolutePath)
                 .put("path", stat.path)
                 .put("name", stat.name)
                 .put("exists", stat.exists)

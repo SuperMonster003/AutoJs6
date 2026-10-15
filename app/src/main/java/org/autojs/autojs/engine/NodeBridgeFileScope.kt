@@ -55,13 +55,14 @@ class NodeBridgeFileScope(root: File, private val legacyFileApi: Boolean = false
 
     class DeleteResult(val path: String, val deleted: Int)
 
-    fun list(path: String = ROOT_PATH, recursive: Boolean = false, maxEntries: Int = MAX_LIST_ENTRIES): ListResult {
+    /** [hidden] entries are neither listed nor descended into (the shared-storage scope hides `Android/data` and `Android/obb`). */
+    fun list(path: String = ROOT_PATH, recursive: Boolean = false, maxEntries: Int = MAX_LIST_ENTRIES, hidden: (File) -> Boolean = { false }): ListResult {
         val limit = maxEntries.coerceIn(1, MAX_LIST_ENTRIES)
         val directory = resolve(path)
         if (!directory.exists()) throw NodeBridgeFileScopeException(Kind.NOT_FOUND, "directory does not exist: $path")
         if (!directory.isDirectory) throw NodeBridgeFileScopeException(Kind.WRONG_TYPE, "not a directory: $path")
         val entries = ArrayList<Entry>()
-        val truncated = !collect(directory, recursive, limit, entries)
+        val truncated = !collect(directory, recursive, limit, entries, hidden)
         return ListResult(relativePathOf(directory), entries, truncated)
     }
 
@@ -194,9 +195,10 @@ class NodeBridgeFileScope(root: File, private val legacyFileApi: Boolean = false
         return path.substring(rootPrefix.length).replace(File.separatorChar, '/')
     }
 
-    private fun collect(directory: File, recursive: Boolean, limit: Int, entries: MutableList<Entry>): Boolean {
+    private fun collect(directory: File, recursive: Boolean, limit: Int, entries: MutableList<Entry>, hidden: (File) -> Boolean): Boolean {
         val children = directory.listFiles()?.sortedWith(compareBy({ !it.isDirectory }, { it.name })) ?: return true
         for (child in children) {
+            if (hidden(child)) continue
             if (entries.size >= limit) return false
             val isDirectory = child.isDirectory
             entries += Entry(
@@ -207,7 +209,7 @@ class NodeBridgeFileScope(root: File, private val legacyFileApi: Boolean = false
                 lastModified = child.lastModified(),
             )
             if (recursive && isDirectory && !isSymbolicLink(child)) {
-                if (!collect(child, true, limit, entries)) return false
+                if (!collect(child, true, limit, entries, hidden)) return false
             }
         }
         return true
