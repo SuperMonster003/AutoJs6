@@ -17,12 +17,10 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.automator.Auto
 import org.autojs.autojs.runtime.api.augment.console.Console
-import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.api.augment.s13n.S13n
 import org.autojs.autojs.runtime.api.augment.selector.Selector
 import org.autojs.autojs.runtime.api.augment.shell.Shell
@@ -52,7 +50,6 @@ import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import java.util.function.Supplier
-import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToLong
@@ -648,123 +645,25 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun cX(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtMost(args, 3) { argList ->
-            var (num, base, isRatio) = argList
-            val deviceWidth = ScreenMetrics.deviceScreenWidth
-            if (argList.isEmpty()) {
-                return@ensureArgumentsAtMost deviceWidth.toDouble()
-            }
-            if (base is Boolean) {
-                isRatio = base
-                base = null
-            }
-            num = coerceNumber(num)
-            if (abs(num) < 1 && isRatio != false || coerceBoolean(isRatio, false)) {
-                return@ensureArgumentsAtMost (deviceWidth * num).roundToLong().toDouble()
-            }
-            when {
-                base.isJsNullish() -> base = scriptRuntime.scale.baseX
-                base is Number -> {
-                    require(RhinoUtils.isInteger(base)) { "Scale base ${base.jsBrief()} must be a positive integer for cX" }
-                    base = Scale.ensureBase(coerceIntNumber(base))
-                }
-                else -> throw WrappedIllegalArgumentException("Argument \"base\" ${base.jsBrief()} for cX must be a number if provided")
-            }
-            return@ensureArgumentsAtMost (deviceWidth * num / coerceIntNumber(base)).roundToLong().toDouble()
+            CoordinateScale.convert(CoordinateScale.Axis.X, ScreenMetrics.deviceScreenWidth, ScreenMetrics.deviceScreenHeight, scriptRuntime.scale, argList)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun cY(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtMost(args, 3) { argList ->
-            var (num, base, isRatio) = argList
-            val deviceHeight = ScreenMetrics.deviceScreenHeight
-            if (argList.isEmpty()) {
-                return@ensureArgumentsAtMost deviceHeight.toDouble()
-            }
-            if (base is Boolean) {
-                isRatio = base
-                base = null
-            }
-            num = coerceNumber(num)
-            if (abs(num) < 1 && isRatio != false || coerceBoolean(isRatio, false)) {
-                return@ensureArgumentsAtMost (deviceHeight * num).roundToLong().toDouble()
-            }
-            when {
-                base.isJsNullish() -> base = scriptRuntime.scale.baseY
-                base is Number -> {
-                    require(RhinoUtils.isInteger(base)) { "Scale base ${base.jsBrief()} must be a positive integer for cY" }
-                    base = Scale.ensureBase(coerceIntNumber(base))
-                }
-                else -> throw WrappedIllegalArgumentException("Argument \"base\" ${base.jsBrief()} for cY must be a number if provided")
-            }
-            return@ensureArgumentsAtMost (deviceHeight * num / coerceIntNumber(base)).roundToLong().toDouble()
+            CoordinateScale.convert(CoordinateScale.Axis.Y, ScreenMetrics.deviceScreenWidth, ScreenMetrics.deviceScreenHeight, scriptRuntime.scale, argList)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun cYx(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtMost(args, 3) { argList ->
-            var (num, base, isRatio) = argList
-            scriptRuntime.scale.ensureBasesConsistent()
-            if (base is Boolean) {
-                isRatio = base
-                base = null
-            }
-            if (base is String) {
-                base = Numberx.parseRatio(scriptRuntime, arrayOf(base))
-                isRatio = true
-            }
-            val deviceWidth = ScreenMetrics.deviceScreenWidth
-            num = coerceNumber(num)
-            when {
-                abs(num) < 1 || coerceBoolean(isRatio, false) -> {
-                    base = coerceNumber(base, scriptRuntime.scale.baseY.toDouble() / scriptRuntime.scale.baseX.toDouble())
-                    when {
-                        base.isNaN() -> Double.NaN
-                        0 < base && base <= 1 -> (num * deviceWidth / base).roundToLong().toDouble()
-                        else -> (num * deviceWidth * base).roundToLong().toDouble()
-                    }
-                }
-                else -> {
-                    base = coerceNumber(base, scriptRuntime.scale.baseX)
-                    when {
-                        base.isNaN() -> Double.NaN
-                        else -> (num * deviceWidth / base).roundToLong().toDouble()
-                    }
-                }
-            }
+        fun cYx(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsLengthInRange(args, 1..3) { argList ->
+            CoordinateScale.convert(CoordinateScale.Axis.Y_FROM_X, ScreenMetrics.deviceScreenWidth, ScreenMetrics.deviceScreenHeight, scriptRuntime.scale, argList)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun cXy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtMost(args, 3) { argList ->
-            var (num, base, isRatio) = argList
-            scriptRuntime.scale.ensureBasesConsistent()
-            if (base is Boolean) {
-                isRatio = base
-                base = null
-            }
-            if (base is String) {
-                base = Numberx.parseRatio(scriptRuntime, arrayOf(base))
-                isRatio = true
-            }
-            val deviceHeight = ScreenMetrics.deviceScreenHeight
-            num = coerceNumber(num)
-            when {
-                abs(num) < 1 || coerceBoolean(isRatio, false) -> {
-                    base = coerceNumber(base, scriptRuntime.scale.baseY.toDouble() / scriptRuntime.scale.baseX.toDouble())
-                    when {
-                        base.isNaN() -> Double.NaN
-                        0 < base && base <= 1 -> (num * deviceHeight * base).roundToLong().toDouble()
-                        else -> (num * deviceHeight / base).roundToLong().toDouble()
-                    }
-                }
-                else -> {
-                    base = coerceNumber(base, scriptRuntime.scale.baseY)
-                    when {
-                        base.isNaN() -> Double.NaN
-                        else -> (num * deviceHeight / base).roundToLong().toDouble()
-                    }
-                }
-            }
+        fun cXy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsLengthInRange(args, 1..3) { argList ->
+            CoordinateScale.convert(CoordinateScale.Axis.X_FROM_Y, ScreenMetrics.deviceScreenWidth, ScreenMetrics.deviceScreenHeight, scriptRuntime.scale, argList)
         }
 
         @JvmStatic

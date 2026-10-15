@@ -443,6 +443,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` IntelliJ IDEA 构建项目时可能无法解析模块依赖, 匹配编译任务或定位当前 APK 产物的问题
 * `修复` 多变体构建时 Kotlin 编译内存不足的问题
 * `修复` Gradle 构建时 SDK 解析及打包模板路径解析异常
+* `修复` cXy/cYx 的 false 模式未强制使用绝对坐标, 横屏宽高比换算倒置及单独设置基数后部分调用异常的问题
 * `优化` 延迟初始化非关键组件以提升应用启动速度
 * `优化` 应用启动时不再自动弹出权限申请对话框, 缺少所有文件管理权限时改为在主页显示可直接授权的提醒
 * `优化` 应用及打包应用适配 Android 17, 完善本地网络授权, 高级保护及后台音频限制的提示
@@ -524,6 +525,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `优化` Gradle 构建支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本, 并降低启动内存占用及清理编译警告
 * `优化` Gradle 平台兼容数据及更新任务迁移至 AutoJs6-Gradle-Platform-Versions, Scrapers 工具支持跨仓库同步
 * `优化` device.getAndroidId 支持 useSystemId 布尔参数, 在 Android 8.0+ 上通过 Shizuku/Root 获取运行应用所属 Android 用户的系统值, 权限或读取失败时抛出异常, 旧系统忽略此参数
+* `优化` cX/cY/cXy/cYx 支持显式 auto 模式, 统一校验坐标和基数, 并避免有限大数换算被截断到 Long 范围
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

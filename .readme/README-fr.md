@@ -293,6 +293,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Mode plein écran immersif dans l'éditeur de code
 * `Fonctionnalité` Panneau de journaux inférieur dans l'éditeur de code, avec démarrage/arrêt des scripts et accès au code source des cadres de pile (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Fonctionnalité` Page de paramètres dédiée à l'éditeur de code, proposant thème, police, numéros de ligne, retour automatique à la ligne, seuil de coloration du code et affichage du panneau de journaux
+* `Fonctionnalité` Les réglages de l'éditeur de code ajoutent la mise en évidence des guides d'indentation, les icônes vectorielles de gouttière, les barres de défilement (avec masquage automatique), les espaces dans les sélections, une loupe de glissement, la mise en évidence des symboles identiques et les aperçus de complétion en ligne (moteur Ace uniquement, plugin Ace Editor 2.0.0 ou ultérieur requis)
 * `Fonctionnalité` La page des journaux et le panneau inférieur de l'éditeur permettent d'exécuter des extraits TypeScript (nécessite le plugin TypeScript Engine)
 * `Fonctionnalité` Outil "Prélever une couleur à l'écran" dans le tiroir d'accueil (nécessite le plugin 3-Color Picker)
 * `Fonctionnalité` Tâches planifiées mensuelles/annuelles/avec compte à rebours et conditions de fin de répétition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
@@ -336,6 +337,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les options non sécurisées d'une requête http pouvaient laisser les requêtes suivantes ignorer la vérification du certificat et du nom d'hôte
 * `Correction` La configuration de sécurité réseau pouvait bloquer involontairement les requêtes HTTP des versions publiées et applications empaquetées
 * `Correction` Impossible d'ouvrir correctement le sélecteur de fichiers du composant WebView en mode UI
+* `Correction` Les expressions d'attributs dynamiques des modèles d'éléments list/grid en mode UI ne pouvaient pas accéder à l'objet courant (par exemple sa propriété name), provoquant ReferenceError et des éléments vides; les résultats numériques s'affichaient aussi sous la forme 18.0 au lieu de 18
 * `Correction` Les scripts UI pouvaient se fermer inopinément lors du passage en écran partagé ou d'un redimensionnement de fenêtre
 * `Correction` Les paramètres d'expression régulière des méthodes de sélecteur surchargées, de la méthode globale filter et des sélecteurs de collection fonctionnaient mal
 * `Correction` Les sélecteurs contains interprétaient à tort les chaînes ordinaires comme des expressions régulières
@@ -360,6 +362,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les rappels d'événements et écouteurs de touches enregistrés cessaient de fonctionner après redémarrage du service d'accessibilité
 * `Correction` Les opérations globales automator pouvaient provoquer une exception de pointeur nul au premier appel, et les coordonnées verticales des gestes étaient mal mises à l'échelle
 * `Correction` Le service d'accessibilité pouvait s'interrompre lors d'opérations répétées telles que back _[`issue #527`](http://issues.autojs6.com/527)_
+* `Correction` La méthode Node.js accessibility.ensureEnabled signalait un délai d'appel du pont dépassé au lieu de renvoyer false lorsque le service d'accessibilité était activé mais ne se liait pas à temps
 * `Correction` L'observateur de notifications signalait les notifications système comme messages flottants et omettait les événements de notification
 * `Correction` Sous Android 14+, la demande d'autorisation de capture d'écran pouvait faire planter l'application à cause d'un échec de démarrage du service au premier plan _[`issue #516`](http://issues.autojs6.com/516)_
 * `Correction` Les appels OCR répétés depuis plusieurs fils ou fichiers pouvaient demander à nouveau l'autorisation de capture d'écran _[`issue #551`](http://issues.autojs6.com/551)_
@@ -402,6 +405,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Lors de la restauration de dossiers, la corbeille pouvait écrire des entrées d'archive anormales hors du dossier cible
 * `Correction` L'éditeur de code pouvait perdre le curseur, la sélection ou les modifications non enregistrées après recréation de la page
 * `Correction` Le clavier virtuel ou la barre de saisie pouvait masquer ou comprimer le contenu de l'éditeur et de la page des journaux
+* `Correction` Les menus "Plus" des boîtes de dialogue de l'éditeur étaient difficiles à lire, leurs couleurs de texte et de fond étant proches lorsque le thème de l'éditeur différait du mode clair/sombre de l'application
 * `Correction` Anomalies de sauvegarde d'état, de couleur du curseur et de langue de l'indication du champ de recherche de l'accueil
 * `Correction` Des gestes multitactiles anormaux dans l'onglet Documentation de l'accueil pouvaient faire planter l'application
 * `Correction` Animation de transition absente lors du passage à l'onglet Fichiers de l'accueil
@@ -439,6 +443,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les constructions dans IntelliJ IDEA pouvaient échouer à résoudre les dépendances de modules, sélectionner les tâches de compilation ou localiser l'APK courant
 * `Correction` Mémoire insuffisante pour la compilation Kotlin lors de constructions multivariantes
 * `Correction` Erreurs de résolution du SDK et du chemin des modèles d'empaquetage dans les constructions Gradle
+* `Correction` cXy/cYx ignoraient le mode de coordonnées absolues avec false, inversaient les rapports largeur/hauteur en paysage et rejetaient certains appels après la modification d'une seule base
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan
@@ -472,7 +477,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Le module ocr sélectionne par défaut un moteur disponible dans l'ordre ML Kit/Paddle/Rapid, avec choix explicite ou retour à la sélection automatique
 * `Amélioration` Le module ocr appelé via le pont de l'hôte (plugin Node.js et autres sessions de plugins) sélectionne un moteur activé dans l'ordre ML Kit/Paddle/Rapid lorsqu'aucun moteur n'est indiqué, au lieu d'exiger systématiquement le plugin ML Kit OCR
 * `Amélioration` Le module accessibility du pont de l'hôte ajoute captureScreenImage, qui transforme une capture d'écran d'accessibilité (avec repli sur la capture d'écran lorsqu'elle est indisponible) en un handle d'image de session, utilisable directement par les sessions de plugins telles que MCP Server pour la reconnaissance de codes-barres et la recherche d'images ou de couleurs; les sessions de plugins peuvent désormais détenir deux fois leur nombre d'appels simultanés en handles d'image au lieu de 4
-* `Amélioration` Lorsque des sessions de plugins orientées modèle telles que MCP Server et 3-Stove Agent lisent une image via le pont (image.readImage), les images dont le plus grand côté dépasse 4096 px sont décodées avec un sous-échantillonnage en puissance de deux et le résultat porte scale ainsi que les dimensions d'origine, afin que les grandes photos de la galerie n'épuisent pas la mémoire de l'hôte; les scripts du plugin Node.js ne sont pas concernés
+* `Amélioration` Lorsque des sessions de plugins orientées modèle telles que MCP Server et 3-Stove Agent lisent une image via le pont (image.readImage), les images dont le plus grand côté dépasse 4096 px sont décodées avec un sous-échantillonnage en puissance de 2 et le résultat porte scale ainsi que les dimensions d'origine, afin que les grandes photos de la galerie n'épuisent pas la mémoire de l'hôte; les scripts du plugin Node.js ne sont pas concernés
 * `Amélioration` Les sessions de plugins orientées modèle telles que MCP Server et 3-Stove Agent qui lisent des images ou des informations de médias par chemin via le pont (image.readImage, mediainfo) sont limitées au répertoire de travail, et les écritures (image.saveImage) y restent également; lorsque la requête déclare files.shared_read et qu'AutoJs6 dispose de l'accès à tous les fichiers, le stockage partagé devient lisible en lecture seule (hors Android/data et Android/obb), et files.list ainsi que files.stat peuvent lister le stockage partagé avec le même jeton; les scripts du plugin Node.js ne sont pas concernés
 * `Amélioration` Le module app du pont de l'hôte ajoute pluginCapabilities, qui indique en temps réel l'état des familles de plugins OCR, codes-barres, Pinyin, Pinyin4j, MediaInfo, OpenCV et documentation hors ligne (available / not_installed / disabled / incompatible), la version, l'activation et l'autorisation des plugins installés, les méthodes du pont qu'ils prennent en charge et l'entrée du Plugin Center, afin que les sessions de plugins telles que MCP Server affichent les outils selon l'état d'installation et orientent les utilisateurs vers le plugin à installer; la liste des méthodes optionnelles reçue à l'ouverture d'une session de plugin est complétée par la même logique pour les familles disponibles à ce moment
 * `Amélioration` L'autorisation de capacités par défaut des sessions du plugin MCP Server s'étend: les méthodes des modules ocr, barcode, pinyin, pinyin4j et mediainfo, image.readImage et les méthodes de recherche d'images / de couleurs, accessibility.readScreenText / captureScreenImage et app.pluginCapabilities, avec leurs jetons de permission (dont files.shared_read pour le stockage partagé en lecture seule); ces méthodes ne fonctionnent que lorsque le plugin correspondant est installé et activé, image.saveImage et image.toBytes restent hors de l'autorisation, et l'autorisation de 3-Stove Agent ne change pas
@@ -499,6 +504,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Couleurs de thème et disposition des menus unifiées dans l'éditeur de code, avec amélioration des polices, du mode lecture seule et de la sélection de texte
 * `Amélioration` Le bouton d'exécution de l'éditeur devient un bouton d'arrêt après lancement d'un script
 * `Amélioration` Indications de téléchargement de polices, correction des numéros de ligne de destination et détection/enregistrement des encodages améliorés dans l'éditeur
+* `Amélioration` Affichage plus rapide de la page lors de l'ouverture de fichiers dans l'éditeur de code
 * `Amélioration` Chargement à la demande des informations de paquets dans le gestionnaire de fichiers, avec meilleur affichage des gros paquets et manifestes
 * `Amélioration` Accès unifiés aux aperçus et actions de plugins dans le gestionnaire de fichiers, avec actualisation différentielle de la liste conservant le défilement
 * `Amélioration` L'historique évite les instantanés en double, conserve le contenu avant écrasement et migre lors d'une restauration de corbeille vers un nouveau chemin
@@ -519,6 +525,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Correspondance dynamique des versions compatibles Kotlin/KSP/AGP/R8 dans Gradle, avec réduction de mémoire au démarrage et nettoyage des avertissements de compilation
 * `Amélioration` Données de compatibilité des plateformes Gradle et tâches de mise à jour déplacées vers AutoJs6-Gradle-Platform-Versions, avec synchronisation inter-dépôts dans l'outil Scrapers
 * `Amélioration` device.getAndroidId accepte le booléen useSystemId, pour obtenir via Shizuku/Root la valeur système de l'utilisateur Android auquel appartient l'application sous Android 8.0+; un échec d'autorisation ou de lecture lève une exception, et les anciens systèmes ignorent ce paramètre
+* `Amélioration` cX/cY/cXy/cYx prennent en charge le mode auto explicite, valident les coordonnées et les bases de façon cohérente et préservent les grands résultats finis au-delà de la plage Long
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

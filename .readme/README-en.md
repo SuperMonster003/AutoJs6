@@ -293,6 +293,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Immersive full-screen mode in the code editor
 * `Feature` Bottom log panel in the code editor, with script start/stop and navigation to stack frame source code (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Feature` Dedicated code editor settings page, with options for theme, font, line numbers, word wrapping, syntax highlighting thresholds and log panel visibility
+* `Feature` Code editor settings add highlighted indentation guides, vector gutter icons, editor scrollbars (including automatic hiding), whitespace in selections, a drag magnifier, matching-symbol highlighting and inline completion previews (Ace engine only, requires Ace Editor plugin 2.0.0 or later)
 * `Feature` TypeScript snippet execution on the log page and in the code editor's bottom log panel (requires the TypeScript Engine plugin)
 * `Feature` "Screen color picker" tool in the home drawer (requires the 3-Color Picker plugin)
 * `Feature` Monthly/yearly/countdown scheduled tasks and conditions for ending repetition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
@@ -336,6 +337,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Issue where insecure options of an http request could cause subsequent requests to keep skipping certificate and hostname verification
 * `Fix` Issue where network security configuration could unexpectedly block HTTP requests in release builds and packaged apps
 * `Fix` Issue where the file chooser of WebView elements in UI mode could not open correctly
+* `Fix` Dynamic attribute expressions in UI-mode list/grid item templates could not access the current item object (such as its name property), causing ReferenceError and blank items, and numeric expression results displayed as 18.0 instead of 18
 * `Fix` Issue where UI scripts could exit unexpectedly when entering split-screen mode or resizing the window
 * `Fix` Issue where regular expression arguments did not work correctly in selector overloads, the filter global method and collection selectors
 * `Fix` Issue where contains selectors incorrectly interpreted ordinary string arguments as regular expressions
@@ -360,6 +362,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Issue where registered event callbacks and key listeners stopped working after restarting the accessibility service
 * `Fix` Possible null pointer exceptions on the first call to automator global actions, and incorrect gesture Y-coordinate scaling
 * `Fix` Issue where the accessibility service could be unexpectedly interrupted when repeatedly performing back and similar actions _[`issue #527`](http://issues.autojs6.com/527)_
+* `Fix` Node.js accessibility.ensureEnabled reporting a bridge call timeout instead of returning false when the accessibility service was enabled but did not bind in time
 * `Fix` Issue where the notification observer misreported system notifications as toasts and missed notification events
 * `Fix` Issue where requesting screen capture permission on Android 14+ could crash the app due to foreground service startup failures _[`issue #516`](http://issues.autojs6.com/516)_
 * `Fix` Issue where repeated OCR calls across threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_
@@ -402,6 +405,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Issue where restoring directories from the recycle bin could write malformed archive entries outside the destination directory
 * `Fix` Issue where the code editor could lose the cursor, selection or unsaved content after page recreation
 * `Fix` Issue where the content area of the code editor and log page could be obscured or compressed when showing the keyboard or input bar
+* `Fix` The "More" menus in code editor dialogs having similar background and text colors when the editor theme and the app light/dark mode differed, making menu items hard to read
 * `Fix` Incorrect saved state, cursor colors and hint language in the home page search field
 * `Fix` Issue where handling abnormal multi-touch input on the home Documentation tab could crash the app
 * `Fix` Missing transition animation when switching to the home Files tab
@@ -439,6 +443,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Issue where IntelliJ IDEA builds could fail to resolve module dependencies, match compilation tasks or locate the current APK output
 * `Fix` Insufficient memory for Kotlin compilation during multi-variant builds
 * `Fix` Incorrect SDK resolution and packaging template path resolution during Gradle builds
+* `Fix` cXy/cYx ignoring absolute coordinate mode when false is specified, reversing landscape aspect ratios, and rejecting some calls after setting only one scale base
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions
@@ -472,7 +477,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` ocr automatically selects available engines in ML Kit/Paddle/Rapid order, with explicit engine selection and restoration of automatic selection
 * `Improvement` The ocr module reached through the host bridge (Node.js plugin and other plugin sessions) selects an enabled engine in ML Kit/Paddle/Rapid order when no engine is specified, instead of always requiring the ML Kit OCR plugin
 * `Improvement` The host bridge accessibility module adds captureScreenImage, which turns an accessibility screenshot (falling back to screen capture when unavailable) into a session image handle that plugin sessions such as MCP Server use directly for barcode recognition and image or color search; plugin sessions may now hold twice their concurrent-call count of image handles instead of 4
-* `Improvement` When model-facing plugin sessions such as MCP Server and 3-Stove Agent read an image through the bridge (image.readImage), images whose longest edge exceeds 4096 px are decoded at a power-of-two sample size and the result carries scale plus the source dimensions, so large gallery photos cannot exhaust host memory; Node.js plugin scripts are unaffected
+* `Improvement` When model-facing plugin sessions such as MCP Server and 3-Stove Agent read an image through the bridge (image.readImage), images whose longest edge exceeds 4096 px are decoded at a sample size that is a power of 2 and the result carries scale plus the source dimensions, so large gallery photos cannot exhaust host memory; Node.js plugin scripts are unaffected
 * `Improvement` Model-facing plugin sessions such as MCP Server and 3-Stove Agent that read images or media information by path through the bridge (image.readImage, mediainfo) are confined to the working directory, and writes (image.saveImage) stay inside it as well; when the request declares files.shared_read and AutoJs6 holds all-files access, shared storage becomes readable read-only (excluding Android/data and Android/obb), and files.list and files.stat can list shared storage under the same token; Node.js plugin scripts are unaffected
 * `Improvement` The host bridge app module adds pluginCapabilities, which reports in real time the status of the plugin families OCR, barcode, Pinyin, Pinyin4j, MediaInfo, OpenCV and offline docs (available / not_installed / disabled / incompatible), the installed plugins' versions, enablement and authorization, the bridge methods they back and the Plugin Center entry, so plugin sessions such as MCP Server can show tools by installation state and point users to the plugin to install; the optional method list a plugin session receives when it opens is completed by the same logic for the families available at that time
 * `Improvement` The default capability grant of MCP Server plugin sessions grows: the ocr, barcode, pinyin, pinyin4j and mediainfo module methods, image.readImage and the image / color search methods, accessibility.readScreenText / captureScreenImage and app.pluginCapabilities, with their permission tokens (including files.shared_read for read-only shared storage); these methods work only while the corresponding plugin is installed and enabled, image.saveImage and image.toBytes stay outside the grant, and the 3-Stove Agent grant is unchanged
@@ -499,6 +504,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Unified code editor theme colors and menu layout, with improved fonts, read-only mode and text selection
 * `Improvement` The code editor run button switches to a stop button after starting a script
 * `Improvement` Improved code editor font download messages, go-to-line correction, and file encoding detection and saving
+* `Improvement` Faster page display when opening files in the code editor
 * `Improvement` File manager loads package information on demand, with improved display of large packages and manifest information
 * `Improvement` Unified file preview and plugin action entries in the file manager, with incremental list refreshes that retain scroll position
 * `Improvement` Version history avoids duplicate snapshots and preserves original content before overwrites; restoring recycle bin items to a new path also migrates their version history
@@ -519,6 +525,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Gradle builds support dynamically matching compatible Kotlin/KSP/AGP/R8 versions, with reduced startup memory usage and cleaned-up compilation warnings
 * `Improvement` Moved Gradle platform compatibility data and update tasks to AutoJs6-Gradle-Platform-Versions, with cross-repository synchronization in Scrapers
 * `Improvement` Added the useSystemId Boolean argument to device.getAndroidId, obtaining the system value for the Android user running the app through Shizuku/Root on Android 8.0+; permission or read failures throw exceptions, and older systems ignore this argument
+* `Improvement` cX/cY/cXy/cYx support explicit auto mode, consistently validate coordinates and scale bases, and preserve large finite results beyond the Long range
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

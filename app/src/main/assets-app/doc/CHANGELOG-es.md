@@ -109,6 +109,7 @@
 * `Nuevo` El editor admite modo inmersivo de pantalla completa
 * `Nuevo` El editor admite un panel inferior de registros, inicio/parada de scripts y salto al código fuente de marcos de pila (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Nuevo` Página de ajustes independiente del editor, con tema, fuente, números de línea, ajuste de líneas, umbral de resaltado y visibilidad del panel de registros
+* `Nuevo` Los ajustes del editor de código añaden guías de sangría resaltadas, iconos vectoriales en el margen, barras de desplazamiento (con ocultación automática), espacios en las selecciones, lupa de arrastre, resaltado de símbolos coincidentes y vistas previas de completado en línea (solo motor Ace, requiere el plugin Ace Editor 2.0.0 o posterior)
 * `Nuevo` La página de registros y el panel inferior del editor permiten ejecutar fragmentos TypeScript (requiere TypeScript Engine)
 * `Nuevo` Herramienta "Selector de color de pantalla" en el panel lateral (requiere 3-Color Picker)
 * `Nuevo` Las tareas programadas admiten programación mensual/anual/cuenta atrás y condiciones de finalización de repeticiones _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
@@ -152,6 +153,7 @@
 * `Corrección` Las opciones inseguras de solicitudes http podían hacer que solicitudes posteriores siguieran omitiendo la validación del certificado y del nombre del servidor
 * `Corrección` La configuración de seguridad de red podía bloquear inesperadamente solicitudes HTTP de versiones oficiales y aplicaciones empaquetadas
 * `Corrección` El selector de archivos del control WebView en modo UI no se abría correctamente
+* `Corrección` Las expresiones de atributos dinámicos de las plantillas de elementos list/grid en modo UI no podían acceder al objeto del elemento actual (como su propiedad name), lo que provocaba ReferenceError y elementos vacíos; los resultados numéricos también se mostraban como 18.0 en lugar de 18
 * `Corrección` Los scripts UI podían terminar inesperadamente al entrar en pantalla dividida o cambiar el tamaño de la ventana
 * `Corrección` Los parámetros de expresión regular no funcionaban correctamente en sobrecargas de selectores, el método global filter y selectores de colecciones
 * `Corrección` Los selectores contains interpretaban incorrectamente cadenas normales como expresiones regulares
@@ -176,6 +178,7 @@
 * `Corrección` Los callbacks de eventos registrados y listeners de teclas dejaban de funcionar tras reiniciar la accesibilidad
 * `Corrección` La primera llamada a operaciones globales automator podía lanzar una excepción de puntero nulo y el escalado vertical de gestos era incorrecto
 * `Corrección` El servicio de accesibilidad podía interrumpirse inesperadamente al ejecutar repetidamente operaciones como back _[`issue #527`](http://issues.autojs6.com/527)_
+* `Corrección` El método Node.js accessibility.ensureEnabled notificaba un tiempo de espera agotado del puente en lugar de devolver false cuando el servicio de accesibilidad estaba habilitado pero no se enlazaba a tiempo
 * `Corrección` El observador de notificaciones confundía notificaciones del sistema con mensajes flotantes y omitía eventos de notificación
 * `Corrección` En Android 14+, solicitar captura de pantalla podía bloquear la aplicación por errores al iniciar el servicio en primer plano _[`issue #516`](http://issues.autojs6.com/516)_
 * `Corrección` Invocar OCR repetidamente desde varios hilos o archivos podía solicitar una y otra vez el permiso de captura _[`issue #551`](http://issues.autojs6.com/551)_
@@ -218,6 +221,7 @@
 * `Corrección` Al restaurar directorios, la papelera podía escribir entradas de archivo anómalas fuera del destino
 * `Corrección` El editor podía perder cursor, selección o contenido sin guardar al recrearse la página
 * `Corrección` El contenido del editor y la página de registros podía quedar oculto o comprimido al mostrar el teclado o campo de entrada
+* `Corrección` Los menús "Más" de los diálogos del editor eran difíciles de leer porque el texto y el fondo tenían colores similares cuando el tema del editor difería del modo claro/oscuro de la aplicación
 * `Corrección` Errores al guardar el estado, colorear el cursor y elegir el idioma de las sugerencias del cuadro de búsqueda principal
 * `Corrección` Los eventos multitáctiles anómalos en la pestaña de documentación podían bloquear la aplicación
 * `Corrección` Faltaba la animación de transición al cambiar a la pestaña de archivos
@@ -255,6 +259,7 @@
 * `Corrección` Al construir con IntelliJ IDEA podía fallar la resolución de dependencias, la selección de tareas de compilación o la localización del APK actual
 * `Corrección` Memoria insuficiente de la compilación Kotlin al construir varias variantes
 * `Corrección` Errores al resolver el SDK y las rutas de plantillas de empaquetado durante la construcción Gradle
+* `Corrección` cXy/cYx ignoraban el modo de coordenadas absolutas con false, invertían la relación de aspecto horizontal y rechazaban algunas llamadas al cambiar una sola base
 * `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
 * `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
 * `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano
@@ -288,7 +293,7 @@
 * `Mejora` ocr selecciona motores disponibles en orden ML Kit/Paddle/Rapid por defecto y permite elegir explícitamente o volver a la selección automática
 * `Mejora` El módulo ocr invocado a través del puente del host (plugin Node.js y otras sesiones de plugins) selecciona un motor habilitado en orden ML Kit/Paddle/Rapid cuando no se indica ninguno, en lugar de exigir siempre el plugin ML Kit OCR
 * `Mejora` El módulo accessibility del puente del host añade captureScreenImage, que convierte una captura de pantalla de accesibilidad (con reserva a la captura de pantalla cuando no está disponible) en un identificador de imagen de sesión que las sesiones de plugins como MCP Server usan directamente para el reconocimiento de códigos de barras y la búsqueda de imágenes o colores; las sesiones de plugins ahora pueden mantener el doble de su número de llamadas concurrentes en identificadores de imagen en lugar de 4
-* `Mejora` Cuando sesiones de plugins orientadas a modelos como MCP Server y 3-Stove Agent leen una imagen a través del puente (image.readImage), las imágenes cuyo lado mayor supera 4096 px se decodifican con un submuestreo en potencia de dos y el resultado incluye scale y las dimensiones originales, para que las fotos grandes de la galería no agoten la memoria del host; los scripts del plugin Node.js no se ven afectados
+* `Mejora` Cuando sesiones de plugins orientadas a modelos como MCP Server y 3-Stove Agent leen una imagen a través del puente (image.readImage), las imágenes cuyo lado mayor supera 4096 px se decodifican con un submuestreo en potencia de 2 y el resultado incluye scale y las dimensiones originales, para que las fotos grandes de la galería no agoten la memoria del host; los scripts del plugin Node.js no se ven afectados
 * `Mejora` Las sesiones de plugins orientadas a modelos como MCP Server y 3-Stove Agent que leen imágenes o información de medios por ruta a través del puente (image.readImage, mediainfo) quedan limitadas al directorio de trabajo, y las escrituras (image.saveImage) también permanecen dentro de él; cuando la solicitud declara files.shared_read y AutoJs6 tiene acceso a todos los archivos, el almacenamiento compartido pasa a ser legible en modo de solo lectura (excluyendo Android/data y Android/obb), y files.list y files.stat pueden listar el almacenamiento compartido con el mismo token; los scripts del plugin Node.js no se ven afectados
 * `Mejora` El módulo app del puente del host añade pluginCapabilities, que informa en tiempo real del estado de las familias de plugins OCR, códigos de barras, Pinyin, Pinyin4j, MediaInfo, OpenCV y documentación sin conexión (available / not_installed / disabled / incompatible), la versión, habilitación y autorización de los plugins instalados, los métodos del puente que respaldan y la entrada del Plugin Center, para que sesiones de plugins como MCP Server muestren herramientas según el estado de instalación y orienten a los usuarios al plugin que deben instalar; la lista de métodos opcionales que recibe una sesión de plugin al abrirse se completa con la misma lógica para las familias disponibles en ese momento
 * `Mejora` La autorización de capacidades predeterminada de las sesiones del plugin MCP Server se amplía: los métodos de los módulos ocr, barcode, pinyin, pinyin4j y mediainfo, image.readImage y los métodos de búsqueda de imágenes / colores, accessibility.readScreenText / captureScreenImage y app.pluginCapabilities, con sus tokens de permiso (incluido files.shared_read para el almacenamiento compartido de solo lectura); estos métodos solo funcionan mientras el plugin correspondiente está instalado y habilitado, image.saveImage e image.toBytes quedan fuera de la autorización, y la autorización de 3-Stove Agent no cambia
@@ -315,6 +320,7 @@
 * `Mejora` Colores del tema y distribución de menús unificados en el editor, con mejoras de fuentes, modo de solo lectura y selección de texto
 * `Mejora` El botón de ejecución del editor cambia a parada tras iniciar un script
 * `Mejora` Mejoras de avisos de descarga de fuentes, corrección de números de línea de destino y detección y guardado de codificación
+* `Mejora` Visualización más rápida de la página al abrir archivos en el editor de código
 * `Mejora` Información de instaladores cargada bajo demanda en el administrador, con mejor presentación de paquetes grandes y manifiestos
 * `Mejora` Accesos de previsualización y operaciones de complementos unificados; actualización diferencial de listas conservando el desplazamiento
 * `Mejora` El historial evita instantáneas duplicadas, conserva el contenido antes de sobrescribir y migra la historia al restaurar la papelera a otra ruta
@@ -335,6 +341,7 @@
 * `Mejora` Gradle permite emparejar dinámicamente versiones compatibles Kotlin/KSP/AGP/R8, reduce la memoria de inicio y elimina advertencias de compilación
 * `Mejora` Datos de compatibilidad de plataformas Gradle y tareas de actualización trasladados a AutoJs6-Gradle-Platform-Versions; Scrapers permite sincronizar entre repositorios
 * `Mejora` device.getAndroidId admite useSystemId booleano para obtener en Android 8.0+ el valor del sistema del usuario Android que ejecuta la aplicación mediante Shizuku/Root; lanza excepciones si fallan permisos o lectura y los sistemas anteriores ignoran el parámetro
+* `Mejora` cX/cY/cXy/cYx admiten el modo auto explícito, validan de forma coherente las coordenadas y las bases, y conservan resultados finitos que superan el rango Long
 * `Dependencia` Modularizado Android AXML
 * `Dependencia` Modularizado Android ARSC Editor
 * `Dependencia` Modularizado APK Signer
