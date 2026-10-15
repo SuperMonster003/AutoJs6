@@ -24,10 +24,23 @@ internal class ShortcutRecoveryPrompt(private val activity: BaseActivity) {
         activity.lifecycleScope.launch {
             try {
                 val repository = ShortcutBackupRepository.get(activity)
-                val missing = withContext(Dispatchers.IO) {
-                    repository.reconcile().entries.filter { it.status == ShortcutBackupEntry.Status.MISSING && !it.notified }
+                val entries = withContext(Dispatchers.IO) { repository.reconcile().entries }
+                if (!activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@launch
+                val missing = entries.filter { it.status == ShortcutBackupEntry.Status.MISSING && !it.notified }
+                if (missing.isEmpty()) {
+                    val missingIcons = entries.filter { it.status == ShortcutBackupEntry.Status.PINNED && it.icon == null && !it.iconNoticeShown }
+                    if (missingIcons.isEmpty()) return@launch
+                    dialog = MaterialDialog.Builder(activity)
+                        .title(R.string.shortcut_backup_complete_icons)
+                        .content(activity.getString(R.string.shortcut_backup_legacy_icons_prompt, missingIcons.size))
+                        .positiveText(R.string.text_select_icon)
+                        .negativeText(R.string.shortcut_backup_later)
+                        .onPositive { _, _ -> activity.startActivity(Intent(activity, ShortcutBackupActivity::class.java)
+                            .putExtra(ShortcutBackupActivity.EXTRA_COMPLETE_ICONS, true)) }
+                        .show()
+                    withContext(Dispatchers.IO) { repository.markIconsNotified(missingIcons.mapTo(hashSetOf()) { it.id }) }
+                    return@launch
                 }
-                if (missing.isEmpty() || !activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@launch
                 val ids = missing.mapTo(hashSetOf()) { it.id }
                 dialog = MaterialDialog.Builder(activity)
                     .title(R.string.shortcut_backup_title)

@@ -62,7 +62,7 @@ class ShortcutBackupDeviceTest {
             val archive = ShortcutBackupArchive.read(bytes.inputStream())
             assertEquals(2, archive.entries.size)
             assertFalse("Each copy must retain its own icon", archive.entries[0].icon.contentEquals(archive.entries[1].icon))
-            val customIcon = archive.entries[1].icon.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
+            val customIcon = requireNotNull(archive.entries[1].icon).let { BitmapFactory.decodeByteArray(it, 0, it.size) }
             assertEquals("Non-square icons must keep their aspect ratio", 2, customIcon.width / customIcon.height)
             customIcon.recycle()
             assertNull(archive.markerToken)

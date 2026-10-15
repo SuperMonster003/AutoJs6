@@ -26,7 +26,7 @@ internal object ShortcutBackupArchive {
         require(state.entries.map { it.id }.toSet().size == state.entries.size)
         val root = JsonObject().apply {
             addProperty("format", "autojs6-shortcuts")
-            addProperty("version", 1)
+            addProperty("version", 2)
             addProperty("markerToken", state.markerToken)
             addProperty("launcher", state.launcher)
             addProperty("activity", state.activity)
@@ -41,17 +41,18 @@ internal object ShortcutBackupArchive {
                         addProperty("path", item.path)
                         addProperty("sourceKind", item.sourceKind)
                         addProperty("projectRoot", item.projectRoot)
-                        addProperty("icon", "icons/$index.png")
+                        addProperty("icon", if (item.icon == null) null else "icons/$index.png")
                         addProperty("status", item.status.name)
                         addProperty("notified", item.notified)
                         addProperty("requestToken", item.requestToken)
+                        addProperty("iconNoticeShown", item.iconNoticeShown)
                     })
                 }
             })
         }
         val manifest = root.toString().toByteArray(Charsets.UTF_8)
         require(manifest.size <= MAX_MANIFEST)
-        require(manifest.size.toLong() + state.entries.sumOf { it.icon.size.toLong() } <= MAX_TOTAL)
+        require(manifest.size.toLong() + state.entries.sumOf { it.icon?.size?.toLong() ?: 0 } <= MAX_TOTAL)
         // Release the deflater without closing AtomicFile's stream before its fsync.
         ZipOutputStream(object : FilterOutputStream(output) {
             override fun write(bytes: ByteArray, offset: Int, length: Int) = out.write(bytes, offset, length)
@@ -63,7 +64,7 @@ internal object ShortcutBackupArchive {
                 zip.closeEntry()
             }
             put("manifest.json", manifest)
-            state.entries.forEachIndexed { index, item -> put("icons/$index.png", item.icon) }
+            state.entries.forEachIndexed { index, item -> item.icon?.let { put("icons/$index.png", it) } }
         }
     }
 
@@ -92,11 +93,15 @@ internal object ShortcutBackupArchive {
             }
         }
         val root = JsonParser.parseString(requireNotNull(files.remove("manifest.json")) { "Missing manifest" }.toString(Charsets.UTF_8)).asJsonObject
-        require(root.text("format") == "autojs6-shortcuts" && root.get("version")?.asString == "1") { "Unsupported shortcut backup format" }
+        val version = root.get("version")?.asString
+        require(root.text("format") == "autojs6-shortcuts" && version in setOf("1", "2")) { "Unsupported shortcut backup format" }
         val items = root.getAsJsonArray("shortcuts") ?: error("Missing shortcuts")
         require(items.size() <= MAX_ENTRIES)
         val entries = items.map { element ->
             val item = element.asJsonObject
+            require(item.has("icon")) { "Missing icon declaration" }
+            val iconName = item.text("icon")
+            require(version == "2" || iconName != null) { "Version 1 requires an icon" }
             ShortcutBackupEntry(
                 id = requireNotNull(item.text("id")),
                 shortLabel = requireNotNull(item.text("shortLabel")),
@@ -105,10 +110,11 @@ internal object ShortcutBackupArchive {
                 path = item.text("path"),
                 sourceKind = item.text("sourceKind"),
                 projectRoot = item.text("projectRoot"),
-                icon = requireNotNull(files.remove(item.text("icon"))) { "Missing or shared icon" },
+                icon = iconName?.let { requireNotNull(files.remove(it)) { "Missing or shared icon" } },
                 status = ShortcutBackupEntry.Status.valueOf(requireNotNull(item.text("status"))),
                 notified = item.get("notified")?.asBoolean ?: false,
                 requestToken = item.text("requestToken"),
+                iconNoticeShown = item.get("iconNoticeShown")?.asBoolean ?: false,
             ).also(::validate)
         }
         require(files.isEmpty() && entries.map { it.id }.toSet().size == entries.size) { "Unexpected files or duplicate shortcut IDs" }
@@ -120,8 +126,9 @@ internal object ShortcutBackupArchive {
         it.asString.also { value -> require(value.length <= 8192 && '\u0000' !in value) }
     }
 
-    private fun validate(item: ShortcutBackupEntry) {
-        require(item.id.isNotBlank() && item.id.length <= 256)
+    internal fun validate(item: ShortcutBackupEntry) {
+        // Older AutoJs6 IDs include a class name, the entire label and a timestamp.
+        require(item.id.isNotBlank() && item.id.length <= 1024)
         require(item.shortLabel.isNotBlank() && item.shortLabel.length <= 256)
         require(item.longLabel.isNotBlank() && item.longLabel.length <= 1024)
         require(item.target in targets)
@@ -131,8 +138,9 @@ internal object ShortcutBackupArchive {
             require(item.path == null && item.sourceKind == null && item.projectRoot == null)
         }
         require(item.projectRoot == null || item.projectRoot.startsWith('/'))
-        require(item.icon.size in 24..MAX_ICON && item.icon.take(8).toByteArray().contentEquals(pngSignature)) { "Invalid PNG icon" }
-        val dimensions = ByteBuffer.wrap(item.icon, 16, 8)
+        val icon = item.icon ?: return
+        require(icon.size in 24..MAX_ICON && icon.take(8).toByteArray().contentEquals(pngSignature)) { "Invalid PNG icon" }
+        val dimensions = ByteBuffer.wrap(icon, 16, 8)
         require(dimensions.int in 1..512 && dimensions.int in 1..512) { "Icon dimensions exceed the limit" }
     }
 }

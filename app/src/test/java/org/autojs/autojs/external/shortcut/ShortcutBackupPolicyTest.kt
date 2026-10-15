@@ -78,4 +78,42 @@ class ShortcutBackupPolicyTest {
         }
         assertEquals("/sdcard/scripts/test.js", local.entries.single().path)
     }
+
+    @Test fun adoptionKeepsEveryLegacyCopyAndIsIdempotentBySystemId() {
+        val copies = listOf(entry("old-one").copy(icon = null), entry("old-two").copy(icon = null))
+        val adopted = ShortcutBackupPolicy.adoptPinned(ShortcutBackupState(), copies)
+        assertEquals(listOf("old-one", "old-two"), adopted.entries.map { it.id })
+        assertTrue(adopted.entries.all { it.status == Status.PINNED && it.icon == null })
+        assertEquals(adopted, ShortcutBackupPolicy.adoptPinned(adopted, copies))
+    }
+
+    @Test fun rescanningDoesNotOverwriteChosenIconsOrRemovalDecisions() {
+        val local = state(entry("one", Status.REMOVED).copy(iconNoticeShown = true), entry("two"))
+        val result = ShortcutBackupPolicy.adoptPinned(local, listOf(entry("one").copy(icon = null), entry("two").copy(icon = null)))
+        assertEquals(local, result)
+    }
+
+    @Test fun completeBackupCanFillOnlyAMissingIconWithoutUndoingRemoval() {
+        val local = state(entry("one", Status.REMOVED).copy(icon = null, iconNoticeShown = true))
+        val result = ShortcutBackupPolicy.merge(local, listOf(entry("one"))).entries.single()
+        assertEquals(Status.REMOVED, result.status)
+        assertTrue(result.iconNoticeShown)
+        assertArrayEquals(byteArrayOf(1), result.icon)
+    }
+
+    @Test fun incompleteBackupCannotEraseAnAlreadySelectedIcon() {
+        val local = state(entry("one"))
+        assertEquals(local, ShortcutBackupPolicy.merge(local, listOf(entry("one").copy(icon = null))))
+        assertThrows(IllegalArgumentException::class.java) {
+            ShortcutBackupPolicy.merge(local, listOf(entry("one").copy(icon = null, path = "/another.js")))
+        }
+    }
+
+    @Test fun iconNoticeDoesNotReturnEveryTimeAPinnedCopyIsQueried() {
+        val local = state(entry("one").copy(icon = null, iconNoticeShown = true))
+        assertTrue(ShortcutBackupPolicy.reconcile(local, setOf("one"), true, true).entries.single().iconNoticeShown)
+        val removed = ShortcutBackupPolicy.reconcile(local, emptySet(), true, true)
+        assertEquals(Status.REMOVED, removed.entries.single().status)
+        assertEquals(Status.REMOVED, ShortcutBackupPolicy.reconcile(removed, emptySet(), false, true).entries.single().status)
+    }
 }

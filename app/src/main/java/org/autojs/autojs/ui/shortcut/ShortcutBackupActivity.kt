@@ -1,7 +1,10 @@
 package org.autojs.autojs.ui.shortcut
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
@@ -56,6 +59,10 @@ class ShortcutBackupActivity : BaseActivity() {
         super.onStart()
         binding.toolbar.navigationIcon?.setTint(ThemeColorManager.getDayOrNightColorByLuminance(this))
     }
+
+    companion object {
+        const val EXTRA_COMPLETE_ICONS = "complete_shortcut_icons"
+    }
 }
 
 class ShortcutBackupFragment : PreferenceFragmentCompat() {
@@ -69,9 +76,45 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
     private var busy = false
     private var dialog: MaterialDialog? = null
     private var pendingImportSelection: Set<String>? = null
+    private var pendingIconId: String? = null
+    private var openMissingIcons = false
     private lateinit var restorePreference: Preference
     private lateinit var exportPreference: Preference
     private lateinit var importPreference: Preference
+    private lateinit var iconsPreference: Preference
+    private lateinit var scanPreference: Preference
+
+    private val pickIcon = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val id = pendingIconId ?: return@registerForActivityResult
+        pendingIconId = null
+        val data = result.data
+        if (result.resultCode == Activity.RESULT_OK && data != null) operation(allowDuringRestore = true) {
+            val context = requireContext()
+            withContext(Dispatchers.IO) {
+                when {
+                    data.getBooleanExtra(AppsIconSelectActivity.EXTRA_USE_DEFAULT_ICON, false) -> repository.useDefaultIcon(id)
+                    data.hasExtra(AppsIconSelectActivity.EXTRA_PACKAGE_NAME) -> repository.replaceIcon(id,
+                        context.packageManager.getApplicationIcon(requireNotNull(data.getStringExtra(AppsIconSelectActivity.EXTRA_PACKAGE_NAME))))
+                    else -> {
+                        val uri = requireNotNull(data.data) { context.getString(R.string.shortcut_backup_icon_unreadable) }
+                        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                        context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+                        require(bounds.outWidth > 0 && bounds.outHeight > 0) { context.getString(R.string.shortcut_backup_icon_unreadable) }
+                        val options = BitmapFactory.Options().apply { inSampleSize = 1 }
+                        while (bounds.outWidth / options.inSampleSize > 768 || bounds.outHeight / options.inSampleSize > 768) options.inSampleSize *= 2
+                        val bitmap = requireNotNull(context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }) {
+                            context.getString(R.string.shortcut_backup_icon_unreadable)
+                        }
+                        try {
+                            repository.replaceIcon(id, BitmapDrawable(context.resources, bitmap))
+                        } finally {
+                            bitmap.recycle()
+                        }
+                    }
+                }
+            }
+        } else viewLifecycleOwner.lifecycleScope.launch { refresh() }
+    }
 
     private val exportFile = registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) operation {
@@ -100,11 +143,22 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
         added = savedInstanceState?.getInt("added") ?: 0
         skipped = savedInstanceState?.getInt("skipped") ?: 0
         pendingImportSelection = savedInstanceState?.getStringArrayList("importSelection")?.toSet()
+        pendingIconId = savedInstanceState?.getString("iconId")
+        openMissingIcons = savedInstanceState?.getBoolean("openIcons")
+            ?: requireActivity().intent.getBooleanExtra(ShortcutBackupActivity.EXTRA_COMPLETE_ICONS, false)
         preferenceScreen = preferenceManager.createPreferenceScreen(requireContext())
         preference(R.string.shortcut_backup_description).apply { isSelectable = false }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             preference(R.string.shortcut_backup_legacy).apply { isSelectable = false }
         }
+        scanPreference = preference(R.string.shortcut_backup_scan) {
+            operation {
+                val state = withContext(Dispatchers.IO) { repository.reconcile() }
+                ViewUtils.showToast(requireContext(), getString(R.string.shortcut_backup_scan_result,
+                    state.entries.size, state.entries.count { it.icon == null }), true)
+            }
+        }.apply { isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 }
+        iconsPreference = preference(R.string.shortcut_backup_complete_icons) { selectMissingIcon() }
         restorePreference = preference(R.string.dialog_button_restore) { selectRestore() }
         exportPreference = preference(R.string.text_export) { exportFile.launch("AutoJs6-shortcuts.zip") }
         importPreference = preference(R.string.text_import) { importFile.launch(arrayOf("application/zip", "application/octet-stream")) }
@@ -133,6 +187,8 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
         outState.putString("waiting", waiting)
         outState.putInt("added", added)
         outState.putInt("skipped", skipped)
+        outState.putString("iconId", pendingIconId)
+        outState.putBoolean("openIcons", openMissingIcons)
         pendingImportSelection?.let { outState.putStringArrayList("importSelection", ArrayList(it)) }
         super.onSaveInstanceState(outState)
     }
@@ -143,6 +199,10 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
             entries = withContext(Dispatchers.IO) { repository.reconcile().entries }
             restorePreference.summary = getString(R.string.shortcut_backup_count, entries.size)
             val idle = queue.isEmpty()
+            val missingIcons = entries.count { it.icon == null }
+            iconsPreference.summary = getString(R.string.shortcut_backup_icons_pending, missingIcons)
+            iconsPreference.isEnabled = idle && missingIcons > 0
+            scanPreference.isEnabled = idle
             restorePreference.isEnabled = idle && entries.any { it.status != ShortcutBackupEntry.Status.PINNED }
             exportPreference.isEnabled = idle && entries.isNotEmpty()
             importPreference.isEnabled = idle
@@ -151,6 +211,9 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
                 val ids = pendingImportSelection
                 pendingImportSelection = null
                 selectRestore(ids)
+            } else if (openMissingIcons && idle && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                openMissingIcons = false
+                if (missingIcons > 0) selectMissingIcon()
             }
         } catch (error: CancellationException) {
             throw error
@@ -171,7 +234,7 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
         dialog?.dismiss()
         dialog = MaterialDialog.Builder(requireContext())
             .title(R.string.shortcut_backup_title)
-            .items(candidates.mapIndexed { index, item -> "${index + 1}. ${item.shortLabel}\n${status(item)}${item.path?.let { path -> "\n$path" }.orEmpty()}" })
+            .items(candidates.mapIndexed { index, item -> entryLabel(index, item) })
             .itemsCallbackMultiChoice(checked) { selection, which, _ ->
                 selection.dismiss()
                 dialog = null
@@ -200,6 +263,64 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
         ShortcutBackupEntry.Status.PENDING -> R.string.shortcut_backup_status_pending
     })
 
+    private fun entryLabel(index: Int, entry: ShortcutBackupEntry): String =
+        "${index + 1}. ${entry.shortLabel}\n${status(entry)}" +
+            (if (entry.icon == null) "\n${getString(R.string.shortcut_backup_icon_missing)}" else "") +
+            entry.path?.let { "\n$it" }.orEmpty()
+
+    private fun selectMissingIcon() {
+        val candidates = entries.filter { it.icon == null }
+        if (candidates.isEmpty()) return
+        dialog?.dismiss()
+        dialog = MaterialDialog.Builder(requireContext())
+            .title(R.string.shortcut_backup_complete_icons)
+            .items(candidates.mapIndexed { index, entry -> entryLabel(index, entry) })
+            .itemsCallback { selection, _, index, _ ->
+                selection.dismiss()
+                dialog = null
+                promptForIcon(candidates[index])
+            }
+            .negativeText(R.string.dialog_button_cancel)
+            .show()
+    }
+
+    private fun promptForIcon(entry: ShortcutBackupEntry) {
+        if (pendingIconId != null || dialog?.isShowing == true) return
+        val restoring = queue.firstOrNull() == entry.id
+        dialog = MaterialDialog.Builder(requireContext())
+            .title(entry.shortLabel)
+            .content(R.string.shortcut_backup_icon_required)
+            .positiveText(R.string.text_select_icon)
+            .onPositive { _, _ ->
+                dialog = null
+                pendingIconId = entry.id
+                pickIcon.launch(Intent(requireContext(), AppsIconSelectActivity::class.java))
+            }
+            .neutralText(R.string.dialog_button_use_default)
+            .onNeutral { _, _ ->
+                dialog = null
+                operation(allowDuringRestore = true) { withContext(Dispatchers.IO) { repository.useDefaultIcon(entry.id) } }
+            }
+            .negativeText(if (restoring) R.string.text_skip else R.string.dialog_button_cancel)
+            .onNegative { _, _ ->
+                dialog = null
+                if (restoring) {
+                    queue.remove(entry.id)
+                    skipped++
+                    if (queue.isEmpty()) reportCompleted()
+                    viewLifecycleOwner.lifecycleScope.launch { refresh() }
+                }
+            }
+            .cancelListener {
+                dialog = null
+                if (restoring) {
+                    queue.clear()
+                    viewLifecycleOwner.lifecycleScope.launch { refresh() }
+                }
+            }
+            .show()
+    }
+
     /** Only one launcher confirmation is outstanding. Cancel has no platform callback. */
     private suspend fun advance() {
         if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return
@@ -222,6 +343,10 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
                                 getString(R.string.shortcut_backup_missing_file, entry.path)
                             }
                         }
+                    }
+                    if (entry.icon == null) {
+                        promptForIcon(entry)
+                        return
                     }
                     waiting = id
                     check(withContext(Dispatchers.IO) { repository.requestPin(id) }) {
@@ -267,18 +392,22 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
         restorePreference.isEnabled = true
         exportPreference.isEnabled = entries.isNotEmpty()
         importPreference.isEnabled = true
+        iconsPreference.isEnabled = entries.any { it.icon == null }
+        scanPreference.isEnabled = true
         reportCompleted()
     }
 
     private fun reportCompleted() = ViewUtils.showToast(requireContext(), getString(R.string.shortcut_backup_complete, added, skipped), true)
 
-    private fun operation(block: suspend () -> Unit) {
-        if (busy || queue.isNotEmpty()) return
+    private fun operation(allowDuringRestore: Boolean = false, block: suspend () -> Unit) {
+        if (busy || (!allowDuringRestore && queue.isNotEmpty())) return
         viewLifecycleOwner.lifecycleScope.launch {
             busy = true
             restorePreference.isEnabled = false
             importPreference.isEnabled = false
             exportPreference.isEnabled = false
+            iconsPreference.isEnabled = false
+            scanPreference.isEnabled = false
             try {
                 block()
             } catch (error: CancellationException) {

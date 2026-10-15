@@ -64,7 +64,7 @@ class ShortcutBackupArchiveTest {
     @Test fun rejectsUnsupportedVersion() {
         val archive = encode(ShortcutBackupState(listOf(entry())))
         val changed = rewrite(archive) { name, bytes ->
-            name to if (name == "manifest.json") bytes.toString(Charsets.UTF_8).replace("\"version\":1", "\"version\":99").toByteArray() else bytes
+            name to if (name == "manifest.json") bytes.toString(Charsets.UTF_8).replace("\"version\":2", "\"version\":99").toByteArray() else bytes
         }
         assertThrows(IllegalArgumentException::class.java) { decode(changed) }
     }
@@ -99,5 +99,54 @@ class ShortcutBackupArchiveTest {
     @Test fun rejectsIconWithHugeDeclaredDimensions() {
         val icon = png.clone().also { it[16] = 127 }
         assertThrows(IllegalArgumentException::class.java) { encode(ShortcutBackupState(listOf(entry().copy(icon = icon)))) }
+    }
+
+    @Test fun missingLegacyIconsSurviveExportAndImportWithoutInventedImages() {
+        val original = listOf(entry().copy(icon = null, iconNoticeShown = true), entry("copy-2"))
+        val archive = encode(ShortcutBackupState(original))
+        val decoded = decode(archive).entries
+        assertEquals(2, decoded.size)
+        assertNull(decoded[0].icon)
+        assertTrue(decoded[0].iconNoticeShown)
+        assertArrayEquals(png, decoded[1].icon)
+        ZipInputStream(archive.inputStream()).use { zip ->
+            val files = mutableListOf<String>()
+            while (true) {
+                val item = zip.nextEntry ?: break
+                files += item.name
+                zip.closeEntry()
+            }
+            assertEquals(listOf("manifest.json", "icons/1.png"), files)
+        }
+    }
+
+    @Test fun readsVersionOneBackupsAndRejectsMissingIconsInThatVersion() {
+        fun asV1(archive: ByteArray) = rewrite(archive) { name, bytes -> name to if (name == "manifest.json") {
+            bytes.toString(Charsets.UTF_8).replace("\"version\":2", "\"version\":1")
+                .replace(",\"iconNoticeShown\":false", "").toByteArray()
+        } else bytes }
+        val legacy = decode(asV1(encode(ShortcutBackupState(listOf(entry()))))).entries.single()
+        assertTrue(entry().sameDefinition(legacy))
+        assertFalse(legacy.iconNoticeShown)
+        assertThrows(IllegalArgumentException::class.java) {
+            decode(asV1(encode(ShortcutBackupState(listOf(entry().copy(icon = null))))))
+        }
+    }
+
+    @Test fun anAbsentIconDeclarationIsCorruptionNotARequestToReselect() {
+        val archive = encode(ShortcutBackupState(listOf(entry().copy(icon = null))))
+        val changed = rewrite(archive) { name, bytes -> name to if (name == "manifest.json") {
+            bytes.toString(Charsets.UTF_8).replace(",\"icon\":null", "").toByteArray()
+        } else bytes }
+        assertThrows(IllegalArgumentException::class.java) { decode(changed) }
+    }
+
+    @Test fun acceptsOldIdsWhichIncludeALongLabelAndTimestamp() {
+        val label = "a".repeat(240)
+        val id = "org.autojs.autojs.external.shortcut.ShortcutActivity\$$label@1234567890000"
+        val original = entry(id).copy(shortLabel = label, longLabel = label, icon = null)
+        val restored = decode(encode(ShortcutBackupState(listOf(original)))).entries.single()
+        assertEquals(id, restored.id)
+        assertTrue(original.sameDefinition(restored))
     }
 }

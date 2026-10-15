@@ -9,16 +9,20 @@ internal data class ShortcutBackupEntry(
     val path: String? = null,
     val sourceKind: String? = null,
     val projectRoot: String? = null,
-    val icon: ByteArray,
+    val icon: ByteArray?,
     val status: Status = Status.PENDING,
     val notified: Boolean = false,
     val requestToken: String? = null,
+    val iconNoticeShown: Boolean = false,
 ) {
     enum class Status { PENDING, PINNED, MISSING, SAVED, REMOVED }
 
-    fun sameDefinition(other: ShortcutBackupEntry): Boolean =
-        copy(icon = other.icon, status = other.status, notified = other.notified, requestToken = other.requestToken) == other &&
-            icon.contentEquals(other.icon)
+    fun sameLaunch(other: ShortcutBackupEntry): Boolean =
+        copy(icon = other.icon, status = other.status, notified = other.notified,
+            requestToken = other.requestToken, iconNoticeShown = other.iconNoticeShown) == other
+
+    fun sameDefinition(other: ShortcutBackupEntry): Boolean = sameLaunch(other) &&
+        (if (icon == null) other.icon == null else other.icon != null && icon.contentEquals(other.icon))
 }
 
 internal data class ShortcutBackupState(
@@ -29,6 +33,18 @@ internal data class ShortcutBackupState(
 )
 
 internal object ShortcutBackupPolicy {
+    /** Keep the system ID, including separate IDs with identical labels, paths and intents. */
+    fun adoptPinned(state: ShortcutBackupState, discovered: List<ShortcutBackupEntry>): ShortcutBackupState {
+        val entries = state.entries.associateByTo(linkedMapOf()) { it.id }
+        discovered.forEach { entry ->
+            if (entry.id !in entries && entries.size < ShortcutBackupArchive.MAX_ENTRIES) {
+                entries[entry.id] = entry.copy(status = ShortcutBackupEntry.Status.PINNED, notified = false,
+                    requestToken = null, iconNoticeShown = false)
+            }
+        }
+        return state.copy(entries = entries.values.toList())
+    }
+
     /**
      * A published dynamic marker survives unpinning (even removal of every desktop icon),
      * whereas AOSP removes the package's dynamic AND pinned records on disable/hide.
@@ -56,7 +72,10 @@ internal object ShortcutBackupPolicy {
         val merged = local.entries.associateByTo(linkedMapOf()) { it.id }
         incoming.forEach { entry ->
             val existing = merged[entry.id]
-            require(existing == null || existing.sameDefinition(entry)) { "Conflicting shortcut ID: ${entry.id}" }
+            require(existing == null || (existing.sameLaunch(entry) &&
+                (existing.icon == null || entry.icon == null || existing.icon.contentEquals(entry.icon)))) {
+                "Conflicting shortcut ID: ${entry.id}"
+            }
             // Reimporting a backup must not resurrect locally removed shortcuts or duplicate IDs.
             if (existing == null) merged[entry.id] = entry.copy(
                 status = when (entry.status) {
@@ -66,7 +85,13 @@ internal object ShortcutBackupPolicy {
                 },
                 notified = false,
                 requestToken = null,
+                iconNoticeShown = false,
             )
+            else if (existing.icon == null && entry.icon != null) {
+                // An older complete backup can fill an unreadable legacy icon without undoing
+                // a local removal, or replacing a user's subsequently chosen icon.
+                merged[entry.id] = existing.copy(icon = entry.icon)
+            }
         }
         return local.copy(entries = merged.values.toList())
     }

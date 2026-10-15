@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.Bitmap
@@ -11,12 +12,14 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Icon
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.PersistableBundle
 import android.os.UserManager
 import android.util.AtomicFile
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -67,10 +70,23 @@ internal class ShortcutBackupRepository private constructor(private val context:
     @Synchronized
     fun reconcile(): ShortcutBackupState {
         var state = read()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || state.entries.isEmpty()) return state
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return state
         check(context.getSystemService(UserManager::class.java).isUserUnlocked) { "Device is locked" }
         val manager = context.getSystemService(ShortcutManager::class.java)
-        val pinned = manager.pinnedShortcuts.mapTo(hashSetOf()) { it.id }
+        val pinnedShortcuts = manager.pinnedShortcuts
+        val known = state.entries.mapTo(hashSetOf()) { it.id }
+        val discovered = pinnedShortcuts.asSequence().filter { it.id !in known && it.id != MARKER_ID }
+            .mapNotNull(::adoptExisting)
+            .take((ShortcutBackupArchive.MAX_ENTRIES - known.size).coerceAtLeast(0))
+            .toList()
+        state = ShortcutBackupPolicy.adoptPinned(state, discovered)
+        if (state.entries.isEmpty()) return state
+        val pinned = pinnedShortcuts.mapTo(hashSetOf()) { it.id }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            state = ShortcutBackupPolicy.reconcile(state, pinned, markerPresent = false, comparable = false)
+            if (state != read()) save(state)
+            return state
+        }
         val marker = manager.dynamicShortcuts.firstOrNull { it.id == MARKER_ID }
         val home = context.packageManager.resolveActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0)
             ?.activityInfo?.let { "${it.packageName}/${it.name}" }
@@ -107,6 +123,81 @@ internal class ShortcutBackupRepository private constructor(private val context:
         require(id != MARKER_ID)
         val target = targetFor(intent.component?.className) ?: error("Unsupported shortcut target")
         val drawable = requireNotNull(icon?.loadDrawable(context)) { "Shortcut icon is missing" }
+        val entry = ShortcutBackupEntry(
+            id = id,
+            shortLabel = shortLabel.toString(),
+            longLabel = longLabel.toString(),
+            target = target,
+            path = intent.getStringExtra(ScriptIntents.EXTRA_KEY_PATH),
+            sourceKind = intent.getStringExtra(ScriptIntents.EXTRA_KEY_SOURCE_KIND),
+            projectRoot = intent.getStringExtra(ScriptIntents.EXTRA_KEY_PROJECT_ROOT),
+            icon = encodeIcon(drawable),
+        )
+        val state = reconcile()
+        save(state.copy(entries = state.entries.filterNot { it.id == id } + entry))
+        // The first creation also needs a marker before the user can remove its desktop icon.
+        reconcile()
+        return entry
+    }
+
+    /** Only adopt launch shapes understood by the restore path; never persist arbitrary intents. */
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
+    private fun adoptExisting(shortcut: ShortcutInfo): ShortcutBackupEntry? = runCatching {
+        val intent = shortcut.intent ?: return@runCatching null
+        if (intent.component?.packageName != context.packageName || intent.data != null ||
+            intent.hasExtra(ScriptIntents.EXTRA_KEY_JSON) || intent.hasExtra(ScriptIntents.EXTRA_KEY_PRE_EXECUTE_SCRIPT)) return@runCatching null
+        val target = targetFor(intent.component?.className) ?: return@runCatching null
+        val label = shortcut.shortLabel?.toString()?.takeIf { it.isNotBlank() } ?: return@runCatching null
+        val entry = ShortcutBackupEntry(
+            id = shortcut.id,
+            shortLabel = label,
+            longLabel = shortcut.longLabel?.toString()?.takeIf { it.isNotBlank() } ?: label,
+            target = target,
+            path = intent.getStringExtra(ScriptIntents.EXTRA_KEY_PATH),
+            sourceKind = intent.getStringExtra(ScriptIntents.EXTRA_KEY_SOURCE_KIND),
+            projectRoot = intent.getStringExtra(ScriptIntents.EXTRA_KEY_PROJECT_ROOT),
+            icon = readExistingIcon(shortcut, target),
+            status = ShortcutBackupEntry.Status.PINNED,
+        )
+        ShortcutBackupArchive.validate(entry)
+        entry
+    }.onFailure { Log.w(TAG, "Cannot archive existing shortcut ${shortcut.id}", it) }.getOrNull()
+
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
+    private fun readExistingIcon(shortcut: ShortcutInfo, target: String): ByteArray? {
+        // getPinnedShortcuts() deliberately strips icons. Do not guess that an old script
+        // used the default image: its custom bitmap may only remain in the launcher's store.
+        val drawable = runCatching {
+            context.getSystemService(LauncherApps::class.java)?.takeIf { it.hasShortcutHostPermission() }
+                ?.getShortcutIconDrawable(shortcut, 0)
+        }.getOrNull()
+        if (drawable != null) return runCatching { encodeIcon(drawable) }.getOrNull()
+        return if (shortcut.isDeclaredInManifest && target != "script") {
+            runCatching { encodeIcon(defaultIcon(target)) }.getOrNull()
+        } else null
+    }
+
+    private fun defaultIcon(target: String): Drawable = requireNotNull(context.getDrawable(when (target) {
+        "settings" -> if (Build.VERSION.SDK_INT >= 33) R.drawable.ic_app_shortcut_settings_green else R.mipmap.ic_app_shortcut_settings_adaptive
+        "docs" -> if (Build.VERSION.SDK_INT >= 33) R.drawable.ic_app_shortcut_docs_green else R.mipmap.ic_app_shortcut_docs_adaptive
+        "log" -> if (Build.VERSION.SDK_INT >= 33) R.drawable.ic_app_shortcut_log_green else R.mipmap.ic_app_shortcut_log_adaptive
+        "plugins" -> if (Build.VERSION.SDK_INT >= 33) R.drawable.ic_app_shortcut_plugin_center_green else R.mipmap.ic_app_shortcut_plugin_center_adaptive
+        else -> R.drawable.ic_file_type_js_dark_green
+    }))
+
+    @Synchronized
+    fun replaceIcon(id: String, drawable: Drawable) {
+        val icon = encodeIcon(drawable)
+        update(id) { it.copy(icon = icon, iconNoticeShown = true) }
+    }
+
+    @Synchronized
+    fun useDefaultIcon(id: String) {
+        val entry = read().entries.first { it.id == id }
+        replaceIcon(id, defaultIcon(entry.target))
+    }
+
+    private fun encodeIcon(drawable: Drawable): ByteArray {
         val bounds = Rect(drawable.bounds)
         // Keep the original aspect ratio: custom icons need not be square. Bounding the
         // longest edge also keeps the PNG comfortably below the archive's per-icon limit.
@@ -126,28 +217,15 @@ internal class ShortcutBackupRepository private constructor(private val context:
         }
         val png = ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
         bitmap.recycle()
-        val entry = ShortcutBackupEntry(
-            id = id,
-            shortLabel = shortLabel.toString(),
-            longLabel = longLabel.toString(),
-            target = target,
-            path = intent.getStringExtra(ScriptIntents.EXTRA_KEY_PATH),
-            sourceKind = intent.getStringExtra(ScriptIntents.EXTRA_KEY_SOURCE_KIND),
-            projectRoot = intent.getStringExtra(ScriptIntents.EXTRA_KEY_PROJECT_ROOT),
-            icon = png,
-        )
-        val state = reconcile()
-        save(state.copy(entries = state.entries.filterNot { it.id == id } + entry))
-        // The first creation also needs a marker before the user can remove its desktop icon.
-        reconcile()
-        return entry
+        return png
     }
 
     @Synchronized
     fun requestPin(id: String): Boolean {
         val entry = read().entries.first { it.id == id }
         val intent = intentFor(entry)
-        val bitmap = requireNotNull(BitmapFactory.decodeByteArray(entry.icon, 0, entry.icon.size)) { "Invalid shortcut icon" }
+        val icon = requireNotNull(entry.icon) { context.getString(R.string.shortcut_backup_icon_required) }
+        val bitmap = requireNotNull(BitmapFactory.decodeByteArray(icon, 0, icon.size)) { "Invalid shortcut icon" }
         val info = ShortcutInfoCompat.Builder(context, id)
             .setIntent(intent)
             .setShortLabel(entry.shortLabel)
@@ -183,6 +261,9 @@ internal class ShortcutBackupRepository private constructor(private val context:
     fun markNotified(ids: Set<String>) = transform(ids) { it.copy(notified = true) }
 
     @Synchronized
+    fun markIconsNotified(ids: Set<String>) = transform(ids) { it.copy(iconNoticeShown = true) }
+
+    @Synchronized
     fun ignore(ids: Set<String>) = transform(ids) { it.copy(status = ShortcutBackupEntry.Status.REMOVED, requestToken = null, notified = true) }
 
     private fun update(id: String, change: (ShortcutBackupEntry) -> ShortcutBackupEntry) = transform(setOf(id), change)
@@ -196,7 +277,9 @@ internal class ShortcutBackupRepository private constructor(private val context:
     fun export(output: OutputStream) {
         val state = reconcile()
         // Device-local marker generations and in-flight callback tokens are never exported.
-        ShortcutBackupArchive.write(ShortcutBackupState(entries = state.entries.map { it.copy(requestToken = null, notified = false) }), output)
+        ShortcutBackupArchive.write(ShortcutBackupState(entries = state.entries.map {
+            it.copy(requestToken = null, notified = false, iconNoticeShown = false)
+        }), output)
     }
 
     fun import(input: InputStream): List<String> {
@@ -204,7 +287,7 @@ internal class ShortcutBackupRepository private constructor(private val context:
         incoming.entries.forEach {
             require(it.id != MARKER_ID)
             // Decode before modifying any local state, in addition to the archive bounds checks.
-            requireNotNull(BitmapFactory.decodeByteArray(it.icon, 0, it.icon.size)) { "Invalid shortcut icon" }.recycle()
+            it.icon?.let { icon -> requireNotNull(BitmapFactory.decodeByteArray(icon, 0, icon.size)) { "Invalid shortcut icon" }.recycle() }
         }
         synchronized(this) {
             val state = ShortcutBackupPolicy.merge(reconcile(), incoming.entries)
