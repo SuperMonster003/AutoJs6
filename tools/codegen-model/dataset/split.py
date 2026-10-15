@@ -4,7 +4,9 @@
 Hash-sort atomic screen families, then allocate 70/15/15 by largest remainders.
 Eight families yield 6/1/1, so a three-percentage-point ratio bound is impossible.
 Report actual family AND group ratios; never split seeds to improve a ratio.
-Real apps are held exclusively in real-test, regardless of their screen family.
+Real apps go to real-train or real-test by a per-app hash threshold (roadmap D25), regardless of
+their screen family. Each app is assigned on its own, so adding apps never moves an existing app,
+and a real-test app never enters training.
 """
 
 import argparse
@@ -24,12 +26,15 @@ if __package__ in (None, ""):
 from dataset.task_io import load_group, nonempty_string, parse_json, private_path, read_json, write_json
 
 
-SPLITS = ("train", "valid", "test", "real-test")
+SPLITS = ("train", "valid", "test", "real-test", "real-train")
 RATIOS = (0.70, 0.15, 0.15)
 FAMILIES = ("SELF", "SELF_INDEX", "ANCHOR_PATH", "ANCHOR_SEARCH", "CONTAINER_ITEMS", "SELF_RELATIVE")
 # Feature schemas the host can extract or project; schema 2 added the relative family (roadmap D22).
 SUPPORTED_FEATURE_SCHEMAS = (1, 2)
 HASH_NAMESPACE = "autojs6.codegen.family-split.v1"
+REAL_HASH_NAMESPACE = "autojs6.codegen.real-app-split.v1"
+# Fraction of real applications held out for real-test (D25); the rest may train.
+REAL_TEST_FRACTION = 0.5
 
 
 def sha256(path):
@@ -43,6 +48,12 @@ def sha256(path):
 def content_hash(value):
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
                                      separators=(",", ":"), allow_nan=False).encode("utf-8")).hexdigest()
+
+
+def real_app_split(app):
+    """A stable per-app assignment: the first 64 hash bits as a fraction of 2^64, below the threshold for real-test."""
+    point = int(hashlib.sha256((REAL_HASH_NAMESPACE + "\0" + app).encode("utf-8")).hexdigest()[:16], 16) / 2**64
+    return "real-test" if point < REAL_TEST_FRACTION else "real-train"
 
 
 def assign_splits(groups):
@@ -60,7 +71,7 @@ def assign_splits(groups):
     for split, count in zip(SPLITS, counts):
         family_splits.update((family, split) for family in ordered[offset:offset + count])
         offset += count
-    return {group["groupId"]: ("real-test" if group["source"] == "real" else family_splits[group["screenFamily"]])
+    return {group["groupId"]: (real_app_split(group["app"]) if group["source"] == "real" else family_splits[group["screenFamily"]])
             for group in sorted(groups, key=lambda item: item["groupId"])}
 
 
@@ -382,14 +393,17 @@ def build_dataset(inputs, *, output, dataset_id, provenance_path=None, labels_pa
         "splits": statistics,
         "splitPolicy": {
             "algorithm": "sha256-ranked-screen-family-largest-remainder-v1", "namespace": HASH_NAMESPACE,
-            "fixtureUnit": "screenFamily", "realUnit": "app", "realDestination": "real-test",
+            "fixtureUnit": "screenFamily", "realUnit": "app",
+            "realAlgorithm": "sha256-app-threshold-v1", "realNamespace": REAL_HASH_NAMESPACE,
+            "realTestFraction": REAL_TEST_FRACTION,
             "targetFamilyRatios": dict(zip(SPLITS, RATIOS)),
             "actualFamilyRatios": {split: len(statistics[split]["screenFamilies"]) / fixture_families if fixture_families else 0
                                    for split in SPLITS[:3]},
             "actualGroupRatios": {split: statistics[split]["groups"] / fixture_groups if fixture_groups else 0 for split in SPLITS[:3]},
             "note": "Atomic families are never divided by seed. Eight families round to 6/1/1 (75/12.5/12.5%). "
                     "Group ratios can differ further when family sizes differ. Freeze this manifest before training; "
-                    "adding families can change hash-ranked assignments.",
+                    "adding families can change hash-ranked assignments. Real apps are assigned one by one, "
+                    "so adding apps never moves an existing app between real-train and real-test.",
         },
         "artifacts": {
             "labels": _artifact(labels_path, "Run CodeGenDatasetExportTask to generate labels.jsonl and rules.jsonl"),

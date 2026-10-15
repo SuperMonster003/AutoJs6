@@ -41,6 +41,7 @@ class CodeGenDatasetExportTask {
 internal object DatasetExporter {
     private val gson = GsonBuilder().disableHtmlEscaping().serializeNulls().create()
     private val artifactNames = listOf("labels.jsonl", "rules.jsonl", "features.csv", "features.json", "export-manifest.json")
+    private val REAL_SPLITS = setOf("real-train", "real-test")
 
     data class FailedState(val stateId: String, val mutations: List<String>, val rejection: Rejected)
     data class Label(
@@ -105,7 +106,7 @@ internal object DatasetExporter {
         require(!datasetId.isNullOrBlank()) { "split-map requires datasetId" }
         val assignmentJson = splitJson.getAsJsonObject("assignment") ?: error("split-map requires assignment")
         val assignment = assignmentJson.entrySet().associate { (id, split) ->
-            require(split.isJsonPrimitive && split.asJsonPrimitive.isString && split.asString in setOf("train", "valid", "test", "real-test")) { "Unknown split for $id" }
+            require(split.isJsonPrimitive && split.asJsonPrimitive.isString && split.asString in setOf("train", "valid", "test", "real-train", "real-test")) { "Unknown split for $id" }
             id to split.asString
         }
         require(assignment.keys == tasks.map { it.first }.toSet()) { "split-map must contain exactly the exported task groups" }
@@ -133,12 +134,14 @@ internal object DatasetExporter {
                             }
                             require(group.groupId == groupId) { "Task identity changed during export" }
                             val split = assignment.getValue(groupId)
+                            // Real applications are split by app into real-train and real-test (roadmap D25).
+                            // zh-CN: 真实应用按应用划分为 real-train 与 real-test (路线图 D25).
                             if (group.source == "real") {
-                                require(split == "real-test") { "Real application groups belong only in real-test" }
+                                require(split in REAL_SPLITS) { "Real application groups belong only in real-train or real-test" }
                                 FeatureExport.requirePrivate(file)
                                 FeatureExport.requirePrivate(output)
                             } else {
-                                require(split != "real-test") { "Fixture groups cannot enter real-test" }
+                                require(split !in REAL_SPLITS) { "Fixture groups cannot enter real-train or real-test" }
                                 val previous = familySplits.putIfAbsent(group.screenFamily, split)
                                 require(previous == null || previous == split) { "A screen family must not cross dataset splits" }
                             }

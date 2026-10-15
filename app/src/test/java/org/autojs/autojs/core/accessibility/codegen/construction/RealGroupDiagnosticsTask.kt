@@ -37,10 +37,10 @@ import java.security.MessageDigest
  * fourth experiment's frozen rule search, construction policy and final rankers on every private
  * group, records each candidate's observed survival in the later states, and optionally verifies
  * hand-written probe plans. The output is reading evidence inside `CODEGEN_PRIVATE_DIR`; it is not a
- * selection protocol, real groups stay in `real-test` and nothing here admits a policy or ranker.
+ * selection protocol. It reads real-train and real-test applications alike (D25) and trains, admits or promotes nothing.
  * zh-CN: 维护者标注的真实应用任务组 (P2.5) 的显式离线诊断. 对每个私有任务组运行第四轮冻结的规则搜索,
  * 构造策略与终局排序器, 记录每个候选在后续状态的观测存活, 并可验证手写探针计划. 输出仅是放在
- * `CODEGEN_PRIVATE_DIR` 内的阅读证据, 不构成选择协议: 真实任务组只属于 real-test, 此处不录用任何策略或排序器.
+ * `CODEGEN_PRIVATE_DIR` 内的阅读证据, 不构成选择协议: 同样读取 real-train 与 real-test 的应用 (D25), 此处不训练, 不录用也不推广任何策略或排序器.
  */
 class RealGroupDiagnosticsTask {
     @Test fun runOfflineRealGroupDiagnostics() {

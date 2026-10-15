@@ -205,14 +205,18 @@ def fit_dataset(dataset, output, *, iterations=256, depth=6, seed=DEFAULT_SEED,
     parameters = training_parameters(iterations=iterations, depth=depth, seed=seed,
                                      early_stopping_rounds=early_stopping_rounds)
     output = _output_path(dataset, output)
-    train_rows, valid_rows = dataset.rows_for("train"), dataset.rows_for("valid")
-    if not train_rows or not valid_rows:
+    # Real-train applications join fitting (roadmap D25); early stopping stays on fixture valid.
+    fixture_rows, real_rows = dataset.rows_for("train"), dataset.rows_for("real-train")
+    train_rows, valid_rows = fixture_rows + real_rows, dataset.rows_for("valid")
+    if not fixture_rows or not valid_rows:
         raise ValueError("Both train and valid must contain observed action rows")
+    fitted_splits = tuple((split, rows) for split, rows in (("train", fixture_rows), ("real-train", real_rows), ("valid", valid_rows)) if rows)
     # Resolve every fitted label before any dependency is imported or any file is written.
     for row in (*train_rows, *valid_rows):
         row_label(row, label)
-    if any(dataset.groups[row.group_id]["source"] != "fixture" for row in (*train_rows, *valid_rows)):
-        raise ValueError("Real application data cannot participate in fitting or early stopping")
+    if any(dataset.groups[row.group_id]["source"] != ("real" if dataset.groups[row.group_id]["split"] == "real-train" else "fixture")
+           for row in (*train_rows, *valid_rows)):
+        raise ValueError("Only real-train application data may participate in fitting; early stopping uses fixtures")
     # Parity uses train/valid vectors only. Even parity sampling cannot expose
     # held-out labels to fitting or influence selected hyperparameters.
     parity_rows = select_parity_rows((*train_rows, *valid_rows), parity_max_rows)
@@ -264,15 +268,15 @@ def fit_dataset(dataset, output, *, iterations=256, depth=6, seed=DEFAULT_SEED,
             "featureNamesHash": dataset.schema.names_hash, "featureCount": len(dataset.schema.names),
             "scoreSemantics": score_semantics, "labelSelection": label, "exportFormat": dataset.export_format,
             "parameters": parameters,
-            "resolvedParameters": model.get_all_params(), "splitsUsed": ["train", "valid"],
+            "resolvedParameters": model.get_all_params(),
+            "splitsUsed": ["train", "real-train", "valid"] if real_rows else ["train", "valid"],
             "paritySplits": ["train", "valid"], "weightPolicy": "uniform-state-action-row",
             "observationsUsedAsWeight": False,
             "labelMeaning": label_meaning,
-            "actions": {split: len(rows) for split, rows in (("train", train_rows), ("valid", valid_rows))},
-            "groups": {split: len({row.group_id for row in rows})
-                       for split, rows in (("train", train_rows), ("valid", valid_rows))},
+            "actions": {split: len(rows) for split, rows in fitted_splits},
+            "groups": {split: len({row.group_id for row in rows}) for split, rows in fitted_splits},
             "observationCountHistogram": {split: dict(sorted(Counter(str(row.observations) for row in rows).items()))
-                                          for split, rows in (("train", train_rows), ("valid", valid_rows))},
+                                          for split, rows in fitted_splits},
             "inputSha256": dataset.hashes, "exportMetadata": dataset.manifest,
             "startedAt": started_at, "completedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "elapsedSeconds": round(elapsed, 6), "treeCount": model.tree_count_,

@@ -130,8 +130,20 @@ class ConstructionDataTest(unittest.TestCase):
         self.fixture.groups[2]["screenFamily"] = "settings"
         self.fixture.groups[0]["source"] = "real"
         self.fixture.refresh()
-        with self.assertRaisesRegex(ValueError, "only be in real-test"):
+        with self.assertRaisesRegex(ValueError, "only be in real-train or real-test"):
             read_dataset(self.fixture.root)
+
+    def test_real_train_trajectories_are_read_without_screen_family_leaks(self):
+        # A real group named like the fixture valid family must not count as a family leak.
+        self.fixture.groups[1].update(source="real", split="real-train", screenFamily="settings")
+        for row in self.fixture.rows:
+            if row[1] == "g2":
+                row[0] = "real-train"
+        self.fixture.refresh()
+        with patch.dict(os.environ, {"CODEGEN_PRIVATE_DIR": self.temporary.name}):
+            dataset = read_dataset(self.fixture.root)
+            self.assertEqual({"g2"}, {row.group_id for row in dataset.rows_for("real-train")})
+            self.assertEqual({"g1"}, {row.group_id for row in dataset.rows_for("train")})
 
     def test_real_test_data_and_output_require_private_directory(self):
         self.fixture.groups[3].update(source="real", split="real-test")

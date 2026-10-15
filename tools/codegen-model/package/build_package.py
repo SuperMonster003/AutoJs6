@@ -303,7 +303,8 @@ def _manifest(binary, schema, dataset, training, metrics, *, model_id, version_c
                   "trees": len(parsed.trees), "depth": max(len(tree.features) for tree in parsed.trees),
                   "features": parsed.feature_count},
         "dataset": {"datasetId": _bounded_text(dataset.get("datasetId"), "datasetId"),
-                    "groups": _integer(training.get("groups", {}).get("train"), "training groups", 1, 2**31 - 1),
+                    "groups": _integer(training.get("groups", {}).get("train"), "training groups", 1, 2**31 - 1)
+                    + _integer(training.get("groups", {}).get("real-train", 0), "real-train groups", 0, 2**31 - 1),
                     "createdAt": _timestamp(dataset.get("generatedAt"), "dataset.createdAt")},
         "metrics": summary,
         "training": {"catboostVersion": _bounded_text(versions.get("catboost"), "CatBoost version"),
@@ -365,6 +366,11 @@ def _provenance(model_json_path, features_json_path, dataset_manifest_path, data
         empty = _integer(stats.get("groupsWithoutCandidates"), split + " empty groups", 0, groups)
         if training.get("groups", {}).get(split) != groups - empty:
             raise ValueError("Training group count differs from the dataset: " + split)
+    real_stats = dataset.get("splits", {}).get("real-train") or {"groups": 0, "groupsWithoutCandidates": 0}
+    real_groups = _integer(real_stats.get("groups"), "real-train dataset groups", 0, 2**31 - 1)
+    real_empty = _integer(real_stats.get("groupsWithoutCandidates"), "real-train empty groups", 0, real_groups)
+    if training.get("groups", {}).get("real-train", 0) != real_groups - real_empty:
+        raise ValueError("Training group count differs from the dataset: real-train")
     parsed = decode_model(binary)
     if (_integer(training.get("treeCount"), "training tree count", 1, MAX_TREES) != len(parsed.trees)
             or _integer(training.get("maximumTreeDepth"), "training maximum depth", 1, MAX_DEPTH)
@@ -372,8 +378,9 @@ def _provenance(model_json_path, features_json_path, dataset_manifest_path, data
         raise ValueError("Model tree dimensions differ from the training log")
 
 
-def model_card(manifest):
-    """Aggregate facts only; no selectors, group IDs, or snapshots enter the card."""
+def model_card(manifest, real_train=(0, 0)):
+    """Aggregate facts only; no selectors, group IDs, or snapshots enter the card.
+    [real_train] is the (groups, apps) count of real applications used in fitting (roadmap D25)."""
     def plain(value):
         return str(value).replace("\\", "\\\\").replace("`", "\\`").replace("|", "\\|")
 
@@ -391,8 +398,10 @@ def model_card(manifest):
               "It does not generate script text or bypass target validation. Inputs are the numeric Kotlin feature schema; "
               "the package contains no layout snapshots or captured text.\n\n"
             + "## Training\n\n"
-            + f"Dataset `{plain(manifest['dataset']['datasetId'])}`; {manifest['dataset']['groups']} training task groups. "
-              f"Dataset created at {plain(manifest['dataset']['createdAt'])}.\n\n"
+            + f"Dataset `{plain(manifest['dataset']['datasetId'])}`; {manifest['dataset']['groups']} training task groups"
+              + (f", of which {real_train[0]} come from {real_train[1]} real applications assigned to real-train. "
+                 "Real-test applications are disjoint from them and never enter training. " if real_train[0] else ". ")
+            + f"Dataset created at {plain(manifest['dataset']['createdAt'])}.\n\n"
             + f"CatBoost {plain(manifest['training']['catboostVersion'])}, Python {plain(manifest['training']['pythonVersion'])}; "
               f"training completed at {plain(manifest['training']['trainedAt'])}. "
               f"Host source commit `{manifest['training']['hostCommit']}`.\n\n"
@@ -410,6 +419,12 @@ def model_card(manifest):
               "Finite sampled changes cannot prove that a selector will remain valid in every future state.\n\n"
             + "Split thresholds and leaves are stored as float32; desktop/host parity must be checked before release. "
               "Packaging alone does not assert release-gate approval or verified official provenance.\n")
+
+
+def _real_train(dataset, training):
+    groups = training.get("groups", {}).get("real-train", 0)
+    apps = (dataset.get("splits", {}).get("real-train") or {}).get("apps") or {}
+    return groups, len(apps)
 
 
 def _archive(entries):
@@ -454,7 +469,7 @@ def build_package(model_json_path, features_json_path, dataset_manifest_path, tr
     if not license_bytes.decode("utf-8").strip():
         raise ValueError("Explicit license text must not be empty")
     entries = {"manifest.json": _json_bytes(manifest), "model.bin": binary, "features.json": schema_bytes,
-               "MODEL_CARD.md": model_card(manifest).encode("utf-8"), "LICENSE": license_bytes}
+               "MODEL_CARD.md": model_card(manifest, _real_train(dataset, training)).encode("utf-8"), "LICENSE": license_bytes}
     package = _archive(entries)
     output.parent.mkdir(parents=True, exist_ok=True)
     # Exclusive creation preserves an existing package even if another process

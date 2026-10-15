@@ -58,7 +58,9 @@ class DatasetFixture:
             (self.root / name).write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
         manifest = {"format": 1, "datasetId": "unit-fixture", "status": "complete", "groups": len(self.groups),
                     "candidates": len(self.rows), "generatorCommit": "a" * 40, "splits": {}, "artifacts": {}}
-        for split in ("train", "valid", "test", "real-test"):
+        # Like manifests written before D25, real-train is described only when a group uses it.
+        real_train = ("real-train",) if any(group["split"] == "real-train" for group in self.groups) else ()
+        for split in ("train", "valid", "test", "real-test", *real_train):
             groups = {group["groupId"] for group in self.groups if group["split"] == split}
             rows = [row for row in self.rows if row[0] == split]
             manifest["splits"][split] = {"groups": len(groups), "candidates": len(rows),
@@ -182,8 +184,29 @@ class TrainingDataTest(unittest.TestCase):
         self.fixture.groups[2]["screenFamily"] = "settings"
         self.fixture.groups[0]["source"] = "real"
         self.fixture.refresh()
-        with self.assertRaisesRegex(ValueError, "only be in real-test"):
+        with self.assertRaisesRegex(ValueError, "only be in real-train or real-test"):
             read_dataset(self.fixture.root)
+
+    def add_real_train_group(self):
+        self.fixture.groups.append({"groupId": "r1", "split": "real-train", "source": "real", "app": "private.app", "screenFamily": "login"})
+        self.fixture.rows.extend(["real-train", "r1", "p" + str(index), label, label, index / 2] for index, label in enumerate((0, 0.5, 1)))
+        self.fixture.refresh()
+
+    def test_real_train_applications_are_read_and_fixtures_cannot_enter_real_splits(self):
+        self.add_real_train_group()
+        with patch.dict(os.environ, {"CODEGEN_PRIVATE_DIR": self.temporary.name}):
+            dataset = read_dataset(self.fixture.root)
+            # A real screen family may share a fixture family name without leaking it.
+            self.assertEqual({"r1"}, set(dataset.grouped_rows("real-train")))
+            self.assertEqual({"g1", "g2"}, set(dataset.grouped_rows("train")))
+        self.fixture.groups[0]["split"] = "real-train"
+        for row in self.fixture.rows:
+            if row[1] == "g1":
+                row[0] = "real-train"
+        self.fixture.refresh()
+        with patch.dict(os.environ, {"CODEGEN_PRIVATE_DIR": self.temporary.name}):
+            with self.assertRaisesRegex(ValueError, "Fixture data cannot be in real-train"):
+                read_dataset(self.fixture.root)
 
     def test_unknown_split_and_group_are_rejected(self):
         self.fixture.rows[0][0] = "future"
@@ -301,6 +324,16 @@ class TrainingDataTest(unittest.TestCase):
             self.assertEqual(raw["oblivious_trees"], canonical["oblivious_trees"])
             self.assertEqual(raw["features_info"], canonical["features_info"])
             self.assertEqual(raw["scale_and_bias"], canonical["scale_and_bias"])
+
+    @unittest.skipUnless(os.environ.get("CODEGEN_TEST_TRAINING") == "1", "set CODEGEN_TEST_TRAINING=1 in Python 3.12 training venv")
+    def test_actual_catboost_training_fits_real_train_but_stops_early_on_fixtures(self):
+        self.add_real_train_group()
+        with patch.dict(os.environ, {"CODEGEN_PRIVATE_DIR": self.temporary.name}):
+            dataset = read_dataset(self.fixture.root)
+            log = fit_dataset(dataset, Path(self.temporary.name) / "with-real-train", iterations=20, early_stopping_rounds=5)
+        self.assertEqual(["train", "real-train", "valid"], log["splitsUsed"])
+        self.assertEqual({"train": 2, "valid": 1, "real-train": 1}, log["groups"])
+        self.assertEqual(3, log["candidates"]["real-train"])
 
 
 class TrainingPolicyTest(unittest.TestCase):

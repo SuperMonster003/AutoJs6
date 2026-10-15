@@ -248,6 +248,34 @@ class PackageBuildTest(unittest.TestCase):
         self.assertEqual("2026-10-03T00:01:00Z", manifest["training"]["trainedAt"])
         self.assertEqual(hashlib.sha256(GOLDEN).hexdigest(), manifest["model"]["sha256"])
 
+    def with_real_train(self, dataset_groups, training_groups):
+        dataset = read_json(self.fixture.root / "dataset-manifest.json")
+        dataset["splits"]["real-train"] = {"groups": dataset_groups, "groupsWithoutCandidates": 0,
+                                           "apps": {"a.private.app": 2, "b.private.app": dataset_groups - 2}}
+        write_json(self.fixture.root / "dataset-manifest.json", dataset)
+        digest = sha256(self.fixture.root / "dataset-manifest.json")
+        training, metrics = read_json(self.fixture.root / "train-log.json"), read_json(self.fixture.root / "metrics.json")
+        training["inputSha256"]["manifest"] = metrics["datasetHashes"]["manifest"] = digest
+        if training_groups is None:
+            training["groups"].pop("real-train", None)
+        else:
+            training["groups"]["real-train"] = training_groups
+        write_json(self.fixture.root / "train-log.json", training)
+        write_json(self.fixture.root / "metrics.json", metrics)
+
+    def test_real_train_groups_are_counted_and_disclosed_in_aggregate(self):
+        self.with_real_train(3, 3)
+        manifest = self.fixture.build("real.ajcgm")
+        self.assertEqual(5, manifest["dataset"]["groups"])
+        with zipfile.ZipFile(self.fixture.root / "real.ajcgm") as archive:
+            card = archive.read("MODEL_CARD.md").decode()
+        self.assertIn("of which 3 come from 2 real applications assigned to real-train", card)
+        self.assertNotIn("private.app", card)
+        for training_groups in (2, None):
+            self.with_real_train(3, training_groups)
+            with self.assertRaisesRegex(ValueError, "real-train"):
+                self.fixture.build("mismatch.ajcgm")
+
     def test_corrupt_provenance_cannot_produce_a_package(self):
         cases = [("train-log.json", "inputSha256", "manifest", "0" * 64),
                  ("train-log.json", "inputSha256", "schema", "0" * 64),

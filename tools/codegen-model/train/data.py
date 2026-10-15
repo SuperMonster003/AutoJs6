@@ -15,7 +15,9 @@ from dataset.split import SUPPORTED_FEATURE_SCHEMAS
 from dataset.task_io import nonempty_string, parse_json, private_path, read_json, require_fields
 
 
-SPLITS = ("train", "valid", "test", "real-test")
+SPLITS = ("train", "valid", "test", "real-test", "real-train")
+# Real applications are split by app (roadmap D25): real-train may join fitting, real-test only evaluates.
+REAL_SPLITS = ("real-train", "real-test")
 PREFIX = ("split", "groupId", "planKey", "label")
 # Kotlin exporters whose provenance is accepted: the original rule-search candidate export and the
 # merged rule + construction candidate export of the construction experiments (same features/labels).
@@ -195,12 +197,12 @@ def _split_groups(split_map):
         app = nonempty_string(group.get("app"), "app")
         family = nonempty_string(group.get("screenFamily"), "screenFamily")
         if source == "real":
-            if split != "real-test":
-                raise ValueError("Real application data must only be in real-test")
+            if split not in REAL_SPLITS:
+                raise ValueError("Real application data must only be in real-train or real-test")
             apps.setdefault(app, set()).add(split)
         elif source == "fixture":
-            if split == "real-test":
-                raise ValueError("Fixture data cannot be in real-test")
+            if split in REAL_SPLITS:
+                raise ValueError("Fixture data cannot be in real-train or real-test")
             families.setdefault(family, set()).add(split)
         else:
             raise ValueError("Unknown data source")
@@ -303,7 +305,11 @@ def read_dataset(dataset_dir):
     for split in SPLITS:
         group_ids = {group_id for group_id, group in groups.items() if group["split"] == split}
         selected = [row for row in rows if row.split == split]
-        stats = manifest.get("splits", {}).get(split, {})
+        stats = manifest.get("splits", {}).get(split)
+        # Manifests written before D25 have no real-train entry; it can only describe zero groups.
+        if stats is None and split == "real-train" and not group_ids:
+            continue
+        stats = stats or {}
         if (stats.get("groups") != len(group_ids) or stats.get("candidates") != len(selected)
                 or stats.get("groupsWithoutCandidates") != len(group_ids - {row.group_id for row in selected})):
             raise ValueError("Dataset manifest split counts do not match: " + split)

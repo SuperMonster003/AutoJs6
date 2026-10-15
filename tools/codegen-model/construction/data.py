@@ -14,7 +14,9 @@ from dataset.task_io import nonempty_string, private_path, read_json, require_fi
 from train.data import sha256
 
 
-SPLITS = ("train", "valid", "test", "real-test")
+SPLITS = ("train", "valid", "test", "real-test", "real-train")
+# Real applications are split by app (roadmap D25): real-train may join fitting, real-test only evaluates.
+REAL_SPLITS = ("real-train", "real-test")
 PREFIX = ("split", "groupId", "stateKey", "actionKey", "label", "observations")
 # Format 2 adds the best observed continuation beside the mean; features follow unchanged.
 PREFIX_V2 = ("split", "groupId", "stateKey", "actionKey", "label", "labelBest", "observations")
@@ -125,14 +127,15 @@ def _groups(manifest):
         if split not in SPLITS:
             raise ValueError("Unknown split in the construction manifest")
         if source == "real":
-            if split != "real-test":
-                raise ValueError("Real application data must only be in real-test")
+            if split not in REAL_SPLITS:
+                raise ValueError("Real application data must only be in real-train or real-test")
         elif source == "fixture":
-            if split == "real-test":
-                raise ValueError("Fixture data cannot be in real-test")
+            if split in REAL_SPLITS:
+                raise ValueError("Fixture data cannot be in real-train or real-test")
+            # Real screen family names are free text and may coincide with fixture families.
+            families.setdefault(family, set()).add(split)
         else:
             raise ValueError("Unknown construction data source")
-        families.setdefault(family, set()).add(split)
         groups[group_id] = group
     if any(len(splits) != 1 for splits in families.values()):
         raise ValueError("Screen family leaked across splits")

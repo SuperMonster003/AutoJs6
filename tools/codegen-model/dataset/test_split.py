@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from dataset.split import assign_splits, build_dataset, main, sha256
+from dataset.split import assign_splits, build_dataset, main, real_app_split, sha256
 from dataset.task_io import read_json, write_json
 
 
@@ -104,12 +104,21 @@ class SplitTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exceeds 2%"):
             self.build()
 
-    def test_all_real_apps_stay_exclusively_in_real_test(self):
-        groups = [group(f"r{index}", f"screen{index % 3}", "real", f"real.app{index % 2}") for index in range(10)]
+    def test_real_apps_are_split_by_app_and_never_move_when_apps_are_added(self):
+        apps = [f"real.app{index}" for index in range(40)]
+        sides = {app: real_app_split(app) for app in apps}
+        # Both sides occur, roughly half each, and the assignment is a pure function of the app.
+        self.assertEqual({"real-train", "real-test"}, set(sides.values()))
+        self.assertTrue(10 <= list(sides.values()).count("real-test") <= 30)
+        groups = [group(f"r{index}", f"screen{index % 3}", "real", apps[index % 4]) for index in range(12)]
         groups += [group("fixture", "screen0")]
         assigned = assign_splits(groups)
-        self.assertTrue(all(assigned[data["groupId"]] == "real-test" for data in groups[:-1]))
-        self.assertNotEqual("real-test", assigned["fixture"])
+        for data in groups[:-1]:
+            self.assertEqual(sides[data["app"]], assigned[data["groupId"]])
+        self.assertNotIn(assigned["fixture"], ("real-train", "real-test"))
+        # Adding further applications and groups leaves every earlier assignment unchanged.
+        more = assign_splits(groups + [group(f"x{index}", "screen9", "real", app) for index, app in enumerate(apps[4:])])
+        self.assertEqual(assigned, {key: more[key] for key in assigned})
 
     def test_pending_artifacts_have_null_hash_and_no_placeholder_files(self):
         self.task(group("g"))

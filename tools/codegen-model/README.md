@@ -125,7 +125,8 @@ up-to-date result. Without `CODEGEN_DATASET_DIR`, normal unit-test runs skip thi
 Optional `CODEGEN_DATASET_OUTPUT_DIR` selects another output directory. For real input, keep
 the input and all exported artifacts inside `CODEGEN_PRIVATE_DIR`, outside Git worktrees.
 `CODEGEN_SPLIT_MAP` can select another frozen split-map file; its assignment must cover exactly
-the exported groups, preserve complete fixture families, and put every real group in `real-test`.
+the exported groups, preserve complete fixture families, and put every real group in `real-train`
+or `real-test` (never a fixture group).
 
 The exporter writes deterministic `labels.jsonl`, `rules.jsonl`, `features.csv`, `features.json`,
 and `export-manifest.json`. The CSV columns are `split,groupId,planKey,label` followed by the 75
@@ -177,14 +178,15 @@ The tool copies snapshots only when needed to keep relative references below the
 and only within the private directory. Raw layouts, tasks, labels, and split maps from real apps
 stay private. The initial automated dataset contains controlled fixture data only; completing
 this annotation tool does not mean the roadmap's suggested real-app evaluation sample has been
-collected. Real application groups belong exclusively in `real-test` at this stage.
+collected. Real application groups are split by app into `real-train` and `real-test` (roadmap D25).
 
 ### Diagnose labelled real groups offline
 
 `RealGroupDiagnosticsTask` runs the fourth experiment's frozen rule search, construction policy
 and final rankers on every `.cgtask.json` below a private directory, records each candidate's
 observed survival in the later states, and verifies optional hand-written probe plans. It is
-reading evidence only: real groups stay in `real-test` and nothing is admitted or promoted.
+reading evidence only: it reads real-train and real-test applications alike and trains, admits or
+promotes nothing.
 
 ```powershell
 $env:CODEGEN_PRIVATE_DIR = 'D:\codegen-private'
@@ -231,9 +233,13 @@ this eight-family dataset; tests verify the target tolerance with sufficiently m
 verify the exact rounding for eight. The manifest records actual family and group ratios. Freeze
 the split map before training; introducing new families can change hash-ranked assignments.
 
-Real application tasks always go to independent `real-test`, grouped by app. For a dataset that
-contains any real tasks, all combined labels, features, split maps, and manifests must also stay
-in `CODEGEN_PRIVATE_DIR`. Publish only separately reviewed aggregate reports.
+Real application tasks are split by app (roadmap D25): each app goes to `real-test` when the first
+64 bits of `sha256("autojs6.codegen.real-app-split.v1\0" + app)`, read as a fraction of 2^64, are
+below 0.5, and to `real-train` otherwise. Every app is assigned on its own, so collecting more apps
+never moves an existing app, and a `real-test` app can never have been used for training. For a
+dataset that contains any real tasks, all combined labels, features, split maps, and manifests must
+also stay in `CODEGEN_PRIVATE_DIR`. Publish only separately reviewed aggregate reports. Manifests
+written before D25 have no `real-train` entry; readers treat it as empty.
 
 ## Train a candidate model
 
@@ -249,7 +255,8 @@ py -3.12 -m venv tools/codegen-model/out/venv-py312
 
 The default is CPU `CatBoostRanker`, YetiRank, symmetric depth-6 trees, at most 1,024 iterations,
 seed `20261003`, one thread, learning rate `0.05`, and validation `NDCG:top=1` early stopping
-after 64 non-improving iterations. Only train and valid participate in fitting and early stopping.
+after 64 non-improving iterations. Fixture train and `real-train` participate in fitting; early
+stopping uses fixture valid only, and `real-test` is used only for evaluation.
 The first dataset's observed labels `0 / 0.5 / 1` become grades `0 / 1 / 2`. Other survival
 fractions remain valid for evaluation but require an explicit future training-grade policy;
 the current trainer rejects them instead of silently changing their meaning.

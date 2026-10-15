@@ -154,6 +154,22 @@ class CodeGenDatasetExporterTest {
     }
 
     @Test
+    fun fixtureGroupsCannotEnterEitherRealApplicationSplit() {
+        val input = input()
+        DatasetExporter.export(input)
+        val split = File(input, "split-map.json")
+        val original = split.readText()
+        for (destination in listOf("real-train", "real-test")) {
+            val json = JsonParser.parseString(original).asJsonObject
+            json.getAsJsonObject("assignment").addProperty("manual-shuffle", destination)
+            split.writeText(json.toString())
+            val failure = assertThrows(IllegalArgumentException::class.java) { DatasetExporter.export(input) }
+            assertEquals("Fixture groups cannot enter real-train or real-test", failure.message)
+        }
+        split.writeText(original)
+    }
+
+    @Test
     fun missingSplitUnknownGroupsAndFamilyLeakageDoNotOverwriteExports() {
         val input = input()
         DatasetExporter.export(input)

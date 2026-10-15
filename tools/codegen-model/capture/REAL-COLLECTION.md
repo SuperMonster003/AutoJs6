@@ -120,7 +120,7 @@ CODEGEN_PRIVATE_DIR/
         task.cgtask.json              完成后导出的 format 1 真实任务
 ```
 
-任务使用现有 `source: real` / `.cgtask.json` 契约, 可以由 `TaskGroup`、候选导出和 `RealGroupDiagnosticsTask` 直接读取。给后续工具指定 `CODEGEN_PRIVATE_DIR\collector\groups` 即可递归读取新任务; 原有任务目录可继续单独使用。助手不运行模型评估或训练, 不打开预留留出集, 不改变真实数据默认用于 `real-test` 的现有约定。后续离线诊断步骤见 [工具总说明](../README.md#diagnose-labelled-real-groups-offline)。
+任务使用现有 `source: real` / `.cgtask.json` 契约, 可以由 `TaskGroup`、候选导出和 `RealGroupDiagnosticsTask` 直接读取。给后续工具指定 `CODEGEN_PRIVATE_DIR\collector\groups` 即可递归读取新任务; 原有任务目录可继续单独使用。助手不运行模型评估或训练, 也不打开预留留出集。导出数据集时, 真实任务按应用包名的固定哈希分到 `real-train` 或 `real-test` (路线图 D25), 同一应用只在一侧, `real-test` 的应用永不进入训练。后续离线诊断步骤见 [工具总说明](../README.md#diagnose-labelled-real-groups-offline)。
 
 电脑端临时文件也放在私有目录。手机端的启动脚本和配置短暂放在 `Download/autojs6-codegen-bootstrap/<本次编号>`; 它们让 AutoJs6 自己创建可访问的应用目录, 避免部分设备上 ADB 创建的目录被拒绝访问。原始布局临时保存在 AutoJs6 自身的 `Android/data/org.autojs.autojs6/files/codegen-real/<本次编号>` 内, 传回并校验后释放; 退出助手会等待工作脚本停止并清理本次协议文件。仍在运行的手机脚本在闲置 2 分钟后自行退出并删除待传输布局。强制杀死手机进程或设备断电会阻止退出清理, 此时可以在设备恢复后检查上述本次编号目录。所有清理仅限本次创建的文件。
 

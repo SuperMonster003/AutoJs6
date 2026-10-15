@@ -130,13 +130,17 @@ def fit_dataset(dataset, output, *, iterations=1024, seed=DEFAULT_SEED, early_st
         raise ValueError("Training output must be separate from the frozen dataset")
     if any(group["source"] == "real" for group in dataset.groups.values()):
         private_path(output)
-    train_rows, valid_rows = dataset.rows_for("train"), dataset.rows_for("valid")
-    if not train_rows or not valid_rows:
+    # Real-train applications join fitting (roadmap D25); early stopping stays on fixture valid,
+    # and real-test applications never reach this point.
+    fixture_rows, real_rows = dataset.rows_for("train"), dataset.rows_for("real-train")
+    train_rows, valid_rows = fixture_rows + real_rows, dataset.rows_for("valid")
+    if not fixture_rows or not valid_rows:
         raise ValueError("Both train and valid must contain candidate rows")
     # Validation precedes dependency loading and any filesystem mutation.
     for row in (*train_rows, *valid_rows):
-        if dataset.groups[row.group_id]["source"] != "fixture":
-            raise ValueError("Real application data cannot participate in fitting or early stopping")
+        expected = "real" if dataset.groups[row.group_id]["split"] == "real-train" else "fixture"
+        if dataset.groups[row.group_id]["source"] != expected:
+            raise ValueError("Only real-train application data may participate in fitting; early stopping uses fixtures")
         survival_grade(row.survival)
     versions = _dependencies()
     import catboost
@@ -179,12 +183,14 @@ def fit_dataset(dataset, output, *, iterations=1024, seed=DEFAULT_SEED, early_st
             "parameters": parameters,
             "resolvedParameters": model.get_all_params(),
             "labelGrades": {"0": 0, "0.5": 1, "1": 2},
-            "splitsUsed": ["train", "valid"],
-            "candidates": {"train": len(train_rows), "valid": len(valid_rows)},
-            "groups": {"train": len({row.group_id for row in train_rows}),
-                       "valid": len({row.group_id for row in valid_rows})},
+            "splitsUsed": ["train", "real-train", "valid"] if real_rows else ["train", "valid"],
+            "candidates": {"train": len(fixture_rows), "valid": len(valid_rows),
+                           **({"real-train": len(real_rows)} if real_rows else {})},
+            "groups": {"train": len({row.group_id for row in fixture_rows}),
+                       "valid": len({row.group_id for row in valid_rows}),
+                       **({"real-train": len({row.group_id for row in real_rows})} if real_rows else {})},
             "gradeCounts": {split: dict(sorted(Counter(str(survival_grade(row.survival)) for row in rows).items()))
-                            for split, rows in (("train", train_rows), ("valid", valid_rows))},
+                            for split, rows in (("train", fixture_rows), ("real-train", real_rows), ("valid", valid_rows)) if rows},
             "inputSha256": dataset.hashes,
             "generatorCommit": dataset.manifest.get("generatorCommit"),
             "exportGeneratorCommit": read_json(dataset.artifact_path("export"))["generatorCommit"],
