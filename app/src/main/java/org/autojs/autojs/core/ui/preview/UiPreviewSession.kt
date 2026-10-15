@@ -250,10 +250,24 @@ internal class UiPreviewSession(
         }
         lastElementCount = tracking.lastDocumentElementCount
         var snapshot: ByteArray? = null
-        if (failure == null && isSnapshot) {
-            layoutOffscreen()
-            snapshot = drawSnapshot()
-            reportBounds()
+        if (failure == null) {
+            // A measure and layout pass at the session size before the window's own traversal: a view whose
+            // measure throws (DatePicker's calendar on Android 7 under an exact-size parent) fails the layout
+            // here instead of the host's main thread, and the content is dropped so the traversal never sees it.
+            // zh-CN: 在窗口自己的遍历之前先按会话尺寸测量布局一遍: 某个 View 在测量时抛出 (Android 7 的 DatePicker
+            // 日历在精确尺寸父容器下) 时在这里判为布局失败而不是让宿主主线程崩溃, 并移除内容, 遍历不会再碰到它.
+            try {
+                layoutOffscreen()
+                if (isSnapshot) {
+                    snapshot = drawSnapshot()
+                    reportBounds()
+                }
+            } catch (e: Throwable) {
+                failure = UiPreviewFailures.classify(e, -1, null, xml)
+                Log.w(TAG, "[$id] layout pass failed: ${failure.code}: ${failure.message}")
+                root.removeAllViews()
+                records.clear()
+            }
         }
         val elapsed = SystemClock.elapsedRealtime() - startedAt
         if (failure == null) {
