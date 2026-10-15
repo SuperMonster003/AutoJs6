@@ -105,6 +105,41 @@ moves to its Trash first.
 Error codes: `UNSUPPORTED_CONTRACT_VERSION`, `INVALID_REQUEST`, `INVALID_OPTIONS` (including a regular
 expression that does not compile), `LIMIT_EXCEEDED`, `INTERNAL_ERROR`.
 
+## Plan semantics
+
+The official plugin (plugin roadmap P2) computes every item in request order:
+
+1. Items excluded by the caller, or by `includeFiles`, `includeFolders` and `includeSubfolders` (depth above 0),
+   keep their names (`excluded`).
+2. The `target` part is the name stem, the extension or the whole name. Only files have an extension: the text
+   after the last dot, unless that dot leads (`.bashrc`) or ends the name. An item without the part, or whose part
+   does not match the search, is `unchanged` / `noMatch`. An empty `search` lets every included item take part
+   without a replacement, so formatting and cleanup alone apply.
+3. The variables of `replace` are expanded for the item: counters `${}` and `${start=X;increment=X;padding=X}`
+   (from 0, advancing only for items whose name changes, before conflicts are decided), the date and time
+   variables `$YYYY` ... `$f` (24-hour clock, month and weekday names in `locale`, standalone forms), and
+   `${rstringalnum=N}`, `${rstringalpha=N}`, `${rstringdigit=N}` (N from 1 to 256) and `${ruuidv4}`. Variables of
+   disabled options and text that does not parse stay literal. `$$` is a literal `$` and keeps the following text
+   from being read as a variable (`$$YYYY` gives `$YYYY`). With `regex` the remaining text keeps its replacement
+   patterns; without it the replacement is literal.
+4. The replacement, text formatting and the cleanup options (normalization, half-width conversion, sanitizing,
+   trimming, in this order) apply to the part, which is joined back; an empty extension leaves no dot.
+5. An unchanged result is `unchanged` / `sameName`; the rest is validated and checked for conflicts.
+
+`conflict` and `invalid` items carry the rejected candidate in `newName` for previews; only `rename` items are
+executed. Under `number` the pattern goes before the extension (`photo (1).jpg`) and the numbers start at 1; under
+`skip`, `number` and `overwrite` the first of several items that compute the same name keeps it, and `overwrite`
+never replaces another item of the batch. Items that keep their names keep occupying them, so a refusal can make
+other items conflict as well.
+
+`twoPhase` marks a case-only change in a case-insensitive directory and every rename whose new name another
+renamed item of the batch still holds (chains, swaps and cycles). The executor moves all `twoPhase` items to
+temporary names first, so it never depends on the order of the remaining renames.
+
+Every regular expression evaluation (compile, test or replace) gets one second and a whole plan thirty seconds;
+running out answers `LIMIT_EXCEEDED`, which stops catastrophic backtracking. On Android 7.x (API 24 / 25) the
+Rhino build cannot parse Unicode property escapes (`\p{...}`) and answers `INVALID_OPTIONS`.
+
 ## Limits
 
 | Limit | Value |
@@ -135,5 +170,6 @@ The character budget keeps one request far below the Binder transaction buffer; 
 ## Status
 
 The contract (host commit `aa4fd4f6d`), Explorer Action v25 (`95c9f0455`), the Plugin Center
-registration and `BatchRenamePluginHost` are in place. The plugin engine (plugin roadmap P2), the host executor, journal and script API (P3) and the
-plugin service and screen (P4) follow.
+registration, `BatchRenamePluginHost` and the rename dialog "More" menu (`26656b7c4`) are in place, and the
+official plugin answers `plan` with its engine (plugin roadmap P2). `BatchRenamePluginRoundTripTest` runs requests
+through an installed plugin. The host executor, journal and script API (P3) and the plugin screen (P4) follow.
