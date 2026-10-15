@@ -117,6 +117,7 @@ internal object ExplorerActionLauncher {
                     action.descriptor.playbackProgress ||
                     action.descriptor.relatedFileSuffixes.isNotEmpty() ||
                     action.descriptor.targetTrash ||
+                    action.descriptor.targetRename ||
                     targets.size > 1 ||
                     targets.any { target -> target.kind == ExplorerActionValues.TARGET_DIRECTORY }
                 )
@@ -144,6 +145,7 @@ internal object ExplorerActionLauncher {
                 allowPlaybackProgress = action.descriptor.playbackProgress,
                 relatedFileSuffixes = action.descriptor.relatedFileSuffixes,
                 allowTargetTrash = action.descriptor.targetTrash,
+                allowTargetRename = action.descriptor.targetRename,
             )
         } else {
             null

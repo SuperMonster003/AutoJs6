@@ -147,4 +147,33 @@ interface IExplorerActionHostSession {
      * exist at session creation. Appended to preserve every v1-v21 Binder transaction code.
      */
     ParcelFileDescriptor openRelatedFile(String targetId, String suffix);
+
+    /**
+     * v25. For an action that declared `targetRename`: pages the entries of the common parent
+     * directory of the request targets, names and kinds only, with the case-folding and restricted
+     * character traits of its file system, so the plugin can detect name conflicts. No entry it
+     * lists becomes readable. Appended to preserve every v1-v24 Binder transaction code.
+     */
+    Bundle listRenameParent(int offset, int limit);
+
+    /**
+     * v25. For an action that declared `targetRename`: renames request targets, or descendants
+     * this session listed through listChildren, to new names in their own directories. The host
+     * revalidates every entry, never overwrites without `renameOverwrite`, records the call as one
+     * undoable batch scoped to this plugin and returns per-entry states.
+     */
+    Bundle renameEntries(in Bundle request);
+
+    /** v25. Returns one rename batch this plugin created through renameEntries. */
+    Bundle queryRenameBatch(String renameBatchId);
+
+    /** v25. Lists bounded recent rename batches this plugin created below the session targets. */
+    Bundle listRenameBatches();
+
+    /**
+     * v25. Restores the old names of one batch, newest entry first, for every entry that still has
+     * the name and identity the batch gave it; restored targets of the overwrite policy return from
+     * the host Trash. Best-effort per entry; occupied old names are never overwritten.
+     */
+    Bundle undoRenameBatch(String renameBatchId);
 }

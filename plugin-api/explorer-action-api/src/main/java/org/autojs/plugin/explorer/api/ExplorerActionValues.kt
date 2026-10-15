@@ -18,6 +18,11 @@ object ExplorerActionValues {
     const val PLACEMENT_OVERFLOW = 1
     const val PLACEMENT_PRIMARY = 2
     const val PLACEMENT_SELECTION_TOOLBAR = 3
+    /**
+     * v25. The "More" menu of the host's single-item rename dialog; requires
+     * [ExplorerActionCatalogKeys.TARGET_RENAME] and a single target.
+     */
+    const val PLACEMENT_RENAME_DIALOG = 4
 
     const val PRESENTATION_ACTIVITY = 1
     /** v5. The host renders a read-only archive session in its own Explorer UI. */

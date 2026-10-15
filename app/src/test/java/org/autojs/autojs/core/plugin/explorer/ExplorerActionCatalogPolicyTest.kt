@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.explorer
 
+import org.autojs.plugin.explorer.api.ExplorerActionCatalogKeys
 import org.autojs.plugin.explorer.api.ExplorerActionPluginPermissions
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerActionValues
@@ -778,6 +779,170 @@ class ExplorerActionCatalogPolicyTest {
     }
 
     @Test
+    fun protocolV25TargetRenameIsLimitedToReadOnlyActivitiesWithoutOtherSessionAuthority() {
+        fun renamer(
+            protocolVersion: Int = 25,
+            cardinality: Int? = ExplorerActionValues.CARDINALITY_MULTIPLE,
+            accessMode: Int = ExplorerActionValues.ACCESS_READ_ONLY,
+            placement: Int = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR,
+            presentation: Int? = null,
+            targetKind: Int = ExplorerActionValues.TARGET_MIXED,
+            mimeTypes: Collection<String>? = listOf("*/*"),
+            readSiblings: Boolean? = null,
+            playbackProgress: Boolean? = null,
+            relatedFileSuffixes: Collection<String>? = null,
+            filesystemPath: Boolean? = null,
+            targetTrash: Boolean? = null,
+            targetRename: Boolean? = true,
+        ) = descriptor(
+            protocolVersion = protocolVersion,
+            id = "batch-rename-selection",
+            targetKind = targetKind,
+            cardinality = cardinality,
+            accessMode = accessMode,
+            placement = placement,
+            presentation = presentation,
+            mimeTypes = mimeTypes,
+            readSiblings = readSiblings,
+            playbackProgress = playbackProgress,
+            relatedFileSuffixes = relatedFileSuffixes,
+            filesystemPath = filesystemPath,
+            targetTrash = targetTrash,
+            targetRename = targetRename,
+        )
+
+        // The three Batch Rename entries of roadmap D23: mixed selection, one directory and the rename dialog.
+        assertTrue(renamer()!!.targetRename)
+        val directory = renamer(
+            targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+            mimeTypes = emptyList(),
+        ) ?: error("Expected a valid v25 directory rename action")
+        assertTrue(directory.targetRename)
+        val dialog = renamer(
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            placement = ExplorerActionValues.PLACEMENT_RENAME_DIALOG,
+        ) ?: error("Expected a valid v25 rename dialog action")
+        assertEquals(ExplorerActionValues.PLACEMENT_RENAME_DIALOG, dialog.placement)
+        assertTrue(
+            renamer(targetKind = ExplorerActionValues.TARGET_FILE, placement = ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR)!!.targetRename,
+        )
+        // Absent or false keeps the pre-v25 meaning of the action.
+        assertFalse(renamer(targetRename = null)!!.targetRename)
+        assertFalse(renamer(targetRename = false)!!.targetRename)
+        assertFalse(renamer(protocolVersion = 24, targetRename = null)!!.targetRename)
+
+        // Every broader shape rejects the action instead of granting rename access.
+        assertNull(renamer(protocolVersion = 24))
+        assertNull(
+            renamer(
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+                accessMode = ExplorerActionValues.ACCESS_CREATE_IN_PARENT,
+            ),
+        )
+        assertNull(
+            renamer(
+                targetKind = ExplorerActionValues.TARGET_FILE,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+                accessMode = ExplorerActionValues.ACCESS_REPLACE_TARGET,
+            ),
+        )
+        assertNull(
+            renamer(
+                targetKind = ExplorerActionValues.TARGET_FILE,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                presentation = ExplorerActionValues.PRESENTATION_HOST_EXPLORER,
+            ),
+        )
+        assertNull(renamer(targetKind = ExplorerActionValues.TARGET_FILE, targetTrash = true))
+        assertNull(
+            renamer(
+                targetKind = ExplorerActionValues.TARGET_FILE,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                readSiblings = true,
+            ),
+        )
+        assertNull(
+            renamer(
+                targetKind = ExplorerActionValues.TARGET_FILE,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                playbackProgress = true,
+            ),
+        )
+        assertNull(
+            renamer(
+                targetKind = ExplorerActionValues.TARGET_FILE,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_PRIMARY,
+                relatedFileSuffixes = listOf(".srt"),
+            ),
+        )
+        assertNull(
+            renamer(
+                targetKind = ExplorerActionValues.TARGET_DIRECTORY,
+                cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+                placement = ExplorerActionValues.PLACEMENT_OVERFLOW,
+                mimeTypes = emptyList(),
+                filesystemPath = true,
+            ),
+        )
+        fun converter(targetRename: Boolean?) = descriptor(
+            protocolVersion = 25,
+            id = "convert-image",
+            mimeTypes = listOf("image/*"),
+            cardinality = ExplorerActionValues.CARDINALITY_SINGLE,
+            outputMode = ExplorerActionValues.OUTPUT_CREATE_SIBLING,
+            outputMimeTypes = listOf("image/png"),
+            outputNameSuffix = ".converted.png",
+            maxOutputBytes = 1024L,
+            targetRename = targetRename,
+        )
+        assertTrue(converter(targetRename = null) != null)
+        assertNull(converter(targetRename = true))
+    }
+
+    @Test
+    fun protocolV25RenameDialogPlacementOnlyHoldsSingleRenameActions() {
+        fun dialogAction(
+            protocolVersion: Int = 25,
+            cardinality: Int? = ExplorerActionValues.CARDINALITY_SINGLE,
+            targetRename: Boolean? = true,
+        ) = descriptor(
+            protocolVersion = protocolVersion,
+            id = "batch-rename-single",
+            targetKind = ExplorerActionValues.TARGET_MIXED,
+            cardinality = cardinality,
+            placement = ExplorerActionValues.PLACEMENT_RENAME_DIALOG,
+            mimeTypes = listOf("*/*"),
+            targetRename = targetRename,
+        )
+
+        val action = dialogAction() ?: error("Expected a valid rename dialog action")
+        assertNull("the rename dialog edits exactly one item", dialogAction(cardinality = ExplorerActionValues.CARDINALITY_MULTIPLE))
+        assertNull("only rename actions belong in the rename dialog", dialogAction(targetRename = null))
+        assertNull("older protocols have no rename dialog placement", dialogAction(protocolVersion = 24))
+
+        val file = ExplorerActionTarget(mimeType = "text/plain", extension = "txt", kind = ExplorerActionValues.TARGET_FILE, fileName = "a.txt")
+        val folder = ExplorerActionTarget(mimeType = "inode/directory", extension = "", kind = ExplorerActionValues.TARGET_DIRECTORY, fileName = "photos")
+        assertTrue(ExplorerActionCatalogPolicy.matches(action, file))
+        assertTrue(ExplorerActionCatalogPolicy.matches(action, folder))
+        assertFalse(ExplorerActionCatalogPolicy.matches(action, listOf(file, folder)))
+
+        assertTrue(ExplorerActionPolicy.allows(ExplorerSurface.MAIN_FILES, ExplorerActionEntryPoint.RENAME_DIALOG, action))
+        assertFalse(ExplorerActionPolicy.allows(ExplorerSurface.MAIN_FILES, ExplorerActionEntryPoint.OVERFLOW_MENU, action))
+        assertFalse(ExplorerActionPolicy.allows(ExplorerSurface.UNSPECIFIED, ExplorerActionEntryPoint.RENAME_DIALOG, action))
+        assertEquals(ExplorerActionValues.PLACEMENT_RENAME_DIALOG, ExplorerActionEntryPoint.RENAME_DIALOG.placement)
+        assertEquals(4, ExplorerActionValues.PLACEMENT_RENAME_DIALOG)
+        assertEquals("targetRename", ExplorerActionCatalogKeys.TARGET_RENAME)
+    }
+
+    @Test
     fun protocolV17AddsAnOverflowOnlyUnmatchedFileProbe() {
         val probe = descriptor(
             protocolVersion = 17,
@@ -1056,6 +1221,7 @@ class ExplorerActionCatalogPolicyTest {
         relatedFileSuffixes: Collection<String>? = null,
         filesystemPath: Boolean? = null,
         targetTrash: Boolean? = null,
+        targetRename: Boolean? = null,
         outputMode: Int? = null,
         outputMimeTypes: Collection<String>? = null,
         outputNameSuffix: String? = null,
@@ -1083,6 +1249,7 @@ class ExplorerActionCatalogPolicyTest {
             relatedFileSuffixes = relatedFileSuffixes,
             filesystemPath = filesystemPath,
             targetTrash = targetTrash,
+            targetRename = targetRename,
             outputMode = outputMode,
             outputMimeTypes = outputMimeTypes,
             outputNameSuffix = outputNameSuffix,

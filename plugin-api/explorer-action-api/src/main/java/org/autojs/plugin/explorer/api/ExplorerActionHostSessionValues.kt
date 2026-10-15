@@ -51,4 +51,25 @@ object ExplorerActionHostSessionValues {
 
     const val PLAYBACK_REPORT_PROGRESS = 1
     const val PLAYBACK_REPORT_COMPLETED = 2
+
+    // v25 rename batches.
+    /** Every entry was renamed. */
+    const val RENAME_BATCH_STATE_COMMITTED = 1
+    /** Some entries were renamed; the others were stale, in conflict or failed and kept their names. */
+    const val RENAME_BATCH_STATE_PARTIAL = 2
+    /** Nothing was renamed: an all-or-nothing request found an entry it could not rename. */
+    const val RENAME_BATCH_STATE_REJECTED = 3
+    /** The batch was undone; every renamed entry that was still unchanged got its old name back. */
+    const val RENAME_BATCH_STATE_RESTORED = 4
+    const val RENAME_BATCH_STATE_RECOVERY_REQUIRED = 5
+    const val RENAME_BATCH_STATE_UNKNOWN = 6
+
+    const val RENAME_ITEM_STATE_RENAMED = 1
+    /** Kept its name: the new name was taken, invalid or the rename failed. */
+    const val RENAME_ITEM_STATE_NOT_RENAMED = 2
+    /** Kept its name: the entry changed or disappeared after the plugin listed it. */
+    const val RENAME_ITEM_STATE_STALE = 3
+    const val RENAME_ITEM_STATE_RESTORED = 4
+    const val RENAME_ITEM_STATE_RECOVERY_REQUIRED = 5
+    const val RENAME_ITEM_STATE_UNKNOWN = 6
 }

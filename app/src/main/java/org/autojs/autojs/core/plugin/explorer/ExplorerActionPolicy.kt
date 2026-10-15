@@ -16,6 +16,8 @@ internal enum class ExplorerActionEntryPoint(
     MEDIA_INFO_DIALOG(ExplorerActionValues.PLACEMENT_PRIMARY),
     OVERFLOW_MENU(ExplorerActionValues.PLACEMENT_OVERFLOW),
     SELECTION_TOOLBAR(ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR),
+    /** v25: the "More" menu of the single-item rename dialog. zh-CN: 单项重命名对话框的 "更多" 菜单. */
+    RENAME_DIALOG(ExplorerActionValues.PLACEMENT_RENAME_DIALOG),
 }
 
 internal object ExplorerActionPolicy {

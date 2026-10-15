@@ -24,6 +24,8 @@ own viewer. The host code did not change for it.
   `filesystemPath` (v23) in particular replaces the session with a path and must stay unset here.
 - `targetTrash` (v24) is not available: it covers request files only, so the files a directory
   session lists can be browsed but not moved into the host Trash.
+- `targetRename` (v25) may be added: the session then renames the directory itself and the
+  descendants the plugin listed, in place and undoable (see `explorer-action-protocol-v25.md`).
 
 `ExplorerActionCatalogPolicyTest.protocolV12AcceptsAReadOnlyDirectoryOverflowActionWithoutMatchers`
 pins this shape.

@@ -27,4 +27,5 @@ android {
 
 dependencies {
     api(project(":plugin-api:common-plugin-api"))
+    testImplementation("junit:junit:4.13.2")
 }

@@ -58,4 +58,31 @@ object ExplorerActionHostSessionKeys {
     const val PLAYBACK_POSITION_MILLIS = "playbackPositionMillis"
     const val PLAYBACK_DURATION_MILLIS = "playbackDurationMillis"
     const val PLAYBACK_UPDATED_AT_MILLIS = "playbackUpdatedAtMillis"
+
+    // v25 target rename (docs/dev/explorer-action-protocol-v25.md).
+    /** ArrayList of Bundle: the entries of one `renameEntries` request or of a batch result. */
+    const val RENAME_ENTRIES = "renameEntries"
+    /** String: request target the entry belongs to; [RELATIVE_PATH] names a listed descendant, empty means the target. */
+    const val RENAME_TARGET_ID = "renameTargetId"
+    /** String: the new name, one path segment of at most `MAX_RENAME_NAME_BYTES` UTF-8 bytes. */
+    const val RENAME_NEW_NAME = "renameNewName"
+    /** Boolean: replace an existing entry of that name; the host moves it to its Trash first and restores it on undo. */
+    const val RENAME_OVERWRITE = "renameOverwrite"
+    /** Boolean request flag: revalidate every entry first and rename nothing when one fails. */
+    const val RENAME_ALL_OR_NOTHING = "renameAllOrNothing"
+    /** String: relative path of the entry after the rename, below the same request target. */
+    const val RENAME_NEW_RELATIVE_PATH = "renameNewRelativePath"
+    const val RENAME_ITEM_STATE = "renameItemState"
+    const val RENAME_BATCH_ID = "renameBatchId"
+    const val RENAME_BATCH_STATE = "renameBatchState"
+    const val RENAME_BATCHES = "renameBatches"
+    const val RENAME_BATCH_CREATED_AT = "renameBatchCreatedAt"
+    const val RENAME_BATCH_UPDATED_AT = "renameBatchUpdatedAt"
+    const val RENAME_RENAMED_COUNT = "renameRenamedCount"
+    const val RENAME_NOT_RENAMED_COUNT = "renameNotRenamedCount"
+    const val RENAME_RESTORED_COUNT = "renameRestoredCount"
+    /** Boolean of a `listRenameParent` page: names differing only in case collide in this file system. */
+    const val RENAME_CASE_INSENSITIVE = "renameCaseInsensitive"
+    /** Boolean of a `listRenameParent` page: the file system rejects `\ : * ? " < > |` in names. */
+    const val RENAME_RESTRICTED_CHARACTERS = "renameRestrictedCharacters"
 }

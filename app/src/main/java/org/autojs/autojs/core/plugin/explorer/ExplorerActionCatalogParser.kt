@@ -65,6 +65,7 @@ internal object ExplorerActionCatalogParser {
                 ),
                 filesystemPath = action.getBooleanOrNull(ExplorerActionCatalogKeys.FILESYSTEM_PATH),
                 targetTrash = action.getBooleanOrNull(ExplorerActionCatalogKeys.TARGET_TRASH),
+                targetRename = action.getBooleanOrNull(ExplorerActionCatalogKeys.TARGET_RENAME),
             ) ?: return@mapNotNull null
             descriptor.takeIf { actionIds.add(it.id) }
         }

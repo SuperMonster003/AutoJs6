@@ -27,6 +27,8 @@ internal data class ExplorerActionDescriptor(
     val filesystemPath: Boolean = false,
     /** v24: the host session may move request targets into the host Trash without output proof. */
     val targetTrash: Boolean = false,
+    /** v25: the host session may rename request targets and their listed descendants in place. */
+    val targetRename: Boolean = false,
 )
 
 internal data class ExplorerActionTarget(

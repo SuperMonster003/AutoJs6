@@ -45,6 +45,7 @@ internal object ExplorerActionCatalogPolicy {
         relatedFileSuffixes: Collection<String>? = null,
         filesystemPath: Boolean? = null,
         targetTrash: Boolean? = null,
+        targetRename: Boolean? = null,
     ): ExplorerActionDescriptor? {
         if (
             protocolVersion !in
@@ -100,6 +101,12 @@ internal object ExplorerActionCatalogPolicy {
             ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR ->
                 protocolVersion >= MULTI_TARGET_PROTOCOL_VERSION &&
                     normalizedCardinality == ExplorerActionValues.CARDINALITY_MULTIPLE
+            // v25: the "More" menu of the single-item rename dialog only offers rename actions.
+            // zh-CN: v25: 单项重命名对话框的 "更多" 菜单只提供重命名动作.
+            ExplorerActionValues.PLACEMENT_RENAME_DIALOG ->
+                protocolVersion >= TARGET_RENAME_PROTOCOL_VERSION &&
+                    normalizedCardinality == ExplorerActionValues.CARDINALITY_SINGLE &&
+                    targetRename == true
             else -> false
         }
         if (!placementSupported) return null
@@ -296,6 +303,28 @@ internal object ExplorerActionCatalogPolicy {
             return null
         }
 
+        // v25 target rename: a read-only Activity action without output or other session capability,
+        // so the only new authority is renaming request targets and listed descendants in place, undoable.
+        // zh-CN: v25 目标重命名仅限只读, 以 Activity 启动且不带输出或其他会话能力的动作, 新增的权限只是就地重命名请求目标及已列出的后代 (可撤销).
+        val normalizedTargetRename = targetRename == true
+        if (
+            normalizedTargetRename &&
+            (
+                protocolVersion < TARGET_RENAME_PROTOCOL_VERSION ||
+                    accessMode != ExplorerActionValues.ACCESS_READ_ONLY ||
+                    normalizedPresentation != ExplorerActionValues.PRESENTATION_ACTIVITY ||
+                    normalizedOutput.mode != ExplorerActionValues.OUTPUT_NONE ||
+                    normalizedProbeForActionId != null ||
+                    normalizedFilesystemPath ||
+                    normalizedTargetTrash ||
+                    normalizedReadSiblings ||
+                    normalizedPlaybackProgress ||
+                    normalizedRelatedFileSuffixes.isNotEmpty()
+                )
+        ) {
+            return null
+        }
+
         return ExplorerActionDescriptor(
             protocolVersion = protocolVersion,
             id = normalizedId,
@@ -321,6 +350,7 @@ internal object ExplorerActionCatalogPolicy {
             relatedFileSuffixes = normalizedRelatedFileSuffixes,
             filesystemPath = normalizedFilesystemPath,
             targetTrash = normalizedTargetTrash,
+            targetRename = normalizedTargetRename,
         )
     }
 
@@ -359,7 +389,8 @@ internal object ExplorerActionCatalogPolicy {
         if (
             descriptor.placement != ExplorerActionValues.PLACEMENT_OVERFLOW &&
             descriptor.placement != ExplorerActionValues.PLACEMENT_PRIMARY &&
-            descriptor.placement != ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR
+            descriptor.placement != ExplorerActionValues.PLACEMENT_SELECTION_TOOLBAR &&
+            descriptor.placement != ExplorerActionValues.PLACEMENT_RENAME_DIALOG
         ) {
             return false
         }
@@ -526,4 +557,5 @@ internal object ExplorerActionCatalogPolicy {
     private const val RELATED_FILE_PROTOCOL_VERSION = 22
     private const val FILESYSTEM_PATH_PROTOCOL_VERSION = 23
     private const val TARGET_TRASH_PROTOCOL_VERSION = 24
+    private const val TARGET_RENAME_PROTOCOL_VERSION = 25
 }

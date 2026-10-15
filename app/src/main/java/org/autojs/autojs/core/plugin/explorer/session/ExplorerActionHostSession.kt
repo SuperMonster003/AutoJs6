@@ -52,6 +52,7 @@ internal class ExplorerActionHostSession private constructor(
     private val allowReplaceTarget: Boolean,
     private val allowReplacementUndo: Boolean,
     private val allowTargetTrash: Boolean,
+    private val allowTargetRename: Boolean,
     allowReadSiblings: Boolean,
     allowPlaybackProgress: Boolean,
     relatedFileSuffixes: Set<String>,
@@ -779,6 +780,42 @@ internal class ExplorerActionHostSession private constructor(
     override fun openRelatedFile(targetId: String, suffix: String): ParcelFileDescriptor? {
         enforceCaller()
         return inputAccess.openRelatedFile(targetId, suffix)
+    }
+
+    // v25 target rename (docs/dev/explorer-action-protocol-v25.md). The transactions and their access
+    // rule exist now; the executor and the undo journal they delegate to arrive with Batch Rename
+    // roadmap P3.1, and until then every call fails instead of guessing.
+    // zh-CN: v25 目标重命名. 事务与访问规则已就位; 其委托的执行器与撤销日志随 Batch Rename 路线图 P3.1 落地, 在此之前每次调用都直接失败.
+
+    override fun listRenameParent(offset: Int, limit: Int): Bundle {
+        enforceTargetRenameAccess()
+        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+    }
+
+    override fun renameEntries(request: Bundle): Bundle {
+        enforceTargetRenameAccess()
+        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+    }
+
+    override fun queryRenameBatch(renameBatchId: String): Bundle {
+        enforceTargetRenameAccess()
+        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+    }
+
+    override fun listRenameBatches(): Bundle {
+        enforceTargetRenameAccess()
+        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+    }
+
+    override fun undoRenameBatch(renameBatchId: String): Bundle {
+        enforceTargetRenameAccess()
+        throw UnsupportedOperationException(TARGET_RENAME_UNAVAILABLE)
+    }
+
+    private fun enforceTargetRenameAccess() {
+        enforceCaller()
+        check(allowTargetRename) { "Explorer Action does not have target rename access" }
+        synchronized(lock) { checkOpen() }
     }
 
     override fun queryTargetTrashBatch(targetTrashBatchId: String): Bundle {
@@ -1891,6 +1928,8 @@ internal class ExplorerActionHostSession private constructor(
 
     companion object {
         private const val DIRECTORY_MIME_TYPE = "inode/directory"
+        private const val TARGET_RENAME_UNAVAILABLE =
+            "Explorer Action target rename is not available in this AutoJs6 build yet"
         private const val OUTPUT_TREE_MARKER_PREFIX = ExplorerActionOutputPathPolicy.OUTPUT_TREE_MARKER_PREFIX
         private val PROCESS_INSTANCE_ID = UUID.randomUUID().toString()
         private val CLIENT_DEATH_EXECUTOR = Executors.newSingleThreadExecutor { runnable ->
@@ -1907,6 +1946,7 @@ internal class ExplorerActionHostSession private constructor(
             allowReplaceTarget: Boolean = false,
             allowReplacementUndo: Boolean = false,
             allowTargetTrash: Boolean = false,
+            allowTargetRename: Boolean = false,
             allowReadSiblings: Boolean = false,
             allowPlaybackProgress: Boolean = false,
             relatedFileSuffixes: Set<String> = emptySet(),
@@ -1929,6 +1969,12 @@ internal class ExplorerActionHostSession private constructor(
                     (!allowCreateOutput && !allowReplaceTarget && selectedOutputDirectory == null),
             ) {
                 "Explorer Action target Trash is available only to read-only sessions"
+            }
+            require(
+                !allowTargetRename ||
+                    (!allowCreateOutput && !allowReplaceTarget && !allowTargetTrash && selectedOutputDirectory == null),
+            ) {
+                "Explorer Action target rename is available only to read-only sessions without Trash access"
             }
             val canonicalParent = commonParent.canonicalFile
             val outputDirectory = selectedOutputDirectory?.canonicalFile
@@ -1966,6 +2012,7 @@ internal class ExplorerActionHostSession private constructor(
                 allowReplaceTarget = allowReplaceTarget,
                 allowReplacementUndo = allowReplacementUndo,
                 allowTargetTrash = allowTargetTrash,
+                allowTargetRename = allowTargetRename,
                 allowReadSiblings = allowReadSiblings,
                 allowPlaybackProgress = allowPlaybackProgress,
                 relatedFileSuffixes = relatedFileSuffixes,

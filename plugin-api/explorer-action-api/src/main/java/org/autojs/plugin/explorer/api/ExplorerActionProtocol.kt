@@ -1,7 +1,7 @@
 package org.autojs.plugin.explorer.api
 
 object ExplorerActionProtocol {
-    const val VERSION = 24
+    const val VERSION = 25
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 
@@ -38,6 +38,14 @@ object ExplorerActionProtocol {
     const val MAX_TARGET_TRASH_BATCH_RESULTS = 32
     const val MAX_TARGET_TRASH_ITEM_RESULTS = MAX_TARGETS_PER_REQUEST
     const val MAX_TARGET_REPLACEMENT_HISTORY_ID_LENGTH = 128
+    /** v25. Entries of one `renameEntries` request (request targets and their listed descendants). */
+    const val MAX_RENAME_ENTRIES_PER_REQUEST = 2_000
+    /** v25. Opaque rename batch ID. */
+    const val MAX_RENAME_BATCH_ID_LENGTH = 128
+    /** v25. Rename batches `listRenameBatches` returns; the host keeps at most this many per plugin. */
+    const val MAX_RENAME_BATCH_RESULTS = 20
+    /** v25. UTF-8 bytes of one new name, a single path segment. */
+    const val MAX_RENAME_NAME_BYTES = 255
     const val MAX_ARCHIVE_SESSION_ID_LENGTH = 128
     const val MAX_ARCHIVE_ENTRY_ID_LENGTH = 128
     const val MAX_ARCHIVE_DISPLAY_NAME_LENGTH = 4_096

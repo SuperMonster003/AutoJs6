@@ -55,4 +55,14 @@ object ExplorerActionCatalogKeys {
      * history. Directories, siblings and other files below the parent stay out of reach.
      */
     const val TARGET_TRASH = "targetTrash"
+
+    /**
+     * v25 optional. Valid only for a read-only Activity action without output, unmatched-file
+     * probe, `filesystemPath` or `targetTrash`; files, directories and mixed selections are all
+     * allowed. The host session then renames request targets, and descendants the plugin listed
+     * through `listChildren`, within their own directories when the plugin asks through
+     * `renameEntries`, records every call as an undoable batch and never moves an entry to another
+     * directory. Required for [ExplorerActionValues.PLACEMENT_RENAME_DIALOG].
+     */
+    const val TARGET_RENAME = "targetRename"
 }
