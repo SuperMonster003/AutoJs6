@@ -225,7 +225,8 @@ class ConstructionPolicyModelTest {
                     require(it.isJsonPrimitive && it.asJsonPrimitive.isNumber) { "Parity feature must be numeric" }
                     it.asFloat
                 }.toFloatArray()
-                assertEquals(ConstructionFeatures.names.size, features.size)
+                // Schema 1 or schema 2 (round five), as the policy declares. zh-CN: 按策略声明为 schema 1 或 schema 2 (第五轮).
+                assertEquals(policy.model.featureCount, features.size)
                 assertTrue(features.all(Float::isFinite))
                 val expected = record["expectedScore"].asDouble
                 assertTrue(expected.isFinite())
