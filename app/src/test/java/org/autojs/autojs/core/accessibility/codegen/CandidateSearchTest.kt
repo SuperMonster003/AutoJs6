@@ -202,11 +202,31 @@ class CandidateSearchTest {
         // A nested "Play" would make the upward relation always true and the sibling one merely positional.
         assertTrue(relative.toString(), relative.none { target in verifier.match(requireNotNull(it.plan.relativeMatch)) })
         val best = RuleRanker().rank(request, result.candidates).first().plan
-        assertEquals(PlanStep.Match(SelectorSpec(Condition("desc", mines))), best.steps.last())
-        // After scrolling one card, the same game is first and the next card's Play button becomes visible.
-        val scrolled = shelf(mines to true, sudoku to true, fruit to false)
-        val later = CodeGenRequest(listOf(scrolled.find("play0")))
+        // The stable first line, including its line break, replaces the changing "Last played" line.
+        assertEquals(PlanStep.Match(SelectorSpec(Condition("descStartsWith", "Mines\n"))), best.steps.last())
+        // Later the shelf scrolls, a similarly named game appears in front and the play time changes.
+        val scrolled = shelf("Mines Pro\nLast played 2 weeks ago" to true, "Mines\nLast played 14 weeks ago" to true, sudoku to false)
+        val later = CodeGenRequest(listOf(scrolled.find("play1")))
         assertTrue("$best", PlanVerifier(scrolled).verify(later, best) is Verified)
+    }
+
+    @Test
+    fun multiLineContentOffersItsFirstLineWithoutRedundantCombinations() {
+        assertEquals("Google\n", CandidateSearch.firstLine("Google\n29 MB\nUpdated 5 days ago\n"))
+        assertEquals(null, CandidateSearch.firstLine("Google"))
+        assertEquals(null, CandidateSearch.firstLine("Google\n"))
+        assertEquals(null, CandidateSearch.firstLine(" \nGoogle"))
+        val root = FakeUiNode.root {
+            child("google") { desc = "Google\n29 MB\nUpdated 5 days ago"; text = "Google\nUpdate"; className = "android.view.View" }
+            child("drive") { desc = "Google Drive\n10 MB\nUpdated 1 day ago"; text = "Google Drive\nUpdate"; className = "android.view.View" }
+        }
+        val result = CandidateSearch(root).search(CodeGenRequest(listOf(root.find("google"))))
+        val conditions = result.candidates.map { it.plan.selector.conditions }
+        assertTrue(conditions.toString(), listOf(Condition("descStartsWith", "Google\n")) in conditions)
+        assertTrue(conditions.toString(), listOf(Condition("textStartsWith", "Google\n")) in conditions)
+        // An exact value already implies its prefix, so no selector carries both.
+        assertTrue(conditions.none { spec -> spec.any { it.attr == "desc" } && spec.any { it.attr == "descStartsWith" } })
+        assertTrue(conditions.none { spec -> spec.any { it.attr == "text" } && spec.any { it.attr == "textStartsWith" } })
     }
 
     @Test

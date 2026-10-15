@@ -142,6 +142,23 @@ class RuleRankerTest {
     }
 
     @Test
+    fun firstLinePrefixesCostSlightlyMoreThanExactValuesButLessThanChangingOnes() {
+        val root = FakeUiNode.root {
+            child("stable") { desc = "Settings\nNetwork and internet"; text = "Settings\nNetwork and internet" }
+            child("changing") { desc = "Google\n29 MB"; text = "Google\n29 MB" }
+        }
+        val verifier = PlanVerifier(root)
+        val stable = CodeGenRequest(listOf(root.find("stable")))
+        val stablePlans = listOf(self("desc", "Settings\nNetwork and internet"), self("descStartsWith", "Settings\n"),
+            self("text", "Settings\nNetwork and internet"), self("textStartsWith", "Settings\n"))
+        assertEquals(stablePlans, ranker.rank(stable, stablePlans.reversed().map { verified(verifier, stable, it) }).map { it.plan })
+        val changing = CodeGenRequest(listOf(root.find("changing")))
+        val changingPlans = listOf(self("descStartsWith", "Google\n"), self("textStartsWith", "Google\n"), self("desc", "Google\n29 MB"), self("text", "Google\n29 MB"))
+        assertEquals(changingPlans, ranker.rank(changing, changingPlans.reversed().map { verified(verifier, changing, it) }).map { it.plan })
+        assertTrue(changingPlans.flatMap { it.selector.conditions }.none(RuleRanker::isStructural))
+    }
+
+    @Test
     fun changingTextAndDescriptionLoseToStableAlternatives() {
         val root = FakeUiNode.root {
             child("target") { text = "Pay 19"; desc = "Pay 19"; className = "android.widget.Button" }

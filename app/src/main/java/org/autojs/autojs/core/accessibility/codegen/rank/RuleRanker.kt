@@ -79,12 +79,16 @@ class RuleRanker : Ranker {
             facts.pathUpLevels.toLong() + facts.pathChildSteps + facts.pathSiblingSteps + facts.receiverUpLevels
 
         internal fun isStructural(condition: Condition): Boolean =
-            condition.attr !in setOf("id", "desc", "text", "className", "packageName")
+            condition.attr !in setOf("id", "desc", "descStartsWith", "text", "textStartsWith", "className", "packageName")
 
+        // A first-line prefix is slightly broader than the exact value, but escapes changing later lines.
+        // zh-CN: 首行前缀比精确值略宽泛, 但不受后续行变化的影响.
         private fun conditionCost(condition: Condition): Long = when (condition.attr) {
             "id" -> if (isFullId(condition.value)) 1L else 2L
             "desc" -> 4L
+            "descStartsWith" -> 5L
             "text" -> 6L
+            "textStartsWith" -> 7L
             "packageName" -> 7L
             "className" -> 8L
             else -> 16L

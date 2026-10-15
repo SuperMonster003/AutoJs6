@@ -463,8 +463,14 @@ class CandidateSearch<N : UiNode<N>>(
                 val entry = fullId.substringAfterLast(":id/")
                 add(Condition("id", if ((idPackages[entry]?.size ?: 0) > 1) fullId else entry))
             }
-            if (Attr.DESC in request.attributes) node.desc()?.takeIf(String::isNotEmpty)?.let { add(Condition("desc", it)) }
-            if (Attr.TEXT in request.attributes) node.text().takeIf(String::isNotEmpty)?.let { add(Condition("text", it)) }
+            if (Attr.DESC in request.attributes) node.desc()?.takeIf(String::isNotEmpty)?.let { desc ->
+                add(Condition("desc", desc))
+                firstLine(desc)?.let { add(Condition("descStartsWith", it)) }
+            }
+            if (Attr.TEXT in request.attributes) node.text().takeIf(String::isNotEmpty)?.let { text ->
+                add(Condition("text", text))
+                firstLine(text)?.let { add(Condition("textStartsWith", it)) }
+            }
             node.className()?.takeIf(String::isNotEmpty)?.let { add(Condition("className", it)) }
             node.packageName()?.takeIf(String::isNotEmpty)?.let { add(Condition("packageName", it)) }
             for ((name, value) in listOf(
@@ -482,7 +488,10 @@ class CandidateSearch<N : UiNode<N>>(
         private fun specs(conditions: List<Condition>): Sequence<SelectorSpec> = sequence {
             val emitted = HashSet<SelectorSpec>()
             suspend fun SequenceScope<SelectorSpec>.emit(indices: List<Int>) {
-                val spec = SelectorSpec(indices.map(conditions::get))
+                val chosen = indices.map(conditions::get)
+                // An exact value already implies its own first-line prefix. zh-CN: 精确值已蕴含其首行前缀.
+                val attrs = chosen.mapTo(HashSet()) { it.attr }
+                val spec = SelectorSpec(chosen.filterNot { it.attr.endsWith(PREFIX) && it.attr.removeSuffix(PREFIX) in attrs })
                 if (emitted.add(spec)) yield(spec)
             }
             for (i in conditions.indices) emit(listOf(i))
@@ -511,6 +520,20 @@ class CandidateSearch<N : UiNode<N>>(
         internal const val SIBLING_RADIUS = 3
         /** Content nodes considered per relation. zh-CN: 每个关系考虑的内容节点数. */
         internal const val CONTENT_LIMIT = 8
-        private val CONTENT_ATTRS = setOf("id", "desc", "text")
+        private const val PREFIX = "StartsWith"
+        private val CONTENT_ATTRS = setOf("id", "desc", "descStartsWith", "text", "textStartsWith")
+
+        /**
+         * The first line of a multi-line value including its line break, so that "Google\n" does not also
+         * match "Google Drive\n"; null for single-line values and when nothing follows the first line.
+         * A later line often carries changing details such as sizes, counts or relative times.
+         * zh-CN: 多行值的首行 (含换行符, 使 "Google\n" 不会同时匹配 "Google Drive\n"); 单行值或首行之后没有内容时为 null.
+         * 后续行常含大小, 数量或相对时间等会变化的细节.
+         */
+        internal fun firstLine(value: String): String? {
+            val end = value.indexOf('\n')
+            if (end < 0 || end == value.lastIndex) return null
+            return value.substring(0, end + 1).takeIf(String::isNotBlank)
+        }
     }
 }
