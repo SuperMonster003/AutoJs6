@@ -99,6 +99,29 @@ class AidlPluginHost<I : IInterface>(
         }
     }
 
+    /**
+     * [discover], then wakes the packages whose service failed to bind and that [shouldWake] accepts (see
+     * [PluginDiscoveryRecovery]) and discovers those packages once more; services that still fail keep their error.
+     * zh-CN: 先 [discover], 再唤醒服务绑定失败且 [shouldWake] 接受的包 (见 [PluginDiscoveryRecovery]), 并对这些包重新发现一次;
+     * 仍然失败的服务保留其错误.
+     */
+    suspend fun discoverWakingFailures(
+        context: Context,
+        recovery: PluginDiscoveryRecovery,
+        shouldWake: (String) -> Boolean,
+    ): List<Discovered> {
+        val first = discover(context)
+        val wake = recovery.packagesToWake(first, { it.serviceInfo.packageName }, { it.error != null }, shouldWake)
+        if (wake.isEmpty()) return first
+        first.filter { it.error != null && it.serviceInfo.packageName in wake }.forEach { invalidateService(it.serviceInfo, it.error!!) }
+        val woken = wake.filter { PluginWakeManager.tryAutoWakeIfNeeded(context, it) }
+        if (woken.isEmpty()) return first
+        Log.i(tag, "discover: woke ${woken.joinToString()} after failed bindings")
+        delay(retryWakeDelayMs)
+        val again = woken.flatMap { discover(context, it) }
+        return PluginDiscoveryRecovery.merge(first, again, { ComponentName(it.serviceInfo.packageName, it.serviceInfo.name) }, { it.error != null })
+    }
+
     suspend fun probe(context: Context, packageName: String): PluginInfo {
         if (!PluginTrustManager.isAuthorized(context, packageName)) {
             error("Plugin not authorized: $packageName")

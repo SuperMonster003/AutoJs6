@@ -18,7 +18,6 @@ import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.junit.After
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
-import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.ui.explorer.ExplorerRenameDialogMenu
 import org.autojs.autojs.ui.explorer.ExplorerRenameDialogMenuEntry
 import org.junit.Assert.assertEquals
@@ -65,9 +64,6 @@ class BatchRenameExplorerFlowTest {
             flags = flags or AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS or
                 AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
         }
-        // ColorOS refuses to bind a plugin that never ran; the Plugin Center "Activate" action wakes it the same way.
-        // zh-CN: ColorOS 拒绝绑定从未运行过的插件; 插件中心的 "激活" 也是这样唤醒它.
-        if (PluginWakeManager.tryAutoWakeIfNeeded(context, PLUGIN_PACKAGE)) SystemClock.sleep(WAKE_DELAY_MILLIS)
         runBlocking { ExplorerActionRegistry.refresh(context) }
     }
 
@@ -275,6 +271,5 @@ class BatchRenameExplorerFlowTest {
         const val LIST = "batchRename.list"
         const val ROW_PREFIX = "batchRename.row:"
         const val TIMEOUT_MILLIS = 60_000L
-        const val WAKE_DELAY_MILLIS = 1_000L
     }
 }

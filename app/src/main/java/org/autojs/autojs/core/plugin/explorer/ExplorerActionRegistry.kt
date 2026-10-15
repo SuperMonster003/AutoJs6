@@ -72,7 +72,7 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         }
         var discoveryClean = true
         val resolved = LinkedHashMap<String, ResolvedExplorerAction>()
-        ExplorerActionPluginHost.discover(appContext)
+        ExplorerActionPluginHost.discoverWakingFailures(appContext)
             .sortedWith(compareBy({ it.serviceInfo.packageName }, { it.serviceInfo.name }))
             .forEach candidateLoop@{ candidate ->
                 val packageName = candidate.serviceInfo.packageName
