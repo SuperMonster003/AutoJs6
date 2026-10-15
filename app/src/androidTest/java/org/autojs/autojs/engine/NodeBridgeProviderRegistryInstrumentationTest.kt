@@ -146,7 +146,8 @@ class NodeBridgeProviderRegistryInstrumentationTest {
                 NodeBridgeProviderStatus.DEGRADED,
             ),
         )
-        assertEquals("mlkit-ocr", healthById.getValue("ocr").details.getValue("defaultEngine"))
+        assertEquals("auto", healthById.getValue("ocr").details.getValue("defaultEngine"))
+        assertEquals("mlkit-ocr,paddle-ocr,rapid-ocr", healthById.getValue("ocr").details.getValue("automaticEngineOrder"))
         assertEquals("mlkit-barcode", healthById.getValue("barcode").details.getValue("defaultEngine"))
         assertTrue(healthById.getValue("barcode").details.getValue("liveMethods").contains("detectAll"))
         assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))

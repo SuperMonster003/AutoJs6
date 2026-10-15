@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/14 - Algunas funciones pasan a complementos; actualiza con precaución
+###### 2026/10/15 - Algunas funciones pasan a complementos; actualiza con precaución
 
 * `Sugerencia` Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas
 * `Sugerencia` El SDK de destino de las aplicaciones empaquetadas cambia de 29 a 37; el acceso al almacenamiento compartido y a la red local requiere los permisos exigidos por el sistema
@@ -285,6 +285,7 @@
 * `Mejora` pinyin4j admite distintos sistemas de romanización y consultas completas de pronunciación
 * `Mejora` opencc admite consulta de tipos de conversión, conversión por lotes y conversiones encadenadas
 * `Mejora` ocr selecciona motores disponibles en orden ML Kit/Paddle/Rapid por defecto y permite elegir explícitamente o volver a la selección automática
+* `Mejora` El módulo ocr invocado a través del puente del host (plugin Node.js y otras sesiones de plugins) selecciona un motor habilitado en orden ML Kit/Paddle/Rapid cuando no se indica ninguno, en lugar de exigir siempre el plugin ML Kit OCR
 * `Mejora` images.save/saveImage/compress/compressToBytes admiten cuantización PNG (conservando transparencia) y límites de píxeles y memoria (requiere Image Quantization)
 * `Mejora` images.readPixels admite parámetros ImageWrapper
 * `Mejora` images.matchTemplate/findPointByImage admiten scales; los resultados incluyen tamaño, escala y región

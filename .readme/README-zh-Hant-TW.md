@@ -190,7 +190,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 
 # v6.8.0
 
-###### 2026/10/14 - 部分功能外掛化, 謹慎升級
+###### 2026/10/15 - 部分功能外掛化, 謹慎升級
 
 * `提示` 部分內建功能改由獨立外掛提供 (如 OCR, 條碼識別, OpenCV, OpenCC, 拼音, MediaInfo, 終端及離線專案文件), 使用前需在外掛中心安裝並啟用對應外掛
 * `提示` 打包應用的目標 SDK 版本由 29 調整為 37, 共享儲存及本地網路訪問需按系統要求授權
@@ -469,6 +469,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `最佳化` pinyin4j 模組支援多種羅馬字方案及完整讀音查詢
 * `最佳化` opencc 模組支援轉換型別查詢, 批次轉換及鏈式轉換
 * `最佳化` ocr 模組預設按 ML Kit/Paddle/Rapid 順序選擇可用引擎, 並支援顯式指定或恢復自動選擇
+* `最佳化` Node.js 外掛程式等經宿主橋接呼叫的 ocr 模組在未指定 engine 時依 ML Kit/Paddle/Rapid 順序自動選擇已啟用的引擎, 不再固定要求 ML Kit OCR 外掛程式
 * `最佳化` images.save/saveImage/compress/compressToBytes 方法支援 PNG 量化選項 (保留透明度) 及畫素與記憶體限制 (需要 Image Quantization 外掛)
 * `最佳化` images.readPixels 方法支援 ImageWrapper 參數
 * `最佳化` images.matchTemplate/findPointByImage 方法支援 scales 選項, 匹配結果增加尺寸, 比例及區域資訊

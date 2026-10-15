@@ -190,7 +190,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/10/14 - Certaines fonctions passent par des plugins, mise à niveau avec prudence
+###### 2026/10/15 - Certaines fonctions passent par des plugins, mise à niveau avec prudence
 
 * `Astuce` Certaines fonctions intégrées sont désormais fournies par des plugins indépendants (OCR, reconnaissance de codes-barres, OpenCV, OpenCC, pinyin, MediaInfo, terminal et documentation hors ligne du projet); installez et activez les plugins correspondants dans le centre de plugins avant utilisation
 * `Astuce` Le SDK cible des applications empaquetées passe de 29 à 37; l'accès au stockage partagé et au réseau local nécessite les autorisations requises par le système
@@ -469,6 +469,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Plusieurs systèmes de romanisation et recherche complète des prononciations dans le module pinyin4j
 * `Amélioration` Consultation des types de conversion, conversion par lots et conversion chaînée dans le module opencc
 * `Amélioration` Le module ocr sélectionne par défaut un moteur disponible dans l'ordre ML Kit/Paddle/Rapid, avec choix explicite ou retour à la sélection automatique
+* `Amélioration` Le module ocr appelé via le pont de l'hôte (plugin Node.js et autres sessions de plugins) sélectionne un moteur activé dans l'ordre ML Kit/Paddle/Rapid lorsqu'aucun moteur n'est indiqué, au lieu d'exiger systématiquement le plugin ML Kit OCR
 * `Amélioration` Les méthodes images.save/saveImage/compress/compressToBytes acceptent des options de quantification PNG (avec transparence conservée) et des limites de pixels et mémoire (nécessite le plugin Image Quantization)
 * `Amélioration` La méthode images.readPixels accepte un paramètre ImageWrapper
 * `Amélioration` Les méthodes images.matchTemplate/findPointByImage acceptent l'option scales et ajoutent des informations de taille, échelle et zone aux résultats

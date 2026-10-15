@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/14 - 일부 기능 플러그인화, 신중하게 업데이트
+###### 2026/10/15 - 일부 기능 플러그인화, 신중하게 업데이트
 
 * `힌트` 일부 내장 기능 (OCR, 바코드 인식, OpenCV, OpenCC, Pinyin, MediaInfo, 터미널 및 오프라인 프로젝트 문서 등)을 독립 플러그인으로 제공하며, 사용 전에 플러그인 센터에서 해당 플러그인을 설치하고 활성화해야 함
 * `힌트` 패키징 앱의 대상 SDK가 29에서 37로 변경되며, 공유 저장소 및 로컬 네트워크 접근에는 시스템 요구에 따른 권한이 필요함
@@ -285,6 +285,7 @@
 * `개선` pinyin4j 모듈의 여러 로마자 방식 및 전체 발음 조회 지원
 * `개선` opencc 모듈의 변환 유형 조회, 일괄 변환 및 연쇄 변환 지원
 * `개선` ocr 모듈이 기본적으로 ML Kit/Paddle/Rapid 순으로 사용 가능한 엔진을 선택하며 명시 지정 및 자동 선택 복원 지원
+* `개선` 호스트 브리지를 통해 호출되는 ocr 모듈 (Node.js 플러그인 등 플러그인 세션) 이 engine 미지정 시 ML Kit/Paddle/Rapid 순으로 활성화된 엔진을 자동 선택하며 더 이상 ML Kit OCR 플러그인을 필수로 요구하지 않음
 * `개선` images.save/saveImage/compress/compressToBytes가 PNG 양자화 (투명도 유지), 픽셀 및 메모리 제한 지원 (Image Quantization 플러그인 필요)
 * `개선` images.readPixels 메서드의 ImageWrapper 인수 지원
 * `개선` images.matchTemplate/findPointByImage의 scales 옵션 지원, 결과에 크기, 비율 및 영역 정보 추가

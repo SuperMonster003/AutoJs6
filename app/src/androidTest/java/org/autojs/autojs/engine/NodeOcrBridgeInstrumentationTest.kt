@@ -11,6 +11,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import com.baidu.paddle.lite.ocr.R as PaddleOcrR
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -276,7 +277,11 @@ class NodeOcrBridgeInstrumentationTest {
         val ocrHealth = NodeBridgeProviderRegistry.androidHealth(NodePluginTestHarness.targetContext)
             .associateBy { it.definition.id }
             .getValue("ocr")
-        assumeTrue("MLKit OCR provider must be available for live OCR gate", ocrHealth.status == NodeBridgeProviderStatus.AVAILABLE)
+        assumeTrue("OCR provider must be available for live OCR gate", ocrHealth.status == NodeBridgeProviderStatus.AVAILABLE)
+        assumeTrue(
+            "ML Kit OCR plugin must be enabled for the ML Kit live OCR gate",
+            "mlkit-ocr" in OcrPluginHost.availableEngines(NodePluginTestHarness.targetContext),
+        )
 
         val workDir = File(NodePluginTestHarness.targetContext.cacheDir, "node-bridge-ocr-live").apply {
             deleteRecursively()
@@ -320,7 +325,7 @@ class NodeOcrBridgeInstrumentationTest {
             provider,
             module = "ocr",
             method = "recognize",
-            argsJson = JSONArray().put(handle).put(JSONObject().put("lang", "zh-CN")).toString(),
+            argsJson = JSONArray().put(handle).put(JSONObject().put("engine", "mlkit-ocr").put("lang", "zh-CN")).toString(),
             timeoutMs = 30_000L,
             permissions = listOf("ocr", "image"),
         )
@@ -336,7 +341,7 @@ class NodeOcrBridgeInstrumentationTest {
             provider,
             module = "ocr",
             method = "recognizeText",
-            argsJson = JSONArray().put(handle).put(JSONObject().put("lang", "zh-CN")).toString(),
+            argsJson = JSONArray().put(handle).put(JSONObject().put("engine", "mlkit-ocr").put("lang", "zh-CN")).toString(),
             timeoutMs = 30_000L,
             permissions = listOf("ocr", "image"),
         )
@@ -353,7 +358,7 @@ class NodeOcrBridgeInstrumentationTest {
             method = "detectTextBounds",
             argsJson = JSONArray()
                 .put(handle)
-                .put(JSONObject().put("lang", "zh-CN").put("region", JSONArray().put(0).put(0).put(handle.getInt("width")).put(handle.getInt("height"))))
+                .put(JSONObject().put("engine", "mlkit-ocr").put("lang", "zh-CN").put("region", JSONArray().put(0).put(0).put(handle.getInt("width")).put(handle.getInt("height"))))
                 .toString(),
             timeoutMs = 30_000L,
             permissions = listOf("ocr", "image"),
@@ -389,6 +394,61 @@ class NodeOcrBridgeInstrumentationTest {
         assertEquals("3", diagnostics["embedded_script.ocr_live_dispatch_count"])
         assertEquals("0", diagnostics["embedded_script.ocr_live_dispatch_failed_count"])
         assertEquals("0", diagnostics["embedded_script.ocr_service_destroy_cancel_count"])
+        provider.destroy(NodeBridgeError.processDead())
+    }
+
+    @Test
+    fun kotlinOcrLiveProviderSelectsEnabledEngineAutomatically() {
+        val context = NodePluginTestHarness.targetContext
+        val availableEngines = OcrPluginHost.availableEngines(context)
+        assumeTrue("At least one OCR plugin must be enabled for the automatic selection gate", availableEngines.isNotEmpty())
+
+        val ocrHealth = NodeBridgeProviderRegistry.androidHealth(context).associateBy { it.definition.id }.getValue("ocr")
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, ocrHealth.status)
+        assertEquals("auto", ocrHealth.details.getValue("defaultEngine"))
+        assertEquals(availableEngines.joinToString(","), ocrHealth.details.getValue("availableEngines"))
+
+        val workDir = File(context.cacheDir, "node-bridge-ocr-auto").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create OCR auto-selection working directory: $absolutePath" }
+        }
+        writeLiveOcrFixture(File(workDir, "ocr-auto.png"))
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(context, id = "ocr-auto-provider", sourceName = "ocr-auto-provider.cjs", cwd = workDir.absolutePath),
+        )
+        val read = dispatch(provider, module = "image", method = "readImage", argsJson = """["ocr-auto.png"]""", timeoutMs = 10_000L, permissions = listOf("image"))
+        assertTrue(read.toString(), read.ok)
+        val handle = JSONObject(read.resultJson.orEmpty())
+
+        fun recognizeWith(options: JSONObject): NodeBridgeResponse = dispatch(
+            provider,
+            module = "ocr",
+            method = "recognizeText",
+            argsJson = JSONArray().put(handle).put(options).toString(),
+            timeoutMs = 60_000L,
+            permissions = listOf("ocr", "image"),
+        )
+
+        // No engine: the first enabled plugin in ML Kit / Paddle / Rapid order answers, whichever it is.
+        val automatic = recognizeWith(JSONObject())
+        assertTrue("automatic selection with $availableEngines: $automatic", automatic.ok)
+        assertTrue("automatic selection returned no text: ${automatic.resultJson}", JSONArray(automatic.resultJson.orEmpty()).length() > 0)
+
+        // Explicit engines still filter: enabled ones answer, missing ones report an unavailable provider.
+        OcrPluginHost.AUTOMATIC_ENGINE_ORDER.forEach { engine ->
+            val explicit = recognizeWith(JSONObject().put("engine", engine))
+            if (engine in availableEngines) {
+                assertTrue("engine=$engine: $explicit", explicit.ok)
+                assertTrue("engine=$engine returned no text: ${explicit.resultJson}", JSONArray(explicit.resultJson.orEmpty()).length() > 0)
+            } else {
+                assertFalse("engine=$engine should be unavailable: $explicit", explicit.ok)
+                assertEquals("engine=$engine: $explicit", NodeBridgeErrorCategory.UNAVAILABLE, explicit.error?.category)
+            }
+        }
+
+        val recycle = dispatch(provider, module = "image", method = "recycle", argsJson = JSONArray().put(handle).toString(), permissions = listOf("image"))
+        assertTrue(recycle.toString(), recycle.ok)
         provider.destroy(NodeBridgeError.processDead())
     }
 

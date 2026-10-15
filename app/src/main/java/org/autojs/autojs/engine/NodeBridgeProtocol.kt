@@ -2290,14 +2290,17 @@ class AndroidNodeBridgeCapabilityProvider(
 
         thread(name = "AutoJs6NodeOcr-${request.id}", isDaemon = true) {
             val response = runCatching {
-                val ocrOptions = buildMlKitOcrPluginOptions(options)
+                val ocrOptions = buildOcrPluginOptions(options)
                 val results = runBlocking {
+                    // Without an explicit engine, pick the first enabled plugin in ML Kit / Paddle / Rapid
+                    // order, the same automatic selection accessibility.readScreenText uses.
                     val target = selectRecognitionProvider { OcrPluginHost.selectOrThrow(
                         context = appContext,
                         engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
-                        engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: MLKIT_OCR_ENGINE,
+                        engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE),
                         variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
-                        moduleLabel = MLKIT_OCR_MODULE_LABEL,
+                        moduleLabel = OCR_MODULE_LABEL,
+                        automatic = true,
                     ) }
                     OcrPluginHost.detect(appContext, target, ocrInput.bitmap, ocrOptions, callTimeoutMs = timeoutMs)
                 }
@@ -2325,7 +2328,7 @@ class AndroidNodeBridgeCapabilityProvider(
         }
     }
 
-    private fun buildMlKitOcrPluginOptions(options: JSONObject): OcrOptions {
+    private fun buildOcrPluginOptions(options: JSONObject): OcrOptions {
         val extras = Bundle()
         options.optNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID)?.let {
             extras.putString(PaddleOcrOptionExtraKeys.ENGINE_ID, it)
@@ -5639,8 +5642,7 @@ class AndroidNodeBridgeCapabilityProvider(
         const val SHELL_STREAM_JOIN_MS = 500L
         const val MAX_ACTIVE_UI_SESSIONS = 4
         const val MAX_ACTIVE_OVERLAY_SESSIONS = 4
-        const val MLKIT_OCR_ENGINE = "mlkit-ocr"
-        const val MLKIT_OCR_MODULE_LABEL = "ML Kit OCR"
+        const val OCR_MODULE_LABEL = "OCR"
         // Gestures block a broker dispatch thread until completion; cap the
         // requested duration so one call cannot pin it for minutes.
         const val MAX_ACCESSIBILITY_GESTURE_DURATION_MS = 10_000L

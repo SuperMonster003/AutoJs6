@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/14 - Some features moved to plugins; upgrade with care
+###### 2026/10/15 - Some features moved to plugins; upgrade with care
 
 * `Hint` Some built-in features are now provided by independent plugins (such as OCR, barcode recognition, OpenCV, OpenCC, Pinyin, MediaInfo, the terminal and offline project documentation); install and enable the corresponding plugins in the Plugin Center before use
 * `Hint` The target SDK of packaged apps changes from 29 to 37; shared storage and local network access require permissions according to system requirements
@@ -285,6 +285,7 @@
 * `Improvement` pinyin4j supports multiple romanization schemes and complete pronunciation queries
 * `Improvement` opencc supports conversion type queries, batch conversion and chained conversion
 * `Improvement` ocr automatically selects available engines in ML Kit/Paddle/Rapid order, with explicit engine selection and restoration of automatic selection
+* `Improvement` The ocr module reached through the host bridge (Node.js plugin and other plugin sessions) selects an enabled engine in ML Kit/Paddle/Rapid order when no engine is specified, instead of always requiring the ML Kit OCR plugin
 * `Improvement` images.save/saveImage/compress/compressToBytes support PNG quantization options (preserving transparency) and pixel/memory limits (requires the Image Quantization plugin)
 * `Improvement` images.readPixels supports ImageWrapper arguments
 * `Improvement` images.matchTemplate/findPointByImage support the scales option, with size, scale and region information in matching results

@@ -414,7 +414,7 @@ object NodeBridgeProviderRegistry {
     private fun androidStatus(id: String, context: Context): NodeBridgeProviderStatus = when (id) {
         FETCH_PROVIDER, WEBSOCKET_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         NodeBridgeModules.AGENT -> NodeBridgeProviderStatus.AVAILABLE
-        OCR_PROVIDER -> if (queryOcrPluginServiceCount(context.applicationContext, "mlkit-ocr") > 0) {
+        OCR_PROVIDER -> if (OcrPluginHost.availableEngines(context.applicationContext).isNotEmpty()) {
             NodeBridgeProviderStatus.AVAILABLE
         } else {
             NodeBridgeProviderStatus.UNAVAILABLE
@@ -722,7 +722,9 @@ object NodeBridgeProviderRegistry {
         val appContext = context.applicationContext
         val paddleVariant = PaddleOcrEmbeddedEngine.resolveVariantName(appContext) ?: "none"
         return linkedMapOf(
-            "defaultEngine" to "mlkit-ocr",
+            "defaultEngine" to "auto",
+            "automaticEngineOrder" to OcrPluginHost.AUTOMATIC_ENGINE_ORDER.joinToString(","),
+            "availableEngines" to OcrPluginHost.availableEngines(appContext).joinToString(","),
             "mlkitPluginServiceCount" to queryOcrPluginServiceCount(appContext, "mlkit-ocr").toString(),
             "paddleEmbeddedVariant" to paddleVariant,
             "paddleEmbeddedAssets" to (paddleVariant != "none").toString(),
@@ -732,11 +734,11 @@ object NodeBridgeProviderRegistry {
             "capability" to NodeBridgePermissionManifest.OCR,
             "imageCapability" to NodeBridgePermissionManifest.IMAGE,
             "phase13Promotion" to "P13-20 partial screenshot/image/OCR promotion evidence gate",
-            "modelSelection" to "options.lang/model accepted by API and forwarded to the selected ML Kit OCR plugin",
-            "fallbackPromotion" to "blocked_until_Paddle_Rapid_plugin_model_selection_and_packaged_asset_policy_evidence",
+            "modelSelection" to "options.engine/engineId/variant select a plugin; options.lang/model are forwarded to the selected OCR plugin as its profile",
+            "fallbackPromotion" to "automatic ML Kit/Paddle/Rapid selection shared with accessibility.readScreenText; packaged asset policy evidence still pending",
             "cleanupPolicy" to "OCR consumes provider-owned image handles; unknown or recycled handles reject and active OCR/image resources return to zero",
             "rawObjectPolicy" to "no raw OCR engine, model, Bitmap, Mat, ImageWrapper, Binder, or Java object crosses the bridge",
-            "statusReason" to "ML Kit OCR is provided by an external OCR plugin over provider-owned image handles",
+            "statusReason" to "OCR is provided by enabled external OCR plugins (ML Kit, Paddle or Rapid) over provider-owned image handles",
         )
     }
 
