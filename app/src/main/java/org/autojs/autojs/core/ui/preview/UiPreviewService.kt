@@ -78,8 +78,14 @@ class UiPreviewService : Service() {
                 } else {
                     null
                 }
-                onMain(UiPreviewContract.SESSION_CREATE_TIMEOUT_MS) { createOnMain(uid, params, hostToken, inputTransferToken, callback) }
-                    ?: failure(UiPreviewContract.ERROR_TIMEOUT, "the preview runtime did not start within ${UiPreviewContract.SESSION_CREATE_TIMEOUT_MS} ms")
+                // A cold host start can outlive the wait; the ticket tells the main thread to release what it created.
+                // zh-CN: 宿主冷启动可能超过等待时间; 票据让主线程释放它已创建的会话.
+                val ticket = java.util.concurrent.atomic.AtomicBoolean(false)
+                onMain(UiPreviewContract.SESSION_CREATE_TIMEOUT_MS) { createOnMain(uid, params, hostToken, inputTransferToken, callback, ticket) }
+                    ?: run {
+                        ticket.set(true)
+                        failure(UiPreviewContract.ERROR_TIMEOUT, "the preview runtime did not start within ${UiPreviewContract.SESSION_CREATE_TIMEOUT_MS} ms")
+                    }
             } catch (e: UiPreviewRequestException) {
                 failure(e.code, e.message ?: e.code)
             }
@@ -206,7 +212,7 @@ class UiPreviewService : Service() {
 
     // ------------------------------------------------------------------------------------------- sessions
 
-    private fun createOnMain(uid: Int, params: UiPreviewSessionParams, hostToken: IBinder?, inputTransferToken: Parcelable?, callback: IUiPreviewCallback): Bundle {
+    private fun createOnMain(uid: Int, params: UiPreviewSessionParams, hostToken: IBinder?, inputTransferToken: Parcelable?, callback: IUiPreviewCallback, abandoned: java.util.concurrent.atomic.AtomicBoolean): Bundle {
         val owned = sessions.values.count { it.callerUid == uid && !it.released }
         if (owned >= UiPreviewContract.MAX_SESSIONS_PER_CLIENT) {
             return failure(UiPreviewContract.ERROR_SESSION_LIMIT, "at most ${UiPreviewContract.MAX_SESSIONS_PER_CLIENT} sessions per client")
@@ -215,6 +221,12 @@ class UiPreviewService : Service() {
         val session = UiPreviewSession(applicationContext, id, uid, params, hostToken, inputTransferToken, callback) { sessions.remove(it.id, it) }
         return try {
             val result = session.create()
+            if (abandoned.get()) {
+                // The caller already received a timeout; nobody will ever address this session.
+                Log.w(TAG, "[$id] created after the caller gave up; releasing")
+                session.release(UiPreviewContract.REASON_TIMEOUT, notify = false)
+                return failure(UiPreviewContract.ERROR_TIMEOUT, "the preview runtime started after the wait")
+            }
             sessions[id] = session
             try {
                 callback.asBinder().linkToDeath({ mainHandler.post { sessions[id]?.release("client died", notify = false) } }, 0)

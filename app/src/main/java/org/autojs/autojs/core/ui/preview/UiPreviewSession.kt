@@ -319,7 +319,7 @@ internal class UiPreviewSession(
     override fun showContent(view: View) {
         root.removeAllViews()
         root.addView(view, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-        if (!isSnapshot) scheduleBounds()
+        // Embedded: the layout pass that follows addView reports the bounds, once the views have their sizes.
     }
 
     override fun onWindowFunctionIgnored(functionName: String) {
@@ -408,6 +408,8 @@ internal class UiPreviewSession(
     }
 
     private fun reportBounds() {
+        // Before the first traversal of the embedded hierarchy every view is 0 x 0; that layout pass reports instead.
+        if (!isSnapshot && (root.width == 0 || root.height == 0)) return
         val entries = ArrayList<UiPreviewBoundsEntry>()
         val instances = HashMap<Int, Int>()
         for ((record, view) in attachedRecords()) {
