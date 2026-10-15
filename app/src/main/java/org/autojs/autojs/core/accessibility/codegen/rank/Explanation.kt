@@ -91,9 +91,8 @@ object Explanation {
             }
         }
         val risks = ArrayList<Message>()
-        val effectiveMatches = if (plan.family == LocatePlan.Family.SELF_RELATIVE) facts.relativeMatchCount else facts.selectorMatchCount
         if (plan.family == LocatePlan.Family.SELF_INDEX ||
-            plan.cardinality == LocatePlan.Cardinality.ONE && effectiveMatches > 1
+            plan.cardinality == LocatePlan.Cardinality.ONE && RuleRanker.orderedMatches(plan, facts) > 1
         ) risks += message(Key.ORDER_DEPENDENT)
         if (facts.dynamicText) risks += message(Key.DYNAMIC_TEXT)
         if (facts.dynamicDesc) risks += message(Key.DYNAMIC_DESCRIPTION)

@@ -33,8 +33,10 @@ class Verified<N : UiNode<N>> internal constructor(
 }
 
 /** Counts concern the complete search, even when script semantics take only its first result.
- * [relativeMatchCount] is the number of entry matches a SELF_RELATIVE plan keeps, -1 for other families.
- * zh-CN: 计数对应完整搜索, 即使脚本语义只取首个结果. [relativeMatchCount] 为 SELF_RELATIVE 保留的入口匹配数, 其它族为 -1. */
+ * [relativeMatchCount] is the number of entry matches a SELF_RELATIVE plan keeps, and
+ * [relativeContentMatchCount] the number of nodes its nested selector matches in the whole capture; both are -1 for other families.
+ * zh-CN: 计数对应完整搜索, 即使脚本语义只取首个结果. [relativeMatchCount] 为 SELF_RELATIVE 保留的入口匹配数,
+ * [relativeContentMatchCount] 为其嵌套选择器在整个捕获中的匹配数; 其它族均为 -1. */
 data class VerificationFacts(
     val selectorMatchCount: Int,
     val anchorMatchCount: Int = 0,
@@ -52,6 +54,7 @@ data class VerificationFacts(
     val conditionCount: Int = 0,
     val containerItemCount: Int = 0,
     val relativeMatchCount: Int = -1,
+    val relativeContentMatchCount: Int = -1,
 )
 
 enum class RejectionReason {
@@ -176,6 +179,7 @@ class PlanVerifier<N : UiNode<N>>(
         var resolvedIndex: Int? = null
         var anchor: N? = null
         var relativeMatchCount = -1
+        var relativeContentMatchCount = -1
         val resolved: List<N> = when (plan.family) {
             Family.SELF -> if (plan.cardinality == Cardinality.ONE) entryMatches.take(1) else entryMatches
             Family.SELF_INDEX -> {
@@ -193,7 +197,9 @@ class PlanVerifier<N : UiNode<N>>(
                 val relative = requireNotNull(plan.relativeMatch)
                 // The relative match is one capture-wide search, then a pre-order range test per entry match.
                 // zh-CN: 相对匹配只做一次整窗搜索, 之后对每个入口匹配项做先序区间判断.
-                val positions = match(relative).map(tree::position).filter { it >= 0 }.sorted()
+                val contents = match(relative)
+                relativeContentMatchCount = contents.size
+                val positions = contents.map(tree::position).filter { it >= 0 }.sorted()
                 val kept = ArrayList<N>()
                 for (candidate in entryMatches) {
                     cancellation.throwIfCancelled()
@@ -271,6 +277,7 @@ class PlanVerifier<N : UiNode<N>>(
             conditionCount = conditions.size,
             containerItemCount = if (plan.family == Family.CONTAINER_ITEMS) resolved.size else 0,
             relativeMatchCount = relativeMatchCount,
+            relativeContentMatchCount = relativeContentMatchCount,
         )
         return Verified(plan, resolved, facts)
     }

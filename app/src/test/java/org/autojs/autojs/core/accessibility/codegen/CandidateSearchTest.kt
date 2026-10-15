@@ -8,6 +8,7 @@ import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan.Family
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanReceiver
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
 import org.autojs.autojs.core.accessibility.codegen.plan.SelectorSpec
+import org.autojs.autojs.core.accessibility.codegen.rank.RuleRanker
 import org.autojs.autojs.core.accessibility.codegen.search.CandidateSearch
 import org.autojs.autojs.core.accessibility.codegen.search.SearchBudget
 import org.autojs.autojs.core.accessibility.codegen.verify.PlanVerifier
@@ -175,6 +176,37 @@ class CandidateSearchTest {
         assertTrue(relative.all { (it.plan.steps.last() as PlanStep.Match).selector.conditions.isNotEmpty() })
         assertTrue(relative.any { it.plan.selector.conditions == listOf(Condition("id", "icon")) })
         assertEquals(result.candidates.size, result.candidates.map { it.plan.planKey }.toSet().size)
+    }
+
+    @Test
+    fun relativeContentThatAlsoMatchesTheTargetIsNeverUsedAndTheTitleSurvivesScrolling() {
+        // A horizontal shelf whose last card is only partly on screen, so its Play button is not captured.
+        fun shelf(vararg games: Pair<String, Boolean>) = FakeUiNode.root {
+            games.forEachIndexed { index, (title, playable) ->
+                child("card$index") {
+                    child("title$index") { desc = title }
+                    if (playable) child("play$index") { desc = "Play" }
+                }
+            }
+        }
+        val fruit = "Fruit\nLast played 1 week ago"
+        val mines = "Mines\nLast played 13 weeks ago"
+        val sudoku = "Sudoku\nLast played 14 weeks ago"
+        val capture = shelf(fruit to true, mines to true, sudoku to false)
+        val target = capture.find("play1")
+        val request = CodeGenRequest(listOf(target))
+        val result = CandidateSearch(capture).search(request)
+        val verifier = PlanVerifier(capture)
+        val relative = result.candidates.filter { it.plan.family == Family.SELF_RELATIVE }
+        assertTrue(relative.isNotEmpty())
+        // A nested "Play" would make the upward relation always true and the sibling one merely positional.
+        assertTrue(relative.toString(), relative.none { target in verifier.match(requireNotNull(it.plan.relativeMatch)) })
+        val best = RuleRanker().rank(request, result.candidates).first().plan
+        assertEquals(PlanStep.Match(SelectorSpec(Condition("desc", mines))), best.steps.last())
+        // After scrolling one card, the same game is first and the next card's Play button becomes visible.
+        val scrolled = shelf(mines to true, sudoku to true, fruit to false)
+        val later = CodeGenRequest(listOf(scrolled.find("play0")))
+        assertTrue("$best", PlanVerifier(scrolled).verify(later, best) is Verified)
     }
 
     @Test

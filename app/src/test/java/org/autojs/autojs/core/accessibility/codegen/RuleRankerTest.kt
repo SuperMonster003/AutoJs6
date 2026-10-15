@@ -113,6 +113,35 @@ class RuleRankerTest {
     }
 
     @Test
+    fun relativeContentRepeatedInTheCaptureCostsLikeFirstOfMany() {
+        // "The Play button whose previous card also has a Play button" keeps only the target, yet only says "the second card".
+        val root = FakeUiNode.root {
+            child("card0") {
+                child("title0") { desc = "Fruit\nLast played 1 week ago" }
+                child("play0") { desc = "Play" }
+            }
+            child("card1") {
+                child("title1") { desc = "Mines\nLast played 13 weeks ago" }
+                child("play1") { desc = "Play" }
+            }
+        }
+        val request = CodeGenRequest(listOf(root.find("play1")))
+        val verifier = PlanVerifier(root)
+        val byNeighbour = verified(verifier, request, LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("desc", "Play"),
+            listOf(PlanStep.Up(1), PlanStep.Sibling(-1), PlanStep.Match(spec("desc", "Play")))))
+        val byTitle = verified(verifier, request, LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("desc", "Play"),
+            listOf(PlanStep.Up(1), PlanStep.Match(spec("desc", "Mines\nLast played 13 weeks ago")))))
+        assertEquals(1, byNeighbour.facts.relativeMatchCount)
+        assertEquals(2, byNeighbour.facts.relativeContentMatchCount)
+        assertEquals(1, byTitle.facts.relativeContentMatchCount)
+        // byNeighbour: family 60 + two descriptions 8 + one up level and one sibling 5 + one of two contents 65;
+        // byTitle: 60 + 8 + dynamic description 32 + one up level 2.
+        assertEquals(138L, ranker.cost(byNeighbour))
+        assertEquals(102L, ranker.cost(byTitle))
+        assertEquals(listOf(byTitle, byNeighbour), ranker.rank(request, listOf(byNeighbour, byTitle)).map { it.verified })
+    }
+
+    @Test
     fun changingTextAndDescriptionLoseToStableAlternatives() {
         val root = FakeUiNode.root {
             child("target") { text = "Pay 19"; desc = "Pay 19"; className = "android.widget.Button" }

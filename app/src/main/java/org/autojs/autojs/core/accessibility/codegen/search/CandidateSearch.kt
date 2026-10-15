@@ -73,6 +73,8 @@ class CandidateSearch<N : UiNode<N>>(
         private val subtreeEnds = IntArray(tree.nodes.size) { it }
         private val idPackages = HashMap<String, MutableSet<String>>()
         private val target = request.targets.firstOrNull()?.let(tree::canonical)
+        private val targets: Set<N> = request.targets.mapNotNullTo(LinkedHashSet(), tree::canonical)
+        private val distinctiveness = HashMap<SelectorSpec, Boolean>()
         private var receiverFailure: RejectionReason? = null
         private val receiver = receiverForTargets()
 
@@ -207,9 +209,9 @@ class CandidateSearch<N : UiNode<N>>(
             }
             for (i in nested.conditions.indices.reversed()) {
                 val remaining = nestedSelector(current.plan).conditions.toMutableList().apply { removeAt(i) }
-                // A relative match keeps at least one condition; an empty one would keep every entry match.
-                // zh-CN: 相对匹配至少保留一个条件, 空条件会保留全部入口匹配项.
-                if (remaining.isEmpty() && current.plan.family == Family.SELF_RELATIVE) continue
+                // A relative match must stay distinctive; an empty one would keep every entry match.
+                // zh-CN: 相对匹配须保持区分度, 空条件会保留全部入口匹配项.
+                if (current.plan.family == Family.SELF_RELATIVE && !distinctive(SelectorSpec(remaining))) continue
                 val reduced = checkPlan(copy(current.plan, steps = withNestedSelector(current.plan, SelectorSpec(remaining))))
                 if (reduced is Verified) current = reduced
                 if (limited) return current
@@ -369,6 +371,9 @@ class CandidateSearch<N : UiNode<N>>(
                     for (sum in 0 until relativeSpecs.size + targetSpecs.size - 1) {
                         for (i in maxOf(0, sum - targetSpecs.lastIndex)..minOf(sum, relativeSpecs.lastIndex)) {
                             cancellation.throwIfCancelled()
+                            // Checked just before verification, which then reuses the cached capture-wide match.
+                            // zh-CN: 紧邻验证前检查, 验证随后复用已缓存的整窗匹配.
+                            if (!distinctive(relativeSpecs[i])) continue
                             yield(LocatePlan(Family.SELF_RELATIVE, targetSpecs[sum - i], relation.steps + PlanStep.Match(relativeSpecs[i]), cardinality, receiver!!))
                         }
                     }
@@ -376,6 +381,16 @@ class CandidateSearch<N : UiNode<N>>(
             }
             return interleave(sources)
         }
+
+        /**
+         * Whether a nested relative selector can tell the targets apart from their neighbours. Content that
+         * also matches a target, such as the entry's own text, makes an upward relation always true and a
+         * sibling relation only say "a neighbour of the same kind", so it carries no identity.
+         * zh-CN: 相对嵌套选择器能否把目标与邻居区分开. 内容若同时匹配目标 (如入口自身的文本), 向上关系恒成立,
+         * 兄弟关系只表示 "旁边有同类邻居", 因而不携带身份信息.
+         */
+        private fun distinctive(spec: SelectorSpec): Boolean = spec.conditions.isNotEmpty() &&
+            distinctiveness.getOrPut(spec) { matches(spec).none { it in targets } }
 
         /** Nearest content-bearing nodes in the subtree of [root], skipping the subtree of [excluded].
          * zh-CN: [root] 子树中最近的带内容节点, 跳过 [excluded] 的子树. */

@@ -76,6 +76,23 @@ class ExplanationTest {
     }
 
     @Test
+    fun relativeContentRepeatedInTheCaptureDisclosesOrderRiskAlthoughOneEntrySurvives() {
+        val shelf = FakeUiNode.root {
+            repeat(2) { index ->
+                child("card$index") {
+                    child("title$index") { desc = "Game $index" }
+                    child("play$index") { desc = "Play" }
+                }
+            }
+        }
+        val request = CodeGenRequest(listOf(shelf.find("play1")))
+        val plan = LocatePlan(LocatePlan.Family.SELF_RELATIVE, spec("desc", "Play"), listOf(PlanStep.Up(1), PlanStep.Sibling(-1), PlanStep.Match(spec("desc", "Play"))))
+        val lines = Explanation.describe(request, PlanVerifier(shelf).verify(request, plan) as Verified<FakeUiNode>)
+        assertEquals(Key.RELATIVE_UNIQUE, lines.first().messages.single().key)
+        assertTrue(Key.ORDER_DEPENDENT in keys(lines))
+    }
+
+    @Test
     fun firstOfManyNeverClaimsTheTargetSelectorIsUnique() {
         val self = explain(LocatePlan(LocatePlan.Family.SELF, spec("id", "app:id/button")), targetIndex = 0)
         assertEquals(Key.SELF_FIRST_MATCH, self.first().messages.single().key)
