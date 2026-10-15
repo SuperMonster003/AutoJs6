@@ -132,6 +132,12 @@ class NodeEnginesBridgeInstrumentationTest {
             "<embedded-autojs-engines-exec-fake.js>",
             workingDirectory = workDir,
             moduleSources = mapOf("node_modules/engines/index.js" to shadowPackageSource),
+            // The Node runtime plugin ships every bare script with an enforced bridge-permission manifest that declares
+            // only "network" (runtime:stable-network), so the facade rejects any other capability with
+            // ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED before the request reaches the (fake) transport; declare what
+            // the script uses, exactly as a project.json would.
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("engines", "engines.exec")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("engines exec fake bridge", result)
@@ -236,6 +242,8 @@ class NodeEnginesBridgeInstrumentationTest {
             "<embedded-autojs-engines-exec-live.js>",
             workingDirectory = workDir,
             timeoutMs = 10000L,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("engines", "engines.exec")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("engines live exec bridge", result)

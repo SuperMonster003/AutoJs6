@@ -335,6 +335,12 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             "<embedded-autojs-accessibility-selector-fake.js>",
             workingDirectory = workDir,
             moduleSources = mapOf("node_modules/accessibility/index.js" to shadowPackageSource),
+            // The Node runtime plugin ships every bare script with an enforced bridge-permission manifest that declares
+            // only "network" (runtime:stable-network), so the facade rejects any other capability with
+            // ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED before the request reaches the (fake) transport; declare what
+            // the script uses, exactly as a project.json would.
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("accessibility")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("accessibility selector fake bridge", result)
@@ -493,6 +499,8 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             })();
             """.trimIndent(),
             "<embedded-autojs-rhino-compat-selector-fake.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("accessibility")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("Rhino compat selector fake bridge", result)
@@ -623,6 +631,8 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             })();
             """.trimIndent(),
             "<embedded-autojs-accessibility-selector-timeout-cancel.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("accessibility")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("accessibility selector timeout/cancellation", result)

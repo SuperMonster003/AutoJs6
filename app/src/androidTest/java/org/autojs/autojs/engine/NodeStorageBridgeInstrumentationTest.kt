@@ -124,6 +124,12 @@ class NodeStorageBridgeInstrumentationTest {
             "<embedded-autojs-storage-fake.js>",
             workingDirectory = workDir,
             moduleSources = shadowModules.associate { "node_modules/$it/index.js" to shadowPackageSource },
+            // The Node runtime plugin ships every bare script with an enforced bridge-permission manifest that declares
+            // only "network" (runtime:stable-network), so the facade rejects any other capability with
+            // ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED before the request reaches the (fake) transport; declare what
+            // the script uses, exactly as a project.json would.
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("storage")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("storage fake bridge", result)

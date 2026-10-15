@@ -151,6 +151,8 @@ class NodeDeviceBridgeInstrumentationTest {
                 device.width >= 0 &&
                 device.height >= 0 &&
                 device.density >= 0;
+              // Hardware and account identifiers stay blocked; plain build fields (brand, model, product, fingerprint,
+              // ...) are published by the plugin's device facade (HOST-API device row) and must not be mistaken for them.
               const sensitiveAbsent = [
                 "imei",
                 "androidId",
@@ -158,16 +160,15 @@ class NodeDeviceBridgeInstrumentationTest {
                 "phoneNumber",
                 "accounts",
                 "macAddress",
-                "ipAddress",
-                "fingerprint",
-                "brand",
-                "manufacturer"
+                "ipAddress"
               ].every(name => typeof device[name] === "undefined");
+              const buildFieldsPresent = ["brand", "model", "product", "fingerprint"].every(name => typeof device[name] === "string");
               console.log("device.resolve=" + resolved);
               console.log("device.shadow=" + (device.shadow === true));
               console.log("device.frozen=" + Object.isFrozen(device));
               console.log("device.metrics=" + metricsOk);
               console.log("device.sensitive_absent=" + sensitiveAbsent);
+              console.log("device.build_fields=" + buildFieldsPresent);
               console.log("device.methods=" + [
                 typeof device.isScreenOn,
                 typeof device.wakeUp,
@@ -188,6 +189,12 @@ class NodeDeviceBridgeInstrumentationTest {
             "<embedded-autojs-device-fake-source.js>",
             workingDirectory = workDir,
             moduleSources = mapOf("node_modules/device/index.js" to shadowPackageSource),
+            // The Node runtime plugin ships every bare script with an enforced bridge-permission manifest that declares
+            // only "network" (runtime:stable-network), so the facade rejects any other capability with
+            // ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED before the request reaches the (fake) transport; declare what
+            // the script uses, exactly as a project.json would.
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("device", "device.power")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("device fake bridge", result)
@@ -196,6 +203,7 @@ class NodeDeviceBridgeInstrumentationTest {
         NodePluginTestHarness.assertStdoutContains("device fake bridge", result, "device.frozen=true")
         NodePluginTestHarness.assertStdoutContains("device fake bridge", result, "device.metrics=true")
         NodePluginTestHarness.assertStdoutContains("device fake bridge", result, "device.sensitive_absent=true")
+        NodePluginTestHarness.assertStdoutContains("device fake bridge", result, "device.build_fields=true")
         NodePluginTestHarness.assertStdoutContains("device fake bridge", result, "device.methods=function|function|function|function|function|undefined")
         NodePluginTestHarness.assertStdoutContains("device fake bridge", result, "device.values=false|undefined|undefined|true|autojs6-node-battery-optimization-settings-v1|true|ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED")
         NodePluginTestHarness.assertStdoutContains("device fake bridge", result, "device.requests=isScreenOn|wakeUp|vibrate|isIgnoringBatteryOptimizations|openBatteryOptimizationSettings")

@@ -189,6 +189,14 @@ class NodeShellBridgeInstrumentationTest {
             "<embedded-autojs-shell-fake-source.js>",
             workingDirectory = workDir,
             moduleSources = mapOf("node_modules/shell/index.js" to shadowPackageSource),
+            // The Node runtime plugin ships every bare script with an enforced bridge-permission manifest that declares
+            // only "network" (runtime:stable-network), so the facade rejects any other capability with
+            // ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED before the request reaches the (fake) transport; declare what
+            // the script uses, exactly as a project.json would.
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("shell", "shell.root")).toJson()),
+            // Node runtime 1.6.0 enables child_process by default; this test covers the request-level gate, so it closes it.
+            childProcessEnabled = false,
         )
 
         NodePluginTestHarness.assertSucceeded("shell fake bridge", result)
@@ -272,6 +280,8 @@ class NodeShellBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-shell-child-process-policy.js>",
             runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to shellManifest.toJson()),
+            // Node runtime 1.6.0 enables child_process by default; this test covers the request-level gate, so it closes it.
+            childProcessEnabled = false,
         )
 
         NodePluginTestHarness.assertSucceeded("shell child_process alternative declared capability", allowed)
@@ -390,6 +400,8 @@ class NodeShellBridgeInstrumentationTest {
             })();
             """.trimIndent(),
             "<embedded-autojs-shell-abort-signal.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
+                .fromDeclaredCapabilities(listOf("shell")).toJson()),
         )
 
         NodePluginTestHarness.assertSucceeded("shell AbortSignal cancellation", result)
