@@ -880,6 +880,7 @@
     <string name="text_background_color_follow">Auto</string>
     <string name="text_background_color_inverse">Auto inverted</string>
     <string name="text_background_color_light">Light</string>
+    <string name="text_batch_rename" tools:ignore="TypographyEllipsis">Batch rename...</string>
     <string name="text_batch_restore_summary">Restored %1$d, skipped %2$d, failed %3$d</string>
     <string name="text_battery_thresholds">Battery thresholds</string>
     <string name="text_battery_thresholds_hint">1 to %1$d percentages from 1 to 99, separated by commas, such as 20, 80</string>

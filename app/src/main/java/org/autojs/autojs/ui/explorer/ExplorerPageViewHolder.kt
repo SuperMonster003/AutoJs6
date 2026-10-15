@@ -228,11 +228,13 @@ internal class ExplorerPageViewHolder(
                         .move(selectedItem.toScriptFile())
                         .ignoreElements()
                         .subscribe({}, { host.showErrorDialog(it, R.string.error_failed_to_move) })
-                R.id.action_rename ->
+                R.id.action_rename -> {
+                    val renamed = selectedItem as? ExplorerFileItem
                     ScriptOperations(host.context, explorerView, host.currentPage)
-                        .rename(selectedItem as? ExplorerFileItem)
+                        .rename(renamed, explorerView.renameDialogOptions(renamed))
                         .ignoreElements()
                         .subscribe({}, { host.showErrorDialog(it, R.string.error_failed_to_rename) })
+                }
                 R.id.action_delete ->
                     ScriptOperations(host.context, explorerView, host.currentPage)
                         .delete(selectedItem.toScriptFile())

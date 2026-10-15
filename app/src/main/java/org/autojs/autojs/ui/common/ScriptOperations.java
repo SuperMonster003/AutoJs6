@@ -44,6 +44,7 @@ import org.autojs.autojs.storage.history.TrashEntities;
 import org.autojs.autojs.storage.history.TrashQuotaHint;
 import org.autojs.autojs.storage.history.TrashRepository;
 import com.google.android.material.snackbar.Snackbar;
+import org.autojs.autojs.ui.explorer.ExplorerRenameDialogMenu;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
@@ -342,6 +343,10 @@ public class ScriptOperations {
     }
 
     private Observable<String> showNameInputDialog(String prefix, MaterialDialog.InputCallback textWatcher) {
+        return showNameInputDialog(prefix, textWatcher, null);
+    }
+
+    private Observable<String> showNameInputDialog(String prefix, MaterialDialog.InputCallback textWatcher, @Nullable List<MaterialDialog.OptionMenuItemSpec> titleOptions) {
         final PublishSubject<String> input = PublishSubject.create();
         MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                 .title(R.string.text_name)
@@ -356,8 +361,16 @@ public class ScriptOperations {
                     input.onComplete();
                 })
                 .canceledOnTouchOutside(false);
+        boolean hasTitleOptions = titleOptions != null && !titleOptions.isEmpty();
+        if (hasTitleOptions) {
+            builder.options(titleOptions);
+        }
         DialogUtils.widgetThemeColor(builder);
-        DialogUtils.showAdaptive(builder.build());
+        MaterialDialog dialog = builder.build();
+        if (hasTitleOptions) {
+            ExplorerRenameDialogMenu.decorateOptionsButton(dialog);
+        }
+        DialogUtils.showAdaptive(dialog);
         return input;
     }
 
@@ -376,8 +389,19 @@ public class ScriptOperations {
     }
 
     public Observable<ExplorerFileItem> rename(final ExplorerFileItem item) {
+        return rename(item, null);
+    }
+
+    /**
+     * Renames {@code item} through the name dialog. Non-empty {@code titleOptions} fill the "More" menu in the dialog
+     * title, which lists the rename dialog actions of Explorer plugins (Batch Rename plugin roadmap D10c).
+     * <p>
+     * zh-CN: 通过名称对话框重命名 {@code item}. {@code titleOptions} 非空时填充对话框标题栏的 "更多" 菜单, 其中列出文件管理器插件的
+     * 重命名对话框动作 (Batch Rename 插件路线图 D10c).
+     */
+    public Observable<ExplorerFileItem> rename(final ExplorerFileItem item, @Nullable List<MaterialDialog.OptionMenuItemSpec> titleOptions) {
         String originalName = item.getName();
-        return showNameInputDialog(originalName, new InputCallback(null, originalName))
+        return showNameInputDialog(originalName, new InputCallback(null, originalName), titleOptions)
                 .map(newName -> {
                     if (newName.equals(originalName)) {
                         return item;

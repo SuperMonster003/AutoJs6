@@ -39,7 +39,8 @@ internal object ExplorerActionPolicy {
         ExplorerSurface.UNSPECIFIED -> null
     }
 
-    private fun allowsThirdPartyActions(surface: ExplorerSurface): Boolean {
+    /** Only the main file manager offers plugin entry points. zh-CN: 只有主文件管理器提供插件入口. */
+    fun allowsThirdPartyActions(surface: ExplorerSurface): Boolean {
         return surface == ExplorerSurface.MAIN_FILES
     }
 }

@@ -57,8 +57,9 @@ internal class ExplorerBuiltInActionHandler(
                 ExplorerViewHelper.copyPaths(host.context, listOf(selected))
             }
             R.id.action_rename -> {
+                val renamed = host.selectedItem as ExplorerFileItem?
                 ScriptOperations(host.context, host.explorerView, host.currentPage)
-                    .rename(host.selectedItem as ExplorerFileItem?)
+                    .rename(renamed, host.explorerView.renameDialogOptions(renamed))
                     .ignoreElements()
                     .subscribe({}, { host.showError(it, R.string.error_failed_to_rename) })
             }

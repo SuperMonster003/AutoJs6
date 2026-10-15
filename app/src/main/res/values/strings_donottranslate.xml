@@ -349,6 +349,7 @@
     <string name="num_zero" translatable="false">0</string>
     <string name="original_developer_full_name" translatable="false">Stardust</string>
     <string name="original_developer_nickname" translatable="false">hyb1996</string>
+    <string name="plugin_batch_rename_name" translatable="false">Batch Rename</string>
     <string name="plugin_html_previewer_name" translatable="false">HTML Previewer</string>
     <string name="plugin_markdown_previewer_name" translatable="false">Markdown Previewer</string>
     <string name="plugin_three_amber_player_name" translatable="false">3-Amber</string>

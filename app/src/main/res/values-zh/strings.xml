@@ -881,6 +881,7 @@
     <string name="text_background_color_follow">自动跟随</string>
     <string name="text_background_color_inverse">自动反色</string>
     <string name="text_background_color_light">亮色</string>
+    <string name="text_batch_rename" tools:ignore="TypographyEllipsis">批量重命名...</string>
     <string name="text_batch_restore_summary">已恢复 %1$d, 跳过 %2$d, 失败 %3$d</string>
     <string name="text_battery_thresholds">电量阈值</string>
     <string name="text_battery_thresholds_hint">1 至 %1$d 个 1 至 99 的百分比, 以逗号分隔, 例如 20, 80</string>

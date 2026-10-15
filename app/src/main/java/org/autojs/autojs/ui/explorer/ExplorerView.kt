@@ -1065,6 +1065,28 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         action: ResolvedExplorerAction,
     ): Result<Unit> = mPluginActions.dispatch(context, surface, entryPoint, items, action)
 
+    /**
+     * Options of the "More" menu in the rename dialog of [item]: the plugin actions placed in that dialog, or the
+     * Batch Rename guidance when no installed plugin offers one (Batch Rename plugin roadmap D10c / D29). Null when this
+     * Explorer has no plugin entry points or the item lives in an archive.
+     * zh-CN: [item] 的重命名对话框 "更多" 菜单选项: 放置在该对话框中的插件动作, 没有已安装插件提供时为 Batch Rename 引导
+     * (Batch Rename 插件路线图 D10c / D29). 本文件管理器没有插件入口或该项位于压缩包内时返回 null.
+     */
+    internal fun renameDialogOptions(item: ExplorerItem?): List<MaterialDialog.OptionMenuItemSpec>? {
+        if (item == null || item is ArchiveExplorerItem) return null
+        val surface = mPluginActions.surface
+        val actions = ExplorerRenameDialogMenu.resolveActions(mPluginActions.provider, surface, item)
+        val entries = ExplorerRenameDialogMenu.entries(surface, actions)
+        if (entries.isEmpty()) return null
+        return ExplorerRenameDialogMenu.options(context, entries) { action ->
+            dispatchPluginAction(context, surface, ExplorerActionEntryPoint.RENAME_DIALOG, listOf(item), action)
+                .onFailure { error ->
+                    Log.e(LOG_TAG, "Failed to launch Explorer rename dialog plugin action", error)
+                    ViewUtils.showToast(context, error.message ?: error.toString(), true)
+                }
+        }
+    }
+
     private fun applyArchiveReindexResult(result: ExplorerArchiveReindexResult) {
         val restoredPage = result.restoredPages.last()
         mPageStateHistory.clear()

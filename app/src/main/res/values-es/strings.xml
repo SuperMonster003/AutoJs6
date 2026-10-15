@@ -885,6 +885,7 @@
     <string name="text_background_color_follow">Automático</string>
     <string name="text_background_color_inverse">Automático (invertido)</string>
     <string name="text_background_color_light">Claro</string>
+    <string name="text_batch_rename" tools:ignore="TypographyEllipsis">Cambiar nombres en lote...</string>
     <string name="text_batch_restore_summary">Restaurados %1$d, omitidos %2$d, fallidos %3$d</string>
     <string name="text_battery_thresholds">Umbrales de batería</string>
     <string name="text_battery_thresholds_hint">De 1 a %1$d porcentajes entre 1 y 99, separados por comas, por ejemplo 20, 80</string>

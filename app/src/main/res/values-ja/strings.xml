@@ -886,6 +886,7 @@
     <string name="text_background_color_follow">自動</string>
     <string name="text_background_color_inverse">自動 (反転)</string>
     <string name="text_background_color_light">ライト</string>
+    <string name="text_batch_rename" tools:ignore="TypographyEllipsis">一括で名前を変更...</string>
     <string name="text_batch_restore_summary">復元 %1$d 件, スキップ %2$d 件, 失敗 %3$d 件</string>
     <string name="text_battery_thresholds">バッテリーのしきい値</string>
     <string name="text_battery_thresholds_hint">1 ~ 99 の百分率を 1 ~ %1$d 個, カンマ区切りで入力 (例: 20, 80)</string>

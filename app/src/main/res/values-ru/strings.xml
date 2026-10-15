@@ -885,6 +885,7 @@
     <string name="text_background_color_follow">Автоматически</string>
     <string name="text_background_color_inverse">Автоматически (инверсия)</string>
     <string name="text_background_color_light">Светлый</string>
+    <string name="text_batch_rename" tools:ignore="TypographyEllipsis">Пакетное переименование...</string>
     <string name="text_batch_restore_summary">Восстановлено: %1$d, пропущено: %2$d, ошибок: %3$d</string>
     <string name="text_battery_thresholds">Пороги заряда</string>
     <string name="text_battery_thresholds_hint">От 1 до %1$d процентов от 1 до 99 через запятую, например 20, 80</string>

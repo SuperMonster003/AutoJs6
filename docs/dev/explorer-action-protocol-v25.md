@@ -16,8 +16,8 @@ another directory and cannot touch an entry it did not list through the session.
 
 ## Status
 
-The catalog key, the placement, the entry point, the transactions and their access rule are in
-place. The rename executor and the undo journal behind `listRenameParent`, `renameEntries`,
+The catalog key, the placement, the entry point, the rename dialog "More" menu, the transactions and
+their access rule are in place. The rename executor and the undo journal behind `listRenameParent`, `renameEntries`,
 `queryRenameBatch`, `listRenameBatches` and `undoRenameBatch` arrive with Batch Rename roadmap P3.1;
 until then those calls fail with `UnsupportedOperationException` for an action that declared
 `targetRename`, and with the usual access error for any other action. Do not ship a host between the
@@ -52,7 +52,10 @@ value keeps the pre-v25 meaning of the action. The host always attaches an
 
 `ExplorerActionValues.PLACEMENT_RENAME_DIALOG` (`4`) is valid only for protocol 25 or later, for
 `CARDINALITY_SINGLE` and together with `targetRename`. The host lists such actions in the "More"
-menu of its rename dialog (`ExplorerActionEntryPoint.RENAME_DIALOG`) and nowhere else.
+menu of its rename dialog (`ExplorerActionEntryPoint.RENAME_DIALOG`) and nowhere else. The menu exists
+only in the main file manager; when no installed action matches the item, it holds a single
+"Batch rename..." entry that names the reason (not installed, disabled, not authorized or too old) and
+opens the Plugin Center at the Batch Rename plugin.
 
 The Batch Rename catalog uses three shapes (roadmap D23):
 

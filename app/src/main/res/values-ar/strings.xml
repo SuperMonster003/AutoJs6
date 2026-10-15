@@ -887,6 +887,7 @@
     <string name="text_background_color_follow">تلقائي</string>
     <string name="text_background_color_inverse">تلقائي (معكوس)</string>
     <string name="text_background_color_light">فاتح</string>
+    <string name="text_batch_rename" tools:ignore="TypographyEllipsis">إعادة تسمية مجمعة...</string>
     <string name="text_batch_restore_summary">تمت الاستعادة %1$d, تم التخطي %2$d, فشل %3$d</string>
     <string name="text_battery_thresholds">عتبات البطارية</string>
     <string name="text_battery_thresholds_hint">من 1 إلى %1$d نسب مئوية بين 1 و99 مفصولة بفواصل، مثل 20, 80</string>

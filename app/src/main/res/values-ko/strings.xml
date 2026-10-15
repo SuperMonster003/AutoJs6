@@ -887,6 +887,7 @@
     <string name="text_background_color_follow">자동</string>
     <string name="text_background_color_inverse">자동 (반전)</string>
     <string name="text_background_color_light">밝은 색</string>
+    <string name="text_batch_rename" tools:ignore="TypographyEllipsis">일괄 이름 바꾸기...</string>
     <string name="text_batch_restore_summary">복원 %1$d개, 건너뜀 %2$d개, 실패 %3$d개</string>
     <string name="text_battery_thresholds">배터리 임계값</string>
     <string name="text_battery_thresholds_hint">1~99 사이의 백분율 1~%1$d개를 쉼표로 구분 (예: 20, 80)</string>
