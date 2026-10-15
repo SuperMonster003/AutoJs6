@@ -139,6 +139,7 @@
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
+* `Corrección` Las propiedades creadas por Object.fromEntries con claves numéricas o cadenas numéricas no eran accesibles y se mostraban de forma incompleta en la consola _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
 * `Corrección` Las funciones envueltas en Proxy y algunos callbacks JavaScript podían rechazarse en módulos integrados o provocar parámetros anidados y ambigüedad de sobrecargas
 * `Corrección` Los listeners EventEmitter#once podían ejecutarse repetidamente al despachar eventos recursivamente o lanzar excepciones desde callbacks
 * `Corrección` app.isInstalled/kill y otros métodos no podían utilizar correctamente parámetros de nombre de paquete _[`issue #495`](http://issues.autojs6.com/495)_

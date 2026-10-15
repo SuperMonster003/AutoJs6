@@ -139,6 +139,7 @@
         "runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제",
         "Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제",
         "Rhino 엔진과 내장 모듈의 스코프, 인수 변환 및 반환값 처리 비호환으로 일부 스크립트 동작이 비정상적인 문제",
+        "Object.fromEntries에서 숫자 또는 숫자 문자열을 키로 사용할 때 생성된 속성에 접근할 수 없고 콘솔 출력이 불완전한 문제 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_",
         "Proxy로 감싼 함수 및 일부 JavaScript 콜백을 내장 모듈에 전달하지 못하거나 인수 중첩 및 오버로드 모호성이 발생하는 문제",
         "EventEmitter#once 리스너가 재귀 이벤트 전달 또는 콜백 예외 시 반복 호출될 수 있는 문제",
         "app.isInstalled/kill 등에서 패키지명 인수를 정상 사용하지 못하는 문제 _[`issue #495`](http://issues.autojs6.com/495)_",

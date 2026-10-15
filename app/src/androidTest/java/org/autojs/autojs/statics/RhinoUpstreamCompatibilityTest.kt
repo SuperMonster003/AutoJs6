@@ -2,6 +2,7 @@ package org.autojs.autojs.statics
 
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
@@ -15,10 +16,41 @@ import org.junit.Test
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 class RhinoUpstreamCompatibilityTest {
+    @Test
+    fun fromEntriesPreservesNumericPropertiesAndConsoleOutput() = runScript(false, """
+        console.log(Object.fromEntries([0, 6].map((v) => [v, true])));
+        function check(value, label) { if (!value) throw new Error(label); }
+        var obj = Object.fromEntries([0, 6].map((v) => [v, true]));
+        check(obj[0] === true && obj[6] === true, "numeric property reads");
+        check(obj["0"] === true && obj["6"] === true, "string property reads");
+        check(JSON.stringify(obj) === '{"0":true,"6":true}', "JSON serialization");
+        [0, 6].forEach(function(key) {
+            var desc = Object.getOwnPropertyDescriptor(obj, String(key));
+            check(Object.prototype.hasOwnProperty.call(obj, key), "own property " + key);
+            check(desc && desc.value === true && desc.writable && desc.enumerable && desc.configurable,
+                  "data descriptor " + key);
+        });
+        var strings = Object.fromEntries([["0", true], ["6", true]]);
+        check(strings[0] === true && strings[6] === true, "numeric string keys");
+        var duplicate = Object.fromEntries([[6, "first"], ["6", "second"], [6, "last"]]);
+        check(duplicate[6] === "last" && Object.keys(duplicate).length === 1, "duplicate keys");
+        var symbol = Symbol("key");
+        var symbols = Object.fromEntries([[Object(symbol), true]]);
+        check(symbols[symbol] === true && Object.getOwnPropertySymbols(symbols)[0] === symbol,
+              "wrapped symbol key");
+    """.trimIndent(), verifyLogs = { logs ->
+        assertTrue("Original example did not log both keys: $logs", logs.any { line ->
+            runCatching { JSONObject(line) }.getOrNull()?.let { value ->
+                value.length() == 2 && value.opt("0") == true && value.opt("6") == true
+            } == true
+        })
+    })
+
     @Test
     fun productionEngineSupportsUpstreamFeaturesAndJavaInterop() = runScript(false, """
         function check(value, label) { if (!value) throw new Error(label); }
@@ -96,7 +128,7 @@ class RhinoUpstreamCompatibilityTest {
         rejects(function() { notice.config([]); }, "non-object configuration");
     """.trimIndent())
 
-    private fun runScript(uiMode: Boolean, body: String) {
+    private fun runScript(uiMode: Boolean, body: String, verifyLogs: ((List<String>) -> Unit)? = null) {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val directory = File(context.cacheDir, "rhino-upstream-${UUID.randomUUID()}")
         assertTrue(directory.mkdirs())
@@ -111,9 +143,22 @@ class RhinoUpstreamCompatibilityTest {
         val completed = CountDownLatch(1)
         val failure = AtomicReference<Throwable>()
         val engineClass = AtomicReference<Class<*>>()
+        val console = AtomicReference<ConsoleImpl>()
+        val logs = CopyOnWriteArrayList<String>()
+        val logListener = object : ConsoleImpl.LogListener {
+            override fun onNewLog(logEntry: ConsoleImpl.LogEntry) {
+                logs += logEntry.content.toString()
+            }
+
+            override fun onLogClear() = Unit
+        }
         val listener = object : SimpleScriptExecutionListener() {
             override fun onStart(execution: ScriptExecution) {
                 engineClass.set(execution.engine.javaClass)
+                ((execution.engine as? RhinoJavaScriptEngine)?.runtime?.console as? ConsoleImpl)?.let {
+                    console.set(it)
+                    it.addLogListener(logListener)
+                }
             }
 
             override fun onSuccess(execution: ScriptExecution, result: Any?) {
@@ -138,7 +183,9 @@ class RhinoUpstreamCompatibilityTest {
             assertTrue(RhinoJavaScriptEngine::class.java.isAssignableFrom(engineClass.get()))
             assertTrue("Rhino script did not complete its assertions", marker.isFile)
             assertEquals("ok", marker.readText())
+            verifyLogs?.invoke(logs.toList())
         } finally {
+            console.get()?.removeLogListener(logListener)
             execution?.engine?.let { if (!it.isDestroyed) it.forceStop() }
             marker.delete()
             script.delete()

@@ -139,6 +139,7 @@
         "runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题",
         "Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题",
         "Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题",
+        "Object.fromEntries 使用数字或数字字符串作为键时, 生成的属性无法正常访问且控制台显示不完整的问题 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_",
         "Proxy 包装函数及部分 JavaScript 回调可能无法传入内置模块, 或出现参数嵌套与重载歧义的问题",
         "EventEmitter#once 监听器在递归派发事件或回调抛出异常时可能被重复调用的问题",
         "app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_",

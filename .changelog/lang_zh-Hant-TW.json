@@ -139,6 +139,7 @@
         "runtime.loadJar 方法無法動態載入較高 Java 版本編譯的 class 檔案的問題",
         "Android 7.x 呼叫 runtime.loadDex 方法時可能損壞 DEX 快取並導致類載入失敗的問題",
         "Rhino 引擎及內建模組的作用域, 參數轉換與回傳值處理不相容導致部分指令碼行為異常的問題",
+        "Object.fromEntries 使用數字或數字字串作為鍵時, 產生的屬性無法正常存取且主控台顯示不完整的問題 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_",
         "Proxy 包裝函式及部分 JavaScript 回呼可能無法傳入內建模組, 或出現參數巢狀與多載歧義的問題",
         "EventEmitter#once 監聽器在遞迴派發事件或回呼丟擲異常時可能被重複呼叫的問題",
         "app.isInstalled/kill 等方法無法正常使用包名參數的問題 _[`issue #495`](http://issues.autojs6.com/495)_",

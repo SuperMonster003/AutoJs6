@@ -139,6 +139,7 @@
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
+* `Fix` Object.fromEntries created inaccessible properties and incomplete console output when keys were numbers or numeric strings _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
 * `Fix` Issue where Proxy-wrapped functions and some JavaScript callbacks could not be passed to built-in modules, or caused nested arguments and overload ambiguity
 * `Fix` Issue where EventEmitter#once listeners could be invoked repeatedly during recursive event dispatch or when callbacks threw exceptions
 * `Fix` Issue where app.isInstalled/kill and other methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_

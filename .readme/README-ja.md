@@ -323,6 +323,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題
 * `修正` Android 7.x で runtime.loadDex が DEX キャッシュを破損させ, クラス読込に失敗する場合がある問題
 * `修正` Rhino エンジンと組み込みモジュールのスコープ, 引数変換と戻り値処理の非互換により一部スクリプトの動作が異常になる問題
+* `修正` Object.fromEntries で数値または数値文字列をキーにした場合, 生成されたプロパティにアクセスできず, コンソール表示も不完全になる問題 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
 * `修正` Proxy で包んだ関数や一部 JavaScript コールバックを組み込みモジュールへ渡せない, または引数の入れ子とオーバーロードの曖昧性が生じる問題
 * `修正` EventEmitter#once リスナーが再帰的イベント配信やコールバック例外時に複数回呼ばれる場合がある問題
 * `修正` app.isInstalled/kill などでパッケージ名引数を正常に使えない問題 _[`issue #495`](http://issues.autojs6.com/495)_
