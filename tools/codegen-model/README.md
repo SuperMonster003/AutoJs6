@@ -144,6 +144,15 @@ after exporting; it validates the Kotlin producer's hashes and records the featu
 
 ## Label real applications locally
 
+For guided collection, double-click `collect-real.cmd` on Windows, or run
+`python tools/codegen-model/capture/real_gui.py --private-dir D:\codegen-private`
+from the repository root. The desktop assistant captures the selected phone's current app,
+shows searchable nodes and a layout preview, recommends targets for explicit confirmation,
+resumes drafts, and exports compatible format-1 tasks after three distinct confirmed states.
+It also audits existing real tasks toward the 30-app / 150-group collection target. Only Python's
+standard library (including Tk) and ADB are required. See the
+[Chinese collection guide](capture/REAL-COLLECTION.md) for the complete workflow and data locations.
+
 Use the existing layout inspector's Save layout action to capture the same screen at different
 times, app versions, or languages. Copy those snapshots into a private local directory outside
 every Git worktree. From `tools/codegen-model`:
