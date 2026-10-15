@@ -203,6 +203,8 @@ contract:
 The contract (host commit `aa4fd4f6d`), Explorer Action v25 (`95c9f0455`), the Plugin Center
 registration, `BatchRenamePluginHost` and the rename dialog "More" menu (`26656b7c4`) are in place, and the
 official plugin answers `plan` with its engine (plugin roadmap P2). The host executor, its journal and the Explorer
-Action session (`3bcd17aba`, P3.1) and the `files.batchRename` script API (P3.2) are in place as well.
-`BatchRenamePluginRoundTripTest` runs contract requests and `BatchRenameScriptApiTest` runs scripts through an
-installed plugin. The plugin screen (P4) follows.
+Action session (`3bcd17aba`, P3.1) and the `files.batchRename` script API (`852afb776`, P3.2) are in place as
+well, and so is the plugin screen (plugin roadmap P4). `BatchRenamePluginRoundTripTest` runs contract requests,
+`BatchRenameScriptApiTest` runs scripts and `BatchRenameExplorerFlowTest` drives the three file manager entries
+through an installed plugin. The Batch Rename plugin 1.0.0 requires host build 5438, the first build with every
+change above (`852afb776`).
