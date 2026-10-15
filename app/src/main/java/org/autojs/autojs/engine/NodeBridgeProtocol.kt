@@ -1758,11 +1758,7 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
         if (request.method == "ensureEnabled") {
-            org.autojs.autojs.core.accessibility.AccessibilityTool(appContext).ensureServiceAsync(
-                level = org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State.OPERATIONAL,
-                timeoutMillis = minOf(request.timeoutMs, 10_000L),
-                launchSettingsIfNeeded = false,
-            ) { result -> callback(NodeBridgeResponse.success(request.id, result.isSatisfied.toString())) }
+            dispatchAccessibilityEnsureEnabled(request, callback)
             return
         }
         val response = when (request.method) {
@@ -1812,6 +1808,36 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private fun accessibilityBridgeOperational(): Boolean {
         return AutoJsAccessibilityService.registry.isOperational
+    }
+
+    /**
+     * `ensureEnabled` lets the controller enable the service through every available strategy and wait for
+     * the operational state, which can take longer than the bridge deadline the plugin enforces
+     * ([NodeBridgeRequest.timeoutMs]); a service that is enabled but cannot bind would then surface as
+     * ERR_AUTOJS6_BRIDGE_TIMEOUT instead of `false`. The reply is therefore sent before that deadline with the
+     * state reached so far, and the controller keeps working in the background.
+     * zh-CN: `ensureEnabled` 会让控制器逐个策略启用服务并等待可用状态, 耗时可能超过插件执行的桥超时
+     * ([NodeBridgeRequest.timeoutMs]); 已启用但无法绑定的服务就会表现为 ERR_AUTOJS6_BRIDGE_TIMEOUT 而不是 `false`.
+     * 因此在该期限之前按当时的状态作答, 控制器继续在后台工作.
+     */
+    private fun dispatchAccessibilityEnsureEnabled(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val waitMillis = (request.timeoutMs - ENSURE_ENABLED_REPLY_MARGIN_MS).coerceIn(0L, ENSURE_ENABLED_MAX_WAIT_MS)
+        val replied = AtomicBoolean(false)
+        fun reply(satisfied: Boolean) {
+            if (replied.compareAndSet(false, true)) {
+                callback(NodeBridgeResponse.success(request.id, satisfied.toString()))
+            }
+        }
+        val deadline = Runnable { reply(accessibilityBridgeOperational()) }
+        mainHandler.postDelayed(deadline, waitMillis)
+        org.autojs.autojs.core.accessibility.AccessibilityTool(appContext).ensureServiceAsync(
+            level = org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State.OPERATIONAL,
+            timeoutMillis = waitMillis,
+            launchSettingsIfNeeded = false,
+        ) { result ->
+            mainHandler.removeCallbacks(deadline)
+            reply(result.isSatisfied)
+        }
     }
 
     private fun dispatchAccessibilityOperation(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -5666,6 +5692,14 @@ class AndroidNodeBridgeCapabilityProvider(
         const val TAG = "AndroidNodeBridge"
         const val SHELL_STREAM_JOIN_MS = 500L
         const val MAX_ACTIVE_UI_SESSIONS = 4
+
+        /**
+         * How long before the plugin's bridge deadline `accessibility.ensureEnabled` answers, and the longest it
+         * waits for the service at all (the controller's own strategies run within this budget).
+         * zh-CN: `accessibility.ensureEnabled` 在插件桥超时前多久作答, 以及最多等待服务多久 (控制器的各策略都在此预算内).
+         */
+        const val ENSURE_ENABLED_REPLY_MARGIN_MS = 500L
+        const val ENSURE_ENABLED_MAX_WAIT_MS = 10_000L
         const val MAX_ACTIVE_OVERLAY_SESSIONS = 4
         const val OCR_MODULE_LABEL = "OCR"
         // Gestures block a broker dispatch thread until completion; cap the

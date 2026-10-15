@@ -687,10 +687,12 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
         )
 
         NodePluginTestHarness.assertSucceeded("accessibility selector Android rejection", result)
-        assertTrue(result.stdout.contains("a11y.selector.android.enabled=false"))
-        assertTrue(result.stdout.contains("a11y.selector.android.ensured=false"))
-        assertFalse(result.stdout.contains(":unexpected"))
-        assertTrue(result.stdout.contains("a11y.selector.android.denied=findOne:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/findOne|findAll:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/findAll|click:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/click|longClick:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/longClick|setText:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/setText|scrollForward:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/scrollForward|scrollBackward:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/scrollBackward"))
+        NodePluginTestHarness.assertStdoutContains("accessibility selector Android rejection", result, "a11y.selector.android.enabled=false")
+        // An enabled service that cannot bind (or has not received its first event) makes the host wait for it;
+        // the host answers `false` before the bridge deadline instead of letting the call time out.
+        NodePluginTestHarness.assertStdoutContains("accessibility selector Android rejection", result, "a11y.selector.android.ensured=false")
+        assertFalse(NodePluginTestHarness.describeResult("accessibility selector Android rejection", result), result.stdout.contains(":unexpected"))
+        NodePluginTestHarness.assertStdoutContains("accessibility selector Android rejection", result, "a11y.selector.android.denied=findOne:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/findOne|findAll:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/findAll|click:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/click|longClick:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/longClick|setText:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/setText|scrollForward:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/scrollForward|scrollBackward:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/scrollBackward")
         result.nativeValues["embedded_script.bridge_live_enabled"]?.let { assertEquals("true", it) }
         result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.let { assertEquals("9", it) }
         result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"]?.let { assertEquals("7", it) }
