@@ -57,6 +57,7 @@ import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.initNewBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.autojs.autojs.util.RhinoUtils.newWithScope
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.autojs.autojs.util.ViewUtils
@@ -839,7 +840,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             while (tmp.indexOf("{{", i + 1).also { i = it } >= 0) {
                 val j = tmp.indexOf("}}", i + 1)
                 if (j < 0) return tmp
-                val evaluated = evalInContext(tmp.slice(i + 2 until j), niceCtx)
+                val evaluated = evalInContext(scriptRuntime, tmp.slice(i + 2 until j), niceCtx)
                 tmp = tmp.slice(0 until i) + attrValueConvert(evaluated) + tmp.slice(j + 2 until tmp.length)
             }
             return tmp
@@ -879,17 +880,27 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
          * }
          * ```
          *
+         * @param scriptRuntime The script runtime whose top-level scope resolves names that ctx does not provide. (zh-CN: 脚本运行时, 其顶层作用域用于解析 ctx 未提供的名称.)
          * @param expression The JavaScript expression to evaluate as a string. (zh-CN: 用于执行的表达式.)
-         * @param ctx The context (scriptable scope) in which the expression should be evaluated. (zh-CN: 提供给参数 expression 的作用域上下文.)
+         * @param ctx The context object in which the expression should be evaluated, like the object of a `with` statement. (zh-CN: 提供给参数 expression 的上下文对象, 相当于 `with` 语句的对象.)
          * @return The result of evaluating the expression. (zh-CN: 参数 expression 执行结果.)
          */
-        private fun evalInContext(expression: String, ctx: Scriptable): Any? {
+        private fun evalInContext(scriptRuntime: ScriptRuntime, expression: String, ctx: Scriptable): Any? {
+            // Rhino resolves names along VarScope chains, which a plain object such as a list item is not part of,
+            // and callFunction(func, Scriptable, ...) would replace ctx by its declaration scope (the script's top level),
+            // so `{{name}}` in a list item template failed with a ReferenceError.
+            // A `with` scope keeps the original semantics: names resolve on ctx first, then on the top-level scope.
+            // zh-CN: Rhino 沿 VarScope 链解析名称, 列表项这样的普通对象并不在该链上,
+            // 而 callFunction(func, Scriptable, ...) 会用 ctx 的声明作用域 (脚本顶层作用域) 取代 ctx,
+            // 导致列表项模板中的 `{{name}}` 抛出 ReferenceError.
+            // `with` 作用域可保持原有语义: 名称先在 ctx 上解析, 再回退到顶层作用域.
+            val withScope = newWithScope(ctx, scriptRuntime.topLevelScope)
             val iife = object : BaseFunction() {
                 override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any? {
                     return cx.evaluateString(scope, expression, "<eval>", 1, null)
                 }
             }
-            return callFunction(iife, ctx, ctx, emptyArray())
+            return callFunction(iife, withScope, ctx, emptyArray())
         }
 
         private fun initListView(scriptRuntime: ScriptRuntime, list: JsListView) {
@@ -996,7 +1007,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             is ColorNativeObject -> Colors.toHexRhino(o)
             is ThemeColor -> o.colorPrimary
             is NativeWith -> attrValueConvert(o.prototype)
-            else -> o
+            // JavaScript ToString semantics for everything else, so that a numeric
+            // expression result such as 18 is spliced in as "18" rather than "18.0".
+            // zh-CN: 其余结果使用 JavaScript 的 ToString 语义, 使 18 这样的数值表达式结果拼接为 "18" 而不是 "18.0".
+            else -> Context.toString(o)
         }
 
     }

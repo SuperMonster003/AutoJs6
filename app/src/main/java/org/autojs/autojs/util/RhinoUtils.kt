@@ -54,6 +54,7 @@ import org.mozilla.javascript.Symbol
 import org.mozilla.javascript.TopLevel
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
+import org.mozilla.javascript.WithScope
 import org.mozilla.javascript.Wrapper
 import org.mozilla.javascript.json.JsonParser
 import java.io.Serializable
@@ -502,6 +503,23 @@ object RhinoUtils {
         }
         return standardObjects
     }
+
+    /**
+     * Creates a scope equivalent to `with (obj) { ... }`:
+     * names resolve on [obj] (including its prototype chain) before falling back to [parentScope].
+     *
+     * Since Rhino separated [VarScope] from [Scriptable], a plain object can no longer serve
+     * as an evaluation scope by itself, and [getDeclarationScope] only yields its parent scope,
+     * which drops the object itself.
+     *
+     * zh-CN: 创建等价于 `with (obj) { ... }` 的作用域: 名称先在 [obj] (含原型链) 上解析, 再回退到 [parentScope].
+     *
+     * Rhino 将 [VarScope] 与 [Scriptable] 分离后, 普通对象无法再直接作为求值作用域,
+     * 而 [getDeclarationScope] 只会得到其父作用域, 对象本身会被丢弃.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun newWithScope(obj: Scriptable, parentScope: VarScope = getDeclarationScope(obj)): VarScope = WithScope(parentScope, obj)
 
     @JvmStatic
     fun getDeclarationScopeOrDefault(vararg scopes: Scriptable?): VarScope {

@@ -8,6 +8,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.EcmaError
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -142,6 +143,45 @@ class RhinoUtilsScopeCompatTest {
 
         assertSame(true, RhinoUtils.callFunction(fn, value, value, emptyArray()))
     }
+
+    @Test
+    fun withScopeResolvesNamesOnTheObjectBeforeItsParentScope() {
+        val topLevel: VarScope = cx.initStandardObjects()
+        ScriptableObject.putProperty(topLevel, "name", "global")
+        ScriptableObject.putProperty(topLevel, "suffix", " (global)")
+        val item = cx.newObject(topLevel).apply {
+            ScriptableObject.putProperty(this, "name", "小明")
+            ScriptableObject.putProperty(this, "age", 18)
+        }
+
+        val scope = RhinoUtils.newWithScope(item, topLevel)
+
+        assertSame(topLevel, scope.parentScope)
+        assertEquals("小明", evaluate(scope, "name"))
+        assertEquals("小明 (global)", evaluate(scope, "name + suffix"))
+        assertEquals(19.0, Context.toNumber(evaluate(scope, "age + 1")), 0.0)
+        assertEquals("global", evaluate(topLevel, "name"))
+    }
+
+    @Test
+    fun withScopeDefaultsToTheDeclarationScopeWhichAloneHidesTheObject() {
+        val topLevel: VarScope = cx.initStandardObjects()
+        ScriptableObject.putProperty(topLevel, "suffix", "!")
+        val item = cx.newObject(topLevel).apply {
+            ScriptableObject.putProperty(this, "name", "小红")
+        }
+
+        // The declaration scope alone cannot see the object's own properties,
+        // which is what a list item bound through callFunction(func, Scriptable, ...) ran into.
+        // zh-CN: 仅凭声明作用域无法看到对象自身的属性, 这正是通过 callFunction(func, Scriptable, ...) 绑定列表项时遇到的问题.
+        assertSame(topLevel, RhinoUtils.getDeclarationScope(item))
+        val error = runCatching { evaluate(topLevel, "name") }.exceptionOrNull()
+        assertTrue("expected a ReferenceError, got $error", error is EcmaError && error.name == "ReferenceError")
+
+        assertEquals("小红!", evaluate(RhinoUtils.newWithScope(item), "name + suffix"))
+    }
+
+    private fun evaluate(scope: VarScope, expression: String): Any? = cx.evaluateString(scope, expression, "<eval>", 1, null)
 
     @Suppress("unused")
     class TestFunctions {
