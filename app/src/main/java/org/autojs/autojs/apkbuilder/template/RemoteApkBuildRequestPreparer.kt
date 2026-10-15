@@ -15,6 +15,7 @@ import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import androidx.core.content.pm.PackageInfoCompat
 import com.google.gson.GsonBuilder
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost
@@ -1211,7 +1212,7 @@ object RemoteApkBuildRequestPreparer {
         }
 
         val bound = runCatching {
-            context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+            PluginAutoWake.bindServiceWaking(context, intent, connection, Context.BIND_AUTO_CREATE)
         }.getOrDefault(false)
         if (!bound) {
             throw IOException("Failed to bind plugin service: ${serviceInfo.packageName}/${serviceInfo.name}")

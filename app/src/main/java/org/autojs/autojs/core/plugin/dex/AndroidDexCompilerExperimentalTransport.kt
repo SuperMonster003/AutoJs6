@@ -10,6 +10,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.core.content.pm.PackageInfoCompat
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginSignatureUtils
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
@@ -112,7 +113,7 @@ internal class AndroidDexCompilerExperimentalTransport(
         fun bind() {
             val component = identity.component.toAndroidComponent()
             val intent = Intent(DexCompilerContract.SERVICE_ACTION).setComponent(component)
-            val didBind = applicationContext.bindService(intent, this, Context.BIND_AUTO_CREATE)
+            val didBind = PluginAutoWake.bindServiceWaking(applicationContext, intent, this, Context.BIND_AUTO_CREATE)
             if (!didBind) throw IllegalStateException("Unable to bind the exact DEX compiler component")
             registered.set(true)
             unbindIfReady()

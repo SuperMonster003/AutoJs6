@@ -191,6 +191,7 @@
         "多线程或跨文件重复调用 OCR 时可能反复申请屏幕捕获权限的问题 _[`issue #551`](http://issues.autojs6.com/551)_",
         "OCR 插件选择失败时错误提示与实际引擎及安装状态不一致的问题",
         "Paddle OCR 插件服务断开后无法恢复或未运行时无法自动唤醒的问题 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_ _[`issue #517`](http://issues.autojs6.com/517)_",
+        "部分系统 (如 ColorOS) 上插件未运行时无法连接, 需在插件中心手动激活的问题 (AutoJs6 位于前台或拥有 \"显示在其他应用上层\" 权限时自动唤醒插件)",
         "打包应用依次使用 Paddle OCR 和 Rapid OCR 时可能导致应用崩溃的问题",
         "打包时同时勾选 Paddle OCR v3 与 v4/v5/v6 插件时, 打包应用的 Paddle OCR 不可用的问题 (打包应用仅支持 PP-OCRv3 插件)",
         "images.resize 方法传入错误参数时可能导致应用崩溃的问题",

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.Looper
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.plugin.ai.provider.api.IAiProvider
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -61,7 +62,8 @@ internal class AndroidAiProviderHandshake(
         private var linkedRecipient: IBinder.DeathRecipient? = null
 
         fun bind() {
-            val didBind = applicationContext.bindService(
+            val didBind = PluginAutoWake.bindServiceWaking(
+                applicationContext,
                 Intent().setComponent(component.toAndroidComponent()),
                 this,
                 Context.BIND_AUTO_CREATE,

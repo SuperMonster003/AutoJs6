@@ -15,6 +15,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.PluginAutoWake
+import org.autojs.autojs.core.plugin.PluginBindRefusedException
 import org.autojs.autojs.core.plugin.ServiceBindingLease
 import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginActions
@@ -89,11 +91,13 @@ object PluginInfoServiceHost {
         bindTimeoutMs: Long = DEFAULT_BIND_TIMEOUT_MS,
         block: (IPluginInfoProvider) -> T,
     ): T {
-        val binding = awaitInfoServiceBinding(
-            appContext = context.applicationContext,
-            serviceInfo = serviceInfo,
-            bindTimeoutMs = bindTimeoutMs,
-        )
+        val binding = PluginAutoWake.retryRefusedBind(context.applicationContext, serviceInfo.packageName) {
+            awaitInfoServiceBinding(
+                appContext = context.applicationContext,
+                serviceInfo = serviceInfo,
+                bindTimeoutMs = bindTimeoutMs,
+            )
+        }
         return try {
             // ServiceConnection callbacks use the application's main thread by default.
             // Never invoke a remote plugin from that callback: even a short Binder wait
@@ -185,7 +189,7 @@ object PluginInfoServiceHost {
         }
         if (!bound) {
             fail(
-                IllegalStateException("bindService failed: $component at ${SystemClock.uptimeMillis()}")
+                PluginBindRefusedException(serviceInfo.packageName, "bindService failed: $component at ${SystemClock.uptimeMillis()}")
             )
             return@suspendCancellableCoroutine
         }

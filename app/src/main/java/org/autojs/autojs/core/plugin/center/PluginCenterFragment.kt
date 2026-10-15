@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginHost
 import org.autojs.autojs.core.plugin.batchrename.BatchRenamePluginHost
@@ -923,7 +924,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     private suspend fun probeAidlPlugin(item: PluginCenterItem) {
         PluginEnableProbe.run(item.packageName) {
-            probeAidlPluginService(item)
+            // The user switched the plugin on (or it was just installed): wake it if the system refuses to bind it,
+            // even though it is not enabled yet. zh-CN: 用户打开了插件开关 (或刚安装): 系统拒绝绑定时唤醒插件, 即使它尚未启用.
+            withContext(PluginAutoWake.UserRequest) {
+                probeAidlPluginService(item)
+            }
         }
     }
 

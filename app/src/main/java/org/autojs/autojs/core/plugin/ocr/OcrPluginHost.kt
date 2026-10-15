@@ -29,6 +29,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.autojs.autojs.core.plugin.PluginAutoWake
+import org.autojs.autojs.core.plugin.PluginBindRefusedException
+import org.autojs.autojs.core.plugin.isPluginBindRefused
 import org.autojs.autojs.core.plugin.center.InstalledPluginMetadataStore
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
@@ -532,8 +535,14 @@ object OcrPluginHost {
         discovered
             .filter { it.error != null }
             .forEach { item ->
-                invalidateService(item.serviceInfo, item.error!!)
-                didWake = PluginWakeManager.tryAutoWakeIfNeeded(context, item.serviceInfo.packageName) || didWake
+                val error = item.error!!
+                invalidateService(item.serviceInfo, error)
+                // Refused bindings were already woken inside the bind (PluginAutoWake); wake only enabled and authorized plugins here.
+                // zh-CN: 被拒的绑定已在绑定内部唤醒 (PluginAutoWake); 这里只唤醒已启用并已授权的插件.
+                val packageName = item.serviceInfo.packageName
+                if (!error.isPluginBindRefused() && PluginAutoWake.isEligible(context, packageName)) {
+                    didWake = PluginWakeManager.tryAutoWakeIfNeeded(context, packageName) || didWake
+                }
             }
         if (didWake) {
             delay(RETRY_WAKE_DELAY_MS)
@@ -775,7 +784,7 @@ object OcrPluginHost {
     ): T {
         val appCtx = context.applicationContext
         val entry = getOrCreateEntry(appCtx, serviceInfo)
-        val proxy = awaitProxy(entry, bindTimeoutMs)
+        val proxy = PluginAutoWake.retryRefusedBind(entry.appCtx, entry.serviceInfo.packageName) { awaitProxy(entry, bindTimeoutMs) }
         return try {
             block(proxy)
         } catch (e: RemoteException) {
@@ -804,7 +813,7 @@ object OcrPluginHost {
         block: suspend (IOcrPlugin) -> T,
     ): T {
         invalidateEntry(entry, error)
-        val proxy = awaitProxy(entry, bindTimeoutMs)
+        val proxy = PluginAutoWake.retryRefusedBind(entry.appCtx, entry.serviceInfo.packageName) { awaitProxy(entry, bindTimeoutMs) }
         return try {
             block(proxy)
         } catch (retryError: RemoteException) {
@@ -902,7 +911,7 @@ object OcrPluginHost {
         if (!ok) {
             val msg = buildBindFailureMessage(entry.appCtx, entry.serviceInfo, entry.cn)
             Log.e(TAG, msg)
-            failWaiters(entry, IllegalStateException(msg))
+            failWaiters(entry, PluginBindRefusedException(entry.serviceInfo.packageName, msg))
             return
         }
 

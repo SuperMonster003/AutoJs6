@@ -11,6 +11,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.content.pm.PackageInfoCompat
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
@@ -76,7 +77,8 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
         abortFailure()?.let { throw it }
         val binding = Binding(applicationContext, onConnectionLost)
         val didBind = try {
-            applicationContext.bindService(
+            PluginAutoWake.bindServiceWaking(
+                applicationContext,
                 Intent().setComponent(OFFICIAL_COMPONENT),
                 binding,
                 Context.BIND_AUTO_CREATE or if (important) Context.BIND_IMPORTANT else 0,

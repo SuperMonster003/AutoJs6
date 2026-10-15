@@ -10,6 +10,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.core.content.pm.PackageInfoCompat
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginSignatureUtils
 import org.autojs.plugin.jvmsource.api.IJvmHostBridge
@@ -114,7 +115,7 @@ internal class AndroidJvmSourceTransport(context: Context) : JvmSourceTransport 
         fun bind() {
             val component = identity.component.toAndroid()
             val intent = Intent(JvmSourceContract.SERVICE_ACTION).setComponent(component)
-            check(applicationContext.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
+            check(PluginAutoWake.bindServiceWaking(applicationContext, intent, this, Context.BIND_AUTO_CREATE)) {
                 "Unable to bind exact JVM source provider"
             }
             registered.set(true)

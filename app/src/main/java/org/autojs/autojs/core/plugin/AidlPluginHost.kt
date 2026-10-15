@@ -100,10 +100,12 @@ class AidlPluginHost<I : IInterface>(
     }
 
     /**
-     * [discover], then wakes the packages whose service failed to bind and that [shouldWake] accepts (see
+     * [discover], then wakes the packages whose service still failed and that [shouldWake] accepts (see
      * [PluginDiscoveryRecovery]) and discovers those packages once more; services that still fail keep their error.
-     * zh-CN: 先 [discover], 再唤醒服务绑定失败且 [shouldWake] 接受的包 (见 [PluginDiscoveryRecovery]), 并对这些包重新发现一次;
-     * 仍然失败的服务保留其错误.
+     * Refused bindings are already woken inside [discover] (see [PluginAutoWake]), so plain [discover] is enough for
+     * new callers.
+     * zh-CN: 先 [discover], 再唤醒仍然失败且 [shouldWake] 接受的包 (见 [PluginDiscoveryRecovery]), 并对这些包重新发现一次; 仍然失败的
+     * 服务保留其错误. 被拒的绑定已在 [discover] 内部唤醒 (见 [PluginAutoWake]), 新代码直接使用 [discover] 即可.
      */
     suspend fun discoverWakingFailures(
         context: Context,
@@ -422,8 +424,15 @@ class AidlPluginHost<I : IInterface>(
         discovered
             .filter { it.error != null }
             .forEach { item ->
-                invalidateService(item.serviceInfo, item.error!!)
-                didWake = PluginWakeManager.tryAutoWakeIfNeeded(context, item.serviceInfo.packageName) || didWake
+                val error = item.error!!
+                invalidateService(item.serviceInfo, error)
+                // A refused binding was already woken inside the bind (see PluginAutoWake); other failures (a plugin
+                // process that died, for instance) are woken here, for enabled and authorized plugins only.
+                // zh-CN: 被拒的绑定已在绑定内部唤醒过 (见 PluginAutoWake); 其他失败 (例如插件进程已退出) 在此唤醒, 且只针对已启用并已授权的插件.
+                val packageName = item.serviceInfo.packageName
+                if (!error.isPluginBindRefused() && PluginAutoWake.isEligible(context, packageName, defaultEnabled)) {
+                    didWake = PluginWakeManager.tryAutoWakeIfNeeded(context, packageName) || didWake
+                }
             }
         if (didWake) {
             delay(retryWakeDelayMs)
@@ -478,7 +487,7 @@ class AidlPluginHost<I : IInterface>(
         if (enforcePreBindValidator) preBindValidator?.invoke(context, serviceInfo)
         val appContext = context.applicationContext
         val entry = getOrCreateEntry(appContext, serviceInfo)
-        val proxy = awaitProxy(entry, bindTimeoutMs)
+        val proxy = PluginAutoWake.retryRefusedBind(appContext, serviceInfo.packageName, defaultEnabled) { awaitProxy(entry, bindTimeoutMs) }
         return try {
             block(proxy)
         } catch (e: RemoteException) {
@@ -502,7 +511,9 @@ class AidlPluginHost<I : IInterface>(
         preBindValidator?.invoke(context, serviceInfo)
         var retriesRemaining = if (retryOnRemoteException) 1 else 0
         while (true) {
-            val binding = awaitDedicatedServiceBinding(context.applicationContext, serviceInfo, bindTimeoutMs)
+            val binding = PluginAutoWake.retryRefusedBind(context.applicationContext, serviceInfo.packageName, defaultEnabled) {
+                awaitDedicatedServiceBinding(context.applicationContext, serviceInfo, bindTimeoutMs)
+            }
             try {
                 return LeasedCall(
                     value = block(binding.proxy),
@@ -645,7 +656,7 @@ class AidlPluginHost<I : IInterface>(
             }
         }
         if (!bound) {
-            fail(IllegalStateException(buildBindFailureMessage(appContext, serviceInfo, component)))
+            fail(PluginBindRefusedException(serviceInfo.packageName, buildBindFailureMessage(appContext, serviceInfo, component)))
             return@suspendCancellableCoroutine
         }
         lease.markRegistered()
@@ -666,7 +677,7 @@ class AidlPluginHost<I : IInterface>(
         block: (I) -> T,
     ): T {
         invalidateEntry(entry, error)
-        val proxy = awaitProxy(entry, bindTimeoutMs)
+        val proxy = PluginAutoWake.retryRefusedBind(entry.appContext, entry.serviceInfo.packageName, defaultEnabled) { awaitProxy(entry, bindTimeoutMs) }
         return try {
             block(proxy)
         } catch (retryError: RemoteException) {
@@ -745,7 +756,7 @@ class AidlPluginHost<I : IInterface>(
         if (!bound) {
             val message = buildBindFailureMessage(entry.appContext, entry.serviceInfo, entry.component)
             Log.e(tag, message)
-            failWaiters(entry, IllegalStateException(message))
+            failWaiters(entry, PluginBindRefusedException(entry.serviceInfo.packageName, message))
             return
         }
 

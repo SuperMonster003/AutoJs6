@@ -18,6 +18,9 @@ import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.PluginAutoWake
+import org.autojs.autojs.core.plugin.isPluginBindRefused
+import kotlin.coroutines.EmptyCoroutineContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.batchrename.BatchRenamePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
@@ -143,6 +146,7 @@ class InstalledPluginRepository {
         declared: List<Discovery>,
     ): List<Discovery> = supervisorScope {
         val semaphore = Semaphore(MAX_PARALLEL_PLUGIN_PROBES)
+        val cachedMetadata = InstalledPluginMetadataStore.readAll(context)
         declared
             .groupBy { it.serviceInfo.packageName }
             .values
@@ -154,11 +158,21 @@ class InstalledPluginRepository {
                         )
                         val preferred = candidates.first { it.serviceAction == preferredAction }
                         val packageName = preferred.serviceInfo.packageName
+                        // A plugin whose metadata of this exact build is cached is not woken just to be listed (ColorOS
+                        // refuses to bind every plugin that is not running, and the list would start them all); its
+                        // refused binding means "not running" and the cached metadata stands in. New or updated
+                        // plugins are woken (PluginAutoWake) so that their metadata can be read.
+                        // zh-CN: 已缓存当前构建元数据的插件不会只为列出而被唤醒 (ColorOS 拒绝绑定所有未运行的插件, 列表会把它们全部启动);
+                        // 其被拒的绑定表示 "未运行", 由缓存的元数据代替. 新装或更新的插件会被唤醒 (PluginAutoWake) 以读取元数据.
+                        val known = isCachedBuild(context, packageName, cachedMetadata)
                         try {
-                            discoverPackage(context, packageName, preferred)
+                            withContext(if (known) PluginAutoWake.Off else EmptyCoroutineContext) {
+                                discoverPackage(context, packageName, preferred)
+                            }.map { if (known && it.error?.isPluginBindRefused() == true) it.copy(error = null) else it }
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Throwable) {
+                            if (known && e.isPluginBindRefused()) return@withPermit listOf(preferred)
                             Log.w(TAG, "Failed to discover plugin services for $packageName", e)
                             PluginCenterProcessLogger.i(
                                 "Failed to discover plugin services for $packageName: ${e.message ?: e.javaClass.simpleName}.",
@@ -170,6 +184,16 @@ class InstalledPluginRepository {
             }
             .awaitAll()
             .flatten()
+    }
+
+    private fun isCachedBuild(
+        context: Context,
+        packageName: String,
+        cachedMetadata: Map<String, InstalledPluginMetadataStore.Entry>,
+    ): Boolean {
+        val entry = cachedMetadata[packageName] ?: return false
+        val pkgInfo = runCatching { context.packageManager.getPackageInfo(packageName, 0) }.getOrNull() ?: return false
+        return entry.matchesInstalledPackage(PackageInfoCompat.getLongVersionCode(pkgInfo), pkgInfo.lastUpdateTime)
     }
 
     private suspend fun discoverPackage(

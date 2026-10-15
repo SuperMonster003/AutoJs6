@@ -9,6 +9,7 @@ import android.os.DeadObjectException
 import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelFileDescriptor
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.plugin.ai.provider.api.IAiCallback
 import org.autojs.plugin.ai.provider.api.IAiProvider
 import org.autojs.plugin.ai.provider.api.IAiSession
@@ -72,7 +73,8 @@ internal class AndroidAiProviderSession(
         private var linkedRecipient: IBinder.DeathRecipient? = null
 
         fun bind() {
-            val didBind = applicationContext.bindService(
+            val didBind = PluginAutoWake.bindServiceWaking(
+                applicationContext,
                 Intent().setComponent(component.toSessionAndroidComponent()),
                 this,
                 Context.BIND_AUTO_CREATE,

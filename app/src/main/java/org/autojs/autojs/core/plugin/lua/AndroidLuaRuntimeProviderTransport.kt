@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.content.pm.PackageInfoCompat
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
@@ -374,7 +375,8 @@ private class ExactComponentBinderLease(
         check(Looper.myLooper() != Looper.getMainLooper()) {
             "Synchronous Lua runtime binding must not block the Android main thread"
         }
-        val didBind = context.bindService(
+        val didBind = PluginAutoWake.bindServiceWaking(
+            context,
             Intent().setComponent(expectedComponent),
             this,
             Context.BIND_AUTO_CREATE,

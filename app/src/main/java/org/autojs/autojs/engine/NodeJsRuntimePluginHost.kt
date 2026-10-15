@@ -19,6 +19,8 @@ import android.util.Log
 import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.autojs.autojs.core.plugin.PluginAutoWake
+import org.autojs.autojs.core.plugin.PluginBindRefusedException
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
@@ -690,7 +692,9 @@ object NodeJsRuntimePluginHost {
         candidate: Candidate,
         refresh: Boolean = false,
     ): Pair<AcquiredRuntime, Bundle> {
-        var acquired = awaitRuntime(context.applicationContext, candidate)
+        var acquired = PluginAutoWake.retryRefusedBind(context.applicationContext, candidate.component.packageName) {
+            awaitRuntime(context.applicationContext, candidate)
+        }
         if (!refresh) {
             synchronized(acquired.entry.lock) {
                 acquired.entry.runtimeInfo?.let { cached ->
@@ -702,7 +706,9 @@ object NodeJsRuntimePluginHost {
             invokeRuntimeInfo(acquired)
         } catch (error: RemoteException) {
             invalidateAcquired(acquired, error, binderFailure = true)
-            acquired = awaitRuntime(context.applicationContext, candidate)
+            acquired = PluginAutoWake.retryRefusedBind(context.applicationContext, candidate.component.packageName) {
+                awaitRuntime(context.applicationContext, candidate)
+            }
             try {
                 invokeRuntimeInfo(acquired)
             } catch (retryError: RemoteException) {
@@ -904,7 +910,10 @@ object NodeJsRuntimePluginHost {
             failWaiters(
                 entry,
                 binding,
-                NodeRuntimePluginUnavailableException("bindService failed: ${entry.component}"),
+                NodeRuntimePluginUnavailableException(
+                    "bindService failed: ${entry.component}",
+                    PluginBindRefusedException(entry.component.packageName, "bindService failed: ${entry.component}"),
+                ),
             )
             return
         }

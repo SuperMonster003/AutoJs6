@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.AidlPluginHost
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginResourceResolver
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
@@ -72,11 +73,14 @@ internal object ExplorerActionRegistry : ExplorerPluginActionProvider {
         }
         var discoveryClean = true
         val resolved = LinkedHashMap<String, ResolvedExplorerAction>()
-        ExplorerActionPluginHost.discoverWakingFailures(appContext)
+        ExplorerActionPluginHost.discover(appContext)
             .sortedWith(compareBy({ it.serviceInfo.packageName }, { it.serviceInfo.name }))
             .forEach candidateLoop@{ candidate ->
                 val packageName = candidate.serviceInfo.packageName
-                if (candidate.error != null) discoveryClean = false
+                // Bindings are woken on demand (PluginAutoWake); a failure of a disabled or unauthorized plugin cannot
+                // offer actions anyway, and enabling it changes the refresh stamps.
+                // zh-CN: 绑定按需唤醒 (PluginAutoWake); 已停用或未授权插件的失败本就不会提供动作, 而启用它会改变刷新戳.
+                if (candidate.error != null && PluginAutoWake.isEligible(appContext, packageName)) discoveryClean = false
                 val pluginInfo = candidate.pluginInfo ?: return@candidateLoop
                 val advertisedProtocolVersion = resolveProtocolVersion(pluginInfo)
                 if (!isAvailablePlugin(appContext, packageName, pluginInfo, advertisedProtocolVersion)) {

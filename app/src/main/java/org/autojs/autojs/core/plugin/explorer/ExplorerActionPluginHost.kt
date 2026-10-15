@@ -4,9 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import org.autojs.autojs.core.plugin.AidlPluginHost
-import org.autojs.autojs.core.plugin.PluginDiscoveryRecovery
-import org.autojs.autojs.core.plugin.center.PluginEnableStore
-import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveOpenRemoteFailure
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.explorer.api.ExplorerActionPluginActions
@@ -28,17 +25,6 @@ object ExplorerActionPluginHost {
     )
 
     suspend fun discover(context: Context, packageName: String? = null) = host.discover(context, packageName)
-
-    private val recovery = PluginDiscoveryRecovery()
-
-    /**
-     * [discover] for the registry: plugins whose service fails to bind (ColorOS refuses plugins that never ran) are
-     * woken and discovered again, as long as the Plugin Center enables and authorizes them.
-     * zh-CN: 供注册表使用的 [discover]: 服务绑定失败的插件 (ColorOS 拒绝从未运行过的插件) 若在插件中心已启用且已授权, 会被唤醒并重新发现.
-     */
-    suspend fun discoverWakingFailures(context: Context) = host.discoverWakingFailures(context, recovery) { packageName ->
-        PluginEnableStore.isEnabled(context, packageName, true) && PluginTrustManager.isAuthorized(context, packageName)
-    }
 
     suspend fun probe(context: Context, packageName: String): PluginInfo = host.probe(context, packageName)
 

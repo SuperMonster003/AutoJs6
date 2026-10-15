@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import androidx.core.content.pm.PackageInfoCompat
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginSignatureUtils
 import org.autojs.plugin.r8compiler.api.IR8CompilerCallback
@@ -115,7 +116,7 @@ internal class AndroidR8CompilerTransport(
         fun bind() {
             val intent = Intent(R8CompilerContract.SERVICE_ACTION)
                 .setComponent(identity.component.toAndroidComponent())
-            val didBind = applicationContext.bindService(intent, this, Context.BIND_AUTO_CREATE)
+            val didBind = PluginAutoWake.bindServiceWaking(applicationContext, intent, this, Context.BIND_AUTO_CREATE)
             check(didBind) { "Unable to bind the exact R8 compiler component" }
             registered.set(true)
             unbindIfReady()

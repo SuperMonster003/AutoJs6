@@ -10,6 +10,7 @@ import android.os.DeadObjectException
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.ai.common.api.AiCommonCodec
@@ -1701,7 +1702,8 @@ private class ProcessAiPluginAskRunner(
             private val linked = AtomicReference<Pair<IBinder, IBinder.DeathRecipient>?>(null)
 
             fun bind() {
-                val didBind = backend.applicationContext.bindService(
+                val didBind = PluginAutoWake.bindServiceWaking(
+                    backend.applicationContext,
                     Intent().setComponent(ComponentName(request.component.packageName, request.component.className)),
                     this,
                     Context.BIND_AUTO_CREATE,
