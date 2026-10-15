@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.batchrename.api.** { *; }
+-dontwarn org.autojs.plugin.batchrename.api.**

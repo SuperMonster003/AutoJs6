@@ -793,6 +793,10 @@ dependencies /* Unclassified */ {
     // Plugin API: ui-mode layout preview for the 3-Block Compose designer (roadmap P10.2)
     // zh-CN: 供 3-Block Compose 设计器使用的 ui 模式布局预览契约 (路线图 P10.2)
     implementation(project(":plugin-api:ui-preview-api"))
+
+    // Plugin API: Batch Rename (files.batchRename and the file manager rename actions)
+    // zh-CN: 批量重命名插件契约 (files.batchRename 与文件管理器重命名动作)
+    implementation(project(":plugin-api:batch-rename-api"))
 }
 
 dependencies /* MIME */ {
