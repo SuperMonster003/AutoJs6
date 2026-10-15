@@ -136,6 +136,7 @@ private val pluginApi = listOf(
     "installer-api",
     "terminal-api",
     "batch-rename-api",
+    "gallery-api",
 )
 
 private val plugins = listOf(

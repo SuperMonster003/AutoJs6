@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.gallery.api.** { *; }
+-dontwarn org.autojs.plugin.gallery.api.**
