@@ -63,6 +63,7 @@ import org.autojs.autojs.runtime.api.augment.dialogs.Dialogs
 import org.autojs.autojs.runtime.api.augment.engines.Engines
 import org.autojs.autojs.runtime.api.augment.events.Events
 import org.autojs.autojs.runtime.api.augment.events.Keys
+import org.autojs.autojs.runtime.api.augment.files.BatchRename
 import org.autojs.autojs.runtime.api.augment.files.Files
 import org.autojs.autojs.runtime.api.augment.floaty.Floaty
 import org.autojs.autojs.runtime.api.augment.flow.Flow
@@ -1041,7 +1042,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Numberx(this).augment(target)
         Mathx(this).augment(target)
         Jsox(this).augment(target)
-        Files(this).augment(target, files)
+        Files(this).augment(target, files).also { BatchRename(this).augment(it) }
         Crypto.augmentWithRuntime(target, this, CoreCrypto)
         RootAutomator(this).augment(target)
         Engines(this).augment(target)

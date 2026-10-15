@@ -1,0 +1,313 @@
+package org.autojs.autojs.core.plugin.batchrename
+
+import org.autojs.plugin.batchrename.api.BatchRenameOptionKeys
+import org.autojs.plugin.batchrename.api.BatchRenameValues
+import java.io.File
+import java.io.IOException
+import java.security.SecureRandom
+import java.util.Locale
+import java.util.TimeZone
+
+/** What the host sends the plugin for one plan (contract v1 request). zh-CN: 宿主为一个方案发给插件的内容. */
+data class BatchRenamePlanRequest(
+    val options: Map<String, Any>,
+    val parents: List<BatchRenameParent>,
+    val items: List<BatchRenameTarget>,
+    /** Items the script excluded, one flag per item. zh-CN: 脚本排除的条目, 每项一个标志. */
+    val excluded: List<Boolean>,
+    val locale: String,
+    val timeZone: String,
+    val now: Long,
+)
+
+data class BatchRenamePlanAnswerItem(val newName: String?, val status: String, val reason: String?, val overwrites: Boolean)
+
+/** The plugin's answer to a [BatchRenamePlanRequest]. zh-CN: 插件对 [BatchRenamePlanRequest] 的应答. */
+data class BatchRenamePlanAnswer(val rejected: Boolean, val items: List<BatchRenamePlanAnswerItem>, val counts: Map<String, Int>)
+
+/** Progress of `apply` as the script sees it: renames done, renames in total and the item just handled. */
+fun interface BatchRenameScriptProgress {
+    fun onProgress(done: Int, total: Int, item: Map<String, Any?>)
+}
+
+/**
+ * The `files.batchRename` script API without Rhino (plugin roadmap P3.2, appendix B): `plan` enumerates the targets
+ * and asks the plugin, `apply` executes a plan through the shared host executor, `undo` and `history` work on the shared
+ * journal. Values come back as maps and lists the Rhino layer turns into script objects. A script keeps its last
+ * [MAX_PLANS] plans; `apply` finds a plan by its ID, plans again when the script changed `excluded` flags or the conflict
+ * policy, and runs each plan at most once.
+ *
+ * zh-CN: 不含 Rhino 的 `files.batchRename` 脚本 API (插件路线图 P3.2, 附录 B): `plan` 枚举目标并询问插件, `apply` 经共用的宿主执行器
+ * 执行方案, `undo` 与 `history` 作用于共用的日志. 结果以 Map 与 List 返回, 由 Rhino 层转为脚本对象. 每个脚本保留最近 [MAX_PLANS]
+ * 个方案; `apply` 按 ID 找到方案, 脚本修改了 `excluded` 标志或冲突策略时重新询问插件, 每个方案至多执行一次.
+ */
+class BatchRenameScriptService(
+    private val executor: () -> BatchRenameExecutor,
+    private val planner: suspend (BatchRenamePlanRequest) -> BatchRenamePlanAnswer,
+    private val collector: BatchRenameTargetCollector = BatchRenameTargetCollector(),
+    private val clock: () -> Long = System::currentTimeMillis,
+    private val locale: () -> String = { Locale.getDefault().toLanguageTag() },
+    private val timeZone: () -> String = { TimeZone.getDefault().id },
+) {
+    private val random = SecureRandom()
+
+    private val plans = object : LinkedHashMap<String, PlanState>(MAX_PLANS, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, PlanState>?) = size > MAX_PLANS
+    }
+
+    private class PlanState(val id: String, val request: BatchRenamePlanRequest, val answer: BatchRenamePlanAnswer) {
+        var used = false
+    }
+
+    /** `plan(paths, options)`: [options] is the map of [BatchRenameScriptArguments.options]. */
+    suspend fun plan(paths: List<File>, options: Map<String, Any>): Map<String, Any?> {
+        val targets = collector.collect(paths, options[BatchRenameOptionKeys.INCLUDE_SUBFOLDERS] as Boolean)
+        val request = BatchRenamePlanRequest(
+            options = LinkedHashMap(options),
+            parents = targets.parents,
+            items = targets.items,
+            excluded = List(targets.items.size) { false },
+            locale = locale(),
+            timeZone = timeZone(),
+            now = clock(),
+        )
+        val state = PlanState(newPlanId(), request, ask(request))
+        synchronized(plans) { plans[state.id] = state }
+        return planView(state.id, request, state.answer)
+    }
+
+    /**
+     * `apply(plan, applyOptions)`. [excluded] holds the `excluded` flags of the script's plan items (null keeps those of
+     * the plan) and [onConflict] overrides the plan's policy.
+     * zh-CN: `apply(plan, applyOptions)`. [excluded] 为脚本方案条目的 `excluded` 标志 (null 沿用方案的), [onConflict] 覆盖方案的策略.
+     */
+    suspend fun apply(planId: String, excluded: List<Boolean>?, onConflict: String?, progress: BatchRenameScriptProgress?): Map<String, Any?> {
+        val state = synchronized(plans) { plans[planId] }
+            ?: batchRenameFailure(BatchRenameScriptCodes.PLAN_STALE, "the plan is unknown to this script or has expired; plan again")
+        synchronized(state) {
+            if (state.used) batchRenameFailure(BatchRenameScriptCodes.PLAN_STALE, "the plan was already applied; plan again")
+            state.used = true
+        }
+        var executed = false
+        try {
+            val flags = excluded ?: state.request.excluded
+            if (flags.size != state.request.items.size) {
+                batchRenameFailure(BatchRenameScriptCodes.INVALID_OPTIONS, "plan items must not be added or removed")
+            }
+            val policy = onConflict ?: state.request.options.getValue(BatchRenameOptionKeys.ON_CONFLICT)
+            val unchanged = flags == state.request.excluded && policy == state.request.options[BatchRenameOptionKeys.ON_CONFLICT]
+            val request = if (unchanged) state.request else state.request.copy(
+                options = LinkedHashMap(state.request.options).apply { put(BatchRenameOptionKeys.ON_CONFLICT, policy) },
+                excluded = flags,
+            )
+            val answer = if (unchanged) state.answer else ask(request)
+            if (answer.rejected) rejected(request, answer)
+            val renames = answer.items.indices.filter { answer.items[it].status == BatchRenameValues.STATUS_RENAME }
+            executed = true
+            val record = if (renames.isEmpty()) null else execute(request, answer, renames, progress)
+            return resultView(request, answer, renames, record)
+        } finally {
+            // A plan that did not reach the executor may be applied again. zh-CN: 未到达执行器的方案可以再次执行.
+            if (!executed) synchronized(state) { state.used = false }
+        }
+    }
+
+    /** `undo(result | batchId)`. */
+    fun undo(batchId: String): Map<String, Any?> {
+        val executor = executor()
+        val stored = executor.journal.load(batchId)
+            ?: batchRenameFailure(BatchRenameScriptCodes.UNDO_UNAVAILABLE, "no rename batch $batchId is kept (the journal keeps the newest ${BatchRenameJournalStore.MAX_BATCHES})")
+        if (!stored.undoable) batchRenameFailure(BatchRenameScriptCodes.UNDO_UNAVAILABLE, "rename batch $batchId has nothing left to undo")
+        var before: BatchRenameJournalRecord? = null
+        val after = try {
+            executor.undo(batchId) { record -> record.undoable.also { if (it) before = record } }
+        } catch (e: IOException) {
+            throw BatchRenameScriptException(BatchRenameScriptCodes.IO_FAILED, "could not update the rename journal: ${e.message}", e)
+        } ?: batchRenameFailure(BatchRenameScriptCodes.UNDO_UNAVAILABLE, "rename batch $batchId has nothing left to undo")
+        val start = requireNotNull(before)
+        val items = start.entries.zip(after.entries)
+            .filter { (old, _) -> old.undoable }
+            .map { (old, new) ->
+                linkedMapOf<String, Any?>(
+                    "path" to start.locationOf(old).path,
+                    "newPath" to after.locationOf(new).path,
+                    "status" to when (new.state) {
+                        BatchRenameEntryState.RESTORED -> STATUS_RESTORED
+                        BatchRenameEntryState.STALE -> STATUS_STALE
+                        else -> STATUS_FAILED
+                    },
+                    "reason" to new.reason,
+                )
+            }
+        return linkedMapOf(
+            "batchId" to batchId,
+            "state" to after.state.value,
+            "counts" to countsOf(items, listOf(STATUS_RESTORED, STATUS_STALE, STATUS_FAILED)),
+            "items" to items,
+            "undoable" to after.undoable,
+        )
+    }
+
+    /** `history(limit)`: the newest batches of scripts and of the file manager. zh-CN: 脚本与文件管理器最近的批次. */
+    fun history(limit: Int): List<Map<String, Any?>> = executor().journal.list().take(limit).map { record ->
+        linkedMapOf(
+            "batchId" to record.batchId,
+            "source" to record.source.value,
+            "state" to record.state.value,
+            "createdAt" to record.createdAt,
+            "updatedAt" to record.updatedAt,
+            "counts" to linkedMapOf(
+                "renamed" to record.renamedCount,
+                "notRenamed" to record.entries.size - record.renamedCount,
+                "restored" to record.restoredCount,
+            ),
+            "undoable" to record.undoable,
+        )
+    }
+
+    private suspend fun ask(request: BatchRenamePlanRequest): BatchRenamePlanAnswer {
+        val answer = planner(request)
+        if (answer.items.size != request.items.size ||
+            answer.items.any { it.status == BatchRenameValues.STATUS_RENAME && !BatchRenameNames.isValid(it.newName.orEmpty()) }
+        ) {
+            batchRenameFailure(BatchRenameScriptCodes.INTERNAL, "the Batch Rename plugin answered a plan that does not match the request")
+        }
+        return answer
+    }
+
+    private fun execute(
+        request: BatchRenamePlanRequest,
+        answer: BatchRenamePlanAnswer,
+        renames: List<Int>,
+        progress: BatchRenameScriptProgress?,
+    ): BatchRenameJournalRecord {
+        val operations = renames.map { index ->
+            val target = request.items[index]
+            BatchRenameOperation(
+                source = target.file,
+                newName = answer.items[index].newName!!,
+                directory = target.directory,
+                expectedLastModified = target.lastModified.takeUnless { target.directory },
+                expectedLength = target.length.takeUnless { target.directory },
+                overwrite = answer.items[index].overwrites,
+            )
+        }
+        val callback = progress?.let {
+            BatchRenameProgress { done, total, entry ->
+                it.onProgress(done, total, linkedMapOf("path" to entry.oldPath, "newPath" to entry.newPath, "status" to statusOf(entry), "reason" to entry.reason))
+            }
+        }
+        return try {
+            executor().execute(operations, BatchRenameSource.SCRIPT, progress = callback)
+        } catch (e: IOException) {
+            throw BatchRenameScriptException(BatchRenameScriptCodes.IO_FAILED, "could not record the rename batch: ${e.message}", e)
+        }
+    }
+
+    private fun planView(id: String, request: BatchRenamePlanRequest, answer: BatchRenamePlanAnswer): Map<String, Any?> = linkedMapOf(
+        "id" to id,
+        "options" to LinkedHashMap(request.options),
+        "items" to request.items.mapIndexed { index, target ->
+            val item = answer.items[index]
+            linkedMapOf(
+                "path" to target.file.path,
+                "name" to target.file.name,
+                "kind" to if (target.directory) KIND_DIRECTORY else KIND_FILE,
+                "depth" to target.depth,
+                "newName" to item.newName,
+                "status" to item.status,
+                "reason" to item.reason,
+                "excluded" to request.excluded[index],
+                "overwrites" to item.overwrites,
+            )
+        },
+        "counts" to linkedMapOf(*PLAN_STATUSES.map { it to (answer.counts[it] ?: 0) }.toTypedArray()),
+        "rejected" to answer.rejected,
+    )
+
+    private fun resultView(
+        request: BatchRenamePlanRequest,
+        answer: BatchRenamePlanAnswer,
+        renames: List<Int>,
+        record: BatchRenameJournalRecord?,
+    ): Map<String, Any?> {
+        val entries = renames.withIndex().associate { (position, index) -> index to record!!.entries[position] }
+        val items = request.items.mapIndexed { index, target ->
+            val item = answer.items[index]
+            val entry = entries[index]
+            val path = target.file.path
+            when {
+                entry != null -> linkedMapOf<String, Any?>(
+                    "path" to path,
+                    "newPath" to record!!.locationOf(entry).path,
+                    "status" to statusOf(entry),
+                    "reason" to entry.reason,
+                )
+                else -> linkedMapOf(
+                    "path" to path,
+                    "newPath" to (record?.relocate(path)?.path ?: path),
+                    "status" to if (item.status == BatchRenameValues.STATUS_EXCLUDED) STATUS_EXCLUDED else STATUS_SKIPPED,
+                    "reason" to item.reason,
+                )
+            }
+        }
+        return linkedMapOf(
+            "batchId" to record?.batchId,
+            "counts" to countsOf(items, listOf(STATUS_RENAMED, STATUS_SKIPPED, STATUS_FAILED, STATUS_STALE, STATUS_EXCLUDED)),
+            "items" to items,
+            "undoable" to (record?.undoable ?: false),
+        )
+    }
+
+    private fun rejected(request: BatchRenamePlanRequest, answer: BatchRenamePlanAnswer): Nothing {
+        val refused = answer.items.withIndex().filter {
+            it.value.status == BatchRenameValues.STATUS_CONFLICT || it.value.status == BatchRenameValues.STATUS_INVALID
+        }
+        val conflicts = refused.count { it.value.status == BatchRenameValues.STATUS_CONFLICT }
+        val examples = refused.take(MAX_REJECTION_EXAMPLES).joinToString { (index, item) ->
+            "${request.items[index].file.name} -> ${item.newName} (${item.reason})"
+        }
+        val more = if (refused.size > MAX_REJECTION_EXAMPLES) ", ..." else ""
+        batchRenameFailure(
+            BatchRenameScriptCodes.PLAN_REJECTED,
+            "the plan has $conflicts conflicting and ${refused.size - conflicts} invalid items " +
+                "(onConflict \"${request.options[BatchRenameOptionKeys.ON_CONFLICT]}\"): $examples$more",
+        )
+    }
+
+    private fun countsOf(items: List<Map<String, Any?>>, statuses: List<String>): Map<String, Int> =
+        linkedMapOf(*statuses.map { status -> status to items.count { it["status"] == status } }.toTypedArray())
+
+    private fun statusOf(entry: BatchRenameJournalEntry): String = when (entry.state) {
+        BatchRenameEntryState.RENAMED -> STATUS_RENAMED
+        BatchRenameEntryState.STALE -> STATUS_STALE
+        else -> STATUS_FAILED
+    }
+
+    private fun newPlanId(): String = "p_" + ByteArray(16).also(random::nextBytes).joinToString("") { "%02x".format(it) }
+
+    companion object {
+        /** Plans a script keeps for `apply`. zh-CN: 每个脚本为 `apply` 保留的方案数. */
+        const val MAX_PLANS = 16
+
+        private const val MAX_REJECTION_EXAMPLES = 5
+
+        const val KIND_FILE = "file"
+        const val KIND_DIRECTORY = "dir"
+
+        const val STATUS_RENAMED = "renamed"
+        const val STATUS_SKIPPED = "skipped"
+        const val STATUS_FAILED = "failed"
+        const val STATUS_STALE = "stale"
+        const val STATUS_EXCLUDED = "excluded"
+        const val STATUS_RESTORED = "restored"
+
+        private val PLAN_STATUSES = listOf(
+            BatchRenameValues.STATUS_RENAME,
+            BatchRenameValues.STATUS_UNCHANGED,
+            BatchRenameValues.STATUS_CONFLICT,
+            BatchRenameValues.STATUS_INVALID,
+            BatchRenameValues.STATUS_EXCLUDED,
+        )
+    }
+}

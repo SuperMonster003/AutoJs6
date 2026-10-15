@@ -1,0 +1,215 @@
+package org.autojs.autojs.core.plugin.batchrename
+
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
+import org.autojs.plugin.batchrename.api.BatchRenameOptionKeys
+import org.autojs.plugin.batchrename.api.BatchRenameValues
+
+/** The `source` and `flags` of a `RegExp` passed as `search`. zh-CN: 作为 `search` 传入的 `RegExp` 的 `source` 与 `flags`. */
+data class BatchRenameRegExp(val source: String, val flags: String)
+
+/**
+ * Checks and normalizes the arguments of `files.batchRename` (plugin roadmap appendix B), as JSON trees the way
+ * `JSON.stringify` sees the script values; the Rhino layer extracts a `RegExp` search beforehand. Options become the
+ * complete contract option map with the defaults of roadmap D17, which is also what `plan.options` shows.
+ *
+ * zh-CN: 检查并规范化 `files.batchRename` 的参数 (插件路线图附录 B), 输入为 `JSON.stringify` 所见的 JSON 树; `RegExp` 形式的
+ * `search` 由 Rhino 层事先提取. 选项被规范化为带 D17 默认值的完整契约选项表, 也就是 `plan.options` 所显示的内容.
+ */
+object BatchRenameScriptArguments {
+
+    /** Declared first: [CHOICES] refers to it. zh-CN: 先声明, [CHOICES] 引用它. */
+    val CONFLICT_POLICIES: List<String> = listOf(
+        BatchRenameValues.CONFLICT_FAIL,
+        BatchRenameValues.CONFLICT_SKIP,
+        BatchRenameValues.CONFLICT_NUMBER,
+        BatchRenameValues.CONFLICT_OVERWRITE,
+    )
+
+    private val BOOLEAN_OPTIONS = listOf(
+        BatchRenameOptionKeys.REGEX to false,
+        BatchRenameOptionKeys.MATCH_ALL to false,
+        BatchRenameOptionKeys.CASE_SENSITIVE to false,
+        BatchRenameOptionKeys.INCLUDE_FILES to true,
+        BatchRenameOptionKeys.INCLUDE_FOLDERS to true,
+        BatchRenameOptionKeys.INCLUDE_SUBFOLDERS to true,
+        BatchRenameOptionKeys.ENUMERATE to false,
+        BatchRenameOptionKeys.RANDOM to false,
+        BatchRenameOptionKeys.HALF_WIDTH to false,
+        BatchRenameOptionKeys.SANITIZE to false,
+        BatchRenameOptionKeys.TRIM to false,
+        BatchRenameOptionKeys.CONTINUE_NUMBERING to false,
+    ).toMap()
+
+    private val CHOICES = mapOf(
+        BatchRenameOptionKeys.TARGET to listOf(BatchRenameValues.TARGET_ALL, BatchRenameValues.TARGET_NAME, BatchRenameValues.TARGET_EXTENSION),
+        BatchRenameOptionKeys.FORMAT to listOf(
+            BatchRenameValues.FORMAT_NONE,
+            BatchRenameValues.FORMAT_LOWER,
+            BatchRenameValues.FORMAT_UPPER,
+            BatchRenameValues.FORMAT_TITLE,
+            BatchRenameValues.FORMAT_CAPITALIZE,
+        ),
+        BatchRenameOptionKeys.DATE_TIME to listOf(BatchRenameValues.DATE_TIME_MODIFIED, BatchRenameValues.DATE_TIME_NOW, BatchRenameValues.DATE_TIME_NONE),
+        BatchRenameOptionKeys.NORMALIZE to listOf(BatchRenameValues.NORMALIZE_NONE, BatchRenameValues.NORMALIZE_NFC, BatchRenameValues.NORMALIZE_NFD),
+        BatchRenameOptionKeys.ON_CONFLICT to CONFLICT_POLICIES,
+    )
+
+    /** The choice an option has when the script passes `false`. zh-CN: 脚本传入 `false` 时选项取的值. */
+    private val FALSE_CHOICES = mapOf(
+        BatchRenameOptionKeys.DATE_TIME to BatchRenameValues.DATE_TIME_NONE,
+        BatchRenameOptionKeys.NORMALIZE to BatchRenameValues.NORMALIZE_NONE,
+    )
+
+    private val TEXT_OPTIONS = listOf(
+        BatchRenameOptionKeys.REPLACE to "",
+        BatchRenameOptionKeys.SANITIZE_REPLACEMENT to BatchRenameValues.DEFAULT_SANITIZE_REPLACEMENT,
+        BatchRenameOptionKeys.CONFLICT_NUMBER_PATTERN to BatchRenameValues.DEFAULT_CONFLICT_NUMBER_PATTERN,
+    ).toMap()
+
+    private val DEFAULT_CHOICES = mapOf(
+        BatchRenameOptionKeys.TARGET to BatchRenameValues.TARGET_ALL,
+        BatchRenameOptionKeys.FORMAT to BatchRenameValues.FORMAT_NONE,
+        BatchRenameOptionKeys.DATE_TIME to BatchRenameValues.DATE_TIME_MODIFIED,
+        BatchRenameOptionKeys.NORMALIZE to BatchRenameValues.NORMALIZE_NONE,
+        BatchRenameOptionKeys.ON_CONFLICT to BatchRenameValues.CONFLICT_FAIL,
+    )
+
+    /** Regular expression flags the contract carries besides `g` and `i`. zh-CN: 契约在 `g` 与 `i` 之外携带的标志. */
+    private const val CARRIED_FLAGS = "msuy"
+
+    /** Flags that do not change what a regular expression matches. zh-CN: 不影响匹配结果的标志. */
+    private const val IGNORED_FLAGS = "gid"
+
+    /** `paths`: a path string or an array of them. zh-CN: `paths`: 路径字符串或其数组. */
+    fun paths(value: JsonElement?): List<String> {
+        val elements = when {
+            value == null || value.isJsonNull -> invalidPaths("paths must be a path string or an array of path strings")
+            value.isJsonArray -> value.asJsonArray.toList()
+            else -> listOf(value)
+        }
+        if (elements.isEmpty()) invalidPaths("paths must not be empty")
+        return elements.map { element ->
+            val text = (element as? JsonPrimitive)?.takeIf { it.isString }?.asString
+                ?: invalidPaths("every path must be a string, got $element")
+            text.ifBlank { invalidPaths("paths must not be blank") }
+        }
+    }
+
+    /**
+     * The complete contract option map of `options`. [regExp] is the `RegExp` the script passed as `search`, which
+     * decides `regex`, `matchAll` and `caseSensitive` (roadmap D17).
+     * zh-CN: `options` 对应的完整契约选项表. [regExp] 为脚本作为 `search` 传入的 `RegExp`, 由它决定 `regex`, `matchAll` 与 `caseSensitive`.
+     */
+    fun options(value: JsonElement?, regExp: BatchRenameRegExp?): LinkedHashMap<String, Any> {
+        val json = value?.takeUnless { it.isJsonNull }?.let {
+            it as? JsonObject ?: invalidOptions("options must be an object")
+        } ?: invalidOptions("options with a search are required")
+        val result = LinkedHashMap<String, Any>()
+        if (regExp != null) {
+            val unsupported = regExp.flags.filter { it !in CARRIED_FLAGS && it !in IGNORED_FLAGS }
+            if (unsupported.isNotEmpty()) invalidOptions("the RegExp flag \"$unsupported\" is not supported")
+            result[BatchRenameOptionKeys.SEARCH] = regExp.source
+            result[BatchRenameOptionKeys.REPLACE] = text(json, BatchRenameOptionKeys.REPLACE)
+            result[BatchRenameOptionKeys.REGEX] = true
+            result[BatchRenameOptionKeys.REGEX_FLAGS] = regExp.flags.filter { it in CARRIED_FLAGS }
+            result[BatchRenameOptionKeys.MATCH_ALL] = 'g' in regExp.flags
+            result[BatchRenameOptionKeys.CASE_SENSITIVE] = 'i' !in regExp.flags
+        } else {
+            val search = json.get(BatchRenameOptionKeys.SEARCH)
+                ?.takeUnless { it.isJsonNull }
+                ?: invalidOptions("search is required: a string or a RegExp")
+            result[BatchRenameOptionKeys.SEARCH] = (search as? JsonPrimitive)?.takeIf { it.isString }?.asString
+                ?: invalidOptions("search must be a string or a RegExp")
+            result[BatchRenameOptionKeys.REPLACE] = text(json, BatchRenameOptionKeys.REPLACE)
+            result[BatchRenameOptionKeys.REGEX] = boolean(json, BatchRenameOptionKeys.REGEX)
+            result[BatchRenameOptionKeys.REGEX_FLAGS] = ""
+            result[BatchRenameOptionKeys.MATCH_ALL] = boolean(json, BatchRenameOptionKeys.MATCH_ALL)
+            result[BatchRenameOptionKeys.CASE_SENSITIVE] = boolean(json, BatchRenameOptionKeys.CASE_SENSITIVE)
+        }
+        listOf(
+            BatchRenameOptionKeys.TARGET,
+            BatchRenameOptionKeys.INCLUDE_FILES,
+            BatchRenameOptionKeys.INCLUDE_FOLDERS,
+            BatchRenameOptionKeys.INCLUDE_SUBFOLDERS,
+            BatchRenameOptionKeys.FORMAT,
+            BatchRenameOptionKeys.ENUMERATE,
+            BatchRenameOptionKeys.RANDOM,
+            BatchRenameOptionKeys.DATE_TIME,
+            BatchRenameOptionKeys.NORMALIZE,
+            BatchRenameOptionKeys.HALF_WIDTH,
+            BatchRenameOptionKeys.SANITIZE,
+            BatchRenameOptionKeys.SANITIZE_REPLACEMENT,
+            BatchRenameOptionKeys.TRIM,
+            BatchRenameOptionKeys.CONTINUE_NUMBERING,
+            BatchRenameOptionKeys.ON_CONFLICT,
+            BatchRenameOptionKeys.CONFLICT_NUMBER_PATTERN,
+        ).forEach { key ->
+            result[key] = when (key) {
+                in BOOLEAN_OPTIONS -> boolean(json, key)
+                in CHOICES -> choice(json, key)
+                else -> text(json, key)
+            }
+        }
+        return result
+    }
+
+    /**
+     * The `onConflict` override of `apply(plan, applyOptions)`, or null to keep the plan's policy.
+     * zh-CN: `apply(plan, applyOptions)` 中覆盖的 `onConflict`, 为 null 时沿用方案的策略.
+     */
+    fun conflictOverride(value: JsonElement?): String? {
+        val json = value?.takeUnless { it.isJsonNull }?.let {
+            it as? JsonObject ?: invalidOptions("apply options must be an object")
+        } ?: return null
+        if (json.get(BatchRenameOptionKeys.ON_CONFLICT)?.isJsonNull != false) return null
+        return choice(json, BatchRenameOptionKeys.ON_CONFLICT)
+    }
+
+    /** `undo(result | batchId)`: the batch ID. zh-CN: `undo(result | batchId)` 中的批次 ID. */
+    fun batchId(value: JsonElement?): String {
+        val element = (value as? JsonObject)?.get("batchId") ?: value
+        val text = (element as? JsonPrimitive)?.takeIf { it.isString }?.asString
+        return text?.takeIf(BatchRenameJournalStore::isValidBatchId)
+            ?: batchRenameFailure(BatchRenameScriptCodes.UNDO_UNAVAILABLE, "undo needs a batch ID or the result of apply, got $value")
+    }
+
+    /** `history(limit?)`: 1 to [maxLimit], all of them when omitted. zh-CN: `history(limit?)`: 1 到 [maxLimit], 省略时为全部. */
+    fun historyLimit(value: JsonElement?, maxLimit: Int): Int {
+        if (value == null || value.isJsonNull) return maxLimit
+        val number = (value as? JsonPrimitive)?.takeIf { it.isNumber }?.asDouble
+        if (number == null || number != Math.floor(number) || number < 0) {
+            invalidOptions("history limit must be a non-negative integer, got $value")
+        }
+        return number.coerceAtMost(maxLimit.toDouble()).toInt()
+    }
+
+    private fun boolean(json: JsonObject, key: String): Boolean {
+        val element = json.get(key)?.takeUnless { it.isJsonNull } ?: return BOOLEAN_OPTIONS.getValue(key)
+        return (element as? JsonPrimitive)?.takeIf { it.isBoolean }?.asBoolean
+            ?: invalidOptions("$key must be a boolean, got $element")
+    }
+
+    private fun text(json: JsonObject, key: String): String {
+        val element = json.get(key)?.takeUnless { it.isJsonNull } ?: return TEXT_OPTIONS.getValue(key)
+        return (element as? JsonPrimitive)?.takeIf { it.isString }?.asString
+            ?: invalidOptions("$key must be a string, got $element")
+    }
+
+    private fun choice(json: JsonObject, key: String): String {
+        val element = json.get(key)?.takeUnless { it.isJsonNull } ?: return DEFAULT_CHOICES.getValue(key)
+        val primitive = element as? JsonPrimitive
+        if (primitive != null && primitive.isBoolean && !primitive.asBoolean) {
+            FALSE_CHOICES[key]?.let { return it }
+        }
+        val choices = CHOICES.getValue(key)
+        val text = primitive?.takeIf { it.isString }?.asString
+        return text?.takeIf { it in choices }
+            ?: invalidOptions("$key must be one of ${choices.joinToString { "\"$it\"" }}${if (key in FALSE_CHOICES) " or false" else ""}, got $element")
+    }
+
+    private fun invalidOptions(message: String): Nothing = batchRenameFailure(BatchRenameScriptCodes.INVALID_OPTIONS, message)
+
+    private fun invalidPaths(message: String): Nothing = batchRenameFailure(BatchRenameScriptCodes.INVALID_PATHS, message)
+}

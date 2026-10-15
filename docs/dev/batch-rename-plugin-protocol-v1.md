@@ -168,9 +168,41 @@ The character budget keeps one request far below the Binder transaction buffer; 
 - Map plan error codes and missing, disabled or incompatible plugins to the script error codes of
   `files.batchRename` (plugin roadmap D27).
 
+## Script path
+
+`files.batchRename` (`runtime/api/augment/files/BatchRename.kt`, with the Rhino-free logic in
+`core/plugin/batchrename/BatchRenameScript*.kt` and `BatchRenameTargetCollector.kt`) is the script side of the
+contract:
+
+- `plan(paths, options)` resolves `paths` (a string or an array) against the script's working directory and
+  enumerates them: every named path at depth 0 in the given order, and with `includeSubfolders` everything below a
+  named directory, depth first and sorted by name. Symbolic links are never followed: a named path must not be one,
+  and links found below a directory are skipped but keep their names in `existingNames`. Duplicates are dropped.
+  More than 2000 items, 512 parents, 20000 existing names or 32 folder levels is `LIMIT_EXCEEDED`; a missing path,
+  the root directory or an empty list is `INVALID_PATHS`. The options become the complete option Bundle with the
+  defaults of roadmap D17; a `RegExp` search sets `regex`, takes `matchAll` from `g`, `caseSensitive` from the
+  absence of `i` and keeps `m`, `s`, `u`, `y` as `regexFlags`. `locale`, `timeZone` and `now` come from the device
+  at planning time.
+- The script receives the plan as an object (`id`, `options`, `items`, `counts`, `rejected`); the host keeps the
+  request and the answer of the newest 16 plans of each script. `apply(plan, { onConflict, onProgress })` looks the
+  plan up by `id`; when the script set `excluded` on items or overrides the policy, the host asks the plugin again
+  with the same enumeration, `now` and names. A rejected plan is `PLAN_REJECTED` and renames nothing; the `rename`
+  items go to the host executor (`overwrite` for `overwrites` items) with the modification time and size seen at
+  planning time, so items that changed since are reported `stale`. A plan runs at most once; applying it again, or
+  applying a plan the script no longer keeps, is `PLAN_STALE`.
+- `undo(result | batchId)` and `history(limit)` work on the shared journal, which also holds the batches of
+  Explorer Action sessions. A batch that does not exist or has nothing left to undo is `UNDO_UNAVAILABLE`.
+- Failures reach the script as `files.batchRename.BatchRenameError` with `code`: no installed plugin is
+  `PLUGIN_UNAVAILABLE` (with the host's localized "missing plugin" message), a disabled or unauthorized one
+  `PLUGIN_DISABLED`, one that needs a newer host or speaks another contract version `PLUGIN_INCOMPATIBLE`; the
+  plan error codes `INVALID_OPTIONS` and `LIMIT_EXCEEDED` keep their names, `UNSUPPORTED_CONTRACT_VERSION` becomes
+  `PLUGIN_INCOMPATIBLE` and the rest `INTERNAL`.
+
 ## Status
 
 The contract (host commit `aa4fd4f6d`), Explorer Action v25 (`95c9f0455`), the Plugin Center
 registration, `BatchRenamePluginHost` and the rename dialog "More" menu (`26656b7c4`) are in place, and the
-official plugin answers `plan` with its engine (plugin roadmap P2). `BatchRenamePluginRoundTripTest` runs requests
-through an installed plugin. The host executor, journal and script API (P3) and the plugin screen (P4) follow.
+official plugin answers `plan` with its engine (plugin roadmap P2). The host executor, its journal and the Explorer
+Action session (`3bcd17aba`, P3.1) and the `files.batchRename` script API (P3.2) are in place as well.
+`BatchRenamePluginRoundTripTest` runs contract requests and `BatchRenameScriptApiTest` runs scripts through an
+installed plugin. The plugin screen (P4) follows.
