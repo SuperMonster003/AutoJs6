@@ -13,7 +13,12 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(27, definitions.size)
+        assertEquals(28, definitions.size)
+        assertProvider(
+            id = "agent",
+            modules = listOf(NodeBridgeModules.AGENT),
+            capabilities = listOf(NodeBridgePermissionManifest.AGENT, NodeBridgePermissionManifest.AGENT_EXEC),
+        )
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
