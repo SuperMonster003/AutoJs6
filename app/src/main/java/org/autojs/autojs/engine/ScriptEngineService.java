@@ -17,6 +17,7 @@ import org.autojs.autojs.execution.ScriptExecutionListener;
 import org.autojs.autojs.execution.ScriptExecutionObserver;
 import org.autojs.autojs.execution.ScriptExecutionTask;
 import org.autojs.autojs.execution.SimpleScriptExecutionListener;
+import org.autojs.autojs.core.ui.preview.UiPreviewScriptExecution;
 import org.autojs.autojs.lang.ThreadCompat;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.Console;
@@ -191,6 +192,13 @@ public class ScriptEngineService {
             task.setExecutionListener(mScriptExecutionObserver);
         }
         ScriptSource source = task.getSource();
+        if (task.getConfig().getUiContentHost() != null) {
+            // A ui-mode preview root replaces the Activity (3-Block Compose roadmap P10.2): the engine runs on the
+            // main thread like a ui script, and the execution stays registered until the preview session is released.
+            // zh-CN: ui 模式预览根容器取代 Activity (3-Block Compose 路线图 P10.2): 引擎像 ui 脚本一样在主线程运行, 执行保持注册直到预览会话释放.
+            var execution = new UiPreviewScriptExecution(mScriptEngineManager, task);
+            return startRegisteredExecution(mScriptExecutions, execution, execution::start);
+        }
         if (source instanceof JavaScriptSource src) {
             if (JavaScriptSource.ENGINE_NODEJS.equals(src.getEngineName())) {
                 NodeJsRuntimePluginHost.prepareForExecution(mApplicationContext);

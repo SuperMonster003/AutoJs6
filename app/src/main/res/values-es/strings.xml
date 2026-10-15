@@ -2939,4 +2939,6 @@
     <string name="warn_continue_operation_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres continuar?</string>
     <string name="warn_exit_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres salir?</string>
     <string name="warning_apk_native_page_alignment_unsupported">La biblioteca nativa %1$s tiene una alineación de %2$d bytes. El APK generado puede ser incompatible con páginas de 16 KB. Actualice la biblioteca o el plugin.</string>
+    <string name="ui_preview_window_function_ignored">ui.%1$s no tiene efecto en la vista previa de 3-Block Compose, que no tiene ventana de Activity</string>
+    <string name="ui_preview_default_label">Vista previa de 3-Block Compose</string>
 </resources>

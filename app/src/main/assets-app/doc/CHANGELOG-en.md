@@ -37,6 +37,7 @@
 * `Feature` Scripts can be registered for Three Stove Agent to call through project.json or an @agent header comment, with argument validation, stopping on timeout and returning structured results
 * `Feature` compose module, for building interfaces with Jetpack Compose, providing node factories, long-lived node handles, reactive state/render/ref and theme control (requires the 3-Block Compose plugin) (see Sample code > 3-Block Compose)
 * `Feature` "Open in 3-Block Compose designer" in the editor menu: saves the current file and opens it in the visual designer of the 3-Block Compose plugin (1.2.0 or later); returning to the editor automatically reloads content saved by the designer (asks first if there are unsaved changes) (see Sample code > 3-Block Compose)
+* `Feature` ui-mode layout preview service, which lets the 3-Block Compose designer preview XML layouts on its canvas with the host's real layout inflater, embedded on Android 11 and later and as a snapshot on older versions (requires 3-Block Compose plugin 1.6.0 or later)
 * `Feature` compose.mount/floaty methods, for mounting UI pages or creating floating windows (floating windows support both UI and non-UI scripts), with automatic cleanup of owned sessions when the script stops
 * `Feature` compose.dialog method, for creating updatable and closable dialog and modal bottom sheet sessions in UI or ordinary scripts
 * `Feature` XML <compose> container and compose.attach method, for embedding Compose sessions in UI pages or floating windows; compose.AndroidView can host existing Android Views

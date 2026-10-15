@@ -888,6 +888,18 @@
             android:name="org.autojs.autojs.timing.TimedTaskAlarmReceiver"
             android:exported="false" />
 
+        <!-- ui-mode layout preview for the 3-Block Compose designer (plugin roadmap P10.2): the host inflates a
+             "ui" layout with its own inflater and embeds it (API 30+) or snapshots it for the designer canvas.
+             zh-CN: 供 3-Block Compose 设计器使用的 ui 模式布局预览 (插件路线图 P10.2): 宿主用自己的布局器 inflate "ui" 布局并嵌入 (API 30+) 或快照到设计器画布. -->
+        <service
+            android:name="org.autojs.autojs.core.ui.preview.UiPreviewService"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN">
+            <intent-filter>
+                <action android:name="org.autojs.plugin.ui.PREVIEW" />
+            </intent-filter>
+        </service>
+
         <receiver
             android:name="org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver"
             android:exported="true"

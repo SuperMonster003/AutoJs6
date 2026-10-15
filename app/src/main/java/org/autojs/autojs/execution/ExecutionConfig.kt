@@ -2,6 +2,7 @@ package org.autojs.autojs.execution
 
 import android.os.Parcel
 import android.os.Parcelable
+import org.autojs.autojs.core.ui.UiContentHost
 import org.autojs.autojs.project.ScriptConfig
 import org.autojs.autojs.rhino.extension.IterableExtensions.toHashCode
 
@@ -26,6 +27,14 @@ data class ExecutionConfig(
 
     /** Host-owned execution marker; never accepted from script arguments or parceled as input. */
     var agentExecutionState: AgentScriptExecutionState? = null
+        internal set
+
+    /**
+     * Host-owned: the ui-mode preview root that takes the place of the Activity for this execution
+     * (3-Block Compose roadmap P10.2). Never accepted from script arguments or parceled as input.
+     * zh-CN: 宿主持有: 替代 Activity 承载本次执行 `ui.layout` 内容的预览根容器 (3-Block Compose 路线图 P10.2); 不从脚本参数接受, 也不参与 Parcel.
+     */
+    var uiContentHost: UiContentHost? = null
         internal set
 
     val arguments: HashMap<String, Any>

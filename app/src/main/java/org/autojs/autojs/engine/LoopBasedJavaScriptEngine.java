@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.Log;
 import org.autojs.autojs.AbstractAutoJs;
 import org.autojs.autojs.core.looper.LooperHelper;
+import org.autojs.autojs.core.ui.UiContentHost;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.script.JavaScriptSource;
@@ -93,6 +94,11 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
         Activity activity = (Activity) getTag("activity");
         if (activity != null) {
             activity.finish();
+        }
+        // A ui-mode preview root (3-Block Compose roadmap P10.2) releases its session the way the Activity finishes.
+        // zh-CN: ui 模式预览根容器 (3-Block Compose 路线图 P10.2) 像 Activity 结束一样释放其会话.
+        if (getTag(UiContentHost.ENGINE_TAG) instanceof UiContentHost host) {
+            host.onEngineForceStop();
         }
         super.forceStop();
     }

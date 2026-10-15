@@ -10,6 +10,7 @@ import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.ui.JsViewHelper
+import org.autojs.autojs.core.ui.UiContentHost
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.core.ui.attribute.ViewAttributeDelegate
 import org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater
@@ -148,8 +149,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         "R" to Supplier { scriptRuntime.augmentedAutojs["R"] },
         "__widgets__" to Supplier { scriptRuntime.ui.widgets },
         "root" to Supplier<Any?> {
-            val activity = getActivity(scriptRuntime)
-            (activity as? ScriptExecuteActivity)?.findViewById(android.R.id.content)
+            UiContentHost.of(scriptRuntime)?.contentRoot
         },
         "emitter" to Supplier {
             val activity = getActivity(scriptRuntime)
@@ -316,7 +316,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 else -> {
                     val boundValue = scriptRuntime.ui.layoutInflater.resourceParser.androidResources.resolveScalar(
                         view.context,
-                        bindValueForApplyingAttribute(scriptRuntime, value),
+                        bindValueForApplyingAttribute(scriptRuntime, attrName, value),
                     )
                     val widget = inflateContext.get("widget")
                     if (widget is NativeObject && callFunction(scriptRuntime, widget.prop("hasAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(attrName)) as Boolean) {
@@ -426,7 +426,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             }
             val activity = getActivity(scriptRuntime)
             scriptRuntime.ui.layoutInflater.context = when {
-                activity.isJsNullish() -> ContextThemeWrapper(ScriptRuntime.applicationContext, R.style.ScriptTheme)
+                // Without an Activity a preview root (if attached) lends its themed context, otherwise the script theme.
+                // zh-CN: 没有 Activity 时, 若附着了预览根容器则借用其主题上下文, 否则使用脚本主题.
+                activity.isJsNullish() -> UiContentHost.attached(scriptRuntime)?.inflaterContext
+                    ?: ContextThemeWrapper(ScriptRuntime.applicationContext, R.style.ScriptTheme)
                 activity is ScriptExecuteActivity -> activity
                 else -> throw WrappedIllegalArgumentException("Global activity ${activity.jsBrief()} must be a ScriptExecuteActivity")
             }
@@ -529,8 +532,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun layout(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { xml ->
-            ensureActivity(scriptRuntime) { activity ->
-                scriptRuntime.ui.layoutInflater.context = activity
+            ensureUiHost(scriptRuntime) { host ->
+                scriptRuntime.ui.layoutInflater.context = host.inflaterContext
                 val tsxLayout = TypeScriptTsxRuntime.renderOrNull(
                     xml,
                     TypeScriptTsxRuntime.messageResolver(globalContext),
@@ -538,7 +541,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 )
                 val inflated = scriptRuntime.ui.layoutInflater.inflate(
                     tsxLayout?.xml ?: toXMLString(xml),
-                    activity.window.decorView as ViewGroup,
+                    host.contentParent,
                     false,
                 )
                 tsxLayout?.attachClickHandlers(scriptRuntime, inflated)
@@ -550,13 +553,13 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun layoutFile(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { path ->
-            ensureActivity(scriptRuntime) { activity ->
-                scriptRuntime.ui.layoutInflater.context = activity
+            ensureUiHost(scriptRuntime) { host ->
+                scriptRuntime.ui.layoutInflater.context = host.inflaterContext
                 val resolvedPath = scriptRuntime.files.path(coerceString(path))
                     ?: throw WrappedIllegalArgumentException("Android layout file path cannot be resolved")
                 scriptRuntime.ui.layoutInflater.inflateFile(
                     resolvedPath,
-                    activity.window.decorView as ViewGroup,
+                    host.contentParent,
                     false,
                 ).let { setContentViewRhinoRuntime(scriptRuntime, it) }
             }
@@ -596,11 +599,11 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             require(view is View) {
                 "Argument \"view\" ${view.jsBrief()} for ui.setContentView must be a View"
             }
-            ensureActivity(scriptRuntime) { activity ->
+            ensureUiHost(scriptRuntime) { host ->
                 scriptRuntime.beforeSetUiContent(view)
                 scriptRuntime.ui.view = view
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
-                    activity.setContentView(view)
+                    host.showContent(view)
                 }, NOT_CONSTRUCTABLE))
             }
             return UNDEFINED
@@ -609,7 +612,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun statusBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
-            ensureActivity(scriptRuntime) { activity ->
+            ensureWindowActivity(scriptRuntime, "statusBarColor") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(color).also { ViewUtils.setStatusBarBackgroundColor(activity, it) }
                 }, NOT_CONSTRUCTABLE))
@@ -621,7 +624,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun statusBarIconLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
             val (isLight) = argList
-            ensureActivity(scriptRuntime) { activity ->
+            ensureWindowActivity(scriptRuntime, "statusBarIconLight") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     ViewUtils.setStatusBarIconLight(activity, coerceBoolean(isLight, true))
                 }, NOT_CONSTRUCTABLE))
@@ -632,7 +635,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun statusBarIconLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
-            ensureActivity(scriptRuntime) { activity ->
+            ensureWindowActivity(scriptRuntime, "statusBarIconLightBy") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(refColor).also { ViewUtils.setStatusBarIconLight(activity, ViewUtils.isLuminanceDark(it)) }
                 }, NOT_CONSTRUCTABLE))
@@ -643,7 +646,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun backgroundColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
-            ensureActivity(scriptRuntime) { activity ->
+            ensureWindowActivity(scriptRuntime, "backgroundColor") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(Colors.setAlphaRhino(color, 1.0)).also {
                         activity.window.setBackgroundDrawable(it.toDrawable())
@@ -656,7 +659,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun navigationBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
-            ensureActivity(scriptRuntime) { activity ->
+            ensureWindowActivity(scriptRuntime, "navigationBarColor") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(color).also { ViewUtils.setNavigationBarBackgroundColor(activity, it) }
                 }, NOT_CONSTRUCTABLE))
@@ -668,7 +671,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun navigationBarIconLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
             val (isLight) = argList
-            ensureActivity(scriptRuntime) { activity ->
+            ensureWindowActivity(scriptRuntime, "navigationBarIconLight") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                         ScriptRuntime.requiresApi(Build.VERSION_CODES.O)
@@ -683,7 +686,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun navigationBarIconLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
-            ensureActivity(scriptRuntime) { activity ->
+            ensureWindowActivity(scriptRuntime, "navigationBarIconLightBy") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(refColor).also {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -743,6 +746,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun finish(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
+            UiContentHost.attached(scriptRuntime)?.let { host ->
+                host.onWindowFunctionIgnored("finish")
+                return@ensureArgumentsIsEmpty UNDEFINED
+            }
             val activity = getScriptExecuteActivity(scriptRuntime)
             if (activity == null) {
                 require(scriptRuntime.isExiting) { globalContext.getString(R.string.error_activity_is_required_for_ui_exec_mode) }
@@ -759,7 +766,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun keepScreenOn(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
-            ensureActivity(scriptRuntime) { activity ->
+            ensureWindowActivity(scriptRuntime, "keepScreenOn") { activity ->
                 activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
             UNDEFINED
@@ -829,7 +836,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             )
         }
 
-        private fun bindValueForApplyingAttribute(scriptRuntime: ScriptRuntime, value: String): String {
+        private fun bindValueForApplyingAttribute(scriptRuntime: ScriptRuntime, attrName: String, value: String): String {
             val ctx = scriptRuntime.ui.bindingContext ?: return value
             val niceCtx = when (ctx) {
                 is Scriptable -> Context.toObject(ctx, ctx)
@@ -840,7 +847,15 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             while (tmp.indexOf("{{", i + 1).also { i = it } >= 0) {
                 val j = tmp.indexOf("}}", i + 1)
                 if (j < 0) return tmp
-                val evaluated = evalInContext(scriptRuntime, tmp.slice(i + 2 until j), niceCtx)
+                val evaluated = try {
+                    evalInContext(scriptRuntime, tmp.slice(i + 2 until j), niceCtx)
+                } catch (e: Throwable) {
+                    // A preview root may keep the raw text and report the failure instead of failing the inflation.
+                    // zh-CN: 预览根容器可以保留原文并报告失败, 而不是让 inflate 失败.
+                    val host = UiContentHost.attached(scriptRuntime)
+                    if (host != null && host.onBindingFailed(attrName, value, e)) return value
+                    throw e
+                }
                 tmp = tmp.slice(0 until i) + attrValueConvert(evaluated) + tmp.slice(j + 2 until tmp.length)
             }
             return tmp
@@ -965,7 +980,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         private fun wrapUiActionForPost(scriptRuntime: ScriptRuntime, action: Callable, waitToken: Loopers.WaitToken?) = Runnable {
             try {
-                val isAutoJsUiMode = !getActivity(scriptRuntime).isJsNullish()
+                val isAutoJsUiMode = !getActivity(scriptRuntime).isJsNullish() || UiContentHost.attached(scriptRuntime) != null
                 when {
                     isAutoJsUiMode -> {
                         callFunction(scriptRuntime, action, null as VarScope?, null, arrayOf())
@@ -1000,6 +1015,30 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val activity = getScriptExecuteActivity(scriptRuntime)
             require(activity != null) { globalContext.getString(R.string.error_activity_is_required_for_ui_exec_mode) }
             return func.invoke(activity)
+        }
+
+        /**
+         * The content host of `ui.layout` / `ui.setContentView`: a preview root attached to the engine, otherwise the
+         * script's Activity; without either the Activity requirement is reported exactly as before.
+         * zh-CN: `ui.layout` / `ui.setContentView` 的内容承载: 附着在引擎上的预览根容器, 否则脚本的 Activity; 两者都没有时照旧报告需要 Activity.
+         */
+        private fun <R> ensureUiHost(scriptRuntime: ScriptRuntime, func: (host: UiContentHost) -> R): R {
+            UiContentHost.attached(scriptRuntime)?.let { return func.invoke(it) }
+            return ensureActivity(scriptRuntime, func)
+        }
+
+        /**
+         * A window-level function: on a preview root it is ignored (the host reports it once), otherwise it needs
+         * the Activity like before.
+         * zh-CN: 窗口级函数: 预览根容器下忽略 (由承载报告一次), 否则照旧需要 Activity.
+         */
+        private fun ensureWindowActivity(scriptRuntime: ScriptRuntime, functionName: String, func: (activity: ScriptExecuteActivity) -> Unit) {
+            val attached = UiContentHost.attached(scriptRuntime)
+            if (attached != null && attached.hostWindow == null) {
+                attached.onWindowFunctionIgnored(functionName)
+                return
+            }
+            ensureActivity(scriptRuntime, func)
         }
 
         private fun attrValueConvert(o: Any?): Any? = when (o) {

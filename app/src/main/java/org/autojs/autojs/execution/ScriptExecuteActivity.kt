@@ -13,9 +13,12 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.View
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +32,7 @@ import org.autojs.autojs.core.eventloop.SimpleEvent
 import org.autojs.autojs.core.plugin.compose.ComposeActivityInsets
 import org.autojs.autojs.core.plugin.compose.ComposeInsetsHost
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
+import org.autojs.autojs.core.ui.UiContentHost
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionPerformance
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
@@ -51,7 +55,15 @@ import java.io.Closeable
  * Created by Stardust on Feb 5, 2017.
  * Modified by SuperMonster003 as of Jan 20, 2026.
  */
-class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.DelegateHost, ComposeInsetsHost {
+class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.DelegateHost, ComposeInsetsHost, UiContentHost {
+
+    // UiContentHost: the Activity window hosts `ui.layout` content; showContent is the Activity's own setContentView.
+    // zh-CN: UiContentHost: Activity 窗口承载 `ui.layout` 内容; showContent 即 Activity 自身的 setContentView.
+    override val inflaterContext: Context get() = this
+    override val contentParent: ViewGroup get() = window.decorView as ViewGroup
+    override val contentRoot: ViewGroup? get() = findViewById(android.R.id.content)
+    override val hostWindow: Window get() = window
+    override fun showContent(view: View) = setContentView(view)
 
     private val mOnBackPressedCallback = object : OnBackPressedCallback(true) {
 

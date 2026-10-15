@@ -2938,4 +2938,6 @@
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
     <string name="warning_apk_native_page_alignment_unsupported">Native library %1$s has %2$d byte alignment. The generated APK may not run on devices with 16 KB pages. Update the library or plugin.</string>
+    <string name="ui_preview_window_function_ignored">ui.%1$s has no effect in the 3-Block Compose preview, which has no Activity window</string>
+    <string name="ui_preview_default_label">3-Block Compose preview</string>
 </resources>

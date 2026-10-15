@@ -2941,4 +2941,6 @@
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
     <string name="warning_apk_native_page_alignment_unsupported">محاذاة المكتبة الأصلية %1$s هي %2$d بايت. قد لا يعمل ملف APK الناتج على أجهزة بصفحات 16 KB. يرجى تحديث المكتبة أو الإضافة.</string>
+    <string name="ui_preview_window_function_ignored">ui.%1$s ليس له تأثير في معاينة 3-Block Compose, التي لا تملك نافذة Activity</string>
+    <string name="ui_preview_default_label">معاينة 3-Block Compose</string>
 </resources>

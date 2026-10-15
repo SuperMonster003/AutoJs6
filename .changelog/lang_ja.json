@@ -35,6 +35,7 @@
         "project.json または @agent ヘッダーコメントで Three Stove Agent から呼び出せるスクリプトを登録し, 引数検査, タイムアウト停止と構造化結果の返送に対応",
         "compose モジュール, Jetpack Compose で UI を構築し, ノードファクトリー, 長期間有効なノードハンドル, リアクティブな state/render/ref とテーマ制御を提供 (3-Block Compose プラグインが必要) (参照: サンプルコード > 3-Block Compose)",
         "エディターメニューの \"3-Block Compose デザイナーで開く\": 現在のファイルを保存し, 3-Block Compose プラグイン (1.2.0 以降) のビジュアルデザイナーで編集, エディターへ戻るとデザイナーの保存内容を自動再読込 (未保存の変更があれば先に確認) (参照: サンプルコード > 3-Block Compose)",
+        "ui モードのレイアウトプレビューサービス, 3-Block Compose デザイナーがキャンバス内でホストの実際のレイアウトインフレーターにより XML レイアウトをプレビューできるようにし, Android 11 以降は埋め込み表示, それ未満ではスナップショットを提供 (3-Block Compose プラグイン 1.6.0 以降が必要)",
         "compose.mount/floaty メソッド, UI ページのマウントと浮動ウィンドウ作成に使用 (浮動ウィンドウは UI/非 UI スクリプト双方に対応), スクリプト停止時に所有セッションを自動解放",
         "compose.dialog メソッド, 更新/閉鎖可能なダイアログとモーダルボトムシートのセッションを作成し, UI/通常スクリプトで利用可能",
         "XML <compose> コンテナーと compose.attach メソッド, UI ページや浮動ウィンドウに Compose セッションを埋め込み, compose.AndroidView で既存の Android View を配置可能",

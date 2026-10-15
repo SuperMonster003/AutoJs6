@@ -37,6 +37,7 @@
 * `新增` 指令碼可透過 project.json 或 @agent 頭註釋登記為 Three Stove Agent 可呼叫的指令碼, 支援參數校驗, 超時停止及結構化結果回傳
 * `新增` compose 模組, 用於以 Jetpack Compose 構建介面, 提供節點工廠, 長期節點控制代碼, 響應式 state/render/ref 及主題控制 (需要 3-Block Compose 外掛) (參閱 範例程式碼 > 3-Block Compose)
 * `新增` 編輯器選單新增 "在 3-Block Compose 設計器中開啟": 儲存目前檔案後交給 3-Block Compose 外掛 (1.2.0 及以上) 的視覺化設計器編輯, 回到編輯器時自動重新載入設計器儲存的內容 (有未儲存修改時先詢問) (參閱 範例程式碼 > 3-Block Compose)
+* `新增` ui 模式佈局預覽服務, 供 3-Block Compose 設計器在畫布內以宿主真實佈局器預覽 XML 佈局, Android 11 及以上嵌入顯示, 更低版本提供快照 (需要 3-Block Compose 外掛 1.6.0 及以上)
 * `新增` compose.mount/floaty 方法, 用於掛載 UI 頁面或建立懸浮窗 (懸浮窗同時支援 UI 與非 UI 指令碼), 指令碼停止時自動清理所屬工作階段
 * `新增` compose.dialog 方法, 用於建立可更新和關閉的對話方塊及模態底部彈層工作階段, 可在 UI 或普通指令碼中使用
 * `新增` XML <compose> 容器及 compose.attach 方法, 用於在 UI 頁面或懸浮窗內嵌入 Compose 工作階段; compose.AndroidView 可承載現有 Android View

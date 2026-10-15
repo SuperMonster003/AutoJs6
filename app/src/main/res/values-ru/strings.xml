@@ -2939,4 +2939,6 @@
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
     <string name="warning_apk_native_page_alignment_unsupported">Нативная библиотека %1$s имеет выравнивание %2$d байт. Созданный APK может не работать на устройствах со страницами 16 KB. Обновите библиотеку или плагин.</string>
+    <string name="ui_preview_window_function_ignored">ui.%1$s не действует в предпросмотре 3-Block Compose, у которого нет окна Activity</string>
+    <string name="ui_preview_default_label">Предпросмотр 3-Block Compose</string>
 </resources>

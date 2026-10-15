@@ -37,6 +37,7 @@
 * `추가` project.json 또는 @agent 헤더 주석으로 Three Stove Agent가 호출할 스크립트 등록, 인수 검증, 시간 초과 중지 및 구조화된 결과 반환 지원
 * `추가` compose 모듈, Jetpack Compose로 UI 구축, 노드 팩터리, 장기 노드 핸들, 반응형 state/render/ref 및 테마 제어 제공 (3-Block Compose 플러그인 필요) (참조: 예제 코드 > 3-Block Compose)
 * `추가` 편집기 메뉴의 "3-Block Compose 디자이너에서 열기": 현재 파일을 저장한 뒤 3-Block Compose 플러그인 (1.2.0 이상)의 시각적 디자이너에서 편집, 편집기로 돌아오면 디자이너가 저장한 내용을 자동 재로드 (저장하지 않은 변경이 있으면 먼저 확인) (참조: 예제 코드 > 3-Block Compose)
+* `추가` ui 모드 레이아웃 미리보기 서비스, 3-Block Compose 디자이너가 캔버스 안에서 호스트의 실제 레이아웃 인플레이터로 XML 레이아웃을 미리 볼 수 있으며, Android 11 이상에서는 임베드 표시, 그 이하 버전에서는 스냅샷 제공 (3-Block Compose 플러그인 1.6.0 이상 필요)
 * `추가` compose.mount/floaty 메서드, UI 페이지 마운트와 부동 창 생성 (부동 창은 UI/비 UI 스크립트 모두 지원), 스크립트 중지 시 소속 세션 자동 정리
 * `추가` compose.dialog 메서드, 갱신 및 종료 가능한 대화상자와 모달 하단 시트 세션 생성, UI/일반 스크립트에서 사용 가능
 * `추가` XML <compose> 컨테이너와 compose.attach 메서드, UI 페이지나 부동 창에 Compose 세션 삽입, compose.AndroidView로 기존 Android View 호스팅 가능

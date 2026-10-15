@@ -2939,4 +2939,6 @@
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
     <string name="warning_apk_native_page_alignment_unsupported">La bibliothèque native %1$s est alignée sur %2$d octets. Le fichier APK généré peut être incompatible avec les pages de 16 KB. Mettez à jour la bibliothèque ou le plugin.</string>
+    <string name="ui_preview_window_function_ignored">ui.%1$s est sans effet dans l\'aperçu 3-Block Compose, qui n\'a pas de fenêtre Activity</string>
+    <string name="ui_preview_default_label">Aperçu 3-Block Compose</string>
 </resources>

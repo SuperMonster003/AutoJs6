@@ -2938,4 +2938,6 @@
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
     <string name="warning_apk_native_page_alignment_unsupported">原生库 %1$s 的对齐值为 %2$d 字节. 生成的 APK 可能无法在页大小为 16 KB 的设备上运行. 请升级原生库或插件.</string>
+    <string name="ui_preview_window_function_ignored">ui.%1$s 在 3-Block Compose 预览中无效 (预览没有 Activity 窗口)</string>
+    <string name="ui_preview_default_label">3-Block Compose 预览</string>
 </resources>

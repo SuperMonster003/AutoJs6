@@ -2940,4 +2940,6 @@
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
     <string name="warning_apk_native_page_alignment_unsupported">ネイティブライブラリ %1$s のアラインメントは %2$d バイトです. 生成された APK はページサイズが 16 KB の端末で動作しない可能性があります. ライブラリまたはプラグインを更新してください.</string>
+    <string name="ui_preview_window_function_ignored">ui.%1$s は 3-Block Compose プレビューでは無効です (プレビューには Activity ウィンドウがありません)</string>
+    <string name="ui_preview_default_label">3-Block Compose プレビュー</string>
 </resources>
