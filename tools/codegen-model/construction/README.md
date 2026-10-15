@@ -11,7 +11,8 @@ The input directory contains exactly these required files; additional evidence
 may coexist in that directory:
 
 - `features.json`: `format: 1`, `role: "construction-state-action"`,
-  `grammarVersion: 1`, `featureSchemaVersion: 1`, ordered `names`, and `namesHash`.
+  `grammarVersion` and `featureSchemaVersion` both 1 (rounds one to four) or both 2
+  (round five, see below), ordered `names`, and `namesHash`.
   The hash is the first 16 lowercase hexadecimal characters of SHA-256 over names
   joined with LF, without a trailing LF.
 - `actions.csv`: columns `split,groupId,stateKey,actionKey,label,observations`,
@@ -449,6 +450,32 @@ itself contributes), and that every development run of every method completes
 without an error or deadline stop. With `CODEGEN_CONSTRUCTION_R3_DEVELOPMENT`
 set, the development run also reports how many construction candidate sets and
 counters reproduce the third experiment's records after the matcher change.
+
+## Fifth round: grammar 2
+
+Grammar 2 adds `SELF_RELATIVE` (target conditions, an upward and/or sibling relation that matches
+the rule search, then a content node of the reached subtree whose nested condition must not match
+any target, roadmap D22/D23) and first-line prefix conditions (D24). Grammar 1 keeps its actions,
+state keys and the 87 names (`f2369debb29eaa54`) of the frozen policies. Feature schema 2 appends
+31 columns after them, so a schema 1 policy scores a schema 2 vector by its leading columns.
+`ConstructionFifthExportTask` has two modes; neither freezes a protocol or opens a holdout:
+
+```powershell
+$env:CODEGEN_CONSTRUCTION_DATASET = (Resolve-Path 'tools/codegen-model/out/cg-ds-2026.10-1').Path
+$env:CODEGEN_CONSTRUCTION_R5_MODE = 'compare'   # or 'export'
+$env:CODEGEN_CONSTRUCTION_OUTPUT = '<fresh directory>'
+# export only: real-train groups (D25) below a private directory; the output must then be private too
+$env:CODEGEN_PRIVATE_DIR = 'D:\codegen-private'
+$env:CODEGEN_CONSTRUCTION_R5_REAL = 'D:\codegen-private'
+.\gradlew.bat --offline :app:testAppDebugUnitTest --rerun --tests 'org.autojs.autojs.core.accessibility.codegen.construction.ConstructionFifthExportTask'
+```
+
+`compare` runs the grammar 1 and grammar 2 heuristics on the same train/valid development groups
+and writes `compare.json`. `export` writes format 2 teacher data (`features.json`, `actions.csv`,
+`teacher-traces.jsonl`, `export-manifest.json`) for fixture train/valid groups by per-family quota
+(`CODEGEN_CONSTRUCTION_R5_SINGLE`, `_COLLECTION`, `CODEGEN_CONSTRUCTION_TEACHER_RUNS`) plus every
+labelable real-train group; real-test groups contribute no rows. `train.py` fits fixture train and
+real-train rows and stops early on fixture valid.
 
 ## Tests
 
