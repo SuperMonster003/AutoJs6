@@ -301,7 +301,7 @@
         "MCP Server 與 3-Stove Agent 等面向模型的外掛程式工作階段經橋接讀取圖片 (image.readImage) 時, 最長邊超過 4096 px 的圖片按 2 的冪降採樣解碼, 結果附 scale 與原圖尺寸, 避免相簿大圖耗盡宿主記憶體; Node.js 外掛程式指令碼不受影響",
         "MCP Server 與 3-Stove Agent 等面向模型的外掛程式工作階段經橋接按路徑讀取圖片與媒體資訊 (image.readImage, mediainfo) 時限制在工作目錄內, 寫入 (image.saveImage) 同樣只限工作目錄; 請求宣告 files.shared_read 且 AutoJs6 持有所有檔案存取權限時可唯讀存取共用儲存空間 (不含 Android/data 與 Android/obb), files.list 與 files.stat 也可按同一權杖列出共用儲存空間; Node.js 外掛程式指令碼不受影響",
         "宿主橋接層 app 模組增加 pluginCapabilities 方法, 即時回傳 OCR, 條碼, 拼音, Pinyin4j, MediaInfo, OpenCV 與離線文件各外掛程式家族的狀態 (available / not_installed / disabled / incompatible), 已安裝外掛程式的版本, 啟用與授權情況, 對應的橋接方法以及外掛程式中心入口, 供 MCP Server 等外掛程式工作階段按安裝情況顯示工具並提示使用者安裝; 外掛程式工作階段開啟時的可選方法清單也按同一邏輯補充已可用家族的方法",
-        "MCP Server 外掛程式工作階段的預設能力授權擴充: 加入 ocr, barcode, pinyin, pinyin4j, mediainfo 各模組的方法, image.readImage 與找圖找色方法, accessibility.readScreenText / captureScreenImage 和 app.pluginCapabilities, 以及對應的權限權杖 (含共用儲存空間唯讀的 files.shared_read); 這些方法只在相應外掛程式已安裝並啟用時可用, image.saveImage 與 image.toBytes 仍不在授權內; 3-Stove Agent 的授權不變",
+        "MCP Server 外掛程式工作階段的預設能力授權擴充: 加入 ocr, barcode, pinyin, pinyin4j, mediainfo 各模組的方法, image.readImage 與找圖找色方法, accessibility.readScreenText / captureScreenImage 和 app.pluginCapabilities, 以及對應的權限權杖 (含共用儲存空間唯讀的 files.shared_read); 這些方法只在相應外掛程式已安裝並啟用時可用, image.saveImage 與 image.toBytes 仍不在授權內; 3-Stove Agent 的授權不變; 另加入 agent.listScripts / readManifest / execRegistered 與 agent, agent.exec 權杖, 供 MCP Server 列出並執行已登記指令碼",
         "images.save/saveImage/compress/compressToBytes 方法支援 PNG 量化選項 (保留透明度) 及畫素與記憶體限制 (需要 Image Quantization 外掛)",
         "images.readPixels 方法支援 ImageWrapper 參數",
         "images.matchTemplate/findPointByImage 方法支援 scales 選項, 匹配結果增加尺寸, 比例及區域資訊",

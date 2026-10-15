@@ -139,6 +139,8 @@ data class HostCapabilityGrant(
             addAll(methodsOf("mediainfo", "read", "get", "countGet", "capabilities"))
             addAll(methodsOf("shell", "exec"))
             addAll(methodsOf("toast", "toast", "showToast"))
+            // Registered scripts (MCP roadmap P11 D42): the catalog, one manifest, and a run validated against it.
+            addAll(methodsOf("agent", "listScripts", "readManifest", "execRegistered"))
         }
 
         /** Permission tokens of the MCP-compatible default; Agent supplies its own narrower ceiling. */
@@ -174,6 +176,9 @@ data class HostCapabilityGrant(
             NodeBridgePermissionManifest.PINYIN4J,
             NodeBridgePermissionManifest.MEDIA,
             NodeBridgePermissionManifest.MEDIA_METADATA,
+            // Registered scripts (MCP roadmap P11 D42): `agent` for the catalog, `agent.exec` with the engines tokens for a run.
+            NodeBridgePermissionManifest.AGENT,
+            NodeBridgePermissionManifest.AGENT_EXEC,
         )
 
         @JvmField

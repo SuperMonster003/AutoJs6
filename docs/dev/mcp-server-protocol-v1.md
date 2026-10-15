@@ -233,17 +233,20 @@ set: `accessibility.{isEnabled, ensureEnabled, dump, explain, screenshot, findOn
 `ocr.{recognize, recognizeText, detectTextBounds}`, `barcode.{detect, detectAll, recognizeText, recognizeTexts}`,
 `pinyin.{convert, simple, compare, compact, fromCodePoint, fromPhrase}`, `pinyin4j.{of, as, readings}`,
 `mediainfo.{read, get, countGet, capabilities}`,
-`shell.exec` and `toast.{toast, showToast}`, plus the global actions
+`agent.{listScripts, readManifest, execRegistered}`, `shell.exec` and `toast.{toast, showToast}`, plus the global actions
 `keys.{notifications, quickSettings, powerDialog, lockScreen}` behind the plugin's
 `ui_press_key` (roadmap P3.2; `keys.takeScreenshot` and `keys.splitScreen` stay
 outside), with the tokens `accessibility`, `accessibility.gesture`, `keys`,
 `engines`, `engines.exec`, `screen_capture`, `image`, `app`, `app.launch`,
 `app.query`, `app.activity`, `clipboard`, `device`, `device.power`, `shell`,
 `toast`, `package_manager`, `files`, `files.write`, `files.delete`, `files.shared_read`, `console`,
-`ocr`, `barcode`, `pinyin`, `pinyin4j`, `media` and `media.metadata`. The plugin-family
+`ocr`, `barcode`, `pinyin`, `pinyin4j`, `media`, `media.metadata`, `agent` and `agent.exec`. The plugin-family
 methods (MCP roadmap P11 D28) are only usable while the corresponding plugin is installed and
 enabled; `app.pluginCapabilities` reports that live, and `getBrokerInfo().availableOptionalMethods`
-lists the ones available when the session opened. Writes (`image.saveImage`) and raw pixel export
+lists the ones available when the session opened. The `agent` methods (MCP roadmap P11 D42) serve the
+registered-script tools: the catalog covers the host default scope (the working directory and its `agent/`
+subtree, no extra roots for MCP sessions), a run validates the arguments against the manifest and may carry
+the manifest the client confirmed as `expectedManifest`. Writes (`image.saveImage`) and raw pixel export
 (`image.toBytes`) stay outside the grant: tools return handles and paths, never pixels.
 A `keys.*` call without a running accessibility service fails with the
 `unavailable` category, as the `accessibility` module does.

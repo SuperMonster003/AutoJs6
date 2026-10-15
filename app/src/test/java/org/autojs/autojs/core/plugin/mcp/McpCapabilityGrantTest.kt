@@ -62,6 +62,20 @@ class McpCapabilityGrantTest {
     }
 
     @Test
+    fun defaultGrantCoversTheRegisteredScriptToolsOfP11() {
+        listOf("agent.listScripts", "agent.readManifest", "agent.execRegistered").forEach { key ->
+            assertTrue("$key must be in the default grant", key in grant.allowedMethods)
+        }
+        assertTrue(NodeBridgePermissionManifest.AGENT in grant.permissions)
+        assertTrue(NodeBridgePermissionManifest.AGENT_EXEC in grant.permissions)
+        assertEquals(HostCapabilityGrant.Decision.Allowed, grant.evaluate("agent", "listScripts", listOf("agent"), 100))
+        assertEquals(HostCapabilityGrant.Decision.Allowed,
+            grant.evaluate("agent", "execRegistered", NodeBridgePermissionManifest.requiredCapabilitiesFor("agent", "execRegistered"), 100))
+        val withoutExec = grant.copy(permissions = grant.permissions - NodeBridgePermissionManifest.AGENT_EXEC)
+        assertTrue(withoutExec.evaluate("agent", "execRegistered", listOf("agent", "agent.exec", "engines", "engines.exec"), 100) is HostCapabilityGrant.Decision.Denied)
+    }
+
+    @Test
     fun evaluateDeniesUnknownMethodsBeforeLookingAtPermissions() {
         val decision = grant.evaluate("rhino", "eval", emptyList(), 10)
         assertTrue(decision is HostCapabilityGrant.Decision.Denied)
