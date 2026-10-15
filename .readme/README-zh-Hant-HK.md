@@ -471,6 +471,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `優化` ocr 模塊默認按 ML Kit/Paddle/Rapid 順序選擇可用引擎, 並支持顯式指定或恢復自動選擇
 * `優化` Node.js 插件等經宿主橋接調用的 ocr 模塊在未指定 engine 時按 ML Kit/Paddle/Rapid 順序自動選擇已啟用的引擎, 不再固定要求 ML Kit OCR 插件
 * `優化` 宿主橋接層 accessibility 模塊增加 captureScreenImage 方法, 以無障礙截圖 (不可用時回退屏幕捕獲) 生成會話內圖像句柄, 供 MCP Server 等插件會話直接用於條碼識別與找圖找色; 插件會話可同時持有的圖像句柄數由 4 提高為並發調用數的兩倍
+* `優化` MCP Server 與 3-Stove Agent 等面向模型的插件會話經橋接讀取圖片 (image.readImage) 時, 最長邊超過 4096 px 的圖片按 2 的冪降採樣解碼, 結果附 scale 與原圖尺寸, 避免相冊大圖耗盡宿主內存; Node.js 插件腳本不受影響
 * `優化` images.save/saveImage/compress/compressToBytes 方法支持 PNG 量化選項 (保留透明度) 及像素與內存限制 (需要 Image Quantization 插件)
 * `優化` images.readPixels 方法支持 ImageWrapper 參數
 * `優化` images.matchTemplate/findPointByImage 方法支持 scales 選項, 匹配結果增加尺寸, 比例及區域信息

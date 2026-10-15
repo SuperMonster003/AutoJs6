@@ -290,6 +290,7 @@
 * `优化` ocr 模块默认按 ML Kit/Paddle/Rapid 顺序选择可用引擎, 并支持显式指定或恢复自动选择
 * `优化` Node.js 插件等经宿主桥接调用的 ocr 模块在未指定 engine 时按 ML Kit/Paddle/Rapid 顺序自动选择已启用的引擎, 不再固定要求 ML Kit OCR 插件
 * `优化` 宿主桥接层 accessibility 模块增加 captureScreenImage 方法, 以无障碍截图 (不可用时回退屏幕捕获) 生成会话内图像句柄, 供 MCP Server 等插件会话直接用于条码识别与找图找色; 插件会话可同时持有的图像句柄数由 4 提高为并发调用数的两倍
+* `优化` MCP Server 与 3-Stove Agent 等面向模型的插件会话经桥接读取图片 (image.readImage) 时, 最长边超过 4096 px 的图片按 2 的幂降采样解码, 结果附 scale 与原图尺寸, 避免相册大图耗尽宿主内存; Node.js 插件脚本不受影响
 * `优化` images.save/saveImage/compress/compressToBytes 方法支持 PNG 量化选项 (保留透明度) 及像素与内存限制 (需要 Image Quantization 插件)
 * `优化` images.readPixels 方法支持 ImageWrapper 参数
 * `优化` images.matchTemplate/findPointByImage 方法支持 scales 选项, 匹配结果增加尺寸, 比例及区域信息

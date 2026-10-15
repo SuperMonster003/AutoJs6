@@ -74,6 +74,7 @@ import org.autojs.autojs.core.automator.bridge.BridgeNode
 import org.autojs.autojs.core.automator.bridge.BridgeNodeActions
 import org.autojs.autojs.core.automator.bridge.BridgeSelector
 import org.autojs.autojs.core.automator.search.DFS
+import org.autojs.autojs.core.plugin.mcp.McpHostCapabilityBroker
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -902,6 +903,12 @@ class AndroidNodeBridgeCapabilityProvider(
     private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
     private val imageHandles = ConcurrentHashMap<String, ControlledImageHandle>()
+    /**
+     * A plugin session that serves a model (MCP Server, 3-Stove Agent). Node.js plugin scripts also run
+     * with backend "plugin" but are user code and keep the script-facing behaviour.
+     */
+    private val modelFacingPluginSession: Boolean =
+        engineInfo.backend == "plugin" && engineInfo.engineName in MODEL_FACING_ENGINES
     private val imageLock = Any()
     private val imageDestroyed = AtomicBoolean(false)
     private val imageExecutor = Executors.newSingleThreadExecutor { task ->
@@ -2850,7 +2857,7 @@ class AndroidNodeBridgeCapabilityProvider(
             )
             return
         }
-        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        val decoded = decodeImageFile(file)
             ?: return callback(
                 NodeBridgeResponse.failure(
                     request.id,
@@ -2861,8 +2868,37 @@ class AndroidNodeBridgeCapabilityProvider(
                     ),
                 ),
             )
-        val handle = registerImage(bitmap, file.name)
-        callback(NodeBridgeResponse.success(request.id, handle.toJson().toString()))
+        val handle = registerImage(decoded.bitmap, file.name)
+        val result = handle.toJson()
+        if (modelFacingPluginSession) {
+            // Tools map recognition bounds back to the file's own pixels with `scale` (MCP roadmap P11 D45).
+            result.put("sourceWidth", decoded.sourceWidth)
+                .put("sourceHeight", decoded.sourceHeight)
+                .put("scale", decoded.bitmap.width.toDouble() / decoded.sourceWidth)
+        }
+        callback(NodeBridgeResponse.success(request.id, result.toString()))
+    }
+
+    private class DecodedImage(val bitmap: Bitmap, val sourceWidth: Int, val sourceHeight: Int)
+
+    /**
+     * Decodes a file for `image.readImage`. Model-facing plugin sessions decode within
+     * [NodeImageDownsample.MAX_EDGE_PX] (MCP roadmap P11 D45): a gallery photo at full size costs tens of
+     * megabytes per handle and OCR, barcodes or template matching do not need it. Scripts keep full size.
+     */
+    private fun decodeImageFile(file: File): DecodedImage? {
+        if (!modelFacingPluginSession) {
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath) ?: return null
+            return DecodedImage(bitmap, bitmap.width, bitmap.height)
+        }
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = NodeImageDownsample.sampleSize(bounds.outWidth, bounds.outHeight)
+        }
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath, options) ?: return null
+        return DecodedImage(bitmap, bounds.outWidth, bounds.outHeight)
     }
 
     private fun dispatchImageRecycle(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -5702,6 +5738,7 @@ class AndroidNodeBridgeCapabilityProvider(
         const val ENSURE_ENABLED_MAX_WAIT_MS = 10_000L
         const val MAX_ACTIVE_OVERLAY_SESSIONS = 4
         const val OCR_MODULE_LABEL = "OCR"
+        val MODEL_FACING_ENGINES: Set<String> = setOf(McpHostCapabilityBroker.ENGINE_NAME, ThreeStoveAgentIds.ENGINE)
         // Gestures block a broker dispatch thread until completion; cap the
         // requested duration so one call cannot pin it for minutes.
         const val MAX_ACCESSIBILITY_GESTURE_DURATION_MS = 10_000L
