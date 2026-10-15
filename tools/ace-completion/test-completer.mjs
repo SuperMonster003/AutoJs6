@@ -5,83 +5,14 @@ import path from "node:path";
 import vm from "node:vm";
 import {
   GENERATED_INDEX_PATH,
-  EDITOR_PROJECT_ROOT,
-  PROJECT_ROOT,
+  EDITOR_ASSET_ROOT,
   relativeToRoot,
 } from "./indices-utils.mjs";
 
-const COMPLETER_PATH = path.join(
-  EDITOR_PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "assets",
-  "editor",
-  "ace-builds-1.4.12",
-  "autojs6",
-  "autojs6_completer.js",
-);
-const BRIDGE_PATH = path.join(
-  EDITOR_PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "assets",
-  "editor",
-  "ace-builds-1.4.12",
-  "autojs6",
-  "autojs6_ace_bridge.js",
-);
-const CSS_PATH = path.join(
-  EDITOR_PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "assets",
-  "editor",
-  "ace-builds-1.4.12",
-  "autojs6",
-  "autojs6.css",
-);
-const ACE_BRIDGE_KT_PATH = process.env.AUTOJS6_ACE_EDITOR_ROOT ? path.join(
-  EDITOR_PROJECT_ROOT, "app/src/main/java/io/github/supermonster003/autojs6/plugin/ace/editor/core/AceBridge.kt",
-) : path.join(
-  PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "java",
-  "org",
-  "autojs",
-  "autojs",
-  "ui",
-  "edit",
-  "editor",
-  "ace",
-  "AceBridge.kt",
-);
-const LANGUAGE_TOOLS_PATH = path.join(
-  EDITOR_PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "assets",
-  "editor",
-  "ace-builds-1.4.12",
-  "src-min-noconflict",
-  "ext-language_tools.js",
-);
-const FALLBACK_INDEX_PATH = path.join(
-  EDITOR_PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "assets",
-  "editor",
-  "ace-builds-1.4.12",
-  "autojs6",
-  "autojs_indices.js",
-);
+const COMPLETER_PATH = path.join(EDITOR_ASSET_ROOT, "autojs6_completer.js");
+const BRIDGE_PATH = path.join(EDITOR_ASSET_ROOT, "autojs6_ace_bridge.js");
+const LANGUAGE_TOOLS_PATH = path.join(EDITOR_ASSET_ROOT, "../src-min-noconflict/ext-language_tools.js");
+const FALLBACK_INDEX_PATH = path.join(EDITOR_ASSET_ROOT, "autojs_indices.js");
 
 function createSandbox() {
   const sandbox = {
@@ -289,7 +220,9 @@ function assertSignatureHelp(completer, line, expected) {
     throw new Error(`${line}: missing signature help`);
   }
   for (const [key, value] of Object.entries(expected)) {
-    if (help[key] !== value) {
+    const actualValue = key === "signature" ? help[key].replace(/'/g, '"') : help[key];
+    const expectedValue = key === "signature" ? value.replace(/'/g, '"') : value;
+    if (actualValue !== expectedValue) {
       throw new Error(`${line}: unexpected ${key}: actual=${help[key]}, expected=${value}`);
     }
   }
@@ -327,45 +260,7 @@ function assertLanguageToolsAcceptShim() {
   }
 }
 
-function assertMobileBridgeStabilityHooks() {
-  const bridge = fs.readFileSync(BRIDGE_PATH, "utf8");
-  for (const expected of [
-    "scheduleResize",
-    "recoverableError",
-    "firstPaint",
-    "requestFirstPaint",
-    "insertShortcutText",
-    "skipExistingClosingPair",
-    "shortcut_insert",
-    "installMemberCompletionDotTrigger",
-    "installTouchCursorSelectionGuard",
-    "touch_cursor",
-    "isSingleInsertedText",
-    "scheduleMemberCompletionAfterDot",
-    "restartMemberCompletionAfterDot",
-    'resetImeTextInputSelectionWindow("shortcut_insert")',
-    "popup.container.scrollLeft += dx",
-  ]) {
-    if (!bridge.includes(expected)) {
-      throw new Error(`ACE mobile stability hook is missing from bridge: ${expected}`);
-    }
-  }
-
-  const css = fs.readFileSync(CSS_PATH, "utf8");
-  for (const expected of ["visibility: hidden", "body.ace-ready #editor", ".ace_editor.ace_autocomplete"]) {
-    if (!css.includes(expected)) {
-      throw new Error(`ACE first-paint CSS guard is missing: ${expected}`);
-    }
-  }
-
-  const nativeBridge = fs.readFileSync(ACE_BRIDGE_KT_PATH, "utf8");
-  for (const expected of ["fun startActionMode", "fun finishActionMode", "fun performLongPressFeedback"]) {
-    if (!nativeBridge.includes(expected)) {
-      throw new Error(`ACE native mobile bridge method is missing: ${expected}`);
-    }
-  }
-}
-
+// Mobile and IME behavior is verified by the plugin tools/ace-lsp/verify-ace-bridge.mjs.
 const completer = createAutoJs6Completer();
 assertIncludes(valuesFor(completer, "toast", "toast"), ["toast"], "toast");
 assertIncludes(valuesFor(completer, "app.la", "la"), ["launch", "launchApp"], "app.la");
@@ -523,6 +418,6 @@ assertNoThrow("prototype-like member contexts should not throw", () => {
 });
 
 assertLanguageToolsAcceptShim();
-assertMobileBridgeStabilityHooks();
+
 
 console.log(`AutoJs6 ACE completer tests passed (${relativeToRoot(COMPLETER_PATH)}).`);

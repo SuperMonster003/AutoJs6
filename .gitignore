@@ -42,6 +42,10 @@ CLAUDE.md
 /release/
 /releases/
 /tools/*
+!/tools/api-coverage/
+!/tools/api-coverage/**
+!/tools/ace-completion/
+!/tools/ace-completion/**
 !/tools/codegen-model/
 !/tools/pangu/
 !/tools/lua/

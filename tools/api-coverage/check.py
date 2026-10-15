@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Check runtime exports against local documentation, declarations and Ace.
+
+This gate checks public names and usable types/completion paths. Dedicated
+signature, negative-type and runtime tests remain necessary for semantics.
+"""
+import argparse
+from collections import Counter
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+from extract_exports import extract
+
+HERE = Path(__file__).resolve().parent
+
+
+def documentation_rows(exports, api_root, policy):
+    texts = {path.stem: path.read_text(encoding="utf-8") for path in api_root.glob("*.md")}
+    if not texts:
+        raise ValueError(f"No Markdown sources under {api_root}")
+    rows = []
+    for item in exports:
+        root = (item["module"] or item["ownerModule"] or "global").split(".")[0]
+        pages = policy["documentationModules"].get(root, [root])
+        pattern = re.compile(r"(?<![\w$])" + re.escape(item["member"]) + r"(?![\w$])")
+        evidence = []
+        for page in pages:
+            for number, line in enumerate(texts.get(page, "").splitlines(), 1):
+                if pattern.search(line):
+                    evidence.append({"page": f"api/{page}.md", "line": number, "heading": line.startswith("#")})
+        headings = [hit for hit in evidence if hit["heading"]]
+        rows.append({"api": item["api"], "status": "heading" if headings else "mention" if evidence else "missing", "evidence": headings or evidence})
+    return rows
+
+
+def public_queries(baseline, policy):
+    ignored = set(policy["internalExports"]) | set(policy["standardExports"])
+    queries = {item["api"] for item in baseline["records"] if item["api"] not in ignored}
+    # Include callable modules with no explicit members, plus all declared keys.
+    for module in baseline["modules"]:
+        if module["module"]:
+            parent = module["module"].rsplit(".", 1)[0] + "." if "." in module["module"] else ""
+            queries.update(parent + alias for alias in module["aliases"])
+    queries.update(policy["returnedObjectProbes"])
+    return sorted(queries)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--host", type=Path, default=HERE.parents[1])
+    parser.add_argument("--documentation", type=Path)
+    parser.add_argument("--declarations", type=Path)
+    parser.add_argument("--ace", type=Path)
+    parser.add_argument("--typescript", type=Path, help="Optional TypeScript compiler module; defaults to Ace's bundled compiler")
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--skip-ace", action="store_true", help="Explicitly check only source docs and canonical types")
+    args = parser.parse_args()
+    host = args.host.resolve()
+    siblings = host.parent
+    docs = (args.documentation or siblings / "AutoJs6-Documentation").resolve()
+    declarations = (args.declarations or siblings / "AutoJs6-TypeScript-Declarations").resolve()
+    ace = (args.ace or siblings / "AutoJs6-Plugin-Ace-Editor").resolve()
+    output = (args.output or host / "build/reports/api-coverage").resolve()
+    output.mkdir(parents=True, exist_ok=True)
+    policy = json.loads((HERE / "policy.json").read_text(encoding="utf-8"))
+    baseline = extract(host)
+    failures = []
+    if not baseline["modules"] or not baseline["records"]:
+        failures.append("No runtime exports extracted")
+    for item in baseline["unresolved"]:
+        key = item.get("module", "") + "." + item.get("registration", "")
+        if key not in policy["dynamicRegistrations"]:
+            failures.append(f"Unreviewed runtime registration: {item}")
+    internal = policy["internalExports"]
+    documented = documentation_rows([r for r in baseline["records"] if r["api"] not in internal], docs / "api", policy)
+    failures.extend("Missing documentation name: " + r["api"] for r in documented if r["status"] == "missing")
+    baseline["queries"] = public_queries(baseline, policy)
+    exports_path = output / "exports.json"
+    exports_path.write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (output / "documentation.json").write_text(json.dumps(documented, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    command = ["node", str(HERE / "verify-surfaces.mjs"), "--exports", str(exports_path), "--declarations", str(declarations), "--ace", str(ace), "--output", str(output)]
+    if args.typescript:
+        command += ["--typescript", str(args.typescript.resolve())]
+    if args.skip_ace:
+        command += ["--skip-ace"]
+    result = subprocess.run(command, check=False)
+    if result.returncode:
+        failures.append("TypeScript/Ace surface checks failed; see surfaces.json")
+    summary = {
+        "registrationRoutes": len(baseline["modules"]), "explicitExports": len(baseline["records"]),
+        "documentation": dict(Counter(row["status"] for row in documented)),
+        "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
+        "scope": baseline["scope"], "failures": failures,
+    }
+    (output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return 1 if failures else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

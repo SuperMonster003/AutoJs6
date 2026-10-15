@@ -48,6 +48,8 @@ jobs:
             ./gradlew \
             :app:testAppDebugUnitTest \
             --tests org.autojs.autojs.core.plugin.editor.AceEditorPluginPolicyTest \
+            --tests org.autojs.autojs.runtime.api.augment.global.* \
+            --tests org.autojs.autojs.runtime.api.ScaleCompatibilityTest \
             --tests org.autojs.autojs.ui.edit.editor.engine.AceEditorPluginMappingsTest \
             --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest \
             --tests org.autojs.autojs.core.plugin.ai.* \

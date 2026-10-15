@@ -13,6 +13,17 @@
         }
       ]
     },
+    "activity.window": {
+      "doc": "AutoJs6 activity.window API",
+      "members": [
+        {
+          "name": "decorView",
+          "kind": "variable",
+          "doc": "decorView: com.android.internal.policy.DecorView;",
+          "signature": "decorView: com.android.internal.policy.DecorView;"
+        }
+      ]
+    },
     "Agent": {
       "doc": "Internal.Ai.Agent instance members",
       "instanceOnly": true,
@@ -219,6 +230,65 @@
           "kind": "function",
           "doc": "catalog(options?: Ai.CatalogOptions | null): Promise<Ai.TargetCatalog>;",
           "signature": "catalog(options?: Ai.CatalogOptions | null): Promise<Ai.TargetCatalog>;"
+        }
+      ]
+    },
+    "ai.agent": {
+      "doc": "AutoJs6 ai.agent API",
+      "members": [
+        {
+          "name": "run",
+          "kind": "function",
+          "doc": "run(goal: string, options?: AgentRunOptions): AgentRun;",
+          "signature": "run(goal: string, options?: AgentRunOptions): AgentRun;"
+        },
+        {
+          "name": "create",
+          "kind": "function",
+          "doc": "create(options: AgentRunOptions): AgentAssistant;",
+          "signature": "create(options: AgentRunOptions): AgentAssistant;"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "doc": "get(id: string): AgentRun | null;",
+          "signature": "get(id: string): AgentRun | null;"
+        },
+        {
+          "name": "list",
+          "kind": "function",
+          "doc": "list(filter?: AgentListFilter): Promise<AgentRunSummary[]>;",
+          "signature": "list(filter?: AgentListFilter): Promise<AgentRunSummary[]>;"
+        },
+        {
+          "name": "catalog",
+          "kind": "function",
+          "doc": "catalog(query?: string): Promise<AgentScriptEntry[]>;",
+          "signature": "catalog(query?: string): Promise<AgentScriptEntry[]>;"
+        },
+        {
+          "name": "presets",
+          "kind": "function",
+          "doc": "presets(): Promise<string[]>;",
+          "signature": "presets(): Promise<string[]>;"
+        },
+        {
+          "name": "status",
+          "kind": "function",
+          "doc": "status(): AgentLinkStatus;",
+          "signature": "status(): AgentLinkStatus;"
+        },
+        {
+          "name": "result",
+          "kind": "function",
+          "doc": "result(value: JsonValue): boolean;",
+          "signature": "result(value: JsonValue): boolean;"
+        },
+        {
+          "name": "context",
+          "kind": "function",
+          "doc": "context(): AgentExecutionContext | null;",
+          "signature": "context(): AgentExecutionContext | null;"
         }
       ]
     },
@@ -517,26 +587,270 @@
         }
       ]
     },
+    "app.autojs": {
+      "doc": "AutoJs6 app.autojs API",
+      "members": [
+        {
+          "name": "versionCode",
+          "kind": "variable",
+          "doc": "versionCode: number;",
+          "signature": "versionCode: number;"
+        },
+        {
+          "name": "versionName",
+          "kind": "variable",
+          "doc": "versionName: string;",
+          "signature": "versionName: string;"
+        },
+        {
+          "name": "versionDate",
+          "kind": "variable",
+          "doc": "versionDate: string;",
+          "signature": "versionDate: string;"
+        },
+        {
+          "name": "name",
+          "kind": "variable",
+          "doc": "name: string;",
+          "signature": "name: string;"
+        },
+        {
+          "name": "packageName",
+          "kind": "variable",
+          "doc": "packageName: string;",
+          "signature": "packageName: string;"
+        },
+        {
+          "name": "R",
+          "kind": "variable",
+          "doc": "R: typeof org.autojs.autojs6.R;",
+          "signature": "R: typeof org.autojs.autojs6.R;"
+        },
+        {
+          "name": "rotation",
+          "kind": "variable",
+          "doc": "rotation: number;",
+          "signature": "rotation: number;"
+        },
+        {
+          "name": "orientation",
+          "kind": "variable",
+          "doc": "orientation: number;",
+          "signature": "orientation: number;"
+        },
+        {
+          "name": "version",
+          "kind": "variable",
+          "doc": "version: AutojsVersion;",
+          "signature": "version: AutojsVersion;"
+        },
+        {
+          "name": "setRootMode",
+          "kind": "function",
+          "doc": "setRootMode(mode: -1 | 0 | 1 | boolean | \"auto\" | \"root\" | \"non-root\", isWriteIntoPreference?: boolean | \"write_into_pref\"): void;",
+          "signature": "setRootMode(mode: -1 | 0 | 1 | boolean | \"auto\" | \"root\" | \"non-root\", isWriteIntoPreference?: boolean | \"write_into_pref\"): void;"
+        },
+        {
+          "name": "isScreenPortrait",
+          "kind": "function",
+          "doc": "isScreenPortrait(): boolean;",
+          "signature": "isScreenPortrait(): boolean;"
+        },
+        {
+          "name": "isScreenLandscape",
+          "kind": "function",
+          "doc": "isScreenLandscape(): boolean;",
+          "signature": "isScreenLandscape(): boolean;"
+        },
+        {
+          "name": "getRootMode",
+          "kind": "function",
+          "doc": "getRootMode(): org.autojs.autojs.util.RootUtils.RootMode;",
+          "signature": "getRootMode(): org.autojs.autojs.util.RootUtils.RootMode;"
+        },
+        {
+          "name": "isRootAvailable",
+          "kind": "function",
+          "doc": "isRootAvailable(): boolean;",
+          "signature": "isRootAvailable(): boolean;"
+        },
+        {
+          "name": "canModifySystemSettings",
+          "kind": "function",
+          "doc": "canModifySystemSettings(): boolean;",
+          "signature": "canModifySystemSettings(): boolean;"
+        },
+        {
+          "name": "canWriteSecureSettings",
+          "kind": "function",
+          "doc": "canWriteSecureSettings(): boolean;",
+          "signature": "canWriteSecureSettings(): boolean;"
+        },
+        {
+          "name": "canDisplayOverOtherApps",
+          "kind": "function",
+          "doc": "canDisplayOverOtherApps(): boolean;",
+          "signature": "canDisplayOverOtherApps(): boolean;"
+        },
+        {
+          "name": "getLanguage",
+          "kind": "function",
+          "doc": "getLanguage(): java.util.Locale;",
+          "signature": "getLanguage(): java.util.Locale;"
+        },
+        {
+          "name": "getLanguageTag",
+          "kind": "function",
+          "doc": "getLanguageTag(): string;",
+          "signature": "getLanguageTag(): string;"
+        },
+        {
+          "name": "restart",
+          "kind": "function",
+          "doc": "restart(scriptsAfterRestart?: string | string[]): void;",
+          "signature": "restart(scriptsAfterRestart?: string | string[]): void;"
+        },
+        {
+          "name": "exit",
+          "kind": "function",
+          "doc": "exit(scriptsAfterRestart?: string | string[]): void;",
+          "signature": "exit(scriptsAfterRestart?: string | string[]): void;"
+        },
+        {
+          "name": "themeColor",
+          "kind": "variable",
+          "doc": "themeColor: org.autojs.autojs.theme.ThemeColor;",
+          "signature": "themeColor: org.autojs.autojs.theme.ThemeColor;"
+        },
+        {
+          "name": "requestHandlers",
+          "kind": "variable",
+          "doc": "requestHandlers: {};",
+          "signature": "requestHandlers: {};"
+        },
+        {
+          "name": "onEventInternal",
+          "kind": "function",
+          "doc": "onEventInternal(event: any, args: any): void;",
+          "signature": "onEventInternal(event: any, args: any): void;"
+        },
+        {
+          "name": "send",
+          "kind": "function",
+          "doc": "send(event: any, ...args: any[]): void;",
+          "signature": "send(event: any, ...args: any[]): void;"
+        },
+        {
+          "name": "invoke",
+          "kind": "function",
+          "doc": "invoke(channel: any, ...args: any[]): Promise<unknown>;",
+          "signature": "invoke(channel: any, ...args: any[]): Promise<unknown>;"
+        },
+        {
+          "name": "handle",
+          "kind": "function",
+          "doc": "handle(channel: any, handler: any): Autojs;",
+          "signature": "handle(channel: any, handler: any): Autojs;"
+        },
+        {
+          "name": "removeHandler",
+          "kind": "function",
+          "doc": "removeHandler(channel: any): void;",
+          "signature": "removeHandler(channel: any): void;"
+        },
+        {
+          "name": "handleRequest",
+          "kind": "function",
+          "doc": "handleRequest(request: any): void;",
+          "signature": "handleRequest(request: any): void;"
+        },
+        {
+          "name": "sendResponse",
+          "kind": "function",
+          "doc": "sendResponse(request: any, result: any, error: any): void;",
+          "signature": "sendResponse(request: any, result: any, error: any): void;"
+        }
+      ]
+    },
+    "app.autojs.version": {
+      "doc": "AutoJs6 app.autojs.version API",
+      "members": [
+        {
+          "name": "code",
+          "kind": "variable",
+          "doc": "code: number;",
+          "signature": "code: number;"
+        },
+        {
+          "name": "name",
+          "kind": "variable",
+          "doc": "name: string;",
+          "signature": "name: string;"
+        },
+        {
+          "name": "date",
+          "kind": "variable",
+          "doc": "date: string;",
+          "signature": "date: string;"
+        },
+        {
+          "name": "isHigherThan",
+          "kind": "function",
+          "doc": "isHigherThan(otherVersion: string | number | Version): boolean;",
+          "signature": "isHigherThan(otherVersion: string | number | Version): boolean;"
+        },
+        {
+          "name": "isLowerThan",
+          "kind": "function",
+          "doc": "isLowerThan(otherVersion: string | number | Version): boolean;",
+          "signature": "isLowerThan(otherVersion: string | number | Version): boolean;"
+        },
+        {
+          "name": "isEqual",
+          "kind": "function",
+          "doc": "isEqual(otherVersion: string | number | Version): boolean;",
+          "signature": "isEqual(otherVersion: string | number | Version): boolean;"
+        },
+        {
+          "name": "isAtLeast",
+          "kind": "function",
+          "doc": "isAtLeast(otherVersion: string | number | Version, ignoreSuffix?: boolean): boolean;",
+          "signature": "isAtLeast(otherVersion: string | number | Version, ignoreSuffix?: boolean): boolean;"
+        }
+      ]
+    },
     "Arrayx": {
       "doc": "AutoJs6 Arrayx API",
       "members": [
         {
           "name": "ensureArray",
           "kind": "function",
-          "doc": "ensureArray(...o: any[]);",
-          "signature": "ensureArray(...o: any[]);"
+          "doc": "ensureArray(...o: unknown[]): void;",
+          "signature": "ensureArray(...o: unknown[]): void;"
+        },
+        {
+          "name": "subtract",
+          "kind": "function",
+          "doc": "subtract<T>(arr: T[], other: readonly unknown[]): T[];",
+          "signature": "subtract<T>(arr: T[], other: readonly unknown[]): T[];"
+        },
+        {
+          "name": "differ",
+          "kind": "function",
+          "doc": "differ<T, U>(arr: T[], other: U[]): (T | U)[];",
+          "signature": "differ<T, U>(arr: T[], other: U[]): (T | U)[];"
         },
         {
           "name": "intersect",
           "kind": "function",
-          "doc": "intersect<T, U>(arr: T[], ...others: U[][]): (T & U)[];",
-          "signature": "intersect<T, U>(arr: T[], ...others: U[][]): (T & U)[];"
+          "doc": "intersect<T, U>(arr: T[], ...others: (U | U[])[]): (T & U)[];",
+          "signature": "intersect<T, U>(arr: T[], ...others: (U | U[])[]): (T & U)[];"
         },
         {
           "name": "union",
           "kind": "function",
-          "doc": "union<T, U>(arr: T[], ...others: U[][]): (T | U)[];",
-          "signature": "union<T, U>(arr: T[], ...others: U[][]): (T | U)[];"
+          "doc": "union<T, U>(arr: T[], ...others: (U | U[])[]): (T | U)[];",
+          "signature": "union<T, U>(arr: T[], ...others: (U | U[])[]): (T | U)[];"
         },
         {
           "name": "distinct",
@@ -547,14 +861,14 @@
         {
           "name": "distinctBy",
           "kind": "function",
-          "doc": "distinctBy<T, U>(arr: T[], selector: (T) => U): T[];",
-          "signature": "distinctBy<T, U>(arr: T[], selector: (T) => U): T[];"
+          "doc": "distinctBy<T, U>(arr: T[], selector: (value: T) => U): T[];",
+          "signature": "distinctBy<T, U>(arr: T[], selector: (value: T) => U): T[];"
         },
         {
           "name": "sortBy",
           "kind": "function",
-          "doc": "sortBy<T, U>(arr: T[], selector: (T) => U): T[];",
-          "signature": "sortBy<T, U>(arr: T[], selector: (T) => U): T[];"
+          "doc": "sortBy<T, U>(arr: T[], selector: (value: T) => U): T[];",
+          "signature": "sortBy<T, U>(arr: T[], selector: (value: T) => U): T[];"
         },
         {
           "name": "sortDescending",
@@ -565,8 +879,8 @@
         {
           "name": "sortByDescending",
           "kind": "function",
-          "doc": "sortByDescending<T, U>(arr: T[], selector: (T) => U): T[];",
-          "signature": "sortByDescending<T, U>(arr: T[], selector: (T) => U): T[];"
+          "doc": "sortByDescending<T, U>(arr: T[], selector: (value: T) => U): T[];",
+          "signature": "sortByDescending<T, U>(arr: T[], selector: (value: T) => U): T[];"
         },
         {
           "name": "sorted",
@@ -577,8 +891,8 @@
         {
           "name": "sortedBy",
           "kind": "function",
-          "doc": "sortedBy<T, U>(arr: T[], selector: (T) => U): T[];",
-          "signature": "sortedBy<T, U>(arr: T[], selector: (T) => U): T[];"
+          "doc": "sortedBy<T, U>(arr: T[], selector: (value: T) => U): T[];",
+          "signature": "sortedBy<T, U>(arr: T[], selector: (value: T) => U): T[];"
         },
         {
           "name": "sortedDescending",
@@ -589,14 +903,14 @@
         {
           "name": "sortedByDescending",
           "kind": "function",
-          "doc": "sortedByDescending<T, U>(arr: T[], selector: (T) => U): T[];",
-          "signature": "sortedByDescending<T, U>(arr: T[], selector: (T) => U): T[];"
+          "doc": "sortedByDescending<T, U>(arr: T[], selector: (value: T) => U): T[];",
+          "signature": "sortedByDescending<T, U>(arr: T[], selector: (value: T) => U): T[];"
         },
         {
           "name": "shuffle",
           "kind": "function",
-          "doc": "shuffle(arr: any[]);",
-          "signature": "shuffle(arr: any[]);"
+          "doc": "shuffle<T>(arr: T[]): T[];",
+          "signature": "shuffle<T>(arr: T[]): T[];"
         }
       ]
     },
@@ -835,6 +1149,188 @@
         }
       ]
     },
+    "auto.state": {
+      "doc": "AutoJs6 auto.state API",
+      "members": [
+        {
+          "name": "hasInstance",
+          "kind": "variable",
+          "doc": "hasInstance: boolean;",
+          "signature": "hasInstance: boolean;"
+        },
+        {
+          "name": "hasService",
+          "kind": "variable",
+          "doc": "hasService: boolean;",
+          "signature": "hasService: boolean;"
+        },
+        {
+          "name": "isRunning",
+          "kind": "variable",
+          "doc": "isRunning: boolean;",
+          "signature": "isRunning: boolean;"
+        },
+        {
+          "name": "isOperational",
+          "kind": "variable",
+          "doc": "isOperational: boolean;",
+          "signature": "isOperational: boolean;"
+        },
+        {
+          "name": "adoptedByEvent",
+          "kind": "variable",
+          "doc": "adoptedByEvent: boolean;",
+          "signature": "adoptedByEvent: boolean;"
+        }
+      ]
+    },
+    "auto.stats": {
+      "doc": "AutoJs6 auto.stats API",
+      "members": [
+        {
+          "name": "since",
+          "kind": "variable",
+          "doc": "since: number;",
+          "signature": "since: number;"
+        },
+        {
+          "name": "now",
+          "kind": "variable",
+          "doc": "now: number;",
+          "signature": "now: number;"
+        },
+        {
+          "name": "elapsed",
+          "kind": "variable",
+          "doc": "elapsed: number;",
+          "signature": "elapsed: number;"
+        },
+        {
+          "name": "searches",
+          "kind": "variable",
+          "doc": "searches: Timing;",
+          "signature": "searches: Timing;"
+        },
+        {
+          "name": "queries",
+          "kind": "variable",
+          "doc": "queries: QueryTiming;",
+          "signature": "queries: QueryTiming;"
+        },
+        {
+          "name": "selectors",
+          "kind": "variable",
+          "doc": "selectors: SelectorStats[];",
+          "signature": "selectors: SelectorStats[];"
+        },
+        {
+          "name": "slowest",
+          "kind": "variable",
+          "doc": "slowest: SelectorStats | null;",
+          "signature": "slowest: SelectorStats | null;"
+        },
+        {
+          "name": "steps",
+          "kind": "variable",
+          "doc": "steps: StepStats[];",
+          "signature": "steps: StepStats[];"
+        },
+        {
+          "name": "text",
+          "kind": "variable",
+          "doc": "text: string;",
+          "signature": "text: string;"
+        },
+        {
+          "name": "reset",
+          "kind": "function",
+          "doc": "reset(): void;",
+          "signature": "reset(): void;"
+        },
+        {
+          "name": "toString",
+          "kind": "function",
+          "doc": "toString(): string;",
+          "signature": "toString(): string;"
+        }
+      ]
+    },
+    "auto.stats.queries": {
+      "doc": "AutoJs6 auto.stats.queries API",
+      "members": [
+        {
+          "name": "found",
+          "kind": "variable",
+          "doc": "found: number;",
+          "signature": "found: number;"
+        },
+        {
+          "name": "missed",
+          "kind": "variable",
+          "doc": "missed: number;",
+          "signature": "missed: number;"
+        },
+        {
+          "name": "attempts",
+          "kind": "variable",
+          "doc": "attempts: number;",
+          "signature": "attempts: number;"
+        },
+        {
+          "name": "count",
+          "kind": "variable",
+          "doc": "count: number;",
+          "signature": "count: number;"
+        },
+        {
+          "name": "totalMillis",
+          "kind": "variable",
+          "doc": "totalMillis: number;",
+          "signature": "totalMillis: number;"
+        },
+        {
+          "name": "averageMillis",
+          "kind": "variable",
+          "doc": "averageMillis: number;",
+          "signature": "averageMillis: number;"
+        },
+        {
+          "name": "maxMillis",
+          "kind": "variable",
+          "doc": "maxMillis: number;",
+          "signature": "maxMillis: number;"
+        }
+      ]
+    },
+    "auto.stats.searches": {
+      "doc": "AutoJs6 auto.stats.searches API",
+      "members": [
+        {
+          "name": "count",
+          "kind": "variable",
+          "doc": "count: number;",
+          "signature": "count: number;"
+        },
+        {
+          "name": "totalMillis",
+          "kind": "variable",
+          "doc": "totalMillis: number;",
+          "signature": "totalMillis: number;"
+        },
+        {
+          "name": "averageMillis",
+          "kind": "variable",
+          "doc": "averageMillis: number;",
+          "signature": "averageMillis: number;"
+        },
+        {
+          "name": "maxMillis",
+          "kind": "variable",
+          "doc": "maxMillis: number;",
+          "signature": "maxMillis: number;"
+        }
+      ]
+    },
     "autojs": {
       "doc": "AutoJs6 Autojs API",
       "members": [
@@ -969,6 +1465,101 @@
           "kind": "variable",
           "doc": "themeColor: org.autojs.autojs.theme.ThemeColor;",
           "signature": "themeColor: org.autojs.autojs.theme.ThemeColor;"
+        },
+        {
+          "name": "requestHandlers",
+          "kind": "variable",
+          "doc": "requestHandlers: {};",
+          "signature": "requestHandlers: {};"
+        },
+        {
+          "name": "onEventInternal",
+          "kind": "function",
+          "doc": "onEventInternal(event: any, args: any): void;",
+          "signature": "onEventInternal(event: any, args: any): void;"
+        },
+        {
+          "name": "send",
+          "kind": "function",
+          "doc": "send(event: any, ...args: any[]): void;",
+          "signature": "send(event: any, ...args: any[]): void;"
+        },
+        {
+          "name": "invoke",
+          "kind": "function",
+          "doc": "invoke(channel: any, ...args: any[]): Promise<unknown>;",
+          "signature": "invoke(channel: any, ...args: any[]): Promise<unknown>;"
+        },
+        {
+          "name": "handle",
+          "kind": "function",
+          "doc": "handle(channel: any, handler: any): Autojs;",
+          "signature": "handle(channel: any, handler: any): Autojs;"
+        },
+        {
+          "name": "removeHandler",
+          "kind": "function",
+          "doc": "removeHandler(channel: any): void;",
+          "signature": "removeHandler(channel: any): void;"
+        },
+        {
+          "name": "handleRequest",
+          "kind": "function",
+          "doc": "handleRequest(request: any): void;",
+          "signature": "handleRequest(request: any): void;"
+        },
+        {
+          "name": "sendResponse",
+          "kind": "function",
+          "doc": "sendResponse(request: any, result: any, error: any): void;",
+          "signature": "sendResponse(request: any, result: any, error: any): void;"
+        }
+      ]
+    },
+    "autojs.version": {
+      "doc": "AutoJs6 autojs.version API",
+      "members": [
+        {
+          "name": "code",
+          "kind": "variable",
+          "doc": "code: number;",
+          "signature": "code: number;"
+        },
+        {
+          "name": "name",
+          "kind": "variable",
+          "doc": "name: string;",
+          "signature": "name: string;"
+        },
+        {
+          "name": "date",
+          "kind": "variable",
+          "doc": "date: string;",
+          "signature": "date: string;"
+        },
+        {
+          "name": "isHigherThan",
+          "kind": "function",
+          "doc": "isHigherThan(otherVersion: string | number | Version): boolean;",
+          "signature": "isHigherThan(otherVersion: string | number | Version): boolean;"
+        },
+        {
+          "name": "isLowerThan",
+          "kind": "function",
+          "doc": "isLowerThan(otherVersion: string | number | Version): boolean;",
+          "signature": "isLowerThan(otherVersion: string | number | Version): boolean;"
+        },
+        {
+          "name": "isEqual",
+          "kind": "function",
+          "doc": "isEqual(otherVersion: string | number | Version): boolean;",
+          "signature": "isEqual(otherVersion: string | number | Version): boolean;"
+        },
+        {
+          "name": "isAtLeast",
+          "kind": "function",
+          "doc": "isAtLeast(otherVersion: string | number | Version, ignoreSuffix?: boolean): boolean;",
+          "signature": "isAtLeast(otherVersion: string | number | Version, ignoreSuffix?: boolean): boolean;"
         }
       ]
     },
@@ -1405,6 +1996,448 @@
         }
       ]
     },
+    "axios": {
+      "doc": "AutoJs6 axios API",
+      "members": [
+        {
+          "name": "create",
+          "kind": "function",
+          "doc": "create(config?: AxiosConfig): AxiosInstance;",
+          "signature": "create(config?: AxiosConfig): AxiosInstance;"
+        },
+        {
+          "name": "isAxiosError",
+          "kind": "function",
+          "doc": "isAxiosError<T = unknown, D = unknown>(error: unknown): error is AxiosError<T, D>;",
+          "signature": "isAxiosError<T = unknown, D = unknown>(error: unknown): error is AxiosError<T, D>;"
+        },
+        {
+          "name": "isCancel",
+          "kind": "function",
+          "doc": "isCancel(value: unknown): boolean;",
+          "signature": "isCancel(value: unknown): boolean;"
+        },
+        {
+          "name": "all",
+          "kind": "function",
+          "doc": "all<T>(values: (T | Promise<T>)[]): Promise<T[]>;",
+          "signature": "all<T>(values: (T | Promise<T>)[]): Promise<T[]>;"
+        },
+        {
+          "name": "spread",
+          "kind": "function",
+          "doc": "spread<T, R>(callback: (...values: T[]) => R): (values: T[]) => R;",
+          "signature": "spread<T, R>(callback: (...values: T[]) => R): (values: T[]) => R;"
+        },
+        {
+          "name": "CancelToken",
+          "kind": "variable",
+          "doc": "CancelToken: { new (executor: (cancel: (message?: string) => void) => void): AxiosCancelToken; source(): { token: AxiosCancelToken; cancel(message?: string): void; }; };",
+          "signature": "CancelToken: { new (executor: (cancel: (message?: string) => void) => void): AxiosCancelToken; source(): { token: AxiosCancelToken; cancel(message?: string): void; }; };"
+        },
+        {
+          "name": "browser",
+          "kind": "variable",
+          "doc": "browser: { Object: ObjectConstructor; window: object; FormData: unknown; XMLHttpRequest: unknown; Blob: unknown; EventTarget: unknown; Event: unknown; setTimeout(callback: () => void, delay?: number): unknown; };",
+          "signature": "browser: { Object: ObjectConstructor; window: object; FormData: unknown; XMLHttpRequest: unknown; Blob: unknown; EventTarget: unknown; Event: unknown; setTimeout(callback: () => void, delay?: number): unknown; };"
+        },
+        {
+          "name": "utils",
+          "kind": "variable",
+          "doc": "utils: { openFile(path: string): HostBlob; saveBlobToFile(blob: HostBlob, path: string): Promise<void>; copyInputStream(input: java.io.InputStream, output: java.io.OutputStream, bufferSize?: number): void; ThreadPool: { run<T>(callback: () => T): Promise<T>; create_thread(): { run<T>(callback: () => T): Promise<T>; close(): void; }; setPrintError(enabled: boolean): void; }; };",
+          "signature": "utils: { openFile(path: string): HostBlob; saveBlobToFile(blob: HostBlob, path: string): Promise<void>; copyInputStream(input: java.io.InputStream, output: java.io.OutputStream, bufferSize?: number): void; ThreadPool: { run<T>(callback: () => T): Promise<T>; create_thread(): { run<T>(callback: () => T): Promise<T>; close(): void; }; setPrintError(enabled: boolean): void; }; };"
+        },
+        {
+          "name": "defaults",
+          "kind": "variable",
+          "doc": "defaults: AxiosConfig<unknown>;",
+          "signature": "defaults: AxiosConfig<unknown>;"
+        },
+        {
+          "name": "interceptors",
+          "kind": "variable",
+          "doc": "interceptors: { request: InterceptorManager<AxiosConfig>; response: InterceptorManager<AxiosResponse>; };",
+          "signature": "interceptors: { request: InterceptorManager<AxiosConfig>; response: InterceptorManager<AxiosResponse>; };"
+        },
+        {
+          "name": "request",
+          "kind": "function",
+          "doc": "request<T = unknown, D = unknown>(config: AxiosConfig<D>): Promise<AxiosResponse<T, D>>;",
+          "signature": "request<T = unknown, D = unknown>(config: AxiosConfig<D>): Promise<AxiosResponse<T, D>>;"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "doc": "get<T = unknown>(url: string, config?: AxiosConfig): Promise<AxiosResponse<T>>;",
+          "signature": "get<T = unknown>(url: string, config?: AxiosConfig): Promise<AxiosResponse<T>>;"
+        },
+        {
+          "name": "delete",
+          "kind": "function",
+          "doc": "delete<T = unknown>(url: string, config?: AxiosConfig): Promise<AxiosResponse<T>>;",
+          "signature": "delete<T = unknown>(url: string, config?: AxiosConfig): Promise<AxiosResponse<T>>;"
+        },
+        {
+          "name": "head",
+          "kind": "function",
+          "doc": "head<T = unknown>(url: string, config?: AxiosConfig): Promise<AxiosResponse<T>>;",
+          "signature": "head<T = unknown>(url: string, config?: AxiosConfig): Promise<AxiosResponse<T>>;"
+        },
+        {
+          "name": "options",
+          "kind": "function",
+          "doc": "options<T = unknown>(url: string, config?: AxiosConfig): Promise<AxiosResponse<T>>;",
+          "signature": "options<T = unknown>(url: string, config?: AxiosConfig): Promise<AxiosResponse<T>>;"
+        },
+        {
+          "name": "post",
+          "kind": "function",
+          "doc": "post<T = unknown, D = unknown>(url: string, data?: D, config?: AxiosConfig<D>): Promise<AxiosResponse<T, D>>;",
+          "signature": "post<T = unknown, D = unknown>(url: string, data?: D, config?: AxiosConfig<D>): Promise<AxiosResponse<T, D>>;"
+        },
+        {
+          "name": "put",
+          "kind": "function",
+          "doc": "put<T = unknown, D = unknown>(url: string, data?: D, config?: AxiosConfig<D>): Promise<AxiosResponse<T, D>>;",
+          "signature": "put<T = unknown, D = unknown>(url: string, data?: D, config?: AxiosConfig<D>): Promise<AxiosResponse<T, D>>;"
+        },
+        {
+          "name": "patch",
+          "kind": "function",
+          "doc": "patch<T = unknown, D = unknown>(url: string, data?: D, config?: AxiosConfig<D>): Promise<AxiosResponse<T, D>>;",
+          "signature": "patch<T = unknown, D = unknown>(url: string, data?: D, config?: AxiosConfig<D>): Promise<AxiosResponse<T, D>>;"
+        },
+        {
+          "name": "getUri",
+          "kind": "function",
+          "doc": "getUri(config?: AxiosConfig): string;",
+          "signature": "getUri(config?: AxiosConfig): string;"
+        }
+      ]
+    },
+    "axios.browser": {
+      "doc": "AutoJs6 axios.browser API",
+      "members": [
+        {
+          "name": "Object",
+          "kind": "function",
+          "doc": "Object(): any;",
+          "signature": "Object(): any;",
+          "signatures": [
+            "Object(): any;",
+            "Object(value: any): any;"
+          ]
+        },
+        {
+          "name": "window",
+          "kind": "variable",
+          "doc": "window: object;",
+          "signature": "window: object;"
+        },
+        {
+          "name": "FormData",
+          "kind": "variable",
+          "doc": "FormData: unknown;",
+          "signature": "FormData: unknown;"
+        },
+        {
+          "name": "XMLHttpRequest",
+          "kind": "variable",
+          "doc": "XMLHttpRequest: unknown;",
+          "signature": "XMLHttpRequest: unknown;"
+        },
+        {
+          "name": "Blob",
+          "kind": "variable",
+          "doc": "Blob: unknown;",
+          "signature": "Blob: unknown;"
+        },
+        {
+          "name": "EventTarget",
+          "kind": "variable",
+          "doc": "EventTarget: unknown;",
+          "signature": "EventTarget: unknown;"
+        },
+        {
+          "name": "Event",
+          "kind": "variable",
+          "doc": "Event: unknown;",
+          "signature": "Event: unknown;"
+        },
+        {
+          "name": "setTimeout",
+          "kind": "function",
+          "doc": "setTimeout(callback: () => void, delay?: number): unknown;",
+          "signature": "setTimeout(callback: () => void, delay?: number): unknown;"
+        }
+      ]
+    },
+    "axios.browser.Object": {
+      "doc": "AutoJs6 axios.browser.Object API",
+      "members": [
+        {
+          "name": "hasOwn",
+          "kind": "function",
+          "doc": "hasOwn(o: object, v: PropertyKey): boolean;",
+          "signature": "hasOwn(o: object, v: PropertyKey): boolean;",
+          "signatures": [
+            "hasOwn(o: object, v: PropertyKey): boolean;",
+            "hasOwn(o: object, v: PropertyKey): any;"
+          ]
+        },
+        {
+          "name": "observe",
+          "kind": "function",
+          "doc": "observe(object: object, handler: Object.Observe.Handler, acceptList: string[]): object;",
+          "signature": "observe(object: object, handler: Object.Observe.Handler, acceptList: string[]): object;"
+        },
+        {
+          "name": "unobserve",
+          "kind": "function",
+          "doc": "unobserve(object: object, handler: Object.Observe.Handler): object;",
+          "signature": "unobserve(object: object, handler: Object.Observe.Handler): object;"
+        },
+        {
+          "name": "getNotifier",
+          "kind": "function",
+          "doc": "getNotifier(object: object): Object.Observe.Notifier;",
+          "signature": "getNotifier(object: object): Object.Observe.Notifier;"
+        },
+        {
+          "name": "deliverChangeRecords",
+          "kind": "function",
+          "doc": "deliverChangeRecords(handler: Object.Observe.Handler): any;",
+          "signature": "deliverChangeRecords(handler: Object.Observe.Handler): any;"
+        }
+      ]
+    },
+    "axios.CancelToken": {
+      "doc": "AutoJs6 axios.CancelToken API",
+      "members": [
+        {
+          "name": "source",
+          "kind": "function",
+          "doc": "source(): { token: AxiosCancelToken; cancel(message?: string): void; };",
+          "signature": "source(): { token: AxiosCancelToken; cancel(message?: string): void; };"
+        }
+      ]
+    },
+    "axios.defaults": {
+      "doc": "AutoJs6 axios.defaults API",
+      "members": [
+        {
+          "name": "url",
+          "kind": "variable",
+          "doc": "url: string | undefined;",
+          "signature": "url: string | undefined;"
+        },
+        {
+          "name": "method",
+          "kind": "variable",
+          "doc": "method: string | undefined;",
+          "signature": "method: string | undefined;"
+        },
+        {
+          "name": "baseURL",
+          "kind": "variable",
+          "doc": "baseURL: string | undefined;",
+          "signature": "baseURL: string | undefined;"
+        },
+        {
+          "name": "headers",
+          "kind": "variable",
+          "doc": "headers: Record<string, string | number | boolean | string[]> | undefined;",
+          "signature": "headers: Record<string, string | number | boolean | string[]> | undefined;"
+        },
+        {
+          "name": "params",
+          "kind": "variable",
+          "doc": "params: Record<string, unknown> | undefined;",
+          "signature": "params: Record<string, unknown> | undefined;"
+        },
+        {
+          "name": "data",
+          "kind": "variable",
+          "doc": "data: unknown;",
+          "signature": "data: unknown;"
+        },
+        {
+          "name": "timeout",
+          "kind": "variable",
+          "doc": "timeout: number | undefined;",
+          "signature": "timeout: number | undefined;"
+        },
+        {
+          "name": "timeoutErrorMessage",
+          "kind": "variable",
+          "doc": "timeoutErrorMessage: string | undefined;",
+          "signature": "timeoutErrorMessage: string | undefined;"
+        },
+        {
+          "name": "responseType",
+          "kind": "variable",
+          "doc": "responseType: \"arraybuffer\" | \"blob\" | \"document\" | \"json\" | \"text\" | \"stream\" | undefined;",
+          "signature": "responseType: \"arraybuffer\" | \"blob\" | \"document\" | \"json\" | \"text\" | \"stream\" | undefined;"
+        },
+        {
+          "name": "responseEncoding",
+          "kind": "variable",
+          "doc": "responseEncoding: string | undefined;",
+          "signature": "responseEncoding: string | undefined;"
+        },
+        {
+          "name": "auth",
+          "kind": "variable",
+          "doc": "auth: { username: string; password: string; } | undefined;",
+          "signature": "auth: { username: string; password: string; } | undefined;"
+        },
+        {
+          "name": "withCredentials",
+          "kind": "variable",
+          "doc": "withCredentials: boolean | undefined;",
+          "signature": "withCredentials: boolean | undefined;"
+        },
+        {
+          "name": "validateStatus",
+          "kind": "variable",
+          "doc": "validateStatus: ((status: number) => boolean) | null | undefined;",
+          "signature": "validateStatus: ((status: number) => boolean) | null | undefined;"
+        },
+        {
+          "name": "transformRequest",
+          "kind": "variable",
+          "doc": "transformRequest: ((data: unknown, headers: Record<string, unknown>) => unknown)[] | undefined;",
+          "signature": "transformRequest: ((data: unknown, headers: Record<string, unknown>) => unknown)[] | undefined;"
+        },
+        {
+          "name": "transformResponse",
+          "kind": "variable",
+          "doc": "transformResponse: ((data: unknown) => unknown)[] | undefined;",
+          "signature": "transformResponse: ((data: unknown) => unknown)[] | undefined;"
+        },
+        {
+          "name": "cancelToken",
+          "kind": "variable",
+          "doc": "cancelToken: AxiosCancelToken | undefined;",
+          "signature": "cancelToken: AxiosCancelToken | undefined;"
+        },
+        {
+          "name": "onUploadProgress",
+          "kind": "variable",
+          "doc": "onUploadProgress: ((event: { loaded: number; total?: number; lengthComputable: boolean; }) => void) | undefined;",
+          "signature": "onUploadProgress: ((event: { loaded: number; total?: number; lengthComputable: boolean; }) => void) | undefined;"
+        },
+        {
+          "name": "onDownloadProgress",
+          "kind": "variable",
+          "doc": "onDownloadProgress: ((event: { loaded: number; total?: number; lengthComputable: boolean; }) => void) | undefined;",
+          "signature": "onDownloadProgress: ((event: { loaded: number; total?: number; lengthComputable: boolean; }) => void) | undefined;"
+        }
+      ]
+    },
+    "axios.interceptors": {
+      "doc": "AutoJs6 axios.interceptors API",
+      "members": [
+        {
+          "name": "request",
+          "kind": "variable",
+          "doc": "request: InterceptorManager<AxiosConfig<unknown>>;",
+          "signature": "request: InterceptorManager<AxiosConfig<unknown>>;"
+        },
+        {
+          "name": "response",
+          "kind": "variable",
+          "doc": "response: InterceptorManager<AxiosResponse<unknown, unknown>>;",
+          "signature": "response: InterceptorManager<AxiosResponse<unknown, unknown>>;"
+        }
+      ]
+    },
+    "axios.interceptors.request": {
+      "doc": "AutoJs6 axios.interceptors.request API",
+      "members": [
+        {
+          "name": "use",
+          "kind": "function",
+          "doc": "use(onFulfilled?: ((value: AxiosConfig<unknown>) => AxiosConfig<unknown> | Promise<AxiosConfig<unknown>>) | undefined, onRejected?: (error: unknown) => unknown): number;",
+          "signature": "use(onFulfilled?: ((value: AxiosConfig<unknown>) => AxiosConfig<unknown> | Promise<AxiosConfig<unknown>>) | undefined, onRejected?: (error: unknown) => unknown): number;"
+        },
+        {
+          "name": "eject",
+          "kind": "function",
+          "doc": "eject(id: number): void;",
+          "signature": "eject(id: number): void;"
+        }
+      ]
+    },
+    "axios.interceptors.response": {
+      "doc": "AutoJs6 axios.interceptors.response API",
+      "members": [
+        {
+          "name": "use",
+          "kind": "function",
+          "doc": "use(onFulfilled?: ((value: AxiosResponse<unknown, unknown>) => AxiosResponse<unknown, unknown> | Promise<AxiosResponse<unknown, unknown>>) | undefined, onRejected?: (error: unknown) => unknown): number;",
+          "signature": "use(onFulfilled?: ((value: AxiosResponse<unknown, unknown>) => AxiosResponse<unknown, unknown> | Promise<AxiosResponse<unknown, unknown>>) | undefined, onRejected?: (error: unknown) => unknown): number;"
+        },
+        {
+          "name": "eject",
+          "kind": "function",
+          "doc": "eject(id: number): void;",
+          "signature": "eject(id: number): void;"
+        }
+      ]
+    },
+    "axios.utils": {
+      "doc": "AutoJs6 axios.utils API",
+      "members": [
+        {
+          "name": "openFile",
+          "kind": "function",
+          "doc": "openFile(path: string): HostBlob;",
+          "signature": "openFile(path: string): HostBlob;"
+        },
+        {
+          "name": "saveBlobToFile",
+          "kind": "function",
+          "doc": "saveBlobToFile(blob: HostBlob, path: string): Promise<void>;",
+          "signature": "saveBlobToFile(blob: HostBlob, path: string): Promise<void>;"
+        },
+        {
+          "name": "copyInputStream",
+          "kind": "function",
+          "doc": "copyInputStream(input: java.io.InputStream, output: java.io.OutputStream, bufferSize?: number): void;",
+          "signature": "copyInputStream(input: java.io.InputStream, output: java.io.OutputStream, bufferSize?: number): void;"
+        },
+        {
+          "name": "ThreadPool",
+          "kind": "variable",
+          "doc": "ThreadPool: { run<T>(callback: () => T): Promise<T>; create_thread(): { run<T>(callback: () => T): Promise<T>; close(): void; }; setPrintError(enabled: boolean): void; };",
+          "signature": "ThreadPool: { run<T>(callback: () => T): Promise<T>; create_thread(): { run<T>(callback: () => T): Promise<T>; close(): void; }; setPrintError(enabled: boolean): void; };"
+        }
+      ]
+    },
+    "axios.utils.ThreadPool": {
+      "doc": "AutoJs6 axios.utils.ThreadPool API",
+      "members": [
+        {
+          "name": "run",
+          "kind": "function",
+          "doc": "run<T>(callback: () => T): Promise<T>;",
+          "signature": "run<T>(callback: () => T): Promise<T>;"
+        },
+        {
+          "name": "create_thread",
+          "kind": "function",
+          "doc": "create_thread(): { run<T>(callback: () => T): Promise<T>; close(): void; };",
+          "signature": "create_thread(): { run<T>(callback: () => T): Promise<T>; close(): void; };"
+        },
+        {
+          "name": "setPrintError",
+          "kind": "function",
+          "doc": "setPrintError(enabled: boolean): void;",
+          "signature": "setPrintError(enabled: boolean): void;"
+        }
+      ]
+    },
     "barcode": {
       "doc": "AutoJs6 Barcode API",
       "members": [
@@ -1489,9 +2522,254 @@
         }
       ]
     },
+    "BuildConfig": {
+      "doc": "AutoJs6 BuildConfig API",
+      "members": [
+        {
+          "name": "DEBUG",
+          "kind": "variable",
+          "doc": "DEBUG: boolean;",
+          "signature": "DEBUG: boolean;"
+        },
+        {
+          "name": "APPLICATION_ID",
+          "kind": "variable",
+          "doc": "APPLICATION_ID: string;",
+          "signature": "APPLICATION_ID: string;"
+        },
+        {
+          "name": "BUILD_TYPE",
+          "kind": "variable",
+          "doc": "BUILD_TYPE: string;",
+          "signature": "BUILD_TYPE: string;"
+        },
+        {
+          "name": "FLAVOR",
+          "kind": "variable",
+          "doc": "FLAVOR: string;",
+          "signature": "FLAVOR: string;"
+        },
+        {
+          "name": "VERSION_CODE",
+          "kind": "variable",
+          "doc": "VERSION_CODE: number;",
+          "signature": "VERSION_CODE: number;"
+        },
+        {
+          "name": "VERSION_NAME",
+          "kind": "variable",
+          "doc": "VERSION_NAME: string;",
+          "signature": "VERSION_NAME: string;"
+        },
+        {
+          "name": "APK_BUILDER_BUILT_IN_TEMPLATE_INCLUDED",
+          "kind": "variable",
+          "doc": "APK_BUILDER_BUILT_IN_TEMPLATE_INCLUDED: boolean;",
+          "signature": "APK_BUILDER_BUILT_IN_TEMPLATE_INCLUDED: boolean;"
+        },
+        {
+          "name": "CHANNEL",
+          "kind": "variable",
+          "doc": "CHANNEL: string;",
+          "signature": "CHANNEL: string;"
+        },
+        {
+          "name": "COMPOSE_UI_SHARED_FINGERPRINT",
+          "kind": "variable",
+          "doc": "COMPOSE_UI_SHARED_FINGERPRINT: string;",
+          "signature": "COMPOSE_UI_SHARED_FINGERPRINT: string;"
+        },
+        {
+          "name": "FILE_PROVIDER_AUTHORITY",
+          "kind": "variable",
+          "doc": "FILE_PROVIDER_AUTHORITY: string;",
+          "signature": "FILE_PROVIDER_AUTHORITY: string;"
+        },
+        {
+          "name": "JVM_SOURCE_EXPERIMENTAL_ENABLED",
+          "kind": "variable",
+          "doc": "JVM_SOURCE_EXPERIMENTAL_ENABLED: boolean;",
+          "signature": "JVM_SOURCE_EXPERIMENTAL_ENABLED: boolean;"
+        },
+        {
+          "name": "VERSION_DATE",
+          "kind": "variable",
+          "doc": "VERSION_DATE: string;",
+          "signature": "VERSION_DATE: string;"
+        },
+        {
+          "name": "VSCODE_EXT_REQUIRED_VERSION",
+          "kind": "variable",
+          "doc": "VSCODE_EXT_REQUIRED_VERSION: string;",
+          "signature": "VSCODE_EXT_REQUIRED_VERSION: string;"
+        },
+        {
+          "name": "isInrt",
+          "kind": "variable",
+          "doc": "isInrt: boolean;",
+          "signature": "isInrt: boolean;"
+        }
+      ]
+    },
+    "cheerio": {
+      "doc": "AutoJs6 cheerio API",
+      "members": [
+        {
+          "name": "default",
+          "kind": "function",
+          "doc": "default(selector?: CheerioContent, context?: CheerioContent, root?: CheerioContent, options?: CheerioOptions): Cheerio;",
+          "signature": "default(selector?: CheerioContent, context?: CheerioContent, root?: CheerioContent, options?: CheerioOptions): Cheerio;"
+        },
+        {
+          "name": "merge",
+          "kind": "function",
+          "doc": "merge<T extends ArrayLike<HtmlNode> & { length: number; }>(first: T, second: ArrayLike<HtmlNode>): T;",
+          "signature": "merge<T extends ArrayLike<HtmlNode> & { length: number; }>(first: T, second: ArrayLike<HtmlNode>): T;"
+        },
+        {
+          "name": "text",
+          "kind": "function",
+          "doc": "text(content?: ArrayLike<HtmlNode>): string;",
+          "signature": "text(content?: ArrayLike<HtmlNode>): string;"
+        },
+        {
+          "name": "html",
+          "kind": "function",
+          "doc": "html(options?: CheerioOptions): string;",
+          "signature": "html(options?: CheerioOptions): string;",
+          "signatures": [
+            "html(options?: CheerioOptions): string;",
+            "html(content: CheerioContent, options?: CheerioOptions): string;"
+          ]
+        },
+        {
+          "name": "xml",
+          "kind": "function",
+          "doc": "xml(content?: CheerioContent): string;",
+          "signature": "xml(content?: CheerioContent): string;"
+        },
+        {
+          "name": "root",
+          "kind": "function",
+          "doc": "root(): Cheerio;",
+          "signature": "root(): Cheerio;"
+        },
+        {
+          "name": "contains",
+          "kind": "function",
+          "doc": "contains(container: HtmlNode, contained: HtmlNode): boolean;",
+          "signature": "contains(container: HtmlNode, contained: HtmlNode): boolean;"
+        },
+        {
+          "name": "parseHTML",
+          "kind": "function",
+          "doc": "parseHTML(data: string, keepScripts?: boolean): HtmlNode[] | null;",
+          "signature": "parseHTML(data: string, keepScripts?: boolean): HtmlNode[] | null;"
+        },
+        {
+          "name": "load",
+          "kind": "function",
+          "doc": "load(content: CheerioContent, options?: CheerioOptions | null, isDocument?: boolean): CheerioAPI;",
+          "signature": "load(content: CheerioContent, options?: CheerioOptions | null, isDocument?: boolean): CheerioAPI;"
+        }
+      ]
+    },
+    "cheerio.default": {
+      "doc": "AutoJs6 cheerio.default API",
+      "members": [
+        {
+          "name": "html",
+          "kind": "function",
+          "doc": "html(options?: CheerioOptions): string;",
+          "signature": "html(options?: CheerioOptions): string;",
+          "signatures": [
+            "html(options?: CheerioOptions): string;",
+            "html(content: CheerioContent, options?: CheerioOptions): string;"
+          ]
+        },
+        {
+          "name": "xml",
+          "kind": "function",
+          "doc": "xml(content?: CheerioContent): string;",
+          "signature": "xml(content?: CheerioContent): string;"
+        },
+        {
+          "name": "text",
+          "kind": "function",
+          "doc": "text(content?: ArrayLike<HtmlNode>): string;",
+          "signature": "text(content?: ArrayLike<HtmlNode>): string;"
+        },
+        {
+          "name": "root",
+          "kind": "function",
+          "doc": "root(): Cheerio;",
+          "signature": "root(): Cheerio;"
+        },
+        {
+          "name": "contains",
+          "kind": "function",
+          "doc": "contains(container: HtmlNode, contained: HtmlNode): boolean;",
+          "signature": "contains(container: HtmlNode, contained: HtmlNode): boolean;"
+        },
+        {
+          "name": "parseHTML",
+          "kind": "function",
+          "doc": "parseHTML(data: string, keepScripts?: boolean): HtmlNode[] | null;",
+          "signature": "parseHTML(data: string, keepScripts?: boolean): HtmlNode[] | null;"
+        },
+        {
+          "name": "load",
+          "kind": "function",
+          "doc": "load(content: CheerioContent, options?: CheerioOptions | null, isDocument?: boolean): CheerioAPI;",
+          "signature": "load(content: CheerioContent, options?: CheerioOptions | null, isDocument?: boolean): CheerioAPI;"
+        }
+      ]
+    },
     "Color": {
       "doc": "AutoJs6 Color API",
       "members": [
+        {
+          "name": "argb",
+          "kind": "function",
+          "doc": "argb(): number[];",
+          "signature": "argb(): number[];"
+        },
+        {
+          "name": "rgb",
+          "kind": "function",
+          "doc": "rgb(): number[];",
+          "signature": "rgb(): number[];"
+        },
+        {
+          "name": "rgba",
+          "kind": "function",
+          "doc": "rgba(): number[];",
+          "signature": "rgba(): number[];"
+        },
+        {
+          "name": "hsv",
+          "kind": "function",
+          "doc": "hsv(result?: FloatArray): number[];",
+          "signature": "hsv(result?: FloatArray): number[];"
+        },
+        {
+          "name": "hsva",
+          "kind": "function",
+          "doc": "hsva(result?: FloatArray): number[];",
+          "signature": "hsva(result?: FloatArray): number[];"
+        },
+        {
+          "name": "hsl",
+          "kind": "function",
+          "doc": "hsl(result?: FloatArray): number[];",
+          "signature": "hsl(result?: FloatArray): number[];"
+        },
+        {
+          "name": "hsla",
+          "kind": "function",
+          "doc": "hsla(): number[];",
+          "signature": "hsla(): number[];"
+        },
         {
           "name": "new",
           "kind": "function",
@@ -5523,7 +6801,11 @@
           "name": "toRgb",
           "kind": "function",
           "doc": "toRgb(color: OmniColor): number[];",
-          "signature": "toRgb(color: OmniColor): number[];"
+          "signature": "toRgb(color: OmniColor): number[];",
+          "signatures": [
+            "toRgb(color: OmniColor): number[];",
+            "toRgb(r: ColorComponent, g: ColorComponent, b: ColorComponent): number[];"
+          ]
         },
         {
           "name": "toRgba",
@@ -5799,6 +7081,65 @@
         }
       ]
     },
+    "colors.theme": {
+      "doc": "AutoJs6 colors.theme API",
+      "members": [
+        {
+          "name": "get",
+          "kind": "function",
+          "doc": "get(): ColorInt;",
+          "signature": "get(): ColorInt;"
+        },
+        {
+          "name": "set",
+          "kind": "function",
+          "doc": "set(color: OmniColor, options?: ThemeSetOptions): void;",
+          "signature": "set(color: OmniColor, options?: ThemeSetOptions): void;"
+        },
+        {
+          "name": "reset",
+          "kind": "function",
+          "doc": "reset(): void;",
+          "signature": "reset(): void;"
+        },
+        {
+          "name": "libraries",
+          "kind": "function",
+          "doc": "libraries(): ThemeLibrary[];",
+          "signature": "libraries(): ThemeLibrary[];"
+        },
+        {
+          "name": "activate",
+          "kind": "function",
+          "doc": "activate(libraryId: number, options?: { group?: number; }): void;",
+          "signature": "activate(libraryId: number, options?: { group?: number; }): void;"
+        },
+        {
+          "name": "deactivate",
+          "kind": "function",
+          "doc": "deactivate(): boolean;",
+          "signature": "deactivate(): boolean;"
+        },
+        {
+          "name": "next",
+          "kind": "function",
+          "doc": "next(): boolean;",
+          "signature": "next(): boolean;"
+        },
+        {
+          "name": "state",
+          "kind": "function",
+          "doc": "state(name: string): void;",
+          "signature": "state(name: string): void;"
+        },
+        {
+          "name": "current",
+          "kind": "function",
+          "doc": "current(): ThemeCurrent;",
+          "signature": "current(): ThemeCurrent;"
+        }
+      ]
+    },
     "compose": {
       "doc": "AutoJs6 Compose API",
       "members": [
@@ -5829,8 +7170,8 @@
         {
           "name": "createElement",
           "kind": "function",
-          "doc": "createElement<N extends ComposeCatalogNodeName>(type: N, ...args: ComposeFactoryArguments<N>): ComposeNode<N>;",
-          "signature": "createElement<N extends ComposeCatalogNodeName>(type: N, ...args: ComposeFactoryArguments<N>): ComposeNode<N>;"
+          "doc": "createElement<N extends ComposeNodeName>(type: N, ...args: ComposeFactoryArguments<N>): ComposeNode<N>;",
+          "signature": "createElement<N extends ComposeNodeName>(type: N, ...args: ComposeFactoryArguments<N>): ComposeNode<N>;"
         },
         {
           "name": "modifier",
@@ -5857,16 +7198,34 @@
           "signature": "batch<T>(callback: () => T): T;"
         },
         {
+          "name": "memo",
+          "kind": "function",
+          "doc": "memo<T extends ComposeNode>(build: () => T, deps: ReadonlyArray<unknown>, options?: ComposeMemoOptions | null): T;",
+          "signature": "memo<T extends ComposeNode>(build: () => T, deps: ReadonlyArray<unknown>, options?: ComposeMemoOptions | null): T;"
+        },
+        {
           "name": "mount",
           "kind": "function",
           "doc": "mount(root: ComposeNode | (() => ComposeNode), options?: ComposeMountOptions | null): ComposeSession;",
           "signature": "mount(root: ComposeNode | (() => ComposeNode), options?: ComposeMountOptions | null): ComposeSession;"
         },
         {
+          "name": "attach",
+          "kind": "function",
+          "doc": "attach(container: ComposeNativeView, root: ComposeNode | (() => ComposeNode), options?: ComposeMountOptions | null): ComposeSession;",
+          "signature": "attach(container: ComposeNativeView, root: ComposeNode | (() => ComposeNode), options?: ComposeMountOptions | null): ComposeSession;"
+        },
+        {
           "name": "floaty",
           "kind": "function",
           "doc": "floaty(root: ComposeNode | (() => ComposeNode), options?: ComposeFloatyOptions | null): ComposeFloatyWindow;",
           "signature": "floaty(root: ComposeNode | (() => ComposeNode), options?: ComposeFloatyOptions | null): ComposeFloatyWindow;"
+        },
+        {
+          "name": "dialog",
+          "kind": "function",
+          "doc": "dialog(root: ComposeNode | (() => ComposeNode), options?: ComposeDialogOptions | null): ComposeSession;",
+          "signature": "dialog(root: ComposeNode | (() => ComposeNode), options?: ComposeDialogOptions | null): ComposeSession;"
         },
         {
           "name": "post",
@@ -5883,6 +7242,17 @@
             "theme(): ComposeThemeSnapshot;",
             "theme(theme: ComposeTheme | null | undefined): ComposeThemeSnapshot;"
           ]
+        }
+      ]
+    },
+    "compose.ComposeError": {
+      "doc": "AutoJs6 compose.ComposeError API",
+      "members": [
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: ComposeError;",
+          "signature": "prototype: ComposeError;"
         }
       ]
     },
@@ -6123,6 +7493,12 @@
             "setContentTextColor(colors: { verbose?: OmniColor; log?: OmniColor; info?: OmniColor; warn?: OmniColor; error?: OmniColor; assert?: OmniColor; }): this;",
             "setContentTextColor(verbose: OmniColor, log?: OmniColor, info?: OmniColor, warn?: OmniColor, error?: OmniColor, assert?: OmniColor): this;"
           ]
+        },
+        {
+          "name": "setContentTextColors",
+          "kind": "variable",
+          "doc": "setContentTextColors: Console['setContentTextColor'];",
+          "signature": "setContentTextColors: Console['setContentTextColor'];"
         },
         {
           "name": "setContentBackgroundColor",
@@ -7168,6 +8544,98 @@
         }
       ]
     },
+    "cvt.bytes": {
+      "doc": "AutoJs6 cvt.bytes API",
+      "members": [
+        {
+          "name": "strict",
+          "kind": "function",
+          "doc": "strict(source: BytesValue, options?: BytesModeOptions | undefined): BytesResult;",
+          "signature": "strict(source: BytesValue, options?: BytesModeOptions | undefined): BytesResult;",
+          "signatures": [
+            "strict(source: BytesValue, options?: BytesModeOptions | undefined): BytesResult;",
+            "strict(source: BytesValue, useIecIdentifier: boolean): BytesResult;",
+            "strict(source: BytesValue, fractionDigits: number): BytesResult;",
+            "strict(source: BytesValue, toUnit: BytesUnit, options?: BytesModeOptions | undefined): BytesResult;",
+            "strict(source: BytesValue, toUnit: BytesUnit, useIecIdentifier: boolean): BytesResult;",
+            "strict(source: BytesValue, toUnit: BytesUnit, fractionDigits: number): BytesResult;",
+            "strict(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, options?: BytesModeOptions | undefined): BytesResult;",
+            "strict(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, useIecIdentifier: boolean): BytesResult;",
+            "strict(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, fractionDigits: number): BytesResult;"
+          ]
+        },
+        {
+          "name": "loose",
+          "kind": "function",
+          "doc": "loose(source: BytesValue, options?: BytesModeOptions | undefined): BytesResult;",
+          "signature": "loose(source: BytesValue, options?: BytesModeOptions | undefined): BytesResult;",
+          "signatures": [
+            "loose(source: BytesValue, options?: BytesModeOptions | undefined): BytesResult;",
+            "loose(source: BytesValue, useIecIdentifier: boolean): BytesResult;",
+            "loose(source: BytesValue, fractionDigits: number): BytesResult;",
+            "loose(source: BytesValue, toUnit: BytesUnit, options?: BytesModeOptions | undefined): BytesResult;",
+            "loose(source: BytesValue, toUnit: BytesUnit, useIecIdentifier: boolean): BytesResult;",
+            "loose(source: BytesValue, toUnit: BytesUnit, fractionDigits: number): BytesResult;",
+            "loose(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, options?: BytesModeOptions | undefined): BytesResult;",
+            "loose(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, useIecIdentifier: boolean): BytesResult;",
+            "loose(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, fractionDigits: number): BytesResult;"
+          ]
+        },
+        {
+          "name": "UNITS",
+          "kind": "variable",
+          "doc": "UNITS: string;",
+          "signature": "UNITS: string;"
+        },
+        {
+          "name": "AUTO",
+          "kind": "variable",
+          "doc": "AUTO: \"AUTO\";",
+          "signature": "AUTO: \"AUTO\";"
+        },
+        {
+          "name": "IEC_DIV",
+          "kind": "variable",
+          "doc": "IEC_DIV: number;",
+          "signature": "IEC_DIV: number;"
+        },
+        {
+          "name": "SI_DIV",
+          "kind": "variable",
+          "doc": "SI_DIV: number;",
+          "signature": "SI_DIV: number;"
+        }
+      ]
+    },
+    "dayjs": {
+      "doc": "AutoJs6 dayjs API",
+      "members": [
+        {
+          "name": "unix",
+          "kind": "function",
+          "doc": "unix(seconds: number): Dayjs;",
+          "signature": "unix(seconds: number): Dayjs;"
+        },
+        {
+          "name": "isDayjs",
+          "kind": "function",
+          "doc": "isDayjs(value: unknown): value is Dayjs;",
+          "signature": "isDayjs(value: unknown): value is Dayjs;"
+        },
+        {
+          "name": "locale",
+          "kind": "function",
+          "doc": "locale(preset?: string | object, object?: object, isLocal?: boolean): string;",
+          "signature": "locale(preset?: string | object, object?: object, isLocal?: boolean): string;"
+        },
+        {
+          "name": "extend",
+          "kind": "function",
+          "doc": "extend<T>(plugin: (option: T | undefined, dayjsClass: { new (...args: unknown[]): Dayjs; }, factory: DayjsFactory) => void, option?: T): DayjsFactory;",
+          "signature": "extend<T>(plugin: (option: T | undefined, dayjsClass: { new (...args: unknown[]): Dayjs; }, factory: DayjsFactory) => void, option?: T): DayjsFactory;"
+        }
+      ]
+    },
     "device": {
       "doc": "Device information and controls",
       "members": [
@@ -7361,7 +8829,11 @@
           "name": "getAndroidId",
           "kind": "function",
           "doc": "getAndroidId(): string;",
-          "signature": "getAndroidId(): string;"
+          "signature": "getAndroidId(): string;",
+          "signatures": [
+            "getAndroidId(): string;",
+            "getAndroidId(useSystemId: boolean): string;"
+          ]
         },
         {
           "name": "getAvailMem",
@@ -7710,6 +9182,12 @@
       "doc": "Script engine management",
       "members": [
         {
+          "name": "getEngines",
+          "kind": "function",
+          "doc": "getEngines(): java.util.Set<org.autojs.autojs.engine.ScriptEngine<org.autojs.autojs.script.ScriptSource>>;",
+          "signature": "getEngines(): java.util.Set<org.autojs.autojs.engine.ScriptEngine<org.autojs.autojs.script.ScriptSource>>;"
+        },
+        {
           "name": "myEngine",
           "kind": "function",
           "doc": "myEngine(): org.autojs.autojs.engine.RhinoJavaScriptEngine;",
@@ -7889,6 +9367,17 @@
           "kind": "variable",
           "doc": "EpubError: Epub.EpubErrorConstructor;",
           "signature": "EpubError: Epub.EpubErrorConstructor;"
+        }
+      ]
+    },
+    "epub.EpubError": {
+      "doc": "AutoJs6 epub.EpubError API",
+      "members": [
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: EpubError;",
+          "signature": "prototype: EpubError;"
         }
       ]
     },
@@ -8323,6 +9812,12 @@
           "kind": "function",
           "doc": "toFile(path: string): java.io.File;",
           "signature": "toFile(path: string): java.io.File;"
+        },
+        {
+          "name": "formatSizeWithUnit",
+          "kind": "function",
+          "doc": "formatSizeWithUnit(bytes: number): string;",
+          "signature": "formatSizeWithUnit(bytes: number): string;"
         }
       ]
     },
@@ -8332,22 +9827,14 @@
         {
           "name": "window",
           "kind": "function",
-          "doc": "window(layout: org.autojs.autojs.core.floaty.BaseResizableFloatyWindow.ViewSupplier | Xml): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;",
-          "signature": "window(layout: org.autojs.autojs.core.floaty.BaseResizableFloatyWindow.ViewSupplier | Xml): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;",
-          "signatures": [
-            "window(layout: org.autojs.autojs.core.floaty.BaseResizableFloatyWindow.ViewSupplier | Xml): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;",
-            "window(layout: android.view.View): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;"
-          ]
+          "doc": "window(layout: string | XML): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;",
+          "signature": "window(layout: string | XML): org.autojs.autojs.runtime.api.Floaty.JsResizableWindow;"
         },
         {
           "name": "rawWindow",
           "kind": "function",
-          "doc": "rawWindow(layout: org.autojs.autojs.core.floaty.RawWindow.RawFloaty | Xml): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;",
-          "signature": "rawWindow(layout: org.autojs.autojs.core.floaty.RawWindow.RawFloaty | Xml): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;",
-          "signatures": [
-            "rawWindow(layout: org.autojs.autojs.core.floaty.RawWindow.RawFloaty | Xml): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;",
-            "rawWindow(layout: android.view.View): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;"
-          ]
+          "doc": "rawWindow(layout: string | XML): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;",
+          "signature": "rawWindow(layout: string | XML): org.autojs.autojs.runtime.api.Floaty.JsRawWindow;"
         },
         {
           "name": "hasPermission",
@@ -8545,8 +10032,12 @@
         {
           "name": "of",
           "kind": "function",
-          "doc": "of<V>(value: V): Flow<V>;",
-          "signature": "of<V>(value: V): Flow<V>;"
+          "doc": "of(): Flow<null>;",
+          "signature": "of(): Flow<null>;",
+          "signatures": [
+            "of(): Flow<null>;",
+            "of<V>(value: V): Flow<V>;"
+          ]
         },
         {
           "name": "Flow",
@@ -8766,6 +10257,17 @@
         }
       ]
     },
+    "flow.Flow": {
+      "doc": "AutoJs6 flow.Flow API",
+      "members": [
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: Flow<any>;",
+          "signature": "prototype: Flow<any>;"
+        }
+      ]
+    },
     "fmt": {
       "doc": "AutoJs6 Formatter API",
       "members": [
@@ -8774,6 +10276,69 @@
           "kind": "variable",
           "doc": "bytes: Formatter.Bytes;",
           "signature": "bytes: Formatter.Bytes;"
+        }
+      ]
+    },
+    "fmt.bytes": {
+      "doc": "AutoJs6 fmt.bytes API",
+      "members": [
+        {
+          "name": "strict",
+          "kind": "function",
+          "doc": "strict(source: BytesValue, options?: BytesStrictOptions | undefined): string;",
+          "signature": "strict(source: BytesValue, options?: BytesStrictOptions | undefined): string;",
+          "signatures": [
+            "strict(source: BytesValue, options?: BytesStrictOptions | undefined): string;",
+            "strict(source: BytesValue, useIecIdentifier: boolean): string;",
+            "strict(source: BytesValue, fractionDigits: number): string;",
+            "strict(source: BytesValue, toUnit: BytesUnit, options?: BytesStrictOptions | undefined): string;",
+            "strict(source: BytesValue, toUnit: BytesUnit, useIecIdentifier: boolean): string;",
+            "strict(source: BytesValue, toUnit: BytesUnit, fractionDigits: number): string;",
+            "strict(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, options?: BytesStrictOptions | undefined): string;",
+            "strict(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, useIecIdentifier: boolean): string;",
+            "strict(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, fractionDigits: number): string;"
+          ]
+        },
+        {
+          "name": "loose",
+          "kind": "function",
+          "doc": "loose(source: BytesValue, options?: BytesLooseOptions | undefined): string;",
+          "signature": "loose(source: BytesValue, options?: BytesLooseOptions | undefined): string;",
+          "signatures": [
+            "loose(source: BytesValue, options?: BytesLooseOptions | undefined): string;",
+            "loose(source: BytesValue, useIecIdentifier: boolean): string;",
+            "loose(source: BytesValue, fractionDigits: number): string;",
+            "loose(source: BytesValue, toUnit: BytesUnit, options?: BytesLooseOptions | undefined): string;",
+            "loose(source: BytesValue, toUnit: BytesUnit, useIecIdentifier: boolean): string;",
+            "loose(source: BytesValue, toUnit: BytesUnit, fractionDigits: number): string;",
+            "loose(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, options?: BytesLooseOptions | undefined): string;",
+            "loose(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, useIecIdentifier: boolean): string;",
+            "loose(source: BytesValue, fromUnit: BytesUnit, toUnit: BytesUnit, fractionDigits: number): string;"
+          ]
+        },
+        {
+          "name": "UNITS",
+          "kind": "variable",
+          "doc": "UNITS: string;",
+          "signature": "UNITS: string;"
+        },
+        {
+          "name": "AUTO",
+          "kind": "variable",
+          "doc": "AUTO: \"AUTO\";",
+          "signature": "AUTO: \"AUTO\";"
+        },
+        {
+          "name": "IEC_DIV",
+          "kind": "variable",
+          "doc": "IEC_DIV: number;",
+          "signature": "IEC_DIV: number;"
+        },
+        {
+          "name": "SI_DIV",
+          "kind": "variable",
+          "doc": "SI_DIV: number;",
+          "signature": "SI_DIV: number;"
         }
       ]
     },
@@ -8968,6 +10533,266 @@
           "kind": "function",
           "doc": "loadAll(): void;",
           "signature": "loadAll(): void;"
+        }
+      ]
+    },
+    "i18n.banana": {
+      "doc": "AutoJs6 i18n.banana API",
+      "members": [
+        {
+          "name": "load",
+          "kind": "function",
+          "doc": "load(messageSource: object, locale?: string): any;",
+          "signature": "load(messageSource: object, locale?: string): any;"
+        },
+        {
+          "name": "i18n",
+          "kind": "function",
+          "doc": "i18n(key: string, ...parameters: any[]): string;",
+          "signature": "i18n(key: string, ...parameters: any[]): string;"
+        },
+        {
+          "name": "messageStore",
+          "kind": "variable",
+          "doc": "messageStore: Banana.BananaMessageStore;",
+          "signature": "messageStore: Banana.BananaMessageStore;"
+        },
+        {
+          "name": "locale",
+          "kind": "variable",
+          "doc": "locale: string;",
+          "signature": "locale: string;"
+        },
+        {
+          "name": "parser",
+          "kind": "variable",
+          "doc": "parser: Banana.Parser;",
+          "signature": "parser: Banana.Parser;"
+        },
+        {
+          "name": "finalFallback",
+          "kind": "variable",
+          "doc": "finalFallback: string;",
+          "signature": "finalFallback: string;"
+        },
+        {
+          "name": "wikilinks",
+          "kind": "variable",
+          "doc": "wikilinks: boolean;",
+          "signature": "wikilinks: boolean;"
+        },
+        {
+          "name": "setLocale",
+          "kind": "function",
+          "doc": "setLocale(locale: string): void;",
+          "signature": "setLocale(locale: string): void;"
+        },
+        {
+          "name": "getFallbackLocales",
+          "kind": "function",
+          "doc": "getFallbackLocales(): string[];",
+          "signature": "getFallbackLocales(): string[];"
+        },
+        {
+          "name": "getMessage",
+          "kind": "function",
+          "doc": "getMessage(key: string): string;",
+          "signature": "getMessage(key: string): string;"
+        },
+        {
+          "name": "registerParserPlugin",
+          "kind": "function",
+          "doc": "registerParserPlugin(name: string, plugin: Function): void;",
+          "signature": "registerParserPlugin(name: string, plugin: Function): void;"
+        }
+      ]
+    },
+    "i18n.banana.messageStore": {
+      "doc": "AutoJs6 i18n.banana.messageStore API",
+      "members": [
+        {
+          "name": "sourceMap",
+          "kind": "variable",
+          "doc": "sourceMap: Map<string, object>;",
+          "signature": "sourceMap: Map<string, object>;"
+        },
+        {
+          "name": "load",
+          "kind": "function",
+          "doc": "load(messageSource: object, locale: string): void;",
+          "signature": "load(messageSource: object, locale: string): void;"
+        },
+        {
+          "name": "getMessage",
+          "kind": "function",
+          "doc": "getMessage(key: string, locale: string): object | null;",
+          "signature": "getMessage(key: string, locale: string): object | null;"
+        },
+        {
+          "name": "hasLocale",
+          "kind": "function",
+          "doc": "hasLocale(locale: string): boolean;",
+          "signature": "hasLocale(locale: string): boolean;"
+        }
+      ]
+    },
+    "i18n.banana.parser": {
+      "doc": "AutoJs6 i18n.banana.parser API",
+      "members": [
+        {
+          "name": "locale",
+          "kind": "variable",
+          "doc": "locale: string;",
+          "signature": "locale: string;"
+        },
+        {
+          "name": "wikilinks",
+          "kind": "variable",
+          "doc": "wikilinks: boolean;",
+          "signature": "wikilinks: boolean;"
+        },
+        {
+          "name": "emitter",
+          "kind": "variable",
+          "doc": "emitter: Emitter;",
+          "signature": "emitter: Emitter;"
+        },
+        {
+          "name": "parse",
+          "kind": "function",
+          "doc": "parse(message: string, params: any[]): string;",
+          "signature": "parse(message: string, params: any[]): string;"
+        },
+        {
+          "name": "simpleParse",
+          "kind": "function",
+          "doc": "simpleParse(message: string, params: any[]): string;",
+          "signature": "simpleParse(message: string, params: any[]): string;"
+        }
+      ]
+    },
+    "i18n.banana.parser.emitter": {
+      "doc": "AutoJs6 i18n.banana.parser.emitter API",
+      "members": [
+        {
+          "name": "locale",
+          "kind": "variable",
+          "doc": "locale: string;",
+          "signature": "locale: string;"
+        },
+        {
+          "name": "language",
+          "kind": "variable",
+          "doc": "language: Language;",
+          "signature": "language: Language;"
+        },
+        {
+          "name": "emit",
+          "kind": "function",
+          "doc": "emit(node: Mixed, replacements: any[]): Mixed;",
+          "signature": "emit(node: Mixed, replacements: any[]): Mixed;"
+        },
+        {
+          "name": "concat",
+          "kind": "function",
+          "doc": "concat(nodes: any[]): string;",
+          "signature": "concat(nodes: any[]): string;"
+        },
+        {
+          "name": "replace",
+          "kind": "function",
+          "doc": "replace(nodes: any[], replacements: any[]): string;",
+          "signature": "replace(nodes: any[], replacements: any[]): string;"
+        },
+        {
+          "name": "plural",
+          "kind": "function",
+          "doc": "plural(nodes: any[]): string;",
+          "signature": "plural(nodes: any[]): string;"
+        },
+        {
+          "name": "gender",
+          "kind": "function",
+          "doc": "gender(nodes: any[]): string;",
+          "signature": "gender(nodes: any[]): string;"
+        },
+        {
+          "name": "grammar",
+          "kind": "function",
+          "doc": "grammar(nodes: any[]): string;",
+          "signature": "grammar(nodes: any[]): string;"
+        },
+        {
+          "name": "wikilink",
+          "kind": "function",
+          "doc": "wikilink(nodes: string[]): string;",
+          "signature": "wikilink(nodes: string[]): string;"
+        },
+        {
+          "name": "extlink",
+          "kind": "function",
+          "doc": "extlink(nodes: string[]): string;",
+          "signature": "extlink(nodes: string[]): string;"
+        },
+        {
+          "name": "bidi",
+          "kind": "function",
+          "doc": "bidi(nodes: string[]): string;",
+          "signature": "bidi(nodes: string[]): string;"
+        },
+        {
+          "name": "formatnum",
+          "kind": "function",
+          "doc": "formatnum(nodes: any[]): number | string;",
+          "signature": "formatnum(nodes: any[]): number | string;"
+        },
+        {
+          "name": "htmlattributes",
+          "kind": "function",
+          "doc": "htmlattributes(nodes: any[]): object;",
+          "signature": "htmlattributes(nodes: any[]): object;"
+        },
+        {
+          "name": "htmlelement",
+          "kind": "function",
+          "doc": "htmlelement(nodes: any[]): string;",
+          "signature": "htmlelement(nodes: any[]): string;"
+        }
+      ]
+    },
+    "Image": {
+      "doc": "AutoJs6 Image API",
+      "members": [
+        {
+          "name": "ofBitmap",
+          "kind": "function",
+          "doc": "ofBitmap(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, bitmap: android.graphics.Bitmap): ImageWrapper;",
+          "signature": "ofBitmap(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, bitmap: android.graphics.Bitmap): ImageWrapper;",
+          "signatures": [
+            "ofBitmap(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, bitmap: android.graphics.Bitmap): ImageWrapper;",
+            "ofBitmap(bitmap: android.graphics.Bitmap): ImageWrapper;"
+          ]
+        },
+        {
+          "name": "ofImage",
+          "kind": "function",
+          "doc": "ofImage(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, image: android.media.Image): ImageWrapper;",
+          "signature": "ofImage(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, image: android.media.Image): ImageWrapper;",
+          "signatures": [
+            "ofImage(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, image: android.media.Image): ImageWrapper;",
+            "ofImage(image: android.media.Image): ImageWrapper;"
+          ]
+        },
+        {
+          "name": "ofMat",
+          "kind": "function",
+          "doc": "ofMat(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, mat: org.opencv.core.Mat): ImageWrapper;",
+          "signature": "ofMat(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, mat: org.opencv.core.Mat): ImageWrapper;",
+          "signatures": [
+            "ofMat(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, mat: org.opencv.core.Mat): ImageWrapper;",
+            "ofMat(mat: org.autojs.autojs.core.opencv.Mat): ImageWrapper;",
+            "ofMat(mat: org.opencv.core.Mat): ImageWrapper;"
+          ]
         }
       ]
     },
@@ -9440,6 +11265,12 @@
           "signature": "buildRegion(img: Images.ImageSource, region: OmniRegion): org.opencv.core.Rect;"
         },
         {
+          "name": "__buildRegion",
+          "kind": "function",
+          "doc": "__buildRegion(region?: OmniRegion, imageWidth?: number, imageHeight?: number): org.opencv.core.Rect | null;",
+          "signature": "__buildRegion(region?: OmniRegion, imageWidth?: number, imageHeight?: number): org.opencv.core.Rect | null;"
+        },
+        {
           "name": "detectAndComputeFeatures",
           "kind": "function",
           "doc": "detectAndComputeFeatures(img: Images.ImageSource, options?: Images.DetectAndComputeFeaturesOptions): Images.ImageFeatures;",
@@ -9498,6 +11329,140 @@
           "kind": "function",
           "doc": "getSimilarity(imageA: Images.ComparableImageSource, imageB: Images.ComparableImageSource, options?: Images.SimilarityOptions): number;",
           "signature": "getSimilarity(imageA: Images.ComparableImageSource, imageB: Images.ComparableImageSource, options?: Images.SimilarityOptions): number;"
+        },
+        {
+          "name": "on",
+          "kind": "function",
+          "doc": "on(eventName: string, listener: any): Internal.Images;",
+          "signature": "on(eventName: string, listener: any): Internal.Images;",
+          "signatures": [
+            "on(eventName: string, listener: any): Internal.Images;",
+            "on(eventName: \"key\" | \"key_down\" | \"key_up\", listener: (keyCode: number, event: android.view.KeyEvent) => void): Internal.Images;",
+            "on(eventName: \"touch\", listener: (point: android.graphics.Point) => void): Internal.Images;",
+            "on(eventName: \"notification\", listener: (notification: org.autojs.autojs.core.notification.Notification) => void): Internal.Images;",
+            "on(eventName: \"toast\", listener: (toast: org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver.Toast) => void): Internal.Images;",
+            "on(eventName: \"gesture\", listener: (gestureString: string) => void): Internal.Images;",
+            "on(eventName: \"exit\", listener: () => void): Internal.Images;",
+            "on(eventName: \"accuracy_change\", listener: (accuracy: number) => void): Internal.Images;",
+            "on(eventName: \"unsupported_sensor\", listener: (sensorName: string) => void): Internal.Images;"
+          ]
+        },
+        {
+          "name": "once",
+          "kind": "function",
+          "doc": "once(eventName: string, listener: any): Internal.Images;",
+          "signature": "once(eventName: string, listener: any): Internal.Images;",
+          "signatures": [
+            "once(eventName: string, listener: any): Internal.Images;",
+            "once(eventName: \"key\" | \"key_down\" | \"key_up\", listener: (keyCode: number, event: android.view.KeyEvent) => void): Internal.Images;",
+            "once(eventName: \"touch\", listener: (point: android.graphics.Point) => void): Internal.Images;",
+            "once(eventName: \"notification\", listener: (notification: org.autojs.autojs.core.notification.Notification) => void): Internal.Images;",
+            "once(eventName: \"toast\", listener: (toast: org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver.Toast) => void): Internal.Images;",
+            "once(eventName: \"gesture\", listener: (gestureString: string) => void): Internal.Images;",
+            "once(eventName: \"exit\", listener: () => void): Internal.Images;"
+          ]
+        },
+        {
+          "name": "emit",
+          "kind": "function",
+          "doc": "emit(eventName: string, ...args: any[]): boolean;",
+          "signature": "emit(eventName: string, ...args: any[]): boolean;"
+        },
+        {
+          "name": "emitSticky",
+          "kind": "function",
+          "doc": "emitSticky(eventName: string, ...args: any[]): boolean;",
+          "signature": "emitSticky(eventName: string, ...args: any[]): boolean;"
+        },
+        {
+          "name": "eventNames",
+          "kind": "function",
+          "doc": "eventNames(): string[];",
+          "signature": "eventNames(): string[];"
+        },
+        {
+          "name": "getMaxListeners",
+          "kind": "function",
+          "doc": "getMaxListeners(): number;",
+          "signature": "getMaxListeners(): number;"
+        },
+        {
+          "name": "listenerCount",
+          "kind": "function",
+          "doc": "listenerCount(eventName: string): number;",
+          "signature": "listenerCount(eventName: string): number;"
+        },
+        {
+          "name": "listeners",
+          "kind": "function",
+          "doc": "listeners(eventName: string): any[];",
+          "signature": "listeners(eventName: string): any[];"
+        },
+        {
+          "name": "prependListener",
+          "kind": "function",
+          "doc": "prependListener(eventName: string, listener: any): Internal.Images;",
+          "signature": "prependListener(eventName: string, listener: any): Internal.Images;"
+        },
+        {
+          "name": "prependOnceListener",
+          "kind": "function",
+          "doc": "prependOnceListener(eventName: string, listener: any): Internal.Images;",
+          "signature": "prependOnceListener(eventName: string, listener: any): Internal.Images;"
+        },
+        {
+          "name": "removeAllListeners",
+          "kind": "function",
+          "doc": "removeAllListeners(eventName?: string): Internal.Images;",
+          "signature": "removeAllListeners(eventName?: string): Internal.Images;"
+        },
+        {
+          "name": "removeListener",
+          "kind": "function",
+          "doc": "removeListener(eventName: string, listener: any): Internal.Images;",
+          "signature": "removeListener(eventName: string, listener: any): Internal.Images;"
+        },
+        {
+          "name": "setMaxListeners",
+          "kind": "function",
+          "doc": "setMaxListeners(maxListeners: number): Internal.Images;",
+          "signature": "setMaxListeners(maxListeners: number): Internal.Images;"
+        }
+      ]
+    },
+    "ImageWrapper": {
+      "doc": "AutoJs6 ImageWrapper API",
+      "members": [
+        {
+          "name": "ofBitmap",
+          "kind": "function",
+          "doc": "ofBitmap(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, bitmap: android.graphics.Bitmap): ImageWrapper;",
+          "signature": "ofBitmap(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, bitmap: android.graphics.Bitmap): ImageWrapper;",
+          "signatures": [
+            "ofBitmap(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, bitmap: android.graphics.Bitmap): ImageWrapper;",
+            "ofBitmap(bitmap: android.graphics.Bitmap): ImageWrapper;"
+          ]
+        },
+        {
+          "name": "ofImage",
+          "kind": "function",
+          "doc": "ofImage(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, image: android.media.Image): ImageWrapper;",
+          "signature": "ofImage(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, image: android.media.Image): ImageWrapper;",
+          "signatures": [
+            "ofImage(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, image: android.media.Image): ImageWrapper;",
+            "ofImage(image: android.media.Image): ImageWrapper;"
+          ]
+        },
+        {
+          "name": "ofMat",
+          "kind": "function",
+          "doc": "ofMat(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, mat: org.opencv.core.Mat): ImageWrapper;",
+          "signature": "ofMat(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, mat: org.opencv.core.Mat): ImageWrapper;",
+          "signatures": [
+            "ofMat(scriptRuntime: org.autojs.autojs.runtime.ScriptRuntime, mat: org.opencv.core.Mat): ImageWrapper;",
+            "ofMat(mat: org.autojs.autojs.core.opencv.Mat): ImageWrapper;",
+            "ofMat(mat: org.opencv.core.Mat): ImageWrapper;"
+          ]
         }
       ]
     },
@@ -9614,6 +11579,75 @@
           "kind": "variable",
           "doc": "InstallerError: Installer.InstallerErrorConstructor;",
           "signature": "InstallerError: Installer.InstallerErrorConstructor;"
+        }
+      ]
+    },
+    "installer.authorizer": {
+      "doc": "AutoJs6 installer.authorizer API",
+      "members": [
+        {
+          "name": "available",
+          "kind": "variable",
+          "doc": "available: ActualAuthorizer[];",
+          "signature": "available: ActualAuthorizer[];"
+        },
+        {
+          "name": "state",
+          "kind": "function",
+          "doc": "state(name?: AuthorizerName): AuthorizerState;",
+          "signature": "state(name?: AuthorizerName): AuthorizerState;"
+        },
+        {
+          "name": "request",
+          "kind": "function",
+          "doc": "request(name: AuthorizerName, timeout?: number): boolean;",
+          "signature": "request(name: AuthorizerName, timeout?: number): boolean;"
+        },
+        {
+          "name": "requestAsync",
+          "kind": "function",
+          "doc": "requestAsync(name: AuthorizerName, timeout?: number): Promise<boolean>;",
+          "signature": "requestAsync(name: AuthorizerName, timeout?: number): Promise<boolean>;"
+        }
+      ]
+    },
+    "installer.InstallerError": {
+      "doc": "AutoJs6 installer.InstallerError API",
+      "members": [
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: InstallerError;",
+          "signature": "prototype: InstallerError;"
+        }
+      ]
+    },
+    "installer.status": {
+      "doc": "AutoJs6 installer.status API",
+      "members": [
+        {
+          "name": "available",
+          "kind": "variable",
+          "doc": "available: boolean;",
+          "signature": "available: boolean;"
+        },
+        {
+          "name": "pluginVersion",
+          "kind": "variable",
+          "doc": "pluginVersion: string | undefined;",
+          "signature": "pluginVersion: string | undefined;"
+        },
+        {
+          "name": "contractVersion",
+          "kind": "variable",
+          "doc": "contractVersion: number | undefined;",
+          "signature": "contractVersion: number | undefined;"
+        },
+        {
+          "name": "reason",
+          "kind": "variable",
+          "doc": "reason: string | undefined;",
+          "signature": "reason: string | undefined;"
         }
       ]
     },
@@ -9869,12 +11903,391 @@
           "kind": "variable",
           "doc": "MailError: Mail.MailErrorConstructor;",
           "signature": "MailError: Mail.MailErrorConstructor;"
+        },
+        {
+          "name": "test",
+          "kind": "function",
+          "doc": "test(): SessionTestResult;",
+          "signature": "test(): SessionTestResult;"
+        },
+        {
+          "name": "testAsync",
+          "kind": "function",
+          "doc": "testAsync(): Promise<SessionTestResult>;",
+          "signature": "testAsync(): Promise<SessionTestResult>;"
+        },
+        {
+          "name": "send",
+          "kind": "function",
+          "doc": "send(message: SendMessage, options?: SendOptions): SendResult;",
+          "signature": "send(message: SendMessage, options?: SendOptions): SendResult;"
+        },
+        {
+          "name": "sendAsync",
+          "kind": "function",
+          "doc": "sendAsync(message: SendMessage, options?: SendOptions): Promise<SendResult>;",
+          "signature": "sendAsync(message: SendMessage, options?: SendOptions): Promise<SendResult>;"
+        },
+        {
+          "name": "folders",
+          "kind": "function",
+          "doc": "folders(options?: FoldersOptions): Folder[];",
+          "signature": "folders(options?: FoldersOptions): Folder[];"
+        },
+        {
+          "name": "foldersAsync",
+          "kind": "function",
+          "doc": "foldersAsync(options?: FoldersOptions): Promise<Folder[]>;",
+          "signature": "foldersAsync(options?: FoldersOptions): Promise<Folder[]>;"
+        },
+        {
+          "name": "folder",
+          "kind": "function",
+          "doc": "folder(path: string): ClientFolder;",
+          "signature": "folder(path: string): ClientFolder;"
+        },
+        {
+          "name": "folderStatus",
+          "kind": "function",
+          "doc": "folderStatus(path: string): FolderStatus;",
+          "signature": "folderStatus(path: string): FolderStatus;"
+        },
+        {
+          "name": "folderStatusAsync",
+          "kind": "function",
+          "doc": "folderStatusAsync(path: string): Promise<FolderStatus>;",
+          "signature": "folderStatusAsync(path: string): Promise<FolderStatus>;"
+        },
+        {
+          "name": "createFolder",
+          "kind": "function",
+          "doc": "createFolder(path: string): Folder;",
+          "signature": "createFolder(path: string): Folder;"
+        },
+        {
+          "name": "createFolderAsync",
+          "kind": "function",
+          "doc": "createFolderAsync(path: string): Promise<Folder>;",
+          "signature": "createFolderAsync(path: string): Promise<Folder>;"
+        },
+        {
+          "name": "deleteFolder",
+          "kind": "function",
+          "doc": "deleteFolder(path: string): boolean;",
+          "signature": "deleteFolder(path: string): boolean;"
+        },
+        {
+          "name": "deleteFolderAsync",
+          "kind": "function",
+          "doc": "deleteFolderAsync(path: string): Promise<boolean>;",
+          "signature": "deleteFolderAsync(path: string): Promise<boolean>;"
+        },
+        {
+          "name": "renameFolder",
+          "kind": "function",
+          "doc": "renameFolder(path: string, newPath: string): Folder;",
+          "signature": "renameFolder(path: string, newPath: string): Folder;"
+        },
+        {
+          "name": "renameFolderAsync",
+          "kind": "function",
+          "doc": "renameFolderAsync(path: string, newPath: string): Promise<Folder>;",
+          "signature": "renameFolderAsync(path: string, newPath: string): Promise<Folder>;"
+        },
+        {
+          "name": "fetch",
+          "kind": "function",
+          "doc": "fetch(options?: FetchOptions): Message[];",
+          "signature": "fetch(options?: FetchOptions): Message[];"
+        },
+        {
+          "name": "fetchAsync",
+          "kind": "function",
+          "doc": "fetchAsync(options?: FetchOptions): Promise<Message[]>;",
+          "signature": "fetchAsync(options?: FetchOptions): Promise<Message[]>;"
+        },
+        {
+          "name": "search",
+          "kind": "function",
+          "doc": "search(query: SearchQuery, options?: SearchOptions): SearchResult;",
+          "signature": "search(query: SearchQuery, options?: SearchOptions): SearchResult;"
+        },
+        {
+          "name": "searchAsync",
+          "kind": "function",
+          "doc": "searchAsync(query: SearchQuery, options?: SearchOptions): Promise<SearchResult>;",
+          "signature": "searchAsync(query: SearchQuery, options?: SearchOptions): Promise<SearchResult>;"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "doc": "get(uid: MessageRef, options?: GetOptions): Message;",
+          "signature": "get(uid: MessageRef, options?: GetOptions): Message;"
+        },
+        {
+          "name": "getAsync",
+          "kind": "function",
+          "doc": "getAsync(uid: MessageRef, options?: GetOptions): Promise<Message>;",
+          "signature": "getAsync(uid: MessageRef, options?: GetOptions): Promise<Message>;"
+        },
+        {
+          "name": "fetchBody",
+          "kind": "function",
+          "doc": "fetchBody(uid: MessageRef, options?: GetOptions): Message;",
+          "signature": "fetchBody(uid: MessageRef, options?: GetOptions): Message;"
+        },
+        {
+          "name": "fetchBodyAsync",
+          "kind": "function",
+          "doc": "fetchBodyAsync(uid: MessageRef, options?: GetOptions): Promise<Message>;",
+          "signature": "fetchBodyAsync(uid: MessageRef, options?: GetOptions): Promise<Message>;"
+        },
+        {
+          "name": "download",
+          "kind": "function",
+          "doc": "download(attachment: AttachmentRef, target?: string, options?: DownloadOptions): string;",
+          "signature": "download(attachment: AttachmentRef, target?: string, options?: DownloadOptions): string;"
+        },
+        {
+          "name": "downloadAsync",
+          "kind": "function",
+          "doc": "downloadAsync(attachment: AttachmentRef, target?: string, options?: DownloadAsyncOptions): Promise<string>;",
+          "signature": "downloadAsync(attachment: AttachmentRef, target?: string, options?: DownloadAsyncOptions): Promise<string>;"
+        },
+        {
+          "name": "raw",
+          "kind": "function",
+          "doc": "raw(uid: MessageRef, target?: string, options?: DownloadOptions): string;",
+          "signature": "raw(uid: MessageRef, target?: string, options?: DownloadOptions): string;"
+        },
+        {
+          "name": "rawAsync",
+          "kind": "function",
+          "doc": "rawAsync(uid: MessageRef, target?: string, options?: DownloadAsyncOptions): Promise<string>;",
+          "signature": "rawAsync(uid: MessageRef, target?: string, options?: DownloadAsyncOptions): Promise<string>;"
+        },
+        {
+          "name": "setFlags",
+          "kind": "function",
+          "doc": "setFlags(uids: MessageRefs, flags: FlagName | FlagName[], mode?: FlagMode, options?: FolderOptions): Uid[];",
+          "signature": "setFlags(uids: MessageRefs, flags: FlagName | FlagName[], mode?: FlagMode, options?: FolderOptions): Uid[];"
+        },
+        {
+          "name": "setFlagsAsync",
+          "kind": "function",
+          "doc": "setFlagsAsync(uids: MessageRefs, flags: FlagName | FlagName[], mode?: FlagMode, options?: FolderOptions): Promise<Uid[]>;",
+          "signature": "setFlagsAsync(uids: MessageRefs, flags: FlagName | FlagName[], mode?: FlagMode, options?: FolderOptions): Promise<Uid[]>;"
+        },
+        {
+          "name": "markRead",
+          "kind": "function",
+          "doc": "markRead(uids: MessageRefs, options?: FolderOptions): Uid[];",
+          "signature": "markRead(uids: MessageRefs, options?: FolderOptions): Uid[];"
+        },
+        {
+          "name": "markReadAsync",
+          "kind": "function",
+          "doc": "markReadAsync(uids: MessageRefs, options?: FolderOptions): Promise<Uid[]>;",
+          "signature": "markReadAsync(uids: MessageRefs, options?: FolderOptions): Promise<Uid[]>;"
+        },
+        {
+          "name": "markUnread",
+          "kind": "function",
+          "doc": "markUnread(uids: MessageRefs, options?: FolderOptions): Uid[];",
+          "signature": "markUnread(uids: MessageRefs, options?: FolderOptions): Uid[];"
+        },
+        {
+          "name": "markUnreadAsync",
+          "kind": "function",
+          "doc": "markUnreadAsync(uids: MessageRefs, options?: FolderOptions): Promise<Uid[]>;",
+          "signature": "markUnreadAsync(uids: MessageRefs, options?: FolderOptions): Promise<Uid[]>;"
+        },
+        {
+          "name": "flag",
+          "kind": "function",
+          "doc": "flag(uids: MessageRefs, options?: FolderOptions): Uid[];",
+          "signature": "flag(uids: MessageRefs, options?: FolderOptions): Uid[];"
+        },
+        {
+          "name": "flagAsync",
+          "kind": "function",
+          "doc": "flagAsync(uids: MessageRefs, options?: FolderOptions): Promise<Uid[]>;",
+          "signature": "flagAsync(uids: MessageRefs, options?: FolderOptions): Promise<Uid[]>;"
+        },
+        {
+          "name": "unflag",
+          "kind": "function",
+          "doc": "unflag(uids: MessageRefs, options?: FolderOptions): Uid[];",
+          "signature": "unflag(uids: MessageRefs, options?: FolderOptions): Uid[];"
+        },
+        {
+          "name": "unflagAsync",
+          "kind": "function",
+          "doc": "unflagAsync(uids: MessageRefs, options?: FolderOptions): Promise<Uid[]>;",
+          "signature": "unflagAsync(uids: MessageRefs, options?: FolderOptions): Promise<Uid[]>;"
+        },
+        {
+          "name": "move",
+          "kind": "function",
+          "doc": "move(uids: MessageRefs, folder: string, options?: TransferOptions): number[] | true;",
+          "signature": "move(uids: MessageRefs, folder: string, options?: TransferOptions): number[] | true;"
+        },
+        {
+          "name": "moveAsync",
+          "kind": "function",
+          "doc": "moveAsync(uids: MessageRefs, folder: string, options?: TransferOptions): Promise<number[] | true>;",
+          "signature": "moveAsync(uids: MessageRefs, folder: string, options?: TransferOptions): Promise<number[] | true>;"
+        },
+        {
+          "name": "copy",
+          "kind": "function",
+          "doc": "copy(uids: MessageRefs, folder: string, options?: TransferOptions): number[] | true;",
+          "signature": "copy(uids: MessageRefs, folder: string, options?: TransferOptions): number[] | true;"
+        },
+        {
+          "name": "copyAsync",
+          "kind": "function",
+          "doc": "copyAsync(uids: MessageRefs, folder: string, options?: TransferOptions): Promise<number[] | true>;",
+          "signature": "copyAsync(uids: MessageRefs, folder: string, options?: TransferOptions): Promise<number[] | true>;"
+        },
+        {
+          "name": "delete",
+          "kind": "function",
+          "doc": "delete(uids: MessageRefs, options?: DeleteOptions): Uid[];",
+          "signature": "delete(uids: MessageRefs, options?: DeleteOptions): Uid[];"
+        },
+        {
+          "name": "deleteAsync",
+          "kind": "function",
+          "doc": "deleteAsync(uids: MessageRefs, options?: DeleteOptions): Promise<Uid[]>;",
+          "signature": "deleteAsync(uids: MessageRefs, options?: DeleteOptions): Promise<Uid[]>;"
+        },
+        {
+          "name": "expunge",
+          "kind": "function",
+          "doc": "expunge(folder?: string): number;",
+          "signature": "expunge(folder?: string): number;"
+        },
+        {
+          "name": "expungeAsync",
+          "kind": "function",
+          "doc": "expungeAsync(folder?: string): Promise<number>;",
+          "signature": "expungeAsync(folder?: string): Promise<number>;"
+        },
+        {
+          "name": "append",
+          "kind": "function",
+          "doc": "append(folder: string, message: SendMessage, flags?: FlagName | FlagName[]): number | null;",
+          "signature": "append(folder: string, message: SendMessage, flags?: FlagName | FlagName[]): number | null;"
+        },
+        {
+          "name": "appendAsync",
+          "kind": "function",
+          "doc": "appendAsync(folder: string, message: SendMessage, flags?: FlagName | FlagName[]): Promise<number | null>;",
+          "signature": "appendAsync(folder: string, message: SendMessage, flags?: FlagName | FlagName[]): Promise<number | null>;"
+        },
+        {
+          "name": "watch",
+          "kind": "function",
+          "doc": "watch(folder?: string, options?: WatchOptions): Watch;",
+          "signature": "watch(folder?: string, options?: WatchOptions): Watch;",
+          "signatures": [
+            "watch(folder?: string, options?: WatchOptions): Watch;",
+            "watch(options: WatchOptions): Watch;"
+          ]
+        }
+      ]
+    },
+    "mail.accounts": {
+      "doc": "AutoJs6 mail.accounts API",
+      "members": [
+        {
+          "name": "list",
+          "kind": "function",
+          "doc": "list(): SavedAccount[];",
+          "signature": "list(): SavedAccount[];"
+        },
+        {
+          "name": "has",
+          "kind": "function",
+          "doc": "has(alias: string): boolean;",
+          "signature": "has(alias: string): boolean;"
+        }
+      ]
+    },
+    "mail.MailError": {
+      "doc": "AutoJs6 mail.MailError API",
+      "members": [
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: MailError;",
+          "signature": "prototype: MailError;"
+        }
+      ]
+    },
+    "mail.providers": {
+      "doc": "AutoJs6 mail.providers API",
+      "members": [
+        {
+          "name": "list",
+          "kind": "function",
+          "doc": "list(): Provider[];",
+          "signature": "list(): Provider[];"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "doc": "get(id: string): Provider | null;",
+          "signature": "get(id: string): Provider | null;"
+        },
+        {
+          "name": "resolve",
+          "kind": "function",
+          "doc": "resolve(address: string): Provider | null;",
+          "signature": "resolve(address: string): Provider | null;"
         }
       ]
     },
     "Mathx": {
       "doc": "AutoJs6 Mathx API",
       "members": [
+        {
+          "name": "randomInt",
+          "kind": "function",
+          "doc": "randomInt(...range: Mathx.NumberInput[]): number;",
+          "signature": "randomInt(...range: Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "randomFloat",
+          "kind": "function",
+          "doc": "randomFloat(...range: Mathx.NumberInput[]): number;",
+          "signature": "randomFloat(...range: Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "random",
+          "kind": "function",
+          "doc": "random(...range: Mathx.NumberInput[]): number;",
+          "signature": "random(...range: Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "randFloat",
+          "kind": "function",
+          "doc": "randFloat(...range: Mathx.NumberInput[]): number;",
+          "signature": "randFloat(...range: Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "mean",
+          "kind": "function",
+          "doc": "mean(...values: Mathx.NumberInput[]): number;",
+          "signature": "mean(...values: Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "mode",
+          "kind": "function",
+          "doc": "mode(...values: Mathx.NumberInput[]): number;",
+          "signature": "mode(...values: Mathx.NumberInput[]): number;"
+        },
         {
           "name": "randInt",
           "kind": "function",
@@ -25564,6 +27977,55 @@
         }
       ]
     },
+    "notice.channel": {
+      "doc": "AutoJs6 notice.channel API",
+      "members": [
+        {
+          "name": "create",
+          "kind": "function",
+          "doc": "create(channelId: Options.Id | null | undefined, options?: Notice.Channel.Options): string;",
+          "signature": "create(channelId: Options.Id | null | undefined, options?: Notice.Channel.Options): string;",
+          "signatures": [
+            "create(channelId: Options.Id | null | undefined, options?: Notice.Channel.Options): string;",
+            "create(options?: Notice.Channel.Options): string;"
+          ]
+        },
+        {
+          "name": "createIfNeeded",
+          "kind": "function",
+          "doc": "createIfNeeded(channelId: Options.Id | null | undefined, options?: Notice.Channel.Options): void;",
+          "signature": "createIfNeeded(channelId: Options.Id | null | undefined, options?: Notice.Channel.Options): void;",
+          "signatures": [
+            "createIfNeeded(channelId: Options.Id | null | undefined, options?: Notice.Channel.Options): void;",
+            "createIfNeeded(options?: Notice.Channel.Options): void;"
+          ]
+        },
+        {
+          "name": "remove",
+          "kind": "function",
+          "doc": "remove(channelId: Options.Id | null | undefined): boolean;",
+          "signature": "remove(channelId: Options.Id | null | undefined): boolean;"
+        },
+        {
+          "name": "contains",
+          "kind": "function",
+          "doc": "contains(channelId: Options.Id | null | undefined): boolean;",
+          "signature": "contains(channelId: Options.Id | null | undefined): boolean;"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "doc": "get(channelId: Options.Id | null | undefined): android.app.NotificationChannel | null;",
+          "signature": "get(channelId: Options.Id | null | undefined): android.app.NotificationChannel | null;"
+        },
+        {
+          "name": "getAll",
+          "kind": "function",
+          "doc": "getAll(): android.app.NotificationChannel[];",
+          "signature": "getAll(): android.app.NotificationChannel[];"
+        }
+      ]
+    },
     "Numberx": {
       "doc": "AutoJs6 Numberx API",
       "members": [
@@ -25576,14 +28038,26 @@
         {
           "name": "ensureNumber",
           "kind": "function",
-          "doc": "ensureNumber(...o: any[]);",
-          "signature": "ensureNumber(...o: any[]);"
+          "doc": "ensureNumber(...o: unknown[]): void;",
+          "signature": "ensureNumber(...o: unknown[]): void;"
+        },
+        {
+          "name": "ensureNumberLike",
+          "kind": "function",
+          "doc": "ensureNumberLike(value: number | string, allowNaN?: boolean): number;",
+          "signature": "ensureNumberLike(value: number | string, allowNaN?: boolean): number;"
+        },
+        {
+          "name": "ensureNumbersLike",
+          "kind": "function",
+          "doc": "ensureNumbersLike(values: readonly (number | string)[], allowNaN?: boolean, containsNaN?: boolean): number[];",
+          "signature": "ensureNumbersLike(values: readonly (number | string)[], allowNaN?: boolean, containsNaN?: boolean): number[];"
         },
         {
           "name": "check",
           "kind": "function",
-          "doc": "check(...numOrOpr: (number | '<' | '<=' | '>' | '>=' | '=')[]): boolean;",
-          "signature": "check(...numOrOpr: (number | '<' | '<=' | '>' | '>=' | '=')[]): boolean;"
+          "doc": "check(...numOrOpr: (number | '<' | '<=' | '>' | '>=' | '=' | '==' | '!=' | '<>')[]): boolean;",
+          "signature": "check(...numOrOpr: (number | '<' | '<=' | '>' | '>=' | '=' | '==' | '!=' | '<>')[]): boolean;"
         },
         {
           "name": "clamp",
@@ -25703,6 +28177,99 @@
           "kind": "function",
           "doc": "summary(): string;",
           "signature": "summary(): string;"
+        },
+        {
+          "name": "toString",
+          "kind": "function",
+          "doc": "toString(): string;",
+          "signature": "toString(): string;"
+        }
+      ]
+    },
+    "ocr.mlkit": {
+      "doc": "AutoJs6 ocr.mlkit API",
+      "members": [
+        {
+          "name": "recognizeText",
+          "kind": "function",
+          "doc": "recognizeText(options?: DetectOptionsMLKit): string[];",
+          "signature": "recognizeText(options?: DetectOptionsMLKit): string[];",
+          "signatures": [
+            "recognizeText(options?: DetectOptionsMLKit): string[];",
+            "recognizeText(region: OmniRegion): string[];",
+            "recognizeText(img: ImageWrapper | string, options?: DetectOptionsMLKit): string[];",
+            "recognizeText(img: ImageWrapper | string, region: OmniRegion): string[];"
+          ]
+        },
+        {
+          "name": "detect",
+          "kind": "function",
+          "doc": "detect(options?: DetectOptionsMLKit): org.autojs.autojs.runtime.api.OcrResult[];",
+          "signature": "detect(options?: DetectOptionsMLKit): org.autojs.autojs.runtime.api.OcrResult[];",
+          "signatures": [
+            "detect(options?: DetectOptionsMLKit): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(img: ImageWrapper | string, options?: DetectOptionsMLKit): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(img: ImageWrapper | string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];"
+          ]
+        }
+      ]
+    },
+    "ocr.paddle": {
+      "doc": "AutoJs6 ocr.paddle API",
+      "members": [
+        {
+          "name": "recognizeText",
+          "kind": "function",
+          "doc": "recognizeText(options?: DetectOptionsPaddle): string[];",
+          "signature": "recognizeText(options?: DetectOptionsPaddle): string[];",
+          "signatures": [
+            "recognizeText(options?: DetectOptionsPaddle): string[];",
+            "recognizeText(region: OmniRegion): string[];",
+            "recognizeText(img: ImageWrapper | string, options?: DetectOptionsPaddle): string[];",
+            "recognizeText(img: ImageWrapper | string, region: OmniRegion): string[];"
+          ]
+        },
+        {
+          "name": "detect",
+          "kind": "function",
+          "doc": "detect(options?: DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];",
+          "signature": "detect(options?: DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];",
+          "signatures": [
+            "detect(options?: DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(img: ImageWrapper | string, options?: DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(img: ImageWrapper | string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];"
+          ]
+        }
+      ]
+    },
+    "ocr.rapid": {
+      "doc": "AutoJs6 ocr.rapid API",
+      "members": [
+        {
+          "name": "recognizeText",
+          "kind": "function",
+          "doc": "recognizeText(options?: DetectOptionsRapid): string[];",
+          "signature": "recognizeText(options?: DetectOptionsRapid): string[];",
+          "signatures": [
+            "recognizeText(options?: DetectOptionsRapid): string[];",
+            "recognizeText(region: OmniRegion): string[];",
+            "recognizeText(img: ImageWrapper | string, options?: DetectOptionsRapid): string[];",
+            "recognizeText(img: ImageWrapper | string, region: OmniRegion): string[];"
+          ]
+        },
+        {
+          "name": "detect",
+          "kind": "function",
+          "doc": "detect(options?: DetectOptionsRapid): org.autojs.autojs.runtime.api.OcrResult[];",
+          "signature": "detect(options?: DetectOptionsRapid): org.autojs.autojs.runtime.api.OcrResult[];",
+          "signatures": [
+            "detect(options?: DetectOptionsRapid): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(img: ImageWrapper | string, options?: DetectOptionsRapid): org.autojs.autojs.runtime.api.OcrResult[];",
+            "detect(img: ImageWrapper | string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];"
+          ]
         }
       ]
     },
@@ -25909,6 +28476,133 @@
         }
       ]
     },
+    "Packages": {
+      "doc": "AutoJs6 Packages API",
+      "members": [
+        {
+          "name": "android",
+          "kind": "variable",
+          "doc": "android: typeof android;",
+          "signature": "android: typeof android;"
+        },
+        {
+          "name": "androidx",
+          "kind": "variable",
+          "doc": "androidx: typeof androidx;",
+          "signature": "androidx: typeof androidx;"
+        },
+        {
+          "name": "java",
+          "kind": "variable",
+          "doc": "java: typeof java;",
+          "signature": "java: typeof java;"
+        },
+        {
+          "name": "javax",
+          "kind": "variable",
+          "doc": "javax: typeof javax;",
+          "signature": "javax: typeof javax;"
+        },
+        {
+          "name": "org",
+          "kind": "variable",
+          "doc": "org: typeof org;",
+          "signature": "org: typeof org;"
+        },
+        {
+          "name": "com",
+          "kind": "variable",
+          "doc": "com: typeof com;",
+          "signature": "com: typeof com;"
+        },
+        {
+          "name": "net",
+          "kind": "variable",
+          "doc": "net: typeof net;",
+          "signature": "net: typeof net;"
+        },
+        {
+          "name": "de",
+          "kind": "variable",
+          "doc": "de: org.mozilla.javascript.NativeJavaPackage;",
+          "signature": "de: org.mozilla.javascript.NativeJavaPackage;"
+        },
+        {
+          "name": "okio",
+          "kind": "variable",
+          "doc": "okio: typeof okio;",
+          "signature": "okio: typeof okio;"
+        },
+        {
+          "name": "ezy",
+          "kind": "variable",
+          "doc": "ezy: typeof ezy;",
+          "signature": "ezy: typeof ezy;"
+        },
+        {
+          "name": "kotlin",
+          "kind": "variable",
+          "doc": "kotlin: typeof kotlin;",
+          "signature": "kotlin: typeof kotlin;"
+        },
+        {
+          "name": "okhttp3",
+          "kind": "variable",
+          "doc": "okhttp3: typeof okhttp3;",
+          "signature": "okhttp3: typeof okhttp3;"
+        },
+        {
+          "name": "io",
+          "kind": "variable",
+          "doc": "io: typeof io;",
+          "signature": "io: typeof io;"
+        }
+      ]
+    },
+    "Packages.android": {
+      "doc": "AutoJs6 Packages.android API",
+      "members": [
+        {
+          "name": "view",
+          "kind": "variable",
+          "doc": "view: typeof view;",
+          "signature": "view: typeof view;"
+        }
+      ]
+    },
+    "Packages.org": {
+      "doc": "AutoJs6 Packages.org API",
+      "members": [
+        {
+          "name": "autojs",
+          "kind": "variable",
+          "doc": "autojs: typeof org.autojs;",
+          "signature": "autojs: typeof org.autojs;"
+        }
+      ]
+    },
+    "Packages.org.autojs": {
+      "doc": "AutoJs6 Packages.org.autojs API",
+      "members": [
+        {
+          "name": "autojs",
+          "kind": "variable",
+          "doc": "autojs: typeof autojs;",
+          "signature": "autojs: typeof autojs;"
+        }
+      ]
+    },
+    "Packages.org.autojs.autojs": {
+      "doc": "AutoJs6 Packages.org.autojs.autojs API",
+      "members": [
+        {
+          "name": "util",
+          "kind": "variable",
+          "doc": "util: typeof util;",
+          "signature": "util: typeof util;"
+        }
+      ]
+    },
     "pangu": {
       "doc": "AutoJs6 Pangu API",
       "members": [
@@ -26033,6 +28727,296 @@
         }
       ]
     },
+    "pinyin.MODE_NORMAL": {
+      "doc": "AutoJs6 pinyin.MODE_NORMAL API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.ModeValue;",
+          "signature": "value: Pinyin.ModeValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.ModeValue;",
+          "signature": "getValue(): Pinyin.ModeValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.MODE_PLACE_NAME": {
+      "doc": "AutoJs6 pinyin.MODE_PLACE_NAME API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.ModeValue;",
+          "signature": "value: Pinyin.ModeValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.ModeValue;",
+          "signature": "getValue(): Pinyin.ModeValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.MODE_PLACENAME": {
+      "doc": "AutoJs6 pinyin.MODE_PLACENAME API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.ModeValue;",
+          "signature": "value: Pinyin.ModeValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.ModeValue;",
+          "signature": "getValue(): Pinyin.ModeValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.MODE_SURNAME": {
+      "doc": "AutoJs6 pinyin.MODE_SURNAME API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.ModeValue;",
+          "signature": "value: Pinyin.ModeValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.ModeValue;",
+          "signature": "getValue(): Pinyin.ModeValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.STYLE_FIRST_LETTER": {
+      "doc": "AutoJs6 pinyin.STYLE_FIRST_LETTER API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.StyleValue;",
+          "signature": "value: Pinyin.StyleValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.StyleValue;",
+          "signature": "getValue(): Pinyin.StyleValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.STYLE_INITIALS": {
+      "doc": "AutoJs6 pinyin.STYLE_INITIALS API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.StyleValue;",
+          "signature": "value: Pinyin.StyleValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.StyleValue;",
+          "signature": "getValue(): Pinyin.StyleValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.STYLE_NORMAL": {
+      "doc": "AutoJs6 pinyin.STYLE_NORMAL API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.StyleValue;",
+          "signature": "value: Pinyin.StyleValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.StyleValue;",
+          "signature": "getValue(): Pinyin.StyleValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.STYLE_TO3NE": {
+      "doc": "AutoJs6 pinyin.STYLE_TO3NE API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.StyleValue;",
+          "signature": "value: Pinyin.StyleValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.StyleValue;",
+          "signature": "getValue(): Pinyin.StyleValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.STYLE_TONE": {
+      "doc": "AutoJs6 pinyin.STYLE_TONE API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.StyleValue;",
+          "signature": "value: Pinyin.StyleValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.StyleValue;",
+          "signature": "getValue(): Pinyin.StyleValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
+    "pinyin.STYLE_TONE2": {
+      "doc": "AutoJs6 pinyin.STYLE_TONE2 API",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "doc": "value: Pinyin.StyleValue;",
+          "signature": "value: Pinyin.StyleValue;"
+        },
+        {
+          "name": "getValue",
+          "kind": "function",
+          "doc": "getValue(): Pinyin.StyleValue;",
+          "signature": "getValue(): Pinyin.StyleValue;"
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "doc": "name(): string;",
+          "signature": "name(): string;"
+        },
+        {
+          "name": "ordinal",
+          "kind": "function",
+          "doc": "ordinal(): number;",
+          "signature": "ordinal(): number;"
+        }
+      ]
+    },
     "pinyin4j": {
       "doc": "AutoJs6 Pinyin4j API",
       "members": [
@@ -26047,6 +29031,12 @@
           "kind": "function",
           "doc": "readings(source: string, options?: Pinyin4j.ReadingsOptions): Pinyin4j.Matrix;",
           "signature": "readings(source: string, options?: Pinyin4j.ReadingsOptions): Pinyin4j.Matrix;"
+        },
+        {
+          "name": "as",
+          "kind": "function",
+          "doc": "as(source: string): string;",
+          "signature": "as(source: string): string;"
         }
       ]
     },
@@ -26076,6 +29066,23 @@
           "kind": "function",
           "doc": "load(name: string): any;",
           "signature": "load(name: string): any;"
+        }
+      ]
+    },
+    "plugins.extend": {
+      "doc": "AutoJs6 plugins.extend API",
+      "members": [
+        {
+          "name": "exclude",
+          "kind": "function",
+          "doc": "exclude(...names: ExtensionName[]): void;",
+          "signature": "exclude(...names: ExtensionName[]): void;"
+        },
+        {
+          "name": "registerModule",
+          "kind": "function",
+          "doc": "registerModule(module: Record<string, { extendJsBuildInObjects(): void; }>): void;",
+          "signature": "registerModule(module: Record<string, { extendJsBuildInObjects(): void; }>): void;"
         }
       ]
     },
@@ -26734,27 +29741,28 @@
         {
           "name": "register",
           "kind": "function",
-          "doc": "register(sensorName: string, delay?: number): org.autojs.autojs.runtime.api.Sensors.SensorEventEmitter;",
-          "signature": "register(sensorName: string, delay?: number): org.autojs.autojs.runtime.api.Sensors.SensorEventEmitter;",
+          "doc": "register(sensorName: 'light', delay?: number): Sensors.Light | null;",
+          "signature": "register(sensorName: 'light', delay?: number): Sensors.Light | null;",
           "signatures": [
-            "register(sensorName: string, delay?: number): org.autojs.autojs.runtime.api.Sensors.SensorEventEmitter;",
-            "register(sensorName: 'light', delay?: number): Sensors.Light;",
-            "register(sensorName: 'accelerometer', delay?: number): Sensors.Accelerometer;",
-            "register(sensorName: 'ambient_temperature', delay?: number): Sensors.AmbientTemperature;",
-            "register(sensorName: 'gravity', delay?: number): Sensors.Gravity;",
-            "register(sensorName: 'gyroscope', delay?: number): Sensors.Gyroscope;",
-            "register(sensorName: 'linear_acceleration', delay?: number): Sensors.LinearAcceleration;",
-            "register(sensorName: 'magnetic_field', delay?: number): Sensors.MagneticField;",
-            "register(sensorName: 'orientation', delay?: number): Sensors.Orientation;",
-            "register(sensorName: 'pressure', delay?: number): Sensors.Pressure;",
-            "register(sensorName: 'proximity', delay?: number): Sensors.Proximity;",
-            "register(sensorName: 'relative_humidity', delay?: number): Sensors.RelativeHumidity;"
+            "register(sensorName: 'light', delay?: number): Sensors.Light | null;",
+            "register(sensorName: 'accelerometer', delay?: number): Sensors.Accelerometer | null;",
+            "register(sensorName: 'ambient_temperature', delay?: number): Sensors.AmbientTemperature | null;",
+            "register(sensorName: 'gravity', delay?: number): Sensors.Gravity | null;",
+            "register(sensorName: 'gyroscope', delay?: number): Sensors.Gyroscope | null;",
+            "register(sensorName: 'linear_acceleration', delay?: number): Sensors.LinearAcceleration | null;",
+            "register(sensorName: 'magnetic_field', delay?: number): Sensors.MagneticField | null;",
+            "register(sensorName: 'orientation', delay?: number): Sensors.Orientation | null;",
+            "register(sensorName: 'pressure', delay?: number): Sensors.Pressure | null;",
+            "register(sensorName: 'proximity', delay?: number): Sensors.Proximity | null;",
+            "register(sensorName: 'relative_humidity', delay?: number): Sensors.RelativeHumidity | null;",
+            "register(sensorName: string, delay?: number): Sensors.EventEmitter | null;"
           ]
         },
         {
           "name": "unregister",
           "kind": "function",
-          "doc": ""
+          "doc": "unregister(emitter: Sensors.EventEmitter | null): void;",
+          "signature": "unregister(emitter: Sensors.EventEmitter | null): void;"
         },
         {
           "name": "unregisterAll",
@@ -26895,6 +29903,268 @@
           "kind": "function",
           "doc": "currentComponent(): string;",
           "signature": "currentComponent(): string;"
+        }
+      ]
+    },
+    "shizuku.state": {
+      "doc": "AutoJs6 shizuku.state API",
+      "members": [
+        {
+          "name": "isInstalled",
+          "kind": "variable",
+          "doc": "isInstalled: boolean;",
+          "signature": "isInstalled: boolean;"
+        },
+        {
+          "name": "hasService",
+          "kind": "variable",
+          "doc": "hasService: boolean;",
+          "signature": "hasService: boolean;"
+        },
+        {
+          "name": "isRunning",
+          "kind": "variable",
+          "doc": "isRunning: boolean;",
+          "signature": "isRunning: boolean;"
+        },
+        {
+          "name": "hasPermission",
+          "kind": "variable",
+          "doc": "hasPermission: boolean;",
+          "signature": "hasPermission: boolean;"
+        },
+        {
+          "name": "isOperational",
+          "kind": "variable",
+          "doc": "isOperational: boolean;",
+          "signature": "isOperational: boolean;"
+        }
+      ]
+    },
+    "species": {
+      "doc": "AutoJs6 species API",
+      "members": [
+        {
+          "name": "isArray",
+          "kind": "function",
+          "doc": "isArray(o: any): boolean;",
+          "signature": "isArray(o: any): boolean;"
+        },
+        {
+          "name": "isArrayBuffer",
+          "kind": "function",
+          "doc": "isArrayBuffer(o: any): boolean;",
+          "signature": "isArrayBuffer(o: any): boolean;"
+        },
+        {
+          "name": "isBigInt",
+          "kind": "function",
+          "doc": "isBigInt(o: any): boolean;",
+          "signature": "isBigInt(o: any): boolean;"
+        },
+        {
+          "name": "isBoolean",
+          "kind": "function",
+          "doc": "isBoolean(o: any): boolean;",
+          "signature": "isBoolean(o: any): boolean;"
+        },
+        {
+          "name": "isContinuation",
+          "kind": "function",
+          "doc": "isContinuation(o: any): boolean;",
+          "signature": "isContinuation(o: any): boolean;"
+        },
+        {
+          "name": "isDataView",
+          "kind": "function",
+          "doc": "isDataView(o: any): boolean;",
+          "signature": "isDataView(o: any): boolean;"
+        },
+        {
+          "name": "isDate",
+          "kind": "function",
+          "doc": "isDate(o: any): boolean;",
+          "signature": "isDate(o: any): boolean;"
+        },
+        {
+          "name": "isError",
+          "kind": "function",
+          "doc": "isError(o: any): boolean;",
+          "signature": "isError(o: any): boolean;"
+        },
+        {
+          "name": "isFloat32Array",
+          "kind": "function",
+          "doc": "isFloat32Array(o: any): boolean;",
+          "signature": "isFloat32Array(o: any): boolean;"
+        },
+        {
+          "name": "isFloat64Array",
+          "kind": "function",
+          "doc": "isFloat64Array(o: any): boolean;",
+          "signature": "isFloat64Array(o: any): boolean;"
+        },
+        {
+          "name": "isFunction",
+          "kind": "function",
+          "doc": "isFunction(o: any): boolean;",
+          "signature": "isFunction(o: any): boolean;"
+        },
+        {
+          "name": "isHTMLDocument",
+          "kind": "function",
+          "doc": "isHTMLDocument(o: any): boolean;",
+          "signature": "isHTMLDocument(o: any): boolean;"
+        },
+        {
+          "name": "isInt16Array",
+          "kind": "function",
+          "doc": "isInt16Array(o: any): boolean;",
+          "signature": "isInt16Array(o: any): boolean;"
+        },
+        {
+          "name": "isInt32Array",
+          "kind": "function",
+          "doc": "isInt32Array(o: any): boolean;",
+          "signature": "isInt32Array(o: any): boolean;"
+        },
+        {
+          "name": "isInt8Array",
+          "kind": "function",
+          "doc": "isInt8Array(o: any): boolean;",
+          "signature": "isInt8Array(o: any): boolean;"
+        },
+        {
+          "name": "isJavaObject",
+          "kind": "function",
+          "doc": "isJavaObject(o: any): boolean;",
+          "signature": "isJavaObject(o: any): boolean;"
+        },
+        {
+          "name": "isJavaClass",
+          "kind": "function",
+          "doc": "isJavaClass(o: any): boolean;",
+          "signature": "isJavaClass(o: any): boolean;"
+        },
+        {
+          "name": "isJavaPackage",
+          "kind": "function",
+          "doc": "isJavaPackage(o: any): boolean;",
+          "signature": "isJavaPackage(o: any): boolean;"
+        },
+        {
+          "name": "isMap",
+          "kind": "function",
+          "doc": "isMap(o: any): boolean;",
+          "signature": "isMap(o: any): boolean;"
+        },
+        {
+          "name": "isNamespace",
+          "kind": "function",
+          "doc": "isNamespace(o: any): boolean;",
+          "signature": "isNamespace(o: any): boolean;"
+        },
+        {
+          "name": "isNull",
+          "kind": "function",
+          "doc": "isNull(o: any): boolean;",
+          "signature": "isNull(o: any): boolean;"
+        },
+        {
+          "name": "isNumber",
+          "kind": "function",
+          "doc": "isNumber(o: any): boolean;",
+          "signature": "isNumber(o: any): boolean;"
+        },
+        {
+          "name": "isObject",
+          "kind": "function",
+          "doc": "isObject(o: any): boolean;",
+          "signature": "isObject(o: any): boolean;"
+        },
+        {
+          "name": "isQName",
+          "kind": "function",
+          "doc": "isQName(o: any): boolean;",
+          "signature": "isQName(o: any): boolean;"
+        },
+        {
+          "name": "isRegExp",
+          "kind": "function",
+          "doc": "isRegExp(o: any): boolean;",
+          "signature": "isRegExp(o: any): boolean;"
+        },
+        {
+          "name": "isSet",
+          "kind": "function",
+          "doc": "isSet(o: any): boolean;",
+          "signature": "isSet(o: any): boolean;"
+        },
+        {
+          "name": "isString",
+          "kind": "function",
+          "doc": "isString(o: any): boolean;",
+          "signature": "isString(o: any): boolean;"
+        },
+        {
+          "name": "isUint16Array",
+          "kind": "function",
+          "doc": "isUint16Array(o: any): boolean;",
+          "signature": "isUint16Array(o: any): boolean;"
+        },
+        {
+          "name": "isUint32Array",
+          "kind": "function",
+          "doc": "isUint32Array(o: any): boolean;",
+          "signature": "isUint32Array(o: any): boolean;"
+        },
+        {
+          "name": "isUint8Array",
+          "kind": "function",
+          "doc": "isUint8Array(o: any): boolean;",
+          "signature": "isUint8Array(o: any): boolean;"
+        },
+        {
+          "name": "isUint8ClampedArray",
+          "kind": "function",
+          "doc": "isUint8ClampedArray(o: any): boolean;",
+          "signature": "isUint8ClampedArray(o: any): boolean;"
+        },
+        {
+          "name": "isUndefined",
+          "kind": "function",
+          "doc": "isUndefined(o: any): boolean;",
+          "signature": "isUndefined(o: any): boolean;"
+        },
+        {
+          "name": "isWeakMap",
+          "kind": "function",
+          "doc": "isWeakMap(o: any): boolean;",
+          "signature": "isWeakMap(o: any): boolean;"
+        },
+        {
+          "name": "isWeakSet",
+          "kind": "function",
+          "doc": "isWeakSet(o: any): boolean;",
+          "signature": "isWeakSet(o: any): boolean;"
+        },
+        {
+          "name": "isWindow",
+          "kind": "function",
+          "doc": "isWindow(o: any): boolean;",
+          "signature": "isWindow(o: any): boolean;"
+        },
+        {
+          "name": "isXML",
+          "kind": "function",
+          "doc": "isXML(o: any): boolean;",
+          "signature": "isXML(o: any): boolean;"
+        },
+        {
+          "name": "isXMLList",
+          "kind": "function",
+          "doc": "isXMLList(o: any): boolean;",
+          "signature": "isXMLList(o: any): boolean;"
         }
       ]
     },
@@ -27246,6 +30516,34 @@
         }
       ]
     },
+    "terminal.npm": {
+      "doc": "AutoJs6 terminal.npm API",
+      "members": [
+        {
+          "name": "run",
+          "kind": "function",
+          "doc": "run(script: string, directory?: string | null, options?: ExecOptions): Session;",
+          "signature": "run(script: string, directory?: string | null, options?: ExecOptions): Session;"
+        },
+        {
+          "name": "runAsync",
+          "kind": "function",
+          "doc": "runAsync(script: string, directory?: string | null, options?: ExecOptions): Promise<Session>;",
+          "signature": "runAsync(script: string, directory?: string | null, options?: ExecOptions): Promise<Session>;"
+        }
+      ]
+    },
+    "terminal.TerminalError": {
+      "doc": "AutoJs6 terminal.TerminalError API",
+      "members": [
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: Error;",
+          "signature": "prototype: Error;"
+        }
+      ]
+    },
     "threads": {
       "doc": "Thread helpers",
       "members": [
@@ -27276,8 +30574,8 @@
         {
           "name": "disposable",
           "kind": "function",
-          "doc": "disposable(): Threads.Disposable;",
-          "signature": "disposable(): Threads.Disposable;"
+          "doc": "disposable<T = unknown>(): Threads.Disposable<T>;",
+          "signature": "disposable<T = unknown>(): Threads.Disposable<T>;"
         },
         {
           "name": "currentThread",
@@ -27312,6 +30610,66 @@
           "kind": "function",
           "doc": "keepAlive(timeout?: number | null): number;",
           "signature": "keepAlive(timeout?: number | null): number;"
+        },
+        {
+          "name": "addDailyTask",
+          "kind": "function",
+          "doc": "addDailyTask<TResult = org.autojs.autojs.timing.TimedTask>(options: Tasks.TimedTask.Daily<TResult>): TimedTask$;",
+          "signature": "addDailyTask<TResult = org.autojs.autojs.timing.TimedTask>(options: Tasks.TimedTask.Daily<TResult>): TimedTask$;"
+        },
+        {
+          "name": "addWeeklyTask",
+          "kind": "function",
+          "doc": "addWeeklyTask<TResult = org.autojs.autojs.timing.TimedTask>(options: Tasks.TimedTask.Weekly<TResult>): TimedTask$;",
+          "signature": "addWeeklyTask<TResult = org.autojs.autojs.timing.TimedTask>(options: Tasks.TimedTask.Weekly<TResult>): TimedTask$;"
+        },
+        {
+          "name": "addDisposableTask",
+          "kind": "function",
+          "doc": "addDisposableTask<TResult = org.autojs.autojs.timing.TimedTask>(options: Tasks.TimedTask.Disposable<TResult>): TimedTask$;",
+          "signature": "addDisposableTask<TResult = org.autojs.autojs.timing.TimedTask>(options: Tasks.TimedTask.Disposable<TResult>): TimedTask$;"
+        },
+        {
+          "name": "addIntentTask",
+          "kind": "function",
+          "doc": "addIntentTask<TResult = org.autojs.autojs.timing.IntentTask>(options: Tasks.IntentTask.Basic<TResult>): IntentTask$;",
+          "signature": "addIntentTask<TResult = org.autojs.autojs.timing.IntentTask>(options: Tasks.IntentTask.Basic<TResult>): IntentTask$;"
+        },
+        {
+          "name": "getTimedTask",
+          "kind": "function",
+          "doc": "getTimedTask(id: number): TimedTask$ | null;",
+          "signature": "getTimedTask(id: number): TimedTask$ | null;"
+        },
+        {
+          "name": "getIntentTask",
+          "kind": "function",
+          "doc": "getIntentTask(id: number): IntentTask$ | null;",
+          "signature": "getIntentTask(id: number): IntentTask$ | null;"
+        },
+        {
+          "name": "removeIntentTask",
+          "kind": "function",
+          "doc": "removeIntentTask(id: number): boolean | null;",
+          "signature": "removeIntentTask(id: number): boolean | null;"
+        },
+        {
+          "name": "removeTimedTask",
+          "kind": "function",
+          "doc": "removeTimedTask(id: number): boolean | null;",
+          "signature": "removeTimedTask(id: number): boolean | null;"
+        },
+        {
+          "name": "queryIntentTasks",
+          "kind": "function",
+          "doc": "queryIntentTasks(options?: Tasks.Query.Intent): IntentTask$[];",
+          "signature": "queryIntentTasks(options?: Tasks.Query.Intent): IntentTask$[];"
+        },
+        {
+          "name": "queryTimedTasks",
+          "kind": "function",
+          "doc": "queryTimedTasks(options?: Tasks.Query.Timed): TimedTask$[];",
+          "signature": "queryTimedTasks(options?: Tasks.Query.Timed): TimedTask$[];"
         },
         {
           "name": "setTimeout",
@@ -27790,6 +31148,36 @@
       "doc": "AutoJs6 Util API",
       "members": [
         {
+          "name": "checkStringArgument",
+          "kind": "function",
+          "doc": "checkStringArgument(source: string | number | boolean, pattern: string | kotlin.text.Regex): boolean;",
+          "signature": "checkStringArgument(source: string | number | boolean, pattern: string | kotlin.text.Regex): boolean;"
+        },
+        {
+          "name": "dpToPx",
+          "kind": "function",
+          "doc": "dpToPx(value: number): number;",
+          "signature": "dpToPx(value: number): number;"
+        },
+        {
+          "name": "spToPx",
+          "kind": "function",
+          "doc": "spToPx(value: number): number;",
+          "signature": "spToPx(value: number): number;"
+        },
+        {
+          "name": "pxToDp",
+          "kind": "function",
+          "doc": "pxToDp(value: number): number;",
+          "signature": "pxToDp(value: number): number;"
+        },
+        {
+          "name": "pxToSp",
+          "kind": "function",
+          "doc": "pxToSp(value: number): number;",
+          "signature": "pxToSp(value: number): number;"
+        },
+        {
           "name": "version",
           "kind": "variable",
           "doc": "version: Util.Version;",
@@ -27818,6 +31206,12 @@
           "kind": "variable",
           "doc": "versionCodes: Util.VersionCodes;",
           "signature": "versionCodes: Util.VersionCodes;"
+        },
+        {
+          "name": "__assignFunctions__",
+          "kind": "function",
+          "doc": "__assignFunctions__(src: object, target: object, functions: string[]): void;",
+          "signature": "__assignFunctions__(src: object, target: object, functions: string[]): void;"
         },
         {
           "name": "isArray",
@@ -28115,6 +31509,299 @@
         }
       ]
     },
+    "util.inspect": {
+      "doc": "AutoJs6 util.inspect API",
+      "members": [
+        {
+          "name": "colors",
+          "kind": "variable",
+          "doc": "colors: { bold: [1, 22]; italic: [3, 23]; underline: [4, 24]; inverse: [7, 27]; white: [37, 39]; grey: [90, 39]; black: [30, 39]; blue: [34, 39]; cyan: [36, 39]; green: [32, 39]; magenta: [35, 39]; red: [31, 39]; yellow: [33, 39]; };",
+          "signature": "colors: { bold: [1, 22]; italic: [3, 23]; underline: [4, 24]; inverse: [7, 27]; white: [37, 39]; grey: [90, 39]; black: [30, 39]; blue: [34, 39]; cyan: [36, 39]; green: [32, 39]; magenta: [35, 39]; red: [31, 39]; yellow: [33, 39]; };"
+        },
+        {
+          "name": "styles",
+          "kind": "variable",
+          "doc": "styles: { special: \"cyan\"; number: \"yellow\"; boolean: \"yellow\"; undefined: \"grey\"; null: \"bold\"; string: \"green\"; date: \"magenta\"; regexp: \"red\"; };",
+          "signature": "styles: { special: \"cyan\"; number: \"yellow\"; boolean: \"yellow\"; undefined: \"grey\"; null: \"bold\"; string: \"green\"; date: \"magenta\"; regexp: \"red\"; };"
+        }
+      ]
+    },
+    "util.inspect.colors": {
+      "doc": "AutoJs6 util.inspect.colors API",
+      "members": [
+        {
+          "name": "bold",
+          "kind": "variable",
+          "doc": "bold: [1, 22];",
+          "signature": "bold: [1, 22];"
+        },
+        {
+          "name": "italic",
+          "kind": "variable",
+          "doc": "italic: [3, 23];",
+          "signature": "italic: [3, 23];"
+        },
+        {
+          "name": "underline",
+          "kind": "variable",
+          "doc": "underline: [4, 24];",
+          "signature": "underline: [4, 24];"
+        },
+        {
+          "name": "inverse",
+          "kind": "variable",
+          "doc": "inverse: [7, 27];",
+          "signature": "inverse: [7, 27];"
+        },
+        {
+          "name": "white",
+          "kind": "variable",
+          "doc": "white: [37, 39];",
+          "signature": "white: [37, 39];"
+        },
+        {
+          "name": "grey",
+          "kind": "variable",
+          "doc": "grey: [90, 39];",
+          "signature": "grey: [90, 39];"
+        },
+        {
+          "name": "black",
+          "kind": "variable",
+          "doc": "black: [30, 39];",
+          "signature": "black: [30, 39];"
+        },
+        {
+          "name": "blue",
+          "kind": "variable",
+          "doc": "blue: [34, 39];",
+          "signature": "blue: [34, 39];"
+        },
+        {
+          "name": "cyan",
+          "kind": "variable",
+          "doc": "cyan: [36, 39];",
+          "signature": "cyan: [36, 39];"
+        },
+        {
+          "name": "green",
+          "kind": "variable",
+          "doc": "green: [32, 39];",
+          "signature": "green: [32, 39];"
+        },
+        {
+          "name": "magenta",
+          "kind": "variable",
+          "doc": "magenta: [35, 39];",
+          "signature": "magenta: [35, 39];"
+        },
+        {
+          "name": "red",
+          "kind": "variable",
+          "doc": "red: [31, 39];",
+          "signature": "red: [31, 39];"
+        },
+        {
+          "name": "yellow",
+          "kind": "variable",
+          "doc": "yellow: [33, 39];",
+          "signature": "yellow: [33, 39];"
+        }
+      ]
+    },
+    "util.inspect.styles": {
+      "doc": "AutoJs6 util.inspect.styles API",
+      "members": [
+        {
+          "name": "special",
+          "kind": "variable",
+          "doc": "special: \"cyan\";",
+          "signature": "special: \"cyan\";"
+        },
+        {
+          "name": "number",
+          "kind": "variable",
+          "doc": "number: \"yellow\";",
+          "signature": "number: \"yellow\";"
+        },
+        {
+          "name": "boolean",
+          "kind": "variable",
+          "doc": "boolean: \"yellow\";",
+          "signature": "boolean: \"yellow\";"
+        },
+        {
+          "name": "undefined",
+          "kind": "variable",
+          "doc": "undefined: \"grey\";",
+          "signature": "undefined: \"grey\";"
+        },
+        {
+          "name": "null",
+          "kind": "variable",
+          "doc": "null: \"bold\";",
+          "signature": "null: \"bold\";"
+        },
+        {
+          "name": "string",
+          "kind": "variable",
+          "doc": "string: \"green\";",
+          "signature": "string: \"green\";"
+        },
+        {
+          "name": "date",
+          "kind": "variable",
+          "doc": "date: \"magenta\";",
+          "signature": "date: \"magenta\";"
+        },
+        {
+          "name": "regexp",
+          "kind": "variable",
+          "doc": "regexp: \"red\";",
+          "signature": "regexp: \"red\";"
+        }
+      ]
+    },
+    "util.java": {
+      "doc": "AutoJs6 util.java API",
+      "members": [
+        {
+          "name": "instanceof",
+          "kind": "function",
+          "doc": "instanceof(obj: any, clazz: java.lang.Class<any> | string | object): boolean;",
+          "signature": "instanceof(obj: any, clazz: java.lang.Class<any> | string | object): boolean;"
+        },
+        {
+          "name": "instanceOf",
+          "kind": "function",
+          "doc": "instanceOf(obj: any, clazz: java.lang.Class<any> | string | object): boolean;",
+          "signature": "instanceOf(obj: any, clazz: java.lang.Class<any> | string | object): boolean;"
+        },
+        {
+          "name": "array",
+          "kind": "function",
+          "doc": "array(type: Java.LangAbbr | java.lang.Class<any> | any, length: number): Array<java.lang.Integer | java.lang.Long | java.lang.Double | java.lang.Character | java.lang.Byte | java.lang.Float | java.lang.String | any>;",
+          "signature": "array(type: Java.LangAbbr | java.lang.Class<any> | any, length: number): Array<java.lang.Integer | java.lang.Long | java.lang.Double | java.lang.Character | java.lang.Byte | java.lang.Float | java.lang.String | any>;",
+          "signatures": [
+            "array(type: Java.LangAbbr | java.lang.Class<any> | any, length: number): Array<java.lang.Integer | java.lang.Long | java.lang.Double | java.lang.Character | java.lang.Byte | java.lang.Float | java.lang.String | any>;",
+            "array(type: Java.LangAbbr | java.lang.Class<any> | any, ...dimensions: number[]): Array<java.lang.Integer | java.lang.Long | java.lang.Double | java.lang.Character | java.lang.Byte | java.lang.Float | java.lang.String | any>;"
+          ]
+        },
+        {
+          "name": "toJsArray",
+          "kind": "function",
+          "doc": "toJsArray(list?: java.util.List<any>, nullListToEmptyArray?: boolean): any[];",
+          "signature": "toJsArray(list?: java.util.List<any>, nullListToEmptyArray?: boolean): any[];"
+        },
+        {
+          "name": "objectToMap",
+          "kind": "function",
+          "doc": "objectToMap(obj?: object): java.util.HashMap<any, any> | null;",
+          "signature": "objectToMap(obj?: object): java.util.HashMap<any, any> | null;"
+        },
+        {
+          "name": "mapToObject",
+          "kind": "function",
+          "doc": "mapToObject(map?: java.util.HashMap<any, any>): object | null;",
+          "signature": "mapToObject(map?: java.util.HashMap<any, any>): object | null;"
+        }
+      ]
+    },
+    "util.morseCode": {
+      "doc": "AutoJs6 util.morseCode API",
+      "members": [
+        {
+          "name": "getPattern",
+          "kind": "function",
+          "doc": "getPattern(text: string): number[];",
+          "signature": "getPattern(text: string): number[];"
+        },
+        {
+          "name": "getCode",
+          "kind": "function",
+          "doc": "getCode(text: string): string;",
+          "signature": "getCode(text: string): string;"
+        },
+        {
+          "name": "vibrate",
+          "kind": "function",
+          "doc": "vibrate(text: string, delay?: number): void;",
+          "signature": "vibrate(text: string, delay?: number): void;"
+        }
+      ]
+    },
+    "util.version": {
+      "doc": "AutoJs6 util.version API",
+      "members": [
+        {
+          "name": "sdkInt",
+          "kind": "variable",
+          "doc": "sdkInt: number;",
+          "signature": "sdkInt: number;"
+        }
+      ]
+    },
+    "util.versionCodes": {
+      "doc": "AutoJs6 util.versionCodes API",
+      "members": [
+        {
+          "name": "toString",
+          "kind": "function",
+          "doc": "toString(isInDetail?: VersionCodes.IsInDetail): string;",
+          "signature": "toString(isInDetail?: VersionCodes.IsInDetail): string;"
+        },
+        {
+          "name": "summary",
+          "kind": "function",
+          "doc": "summary(isInDetail?: VersionCodes.IsInDetail): string;",
+          "signature": "summary(isInDetail?: VersionCodes.IsInDetail): string;"
+        },
+        {
+          "name": "searchAll",
+          "kind": "function",
+          "doc": "searchAll(value: string | number | Date | null): VersionCodes.Info[];",
+          "signature": "searchAll(value: string | number | Date | null): VersionCodes.Info[];"
+        },
+        {
+          "name": "search",
+          "kind": "function",
+          "doc": "search(versionCode: VersionCodes.CodeName | string): VersionCodes.SearchResult;",
+          "signature": "search(versionCode: VersionCodes.CodeName | string): VersionCodes.SearchResult;",
+          "signatures": [
+            "search(versionCode: VersionCodes.CodeName | string): VersionCodes.SearchResult;",
+            "search(releaseName: string): VersionCodes.SearchResult;",
+            "search(internalCodename: string): VersionCodes.SearchResult;",
+            "search(platformVersion: string | number): VersionCodes.SearchResult;",
+            "search(apiLevel: number): VersionCodes.SearchResult;",
+            "search(releaseDate: Date): VersionCodes.SearchResult;",
+            "search(releaseYear: number | string): VersionCodes.SearchResult;",
+            "search(releaseMonth: string): VersionCodes.SearchResult;",
+            "search(releaseDay: string): VersionCodes.SearchResult;",
+            "search(releaseTimestamp: number): VersionCodes.SearchResult;"
+          ]
+        }
+      ]
+    },
+    "wait": {
+      "doc": "AutoJs6 wait API",
+      "members": [
+        {
+          "name": "async",
+          "kind": "function",
+          "doc": "async(cond: Flow<T = any>.SelectorCond, options: Flow.WaitOptions & { resultType: \"[]\"; }, onOk?: Flow.OnOk<UiObject[]>, onErr?: Flow.OnErr): Flow<UiObject[]>;",
+          "signature": "async(cond: Flow<T = any>.SelectorCond, options: Flow.WaitOptions & { resultType: \"[]\"; }, onOk?: Flow.OnOk<UiObject[]>, onErr?: Flow.OnErr): Flow<UiObject[]>;",
+          "signatures": [
+            "async(cond: Flow<T = any>.SelectorCond, options: Flow.WaitOptions & { resultType: \"[]\"; }, onOk?: Flow.OnOk<UiObject[]>, onErr?: Flow.OnErr): Flow<UiObject[]>;",
+            "async(cond: Flow<T = any>.SelectorCond, timeout?: number, interval?: number, onOk?: Flow.OnOk<UiObject, any> | undefined, onErr?: Flow.OnErr): Flow<UiObject>;",
+            "async(cond: Flow<T = any>.SelectorCond, options: Flow.WaitOptions, onOk?: Flow.OnOk<UiObject, any> | undefined, onErr?: Flow.OnErr): Flow<UiObject>;",
+            "async<T>(cond: () => T, timeout?: number, interval?: number, onOk?: Flow<T = any>.OnOk<T, any> | undefined, onErr?: Flow.OnErr): Flow<T>;",
+            "async<T>(cond: () => T, options: Flow<T = any>.WaitOptions, onOk?: Flow.OnOk<T, any> | undefined, onErr?: Flow.OnErr): Flow<T>;",
+            "async<T>(cond: Flow<T> | PromiseLike<T>, timeout?: number, interval?: number, onOk?: Flow<T = any>.OnOk<T, any> | undefined, onErr?: Flow.OnErr): Flow<T>;",
+            "async<T>(cond: Flow<T> | PromiseLike<T>, options: Flow<T = any>.WaitOptions, onOk?: Flow.OnOk<T, any> | undefined, onErr?: Flow.OnErr): Flow<T>;"
+          ]
+        }
+      ]
+    },
     "web": {
       "doc": "AutoJs6 Web API",
       "members": [
@@ -28141,6 +31828,149 @@
           "kind": "function",
           "doc": "newWebSocket(url: string, options?: Web.NewWebSocketOptions): org.autojs.autojs.core.web.WebSocket;",
           "signature": "newWebSocket(url: string, options?: Web.NewWebSocketOptions): org.autojs.autojs.core.web.WebSocket;"
+        }
+      ]
+    },
+    "WebSocket": {
+      "doc": "AutoJs6 WebSocket API",
+      "members": [
+        {
+          "name": "CODE_CLOSE_NORMAL",
+          "kind": "variable",
+          "doc": "CODE_CLOSE_NORMAL: number;",
+          "signature": "CODE_CLOSE_NORMAL: number;"
+        },
+        {
+          "name": "CODE_CLOSE_GOING_AWAY",
+          "kind": "variable",
+          "doc": "CODE_CLOSE_GOING_AWAY: number;",
+          "signature": "CODE_CLOSE_GOING_AWAY: number;"
+        },
+        {
+          "name": "CODE_CLOSE_PROTOCOL_ERROR",
+          "kind": "variable",
+          "doc": "CODE_CLOSE_PROTOCOL_ERROR: number;",
+          "signature": "CODE_CLOSE_PROTOCOL_ERROR: number;"
+        },
+        {
+          "name": "CODE_CLOSE_UNSUPPORTED",
+          "kind": "variable",
+          "doc": "CODE_CLOSE_UNSUPPORTED: number;",
+          "signature": "CODE_CLOSE_UNSUPPORTED: number;"
+        },
+        {
+          "name": "CODE_CLOSED_NO_STATUS",
+          "kind": "variable",
+          "doc": "CODE_CLOSED_NO_STATUS: number;",
+          "signature": "CODE_CLOSED_NO_STATUS: number;"
+        },
+        {
+          "name": "CODE_CLOSE_ABNORMAL",
+          "kind": "variable",
+          "doc": "CODE_CLOSE_ABNORMAL: number;",
+          "signature": "CODE_CLOSE_ABNORMAL: number;"
+        },
+        {
+          "name": "CODE_UNSUPPORTED_PAYLOAD",
+          "kind": "variable",
+          "doc": "CODE_UNSUPPORTED_PAYLOAD: number;",
+          "signature": "CODE_UNSUPPORTED_PAYLOAD: number;"
+        },
+        {
+          "name": "CODE_POLICY_VIOLATION",
+          "kind": "variable",
+          "doc": "CODE_POLICY_VIOLATION: number;",
+          "signature": "CODE_POLICY_VIOLATION: number;"
+        },
+        {
+          "name": "CODE_CLOSE_TOO_LARGE",
+          "kind": "variable",
+          "doc": "CODE_CLOSE_TOO_LARGE: number;",
+          "signature": "CODE_CLOSE_TOO_LARGE: number;"
+        },
+        {
+          "name": "CODE_MANDATORY_EXTENSION",
+          "kind": "variable",
+          "doc": "CODE_MANDATORY_EXTENSION: number;",
+          "signature": "CODE_MANDATORY_EXTENSION: number;"
+        },
+        {
+          "name": "CODE_SERVER_ERROR",
+          "kind": "variable",
+          "doc": "CODE_SERVER_ERROR: number;",
+          "signature": "CODE_SERVER_ERROR: number;"
+        },
+        {
+          "name": "CODE_SERVICE_RESTART",
+          "kind": "variable",
+          "doc": "CODE_SERVICE_RESTART: number;",
+          "signature": "CODE_SERVICE_RESTART: number;"
+        },
+        {
+          "name": "CODE_TRY_AGAIN_LATER",
+          "kind": "variable",
+          "doc": "CODE_TRY_AGAIN_LATER: number;",
+          "signature": "CODE_TRY_AGAIN_LATER: number;"
+        },
+        {
+          "name": "CODE_BAD_GATEWAY",
+          "kind": "variable",
+          "doc": "CODE_BAD_GATEWAY: number;",
+          "signature": "CODE_BAD_GATEWAY: number;"
+        },
+        {
+          "name": "CODE_TLS_HANDSHAKE_FAIL",
+          "kind": "variable",
+          "doc": "CODE_TLS_HANDSHAKE_FAIL: number;",
+          "signature": "CODE_TLS_HANDSHAKE_FAIL: number;"
+        },
+        {
+          "name": "EVENT_CLOSED",
+          "kind": "variable",
+          "doc": "EVENT_CLOSED: string;",
+          "signature": "EVENT_CLOSED: string;"
+        },
+        {
+          "name": "EVENT_CLOSING",
+          "kind": "variable",
+          "doc": "EVENT_CLOSING: string;",
+          "signature": "EVENT_CLOSING: string;"
+        },
+        {
+          "name": "EVENT_FAILURE",
+          "kind": "variable",
+          "doc": "EVENT_FAILURE: string;",
+          "signature": "EVENT_FAILURE: string;"
+        },
+        {
+          "name": "EVENT_TEXT",
+          "kind": "variable",
+          "doc": "EVENT_TEXT: string;",
+          "signature": "EVENT_TEXT: string;"
+        },
+        {
+          "name": "EVENT_MESSAGE",
+          "kind": "variable",
+          "doc": "EVENT_MESSAGE: string;",
+          "signature": "EVENT_MESSAGE: string;"
+        },
+        {
+          "name": "EVENT_BYTES",
+          "kind": "variable",
+          "doc": "EVENT_BYTES: string;",
+          "signature": "EVENT_BYTES: string;"
+        },
+        {
+          "name": "EVENT_OPEN",
+          "kind": "variable",
+          "doc": "EVENT_OPEN: string;",
+          "signature": "EVENT_OPEN: string;"
+        },
+        {
+          "name": "EVENT_MAX_REBUILDS",
+          "kind": "variable",
+          "doc": "EVENT_MAX_REBUILDS: string;",
+          "signature": "EVENT_MAX_REBUILDS: string;"
         }
       ]
     },
@@ -28690,7 +32520,28 @@
     "maxIndexInParent",
     "minChildCount",
     "minDepth",
-    "minIndexInParent"
+    "minIndexInParent",
+    "randomInt",
+    "randomFloat",
+    "verbose",
+    "$selector",
+    "waitAsync",
+    "waitThenClick",
+    "waitThenClickBounds",
+    "clickWait",
+    "clickBoundsWait",
+    "waitForStable",
+    "waitForStableThenClick",
+    "waitForStableThenClickBounds",
+    "clickWhenStable",
+    "clickBoundsWhenStable",
+    "waitForVisible",
+    "waitForHidden",
+    "waitForGone",
+    "clickWhenStableAfter",
+    "clickBoundsWhenStableAfter",
+    "nanoid",
+    "sync"
   ],
   "variables": [
     "context",
@@ -28718,7 +32569,176 @@
     "waitForHidden",
     "waitForGone",
     "clickWhenStableAfter",
-    "clickBoundsWhenStableAfter"
+    "clickBoundsWhenStableAfter",
+    "$species",
+    "EventEmitter$",
+    "media",
+    "RootAutomator",
+    "App",
+    "RootMode",
+    "Version",
+    "ColorTable",
+    "R",
+    "Pref",
+    "Canvas",
+    "Shell",
+    "Paint",
+    "KeyEvent",
+    "MotionEvent",
+    "UiObjectIterator",
+    "UiObjectCollection",
+    "UiSelector",
+    "ScriptInterruptedException",
+    "Toast",
+    "NotificationManager",
+    "ComponentName",
+    "Handler",
+    "Settings",
+    "TextToSpeech",
+    "SecurityException",
+    "System",
+    "Locale",
+    "Crypto",
+    "TextUtils",
+    "ScriptEngineService",
+    "Intent",
+    "Context",
+    "OkHttpClient",
+    "MutableOkHttp",
+    "VolatileBox",
+    "ReentrantLock",
+    "ScreenMetrics",
+    "WebView",
+    "WebViewClient",
+    "WebChromeClient",
+    "StandardCharsets",
+    "PendingIntent",
+    "GlobalAppContext",
+    "ArrayUtils",
+    "DisplayUtils",
+    "ColorUtils",
+    "StringUtils",
+    "ProxyObject",
+    "ProxyJavaObject",
+    "NotificationCompat",
+    "NotificationManagerCompat",
+    "URI",
+    "File",
+    "JsAppBarLayout",
+    "JsButton",
+    "JsCanvasView",
+    "JsCardView",
+    "JsCheckBox",
+    "JsConsoleView",
+    "JsDatePicker",
+    "JsDrawerLayout",
+    "JsEditText",
+    "JsFloatingActionButton",
+    "JsFrameLayout",
+    "JsGridView",
+    "JsImageButton",
+    "JsImageView",
+    "JsLinearLayout",
+    "JsListView",
+    "JsProgressBar",
+    "JsRadioButton",
+    "JsRadioGroup",
+    "JsRatingBar",
+    "JsRelativeLayout",
+    "JsScrollView",
+    "JsSeekBar",
+    "JsSpinner",
+    "JsSwitch",
+    "JsTabLayout",
+    "JsTextClock",
+    "JsTextView",
+    "JsTimePicker",
+    "JsToggleButton",
+    "JsToolbar",
+    "JsViewPager",
+    "JsWebView",
+    "JsVideoView",
+    "JsViewFlipper",
+    "JsViewSwitcher",
+    "ScriptRuntime",
+    "EventEmitter",
+    "FileProvider",
+    "AppUtils",
+    "Uri",
+    "JavaScriptSource",
+    "Looper",
+    "Runnable",
+    "Build",
+    "Manifest",
+    "PackageManager",
+    "NetworkUtils",
+    "DeviceUtils",
+    "JavaUtils",
+    "RootUtils",
+    "InputType",
+    "TextWatcher",
+    "AccessibilityBridge",
+    "Base64",
+    "ColorStateList",
+    "ColorDetector",
+    "ThemeColor",
+    "AtomicLong",
+    "BigTextStyle",
+    "Bitmap",
+    "BitmapFactory",
+    "Typeface",
+    "ByteArrayOutputStream",
+    "Callback",
+    "ColorDrawable",
+    "ConsoleUtils",
+    "ContextThemeWrapper",
+    "DynamicLayoutInflater",
+    "FormBody",
+    "Gravity",
+    "IntentUtils",
+    "JavaScriptEngine",
+    "ScaleGestureDetector",
+    "WindowManager",
+    "LayoutParams",
+    "Level",
+    "Linkify",
+    "Log",
+    "TypedValue",
+    "LogConfigurator",
+    "LogManager",
+    "Mat",
+    "MediaType",
+    "MimeTypeMap",
+    "MultipartBody",
+    "Notification",
+    "NotificationUtils",
+    "PFile",
+    "Request",
+    "RequestBody",
+    "Snackbar",
+    "MaterialDialog",
+    "Thread",
+    "Throwable",
+    "ApkBuilder",
+    "GestureResultCallback",
+    "TimeUnit",
+    "Imgproc",
+    "Imgcodecs",
+    "CvType",
+    "TopLevelScope",
+    "ContinuationResult",
+    "ContinuationCreator",
+    "RhinoUtils",
+    "EvaluatorException",
+    "PorterDuff",
+    "ImageViewCompat",
+    "AndroidUtils",
+    "Continuation",
+    "JavaImporter",
+    "XML",
+    "XMLList",
+    "Namespace",
+    "QName"
   ],
   "globalMembers": {
     "app": [
@@ -28782,5 +32802,454 @@
       "snippet": "ui.layout(\\n    <vertical>\\n        ${1}\\n    </vertical>\\n);",
       "meta": "snippet"
     }
-  ]
+  ],
+  "aliases": {
+    "$keys": "keys",
+    "$app": "app",
+    "$ai": "ai",
+    "$auto": "auto",
+    "$autojs": "autojs",
+    "$automator": "automator",
+    "$base64": "base64",
+    "$colors": "colors",
+    "$compose": "compose",
+    "$console": "console",
+    "$continuation": "continuation",
+    "$crypto": "crypto",
+    "$device": "device",
+    "$dialogs": "dialogs",
+    "$engines": "engines",
+    "$events": "events",
+    "$files": "files",
+    "$floaty": "floaty",
+    "$flow": "flow",
+    "$http": "http",
+    "$i18n": "i18n",
+    "$images": "images",
+    "$installer": "installer",
+    "$mail": "mail",
+    "$epub": "epub",
+    "$terminal": "terminal",
+    "$media": "media",
+    "$notice": "notice",
+    "$ocr": "ocr",
+    "$barcode": "barcode",
+    "$pinyin": "pinyin",
+    "$qrcode": "qrcode",
+    "$s13n": "s13n",
+    "$plugins": "plugins",
+    "$recorder": "recorder",
+    "$require": "require",
+    "$sensors": "sensors",
+    "$shell": "shell",
+    "$shizuku": "shizuku",
+    "$sqlite": "sqlite",
+    "$storages": "storages",
+    "$tasks": "tasks",
+    "$threads": "threads",
+    "$timers": "timers",
+    "$toast": "toast",
+    "$ui": "ui",
+    "$util": "util",
+    "$web": "web",
+    "$yolo": "yolo",
+    "$opencc": "opencc",
+    "$mime": "mime",
+    "$cvt": "cvt",
+    "$fmt": "fmt",
+    "$jsox": "jsox",
+    "$sysprops": "sysprops",
+    "$zip": "zip",
+    "$nanoid": "nanoid",
+    "$pinyin4j": "pinyin4j",
+    "$powerManager": "powerManager",
+    "$power_manager": "power_manager",
+    "$settings": "settings",
+    "$mediainfo": "mediainfo",
+    "$tts": "tts",
+    "$workManager": "workManager",
+    "$work_manager": "work_manager",
+    "$species": "species",
+    "$selector": "selector"
+  },
+  "conditionalModules": {
+    "array": {
+      "Array": [
+        {
+          "name": "ensureArray",
+          "kind": "function",
+          "doc": "ensureArray(...o: unknown[]): void;",
+          "signature": "ensureArray(...o: unknown[]): void;"
+        }
+      ],
+      "Array.prototype": [
+        {
+          "name": "distinct",
+          "kind": "function",
+          "doc": "distinct(): T[];",
+          "signature": "distinct(): T[];"
+        },
+        {
+          "name": "distinctBy",
+          "kind": "function",
+          "doc": "distinctBy<U>(selector: (value: T) => U): T[];",
+          "signature": "distinctBy<U>(selector: (value: T) => U): T[];"
+        },
+        {
+          "name": "union",
+          "kind": "function",
+          "doc": "union<U>(...others: (U | U[])[]): (T | U)[];",
+          "signature": "union<U>(...others: (U | U[])[]): (T | U)[];"
+        },
+        {
+          "name": "intersect",
+          "kind": "function",
+          "doc": "intersect<U>(...others: (U | U[])[]): (T & U)[];",
+          "signature": "intersect<U>(...others: (U | U[])[]): (T & U)[];"
+        },
+        {
+          "name": "subtract",
+          "kind": "function",
+          "doc": "subtract(other: readonly unknown[]): T[];",
+          "signature": "subtract(other: readonly unknown[]): T[];"
+        },
+        {
+          "name": "differ",
+          "kind": "function",
+          "doc": "differ<U>(other: U[]): (T | U)[];",
+          "signature": "differ<U>(other: U[]): (T | U)[];"
+        },
+        {
+          "name": "sortBy",
+          "kind": "function",
+          "doc": "sortBy<U>(selector: (value: T) => U): T[];",
+          "signature": "sortBy<U>(selector: (value: T) => U): T[];"
+        },
+        {
+          "name": "sortByDescending",
+          "kind": "function",
+          "doc": "sortByDescending<U>(selector: (value: T) => U): T[];",
+          "signature": "sortByDescending<U>(selector: (value: T) => U): T[];"
+        },
+        {
+          "name": "sortDescending",
+          "kind": "function",
+          "doc": "sortDescending(): T[];",
+          "signature": "sortDescending(): T[];"
+        },
+        {
+          "name": "sorted",
+          "kind": "function",
+          "doc": "sorted(): T[];",
+          "signature": "sorted(): T[];"
+        },
+        {
+          "name": "sortedDescending",
+          "kind": "function",
+          "doc": "sortedDescending(): T[];",
+          "signature": "sortedDescending(): T[];"
+        },
+        {
+          "name": "sortedBy",
+          "kind": "function",
+          "doc": "sortedBy<U>(selector: (value: T) => U): T[];",
+          "signature": "sortedBy<U>(selector: (value: T) => U): T[];"
+        },
+        {
+          "name": "sortedByDescending",
+          "kind": "function",
+          "doc": "sortedByDescending<U>(selector: (value: T) => U): T[];",
+          "signature": "sortedByDescending<U>(selector: (value: T) => U): T[];"
+        },
+        {
+          "name": "shuffle",
+          "kind": "function",
+          "doc": "shuffle(): T[];",
+          "signature": "shuffle(): T[];"
+        }
+      ]
+    },
+    "number": {
+      "Number": [
+        {
+          "name": "ICU",
+          "kind": "variable",
+          "doc": "ICU: 996;",
+          "signature": "ICU: 996;"
+        },
+        {
+          "name": "ensureNumber",
+          "kind": "function",
+          "doc": "ensureNumber(...o: unknown[]): void;",
+          "signature": "ensureNumber(...o: unknown[]): void;"
+        },
+        {
+          "name": "ensureNumberLike",
+          "kind": "function",
+          "doc": "ensureNumberLike(value: number | string, allowNaN?: boolean): number;",
+          "signature": "ensureNumberLike(value: number | string, allowNaN?: boolean): number;"
+        },
+        {
+          "name": "ensureNumbersLike",
+          "kind": "function",
+          "doc": "ensureNumbersLike(values: readonly (number | string)[], allowNaN?: boolean, containsNaN?: boolean): number[];",
+          "signature": "ensureNumbersLike(values: readonly (number | string)[], allowNaN?: boolean, containsNaN?: boolean): number[];"
+        },
+        {
+          "name": "check",
+          "kind": "function",
+          "doc": "check(...numOrOpr: (number | \"<\" | \"<=\" | \">\" | \">=\" | \"=\" | \"==\" | \"!=\" | \"<>\")[]): boolean;",
+          "signature": "check(...numOrOpr: (number | \"<\" | \"<=\" | \">\" | \">=\" | \"=\" | \"==\" | \"!=\" | \"<>\")[]): boolean;"
+        },
+        {
+          "name": "parseFloat",
+          "kind": "function",
+          "doc": "parseFloat(string: string): number;",
+          "signature": "parseFloat(string: string): number;",
+          "signatures": [
+            "parseFloat(string: string): number;",
+            "parseFloat(value: string, radix?: number): number;"
+          ]
+        },
+        {
+          "name": "parsePercent",
+          "kind": "function",
+          "doc": "parsePercent(percentage: Percentage$): number;",
+          "signature": "parsePercent(percentage: Percentage$): number;"
+        },
+        {
+          "name": "parseRatio",
+          "kind": "function",
+          "doc": "parseRatio(ratio: string): number;",
+          "signature": "parseRatio(ratio: string): number;"
+        },
+        {
+          "name": "parseAny",
+          "kind": "function",
+          "doc": "parseAny(o: any): number;",
+          "signature": "parseAny(o: any): number;"
+        }
+      ],
+      "Number.prototype": [
+        {
+          "name": "clamp",
+          "kind": "function",
+          "doc": "clamp(...bounds: (number | number[])[]): number;",
+          "signature": "clamp(...bounds: (number | number[])[]): number;"
+        },
+        {
+          "name": "clampTo",
+          "kind": "function",
+          "doc": "clampTo(range: number[], cycle?: number): number;",
+          "signature": "clampTo(range: number[], cycle?: number): number;"
+        },
+        {
+          "name": "toFixedNum",
+          "kind": "function",
+          "doc": "toFixedNum(fraction: number): number;",
+          "signature": "toFixedNum(fraction: number): number;"
+        },
+        {
+          "name": "padStart",
+          "kind": "function",
+          "doc": "padStart(targetLength: number, pad?: number | string): string;",
+          "signature": "padStart(targetLength: number, pad?: number | string): string;"
+        },
+        {
+          "name": "padEnd",
+          "kind": "function",
+          "doc": "padEnd(targetLength: number, pad?: number | string): string;",
+          "signature": "padEnd(targetLength: number, pad?: number | string): string;"
+        }
+      ]
+    },
+    "math": {
+      "Math": [
+        {
+          "name": "randInt",
+          "kind": "function",
+          "doc": "randInt(range?: number[]): number;",
+          "signature": "randInt(range?: number[]): number;",
+          "signatures": [
+            "randInt(range?: number[]): number;",
+            "randInt(stop: number): number;",
+            "randInt(start: number, stop: number): number;",
+            "randInt(...numbers: number[]): number;"
+          ]
+        },
+        {
+          "name": "randomInt",
+          "kind": "function",
+          "doc": "randomInt(...range: Internal.Mathx.NumberInput[]): number;",
+          "signature": "randomInt(...range: Internal.Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "randFloat",
+          "kind": "function",
+          "doc": "randFloat(...range: Internal.Mathx.NumberInput[]): number;",
+          "signature": "randFloat(...range: Internal.Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "randomFloat",
+          "kind": "function",
+          "doc": "randomFloat(...range: Internal.Mathx.NumberInput[]): number;",
+          "signature": "randomFloat(...range: Internal.Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "random",
+          "kind": "function",
+          "doc": "random(): number;",
+          "signature": "random(): number;",
+          "signatures": [
+            "random(): number;",
+            "random(...range: Internal.Mathx.NumberInput[]): number;"
+          ]
+        },
+        {
+          "name": "sum",
+          "kind": "function",
+          "doc": "sum(num: number[], fraction?: number): number;",
+          "signature": "sum(num: number[], fraction?: number): number;",
+          "signatures": [
+            "sum(num: number[], fraction?: number): number;",
+            "sum(...nums: number[]): number;"
+          ]
+        },
+        {
+          "name": "mean",
+          "kind": "function",
+          "doc": "mean(...values: Internal.Mathx.NumberInput[]): number;",
+          "signature": "mean(...values: Internal.Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "avg",
+          "kind": "function",
+          "doc": "avg(num: number[], fraction?: number): number;",
+          "signature": "avg(num: number[], fraction?: number): number;",
+          "signatures": [
+            "avg(num: number[], fraction?: number): number;",
+            "avg(...nums: number[]): number;"
+          ]
+        },
+        {
+          "name": "median",
+          "kind": "function",
+          "doc": "median(num?: number[], fraction?: number): number;",
+          "signature": "median(num?: number[], fraction?: number): number;",
+          "signatures": [
+            "median(num?: number[], fraction?: number): number;",
+            "median(...nums: number[]): number;"
+          ]
+        },
+        {
+          "name": "var",
+          "kind": "function",
+          "doc": "var(num: number[], fraction?: number): number;",
+          "signature": "var(num: number[], fraction?: number): number;",
+          "signatures": [
+            "var(num: number[], fraction?: number): number;",
+            "var(...nums: number[]): number;"
+          ]
+        },
+        {
+          "name": "std",
+          "kind": "function",
+          "doc": "std(num: number[], fraction?: number): number;",
+          "signature": "std(num: number[], fraction?: number): number;",
+          "signatures": [
+            "std(num: number[], fraction?: number): number;",
+            "std(...nums: number[]): number;"
+          ]
+        },
+        {
+          "name": "cv",
+          "kind": "function",
+          "doc": "cv(num: number[], fraction?: number): number;",
+          "signature": "cv(num: number[], fraction?: number): number;",
+          "signatures": [
+            "cv(num: number[], fraction?: number): number;",
+            "cv(...nums: number[]): number;"
+          ]
+        },
+        {
+          "name": "mode",
+          "kind": "function",
+          "doc": "mode(...values: Internal.Mathx.NumberInput[]): number;",
+          "signature": "mode(...values: Internal.Mathx.NumberInput[]): number;"
+        },
+        {
+          "name": "dist",
+          "kind": "function",
+          "doc": "dist(point1: [number, number] | { x: number; y: number; } | org.opencv.core.Point | android.graphics.Rect, point2: [number, number] | { x: number; y: number; } | org.opencv.core.Point | android.graphics.Rect, fraction?: number): number;",
+          "signature": "dist(point1: [number, number] | { x: number; y: number; } | org.opencv.core.Point | android.graphics.Rect, point2: [number, number] | { x: number; y: number; } | org.opencv.core.Point | android.graphics.Rect, fraction?: number): number;",
+          "signatures": [
+            "dist(point1: [number, number] | { x: number; y: number; } | org.opencv.core.Point | android.graphics.Rect, point2: [number, number] | { x: number; y: number; } | org.opencv.core.Point | android.graphics.Rect, fraction?: number): number;",
+            "dist(rect: android.graphics.Rect, fraction?: number): number;"
+          ]
+        },
+        {
+          "name": "logMn",
+          "kind": "function",
+          "doc": "logMn(base: number, antilogarithm: number, fraction?: number): number;",
+          "signature": "logMn(base: number, antilogarithm: number, fraction?: number): number;"
+        },
+        {
+          "name": "floorLog",
+          "kind": "function",
+          "doc": "floorLog(base: number, antilogarithm: number): number;",
+          "signature": "floorLog(base: number, antilogarithm: number): number;"
+        },
+        {
+          "name": "ceilLog",
+          "kind": "function",
+          "doc": "ceilLog(base: number, antilogarithm: number): number;",
+          "signature": "ceilLog(base: number, antilogarithm: number): number;"
+        },
+        {
+          "name": "roundLog",
+          "kind": "function",
+          "doc": "roundLog(base: number, antilogarithm: number): number;",
+          "signature": "roundLog(base: number, antilogarithm: number): number;"
+        },
+        {
+          "name": "floorPow",
+          "kind": "function",
+          "doc": "floorPow(base: number, power: number): number;",
+          "signature": "floorPow(base: number, power: number): number;"
+        },
+        {
+          "name": "ceilPow",
+          "kind": "function",
+          "doc": "ceilPow(base: number, power: number): number;",
+          "signature": "ceilPow(base: number, power: number): number;"
+        },
+        {
+          "name": "roundPow",
+          "kind": "function",
+          "doc": "roundPow(base: number, power: number): number;",
+          "signature": "roundPow(base: number, power: number): number;"
+        },
+        {
+          "name": "maxi",
+          "kind": "function",
+          "doc": "maxi(num: number[], fraction?: number): number;",
+          "signature": "maxi(num: number[], fraction?: number): number;",
+          "signatures": [
+            "maxi(num: number[], fraction?: number): number;",
+            "maxi(...nums: number[]): number;"
+          ]
+        },
+        {
+          "name": "mini",
+          "kind": "function",
+          "doc": "mini(num: number[], fraction?: number): number;",
+          "signature": "mini(num: number[], fraction?: number): number;",
+          "signatures": [
+            "mini(num: number[], fraction?: number): number;",
+            "mini(...nums: number[]): number;"
+          ]
+        }
+      ]
+    }
+  }
 }

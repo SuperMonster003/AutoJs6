@@ -1,0 +1,91 @@
+name: Script API coverage
+
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/augment/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
+      - 'tools/api-coverage/**'
+      - 'tools/ace-completion/**'
+      - '.github/workflows/api-coverage.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/augment/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
+      - 'tools/api-coverage/**'
+      - 'tools/ace-completion/**'
+      - '.github/workflows/api-coverage.yml'
+  workflow_dispatch:
+    inputs:
+      documentation_ref:
+        description: Documentation branch or commit (empty uses default branch)
+        required: false
+      declarations_ref:
+        description: Declaration branch or commit (empty uses default branch)
+        required: false
+      ace_ref:
+        description: Ace plugin branch or commit (empty uses default branch)
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-coverage-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: AutoJs6
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Documentation
+          ref: ${{ inputs.documentation_ref }}
+          path: AutoJs6-Documentation
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-TypeScript-Declarations
+          ref: ${{ inputs.declarations_ref }}
+          path: AutoJs6-TypeScript-Declarations
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Ace-Editor
+          ref: ${{ inputs.ace_ref }}
+          path: AutoJs6-Plugin-Ace-Editor
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test registration extraction and compare public surfaces
+        working-directory: AutoJs6
+        run: |
+          python -m unittest discover -s tools/api-coverage -p 'test_*.py'
+          python tools/api-coverage/check.py
+      - name: Check handwritten types and conditional extensions
+        working-directory: AutoJs6-TypeScript-Declarations
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import {spawnSync} from 'node:child_process';
+          const plugin = path.resolve('../AutoJs6-Plugin-Ace-Editor');
+          const lock = JSON.parse(fs.readFileSync(path.join(plugin, 'tools/ace-lsp/ace-builds-lock.json'), 'utf8'));
+          const compiler = path.join(plugin, lock.assetRoot, 'autojs6/typescript/typescript.js');
+          const result = spawnSync(process.execPath, ['tools/verify-api-coverage.mjs', '--typescript', compiler], {stdio: 'inherit'});
+          if (result.error) throw result.error;
+          process.exit(result.status ?? 1);
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: script-api-coverage
+          path: AutoJs6/build/reports/api-coverage/
+          if-no-files-found: warn

@@ -7,42 +7,18 @@ export const PROJECT_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
 // The editor assets now live in a separate plugin checkout. Keep legacy host layouts usable.
 export const EDITOR_PROJECT_ROOT = process.env.AUTOJS6_ACE_EDITOR_ROOT
   ? path.resolve(process.env.AUTOJS6_ACE_EDITOR_ROOT)
-  : PROJECT_ROOT;
+  : path.resolve(PROJECT_ROOT, "../AutoJs6-Plugin-Ace-Editor");
+const aceLockPath = path.join(EDITOR_PROJECT_ROOT, "tools/ace-lsp/ace-builds-lock.json");
+const aceAssetRoot = JSON.parse(fs.readFileSync(aceLockPath, "utf8")).assetRoot;
+export const EDITOR_ASSET_ROOT = path.resolve(EDITOR_PROJECT_ROOT, aceAssetRoot, "autojs6");
+if (!EDITOR_ASSET_ROOT.startsWith(EDITOR_PROJECT_ROOT + path.sep)) {
+  throw new Error(`Ace asset root escapes the editor checkout: ${aceAssetRoot}`);
+}
+export const TYPESCRIPT_RUNTIME = path.join(EDITOR_ASSET_ROOT, "typescript/typescript.js");
 export const SOURCE_PATH = path.join(SCRIPT_DIR, "autojs6_indices.source.json");
-export const GENERATED_INDEX_PATH = path.join(
-  EDITOR_PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "assets",
-  "editor",
-  "ace-builds-1.4.12",
-  "autojs6",
-  "autojs6_indices.js",
-);
-export const GENERATED_DTS_PATH = path.join(
-  EDITOR_PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "assets",
-  "editor",
-  "ace-builds-1.4.12",
-  "autojs6",
-  "types",
-  "lib.autojs6.d.ts",
-);
-export const BUNDLED_TYPES_ROOT = path.join(
-  EDITOR_PROJECT_ROOT,
-  "app",
-  "src",
-  "main",
-  "assets",
-  "editor",
-  "ace-builds-1.4.12",
-  "autojs6",
-  "types",
-);
+export const GENERATED_INDEX_PATH = path.join(EDITOR_ASSET_ROOT, "autojs6_indices.js");
+export const GENERATED_DTS_PATH = path.join(EDITOR_ASSET_ROOT, "types/lib.autojs6.d.ts");
+export const BUNDLED_TYPES_ROOT = path.join(EDITOR_ASSET_ROOT, "types");
 export const BUNDLED_AUTOJS6_DTS_ROOT = path.join(BUNDLED_TYPES_ROOT, "autojs6");
 export const REPORT_DIR = path.join(
   PROJECT_ROOT,
@@ -58,6 +34,7 @@ export const API_MODEL_JSON_PATH = path.join(REPORT_DIR, "autojs6-api-model.json
 export const API_MODEL_REPORT_PATH = path.join(REPORT_DIR, "autojs6-api-model-report.md");
 
 const IDENTIFIER_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+const MODULE_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)*$/;
 export const PRO_ONLY_COMPLETION_NAMES = [
   "autojsPro",
   "autojspro",
@@ -165,7 +142,7 @@ export function validateSource(source) {
 
   const modules = source.modules || {};
   for (const [moduleName, moduleSpec] of Object.entries(modules)) {
-    if (!IDENTIFIER_PATTERN.test(moduleName)) {
+    if (!MODULE_PATTERN.test(moduleName)) {
       errors.push(`invalid module name: ${moduleName}`);
     }
     if (!moduleSpec || typeof moduleSpec !== "object" || Array.isArray(moduleSpec)) {
@@ -267,7 +244,7 @@ export function buildRuntimeIndices(source) {
         score: member.score,
       };
     });
-    if (!moduleSpec.instanceOnly) globals.push({
+    if (!moduleSpec.instanceOnly && !moduleName.includes(".")) globals.push({
       name: moduleName,
       type: "module",
       doc: moduleSpec.doc,
@@ -288,6 +265,9 @@ export function buildRuntimeIndices(source) {
       type: "variable",
       doc: "",
     });
+  }
+  for (const name of Object.keys(source.aliases || {})) {
+    globals.push({ name, type: "module", doc: `Alias of ${source.aliases[name]}` });
   }
   for (const [moduleName, memberNames] of Object.entries(source.globalMembers)) {
     const moduleMembers = source.modules[moduleName].members.map(normalizeMember);
@@ -311,6 +291,8 @@ export function buildRuntimeIndices(source) {
     version: source.version,
     globals: dedupeEntries(globals),
     modules,
+    aliases: source.aliases || {},
+    conditionalModules: source.conditionalModules || {},
     snippets: source.snippets,
   };
 }
@@ -360,7 +342,7 @@ export function renderDts(source) {
   lines.push("");
 
   for (const moduleName of Object.keys(source.modules)) {
-    if (source.modules[moduleName].instanceOnly) continue;
+    if (source.modules[moduleName].instanceOnly || moduleName.includes(".")) continue;
     lines.push(`declare const ${moduleName}: AutoJs6.${interfaceName(moduleName)};`);
   }
   const globalMemberDeclarations = collectGlobalMemberDeclarations(source);
@@ -567,7 +549,7 @@ function indentJson(value, spaces) {
 }
 
 function interfaceName(moduleName) {
-  return moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
+  return (moduleName.charAt(0).toUpperCase() + moduleName.slice(1)).replace(/\./g, "_");
 }
 
 function escapeRegExp(value) {

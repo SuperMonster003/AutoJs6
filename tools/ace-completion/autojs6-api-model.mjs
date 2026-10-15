@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { completeTypeBackedModules } from "./type-backed-api-model.mjs";
 import {
   BUNDLED_AUTOJS6_DTS_ROOT,
   PRO_ONLY_COMPLETION_NAMES,
@@ -10,7 +11,7 @@ import {
 
 const API_MODEL_VERSION = 1;
 const IDENTIFIER_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-const INTERNAL_GLOBAL_PREFIXES = ["$", "__"];
+const INTERNAL_GLOBAL_PREFIXES = ["__"];
 const MEMBER_KINDS = new Set(["function", "member", "module", "variable"]);
 
 export function buildAutoJs6ApiModel(dtsRoot = BUNDLED_AUTOJS6_DTS_ROOT) {
@@ -31,9 +32,11 @@ export function buildAutoJs6ApiModel(dtsRoot = BUNDLED_AUTOJS6_DTS_ROOT) {
   const filteredEntries = [];
   const internalTypes = parseInternalTypes(parsedText, filteredEntries);
   const globalDeclarations = parseGlobalDeclarations(parsedText, filteredEntries);
-  const globalFunctions = dedupeNames(globalDeclarations.functions);
-  const globalVariables = dedupeNames(globalDeclarations.variables);
-  const modules = buildDeclarationModules(internalTypes, globalDeclarations.moduleBindings, filteredEntries);
+  const resolved = completeTypeBackedModules(resolvedRoot,
+    buildDeclarationModules(internalTypes, globalDeclarations.moduleBindings, filteredEntries));
+  const globalFunctions = dedupeNames(globalDeclarations.functions.concat(resolved.functions));
+  const globalVariables = dedupeNames(globalDeclarations.variables.concat(resolved.variables));
+  const modules = resolved.modules;
   const declarationBackedMemberCount = modules
     .reduce((count, moduleSpec) => count + moduleSpec.members.length, 0);
   const filteredSummary = summarizeFilteredEntries(filteredEntries);
@@ -58,6 +61,8 @@ export function buildAutoJs6ApiModel(dtsRoot = BUNDLED_AUTOJS6_DTS_ROOT) {
       }))
       .sort((a, b) => a.moduleName.localeCompare(b.moduleName)),
     modules,
+    aliases: resolved.aliases,
+    conditionalModules: resolved.conditionalModules,
     globals: {
       functions: globalFunctions.map((name) => ({ name, kind: "function" })),
       variables: globalVariables.map((name) => ({ name, kind: "variable" })),
@@ -90,6 +95,8 @@ export function buildAutoJs6CompletionSource(baseSource, apiModel) {
     ),
     globalMembers: {},
     snippets: baseSource.snippets || [],
+    aliases: apiModel.aliases || {},
+    conditionalModules: apiModel.conditionalModules || {},
   };
   source.globalMembers = sanitizeGlobalMembers(baseSource.globalMembers, source.modules);
   return source;
@@ -465,7 +472,7 @@ function mergeSourceModules(baseModules, declarationModules) {
 
   return Object.fromEntries(
     [...modules.entries()]
-      .filter(([moduleName, moduleSpec]) => isPublicCompletionName(moduleName) && moduleSpec.members.length > 0)
+      .filter(([moduleName, moduleSpec]) => !moduleName.startsWith("$") && isPublicModuleName(moduleName) && moduleSpec.members.length > 0)
       .sort(([a], [b]) => a.localeCompare(b)),
   );
 }
@@ -563,7 +570,7 @@ function validateModelModule(moduleSpec, errors, seenModules) {
     errors.push(`api model module must be an object: ${JSON.stringify(moduleSpec)}`);
     return;
   }
-  if (!isPublicCompletionName(moduleSpec.name)) {
+  if (!isPublicModuleName(moduleSpec.name)) {
     errors.push(`api model module has invalid name: ${moduleSpec.name}`);
   }
   if (seenModules.has(moduleSpec.name)) {
@@ -880,6 +887,10 @@ function isPublicCompletionName(name) {
   return isIdentifierName(name) && !completionFilterReason(name);
 }
 
+function isPublicModuleName(name) {
+  return String(name || "").split(".").every(isPublicCompletionName);
+}
+
 function memberSignature(declaration, kind, name) {
   const signature = ensureTrailingSemicolon(declaration);
   if (kind !== "variable") {
@@ -914,6 +925,8 @@ function isIdentifierName(name) {
 
 function completionFilterReason(name) {
   const value = String(name || "");
+  // These are registered receiver methods, despite their historical internal-style spelling.
+  if (value === "__buildRegion" || value === "__assignFunctions__") return null;
   if (!isIdentifierName(value)) {
     return null;
   }

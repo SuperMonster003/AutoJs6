@@ -1,0 +1,65 @@
+{
+  "documentationModules": {
+    "global": ["global"],
+    "species": ["global"],
+    "isNullish": ["global"],
+    "auto": ["automator"],
+    "automator": ["automator"],
+    "selector": ["uiSelectorType", "global"],
+    "Canvas": ["canvas"],
+    "images": ["image", "imageWrapperType"],
+    "colors": ["color", "colorType", "colorTable"],
+    "Color": ["colorType", "color"],
+    "Mathx": ["mathx"],
+    "Arrayx": ["arrayx"],
+    "Numberx": ["numberx"],
+    "RootAutomator": ["automator"],
+    "WebSocket": ["webSocketType", "web"],
+    "flow": ["flow", "flowType"],
+    "compose": ["compose", "composeComponents"],
+    "util": ["util", "versionType"],
+    "notice": ["notice", "noticeChannelOptionsType"],
+    "http": ["http", "httpResponseType", "httpResponseBodyType"]
+  },
+  "internalExports": {
+    "__autojs6Tsx": "Compiler-generated TSX bridge, not a user script API.",
+    "__autojs6TsxFragment": "Compiler-generated TSX fragment token.",
+    "ui.__autojs6Tsx": "Internal alias of the compiler-generated TSX bridge.",
+    "ui.__autojs6TsxFragment": "Internal alias of the compiler fragment token.",
+    "events.__asEmitter__": "Internal event-emitter augmentation bridge.",
+    "http.__okhttp__": "Internal HTTP client bridge.",
+    "ui.__inflate__": "Internal UI inflater bridge.",
+    "ui.__widgets__": "Internal widget registry."
+  },
+  "standardExports": {
+    "toString": "Object.toString is implicit; not a TypeScript lexical global or standalone completion target."
+  },
+  "dynamicRegistrations": {
+    "colors.selfAssignmentProperties": "Colour tables are generated from JVM objects; their constants use the dedicated colors contract checks.",
+    "compose.selfAssignmentProperties": "Explicit function-map keys are extracted; catalogue factories use the dedicated Compose contract checks."
+  },
+  "returnedObjectProbes": [
+    "threads.disposable.().blockedGet",
+    "threads.disposable.().blockedGetOrThrow",
+    "threads.disposable.().setAndNotify",
+    "Color.().argb",
+    "Color.().hsl",
+    "Color.().hsla",
+    "Color.().hsv",
+    "Color.().hsva",
+    "Color.().rgb",
+    "Color.().rgba",
+    "selector.().findOne",
+    "selector.().findOne.().text",
+    "selector.().findOne.().click",
+    "floaty.rawWindow.().close",
+    "floaty.rawWindow.().setPosition",
+    "wait.async",
+    "$media.playMusic",
+    "files.createIfNotExists",
+    "files.readAssets",
+    "files.getHumanReadableSize",
+    "files.formatSizeWithUnit",
+    "files.getSimplifiedPath"
+  ]
+}
