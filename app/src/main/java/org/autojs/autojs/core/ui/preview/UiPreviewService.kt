@@ -45,9 +45,11 @@ class UiPreviewService : Service() {
 
     private val binder = object : IUiPreviewService.Stub() {
 
-        override fun getContractVersion(): Int = UiPreviewContract.VERSION
+        // The frozen v1 base, so a v1 client keeps working; getPreviewInfo carries the current version and hash.
+        // zh-CN: 冻结的 v1 基础面, 让 v1 客户端照常工作; 当前版本与哈希由 getPreviewInfo 给出.
+        override fun getContractVersion(): Int = UiPreviewContract.BASE_VERSION
 
-        override fun getContractHash(): String = UiPreviewContract.HASH
+        override fun getContractHash(): String = UiPreviewContract.HASH_V1
 
         override fun getPreviewInfo(): Bundle {
             enforcePermission()
@@ -200,6 +202,29 @@ class UiPreviewService : Service() {
             return onMain(UiPreviewContract.LAYOUT_TIMEOUT_MS) { session.setHighlight(elementIndex); applied() }
                 ?: failure(UiPreviewContract.ERROR_TIMEOUT, "setHighlight timed out")
         }
+
+        // v2 (3-Block Compose roadmap P10.6): a real run of the whole script in the session's root.
+        override fun runScript(sessionId: String?, request: Bundle?): Bundle {
+            enforcePermission()
+            val session = sessionOf(sessionId) ?: return failure(UiPreviewContract.ERROR_SESSION_NOT_FOUND, "no session $sessionId")
+            if (request == null) return failure(UiPreviewContract.ERROR_INVALID_REQUEST, "request is required")
+            return try {
+                val text = request.getString(UiPreviewContract.KEY_SCRIPT_TEXT)
+                UiPreviewRequests.validateScript(text, session.params.mode, Build.VERSION.SDK_INT)
+                val name = UiPreviewRequests.sanitizeLabel(request.getString(UiPreviewContract.KEY_SCRIPT_NAME), session.params.label)
+                onMain(UiPreviewContract.SCRIPT_START_TIMEOUT_MS) { session.runScript(text!!, name) }
+                    ?: failure(UiPreviewContract.ERROR_TIMEOUT, "the script did not start within ${UiPreviewContract.SCRIPT_START_TIMEOUT_MS} ms")
+            } catch (e: UiPreviewRequestException) {
+                failure(e.code, e.message ?: e.code)
+            }
+        }
+
+        override fun stopScript(sessionId: String?): Bundle {
+            enforcePermission()
+            val session = sessionOf(sessionId) ?: return failure(UiPreviewContract.ERROR_SESSION_NOT_FOUND, "no session $sessionId")
+            return onMain(UiPreviewContract.LAYOUT_TIMEOUT_MS) { session.stopScript() }
+                ?: failure(UiPreviewContract.ERROR_TIMEOUT, "stopScript timed out")
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
@@ -254,9 +279,11 @@ class UiPreviewService : Service() {
 
     private fun previewInfo(): Bundle = Bundle().apply {
         val sdk = Build.VERSION.SDK_INT
+        // The current contract (v2); getContractVersion / getContractHash answer for the v1 base.
         putInt(UiPreviewContract.KEY_CONTRACT_VERSION, UiPreviewContract.VERSION)
         putString(UiPreviewContract.KEY_CONTRACT_HASH, UiPreviewContract.HASH)
         putString(UiPreviewContract.KEY_STATUS, UiPreviewContract.STATUS_READY)
+        putBoolean(UiPreviewContract.KEY_SCRIPT_RUN_SUPPORTED, sdk >= UiPreviewContract.MIN_API_INTERACTIVE)
         runCatching { packageManager.getPackageInfo(packageName, 0) }.getOrNull()?.let { info ->
             putLong(UiPreviewContract.KEY_HOST_VERSION_CODE, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.longVersionCode else @Suppress("DEPRECATION") info.versionCode.toLong())
             putString(UiPreviewContract.KEY_HOST_VERSION_NAME, info.versionName)

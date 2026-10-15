@@ -29,6 +29,27 @@ class UiPreviewRequestsTest {
     }
 
     @Test
+    fun v1AndV2ClientsBothCreateSessions() {
+        // v2 only appends transactions, so a 1.6.0 client that sends contractVersion 1 keeps working.
+        val params = UiPreviewSessionParams(UiPreviewContract.MODE_SNAPSHOT, 100, 100, 0, 0, "", 0f, 0, "label", 1L)
+        assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.BASE_VERSION, 24) })
+        assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.VERSION, 24) })
+        assertEquals(UiPreviewContract.ERROR_CONTRACT_MISMATCH, codeOf { UiPreviewRequests.validateSession(params, 3, 24) })
+    }
+
+    @Test
+    fun scriptRunsNeedAnEmbeddedSessionOnApi33AndAUiScript() {
+        val script = "\"ui\";\nui.layout(<vertical/>);\n"
+        assertNull(codeOf { UiPreviewRequests.validateScript(script, UiPreviewContract.MODE_EMBEDDED, 33) })
+        assertNull(codeOf { UiPreviewRequests.validateScript("// comment\n'ui';\nui.layout(<frame/>);", UiPreviewContract.MODE_EMBEDDED, 35) })
+        assertEquals(UiPreviewContract.ERROR_UNSUPPORTED_MODE, codeOf { UiPreviewRequests.validateScript(script, UiPreviewContract.MODE_SNAPSHOT, 33) })
+        assertEquals(UiPreviewContract.ERROR_UNSUPPORTED_MODE, codeOf { UiPreviewRequests.validateScript(script, UiPreviewContract.MODE_EMBEDDED, 32) })
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateScript(null, UiPreviewContract.MODE_EMBEDDED, 33) })
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateScript("x".repeat(UiPreviewContract.MAX_SCRIPT_CHARS + 1), UiPreviewContract.MODE_EMBEDDED, 33) })
+        assertEquals(UiPreviewContract.ERROR_SCRIPT_FAILED, codeOf { UiPreviewRequests.validateScript("console.log(1);", UiPreviewContract.MODE_EMBEDDED, 33) })
+    }
+
+    @Test
     fun theConstantScriptCarriesNoRequestContent() {
         // The runtime executes a fixed source; XML and bindings are applied from Kotlin (D47 level 1).
         assertEquals("\"ui\";", UiPreviewScript.SOURCE)
@@ -45,7 +66,7 @@ class UiPreviewRequestsTest {
 
     @Test
     fun contractAndModeMismatchesAreNamed() {
-        assertEquals(UiPreviewContract.ERROR_CONTRACT_MISMATCH, codeOf { UiPreviewRequests.validateSession(params(), 2, 33) })
+        assertEquals(UiPreviewContract.ERROR_CONTRACT_MISMATCH, codeOf { UiPreviewRequests.validateSession(params(), UiPreviewContract.VERSION + 1, 33) })
         assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateSession(params(mode = "window"), 1, 33) })
         assertEquals(UiPreviewContract.ERROR_UNSUPPORTED_MODE, codeOf { UiPreviewRequests.validateSession(params(mode = UiPreviewContract.MODE_EMBEDDED), 1, 29) })
     }

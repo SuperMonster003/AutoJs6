@@ -34,10 +34,11 @@ object UiPreviewRequests {
 
     @Throws(UiPreviewRequestException::class)
     fun validateSession(params: UiPreviewSessionParams, contractVersion: Int, sdkInt: Int) {
-        if (contractVersion != UiPreviewContract.VERSION) {
+        // A v1 client keeps working against a v2 host (v2 only appends transactions).
+        if (contractVersion != UiPreviewContract.VERSION && contractVersion != UiPreviewContract.BASE_VERSION) {
             throw UiPreviewRequestException(
                 UiPreviewContract.ERROR_CONTRACT_MISMATCH,
-                "contractVersion must be ${UiPreviewContract.VERSION}, got $contractVersion",
+                "contractVersion must be ${UiPreviewContract.BASE_VERSION} or ${UiPreviewContract.VERSION}, got $contractVersion",
             )
         }
         if (params.mode !in UiPreviewContract.MODES) {
@@ -104,6 +105,32 @@ object UiPreviewRequests {
             else -> throw invalid("pointer mode must be 0 or 1")
         }
     }
+
+    /**
+     * Checks a v2 `runScript` request (3-Block Compose 1.7.0): the text must be present, within the limit and a
+     * `"ui"` mode script; the session must be embedded on a device that lets pointer input reach the tree (API 33+).
+     * zh-CN: 校验 v2 `runScript` 请求 (3-Block Compose 1.7.0): 文本必须存在, 不超上限且是 `"ui"` 模式脚本; 会话必须是嵌入模式且设备允许指针进入树 (API 33+).
+     */
+    @Throws(UiPreviewRequestException::class)
+    fun validateScript(text: String?, mode: String, sdkInt: Int) {
+        if (mode != UiPreviewContract.MODE_EMBEDDED) {
+            throw UiPreviewRequestException(UiPreviewContract.ERROR_UNSUPPORTED_MODE, "runScript needs an embedded session")
+        }
+        if (sdkInt < UiPreviewContract.MIN_API_INTERACTIVE) {
+            throw UiPreviewRequestException(
+                UiPreviewContract.ERROR_UNSUPPORTED_MODE,
+                "the interactive preview needs API ${UiPreviewContract.MIN_API_INTERACTIVE}, this device is API $sdkInt",
+            )
+        }
+        if (text == null) throw invalid("scriptText is required")
+        if (text.length > UiPreviewContract.MAX_SCRIPT_CHARS) throw invalid("scriptText exceeds ${UiPreviewContract.MAX_SCRIPT_CHARS} chars")
+        if (!UI_DIRECTIVE.containsMatchIn(text)) {
+            throw UiPreviewRequestException(UiPreviewContract.ERROR_SCRIPT_FAILED, "the script does not start with the \"ui\" directive")
+        }
+    }
+
+    /** The `"ui"` directive as the first statement, with comments allowed before it (the host's own execution mode rule). */
+    private val UI_DIRECTIVE = Regex("""^\s*(?:(?://[^\n]*\n|/\*.*?\*/)\s*)*(['"])ui\1\s*;""", RegexOption.DOT_MATCHES_ALL)
 
     /** A label for the host's task list: control characters removed, trimmed, limited; [fallback] when empty. */
     fun sanitizeLabel(label: String?, fallback: String): String {

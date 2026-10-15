@@ -42,6 +42,7 @@ import org.autojs.plugin.ui.preview.UiPreviewContract
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.json.JsonParser
+import java.io.File
 import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
 import java.util.Locale
@@ -112,6 +113,10 @@ internal class UiPreviewSession(
     private val warnedFunctions = HashSet<String>()
     private var boundsPending = false
     private var highlighted = -1
+    /** The interactive-preview run of the session (contract v2), if a script is running. */
+    private var run: UiPreviewScriptRun? = null
+    private var runCounter = 0
+    private val runDirectory: File get() = File(appContext.cacheDir, "ui-preview/$id")
 
     @Volatile
     var released = false
@@ -192,9 +197,49 @@ internal class UiPreviewSession(
         execution = started
     }
 
+    // ------------------------------------------------------------------------------- interactive preview (v2)
+
+    /**
+     * Runs [text] as a normal `"ui"` mode script in this session's root (3-Block Compose roadmap P10.6); a run that
+     * is still going is replaced first. Throws [UiPreviewRequestException] when the script cannot start.
+     */
+    fun runScript(text: String, name: String): Bundle {
+        stopRun(UiPreviewContract.EXIT_REPLACED)
+        val directory = runDirectory.apply { mkdirs() }
+        val started = UiPreviewScriptRun(appContext, this, "$id-r${++runCounter}", name, text, directory, callback) { ended ->
+            if (run === ended) run = null
+        }
+        if (!started.start()) {
+            throw UiPreviewRequestException(UiPreviewContract.ERROR_SCRIPT_FAILED, started.startFailure ?: "the script could not start")
+        }
+        run = started
+        return Bundle().apply {
+            putString(UiPreviewContract.KEY_OUTCOME, UiPreviewContract.OUTCOME_APPLIED)
+            putString(UiPreviewContract.KEY_RUN_ID, started.runId)
+        }
+    }
+
+    /** Stops the running script, if any; the layout-preview runtime and the root stay. */
+    fun stopScript(): Bundle {
+        val stopped = run?.runId
+        stopRun(UiPreviewContract.EXIT_STOPPED)
+        return Bundle().apply {
+            putString(UiPreviewContract.KEY_OUTCOME, UiPreviewContract.OUTCOME_APPLIED)
+            stopped?.let { putString(UiPreviewContract.KEY_RUN_ID, it) }
+        }
+    }
+
+    private fun stopRun(reason: String) {
+        val current = run ?: return
+        run = null
+        current.stop(reason)
+    }
+
     fun release(reason: String, notify: Boolean) {
         if (released) return
         released = true
+        stopRun(UiPreviewContract.EXIT_RELEASED)
+        runCatching { runDirectory.deleteRecursively() }
         runCatching { execution?.finish() }.onFailure { Log.w(TAG, "[$id] runtime release failed", it) }
         execution = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
