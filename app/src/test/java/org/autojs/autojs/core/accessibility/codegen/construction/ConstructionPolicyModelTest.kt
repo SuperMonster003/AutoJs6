@@ -81,6 +81,26 @@ class ConstructionPolicyModelTest {
     }
 
     @Test
+    fun schemaTwoPoliciesLoadAndSchemaOnePoliciesScoreSchemaTwoVectorsByTheirLeadingColumns() {
+        val second = parse(document().apply {
+            addProperty("grammarVersion", ConstructionFeaturesV2.grammarVersion)
+            addProperty("featureSchemaVersion", ConstructionFeaturesV2.version)
+            addProperty("featureNamesHash", ConstructionFeaturesV2.namesHash)
+            addProperty("featureCount", ConstructionFeaturesV2.names.size)
+        })
+        assertEquals(ConstructionFeaturesV2.names.size, second.model.featureCount)
+        assertThrows(IllegalArgumentException::class.java) { second.score(FloatArray(ConstructionFeatures.names.size)) }
+        val first = parse(document())
+        val extended = FloatArray(ConstructionFeaturesV2.names.size).also { it[0] = 1f; it[1] = 2f; it[it.lastIndex] = 99f }
+        assertEquals(first.score(extended.copyOf(ConstructionFeatures.names.size)), first.score(extended), 0.0)
+        assertEquals(5.5, first.score(extended), 0.0)
+        // A grammar 2 document must declare schema 2, never a mix.
+        assertThrows(IllegalArgumentException::class.java) {
+            parse(document().apply { addProperty("grammarVersion", ConstructionFeaturesV2.grammarVersion) })
+        }
+    }
+
+    @Test
     fun rejectsWrongRoleGrammarSchemaNamesCountAndScoreMeaning() {
         val changes = listOf<JsonObject.() -> Unit>(
             { addProperty("format", 2) },

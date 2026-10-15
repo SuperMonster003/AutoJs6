@@ -13,21 +13,30 @@ import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan.Family
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanReceiver
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanStep
 import org.autojs.autojs.core.accessibility.codegen.plan.SelectorSpec
+import org.autojs.autojs.core.accessibility.codegen.search.CandidateSearch
 import org.autojs.autojs.core.accessibility.codegen.verify.PlanVerifier
 import org.autojs.autojs.core.accessibility.codegen.verify.RejectionReason
 import org.autojs.autojs.core.automator.UiNode
 import java.util.BitSet
 
 /** Offline prototype only. No complete LocatePlan is created until the FINISH action is chosen.
- * zh-CN: 仅离线原型使用. 只有选中 FINISH 动作后才创建完整 LocatePlan. */
+ * Grammar 1 is the frozen five-family grammar of the first four rounds. Grammar 2 (round five) adds
+ * SELF_RELATIVE (target conditions, then an upward and/or sibling relation, then a distinctive content
+ * node of the reached subtree, D22/D23) and first-line prefix conditions (D24); grammar 1 is unchanged.
+ * zh-CN: 仅离线原型使用. 只有选中 FINISH 动作后才创建完整 LocatePlan. 语法 1 为前四轮冻结的五族语法;
+ * 语法 2 (第五轮) 加入 SELF_RELATIVE (目标条件, 向上和/或兄弟关系, 关系可达子树中具区分度的内容节点, D22/D23)
+ * 与首行前缀条件 (D24), 语法 1 保持不变. */
 internal class ConstructionGrammar<N : UiNode<N>>(
     val request: CodeGenRequest<N>,
     val verifier: PlanVerifier<N>,
     val budget: ConstructionBudget,
     private val cancellation: CancellationSignal,
+    val version: Int = GRAMMAR_V1,
     private val checkpoint: () -> Unit,
 ) {
-    enum class Phase { FAMILY, ANCHOR, OUTER, INDEX, PATH, INNER, READY, DONE }
+    /** Grammar 2 phases follow DONE so that the ordinals of grammar 1 phases stay unchanged.
+     * zh-CN: 语法 2 的阶段排在 DONE 之后, 保持语法 1 各阶段的序号不变. */
+    enum class Phase { FAMILY, ANCHOR, OUTER, INDEX, PATH, INNER, READY, DONE, RELATION, CONTENT, MATCH }
 
     data class State(
         val phase: Phase = Phase.FAMILY,
@@ -39,9 +48,13 @@ internal class ConstructionGrammar<N : UiNode<N>>(
         val cursor: Int = -1,
         val index: Int? = null,
         val depth: Int = 0,
+        val grammar: Int = GRAMMAR_V1,
+        val relation: List<PlanStep> = emptyList(),
+        val content: Int = -1,
+        val match: List<Int> = emptyList(),
     ) {
-        val key: String get() = listOf(
-            "g1", phase.name, family?.name.orEmpty(), anchor, outer.joinToString(","),
+        val key: String get() = (listOf(
+            "g$grammar", phase.name, family?.name.orEmpty(), anchor, outer.joinToString(","),
             inner.joinToString(","), path.joinToString(",") {
                 when (it) {
                     is PlanStep.Up -> "u${it.levels}"
@@ -49,7 +62,15 @@ internal class ConstructionGrammar<N : UiNode<N>>(
                     else -> error("Non-path step in a partial path")
                 }
             }, cursor, index ?: "",
-        ).joinToString("|")
+        ) + if (grammar < GRAMMAR_V2) emptyList() else listOf(
+            relation.joinToString(",") {
+                when (it) {
+                    is PlanStep.Up -> "u${it.levels}"
+                    is PlanStep.Sibling -> "s${it.offset}"
+                    else -> error("Non-relation step in a partial relation")
+                }
+            }, content, match.joinToString(","),
+        )).joinToString("|")
     }
 
     sealed interface Operation {
@@ -64,7 +85,15 @@ internal class ConstructionGrammar<N : UiNode<N>>(
         data class Up(val levels: Int) : Operation { override val key = "up:$levels" }
         data class Child(val index: Int) : Operation { override val key = "child:$index" }
         data object Finish : Operation { override val key = "finish" }
+        // Grammar 2 only. zh-CN: 仅语法 2.
+        data class RelationUp(val levels: Int) : Operation { override val key = "relation-up:$levels" }
+        data class Sibling(val offset: Int) : Operation { override val key = "sibling:$offset" }
+        data object EndRelation : Operation { override val key = "end-relation" }
+        data class ChooseContent(val position: Int) : Operation { override val key = "content:$position" }
+        data class AddMatch(val position: Int, val attr: String) : Operation { override val key = "match:$position:$attr" }
     }
+
+    fun initialState() = State(grammar = version)
 
     val tree = verifier.tree
     val positions = tree.nodes.withIndex().associate { it.value to it.index }
@@ -80,6 +109,12 @@ internal class ConstructionGrammar<N : UiNode<N>>(
         private set
     val targets = request.targets.mapNotNull(tree::canonical).distinct()
     val target: N? = targets.firstOrNull()
+    private val targetSet = targets.toSet()
+    private val keptCache = object : LinkedHashMap<Triple<SelectorSpec, List<PlanStep>, SelectorSpec>, List<N>>(64, .75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Triple<SelectorSpec, List<PlanStep>, SelectorSpec>, List<N>>?): Boolean =
+            size > MAX_CACHED_SPECS
+    }
+    private val contentCache = HashMap<List<PlanStep>, List<Int>>()
     val cardinality = if (request.scope == Scope.SINGLE) Cardinality.ONE else Cardinality.ALL
     private val idPackages = HashMap<String, MutableSet<String>>()
     private val nodeConditions = HashMap<Int, List<Condition>>()
@@ -138,14 +173,13 @@ internal class ConstructionGrammar<N : UiNode<N>>(
     fun legal(state: State): List<Operation> {
         checkpoint()
         return when (state.phase) {
-            Phase.FAMILY -> if (request.scope == Scope.SINGLE) listOf(
-                Family.SELF, Family.SELF_INDEX, Family.ANCHOR_PATH, Family.ANCHOR_SEARCH,
-            ).map { Operation.ChooseFamily(it) } else listOf(Family.SELF, Family.CONTAINER_ITEMS).map { Operation.ChooseFamily(it) }
+            Phase.FAMILY -> families().map { Operation.ChooseFamily(it) }
             Phase.ANCHOR -> (if (state.family == Family.ANCHOR_PATH) pathCandidates else ancestorCandidates)
                 .map { Operation.ChooseAnchor(it) }
             Phase.OUTER -> buildList {
                 val source = outerSource(state)
                 for (i in (state.outer.lastOrNull()?.plus(1) ?: 0) until source.size) {
+                    if (impliedPrefix(source, state.outer, i)) continue
                     add(Operation.AddCondition(i, false, source[i].attr))
                 }
                 add(if (state.family == Family.SELF) Operation.Finish else Operation.EndOuter)
@@ -179,13 +213,60 @@ internal class ConstructionGrammar<N : UiNode<N>>(
             }
             Phase.INNER -> buildList {
                 for (i in (state.inner.lastOrNull()?.plus(1) ?: 0) until targetConditions.size) {
+                    if (impliedPrefix(targetConditions, state.inner, i)) continue
                     add(Operation.AddCondition(i, true, targetConditions[i].attr))
                 }
                 add(Operation.Finish)
             }
             Phase.READY -> listOf(Operation.Finish)
             Phase.DONE -> emptyList()
+            Phase.RELATION -> buildList {
+                val origin = target ?: return@buildList
+                val last = state.relation.lastOrNull()
+                if (last == null) {
+                    for (level in 1..minOf(LocatePlan.MAX_RELATION_STEPS, tree.depth(origin))) add(Operation.RelationUp(level))
+                    addSiblings(origin)
+                } else if (last is PlanStep.Up && last.levels < LocatePlan.MAX_RELATION_STEPS) {
+                    // Exactly the rule search's relations: an ancestor, or a sibling of the target or of an ancestor.
+                    // zh-CN: 与规则搜索的关系完全一致: 祖先, 或目标及其祖先的兄弟.
+                    addSiblings(tree.nodes[state.cursor])
+                }
+                if (last != null) add(Operation.EndRelation)
+            }
+            Phase.CONTENT -> contentCandidates(state).map { Operation.ChooseContent(it) }
+            Phase.MATCH -> buildList {
+                val source = contentConditions(tree.nodes[state.content])
+                for (i in (state.match.lastOrNull()?.plus(1) ?: 0) until source.size) {
+                    if (impliedPrefix(source, state.match, i)) continue
+                    add(Operation.AddMatch(i, source[i].attr))
+                }
+                // D23: a nested content condition that also matches a target carries no identity.
+                // zh-CN: D23: 同时匹配目标的嵌套内容条件不携带身份信息.
+                if (state.match.isNotEmpty() && distinctive(matchSpec(state))) add(Operation.Finish)
+            }
         }
+    }
+
+    private fun families(): List<Family> = buildList {
+        if (request.scope == Scope.SINGLE) addAll(listOf(Family.SELF, Family.SELF_INDEX, Family.ANCHOR_PATH, Family.ANCHOR_SEARCH))
+        else addAll(listOf(Family.SELF, Family.CONTAINER_ITEMS))
+        if (version >= GRAMMAR_V2) add(Family.SELF_RELATIVE)
+    }
+
+    private fun MutableList<Operation>.addSiblings(node: N) {
+        val parent = tree.parent(node) ?: return
+        val index = tree.childIndex(node)
+        for (distance in 1..CandidateSearch.SIBLING_RADIUS) for (sign in intArrayOf(1, -1)) {
+            checkpoint()
+            val at = index + sign * distance
+            if (at >= 0 && tree.child(parent, at) != null) add(Operation.Sibling(sign * distance))
+        }
+    }
+
+    /** An exact value already implies its own first-line prefix (D24). zh-CN: 精确值已蕴含其首行前缀 (D24). */
+    private fun impliedPrefix(source: List<Condition>, chosen: List<Int>, candidate: Int): Boolean {
+        val attr = source[candidate].attr
+        return attr.endsWith(PREFIX) && chosen.any { source[it].attr == attr.removeSuffix(PREFIX) }
     }
 
     fun apply(state: State, operation: Operation): State {
@@ -193,17 +274,30 @@ internal class ConstructionGrammar<N : UiNode<N>>(
         val next = when (operation) {
             is Operation.ChooseFamily -> state.copy(
                 family = operation.family,
-                phase = if (operation.family == Family.SELF || operation.family == Family.SELF_INDEX) Phase.OUTER else Phase.ANCHOR,
+                phase = if (operation.family in SELF_FAMILIES) Phase.OUTER else Phase.ANCHOR,
             )
             is Operation.ChooseAnchor -> state.copy(phase = Phase.OUTER, anchor = operation.position, cursor = operation.position)
             is Operation.AddCondition -> if (operation.inner) state.copy(inner = state.inner + operation.position)
                 else state.copy(outer = state.outer + operation.position)
-            Operation.EndOuter -> state.copy(phase = when (state.family) {
+            Operation.EndOuter -> if (state.family == Family.SELF_RELATIVE) {
+                state.copy(phase = Phase.RELATION, cursor = positions.getValue(requireNotNull(target)))
+            } else state.copy(phase = when (state.family) {
                 Family.SELF_INDEX -> Phase.INDEX
                 Family.ANCHOR_PATH -> Phase.PATH
                 Family.ANCHOR_SEARCH, Family.CONTAINER_ITEMS -> Phase.INNER
                 else -> error("Illegal end-outer")
             })
+            is Operation.RelationUp -> state.copy(
+                relation = state.relation + PlanStep.Up(operation.levels),
+                cursor = positions.getValue(requireNotNull(ancestor(tree.nodes[state.cursor], operation.levels))),
+            )
+            is Operation.Sibling -> state.copy(
+                relation = state.relation + PlanStep.Sibling(operation.offset),
+                cursor = positions.getValue(requireNotNull(sibling(tree.nodes[state.cursor], operation.offset))),
+            )
+            Operation.EndRelation -> state.copy(phase = Phase.CONTENT)
+            is Operation.ChooseContent -> state.copy(phase = Phase.MATCH, content = operation.position)
+            is Operation.AddMatch -> state.copy(match = state.match + operation.position)
             is Operation.Index -> state.copy(phase = Phase.READY, index = operation.index)
             is Operation.Up -> {
                 var cursor = tree.nodes[state.cursor]
@@ -227,7 +321,10 @@ internal class ConstructionGrammar<N : UiNode<N>>(
             Family.SELF_INDEX -> listOf(PlanStep.Index(requireNotNull(state.index)))
             Family.ANCHOR_PATH -> state.path
             Family.ANCHOR_SEARCH, Family.CONTAINER_ITEMS -> listOf(PlanStep.Search(innerSpec(state)))
-            Family.SELF_RELATIVE -> error("SELF_RELATIVE is outside the construction grammar")
+            Family.SELF_RELATIVE -> {
+                check(version >= GRAMMAR_V2) { "SELF_RELATIVE is outside grammar 1" }
+                state.relation + PlanStep.Match(matchSpec(state))
+            }
         }
         return LocatePlan(family, outerSpec(state), steps, cardinality, requireNotNull(receiver))
     }
@@ -235,8 +332,87 @@ internal class ConstructionGrammar<N : UiNode<N>>(
     fun outerSource(state: State): List<Condition> = if (state.anchor >= 0) conditions(tree.nodes[state.anchor]) else targetConditions
     fun outerSpec(state: State) = SelectorSpec(state.outer.map(outerSource(state)::get))
     fun innerSpec(state: State) = SelectorSpec(state.inner.map(targetConditions::get))
-    fun condition(state: State, operation: Operation): Condition? = (operation as? Operation.AddCondition)?.let {
-        (if (it.inner) targetConditions else outerSource(state))[it.position]
+    /** The nested content selector of a SELF_RELATIVE state; empty before content is chosen.
+     * zh-CN: SELF_RELATIVE 状态的嵌套内容选择器; 选定内容节点前为空. */
+    fun matchSpec(state: State): SelectorSpec =
+        if (state.content < 0) SelectorSpec() else SelectorSpec(state.match.map(contentConditions(tree.nodes[state.content])::get))
+    fun condition(state: State, operation: Operation): Condition? = when (operation) {
+        is Operation.AddCondition -> (if (operation.inner) targetConditions else outerSource(state))[operation.position]
+        is Operation.AddMatch -> contentConditions(tree.nodes[state.content])[operation.position]
+        else -> null
+    }
+
+    /** Whether no target matches [spec] anywhere in the capture (D23). zh-CN: 捕获中没有目标匹配 [spec] (D23). */
+    fun distinctive(spec: SelectorSpec): Boolean = spec.conditions.isNotEmpty() && matches(spec).none { it in targetSet }
+
+    /**
+     * The entry matches a SELF_RELATIVE state keeps: those whose relation reaches a node whose subtree contains
+     * a match of the nested content selector, evaluated like the verifier on the captured tree. Cached by prefix.
+     * zh-CN: SELF_RELATIVE 状态保留的入口匹配项: 关系到达的节点子树含嵌套内容匹配者, 与验证器在捕获树上的判定一致, 按前缀缓存.
+     */
+    fun relativeKept(state: State): List<N> {
+        val outer = outerSpec(state)
+        val match = matchSpec(state)
+        if (match.conditions.isEmpty()) return emptyList()
+        return keptCache.getOrPut(Triple(outer, state.relation, match)) {
+            val contents = matches(match).map(positions::getValue).sorted().toIntArray()
+            matches(outer).filter { entry ->
+                checkpoint()
+                val reached = navigate(entry, state.relation) ?: return@filter false
+                val start = positions.getValue(reached)
+                val at = lowerBound(contents, start)
+                at < contents.size && contents[at] < subtreeEnd[start]
+            }
+        }
+    }
+
+    fun navigate(start: N, relation: List<PlanStep>): N? {
+        var current = start
+        for (step in relation) {
+            current = when (step) {
+                is PlanStep.Up -> ancestor(current, step.levels)
+                is PlanStep.Sibling -> sibling(current, step.offset)
+                else -> error("Non-relation step")
+            } ?: return null
+        }
+        return current
+    }
+
+    private fun ancestor(node: N, levels: Int): N? {
+        var current: N? = node
+        repeat(levels) { current = current?.let(tree::parent) }
+        return current
+    }
+
+    private fun sibling(node: N, offset: Int): N? {
+        val parent = tree.parent(node) ?: return null
+        val at = tree.childIndex(node) + offset
+        return if (at < 0) null else tree.child(parent, at)
+    }
+
+    fun contentConditions(node: N): List<Condition> = conditions(node).filter { it.attr in CONTENT_ATTRS }
+
+    /**
+     * Content nodes of a finished relation, as in the rule search: the nearest nodes with id, description or
+     * text in the reached subtree, outside the branch that holds the target for a purely upward relation.
+     * zh-CN: 关系完成后的内容节点, 与规则搜索一致: 到达子树中最近的带 id, 描述或文本的节点; 纯向上关系跳过包含目标的分支.
+     */
+    fun contentCandidates(state: State): List<Int> = contentCache.getOrPut(state.relation) {
+        val origin = requireNotNull(target)
+        val reached = tree.nodes[state.cursor]
+        val start = positions.getValue(reached)
+        val excluded = (state.relation.singleOrNull() as? PlanStep.Up)?.let { up -> ancestor(origin, up.levels - 1) }
+        val skipStart = excluded?.let(positions::getValue) ?: -1
+        val skipEnd = if (skipStart >= 0) subtreeEnd[skipStart] else -1
+        val found = ArrayList<Pair<Int, Int>>()
+        var index = start
+        while (index < subtreeEnd[start]) {
+            checkpoint()
+            if (index == skipStart) { index = skipEnd; continue }
+            if (contentConditions(tree.nodes[index]).isNotEmpty()) found += index to distance(tree.nodes[index], origin)
+            index++
+        }
+        found.sortedWith(compareBy({ it.second }, { it.first })).take(CandidateSearch.CONTENT_LIMIT).map { it.first }
     }
 
     /**
@@ -339,6 +515,11 @@ internal class ConstructionGrammar<N : UiNode<N>>(
 
     companion object {
         private const val MAX_CACHED_SPECS = 4_096
+        const val GRAMMAR_V1 = 1
+        const val GRAMMAR_V2 = 2
+        private const val PREFIX = "StartsWith"
+        private val CONTENT_ATTRS = setOf("id", "desc", "descStartsWith", "text", "textStartsWith")
+        private val SELF_FAMILIES = setOf(Family.SELF, Family.SELF_INDEX, Family.SELF_RELATIVE)
     }
 
     private fun receiverForTargets(): PlanReceiver? {
@@ -366,8 +547,14 @@ internal class ConstructionGrammar<N : UiNode<N>>(
                 val entry = fullId.substringAfterLast(":id/")
                 add(Condition("id", if ((idPackages[entry]?.size ?: 0) > 1) fullId else entry))
             }
-            if (Attr.DESC in request.attributes) node.desc()?.takeIf(String::isNotEmpty)?.let { add(Condition("desc", it)) }
-            if (Attr.TEXT in request.attributes) node.text().takeIf(String::isNotEmpty)?.let { add(Condition("text", it)) }
+            if (Attr.DESC in request.attributes) node.desc()?.takeIf(String::isNotEmpty)?.let { desc ->
+                add(Condition("desc", desc))
+                if (version >= GRAMMAR_V2) CandidateSearch.firstLine(desc)?.let { add(Condition("descStartsWith", it)) }
+            }
+            if (Attr.TEXT in request.attributes) node.text().takeIf(String::isNotEmpty)?.let { text ->
+                add(Condition("text", text))
+                if (version >= GRAMMAR_V2) CandidateSearch.firstLine(text)?.let { add(Condition("textStartsWith", it)) }
+            }
             node.className()?.takeIf(String::isNotEmpty)?.let { add(Condition("className", it)) }
             node.packageName()?.takeIf(String::isNotEmpty)?.let { add(Condition("packageName", it)) }
             for ((name, value) in listOf(

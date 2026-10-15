@@ -95,6 +95,17 @@ class ConstructionDataTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unknown requested"):
             dataset.rows_for("future")
 
+    def test_grammar_two_exports_with_feature_schema_two_are_read_but_mixed_versions_are_not(self):
+        original = deepcopy(self.fixture.schema)
+        self.fixture.schema = {**original, "grammarVersion": 2, "featureSchemaVersion": 2}
+        self.fixture.refresh()
+        dataset = read_dataset(self.fixture.root)
+        self.assertEqual((2, 2), (dataset.schema.grammar_version, dataset.schema.version))
+        self.fixture.schema = {**original, "grammarVersion": 2, "featureSchemaVersion": 1}
+        self.fixture.refresh()
+        with self.assertRaisesRegex(ValueError, "Unsupported construction feature schema/grammar version"):
+            read_dataset(self.fixture.root)
+
     def test_roles_versions_names_hash_and_column_order_are_independent_from_ranker(self):
         original = deepcopy(self.fixture.schema)
         for field, value in (("role", "ranker"), ("grammarVersion", True), ("featureSchemaVersion", 2),

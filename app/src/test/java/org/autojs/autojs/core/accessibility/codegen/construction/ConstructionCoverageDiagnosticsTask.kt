@@ -189,6 +189,9 @@ class ConstructionCoverageDiagnosticsTask {
         is Operation.Up -> "UP"
         is Operation.Child -> "CHILD"
         Operation.Finish -> "FINISH"
+        // Grammar 2 operations never occur in this grammar 1 replay. zh-CN: 语法 1 的重放中不会出现语法 2 的动作.
+        is Operation.RelationUp, is Operation.Sibling, Operation.EndRelation, is Operation.ChooseContent, is Operation.AddMatch ->
+            error("Grammar 2 operation in a grammar 1 replay")
     }
     private fun strings(values: List<String>) = JsonArray().apply { values.forEach(::add) }
 }

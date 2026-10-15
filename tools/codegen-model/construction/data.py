@@ -15,6 +15,8 @@ from train.data import sha256
 
 
 SPLITS = ("train", "valid", "test", "real-test", "real-train")
+# (grammarVersion, featureSchemaVersion) pairs of the Kotlin construction exporters.
+SUPPORTED_GRAMMARS = ((1, 1), (2, 2))
 # Real applications are split by app (roadmap D25): real-train may join fitting, real-test only evaluates.
 REAL_SPLITS = ("real-train", "real-test")
 PREFIX = ("split", "groupId", "stateKey", "actionKey", "label", "observations")
@@ -73,8 +75,9 @@ def read_schema(path):
     value = read_json(path)
     require_fields(value, ("format", "role", "grammarVersion", "featureSchemaVersion", "names", "namesHash"),
                    description="construction feature schema")
-    if any(type(value[field]) is not int or value[field] != 1
-           for field in ("format", "grammarVersion", "featureSchemaVersion")):
+    # Grammar 1 uses feature schema 1; grammar 2 (round five: relative family and first-line prefixes) uses schema 2.
+    if (any(type(value[field]) is not int for field in ("format", "grammarVersion", "featureSchemaVersion"))
+            or value["format"] != 1 or (value["grammarVersion"], value["featureSchemaVersion"]) not in SUPPORTED_GRAMMARS):
         raise ValueError("Unsupported construction feature schema/grammar version")
     if value["role"] != "construction-state-action":
         raise ValueError("Feature role must be construction-state-action")

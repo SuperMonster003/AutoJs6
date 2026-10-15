@@ -104,7 +104,14 @@ class ConstructionSearch<N : UiNode<N>>(
     private val verifier: PlanVerifier<N> = PlanVerifier(root, cancellation),
     private val nanoTime: () -> Long = System::nanoTime,
     private val frontierMode: ConstructionFrontierMode = ConstructionFrontierMode.FAMILY_SCORE,
+    /** Grammar 2 adds SELF_RELATIVE and first-line prefixes and uses feature schema 2 (round five).
+     * zh-CN: 语法 2 加入 SELF_RELATIVE 与首行前缀, 并使用特征 schema 2 (第五轮). */
+    private val grammarVersion: Int = ConstructionGrammar.GRAMMAR_V1,
 ) {
+    init {
+        require(grammarVersion in ConstructionGrammar.GRAMMAR_V1..ConstructionGrammar.GRAMMAR_V2) { "Unknown construction grammar version" }
+    }
+
     fun search(request: CodeGenRequest<N>): ConstructionResult<N> = Session(request).run()
 
     private class Stop(val reason: ConstructionStopReason) : RuntimeException(null, null, false, false)
@@ -173,13 +180,13 @@ class ConstructionSearch<N : UiNode<N>>(
                 checkpoint()
                 if (verifier.tree.nodes.size > budget.maxCapturedNodes) throw Stop(ConstructionStopReason.CAPTURE_LIMIT)
                 if (budget.maxAttempts == 0) throw Stop(ConstructionStopReason.VERIFICATION_BUDGET)
-                grammar = ConstructionGrammar(request, verifier, budget, cancellation, ::checkpoint)
+                grammar = ConstructionGrammar(request, verifier, budget, cancellation, grammarVersion, ::checkpoint)
                 grammar.initialRejection?.let {
                     closest = Rejected(it)
                     rejections[it] = 1
                     throw Stop(ConstructionStopReason.INVALID_REQUEST)
                 }
-                frontier += Prefix(State(), emptyList(), 0.0, "")
+                frontier += Prefix(grammar.initialState(), emptyList(), 0.0, "")
                 peak = 1
                 while (frontier.isNotEmpty()) {
                     checkpoint()
@@ -203,7 +210,10 @@ class ConstructionSearch<N : UiNode<N>>(
                             scores++
                             val next = grammar.apply(prefix.state, action)
                             val featureStart = nanoTime()
-                            val features = try { ConstructionFeatures.extract(grammar, prefix.state, action, next) }
+                            val features = try {
+                                if (grammarVersion >= ConstructionGrammar.GRAMMAR_V2) ConstructionFeaturesV2.extract(grammar, prefix.state, action, next)
+                                else ConstructionFeatures.extract(grammar, prefix.state, action, next)
+                            }
                                 finally { featureNanos += (nanoTime() - featureStart).coerceAtLeast(0) }
                             checkpoint()
                             policyCalls++
@@ -256,7 +266,8 @@ class ConstructionSearch<N : UiNode<N>>(
         }
 
         private fun enqueueBatch(pending: List<PendingPrefix>) {
-            val families = if (request.scope == CodeGenRequest.Scope.SINGLE) 4 else 2
+            val families = (if (request.scope == CodeGenRequest.Scope.SINGLE) 4 else 2) +
+                (if (grammarVersion >= ConstructionGrammar.GRAMMAR_V2) 1 else 0)
             val quota = budget.maxFrontier / families
             // Near-tie bands depend on the group's maximum. Trimming after every sibling would
             // discard an entry that belongs to the winning band once later siblings are scored.
@@ -414,6 +425,19 @@ class ConstructionSearch<N : UiNode<N>>(
                 if (reduced is Verified) current = reduced
                 if (attempts >= budget.maxAttempts) return current
             }
+            (current.plan.steps.lastOrNull() as? PlanStep.Match)?.let { match ->
+                // As in the rule search, a relative match stays distinctive (D23); empty never is.
+                // zh-CN: 与规则搜索相同, 相对匹配须保持区分度 (D23), 空条件从不满足.
+                for (i in match.selector.conditions.indices.reversed()) {
+                    val steps = current.plan.steps
+                    val remaining = (steps.last() as PlanStep.Match).selector.conditions.toMutableList().apply { removeAt(i) }
+                    if (!grammar.distinctive(SelectorSpec(remaining))) continue
+                    val reduced = checkPlan(copy(current.plan, steps = steps.dropLast(1) + PlanStep.Match(SelectorSpec(remaining))))
+                    if (reduced is Verified) current = reduced
+                    if (attempts >= budget.maxAttempts) return current
+                }
+                return current
+            }
             val search = current.plan.steps.singleOrNull() as? PlanStep.Search ?: return current
             for (i in search.selector.conditions.indices.reversed()) {
                 val inner = (current.plan.steps.single() as PlanStep.Search).selector.conditions.toMutableList().apply { removeAt(i) }
@@ -434,7 +458,11 @@ class ConstructionSearch<N : UiNode<N>>(
         fun canonicalKey(plan: LocatePlan): String {
             fun spec(value: SelectorSpec) = SelectorSpec(value.conditions.sortedWith(compareBy({ it.attr }, { it.value.toString() })))
             return copy(plan, selector = spec(plan.selector), steps = plan.steps.map {
-                if (it is PlanStep.Search) PlanStep.Search(spec(it.selector)) else it
+                when (it) {
+                    is PlanStep.Search -> PlanStep.Search(spec(it.selector))
+                    is PlanStep.Match -> PlanStep.Match(spec(it.selector))
+                    else -> it
+                }
             }).planKey
         }
 

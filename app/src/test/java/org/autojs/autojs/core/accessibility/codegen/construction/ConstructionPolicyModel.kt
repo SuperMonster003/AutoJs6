@@ -14,9 +14,19 @@ import java.nio.charset.CodingErrorAction
  * [scoreSemantics] names the supervised target the policy predicts; both supported targets are
  * comparable completion values of one state, never sums across construction steps.
  * zh-CN: 仅离线原型使用. scoreSemantics 声明策略预测的监督目标; 两种目标都是单个状态的完成价值, 不跨步骤累加. */
-class ConstructionPolicyModel private constructor(val model: ObliviousTreeModel, val scoreSemantics: String) : ConstructionPolicy {
-    /** Completion-value prediction, without clipping or summing scores from different states. */
-    override fun score(features: FloatArray): Double = model.score(features)
+class ConstructionPolicyModel private constructor(
+    val model: ObliviousTreeModel,
+    val scoreSemantics: String,
+    val featureSchemaVersion: Int = ConstructionFeatures.version,
+) : ConstructionPolicy {
+    /** Completion-value prediction, without clipping or summing scores from different states. A schema 1
+     * policy scores a schema 2 vector by its leading columns, which keep their schema 1 meaning (round five).
+     * zh-CN: 预测完成价值, 不截断也不累加不同状态的分数. schema 1 策略以前缀列为 schema 2 向量打分, 这些列保持 schema 1 的含义 (第五轮). */
+    override fun score(features: FloatArray): Double = model.score(
+        if (featureSchemaVersion == ConstructionFeatures.version && features.size == ConstructionFeaturesV2.count) {
+            features.copyOf(ConstructionFeatures.count)
+        } else features,
+    )
 
     companion object {
         const val MAX_FILE_BYTES = 32 * 1024 * 1024
@@ -58,7 +68,7 @@ class ConstructionPolicyModel private constructor(val model: ObliviousTreeModel,
                     reader.isLenient = false
                     val document = readDocument(reader)
                     require(reader.peek() == JsonToken.END_DOCUMENT) { "Trailing construction policy content" }
-                    return ConstructionPolicyModel(document.toModel(), document.scoreSemantics)
+                    return ConstructionPolicyModel(document.toModel(), document.scoreSemantics, document.featureSchemaVersion)
                 }
             } catch (error: IOException) {
                 throw IllegalArgumentException("Invalid construction policy JSON", error)
@@ -78,10 +88,16 @@ class ConstructionPolicyModel private constructor(val model: ObliviousTreeModel,
             fun toModel(): ObliviousTreeModel {
                 require(format == 1) { "Unsupported construction policy format" }
                 require(role == "construction-policy") { "Model does not declare the construction-policy role" }
-                require(grammarVersion == ConstructionFeatures.grammarVersion) { "Construction grammar version differs" }
-                require(featureSchemaVersion == ConstructionFeatures.version) { "Construction feature schema version differs" }
-                require(featureNamesHash == ConstructionFeatures.namesHash) { "Construction feature names hash differs" }
-                require(featureCount == ConstructionFeatures.names.size) { "Construction feature count differs" }
+                // Grammar 1 uses feature schema 1; grammar 2 (round five) uses feature schema 2.
+                // zh-CN: 语法 1 使用特征 schema 1, 语法 2 (第五轮) 使用特征 schema 2.
+                val (names, hash) = when (grammarVersion) {
+                    ConstructionFeatures.grammarVersion -> ConstructionFeatures.names to ConstructionFeatures.namesHash
+                    ConstructionFeaturesV2.grammarVersion -> ConstructionFeaturesV2.names to ConstructionFeaturesV2.namesHash
+                    else -> throw IllegalArgumentException("Construction grammar version differs")
+                }
+                require(featureSchemaVersion == grammarVersion) { "Construction feature schema version differs" }
+                require(featureNamesHash == hash) { "Construction feature names hash differs" }
+                require(featureCount == names.size) { "Construction feature count differs" }
                 require(scoreSemantics in SUPPORTED_SCORE_SEMANTICS) { "Construction policy score semantics are not supported" }
                 return ObliviousTreeModel(featureCount, model.depths, model.splitOffsets, model.leafOffsets,
                     model.featureIndices, model.thresholds, model.leafValues, model.bias, model.scale)
