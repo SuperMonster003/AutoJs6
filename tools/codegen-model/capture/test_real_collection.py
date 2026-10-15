@@ -1,13 +1,15 @@
 import json
 import os
 from pathlib import Path
+import subprocess
 import tempfile
 import time
 import unittest
 from unittest.mock import Mock, patch
 
 from capture.real_device import PrivateAdb, RealCaptureWorker, list_devices
-from capture.real_store import CollectionStore, WorkspaceLock, inspect_snapshot, private_write_json
+from capture.real_store import (CollectionStore, NOTE_HISTORY_LIMIT, WorkspaceLock,
+                                inspect_snapshot, private_write_json)
 from dataset.task_io import load_group, read_json, write_json
 
 APP = "example.app"
@@ -48,6 +50,121 @@ class PrivateCollectionCase(unittest.TestCase):
 
 
 class RealCollectionTest(PrivateCollectionCase):
+    def test_delete_state_removes_only_its_snapshot_and_does_not_reuse_ids(self):
+        for i, order in enumerate((("A", "B", "C"), ("B", "A", "C"), ("B", "C", "A"))):
+            self.add(order)
+            self.store.confirm(self.gid, i, [i + 1], "" if i == 0 else "reorder")
+        original = self.store.load(self.gid)
+        removed = self.store.folder(self.gid) / original["states"][1]["snapshot"]
+        result = self.store.delete_state(self.gid, 1)
+        self.assertFalse(removed.exists())
+        self.assertEqual(["s0", "s2"], [s["stateId"] for s in result["states"]])
+        self.assertEqual([original["states"][0], original["states"][2]], result["states"])
+        result = self.add(("C", "A", "B"))
+        self.assertEqual(["s0", "s2", "s3"], [s["stateId"] for s in result["states"]])
+        for i in range(3):
+            self.store.read_state(result, i)
+
+    def test_deleting_baseline_requires_new_notes_and_confirmation(self):
+        for i, order in enumerate((("A", "B", "C"), ("B", "A", "C"), ("B", "C", "A"))):
+            self.add(order)
+            self.store.confirm(self.gid, i, [i + 1], "" if i == 0 else "reorder")
+        result = self.store.delete_state(self.gid, 0)
+        self.assertEqual([[[1]], [[2]]], [s["targets"] for s in result["states"]])
+        self.assertTrue(all(s["confirmedAt"] is None and s["note"] == "" for s in result["states"]))
+        with self.assertRaises(ValueError):
+            self.store.export(self.gid)
+
+    def test_legacy_draft_can_delete_all_states_and_resume_without_reusing_ids(self):
+        self.add()
+        session = self.add(("B", "A", "C"))
+        del session["nextStateNumber"]
+        self.store.save(session)
+        self.store.delete_state(self.gid, 1)
+        self.store.delete_state(self.gid, 0)
+        self.assertEqual([], self.store.load(self.gid)["states"])
+        self.assertEqual("s2", self.add()["states"][0]["stateId"])
+
+    def test_delete_state_write_failure_preserves_live_snapshot(self):
+        session = self.add()
+        path = self.store.folder(self.gid) / session["states"][0]["snapshot"]
+        before = path.read_bytes()
+        with patch("capture.real_store.private_write_json", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError):
+                self.store.delete_state(self.gid, 0)
+        self.assertEqual(before, path.read_bytes())
+        self.assertEqual(1, len(self.store.load(self.gid)["states"]))
+
+    def test_delete_state_unlink_failure_keeps_valid_references_and_reports_error(self):
+        session = self.add()
+        path = self.store.folder(self.gid) / session["states"][0]["snapshot"]
+        with patch.object(Path, "unlink", side_effect=OSError("file locked")):
+            with self.assertRaisesRegex(OSError, "状态已从草稿移除"):
+                self.store.delete_state(self.gid, 0)
+        self.assertEqual([], self.store.load(self.gid)["states"])
+        self.assertTrue(path.exists())
+
+    def test_delete_draft_removes_its_folder_without_touching_other_drafts(self):
+        self.add()
+        another = self.store.create(app=APP, title="Another task")
+        folder = self.store.folder(self.gid)
+        self.store.delete_draft(self.gid)
+        self.assertFalse(folder.exists())
+        self.assertEqual(another["groupId"], self.store.load(another["groupId"])["groupId"])
+        self.assertEqual(1, self.store.report()["drafts"])
+
+    def test_exported_group_and_states_cannot_be_deleted(self):
+        task = self.complete()
+        before = {p: p.read_bytes() for p in task.parent.rglob("*") if p.is_file()}
+        for operation in (lambda: self.store.delete_draft(self.gid), lambda: self.store.delete_state(self.gid, 0)):
+            with self.assertRaises(ValueError):
+                operation()
+        self.assertEqual(before, {p: p.read_bytes() for p in task.parent.rglob("*") if p.is_file()})
+
+    def make_directory_link(self, link, target):
+        try:
+            link.symlink_to(target, target_is_directory=True)
+        except OSError:
+            if os.name != "nt":
+                raise
+            env = dict(os.environ, CODEGEN_LINK_TEST=str(link), CODEGEN_LINK_TARGET=str(target))
+            subprocess.run(["powershell", "-NoProfile", "-Command",
+                            "New-Item -ItemType Junction -Path $env:CODEGEN_LINK_TEST -Target $env:CODEGEN_LINK_TARGET | Out-Null"],
+                           env=env, check=True, capture_output=True)
+
+    def test_deletion_rejects_nested_junction_and_other_group_alias_before_removing_anything(self):
+        self.add()
+        other = self.store.create(app=APP, title="Other")
+        other_folder = self.store.folder(other["groupId"])
+        link = self.store.folder(self.gid) / "external"
+        self.make_directory_link(link, other_folder)
+        with self.assertRaises(ValueError):
+            self.store.delete_draft(self.gid)
+        self.assertEqual(1, len(self.store.load(self.gid)["states"]))
+        self.assertEqual(other["groupId"], self.store.load(other["groupId"])["groupId"])
+        alias_id = "real-" + "0" * 32
+        self.make_directory_link(self.store.sessions / alias_id, other_folder)
+        with self.assertRaises(ValueError):
+            self.store.delete_draft(alias_id)
+        self.assertTrue(other_folder.exists())
+
+    def test_note_history_is_recent_unique_bounded_persistent_and_preserves_device(self):
+        self.store.update_preferences(serial="Sony", anotherPreference=True)
+        for i in range(NOTE_HISTORY_LIMIT + 5):
+            self.store.remember_note(f"变化 {i}")
+        expected = [f"变化 {i}" for i in range(NOTE_HISTORY_LIMIT + 4, 4, -1)]
+        self.assertEqual(expected, self.store.note_history())
+        self.store.remember_note("  变化 9  ")
+        self.store.remember_note("  ")
+        expected.remove("变化 9")
+        expected.insert(0, "变化 9")
+        resumed = CollectionStore(self.root)
+        self.assertEqual(expected, resumed.note_history())
+        self.assertEqual("Sony", resumed.preferences()["serial"])
+        self.assertTrue(resumed.preferences()["anotherPreference"])
+        resumed.update_preferences(serial="another device")
+        self.assertEqual(expected, resumed.note_history())
+
     def test_resume_keeps_unconfirmed_states_and_never_exports_a_proposal(self):
         self.add()
         self.store.confirm(self.gid, 0, [1], "")
@@ -332,6 +449,133 @@ class RealDeviceTest(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("CODEGEN_COLLECTOR_GUI_TEST") == "1", "Opt-in desktop UI smoke test")
 class RealCollectorGuiTest(PrivateCollectionCase):
+    def create_app(self):
+        import tkinter as tk
+        from capture.real_gui import CollectorApp
+        window = tk.Tk()
+        window.withdraw()
+        self.addCleanup(window.destroy)
+        app = CollectorApp(window, self.store, auto_refresh=False)
+        return window, app
+
+    def wait_job(self, window, app):
+        deadline = time.monotonic() + 5
+        while app.busy and time.monotonic() < deadline:
+            window.update()
+            time.sleep(0.01)
+        self.assertFalse(app.busy)
+        window.update()
+
+    def test_preview_without_task_never_creates_a_group_and_disables_task_actions(self):
+        window, app = self.create_app()
+        before = {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+        adb = Mock()
+        adb.foreground_package.return_value = APP
+        app.selected_adb = Mock(return_value=adb)
+        app.read_phone_layout = Mock(return_value=(snapshot(), {}))
+        app.preview_current()
+        self.wait_job(window, app)
+        self.assertIsNone(app.session)
+        self.assertIsNotNone(app.preview_return)
+        self.assertEqual(4, len(app.nodes))
+        self.assertTrue(app.confirm_button.instate(["disabled"]))
+        self.assertTrue(app.export_button.instate(["disabled"]))
+        self.assertTrue(app.capture_button.instate(["disabled"]))
+        with self.assertRaises(ValueError):
+            app.confirm()
+        self.assertEqual(before, {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()})
+        app.return_to_task()
+        self.assertIsNone(app.preview_return)
+        self.assertEqual([], app.nodes)
+
+    def test_preview_preserves_unsaved_selection_note_query_and_can_refresh_other_app(self):
+        window, app = self.create_app()
+        self.add()
+        app.open_session(self.gid)
+        app.selected = {2}
+        app.query.set("B")
+        app.note.set("尚未确认的说明")
+        app.render_nodes()
+        window.update()
+        before = (self.store.folder(self.gid) / "session.json").read_bytes()
+        adb = Mock()
+        adb.foreground_package.return_value = "another.app"
+        app.selected_adb = Mock(return_value=adb)
+        app.read_phone_layout = Mock(return_value=(snapshot(package="another.app"), {}))
+        app.preview_current()
+        self.wait_job(window, app)
+        self.assertIn("another.app", app.state_text.get())
+        app.read_phone_layout.assert_called_once_with(adb, "another.app")
+        self.assertTrue(app.delete_state_button.instate(["disabled"]))
+        app.preview_current()
+        self.wait_job(window, app)
+        app.return_to_task()
+        window.update()
+        self.assertEqual({2}, app.selected)
+        self.assertEqual("B", app.query.get())
+        self.assertEqual("尚未确认的说明", app.note.get())
+        self.assertEqual(before, (self.store.folder(self.gid) / "session.json").read_bytes())
+        self.assertIn("尚未确认的说明", self.store.note_history())
+        self.assertTrue(app.confirm_button.instate(["!disabled"]))
+
+    def test_preview_failure_leaves_task_view_intact(self):
+        window, app = self.create_app()
+        self.add()
+        app.open_session(self.gid)
+        app.selected = {1}
+        app.error = Mock()
+        adb = Mock()
+        adb.foreground_package.side_effect = RuntimeError("device disconnected")
+        app.selected_adb = Mock(return_value=adb)
+        app.preview_current()
+        self.wait_job(window, app)
+        self.assertIsNone(app.preview_return)
+        self.assertEqual({1}, app.selected)
+        self.assertEqual(self.gid, app.session["groupId"])
+        app.error.assert_called_once()
+
+    def test_deletion_buttons_cancel_or_remove_and_reload_selection(self):
+        window, app = self.create_app()
+        self.add()
+        self.add(("B", "A", "C"))
+        app.open_session(self.gid, 1)
+        with patch("capture.real_gui.messagebox.askyesno", return_value=False):
+            app.delete_state()
+            app.delete_draft()
+        self.assertEqual(2, len(self.store.load(self.gid)["states"]))
+        with patch("capture.real_gui.messagebox.askyesno", return_value=True):
+            app.delete_state()
+        self.wait_job(window, app)
+        self.assertEqual(0, app.state_index)
+        self.assertEqual(1, len(app.session["states"]))
+        with patch("capture.real_gui.messagebox.askyesno", return_value=True):
+            app.delete_state()
+        self.wait_job(window, app)
+        self.assertIsNone(app.state_index)
+        self.assertTrue(app.delete_state_button.instate(["disabled"]))
+        with patch("capture.real_gui.messagebox.askyesno", return_value=True):
+            app.delete_draft()
+        self.wait_job(window, app)
+        self.assertIsNone(app.session)
+        self.assertEqual([], app.group_ids)
+        self.assertEqual(0, app.report_data["drafts"])
+
+    def test_note_history_saves_unconfirmed_input_on_navigation_and_keeps_device_preference(self):
+        window, app = self.create_app()
+        self.add()
+        self.add(("B", "A", "C"))
+        app.open_session(self.gid, 0)
+        app.note.set("输入但尚未确认")
+        app.show_state(1)
+        window.update()
+        self.assertIn("输入但尚未确认", app.note_entry["values"])
+        self.assertIsNone(self.store.load(self.gid)["states"][0]["confirmedAt"])
+        app.devices = {"phone": {"serial": "Sony"}}
+        app.device.set("phone")
+        app.remember_device()
+        self.assertEqual(["输入但尚未确认"], self.store.note_history())
+        self.assertEqual("Sony", self.store.preferences()["serial"])
+
     def test_desktop_import_selection_confirmation_resume_and_background_job(self):
         import tkinter as tk
         from capture.real_gui import CollectorApp
@@ -382,9 +626,10 @@ class RealCollectorGuiTest(PrivateCollectionCase):
         for size in ("1360x880", "1040x700"):
             window.geometry(size)
             window.update()
-            button = app.confirm_button
-            self.assertTrue(button.winfo_ismapped())
-            self.assertLessEqual(button.winfo_rooty() + button.winfo_height(),
-                                 window.winfo_rooty() + window.winfo_height())
-            self.assertLessEqual(button.winfo_rootx() + button.winfo_width(),
-                                 window.winfo_rootx() + window.winfo_width())
+            for button in (app.confirm_button, app.preview_button, app.return_button,
+                           app.delete_draft_button, app.delete_state_button):
+                self.assertTrue(button.winfo_ismapped())
+                self.assertLessEqual(button.winfo_rooty() + button.winfo_height(),
+                                     window.winfo_rooty() + window.winfo_height())
+                self.assertLessEqual(button.winfo_rootx() + button.winfo_width(),
+                                     window.winfo_rootx() + window.winfo_width())

@@ -9,6 +9,8 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
+import stat
 import uuid
 
 from dataset.task_io import (ACTIONS, ATTRIBUTES, SCOPES, load_group, nonempty_string,
@@ -19,6 +21,7 @@ from label.label_real import flatten, recommend
 PACKAGE = re.compile(r"[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)+\Z")
 IDENTITY = re.compile(r"real-[a-f0-9]{32}\Z")
 MAX_SNAPSHOT_BYTES = 32 * 1024 * 1024
+NOTE_HISTORY_LIMIT = 20
 
 
 def now():
@@ -91,10 +94,120 @@ class CollectionStore:
     def folder(self, group_id):
         if not isinstance(group_id, str) or not IDENTITY.fullmatch(group_id):
             raise ValueError("无效的采集任务编号。")
-        folder = private_path(self.sessions / group_id)
-        if folder.parent != self.sessions:
+        expected = self.sessions / group_id
+        folder = private_path(expected)
+        if folder != expected or folder.parent != self.sessions:
             raise ValueError("任务目录不能链接到其他位置。")
         return folder
+
+    def preferences(self):
+        path = private_path(self.root / "collector" / "preferences.json")
+        value = read_json(path) if path.exists() else {}
+        if not isinstance(value, dict):
+            raise ValueError("采集助手偏好设置格式无效。")
+        return value
+
+    def update_preferences(self, **changes):
+        preferences = self.preferences()
+        preferences.update(changes)
+        private_write_json(self.root / "collector" / "preferences.json", preferences)
+
+    def note_history(self):
+        values = self.preferences().get("noteHistory", [])
+        if not isinstance(values, list):
+            raise ValueError("变化说明历史格式无效。")
+        history = []
+        for value in values:
+            if isinstance(value, str) and value.strip():
+                value = nonempty_string(value.strip(), "变化说明")
+                if value not in history:
+                    history.append(value)
+        return history[:NOTE_HISTORY_LIMIT]
+
+    def remember_note(self, note):
+        note = note.strip()
+        history = self.note_history()
+        if note:
+            nonempty_string(note, "变化说明")
+            history = [note] + [value for value in history if value != note]
+            self.update_preferences(noteHistory=history[:NOTE_HISTORY_LIMIT])
+        return history[:NOTE_HISTORY_LIMIT]
+
+    @staticmethod
+    def next_state_number(session):
+        # Preserve a high-water mark when states are deleted, including older drafts.
+        counter = session.get("nextStateNumber", 0)
+        if type(counter) is not int or counter < 0:
+            raise ValueError("草稿状态计数无效。")
+        for state in session["states"]:
+            match = re.fullmatch(r"s(\d+)", state["stateId"])
+            if not match:
+                raise ValueError("草稿状态编号无效。")
+            counter = max(counter, int(match[1]) + 1)
+        return counter
+
+    @staticmethod
+    def baseline(session):
+        return next((s["stateId"] for s in session["states"] if not s["excluded"]), None)
+
+    def reset_changed_baseline(self, session, previous):
+        if self.baseline(session) != previous:
+            for state in session["states"]:
+                if not state["excluded"]:
+                    # Keep the previous node choices for review, but old relative notes no longer apply.
+                    state.update(confirmedAt=None, note="")
+
+    def require_draft(self, group_id):
+        if self.export_path(group_id).exists():
+            raise ValueError("已导出的任务已经冻结, 不能删除草稿或状态。")
+
+    def owned_path(self, path, folder):
+        """Reject links/junctions before deleting; every resolved component must stay in this task."""
+        path = Path(path)
+        resolved = private_path(path)
+        if resolved != path or not resolved.is_relative_to(folder):
+            raise ValueError("删除路径必须位于当前任务目录内, 且不能是链接。")
+        current = path
+        while current != folder.parent:
+            info = current.lstat()
+            if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+                raise ValueError("删除路径不能包含符号链接或目录联接。")
+            current = current.parent
+        return resolved
+
+    def delete_draft(self, group_id):
+        self.require_draft(group_id)
+        self.load(group_id)
+        folder = self.folder(group_id)
+        self.owned_path(folder, folder)
+        # Validate the complete tree before the first removal, including abandoned captures.
+        for directory, dirs, files in os.walk(folder, followlinks=False):
+            for name in dirs + files:
+                self.owned_path(Path(directory) / name, folder)
+        shutil.rmtree(folder)
+
+    def delete_state(self, group_id, index):
+        self.require_draft(group_id)
+        session = self.load(group_id)
+        if type(index) is not int or not 0 <= index < len(session["states"]):
+            raise ValueError("请选择需要删除的状态。")
+        folder = self.folder(group_id)
+        state = session["states"][index]
+        path = self.owned_path(folder / state["snapshot"], folder)
+        if not path.is_relative_to(folder / "snapshots"):
+            raise ValueError("只能删除本任务 snapshots 目录中的布局。")
+        previous = self.baseline(session)
+        session["nextStateNumber"] = self.next_state_number(session)
+        del session["states"][index]
+        self.reset_changed_baseline(session, previous)
+        # Commit references first: a failed metadata write must never destroy a live snapshot.
+        self.save(session)
+        if all(s["snapshot"] != state["snapshot"] for s in session["states"]):
+            try:
+                path.unlink()
+            except OSError as error:
+                raise OSError("状态已从草稿移除, 但布局文件未能删除: " + str(path)) from error
+        return session
 
     def create(self, *, app, title, scope="single", action="none", receiver="auto", attributes=ATTRIBUTES):
         if not isinstance(app, str) or not PACKAGE.fullmatch(app):
@@ -161,7 +274,9 @@ class CollectionStore:
         fingerprint = tree_digest(root)
         if any(s["treeSha256"] == fingerprint and not s["excluded"] for s in session["states"]):
             raise ValueError("布局与已有状态完全相同。请先改变列表顺序、内容、语言或页面结构。")
-        state_id = f"s{len(session['states'])}"
+        number = self.next_state_number(session)
+        state_id = f"s{number}"
+        session["nextStateNumber"] = number + 1
         relative = f"snapshots/{state_id}-{uuid.uuid4().hex[:12]}.layout.json"
         destination = private_path(self.folder(group_id) / relative)
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -222,8 +337,10 @@ class CollectionStore:
 
     def exclude(self, group_id, index, excluded=True):
         session = self.load(group_id)
+        previous = self.baseline(session)
         # Restoring requires a fresh explicit confirmation, avoiding stale labels/counts.
         session["states"][index].update(excluded=excluded, targets=None, confirmedAt=None)
+        self.reset_changed_baseline(session, previous)
         self.save(session)
         return session
 
