@@ -45,6 +45,24 @@ object BatchRenameValues {
     const val CONFLICT_OVERWRITE = "overwrite"
     val CONFLICT_POLICIES: List<String> = listOf(CONFLICT_FAIL, CONFLICT_SKIP, CONFLICT_NUMBER, CONFLICT_OVERWRITE)
 
+    // Pinyin tones (BatchRenameOptionKeys.PINYIN_TONE): none ("zhang"), tone marks ("zhāng") or numbers ("zhang1").
+    const val PINYIN_TONE_NONE = "none"
+    const val PINYIN_TONE_MARK = "mark"
+    const val PINYIN_TONE_NUMBER = "number"
+    val PINYIN_TONES: List<String> = listOf(PINYIN_TONE_NONE, PINYIN_TONE_MARK, PINYIN_TONE_NUMBER)
+
+    // Pinyin syllable separators (BatchRenameOptionKeys.PINYIN_SEPARATOR).
+    const val PINYIN_SEPARATOR_NONE = "none"
+    const val PINYIN_SEPARATOR_SPACE = "space"
+    const val PINYIN_SEPARATOR_UNDERSCORE = "underscore"
+    const val PINYIN_SEPARATOR_HYPHEN = "hyphen"
+    val PINYIN_SEPARATORS: List<String> = listOf(PINYIN_SEPARATOR_NONE, PINYIN_SEPARATOR_SPACE, PINYIN_SEPARATOR_UNDERSCORE, PINYIN_SEPARATOR_HYPHEN)
+
+    // Pinyin letter case (BatchRenameOptionKeys.PINYIN_CASE): "zhangsan" or "ZhangSan".
+    const val PINYIN_CASE_LOWER = "lower"
+    const val PINYIN_CASE_CAPITALIZE = "capitalize"
+    val PINYIN_CASES: List<String> = listOf(PINYIN_CASE_LOWER, PINYIN_CASE_CAPITALIZE)
+
     const val DEFAULT_CONFLICT_NUMBER_PATTERN = " ({n})"
     const val CONFLICT_NUMBER_PLACEHOLDER = "{n}"
     const val DEFAULT_SANITIZE_REPLACEMENT = "_"
@@ -101,5 +119,7 @@ object BatchRenameValues {
     const val FEATURE_RANDOM = "random"
     /** Normalization, half-width conversion, sanitizing, trimming and continued numbering. */
     const val FEATURE_CLEANUP = "cleanup"
-    val FEATURES: List<String> = listOf(FEATURE_COUNTER, FEATURE_DATE_TIME, FEATURE_RANDOM, FEATURE_CLEANUP)
+    /** The `pinyin*` options and the `${pinyin}` variable (plugin 1.1.0). */
+    const val FEATURE_PINYIN = "pinyin"
+    val FEATURES: List<String> = listOf(FEATURE_COUNTER, FEATURE_DATE_TIME, FEATURE_RANDOM, FEATURE_CLEANUP, FEATURE_PINYIN)
 }

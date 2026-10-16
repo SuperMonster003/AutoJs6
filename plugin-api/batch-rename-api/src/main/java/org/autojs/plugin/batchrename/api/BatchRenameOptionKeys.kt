@@ -75,4 +75,22 @@ object BatchRenameOptionKeys {
 
     /** String: suffix pattern of the number policy, `{n}` is the number; default [BatchRenameValues.DEFAULT_CONFLICT_NUMBER_PATTERN]. */
     const val CONFLICT_NUMBER_PATTERN = "conflictNumberPattern"
+
+    // Pinyin ([BatchRenameValues.FEATURE_PINYIN]); a plugin without the feature ignores these keys, so the host only
+    // sends them to plugins that declare it. The style keys also shape the `${pinyin}` variable.
+
+    /** Boolean: convert the Chinese characters of the new name to pinyin (after the replacement, before [FORMAT]); default false. */
+    const val PINYIN = "pinyin"
+
+    /** String: `PINYIN_TONE_*` of [BatchRenameValues]; default [BatchRenameValues.PINYIN_TONE_NONE]. */
+    const val PINYIN_TONE = "pinyinTone"
+
+    /** String: `PINYIN_SEPARATOR_*` of [BatchRenameValues], placed between syllables; default [BatchRenameValues.PINYIN_SEPARATOR_NONE]. */
+    const val PINYIN_SEPARATOR = "pinyinSeparator"
+
+    /** String: `PINYIN_CASE_*` of [BatchRenameValues]; default [BatchRenameValues.PINYIN_CASE_LOWER]. */
+    const val PINYIN_CASE = "pinyinCase"
+
+    /** Boolean: keep only the first letter of every syllable; default false. */
+    const val PINYIN_INITIALS = "pinyinInitials"
 }

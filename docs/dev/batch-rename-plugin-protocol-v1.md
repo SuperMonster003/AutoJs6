@@ -28,7 +28,7 @@ path additionally uses Explorer Action protocol v25 (`explorer-action-protocol-v
 | Package | `io.github.supermonster003.autojs6.plugin.batch.rename` |
 
 `PluginInfo.capabilities` carries `requiresHostVersion` (Long), `batchRenameContractVersion` (Int),
-`batchRenameFeatures` (String array, a subset of `counter`, `dateTime`, `random`, `cleanup`),
+`batchRenameFeatures` (String array, a subset of `counter`, `dateTime`, `random`, `cleanup`, `pinyin`),
 `batchRenameMaxItems` (Int) and `batchRenameRegexDialect` (`ecmascript`). The host calls `plan` only
 when the advertised contract version lies in its own supported range.
 
@@ -79,6 +79,15 @@ Options (missing keys take the PowerRename defaults of roadmap D17):
 | `sanitizeReplacement` | String | `_` |
 | `onConflict` | `fail`, `skip`, `number`, `overwrite` | `fail` |
 | `conflictNumberPattern` | String containing `{n}` | ` ({n})` |
+| `pinyin` | Boolean: convert Chinese characters to pinyin (after the replacement, before `format`) | `false` |
+| `pinyinTone` | `none`, `mark`, `number` | `none` |
+| `pinyinSeparator` | `none`, `space`, `underscore`, `hyphen` (between syllables) | `none` |
+| `pinyinCase` | `lower`, `capitalize` | `lower` |
+| `pinyinInitials` | Boolean: only the first letter of each syllable | `false` |
+
+The `pinyin*` keys (contract 1, added with plugin 1.1.0) also style the `${pinyin}` variable of the replacement.
+Hosts send them only to plugins whose `batchRenameFeatures` contain `pinyin`; older plugins ignore unknown keys,
+so a script that asks for pinyin from such a plugin fails with `PLUGIN_INCOMPATIBLE` instead.
 
 Regular expressions follow ECMAScript exactly, like `RegExp` in scripts: `g` comes from `matchAll`
 and `i` from the absence of `caseSensitive`; the replacement supports `$1`, `$<name>`, `$&`,
