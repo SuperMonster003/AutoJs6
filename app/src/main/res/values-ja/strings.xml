@@ -2337,6 +2337,8 @@
     <string name="text_plugin_activated">有効</string>
     <string name="text_plugin_activation_recommended">有効化を推奨</string>
     <string name="text_plugin_additional_variants">その他のプラグインバリアント</string>
+    <string name="text_plugin_attention_enable_failed">有効化に失敗</string>
+    <string name="text_plugin_attention_new_install">新規インストール</string>
     <string name="text_plugin_authorization_denied">許可が拒否されました</string>
     <string name="text_plugin_authorization_required">許可が必要</string>
     <string name="text_plugin_authorized">許可済み</string>

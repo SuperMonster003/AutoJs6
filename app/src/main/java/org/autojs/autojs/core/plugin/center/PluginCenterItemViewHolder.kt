@@ -58,6 +58,7 @@ class PluginCenterItemViewHolder(
     private val downloadButton = itemViewBinding.downloadButton
 
     private val updatableBadgeView = itemViewBinding.updatableBadge
+    private val attentionBadgeView = itemViewBinding.attentionBadge
     private val versionInfoForUpdateView = itemViewBinding.versionInfoForUpdate
 
     private val btnDeleteView = itemViewBinding.btnDelete
@@ -73,6 +74,21 @@ class PluginCenterItemViewHolder(
         val actionIconSize = context.resources.getDimensionPixelSize(R.dimen.plugin_center_action_icon_size)
         listOf(btnDeleteView, btnUpdateView, btnSettingsView, btnDetailsView).forEach { actionView ->
             actionView.resizeStartCompoundDrawable(actionIconSize)
+        }
+    }
+
+    private fun bindAttentionBadge(attention: PluginCenterAttention?) {
+        attentionBadgeView.isVisible = attention != null
+        when (attention) {
+            null -> Unit
+            PluginCenterAttention.NEW_INSTALL -> {
+                attentionBadgeView.setText(R.string.text_plugin_attention_new_install)
+                attentionBadgeView.setTextColor(adjustedTextContrastColor)
+            }
+            PluginCenterAttention.ENABLE_FAILED -> {
+                attentionBadgeView.setText(R.string.text_plugin_attention_enable_failed)
+                attentionBadgeView.setTextColor(context.getColor(R.color.dialog_button_caution))
+            }
         }
     }
 
@@ -165,6 +181,7 @@ class PluginCenterItemViewHolder(
             ImageViewCompat.setImageTintList(downloadButton, ColorStateList.valueOf(context.getColor(R.color.text_color_primary_alpha_50)))
         }
 
+        bindAttentionBadge(item.attention)
         titleView.text = item.title.takeUnless { it.isBlank() }
             ?: "[ ${context.getString(R.string.text_unknown_title_for_plugin)} ]"
         versionInfoView.text = item.versionSummary.takeUnless { it.isBlank() }

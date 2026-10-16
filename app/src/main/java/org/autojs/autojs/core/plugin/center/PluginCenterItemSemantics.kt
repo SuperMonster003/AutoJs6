@@ -75,6 +75,7 @@ object PluginCenterItemSemantics {
                 && a.iconBackgroundColor == b.iconBackgroundColor
                 && a.nightIconBackgroundColor == b.nightIconBackgroundColor
                 && a.iconSignature == b.iconSignature
+                && a.attention == b.attention
     }
 
     private fun haveSameInstallationState(a: PluginCenterItem, b: PluginCenterItem): Boolean {

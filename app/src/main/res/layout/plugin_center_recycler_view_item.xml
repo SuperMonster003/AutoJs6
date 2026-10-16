@@ -52,6 +52,19 @@
                     tools:text="Paddle OCR (PP-OCRv5)" />
 
                 <android.widget.TextView
+                    android:id="@+id/attention_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:maxLines="1"
+                    android:padding="2sp"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:text="@string/text_plugin_attention_new_install"
+                    tools:visibility="visible" />
+
+                <android.widget.TextView
                     android:id="@+id/updatable_badge"
                     android:layout_width="@dimen/plugin_center_item_side_length"
                     android:layout_height="wrap_content"

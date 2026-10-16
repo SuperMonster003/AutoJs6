@@ -2338,6 +2338,8 @@
     <string name="text_plugin_activated">مفعّل</string>
     <string name="text_plugin_activation_recommended">يوصى بالتفعيل</string>
     <string name="text_plugin_additional_variants">متغيرات الاضافات الاخرى</string>
+    <string name="text_plugin_attention_enable_failed">فشل التفعيل</string>
+    <string name="text_plugin_attention_new_install">مثبت حديثا</string>
     <string name="text_plugin_authorization_denied">تم رفض التفويض</string>
     <string name="text_plugin_authorization_required">يتطلب تفويضا</string>
     <string name="text_plugin_authorized">مفوّض</string>

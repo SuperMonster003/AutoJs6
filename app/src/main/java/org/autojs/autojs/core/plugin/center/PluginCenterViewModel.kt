@@ -98,6 +98,10 @@ class PluginCenterViewModel : ViewModel() {
     private val installedRepo = InstalledPluginRepository()
     private val legacyRepo = LegacyInstalledPluginRepository()
     private val legacyRefreshState = PluginCenterLegacyRefreshState<LegacyInstalledPluginRepository.LegacyInstalledPlugin>()
+    private val installedRefreshState = PluginCenterInstalledRefreshState<InstalledPluginRepository.InstalledPlugin>(
+        packageOf = { it.packageName },
+        buildOf = { it.versionCode to it.lastUpdateTime },
+    )
     private val enableStore = PluginEnableStore
     private val iconRenderModeTracker = PluginIconRenderModeTracker()
 
@@ -111,6 +115,11 @@ class PluginCenterViewModel : ViewModel() {
 
     private val _toastMessage = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val toastMessage: SharedFlow<String> = _toastMessage
+
+    // Plugins installed while Plugin Center was closed, found by the comparison of PluginCenterAttentionStore.
+    // zh-CN: 插件中心关闭期间装入的插件, 由 PluginCenterAttentionStore 的比对发现.
+    private val _freshInstalls = MutableSharedFlow<List<String>>(extraBufferCapacity = 8)
+    val freshInstalls: SharedFlow<List<String>> = _freshInstalls
 
     private var loadGeneration: Long = 0L
     private var loadJob: Job? = null
@@ -174,7 +183,7 @@ class PluginCenterViewModel : ViewModel() {
             // Render their merged result before starting complete discovery.
             // zh-CN: 两个操作均只访问磁盘或 PackageManager, 不绑定插件进程.
             // 在完整发现开始前优先渲染二者的合并结果.
-            val (cachedIndexEntries, installedSnapshot) = coroutineScope {
+            val (cachedIndexEntries, installedSnapshotResult) = coroutineScope {
                 val cachedIndex = async {
                     runCatching {
                         indexRepo.getCachedIndex(
@@ -189,7 +198,7 @@ class PluginCenterViewModel : ViewModel() {
                         emitRefreshError(message)
                     }.getOrElse { emptyList() }
                 }
-                val localSnapshot = async {
+                val localSnapshot = async<List<InstalledPluginRepository.InstalledPlugin>?> {
                     runCatching {
                         installedRepo.discoverInstalledSnapshot(context)
                     }.onFailure { error ->
@@ -203,11 +212,17 @@ class PluginCenterViewModel : ViewModel() {
                             "Failed to create installed plugin snapshot: ${error.message ?: error.javaClass.simpleName}.",
                         )
                         emitRefreshError(message)
-                    }.getOrElse { emptyList() }
+                    }.getOrNull()
                 }
                 cachedIndex.await() to localSnapshot.await()
             }
             if (!isLatestLoad()) return@load
+            if (installedSnapshotResult != null) {
+                // Before the first render, so a plugin installed while Plugin Center was closed is pinned at once.
+                // zh-CN: 在首次渲染之前比对, 使插件中心关闭期间装入的插件立即置顶.
+                reportFreshInstalls(context, PluginCenterAttentionLedger.SOURCE_AIDL, installedSnapshotResult.associate { it.packageName to it.firstInstallTime })
+            }
+            val installedSnapshot = installedSnapshotResult.orEmpty()
 
             PluginCenterProcessLogger.i("Cached plugin index entries loaded: count=${cachedIndexEntries.size}.")
             PluginCenterProcessLogger.i("Installed plugin snapshot created: count=${installedSnapshot.size}.")
@@ -232,7 +247,9 @@ class PluginCenterViewModel : ViewModel() {
             // 任一阶段完成后都立即更新当前列表, 无需等待其他阶段.
             coroutineScope {
                 val stateMutex = Mutex()
-                var currentInstalled = installedSnapshot
+                // A refresh keeps the complete entries already on screen until its own complete discovery finishes.
+                // zh-CN: 刷新在自身完整发现完成前沿用屏幕上已有的完整条目.
+                var currentInstalled = installedRefreshState.baseline(installedSnapshot)
                 var currentLegacyInstalled = retainedLegacySnapshot
                 var currentIndexEntries = cachedIndexEntries
 
@@ -279,7 +296,7 @@ class PluginCenterViewModel : ViewModel() {
                     }.getOrNull()
                     if (result != null) {
                         PluginCenterProcessLogger.i("Installed AIDL plugins discovered: count=${result.size}.")
-                        publish(installedUpdate = result)
+                        publish(installedUpdate = installedRefreshState.complete(result))
                     }
                 }
 
@@ -296,6 +313,9 @@ class PluginCenterViewModel : ViewModel() {
                     }.getOrNull()
                     if (result != null) {
                         PluginCenterProcessLogger.i("Installed legacy SDK plugins discovered: count=${result.size}.")
+                        if (isLatestLoad()) {
+                            reportFreshInstalls(context, PluginCenterAttentionLedger.SOURCE_LEGACY, result.associate { it.packageName to it.firstInstallTime })
+                        }
                         publish(legacyUpdate = result)
                     }
                 }
@@ -343,6 +363,14 @@ class PluginCenterViewModel : ViewModel() {
             if (generation == loadGeneration && !_indexLoaded.value) {
                 _indexLoaded.value = true
             }
+        }
+    }
+
+    private fun reportFreshInstalls(context: Context, source: String, observed: Map<String, Long?>) {
+        val fresh = PluginCenterAttentionStore.reconcile(context, source, observed)
+        if (fresh.isNotEmpty()) {
+            PluginCenterProcessLogger.i("Plugins installed while Plugin Center was closed: $fresh.")
+            _freshInstalls.tryEmit(fresh)
         }
     }
 

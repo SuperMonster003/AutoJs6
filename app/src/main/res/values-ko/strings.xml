@@ -2338,6 +2338,8 @@
     <string name="text_plugin_activated">활성화됨</string>
     <string name="text_plugin_activation_recommended">활성화 권장</string>
     <string name="text_plugin_additional_variants">기타 플러그인 변형</string>
+    <string name="text_plugin_attention_enable_failed">활성화 실패</string>
+    <string name="text_plugin_attention_new_install">새로 설치됨</string>
     <string name="text_plugin_authorization_denied">권한 거부됨</string>
     <string name="text_plugin_authorization_required">권한 필요</string>
     <string name="text_plugin_authorized">권한 부여됨</string>

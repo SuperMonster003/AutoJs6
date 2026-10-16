@@ -2333,6 +2333,8 @@
     <string name="text_plugin_activated">已激活</string>
     <string name="text_plugin_activation_recommended">建议激活</string>
     <string name="text_plugin_additional_variants">其他插件变体</string>
+    <string name="text_plugin_attention_enable_failed">启用失败</string>
+    <string name="text_plugin_attention_new_install">新安装</string>
     <string name="text_plugin_authorization_denied">授权拒绝</string>
     <string name="text_plugin_authorization_required">需要授权</string>
     <string name="text_plugin_authorized">已授权</string>

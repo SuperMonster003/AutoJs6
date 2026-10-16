@@ -103,6 +103,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     private var currentFilterState = PluginFilterStore.defaultFilterState()
     private val sortPolicy = PluginCenterSortPolicy()
     private val actionPositionPolicy = PluginCenterActionPositionPolicy()
+
+    // Whether the user is in this Plugin Center session; pins shown meanwhile are consumed when it ends (tab switch,
+    // closed page). Visiting another Activity or the background does not end it.
+    // zh-CN: 用户是否处于本次插件中心会话; 期间展示的置顶在会话结束 (切换标签, 关闭页面) 时消耗. 访问其他 Activity 或进入后台不结束会话.
+    private var attentionSessionActive = true
     private var renderedSortSelection: SortSelection? = null
 
     private val sortPrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
@@ -350,6 +355,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
         }
 
+        // Plugins installed while Plugin Center was closed are only pinned: they keep their enable policy, as other
+        // installations outside Plugin Center do.
+        // zh-CN: 插件中心关闭期间装入的插件只置顶: 与其他在插件中心之外的安装一样保留原有启用策略.
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.freshInstalls.collect { renderList() }
+        }
+
         // Subscribe to recoverable loading exceptions for user-initiated pull-to-refresh.
         // zh-CN: 订阅用户手动下拉刷新时的可恢复加载异常.
         viewLifecycleOwner.lifecycleScope.launch {
@@ -432,6 +444,30 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    /**
+     * The Plugin Center tab became visible again. zh-CN: 插件中心标签页再次可见.
+     */
+    fun onAttentionSessionStarted() {
+        if (attentionSessionActive) return
+        attentionSessionActive = true
+        if (_binding != null) renderList()
+    }
+
+    /**
+     * The user left Plugin Center (another tab or the page closed): the pins shown in this session are consumed.
+     * zh-CN: 用户离开插件中心 (切换到其他标签或关闭页面): 消耗本次会话展示过的置顶.
+     */
+    fun onAttentionSessionEnded() {
+        if (!attentionSessionActive) return
+        attentionSessionActive = false
+        val ctx = context ?: return
+        if (PluginCenterAttentionStore.endSession(ctx) && _binding != null) renderList()
+    }
+
+    private fun markEnableFailedAfterInstall(packageName: String) {
+        if (PluginCenterAttentionStore.markEnableFailed(contextRef, packageName) && _binding != null) renderList()
+    }
+
     private fun retainActionPosition(item: PluginCenterItem) {
         if (_binding == null || !::adapter.isInitialized) return
         actionPositionPolicy.retain(item.packageName, adapter.items())
@@ -485,7 +521,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
         val filtered = filteredByQuery.filter { actionPositionPolicy.isRetained(it.packageName) || matchesCurrentFilter(it) }
 
-        val sorted = actionPositionPolicy.apply(filtered.sortedWith(comparator))
+        val pins = PluginCenterAttentionStore.pins(contextRef)
+        if (attentionSessionActive) {
+            PluginCenterAttentionStore.markSeen(contextRef, PluginCenterAttentionPolicy.presentPins(visibleItems, pins))
+        }
+        val sorted = actionPositionPolicy.apply(
+            PluginCenterAttentionPolicy.apply(filtered.sortedWith(comparator), pins, actionPositionPolicy::isRetained),
+        )
 
         if (sorted.isEmpty() || isInitialViewportReady) {
             pendingInitialRenderItems = null
@@ -985,16 +1027,23 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 // runtime still reads the saved record, so adb sideloads stay disabled.
                 // zh-CN: 默认关闭的引擎仅对宿主官方签名自动启用; 运行时仍只读取已保存的记录, adb 侧装保持关闭.
                 val canAutoEnable = PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(item.engine, item.authorizedState)
-                if (!canAutoEnable || item.isEnabled || PluginNativeAlignmentPolicy.needsWarning(
+                if (!canAutoEnable || item.isEnabled) return@launch
+                if (PluginNativeAlignmentPolicy.needsWarning(
                         item.nativePageAlignment, org.autojs.autojs.core.plugin.nativealign.NativePageSize.current(),
-                    )) return@launch
+                    )) {
+                    markEnableFailedAfterInstall(packageName)
+                    return@launch
+                }
                 if (item.isAwaitingFreshInstallProbe()) {
                     vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope)
                     return@repeat
                 }
                 val requiresHostVersion = item.requiresHostVersion
                 val hostVersion = item.hostVersionCode ?: BuildConfig.VERSION_CODE.toLong()
-                if (requiresHostVersion != null && hostVersion < requiresHostVersion) return@launch
+                if (requiresHostVersion != null && hostVersion < requiresHostVersion) {
+                    markEnableFailedAfterInstall(packageName)
+                    return@launch
+                }
 
                 when (item.mechanism) {
                     PluginMechanism.SDK -> enableLegacyPlugin(item)
@@ -1043,6 +1092,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             // zh-CN: 替换安装 (更新) 不记录 "最近安装", 但会刷新.
                             if (!replacing) {
                                 PluginRecentStore.setLastInstalled(packageName)
+                                PluginCenterAttentionStore.recordFreshInstall(context, packageName)
                                 vm.load(context, forceRefreshIndex = false, sourceScope = sourceScope)
                                 scheduleAutoEnableAfterInstall(packageName)
                                 return
@@ -1063,6 +1113,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             // zh-CN: 替换卸载 (更新前阶段) 不记录 "最近卸载".
                             if (!replacing) {
                                 PluginRecentStore.setLastUninstalled(packageName)
+                                PluginCenterAttentionStore.forget(context, packageName)
                                 vm.load(context, forceRefreshIndex = false, sourceScope = sourceScope)
                                 return
                             }
@@ -1144,6 +1195,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private fun isNightModeEnabled(): Boolean = ViewUtils.isNightModeEnabled
+
+    override fun onDestroy() {
+        // Closing the page (or the main page) ends the session; recreating it for a configuration change does not.
+        // zh-CN: 关闭页面 (或主页面) 会结束会话; 因配置变化而重建不会.
+        if (activity?.isChangingConfigurations != true) onAttentionSessionEnded()
+        super.onDestroy()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

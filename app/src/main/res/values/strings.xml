@@ -2332,6 +2332,8 @@
     <string name="text_plugin_activated">Activated</string>
     <string name="text_plugin_activation_recommended">Activation recommended</string>
     <string name="text_plugin_additional_variants">Other plugin variants</string>
+    <string name="text_plugin_attention_enable_failed">Enable failed</string>
+    <string name="text_plugin_attention_new_install">Newly installed</string>
     <string name="text_plugin_authorization_denied">Authorization denied</string>
     <string name="text_plugin_authorization_required">Authorization required</string>
     <string name="text_plugin_authorized">Authorized</string>

@@ -84,6 +84,10 @@ data class PluginCenterItem(
     val hostVersionCode: Long? = null,
     val nativePageAlignment: Long? = null,
     val updatableNativePageAlignment: Long? = null,
+
+    // Set by Plugin Center while the row is temporarily pinned (PluginCenterAttentionPolicy), never by discovery.
+    // zh-CN: 仅在条目被临时置顶时由插件中心设置 (PluginCenterAttentionPolicy), 发现过程从不设置.
+    val attention: PluginCenterAttention? = null,
 ) {
     val versionSummary: String = PluginVersionSummaryFormatter.format(versionName, versionCode, versionDate)
 
