@@ -850,6 +850,21 @@
             </intent-filter>
         </activity>
 
+        <!-- Project zips handed over by plugins (3-Block Compose folder projects): explicit intents only. -->
+        <!-- zh-CN: 插件交来的工程 zip (3-Block Compose 文件夹工程), 只接受显式 Intent. -->
+        <activity
+            android:name="org.autojs.autojs.external.open.RunProjectIntentActivity"
+            android:exported="true"
+            android:label="@string/text_run_script"
+            android:taskAffinity="org.autojs.autojs.external.open.RunIntentActivity"
+            android:theme="@style/AppTheme.Transparent" />
+
+        <activity
+            android:name="org.autojs.autojs.external.open.ImportProjectIntentActivity"
+            android:exported="true"
+            android:label="@string/text_import_script"
+            android:theme="@style/AppTheme.Transparent" />
+
         <service
             android:name="org.autojs.autojs.core.notification.NotificationListenerService"
             android:exported="false"
