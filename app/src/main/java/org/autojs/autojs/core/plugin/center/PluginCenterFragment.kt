@@ -14,14 +14,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
@@ -291,6 +294,14 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             excludePaddingClippableViewFromBottomNavigationBar()
         }
 
+        // RecyclerView keeps the first visible row anchored, so a row inserted or moved above it (a pinned plugin) would
+        // land above the viewport: follow it while the list is at the top.
+        // zh-CN: RecyclerView 会锚定第一个可见行, 插入或移动到其上方的行 (置顶插件) 会落在可视区上方: 列表位于顶部时跟随显示.
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) = followRowAboveTheTop(positionStart)
+            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) = followRowAboveTheTop(toPosition)
+        })
+
         listSubmitter = PluginCenterFrameChunkedListSubmitter(
             submitList = adapter::updateData,
             postNextFrame = binding.pluginCenterRecyclerView::postOnAnimation,
@@ -465,6 +476,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         attentionSessionActive = false
         val ctx = context ?: return
         if (PluginCenterAttentionStore.endSession(ctx) && _binding != null) renderList()
+    }
+
+    private fun followRowAboveTheTop(position: Int) {
+        val list = _binding?.pluginCenterRecyclerView ?: return
+        if (position == 0 && !list.canScrollVertically(-1)) list.scrollToPosition(0)
     }
 
     private fun markEnableFailedAfterInstall(packageName: String) {
@@ -1021,8 +1037,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             repeat(8) { index ->
                 delay(if (index == 0) 500L else 700L)
                 if (!isAdded || _binding == null) return@launch
+                // The first rows of a load come from the package snapshot, which never binds the plugin: judge the
+                // installation once the complete discovery has shown whether the plugin answers.
+                // zh-CN: 一次加载的最初几行来自不绑定插件的包快照: 待完整发现确认插件能否响应后再判断这次安装.
+                if (withTimeoutOrNull(AUTO_ENABLE_DISCOVERY_TIMEOUT_MS) { vm.indexLoaded.first { it } } == null) return@launch
+                if (!isAdded || _binding == null) return@launch
 
-                val item = latestFullItems.firstOrNull { it.packageName == packageName && it.isInstalled } ?: return@repeat
+                val item = vm.items.value.firstOrNull { it.packageName == packageName && it.isInstalled } ?: return@repeat
                 // Official Agent installations are enabled by the shared default policy, including
                 // installs completed while this page was stopped. Never override a saved opt-out.
                 if (item.engine == ThreeStoveAgentIds.ENGINE && item.authorizedState == PluginAuthorizedState.OFFICIAL) return@launch
@@ -1293,6 +1314,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         private const val ARG_INITIAL_QUERY = "arg_initial_query"
         private const val NIGHT_MODE_ICON_REFRESH_DELAY_MS = 120L
         private const val SWIPE_REFRESH_MAX_VISIBLE_MS = 8_000L
+        private const val AUTO_ENABLE_DISCOVERY_TIMEOUT_MS = 20_000L
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
         private val BARCODE_SERVICE_ENGINES = setOf("mlkit-barcode")
         private val AUTO_ENABLE_RETRYABLE_ERROR_CODES = setOf(
