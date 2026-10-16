@@ -154,7 +154,8 @@ R 与 A 互不依赖 (A4 的诊断码除外), R 先做 (工作量小, 插件 P11
 
 ### A1 元数据
 
-- [ ] 生成器与 `android-attrs.json` (API 24 - 37 起始 API, 公开过滤, AndroidX / Material `app:` 属性); 体积记录; `--check`; JVM 读取与查询单测.
+- [x] 生成器与 `android-attrs.json` (API 24 - 37 起始 API, 公开过滤, AndroidX / Material `app:` 属性); 体积记录; `--check`; JVM 读取与查询单测.
+  证据 (2026-10-16): `.python/generate_android_attrs.py --sdk <SDK> [--gradle-home <GRADLE_USER_HOME>] [--check]`: SDK `android-24` ... `android-36`, `android-37.0` 的 `attrs.xml` 逐级比对 (属性只在 `public.xml` / `public-final.xml` / `public-staging.xml` 公开时计入, 起始 API 为第一次以公开属性出现在该 styleable 的平台), 格式与枚举 / 标志值取自最新平台; `android.jar` 的 `android.widget` / `android.view` / `android.webkit` 类名决定保留哪些 styleable (`<Name>` 为类自身, `<Name>_Layout` / `<Name>_MarginLayout` 为其子视图的布局参数); AAR (appcompat 1.7.1, cardview 1.0.0, constraintlayout 2.2.1, coordinatorlayout 1.1.0, drawerlayout 1.1.1, recyclerview 1.4.0, swiperefreshlayout 1.1.0, material 1.13.0; 版本按 `appDebugRuntimeClasspath` 的解析结果) 的 `values.xml` 与 `classes.jar` 同理, 其中引用的 `android:` 属性沿用 SDK 定义; ConstraintLayout 写作 `format="flags"` 的属性按 `flag` 读. 输出 `app/src/main/assets/ui/android-attrs.json` 126787 B (621 个 `android:` 属性, 808 个 `app:` 属性, 153 个 styleable, 154 个类键), `--check` 输出 `ANDROID_ATTRS_OK`. 运行时 `core/ui/inflater/AndroidAttributeTable` (Gson 解析, 资产懒加载一次): 按类链取成员 (近者优先, 结果按类缓存), 按父容器取布局参数成员, `find` / `findLayout` 先按给定前缀再回退 `android` / `app`. 测试: `.python/test_generate_android_attrs.py` 4 项 (定义与 styleable, 库属性引用 `android:` 与 `flags` 别名, 32 位标志), JVM `AndroidAttributeTableTest` 4 项 (TextView 自身与继承属性及起始 API, gravity / visibility 取值, LinearLayout / RelativeLayout / ConstraintLayout / CoordinatorLayout 的布局参数, AppCompatTextView 的库属性与前缀回退) 通过.
 
 ### A2 View 属性兜底
 
