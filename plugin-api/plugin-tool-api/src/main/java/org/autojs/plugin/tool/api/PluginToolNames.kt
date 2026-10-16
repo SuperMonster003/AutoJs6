@@ -26,19 +26,25 @@ object PluginToolNames {
         "agent", "autojs", "autojs6", "host", "plugin", "plugins", "tool", "tools", "mcp",
     )
 
+    @JvmStatic
     fun isValidShortName(shortName: String): Boolean = SHORT_NAME_PATTERN.matches(shortName)
 
+    @JvmStatic
     fun isReservedShortName(shortName: String): Boolean = shortName in RESERVED_SHORT_NAMES
 
+    @JvmStatic
     fun isValidToolName(name: String): Boolean = TOOL_NAME_PATTERN.matches(name)
 
     /** The name consumers see. */
+    @JvmStatic
     fun fullName(shortName: String, name: String): String = "${shortName}_$name"
 
     /** True when [fullName] still fits after MCP clients put [PluginToolLimits.MCP_TOOL_NAME_PREFIX] before it. */
+    @JvmStatic
     fun fitsMcpName(fullName: String): Boolean = fullName.length <= PluginToolLimits.MAX_FULL_NAME_CHARS
 
     /** The short name and the tool name of [fullName], or null when it is not `<shortName>_<name>` with valid parts. */
+    @JvmStatic
     fun split(fullName: String): Pair<String, String>? {
         val separator = fullName.indexOf('_')
         if (separator <= 0) return null

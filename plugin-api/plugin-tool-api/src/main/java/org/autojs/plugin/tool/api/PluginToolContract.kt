@@ -20,6 +20,7 @@ object PluginToolContract {
     const val MIN_CONTRACT_VERSION = 1
     const val MAX_CONTRACT_VERSION = 1
 
+    @JvmStatic
     fun supportsContractVersion(version: Int): Boolean = version in MIN_CONTRACT_VERSION..MAX_CONTRACT_VERSION
 }
 

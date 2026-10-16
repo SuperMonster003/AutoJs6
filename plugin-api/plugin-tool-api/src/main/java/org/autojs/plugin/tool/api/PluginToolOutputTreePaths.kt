@@ -10,6 +10,7 @@ package org.autojs.plugin.tool.api
 object PluginToolOutputTreePaths {
 
     /** Null when [relativePath] is acceptable, otherwise why not. */
+    @JvmStatic
     fun problemOf(relativePath: String): String? {
         if (relativePath.isEmpty()) return "the path is empty"
         if (relativePath.startsWith("/")) return "the path is absolute"
