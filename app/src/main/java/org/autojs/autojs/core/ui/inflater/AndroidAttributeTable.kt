@@ -92,6 +92,15 @@ class AndroidAttributeTable private constructor(root: JsonObject) {
 
     fun findLayout(parentClass: Class<*>, namespace: String?, name: String): Member? = lookup(layoutMembersOf(parentClass), namespace, name)
 
+    /** The classes the table lists styleables for, sorted: view classes, or ([layout]) containers of layout params. */
+    fun classNames(layout: Boolean = false): List<String> =
+        classes.keys.filter { it.endsWith(LAYOUT_SUFFIX) == layout }.map { it.removeSuffix(LAYOUT_SUFFIX) }.sorted()
+
+    /** The attributes the styleables of [className] itself define (not inherited), by key `namespace:name` (A5 coverage). */
+    fun ownMembersOf(className: String, layout: Boolean = false): Map<String, Member> = LinkedHashMap<String, Member>().apply {
+        classes[className + if (layout) LAYOUT_SUFFIX else ""]?.forEach { key -> styleables[key]?.forEach { (name, member) -> putIfAbsent(name, member) } }
+    }
+
     private fun lookup(members: Map<String, Member>, namespace: String?, name: String): Member? {
         namespace?.let { members["$it:$name"]?.let { member -> return member } }
         return members["android:$name"] ?: members["app:$name"]

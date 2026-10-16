@@ -93,22 +93,7 @@ class AndroidAttributeFallback(private val table: AndroidAttributeTable, private
 
     /** Sets the first setter or field of [params] that takes the value; false when the params have none for [attr]. */
     private fun setLayoutMember(params: ViewGroup.LayoutParams, attr: AndroidAttributeTable.Attr, values: Values, value: String): Boolean {
-        val members = layoutMembers.getOrPut(params.javaClass.name + "|" + attr.qualifiedName) {
-            val property = AndroidLayoutParamRules.property(attr.name)
-            val kinds = Kind.preferred(attr.formats)
-            fun rank(type: Class<*>) = kinds.indexOfFirst { it.accepts(type) }
-            val names = AndroidAttributeSetters.candidates(property) + ("set" + property.replaceFirstChar { it.uppercaseChar() } + "Id")
-            val setters = names.flatMap { candidate ->
-                params.javaClass.methods
-                    .filter { !Modifier.isStatic(it.modifiers) && it.parameterTypes.size == 1 && it.name.equals(candidate, ignoreCase = true) }
-                    .filter { rank(it.parameterTypes[0]) >= 0 }
-                    .sortedBy { rank(it.parameterTypes[0]) }
-            }
-            val fields = params.javaClass.fields.filter {
-                !Modifier.isStatic(it.modifiers) && !Modifier.isFinal(it.modifiers) && it.name.equals(property, ignoreCase = true) && rank(it.type) >= 0
-            }
-            (setters + fields).distinct()
-        }
+        val members = layoutMembersOf(params.javaClass, attr)
         if (members.isEmpty()) return false
         var reason: String? = null
         for (member in members) {
@@ -124,6 +109,25 @@ class AndroidAttributeFallback(private val table: AndroidAttributeTable, private
         }
         throw IllegalArgumentException(reason ?: "no member of ${params.javaClass.simpleName} takes it")
     }
+
+    /** The public setters and fields of [paramsClass] that may take the layout attribute [attr], in the order they are tried. */
+    internal fun layoutMembersOf(paramsClass: Class<*>, attr: AndroidAttributeTable.Attr): List<Member> =
+        layoutMembers.getOrPut(paramsClass.name + "|" + attr.qualifiedName) {
+            val property = AndroidLayoutParamRules.property(attr.name)
+            val kinds = Kind.preferred(attr.formats)
+            fun rank(type: Class<*>) = kinds.indexOfFirst { it.accepts(type) }
+            val names = AndroidAttributeSetters.candidates(property) + ("set" + property.replaceFirstChar { it.uppercaseChar() } + "Id")
+            val setters = names.flatMap { candidate ->
+                paramsClass.methods
+                    .filter { !Modifier.isStatic(it.modifiers) && it.parameterTypes.size == 1 && it.name.equals(candidate, ignoreCase = true) }
+                    .filter { rank(it.parameterTypes[0]) >= 0 }
+                    .sortedBy { rank(it.parameterTypes[0]) }
+            }
+            val fields = paramsClass.fields.filter {
+                !Modifier.isStatic(it.modifiers) && !Modifier.isFinal(it.modifiers) && it.name.equals(property, ignoreCase = true) && rank(it.type) >= 0
+            }
+            (setters + fields).distinct()
+        }
 
     /** The public one-argument methods that may set [attr] on [viewClass], in the order they are tried. */
     internal fun candidatesOf(viewClass: Class<*>, attr: AndroidAttributeTable.Attr): List<Method> =
@@ -187,6 +191,9 @@ class AndroidAttributeFallback(private val table: AndroidAttributeTable, private
             Kind.COLOR_STATE_LIST.accepts(type) -> colorStateList(value)
             else -> throw IllegalArgumentException("${type.simpleName} parameters are not supported")
         }
+
+        /** A string, array (joined with `|`) or other scalar resource resolved; any other value as written. */
+        fun scalar(value: String): String = resourceParser.androidResources.resolveScalar(view.context, value.trim())
 
         fun boolean(value: String): Boolean = when (value.trim().lowercase(Locale.ROOT)) {
             "true" -> true

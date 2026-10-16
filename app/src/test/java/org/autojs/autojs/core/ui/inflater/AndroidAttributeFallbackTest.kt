@@ -69,4 +69,35 @@ class AndroidAttributeFallbackTest {
         assertEquals("setDividerDrawable(Drawable)", setters(LinearLayout::class.java, "divider").first())
         assertEquals("setTooltipText(CharSequence)", setters(View::class.java, "tooltipText").first())
     }
+
+    /** A5: gaps the coverage matrix showed, closed by names, a state rule, formats from attrs_manifest.xml and specials. */
+    @Test
+    fun coverageGapsAreClosed() {
+        assertEquals("setThreshold", AndroidAttributeSetters.candidates("completionThreshold").first())
+        assertEquals("setSelectedTabIndicator", AndroidAttributeSetters.candidates("tabIndicator").first())
+        assertTrue("setTrackActiveTintList" in AndroidAttributeSetters.candidates("trackColorActive"))
+        assertTrue("setHaloTintList" in AndroidAttributeSetters.candidates("haloColor"))
+        assertTrue("setTickInactiveRadius" in AndroidAttributeSetters.candidates("tickRadiusInactive"))
+        assertEquals(listOf("setThreshold(int)"), setters(android.widget.AutoCompleteTextView::class.java, "completionThreshold"))
+        // logo and theme take their format from attrs_manifest.xml.
+        assertEquals("setLogo(Drawable)", setters(android.widget.Toolbar::class.java, "logo").first())
+        assertEquals(setOf(Format.REFERENCE), table.attr("android", "theme")!!.formats)
+        for (name in listOf("layerType", "outlineProvider", "autofillHints", "pointerIcon", "digits", "textFontWeight", "textLocale", "stretchColumns", "contentInsetStart", "titleTextAppearance", "shapeAppearance")) {
+            assertTrue(name, name in AndroidAttributeSetters.SPECIAL)
+        }
+        assertEquals("src", DynamicLayoutInflater.COMPAT_ALIASES["srcCompat"])
+        assertEquals("drawableStart", DynamicLayoutInflater.COMPAT_ALIASES["drawableStartCompat"])
+    }
+
+    @Test
+    fun ownMembersAndClassNamesListTheTable() {
+        assertTrue("android.widget.TextView" in table.classNames())
+        assertTrue("androidx.constraintlayout.widget.ConstraintLayout" in table.classNames(layout = true))
+        val own = table.ownMembersOf("android.widget.TextView")
+        assertTrue("android:text" in own)
+        // Inherited View attributes belong to View.
+        assertTrue("android:padding" !in own)
+        assertTrue("android:padding" in table.ownMembersOf("android.view.View"))
+        assertTrue("app:layout_constraintTop_toTopOf" in table.ownMembersOf("androidx.constraintlayout.widget.ConstraintLayout", layout = true))
+    }
 }

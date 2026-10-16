@@ -1,0 +1,2154 @@
+{
+ "api": 37,
+ "created": {},
+ "layouts": {
+  "android.view.ViewGroup": {
+   "handler": [
+    "android:layout_height",
+    "android:layout_margin",
+    "android:layout_marginBottom",
+    "android:layout_marginEnd",
+    "android:layout_marginHorizontal",
+    "android:layout_marginLeft",
+    "android:layout_marginRight",
+    "android:layout_marginStart",
+    "android:layout_marginTop",
+    "android:layout_marginVertical",
+    "android:layout_width"
+   ]
+  },
+  "android.widget.AbsoluteLayout": {
+   "params": [
+    "android:layout_x",
+    "android:layout_y"
+   ]
+  },
+  "android.widget.FrameLayout": {
+   "handler": [
+    "android:layout_gravity"
+   ]
+  },
+  "android.widget.GridLayout": {
+   "handler": [
+    "android:layout_gravity"
+   ],
+   "params": [
+    "android:layout_column",
+    "android:layout_columnSpan",
+    "android:layout_columnWeight",
+    "android:layout_row",
+    "android:layout_rowSpan",
+    "android:layout_rowWeight"
+   ]
+  },
+  "android.widget.LinearLayout": {
+   "handler": [
+    "android:layout_gravity",
+    "android:layout_height",
+    "android:layout_weight",
+    "android:layout_width"
+   ]
+  },
+  "android.widget.RelativeLayout": {
+   "handler": [
+    "android:layout_above",
+    "android:layout_alignBaseline",
+    "android:layout_alignBottom",
+    "android:layout_alignEnd",
+    "android:layout_alignLeft",
+    "android:layout_alignParentBottom",
+    "android:layout_alignParentEnd",
+    "android:layout_alignParentLeft",
+    "android:layout_alignParentRight",
+    "android:layout_alignParentStart",
+    "android:layout_alignParentTop",
+    "android:layout_alignRight",
+    "android:layout_alignStart",
+    "android:layout_alignTop",
+    "android:layout_below",
+    "android:layout_centerHorizontal",
+    "android:layout_centerInParent",
+    "android:layout_centerVertical",
+    "android:layout_toEndOf",
+    "android:layout_toLeftOf",
+    "android:layout_toRightOf",
+    "android:layout_toStartOf"
+   ],
+   "params": [
+    "android:layout_alignWithParentIfMissing"
+   ]
+  },
+  "androidx.appcompat.widget.LinearLayoutCompat": {
+   "handler": [
+    "android:layout_gravity",
+    "android:layout_height",
+    "android:layout_weight",
+    "android:layout_width"
+   ]
+  },
+  "androidx.constraintlayout.widget.ConstraintLayout": {
+   "design": [
+    "app:layout_editor_absoluteX",
+    "app:layout_editor_absoluteY"
+   ],
+   "handler": [
+    "android:elevation",
+    "android:layout_height",
+    "android:layout_margin",
+    "android:layout_marginBottom",
+    "android:layout_marginEnd",
+    "android:layout_marginHorizontal",
+    "android:layout_marginLeft",
+    "android:layout_marginRight",
+    "android:layout_marginStart",
+    "android:layout_marginTop",
+    "android:layout_marginVertical",
+    "android:layout_width",
+    "android:minHeight",
+    "android:minWidth",
+    "android:padding",
+    "android:paddingBottom",
+    "android:paddingEnd",
+    "android:paddingLeft",
+    "android:paddingRight",
+    "android:paddingStart",
+    "android:paddingTop",
+    "android:visibility"
+   ],
+   "params": [
+    "android:orientation",
+    "app:guidelineUseRtl",
+    "app:layout_constrainedHeight",
+    "app:layout_constrainedWidth",
+    "app:layout_constraintBaseline_toBaselineOf",
+    "app:layout_constraintBaseline_toBottomOf",
+    "app:layout_constraintBaseline_toTopOf",
+    "app:layout_constraintBottom_toBottomOf",
+    "app:layout_constraintBottom_toTopOf",
+    "app:layout_constraintCircle",
+    "app:layout_constraintCircleAngle",
+    "app:layout_constraintCircleRadius",
+    "app:layout_constraintDimensionRatio",
+    "app:layout_constraintEnd_toEndOf",
+    "app:layout_constraintEnd_toStartOf",
+    "app:layout_constraintGuide_begin",
+    "app:layout_constraintGuide_end",
+    "app:layout_constraintGuide_percent",
+    "app:layout_constraintHeight",
+    "app:layout_constraintHeight_default",
+    "app:layout_constraintHeight_max",
+    "app:layout_constraintHeight_min",
+    "app:layout_constraintHeight_percent",
+    "app:layout_constraintHorizontal_bias",
+    "app:layout_constraintHorizontal_chainStyle",
+    "app:layout_constraintHorizontal_weight",
+    "app:layout_constraintLeft_toLeftOf",
+    "app:layout_constraintLeft_toRightOf",
+    "app:layout_constraintRight_toLeftOf",
+    "app:layout_constraintRight_toRightOf",
+    "app:layout_constraintStart_toEndOf",
+    "app:layout_constraintStart_toStartOf",
+    "app:layout_constraintTag",
+    "app:layout_constraintTop_toBottomOf",
+    "app:layout_constraintTop_toTopOf",
+    "app:layout_constraintVertical_bias",
+    "app:layout_constraintVertical_chainStyle",
+    "app:layout_constraintVertical_weight",
+    "app:layout_constraintWidth",
+    "app:layout_constraintWidth_default",
+    "app:layout_constraintWidth_max",
+    "app:layout_constraintWidth_min",
+    "app:layout_constraintWidth_percent",
+    "app:layout_goneMarginBaseline",
+    "app:layout_goneMarginBottom",
+    "app:layout_goneMarginEnd",
+    "app:layout_goneMarginLeft",
+    "app:layout_goneMarginRight",
+    "app:layout_goneMarginStart",
+    "app:layout_goneMarginTop",
+    "app:layout_wrapBehaviorInParent"
+   ],
+   "unsupported": [
+    "android:maxHeight",
+    "android:maxWidth",
+    "app:barrierAllowsGoneWidgets",
+    "app:barrierDirection",
+    "app:barrierMargin",
+    "app:chainUseRtl",
+    "app:circularflow_angles",
+    "app:circularflow_defaultAngle",
+    "app:circularflow_defaultRadius",
+    "app:circularflow_radiusInDP",
+    "app:circularflow_viewCenter",
+    "app:constraintSet",
+    "app:constraint_referenced_ids",
+    "app:constraint_referenced_tags",
+    "app:flow_firstHorizontalBias",
+    "app:flow_firstHorizontalStyle",
+    "app:flow_firstVerticalBias",
+    "app:flow_firstVerticalStyle",
+    "app:flow_horizontalAlign",
+    "app:flow_horizontalBias",
+    "app:flow_horizontalGap",
+    "app:flow_horizontalStyle",
+    "app:flow_lastHorizontalBias",
+    "app:flow_lastHorizontalStyle",
+    "app:flow_lastVerticalBias",
+    "app:flow_lastVerticalStyle",
+    "app:flow_maxElementsWrap",
+    "app:flow_verticalAlign",
+    "app:flow_verticalBias",
+    "app:flow_verticalGap",
+    "app:flow_verticalStyle",
+    "app:flow_wrapMode",
+    "app:layoutDescription",
+    "app:layout_constraintBaseline_creator",
+    "app:layout_constraintBottom_creator",
+    "app:layout_constraintLeft_creator",
+    "app:layout_constraintRight_creator",
+    "app:layout_constraintTop_creator",
+    "app:layout_marginBaseline",
+    "app:layout_optimizationLevel"
+   ]
+  },
+  "androidx.coordinatorlayout.widget.CoordinatorLayout": {
+   "handler": [
+    "android:layout_gravity"
+   ],
+   "params": [
+    "app:layout_anchor",
+    "app:layout_anchorGravity",
+    "app:layout_behavior",
+    "app:layout_dodgeInsetEdges",
+    "app:layout_insetEdge",
+    "app:layout_keyline"
+   ]
+  },
+  "com.google.android.material.appbar.AppBarLayout": {
+   "params": [
+    "app:layout_scrollEffect",
+    "app:layout_scrollFlags"
+   ],
+   "unsupported": [
+    "app:layout_scrollInterpolator"
+   ]
+  },
+  "com.google.android.material.appbar.CollapsingToolbarLayout": {
+   "params": [
+    "app:layout_collapseMode",
+    "app:layout_collapseParallaxMultiplier"
+   ]
+  }
+ },
+ "schema": 1,
+ "skipped": {
+  "android.widget.SlidingDrawer": "IllegalArgumentException: The handle attribute is required and must refer to a valid child."
+ },
+ "totals": {
+  "layouts": {
+   "design": 2,
+   "handler": 66,
+   "params": 70,
+   "unsupported": 41
+  },
+  "views": {
+   "handler": 333,
+   "setter": 622,
+   "unsupported": 323
+  }
+ },
+ "views": {
+  "android.view.View": {
+   "handler": [
+    "android:alpha",
+    "android:background",
+    "android:backgroundTint",
+    "android:backgroundTintMode",
+    "android:clickable",
+    "android:contentDescription",
+    "android:contextClickable",
+    "android:drawingCacheQuality",
+    "android:duplicateParentState",
+    "android:elevation",
+    "android:fadeScrollbars",
+    "android:fadingEdgeLength",
+    "android:filterTouchesWhenObscured",
+    "android:fitsSystemWindows",
+    "android:focusable",
+    "android:focusableInTouchMode",
+    "android:forceHasOverlappingRendering",
+    "android:foreground",
+    "android:foregroundGravity",
+    "android:foregroundTint",
+    "android:foregroundTintMode",
+    "android:hapticFeedbackEnabled",
+    "android:id",
+    "android:importantForAccessibility",
+    "android:isScrollContainer",
+    "android:keepScreenOn",
+    "android:layoutDirection",
+    "android:longClickable",
+    "android:minHeight",
+    "android:minWidth",
+    "android:padding",
+    "android:paddingBottom",
+    "android:paddingEnd",
+    "android:paddingHorizontal",
+    "android:paddingLeft",
+    "android:paddingRight",
+    "android:paddingStart",
+    "android:paddingTop",
+    "android:paddingVertical",
+    "android:requiresFadingEdge",
+    "android:rotation",
+    "android:rotationX",
+    "android:rotationY",
+    "android:saveEnabled",
+    "android:scaleX",
+    "android:scaleY",
+    "android:scrollIndicators",
+    "android:scrollX",
+    "android:scrollY",
+    "android:scrollbarDefaultDelayBeforeFade",
+    "android:scrollbarFadeDuration",
+    "android:scrollbarSize",
+    "android:scrollbarStyle",
+    "android:scrollbars",
+    "android:soundEffectsEnabled",
+    "android:tag",
+    "android:textAlignment",
+    "android:textDirection",
+    "android:theme",
+    "android:transformPivotX",
+    "android:transformPivotY",
+    "android:transitionName",
+    "android:translationX",
+    "android:translationY",
+    "android:translationZ",
+    "android:visibility"
+   ],
+   "setter": [
+    "android:accessibilityDataSensitive",
+    "android:accessibilityHeading",
+    "android:accessibilityLiveRegion",
+    "android:accessibilityPaneTitle",
+    "android:accessibilityTraversalAfter",
+    "android:accessibilityTraversalBefore",
+    "android:allowClickWhenDisabled",
+    "android:autoHandwritingEnabled",
+    "android:autofillHints",
+    "android:clipToOutline",
+    "android:contentSensitivity",
+    "android:defaultFocusHighlightEnabled",
+    "android:fadingEdge",
+    "android:focusedByDefault",
+    "android:forceDarkAllowed",
+    "android:importantForAutofill",
+    "android:importantForContentCapture",
+    "android:isCredential",
+    "android:keyboardNavigationCluster",
+    "android:labelFor",
+    "android:layerType",
+    "android:nestedScrollingEnabled",
+    "android:nextClusterForward",
+    "android:nextFocusDown",
+    "android:nextFocusForward",
+    "android:nextFocusLeft",
+    "android:nextFocusRight",
+    "android:nextFocusUp",
+    "android:outlineAmbientShadowColor",
+    "android:outlineProvider",
+    "android:outlineSpotShadowColor",
+    "android:overScrollMode",
+    "android:pointerIcon",
+    "android:preferKeepClear",
+    "android:screenReaderFocusable",
+    "android:scrollbarThumbHorizontal",
+    "android:scrollbarThumbVertical",
+    "android:scrollbarTrackHorizontal",
+    "android:scrollbarTrackVertical",
+    "android:supplementalDescription",
+    "android:tooltipText",
+    "android:verticalScrollbarPosition"
+   ],
+   "unsupported": [
+    "android:handwritingBoundsOffsetBottom",
+    "android:handwritingBoundsOffsetLeft",
+    "android:handwritingBoundsOffsetRight",
+    "android:handwritingBoundsOffsetTop",
+    "android:onClick",
+    "android:scrollbarAlwaysDrawHorizontalTrack",
+    "android:scrollbarAlwaysDrawVerticalTrack",
+    "android:stateListAnimator"
+   ]
+  },
+  "android.view.ViewGroup": {
+   "handler": [
+    "android:addStatesFromChildren",
+    "android:animateLayoutChanges",
+    "android:clipChildren",
+    "android:clipToPadding",
+    "android:descendantFocusability",
+    "android:layoutMode",
+    "android:persistentDrawingCache",
+    "android:splitMotionEvents"
+   ],
+   "setter": [
+    "android:alwaysDrawnWithCache",
+    "android:animationCache",
+    "android:touchscreenBlocksFocus",
+    "android:transitionGroup"
+   ],
+   "unsupported": [
+    "android:layoutAnimation"
+   ]
+  },
+  "android.view.ViewStub": {
+   "handler": [
+    "android:id"
+   ],
+   "setter": [
+    "android:inflatedId"
+   ],
+   "unsupported": [
+    "android:layout"
+   ]
+  },
+  "android.widget.AbsListView": {
+   "setter": [
+    "android:cacheColorHint",
+    "android:choiceMode",
+    "android:drawSelectorOnTop",
+    "android:fastScrollAlwaysVisible",
+    "android:fastScrollEnabled",
+    "android:fastScrollStyle",
+    "android:listSelector",
+    "android:scrollingCache",
+    "android:smoothScrollbar",
+    "android:stackFromBottom",
+    "android:textFilterEnabled",
+    "android:transcriptMode"
+   ]
+  },
+  "android.widget.AbsSpinner": {
+   "handler": [
+    "android:entries"
+   ]
+  },
+  "android.widget.AdapterViewAnimator": {
+   "setter": [
+    "android:animateFirstView"
+   ],
+   "unsupported": [
+    "android:inAnimation",
+    "android:loopViews",
+    "android:outAnimation"
+   ]
+  },
+  "android.widget.AdapterViewFlipper": {
+   "setter": [
+    "android:autoStart",
+    "android:flipInterval"
+   ]
+  },
+  "android.widget.AnalogClock": {
+   "setter": [
+    "android:dialTint",
+    "android:timeZone"
+   ],
+   "unsupported": [
+    "android:dial",
+    "android:dialTintMode",
+    "android:hand_hour",
+    "android:hand_hourTint",
+    "android:hand_hourTintMode",
+    "android:hand_minute",
+    "android:hand_minuteTint",
+    "android:hand_minuteTintMode",
+    "android:hand_second",
+    "android:hand_secondTint",
+    "android:hand_secondTintMode"
+   ]
+  },
+  "android.widget.AutoCompleteTextView": {
+   "handler": [
+    "android:inputType"
+   ],
+   "setter": [
+    "android:completionHint",
+    "android:completionThreshold",
+    "android:dropDownAnchor",
+    "android:dropDownHeight",
+    "android:dropDownWidth"
+   ],
+   "unsupported": [
+    "android:completionHintView",
+    "android:dropDownSelector",
+    "android:popupTheme"
+   ]
+  },
+  "android.widget.CalendarView": {
+   "handler": [
+    "android:firstDayOfWeek",
+    "android:maxDate",
+    "android:minDate"
+   ],
+   "setter": [
+    "android:dateTextAppearance",
+    "android:focusedMonthDateColor",
+    "android:selectedDateVerticalBar",
+    "android:selectedWeekBackgroundColor",
+    "android:showWeekNumber",
+    "android:shownWeekCount",
+    "android:unfocusedMonthDateColor",
+    "android:weekDayTextAppearance",
+    "android:weekNumberColor",
+    "android:weekSeparatorLineColor"
+   ]
+  },
+  "android.widget.CheckedTextView": {
+   "handler": [
+    "android:checkMarkTint"
+   ],
+   "setter": [
+    "android:checkMark",
+    "android:checkMarkTintMode",
+    "android:checked"
+   ]
+  },
+  "android.widget.Chronometer": {
+   "handler": [
+    "android:countDown",
+    "android:format"
+   ]
+  },
+  "android.widget.CompoundButton": {
+   "handler": [
+    "android:buttonTint",
+    "android:checked"
+   ],
+   "setter": [
+    "android:button",
+    "android:buttonTintMode"
+   ]
+  },
+  "android.widget.DatePicker": {
+   "handler": [
+    "android:calendarViewShown",
+    "android:datePickerMode",
+    "android:firstDayOfWeek",
+    "android:maxDate",
+    "android:minDate",
+    "android:spinnersShown"
+   ],
+   "unsupported": [
+    "android:calendarTextColor",
+    "android:dayOfWeekBackground",
+    "android:dayOfWeekTextAppearance",
+    "android:endYear",
+    "android:headerBackground",
+    "android:headerDayOfMonthTextAppearance",
+    "android:headerMonthTextAppearance",
+    "android:headerYearTextAppearance",
+    "android:startYear",
+    "android:yearListItemTextAppearance",
+    "android:yearListSelectorColor"
+   ]
+  },
+  "android.widget.EditText": {
+   "unsupported": [
+    "android:enableTextStylingShortcuts"
+   ]
+  },
+  "android.widget.ExpandableListView": {
+   "setter": [
+    "android:childDivider",
+    "android:childIndicator",
+    "android:groupIndicator"
+   ],
+   "unsupported": [
+    "android:childIndicatorEnd",
+    "android:childIndicatorLeft",
+    "android:childIndicatorRight",
+    "android:childIndicatorStart",
+    "android:indicatorEnd",
+    "android:indicatorLeft",
+    "android:indicatorRight",
+    "android:indicatorStart"
+   ]
+  },
+  "android.widget.FrameLayout": {
+   "setter": [
+    "android:measureAllChildren"
+   ]
+  },
+  "android.widget.Gallery": {
+   "handler": [
+    "android:gravity"
+   ],
+   "setter": [
+    "android:animationDuration",
+    "android:spacing",
+    "android:unselectedAlpha"
+   ]
+  },
+  "android.widget.GridLayout": {
+   "setter": [
+    "android:alignmentMode",
+    "android:columnCount",
+    "android:columnOrderPreserved",
+    "android:orientation",
+    "android:rowCount",
+    "android:rowOrderPreserved",
+    "android:useDefaultMargins"
+   ]
+  },
+  "android.widget.GridView": {
+   "handler": [
+    "android:gravity"
+   ],
+   "setter": [
+    "android:columnWidth",
+    "android:horizontalSpacing",
+    "android:numColumns",
+    "android:stretchMode",
+    "android:verticalSpacing"
+   ]
+  },
+  "android.widget.HorizontalScrollView": {
+   "handler": [
+    "android:fillViewport"
+   ]
+  },
+  "android.widget.ImageView": {
+   "handler": [
+    "android:adjustViewBounds",
+    "android:baseline",
+    "android:baselineAlignBottom",
+    "android:cropToPadding",
+    "android:maxHeight",
+    "android:maxWidth",
+    "android:scaleType",
+    "android:src",
+    "android:tint",
+    "android:tintMode"
+   ]
+  },
+  "android.widget.LinearLayout": {
+   "handler": [
+    "android:baselineAligned",
+    "android:baselineAlignedChildIndex",
+    "android:divider",
+    "android:gravity",
+    "android:measureWithLargestChild",
+    "android:orientation",
+    "android:showDividers",
+    "android:weightSum"
+   ],
+   "setter": [
+    "android:dividerPadding"
+   ]
+  },
+  "android.widget.ListView": {
+   "setter": [
+    "android:divider",
+    "android:dividerHeight",
+    "android:entries",
+    "android:footerDividersEnabled",
+    "android:headerDividersEnabled",
+    "android:overScrollFooter",
+    "android:overScrollHeader"
+   ]
+  },
+  "android.widget.NumberPicker": {
+   "handler": [
+    "android:selectionDividerHeight"
+   ],
+   "unsupported": [
+    "android:solidColor"
+   ]
+  },
+  "android.widget.ProgressBar": {
+   "handler": [
+    "android:backgroundTint",
+    "android:backgroundTintMode",
+    "android:indeterminate",
+    "android:indeterminateDrawable",
+    "android:indeterminateTint",
+    "android:indeterminateTintMode",
+    "android:max",
+    "android:min",
+    "android:minHeight",
+    "android:minWidth",
+    "android:progress",
+    "android:progressBackgroundTint",
+    "android:progressBackgroundTintMode",
+    "android:progressDrawable",
+    "android:progressTint",
+    "android:progressTintMode",
+    "android:secondaryProgress",
+    "android:secondaryProgressTint",
+    "android:secondaryProgressTintMode"
+   ],
+   "setter": [
+    "android:maxHeight",
+    "android:maxWidth"
+   ],
+   "unsupported": [
+    "android:animationResolution",
+    "android:indeterminateBehavior",
+    "android:indeterminateDuration",
+    "android:indeterminateOnly",
+    "android:interpolator",
+    "android:mirrorForRtl"
+   ]
+  },
+  "android.widget.RadioGroup": {
+   "handler": [
+    "android:checkedButton",
+    "android:orientation"
+   ]
+  },
+  "android.widget.RatingBar": {
+   "handler": [
+    "android:isIndicator",
+    "android:numStars",
+    "android:rating",
+    "android:stepSize"
+   ]
+  },
+  "android.widget.RelativeLayout": {
+   "handler": [
+    "android:gravity"
+   ],
+   "setter": [
+    "android:ignoreGravity"
+   ]
+  },
+  "android.widget.ScrollView": {
+   "handler": [
+    "android:fillViewport"
+   ]
+  },
+  "android.widget.SearchView": {
+   "handler": [
+    "android:focusable",
+    "android:iconifiedByDefault",
+    "android:imeOptions",
+    "android:inputType",
+    "android:maxWidth",
+    "android:queryHint"
+   ],
+   "unsupported": [
+    "android:closeIcon",
+    "android:commitIcon",
+    "android:goIcon",
+    "android:layout",
+    "android:queryBackground",
+    "android:searchHintIcon",
+    "android:searchIcon",
+    "android:submitBackground",
+    "android:suggestionRowLayout",
+    "android:voiceIcon"
+   ]
+  },
+  "android.widget.SeekBar": {
+   "handler": [
+    "android:splitTrack",
+    "android:thumb",
+    "android:thumbOffset",
+    "android:tickMark"
+   ],
+   "setter": [
+    "android:thumbTint",
+    "android:thumbTintMode",
+    "android:tickMarkTint",
+    "android:tickMarkTintMode"
+   ]
+  },
+  "android.widget.Spinner": {
+   "handler": [
+    "android:dropDownWidth",
+    "android:gravity",
+    "android:popupBackground",
+    "android:prompt",
+    "android:spinnerMode"
+   ],
+   "unsupported": [
+    "android:dropDownSelector",
+    "android:popupElevation",
+    "android:popupTheme"
+   ]
+  },
+  "android.widget.Switch": {
+   "setter": [
+    "android:showText",
+    "android:splitTrack",
+    "android:switchMinWidth",
+    "android:switchPadding",
+    "android:switchTextAppearance",
+    "android:textOff",
+    "android:textOn",
+    "android:thumb",
+    "android:thumbTextPadding",
+    "android:thumbTint",
+    "android:thumbTintMode",
+    "android:track",
+    "android:trackTint",
+    "android:trackTintMode"
+   ]
+  },
+  "android.widget.TabWidget": {
+   "handler": [
+    "android:divider"
+   ],
+   "setter": [
+    "android:tabStripEnabled",
+    "android:tabStripLeft",
+    "android:tabStripRight"
+   ]
+  },
+  "android.widget.TableLayout": {
+   "setter": [
+    "android:collapseColumns",
+    "android:shrinkColumns",
+    "android:stretchColumns"
+   ]
+  },
+  "android.widget.TextClock": {
+   "handler": [
+    "android:format12Hour",
+    "android:format24Hour",
+    "android:timeZone"
+   ]
+  },
+  "android.widget.TextView": {
+   "handler": [
+    "android:autoLink",
+    "android:autoText",
+    "android:capitalize",
+    "android:cursorVisible",
+    "android:drawableBottom",
+    "android:drawableLeft",
+    "android:drawablePadding",
+    "android:drawableRight",
+    "android:drawableTop",
+    "android:elegantTextHeight",
+    "android:ellipsize",
+    "android:ems",
+    "android:fontFamily",
+    "android:fontFeatureSettings",
+    "android:freezesText",
+    "android:gravity",
+    "android:height",
+    "android:hint",
+    "android:hyphenationFrequency",
+    "android:imeActionId",
+    "android:imeActionLabel",
+    "android:imeOptions",
+    "android:includeFontPadding",
+    "android:inputType",
+    "android:letterSpacing",
+    "android:lineSpacingExtra",
+    "android:lineSpacingMultiplier",
+    "android:lines",
+    "android:linksClickable",
+    "android:marqueeRepeatLimit",
+    "android:maxEms",
+    "android:maxHeight",
+    "android:maxLength",
+    "android:maxLines",
+    "android:maxWidth",
+    "android:minEms",
+    "android:minHeight",
+    "android:minLines",
+    "android:minWidth",
+    "android:numeric",
+    "android:password",
+    "android:phoneNumber",
+    "android:privateImeOptions",
+    "android:scrollHorizontally",
+    "android:selectAllOnFocus",
+    "android:shadowColor",
+    "android:shadowDx",
+    "android:shadowDy",
+    "android:shadowRadius",
+    "android:singleLine",
+    "android:text",
+    "android:textAllCaps",
+    "android:textAppearance",
+    "android:textColor",
+    "android:textColorHighlight",
+    "android:textColorHint",
+    "android:textColorLink",
+    "android:textIsSelectable",
+    "android:textScaleX",
+    "android:textSize",
+    "android:textStyle",
+    "android:typeface",
+    "android:width"
+   ],
+   "setter": [
+    "android:autoSizeMaxTextSize",
+    "android:autoSizeMinTextSize",
+    "android:autoSizeStepGranularity",
+    "android:autoSizeTextType",
+    "android:breakStrategy",
+    "android:digits",
+    "android:drawableEnd",
+    "android:drawableStart",
+    "android:drawableTint",
+    "android:drawableTintMode",
+    "android:enabled",
+    "android:fallbackLineSpacing",
+    "android:firstBaselineToTopHeight",
+    "android:focusedSearchResultHighlightColor",
+    "android:fontVariationSettings",
+    "android:justificationMode",
+    "android:lastBaselineToBottomHeight",
+    "android:lineBreakStyle",
+    "android:lineBreakWordStyle",
+    "android:lineHeight",
+    "android:searchResultHighlightColor",
+    "android:shiftDrawingOffsetForStartOverhang",
+    "android:textCursorDrawable",
+    "android:textFontWeight",
+    "android:textLocale",
+    "android:textSelectHandle",
+    "android:textSelectHandleLeft",
+    "android:textSelectHandleRight",
+    "android:useBoundsForWidth"
+   ],
+   "unsupported": [
+    "android:allowUndo",
+    "android:autoSizePresetSizes",
+    "android:bufferType",
+    "android:editable",
+    "android:editorExtras",
+    "android:inputMethod",
+    "android:textEditNoPasteWindowLayout",
+    "android:textEditPasteWindowLayout",
+    "android:textEditSideNoPasteWindowLayout",
+    "android:textEditSidePasteWindowLayout",
+    "android:textEditSuggestionItemLayout",
+    "android:useLocalePreferredLineHeightForMinimum"
+   ]
+  },
+  "android.widget.TimePicker": {
+   "handler": [
+    "android:timePickerMode"
+   ],
+   "unsupported": [
+    "android:amPmBackgroundColor",
+    "android:amPmTextColor",
+    "android:headerAmPmTextAppearance",
+    "android:headerBackground",
+    "android:headerTimeTextAppearance",
+    "android:numbersBackgroundColor",
+    "android:numbersInnerTextColor",
+    "android:numbersSelectorColor",
+    "android:numbersTextColor"
+   ]
+  },
+  "android.widget.ToggleButton": {
+   "handler": [
+    "android:textOff",
+    "android:textOn"
+   ],
+   "unsupported": [
+    "android:disabledAlpha"
+   ]
+  },
+  "android.widget.Toolbar": {
+   "handler": [
+    "android:gravity"
+   ],
+   "setter": [
+    "android:collapseContentDescription",
+    "android:collapseIcon",
+    "android:contentInsetEnd",
+    "android:contentInsetEndWithActions",
+    "android:contentInsetLeft",
+    "android:contentInsetRight",
+    "android:contentInsetStart",
+    "android:contentInsetStartWithNavigation",
+    "android:logo",
+    "android:logoDescription",
+    "android:navigationContentDescription",
+    "android:navigationIcon",
+    "android:popupTheme",
+    "android:subtitle",
+    "android:subtitleTextAppearance",
+    "android:subtitleTextColor",
+    "android:title",
+    "android:titleMargin",
+    "android:titleMarginBottom",
+    "android:titleMarginEnd",
+    "android:titleMarginStart",
+    "android:titleMarginTop",
+    "android:titleTextAppearance",
+    "android:titleTextColor"
+   ],
+   "unsupported": [
+    "android:buttonGravity",
+    "android:maxButtonHeight"
+   ]
+  },
+  "android.widget.TwoLineListItem": {
+   "unsupported": [
+    "android:mode"
+   ]
+  },
+  "android.widget.ViewAnimator": {
+   "handler": [
+    "android:animateFirstView"
+   ],
+   "unsupported": [
+    "android:inAnimation",
+    "android:outAnimation"
+   ]
+  },
+  "android.widget.ViewFlipper": {
+   "handler": [
+    "android:autoStart",
+    "android:flipInterval"
+   ]
+  },
+  "androidx.appcompat.view.menu.ActionMenuItemView": {
+   "handler": [
+    "android:minWidth"
+   ]
+  },
+  "androidx.appcompat.widget.ActivityChooserView": {
+   "setter": [
+    "app:expandActivityOverflowButtonDrawable"
+   ],
+   "unsupported": [
+    "app:initialActivityCount"
+   ]
+  },
+  "androidx.appcompat.widget.AppCompatImageView": {
+   "handler": [
+    "android:src",
+    "app:srcCompat",
+    "app:tint",
+    "app:tintMode"
+   ]
+  },
+  "androidx.appcompat.widget.AppCompatSeekBar": {
+   "handler": [
+    "android:thumb",
+    "app:tickMark"
+   ],
+   "setter": [
+    "app:tickMarkTint",
+    "app:tickMarkTintMode"
+   ]
+  },
+  "androidx.appcompat.widget.AppCompatTextView": {
+   "handler": [
+    "android:textAppearance",
+    "app:drawableBottomCompat",
+    "app:drawableLeftCompat",
+    "app:drawableRightCompat",
+    "app:drawableTopCompat",
+    "app:fontFamily",
+    "app:textAllCaps"
+   ],
+   "setter": [
+    "app:autoSizeMaxTextSize",
+    "app:autoSizeMinTextSize",
+    "app:autoSizeStepGranularity",
+    "app:autoSizeTextType",
+    "app:drawableEndCompat",
+    "app:drawableStartCompat",
+    "app:drawableTint",
+    "app:drawableTintMode",
+    "app:emojiCompatEnabled",
+    "app:firstBaselineToTopHeight",
+    "app:fontVariationSettings",
+    "app:lastBaselineToBottomHeight",
+    "app:lineHeight",
+    "app:textLocale"
+   ],
+   "unsupported": [
+    "app:autoSizePresetSizes"
+   ]
+  },
+  "androidx.appcompat.widget.ButtonBarLayout": {
+   "setter": [
+    "app:allowStacking"
+   ]
+  },
+  "androidx.appcompat.widget.LinearLayoutCompat": {
+   "handler": [
+    "android:gravity"
+   ],
+   "setter": [
+    "android:baselineAligned",
+    "android:baselineAlignedChildIndex",
+    "android:orientation",
+    "android:weightSum",
+    "app:divider",
+    "app:dividerPadding",
+    "app:measureWithLargestChild",
+    "app:showDividers"
+   ]
+  },
+  "androidx.appcompat.widget.SearchView": {
+   "handler": [
+    "android:focusable",
+    "app:backgroundTint"
+   ],
+   "setter": [
+    "android:imeOptions",
+    "android:inputType",
+    "android:maxWidth",
+    "app:iconifiedByDefault",
+    "app:queryHint"
+   ],
+   "unsupported": [
+    "android:hint",
+    "android:text",
+    "android:textAppearance",
+    "app:animateMenuItems",
+    "app:animateNavigationIcon",
+    "app:autoShowKeyboard",
+    "app:backHandlingEnabled",
+    "app:closeIcon",
+    "app:commitIcon",
+    "app:defaultQueryHint",
+    "app:goIcon",
+    "app:headerLayout",
+    "app:hideNavigationIcon",
+    "app:layout",
+    "app:queryBackground",
+    "app:searchHintIcon",
+    "app:searchIcon",
+    "app:searchPrefixText",
+    "app:submitBackground",
+    "app:suggestionRowLayout",
+    "app:useDrawerArrowDrawable",
+    "app:voiceIcon"
+   ]
+  },
+  "androidx.appcompat.widget.SwitchCompat": {
+   "handler": [
+    "android:textOff",
+    "android:textOn",
+    "app:showText",
+    "app:splitTrack",
+    "app:switchMinWidth",
+    "app:switchPadding",
+    "app:thumbTextPadding",
+    "app:thumbTint",
+    "app:trackTint"
+   ],
+   "setter": [
+    "android:thumb",
+    "app:switchTextAppearance",
+    "app:thumbTintMode",
+    "app:track",
+    "app:trackTintMode"
+   ]
+  },
+  "androidx.appcompat.widget.Toolbar": {
+   "handler": [
+    "android:gravity",
+    "android:minHeight",
+    "app:collapseContentDescription",
+    "app:collapseIcon",
+    "app:logo",
+    "app:logoDescription",
+    "app:navigationContentDescription",
+    "app:navigationIcon",
+    "app:popupTheme",
+    "app:subtitle",
+    "app:subtitleTextColor",
+    "app:title",
+    "app:titleMargin",
+    "app:titleMarginBottom",
+    "app:titleMarginEnd",
+    "app:titleMarginStart",
+    "app:titleMarginTop",
+    "app:titleTextColor"
+   ],
+   "setter": [
+    "app:contentInsetEnd",
+    "app:contentInsetEndWithActions",
+    "app:contentInsetLeft",
+    "app:contentInsetRight",
+    "app:contentInsetStart",
+    "app:contentInsetStartWithNavigation",
+    "app:subtitleTextAppearance",
+    "app:titleMargins",
+    "app:titleTextAppearance"
+   ],
+   "unsupported": [
+    "app:buttonGravity",
+    "app:maxButtonHeight",
+    "app:menu"
+   ]
+  },
+  "androidx.appcompat.widget.ViewStubCompat": {
+   "handler": [
+    "android:id"
+   ],
+   "setter": [
+    "android:inflatedId"
+   ],
+   "unsupported": [
+    "android:layout"
+   ]
+  },
+  "androidx.cardview.widget.CardView": {
+   "handler": [
+    "android:minHeight",
+    "android:minWidth",
+    "app:cardBackgroundColor",
+    "app:cardCornerRadius",
+    "app:cardElevation",
+    "app:cardMaxElevation",
+    "app:cardPreventCornerOverlap",
+    "app:cardUseCompatPadding",
+    "app:contentPadding",
+    "app:contentPaddingBottom",
+    "app:contentPaddingLeft",
+    "app:contentPaddingRight",
+    "app:contentPaddingTop"
+   ]
+  },
+  "androidx.constraintlayout.helper.widget.Carousel": {
+   "unsupported": [
+    "app:carousel_backwardTransition",
+    "app:carousel_emptyViewsBehavior",
+    "app:carousel_firstView",
+    "app:carousel_forwardTransition",
+    "app:carousel_infinite",
+    "app:carousel_nextState",
+    "app:carousel_previousState",
+    "app:carousel_touchUpMode",
+    "app:carousel_touchUp_dampeningFactor",
+    "app:carousel_touchUp_velocityThreshold"
+   ]
+  },
+  "androidx.constraintlayout.helper.widget.Grid": {
+   "unsupported": [
+    "app:grid_columnWeights",
+    "app:grid_columns",
+    "app:grid_horizontalGaps",
+    "app:grid_orientation",
+    "app:grid_rowWeights",
+    "app:grid_rows",
+    "app:grid_skips",
+    "app:grid_spans",
+    "app:grid_useRtl",
+    "app:grid_validateInputs",
+    "app:grid_verticalGaps"
+   ]
+  },
+  "androidx.constraintlayout.helper.widget.MotionEffect": {
+   "unsupported": [
+    "app:motionEffect_alpha",
+    "app:motionEffect_end",
+    "app:motionEffect_move",
+    "app:motionEffect_start",
+    "app:motionEffect_strict",
+    "app:motionEffect_translationX",
+    "app:motionEffect_translationY",
+    "app:motionEffect_viewTransition"
+   ]
+  },
+  "androidx.constraintlayout.motion.widget.MotionHelper": {
+   "unsupported": [
+    "app:onHide",
+    "app:onShow"
+   ]
+  },
+  "androidx.constraintlayout.motion.widget.MotionLayout": {
+   "unsupported": [
+    "app:applyMotionScene",
+    "app:currentState",
+    "app:layoutDescription",
+    "app:motionDebug",
+    "app:motionProgress",
+    "app:showPaths"
+   ]
+  },
+  "androidx.constraintlayout.utils.widget.ImageFilterView": {
+   "setter": [
+    "app:brightness",
+    "app:contrast",
+    "app:crossfade",
+    "app:imagePanX",
+    "app:imagePanY",
+    "app:imageRotate",
+    "app:imageZoom",
+    "app:round",
+    "app:roundPercent",
+    "app:saturation",
+    "app:warmth"
+   ],
+   "unsupported": [
+    "app:altSrc",
+    "app:blendSrc",
+    "app:overlay"
+   ]
+  },
+  "androidx.constraintlayout.utils.widget.MockView": {
+   "unsupported": [
+    "app:mock_diagonalsColor",
+    "app:mock_label",
+    "app:mock_labelBackgroundColor",
+    "app:mock_labelColor",
+    "app:mock_showDiagonals",
+    "app:mock_showLabel"
+   ]
+  },
+  "androidx.constraintlayout.utils.widget.MotionLabel": {
+   "handler": [
+    "android:gravity"
+   ],
+   "setter": [
+    "android:shadowRadius",
+    "android:text",
+    "android:textSize",
+    "app:scaleFromTextSize",
+    "app:textBackgroundPanX",
+    "app:textBackgroundPanY",
+    "app:textBackgroundRotate",
+    "app:textBackgroundZoom",
+    "app:textOutlineColor",
+    "app:textOutlineThickness",
+    "app:textPanX",
+    "app:textPanY",
+    "app:textureHeight",
+    "app:textureWidth"
+   ],
+   "unsupported": [
+    "android:autoSizeTextType",
+    "android:fontFamily",
+    "android:textColor",
+    "android:textStyle",
+    "android:typeface",
+    "app:borderRound",
+    "app:borderRoundPercent",
+    "app:textBackground",
+    "app:textureBlurFactor",
+    "app:textureEffect"
+   ]
+  },
+  "androidx.constraintlayout.utils.widget.MotionTelltales": {
+   "unsupported": [
+    "app:telltales_tailColor",
+    "app:telltales_tailScale",
+    "app:telltales_velocityMode"
+   ]
+  },
+  "androidx.coordinatorlayout.widget.CoordinatorLayout": {
+   "setter": [
+    "app:statusBarBackground"
+   ],
+   "unsupported": [
+    "app:keylines"
+   ]
+  },
+  "androidx.drawerlayout.widget.DrawerLayout": {
+   "handler": [
+    "app:elevation"
+   ]
+  },
+  "androidx.recyclerview.widget.RecyclerView": {
+   "handler": [
+    "android:clipToPadding",
+    "android:descendantFocusability"
+   ],
+   "unsupported": [
+    "android:orientation",
+    "app:fastScrollEnabled",
+    "app:fastScrollHorizontalThumbDrawable",
+    "app:fastScrollHorizontalTrackDrawable",
+    "app:fastScrollVerticalThumbDrawable",
+    "app:fastScrollVerticalTrackDrawable",
+    "app:layoutManager",
+    "app:reverseLayout",
+    "app:spanCount",
+    "app:stackFromEnd"
+   ]
+  },
+  "androidx.swiperefreshlayout.widget.SwipeRefreshLayout": {
+   "setter": [
+    "app:swipeRefreshLayoutProgressSpinnerBackgroundColor"
+   ]
+  },
+  "com.google.android.material.appbar.AppBarLayout": {
+   "handler": [
+    "android:background",
+    "app:expanded"
+   ],
+   "setter": [
+    "android:keyboardNavigationCluster",
+    "android:touchscreenBlocksFocus",
+    "app:liftOnScroll",
+    "app:liftOnScrollColor",
+    "app:liftOnScrollTargetViewId",
+    "app:statusBarForeground"
+   ]
+  },
+  "com.google.android.material.appbar.CollapsingToolbarLayout": {
+   "setter": [
+    "app:collapsedSubtitleTextAppearance",
+    "app:collapsedSubtitleTextColor",
+    "app:collapsedTitleGravity",
+    "app:collapsedTitleTextAppearance",
+    "app:collapsedTitleTextColor",
+    "app:contentScrim",
+    "app:expandedSubtitleTextAppearance",
+    "app:expandedSubtitleTextColor",
+    "app:expandedTitleGravity",
+    "app:expandedTitleMargin",
+    "app:expandedTitleMarginBottom",
+    "app:expandedTitleMarginEnd",
+    "app:expandedTitleMarginStart",
+    "app:expandedTitleMarginTop",
+    "app:expandedTitleSpacing",
+    "app:expandedTitleTextAppearance",
+    "app:expandedTitleTextColor",
+    "app:extraMultilineHeightEnabled",
+    "app:forceApplySystemWindowInsetTop",
+    "app:maxLines",
+    "app:scrimAnimationDuration",
+    "app:scrimVisibleHeightTrigger",
+    "app:statusBarScrim",
+    "app:titleCollapseMode",
+    "app:titleEnabled",
+    "app:titleMaxLines",
+    "app:titleTextEllipsize"
+   ],
+   "unsupported": [
+    "app:collapsedTitleGravityMode",
+    "app:subtitleMaxLines",
+    "app:titlePositionInterpolator",
+    "app:toolbarId"
+   ]
+  },
+  "com.google.android.material.appbar.MaterialToolbar": {
+   "setter": [
+    "app:logoAdjustViewBounds",
+    "app:logoScaleType",
+    "app:navigationIconTint",
+    "app:subtitleCentered",
+    "app:titleCentered"
+   ]
+  },
+  "com.google.android.material.bottomappbar.BottomAppBar": {
+   "handler": [
+    "app:backgroundTint"
+   ],
+   "setter": [
+    "app:fabAlignmentMode",
+    "app:fabAlignmentModeEndMargin",
+    "app:fabAnchorMode",
+    "app:fabAnimationMode",
+    "app:fabCradleMargin",
+    "app:fabCradleRoundedCornerRadius",
+    "app:hideOnScroll",
+    "app:menuAlignmentMode",
+    "app:navigationIconTint"
+   ],
+   "unsupported": [
+    "app:addElevationShadow",
+    "app:fabCradleVerticalOffset",
+    "app:paddingBottomSystemWindowInsets",
+    "app:paddingLeftSystemWindowInsets",
+    "app:paddingRightSystemWindowInsets",
+    "app:removeEmbeddedFabElevation"
+   ]
+  },
+  "com.google.android.material.bottomnavigation.BottomNavigationView": {
+   "handler": [
+    "android:minHeight"
+   ],
+   "setter": [
+    "app:itemHorizontalTranslationEnabled",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay"
+   ],
+   "unsupported": [
+    "app:compatShadowEnabled"
+   ]
+  },
+  "com.google.android.material.button.MaterialButton": {
+   "handler": [
+    "android:background",
+    "app:backgroundTint"
+   ],
+   "setter": [
+    "android:checkable",
+    "android:checked",
+    "android:insetBottom",
+    "android:insetTop",
+    "app:cornerRadius",
+    "app:icon",
+    "app:iconGravity",
+    "app:iconPadding",
+    "app:iconSize",
+    "app:iconTint",
+    "app:opticalCenterEnabled",
+    "app:rippleColor",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay",
+    "app:strokeColor",
+    "app:strokeWidth",
+    "app:toggleCheckedStateOnClick"
+   ],
+   "unsupported": [
+    "android:insetLeft",
+    "android:insetRight"
+   ]
+  },
+  "com.google.android.material.button.MaterialButtonGroup": {
+   "setter": [
+    "android:enabled",
+    "android:spacing",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay"
+   ],
+   "unsupported": [
+    "app:buttonSizeChange",
+    "app:innerCornerSize"
+   ]
+  },
+  "com.google.android.material.button.MaterialButtonToggleGroup": {
+   "setter": [
+    "android:enabled",
+    "android:spacing",
+    "app:selectionRequired",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay",
+    "app:singleSelection"
+   ],
+   "unsupported": [
+    "app:checkedButton",
+    "app:innerCornerSize"
+   ]
+  },
+  "com.google.android.material.card.MaterialCardView": {
+   "setter": [
+    "android:checkable",
+    "app:cardForegroundColor",
+    "app:checkedIcon",
+    "app:checkedIconGravity",
+    "app:checkedIconMargin",
+    "app:checkedIconSize",
+    "app:checkedIconTint",
+    "app:rippleColor",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay",
+    "app:strokeColor",
+    "app:strokeWidth"
+   ],
+   "unsupported": [
+    "app:state_dragged"
+   ]
+  },
+  "com.google.android.material.checkbox.MaterialCheckBox": {
+   "setter": [
+    "android:button",
+    "app:buttonIcon",
+    "app:buttonIconTint",
+    "app:buttonIconTintMode",
+    "app:centerIfNoTextEnabled",
+    "app:checkedState",
+    "app:errorAccessibilityLabel",
+    "app:errorShown",
+    "app:useMaterialThemeColors"
+   ]
+  },
+  "com.google.android.material.chip.Chip": {
+   "handler": [
+    "android:ellipsize",
+    "android:maxWidth",
+    "android:text",
+    "android:textAppearance",
+    "android:textColor",
+    "android:textSize"
+   ],
+   "setter": [
+    "android:checkable",
+    "app:checkedIcon",
+    "app:checkedIconEnabled",
+    "app:checkedIconTint",
+    "app:checkedIconVisible",
+    "app:chipBackgroundColor",
+    "app:chipCornerRadius",
+    "app:chipEndPadding",
+    "app:chipIcon",
+    "app:chipIconEnabled",
+    "app:chipIconSize",
+    "app:chipIconTint",
+    "app:chipIconVisible",
+    "app:chipMinHeight",
+    "app:chipStartPadding",
+    "app:chipStrokeColor",
+    "app:chipStrokeWidth",
+    "app:closeIcon",
+    "app:closeIconEnabled",
+    "app:closeIconEndPadding",
+    "app:closeIconSize",
+    "app:closeIconStartPadding",
+    "app:closeIconTint",
+    "app:closeIconVisible",
+    "app:ensureMinTouchTargetSize",
+    "app:iconEndPadding",
+    "app:iconStartPadding",
+    "app:rippleColor",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay",
+    "app:textEndPadding",
+    "app:textStartPadding"
+   ],
+   "unsupported": [
+    "app:chipMinTouchTargetSize",
+    "app:chipSurfaceColor",
+    "app:hideMotionSpec",
+    "app:showMotionSpec"
+   ]
+  },
+  "com.google.android.material.chip.ChipGroup": {
+   "setter": [
+    "app:chipSpacing",
+    "app:chipSpacingHorizontal",
+    "app:chipSpacingVertical",
+    "app:selectionRequired",
+    "app:singleLine",
+    "app:singleSelection"
+   ],
+   "unsupported": [
+    "app:checkedChip"
+   ]
+  },
+  "com.google.android.material.divider.MaterialDivider": {
+   "setter": [
+    "app:dividerColor",
+    "app:dividerInsetEnd",
+    "app:dividerInsetStart",
+    "app:dividerThickness"
+   ],
+   "unsupported": [
+    "app:lastItemDecorated"
+   ]
+  },
+  "com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton": {
+   "unsupported": [
+    "app:collapsedSize",
+    "app:extendMotionSpec",
+    "app:extendStrategy",
+    "app:hideMotionSpec",
+    "app:showMotionSpec",
+    "app:shrinkMotionSpec"
+   ]
+  },
+  "com.google.android.material.floatingactionbutton.FloatingActionButton": {
+   "handler": [
+    "app:backgroundTint",
+    "app:ensureMinTouchTargetSize",
+    "app:fabCustomSize",
+    "app:fabSize",
+    "app:maxImageSize",
+    "app:rippleColor",
+    "app:useCompatPadding"
+   ],
+   "setter": [
+    "android:enabled",
+    "app:hoveredFocusedTranslationZ",
+    "app:pressedTranslationZ",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay"
+   ],
+   "unsupported": [
+    "app:borderWidth",
+    "app:hideMotionSpec",
+    "app:showMotionSpec"
+   ]
+  },
+  "com.google.android.material.imageview.ShapeableImageView": {
+   "setter": [
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay",
+    "app:strokeColor",
+    "app:strokeWidth"
+   ],
+   "unsupported": [
+    "app:contentPaddingEnd",
+    "app:contentPaddingStart"
+   ]
+  },
+  "com.google.android.material.internal.FlowLayout": {
+   "unsupported": [
+    "app:horizontalItemSpacing",
+    "app:lineSpacing"
+   ]
+  },
+  "com.google.android.material.internal.ForegroundLinearLayout": {
+   "handler": [
+    "android:foreground",
+    "android:foregroundGravity"
+   ],
+   "unsupported": [
+    "app:foregroundInsidePadding"
+   ]
+  },
+  "com.google.android.material.internal.ScrimInsetsFrameLayout": {
+   "unsupported": [
+    "app:insetForeground"
+   ]
+  },
+  "com.google.android.material.loadingindicator.LoadingIndicator": {
+   "setter": [
+    "app:containerColor",
+    "app:containerHeight",
+    "app:containerWidth",
+    "app:indicatorColor",
+    "app:indicatorSize"
+   ]
+  },
+  "com.google.android.material.materialswitch.MaterialSwitch": {
+   "setter": [
+    "app:thumbIcon",
+    "app:thumbIconSize",
+    "app:thumbIconTint",
+    "app:thumbIconTintMode",
+    "app:trackDecoration",
+    "app:trackDecorationTint",
+    "app:trackDecorationTintMode"
+   ]
+  },
+  "com.google.android.material.navigation.NavigationBarView": {
+   "handler": [
+    "app:backgroundTint"
+   ],
+   "setter": [
+    "app:activeIndicatorLabelPadding",
+    "app:horizontalItemTextAppearanceActive",
+    "app:horizontalItemTextAppearanceInactive",
+    "app:iconLabelHorizontalSpacing",
+    "app:itemBackground",
+    "app:itemGravity",
+    "app:itemIconGravity",
+    "app:itemIconSize",
+    "app:itemIconTint",
+    "app:itemPaddingBottom",
+    "app:itemPaddingTop",
+    "app:itemRippleColor",
+    "app:itemTextAppearanceActive",
+    "app:itemTextAppearanceActiveBoldEnabled",
+    "app:itemTextAppearanceInactive",
+    "app:itemTextColor",
+    "app:labelFontScalingEnabled",
+    "app:labelMaxLines",
+    "app:labelVisibilityMode"
+   ],
+   "unsupported": [
+    "app:itemActiveIndicatorStyle",
+    "app:measureBottomPaddingFromLabelBaseline",
+    "app:menu"
+   ]
+  },
+  "com.google.android.material.navigation.NavigationView": {
+   "handler": [
+    "android:background",
+    "android:fitsSystemWindows",
+    "android:layout_gravity"
+   ],
+   "setter": [
+    "app:bottomInsetScrimEnabled",
+    "app:dividerInsetEnd",
+    "app:dividerInsetStart",
+    "app:endInsetScrimEnabled",
+    "app:itemBackground",
+    "app:itemHorizontalPadding",
+    "app:itemIconPadding",
+    "app:itemIconSize",
+    "app:itemIconTint",
+    "app:itemMaxLines",
+    "app:itemTextAppearance",
+    "app:itemTextAppearanceActiveBoldEnabled",
+    "app:itemTextColor",
+    "app:itemVerticalPadding",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay",
+    "app:startInsetScrimEnabled",
+    "app:subheaderInsetEnd",
+    "app:subheaderInsetStart",
+    "app:topInsetScrimEnabled"
+   ],
+   "unsupported": [
+    "android:maxWidth",
+    "app:drawerLayoutCornerSize",
+    "app:headerLayout",
+    "app:itemRippleColor",
+    "app:itemShapeAppearance",
+    "app:itemShapeAppearanceOverlay",
+    "app:itemShapeFillColor",
+    "app:itemShapeInsetBottom",
+    "app:itemShapeInsetEnd",
+    "app:itemShapeInsetStart",
+    "app:itemShapeInsetTop",
+    "app:menu",
+    "app:subheaderColor",
+    "app:subheaderTextAppearance"
+   ]
+  },
+  "com.google.android.material.navigationrail.NavigationRailView": {
+   "setter": [
+    "app:itemSpacing",
+    "app:menuGravity",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay",
+    "app:submenuDividersEnabled"
+   ],
+   "unsupported": [
+    "app:collapsedItemMinHeight",
+    "app:contentMarginTop",
+    "app:expanded",
+    "app:expandedItemMinHeight",
+    "app:expandedMaxWidth",
+    "app:expandedMinWidth",
+    "app:headerLayout",
+    "app:headerMarginBottom",
+    "app:itemMinHeight",
+    "app:paddingBottomSystemWindowInsets",
+    "app:paddingStartSystemWindowInsets",
+    "app:paddingTopSystemWindowInsets",
+    "app:scrollingEnabled"
+   ]
+  },
+  "com.google.android.material.progressindicator.BaseProgressIndicator": {
+   "handler": [
+    "android:indeterminate"
+   ],
+   "setter": [
+    "app:hideAnimationBehavior",
+    "app:indeterminateAnimatorDurationScale",
+    "app:indicatorColor",
+    "app:indicatorTrackGapSize",
+    "app:showAnimationBehavior",
+    "app:trackColor",
+    "app:trackCornerRadius",
+    "app:trackThickness",
+    "app:waveAmplitude",
+    "app:waveSpeed",
+    "app:wavelength",
+    "app:wavelengthDeterminate",
+    "app:wavelengthIndeterminate"
+   ],
+   "unsupported": [
+    "app:minHideDelay",
+    "app:showDelay"
+   ]
+  },
+  "com.google.android.material.progressindicator.CircularProgressIndicator": {
+   "setter": [
+    "app:indicatorInset",
+    "app:indicatorSize"
+   ],
+   "unsupported": [
+    "app:indeterminateAnimationTypeCircular",
+    "app:indeterminateTrackVisible",
+    "app:indicatorDirectionCircular"
+   ]
+  },
+  "com.google.android.material.progressindicator.LinearProgressIndicator": {
+   "setter": [
+    "app:indeterminateAnimationType",
+    "app:trackInnerCornerRadius",
+    "app:trackStopIndicatorPadding",
+    "app:trackStopIndicatorSize"
+   ],
+   "unsupported": [
+    "app:indicatorDirectionLinear"
+   ]
+  },
+  "com.google.android.material.radiobutton.MaterialRadioButton": {
+   "setter": [
+    "app:useMaterialThemeColors"
+   ]
+  },
+  "com.google.android.material.search.SearchBar": {
+   "handler": [
+    "app:backgroundTint"
+   ],
+   "setter": [
+    "android:hint",
+    "android:maxWidth",
+    "android:text",
+    "app:defaultScrollFlagsEnabled",
+    "app:liftOnScroll",
+    "app:strokeColor",
+    "app:strokeWidth",
+    "app:textCentered"
+   ],
+   "unsupported": [
+    "android:textAppearance",
+    "app:defaultMarginsEnabled",
+    "app:forceDefaultNavigationOnClickListener",
+    "app:hideNavigationIcon",
+    "app:liftOnScrollColor",
+    "app:navigationIconTint",
+    "app:tintNavigationIcon"
+   ]
+  },
+  "com.google.android.material.search.SearchView": {
+   "handler": [
+    "android:focusable",
+    "app:backgroundTint"
+   ],
+   "setter": [
+    "android:hint",
+    "android:text",
+    "app:autoShowKeyboard",
+    "app:searchPrefixText"
+   ],
+   "unsupported": [
+    "android:imeOptions",
+    "android:inputType",
+    "android:maxWidth",
+    "android:textAppearance",
+    "app:animateMenuItems",
+    "app:animateNavigationIcon",
+    "app:backHandlingEnabled",
+    "app:closeIcon",
+    "app:commitIcon",
+    "app:defaultQueryHint",
+    "app:goIcon",
+    "app:headerLayout",
+    "app:hideNavigationIcon",
+    "app:iconifiedByDefault",
+    "app:layout",
+    "app:queryBackground",
+    "app:queryHint",
+    "app:searchHintIcon",
+    "app:searchIcon",
+    "app:submitBackground",
+    "app:suggestionRowLayout",
+    "app:useDrawerArrowDrawable",
+    "app:voiceIcon"
+   ]
+  },
+  "com.google.android.material.slider.RangeSlider": {
+   "setter": [
+    "app:minSeparation"
+   ],
+   "unsupported": [
+    "app:values"
+   ]
+  },
+  "com.google.android.material.slider.Slider": {
+   "setter": [
+    "android:enabled",
+    "android:orientation",
+    "android:stepSize",
+    "android:value",
+    "android:valueFrom",
+    "android:valueTo",
+    "app:centered",
+    "app:haloColor",
+    "app:haloRadius",
+    "app:labelBehavior",
+    "app:thumbColor",
+    "app:thumbElevation",
+    "app:thumbHeight",
+    "app:thumbRadius",
+    "app:thumbStrokeColor",
+    "app:thumbStrokeWidth",
+    "app:thumbTrackGapSize",
+    "app:thumbWidth",
+    "app:tickColor",
+    "app:tickColorActive",
+    "app:tickColorInactive",
+    "app:tickRadiusActive",
+    "app:tickRadiusInactive",
+    "app:tickVisibilityMode",
+    "app:tickVisible",
+    "app:trackColor",
+    "app:trackColorActive",
+    "app:trackColorInactive",
+    "app:trackCornerSize",
+    "app:trackHeight",
+    "app:trackIconActiveColor",
+    "app:trackIconActiveEnd",
+    "app:trackIconActiveStart",
+    "app:trackIconInactiveColor",
+    "app:trackIconInactiveEnd",
+    "app:trackIconInactiveStart",
+    "app:trackIconSize",
+    "app:trackInsideCornerSize",
+    "app:trackStopIndicatorSize"
+   ],
+   "unsupported": [
+    "app:labelStyle",
+    "app:minTouchTargetSize"
+   ]
+  },
+  "com.google.android.material.switchmaterial.SwitchMaterial": {
+   "setter": [
+    "app:useMaterialThemeColors"
+   ]
+  },
+  "com.google.android.material.tabs.TabItem": {
+   "unsupported": [
+    "android:icon",
+    "android:layout",
+    "android:text"
+   ]
+  },
+  "com.google.android.material.tabs.TabLayout": {
+   "handler": [
+    "app:tabGravity",
+    "app:tabIconTint",
+    "app:tabIndicatorColor",
+    "app:tabIndicatorFullWidth",
+    "app:tabIndicatorGravity",
+    "app:tabIndicatorHeight",
+    "app:tabMode",
+    "app:tabRippleColor",
+    "app:tabSelectedTextColor",
+    "app:tabTextColor"
+   ],
+   "setter": [
+    "app:tabIndicator",
+    "app:tabIndicatorAnimationMode",
+    "app:tabInlineLabel",
+    "app:tabUnboundedRipple"
+   ],
+   "unsupported": [
+    "app:tabBackground",
+    "app:tabContentStart",
+    "app:tabIconTintMode",
+    "app:tabIndicatorAnimationDuration",
+    "app:tabMaxWidth",
+    "app:tabMinWidth",
+    "app:tabPadding",
+    "app:tabPaddingBottom",
+    "app:tabPaddingEnd",
+    "app:tabPaddingStart",
+    "app:tabPaddingTop",
+    "app:tabSelectedTextAppearance",
+    "app:tabTextAppearance"
+   ]
+  },
+  "com.google.android.material.textfield.MaterialAutoCompleteTextView": {
+   "handler": [
+    "android:inputType"
+   ],
+   "setter": [
+    "app:dropDownBackgroundTint",
+    "app:simpleItemSelectedColor",
+    "app:simpleItemSelectedRippleColor",
+    "app:simpleItems"
+   ],
+   "unsupported": [
+    "android:popupElevation",
+    "app:simpleItemLayout"
+   ]
+  },
+  "com.google.android.material.textfield.TextInputEditText": {
+   "setter": [
+    "app:textInputLayoutFocusedRectEnabled"
+   ]
+  },
+  "com.google.android.material.textfield.TextInputLayout": {
+   "handler": [
+    "android:minWidth"
+   ],
+   "setter": [
+    "android:enabled",
+    "android:hint",
+    "android:maxEms",
+    "android:maxWidth",
+    "android:minEms",
+    "android:textColorHint",
+    "app:boxBackgroundColor",
+    "app:boxBackgroundMode",
+    "app:boxCollapsedPaddingTop",
+    "app:boxCornerRadiusBottomEnd",
+    "app:boxCornerRadiusBottomStart",
+    "app:boxCornerRadiusTopEnd",
+    "app:boxCornerRadiusTopStart",
+    "app:boxStrokeColor",
+    "app:boxStrokeErrorColor",
+    "app:boxStrokeWidth",
+    "app:boxStrokeWidthFocused",
+    "app:counterEnabled",
+    "app:counterMaxLength",
+    "app:counterOverflowTextAppearance",
+    "app:counterOverflowTextColor",
+    "app:counterTextAppearance",
+    "app:counterTextColor",
+    "app:cursorColor",
+    "app:cursorErrorColor",
+    "app:endIconCheckable",
+    "app:endIconContentDescription",
+    "app:endIconDrawable",
+    "app:endIconMinSize",
+    "app:endIconMode",
+    "app:endIconScaleType",
+    "app:endIconTint",
+    "app:endIconTintMode",
+    "app:errorAccessibilityLiveRegion",
+    "app:errorContentDescription",
+    "app:errorEnabled",
+    "app:errorIconDrawable",
+    "app:errorIconTint",
+    "app:errorIconTintMode",
+    "app:errorTextAppearance",
+    "app:errorTextColor",
+    "app:expandedHintEnabled",
+    "app:helperText",
+    "app:helperTextEnabled",
+    "app:helperTextTextAppearance",
+    "app:helperTextTextColor",
+    "app:hintAnimationEnabled",
+    "app:hintEnabled",
+    "app:hintMaxLines",
+    "app:hintTextAppearance",
+    "app:hintTextColor",
+    "app:placeholderText",
+    "app:placeholderTextAppearance",
+    "app:placeholderTextColor",
+    "app:prefixText",
+    "app:prefixTextAppearance",
+    "app:prefixTextColor",
+    "app:shapeAppearance",
+    "app:shapeAppearanceOverlay",
+    "app:startIconCheckable",
+    "app:startIconContentDescription",
+    "app:startIconDrawable",
+    "app:startIconMinSize",
+    "app:startIconScaleType",
+    "app:startIconTint",
+    "app:startIconTintMode",
+    "app:suffixText",
+    "app:suffixTextAppearance",
+    "app:suffixTextColor"
+   ],
+   "unsupported": [
+    "app:passwordToggleContentDescription",
+    "app:passwordToggleDrawable",
+    "app:passwordToggleEnabled",
+    "app:passwordToggleTint",
+    "app:passwordToggleTintMode"
+   ]
+  },
+  "com.google.android.material.textview.MaterialTextView": {
+   "handler": [
+    "android:textAppearance"
+   ],
+   "setter": [
+    "android:lineHeight",
+    "app:lineHeight"
+   ]
+  }
+ }
+}

@@ -55,6 +55,21 @@ class ValuesFileTest(unittest.TestCase):
         self.assertEqual({"parent": 0}, constraint.enums)
         self.assertEqual({"flag"}, values.attrs[("app", "springBoundary")].formats)
 
+    def test_formats_missing_from_attrs_xml_come_from_the_manifest_attributes(self):
+        values = gen.ValuesFile(b"""<resources>
+  <attr name="presetSizes"/>
+  <attr name="textSize" format="dimension"/>
+  <declare-styleable name="Toolbar"><attr name="logo"/></declare-styleable>
+</resources>""", "android")
+        manifest = gen.ValuesFile(b"""<resources>
+  <attr name="logo" format="reference"/>
+  <attr name="textSize" format="string"/>
+</resources>""", "android")
+        gen.merge_missing_formats(values, manifest)
+        self.assertEqual({"reference"}, values.attrs[("android", "logo")].formats)
+        self.assertEqual({"dimension"}, values.attrs[("android", "textSize")].formats)
+        self.assertEqual(set(), values.attrs[("android", "presetSizes")].formats)
+
     def test_flag_masks_are_signed_32_bit(self):
         self.assertEqual(-1, gen.parse_int("0xffffffff"))
         self.assertEqual(0x800005, gen.parse_int("0x00800005"))

@@ -290,7 +290,9 @@ class UiPreviewServiceTest {
         val id = sessionId(create(request(UiPreviewContract.MODE_SNAPSHOT, 200, 200), callback))
         val xml = "<LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\" xmlns:tools=\"http://schemas.android.com/tools\" " +
             "android:layout_width=\"match_parent\" android:layout_height=\"match_parent\" tools:ignore=\"x\">" +
-            "<TextView android:text=\"a\" android:onClick=\"go\" android:noSuchAttribute=\"1\"/></LinearLayout>"
+            "<TextView android:text=\"a\" android:onClick=\"go\" android:noSuchAttribute=\"1\" " +
+            // Read when the view is created: no diagnostic.
+            "style=\"@android:style/Widget.Material.TextView\" android:theme=\"@android:style/Theme.Material.Light\"/></LinearLayout>"
         val result = service.setLayout(id, layout(xml), snapshotFile().second)
         assertEquals(result.getString(UiPreviewContract.KEY_ERROR_MESSAGE), UiPreviewContract.OUTCOME_APPLIED, outcome(result))
         val diagnostics = JSONArray(result.getString(UiPreviewContract.KEY_DIAGNOSTICS_JSON))
@@ -645,6 +647,8 @@ class UiPreviewServiceTest {
         val resources = zipAssets(focusProject) { it.startsWith("res/") }
         val result = service.setLayout(id, withResources(layout(xml), resources, layoutPath, androidLayout = true), snapshotFile().second)
         assertEquals(result.getString(UiPreviewContract.KEY_ERROR_MESSAGE), UiPreviewContract.OUTCOME_APPLIED, outcome(result))
+        // Host roadmap A5: every attribute the sample writes takes effect; those its theme overlay and styles add are not reported.
+        assertEquals("[]", result.getString(UiPreviewContract.KEY_DIAGNOSTICS_JSON))
         val bounds = awaitBounds(callback)
         val ids = (0 until bounds.length()).map { bounds.getJSONObject(it).optString(UiPreviewContract.Bounds.ID) }
         assertTrue(ids.toString(), "root" in ids)

@@ -40,6 +40,7 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
     protected val androidResources = resourceParser.androidResources
 
     private val mAttributes: MutableMap<String, Attribute> = HashMap()
+    private val mUnsupportedAttributes: MutableMap<String, Attribute> = HashMap()
     private var mViewAttributeDelegate: ViewAttributeDelegate? = null
 
     init {
@@ -157,6 +158,9 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
         registerAttrs(arrayOf("layout_above", "layoutAbove")) { setLayoutRule(RelativeLayout.ABOVE, true, it) }
         registerAttrs(arrayOf("layout_toLeftOf", "layoutToLeftOf")) { setLayoutRule(RelativeLayout.LEFT_OF, true, it) }
         registerAttrs(arrayOf("layout_toRightOf", "layoutToRightOf")) { setLayoutRule(RelativeLayout.RIGHT_OF, true, it) }
+        registerAttrs(arrayOf("layout_toStartOf", "layoutToStartOf")) { setLayoutRule(RelativeLayout.START_OF, true, it) }
+        registerAttrs(arrayOf("layout_toEndOf", "layoutToEndOf")) { setLayoutRule(RelativeLayout.END_OF, true, it) }
+        registerAttrs(arrayOf("layout_alignBaseline", "layoutAlignBaseline")) { setLayoutRule(RelativeLayout.ALIGN_BASELINE, true, it) }
         registerAttrs(arrayOf("layout_alignBottom", "layoutAlignBottom")) { setLayoutRule(RelativeLayout.ALIGN_BOTTOM, true, it) }
         registerAttrs(arrayOf("layout_alignTop", "layoutAlignTop")) { setLayoutRule(RelativeLayout.ALIGN_TOP, true, it) }
         registerAttrs(arrayOf("layout_alignLeft", "layoutAlignLeft")) { setLayoutRule(RelativeLayout.ALIGN_LEFT, true, it) }
@@ -274,22 +278,17 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
         ViewCompat.setElevation(view, e.toFloat())
     }
 
+    // The flags name exactly the enabled directions, as in Android: "none" turns both off (host roadmap A5).
     private fun setScrollbars(scrollbars: String) {
-        scrollbars.split("\\|".toRegex()).forEach { str ->
-            when (str) {
-                "horizontal" -> view.isHorizontalScrollBarEnabled = true
-                "vertical" -> view.isVerticalScrollBarEnabled = true
-            }
-        }
+        val flags = scrollbars.split("|").map { it.trim() }
+        view.isHorizontalScrollBarEnabled = "horizontal" in flags
+        view.isVerticalScrollBarEnabled = "vertical" in flags
     }
 
     private fun requiresFadingEdge(fadingEdge: String) {
-        fadingEdge.split("\\|".toRegex()).forEach { str ->
-            when (str) {
-                "horizontal" -> view.isHorizontalFadingEdgeEnabled = true
-                "vertical" -> view.isVerticalFadingEdgeEnabled = true
-            }
-        }
+        val flags = fadingEdge.split("|").map { it.trim() }
+        view.isHorizontalFadingEdgeEnabled = "horizontal" in flags
+        view.isVerticalFadingEdgeEnabled = "vertical" in flags
     }
 
     protected fun parseDimensionToPixel(value: String): Float {
@@ -337,8 +336,18 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
     }
 
     protected fun registerAttrUnsupported(names: Array<String>) {
-        names.forEach { registerAttr(it) { value -> Exceptions.unsupported(view, it, value) } }
+        names.forEach { name ->
+            registerAttr(name) { value -> Exceptions.unsupported(view, name, value) }
+            mAttributes[name]?.let { mUnsupportedAttributes[name] = it }
+        }
     }
+
+    /**
+     * Whether [name] is registered as unsupported (and not registered again by a subclass): setting it throws
+     * `UnsupportedAttributeException`, which sends it to the inflater's attribute fallback (host roadmap A2 / A5).
+     * zh-CN: [name] 是否注册为不支持 (且未被子类重新注册): 设值会抛出 `UnsupportedAttributeException`, 由布局器的属性兜底接手.
+     */
+    fun isDeclaredUnsupported(name: String): Boolean = mUnsupportedAttributes[name]?.let { it === mAttributes[name] } == true
 
     private fun <T> registerAttr(name: String, converter: (String) -> T, applier: (T) -> Unit) {
         val attributeSetter = MappingAttributeSetter(

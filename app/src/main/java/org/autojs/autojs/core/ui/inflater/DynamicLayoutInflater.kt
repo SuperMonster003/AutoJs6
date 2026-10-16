@@ -3,9 +3,11 @@
 package org.autojs.autojs.core.ui.inflater
 
 import android.content.Context
+import android.content.res.Resources
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
+import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.InflateException
 import android.view.SurfaceView
@@ -26,6 +28,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.R as MaterialR
 import com.makeramen.roundedimageview.RoundedImageView
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
@@ -462,6 +465,8 @@ open class DynamicLayoutInflater {
                 parent.removeView(view)
             }
         }
+        // Only these were written on the element; the rest came from its style or theme (A4).
+        context.put(WRITTEN_ATTRIBUTES, getRawAttributesMap(node).keys)
         val inflater = applyAttributes(context, view, attrs, parent)
         if (node.hasChildNodes()) {
             if (view is ViewGroup) {
@@ -569,14 +574,15 @@ open class DynamicLayoutInflater {
                         .firstOrNull { runCatching { Class.forName(it) }.isSuccess }
                     ?: "android.widget.$niceName"
             }
+            val creationContext = if (niceName.startsWith(MATERIAL_PACKAGE)) withMaterialTheme(baseContext) else baseContext
             val creator = mViewCreators[niceName]
             if (creator != null) {
-                return creator.create(baseContext, attrs, parent)
+                return creator.create(creationContext, attrs, parent)
             }
             val clazz: Class<*> = runCatching { Class.forName(niceName) }.getOrElse {
                 throw WrappedRuntimeException(context.getString(R.string.error_unknown_element_name, name))
             }
-            createReflectedView(clazz, attrs, baseContext)
+            createReflectedView(clazz, attrs, creationContext)
         } catch (e: Exception) {
             throw InflateException(e)
         }
@@ -851,7 +857,7 @@ open class DynamicLayoutInflater {
 
     private fun applyAttributes(context: InflateContext, view: View, setter: ViewInflater<View>?, attrs: Map<String, String>, parent: ViewGroup?) {
         if (setter != null) {
-            for ((key, value) in attrs) {
+            for ((key, value) in constructorOrder(view, attrs)) {
                 val attr = key.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 when (attr.size) {
                     1 -> applyAttribute(context, setter, view, null, attr[0], value, parent)
@@ -862,6 +868,21 @@ open class DynamicLayoutInflater {
             setter.applyPendingAttributes(view, parent)
         } else {
             Log.e(LOG_TAG, "cannot set attributes for view: " + view.javaClass)
+        }
+    }
+
+    /**
+     * Document order (host roadmap D5), except where a platform constructor reads one attribute before another that
+     * its setter would reset: ImageView's `adjustViewBounds` (its setter sets the scale type to fitCenter) comes first.
+     * zh-CN: 按书写顺序, 但平台构造函数先读取, 且其 setter 会重置另一属性的除外: ImageView 的 `adjustViewBounds` (setter 会把缩放类型设为 fitCenter) 总是先应用.
+     */
+    private fun constructorOrder(view: View, attrs: Map<String, String>): Map<String, String> {
+        if (view !is ImageView) return attrs
+        val first = attrs.keys.filter { it.substringAfter(':') == "adjustViewBounds" }
+        if (first.isEmpty()) return attrs
+        return LinkedHashMap<String, String>().apply {
+            first.forEach { put(it, attrs.getValue(it)) }
+            putAll(attrs)
         }
     }
 
@@ -889,8 +910,11 @@ open class DynamicLayoutInflater {
      * 原生 Android XML 中跳过, 控制台按类与属性警告一次, 并告知预览承载; AutoJs6 XML 中未知属性照旧忽略, 声明不支持的属性照旧使布局失败.
      */
     fun applyAttributeValue(context: InflateContext, view: View, inflater: ViewInflater<View>, ns: String?, attrName: String, value: String, parent: ViewGroup?): AttributeOutcome {
+        // AppCompat's names for platform attributes (`app:srcCompat`, `app:drawableStartCompat`), common in Android Studio layouts.
+        if (ns == "app") COMPAT_ALIASES[attrName]?.let { return applyAttributeValue(context, view, inflater, "android", it, value, parent) }
         val outcome = try {
             if (inflater.setAttr(view, ns, attrName, value, parent)) return AttributeOutcome.APPLIED
+            if (isCreationAttribute(view, ns, attrName)) return AttributeOutcome.APPLIED
             if (ns != null && ns != "android" && ns != "app") AttributeOutcome.IGNORED_NAMESPACE else attributeFallback.apply(view, ns, attrName, value, parent)
         } catch (e: UnsupportedAttributeException) {
             val fallback = attributeFallback.apply(view, ns, attrName, value, parent)
@@ -899,7 +923,10 @@ open class DynamicLayoutInflater {
             AttributeOutcome.UNSUPPORTED
         }
         if (outcome == AttributeOutcome.UNSUPPORTED || outcome == AttributeOutcome.UNKNOWN) {
-            if (context.get(ANDROID_XML) == true) reportIgnoredAttribute(view, if (ns != null) "$ns:$attrName" else attrName, outcome)
+            val key = if (ns != null) "$ns:$attrName" else attrName
+            // Like Android, attributes of a style or theme the view does not take are ignored silently.
+            val written = (context.get(WRITTEN_ATTRIBUTES) as? Set<*>)?.contains(key) != false
+            if (context.get(ANDROID_XML) == true && written) reportIgnoredAttribute(view, key, outcome)
         }
         return outcome
     }
@@ -943,5 +970,53 @@ open class DynamicLayoutInflater {
         private const val SPINNER_MODE_THEME = -1
         private val NON_VIEW_ROOT_ELEMENTS = setOf("include", "requestFocus", "tag")
         private val ANDROID_VIEW_PREFIXES = listOf("android.widget", "android.view", "android.webkit")
+
+        /** The keys written on the element being applied, as opposed to those its style or theme added. */
+        private const val WRITTEN_ATTRIBUTES = "android.written.attributes"
+
+        private const val MATERIAL_PACKAGE = "com.google.android.material."
+
+        /** Attributes [createViewForName] and the view creators read when they create a view. */
+        private val CREATION_ATTRIBUTES = setOf("theme", "style", "class")
+
+        /** AppCompat attributes that stand for platform ones on any view. */
+        internal val COMPAT_ALIASES = mapOf(
+            "srcCompat" to "src",
+            "drawableLeftCompat" to "drawableLeft",
+            "drawableTopCompat" to "drawableTop",
+            "drawableRightCompat" to "drawableRight",
+            "drawableBottomCompat" to "drawableBottom",
+            "drawableStartCompat" to "drawableStart",
+            "drawableEndCompat" to "drawableEnd",
+        )
+
+        /**
+         * Whether the attribute took effect when the view was created (theme, style, the class of a `<view>`, the mode
+         * of a Spinner, DatePicker or TimePicker), so no handler or setter is needed afterwards.
+         * zh-CN: 该属性是否已在创建 View 时生效 (主题, 样式, `<view>` 的类名, Spinner / DatePicker / TimePicker 的模式), 之后无需处理器或 setter.
+         */
+        internal fun isCreationAttribute(view: View, ns: String?, attrName: String): Boolean =
+            (ns == null || ns == "android") && when (attrName) {
+                in CREATION_ATTRIBUTES -> true
+                "spinnerMode" -> view is Spinner
+                "datePickerMode" -> view is DatePicker
+                "timePickerMode" -> view is TimePicker
+                else -> false
+            }
+
+        /**
+         * A Material component checks for a Material theme when it is created; a context whose theme is not one (the
+         * AppCompat theme of a ui script) gets the missing attributes from Material 3, while those it defines win.
+         * zh-CN: Material 组件创建时检查 Material 主题; 主题不是 Material 主题时 (ui 脚本的 AppCompat 主题) 从 Material 3 补齐缺少的属性, 已定义的属性保持不变.
+         */
+        internal fun withMaterialTheme(context: Context): Context {
+            val value = TypedValue()
+            if (context.theme.resolveAttribute(MaterialR.attr.isMaterialTheme, value, true) && value.data != 0) return context
+            return object : ContextThemeWrapper(context, MaterialR.style.Theme_Material3_DayNight_NoActionBar) {
+                override fun onApplyThemeResource(theme: Resources.Theme, resid: Int, first: Boolean) {
+                    theme.applyStyle(resid, false)
+                }
+            }
+        }
     }
 }

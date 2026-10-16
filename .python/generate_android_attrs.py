@@ -135,6 +135,17 @@ class ValuesFile:
         self.attrs.setdefault(key, AttrDef()).merge(element)
 
 
+def merge_missing_formats(values: ValuesFile, other: ValuesFile) -> None:
+    """Definitions [values] lacks, or has without a format, taken from [other]: attrs.xml only references `logo` and
+    `theme` in styleables because attrs_manifest.xml declares them."""
+    for key, definition in other.attrs.items():
+        target = values.attrs.setdefault(key, AttrDef())
+        if not target.formats:
+            target.formats |= definition.formats
+            target.enums.update(definition.enums)
+            target.flags.update(definition.flags)
+
+
 def public_attrs(values_dir: Path) -> set[str]:
     names: set[str] = set()
     for file in ("public.xml", "public-final.xml", "public-staging.xml"):
@@ -237,6 +248,9 @@ def generate(sdk: Path, gradle_home: Path) -> dict:
                     since.setdefault(name, {}).setdefault(attr, level)
         newest = values
     assert newest is not None
+    manifest = sdk / "platforms" / SDK_LEVELS[-1][1] / "data/res/values/attrs_manifest.xml"
+    if manifest.is_file():
+        merge_missing_formats(newest, ValuesFile(manifest.read_bytes(), "android"))
     # Only public View subclasses own attributes, only ViewGroup subclasses own layout params.
     supers: dict[str, str | None] = {}
     public_classes: set[str] = set()
