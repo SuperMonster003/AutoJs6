@@ -138,6 +138,7 @@ private val pluginApi = listOf(
     "batch-rename-api",
     "gallery-api",
     "plugin-tool-api",
+    "speech-api",
 )
 
 private val plugins = listOf(
@@ -154,6 +155,7 @@ private val pluginConformanceTestApps = listOf(
     "python-runtime-api-consumer",
     "yolo-provider-conformance",
     "plugin-tool-provider-conformance",
+    "speech-provider-conformance",
 )
 
 private val codegenFixtureApps = listOf(

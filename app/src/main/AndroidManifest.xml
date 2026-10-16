@@ -49,6 +49,7 @@
         <package android:name="io.github.supermonster003.autojs6.plugin.three.amber.player" />
         <package android:name="io.github.supermonster003.autojs6.plugin.mcp.server" />
         <package android:name="io.github.supermonster003.autojs6.plugin.three.shell.terminal" />
+        <package android:name="io.github.supermonster003.autojs6.plugin.three.macaw.speech" />
         <intent>
             <action android:name="org.autojs.plugin.INFO" />
         </intent>
@@ -108,6 +109,10 @@
         <intent>
             <action android:name="org.autojs.plugin.GALLERY" />
             <category android:name="gallery" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.SPEECH" />
+            <category android:name="speech" />
         </intent>
         <intent>
             <action android:name="org.autojs.plugin.typescript.COMPILER" />

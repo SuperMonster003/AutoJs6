@@ -132,6 +132,7 @@ object PluginInstallWizardCatalog {
         entry(official("mcp.server"), "MCP Server", TOOLS, standard = true),
         entry(official("threestoneai"), "Three Stone AI", TOOLS, standard = true),
         entry(official("three.color.picker"), "Three Color Picker", TOOLS),
+        entry(official("three.macaw.speech"), "Three Macaw Speech", TOOLS),
     )
 
     private val entriesByPackage: Map<String, PluginInstallWizardCatalogEntry> = entries.associateBy { it.packageName }

@@ -802,6 +802,10 @@ dependencies /* Unclassified */ {
     // Plugin API: self-described plugin tools (MCP Server roadmap P12, docs/dev/plugin-tool-protocol-v1.md)
     // zh-CN: 插件自描述工具契约 (MCP Server 路线图 P12)
     implementation(project(":plugin-api:plugin-tool-api"))
+
+    // Plugin API: speech (3-Macaw Speech roadmap D21, docs/dev/speech-plugin-protocol-v1.md)
+    // zh-CN: 语音插件契约 (3-Macaw Speech 路线图 D21)
+    implementation(project(":plugin-api:speech-api"))
 }
 
 dependencies /* MIME */ {

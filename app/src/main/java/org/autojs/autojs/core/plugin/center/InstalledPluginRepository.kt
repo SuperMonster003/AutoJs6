@@ -25,6 +25,8 @@ import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.batchrename.BatchRenamePluginHost
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.gallery.GalleryPluginHost
+import org.autojs.autojs.core.plugin.speech.SpeechPluginHost
+import org.autojs.plugin.speech.api.SpeechPluginActions
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginHost
 import org.autojs.autojs.core.plugin.explorer.ExplorerActionPluginHost
 import org.autojs.autojs.core.plugin.installer.InstallerPluginHost
@@ -270,6 +272,9 @@ class InstalledPluginRepository {
         GalleryPluginHost.ACTION_GALLERY -> GalleryPluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = GalleryPluginHost.ACTION_GALLERY)
         }
+        SpeechPluginHost.ACTION_SPEECH -> SpeechPluginHost.discover(context, packageName).map {
+            Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = SpeechPluginHost.ACTION_SPEECH)
+        }
         else -> listOf(preferred)
     }
 
@@ -321,6 +326,10 @@ class InstalledPluginRepository {
             ServiceQuery(
                 action = GalleryPluginHost.ACTION_GALLERY,
                 category = GalleryActions.SERVICE_CATEGORY,
+            ),
+            ServiceQuery(
+                action = SpeechPluginHost.ACTION_SPEECH,
+                category = SpeechPluginActions.SERVICE_CATEGORY,
             ),
         )
         return specs.flatMap { spec ->

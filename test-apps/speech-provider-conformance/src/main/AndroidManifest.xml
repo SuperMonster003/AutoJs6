@@ -1,0 +1,38 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="org.autojs.permission.PLUGIN" />
+
+    <!-- The background microphone probe of 3-Macaw Speech roadmap D22 records in this app's own process. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <queries>
+        <package android:name="org.autojs.autojs6" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:label="AutoJs6 Speech Conformance"
+        android:supportsRtl="true"
+        android:testOnly="true"
+        android:usesCleartextTraffic="false">
+
+        <!-- Test-only provider of the speech contract (docs/dev/speech-plugin-protocol-v1.md). -->
+        <service
+            android:name=".FakeSpeechPluginService"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:process=":provider">
+            <intent-filter>
+                <action android:name="org.autojs.plugin.SPEECH" />
+                <category android:name="speech" />
+            </intent-filter>
+        </service>
+
+        <!-- Shows the system microphone permission dialog; the maintainer answers it on the device. -->
+        <activity
+            android:name=".FakeSpeechPermissionActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+    </application>
+</manifest>

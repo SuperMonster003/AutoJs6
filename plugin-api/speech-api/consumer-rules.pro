@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.speech.api.** { *; }
+-dontwarn org.autojs.plugin.speech.api.**
