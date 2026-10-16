@@ -984,10 +984,11 @@ class AndroidNodeBridgeCapabilityProvider(
     private val samplesBridge by lazy { NodeBridgeSamplesBridge(appContext) }
     // Self-described plugin tools (MCP roadmap P12 D29); the screen is captured like accessibility.captureScreenImage.
     private val pluginToolsBridge = lazy {
+        // Script sessions get the same scope without shared storage: inside the working directory only.
+        val policy = modelPathPolicy ?: NodeBridgeModelPathPolicy(File(engineInfo.cwd.ifBlank { appContext.filesDir.absolutePath }), null) { false }
         NodeBridgePluginToolsBridge(
             context = appContext,
-            workingDirectory = engineInfo.cwd,
-            modelPathPolicy = modelPathPolicy,
+            paths = PluginToolPaths.of(policy),
             consumer = NodeBridgePluginToolsBridge.consumerOf(engineInfo.engineName),
             captureScreen = { timeoutMs -> NodeBridgeScreenCapture.capture(timeoutMs) { screenCapture.capture() }.bitmap },
         )

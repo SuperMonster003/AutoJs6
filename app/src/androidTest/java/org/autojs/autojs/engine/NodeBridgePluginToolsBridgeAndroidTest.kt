@@ -46,7 +46,7 @@ class NodeBridgePluginToolsBridgeAndroidTest {
         restore = authorizeFakeProvider()
         workingDirectory = File(context.cacheDir, "plugin-tools-bridge-test-${UUID.randomUUID()}").apply { mkdirs() }
         val policy = NodeBridgeModelPathPolicy(workingDirectory, null) { false }
-        bridge = NodeBridgePluginToolsBridge(context, workingDirectory.absolutePath, policy, "mcp") { _ ->
+        bridge = NodeBridgePluginToolsBridge(context, PluginToolPaths.of(policy), "mcp") { _ ->
             Bitmap.createBitmap(32, 24, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.RED) }
         }
         PluginToolRegistry.invalidate()

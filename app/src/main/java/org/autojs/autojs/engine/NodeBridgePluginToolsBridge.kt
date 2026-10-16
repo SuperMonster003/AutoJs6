@@ -55,6 +55,26 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
+ * Where image / file arguments are read and binary outputs are written; failures throw [SecurityException] with the
+ * reason the caller should see. Bridge sessions use their path policy ([of]); the script API resolves like `files.path`.
+ * zh-CN: 图片 / 文件参数的读取位置与二进制输出的写入位置; 失败时抛出带原因的 [SecurityException].
+ */
+internal interface PluginToolPaths {
+
+    fun read(path: String, permissions: Collection<String>, label: String): File
+
+    fun write(path: String, label: String): File
+
+    companion object {
+
+        fun of(policy: NodeBridgeModelPathPolicy): PluginToolPaths = object : PluginToolPaths {
+            override fun read(path: String, permissions: Collection<String>, label: String) = policy.resolveRead(path, permissions, label).file
+            override fun write(path: String, label: String) = policy.resolveWrite(path, label).file
+        }
+    }
+}
+
+/**
  * The `plugin_tools` bridge module (MCP Server roadmap P12 D29 / D32 / D34, docs/dev/plugin-tool-protocol-v1.md):
  * `list` returns the tools of the available providers, `invoke` runs one call and `cancel` stops it. The host checks
  * the arguments against the tool's schema, resolves image arguments (`"screen"` is captured like
@@ -70,8 +90,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 internal class NodeBridgePluginToolsBridge(
     context: Context,
-    workingDirectory: String,
-    modelPathPolicy: NodeBridgeModelPathPolicy?,
+    private val paths: PluginToolPaths,
     private val consumer: String,
     private val captureScreen: (Long) -> Bitmap,
 ) {
@@ -81,10 +100,6 @@ internal class NodeBridgePluginToolsBridge(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val operations = ConcurrentHashMap<String, Operation>()
     private val destroyed = AtomicBoolean(false)
-
-    /** Script sessions get the same scope without shared storage: inside the working directory only. */
-    private val pathPolicy: NodeBridgeModelPathPolicy = modelPathPolicy
-        ?: NodeBridgeModelPathPolicy(File(workingDirectory.ifBlank { appContext.filesDir.absolutePath }), null) { false }
 
     fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         if (destroyed.get()) return callback(failure(request, NodeBridgeError.processDead("AutoJs6 plugin_tools bridge is closed.")))
@@ -174,7 +189,7 @@ internal class NodeBridgePluginToolsBridge(
         if (plan.outputs.isNotEmpty()) requireToken(request, NodeBridgePermissionManifest.FILES_WRITE, "write the outputs of ${tool.fullName}")
 
         val targets = plan.outputs.mapValues { (name, path) ->
-            val file = resolve { pathPolicy.resolveWrite(path, "plugin_tools.invoke output $name").file }
+            val file = resolve { paths.write(path, "plugin_tools.invoke output $name") }
             if (file.isDirectory) throw RequestProblem(NodeBridgeError.invalidRequest("output $name points at a directory: $path", request.module, request.method))
             if (file.exists() && !overwrite) throw RequestProblem(NodeBridgeError.invalidRequest("output $name already exists: $path (pass overwrite: true to replace it)", request.module, request.method))
             OutputTarget(path, file)
@@ -246,7 +261,7 @@ internal class NodeBridgePluginToolsBridge(
     }
 
     private fun fileInput(request: NodeBridgeRequest, input: PluginToolInput): ResolvedInput {
-        val file = resolve { pathPolicy.resolveRead(input.value, request.permissions, "plugin_tools.invoke ${input.parameter}").file }
+        val file = resolve { paths.read(input.value, request.permissions, "plugin_tools.invoke ${input.parameter}") }
         if (!file.isFile) throw RequestProblem(NodeBridgeError.invalidRequest("${input.parameter} is not a readable file: ${input.value}", request.module, request.method))
         if (file.length() > PluginToolLimits.MAX_DESCRIPTOR_BYTES) {
             throw RequestProblem(NodeBridgeError.resourceLimit("${input.parameter} has ${file.length()} bytes, more than ${PluginToolLimits.MAX_DESCRIPTOR_BYTES}", request.module, request.method))

@@ -97,6 +97,7 @@ import org.autojs.autojs.runtime.api.augment.opencc.OpenCC
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin
 import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4j
 import org.autojs.autojs.runtime.api.augment.plugins.Plugins
+import org.autojs.autojs.runtime.api.augment.plugins.PluginsTools
 import org.autojs.autojs.runtime.api.augment.power.PowerManager
 import org.autojs.autojs.runtime.api.augment.recorder.Recorder
 import org.autojs.autojs.runtime.api.augment.s13n.S13n
@@ -1042,7 +1043,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             BytesFmt.augmentWithRuntime(fmt, this)
         }
         Console(this).proxying(target, console).also { consoleProxyObject = it }
-        Plugins(this).augment(target)
+        Plugins(this).augment(target).also { PluginsTools(this).augment(it) }
         Arrayx(this).augment(target)
         Numberx(this).augment(target)
         Mathx(this).augment(target)
