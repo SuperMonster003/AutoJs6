@@ -69,8 +69,8 @@ object BatchRenameMetadataReader {
         if (author == null || copyright == null) {
             val xmp = exif.getAttributeBytes(ExifInterface.TAG_XMP)?.let { String(it, Charsets.UTF_8) }
             if (xmp != null) {
-                if (author == null) author = text(xmpValue(xmp, "dc:creator"))
-                if (copyright == null) copyright = text(xmpValue(xmp, "dc:rights"))
+                if (author == null) author = text(xmpValue(xmp, "creator"))
+                if (copyright == null) copyright = text(xmpValue(xmp, "rights"))
             }
         }
         put(BatchRenameMetadataKeys.AUTHOR, author)
@@ -136,6 +136,8 @@ object BatchRenameMetadataReader {
         return "$year-$month-${day}T$hour:$minute:$second"
     }
 
+    private const val DUBLIN_CORE = "http://purl.org/dc/elements/1.1/"
+
     private val DATE_TIME = Regex("([0-9]{4})[:-]([0-9]{2})[:-]([0-9]{2})[ T]([0-9]{2}):([0-9]{2}):([0-9]{2}).*")
 
     /**
@@ -157,9 +159,11 @@ object BatchRenameMetadataReader {
     }
 
     /**
-     * The first `rdf:li` text below [element] (`dc:creator` is a sequence, `dc:rights` a language alternative), or the
-     * element's own text; null for a packet that does not parse.
-     * zh-CN: [element] 之下第一个 `rdf:li` 的文本 (`dc:creator` 为序列, `dc:rights` 为多语言替代), 或该元素自身的文本; 无法解析的包为 null.
+     * The first `rdf:li` text below the Dublin Core property [element] (`creator` is a sequence, `rights` a language
+     * alternative), or the property's own text; null for a packet that does not parse. The parser of [Xml] resolves
+     * namespaces, so the property is matched by its namespace and local name, whatever prefix the packet uses.
+     * zh-CN: Dublin Core 属性 [element] 之下第一个 `rdf:li` 的文本 (`creator` 为序列, `rights` 为多语言替代), 或该属性自身的文本;
+     * 无法解析的包为 null. [Xml] 的解析器会解析命名空间, 因此按命名空间与本地名匹配属性, 与包中使用的前缀无关.
      */
     internal fun xmpValue(xmp: String, element: String): String? = try {
         val parser = Xml.newPullParser()
@@ -169,7 +173,7 @@ object BatchRenameMetadataReader {
         while (result == null) {
             when (parser.next()) {
                 XmlPullParser.END_DOCUMENT -> break
-                XmlPullParser.START_TAG -> if (depth < 0 && parser.name == element) depth = parser.depth
+                XmlPullParser.START_TAG -> if (depth < 0 && parser.name == element && parser.namespace == DUBLIN_CORE) depth = parser.depth
                 XmlPullParser.TEXT -> if (depth >= 0) result = parser.text.trim().takeIf { it.isNotEmpty() }
                 XmlPullParser.END_TAG -> if (depth >= 0 && parser.depth == depth) break
             }

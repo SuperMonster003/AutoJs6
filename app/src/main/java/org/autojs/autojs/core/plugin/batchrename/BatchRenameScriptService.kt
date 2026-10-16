@@ -25,7 +25,14 @@ data class BatchRenamePlanRequest(
     val now: Long,
 )
 
-data class BatchRenamePlanAnswerItem(val newName: String?, val status: String, val reason: String?, val overwrites: Boolean)
+data class BatchRenamePlanAnswerItem(
+    val newName: String?,
+    val status: String,
+    val reason: String?,
+    val overwrites: Boolean,
+    /** A metadata variable had no value for the item (plugin roadmap D34). zh-CN: 条目缺少某个元数据变量的值. */
+    val metadataMissing: Boolean = false,
+)
 
 /**
  * The plugin's answer to a [BatchRenamePlanRequest]; [options] are the complete options the plan used, answered by
@@ -289,6 +296,7 @@ class BatchRenameScriptService(
                 "reason" to item.reason,
                 "excluded" to request.excluded[index],
                 "overwrites" to item.overwrites,
+                "metadataMissing" to item.metadataMissing,
             )
         },
         "counts" to linkedMapOf(*PLAN_STATUSES.map { it to (answer.counts[it] ?: 0) }.toTypedArray()),

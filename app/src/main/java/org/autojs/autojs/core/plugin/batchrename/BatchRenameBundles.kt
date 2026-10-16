@@ -62,6 +62,7 @@ internal object BatchRenameBundles {
                 status = item.getString(BatchRenameItemKeys.STATUS).orEmpty(),
                 reason = item.getString(BatchRenameItemKeys.REASON),
                 overwrites = item.getBoolean(BatchRenameItemKeys.OVERWRITES, false),
+                metadataMissing = item.getBoolean(BatchRenameItemKeys.METADATA_MISSING, false),
             )
         }
         val counts = bundle.getBundle(BatchRenameResultKeys.COUNTS)?.let { counts ->

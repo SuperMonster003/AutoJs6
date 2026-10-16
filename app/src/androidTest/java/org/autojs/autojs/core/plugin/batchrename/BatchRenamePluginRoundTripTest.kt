@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import org.autojs.plugin.batchrename.api.BatchRenameContract
 import org.autojs.plugin.batchrename.api.BatchRenameErrorCodes
 import org.autojs.plugin.batchrename.api.BatchRenameItemKeys
+import org.autojs.plugin.batchrename.api.BatchRenameMetadataKeys
 import org.autojs.plugin.batchrename.api.BatchRenameOptionKeys
 import org.autojs.plugin.batchrename.api.BatchRenameParentKeys
 import org.autojs.plugin.batchrename.api.BatchRenameRequestKeys
@@ -105,6 +106,29 @@ class BatchRenamePluginRoundTripTest {
             putString(BatchRenameOptionKeys.PINYIN_CASE, BatchRenameValues.PINYIN_CASE_CAPITALIZE)
         }, names.take(1)))
         assertEquals(listOf("Chong2Qing4Yin2Hang2-重慶銀行.jpg"), items(variable).map { it.getString(BatchRenameItemKeys.NEW_NAME) })
+    }
+
+    /** Item metadata crosses the Binder and names items (plugin 1.1.0, roadmap P6.4). zh-CN: 条目元数据跨进程传递并用于命名. */
+    @Test
+    fun metadataTravelsWithTheItems(): Unit = runBlocking {
+        requirePlugin()
+        val features = BatchRenamePluginHost.discover(context).flatMap { BatchRenamePluginHost.featuresOf(it.pluginInfo) }
+        assumeTrue("The installed plugin predates metadata", BatchRenameValues.FEATURE_METADATA in features)
+        val request = request(Bundle().apply {
+            putString(BatchRenameOptionKeys.SEARCH, "^")
+            putString(BatchRenameOptionKeys.REPLACE, "\$CAMERA_MODEL_\$SHUTTER_")
+            putBoolean(BatchRenameOptionKeys.REGEX, true)
+            putBoolean(BatchRenameOptionKeys.METADATA, true)
+        }, listOf("a.jpg", "b.jpg"))
+        @Suppress("DEPRECATION")
+        request.getParcelableArrayList<Bundle>(BatchRenameRequestKeys.ITEMS)!![0].putBundle(BatchRenameItemKeys.METADATA, Bundle().apply {
+            putString(BatchRenameMetadataKeys.CAMERA_MODEL, "Pixel 9")
+            putDouble(BatchRenameMetadataKeys.EXPOSURE_TIME, 0.004)
+        })
+        val answer = BatchRenamePluginHost.plan(context, request)
+        assertFalse("error: ${answer.getString(BatchRenameResultKeys.ERROR_MESSAGE)}", answer.containsKey(BatchRenameResultKeys.ERROR_CODE))
+        assertEquals(listOf("Pixel 9_1-250s_a.jpg", "__b.jpg"), items(answer).map { it.getString(BatchRenameItemKeys.NEW_NAME) })
+        assertEquals(listOf(false, true), items(answer).map { it.getBoolean(BatchRenameItemKeys.METADATA_MISSING, false) })
     }
 
     @Test

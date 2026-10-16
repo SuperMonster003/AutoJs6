@@ -275,7 +275,42 @@ class BatchRenameScriptApiTest {
     }
 
     /**
-     * A plugin before 1.1.0 does not advertise pinyin or presets: scripts that use them fail, the others still plan.
+     * Metadata variables from a script (plugin roadmap P6.4): the host reads the image's EXIF, the plugin names the item,
+     * a file without the value gets an empty one and `metadataMissing`, and `preview` refuses `metadata`.
+     * zh-CN: 脚本中的元数据变量 (插件路线图 P6.4): 宿主读取图片 EXIF, 插件为条目命名, 缺少该值的文件得到空值与 `metadataMissing`,
+     * `preview` 拒绝 `metadata`.
+     */
+    @Test
+    fun scriptsExpandMetadataVariables() {
+        val features = runBlocking { BatchRenamePluginHost.discover(context) }.flatMap { BatchRenamePluginHost.featuresOf(it.pluginInfo) }
+        assumeTrue("No Batch Rename plugin with metadata is installed", "metadata" in features)
+        BatchRenameSampleImages.write(
+            File(root, "IMG_1.jpg"),
+            exif = mapOf(
+                androidx.exifinterface.media.ExifInterface.TAG_MODEL to "Pixel 9",
+                androidx.exifinterface.media.ExifInterface.TAG_DATETIME_ORIGINAL to "2026:10:15 08:30:59",
+                androidx.exifinterface.media.ExifInterface.TAG_F_NUMBER to "1.8",
+            ),
+        )
+        File(root, "notes.txt").apply { writeText("n") }.setLastModified(1_700_000_000_000L)
+        val result = runScript(
+            """
+            var result = {};
+            var plan = files.batchRename.plan(["IMG_1.jpg", "notes.txt"], { search: /^/, replace: "${'$'}CAMERA_MODEL_${'$'}APERTURE_${'$'}DATE_TAKEN_YYYY_", metadata: true });
+            result.items = plan.items.map(function (it) { return [it.newName, it.metadataMissing]; });
+            result.metadataOption = plan.options.metadata;
+            try { files.batchRename.preview("a.jpg", { search: "a", metadata: true }); } catch (e) { result.previewCode = e.code; }
+            files.write(MARKER, JSON.stringify(result));
+            """,
+        )
+        val year = java.time.Instant.ofEpochMilli(1_700_000_000_000L).atZone(java.time.ZoneId.systemDefault()).year
+        assertEquals("""[["Pixel 9_f1.8_2026_IMG_1.jpg",false],["__${year}_notes.txt",true]]""", result.getJSONArray("items").toString())
+        assertTrue(result.getBoolean("metadataOption"))
+        assertEquals(BatchRenameScriptCodes.INVALID_OPTIONS, result.getString("previewCode"))
+    }
+
+    /**
+     * A plugin before 1.1.0 does not advertise pinyin, presets or metadata: scripts that use them fail, the others still plan.
      * zh-CN: 1.1.0 之前的插件未声明拼音: 用到拼音的脚本失败, 其余脚本照常生成方案.
      */
     @Test
@@ -292,6 +327,7 @@ class BatchRenameScriptApiTest {
             result.plain = files.batchRename.plan("照片.jpg", { search: "照片", replace: "${'$'}${'$'}{pinyin}", pinyinTone: "mark" }).items[0].newName;
             try { files.batchRename.presets(); } catch (e) { result.presetsCode = e.code; }
             try { files.batchRename.plan("照片.jpg", { preset: "any" }); } catch (e) { result.presetCode = e.code; }
+            try { files.batchRename.plan("照片.jpg", { search: "照片", metadata: true }); } catch (e) { result.metadataCode = e.code; }
             files.write(MARKER, JSON.stringify(result));
             """,
         )
@@ -300,6 +336,7 @@ class BatchRenameScriptApiTest {
         assertEquals("${'$'}{pinyin}.jpg", result.getString("plain"))
         assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("presetsCode"))
         assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("presetCode"))
+        assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("metadataCode"))
     }
 
     @Test
