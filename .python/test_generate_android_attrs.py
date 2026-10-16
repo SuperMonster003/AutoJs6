@@ -85,6 +85,35 @@ class ValuesFileTest(unittest.TestCase):
         self.assertEqual(["app:ConstraintHelper"], classes["androidx.constraintlayout.widget.ConstraintHelper"])
         self.assertEqual([], classes["androidx.constraintlayout.widget.Barrier"])
 
+    def test_documentation_block_lists_each_class_and_container(self):
+        table = {
+            "attrs": {
+                "android": {"text": {"f": ["string"]}, "justificationMode": {"f": ["enum"], "e": {"none": 0, "inter_word": 1}}, "layout_weight": {"f": ["float"]}},
+                "app": {"srcCompat": {"f": ["reference"]}},
+            },
+            "styleables": {"android:TextView": {"text": 1, "justificationMode": 26}, "app:AppCompatImageView": {"srcCompat": 0}, "android:LinearLayout_Layout": {"layout_weight": 1}},
+            "classes": {"android.widget.TextView": ["android:TextView"], "androidx.appcompat.widget.AppCompatImageView": ["app:AppCompatImageView"], "android.widget.LinearLayout#layout": ["android:LinearLayout_Layout"]},
+        }
+        coverage = {
+            "api": 37,
+            "totals": {"views": {"handler": 1, "setter": 1, "unsupported": 1}, "layouts": {"handler": 1}},
+            "views": {
+                "android.widget.TextView": {"handler": ["android:text"], "setter": ["android:justificationMode"]},
+                "androidx.appcompat.widget.AppCompatImageView": {"unsupported": ["app:srcCompat"]},
+            },
+            "layouts": {"android.widget.LinearLayout": {"handler": ["android:layout_weight"]}},
+        }
+        block = gen.docs_block(table, coverage)
+        self.assertTrue(block.startswith(gen.DOCS_BEGIN) and block.endswith(gen.DOCS_END))
+        self.assertIn("- View 属性: 3 个 (2 个类), 处理器 1, 公开方法 1, 不支持 1.", block)
+        self.assertIn("| `android:justificationMode` | enum: none, inter_word | 26 | 公开方法 |", block)
+        self.assertIn("| `android:text` | string |  | 处理器 |", block)
+        self.assertIn("### LinearLayout 子视图", block)
+        # The class tables come in simple-name order; the generated block replaces only itself.
+        self.assertLess(block.index("### AppCompatImageView"), block.index("### TextView"))
+        page = "# Title\n\nIntro.\n\n" + gen.DOCS_BEGIN + "\nold\n" + gen.DOCS_END + "\n\nAfter.\n"
+        self.assertEqual("# Title\n\nIntro.\n\n" + block + "\n\nAfter.\n", gen.docs_page(page, block))
+
     def test_flag_masks_are_signed_32_bit(self):
         self.assertEqual(-1, gen.parse_int("0xffffffff"))
         self.assertEqual(0x800005, gen.parse_int("0x00800005"))

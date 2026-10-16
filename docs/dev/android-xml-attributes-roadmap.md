@@ -196,7 +196,8 @@ R 与 A 互不依赖 (A4 的诊断码除外), R 先做 (工作量小, 插件 P11
 
 ### A6 文档
 
-- [ ] 文档站 `api/uiAndroidAttributes.md` 与侧栏, `ui.md` / `uiAttributes.md` 修订, 生成器 `--docs` / `--check`; 更新日志 zh-Hans; 离线文档同步随宿主发布.
+- [x] 文档站 `api/uiAndroidAttributes.md` 与侧栏, `ui.md` / `uiAttributes.md` 修订, 生成器 `--docs` / `--check`; 更新日志 zh-Hans; 离线文档同步随宿主发布.
+  证据 (2026-10-16): 生成器 `.python/generate_android_attrs.py --docs <AutoJs6-Documentation>` 用属性表与覆盖快照 (API 37) 只替换新页面中 `android-attrs:begin` / `end` 标记之间的内容 (覆盖概况, 110 个视图类与 11 个容器的属性表: 格式与枚举 / 标志名, 高于 API 24 的起始 API, 设置方式), 页面其余部分手写; `--docs --check` 输出 `ANDROID_ATTRS_DOCS_OK`. 生成器测试 9 项 (新增文档块与替换). 文档仓库 (实际位于 `D:\idea-projects\AutoJs6-Documentation`) 本地提交 22d7b1e (未推送): 新页面 `api/uiAndroidAttributes.md` (应用顺序, 取值转换与书写顺序及其例外, 不支持与未知属性的处理, 命名空间与 AppCompat 别名, Material 组件的主题补齐, ConstraintLayout 辅助类, 属性表) 加入侧栏与 `progress.md`; `ui.md` 修订 "布局转换模式" 并新增 "工程资源" 一节 (res 目录位置, 资源类型, vector, 限定符目录与选取规则, 样式与主题的优先级); `uiAttributes.md` 补 RelativeLayout 三条规则, scrollbars / requiresFadingEdge 的 `none` 与关闭语义, 修正 `style` 的查找范围 (原文 "仅查找 AutoJs6 应用资源"); `normalize-markdown.py --check` 与 `auto-generate.py --check` 通过 (161 个模块). 宿主更新日志 zh-Hans 6.8.0 (提交 dbbb62a44, 只暂存本项条目, 其他会话的未提交改动保留): 新增 2 条 (工程 res 目录与限定符, 原生 XML 更多控件属性), 优化 2 条 (跳过并警告, 书写顺序), 修复 4 条 (RelativeLayout 三条规则, paddingHorizontal / paddingVertical, scrollbars / requiresFadingEdge, ImageView 的 adjustViewBounds 与 scaleType); 只生成 zh-Hans 的 Markdown (其他语言由维护者同步, 其条目数本就落后, `generate_markdown.py --check` 的条目数报错因此早已存在). 离线文档插件的同步按惯例在宿主 6.8.0 发布时进行. 预览服务对工程资源的支持待插件 P11.3 完成后在插件 1.8.0 的更新日志中说明.
 
 ---
 
