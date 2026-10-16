@@ -25,7 +25,21 @@ android {
         aidl = true
         buildConfig = false
     }
+
+    // Maven Central (MCP roadmap D58), see ../maven-central.gradle.kts.
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
+
+extra["mavenArtifactId"] = "autojs6-plugin-tool-api"
+extra["mavenName"] = "AutoJs6 Plugin Tool API"
+extra["mavenDescription"] = "Contract of AutoJs6 plugins that describe their own tools for MCP, agents and scripts, with an optional provider base class."
+extra["mavenVersion"] = "1.0.0"
+apply(from = "../maven-central.gradle.kts")
 
 dependencies {
     api(project(":plugin-api:common-plugin-api"))
