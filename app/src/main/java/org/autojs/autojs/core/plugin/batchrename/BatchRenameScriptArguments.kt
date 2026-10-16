@@ -40,6 +40,8 @@ object BatchRenameScriptArguments {
         BatchRenameOptionKeys.SANITIZE to false,
         BatchRenameOptionKeys.TRIM to false,
         BatchRenameOptionKeys.CONTINUE_NUMBERING to false,
+        BatchRenameOptionKeys.PINYIN to false,
+        BatchRenameOptionKeys.PINYIN_INITIALS to false,
     ).toMap()
 
     private val CHOICES = mapOf(
@@ -54,12 +56,17 @@ object BatchRenameScriptArguments {
         BatchRenameOptionKeys.DATE_TIME to listOf(BatchRenameValues.DATE_TIME_MODIFIED, BatchRenameValues.DATE_TIME_NOW, BatchRenameValues.DATE_TIME_NONE),
         BatchRenameOptionKeys.NORMALIZE to listOf(BatchRenameValues.NORMALIZE_NONE, BatchRenameValues.NORMALIZE_NFC, BatchRenameValues.NORMALIZE_NFD),
         BatchRenameOptionKeys.ON_CONFLICT to CONFLICT_POLICIES,
+        BatchRenameOptionKeys.PINYIN_TONE to BatchRenameValues.PINYIN_TONES,
+        BatchRenameOptionKeys.PINYIN_SEPARATOR to BatchRenameValues.PINYIN_SEPARATORS,
+        BatchRenameOptionKeys.PINYIN_CASE to BatchRenameValues.PINYIN_CASES,
     )
 
     /** The choice an option has when the script passes `false`. zh-CN: 脚本传入 `false` 时选项取的值. */
     private val FALSE_CHOICES = mapOf(
         BatchRenameOptionKeys.DATE_TIME to BatchRenameValues.DATE_TIME_NONE,
         BatchRenameOptionKeys.NORMALIZE to BatchRenameValues.NORMALIZE_NONE,
+        BatchRenameOptionKeys.PINYIN_TONE to BatchRenameValues.PINYIN_TONE_NONE,
+        BatchRenameOptionKeys.PINYIN_SEPARATOR to BatchRenameValues.PINYIN_SEPARATOR_NONE,
     )
 
     private val TEXT_OPTIONS = listOf(
@@ -74,7 +81,21 @@ object BatchRenameScriptArguments {
         BatchRenameOptionKeys.DATE_TIME to BatchRenameValues.DATE_TIME_MODIFIED,
         BatchRenameOptionKeys.NORMALIZE to BatchRenameValues.NORMALIZE_NONE,
         BatchRenameOptionKeys.ON_CONFLICT to BatchRenameValues.CONFLICT_FAIL,
+        BatchRenameOptionKeys.PINYIN_TONE to BatchRenameValues.PINYIN_TONE_NONE,
+        BatchRenameOptionKeys.PINYIN_SEPARATOR to BatchRenameValues.PINYIN_SEPARATOR_NONE,
+        BatchRenameOptionKeys.PINYIN_CASE to BatchRenameValues.PINYIN_CASE_LOWER,
     )
+
+    /** The options a plugin receives only with [BatchRenameValues.FEATURE_PINYIN]. zh-CN: 插件声明拼音功能时才收到的选项. */
+    private val PINYIN_OPTIONS = listOf(
+        BatchRenameOptionKeys.PINYIN,
+        BatchRenameOptionKeys.PINYIN_TONE,
+        BatchRenameOptionKeys.PINYIN_SEPARATOR,
+        BatchRenameOptionKeys.PINYIN_CASE,
+        BatchRenameOptionKeys.PINYIN_INITIALS,
+    )
+
+    private const val PINYIN_VARIABLE = "\${pinyin}"
 
     /** Regular expression flags the contract carries besides `g` and `i`. zh-CN: 契约在 `g` 与 `i` 之外携带的标志. */
     private const val CARRIED_FLAGS = "msuy"
@@ -145,6 +166,7 @@ object BatchRenameScriptArguments {
             BatchRenameOptionKeys.CONTINUE_NUMBERING,
             BatchRenameOptionKeys.ON_CONFLICT,
             BatchRenameOptionKeys.CONFLICT_NUMBER_PATTERN,
+            *PINYIN_OPTIONS.toTypedArray(),
         ).forEach { key ->
             result[key] = when (key) {
                 in BOOLEAN_OPTIONS -> boolean(json, key)
@@ -153,6 +175,40 @@ object BatchRenameScriptArguments {
             }
         }
         return result
+    }
+
+    /**
+     * [options] as a plugin with [features] receives them: without [BatchRenameValues.FEATURE_PINYIN] (plugins before
+     * 1.1.0) the pinyin options are left out, and a script that uses pinyin, through the `pinyin` option or the
+     * `${pinyin}` variable of `replace`, fails with `PLUGIN_INCOMPATIBLE` instead of keeping its Chinese names.
+     * zh-CN: 声明 [features] 的插件收到的 [options]: 没有 [BatchRenameValues.FEATURE_PINYIN] (1.1.0 之前的插件) 时省去拼音选项;
+     * 脚本通过 `pinyin` 选项或 `replace` 中的 `${pinyin}` 变量用到拼音时以 `PLUGIN_INCOMPATIBLE` 失败, 而不是保留中文名称.
+     */
+    fun forPluginFeatures(options: Map<String, Any>, features: Collection<String>): Map<String, Any> {
+        if (BatchRenameValues.FEATURE_PINYIN in features) return options
+        if (options[BatchRenameOptionKeys.PINYIN] == true || usesPinyinVariable(options[BatchRenameOptionKeys.REPLACE] as? String ?: "")) {
+            batchRenameFailure(
+                BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE,
+                "the installed Batch Rename plugin does not convert to pinyin; update it to 1.1.0 or later",
+            )
+        }
+        return options.filterKeys { it !in PINYIN_OPTIONS }
+    }
+
+    /**
+     * Whether [replace] holds `${pinyin}` outside a `$$` escape, read the way the plugin reads its variables.
+     * zh-CN: [replace] 是否在 `$$` 转义之外含有 `${pinyin}`, 读法与插件读取变量的方式一致.
+     */
+    fun usesPinyinVariable(replace: String): Boolean {
+        var index = 0
+        while (index < replace.length) {
+            when {
+                replace.startsWith("$$", index) -> index += 2
+                replace.startsWith(PINYIN_VARIABLE, index) -> return true
+                else -> index++
+            }
+        }
+        return false
     }
 
     /**

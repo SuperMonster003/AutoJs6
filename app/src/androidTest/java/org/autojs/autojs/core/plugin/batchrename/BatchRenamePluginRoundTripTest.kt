@@ -82,6 +82,31 @@ class BatchRenamePluginRoundTripTest {
         assertEquals(listOf("p_same.txt", "p_same (1).txt"), items(numbered).map { it.getString(BatchRenameItemKeys.NEW_NAME) })
     }
 
+    /** The dictionary of plugin 1.1.0 loads in the plugin process, also after R8 (roadmap P6.1). zh-CN: 插件 1.1.0 的词典在插件进程中加载. */
+    @Test
+    fun pinyinComesFromTheBuiltInDictionary(): Unit = runBlocking {
+        requirePlugin()
+        val features = BatchRenamePluginHost.discover(context).flatMap { BatchRenamePluginHost.featuresOf(it.pluginInfo) }
+        assumeTrue("The installed plugin predates pinyin", BatchRenameValues.FEATURE_PINYIN in features)
+        val names = listOf("重慶銀行.jpg", "我的照片.jpg", "notes.txt")
+        val cleanup = BatchRenamePluginHost.plan(context, request(Bundle().apply {
+            putString(BatchRenameOptionKeys.SEARCH, "")
+            putBoolean(BatchRenameOptionKeys.PINYIN, true)
+            putString(BatchRenameOptionKeys.PINYIN_SEPARATOR, BatchRenameValues.PINYIN_SEPARATOR_UNDERSCORE)
+        }, names))
+        assertFalse("error: ${cleanup.getString(BatchRenameResultKeys.ERROR_MESSAGE)}", cleanup.containsKey(BatchRenameResultKeys.ERROR_CODE))
+        assertEquals(listOf("chong_qing_yin_hang.jpg", "wo_de_zhao_pian.jpg", "notes.txt"), items(cleanup).map { it.getString(BatchRenameItemKeys.NEW_NAME) })
+        val variable = BatchRenamePluginHost.plan(context, request(Bundle().apply {
+            putString(BatchRenameOptionKeys.SEARCH, "^")
+            putString(BatchRenameOptionKeys.REPLACE, "\${pinyin}-")
+            putBoolean(BatchRenameOptionKeys.REGEX, true)
+            putString(BatchRenameOptionKeys.TARGET, BatchRenameValues.TARGET_NAME)
+            putString(BatchRenameOptionKeys.PINYIN_TONE, BatchRenameValues.PINYIN_TONE_NUMBER)
+            putString(BatchRenameOptionKeys.PINYIN_CASE, BatchRenameValues.PINYIN_CASE_CAPITALIZE)
+        }, names.take(1)))
+        assertEquals(listOf("Chong2Qing4Yin2Hang2-重慶銀行.jpg"), items(variable).map { it.getString(BatchRenameItemKeys.NEW_NAME) })
+    }
+
     @Test
     fun refusedRequestsComeBackAsContractErrors(): Unit = runBlocking {
         requirePlugin()

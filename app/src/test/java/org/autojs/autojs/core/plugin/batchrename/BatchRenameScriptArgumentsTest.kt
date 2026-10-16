@@ -41,7 +41,8 @@ class BatchRenameScriptArgumentsTest {
                 "target" to "all", "includeFiles" to true, "includeFolders" to true, "includeSubfolders" to true, "format" to "none",
                 "enumerate" to false, "random" to false, "dateTime" to "modified", "normalize" to "none", "halfWidth" to false,
                 "sanitize" to false, "sanitizeReplacement" to "_", "trim" to false, "continueNumbering" to false,
-                "onConflict" to "fail", "conflictNumberPattern" to " ({n})",
+                "onConflict" to "fail", "conflictNumberPattern" to " ({n})", "pinyin" to false, "pinyinTone" to "none",
+                "pinyinSeparator" to "none", "pinyinCase" to "lower", "pinyinInitials" to false,
             ),
             options,
         )
@@ -94,9 +95,38 @@ class BatchRenameScriptArgumentsTest {
             "{\"search\": \"a\", \"format\": false}",
             "{\"search\": \"a\", \"dateTime\": true}",
             "{\"search\": \"a\", \"onConflict\": \"rename\"}",
+            "{\"search\": \"a\", \"pinyin\": \"yes\"}",
+            "{\"search\": \"a\", \"pinyinTone\": \"marks\"}",
+            "{\"search\": \"a\", \"pinyinCase\": false}",
         ).forEach { text ->
             expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.options(json(text), null) }
         }
+    }
+
+    @Test
+    fun `pinyin options reach only plugins with the pinyin feature`() {
+        val options = BatchRenameScriptArguments.options(
+            json("{\"search\": \"\", \"pinyin\": true, \"pinyinTone\": \"number\", \"pinyinSeparator\": false, \"pinyinCase\": \"capitalize\", \"pinyinInitials\": true}"),
+            null,
+        )
+        assertEquals(listOf(true, "number", "none", "capitalize", true), PINYIN_KEYS.map { options[it] })
+        val features = listOf("counter", "dateTime", "random", "cleanup")
+        assertEquals(options, BatchRenameScriptArguments.forPluginFeatures(options, features + "pinyin"))
+        expectCode(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE) { BatchRenameScriptArguments.forPluginFeatures(options, features) }
+
+        // Without pinyin in use, an older plugin gets the options of contract v1 1.0.0. zh-CN: 未用到拼音时旧插件收到 1.0.0 的选项.
+        val plain = BatchRenameScriptArguments.options(json("{\"search\": \"a\", \"replace\": \"$$" + "{pinyin}\", \"pinyinTone\": \"mark\"}"), null)
+        assertEquals(plain.keys - PINYIN_KEYS.toSet(), BatchRenameScriptArguments.forPluginFeatures(plain, features).keys)
+        val variable = plain + (BatchRenameOptionKeys.REPLACE to "IMG_$" + "{pinyin}")
+        expectCode(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE) { BatchRenameScriptArguments.forPluginFeatures(variable, features) }
+    }
+
+    @Test
+    fun `the pinyin variable is read like the plugin reads it`() {
+        mapOf(
+            "$" + "{pinyin}" to true, "a$$$" + "{pinyin}" to true, "$$" + "{pinyin}" to false, "$" + "{Pinyin}" to false,
+            "$" + "{pinyin" to false, "" to false,
+        ).forEach { (replace, expected) -> assertEquals(replace, expected, BatchRenameScriptArguments.usesPinyinVariable(replace)) }
     }
 
     @Test
@@ -130,5 +160,15 @@ class BatchRenameScriptArgumentsTest {
         listOf("-1", "1.5", "\"3\"").forEach { text ->
             expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.historyLimit(json(text), 20) }
         }
+    }
+
+    private companion object {
+        val PINYIN_KEYS = listOf(
+            BatchRenameOptionKeys.PINYIN,
+            BatchRenameOptionKeys.PINYIN_TONE,
+            BatchRenameOptionKeys.PINYIN_SEPARATOR,
+            BatchRenameOptionKeys.PINYIN_CASE,
+            BatchRenameOptionKeys.PINYIN_INITIALS,
+        )
     }
 }

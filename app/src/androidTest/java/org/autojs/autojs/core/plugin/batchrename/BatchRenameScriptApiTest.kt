@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.batchrename
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
@@ -151,6 +152,55 @@ class BatchRenameScriptApiTest {
         assertEquals("restored", result.getString("asyncUndo"))
         assertEquals(BatchRenameScriptCodes.INVALID_PATHS, result.getString("asyncRejectedCode"))
         assertTrue(File(root, "z.txt").exists())
+    }
+
+    /** Pinyin options and the `${pinyin}` variable from a script (plugin roadmap P6.1, plugin 1.1.0). zh-CN: 脚本中的拼音选项与变量. */
+    @Test
+    fun scriptsConvertChineseNamesToPinyin() {
+        val features = runBlocking { BatchRenamePluginHost.discover(context) }.flatMap { BatchRenamePluginHost.featuresOf(it.pluginInfo) }
+        assumeTrue("No Batch Rename plugin with pinyin is installed", "pinyin" in features)
+        File(root, "我的照片.jpg").writeText("a")
+        File(root, "重慶.txt").writeText("b")
+        val result = runScript(
+            """
+            var result = {};
+            var plan = files.batchRename.plan(["我的照片.jpg", "重慶.txt"], { search: "", pinyin: true, pinyinSeparator: "underscore", pinyinCase: "capitalize" });
+            result.newNames = plan.items.map(function (it) { return it.newName; });
+            var o = plan.options;
+            result.options = [o.pinyin, o.pinyinTone, o.pinyinSeparator, o.pinyinCase, o.pinyinInitials];
+            result.variable = files.batchRename.plan("我的照片.jpg", { search: /^/, replace: "${'$'}{pinyin}-", target: "name", pinyinTone: "mark" }).items[0].newName;
+            try { files.batchRename.plan("我的照片.jpg", { search: "", pinyinTone: "marks" }); } catch (e) { result.badToneCode = e.code; }
+            files.write(MARKER, JSON.stringify(result));
+            """,
+        )
+        assertEquals("""["Wo_De_Zhao_Pian.jpg","Chong_Qing.txt"]""", result.getJSONArray("newNames").toString())
+        assertEquals("""[true,"none","underscore","capitalize",false]""", result.getJSONArray("options").toString())
+        assertEquals("wǒdezhàopiàn-我的照片.jpg", result.getString("variable"))
+        assertEquals(BatchRenameScriptCodes.INVALID_OPTIONS, result.getString("badToneCode"))
+    }
+
+    /**
+     * A plugin before 1.1.0 does not advertise pinyin: scripts that use it fail, the others still plan.
+     * zh-CN: 1.1.0 之前的插件未声明拼音: 用到拼音的脚本失败, 其余脚本照常生成方案.
+     */
+    @Test
+    fun olderPluginsRefuseScriptsThatUsePinyin() {
+        assumeTrue("No Batch Rename plugin is installed", BatchRenamePluginHost.queryServiceCount(context) > 0)
+        val features = runBlocking { BatchRenamePluginHost.discover(context) }.flatMap { BatchRenamePluginHost.featuresOf(it.pluginInfo) }
+        assumeFalse("The installed plugin converts to pinyin", "pinyin" in features)
+        File(root, "照片.jpg").writeText("a")
+        val result = runScript(
+            """
+            var result = {};
+            try { files.batchRename.plan("照片.jpg", { search: "", pinyin: true }); } catch (e) { result.optionCode = e.code; }
+            try { files.batchRename.plan("照片.jpg", { search: "照片", replace: "${'$'}{pinyin}" }); } catch (e) { result.variableCode = e.code; }
+            result.plain = files.batchRename.plan("照片.jpg", { search: "照片", replace: "${'$'}${'$'}{pinyin}", pinyinTone: "mark" }).items[0].newName;
+            files.write(MARKER, JSON.stringify(result));
+            """,
+        )
+        assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("optionCode"))
+        assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("variableCode"))
+        assertEquals("${'$'}{pinyin}.jpg", result.getString("plain"))
     }
 
     @Test

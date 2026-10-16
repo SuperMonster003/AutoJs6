@@ -74,6 +74,10 @@ object BatchRenamePluginHost {
         }
     }
 
+    /** The optional features a plugin advertises. zh-CN: 插件声明的可选功能. */
+    fun featuresOf(info: PluginInfo?): List<String> =
+        info?.capabilities?.getStringArray(BatchRenameCapabilityKeys.FEATURES)?.toList().orEmpty()
+
     /** The contract version a plugin advertises; 0 when it advertises none. zh-CN: 插件声明的契约版本; 未声明时为 0. */
     fun contractVersionOf(info: PluginInfo?): Int =
         info?.capabilities?.getInt(BatchRenameCapabilityKeys.CONTRACT_VERSION, 0) ?: 0
@@ -94,13 +98,16 @@ object BatchRenamePluginHost {
 
     /**
      * [plan] for the script API: the request and answer as script models, every failure as a
-     * [BatchRenameScriptException] with its script code (plugin roadmap D27).
-     * zh-CN: 供脚本 API 使用的 [plan]: 请求与应答为脚本模型, 每个失败都是带脚本错误码的 [BatchRenameScriptException].
+     * [BatchRenameScriptException] with its script code (plugin roadmap D27). Options of features the plugin does not
+     * advertise are left out (see [BatchRenameScriptArguments.forPluginFeatures]).
+     * zh-CN: 供脚本 API 使用的 [plan]: 请求与应答为脚本模型, 每个失败都是带脚本错误码的 [BatchRenameScriptException]. 插件未声明的
+     * 功能对应的选项不会发送 (见 [BatchRenameScriptArguments.forPluginFeatures]).
      */
     suspend fun planForScript(context: Context, request: BatchRenamePlanRequest): BatchRenamePlanAnswer = withContext(Dispatchers.IO) {
         val target = selectForScript(context)
+        val sent = request.copy(options = BatchRenameScriptArguments.forPluginFeatures(request.options, featuresOf(target.pluginInfo)))
         val answer = try {
-            host.call(context, target, retryOnRemoteException = false) { proxy -> proxy.plan(BatchRenameBundles.request(request)) }
+            host.call(context, target, retryOnRemoteException = false) { proxy -> proxy.plan(BatchRenameBundles.request(sent)) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: TransactionTooLargeException) {
