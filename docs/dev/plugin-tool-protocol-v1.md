@@ -206,7 +206,7 @@ Request (`PluginToolInvokeKeys`):
 | `invocationId` | String, unique per call |
 | `tool` | the tool name without the short name |
 | `argumentsJson` | JSON object of the validated arguments, image and file arguments removed; at most 64 KiB |
-| `inputsJson` | JSON array, entry i describes `inputs[i]`: `{name, source, mimeType?, displayName?, byteCount?, width?, height?}`, `source` is `screen` or `file` |
+| `inputsJson` | JSON array, entry i describes `inputs[i]`: `{name, source, mimeType?, displayName?, byteCount?, width?, height?}`, `source` is `screen`, `file` or `directory` |
 | `outputsJson` | JSON array of the declared output names the caller wants written |
 | `timeoutMs` | Long, the tool's `timeoutMs` capped by the consumer's limit |
 | `consumer` | `mcp`, `agent` or `script`, informational |

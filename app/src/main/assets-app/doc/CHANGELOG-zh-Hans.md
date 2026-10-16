@@ -37,7 +37,7 @@
 * `新增` ai.agent 脚本 API, 用于启动, 查询, 回应, 确认及取消 Three Stove Agent 任务, 支持 detached 后台任务 (需要 Three Stove Agent 插件) (参阅 示例代码 > agent)
 * `新增` ai.agent.run/create 方法支持 plan 选项参数, 用于让 Three Stove Agent 以计划模式先提出步骤计划再执行
 * `新增` 脚本可通过 project.json 或 @agent 头注释登记为 Three Stove Agent 可调用的脚本, 支持参数校验, 超时停止及结构化结果回传
-* `新增` plugins.tools 模块, 用于列出并调用插件自行声明的工具, 支持同步与异步调用; 参数按工具声明的格式校验, 图片参数支持当前屏幕, 文件路径或 ImageWrapper, 工具生成的文件写入指定路径 (需要提供工具的插件) (参阅 项目文档 > [插件](https://docs.autojs6.com/#/plugins))
+* `新增` plugins.tools 模块, 用于列出并调用插件自行声明的工具, 支持同步与异步调用; 参数按工具声明的格式校验, 图片参数支持当前屏幕, 文件路径或 ImageWrapper, 目录参数把目录中的文件 (例如模型文件) 交给插件, 工具生成的文件写入指定路径 (需要提供工具的插件) (参阅 项目文档 > [插件](https://docs.autojs6.com/#/plugins))
 * `新增` 插件工具契约, 用于插件声明自己提供的工具 (名称, 说明, 参数格式及风险等级), 由 AutoJs6 汇总, 校验参数并转发调用, 供脚本及 MCP Server 等插件使用 (仅收录在插件中心启用并授权的插件)
 * `新增` compose 模块, 用于以 Jetpack Compose 构建界面, 提供节点工厂, 长期节点句柄, 响应式 state/render/ref 及主题控制 (需要 3-Block Compose 插件) (参阅 示例代码 > 3-Block Compose)
 * `新增` 编辑器菜单新增 "在 3-Block Compose 设计器中打开": 保存当前文件后交给 3-Block Compose 插件 (1.2.0 及以上) 的可视化设计器编辑, 回到编辑器时自动重新加载设计器保存的内容 (有未保存修改时先询问) (参阅 示例代码 > 3-Block Compose)
