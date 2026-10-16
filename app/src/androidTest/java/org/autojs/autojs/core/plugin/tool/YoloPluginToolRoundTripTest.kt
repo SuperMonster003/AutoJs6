@@ -83,12 +83,31 @@ class YoloPluginToolRoundTripTest {
         assertEquals(810, first.getJSONObject("image").getInt("width"))
         val labels = (0 until first.getJSONArray("detections").length()).map { first.getJSONArray("detections").getJSONObject(it).getString("label") }
         assertTrue(labels.toString(), "bus" in labels && "person" in labels)
-        assertEquals(false, first.getJSONObject("model").getBoolean("cached"))
+        // Whether the first call loads the model depends on the tests before it; the second one always reuses it.
         val second = result.getJSONObject("second")
         assertEquals(true, second.getJSONObject("model").getBoolean("cached"))
         assertEquals(1, second.getInt("count"))
         assertTrue(result.getString("text"), result.getString("text").contains("bus"))
         assertTrue(result.getString("missing"), result.getString("missing").contains("is not a readable directory"))
+    }
+
+    @Test
+    fun aTimedOutDetectionIsCancelledAndTheNextOneRuns() {
+        // The first call loads the model, so the 30 ms limit of the second one expires during the inference itself.
+        val result = runScript(
+            """
+            let args = { image: "models/yolo11n/bus.jpg", model: "models/yolo11n" };
+            plugins.tools.call("yolo_detect", args);
+            let timedOut = "";
+            try { plugins.tools.call("yolo_detect", args, { timeoutMs: 30 }); } catch (e) { timedOut = String(e.message || e); }
+            let after = plugins.tools.call("yolo_detect", args);
+            files.write(files.path("$MARKER"), JSON.stringify({ timedOut: timedOut, after: after.result }));
+            """,
+        )
+        assertTrue(result.getString("timedOut"), result.getString("timedOut").contains("did not answer within 30 ms"))
+        val after = result.getJSONObject("after")
+        assertTrue(after.toString(), after.getInt("count") >= 1)
+        assertEquals(true, after.getJSONObject("model").getBoolean("cached"))
     }
 
     @Test
