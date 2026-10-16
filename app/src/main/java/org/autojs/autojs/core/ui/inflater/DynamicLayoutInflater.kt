@@ -21,6 +21,7 @@ import androidx.appcompat.widget.AppCompatSpinner
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar as AppCompatToolbar
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.cardview.widget.CardView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.RecyclerView
@@ -468,6 +469,9 @@ open class DynamicLayoutInflater {
         // Only these were written on the element; the rest came from its style or theme (A4).
         context.put(WRITTEN_ATTRIBUTES, getRawAttributesMap(node).keys)
         val inflater = applyAttributes(context, view, attrs, parent)
+        // ConstraintLayout indexes a child by id when it is added, which happens above before android:id is applied;
+        // its helpers (Barrier, Group, Flow) look their views up there, so the child is registered again (A9).
+        if (parent is ConstraintLayout && view.parent === parent && view.id != View.NO_ID) parent.onViewAdded(view)
         if (node.hasChildNodes()) {
             if (view is ViewGroup) {
                 inflateChildren(context, inflater, node, view)

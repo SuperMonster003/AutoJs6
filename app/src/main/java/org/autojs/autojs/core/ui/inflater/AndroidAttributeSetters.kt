@@ -14,9 +14,11 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TableLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintHelper
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.shape.Shapeable
 import com.google.android.material.textfield.TextInputLayout
+import org.autojs.autojs.core.ui.inflater.util.Ids
 import org.autojs.autojs.core.ui.inflater.util.Res
 
 /**
@@ -44,10 +46,16 @@ internal object AndroidAttributeSetters {
         STATE_STYLED.matchEntire(name)?.destructured?.let { (base, kind, state) ->
             names += "set" + base.replaceFirstChar { it.uppercaseChar() } + state + if (kind == "Color") "TintList" else kind
         }
+        // ConstraintLayout's Flow and CircularFlow (A9): flow_horizontalGap -> setHorizontalGap.
+        HELPER_PREFIXES.firstOrNull { name.startsWith(it) }?.let { prefix ->
+            names += "set" + name.removePrefix(prefix).replaceFirstChar { it.uppercaseChar() }
+        }
         return names.toList()
     }
 
     private val STATE_STYLED = Regex("([a-z]\\w*?)(Color|Radius)(Active|Inactive)?")
+
+    private val HELPER_PREFIXES = listOf("circularflow_", "flow_")
 
     /** Attributes whose setter follows no naming rule. */
     private val EXPLICIT: Map<String, List<String>> = mapOf(
@@ -95,6 +103,11 @@ internal object AndroidAttributeSetters {
         "helperTextTextColor" to listOf("setHelperTextColor"),
         "pressedTranslationZ" to listOf("setCompatPressedTranslationZ"),
         "hoveredFocusedTranslationZ" to listOf("setCompatHoveredFocusedTranslationZ"),
+        // ConstraintLayout's own attribute and its Barrier (A9).
+        "layout_optimizationLevel" to listOf("setOptimizationLevel"),
+        "barrierDirection" to listOf("setType"),
+        "barrierMargin" to listOf("setMargin"),
+        "barrierAllowsGoneWidgets" to listOf("setAllowsGoneWidget"),
     )
 
     /**
@@ -182,6 +195,14 @@ internal object AndroidAttributeSetters {
         "indicatorColor" to { values, view, value ->
             view.javaClass.methods.firstOrNull { it.name == "setIndicatorColor" && it.parameterTypes.contentEquals(arrayOf(IntArray::class.java)) }
                 ?.let { it.invoke(view, intArrayOf(values.color(value))); true } ?: false
+        },
+        // A ConstraintLayout helper's views by id name (A9): "a,b" -> the ids of @id/a and @id/b.
+        "constraint_referenced_ids" to { values, view, value ->
+            (view as? ConstraintHelper)?.let { helper ->
+                helper.referencedIds = values.scalar(value).split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                    .map { Ids.parse(if (it.startsWith("@")) it else "@id/$it") }.toIntArray()
+                true
+            } ?: false
         },
         "shapeAppearance" to { _, view, value -> shapeAppearance(view, value, overlay = false) },
         "shapeAppearanceOverlay" to { _, view, value -> shapeAppearance(view, value, overlay = true) },

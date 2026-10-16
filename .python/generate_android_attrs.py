@@ -315,6 +315,7 @@ def generate(sdk: Path, gradle_home: Path) -> dict:
             if key not in classes.setdefault(owner + kind, []):
                 classes[owner + kind].append(key)
 
+    split_constraint_layout(styleables, classes)
     return {
         "schema": SCHEMA,
         "generator": ".python/generate_android_attrs.py",
@@ -323,6 +324,53 @@ def generate(sdk: Path, gradle_home: Path) -> dict:
         "styleables": dict(sorted(styleables.items())),
         "classes": {name: sorted(keys) for name, keys in sorted(classes.items())},
     }
+
+
+CONSTRAINT_LAYOUT = "androidx.constraintlayout.widget.ConstraintLayout"
+CONSTRAINT_HELPER = "androidx.constraintlayout.widget.ConstraintHelper"
+# Attributes of the ConstraintLayout element itself and of its helpers (Barrier, Group, Flow, CircularFlow, Layer),
+# which the library declares in ConstraintLayout_Layout together with the children's layout params (roadmap A9).
+CONSTRAINT_CONTAINER_ATTRS = {
+    "android:maxWidth", "android:maxHeight", "android:minWidth", "android:minHeight",
+    "constraintSet", "layoutDescription", "layout_optimizationLevel",
+}
+CONSTRAINT_HELPER_ATTRS = {"android:orientation"}
+CONSTRAINT_HELPER_PREFIXES = ("barrier", "constraint_referenced_", "flow_", "circularflow_")
+CONSTRAINT_HELPER_CLASSES = (
+    "androidx.constraintlayout.widget.Barrier",
+    "androidx.constraintlayout.widget.Group",
+    "androidx.constraintlayout.helper.widget.Flow",
+    "androidx.constraintlayout.helper.widget.Layer",
+    "androidx.constraintlayout.helper.widget.CircularFlow",
+)
+
+
+def split_constraint_layout(styleables: dict[str, dict[str, int]], classes: dict[str, list[str]]) -> None:
+    """Moves the container and helper attributes out of `app:ConstraintLayout_Layout` into `app:ConstraintLayout_Container`
+    (owned by ConstraintLayout) and `app:ConstraintHelper` (owned by ConstraintHelper, so Barrier / Group / Flow take
+    them); the children keep the `layout_*` attributes (and guidelineUseRtl / chainUseRtl, and android:orientation, the
+    orientation of a Guideline's params), not the View attributes (padding, elevation, visibility) the library also
+    lists there."""
+    members = styleables.get("app:ConstraintLayout_Layout")
+    if not members:
+        return
+    container = {k: v for k, v in members.items() if k in CONSTRAINT_CONTAINER_ATTRS}
+    helper = {k: v for k, v in members.items() if k in CONSTRAINT_HELPER_ATTRS or k.startswith(CONSTRAINT_HELPER_PREFIXES)}
+    child = {
+        k: v for k, v in members.items()
+        if k not in container and (k not in helper or k == "android:orientation")
+        and (k.removeprefix("android:").startswith("layout_") or not k.startswith("android:") or k == "android:orientation")
+    }
+    styleables["app:ConstraintLayout_Layout"] = child
+    styleables["app:ConstraintLayout_Container"] = container
+    styleables["app:ConstraintHelper"] = helper
+    for owner, key in ((CONSTRAINT_LAYOUT, "app:ConstraintLayout_Container"), (CONSTRAINT_HELPER, "app:ConstraintHelper")):
+        keys = classes.setdefault(owner, [])
+        if key not in keys:
+            keys.append(key)
+    # The concrete helpers have no styleable of their own; listing them lets tools find the classes that take these.
+    for helper_class in CONSTRAINT_HELPER_CLASSES:
+        classes.setdefault(helper_class, [])
 
 
 LAYOUT_SUFFIXES = ("_MarginLayout", "_Layout")

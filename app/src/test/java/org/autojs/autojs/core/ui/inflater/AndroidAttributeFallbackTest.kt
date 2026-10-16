@@ -89,6 +89,21 @@ class AndroidAttributeFallbackTest {
         assertEquals("drawableStart", DynamicLayoutInflater.COMPAT_ALIASES["drawableStartCompat"])
     }
 
+    /** A9: ConstraintLayout's helpers and its own attributes find their setters. */
+    @Test
+    fun constraintLayoutHelpersFindTheirSetters() {
+        fun app(viewClass: Class<*>, name: String) =
+            fallback.candidatesOf(viewClass, table.find(viewClass, "app", name)!!.attr).map { "${it.name}(${it.parameterTypes[0].simpleName})" }
+        assertEquals("setType(int)", app(androidx.constraintlayout.widget.Barrier::class.java, "barrierDirection").first())
+        assertEquals("setMargin(int)", app(androidx.constraintlayout.widget.Barrier::class.java, "barrierMargin").first())
+        assertEquals("setAllowsGoneWidget(boolean)", app(androidx.constraintlayout.widget.Barrier::class.java, "barrierAllowsGoneWidgets").first())
+        assertEquals("setHorizontalGap(int)", app(androidx.constraintlayout.helper.widget.Flow::class.java, "flow_horizontalGap").first())
+        assertEquals("setWrapMode(int)", app(androidx.constraintlayout.helper.widget.Flow::class.java, "flow_wrapMode").first())
+        assertEquals("setOptimizationLevel(int)", app(androidx.constraintlayout.widget.ConstraintLayout::class.java, "layout_optimizationLevel").first())
+        assertEquals("setMaxWidth(int)", setters(androidx.constraintlayout.widget.ConstraintLayout::class.java, "maxWidth").first())
+        assertTrue("constraint_referenced_ids" in AndroidAttributeSetters.SPECIAL)
+    }
+
     @Test
     fun ownMembersAndClassNamesListTheTable() {
         assertTrue("android.widget.TextView" in table.classNames())

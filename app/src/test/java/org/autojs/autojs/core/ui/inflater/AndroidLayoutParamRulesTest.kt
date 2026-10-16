@@ -60,13 +60,21 @@ class AndroidLayoutParamRulesTest {
                 if (!hasSetter && !hasField) missing += "${container.simpleName}:$name -> $property"
             }
         }
-        // ConstraintLayout attributes that belong to helpers (Flow, Layer, MotionLayout) rather than to a child's params.
-        val helperOnly = missing.filter { entry -> HELPER_ONLY.any { entry.contains(it) } }
-        assertEquals("unmapped layout attributes: ${missing - helperOnly.toSet()}", emptyList<String>(), missing - helperOnly.toSet())
+        // A9 moved ConstraintLayout's own and its helpers' attributes out of the children's params; what is left
+        // without a member has no public one in the library.
+        val unmapped = missing.filter { entry -> NO_PUBLIC_MEMBER.none { entry.contains(it) } }
+        assertEquals("unmapped layout attributes: $unmapped", emptyList<String>(), unmapped)
         assertNotNull(table.findLayout(ConstraintLayout::class.java, "app", "layout_constraintTop_toTopOf"))
+        // A9: container and helper attributes belong to the ConstraintLayout and helper elements, not to children.
+        assertEquals(null, table.findLayout(ConstraintLayout::class.java, "app", "barrierDirection"))
+        assertNotNull(table.find(androidx.constraintlayout.widget.Barrier::class.java, "app", "barrierDirection"))
+        assertNotNull(table.find(androidx.constraintlayout.helper.widget.Flow::class.java, "app", "flow_horizontalGap"))
+        assertNotNull(table.find(ConstraintLayout::class.java, "app", "layout_optimizationLevel"))
+        assertTrue(AndroidLayoutParamRules.isDesignTime("layout_constraintTop_creator"))
+        assertEquals("baselineMargin", AndroidLayoutParamRules.property("layout_marginBaseline"))
     }
 
     private companion object {
-        val HELPER_ONLY = listOf("layout_optimizationLevel", "layout_constraintLayoutDescription", "layout_marginBaseline", "layout_wrapBehaviorInParent", "barrier", "flow_", "chainUseRtl", "layout_constraintTag", "constraint_referenced", "layout_constraintBaseline_creator", "_creator")
+        val NO_PUBLIC_MEMBER = listOf("chainUseRtl", "layout_constraintLayoutDescription")
     }
 }

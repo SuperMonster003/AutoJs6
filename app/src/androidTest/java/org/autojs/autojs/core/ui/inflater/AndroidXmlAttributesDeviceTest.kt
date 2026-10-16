@@ -201,6 +201,73 @@ class AndroidXmlAttributesDeviceTest {
         assertEquals(0xff00ff00.toInt(), report.getInt("sliderTrack"))
     }
 
+    /** Host roadmap A9: ConstraintLayout's own attributes and its Barrier, Flow and Group helpers. */
+    @Test
+    fun constraintLayoutHelpersAndContainerAttributesTakeEffect() {
+        val layout = """
+            <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cl"
+                android:layout_width="200px"
+                android:layout_height="100px"
+                android:maxWidth="150px"
+                app:layout_optimizationLevel="none">
+                <View android:id="@+id/a" android:layout_width="30px" android:layout_height="10px"
+                    app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+                <View android:id="@+id/b" android:layout_width="50px" android:layout_height="10px"
+                    app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/a" />
+                <androidx.constraintlayout.widget.Barrier android:id="@+id/barrier" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    app:barrierDirection="end" app:barrierMargin="5px" app:constraint_referenced_ids="a,b" />
+                <View android:id="@+id/c" android:layout_width="10px" android:layout_height="10px"
+                    app:layout_constraintStart_toEndOf="@id/barrier" app:layout_constraintTop_toTopOf="parent" />
+                <View android:id="@+id/d" android:layout_width="10px" android:layout_height="10px" />
+                <View android:id="@+id/e" android:layout_width="10px" android:layout_height="10px" />
+                <androidx.constraintlayout.helper.widget.Flow android:id="@+id/flow" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:orientation="horizontal" app:flow_horizontalGap="7px" app:constraint_referenced_ids="d,e"
+                    app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" />
+                <View android:id="@+id/g" android:layout_width="10px" android:layout_height="10px"
+                    app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" />
+                <androidx.constraintlayout.widget.Group android:id="@+id/group" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:visibility="gone" app:constraint_referenced_ids="g" />
+                <androidx.constraintlayout.widget.Guideline android:id="@+id/guide" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:orientation="vertical" app:layout_constraintGuide_percent="0.5" />
+                <View android:id="@+id/h" android:layout_width="10px" android:layout_height="10px"
+                    app:layout_constraintStart_toStartOf="@id/guide" app:layout_constraintBottom_toBottomOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        """.trimIndent()
+        val report = runUiScript(
+            """
+            ui.useAndroidLayout(true);
+            ui.layoutFile('main.xml');
+            function v(id) { return ui.findView(id); }
+            ui.post(function () {
+                finish({
+                    maxWidth: Number(v('cl').getMaxWidth()),
+                    optimization: Number(v('cl').getOptimizationLevel()),
+                    barrierType: Number(v('barrier').getType()),
+                    barrierMargin: Number(v('barrier').getMargin()),
+                    cLeft: Number(v('c').getLeft()),
+                    gap: Number(v('e').getLeft()) - Number(v('d').getRight()),
+                    gVisibility: Number(v('g').getVisibility()),
+                    clWidth: Number(v('cl').getWidth()),
+                    hLeft: Number(v('h').getLeft()),
+                });
+            }, 300);
+            """,
+            layout,
+        )
+        assertEquals(150, report.getInt("maxWidth"))
+        assertEquals(0, report.getInt("optimization"))
+        // barrierDirection="end" is Barrier.END (6); c sits right of the wider of a and b plus the barrier margin.
+        assertEquals(6, report.getInt("barrierType"))
+        assertEquals(5, report.getInt("barrierMargin"))
+        assertEquals(55, report.getInt("cLeft"))
+        assertEquals(7, report.getInt("gap"))
+        assertEquals(android.view.View.GONE, report.getInt("gVisibility"))
+        // A vertical Guideline at half of the container's width (android:orientation is a param of the Guideline's LayoutParams).
+        assertEquals(report.getInt("clWidth") / 2, report.getInt("hLeft"))
+    }
+
     private fun runUiScript(body: String, layoutText: String, files: Map<String, String> = emptyMap()): JSONObject {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val directory = File(context.cacheDir, "android-xml-${UUID.randomUUID()}")

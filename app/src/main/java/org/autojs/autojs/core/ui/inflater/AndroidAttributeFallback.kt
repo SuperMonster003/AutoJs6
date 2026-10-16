@@ -40,7 +40,12 @@ class AndroidAttributeFallback(private val table: AndroidAttributeTable, private
      */
     fun apply(view: View, namespace: String?, name: String, value: String, parent: ViewGroup?): AttributeOutcome {
         val member = table.find(view.javaClass, namespace, name)
-            ?: return if (name.startsWith("layout_") && parent != null) applyLayout(view, parent, namespace, name, value) else AttributeOutcome.UNKNOWN
+            // Child params are layout_* attributes, and a few others (a ConstraintLayout Guideline's android:orientation, A9).
+            ?: return if (parent != null && (name.startsWith("layout_") || table.findLayout(parent.javaClass, namespace, name) != null)) {
+                applyLayout(view, parent, namespace, name, value)
+            } else {
+                AttributeOutcome.UNKNOWN
+            }
         if (Build.VERSION.SDK_INT < member.sinceApi) return AttributeOutcome.UNSUPPORTED
         val values = Values(view, resourceParser, member.attr)
         AndroidAttributeSetters.SPECIAL[member.attr.name]?.let { special ->

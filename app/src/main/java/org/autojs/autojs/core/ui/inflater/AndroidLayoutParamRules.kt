@@ -34,11 +34,15 @@ internal object AndroidLayoutParamRules {
         "layout_constrainedHeight" to "constrainedHeight",
         "layout_alignWithParentIfMissing" to "alignWithParent",
         "layout_collapseParallaxMultiplier" to "parallaxMultiplier",
+        "layout_marginBaseline" to "baselineMargin",
         "layout_anchor" to "anchorId",
     )
 
-    /** Attributes for design tools only (Android Studio's layout editor); the inflater has nothing to do with them. */
-    fun isDesignTime(name: String): Boolean = name.startsWith("layout_editor_")
+    /**
+     * Attributes for design tools only (Android Studio's layout editor, including the `layout_constraint*_creator`
+     * ids it writes); the inflater has nothing to do with them.
+     */
+    fun isDesignTime(name: String): Boolean = name.startsWith("layout_editor_") || name.startsWith("layout_constraint") && name.endsWith("_creator")
 
     /** The LayoutParams property [name] sets: a public field, or the stem of a public setter. */
     fun property(name: String): String {

@@ -88,11 +88,15 @@
   },
   "androidx.constraintlayout.widget.ConstraintLayout": {
    "design": [
+    "app:layout_constraintBaseline_creator",
+    "app:layout_constraintBottom_creator",
+    "app:layout_constraintLeft_creator",
+    "app:layout_constraintRight_creator",
+    "app:layout_constraintTop_creator",
     "app:layout_editor_absoluteX",
     "app:layout_editor_absoluteY"
    ],
    "handler": [
-    "android:elevation",
     "android:layout_height",
     "android:layout_margin",
     "android:layout_marginBottom",
@@ -103,17 +107,7 @@
     "android:layout_marginStart",
     "android:layout_marginTop",
     "android:layout_marginVertical",
-    "android:layout_width",
-    "android:minHeight",
-    "android:minWidth",
-    "android:padding",
-    "android:paddingBottom",
-    "android:paddingEnd",
-    "android:paddingLeft",
-    "android:paddingRight",
-    "android:paddingStart",
-    "android:paddingTop",
-    "android:visibility"
+    "android:layout_width"
    ],
    "params": [
     "android:orientation",
@@ -166,49 +160,11 @@
     "app:layout_goneMarginRight",
     "app:layout_goneMarginStart",
     "app:layout_goneMarginTop",
+    "app:layout_marginBaseline",
     "app:layout_wrapBehaviorInParent"
    ],
    "unsupported": [
-    "android:maxHeight",
-    "android:maxWidth",
-    "app:barrierAllowsGoneWidgets",
-    "app:barrierDirection",
-    "app:barrierMargin",
-    "app:chainUseRtl",
-    "app:circularflow_angles",
-    "app:circularflow_defaultAngle",
-    "app:circularflow_defaultRadius",
-    "app:circularflow_radiusInDP",
-    "app:circularflow_viewCenter",
-    "app:constraintSet",
-    "app:constraint_referenced_ids",
-    "app:constraint_referenced_tags",
-    "app:flow_firstHorizontalBias",
-    "app:flow_firstHorizontalStyle",
-    "app:flow_firstVerticalBias",
-    "app:flow_firstVerticalStyle",
-    "app:flow_horizontalAlign",
-    "app:flow_horizontalBias",
-    "app:flow_horizontalGap",
-    "app:flow_horizontalStyle",
-    "app:flow_lastHorizontalBias",
-    "app:flow_lastHorizontalStyle",
-    "app:flow_lastVerticalBias",
-    "app:flow_lastVerticalStyle",
-    "app:flow_maxElementsWrap",
-    "app:flow_verticalAlign",
-    "app:flow_verticalBias",
-    "app:flow_verticalGap",
-    "app:flow_verticalStyle",
-    "app:flow_wrapMode",
-    "app:layoutDescription",
-    "app:layout_constraintBaseline_creator",
-    "app:layout_constraintBottom_creator",
-    "app:layout_constraintLeft_creator",
-    "app:layout_constraintRight_creator",
-    "app:layout_constraintTop_creator",
-    "app:layout_marginBaseline",
-    "app:layout_optimizationLevel"
+    "app:chainUseRtl"
    ]
   },
   "androidx.coordinatorlayout.widget.CoordinatorLayout": {
@@ -246,15 +202,15 @@
  },
  "totals": {
   "layouts": {
-   "design": 2,
-   "handler": 66,
-   "params": 70,
-   "unsupported": 41
+   "design": 7,
+   "handler": 55,
+   "params": 71,
+   "unsupported": 2
   },
   "views": {
-   "handler": 333,
-   "setter": 622,
-   "unsupported": 323
+   "handler": 335,
+   "setter": 650,
+   "unsupported": 329
   }
  },
  "views": {
@@ -1343,6 +1299,56 @@
     "app:telltales_tailColor",
     "app:telltales_tailScale",
     "app:telltales_velocityMode"
+   ]
+  },
+  "androidx.constraintlayout.widget.ConstraintHelper": {
+   "setter": [
+    "android:orientation",
+    "app:barrierAllowsGoneWidgets",
+    "app:barrierDirection",
+    "app:barrierMargin",
+    "app:circularflow_defaultAngle",
+    "app:circularflow_defaultRadius",
+    "app:constraint_referenced_ids",
+    "app:flow_firstHorizontalBias",
+    "app:flow_firstHorizontalStyle",
+    "app:flow_firstVerticalBias",
+    "app:flow_firstVerticalStyle",
+    "app:flow_horizontalAlign",
+    "app:flow_horizontalBias",
+    "app:flow_horizontalGap",
+    "app:flow_horizontalStyle",
+    "app:flow_lastHorizontalBias",
+    "app:flow_lastHorizontalStyle",
+    "app:flow_lastVerticalBias",
+    "app:flow_lastVerticalStyle",
+    "app:flow_maxElementsWrap",
+    "app:flow_verticalAlign",
+    "app:flow_verticalBias",
+    "app:flow_verticalGap",
+    "app:flow_verticalStyle",
+    "app:flow_wrapMode"
+   ],
+   "unsupported": [
+    "app:circularflow_angles",
+    "app:circularflow_radiusInDP",
+    "app:circularflow_viewCenter",
+    "app:constraint_referenced_tags"
+   ]
+  },
+  "androidx.constraintlayout.widget.ConstraintLayout": {
+   "handler": [
+    "android:minHeight",
+    "android:minWidth"
+   ],
+   "setter": [
+    "android:maxHeight",
+    "android:maxWidth",
+    "app:layout_optimizationLevel"
+   ],
+   "unsupported": [
+    "app:constraintSet",
+    "app:layoutDescription"
    ]
   },
   "androidx.coordinatorlayout.widget.CoordinatorLayout": {

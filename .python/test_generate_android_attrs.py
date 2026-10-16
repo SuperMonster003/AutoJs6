@@ -70,6 +70,21 @@ class ValuesFileTest(unittest.TestCase):
         self.assertEqual({"dimension"}, values.attrs[("android", "textSize")].formats)
         self.assertEqual(set(), values.attrs[("android", "presetSizes")].formats)
 
+    def test_constraint_layout_container_and_helper_attributes_get_their_own_owners(self):
+        styleables = {"app:ConstraintLayout_Layout": {
+            "layout_constraintTop_toTopOf": 0, "android:layout_width": 0, "guidelineUseRtl": 0,
+            "android:padding": 0, "android:maxWidth": 0, "layout_optimizationLevel": 0,
+            "barrierDirection": 0, "constraint_referenced_ids": 0, "flow_wrapMode": 0, "android:orientation": 0,
+        }}
+        classes = {"androidx.constraintlayout.widget.ConstraintLayout#layout": ["app:ConstraintLayout_Layout"]}
+        gen.split_constraint_layout(styleables, classes)
+        self.assertEqual({"layout_constraintTop_toTopOf", "android:layout_width", "guidelineUseRtl", "android:orientation"}, set(styleables["app:ConstraintLayout_Layout"]))
+        self.assertEqual({"android:maxWidth", "layout_optimizationLevel"}, set(styleables["app:ConstraintLayout_Container"]))
+        self.assertEqual({"barrierDirection", "constraint_referenced_ids", "flow_wrapMode", "android:orientation"}, set(styleables["app:ConstraintHelper"]))
+        self.assertEqual(["app:ConstraintLayout_Container"], classes["androidx.constraintlayout.widget.ConstraintLayout"])
+        self.assertEqual(["app:ConstraintHelper"], classes["androidx.constraintlayout.widget.ConstraintHelper"])
+        self.assertEqual([], classes["androidx.constraintlayout.widget.Barrier"])
+
     def test_flag_masks_are_signed_32_bit(self):
         self.assertEqual(-1, gen.parse_int("0xffffffff"))
         self.assertEqual(0x800005, gen.parse_int("0x00800005"))
