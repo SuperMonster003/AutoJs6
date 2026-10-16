@@ -4,17 +4,26 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
+import android.util.TypedValue
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.afollestad.materialdialogs.DialogAction
+import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.ui.JsViewHelper
 import org.autojs.autojs.core.ui.UiContentHost
@@ -49,12 +58,15 @@ import kotlin.math.roundToInt
  * exercises contract v1: info, snapshot sessions with pixels and bounds, embedded sessions on API 30+,
  * failure positions, lenient bindings, the per-client limit, request limits, host-side stop and release; and
  * contract v2 (3-Block Compose roadmap P10.6, API 33+): a script run in the embedded root with its console,
- * clicks, replacement, stop, errors, `exit()` and the release of a running session; and contract v3 (host roadmap
- * `docs/dev/android-xml-attributes-roadmap.md` R3): the resources of a project in layouts and a project run.
+ * clicks, replacement, stop, errors, `exit()` and the release of a running session; contract v3 (host roadmap
+ * `docs/dev/android-xml-attributes-roadmap.md` R3): the resources of a project in layouts and a project run; and
+ * contract v4 (3-Block Compose roadmap P11.5, API 33+): dialogs inside the root, lifecycle events on `ui.emitter`
+ * with the back key, window colors as strips and background, and the busy-wait limit.
  *
  * zh-CN: 以 instrumentation (与宿主同签名同进程) 绑定 ui 模式预览服务并验证契约 v1: 信息, 快照会话的像素与边界, API 30+ 的嵌入会话,
  * 失败定位, 宽松绑定, 每客户端上限, 请求上限, 宿主侧停止与释放; 以及契约 v2 (3-Block Compose 路线图 P10.6, API 33+): 嵌入根中的脚本运行及其控制台,
- * 点击, 替换, 停止, 错误, `exit()` 与运行中会话的释放.
+ * 点击, 替换, 停止, 错误, `exit()` 与运行中会话的释放; 契约 v3: 布局中的工程资源与工程运行; 契约 v4 (3-Block Compose 路线图 P11.5, API 33+):
+ * 根容器内的对话框, `ui.emitter` 上的生命周期事件与返回键, 窗口颜色的色条与背景, 忙等上限.
  */
 @RunWith(AndroidJUnit4::class)
 class UiPreviewServiceTest {
@@ -74,6 +86,7 @@ class UiPreviewServiceTest {
         val console = LinkedBlockingQueue<Bundle>()
         val scriptErrors = LinkedBlockingQueue<Bundle>()
         val exits = LinkedBlockingQueue<Bundle>()
+        val handled = LinkedBlockingQueue<Bundle>()
         override fun onBounds(sessionId: String, bounds: Bundle) { this.bounds.add(bounds) }
         override fun onLayoutFailed(sessionId: String, failure: Bundle) { failures.add(failure) }
         override fun onSessionLost(sessionId: String, reason: Bundle) { lost.add(reason) }
@@ -82,6 +95,8 @@ class UiPreviewServiceTest {
         override fun onConsole(sessionId: String, entry: Bundle) { console.add(entry) }
         override fun onScriptError(sessionId: String, error: Bundle) { scriptErrors.add(error) }
         override fun onScriptExit(sessionId: String, exit: Bundle) { exits.add(exit) }
+        // Contract v4 (3-Block Compose roadmap P11.5): a lifecycle event reached the run.
+        override fun onLifecycleHandled(sessionId: String, result: Bundle) { handled.add(result) }
     }
 
     @Before
@@ -189,6 +204,16 @@ class UiPreviewServiceTest {
         assertEquals(listOf(UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2), versions.take(2))
         assertEquals(listOf(UiPreviewContract.HASH_V1, UiPreviewContract.HASH_V2), hashes.take(2))
         assertEquals(versions.sorted(), versions)
+        // v3 (3-Block Compose 1.8.0) and v4 follow with their frozen hashes; v4 says what runs get beyond v3.
+        assertEquals(listOf(UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2, UiPreviewContract.VERSION_V3, UiPreviewContract.VERSION), versions)
+        assertEquals(listOf(UiPreviewContract.HASH_V1, UiPreviewContract.HASH_V2, UiPreviewContract.HASH_V3, UiPreviewContract.HASH), hashes)
+        val runs = Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE
+        for (key in listOf(
+            UiPreviewContract.KEY_DIALOGS_IN_CANVAS, UiPreviewContract.KEY_LIFECYCLE_EVENTS,
+            UiPreviewContract.KEY_BUSY_WAIT_LIMIT_SUPPORTED, UiPreviewContract.KEY_WINDOW_FUNCTIONS_VISIBLE,
+        )) {
+            assertEquals(key, runs, info.getBoolean(key))
+        }
         assertEquals(Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE, info.getBoolean(UiPreviewContract.KEY_SCRIPT_RUN_SUPPORTED))
         assertTrue(info.getLong(UiPreviewContract.KEY_HOST_VERSION_CODE) > 0)
         val modes = info.getStringArray(UiPreviewContract.KEY_MODES)!!.toList()
@@ -767,6 +792,216 @@ class UiPreviewServiceTest {
             assertFalse(copy.exists())
             service.stopScript(id)
             awaitExit(callback, second)
+        }
+    }
+
+    // ------------------------------------------------------- dialogs, lifecycle, window colors, busy wait (v4)
+
+    private fun lifecycle(event: String) = Bundle().apply { putString(UiPreviewContract.KEY_LIFECYCLE_EVENT, event) }
+
+    private fun awaitHandled(callback: Callback, event: String): Bundle {
+        val handled = callback.handled.poll(15, TimeUnit.SECONDS) ?: throw AssertionError("onLifecycleHandled for $event did not arrive")
+        assertEquals(event, handled.getString(UiPreviewContract.KEY_LIFECYCLE_EVENT))
+        return handled
+    }
+
+    /** The session root around the content root of the run [name]. */
+    private fun sessionRoot(name: String): UiPreviewRootView = runRoot(name).parent as UiPreviewRootView
+
+    /** Waits until the root shows [count] dialogs and returns the top one (null for none). */
+    private fun awaitDialogs(root: UiPreviewRootView, count: Int): MaterialDialog? {
+        val deadline = SystemClock.uptimeMillis() + 10_000
+        while (SystemClock.uptimeMillis() < deadline) {
+            var dialogs: List<MaterialDialog> = emptyList()
+            instrumentation.runOnMainSync { dialogs = root.dialogLayer.dialogs }
+            if (dialogs.size == count) return dialogs.lastOrNull()
+            SystemClock.sleep(50)
+        }
+        throw AssertionError("the preview root did not come to show $count dialog(s)")
+    }
+
+    private fun awaitDialog(root: UiPreviewRootView): MaterialDialog = awaitDialogs(root, 1)!!
+
+    private fun isInside(view: View, ancestor: View): Boolean {
+        var current: View? = view
+        while (current != null) {
+            if (current === ancestor) return true
+            current = current.parent as? View
+        }
+        return false
+    }
+
+    private fun pixels(view: View): Bitmap {
+        lateinit var bitmap: Bitmap
+        instrumentation.runOnMainSync {
+            bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            view.draw(Canvas(bitmap))
+        }
+        return bitmap
+    }
+
+    @Test
+    fun dialogsOfARunShowInsideTheRootAndTakeTheBackKey() {
+        assumeTrue("script runs need API 33", Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE)
+        withEmbeddedSession { id, callback ->
+            val name = "dialog-run-${UUID.randomUUID()}"
+            val alert = "\"ui\";\nui.layout(<frame><text text=\"main\"/></frame>);\n" +
+                "dialogs.alert(\"Alert title\", \"Alert body\", () => console.log(\"alert closed\"));\nconsole.log(\"alert shown\");\n"
+            val first = runId(service.runScript(id, script(alert, name)))
+            awaitConsole(callback, "alert shown")
+            val root = sessionRoot(name)
+            val dialog = awaitDialog(root)
+            // The dialog's view is part of the embedded root, and its own window was never added.
+            instrumentation.runOnMainSync {
+                assertTrue(dialog.isShowing)
+                assertTrue(isInside(dialog.view, root))
+                assertTrue(dialog.view.isAttachedToWindow)
+                assertFalse(dialog.window?.peekDecorView()?.isAttachedToWindow == true)
+                assertTrue(dialog.view.width > 0 && dialog.view.width <= root.width)
+            }
+            // Its button works like in a window: the script's callback runs and the dialog leaves the root.
+            instrumentation.runOnMainSync { dialog.getActionButton(DialogAction.POSITIVE).performClick() }
+            awaitConsole(callback, "alert closed")
+            instrumentation.runOnMainSync {
+                assertTrue(root.dialogLayer.dialogs.isEmpty())
+                assertFalse(dialog.isShowing)
+                assertFalse(dialog.view.isAttachedToWindow)
+            }
+            // A cancelable dialog takes the back key: it is cancelled, the key counts as consumed and the run goes on.
+            val confirm = "\"ui\";\nui.layout(<frame/>);\n" +
+                "dialogs.confirm(\"Confirm title\", \"Confirm body\", (ok) => console.log(\"confirmed \" + ok));\nconsole.log(\"confirm shown\");\n"
+            val second = runId(service.runScript(id, script(confirm, name)))
+            assertEquals(UiPreviewContract.EXIT_REPLACED, awaitExit(callback, first))
+            awaitConsole(callback, "confirm shown")
+            awaitDialog(sessionRoot(name))
+            assertEquals(second, runId(service.sendLifecycle(id, lifecycle(UiPreviewContract.LIFECYCLE_BACK_PRESSED))))
+            val back = awaitHandled(callback, UiPreviewContract.LIFECYCLE_BACK_PRESSED)
+            assertEquals(second, back.getString(UiPreviewContract.KEY_RUN_ID))
+            assertTrue(back.getBoolean(UiPreviewContract.KEY_CONSUMED))
+            awaitConsole(callback, "confirmed false")
+            awaitDialogs(sessionRoot(name), 0)
+            assertNull(callback.exits.poll(500, TimeUnit.MILLISECONDS))
+            // A dialog left open goes with its run.
+            val third = runId(service.runScript(id, script(alert, name)))
+            assertEquals(UiPreviewContract.EXIT_REPLACED, awaitExit(callback, second))
+            awaitDialog(sessionRoot(name))
+            service.stopScript(id)
+            assertEquals(UiPreviewContract.EXIT_STOPPED, awaitExit(callback, third))
+            instrumentation.runOnMainSync { assertTrue(root.dialogLayer.dialogs.isEmpty()) }
+            assertTrue(callback.scriptErrors.isEmpty())
+        }
+    }
+
+    @Test
+    fun lifecycleEventsReachUiEmitterAndAnUnconsumedBackKeyExits() {
+        assumeTrue("script runs need API 33", Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE)
+        withEmbeddedSession { id, callback ->
+            // Without a run there is nothing to deliver to; unknown events are refused.
+            assertEquals(UiPreviewContract.ERROR_NOT_RUNNING, error(service.sendLifecycle(id, lifecycle(UiPreviewContract.LIFECYCLE_PAUSE))))
+            val text = "\"ui\";\nui.layout(<frame/>);\nlet backs = 0;\n" +
+                "ui.emitter.on(\"pause\", () => console.log(\"paused\"));\n" +
+                "ui.emitter.on(\"resume\", () => console.log(\"resumed\"));\n" +
+                "ui.emitter.on(\"back_pressed\", (e) => {\n    backs++;\n    console.log(\"back \" + backs);\n    if (backs === 1) e.consumed = true;\n});\n" +
+                "console.log(\"ready \" + (ui.emitter !== null));\n"
+            val run = runId(service.runScript(id, script(text, "lifecycle-run")))
+            awaitConsole(callback, "ready true")
+            assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, error(service.sendLifecycle(id, lifecycle("create"))))
+            assertEquals(run, runId(service.sendLifecycle(id, lifecycle(UiPreviewContract.LIFECYCLE_PAUSE))))
+            awaitConsole(callback, "paused")
+            assertFalse(awaitHandled(callback, UiPreviewContract.LIFECYCLE_PAUSE).getBoolean(UiPreviewContract.KEY_CONSUMED))
+            runId(service.sendLifecycle(id, lifecycle(UiPreviewContract.LIFECYCLE_RESUME)))
+            awaitConsole(callback, "resumed")
+            awaitHandled(callback, UiPreviewContract.LIFECYCLE_RESUME)
+            // The first back key is consumed by the handler, so the run goes on.
+            runId(service.sendLifecycle(id, lifecycle(UiPreviewContract.LIFECYCLE_BACK_PRESSED)))
+            awaitConsole(callback, "back 1")
+            assertTrue(awaitHandled(callback, UiPreviewContract.LIFECYCLE_BACK_PRESSED).getBoolean(UiPreviewContract.KEY_CONSUMED))
+            assertNull(callback.exits.poll(500, TimeUnit.MILLISECONDS))
+            // The second is not: the run ends with exit, as an Activity would finish.
+            runId(service.sendLifecycle(id, lifecycle(UiPreviewContract.LIFECYCLE_BACK_PRESSED)))
+            awaitConsole(callback, "back 2")
+            assertFalse(awaitHandled(callback, UiPreviewContract.LIFECYCLE_BACK_PRESSED).getBoolean(UiPreviewContract.KEY_CONSUMED))
+            assertEquals(UiPreviewContract.EXIT_SCRIPT, awaitExit(callback, run))
+            assertEquals(UiPreviewContract.ERROR_NOT_RUNNING, error(service.sendLifecycle(id, lifecycle(UiPreviewContract.LIFECYCLE_RESUME))))
+            assertTrue(callback.scriptErrors.isEmpty())
+        }
+    }
+
+    @Test
+    fun windowColorsShowAsStripsAndBackgroundAndOtherFunctionsWarnInTheRunConsole() {
+        assumeTrue("script runs need API 33", Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE)
+        withEmbeddedSession { id, callback ->
+            val name = "colors-run-${UUID.randomUUID()}"
+            val text = "\"ui\";\nui.layout(<frame><text text=\"x\"/></frame>);\n" +
+                "ui.statusBarColor(\"#ff0000\");\nui.navigationBarColor(\"#0000ff\");\nui.backgroundColor(\"#00ff00\");\n" +
+                "ui.keepScreenOn();\nui.keepScreenOn();\nconsole.log(\"colored\");\n"
+            val run = runId(service.runScript(id, script(text, name)))
+            // The ignored function warns once, in the run's own console that the client sees.
+            awaitConsole(callback, "keepScreenOn has no effect")
+            awaitConsole(callback, "colored")
+            assertTrue(callback.console.none { it.getString(UiPreviewContract.KEY_TEXT).orEmpty().contains("keepScreenOn") })
+            instrumentation.waitForIdleSync()
+            val root = sessionRoot(name)
+            val content = runRoot(name)
+            val density = root.resources.displayMetrics
+            val status = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, UiPreviewContract.STATUS_BAR_STRIP_DP.toFloat(), density).toInt()
+            val navigation = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, UiPreviewContract.NAVIGATION_BAR_STRIP_DP.toFloat(), density).toInt()
+            assertEquals(status, content.top)
+            assertEquals(navigation, root.height - content.bottom)
+            val bitmap = pixels(root)
+            assertEquals(Color.RED, bitmap.getPixel(root.width / 2, status / 2))
+            assertEquals(Color.BLUE, bitmap.getPixel(root.width / 2, root.height - navigation / 2))
+            assertEquals(Color.GREEN, bitmap.getPixel(root.width - 2, root.height / 2))
+            // Once the run is over, a layout shows on the plain root again.
+            service.stopScript(id)
+            assertEquals(UiPreviewContract.EXIT_STOPPED, awaitExit(callback, run))
+            assertEquals(UiPreviewContract.OUTCOME_APPLIED, outcome(service.setLayout(id, layout("<frame><text text=\"plain\"/></frame>"), null)))
+            instrumentation.waitForIdleSync()
+            assertEquals(0, root.contentFrame.top)
+            assertTrue(pixels(root).getPixel(root.width / 2, status / 2) != Color.RED)
+        }
+    }
+
+    @Test
+    fun aBusyMainThreadEndsTheRunWithinItsLimitAndAStopReachesABusyHandler() {
+        assumeTrue("script runs need API 33", Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE)
+        withEmbeddedSession { id, callback ->
+            // Limits outside the contract are refused.
+            assertEquals(
+                UiPreviewContract.ERROR_INVALID_REQUEST,
+                error(service.runScript(id, script("\"ui\";\n", "bad-limit").apply { putLong(UiPreviewContract.KEY_BUSY_WAIT_LIMIT_MS, 500L) })),
+            )
+            // The body never returns to the main thread, and a catch block cannot keep it going.
+            val spin = "\"ui\";\nui.layout(<frame/>);\nconsole.log(\"spinning\");\nwhile (true) {\n    try {\n        while (true) {}\n" +
+                "    } catch (e) {\n        console.log(\"caught \" + e);\n    }\n}\n"
+            val startedAt = SystemClock.uptimeMillis()
+            val busy = runId(service.runScript(id, script(spin, "busy-run").apply { putLong(UiPreviewContract.KEY_BUSY_WAIT_LIMIT_MS, 1_000L) }))
+            awaitConsole(callback, "spinning")
+            val error = callback.scriptErrors.poll(15, TimeUnit.SECONDS) ?: throw AssertionError("onScriptError did not arrive")
+            assertEquals(busy, error.getString(UiPreviewContract.KEY_RUN_ID))
+            assertEquals(UiPreviewContract.ERROR_BUSY_WAIT, error.getString(UiPreviewContract.KEY_ERROR_CODE))
+            assertEquals(6, error.getInt(UiPreviewContract.KEY_LINE))
+            assertTrue(error.getLong(UiPreviewContract.KEY_ELAPSED_MS) >= 1_000L)
+            assertEquals(UiPreviewContract.EXIT_ERROR, awaitExit(callback, busy))
+            assertTrue(SystemClock.uptimeMillis() - startedAt < 1_000L + 5_000L)
+            assertTrue(callback.console.none { it.getString(UiPreviewContract.KEY_TEXT).orEmpty().contains("caught") })
+            // The main thread is back: the session answers at once.
+            assertEquals(UiPreviewContract.OUTCOME_APPLIED, outcome(service.resize(id, 400, 600)))
+            // With the watch off, a click handler that never returns still yields to stopScript.
+            val handler = "\"ui\";\nui.layout(<frame><button id=\"b\" text=\"spin\"/></frame>);\n" +
+                "ui.b.on(\"click\", () => {\n    console.log(\"spin\");\n    while (true) {}\n});\nconsole.log(\"ready\");\n"
+            val spinning = runId(service.runScript(id, script(handler, "busy-stop-run").apply { putInt(UiPreviewContract.KEY_BUSY_WAIT_LIMIT_MS, 0) }))
+            awaitConsole(callback, "ready")
+            val button = JsViewHelper.findViewByStringId(runRoot("busy-stop-run"), "b")!!
+            Handler(Looper.getMainLooper()).post { button.performClick() }
+            awaitConsole(callback, "spin")
+            SystemClock.sleep(1_500)
+            assertNull(callback.exits.poll(10, TimeUnit.MILLISECONDS))
+            val stopped = service.stopScript(id)
+            assertEquals(stopped.getString(UiPreviewContract.KEY_ERROR_MESSAGE), UiPreviewContract.OUTCOME_APPLIED, outcome(stopped))
+            assertEquals(UiPreviewContract.EXIT_STOPPED, awaitExit(callback, spinning))
+            assertTrue(callback.scriptErrors.isEmpty())
+            assertEquals(UiPreviewContract.OUTCOME_APPLIED, outcome(service.resize(id, 300, 500)))
         }
     }
 }

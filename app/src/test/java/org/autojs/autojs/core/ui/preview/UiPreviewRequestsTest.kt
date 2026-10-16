@@ -30,10 +30,11 @@ class UiPreviewRequestsTest {
 
     @Test
     fun everyServedContractVersionCreatesSessions() {
-        // Versions only append, so a 1.6.0 client (contractVersion 1) and a 1.7.0 client (2) keep working beside v3.
+        // Versions only append, so 1.6.0 (contractVersion 1), 1.7.0 (2) and 1.8.0 (3) clients keep working beside v4.
         val params = UiPreviewSessionParams(UiPreviewContract.MODE_SNAPSHOT, 100, 100, 0, 0, "", 0f, 0, "label", 1L)
         assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.BASE_VERSION, 24) })
         assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.VERSION_V2, 24) })
+        assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.VERSION_V3, 24) })
         assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.VERSION, 24) })
         assertEquals(UiPreviewContract.ERROR_CONTRACT_MISMATCH, codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.VERSION + 1, 24) })
         assertEquals(UiPreviewContract.ERROR_CONTRACT_MISMATCH, codeOf { UiPreviewRequests.validateSession(params, 0, 24) })
@@ -152,5 +153,27 @@ class UiPreviewRequestsTest {
         assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateProject(true, digest, "../main.js") })
         // Zip entries use their own code.
         assertEquals(UiPreviewContract.ERROR_ARCHIVE_INVALID, codeOf { UiPreviewRequests.archivePath("..", "zip entry", UiPreviewContract.ERROR_ARCHIVE_INVALID) })
+    }
+
+    @Test
+    fun v4BusyWaitLimitsDefaultTurnOffOrStayInRange() {
+        assertEquals(UiPreviewContract.DEFAULT_BUSY_WAIT_LIMIT_MS, UiPreviewRequests.validateBusyWaitLimit(null))
+        assertEquals(0L, UiPreviewRequests.validateBusyWaitLimit(0L))
+        assertEquals(0L, UiPreviewRequests.validateBusyWaitLimit(0))
+        // A client may put an int: it means the same milliseconds.
+        assertEquals(3_000L, UiPreviewRequests.validateBusyWaitLimit(3_000))
+        assertEquals(UiPreviewContract.MIN_BUSY_WAIT_LIMIT_MS, UiPreviewRequests.validateBusyWaitLimit(UiPreviewContract.MIN_BUSY_WAIT_LIMIT_MS))
+        assertEquals(UiPreviewContract.MAX_BUSY_WAIT_LIMIT_MS, UiPreviewRequests.validateBusyWaitLimit(UiPreviewContract.MAX_BUSY_WAIT_LIMIT_MS))
+        for (bad in listOf<Any>(999L, 60_001L, -1L, 5_000.0, "5000", true)) {
+            assertEquals("$bad", UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateBusyWaitLimit(bad) })
+        }
+    }
+
+    @Test
+    fun v4LifecycleEventsAreTheThreeNamedOnes() {
+        for (event in UiPreviewContract.LIFECYCLE_EVENTS) assertEquals(event, UiPreviewRequests.validateLifecycleEvent(event))
+        for (bad in listOf(null, "", "create", "BACK_PRESSED", "back")) {
+            assertEquals("$bad", UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateLifecycleEvent(bad) })
+        }
     }
 }
