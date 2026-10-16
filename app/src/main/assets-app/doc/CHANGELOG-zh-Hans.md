@@ -67,6 +67,8 @@
 * `新增` device.pageSize 属性 (getter), 用于获取系统内存页大小
 * `新增` device.getMarketName 方法, 用于获取设备的市场名称 _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` ui.useAndroidLayout 方法, 用于启用 Android 原生布局控件支持
+* `新增` UI 布局支持工程 res 目录, 可引用其中的字符串, 颜色, 尺寸, 数组, 样式, 主题, 图片, Drawable (含 vector 矢量图), 颜色状态列表及 <include> 布局, 并按夜间模式, 语言, 屏幕方向, 屏幕宽度, 密度与 Android 版本选择对应的限定符目录 (如 values-night, layout-land) (参阅 项目文档 > [用户界面](https://docs.autojs6.com/#/ui))
+* `新增` 原生 Android XML 布局支持更多控件属性: 属性处理器之外的属性按 Android SDK 及 AndroidX / Material 库的属性定义, 经控件公开方法或父布局参数设置, 包括 ConstraintLayout 的约束与 Barrier/Group/Flow/Guideline, CoordinatorLayout 的 layout_behavior 及 AppBarLayout 的滚动标志等, 并可直接使用 MaterialButton 等 Material 组件 (参阅 项目文档 > [Android XML 属性](https://docs.autojs6.com/#/uiAndroidAttributes))
 * `新增` runtime.loadAar 方法, 用于动态加载 AAR 文件
 * `新增` runtime.loadJarWithR8/retraceR8Stack 方法, 用于借助 R8 Compiler 插件加载 JAR 文件及还原混淆堆栈 (实验性)
 * `新增` images.quantize/quantizeToFile 方法, 用于 PNG 图像量化及文件保存, 并返回图像大小与质量信息 (需要 Image Quantization 插件)
@@ -165,6 +167,10 @@
 * `修复` 正式发行版本及打包应用的 HTTP 请求可能被网络安全配置意外拦截的问题
 * `修复` UI 模式 WebView 控件的文件选择器无法正常打开的问题
 * `修复` UI 模式 list/grid 控件项目模板中的动态属性表达式无法访问当前项目对象 (如 name 属性) 而报告 ReferenceError 并导致列表项显示空白, 以及数值表达式结果显示为 18.0 而非 18 的问题
+* `修复` UI 布局中 RelativeLayout 子控件的 layout_toStartOf, layout_toEndOf 及 layout_alignBaseline 属性无效的问题
+* `修复` UI 布局中 paddingHorizontal/paddingVertical 属性导致布局加载失败的问题
+* `修复` UI 布局中 scrollbars 及 requiresFadingEdge 属性无法关闭滚动条或边缘渐隐 (如设为 none) 的问题
+* `修复` UI 布局中 ImageView 控件同时设置 adjustViewBounds 与 scaleType 时缩放类型可能失效的问题
 * `修复` UI 脚本进入分屏或调整窗口尺寸时可能意外退出的问题
 * `修复` 选择器重载方法, filter 全局方法及集合选择器的正则参数无法正常使用的问题
 * `修复` contains 系列选择器将普通字符串参数误解析为正则表达式的问题
@@ -359,6 +365,8 @@
 * `优化` Gradle 平台兼容数据及更新任务迁移至 AutoJs6-Gradle-Platform-Versions, Scrapers 工具支持跨仓库同步
 * `优化` device.getAndroidId 支持 useSystemId 布尔参数, 在 Android 8.0+ 上通过 Shizuku/Root 获取运行应用所属 Android 用户的系统值, 权限或读取失败时抛出异常, 旧系统忽略此参数
 * `优化` cX/cY/cXy/cYx 支持显式 auto 模式, 统一校验坐标和基数, 并避免有限大数换算被截断到 Long 范围
+* `优化` 原生 Android XML 布局中无法设置或未知的属性改为跳过并在控制台警告一次, 不再导致整个布局加载失败
+* `优化` UI 布局属性按书写顺序应用, 后写的属性覆盖先写的属性 (如 padding 之后的 paddingHorizontal)
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer
