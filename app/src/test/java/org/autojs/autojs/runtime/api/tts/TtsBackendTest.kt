@@ -200,6 +200,58 @@ class TtsBackendTest {
         assertTrue(ttsLocaleMatches("zh-Hant-TW", "zh"))
     }
 
+    @Test
+    fun modelVoiceReplacesVoiceAndLocale() {
+        val modelVoice = TtsSelection.ModelVoice("tts.kokoro", null, "zh")
+        assertEquals(modelVoice, TtsConfiguration.from(TtsOptions(speechSelection = modelVoice)).selection)
+        assertThrows(IllegalArgumentException::class.java) {
+            TtsConfiguration.from(TtsOptions(voice = "tts.kokoro/3", speechSelection = modelVoice))
+        }
+        assertEquals(
+            TtsSelection.PreferredLanguage("zh"),
+            TtsConfiguration.from(TtsOptions(speechSelection = TtsSelection.PreferredLanguage("zh"))).selection,
+        )
+        assertThrows(IllegalArgumentException::class.java) { TtsSelection.PreferredLanguage("zh_CN") }
+        assertThrows(IllegalArgumentException::class.java) { TtsSelection.ModelVoice("tts.kokoro", "a/b") }
+        assertThrows(IllegalArgumentException::class.java) { TtsSelection.ModelVoice("tts.kokoro", null, "zh_CN") }
+    }
+
+    @Test
+    fun modelVoiceFollowsTheSpeakerOrTheLanguage() {
+        // Kokoro multi-lang v1.1 as 3-Macaw Speech lists it: 0 - 2 English first, 3 and above Chinese first.
+        val kokoro = listOf(
+            voice("tts.kokoro/0", "en-US", 400, 300),
+            voice("tts.kokoro/0/zh-CN", "zh-CN", 400, 300),
+            voice("tts.kokoro/10", "zh-CN", 400, 300),
+            voice("tts.kokoro/2", "en-US", 400, 300),
+            voice("tts.kokoro/3", "zh-CN", 400, 300),
+            voice("tts.kokoro/3/en-US", "en-US", 400, 300),
+            voice("tts.kokoro.other/1", "zh-CN", 400, 300),
+        )
+        fun listed(speaker: String?, language: String?): String {
+            val choice = resolveTtsModelVoice(kokoro, TtsSelection.ModelVoice("tts.kokoro", speaker, language))
+            return (choice as TtsModelVoiceChoice.Listed).voice.name
+        }
+        assertEquals("tts.kokoro/3", listed(null, "zh"))
+        assertEquals("tts.kokoro/3", listed(null, "zh-TW"))
+        assertEquals("tts.kokoro/0", listed(null, "en"))
+        assertEquals("tts.kokoro/0", listed(null, "ja"))
+        assertEquals("tts.kokoro/0", listed(null, null))
+        assertEquals("tts.kokoro/10", listed("10", "en"))
+        assertEquals("tts.kokoro/2", listed("02", null))
+
+        val named = resolveTtsModelVoice(kokoro, TtsSelection.ModelVoice("tts.kokoro", "SSB0005"))
+        assertEquals(TtsModelVoiceChoice.Named("tts.kokoro/SSB0005", kokoro[0]), named)
+
+        val missingNumber = assertThrows(TtsBackendException::class.java) {
+            resolveTtsModelVoice(kokoro, TtsSelection.ModelVoice("tts.kokoro", "11"))
+        }
+        assertTrue(missingNumber.message!!.contains("speakers 0 to 10"))
+        assertThrows(TtsBackendException::class.java) {
+            resolveTtsModelVoice(kokoro, TtsSelection.ModelVoice("tts.missing", null, "zh"))
+        }
+    }
+
     private fun voice(
         name: String,
         languageTag: String,

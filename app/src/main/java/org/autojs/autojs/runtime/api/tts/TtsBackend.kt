@@ -169,7 +169,105 @@ internal sealed class TtsSelection {
             }
         }
     }
+
+    /**
+     * A speaker of one model of an engine that names its voices like the speech plugin (3-Macaw Speech roadmap D19,
+     * appendix D Q6): `<model>/<speaker>` in the speaker's first language and `<model>/<speaker>/<languageTag>` in the
+     * model's other languages. Only `speech.speak` builds it; `tts` scripts name voices with [Voice]. [speaker] is a
+     * number, a name the engine resolves itself, or null for the speaker that suits [languageTag]
+     * ([resolveTtsModelVoice]).
+     */
+    data class ModelVoice(
+        val model: String,
+        val speaker: String? = null,
+        val languageTag: String? = null,
+    ) : TtsSelection() {
+
+        init {
+            require(model.isNotBlank() && model == model.trim()) { "TTS model name must be normalized" }
+            require(speaker == null || (speaker.isNotBlank() && speaker == speaker.trim() && '/' !in speaker)) {
+                "TTS model speaker must be a normalized number or name without '/'"
+            }
+            require("$model/${speaker.orEmpty()}".length <= TtsOptionsParser.MAX_VOICE_LENGTH) {
+                "TTS voice name is too long"
+            }
+            require('\u0000' !in model && '\u0000' !in speaker.orEmpty()) { "TTS voice name must not contain NUL" }
+            require(languageTag == null || languageTag == normalizeTtsLanguageTag(languageTag)) {
+                "TTS language tag must be normalized"
+            }
+        }
+    }
+
+    /**
+     * [Language] when the engine has the language, otherwise [Default] instead of a failure. Only `speech.speak`
+     * builds it, with the language of the text when the script names neither a model nor a language.
+     */
+    data class PreferredLanguage(
+        val languageTag: String,
+    ) : TtsSelection() {
+
+        init {
+            require(languageTag == normalizeTtsLanguageTag(languageTag)) {
+                "TTS language tag must be normalized"
+            }
+        }
+    }
 }
+
+/**
+ * The voice [resolveTtsModelVoice] chose: one the engine lists, or a speaker name the engine is asked to load
+ * ([template] lends it a locale and quality).
+ */
+internal sealed class TtsModelVoiceChoice {
+
+    data class Listed(val voice: TtsVoice) : TtsModelVoiceChoice()
+
+    data class Named(val name: String, val template: TtsVoice) : TtsModelVoiceChoice()
+}
+
+/**
+ * The voice of [selection] among the engine's [voices]. Only the voices in a speaker's first language take part
+ * (`<model>/<number>`). A numbered speaker must be listed. A named speaker is not listed (the engine lists numbers only)
+ * and becomes [TtsModelVoiceChoice.Named], which the engine accepts or refuses when the voice is set. Without a speaker
+ * the lowest numbered voice whose language is the one of [TtsSelection.ModelVoice.languageTag] wins, otherwise the
+ * lowest numbered voice: Kokoro multi-lang v1.1 lists speakers 0 to 2 in English and 3 to 102 in Chinese, so Chinese
+ * text gets speaker 3 (the plugin's default speaker) and English text speaker 0. A model without listed voices (not
+ * installed) and a number the model does not have fail with [TtsBackendException].
+ */
+internal fun resolveTtsModelVoice(
+    voices: Collection<TtsVoice>,
+    selection: TtsSelection.ModelVoice,
+): TtsModelVoiceChoice {
+    val prefix = "${selection.model}/"
+    val speakers = voices.mapNotNull { voice ->
+        val rest = voice.name.takeIf { it.startsWith(prefix) }?.substring(prefix.length) ?: return@mapNotNull null
+        speakerNumber(rest)?.let { it to voice }
+    }.sortedBy { it.first }
+    if (speakers.isEmpty()) {
+        throw TtsBackendException(
+            operation = "selectModelVoice",
+            statusCode = TtsBackendStatus.ERROR,
+            message = "The TTS engine lists no voice of model ${selection.model}; is the model installed?",
+        )
+    }
+    val speaker = selection.speaker ?: run {
+        val language = selection.languageTag?.let { Locale.forLanguageTag(it).language }
+        val chosen = speakers.firstOrNull { (_, voice) -> Locale.forLanguageTag(voice.languageTag).language == language }
+            ?: speakers.first()
+        return TtsModelVoiceChoice.Listed(chosen.second)
+    }
+    val number = speakerNumber(speaker) ?: return TtsModelVoiceChoice.Named(prefix + speaker, speakers.first().second)
+    return speakers.firstOrNull { it.first == number }?.let { TtsModelVoiceChoice.Listed(it.second) }
+        ?: throw TtsBackendException(
+            operation = "selectModelVoice",
+            statusCode = TtsBackendStatus.ERROR,
+            message = "TTS voice is not available: $prefix$speaker " +
+                "(${selection.model} has speakers ${speakers.first().first} to ${speakers.last().first})",
+        )
+}
+
+private fun speakerNumber(text: String): Int? =
+    text.takeIf { it.isNotEmpty() && it.length <= 9 && it.all { c -> c in '0'..'9' } }?.toInt()
 
 internal enum class TtsAudioUsage(val value: String) {
     MEDIA("media"),
@@ -220,8 +318,12 @@ internal data class TtsConfiguration(
             require(options.locale == null || options.voice == null) {
                 "TTS locale and voice are mutually exclusive"
             }
+            require(options.speechSelection == null || (options.locale == null && options.voice == null)) {
+                "TTS speech selection excludes locale and voice"
+            }
             return TtsConfiguration(
                 selection = when {
+                    options.speechSelection != null -> options.speechSelection
                     options.voice != null -> TtsSelection.Voice.from(options.voice)
                     options.locale != null -> TtsSelection.Language.from(options.locale)
                     else -> TtsSelection.Default

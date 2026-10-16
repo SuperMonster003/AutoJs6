@@ -13,6 +13,8 @@ import org.autojs.autojs.core.plugin.speech.SpeechRecognizeRequest
 import org.autojs.autojs.core.plugin.speech.SpeechSynthesisRequest
 import org.autojs.autojs.core.plugin.speech.SpeechVadRequest
 import org.autojs.autojs.core.plugin.speech.SpeechWakeRequest
+import org.autojs.autojs.runtime.api.tts.TtsSelection
+import org.autojs.autojs.runtime.api.tts.normalizeTtsLanguageTag
 import org.autojs.plugin.speech.api.SpeechContract
 import org.autojs.plugin.speech.api.SpeechErrorCodes
 import org.autojs.plugin.speech.api.SpeechLimits
@@ -40,13 +42,26 @@ internal object SpeechScriptArguments {
 
     /**
      * `speech.speak(text, options?)`: the speech options and the `tts` options passed through (roadmap D20); the engine
-     * is always the plugin's.
-     * zh-CN: `speech.speak(text, options?)`: 语音选项与透传的 `tts` 选项 (路线图 D20); 引擎固定为本插件.
+     * is always the plugin's. [languageTag] is the language the voice should speak: `language` of the options with
+     * [model], else the language of the text (null when the script gave a language without [model], which then goes to
+     * `tts` unchanged, or when the text has no letters).
+     * zh-CN: `speech.speak(text, options?)`: 语音选项与透传的 `tts` 选项 (路线图 D20); 引擎固定为本插件. [languageTag] 为语音应使用的语言:
+     * 给出 [model] 时取选项中的 `language`, 否则取文本的语言 (未给 [model] 而给了语言时为 null, 该语言原样交给 `tts`; 文本没有字母时也为 null).
      */
-    class Speak(val model: String?, val speaker: String?, val speed: Double?, val ttsOptions: JsonObject) {
-        /** The system TTS voice of roadmap D19 (`<modelId>/<speakerId>`), or null to let the engine choose. zh-CN: 路线图 D19 的系统 TTS 语音 (`<modelId>/<speakerId>`), 为 null 时由引擎选择. */
-        val voice: String?
-            get() = model?.let { "$it/${speaker ?: DEFAULT_SPEAKER}" }
+    class Speak(val model: String?, val speaker: String?, val speed: Double?, val languageTag: String?, val ttsOptions: JsonObject) {
+        /**
+         * How the engine's voice is chosen: the voice of roadmap D19 the engine resolves (`<model>/<speaker>`, a speaker
+         * name included, or the model's speaker of [languageTag]), else the engine's default voice of [languageTag]
+         * when it has the language, else (null) the `tts` rules.
+         * zh-CN: 引擎语音的选择方式: 由引擎解析的路线图 D19 语音 (`<model>/<speaker>`, 包括说话人名字, 或该模型适合 [languageTag] 的说话人),
+         * 否则在引擎支持 [languageTag] 时取其默认语音, 否则 (null) 按 `tts` 的规则.
+         */
+        val selection: TtsSelection?
+            get() = when {
+                model != null -> TtsSelection.ModelVoice(model, speaker, languageTag)
+                languageTag != null -> TtsSelection.PreferredLanguage(languageTag)
+                else -> null
+            }
     }
 
     const val MODEL = "model"
@@ -81,9 +96,6 @@ internal object SpeechScriptArguments {
     const val VOICE = "voice"
     const val RATE = "rate"
 
-    /** The speaker of a model when the script names none (the model's first speaker). zh-CN: 脚本未指定说话人时使用的说话人 (模型的第一个说话人). */
-    const val DEFAULT_SPEAKER = "0"
-
     /** The largest PCM sample rate accepted for `recognize` / `detectVoice` (the plugin resamples). zh-CN: `recognize` / `detectVoice` 接受的最大 PCM 采样率 (插件负责重采样). */
     const val MAX_PCM_SAMPLE_RATE = 192_000
     const val MIN_PCM_SAMPLE_RATE = 8_000
@@ -106,6 +118,9 @@ internal object SpeechScriptArguments {
 
     /** `tts` options `speak` refuses: the engine is the plugin's, the voice and rate come from `model` / `speaker` / `speed`. zh-CN: `speak` 拒绝的 `tts` 选项. */
     private val SPEAK_RESERVED = setOf(ENGINE, VOICE, RATE, "speechRate")
+
+    /** The `tts` language keys in the order `tts` reads them. zh-CN: `tts` 的语言键, 顺序与 `tts` 读取时一致. */
+    private val SPEAK_LANGUAGE_KEYS = listOf("locale", LANGUAGE, "lang")
 
     private val LANGUAGE_TAG = Regex("^[A-Za-z]{2,8}([-_][A-Za-z0-9]{1,8}){0,4}$")
 
@@ -267,12 +282,16 @@ internal object SpeechScriptArguments {
 
     /**
      * `speech.speak(text, options?)`: `model`, `speaker` and `speed` become the plugin voice and the speech rate, every
-     * other key goes to `tts` unchanged (it validates them itself); `engine`, `voice` and `rate` are refused.
+     * other key goes to `tts` unchanged (it validates them itself); `engine`, `voice` and `rate` are refused. With
+     * `model` the `tts` language keys (`locale`, `language`, `lang`) only choose the model's speaker when `speaker` is
+     * absent ([textLanguage] of [text] otherwise) and do not reach `tts`; without `model` and without a language key
+     * the voice follows the [textLanguage] of [text] when the engine has it.
      * zh-CN: `speech.speak(text, options?)`: `model`, `speaker` 与 `speed` 转为插件语音与语速, 其余键原样交给 `tts` (由其自行校验); 拒绝
-     * `engine`, `voice` 与 `rate`.
+     * `engine`, `voice` 与 `rate`. 给出 `model` 时, `tts` 的语言键 (`locale`, `language`, `lang`) 只在未给 `speaker` 时用于选择模型的说话人
+     * (否则用 [text] 的 [textLanguage]), 不交给 `tts`; 既无 `model` 也无语言键时, 引擎支持 [text] 的 [textLanguage] 则按其选择语音.
      */
-    fun speak(options: JsonElement?): Speak {
-        val given = optionalObject(options, "options") ?: return Speak(null, null, null, JsonObject())
+    fun speak(options: JsonElement?, text: String): Speak {
+        val given = optionalObject(options, "options") ?: return Speak(null, null, null, textLanguage(text), JsonObject())
         given.keySet().firstOrNull { it in SPEAK_RESERVED }?.let { key ->
             throw invalid("'options.$key' is not accepted: speech.speak always uses the 3-Macaw Speech engine; choose the voice with 'model' / 'speaker' and the pace with 'speed'")
         }
@@ -284,7 +303,46 @@ internal object SpeechScriptArguments {
         val speaker = speaker(given.get(SPEAKER), "options.speaker")
         val model = token(given.get(MODEL), "options.model")
         if (speaker != null && model == null) throw invalid("'options.speaker' needs 'options.model'")
-        return Speak(model, speaker, speed(given, "options"), passThrough)
+        if (speaker != null && '/' in speaker) throw invalid("'options.speaker' must be a speaker id or name without '/', got $speaker")
+        val languageKey = SPEAK_LANGUAGE_KEYS.firstOrNull { given.has(it) && !given.get(it).isJsonNull }
+        if (model == null) return Speak(null, null, speed(given, "options"), if (languageKey == null) textLanguage(text) else null, passThrough)
+        SPEAK_LANGUAGE_KEYS.forEach(passThrough::remove)
+        val languageTag = languageKey?.let { key ->
+            val tag = language(given.get(key), "options.$key") ?: return@let null
+            try {
+                normalizeTtsLanguageTag(tag)
+            } catch (e: IllegalArgumentException) {
+                throw invalid("'options.$key' must be a language tag such as zh, en or zh-CN, got $tag")
+            }
+        } ?: textLanguage(text)
+        return Speak(model, speaker, speed(given, "options"), languageTag, passThrough)
+    }
+
+    /**
+     * The language a speaker should read [text] in: `ja` for kana, `ko` for Hangul, `zh` for other text with Han
+     * characters (mixed Chinese and English included), `en` for Latin letters only, null otherwise.
+     * zh-CN: 朗读 [text] 的说话人应使用的语言: 含假名为 `ja`, 含谚文为 `ko`, 其他含汉字的文本 (包括中英混合) 为 `zh`, 只有拉丁字母为 `en`, 其余为 null.
+     */
+    fun textLanguage(text: String): String? {
+        var han = false
+        var latin = false
+        var i = 0
+        while (i < text.length) {
+            val codePoint = text.codePointAt(i)
+            when (Character.UnicodeScript.of(codePoint)) {
+                Character.UnicodeScript.HIRAGANA, Character.UnicodeScript.KATAKANA -> return "ja"
+                Character.UnicodeScript.HANGUL -> return "ko"
+                Character.UnicodeScript.HAN -> han = true
+                Character.UnicodeScript.LATIN -> latin = true
+                else -> Unit
+            }
+            i += Character.charCount(codePoint)
+        }
+        return when {
+            han -> "zh"
+            latin -> "en"
+            else -> null
+        }
     }
 
     fun synthesisText(value: JsonElement?): String {

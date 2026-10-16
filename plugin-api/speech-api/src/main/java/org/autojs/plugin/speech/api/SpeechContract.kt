@@ -141,7 +141,7 @@ object SpeechContract {
     /** One `recognizeFile` or `detectVoice` call (a 30 minute file on a slow device). */
     const val FILE_CALL_TIMEOUT_MS = 600_000L
 
-    /** From `synthesizeToFile` to its completion callback. */
+    /** From `synthesizeToFile` to its first progress, between two progress callbacks and from the last one to the completion; the whole synthesis has no limit. */
     const val SYNTHESIS_TIMEOUT_MS = 600_000L
 
     /** From `refreshCatalog` to its completion callback. */

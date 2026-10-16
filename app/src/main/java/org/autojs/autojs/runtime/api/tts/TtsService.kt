@@ -151,12 +151,21 @@ internal class TtsService(
         }
     }
 
+    /**
+     * Speaks [text]; [selection] (only `speech.speak`, 3-Macaw Speech roadmap D19) replaces the voice and locale of
+     * [options] and of the defaults: always for [TtsSelection.ModelVoice], for [TtsSelection.PreferredLanguage] only
+     * when neither names a voice or a locale.
+     */
     fun speech(
         text: String,
         options: JsonObject,
         forcedQueueMode: TtsQueueMode? = null,
+        selection: TtsSelection? = null,
     ): TtsUtterance {
-        val parsed = TtsOptionsParser.merge(defaults.get(), options, forcedQueueMode)
+        val merged = TtsOptionsParser.merge(defaults.get(), options, forcedQueueMode)
+        val applies = selection != null &&
+            (selection !is TtsSelection.PreferredLanguage || (merged.speech.locale == null && merged.speech.voice == null))
+        val parsed = if (applies) merged.copy(speech = merged.speech.copy(locale = null, voice = null, speechSelection = selection)) else merged
         val chunks = if (parsed.speech.autoSplit) {
             TtsTextChunker.chunk(text)
         } else {

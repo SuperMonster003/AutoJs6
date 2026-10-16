@@ -23,6 +23,8 @@ internal data class TtsOptions(
     val usage: String = TtsOptionsParser.DEFAULT_USAGE,
     val timeoutMillis: Long? = null,
     val parameters: Map<String, Any> = emptyMap(),
+    // Set only by speech.speak (TtsService.speech); never parsed from script options nor kept in the defaults.
+    val speechSelection: TtsSelection? = null,
 ) {
 
     fun toPublicValue(): Map<String, Any?> = linkedMapOf(

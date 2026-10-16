@@ -391,29 +391,18 @@ internal class AndroidTtsBackend(
         val selectedVoice = if (!configuration.applySpeechProperties) {
             textToSpeech.voice
         } else when (val selection = configuration.selection) {
-            TtsSelection.Default -> {
-                val defaultVoice = resolveEngineDefaultVoice()
-                setVoice(defaultVoice, "resetDefaultVoice")
-                if (configuration.offlineOnly) {
-                    selectOfflineVoice(
-                        languageTag = defaultVoice.locale.toLanguageTag(),
-                        preferredVoiceName = defaultVoice.name,
-                    )
+            TtsSelection.Default -> selectDefault(configuration.offlineOnly)
+            is TtsSelection.Language -> selectLanguage(selection.languageTag, configuration.offlineOnly)
+            is TtsSelection.PreferredLanguage -> {
+                val available = if (configuration.offlineOnly) {
+                    selectOfflineTtsVoice(platformVoices().map(AndroidVoice::toTtsVoice), selection.languageTag) != null
                 } else {
-                    defaultVoice
+                    textToSpeech.isLanguageAvailable(Locale.forLanguageTag(selection.languageTag)) >= TextToSpeech.LANG_AVAILABLE
                 }
-            }
-            is TtsSelection.Language -> {
-                if (configuration.offlineOnly) {
-                    selectOfflineVoice(selection.languageTag)
+                if (available) {
+                    selectLanguage(selection.languageTag, configuration.offlineOnly)
                 } else {
-                    ensureLanguageAvailable(
-                        textToSpeech.setLanguage(
-                            Locale.forLanguageTag(selection.languageTag),
-                        ),
-                        selection.languageTag,
-                    )
-                    textToSpeech.voice
+                    selectDefault(configuration.offlineOnly)
                 }
             }
             is TtsSelection.Voice -> {
@@ -424,23 +413,40 @@ internal class AndroidTtsBackend(
                         statusCode = TtsBackendStatus.ERROR,
                         message = "TTS voice is not available: ${selection.name}",
                     )
-                val model = voice.toTtsVoice()
-                if (model.notInstalled) {
-                    throw TtsBackendException(
-                        operation = "setVoice",
-                        statusCode = TextToSpeech.ERROR_NOT_INSTALLED_YET,
-                        message = "TTS voice is not installed: ${selection.name}",
-                    )
-                }
-                if (configuration.offlineOnly && model.networkRequired) {
-                    throw TtsBackendException(
-                        operation = "setVoice",
-                        statusCode = TextToSpeech.ERROR_NETWORK,
-                        message = "TTS voice requires a network connection: ${selection.name}",
-                    )
-                }
+                ensureUsable(voice, configuration)
                 setVoice(voice)
                 voice
+            }
+            is TtsSelection.ModelVoice -> {
+                val voices = platformVoices()
+                when (val choice = resolveTtsModelVoice(voices.map(AndroidVoice::toTtsVoice), selection)) {
+                    is TtsModelVoiceChoice.Listed -> {
+                        val voice = voices.first { it.name == choice.voice.name }
+                        ensureUsable(voice, configuration)
+                        setVoice(voice)
+                        voice
+                    }
+                    is TtsModelVoiceChoice.Named -> {
+                        // The engine lists numbered speakers only; it resolves a speaker name when the voice is set.
+                        val voice = AndroidVoice(
+                            choice.name,
+                            Locale.forLanguageTag(choice.template.languageTag),
+                            choice.template.quality,
+                            choice.template.latency,
+                            false,
+                            emptySet(),
+                        )
+                        if (textToSpeech.setVoice(voice) != TextToSpeech.SUCCESS) {
+                            throw TtsBackendException(
+                                operation = "setVoice",
+                                statusCode = TtsBackendStatus.ERROR,
+                                message = "TTS voice is not available: ${choice.name} " +
+                                    "(the engine knows no speaker named \"${selection.speaker}\" in ${selection.model})",
+                            )
+                        }
+                        voice
+                    }
+                }
             }
         }
 
@@ -546,6 +552,46 @@ internal class AndroidTtsBackend(
         }
         setVoice(voice)
         return voice
+    }
+
+    private fun selectDefault(offlineOnly: Boolean): AndroidVoice? {
+        val defaultVoice = resolveEngineDefaultVoice()
+        setVoice(defaultVoice, "resetDefaultVoice")
+        return if (offlineOnly) {
+            selectOfflineVoice(
+                languageTag = defaultVoice.locale.toLanguageTag(),
+                preferredVoiceName = defaultVoice.name,
+            )
+        } else {
+            defaultVoice
+        }
+    }
+
+    private fun selectLanguage(languageTag: String, offlineOnly: Boolean): AndroidVoice? {
+        if (offlineOnly) return selectOfflineVoice(languageTag)
+        ensureLanguageAvailable(
+            textToSpeech.setLanguage(Locale.forLanguageTag(languageTag)),
+            languageTag,
+        )
+        return textToSpeech.voice
+    }
+
+    private fun ensureUsable(voice: AndroidVoice, configuration: TtsConfiguration) {
+        val model = voice.toTtsVoice()
+        if (model.notInstalled) {
+            throw TtsBackendException(
+                operation = "setVoice",
+                statusCode = TextToSpeech.ERROR_NOT_INSTALLED_YET,
+                message = "TTS voice is not installed: ${voice.name}",
+            )
+        }
+        if (configuration.offlineOnly && model.networkRequired) {
+            throw TtsBackendException(
+                operation = "setVoice",
+                statusCode = TextToSpeech.ERROR_NETWORK,
+                message = "TTS voice requires a network connection: ${voice.name}",
+            )
+        }
     }
 
     private fun setVoice(

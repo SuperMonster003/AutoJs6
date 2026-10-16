@@ -8,7 +8,9 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.speech.tts.TextToSpeech
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
@@ -18,6 +20,7 @@ import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
+import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.speech.api.ISpeechPlugin
 import org.autojs.plugin.speech.api.ISpeechProgressCallback
@@ -270,9 +273,13 @@ object SpeechPluginHost {
 
     /**
      * Synthesizes [request] into [target] (staged, checked and published by the host); answers
-     * `{ path, sampleRate, durationMillis, modelId, speakerId, sizeBytes }` (roadmap appendix B.1).
-     * zh-CN: 把 [request] 合成到 [target] (由宿主暂存, 检查并发布); 应答 `{ path, sampleRate, durationMillis, modelId, speakerId, sizeBytes }`
-     * (路线图附录 B.1).
+     * `{ path, sampleRate, durationMillis, modelId, speakerId, sizeBytes, warnings }` (roadmap appendix B.1). The host
+     * waits [SpeechContract.SYNTHESIS_TIMEOUT_MS] for each progress (one per sentence) and for the completion, with no
+     * limit on the whole synthesis: the longest text took 405 seconds with AISHELL-3 on a Sony G8441, and slower models
+     * run several times longer there.
+     * zh-CN: 把 [request] 合成到 [target] (由宿主暂存, 检查并发布); 应答 `{ path, sampleRate, durationMillis, modelId, speakerId, sizeBytes,
+     * warnings }` (路线图附录 B.1). 宿主为每次进度 (每句一次) 与完成各等待 [SpeechContract.SYNTHESIS_TIMEOUT_MS], 整个合成不设上限: 最长文本在
+     * Sony G8441 上用 AISHELL-3 需 405 秒, 更慢的模型在该机上要长数倍.
      */
     suspend fun synthesizeToFile(
         context: Context,
@@ -285,25 +292,35 @@ object SpeechPluginHost {
         val output = SpeechOutputFile.stage(target)
         try {
             val answer = output.openStaging().use { staging ->
-                operation(context, selected, "synthesizeToFile", SpeechContract.SYNTHESIS_TIMEOUT_MS, onProgress) { proxy, callback ->
+                operation(context, selected, "synthesizeToFile", SpeechContract.SYNTHESIS_TIMEOUT_MS, onProgress, renewOnProgress = true) { proxy, callback ->
                     proxy.synthesizeToFile(SpeechBundles.synthesis(request), staging, callback)
                 }
             }
             val size = output.publish()
-            val plain = SpeechBundles.plain(answer)
-            linkedMapOf(
-                FIELD_PATH to output.target.path,
-                SpeechResultKeys.SAMPLE_RATE to plain[SpeechResultKeys.SAMPLE_RATE],
-                SpeechResultKeys.DURATION_MILLIS to plain[SpeechResultKeys.DURATION_MILLIS],
-                SpeechResultKeys.MODEL_ID to plain[SpeechResultKeys.MODEL_ID],
-                SpeechResultKeys.SPEAKER_ID to plain[SpeechResultKeys.SPEAKER_ID],
-                SpeechResultKeys.SIZE_BYTES to SpeechValues.number(size),
-            )
+            SpeechBundles.synthesisResult(output.target.path, SpeechBundles.plain(answer), size)
         } catch (t: Throwable) {
             output.discard()
             throw t
         }
     }
+
+    /**
+     * Whether [packageName] is installed with a system TTS engine service (`speech.speak`, roadmap D20); a package
+     * query, no binding, so it may run on the script or UI thread.
+     * zh-CN: [packageName] 是否已安装且带系统 TTS 引擎服务 (`speech.speak`, 路线图 D20); 只查询包管理器, 不绑定, 因此可在脚本线程或 UI 线程上运行.
+     */
+    fun isTtsEngineInstalled(context: Context, packageName: String): Boolean =
+        queryServices(context, Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE).setPackage(packageName)).isNotEmpty()
+
+    /**
+     * `PLUGIN_UNAVAILABLE` with the localized missing-plugin message, as every speech call reports it without the
+     * plugin (roadmap D27).
+     * zh-CN: 带本地化缺插件文案的 `PLUGIN_UNAVAILABLE`, 与缺少插件时每个语音调用的报告一致 (路线图 D27).
+     */
+    fun missingPlugin(context: Context): SpeechPluginException = SpeechErrorMapper.failure(
+        SpeechErrorCodes.PLUGIN_UNAVAILABLE,
+        context.getString(R.string.error_missing_required_plugin_for_module_label, LABEL),
+    )
 
     // ------------------------------------------------------------------ selection
 
@@ -415,6 +432,10 @@ object SpeechPluginHost {
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             setPackage(packageName)
         }
+        return queryServices(context, intent)
+    }
+
+    private fun queryServices(context: Context, intent: Intent): Set<ComponentName> {
         val resolved = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.packageManager.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0))
         } else {
@@ -457,9 +478,10 @@ object SpeechPluginHost {
     /**
      * Runs one operation of the progress callback family on a dedicated binding: the plugin answers an operation id at
      * once and completes later; cancellation of the caller (script exit, timeout) cancels the operation in the plugin,
-     * and the death of the plugin process fails it with `SESSION_CLOSED`.
+     * and the death of the plugin process fails it with `SESSION_CLOSED`. [timeoutMs] bounds the whole operation, or
+     * with [renewOnProgress] the wait for each progress and for the completion.
      * zh-CN: 在专用绑定上运行一个进度回调类操作: 插件立即应答操作 id, 之后完成; 调用方取消 (脚本退出, 超时) 会取消插件中的操作, 插件进程死亡
-     * 以 `SESSION_CLOSED` 使其失败.
+     * 以 `SESSION_CLOSED` 使其失败. [timeoutMs] 限制整个操作, 带 [renewOnProgress] 时限制每次进度与完成的等待.
      */
     private suspend fun operation(
         context: Context,
@@ -467,6 +489,7 @@ object SpeechPluginHost {
         label: String,
         timeoutMs: Long?,
         onProgress: ((Long, Long) -> Unit)?,
+        renewOnProgress: Boolean = false,
         start: (ISpeechPlugin, ISpeechProgressCallback) -> Int,
     ): Bundle {
         val callback = SpeechProgressBinder(onProgress)
@@ -479,11 +502,18 @@ object SpeechPluginHost {
             callback.fail(SpeechErrorMapper.normalize(SpeechErrorCodes.SESSION_CLOSED, "speech plugin process died"))
         }
         try {
-            val result = if (timeoutMs == null) callback.await() else withTimeout(timeoutMs) { callback.await() }
+            val result = when {
+                timeoutMs == null -> callback.await()
+                renewOnProgress -> callback.awaitRenewing(timeoutMs)
+                else -> withTimeout(timeoutMs) { callback.await() }
+            }
             return SpeechBundles.answer(result, label)
         } catch (e: CancellationException) {
             runCatching { leased.value.proxy.cancelOperation(leased.value.opId) }
-            if (e is TimeoutCancellationException) throw SpeechErrorMapper.failure(SpeechErrorCodes.TIMEOUT, "$label did not finish within $timeoutMs ms", e)
+            if (e is TimeoutCancellationException) {
+                val detail = if (renewOnProgress) "reported no progress within $timeoutMs ms" else "did not finish within $timeoutMs ms"
+                throw SpeechErrorMapper.failure(SpeechErrorCodes.TIMEOUT, "$label $detail", e)
+            }
             throw e
         } finally {
             runCatching { binder.unlinkToDeath(death, 0) }
@@ -497,14 +527,16 @@ object SpeechPluginHost {
 
 /**
  * Completion channel of one operation: progress reaches [onProgress] on a Binder thread until the operation completes or
- * fails; the outcome settles [await].
- * zh-CN: 一个操作的完成通道: 操作完成或失败前, 进度在 Binder 线程上到达 [onProgress]; 结果使 [await] 落定.
+ * fails; the outcome settles [await] and [awaitRenewing].
+ * zh-CN: 一个操作的完成通道: 操作完成或失败前, 进度在 Binder 线程上到达 [onProgress]; 结果使 [await] 与 [awaitRenewing] 落定.
  */
 internal class SpeechProgressBinder(private val onProgress: ((Long, Long) -> Unit)?) : ISpeechProgressCallback.Stub() {
 
     private val outcome = CompletableDeferred<Bundle>()
+    private val deadline = SpeechProgressDeadline()
 
     override fun onProgress(opId: Int, done: Long, total: Long) {
+        deadline.renew()
         if (!outcome.isCompleted) runCatching { onProgress?.invoke(done, total) }
     }
 
@@ -521,4 +553,35 @@ internal class SpeechProgressBinder(private val onProgress: ((Long, Long) -> Uni
     }
 
     suspend fun await(): Bundle = outcome.await()
+
+    /** [await] that fails with `TimeoutCancellationException` once [windowMs] passed without progress. zh-CN: 连续 [windowMs] 无进度即以 `TimeoutCancellationException` 失败的 [await]. */
+    suspend fun awaitRenewing(windowMs: Long): Bundle = deadline.await(windowMs, outcome)
+}
+
+/**
+ * The renewable deadline of an operation that reports progress (roadmap P4.3): the wait for the outcome fails with
+ * `TimeoutCancellationException` once a whole window passed since the start or the last [renew], however long the
+ * operation runs in total. [clockMillis] is a monotonic clock (replaced in the JVM tests).
+ * zh-CN: 报告进度的操作的可续期截止时间 (路线图 P4.3): 自开始或最近一次 [renew] 起整整一个窗口没有动静时, 对结果的等待以
+ * `TimeoutCancellationException` 失败, 不论操作总共运行多久. [clockMillis] 为单调时钟 (JVM 测试中替换).
+ */
+internal class SpeechProgressDeadline(private val clockMillis: () -> Long = { System.nanoTime() / 1_000_000 }) {
+
+    @Volatile
+    private var lastActivity = clockMillis()
+
+    fun renew() {
+        lastActivity = clockMillis()
+    }
+
+    suspend fun <T> await(windowMs: Long, outcome: Deferred<T>): T {
+        while (true) {
+            val remaining = windowMs - (clockMillis() - lastActivity)
+            try {
+                return withTimeout(remaining.coerceAtLeast(1)) { outcome.await() }
+            } catch (e: TimeoutCancellationException) {
+                if (clockMillis() - lastActivity >= windowMs) throw e
+            }
+        }
+    }
 }

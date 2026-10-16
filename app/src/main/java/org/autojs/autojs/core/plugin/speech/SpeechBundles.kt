@@ -146,6 +146,23 @@ object SpeechBundles {
         return result
     }
 
+    /**
+     * The script's `SpeechSynthesisResult` from the [plain] completion of `synthesizeToFile`: the published [path], the
+     * plugin's `sampleRate`, `durationMillis`, `modelId`, `speakerId` and `warnings` (an empty list when it sent none,
+     * like recognition results), and the [size] the host published.
+     * zh-CN: 由 `synthesizeToFile` 的 [plain] 完成值构造脚本的 `SpeechSynthesisResult`: 发布后的 [path], 插件给出的 `sampleRate`,
+     * `durationMillis`, `modelId`, `speakerId` 与 `warnings` (未给出时为空列表, 与识别结果一致), 以及宿主发布的 [size].
+     */
+    fun synthesisResult(path: String, plain: Map<String, Any?>, size: Long): Map<String, Any?> = linkedMapOf(
+        SpeechPluginHost.FIELD_PATH to path,
+        SpeechResultKeys.SAMPLE_RATE to plain[SpeechResultKeys.SAMPLE_RATE],
+        SpeechResultKeys.DURATION_MILLIS to plain[SpeechResultKeys.DURATION_MILLIS],
+        SpeechResultKeys.MODEL_ID to plain[SpeechResultKeys.MODEL_ID],
+        SpeechResultKeys.SPEAKER_ID to plain[SpeechResultKeys.SPEAKER_ID],
+        SpeechResultKeys.SIZE_BYTES to SpeechValues.number(size),
+        SpeechResultKeys.WARNINGS to (plain[SpeechResultKeys.WARNINGS] as? List<*> ?: emptyList<Any?>()),
+    )
+
     /** One model Bundle as the script's `SpeechModelInfo`. zh-CN: 单个模型 Bundle 转为脚本的 `SpeechModelInfo`. */
     fun model(bundle: Bundle?): Map<String, Any?> = plain(bundle)
 

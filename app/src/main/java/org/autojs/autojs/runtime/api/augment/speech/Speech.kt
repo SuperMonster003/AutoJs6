@@ -133,22 +133,28 @@ class Speech internal constructor(
 
     /**
      * `speech.speak(text, options?)`: the host `tts(text, options)` with the engine fixed to the plugin (roadmap D20);
-     * `model` / `speaker` choose the voice `<model>/<speaker>` (roadmap D19) and `speed` the rate. Returns what `tts()`
-     * returns.
+     * `model` / `speaker` choose the voice `<model>/<speaker>` (roadmap D19; a speaker name is resolved by the engine,
+     * a model without `speaker` gets its speaker for the language of the text, no model the engine's voice for that
+     * language) and `speed` the rate. Returns what `tts()` returns, a Promise; without the plugin the Promise is
+     * rejected with `PLUGIN_UNAVAILABLE` like every other speech call, instead of the `tts` initialization error.
      * zh-CN: `speech.speak(text, options?)`: engine 固定为本插件的宿主 `tts(text, options)` (路线图 D20); `model` / `speaker` 选择语音
-     * `<model>/<speaker>` (路线图 D19), `speed` 选择语速. 返回值与 `tts()` 相同.
+     * `<model>/<speaker>` (路线图 D19; 说话人名字由引擎解析, 只给 `model` 时取该模型适合文本语言的说话人, 不给 `model` 时取引擎在该语言下的语音),
+     * `speed` 选择语速. 返回值与 `tts()` 相同, 为 Promise; 缺少插件时该 Promise 与其他语音调用一样以 `PLUGIN_UNAVAILABLE` 拒绝, 而不是 `tts` 的
+     * 初始化错误.
      */
     @RhinoRuntimeFunctionInterface
     fun speak(runtime: ScriptRuntime, args: Array<out Any?>): Any = guarded {
         ensureArgumentsLengthInRange(args, 1..2) { a ->
             val text = SpeechCalls.text(a[0], "text")
-            val speak = SpeechScriptArguments.speak(SpeechCalls.json(a.getOrNull(1)))
+            val speak = SpeechScriptArguments.speak(SpeechCalls.json(a.getOrNull(1)), text)
             val options = speak.ttsOptions.deepCopy().apply {
                 addProperty(SpeechScriptArguments.ENGINE, SpeechPluginIds.OFFICIAL_PACKAGE_NAME)
-                speak.voice?.let { addProperty(SpeechScriptArguments.VOICE, it) }
                 speak.speed?.let { addProperty(SpeechScriptArguments.RATE, it) }
             }
-            tts.speech(text, options).result
+            if (!SpeechPluginHost.isTtsEngineInstalled(service.appContext, SpeechPluginIds.OFFICIAL_PACKAGE_NAME)) {
+                return@ensureArgumentsLengthInRange SpeechCalls.asyncOf(scriptRuntime) { throw SpeechPluginHost.missingPlugin(service.appContext) }
+            }
+            tts.speech(text, options, selection = speak.selection).result
         }
     }
 

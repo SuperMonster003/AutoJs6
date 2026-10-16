@@ -11,6 +11,7 @@ import org.autojs.autojs.core.plugin.speech.SpeechPluginException
 import org.autojs.autojs.core.plugin.speech.SpeechRecognizeRequest
 import org.autojs.autojs.core.plugin.speech.SpeechSynthesisRequest
 import org.autojs.autojs.core.plugin.speech.SpeechVadRequest
+import org.autojs.autojs.runtime.api.tts.TtsSelection
 import org.autojs.plugin.speech.api.SpeechContract
 import org.autojs.plugin.speech.api.SpeechErrorCodes
 import org.autojs.plugin.speech.api.SpeechLimits
@@ -175,16 +176,47 @@ class SpeechScriptArgumentsTest {
 
     @Test
     fun speakMapsTheVoiceAndPassesTtsOptionsThrough() {
-        val speak = SpeechScriptArguments.speak(json("""{"model":"tts.vits","speaker":3,"speed":0.8,"pitch":1.1,"queue":"add"}"""))
-        assertEquals("tts.vits/3", speak.voice)
+        val speak = SpeechScriptArguments.speak(json("""{"model":"tts.vits","speaker":3,"speed":0.8,"pitch":1.1,"queue":"add"}"""), "hello")
+        assertEquals(TtsSelection.ModelVoice("tts.vits", "3", "en"), speak.selection)
         assertEquals(0.8, speak.speed)
         assertEquals(setOf("pitch", "queue"), speak.ttsOptions.keySet())
-        assertEquals("tts.vits/0", SpeechScriptArguments.speak(json("""{"model":"tts.vits"}""")).voice)
-        assertNull(SpeechScriptArguments.speak(null).voice)
+        // Without a model the engine's voice follows the text unless the script names a language, which goes to tts.
+        // zh-CN: 不给模型时, 引擎语音随文本语言而定, 除非脚本给出语言 (该语言交给 tts).
+        assertEquals(TtsSelection.PreferredLanguage("en"), SpeechScriptArguments.speak(null, "hello").selection)
+        assertEquals(TtsSelection.PreferredLanguage("zh"), SpeechScriptArguments.speak(json("""{"pitch":1.1}"""), "\u4f60\u597d").selection)
+        assertNull(SpeechScriptArguments.speak(null, "42").selection)
+        assertNull(SpeechScriptArguments.speak(json("""{"language":"zh-CN"}"""), "hello").selection)
+        assertEquals(setOf("language"), SpeechScriptArguments.speak(json("""{"language":"zh-CN"}"""), "hello").ttsOptions.keySet())
         listOf("engine", "voice", "rate", "speechRate").forEach { key ->
-            refused { SpeechScriptArguments.speak(json("""{"$key":"x"}""")) }
+            refused { SpeechScriptArguments.speak(json("""{"$key":"x"}"""), "hello") }
         }
-        refused { SpeechScriptArguments.speak(json("""{"speaker":1}""")) }
+        refused { SpeechScriptArguments.speak(json("""{"speaker":1}"""), "hello") }
+        refused { SpeechScriptArguments.speak(json("""{"model":"tts.vits","speaker":"a/b"}"""), "hello") }
+    }
+
+    @Test
+    fun speakLeavesTheSpeakerToTheTextLanguageOrTheLanguageOption() {
+        // Without a speaker the engine picks the model's speaker for this language (Kokoro: 3 for Chinese, 0 for English).
+        // zh-CN: 未给说话人时, 引擎按此语言选择模型的说话人 (Kokoro: 中文为 3 号, 英文为 0 号).
+        val kokoro = "tts.kokoro.multi-lang.v1_1"
+        assertEquals(TtsSelection.ModelVoice(kokoro, null, "zh"), SpeechScriptArguments.speak(json("""{"model":"$kokoro"}"""), "\u4efb\u52a1 done").selection)
+        assertEquals(TtsSelection.ModelVoice(kokoro, null, "en"), SpeechScriptArguments.speak(json("""{"model":"$kokoro"}"""), "The task is done.").selection)
+        assertEquals(TtsSelection.ModelVoice(kokoro, null, null), SpeechScriptArguments.speak(json("""{"model":"$kokoro"}"""), "123 ...").selection)
+        val tagged = SpeechScriptArguments.speak(json("""{"model":"$kokoro","language":"en_US","pitch":1.2}"""), "\u4f60\u597d")
+        assertEquals(TtsSelection.ModelVoice(kokoro, null, "en-US"), tagged.selection)
+        assertEquals(setOf("pitch"), tagged.ttsOptions.keySet())
+        val named = SpeechScriptArguments.speak(json("""{"model":"tts.vits.icefall.zh-aishell3","speaker":"SSB0005"}"""), "hi").selection
+        assertEquals("SSB0005", (named as TtsSelection.ModelVoice).speaker)
+        refused { SpeechScriptArguments.speak(json("""{"model":"$kokoro","locale":"not a tag"}"""), "hi") }
+    }
+
+    @Test
+    fun textLanguageFollowsTheScripts() {
+        assertEquals("zh", SpeechScriptArguments.textLanguage("\u4f60\u597d, AutoJs6"))
+        assertEquals("en", SpeechScriptArguments.textLanguage("Hello, world"))
+        assertEquals("ja", SpeechScriptArguments.textLanguage("\u4eca\u65e5\u306f"))
+        assertEquals("ko", SpeechScriptArguments.textLanguage("\uc548\ub155"))
+        assertNull(SpeechScriptArguments.textLanguage("42!"))
     }
 
     @Test
