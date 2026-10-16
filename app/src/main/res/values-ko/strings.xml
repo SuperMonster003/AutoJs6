@@ -779,11 +779,8 @@
     <string name="shortcut_backup_icons_pending">완성이 필요한 아이콘: %1$d</string>
     <string name="shortcut_backup_ignore">다시 알리지 않기</string>
     <string name="shortcut_backup_imported">백업을 가져왔습니다. 복원할 바로가기를 선택하세요.</string>
-    <string name="shortcut_backup_later">나중에 처리</string>
     <string name="shortcut_backup_legacy">Android 8.0 미만에서는 삭제와 추가 확인을 감지할 수 없습니다. 수동 복원 후 홈 화면을 확인하세요.</string>
-    <string name="shortcut_backup_legacy_icons_prompt">기존 바로가기 설정을 저장했습니다. 완성이 필요한 아이콘: %1$d. 복원 전에 이미지를 선택하거나 나중에 바로가기 백업에서 완성하세요.</string>
     <string name="shortcut_backup_missing_file">스크립트가 없거나 읽을 수 없습니다: %1$s</string>
-    <string name="shortcut_backup_restore_prompt">복원 가능한 바로가기: %1$d. 시스템 기록이 초기화되었습니다. 저장된 항목을 확인하고 복원할 수 있습니다. 나중에 처리를 선택하면 백업을 유지하고 알림을 반복하지 않습니다.</string>
     <string name="shortcut_backup_scan">기존 바로가기 검색</string>
     <string name="shortcut_backup_scan_result">저장된 바로가기: %1$d; 아이콘 대기: %2$d</string>
     <string name="shortcut_backup_status_missing">누락됨</string>

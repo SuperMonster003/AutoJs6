@@ -777,11 +777,8 @@
     <string name="shortcut_backup_icons_pending">Icônes à compléter: %1$d</string>
     <string name="shortcut_backup_ignore">Ne plus rappeler</string>
     <string name="shortcut_backup_imported">Sauvegarde importée. Sélectionnez les raccourcis à restaurer.</string>
-    <string name="shortcut_backup_later">Plus tard</string>
     <string name="shortcut_backup_legacy">Avant Android 8.0, la suppression et la confirmation ne peuvent pas être détectées. Restaurez manuellement et vérifiez le bureau.</string>
-    <string name="shortcut_backup_legacy_icons_prompt">Les paramètres des raccourcis existants sont enregistrés. Icônes à compléter: %1$d. Choisissez des images avant la restauration, ou plus tard dans Sauvegarde des raccourcis.</string>
     <string name="shortcut_backup_missing_file">Script absent ou illisible: %1$s</string>
-    <string name="shortcut_backup_restore_prompt">Raccourcis récupérables: %1$d. Les données système ont été réinitialisées. Consultez les éléments à restaurer. Plus tard conserve la sauvegarde sans répéter ce rappel.</string>
     <string name="shortcut_backup_scan">Rechercher les raccourcis existants</string>
     <string name="shortcut_backup_scan_result">Raccourcis enregistrés: %1$d; icônes à compléter: %2$d</string>
     <string name="shortcut_backup_status_missing">Manquant</string>

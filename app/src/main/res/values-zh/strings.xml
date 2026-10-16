@@ -773,11 +773,8 @@
     <string name="shortcut_backup_icons_pending">待补全的图标: %1$d</string>
     <string name="shortcut_backup_ignore">不再提示</string>
     <string name="shortcut_backup_imported">备份已导入, 请选择要恢复的快捷方式</string>
-    <string name="shortcut_backup_later">稍后处理</string>
     <string name="shortcut_backup_legacy">Android 8.0 以下无法检测移除或确认添加结果. 请手动恢复并检查桌面.</string>
-    <string name="shortcut_backup_legacy_icons_prompt">已有快捷方式的配置已保存, 仍有 %1$d 项图标需要补选. 恢复前请选择图标, 也可以稍后在快捷方式备份页面补全.</string>
     <string name="shortcut_backup_missing_file">脚本不存在或无法读取: %1$s</string>
-    <string name="shortcut_backup_restore_prompt">可恢复的快捷方式: %1$d. 系统中的快捷方式记录已被重置, 可查看存档并选择恢复. 选择稍后处理将保留存档, 不再重复此提示.</string>
     <string name="shortcut_backup_scan">扫描已有快捷方式</string>
     <string name="shortcut_backup_scan_result">已存档的快捷方式: %1$d; 待补全的图标: %2$d</string>
     <string name="shortcut_backup_status_missing">已丢失</string>

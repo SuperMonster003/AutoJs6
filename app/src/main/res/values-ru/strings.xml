@@ -777,11 +777,8 @@
     <string name="shortcut_backup_icons_pending">Нужно выбрать значков: %1$d</string>
     <string name="shortcut_backup_ignore">Не напоминать</string>
     <string name="shortcut_backup_imported">Копия импортирована. Выберите ярлыки для восстановления.</string>
-    <string name="shortcut_backup_later">Позже</string>
     <string name="shortcut_backup_legacy">До Android 8.0 удаление и подтверждение добавления не определяются. Восстановите вручную и проверьте рабочий стол.</string>
-    <string name="shortcut_backup_legacy_icons_prompt">Настройки существующих ярлыков сохранены. Нужно выбрать значков: %1$d. Выберите изображения перед восстановлением или позже в разделе копии ярлыков.</string>
     <string name="shortcut_backup_missing_file">Скрипт отсутствует или недоступен: %1$s</string>
-    <string name="shortcut_backup_restore_prompt">Доступно для восстановления: %1$d. Системные записи сброшены. Проверьте сохраненные ярлыки. Позже сохраняет копию без повторного напоминания.</string>
     <string name="shortcut_backup_scan">Найти существующие ярлыки</string>
     <string name="shortcut_backup_scan_result">Сохранено ярлыков: %1$d; значков ожидает выбора: %2$d</string>
     <string name="shortcut_backup_status_missing">Отсутствует</string>

@@ -779,11 +779,8 @@
     <string name="shortcut_backup_icons_pending">أيقونات تحتاج إلى إكمال: %1$d</string>
     <string name="shortcut_backup_ignore">عدم التذكير</string>
     <string name="shortcut_backup_imported">تم استيراد النسخة. حدد الاختصارات لاستعادتها.</string>
-    <string name="shortcut_backup_later">لاحقا</string>
     <string name="shortcut_backup_legacy">قبل Android 8.0 لا يمكن اكتشاف الإزالة أو تأكيد الإضافة. استعد يدويا وتحقق من سطح المكتب.</string>
-    <string name="shortcut_backup_legacy_icons_prompt">حفظت إعدادات الاختصارات الموجودة. أيقونات تحتاج إلى إكمال: %1$d. اختر الصور قبل الاستعادة أو لاحقا من صفحة نسخ الاختصارات.</string>
     <string name="shortcut_backup_missing_file">البرنامج النصي مفقود أو غير قابل للقراءة: %1$s</string>
-    <string name="shortcut_backup_restore_prompt">الاختصارات القابلة للاستعادة: %1$d. أعيد ضبط سجلات النظام. راجع العناصر المحفوظة لاستعادتها. يحتفظ خيار لاحقا بالنسخة دون تكرار التنبيه.</string>
     <string name="shortcut_backup_scan">فحص الاختصارات الموجودة</string>
     <string name="shortcut_backup_scan_result">الاختصارات المحفوظة: %1$d; أيقونات تحتاج إلى إكمال: %2$d</string>
     <string name="shortcut_backup_status_missing">مفقود</string>
