@@ -150,6 +150,56 @@ def public_attrs(values_dir: Path) -> set[str]:
     return names
 
 
+def super_name(data: bytes) -> tuple[str | None, bool]:
+    """The superclass of a class file (dotted) and whether the class is public; None for java.lang.Object."""
+    if data[:4] != bytes.fromhex("cafebabe"):
+        raise SystemExit("not a class file")
+    count = int.from_bytes(data[8:10], "big")
+    offset = 10
+    utf8: dict[int, str] = {}
+    classes: dict[int, int] = {}
+    index = 1
+    sizes = {3: 4, 4: 4, 5: 8, 6: 8, 8: 2, 9: 4, 10: 4, 11: 4, 12: 4, 15: 3, 16: 2, 17: 4, 18: 4, 19: 2, 20: 2}
+    while index < count:
+        tag = data[offset]
+        offset += 1
+        if tag == 1:
+            length = int.from_bytes(data[offset:offset + 2], "big")
+            utf8[index] = data[offset + 2:offset + 2 + length].decode("utf-8", "replace")
+            offset += 2 + length
+        elif tag == 7:
+            classes[index] = int.from_bytes(data[offset:offset + 2], "big")
+            offset += 2
+        elif tag in sizes:
+            offset += sizes[tag]
+        else:
+            raise SystemExit(f"unknown constant pool tag {tag}")
+        index += 2 if tag in (5, 6) else 1
+    access = int.from_bytes(data[offset:offset + 2], "big")
+    super_index = int.from_bytes(data[offset + 4:offset + 6], "big")
+    name = utf8[classes[super_index]].replace("/", ".") if super_index else None
+    return name, bool(access & 0x0001)
+
+
+def read_supers(jar: zipfile.ZipFile, supers: dict[str, str | None], public: set[str]) -> None:
+    for entry in jar.namelist():
+        if entry.endswith(".class") and not entry.startswith("META-INF/"):
+            name = entry[: -len(".class")].replace("/", ".")
+            parent, is_public = super_name(jar.read(entry))
+            supers[name] = parent
+            if is_public:
+                public.add(name)
+
+
+def extends(name: str, ancestor: str, supers: dict[str, str | None]) -> bool:
+    current: str | None = name
+    while current is not None:
+        if current == ancestor:
+            return True
+        current = supers.get(current)
+    return False
+
+
 def class_names(jar: zipfile.ZipFile, prefixes: tuple[str, ...] | None = None) -> list[str]:
     names = []
     for entry in jar.namelist():
@@ -187,12 +237,29 @@ def generate(sdk: Path, gradle_home: Path) -> dict:
                     since.setdefault(name, {}).setdefault(attr, level)
         newest = values
     assert newest is not None
+    # Only public View subclasses own attributes, only ViewGroup subclasses own layout params.
+    supers: dict[str, str | None] = {}
+    public_classes: set[str] = set()
     with zipfile.ZipFile(sdk / "platforms" / SDK_LEVELS[-1][1] / "android.jar") as jar:
         android_classes = class_names(jar, ANDROID_PACKAGES)
+        read_supers(jar, supers, public_classes)
+    aar_data = []
+    for group, artifact, version in AARS:
+        aar = find_aar(gradle_home, group, artifact, version)
+        with zipfile.ZipFile(aar) as archive:
+            values_bytes = archive.read("res/values/values.xml") if "res/values/values.xml" in archive.namelist() else None
+            with zipfile.ZipFile(io.BytesIO(archive.read("classes.jar"))) as jar:
+                library_classes = class_names(jar)
+                read_supers(jar, supers, public_classes)
+        aar_data.append((f"{group}:{artifact}:{version}", values_bytes, library_classes))
+
+    def is_owner(name: str, kind: str) -> bool:
+        return name in public_classes and extends(name, "android.view.ViewGroup" if kind else "android.view.View", supers)
+
     by_simple = {name.rsplit(".", 1)[1]: name for name in android_classes}
     for styleable, members in sorted(since.items()):
         owner, kind = owner_of(styleable, by_simple)
-        if owner is None:
+        if owner is None or not is_owner(owner, kind):
             continue
         key = f"android:{styleable}"
         styleables[key] = dict(sorted(members.items()))
@@ -202,19 +269,15 @@ def generate(sdk: Path, gradle_home: Path) -> dict:
 
     # app: each library's own styleables for its own classes; their android: members reuse the SDK definitions.
     sources = []
-    for group, artifact, version in AARS:
-        aar = find_aar(gradle_home, group, artifact, version)
-        sources.append(f"{group}:{artifact}:{version}")
-        with zipfile.ZipFile(aar) as archive:
-            values = ValuesFile(archive.read("res/values/values.xml"), "app") if "res/values/values.xml" in archive.namelist() else None
-            with zipfile.ZipFile(io.BytesIO(archive.read("classes.jar"))) as jar:
-                library_classes = class_names(jar)
-        if values is None:
+    for source, values_bytes, library_classes in aar_data:
+        sources.append(source)
+        if values_bytes is None:
             continue
+        values = ValuesFile(values_bytes, "app")
         simple = {name.rsplit(".", 1)[1]: name for name in library_classes}
         for styleable, members in sorted(values.styleables.items()):
             owner, kind = owner_of(styleable, simple)
-            if owner is None:
+            if owner is None or not is_owner(owner, kind):
                 continue
             key = f"app:{styleable}"
             entry = styleables.setdefault(key, {})

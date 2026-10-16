@@ -61,6 +61,30 @@ class ValuesFileTest(unittest.TestCase):
         self.assertEqual(-1, gen.parse_int("-1"))
 
 
+def class_file(name: str, parent: str, public: bool = True) -> bytes:
+    """A minimal class file: magic, version, a four-entry constant pool, flags, this and super."""
+    def utf8(text: str) -> bytes:
+        data = text.encode()
+        return bytes([1]) + len(data).to_bytes(2, "big") + data
+    pool = utf8(name) + bytes([7]) + (1).to_bytes(2, "big") + utf8(parent) + bytes([7]) + (3).to_bytes(2, "big")
+    flags = 0x0021 if public else 0x0020
+    return bytes.fromhex("cafebabe") + bytes(4) + (5).to_bytes(2, "big") + pool + flags.to_bytes(2, "big") + (2).to_bytes(2, "big") + (4).to_bytes(2, "big")
+
+
+class SuperclassTest(unittest.TestCase):
+
+    def test_class_files_name_their_superclass_and_visibility(self):
+        self.assertEqual(("android.view.View", True), gen.super_name(class_file("a/B", "android/view/View")))
+        self.assertEqual(("android.view.View", False), gen.super_name(class_file("a/B", "android/view/View", public=False)))
+
+    def test_chains_reach_their_ancestors(self):
+        supers = {"m.Chip": "a.AppCompatCheckBox", "a.AppCompatCheckBox": "android.widget.CheckBox",
+                  "android.widget.CheckBox": "android.view.View", "android.view.View": "java.lang.Object", "java.lang.Object": None}
+        self.assertTrue(gen.extends("m.Chip", "android.view.View", supers))
+        self.assertFalse(gen.extends("m.Chip", "android.view.ViewGroup", supers))
+        self.assertFalse(gen.extends("m.Unknown", "android.view.View", supers))
+
+
 class OwnerTest(unittest.TestCase):
 
     def test_styleables_map_to_classes_and_layout_params(self):
