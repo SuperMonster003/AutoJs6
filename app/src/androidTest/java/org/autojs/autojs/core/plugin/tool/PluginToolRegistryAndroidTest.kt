@@ -34,7 +34,7 @@ class PluginToolRegistryAndroidTest {
         assertEquals(PluginAuthorizedState.USER_GRANTED, provider.trust)
         val catalog = requireNotNull(provider.catalog)
         assertEquals("faketool", catalog.shortName)
-        assertEquals(listOf("faketool_echo", "faketool_fail", "faketool_slow", "faketool_inspect", "faketool_emit", "faketool_last_cancel"), catalog.tools.map { it.fullName })
+        assertEquals(listOf("faketool_echo", "faketool_fail", "faketool_slow", "faketool_inspect", "faketool_emit", "faketool_last_cancel", "faketool_die"), catalog.tools.map { it.fullName })
         assertTrue(catalog.diagnostics.toString(), catalog.diagnostics.single().contains("(bad_schema) dropped: inputSchema"))
         val echo = catalog.tools.first()
         assertEquals(5000L, echo.timeoutMs)

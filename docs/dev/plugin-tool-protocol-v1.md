@@ -28,7 +28,7 @@ released it only grows by appended keys, values and transactions (D43).
 | Item | Value |
 | --- | --- |
 | Provider service | action `org.autojs.plugin.TOOL_PROVIDER` (`PluginToolContract.SERVICE_ACTION`), no category, exported and protected by `org.autojs.permission.PLUGIN` |
-| Info service | the plugin's existing `org.autojs.plugin.INFO` service; `getInfo()` of the provider returns the same `PluginInfo` |
+| Info service | required: the plugin's `org.autojs.plugin.INFO` service (`IPluginInfoProvider`); the plugin center lists, enables and authorizes plugins through it, so a provider without one never becomes usable. `getInfo()` of the provider returns the same `PluginInfo` |
 | Capability | `PluginInfo.capabilities[pluginToolContractVersion]` (Int, `PluginToolCapabilityKeys.CONTRACT_VERSION`), the highest version the provider speaks |
 | Wake | the plugin's `WakeActivity`, as for every plugin (the host wakes a stopped package before binding) |
 

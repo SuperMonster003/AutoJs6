@@ -24,5 +24,17 @@
             </intent-filter>
         </service>
 
+        <!-- The plugin center lists plugins by their INFO service; without it this provider could never be authorized. -->
+        <service
+            android:name=".service.FakePluginInfoService"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN">
+
+            <intent-filter>
+                <action android:name="org.autojs.plugin.INFO" />
+                <category android:name="plugin-tool-conformance" />
+            </intent-filter>
+        </service>
+
     </application>
 </manifest>

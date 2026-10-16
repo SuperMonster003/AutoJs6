@@ -107,6 +107,18 @@ class NodeBridgePluginToolsBridgeAndroidTest {
     }
 
     @Test
+    fun aProviderThatDiesFailsTheCallAtOnceAndTheNextCallBindsAgain() {
+        val startedAt = System.currentTimeMillis()
+        val died = call("invoke", JSONArray().put("faketool_die").put(JSONObject().put("afterMs", 200)), GRANTED)
+        val elapsed = System.currentTimeMillis() - startedAt
+        assertEquals(NodeBridgeErrorCategory.PROVIDER_FAILED, died.error!!.category)
+        assertTrue(died.error!!.message, died.error!!.message.contains("died during the call"))
+        assertTrue("the death is reported long before the 15 s tool limit ($elapsed ms)", elapsed < 8_000L)
+        val again = result(call("invoke", JSONArray().put("faketool_echo").put(JSONObject().put("text", "back")), GRANTED))
+        assertEquals("back", again.getJSONObject("result").getString("text"))
+    }
+
+    @Test
     fun aTimedOutCallIsCancelledAtTheProvider() {
         val invocationId = "timeout-${UUID.randomUUID()}"
         val timedOut = call("invoke", JSONArray().put("faketool_slow").put(JSONObject().put("sleepMs", 10_000)).put(JSONObject().put("invocationId", invocationId).put("timeoutMs", 400)), GRANTED)

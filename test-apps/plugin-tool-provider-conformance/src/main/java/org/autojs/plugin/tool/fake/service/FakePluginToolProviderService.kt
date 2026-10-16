@@ -27,8 +27,8 @@ import kotlin.concurrent.thread
  * Test-only provider of the plugin tool contract (docs/dev/plugin-tool-protocol-v1.md). Its catalog declares `faketool`
  * with `echo` (returns its text), `fail` (always fails), `slow` (waits until cancelled or `sleepMs` passed), `inspect`
  * (reports the bytes behind its image and file descriptors), `emit` (returns its text as the binary output `data`) and
- * `last_cancel` (returns the invocation id and reason of the last cancel it received) and `bad_schema` (an open schema
- * the host must drop). Nothing here is reachable from production code.
+ * `last_cancel` (returns the invocation id and reason of the last cancel it received), `die` (kills the provider process
+ * during the call) and `bad_schema` (an open schema the host must drop). Nothing here is reachable from production code.
  */
 class FakePluginToolProviderService : Service() {
 
@@ -36,21 +36,7 @@ class FakePluginToolProviderService : Service() {
 
     private val binder = object : IPluginToolProvider.Stub() {
 
-        override fun getInfo(): PluginInfo = PluginInfo(
-            name = "AutoJs6 Plugin Tool Conformance",
-            description = "Test-only plugin tool provider",
-            instruction = null,
-            author = "SuperMonster003",
-            collaborators = null,
-            versionName = "1.0.0",
-            versionCode = 1L,
-            versionDate = null,
-            id = "plugin-tool-conformance",
-            engine = "plugin-tool-conformance",
-            variant = "default",
-            supportedAbis = emptyArray(),
-            capabilities = Bundle().apply { putInt(PluginToolCapabilityKeys.CONTRACT_VERSION, PluginToolContract.CONTRACT_VERSION) },
-        )
+        override fun getInfo(): PluginInfo = pluginInfo()
 
         override fun getCatalog(request: Bundle?): Bundle = Bundle().apply {
             putInt(PluginToolCatalogKeys.CONTRACT_VERSION, PluginToolContract.CONTRACT_VERSION)
@@ -116,6 +102,10 @@ class FakePluginToolProviderService : Service() {
                     }, outputs)
                     outputs.forEach { runCatching { it.close() } }
                 }
+                "die" -> thread(name = "fake-tool-die") {
+                    Thread.sleep(arguments.optLong("afterMs", 300L))
+                    android.os.Process.killProcess(android.os.Process.myPid())
+                }
                 "last_cancel" -> thread(name = "fake-tool-last-cancel") {
                     callback.onResult(Bundle().apply {
                         putString(PluginToolResultKeys.INVOCATION_ID, invocationId)
@@ -148,6 +138,23 @@ class FakePluginToolProviderService : Service() {
     }
 
     companion object {
+
+        /** What both the provider and the `org.autojs.plugin.INFO` service ([FakePluginInfoService]) report. */
+        fun pluginInfo(): PluginInfo = PluginInfo(
+            name = "AutoJs6 Plugin Tool Conformance",
+            description = "Test-only plugin tool provider",
+            instruction = null,
+            author = "SuperMonster003",
+            collaborators = null,
+            versionName = "1.0.0",
+            versionCode = 1L,
+            versionDate = null,
+            id = "plugin-tool-conformance",
+            engine = "plugin-tool-conformance",
+            variant = "default",
+            supportedAbis = emptyArray(),
+            capabilities = Bundle().apply { putInt(PluginToolCapabilityKeys.CONTRACT_VERSION, PluginToolContract.CONTRACT_VERSION) },
+        )
 
         /** `<invocationId>:<reason>` of the last cancel this provider process received; the `last_cancel` tool returns it. */
         @Volatile
@@ -198,6 +205,13 @@ class FakePluginToolProviderService : Service() {
       "description": "Returns the invocation id and reason of the last cancel the provider received. Test-only tool.",
       "inputSchema": {"type": "object", "properties": {}, "additionalProperties": false},
       "risk": "readonly"
+    },
+    {
+      "name": "die",
+      "description": "Kills the provider process during the call, after afterMs. Test-only tool.",
+      "inputSchema": {"type": "object", "properties": {"afterMs": {"type": "integer", "minimum": 0, "maximum": 5000}}, "additionalProperties": false},
+      "risk": "readonly",
+      "timeoutMs": 15000
     },
     {
       "name": "bad_schema",
