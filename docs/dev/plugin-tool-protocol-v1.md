@@ -28,7 +28,7 @@ released it only grows by appended keys, values and transactions (D43).
 | Item | Value |
 | --- | --- |
 | Provider service | action `org.autojs.plugin.TOOL_PROVIDER` (`PluginToolContract.SERVICE_ACTION`), no category, exported and protected by `org.autojs.permission.PLUGIN` |
-| Info service | required: the plugin's `org.autojs.plugin.INFO` service (`IPluginInfoProvider`); the plugin center lists, enables and authorizes plugins through it, so a provider without one never becomes usable. `getInfo()` of the provider returns the same `PluginInfo` |
+| Info service | optional (MCP roadmap D60): a package that declares no other plugin service is listed, enabled and authorized in the plugin center through its provider (`getInfo()` of the provider, the string resource `plugin_description`), so a third-party plugin needs nothing but the provider service. A package with an `org.autojs.plugin.INFO` service or a family service keeps that endpoint in the plugin center, and `getInfo()` of its provider returns the same `PluginInfo` |
 | Capability | `PluginInfo.capabilities[pluginToolContractVersion]` (Int, `PluginToolCapabilityKeys.CONTRACT_VERSION`), the highest version the provider speaks |
 | Wake | the plugin's `WakeActivity`, as for every plugin (the host wakes a stopped package before binding) |
 
@@ -75,6 +75,32 @@ Every provider method answers quickly on its Binder thread. `invoke` only checks
 answers `PluginToolAcceptKeys` at once; the work runs on the plugin's own threads and ends with
 exactly one `onResult` or `onError`. Providers never throw for invalid input; they answer an error
 code.
+
+### Libraries and the provider base class
+
+Plugins outside the host repository depend on `io.github.supermonster003:autojs6-plugin-tool-api`, which brings
+`io.github.supermonster003:autojs6-common-plugin-api` (MCP roadmap D58, [plugin-api-maven-central.md](plugin-api-maven-central.md)).
+Both are built for Java 17 bytecode and the Kotlin 2.2 language and standard library, need `minSdk` 24 and
+`compileSdk` 36, and keep their classes through consumer R8 rules.
+
+`PluginToolProviderService` (MCP roadmap D59) is an optional base class that answers the Binder interface above: a
+subclass implements `createPluginInfo()`, `createCatalogJson()` and `onCall(PluginToolCall)`. The base class
+
+- adds `pluginToolContractVersion` to the capabilities, checks the contract version of every request, refuses tools
+  missing from the catalog with `UNKNOWN_TOOL` and duplicate invocation ids, and answers catalog errors thrown as
+  `PluginToolException`;
+- runs accepted calls on a pool of `workerThreads` daemon threads (default 4), forwards `cancel` as
+  `PluginToolCall.isCancelled`, `onCancel` listeners and, unless `interruptOnCancel` is false, a thread interrupt;
+- hands out the input descriptors by parameter name (`PluginToolInput`: `openStream`, `readBytes` with a limit) and the
+  directory outputs (`PluginToolDirectoryOutput`: `createDirectory`, `openFile` returning null for `EXISTS`, `existing`);
+- reports `PluginToolResult` (JSON, text, file outputs from a descriptor, a file or bytes; outputs the caller does not
+  want are dropped) after checking `MAX_RESULT_BYTES` and `MAX_DESCRIPTOR_BYTES`, or the failure: the code of a
+  `PluginToolException`, `INVALID_ARGUMENTS` for an `IllegalArgumentException`, `FAILED` otherwise and `CANCELLED`
+  for anything after a cancel;
+- closes every input descriptor, directory output stream and output descriptor before the single report.
+
+The pilots implement the interface directly and do not need to migrate. The third-party sample repository
+`AutoJs6-Third-Party-Tool-Sample` (D57, D61 - D64) shows the base class in Kotlin and in Java.
 
 ## Catalog
 
@@ -385,3 +411,7 @@ the `plugins` module); there is no broker and no grant in between (MCP roadmap D
 | Pilots YOLO, Image Quantization | done: `yolo_detect` (directory parameters, D49) and `imagequant_quantize` (binary output in the plugin's own process, D51 / D52) |
 | Directory outputs | done (D53 / D56: `IPluginToolOutputTree`, staging and commit in `PluginToolOutputTree`, fake tool `emit_tree`) |
 | Pilot Stack Archive | done: 3-Stack Archive 3.1.0 declares `archive_list`, `archive_read` and `archive_extract` (directory output, existing files kept, D54 - D56); `ArchivePluginToolRoundTripTest` runs them through the script API and the bridge |
+| Provider base class | done (D59: `PluginToolProviderService` and its helpers, `@JvmStatic` contract helpers; in-process androidTests of the module, a Java subclass included) |
+| Plugin center lists provider-only plugins | done (D60: `InstalledPluginRepository` queries `TOOL_PROVIDER` for packages without another plugin service) |
+| Maven Central publishing | configuration done and verified with the local staging repository (D58); the release needs the maintainer's account and key |
+| Third-party sample | `AutoJs6-Third-Party-Tool-Sample` 1.0.0: `ktsample` / `javasample` with `hash`, `thumbnail` and `split`, own signing key (USER_GRANTED), APKs in Auto.js-SDK-Plugins-Garage (D57, D61 - D64) |
