@@ -41,3 +41,24 @@ extra["mavenName"] = "AutoJs6 Common Plugin API"
 extra["mavenDescription"] = "Common Binder types of AutoJs6 plugins, such as PluginInfo."
 extra["mavenVersion"] = "1.0.0"
 apply(from = "../maven-central.gradle.kts")
+
+// Published to third parties (MCP roadmap D58): Java 17 bytecode and the Kotlin 2.2 language, API and standard library, so
+// that plugins built with JDK 17 or Kotlin 2.1 and newer compile against the library; the host modules keep their targets.
+android {
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+kotlin {
+    coreLibrariesVersion = "2.2.0"
+    compilerOptions {
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+}

@@ -10,8 +10,9 @@ of copying host modules.
 
 The Java packages stay `org.autojs.plugin.common.api` and `org.autojs.plugin.tool.api`. `autojs6-plugin-tool-api`
 depends on `autojs6-common-plugin-api` (API scope) and `kotlin-stdlib`. Consumers need `minSdk` 24 or higher and
-`compileSdk` 36 or higher; Kotlin consumers need a Kotlin compiler that reads the metadata of the host's Kotlin
-(2.4.0 for 1.0.0, so 2.3 or newer). Java consumers have no Kotlin requirement.
+`compileSdk` 36 or higher. Unlike the other host modules, both libraries are built for Java 17 bytecode and the Kotlin 2.2
+language, API and standard library, so plugins built with JDK 17 or Kotlin 2.1 and newer compile against them; Java
+consumers have no Kotlin requirement.
 
 ## Versions
 
