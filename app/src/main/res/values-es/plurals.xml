@@ -101,6 +101,18 @@
         <item quantity="other">Se omitirán %d bibliotecas de colores de tipo desconocido</item>
     </plurals>
 
+    <plurals name="text_rename_history_batches">
+        <item quantity="one">%d lote</item>
+        <item quantity="many">%d lotes</item>
+        <item quantity="other">%d lotes</item>
+    </plurals>
+
+    <plurals name="text_rename_history_items">
+        <item quantity="one">%d elemento</item>
+        <item quantity="many">%d elementos</item>
+        <item quantity="other">%d elementos</item>
+    </plurals>
+
     <plurals name="text_used_n_times">
         <item quantity="one">Usado %d vez</item>
         <item quantity="other">Usado %d veces</item>

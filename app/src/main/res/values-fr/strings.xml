@@ -2512,6 +2512,31 @@
     <string name="text_removed_from_favorites">Retirée des favoris</string>
     <string name="text_rename">Renommer</string>
     <string name="text_rename_color_library">Renommer la bibliothèque de couleurs</string>
+    <string name="text_rename_history">Historique des renommages</string>
+    <string name="text_rename_history_clear">Effacer l\'historique</string>
+    <string name="text_rename_history_clear_confirm">Effacer tout l\'historique des renommages? Ces lots ne pourront plus être annulés.</string>
+    <string name="text_rename_history_delete_confirm">Supprimer ce lot de l\'historique des renommages? Il ne pourra plus être annulé.</string>
+    <string name="text_rename_history_entry_not_renamed">Non renommé</string>
+    <string name="text_rename_history_entry_not_restored">Non restauré</string>
+    <string name="text_rename_history_entry_renamed">Renommé</string>
+    <string name="text_rename_history_entry_restored">Restauré</string>
+    <string name="text_rename_history_entry_stale">Modifié ensuite</string>
+    <string name="text_rename_history_filter_source">Source</string>
+    <string name="text_rename_history_filter_state">État</string>
+    <string name="text_rename_history_more_entries" tools:ignore="TypographyEllipsis">... et %1$d de plus</string>
+    <string name="text_rename_history_retention">Lots conservés par source</string>
+    <string name="text_rename_history_retention_hint">Les scripts et chaque plugin conservent ce nombre de lots les plus récents. Les lots plus anciens sont supprimés et ne peuvent plus être annulés.</string>
+    <string name="text_rename_history_source_explorer">Gestionnaire de fichiers</string>
+    <string name="text_rename_history_source_script">Script</string>
+    <string name="text_rename_history_state_committed">Terminé</string>
+    <string name="text_rename_history_state_partial">Terminé en partie</string>
+    <string name="text_rename_history_state_recovery_required">Annulation incomplète</string>
+    <string name="text_rename_history_state_rejected">Rien renommé</string>
+    <string name="text_rename_history_state_restored">Annulé</string>
+    <string name="text_rename_history_undo">Annuler</string>
+    <string name="text_rename_history_undo_incomplete">Certains éléments n\'ont pas pu être restaurés, voir les détails</string>
+    <string name="text_rename_history_undo_unavailable">Ce lot ne figure plus dans l\'historique des renommages</string>
+    <string name="text_rename_history_undoing" tools:ignore="TypographyEllipsis">Annulation...</string>
     <string name="text_reorder_color_libraries">Réorganiser les bibliothèques de couleurs</string>
     <string name="text_reorder_color_libraries_hint">Appuyez longuement sur l\'une de vos bibliothèques de couleurs et faites-la glisser vers une nouvelle position</string>
     <string name="text_reorder_colors">Réorganiser les couleurs</string>

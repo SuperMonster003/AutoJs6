@@ -272,6 +272,30 @@ class BatchRenameScriptServiceTest {
     }
 
     @Test
+    fun `deleteHistory and clearHistory remove batches of every source`() = runBlocking {
+        val ids = (1..2).map { n ->
+            file("h$n.txt")
+            val plan = service.plan(listOf(File(root, "h$n.txt")), options("{\"search\": \"h\", \"replace\": \"k\"}"))
+            service.apply(plan["id"] as String, null, null, null)["batchId"] as String
+        }
+        val moved = file("x.txt")
+        val explorer = executor.execute(
+            listOf(BatchRenameOperation(moved, "y.txt", false, moved.lastModified(), moved.length(), false)),
+            BatchRenameSource.EXPLORER,
+            pluginUid = 10_500,
+        ).batchId
+        assertEquals(listOf(explorer) + ids.reversed(), service.history(20).map { it["batchId"] })
+        assertTrue(service.deleteHistory(ids.first()))
+        assertFalse(service.deleteHistory(ids.first()))
+        assertEquals(1, service.clearHistory(BatchRenameSource.EXPLORER))
+        assertEquals(listOf(ids.last()), service.history(20).map { it["batchId"] })
+        assertEquals(1, service.clearHistory(null))
+        assertEquals(emptyList<Any>(), service.history(20))
+        // The renamed files stay as they are; only the history is gone. zh-CN: 已改名的文件保持不变, 只删除了历史.
+        assertEquals(listOf("k1.txt", "k2.txt", "y.txt"), names())
+    }
+
+    @Test
     fun `a planner that does not match the request is INTERNAL`() {
         file("a.txt")
         val broken = BatchRenameScriptService(executor = { executor }, planner = { BatchRenamePlanAnswer(false, emptyList(), emptyMap()) })

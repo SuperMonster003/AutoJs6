@@ -177,6 +177,24 @@
         <item quantity="other">سيتم تخطي %d مكتبة ألوان من نوع غير معروف</item>
     </plurals>
 
+    <plurals name="text_rename_history_batches">
+        <item quantity="zero">%d دفعة</item>
+        <item quantity="one">دفعة واحدة</item>
+        <item quantity="two">دفعتان</item>
+        <item quantity="few">%d دفعات</item>
+        <item quantity="many">%d دفعة</item>
+        <item quantity="other">%d دفعة</item>
+    </plurals>
+
+    <plurals name="text_rename_history_items">
+        <item quantity="zero">%d عنصر</item>
+        <item quantity="one">عنصر واحد</item>
+        <item quantity="two">عنصران</item>
+        <item quantity="few">%d عناصر</item>
+        <item quantity="many">%d عنصرا</item>
+        <item quantity="other">%d عنصر</item>
+    </plurals>
+
     <plurals name="text_used_n_times">
         <item quantity="zero">استخدم %d مرة</item>
         <item quantity="one">استخدم مرة واحدة</item>

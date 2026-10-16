@@ -15,7 +15,7 @@ class ExplorerRenameDialogMenuTest {
     @Test
     fun withoutAnyRenameDialogActionTheMenuOffersTheBatchRenameGuidance() {
         assertEquals(
-            listOf(ExplorerRenameDialogMenuEntry.BatchRenameGuidance),
+            listOf(ExplorerRenameDialogMenuEntry.BatchRenameGuidance, ExplorerRenameDialogMenuEntry.RenameHistory),
             ExplorerRenameDialogMenu.entries(ExplorerSurface.MAIN_FILES, emptyList<String>()),
         )
     }
@@ -26,17 +26,18 @@ class ExplorerRenameDialogMenuTest {
             listOf(
                 ExplorerRenameDialogMenuEntry.PluginAction("batch-rename-single"),
                 ExplorerRenameDialogMenuEntry.PluginAction("other-rename"),
+                ExplorerRenameDialogMenuEntry.RenameHistory,
             ),
             ExplorerRenameDialogMenu.entries(ExplorerSurface.MAIN_FILES, listOf("batch-rename-single", "other-rename")),
         )
     }
 
     @Test
-    fun theMenuKeepsTheTitleOptionsLimitOfMaterialDialogs() {
+    fun theMenuKeepsTheTitleOptionsLimitOfMaterialDialogsWithTheRenameHistoryLast() {
         val actions = (1..12).map { "action-$it" }
         val entries = ExplorerRenameDialogMenu.entries(ExplorerSurface.MAIN_FILES, actions)
         assertEquals(10, ExplorerRenameDialogMenu.MAX_ENTRIES)
-        assertEquals(actions.take(10).map { ExplorerRenameDialogMenuEntry.PluginAction(it) }, entries)
+        assertEquals(actions.take(9).map { ExplorerRenameDialogMenuEntry.PluginAction(it) } + ExplorerRenameDialogMenuEntry.RenameHistory, entries)
     }
 
     @Test

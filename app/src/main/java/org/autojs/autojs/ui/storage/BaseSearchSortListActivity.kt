@@ -122,11 +122,12 @@ abstract class BaseSearchSortListActivity<VB : ViewBinding, T> : BaseActivity() 
 
     protected open fun applyFilterAndSort() {
         val q = queryText.trim()
+        val candidates = allItems.filter { matchesFilters(it) }
         val filtered = if (q.isBlank()) {
-            allItems
+            candidates
         } else {
             val qLower = q.lowercase(Locale.getDefault())
-            allItems.filter { matchesQuery(it, qLower) }
+            candidates.filter { matchesQuery(it, qLower) }
         }
 
         val sorted = sortItems(filtered, internalSortMode)
@@ -270,6 +271,12 @@ abstract class BaseSearchSortListActivity<VB : ViewBinding, T> : BaseActivity() 
      * zh-CN: 查询匹配规则.
      */
     protected abstract fun matchesQuery(item: T, qLower: String): Boolean
+
+    /**
+     * Filters other than the search query, such as a choice in the menu; every item passes by default.
+     * zh-CN: 搜索词以外的筛选条件 (例如菜单中的选择); 默认全部通过.
+     */
+    protected open fun matchesFilters(item: T): Boolean = true
 
     /**
      * Sort items.

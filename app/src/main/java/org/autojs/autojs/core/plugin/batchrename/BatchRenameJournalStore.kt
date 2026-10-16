@@ -136,17 +136,20 @@ class BatchRenamePathMap(rules: Map<String, String>) {
 
 /**
  * Persists rename batches as one JSON file each (plugin roadmap D21): `<directory>/<batchId>.json`. Scripts and every
- * plugin keep at most [maxBatches] each, the oldest evicted first; unreadable files are skipped and logged. Batch ids
- * are random and not guessable, so a plugin cannot address batches it did not create without listing them through its
- * session.
+ * plugin keep at most the retention each (20, 50 or 100, set on the rename history page, plugin roadmap D39), the oldest
+ * evicted first; unreadable files are skipped and logged. Batch ids are random and not guessable, so a plugin cannot
+ * address batches it did not create without listing them through its session.
  *
- * zh-CN: 把改名批次各存为一个 JSON 文件 (插件路线图 D21). 脚本与每个插件各至多保留 [maxBatches] 批, 最旧的先淘汰; 无法读取的
- * 文件被跳过并记录日志. 批次 id 随机且不可猜测, 插件不经会话列出就无法定位不是它创建的批次.
+ * zh-CN: 把改名批次各存为一个 JSON 文件 (插件路线图 D21). 脚本与每个插件各至多保留设定的批数 (20, 50 或 100, 在重命名历史页面中
+ * 设置, 插件路线图 D39), 最旧的先淘汰; 无法读取的文件被跳过并记录日志. 批次 id 随机且不可猜测, 插件不经会话列出就无法定位不是它
+ * 创建的批次.
  */
 class BatchRenameJournalStore(
     private val directory: File,
     private val maxBatches: Int = MAX_BATCHES,
     private val log: (String) -> Unit = { message -> runCatching { Log.w(TAG, message) } },
+    /** The current retention; [maxBatches] when absent. zh-CN: 当前的保留批数; 缺省时为 [maxBatches]. */
+    private val retention: (() -> Int)? = null,
 ) {
     private val lock = Any()
     private val random = SecureRandom()
@@ -181,14 +184,32 @@ class BatchRenameJournalStore(
             .sortedWith(compareByDescending<BatchRenameJournalRecord> { it.createdAt }.thenByDescending { it.batchId })
     }
 
-    /** Keeps the newest [maxBatches] of scripts and of every plugin. zh-CN: 脚本与每个插件各保留最新的 [maxBatches] 批. */
+    /** Deletes one batch; false when it is not kept. zh-CN: 删除一个批次; 未保存该批次时为 false. */
+    fun delete(batchId: String): Boolean = synchronized(lock) {
+        isValidBatchId(batchId) && fileOf(batchId).delete()
+    }
+
+    /**
+     * Deletes every batch, or those of [source]; answers how many were deleted (plugin roadmap D39).
+     * zh-CN: 删除全部批次或 [source] 的批次; 返回删除的数量 (插件路线图 D39).
+     */
+    fun clear(source: BatchRenameSource? = null): Int = synchronized(lock) {
+        directory.listFiles { file -> file.isFile && file.name.endsWith(".json") }.orEmpty()
+            .count { file -> (source == null || read(file)?.source == source) && file.delete() }
+    }
+
+    /** Applies a lowered retention at once. zh-CN: 立即应用调低后的保留批数. */
+    fun trim() = synchronized(lock) { evict() }
+
+    /** Keeps the newest batches of scripts and of every plugin. zh-CN: 脚本与每个插件各保留最新的若干批. */
     private fun evict() {
+        val keep = retention?.invoke() ?: maxBatches
         directory.listFiles { file -> file.isFile && file.name.endsWith(".json") }.orEmpty()
             .mapNotNull { file -> read(file)?.let { it to file } }
             .groupBy { (record, _) -> record.source to record.pluginUid }
             .values.forEach { owned ->
                 owned.sortedWith(compareByDescending<Pair<BatchRenameJournalRecord, File>> { it.first.createdAt }.thenByDescending { it.first.batchId })
-                    .drop(maxBatches)
+                    .drop(keep)
                     .forEach { (_, file) -> file.delete() }
             }
     }
@@ -206,8 +227,11 @@ class BatchRenameJournalStore(
         private const val TAG = "BatchRenameJournal"
         private const val FORMAT = 1
 
-        /** Batches kept for scripts and for each plugin (Explorer Action `MAX_RENAME_BATCH_RESULTS`). */
+        /** Batches kept for scripts and for each plugin by default (Explorer Action `MAX_RENAME_BATCH_RESULTS`). */
         const val MAX_BATCHES = 20
+
+        /** Retention choices of the rename history page (plugin roadmap D39). zh-CN: 重命名历史页面可选的保留批数. */
+        val RETENTION_CHOICES: List<Int> = listOf(20, 50, 100)
 
         private val BATCH_ID = Regex("b_[0-9a-f]{32}")
 

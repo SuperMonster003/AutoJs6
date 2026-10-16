@@ -2513,6 +2513,31 @@
     <string name="text_removed_from_favorites">お気に入りから削除しました</string>
     <string name="text_rename">名前の変更</string>
     <string name="text_rename_color_library">カラーライブラリの名前を変更</string>
+    <string name="text_rename_history">名前の変更履歴</string>
+    <string name="text_rename_history_clear">履歴を消去</string>
+    <string name="text_rename_history_clear_confirm">名前の変更履歴をすべて消去しますか? 消去後はこれらの変更を元に戻せません.</string>
+    <string name="text_rename_history_delete_confirm">この変更を履歴から削除しますか? 削除後は元に戻せません.</string>
+    <string name="text_rename_history_entry_not_renamed">未変更</string>
+    <string name="text_rename_history_entry_not_restored">未復元</string>
+    <string name="text_rename_history_entry_renamed">変更済み</string>
+    <string name="text_rename_history_entry_restored">復元済み</string>
+    <string name="text_rename_history_entry_stale">その後に変更済み</string>
+    <string name="text_rename_history_filter_source">実行元</string>
+    <string name="text_rename_history_filter_state">状態</string>
+    <string name="text_rename_history_more_entries" tools:ignore="TypographyEllipsis">... ほか %1$d 件</string>
+    <string name="text_rename_history_retention">実行元ごとの保存件数</string>
+    <string name="text_rename_history_retention_hint">スクリプトと各プラグインは, それぞれ最新のこの件数まで保存します. それより古いものは削除され, 元に戻せなくなります.</string>
+    <string name="text_rename_history_source_explorer">ファイルマネージャー</string>
+    <string name="text_rename_history_source_script">スクリプト</string>
+    <string name="text_rename_history_state_committed">完了</string>
+    <string name="text_rename_history_state_partial">一部完了</string>
+    <string name="text_rename_history_state_recovery_required">取り消し未完了</string>
+    <string name="text_rename_history_state_rejected">変更なし</string>
+    <string name="text_rename_history_state_restored">取り消し済み</string>
+    <string name="text_rename_history_undo">元に戻す</string>
+    <string name="text_rename_history_undo_incomplete">一部の項目を復元できませんでした. 詳細を確認してください</string>
+    <string name="text_rename_history_undo_unavailable">この変更はすでに履歴にありません</string>
+    <string name="text_rename_history_undoing" tools:ignore="TypographyEllipsis">元に戻しています...</string>
     <string name="text_reorder_color_libraries">カラーライブラリの並べ替え</string>
     <string name="text_reorder_color_libraries_hint">ユーザーカラーライブラリを長押ししてドラッグすると位置を変更できます</string>
     <string name="text_reorder_colors">色の並べ替え</string>

@@ -235,6 +235,37 @@ class BatchRenameExecutorTest {
         )
     }
 
+    @Test
+    fun `the retention follows the setting and trim applies a lowered one at once`() {
+        var keep = 3
+        val store = BatchRenameJournalStore(File(folder.root, "retention"), log = { logged += it }, retention = { keep })
+        val kept = BatchRenameExecutor(store, environment, clock = { counter++ })
+        val ids = (1..4).map { kept.execute(listOf(op(file("r$it"), "s$it")), BatchRenameSource.SCRIPT).batchId }
+        assertEquals(ids.takeLast(3).reversed(), store.list().map { it.batchId })
+        // A lowered setting waits for the next save or for trim. zh-CN: 调低的设置等到下一次保存或 trim 时生效.
+        keep = 2
+        assertEquals(3, store.list().size)
+        store.trim()
+        assertEquals(ids.takeLast(2).reversed(), store.list().map { it.batchId })
+    }
+
+    @Test
+    fun `delete and clear remove batches of any source`() {
+        val store = BatchRenameJournalStore(File(folder.root, "cleared"), log = { logged += it })
+        val cleared = BatchRenameExecutor(store, environment, clock = { counter++ })
+        val script = (1..2).map { cleared.execute(listOf(op(file("c$it"), "d$it")), BatchRenameSource.SCRIPT).batchId }
+        val explorer = (1..2).map { cleared.execute(listOf(op(file("e$it"), "f$it")), BatchRenameSource.EXPLORER, pluginUid = 10_400).batchId }
+        assertEquals(explorer.reversed() + script.reversed(), store.list().map { it.batchId })
+        assertTrue(store.delete(script.first()))
+        assertFalse(store.delete(script.first()))
+        assertFalse(store.delete("../cleared"))
+        assertEquals(2, store.clear(BatchRenameSource.EXPLORER))
+        assertEquals(listOf(script.last()), store.list().map { it.batchId })
+        assertEquals(1, store.clear())
+        assertEquals(emptyList<BatchRenameJournalRecord>(), store.list())
+        assertEquals(0, store.clear())
+    }
+
     private var counter = 1_000L
 
     private class FakeEnvironment : BatchRenameEnvironment {

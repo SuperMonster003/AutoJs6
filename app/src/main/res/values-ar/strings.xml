@@ -2514,6 +2514,31 @@
     <string name="text_removed_from_favorites">تمت الإزالة من المفضلة</string>
     <string name="text_rename">إعادة تسمية</string>
     <string name="text_rename_color_library">إعادة تسمية مكتبة الألوان</string>
+    <string name="text_rename_history">سجل إعادة التسمية</string>
+    <string name="text_rename_history_clear">مسح السجل</string>
+    <string name="text_rename_history_clear_confirm">مسح سجل إعادة التسمية بالكامل? لن يكون من الممكن التراجع عن هذه الدفعات بعد ذلك.</string>
+    <string name="text_rename_history_delete_confirm">حذف هذه الدفعة من سجل إعادة التسمية? لن يكون من الممكن التراجع عنها بعد ذلك.</string>
+    <string name="text_rename_history_entry_not_renamed">لم تتم إعادة التسمية</string>
+    <string name="text_rename_history_entry_not_restored">لم تتم الاستعادة</string>
+    <string name="text_rename_history_entry_renamed">تمت إعادة التسمية</string>
+    <string name="text_rename_history_entry_restored">تمت الاستعادة</string>
+    <string name="text_rename_history_entry_stale">تم تغييره لاحقا</string>
+    <string name="text_rename_history_filter_source">المصدر</string>
+    <string name="text_rename_history_filter_state">الحالة</string>
+    <string name="text_rename_history_more_entries" tools:ignore="TypographyEllipsis">... و %1$d أخرى</string>
+    <string name="text_rename_history_retention">عدد الدفعات المحفوظة لكل مصدر</string>
+    <string name="text_rename_history_retention_hint">تحتفظ البرامج النصية وكل إضافة بهذا العدد من أحدث الدفعات. يتم حذف الدفعات الأقدم ولا يمكن التراجع عنها بعد ذلك.</string>
+    <string name="text_rename_history_source_explorer">مدير الملفات</string>
+    <string name="text_rename_history_source_script">برنامج نصي</string>
+    <string name="text_rename_history_state_committed">مكتمل</string>
+    <string name="text_rename_history_state_partial">مكتمل جزئيا</string>
+    <string name="text_rename_history_state_recovery_required">التراجع غير مكتمل</string>
+    <string name="text_rename_history_state_rejected">لم تتم إعادة تسمية أي شيء</string>
+    <string name="text_rename_history_state_restored">تم التراجع</string>
+    <string name="text_rename_history_undo">تراجع</string>
+    <string name="text_rename_history_undo_incomplete">تعذرت استعادة بعض العناصر, راجع التفاصيل</string>
+    <string name="text_rename_history_undo_unavailable">لم تعد هذه الدفعة موجودة في سجل إعادة التسمية</string>
+    <string name="text_rename_history_undoing" tools:ignore="TypographyEllipsis">جار التراجع...</string>
     <string name="text_reorder_color_libraries">إعادة ترتيب مكتبات الألوان</string>
     <string name="text_reorder_color_libraries_hint">اضغط مطولا على إحدى مكتبات ألوانك واسحبها إلى موضع جديد</string>
     <string name="text_reorder_colors">إعادة ترتيب الألوان</string>

@@ -22,6 +22,7 @@ class BatchRenameContractTest {
         assertEquals("org.autojs.plugin.BATCH_RENAME", BatchRenamePluginActions.BATCH_RENAME)
         assertEquals("batch-rename", BatchRenamePluginActions.SERVICE_CATEGORY)
         assertEquals("org.autojs.permission.PLUGIN", BatchRenamePluginActions.PLUGIN_PERMISSION)
+        assertEquals("org.autojs.autojs6.action.RENAME_HISTORY", BatchRenamePluginActions.RENAME_HISTORY)
         assertEquals("batch-rename", BatchRenamePluginIds.ID)
         assertEquals("batch-rename", BatchRenamePluginIds.ENGINE)
         assertEquals("default", BatchRenamePluginIds.VARIANT_DEFAULT)

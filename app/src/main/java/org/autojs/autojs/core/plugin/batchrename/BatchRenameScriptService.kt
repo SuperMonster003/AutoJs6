@@ -193,7 +193,7 @@ class BatchRenameScriptService(
     fun undo(batchId: String): Map<String, Any?> {
         val executor = executor()
         val stored = executor.journal.load(batchId)
-            ?: batchRenameFailure(BatchRenameScriptCodes.UNDO_UNAVAILABLE, "no rename batch $batchId is kept (the journal keeps the newest ${BatchRenameJournalStore.MAX_BATCHES})")
+            ?: batchRenameFailure(BatchRenameScriptCodes.UNDO_UNAVAILABLE, "no rename batch $batchId is kept (the journal keeps the newest batches of each source)")
         if (!stored.undoable) batchRenameFailure(BatchRenameScriptCodes.UNDO_UNAVAILABLE, "rename batch $batchId has nothing left to undo")
         var before: BatchRenameJournalRecord? = null
         val after = try {
@@ -241,6 +241,20 @@ class BatchRenameScriptService(
             "undoable" to record.undoable,
         )
     }
+
+    /**
+     * `deleteHistory(result | batchId)` (plugin roadmap D39): forgets one batch of any source, including the file
+     * manager's; it can no longer be undone. False when no such batch is kept.
+     * zh-CN: `deleteHistory(result | batchId)` (插件路线图 D39): 删除任一来源 (包括文件管理器) 的一个批次, 之后无法再撤销. 未保存该批次
+     * 时为 false.
+     */
+    fun deleteHistory(batchId: String): Boolean = executor().journal.delete(batchId)
+
+    /**
+     * `clearHistory({ source })` (plugin roadmap D39): forgets every batch, or those of one source; answers how many.
+     * zh-CN: `clearHistory({ source })` (插件路线图 D39): 删除全部批次或某个来源的批次; 返回删除的数量.
+     */
+    fun clearHistory(source: BatchRenameSource?): Int = executor().journal.clear(source)
 
     private suspend fun ask(request: BatchRenamePlanRequest): BatchRenamePlanAnswer {
         val answer = planner(request)

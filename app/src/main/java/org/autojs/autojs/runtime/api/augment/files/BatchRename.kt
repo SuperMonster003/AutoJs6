@@ -9,7 +9,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameHostServices
-import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalStore
 import org.autojs.autojs.core.plugin.batchrename.BatchRenamePluginHost
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameRegExp
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameScriptArguments
@@ -82,6 +81,8 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
         ::importPresetsAsync.name,
         ::preview.name,
         ::previewAsync.name,
+        ::deleteHistory.name,
+        ::clearHistory.name,
     )
 
     /** `BatchRenameError` instances reach the script unwrapped. zh-CN: `BatchRenameError` 实例不经包装到达脚本. */
@@ -173,7 +174,7 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
     @RhinoRuntimeFunctionInterface
     fun history(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
         ensureArgumentsAtMost(args, 1) { a ->
-            val limit = BatchRenameScriptArguments.historyLimit(json(a.getOrNull(0)), BatchRenameJournalStore.MAX_BATCHES)
+            val limit = BatchRenameScriptArguments.historyLimit(json(a.getOrNull(0)), Int.MAX_VALUE)
             sync { service.history(limit) }
         }
     }
@@ -241,6 +242,24 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
                 val run: suspend (ProgressBinder) -> Any? = { work() }
                 run
             }
+        }
+    }
+
+    /** `deleteHistory(result | batchId)` (plugin roadmap D39). zh-CN: 删除一个批次的历史 (插件路线图 D39). */
+    @RhinoRuntimeFunctionInterface
+    fun deleteHistory(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
+        ensureArgumentsOnlyOne(args) { target ->
+            val batchId = BatchRenameScriptArguments.historyBatchId(json(target))
+            sync { service.deleteHistory(batchId) }
+        }
+    }
+
+    /** `clearHistory({ source })` (plugin roadmap D39). zh-CN: 清空全部或某个来源的历史 (插件路线图 D39). */
+    @RhinoRuntimeFunctionInterface
+    fun clearHistory(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
+        ensureArgumentsAtMost(args, 1) { a ->
+            val source = BatchRenameScriptArguments.historySource(json(a.getOrNull(0)))
+            sync { service.clearHistory(source) }
         }
     }
 
@@ -439,7 +458,7 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
     private companion object {
         val PASS_THROUGH = setOf(
             "plan", "applyPlan", "undo", "history", "isAvailable", "planAsync", "applyAsync", "undoAsync",
-            "presets", "presetsAsync", "importPresets", "importPresetsAsync", "preview", "previewAsync",
+            "presets", "presetsAsync", "importPresets", "importPresetsAsync", "preview", "previewAsync", "deleteHistory", "clearHistory",
         )
     }
 }

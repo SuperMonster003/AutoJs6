@@ -145,6 +145,7 @@
     <string name="key_app_language_zh_hant_tw" translatable="false">key_$_app_language_zh_tw</string>
     <string name="key_auto_check_for_updates" translatable="false">key_$_auto_check_for_updates</string>
     <string name="key_auto_night_mode_enabled" translatable="false">key_$_auto_night_mode_enabled</string>
+    <string name="key_batch_rename_history_retention" translatable="false">key_$_batch_rename_history_retention</string>
     <string name="key_change_working_dir" translatable="false">key_$_change_working_dir</string>
     <string name="key_clear_explorer_playback_history" translatable="false">key_$_clear_explorer_playback_history</string>
     <string name="key_check_for_updates" translatable="false">key_$_check_for_updates</string>

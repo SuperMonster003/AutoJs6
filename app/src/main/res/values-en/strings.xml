@@ -2509,6 +2509,31 @@
     <string name="text_removed_from_favorites">Removed from favorites</string>
     <string name="text_rename">Rename</string>
     <string name="text_rename_color_library">Rename color library</string>
+    <string name="text_rename_history">Rename history</string>
+    <string name="text_rename_history_clear">Clear history</string>
+    <string name="text_rename_history_clear_confirm">Clear the whole rename history? None of these batches can be undone afterwards.</string>
+    <string name="text_rename_history_delete_confirm">Delete this batch from the rename history? It can no longer be undone afterwards.</string>
+    <string name="text_rename_history_entry_not_renamed">Not renamed</string>
+    <string name="text_rename_history_entry_not_restored">Not restored</string>
+    <string name="text_rename_history_entry_renamed">Renamed</string>
+    <string name="text_rename_history_entry_restored">Restored</string>
+    <string name="text_rename_history_entry_stale">Changed afterwards</string>
+    <string name="text_rename_history_filter_source">Source</string>
+    <string name="text_rename_history_filter_state">State</string>
+    <string name="text_rename_history_more_entries" tools:ignore="TypographyEllipsis">... and %1$d more</string>
+    <string name="text_rename_history_retention">Batches kept per source</string>
+    <string name="text_rename_history_retention_hint">Scripts and each plugin keep this many of their newest batches. Older batches are deleted and can no longer be undone.</string>
+    <string name="text_rename_history_source_explorer">File manager</string>
+    <string name="text_rename_history_source_script">Script</string>
+    <string name="text_rename_history_state_committed">Completed</string>
+    <string name="text_rename_history_state_partial">Partly completed</string>
+    <string name="text_rename_history_state_recovery_required">Undo incomplete</string>
+    <string name="text_rename_history_state_rejected">Nothing renamed</string>
+    <string name="text_rename_history_state_restored">Undone</string>
+    <string name="text_rename_history_undo">Undo</string>
+    <string name="text_rename_history_undo_incomplete">Some items could not be restored, see the details</string>
+    <string name="text_rename_history_undo_unavailable">This batch is no longer in the rename history</string>
+    <string name="text_rename_history_undoing" tools:ignore="TypographyEllipsis">Undoing...</string>
     <string name="text_reorder_color_libraries">Reorder color libraries</string>
     <string name="text_reorder_color_libraries_hint">Long press one of your color libraries and drag it to a new position</string>
     <string name="text_reorder_colors">Reorder colors</string>

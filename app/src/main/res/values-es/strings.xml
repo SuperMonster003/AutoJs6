@@ -2512,6 +2512,31 @@
     <string name="text_removed_from_favorites">Quitado de favoritos</string>
     <string name="text_rename">Cambiar el nombre de</string>
     <string name="text_rename_color_library">Cambiar el nombre de la biblioteca de colores</string>
+    <string name="text_rename_history">Historial de cambios de nombre</string>
+    <string name="text_rename_history_clear">Borrar historial</string>
+    <string name="text_rename_history_clear_confirm">Borrar todo el historial de cambios de nombre? Ya no se podrá deshacer ninguno de estos lotes.</string>
+    <string name="text_rename_history_delete_confirm">Eliminar este lote del historial de cambios de nombre? Después ya no se podrá deshacer.</string>
+    <string name="text_rename_history_entry_not_renamed">Sin cambiar</string>
+    <string name="text_rename_history_entry_not_restored">Sin restaurar</string>
+    <string name="text_rename_history_entry_renamed">Cambiado</string>
+    <string name="text_rename_history_entry_restored">Restaurado</string>
+    <string name="text_rename_history_entry_stale">Modificado después</string>
+    <string name="text_rename_history_filter_source">Origen</string>
+    <string name="text_rename_history_filter_state">Estado</string>
+    <string name="text_rename_history_more_entries" tools:ignore="TypographyEllipsis">... y %1$d más</string>
+    <string name="text_rename_history_retention">Lotes conservados por origen</string>
+    <string name="text_rename_history_retention_hint">Los scripts y cada plugin conservan esta cantidad de lotes más recientes. Los lotes anteriores se eliminan y ya no se pueden deshacer.</string>
+    <string name="text_rename_history_source_explorer">Administrador de archivos</string>
+    <string name="text_rename_history_source_script">Script</string>
+    <string name="text_rename_history_state_committed">Completado</string>
+    <string name="text_rename_history_state_partial">Completado en parte</string>
+    <string name="text_rename_history_state_recovery_required">Deshacer incompleto</string>
+    <string name="text_rename_history_state_rejected">Nada cambiado</string>
+    <string name="text_rename_history_state_restored">Deshecho</string>
+    <string name="text_rename_history_undo">Deshacer</string>
+    <string name="text_rename_history_undo_incomplete">Algunos elementos no se pudieron restaurar, consulte los detalles</string>
+    <string name="text_rename_history_undo_unavailable">Este lote ya no está en el historial de cambios de nombre</string>
+    <string name="text_rename_history_undoing" tools:ignore="TypographyEllipsis">Deshaciendo...</string>
     <string name="text_reorder_color_libraries">Reordenar bibliotecas de colores</string>
     <string name="text_reorder_color_libraries_hint">Mantén pulsada una de tus bibliotecas de colores y arrástrala a una nueva posición</string>
     <string name="text_reorder_colors">Reordenar colores</string>

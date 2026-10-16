@@ -21,4 +21,13 @@ object BatchRenamePluginActions {
 
     /** Signature permission every exported entry point of the plugin requires. */
     const val PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN"
+
+    /**
+     * Activity action of the rename history page of the host (plugin roadmap D38 / D51), opened from the plugin's
+     * "Rename history" menu item. The intent names the host package; the page requires [PLUGIN_PERMISSION]. Hosts
+     * without the page do not resolve it.
+     * zh-CN: 宿主重命名历史页面的 Activity 动作 (插件路线图 D38 / D51), 由插件的 "重命名历史" 菜单项打开. Intent 需指定宿主包名; 该页面要求
+     * [PLUGIN_PERMISSION]. 没有该页面的宿主无法解析此动作.
+     */
+    const val RENAME_HISTORY = "org.autojs.autojs6.action.RENAME_HISTORY"
 }

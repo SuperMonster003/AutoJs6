@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_smaller_black_48dp"
+        android:title="@string/text_search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
+
+    <item
+        android:id="@+id/action_sort"
+        android:title="@string/text_sort"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/action_sort_time_desc"
+                android:title="@string/text_sort_by_time_desc" />
+            <item
+                android:id="@+id/action_sort_time_asc"
+                android:title="@string/text_sort_by_time_asc" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_rename_history_source"
+        android:title="@string/text_rename_history_filter_source"
+        app:showAsAction="never">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_rename_history_source_all"
+                    android:checked="true"
+                    android:title="@string/text_all" />
+                <item
+                    android:id="@+id/action_rename_history_source_script"
+                    android:title="@string/text_rename_history_source_script" />
+                <item
+                    android:id="@+id/action_rename_history_source_explorer"
+                    android:title="@string/text_rename_history_source_explorer" />
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_rename_history_state"
+        android:title="@string/text_rename_history_filter_state"
+        app:showAsAction="never">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_rename_history_state_all"
+                    android:checked="true"
+                    android:title="@string/text_all" />
+                <item
+                    android:id="@+id/action_rename_history_state_committed"
+                    android:title="@string/text_rename_history_state_committed" />
+                <item
+                    android:id="@+id/action_rename_history_state_partial"
+                    android:title="@string/text_rename_history_state_partial" />
+                <item
+                    android:id="@+id/action_rename_history_state_rejected"
+                    android:title="@string/text_rename_history_state_rejected" />
+                <item
+                    android:id="@+id/action_rename_history_state_restored"
+                    android:title="@string/text_rename_history_state_restored" />
+                <item
+                    android:id="@+id/action_rename_history_state_recovery_required"
+                    android:title="@string/text_rename_history_state_recovery_required" />
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_rename_history_retention"
+        android:title="@string/text_rename_history_retention"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_rename_history_clear"
+        android:title="@string/text_rename_history_clear"
+        app:showAsAction="never" />
+</menu>

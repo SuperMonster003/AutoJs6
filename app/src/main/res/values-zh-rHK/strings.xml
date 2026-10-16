@@ -2509,6 +2509,31 @@
     <string name="text_removed_from_favorites">已取消收藏</string>
     <string name="text_rename">重命名</string>
     <string name="text_rename_color_library">重命名顏色庫</string>
+    <string name="text_rename_history">重命名歷史</string>
+    <string name="text_rename_history_clear">清空歷史</string>
+    <string name="text_rename_history_clear_confirm">清空全部重命名歷史? 清空後這些批次都無法再撤銷.</string>
+    <string name="text_rename_history_delete_confirm">從重命名歷史中刪除這一批? 刪除後無法再撤銷.</string>
+    <string name="text_rename_history_entry_not_renamed">未改名</string>
+    <string name="text_rename_history_entry_not_restored">未能恢復</string>
+    <string name="text_rename_history_entry_renamed">已改名</string>
+    <string name="text_rename_history_entry_restored">已恢復</string>
+    <string name="text_rename_history_entry_stale">之後已被更改</string>
+    <string name="text_rename_history_filter_source">來源</string>
+    <string name="text_rename_history_filter_state">狀態</string>
+    <string name="text_rename_history_more_entries" tools:ignore="TypographyEllipsis">... 另有 %1$d 項</string>
+    <string name="text_rename_history_retention">每個來源保留的批數</string>
+    <string name="text_rename_history_retention_hint">腳本與每個插件各自保留這麼多個最新批次. 更早的批次會被刪除, 之後無法再撤銷.</string>
+    <string name="text_rename_history_source_explorer">檔案管理器</string>
+    <string name="text_rename_history_source_script">腳本</string>
+    <string name="text_rename_history_state_committed">已完成</string>
+    <string name="text_rename_history_state_partial">部分完成</string>
+    <string name="text_rename_history_state_recovery_required">撤銷未完成</string>
+    <string name="text_rename_history_state_rejected">未改名任何項</string>
+    <string name="text_rename_history_state_restored">已撤銷</string>
+    <string name="text_rename_history_undo">撤銷</string>
+    <string name="text_rename_history_undo_incomplete">部分項目未能恢復, 詳見明細</string>
+    <string name="text_rename_history_undo_unavailable">該批次已不在重命名歷史中</string>
+    <string name="text_rename_history_undoing" tools:ignore="TypographyEllipsis">正在撤銷...</string>
     <string name="text_reorder_color_libraries">調整顏色庫順序</string>
     <string name="text_reorder_color_libraries_hint">長按自建顏色庫並拖動以調整位置</string>
     <string name="text_reorder_colors">調整顏色順序</string>

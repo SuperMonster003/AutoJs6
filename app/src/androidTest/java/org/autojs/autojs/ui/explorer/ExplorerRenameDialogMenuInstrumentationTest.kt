@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.explorer
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.SystemClock
 import android.view.View
@@ -20,6 +21,7 @@ import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.storage.BatchRenameHistoryActivity
 import org.autojs.autojs6.R
 import org.autojs.plugin.batchrename.api.BatchRenamePluginIds
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
@@ -125,6 +127,34 @@ class ExplorerRenameDialogMenuInstrumentationTest {
         assertFalse(showing)
     }
 
+    /**
+     * "Rename history" is the last entry, with or without plugin actions, and opens the history page after closing the
+     * dialog (D51).
+     * zh-CN: "重命名历史" 是最后一项 (无论是否有插件动作), 关闭对话框后打开历史页面 (D51).
+     */
+    @Test
+    fun renameHistoryClosesTheDialogAndOpensTheHistoryPage() {
+        val dialog = showRenameDialog { unexpectedLaunch ->
+            ExplorerRenameDialogMenu.options(activity, ExplorerRenameDialogMenu.entries(ExplorerSurface.MAIN_FILES, emptyList()), unexpectedLaunch)
+        }
+        clickOptionsButton()
+        awaitText(context.getString(R.string.text_rename_history))
+        screenshot("rename-dialog-menu")
+        clickStableText(context.getString(R.string.text_rename_history))
+        var page: BatchRenameHistoryActivity? = null
+        awaitMain {
+            page = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED)
+                .filterIsInstance<BatchRenameHistoryActivity>().firstOrNull()
+            page != null
+        }
+        var showing = true
+        instrumentation.runOnMainSync {
+            showing = dialog.isShowing
+            page?.finish()
+        }
+        assertFalse("the rename dialog closes before the history page opens", showing)
+    }
+
     /** Opens the rename dialog with [buildOptions] plus a probe option and returns the dialog after one probe click. */
     private fun showRenameDialog(
         buildOptions: ((ResolvedExplorerAction) -> Unit) -> List<MaterialDialog.OptionMenuItemSpec>,
@@ -219,6 +249,19 @@ class ExplorerRenameDialogMenuInstrumentationTest {
             SystemClock.sleep(50)
         }
         throw AssertionError("Text did not settle: $text")
+    }
+
+    /**
+     * With the instrumentation argument `batchRename.screenshots=true`, saves the screen under the app's external files
+     * directory (`screenshots/`) for the manual check of the layout.
+     * zh-CN: 传入 instrumentation 参数 `batchRename.screenshots=true` 时, 把屏幕保存到应用外部文件目录 (`screenshots/`), 供人工检查布局.
+     */
+    private fun screenshot(name: String) {
+        if (InstrumentationRegistry.getArguments().getString("batchRename.screenshots") != "true") return
+        SystemClock.sleep(500)
+        val bitmap = instrumentation.uiAutomation.takeScreenshot() ?: return
+        val directory = File(context.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
+        File(directory, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
     private fun awaitMain(condition: () -> Boolean) {

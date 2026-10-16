@@ -135,6 +135,20 @@
         <item quantity="other">%d цветовой библиотеки неизвестного типа будут пропущены</item>
     </plurals>
 
+    <plurals name="text_rename_history_batches">
+        <item quantity="one">%d пакет</item>
+        <item quantity="few">%d пакета</item>
+        <item quantity="many">%d пакетов</item>
+        <item quantity="other">%d пакета</item>
+    </plurals>
+
+    <plurals name="text_rename_history_items">
+        <item quantity="one">%d элемент</item>
+        <item quantity="few">%d элемента</item>
+        <item quantity="many">%d элементов</item>
+        <item quantity="other">%d элемента</item>
+    </plurals>
+
     <plurals name="text_used_n_times">
         <item quantity="one">Использован %d раз</item>
         <item quantity="few">Использован %d раза</item>

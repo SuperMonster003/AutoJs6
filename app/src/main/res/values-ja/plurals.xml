@@ -76,6 +76,14 @@
         <item quantity="other">種類が不明な %d 個のカラーライブラリはスキップされます</item>
     </plurals>
 
+    <plurals name="text_rename_history_batches">
+        <item quantity="other">%d 件</item>
+    </plurals>
+
+    <plurals name="text_rename_history_items">
+        <item quantity="other">%d 件</item>
+    </plurals>
+
     <plurals name="text_used_n_times">
         <item quantity="other">%d 回使用</item>
     </plurals>

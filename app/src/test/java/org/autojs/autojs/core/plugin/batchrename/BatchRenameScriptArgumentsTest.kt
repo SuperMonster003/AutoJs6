@@ -224,6 +224,23 @@ class BatchRenameScriptArgumentsTest {
         listOf("-1", "1.5", "\"3\"").forEach { text ->
             expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.historyLimit(json(text), 20) }
         }
+
+        // deleteHistory takes a batch ID or the result of apply; clearHistory an optional source (plugin roadmap D39).
+        // zh-CN: deleteHistory 接受批次 ID 或 apply 的结果; clearHistory 接受可选的来源 (插件路线图 D39).
+        assertEquals(id, BatchRenameScriptArguments.historyBatchId(json("\"$id\"")))
+        assertEquals(id, BatchRenameScriptArguments.historyBatchId(json("{\"batchId\": \"$id\", \"items\": []}")))
+        listOf("null", "\"b_1\"", "{\"batchId\": null}", "{}", "3").forEach { text ->
+            expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.historyBatchId(json(text)) }
+        }
+        expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.historyBatchId(null) }
+        assertNull(BatchRenameScriptArguments.historySource(null))
+        assertNull(BatchRenameScriptArguments.historySource(json("{}")))
+        assertNull(BatchRenameScriptArguments.historySource(json("{\"source\": null}")))
+        assertEquals(BatchRenameSource.SCRIPT, BatchRenameScriptArguments.historySource(json("{\"source\": \"script\"}")))
+        assertEquals(BatchRenameSource.EXPLORER, BatchRenameScriptArguments.historySource(json("{\"source\": \"explorer\"}")))
+        listOf("{\"source\": \"plugin\"}", "{\"source\": 1}", "\"script\"").forEach { text ->
+            expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.historySource(json(text)) }
+        }
     }
 
     private companion object {

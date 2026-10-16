@@ -382,6 +382,31 @@ object BatchRenameScriptArguments {
             ?: batchRenameFailure(BatchRenameScriptCodes.UNDO_UNAVAILABLE, "undo needs a batch ID or the result of apply, got $value")
     }
 
+    /**
+     * `deleteHistory(result | batchId)`: the batch ID; an ID that is not one is `INVALID_OPTIONS`.
+     * zh-CN: `deleteHistory(result | batchId)` 中的批次 ID; 格式不对时为 `INVALID_OPTIONS`.
+     */
+    fun historyBatchId(value: JsonElement?): String {
+        val element = (value as? JsonObject)?.get("batchId") ?: value
+        val text = (element as? JsonPrimitive)?.takeIf { it.isString }?.asString
+        return text?.takeIf(BatchRenameJournalStore::isValidBatchId)
+            ?: invalidOptions("deleteHistory needs a batch ID or the result of apply, got $value")
+    }
+
+    /**
+     * `clearHistory({ source })`: `script`, `explorer` (the file manager) or null for every source.
+     * zh-CN: `clearHistory({ source })`: `script`, `explorer` (文件管理器), 或表示全部来源的 null.
+     */
+    fun historySource(value: JsonElement?): BatchRenameSource? {
+        val json = value?.takeUnless { it.isJsonNull }?.let {
+            it as? JsonObject ?: invalidOptions("clearHistory options must be an object")
+        } ?: return null
+        val element = json.get("source")?.takeUnless { it.isJsonNull } ?: return null
+        val text = (element as? JsonPrimitive)?.takeIf { it.isString }?.asString
+        return BatchRenameSource.entries.firstOrNull { it.value == text }
+            ?: invalidOptions("source must be one of ${BatchRenameSource.entries.joinToString { "\"${it.value}\"" }}, got $element")
+    }
+
     /** `history(limit?)`: 1 to [maxLimit], all of them when omitted. zh-CN: `history(limit?)`: 1 到 [maxLimit], 省略时为全部. */
     fun historyLimit(value: JsonElement?, maxLimit: Int): Int {
         if (value == null || value.isJsonNull) return maxLimit

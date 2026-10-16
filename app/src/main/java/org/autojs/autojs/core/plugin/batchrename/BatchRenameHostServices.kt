@@ -25,7 +25,10 @@ object BatchRenameHostServices {
     private var journal: BatchRenameJournalStore? = null
 
     fun journal(context: Context): BatchRenameJournalStore = journal ?: synchronized(this) {
-        journal ?: BatchRenameJournalStore(File(context.applicationContext.noBackupFilesDir, "batch-rename/journals")).also { journal = it }
+        journal ?: BatchRenameJournalStore(
+            File(context.applicationContext.noBackupFilesDir, "batch-rename/journals"),
+            retention = BatchRenameHistoryPrefs::retention,
+        ).also { journal = it }
     }
 
     fun executor(context: Context): BatchRenameExecutor = executor ?: synchronized(this) {

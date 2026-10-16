@@ -9,6 +9,8 @@ cleanup rules, modeled on PowerToys PowerRename. AutoJs6 offers it in two places
 - the script API `files.batchRename` (plan, apply, undo, history);
 - the file manager: the selection toolbar, the folder menu and the "More" menu of the rename dialog.
 
+The host also shows every journaled batch, from scripts and from the file manager, on its rename history page.
+
 Both paths share one division of work (plugin roadmap D3 / D13): the plugin computes rename plans,
 the host enumerates targets, performs every rename, checks conflicts again and keeps the undo
 journal. The plugin never needs storage permission.
@@ -26,6 +28,7 @@ path additionally uses Explorer Action protocol v25 (`explorer-action-protocol-v
 | Permission | `org.autojs.permission.PLUGIN` (signature) on every exported entry |
 | Identity | id / engine `batch-rename`, variant `default` |
 | Package | `io.github.supermonster003.autojs6.plugin.batch.rename` |
+| Host rename history page | activity action `org.autojs.autojs6.action.RENAME_HISTORY` in the host package, `org.autojs.permission.PLUGIN` |
 
 `PluginInfo.capabilities` carries `requiresHostVersion` (Long), `batchRenameContractVersion` (Int),
 `batchRenameFeatures` (String array, a subset of `counter`, `dateTime`, `random`, `cleanup`, `pinyin`, `presets`, `metadata`),
@@ -256,6 +259,23 @@ contract:
   `INVALID_OPTIONS`, since preview reads no files.
 - `undo(result | batchId)` and `history(limit)` work on the shared journal, which also holds the batches of
   Explorer Action sessions. A batch that does not exist or has nothing left to undo is `UNDO_UNAVAILABLE`.
+  `history()` without a limit lists every kept batch. `deleteHistory(result | batchId)` forgets one batch of any
+  source and answers whether it was kept; `clearHistory({ source })` forgets every batch, or those of `script` or
+  `explorer`, and answers how many (plugin roadmap D39). Deleted batches can no longer be undone; the files stay as
+  they are.
+
+## Rename history page
+
+`BatchRenameHistoryActivity` (plugin roadmap D38 / D39 / D51) lists the batches of the shared journal, newest first:
+the first entry as `old -> new`, the time, the source, the state, the entry count and the folder. The menu searches
+old and new names, filters by source and state, sorts by time, clears the history and sets the batches kept for
+scripts and for each plugin (20, 50 or 100, default 20; a lower choice deletes the older batches at once). A batch
+opens its details (`old -> new (state)` per entry, at most 200 listed), from which it can be undone or deleted.
+
+The page opens from the last entry of the "More" menu of the file manager's rename dialog, which plugin actions
+leave free (they get at most nine of the ten title options), and from the plugin through the exported activity
+action `BatchRenamePluginActions.RENAME_HISTORY` with the host package set; the action requires
+`org.autojs.permission.PLUGIN`. A plugin shows its entry only when the action resolves, so older hosts hide it.
 - Failures reach the script as `files.batchRename.BatchRenameError` with `code`: no installed plugin is
   `PLUGIN_UNAVAILABLE` (with the host's localized "missing plugin" message), a disabled or unauthorized one
   `PLUGIN_DISABLED`, one that needs a newer host or speaks another contract version `PLUGIN_INCOMPATIBLE`; the

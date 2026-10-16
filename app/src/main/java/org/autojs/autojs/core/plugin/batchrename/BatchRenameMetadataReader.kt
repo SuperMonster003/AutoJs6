@@ -28,7 +28,7 @@ object BatchRenameMetadataReader {
     const val MAX_TEXT_LENGTH = 256
 
     private val IMAGE_EXTENSIONS = setOf(
-        "jpg", "jpeg", "jpe", "png", "webp", "heic", "heif", "dng", "cr2", "nef", "nrw", "arw", "rw2", "orf", "pef", "srw", "raf",
+        "jpg", "jpeg", "jpe", "png", "webp", "heic", "heif", "dng", "cr2", "nef", "nrw", "arw", "rw2", "orf", "pef", "srw", "raf", "raw",
     )
 
     fun isImage(file: File): Boolean = file.extension.lowercase(Locale.ROOT) in IMAGE_EXTENSIONS

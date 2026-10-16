@@ -95,6 +95,16 @@
         <item quantity="other">%d color libraries of unknown types will be skipped</item>
     </plurals>
 
+    <plurals name="text_rename_history_batches">
+        <item quantity="one">%d batch</item>
+        <item quantity="other">%d batches</item>
+    </plurals>
+
+    <plurals name="text_rename_history_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+
     <plurals name="text_used_n_times">
         <item quantity="one">Used %d time</item>
         <item quantity="other">Used %d times</item>

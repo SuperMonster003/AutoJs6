@@ -76,6 +76,14 @@
         <item quantity="other">%d 个未知类型的颜色库将被跳过</item>
     </plurals>
 
+    <plurals name="text_rename_history_batches">
+        <item quantity="other">%d 批</item>
+    </plurals>
+
+    <plurals name="text_rename_history_items">
+        <item quantity="other">%d 项</item>
+    </plurals>
+
     <plurals name="text_used_n_times">
         <item quantity="other">使用 %d 次</item>
     </plurals>

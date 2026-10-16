@@ -150,7 +150,10 @@ class BatchRenameExplorerFlowTest {
                 assertTrue("a disabled plugin offers $offered at $entryPoint", offered.isEmpty())
             }
             val dialogActions = ExplorerRenameDialogMenu.resolveActions(ExplorerActionRegistry, ExplorerSurface.MAIN_FILES, file.single())
-            assertEquals(listOf(ExplorerRenameDialogMenuEntry.BatchRenameGuidance), ExplorerRenameDialogMenu.entries(ExplorerSurface.MAIN_FILES, dialogActions))
+            assertEquals(
+                listOf(ExplorerRenameDialogMenuEntry.BatchRenameGuidance, ExplorerRenameDialogMenuEntry.RenameHistory),
+                ExplorerRenameDialogMenu.entries(ExplorerSurface.MAIN_FILES, dialogActions),
+            )
         } finally {
             PluginEnableStore.setEnabled(context, PLUGIN_PACKAGE, true)
             runBlocking { ExplorerActionRegistry.refresh(context) }

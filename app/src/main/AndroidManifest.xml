@@ -566,6 +566,21 @@
             android:name="org.autojs.autojs.ui.storage.TrashActivity"
             android:theme="@style/AppTheme.Settings" />
 
+        <!-- Opened by the Batch Rename plugin as well (BatchRenamePluginActions.RENAME_HISTORY). -->
+        <!-- zh-CN: Batch Rename 插件也会打开此页面 (BatchRenamePluginActions.RENAME_HISTORY). -->
+        <activity
+            android:name="org.autojs.autojs.ui.storage.BatchRenameHistoryActivity"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:theme="@style/AppTheme.Settings">
+
+            <intent-filter>
+                <action android:name="org.autojs.autojs6.action.RENAME_HISTORY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name="org.autojs.autojs.ui.storage.VersionHistoryActivity"
             android:theme="@style/AppTheme.Settings" />
