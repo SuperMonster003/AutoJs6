@@ -33,9 +33,12 @@ object UiPreviewBusyWatch {
     /** How often the heartbeat runs while a run is watched; the limit is measured with this much slack at most. */
     const val BEAT_INTERVAL_MS = 200L
 
-    /** What a guard tells its run; called on the main thread from inside the run's script code, right before it unwinds. */
+    /**
+     * What a guard tells its run; called on the main thread from inside the run's script code, right before it unwinds.
+     * [sourceName] and [line] are the position Rhino was executing (null / -1 when unknown).
+     */
     fun interface Listener {
-        fun onBusy(line: Int, elapsedMs: Long)
+        fun onBusy(sourceName: String?, line: Int, elapsedMs: Long)
     }
 
     /** One watched run: its global scope, its limit (0 only honors [interrupt]) and its [Listener]. */
@@ -96,8 +99,8 @@ object UiPreviewBusyWatch {
         if (elapsed <= guard.limitMs) return
         guard.interrupt()
         val line = IntArray(1)
-        runCatching { Context.getSourcePositionFromStack(line) }
-        guard.listener.onBusy(if (line[0] > 0) line[0] else -1, elapsed)
+        val sourceName = runCatching { Context.getSourcePositionFromStack(line) }.getOrNull()
+        guard.listener.onBusy(sourceName, if (line[0] > 0) line[0] else -1, elapsed)
         throw UiPreviewInterruptedException("the script kept the main thread busy for $elapsed ms")
     }
 }

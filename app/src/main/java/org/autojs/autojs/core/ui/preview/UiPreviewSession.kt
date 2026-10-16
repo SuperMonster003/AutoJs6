@@ -258,13 +258,15 @@ internal class UiPreviewSession(
 
     /**
      * Runs [text] as a normal `"ui"` mode script in this session's root (3-Block Compose roadmap P10.6); a run that
-     * is still going is replaced first. Throws [UiPreviewRequestException] when the script cannot start.
+     * is still going is replaced first. Throws [UiPreviewRequestException] when the script cannot start; a v5 TSX
+     * [dialect] run reports a compilation or start failure through its callbacks instead, as it starts later.
      */
     fun runScript(
         text: String,
         name: String,
         project: ProjectRun? = null,
         busyWaitLimitMs: Long = UiPreviewContract.DEFAULT_BUSY_WAIT_LIMIT_MS,
+        dialect: String = UiPreviewContract.SCRIPT_DIALECT_JS,
     ): Bundle {
         stopRun(UiPreviewContract.EXIT_REPLACED)
         // v4: every run starts from the plain root; the colors and dialogs of the last one are gone.
@@ -277,7 +279,7 @@ internal class UiPreviewSession(
         }
         val directory = project?.directory ?: runDirectory.apply { mkdirs() }
         val scriptFile = project?.let { File(it.directory, it.scriptPath) }
-        val started = UiPreviewScriptRun(appContext, this, "$id-r${++runCounter}", name, text, directory, scriptFile, busyWaitLimitMs, callback) { ended ->
+        val started = UiPreviewScriptRun(appContext, this, "$id-r${++runCounter}", name, text, directory, scriptFile, busyWaitLimitMs, dialect, callback) { ended ->
             if (run === ended) run = null
             // The dialogs belong to the run's runtime, which is gone; drop them like the windows of a finished Activity.
             root.dialogLayer.clear()

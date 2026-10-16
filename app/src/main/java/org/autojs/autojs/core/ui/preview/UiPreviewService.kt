@@ -13,6 +13,9 @@ import android.os.ParcelFileDescriptor
 import android.os.Parcelable
 import android.util.Log
 import android.view.Display
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
+import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerPluginClient
 import org.autojs.plugin.ui.preview.IUiPreviewCallback
 import org.autojs.plugin.ui.preview.IUiPreviewService
 import org.autojs.plugin.ui.preview.UiPreviewContract
@@ -238,8 +241,11 @@ class UiPreviewService : Service() {
                 // v4: the busy-wait limit; a run that is still going may keep the main thread busy, so it is interrupted first.
                 @Suppress("DEPRECATION")
                 val busyWaitLimitMs = UiPreviewRequests.validateBusyWaitLimit(request.get(UiPreviewContract.KEY_BUSY_WAIT_LIMIT_MS))
+                // v5: a TSX text is compiled by TypeScript Engine before the run starts.
+                @Suppress("DEPRECATION")
+                val dialect = UiPreviewRequests.validateScriptDialect(request.get(UiPreviewContract.KEY_SCRIPT_DIALECT))
                 session.interruptRun(UiPreviewContract.EXIT_REPLACED)
-                onMain(UiPreviewContract.SCRIPT_START_TIMEOUT_MS) { session.runScript(text!!, name, project, busyWaitLimitMs) }
+                onMain(UiPreviewContract.SCRIPT_START_TIMEOUT_MS) { session.runScript(text!!, name, project, busyWaitLimitMs, dialect) }
                     ?: failure(UiPreviewContract.ERROR_TIMEOUT, "the script did not start within ${UiPreviewContract.SCRIPT_START_TIMEOUT_MS} ms")
             } catch (e: UiPreviewRequestException) {
                 failure(e.code, e.message ?: e.code)
@@ -358,6 +364,19 @@ class UiPreviewService : Service() {
         putBoolean(UiPreviewContract.KEY_LIFECYCLE_EVENTS, runs)
         putBoolean(UiPreviewContract.KEY_BUSY_WAIT_LIMIT_SUPPORTED, runs)
         putBoolean(UiPreviewContract.KEY_WINDOW_FUNCTIONS_VISIBLE, runs)
+        // v5: TSX runs need runs and a TypeScript Engine compiler the host accepts.
+        putBoolean(UiPreviewContract.KEY_TSX_RUN_SUPPORTED, runs && tsxCompilerAvailable())
+    }
+
+    /**
+     * Whether TypeScript Engine can compile TSX runs, asked on the calling Binder thread and given at most
+     * [TSX_PROBE_TIMEOUT_MS]; false on the main thread (an in-process caller), where the probe must not block.
+     */
+    private fun tsxCompilerAvailable(): Boolean {
+        if (Looper.myLooper() == Looper.getMainLooper()) return false
+        return runCatching {
+            runBlocking { withTimeoutOrNull(TSX_PROBE_TIMEOUT_MS) { TypeScriptCompilerPluginClient(applicationContext).isAvailable() } }
+        }.onFailure { Log.w(TAG, "TypeScript Engine probe failed", it) }.getOrNull() == true
     }
 
     // -------------------------------------------------------------------------------------------- helpers
@@ -398,7 +417,11 @@ class UiPreviewService : Service() {
             UiPreviewContract.BASE_VERSION to UiPreviewContract.HASH_V1,
             UiPreviewContract.VERSION_V2 to UiPreviewContract.HASH_V2,
             UiPreviewContract.VERSION_V3 to UiPreviewContract.HASH_V3,
+            UiPreviewContract.VERSION_V4 to UiPreviewContract.HASH_V4,
             UiPreviewContract.VERSION to UiPreviewContract.HASH,
         )
+
+        /** How long building the preview info may wait for TypeScript Engine to answer whether it is there. */
+        private const val TSX_PROBE_TIMEOUT_MS = 3_000L
     }
 }

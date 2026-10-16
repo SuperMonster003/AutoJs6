@@ -240,5 +240,35 @@ object UiPreviewRequests {
         return event
     }
 
+    // ------------------------------------------------------------------------------------------------ v5
+
+    /**
+     * The dialect of a v5 `runScript` request: absent (null) means `js`, anything else must be one of
+     * [UiPreviewContract.SCRIPT_DIALECTS].
+     * zh-CN: v5 `runScript` 请求的脚本方言: 缺省 (null) 为 `js`, 其余须为 [UiPreviewContract.SCRIPT_DIALECTS] 之一.
+     */
+    @Throws(UiPreviewRequestException::class)
+    fun validateScriptDialect(value: Any?): String {
+        if (value == null) return UiPreviewContract.SCRIPT_DIALECT_JS
+        if (value !is String || value !in UiPreviewContract.SCRIPT_DIALECTS) {
+            throw invalid("${UiPreviewContract.KEY_SCRIPT_DIALECT} must be one of ${UiPreviewContract.SCRIPT_DIALECTS.joinToString()}")
+        }
+        return value
+    }
+
+    /**
+     * The file name a v5 TSX run is compiled under: the (sanitized) script name with path separators replaced and `.tsx`
+     * appended unless it is there, so diagnostics and the host's task list name the script as the client does;
+     * [FALLBACK_TSX_SOURCE_NAME] for a name that makes no file name of its own.
+     * zh-CN: v5 TSX 运行的编译文件名: (已清理的) 脚本名, 替换路径分隔符, 未以 `.tsx` 结尾时追加; 不能成为文件名时用 [FALLBACK_TSX_SOURCE_NAME].
+     */
+    fun tsxSourceName(name: String): String {
+        val base = name.replace('/', '_').replace('\\', '_').trim()
+        if (base.isEmpty() || base == "." || base == ".." || base.startsWith(".")) return FALLBACK_TSX_SOURCE_NAME
+        return if (base.endsWith(".tsx")) base else "$base.tsx"
+    }
+
+    const val FALLBACK_TSX_SOURCE_NAME = "ui-preview.tsx"
+
     private fun invalid(message: String) = UiPreviewRequestException(UiPreviewContract.ERROR_INVALID_REQUEST, message)
 }
