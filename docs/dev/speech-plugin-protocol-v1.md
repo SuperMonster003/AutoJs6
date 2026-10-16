@@ -42,10 +42,12 @@ Center lists the official package once, under its INFO identity, and probes it t
 | `speechFeatures` | String array | the features the build implements, a subset of the table below |
 | `speechCatalogVersion` | Int | version of the bundled model catalog, 0 before one is bundled |
 | `speechMaxPcmSessions` | Int, optional | external PCM sessions per caller, at most 4 |
-| `speechTtsEnginePackage` | String, optional | package of the system TTS engine (`speech.speak`) |
+| `speechTtsEnginePackage` | String, optional | package of the system TTS engine (`speech.speak`), with the feature `ttsSystemEngine` |
 
 `getCapabilities` may add `speechEngineName`, `speechEngineVersion` (the runtime, `sherpa-onnx` / `1.13.8`) and
-`speechMicrophoneGranted` (Boolean, the plugin holds `RECORD_AUDIO` right now).
+`speechMicrophoneGranted` (Boolean, the plugin holds `RECORD_AUDIO` right now). 3-Macaw Speech reports
+`speechTtsEnginePackage` (its own package) in the `getCapabilities` answer only; `speech.capabilities()` merges both
+Bundles and shows it as `ttsEnginePackage`.
 
 | Feature | Unlocks |
 | --- | --- |
@@ -54,11 +56,13 @@ Center lists the official package once, under its INFO identity, and probes it t
 | `vad` | `detectVoice` |
 | `kws` | `openWakeSession` |
 | `tts` | `synthesizeToFile` |
-| `ttsSystemEngine` | the system TTS engine of `speechTtsEnginePackage` |
+| `ttsSystemEngine` | the system TTS engine of `speechTtsEnginePackage` (see "System TTS engine") |
 | `models` | `installModel`, `importModel`, `removeModel`, `setDefaultModel`, `refreshCatalog` |
 
 The host refuses a call whose feature the plugin does not advertise with `PLUGIN_INCOMPATIBLE` before any transaction;
-`getInfo`, `getCapabilities`, `listModels` and `cancelOperation` need no feature.
+`getInfo`, `getCapabilities`, `listModels` and `cancelOperation` need no feature. `ttsSystemEngine` guards no Binder
+call: the engine is an ordinary Android `TextToSpeechService` that `tts` and `speech.speak` reach through
+`TextToSpeech`.
 
 Every binding to the capability service carries `BIND_AUTO_CREATE | BIND_ALLOW_ACTIVITY_STARTS |
 BIND_INCLUDE_CAPABILITIES | BIND_IMPORTANT` (`BIND_INCLUDE_CAPABILITIES` from API 29, `BIND_ALLOW_ACTIVITY_STARTS` from
@@ -157,7 +161,7 @@ with roadmap appendix C.1, version 1 adds `importModel`, `setDefaultModel`, `ref
 | `detectVoice` | blocks until done | 10 min | as `recognizeFile` | `segments` (`startMillis`, `endMillis`), `durationMillis` | `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED`, `ENGINE_FAILED`, `IO_FAILED` |
 | `openSession` | returns at once | 30 s | `maxDurationMillis` 30 min, `hotwords` 200, `feed` 1 MiB | session, events | `SESSION_BUSY`, `PERMISSION_DENIED` (no microphone permission), `MODEL_MISSING` (also as `error` event) |
 | `openWakeSession` | returns at once | 30 s | `keywords` 50 | session, events | as `openSession` |
-| `synthesizeToFile` | returns the operation id at once | 10 min to completion | `text` 8000 characters; output 100 MiB | completion `sampleRate`, `durationMillis`, `modelId`, `speakerId`, `sizeBytes` | `MODEL_MISSING`, `INVALID_OPTIONS`, `LIMIT_EXCEEDED`, `ENGINE_FAILED`, `IO_FAILED`, `SESSION_CANCELLED` |
+| `synthesizeToFile` | returns the operation id at once | 10 min to each progress and to completion, no limit in total | `text` 8000 characters; output 100 MiB | completion `sampleRate`, `durationMillis`, `modelId`, `speakerId`, `sizeBytes`, `warnings` | `MODEL_MISSING`, `INVALID_OPTIONS`, `LIMIT_EXCEEDED`, `ENGINE_FAILED`, `IO_FAILED`, `SESSION_CANCELLED` |
 | `importModel` | returns the operation id at once | none | archive (`tar.bz2` or `zip`) | completion `model` | `INVALID_OPTIONS`, `UNSUPPORTED_FORMAT`, `MODEL_CHECKSUM_MISMATCH`, `IO_FAILED` |
 | `setDefaultModel` | immediate | 30 s | `model`, `kind` | `model` | `MODEL_MISSING`, `INVALID_OPTIONS` |
 | `refreshCatalog` | returns the operation id at once | 2 min to completion | - | completion `catalogVersion`, `updated` | `IO_FAILED`, `MODEL_CHECKSUM_MISMATCH` (signature) |
@@ -213,7 +217,8 @@ Wake options (`openWakeSession`): `keywords` (ArrayList of Bundle with `keyword`
 Voice activity (`detectVoice`): `model`, `vadThreshold` (Float), `minSpeechMillis`, `minSilenceMillis` (Long).
 
 Synthesis (`synthesizeToFile`): `text`, `model`, `speaker` (String: a speaker id or name), `speed` (Double, 0.5 to
-2.0), `format` (`wav`).
+2.0), `format` (`wav`). Without `speaker` the plugin uses the model's default speaker (3-Macaw Speech: speaker 3 of
+Kokoro multi-lang v1.1, whose speakers 0 to 2 speak English, and speaker 0 of the other models).
 
 Models: `listModels` takes `kind`, `language`, `installed`; `installModel` takes `model` and `acceptLicense`;
 `importModel` takes `model` (the id for a model outside the catalog), `kind`, `modelType`, `name`, `languages`,
@@ -224,6 +229,10 @@ Models: `listModels` takes `kind`, `language`, `installed`; `installModel` takes
 A recognition result carries `text`, `segments` (ArrayList of Bundle: `startMillis`, `endMillis`, `text`, optional
 `language` and `tags` with `emotion` / `event`), `language`, `durationMillis`, `modelId` and `warnings` (ArrayList of
 Bundle with `errorCode` / `errorMessage`).
+
+The completion of `synthesizeToFile` carries `sampleRate`, `durationMillis`, `modelId`, `speakerId`, `sizeBytes` and
+`warnings` like a recognition result; 3-Macaw Speech warns with `INVALID_OPTIONS` when a model with a single speaker
+ignores the requested one. The host reports its own published size as `sizeBytes`.
 
 A model Bundle carries `id`, `kind` (`asr`, `tts`, `kws`, `vad`), `modelType`, `name`, `languages`, `sizeBytes`,
 optional `installedBytes`, `installed`, `isDefault`, `recommended`, `version`, `license` (Bundle: `spdx`,
@@ -266,7 +275,50 @@ callbacks are separate oneway Binders, so a round's `onReady` may arrive before 
 session. A wake session, rounds included, is the plugin's one microphone session.
 
 Progress: installs and imports report bytes, synthesis reports characters; `total` may be 0 when unknown. A cancelled
-operation fails with `SESSION_CANCELLED`.
+operation fails with `SESSION_CANCELLED`. The host gives a synthesis `SYNTHESIS_TIMEOUT_MS` (10 minutes) from the call
+to the first progress, between two progress callbacks and from the last one to the completion, and no limit in total:
+3-Macaw Speech reports once per sentence (at most 120 characters), and 8000 characters of AISHELL-3 took 405 seconds on
+a Sony G8441 (API 28), where MeloTTS and Kokoro run slower than real time: 1598 characters of Kokoro took 1182 seconds
+there (324 seconds of audio, 2026-10-16), past the earlier fixed limit of 10 minutes. Ten minutes without progress
+cancel the operation and fail the call with `TIMEOUT`.
+
+## System TTS engine
+
+A plugin with the feature `ttsSystemEngine` registers an Android TTS engine (`TextToSpeechService`) in the package
+`speechTtsEnginePackage`. The host neither binds it through the speech contract nor checks its feature: `tts(text,
+{ engine })` and `speech.speak` use it through `TextToSpeech` like any engine (plugin roadmap D3, D20).
+
+Voice names (plugin roadmap D19, appendix D Q6 (c)): every installed TTS model contributes one voice per speaker and
+language.
+
+- In the speaker's first language the voice is `<modelId>/<speakerId>`, for example `tts.vits.icefall.zh-aishell3/10`;
+  this is the name `speech.speak({ model, speaker })` asks for.
+- In the model's other languages the same speaker is `<modelId>/<speakerId>/<languageTag>`, for example
+  `tts.vits.melo.zh-en/0/en-US`, so every name is unique (Android requires it) and an app that asks for a language by
+  locale finds a voice of a bilingual model.
+- Locales come from the catalog languages (`zh` -> `zh-CN`, `en` -> `en-US`). A speaker's first language is the
+  model's first catalog language, except where 3-Macaw Speech knows better: Kokoro multi-lang v1.1 speakers 0 to 2 are
+  English (`en-US` first, with `/0/zh-CN`), speakers 3 to 102 Chinese.
+- `getVoices` lists numbered speakers only. `onIsValidVoiceName`, `onLoadVoice` and synthesis also accept a speaker by
+  its `speakers.txt` name (`<modelId>/<speakerName>`, AISHELL-3 has names such as `SSB0005`).
+- No voice needs the network; quality follows the sample rate (22.05 kHz and more high, 16 kHz normal, less low).
+
+`speech.speak` picks the voice from that list (`TtsSelection.ModelVoice`, `resolveTtsModelVoice`):
+
+| Script options | Voice |
+| --- | --- |
+| no `model`, `language` (or `locale` / `lang`) | `tts` selects the engine's voice for that language |
+| no `model`, no language | the engine's default voice for the language of the text (below) when the engine has it (`TtsSelection.PreferredLanguage`), else the engine's default voice |
+| `model`, numeric `speaker` | `<model>/<speaker>`, which must be listed |
+| `model`, `speaker` name | `<model>/<name>` set directly; the engine resolves the name or refuses it |
+| `model` only | the lowest numbered `<model>/<n>` whose language is `language` (or `locale` / `lang`) when given, else the language of the text (kana `ja`, Hangul `ko`, other Han text `zh`, Latin letters only `en`); the lowest numbered voice when none matches |
+
+So Chinese or mixed Chinese and English text without a speaker reads with Kokoro speaker 3, English text with speaker
+0, and the other catalog models use speaker 0. Without a model, Chinese text on a device set to English no longer falls
+to the engine's `en-US` default voice: 3-Macaw Speech answers the language with its default voice for it (the default
+TTS model first, then the voices in their first language, then the installed order, then the model's default speaker).
+Text in a language the engine lacks (Japanese with the 1.0.0 catalog) keeps the engine's default voice instead of
+failing. A model the engine lists no voice for fails the `tts` promise (`CONFIGURATION`, "is the model installed?").
 
 ## Limits
 
@@ -394,9 +446,13 @@ silenced until `maxDuration`.
 - `recognize(source, options?)` / `recognizeAsync` take a WAV path or PCM (`ArrayBuffer`, `Int16Array`, `byte[]`, with
   `options.sampleRate`, default 16000); `detectVoice(source, options?)` likewise.
 - `synthesize(text, path, options?)` / `synthesizeAsync` answer `{ path, sampleRate, durationMillis, modelId,
-  speakerId, sizeBytes }`.
-- `speak(text, options?)` is `tts(text, options)` with `engine` set to the plugin package, `voice` to
-  `<model>/<speaker>` (roadmap D19) and `rate` to `speed`; `engine`, `voice` and `rate` themselves are refused.
+  speakerId, sizeBytes, warnings }` (`warnings`: `[{ code, message }]`, empty when the plugin sent none).
+- `speak(text, options?)` is `tts(text, options)` with `engine` set to the plugin package, the voice chosen from
+  `model` / `speaker` as "System TTS engine" describes and `rate` set to `speed`; `engine`, `voice` and `rate`
+  themselves are refused, and with `model` the language keys only steer the speaker choice. It returns the Promise of
+  `tts()`. When the plugin package has no TTS engine service (not installed), the Promise is rejected with
+  `PLUGIN_UNAVAILABLE` and the missing-plugin message below instead of the `tts` initialization error; the check is a
+  package query, the Plugin Center's enabled state does not apply to the system engine.
 - `models.list(filter?)`, `models.install(id, { acceptLicense, onProgress })` / `installAsync`,
   `models.importFile(path, options?)`, `models.remove(id)`, `models.setDefault(kind, id)`, `models.getDefault(kind)`,
   `models.refreshCatalog()`.
@@ -413,7 +469,8 @@ roadmap P3.1), the Plugin Center registration (install wizard category Tools) an
 place (plugin roadmap P1). `SpeechContractTest`, `SpeechAidlOrderTest`, `AidlPluginHostBindFlagsTest` and the
 `Speech*Test` JVM tests cover them, and `SpeechScriptApiTest` runs scripts on devices against the fake provider of
 `test-apps/speech-provider-conformance`. 3-Macaw Speech answers the contract with the features `models`, `asr`,
-`asrStreaming`, `vad` and `kws` since plugin roadmap P3 (not released yet); `tts` and `ttsSystemEngine` follow in P4,
-and its `device_host_scripts.py` runs the host scripts against the real plugin.
+`asrStreaming`, `vad` and `kws` since plugin roadmap P3 and `tts` and `ttsSystemEngine` (with `speechTtsEnginePackage`)
+since P4 (not released yet); its `device_host_scripts.py` and `device_tts_run.py` run the host scripts against the real
+plugin.
 `SpeechPluginIds.REQUIRED_HOST_VERSION_CODE` (5451) is the temporary value of plugin roadmap D28: the host build that
 ships this module; plugin roadmap P6.4 raises it to the final 6.8.0 build.
