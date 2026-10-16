@@ -52,6 +52,14 @@ class PluginToolContractTest {
         assertEquals(setOf("image", "file", "directory"), PluginToolValues.SPECIAL_TYPES)
         assertEquals("directory", PluginToolValues.INPUT_SOURCE_DIRECTORY)
         assertEquals("x-autojs6-files", PluginToolCatalogJson.DIRECTORY_FILES)
+        assertEquals("kind", PluginToolCatalogJson.OUTPUT_KIND)
+        assertEquals(setOf("file", "directory"), PluginToolValues.OUTPUT_KINDS)
+        assertEquals("outputTrees", PluginToolInvokeKeys.OUTPUT_TREES)
+        assertEquals(listOf("ok", "errorCode", "errorMessage"),
+            listOf(PluginToolOutputTreeKeys.OK, PluginToolOutputTreeKeys.ERROR_CODE, PluginToolOutputTreeKeys.ERROR_MESSAGE))
+        assertEquals(listOf("EXISTS", "INVALID_PATH", "LIMIT_EXCEEDED", "CLOSED", "IO_ERROR"),
+            listOf(PluginToolOutputTreeErrors.EXISTS, PluginToolOutputTreeErrors.INVALID_PATH, PluginToolOutputTreeErrors.LIMIT_EXCEEDED,
+                PluginToolOutputTreeErrors.CLOSED, PluginToolOutputTreeErrors.IO_ERROR))
         assertEquals("screen", PluginToolValues.IMAGE_SCREEN)
         assertEquals(
             listOf("UNSUPPORTED_CONTRACT_VERSION", "UNKNOWN_TOOL", "INVALID_ARGUMENTS", "NOT_READY", "BUSY", "LIMIT_EXCEEDED", "INPUT_UNREADABLE", "CANCELLED", "TIMEOUT", "FAILED"),
@@ -68,6 +76,9 @@ class PluginToolContractTest {
         assertEquals(8 * 1024 * 1024, PluginToolLimits.MAX_DESCRIPTOR_BYTES)
         assertEquals(512L * 1024 * 1024, PluginToolLimits.MAX_FILE_INPUT_BYTES)
         assertEquals(16, PluginToolLimits.MAX_DIRECTORY_FILES)
+        assertEquals(100_000, PluginToolLimits.MAX_OUTPUT_TREE_FILES)
+        assertEquals(4096, PluginToolLimits.MAX_OUTPUT_TREE_PATH_BYTES)
+        assertEquals(255, PluginToolLimits.MAX_OUTPUT_TREE_SEGMENT_BYTES)
         assertEquals(32, PluginToolLimits.MAX_INPUT_DESCRIPTORS)
         assertEquals(PluginToolLimits.MAX_MCP_TOOL_NAME_CHARS - PluginToolLimits.MCP_TOOL_NAME_PREFIX.length, PluginToolLimits.MAX_FULL_NAME_CHARS)
         assertTrue(PluginToolLimits.DEFAULT_TIMEOUT_MS <= PluginToolLimits.MAX_TIMEOUT_MS)

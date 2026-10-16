@@ -214,6 +214,56 @@ class NodeBridgePluginToolsBridgeAndroidTest {
         assertTrue(call("invoke", undeclared, permissions).error!!.message.contains("declares no output named thumbnail"))
     }
 
+    @Test
+    fun directoryOutputsAreCommittedOnSuccessAndDroppedOnFailure() {
+        val permissions = GRANTED + "files.write"
+        fun emit(files: List<String>, output: String?, vararg extra: Pair<String, Any>): NodeBridgeResponse {
+            val arguments = JSONObject().put("files", JSONArray(files)).apply { extra.forEach { (key, value) -> if (key != "overwrite") put(key, value) } }
+            val options = JSONObject().apply {
+                output?.let { put("outputs", JSONObject().put("tree", it)) }
+                extra.firstOrNull { it.first == "overwrite" }?.let { put("overwrite", it.second) }
+            }
+            return call("invoke", JSONArray().put("faketool_emit_tree").put(arguments).put(options), permissions)
+        }
+
+        val listed = result(call("list", JSONArray(), GRANTED)).getJSONArray("tools").objects().single { it.getString("name") == "faketool_emit_tree" }
+        assertEquals("directory", listed.getJSONArray("outputs").getJSONObject(0).getString("kind"))
+
+        val first = result(emit(listOf("a.txt", "sub/b.txt", "../escape.txt"), "trees/one", "directories" to JSONArray().put("empty")))
+        val answers = first.getJSONObject("result").getJSONObject("answers")
+        assertEquals("OK", answers.getString("a.txt"))
+        assertEquals("OK", answers.getString("sub/b.txt"))
+        assertEquals("INVALID_PATH", answers.getString("../escape.txt"))
+        assertEquals("OK", answers.getString("empty"))
+        val output = first.getJSONArray("outputs").getJSONObject(0)
+        assertEquals("directory", output.getString("kind"))
+        assertEquals("trees/one", output.getString("path"))
+        assertEquals(2, output.getInt("files"))
+        assertEquals("content of a.txt".length + "content of sub/b.txt".length, output.getInt("bytes"))
+        val tree = File(workingDirectory, "trees/one")
+        assertEquals("content of sub/b.txt", File(tree, "sub/b.txt").readText())
+        assertTrue(File(tree, "empty").isDirectory)
+        assertFalse(File(workingDirectory, "escape.txt").exists())
+        assertTrue("no staging directory is left", File(workingDirectory, "trees").listFiles()!!.map { it.name } == listOf("one"))
+
+        // The destination may exist (MCP roadmap D56): existing files are refused one by one, new ones are added.
+        val merged = result(emit(listOf("a.txt", "c.txt"), "trees/one"))
+        assertEquals("EXISTS", merged.getJSONObject("result").getJSONObject("answers").getString("a.txt"))
+        assertEquals(1, merged.getJSONArray("outputs").getJSONObject(0).getInt("files"))
+        assertTrue(File(tree, "c.txt").isFile)
+        val replaced = result(emit(listOf("a.txt"), "trees/one", "overwrite" to true))
+        assertEquals("OK", replaced.getJSONObject("result").getJSONObject("answers").getString("a.txt"))
+
+        val failed = emit(listOf("x.txt"), "trees/two", "failAfter" to true)
+        assertEquals(NodeBridgeErrorCategory.PROVIDER_FAILED, failed.error!!.category)
+        assertFalse(File(workingDirectory, "trees/two").exists())
+        assertTrue("a failed call leaves nothing behind", File(workingDirectory, "trees").listFiles()!!.map { it.name } == listOf("one"))
+
+        assertFalse("without the output the plugin gets no tree", result(emit(listOf("y.txt"), null)).getJSONObject("result").getBoolean("tree"))
+        File(workingDirectory, "plain.txt").writeText("a file")
+        assertTrue(emit(listOf("z.txt"), "plain.txt").error!!.message.contains("points at a file"))
+    }
+
     private fun call(method: String, args: JSONArray, permissions: List<String>, timeoutMs: Long = 20_000L): NodeBridgeResponse {
         val latch = CountDownLatch(1)
         var response: NodeBridgeResponse? = null

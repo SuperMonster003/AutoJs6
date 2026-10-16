@@ -15,7 +15,9 @@ import org.autojs.plugin.tool.api.PluginToolCatalogKeys
 import org.autojs.plugin.tool.api.PluginToolContract
 import org.autojs.plugin.tool.api.PluginToolErrorCodes
 import org.autojs.plugin.tool.api.PluginToolErrorKeys
+import org.autojs.plugin.tool.api.IPluginToolOutputTree
 import org.autojs.plugin.tool.api.PluginToolInvokeKeys
+import org.autojs.plugin.tool.api.PluginToolOutputTreeKeys
 import org.autojs.plugin.tool.api.PluginToolResultKeys
 import org.json.JSONArray
 import org.json.JSONObject
@@ -28,8 +30,9 @@ import kotlin.concurrent.thread
  * with `echo` (returns its text), `fail` (always fails), `slow` (waits until cancelled or `sleepMs` passed), `inspect`
  * (reports the bytes behind its image and file descriptors), `emit` (returns its text as the binary output `data`) and
  * `last_cancel` (returns the invocation id and reason of the last cancel it received), `inspect_dir` (reports the files of
- * its directory inputs), `die` (kills the provider process
- * during the call) and `bad_schema` (an open schema the host must drop). Nothing here is reachable from production code.
+ * its directory inputs), `emit_tree` (writes its files into the directory output `tree` and reports each answer of the
+ * host), `die` (kills the provider process during the call) and `bad_schema` (an open schema the host must drop).
+ * Nothing here is reachable from production code.
  */
 class FakePluginToolProviderService : Service() {
 
@@ -64,6 +67,36 @@ class FakePluginToolProviderService : Service() {
                     }, emptyArray())
                 }
                 "fail" -> thread(name = "fake-tool-fail") { callback.onError(error(invocationId, PluginToolErrorCodes.FAILED, "the fake tool always fails")) }
+                "emit_tree" -> thread(name = "fake-tool-emit-tree") {
+                    val tree = request.getBundle(PluginToolInvokeKeys.OUTPUT_TREES)?.getBinder("tree")?.let(IPluginToolOutputTree.Stub::asInterface)
+                    val answers = JSONObject()
+                    if (tree != null) {
+                        arguments.optJSONArray("directories")?.let { list ->
+                            for (index in 0 until list.length()) {
+                                val path = list.getString(index)
+                                val answer = tree.createDirectory(path)
+                                answers.put(path, if (answer.getBoolean(PluginToolOutputTreeKeys.OK)) "OK" else answer.getString(PluginToolOutputTreeKeys.ERROR_CODE))
+                            }
+                        }
+                        val files = arguments.optJSONArray("files") ?: JSONArray()
+                        for (index in 0 until files.length()) {
+                            val path = files.getString(index)
+                            val answer = Bundle()
+                            val descriptor = tree.openFile(path, -1L, answer)
+                            if (descriptor != null) ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { it.write("content of $path".toByteArray()) }
+                            answers.put(path, if (descriptor != null) "OK" else answer.getString(PluginToolOutputTreeKeys.ERROR_CODE))
+                        }
+                    }
+                    if (arguments.optBoolean("failAfter")) {
+                        callback.onError(error(invocationId, PluginToolErrorCodes.FAILED, "failed after writing ${answers.length()} entries"))
+                    } else {
+                        callback.onResult(Bundle().apply {
+                            putString(PluginToolResultKeys.INVOCATION_ID, invocationId)
+                            putString(PluginToolResultKeys.RESULT_JSON, JSONObject().put("tree", tree != null).put("answers", answers).toString())
+                            putString(PluginToolResultKeys.OUTPUTS_JSON, "[]")
+                        }, emptyArray())
+                    }
+                }
                 "slow" -> thread(name = "fake-tool-slow") {
                     val until = System.currentTimeMillis() + arguments.optLong("sleepMs", 60_000L)
                     while (System.currentTimeMillis() < until && invocationId !in cancelled) Thread.sleep(20)
@@ -216,6 +249,14 @@ class FakePluginToolProviderService : Service() {
       "inputSchema": {"type": "object", "properties": {"dir": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": ["a.txt", "b.bin"]}, "all": {"type": "string", "x-autojs6-type": "directory"}}, "additionalProperties": false},
       "risk": "readonly",
       "timeoutMs": 10000
+    },
+    {
+      "name": "emit_tree",
+      "description": "Writes its files, each holding 'content of <path>', into the directory output tree and reports the answer for every path; failAfter reports an error afterwards. Test-only tool.",
+      "inputSchema": {"type": "object", "properties": {"files": {"type": "array", "items": {"type": "string", "maxLength": 300}, "maxItems": 16}, "directories": {"type": "array", "items": {"type": "string", "maxLength": 300}, "maxItems": 8}, "failAfter": {"type": "boolean"}}, "required": ["files"], "additionalProperties": false},
+      "risk": "write",
+      "timeoutMs": 10000,
+      "outputs": [{"name": "tree", "kind": "directory", "description": "the files"}]
     },
     {
       "name": "die",

@@ -10,8 +10,13 @@ import org.autojs.plugin.tool.api.PluginToolLimits
 import org.autojs.plugin.tool.api.PluginToolNames
 import org.autojs.plugin.tool.api.PluginToolValues
 
-/** One binary output a tool declares (docs/dev/plugin-tool-protocol-v1.md). */
-data class PluginToolOutput(val name: String, val mimeType: String, val description: String?)
+/**
+ * One output a tool declares (docs/dev/plugin-tool-protocol-v1.md): a file returned as a descriptor, or a directory the
+ * plugin fills through an IPluginToolOutputTree (MCP roadmap D53), whose [mimeType] is `inode/directory`.
+ */
+data class PluginToolOutput(val name: String, val mimeType: String, val description: String?, val kind: String = PluginToolValues.OUTPUT_KIND_FILE) {
+    val isDirectory: Boolean get() = kind == PluginToolValues.OUTPUT_KIND_DIRECTORY
+}
 
 /**
  * One usable tool of an accepted catalog; [fullName] is what consumers see, [specialParameters] maps the image and file
@@ -178,13 +183,18 @@ object PluginToolCatalogParser {
             val output = element as? JsonObject ?: throw IllegalArgumentException("an output is not an object")
             val name = output.string(PluginToolCatalogJson.OUTPUT_NAME)?.takeIf(PluginToolNames::isValidToolName)
                 ?: throw IllegalArgumentException("an output name does not match ${PluginToolNames.TOOL_NAME_PATTERN.pattern}")
-            val mimeType = output.string(PluginToolCatalogJson.OUTPUT_MIME_TYPE)?.takeIf { MIME_TYPE.matches(it) }
+            val kind = output.opt(PluginToolCatalogJson.OUTPUT_KIND)?.let {
+                output.string(PluginToolCatalogJson.OUTPUT_KIND)?.takeIf { value -> value in PluginToolValues.OUTPUT_KINDS }
+                    ?: throw IllegalArgumentException("output $name has an unknown kind")
+            } ?: PluginToolValues.OUTPUT_KIND_FILE
+            val mimeType = if (kind == PluginToolValues.OUTPUT_KIND_DIRECTORY) DIRECTORY_MIME_TYPE
+            else output.string(PluginToolCatalogJson.OUTPUT_MIME_TYPE)?.takeIf { MIME_TYPE.matches(it) }
                 ?: throw IllegalArgumentException("output $name has no valid mimeType")
             val description = output.opt(PluginToolCatalogJson.OUTPUT_DESCRIPTION)?.let {
                 output.string(PluginToolCatalogJson.OUTPUT_DESCRIPTION)?.takeIf { text -> text.length <= PluginToolLimits.MAX_DESCRIPTION_CHARS }
                     ?: throw IllegalArgumentException("output $name has an invalid description")
             }
-            PluginToolOutput(name, mimeType, description)
+            PluginToolOutput(name, mimeType, description, kind)
         }
         require(outputs.map { it.name }.toSet().size == outputs.size) { "output names repeat" }
         outputs
@@ -205,4 +215,6 @@ object PluginToolCatalogParser {
     }
 
     private val MIME_TYPE = Regex("^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]*$")
+
+    const val DIRECTORY_MIME_TYPE = "inode/directory"
 }

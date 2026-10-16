@@ -63,6 +63,13 @@ object PluginToolLimits {
     /** Input descriptors of one call, directory files included. */
     const val MAX_INPUT_DESCRIPTORS = 32
 
+    /** Files one directory output may hold (MCP roadmap D53). */
+    const val MAX_OUTPUT_TREE_FILES = 100_000
+
+    /** UTF-8 bytes of one relative path of a directory output, and of one of its segments. */
+    const val MAX_OUTPUT_TREE_PATH_BYTES = 4096
+    const val MAX_OUTPUT_TREE_SEGMENT_BYTES = 255
+
     const val DEFAULT_TIMEOUT_MS = 30_000L
     const val MAX_TIMEOUT_MS = 300_000L
 

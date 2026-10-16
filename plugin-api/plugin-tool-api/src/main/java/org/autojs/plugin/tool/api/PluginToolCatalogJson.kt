@@ -67,13 +67,19 @@ object PluginToolCatalogJson {
     /** Number, optional: calls of this tool the plugin runs at once, default 1, at most PluginToolLimits.MAX_CONCURRENCY. */
     const val MAX_CONCURRENCY = "maxConcurrency"
 
-    /** Array, optional: binary outputs the tool can produce, `{name, mimeType, description?}`, at most PluginToolLimits.MAX_OUTPUTS. */
+    /**
+     * Array, optional: outputs the tool can produce, `{name, kind?, mimeType, description?}`, at most
+     * PluginToolLimits.MAX_OUTPUTS. A file output (the default kind) needs its mimeType; a directory output does not.
+     */
     const val OUTPUTS = "outputs"
 
     /** Field of an output entry: name, unique within the tool. */
     const val OUTPUT_NAME = "name"
 
-    /** Field of an output entry: the MIME type of the bytes, such as `image/png`. */
+    /** Field of an output entry, optional: PluginToolValues.OUTPUT_KIND_FILE (default) or OUTPUT_KIND_DIRECTORY. */
+    const val OUTPUT_KIND = "kind"
+
+    /** Field of an output entry: the MIME type of the bytes, such as `image/png`; ignored for a directory output. */
     const val OUTPUT_MIME_TYPE = "mimeType"
 
     /** Field of an output entry, optional. */

@@ -21,6 +21,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.plugin.ServiceBindingLease
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
+import org.autojs.autojs.core.plugin.tool.PluginToolCatalogParser
 import org.autojs.autojs.core.plugin.tool.PluginToolDefinition
 import org.autojs.autojs.core.plugin.tool.PluginToolInput
 import org.autojs.autojs.core.plugin.tool.PluginToolInvocationPlan
@@ -192,6 +193,11 @@ internal class NodeBridgePluginToolsBridge(
 
         val targets = plan.outputs.mapValues { (name, path) ->
             val file = resolve { paths.write(path, "plugin_tools.invoke output $name") }
+            if (tool.outputs.firstOrNull { it.name == name }?.isDirectory == true) {
+                // A directory output may land in an existing directory (MCP roadmap D56); its files are checked one by one.
+                if (file.exists() && !file.isDirectory) throw RequestProblem(NodeBridgeError.invalidRequest("output $name points at a file: $path", request.module, request.method))
+                return@mapValues OutputTarget(path, file, PluginToolOutputTree(file, overwrite, ".${file.name}.${UUID.randomUUID()}.partial"))
+            }
             if (file.isDirectory) throw RequestProblem(NodeBridgeError.invalidRequest("output $name points at a directory: $path", request.module, request.method))
             if (file.exists() && !overwrite) throw RequestProblem(NodeBridgeError.invalidRequest("output $name already exists: $path (pass overwrite: true to replace it)", request.module, request.method))
             OutputTarget(path, file)
@@ -210,6 +216,10 @@ internal class NodeBridgePluginToolsBridge(
                 putString(PluginToolInvokeKeys.OUTPUTS_JSON, JSONArray(plan.outputs.keys.toList()).toString())
                 putLong(PluginToolInvokeKeys.TIMEOUT_MS, plan.timeoutMs)
                 putString(PluginToolInvokeKeys.CONSUMER, consumer)
+                val trees = targets.filterValues { it.tree != null }
+                if (trees.isNotEmpty()) {
+                    putBundle(PluginToolInvokeKeys.OUTPUT_TREES, Bundle().apply { trees.forEach { (name, target) -> putBinder(name, target.tree!!.asBinder()) } })
+                }
             }
             if (operation.isFinished) return
             val target = provider.target ?: throw IOException("the provider ${provider.packageName} is not bound")
@@ -342,7 +352,8 @@ internal class NodeBridgePluginToolsBridge(
         return success(request, JSONObject().put("schema", CANCEL_SCHEMA).put("invocationId", invocationId).put("cancelled", cancelled))
     }
 
-    private class OutputTarget(val path: String, val file: File)
+    /** Where one requested output goes; a directory output also has the [tree] the plugin writes through. */
+    private class OutputTarget(val path: String, val file: File, val tree: PluginToolOutputTree? = null)
 
     private class ResolvedInput(val meta: JSONObject, val descriptor: ParcelFileDescriptor)
 
@@ -419,6 +430,8 @@ internal class NodeBridgePluginToolsBridge(
             if (!finished.compareAndSet(false, true)) return false
             operations.remove(invocationId, this)
             mainHandler.removeCallbacks(timeout)
+            // A successful result committed its directory outputs already; any other end drops what the plugin wrote.
+            targets.values.forEach { it.tree?.discard() }
             cancelReason?.let(::sendCancel)
             release()
             reply(response)
@@ -466,12 +479,22 @@ internal class NodeBridgePluginToolsBridge(
                 val names = runCatching { JSONArray(result.getString(PluginToolResultKeys.OUTPUTS_JSON) ?: "[]") }.getOrElse { JSONArray() }
                 for (index in descriptors.indices) {
                     val name = names.optJSONObject(index)?.optString(PluginToolOutputJson.NAME).orEmpty()
-                    val target = targets[name] ?: continue
+                    val target = targets[name]?.takeIf { it.tree == null } ?: continue
                     val bytes = runCatching { writeOutput(descriptors[index], target.file) }.getOrElse { error ->
                         return badResult("output $name could not be written: ${error.message}")
                     }
                     written.put(JSONObject().put("name", name).put("path", target.path).put("bytes", bytes)
                         .put("mimeType", names.optJSONObject(index)?.optString(PluginToolOutputJson.MIME_TYPE).orEmpty()))
+                }
+                for ((name, target) in targets) {
+                    val tree = target.tree ?: continue
+                    val committed = runCatching { tree.commit() }.getOrElse { error -> return badResult("output $name could not be committed: ${error.message}") }
+                    written.put(JSONObject().put("name", name).put("kind", PluginToolValues.OUTPUT_KIND_DIRECTORY).put("path", target.path)
+                        .put("mimeType", PluginToolCatalogParser.DIRECTORY_MIME_TYPE).put("files", committed.files).put("bytes", committed.bytes).apply {
+                            if (committed.conflicts.isNotEmpty()) {
+                                put("conflicts", JSONArray(committed.conflicts.take(MAX_REPORTED_CONFLICTS))).put("conflictCount", committed.conflicts.size)
+                            }
+                        })
                 }
                 val missing = targets.keys.filter { name -> (0 until written.length()).none { written.getJSONObject(it).getString("name") == name } }
                 val json = JSONObject()
@@ -568,7 +591,9 @@ internal class NodeBridgePluginToolsBridge(
         put("timeoutMs", tool.timeoutMs)
         put("maxConcurrency", tool.maxConcurrency)
         put("outputs", JSONArray().apply {
-            tool.outputs.forEach { output -> put(JSONObject().put("name", output.name).put("mimeType", output.mimeType).apply { output.description?.let { put("description", it) } }) }
+            tool.outputs.forEach { output ->
+                put(JSONObject().put("name", output.name).put("kind", output.kind).put("mimeType", output.mimeType).apply { output.description?.let { put("description", it) } })
+            }
         })
         put("imageParameters", JSONArray(tool.specialParameters.filterValues { it == PluginToolValues.SPECIAL_TYPE_IMAGE }.keys.toList()))
         put("fileParameters", JSONArray(tool.specialParameters.filterValues { it == PluginToolValues.SPECIAL_TYPE_FILE }.keys.toList()))
@@ -598,6 +623,9 @@ internal class NodeBridgePluginToolsBridge(
         const val DEADLINE_MARGIN_MS = 750L
 
         private const val INPUT_DIRECTORY = "plugin-tool-inputs"
+
+        /** Conflicts a directory output reports by path; `conflictCount` has the total. */
+        private const val MAX_REPORTED_CONFLICTS = 20
         private val INVOCATION_ID = Regex("^[A-Za-z0-9._:-]{1,128}$")
 
         fun consumerOf(engineName: String): String = when (engineName) {

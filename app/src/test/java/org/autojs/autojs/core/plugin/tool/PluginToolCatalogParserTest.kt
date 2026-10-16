@@ -97,6 +97,22 @@ class PluginToolCatalogParserTest {
     }
 
     @Test
+    fun directoryOutputsNeedNoMimeTypeAndUnknownKindsAreDropped() {
+        val catalog = accepted(
+            catalog(
+                tool("extract", risk = "write", extra = """"outputs": [{"name": "files", "kind": "directory", "description": "the entries"}]"""),
+                tool("odd", extra = """"outputs": [{"name": "a", "kind": "symlink", "mimeType": "text/plain"}]"""),
+            ),
+        )
+        val output = catalog.tools.single().outputs.single()
+        assertEquals(PluginToolOutput("files", "inode/directory", "the entries", "directory"), output)
+        assertTrue(output.isDirectory)
+        assertTrue(catalog.diagnostics.any { "unknown kind" in it })
+        val file = accepted(catalog(tool("emit", extra = """"outputs": [{"name": "data", "kind": "file", "mimeType": "text/plain"}]"""))).tools.single().outputs.single()
+        assertEquals("file", file.kind)
+    }
+
+    @Test
     fun unknownFieldsAreIgnoredAndTheSchemaHookDecides() {
         val catalog = accepted(catalog(tool("a", extra = """"futureField": {"x": 1}"""), extraRoot = """"futureRoot": true,"""))
         assertEquals(1, catalog.tools.size)

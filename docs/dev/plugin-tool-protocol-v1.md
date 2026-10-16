@@ -64,6 +64,13 @@ an unchanged set binds nothing. A provider is reported as `AVAILABLE`, `DISABLED
 | 2 | `onResult(in Bundle result, in ParcelFileDescriptor[] outputs)` | the result and the binary outputs |
 | 3 | `onError(in Bundle error)` | the failure, including `CANCELLED` |
 
+`IPluginToolOutputTree` (synchronous, implemented by the host for each directory output, see below):
+
+| # | Method | Use |
+| --- | --- | --- |
+| 1 | `Bundle createDirectory(String relativePath)` | creates a directory and its parents |
+| 2 | `ParcelFileDescriptor openFile(String relativePath, long expectedBytes, out Bundle answer)` | a writable descriptor of a new file, or null with the reason in `answer` |
+
 Every provider method answers quickly on its Binder thread. `invoke` only checks the request and
 answers `PluginToolAcceptKeys` at once; the work runs on the plugin's own threads and ends with
 exactly one `onResult` or `onError`. Providers never throw for invalid input; they answer an error
@@ -126,7 +133,7 @@ reduced from its 32 names):
 | `risk` | `readonly`, `write`, `destructive` or `network` |
 | `timeoutMs` | optional, default 30000, at most 300000 |
 | `maxConcurrency` | optional, default 1, at most 4 |
-| `outputs` | optional binary outputs `{name, mimeType, description?}`, at most 8 |
+| `outputs` | optional outputs `{name, kind?, mimeType, description?}`, at most 8; `kind` is `file` (default, needs `mimeType`) or `directory` (MCP roadmap D53, no `mimeType`) |
 
 The whole document is at most 256 KiB of UTF-8. A document that is not a JSON object, breaks a limit,
 uses an invalid or reserved short name, declares a shared family it may not use, or repeats a tool
@@ -210,6 +217,7 @@ Request (`PluginToolInvokeKeys`):
 | `outputsJson` | JSON array of the declared output names the caller wants written |
 | `timeoutMs` | Long, the tool's `timeoutMs` capped by the consumer's limit |
 | `consumer` | `mcp`, `agent` or `script`, informational |
+| `outputTrees` | Bundle, only when the caller wants directory outputs: output name to the IBinder of an `IPluginToolOutputTree` |
 
 The provider owns and closes the input descriptors. Immediate answer (`PluginToolAcceptKeys`):
 `accepted` (Boolean), or `errorCode` / `errorMessage` (for example `UNKNOWN_TOOL`, `BUSY`,
@@ -224,6 +232,30 @@ the caller gave for that output (D32). A provider may return a pipe or a file in
 
 Failure (`onError`, `PluginToolErrorKeys`): `invocationId`, `code`, `message` (English, at most 4096
 characters).
+
+### Directory outputs
+
+A tool that produces a tree of files, such as extracting an archive, declares an output with
+`"kind": "directory"` (MCP roadmap D53). For every directory output the caller wants, the request
+carries an `IPluginToolOutputTree` in `outputTrees`, and the provider writes through it while the call
+runs:
+
+- Paths are relative, with `/` between segments; empty, `.` and `..` segments, a leading `/`, backslashes
+  and control characters are refused (`INVALID_PATH`), as are paths above 4096 UTF-8 bytes or segments
+  above 255 (`PluginToolOutputTreePaths` checks the same rule on the plugin side).
+- `createDirectory` answers `ok`, or `errorCode` / `errorMessage`. `openFile` returns a writable
+  descriptor of a new, empty file, or null with the reason in `answer`. The provider writes and closes
+  every descriptor before it reports the result; a tree holds at most 100000 files (`LIMIT_EXCEEDED`).
+- The destination directory may already exist (D56). A file that exists there answers `EXISTS` unless the
+  caller passed `overwrite: true`; the provider may skip it, report it in its own result and go on.
+- The host writes into a hidden staging directory next to the destination. When the call reports
+  `onResult`, it moves the files into the destination (a file that appeared meanwhile, or a path that
+  would leave the destination through a link, is reported as a conflict) and deletes the staging
+  directory; when the call fails, times out, is cancelled or the provider dies, it deletes the staging
+  directory and nothing reaches the destination. After the call ended both methods answer `CLOSED`.
+
+Hosts before directory outputs never send `outputTrees`; a provider that finds no tree for a wanted
+directory output may still answer, for example with a listing of what it would have written.
 
 Time limit and cancel: when `timeoutMs` passes without a callback, or the consumer cancels, the host
 calls `cancel({invocationId, reason})` with reason `timeout`, `caller` or `host`, answers the consumer
@@ -259,6 +291,7 @@ the provider process dies, every running call of it fails on the host side.
 | one image input or output descriptor | 8 MiB |
 | one file of a file or directory parameter | 512 MiB (opened read-only, no copy) |
 | image, file or directory parameters / outputs per tool | 8 / 8 |
+| files per directory output / bytes of one relative path / of one segment | 100000 / 4096 / 255 |
 | files per directory parameter / input descriptors per call | 16 / 32 |
 | time limit | default 30 s, at most 300 s |
 | concurrency per tool | default 1, at most 4 |
@@ -282,7 +315,7 @@ through the provider directly (MCP roadmap D29). Every method needs the token `p
 | Method | Arguments | Result (`schema`) |
 | --- | --- | --- |
 | `list()` | none | `autojs6-bridge-plugin-tools-list-v1`: `tools[]` with `name` (`<shortName>_<name>`), `tool`, `shortName`, `provider`, `trust`, `title`, `description`, `inputSchema`, `outputSchema`, `risk`, `timeoutMs`, `maxConcurrency`, `outputs`, `imageParameters`, `fileParameters`, `directoryParameters`; `providers[]` with `packageName`, `versionCode`, `trust`, `status`, `shortName`, `tools`, `diagnostics`, `detail` and `toolsHidden` |
-| `invoke(name, arguments, options)` | `options`: `invocationId` (`[A-Za-z0-9._:-]{1,128}`, generated when absent), `timeoutMs` (only shortens the tool's), `outputs` (output name to working-directory path), `overwrite` (default false) | `autojs6-bridge-plugin-tools-invoke-v1`: `tool`, `provider`, `invocationId`, `result`, `text`, `outputs[]` (`name`, `path`, `bytes`, `mimeType`), `missingOutputs`, `durationMs` |
+| `invoke(name, arguments, options)` | `options`: `invocationId` (`[A-Za-z0-9._:-]{1,128}`, generated when absent), `timeoutMs` (only shortens the tool's), `outputs` (output name to working-directory path), `overwrite` (default false) | `autojs6-bridge-plugin-tools-invoke-v1`: `tool`, `provider`, `invocationId`, `result`, `text`, `outputs[]` (`name`, `path`, `bytes`, `mimeType`; a directory output adds `kind: "directory"`, `files` and, when some were left alone, `conflicts` (at most 20 paths) and `conflictCount`), `missingOutputs`, `durationMs` |
 | `cancel(invocationId)` or `cancel({invocationId})` | | `autojs6-bridge-plugin-tools-cancel-v1`: `invocationId`, `cancelled` (false when the call already ended or never ran) |
 
 Rules the bridge enforces before the provider sees a call:
@@ -303,7 +336,8 @@ Rules the bridge enforces before the provider sees a call:
   during a call fails it at once. The call keeps a dedicated binding to the provider until it ends.
 - A result larger than 512 KiB, a result that is not JSON or does not match the declared output schema, and an output
   above 8 MiB fail the call (`resource-limit` / `provider-failed`). Outputs are copied into a sibling temporary file
-  and renamed over the target.
+  and renamed over the target. A directory output may name an existing directory (not a file); its files are staged
+  and moved in as described under "Directory outputs".
 
 Provider error codes map onto bridge categories: `INVALID_ARGUMENTS`, `UNKNOWN_TOOL` and `INPUT_UNREADABLE` to
 `invalid-request`, `BUSY` to `rate-limited`, `LIMIT_EXCEEDED` to `resource-limit`, `TIMEOUT` to `timeout`, `NOT_READY`
@@ -348,4 +382,6 @@ the `plugins` module); there is no broker and no grant in between (MCP roadmap D
 | Script API `plugins.tools` | done (P12 host item 5: `PluginsTools`; documentation, declarations 4.41.0 and Ace Editor completion synchronized) |
 | Host changelog and protocol documents | done (P12 host item 6: 6.8.0 changelog, `host-capability-contract-v1.md`) |
 | Pilot OpenCC (part of the 6.8.0 release gate) | done: 3-Hanzi CC 2.1.0 declares `opencc_convert` (`config` takes the 32 names of the `opencc` module, `text` up to 16384 characters); `OpenccPluginToolRoundTripTest` runs it through the script API and the bridge |
-| Pilots YOLO, Image Quantization, Stack Archive | planned |
+| Pilots YOLO, Image Quantization | done: `yolo_detect` (directory parameters, D49) and `imagequant_quantize` (binary output in the plugin's own process, D51 / D52) |
+| Directory outputs | done (D53 / D56: `IPluginToolOutputTree`, staging and commit in `PluginToolOutputTree`, fake tool `emit_tree`) |
+| Pilot Stack Archive | in progress: list, read and extract with a directory output |

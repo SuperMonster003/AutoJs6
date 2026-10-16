@@ -59,6 +59,25 @@ object PluginToolInvokeKeys {
 
     /** String: who asked (PluginToolValues.CONSUMER_*), for logs and statistics only. */
     const val CONSUMER = "consumer"
+
+    /**
+     * Bundle, present when the caller wants directory outputs (MCP roadmap D53): output name to the IBinder of an
+     * IPluginToolOutputTree. The names also appear in [OUTPUTS_JSON]; hosts before directory outputs never send it.
+     */
+    const val OUTPUT_TREES = "outputTrees"
+}
+
+/** Answers of IPluginToolOutputTree: the result of `createDirectory`, the `answer` of `openFile`. */
+object PluginToolOutputTreeKeys {
+
+    /** Boolean: true when the directory exists or the file is open. */
+    const val OK = "ok"
+
+    /** String: one of PluginToolOutputTreeErrors when OK is false. */
+    const val ERROR_CODE = "errorCode"
+
+    /** String: what went wrong, for logs and for the plugin's own result. */
+    const val ERROR_MESSAGE = "errorMessage"
 }
 
 /** Immediate answer of `invoke`. */

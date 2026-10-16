@@ -50,6 +50,33 @@ object PluginToolValues {
     const val CANCEL_REASON_CALLER = "caller"
     const val CANCEL_REASON_TIMEOUT = "timeout"
     const val CANCEL_REASON_HOST = "host"
+
+    /** PluginToolCatalogJson.OUTPUT_KIND: one file, returned as a descriptor of onResult (the default). */
+    const val OUTPUT_KIND_FILE = "file"
+
+    /** PluginToolCatalogJson.OUTPUT_KIND: a directory the plugin fills through an IPluginToolOutputTree (MCP roadmap D53). */
+    const val OUTPUT_KIND_DIRECTORY = "directory"
+
+    val OUTPUT_KINDS: Set<String> = setOf(OUTPUT_KIND_FILE, OUTPUT_KIND_DIRECTORY)
+}
+
+/** PluginToolOutputTreeKeys.ERROR_CODE values. */
+object PluginToolOutputTreeErrors {
+
+    /** The file exists in the destination and the caller did not allow overwriting; the plugin may skip it. */
+    const val EXISTS = "EXISTS"
+
+    /** The path is empty, absolute, has an empty, `.` or `..` segment, a control character or a backslash, or is too long. */
+    const val INVALID_PATH = "INVALID_PATH"
+
+    /** The tree already holds PluginToolLimits.MAX_OUTPUT_TREE_FILES files. */
+    const val LIMIT_EXCEEDED = "LIMIT_EXCEEDED"
+
+    /** The call has ended; nothing more is written. */
+    const val CLOSED = "CLOSED"
+
+    /** The host could not create the directory or the file. */
+    const val IO_ERROR = "IO_ERROR"
 }
 
 /** Error codes a provider reports in PluginToolErrorKeys.CODE, PluginToolAcceptKeys.ERROR_CODE and PluginToolCatalogKeys.ERROR_CODE. */

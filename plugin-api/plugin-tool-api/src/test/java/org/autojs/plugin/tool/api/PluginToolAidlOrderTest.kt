@@ -19,11 +19,11 @@ import java.nio.file.Paths
 class PluginToolAidlOrderTest {
 
     @Test
-    fun theContractHasTwoInterfaces() {
+    fun theContractHasThreeInterfaces() {
         val files = Files.list(aidlDirectory()).use { paths ->
             paths.filter { Files.isRegularFile(it) && it.fileName.toString().endsWith(".aidl") }.map { it.fileName.toString() }.sorted().toList()
         }
-        assertEquals(listOf("IPluginToolCallback.aidl", "IPluginToolProvider.aidl"), files)
+        assertEquals(listOf("IPluginToolCallback.aidl", "IPluginToolOutputTree.aidl", "IPluginToolProvider.aidl"), files)
     }
 
     @Test
@@ -50,6 +50,19 @@ class PluginToolAidlOrderTest {
                 "void onProgress(in Bundle update)",
                 "void onResult(in Bundle result, in ParcelFileDescriptor[] outputs)",
                 "void onError(in Bundle error)",
+            ),
+            methods(source),
+        )
+    }
+
+    @Test
+    fun theOutputTreeIsSynchronousAndKeepsItsFrozenOrder() {
+        val source = withoutComments("IPluginToolOutputTree.aidl")
+        assertFalse("the plugin waits for each answer", Regex("\\boneway\\b").containsMatchIn(source))
+        assertEquals(
+            listOf(
+                "Bundle createDirectory(String relativePath)",
+                "ParcelFileDescriptor openFile(String relativePath, long expectedBytes, out Bundle answer)",
             ),
             methods(source),
         )
