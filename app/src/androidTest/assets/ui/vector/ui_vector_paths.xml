@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Host roadmap A8 test vector: relative commands, implicit repetition, compact numbers, smooth curves, arcs and group transforms. The copy in androidTest/assets/ui/vector must stay identical. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFE53935"
+        android:pathData="M12,21.35l-1.45,-1.32C5.4,15.36 2,12.28 2,8.5 2,5.42 4.42,3 7.5,3c1.74,0 3.41,0.81 4.5,2.09C13.09,3.81 14.76,3 16.5,3 19.58,3 22,5.42 22,8.5c0,3.78 -3.4,6.86 -8.55,11.54L12,21.35z" />
+    <path
+        android:pathData="M4,12a8,8 0 1,1 16,0a8,8 0 1,1 -16,0z"
+        android:strokeColor="#FF1E88E5"
+        android:strokeWidth="1.2" />
+    <path
+        android:pathData="M2,20a6,3 30 0,1 10,-2"
+        android:strokeColor="#FF43A047"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M2,2Q6,0 10,2T18,2M2,6C4,4 6,4 8,6S12,8 14,6M1.5.5l2-2.5h3v1.5e0z"
+        android:strokeColor="#FF8E24AA"
+        android:strokeWidth="0.8" />
+    <group
+        android:pivotX="18"
+        android:pivotY="18"
+        android:rotation="30"
+        android:scaleX="0.8"
+        android:scaleY="1.2"
+        android:translateX="-1"
+        android:translateY="0.5">
+        <path
+            android:fillColor="#FFFB8C00"
+            android:pathData="M15,15h6v6h-6z" />
+        <group
+            android:rotation="-45"
+            android:pivotX="18"
+            android:pivotY="18">
+            <path
+                android:fillColor="#FF00897B"
+                android:pathData="M17,16h2v4h-2z" />
+        </group>
+    </group>
+</vector>

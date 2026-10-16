@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Host roadmap A8 test vector: inline linear (items), radial (start / center / end colors) and sweep gradients, one in a scaled group. The copy in androidTest/assets/ui/vector must stay identical. -->
+<vector xmlns:aapt="http://schemas.android.com/aapt"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:pathData="M1,1h10v10h-10z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="11"
+                android:endY="11"
+                android:startX="1"
+                android:startY="1"
+                android:type="linear">
+                <item
+                    android:color="#FFE53935"
+                    android:offset="0" />
+                <item
+                    android:color="#FFFFEB3B"
+                    android:offset="0.4" />
+                <item
+                    android:color="#FF1E88E5"
+                    android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M18,6m-5,0a5,5 0 1,1 10,0a5,5 0 1,1 -10,0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerColor="#FFFFFFFF"
+                android:centerX="18"
+                android:centerY="6"
+                android:endColor="#FF43A047"
+                android:gradientRadius="5"
+                android:startColor="#FF8E24AA"
+                android:type="radial" />
+        </aapt:attr>
+    </path>
+    <group
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:translateX="1"
+        android:translateY="13">
+        <path android:pathData="M0,0h20v20h-20z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:centerX="10"
+                    android:centerY="10"
+                    android:endColor="#FF00897B"
+                    android:startColor="#FFFB8C00"
+                    android:type="sweep" />
+            </aapt:attr>
+        </path>
+    </group>
+    <path
+        android:pathData="M14,14L22,22"
+        android:strokeWidth="2">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:endColor="#FF000000"
+                android:endX="22"
+                android:endY="22"
+                android:startColor="#FFFF4081"
+                android:startX="14"
+                android:startY="14"
+                android:type="linear" />
+        </aapt:attr>
+    </path>
+</vector>

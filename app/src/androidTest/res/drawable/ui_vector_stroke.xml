@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Host roadmap A8 test vector: stroke caps, joins, miter limit, stroke alpha and trimmed paths (with an offset that wraps). The copy in androidTest/assets/ui/vector must stay identical. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    <path
+        android:pathData="M4,4L14,4L4,10"
+        android:strokeColor="#FF3949AB"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="2.5" />
+    <path
+        android:pathData="M18,4L28,4L18,10"
+        android:strokeAlpha="0.6"
+        android:strokeColor="#FFD81B60"
+        android:strokeLineCap="square"
+        android:strokeLineJoin="bevel"
+        android:strokeWidth="2.5" />
+    <path
+        android:pathData="M4,14L14,14L4,18"
+        android:strokeColor="#FF00ACC1"
+        android:strokeMiterLimit="10"
+        android:strokeWidth="2" />
+    <path
+        android:pathData="M20,22m-6,0a6,6 0 1,1 12,0a6,6 0 1,1 -12,0"
+        android:strokeColor="#FF7CB342"
+        android:strokeWidth="2"
+        android:trimPathEnd="0.6"
+        android:trimPathStart="0.1" />
+    <path
+        android:pathData="M4,28L28,28"
+        android:strokeColor="#FFF4511E"
+        android:strokeWidth="2"
+        android:trimPathEnd="0.5"
+        android:trimPathOffset="0.75"
+        android:trimPathStart="0" />
+</vector>

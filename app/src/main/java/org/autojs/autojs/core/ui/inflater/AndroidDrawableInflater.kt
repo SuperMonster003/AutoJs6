@@ -3,9 +3,16 @@ package org.autojs.autojs.core.ui.inflater
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.NinePatch
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.PorterDuff
+import android.graphics.RadialGradient
 import android.graphics.Rect
 import android.graphics.Shader
+import android.graphics.SweepGradient
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ClipDrawable
@@ -22,6 +29,7 @@ import android.graphics.drawable.ScaleDrawable
 import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.TransitionDrawable
 import android.os.Build
+import android.util.Log
 import android.view.Gravity
 import org.autojs.autojs.core.ui.inflater.ScriptResourceRepository.Companion.childElements
 import org.autojs.autojs.core.ui.inflater.util.Gravities
@@ -29,6 +37,7 @@ import org.autojs.autojs.core.ui.inflater.util.Ids
 import org.w3c.dom.Element
 import java.io.File
 import java.util.LinkedHashSet
+import kotlin.math.roundToInt
 
 /**
  * Inflates common Android drawable XML directly from an uncompiled script resource directory.
@@ -107,6 +116,7 @@ internal class AndroidDrawableInflater(
                 "ripple" -> inflateRipple(context, element)
                 "animation-list" -> inflateAnimationList(context, element)
                 "bitmap", "nine-patch" -> inflateBitmap(context, element)
+                "vector" -> inflateVector(context, element)
                 "color" -> ColorDrawable(parseColor(context, element.attr("color") ?: element.textContent))
                 else -> error("Unsupported Android drawable XML element: <${element.tagName}>")
             }
@@ -426,6 +436,152 @@ internal class AndroidDrawableInflater(
             ?: error("<${element.tagName}> must contain exactly one drawable or an android:drawable attribute")
     }
 
+    /**
+     * A `<vector>` (host roadmap A8): the size, viewport, tint, alpha and mirroring of the root, then its groups,
+     * paths and clip paths in document order; colors may be inline `<aapt:attr>` gradients. Elements a vector
+     * cannot contain are skipped with a log line, like the attributes Android ignores.
+     */
+    private fun inflateVector(context: Context, element: Element): Drawable {
+        val width = dimensionFloat(context, element.requireAttr("width")).roundToInt().coerceAtLeast(1)
+        val height = dimensionFloat(context, element.requireAttr("height")).roundToInt().coerceAtLeast(1)
+        val viewportWidth = number(context, element.requireAttr("viewportWidth"))
+        val viewportHeight = number(context, element.requireAttr("viewportHeight"))
+        require(viewportWidth > 0f && viewportHeight > 0f) { "<vector> requires a positive viewportWidth and viewportHeight" }
+        return ScriptVectorDrawable(
+            width = width,
+            height = height,
+            viewportWidth = viewportWidth,
+            viewportHeight = viewportHeight,
+            tint = element.attr("tint")?.let { resolver.parseColorStateList(context, it) },
+            tintMode = element.attr("tintMode")?.let { porterDuffMode(scalar(context, it)) } ?: PorterDuff.Mode.SRC_IN,
+            alpha = element.attr("alpha")?.let { number(context, it) } ?: 1f,
+            autoMirrored = element.attr("autoMirrored")?.let { boolean(context, it) } ?: false,
+            root = vectorGroup(context, element, isRoot = true),
+        )
+    }
+
+    private fun vectorGroup(context: Context, element: Element, isRoot: Boolean): ScriptVectorDrawable.Group {
+        val children = element.childElements().mapNotNull { child ->
+            when (child.tagName.substringAfterLast(':')) {
+                "group" -> vectorGroup(context, child, isRoot = false)
+                "path" -> vectorPath(context, child)
+                "clip-path" -> ScriptVectorDrawable.ClipItem(vectorPathData(context, child))
+                "attr" -> null
+                else -> null.also { Log.w(TAG, "<${child.tagName}> is not supported in a <vector> and was skipped") }
+            }
+        }
+        if (isRoot) return ScriptVectorDrawable.Group(children = children)
+        fun value(name: String, default: Float) = element.attr(name)?.let { number(context, it) } ?: default
+        return ScriptVectorDrawable.Group(
+            rotation = value("rotation", 0f),
+            pivotX = value("pivotX", 0f),
+            pivotY = value("pivotY", 0f),
+            scaleX = value("scaleX", 1f),
+            scaleY = value("scaleY", 1f),
+            translateX = value("translateX", 0f),
+            translateY = value("translateY", 0f),
+            children = children,
+        )
+    }
+
+    private fun vectorPath(context: Context, element: Element): ScriptVectorDrawable.PathItem {
+        fun value(name: String, default: Float) = element.attr(name)?.let { number(context, it) } ?: default
+        val fillShader = inlineGradient(context, element, "fillColor")
+        val strokeShader = inlineGradient(context, element, "strokeColor")
+        return ScriptVectorDrawable.PathItem(
+            path = vectorPathData(context, element),
+            fillColor = if (fillShader != null) Color.TRANSPARENT else element.attr("fillColor")?.let { vectorColor(context, it) } ?: Color.TRANSPARENT,
+            fillShader = fillShader,
+            fillAlpha = value("fillAlpha", 1f),
+            evenOdd = element.attr("fillType")?.let { scalar(context, it) } == "evenOdd",
+            strokeColor = if (strokeShader != null) Color.TRANSPARENT else element.attr("strokeColor")?.let { vectorColor(context, it) } ?: Color.TRANSPARENT,
+            strokeShader = strokeShader,
+            strokeAlpha = value("strokeAlpha", 1f),
+            strokeWidth = value("strokeWidth", 0f),
+            strokeCap = when (element.attr("strokeLineCap")?.let { scalar(context, it) }) {
+                null, "butt" -> Paint.Cap.BUTT
+                "round" -> Paint.Cap.ROUND
+                "square" -> Paint.Cap.SQUARE
+                else -> error("Unknown strokeLineCap: ${element.attr("strokeLineCap")}")
+            },
+            strokeJoin = when (element.attr("strokeLineJoin")?.let { scalar(context, it) }) {
+                null, "miter" -> Paint.Join.MITER
+                "round" -> Paint.Join.ROUND
+                "bevel" -> Paint.Join.BEVEL
+                else -> error("Unknown strokeLineJoin: ${element.attr("strokeLineJoin")}")
+            },
+            strokeMiter = value("strokeMiterLimit", 4f),
+            trimStart = value("trimPathStart", 0f),
+            trimEnd = value("trimPathEnd", 1f),
+            trimOffset = value("trimPathOffset", 0f),
+        )
+    }
+
+    private fun vectorPathData(context: Context, element: Element): Path = Path().apply {
+        for (op in VectorPathData.parse(scalar(context, element.requireAttr("pathData")))) {
+            when (op) {
+                is VectorPathData.MoveTo -> moveTo(op.x, op.y)
+                is VectorPathData.LineTo -> lineTo(op.x, op.y)
+                is VectorPathData.QuadTo -> quadTo(op.x1, op.y1, op.x, op.y)
+                is VectorPathData.CubicTo -> cubicTo(op.x1, op.y1, op.x2, op.y2, op.x, op.y)
+                VectorPathData.Close -> close()
+            }
+        }
+    }
+
+    /** A color, or the default color of a color state list (as the platform takes complex colors). */
+    private fun vectorColor(context: Context, value: String): Int =
+        runCatching { parseColor(context, value) }.getOrElse { resolver.parseColorStateList(context, value).defaultColor }
+
+    /** The `<gradient>` of an `<aapt:attr name="android:[name]">` child of [element], as a shader in viewport units. */
+    private fun inlineGradient(context: Context, element: Element, name: String): Shader? {
+        val gradient = element.childElements()
+            .firstOrNull { it.tagName.substringAfterLast(':') == "attr" && it.getAttribute("name").substringAfterLast(':') == name }
+            ?.childElements()?.firstOrNull { it.tagName == "gradient" }
+            ?: return null
+        fun value(attr: String) = gradient.attr(attr)?.let { number(context, it) } ?: 0f
+        val items = gradient.childElements().filter { it.tagName == "item" }
+        val colors: IntArray
+        val positions: FloatArray?
+        if (items.isNotEmpty()) {
+            colors = items.map { vectorColor(context, it.requireAttr("color")) }.toIntArray()
+            positions = items.map { item -> item.attr("offset")?.let { number(context, it) } ?: 0f }.toFloatArray()
+        } else {
+            val start = gradient.attr("startColor")?.let { vectorColor(context, it) } ?: Color.TRANSPARENT
+            val end = gradient.attr("endColor")?.let { vectorColor(context, it) } ?: Color.TRANSPARENT
+            val center = gradient.attr("centerColor")?.let { vectorColor(context, it) }
+            colors = if (center != null) intArrayOf(start, center, end) else intArrayOf(start, end)
+            positions = if (center != null) floatArrayOf(0f, 0.5f, 1f) else null
+        }
+        val tileMode = when (gradient.attr("tileMode")?.let { scalar(context, it) }) {
+            null, "clamp", "disabled" -> Shader.TileMode.CLAMP
+            "repeated" -> Shader.TileMode.REPEAT
+            "mirror" -> Shader.TileMode.MIRROR
+            else -> error("Unknown gradient tileMode: ${gradient.attr("tileMode")}")
+        }
+        return when (gradient.attr("type")?.let { scalar(context, it) } ?: "linear") {
+            "linear" -> LinearGradient(value("startX"), value("startY"), value("endX"), value("endY"), colors, positions, tileMode)
+            "radial" -> RadialGradient(value("centerX"), value("centerY"), value("gradientRadius").coerceAtLeast(Float.MIN_VALUE), colors, positions, tileMode)
+            "sweep" -> SweepGradient(value("centerX"), value("centerY"), colors, positions)
+            else -> error("Unknown gradient type: ${gradient.attr("type")}")
+        }
+    }
+
+    private fun number(context: Context, value: String): Float {
+        val resolved = scalar(context, value)
+        return resolved.toFloatOrNull() ?: error("Invalid Android number value: $resolved")
+    }
+
+    private fun porterDuffMode(value: String) = when (value) {
+        "src_over" -> PorterDuff.Mode.SRC_OVER
+        "src_in" -> PorterDuff.Mode.SRC_IN
+        "src_atop" -> PorterDuff.Mode.SRC_ATOP
+        "multiply" -> PorterDuff.Mode.MULTIPLY
+        "screen" -> PorterDuff.Mode.SCREEN
+        "add" -> PorterDuff.Mode.ADD
+        else -> error("Unknown tintMode: $value")
+    }
+
     private fun parseColor(context: Context, value: String) = resolver.parseColor(context, value)
 
     private fun dimension(context: Context, value: String) =
@@ -533,6 +689,7 @@ internal class AndroidDrawableInflater(
 
         private const val ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android"
         private const val MAX_DRAWABLE_DEPTH = 64
+        private const val TAG = "AndroidDrawableInflater"
         private const val MAX_BITMAP_PIXELS = 16L * 1024L * 1024L
 
         @Suppress("DEPRECATION")
