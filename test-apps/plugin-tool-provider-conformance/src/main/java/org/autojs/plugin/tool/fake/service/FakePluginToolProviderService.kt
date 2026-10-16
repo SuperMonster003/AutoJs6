@@ -17,14 +17,18 @@ import org.autojs.plugin.tool.api.PluginToolErrorCodes
 import org.autojs.plugin.tool.api.PluginToolErrorKeys
 import org.autojs.plugin.tool.api.PluginToolInvokeKeys
 import org.autojs.plugin.tool.api.PluginToolResultKeys
+import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.concurrent.thread
 
 /**
  * Test-only provider of the plugin tool contract (docs/dev/plugin-tool-protocol-v1.md). Its catalog declares `faketool`
- * with `echo` (returns its text), `fail` (always fails), `slow` (waits until cancelled or `sleepMs` passed) and
- * `bad_schema` (an open schema the host must drop). Nothing here is reachable from production code.
+ * with `echo` (returns its text), `fail` (always fails), `slow` (waits until cancelled or `sleepMs` passed), `inspect`
+ * (reports the bytes behind its image and file descriptors), `emit` (returns its text as the binary output `data`) and
+ * `last_cancel` (returns the invocation id and reason of the last cancel it received) and `bad_schema` (an open schema
+ * the host must drop). Nothing here is reachable from production code.
  */
 class FakePluginToolProviderService : Service() {
 
@@ -54,7 +58,8 @@ class FakePluginToolProviderService : Service() {
         }
 
         override fun invoke(request: Bundle?, inputs: Array<out ParcelFileDescriptor>?, callback: IPluginToolCallback?): Bundle {
-            inputs?.forEach { runCatching { it.close() } }
+            val descriptors = inputs?.toList().orEmpty()
+            if (request?.getString(PluginToolInvokeKeys.TOOL) != "inspect") descriptors.forEach { runCatching { it.close() } }
             val invocationId = request?.getString(PluginToolInvokeKeys.INVOCATION_ID)
             if (request == null || callback == null || invocationId == null) return refuse(PluginToolErrorCodes.FAILED, "incomplete request")
             if (!PluginToolContract.supportsContractVersion(request.getInt(PluginToolInvokeKeys.CONTRACT_VERSION))) {
@@ -84,12 +89,46 @@ class FakePluginToolProviderService : Service() {
                         }, emptyArray())
                     }
                 }
+                "inspect" -> thread(name = "fake-tool-inspect") {
+                    val meta = JSONArray(request.getString(PluginToolInvokeKeys.INPUTS_JSON) ?: "[]")
+                    val report = JSONArray()
+                    descriptors.forEachIndexed { index, descriptor ->
+                        val bytes = ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() }
+                        val entry = meta.optJSONObject(index) ?: JSONObject()
+                        report.put(JSONObject().put("name", entry.optString("name")).put("source", entry.optString("source"))
+                            .put("mimeType", entry.optString("mimeType")).put("bytes", bytes.size).put("declaredBytes", entry.optLong("byteCount", -1)))
+                    }
+                    callback.onResult(Bundle().apply {
+                        putString(PluginToolResultKeys.INVOCATION_ID, invocationId)
+                        putString(PluginToolResultKeys.RESULT_JSON, JSONObject().put("inputs", report).toString())
+                    }, emptyArray())
+                }
+                "emit" -> thread(name = "fake-tool-emit") {
+                    val file = File(cacheDir, "emit-$invocationId.txt").apply { writeText(arguments.optString("text")) }
+                    val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+                    file.delete()
+                    val wanted = JSONArray(request.getString(PluginToolInvokeKeys.OUTPUTS_JSON) ?: "[]")
+                    val outputs = if ((0 until wanted.length()).any { wanted.optString(it) == "data" }) arrayOf(descriptor) else emptyArray<ParcelFileDescriptor>().also { descriptor.close() }
+                    callback.onResult(Bundle().apply {
+                        putString(PluginToolResultKeys.INVOCATION_ID, invocationId)
+                        putString(PluginToolResultKeys.RESULT_JSON, JSONObject().put("length", arguments.optString("text").length).toString())
+                        putString(PluginToolResultKeys.OUTPUTS_JSON, JSONArray().apply { if (outputs.isNotEmpty()) put(JSONObject().put("name", "data").put("mimeType", "text/plain")) }.toString())
+                    }, outputs)
+                    outputs.forEach { runCatching { it.close() } }
+                }
+                "last_cancel" -> thread(name = "fake-tool-last-cancel") {
+                    callback.onResult(Bundle().apply {
+                        putString(PluginToolResultKeys.INVOCATION_ID, invocationId)
+                        putString(PluginToolResultKeys.RESULT_JSON, JSONObject().put("lastCancel", lastCancel).toString())
+                    }, emptyArray())
+                }
                 else -> return refuse(PluginToolErrorCodes.UNKNOWN_TOOL, "no tool ${request.getString(PluginToolInvokeKeys.TOOL)}")
             }
             return Bundle().apply { putBoolean(PluginToolAcceptKeys.ACCEPTED, true) }
         }
 
         override fun cancel(request: Bundle?) {
+            lastCancel = "${request?.getString(PluginToolCancelKeys.INVOCATION_ID)}:${request?.getString(PluginToolCancelKeys.REASON)}"
             request?.getString(PluginToolCancelKeys.INVOCATION_ID)?.let(cancelled::add)
         }
     }
@@ -109,6 +148,10 @@ class FakePluginToolProviderService : Service() {
     }
 
     companion object {
+
+        /** `<invocationId>:<reason>` of the last cancel this provider process received; the `last_cancel` tool returns it. */
+        @Volatile
+        var lastCancel: String = ""
 
         const val CATALOG = """{
   "shortName": "faketool",
@@ -134,7 +177,27 @@ class FakePluginToolProviderService : Service() {
       "description": "Waits until it is cancelled or sleepMs passed. Test-only tool.",
       "inputSchema": {"type": "object", "properties": {"sleepMs": {"type": "integer", "minimum": 0, "maximum": 60000}}, "additionalProperties": false},
       "risk": "readonly",
-      "timeoutMs": 2000
+      "timeoutMs": 15000
+    },
+    {
+      "name": "inspect",
+      "description": "Reports the bytes behind its image and file inputs. Test-only tool.",
+      "inputSchema": {"type": "object", "properties": {"image": {"type": "string", "x-autojs6-type": "image"}, "file": {"type": "string", "x-autojs6-type": "file"}}, "additionalProperties": false},
+      "risk": "readonly",
+      "timeoutMs": 10000
+    },
+    {
+      "name": "emit",
+      "description": "Returns its text as the binary output data. Test-only tool.",
+      "inputSchema": {"type": "object", "properties": {"text": {"type": "string", "maxLength": 4096}}, "required": ["text"], "additionalProperties": false},
+      "risk": "write",
+      "outputs": [{"name": "data", "mimeType": "text/plain", "description": "the text as UTF-8"}]
+    },
+    {
+      "name": "last_cancel",
+      "description": "Returns the invocation id and reason of the last cancel the provider received. Test-only tool.",
+      "inputSchema": {"type": "object", "properties": {}, "additionalProperties": false},
+      "risk": "readonly"
     },
     {
       "name": "bad_schema",

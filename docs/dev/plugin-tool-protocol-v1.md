@@ -254,6 +254,45 @@ tools sit behind a second switch of the group that is off by default, and consum
 MCP annotations (`readOnlyHint`, `destructiveHint`, `openWorldHint`). There is no confirmation on the
 phone per call. Scripts written by the user may call every tool of an authorized provider.
 
+## Bridge module `plugin_tools`
+
+Consumers reach the tools through the host's Node bridge module `plugin_tools` (`NodeBridgePluginToolsBridge`), never
+through the provider directly (MCP roadmap D29). Every method needs the token `plugin_tools`.
+
+| Method | Arguments | Result (`schema`) |
+| --- | --- | --- |
+| `list()` | none | `autojs6-bridge-plugin-tools-list-v1`: `tools[]` with `name` (`<shortName>_<name>`), `tool`, `shortName`, `provider`, `trust`, `title`, `description`, `inputSchema`, `outputSchema`, `risk`, `timeoutMs`, `maxConcurrency`, `outputs`, `imageParameters`, `fileParameters`; `providers[]` with `packageName`, `versionCode`, `trust`, `status`, `shortName`, `tools`, `diagnostics`, `detail` and `toolsHidden` |
+| `invoke(name, arguments, options)` | `options`: `invocationId` (`[A-Za-z0-9._:-]{1,128}`, generated when absent), `timeoutMs` (only shortens the tool's), `outputs` (output name to working-directory path), `overwrite` (default false) | `autojs6-bridge-plugin-tools-invoke-v1`: `tool`, `provider`, `invocationId`, `result`, `text`, `outputs[]` (`name`, `path`, `bytes`, `mimeType`), `missingOutputs`, `durationMs` |
+| `cancel(invocationId)` or `cancel({invocationId})` | | `autojs6-bridge-plugin-tools-cancel-v1`: `invocationId`, `cancelled` (false when the call already ended or never ran) |
+
+Rules the bridge enforces before the provider sees a call:
+
+- Tools of USER_GRANTED providers are listed and run only for requests that declare `plugin_tools.user_granted`; that
+  token is never implied by `plugin_tools`. MCP Server declares it only for the USER_GRANTED tools the user turned on.
+  Without it, `list` still names the provider with `toolsHidden: true`.
+- The arguments must match the tool's schema (problems are reported with their JSON path); absent defaults are filled
+  in. Image arguments of `"screen"` need `screen_capture` and are captured like `accessibility.captureScreenImage`
+  (PNG); paths need `files` and resolve through the session's path policy (model-facing sessions: the working
+  directory, and shared storage with `files.shared_read`; script sessions: the working directory only). Outputs need
+  `files.write`, must be declared by the tool and resolve inside the working directory; an existing file is replaced
+  only with `overwrite: true`.
+- The time limit is the tool's `timeoutMs`, shortened by `options.timeoutMs` and by the bridge deadline (the request
+  timeout minus 750 ms, so the bridge answers before the broker and can still tell the provider). On expiry the
+  bridge answers `timeout` and calls `cancel` with reason `timeout`; `plugin_tools.cancel` answers the running call and
+  calls `cancel` with reason `caller`; closing the session cancels with reason `host`. A provider process that dies
+  during a call fails it at once. The call keeps a dedicated binding to the provider until it ends.
+- A result larger than 512 KiB, a result that is not JSON or does not match the declared output schema, and an output
+  above 8 MiB fail the call (`resource-limit` / `provider-failed`). Outputs are copied into a sibling temporary file
+  and renamed over the target.
+
+Provider error codes map onto bridge categories: `INVALID_ARGUMENTS`, `UNKNOWN_TOOL` and `INPUT_UNREADABLE` to
+`invalid-request`, `BUSY` to `rate-limited`, `LIMIT_EXCEEDED` to `resource-limit`, `TIMEOUT` to `timeout`, `NOT_READY`
+to `unavailable`, everything else to `provider-failed`; the message keeps the code and the provider's text.
+
+The MCP Server default grant includes the three methods and both tokens; the 3-Stove Agent grant does not include
+them until its roadmap decides. `plugin_tools.cancel` is an ordinary bridge call: while a session's concurrency limit
+is used up by running calls, a cancel waits for a slot like any other request.
+
 ## Status
 
 | Part | State |
@@ -261,6 +300,6 @@ phone per call. Scripts written by the user may call every tool of an authorized
 | Contract module, frozen literals and transactions | done (P12 host item 1) |
 | Discovery and catalog cache, short name checks | done (P12 host item 2: `PluginToolRegistry`, `PluginToolCatalogParser`, `PluginToolShortNames`; fake provider `test-apps/plugin-tool-provider-conformance`) |
 | Schema validation | done (P12 host item 3: `PluginToolSchema` checks schemas when catalogs load; argument validation and defaults are ready for the bridge) |
-| Bridge module `plugin_tools`, grants and tokens | planned (P12 host item 4) |
+| Bridge module `plugin_tools`, grants and tokens | done (P12 host item 4: `NodeBridgePluginToolsBridge`, `PluginToolInvocationPlanner`, MCP default grant) |
 | Script API `plugins.tools` | planned (P12 host item 5) |
 | Pilots | OpenCC (part of the 6.8.0 release gate), YOLO, Image Quantization, Stack Archive |

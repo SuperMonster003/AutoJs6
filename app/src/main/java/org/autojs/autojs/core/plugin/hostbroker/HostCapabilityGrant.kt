@@ -141,6 +141,8 @@ data class HostCapabilityGrant(
             addAll(methodsOf("toast", "toast", "showToast"))
             // Registered scripts (MCP roadmap P11 D42): the catalog, one manifest, and a run validated against it.
             addAll(methodsOf("agent", "listScripts", "readManifest", "execRegistered"))
+            // Self-described plugin tools (MCP roadmap P12 D29): the catalog, a call and its cancellation.
+            addAll(methodsOf("plugin_tools", "list", "invoke", "cancel"))
         }
 
         /** Permission tokens of the MCP-compatible default; Agent supplies its own narrower ceiling. */
@@ -179,6 +181,9 @@ data class HostCapabilityGrant(
             // Registered scripts (MCP roadmap P11 D42): `agent` for the catalog, `agent.exec` with the engines tokens for a run.
             NodeBridgePermissionManifest.AGENT,
             NodeBridgePermissionManifest.AGENT_EXEC,
+            // Plugin tools (MCP roadmap P12 D34): MCP declares `plugin_tools.user_granted` only for USER_GRANTED tools the user turned on.
+            NodeBridgePermissionManifest.PLUGIN_TOOLS,
+            NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED,
         )
 
         @JvmField

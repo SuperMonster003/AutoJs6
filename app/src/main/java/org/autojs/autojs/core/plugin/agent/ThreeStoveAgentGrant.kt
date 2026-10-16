@@ -30,6 +30,9 @@ internal object ThreeStoveAgentGrant {
         permissions = HostCapabilityGrant.DEFAULT_PERMISSIONS - setOf(
             NodeBridgePermissionManifest.FILES_DELETE,
             NodeBridgePermissionManifest.APP_ACTIVITY,
+            // Plugin tools stay out until the Agent roadmap decides (MCP roadmap P12 host item 4).
+            NodeBridgePermissionManifest.PLUGIN_TOOLS,
+            NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED,
         ) + setOf(NodeBridgePermissionManifest.AGENT, NodeBridgePermissionManifest.AGENT_EXEC, NodeBridgePermissionManifest.OCR),
         maxConcurrentCalls = 2,
         modelCallsPerMinute = 30,

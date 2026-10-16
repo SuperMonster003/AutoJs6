@@ -76,6 +76,20 @@ class McpCapabilityGrantTest {
     }
 
     @Test
+    fun defaultGrantCoversThePluginToolsModuleOfP12() {
+        listOf("plugin_tools.list", "plugin_tools.invoke", "plugin_tools.cancel").forEach { key ->
+            assertTrue("$key must be in the default grant", key in grant.allowedMethods)
+        }
+        assertTrue(NodeBridgePermissionManifest.PLUGIN_TOOLS in grant.permissions)
+        assertTrue(NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED in grant.permissions)
+        assertEquals(listOf("plugin_tools"), NodeBridgePermissionManifest.requiredCapabilitiesFor("plugin_tools", "invoke"))
+        assertEquals(HostCapabilityGrant.Decision.Allowed,
+            grant.evaluate("plugin_tools", "invoke", listOf("plugin_tools", "plugin_tools.user_granted", "screen_capture", "files", "files.write"), 100))
+        val withoutUserGranted = grant.copy(permissions = grant.permissions - NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED)
+        assertTrue(withoutUserGranted.evaluate("plugin_tools", "invoke", listOf("plugin_tools", "plugin_tools.user_granted"), 100) is HostCapabilityGrant.Decision.Denied)
+    }
+
+    @Test
     fun evaluateDeniesUnknownMethodsBeforeLookingAtPermissions() {
         val decision = grant.evaluate("rhino", "eval", emptyList(), 10)
         assertTrue(decision is HostCapabilityGrant.Decision.Denied)

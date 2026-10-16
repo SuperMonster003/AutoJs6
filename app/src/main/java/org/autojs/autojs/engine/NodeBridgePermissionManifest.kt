@@ -73,6 +73,9 @@ object NodeBridgePermissionManifest {
     // Read-only shared storage for model-facing plugin sessions (MCP roadmap P11 D26); never implied by `files`.
     const val FILES_SHARED_READ = "files.shared_read"
     const val CONSOLE = "console"
+    // Self-described plugin tools (MCP roadmap P12 D29 / D34); `plugin_tools.user_granted` admits USER_GRANTED providers and is never implied.
+    const val PLUGIN_TOOLS = "plugin_tools"
+    const val PLUGIN_TOOLS_USER_GRANTED = "plugin_tools.user_granted"
     const val EVENTS = "events"
     const val EVENTS_NOTIFICATION = "events.notification"
     const val EVENTS_TOAST = "events.toast"
@@ -158,6 +161,8 @@ object NodeBridgePermissionManifest {
         FILES_DELETE,
         FILES_SHARED_READ,
         CONSOLE,
+        PLUGIN_TOOLS,
+        PLUGIN_TOOLS_USER_GRANTED,
         EVENTS,
         EVENTS_NOTIFICATION,
         EVENTS_TOAST,
@@ -536,6 +541,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(FILES)
             }
             NodeBridgeModules.CONSOLE -> listOf(CONSOLE)
+            NodeBridgeModules.PLUGIN_TOOLS -> listOf(PLUGIN_TOOLS)
             NodeBridgeModules.EVENTS -> when (method) {
                 "observeNotification" -> listOf(EVENTS, EVENTS_NOTIFICATION)
                 "observeToast" -> listOf(EVENTS, EVENTS_TOAST)
@@ -616,6 +622,7 @@ object NodeBridgePermissionManifest {
             required == FILES_WRITE ||
             required == FILES_DELETE ||
             required == AGENT_EXEC ||
+            required == PLUGIN_TOOLS_USER_GRANTED ||
             // M3.2: coordinate gestures are never implied by "accessibility".
             required == ACCESSIBILITY_GESTURE
         ) {

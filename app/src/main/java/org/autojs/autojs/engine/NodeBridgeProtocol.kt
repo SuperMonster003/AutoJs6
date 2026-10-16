@@ -694,10 +694,12 @@ object NodeBridgeModules {
     const val INPUT_OBSERVER = NodeBridgePermissionManifest.INPUT_OBSERVER
     const val FILES = NodeBridgePermissionManifest.FILES
     const val CONSOLE = NodeBridgePermissionManifest.CONSOLE
+    const val PLUGIN_TOOLS = NodeBridgePermissionManifest.PLUGIN_TOOLS
     const val EVENTS = NodeBridgePermissionManifest.EVENTS
     const val KEYS = NodeBridgePermissionManifest.KEYS
 
     val toastMethods = setOf("showToast", "toast")
+    val pluginToolsMethods = setOf("list", "invoke", "cancel")
     val appMethods = setOf(
         "launchPackage",
         "launchApp",
@@ -848,6 +850,7 @@ object NodeBridgeModules {
         INPUT_OBSERVER to inputObserverMethods,
         FILES to filesMethods,
         CONSOLE to consoleMethods,
+        PLUGIN_TOOLS to pluginToolsMethods,
     )
 
     fun supports(module: String, method: String): Boolean {
@@ -979,6 +982,16 @@ class AndroidNodeBridgeCapabilityProvider(
     private val consoleBridge by lazy { NodeBridgeConsoleBridge() }
     private val hostEnginesBridge by lazy { NodeBridgeHostEnginesBridge() }
     private val samplesBridge by lazy { NodeBridgeSamplesBridge(appContext) }
+    // Self-described plugin tools (MCP roadmap P12 D29); the screen is captured like accessibility.captureScreenImage.
+    private val pluginToolsBridge = lazy {
+        NodeBridgePluginToolsBridge(
+            context = appContext,
+            workingDirectory = engineInfo.cwd,
+            modelPathPolicy = modelPathPolicy,
+            consumer = NodeBridgePluginToolsBridge.consumerOf(engineInfo.engineName),
+            captureScreen = { timeoutMs -> NodeBridgeScreenCapture.capture(timeoutMs) { screenCapture.capture() }.bitmap },
+        )
+    }
     private val capabilityBrokerAudit = NodeCapabilityBrokerAuditLog(engineInfo.id)
 
     /** Host-only configuration; bridge requests cannot widen their own registered-script roots. */
@@ -1089,6 +1102,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.FILES && request.method in NodeBridgeModules.filesMethods -> auditedCallback(filesBridge.dispatch(request))
             request.module == NodeBridgeModules.AGENT && request.method in NodeBridgeModules.agentMethods -> dispatchAgent(request, auditedCallback)
             request.module == NodeBridgeModules.CONSOLE && request.method in NodeBridgeModules.consoleMethods -> auditedCallback(consoleBridge.dispatch(request))
+            request.module == NodeBridgeModules.PLUGIN_TOOLS && request.method in NodeBridgeModules.pluginToolsMethods -> pluginToolsBridge.value.dispatch(request, auditedCallback)
             else -> auditedCallback(unavailable(request))
         }
     }
@@ -1151,6 +1165,7 @@ class AndroidNodeBridgeCapabilityProvider(
 
     override fun destroy(reason: NodeBridgeError) {
         closeAgentHelpers()
+        if (pluginToolsBridge.isInitialized()) pluginToolsBridge.value.destroy()
         accessibilityDiagnostics.clearNodeRefs()
         imageDestroyed.set(true)
         imageExecutor.shutdownNow()

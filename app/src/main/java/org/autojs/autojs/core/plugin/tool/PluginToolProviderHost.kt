@@ -2,11 +2,14 @@ package org.autojs.autojs.core.plugin.tool
 
 import android.content.Context
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.autojs.core.plugin.PluginDiscoveryRecovery
+import org.autojs.autojs.core.plugin.ServiceBindingLease
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.tool.api.IPluginToolCallback
 import org.autojs.plugin.tool.api.IPluginToolProvider
 import org.autojs.plugin.tool.api.PluginToolCatalogRequestKeys
 import org.autojs.plugin.tool.api.PluginToolContract
@@ -36,6 +39,27 @@ object PluginToolProviderHost {
         host.discoverWakingFailures(context, recovery) { packageName ->
             PluginEnableStore.isEnabled(context, packageName, true) && PluginTrustManager.isAuthorized(context, packageName)
         }
+
+    /** One accepted or refused call: the provider's answer, the proxy for `cancel` and death notices, and the binding to release when the call ends. */
+    class Started(val answer: Bundle, val provider: IPluginToolProvider, val lease: ServiceBindingLease)
+
+    /**
+     * Sends one call to [target] on a dedicated binding, so the pooled connection's idle unbind cannot drop the provider
+     * while the call runs; the caller closes [Started.lease] when the call ends.
+     * zh-CN: 在专用绑定上向 [target] 发送一次调用, 以免连接池的空闲解绑在调用期间断开提供者; 调用结束时由调用方关闭租约.
+     */
+    suspend fun invoke(
+        context: Context,
+        target: AidlPluginHost.Discovered,
+        request: Bundle,
+        inputs: Array<ParcelFileDescriptor>,
+        callback: IPluginToolCallback,
+    ): Started {
+        val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
+            proxy to requireNotNull(proxy.invoke(request, inputs, callback)) { "invoke returned null" }
+        }
+        return Started(leased.value.second, leased.value.first, leased.bindingLease)
+    }
 
     /** The catalog answer (PluginToolCatalogKeys) of [target]; authorization and host version are enforced by the host. */
     suspend fun getCatalog(context: Context, target: AidlPluginHost.Discovered): Bundle = host.call(context, target) { proxy ->
