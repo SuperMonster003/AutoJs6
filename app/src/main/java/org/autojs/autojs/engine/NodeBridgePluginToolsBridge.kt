@@ -115,8 +115,10 @@ internal class NodeBridgePluginToolsBridge(
     fun destroy() {
         if (!destroyed.compareAndSet(false, true)) return
         operations.values.toList().forEach { operation ->
-            operation.sendCancel(PluginToolValues.CANCEL_REASON_HOST)
-            operation.finish(failure(operation.request, NodeBridgeError.processDead("AutoJs6 plugin_tools session closed while ${operation.toolName} was running.")))
+            operation.finish(
+                failure(operation.request, NodeBridgeError.processDead("AutoJs6 plugin_tools session closed while ${operation.toolName} was running.")),
+                cancelReason = PluginToolValues.CANCEL_REASON_HOST,
+            )
         }
         scope.cancel()
     }
@@ -331,13 +333,12 @@ internal class NodeBridgePluginToolsBridge(
         val invocationId = args.stringAt(0) ?: args.objectAt(0)?.stringOf("invocationId")
             ?: return invalid(request, "plugin_tools.cancel requires an invocationId")
         val operation = operations[invocationId]
-        val cancelled = operation != null && !operation.isFinished
-        if (operation != null && cancelled) {
-            operation.sendCancel(PluginToolValues.CANCEL_REASON_CALLER)
-            operation.finish(failure(operation.request, NodeBridgeError.providerFailed(
+        val cancelled = operation != null && operation.finish(
+            failure(operation.request, NodeBridgeError.providerFailed(
                 "plugin_tools.invoke: ${operation.toolName} was cancelled by the caller", operation.request.module, operation.request.method, code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
-            )))
-        }
+            )),
+            cancelReason = PluginToolValues.CANCEL_REASON_CALLER,
+        )
         return success(request, JSONObject().put("schema", CANCEL_SCHEMA).put("invocationId", invocationId).put("cancelled", cancelled))
     }
 
@@ -365,19 +366,18 @@ internal class NodeBridgePluginToolsBridge(
         @Volatile private var targets: Map<String, OutputTarget> = emptyMap()
         @Volatile private var overwrite = false
         @Volatile private var timeoutMs = 0L
-        /** A cancel that came before the provider was bound; it is sent once [attach] has the proxy. */
+        /** The cancel reason of a call that ended before the provider was bound; [attach] sends it once it has the proxy. */
         @Volatile private var pendingCancel: String? = null
 
         val isFinished: Boolean get() = finished.get()
 
         val timeout = Runnable {
-            sendCancel(PluginToolValues.CANCEL_REASON_TIMEOUT)
             finish(failure(request, NodeBridgeError(
                 message = "plugin_tools.invoke: $toolName did not answer within $timeoutMs ms",
                 code = NodeRuntimeErrorCodes.BRIDGE_TIMEOUT,
                 module = request.module,
                 method = request.method,
-            )))
+            )), cancelReason = PluginToolValues.CANCEL_REASON_TIMEOUT)
         }
 
         fun prepare(tool: PluginToolDefinition, owner: PluginToolProvider, plan: PluginToolInvocationPlan, targets: Map<String, OutputTarget>, overwrite: Boolean) {
@@ -404,15 +404,22 @@ internal class NodeBridgePluginToolsBridge(
             }
         }
 
-        fun sendCancel(reason: String) {
-            val target = provider ?: return run { pendingCancel = reason }
+        private fun sendCancel(reason: String) {
+            // Recorded first, so that an [attach] racing with this call either sees the reason or leaves the provider to us.
+            pendingCancel = reason
+            val target = provider ?: return
             runCatching { target.cancel(Bundle().apply { putString(PluginToolCancelKeys.INVOCATION_ID, invocationId); putString(PluginToolCancelKeys.REASON, reason) }) }
         }
 
-        fun finish(response: NodeBridgeResponse): Boolean {
+        /**
+         * Answers the caller once. A [cancelReason] (timeout, caller or host) also tells the provider, but only after this
+         * answer has won: a provider that replies CANCELLED at once must not turn a timeout into its own error.
+         */
+        fun finish(response: NodeBridgeResponse, cancelReason: String? = null): Boolean {
             if (!finished.compareAndSet(false, true)) return false
             operations.remove(invocationId, this)
             mainHandler.removeCallbacks(timeout)
+            cancelReason?.let(::sendCancel)
             release()
             reply(response)
             return true
