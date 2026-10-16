@@ -45,6 +45,7 @@ internal object BatchRenameBundles {
                 putLong(BatchRenameItemKeys.LAST_MODIFIED, item.lastModified)
                 putLong(BatchRenameItemKeys.LENGTH, item.length)
                 putBoolean(BatchRenameItemKeys.EXCLUDED, request.excluded[index])
+                item.metadata?.let { putBundle(BatchRenameItemKeys.METADATA, BatchRenameMetadataReader.toBundle(it)) }
             }
         }))
         putString(BatchRenameRequestKeys.LOCALE, request.locale)

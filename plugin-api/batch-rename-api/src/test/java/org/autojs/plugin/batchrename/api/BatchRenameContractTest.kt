@@ -82,14 +82,14 @@ class BatchRenameContractTest {
         )
         assertEquals(
             listOf(
-                "index", "parentId", "name", "kind", "depth", "lastModified", "length", "excluded",
-                "newName", "status", "reason", "twoPhase", "overwrites",
+                "index", "parentId", "name", "kind", "depth", "lastModified", "length", "excluded", "metadata",
+                "newName", "status", "reason", "twoPhase", "overwrites", "metadataMissing",
             ),
             listOf(
                 BatchRenameItemKeys.INDEX, BatchRenameItemKeys.PARENT_ID, BatchRenameItemKeys.NAME, BatchRenameItemKeys.KIND,
                 BatchRenameItemKeys.DEPTH, BatchRenameItemKeys.LAST_MODIFIED, BatchRenameItemKeys.LENGTH, BatchRenameItemKeys.EXCLUDED,
-                BatchRenameItemKeys.NEW_NAME, BatchRenameItemKeys.STATUS, BatchRenameItemKeys.REASON, BatchRenameItemKeys.TWO_PHASE,
-                BatchRenameItemKeys.OVERWRITES,
+                BatchRenameItemKeys.METADATA, BatchRenameItemKeys.NEW_NAME, BatchRenameItemKeys.STATUS, BatchRenameItemKeys.REASON,
+                BatchRenameItemKeys.TWO_PHASE, BatchRenameItemKeys.OVERWRITES, BatchRenameItemKeys.METADATA_MISSING,
             ),
         )
         assertEquals(
@@ -97,7 +97,7 @@ class BatchRenameContractTest {
                 "search", "replace", "regex", "regexFlags", "matchAll", "caseSensitive", "target", "includeFiles",
                 "includeFolders", "includeSubfolders", "format", "enumerate", "random", "dateTime", "normalize", "halfWidth",
                 "sanitize", "sanitizeReplacement", "trim", "continueNumbering", "onConflict", "conflictNumberPattern",
-                "pinyin", "pinyinTone", "pinyinSeparator", "pinyinCase", "pinyinInitials", "preset",
+                "pinyin", "pinyinTone", "pinyinSeparator", "pinyinCase", "pinyinInitials", "preset", "metadata",
             ),
             listOf(
                 BatchRenameOptionKeys.SEARCH, BatchRenameOptionKeys.REPLACE, BatchRenameOptionKeys.REGEX, BatchRenameOptionKeys.REGEX_FLAGS,
@@ -108,7 +108,7 @@ class BatchRenameContractTest {
                 BatchRenameOptionKeys.SANITIZE_REPLACEMENT, BatchRenameOptionKeys.TRIM, BatchRenameOptionKeys.CONTINUE_NUMBERING,
                 BatchRenameOptionKeys.ON_CONFLICT, BatchRenameOptionKeys.CONFLICT_NUMBER_PATTERN, BatchRenameOptionKeys.PINYIN,
                 BatchRenameOptionKeys.PINYIN_TONE, BatchRenameOptionKeys.PINYIN_SEPARATOR, BatchRenameOptionKeys.PINYIN_CASE,
-                BatchRenameOptionKeys.PINYIN_INITIALS, BatchRenameOptionKeys.PRESET,
+                BatchRenameOptionKeys.PINYIN_INITIALS, BatchRenameOptionKeys.PRESET, BatchRenameOptionKeys.METADATA,
             ),
         )
         assertEquals(
@@ -148,7 +148,16 @@ class BatchRenameContractTest {
             ),
             BatchRenameValues.REASONS,
         )
-        assertEquals(listOf("counter", "dateTime", "random", "cleanup", "pinyin", "presets"), BatchRenameValues.FEATURES)
+        assertEquals(listOf("counter", "dateTime", "random", "cleanup", "pinyin", "presets", "metadata"), BatchRenameValues.FEATURES)
+        assertEquals(25, BatchRenameValues.METADATA_VARIABLES.size)
+        assertEquals(listOf("sRGB", "AdobeRGB", "Uncalibrated"), BatchRenameValues.COLOR_SPACES)
+        assertEquals(
+            listOf(
+                "cameraMake", "cameraModel", "lens", "iso", "fNumber", "exposureTime", "focalLength", "flash", "width", "height",
+                "author", "copyright", "latitude", "longitude", "altitude", "dateTaken", "exposureBias", "orientation", "colorSpace",
+            ),
+            BatchRenameMetadataKeys.ALL,
+        )
         assertEquals(listOf("skip", "overwrite", "rename"), BatchRenameValues.PRESET_CONFLICTS)
         assertEquals(listOf("none", "mark", "number"), BatchRenameValues.PINYIN_TONES)
         assertEquals(listOf("none", "space", "underscore", "hyphen"), BatchRenameValues.PINYIN_SEPARATORS)
@@ -165,7 +174,8 @@ class BatchRenameContractTest {
             BatchRenameValues.TARGETS, BatchRenameValues.FORMATS, BatchRenameValues.DATE_TIMES, BatchRenameValues.NORMALIZATIONS,
             BatchRenameValues.CONFLICT_POLICIES, BatchRenameValues.STATUSES, BatchRenameValues.REASONS, BatchRenameValues.FEATURES,
             BatchRenameValues.PINYIN_TONES, BatchRenameValues.PINYIN_SEPARATORS, BatchRenameValues.PINYIN_CASES,
-            BatchRenameValues.PRESET_CONFLICTS, BatchRenameErrorCodes.ALL,
+            BatchRenameValues.PRESET_CONFLICTS, BatchRenameValues.METADATA_VARIABLES, BatchRenameValues.COLOR_SPACES,
+            BatchRenameMetadataKeys.ALL, BatchRenameErrorCodes.ALL,
         ).forEach { values -> assertEquals(values.toSet().size, values.size) }
     }
 }

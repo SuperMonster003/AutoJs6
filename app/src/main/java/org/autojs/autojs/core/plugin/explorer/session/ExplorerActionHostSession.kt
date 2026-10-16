@@ -19,6 +19,7 @@ import org.autojs.autojs.core.plugin.batchrename.BatchRenameExecutor
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameHostServices
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalEntry
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalRecord
+import org.autojs.autojs.core.plugin.batchrename.BatchRenameMetadataReader
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameOperation
 import org.autojs.autojs.core.plugin.batchrename.BatchRenamePathMap
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameSource
@@ -907,6 +908,51 @@ internal class ExplorerActionHostSession private constructor(
             return renameBatchBundle(after, withEntries = true)
         } finally {
             endRename()
+        }
+    }
+
+    // v26 photo metadata (docs/dev/explorer-action-protocol-v26.md): the Batch Rename metadata variables of the file
+    // manager path. The host reads the files; the plugin receives raw values only.
+    // zh-CN: v26 照片元数据: 文件管理器路径下的 Batch Rename 元数据变量. 由宿主读取文件, 插件只收到原始值.
+
+    override fun readMetadata(request: Bundle): Bundle {
+        enforceTargetRenameAccess()
+        val entries = BundleCompat.getParcelableArrayList(
+            request,
+            ExplorerActionHostSessionKeys.METADATA_ENTRIES,
+            Bundle::class.java,
+        )
+        require(entries != null && entries.size in 1..ExplorerActionProtocol.MAX_METADATA_ENTRIES_PER_REQUEST) {
+            "Explorer Action metadata request must have 1 to ${ExplorerActionProtocol.MAX_METADATA_ENTRIES_PER_REQUEST} entries"
+        }
+        val files = entries.map { entry ->
+            val targetId = requireNotNull(entry.getString(ExplorerActionHostSessionKeys.RENAME_TARGET_ID)) {
+                "Explorer Action metadata entry has no target ID"
+            }
+            val relativePath = ExplorerActionInputPathPolicy.normalizeRelativePath(
+                entry.getString(ExplorerActionHostSessionKeys.RELATIVE_PATH).orEmpty(),
+            )
+            val target = inputAccess.targetState(targetId)
+            when {
+                relativePath.isEmpty() -> target.file.takeUnless { target.directory }
+                else -> {
+                    require(target.directory) { "Explorer Action file target cannot have a relative path" }
+                    val listed = requireNotNull(inputAccess.listedEntry(targetId, relativePath)) {
+                        "Explorer Action metadata entry was not listed in this session"
+                    }
+                    ExplorerActionInputPathPolicy.resolve(target.file, relativePath).takeUnless { listed.directory }
+                }
+            }
+        }
+        return Bundle().apply {
+            putParcelableArrayList(
+                ExplorerActionHostSessionKeys.METADATA_ITEMS,
+                ArrayList(files.map { file ->
+                    Bundle().apply {
+                        file?.let(BatchRenameMetadataReader::read)?.let { putBundle(ExplorerActionHostSessionKeys.METADATA, BatchRenameMetadataReader.toBundle(it)) }
+                    }
+                }),
+            )
         }
     }
 

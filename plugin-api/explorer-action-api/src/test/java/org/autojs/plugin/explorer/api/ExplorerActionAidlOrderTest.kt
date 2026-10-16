@@ -10,7 +10,7 @@ import java.nio.file.Paths
 /**
  * Freezes the transaction order of the plugin and host session interfaces: Binder transaction codes follow the
  * declaration order, so methods of a new protocol version may only be appended (v25 appended the five rename calls
- * after `openRelatedFile`). Plugins call these codes from their own builds of older AARs.
+ * after `openRelatedFile`, v26 `readMetadata` after them). Plugins call these codes from their own builds of older AARs.
  *
  * zh-CN: 冻结插件接口与宿主会话接口的事务顺序: Binder 事务号按声明顺序分配, 新协议版本的方法只能追加 (v25 在 `openRelatedFile`
  * 之后追加了五个重命名调用). 插件会以其构建时的旧版 AAR 调用这些事务号.
@@ -57,6 +57,8 @@ class ExplorerActionAidlOrderTest {
                 "Bundle queryRenameBatch(String renameBatchId)",
                 "Bundle listRenameBatches()",
                 "Bundle undoRenameBatch(String renameBatchId)",
+                // v26
+                "Bundle readMetadata(in Bundle request)",
             ),
             methods("IExplorerActionHostSession.aidl"),
         )
@@ -78,13 +80,19 @@ class ExplorerActionAidlOrderTest {
 
     @Test
     fun protocolVersionMatchesTheLastAppendedTransactions() {
-        assertEquals(25, ExplorerActionProtocol.VERSION)
+        assertEquals(26, ExplorerActionProtocol.VERSION)
         assertEquals(ExplorerActionProtocol.VERSION, ExplorerActionProtocol.MAX_SUPPORTED_VERSION)
         assertEquals(4, ExplorerActionValues.PLACEMENT_RENAME_DIALOG)
         assertEquals("targetRename", ExplorerActionCatalogKeys.TARGET_RENAME)
         assertEquals(2_000, ExplorerActionProtocol.MAX_RENAME_ENTRIES_PER_REQUEST)
         assertEquals(20, ExplorerActionProtocol.MAX_RENAME_BATCH_RESULTS)
         assertEquals(255, ExplorerActionProtocol.MAX_RENAME_NAME_BYTES)
+        assertEquals(128, ExplorerActionProtocol.MAX_METADATA_ENTRIES_PER_REQUEST)
+        assertEquals(256, ExplorerActionProtocol.MAX_METADATA_TEXT_LENGTH)
+        assertEquals(listOf("metadataEntries", "metadataItems", "metadata"), listOf(
+            ExplorerActionHostSessionKeys.METADATA_ENTRIES, ExplorerActionHostSessionKeys.METADATA_ITEMS, ExplorerActionHostSessionKeys.METADATA,
+        ))
+        assertEquals(19, ExplorerPhotoMetadataKeys.ALL.toSet().size)
     }
 
     private fun methods(fileName: String): List<String> {

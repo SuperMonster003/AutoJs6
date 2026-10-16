@@ -153,6 +153,33 @@ class BatchRenameScriptServiceTest {
     }
 
     @Test
+    fun `metadata is read for files only when the replacement uses it`() = runBlocking {
+        val read = mutableListOf<List<String>>()
+        val metadataService = BatchRenameScriptService(
+            executor = { executor },
+            planner = ::fakePlan,
+            metadata = { files -> files.map { it.name }.also { read += it }.map { name -> mapOf<String, Any>("cameraModel" to "Model of $name") } },
+            locale = { "en-US" },
+            timeZone = { "UTC" },
+            clock = { 42L },
+        )
+        file("IMG_1.jpg")
+        File(root, "dir").mkdirs()
+        metadataService.plan(listOf(root), options("{\"search\": \"IMG\", \"replace\": \"${'$'}CAMERA_MODEL\", \"metadata\": true}"))
+        assertEquals(listOf(listOf("IMG_1.jpg")), read)
+        assertEquals(listOf(null, null, mapOf("cameraModel" to "Model of IMG_1.jpg")), requests.last().items.map { it.metadata })
+        metadataService.plan(listOf(root), options("{\"search\": \"IMG\", \"replace\": \"${'$'}${'$'}CAMERA_MODEL\", \"metadata\": true}"))
+        metadataService.plan(listOf(root), options("{\"search\": \"IMG\", \"replace\": \"${'$'}CAMERA_MODEL\"}"))
+        assertEquals("no read without a variable or without the option", 1, read.size)
+        assertTrue(requests.last().items.all { it.metadata == null })
+        expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) {
+            metadataService.preview(listOf(BatchRenamePreviewItem("a.jpg")), options("{\"search\": \"a\", \"metadata\": true}"))
+        }
+        // Both contracts name the metadata the same way. zh-CN: 两个契约对元数据使用相同的键.
+        assertEquals(org.autojs.plugin.batchrename.api.BatchRenameMetadataKeys.ALL, org.autojs.plugin.explorer.api.ExplorerPhotoMetadataKeys.ALL)
+    }
+
+    @Test
     fun `preview plans names as one directory without touching the disk`() = runBlocking {
         val results = service.preview(
             listOf(BatchRenamePreviewItem("IMG_1.jpg"), BatchRenamePreviewItem("IMG_2.jpg", directory = true, lastModified = 7L), BatchRenamePreviewItem("Photo_1.jpg")),

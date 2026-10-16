@@ -123,7 +123,27 @@ object BatchRenameValues {
     const val FEATURE_PINYIN = "pinyin"
     /** Named presets: the `preset` option, the effective options of a plan and the preset transactions (plugin 1.1.0). */
     const val FEATURE_PRESETS = "presets"
-    val FEATURES: List<String> = listOf(FEATURE_COUNTER, FEATURE_DATE_TIME, FEATURE_RANDOM, FEATURE_CLEANUP, FEATURE_PINYIN, FEATURE_PRESETS)
+    /** The `metadata` option, item metadata and the photo metadata variables (plugin 1.1.0). */
+    const val FEATURE_METADATA = "metadata"
+    val FEATURES: List<String> = listOf(
+        FEATURE_COUNTER, FEATURE_DATE_TIME, FEATURE_RANDOM, FEATURE_CLEANUP, FEATURE_PINYIN, FEATURE_PRESETS, FEATURE_METADATA,
+    )
+
+    /**
+     * The 25 photo metadata variables of PowerRename, written `$` plus the name; the longest name wins and they are
+     * matched before the date variables (`$DATE_TAKEN_YYYY` is not `$D`).
+     */
+    val METADATA_VARIABLES: List<String> = listOf(
+        "CAMERA_MAKE", "CAMERA_MODEL", "LENS", "ISO", "APERTURE", "SHUTTER", "FOCAL", "FLASH", "WIDTH", "HEIGHT", "AUTHOR",
+        "COPYRIGHT", "LATITUDE", "LONGITUDE", "ALTITUDE", "DATE_TAKEN_YYYY", "DATE_TAKEN_YY", "DATE_TAKEN_MM", "DATE_TAKEN_DD",
+        "DATE_TAKEN_HH", "DATE_TAKEN_mm", "DATE_TAKEN_SS", "EXPOSURE_BIAS", "ORIENTATION", "COLOR_SPACE",
+    )
+
+    // Values of [BatchRenameMetadataKeys.COLOR_SPACE].
+    const val COLOR_SPACE_SRGB = "sRGB"
+    const val COLOR_SPACE_ADOBE_RGB = "AdobeRGB"
+    const val COLOR_SPACE_UNCALIBRATED = "Uncalibrated"
+    val COLOR_SPACES: List<String> = listOf(COLOR_SPACE_SRGB, COLOR_SPACE_ADOBE_RGB, COLOR_SPACE_UNCALIBRATED)
 
     // What importPresets does with a preset whose name is taken ([BatchRenamePresetKeys.ON_CONFLICT]).
     /** Keep the existing preset and list the name under [BatchRenamePresetKeys.SKIPPED]; the default. */

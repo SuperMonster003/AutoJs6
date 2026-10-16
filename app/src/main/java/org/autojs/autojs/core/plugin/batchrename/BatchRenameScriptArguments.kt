@@ -53,6 +53,7 @@ object BatchRenameScriptArguments {
         BatchRenameOptionKeys.CONTINUE_NUMBERING to false,
         BatchRenameOptionKeys.PINYIN to false,
         BatchRenameOptionKeys.PINYIN_INITIALS to false,
+        BatchRenameOptionKeys.METADATA to false,
     ).toMap()
 
     private val CHOICES = mapOf(
@@ -107,6 +108,9 @@ object BatchRenameScriptArguments {
     )
 
     private const val PINYIN_VARIABLE = "\${pinyin}"
+
+    /** Longest first, like the plugin. zh-CN: 与插件一致, 长名称在前. */
+    private val METADATA_VARIABLES = BatchRenameValues.METADATA_VARIABLES.sortedByDescending { it.length }
 
     /** Keys a `RegExp` search decides. zh-CN: 由 `RegExp` 形式的查找决定的键. */
     private val REGEXP_OPTIONS = setOf(
@@ -282,6 +286,7 @@ object BatchRenameScriptArguments {
             BatchRenameOptionKeys.ON_CONFLICT,
             BatchRenameOptionKeys.CONFLICT_NUMBER_PATTERN,
             *PINYIN_OPTIONS.toTypedArray(),
+            BatchRenameOptionKeys.METADATA,
         ).forEach { key ->
             result[key] = when (key) {
                 in BOOLEAN_OPTIONS -> boolean(json, key)
@@ -301,6 +306,36 @@ object BatchRenameScriptArguments {
      */
     fun forPluginFeatures(options: Map<String, Any>, features: Collection<String>): Map<String, Any> {
         if (BatchRenameOptionKeys.PRESET in options && BatchRenameValues.FEATURE_PRESETS !in features) pluginWithoutPresets()
+        val sent = if (BatchRenameValues.FEATURE_METADATA in features) options else {
+            if (options[BatchRenameOptionKeys.METADATA] == true) {
+                batchRenameFailure(
+                    BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE,
+                    "the installed Batch Rename plugin has no metadata variables; update it to 1.1.0 or later",
+                )
+            }
+            options - BatchRenameOptionKeys.METADATA
+        }
+        return pinyinForPluginFeatures(sent, features)
+    }
+
+    /**
+     * Whether [replace] holds a photo metadata variable (`$CAMERA_MAKE` ... `$COLOR_SPACE`) outside a `$$` escape, read
+     * the way the plugin reads its variables.
+     * zh-CN: [replace] 是否在 `$$` 转义之外含有照片元数据变量, 读法与插件读取变量的方式一致.
+     */
+    fun usesMetadataVariables(replace: String): Boolean {
+        var index = 0
+        while (index < replace.length) {
+            when {
+                replace.startsWith("$$", index) -> index += 2
+                replace[index] == '$' && METADATA_VARIABLES.any { replace.startsWith(it, index + 1) } -> return true
+                else -> index++
+            }
+        }
+        return false
+    }
+
+    private fun pinyinForPluginFeatures(options: Map<String, Any>, features: Collection<String>): Map<String, Any> {
         if (BatchRenameValues.FEATURE_PINYIN in features) return options
         if (options[BatchRenameOptionKeys.PINYIN] == true || usesPinyinVariable(options[BatchRenameOptionKeys.REPLACE] as? String ?: "")) {
             batchRenameFailure(

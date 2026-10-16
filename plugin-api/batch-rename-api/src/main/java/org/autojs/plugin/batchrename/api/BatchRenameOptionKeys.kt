@@ -95,6 +95,12 @@ object BatchRenameOptionKeys {
     const val PINYIN_INITIALS = "pinyinInitials"
 
     /**
+     * Boolean: expand the photo metadata variables `$CAMERA_MAKE` ... `$COLOR_SPACE` ([BatchRenameValues.METADATA_VARIABLES])
+     * from [BatchRenameItemKeys.METADATA]; when false they stay literal. Default false ([BatchRenameValues.FEATURE_METADATA]).
+     */
+    const val METADATA = "metadata"
+
+    /**
      * String: name of a preset the plugin keeps ([BatchRenameValues.FEATURE_PRESETS]). The plugin starts from the
      * defaults, applies the preset's options and then every other key of the request, and answers the result under
      * [BatchRenameResultKeys.OPTIONS]; an unknown name fails with [BatchRenameErrorCodes.INVALID_OPTIONS].

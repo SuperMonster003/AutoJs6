@@ -34,6 +34,12 @@ object BatchRenameItemKeys {
     /** Boolean: excluded by the caller; keeps its name and does not advance counters. */
     const val EXCLUDED = "excluded"
 
+    /**
+     * Bundle: photo metadata the host read from the item, keyed by [BatchRenameMetadataKeys] ([BatchRenameValues.FEATURE_METADATA]);
+     * absent when the host read none. Hosts send it only with [BatchRenameOptionKeys.METADATA].
+     */
+    const val METADATA = "metadata"
+
     // Answer item.
 
     /** String: the computed name; equals [NAME] when the item is not renamed. */
@@ -50,4 +56,7 @@ object BatchRenameItemKeys {
 
     /** Boolean: the rename replaces an existing entry (overwrite policy); the host moves it to its Trash first. */
     const val OVERWRITES = "overwrites"
+
+    /** Boolean: a metadata variable of the replacement had no value for this item and became empty; absent when false. */
+    const val METADATA_MISSING = "metadataMissing"
 }

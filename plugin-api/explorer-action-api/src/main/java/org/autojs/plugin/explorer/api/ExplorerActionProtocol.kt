@@ -1,7 +1,7 @@
 package org.autojs.plugin.explorer.api
 
 object ExplorerActionProtocol {
-    const val VERSION = 25
+    const val VERSION = 26
     const val MIN_SUPPORTED_VERSION = 1
     const val MAX_SUPPORTED_VERSION = VERSION
 
@@ -46,6 +46,10 @@ object ExplorerActionProtocol {
     const val MAX_RENAME_BATCH_RESULTS = 20
     /** v25. UTF-8 bytes of one new name, a single path segment. */
     const val MAX_RENAME_NAME_BYTES = 255
+    /** v26. Entries of one `readMetadata` request. */
+    const val MAX_METADATA_ENTRIES_PER_REQUEST = 128
+    /** v26. UTF-16 characters of one text value of [ExplorerPhotoMetadataKeys]; longer values are cut. */
+    const val MAX_METADATA_TEXT_LENGTH = 256
     const val MAX_ARCHIVE_SESSION_ID_LENGTH = 128
     const val MAX_ARCHIVE_ENTRY_ID_LENGTH = 128
     const val MAX_ARCHIVE_DISPLAY_NAME_LENGTH = 4_096

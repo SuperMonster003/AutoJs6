@@ -28,7 +28,7 @@ path additionally uses Explorer Action protocol v25 (`explorer-action-protocol-v
 | Package | `io.github.supermonster003.autojs6.plugin.batch.rename` |
 
 `PluginInfo.capabilities` carries `requiresHostVersion` (Long), `batchRenameContractVersion` (Int),
-`batchRenameFeatures` (String array, a subset of `counter`, `dateTime`, `random`, `cleanup`, `pinyin`, `presets`),
+`batchRenameFeatures` (String array, a subset of `counter`, `dateTime`, `random`, `cleanup`, `pinyin`, `presets`, `metadata`),
 `batchRenameMaxItems` (Int) and `batchRenameRegexDialect` (`ecmascript`). The host calls `plan` only
 when the advertised contract version lies in its own supported range.
 
@@ -55,7 +55,7 @@ only. Methods may only be appended in later versions; hosts call the preset meth
 | `contractVersion` | Int | the host's contract version (1) |
 | `options` | Bundle | rename options, below |
 | `parents` | ArrayList of Bundle | one entry per directory: `parentId`, `existingNames`, `caseInsensitive`, `restrictedCharacters` |
-| `items` | ArrayList of Bundle | targets in enumeration order: `index`, `parentId`, `name`, `kind` (1 file, 2 directory), `depth`, `lastModified`, `length`, `excluded` |
+| `items` | ArrayList of Bundle | targets in enumeration order: `index`, `parentId`, `name`, `kind` (1 file, 2 directory), `depth`, `lastModified`, `length`, `excluded`, `metadata` (feature `metadata`) |
 | `locale` | String | BCP 47 tag for month and weekday names and case conversion |
 | `timeZone` | String | IANA id for formatting times |
 | `now` | Long | epoch milliseconds for the `now` date source, fixed for the whole plan |
@@ -92,6 +92,16 @@ The `pinyin*` keys (contract 1, added with plugin 1.1.0) also style the `${pinyi
 Hosts send them only to plugins whose `batchRenameFeatures` contain `pinyin`; older plugins ignore unknown keys,
 so a script that asks for pinyin from such a plugin fails with `PLUGIN_INCOMPATIBLE` instead.
 
+`metadata` (Boolean, default `false`, feature `metadata`, plugin 1.1.0) expands the 25 photo metadata variables of
+PowerRename (`$CAMERA_MAKE`, `$CAMERA_MODEL`, `$LENS`, `$ISO`, `$APERTURE`, `$SHUTTER`, `$FOCAL`, `$FLASH`, `$WIDTH`,
+`$HEIGHT`, `$AUTHOR`, `$COPYRIGHT`, `$LATITUDE`, `$LONGITUDE`, `$ALTITUDE`, `$DATE_TAKEN_YYYY`, `$DATE_TAKEN_YY`,
+`$DATE_TAKEN_MM`, `$DATE_TAKEN_DD`, `$DATE_TAKEN_HH`, `$DATE_TAKEN_mm`, `$DATE_TAKEN_SS`, `$EXPOSURE_BIAS`,
+`$ORIENTATION`, `$COLOR_SPACE`) from the item key `metadata` (a Bundle keyed by `BatchRenameMetadataKeys`, raw values
+the host read). They are matched before the date variables, longest name first, and stay literal while the option is
+off. The plugin formats them (plugin roadmap D47-D50): `f2.8`, `1-250s`, `50mm`, `+0.3EV`, `120m`, `On` / `Off`,
+`0` / `90M`, `sRGB` / `AdobeRGB` / `Uncalibrated`, degrees with six decimals; a missing value becomes empty and the
+answer item carries `metadataMissing`, except `$DATE_TAKEN_*`, which fall back to the modification time in `timeZone`.
+
 `preset` (String, feature `presets`, plugin 1.1.0) names a preset the plugin keeps. The plugin starts from the
 defaults, applies the preset's options and then every other key of the request, so a request that names a preset
 carries only the keys it overrides and may leave out `search`. An unknown name is `INVALID_OPTIONS`.
@@ -107,7 +117,7 @@ and `i` from the absence of `caseSensitive`; the replacement supports `$1`, `$<n
 | `contractVersion` | Int | equal to the request's |
 | `errorCode`, `errorMessage` | String | only on failure |
 | `rejected` | Boolean | the plan must not be executed |
-| `items` | ArrayList of Bundle | one per request item, in order: `index`, `newName`, `status`, `reason`, `twoPhase`, `overwrites` |
+| `items` | ArrayList of Bundle | one per request item, in order: `index`, `newName`, `status`, `reason`, `twoPhase`, `overwrites`, `metadataMissing` (feature `metadata`, when true) |
 | `counts` | Bundle | Int per status |
 | `options` | Bundle | the complete options the plan used, without `preset` (feature `presets`, every plan) |
 
@@ -234,11 +244,16 @@ contract:
   `presets()` lists `{ name, options }` objects and `importPresets(json, { onConflict })` (a JSON string or an
   object) answers `{ imported, skipped, rejected }`; both have `Async` forms. A plugin without the `presets` feature
   makes all three `PLUGIN_INCOMPATIBLE`.
+- With `metadata: true` and a metadata variable in `replace`, the host reads the image files among the targets
+  (`BatchRenameMetadataReader`: EXIF, and XMP for author and copyright; four at a time) and sends their values with
+  the items; otherwise it reads nothing. A plugin without the `metadata` feature makes `metadata: true`
+  `PLUGIN_INCOMPATIBLE`. The file manager path gets the same values through Explorer Action v26 `readMetadata`.
 - `preview(nameOrItems, options)` (and `previewAsync`, plugin roadmap D37) asks `plan` about names that need not
   exist: a name, `{ name, isDirectory, lastModified }` (epoch milliseconds or a `Date`; the time of the call when
   missing) or an array of them. The host sends them as the only entries of one directory without file-system traits,
   so counters advance in array order and conflicts come only from the array itself; nothing is enumerated or renamed.
-  The answer is `{ newName, status, reason }`, or an array of them for an array.
+  The answer is `{ newName, status, reason }`, or an array of them for an array. `metadata: true` is
+  `INVALID_OPTIONS`, since preview reads no files.
 - `undo(result | batchId)` and `history(limit)` work on the shared journal, which also holds the batches of
   Explorer Action sessions. A batch that does not exist or has nothing left to undo is `UNDO_UNAVAILABLE`.
 - Failures reach the script as `files.batchRename.BatchRenameError` with `code`: no installed plugin is

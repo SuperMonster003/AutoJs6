@@ -15,6 +15,8 @@ data class BatchRenameTarget(
     val lastModified: Long,
     /** Size of a file; -1 for a directory. zh-CN: 文件大小; 目录为 -1. */
     val length: Long,
+    /** Photo metadata of [BatchRenameMetadataReader], read only for plans that use it. zh-CN: 照片元数据, 仅在方案用到时读取. */
+    val metadata: Map<String, Any>? = null,
 )
 
 /** A directory that holds candidates, with every name it holds and its file-system traits. zh-CN: 含候选项的目录. */

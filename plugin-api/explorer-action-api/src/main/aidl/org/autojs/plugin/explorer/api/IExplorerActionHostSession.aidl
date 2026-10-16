@@ -180,4 +180,12 @@ interface IExplorerActionHostSession {
      * never overwritten.
      */
     Bundle undoRenameBatch(String renameBatchId);
+
+    /**
+     * v26. For an action that declared `targetRename`: reads the photo metadata (EXIF, and XMP for
+     * author and copyright) of request targets or of descendants this session listed through
+     * listChildren, at most 128 entries per call. Only image files answer metadata; the plugin still
+     * receives no file. Appended to preserve every v1-v25 Binder transaction code.
+     */
+    Bundle readMetadata(in Bundle request);
 }

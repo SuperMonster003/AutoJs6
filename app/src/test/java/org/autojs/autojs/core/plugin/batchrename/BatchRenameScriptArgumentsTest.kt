@@ -42,7 +42,7 @@ class BatchRenameScriptArgumentsTest {
                 "enumerate" to false, "random" to false, "dateTime" to "modified", "normalize" to "none", "halfWidth" to false,
                 "sanitize" to false, "sanitizeReplacement" to "_", "trim" to false, "continueNumbering" to false,
                 "onConflict" to "fail", "conflictNumberPattern" to " ({n})", "pinyin" to false, "pinyinTone" to "none",
-                "pinyinSeparator" to "none", "pinyinCase" to "lower", "pinyinInitials" to false,
+                "pinyinSeparator" to "none", "pinyinCase" to "lower", "pinyinInitials" to false, "metadata" to false,
             ),
             options,
         )
@@ -111,12 +111,12 @@ class BatchRenameScriptArgumentsTest {
         )
         assertEquals(listOf(true, "number", "none", "capitalize", true), PINYIN_KEYS.map { options[it] })
         val features = listOf("counter", "dateTime", "random", "cleanup")
-        assertEquals(options, BatchRenameScriptArguments.forPluginFeatures(options, features + "pinyin"))
+        assertEquals(options, BatchRenameScriptArguments.forPluginFeatures(options, features + "pinyin" + "metadata"))
         expectCode(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE) { BatchRenameScriptArguments.forPluginFeatures(options, features) }
 
         // Without pinyin in use, an older plugin gets the options of contract v1 1.0.0. zh-CN: 未用到拼音时旧插件收到 1.0.0 的选项.
         val plain = BatchRenameScriptArguments.options(json("{\"search\": \"a\", \"replace\": \"$$" + "{pinyin}\", \"pinyinTone\": \"mark\"}"), null)
-        assertEquals(plain.keys - PINYIN_KEYS.toSet(), BatchRenameScriptArguments.forPluginFeatures(plain, features).keys)
+        assertEquals(plain.keys - PINYIN_KEYS.toSet() - "metadata", BatchRenameScriptArguments.forPluginFeatures(plain, features).keys)
         val variable = plain + (BatchRenameOptionKeys.REPLACE to "IMG_$" + "{pinyin}")
         expectCode(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE) { BatchRenameScriptArguments.forPluginFeatures(variable, features) }
     }
@@ -156,6 +156,22 @@ class BatchRenameScriptArgumentsTest {
             "{\"name\": \"a\", \"lastModified\": \"yesterday\"}", "{\"name\": \"a\", \"lastModified\": 1.5}", "[\"${"n".repeat(1025)}\"]",
         ).forEach { text -> expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.previewItems(json(text)) } }
         expectCode(BatchRenameScriptCodes.LIMIT_EXCEEDED) { BatchRenameScriptArguments.previewItems(json("[" + List(2001) { "\"n$it\"" }.joinToString(",") + "]")) }
+    }
+
+    @Test
+    fun `metadata needs the plugin feature and is read only for its variables`() {
+        val off = BatchRenameScriptArguments.options(json("{\"search\": \"a\"}"), null)
+        val on = BatchRenameScriptArguments.options(json("{\"search\": \"a\", \"replace\": \"${'$'}CAMERA_MODEL\", \"metadata\": true}"), null)
+        assertEquals(true, on["metadata"])
+        val old = listOf("counter", "dateTime", "random", "cleanup", "pinyin", "presets")
+        assertEquals(off.keys - "metadata", BatchRenameScriptArguments.forPluginFeatures(off, old).keys)
+        expectCode(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE) { BatchRenameScriptArguments.forPluginFeatures(on, old) }
+        assertEquals(on, BatchRenameScriptArguments.forPluginFeatures(on, old + "metadata"))
+        mapOf(
+            "${'$'}CAMERA_MAKE" to true, "x_${'$'}DATE_TAKEN_YYYY" to true, "${'$'}${'$'}ISO" to false, "${'$'}${'$'}${'$'}ISO" to true,
+            "${'$'}DATE" to false, "${'$'}{ISO}" to false, "${'$'}YYYY" to false, "" to false,
+        ).forEach { (replace, expected) -> assertEquals(replace, expected, BatchRenameScriptArguments.usesMetadataVariables(replace)) }
+        expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.options(json("{\"search\": \"a\", \"metadata\": 1}"), null) }
     }
 
     @Test

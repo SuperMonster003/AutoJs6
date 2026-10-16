@@ -2,6 +2,11 @@ package org.autojs.autojs.core.plugin.batchrename
 
 import org.autojs.plugin.batchrename.api.BatchRenameOptionKeys
 import org.autojs.plugin.batchrename.api.BatchRenameValues
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import java.io.File
 import java.io.IOException
 import java.security.SecureRandom
@@ -61,6 +66,8 @@ class BatchRenameScriptService(
     private val planner: suspend (BatchRenamePlanRequest) -> BatchRenamePlanAnswer,
     /** The plugin's presets, asked only for a plan that names one (plugin roadmap D36). zh-CN: 插件的预设, 仅在方案指定预设时询问. */
     private val presets: suspend () -> List<BatchRenamePreset> = { emptyList() },
+    /** Photo metadata of image files, null for the others (plugin roadmap D34). zh-CN: 图片文件的照片元数据, 其他文件为 null. */
+    private val metadata: suspend (List<File>) -> List<Map<String, Any>?> = ::readMetadata,
     private val collector: BatchRenameTargetCollector = BatchRenameTargetCollector(),
     private val clock: () -> Long = System::currentTimeMillis,
     private val locale: () -> String = { Locale.getDefault().toLanguageTag() },
@@ -89,7 +96,17 @@ class BatchRenameScriptService(
                 ?: batchRenameFailure(BatchRenameScriptCodes.INVALID_OPTIONS, "the preset \"$name\" does not exist")
             BatchRenameScriptArguments.withPreset(options, preset.options)
         } ?: options
-        val targets = collector.collect(paths, starting[BatchRenameOptionKeys.INCLUDE_SUBFOLDERS] as Boolean)
+        val collected = collector.collect(paths, starting[BatchRenameOptionKeys.INCLUDE_SUBFOLDERS] as Boolean)
+        // Metadata is read only when the replacement uses it (plugin roadmap D34). zh-CN: 仅当替换文本用到时读取元数据.
+        val targets = if (starting[BatchRenameOptionKeys.METADATA] == true &&
+            BatchRenameScriptArguments.usesMetadataVariables(starting[BatchRenameOptionKeys.REPLACE] as? String ?: "")
+        ) {
+            val files = collected.items.filterNot { it.directory }.map { it.file }
+            val read = files.zip(metadata(files)).toMap()
+            collected.copy(items = collected.items.map { item -> if (item.directory) item else item.copy(metadata = read[item.file]) })
+        } else {
+            collected
+        }
         val request = BatchRenamePlanRequest(
             options = LinkedHashMap(options),
             parents = targets.parents,
@@ -116,6 +133,9 @@ class BatchRenameScriptService(
      * 条目本身; 不读取也不改名磁盘上的任何内容. 计数器按 [items] 的顺序递增. 每个结果为 `{ newName, status, reason }`.
      */
     suspend fun preview(items: List<BatchRenamePreviewItem>, options: Map<String, Any>): List<Map<String, Any?>> {
+        if (options[BatchRenameOptionKeys.METADATA] == true) {
+            batchRenameFailure(BatchRenameScriptCodes.INVALID_OPTIONS, "preview reads no files, so it cannot expand metadata variables")
+        }
         if (items.isEmpty()) return emptyList()
         val now = clock()
         val parent = BatchRenameParent(PREVIEW_PARENT, File(""), items.map { it.name }, BatchRenameVolumeTraits(caseInsensitive = false, restrictedCharacters = false))
@@ -344,6 +364,19 @@ class BatchRenameScriptService(
 
         /** The one directory of a preview request; no file is read. zh-CN: 试算请求中唯一的目录; 不读取任何文件. */
         private const val PREVIEW_PARENT = "preview"
+
+        /** Images read at the same time. zh-CN: 同时读取的图片数. */
+        private const val METADATA_PARALLELISM = 4
+
+        /**
+         * Reads image files [METADATA_PARALLELISM] at a time on the IO dispatcher; other files get null.
+         * zh-CN: 在 IO 调度器上每次并发读取 [METADATA_PARALLELISM] 个图片文件; 其他文件为 null.
+         */
+        @OptIn(ExperimentalCoroutinesApi::class)
+        suspend fun readMetadata(files: List<File>): List<Map<String, Any>?> = coroutineScope {
+            val dispatcher = Dispatchers.IO.limitedParallelism(METADATA_PARALLELISM)
+            files.map { file -> async(dispatcher) { if (BatchRenameMetadataReader.isImage(file)) BatchRenameMetadataReader.read(file) else null } }.awaitAll()
+        }
 
         const val KIND_FILE = "file"
         const val KIND_DIRECTORY = "dir"

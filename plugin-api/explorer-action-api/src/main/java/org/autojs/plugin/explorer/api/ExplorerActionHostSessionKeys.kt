@@ -85,4 +85,12 @@ object ExplorerActionHostSessionKeys {
     const val RENAME_CASE_INSENSITIVE = "renameCaseInsensitive"
     /** Boolean of a `listRenameParent` page: the file system rejects `\ : * ? " < > |` in names. */
     const val RENAME_RESTRICTED_CHARACTERS = "renameRestrictedCharacters"
+
+    // v26 photo metadata (docs/dev/explorer-action-protocol-v26.md).
+    /** ArrayList of Bundle: the entries of one `readMetadata` request, each with [RENAME_TARGET_ID] and [RELATIVE_PATH]. */
+    const val METADATA_ENTRIES = "metadataEntries"
+    /** ArrayList of Bundle: one answer per request entry, in request order; each holds [METADATA] when the host read any. */
+    const val METADATA_ITEMS = "metadataItems"
+    /** Bundle: the photo metadata of one entry, keyed by [ExplorerPhotoMetadataKeys]. */
+    const val METADATA = "metadata"
 }

@@ -550,6 +550,9 @@ dependencies /* Unclassified */ {
     // SwipeRefreshLayout
     implementation(libs.swiperefreshlayout)
 
+    // ExifInterface (photo metadata of the Batch Rename variables)
+    implementation(libs.exifinterface)
+
     // ConstraintLayout
     implementation(libs.constraintlayout)
 
