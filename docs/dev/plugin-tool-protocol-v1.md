@@ -384,4 +384,4 @@ the `plugins` module); there is no broker and no grant in between (MCP roadmap D
 | Pilot OpenCC (part of the 6.8.0 release gate) | done: 3-Hanzi CC 2.1.0 declares `opencc_convert` (`config` takes the 32 names of the `opencc` module, `text` up to 16384 characters); `OpenccPluginToolRoundTripTest` runs it through the script API and the bridge |
 | Pilots YOLO, Image Quantization | done: `yolo_detect` (directory parameters, D49) and `imagequant_quantize` (binary output in the plugin's own process, D51 / D52) |
 | Directory outputs | done (D53 / D56: `IPluginToolOutputTree`, staging and commit in `PluginToolOutputTree`, fake tool `emit_tree`) |
-| Pilot Stack Archive | in progress: list, read and extract with a directory output |
+| Pilot Stack Archive | done: 3-Stack Archive 3.1.0 declares `archive_list`, `archive_read` and `archive_extract` (directory output, existing files kept, D54 - D56); `ArchivePluginToolRoundTripTest` runs them through the script API and the bridge |
