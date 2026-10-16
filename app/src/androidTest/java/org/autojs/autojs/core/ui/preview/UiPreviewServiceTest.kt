@@ -39,6 +39,8 @@ import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -47,7 +49,8 @@ import kotlin.math.roundToInt
  * exercises contract v1: info, snapshot sessions with pixels and bounds, embedded sessions on API 30+,
  * failure positions, lenient bindings, the per-client limit, request limits, host-side stop and release; and
  * contract v2 (3-Block Compose roadmap P10.6, API 33+): a script run in the embedded root with its console,
- * clicks, replacement, stop, errors, `exit()` and the release of a running session.
+ * clicks, replacement, stop, errors, `exit()` and the release of a running session; and contract v3 (host roadmap
+ * `docs/dev/android-xml-attributes-roadmap.md` R3): the resources of a project in layouts and a project run.
  *
  * zh-CN: 以 instrumentation (与宿主同签名同进程) 绑定 ui 模式预览服务并验证契约 v1: 信息, 快照会话的像素与边界, API 30+ 的嵌入会话,
  * 失败定位, 宽松绑定, 每客户端上限, 请求上限, 宿主侧停止与释放; 以及契约 v2 (3-Block Compose 路线图 P10.6, API 33+): 嵌入根中的脚本运行及其控制台,
@@ -551,6 +554,129 @@ class UiPreviewServiceTest {
             assertEquals(UiPreviewContract.EXIT_RELEASED, awaitExit(callback, running))
             instrumentation.waitForIdleSync()
             assertTrue(AutoJs.instance.scriptEngineService.scriptExecutions.none { it.source.name == "release-run" && !it.isFinished })
+        }
+    }
+
+    // ----------------------------------------------------------------------- project resources and projects (v3)
+
+    /** The host's native layout sample: res/ with colors, drawables, five layouts (four of them included) and values. */
+    private val focusProject = "sample/\u5e03\u5c40/Android \u539f\u751f\u5e03\u5c40/\u4e13\u6ce8\u65f6\u5149"
+
+    /** The files under the asset directory [dir], as paths relative to it. */
+    private fun assetFiles(dir: String, relative: String = ""): List<String> {
+        val children = context.assets.list(if (relative.isEmpty()) dir else "$dir/$relative").orEmpty()
+        if (children.isEmpty()) return listOf(relative)
+        return children.flatMap { assetFiles(dir, if (relative.isEmpty()) it else "$relative/$it") }
+    }
+
+    private fun zipOf(entries: List<Pair<String, ByteArray>>): Pair<File, String> {
+        val file = File(context.cacheDir, "ui-preview-${UUID.randomUUID()}.zip").also { files.add(it) }
+        ZipOutputStream(file.outputStream()).use { zip ->
+            for ((name, bytes) in entries) {
+                zip.putNextEntry(ZipEntry(name))
+                zip.write(bytes)
+                zip.closeEntry()
+            }
+        }
+        return file to sha256(file.readBytes())
+    }
+
+    /** A zip of the asset directory [dir] with the files [include] accepts, and its digest. */
+    private fun zipAssets(dir: String, include: (String) -> Boolean = { true }): Pair<File, String> =
+        zipOf(assetFiles(dir).filter(include).map { path -> path to context.assets.open("$dir/$path").use { it.readBytes() } })
+
+    private fun assetText(path: String) = context.assets.open(path).use { it.readBytes().toString(Charsets.UTF_8) }
+
+    private fun withResources(bundle: Bundle, zip: Pair<File, String>, layoutPath: String?, androidLayout: Boolean? = null) = bundle.apply {
+        putParcelable(UiPreviewContract.KEY_RESOURCES_FD, ParcelFileDescriptor.open(zip.first, ParcelFileDescriptor.MODE_READ_ONLY))
+        putString(UiPreviewContract.KEY_RESOURCES_SHA256, zip.second)
+        layoutPath?.let { putString(UiPreviewContract.KEY_LAYOUT_PATH, it) }
+        androidLayout?.let { putBoolean(UiPreviewContract.KEY_ANDROID_LAYOUT, it) }
+    }
+
+    @Test
+    fun projectResourcesResolveInLayoutsAndTheUnpackedCopyFollowsTheDigest() {
+        val info = service.previewInfo
+        assertTrue(info.getBoolean(UiPreviewContract.KEY_RESOURCES_SUPPORTED))
+        assertEquals(UiPreviewContract.VERSION, info.getIntArray(UiPreviewContract.KEY_SUPPORTED_CONTRACT_VERSIONS)!!.last())
+        assertEquals(UiPreviewContract.HASH, info.getStringArray(UiPreviewContract.KEY_CONTRACT_HASHES)!!.last())
+
+        val callback = Callback()
+        val id = sessionId(create(request(UiPreviewContract.MODE_SNAPSHOT, 1080, 2200), callback))
+        val layoutPath = "res/layout/activity_main.xml"
+        val xml = assetText("$focusProject/$layoutPath")
+        // Without the project's resources its @drawable / @dimen / @layout references cannot resolve.
+        val bare = service.setLayout(id, layout(xml), snapshotFile().second)
+        assertEquals(bare.getString(UiPreviewContract.KEY_ERROR_MESSAGE), UiPreviewContract.OUTCOME_FAILED, outcome(bare))
+        // With them the layout applies the way ui.layoutFile applies it in a run of the project.
+        val resources = zipAssets(focusProject) { it.startsWith("res/") }
+        val result = service.setLayout(id, withResources(layout(xml), resources, layoutPath, androidLayout = true), snapshotFile().second)
+        assertEquals(result.getString(UiPreviewContract.KEY_ERROR_MESSAGE), UiPreviewContract.OUTCOME_APPLIED, outcome(result))
+        val bounds = awaitBounds(callback)
+        val ids = (0 until bounds.length()).map { bounds.getJSONObject(it).optString(UiPreviewContract.Bounds.ID) }
+        assertTrue(ids.toString(), "root" in ids)
+        // The same layout without layoutPath resolves from the zip root as the working directory.
+        val fromRoot = service.setLayout(id, withResources(layout(xml), resources, null, androidLayout = true), snapshotFile().second)
+        assertEquals(fromRoot.getString(UiPreviewContract.KEY_ERROR_MESSAGE), UiPreviewContract.OUTCOME_APPLIED, outcome(fromRoot))
+        // The unpacked copy is reused while the digest stays the same, and replaced when it changes.
+        val archives = File(context.cacheDir, "ui-preview/$id/archives")
+        fun copies() = archives.list().orEmpty().filter { it.startsWith("resources-") }.sorted()
+        val first = copies()
+        assertEquals(first.toString(), 1, first.size)
+        val changed = zipAssets(focusProject) { it.startsWith("res/") && !it.endsWith("strings.xml") }
+        assertEquals(UiPreviewContract.OUTCOME_FAILED, outcome(service.setLayout(id, withResources(layout(xml), changed, layoutPath, true), snapshotFile().second)))
+        val second = copies()
+        assertEquals(1, second.size)
+        assertFalse(second == first)
+        assertTrue(archives.list().orEmpty().none { it.startsWith("incoming") || it.endsWith(".partial") })
+        // A v2 request afterwards goes back to the session's own working directory: the references fail again.
+        assertEquals(UiPreviewContract.OUTCOME_FAILED, outcome(service.setLayout(id, layout(xml), snapshotFile().second)))
+    }
+
+    @Test
+    fun invalidResourceZipsAreRejectedAndTheSessionStays() {
+        val callback = Callback()
+        val id = sessionId(create(request(UiPreviewContract.MODE_SNAPSHOT, 200, 200), callback))
+        val xml = "<vertical><text text=\"ok\"/></vertical>"
+        val good = zipOf(listOf("res/values/strings.xml" to "<resources/>".toByteArray()))
+        val wrongDigest = good.first to UiPreviewRequests.sha256Hex("not the zip")
+        assertEquals(UiPreviewContract.ERROR_ARCHIVE_INVALID, error(service.setLayout(id, withResources(layout(xml), wrongDigest, null), snapshotFile().second)))
+        val escaping = zipOf(listOf("../escaped.xml" to "<resources/>".toByteArray()))
+        assertEquals(UiPreviewContract.ERROR_ARCHIVE_INVALID, error(service.setLayout(id, withResources(layout(xml), escaping, null), snapshotFile().second)))
+        assertFalse(File(context.cacheDir, "ui-preview/$id/escaped.xml").exists())
+        assertFalse(File(context.cacheDir, "ui-preview/escaped.xml").exists())
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, error(service.setLayout(id, withResources(layout(xml), good, "../main.xml"), snapshotFile().second)))
+        val noZip = layout(xml).apply { putString(UiPreviewContract.KEY_LAYOUT_PATH, "res/layout/main.xml") }
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, error(service.setLayout(id, noZip, snapshotFile().second)))
+        assertEquals(UiPreviewContract.OUTCOME_APPLIED, outcome(service.setLayout(id, withResources(layout(xml), good, null), snapshotFile().second)))
+    }
+
+    @Test
+    fun aProjectRunWorksInItsUnpackedProject() {
+        assumeTrue("script runs need API 33", Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE)
+        withEmbeddedSession { id, callback ->
+            val project = zipAssets(focusProject)
+            val text = "\"ui\";\nui.useAndroidLayout();\nui.layoutFile('res/layout/activity_main.xml');\n" +
+                "console.log('cwd ' + files.cwd());\nconsole.log('laid out ' + ui.root.getChildCount());\n"
+            val request = script(text, "project-run").apply {
+                putParcelable(UiPreviewContract.KEY_PROJECT_FD, ParcelFileDescriptor.open(project.first, ParcelFileDescriptor.MODE_READ_ONLY))
+                putString(UiPreviewContract.KEY_PROJECT_SHA256, project.second)
+                putString(UiPreviewContract.KEY_SCRIPT_PATH, "main.js")
+            }
+            val first = runId(service.runScript(id, request))
+            val cwd = awaitConsole(callback, "cwd ").getString(UiPreviewContract.KEY_TEXT)!!
+            assertTrue(cwd, cwd.contains("ui-preview/$id/archives/project-"))
+            assertEquals(first, awaitConsole(callback, "laid out 1").getString(UiPreviewContract.KEY_RUN_ID))
+            val copy = File(cwd.removePrefix("cwd ").trim())
+            assertTrue(File(copy, "res/layout/view_timer.xml").isFile)
+            // A plain v2 run replaces it and its copy goes with it.
+            val second = runId(service.runScript(id, script("\"ui\";\nconsole.log('plain ' + files.cwd());\n", "plain-run")))
+            assertEquals(UiPreviewContract.EXIT_REPLACED, awaitExit(callback, first))
+            val plain = awaitConsole(callback, "plain ").getString(UiPreviewContract.KEY_TEXT)!!
+            assertFalse(plain, plain.contains("archives"))
+            assertFalse(copy.exists())
+            service.stopScript(id)
+            awaitExit(callback, second)
         }
     }
 }

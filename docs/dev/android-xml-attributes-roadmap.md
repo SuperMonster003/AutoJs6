@@ -147,8 +147,10 @@ R 与 A 互不依赖 (A4 的诊断码除外), R 先做 (工作量小, 插件 P11
 
 ### R3 测试与 AAR
 
-- [ ] JVM: 解压的上限, 路径越界, 摘要缓存. 设备 `UiPreviewServiceTest`: "专注时光" 资源 zip + `res/layout/activity_main.xml` 的布局成功且 `@drawable` / `@dimen` / `<include>` 生效 (读回背景与尺寸), 无资源时同一布局失败或缺省; 工程 zip 的 `runScript` 中 `ui.layoutFile` 相对路径可用; 旧客户端 (v2 请求) 行为不变. API 24 / 33 / 35.
-- [ ] `:plugin-api:ui-preview-api` release AAR 重建, 记录摘要 (供 3-Block Compose 锁定).
+- [x] JVM: 解压的上限, 路径越界, 摘要缓存. 设备 `UiPreviewServiceTest`: "专注时光" 资源 zip + `res/layout/activity_main.xml` 的布局成功且 `@drawable` / `@dimen` / `<include>` 生效 (读回背景与尺寸), 无资源时同一布局失败或缺省; 工程 zip 的 `runScript` 中 `ui.layoutFile` 相对路径可用; 旧客户端 (v2 请求) 行为不变. API 24 / 33 / 35.
+  证据 (2026-10-16): JVM `UiPreviewArchiveTest` 5 项 (文件与目录解出; `../`, 多级 `..`, 绝对路径, 反斜杠, 盘符, 空段, `.` 段与超长名称各自拒绝整个 zip 且不留目标与 `.partial`; 重复名; 条目数上限与按实写字节计的解包上限 (高压缩比条目), 恰好等于上限可通过; 已存在的目标不被覆盖), `UiPreviewRequestsTest` 新增 2 项 (资源键与 `layoutPath` 的组合与路径规则, 工程键与 `scriptPath`, zip 条目用 `ARCHIVE_INVALID`), 预览包 26 项全部通过. 设备 `UiPreviewServiceTest` 新增 3 项: (1) 信息宣告 v3 与 `resourcesSupported`; "专注时光" 的 `activity_main.xml` (根 `ScrollView`, `@drawable` 背景, `@dimen` 间距, 四个 `<include>`, 其中引用 `@string` / `@color`) 无资源时布局失败, 带资源 zip 与 `layoutPath` 时成功且边界含 `root`, 不带 `layoutPath` (以 zip 根为工作目录) 也成功; 同一摘要的两次请求只有一个解压副本, 去掉 `strings.xml` 的新 zip 换掉副本 (该布局因此失败), 临时与 `.partial` 文件不残留; 之后的 v2 请求回到会话自己的工作目录而再次失败; (2) 摘要不符与 `../` 条目的 zip 以 `ARCHIVE_INVALID` 拒绝且会话外无文件写出, `../` 的 `layoutPath` 与缺少 zip 的 `layoutPath` 以 `INVALID_REQUEST` 拒绝, 会话随后照常布局; (3) (API 33+) 工程 zip 的运行中 `ui.useAndroidLayout(); ui.layoutFile('res/layout/activity_main.xml')` 成功, `files.cwd()` 为 `archives/project-<n>`, 副本中有 `res/layout/view_timer.xml`; 随后的 v2 运行以 `replaced` 结束前一次并删除其副本, 新运行的工作目录不在 archives 下. 结果 (宿主 debug versionCode 5448): emulator-5580 (AVD_API_33) 14 项全部通过; emulator-5570 (API 24 x86) 14 项通过 (需要 API 33 的运行用例按假设跳过); AVD_API_35_16K 只读实例 (端口 5584, 2.5 GB 内存) 首次在开机后的内存紧张中宿主进程被回收 (无 Java / 原生崩溃记录, lowmemorykiller 同时杀了多个进程), 稍后复跑 14 项全部通过, 测试后关闭该实例.
+- [x] `:plugin-api:ui-preview-api` release AAR 重建, 记录摘要 (供 3-Block Compose 锁定).
+  证据 (2026-10-16): `ui-preview-api-release.aar` 20618 B, SHA-256 `4746f9f3e817e2c634e2005635373c9f864c7a33ca7f0703ca16133911dd8b94` (契约提交 `2da2d4119`), `--rerun-tasks` 重建字节一致; 由插件 P11.3 复制到 `libs/` 并更新锁文件.
 
 ### A1 元数据
 

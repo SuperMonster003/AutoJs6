@@ -125,4 +125,32 @@ class UiPreviewRequestsTest {
         }
         assertTrue(digest.all { it in '0'..'9' || it in 'a'..'f' })
     }
+
+    @Test
+    fun v3ResourcesNeedTheirZipAndASafeLayoutPath() {
+        val digest = UiPreviewRequests.sha256Hex("zip")
+        assertNull(UiPreviewRequests.validateLayoutResources(false, null, null))
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateLayoutResources(false, digest, null) })
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateLayoutResources(false, null, "res/layout/main.xml") })
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateLayoutResources(true, null, null) })
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateLayoutResources(true, digest.uppercase(), null) })
+        assertNull(UiPreviewRequests.validateLayoutResources(true, digest, null))
+        assertEquals("res/layout/main.xml", UiPreviewRequests.validateLayoutResources(true, digest, "res/layout/main.xml"))
+        for (path in listOf("", "/res/layout/main.xml", "../main.xml", "res\\main.xml", "res/../x.xml", "C:x.xml", "res//x.xml")) {
+            assertEquals(path, UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateLayoutResources(true, digest, path) })
+        }
+    }
+
+    @Test
+    fun v3ProjectRunsNeedTheirZipDigestAndScriptPath() {
+        val digest = UiPreviewRequests.sha256Hex("project")
+        assertNull(UiPreviewRequests.validateProject(false, null, null))
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateProject(false, null, "main.js") })
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateProject(true, digest, null) })
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateProject(true, "abc", "main.js") })
+        assertEquals("main.js", UiPreviewRequests.validateProject(true, digest, "main.js"))
+        assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateProject(true, digest, "../main.js") })
+        // Zip entries use their own code.
+        assertEquals(UiPreviewContract.ERROR_ARCHIVE_INVALID, codeOf { UiPreviewRequests.archivePath("..", "zip entry", UiPreviewContract.ERROR_ARCHIVE_INVALID) })
+    }
 }
