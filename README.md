@@ -226,6 +226,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` compose 模块, 用于以 Jetpack Compose 构建界面, 提供节点工厂, 长期节点句柄, 响应式 state/render/ref 及主题控制 (需要 3-Block Compose 插件) (参阅 示例代码 > 3-Block Compose)
 * `新增` 编辑器菜单新增 "在 3-Block Compose 设计器中打开": 保存当前文件后交给 3-Block Compose 插件 (1.2.0 及以上) 的可视化设计器编辑, 回到编辑器时自动重新加载设计器保存的内容 (有未保存修改时先询问) (参阅 示例代码 > 3-Block Compose)
 * `新增` ui 模式布局预览服务, 供 3-Block Compose 设计器在画布内以宿主真实布局器预览 XML 布局, Android 11 及以上嵌入显示, 更低版本提供快照 (需要 3-Block Compose 插件 1.6.0 及以上)
+* `新增` 3-Block Compose 设计器的交互预览 (Android 13 及以上) 在画布内真实运行 ui 模式脚本: 脚本的对话框显示在画布内, ui.statusBarColor / navigationBarColor / backgroundColor 以仿状态栏 / 导航栏色条与背景显示, 长时间占用主线程的脚本在设定时长 (默认 5 秒) 后停止并报告所在行; 设计器切到后台, 回到前台或按下画布上方的返回键时 ui.emitter 收到 pause / resume / back_pressed 事件, 返回键未被处理时结束运行 (需要 3-Block Compose 插件 1.7.0 及以上, 生命周期事件与时长设置需要 1.9.0 及以上)
 * `新增` 3-Block Compose 设计器的文件夹工程 (含 XML 布局文件) 可直接交给 AutoJs6 运行或导入: 运行时解压到缓存目录并以工程方式运行, 结束后自动清理; 导入时解压到脚本目录下的同名文件夹, 已存在时可选择覆盖或另存为新文件夹 (需要 3-Block Compose 插件 1.8.0 及以上)
 * `新增` compose.mount/floaty 方法, 用于挂载 UI 页面或创建悬浮窗 (悬浮窗同时支持 UI 与非 UI 脚本), 脚本停止时自动清理所属会话
 * `新增` compose.dialog 方法, 用于创建可更新和关闭的对话框及模态底部弹层会话, 可在 UI 或普通脚本中使用
