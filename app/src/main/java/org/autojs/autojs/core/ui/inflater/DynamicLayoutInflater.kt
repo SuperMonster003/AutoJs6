@@ -213,6 +213,9 @@ open class DynamicLayoutInflater {
     val resourceParser: ResourceParser
     var inflateFlags = 0
 
+    /** Sets the attributes no handler takes through the view's public API (host roadmap A2). */
+    private val attributeFallback by lazy { AndroidAttributeFallback(AndroidAttributeTable.get(context), resourceParser) }
+
     constructor(resourceParser: ResourceParser, scriptRuntime: ScriptRuntime) {
         this.resourceParser = resourceParser
         this.scriptRuntime = scriptRuntime
@@ -782,7 +785,8 @@ open class DynamicLayoutInflater {
 
     private fun getRawAttributesMap(currentNode: Node): HashMap<String, String> {
         val attributeMap = currentNode.attributes
-        val attributes = HashMap<String, String>(attributeMap?.length ?: 0)
+        // Kept in document order (host roadmap D5): of two attributes that set the same thing, the later one wins.
+        val attributes = LinkedHashMap<String, String>(attributeMap?.length ?: 0)
         if (attributeMap != null) {
             for (index in 0 until attributeMap.length) {
                 val attribute = attributeMap.item(index)
@@ -860,8 +864,27 @@ open class DynamicLayoutInflater {
         if (isDynamic && isIgnoresDynamicFlags || !isDynamic && isJustDynamicFlags) {
             return
         }
-        inflater.setAttr(view, ns, attrName, value, parent)
+        applyAttributeValue(view, inflater, ns, attrName, value, parent)
         layoutInflaterDelegate.afterApplyAttribute(context, inflater, view, ns, attrName, value, parent)
+    }
+
+    /**
+     * Sets one attribute (host roadmap `docs/dev/android-xml-attributes-roadmap.md` A2): the view's handlers first
+     * ([ViewInflater.setAttr]); an attribute none of them takes, or one they declare unsupported, goes to the
+     * metadata fallback ([AndroidAttributeFallback]), which uses the view's public API. Returns how it ended; an
+     * attribute declared unsupported that the fallback cannot set either still fails the layout as before.
+     * zh-CN: 设置一个属性: 先由视图的处理器处理; 没有处理器接受或处理器声明不支持的属性交给元数据兜底, 以视图的公开 API 设置.
+     */
+    fun applyAttributeValue(view: View, inflater: ViewInflater<View>, ns: String?, attrName: String, value: String, parent: ViewGroup?): AttributeOutcome {
+        try {
+            if (inflater.setAttr(view, ns, attrName, value, parent)) return AttributeOutcome.APPLIED
+        } catch (e: UnsupportedAttributeException) {
+            val outcome = attributeFallback.apply(view, ns, attrName, value, parent)
+            if (outcome == AttributeOutcome.APPLIED) return outcome
+            throw e
+        }
+        if (ns != null && ns != "android" && ns != "app") return AttributeOutcome.IGNORED_NAMESPACE
+        return attributeFallback.apply(view, ns, attrName, value, parent)
     }
 
     private val isJustDynamicFlags: Boolean

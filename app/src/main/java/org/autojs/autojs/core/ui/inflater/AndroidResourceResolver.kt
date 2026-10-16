@@ -51,7 +51,8 @@ class AndroidResourceResolver(
                 else -> resolveScalar(context, value)
             }
         }
-        return HashMap(attributes)
+        // A LinkedHashMap keeps the document order the inflater applies the attributes in.
+        return attributes
     }
 
     /**

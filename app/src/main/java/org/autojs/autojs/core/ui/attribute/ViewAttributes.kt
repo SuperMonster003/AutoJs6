@@ -170,7 +170,7 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
         registerAttr("paddingBottom", { parseDimension(it, false) }, ::setPaddingBottom)
         registerAttr("paddingStart", { parseDimension(it, true) }, ::setPaddingStart)
         registerAttr("paddingEnd", { parseDimension(it, true) }, ::setPaddingEnd)
-        registerAttr("paddingVertical", { parseDimension(it, true) }, ::setPaddingVertical)
+        registerAttr("paddingVertical", { parseDimension(it, false) }, ::setPaddingVertical)
         registerAttr("paddingHorizontal", { parseDimension(it, true) }, ::setPaddingHorizontal)
         registerAttr("alpha") { view.alpha = it.toFloat() }
         registerAttrs(arrayOf("isClickable", "clickable")) { view.isClickable = it.toBoolean() }
@@ -242,8 +242,6 @@ open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resource
                 "nextFocusRight",
                 "nextFocusUp",
                 "onClick",
-                "paddingHorizontal",
-                "paddingVertical",
                 "scrollbarAlwaysDrawHorizontalTrack",
                 "scrollbarAlwaysDrawVerticalTrack",
                 "scrollbarThumbHorizontal",
