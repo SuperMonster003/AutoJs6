@@ -87,6 +87,9 @@ uses the highest version both sides know, and its hash must match. A host servin
 `resourcesSupported` and the archive limits `maxArchiveBytes`, `maxArchiveUnpackedBytes`, `maxArchiveEntries`.
 A host serving V4 lists `[1, 2, 3, 4]` (V3 keeps its frozen `HASH_V3`) and answers `dialogsInCanvas`,
 `lifecycleEvents`, `busyWaitLimitSupported` and `windowFunctionsVisible`, each true where runs are (API 33+).
+A host serving V5 lists `[1, 2, 3, 4, 5]` (V4 keeps its frozen `HASH_V4`) and answers `tsxRunSupported`: true
+where runs are and the host finds a TypeScript Engine compiler it accepts (probed while the info is built, for
+at most 3 s).
 
 ## Sessions
 
@@ -252,6 +255,27 @@ the session). The call returns `outcome` = `applied` and `runId` once the engine
   are no longer stuck behind it.
 - A V3 client keeps working: it never sends the new keys or the transaction, its runs get the default limit,
   and its dialogs and window colors show in the root as well.
+
+## TSX runs (V5)
+
+- `runScript` takes `scriptDialect`: `js` (the default when absent) or `tsx`; anything else is
+  `INVALID_REQUEST`. A `tsx` text still starts with the `"ui"` directive and is compiled by TypeScript Engine
+  as one source file named after `scriptName` (`<name>.tsx`; path separators become `_`, a name that makes no
+  file name becomes `ui-preview.tsx`), with the same compiler options and declarations as running a `.tsx` file
+  in AutoJs6 (`strict`, `noUnusedParameters`, `noEmitOnError`, the TSX runtime's `ui.layout(<...>)`).
+- The compilation runs on a host thread after `runScript` returned `applied` with the `runId`; the run then
+  starts on the main thread with the generated JavaScript, as a JS run would, and its console, errors, exit,
+  lifecycle events and busy-wait limit work the same. The host task list shows it under the name without
+  `.tsx`. A `stopScript`, a replacing `runScript` or `release` during the compilation ends the run at once with
+  its reason; the compiled result is dropped and nothing of the script runs.
+- A text that does not compile: every error diagnostic comes through `onConsole` at level 6
+  (`<name>.tsx:<line>:<column> - error TS<code>: <text>`), then `onScriptError` with `errorCode`
+  `ERR_AUTOJS6_UI_PREVIEW_COMPILE_FAILED`, `errorMessage` `TS<code>: <text>`, `line` and `column` (1-based) of
+  the first one, then `onScriptExit` with `error`. Without a diagnostic (no compiler, a timeout, a text over
+  the compiler's size limit) `line` and `column` are -1 and the message says why.
+- Lines: the `line` of an uncaught error and of `ERR_AUTOJS6_UI_PREVIEW_BUSY_WAIT` in a TSX run is a line of
+  the TSX text, mapped through the compiler's source map (-1 when the generated line has no mapping).
+- A V4 client keeps working: it never sends `scriptDialect`, so its runs are JavaScript.
 
 ## Residual differences from running the script
 

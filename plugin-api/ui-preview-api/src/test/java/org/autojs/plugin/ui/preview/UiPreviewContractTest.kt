@@ -11,11 +11,13 @@ class UiPreviewContractTest {
 
     @Test
     fun contractHashMatchesItsInput() {
-        assertEquals(4, UiPreviewContract.VERSION)
+        assertEquals(5, UiPreviewContract.VERSION)
+        assertEquals(4, UiPreviewContract.VERSION_V4)
         assertEquals(3, UiPreviewContract.VERSION_V3)
         assertEquals(2, UiPreviewContract.VERSION_V2)
         assertEquals(1, UiPreviewContract.BASE_VERSION)
         assertEquals(UiPreviewContract.HASH, sha256(UiPreviewContract.HASH_INPUT))
+        assertEquals(UiPreviewContract.HASH_V4, sha256(UiPreviewContract.HASH_INPUT_V4))
         assertEquals(UiPreviewContract.HASH_V3, sha256(UiPreviewContract.HASH_INPUT_V3))
         assertEquals(UiPreviewContract.HASH_V2, sha256(UiPreviewContract.HASH_INPUT_V2))
         assertEquals(UiPreviewContract.HASH_V1, sha256(UiPreviewContract.HASH_INPUT_V1))
@@ -24,6 +26,8 @@ class UiPreviewContractTest {
         assertEquals("81f7fe8d2338eed197dcc21e3cff7007a681ea89d080b42d1ae132c94688f1bb", UiPreviewContract.HASH_V2)
         // The v3 identity is frozen as well: 3-Block Compose 1.8.0 finds it among the supported versions.
         assertEquals("196e52cd66ff871dca8351a0e9208679ed2bf64af5f733d05312239b1f03a44b", UiPreviewContract.HASH_V3)
+        // So is v4: the host of stage P11.5 lists it, and a v4 client compares it.
+        assertEquals("b7591e9ee2fe24f475db79a0186c87fd6c36d8de632c3074cc491155d2e881b2", UiPreviewContract.HASH_V4)
         // v2 only appends: every v1 transaction keeps its code, so a v1 client works against a v2 host.
         val v1Service = servicesOf(UiPreviewContract.HASH_INPUT_V1)
         val v2Service = servicesOf(UiPreviewContract.HASH_INPUT_V2)
@@ -34,13 +38,19 @@ class UiPreviewContractTest {
         assertEquals(v2Service, servicesOf(UiPreviewContract.HASH_INPUT_V3))
         assertEquals(callbacksOf(UiPreviewContract.HASH_INPUT_V2), callbacksOf(UiPreviewContract.HASH_INPUT_V3))
         // v4 appends one transaction and one callback after them, and keeps every v3 descriptor in order.
-        val v4Service = servicesOf(UiPreviewContract.HASH_INPUT)
+        val v4Service = servicesOf(UiPreviewContract.HASH_INPUT_V4)
         assertEquals(v2Service, v4Service.take(v2Service.size))
         assertEquals(listOf("sendLifecycle(String,Bundle)->Bundle"), v4Service.drop(v2Service.size))
         val v3Callbacks = callbacksOf(UiPreviewContract.HASH_INPUT_V3)
-        assertEquals(v3Callbacks + "onLifecycleHandled", callbacksOf(UiPreviewContract.HASH_INPUT))
+        assertEquals(v3Callbacks + "onLifecycleHandled", callbacksOf(UiPreviewContract.HASH_INPUT_V4))
         val v3Descriptors = descriptorsOf(UiPreviewContract.HASH_INPUT_V3)
-        assertEquals(v3Descriptors, descriptorsOf(UiPreviewContract.HASH_INPUT).take(v3Descriptors.size))
+        assertEquals(v3Descriptors, descriptorsOf(UiPreviewContract.HASH_INPUT_V4).take(v3Descriptors.size))
+        // v5 appends no transaction or callback, only descriptors after every v4 one.
+        assertEquals(v4Service, servicesOf(UiPreviewContract.HASH_INPUT))
+        assertEquals(callbacksOf(UiPreviewContract.HASH_INPUT_V4), callbacksOf(UiPreviewContract.HASH_INPUT))
+        val v4Descriptors = descriptorsOf(UiPreviewContract.HASH_INPUT_V4)
+        assertEquals(v4Descriptors, descriptorsOf(UiPreviewContract.HASH_INPUT).take(v4Descriptors.size))
+        assertTrue(descriptorsOf(UiPreviewContract.HASH_INPUT).size > v4Descriptors.size)
     }
 
     private fun descriptorsOf(input: String): List<String> = input.split('|').dropWhile { !it.startsWith("bundle:") }
@@ -102,6 +112,7 @@ class UiPreviewContractTest {
             UiPreviewContract.ERROR_UNAVAILABLE, UiPreviewContract.ERROR_SCRIPT_FAILED,
             UiPreviewContract.ERROR_ARCHIVE_INVALID, UiPreviewContract.ERROR_ATTRIBUTE_IGNORED,
             UiPreviewContract.ERROR_BUSY_WAIT, UiPreviewContract.ERROR_NOT_RUNNING,
+            UiPreviewContract.ERROR_COMPILE_FAILED,
         )
         assertEquals(errors.size, errors.toSet().size)
         errors.forEach { assertTrue(it, it.startsWith("ERR_AUTOJS6_UI_PREVIEW_")) }
@@ -144,6 +155,8 @@ class UiPreviewContractTest {
             assertEquals(60_000L, MAX_BUSY_WAIT_LIMIT_MS)
             assertEquals(listOf("pause", "resume", "back_pressed"), LIFECYCLE_EVENTS.toList())
             assertTrue(STATUS_BAR_STRIP_DP in 1 until NAVIGATION_BAR_STRIP_DP)
+            // v5: the dialects of a run.
+            assertEquals(listOf("js", "tsx"), SCRIPT_DIALECTS.toList())
         }
     }
 
@@ -176,6 +189,7 @@ class UiPreviewContractTest {
                 KEY_ANDROID_LAYOUT, KEY_PROJECT_FD, KEY_PROJECT_SHA256, KEY_SCRIPT_PATH,
                 KEY_DIALOGS_IN_CANVAS, KEY_LIFECYCLE_EVENTS, KEY_BUSY_WAIT_LIMIT_SUPPORTED, KEY_WINDOW_FUNCTIONS_VISIBLE,
                 KEY_BUSY_WAIT_LIMIT_MS, KEY_LIFECYCLE_EVENT, KEY_CONSUMED,
+                KEY_TSX_RUN_SUPPORTED, KEY_SCRIPT_DIALECT,
             )
         }
         assertEquals(keys.size, keys.toSet().size)

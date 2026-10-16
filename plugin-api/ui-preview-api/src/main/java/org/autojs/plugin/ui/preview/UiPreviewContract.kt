@@ -27,16 +27,21 @@ object UiPreviewContract {
      * resources for `setLayout` and the whole project for `runScript`, each as a zip behind a read-only file
      * descriptor (3-Block Compose roadmap P11.H1, decision D65), and the [ERROR_ATTRIBUTE_IGNORED] diagnostic;
      * v4 appends `sendLifecycle` and `onLifecycleHandled` with the busy-wait limit of a run, and shows dialogs
-     * and window-level colors of a run inside the session's root (3-Block Compose roadmap P11.5).
+     * and window-level colors of a run inside the session's root (3-Block Compose roadmap P11.5); v5 appends no
+     * transaction, only the [KEY_SCRIPT_DIALECT] of a run: a TSX text is compiled by TypeScript Engine before it runs,
+     * a text that does not compile ends with [ERROR_COMPILE_FAILED], and the lines of a TSX run are lines of its TSX
+     * text (3-Block Compose roadmap P11.H3, decision D69).
      *
      * Identity is answered in three frozen layers: `getContractVersion()` / `getContractHash()` keep answering
      * v1 ([BASE_VERSION] / [HASH_V1]); [KEY_CONTRACT_VERSION] / [KEY_CONTRACT_HASH] of `getPreviewInfo()` keep
      * answering v2 ([VERSION_V2] / [HASH_V2]), because 3-Block Compose 1.7.0 compares them strictly; every
      * version the host serves, this one included, is listed by [KEY_SUPPORTED_CONTRACT_VERSIONS] with the
      * hashes of [KEY_CONTRACT_HASHES] in the same order. A v3 client finds [VERSION_V3] / [HASH_V3] there, a
-     * v4 client [VERSION] / [HASH].
+     * v4 client [VERSION_V4] / [HASH_V4], a v5 client [VERSION] / [HASH].
      */
-    const val VERSION = 4
+    const val VERSION = 5
+    /** The frozen v4 identity (host stage P11.5), listed by [KEY_SUPPORTED_CONTRACT_VERSIONS]. */
+    const val VERSION_V4 = 4
     /** The frozen v3 identity (3-Block Compose 1.8.0), listed by [KEY_SUPPORTED_CONTRACT_VERSIONS]. */
     const val VERSION_V3 = 3
     /** The frozen v2 identity, answered by [KEY_CONTRACT_VERSION] / [KEY_CONTRACT_HASH] of `getPreviewInfo()`. */
@@ -81,7 +86,7 @@ object UiPreviewContract {
             "archive:zip-pfd-readonly|setLayout:resourcesFd,resourcesSha256,layoutPath,androidLayout|" +
             "runScript:projectFd,projectSha256,scriptPath|diagnostic:attribute-ignored"
     const val HASH_V3 = "196e52cd66ff871dca8351a0e9208679ed2bf64af5f733d05312239b1f03a44b"
-    const val HASH_INPUT =
+    const val HASH_INPUT_V4 =
         "autojs6.ui.preview.v4|" +
             "getContractVersion()->int|getContractHash()->String|getPreviewInfo()->Bundle|" +
             "createSession(Bundle,IUiPreviewCallback)->Bundle|" +
@@ -96,7 +101,24 @@ object UiPreviewContract {
             "runScript:projectFd,projectSha256,scriptPath|diagnostic:attribute-ignored|" +
             "runScript:busyWaitLimitMs|scriptError:errorCode,busy-wait|lifecycle:pause,resume,back_pressed|" +
             "dialogs:in-root|window:status-strip,navigation-strip,background"
-    const val HASH = "b7591e9ee2fe24f475db79a0186c87fd6c36d8de632c3074cc491155d2e881b2"
+    const val HASH_V4 = "b7591e9ee2fe24f475db79a0186c87fd6c36d8de632c3074cc491155d2e881b2"
+    const val HASH_INPUT =
+        "autojs6.ui.preview.v5|" +
+            "getContractVersion()->int|getContractHash()->String|getPreviewInfo()->Bundle|" +
+            "createSession(Bundle,IUiPreviewCallback)->Bundle|" +
+            "setLayout(String,Bundle,ParcelFileDescriptor)->Bundle|" +
+            "resize(String,int,int)->Bundle|release(String)->void|reattach(String)->Bundle|" +
+            "setPointerMode(String,int)->Bundle|setHighlight(String,int)->Bundle|" +
+            "runScript(String,Bundle)->Bundle|stopScript(String)->Bundle|sendLifecycle(String,Bundle)->Bundle|" +
+            "callback:onBounds(String,Bundle)|onLayoutFailed(String,Bundle)|onSessionLost(String,Bundle)|onTap(String,Bundle)|" +
+            "onConsole(String,Bundle)|onScriptError(String,Bundle)|onScriptExit(String,Bundle)|onLifecycleHandled(String,Bundle)|" +
+            "bundle:primitive-surface-package-binder-pfd|snapshot:argb8888-rowmajor|bounds:json-inline|script:text-inline|" +
+            "archive:zip-pfd-readonly|setLayout:resourcesFd,resourcesSha256,layoutPath,androidLayout|" +
+            "runScript:projectFd,projectSha256,scriptPath|diagnostic:attribute-ignored|" +
+            "runScript:busyWaitLimitMs|scriptError:errorCode,busy-wait|lifecycle:pause,resume,back_pressed|" +
+            "dialogs:in-root|window:status-strip,navigation-strip,background|" +
+            "runScript:scriptDialect|dialect:js,tsx|scriptError:compile-failed,column|lines:tsx-source-map|info:tsxRunSupported"
+    const val HASH = "cd6681bb749ff99b666843911187b1783115f20022d0c043fdfe44ef57354ad0"
 
     // -------------------------------------------------------------------------------------------- modes
 
@@ -464,4 +486,37 @@ object UiPreviewContract {
 
     val LIFECYCLE_EVENTS
         get() = arrayOf(LIFECYCLE_PAUSE, LIFECYCLE_RESUME, LIFECYCLE_BACK_PRESSED)
+
+    // ----------------------------------------------------------------------------- v5: TSX runs (P11.H3, D69)
+
+    /**
+     * `getPreviewInfo()`: true when `runScript` takes [SCRIPT_DIALECT_TSX]: runs are supported and the host found a
+     * TypeScript Engine compiler it accepts. It is probed while the info is built, so it can change between two calls.
+     */
+    const val KEY_TSX_RUN_SUPPORTED = "tsxRunSupported"
+
+    /**
+     * `runScript` request: the language of [KEY_SCRIPT_TEXT], one of [SCRIPT_DIALECTS]; absent means
+     * [SCRIPT_DIALECT_JS]. A [SCRIPT_DIALECT_TSX] text (still starting with the `"ui"` directive) is compiled by
+     * TypeScript Engine as one source file named after [KEY_SCRIPT_NAME], with the options of running a `.tsx` file in
+     * AutoJs6, on a host thread after `runScript` returned its `runId`; the run starts once the compilation is done,
+     * and a `stopScript`, a replacing `runScript` or `release` meanwhile ends it without starting it. A text that does
+     * not compile ends with an `onScriptError` of [ERROR_COMPILE_FAILED]. The [KEY_LINE] of the other errors of a TSX
+     * run (uncaught errors, [ERROR_BUSY_WAIT]) is a line of the TSX text, mapped through the compiler's source map
+     * (-1 when the generated line has no mapping).
+     */
+    const val KEY_SCRIPT_DIALECT = "scriptDialect"
+    const val SCRIPT_DIALECT_JS = "js"
+    const val SCRIPT_DIALECT_TSX = "tsx"
+
+    /**
+     * `onScriptError` of a TSX run that did not compile: [KEY_ERROR_MESSAGE] (`TS<code>: <text>`), [KEY_LINE] and
+     * [KEY_COLUMN] (1-based) are those of the first error diagnostic, and every error diagnostic came through
+     * `onConsole` at level 6 before it; a failure without a diagnostic (no compiler, a timeout) has -1 for both. Nothing
+     * of the script ran; `onScriptExit` with [EXIT_ERROR] follows.
+     */
+    const val ERROR_COMPILE_FAILED = "ERR_AUTOJS6_UI_PREVIEW_COMPILE_FAILED"
+
+    val SCRIPT_DIALECTS
+        get() = arrayOf(SCRIPT_DIALECT_JS, SCRIPT_DIALECT_TSX)
 }
