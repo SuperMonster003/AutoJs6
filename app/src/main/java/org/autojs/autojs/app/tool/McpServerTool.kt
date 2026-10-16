@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.*
 import org.autojs.autojs.core.plugin.mcp.*
 import org.autojs.autojs.core.pref.Pref
@@ -22,6 +23,7 @@ import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 import org.autojs.autojs6.BuildConfig
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.coroutines.EmptyCoroutineContext
 import org.autojs.plugin.mcp.server.api.McpServerCapabilityKeys
 import org.autojs.plugin.mcp.server.api.McpServerContract
 import org.autojs.plugin.mcp.server.api.McpServerIds
@@ -245,7 +247,10 @@ private class McpServerOwner(context: Context) {
         if (wanted || startJob?.isActive == true) return
         wanted = true
         mutableState.value = McpServerToolState(McpServerUiState.CHECKING)
-        startJob = scope.launch {
+        // Switching the server on wakes the plugin even while an earlier wake that did not help backs it off (ColorOS);
+        // restoring it on start only wakes on demand.
+        // zh-CN: 手动打开开关时即使先前的唤醒无效处于退避期也会唤醒插件 (ColorOS); 启动时的自动恢复只按需唤醒.
+        startJob = scope.launch(if (automatic) EmptyCoroutineContext else PluginAutoWake.UserRequest) {
             try {
                 val caps = withContext(Dispatchers.IO) { McpServerPluginHost.getCapabilities(context) }
                 if (caps.getInt(McpServerCapabilityKeys.SETTINGS_VERSION, 0) < McpServerContract.SETTINGS_VERSION) {

@@ -36,6 +36,18 @@ class PluginWakePolicyTest {
     }
 
     @Test
+    fun onlyOnDemandWakesHonorTheBackoffAndOnlyUserRequestsSkipEligibility() {
+        // Rebinds of a session the user keeps open still need an enabled and authorized plugin but wake on every
+        // refusal (MCP Server on ColorOS, 2026-10-17). zh-CN: 重绑仍要求插件已启用且已授权, 但每次被拒都唤醒.
+        assertTrue(PluginAutoWake.Mode.ON_DEMAND.honorsBackoff)
+        assertTrue(PluginAutoWake.Mode.ON_DEMAND.needsEligibility)
+        assertFalse(PluginAutoWake.Mode.REBIND.honorsBackoff)
+        assertTrue(PluginAutoWake.Mode.REBIND.needsEligibility)
+        assertFalse(PluginAutoWake.Mode.USER_REQUEST.honorsBackoff)
+        assertFalse(PluginAutoWake.Mode.USER_REQUEST.needsEligibility)
+    }
+
+    @Test
     fun theRetrySchedulePausesAtMostThreeSeconds() {
         assertEquals(300L, PluginWakePolicy.RETRY_DELAYS_MS.first())
         assertTrue(PluginWakePolicy.RETRY_DELAYS_MS.sum() <= 3_000L)

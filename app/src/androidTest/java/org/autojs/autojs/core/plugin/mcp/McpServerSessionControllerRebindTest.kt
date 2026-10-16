@@ -9,10 +9,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.autojs.autojs.core.plugin.AidlPluginHost
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.ServiceBindingLease
 import org.autojs.plugin.mcp.server.api.IMcpServerSession
 import org.autojs.plugin.mcp.server.api.McpServerContract
@@ -45,6 +47,7 @@ class McpServerSessionControllerRebindTest {
     private val sleeps = CopyOnWriteArrayList<Long>()
     private val sleepGate = Channel<Unit>(Channel.UNLIMITED)
     private val available = AtomicBoolean(true)
+    private val wakeModes = CopyOnWriteArrayList<Any>()
 
     private class FakeSession : IMcpServerSession.Stub() {
         val stops = AtomicInteger()
@@ -79,6 +82,7 @@ class McpServerSessionControllerRebindTest {
         pluginAvailable = { available.get() },
         openServer = { _, _, _, _ ->
             opens.incrementAndGet()
+            wakeModes += currentCoroutineContext()[PluginAutoWake.Scope]?.mode ?: "none"
             if (failOpens.getAndUpdate { if (it > 0) it - 1 else 0 } > 0) {
                 throw IllegalStateException("fake plugin refused to open")
             }
@@ -165,6 +169,22 @@ class McpServerSessionControllerRebindTest {
         assertEquals(McpServerContract.REASON_PLUGIN_DIED, stopped.lastErrorCode)
         assertTrue(stopped.lastError!!, stopped.lastError!!.contains("did not come back after 3 rebind attempts"))
         assertTrue(!controller.isOpen)
+    }
+
+    @Test
+    fun everyRebindAttemptMayWakeThePluginDespiteTheBackoff() {
+        // ColorOS refuses to bind a plugin whose process is not running; a wake that did not help must not keep the
+        // remaining attempts from waking (2026-10-17, OnePlus OPD2413).
+        // zh-CN: ColorOS 拒绝绑定进程不在的插件; 一次无效的唤醒不能让余下的尝试都不再唤醒.
+        openRunning()
+        failOpens.set(1)
+        killPlugin()
+        repeat(2) { attempt ->
+            awaitCondition("backoff ${attempt + 1} requested") { sleeps.size == attempt + 1 }
+            releaseSleep()
+        }
+        awaitCondition("reopened by the second attempt") { opens.get() == 3 && controller.isOpen }
+        assertEquals(listOf<Any>("none", PluginAutoWake.Mode.REBIND, PluginAutoWake.Mode.REBIND), wakeModes.toList())
     }
 
     @Test

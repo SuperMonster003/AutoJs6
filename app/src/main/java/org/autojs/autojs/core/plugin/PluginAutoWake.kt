@@ -26,15 +26,17 @@ import kotlin.coroutines.CoroutineContext
  * [retryRefusedBind] (coroutines) or [retryRefusedBindBlocking] (worker threads).
  *
  * A plugin is woken when it is enabled in the Plugin Center (or only suspended because it could not be reached) and
- * authorized; [UserRequest] lifts that condition for a call the user asked for, such as switching a plugin on, and
- * [Off] keeps a call from waking at all (the Plugin Center list, which would otherwise start every plugin at once).
+ * authorized; [UserRequest] lifts that condition for a call the user asked for, such as switching a plugin on,
+ * [Rebind] keeps it but ignores the backoff for bounded rebinds of a session the user keeps open, and [Off] keeps a
+ * call from waking at all (the Plugin Center list, which would otherwise start every plugin at once).
  * Starting the wake activity needs AutoJs6 in the foreground or the "display over other apps" permission; otherwise
  * the system ignores it and the call fails as before. [PluginWakePolicy] backs off after wakes that did not help.
  *
  * zh-CN: 唤醒系统拒绝绑定其服务的插件, 使用户不再需要插件中心的 "激活" 操作. ColorOS 在插件进程未运行时一律拒绝绑定 (不只是首次运行前);
  * 启动插件的唤醒 Activity (无界面, 立即结束) 后, 下一次绑定通常在约 300 ms 后即可成功. 各绑定点在 `bindService` 返回 false 时抛出
  * [PluginBindRefusedException], 并用 [retryRefusedBind] (协程) 或 [retryRefusedBindBlocking] (工作线程) 包裹绑定. 插件在插件中心已启用
- * (或只是因无法连接而被挂起) 且已授权时才会被唤醒; [UserRequest] 为用户主动发起的调用 (例如打开插件开关) 取消该条件, [Off] 让调用
+ * (或只是因无法连接而被挂起) 且已授权时才会被唤醒; [UserRequest] 为用户主动发起的调用 (例如打开插件开关) 取消该条件, [Rebind]
+ * 保留该条件但在重绑用户保持开启的会话时忽略退避 (次数有限), [Off] 让调用
  * 完全不唤醒 (插件中心列表, 否则会一次启动全部插件). 启动唤醒 Activity 需要 AutoJs6 位于前台或拥有 "显示在其他应用上层" 权限,
  * 否则系统会忽略, 调用照旧失败. [PluginWakePolicy] 在唤醒无效后退避.
  */
@@ -52,7 +54,23 @@ object PluginAutoWake {
     @VisibleForTesting
     internal fun wakesStartedFor(packageName: String): Int = wakeCounts[packageName]?.get() ?: 0
 
-    enum class Mode { ON_DEMAND, USER_REQUEST, OFF }
+    enum class Mode {
+        ON_DEMAND, USER_REQUEST, REBIND, OFF;
+
+        /**
+         * Whether the plugin must be enabled in the Plugin Center (or only suspended) and authorized to be woken.
+         * zh-CN: 唤醒前插件是否须在插件中心已启用 (或只是被挂起) 且已授权.
+         */
+        val needsEligibility: Boolean
+            get() = this == ON_DEMAND || this == REBIND
+
+        /**
+         * Whether a recent wake that did not help ([PluginWakePolicy]) keeps this call from waking.
+         * zh-CN: 最近一次无效的唤醒 ([PluginWakePolicy]) 是否阻止本次调用唤醒.
+         */
+        val honorsBackoff: Boolean
+            get() = this == ON_DEMAND
+    }
 
     /** How the calls in a coroutine may wake plugins. zh-CN: 协程中的调用可以如何唤醒插件. */
     class Scope(val mode: Mode) : AbstractCoroutineContextElement(Key) {
@@ -61,6 +79,16 @@ object PluginAutoWake {
 
     /** The user asked for the call: wake even a plugin that is not enabled yet. zh-CN: 用户主动发起: 未启用的插件也唤醒. */
     val UserRequest: CoroutineContext = Scope(Mode.USER_REQUEST)
+
+    /**
+     * Rebinding a session the user keeps open: wake an enabled and authorized plugin on every refusal, even while an
+     * earlier wake that did not help backs it off; the caller bounds its attempts. On ColorOS a wake does not help when
+     * the process it started ends again before the binding (the package stopped or its process killed right after the
+     * wake), and the backoff would then keep the remaining rebind attempts from waking at all.
+     * zh-CN: 重绑用户保持开启的会话: 每次被拒都唤醒已启用且已授权的插件, 即使先前无效的唤醒使其处于退避期; 尝试次数由调用方限定.
+     * ColorOS 上唤醒启动的进程若在绑定前又结束 (唤醒后包随即被停止或进程被结束), 唤醒无效, 退避会让余下的重绑都不再唤醒.
+     */
+    val Rebind: CoroutineContext = Scope(Mode.REBIND)
 
     /** Never wake. zh-CN: 从不唤醒. */
     val Off: CoroutineContext = Scope(Mode.OFF)
@@ -101,7 +129,7 @@ object PluginAutoWake {
                 } catch (again: Throwable) {
                     if (!again.isPluginBindRefused()) throw again
                 }
-                if (mode != Mode.USER_REQUEST && !policy.mayWake(packageName)) throw refused
+                if (mode.honorsBackoff && !policy.mayWake(packageName)) throw refused
                 if (!wake(context, packageName)) throw refused
                 var last = refused
                 for (pause in PluginWakePolicy.RETRY_DELAYS_MS) {
@@ -182,8 +210,8 @@ object PluginAutoWake {
 
     private fun mayWake(context: Context, packageName: String, defaultEnabled: Boolean, mode: Mode): Boolean = when (mode) {
         Mode.OFF -> false
-        Mode.USER_REQUEST -> true
-        Mode.ON_DEMAND -> policy.mayWake(packageName) && isEligible(context, packageName, defaultEnabled)
+        else -> (!mode.honorsBackoff || policy.mayWake(packageName)) &&
+                (!mode.needsEligibility || isEligible(context, packageName, defaultEnabled))
     }
 
     private fun wake(context: Context, packageName: String): Boolean {

@@ -16,7 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.AidlPluginHost
+import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.plugin.mcp.server.api.IMcpHostCapabilityBroker
 import org.autojs.plugin.mcp.server.api.IMcpServerCallback
 import org.autojs.plugin.mcp.server.api.IMcpServerSession
@@ -276,7 +278,9 @@ class McpServerSessionController(
                 }
                 val target = desiredConfig ?: config
                 try {
-                    openLocked(target, rebinding = true)
+                    // Every attempt may wake a plugin ColorOS refuses to bind, even after a wake that did not help.
+                    // zh-CN: 每次尝试都可以唤醒 ColorOS 拒绝绑定的插件, 即使之前的唤醒无效.
+                    withContext(PluginAutoWake.Rebind) { openLocked(target, rebinding = true) }
                     rebindAttempt = 0
                 } catch (error: Throwable) {
                     Log.w(TAG, "MCP Server rebind attempt $attempt failed: ${error.message}")
