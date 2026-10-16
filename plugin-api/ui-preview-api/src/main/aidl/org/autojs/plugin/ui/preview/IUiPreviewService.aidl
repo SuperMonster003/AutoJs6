@@ -52,4 +52,9 @@ interface IUiPreviewService {
 
     // v2: stops the running script of the session, if any; the layout preview runtime stays.
     Bundle stopScript(String sessionId);
+
+    // v4 (3-Block Compose 1.9.0): a lifecycle event of the client's screen for the running script, event = pause, resume
+    // or back_pressed. The result carries runId (ERR_AUTOJS6_UI_PREVIEW_NOT_RUNNING without a run); the event reaches
+    // ui.emitter after the call returns, and onLifecycleHandled reports it, with consumed for back_pressed.
+    Bundle sendLifecycle(String sessionId, in Bundle event);
 }

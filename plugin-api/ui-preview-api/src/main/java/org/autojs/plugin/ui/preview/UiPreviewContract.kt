@@ -25,15 +25,20 @@ object UiPreviewContract {
      * The current contract. v2 appends `runScript` / `stopScript` and the console / error / exit callbacks
      * (interactive preview, 3-Block Compose 1.7.0); v3 appends no transaction, only request keys: a project's
      * resources for `setLayout` and the whole project for `runScript`, each as a zip behind a read-only file
-     * descriptor (3-Block Compose roadmap P11.H1, decision D65), and the [ERROR_ATTRIBUTE_IGNORED] diagnostic.
+     * descriptor (3-Block Compose roadmap P11.H1, decision D65), and the [ERROR_ATTRIBUTE_IGNORED] diagnostic;
+     * v4 appends `sendLifecycle` and `onLifecycleHandled` with the busy-wait limit of a run, and shows dialogs
+     * and window-level colors of a run inside the session's root (3-Block Compose roadmap P11.5).
      *
      * Identity is answered in three frozen layers: `getContractVersion()` / `getContractHash()` keep answering
      * v1 ([BASE_VERSION] / [HASH_V1]); [KEY_CONTRACT_VERSION] / [KEY_CONTRACT_HASH] of `getPreviewInfo()` keep
      * answering v2 ([VERSION_V2] / [HASH_V2]), because 3-Block Compose 1.7.0 compares them strictly; every
      * version the host serves, this one included, is listed by [KEY_SUPPORTED_CONTRACT_VERSIONS] with the
-     * hashes of [KEY_CONTRACT_HASHES] in the same order. A v3 client finds [VERSION] and [HASH] there.
+     * hashes of [KEY_CONTRACT_HASHES] in the same order. A v3 client finds [VERSION_V3] / [HASH_V3] there, a
+     * v4 client [VERSION] / [HASH].
      */
-    const val VERSION = 3
+    const val VERSION = 4
+    /** The frozen v3 identity (3-Block Compose 1.8.0), listed by [KEY_SUPPORTED_CONTRACT_VERSIONS]. */
+    const val VERSION_V3 = 3
     /** The frozen v2 identity, answered by [KEY_CONTRACT_VERSION] / [KEY_CONTRACT_HASH] of `getPreviewInfo()`. */
     const val VERSION_V2 = 2
     /** The frozen v1 surface every host answers through `getContractVersion()`. */
@@ -62,7 +67,7 @@ object UiPreviewContract {
             "onConsole(String,Bundle)|onScriptError(String,Bundle)|onScriptExit(String,Bundle)|" +
             "bundle:primitive-surface-package-binder|snapshot:argb8888-rowmajor|bounds:json-inline|script:text-inline"
     const val HASH_V2 = "81f7fe8d2338eed197dcc21e3cff7007a681ea89d080b42d1ae132c94688f1bb"
-    const val HASH_INPUT =
+    const val HASH_INPUT_V3 =
         "autojs6.ui.preview.v3|" +
             "getContractVersion()->int|getContractHash()->String|getPreviewInfo()->Bundle|" +
             "createSession(Bundle,IUiPreviewCallback)->Bundle|" +
@@ -75,7 +80,23 @@ object UiPreviewContract {
             "bundle:primitive-surface-package-binder-pfd|snapshot:argb8888-rowmajor|bounds:json-inline|script:text-inline|" +
             "archive:zip-pfd-readonly|setLayout:resourcesFd,resourcesSha256,layoutPath,androidLayout|" +
             "runScript:projectFd,projectSha256,scriptPath|diagnostic:attribute-ignored"
-    const val HASH = "196e52cd66ff871dca8351a0e9208679ed2bf64af5f733d05312239b1f03a44b"
+    const val HASH_V3 = "196e52cd66ff871dca8351a0e9208679ed2bf64af5f733d05312239b1f03a44b"
+    const val HASH_INPUT =
+        "autojs6.ui.preview.v4|" +
+            "getContractVersion()->int|getContractHash()->String|getPreviewInfo()->Bundle|" +
+            "createSession(Bundle,IUiPreviewCallback)->Bundle|" +
+            "setLayout(String,Bundle,ParcelFileDescriptor)->Bundle|" +
+            "resize(String,int,int)->Bundle|release(String)->void|reattach(String)->Bundle|" +
+            "setPointerMode(String,int)->Bundle|setHighlight(String,int)->Bundle|" +
+            "runScript(String,Bundle)->Bundle|stopScript(String)->Bundle|sendLifecycle(String,Bundle)->Bundle|" +
+            "callback:onBounds(String,Bundle)|onLayoutFailed(String,Bundle)|onSessionLost(String,Bundle)|onTap(String,Bundle)|" +
+            "onConsole(String,Bundle)|onScriptError(String,Bundle)|onScriptExit(String,Bundle)|onLifecycleHandled(String,Bundle)|" +
+            "bundle:primitive-surface-package-binder-pfd|snapshot:argb8888-rowmajor|bounds:json-inline|script:text-inline|" +
+            "archive:zip-pfd-readonly|setLayout:resourcesFd,resourcesSha256,layoutPath,androidLayout|" +
+            "runScript:projectFd,projectSha256,scriptPath|diagnostic:attribute-ignored|" +
+            "runScript:busyWaitLimitMs|scriptError:errorCode,busy-wait|lifecycle:pause,resume,back_pressed|" +
+            "dialogs:in-root|window:status-strip,navigation-strip,background"
+    const val HASH = "b7591e9ee2fe24f475db79a0186c87fd6c36d8de632c3074cc491155d2e881b2"
 
     // -------------------------------------------------------------------------------------------- modes
 
@@ -383,4 +404,64 @@ object UiPreviewContract {
         const val ATTR_NAME = "a"
         const val OUTCOME = "o"
     }
+
+    // ------------------------------------------- v4: dialogs, lifecycle, window colors, busy wait (P11.5)
+
+    /** `getPreviewInfo()`: true when the dialogs of a run (`dialogs.*`, `dialogs.build`) are shown inside the session's root. */
+    const val KEY_DIALOGS_IN_CANVAS = "dialogsInCanvas"
+    /** `getPreviewInfo()`: true when `sendLifecycle` is available and `ui.emitter` of a run is an event emitter. */
+    const val KEY_LIFECYCLE_EVENTS = "lifecycleEvents"
+    /** `getPreviewInfo()`: true when `runScript` takes [KEY_BUSY_WAIT_LIMIT_MS]. */
+    const val KEY_BUSY_WAIT_LIMIT_SUPPORTED = "busyWaitLimitSupported"
+    /**
+     * `getPreviewInfo()`: true when `ui.statusBarColor` / `ui.navigationBarColor` of a run show as strips at the top /
+     * bottom of the root ([STATUS_BAR_STRIP_DP] / [NAVIGATION_BAR_STRIP_DP], the content between them) and
+     * `ui.backgroundColor` paints the root. The other window-level functions stay ignored with a console warning.
+     */
+    const val KEY_WINDOW_FUNCTIONS_VISIBLE = "windowFunctionsVisible"
+
+    /**
+     * `runScript` request: a long, how long the script may keep the main thread busy without returning to it before
+     * the run ends with [EXIT_ERROR] and an `onScriptError` of [ERROR_BUSY_WAIT]; [MIN_BUSY_WAIT_LIMIT_MS] -
+     * [MAX_BUSY_WAIT_LIMIT_MS], 0 turns the watch off, absent means [DEFAULT_BUSY_WAIT_LIMIT_MS]. The watch counts
+     * script instructions, so a busy native call is not interrupted, and timers and other threads never trip it.
+     */
+    const val KEY_BUSY_WAIT_LIMIT_MS = "busyWaitLimitMs"
+    /** `sendLifecycle` request and `onLifecycleHandled`: one of [LIFECYCLE_EVENTS]. */
+    const val KEY_LIFECYCLE_EVENT = "event"
+    /**
+     * `onLifecycleHandled`: true when a `back_pressed` was consumed, by a handler that called `event.consume()`
+     * (`e.consumed = true`) or by a dialog of the run, which takes the key like its window would; false for `pause`
+     * and `resume`, and for a `back_pressed` that then ended the run with [EXIT_SCRIPT] (an Activity finishes then).
+     */
+    const val KEY_CONSUMED = "consumed"
+
+    /** The client's surface went out of sight (the designer left the preview); `ui.emitter` gets `pause`. */
+    const val LIFECYCLE_PAUSE = "pause"
+    /** The surface came back; `ui.emitter` gets `resume`. */
+    const val LIFECYCLE_RESUME = "resume"
+    /**
+     * The back key: the topmost dialog of the run takes it (cancelled when cancelable), otherwise `ui.emitter` gets
+     * `back_pressed` with an event object, and when no handler consumes it the run ends with [EXIT_SCRIPT].
+     */
+    const val LIFECYCLE_BACK_PRESSED = "back_pressed"
+
+    /**
+     * `onScriptError` (v4 adds [KEY_ERROR_CODE] for this error only): the busy-wait limit ended the run; [KEY_LINE] is
+     * the script line that was running and [KEY_ELAPSED_MS] how long the main thread had been busy.
+     */
+    const val ERROR_BUSY_WAIT = "ERR_AUTOJS6_UI_PREVIEW_BUSY_WAIT"
+    /** `sendLifecycle` while the session has no running script. */
+    const val ERROR_NOT_RUNNING = "ERR_AUTOJS6_UI_PREVIEW_NOT_RUNNING"
+
+    const val MIN_BUSY_WAIT_LIMIT_MS = 1_000L
+    const val MAX_BUSY_WAIT_LIMIT_MS = 60_000L
+    const val DEFAULT_BUSY_WAIT_LIMIT_MS = 5_000L
+    /** Height of the status bar strip of `ui.statusBarColor`, in dp of the session's density. */
+    const val STATUS_BAR_STRIP_DP = 24
+    /** Height of the navigation bar strip of `ui.navigationBarColor`, in dp of the session's density. */
+    const val NAVIGATION_BAR_STRIP_DP = 48
+
+    val LIFECYCLE_EVENTS
+        get() = arrayOf(LIFECYCLE_PAUSE, LIFECYCLE_RESUME, LIFECYCLE_BACK_PRESSED)
 }

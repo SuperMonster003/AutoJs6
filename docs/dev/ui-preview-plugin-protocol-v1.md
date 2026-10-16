@@ -1,4 +1,4 @@
-# ui-mode layout preview contract V1 / V2 / V3
+# ui-mode layout preview contract V1 / V2 / V3 / V4
 
 Status: V1, added 2026-10-15 for the 3-Block Compose designer's `"ui"` mode (XML / E4X) projects (plugin
 roadmap P10.2, decisions D46 - D50); V2, appended the same day for the interactive preview (plugin roadmap
@@ -9,7 +9,9 @@ P10.6, 3-Block Compose 1.7.0): `runScript` / `stopScript` and the `onConsole` / 
 packages the module and is the first client. V3 (2026-10-16, plugin roadmap P11.H1, decision D65) appends no
 transaction: `setLayout` may carry the project's resources and `runScript` the whole project, each as a zip
 behind a read-only file descriptor, and diagnostics gain `ATTRIBUTE_IGNORED`; see "Project resources and
-projects (V3)".
+projects (V3)". V4 (2026-10-16, plugin roadmap P11.5) appends `sendLifecycle` and `onLifecycleHandled`, the
+busy-wait limit of a run, and shows a run's dialogs and window colors inside the session's root; see "Runs closer
+to an Activity (V4)".
 
 ## Why the host renders
 
@@ -40,6 +42,8 @@ interface IUiPreviewService {
     // V2
     Bundle runScript(String sessionId, in Bundle request);
     Bundle stopScript(String sessionId);
+    // V4
+    Bundle sendLifecycle(String sessionId, in Bundle event);
 }
 oneway interface IUiPreviewCallback {
     void onBounds(String sessionId, in Bundle bounds);
@@ -50,6 +54,8 @@ oneway interface IUiPreviewCallback {
     void onConsole(String sessionId, in Bundle entry);
     void onScriptError(String sessionId, in Bundle error);
     void onScriptExit(String sessionId, in Bundle exit);
+    // V4
+    void onLifecycleHandled(String sessionId, in Bundle result);
 }
 ```
 
@@ -79,6 +85,8 @@ oneway interface IUiPreviewCallback {
 `supportedContractVersions` (int array, ascending) with `contractHashes` (string array, same order): a client
 uses the highest version both sides know, and its hash must match. A host serving V3 also answers
 `resourcesSupported` and the archive limits `maxArchiveBytes`, `maxArchiveUnpackedBytes`, `maxArchiveEntries`.
+A host serving V4 lists `[1, 2, 3, 4]` (V3 keeps its frozen `HASH_V3`) and answers `dialogsInCanvas`,
+`lifecycleEvents`, `busyWaitLimitSupported` and `windowFunctionsVisible`, each true where runs are (API 33+).
 
 ## Sessions
 
@@ -211,12 +219,48 @@ the session). The call returns `outcome` = `applied` and `runId` once the engine
 - A host that does not serve V3 ignores these keys; a client then sends the XML text alone and tells its user
   that project resources cannot be resolved.
 
+## Runs closer to an Activity (V4)
+
+- Lifecycle: `ui.emitter` of a run is the run's own event emitter (V3 and earlier: null). Like
+  `ScriptExecuteActivity`, the host emits `create` and `resume` on it (and on the `events` module) right after
+  posting the script's body, so the body's own listeners do not see them. `sendLifecycle(sessionId, { event })`
+  with `event` = `pause`, `resume` or `back_pressed` returns `applied` with the `runId` (`NOT_RUNNING` without a
+  run, `INVALID_REQUEST` for another event) and delivers the event after the call returned; then
+  `onLifecycleHandled(sessionId, { runId, event, consumed })` follows. `back_pressed` first goes to the run's top
+  dialog, which takes it (and is cancelled when it is cancelable); otherwise the emitter gets `back_pressed` with
+  an event object, and when no handler sets `consumed` the run ends with `exit`, as finishing the Activity would.
+  The client sends `pause` / `resume` when its surface leaves / returns instead of running the script again.
+- Dialogs: the dialogs of a run (`dialogs.alert` / `confirm` / `rawInput` / `select` / ... and `dialogs.build`)
+  are built with a context of the session (its density, night mode, locale and font scale) that shows them in a
+  dialog layer of the root, over a scrim, at the width a dialog window of the session's size gets: no overlay
+  window opens. Buttons, lists and inputs work as in a window (input needs the IME level, API 35+); an outside
+  touch or the back key cancels the top dialog when it allows that. The dialogs go with their run.
+- Window colors: `ui.statusBarColor` / `ui.navigationBarColor` of a run show as strips of
+  `STATUS_BAR_STRIP_DP` (24) / `NAVIGATION_BAR_STRIP_DP` (48) dp at the top / bottom of the root, the content
+  (`ui.root`) between them, and `ui.backgroundColor` paints the root. The next run and a layout without a run
+  start from the plain root. The other window-level functions stay no-ops; their one warning per function and
+  run now goes to the run's console, which the client gets through `onConsole`.
+- Busy wait: `runScript` takes `busyWaitLimitMs` (a long or an int: `MIN_BUSY_WAIT_LIMIT_MS` = 1000 to
+  `MAX_BUSY_WAIT_LIMIT_MS` = 60000, 0 off, absent `DEFAULT_BUSY_WAIT_LIMIT_MS` = 5000; other values are
+  `INVALID_REQUEST`). A run executes on the host's main thread; when its script keeps that thread from returning
+  to its looper for longer than the limit, the host stops it with `onScriptError` carrying `errorCode`
+  `ERR_AUTOJS6_UI_PREVIEW_BUSY_WAIT`, the running `line` and `elapsedMs`, then `onScriptExit` with `error`. The
+  watch counts script instructions through Rhino's instruction observer and measures the main thread with a
+  heartbeat on its looper, so timers and handlers that return in time never trip it, a native call that blocks
+  is not interrupted, and a script `catch` cannot swallow the stop (`finally` blocks run). `stopScript`, a
+  replacing `runScript` and `release` interrupt a busy script the same way, also with the watch off, so they
+  are no longer stuck behind it.
+- A V3 client keeps working: it never sends the new keys or the transaction, its runs get the default limit,
+  and its dialogs and window colors show in the root as well.
+
 ## Residual differences from running the script
 
-The preview has no Activity window: `ui.finish`, `keepScreenOn`, `statusBarColor`, `statusBarIconLight`,
-`statusBarIconLightBy`, `backgroundColor`, `navigationBarColor`, `navigationBarIconLight` and
-`navigationBarIconLightBy` are no-ops that print one warning per function to the runtime console; `ui.root`
-is the session root; `ui.emitter` is null. The root carries the script theme's window background; there are
-no status / navigation bar insets. Dialogs of the runtime (`dialogs.*`) would open as the host's overlay
-windows, which V1 never triggers because no user code runs. The plugin roadmap's section 3.5 lists the full
-set for both D47 levels.
+The preview has no Activity window. With a V4 host (see above) a run has `ui.emitter` with `create`, `resume`,
+`pause` and `back_pressed`, dialogs inside the root, and bar strips and background for the three color
+functions; `ui.finish`, `keepScreenOn`, `statusBarIconLight`, `statusBarIconLightBy`, `navigationBarIconLight`
+and `navigationBarIconLightBy` stay no-ops with one console warning per function; other Activity events
+(`key_down`, `options_item_selected`, `activity_result`, ...) never happen; `ui.root` is the content frame of
+the session root. The layout preview itself runs no user code, so none of this applies to it. Before V4,
+`ui.emitter` is null, the window-level functions are all no-ops, and dialogs of a run open as the host's overlay
+windows (or in the host's current Activity). The plugin roadmap's section 3.5 lists the full set for both D47
+levels.

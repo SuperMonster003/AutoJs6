@@ -11,15 +11,19 @@ class UiPreviewContractTest {
 
     @Test
     fun contractHashMatchesItsInput() {
-        assertEquals(3, UiPreviewContract.VERSION)
+        assertEquals(4, UiPreviewContract.VERSION)
+        assertEquals(3, UiPreviewContract.VERSION_V3)
         assertEquals(2, UiPreviewContract.VERSION_V2)
         assertEquals(1, UiPreviewContract.BASE_VERSION)
         assertEquals(UiPreviewContract.HASH, sha256(UiPreviewContract.HASH_INPUT))
+        assertEquals(UiPreviewContract.HASH_V3, sha256(UiPreviewContract.HASH_INPUT_V3))
         assertEquals(UiPreviewContract.HASH_V2, sha256(UiPreviewContract.HASH_INPUT_V2))
         assertEquals(UiPreviewContract.HASH_V1, sha256(UiPreviewContract.HASH_INPUT_V1))
         // The v1 and v2 identities are frozen: 1.6.0 compares the first through the getters, 1.7.0 the second through the info.
         assertEquals("680f41b5459648ff07bd1d3d9684c5279d9398b78f61c0307862f50f8dcac0b6", UiPreviewContract.HASH_V1)
         assertEquals("81f7fe8d2338eed197dcc21e3cff7007a681ea89d080b42d1ae132c94688f1bb", UiPreviewContract.HASH_V2)
+        // The v3 identity is frozen as well: 3-Block Compose 1.8.0 finds it among the supported versions.
+        assertEquals("196e52cd66ff871dca8351a0e9208679ed2bf64af5f733d05312239b1f03a44b", UiPreviewContract.HASH_V3)
         // v2 only appends: every v1 transaction keeps its code, so a v1 client works against a v2 host.
         val v1Service = servicesOf(UiPreviewContract.HASH_INPUT_V1)
         val v2Service = servicesOf(UiPreviewContract.HASH_INPUT_V2)
@@ -27,9 +31,19 @@ class UiPreviewContractTest {
         val v1Callbacks = callbacksOf(UiPreviewContract.HASH_INPUT_V1)
         assertEquals(v1Callbacks, callbacksOf(UiPreviewContract.HASH_INPUT_V2).take(v1Callbacks.size))
         // v3 appends no transaction at all, only request keys and a diagnostic.
-        assertEquals(v2Service, servicesOf(UiPreviewContract.HASH_INPUT))
-        assertEquals(callbacksOf(UiPreviewContract.HASH_INPUT_V2), callbacksOf(UiPreviewContract.HASH_INPUT))
+        assertEquals(v2Service, servicesOf(UiPreviewContract.HASH_INPUT_V3))
+        assertEquals(callbacksOf(UiPreviewContract.HASH_INPUT_V2), callbacksOf(UiPreviewContract.HASH_INPUT_V3))
+        // v4 appends one transaction and one callback after them, and keeps every v3 descriptor in order.
+        val v4Service = servicesOf(UiPreviewContract.HASH_INPUT)
+        assertEquals(v2Service, v4Service.take(v2Service.size))
+        assertEquals(listOf("sendLifecycle(String,Bundle)->Bundle"), v4Service.drop(v2Service.size))
+        val v3Callbacks = callbacksOf(UiPreviewContract.HASH_INPUT_V3)
+        assertEquals(v3Callbacks + "onLifecycleHandled", callbacksOf(UiPreviewContract.HASH_INPUT))
+        val v3Descriptors = descriptorsOf(UiPreviewContract.HASH_INPUT_V3)
+        assertEquals(v3Descriptors, descriptorsOf(UiPreviewContract.HASH_INPUT).take(v3Descriptors.size))
     }
+
+    private fun descriptorsOf(input: String): List<String> = input.split('|').dropWhile { !it.startsWith("bundle:") }
 
     private fun servicesOf(input: String): List<String> = input.split('|').drop(1).takeWhile { !it.startsWith("callback:") }
 
@@ -57,6 +71,7 @@ class UiPreviewContractTest {
             "setHighlight(String,int)->Bundle",
             "runScript(String,Bundle)->Bundle",
             "stopScript(String)->Bundle",
+            "sendLifecycle(String,Bundle)->Bundle",
         )
         val described = UiPreviewContract.HASH_INPUT.split('|').drop(1).takeWhile { !it.startsWith("callback:") }
         assertEquals(expected, described)
@@ -65,7 +80,9 @@ class UiPreviewContractTest {
 
     @Test
     fun callbackTransactionsAreFrozenInOrder() {
-        val expected = listOf("onBounds", "onLayoutFailed", "onSessionLost", "onTap", "onConsole", "onScriptError", "onScriptExit")
+        val expected = listOf(
+            "onBounds", "onLayoutFailed", "onSessionLost", "onTap", "onConsole", "onScriptError", "onScriptExit", "onLifecycleHandled",
+        )
         assertEquals(expected, callbacksOf(UiPreviewContract.HASH_INPUT))
         assertEquals(expected, declaredMethods("IUiPreviewCallback"))
         val aidl = File("src/main/aidl/org/autojs/plugin/ui/preview/IUiPreviewCallback.aidl").readText()
@@ -84,6 +101,7 @@ class UiPreviewContractTest {
             UiPreviewContract.ERROR_TIMEOUT, UiPreviewContract.ERROR_OUTPUT_TRANSPORT,
             UiPreviewContract.ERROR_UNAVAILABLE, UiPreviewContract.ERROR_SCRIPT_FAILED,
             UiPreviewContract.ERROR_ARCHIVE_INVALID, UiPreviewContract.ERROR_ATTRIBUTE_IGNORED,
+            UiPreviewContract.ERROR_BUSY_WAIT, UiPreviewContract.ERROR_NOT_RUNNING,
         )
         assertEquals(errors.size, errors.toSet().size)
         errors.forEach { assertTrue(it, it.startsWith("ERR_AUTOJS6_UI_PREVIEW_")) }
@@ -120,6 +138,12 @@ class UiPreviewContractTest {
             assertTrue(MAX_ARCHIVE_BYTES in 1L..MAX_ARCHIVE_UNPACKED_BYTES)
             assertTrue(MAX_ARCHIVE_ENTRIES > 0 && MAX_ARCHIVE_PATH_CHARS in 64..4096)
             assertEquals(3, ATTRIBUTE_OUTCOMES.toSet().size)
+            // v4: the busy-wait limit of a run stays above a layout's wait and within a minute.
+            assertTrue(MIN_BUSY_WAIT_LIMIT_MS in 1L..DEFAULT_BUSY_WAIT_LIMIT_MS)
+            assertTrue(DEFAULT_BUSY_WAIT_LIMIT_MS in LAYOUT_TIMEOUT_MS..MAX_BUSY_WAIT_LIMIT_MS)
+            assertEquals(60_000L, MAX_BUSY_WAIT_LIMIT_MS)
+            assertEquals(listOf("pause", "resume", "back_pressed"), LIFECYCLE_EVENTS.toList())
+            assertTrue(STATUS_BAR_STRIP_DP in 1 until NAVIGATION_BAR_STRIP_DP)
         }
     }
 
@@ -150,6 +174,8 @@ class UiPreviewContractTest {
                 KEY_SUPPORTED_CONTRACT_VERSIONS, KEY_CONTRACT_HASHES, KEY_RESOURCES_SUPPORTED, KEY_MAX_ARCHIVE_BYTES,
                 KEY_MAX_ARCHIVE_UNPACKED_BYTES, KEY_MAX_ARCHIVE_ENTRIES, KEY_RESOURCES_FD, KEY_RESOURCES_SHA256, KEY_LAYOUT_PATH,
                 KEY_ANDROID_LAYOUT, KEY_PROJECT_FD, KEY_PROJECT_SHA256, KEY_SCRIPT_PATH,
+                KEY_DIALOGS_IN_CANVAS, KEY_LIFECYCLE_EVENTS, KEY_BUSY_WAIT_LIMIT_SUPPORTED, KEY_WINDOW_FUNCTIONS_VISIBLE,
+                KEY_BUSY_WAIT_LIMIT_MS, KEY_LIFECYCLE_EVENT, KEY_CONSUMED,
             )
         }
         assertEquals(keys.size, keys.toSet().size)

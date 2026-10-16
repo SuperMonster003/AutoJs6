@@ -26,9 +26,14 @@ oneway interface IUiPreviewCallback {
     // v2: one console entry of the running script: runId, level (android.util.Log priority) and text.
     void onConsole(String sessionId, in Bundle entry);
 
-    // v2: an uncaught error of the running script: runId, errorMessage and line (-1 when unknown).
+    // v2: an uncaught error of the running script: runId, errorMessage and line (-1 when unknown); v4 adds errorCode
+    // and elapsedMs when the busy-wait limit ended the run (ERR_AUTOJS6_UI_PREVIEW_BUSY_WAIT).
     void onScriptError(String sessionId, in Bundle error);
 
     // v2: the running script ended: runId and reason (exit, stopped, error, replaced, released).
     void onScriptExit(String sessionId, in Bundle exit);
+
+    // v4: an event of sendLifecycle reached the run: runId, event and consumed (back_pressed only; false means the
+    // run then ended with exit).
+    void onLifecycleHandled(String sessionId, in Bundle result);
 }
