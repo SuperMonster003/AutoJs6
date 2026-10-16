@@ -79,7 +79,8 @@ when the package changes, so listing tools does not wake the plugin; a provider 
 to the device (for example list a tool only once its model is present) and should then stay
 consistent until the next package change.
 
-The document (`PluginToolCatalogJson`):
+The document (`PluginToolCatalogJson`), shown with the catalog of 3-Hanzi CC 2.1.0 (descriptions shortened, `enum`
+reduced from its 32 names):
 
 ```json
 {
@@ -87,21 +88,26 @@ The document (`PluginToolCatalogJson`):
   "tools": [
     {
       "name": "convert",
-      "title": "Convert Chinese text",
-      "description": "Converts Chinese text between Simplified, Traditional and regional variants with an OpenCC configuration.",
+      "title": "Convert Chinese text (OpenCC)",
+      "description": "Converts Chinese text between Simplified, Traditional, Hong Kong, Taiwan and Japanese Shinjitai character forms with OpenCC, offline on the phone. ...",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "text": {"type": "string", "maxLength": 65536},
-          "config": {"type": "string", "enum": ["s2t", "t2s", "s2tw", "tw2s"], "default": "s2t"}
+          "text": {"type": "string", "description": "The text to convert, at most 16384 characters.", "maxLength": 16384},
+          "config": {"type": "string", "description": "The conversion, named <from>2<to> ...", "enum": ["hk2s", "s2t", "s2twp", "t2s", "s2twi", "s2jp"], "default": "s2t"}
         },
         "required": ["text"],
         "additionalProperties": false
       },
-      "outputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"], "additionalProperties": false},
+      "outputSchema": {
+        "type": "object",
+        "properties": {"text": {"type": "string"}, "config": {"type": "string"}},
+        "required": ["text", "config"],
+        "additionalProperties": false
+      },
       "risk": "readonly",
-      "timeoutMs": 30000,
-      "maxConcurrency": 2
+      "timeoutMs": 10000,
+      "maxConcurrency": 4
     }
   ]
 }
@@ -327,4 +333,5 @@ the `plugins` module); there is no broker and no grant in between (MCP roadmap D
 | Bridge module `plugin_tools`, grants and tokens | done (P12 host item 4: `NodeBridgePluginToolsBridge`, `PluginToolInvocationPlanner`, MCP default grant) |
 | Script API `plugins.tools` | done (P12 host item 5: `PluginsTools`; documentation, declarations 4.41.0 and Ace Editor completion synchronized) |
 | Host changelog and protocol documents | done (P12 host item 6: 6.8.0 changelog, `host-capability-contract-v1.md`) |
-| Pilots | OpenCC (part of the 6.8.0 release gate), YOLO, Image Quantization, Stack Archive |
+| Pilot OpenCC (part of the 6.8.0 release gate) | done: 3-Hanzi CC 2.1.0 declares `opencc_convert` (`config` takes the 32 names of the `opencc` module, `text` up to 16384 characters); `OpenccPluginToolRoundTripTest` runs it through the script API and the bridge |
+| Pilots YOLO, Image Quantization, Stack Archive | planned |
