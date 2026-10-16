@@ -38,6 +38,33 @@ class PluginToolInvocationPlannerTest {
     }
 
     @Test
+    fun directoryArgumentsCarryTheFileNamesTheToolAsksFor() {
+        val catalog = """{"shortName": "yolo", "tools": [{
+            "name": "detect",
+            "description": "Detects objects",
+            "inputSchema": {"type": "object", "additionalProperties": false, "required": ["image", "model"], "properties": {
+                "image": {"type": "string", "x-autojs6-type": "image"},
+                "model": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": ["model.json", "model.ncnn.bin"]},
+                "extra": {"type": "string", "x-autojs6-type": "directory"}
+            }},
+            "risk": "readonly"
+        }]}"""
+        val yolo = (PluginToolCatalogParser.parse(catalog, official = true) as PluginToolCatalogParse.Accepted).catalog.tools.single()
+        assertEquals(mapOf("model" to listOf("model.json", "model.ncnn.bin")), yolo.directoryFiles)
+        val plan = (PluginToolInvocationPlanner.plan(yolo, args("""{"image": "screen", "model": " models/yolo11n ", "extra": "more"}"""), null, null, 30_000L) as PluginToolPlanResult.Ready).plan
+        assertEquals(
+            listOf(
+                PluginToolInput("image", "image", "screen"),
+                PluginToolInput("model", "directory", "models/yolo11n", listOf("model.json", "model.ncnn.bin")),
+                PluginToolInput("extra", "directory", "more"),
+            ),
+            plan.inputs,
+        )
+        val refused = PluginToolInvocationPlanner.plan(yolo, args("""{"image": "screen", "model": "screen"}"""), null, null, 30_000L)
+        assertTrue(refused.toString(), refused.toString().contains("model is a directory parameter and takes a path, not \"screen\""))
+    }
+
+    @Test
     fun theTimeLimitIsTheShortestOfToolCallerAndBridge() {
         assertEquals(5_000L, ready(args("""{"image": "a.png"}"""), requestedTimeoutMs = 5_000L).timeoutMs)
         assertEquals(1_000L, ready(args("""{"image": "a.png"}"""), requestedTimeoutMs = 5_000L, ceilingMs = 1_000L).timeoutMs)

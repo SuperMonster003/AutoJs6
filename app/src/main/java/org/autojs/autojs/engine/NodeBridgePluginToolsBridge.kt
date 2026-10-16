@@ -226,7 +226,16 @@ internal class NodeBridgePluginToolsBridge(
     private fun resolveInputs(request: NodeBridgeRequest, plan: PluginToolInvocationPlan): List<ResolvedInput> {
         val resolved = mutableListOf<ResolvedInput>()
         try {
-            for (input in plan.inputs) resolved += if (input.isScreen) screenInput(input, plan.timeoutMs) else fileInput(request, input)
+            for (input in plan.inputs) {
+                when {
+                    input.isScreen -> resolved += screenInput(input, plan.timeoutMs)
+                    input.type == PluginToolValues.SPECIAL_TYPE_DIRECTORY -> directoryInputs(request, input, resolved)
+                    else -> resolved += fileInput(request, input)
+                }
+                if (resolved.size > PluginToolLimits.MAX_INPUT_DESCRIPTORS) {
+                    throw RequestProblem(NodeBridgeError.resourceLimit("the inputs need more than ${PluginToolLimits.MAX_INPUT_DESCRIPTORS} descriptors", request.module, request.method))
+                }
+            }
         } catch (error: Throwable) {
             resolved.forEach { runCatching { it.descriptor.close() } }
             throw error
@@ -263,8 +272,10 @@ internal class NodeBridgePluginToolsBridge(
     private fun fileInput(request: NodeBridgeRequest, input: PluginToolInput): ResolvedInput {
         val file = resolve { paths.read(input.value, request.permissions, "plugin_tools.invoke ${input.parameter}") }
         if (!file.isFile) throw RequestProblem(NodeBridgeError.invalidRequest("${input.parameter} is not a readable file: ${input.value}", request.module, request.method))
-        if (file.length() > PluginToolLimits.MAX_DESCRIPTOR_BYTES) {
-            throw RequestProblem(NodeBridgeError.resourceLimit("${input.parameter} has ${file.length()} bytes, more than ${PluginToolLimits.MAX_DESCRIPTOR_BYTES}", request.module, request.method))
+        // Files are handed over without a copy; images are decoded by the provider and keep the descriptor ceiling (MCP roadmap D49).
+        val ceiling = if (input.type == PluginToolValues.SPECIAL_TYPE_IMAGE) PluginToolLimits.MAX_DESCRIPTOR_BYTES.toLong() else PluginToolLimits.MAX_FILE_INPUT_BYTES
+        if (file.length() > ceiling) {
+            throw RequestProblem(NodeBridgeError.resourceLimit("${input.parameter} has ${file.length()} bytes, more than $ceiling", request.module, request.method))
         }
         val mimeType = URLConnection.guessContentTypeFromName(file.name) ?: "application/octet-stream"
         val meta = JSONObject()
@@ -279,6 +290,40 @@ internal class NodeBridgePluginToolsBridge(
             if (bounds.outWidth > 0 && bounds.outHeight > 0) meta.put(PluginToolInputJson.WIDTH, bounds.outWidth).put(PluginToolInputJson.HEIGHT, bounds.outHeight)
         }
         return ResolvedInput(meta, ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY))
+    }
+
+    /**
+     * The files of a directory parameter (MCP roadmap D49): the names the tool asks for, each of which must exist, or
+     * every regular file directly inside; each becomes one read-only descriptor, named by DISPLAY_NAME.
+     */
+    private fun directoryInputs(request: NodeBridgeRequest, input: PluginToolInput, into: MutableList<ResolvedInput>) {
+        val directory = resolve { paths.read(input.value, request.permissions, "plugin_tools.invoke ${input.parameter}") }
+        if (!directory.isDirectory) throw RequestProblem(NodeBridgeError.invalidRequest("${input.parameter} is not a readable directory: ${input.value}", request.module, request.method))
+        val files = if (input.files.isNotEmpty()) {
+            input.files.map { name ->
+                File(directory, name).also { file ->
+                    if (!file.isFile) throw RequestProblem(NodeBridgeError.invalidRequest("${input.parameter}: ${input.value} has no file named $name", request.module, request.method))
+                }
+            }
+        } else {
+            val all = directory.listFiles()?.filter { it.isFile }?.sortedBy { it.name }.orEmpty()
+            if (all.size > PluginToolLimits.MAX_DIRECTORY_FILES) {
+                throw RequestProblem(NodeBridgeError.resourceLimit("${input.parameter}: ${input.value} has more than ${PluginToolLimits.MAX_DIRECTORY_FILES} files", request.module, request.method))
+            }
+            all
+        }
+        for (file in files) {
+            if (file.length() > PluginToolLimits.MAX_FILE_INPUT_BYTES) {
+                throw RequestProblem(NodeBridgeError.resourceLimit("${input.parameter}: ${file.name} has ${file.length()} bytes, more than ${PluginToolLimits.MAX_FILE_INPUT_BYTES}", request.module, request.method))
+            }
+            val meta = JSONObject()
+                .put(PluginToolInputJson.NAME, input.parameter)
+                .put(PluginToolInputJson.SOURCE, PluginToolValues.INPUT_SOURCE_DIRECTORY)
+                .put(PluginToolInputJson.MIME_TYPE, URLConnection.guessContentTypeFromName(file.name) ?: "application/octet-stream")
+                .put(PluginToolInputJson.DISPLAY_NAME, file.name)
+                .put(PluginToolInputJson.BYTE_COUNT, file.length())
+            into += ResolvedInput(meta, ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY))
+        }
     }
 
     private fun cancel(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -520,6 +565,7 @@ internal class NodeBridgePluginToolsBridge(
         })
         put("imageParameters", JSONArray(tool.specialParameters.filterValues { it == PluginToolValues.SPECIAL_TYPE_IMAGE }.keys.toList()))
         put("fileParameters", JSONArray(tool.specialParameters.filterValues { it == PluginToolValues.SPECIAL_TYPE_FILE }.keys.toList()))
+        put("directoryParameters", JSONArray(tool.specialParameters.filterValues { it == PluginToolValues.SPECIAL_TYPE_DIRECTORY }.keys.toList()))
     }
 
     private fun success(request: NodeBridgeRequest, json: JSONObject) = NodeBridgeResponse.success(request.id, json.toString())

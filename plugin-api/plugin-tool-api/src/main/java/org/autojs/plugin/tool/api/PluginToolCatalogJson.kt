@@ -85,6 +85,13 @@ object PluginToolCatalogJson {
      * scope, opens the file and hands the plugin a descriptor instead of the string.
      */
     const val SPECIAL_TYPE = "x-autojs6-type"
+
+    /**
+     * Schema keyword beside SPECIAL_TYPE `directory`, optional: the plain file names (1 to
+     * PluginToolLimits.MAX_DIRECTORY_FILES) the tool needs from the directory. The host refuses a directory that lacks
+     * one of them and opens only these; without the keyword it opens every regular file directly inside.
+     */
+    const val DIRECTORY_FILES = "x-autojs6-files"
 }
 
 /** Field names of one entry of PluginToolInvokeKeys.INPUTS_JSON, describing the descriptor at the same position. */

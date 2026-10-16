@@ -52,15 +52,32 @@ class PluginToolSchemaTest {
             obj(""""o": {"type": "object", "additionalProperties": false, "properties": {"img": {"type": "string", "x-autojs6-type": "image"}}}""") to "$.o.img: x-autojs6-type is only allowed on top-level properties",
             obj(""""a": {"type": "array", "items": {"type": "string", "x-autojs6-type": "file"}}""") to "$.a[]: x-autojs6-type is only allowed on top-level properties",
             obj(""""c": {"oneOf": [{"type": "string", "x-autojs6-type": "image"}, {"type": "integer"}]}""") to "$.c.oneOf[0]: x-autojs6-type is only allowed on top-level properties",
-            obj(""""i": {"type": "integer", "x-autojs6-type": "image"}""") to "$.i: an image or file parameter must be of type string",
-            obj(""""i": {"type": "string", "x-autojs6-type": "video"}""") to "$.i: x-autojs6-type must be image or file",
-            obj((0..8).joinToString { """"f$it": {"type": "string", "x-autojs6-type": "file"}""" }) to "more than 8 image or file parameters",
+            obj(""""i": {"type": "integer", "x-autojs6-type": "image"}""") to "$.i: an image, file or directory parameter must be of type string",
+            obj(""""i": {"type": "string", "x-autojs6-type": "video"}""") to "$.i: x-autojs6-type must be image or file or directory",
+            obj((0..8).joinToString { """"f$it": {"type": "string", "x-autojs6-type": "file"}""" }) to "more than 8 image, file or directory parameters",
+            obj(""""d": {"type": "string", "x-autojs6-type": "file", "x-autojs6-files": ["a"]}""") to "$.d: x-autojs6-files is only allowed beside x-autojs6-type directory",
+            obj(""""d": {"type": "string", "x-autojs6-files": ["a"]}""") to "$.d: x-autojs6-files is only allowed beside x-autojs6-type directory",
+            obj(""""d": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": []}""") to "$.d: x-autojs6-files needs 1 to 16 names",
+            obj(""""d": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": ["a", "a"]}""") to "$.d: x-autojs6-files repeats a name",
+            obj(""""d": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": ["sub/a"]}""") to "$.d: x-autojs6-files entry \"sub/a\" is not a plain file name",
+            obj(""""d": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": [".."]}""") to "is not a plain file name",
+            obj(""""d": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": "model.json"}""") to "$.d: x-autojs6-files is not an array",
         ).forEach { (schema, needle) ->
             val reason = PluginToolSchema.checkInput(json(schema))
             assertTrue("\"$needle\" in \"$reason\"", reason?.contains(needle) == true)
         }
         val reason = PluginToolSchema.checkOutput(json(obj(""""img": {"type": "string", "x-autojs6-type": "image"}""")))
         assertTrue(reason, reason?.contains("only allowed in input schemas") == true)
+    }
+
+    @Test
+    fun directoryParametersMayNameTheFilesTheyNeed() {
+        val schema = json(obj(
+            """"image": {"type": "string", "x-autojs6-type": "image"}, "model": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": ["model.json", "model.ncnn.param", "model.ncnn.bin"]}, "any": {"type": "string", "x-autojs6-type": "directory"}""",
+        ))
+        assertEquals(null, PluginToolSchema.checkInput(schema))
+        assertEquals(mapOf("image" to "image", "model" to "directory", "any" to "directory"), PluginToolSchema.specialParameters(schema))
+        assertEquals(mapOf("model" to listOf("model.json", "model.ncnn.param", "model.ncnn.bin")), PluginToolSchema.directoryFiles(schema))
     }
 
     @Test

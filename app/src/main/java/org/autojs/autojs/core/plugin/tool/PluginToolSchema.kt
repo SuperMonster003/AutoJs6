@@ -44,7 +44,15 @@ object PluginToolSchema {
     /** Why [schema] is not a usable output schema, or null: a closed object within the subset, without special types. */
     fun checkOutput(schema: JsonObject): String? = check(schema, input = false)
 
-    /** The image and file parameters of a valid input schema, in declaration order, mapped to their special type. */
+    /** The plain file names a directory parameter asks for (`x-autojs6-files`); a directory parameter without them is absent. */
+    fun directoryFiles(schema: JsonObject): Map<String, List<String>> {
+        val properties = schema.get("properties") as? JsonObject ?: return emptyMap()
+        return properties.entrySet().mapNotNull { (name, node) ->
+            ((node as? JsonObject)?.get(PluginToolCatalogJson.DIRECTORY_FILES) as? JsonArray)?.let { files -> name to files.mapNotNull { it.asStringOrNull() } }
+        }.toMap(LinkedHashMap())
+    }
+
+    /** The image, file and directory parameters of a valid input schema, in declaration order, mapped to their special type. */
     fun specialParameters(schema: JsonObject): Map<String, String> {
         val properties = schema.get("properties") as? JsonObject ?: return emptyMap()
         return properties.entrySet().mapNotNull { (name, node) ->
@@ -74,7 +82,7 @@ object PluginToolSchema {
         require(schema.get("type")?.asStringOrNull() == "object") { "the root is not of type object" }
         val specials = intArrayOf(0)
         checkNode(schema, "$", depth = 1, rootProperty = false, input = input, specials = specials)
-        require(specials[0] <= PluginToolLimits.MAX_INPUTS) { "more than ${PluginToolLimits.MAX_INPUTS} image or file parameters" }
+        require(specials[0] <= PluginToolLimits.MAX_INPUTS) { "more than ${PluginToolLimits.MAX_INPUTS} image, file or directory parameters" }
         null
     }.getOrElse { it.message ?: "the schema is invalid" }
 
@@ -85,10 +93,21 @@ object PluginToolSchema {
             require(input) { "$path: ${PluginToolCatalogJson.SPECIAL_TYPE} is only allowed in input schemas" }
             require(rootProperty) { "$path: ${PluginToolCatalogJson.SPECIAL_TYPE} is only allowed on top-level properties" }
             require(special.asStringOrNull() in PluginToolValues.SPECIAL_TYPES) { "$path: ${PluginToolCatalogJson.SPECIAL_TYPE} must be ${PluginToolValues.SPECIAL_TYPES.joinToString(" or ")}" }
-            require(node.get("type")?.asStringOrNull() == "string") { "$path: an image or file parameter must be of type string" }
+            require(node.get("type")?.asStringOrNull() == "string") { "$path: an image, file or directory parameter must be of type string" }
             specials[0]++
         }
-        val keys = node.keySet() - PluginToolCatalogJson.SPECIAL_TYPE
+        node.get(PluginToolCatalogJson.DIRECTORY_FILES)?.let { files ->
+            val keyword = PluginToolCatalogJson.DIRECTORY_FILES
+            require(node.get(PluginToolCatalogJson.SPECIAL_TYPE)?.asStringOrNull() == PluginToolValues.SPECIAL_TYPE_DIRECTORY) {
+                "$path: $keyword is only allowed beside ${PluginToolCatalogJson.SPECIAL_TYPE} ${PluginToolValues.SPECIAL_TYPE_DIRECTORY}"
+            }
+            val names = (files as? JsonArray)?.map { it.asStringOrNull() ?: throw IllegalArgumentException("$path: $keyword entries must be strings") }
+                ?: throw IllegalArgumentException("$path: $keyword is not an array")
+            require(names.size in 1..PluginToolLimits.MAX_DIRECTORY_FILES) { "$path: $keyword needs 1 to ${PluginToolLimits.MAX_DIRECTORY_FILES} names" }
+            require(names.toSet().size == names.size) { "$path: $keyword repeats a name" }
+            names.forEach { name -> require(isPlainFileName(name)) { "$path: $keyword entry \"$name\" is not a plain file name" } }
+        }
+        val keys = node.keySet() - PluginToolCatalogJson.SPECIAL_TYPE - PluginToolCatalogJson.DIRECTORY_FILES
         node.get("title")?.let { require(it.asStringOrNull()?.let { title -> title.length <= MAX_TITLE_CHARS } == true) { "$path: title is not a string of at most $MAX_TITLE_CHARS characters" } }
         node.get("description")?.let { require(it.asStringOrNull()?.let { text -> text.length <= MAX_DESCRIPTION_CHARS } == true) { "$path: description is not a string of at most $MAX_DESCRIPTION_CHARS characters" } }
 
@@ -218,6 +237,10 @@ object PluginToolSchema {
             if (enum != null && enum.none { equivalent(value, it) }) problems += "$path: not one of ${enum.joinToString()}"
         }
     }
+
+    /** A file name without directories: not empty, not `.` or `..`, no slash, backslash or control character, at most 255 characters. */
+    private fun isPlainFileName(name: String): Boolean =
+        name.isNotEmpty() && name.length <= 255 && name != "." && name != ".." && name.none { it == '/' || it == '\\' || it.isISOControl() }
 
     private fun unknownKeys(keys: Set<String>, allowed: Set<String>): String? = (keys - allowed).takeIf { it.isNotEmpty() }?.sorted()?.joinToString()
 

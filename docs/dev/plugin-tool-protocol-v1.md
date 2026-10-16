@@ -170,19 +170,31 @@ JSON Schema library: the libraries bring Jackson or a second org.json and need R
 and the subset's own rules (closed objects, top-level-only special types, unknown keywords) would still
 need code around them.
 
-### Images and files
+### Images, files and directories
 
-A top-level string property may carry `"x-autojs6-type": "image"` or `"file"` (only at the top level,
-at most 8 per tool). The consumer passes:
+A top-level string property may carry `"x-autojs6-type": "image"`, `"file"` or `"directory"` (only at
+the top level, at most 8 per tool). The consumer passes:
 
 - image: `"screen"` (the host captures the screen as for the MCP screen tools; such calls count
   against the shared screenshot limit, MCP roadmap D39) or a path;
-- file: a path.
+- file: a path;
+- directory: a path (MCP roadmap D49). Beside the type, `"x-autojs6-files"` may list the plain file names
+  the tool needs (1 - 16 names, no directories); the host refuses a directory that lacks one of them and
+  opens only those. Without the keyword the host opens every regular file directly inside the directory
+  (at most 16, in name order, no subdirectories).
 
 The host checks the path scope (the working directory; shared storage read-only where the consumer
-allows it, never `Android/data` or `Android/obb`), opens the file or captures the screen, and passes
-a readable descriptor instead of the string. The provider gets the other arguments in
-`argumentsJson` and one entry per descriptor in `inputsJson`.
+allows it, never `Android/data` or `Android/obb`), opens the files or captures the screen, and passes
+readable descriptors instead of the string. The provider gets the other arguments in `argumentsJson`
+and one entry per descriptor in `inputsJson` (`name` is the parameter, `source` is `screen`, `file` or
+`directory`, `displayName` is the file name, `byteCount` its size, `width` / `height` for images).
+Files of file and directory parameters are opened read-only without a copy and may be large (up to
+512 MiB each); images keep the 8 MiB descriptor ceiling. A model with several files, such as an NCNN
+model, is one directory parameter:
+
+```json
+"model": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": ["model.json", "model.ncnn.param", "model.ncnn.bin"]}
+```
 
 ## Invocation
 
@@ -244,8 +256,10 @@ the provider process dies, every running call of it fails on the host side.
 | schema depth / properties per object | 8 / 64 |
 | arguments | 64 KiB UTF-8 |
 | result (`resultJson` + `text`) | 512 KiB UTF-8 |
-| one descriptor (input or output) | 8 MiB |
-| image or file parameters / outputs per tool | 8 / 8 |
+| one image input or output descriptor | 8 MiB |
+| one file of a file or directory parameter | 512 MiB (opened read-only, no copy) |
+| image, file or directory parameters / outputs per tool | 8 / 8 |
+| files per directory parameter / input descriptors per call | 16 / 32 |
 | time limit | default 30 s, at most 300 s |
 | concurrency per tool | default 1, at most 4 |
 
@@ -267,7 +281,7 @@ through the provider directly (MCP roadmap D29). Every method needs the token `p
 
 | Method | Arguments | Result (`schema`) |
 | --- | --- | --- |
-| `list()` | none | `autojs6-bridge-plugin-tools-list-v1`: `tools[]` with `name` (`<shortName>_<name>`), `tool`, `shortName`, `provider`, `trust`, `title`, `description`, `inputSchema`, `outputSchema`, `risk`, `timeoutMs`, `maxConcurrency`, `outputs`, `imageParameters`, `fileParameters`; `providers[]` with `packageName`, `versionCode`, `trust`, `status`, `shortName`, `tools`, `diagnostics`, `detail` and `toolsHidden` |
+| `list()` | none | `autojs6-bridge-plugin-tools-list-v1`: `tools[]` with `name` (`<shortName>_<name>`), `tool`, `shortName`, `provider`, `trust`, `title`, `description`, `inputSchema`, `outputSchema`, `risk`, `timeoutMs`, `maxConcurrency`, `outputs`, `imageParameters`, `fileParameters`, `directoryParameters`; `providers[]` with `packageName`, `versionCode`, `trust`, `status`, `shortName`, `tools`, `diagnostics`, `detail` and `toolsHidden` |
 | `invoke(name, arguments, options)` | `options`: `invocationId` (`[A-Za-z0-9._:-]{1,128}`, generated when absent), `timeoutMs` (only shortens the tool's), `outputs` (output name to working-directory path), `overwrite` (default false) | `autojs6-bridge-plugin-tools-invoke-v1`: `tool`, `provider`, `invocationId`, `result`, `text`, `outputs[]` (`name`, `path`, `bytes`, `mimeType`), `missingOutputs`, `durationMs` |
 | `cancel(invocationId)` or `cancel({invocationId})` | | `autojs6-bridge-plugin-tools-cancel-v1`: `invocationId`, `cancelled` (false when the call already ended or never ran) |
 

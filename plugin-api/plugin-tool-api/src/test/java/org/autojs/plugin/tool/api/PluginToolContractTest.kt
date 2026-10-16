@@ -49,7 +49,9 @@ class PluginToolContractTest {
     @Test
     fun valuesAreFrozen() {
         assertEquals(setOf("readonly", "write", "destructive", "network"), PluginToolValues.RISKS)
-        assertEquals(setOf("image", "file"), PluginToolValues.SPECIAL_TYPES)
+        assertEquals(setOf("image", "file", "directory"), PluginToolValues.SPECIAL_TYPES)
+        assertEquals("directory", PluginToolValues.INPUT_SOURCE_DIRECTORY)
+        assertEquals("x-autojs6-files", PluginToolCatalogJson.DIRECTORY_FILES)
         assertEquals("screen", PluginToolValues.IMAGE_SCREEN)
         assertEquals(
             listOf("UNSUPPORTED_CONTRACT_VERSION", "UNKNOWN_TOOL", "INVALID_ARGUMENTS", "NOT_READY", "BUSY", "LIMIT_EXCEEDED", "INPUT_UNREADABLE", "CANCELLED", "TIMEOUT", "FAILED"),
@@ -64,6 +66,9 @@ class PluginToolContractTest {
         assertEquals(256 * 1024, PluginToolLimits.MAX_CATALOG_BYTES)
         assertEquals(64, PluginToolLimits.MAX_TOOLS_PER_PLUGIN)
         assertEquals(8 * 1024 * 1024, PluginToolLimits.MAX_DESCRIPTOR_BYTES)
+        assertEquals(512L * 1024 * 1024, PluginToolLimits.MAX_FILE_INPUT_BYTES)
+        assertEquals(16, PluginToolLimits.MAX_DIRECTORY_FILES)
+        assertEquals(32, PluginToolLimits.MAX_INPUT_DESCRIPTORS)
         assertEquals(PluginToolLimits.MAX_MCP_TOOL_NAME_CHARS - PluginToolLimits.MCP_TOOL_NAME_PREFIX.length, PluginToolLimits.MAX_FULL_NAME_CHARS)
         assertTrue(PluginToolLimits.DEFAULT_TIMEOUT_MS <= PluginToolLimits.MAX_TIMEOUT_MS)
         assertTrue(PluginToolLimits.DEFAULT_MAX_CONCURRENCY <= PluginToolLimits.MAX_CONCURRENCY)

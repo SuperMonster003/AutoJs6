@@ -27,7 +27,8 @@ import kotlin.concurrent.thread
  * Test-only provider of the plugin tool contract (docs/dev/plugin-tool-protocol-v1.md). Its catalog declares `faketool`
  * with `echo` (returns its text), `fail` (always fails), `slow` (waits until cancelled or `sleepMs` passed), `inspect`
  * (reports the bytes behind its image and file descriptors), `emit` (returns its text as the binary output `data`) and
- * `last_cancel` (returns the invocation id and reason of the last cancel it received), `die` (kills the provider process
+ * `last_cancel` (returns the invocation id and reason of the last cancel it received), `inspect_dir` (reports the files of
+ * its directory inputs), `die` (kills the provider process
  * during the call) and `bad_schema` (an open schema the host must drop). Nothing here is reachable from production code.
  */
 class FakePluginToolProviderService : Service() {
@@ -45,7 +46,7 @@ class FakePluginToolProviderService : Service() {
 
         override fun invoke(request: Bundle?, inputs: Array<out ParcelFileDescriptor>?, callback: IPluginToolCallback?): Bundle {
             val descriptors = inputs?.toList().orEmpty()
-            if (request?.getString(PluginToolInvokeKeys.TOOL) != "inspect") descriptors.forEach { runCatching { it.close() } }
+            if (request?.getString(PluginToolInvokeKeys.TOOL) !in INSPECTING) descriptors.forEach { runCatching { it.close() } }
             val invocationId = request?.getString(PluginToolInvokeKeys.INVOCATION_ID)
             if (request == null || callback == null || invocationId == null) return refuse(PluginToolErrorCodes.FAILED, "incomplete request")
             if (!PluginToolContract.supportsContractVersion(request.getInt(PluginToolInvokeKeys.CONTRACT_VERSION))) {
@@ -75,13 +76,13 @@ class FakePluginToolProviderService : Service() {
                         }, emptyArray())
                     }
                 }
-                "inspect" -> thread(name = "fake-tool-inspect") {
+                "inspect", "inspect_dir" -> thread(name = "fake-tool-inspect") {
                     val meta = JSONArray(request.getString(PluginToolInvokeKeys.INPUTS_JSON) ?: "[]")
                     val report = JSONArray()
                     descriptors.forEachIndexed { index, descriptor ->
                         val bytes = ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() }
                         val entry = meta.optJSONObject(index) ?: JSONObject()
-                        report.put(JSONObject().put("name", entry.optString("name")).put("source", entry.optString("source"))
+                        report.put(JSONObject().put("name", entry.optString("name")).put("source", entry.optString("source")).put("displayName", entry.optString("displayName"))
                             .put("mimeType", entry.optString("mimeType")).put("bytes", bytes.size).put("declaredBytes", entry.optLong("byteCount", -1)))
                     }
                     callback.onResult(Bundle().apply {
@@ -156,6 +157,9 @@ class FakePluginToolProviderService : Service() {
             capabilities = Bundle().apply { putInt(PluginToolCapabilityKeys.CONTRACT_VERSION, PluginToolContract.CONTRACT_VERSION) },
         )
 
+        /** The tools that read their input descriptors; every other tool closes them at once. */
+        private val INSPECTING = setOf("inspect", "inspect_dir")
+
         /** `<invocationId>:<reason>` of the last cancel this provider process received; the `last_cancel` tool returns it. */
         @Volatile
         var lastCancel: String = ""
@@ -205,6 +209,13 @@ class FakePluginToolProviderService : Service() {
       "description": "Returns the invocation id and reason of the last cancel the provider received. Test-only tool.",
       "inputSchema": {"type": "object", "properties": {}, "additionalProperties": false},
       "risk": "readonly"
+    },
+    {
+      "name": "inspect_dir",
+      "description": "Reports the files behind its directory inputs: dir hands over a.txt and b.bin, all hands over every file. Test-only tool.",
+      "inputSchema": {"type": "object", "properties": {"dir": {"type": "string", "x-autojs6-type": "directory", "x-autojs6-files": ["a.txt", "b.bin"]}, "all": {"type": "string", "x-autojs6-type": "directory"}}, "additionalProperties": false},
+      "risk": "readonly",
+      "timeoutMs": 10000
     },
     {
       "name": "die",

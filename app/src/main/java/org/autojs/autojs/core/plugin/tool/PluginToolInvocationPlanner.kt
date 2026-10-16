@@ -8,8 +8,11 @@ import org.autojs.plugin.tool.api.PluginToolErrorCodes
 import org.autojs.plugin.tool.api.PluginToolLimits
 import org.autojs.plugin.tool.api.PluginToolValues
 
-/** One image or file argument the host resolves into a descriptor; [value] is `"screen"` (images only) or a path. */
-data class PluginToolInput(val parameter: String, val type: String, val value: String) {
+/**
+ * One image, file or directory argument the host resolves into descriptors; [value] is `"screen"` (images only) or a
+ * path, and [files] are the names a directory parameter asks for (empty: every regular file of the directory).
+ */
+data class PluginToolInput(val parameter: String, val type: String, val value: String, val files: List<String> = emptyList()) {
     val isScreen: Boolean get() = type == PluginToolValues.SPECIAL_TYPE_IMAGE && value == PluginToolValues.IMAGE_SCREEN
 }
 
@@ -72,8 +75,8 @@ object PluginToolInvocationPlanner {
             if (value.isJsonNull) continue
             val text = (value as? JsonPrimitive)?.takeIf { it.isString }?.asString?.trim().orEmpty()
             if (text.isEmpty()) return invalid("$parameter must name ${if (type == PluginToolValues.SPECIAL_TYPE_IMAGE) "\"screen\" or a path" else "a path"}")
-            if (type == PluginToolValues.SPECIAL_TYPE_FILE && text == PluginToolValues.IMAGE_SCREEN) return invalid("$parameter is a file parameter and takes a path, not \"screen\"")
-            inputs += PluginToolInput(parameter, type, text)
+            if (type != PluginToolValues.SPECIAL_TYPE_IMAGE && text == PluginToolValues.IMAGE_SCREEN) return invalid("$parameter is a $type parameter and takes a path, not \"screen\"")
+            inputs += PluginToolInput(parameter, type, text, tool.directoryFiles[parameter].orEmpty())
         }
 
         val wanted = LinkedHashMap<String, String>()

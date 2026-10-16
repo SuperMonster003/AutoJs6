@@ -44,12 +44,24 @@ object PluginToolLimits {
     /** UTF-8 bytes of PluginToolResultKeys.RESULT_JSON and TEXT together. */
     const val MAX_RESULT_BYTES = 512 * 1024
 
-    /** Bytes behind one input or output descriptor (the host's descriptor ceiling). */
+    /** Bytes behind one image input or one output descriptor (the host's descriptor ceiling). */
     const val MAX_DESCRIPTOR_BYTES = 8 * 1024 * 1024
 
-    /** Image or file parameters of one tool, and binary outputs of one tool. */
+    /**
+     * Bytes of one file the host opens read-only for a file or directory parameter. The provider reads the file through
+     * the descriptor without a copy, so the ceiling is higher than for images and outputs (MCP roadmap D49).
+     */
+    const val MAX_FILE_INPUT_BYTES = 512L * 1024 * 1024
+
+    /** Image, file or directory parameters of one tool, and binary outputs of one tool. */
     const val MAX_INPUTS = 8
     const val MAX_OUTPUTS = 8
+
+    /** Files the host opens for one directory parameter. */
+    const val MAX_DIRECTORY_FILES = 16
+
+    /** Input descriptors of one call, directory files included. */
+    const val MAX_INPUT_DESCRIPTORS = 32
 
     const val DEFAULT_TIMEOUT_MS = 30_000L
     const val MAX_TIMEOUT_MS = 300_000L

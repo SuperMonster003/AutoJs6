@@ -29,6 +29,8 @@ data class PluginToolDefinition(
     val maxConcurrency: Int,
     val outputs: List<PluginToolOutput>,
     val specialParameters: Map<String, String> = emptyMap(),
+    /** The file names each directory parameter asks for (PluginToolSchema.directoryFiles); absent means every regular file. */
+    val directoryFiles: Map<String, List<String>> = emptyMap(),
 )
 
 /** An accepted catalog: the usable tools and why the others were dropped. */
@@ -165,6 +167,7 @@ object PluginToolCatalogParser {
             PluginToolDefinition(
                 name, fullName, title, description, inputSchema, outputSchema, risk, timeoutMs, maxConcurrency.toInt(), outputs,
                 PluginToolSchema.specialParameters(inputSchema),
+                PluginToolSchema.directoryFiles(inputSchema),
             ),
         )
     }

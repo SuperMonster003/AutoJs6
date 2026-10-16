@@ -23,7 +23,13 @@ object PluginToolValues {
     /** Value of PluginToolCatalogJson.SPECIAL_TYPE: a file, given as a path. */
     const val SPECIAL_TYPE_FILE = "file"
 
-    val SPECIAL_TYPES: Set<String> = setOf(SPECIAL_TYPE_IMAGE, SPECIAL_TYPE_FILE)
+    /**
+     * Value of PluginToolCatalogJson.SPECIAL_TYPE: a directory, given as a path; the host opens its regular files (those
+     * PluginToolCatalogJson.DIRECTORY_FILES names, or all of them) and hands the plugin one descriptor per file.
+     */
+    const val SPECIAL_TYPE_DIRECTORY = "directory"
+
+    val SPECIAL_TYPES: Set<String> = setOf(SPECIAL_TYPE_IMAGE, SPECIAL_TYPE_FILE, SPECIAL_TYPE_DIRECTORY)
 
     /** The argument value of an image parameter that asks the host for the current screen. */
     const val IMAGE_SCREEN = "screen"
@@ -33,6 +39,9 @@ object PluginToolValues {
 
     /** PluginToolInputJson.SOURCE: the host opened a file. */
     const val INPUT_SOURCE_FILE = "file"
+
+    /** PluginToolInputJson.SOURCE: the host opened a file of a directory parameter; DISPLAY_NAME is its name. */
+    const val INPUT_SOURCE_DIRECTORY = "directory"
 
     const val CONSUMER_MCP = "mcp"
     const val CONSUMER_AGENT = "agent"

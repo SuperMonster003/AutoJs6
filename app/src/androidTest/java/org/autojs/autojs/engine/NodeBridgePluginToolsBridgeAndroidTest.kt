@@ -166,6 +166,30 @@ class NodeBridgePluginToolsBridgeAndroidTest {
     }
 
     @Test
+    fun directoriesHandOverTheNamedFilesOrEveryFile() {
+        val model = File(workingDirectory, "models/m1").apply { mkdirs() }
+        File(model, "a.txt").writeText("abc")
+        File(model, "b.bin").writeBytes(ByteArray(5))
+        File(model, "c.txt").writeText("ignored by dir")
+        File(model, "nested").mkdirs()
+        val permissions = GRANTED + "files"
+        val answer = result(call("invoke", JSONArray().put("faketool_inspect_dir").put(JSONObject().put("dir", "models/m1").put("all", "models/m1")), permissions))
+        val inputs = answer.getJSONObject("result").getJSONArray("inputs").objects()
+        assertEquals(listOf("a.txt" to 3, "b.bin" to 5), inputs.filter { it.getString("name") == "dir" }.map { it.getString("displayName") to it.getInt("bytes") })
+        assertEquals(listOf("a.txt", "b.bin", "c.txt"), inputs.filter { it.getString("name") == "all" }.map { it.getString("displayName") })
+        assertTrue(inputs.all { it.getString("source") == "directory" })
+
+        File(model, "b.bin").delete()
+        val missing = call("invoke", JSONArray().put("faketool_inspect_dir").put(JSONObject().put("dir", "models/m1")), permissions)
+        assertEquals(NodeBridgeErrorCategory.INVALID_REQUEST, missing.error!!.category)
+        assertTrue(missing.error!!.message, missing.error!!.message.contains("has no file named b.bin"))
+        val notDirectory = call("invoke", JSONArray().put("faketool_inspect_dir").put(JSONObject().put("all", "models/m1/a.txt")), permissions)
+        assertTrue(notDirectory.error!!.message, notDirectory.error!!.message.contains("is not a readable directory"))
+        val noToken = call("invoke", JSONArray().put("faketool_inspect_dir").put(JSONObject().put("all", "models/m1")), GRANTED)
+        assertTrue(noToken.error!!.message, noToken.error!!.message.contains("files"))
+    }
+
+    @Test
     fun binaryOutputsAreWrittenIntoTheWorkingDirectory() {
         val permissions = GRANTED + "files.write"
         val args = JSONArray().put("faketool_emit").put(JSONObject().put("text", "output text")).put(JSONObject().put("outputs", JSONObject().put("data", "out/data.txt")))
