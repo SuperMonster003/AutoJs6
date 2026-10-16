@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.ParcelFileDescriptor
 import android.os.Parcelable
 import android.os.SystemClock
 import android.util.Log
@@ -28,6 +29,7 @@ import android.widget.FrameLayout
 import android.widget.VideoView
 import androidx.annotation.RequiresApi
 import org.autojs.autojs.core.ui.UiContentHost
+import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
@@ -66,6 +68,16 @@ internal class UiPreviewSession(
     private val callback: IUiPreviewCallback,
     private val onReleased: (UiPreviewSession) -> Unit,
 ) : UiContentHost, UiPreviewTrackingDelegate.Tracker, UiPreviewRootView.Listener {
+
+    /**
+     * The unpacked resources of a v3 layout request (host roadmap R2): [directory] holds the client's zip; with
+     * [layoutPath] the XML is that file of it and resources resolve from there, like `ui.layoutFile`; without it
+     * they resolve from [directory] as the working directory.
+     */
+    class LayoutResources(val directory: File, val layoutPath: String?)
+
+    /** The unpacked project of a v3 `runScript` request: the run's working directory and its script's path in it. */
+    class ProjectRun(val directory: File, val scriptPath: String)
 
     /** What a layout request produced on the main thread; the service turns it into the response Bundle. */
     class LayoutResult(
@@ -117,6 +129,13 @@ internal class UiPreviewSession(
     private var run: UiPreviewScriptRun? = null
     private var runCounter = 0
     private val runDirectory: File get() = File(appContext.cacheDir, "ui-preview/$id")
+    /** Guards the unpacked archives, which the service receives on Binder threads (contract v3). */
+    private val archiveLock = Any()
+    /** The digest and directory of the last resources zip; reused while the digest stays the same. */
+    private var resourcesArchive: Pair<String, File>? = null
+    /** The project copy of the current or last run; each run gets its own, removed when the next one starts. */
+    private var projectDirectory: File? = null
+    private var archiveCounter = 0
 
     @Volatile
     var released = false
@@ -197,16 +216,51 @@ internal class UiPreviewSession(
         execution = started
     }
 
+    // ------------------------------------------------------------------------------------- archives (v3)
+
+    /**
+     * Receives the resources zip of a v3 layout request on the calling Binder thread and returns its unpacked
+     * directory; an unchanged digest reuses the previous copy without reading [fd] (which is closed either way).
+     */
+    @Throws(UiPreviewRequestException::class)
+    fun receiveResources(fd: ParcelFileDescriptor, sha256: String): File {
+        synchronized(archiveLock) {
+            resourcesArchive?.takeIf { it.first == sha256 && it.second.isDirectory }?.let {
+                runCatching { fd.close() }
+                return it.second
+            }
+            val target = File(runDirectory, "archives/resources-${++archiveCounter}")
+            UiPreviewArchive.receive(fd, sha256, File(runDirectory, "archives/incoming-$archiveCounter.zip"), target)
+            resourcesArchive?.second?.deleteRecursively()
+            resourcesArchive = sha256 to target
+            return target
+        }
+    }
+
+    /** Receives the project zip of a v3 `runScript` request on the calling Binder thread into a fresh directory. */
+    @Throws(UiPreviewRequestException::class)
+    fun receiveProject(fd: ParcelFileDescriptor, sha256: String): File = synchronized(archiveLock) {
+        val target = File(runDirectory, "archives/project-${++archiveCounter}")
+        UiPreviewArchive.receive(fd, sha256, File(runDirectory, "archives/incoming-$archiveCounter.zip"), target)
+        target
+    }
+
     // ------------------------------------------------------------------------------- interactive preview (v2)
 
     /**
      * Runs [text] as a normal `"ui"` mode script in this session's root (3-Block Compose roadmap P10.6); a run that
      * is still going is replaced first. Throws [UiPreviewRequestException] when the script cannot start.
      */
-    fun runScript(text: String, name: String): Bundle {
+    fun runScript(text: String, name: String, project: ProjectRun? = null): Bundle {
         stopRun(UiPreviewContract.EXIT_REPLACED)
-        val directory = runDirectory.apply { mkdirs() }
-        val started = UiPreviewScriptRun(appContext, this, "$id-r${++runCounter}", name, text, directory, callback) { ended ->
+        // v3: a project run works in its own unpacked copy; the previous copy goes with the run it served.
+        synchronized(archiveLock) {
+            projectDirectory?.takeIf { it != project?.directory }?.deleteRecursively()
+            projectDirectory = project?.directory
+        }
+        val directory = project?.directory ?: runDirectory.apply { mkdirs() }
+        val scriptFile = project?.let { File(it.directory, it.scriptPath) }
+        val started = UiPreviewScriptRun(appContext, this, "$id-r${++runCounter}", name, text, directory, scriptFile, callback) { ended ->
             if (run === ended) run = null
         }
         if (!started.start()) {
@@ -260,8 +314,12 @@ internal class UiPreviewSession(
 
     // ------------------------------------------------------------------------------------------------ layout
 
-    /** Applies [xml] with [bindingsJson] as the binding context; for snapshots the pixels are drawn here too. */
-    fun applyLayout(xml: String, bindingsJson: String?): LayoutResult {
+    /**
+     * Applies [xml] with [bindingsJson] as the binding context; for snapshots the pixels are drawn here too. v3:
+     * [resources] lets the layout resolve the project's resources, [androidLayout] is the `ui.useAndroidLayout`
+     * mode (null automatic); both are set on every request, so a request without them gets the v2 behavior.
+     */
+    fun applyLayout(xml: String, bindingsJson: String?, resources: LayoutResources? = null, androidLayout: Boolean? = null): LayoutResult {
         val startedAt = SystemClock.elapsedRealtime()
         val runtime = runtime ?: return LayoutResult(
             UiPreviewLayoutFailure(UiPreviewContract.ERROR_UNAVAILABLE, "the preview runtime is gone", -1, null, -1, -1),
@@ -282,8 +340,18 @@ internal class UiPreviewSession(
         try {
             withRhinoContext(runtime) { cx ->
                 runtime.ui.bindingContext = parseBindings(cx, runtime, bindingsJson)
+                runtime.ui.isAndroidLayout = androidLayout
                 records.clear()
-                UI.layout(runtime, arrayOf(xml))
+                // The inflater resolves project resources from the working directory, or from the layout's own file.
+                execution?.engine?.setTag(ScriptEngine.TAG_WORKING_DIRECTORY, (resources?.directory ?: appContext.cacheDir).absolutePath)
+                val layoutFile = resources?.layoutPath?.let { File(resources.directory, it) }
+                if (layoutFile != null) {
+                    layoutFile.parentFile?.mkdirs()
+                    layoutFile.writeText(xml)
+                    UI.layoutFile(runtime, arrayOf(layoutFile.absolutePath))
+                } else {
+                    UI.layout(runtime, arrayOf(xml))
+                }
             }
         } catch (e: UiPreviewRequestException) {
             failure = UiPreviewLayoutFailure(e.code, e.message ?: e.code, -1, null, -1, -1)

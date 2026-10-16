@@ -39,6 +39,8 @@ internal class UiPreviewScriptRun(
     private val name: String,
     private val text: String,
     private val workingDirectory: File,
+    /** v3: the script's file in an unpacked project, which becomes the source's path; null for a v2 run. */
+    private val scriptFile: File?,
     private val callback: IUiPreviewCallback,
     private val onEnded: (UiPreviewScriptRun) -> Unit,
 ) : UiContentHost {
@@ -70,7 +72,7 @@ internal class UiPreviewScriptRun(
 
     /** Starts the execution; false (with [startFailure]) when the engine could not be created or the body threw at once. */
     fun start(): Boolean {
-        val source = StringScriptSource(name, text)
+        val source = StringScriptSource(name, text).also { source -> scriptFile?.let { source.overriddenFullPath = it.absolutePath } }
         val config = ExecutionConfig(workingDirectory = workingDirectory.absolutePath).also { it.uiContentHost = this }
         val listener = object : SimpleScriptExecutionListener() {
             override fun onException(execution: ScriptExecution, e: Throwable) {

@@ -101,7 +101,23 @@ class UiPreviewService : Service() {
                 val xml = layout.getString(UiPreviewContract.KEY_XML)
                 val bindingsJson = layout.getString(UiPreviewContract.KEY_BINDINGS_JSON)
                 UiPreviewRequests.validateLayout(xml, bindingsJson, layout.getString(UiPreviewContract.KEY_XML_SHA256), session.params.mode, output != null)
-                val result = onMain(UiPreviewContract.LAYOUT_TIMEOUT_MS) { session.applyLayout(xml!!, bindingsJson) }
+                // v3: the project's resources (a zip) and the useAndroidLayout mode.
+                @Suppress("DEPRECATION")
+                val resourcesFd = layout.getParcelable<ParcelFileDescriptor>(UiPreviewContract.KEY_RESOURCES_FD)
+                val resources = try {
+                    val layoutPath = UiPreviewRequests.validateLayoutResources(
+                        resourcesFd != null,
+                        layout.getString(UiPreviewContract.KEY_RESOURCES_SHA256),
+                        layout.getString(UiPreviewContract.KEY_LAYOUT_PATH),
+                    )
+                    resourcesFd?.let { fd ->
+                        UiPreviewSession.LayoutResources(session.receiveResources(fd, layout.getString(UiPreviewContract.KEY_RESOURCES_SHA256)!!), layoutPath)
+                    }
+                } finally {
+                    runCatching { resourcesFd?.close() }
+                }
+                val androidLayout = if (layout.containsKey(UiPreviewContract.KEY_ANDROID_LAYOUT)) layout.getBoolean(UiPreviewContract.KEY_ANDROID_LAYOUT) else null
+                val result = onMain(UiPreviewContract.LAYOUT_TIMEOUT_MS) { session.applyLayout(xml!!, bindingsJson, resources, androidLayout) }
                 if (result == null) {
                     session.timedOut = true
                     Log.w(TAG, "[${session.id}] layout timed out after ${UiPreviewContract.LAYOUT_TIMEOUT_MS} ms; releasing when the main thread returns")
@@ -208,14 +224,22 @@ class UiPreviewService : Service() {
             enforcePermission()
             val session = sessionOf(sessionId) ?: return failure(UiPreviewContract.ERROR_SESSION_NOT_FOUND, "no session $sessionId")
             if (request == null) return failure(UiPreviewContract.ERROR_INVALID_REQUEST, "request is required")
+            @Suppress("DEPRECATION")
+            val projectFd = request.getParcelable<ParcelFileDescriptor>(UiPreviewContract.KEY_PROJECT_FD)
             return try {
                 val text = request.getString(UiPreviewContract.KEY_SCRIPT_TEXT)
                 UiPreviewRequests.validateScript(text, session.params.mode, Build.VERSION.SDK_INT)
                 val name = UiPreviewRequests.sanitizeLabel(request.getString(UiPreviewContract.KEY_SCRIPT_NAME), session.params.label)
-                onMain(UiPreviewContract.SCRIPT_START_TIMEOUT_MS) { session.runScript(text!!, name) }
+                // v3: the whole project, unpacked for this run.
+                val projectSha256 = request.getString(UiPreviewContract.KEY_PROJECT_SHA256)
+                val scriptPath = UiPreviewRequests.validateProject(projectFd != null, projectSha256, request.getString(UiPreviewContract.KEY_SCRIPT_PATH))
+                val project = projectFd?.let { UiPreviewSession.ProjectRun(session.receiveProject(it, projectSha256!!), scriptPath!!) }
+                onMain(UiPreviewContract.SCRIPT_START_TIMEOUT_MS) { session.runScript(text!!, name, project) }
                     ?: failure(UiPreviewContract.ERROR_TIMEOUT, "the script did not start within ${UiPreviewContract.SCRIPT_START_TIMEOUT_MS} ms")
             } catch (e: UiPreviewRequestException) {
                 failure(e.code, e.message ?: e.code)
+            } finally {
+                runCatching { projectFd?.close() }
             }
         }
 
@@ -303,6 +327,11 @@ class UiPreviewService : Service() {
         putInt(UiPreviewContract.KEY_MAX_BOUNDS_ENTRIES, UiPreviewContract.MAX_BOUNDS_ENTRIES)
         putLong(UiPreviewContract.KEY_MAX_SNAPSHOT_PIXELS, UiPreviewContract.MAX_SNAPSHOT_PIXELS)
         putLong(UiPreviewContract.KEY_LAYOUT_TIMEOUT_MS, UiPreviewContract.LAYOUT_TIMEOUT_MS)
+        // v3: project resources for layouts and projects for runs.
+        putBoolean(UiPreviewContract.KEY_RESOURCES_SUPPORTED, true)
+        putLong(UiPreviewContract.KEY_MAX_ARCHIVE_BYTES, UiPreviewContract.MAX_ARCHIVE_BYTES)
+        putLong(UiPreviewContract.KEY_MAX_ARCHIVE_UNPACKED_BYTES, UiPreviewContract.MAX_ARCHIVE_UNPACKED_BYTES)
+        putInt(UiPreviewContract.KEY_MAX_ARCHIVE_ENTRIES, UiPreviewContract.MAX_ARCHIVE_ENTRIES)
     }
 
     // -------------------------------------------------------------------------------------------- helpers
@@ -338,10 +367,11 @@ class UiPreviewService : Service() {
     companion object {
         private const val TAG = "UiPreviewService"
 
-        /** The contract versions this host implements with their hashes; v3 joins once its requests are served. */
+        /** The contract versions this host implements with their hashes, ascending. */
         private val SERVED_VERSIONS = listOf(
             UiPreviewContract.BASE_VERSION to UiPreviewContract.HASH_V1,
             UiPreviewContract.VERSION_V2 to UiPreviewContract.HASH_V2,
+            UiPreviewContract.VERSION to UiPreviewContract.HASH,
         )
     }
 }

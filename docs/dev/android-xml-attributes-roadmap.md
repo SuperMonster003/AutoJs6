@@ -142,7 +142,8 @@ R 与 A 互不依赖 (A4 的诊断码除外), R 先做 (工作量小, 插件 P11
 
 ### R2 宿主实现
 
-- [ ] `UiPreviewArchive` (校验, 解压, 缓存, 清理); `UiPreviewService.setLayout` / `runScript` 读取 v3 键并校验; `UiPreviewSession.applyLayout` 的资源配置与 `androidLayout`; 交互预览以工程目录为工作目录; `getPreviewInfo()` 宣告.
+- [x] `UiPreviewArchive` (校验, 解压, 缓存, 清理); `UiPreviewService.setLayout` / `runScript` 读取 v3 键并校验; `UiPreviewSession.applyLayout` 的资源配置与 `androidLayout`; 交互预览以工程目录为工作目录; `getPreviewInfo()` 宣告.
+  证据 (2026-10-16): `UiPreviewArchive.receive` 在 Binder 线程把描述符内容复制到会话目录的临时文件 (32 MiB 上限, 边复制边算 SHA-256 并核对), `unpack` 逐条写普通文件 (名称经 `UiPreviewRequests.archivePath` 校验, 拒绝重复名, 条目数与解包字节边写边计), 先写 `<目标>.partial` 再改名, 任何拒绝都删除残余; `UiPreviewRequests.validateLayoutResources` / `validateProject` / `validateArchiveDigest` / `archivePath` (请求键用 `INVALID_REQUEST`, zip 条目用 `ARCHIVE_INVALID`). 会话: `receiveResources` 摘要不变时不读描述符而复用 `archives/resources-<n>`, 变化时解出新副本并删除旧的; `receiveProject` 每次运行一个新副本, `runScript` 在停止上一次运行后删除上一个副本; `applyLayout` 每次请求都设置 `ui.isAndroidLayout` 与引擎工作目录 (有资源时为解压目录, 否则恢复会话的缓存目录), 有 `layoutPath` 时把请求的 XML 写到解压副本中的该文件并以 `UI.layoutFile` 应用 (资源按源文件位置解析), 否则以 `UI.layout` 应用. `UiPreviewScriptRun` 以工程副本为工作目录, 并把 `scriptPath` 设为脚本源的 `overriddenFullPath`. 服务读取 `resourcesFd` / `projectFd` 后在任何路径上都关闭它们; 信息加入 v3 版本与哈希, `resourcesSupported` 与三个归档上限. 编译与既有预览单测通过; 新增测试与设备结果见 R3.
 
 ### R3 测试与 AAR
 

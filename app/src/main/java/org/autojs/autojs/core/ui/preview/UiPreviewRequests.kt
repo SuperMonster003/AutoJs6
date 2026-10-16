@@ -147,5 +147,63 @@ object UiPreviewRequests {
     fun sha256Hex(bytes: ByteArray): String =
         MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { String.format(Locale.ROOT, "%02x", it) }
 
+    // ------------------------------------------------------------------------------------------------ v3
+
+    /**
+     * Checks the v3 keys of a layout request (host roadmap R2): a resources zip needs its lowercase SHA-256, and
+     * `layoutPath` needs the zip. Returns the normalized `layoutPath`, or null.
+     * zh-CN: 校验布局请求的 v3 键: 资源 zip 必须带小写 SHA-256, `layoutPath` 必须伴随 zip; 返回规范化的 `layoutPath`.
+     */
+    @Throws(UiPreviewRequestException::class)
+    fun validateLayoutResources(hasResources: Boolean, resourcesSha256: String?, layoutPath: String?): String? {
+        if (!hasResources) {
+            if (resourcesSha256 != null || layoutPath != null) throw invalid("resourcesSha256 and layoutPath need resourcesFd")
+            return null
+        }
+        validateArchiveDigest(resourcesSha256, UiPreviewContract.KEY_RESOURCES_SHA256)
+        return layoutPath?.let { archivePath(it, UiPreviewContract.KEY_LAYOUT_PATH) }
+    }
+
+    /**
+     * Checks the v3 keys of a `runScript` request: a project zip needs its digest and the script's path in it.
+     * Returns the normalized `scriptPath`, or null without a project.
+     * zh-CN: 校验 `runScript` 的 v3 键: 工程 zip 必须带摘要与脚本在其中的路径; 返回规范化的 `scriptPath`.
+     */
+    @Throws(UiPreviewRequestException::class)
+    fun validateProject(hasProject: Boolean, projectSha256: String?, scriptPath: String?): String? {
+        if (!hasProject) {
+            if (projectSha256 != null || scriptPath != null) throw invalid("projectSha256 and scriptPath need projectFd")
+            return null
+        }
+        validateArchiveDigest(projectSha256, UiPreviewContract.KEY_PROJECT_SHA256)
+        if (scriptPath == null) throw invalid("scriptPath is required with projectFd")
+        return archivePath(scriptPath, UiPreviewContract.KEY_SCRIPT_PATH)
+    }
+
+    @Throws(UiPreviewRequestException::class)
+    fun validateArchiveDigest(sha256: String?, key: String) {
+        if (sha256 == null || !SHA256_HEX.matches(sha256)) throw invalid("$key must be a lowercase SHA-256")
+    }
+
+    /**
+     * [path] as a normalized `/`-separated relative path inside an archive: not empty, at most
+     * [UiPreviewContract.MAX_ARCHIVE_PATH_CHARS] chars, no leading `/`, no backslash, colon or control character, no
+     * empty, `.` or `..` segment. Anything else is rejected with [code] (a request key or a zip entry, [what]).
+     * zh-CN: 归档内的规范化相对路径: 非空, 不超长, 不以 `/` 开头, 不含反斜杠 / 冒号 / 控制字符, 不含空段, `.` 段或 `..` 段.
+     */
+    @Throws(UiPreviewRequestException::class)
+    fun archivePath(path: String?, what: String, code: String = UiPreviewContract.ERROR_INVALID_REQUEST): String {
+        fun reject(reason: String): Nothing = throw UiPreviewRequestException(code, "$what \"${path.orEmpty().take(80)}\" $reason")
+        if (path.isNullOrEmpty()) reject("is empty")
+        if (path.length > UiPreviewContract.MAX_ARCHIVE_PATH_CHARS) reject("exceeds ${UiPreviewContract.MAX_ARCHIVE_PATH_CHARS} chars")
+        if (path.startsWith("/")) reject("is absolute")
+        if ('\\' in path || ':' in path || CONTROL_CHARS.containsMatchIn(path)) reject("contains a backslash, colon or control character")
+        val segments = path.split('/')
+        if (segments.any { it.isEmpty() || it == "." || it == ".." }) reject("has an empty, . or .. segment")
+        return segments.joinToString("/")
+    }
+
+    private val SHA256_HEX = Regex("[0-9a-f]{64}")
+
     private fun invalid(message: String) = UiPreviewRequestException(UiPreviewContract.ERROR_INVALID_REQUEST, message)
 }
