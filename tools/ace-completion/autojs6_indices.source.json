@@ -29224,6 +29224,12 @@
           "kind": "function",
           "doc": "load(name: string): any;",
           "signature": "load(name: string): any;"
+        },
+        {
+          "name": "tools",
+          "kind": "variable",
+          "doc": "tools: Plugins.Tools;",
+          "signature": "tools: Plugins.Tools;"
         }
       ]
     },
@@ -29241,6 +29247,35 @@
           "kind": "function",
           "doc": "registerModule(module: Record<string, { extendJsBuildInObjects(): void; }>): void;",
           "signature": "registerModule(module: Record<string, { extendJsBuildInObjects(): void; }>): void;"
+        }
+      ]
+    },
+    "plugins.tools": {
+      "doc": "AutoJs6 plugins.tools API",
+      "members": [
+        {
+          "name": "list",
+          "kind": "function",
+          "doc": "list(): ToolInfo[];",
+          "signature": "list(): ToolInfo[];"
+        },
+        {
+          "name": "providers",
+          "kind": "function",
+          "doc": "providers(): ToolProviderInfo[];",
+          "signature": "providers(): ToolProviderInfo[];"
+        },
+        {
+          "name": "call",
+          "kind": "function",
+          "doc": "call(name: string, args?: ToolArguments, options?: ToolCallOptions): ToolCallResult;",
+          "signature": "call(name: string, args?: ToolArguments, options?: ToolCallOptions): ToolCallResult;"
+        },
+        {
+          "name": "callAsync",
+          "kind": "function",
+          "doc": "callAsync(name: string, args?: ToolArguments, options?: ToolCallOptions): Promise<ToolCallResult>;",
+          "signature": "callAsync(name: string, args?: ToolArguments, options?: ToolCallOptions): Promise<ToolCallResult>;"
         }
       ]
     },
