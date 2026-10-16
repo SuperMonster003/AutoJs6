@@ -1,6 +1,7 @@
 package org.autojs.autojs.rhino;
 
 import android.util.Log;
+import org.autojs.autojs.core.ui.preview.UiPreviewBusyWatch;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.mozilla.javascript.Context;
 
@@ -28,6 +29,8 @@ public class InterruptibleAndroidContextFactory extends AndroidContextFactory {
         if (Thread.currentThread().isInterrupted() && isBackgroundThread()) {
             throw new ScriptInterruptedException();
         }
+        // The busy-wait watch of ui-mode preview runs on the main thread (preview contract v4); a no-op without runs.
+        UiPreviewBusyWatch.observe(cx);
     }
 
     @Override

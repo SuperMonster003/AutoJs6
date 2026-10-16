@@ -33,7 +33,9 @@ object UiPreviewRequests {
     private val CONTROL_CHARS = Regex("[\\p{Cntrl}]")
 
     /** The contract versions a session may be created with, ascending. */
-    val SUPPORTED_CONTRACT_VERSIONS = listOf(UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2, UiPreviewContract.VERSION)
+    val SUPPORTED_CONTRACT_VERSIONS = listOf(
+        UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2, UiPreviewContract.VERSION_V3, UiPreviewContract.VERSION,
+    )
 
     @Throws(UiPreviewRequestException::class)
     fun validateSession(params: UiPreviewSessionParams, contractVersion: Int, sdkInt: Int) {
@@ -204,6 +206,39 @@ object UiPreviewRequests {
     }
 
     private val SHA256_HEX = Regex("[0-9a-f]{64}")
+
+    // ------------------------------------------------------------------------------------------------ v4
+
+    /**
+     * The busy-wait limit of a v4 `runScript` request: absent (null) means the default, a number is taken as whole
+     * milliseconds (a client may put an int or a long), 0 turns the watch off, anything else must be within the limits.
+     * zh-CN: v4 `runScript` 请求的忙等上限: 缺省 (null) 取默认值, 数值按整毫秒 (客户端可放 int 或 long), 0 关闭观察, 其余须在上下限之内.
+     */
+    @Throws(UiPreviewRequestException::class)
+    fun validateBusyWaitLimit(value: Any?): Long {
+        if (value == null) return UiPreviewContract.DEFAULT_BUSY_WAIT_LIMIT_MS
+        val limit = when (value) {
+            is Int -> value.toLong()
+            is Long -> value
+            else -> throw invalid("${UiPreviewContract.KEY_BUSY_WAIT_LIMIT_MS} must be an int or a long")
+        }
+        if (limit != 0L && limit !in UiPreviewContract.MIN_BUSY_WAIT_LIMIT_MS..UiPreviewContract.MAX_BUSY_WAIT_LIMIT_MS) {
+            throw invalid(
+                "${UiPreviewContract.KEY_BUSY_WAIT_LIMIT_MS} must be 0 or " +
+                    "${UiPreviewContract.MIN_BUSY_WAIT_LIMIT_MS}..${UiPreviewContract.MAX_BUSY_WAIT_LIMIT_MS}, got $limit",
+            )
+        }
+        return limit
+    }
+
+    /** The event of a v4 `sendLifecycle` request: one of [UiPreviewContract.LIFECYCLE_EVENTS]. */
+    @Throws(UiPreviewRequestException::class)
+    fun validateLifecycleEvent(event: String?): String {
+        if (event == null || event !in UiPreviewContract.LIFECYCLE_EVENTS) {
+            throw invalid("${UiPreviewContract.KEY_LIFECYCLE_EVENT} must be one of ${UiPreviewContract.LIFECYCLE_EVENTS.joinToString()}")
+        }
+        return event
+    }
 
     private fun invalid(message: String) = UiPreviewRequestException(UiPreviewContract.ERROR_INVALID_REQUEST, message)
 }

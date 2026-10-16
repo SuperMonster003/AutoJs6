@@ -5,10 +5,15 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewConfiguration
 import android.widget.FrameLayout
+import org.autojs.plugin.ui.preview.UiPreviewContract
 import kotlin.math.abs
 
 /**
@@ -17,8 +22,12 @@ import kotlin.math.abs
  * highlight frame the client asked for. The embedded surface sits above the client's window (P10.0: touches
  * only reach the hierarchy that way), so these edit-mode affordances cannot be drawn by the client.
  *
+ * Since preview contract v4 the content lives in [contentFrame] (`ui.root`), between the strips that stand in for the
+ * status and navigation bars once a run colors them, and the [dialogLayer] of a run's dialogs lies above it all.
+ *
  * zh-CN: 预览会话的根容器: 带上脚本主题的窗口背景 (嵌入树没有窗口来绘制它), 在编辑指针模式下消费指针并报告点击,
  * 并绘制客户端要求的高亮框. 嵌入表面位于客户端窗口之上 (P10.0: 只有这样触摸才能到达嵌入树), 因此这些编辑态的标记不能由客户端绘制.
+ * 自预览契约 v4 起内容位于 [contentFrame] (`ui.root`), 夹在运行为其着色后代替状态栏与导航栏的色条之间, 运行的对话框层 [dialogLayer] 位于最上层.
  */
 class UiPreviewRootView(context: Context, private val listener: Listener) : FrameLayout(context) {
 
@@ -44,16 +53,68 @@ class UiPreviewRootView(context: Context, private val listener: Listener) : Fram
     private var downX = 0f
     private var downY = 0f
     private var moved = false
+    private val windowBackground: Drawable?
+
+    /** The parent of the content and the value of `ui.root`; inset by the bar strips (contract v4). */
+    val contentFrame = FrameLayout(context)
+    private val statusStrip = View(context).apply { visibility = GONE }
+    private val navigationStrip = View(context).apply { visibility = GONE }
+
+    /** The dialogs of a run, above the content and the strips (contract v4). */
+    val dialogLayer = UiPreviewDialogLayer(context)
 
     init {
         setWillNotDraw(false)
         val attrs = context.obtainStyledAttributes(intArrayOf(android.R.attr.windowBackground))
         try {
-            background = attrs.getDrawable(0)
+            windowBackground = attrs.getDrawable(0)
         } finally {
             attrs.recycle()
         }
+        background = windowBackground
+        addView(contentFrame, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+        addView(statusStrip, LayoutParams(LayoutParams.MATCH_PARENT, dp(UiPreviewContract.STATUS_BAR_STRIP_DP), Gravity.TOP))
+        addView(navigationStrip, LayoutParams(LayoutParams.MATCH_PARENT, dp(UiPreviewContract.NAVIGATION_BAR_STRIP_DP), Gravity.BOTTOM))
+        addView(dialogLayer, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
     }
+
+    /** `ui.statusBarColor` of a run: a strip of [color] at the top, the content below it. */
+    fun showStatusBarColor(color: Int) = showStrip(statusStrip, color)
+
+    /** `ui.navigationBarColor` of a run: a strip of [color] at the bottom, the content above it. */
+    fun showNavigationBarColor(color: Int) = showStrip(navigationStrip, color)
+
+    /** `ui.backgroundColor` of a run: the root's background, in place of the theme's window background. */
+    fun showBackgroundColor(color: Int) {
+        background = ColorDrawable(color)
+    }
+
+    /** Back to the plain root of a layout: no strips, the theme's window background. */
+    fun resetWindowColors() {
+        statusStrip.visibility = GONE
+        navigationStrip.visibility = GONE
+        background = windowBackground
+        updateContentInsets()
+    }
+
+    private fun showStrip(strip: View, color: Int) {
+        strip.background = ColorDrawable(color)
+        strip.visibility = VISIBLE
+        updateContentInsets()
+    }
+
+    private fun updateContentInsets() {
+        val params = contentFrame.layoutParams as LayoutParams
+        val top = if (statusStrip.visibility == VISIBLE) statusStrip.layoutParams.height else 0
+        val bottom = if (navigationStrip.visibility == VISIBLE) navigationStrip.layoutParams.height else 0
+        if (params.topMargin != top || params.bottomMargin != bottom) {
+            params.topMargin = top
+            params.bottomMargin = bottom
+            contentFrame.layoutParams = params
+        }
+    }
+
+    private fun dp(value: Int): Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), resources.displayMetrics).toInt()
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean = interceptsPointer
 

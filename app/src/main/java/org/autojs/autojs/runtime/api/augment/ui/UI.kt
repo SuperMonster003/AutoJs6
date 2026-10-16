@@ -152,8 +152,11 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             UiContentHost.of(scriptRuntime)?.contentRoot
         },
         "emitter" to Supplier {
-            val activity = getActivity(scriptRuntime)
-            (activity as? ScriptExecuteActivity)?.eventEmitter
+            // A preview run has its own emitter (contract v4); otherwise the Activity's.
+            UiContentHost.attached(scriptRuntime)?.lifecycleEmitter ?: run {
+                val activity = getActivity(scriptRuntime)
+                (activity as? ScriptExecuteActivity)?.eventEmitter
+            }
         },
         "statusBarHeight" to Supplier {
             val activity = getActivity(scriptRuntime)
@@ -612,6 +615,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun statusBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
+            if (showWindowColorOnHost(scriptRuntime, "statusBarColor") { Colors.toIntRhino(color) }) return@ensureArgumentsOnlyOne UNDEFINED
             ensureWindowActivity(scriptRuntime, "statusBarColor") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(color).also { ViewUtils.setStatusBarBackgroundColor(activity, it) }
@@ -646,6 +650,9 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun backgroundColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
+            if (showWindowColorOnHost(scriptRuntime, "backgroundColor") { Colors.toIntRhino(Colors.setAlphaRhino(color, 1.0)) }) {
+                return@ensureArgumentsOnlyOne UNDEFINED
+            }
             ensureWindowActivity(scriptRuntime, "backgroundColor") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(Colors.setAlphaRhino(color, 1.0)).also {
@@ -659,6 +666,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun navigationBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
+            if (showWindowColorOnHost(scriptRuntime, "navigationBarColor") { Colors.toIntRhino(color) }) return@ensureArgumentsOnlyOne UNDEFINED
             ensureWindowActivity(scriptRuntime, "navigationBarColor") { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction(scriptRuntime.topLevelScope, "action", {
                     Colors.toIntRhino(color).also { ViewUtils.setNavigationBarBackgroundColor(activity, it) }
@@ -1025,6 +1033,17 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         private fun <R> ensureUiHost(scriptRuntime: ScriptRuntime, func: (host: UiContentHost) -> R): R {
             UiContentHost.attached(scriptRuntime)?.let { return func.invoke(it) }
             return ensureActivity(scriptRuntime, func)
+        }
+
+        /**
+         * A window color function on a host without a window: true when the host showed the color another way (a preview
+         * run draws bar strips and paints its root, contract v4); false leaves the call to [ensureWindowActivity].
+         * zh-CN: 无窗口承载上的窗口颜色函数: 承载以其它方式呈现时返回 true (预览运行绘制仿状态栏 / 导航栏色条与根背景, 契约 v4); false 交给 [ensureWindowActivity].
+         */
+        private fun showWindowColorOnHost(scriptRuntime: ScriptRuntime, functionName: String, color: () -> Int): Boolean {
+            val attached = UiContentHost.attached(scriptRuntime) ?: return false
+            if (attached.hostWindow != null) return false
+            return attached.onWindowColor(functionName, color())
         }
 
         /**

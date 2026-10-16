@@ -10,6 +10,7 @@ import com.afollestad.materialdialogs.Theme;
 
 import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.annotation.ScriptVariable;
+import org.autojs.autojs.core.ui.UiContentHost;
 import org.autojs.autojs.core.ui.dialog.BlockedMaterialDialog;
 import org.autojs.autojs.core.ui.dialog.JsDialogBuilder;
 import org.autojs.autojs.runtime.ScriptRuntime;
@@ -110,22 +111,32 @@ public class Dialogs {
     }
 
     private BlockedMaterialDialog.Builder dialogBuilder(Callable callback) {
-        Context context = mRuntime.app.getCurrentActivity();
-        if (context == null || ((Activity) context).isFinishing()) {
-            context = getContext();
-        }
+        Context context = hostContext();
         return (BlockedMaterialDialog.Builder) new BlockedMaterialDialog.Builder(context, mRuntime, callback)
                 .theme(Theme.LIGHT);
     }
 
     @ScriptInterface
     public JsDialogBuilder newBuilder() {
+        Context context = hostContext();
+        return new JsDialogBuilder(context, mRuntime)
+                .theme(Theme.LIGHT);
+    }
+
+    /**
+     * The context of a new dialog: the dialog context of a ui-mode preview run (its dialogs show inside the preview,
+     * contract v4), otherwise the current Activity, otherwise the themed application context.
+     */
+    private Context hostContext() {
+        Context hosted = UiContentHost.dialogContextOf(mRuntime);
+        if (hosted != null) {
+            return hosted;
+        }
         Context context = mRuntime.app.getCurrentActivity();
         if (context == null || ((Activity) context).isFinishing()) {
             context = getContext();
         }
-        return new JsDialogBuilder(context, mRuntime)
-                .theme(Theme.LIGHT);
+        return context;
     }
 
     public class NonUiDialogs {

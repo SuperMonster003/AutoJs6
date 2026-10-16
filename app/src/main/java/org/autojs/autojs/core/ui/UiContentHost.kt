@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.ui.inflater.AttributeOutcome
 import org.autojs.autojs.core.ui.inflater.ResourceConfiguration
 import org.autojs.autojs.execution.ScriptExecuteActivity
@@ -49,6 +50,28 @@ interface UiContentHost {
     }
 
     /**
+     * A window color function ([functionName] is `statusBarColor`, `navigationBarColor` or `backgroundColor`, [color] an
+     * ARGB value) on a host without a window: true when the host showed it some other way (preview contract v4, which
+     * draws bar strips and paints its root), false to have it ignored through [onWindowFunctionIgnored].
+     */
+    fun onWindowColor(functionName: String, color: Int): Boolean = false
+
+    /**
+     * The value of `ui.emitter` on a host that is not a [ScriptExecuteActivity]: a preview run emits `create`,
+     * `resume`, `pause` and `back_pressed` on it the way the Activity does (preview contract v4); null otherwise.
+     */
+    val lifecycleEmitter: EventEmitter?
+        get() = null
+
+    /**
+     * The context the script's dialogs are built with (preview contract v4): a preview host returns one that shows them
+     * inside its root (a `com.afollestad.materialdialogs.MaterialDialogPresenter`); null keeps the current Activity or
+     * the application context.
+     */
+    val dialogContext: Context?
+        get() = null
+
+    /**
      * A `{{ expression }}` of [attrName] failed to evaluate. Returning true applies the raw attribute text
      * instead and lets the inflation continue; false rethrows [error] (the script behavior).
      */
@@ -86,6 +109,10 @@ interface UiContentHost {
         } catch (e: Throwable) {
             null
         }
+
+        /** The [dialogContext] of the host attached to the engine, or null. */
+        @JvmStatic
+        fun dialogContextOf(scriptRuntime: ScriptRuntime): Context? = attached(scriptRuntime)?.dialogContext
 
         /**
          * The attached host, otherwise the script's global `activity` when it is a [ScriptExecuteActivity];

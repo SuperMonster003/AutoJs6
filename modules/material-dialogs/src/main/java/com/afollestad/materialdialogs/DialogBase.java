@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.internal.MDRootLayout;
 
 /** @author Aidan Follestad (afollestad) */
@@ -13,6 +14,9 @@ class DialogBase extends Dialog implements DialogInterface.OnShowListener {
 
     protected MDRootLayout view;
     private OnShowListener showListener;
+    /** Kept for a dialog shown by a {@link MaterialDialogPresenter}, whose window never sends the dismiss message. */
+    @Nullable
+    private OnDismissListener dismissListener;
 
     DialogBase(Context context, int theme) {
         super(context, theme);
@@ -30,6 +34,17 @@ class DialogBase extends Dialog implements DialogInterface.OnShowListener {
 
     final void setOnShowListenerInternal() {
         super.setOnShowListener(this);
+    }
+
+    @Override
+    public void setOnDismissListener(@Nullable OnDismissListener listener) {
+        dismissListener = listener;
+        super.setOnDismissListener(listener);
+    }
+
+    @Nullable
+    final OnDismissListener getDismissListenerInternal() {
+        return dismissListener;
     }
 
     final void setViewInternal(View view) {

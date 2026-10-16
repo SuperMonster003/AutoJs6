@@ -187,6 +187,7 @@ class UiPreviewService : Service() {
         override fun release(sessionId: String?) {
             enforcePermission()
             val session = sessionOf(sessionId) ?: return
+            session.interruptRun(UiPreviewContract.EXIT_RELEASED)
             mainHandler.post { session.release("client", notify = false) }
         }
 
@@ -234,7 +235,11 @@ class UiPreviewService : Service() {
                 val projectSha256 = request.getString(UiPreviewContract.KEY_PROJECT_SHA256)
                 val scriptPath = UiPreviewRequests.validateProject(projectFd != null, projectSha256, request.getString(UiPreviewContract.KEY_SCRIPT_PATH))
                 val project = projectFd?.let { UiPreviewSession.ProjectRun(session.receiveProject(it, projectSha256!!), scriptPath!!) }
-                onMain(UiPreviewContract.SCRIPT_START_TIMEOUT_MS) { session.runScript(text!!, name, project) }
+                // v4: the busy-wait limit; a run that is still going may keep the main thread busy, so it is interrupted first.
+                @Suppress("DEPRECATION")
+                val busyWaitLimitMs = UiPreviewRequests.validateBusyWaitLimit(request.get(UiPreviewContract.KEY_BUSY_WAIT_LIMIT_MS))
+                session.interruptRun(UiPreviewContract.EXIT_REPLACED)
+                onMain(UiPreviewContract.SCRIPT_START_TIMEOUT_MS) { session.runScript(text!!, name, project, busyWaitLimitMs) }
                     ?: failure(UiPreviewContract.ERROR_TIMEOUT, "the script did not start within ${UiPreviewContract.SCRIPT_START_TIMEOUT_MS} ms")
             } catch (e: UiPreviewRequestException) {
                 failure(e.code, e.message ?: e.code)
@@ -246,8 +251,23 @@ class UiPreviewService : Service() {
         override fun stopScript(sessionId: String?): Bundle {
             enforcePermission()
             val session = sessionOf(sessionId) ?: return failure(UiPreviewContract.ERROR_SESSION_NOT_FOUND, "no session $sessionId")
+            // v4: a script that keeps the main thread busy is interrupted, so the stop below gets the main thread.
+            session.interruptRun(UiPreviewContract.EXIT_STOPPED)
             return onMain(UiPreviewContract.LAYOUT_TIMEOUT_MS) { session.stopScript() }
                 ?: failure(UiPreviewContract.ERROR_TIMEOUT, "stopScript timed out")
+        }
+
+        // v4 (3-Block Compose roadmap P11.5): pause, resume and the back key for the running script.
+        override fun sendLifecycle(sessionId: String?, event: Bundle?): Bundle {
+            enforcePermission()
+            val session = sessionOf(sessionId) ?: return failure(UiPreviewContract.ERROR_SESSION_NOT_FOUND, "no session $sessionId")
+            return try {
+                val name = UiPreviewRequests.validateLifecycleEvent(event?.getString(UiPreviewContract.KEY_LIFECYCLE_EVENT))
+                onMain(UiPreviewContract.LAYOUT_TIMEOUT_MS) { session.sendLifecycle(name) }
+                    ?: failure(UiPreviewContract.ERROR_TIMEOUT, "sendLifecycle timed out")
+            } catch (e: UiPreviewRequestException) {
+                failure(e.code, e.message ?: e.code)
+            }
         }
     }
 
@@ -332,6 +352,12 @@ class UiPreviewService : Service() {
         putLong(UiPreviewContract.KEY_MAX_ARCHIVE_BYTES, UiPreviewContract.MAX_ARCHIVE_BYTES)
         putLong(UiPreviewContract.KEY_MAX_ARCHIVE_UNPACKED_BYTES, UiPreviewContract.MAX_ARCHIVE_UNPACKED_BYTES)
         putInt(UiPreviewContract.KEY_MAX_ARCHIVE_ENTRIES, UiPreviewContract.MAX_ARCHIVE_ENTRIES)
+        // v4: what a run gets beyond v3; all of it needs runs, so it follows scriptRunSupported.
+        val runs = sdk >= UiPreviewContract.MIN_API_INTERACTIVE
+        putBoolean(UiPreviewContract.KEY_DIALOGS_IN_CANVAS, runs)
+        putBoolean(UiPreviewContract.KEY_LIFECYCLE_EVENTS, runs)
+        putBoolean(UiPreviewContract.KEY_BUSY_WAIT_LIMIT_SUPPORTED, runs)
+        putBoolean(UiPreviewContract.KEY_WINDOW_FUNCTIONS_VISIBLE, runs)
     }
 
     // -------------------------------------------------------------------------------------------- helpers
@@ -371,6 +397,7 @@ class UiPreviewService : Service() {
         private val SERVED_VERSIONS = listOf(
             UiPreviewContract.BASE_VERSION to UiPreviewContract.HASH_V1,
             UiPreviewContract.VERSION_V2 to UiPreviewContract.HASH_V2,
+            UiPreviewContract.VERSION_V3 to UiPreviewContract.HASH_V3,
             UiPreviewContract.VERSION to UiPreviewContract.HASH,
         )
     }

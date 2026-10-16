@@ -104,9 +104,15 @@ internal class UiPreviewSession(
 
     override val inflaterContext: Context = themedContext()
     private val root = UiPreviewRootView(inflaterContext, this)
-    override val contentParent: ViewGroup get() = root
-    override val contentRoot: ViewGroup get() = root
+    override val contentParent: ViewGroup get() = root.contentFrame
+    override val contentRoot: ViewGroup get() = root.contentFrame
     override val hostWindow: Window? get() = null
+
+    /** The dialogs of a run (contract v4). */
+    val dialogLayer: UiPreviewDialogLayer get() = root.dialogLayer
+
+    /** What the dialogs of a run are built with, so that they show in [dialogLayer] (contract v4). */
+    override val dialogContext: Context by lazy { UiPreviewDialogContext(inflaterContext, root.dialogLayer) }
 
     var width = params.widthPx
         private set
@@ -127,7 +133,8 @@ internal class UiPreviewSession(
     private val warnedFunctions = HashSet<String>()
     private var boundsPending = false
     private var highlighted = -1
-    /** The interactive-preview run of the session (contract v2), if a script is running. */
+    /** The interactive-preview run of the session (contract v2), if a script is running; read on Binder threads too. */
+    @Volatile
     private var run: UiPreviewScriptRun? = null
     private var runCounter = 0
     private val runDirectory: File get() = File(appContext.cacheDir, "ui-preview/$id")
@@ -253,8 +260,16 @@ internal class UiPreviewSession(
      * Runs [text] as a normal `"ui"` mode script in this session's root (3-Block Compose roadmap P10.6); a run that
      * is still going is replaced first. Throws [UiPreviewRequestException] when the script cannot start.
      */
-    fun runScript(text: String, name: String, project: ProjectRun? = null): Bundle {
+    fun runScript(
+        text: String,
+        name: String,
+        project: ProjectRun? = null,
+        busyWaitLimitMs: Long = UiPreviewContract.DEFAULT_BUSY_WAIT_LIMIT_MS,
+    ): Bundle {
         stopRun(UiPreviewContract.EXIT_REPLACED)
+        // v4: every run starts from the plain root; the colors and dialogs of the last one are gone.
+        root.resetWindowColors()
+        root.dialogLayer.clear()
         // v3: a project run works in its own unpacked copy; the previous copy goes with the run it served.
         synchronized(archiveLock) {
             projectDirectory?.takeIf { it != project?.directory }?.deleteRecursively()
@@ -262,8 +277,10 @@ internal class UiPreviewSession(
         }
         val directory = project?.directory ?: runDirectory.apply { mkdirs() }
         val scriptFile = project?.let { File(it.directory, it.scriptPath) }
-        val started = UiPreviewScriptRun(appContext, this, "$id-r${++runCounter}", name, text, directory, scriptFile, callback) { ended ->
+        val started = UiPreviewScriptRun(appContext, this, "$id-r${++runCounter}", name, text, directory, scriptFile, busyWaitLimitMs, callback) { ended ->
             if (run === ended) run = null
+            // The dialogs belong to the run's runtime, which is gone; drop them like the windows of a finished Activity.
+            root.dialogLayer.clear()
         }
         if (!started.start()) {
             throw UiPreviewRequestException(UiPreviewContract.ERROR_SCRIPT_FAILED, started.startFailure ?: "the script could not start")
@@ -291,6 +308,35 @@ internal class UiPreviewSession(
         current.stop(reason)
     }
 
+    /**
+     * Lets the stop, replacement or release ([reason]) that follows on the main thread reach a running script that
+     * keeps the main thread busy (contract v4). Called on a Binder thread.
+     */
+    fun interruptRun(reason: String) {
+        run?.requestInterrupt(reason)
+    }
+
+    /**
+     * v4: hands [event] (`pause`, `resume`, `back_pressed`) to the running script once this call has returned; the
+     * client hears about it through `onLifecycleHandled`. Throws [UiPreviewRequestException] without a run.
+     */
+    fun sendLifecycle(event: String): Bundle {
+        val current = run ?: throw UiPreviewRequestException(UiPreviewContract.ERROR_NOT_RUNNING, "no script is running in session $id")
+        mainHandler.post { if (run === current) current.deliverLifecycle(event) }
+        return Bundle().apply {
+            putString(UiPreviewContract.KEY_OUTCOME, UiPreviewContract.OUTCOME_APPLIED)
+            putString(UiPreviewContract.KEY_RUN_ID, current.runId)
+        }
+    }
+
+    // v4: the window colors of a run, on the root.
+
+    fun showStatusBarColor(color: Int) = root.showStatusBarColor(color)
+
+    fun showNavigationBarColor(color: Int) = root.showNavigationBarColor(color)
+
+    fun showBackgroundColor(color: Int) = root.showBackgroundColor(color)
+
     fun release(reason: String, notify: Boolean) {
         if (released) return
         released = true
@@ -303,7 +349,8 @@ internal class UiPreviewSession(
         }
         viewHost = null
         root.viewTreeObserver.takeIf { it.isAlive }?.removeOnGlobalLayoutListener(layoutListener)
-        root.removeAllViews()
+        root.dialogLayer.clear()
+        root.contentFrame.removeAllViews()
         records.clear()
         if (notify) {
             runCatching {
@@ -337,6 +384,8 @@ internal class UiPreviewSession(
         diagnostics.clear()
         highlighted = -1
         root.highlightRect = null
+        // v4: a layout shows on the plain root, without the bar strips or background of a run that came before.
+        if (run == null) root.resetWindowColors()
         applying = true
         var failure: UiPreviewLayoutFailure? = null
         try {
@@ -380,7 +429,7 @@ internal class UiPreviewSession(
             } catch (e: Throwable) {
                 failure = UiPreviewFailures.classify(e, -1, null, xml)
                 Log.w(TAG, "[$id] layout pass failed: ${failure.code}: ${failure.message}")
-                root.removeAllViews()
+                root.contentFrame.removeAllViews()
                 records.clear()
             }
         }
@@ -446,8 +495,8 @@ internal class UiPreviewSession(
     // ----------------------------------------------------------------------------------------- UiContentHost
 
     override fun showContent(view: View) {
-        root.removeAllViews()
-        root.addView(view, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        root.contentFrame.removeAllViews()
+        root.contentFrame.addView(view, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         // Embedded: the layout pass that follows addView reports the bounds, once the views have their sizes.
     }
 

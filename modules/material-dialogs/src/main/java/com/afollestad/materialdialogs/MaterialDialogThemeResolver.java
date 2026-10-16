@@ -13,6 +13,26 @@ final class MaterialDialogThemeResolver {
     private MaterialDialogThemeResolver() {
     }
 
+    /** The first {@link MaterialDialogPresenter} among the ContextWrapper layers of {@code initialContext}, or null. */
+    @Nullable
+    static MaterialDialogPresenter resolvePresenter(@NonNull Context initialContext) {
+        Context context = initialContext;
+        for (int depth = 0; depth < MAX_CONTEXT_WRAPPER_DEPTH; depth++) {
+            if (context instanceof MaterialDialogPresenter) {
+                return (MaterialDialogPresenter) context;
+            }
+            if (!(context instanceof ContextWrapper)) {
+                return null;
+            }
+            Context baseContext = ((ContextWrapper) context).getBaseContext();
+            if (baseContext == null || baseContext == context) {
+                return null;
+            }
+            context = baseContext;
+        }
+        return null;
+    }
+
     @Nullable
     static MaterialDialogThemeDelegate resolve(@NonNull Context initialContext) {
         Context context = initialContext;

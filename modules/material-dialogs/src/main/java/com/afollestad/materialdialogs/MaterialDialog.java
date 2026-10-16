@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
@@ -65,6 +66,14 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
     @Nullable
     final MaterialDialogThemeDelegate themeDelegate;
     private boolean themeDelegateDismissed;
+    /** Shows the dialog inside another hierarchy instead of its own window; null for a normal dialog. */
+    @Nullable
+    private final MaterialDialogPresenter presenter;
+    /** True while {@link #presenter} shows the dialog. */
+    private boolean presented;
+    /** Mirrors of the window's cancel flags, which a presenter acts on itself. */
+    private boolean cancelsOnBack = true;
+    private boolean cancelsOnTouchOutside = true;
     protected ImageView icon;
     protected TextView title;
     protected TextView content;
@@ -91,6 +100,7 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         handler = new Handler();
         this.builder = builder;
         themeDelegate = builder.themeDelegate;
+        presenter = MaterialDialogThemeResolver.resolvePresenter(builder.context);
         final LayoutInflater inflater = LayoutInflater.from(builder.context);
         view = (MDRootLayout) inflater.inflate(DialogInit.getInflateLayout(builder), null);
         DialogInit.init(this);
@@ -480,9 +490,57 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         }
     }
 
+    /** The presenter that shows this dialog instead of a window, or null (see {@link MaterialDialogPresenter}). */
+    @Nullable
+    public final MaterialDialogPresenter getPresenter() {
+        return presenter;
+    }
+
+    @Override
+    public boolean isShowing() {
+        return presented || super.isShowing();
+    }
+
+    @Override
+    public void setCancelable(boolean flag) {
+        cancelsOnBack = flag;
+        super.setCancelable(flag);
+    }
+
+    @Override
+    public void setCanceledOnTouchOutside(boolean cancel) {
+        // The same rule as Dialog: cancelling on an outside touch makes the dialog cancelable.
+        if (cancel) {
+            cancelsOnBack = true;
+        }
+        cancelsOnTouchOutside = cancel;
+        super.setCanceledOnTouchOutside(cancel);
+    }
+
+    /** Whether the back key cancels the dialog ({@link #setCancelable(boolean)}), for a presenter. */
+    public final boolean cancelsOnBack() {
+        return cancelsOnBack;
+    }
+
+    /** Whether a touch outside the dialog cancels it, for a presenter. */
+    public final boolean cancelsOnTouchOutside() {
+        return cancelsOnBack && cancelsOnTouchOutside;
+    }
+
     @Override
     @UiThread
     public void show() {
+        if (presenter != null && Looper.myLooper() == Looper.getMainLooper()) {
+            if (presented) {
+                return;
+            }
+            if (presenter.presentDialog(this)) {
+                presented = true;
+                // What the window's show message would have done: keyboard, theme hook, the user's show listener.
+                onShow(this);
+                return;
+            }
+        }
         try {
             super.show();
         } catch (WindowManager.BadTokenException e) {
@@ -1021,6 +1079,14 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
 
     @Override
     public void dismiss() {
+        if (presented) {
+            if (Looper.myLooper() != Looper.getMainLooper()) {
+                new Handler(Looper.getMainLooper()).post(this::dismiss);
+                return;
+            }
+            dismissPresented();
+            return;
+        }
         if (input != null) {
             DialogUtils.hideKeyboard(this, builder);
         }
@@ -1028,6 +1094,23 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         if (themeDelegate != null && !themeDelegateDismissed) {
             themeDelegateDismissed = true;
             themeDelegate.onDialogDismissed(this);
+        }
+    }
+
+    private void dismissPresented() {
+        presented = false;
+        if (input != null) {
+            DialogUtils.hideKeyboard(this, builder);
+        }
+        presenter.dismissPresentedDialog(this);
+        if (themeDelegate != null && !themeDelegateDismissed) {
+            themeDelegateDismissed = true;
+            themeDelegate.onDialogDismissed(this);
+        }
+        // A window dismissal notifies through a message, after the cancel message of cancel(); keep that order.
+        OnDismissListener listener = getDismissListenerInternal();
+        if (listener != null) {
+            new Handler(Looper.getMainLooper()).post(() -> listener.onDismiss(this));
         }
     }
 
