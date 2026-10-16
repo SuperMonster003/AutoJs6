@@ -30,6 +30,7 @@ import android.widget.VideoView
 import androidx.annotation.RequiresApi
 import org.autojs.autojs.core.ui.UiContentHost
 import org.autojs.autojs.core.ui.inflater.AttributeOutcome
+import org.autojs.autojs.core.ui.inflater.ResourceConfiguration
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.execution.ExecutionConfig
@@ -453,6 +454,14 @@ internal class UiPreviewSession(
     override fun onWindowFunctionIgnored(functionName: String) {
         if (!warnedFunctions.add(functionName)) return
         runCatching { runtime?.console?.warn(appContext.getString(R.string.ui_preview_window_function_ignored, functionName)) }
+    }
+
+    /** Qualified resources follow the session: its size (as the screen, in dp of its density) and the orientation it implies. */
+    override fun resourceConfiguration(base: ResourceConfiguration): ResourceConfiguration {
+        val density = inflaterContext.resources.displayMetrics.density.takeIf { it > 0f } ?: 1f
+        val widthDp = (width / density).toInt()
+        val heightDp = (height / density).toInt()
+        return base.copy(widthDp = widthDp, heightDp = heightDp, smallestWidthDp = minOf(widthDp, heightDp), landscape = width > height)
     }
 
     override fun onAttributeIgnored(attrName: String, outcome: AttributeOutcome, message: String) {

@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import org.autojs.autojs.core.ui.inflater.AttributeOutcome
+import org.autojs.autojs.core.ui.inflater.ResourceConfiguration
 import org.autojs.autojs.execution.ScriptExecuteActivity
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
@@ -61,6 +62,12 @@ interface UiContentHost {
     fun onAttributeIgnored(attrName: String, outcome: AttributeOutcome, message: String) {
         /* Empty default: the Activity host only has the console warning. */
     }
+
+    /**
+     * The configuration project resources in qualified directories are chosen for (host roadmap A7): [base] comes from
+     * the inflater's context; a host whose content is not the size of the device (a preview session) adjusts it.
+     */
+    fun resourceConfiguration(base: ResourceConfiguration): ResourceConfiguration = base
 
     /** The engine of this host is being force-stopped (host task list, `engines.stopAll()`). */
     fun onEngineForceStop() {

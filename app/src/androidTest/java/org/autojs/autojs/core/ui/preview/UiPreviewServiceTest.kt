@@ -670,6 +670,59 @@ class UiPreviewServiceTest {
         assertEquals(UiPreviewContract.OUTCOME_FAILED, outcome(service.setLayout(id, layout(xml), snapshotFile().second)))
     }
 
+    /**
+     * Host roadmap A7: qualified resource directories follow the session (night mode, locale, and its size as the
+     * screen width); a locale match comes before width, and width before night mode, as in Android.
+     */
+    @Test
+    fun qualifiedResourcesFollowTheSessionNightModeLocaleAndSize() {
+        fun dimen(px: Int) = "<resources><dimen name=\"box\">${px}px</dimen></resources>".toByteArray()
+        val layoutPath = "res/layout/main.xml"
+        val xml = "<FrameLayout xmlns:android=\"http://schemas.android.com/apk/res/android\" android:layout_width=\"match_parent\" android:layout_height=\"match_parent\">" +
+            "<View android:id=\"@+id/box\" android:layout_width=\"@dimen/box\" android:layout_height=\"10px\"/></FrameLayout>"
+        val resources = zipOf(
+            listOf(
+                layoutPath to xml.toByteArray(),
+                "res/values/dimens.xml" to dimen(10),
+                "res/values-night/dimens.xml" to dimen(20),
+                "res/values-fr/dimens.xml" to dimen(30),
+                "res/values-w300dp/dimens.xml" to dimen(40),
+            ),
+        )
+
+        fun boxWidth(id: String, callback: Callback): Int {
+            val result = service.setLayout(id, withResources(layout(xml), resources, layoutPath, androidLayout = true), snapshotFile().second)
+            assertEquals(result.getString(UiPreviewContract.KEY_ERROR_MESSAGE), UiPreviewContract.OUTCOME_APPLIED, outcome(result))
+            val bounds = awaitBounds(callback)
+            val box = (0 until bounds.length()).map { bounds.getJSONObject(it) }.first { it.optString(UiPreviewContract.Bounds.ID) == "box" }
+            return box.getInt(UiPreviewContract.Bounds.RIGHT) - box.getInt(UiPreviewContract.Bounds.LEFT)
+        }
+
+        fun session(nightMode: Int, localeTag: String?, width: Int): Pair<String, Callback> {
+            val callback = Callback()
+            val request = request(UiPreviewContract.MODE_SNAPSHOT, width, 200).apply {
+                putInt(UiPreviewContract.KEY_DENSITY_DPI, 160)
+                putInt(UiPreviewContract.KEY_NIGHT_MODE, nightMode)
+                localeTag?.let { putString(UiPreviewContract.KEY_LOCALE_TAG, it) }
+            }
+            return sessionId(create(request, callback)) to callback
+        }
+
+        // A client has at most two sessions at a time.
+        val (day, dayCallback) = session(UiPreviewContract.NIGHT_MODE_NO, "en-US", 200)
+        assertEquals(10, boxWidth(day, dayCallback))
+        service.release(day)
+        val (french, frenchCallback) = session(UiPreviewContract.NIGHT_MODE_YES, "fr-FR", 200)
+        assertEquals(30, boxWidth(french, frenchCallback))
+        service.release(french)
+        val (night, nightCallback) = session(UiPreviewContract.NIGHT_MODE_YES, "en-US", 200)
+        assertEquals(20, boxWidth(night, nightCallback))
+        // 400 px at 160 dpi is 400 dp wide: values-w300dp applies, before night mode; a resize is followed by the next layout.
+        assertEquals(UiPreviewContract.OUTCOME_APPLIED, outcome(service.resize(night, 400, 200)))
+        nightCallback.bounds.clear()
+        assertEquals(40, boxWidth(night, nightCallback))
+    }
+
     @Test
     fun invalidResourceZipsAreRejectedAndTheSessionStays() {
         val callback = Callback()

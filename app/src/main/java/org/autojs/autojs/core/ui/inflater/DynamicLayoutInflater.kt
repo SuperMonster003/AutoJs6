@@ -852,7 +852,10 @@ open class DynamicLayoutInflater {
 
     private fun configureAndroidResources(sourceFile: File? = null) {
         val workingDirectory = runCatching { scriptRuntime?.files?.cwd()?.let(::File) }.getOrNull()
-        resourceParser.androidResources.configure(sourceFile, workingDirectory)
+        // Qualified resource directories follow the inflater's context, or what a preview host says (A7).
+        val base = ResourceConfiguration.of(context)
+        val configuration = scriptRuntime?.let { UiContentHost.attached(it) }?.resourceConfiguration(base) ?: base
+        resourceParser.androidResources.configure(sourceFile, workingDirectory, configuration)
     }
 
     private fun applyAttributes(context: InflateContext, view: View, setter: ViewInflater<View>?, attrs: Map<String, String>, parent: ViewGroup?) {

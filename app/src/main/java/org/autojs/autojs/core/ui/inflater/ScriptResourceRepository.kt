@@ -11,6 +11,10 @@ import java.util.LinkedHashMap
  * Android's [android.content.res.Resources] can only see resources compiled into an APK. Rhino
  * projects, however, keep their resources as ordinary files. This repository reads the familiar
  * `res/layout`, `res/drawable`, and `res/values` tree without assigning compiled resource IDs.
+ *
+ * Qualified directories (`values-night`, `layout-land`, `drawable-xxhdpi`, host roadmap A7) take part: each resource
+ * comes from the directory Android would choose for [configuration] ([ResourceQualifiers.best]); a directory with a
+ * qualifier the repository does not support is ignored and listed in [ignoredDirectories].
  */
 class ScriptResourceRepository {
 
@@ -27,23 +31,34 @@ class ScriptResourceRepository {
     var resourceRoot: File? = null
         private set
 
+    /** What qualified directories are matched against; set with [configure]. */
+    var configuration: ResourceConfiguration = ResourceConfiguration.DEFAULT
+        private set
+
     private val values = LinkedHashMap<String, String>()
     private val styles = LinkedHashMap<String, Style>()
+    private val qualifiedValues = LinkedHashMap<String, MutableList<Pair<ResourceQualifiers, String>>>()
+    private val qualifiedStyles = LinkedHashMap<String, MutableList<Pair<ResourceQualifiers, Style>>>()
+    private val ignored = LinkedHashSet<String>()
     private var valuesLoaded = false
 
+    /** Names of resource directories skipped for a qualifier the repository does not support (`layout-large`). */
+    val ignoredDirectories: Set<String>
+        @Synchronized get() = LinkedHashSet(ignored)
+
     @Synchronized
-    fun configure(sourceFile: File? = null, workingDirectory: File? = null) {
-        val resolvedRoot = findResourceRoot(sourceFile, workingDirectory)
-        if (resolvedRoot == null) {
-            resourceRoot = null
-            values.clear()
-            styles.clear()
-            valuesLoaded = false
-            return
-        }
-        resourceRoot = resolvedRoot
+    fun configure(sourceFile: File? = null, workingDirectory: File? = null, configuration: ResourceConfiguration = ResourceConfiguration.DEFAULT) {
+        this.configuration = configuration
+        resourceRoot = findResourceRoot(sourceFile, workingDirectory)
+        clearValues()
+        ignored.clear()
+    }
+
+    private fun clearValues() {
         values.clear()
         styles.clear()
+        qualifiedValues.clear()
+        qualifiedStyles.clear()
         valuesLoaded = false
     }
 
@@ -87,21 +102,20 @@ class ScriptResourceRepository {
         return findFileResource(reference, setOf("color"), listOf("xml"))
     }
 
+    @Synchronized
     internal fun findFileResource(reference: String, acceptedTypes: Set<String>, extensions: List<String>): File? {
         val (type, name) = parseReference(reference) ?: return null
         if (type !in acceptedTypes || !RESOURCE_NAME.matches(name)) {
             return null
         }
         val root = resourceRoot?.canonicalFile ?: return null
-        resourceDirectories(root, type).forEach { directory ->
-            extensions.forEach { extension ->
-                val candidate = File(directory, "$name.$extension").canonicalFile
-                if (candidate.startsWith(root) && candidate.isFile) {
-                    return candidate
-                }
-            }
+        val candidates = resourceDirectories(root, type).mapNotNull { (directory, qualifiers) ->
+            extensions.asSequence()
+                .map { extension -> File(directory, "$name.$extension").canonicalFile }
+                .firstOrNull { candidate -> candidate.startsWith(root) && candidate.isFile }
+                ?.let { qualifiers to it }
         }
-        return null
+        return ResourceQualifiers.best(candidates, configuration)
     }
 
     internal fun parseDocument(xml: String) = SecureXml.parse(xml)
@@ -172,23 +186,31 @@ class ScriptResourceRepository {
             return
         }
         val root = resourceRoot ?: return
-        values.clear()
-        styles.clear()
+        clearValues()
         try {
-            resourceDirectories(root, "values").forEach { directory ->
+            resourceDirectories(root, "values").forEach { (directory, qualifiers) ->
                 directory.listFiles { file -> file.isFile && file.extension.equals("xml", true) }
                     ?.sortedBy(File::getName)
-                    ?.forEach(::loadValuesFile)
+                    ?.forEach { loadValuesFile(it, qualifiers) }
             }
+            // Each value and style from the directory that suits the configuration best.
+            qualifiedValues.forEach { (key, candidates) -> ResourceQualifiers.best(candidates, configuration)?.let { values[key] = it } }
+            qualifiedStyles.forEach { (name, candidates) -> ResourceQualifiers.best(candidates, configuration)?.let { styles[name] = it } }
             valuesLoaded = true
         } catch (error: Exception) {
-            values.clear()
-            styles.clear()
+            clearValues()
             throw error
         }
     }
 
-    private fun loadValuesFile(file: File) {
+    /** A later definition in the same directory replaces an earlier one, as before qualifiers were read. */
+    private fun <T> MutableMap<String, MutableList<Pair<ResourceQualifiers, T>>>.define(key: String, qualifiers: ResourceQualifiers, value: T) {
+        val candidates = getOrPut(key) { ArrayList() }
+        candidates.removeAll { it.first == qualifiers }
+        candidates += qualifiers to value
+    }
+
+    private fun loadValuesFile(file: File, qualifiers: ResourceQualifiers) {
         val root = parseDocument(file).documentElement ?: return
         if (root.tagName != "resources") {
             return
@@ -208,33 +230,48 @@ class ScriptResourceRepository {
                                 .takeIf(String::isNotEmpty)
                                 ?.let { items[it] = decodeValue(item.textContent) }
                         }
-                    styles[name] = Style(
-                        parent = element.getAttribute("parent").takeIf { element.hasAttribute("parent") },
-                        items = items,
+                    qualifiedStyles.define(
+                        name,
+                        qualifiers,
+                        Style(
+                            parent = element.getAttribute("parent").takeIf { element.hasAttribute("parent") },
+                            items = items,
+                        ),
                     )
                 }
                 "string-array", "integer-array", "array" -> {
-                    values["array/$name"] = element.childElements()
-                        .filter { it.tagName == "item" }
-                        .joinToString("|") { decodeValue(it.textContent) }
+                    qualifiedValues.define(
+                        "array/$name",
+                        qualifiers,
+                        element.childElements()
+                            .filter { it.tagName == "item" }
+                            .joinToString("|") { decodeValue(it.textContent) },
+                    )
                 }
                 "item" -> {
                     val type = element.getAttribute("type").trim()
                     if (RESOURCE_TYPE.matches(type)) {
-                        values["$type/$name"] = decodeValue(element.textContent)
+                        qualifiedValues.define("$type/$name", qualifiers, decodeValue(element.textContent))
                     }
                 }
                 else -> if (RESOURCE_TYPE.matches(element.tagName)) {
-                    values["${element.tagName}/$name"] = decodeValue(element.textContent)
+                    qualifiedValues.define("${element.tagName}/$name", qualifiers, decodeValue(element.textContent))
                 }
             }
         }
     }
 
-    private fun resourceDirectories(root: File, type: String): List<File> {
-        val base = File(root, type)
-        return if (base.isDirectory) listOf(base) else emptyList()
-    }
+    /** The directories of [type] (`drawable`, `drawable-night-xxhdpi`) with their qualifiers, by name; unsupported ones are noted. */
+    private fun resourceDirectories(root: File, type: String): List<Pair<File, ResourceQualifiers>> =
+        root.listFiles { file -> file.isDirectory && (file.name == type || file.name.startsWith("$type-")) }
+            .orEmpty()
+            .sortedBy(File::getName)
+            .mapNotNull { directory ->
+                ResourceQualifiers.parse(directory.name, type)?.let { directory to it } ?: run {
+                    ignored += directory.name
+                    null
+                }
+            }
 
     private fun findResourceRoot(sourceFile: File?, workingDirectory: File?): File? {
         sourceFile?.canonicalFile?.let { source ->

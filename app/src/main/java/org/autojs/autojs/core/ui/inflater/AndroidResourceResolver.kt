@@ -23,8 +23,8 @@ class AndroidResourceResolver(
     private val drawableInflater = AndroidDrawableInflater(this)
     private val colorStateListInflater = AndroidColorStateListInflater(this)
 
-    fun configure(sourceFile: File? = null, workingDirectory: File? = null) {
-        repository.configure(sourceFile, workingDirectory)
+    fun configure(sourceFile: File? = null, workingDirectory: File? = null, configuration: ResourceConfiguration = ResourceConfiguration.DEFAULT) {
+        repository.configure(sourceFile, workingDirectory, configuration)
     }
 
     fun resolveAttributes(context: Context, source: Map<String, String>): HashMap<String, String> {
