@@ -293,6 +293,30 @@ The MCP Server default grant includes the three methods and both tokens; the 3-S
 them until its roadmap decides. `plugin_tools.cancel` is an ordinary bridge call: while a session's concurrency limit
 is used up by running calls, a cancel waits for a slot like any other request.
 
+## Script API `plugins.tools`
+
+Rhino scripts use the same bridge implementation in process through `plugins.tools` (`PluginsTools`, mounted with
+the `plugins` module); there is no broker and no grant in between (MCP roadmap D35).
+
+| Method | Result |
+| --- | --- |
+| `list()` | the `tools` array of `plugin_tools.list` |
+| `providers()` | the `providers` array of `plugin_tools.list`, to find out why a tool is missing |
+| `call(name, args?, options?)` | the result of `plugin_tools.invoke`; blocks the script thread, and stopping the script cancels the call (reason `host`) |
+| `callAsync(name, args?, options?)` | a Promise of the same, settled on the script thread; it rejects with an `Error` that carries the reason |
+
+- Scripts are the user's own code (D34): their requests carry every token of the module (`plugin_tools`,
+  `plugin_tools.user_granted`, `screen_capture`, `files`, `files.write`), so the tools of every enabled and authorized
+  provider, USER_GRANTED included, are available. The consumer is `script`.
+- Paths of image and file arguments and of outputs resolve like `files.path` (relative paths against the script's
+  working directory) and are not confined further; the contract limits still apply.
+- Image arguments also accept an `ImageWrapper`: the host writes a PNG copy under the app cache directory
+  (`plugin-tool-script-images`) and deletes it when the call ends. `"screen"` takes the accessibility screenshot on
+  Android 11+ while the service runs, otherwise `images.captureScreen()`, which needs `images.requestScreenCapture()`
+  first; without either the call fails and says so.
+- `options` are those of `plugin_tools.invoke` without `invocationId`. The request timeout is set above the longest
+  tool limit, so the tool's own limit (or a shorter `options.timeoutMs`) decides.
+
 ## Status
 
 | Part | State |
@@ -301,5 +325,6 @@ is used up by running calls, a cancel waits for a slot like any other request.
 | Discovery and catalog cache, short name checks | done (P12 host item 2: `PluginToolRegistry`, `PluginToolCatalogParser`, `PluginToolShortNames`; fake provider `test-apps/plugin-tool-provider-conformance`) |
 | Schema validation | done (P12 host item 3: `PluginToolSchema` checks schemas when catalogs load; argument validation and defaults are ready for the bridge) |
 | Bridge module `plugin_tools`, grants and tokens | done (P12 host item 4: `NodeBridgePluginToolsBridge`, `PluginToolInvocationPlanner`, MCP default grant) |
-| Script API `plugins.tools` | planned (P12 host item 5) |
+| Script API `plugins.tools` | done (P12 host item 5: `PluginsTools`; documentation, declarations 4.41.0 and Ace Editor completion synchronized) |
+| Host changelog and protocol documents | done (P12 host item 6: 6.8.0 changelog, `host-capability-contract-v1.md`) |
 | Pilots | OpenCC (part of the 6.8.0 release gate), YOLO, Image Quantization, Stack Archive |

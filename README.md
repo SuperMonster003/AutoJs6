@@ -220,6 +220,8 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` ai.agent 脚本 API, 用于启动, 查询, 回应, 确认及取消 Three Stove Agent 任务, 支持 detached 后台任务 (需要 Three Stove Agent 插件) (参阅 示例代码 > agent)
 * `新增` ai.agent.run/create 方法支持 plan 选项参数, 用于让 Three Stove Agent 以计划模式先提出步骤计划再执行
 * `新增` 脚本可通过 project.json 或 @agent 头注释登记为 Three Stove Agent 可调用的脚本, 支持参数校验, 超时停止及结构化结果回传
+* `新增` plugins.tools 模块, 用于列出并调用插件自行声明的工具, 支持同步与异步调用; 参数按工具声明的格式校验, 图片参数支持当前屏幕, 文件路径或 ImageWrapper, 工具生成的文件写入指定路径 (需要提供工具的插件) (参阅 项目文档 > [插件](https://docs.autojs6.com/#/plugins))
+* `新增` 插件工具契约, 用于插件声明自己提供的工具 (名称, 说明, 参数格式及风险等级), 由 AutoJs6 汇总, 校验参数并转发调用, 供脚本及 MCP Server 等插件使用 (仅收录在插件中心启用并授权的插件)
 * `新增` compose 模块, 用于以 Jetpack Compose 构建界面, 提供节点工厂, 长期节点句柄, 响应式 state/render/ref 及主题控制 (需要 3-Block Compose 插件) (参阅 示例代码 > 3-Block Compose)
 * `新增` 编辑器菜单新增 "在 3-Block Compose 设计器中打开": 保存当前文件后交给 3-Block Compose 插件 (1.2.0 及以上) 的可视化设计器编辑, 回到编辑器时自动重新加载设计器保存的内容 (有未保存修改时先询问) (参阅 示例代码 > 3-Block Compose)
 * `新增` ui 模式布局预览服务, 供 3-Block Compose 设计器在画布内以宿主真实布局器预览 XML 布局, Android 11 及以上嵌入显示, 更低版本提供快照 (需要 3-Block Compose 插件 1.6.0 及以上)
@@ -491,6 +493,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `优化` MCP Server 与 3-Stove Agent 等面向模型的插件会话经桥接读取图片 (image.readImage) 时, 最长边超过 4096 px 的图片按 2 的幂降采样解码, 结果附 scale 与原图尺寸, 避免相册大图耗尽宿主内存; Node.js 插件脚本不受影响
 * `优化` MCP Server 与 3-Stove Agent 等面向模型的插件会话经桥接按路径读取图片与媒体信息 (image.readImage, mediainfo) 时限制在工作目录内, 写入 (image.saveImage) 同样只限工作目录; 请求声明 files.shared_read 且 AutoJs6 持有所有文件访问权限时可只读访问共享存储 (不含 Android/data 与 Android/obb), files.list 与 files.stat 也可按同一令牌列出共享存储; Node.js 插件脚本不受影响
 * `优化` 宿主桥接层 app 模块增加 pluginCapabilities 方法, 实时返回 OCR, 条码, 拼音, Pinyin4j, MediaInfo, OpenCV 与离线文档各插件家族的状态 (available / not_installed / disabled / incompatible), 已安装插件的版本, 启用与授权情况, 对应的桥接方法以及插件中心入口, 供 MCP Server 等插件会话按安装情况显示工具并提示用户安装; 插件会话打开时的可选方法列表也按同一逻辑补充已可用家族的方法
+* `优化` 宿主桥接层增加 plugin_tools 模块, 供 MCP Server 等插件会话列出, 调用及取消插件声明的工具: 截屏与工作目录内的文件以文件描述符交给插件, 工具生成的文件写入工作目录, 超时或取消时通知插件停止; 非官方插件的工具需请求声明 plugin_tools.user_granted 令牌; MCP Server 的默认能力授权包含该模块, 3-Stove Agent 的授权不包含
 * `优化` MCP Server 插件会话的默认能力授权扩充: 加入 ocr, barcode, pinyin, pinyin4j, mediainfo 各模块的方法, image.readImage 与找图找色方法, accessibility.readScreenText / captureScreenImage 和 app.pluginCapabilities, 以及对应的权限令牌 (含共享存储只读的 files.shared_read); 这些方法只在相应插件已安装并启用时可用, image.saveImage 与 image.toBytes 仍不在授权内; 3-Stove Agent 的授权不变; 另加入 agent.listScripts / readManifest / execRegistered 与 agent, agent.exec 令牌, 供 MCP Server 列出并运行已登记脚本
 * `优化` images.save/saveImage/compress/compressToBytes 方法支持 PNG 量化选项 (保留透明度) 及像素与内存限制 (需要 Image Quantization 插件)
 * `优化` AutoJs6 工作目录不存在, 被同名文件占用或因缺少存储权限无法访问时, 经宿主桥接的 files 模块与 engines.execScript / execScriptFile 等调用的错误消息说明原因与处理办法 (错误码 ERR_AUTOJS6_WORKING_DIRECTORY_UNAVAILABLE)

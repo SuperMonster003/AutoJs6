@@ -83,6 +83,20 @@ only the UTF-8 byte count and duration. The displayed toast is unchanged.
 Direct Node.js script calls retain their explicit text-logging behavior; the
 restriction applies to the host-owned `backend=plugin` bridge context.
 
+## Plugin tool module
+
+Since AutoJs6 6.8.0 the data plane also carries `plugin_tools` (`list`, `invoke`, `cancel`), which forwards
+calls to the tools that plugins describe themselves; see [Plugin tool protocol v1](plugin-tool-protocol-v1.md)
+for the provider contract, the argument rules and the result schemas. Its tokens are `plugin_tools` and
+`plugin_tools.user_granted`; the second admits the tools of USER_GRANTED providers and is never implied by
+the first. A call also needs `screen_capture` for a `"screen"` image argument, `files` for path arguments
+and `files.write` for declared outputs. The MCP default grant includes the three methods and both tokens;
+`ThreeStoveAgentGrant` includes neither. `NodeCapabilityBrokerPolicy` allows 72 KiB of arguments for
+`plugin_tools.invoke` (the contract's 64 KiB of tool arguments plus the name and options) within the
+96 KiB request grant. Binary outputs do not return through broker descriptors: the host writes them to the
+working-directory paths the request names, and the response lists their paths and sizes. The bridge
+answers 750 ms before the request deadline, so it can still tell the provider to cancel.
+
 ## Host implementation and compatibility
 
 `HostCapabilityBrokerCore` owns admission, the Node bridge adapter, deadlines,
