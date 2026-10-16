@@ -95,7 +95,11 @@ class BatchRenameScriptApiTest {
             try { files.batchRename.plan("a.txt", { search: "(", regex: true }); } catch (e) { result.badRegexCode = e.code; }
             try {
                 files.batchRename(["a.txt"], { search: "a", replace: "z", onProgress: function () { throw new Error("from the callback"); } });
-            } catch (e) { result.callbackError = e.message; result.callbackRenamed = files.exists("z.txt"); }
+            } catch (e) {
+                result.callbackError = e.message;
+                result.callbackRenamed = files.exists("z.txt");
+                result.batchIds.push(files.batchRename.history(1)[0].batchId);
+            }
 
             files.batchRename.planAsync("z.txt", { search: "z", replace: "c" }).then(function (p) {
                 return files.batchRename.applyAsync(p, { onProgress: function (done, total) { result.asyncProgress = [done, total]; } });
@@ -365,6 +369,66 @@ class BatchRenameScriptApiTest {
         assertTrue(result.getBoolean("isBatchRenameError"))
         assertEquals(BatchRenameScriptCodes.PLUGIN_UNAVAILABLE, result.getString("asyncCode"))
         assertTrue(File(root, "a.txt").exists())
+    }
+
+    /**
+     * `deleteHistory` and `clearHistory` (plugin roadmap D39) on batches of both sources; they need no plugin. The journal
+     * of the device is set aside meanwhile and put back afterwards.
+     * zh-CN: 对两种来源的批次调用 `deleteHistory` 与 `clearHistory` (插件路线图 D39); 两者不需要插件. 期间设备原有的日志被移开, 结束后放回.
+     */
+    @Test
+    fun scriptsDeleteAndClearTheHistoryOfEverySource() {
+        val journal = File(context.noBackupFilesDir, "batch-rename/journals")
+        val aside = File(context.cacheDir, "batch-rename-journal-aside-${System.nanoTime()}").apply { mkdirs() }
+        journal.listFiles().orEmpty().forEach { file -> check(file.renameTo(File(aside, file.name))) { "could not set ${file.name} aside" } }
+        try {
+            val executor = BatchRenameHostServices.executor(context)
+            fun rename(name: String, source: BatchRenameSource): String {
+                val file = File(root, name).apply { writeText(name) }
+                return executor.execute(
+                    listOf(BatchRenameOperation(file, "renamed-$name", false, file.lastModified(), file.length(), false)),
+                    source,
+                    pluginUid = android.os.Process.myUid().takeIf { source == BatchRenameSource.EXPLORER },
+                ).batchId
+            }
+            val first = rename("a.txt", BatchRenameSource.SCRIPT)
+            rename("b.txt", BatchRenameSource.SCRIPT)
+            rename("c.txt", BatchRenameSource.EXPLORER)
+            val result = runScript(
+                """
+                var result = {};
+                result.all = files.batchRename.history().length;
+                result.deleted = files.batchRename.deleteHistory("$first");
+                result.deletedAgain = files.batchRename.deleteHistory("$first");
+                result.deletedNewest = files.batchRename.deleteHistory(files.batchRename.history(1)[0]);
+                try { files.batchRename.deleteHistory("b_1"); } catch (e) { result.badIdCode = e.code; }
+                try { files.batchRename.clearHistory({ source: "plugin" }); } catch (e) { result.badSourceCode = e.code; }
+                result.clearedExplorer = files.batchRename.clearHistory({ source: "explorer" });
+                result.left = files.batchRename.history().map(function (it) { return it.source; });
+                result.clearedAll = files.batchRename.clearHistory();
+                result.after = files.batchRename.history().length;
+                files.write(MARKER, JSON.stringify(result));
+                """,
+            )
+            assertEquals(3, result.getInt("all"))
+            assertTrue(result.getBoolean("deleted"))
+            assertFalse(result.getBoolean("deletedAgain"))
+            // The newest batch is the file manager's. zh-CN: 最新的批次来自文件管理器.
+            assertTrue(result.getBoolean("deletedNewest"))
+            assertEquals(BatchRenameScriptCodes.INVALID_OPTIONS, result.getString("badIdCode"))
+            assertEquals(BatchRenameScriptCodes.INVALID_OPTIONS, result.getString("badSourceCode"))
+            assertEquals(0, result.getInt("clearedExplorer"))
+            assertEquals("""["script"]""", result.getJSONArray("left").toString())
+            assertEquals(1, result.getInt("clearedAll"))
+            assertEquals(0, result.getInt("after"))
+            // Forgetting the history leaves the files as they are. zh-CN: 删除历史不影响文件.
+            assertEquals(listOf("renamed-a.txt", "renamed-b.txt", "renamed-c.txt"), root.list().orEmpty().sorted())
+        } finally {
+            journal.mkdirs()
+            journal.listFiles().orEmpty().forEach(File::delete)
+            aside.listFiles().orEmpty().forEach { file -> file.renameTo(File(journal, file.name)) }
+            aside.deleteRecursively()
+        }
     }
 
     private fun runScript(body: String): JSONObject {
