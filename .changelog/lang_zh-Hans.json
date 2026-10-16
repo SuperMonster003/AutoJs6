@@ -56,7 +56,7 @@
         "epub.annotations/annotationsAsync 方法, 用于读取高亮与笔记, 阅读器会话支持监听标注变更",
         "files.batchRename 方法, 用于按查找与替换, 正则表达式, 计数器, 日期变量, 照片元数据 (EXIF / XMP) 及汉字转拼音批量重命名文件与文件夹, 支持预览方案, 不访问文件的名称试算, 命名预设, 冲突处理策略, 进度回调, 撤销及历史记录的查询与清理 (需要 Batch Rename 插件, 照片元数据, 汉字转拼音与命名预设需要 1.1.0 及以上版本) (参阅 项目文档 > [文件](https://docs.autojs6.com/#/files))",
         "gallery 模块, 用于通过 3-Maple Image 插件选择, 查看, 编辑及转换图片, 读取与写入的文件限于脚本自身可访问的路径 (需要 3-Maple Image 插件 3.4.0 及以上) (参阅 项目文档 > [相册](https://docs.autojs6.com/#/gallery))",
-        "speech 模块, 用于离线语音识别, 语音活动检测, 唤醒词检测及语音合成, 支持麦克风听写会话, 唤醒词会话 (可在唤醒后自动听写), 识别 WAV 文件或 PCM 数据, 合成到 WAV 文件, 通过插件引擎朗读文本及管理语音模型, 读取与写入的文件限于脚本自身可访问的路径 (需要 3-Macaw Speech 插件)",
+        "speech 模块, 用于离线语音识别, 语音活动检测, 唤醒词检测及语音合成, 支持麦克风听写会话, 唤醒词会话 (可在唤醒后自动听写), 识别 WAV 文件或 PCM 数据, 合成到 WAV 文件, 通过插件引擎朗读文本及管理语音模型, 读取与写入的文件限于脚本自身可访问的路径; 麦克风会话在 AutoJs6 位于前台时开启后, 应用退到后台或熄屏仍可继续收音 (需要 3-Macaw Speech 插件)",
         "yolo 模块, 用于通过 YOLO 插件加载模型并进行目标检测 (参阅 项目文档 > [YOLO](https://docs.autojs6.com/#/yolo))",
         "tts 模块, 用于文本转语音 (参阅 项目文档 > [文本转语音](https://docs.autojs6.com/#/tts))",
         "settings 模块, 用于读取及修改应用设置 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [设置](https://docs.autojs6.com/#/settings))",
