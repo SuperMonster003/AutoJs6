@@ -29,6 +29,7 @@ import android.widget.FrameLayout
 import android.widget.VideoView
 import androidx.annotation.RequiresApi
 import org.autojs.autojs.core.ui.UiContentHost
+import org.autojs.autojs.core.ui.inflater.AttributeOutcome
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.execution.ExecutionConfig
@@ -452,6 +453,17 @@ internal class UiPreviewSession(
     override fun onWindowFunctionIgnored(functionName: String) {
         if (!warnedFunctions.add(functionName)) return
         runCatching { runtime?.console?.warn(appContext.getString(R.string.ui_preview_window_function_ignored, functionName)) }
+    }
+
+    override fun onAttributeIgnored(attrName: String, outcome: AttributeOutcome, message: String) {
+        if (!applying) return
+        val code = when (outcome) {
+            AttributeOutcome.UNSUPPORTED -> UiPreviewContract.ATTRIBUTE_OUTCOME_UNSUPPORTED
+            AttributeOutcome.UNKNOWN -> UiPreviewContract.ATTRIBUTE_OUTCOME_UNKNOWN
+            AttributeOutcome.IGNORED_NAMESPACE -> UiPreviewContract.ATTRIBUTE_OUTCOME_NAMESPACE
+            AttributeOutcome.APPLIED -> return
+        }
+        diagnostics.add(UiPreviewDiagnostic(UiPreviewContract.ERROR_ATTRIBUTE_IGNORED, message, elementStack.lastOrNull() ?: -1, attrName, code))
     }
 
     override fun onBindingFailed(attrName: String, rawValue: String, error: Throwable): Boolean {

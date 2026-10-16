@@ -2970,6 +2970,8 @@
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="text_yearly_task">مهمة سنوية</string>
     <string name="text_zero_means_unlimited">0 يعني بلا حدود</string>
+    <string name="ui_android_attribute_unknown">%1$s ليست سمة في %2$s وتم تجاهلها</string>
+    <string name="ui_android_attribute_unsupported">لا يمكن تعيين %1$s في %2$s على هذا الجهاز وتم تجاهلها</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
     <string name="warning_apk_native_page_alignment_unsupported">محاذاة المكتبة الأصلية %1$s هي %2$d بايت. قد لا يعمل ملف APK الناتج على أجهزة بصفحات 16 KB. يرجى تحديث المكتبة أو الإضافة.</string>

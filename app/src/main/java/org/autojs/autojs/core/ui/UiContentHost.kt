@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import org.autojs.autojs.core.ui.inflater.AttributeOutcome
 import org.autojs.autojs.execution.ScriptExecuteActivity
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
@@ -51,6 +52,15 @@ interface UiContentHost {
      * instead and lets the inflation continue; false rethrows [error] (the script behavior).
      */
     fun onBindingFailed(attrName: String, rawValue: String, error: Throwable): Boolean = false
+
+    /**
+     * An attribute of a native Android XML layout had no effect and was skipped (host roadmap
+     * `docs/dev/android-xml-attributes-roadmap.md` A4): [outcome] is [AttributeOutcome.UNSUPPORTED] or
+     * [AttributeOutcome.UNKNOWN], [message] the warning the script's console got.
+     */
+    fun onAttributeIgnored(attrName: String, outcome: AttributeOutcome, message: String) {
+        /* Empty default: the Activity host only has the console warning. */
+    }
 
     /** The engine of this host is being force-stopped (host task list, `engines.stopAll()`). */
     fun onEngineForceStop() {

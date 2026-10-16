@@ -57,5 +57,12 @@ class UiPreviewBoundsTest {
             json,
         )
         assertEquals("[]", UiPreviewBounds.encodeDiagnostics(emptyList()))
+        // Contract v3: an ignored attribute carries its outcome.
+        assertEquals(
+            "[{\"code\":\"ERR_AUTOJS6_UI_PREVIEW_ATTRIBUTE_IGNORED\",\"message\":\"m\",\"i\":2,\"a\":\"android:onClick\",\"o\":\"unsupported\"}]",
+            UiPreviewBounds.encodeDiagnostics(
+                listOf(UiPreviewDiagnostic(UiPreviewContract.ERROR_ATTRIBUTE_IGNORED, "m", 2, "android:onClick", UiPreviewContract.ATTRIBUTE_OUTCOME_UNSUPPORTED)),
+            ),
+        )
     }
 }

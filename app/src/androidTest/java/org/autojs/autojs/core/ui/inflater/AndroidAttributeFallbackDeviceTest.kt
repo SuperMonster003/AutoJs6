@@ -262,6 +262,30 @@ class AndroidAttributeFallbackDeviceTest {
         assertEquals(30, report.getInt("cellTop"))
     }
 
+    @Test
+    fun unsupportedAndUnknownAttributesOfNativeXmlAreSkippedWithOneWarning() {
+        val layoutText = """
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <TextView android:id="@+id/one" android:text="1" android:onClick="go" android:noSuchAttribute="x" />
+                <TextView android:id="@+id/two" android:text="2" android:onClick="go" android:noSuchAttribute="x" />
+            </LinearLayout>
+        """.trimIndent()
+        val report = runUiScript(
+            """
+            ui.useAndroidLayout(true);
+            ui.layoutFile('main.xml');
+            finish({ one: String(ui.findView('one').getText()), two: String(ui.findView('two').getText()) });
+            """,
+            layoutText,
+        )
+        // onClick (declared unsupported, no public setter) used to fail the whole layout; now both views exist.
+        assertEquals("1", report.getString("one"))
+        assertEquals("2", report.getString("two"))
+    }
+
     private fun runUiScript(body: String, layoutText: String = layout()): JSONObject {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val directory = File(context.cacheDir, "android-attrs-${UUID.randomUUID()}")

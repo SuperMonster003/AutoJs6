@@ -2968,6 +2968,8 @@
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="text_yearly_task">Tâche annuelle</string>
     <string name="text_zero_means_unlimited">0 signifie illimité</string>
+    <string name="ui_android_attribute_unknown">%1$s n\'est pas un attribut de %2$s et a été ignoré</string>
+    <string name="ui_android_attribute_unsupported">%1$s de %2$s ne peut pas être appliqué sur cet appareil et a été ignoré</string>
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
     <string name="warning_apk_native_page_alignment_unsupported">La bibliothèque native %1$s est alignée sur %2$d octets. Le fichier APK généré peut être incompatible avec les pages de 16 KB. Mettez à jour la bibliothèque ou le plugin.</string>

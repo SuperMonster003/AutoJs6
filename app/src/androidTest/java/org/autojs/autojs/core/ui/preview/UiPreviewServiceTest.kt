@@ -139,9 +139,17 @@ class UiPreviewServiceTest {
         return file to fd
     }
 
+    /**
+     * The next bounds report of a layout. An embedded session also reports the empty hierarchy after its first
+     * traversal; on a slow device that report can arrive after the test applied its layout, so it is skipped.
+     * zh-CN: 下一份布局的边界报告. 嵌入会话首次遍历时也会报告空层级, 设备较慢时它可能晚于测试应用布局到达, 故跳过.
+     */
     private fun awaitBounds(callback: Callback): JSONArray {
-        val bounds = callback.bounds.poll(15, TimeUnit.SECONDS) ?: throw AssertionError("no bounds arrived")
-        return JSONArray(bounds.getString(UiPreviewContract.KEY_BOUNDS_JSON))
+        while (true) {
+            val bounds = callback.bounds.poll(15, TimeUnit.SECONDS) ?: throw AssertionError("no bounds arrived")
+            if (bounds.getInt(UiPreviewContract.KEY_ELEMENT_COUNT) == 0) continue
+            return JSONArray(bounds.getString(UiPreviewContract.KEY_BOUNDS_JSON))
+        }
     }
 
     private fun sha256(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
@@ -274,6 +282,31 @@ class UiPreviewServiceTest {
         assertTrue(diagnostic.getString(UiPreviewContract.Diagnostic.MESSAGE).contains("missing"))
         assertEquals(200 * 200 * 4, file.readBytes().size)
         assertEquals(3, awaitBounds(callback).length())
+    }
+
+    @Test
+    fun ignoredAttributesOfNativeXmlAreDiagnosedWithoutStoppingTheFrame() {
+        val callback = Callback()
+        val id = sessionId(create(request(UiPreviewContract.MODE_SNAPSHOT, 200, 200), callback))
+        val xml = "<LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\" xmlns:tools=\"http://schemas.android.com/tools\" " +
+            "android:layout_width=\"match_parent\" android:layout_height=\"match_parent\" tools:ignore=\"x\">" +
+            "<TextView android:text=\"a\" android:onClick=\"go\" android:noSuchAttribute=\"1\"/></LinearLayout>"
+        val result = service.setLayout(id, layout(xml), snapshotFile().second)
+        assertEquals(result.getString(UiPreviewContract.KEY_ERROR_MESSAGE), UiPreviewContract.OUTCOME_APPLIED, outcome(result))
+        val diagnostics = JSONArray(result.getString(UiPreviewContract.KEY_DIAGNOSTICS_JSON))
+        val byAttr = (0 until diagnostics.length()).map { diagnostics.getJSONObject(it) }.associateBy { it.getString(UiPreviewContract.Diagnostic.ATTR_NAME) }
+        assertEquals(setOf("android:onClick", "android:noSuchAttribute"), byAttr.keys)
+        byAttr.values.forEach {
+            assertEquals(UiPreviewContract.ERROR_ATTRIBUTE_IGNORED, it.getString(UiPreviewContract.Diagnostic.CODE))
+            assertEquals(1, it.getInt(UiPreviewContract.Diagnostic.ELEMENT_INDEX))
+        }
+        assertEquals(UiPreviewContract.ATTRIBUTE_OUTCOME_UNSUPPORTED, byAttr.getValue("android:onClick").getString(UiPreviewContract.Diagnostic.OUTCOME))
+        assertEquals(UiPreviewContract.ATTRIBUTE_OUTCOME_UNKNOWN, byAttr.getValue("android:noSuchAttribute").getString(UiPreviewContract.Diagnostic.OUTCOME))
+        // AutoJs6 XML keeps its rules: an unknown attribute is silently ignored, a declared unsupported one fails.
+        val autojs = service.setLayout(id, layout("<vertical><text text=\"a\" noSuchAttribute=\"1\"/></vertical>"), snapshotFile().second)
+        assertEquals(UiPreviewContract.OUTCOME_APPLIED, outcome(autojs))
+        assertEquals("[]", autojs.getString(UiPreviewContract.KEY_DIAGNOSTICS_JSON))
+        assertEquals(UiPreviewContract.OUTCOME_FAILED, outcome(service.setLayout(id, layout("<vertical><text text=\"a\" onClick=\"go\"/></vertical>"), snapshotFile().second)))
     }
 
     @Test

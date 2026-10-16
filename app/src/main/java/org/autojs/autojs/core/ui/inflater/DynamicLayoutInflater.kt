@@ -29,6 +29,7 @@ import com.google.android.material.tabs.TabLayout
 import com.makeramen.roundedimageview.RoundedImageView
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.ui.UiContentHost
 import org.autojs.autojs.util.ContextUtils.findActivity
 import org.autojs.autojs.core.automator.filter.ClassNameFilter
 import org.autojs.autojs.core.ui.inflater.inflaters.BaseViewInflater
@@ -216,6 +217,9 @@ open class DynamicLayoutInflater {
     /** Sets the attributes no handler takes through the view's public API (host roadmap A2). */
     private val attributeFallback by lazy { AndroidAttributeFallback(AndroidAttributeTable.get(context), resourceParser) }
 
+    /** `class|attribute` keys already warned about in this runtime's console (host roadmap A4, decision D7). */
+    private val warnedAttributes = HashSet<String>()
+
     constructor(resourceParser: ResourceParser, scriptRuntime: ScriptRuntime) {
         this.resourceParser = resourceParser
         this.scriptRuntime = scriptRuntime
@@ -399,7 +403,12 @@ open class DynamicLayoutInflater {
     }
 
     protected fun convertXml(context: InflateContext?, xml: String?): String {
-        return layoutInflaterDelegate.beforeConvertXml(context, xml) ?: try {
+        // A layout the delegate keeps as it is (ui.useAndroidLayout, or namespaced attributes) is native Android XML (A4).
+        layoutInflaterDelegate.beforeConvertXml(context, xml)?.let { kept ->
+            context?.put(ANDROID_XML, true)
+            return kept
+        }
+        return try {
             layoutInflaterDelegate.afterConvertXml(context, XmlConverter.convertToAndroidLayout(xml))
         } catch (e: Exception) {
             throw InflateException(e)
@@ -864,27 +873,48 @@ open class DynamicLayoutInflater {
         if (isDynamic && isIgnoresDynamicFlags || !isDynamic && isJustDynamicFlags) {
             return
         }
-        applyAttributeValue(view, inflater, ns, attrName, value, parent)
+        applyAttributeValue(context, view, inflater, ns, attrName, value, parent)
         layoutInflaterDelegate.afterApplyAttribute(context, inflater, view, ns, attrName, value, parent)
     }
 
     /**
      * Sets one attribute (host roadmap `docs/dev/android-xml-attributes-roadmap.md` A2): the view's handlers first
      * ([ViewInflater.setAttr]); an attribute none of them takes, or one they declare unsupported, goes to the
-     * metadata fallback ([AndroidAttributeFallback]), which uses the view's public API. Returns how it ended; an
-     * attribute declared unsupported that the fallback cannot set either still fails the layout as before.
-     * zh-CN: 设置一个属性: 先由视图的处理器处理; 没有处理器接受或处理器声明不支持的属性交给元数据兜底, 以视图的公开 API 设置.
+     * metadata fallback ([AndroidAttributeFallback]), which uses the view's public API. What happens to an attribute
+     * that stays unset (A4, decision D7): in native Android XML ([context] marked by [convertXml]) it is skipped, the
+     * script's console warns once per class and attribute, and a preview host hears of it
+     * ([UiContentHost.onAttributeIgnored]); in AutoJs6 XML an unknown attribute stays silently ignored and one the
+     * handlers declare unsupported still fails the layout.
+     * zh-CN: 设置一个属性: 先由视图的处理器处理; 没有处理器接受或处理器声明不支持的属性交给元数据兜底, 以视图的公开 API 设置. 仍未设置的属性:
+     * 原生 Android XML 中跳过, 控制台按类与属性警告一次, 并告知预览承载; AutoJs6 XML 中未知属性照旧忽略, 声明不支持的属性照旧使布局失败.
      */
-    fun applyAttributeValue(view: View, inflater: ViewInflater<View>, ns: String?, attrName: String, value: String, parent: ViewGroup?): AttributeOutcome {
-        try {
+    fun applyAttributeValue(context: InflateContext, view: View, inflater: ViewInflater<View>, ns: String?, attrName: String, value: String, parent: ViewGroup?): AttributeOutcome {
+        val outcome = try {
             if (inflater.setAttr(view, ns, attrName, value, parent)) return AttributeOutcome.APPLIED
+            if (ns != null && ns != "android" && ns != "app") AttributeOutcome.IGNORED_NAMESPACE else attributeFallback.apply(view, ns, attrName, value, parent)
         } catch (e: UnsupportedAttributeException) {
-            val outcome = attributeFallback.apply(view, ns, attrName, value, parent)
-            if (outcome == AttributeOutcome.APPLIED) return outcome
-            throw e
+            val fallback = attributeFallback.apply(view, ns, attrName, value, parent)
+            if (fallback == AttributeOutcome.APPLIED) return fallback
+            if (context.get(ANDROID_XML) != true) throw e
+            AttributeOutcome.UNSUPPORTED
         }
-        if (ns != null && ns != "android" && ns != "app") return AttributeOutcome.IGNORED_NAMESPACE
-        return attributeFallback.apply(view, ns, attrName, value, parent)
+        if (outcome == AttributeOutcome.UNSUPPORTED || outcome == AttributeOutcome.UNKNOWN) {
+            if (context.get(ANDROID_XML) == true) reportIgnoredAttribute(view, if (ns != null) "$ns:$attrName" else attrName, outcome)
+        }
+        return outcome
+    }
+
+    private fun reportIgnoredAttribute(view: View, attrName: String, outcome: AttributeOutcome) {
+        val runtime = scriptRuntime ?: return
+        val message = this.context.getString(
+            if (outcome == AttributeOutcome.UNSUPPORTED) R.string.ui_android_attribute_unsupported else R.string.ui_android_attribute_unknown,
+            attrName,
+            view.javaClass.simpleName,
+        )
+        if (warnedAttributes.add(view.javaClass.name + "|" + attrName)) {
+            runCatching { runtime.console.warn(message) }
+        }
+        UiContentHost.attached(runtime)?.onAttributeIgnored(attrName, outcome, message)
     }
 
     private val isJustDynamicFlags: Boolean
@@ -904,6 +934,8 @@ open class DynamicLayoutInflater {
         const val FLAG_JUST_DYNAMIC_ATTRS = 2
         private const val LOG_TAG = "DynamicLayoutInflater"
         private const val ANDROID_LAYOUT_STACK = "android.layout.stack"
+        /** Set on an inflate context whose layout is native Android XML (kept, not converted from AutoJs6 XML). */
+        private const val ANDROID_XML = "android.xml"
         private const val ANDROID_VIEW_DEPTH = "android.view.depth"
         private const val ANDROID_BASE_CONTEXT = "android.base.context"
         private const val MAX_RESOURCE_DEPTH = 32

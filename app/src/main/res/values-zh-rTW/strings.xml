@@ -2965,6 +2965,8 @@
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
     <string name="text_yearly_task">每年任務</string>
     <string name="text_zero_means_unlimited">0 表示不限制</string>
+    <string name="ui_android_attribute_unknown">%1$s 不是 %2$s 的屬性, 已忽略</string>
+    <string name="ui_android_attribute_unsupported">%2$s 的 %1$s 在此裝置上無法設定, 已忽略</string>
     <string name="warn_continue_operation_without_saving_settings">設定尚未儲存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設定尚未儲存, 確定要退出嗎</string>
     <string name="warning_apk_native_page_alignment_unsupported">原生程式庫 %1$s 的對齊值為 %2$d 位元組. 產生的 APK 可能無法在頁面大小為 16 KB 的裝置上執行. 請升級原生程式庫或外掛程式.</string>

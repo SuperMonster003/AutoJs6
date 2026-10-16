@@ -21,6 +21,8 @@ data class UiPreviewDiagnostic(
     val message: String,
     val elementIndex: Int,
     val attrName: String?,
+    /** Contract v3: why an attribute was ignored ([UiPreviewContract.ATTRIBUTE_OUTCOMES]), for `ATTRIBUTE_IGNORED` only. */
+    val outcome: String? = null,
 )
 
 /** The JSON of a bounds list after the entry limit was applied. */
@@ -65,6 +67,7 @@ object UiPreviewBounds {
                 .append(",\"").append(UiPreviewContract.Diagnostic.MESSAGE).append("\":").append(quote(diagnostic.message))
                 .append(",\"").append(UiPreviewContract.Diagnostic.ELEMENT_INDEX).append("\":").append(diagnostic.elementIndex)
             diagnostic.attrName?.let { json.append(",\"").append(UiPreviewContract.Diagnostic.ATTR_NAME).append("\":").append(quote(it)) }
+            diagnostic.outcome?.let { json.append(",\"").append(UiPreviewContract.Diagnostic.OUTCOME).append("\":").append(quote(it)) }
             json.append('}')
         }
         return json.append(']').toString()

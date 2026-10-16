@@ -322,10 +322,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     if (widget is NativeObject && callFunction(scriptRuntime, widget.prop("hasAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(attrName)) as Boolean) {
                         callFunction(scriptRuntime, widget.prop("setAttr") as Callable, getDeclarationScope(widget), widget, arrayOf(view, attrName, boundValue, newBaseFunction(scriptRuntime.topLevelScope, "setter", {
                             val (viewArg, attrNameArg, valueArg, parentArg) = it
-                            scriptRuntime.ui.layoutInflater.applyAttributeValue(viewArg as View, inflater, ns, coerceString(attrNameArg), coerceString(valueArg, ""), parentArg as ViewGroup?)
+                            scriptRuntime.ui.layoutInflater.applyAttributeValue(inflateContext, viewArg as View, inflater, ns, coerceString(attrNameArg), coerceString(valueArg, ""), parentArg as ViewGroup?)
                         }, NOT_CONSTRUCTABLE)))
                     } else {
-                        scriptRuntime.ui.layoutInflater.applyAttributeValue(view, inflater, ns, attrName, boundValue, parent)
+                        scriptRuntime.ui.layoutInflater.applyAttributeValue(inflateContext, view, inflater, ns, attrName, boundValue, parent)
                     }
                     afterApplyAttribute(inflateContext, inflater, view, ns, attrName, boundValue, parent)
                     true

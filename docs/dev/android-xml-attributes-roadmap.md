@@ -169,7 +169,8 @@ R 与 A 互不依赖 (A4 的诊断码除外), R 先做 (工作量小, 插件 P11
 
 ### A4 不支持与未知
 
-- [ ] 结果分类贯通 `applyAttribute` 与运行时委托; Android XML 中跳过并警告一次 (按 Q1 拍板); `UiContentHost.onAttributeIgnored` 与预览诊断.
+- [x] 结果分类贯通 `applyAttribute` 与运行时委托; Android XML 中跳过并警告一次 (按 Q1 拍板); `UiContentHost.onAttributeIgnored` 与预览诊断.
+  证据 (2026-10-16): `DynamicLayoutInflater.convertXml` 在委托保留原 XML 时 (`ui.useAndroidLayout`, 或带命名空间前缀的属性) 给 inflate 上下文打上原生 XML 标记; `applyAttributeValue` 多一个上下文参数 (布局器与 `UI` 运行时委托两处调用同步更新), 处理器与兜底都没设上的属性: 原生 XML 中 `UNSUPPORTED` (含处理器声明不支持且兜底也设不了的, 此前抛异常使整个布局失败) 与 `UNKNOWN` 都跳过, 脚本控制台按 (类, 属性) 每个运行时警告一次 (新字符串 `ui_android_attribute_unknown` / `ui_android_attribute_unsupported`, 11 个语言目录), 并经新钩子 `UiContentHost.onAttributeIgnored(attrName, outcome, message)` 告知承载方; AutoJs6 XML 照旧 (未知属性静默忽略, 声明不支持的属性使布局失败). `tools:` 等其他命名空间为 `IGNORED_NAMESPACE`, 不警告也不产生诊断 (契约的 `namespace` 分类值保留未用). 预览会话在应用布局期间把钩子转为 `ATTRIBUTE_IGNORED` 诊断 (元素序号取当前元素, 属性名带前缀, 新字段 `o` 为 `unsupported` / `unknown`), 布局照常完成. 测试: JVM `UiPreviewBoundsTest` (诊断编码含 `o`); 设备 `UiPreviewServiceTest.ignoredAttributesOfNativeXmlAreDiagnosedWithoutStoppingTheFrame` (原生 XML 中 `android:onClick` 为 unsupported, `android:noSuchAttribute` 为 unknown, 都在元素 1, 布局为 applied; AutoJs6 XML 的未知属性无诊断, `onClick` 仍为 failed), `AndroidAttributeFallbackDeviceTest.unsupportedAndUnknownAttributesOfNativeXmlAreSkippedWithOneWarning` (两个带 onClick 与未知属性的 TextView 都创建成功) 在 emulator-5580 (API 33) 与 emulator-5570 (API 24) 通过; 回归: `UiPreviewServiceTest` 全部 15 项, `JsListViewDataBindingDeviceTest`, JVM `core.ui.preview` / `core.ui.inflater` 51 项通过. 顺带: `UiPreviewServiceTest` 的边界等待跳过元素数为 0 的报告 (嵌入会话首次遍历时报告的空层级在慢设备上可能晚于测试布局到达, 曾使 `embeddedSessionReturnsASurfacePackageAndBounds` 在 API 33 连续失败).
 
 ### A5 覆盖与测试
 

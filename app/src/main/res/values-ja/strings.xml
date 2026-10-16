@@ -2969,6 +2969,8 @@
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
     <string name="text_yearly_task">毎年のタスク</string>
     <string name="text_zero_means_unlimited">0 は無制限を意味します</string>
+    <string name="ui_android_attribute_unknown">%1$s は %2$s の属性ではないため無視しました</string>
+    <string name="ui_android_attribute_unsupported">%2$s の %1$s はこの端末では設定できないため無視しました</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
     <string name="warning_apk_native_page_alignment_unsupported">ネイティブライブラリ %1$s のアラインメントは %2$d バイトです. 生成された APK はページサイズが 16 KB の端末で動作しない可能性があります. ライブラリまたはプラグインを更新してください.</string>

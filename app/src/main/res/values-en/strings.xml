@@ -2965,6 +2965,8 @@
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
     <string name="text_yearly_task">Yearly task</string>
     <string name="text_zero_means_unlimited">0 means unlimited</string>
+    <string name="ui_android_attribute_unknown">%1$s is not an attribute of %2$s and was ignored</string>
+    <string name="ui_android_attribute_unsupported">%1$s of %2$s cannot be set on this device and was ignored</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
     <string name="warning_apk_native_page_alignment_unsupported">Native library %1$s has %2$d byte alignment. The generated APK may not run on devices with 16 KB pages. Update the library or plugin.</string>

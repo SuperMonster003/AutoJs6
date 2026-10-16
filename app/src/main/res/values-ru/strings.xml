@@ -2968,6 +2968,8 @@
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="text_yearly_task">Ежегодная задача</string>
     <string name="text_zero_means_unlimited">0 означает отсутствие ограничений</string>
+    <string name="ui_android_attribute_unknown">%1$s не является атрибутом %2$s и был пропущен</string>
+    <string name="ui_android_attribute_unsupported">%1$s у %2$s нельзя применить на этом устройстве, атрибут пропущен</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
     <string name="warning_apk_native_page_alignment_unsupported">Нативная библиотека %1$s имеет выравнивание %2$d байт. Созданный APK может не работать на устройствах со страницами 16 KB. Обновите библиотеку или плагин.</string>
