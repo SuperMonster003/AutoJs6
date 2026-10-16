@@ -9,7 +9,9 @@ import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.AndroidAttributeTable.Format
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Ids
+import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.util.Locale
@@ -30,10 +32,15 @@ import java.util.concurrent.ConcurrentHashMap
 class AndroidAttributeFallback(private val table: AndroidAttributeTable, private val resourceParser: ResourceParser) {
 
     private val methods = ConcurrentHashMap<String, List<Method>>()
+    private val layoutMembers = ConcurrentHashMap<String, List<Member>>()
 
-    /** Sets [name] on [view] if the metadata knows it for the view's class; see [AttributeOutcome]. */
+    /**
+     * Sets [name] on [view] if the metadata knows it for the view's class, or (A3) a `layout_*` attribute on the view's
+     * layout params if it knows it for the [parent]'s class; see [AttributeOutcome].
+     */
     fun apply(view: View, namespace: String?, name: String, value: String, parent: ViewGroup?): AttributeOutcome {
-        val member = table.find(view.javaClass, namespace, name) ?: return AttributeOutcome.UNKNOWN
+        val member = table.find(view.javaClass, namespace, name)
+            ?: return if (name.startsWith("layout_") && parent != null) applyLayout(view, parent, namespace, name, value) else AttributeOutcome.UNKNOWN
         if (Build.VERSION.SDK_INT < member.sinceApi) return AttributeOutcome.UNSUPPORTED
         val values = Values(view, resourceParser, member.attr)
         AndroidAttributeSetters.SPECIAL[member.attr.name]?.let { special ->
@@ -58,6 +65,64 @@ class AndroidAttributeFallback(private val table: AndroidAttributeTable, private
             return AttributeOutcome.APPLIED
         }
         throw InflateException("${member.attr.qualifiedName}=\"$value\" is not a valid value" + (reason?.let { ": $it" } ?: ""))
+    }
+
+    /**
+     * A `layout_*` attribute of the parent's layout params (host roadmap A3): a special rule, else a public setter
+     * or a public field of the params named by [AndroidLayoutParamRules.property]; the params are validated (when they
+     * can be, as ConstraintLayout's) and assigned back so the parent lays the view out again.
+     */
+    private fun applyLayout(view: View, parent: ViewGroup, namespace: String?, name: String, value: String): AttributeOutcome {
+        if (AndroidLayoutParamRules.isDesignTime(name)) return AttributeOutcome.IGNORED_NAMESPACE
+        val member = table.findLayout(parent.javaClass, namespace, name) ?: return AttributeOutcome.UNKNOWN
+        if (Build.VERSION.SDK_INT < member.sinceApi) return AttributeOutcome.UNSUPPORTED
+        val params = view.layoutParams ?: return AttributeOutcome.UNSUPPORTED
+        val values = Values(view, resourceParser, member.attr)
+        val applied = try {
+            AndroidLayoutParamRules.SPECIAL[name]?.invoke(values, view, params, value) == true || setLayoutMember(params, member.attr, values, value)
+        } catch (e: IllegalArgumentException) {
+            throw InflateException("${member.attr.qualifiedName}=\"$value\" is not a valid value: ${e.message}", e)
+        } catch (e: InvocationTargetException) {
+            throw InflateException("${member.attr.qualifiedName}=\"$value\" failed: ${e.targetException.message}", e.targetException)
+        }
+        if (!applied) return AttributeOutcome.UNSUPPORTED
+        params.javaClass.methods.firstOrNull { it.name == "validate" && it.parameterTypes.isEmpty() }?.invoke(params)
+        view.layoutParams = params
+        return AttributeOutcome.APPLIED
+    }
+
+    /** Sets the first setter or field of [params] that takes the value; false when the params have none for [attr]. */
+    private fun setLayoutMember(params: ViewGroup.LayoutParams, attr: AndroidAttributeTable.Attr, values: Values, value: String): Boolean {
+        val members = layoutMembers.getOrPut(params.javaClass.name + "|" + attr.qualifiedName) {
+            val property = AndroidLayoutParamRules.property(attr.name)
+            val kinds = Kind.preferred(attr.formats)
+            fun rank(type: Class<*>) = kinds.indexOfFirst { it.accepts(type) }
+            val names = AndroidAttributeSetters.candidates(property) + ("set" + property.replaceFirstChar { it.uppercaseChar() } + "Id")
+            val setters = names.flatMap { candidate ->
+                params.javaClass.methods
+                    .filter { !Modifier.isStatic(it.modifiers) && it.parameterTypes.size == 1 && it.name.equals(candidate, ignoreCase = true) }
+                    .filter { rank(it.parameterTypes[0]) >= 0 }
+                    .sortedBy { rank(it.parameterTypes[0]) }
+            }
+            val fields = params.javaClass.fields.filter {
+                !Modifier.isStatic(it.modifiers) && !Modifier.isFinal(it.modifiers) && it.name.equals(property, ignoreCase = true) && rank(it.type) >= 0
+            }
+            (setters + fields).distinct()
+        }
+        if (members.isEmpty()) return false
+        var reason: String? = null
+        for (member in members) {
+            val type = if (member is Method) member.parameterTypes[0] else (member as Field).type
+            val argument = try {
+                values.convert(type, value)
+            } catch (e: IllegalArgumentException) {
+                reason = e.message
+                continue
+            }
+            if (member is Method) member.invoke(params, argument) else (member as Field).set(params, argument)
+            return true
+        }
+        throw IllegalArgumentException(reason ?: "no member of ${params.javaClass.simpleName} takes it")
     }
 
     /** The public one-argument methods that may set [attr] on [viewClass], in the order they are tried. */
