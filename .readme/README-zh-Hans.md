@@ -209,6 +209,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` 代码生成模型管理页, 支持本地导入, 按需下载, 多版本管理与对比及官方模型更新 (入口: 设置页面 > 无障碍服务 > 代码生成模型)
 * `新增` MCP Server 插件, 用于通过 MCP 客户端访问 AutoJs6 的脚本, 文件及设备操作能力 (入口: 主页抽屉/插件中心)
 * `新增` 3-Shell Terminal 插件, 提供终端能力 (入口: 主页抽屉, 项目工具栏, 文件管理器目录菜单)
+* `新增` 3-Macaw Speech 插件, 用于离线语音识别, 唤醒词检测及语音合成, 可注册为系统 TTS 引擎, 语音模型按需下载 (入口: 插件中心/插件安装向导)
 * `新增` Node.js Runtime 插件, 用于运行 Node.js 文件及项目 (支持 "nodejs" 模式参数及 .node.js/.cjs/.mjs 文件)
 * `新增` Python Runtime 插件, 用于运行 Python 文件及项目, 支持模块入口, 执行超时及预置标准输入
 * `新增` Lua Runtime 插件, 用于运行 Lua 脚本
@@ -240,6 +241,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` epub.annotations/annotationsAsync 方法, 用于读取高亮与笔记, 阅读器会话支持监听标注变更
 * `新增` files.batchRename 方法, 用于按查找与替换, 正则表达式, 计数器, 日期变量及汉字转拼音批量重命名文件与文件夹, 支持预览方案, 冲突处理策略, 进度回调及撤销 (需要 Batch Rename 插件, 汉字转拼音需要 1.1.0 及以上版本) (参阅 项目文档 > [文件](https://docs.autojs6.com/#/files))
 * `新增` gallery 模块, 用于通过 3-Maple Image 插件选择, 查看, 编辑及转换图片, 读取与写入的文件限于脚本自身可访问的路径 (需要 3-Maple Image 插件 3.4.0 及以上) (参阅 项目文档 > [相册](https://docs.autojs6.com/#/gallery))
+* `新增` speech 模块, 用于离线语音识别, 语音活动检测, 唤醒词检测及语音合成, 支持麦克风听写会话, 唤醒词会话 (可在唤醒后自动听写), 识别 WAV 文件或 PCM 数据, 合成到 WAV 文件, 通过插件引擎朗读文本及管理语音模型, 读取与写入的文件限于脚本自身可访问的路径 (需要 3-Macaw Speech 插件)
 * `新增` yolo 模块, 用于通过 YOLO 插件加载模型并进行目标检测 (参阅 项目文档 > [YOLO](https://docs.autojs6.com/#/yolo))
 * `新增` tts 模块, 用于文本转语音 (参阅 项目文档 > [文本转语音](https://docs.autojs6.com/#/tts))
 * `新增` settings 模块, 用于读取及修改应用设置 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [设置](https://docs.autojs6.com/#/settings))
