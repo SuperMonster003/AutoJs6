@@ -56,6 +56,10 @@ class BatchRenameContractTest {
         assertEquals(256, BatchRenameLimits.MAX_RANDOM_LENGTH)
         assertEquals(999, BatchRenameLimits.MAX_CONFLICT_NUMBER)
         assertEquals(255, BatchRenameLimits.MAX_RESULT_NAME_BYTES)
+        assertEquals(100, BatchRenameLimits.MAX_PRESETS)
+        assertEquals(64, BatchRenameLimits.MAX_PRESET_NAME_CHARS)
+        assertEquals(131_072, BatchRenameLimits.MAX_PRESET_DOCUMENT_CHARS)
+        assertTrue(BatchRenameLimits.MAX_PRESET_DOCUMENT_CHARS * 2 <= 512 * 1024)
         // One request of the largest allowed size stays well below the 1 MiB Binder transaction buffer.
         assertTrue(BatchRenameLimits.MAX_REQUEST_CHARS * 2 <= 512 * 1024)
     }
@@ -93,7 +97,7 @@ class BatchRenameContractTest {
                 "search", "replace", "regex", "regexFlags", "matchAll", "caseSensitive", "target", "includeFiles",
                 "includeFolders", "includeSubfolders", "format", "enumerate", "random", "dateTime", "normalize", "halfWidth",
                 "sanitize", "sanitizeReplacement", "trim", "continueNumbering", "onConflict", "conflictNumberPattern",
-                "pinyin", "pinyinTone", "pinyinSeparator", "pinyinCase", "pinyinInitials",
+                "pinyin", "pinyinTone", "pinyinSeparator", "pinyinCase", "pinyinInitials", "preset",
             ),
             listOf(
                 BatchRenameOptionKeys.SEARCH, BatchRenameOptionKeys.REPLACE, BatchRenameOptionKeys.REGEX, BatchRenameOptionKeys.REGEX_FLAGS,
@@ -104,14 +108,22 @@ class BatchRenameContractTest {
                 BatchRenameOptionKeys.SANITIZE_REPLACEMENT, BatchRenameOptionKeys.TRIM, BatchRenameOptionKeys.CONTINUE_NUMBERING,
                 BatchRenameOptionKeys.ON_CONFLICT, BatchRenameOptionKeys.CONFLICT_NUMBER_PATTERN, BatchRenameOptionKeys.PINYIN,
                 BatchRenameOptionKeys.PINYIN_TONE, BatchRenameOptionKeys.PINYIN_SEPARATOR, BatchRenameOptionKeys.PINYIN_CASE,
-                BatchRenameOptionKeys.PINYIN_INITIALS,
+                BatchRenameOptionKeys.PINYIN_INITIALS, BatchRenameOptionKeys.PRESET,
             ),
         )
         assertEquals(
-            listOf("contractVersion", "errorCode", "errorMessage", "rejected", "items", "counts"),
+            listOf("contractVersion", "errorCode", "errorMessage", "rejected", "items", "counts", "options"),
             listOf(
                 BatchRenameResultKeys.CONTRACT_VERSION, BatchRenameResultKeys.ERROR_CODE, BatchRenameResultKeys.ERROR_MESSAGE,
-                BatchRenameResultKeys.REJECTED, BatchRenameResultKeys.ITEMS, BatchRenameResultKeys.COUNTS,
+                BatchRenameResultKeys.REJECTED, BatchRenameResultKeys.ITEMS, BatchRenameResultKeys.COUNTS, BatchRenameResultKeys.OPTIONS,
+            ),
+        )
+        assertEquals(
+            listOf("document", "onConflict", "presets", "name", "options", "imported", "skipped", "rejected", "index", "reason"),
+            listOf(
+                BatchRenamePresetKeys.DOCUMENT, BatchRenamePresetKeys.ON_CONFLICT, BatchRenamePresetKeys.PRESETS, BatchRenamePresetKeys.NAME,
+                BatchRenamePresetKeys.OPTIONS, BatchRenamePresetKeys.IMPORTED, BatchRenamePresetKeys.SKIPPED, BatchRenamePresetKeys.REJECTED,
+                BatchRenamePresetKeys.INDEX, BatchRenamePresetKeys.REASON,
             ),
         )
     }
@@ -136,7 +148,8 @@ class BatchRenameContractTest {
             ),
             BatchRenameValues.REASONS,
         )
-        assertEquals(listOf("counter", "dateTime", "random", "cleanup", "pinyin"), BatchRenameValues.FEATURES)
+        assertEquals(listOf("counter", "dateTime", "random", "cleanup", "pinyin", "presets"), BatchRenameValues.FEATURES)
+        assertEquals(listOf("skip", "overwrite", "rename"), BatchRenameValues.PRESET_CONFLICTS)
         assertEquals(listOf("none", "mark", "number"), BatchRenameValues.PINYIN_TONES)
         assertEquals(listOf("none", "space", "underscore", "hyphen"), BatchRenameValues.PINYIN_SEPARATORS)
         assertEquals(listOf("lower", "capitalize"), BatchRenameValues.PINYIN_CASES)
@@ -151,7 +164,8 @@ class BatchRenameContractTest {
         listOf(
             BatchRenameValues.TARGETS, BatchRenameValues.FORMATS, BatchRenameValues.DATE_TIMES, BatchRenameValues.NORMALIZATIONS,
             BatchRenameValues.CONFLICT_POLICIES, BatchRenameValues.STATUSES, BatchRenameValues.REASONS, BatchRenameValues.FEATURES,
-            BatchRenameValues.PINYIN_TONES, BatchRenameValues.PINYIN_SEPARATORS, BatchRenameValues.PINYIN_CASES, BatchRenameErrorCodes.ALL,
+            BatchRenameValues.PINYIN_TONES, BatchRenameValues.PINYIN_SEPARATORS, BatchRenameValues.PINYIN_CASES,
+            BatchRenameValues.PRESET_CONFLICTS, BatchRenameErrorCodes.ALL,
         ).forEach { values -> assertEquals(values.toSet().size, values.size) }
     }
 }

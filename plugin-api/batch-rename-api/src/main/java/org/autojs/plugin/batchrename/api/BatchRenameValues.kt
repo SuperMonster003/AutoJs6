@@ -121,5 +121,16 @@ object BatchRenameValues {
     const val FEATURE_CLEANUP = "cleanup"
     /** The `pinyin*` options and the `${pinyin}` variable (plugin 1.1.0). */
     const val FEATURE_PINYIN = "pinyin"
-    val FEATURES: List<String> = listOf(FEATURE_COUNTER, FEATURE_DATE_TIME, FEATURE_RANDOM, FEATURE_CLEANUP, FEATURE_PINYIN)
+    /** Named presets: the `preset` option, the effective options of a plan and the preset transactions (plugin 1.1.0). */
+    const val FEATURE_PRESETS = "presets"
+    val FEATURES: List<String> = listOf(FEATURE_COUNTER, FEATURE_DATE_TIME, FEATURE_RANDOM, FEATURE_CLEANUP, FEATURE_PINYIN, FEATURE_PRESETS)
+
+    // What importPresets does with a preset whose name is taken ([BatchRenamePresetKeys.ON_CONFLICT]).
+    /** Keep the existing preset and list the name under [BatchRenamePresetKeys.SKIPPED]; the default. */
+    const val PRESET_CONFLICT_SKIP = "skip"
+    /** Replace the existing preset. */
+    const val PRESET_CONFLICT_OVERWRITE = "overwrite"
+    /** Store the imported preset under the first free name of the form `name (n)`. */
+    const val PRESET_CONFLICT_RENAME = "rename"
+    val PRESET_CONFLICTS: List<String> = listOf(PRESET_CONFLICT_SKIP, PRESET_CONFLICT_OVERWRITE, PRESET_CONFLICT_RENAME)
 }

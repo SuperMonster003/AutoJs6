@@ -28,7 +28,7 @@ path additionally uses Explorer Action protocol v25 (`explorer-action-protocol-v
 | Package | `io.github.supermonster003.autojs6.plugin.batch.rename` |
 
 `PluginInfo.capabilities` carries `requiresHostVersion` (Long), `batchRenameContractVersion` (Int),
-`batchRenameFeatures` (String array, a subset of `counter`, `dateTime`, `random`, `cleanup`, `pinyin`),
+`batchRenameFeatures` (String array, a subset of `counter`, `dateTime`, `random`, `cleanup`, `pinyin`, `presets`),
 `batchRenameMaxItems` (Int) and `batchRenameRegexDialect` (`ecmascript`). The host calls `plan` only
 when the advertised contract version lies in its own supported range.
 
@@ -38,12 +38,15 @@ when the advertised contract version lies in its own supported range.
 interface IBatchRenamePlugin {
     org.autojs.plugin.common.api.PluginInfo getInfo();
     Bundle plan(in Bundle request);
+    Bundle presets(in Bundle request);        // feature `presets`, plugin 1.1.0
+    Bundle importPresets(in Bundle request);  // feature `presets`, plugin 1.1.0
 }
 ```
 
-Both methods are synchronous, stateless and safe to call concurrently. `plan` never throws for
-invalid input and never returns null: a failed call answers `errorCode` and `errorMessage` only.
-Methods may only be appended in later versions.
+All methods are synchronous and safe to call concurrently; only `importPresets` changes state (the plugin's
+presets). No method throws for invalid input or returns null: a failed call answers `errorCode` and `errorMessage`
+only. Methods may only be appended in later versions; hosts call the preset methods only on plugins whose
+`batchRenameFeatures` contain `presets`.
 
 ## Request
 
@@ -89,6 +92,10 @@ The `pinyin*` keys (contract 1, added with plugin 1.1.0) also style the `${pinyi
 Hosts send them only to plugins whose `batchRenameFeatures` contain `pinyin`; older plugins ignore unknown keys,
 so a script that asks for pinyin from such a plugin fails with `PLUGIN_INCOMPATIBLE` instead.
 
+`preset` (String, feature `presets`, plugin 1.1.0) names a preset the plugin keeps. The plugin starts from the
+defaults, applies the preset's options and then every other key of the request, so a request that names a preset
+carries only the keys it overrides and may leave out `search`. An unknown name is `INVALID_OPTIONS`.
+
 Regular expressions follow ECMAScript exactly, like `RegExp` in scripts: `g` comes from `matchAll`
 and `i` from the absence of `caseSensitive`; the replacement supports `$1`, `$<name>`, `$&`,
 `` $` ``, `$'` and `$$`. A plain-text search is escaped and evaluated the same way.
@@ -102,6 +109,7 @@ and `i` from the absence of `caseSensitive`; the replacement supports `$1`, `$<n
 | `rejected` | Boolean | the plan must not be executed |
 | `items` | ArrayList of Bundle | one per request item, in order: `index`, `newName`, `status`, `reason`, `twoPhase`, `overwrites` |
 | `counts` | Bundle | Int per status |
+| `options` | Bundle | the complete options the plan used, without `preset` (feature `presets`, every plan) |
 
 Statuses: `rename`, `unchanged`, `conflict`, `invalid`, `excluded`. Reasons: `noMatch`, `sameName`,
 `excludedByCaller`, `notIncluded`, `duplicateInBatch`, `existingEntry`, `numbersExhausted`,
@@ -113,6 +121,25 @@ moves to its Trash first.
 
 Error codes: `UNSUPPORTED_CONTRACT_VERSION`, `INVALID_REQUEST`, `INVALID_OPTIONS` (including a regular
 expression that does not compile), `LIMIT_EXCEEDED`, `INTERNAL_ERROR`.
+
+## Presets
+
+Named presets (plugin roadmap D36) belong to the plugin: its screen saves, loads, renames, deletes, imports and
+exports them, and plans resolve `preset` against them. Both preset requests carry `contractVersion`; both answers
+carry `contractVersion` and, on failure, `errorCode` and `errorMessage`.
+
+| Call | Request | Answer |
+| --- | --- | --- |
+| `presets` | - | `presets`: ArrayList of Bundle (`name`, `options` with the complete options), in the plugin's order |
+| `importPresets` | `document`: String, `onConflict`: `skip` (default), `overwrite`, `rename` | `imported` and `skipped`: ArrayList of String; `rejected`: ArrayList of Bundle (`index`, `name` when readable, `reason`) |
+
+The document is the JSON the plugin exports: `{"format": "autojs6-batch-rename-presets", "version": 1, "presets":
+[{"name": ..., "options": {...}}]}` with the option keys of the request (strings and booleans; missing keys take
+their defaults, unknown keys are dropped). A document that is not of this format, or is longer than 131072
+characters, fails as a whole with `INVALID_OPTIONS` or `LIMIT_EXCEEDED`; a single entry with a missing, blank,
+duplicate or over-long name, or with option values outside the contract, is listed under `rejected` and the others are
+imported. Under `skip` an entry whose name is taken keeps the existing preset; `rename` stores it under the first
+free `name (n)`. Entries that would exceed 100 presets or 131072 characters of stored presets are rejected.
 
 ## Plan semantics
 
@@ -163,6 +190,9 @@ running out answers `LIMIT_EXCEEDED`, which stops catastrophic backtracking.
 | Random string length | 256 |
 | Conflict numbers tried | 999 |
 | UTF-8 bytes of a valid resulting name | 255 |
+| Presets kept by the plugin | 100 |
+| Characters of a preset name | 64 |
+| Characters of a preset document (and of all stored presets) | 131072 |
 
 The character budget keeps one request far below the Binder transaction buffer; the host maps a
 `TransactionTooLargeException` to `LIMIT_EXCEEDED` as well.
@@ -199,6 +229,11 @@ contract:
   items go to the host executor (`overwrite` for `overwrites` items) with the modification time and size seen at
   planning time, so items that changed since are reported `stale`. A plan runs at most once; applying it again, or
   applying a plan the script no longer keeps, is `PLAN_STALE`.
+- With `options.preset` the host sends only the options the script gave (validated the same way) plus `preset`,
+  and `plan.options` shows the complete options the plugin answers, which `apply` sends again without the preset.
+  `presets()` lists `{ name, options }` objects and `importPresets(json, { onConflict })` (a JSON string or an
+  object) answers `{ imported, skipped, rejected }`; both have `Async` forms. A plugin without the `presets` feature
+  makes all three `PLUGIN_INCOMPATIBLE`.
 - `undo(result | batchId)` and `history(limit)` work on the shared journal, which also holds the batches of
   Explorer Action sessions. A batch that does not exist or has nothing left to undo is `UNDO_UNAVAILABLE`.
 - Failures reach the script as `files.batchRename.BatchRenameError` with `code`: no installed plugin is

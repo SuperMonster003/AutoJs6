@@ -36,4 +36,13 @@ object BatchRenameLimits {
 
     /** UTF-8 bytes of a valid resulting name (ext4 / f2fs single path segment). */
     const val MAX_RESULT_NAME_BYTES = 255
+
+    /** Presets the plugin keeps ([BatchRenameValues.FEATURE_PRESETS]). */
+    const val MAX_PRESETS = 100
+
+    /** UTF-16 characters of a preset name. */
+    const val MAX_PRESET_NAME_CHARS = 64
+
+    /** UTF-16 characters of a preset document passed to `importPresets`, and of all stored presets as one document. */
+    const val MAX_PRESET_DOCUMENT_CHARS = 131_072
 }

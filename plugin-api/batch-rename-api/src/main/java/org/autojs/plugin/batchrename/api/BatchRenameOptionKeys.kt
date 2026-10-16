@@ -93,4 +93,11 @@ object BatchRenameOptionKeys {
 
     /** Boolean: keep only the first letter of every syllable; default false. */
     const val PINYIN_INITIALS = "pinyinInitials"
+
+    /**
+     * String: name of a preset the plugin keeps ([BatchRenameValues.FEATURE_PRESETS]). The plugin starts from the
+     * defaults, applies the preset's options and then every other key of the request, and answers the result under
+     * [BatchRenameResultKeys.OPTIONS]; an unknown name fails with [BatchRenameErrorCodes.INVALID_OPTIONS].
+     */
+    const val PRESET = "preset"
 }

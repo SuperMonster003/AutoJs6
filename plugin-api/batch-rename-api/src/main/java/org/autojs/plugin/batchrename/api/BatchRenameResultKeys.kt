@@ -26,4 +26,11 @@ object BatchRenameResultKeys {
 
     /** Bundle: item count per `STATUS_*` value of [BatchRenameValues] (Int, every status present). */
     const val COUNTS = "counts"
+
+    /**
+     * Bundle: the complete options the plan used, keyed by [BatchRenameOptionKeys] without [BatchRenameOptionKeys.PRESET]
+     * (defaults, then the preset, then the request). Plugins with [BatchRenameValues.FEATURE_PRESETS] answer it with
+     * every plan; sending these options back reproduces the plan without the preset.
+     */
+    const val OPTIONS = "options"
 }

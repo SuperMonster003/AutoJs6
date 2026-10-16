@@ -38,6 +38,8 @@ class BatchRenameAidlOrderTest {
             listOf(
                 "org.autojs.plugin.common.api.PluginInfo getInfo()",
                 "Bundle plan(in Bundle request)",
+                "Bundle presets(in Bundle request)",
+                "Bundle importPresets(in Bundle request)",
             ),
             methods,
         )
