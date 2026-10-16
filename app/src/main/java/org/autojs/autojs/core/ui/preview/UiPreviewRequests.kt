@@ -32,13 +32,16 @@ object UiPreviewRequests {
 
     private val CONTROL_CHARS = Regex("[\\p{Cntrl}]")
 
+    /** The contract versions a session may be created with, ascending. */
+    val SUPPORTED_CONTRACT_VERSIONS = listOf(UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2, UiPreviewContract.VERSION)
+
     @Throws(UiPreviewRequestException::class)
     fun validateSession(params: UiPreviewSessionParams, contractVersion: Int, sdkInt: Int) {
-        // A v1 client keeps working against a v2 host (v2 only appends transactions).
-        if (contractVersion != UiPreviewContract.VERSION && contractVersion != UiPreviewContract.BASE_VERSION) {
+        // Older clients keep working against a newer host: every version only appends.
+        if (contractVersion !in SUPPORTED_CONTRACT_VERSIONS) {
             throw UiPreviewRequestException(
                 UiPreviewContract.ERROR_CONTRACT_MISMATCH,
-                "contractVersion must be ${UiPreviewContract.BASE_VERSION} or ${UiPreviewContract.VERSION}, got $contractVersion",
+                "contractVersion must be one of ${SUPPORTED_CONTRACT_VERSIONS.joinToString()}, got $contractVersion",
             )
         }
         if (params.mode !in UiPreviewContract.MODES) {

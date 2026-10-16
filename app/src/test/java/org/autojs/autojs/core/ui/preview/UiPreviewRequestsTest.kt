@@ -29,12 +29,14 @@ class UiPreviewRequestsTest {
     }
 
     @Test
-    fun v1AndV2ClientsBothCreateSessions() {
-        // v2 only appends transactions, so a 1.6.0 client that sends contractVersion 1 keeps working.
+    fun everyServedContractVersionCreatesSessions() {
+        // Versions only append, so a 1.6.0 client (contractVersion 1) and a 1.7.0 client (2) keep working beside v3.
         val params = UiPreviewSessionParams(UiPreviewContract.MODE_SNAPSHOT, 100, 100, 0, 0, "", 0f, 0, "label", 1L)
         assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.BASE_VERSION, 24) })
+        assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.VERSION_V2, 24) })
         assertNull(codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.VERSION, 24) })
-        assertEquals(UiPreviewContract.ERROR_CONTRACT_MISMATCH, codeOf { UiPreviewRequests.validateSession(params, 3, 24) })
+        assertEquals(UiPreviewContract.ERROR_CONTRACT_MISMATCH, codeOf { UiPreviewRequests.validateSession(params, UiPreviewContract.VERSION + 1, 24) })
+        assertEquals(UiPreviewContract.ERROR_CONTRACT_MISMATCH, codeOf { UiPreviewRequests.validateSession(params, 0, 24) })
     }
 
     @Test

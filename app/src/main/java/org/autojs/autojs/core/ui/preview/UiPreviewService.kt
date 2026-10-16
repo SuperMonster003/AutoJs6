@@ -279,9 +279,12 @@ class UiPreviewService : Service() {
 
     private fun previewInfo(): Bundle = Bundle().apply {
         val sdk = Build.VERSION.SDK_INT
-        // The current contract (v2); getContractVersion / getContractHash answer for the v1 base.
-        putInt(UiPreviewContract.KEY_CONTRACT_VERSION, UiPreviewContract.VERSION)
-        putString(UiPreviewContract.KEY_CONTRACT_HASH, UiPreviewContract.HASH)
+        // getContractVersion / getContractHash answer for the v1 base and these two keys for v2, both frozen
+        // (3-Block Compose 1.6.0 / 1.7.0 compare them strictly); every version served is listed with its hash.
+        putInt(UiPreviewContract.KEY_CONTRACT_VERSION, UiPreviewContract.VERSION_V2)
+        putString(UiPreviewContract.KEY_CONTRACT_HASH, UiPreviewContract.HASH_V2)
+        putIntArray(UiPreviewContract.KEY_SUPPORTED_CONTRACT_VERSIONS, SERVED_VERSIONS.map { it.first }.toIntArray())
+        putStringArray(UiPreviewContract.KEY_CONTRACT_HASHES, SERVED_VERSIONS.map { it.second }.toTypedArray())
         putString(UiPreviewContract.KEY_STATUS, UiPreviewContract.STATUS_READY)
         putBoolean(UiPreviewContract.KEY_SCRIPT_RUN_SUPPORTED, sdk >= UiPreviewContract.MIN_API_INTERACTIVE)
         runCatching { packageManager.getPackageInfo(packageName, 0) }.getOrNull()?.let { info ->
@@ -334,5 +337,11 @@ class UiPreviewService : Service() {
 
     companion object {
         private const val TAG = "UiPreviewService"
+
+        /** The contract versions this host implements with their hashes; v3 joins once its requests are served. */
+        private val SERVED_VERSIONS = listOf(
+            UiPreviewContract.BASE_VERSION to UiPreviewContract.HASH_V1,
+            UiPreviewContract.VERSION_V2 to UiPreviewContract.HASH_V2,
+        )
     }
 }

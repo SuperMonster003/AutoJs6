@@ -135,8 +135,10 @@ R 与 A 互不依赖 (A4 的诊断码除外), R 先做 (工作量小, 插件 P11
 
 ### R1 契约 v3
 
-- [ ] `UiPreviewContract`: `VERSION` 3 与新 `HASH_INPUT` (v2 之后追加 Bundle 载荷类别 `pfd-zip` 与新键), `HASH_V2` 冻结; 新键常量与上限; `ERROR_ATTRIBUTE_IGNORED` 诊断码 (A4 使用); 身份宣告键. `UiPreviewContractTest`: 哈希, 键唯一, v1 / v2 前缀与冻结值不变.
-- [ ] `docs/dev/ui-preview-plugin-protocol-v1.md` 增加 v3 小节 (身份宣告, 资源 / 工程 zip 的格式与上限, 旧客户端行为).
+- [x] `UiPreviewContract`: `VERSION` 3 与新 `HASH_INPUT` (v2 之后追加 Bundle 载荷类别 `pfd-zip` 与新键), `HASH_V2` 冻结; 新键常量与上限; `ERROR_ATTRIBUTE_IGNORED` 诊断码 (A4 使用); 身份宣告键. `UiPreviewContractTest`: 哈希, 键唯一, v1 / v2 前缀与冻结值不变.
+  证据 (2026-10-16): `VERSION` = 3, `HASH` = `196e52cd...a44b` (输入在 v2 的方法与回调之后追加 `bundle:...-pfd`, `archive:zip-pfd-readonly` 与 setLayout / runScript 的新键名, 不加事务), `VERSION_V2` / `HASH_INPUT_V2` / `HASH_V2` (`81f7fe8d...`) 冻结; 新键 `supportedContractVersions`, `contractHashes`, `resourcesSupported`, 三个归档上限键, `resourcesFd` / `resourcesSha256` / `layoutPath` / `androidLayout`, `projectFd` / `projectSha256` / `scriptPath`; `ERROR_ARCHIVE_INVALID`, `ERROR_ATTRIBUTE_IGNORED` 与 `Diagnostic.OUTCOME` (`"o"`: namespace / unsupported / unknown); 上限 32 MiB / 解包 128 MiB / 4096 条目 / 路径 512 字符. `UiPreviewContractTest` 8 项通过 (v3 与 v2 的事务和回调完全相同, v1 / v2 哈希冻结值, 新错误码前缀, 上限, 键唯一). 宿主同一提交: `UiPreviewRequests.SUPPORTED_CONTRACT_VERSIONS` 接受 1 / 2 / 3; `getPreviewInfo()` 的 `contractVersion` / `contractHash` 改为冻结的 v2 值 (此前引用 `VERSION` / `HASH`, 升到 3 会使 1.7.0 插件失配), 新数组暂列 1 / 2 (R2 实现后加入 3); `UiPreviewRequestsTest` 10 项通过, `UiPreviewServiceTest` 的信息断言改为 v2 冻结值与数组 (设备运行见 R3), androidTest 编译通过.
+- [x] `docs/dev/ui-preview-plugin-protocol-v1.md` 增加 v3 小节 (身份宣告, 资源 / 工程 zip 的格式与上限, 旧客户端行为).
+  证据 (2026-10-16): 标题改为 V1 / V2 / V3, 状态段与 "Preview info" 说明三层身份, 新增 "Project resources and projects (V3)" 一节 (归档校验, setLayout / runScript 的新键与解析规则, 诊断, 旧宿主上的客户端降级).
 
 ### R2 宿主实现
 

@@ -164,13 +164,20 @@ class UiPreviewServiceTest {
     @Test
     fun previewInfoReportsContractModesAndLimits() {
         // The Binder getters keep answering for the frozen v1 base (a 1.6.0 client compares them strictly); the
-        // preview info carries the v2 identity and whether scripts can run (API 33+).
+        // preview info keeps the frozen v2 identity in its two keys (a 1.7.0 client compares them strictly) and
+        // lists every served version with its hash, and whether scripts can run (API 33+).
         assertEquals(UiPreviewContract.BASE_VERSION, service.contractVersion)
         assertEquals(UiPreviewContract.HASH_V1, service.contractHash)
         val info = service.previewInfo
         assertEquals(UiPreviewContract.STATUS_READY, info.getString(UiPreviewContract.KEY_STATUS))
-        assertEquals(UiPreviewContract.VERSION, info.getInt(UiPreviewContract.KEY_CONTRACT_VERSION))
-        assertEquals(UiPreviewContract.HASH, info.getString(UiPreviewContract.KEY_CONTRACT_HASH))
+        assertEquals(UiPreviewContract.VERSION_V2, info.getInt(UiPreviewContract.KEY_CONTRACT_VERSION))
+        assertEquals(UiPreviewContract.HASH_V2, info.getString(UiPreviewContract.KEY_CONTRACT_HASH))
+        val versions = info.getIntArray(UiPreviewContract.KEY_SUPPORTED_CONTRACT_VERSIONS)!!.toList()
+        val hashes = info.getStringArray(UiPreviewContract.KEY_CONTRACT_HASHES)!!.toList()
+        assertEquals(versions.size, hashes.size)
+        assertEquals(listOf(UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2), versions.take(2))
+        assertEquals(listOf(UiPreviewContract.HASH_V1, UiPreviewContract.HASH_V2), hashes.take(2))
+        assertEquals(versions.sorted(), versions)
         assertEquals(Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE, info.getBoolean(UiPreviewContract.KEY_SCRIPT_RUN_SUPPORTED))
         assertTrue(info.getLong(UiPreviewContract.KEY_HOST_VERSION_CODE) > 0)
         val modes = info.getStringArray(UiPreviewContract.KEY_MODES)!!.toList()

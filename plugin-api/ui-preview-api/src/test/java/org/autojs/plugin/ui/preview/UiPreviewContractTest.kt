@@ -11,18 +11,27 @@ class UiPreviewContractTest {
 
     @Test
     fun contractHashMatchesItsInput() {
-        assertEquals(2, UiPreviewContract.VERSION)
+        assertEquals(3, UiPreviewContract.VERSION)
+        assertEquals(2, UiPreviewContract.VERSION_V2)
         assertEquals(1, UiPreviewContract.BASE_VERSION)
         assertEquals(UiPreviewContract.HASH, sha256(UiPreviewContract.HASH_INPUT))
+        assertEquals(UiPreviewContract.HASH_V2, sha256(UiPreviewContract.HASH_INPUT_V2))
         assertEquals(UiPreviewContract.HASH_V1, sha256(UiPreviewContract.HASH_INPUT_V1))
+        // The v1 and v2 identities are frozen: 1.6.0 compares the first through the getters, 1.7.0 the second through the info.
         assertEquals("680f41b5459648ff07bd1d3d9684c5279d9398b78f61c0307862f50f8dcac0b6", UiPreviewContract.HASH_V1)
+        assertEquals("81f7fe8d2338eed197dcc21e3cff7007a681ea89d080b42d1ae132c94688f1bb", UiPreviewContract.HASH_V2)
         // v2 only appends: every v1 transaction keeps its code, so a v1 client works against a v2 host.
-        val v1Service = UiPreviewContract.HASH_INPUT_V1.split('|').drop(1).takeWhile { !it.startsWith("callback:") }
-        val v2Service = UiPreviewContract.HASH_INPUT.split('|').drop(1).takeWhile { !it.startsWith("callback:") }
+        val v1Service = servicesOf(UiPreviewContract.HASH_INPUT_V1)
+        val v2Service = servicesOf(UiPreviewContract.HASH_INPUT_V2)
         assertEquals(v1Service, v2Service.take(v1Service.size))
         val v1Callbacks = callbacksOf(UiPreviewContract.HASH_INPUT_V1)
-        assertEquals(v1Callbacks, callbacksOf(UiPreviewContract.HASH_INPUT).take(v1Callbacks.size))
+        assertEquals(v1Callbacks, callbacksOf(UiPreviewContract.HASH_INPUT_V2).take(v1Callbacks.size))
+        // v3 appends no transaction at all, only request keys and a diagnostic.
+        assertEquals(v2Service, servicesOf(UiPreviewContract.HASH_INPUT))
+        assertEquals(callbacksOf(UiPreviewContract.HASH_INPUT_V2), callbacksOf(UiPreviewContract.HASH_INPUT))
     }
+
+    private fun servicesOf(input: String): List<String> = input.split('|').drop(1).takeWhile { !it.startsWith("callback:") }
 
     private fun sha256(text: String): String =
         MessageDigest.getInstance("SHA-256").digest(text.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
@@ -74,6 +83,7 @@ class UiPreviewContractTest {
             UiPreviewContract.ERROR_INFLATE_FAILED, UiPreviewContract.ERROR_BINDING_FAILED,
             UiPreviewContract.ERROR_TIMEOUT, UiPreviewContract.ERROR_OUTPUT_TRANSPORT,
             UiPreviewContract.ERROR_UNAVAILABLE, UiPreviewContract.ERROR_SCRIPT_FAILED,
+            UiPreviewContract.ERROR_ARCHIVE_INVALID, UiPreviewContract.ERROR_ATTRIBUTE_IGNORED,
         )
         assertEquals(errors.size, errors.toSet().size)
         errors.forEach { assertTrue(it, it.startsWith("ERR_AUTOJS6_UI_PREVIEW_")) }
@@ -106,13 +116,17 @@ class UiPreviewContractTest {
             assertTrue(MAX_SCRIPT_CHARS * 2L <= 1024L * 1024L)
             assertTrue(SCRIPT_START_TIMEOUT_MS in LAYOUT_TIMEOUT_MS..SESSION_CREATE_TIMEOUT_MS)
             assertEquals(5, EXIT_REASONS.toSet().size)
+            // v3: a zip goes through a file descriptor, so only its own limits bound it.
+            assertTrue(MAX_ARCHIVE_BYTES in 1L..MAX_ARCHIVE_UNPACKED_BYTES)
+            assertTrue(MAX_ARCHIVE_ENTRIES > 0 && MAX_ARCHIVE_PATH_CHARS in 64..4096)
+            assertEquals(3, ATTRIBUTE_OUTCOMES.toSet().size)
         }
     }
 
     @Test
     fun jsonMemberNamesAreDistinct() {
         val bounds = with(UiPreviewContract.Bounds) { listOf(ELEMENT_INDEX, LEFT, TOP, RIGHT, BOTTOM, CLASS_NAME, ID, INSTANCE, VISIBILITY) }
-        val diagnostic = with(UiPreviewContract.Diagnostic) { listOf(CODE, MESSAGE, ELEMENT_INDEX, ATTR_NAME) }
+        val diagnostic = with(UiPreviewContract.Diagnostic) { listOf(CODE, MESSAGE, ELEMENT_INDEX, ATTR_NAME, OUTCOME) }
         for (names in listOf(bounds, diagnostic)) assertEquals(names.size, names.toSet().size)
         assertFalse("bounds members are single letters to keep large arrays small", bounds.any { it.length != 1 })
     }
@@ -133,6 +147,9 @@ class UiPreviewContractTest {
                 KEY_INTERACTIVE_POINTER_SUPPORTED, KEY_IME_SUPPORTED, KEY_MAX_SESSIONS_PER_CLIENT, KEY_MAX_WIDTH_PX, KEY_MAX_HEIGHT_PX,
                 KEY_MAX_XML_CHARS, KEY_MAX_BINDINGS_CHARS, KEY_MAX_BOUNDS_ENTRIES, KEY_MAX_SNAPSHOT_PIXELS, KEY_LAYOUT_TIMEOUT_MS,
                 KEY_SCRIPT_RUN_SUPPORTED, KEY_SCRIPT_TEXT, KEY_SCRIPT_NAME, KEY_RUN_ID, KEY_LEVEL, KEY_TEXT,
+                KEY_SUPPORTED_CONTRACT_VERSIONS, KEY_CONTRACT_HASHES, KEY_RESOURCES_SUPPORTED, KEY_MAX_ARCHIVE_BYTES,
+                KEY_MAX_ARCHIVE_UNPACKED_BYTES, KEY_MAX_ARCHIVE_ENTRIES, KEY_RESOURCES_FD, KEY_RESOURCES_SHA256, KEY_LAYOUT_PATH,
+                KEY_ANDROID_LAYOUT, KEY_PROJECT_FD, KEY_PROJECT_SHA256, KEY_SCRIPT_PATH,
             )
         }
         assertEquals(keys.size, keys.toSet().size)

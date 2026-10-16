@@ -14,20 +14,28 @@ package org.autojs.plugin.ui.preview
  * No user code runs: the host's runtime executes the constant script `"ui";` and every layout is applied
  * from Kotlin, so a request never becomes source text. Transactions are frozen in order and only grow by
  * appending; Bundles carry primitives, strings, string arrays, the `SurfacePackage` Parcelable, the
- * `InputTransferToken` Parcelable and the host token Binder. Error codes, limits and the JSON member names
+ * `InputTransferToken` Parcelable and the host token Binder, and since v3 the read-only `ParcelFileDescriptor`
+ * of a project or resources zip. Error codes, limits and the JSON member names
  * of bounds and diagnostics are listed here; the protocol is described in
  * `docs/dev/ui-preview-plugin-protocol-v1.md`.
  */
 object UiPreviewContract {
 
     /**
-     * The current contract: v2 appends `runScript` / `stopScript` and the console / error / exit callbacks
-     * (interactive preview, 3-Block Compose 1.7.0). `getContractVersion()` and `getContractHash()` keep
-     * answering for the frozen v1 base ([BASE_VERSION] / [HASH_V1]) so that v1 clients keep working against a
-     * v2 host; a v2 client reads [KEY_CONTRACT_VERSION] and [KEY_CONTRACT_HASH] of `getPreviewInfo()` (the
-     * current [VERSION] / [HASH]) and [KEY_SCRIPT_RUN_SUPPORTED] before it uses the v2 transactions.
+     * The current contract. v2 appends `runScript` / `stopScript` and the console / error / exit callbacks
+     * (interactive preview, 3-Block Compose 1.7.0); v3 appends no transaction, only request keys: a project's
+     * resources for `setLayout` and the whole project for `runScript`, each as a zip behind a read-only file
+     * descriptor (3-Block Compose roadmap P11.H1, decision D65), and the [ERROR_ATTRIBUTE_IGNORED] diagnostic.
+     *
+     * Identity is answered in three frozen layers: `getContractVersion()` / `getContractHash()` keep answering
+     * v1 ([BASE_VERSION] / [HASH_V1]); [KEY_CONTRACT_VERSION] / [KEY_CONTRACT_HASH] of `getPreviewInfo()` keep
+     * answering v2 ([VERSION_V2] / [HASH_V2]), because 3-Block Compose 1.7.0 compares them strictly; every
+     * version the host serves, this one included, is listed by [KEY_SUPPORTED_CONTRACT_VERSIONS] with the
+     * hashes of [KEY_CONTRACT_HASHES] in the same order. A v3 client finds [VERSION] and [HASH] there.
      */
-    const val VERSION = 2
+    const val VERSION = 3
+    /** The frozen v2 identity, answered by [KEY_CONTRACT_VERSION] / [KEY_CONTRACT_HASH] of `getPreviewInfo()`. */
+    const val VERSION_V2 = 2
     /** The frozen v1 surface every host answers through `getContractVersion()`. */
     const val BASE_VERSION = 1
     const val ACTION = "org.autojs.plugin.ui.PREVIEW"
@@ -42,7 +50,7 @@ object UiPreviewContract {
             "callback:onBounds(String,Bundle)|onLayoutFailed(String,Bundle)|onSessionLost(String,Bundle)|onTap(String,Bundle)|" +
             "bundle:primitive-surface-package-binder|snapshot:argb8888-rowmajor|bounds:json-inline"
     const val HASH_V1 = "680f41b5459648ff07bd1d3d9684c5279d9398b78f61c0307862f50f8dcac0b6"
-    const val HASH_INPUT =
+    const val HASH_INPUT_V2 =
         "autojs6.ui.preview.v2|" +
             "getContractVersion()->int|getContractHash()->String|getPreviewInfo()->Bundle|" +
             "createSession(Bundle,IUiPreviewCallback)->Bundle|" +
@@ -53,7 +61,21 @@ object UiPreviewContract {
             "callback:onBounds(String,Bundle)|onLayoutFailed(String,Bundle)|onSessionLost(String,Bundle)|onTap(String,Bundle)|" +
             "onConsole(String,Bundle)|onScriptError(String,Bundle)|onScriptExit(String,Bundle)|" +
             "bundle:primitive-surface-package-binder|snapshot:argb8888-rowmajor|bounds:json-inline|script:text-inline"
-    const val HASH = "81f7fe8d2338eed197dcc21e3cff7007a681ea89d080b42d1ae132c94688f1bb"
+    const val HASH_V2 = "81f7fe8d2338eed197dcc21e3cff7007a681ea89d080b42d1ae132c94688f1bb"
+    const val HASH_INPUT =
+        "autojs6.ui.preview.v3|" +
+            "getContractVersion()->int|getContractHash()->String|getPreviewInfo()->Bundle|" +
+            "createSession(Bundle,IUiPreviewCallback)->Bundle|" +
+            "setLayout(String,Bundle,ParcelFileDescriptor)->Bundle|" +
+            "resize(String,int,int)->Bundle|release(String)->void|reattach(String)->Bundle|" +
+            "setPointerMode(String,int)->Bundle|setHighlight(String,int)->Bundle|" +
+            "runScript(String,Bundle)->Bundle|stopScript(String)->Bundle|" +
+            "callback:onBounds(String,Bundle)|onLayoutFailed(String,Bundle)|onSessionLost(String,Bundle)|onTap(String,Bundle)|" +
+            "onConsole(String,Bundle)|onScriptError(String,Bundle)|onScriptExit(String,Bundle)|" +
+            "bundle:primitive-surface-package-binder-pfd|snapshot:argb8888-rowmajor|bounds:json-inline|script:text-inline|" +
+            "archive:zip-pfd-readonly|setLayout:resourcesFd,resourcesSha256,layoutPath,androidLayout|" +
+            "runScript:projectFd,projectSha256,scriptPath|diagnostic:attribute-ignored"
+    const val HASH = "196e52cd66ff871dca8351a0e9208679ed2bf64af5f733d05312239b1f03a44b"
 
     // -------------------------------------------------------------------------------------------- modes
 
@@ -290,11 +312,75 @@ object UiPreviewContract {
         const val VISIBILITY = "s"
     }
 
-    /** Members of one diagnostic: `{ "code": "...", "message": "...", "i": 3, "a": "text" }`. */
+    // ------------------------------------------------------- v3: project resources and projects (P11.H1)
+
+    /** `getPreviewInfo()`: int array of every contract version the host serves, ascending. */
+    const val KEY_SUPPORTED_CONTRACT_VERSIONS = "supportedContractVersions"
+    /** `getPreviewInfo()`: string array of the hashes of [KEY_SUPPORTED_CONTRACT_VERSIONS], in the same order. */
+    const val KEY_CONTRACT_HASHES = "contractHashes"
+    /** `getPreviewInfo()`: true when `setLayout` resolves [KEY_RESOURCES_FD] and `runScript` runs [KEY_PROJECT_FD]. */
+    const val KEY_RESOURCES_SUPPORTED = "resourcesSupported"
+    const val KEY_MAX_ARCHIVE_BYTES = "maxArchiveBytes"
+    const val KEY_MAX_ARCHIVE_UNPACKED_BYTES = "maxArchiveUnpackedBytes"
+    const val KEY_MAX_ARCHIVE_ENTRIES = "maxArchiveEntries"
+
+    /**
+     * `setLayout` request: a read-only `ParcelFileDescriptor` of a zip holding the project's `res/` directory (and
+     * any other file the layout resolves relative to the project), owned by the client and read during the call.
+     */
+    const val KEY_RESOURCES_FD = "resourcesFd"
+    /** Lowercase SHA-256 of the zip bytes; required with [KEY_RESOURCES_FD]. An unchanged digest reuses the unpacked copy. */
+    const val KEY_RESOURCES_SHA256 = "resourcesSha256"
+    /**
+     * `setLayout` request: the `/`-separated path inside the zip of the file the XML comes from (`res/layout/main.xml`,
+     * a `ui.layoutFile` target); resources are then resolved from that file the way `ui.layoutFile` resolves them.
+     * Without it they are resolved from the zip's root, like a layout of a script whose working directory it is.
+     */
+    const val KEY_LAYOUT_PATH = "layoutPath"
+    /** `setLayout` request: the `ui.useAndroidLayout` mode, a boolean; absent means automatic (`null`). */
+    const val KEY_ANDROID_LAYOUT = "androidLayout"
+    /** `runScript` request: a read-only `ParcelFileDescriptor` of a zip of the whole project the script belongs to. */
+    const val KEY_PROJECT_FD = "projectFd"
+    /** Lowercase SHA-256 of the project zip bytes; required with [KEY_PROJECT_FD]. */
+    const val KEY_PROJECT_SHA256 = "projectSha256"
+    /**
+     * `runScript` request: the `/`-separated path of the script inside the project zip (`main.js`); the run uses the
+     * unpacked project as its working directory and this file as the script's path. Required with [KEY_PROJECT_FD].
+     */
+    const val KEY_SCRIPT_PATH = "scriptPath"
+
+    /** A resources or project zip is unreadable, over a limit, has an unsafe entry name or does not match its digest. */
+    const val ERROR_ARCHIVE_INVALID = "ERR_AUTOJS6_UI_PREVIEW_ARCHIVE_INVALID"
+    /**
+     * Diagnostic (v3): an attribute had no effect and the layout went on; [Diagnostic.OUTCOME] tells why (an ignored
+     * namespace, an attribute the host does not support on that view, or an attribute it does not know at all).
+     */
+    const val ERROR_ATTRIBUTE_IGNORED = "ERR_AUTOJS6_UI_PREVIEW_ATTRIBUTE_IGNORED"
+
+    const val ATTRIBUTE_OUTCOME_NAMESPACE = "namespace"
+    const val ATTRIBUTE_OUTCOME_UNSUPPORTED = "unsupported"
+    const val ATTRIBUTE_OUTCOME_UNKNOWN = "unknown"
+
+    /** Bytes of one zip as sent. */
+    const val MAX_ARCHIVE_BYTES = 32L * 1024L * 1024L
+    /** Bytes of all entries of one zip once unpacked. */
+    const val MAX_ARCHIVE_UNPACKED_BYTES = 128L * 1024L * 1024L
+    const val MAX_ARCHIVE_ENTRIES = 4_096
+    /** UTF-16 chars of one entry path, [KEY_LAYOUT_PATH] and [KEY_SCRIPT_PATH]. */
+    const val MAX_ARCHIVE_PATH_CHARS = 512
+
+    val ATTRIBUTE_OUTCOMES
+        get() = arrayOf(ATTRIBUTE_OUTCOME_NAMESPACE, ATTRIBUTE_OUTCOME_UNSUPPORTED, ATTRIBUTE_OUTCOME_UNKNOWN)
+
+    /**
+     * Members of one diagnostic: `{ "code": "...", "message": "...", "i": 3, "a": "text" }`, and since v3 `"o"` for
+     * [ERROR_ATTRIBUTE_IGNORED] (one of [ATTRIBUTE_OUTCOMES]).
+     */
     object Diagnostic {
         const val CODE = "code"
         const val MESSAGE = "message"
         const val ELEMENT_INDEX = "i"
         const val ATTR_NAME = "a"
+        const val OUTCOME = "o"
     }
 }

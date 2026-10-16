@@ -1,4 +1,4 @@
-# ui-mode layout preview contract V1 / V2
+# ui-mode layout preview contract V1 / V2 / V3
 
 Status: V1, added 2026-10-15 for the 3-Block Compose designer's `"ui"` mode (XML / E4X) projects (plugin
 roadmap P10.2, decisions D46 - D50); V2, appended the same day for the interactive preview (plugin roadmap
@@ -6,7 +6,10 @@ P10.6, 3-Block Compose 1.7.0): `runScript` / `stopScript` and the `onConsole` / 
 `onScriptExit` callbacks, see "Script runs (V2)". The host owns `plugin-api/ui-preview-api` (package
 `org.autojs.plugin.ui.preview`) and provides the service (`UiPreviewService`, action
 `org.autojs.plugin.ui.PREVIEW`, permission `org.autojs.permission.PLUGIN`); the 3-Block Compose plugin
-packages the module and is the first client.
+packages the module and is the first client. V3 (2026-10-16, plugin roadmap P11.H1, decision D65) appends no
+transaction: `setLayout` may carry the project's resources and `runScript` the whole project, each as a zip
+behind a read-only file descriptor, and diagnostics gain `ATTRIBUTE_IGNORED`; see "Project resources and
+projects (V3)".
 
 ## Why the host renders
 
@@ -71,7 +74,11 @@ oneway interface IUiPreviewCallback {
 `interactivePointerSupported` (API 33+), `imeSupported` (API 35+), `maxSessionsPerClient` (2), `maxWidthPx` /
 `maxHeightPx` (4096), `maxXmlChars` (262144), `maxBindingsChars` (65536), `maxBoundsEntries` (5000),
 `maxSnapshotPixels` (16777216) and `layoutTimeoutMs` (5000). V2 adds `scriptRunSupported` (API 33+): whether
-`runScript` is available on this device; `contractVersion` / `contractHash` here are the current V2 values.
+`runScript` is available on this device. V3 freezes `contractVersion` / `contractHash` at the V2 values
+(3-Block Compose 1.7.0 compares them strictly; the Binder getters stay at V1 for 1.6.0) and adds
+`supportedContractVersions` (int array, ascending) with `contractHashes` (string array, same order): a client
+uses the highest version both sides know, and its hash must match. A host serving V3 also answers
+`resourcesSupported` and the archive limits `maxArchiveBytes`, `maxArchiveUnpackedBytes`, `maxArchiveEntries`.
 
 ## Sessions
 
@@ -179,6 +186,30 @@ the session). The call returns `outcome` = `applied` and `runId` once the engine
   `runId`); the layout-preview runtime and the root stay, so the client can send `setLayout` again.
 - The layout-preview runtime (`"ui";`) of the session keeps running beside a script run; the session's
   `setLayout` during a run replaces the root content as well, so a client should not interleave them.
+
+## Project resources and projects (V3)
+
+- Archives: a zip behind a read-only `ParcelFileDescriptor` in the request Bundle, owned by the client and read
+  by the host during the call, with its lowercase SHA-256. The host rejects it with `ARCHIVE_INVALID` when it
+  cannot be read, is larger than `MAX_ARCHIVE_BYTES` (32 MiB) or unpacks to more than
+  `MAX_ARCHIVE_UNPACKED_BYTES` (128 MiB) or `MAX_ARCHIVE_ENTRIES` (4096) entries, has an entry whose name is
+  absolute, contains `..`, a backslash or a drive letter, or is longer than `MAX_ARCHIVE_PATH_CHARS` (512), or
+  does not match its digest. Only regular files are unpacked. The unpacked copy lives under the session's
+  directory, is kept while the digest stays the same and is removed with the session.
+- `setLayout` may add `resourcesFd` / `resourcesSha256` (a zip holding at least `res/`), `layoutPath` (the
+  `/`-separated path of the file the XML comes from, such as `res/layout/main.xml`) and `androidLayout` (a
+  boolean for `ui.useAndroidLayout`; absent is automatic). With resources, the layout resolves `@drawable`,
+  `@dimen`, `@layout` (`<include>`), styles and themes from them by the rules of a normal run: from
+  `layoutPath` the way `ui.layoutFile` does, otherwise from the zip root as the working directory.
+- `runScript` may add `projectFd` / `projectSha256` (a zip of the whole project) and `scriptPath` (the script
+  inside it, such as `main.js`): the run uses the unpacked project as its working directory and that file as its
+  path, so `ui.layoutFile('res/layout/main.xml')`, `files.*` relative paths and project resources resolve as in a
+  run of the project. `scriptText` stays required and is what runs (the client's current, possibly unsaved text).
+- Diagnostics: `ERR_AUTOJS6_UI_PREVIEW_ATTRIBUTE_IGNORED` with `"o"` = `namespace`, `unsupported` or `unknown`
+  reports an attribute that had no effect while the layout went on (host roadmap
+  `docs/dev/android-xml-attributes-roadmap.md`, A4).
+- A host that does not serve V3 ignores these keys; a client then sends the XML text alone and tells its user
+  that project resources cannot be resolved.
 
 ## Residual differences from running the script
 
