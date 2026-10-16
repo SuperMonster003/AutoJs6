@@ -1,15 +1,18 @@
 package org.autojs.autojs.core.plugin
 
 import android.content.Context
+import org.autojs.autojs.core.plugin.speech.SpeechPluginHost
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
  * The `bindService` flags of plugin bindings (3-Macaw Speech roadmap D22, P1.2): `BIND_INCLUDE_CAPABILITIES` is opt-in
  * and only from API 29, `BIND_ALLOW_ACTIVITY_STARTS` only from API 34, `BIND_IMPORTANT` is independent of the API level,
- * and a host that opts into nothing keeps the historical `BIND_AUTO_CREATE` binding.
+ * a host that opts into nothing keeps the historical `BIND_AUTO_CREATE` binding, and the speech host opts into all three
+ * (P3.1: its plugin starts the microphone foreground service from an activity on Android 14+).
  * zh-CN: 插件绑定的 `bindService` flags (3-Macaw Speech 路线图 D22, P1.2): `BIND_INCLUDE_CAPABILITIES` 需显式开启且只在 API 29 起生效,
- * `BIND_ALLOW_ACTIVITY_STARTS` 只在 API 34 起生效, `BIND_IMPORTANT` 与 API 级别无关, 未开启任何选项的宿主保持原有的 `BIND_AUTO_CREATE` 绑定.
+ * `BIND_ALLOW_ACTIVITY_STARTS` 只在 API 34 起生效, `BIND_IMPORTANT` 与 API 级别无关, 未开启任何选项的宿主保持原有的 `BIND_AUTO_CREATE` 绑定,
+ * 语音宿主三项全部开启 (P3.1: Android 14+ 上其插件经 Activity 启动麦克风前台服务).
  */
 class AidlPluginHostBindFlagsTest {
 
@@ -41,7 +44,7 @@ class AidlPluginHostBindFlagsTest {
     }
 
     @Test
-    fun theSpeechHostCombinationAddsImportantOnEveryLevel() {
+    fun capabilitiesAndImportantCombineOnEveryLevel() {
         assertEquals(Context.BIND_AUTO_CREATE or Context.BIND_IMPORTANT, AidlPluginHost.bindFlags(24, allowActivityStarts = false, includeCapabilities = true, important = true))
         assertEquals(
             Context.BIND_AUTO_CREATE or Context.BIND_INCLUDE_CAPABILITIES or Context.BIND_IMPORTANT,
@@ -60,6 +63,25 @@ class AidlPluginHostBindFlagsTest {
             Context.BIND_AUTO_CREATE or Context.BIND_ALLOW_ACTIVITY_STARTS or Context.BIND_INCLUDE_CAPABILITIES or Context.BIND_IMPORTANT or EXTERNAL,
             AidlPluginHost.bindFlags(36, allowActivityStarts = true, includeCapabilities = true, important = true, externalServiceFlag = EXTERNAL),
         )
+    }
+
+    @Test
+    fun theSpeechHostAlsoAllowsActivityStartsFromApi34() {
+        fun speech(sdk: Int) = AidlPluginHost.bindFlags(
+            sdk,
+            allowActivityStarts = SpeechPluginHost.ALLOW_ACTIVITY_STARTS,
+            includeCapabilities = SpeechPluginHost.INCLUDE_CAPABILITIES,
+            important = SpeechPluginHost.IMPORTANT,
+        )
+        assertEquals(Context.BIND_AUTO_CREATE or Context.BIND_IMPORTANT, speech(28))
+        assertEquals(Context.BIND_AUTO_CREATE or Context.BIND_INCLUDE_CAPABILITIES or Context.BIND_IMPORTANT, speech(33))
+        listOf(34, 35, 36, 37).forEach { sdk ->
+            assertEquals(
+                "API $sdk",
+                Context.BIND_AUTO_CREATE or Context.BIND_ALLOW_ACTIVITY_STARTS or Context.BIND_INCLUDE_CAPABILITIES or Context.BIND_IMPORTANT,
+                speech(sdk),
+            )
+        }
     }
 
     @Test

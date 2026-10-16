@@ -38,17 +38,21 @@ import kotlin.coroutines.cancellation.CancellationException
  * ships this module.
  *
  * Every binding carries `BIND_INCLUDE_CAPABILITIES` and `BIND_IMPORTANT` (roadmap D22), so the plugin process that
- * records the microphone inherits the while-in-use capabilities of the host. Sessions and long operations hold a
- * dedicated binding lease for their whole life; short calls use the pooled binding. Files stay with the host: inputs are
- * opened read-only from the script's paths and checked first, synthesis outputs are staged next to the target and
- * published by [SpeechOutputFile], so the plugin never sees a path. The host keeps no recognition or synthesis
+ * records the microphone inherits the while-in-use capabilities of the host, and from API 34 `BIND_ALLOW_ACTIVITY_STARTS`
+ * (roadmap P3.1), so the plugin may open its transparent start activity while the host is visible and start its
+ * microphone foreground service from there: Android 14+ refuses that service to a process that is only bound by the
+ * visible host, and without it a session goes silent once the host leaves the foreground. Sessions and long operations
+ * hold a dedicated binding lease for their whole life; short calls use the pooled binding. Files stay with the host:
+ * inputs are opened read-only from the script's paths and checked first, synthesis outputs are staged next to the target
+ * and published by [SpeechOutputFile], so the plugin never sees a path. The host keeps no recognition or synthesis
  * implementation of its own.
  *
  * zh-CN: 语音契约的宿主客户端 (3-Macaw Speech 路线图 D21, D22): 任何以 `speech` 类别与引擎应答 `org.autojs.plugin.SPEECH` 查询的包都可被选中,
  * 插件须声明宿主理解的契约版本以及不低于本模块所在构建的 `requiresHostVersion`. 每个绑定都带 `BIND_INCLUDE_CAPABILITIES` 与
- * `BIND_IMPORTANT` (路线图 D22), 使录音的插件进程继承宿主的 while-in-use 能力. 会话与长操作在整个生命周期内持有专用绑定租约; 短调用使用
- * 连接池绑定. 文件由宿主掌握: 输入以只读方式从脚本路径打开并先行检查, 合成输出暂存在目标旁边并由 [SpeechOutputFile] 发布, 因此插件从不接触
- * 路径. 宿主自身不保留任何识别或合成实现.
+ * `BIND_IMPORTANT` (路线图 D22), 使录音的插件进程继承宿主的 while-in-use 能力; API 34 起另带 `BIND_ALLOW_ACTIVITY_STARTS` (路线图 P3.1),
+ * 使插件能在宿主可见时打开透明的启动 Activity 并由此启动麦克风前台服务: Android 14+ 拒绝仅被可见宿主绑定的进程启动该服务, 缺少它时宿主一离开
+ * 前台会话即被静音. 会话与长操作在整个生命周期内持有专用绑定租约; 短调用使用连接池绑定. 文件由宿主掌握: 输入以只读方式从脚本路径打开并先行检查,
+ * 合成输出暂存在目标旁边并由 [SpeechOutputFile] 发布, 因此插件从不接触路径. 宿主自身不保留任何识别或合成实现.
  */
 object SpeechPluginHost {
 
@@ -56,6 +60,11 @@ object SpeechPluginHost {
 
     /** Module label of the selection errors (`error_missing_required_plugin_for_module_label`, roadmap D27). zh-CN: 选择错误使用的模块标签 (路线图 D27). */
     const val LABEL = "3-Macaw Speech"
+
+    /** Binding options of every speech binding (roadmap D22, P3.1); constants, so the JVM tests read them without this object. zh-CN: 每个语音绑定的选项 (路线图 D22, P3.1); 使用常量, JVM 测试读取时无需初始化本对象. */
+    internal const val ALLOW_ACTIVITY_STARTS = true
+    internal const val INCLUDE_CAPABILITIES = true
+    internal const val IMPORTANT = true
 
     private val defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(SpeechPluginIds.ENGINE)
 
@@ -67,9 +76,10 @@ object SpeechPluginHost {
         proxyFactory = { binder -> ISpeechPlugin.Stub.asInterface(binder) },
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
         defaultEnabled = defaultEnabled,
+        allowActivityStarts = ALLOW_ACTIVITY_STARTS,
         preBindValidator = ::validateService,
-        includeCapabilities = true,
-        important = true,
+        includeCapabilities = INCLUDE_CAPABILITIES,
+        important = IMPORTANT,
     )
 
     suspend fun discover(context: Context, packageName: String? = null) = withContext(Dispatchers.IO) {
