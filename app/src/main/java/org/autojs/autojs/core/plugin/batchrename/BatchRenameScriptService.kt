@@ -22,8 +22,23 @@ data class BatchRenamePlanRequest(
 
 data class BatchRenamePlanAnswerItem(val newName: String?, val status: String, val reason: String?, val overwrites: Boolean)
 
-/** The plugin's answer to a [BatchRenamePlanRequest]. zh-CN: 插件对 [BatchRenamePlanRequest] 的应答. */
-data class BatchRenamePlanAnswer(val rejected: Boolean, val items: List<BatchRenamePlanAnswerItem>, val counts: Map<String, Int>)
+/**
+ * The plugin's answer to a [BatchRenamePlanRequest]; [options] are the complete options the plan used, answered by
+ * plugins with the presets feature (plugin roadmap D44).
+ * zh-CN: 插件对 [BatchRenamePlanRequest] 的应答; [options] 为方案所用的完整选项, 由具备预设功能的插件回传 (插件路线图 D44).
+ */
+data class BatchRenamePlanAnswer(
+    val rejected: Boolean,
+    val items: List<BatchRenamePlanAnswerItem>,
+    val counts: Map<String, Int>,
+    val options: Map<String, Any>? = null,
+)
+
+/** A preset the plugin keeps: its name and complete options. zh-CN: 插件保存的预设: 名称与完整选项. */
+data class BatchRenamePreset(val name: String, val options: Map<String, Any>)
+
+/** The outcome of `importPresets`. zh-CN: `importPresets` 的结果. */
+data class BatchRenamePresetImport(val imported: List<String>, val skipped: List<String>, val rejected: List<Map<String, Any?>>)
 
 /** Progress of `apply` as the script sees it: renames done, renames in total and the item just handled. */
 fun interface BatchRenameScriptProgress {
@@ -44,6 +59,8 @@ fun interface BatchRenameScriptProgress {
 class BatchRenameScriptService(
     private val executor: () -> BatchRenameExecutor,
     private val planner: suspend (BatchRenamePlanRequest) -> BatchRenamePlanAnswer,
+    /** The plugin's presets, asked only for a plan that names one (plugin roadmap D36). zh-CN: 插件的预设, 仅在方案指定预设时询问. */
+    private val presets: suspend () -> List<BatchRenamePreset> = { emptyList() },
     private val collector: BatchRenameTargetCollector = BatchRenameTargetCollector(),
     private val clock: () -> Long = System::currentTimeMillis,
     private val locale: () -> String = { Locale.getDefault().toLanguageTag() },
@@ -59,9 +76,20 @@ class BatchRenameScriptService(
         var used = false
     }
 
-    /** `plan(paths, options)`: [options] is the map of [BatchRenameScriptArguments.options]. */
+    /**
+     * `plan(paths, options)`: [options] is the map of [BatchRenameScriptArguments.options]. With `preset` the host reads
+     * the preset to enumerate the targets with its `includeSubfolders`, the plugin resolves the preset itself, and the
+     * plan keeps the complete options the plugin answers (plugin roadmap D36 / D44).
+     * zh-CN: `plan(paths, options)`: [options] 为 [BatchRenameScriptArguments.options] 的结果. 带 `preset` 时, 宿主读取该预设以按其
+     * `includeSubfolders` 枚举目标, 由插件自行解析预设, 方案保存插件回传的完整选项 (插件路线图 D36 / D44).
+     */
     suspend fun plan(paths: List<File>, options: Map<String, Any>): Map<String, Any?> {
-        val targets = collector.collect(paths, options[BatchRenameOptionKeys.INCLUDE_SUBFOLDERS] as Boolean)
+        val starting = (options[BatchRenameOptionKeys.PRESET] as? String)?.let { name ->
+            val preset = presets().firstOrNull { it.name == name }
+                ?: batchRenameFailure(BatchRenameScriptCodes.INVALID_OPTIONS, "the preset \"$name\" does not exist")
+            BatchRenameScriptArguments.withPreset(options, preset.options)
+        } ?: options
+        val targets = collector.collect(paths, starting[BatchRenameOptionKeys.INCLUDE_SUBFOLDERS] as Boolean)
         val request = BatchRenamePlanRequest(
             options = LinkedHashMap(options),
             parents = targets.parents,
@@ -71,9 +99,13 @@ class BatchRenameScriptService(
             timeZone = timeZone(),
             now = clock(),
         )
-        val state = PlanState(newPlanId(), request, ask(request))
+        val answer = ask(request)
+        // Later requests of this plan (apply with new flags or policy) send the complete options without the preset.
+        // zh-CN: 该方案之后的请求 (以新的标志或策略执行) 发送不带预设的完整选项.
+        val kept = if (options.containsKey(BatchRenameOptionKeys.PRESET)) request.copy(options = LinkedHashMap(answer.options ?: starting)) else request
+        val state = PlanState(newPlanId(), kept, answer)
         synchronized(plans) { plans[state.id] = state }
-        return planView(state.id, request, state.answer)
+        return planView(state.id, kept, state.answer)
     }
 
     /**

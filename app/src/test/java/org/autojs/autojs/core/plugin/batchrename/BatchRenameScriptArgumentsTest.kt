@@ -122,6 +122,37 @@ class BatchRenameScriptArgumentsTest {
     }
 
     @Test
+    fun `with a preset only the given options travel`() {
+        val sparse = BatchRenameScriptArguments.options(json("{\"preset\": \"photos\", \"replace\": \"x\", \"normalize\": false, \"trim\": null}"), null)
+        assertEquals(linkedMapOf<String, Any>("preset" to "photos", "replace" to "x", "normalize" to "none"), sparse)
+        val regExp = BatchRenameScriptArguments.options(json("{\"preset\": \"photos\"}"), BatchRenameRegExp("^a", "gi"))
+        assertEquals(listOf("preset", "search", "regex", "regexFlags", "matchAll", "caseSensitive"), regExp.keys.toList())
+        listOf("{\"preset\": \"\"}", "{\"preset\": \"  \"}", "{\"preset\": 3}", "{\"preset\": \"p\", \"target\": \"stem\"}").forEach { text ->
+            expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.options(json(text), null) }
+        }
+
+        val preset = mapOf<String, Any>("search" to "IMG", "replace" to "Pic", "format" to "upper", "futureOption" to true)
+        val merged = BatchRenameScriptArguments.withPreset(sparse, preset)
+        assertEquals(BatchRenameScriptArguments.options(json("{\"search\": \"\"}"), null).keys, merged.keys)
+        assertEquals(listOf("IMG", "x", "upper", "fail"), listOf(merged["search"], merged["replace"], merged["format"], merged["onConflict"]))
+
+        val features = listOf("counter", "dateTime", "random", "cleanup", "pinyin")
+        expectCode(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE) { BatchRenameScriptArguments.forPluginFeatures(sparse, features) }
+        assertEquals(sparse, BatchRenameScriptArguments.forPluginFeatures(sparse, features + "presets"))
+    }
+
+    @Test
+    fun `importPresets takes skip, overwrite or rename`() {
+        assertEquals("skip", BatchRenameScriptArguments.presetConflict(null))
+        assertEquals("skip", BatchRenameScriptArguments.presetConflict(json("{}")))
+        assertEquals("rename", BatchRenameScriptArguments.presetConflict(json("{\"onConflict\": \"rename\"}")))
+        assertEquals("overwrite", BatchRenameScriptArguments.presetConflict(json("{\"onConflict\": \"overwrite\"}")))
+        listOf("{\"onConflict\": \"merge\"}", "{\"onConflict\": true}", "\"skip\"").forEach { text ->
+            expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.presetConflict(json(text)) }
+        }
+    }
+
+    @Test
     fun `the pinyin variable is read like the plugin reads it`() {
         mapOf(
             "$" + "{pinyin}" to true, "a$$$" + "{pinyin}" to true, "$$" + "{pinyin}" to false, "$" + "{Pinyin}" to false,

@@ -5,6 +5,7 @@ import androidx.core.os.BundleCompat
 import org.autojs.plugin.batchrename.api.BatchRenameContract
 import org.autojs.plugin.batchrename.api.BatchRenameItemKeys
 import org.autojs.plugin.batchrename.api.BatchRenameParentKeys
+import org.autojs.plugin.batchrename.api.BatchRenamePresetKeys
 import org.autojs.plugin.batchrename.api.BatchRenameRequestKeys
 import org.autojs.plugin.batchrename.api.BatchRenameResultKeys
 import org.autojs.plugin.batchrename.api.BatchRenameValues
@@ -53,12 +54,7 @@ internal object BatchRenameBundles {
 
     /** The answer, or the script error its error code stands for. zh-CN: 应答, 或其错误码对应的脚本错误. */
     fun answer(bundle: Bundle): BatchRenamePlanAnswer {
-        bundle.getString(BatchRenameResultKeys.ERROR_CODE)?.let { code ->
-            throw BatchRenameScriptException(
-                BatchRenameScriptCodes.fromPluginErrorCode(code),
-                bundle.getString(BatchRenameResultKeys.ERROR_MESSAGE)?.takeIf { it.isNotBlank() } ?: "the Batch Rename plugin answered $code",
-            )
-        }
+        failure(bundle)
         val items = BundleCompat.getParcelableArrayList(bundle, BatchRenameResultKeys.ITEMS, Bundle::class.java).orEmpty().map { item ->
             BatchRenamePlanAnswerItem(
                 newName = item.getString(BatchRenameItemKeys.NEW_NAME),
@@ -70,6 +66,60 @@ internal object BatchRenameBundles {
         val counts = bundle.getBundle(BatchRenameResultKeys.COUNTS)?.let { counts ->
             counts.keySet().associateWith { counts.getInt(it, 0) }
         }.orEmpty()
-        return BatchRenamePlanAnswer(bundle.getBoolean(BatchRenameResultKeys.REJECTED, false), items, counts)
+        return BatchRenamePlanAnswer(
+            bundle.getBoolean(BatchRenameResultKeys.REJECTED, false),
+            items,
+            counts,
+            bundle.getBundle(BatchRenameResultKeys.OPTIONS)?.let(::options),
+        )
+    }
+
+    /** A request of the preset transactions. zh-CN: 预设事务的请求. */
+    fun presetRequest(document: String? = null, onConflict: String? = null): Bundle = Bundle().apply {
+        putInt(BatchRenameRequestKeys.CONTRACT_VERSION, BatchRenameContract.CONTRACT_VERSION)
+        document?.let { putString(BatchRenamePresetKeys.DOCUMENT, it) }
+        onConflict?.let { putString(BatchRenamePresetKeys.ON_CONFLICT, it) }
+    }
+
+    fun presets(bundle: Bundle): List<BatchRenamePreset> {
+        failure(bundle)
+        return BundleCompat.getParcelableArrayList(bundle, BatchRenamePresetKeys.PRESETS, Bundle::class.java).orEmpty().mapNotNull { preset ->
+            val name = preset.getString(BatchRenamePresetKeys.NAME) ?: return@mapNotNull null
+            BatchRenamePreset(name, preset.getBundle(BatchRenamePresetKeys.OPTIONS)?.let(::options).orEmpty())
+        }
+    }
+
+    /** Empty name lists travel as empty Bundle lists, read here as empty. zh-CN: 空名称列表以空 Bundle 列表传输, 此处读作空. */
+    fun presetImport(bundle: Bundle): BatchRenamePresetImport {
+        failure(bundle)
+        fun names(key: String): List<String> = runCatching { bundle.getStringArrayList(key) }.getOrNull().orEmpty()
+        val rejected = BundleCompat.getParcelableArrayList(bundle, BatchRenamePresetKeys.REJECTED, Bundle::class.java).orEmpty().map { entry ->
+            linkedMapOf<String, Any?>(
+                "index" to entry.getInt(BatchRenamePresetKeys.INDEX, -1),
+                "name" to entry.getString(BatchRenamePresetKeys.NAME),
+                "reason" to entry.getString(BatchRenamePresetKeys.REASON).orEmpty(),
+            )
+        }
+        return BatchRenamePresetImport(names(BatchRenamePresetKeys.IMPORTED), names(BatchRenamePresetKeys.SKIPPED), rejected)
+    }
+
+    /** Options as the plugin answers them: Boolean or String values. zh-CN: 插件回传的选项: Boolean 或 String 值. */
+    private fun options(bundle: Bundle): Map<String, Any> = linkedMapOf<String, Any>().apply {
+        bundle.keySet().sorted().forEach { key ->
+            @Suppress("DEPRECATION")
+            when (val value = bundle.get(key)) {
+                is Boolean -> put(key, value)
+                is String -> put(key, value)
+            }
+        }
+    }
+
+    private fun failure(bundle: Bundle) {
+        bundle.getString(BatchRenameResultKeys.ERROR_CODE)?.let { code ->
+            throw BatchRenameScriptException(
+                BatchRenameScriptCodes.fromPluginErrorCode(code),
+                bundle.getString(BatchRenameResultKeys.ERROR_MESSAGE)?.takeIf { it.isNotBlank() } ?: "the Batch Rename plugin answered $code",
+            )
+        }
     }
 }

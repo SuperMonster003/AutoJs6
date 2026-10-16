@@ -112,6 +112,47 @@ class BatchRenameScriptServiceTest {
     }
 
     @Test
+    fun `a preset fills the plan and later requests send the options the plugin answered`() = runBlocking {
+        val preset = BatchRenamePreset(
+            "photos",
+            options("{\"search\": \"IMG_\", \"replace\": \"Pic_\", \"includeSubfolders\": false, \"onConflict\": \"skip\"}"),
+        )
+        val sent = mutableListOf<BatchRenamePlanRequest>()
+        val presetService = BatchRenameScriptService(
+            executor = { executor },
+            planner = { request ->
+                // Like the plugin: resolve the preset, plan, and answer the complete options.
+                // zh-CN: 与插件一样: 解析预设, 计算方案, 并回传完整选项.
+                sent += request
+                val effective = if (BatchRenameOptionKeys.PRESET in request.options) BatchRenameScriptArguments.withPreset(request.options, preset.options) else request.options
+                fakePlan(request.copy(options = effective)).copy(options = effective)
+            },
+            presets = { listOf(preset) },
+            locale = { "en-US" },
+            timeZone = { "UTC" },
+            clock = { 42L },
+        )
+        file("IMG_1.jpg")
+        file("deep/IMG_2.jpg")
+        val plan = presetService.plan(listOf(File(root, "IMG_1.jpg"), File(root, "deep")), options("{\"preset\": \"photos\", \"replace\": \"Shot_\"}"))
+        assertEquals(mapOf(BatchRenameOptionKeys.PRESET to "photos", BatchRenameOptionKeys.REPLACE to "Shot_"), sent.single().options)
+        // The preset's includeSubfolders (false) kept deep/IMG_2.jpg out. zh-CN: 预设的 includeSubfolders (false) 使 deep/IMG_2.jpg 未被枚举.
+        assertEquals(listOf("IMG_1.jpg", "deep"), plan.items().map { it["name"] })
+        assertEquals("Shot_1.jpg", plan.items()[0]["newName"])
+        val shown = plan["options"] as Map<*, *>
+        assertEquals(listOf("IMG_", "Shot_", false, "skip"), listOf(shown["search"], shown["replace"], shown["includeSubfolders"], shown["onConflict"]))
+        assertFalse(shown.containsKey(BatchRenameOptionKeys.PRESET))
+
+        presetService.apply(plan["id"] as String, null, BatchRenameValues.CONFLICT_NUMBER, null)
+        val replanned = sent.last().options
+        assertFalse(replanned.containsKey(BatchRenameOptionKeys.PRESET))
+        assertEquals(listOf("Shot_", "number"), listOf(replanned[BatchRenameOptionKeys.REPLACE], replanned[BatchRenameOptionKeys.ON_CONFLICT]))
+        assertEquals(listOf("Shot_1.jpg", "deep"), names())
+
+        expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { presetService.plan(listOf(root), options("{\"preset\": \"missing\"}")) }
+    }
+
+    @Test
     fun `excluding items or changing the policy plans again`() = runBlocking {
         file("a-old.txt")
         file("b-old.txt")

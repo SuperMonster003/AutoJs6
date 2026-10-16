@@ -4,6 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import org.autojs.plugin.batchrename.api.BatchRenameOptionKeys
+import org.autojs.plugin.batchrename.api.BatchRenamePresetKeys
 import org.autojs.plugin.batchrename.api.BatchRenameValues
 
 /** The `source` and `flags` of a `RegExp` passed as `search`. zh-CN: 作为 `search` 传入的 `RegExp` 的 `source` 与 `flags`. */
@@ -97,6 +98,15 @@ object BatchRenameScriptArguments {
 
     private const val PINYIN_VARIABLE = "\${pinyin}"
 
+    /** Keys a `RegExp` search decides. zh-CN: 由 `RegExp` 形式的查找决定的键. */
+    private val REGEXP_OPTIONS = setOf(
+        BatchRenameOptionKeys.SEARCH,
+        BatchRenameOptionKeys.REGEX,
+        BatchRenameOptionKeys.REGEX_FLAGS,
+        BatchRenameOptionKeys.MATCH_ALL,
+        BatchRenameOptionKeys.CASE_SENSITIVE,
+    )
+
     /** Regular expression flags the contract carries besides `g` and `i`. zh-CN: 契约在 `g` 与 `i` 之外携带的标志. */
     private const val CARRIED_FLAGS = "msuy"
 
@@ -127,6 +137,52 @@ object BatchRenameScriptArguments {
         val json = value?.takeUnless { it.isJsonNull }?.let {
             it as? JsonObject ?: invalidOptions("options must be an object")
         } ?: invalidOptions("options with a search are required")
+        val preset = presetName(json)
+        val complete = complete(json, regExp, searchRequired = preset == null)
+        if (preset == null) return complete
+        // A preset fills what the script leaves out, so only the given keys travel (plugin roadmap D36).
+        // zh-CN: 预设补齐脚本未给出的选项, 因此只发送脚本给出的键 (插件路线图 D36).
+        return LinkedHashMap<String, Any>().apply {
+            put(BatchRenameOptionKeys.PRESET, preset)
+            complete.forEach { (key, option) ->
+                if (json.get(key)?.isJsonNull == false || (regExp != null && key in REGEXP_OPTIONS)) put(key, option)
+            }
+        }
+    }
+
+    /**
+     * The complete option map a plan starts from: the defaults, then [preset] (the complete options the plugin listed
+     * for it), then the options the script gave besides `preset`.
+     * zh-CN: 方案起始的完整选项表: 默认值, 然后是 [preset] (插件为其列出的完整选项), 最后是脚本给出的 `preset` 以外的选项.
+     */
+    fun withPreset(options: Map<String, Any>, preset: Map<String, Any>): LinkedHashMap<String, Any> {
+        val result = complete(JsonObject().apply { addProperty(BatchRenameOptionKeys.SEARCH, "") }, null, searchRequired = true)
+        preset.forEach { (key, value) -> if (key in result) result[key] = value }
+        options.forEach { (key, value) -> if (key != BatchRenameOptionKeys.PRESET) result[key] = value }
+        return result
+    }
+
+    /**
+     * `importPresets(json, { onConflict })`: the conflict policy, skip when missing.
+     * zh-CN: `importPresets(json, { onConflict })`: 同名策略, 缺省为 skip.
+     */
+    fun presetConflict(value: JsonElement?): String {
+        val json = value?.takeUnless { it.isJsonNull }?.let {
+            it as? JsonObject ?: invalidOptions("importPresets options must be an object")
+        } ?: return BatchRenameValues.PRESET_CONFLICT_SKIP
+        val element = json.get(BatchRenamePresetKeys.ON_CONFLICT)?.takeUnless { it.isJsonNull } ?: return BatchRenameValues.PRESET_CONFLICT_SKIP
+        val text = (element as? JsonPrimitive)?.takeIf { it.isString }?.asString
+        return text?.takeIf { it in BatchRenameValues.PRESET_CONFLICTS }
+            ?: invalidOptions("onConflict must be one of ${BatchRenameValues.PRESET_CONFLICTS.joinToString { "\"$it\"" }}, got $element")
+    }
+
+    private fun presetName(json: JsonObject): String? {
+        val element = json.get(BatchRenameOptionKeys.PRESET)?.takeUnless { it.isJsonNull } ?: return null
+        val name = (element as? JsonPrimitive)?.takeIf { it.isString }?.asString
+        return name?.takeIf { it.isNotBlank() } ?: invalidOptions("preset must be the name of a preset, got $element")
+    }
+
+    private fun complete(json: JsonObject, regExp: BatchRenameRegExp?, searchRequired: Boolean): LinkedHashMap<String, Any> {
         val result = LinkedHashMap<String, Any>()
         if (regExp != null) {
             val unsupported = regExp.flags.filter { it !in CARRIED_FLAGS && it !in IGNORED_FLAGS }
@@ -140,7 +196,7 @@ object BatchRenameScriptArguments {
         } else {
             val search = json.get(BatchRenameOptionKeys.SEARCH)
                 ?.takeUnless { it.isJsonNull }
-                ?: invalidOptions("search is required: a string or a RegExp")
+                ?: if (searchRequired) invalidOptions("search is required: a string or a RegExp") else JsonPrimitive("")
             result[BatchRenameOptionKeys.SEARCH] = (search as? JsonPrimitive)?.takeIf { it.isString }?.asString
                 ?: invalidOptions("search must be a string or a RegExp")
             result[BatchRenameOptionKeys.REPLACE] = text(json, BatchRenameOptionKeys.REPLACE)
@@ -185,6 +241,7 @@ object BatchRenameScriptArguments {
      * 脚本通过 `pinyin` 选项或 `replace` 中的 `${pinyin}` 变量用到拼音时以 `PLUGIN_INCOMPATIBLE` 失败, 而不是保留中文名称.
      */
     fun forPluginFeatures(options: Map<String, Any>, features: Collection<String>): Map<String, Any> {
+        if (BatchRenameOptionKeys.PRESET in options && BatchRenameValues.FEATURE_PRESETS !in features) pluginWithoutPresets()
         if (BatchRenameValues.FEATURE_PINYIN in features) return options
         if (options[BatchRenameOptionKeys.PINYIN] == true || usesPinyinVariable(options[BatchRenameOptionKeys.REPLACE] as? String ?: "")) {
             batchRenameFailure(
@@ -264,6 +321,12 @@ object BatchRenameScriptArguments {
         return text?.takeIf { it in choices }
             ?: invalidOptions("$key must be one of ${choices.joinToString { "\"$it\"" }}${if (key in FALSE_CHOICES) " or false" else ""}, got $element")
     }
+
+    /** A plugin before 1.1.0 keeps no presets. zh-CN: 1.1.0 之前的插件不保存预设. */
+    fun pluginWithoutPresets(): Nothing = batchRenameFailure(
+        BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE,
+        "the installed Batch Rename plugin keeps no presets; update it to 1.1.0 or later",
+    )
 
     private fun invalidOptions(message: String): Nothing = batchRenameFailure(BatchRenameScriptCodes.INVALID_OPTIONS, message)
 

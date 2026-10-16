@@ -11,8 +11,10 @@ import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.plugin.batchrename.api.BatchRenameCapabilityKeys
 import org.autojs.plugin.batchrename.api.BatchRenameContract
+import org.autojs.plugin.batchrename.api.BatchRenameLimits
 import org.autojs.plugin.batchrename.api.BatchRenamePluginActions
 import org.autojs.plugin.batchrename.api.BatchRenamePluginIds
+import org.autojs.plugin.batchrename.api.BatchRenameValues
 import org.autojs.plugin.batchrename.api.IBatchRenamePlugin
 import org.autojs.plugin.common.api.PluginInfo
 import kotlin.coroutines.cancellation.CancellationException
@@ -116,6 +118,43 @@ object BatchRenamePluginHost {
             throw BatchRenameScriptException(BatchRenameScriptCodes.INTERNAL, "the Batch Rename plugin stopped answering: ${e.message ?: e}", e)
         } ?: throw BatchRenameScriptException(BatchRenameScriptCodes.INTERNAL, "the Batch Rename plugin returned no plan")
         BatchRenameBundles.answer(answer)
+    }
+
+    /**
+     * `files.batchRename.presets()`: the presets the plugin keeps (plugin roadmap D36). A plugin without the presets
+     * feature is `PLUGIN_INCOMPATIBLE`.
+     * zh-CN: `files.batchRename.presets()`: 插件保存的预设 (插件路线图 D36). 没有预设功能的插件为 `PLUGIN_INCOMPATIBLE`.
+     */
+    suspend fun presetsForScript(context: Context): List<BatchRenamePreset> = withContext(Dispatchers.IO) {
+        BatchRenameBundles.presets(presetCall(context) { proxy -> proxy.presets(BatchRenameBundles.presetRequest()) })
+    }
+
+    /**
+     * `files.batchRename.importPresets(json, { onConflict })` (plugin roadmap D36 / D43). A document longer than the
+     * contract limit is `LIMIT_EXCEEDED` before it reaches the Binder.
+     * zh-CN: `files.batchRename.importPresets(json, { onConflict })` (插件路线图 D36 / D43). 超过契约上限的文档在进入 Binder 之前即为
+     * `LIMIT_EXCEEDED`.
+     */
+    suspend fun importPresetsForScript(context: Context, document: String, onConflict: String): BatchRenamePresetImport = withContext(Dispatchers.IO) {
+        if (document.length > BatchRenameLimits.MAX_PRESET_DOCUMENT_CHARS) {
+            throw BatchRenameScriptException(
+                BatchRenameScriptCodes.LIMIT_EXCEEDED,
+                "the preset document has ${document.length} characters, more than ${BatchRenameLimits.MAX_PRESET_DOCUMENT_CHARS}",
+            )
+        }
+        BatchRenameBundles.presetImport(presetCall(context) { proxy -> proxy.importPresets(BatchRenameBundles.presetRequest(document, onConflict)) })
+    }
+
+    private suspend fun presetCall(context: Context, call: (IBatchRenamePlugin) -> Bundle?): Bundle {
+        val target = selectForScript(context)
+        if (BatchRenameValues.FEATURE_PRESETS !in featuresOf(target.pluginInfo)) BatchRenameScriptArguments.pluginWithoutPresets()
+        return try {
+            host.call(context, target, retryOnRemoteException = false, block = call)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: RemoteException) {
+            throw BatchRenameScriptException(BatchRenameScriptCodes.INTERNAL, "the Batch Rename plugin stopped answering: ${e.message ?: e}", e)
+        } ?: throw BatchRenameScriptException(BatchRenameScriptCodes.INTERNAL, "the Batch Rename plugin returned no answer")
     }
 
     private suspend fun selectForScript(context: Context): AidlPluginHost.Discovered {

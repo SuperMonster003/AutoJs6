@@ -180,7 +180,57 @@ class BatchRenameScriptApiTest {
     }
 
     /**
-     * A plugin before 1.1.0 does not advertise pinyin: scripts that use it fail, the others still plan.
+     * Presets from a script (plugin roadmap P6.2): import a document object and its JSON text, list the presets, plan
+     * with a preset plus an override, and the error codes of an unknown preset and a foreign document. The test leaves
+     * the preset "AutoJs6 test preset" in the plugin, since scripts cannot delete presets.
+     * zh-CN: 脚本中的预设 (插件路线图 P6.2): 导入文档对象及其 JSON 文本, 列出预设, 用预设加覆盖选项生成方案, 以及未知预设与非预设文档的
+     * 错误码. 脚本无法删除预设, 因此测试会在插件中留下预设 "AutoJs6 test preset".
+     */
+    @Test
+    fun scriptsImportListAndPlanWithPresets() {
+        val features = runBlocking { BatchRenamePluginHost.discover(context) }.flatMap { BatchRenamePluginHost.featuresOf(it.pluginInfo) }
+        assumeTrue("No Batch Rename plugin with presets is installed", "presets" in features)
+        File(root, "IMG_1.jpg").writeText("a")
+        val result = runScript(
+            """
+            var result = {};
+            var name = "AutoJs6 test preset";
+            var doc = { format: "autojs6-batch-rename-presets", version: 1, presets: [{ name: name, options: { search: "IMG_", replace: "Pic_", target: "name" } }] };
+            result.imported = files.batchRename.importPresets(doc, { onConflict: "overwrite" }).imported;
+            result.skipped = files.batchRename.importPresets(JSON.stringify(doc)).skipped;
+            var listed = files.batchRename.presets().filter(function (p) { return p.name === name; })[0];
+            result.listed = [listed.options.search, listed.options.replace, listed.options.target, listed.options.onConflict];
+            var plan = files.batchRename.plan("IMG_1.jpg", { preset: name, replace: "Shot_" });
+            result.newName = plan.items[0].newName;
+            result.planOptions = [plan.options.search, plan.options.replace, plan.options.target, plan.options.preset === undefined];
+            try { files.batchRename.plan("IMG_1.jpg", { preset: "no such preset" }); } catch (e) { result.missingCode = e.code; }
+            try { files.batchRename.importPresets("[]"); } catch (e) { result.foreignCode = e.code; }
+            files.batchRename.importPresetsAsync(doc).then(function (r) {
+                result.asyncSkipped = r.skipped;
+                return files.batchRename.presetsAsync();
+            }).then(function (list) {
+                result.asyncListed = list.some(function (p) { return p.name === name; });
+            }).catch(function (e) {
+                result.asyncError = String(e);
+            }).then(function () {
+                files.write(MARKER, JSON.stringify(result));
+            });
+            """,
+        )
+        assertEquals("""["AutoJs6 test preset"]""", result.getJSONArray("imported").toString())
+        assertEquals("""["AutoJs6 test preset"]""", result.getJSONArray("skipped").toString())
+        assertEquals("""["IMG_","Pic_","name","fail"]""", result.getJSONArray("listed").toString())
+        assertEquals("Shot_1.jpg", result.getString("newName"))
+        assertEquals("""["IMG_","Shot_","name",true]""", result.getJSONArray("planOptions").toString())
+        assertEquals(BatchRenameScriptCodes.INVALID_OPTIONS, result.getString("missingCode"))
+        assertEquals(BatchRenameScriptCodes.INVALID_OPTIONS, result.getString("foreignCode"))
+        assertFalse(result.optString("asyncError"), result.has("asyncError"))
+        assertEquals("""["AutoJs6 test preset"]""", result.getJSONArray("asyncSkipped").toString())
+        assertTrue(result.getBoolean("asyncListed"))
+    }
+
+    /**
+     * A plugin before 1.1.0 does not advertise pinyin or presets: scripts that use them fail, the others still plan.
      * zh-CN: 1.1.0 之前的插件未声明拼音: 用到拼音的脚本失败, 其余脚本照常生成方案.
      */
     @Test
@@ -195,12 +245,16 @@ class BatchRenameScriptApiTest {
             try { files.batchRename.plan("照片.jpg", { search: "", pinyin: true }); } catch (e) { result.optionCode = e.code; }
             try { files.batchRename.plan("照片.jpg", { search: "照片", replace: "${'$'}{pinyin}" }); } catch (e) { result.variableCode = e.code; }
             result.plain = files.batchRename.plan("照片.jpg", { search: "照片", replace: "${'$'}${'$'}{pinyin}", pinyinTone: "mark" }).items[0].newName;
+            try { files.batchRename.presets(); } catch (e) { result.presetsCode = e.code; }
+            try { files.batchRename.plan("照片.jpg", { preset: "any" }); } catch (e) { result.presetCode = e.code; }
             files.write(MARKER, JSON.stringify(result));
             """,
         )
         assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("optionCode"))
         assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("variableCode"))
         assertEquals("${'$'}{pinyin}.jpg", result.getString("plain"))
+        assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("presetsCode"))
+        assertEquals(BatchRenameScriptCodes.PLUGIN_INCOMPATIBLE, result.getString("presetCode"))
     }
 
     @Test
