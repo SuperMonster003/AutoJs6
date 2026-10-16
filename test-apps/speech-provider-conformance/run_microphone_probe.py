@@ -4,11 +4,17 @@ A script started through AutoJs6's RunIntentActivity (no instrumentation, so the
 opens `speech.listen()`; the host binds the fake speech plugin of this test app with BIND_INCLUDE_CAPABILITIES and the
 fake records with AudioRecord in its own process (another uid), reporting a `vad` event every 500 ms. The driver keeps
 AutoJs6 in the foreground, then sends it to the background (HOME), then turns the screen off, and classifies the events
-of each phase: `audio` (non-zero samples, not silenced) or `silenced` (all samples zero or isClientSilenced).
+of each phase: `audio` (non-zero samples, not silenced) or `silenced` (all samples zero or isClientSilenced). For each
+phase it also samples `procState/capability` of the AutoJs6 process and of the plugin process (`dumpsys activity
+processes`; capability letters L location, C camera, M microphone, N network) and reports whether the AutoJs6
+accessibility service is bound, because a bound accessibility service keeps AutoJs6 capable in the background (an
+enabled service the system fails to bind gives nothing).
 
 Prerequisites: the host debug build with the speech module, this test app (`adb install -t`), and RECORD_AUDIO granted
 to the test app by the maintainer (`adb shell am start -n org.autojs.plugin.speech.fake/.FakeSpeechPermissionActivity`
-shows the system dialog). The driver never grants permissions itself.
+shows the system dialog), and all-files access of AutoJs6 (the script and its result live in shared storage). The
+driver never grants permissions itself and removes its files when it is done. The screen-off phase locks a device with
+a secure lock screen: unlock it before every run (a run behind the lock screen is reported as INVALID).
 
     py test-apps/speech-provider-conformance/run_microphone_probe.py <serial> [<serial> ...]
 
@@ -23,13 +29,14 @@ import time
 
 HOST = "org.autojs.autojs6"
 FAKE = "org.autojs.plugin.speech.fake"
-REMOTE_DIR = f"/sdcard/Android/data/{HOST}/files/speech-probe"
+REMOTE_DIR = "/sdcard/Download/autojs6-speech-probe"
 PHASE_SECONDS = 8
 PHASES = ("foreground", "background", "screen-off")
 
 SCRIPT = """
 var out = "%(out)s";
 var r = { events: [], errors: [] };
+files.write(out + ".started", String(Date.now()));
 var s = speech.listen({ maxDurationMillis: %(duration)d, timeoutMillis: 0, vad: false });
 s.on("ready", function (e) { r.ready = Date.now(); });
 s.on("vad", function (e) { r.events.push([e.at, e.active ? 1 : 0, e.peak, e.nonZero, e.frames, e.silenced === undefined ? -1 : (e.silenced ? 1 : 0)]); });
@@ -51,6 +58,49 @@ def granted(serial):
     return "android.permission.RECORD_AUDIO: granted=true" in dump
 
 
+def storage_allowed(serial, sdk):
+    """The probe files live in shared storage: AutoJs6 reads the script and writes the result with all-files access.
+
+    The app-specific directory is no option: when AutoJs6 never created it, `adb shell mkdir` creates it owned by
+    shell and the app cannot read it ("file does not exist").
+    """
+    if int(sdk) < 30:
+        return True
+    return "MANAGE_EXTERNAL_STORAGE: allow" in adb(serial, "shell", "appops", "get", HOST, "MANAGE_EXTERNAL_STORAGE", check=False)
+
+
+def process_state(serial, package, process):
+    """`procState/capability` of one process from `dumpsys activity processes`, `-` when it does not run."""
+    dump = adb(serial, "shell", "dumpsys", "activity", "processes", package, check=False).splitlines()
+    for index, line in enumerate(dump):
+        if "ProcessRecord{" in line and f":{process}/" in line and "*APP*" in line:
+            state = capability = "?"
+            for detail in dump[index + 1:index + 80]:
+                detail = detail.strip()
+                if "*APP*" in detail:
+                    break
+                if detail.startswith("curProcState="):
+                    state = detail.split()[0].split("=")[1]
+                if detail.startswith("curCapability="):
+                    capability = detail.split()[0].split("=")[1]
+            return f"{state}/{capability}"
+    return "-"
+
+
+def states(serial):
+    return f"host {process_state(serial, HOST, HOST)}, plugin {process_state(serial, FAKE, FAKE + ':provider')}"
+
+
+def accessibility(serial):
+    """`bound`, `enabled, not bound` (the system still tries to bind it, so it gives AutoJs6 nothing) or `off`."""
+    enabled = adb(serial, "shell", "settings", "get", "secure", "enabled_accessibility_services", check=False)
+    if not any(item.startswith(HOST + "/") for item in enabled.split(":")):
+        return "off"
+    dump = adb(serial, "shell", "dumpsys", "accessibility", check=False)
+    binding = [line for line in dump.splitlines() if line.strip().startswith("Binding services:")]
+    return "enabled, not bound" if any(f"{{{HOST}/" in line for line in binding) else "bound"
+
+
 def launcher(serial):
     return adb(serial, "shell", "cmd", "package", "resolve-activity", "--brief", "-c", "android.intent.category.LAUNCHER", HOST).splitlines()[-1].strip()
 
@@ -65,6 +115,10 @@ def probe(serial):
     if not granted(serial):
         print(f"{label}: BLOCKED RECORD_AUDIO not granted to {FAKE}; ask the maintainer to allow it in the dialog of FakeSpeechPermissionActivity")
         return False
+    if not storage_allowed(serial, sdk):
+        print(f"{label}: BLOCKED AutoJs6 has no all-files access; ask the maintainer to allow it in the system settings")
+        return False
+    a11y = accessibility(serial)
     total = PHASE_SECONDS * len(PHASES) + 4
     adb(serial, "shell", "rm", "-rf", REMOTE_DIR, check=False)
     adb(serial, "shell", "mkdir", "-p", REMOTE_DIR)
@@ -77,17 +131,32 @@ def probe(serial):
     time.sleep(2)
     adb(serial, "shell", "am", "start", "-a", "android.intent.action.VIEW", "-t", "application/x-javascript",
         "-d", f"file://{REMOTE_DIR}/probe.js", "-n", f"{HOST}/org.autojs.autojs.external.open.RunIntentActivity")
-    time.sleep(2)
+    started = False
+    for _ in range(8):
+        time.sleep(1)
+        if adb(serial, "shell", "ls", f"{REMOTE_DIR}/result.json.started", check=False).endswith(".started"):
+            started = True
+            break
+    if not started:
+        adb(serial, "shell", "rm", "-rf", REMOTE_DIR, check=False)
+        print(f"{label}: BLOCKED the script did not start; a secure lock screen keeps activities from starting (ask the maintainer to unlock the device), or AutoJs6 cannot read {REMOTE_DIR} (see its toast)")
+        return False
     marks = {"foreground": device_now(serial)}
-    time.sleep(PHASE_SECONDS)
+    sampled = {}
+    time.sleep(PHASE_SECONDS / 2)
+    sampled["foreground"] = states(serial)
+    time.sleep(PHASE_SECONDS / 2)
     adb(serial, "shell", "input", "keyevent", "KEYCODE_HOME")
     marks["background"] = device_now(serial)
     time.sleep(PHASE_SECONDS / 2)
     host_fgs = "isForeground=true" in adb(serial, "shell", "dumpsys", "activity", "services", HOST, check=False)
+    sampled["background"] = states(serial)
     time.sleep(PHASE_SECONDS / 2)
     adb(serial, "shell", "input", "keyevent", "KEYCODE_SLEEP")
     marks["screen-off"] = device_now(serial)
-    time.sleep(PHASE_SECONDS)
+    time.sleep(PHASE_SECONDS / 2)
+    sampled["screen-off"] = states(serial)
+    time.sleep(PHASE_SECONDS / 2)
     end = device_now(serial)
     adb(serial, "shell", "input", "keyevent", "KEYCODE_WAKEUP")
     deadline = time.time() + 30
@@ -97,6 +166,7 @@ def probe(serial):
         if raw.startswith("{"):
             break
         time.sleep(2)
+    adb(serial, "shell", "rm", "-rf", REMOTE_DIR, check=False)
     if not raw.startswith("{"):
         print(f"{label}: FAIL no result file (the script did not finish)")
         return False
@@ -117,8 +187,12 @@ def probe(serial):
         silenced = sum(1 for e in events if e[5] == 1)
         peak = max(e[2] for e in events)
         verdict = "audio" if audio == len(events) else ("silenced" if audio == 0 else "mixed")
-        print(f"{label}: {phase}: {verdict} (events {len(events)}, with audio {audio}, flagged silenced {silenced}, peak {peak})")
-    print(f"{label}: end reason {result.get('reason')}, host foreground service in the background phase {'on' if host_fgs else 'off'}")
+        if phase == "foreground" and not sampled[phase].startswith("host 2/"):
+            # 2 is PROCESS_STATE_TOP; 12 (TOP_SLEEPING) means the screen went off before the run.
+            print(f"{label}: INVALID AutoJs6 was not the top app in the foreground phase ({sampled[phase]}); keep the device unlocked with the screen on")
+            ok = False
+        print(f"{label}: {phase}: {verdict} (events {len(events)}, with audio {audio}, flagged silenced {silenced}, peak {peak}; procState/capability {sampled[phase]})")
+    print(f"{label}: end reason {result.get('reason')}, host foreground service in the background phase {'on' if host_fgs else 'off'}, AutoJs6 accessibility service {a11y}")
     return ok
 
 

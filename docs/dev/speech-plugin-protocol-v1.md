@@ -286,8 +286,21 @@ when it is the top app, when it runs a foreground service of type `microphone`, 
 capability binds it with `BIND_INCLUDE_CAPABILITIES` (API 29+). A process without it reads silenced audio (all zero
 samples; `AudioRecordingConfiguration.isClientSilenced()` from API 29). The host binds with
 `BIND_INCLUDE_CAPABILITIES`, so the plugin records whenever AutoJs6 itself may: while AutoJs6 is visible, and while it
-holds a microphone capability of its own. The device evidence and the decision for other states (roadmap appendix D
-Q5) are recorded in the plugin roadmap (P1.2).
+holds a microphone capability of its own (a bound accessibility service or a foreground service of type `microphone`).
+
+Measured on 2026-10-16 with `test-apps/speech-provider-conformance/run_microphone_probe.py` (AutoJs6 without a
+foreground service; `procState/capability` of host and plugin process in brackets):
+
+| Device | AutoJs6 accessibility service | Foreground | Background (HOME) | Screen off |
+| --- | --- | --- | --- | --- |
+| Sony XQ-AT72, API 31 | bound | audio | audio (both `5/LCMN`) | audio (both `6/LCMN`) |
+| OnePlus OPD2413, API 35 | off | audio (`2` / `3`, `LCMNFUA`) | silenced (both `15`, none) | silenced |
+| Xiaomi Pad 23046RP50C, API 35 | enabled, never bound | audio (`2` / `3`, `LCMNFUA`) | silenced (both `15`, none) | silenced |
+
+The plugin process always carried the host's capability, and nothing more. API 33 and 36 were not measured. For a
+host in the background without the capability the plugin starts a foreground service of type `microphone` of its own
+(roadmap appendix D Q5 (a), implemented with the microphone sessions in P3); until then such a session reads silenced
+audio.
 
 ## Script path
 

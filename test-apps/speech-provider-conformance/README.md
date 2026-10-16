@@ -35,4 +35,7 @@ py test-apps/speech-provider-conformance/run_microphone_probe.py SERIAL
 
 The first command shows the system microphone dialog, which the maintainer answers on the device. The probe starts a
 script through `RunIntentActivity`, keeps AutoJs6 in the foreground, then presses HOME, then turns the screen off, and
-prints for each phase whether the fake plugin process received audio or silence.
+prints for each phase whether the fake plugin process received audio or silence, with `procState/capability` of both
+processes and whether the AutoJs6 accessibility service is bound. It needs all-files access of AutoJs6 (the script and
+its result live in `/sdcard/Download/autojs6-speech-probe`, removed afterwards) and an unlocked device with the screen
+on: the screen-off phase locks the device again, so unlock it before every run.
