@@ -9,6 +9,7 @@ import org.autojs.autojs.core.plugin.ServiceBindingLease
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.tool.api.IPluginToolCallback
 import org.autojs.plugin.tool.api.IPluginToolProvider
 import org.autojs.plugin.tool.api.PluginToolCatalogRequestKeys
@@ -39,6 +40,16 @@ object PluginToolProviderHost {
         host.discoverWakingFailures(context, recovery) { packageName ->
             PluginEnableStore.isEnabled(context, packageName, true) && PluginTrustManager.isAuthorized(context, packageName)
         }
+
+    /**
+     * The providers of [packageName] (all when null), for the Plugin Center listing plugins that only describe their tools
+     * (MCP roadmap D60).
+     * zh-CN: [packageName] 的提供者 (为 null 时为全部), 供插件中心列出只提供工具服务的插件.
+     */
+    suspend fun discover(context: Context, packageName: String? = null): List<AidlPluginHost.Discovered> = host.discover(context, packageName)
+
+    /** The identity of the provider of [packageName], for the Plugin Center switch. zh-CN: [packageName] 的提供者身份, 供插件中心开关使用. */
+    suspend fun probe(context: Context, packageName: String): PluginInfo = host.probe(context, packageName)
 
     /** One accepted or refused call: the provider's answer, the proxy for `cancel` and death notices, and the binding to release when the call ends. */
     class Started(val answer: Bundle, val provider: IPluginToolProvider, val lease: ServiceBindingLease)

@@ -46,6 +46,7 @@ import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginHo
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
+import org.autojs.autojs.core.plugin.tool.PluginToolProviderHost
 import org.autojs.autojs.core.plugin.yolo.YoloPluginHost
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -57,6 +58,7 @@ import org.autojs.autojs6.databinding.FragmentPluginCenterBinding
 import org.autojs.plugin.imagequant.api.ImageQuantPluginContract
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 import org.autojs.plugin.opencv.api.OpenCvPluginContract
+import org.autojs.plugin.tool.api.PluginToolContract
 import org.autojs.plugin.yolo.api.YoloContract
 
 class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
@@ -1019,6 +1021,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 OfflineDocsPluginHost.probe(contextRef, item.packageName)
             }
             OpenCvPluginContract.ACTION_RUNTIME -> PluginInfoServiceHost.probe(contextRef, item.packageName)
+            PluginToolContract.SERVICE_ACTION -> PluginToolProviderHost.probe(contextRef, item.packageName)
             YoloContract.SERVICE_ACTION -> {
                 YoloPluginHost.probePackage(contextRef, item.packageName)
             }

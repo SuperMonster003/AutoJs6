@@ -42,11 +42,13 @@ import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginHo
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
+import org.autojs.autojs.core.plugin.tool.PluginToolProviderHost
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.tool.api.PluginToolContract
 import org.autojs.plugin.batchrename.api.BatchRenamePluginActions
 import org.autojs.plugin.epub.api.EpubActions
 import org.autojs.plugin.terminal.api.TerminalActions
@@ -275,6 +277,9 @@ class InstalledPluginRepository {
         SpeechPluginHost.ACTION_SPEECH -> SpeechPluginHost.discover(context, packageName).map {
             Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = SpeechPluginHost.ACTION_SPEECH)
         }
+        PluginToolContract.SERVICE_ACTION -> PluginToolProviderHost.discover(context, packageName).map {
+            Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = PluginToolContract.SERVICE_ACTION)
+        }
         else -> listOf(preferred)
     }
 
@@ -332,23 +337,30 @@ class InstalledPluginRepository {
                 category = SpeechPluginActions.SERVICE_CATEGORY,
             ),
         )
-        return specs.flatMap { spec ->
-            runCatching {
-                queryIntentServices(context, spec).map { serviceInfo ->
-                    Discovery(
-                        serviceInfo = serviceInfo,
-                        pluginInfo = null,
-                        error = null,
-                        isOcrService = spec.isOcrService,
-                        isBarcodeService = spec.isBarcodeService,
-                        serviceAction = spec.action.takeUnless { it == PluginActions.INFO },
-                    )
-                }
-            }.onFailure { error ->
-                Log.w(TAG, "Failed to query declared plugin services for ${spec.action}", error)
-            }.getOrDefault(emptyList())
-        }
+        val declared = specs.flatMap { spec -> queryDeclared(context, spec) }
+        // Plugins that only export a plugin tool provider (MCP roadmap D60) are listed through it, so that third parties
+        // need no INFO service. Packages declaring any other service keep their endpoint: the official tool pilots also
+        // describe their tools, and their listing and probing must not change.
+        // zh-CN: 只导出插件工具提供者的插件经由它列出, 第三方无需 INFO 服务. 声明了其他服务的包保持原有端点: 官方试点插件也提供工具服务,
+        // 其列出与探测方式不应改变.
+        val toolProviders = queryDeclared(context, ServiceQuery(PluginToolContract.SERVICE_ACTION))
+        return declared + PluginDiscoveryEndpointPolicy.toolProviderOnly(declared, toolProviders) { it.serviceInfo.packageName }
     }
+
+    private fun queryDeclared(context: Context, spec: ServiceQuery): List<Discovery> = runCatching {
+        queryIntentServices(context, spec).map { serviceInfo ->
+            Discovery(
+                serviceInfo = serviceInfo,
+                pluginInfo = null,
+                error = null,
+                isOcrService = spec.isOcrService,
+                isBarcodeService = spec.isBarcodeService,
+                serviceAction = spec.action.takeUnless { it == PluginActions.INFO },
+            )
+        }
+    }.onFailure { error ->
+        Log.w(TAG, "Failed to query declared plugin services for ${spec.action}", error)
+    }.getOrDefault(emptyList())
 
     private fun queryIntentServices(context: Context, spec: ServiceQuery): List<ServiceInfo> {
         val intent = Intent(spec.action).apply {
