@@ -17,7 +17,7 @@ import zipfile
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from dataset.task_io import parse_json, private_path, write_json
+from dataset.task_io import inherit_parent_acl, parse_json, private_path, write_json
 from package.build_package import decode_model, score_model
 from train.data import rank_indices, read_dataset, sha256
 from train.evaluate import predict
@@ -145,6 +145,8 @@ def export_parity(dataset_dir, reference_model, package_file, output, *, max_can
     output.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=".codegen-parity-", dir=output.parent))
     try:
+        # Before anything is written, so the renamed output gets the access rights of its parent directory.
+        inherit_parent_acl(staging)
         with (staging / "parity.jsonl").open("w", encoding="utf-8", newline="\n") as target:
             for record in records:
                 target.write(json.dumps(record, ensure_ascii=False, allow_nan=False, separators=(",", ":")) + "\n")

@@ -27,7 +27,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from construction.data import read_dataset
-from dataset.task_io import private_path, read_json, write_json
+from dataset.task_io import inherit_parent_acl, private_path, read_json, write_json
 from package.build_package import decode_model, encode_model, score_model
 from train.data import FeatureSchema as NumericSchema, sha256
 from train.train import PINNED_VERSIONS, canonical_model_json
@@ -245,6 +245,8 @@ def fit_dataset(dataset, output, *, iterations=256, depth=6, seed=DEFAULT_SEED,
     output.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix="." + output.name + "-", dir=output.parent)).resolve()
     try:
+        # Before anything is written, so no file starts with the restricted mkdtemp() access rights.
+        inherit_parent_acl(staging)
         model.save_model(str(staging / "model.cbm"))
         model.save_model(str(staging / "model.raw.json"), format="json")
         canonical, removed = canonical_model_json(read_json(staging / "model.raw.json"))
@@ -300,6 +302,8 @@ def fit_dataset(dataset, output, *, iterations=256, depth=6, seed=DEFAULT_SEED,
         output.mkdir()
         for name in (*artifacts, "train-log.json"):
             (staging / name).rename(output / name)
+            # Inherit from the output directory itself, not through the staging directory.
+            inherit_parent_acl(output / name)
         return log
     finally:
         if staging.exists():

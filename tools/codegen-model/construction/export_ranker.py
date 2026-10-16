@@ -20,7 +20,7 @@ import tempfile
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from dataset.task_io import read_json, write_json
+from dataset.task_io import inherit_parent_acl, read_json, write_json
 from package.build_package import decode_model, encode_model, score_model
 from train.data import read_dataset, read_schema, sha256
 from train.train import PINNED_VERSIONS
@@ -129,6 +129,8 @@ def export_ranker(fit_dir, dataset_dir, output_dir, *, parity_max_rows=5000):
     output.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix="." + output.name + "-", dir=output.parent)).resolve()
     try:
+        # Before anything is written, so no file starts with the restricted mkdtemp() access rights.
+        inherit_parent_acl(staging)
         write_json(staging / "ranker.json", document)
         with (staging / "parity.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
             for row, score in zip(parity_rows, expected):
@@ -152,6 +154,8 @@ def export_ranker(fit_dir, dataset_dir, output_dir, *, parity_max_rows=5000):
         output.mkdir()
         for name in (*artifacts, "export-log.json"):
             (staging / name).rename(output / name)
+            # Inherit from the output directory itself, not through the staging directory.
+            inherit_parent_acl(output / name)
     finally:
         if staging.exists():
             shutil.rmtree(staging)

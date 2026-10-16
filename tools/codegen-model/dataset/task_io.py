@@ -41,6 +41,35 @@ def write_json(path, value):
     temporary.replace(path)
 
 
+def inherit_parent_acl(path):
+    """Give a staging directory or a moved file the Windows access rights of a plain mkdir in its parent.
+
+    Since the CVE-2024-4030 fix (Python 3.12.4 and 3.13), tempfile.mkdtemp() on Windows sets a
+    protected DACL that allows only SYSTEM, Administrators and OWNER RIGHTS. Files created inside
+    inherit it and a rename keeps it, so a run directory would stay unreadable for other accounts
+    and tools. An empty, unprotected DACL keeps only the entries inherited from the parent (what
+    icacls /reset does). Other platforms are left untouched.
+    """
+    if os.name != "nt":
+        return
+    import ctypes
+    from ctypes import wintypes
+    advapi32 = ctypes.WinDLL("advapi32", use_last_error=True)
+    initialize = advapi32.InitializeAcl
+    initialize.argtypes, initialize.restype = (ctypes.c_void_p, wintypes.DWORD, wintypes.DWORD), wintypes.BOOL
+    apply = advapi32.SetNamedSecurityInfoW
+    apply.argtypes = (wintypes.LPCWSTR, ctypes.c_int, wintypes.DWORD) + (ctypes.c_void_p,) * 4
+    apply.restype = wintypes.DWORD
+    # An empty ACL, never a NULL one: a NULL DACL would grant everyone full access.
+    acl = ctypes.create_string_buffer(8)  # sizeof(ACL)
+    if not initialize(acl, len(acl), 2):  # ACL_REVISION
+        raise ctypes.WinError(ctypes.get_last_error())
+    # SE_FILE_OBJECT, DACL_SECURITY_INFORMATION | UNPROTECTED_DACL_SECURITY_INFORMATION
+    error = apply(str(path), 1, 0x20000004, None, None, acl, None)
+    if error:
+        raise OSError(None, ctypes.FormatError(error), str(path), error)
+
+
 def require_fields(value, required, optional=(), description="object"):
     if not isinstance(value, dict):
         raise ValueError(description + " must be an object")

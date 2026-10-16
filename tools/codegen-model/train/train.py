@@ -22,7 +22,7 @@ import time
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from dataset.task_io import private_path, read_json, write_json
+from dataset.task_io import inherit_parent_acl, private_path, read_json, write_json
 from train.data import read_dataset, sha256, survival_grade
 
 
@@ -166,6 +166,8 @@ def fit_dataset(dataset, output, *, iterations=1024, seed=DEFAULT_SEED, early_st
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix="." + output.name + "-", dir=output.parent))
     try:
+        # Before anything is written, so the renamed run gets the access rights of its parent directory.
+        inherit_parent_acl(temporary)
         model.save_model(str(temporary / "model.cbm"))
         model.save_model(str(temporary / "model.raw.json"), format="json")
         raw = read_json(temporary / "model.raw.json")
