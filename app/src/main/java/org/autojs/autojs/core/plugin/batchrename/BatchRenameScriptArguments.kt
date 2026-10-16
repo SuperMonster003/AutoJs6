@@ -3,12 +3,22 @@ package org.autojs.autojs.core.plugin.batchrename
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import java.time.Instant
+import java.time.format.DateTimeParseException
+import org.autojs.plugin.batchrename.api.BatchRenameLimits
 import org.autojs.plugin.batchrename.api.BatchRenameOptionKeys
 import org.autojs.plugin.batchrename.api.BatchRenamePresetKeys
 import org.autojs.plugin.batchrename.api.BatchRenameValues
 
 /** The `source` and `flags` of a `RegExp` passed as `search`. zh-CN: 作为 `search` 传入的 `RegExp` 的 `source` 与 `flags`. */
 data class BatchRenameRegExp(val source: String, val flags: String)
+
+/**
+ * One name of `preview` (plugin roadmap D37); [lastModified] is null when the script gave none, and the date variables
+ * then use the time of the call.
+ * zh-CN: `preview` 的一个名称 (插件路线图 D37); 脚本未给出 [lastModified] 时为 null, 日期变量改用调用时刻.
+ */
+data class BatchRenamePreviewItem(val name: String, val directory: Boolean = false, val lastModified: Long? = null)
 
 /**
  * Checks and normalizes the arguments of `files.batchRename` (plugin roadmap appendix B), as JSON trees the way
@@ -147,6 +157,55 @@ object BatchRenameScriptArguments {
             complete.forEach { (key, option) ->
                 if (json.get(key)?.isJsonNull == false || (regExp != null && key in REGEXP_OPTIONS)) put(key, option)
             }
+        }
+    }
+
+    /**
+     * `preview(nameOrItems, options)` (plugin roadmap D37): a name, `{ name, isDirectory, lastModified }` or an array of
+     * them; the flag tells whether the script passed an array, so the answer is one too. `lastModified` takes epoch
+     * milliseconds or the ISO text `JSON.stringify` makes of a `Date`.
+     * zh-CN: `preview(nameOrItems, options)` (插件路线图 D37): 名称, `{ name, isDirectory, lastModified }` 或其数组; 标志表示脚本是否
+     * 传入数组, 结果随之为数组. `lastModified` 接受毫秒时间戳, 或 `JSON.stringify` 由 `Date` 得到的 ISO 文本.
+     */
+    fun previewItems(value: JsonElement?): Pair<List<BatchRenamePreviewItem>, Boolean> {
+        if (value == null || value.isJsonNull) invalidOptions("preview needs a name, an item { name, isDirectory, lastModified } or an array of them")
+        if (!value.isJsonArray) return listOf(previewItem(value, "the item")) to false
+        val array = value.asJsonArray
+        if (array.size() > BatchRenameLimits.MAX_ITEMS_PER_PLAN) {
+            batchRenameFailure(BatchRenameScriptCodes.LIMIT_EXCEEDED, "${array.size()} names exceed ${BatchRenameLimits.MAX_ITEMS_PER_PLAN}")
+        }
+        return array.mapIndexed { index, element -> previewItem(element, "item $index") } to true
+    }
+
+    private fun previewItem(element: JsonElement, subject: String): BatchRenamePreviewItem {
+        val item = when {
+            element is JsonPrimitive && element.isString -> BatchRenamePreviewItem(element.asString)
+            element is JsonObject -> BatchRenamePreviewItem(
+                name = (element.get("name") as? JsonPrimitive)?.takeIf { it.isString }?.asString ?: invalidOptions("$subject needs a string name"),
+                directory = element.get("isDirectory")?.takeUnless { it.isJsonNull }?.let {
+                    (it as? JsonPrimitive)?.takeIf { primitive -> primitive.isBoolean }?.asBoolean ?: invalidOptions("isDirectory of $subject must be a boolean")
+                } ?: false,
+                lastModified = element.get("lastModified")?.takeUnless { it.isJsonNull }?.let { epochMillis(it, subject) },
+            )
+            else -> invalidOptions("$subject must be a name or { name, isDirectory, lastModified }, got $element")
+        }
+        val name = item.name
+        if (name.isEmpty() || name == "." || name == ".." || '/' in name || name.any { it.code == 0 } || name.length > BatchRenameLimits.MAX_NAME_CHARS) {
+            invalidOptions("the name of $subject must be one file name of 1 to ${BatchRenameLimits.MAX_NAME_CHARS} characters without \"/\", got \"$name\"")
+        }
+        return item
+    }
+
+    private fun epochMillis(element: JsonElement, subject: String): Long {
+        val primitive = element as? JsonPrimitive
+        return when {
+            primitive != null && primitive.isNumber && primitive.asDouble == Math.floor(primitive.asDouble) -> primitive.asLong
+            primitive != null && primitive.isString -> try {
+                Instant.parse(primitive.asString).toEpochMilli()
+            } catch (_: DateTimeParseException) {
+                invalidOptions("lastModified of $subject must be epoch milliseconds or a Date, got $element")
+            }
+            else -> invalidOptions("lastModified of $subject must be epoch milliseconds or a Date, got $element")
         }
     }
 

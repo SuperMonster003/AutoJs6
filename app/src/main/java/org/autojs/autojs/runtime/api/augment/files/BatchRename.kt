@@ -44,8 +44,8 @@ import kotlin.coroutines.cancellation.CancellationException
 /**
  * `files.batchRename` (plugin roadmap P3.2, D2, D9, appendix B): the callable `files.batchRename(paths, options)`
  * (plan and apply in one step) with `plan`, `apply`, `undo`, `history`, `isAvailable`, `presets`, `importPresets`
- * (plugin roadmap D36), the `Async` forms of `plan`, `apply`, `undo`, `presets` and `importPresets`, and the
- * `BatchRenameError` constructor. `$files.batchRename` is the same object. The Batch Rename
+ * (plugin roadmap D36), `preview` (D37), the `Async` forms of `plan`, `apply`, `undo`, `presets`, `importPresets` and
+ * `preview`, and the `BatchRenameError` constructor. `$files.batchRename` is the same object. The Batch Rename
  * plugin computes the names; the host enumerates the targets and performs, journals and undoes the renames
  * ([BatchRenameScriptService]). Only the Rhino conversion happens here.
  *
@@ -55,8 +55,8 @@ import kotlin.coroutines.cancellation.CancellationException
  * finishes and is journaled, then the call throws (or rejects) with the callback's error.
  *
  * zh-CN: `files.batchRename` (插件路线图 P3.2, D2, D9, 附录 B): 可调用的 `files.batchRename(paths, options)` (一步完成方案与执行),
- * 以及 `plan`, `apply`, `undo`, `history`, `isAvailable`, `presets`, `importPresets` (插件路线图 D36), `plan` / `apply` / `undo` /
- * `presets` / `importPresets` 的 `Async` 形态与 `BatchRenameError` 构造器.
+ * 以及 `plan`, `apply`, `undo`, `history`, `isAvailable`, `presets`, `importPresets` (插件路线图 D36), `preview` (D37), `plan` /
+ * `apply` / `undo` / `presets` / `importPresets` / `preview` 的 `Async` 形态与 `BatchRenameError` 构造器.
  * `$files.batchRename` 为同一对象. 名称由 Batch Rename 插件计算; 宿主负责枚举目标, 执行, 记录与撤销改名 ([BatchRenameScriptService]).
  * 这里只做 Rhino 转换. 同步形态以脚本的 Job 阻塞脚本线程 (停止脚本即取消等待), 改名与 `onProgress` 回调都在该线程上运行. `Async`
  * 形态在脚本的协程作用域里运行, 进度与结果在脚本线程上送达. 抛出异常的 `onProgress` 不会中断批次: 批次完成并记入日志后, 调用再抛出
@@ -80,6 +80,8 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
         ::presetsAsync.name,
         ::importPresets.name,
         ::importPresetsAsync.name,
+        ::preview.name,
+        ::previewAsync.name,
     )
 
     /** `BatchRenameError` instances reach the script unwrapped. zh-CN: `BatchRenameError` 实例不经包装到达脚本. */
@@ -176,6 +178,30 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
         }
     }
 
+    /**
+     * `preview(nameOrItems, options)`: what the options make of names that need not exist (plugin roadmap D37); an
+     * array answers an array.
+     * zh-CN: `preview(nameOrItems, options)`: 选项作用于不必存在的名称的结果 (插件路线图 D37); 传入数组则返回数组.
+     */
+    @RhinoRuntimeFunctionInterface
+    fun preview(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
+        ensureArgumentsLength(args, 2) { (items, options) ->
+            val work = previewWork(items, options)
+            sync { work() }
+        }
+    }
+
+    @RhinoRuntimeFunctionInterface
+    fun previewAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any = guarded {
+        ensureArgumentsLength(args, 2) { (items, options) ->
+            async {
+                val work = previewWork(items, options)
+                val run: suspend (ProgressBinder) -> Any? = { work() }
+                run
+            }
+        }
+    }
+
     /** `presets()`: `{ name, options }` of every preset the plugin keeps. zh-CN: `presets()`: 插件保存的每个预设的 `{ name, options }`. */
     @RhinoRuntimeFunctionInterface
     fun presets(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
@@ -254,6 +280,16 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
         val onConflict = BatchRenameScriptArguments.conflictOverride(json(applyOptions))
         val progress = progressOf(applyOptions)
         return { binder -> service.apply(id.toString(), excluded, onConflict, binder.bind(progress)) }
+    }
+
+    /** Checks the arguments of `preview` on the script thread and returns the work that asks the plugin. */
+    private fun previewWork(items: Any?, options: Any?): suspend () -> Any? {
+        val (list, array) = BatchRenameScriptArguments.previewItems(json(items))
+        val normalized = BatchRenameScriptArguments.options(json(options), regExpOf(options))
+        return {
+            val results = service.preview(list, normalized)
+            if (array) results else results.single()
+        }
     }
 
     private suspend fun presetsView(): List<Map<String, Any?>> =
@@ -403,7 +439,7 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
     private companion object {
         val PASS_THROUGH = setOf(
             "plan", "applyPlan", "undo", "history", "isAvailable", "planAsync", "applyAsync", "undoAsync",
-            "presets", "presetsAsync", "importPresets", "importPresetsAsync",
+            "presets", "presetsAsync", "importPresets", "importPresetsAsync", "preview", "previewAsync",
         )
     }
 }

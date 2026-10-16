@@ -230,6 +230,51 @@ class BatchRenameScriptApiTest {
     }
 
     /**
+     * `preview` (plugin roadmap P6.3): names that need not exist, counters in array order, conflicts only within the
+     * array, `lastModified` as a `Date`, and the `Async` form; nothing on disk changes.
+     * zh-CN: `preview` (插件路线图 P6.3): 名称不必存在, 计数器按数组顺序, 只检查数组内的冲突, `lastModified` 可为 `Date`, 以及 `Async`
+     * 形态; 磁盘上的内容不变.
+     */
+    @Test
+    fun scriptsPreviewNamesWithoutFiles() {
+        assumeTrue("No Batch Rename plugin is installed", BatchRenamePluginHost.queryServiceCount(context) > 0)
+        val result = runScript(
+            """
+            var result = {};
+            var single = files.batchRename.preview("IMG_1.jpg", { search: "IMG_", replace: "Photo_" });
+            result.single = [single.newName, single.status, single.reason];
+            result.many = files.batchRename.preview(
+                ["a.txt", "b.txt", { name: "c", isDirectory: true }],
+                { search: /^/, replace: "${'$'}{start=1;padding=2}_", enumerate: true, includeFolders: false }
+            ).map(function (r) { return [r.newName, r.status]; });
+            result.date = files.batchRename.preview(
+                { name: "x.txt", lastModified: new Date(Date.UTC(2020, 10, 2, 12)) },
+                { search: "x", replace: "${'$'}YYYY-${'$'}MM-${'$'}DD" }
+            ).newName;
+            result.duplicate = files.batchRename.preview(["a1.txt", "a2.txt"], { search: /\d/, replace: "" }).map(function (r) { return r.status; });
+            try { files.batchRename.preview("a/b", { search: "a" }); } catch (e) { result.badNameCode = e.code; }
+            files.batchRename.previewAsync("q.txt", { search: "q", replace: "r" }).then(function (r) {
+                result.async = r.newName;
+            }).catch(function (e) {
+                result.asyncError = String(e);
+            }).then(function () {
+                files.write(MARKER, JSON.stringify(result));
+            });
+            """,
+        )
+        assertEquals("""["Photo_1.jpg","rename",null]""", result.getJSONArray("single").toString())
+        assertEquals("""[["01_a.txt","rename"],["02_b.txt","rename"],["c","excluded"]]""", result.getJSONArray("many").toString())
+        assertEquals("2020-11-02.txt", result.getString("date"))
+        assertEquals("""["conflict","conflict"]""", result.getJSONArray("duplicate").toString())
+        assertEquals(BatchRenameScriptCodes.INVALID_OPTIONS, result.getString("badNameCode"))
+        assertFalse(result.optString("asyncError"), result.has("asyncError"))
+        assertEquals("r.txt", result.getString("async"))
+        // runScript deletes the marker after reading it: the preview left the directory empty.
+        // zh-CN: runScript 读取后会删除标记文件: 试算没有在目录中留下任何内容.
+        assertEquals(emptyList<String>(), root.list()!!.toList())
+    }
+
+    /**
      * A plugin before 1.1.0 does not advertise pinyin or presets: scripts that use them fail, the others still plan.
      * zh-CN: 1.1.0 之前的插件未声明拼音: 用到拼音的脚本失败, 其余脚本照常生成方案.
      */

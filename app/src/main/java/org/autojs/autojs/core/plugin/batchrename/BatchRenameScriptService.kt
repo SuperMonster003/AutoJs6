@@ -109,6 +109,24 @@ class BatchRenameScriptService(
     }
 
     /**
+     * `preview(nameOrItems, options)` (plugin roadmap D37): the plugin plans [items] as if they were the only entries of
+     * one directory, so conflicts come only from the items themselves; nothing on disk is read or renamed. Counters
+     * advance in the order of [items]. Each answer is `{ newName, status, reason }`.
+     * zh-CN: `preview(nameOrItems, options)` (插件路线图 D37): 插件把 [items] 视为某个目录中仅有的条目来计算方案, 因此冲突只来自这些
+     * 条目本身; 不读取也不改名磁盘上的任何内容. 计数器按 [items] 的顺序递增. 每个结果为 `{ newName, status, reason }`.
+     */
+    suspend fun preview(items: List<BatchRenamePreviewItem>, options: Map<String, Any>): List<Map<String, Any?>> {
+        if (items.isEmpty()) return emptyList()
+        val now = clock()
+        val parent = BatchRenameParent(PREVIEW_PARENT, File(""), items.map { it.name }, BatchRenameVolumeTraits(caseInsensitive = false, restrictedCharacters = false))
+        val targets = items.map { item ->
+            BatchRenameTarget(File(item.name), PREVIEW_PARENT, 0, item.directory, item.lastModified ?: now, if (item.directory) -1L else 0L)
+        }
+        val request = BatchRenamePlanRequest(LinkedHashMap(options), listOf(parent), targets, List(items.size) { false }, locale(), timeZone(), now)
+        return ask(request).items.map { linkedMapOf("newName" to it.newName, "status" to it.status, "reason" to it.reason) }
+    }
+
+    /**
      * `apply(plan, applyOptions)`. [excluded] holds the `excluded` flags of the script's plan items (null keeps those of
      * the plan) and [onConflict] overrides the plan's policy.
      * zh-CN: `apply(plan, applyOptions)`. [excluded] 为脚本方案条目的 `excluded` 标志 (null 沿用方案的), [onConflict] 覆盖方案的策略.
@@ -323,6 +341,9 @@ class BatchRenameScriptService(
         const val MAX_PLANS = 16
 
         private const val MAX_REJECTION_EXAMPLES = 5
+
+        /** The one directory of a preview request; no file is read. zh-CN: 试算请求中唯一的目录; 不读取任何文件. */
+        private const val PREVIEW_PARENT = "preview"
 
         const val KIND_FILE = "file"
         const val KIND_DIRECTORY = "dir"

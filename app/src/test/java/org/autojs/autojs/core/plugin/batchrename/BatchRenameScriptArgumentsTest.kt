@@ -142,6 +142,23 @@ class BatchRenameScriptArgumentsTest {
     }
 
     @Test
+    fun `preview takes names, items or arrays of them`() {
+        assertEquals(listOf(BatchRenamePreviewItem("a.txt")) to false, BatchRenameScriptArguments.previewItems(json("\"a.txt\"")))
+        assertEquals(
+            listOf(BatchRenamePreviewItem("a.txt"), BatchRenamePreviewItem("dir", directory = true, lastModified = 1_792_053_000_000L)) to true,
+            BatchRenameScriptArguments.previewItems(json("[\"a.txt\", {\"name\": \"dir\", \"isDirectory\": true, \"lastModified\": 1792053000000}]")),
+        )
+        // JSON.stringify turns a Date into ISO text. zh-CN: JSON.stringify 把 Date 转为 ISO 文本.
+        assertEquals(1_792_053_000_000L, BatchRenameScriptArguments.previewItems(json("{\"name\": \"a\", \"lastModified\": \"2026-10-15T08:30:00.000Z\"}")).first.single().lastModified)
+        assertEquals(emptyList<BatchRenamePreviewItem>() to true, BatchRenameScriptArguments.previewItems(json("[]")))
+        listOf(
+            "null", "1", "{}", "[\"\"]", "[\"a/b\"]", "[\"..\"]", "{\"name\": 3}", "{\"name\": \"a\", \"isDirectory\": \"yes\"}",
+            "{\"name\": \"a\", \"lastModified\": \"yesterday\"}", "{\"name\": \"a\", \"lastModified\": 1.5}", "[\"${"n".repeat(1025)}\"]",
+        ).forEach { text -> expectCode(BatchRenameScriptCodes.INVALID_OPTIONS) { BatchRenameScriptArguments.previewItems(json(text)) } }
+        expectCode(BatchRenameScriptCodes.LIMIT_EXCEEDED) { BatchRenameScriptArguments.previewItems(json("[" + List(2001) { "\"n$it\"" }.joinToString(",") + "]")) }
+    }
+
+    @Test
     fun `importPresets takes skip, overwrite or rename`() {
         assertEquals("skip", BatchRenameScriptArguments.presetConflict(null))
         assertEquals("skip", BatchRenameScriptArguments.presetConflict(json("{}")))

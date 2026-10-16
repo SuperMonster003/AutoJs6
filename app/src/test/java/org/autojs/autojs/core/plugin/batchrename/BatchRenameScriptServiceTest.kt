@@ -153,6 +153,30 @@ class BatchRenameScriptServiceTest {
     }
 
     @Test
+    fun `preview plans names as one directory without touching the disk`() = runBlocking {
+        val results = service.preview(
+            listOf(BatchRenamePreviewItem("IMG_1.jpg"), BatchRenamePreviewItem("IMG_2.jpg", directory = true, lastModified = 7L), BatchRenamePreviewItem("Photo_1.jpg")),
+            options("{\"search\": \"IMG_\", \"replace\": \"Photo_\"}"),
+        )
+        val request = requests.single()
+        assertEquals(listOf("IMG_1.jpg", "IMG_2.jpg", "Photo_1.jpg"), request.parents.single().existingNames)
+        assertEquals(listOf(false, true, false), request.items.map { it.directory })
+        // Without a time the date variables use the time of the call. zh-CN: 未给出时间时日期变量使用调用时刻.
+        assertEquals(listOf(42L, 7L, 42L), request.items.map { it.lastModified })
+        assertEquals(
+            listOf(
+                mapOf("newName" to "Photo_1.jpg", "status" to "conflict", "reason" to "existingEntry"),
+                mapOf("newName" to "Photo_2.jpg", "status" to "rename", "reason" to null),
+                mapOf("newName" to "Photo_1.jpg", "status" to "unchanged", "reason" to "noMatch"),
+            ),
+            results,
+        )
+        assertTrue(names().isEmpty())
+        assertTrue(service.preview(emptyList(), options("{\"search\": \"a\"}")).isEmpty())
+        assertEquals(1, requests.size)
+    }
+
+    @Test
     fun `excluding items or changing the policy plans again`() = runBlocking {
         file("a-old.txt")
         file("b-old.txt")

@@ -234,6 +234,11 @@ contract:
   `presets()` lists `{ name, options }` objects and `importPresets(json, { onConflict })` (a JSON string or an
   object) answers `{ imported, skipped, rejected }`; both have `Async` forms. A plugin without the `presets` feature
   makes all three `PLUGIN_INCOMPATIBLE`.
+- `preview(nameOrItems, options)` (and `previewAsync`, plugin roadmap D37) asks `plan` about names that need not
+  exist: a name, `{ name, isDirectory, lastModified }` (epoch milliseconds or a `Date`; the time of the call when
+  missing) or an array of them. The host sends them as the only entries of one directory without file-system traits,
+  so counters advance in array order and conflicts come only from the array itself; nothing is enumerated or renamed.
+  The answer is `{ newName, status, reason }`, or an array of them for an array.
 - `undo(result | batchId)` and `history(limit)` work on the shared journal, which also holds the batches of
   Explorer Action sessions. A batch that does not exist or has nothing left to undo is `UNDO_UNAVAILABLE`.
 - Failures reach the script as `files.batchRename.BatchRenameError` with `code`: no installed plugin is
