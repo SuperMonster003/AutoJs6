@@ -75,7 +75,7 @@ class PluginVariantPriorityActivity : BaseActivity() {
                             enabled = PluginEnableStore.isEnabled(
                                 this@PluginVariantPriorityActivity,
                                 plugin.packageName,
-                                PluginDefaultEnabledPolicy.isEnabledByDefault(plugin.engine),
+                                PluginDefaultEnabledPolicy.isEnabledByDefault(this@PluginVariantPriorityActivity, plugin.engine, plugin.packageName),
                             ),
                         )
                     }

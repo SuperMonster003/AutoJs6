@@ -41,6 +41,9 @@ class AidlPluginHost<I : IInterface>(
     private val proxyFactory: (IBinder) -> I,
     private val infoReader: (I) -> PluginInfo,
     private val defaultEnabled: Boolean = true,
+    // Decides the default per installed package (for example by its signer) instead of [defaultEnabled].
+    // zh-CN: 按已安装的包 (例如按其签名) 决定默认值, 代替 [defaultEnabled].
+    private val defaultEnabledFor: ((Context, String) -> Boolean)? = null,
     private val allowActivityStarts: Boolean = false,
     private val preBindValidator: ((Context, ServiceInfo) -> Unit)? = null,
     /**
@@ -63,6 +66,9 @@ class AidlPluginHost<I : IInterface>(
      */
     private val important: Boolean = false,
 ) {
+
+    private fun isDefaultEnabled(context: Context, packageName: String): Boolean =
+        defaultEnabledFor?.invoke(context, packageName) ?: defaultEnabled
 
     private val defaultBindTimeoutMs = 60_000L
     private val idleUnbindMs = 30_000L
@@ -251,7 +257,7 @@ class AidlPluginHost<I : IInterface>(
     ): Discovered? {
         val list = discovered
             .filter { it.pluginInfo != null }
-            .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, defaultEnabled) }
+            .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, isDefaultEnabled(context, it.serviceInfo.packageName)) }
             .filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
             .filter { isHostVersionCompatible(it.pluginInfo) }
         if (list.isEmpty()) return null
@@ -374,7 +380,7 @@ class AidlPluginHost<I : IInterface>(
         }
 
         val enabledItems = authorizedItems.filter {
-            PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, defaultEnabled)
+            PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, isDefaultEnabled(context, it.serviceInfo.packageName))
         }
         if (enabledItems.isEmpty()) {
             return IllegalStateException(context.getString(R.string.error_plugin_is_not_enabled_in_plugin_center, authorizedItems.first().serviceInfo.packageName))
@@ -444,7 +450,7 @@ class AidlPluginHost<I : IInterface>(
                 // process that died, for instance) are woken here, for enabled and authorized plugins only.
                 // zh-CN: 被拒的绑定已在绑定内部唤醒过 (见 PluginAutoWake); 其他失败 (例如插件进程已退出) 在此唤醒, 且只针对已启用并已授权的插件.
                 val packageName = item.serviceInfo.packageName
-                if (!error.isPluginBindRefused() && PluginAutoWake.isEligible(context, packageName, defaultEnabled)) {
+                if (!error.isPluginBindRefused() && PluginAutoWake.isEligible(context, packageName, isDefaultEnabled(context, packageName))) {
                     didWake = PluginWakeManager.tryAutoWakeIfNeeded(context, packageName) || didWake
                 }
             }
@@ -529,7 +535,7 @@ class AidlPluginHost<I : IInterface>(
         if (enforcePreBindValidator) preBindValidator?.invoke(context, serviceInfo)
         val appContext = context.applicationContext
         val entry = getOrCreateEntry(appContext, serviceInfo)
-        val proxy = PluginAutoWake.retryRefusedBind(appContext, serviceInfo.packageName, defaultEnabled) { awaitProxy(entry, bindTimeoutMs) }
+        val proxy = PluginAutoWake.retryRefusedBind(appContext, serviceInfo.packageName, isDefaultEnabled(appContext, serviceInfo.packageName)) { awaitProxy(entry, bindTimeoutMs) }
         return try {
             block(proxy)
         } catch (e: RemoteException) {
@@ -553,7 +559,7 @@ class AidlPluginHost<I : IInterface>(
         preBindValidator?.invoke(context, serviceInfo)
         var retriesRemaining = if (retryOnRemoteException) 1 else 0
         while (true) {
-            val binding = PluginAutoWake.retryRefusedBind(context.applicationContext, serviceInfo.packageName, defaultEnabled) {
+            val binding = PluginAutoWake.retryRefusedBind(context.applicationContext, serviceInfo.packageName, isDefaultEnabled(context, serviceInfo.packageName)) {
                 awaitDedicatedServiceBinding(context.applicationContext, serviceInfo, bindTimeoutMs)
             }
             try {
@@ -719,7 +725,7 @@ class AidlPluginHost<I : IInterface>(
         block: (I) -> T,
     ): T {
         invalidateEntry(entry, error)
-        val proxy = PluginAutoWake.retryRefusedBind(entry.appContext, entry.serviceInfo.packageName, defaultEnabled) { awaitProxy(entry, bindTimeoutMs) }
+        val proxy = PluginAutoWake.retryRefusedBind(entry.appContext, entry.serviceInfo.packageName, isDefaultEnabled(entry.appContext, entry.serviceInfo.packageName)) { awaitProxy(entry, bindTimeoutMs) }
         return try {
             block(proxy)
         } catch (retryError: RemoteException) {

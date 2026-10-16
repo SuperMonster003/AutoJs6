@@ -56,4 +56,13 @@ class PluginErrorMapperTest {
         assertEquals(PluginErrorCode.PLUGIN_PROCESS_CRASHED, error.code)
         org.junit.Assert.assertFalse(PluginErrorMapper.shouldRecommendActivation(error))
     }
+
+    @Test
+    fun aRefusedBindingIsMarkedSoTheAutomaticEnableCanWakeThePlugin() {
+        val refused = org.autojs.autojs.core.plugin.PluginBindRefusedException("example", "bindService failed: example.PluginService")
+        val error = PluginErrorMapper.fromThrowable(IllegalStateException("discovery failed", refused))
+        assertEquals(PluginErrorCode.BIND_FAILED, PluginErrorMapper.fromThrowable(refused).code)
+        org.junit.Assert.assertTrue(error.bindRefused)
+        org.junit.Assert.assertFalse(PluginErrorMapper.fromThrowable(IllegalStateException("bindService failed: other")).bindRefused)
+    }
 }

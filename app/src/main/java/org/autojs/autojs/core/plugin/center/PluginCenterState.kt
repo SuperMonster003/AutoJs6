@@ -51,4 +51,7 @@ data class PluginError(
     val message: String? = null,
     val recoverHint: String? = null,
     val causeClass: String? = null,
+    // The system refused the binding (PluginBindRefusedException), as ColorOS does for a plugin that is not running.
+    // zh-CN: 系统拒绝了绑定 (PluginBindRefusedException), 如 ColorOS 对未运行的插件.
+    val bindRefused: Boolean = false,
 )

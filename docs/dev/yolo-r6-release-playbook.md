@@ -16,9 +16,9 @@ TEST-SIGNED APK 或单台设备结果写成完整生产发布结论。
 - 首发 Provider 仅声明 `arm64-v8a / NCNN / CPU / YOLO11 detect / manifest schema v1 /
   ultralytics-detect`。Host 与 Provider APK 均不得内置模型；Vulkan、其他 ABI、decoder
   或任务不在首发声明中。
-- Provider 运行时始终 default-off。安装或升级不得自动授权、改选其他 provider，也不得在
-  dispatch 后自动重试。唯一的自动启用来源是插件中心对宿主同证书 (OFFICIAL) provider
-  全新安装写入的显式启用记录（2026-09-18 产品决定）；adb 侧装、升级与其他签名仍需手动启用。
+- Provider 运行时对非官方签名保持 default-off。安装或升级不得自动授权、改选其他 provider，也不得在
+  dispatch 后自动重试。宿主同证书 (OFFICIAL) provider 没有启用记录时视为启用（2026-10-16 维护者决定），
+  插件中心对其全新安装还会写入显式启用记录（2026-09-18 产品决定）；其他签名仍需手动启用。
 
 ## 2. 发布证据分层
 
@@ -68,8 +68,8 @@ TEST-SIGNED APK 或单台设备结果写成完整生产发布结论。
 3. 若仅需恢复同一首发二进制，可按 `ARCHIVED_EXACT_V2_REINSTALL_ONLY` 从已验证归档重装
    exact `versionCode=2`，并核对 package、
    exact component、生产 signer 和归档 SHA-256；这是 same-version recovery，不是 rollback。
-4. 恢复后运行时仍保持 default-off；adb 重装由操作者重新显式授权/启用，插件中心重装的
-   OFFICIAL 包会自动写入启用记录；随后再跑一次冷推理和 `PROVIDER_KILL_EXPLICIT_REOPEN`。
+4. 恢复后 OFFICIAL 包没有启用记录时视为启用，插件中心重装的 OFFICIAL 包会自动写入启用记录；
+   其他签名由操作者重新显式授权/启用；随后再跑一次冷推理和 `PROVIDER_KILL_EXPLICIT_REOPEN`。
 5. 若 v2 本身存在缺陷，则发布 forward-fix `versionCode=3`；不得把重装 v2 描述为版本回滚。
 
 首发明确**不得原位降级**，也没有可降级的 code 1 artifact。卸载会删除 Provider 私有目录

@@ -7,51 +7,45 @@ import org.junit.Test
 
 class PluginDefaultEnabledPolicyTest {
 
+    private val officialSignerEngines = listOf("three-stove-agent", " THREE-STOVE-AGENT ", McpServerIds.ENGINE, " MCP-SERVER ", "yolo", " YOLO ")
+
     @Test
-    fun onlyOfficialThreeStoveAgentIsEnabledWithoutAnInstallBroadcast() {
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault("three-stove-agent"))
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(" THREE-STOVE-AGENT "))
-        for (state in PluginAuthorizedState.entries) {
-            assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault("three-stove-agent", state) ==
-                (state == PluginAuthorizedState.OFFICIAL))
-            assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("three-stove-agent", state) ==
-                PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("mcp-server", state))
+    fun theAgentMcpServerAndYoloAreEnabledByDefaultOnlyWithTheOfficialSigner() {
+        for (engine in officialSignerEngines) {
+            for (state in PluginAuthorizedState.entries) {
+                assertTrue("$engine $state", PluginDefaultEnabledPolicy.isEnabledByDefault(engine, state) == (state == PluginAuthorizedState.OFFICIAL))
+            }
         }
-        assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault(" THREE-STOVE-AGENT ", PluginAuthorizedState.OFFICIAL))
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE, PluginAuthorizedState.OFFICIAL))
     }
 
     @Test
-    fun mcpServerRequiresExplicitEnablement() {
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE))
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(" MCP-SERVER "))
-    }
-
-    @Test
-    fun yoloIsDisabledByDefault() {
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault("yolo"))
-        assertFalse(PluginDefaultEnabledPolicy.isEnabledByDefault(" YOLO "))
+    fun withoutAKnownSignerTheyStayDisabled() {
+        for (engine in officialSignerEngines) {
+            assertFalse(engine, PluginDefaultEnabledPolicy.isEnabledByDefault(engine))
+        }
     }
 
     @Test
     fun existingAndUnknownEnginesKeepLegacyDefault() {
         assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault("paddle-ocr"))
         assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault(null))
+        assertTrue(PluginDefaultEnabledPolicy.isEnabledByDefault("paddle-ocr", PluginAuthorizedState.REQUIRED))
     }
 
     @Test
-    fun officialSignerAutoEnablesDefaultOffEnginesAfterInstall() {
-        assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("yolo", PluginAuthorizedState.OFFICIAL))
-        assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(" YOLO ", PluginAuthorizedState.OFFICIAL))
-        assertTrue(PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(McpServerIds.ENGINE, PluginAuthorizedState.OFFICIAL))
+    fun officialSignerAutoEnablesEveryEngineAfterInstall() {
+        for (engine in officialSignerEngines + listOf("paddle-ocr", null)) {
+            assertTrue("$engine", PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(engine, PluginAuthorizedState.OFFICIAL))
+        }
     }
 
     @Test
-    fun otherSignersKeepDefaultOffEnginesDisabledAfterInstall() {
+    fun otherSignersKeepTheOfficialSignerEnginesDisabledAfterInstall() {
         val nonOfficial = listOf(PluginAuthorizedState.TRUSTED, PluginAuthorizedState.USER_GRANTED, PluginAuthorizedState.REQUIRED)
         for (state in nonOfficial) {
-            assertFalse(state.name, PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall("yolo", state))
-            assertFalse(state.name, PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(" MCP-SERVER ", state))
+            for (engine in officialSignerEngines) {
+                assertFalse("$engine $state", PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall(engine, state))
+            }
         }
     }
 

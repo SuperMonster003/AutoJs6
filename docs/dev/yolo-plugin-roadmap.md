@@ -20,7 +20,7 @@ Provider 公开发布的硬性前置条件。
 | R3 当前声明 | `SOURCE / ANDROID_BUILD / DEVICE_E2E / PUBLIC_PREVIEW = PASS`；仍明确不声明 `PRODUCTION` |
 | R4 当前声明 | `SOURCE / ANDROID_BUILD / BINDER_PFD / NATIVE_RUNTIME / DEVICE_E2E / PUBLIC_MODEL_IMPORT = PASS`；仅覆盖同一 decoder 的 YOLO11 detect 有限兼容集，不声明 `PRODUCTION` |
 | R5 当前声明 | `SOURCE / ANDROID_BUILD / HOSTILE_BINDER / DESCRIPTOR_INTEGRITY / RESOURCE_200_FRAME / APK_PACKAGING / NATIVE_LOAD_ARM64_DEVICE = PASS`；`ELF_16K_COMPATIBLE = PASS_STATIC_ONLY`，性能只记录不设阈值；RC 是 `TEST_SIGNED_NONDEBUGGABLE`，不声明 `PRODUCTION` |
-| 生产入口 | 插件中心可发现；无启用记录时 YOLO 默认关闭，2026-09-18 起插件中心对宿主同证书 (OFFICIAL) provider 的全新安装自动写入启用记录，其余签名、adb 侧装与覆盖安装仍需手动启用；Rhino 已提供显式 component 的 opt-in Preview，无静默 provider 选择或回退 |
+| 生产入口 | 插件中心可发现；无启用记录时，宿主同证书 (OFFICIAL) provider 视为启用（2026-10-16 起），其余签名默认关闭并需手动启用；2026-09-18 起插件中心对 OFFICIAL provider 的全新安装还会写入启用记录并完成启用探测；Rhino 已提供显式 component 的 opt-in Preview，无静默 provider 选择或回退 |
 
 ## 固定架构决定
 
@@ -40,6 +40,9 @@ Provider 公开发布的硬性前置条件。
    全新（非替换）安装时，可代替用户写入显式启用记录并完成启用探测；TRUSTED /
    USER_GRANTED 签名、adb 侧装与覆盖安装不自动启用。该规则对同一策略对象中的
    MCP Server 同样生效，宿主实现见 `PluginDefaultEnabledPolicy.shouldAutoEnableAfterInstall`。
+   2026-10-16 维护者决定：宿主同证书 (OFFICIAL) provider 没有启用记录时也视为启用（与 MCP Server、3-Stove Agent 相同，任何安装途径都生效）；TRUSTED / USER_GRANTED 签名仍需显式启用，运行时选择仍固定已授权的 exact component，
+   不静默选择、不跨 provider 回退。宿主实现见 `PluginDefaultEnabledPolicy.isEnabledByDefault` 与
+   `AidlPluginHost` 的 `defaultEnabledFor`。
 7. R0/R1 不重构 OCR。首次 YOLO 竖切稳定后，再决定是否把图像传输提取为公共组件。
 
 协议细节见 [YOLO Plugin Protocol V1](yolo-plugin-protocol-v1.md)。

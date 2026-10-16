@@ -40,7 +40,8 @@ object McpServerPluginHost {
         moduleLabel = LABEL,
         proxyFactory = { binder -> IMcpServerPlugin.Stub.asInterface(binder) },
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
-        defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE),
+        defaultEnabled = false,
+        defaultEnabledFor = { context, packageName -> PluginDefaultEnabledPolicy.isEnabledByDefault(context, McpServerIds.ENGINE, packageName) },
         preBindValidator = ::validateService,
         // The plugin owns the pairing confirmation a computer requests. Since Android 14 a bound service may start
         // it only with this opt-in, and only while AutoJs6 is visible; otherwise the plugin's notification remains.

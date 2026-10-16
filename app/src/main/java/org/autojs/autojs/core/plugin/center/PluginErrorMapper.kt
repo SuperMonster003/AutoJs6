@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
+import org.autojs.autojs.core.plugin.isPluginBindRefused
+
 import android.os.DeadObjectException
 import android.os.RemoteException
 
@@ -42,6 +44,7 @@ object PluginErrorMapper {
             code = code,
             message = message,
             causeClass = causeClass,
+            bindRefused = t.isPluginBindRefused(),
         )
     }
 

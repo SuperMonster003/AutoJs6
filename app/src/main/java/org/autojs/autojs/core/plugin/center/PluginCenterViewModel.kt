@@ -550,7 +550,7 @@ class PluginCenterViewModel : ViewModel() {
         )
         // Suspended, not disabled: the next item that builds again restores the user's switch.
         // zh-CN: 挂起而非禁用: 下次条目重新构建成功时恢复用户原来的开关状态.
-        enableStore.suspend(context, local.packageName, defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(index?.engine))
+        enableStore.suspend(context, local.packageName, defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(context, index?.engine, local.packageName))
         val mappedError = PluginErrorMapper.fromThrowable(error)
         val trustInfo = runCatching {
             PluginTrustManager.resolveTrustInfo(context, local.packageName)
@@ -964,7 +964,7 @@ class PluginCenterViewModel : ViewModel() {
         var enabled = enableStore.isEnabled(
             context,
             packageName,
-            defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(index?.engine),
+            defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(index?.engine, trustInfo.authorizedState),
         )
         if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED && enabled) {
             enableStore.setEnabled(context, packageName, false)

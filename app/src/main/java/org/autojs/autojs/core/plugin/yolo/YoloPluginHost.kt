@@ -13,6 +13,7 @@ import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.AidlPluginHost
+import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginSignatureUtils
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
@@ -63,6 +64,7 @@ object YoloPluginHost {
             decodeProviderInfo(provider).toCommonPluginInfo()
         },
         defaultEnabled = false,
+        defaultEnabledFor = { context, packageName -> PluginDefaultEnabledPolicy.isEnabledByDefault(context, YoloContract.ENGINE_ID, packageName) },
     )
 
     data class ProviderIdentity(
@@ -414,8 +416,9 @@ object YoloPluginHost {
 
     private fun requireAuthorized(context: Context, packageName: String, requireEnabled: Boolean) {
         if (requireEnabled) {
-            check(PluginEnableStore.isEnabled(context, packageName, defaultEnabled = false)) {
-                "YOLO provider is disabled by default; explicitly enable $packageName in Plugin Center"
+            val defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(context, YoloContract.ENGINE_ID, packageName)
+            check(PluginEnableStore.isEnabled(context, packageName, defaultEnabled)) {
+                "YOLO provider $packageName is disabled; enable it in Plugin Center"
             }
         }
         check(PluginTrustManager.isAuthorized(context, packageName)) {

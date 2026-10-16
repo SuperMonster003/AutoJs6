@@ -56,7 +56,7 @@ object McpServerPluginInspector {
             pluginEnabled = PluginEnableStore.isEnabled(
                 context,
                 McpServerIds.DEFAULT_PACKAGE_NAME,
-                defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE),
+                defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(McpServerIds.ENGINE, trust.authorizedState),
             ),
             authorized = PluginTrustManager.isAuthorized(context, McpServerIds.DEFAULT_PACKAGE_NAME),
             trustedSigner = trust.isOfficial || trust.isTrusted,

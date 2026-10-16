@@ -355,11 +355,14 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
         }
 
-        // Plugins installed while Plugin Center was closed are only pinned: they keep their enable policy, as other
-        // installations outside Plugin Center do.
-        // zh-CN: 插件中心关闭期间装入的插件只置顶: 与其他在插件中心之外的安装一样保留原有启用策略.
+        // Plugins installed while Plugin Center was closed, or while a full-screen system installer stopped it (ColorOS),
+        // get the automatic enable of a fresh installation too (maintainer decision of 2026-10-16).
+        // zh-CN: 插件中心关闭期间, 或被全屏系统安装界面停止期间 (ColorOS) 装入的插件同样执行全新安装后的自动启用 (维护者 2026-10-16 的决定).
         viewLifecycleOwner.lifecycleScope.launch {
-            vm.freshInstalls.collect { renderList() }
+            vm.freshInstalls.collect { packageNames ->
+                packageNames.forEach(::scheduleAutoEnableAfterInstall)
+                renderList()
+            }
         }
 
         // Subscribe to recoverable loading exceptions for user-initiated pull-to-refresh.
@@ -1034,7 +1037,12 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     markEnableFailedAfterInstall(packageName)
                     return@launch
                 }
-                if (item.isAwaitingFreshInstallProbe()) {
+                // A refused binding means a system (ColorOS) that binds no plugin before it ran once, and discovery does not
+                // wake a new plugin: enable it through the switch's wake and probe instead of waiting. Other systems never
+                // refuse the binding, so their wait for the probe of the fresh installation is unchanged.
+                // zh-CN: 绑定被拒说明系统 (ColorOS) 在插件运行过一次之前不允许绑定, 而发现过程不会唤醒新插件: 改用与开关相同的
+                // 唤醒与探测启用, 不再等待. 其他系统不会拒绝绑定, 因此其等待全新安装探测的流程不变.
+                if (item.isAwaitingFreshInstallProbe() && item.lastError?.bindRefused != true) {
                     vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope)
                     return@repeat
                 }
