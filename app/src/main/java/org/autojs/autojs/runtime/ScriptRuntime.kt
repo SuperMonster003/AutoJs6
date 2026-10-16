@@ -38,6 +38,7 @@ import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.ai.AiService
 import org.autojs.autojs.runtime.api.epub.EpubService
+import org.autojs.autojs.runtime.api.speech.SpeechService
 import org.autojs.autojs.runtime.api.gallery.GalleryService
 import org.autojs.autojs.runtime.api.terminal.TerminalService
 import org.autojs.autojs.runtime.api.mail.MailService
@@ -81,6 +82,8 @@ import org.autojs.autojs.runtime.api.augment.jsox.Mathx
 import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.api.augment.media.Media
 import org.autojs.autojs.runtime.api.augment.epub.Epub
+import org.autojs.autojs.runtime.api.augment.speech.Speech
+import org.autojs.autojs.runtime.api.augment.speech.SpeechModels
 import org.autojs.autojs.runtime.api.augment.gallery.Gallery
 import org.autojs.autojs.runtime.api.augment.terminal.Terminal
 import org.autojs.autojs.runtime.api.augment.mail.Mail
@@ -310,6 +313,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     private val epub: EpubService
     private val gallery: GalleryService
     private val terminal: TerminalService
+    private val speech: SpeechService
     private var compose: Compose? = null
 
     internal fun composeForTsx(): Compose = checkNotNull(compose)
@@ -512,6 +516,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         epub = EpubService(mUiHandlerAppContext, this)
         gallery = GalleryService(mUiHandlerAppContext, this)
         terminal = TerminalService(mUiHandlerAppContext, this)
+        speech = SpeechService(mUiHandlerAppContext, this)
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()
 
@@ -843,6 +848,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         ignoresException { epub.close() }
         ignoresException { gallery.close() }
         ignoresException { terminal.close() }
+        ignoresException { speech.close() }
         ignoresException { ai.close() }
         ignoresException { tts.close() }
         if (::threads.isInitialized) ignoresException { threads.shutDownAll() }
@@ -1080,6 +1086,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Epub(this, epub).augment(target)
         Gallery(this, gallery).augment(target)
         Terminal(this, terminal).augment(target)
+        Speech(this, speech, tts).augment(target).also { SpeechModels(this, speech).augment(it) }
         Compose(this).also { compose = it }.augment(target)
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
