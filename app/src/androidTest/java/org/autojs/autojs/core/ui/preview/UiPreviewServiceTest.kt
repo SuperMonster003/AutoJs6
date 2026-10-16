@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelFileDescriptor
@@ -204,9 +205,12 @@ class UiPreviewServiceTest {
         assertEquals(listOf(UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2), versions.take(2))
         assertEquals(listOf(UiPreviewContract.HASH_V1, UiPreviewContract.HASH_V2), hashes.take(2))
         assertEquals(versions.sorted(), versions)
-        // v3 (3-Block Compose 1.8.0) and v4 follow with their frozen hashes; v4 says what runs get beyond v3.
-        assertEquals(listOf(UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2, UiPreviewContract.VERSION_V3, UiPreviewContract.VERSION), versions)
-        assertEquals(listOf(UiPreviewContract.HASH_V1, UiPreviewContract.HASH_V2, UiPreviewContract.HASH_V3, UiPreviewContract.HASH), hashes)
+        // v3 (3-Block Compose 1.8.0), v4 and v5 follow with their frozen hashes; v4 says what runs get beyond v3.
+        assertEquals(
+            listOf(UiPreviewContract.BASE_VERSION, UiPreviewContract.VERSION_V2, UiPreviewContract.VERSION_V3, UiPreviewContract.VERSION_V4, UiPreviewContract.VERSION),
+            versions,
+        )
+        assertEquals(listOf(UiPreviewContract.HASH_V1, UiPreviewContract.HASH_V2, UiPreviewContract.HASH_V3, UiPreviewContract.HASH_V4, UiPreviewContract.HASH), hashes)
         val runs = Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE
         for (key in listOf(
             UiPreviewContract.KEY_DIALOGS_IN_CANVAS, UiPreviewContract.KEY_LIFECYCLE_EVENTS,
@@ -214,6 +218,10 @@ class UiPreviewServiceTest {
         )) {
             assertEquals(key, runs, info.getBoolean(key))
         }
+        // v5: TSX runs need runs and TypeScript Engine, which this device may not have.
+        assertTrue(info.containsKey(UiPreviewContract.KEY_TSX_RUN_SUPPORTED))
+        if (!runs) assertFalse(info.getBoolean(UiPreviewContract.KEY_TSX_RUN_SUPPORTED))
+        Log.i(TAG, "tsxRunSupported: ${info.getBoolean(UiPreviewContract.KEY_TSX_RUN_SUPPORTED)}")
         assertEquals(Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE, info.getBoolean(UiPreviewContract.KEY_SCRIPT_RUN_SUPPORTED))
         assertTrue(info.getLong(UiPreviewContract.KEY_HOST_VERSION_CODE) > 0)
         val modes = info.getStringArray(UiPreviewContract.KEY_MODES)!!.toList()
@@ -617,6 +625,78 @@ class UiPreviewServiceTest {
         }
     }
 
+    // ------------------------------------------------------------------------------------------------ TSX runs (v5)
+
+    private fun tsx(text: String, name: String) = script(text, name).apply { putString(UiPreviewContract.KEY_SCRIPT_DIALECT, UiPreviewContract.SCRIPT_DIALECT_TSX) }
+
+    /** The next `onScriptError` of [runId]; a TSX run may first spend a few seconds in the compiler. */
+    private fun awaitError(callback: Callback, runId: String): Bundle {
+        val deadline = SystemClock.uptimeMillis() + 30_000
+        while (true) {
+            val error = callback.scriptErrors.poll((deadline - SystemClock.uptimeMillis()).coerceAtLeast(1), TimeUnit.MILLISECONDS)
+                ?: throw AssertionError("onScriptError for $runId did not arrive")
+            if (error.getString(UiPreviewContract.KEY_RUN_ID) == runId) return error
+        }
+    }
+
+    @Test
+    fun tsxRunsAreCompiledFirstAndReportTheirErrorsOnTsxLines() {
+        assumeTrue("script runs need API 33", Build.VERSION.SDK_INT >= UiPreviewContract.MIN_API_INTERACTIVE)
+        assumeTrue("TSX runs need TypeScript Engine", service.previewInfo.getBoolean(UiPreviewContract.KEY_TSX_RUN_SUPPORTED))
+        withEmbeddedSession { id, callback ->
+            // The TypeScript Engine template's way: an inline onClick, and the ui module through `as any` for ids.
+            val name = "tsx-${UUID.randomUUID()}"
+            val counter = "\"ui\";\n\nlet n: number = 0;\nui.layout(\n    <vertical>\n" +
+                "        <button id='b' text='count 0' onClick={() => {\n            n++;\n            (ui as any).b.setText('count ' + n);\n" +
+                "            console.log('clicked ' + n);\n        }} />\n    </vertical>\n);\nconsole.log('tsx started');\n"
+            val first = runId(service.runScript(id, tsx(counter, name)))
+            val started = SystemClock.uptimeMillis()
+            assertEquals(first, awaitConsole(callback, "tsx started").getString(UiPreviewContract.KEY_RUN_ID))
+            Log.i(TAG, "TSX run started after ${SystemClock.uptimeMillis() - started} ms")
+            // The run is an execution under the script's name, with the compiled layout in the session's root.
+            val root = runRoot(name)
+            assertEquals("count 0", textOf(root, "b"))
+            instrumentation.runOnMainSync { JsViewHelper.findViewByStringId(root, "b")!!.performClick() }
+            awaitConsole(callback, "clicked 1")
+            assertEquals("count 1", textOf(root, "b"))
+            // A text that does not compile: every error on the console, the first one with its TSX line and column,
+            // the error exit, and nothing of the script ran.
+            val wrong = "\"ui\";\nui.layout(<frame />);\nconst x: number = 'one';\nconsole.log('not compiled ' + x);\n"
+            val failing = runId(service.runScript(id, tsx(wrong, "tsx-wrong")))
+            assertEquals(UiPreviewContract.EXIT_REPLACED, awaitExit(callback, first))
+            val error = awaitError(callback, failing)
+            assertEquals(UiPreviewContract.ERROR_COMPILE_FAILED, error.getString(UiPreviewContract.KEY_ERROR_CODE))
+            assertTrue(error.getString(UiPreviewContract.KEY_ERROR_MESSAGE)!!, error.getString(UiPreviewContract.KEY_ERROR_MESSAGE)!!.startsWith("TS2322: "))
+            assertEquals(3, error.getInt(UiPreviewContract.KEY_LINE))
+            assertEquals(7, error.getInt(UiPreviewContract.KEY_COLUMN))
+            val logged = awaitConsole(callback, "TS2322")
+            assertEquals(failing, logged.getString(UiPreviewContract.KEY_RUN_ID))
+            assertEquals(Log.ERROR, logged.getInt(UiPreviewContract.KEY_LEVEL))
+            assertEquals(UiPreviewContract.EXIT_ERROR, awaitExit(callback, failing))
+            assertTrue(callback.console.none { it.getString(UiPreviewContract.KEY_TEXT).orEmpty().contains("not compiled") })
+            // An uncaught error of a TSX run names its TSX line: the interface the compiler erased does not shift it.
+            val throwing = "\"ui\";\n\ninterface Point {\n    x: number;\n}\n\nconst p: Point = { x: 1 };\nui.layout(<frame />);\n" +
+                "if (p.x > 0) {\n    throw new Error('tsx boom');\n}\n"
+            val thrown = runId(service.runScript(id, tsx(throwing, "tsx-throw")))
+            val runtimeError = awaitError(callback, thrown)
+            assertEquals(null, runtimeError.getString(UiPreviewContract.KEY_ERROR_CODE))
+            assertTrue(runtimeError.getString(UiPreviewContract.KEY_ERROR_MESSAGE)!!.contains("tsx boom"))
+            assertEquals(10, runtimeError.getInt(UiPreviewContract.KEY_LINE))
+            assertEquals(UiPreviewContract.EXIT_ERROR, awaitExit(callback, thrown))
+            // A stop right after runScript ends the run whether or not it is still compiling, exactly once.
+            val stoppedEarly = runId(service.runScript(id, tsx(counter, "tsx-stopped")))
+            assertEquals(UiPreviewContract.OUTCOME_APPLIED, outcome(service.stopScript(id)))
+            assertEquals(UiPreviewContract.EXIT_STOPPED, awaitExit(callback, stoppedEarly))
+            SystemClock.sleep(3_000)
+            assertTrue(callback.exits.none { it.getString(UiPreviewContract.KEY_RUN_ID) == stoppedEarly })
+            assertTrue(callback.console.none { it.getString(UiPreviewContract.KEY_RUN_ID) == stoppedEarly })
+            // Requests: an unknown dialect is refused.
+            assertEquals(UiPreviewContract.ERROR_INVALID_REQUEST, error(service.runScript(id, script(counter, name).apply { putString(UiPreviewContract.KEY_SCRIPT_DIALECT, "ts") })))
+            instrumentation.waitForIdleSync()
+            assertTrue(AutoJs.instance.scriptEngineService.scriptExecutions.none { it.source.name.startsWith("tsx-") && !it.isFinished })
+        }
+    }
+
     // ----------------------------------------------------------------------- project resources and projects (v3)
 
     /** The host's native layout sample: res/ with colors, drawables, five layouts (four of them included) and values. */
@@ -1003,5 +1083,9 @@ class UiPreviewServiceTest {
             assertTrue(callback.scriptErrors.isEmpty())
             assertEquals(UiPreviewContract.OUTCOME_APPLIED, outcome(service.resize(id, 300, 500)))
         }
+    }
+
+    private companion object {
+        const val TAG = "UiPreviewServiceTest"
     }
 }

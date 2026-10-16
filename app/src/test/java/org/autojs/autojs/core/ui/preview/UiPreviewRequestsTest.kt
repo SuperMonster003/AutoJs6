@@ -176,4 +176,21 @@ class UiPreviewRequestsTest {
             assertEquals("$bad", UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateLifecycleEvent(bad) })
         }
     }
+
+    @Test
+    fun v5DialectsDefaultToJsAndTsxRunsAreNamedAfterTheScript() {
+        assertEquals(UiPreviewContract.SCRIPT_DIALECT_JS, UiPreviewRequests.validateScriptDialect(null))
+        for (dialect in UiPreviewContract.SCRIPT_DIALECTS) assertEquals(dialect, UiPreviewRequests.validateScriptDialect(dialect))
+        for (bad in listOf<Any>("", "ts", "TSX", "jsx", 1, true)) {
+            assertEquals("$bad", UiPreviewContract.ERROR_INVALID_REQUEST, codeOf { UiPreviewRequests.validateScriptDialect(bad) })
+        }
+        // The compiled file is the script's name, which the host's task list shows without the extension.
+        assertEquals("todo.tsx", UiPreviewRequests.tsxSourceName("todo"))
+        assertEquals("main.tsx", UiPreviewRequests.tsxSourceName("main.tsx"))
+        assertEquals("a_b_c.tsx", UiPreviewRequests.tsxSourceName("a/b\\c"))
+        assertEquals("v1.2.tsx", UiPreviewRequests.tsxSourceName("v1.2"))
+        for (bad in listOf("", " ", ".", "..", ".hidden")) {
+            assertEquals("'$bad'", UiPreviewRequests.FALLBACK_TSX_SOURCE_NAME, UiPreviewRequests.tsxSourceName(bad))
+        }
+    }
 }
