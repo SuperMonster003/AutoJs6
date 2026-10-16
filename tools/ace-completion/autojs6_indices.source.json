@@ -9837,6 +9837,16 @@
           "signature": "plan(paths: string | string[], options: FilesBatchRename.Options): FilesBatchRename.Plan;"
         },
         {
+          "name": "preview",
+          "kind": "function",
+          "doc": "preview(item: string | FilesBatchRename.PreviewItem, options: FilesBatchRename.Options): FilesBatchRename.PreviewResult;",
+          "signature": "preview(item: string | FilesBatchRename.PreviewItem, options: FilesBatchRename.Options): FilesBatchRename.PreviewResult;",
+          "signatures": [
+            "preview(item: string | FilesBatchRename.PreviewItem, options: FilesBatchRename.Options): FilesBatchRename.PreviewResult;",
+            "preview(items: (string | FilesBatchRename.PreviewItem)[], options: FilesBatchRename.Options): FilesBatchRename.PreviewResult[];"
+          ]
+        },
+        {
           "name": "apply",
           "kind": "function",
           "doc": "apply(plan: FilesBatchRename.Plan, options?: FilesBatchRename.ApplyOptions): FilesBatchRename.Result;",
@@ -9855,6 +9865,30 @@
           "signature": "history(limit?: number): FilesBatchRename.HistoryEntry[];"
         },
         {
+          "name": "deleteHistory",
+          "kind": "function",
+          "doc": "deleteHistory(target: FilesBatchRename.Result | FilesBatchRename.HistoryEntry | string): boolean;",
+          "signature": "deleteHistory(target: FilesBatchRename.Result | FilesBatchRename.HistoryEntry | string): boolean;"
+        },
+        {
+          "name": "clearHistory",
+          "kind": "function",
+          "doc": "clearHistory(options?: FilesBatchRename.ClearHistoryOptions): number;",
+          "signature": "clearHistory(options?: FilesBatchRename.ClearHistoryOptions): number;"
+        },
+        {
+          "name": "presets",
+          "kind": "function",
+          "doc": "presets(): FilesBatchRename.Preset[];",
+          "signature": "presets(): FilesBatchRename.Preset[];"
+        },
+        {
+          "name": "importPresets",
+          "kind": "function",
+          "doc": "importPresets(json: string | FilesBatchRename.PresetDocument, options?: FilesBatchRename.ImportPresetsOptions): FilesBatchRename.ImportPresetsResult;",
+          "signature": "importPresets(json: string | FilesBatchRename.PresetDocument, options?: FilesBatchRename.ImportPresetsOptions): FilesBatchRename.ImportPresetsResult;"
+        },
+        {
           "name": "isAvailable",
           "kind": "function",
           "doc": "isAvailable(): boolean;",
@@ -9867,6 +9901,16 @@
           "signature": "planAsync(paths: string | string[], options: FilesBatchRename.Options): Promise<FilesBatchRename.Plan>;"
         },
         {
+          "name": "previewAsync",
+          "kind": "function",
+          "doc": "previewAsync(item: string | FilesBatchRename.PreviewItem, options: FilesBatchRename.Options): Promise<FilesBatchRename.PreviewResult>;",
+          "signature": "previewAsync(item: string | FilesBatchRename.PreviewItem, options: FilesBatchRename.Options): Promise<FilesBatchRename.PreviewResult>;",
+          "signatures": [
+            "previewAsync(item: string | FilesBatchRename.PreviewItem, options: FilesBatchRename.Options): Promise<FilesBatchRename.PreviewResult>;",
+            "previewAsync(items: (string | FilesBatchRename.PreviewItem)[], options: FilesBatchRename.Options): Promise<FilesBatchRename.PreviewResult[]>;"
+          ]
+        },
+        {
           "name": "applyAsync",
           "kind": "function",
           "doc": "applyAsync(plan: FilesBatchRename.Plan, options?: FilesBatchRename.ApplyOptions): Promise<FilesBatchRename.Result>;",
@@ -9877,6 +9921,18 @@
           "kind": "function",
           "doc": "undoAsync(target: FilesBatchRename.Result | string): Promise<FilesBatchRename.UndoResult>;",
           "signature": "undoAsync(target: FilesBatchRename.Result | string): Promise<FilesBatchRename.UndoResult>;"
+        },
+        {
+          "name": "presetsAsync",
+          "kind": "function",
+          "doc": "presetsAsync(): Promise<FilesBatchRename.Preset[]>;",
+          "signature": "presetsAsync(): Promise<FilesBatchRename.Preset[]>;"
+        },
+        {
+          "name": "importPresetsAsync",
+          "kind": "function",
+          "doc": "importPresetsAsync(json: string | FilesBatchRename.PresetDocument, options?: FilesBatchRename.ImportPresetsOptions): Promise<FilesBatchRename.ImportPresetsResult>;",
+          "signature": "importPresetsAsync(json: string | FilesBatchRename.PresetDocument, options?: FilesBatchRename.ImportPresetsOptions): Promise<FilesBatchRename.ImportPresetsResult>;"
         },
         {
           "name": "BatchRenameError",
