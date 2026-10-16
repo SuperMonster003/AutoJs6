@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -48,6 +49,19 @@ class AidlPluginHost<I : IInterface>(
      * capabilities; [probe] always reads fresh.
      */
     private val cacheDiscovery: Boolean = false,
+    /**
+     * Bind with `BIND_INCLUDE_CAPABILITIES` (API 29+), so the plugin process inherits the host's while-in-use
+     * capabilities such as the microphone (3-Macaw Speech roadmap D22). Off by default; only plugins that record or
+     * capture for the host opt in.
+     * zh-CN: 以 `BIND_INCLUDE_CAPABILITIES` (API 29+) 绑定, 使插件进程继承宿主的 while-in-use 能力 (如麦克风, 3-Macaw Speech 路线图 D22).
+     * 默认关闭; 只有替宿主录音或采集的插件才开启.
+     */
+    private val includeCapabilities: Boolean = false,
+    /**
+     * Bind with `BIND_IMPORTANT`, raising the plugin process to the host's foreground importance while bound.
+     * zh-CN: 以 `BIND_IMPORTANT` 绑定, 绑定期间把插件进程提升到宿主的前台重要性.
+     */
+    private val important: Boolean = false,
 ) {
 
     private val defaultBindTimeoutMs = 60_000L
@@ -456,14 +470,42 @@ class AidlPluginHost<I : IInterface>(
     }
 
     private fun buildBindFlags(serviceInfo: ServiceInfo): Int {
-        var flags = Context.BIND_AUTO_CREATE
-        // Only a plugin that owns a requested user interface receives this opt-in. Android still
-        // requires the bound client to be visible; background calls use the plugin notification.
-        if (allowActivityStarts && Build.VERSION.SDK_INT >= 34) flags = flags or Context.BIND_ALLOW_ACTIVITY_STARTS
-        if (externalServiceFlag != 0 && bindExternalServiceFlag != 0 && (serviceInfo.flags and externalServiceFlag) != 0) {
-            flags = flags or bindExternalServiceFlag
+        val external = externalServiceFlag != 0 && bindExternalServiceFlag != 0 && (serviceInfo.flags and externalServiceFlag) != 0
+        return bindFlags(
+            sdkInt = Build.VERSION.SDK_INT,
+            allowActivityStarts = allowActivityStarts,
+            includeCapabilities = includeCapabilities,
+            important = important,
+            externalServiceFlag = if (external) bindExternalServiceFlag else 0,
+        )
+    }
+
+    companion object {
+
+        /**
+         * The `bindService` flags of a plugin binding, pure for the JVM tests: `BIND_AUTO_CREATE`, plus
+         * `BIND_ALLOW_ACTIVITY_STARTS` (API 34+) for a plugin that owns a requested user interface (Android still
+         * requires the bound client to be visible; background calls use the plugin notification),
+         * `BIND_INCLUDE_CAPABILITIES` (API 29+) for a plugin that records for the host (3-Macaw Speech roadmap D22),
+         * `BIND_IMPORTANT`, and the external-service flag of an isolated service.
+         * zh-CN: 插件绑定的 `bindService` flags, 为 JVM 测试保持纯函数: `BIND_AUTO_CREATE`, 加上拥有被请求界面的插件所需的
+         * `BIND_ALLOW_ACTIVITY_STARTS` (API 34+; Android 仍要求绑定方可见, 后台调用使用插件通知), 替宿主录音的插件所需的
+         * `BIND_INCLUDE_CAPABILITIES` (API 29+, 3-Macaw Speech 路线图 D22), `BIND_IMPORTANT`, 以及隔离服务的外部服务 flag.
+         */
+        @SuppressLint("InlinedApi")
+        fun bindFlags(
+            sdkInt: Int,
+            allowActivityStarts: Boolean,
+            includeCapabilities: Boolean,
+            important: Boolean,
+            externalServiceFlag: Int = 0,
+        ): Int {
+            var flags = Context.BIND_AUTO_CREATE
+            if (allowActivityStarts && sdkInt >= 34) flags = flags or Context.BIND_ALLOW_ACTIVITY_STARTS
+            if (includeCapabilities && sdkInt >= 29) flags = flags or Context.BIND_INCLUDE_CAPABILITIES
+            if (important) flags = flags or Context.BIND_IMPORTANT
+            return flags or externalServiceFlag
         }
-        return flags
     }
 
     private fun buildBindFailureMessage(context: Context, serviceInfo: ServiceInfo, component: ComponentName, reason: String? = null): String {
