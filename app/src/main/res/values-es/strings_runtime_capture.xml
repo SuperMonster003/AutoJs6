@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_capture_grant">Permitir que Bun solicite el consentimiento de Android para capturar la pantalla. Desactivado por defecto; los cambios se aplican en la siguiente ejecución.</string>
+    <string name="text_bun_screen_capture_grant">Captura de pantalla</string>
+</resources>

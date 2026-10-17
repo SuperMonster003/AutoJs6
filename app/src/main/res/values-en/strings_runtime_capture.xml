@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_capture_grant">Allow Bun to request Android screen capture consent. Disabled by default; changes apply to the next execution.</string>
+    <string name="text_bun_screen_capture_grant">Screen capture</string>
+</resources>

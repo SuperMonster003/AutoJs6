@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.media.projection.MediaProjectionManager;
+import android.media.projection.MediaProjectionConfig;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +36,7 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     private static final int REQUEST_CODE_MEDIA_PROJECTION = 17777;
 
     private final Handler mHandler;
+    private final boolean mDefaultDisplay;
 
     @NonNull
     private WeakReference<Activity> mActivityRef = new WeakReference<>(null);
@@ -46,8 +48,13 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     private boolean mServiceUser;
 
     public ScreenCaptureRequester() {
+        this(false);
+    }
+
+    public ScreenCaptureRequester(boolean defaultDisplay) {
         super();
         mHandler = new Handler(Looper.getMainLooper());
+        mDefaultDisplay = defaultDisplay;
     }
 
     public interface Callback {
@@ -60,15 +67,11 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
 
     @Override
     public void onActivityCreate(StartForResultActivity startForResultActivity) {
-        /* Empty body. */
-    }
-
-    @Override
-    public void onActivityCreated(Activity activity, Bundle bundle) {
-        super.onActivityCreated(activity, bundle);
-        if (activity instanceof StartForResultActivity && mActivityRef.get() == null) {
+        // This callback belongs to our proxy. An application-wide lifecycle callback can
+        // otherwise attach a concurrent request to a different StartForResultActivity.
+        if (startForResultActivity != null && mCallback != null) {
             mHandler.removeCallbacksAndMessages(null);
-            request(activity);
+            request(startForResultActivity);
         }
     }
 
@@ -140,8 +143,10 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     }
 
     @Override
-    public void onActivityStopped(Activity activity) {
-        super.onActivityStopped(activity);
+    public void onActivityDestroyed(Activity activity) {
+        super.onActivityDestroyed(activity);
+        // A full-screen Android consent UI stops its caller while awaiting a decision.
+        // Only destruction, an actual result, or explicit cancellation ends the request.
         if (activity == mActivityRef.get() && activity instanceof StartForResultActivity && !mWaitingForForegroundService) {
             if (mCallback != null) {
                 mCallback.onRequestResult(0, null);
@@ -179,7 +184,10 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
         mActivityRef = new WeakReference<>(activity);
         try {
             MediaProjectionManager manager = (MediaProjectionManager) activity.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-            activity.startActivityForResult(manager.createScreenCaptureIntent(), REQUEST_CODE_MEDIA_PROJECTION);
+            Intent intent = mDefaultDisplay && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                    ? manager.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay())
+                    : manager.createScreenCaptureIntent();
+            activity.startActivityForResult(intent, REQUEST_CODE_MEDIA_PROJECTION);
         } catch (Exception e) {
             if (mCallback != null) {
                 mCallback.onRequestError(e);
@@ -286,6 +294,11 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     /** Cancels this request's activity and callbacks, without cancelling other capturers. */
     public void cancel() {
         mHandler.post(() -> {
+            Activity activity = mActivityRef.get();
+            if (activity instanceof StartForResultActivity) {
+                // Finishing only the proxy leaves its system consent activity on screen.
+                activity.finishActivity(REQUEST_CODE_MEDIA_PROJECTION);
+            }
             recycle();
             unbindService();
         });

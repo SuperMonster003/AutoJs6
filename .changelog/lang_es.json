@@ -140,7 +140,9 @@
         "El modo cliente admite reconexión automática tras desconexiones inesperadas, reintentos al recuperarse la red y restauración de conexiones al iniciar la aplicación",
         "Módulo Node.js screen_metrics y funciones globales de coordenadas compatibles, con las reglas del host compartidas con el SDK Bun y la rotación actual de pantalla",
         "Cliente explícito de API del host para Bun con Pinyin, Pinyin4j, coordenadas y consola, con interruptores de capacidades independientes",
-        "Node.js y Bun admiten OpenCC asíncrono, códecs de imagen, lectura de píxeles, transformaciones y búsqueda de colores; acceso a archivos de imagen de Bun autorizado por separado"
+        "Node.js y Bun admiten OpenCC asíncrono, códecs de imagen, lectura de píxeles, transformaciones y búsqueda de colores; acceso a archivos de imagen de Bun autorizado por separado",
+        "Los Workers de Node.js usan OpenCC e imágenes mediante el runtime padre, con CJS, ESM, Workers anidados y transferencia binaria",
+        "Bun ofrece captura de pantalla con permiso independiente, consentimiento de Android, limpieza al cancelar o expirar y nueva solicitud"
       ],
       "fix": [
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",
@@ -272,7 +274,8 @@
         "device.width/height y las conversiones de coordenadas leían dimensiones nulas al recrearse una actividad durante la lectura del tamaño por un script",
         "Node.js pinyin/pinyin4j solo convertía un pequeño diccionario integrado; ahora usa los plugins Pinyin instalados",
         "Métodos de ventana y estilo de consola de Node.js que no tenían efecto",
-        "Pérdida de los últimos registros de Bun cuando el resultado síncrono llegaba antes de los callbacks de salida al finalizar el script"
+        "Pérdida de los últimos registros de Bun cuando el resultado síncrono llegaba antes de los callbacks de salida al finalizar el script",
+        "Finalización prematura del consentimiento al ocultarse su actividad, diálogos persistentes tras cancelar y dimensiones de captura ignoradas"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",

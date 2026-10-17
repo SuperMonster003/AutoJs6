@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_capture_grant">Разрешить Bun запрашивать согласие Android на захват экрана. По умолчанию отключено; изменения действуют со следующего запуска.</string>
+    <string name="text_bun_screen_capture_grant">Снимок экрана</string>
+</resources>

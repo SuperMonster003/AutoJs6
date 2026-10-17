@@ -57,7 +57,7 @@ internal class NodeScreenCaptureSession(
                     return@synchronized callback(Result.failure(IllegalArgumentException("Capture dimensions must both be omitted or in 1..8192.")))
                 }
                 pending = callback
-                val request = ScreenCaptureRequester()
+                val request = ScreenCaptureRequester(true)
                 requester = request
                 val deadline = Runnable {
                     synchronized(lock) {
@@ -93,7 +93,8 @@ internal class NodeScreenCaptureSession(
                             }
                             val result = runCatching {
                                 val capture = ScreenCapturer(context, data, ScreenCapturer.Options(
-                                    width, height, orientation, context.resources.displayMetrics.densityDpi, false,
+                                    width, height, if (width > 0) ScreenCapturer.ORIENTATION_NONE else orientation,
+                                    context.resources.displayMetrics.densityDpi, false,
                                 ), main)
                                 capturer = capture
                                 id = "screen-${UUID.randomUUID()}"

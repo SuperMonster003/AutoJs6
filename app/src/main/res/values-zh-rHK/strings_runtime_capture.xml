@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_capture_grant">允許 Bun 請求 Android 螢幕錄製授權. 預設關閉, 變更於下次執行生效.</string>
+    <string name="text_bun_screen_capture_grant">螢幕擷取</string>
+</resources>

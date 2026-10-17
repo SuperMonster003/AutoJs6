@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_capture_grant">允许 Bun 请求 Android 录屏授权. 默认关闭, 修改对下一次执行生效.</string>
+    <string name="text_bun_screen_capture_grant">屏幕截图</string>
+</resources>

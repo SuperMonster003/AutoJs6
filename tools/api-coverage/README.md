@@ -19,7 +19,10 @@ Run the Node wrapper regression, Bun client tests and the host's
 `OpenccImageBridgeDeviceTest` additionally covers real CJS/ESM/Bun conversions,
 ARGB pixels and alpha, transforms, encoded and PFD byte round trips, bounded JSON
 results, revoked grants and execution-owned handles. Workers use their documented
-`autojs6:bridge` entry rather than the main-thread module facade.
+`autojs6:bridge` entry in that baseline suite. `CaptureWorkerBridgeDeviceTest`
+adds the real CJS/ESM/nested Worker facades, large byte transfers, Bun consent
+and actual pixels across rotation, fixed dimensions, denial, timeout, cancellation
+and grant checks. The screen tests use an owned color fixture and real Android UI.
 
 The extractor also resolves Mail's explicit default-client forwarding table,
 including its synchronous-only methods and generated Async names. List suffixes,

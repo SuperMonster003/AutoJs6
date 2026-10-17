@@ -140,7 +140,9 @@
         "Le mode client permet la reconnexion après une coupure imprévue, de nouvelles tentatives au retour du réseau et la restauration de la connexion au démarrage de l'application",
         "Module Node.js screen_metrics et fonctions globales de conversion compatibles, partageant les règles de l'hôte avec le SDK Bun et suivant la rotation de l'écran",
         "Client explicite de l'API hôte Bun pour Pinyin, Pinyin4j, les coordonnées et la console, avec des interrupteurs de capacités indépendants",
-        "Node.js et Bun prennent en charge OpenCC asynchrone, les codecs, la lecture des pixels, les transformations et la recherche de couleurs; accès aux fichiers image de Bun autorisé séparément"
+        "Node.js et Bun prennent en charge OpenCC asynchrone, les codecs, la lecture des pixels, les transformations et la recherche de couleurs; accès aux fichiers image de Bun autorisé séparément",
+        "Les Workers Node.js utilisent OpenCC et les images via le runtime parent, avec CJS, ESM, Workers imbriqués et transfert binaire",
+        "Bun propose la capture écran avec autorisation distincte, consentement Android, nettoyage après expiration/annulation et nouvelle demande"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
@@ -272,7 +274,8 @@
         "device.width/height et les conversions de coordonnées lisant des dimensions nulles lorsqu'une activité est recréée pendant la lecture des dimensions par un script",
         "Node.js pinyin/pinyin4j limité à un petit dictionnaire intégré; les plugins Pinyin installés sont désormais utilisés",
         "Méthodes Node.js de contrôle de la fenêtre et du style de console sans effet",
-        "Perte des derniers journaux Bun lorsque le résultat synchrone arrivait avant les rappels de sortie en fin de script"
+        "Perte des derniers journaux Bun lorsque le résultat synchrone arrivait avant les rappels de sortie en fin de script",
+        "Fin prématurée du consentement lorsque son activité est masquée, dialogues persistants après annulation et dimensions de capture ignorées"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",

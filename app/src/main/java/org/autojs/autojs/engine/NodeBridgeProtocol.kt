@@ -2185,9 +2185,16 @@ class AndroidNodeBridgeCapabilityProvider(
                 registerImage(bitmap, "screen").toJson().toString()
             }
             "stop" -> imageOperation(request, callback) {
-                val id = args.optString(0)
-                resourceRegistry.close(id, "media_projection.stop")
-                if (screenCaptureResourceId == id) screenCaptureResourceId = null
+                val id = args.optString(0).takeIf(String::isNotBlank)
+                if (id == null) {
+                    // Also cancel an outstanding consent dialog, before a capturer id exists.
+                    screenCapture.stop()
+                    screenCaptureResourceId?.let { resourceRegistry.close(it, "media_projection.stop") }
+                    screenCaptureResourceId = null
+                } else {
+                    resourceRegistry.close(id, "media_projection.stop")
+                    if (screenCaptureResourceId == id) screenCaptureResourceId = null
+                }
                 "null"
             }
         }

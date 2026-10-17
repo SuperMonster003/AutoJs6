@@ -98,8 +98,9 @@ removed. Each host test restores the Bun grant preferences it changed.
 
 ## Remaining boundaries
 
-Advanced feature extraction/matching and the rest of Rhino's image/OpenCV API,
-Bun screen capture, high-level Worker facade parity, Android-object helpers,
+The subsequent [capture/Worker batch](runtime-capture-worker-2026-10-17.md) adds Bun
+screen capture and the Worker OpenCC/image facades. Advanced feature extraction/
+matching and the rest of Rhino's image/OpenCV API, the other Worker host facades, Android-object helpers,
 calendar/IntentTask, UI/Compose and the other large runtime surfaces remain
 separate audit items. Direct implementations, native alternatives and Rhino
 delegation must continue to be counted separately.

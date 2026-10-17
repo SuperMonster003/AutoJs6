@@ -20,6 +20,7 @@ object BunHostCapabilityGrants {
     const val TEXT_OPENCC = "text.opencc"
     const val IMAGE_PROCESS = "image.process"
     const val IMAGE_FILES = "image.files"
+    const val SCREEN_CAPTURE = "screen.capture"
     const val SCREEN_METRICS = "screen.metrics"
     const val CONSOLE_CONTROL = "console.control"
 
@@ -71,6 +72,10 @@ object BunHostCapabilityGrants {
     fun isImageFilesGranted(context: Context): Boolean = isGranted(context, IMAGE_FILES, false)
     fun setImageFilesGranted(context: Context, granted: Boolean) = setGranted(context, IMAGE_FILES, granted)
 
+    /** Allows requesting Android consent, not silently authorizing MediaProjection. */
+    fun isScreenCaptureGranted(context: Context): Boolean = isGranted(context, SCREEN_CAPTURE, false)
+    fun setScreenCaptureGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_CAPTURE, granted)
+
     fun isScreenMetricsGranted(context: Context): Boolean = isGranted(context, SCREEN_METRICS, true)
     fun setScreenMetricsGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_METRICS, granted)
 
@@ -94,6 +99,7 @@ object BunHostCapabilityGrants {
         if (isTextOpenccGranted(context)) add(TEXT_OPENCC)
         if (isImageProcessGranted(context)) add(IMAGE_PROCESS)
         if (isImageFilesGranted(context)) add(IMAGE_FILES)
+        if (isScreenCaptureGranted(context)) add(SCREEN_CAPTURE)
         if (isScreenMetricsGranted(context)) add(SCREEN_METRICS)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
     }

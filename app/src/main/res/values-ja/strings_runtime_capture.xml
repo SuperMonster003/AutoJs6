@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_capture_grant">Bun が Android の画面キャプチャ許可を要求できるようにします. 初期設定では無効, 変更は次回実行から適用されます.</string>
+    <string name="text_bun_screen_capture_grant">画面キャプチャ</string>
+</resources>

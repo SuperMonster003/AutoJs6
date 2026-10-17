@@ -51,6 +51,10 @@ internal class BunHostCapabilityBroker(
     private val opencc by lazy { AndroidNodeOpenccBackend(appContext) }
     private val imageScopeLock = Any()
     private var imageProvider: AndroidNodeBridgeCapabilityProvider? = null
+    private val captureLock = Any()
+    private data class CaptureAttempt(val id: String, val result: CompletableFuture<NodeBridgeResponse>)
+    private var captureAttempt: CaptureAttempt? = null
+    private var captureId: String? = null
 
     /** Granted capability IDs in contract order; a broker is only attached when this is non-empty. */
     val capabilities: List<String> = capabilities.toList()
@@ -64,6 +68,7 @@ internal class BunHostCapabilityBroker(
     /** After this no call is answered; the plugin fails its pending calls itself when the run ends. */
     fun close() {
         if (!closed.compareAndSet(false, true)) return
+        synchronized(captureLock) { captureAttempt = null; captureId = null }
         val provider = synchronized(imageScopeLock) { imageProvider.also { imageProvider = null } }
         provider?.destroy(NodeBridgeError.processDead("Bun execution finished"))
     }
@@ -146,6 +151,7 @@ internal class BunHostCapabilityBroker(
             }
             BunHostCapabilityGrants.IMAGE_PROCESS -> imageCall(request, IMAGE_PROCESS_METHODS)
             BunHostCapabilityGrants.IMAGE_FILES -> imageCall(request, IMAGE_FILE_METHODS)
+            BunHostCapabilityGrants.SCREEN_CAPTURE -> screenCaptureCall(request)
             BunHostCapabilityGrants.SCREEN_METRICS -> methodCall(request, coordinates::invoke)
             BunHostCapabilityGrants.CONSOLE_CONTROL -> methodCall(request, console::invoke)
             else -> Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_UNKNOWN_CAPABILITY, "Capability is not implemented by this host")
@@ -202,25 +208,33 @@ internal class BunHostCapabilityBroker(
         return Outcome.Failure(code, error?.message ?: "Host capability failed")
     }
 
-    /** Reuses Node's codec, serial image lane, execution-owned handles and resource cleanup. */
-    private fun imageCall(request: JSONObject, methods: Set<String>): Outcome {
-        val (method, args) = parseMethodCall(request)
-        require(method in methods) { "Image method is not part of this capability: $method" }
-        val provider = synchronized(imageScopeLock) {
-            if (closed.get()) return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE, "Bun execution has finished")
+    private fun imagesProvider(): AndroidNodeBridgeCapabilityProvider = synchronized(imageScopeLock) {
+            check(!closed.get()) { "Bun execution has finished" }
             imageProvider ?: AndroidNodeBridgeCapabilityProvider(
                 appContext,
                 engineInfo = NodeBridgeEngineInfo.fromContext(appContext, id = executionId, cwd = workingDirectory.orEmpty())
                     .copy(engineName = "bun", backend = "plugin"),
                 javaInteropEnabled = false,
-                permissionManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf(NodeBridgePermissionManifest.IMAGE)),
+                permissionManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(buildList {
+                    add(NodeBridgePermissionManifest.IMAGE)
+                    if (BunHostCapabilityGrants.SCREEN_CAPTURE in capabilities) add(NodeBridgePermissionManifest.SCREEN_CAPTURE)
+                }),
             ).also { imageProvider = it }
-        }
+    }
+
+    /** Reuses Node's codec, serial image lane, execution-owned handles and resource cleanup. */
+    private fun imageCall(request: JSONObject, methods: Set<String>): Outcome {
+        val (method, args) = parseMethodCall(request)
+        require(method in methods) { "Image method is not part of this capability: $method" }
+        return awaitImageCall(NodeBridgeModules.IMAGES, method, args)
+    }
+
+    private fun awaitImageCall(module: String, method: String, args: JSONArray): Outcome {
         val result = CompletableFuture<NodeBridgeResponse>()
-        provider.dispatch(NodeBridgeRequest(
-            id = "$executionId-image-${UUID.randomUUID()}", module = NodeBridgeModules.IMAGES, method = method,
+        imagesProvider().dispatch(NodeBridgeRequest(
+            id = "$executionId-image-${UUID.randomUUID()}", module = module, method = method,
             argsJson = args.toString(), timeoutMs = IMAGE_CALL_TIMEOUT_MILLIS,
-            permissions = listOf(NodeBridgePermissionManifest.IMAGE),
+            permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method),
         )) { response -> result.complete(response) }
         return try {
             bridgeResponse(result.get(IMAGE_CALL_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS))
@@ -231,6 +245,72 @@ internal class BunHostCapabilityBroker(
             Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE, "Image execution is finishing")
         }
     }
+
+    /** Consent can outlive one 10 s bridge call. Polls wait at most 1 s, leaving stop/exit bounded. */
+    private fun screenCaptureCall(request: JSONObject): Outcome {
+        val (method, args) = parseMethodCall(request)
+        require(method in SCREEN_CAPTURE_METHODS) { "Unsupported screen capture method: $method" }
+        return when (method) {
+            "requestScreenCapture" -> {
+                require(args.length() <= 1 && (args.length() == 0 || args.opt(0) is JSONObject)) { "Capture options must be an object" }
+                val options = args.optJSONObject(0) ?: JSONObject()
+                val duration = if (options.has("timeoutMs")) (options.opt("timeoutMs") as? Number)?.toDouble() else 120_000.0
+                require(duration != null && duration.isFinite() && duration % 1 == 0.0 && duration in 1.0..120_000.0) { "Consent timeoutMs must be an integer in 1..120000" }
+                val attempt = synchronized(captureLock) {
+                    require(captureAttempt?.result?.isDone != false) { "Screen capture consent is already pending" }
+                    CaptureAttempt(UUID.randomUUID().toString(), CompletableFuture()).also { captureAttempt = it }
+                }
+                val provider = imagesProvider()
+                provider.dispatch(NodeBridgeRequest(
+                    id = "$executionId-consent-${attempt.id}", module = NodeBridgeModules.MEDIA_PROJECTION,
+                    method = "requestScreenCapture", argsJson = JSONArray().put(options).toString(),
+                    timeoutMs = duration.toLong(), permissions = listOf(NodeBridgePermissionManifest.SCREEN_CAPTURE),
+                )) { response ->
+                    val id = if (response.ok) JSONObject(response.resultJson!!).getString("id") else null
+                    val accepted = synchronized(captureLock) {
+                        if (!closed.get() && captureAttempt === attempt) {
+                            if (id != null) captureId = id
+                            attempt.result.complete(response)
+                            true
+                        } else { attempt.result.complete(response); false }
+                    }
+                    if (!accepted && id != null) provider.dispatch(NodeBridgeRequest(
+                        id = "$executionId-late-consent", module = NodeBridgeModules.MEDIA_PROJECTION, method = "stop",
+                        argsJson = JSONArray().put(id).toString(), timeoutMs = IMAGE_CALL_TIMEOUT_MILLIS,
+                        permissions = listOf(NodeBridgePermissionManifest.SCREEN_CAPTURE),
+                    )) { }
+                }
+                value(JSONObject().put("requestId", attempt.id))
+            }
+            "getRequestResult" -> {
+                require(args.length() == 1 && args.opt(0) is String) { "Consent request id is required" }
+                val attempt = synchronized(captureLock) { captureAttempt?.takeIf { it.id == args.getString(0) } }
+                    ?: return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "Consent request has ended or was replaced")
+                try {
+                    val response = attempt.result.get(1, TimeUnit.SECONDS)
+                    if (response.ok) value(JSONObject().put("state", "granted")) else bridgeResponse(response)
+                } catch (_: TimeoutException) { value(JSONObject().put("state", "pending")) }
+            }
+            "captureScreen" -> {
+                require(args.length() == 0) { "captureScreen takes no arguments" }
+                val id = synchronized(captureLock) { captureId }
+                    ?: return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_NOT_GRANTED, "Request Android screen capture consent first")
+                awaitImageCall(NodeBridgeModules.MEDIA_PROJECTION, "nextImage", JSONArray().put(id))
+            }
+            else -> {
+                require(args.length() == 0) { "stopScreenCapture takes no arguments" }
+                val hadSession = synchronized(captureLock) {
+                    val existed = captureAttempt != null || captureId != null
+                    captureAttempt = null; captureId = null
+                    existed
+                }
+                val stopped = awaitImageCall(NodeBridgeModules.MEDIA_PROJECTION, "stop", JSONArray())
+                if (stopped is Outcome.Failure) stopped else value(hadSession)
+            }
+        }
+    }
+
+    private fun value(value: Any) = Outcome.Success(JSONObject().put("value", value).toString())
 
     /** `{}` in, the `android.os.Build` facts out; never a serial, IMEI, Android ID, account or network identifier. */
     private fun deviceInfo(request: JSONObject): Outcome {
@@ -295,6 +375,7 @@ internal class BunHostCapabilityBroker(
             "findImage", "matchTemplate", "findColor", "findMultiColors", "detectsColor", "findAllPointsForColor", "recycle",
         )
         val IMAGE_FILE_METHODS = setOf("readImage", "saveImage")
+        val SCREEN_CAPTURE_METHODS = setOf("requestScreenCapture", "getRequestResult", "captureScreen", "stopScreenCapture")
         const val TOAST_TEXT_KEY = "text"
         const val TOAST_DURATION_KEY = "duration"
         const val TOAST_DURATION_SHORT = "short"

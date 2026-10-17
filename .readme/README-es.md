@@ -327,6 +327,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Módulo Node.js screen_metrics y funciones globales de coordenadas compatibles, con las reglas del host compartidas con el SDK Bun y la rotación actual de pantalla
 * `Nuevo` Cliente explícito de API del host para Bun con Pinyin, Pinyin4j, coordenadas y consola, con interruptores de capacidades independientes
 * `Nuevo` Node.js y Bun admiten OpenCC asíncrono, códecs de imagen, lectura de píxeles, transformaciones y búsqueda de colores; acceso a archivos de imagen de Bun autorizado por separado
+* `Nuevo` Los Workers de Node.js usan OpenCC e imágenes mediante el runtime padre, con CJS, ESM, Workers anidados y transferencia binaria
+* `Nuevo` Bun ofrece captura de pantalla con permiso independiente, consentimiento de Android, limpieza al cancelar o expirar y nueva solicitud
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
@@ -457,6 +459,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Node.js pinyin/pinyin4j solo convertía un pequeño diccionario integrado; ahora usa los plugins Pinyin instalados
 * `Corrección` Métodos de ventana y estilo de consola de Node.js que no tenían efecto
 * `Corrección` Pérdida de los últimos registros de Bun cuando el resultado síncrono llegaba antes de los callbacks de salida al finalizar el script
+* `Corrección` Finalización prematura del consentimiento al ocultarse su actividad, diálogos persistentes tras cancelar y dimensiones de captura ignoradas
 * `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
 * `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
 * `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano

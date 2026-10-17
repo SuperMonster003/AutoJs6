@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_capture_grant">السماح لـ Bun بطلب موافقة Android على التقاط الشاشة. معطل افتراضيا; تسري التغييرات عند التشغيل التالي.</string>
+    <string name="text_bun_screen_capture_grant">التقاط الشاشة</string>
+</resources>

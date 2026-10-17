@@ -93,6 +93,8 @@ public class ScreenCapturer {
     public ScreenCapturer(Context context, Intent data, Options options, Handler handler) {
         mOptions = options;
         mHandler = handler;
+        mScreenDensity = options.density;
+        mOrientation = options.orientation;
 
         mImageCallbackThread = new HandlerThread("ScreenCapturer-ImageReader");
         mImageCallbackThread.start();
@@ -116,6 +118,7 @@ public class ScreenCapturer {
                 // Only care about DEFAULT_DISPLAY.
                 // zh-CN: 只关心 DEFAULT_DISPLAY.
                 if (displayId != Display.DEFAULT_DISPLAY) return;
+                if (mOrientation != ORIENTATION_AUTO) return;
 
                 // Mark refresh for next capture to survive background state.
                 // zh-CN: 标记下一次 capture 刷新, 用于后台状态下避免错过配置变化事件.
@@ -137,8 +140,6 @@ public class ScreenCapturer {
             mMediaProjection = ((MediaProjectionManager) context.getSystemService(Context.MEDIA_PROJECTION_SERVICE))
                     .getMediaProjection(Activity.RESULT_OK, (Intent) data.clone());
             mMediaProjection.registerCallback(mMediaProjectionCallback, mHandler);
-            mScreenDensity = options.density;
-            mOrientation = options.orientation;
 
             refreshDetectedOrientation();
             refreshVirtualDisplay(mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation, true);
@@ -299,6 +300,9 @@ public class ScreenCapturer {
         }
 
         if (mImageReader != null) {
+            // Detach the producer before closing its consumer. Some devices otherwise keep
+            // the virtual display attached to an abandoned BufferQueue after rotation.
+            if (mVirtualDisplay != null) mVirtualDisplay.setSurface(null);
             mImageReader.close();
         }
         synchronized (mImageAvailableLock) {
@@ -415,6 +419,7 @@ public class ScreenCapturer {
             if (mImageReader != null
                 && (mImageReader.getWidth() != expectedWidth || mImageReader.getHeight() != expectedHeight)) {
                 refreshVirtualDisplay(mDetectedOrientation, false);
+                mShouldRefreshVirtualDisplayOnNextCapture = false;
             }
         }
 

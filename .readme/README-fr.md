@@ -327,6 +327,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Module Node.js screen_metrics et fonctions globales de conversion compatibles, partageant les règles de l'hôte avec le SDK Bun et suivant la rotation de l'écran
 * `Fonctionnalité` Client explicite de l'API hôte Bun pour Pinyin, Pinyin4j, les coordonnées et la console, avec des interrupteurs de capacités indépendants
 * `Fonctionnalité` Node.js et Bun prennent en charge OpenCC asynchrone, les codecs, la lecture des pixels, les transformations et la recherche de couleurs; accès aux fichiers image de Bun autorisé séparément
+* `Fonctionnalité` Les Workers Node.js utilisent OpenCC et les images via le runtime parent, avec CJS, ESM, Workers imbriqués et transfert binaire
+* `Fonctionnalité` Bun propose la capture écran avec autorisation distincte, consentement Android, nettoyage après expiration/annulation et nouvelle demande
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés
@@ -457,6 +459,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Node.js pinyin/pinyin4j limité à un petit dictionnaire intégré; les plugins Pinyin installés sont désormais utilisés
 * `Correction` Méthodes Node.js de contrôle de la fenêtre et du style de console sans effet
 * `Correction` Perte des derniers journaux Bun lorsque le résultat synchrone arrivait avant les rappels de sortie en fin de script
+* `Correction` Fin prématurée du consentement lorsque son activité est masquée, dialogues persistants après annulation et dimensions de capture ignorées
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan

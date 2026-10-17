@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_capture_grant">Bun이 Android 화면 캡처 승인을 요청하도록 허용합니다. 기본적으로 꺼져 있으며 변경 사항은 다음 실행부터 적용됩니다.</string>
+    <string name="text_bun_screen_capture_grant">화면 캡처</string>
+</resources>

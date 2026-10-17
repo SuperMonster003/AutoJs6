@@ -113,14 +113,23 @@ const nodeImageAdaptors = ['getSize','getWidth','getHeight','isRecycled','reques
   'detectColor','findPointsByColor','findColorEquals','findPointByColor','findPointByColors','read','save'];
 assert.deepEqual(sorted(keys(node.image)),sorted([...imageMethods,...nodeImageAdaptors]),'Node image export/host drift');
 assert.deepEqual(sorted(keys(node.images)),sorted(keys(node.image)),'image/images export drift');
-for (const [capability,field] of [['image.process','IMAGE_PROCESS_METHODS'],['image.files','IMAGE_FILE_METHODS']]) {
+for (const [capability,field] of [['image.process','IMAGE_PROCESS_METHODS'],['image.files','IMAGE_FILE_METHODS'],['screen.capture','SCREEN_CAPTURE_METHODS']]) {
   assert.deepEqual(sorted(bun.HOST_API_METHODS[capability]),methods('BunHostCapabilityBroker.kt',field),`${capability}: Bun host/client drift`);
 }
 assert.deepEqual(sorted(keys(bunClient.images)),sorted([
   ...bun.HOST_API_METHODS['image.process'],...bun.HOST_API_METHODS['image.files'],
   'fromBytes','toBytes','getSize','detectColor','findPointsByColor',
+  'requestScreenCapture','captureScreen','stopScreenCapture',
 ]),'Bun public image wrapper drift');
-assert(!('captureScreen' in bunClient.images),'Bun must not advertise undeclared screen-capture support');
+const createWorkerModules = new Function('return (' + segment('  function __autojs6_worker_host_modules(', '  async function __autojs6_worker_invoke(') + ')')();
+const workerCalls = [];
+const workerModules = createWorkerModules(async (...call) => { workerCalls.push(call); return 'converted'; },
+  {opencc:keys(node.opencc),image:keys(node.image),images:keys(node.images)});
+for (const name of ['opencc','image','images']) assert.deepEqual(sorted(keys(workerModules.get(name))),sorted(keys(node[name])));
+for (const name of conversionTypes) {
+  assert.equal(await workerModules.get('opencc')[name]('汉字'),'converted');
+  assert.deepEqual(workerCalls.at(-1).slice(0,3),['autojs6:worker-module:opencc',name,['汉字']]);
+}
 const protocol = read(path.join(engine,'NodeBridgeProtocol.kt'));
 assert.match(protocol,/SCREEN_METRICS to screenMetricsMethods/);
 assert.match(protocol,/consoleMethods = setOf\("tail"\) \+ RuntimeConsoleBridge\.METHODS/);
@@ -130,4 +139,5 @@ assert.match(index,/screen_metrics\.d\.ts/);
 console.log(JSON.stringify({passed:true,groups:Object.fromEntries(groups.map(([name,methods])=>[name,methods.length])),
   opencc:{conversions:conversionTypes.length,methods:openccMethods.length,dispatchChecks:nodeCalls.length+bunCalls.length},
   images:{node:keys(node.images).length,bun:keys(bunClient.images).length},
-  scope:'Actual main-thread Node and Bun clients versus host; not full Rhino equivalence or Android execution'},null,2));
+  workers:{modules:workerModules.size,openccDispatches:workerCalls.length},
+  scope:'Actual Node main/Worker and Bun clients versus host; not full Rhino equivalence or Android execution'},null,2));

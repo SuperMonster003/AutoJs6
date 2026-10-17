@@ -2,6 +2,11 @@
 
     <application>
         <activity
+            android:name="org.autojs.autojs.engine.RuntimeCaptureFixtureActivity"
+            android:exported="false"
+            android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|screenLayout"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity
             android:name="org.autojs.autojs.ui.explorer.ExplorerPathMenuProbeActivity"
             android:exported="false"
             android:theme="@style/AppTheme" />
