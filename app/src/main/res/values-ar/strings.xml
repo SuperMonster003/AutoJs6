@@ -823,6 +823,8 @@
     <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
     <string name="summary_auto_reconnect">إعادة الاتصال تلقائيا بعد انقطاع غير متوقع. يتم احترام قطع الاتصال الصريح من أي طرف</string>
+    <string name="summary_bun_ui_compose_grant">السماح بعرض نوافذ Compose ومربعات الحوار والنوافذ العائمة</string>
+    <string name="summary_bun_ui_layout_grant">السماح للبرامج النصية بفتح نوافذ التخطيط الأصلية وتحديثها</string>
     <string name="summary_clear_media_playback_history">حذف جميع مواضع تشغيل الوسائط التي حفظها المضيف</string>
     <string name="summary_code_editor_settings">فتح صفحة إعدادات محرر الشفرة الكاملة</string>
     <string name="summary_codegen_models">استيراد نماذج توليد الكود وتنزيلها وإدارتها</string>
@@ -924,6 +926,8 @@
     <string name="text_bun_host_capabilities">جسر قدرات Bun</string>
     <string name="text_bun_host_info_grant">لقطة معلومات المضيف</string>
     <string name="summary_bun_host_info_grant">تقديم لقطة للقراءة فقط عن إصدار AutoJs6 ولغته إلى Bun scripts عبر AUTOJS6_HOST_INFO_FILE; تسري من التشغيل التالي</string>
+    <string name="text_bun_ui_compose_grant">واجهة Compose</string>
+    <string name="text_bun_ui_layout_grant">تخطيطات الواجهة</string>
     <string name="text_bun_ui_toast_grant">رسائل Toast</string>
     <string name="summary_bun_ui_toast_grant">السماح لـ Bun scripts بعرض رسائل Toast قصيرة عبر جسر القدرات (ui.toast, بحد أقصى 4 لكل تشغيل); تسري من التشغيل التالي</string>
     <string name="text_bun_device_info_grant">معلومات الجهاز</string>

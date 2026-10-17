@@ -335,6 +335,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `新增` Node.js/Bun images 支援進階濾鏡, 色彩空間轉換, 多點找色, 圓形偵測, 相似度指標及 URL 載入
 * `新增` Node.js/Bun images 支援 SIFT/ORB 特徵擷取與比對, 返回場景座標和 ObjectFrame 幾何資訊, 並管理執行內的 Mat/特徵控制代碼
 * `新增` Node.js/Bun images 支援 PNG 量化和壓縮, 提供品質/記憶體度量, 二進位結果及檔案描述元輸出
+* `新增` Node.js/Bun UI 與 Compose 支援原生佈局, 資料組件, 響應式狀態及視窗事件, 提供獨立授權與視窗自動清理
 * `修復` runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題
 * `修復` Android 7.x 調用 runtime.loadDex 方法時可能損壞 DEX 緩存並導致類加載失敗的問題
 * `修復` Rhino 引擎及內置模塊的作用域, 參數轉換與返回值處理不兼容導致部分腳本行為異常的問題

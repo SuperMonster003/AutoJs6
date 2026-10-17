@@ -335,6 +335,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` Node.js/Bun images에서 고급 필터, 색 공간 변환, 다중 색상 검색, 원 검출, 유사도 지표 및 URL 로드 지원
 * `추가` Node.js/Bun images에서 SIFT/ORB 특징 추출과 매칭, 장면 좌표와 ObjectFrame 기하 정보 및 실행별 Mat/특징 핸들 관리 지원
 * `추가` Node.js/Bun images에서 PNG 양자화와 압축, 품질/메모리 지표, 바이너리 결과 및 파일 디스크립터 출력 지원
+* `추가` Node.js/Bun UI 및 Compose에서 기본 레이아웃, 데이터 구성 요소, 반응형 상태, 창 이벤트, 개별 권한 및 자동 창 정리 지원
 * `수정` runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제
 * `수정` Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제
 * `수정` Rhino 엔진과 내장 모듈의 스코프, 인수 변환 및 반환값 처리 비호환으로 일부 스크립트 동작이 비정상적인 문제

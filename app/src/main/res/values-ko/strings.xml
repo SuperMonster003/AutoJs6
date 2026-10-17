@@ -823,6 +823,8 @@
     <string name="summary_all_files_access">AutoJs6 가 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_all_files_access_inrt">앱이 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_auto_reconnect">예기치 않은 연결 끊김 후 자동으로 재연결합니다. 어느 한쪽이 명시적으로 연결을 해제한 경우에는 재연결하지 않습니다</string>
+    <string name="summary_bun_ui_compose_grant">스크립트의 Compose 창, 대화상자 및 오버레이 표시 허용</string>
+    <string name="summary_bun_ui_layout_grant">스크립트의 기본 레이아웃 창 열기 및 업데이트 허용</string>
     <string name="summary_clear_media_playback_history">호스트가 저장한 모든 미디어 재생 위치 삭제</string>
     <string name="summary_code_editor_settings">전체 코드 편집기 설정 페이지 열기</string>
     <string name="summary_codegen_models">코드 생성 모델 가져오기, 다운로드 및 관리</string>
@@ -924,6 +926,8 @@
     <string name="text_bun_host_capabilities">Bun 기능 브리지</string>
     <string name="text_bun_host_info_grant">호스트 정보 스냅샷</string>
     <string name="summary_bun_host_info_grant">AUTOJS6_HOST_INFO_FILE을 통해 Bun 스크립트에 AutoJs6 버전과 언어의 읽기 전용 스냅샷을 제공합니다; 다음 실행부터 적용</string>
+    <string name="text_bun_ui_compose_grant">Compose UI</string>
+    <string name="text_bun_ui_layout_grant">UI 레이아웃</string>
     <string name="text_bun_ui_toast_grant">Toast 메시지</string>
     <string name="summary_bun_ui_toast_grant">Bun 스크립트가 기능 브리지를 통해 짧은 Toast 메시지를 표시하도록 허용합니다 (ui.toast, 실행당 최대 4개); 다음 실행부터 적용</string>
     <string name="text_bun_device_info_grant">기기 정보</string>

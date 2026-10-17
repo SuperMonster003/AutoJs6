@@ -817,6 +817,8 @@
     <string name="summary_all_files_access">允许 AutoJs6 访问所有文件, 包括外部存储</string>
     <string name="summary_all_files_access_inrt">允许应用访问所有文件, 包括外部存储</string>
     <string name="summary_auto_reconnect">意外断开后自动重连. 任一方显式断开连接后不再重连</string>
+    <string name="summary_bun_ui_compose_grant">允许脚本渲染 Compose 窗口, 对话框及悬浮窗</string>
+    <string name="summary_bun_ui_layout_grant">允许脚本打开和更新原生布局窗口</string>
     <string name="summary_clear_media_playback_history">清除宿主保存的全部媒体播放位置</string>
     <string name="summary_code_editor_settings">打开完整的代码编辑器设置页面</string>
     <string name="summary_codegen_models">导入, 下载及管理代码生成模型</string>
@@ -918,6 +920,8 @@
     <string name="text_bun_host_capabilities">Bun 能力桥</string>
     <string name="text_bun_host_info_grant">宿主信息快照</string>
     <string name="summary_bun_host_info_grant">通过 AUTOJS6_HOST_INFO_FILE 向 Bun 脚本提供只读的 AutoJs6 版本与语言快照; 下次运行起生效</string>
+    <string name="text_bun_ui_compose_grant">Compose 界面</string>
+    <string name="text_bun_ui_layout_grant">UI 布局</string>
     <string name="text_bun_ui_toast_grant">Toast 消息</string>
     <string name="summary_bun_ui_toast_grant">允许 Bun 脚本通过能力桥弹出简短的 Toast 消息 (ui.toast, 每次运行至多 4 条); 下次运行起生效</string>
     <string name="text_bun_device_info_grant">设备信息</string>

@@ -303,7 +303,7 @@ class NodeUiBridgeInstrumentationTest {
         NodePluginTestHarness.assertStdoutContains("ui fake bridge", result, "ui.timeout=777")
         NodePluginTestHarness.assertStdoutContains("ui fake bridge", result, "ui.no_raw_view=true")
         NodePluginTestHarness.assertStdoutContains("ui fake bridge", result, "ui.invalid_no_request=true")
-        NodePluginTestHarness.assertStdoutContains("ui fake bridge", result, "ui.invalid=${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}")
+        NodePluginTestHarness.assertStdoutContains("ui fake bridge", result, "ui.invalid=${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}")
         NodePluginTestHarness.assertStdoutContains("ui fake bridge", result, "ui.pending=0")
     }
 

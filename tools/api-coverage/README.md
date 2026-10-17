@@ -155,3 +155,13 @@ The plugin's `AceApiCoverageDeviceTest` additionally checks actual popup geometr
 and captures screenshots, so a correct candidate list cannot hide an overlapping
 documentation tooltip. These are physical-device results only when run on an
 identified physical serial; desktop jsdom checks are complementary.
+
+The runtime bridge check also runs `check-ui-compose.mjs`. It compares the 54
+portable Compose factories with the canonical component declarations, the 11
+host operations with the development catalog/provider discovery, Node/Bun facade
+bytes and Worker window cleanup. Node's `tools/nodejs/api/test-ui-compose.js`
+executes real desktop CJS/ESM Workers and checks state/ref/memo, bindings, late
+creation replies and cancellation. `RuntimeUiComposeDeviceTest` covers native
+interaction, dialogs, Snackbar, floating geometry, grants, Worker cleanup and
+Activity recreation in the real runtime processes. Full evidence and the native
+interop boundaries are in `docs/dev/runtime-ui-compose-2026-10-18.md`.

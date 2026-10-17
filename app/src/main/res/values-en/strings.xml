@@ -818,6 +818,8 @@
     <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
     <string name="summary_auto_reconnect">Reconnect automatically after an unexpected disconnect. An explicit disconnect on either side is respected</string>
+    <string name="summary_bun_ui_compose_grant">Allow scripts to render Compose windows, dialogs and overlays</string>
+    <string name="summary_bun_ui_layout_grant">Allow scripts to open and update native layout windows</string>
     <string name="summary_clear_media_playback_history">Delete every playback position saved by the host</string>
     <string name="summary_code_editor_settings">Open the full code editor settings page</string>
     <string name="summary_codegen_models">Import, download and manage code generation models</string>
@@ -919,6 +921,8 @@
     <string name="text_bun_host_capabilities">Bun capability bridge</string>
     <string name="text_bun_host_info_grant">Host info snapshot</string>
     <string name="summary_bun_host_info_grant">Offer Bun scripts a read-only snapshot of the AutoJs6 version and language through AUTOJS6_HOST_INFO_FILE; applies from the next run</string>
+    <string name="text_bun_ui_compose_grant">Compose UI</string>
+    <string name="text_bun_ui_layout_grant">UI layouts</string>
     <string name="text_bun_ui_toast_grant">Toast messages</string>
     <string name="summary_bun_ui_toast_grant">Let Bun scripts show short toast messages through the capability bridge (ui.toast, at most 4 per run); applies from the next run</string>
     <string name="text_bun_device_info_grant">Device info</string>

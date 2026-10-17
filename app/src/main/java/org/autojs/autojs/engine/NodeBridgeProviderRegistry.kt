@@ -288,10 +288,10 @@ object NodeBridgeProviderRegistry {
         ),
         provider(
             id = UI_PROVIDER,
-            modules = listOf(NodeBridgeModules.UI),
+            modules = listOf(NodeBridgeModules.UI, NodeBridgeModules.COMPOSE),
             capabilities = listOf(NodeBridgePermissionManifest.UI),
             packagedSupport = packagedProviderDependent(
-                "P13-17 records live main-app Activity UI provider evidence plus packaged entry/update/close smoke; live packaged UI promotion still requires task relaunch, crash, and disclosure evidence",
+                "Activity layouts and portable Compose are available in main-app executions; Compose also requires its enabled, authorized renderer plugin. Packaged Compose is not validated; prior P13-17 layout evidence does not cover it",
             ),
         ),
         provider(

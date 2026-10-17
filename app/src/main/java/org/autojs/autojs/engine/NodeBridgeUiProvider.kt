@@ -152,7 +152,7 @@ class NodeBridgeUiDispatchService : Service() {
         )
         NodeBridgeUiSessionStore.put(session)
         val intent = Intent(applicationContext, NodeBridgeUiActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
             putExtra(NodeBridgeUiActivity.EXTRA_SESSION_ID, session.id)
         }
         val started = runCatching { applicationContext.startActivity(intent) }
@@ -383,7 +383,18 @@ class NodeBridgeUiSession(
     @Volatile
     private var activityRef: WeakReference<NodeBridgeUiActivity>? = null
 
-    fun rootDescriptor(): JSONObject = JSONObject(descriptorText)
+    fun rootDescriptor(): JSONObject = JSONObject(descriptorText).also { root ->
+        fun restore(node: JSONObject) {
+            synchronized(stateLock) { state[node.optString("id")]?.let { saved ->
+                saved.keys().forEach { key -> if (key !in setOf("type", "itemCount")) node.put(key, saved.opt(key)) }
+            } }
+            for (key in listOf("children", "tabs")) node.optJSONArray(key)?.let { children ->
+                for (i in 0 until children.length()) children.optJSONObject(i)?.let(::restore)
+            }
+            node.optJSONObject("content")?.let(::restore)
+        }
+        restore(root)
+    }
 
     fun isClosed(): Boolean = closed.get()
 
@@ -402,7 +413,7 @@ class NodeBridgeUiSession(
         if (activityRef?.get() === activity) {
             activityRef = null
         }
-        close("activity_destroyed")
+        if (!activity.isChangingConfigurations) close("activity_destroyed")
     }
 
     fun markShown() {
@@ -416,6 +427,7 @@ class NodeBridgeUiSession(
 
     fun replaceRootDescriptor(descriptor: JSONObject) {
         descriptorText = descriptor.toString()
+        synchronized(stateLock) { state.clear() }
     }
 
     fun update(patch: JSONObject): Boolean {

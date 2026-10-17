@@ -703,6 +703,12 @@
             android:foregroundServiceType="microphone" />
 
         <activity
+            android:name="org.autojs.autojs.engine.RuntimeComposeActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@style/ScriptTheme" />
+
+        <activity
             android:name="org.autojs.autojs.engine.NodeBridgeUiActivity"
             android:excludeFromRecents="true"
             android:exported="false"

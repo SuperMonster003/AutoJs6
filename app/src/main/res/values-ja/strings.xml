@@ -822,6 +822,8 @@
     <string name="summary_all_files_access">AutoJs6 が外部ストレージを含むすべてのファイルにアクセスすることを許可します</string>
     <string name="summary_all_files_access_inrt">アプリが外部ストレージを含むすべてのファイルにアクセスすることを許可する</string>
     <string name="summary_auto_reconnect">予期しない切断の後に自動的に再接続します. どちらかが明示的に切断した場合は再接続しません</string>
+    <string name="summary_bun_ui_compose_grant">スクリプトによる Compose 画面, ダイアログ, フローティング画面の表示を許可</string>
+    <string name="summary_bun_ui_layout_grant">スクリプトによるネイティブレイアウト画面の表示と更新を許可</string>
     <string name="summary_clear_media_playback_history">ホストが保存したすべての再生位置を削除します</string>
     <string name="summary_code_editor_settings">コードエディターの全設定ページを開く</string>
     <string name="summary_codegen_models">コード生成モデルのインポート, ダウンロードと管理</string>
@@ -923,6 +925,8 @@
     <string name="text_bun_host_capabilities">Bun 機能ブリッジ</string>
     <string name="text_bun_host_info_grant">ホスト情報スナップショット</string>
     <string name="summary_bun_host_info_grant">AUTOJS6_HOST_INFO_FILE を通じて Bun スクリプトに AutoJs6 のバージョンと言語の読み取り専用スナップショットを提供します; 次回の実行から適用</string>
+    <string name="text_bun_ui_compose_grant">Compose UI</string>
+    <string name="text_bun_ui_layout_grant">UI レイアウト</string>
     <string name="text_bun_ui_toast_grant">Toast メッセージ</string>
     <string name="summary_bun_ui_toast_grant">Bun スクリプトが機能ブリッジを通じて短い Toast メッセージを表示できるようにします (ui.toast, 1 回の実行につき最大 4 件); 次回の実行から適用</string>
     <string name="text_bun_device_info_grant">デバイス情報</string>

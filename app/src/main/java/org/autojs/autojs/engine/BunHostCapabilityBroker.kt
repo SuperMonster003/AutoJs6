@@ -138,6 +138,12 @@ internal class BunHostCapabilityBroker(
             return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "Request is not a JSON object")
         }
         val outcome = when (capability) {
+            BunHostCapabilityGrants.UI_LAYOUT, BunHostCapabilityGrants.UI_COMPOSE -> {
+                val (method, args) = parseMethodCall(request)
+                val compose = capability == BunHostCapabilityGrants.UI_COMPOSE
+                require(method in if (compose) RuntimeComposeBridge.methods else NodeBridgeModules.uiMethods) { "Unsupported UI operation" }
+                awaitImageCall(if (compose) NodeBridgeModules.COMPOSE else NodeBridgeModules.UI, method, args)
+            }
             BunRuntimeContract.HOST_CAPABILITY_DEVICE_INFO -> deviceInfo(request)
             BunRuntimeContract.HOST_CAPABILITY_UI_TOAST -> toast(request)
             BunHostCapabilityGrants.TEXT_PINYIN -> textCall(request, NodeBridgeModules.PINYIN, PINYIN_METHODS) {
@@ -218,6 +224,7 @@ internal class BunHostCapabilityBroker(
                 javaInteropEnabled = false,
                 permissionManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(buildList {
                     add(NodeBridgePermissionManifest.IMAGE)
+                    if (BunHostCapabilityGrants.UI_LAYOUT in capabilities || BunHostCapabilityGrants.UI_COMPOSE in capabilities) add(NodeBridgePermissionManifest.UI)
                     if (BunHostCapabilityGrants.IMAGE_FILES in capabilities) add(NodeBridgePermissionManifest.NETWORK)
                     if (BunHostCapabilityGrants.SCREEN_CAPTURE in capabilities) add(NodeBridgePermissionManifest.SCREEN_CAPTURE)
                 }),

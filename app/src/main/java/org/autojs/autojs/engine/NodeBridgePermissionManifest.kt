@@ -520,7 +520,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(NOTIFICATIONS)
             }
             NodeBridgeModules.SENSORS -> listOf(SENSORS)
-            NodeBridgeModules.UI -> listOf(UI)
+            NodeBridgeModules.UI, NodeBridgeModules.COMPOSE -> listOf(UI)
             NodeBridgeModules.UI_OVERLAY -> when (method) {
                 "hasPermission", "openPermissionSettings" -> listOf(UI_OVERLAY_PERMISSION)
                 else -> listOf(UI_OVERLAY)

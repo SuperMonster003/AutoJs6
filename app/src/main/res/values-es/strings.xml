@@ -821,6 +821,8 @@
     <string name="summary_all_files_access">Permite que AutoJs6 acceda a todos los archivos, incluidos los del almacenamiento externo</string>
     <string name="summary_all_files_access_inrt">Permitir que la aplicación acceda a todos los archivos, incluido el almacenamiento externo</string>
     <string name="summary_auto_reconnect">Reconectar automáticamente tras una desconexión inesperada. Una desconexión explícita de cualquiera de las partes se respeta</string>
+    <string name="summary_bun_ui_compose_grant">Permitir ventanas, diálogos y superposiciones de Compose</string>
+    <string name="summary_bun_ui_layout_grant">Permitir que los scripts abran y actualicen ventanas nativas</string>
     <string name="summary_clear_media_playback_history">Eliminar todas las posiciones de reproducción guardadas por el host</string>
     <string name="summary_code_editor_settings">Abrir la página completa de ajustes del editor de código</string>
     <string name="summary_codegen_models">Importar, descargar y gestionar modelos de generación de código</string>
@@ -922,6 +924,8 @@
     <string name="text_bun_host_capabilities">Puente de capacidades de Bun</string>
     <string name="text_bun_host_info_grant">Instantánea de información del host</string>
     <string name="summary_bun_host_info_grant">Ofrecer a los scripts Bun una instantánea de solo lectura de la versión y el idioma de AutoJs6 mediante AUTOJS6_HOST_INFO_FILE; se aplica a partir de la próxima ejecución</string>
+    <string name="text_bun_ui_compose_grant">Interfaz Compose</string>
+    <string name="text_bun_ui_layout_grant">Diseños de interfaz</string>
     <string name="text_bun_ui_toast_grant">Mensajes toast</string>
     <string name="summary_bun_ui_toast_grant">Permitir que los scripts Bun muestren mensajes toast breves mediante el puente de capacidades (ui.toast, máximo 4 por ejecución); se aplica a partir de la próxima ejecución</string>
     <string name="text_bun_device_info_grant">Información del dispositivo</string>

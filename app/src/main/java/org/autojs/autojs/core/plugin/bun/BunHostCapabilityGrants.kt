@@ -15,6 +15,8 @@ import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
 object BunHostCapabilityGrants {
 
     // Host-owned capabilities. The plugin negotiates these IDs through /v1/info, without a new AIDL version.
+    const val UI_LAYOUT = "ui.layout"
+    const val UI_COMPOSE = "ui.compose"
     const val TEXT_PINYIN = "text.pinyin"
     const val TEXT_PINYIN4J = "text.pinyin4j"
     const val TEXT_OPENCC = "text.opencc"
@@ -95,6 +97,11 @@ object BunHostCapabilityGrants {
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
+    fun isUiLayoutGranted(context: Context): Boolean = isGranted(context, UI_LAYOUT, false)
+    fun setUiLayoutGranted(context: Context, granted: Boolean) = setGranted(context, UI_LAYOUT, granted)
+    fun isUiComposeGranted(context: Context): Boolean = isGranted(context, UI_COMPOSE, false)
+    fun setUiComposeGranted(context: Context, granted: Boolean) = setGranted(context, UI_COMPOSE, granted)
+
     private fun isGranted(context: Context, key: String, default: Boolean): Boolean =
         context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE).getBoolean(key, default)
 
@@ -104,6 +111,8 @@ object BunHostCapabilityGrants {
 
     /** Capability IDs of the runtime bridge (plugin M7, dynamic calls) that are currently granted, in contract order. */
     fun grantedBridgeCapabilities(context: Context): List<String> = buildList {
+        if (isUiLayoutGranted(context)) add(UI_LAYOUT)
+        if (isUiComposeGranted(context)) add(UI_COMPOSE)
         if (isUiToastGranted(context)) add(BunRuntimeContract.HOST_CAPABILITY_UI_TOAST)
         if (isDeviceInfoGranted(context)) add(BunRuntimeContract.HOST_CAPABILITY_DEVICE_INFO)
         if (isTextPinyinGranted(context)) add(TEXT_PINYIN)

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Compare actual client exports with host method sets; runtime behavior has separate tests.
+import './check-ui-compose.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -147,13 +148,16 @@ const bunAdapter=bunSource.slice(bunSource.indexOf('  function __autojs6_image_e
 assert.equal(imageExtensions.toString(),new Function('return ('+bunAdapter+')')().toString(),'Portable Node/Bun image adapters drifted');
 const createWorkerModules = new Function('return (' + segment('  function __autojs6_worker_host_modules(', '  async function __autojs6_worker_invoke(') + ')')();
 const workerCalls = [];
+const uiFactories = new Function(read(path.join(nodeRoot,'tools/nodejs/api/portable-ui-compose.js')) +
+  ';return {ui:__autojs6_create_ui,compose:__autojs6_create_compose};')();
+node.ui=uiFactories.ui(()=>Promise.resolve(null));node.compose=uiFactories.compose(()=>Promise.resolve(null));
 const workerModules = createWorkerModules(async (...call) => { workerCalls.push(call); return 'converted'; },
-  {opencc:keys(node.opencc),image:keys(node.image),images:keys(node.images),pinyin:Object.keys(node.pinyin),pinyin4j:keys(node.pinyin4j),
+  {ui:keys(node.ui),compose:keys(node.compose),opencc:keys(node.opencc),image:keys(node.image),images:keys(node.images),pinyin:Object.keys(node.pinyin),pinyin4j:keys(node.pinyin4j),
     screen_metrics:keys(node.coordinates),console:keys(node.console),screen_recorder:keys(node.screenRecorder),
     media_projection:keys(node.media_projection),recorder:keys(node.recorder)},
   {pinyin:Object.fromEntries(Object.entries(node.pinyin).filter(([,v])=>typeof v!=='function'))},
-  keys(node.console).filter(name=>node.console[name].__autojs6ConsoleControl),console,imageExtensions);
-for (const name of ['opencc','image','images','pinyin','pinyin4j','console','screen_metrics','screen_recorder','media_projection','recorder']) {
+  keys(node.console).filter(name=>node.console[name].__autojs6ConsoleControl),console,imageExtensions,uiFactories.ui,uiFactories.compose);
+for (const name of ['ui','compose','opencc','image','images','pinyin','pinyin4j','console','screen_metrics','screen_recorder','media_projection','recorder']) {
   const target=name==='screen_metrics'?node.coordinates:name==='screen_recorder'?node.screenRecorder:node[name];
   assert.deepEqual(sorted(keys(workerModules.get(name))),sorted(keys(target)));
 }

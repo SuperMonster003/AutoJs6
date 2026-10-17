@@ -682,6 +682,7 @@ object NodeBridgeModules {
     const val SQLITE = "sqlite"
     const val NOTIFICATIONS = NodeBridgePermissionManifest.NOTIFICATIONS
     const val SENSORS = NodeBridgePermissionManifest.SENSORS
+    const val COMPOSE = "compose"
     const val UI = NodeBridgePermissionManifest.UI
     const val UI_OVERLAY = NodeBridgePermissionManifest.UI_OVERLAY
     const val CLIPBOARD = NodeBridgePermissionManifest.CLIPBOARD
@@ -846,6 +847,7 @@ object NodeBridgeModules {
         NOTIFICATIONS to notificationsMethods,
         SENSORS to sensorsMethods,
         UI to uiMethods,
+        COMPOSE to RuntimeComposeBridge.methods,
         UI_OVERLAY to uiOverlayMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
@@ -973,6 +975,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
     private val notificationIdCounter = AtomicInteger(1_000_000)
     private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
+    private val composeBridge = lazy { RuntimeComposeBridge(appContext) { value ->
+        synchronized(imageLock) { requireNotNull(imageArgument(JSONArray().put(value), 0).bitmap.copy(Bitmap.Config.ARGB_8888, false)) }
+    } }
     private val uiSessionIds = ConcurrentHashMap.newKeySet<String>()
     private val overlaySessionIds = ConcurrentHashMap.newKeySet<String>()
     private val overlaySessions = ConcurrentHashMap<String, ControlledOverlaySession>()
@@ -1108,6 +1113,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, auditedCallback)
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, auditedCallback)
             request.module == NodeBridgeModules.SENSORS && request.method in NodeBridgeModules.sensorsMethods -> dispatchSensors(request, auditedCallback)
+            request.module == NodeBridgeModules.COMPOSE -> composeBridge.value.dispatch(request, auditedCallback)
             request.module == NodeBridgeModules.UI && request.method in NodeBridgeModules.uiMethods -> dispatchUi(request, auditedCallback)
             request.module == NodeBridgeModules.UI_OVERLAY && request.method in NodeBridgeModules.uiOverlayMethods -> dispatchUiOverlay(request, auditedCallback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
@@ -1184,7 +1190,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "database" to databaseHandles.size,
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
-                "ui" to uiSessionIds.size,
+                "ui" to uiSessionIds.size + if (composeBridge.isInitialized()) composeBridge.value.activeCount else 0,
                 NodeBridgeModules.UI_OVERLAY to overlaySessionIds.size,
                 "input_observer" to inputObserverSubscriptions.size,
                 "work_manager" to workManagerTasks.size,
@@ -1196,6 +1202,7 @@ class AndroidNodeBridgeCapabilityProvider(
 
     override fun destroy(reason: NodeBridgeError) {
         closeAgentHelpers()
+        if (composeBridge.isInitialized()) composeBridge.value.close()
         if (pluginToolsBridge.isInitialized()) pluginToolsBridge.value.destroy()
         accessibilityDiagnostics.clearNodeRefs()
         imageDestroyed.set(true)

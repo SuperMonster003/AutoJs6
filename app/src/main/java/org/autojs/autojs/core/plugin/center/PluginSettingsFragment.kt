@@ -88,6 +88,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunPinyin4jGrantPreference: ThemeColorSwitchPreference? = null
     private var bunScreenMetricsGrantPreference: ThemeColorSwitchPreference? = null
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunUiLayoutGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunUiComposeGrantPreference: ThemeColorSwitchPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val args = requireArguments()
@@ -222,6 +224,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunPinyin4jGrantPreference = findPreference("plugin_bun_pinyin4j_grant")
         bunScreenMetricsGrantPreference = findPreference("plugin_bun_screen_metrics_grant")
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
+        bunUiLayoutGrantPreference = findPreference("plugin_bun_ui_layout_grant")
+        bunUiComposeGrantPreference = findPreference("plugin_bun_ui_compose_grant")
 
         launcherIconPreference.setOnPreferenceChangeListener { _, value ->
             val context = requireContext().applicationContext
@@ -345,6 +349,14 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
             true
         }
+        bunUiLayoutGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setUiLayoutGranted(requireContext(), value == true)
+            true
+        }
+        bunUiComposeGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setUiComposeGranted(requireContext(), value == true)
+            true
+        }
 
         instructionPreference.setOnPreferenceClickListener {
             PluginInstructionActivity.launch(
@@ -415,6 +427,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunPinyin4jGrantPreference?.isChecked = BunHostCapabilityGrants.isTextPinyin4jGranted(requireContext())
         bunScreenMetricsGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenMetricsGranted(requireContext())
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
+        bunUiLayoutGrantPreference?.isChecked = BunHostCapabilityGrants.isUiLayoutGranted(requireContext())
+        bunUiComposeGrantPreference?.isChecked = BunHostCapabilityGrants.isUiComposeGranted(requireContext())
         autoCheckPreference.isEnabled = globalAutoCheckEnabled
         autoCheckPreference.setTitleColorVisualEnabledWith { globalAutoCheckEnabled }
         autoCheckPreference.setSummaryColorVisualEnabledWith { globalAutoCheckEnabled }
