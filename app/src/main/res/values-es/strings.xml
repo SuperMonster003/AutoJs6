@@ -1659,6 +1659,26 @@
     <string name="text_expand_all">Expandir todo</string>
     <string name="text_expired">Caducado</string>
     <string name="text_expires_at">Caduca</string>
+    <string name="text_explorer_access_failed">No se puede leer este directorio.\n%1$s</string>
+    <string name="text_explorer_access_hint">El acceso estándar permite acceder al almacenamiento compartido y a las tarjetas de almacenamiento. Para acceder a directorios restringidos, concede acceso mediante Shizuku o Root y vuelve a intentarlo. El alcance del acceso de Shizuku depende del sistema. La navegación con privilegios solo permite ver directorios e información de archivos.</string>
+    <string name="text_explorer_access_missing">El directorio no existe o se ha retirado el almacenamiento.\n%1$s</string>
+    <string name="text_explorer_access_mode">Método de acceso</string>
+    <string name="text_explorer_access_normal">Acceso estándar</string>
+    <string name="text_explorer_access_options">Acceso a directorios</string>
+    <string name="text_explorer_access_read_only">Navegación con privilegios (solo lectura)</string>
+    <string name="text_explorer_access_restricted">Android restringe el acceso a este directorio. El permiso de acceso a todos los archivos no permite acceder a los directorios Android/data o Android/obb de otras aplicaciones. Prueba Shizuku o Root desde Acceso a directorios.</string>
+    <string name="text_explorer_access_root">Root (solo lectura)</string>
+    <string name="text_explorer_access_shizuku">Shizuku (solo lectura)</string>
+    <string name="text_explorer_display_options">Opciones de visualización</string>
+    <string name="text_explorer_forward">Adelante</string>
+    <string name="text_explorer_home">Inicio</string>
+    <string name="text_explorer_path_menu">Explorar y navegar</string>
+    <string name="text_explorer_privileged_file_hint">Este archivo se muestra mediante acceso con privilegios. Aquí solo están disponibles su ruta, tamaño y fecha de modificación.</string>
+    <string name="text_explorer_storage">Almacenamiento</string>
+    <string name="text_explorer_storage_root">Directorio raíz</string>
+    <string name="text_explorer_storage_unavailable">Información de almacenamiento no disponible</string>
+    <string name="text_explorer_storage_usage">%1$s usados, %2$s disponibles</string>
+    <string name="text_explorer_up">Subir</string>
     <string name="text_export">Exportar</string>
     <string name="text_export_all">Exportar todo</string>
     <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">Exportar bibliotecas de colores...</string>

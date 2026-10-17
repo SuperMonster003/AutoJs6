@@ -1718,8 +1718,8 @@ public class ScriptOperations {
     }
 
     public void setAsWorkingDirNow(final ScriptFile scriptFile) {
-        WorkingDirectoryUtils.setPath(scriptFile.getPath());
-        WorkingDirectoryUtils.addIntoHistory(scriptFile.getPath());
+        WorkingDirectoryUtils.setAbsolutePath(scriptFile.getPath());
+        WorkingDirectoryUtils.addAbsoluteIntoHistory(scriptFile.getPath());
         showMessage(R.string.text_done);
     }
 

@@ -1659,6 +1659,26 @@
     <string name="text_expand_all">Развернуть всё</string>
     <string name="text_expired">Истек</string>
     <string name="text_expires_at">Истекает</string>
+    <string name="text_explorer_access_failed">Не удалось прочитать этот каталог.\n%1$s</string>
+    <string name="text_explorer_access_hint">Обычный доступ работает с общим хранилищем и картами памяти. Для доступа к ограниченным каталогам предоставьте разрешение Shizuku или Root и повторите попытку. Возможности доступа через Shizuku зависят от системы. Просмотр с повышенными правами позволяет только просматривать каталоги и информацию о файлах.</string>
+    <string name="text_explorer_access_missing">Каталог не существует или накопитель извлечён.\n%1$s</string>
+    <string name="text_explorer_access_mode">Способ доступа</string>
+    <string name="text_explorer_access_normal">Обычный доступ</string>
+    <string name="text_explorer_access_options">Доступ к каталогам</string>
+    <string name="text_explorer_access_read_only">Просмотр с повышенными правами (только чтение)</string>
+    <string name="text_explorer_access_restricted">Android ограничивает доступ к этому каталогу. Разрешение на доступ ко всем файлам не предоставляет доступ к каталогам Android/data или Android/obb других приложений. Попробуйте Shizuku или Root в разделе доступа к каталогам.</string>
+    <string name="text_explorer_access_root">Root (только чтение)</string>
+    <string name="text_explorer_access_shizuku">Shizuku (только чтение)</string>
+    <string name="text_explorer_display_options">Параметры отображения</string>
+    <string name="text_explorer_forward">Вперёд</string>
+    <string name="text_explorer_home">Домой</string>
+    <string name="text_explorer_path_menu">Просмотр и навигация</string>
+    <string name="text_explorer_privileged_file_hint">Этот файл отображается с использованием повышенных прав. Здесь доступны только его путь, размер и время изменения.</string>
+    <string name="text_explorer_storage">Хранилище</string>
+    <string name="text_explorer_storage_root">Корневой каталог</string>
+    <string name="text_explorer_storage_unavailable">Информация о хранилище недоступна</string>
+    <string name="text_explorer_storage_usage">Занято %1$s, доступно %2$s</string>
+    <string name="text_explorer_up">Вверх</string>
     <string name="text_export">Экспорт</string>
     <string name="text_export_all">Экспортировать все</string>
     <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">Экспортировать цветовые библиотеки...</string>

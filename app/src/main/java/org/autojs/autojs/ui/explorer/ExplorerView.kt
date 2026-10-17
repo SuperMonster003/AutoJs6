@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.explorer
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
+import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -34,10 +36,15 @@ import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.model.explorer.Explorer
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent
 import org.autojs.autojs.model.explorer.ExplorerDirPage
+import org.autojs.autojs.model.explorer.ExplorerDirectoryAccessException
 import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.Explorers
+import org.autojs.autojs.model.explorer.PrivilegedAccessMode
+import org.autojs.autojs.model.explorer.PrivilegedExplorerAccess
+import org.autojs.autojs.model.explorer.PrivilegedExplorerItem
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.project.ProjectConfig
@@ -58,7 +65,6 @@ import org.autojs.autojs6.databinding.ExplorerViewBinding
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.util.Objects
-import java.util.Stack
 import java.util.concurrent.Callable
 
 private data class ArchiveNavigationState(
@@ -67,6 +73,7 @@ private data class ArchiveNavigationState(
     val previousRootPath: String?,
     val previousPageState: ExplorerView.ExplorerPageState,
     val previousHistory: List<ExplorerView.ExplorerPageState>,
+    val previousForwardHistory: List<ExplorerView.ExplorerPageState>,
     val sourceParentSegments: List<ExplorerPathSegment>,
 )
 
@@ -117,6 +124,22 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
     private var mExplorer: Explorer? = null
     private var mExplorerRootPath: String? = null
+    private var mPathMenu: ExplorerPathMenu? = null
+    private val mDirectoryAccessUi = ExplorerDirectoryAccessUi(this)
+    private var mDirectoryAccessMode: PrivilegedAccessMode? = null
+    private var mDirectoryAccessFailed = false
+    private var mDirectoryNavigationPending = false
+
+    internal val directoryAccessLabel: String
+        get() = context.getString(when (mDirectoryAccessMode) {
+            PrivilegedAccessMode.ROOT -> R.string.text_explorer_access_root
+            PrivilegedAccessMode.SHIZUKU -> R.string.text_explorer_access_shizuku
+            null -> R.string.text_explorer_access_normal
+        })
+
+    private val directoryOperationsBlocked: Boolean
+        get() = mArchiveNavigationState != null || currentPageState.page is PrivilegedExplorerItem ||
+            mDirectoryAccessFailed || mDirectoryNavigationPending
 
     private val mExplorerAdapter = ExplorerAdapter(
         itemManager = { explorerItemManager },
@@ -462,7 +485,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
     private var mOnArchiveModeStateChangeListener: ((Boolean) -> Unit)? = null
 
-    private val mPageStateHistory = Stack<ExplorerPageState>()
+    private val mNavigationHistory = ExplorerNavigationHistory<ExplorerPageState>()
     private var mDirectorySpanSize = 2
 
     // Keep only one refresh chain running to avoid concurrent updates.
@@ -539,6 +562,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                 mProjectToolbar = it
             }
             binding.explorerPathBar.setOnParentPathClickListener(::navigateToPath)
+            mPathMenu = ExplorerPathMenu(this, binding.explorerPathRow, binding.explorerPathMore)
+            binding.explorerPathMore.setOnClickListener { mPathMenu?.toggle() }
+            binding.explorerAccessNotice.setOnClickListener { showDirectoryAccessOptions() }
+            binding.explorerAccessRetry.setOnClickListener { refreshFromPathMenu() }
+            binding.explorerAccessSettings.setOnClickListener { showDirectoryAccessOptions() }
             binding.archiveFilenameEncoding.setOnClickListener {
                 showArchiveFilenameEncodingDialog()
             }
@@ -582,11 +610,18 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
     override fun setThemeColor(themeColor: ThemeColor) {
         super.setThemeColor(themeColor)
+        mPathMenu?.dismiss()
         if (::mSelectionToolbar.isInitialized) mSelectionToolbar.applyTheme(themeColor)
     }
     @Subscribe
     fun onExplorerChange(event: ExplorerChangeEvent) {
         Log.d(LOG_TAG, "on explorer change: $event")
+        if (mDirectoryAccessMode != null) {
+            if (event.action == ExplorerChangeEvent.ALL || event.page?.path == currentPageState.page?.path) {
+                refreshCurrentPage()
+            }
+            return
+        }
         if ((event.action == ExplorerChangeEvent.ALL)) {
             refreshCurrentPage()
             return
@@ -636,10 +671,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        mPathMenu?.dismiss()
+        mDirectoryAccessUi.detach()
+        mDirectoryAccessMode = null
         mArchiveCoordinator.release()
         closeArchiveNavigation(restorePrevious = false)
         mExplorer?.unregisterChangeListener(this)
-        mPageStateHistory.clear()
+        mNavigationHistory.clear()
         if (::mSelectionToolbar.isInitialized) mSelectionToolbar.detach()
         binding = null
 
@@ -649,10 +687,20 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         mRefreshDisposable = null
     }
 
+    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
+        super.onWindowFocusChanged(hasWindowFocus)
+        if (hasWindowFocus) mDirectoryAccessUi.onWindowFocusGained()
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w != oldw || h != oldh) mPathMenu?.dismiss()
+    }
+
     override fun onRefresh() {
         currentPageState.scrollY = 0
         mExplorer?.notifyChildrenChanged(currentPage)
-        if (mArchiveNavigationState == null) mProjectToolbar.refresh()
+        if (!directoryOperationsBlocked) mProjectToolbar.refresh()
         updateProjectToolbarVisibility()
     }
 
@@ -765,6 +813,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun isItemSelectable(item: ExplorerItem) = when (item) {
+        is PrivilegedExplorerItem -> false
         is ArchiveExplorerItem -> {
             val provider = mArchiveNavigationState?.provider
             provider != null &&
@@ -940,8 +989,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     fun enterDirectChildPage(childItemGroup: ExplorerPage) {
+        if (childItemGroup.path == currentPage.path) return
         clearSelection()
-        saveCurrentScrollPosition()
         saveCurrentPageIntoHistory()
         setCurrentPageState(ExplorerPageState(childItemGroup))
         refreshCurrentPage()
@@ -998,9 +1047,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         pluginAction: ResolvedExplorerAction,
         item: ExplorerItem,
     ): Boolean = mPluginActions.launch(context, entryPoint, pluginAction, item)
-    internal fun setOnArchiveModeStateChangeListener(listener: ((Boolean) -> Unit)?) {
+    internal fun setOnDirectoryOperationsStateChangeListener(listener: ((Boolean) -> Unit)?) {
         mOnArchiveModeStateChangeListener = listener
-        listener?.invoke(mArchiveNavigationState != null)
+        listener?.invoke(directoryOperationsBlocked)
     }
 
     internal fun releasePluginResources() {
@@ -1010,8 +1059,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage) {
+        mDirectoryAccessMode = null
         mArchiveCoordinator.release()
         closeArchiveNavigation(restorePrevious = false)
+        mNavigationHistory.clear()
         if (mExplorer != null) {
             mExplorer!!.unregisterChangeListener(this)
         }
@@ -1047,8 +1098,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     fun setExplorer(explorer: Explorer?, rootPage: ExplorerPage, currentPage: ExplorerPage) {
+        mDirectoryAccessMode = null
         mArchiveCoordinator.release()
         closeArchiveNavigation(restorePrevious = false)
+        mNavigationHistory.clear()
         mExplorer?.unregisterChangeListener(this)
         mExplorer = explorer
         mExplorerRootPath = rootPage.path
@@ -1089,10 +1142,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
     private fun applyArchiveReindexResult(result: ExplorerArchiveReindexResult) {
         val restoredPage = result.restoredPages.last()
-        mPageStateHistory.clear()
-        result.restoredPages.dropLast(1).forEach { ancestor ->
-            mPageStateHistory.push(ExplorerPageState(ancestor))
-        }
+        // Reindexing replaces archive page objects, including entries on the forward side.
+        // zh-CN: 重建索引会替换压缩包页面对象, 前进历史中的旧对象也必须移除.
+        mNavigationHistory.restore(result.restoredPages.dropLast(1).map(::ExplorerPageState))
         mSelection.replace(result.restoredSelection)
         setCurrentPageState(
             ExplorerPageState(restoredPage).also { state ->
@@ -1151,8 +1203,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
 
     private fun enterArchiveNavigation(connection: ExplorerArchiveSessionConnection) {
+        val wasInArchive = mArchiveNavigationState != null
         closeArchiveNavigation(restorePrevious = true)
-        saveCurrentScrollPosition()
+        if (!wasInArchive) saveCurrentScrollPosition()
         val previousExplorer = requireNotNull(mExplorer) { "Explorer is unavailable" }
         val sourceParentPath = File(connection.sourcePath).parentFile?.path
             ?: ExplorerPathSegmentBuilder.filesystemRoot(connection.sourcePath)
@@ -1163,7 +1216,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             previousExplorer = previousExplorer,
             previousRootPath = mExplorerRootPath,
             previousPageState = currentPageState,
-            previousHistory = mPageStateHistory.toList(),
+            previousHistory = mNavigationHistory.backwardEntries,
+            previousForwardHistory = mNavigationHistory.forwardEntries,
             sourceParentSegments = sourceParentSegments,
         )
 
@@ -1171,7 +1225,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         mArchiveNavigationState = state
         mExplorer = Explorer(provider, 0)
         mExplorerRootPath = provider.rootPage.path
-        mPageStateHistory.clear()
+        mNavigationHistory.clear()
         mExplorer?.registerChangeListener(this)
         setRootPage(provider.rootPage)
         updateProjectToolbarVisibility()
@@ -1180,20 +1234,22 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
     private fun closeArchiveNavigation(restorePrevious: Boolean) {
         val state = mArchiveNavigationState ?: return
+        mRefreshDisposable?.dispose()
+        mRefreshDisposable = null
         mArchiveCoordinator.closeArchiveContent()
         isRefreshing = false
         mArchiveNavigationState = null
         updateArchiveExtractionAction()
         mExplorer?.unregisterChangeListener(this)
         state.provider.close()
-        mOnArchiveModeStateChangeListener?.invoke(false)
-        if (!restorePrevious) return
-
+        mOnArchiveModeStateChangeListener?.invoke(directoryOperationsBlocked)
+        mNavigationHistory.clear()
         mExplorer = state.previousExplorer
         mExplorerRootPath = state.previousRootPath
-        mPageStateHistory.clear()
-        mPageStateHistory.addAll(state.previousHistory)
         setCurrentPageState(state.previousPageState)
+        if (!restorePrevious) return
+
+        mNavigationHistory.restore(state.previousHistory, state.previousForwardHistory)
         mExplorer?.registerChangeListener(this)
         refreshCurrentPage()
         updateProjectToolbarVisibility()
@@ -1360,7 +1416,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun updateProjectToolbarVisibility() {
-        if (mArchiveNavigationState != null) {
+        if (directoryOperationsBlocked || currentPageState.page is PrivilegedExplorerItem) {
             mProjectToolbar.visibility = GONE
         } else {
             mProjectToolbar.updateVisibility()
@@ -1382,11 +1438,73 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun setCurrentPageState(pageState: ExplorerPageState) {
+        mPathMenu?.dismiss()
+        mDirectoryAccessFailed = false
+        mDirectoryNavigationPending = true
+        binding?.explorerAccessError?.isVisible = false
+        binding?.explorerItemList?.isVisible = false
+        mProjectToolbar.clearProject()
+        mProjectToolbar.visibility = GONE
         currentPageState = pageState
         mApplyPageStateScrollOnRefresh = true
         pageState.page?.let(::updatePathBar)
         updateArchiveExtractionAction()
+        updateDirectoryAccessState()
     }
+
+    internal fun refreshFromPathMenu() {
+        if (currentPageState.page == null) return
+        onRefresh()
+    }
+
+    internal fun goBackFromPathMenu() {
+        clearSelection()
+        goBack()
+    }
+
+    internal fun canNavigateBackFromPathMenu() = mNavigationHistory.canGoBack || mArchiveNavigationState != null
+
+    internal fun canSetCurrentAsWorkingDirectory(): Boolean {
+        val page = currentPageState.page ?: return false
+        return !directoryOperationsBlocked && page !is PrivilegedExplorerItem &&
+            page.canSetAsWorkingDir() && File(page.path).let { it.isDirectory && it.canRead() && it.canWrite() }
+    }
+
+    internal fun showDirectoryAccessOptions() = mDirectoryAccessUi.showOptions()
+
+    internal fun setDirectoryAccessMode(mode: PrivilegedAccessMode?) {
+        mPathMenu?.dismiss()
+        clearSelection()
+        if (mArchiveNavigationState != null) closeArchiveNavigation(restorePrevious = true)
+        saveCurrentScrollPosition()
+        val previous = currentPageState
+        val currentPath = previous.page?.path ?: return
+        mDirectoryAccessMode = mode
+        setCurrentPageState(ExplorerPageState(ExplorerDirPage.createRoot(currentPath)).also {
+            it.scrollY = previous.scrollY
+            it.dirsCollapsed = previous.dirsCollapsed
+            it.filesCollapsed = previous.filesCollapsed
+        })
+        refreshCurrentPage()
+    }
+
+    private fun updateDirectoryAccessState() {
+        binding?.explorerAccessNotice?.apply {
+            val privileged = currentPageState.page is PrivilegedExplorerItem
+            val restricted = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                ExplorerStorageCatalog.isAndroidRestrictedPath(currentPageState.page?.path.orEmpty())
+            isVisible = mArchiveNavigationState == null && (privileged || restricted)
+            text = if (privileged) {
+                directoryAccessLabel
+            } else {
+                context.getString(R.string.text_explorer_access_restricted)
+            }
+        }
+        mOnArchiveModeStateChangeListener?.invoke(directoryOperationsBlocked)
+    }
+
+    /** Keeps navigation history when the floating explorer returns to the working directory. */
+    fun navigateToDirectory(directory: String) = navigateToPath(directory)
 
     private fun updatePathBar(page: ExplorerPage) {
         binding?.explorerPathBar?.setSegments(createPathSegments(page))
@@ -1458,14 +1576,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         return null
     }
 
-    private fun navigateToPath(targetPath: String) {
+    internal fun navigateToPath(targetPath: String) {
         val archiveState = mArchiveNavigationState
         if (archiveState != null) {
             val archivePage = archiveState.provider.pageForPath(targetPath)
             if (archivePage != null) {
                 if (archivePage.path == currentPage.path) return
                 clearSelection()
-                saveCurrentScrollPosition()
                 saveCurrentPageIntoHistory()
                 setCurrentPageState(ExplorerPageState(archivePage))
                 refreshCurrentPage()
@@ -1476,19 +1593,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         }
         if (targetPath == currentPage.path) return
         clearSelection()
-        saveCurrentScrollPosition()
-        saveCurrentPageIntoHistory()
+        // After leaving an archive, the list can still display archive rows until refresh completes.
+        // Keep the saved outer-page scroll position instead of reading that obsolete layout.
+        // zh-CN: 刚退出压缩包时列表可能仍显示压缩包条目, 此时保留外部页面已保存的滚动位置.
+        if (archiveState == null) saveCurrentScrollPosition()
+        mNavigationHistory.recordNavigation(currentPageState)
         setCurrentPageState(ExplorerPageState(ExplorerDirPage.createRoot(targetPath)))
         refreshCurrentPage()
     }
 
     private fun saveCurrentScrollPosition() {
+        // The previous page's rows may still be visible during an asynchronous navigation.
+        // zh-CN: 异步导航尚未应用新页面时, 列表中的滚动位置仍属于上一个页面.
+        if (mApplyPageStateScrollOnRefresh) return
         val layoutManager = explorerItemListView?.layoutManager as? LinearLayoutManager ?: return
         // @Overwrite by SuperMonster003 on Apr 3, 2023.
         //  ! Should be "first" instead of "last".
         //  ! zh-CN: 应该是 "first" 而非 "last".
         //  # mCurrentPageState.scrollY = layoutManager.findLastCompletelyVisibleItemPosition();
-        currentPageState.scrollY = layoutManager.findFirstCompletelyVisibleItemPosition()
+        currentPageState.scrollY = layoutManager.findFirstCompletelyVisibleItemPosition().coerceAtLeast(0)
     }
 
     private fun enterChildPage(childPage: ExplorerPage) {
@@ -1510,7 +1633,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     fun canGoBack(): Boolean {
-        return isInSelectionMode || !mPageStateHistory.empty() || mArchiveNavigationState != null
+        return isInSelectionMode || mNavigationHistory.canGoBack || mArchiveNavigationState != null
     }
 
     fun goBack() {
@@ -1518,12 +1641,25 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             clearSelection()
             return
         }
-        if (mPageStateHistory.isNotEmpty()) {
-            setCurrentPageState(mPageStateHistory.pop())
+        if (mNavigationHistory.canGoBack) {
+            saveCurrentScrollPosition()
+            val previousPage = mNavigationHistory.goBack(currentPageState) ?: return
+            setCurrentPageState(previousPage)
             refreshCurrentPage()
         } else {
             closeArchiveNavigation(restorePrevious = true)
         }
+    }
+
+    fun canGoForward(): Boolean = mNavigationHistory.canGoForward
+
+    fun goForward() {
+        if (!mNavigationHistory.canGoForward) return
+        clearSelection()
+        saveCurrentScrollPosition()
+        val nextPage = mNavigationHistory.goForward(currentPageState) ?: return
+        setCurrentPageState(nextPage)
+        refreshCurrentPage()
     }
 
     fun saveViewStates() {
@@ -1560,7 +1696,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     private fun saveExplorerState() {
         val archiveState = mArchiveNavigationState
         val persistentPageState = archiveState?.previousPageState ?: currentPageState
-        val persistentHistory = archiveState?.previousHistory ?: mPageStateHistory.toList()
+        val persistentHistory = archiveState?.previousHistory ?: mNavigationHistory.backwardEntries
         val currentPath = persistentPageState.page?.path ?: return
         val rootPath = archiveState?.previousRootPath
             ?: if (persistentHistory.isEmpty()) path else persistentHistory.first().page!!.path
@@ -1578,40 +1714,43 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         } else {
             setDefaultExplorer()
         }
-        stored.history.mapTo(mPageStateHistory) { it.toPageState() }
+        mNavigationHistory.restore(stored.history.map { it.toPageState() })
     }
+
     fun canGoUp(): Boolean {
-        val archivePage = currentPage as? ArchiveExplorerPage
-        if (archivePage != null) return archivePage.parentId != null
-        return !externalStoragePath.startsWith(currentPage.path)
+        return parentPage() != null
     }
 
     fun goUp() {
-        clearSelection()
-        saveCurrentPageIntoHistory()
+        val parent = parentPage() ?: return
+        enterDirectChildPage(parent)
+    }
+
+    private fun parentPage(): ExplorerPage? {
+        val page = currentPageState.page ?: return null
         val archiveState = mArchiveNavigationState
-        val archivePage = currentPage as? ArchiveExplorerPage
-        if (archiveState != null && archivePage != null) {
-            val parent = archivePage.parentId?.let { parentId ->
-                archiveState.provider.ancestors(archivePage)
-                    .firstOrNull { it.entryId == parentId }
-            } ?: return
-            setCurrentPageState(ExplorerPageState(parent))
-            refreshCurrentPage()
-            return
+        if (page is ArchiveExplorerPage) {
+            return page.parentId?.let { parentId ->
+                archiveState?.provider?.ancestors(page)
+                    ?.firstOrNull { it.entryId == parentId }
+            }
         }
-        val currentPagePath = currentPage.path
-        val nextPagePath = if (Explorers.Providers.workspace().isCurrentSampleDir(currentDirectory)) {
+
+        val workspaceProvider = Explorers.Providers.workspace()
+        val nextPagePath = if (
+            mExplorer?.provider === workspaceProvider &&
+            workspaceProvider.isCurrentSampleDir(page.toScriptFile())
+        ) {
             path
         } else {
-            File(currentPagePath).parent
+            File(page.path).parent
         }
-        setCurrentPageState(ExplorerPageState(ExplorerDirPage.createRoot(nextPagePath)))
-        refreshCurrentPage()
+        return nextPagePath?.takeUnless { it == page.path }?.let(ExplorerDirPage::createRoot)
     }
 
     fun saveCurrentPageIntoHistory() {
-        mPageStateHistory.push(currentPageState)
+        saveCurrentScrollPosition()
+        mNavigationHistory.recordNavigation(currentPageState)
     }
 
     fun setDirectorySpanSize(directorySpanSize: Int) {
@@ -1654,23 +1793,47 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
     private fun refreshCurrentPage() {
         val explorer = mExplorer ?: return
-        isRefreshing = true
+        val pageState = currentPageState
+        val page = pageState.page ?: return
 
         // Cancel the previous refresh to prevent multiple concurrent iterators on mutable data.
         // zh-CN: 取消上一次刷新, 防止对可变数据产生多个并发迭代器.
         mRefreshDisposable?.dispose()
+        isRefreshing = true
 
-        mRefreshDisposable = explorer.fetchChildren(currentPage)
+        val accessMode = mDirectoryAccessMode
+        // A privileged history entry may become directly readable again after permissions change.
+        val ordinaryPage = if (page is PrivilegedExplorerItem) ExplorerDirPage.createRoot(page.path) else page
+        val ordinaryFetch = explorer.fetchChildren(ordinaryPage)
+        val fetch: Single<ExplorerPage> = if (accessMode != null && page !is ArchiveExplorerPage && findSampleRootPath(page.path) == null) {
+            val privilegedFetch = Single.fromCallable { PrivilegedExplorerAccess.listDirectory(page.path, accessMode) }
+                .subscribeOn(Schedulers.io())
+            // Android may return only this app's own directory without reporting an error.
+            // Once explicitly authorized, use the selected reader for the full restricted listing.
+            if (ExplorerStorageCatalog.isAndroidRestrictedPath(page.path)) privilegedFetch else {
+                ordinaryFetch.onErrorResumeNext { error ->
+                    if (error is ExplorerDirectoryAccessException || error is SecurityException) privilegedFetch else Single.error(error)
+                }
+            }
+        } else {
+            ordinaryFetch
+        }
+        mRefreshDisposable = fetch
             .subscribeOn(Schedulers.io())
-            .flatMapObservable { page: ExplorerPage? ->
-                currentPageState.page = page
+            .observeOn(AndroidSchedulers.mainThread())
+            .flatMapObservable { fetchedPage: ExplorerPage? ->
+                if ((pageState.page is PrivilegedExplorerItem) != (fetchedPage is PrivilegedExplorerItem)) {
+                    mApplyPageStateScrollOnRefresh = true
+                }
+                pageState.page = fetchedPage
 
                 // Snapshot the iterable to avoid ConcurrentModificationException during iteration.
                 // zh-CN: 对可迭代对象做快照, 避免迭代期间被修改触发 ConcurrentModificationException.
-                val snapshot: List<ExplorerItem> = page?.toList() ?: emptyList()
+                val snapshot: List<ExplorerItem> = fetchedPage?.toList() ?: emptyList()
 
                 Observable.fromIterable(snapshot)
             }
+            .filter { item -> (item !is PrivilegedExplorerItem && item !is ArchiveExplorerItem) || Pref.isHiddenFilesShown || !item.name.startsWith('.') }
             .filter { f: ExplorerItem -> mFilter == null || mFilter!!.invoke(f) }
             .collectInto(explorerItemManager.cloneConfig(), ExplorerItemManager::add)
             .observeOn(Schedulers.computation())
@@ -1680,9 +1843,15 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
             .doFinally {
                 // Always end the refreshing state even when errors happen.
                 // zh-CN: 无论成功或失败都要结束刷新状态.
-                isRefreshing = false
+                if (currentPageState === pageState && mExplorer === explorer) isRefreshing = false
             }
             .subscribe({ (newManager, newMeta) ->
+                if (currentPageState !== pageState || mExplorer !== explorer) return@subscribe
+                mDirectoryAccessFailed = false
+                mDirectoryNavigationPending = false
+                binding?.explorerAccessError?.isVisible = false
+                binding?.explorerItemList?.isVisible = true
+                updateDirectoryAccessState()
                 updateProjectToolbarVisibility()
                 val oldManager = explorerItemManager
                 val oldMeta = mRefreshMetaByPath
@@ -1701,8 +1870,19 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
                     notifyRefreshedInPlace(oldManager, oldMeta, newManager, newMeta)
                 }
             }, { e ->
+                if (currentPageState !== pageState || mExplorer !== explorer) return@subscribe
                 Log.e(LOG_TAG, "refreshCurrentPage() failed", e)
-                showSnack(this, R.string.error_refresh_failed, true)
+                clearSelection()
+                explorerItemManager = explorerItemManager.cloneConfig()
+                mRefreshMetaByPath = emptyMap()
+                notifyDataSetChanged()
+                mDirectoryAccessFailed = true
+                mDirectoryNavigationPending = false
+                binding?.explorerItemList?.isVisible = false
+                binding?.explorerAccessError?.isVisible = true
+                binding?.explorerAccessErrorMessage?.text = ExplorerDirectoryAccessUi.errorMessage(this, e)
+                updateDirectoryAccessState()
+                updateProjectToolbarVisibility()
             })
     }
 

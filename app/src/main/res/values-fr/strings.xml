@@ -1659,6 +1659,26 @@
     <string name="text_expand_all">Tout développer</string>
     <string name="text_expired">Expiré</string>
     <string name="text_expires_at">Expire</string>
+    <string name="text_explorer_access_failed">Impossible de lire ce dossier.\n%1$s</string>
+    <string name="text_explorer_access_hint">L\'accès standard permet d\'accéder au stockage partagé et aux cartes de stockage. Pour les dossiers restreints, autorisez l\'accès via Shizuku ou Root, puis réessayez. L\'étendue de l\'accès via Shizuku dépend du système. La navigation privilégiée permet uniquement de consulter les dossiers et les informations des fichiers.</string>
+    <string name="text_explorer_access_missing">Le dossier n\'existe pas ou le support de stockage a été retiré.\n%1$s</string>
+    <string name="text_explorer_access_mode">Méthode d\'accès</string>
+    <string name="text_explorer_access_normal">Accès standard</string>
+    <string name="text_explorer_access_options">Accès aux dossiers</string>
+    <string name="text_explorer_access_read_only">Navigation privilégiée (lecture seule)</string>
+    <string name="text_explorer_access_restricted">Android restreint l\'accès à ce dossier. L\'autorisation d\'accès à tous les fichiers ne donne pas accès aux dossiers Android/data ou Android/obb des autres applications. Essayez Shizuku ou Root depuis Accès aux dossiers.</string>
+    <string name="text_explorer_access_root">Root (lecture seule)</string>
+    <string name="text_explorer_access_shizuku">Shizuku (lecture seule)</string>
+    <string name="text_explorer_display_options">Options d\'affichage</string>
+    <string name="text_explorer_forward">Avancer</string>
+    <string name="text_explorer_home">Accueil</string>
+    <string name="text_explorer_path_menu">Parcourir et naviguer</string>
+    <string name="text_explorer_privileged_file_hint">Ce fichier est affiché via un accès privilégié. Seuls son chemin, sa taille et sa date de modification sont disponibles ici.</string>
+    <string name="text_explorer_storage">Stockage</string>
+    <string name="text_explorer_storage_root">Dossier racine</string>
+    <string name="text_explorer_storage_unavailable">Informations de stockage indisponibles</string>
+    <string name="text_explorer_storage_usage">%1$s utilisés, %2$s disponibles</string>
+    <string name="text_explorer_up">Remonter</string>
     <string name="text_export">Export</string>
     <string name="text_export_all">Tout exporter</string>
     <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">Exporter des bibliothèques de couleurs...</string>

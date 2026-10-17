@@ -76,12 +76,37 @@
                 app:tint="@color/explorer_category_operation_button"
                 tools:visibility="visible" />
 
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/explorer_path_more"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_explorer_path_menu"
+                android:padding="0dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_more_explorer_btn"
+                app:tint="@color/explorer_file_operation_button" />
+
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:background="?android:divider" />
+
+        <TextView
+            android:id="@+id/explorer_access_notice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:text="@string/text_explorer_access_read_only"
+            android:textColor="?android:textColorSecondary"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <org.autojs.autojs.ui.explorer.ExplorerProjectToolbar
             android:id="@+id/project_toolbar"
@@ -92,12 +117,53 @@
             app:cardElevation="0.97dp"
             app:cardUseCompatPadding="true" />
 
-        <androidx.recyclerview.widget.ThemeColorRecyclerView
-            android:id="@+id/explorer_item_list"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false" />
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.ThemeColorRecyclerView
+                android:id="@+id/explorer_item_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false" />
+
+            <LinearLayout
+                android:id="@+id/explorer_access_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/explorer_access_error_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:accessibilityLiveRegion="polite"
+                    android:gravity="center"
+                    android:textColor="?android:textColorSecondary"
+                    android:textSize="14sp" />
+
+                <Button
+                    android:id="@+id/explorer_access_retry"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/text_refresh" />
+
+                <Button
+                    android:id="@+id/explorer_access_settings"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_explorer_access_options" />
+
+            </LinearLayout>
+        </FrameLayout>
 
     </LinearLayout>
 

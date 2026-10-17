@@ -41,19 +41,24 @@ public class ExplorerFileProvider implements ExplorerProvider {
     }
 
     protected Observable<PFile> listFiles(PFile directory) {
-        boolean isShowHidden = Pref.isHiddenFilesShown();
-        return Observable.just(directory)
-                .flatMap(dir -> {
+        return Observable.fromCallable(() -> {
+                    boolean isShowHidden = Pref.isHiddenFilesShown();
                     PFile[] files;
-                    if (mFileFilter == null) {
-                        files = dir.listFiles(isShowHidden);
-                    } else {
-                        files = dir.listFiles(mFileFilter, isShowHidden);
+                    try {
+                        if (mFileFilter == null) {
+                            files = directory.listFiles(isShowHidden);
+                        } else {
+                            files = directory.listFiles(mFileFilter, isShowHidden);
+                        }
+                    } catch (SecurityException error) {
+                        throw new ExplorerDirectoryAccessException(directory.getPath(),
+                                ExplorerDirectoryAccessException.Reason.ACCESS_DENIED, error);
                     }
                     if (files == null) {
-                        return Observable.empty();
+                        throw ExplorerDirectoryAccessException.forFailedListing(directory.getPath());
                     }
-                    return Observable.fromArray(files);
-                });
+                    return files;
+                })
+                .flatMap(Observable::fromArray);
     }
 }

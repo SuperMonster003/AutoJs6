@@ -20,6 +20,7 @@ import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
+import org.autojs.autojs.model.explorer.PrivilegedExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerSamplePage
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.explorer.WorkspaceFileProvider
@@ -132,6 +133,15 @@ internal class ExplorerPageViewHolder(
 
     private fun showOptionsMenu() {
         val explorerPage = mExplorerPage ?: return
+        if (explorerPage is PrivilegedExplorerItem) {
+            PopupMenu(host.context, mOptions).apply {
+                menu.add(R.string.text_copy_path).setOnMenuItemClickListener {
+                    ExplorerViewHelper.copyPaths(host.context, listOf(explorerPage))
+                    true
+                }
+            }.show()
+            return
+        }
         val popupMenu = PopupMenu(host.context, mOptions)
         val menu = popupMenu.menu
         popupMenu.inflate(R.menu.menu_dir_options)

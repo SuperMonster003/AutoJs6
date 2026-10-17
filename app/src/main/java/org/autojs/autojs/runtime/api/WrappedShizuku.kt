@@ -17,6 +17,7 @@ import org.autojs.autojs.core.shizuku.UserService
 import org.autojs.autojs.util.App.SHIZUKU
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import rikka.shizuku.Shizuku
 import java.util.concurrent.CopyOnWriteArrayList
@@ -68,6 +69,8 @@ object WrappedShizuku {
         val pkg = GlobalAppContext.get().packageName
         Shizuku.UserServiceArgs(ComponentName(pkg, UserService::class.java.name))
             .processNameSuffix("shizuku-service-for-${pkg.substringAfterLast(".")}")
+            // Recreate an older user process when its AIDL implementation changes after an update.
+            .version(BuildConfig.VERSION_CODE)
             .daemon(false)
     }
 

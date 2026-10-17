@@ -13,4 +13,7 @@ interface IUserService {
     String currentComponent() = 13;
     String currentComponentShort() = 14;
 
+    String listExplorerDirectory(String path, String snapshotToken, int offset) = 21;
+    oneway void closeExplorerDirectory(String snapshotToken) = 22;
+
 }

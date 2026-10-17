@@ -409,6 +409,7 @@
     <string name="text_default_validity_years" translatable="false">25</string>
     <string name="text_device_imei" translatable="false">IMEI</string>
     <string name="text_en_import" translatable="false">import</string>
+    <string name="text_explorer_storage_percent" translatable="false">%1$d%%</string>
     <string name="text_full_version_info" translatable="false">%1$s (%2$d)</string>
     <string name="text_half_ellipsis" translatable="false" formatted="true" tools:ignore="TypographyEllipsis">...</string>
     <string name="text_jks" translatable="false">JKS</string>

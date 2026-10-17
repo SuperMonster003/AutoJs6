@@ -1661,6 +1661,26 @@
     <string name="text_expand_all">모두 펼치기</string>
     <string name="text_expired">만료됨</string>
     <string name="text_expires_at">만료</string>
+    <string name="text_explorer_access_failed">이 디렉터리를 읽을 수 없습니다.\n%1$s</string>
+    <string name="text_explorer_access_hint">일반 접근은 공유 저장소와 저장 카드에 사용할 수 있습니다. 제한된 디렉터리에 접근하려면 Shizuku 또는 Root 권한을 부여한 후 다시 시도하세요. Shizuku의 접근 범위는 시스템에 따라 다릅니다. 높은 권한으로 탐색할 때는 디렉터리와 파일 정보만 볼 수 있습니다.</string>
+    <string name="text_explorer_access_missing">디렉터리가 없거나 저장 장치가 제거되었습니다.\n%1$s</string>
+    <string name="text_explorer_access_mode">접근 방식</string>
+    <string name="text_explorer_access_normal">일반 접근</string>
+    <string name="text_explorer_access_options">디렉터리 접근</string>
+    <string name="text_explorer_access_read_only">높은 권한으로 탐색 (읽기 전용)</string>
+    <string name="text_explorer_access_restricted">Android에서 이 디렉터리에 대한 접근을 제한합니다. 모든 파일 접근 권한은 다른 앱의 Android/data 또는 Android/obb 디렉터리에 대한 접근을 허용하지 않습니다. 디렉터리 접근 설정에서 Shizuku 또는 Root를 시도하세요.</string>
+    <string name="text_explorer_access_root">Root (읽기 전용)</string>
+    <string name="text_explorer_access_shizuku">Shizuku (읽기 전용)</string>
+    <string name="text_explorer_display_options">표시 설정</string>
+    <string name="text_explorer_forward">앞으로</string>
+    <string name="text_explorer_home">홈</string>
+    <string name="text_explorer_path_menu">탐색 및 이동</string>
+    <string name="text_explorer_privileged_file_hint">이 파일은 높은 권한을 통해 표시됩니다. 여기서는 경로, 크기 및 수정 시간만 확인할 수 있습니다.</string>
+    <string name="text_explorer_storage">저장 공간</string>
+    <string name="text_explorer_storage_root">루트 디렉터리</string>
+    <string name="text_explorer_storage_unavailable">저장 공간 정보를 사용할 수 없음</string>
+    <string name="text_explorer_storage_usage">%1$s 사용 중, %2$s 사용 가능</string>
+    <string name="text_explorer_up">위로</string>
     <string name="text_export">내보내다</string>
     <string name="text_export_all">모두 내보내기</string>
     <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">색상 라이브러리 내보내기...</string>

@@ -1656,6 +1656,26 @@
     <string name="text_expand_all">展开全部</string>
     <string name="text_expired">已到期</string>
     <string name="text_expires_at">到期时间</string>
+    <string name="text_explorer_access_failed">无法读取此目录.\n%1$s</string>
+    <string name="text_explorer_access_hint">普通访问适用于共享存储和存储卡. 受限目录可授权 Shizuku 或 Root 后重试. Shizuku 的访问范围取决于系统. 高权限浏览仅支持查看目录和文件信息.</string>
+    <string name="text_explorer_access_missing">目录不存在或存储已移除.\n%1$s</string>
+    <string name="text_explorer_access_mode">访问方式</string>
+    <string name="text_explorer_access_normal">普通访问</string>
+    <string name="text_explorer_access_options">目录访问权限</string>
+    <string name="text_explorer_access_read_only">高权限浏览 (只读)</string>
+    <string name="text_explorer_access_restricted">Android 限制了此目录的访问. 所有文件访问权限不包含其他应用的 Android/data 或 Android/obb 目录. 可在目录访问权限中尝试 Shizuku 或 Root.</string>
+    <string name="text_explorer_access_root">Root (只读)</string>
+    <string name="text_explorer_access_shizuku">Shizuku (只读)</string>
+    <string name="text_explorer_display_options">显示设置</string>
+    <string name="text_explorer_forward">前进</string>
+    <string name="text_explorer_home">回到首页</string>
+    <string name="text_explorer_path_menu">浏览与导航</string>
+    <string name="text_explorer_privileged_file_hint">此文件通过高权限访问显示. 此处仅提供路径, 大小和修改时间.</string>
+    <string name="text_explorer_storage">存储空间</string>
+    <string name="text_explorer_storage_root">根目录</string>
+    <string name="text_explorer_storage_unavailable">存储信息不可用</string>
+    <string name="text_explorer_storage_usage">已用 %1$s, 可用 %2$s</string>
+    <string name="text_explorer_up">向上</string>
     <string name="text_export">导出</string>
     <string name="text_export_all">导出全部</string>
     <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">导出颜色库...</string>

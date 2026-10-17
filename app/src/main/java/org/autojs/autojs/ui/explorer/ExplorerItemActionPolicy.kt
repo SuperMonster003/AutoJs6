@@ -4,6 +4,7 @@ import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerFileItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.autojs.model.explorer.PrivilegedExplorerItem
 import org.autojs.plugin.explorer.api.ExplorerActionValues
 
 /** Immutable presentation state for the action strip of one Explorer file row. */
@@ -29,6 +30,9 @@ internal object ExplorerItemActionPolicy {
         item: ExplorerItem,
         pluginPrimaryAction: ResolvedExplorerAction?,
     ): ExplorerItemActionState {
+        if (item is PrivilegedExplorerItem) {
+            return ExplorerItemActionState(null, null, false, false, false, false, false)
+        }
         val primaryAction = when (item) {
             is ArchiveExplorerFileItem -> ExplorerPrimaryActionResolver
                 .resolve(item.type)

@@ -7,6 +7,7 @@ import android.os.Process
 import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.Keep
+import org.autojs.autojs.model.explorer.PrivilegedExplorerDirectoryService
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
 import kotlin.system.exitProcess
@@ -14,6 +15,7 @@ import kotlin.system.exitProcess
 class UserService : IUserService.Stub {
 
     private var mContext: Context? = null
+    private val explorerDirectories = PrivilegedExplorerDirectoryService()
 
     @Suppress("DEPRECATION")
     private val currentActivity: ComponentName?
@@ -89,5 +91,10 @@ class UserService : IUserService.Stub {
     override fun currentComponent() = currentActivity?.flattenToString() ?: ""
 
     override fun currentComponentShort() = currentActivity?.flattenToShortString() ?: ""
+
+    override fun listExplorerDirectory(path: String, snapshotToken: String, offset: Int): String =
+        explorerDirectories.listDirectory(path, snapshotToken, offset)
+
+    override fun closeExplorerDirectory(snapshotToken: String) = explorerDirectories.closeDirectory(snapshotToken)
 
 }

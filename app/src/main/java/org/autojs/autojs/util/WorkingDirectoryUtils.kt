@@ -19,25 +19,28 @@ object WorkingDirectoryUtils {
     @JvmStatic
     var path: String
         get() = Pref.getString(R.string.key_working_directory, str(R.string.default_value_working_directory)).let {
-            File(externalStorageDirectory, it).path
+            WorkingDirectoryPathPolicy.resolveStored(it, externalStoragePath)
         }
         set(path) {
-            var scriptDirPath = path
-            if (path.startsWith(externalStoragePath)) {
-                scriptDirPath = toRelativePath(path)
-            }
+            val scriptDirPath = WorkingDirectoryPathPolicy.decodeAbsolute(path)?.let {
+                WorkingDirectoryPathPolicy.encodeAbsolute(it, externalStoragePath)
+            } ?: toRelativePath(path)
             val dirKey = key(R.string.key_working_directory)
             Pref.putString(dirKey, scriptDirPath)
         }
 
+    /** File-picker and Explorer results are already absolute, unlike legacy preference input. */
+    @JvmStatic
+    fun setAbsolutePath(path: String) {
+        Pref.putString(
+            R.string.key_working_directory,
+            WorkingDirectoryPathPolicy.encodeAbsolute(path, externalStoragePath),
+        )
+    }
+
     @JvmStatic
     val relativePath
-        get() = path.let {
-            when (it.startsWith(externalStoragePath)) {
-                true -> toRelativePath(it)
-                else -> it
-            }
-        }
+        get() = toRelativePath(path)
 
     @MinSize(1)
     fun getRecommendedDefaultPaths() = getDefaultPathCandidates().map { getDir(it) }.toSet()
@@ -78,16 +81,25 @@ object WorkingDirectoryUtils {
     }
 
     @JvmStatic
-    fun toRelativePath(scriptDirPath: String) = when {
-        scriptDirPath.startsWith(externalStoragePath) -> {
-            scriptDirPath.substring(externalStoragePath.length)
-        }
-        else -> scriptDirPath
-    }
+    fun toRelativePath(scriptDirPath: String) = WorkingDirectoryPathPolicy.toRelativePath(scriptDirPath, externalStoragePath)
+
+    internal fun resolveInputPath(input: String, selectedAbsolutePath: String? = null): String =
+        WorkingDirectoryPathPolicy.resolveInput(input, externalStoragePath, selectedAbsolutePath)
+
+    internal fun displayStoredPath(value: String): String = WorkingDirectoryPathPolicy.displayStored(value)
+
+    internal fun decodeStoredAbsolutePath(value: String): String? = WorkingDirectoryPathPolicy.decodeAbsolute(value)
+
+    internal fun isInternalStoragePath(value: String): Boolean = WorkingDirectoryPathPolicy.isWithinStorage(value, externalStoragePath)
 
     @JvmStatic
     fun addIntoHistory(item: CharSequence) {
         history = linkedSetOf(toRelativePath(item.toString())).apply { addAll(history) }
+    }
+
+    @JvmStatic
+    fun addAbsoluteIntoHistory(path: String) {
+        history = linkedSetOf(WorkingDirectoryPathPolicy.encodeAbsolute(path, externalStoragePath)).apply { addAll(history) }
     }
 
     fun removeFromHistory(item: CharSequence) {

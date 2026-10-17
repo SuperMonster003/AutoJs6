@@ -171,13 +171,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                         .options(List.of(
                                 new MaterialDialog.OptionMenuItemSpec(mContext.getString(R.string.dialog_button_homepage), (d) -> {
                                     String homepage = WorkingDirectoryUtils.getPath();
-                                    ExplorerPage currentPageStatePage = mScriptListDialogExplorerView.currentPageState.getPage();
-                                    if (currentPageStatePage != null) {
-                                        if (!Objects.equals(currentPageStatePage.getPath(), homepage)) {
-                                            mScriptListDialogExplorerView.saveCurrentPageIntoHistory();
-                                        }
-                                    }
-                                    mScriptListDialogExplorerView.setExplorer(Explorers.workspace(), ExplorerDirPage.createRoot(homepage));
+                                    mScriptListDialogExplorerView.navigateToDirectory(homepage);
                                 })
                         ))
                         .customView(mScriptListDialogExplorerView, false)

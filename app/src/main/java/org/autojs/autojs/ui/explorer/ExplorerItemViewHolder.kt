@@ -26,6 +26,7 @@ import org.autojs.autojs.core.accessibility.LayoutSnapshotFiles
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerFileItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.autojs.model.explorer.PrivilegedExplorerItem
 import org.autojs.autojs.model.explorer.WorkspaceFileProvider
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.model.script.Scripts
@@ -230,7 +231,7 @@ internal class ExplorerItemViewHolder(
         }
 
         Observable.fromCallable {
-            val pluginPrimaryAction = if (item is ArchiveExplorerItem) {
+            val pluginPrimaryAction = if (item is ArchiveExplorerItem || item is PrivilegedExplorerItem) {
                 null
             } else {
                 runCatching {
@@ -321,6 +322,10 @@ internal class ExplorerItemViewHolder(
     }
 
     private fun onItemClick() {
+        if (mExplorerItem is PrivilegedExplorerItem) {
+            ExplorerDirectoryAccessUi.showFileInfo(host.explorerView, mExplorerItem)
+            return
+        }
         if (host.isInSelectionMode) {
             host.toggleItemSelection(mExplorerItem)
             return
@@ -636,6 +641,10 @@ internal class ExplorerItemViewHolder(
 
     @SuppressLint("CheckResult")
     private fun showOptionsMenu() {
+        if (mExplorerItem is PrivilegedExplorerItem) {
+            ExplorerDirectoryAccessUi.showFileInfo(host.explorerView, mExplorerItem)
+            return
+        }
         val actionItem = mExplorerItem
         val actionPrimaryPlugin = mPrimaryPluginAction
         val popupMenu = PopupMenu(host.context, mOptions)

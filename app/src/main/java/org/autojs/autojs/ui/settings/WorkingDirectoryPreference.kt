@@ -64,6 +64,8 @@ class WorkingDirectoryPreference : MaterialPreference {
 
         private val mPrefFullPath = WorkingDirectoryUtils.path
         private val mExtStoragePath = EnvironmentUtils.externalStoragePath
+        private var mSelectedAbsolutePath: String? = mPrefFullPath.takeUnless(WorkingDirectoryUtils::isInternalStoragePath)
+        private var mSettingSelectedPath = false
 
         init {
             build()
@@ -102,15 +104,21 @@ class WorkingDirectoryPreference : MaterialPreference {
             .neutralText(R.string.dialog_button_history)
             .neutralColorRes(R.color.dialog_button_hint)
             .onNeutral { _, _ ->
+                val historyEntries = WorkingDirectoryUtils.history.toMutableList()
                 MaterialDialog.Builder(prefContext)
                     .title(R.string.text_history)
                     .content(R.string.text_no_history)
-                    .items(WorkingDirectoryUtils.history)
-                    .itemsCallback { dHistory, _, _, text ->
+                    .items(historyEntries.map(WorkingDirectoryUtils::displayStoredPath))
+                    .itemsCallback { dHistory, _, position, _ ->
                         dHistory.dismiss()
-                        mContentView.setText(text)
+                        val stored = historyEntries[position]
+                        setSelectedPath(
+                            WorkingDirectoryUtils.displayStoredPath(stored),
+                            WorkingDirectoryUtils.decodeStoredAbsolutePath(stored),
+                        )
                     }
-                    .itemsLongCallback { dHistory, _, _, text ->
+                    .itemsLongCallback { dHistory, _, position, _ ->
+                        val stored = historyEntries[position]
                         false.also {
                             MaterialDialog.Builder(prefContext)
                                 .title(R.string.text_prompt)
@@ -120,9 +128,10 @@ class WorkingDirectoryPreference : MaterialPreference {
                                 .positiveColorRes(R.color.dialog_button_caution)
                                 .onPositive { ds, _ ->
                                     ds.dismiss()
-                                    WorkingDirectoryUtils.removeFromHistory(text)
+                                    WorkingDirectoryUtils.removeFromHistory(stored)
                                     dHistory.items?.let {
-                                        it.remove(text)
+                                        historyEntries.removeAt(position)
+                                        it.removeAt(position)
                                         dHistory.notifyItemsChanged()
                                         dHistory.toggleContentViewByItems()
                                     }
@@ -145,12 +154,17 @@ class WorkingDirectoryPreference : MaterialPreference {
             .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { dialog, _ ->
                 val inputPath = mContentView.text.toString()
-                WorkingDirectoryUtils.addIntoHistory(inputPath)
+                val fullPath = toFullPath(inputPath)
+                if (mSelectedAbsolutePath != null) {
+                    WorkingDirectoryUtils.addAbsoluteIntoHistory(fullPath)
+                } else {
+                    WorkingDirectoryUtils.addIntoHistory(inputPath)
+                }
                 if (isDirPathChanged(inputPath)) {
                     if (mSwitchView.isChecked) {
                         transfer(mPrefFullPath, inputPath)
                     }
-                    WorkingDirectoryUtils.path = inputPath
+                    WorkingDirectoryUtils.setAbsolutePath(fullPath)
                     MainActivity.shouldRecreateMainActivity = true
                 }
                 dialog.dismiss()
@@ -173,7 +187,9 @@ class WorkingDirectoryPreference : MaterialPreference {
                                 .title(R.string.text_working_dir_path)
                                 .dir(mExtStoragePath, initialDir ?: WorkingDirectoryUtils.path)
                                 .chooseDir()
-                                .singleChoice { file -> mContentView.setText(WorkingDirectoryUtils.toRelativePath(file.path)) }
+                                .singleChoice { file ->
+                                    setSelectedPath(WorkingDirectoryUtils.toRelativePath(file.path), file.path)
+                                }
                                 .show()
                         }
                     }
@@ -186,6 +202,9 @@ class WorkingDirectoryPreference : MaterialPreference {
                             }
 
                             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                                if (!mSettingSelectedPath && mSelectedAbsolutePath?.let(WorkingDirectoryUtils::isInternalStoragePath) == true) {
+                                    mSelectedAbsolutePath = null
+                                }
                                 mFileTransferView.visibility = when (isDirPathChanged(s)) {
                                     true -> View.VISIBLE
                                     else -> View.GONE
@@ -261,10 +280,17 @@ class WorkingDirectoryPreference : MaterialPreference {
 
         private fun isDirPathChanged(inputPath: String) = toFullPath(inputPath) != mPrefFullPath
 
-        private fun toFullPath(path: String) = when (path.startsWith(mExtStoragePath)) {
-            true -> path
-            else -> File(mExtStoragePath, path).path
+        private fun setSelectedPath(displayPath: String, absolutePath: String?) {
+            mSelectedAbsolutePath = absolutePath
+            mSettingSelectedPath = true
+            try {
+                mContentView.setText(displayPath)
+            } finally {
+                mSettingSelectedPath = false
+            }
         }
+
+        private fun toFullPath(path: String) = WorkingDirectoryUtils.resolveInputPath(path, mSelectedAbsolutePath)
 
     }
 

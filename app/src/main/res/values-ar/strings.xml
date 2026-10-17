@@ -1661,6 +1661,26 @@
     <string name="text_expand_all">توسيع الكل</string>
     <string name="text_expired">منتهي</string>
     <string name="text_expires_at">ينتهي</string>
+    <string name="text_explorer_access_failed">تعذرت قراءة هذا الدليل.\n%1$s</string>
+    <string name="text_explorer_access_hint">يعمل الوصول العادي مع التخزين المشترك وبطاقات التخزين. للأدلة المقيدة, امنح إذن الوصول عبر Shizuku أو Root ثم أعد المحاولة. يعتمد نطاق وصول Shizuku على النظام. يتيح التصفح بصلاحيات مرتفعة عرض الأدلة ومعلومات الملفات فقط.</string>
+    <string name="text_explorer_access_missing">الدليل غير موجود أو تمت إزالة وحدة التخزين.\n%1$s</string>
+    <string name="text_explorer_access_mode">طريقة الوصول</string>
+    <string name="text_explorer_access_normal">الوصول العادي</string>
+    <string name="text_explorer_access_options">الوصول إلى الأدلة</string>
+    <string name="text_explorer_access_read_only">التصفح بصلاحيات مرتفعة (للقراءة فقط)</string>
+    <string name="text_explorer_access_restricted">يقيد Android الوصول إلى هذا الدليل. إذن الوصول إلى جميع الملفات لا يتيح الوصول إلى أدلة Android/data أو Android/obb الخاصة بالتطبيقات الأخرى. جرب Shizuku أو Root من إعدادات الوصول إلى الأدلة.</string>
+    <string name="text_explorer_access_root">Root (للقراءة فقط)</string>
+    <string name="text_explorer_access_shizuku">Shizuku (للقراءة فقط)</string>
+    <string name="text_explorer_display_options">خيارات العرض</string>
+    <string name="text_explorer_forward">إلى الأمام</string>
+    <string name="text_explorer_home">الصفحة الرئيسية</string>
+    <string name="text_explorer_path_menu">التصفح والتنقل</string>
+    <string name="text_explorer_privileged_file_hint">يتم عرض هذا الملف باستخدام صلاحيات مرتفعة. يتوفر هنا مساره وحجمه ووقت تعديله فقط.</string>
+    <string name="text_explorer_storage">مساحة التخزين</string>
+    <string name="text_explorer_storage_root">الدليل الجذر</string>
+    <string name="text_explorer_storage_unavailable">معلومات التخزين غير متاحة</string>
+    <string name="text_explorer_storage_usage">%1$s مستخدمة, %2$s متاحة</string>
+    <string name="text_explorer_up">إلى الأعلى</string>
     <string name="text_export">يصدّر</string>
     <string name="text_export_all">تصدير الكل</string>
     <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">تصدير مكتبات الألوان...</string>

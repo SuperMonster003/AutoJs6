@@ -1656,6 +1656,26 @@
     <string name="text_expand_all">Expand all</string>
     <string name="text_expired">Expired</string>
     <string name="text_expires_at">Expires</string>
+    <string name="text_explorer_access_failed">Unable to read this directory.\n%1$s</string>
+    <string name="text_explorer_access_hint">Standard access works for shared storage and storage cards. For restricted directories, grant Shizuku or Root access and retry. Shizuku access depends on the system. Privileged browsing only shows directories and file information.</string>
+    <string name="text_explorer_access_missing">The directory does not exist or the storage was removed.\n%1$s</string>
+    <string name="text_explorer_access_mode">Access method</string>
+    <string name="text_explorer_access_normal">Standard access</string>
+    <string name="text_explorer_access_options">Directory access</string>
+    <string name="text_explorer_access_read_only">Privileged browsing (read only)</string>
+    <string name="text_explorer_access_restricted">Android restricts access to this directory. All files access does not grant access to other apps\' Android/data or Android/obb directories. Try Shizuku or Root from Directory access.</string>
+    <string name="text_explorer_access_root">Root (read only)</string>
+    <string name="text_explorer_access_shizuku">Shizuku (read only)</string>
+    <string name="text_explorer_display_options">Display options</string>
+    <string name="text_explorer_forward">Forward</string>
+    <string name="text_explorer_home">Home</string>
+    <string name="text_explorer_path_menu">Browse and navigate</string>
+    <string name="text_explorer_privileged_file_hint">This file is shown through privileged access. Only its path, size and modification time are available here.</string>
+    <string name="text_explorer_storage">Storage</string>
+    <string name="text_explorer_storage_root">Root directory</string>
+    <string name="text_explorer_storage_unavailable">Storage information unavailable</string>
+    <string name="text_explorer_storage_usage">%1$s used, %2$s available</string>
+    <string name="text_explorer_up">Up</string>
     <string name="text_export">Export</string>
     <string name="text_export_all">Export all</string>
     <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">Export color libraries...</string>

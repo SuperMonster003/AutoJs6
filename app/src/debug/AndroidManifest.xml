@@ -2,6 +2,10 @@
 
     <application>
         <activity
+            android:name="org.autojs.autojs.ui.explorer.ExplorerPathMenuProbeActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
+        <activity
             android:name="org.autojs.autojs.core.plugin.compose.ComposeInsetsProbeActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />

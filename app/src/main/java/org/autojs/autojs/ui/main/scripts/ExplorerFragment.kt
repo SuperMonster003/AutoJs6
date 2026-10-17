@@ -105,7 +105,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
                     handleSelectionToolbarStateChanged(shown)
                 }
             })
-            explorerView.setOnArchiveModeStateChangeListener(::handleArchiveModeStateChanged)
+            explorerView.setOnDirectoryOperationsStateChangeListener(::handleArchiveModeStateChanged)
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -133,7 +133,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     private fun toggleFabVisibility() {
         val behavior = (fab.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? ScrollAwareFABBehavior
 
-        if (mSelectionToolbarShown) {
+        if (mSelectionToolbarShown || mArchiveModeShown) {
             hideFabForSelectionToolbar()
             return
         }
@@ -206,6 +206,8 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
 
     private fun handleArchiveModeStateChanged(shown: Boolean) {
         mArchiveModeShown = shown
+        // Directory loads may finish after the shared FAB has moved to another tab.
+        if (!mIsCurrentPageFiles) return
         if (shown) {
             if (!mFabStateSavedForArchive) {
                 mFabVisibilityBeforeArchive = fab.visibility
@@ -247,6 +249,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     }
 
     override fun onFabClick(fab: FloatingActionButton) {
+        if (mArchiveModeShown) return
         initFloatingActionMenuIfNeeded(fab).run { if (isExpanded) collapse() else expand() }
     }
 

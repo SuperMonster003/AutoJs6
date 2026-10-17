@@ -1660,6 +1660,26 @@
     <string name="text_expand_all">すべて展開する</string>
     <string name="text_expired">期限切れ</string>
     <string name="text_expires_at">期限</string>
+    <string name="text_explorer_access_failed">このディレクトリを読み取れません.\n%1$s</string>
+    <string name="text_explorer_access_hint">通常アクセスは共有ストレージとストレージカードに対応しています. アクセスが制限されたディレクトリには, Shizuku または Root の権限を付与してから再試行してください. Shizuku でアクセスできる範囲はシステムによって異なります. 特権アクセスではディレクトリとファイル情報の閲覧のみが可能です.</string>
+    <string name="text_explorer_access_missing">ディレクトリが存在しないか, ストレージが取り外されています.\n%1$s</string>
+    <string name="text_explorer_access_mode">アクセス方法</string>
+    <string name="text_explorer_access_normal">通常アクセス</string>
+    <string name="text_explorer_access_options">ディレクトリへのアクセス</string>
+    <string name="text_explorer_access_read_only">特権アクセス (読み取り専用)</string>
+    <string name="text_explorer_access_restricted">Android によってこのディレクトリへのアクセスが制限されています. すべてのファイルへのアクセス権限には, 他のアプリの Android/data や Android/obb ディレクトリへのアクセスは含まれません. ディレクトリへのアクセス設定から Shizuku または Root をお試しください.</string>
+    <string name="text_explorer_access_root">Root (読み取り専用)</string>
+    <string name="text_explorer_access_shizuku">Shizuku (読み取り専用)</string>
+    <string name="text_explorer_display_options">表示設定</string>
+    <string name="text_explorer_forward">進む</string>
+    <string name="text_explorer_home">ホーム</string>
+    <string name="text_explorer_path_menu">参照と移動</string>
+    <string name="text_explorer_privileged_file_hint">このファイルは特権アクセスで表示されています. ここではパス, サイズ, 更新日時のみ確認できます.</string>
+    <string name="text_explorer_storage">ストレージ</string>
+    <string name="text_explorer_storage_root">ルートディレクトリ</string>
+    <string name="text_explorer_storage_unavailable">ストレージ情報を取得できません</string>
+    <string name="text_explorer_storage_usage">%1$s 使用済み, %2$s 使用可能</string>
+    <string name="text_explorer_up">上へ</string>
     <string name="text_export">輸出</string>
     <string name="text_export_all">全てエクスポート</string>
     <string name="text_export_color_libraries" tools:ignore="TypographyEllipsis">カラーライブラリをエクスポート...</string>

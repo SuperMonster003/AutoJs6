@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="explorer_menu_back" type="id" />
+    <item name="explorer_menu_copy_path" type="id" />
+    <item name="explorer_menu_extensions" type="id" />
+    <item name="explorer_menu_forward" type="id" />
+    <item name="explorer_menu_hidden" type="id" />
+    <item name="explorer_menu_home" type="id" />
+    <item name="explorer_menu_panel" type="id" />
+    <item name="explorer_menu_refresh" type="id" />
+    <item name="explorer_menu_set_home" type="id" />
+    <item name="explorer_menu_storage" type="id" />
+    <item name="explorer_menu_up" type="id" />
+</resources>
