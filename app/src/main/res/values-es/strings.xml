@@ -1680,7 +1680,7 @@
     <string name="text_explorer_privileged_conflict">El destino ya existe. Elige otra carpeta u otro nombre. No se han reemplazado los archivos existentes.</string>
     <string name="text_explorer_privileged_delete_confirmation">Estos elementos se eliminarán de forma permanente sin pasar por la papelera:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">Elige una carpeta de destino. La operación se detiene si ya existe un elemento con el mismo nombre.</string>
-    <string name="text_explorer_privileged_file_hint">Los archivos de texto se pueden editar y guardar en el original tras verificarlo. Los archivos abiertos en otras aplicaciones usan copias temporales de solo lectura.</string>
+    <string name="text_explorer_privileged_file_hint">Los archivos de texto se pueden editar y guardar en el original tras verificarlo. Otras aplicaciones leen los archivos directamente o bajo demanda con acceso de solo lectura. Solo se crea una copia temporal de compatibilidad después de confirmar.</string>
     <string name="text_explorer_privileged_invalid_name">Introduce un único nombre de archivo válido (no . ni .., y sin / ni NUL).</string>
     <string name="text_explorer_privileged_move_scope">Mover entre sistemas de archivos solo está permitido entre ubicaciones de almacenamiento compartido. Copia y verifica el destino antes de gestionar el origen por separado.</string>
     <string name="text_explorer_privileged_no_space">No hay suficiente espacio libre en el destino.</string>
@@ -1697,6 +1697,16 @@
     <string name="text_explorer_storage_root">Directorio raíz</string>
     <string name="text_explorer_storage_unavailable">Información de almacenamiento no disponible</string>
     <string name="text_explorer_storage_usage">%1$s usados, %2$s disponibles</string>
+    <string name="text_explorer_stream_access_lost">La lectura se detuvo porque el acceso con privilegios o su conexión no están disponibles. Restablece el acceso y vuelve a abrir el archivo</string>
+    <string name="text_explorer_stream_changed">El archivo cambió o se retiró su almacenamiento. Vuelve a abrirlo</string>
+    <string name="text_explorer_stream_compatibility_open">Abrir copia compatible</string>
+    <string name="text_explorer_stream_copy_cancelled">Copia temporal cancelada</string>
+    <string name="text_explorer_stream_copy_confirm">Usa esta opción solo si la aplicación de visualización no puede leer el archivo directamente ni bajo demanda. Primero se copiará el archivo completo al directorio temporal de la aplicación, con un espacio adicional necesario de %1$s, y se abrirá al terminar. Cancela para volver sin copiar.\n\n%2$s\nEspacio temporal disponible: %3$s</string>
+    <string name="text_explorer_stream_copy_progress">%1$s / %2$s</string>
+    <string name="text_explorer_stream_copy_title">Abrir una copia temporal</string>
+    <string name="text_explorer_stream_expired">El enlace del archivo ha caducado. Vuelve a abrirlo desde el administrador de archivos</string>
+    <string name="text_explorer_stream_read_only">Este enlace es de solo lectura</string>
+    <string name="text_explorer_stream_unsupported">Este dispositivo no puede proporcionar lectura bajo demanda con desplazamiento dentro del archivo. Puedes usar una copia temporal</string>
     <string name="text_explorer_up">Subir</string>
     <string name="text_export">Exportar</string>
     <string name="text_export_all">Exportar todo</string>

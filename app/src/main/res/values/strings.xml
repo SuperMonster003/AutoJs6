@@ -1676,7 +1676,7 @@
     <string name="text_explorer_privileged_conflict">The destination already exists. Choose another folder or name. Existing files have not been replaced.</string>
     <string name="text_explorer_privileged_delete_confirmation">These items will be permanently deleted without using the trash:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">Choose a destination folder. The operation stops if an item with the same name already exists.</string>
-    <string name="text_explorer_privileged_file_hint">Text files can be edited and saved to the original after verification. Files opened in other apps use read-only temporary copies.</string>
+    <string name="text_explorer_privileged_file_hint">Text files can be edited and saved to the original after verification. Other apps read files in place or on demand with read-only access. A temporary compatibility copy is created only after confirmation.</string>
     <string name="text_explorer_privileged_invalid_name">Enter a valid single file name (not . or .., and without / or NUL).</string>
     <string name="text_explorer_privileged_move_scope">Moving across filesystems is supported only between shared-storage locations. Copy and verify the destination before handling the source separately.</string>
     <string name="text_explorer_privileged_no_space">The destination does not have enough free space.</string>
@@ -1693,6 +1693,16 @@
     <string name="text_explorer_storage_root">Root directory</string>
     <string name="text_explorer_storage_unavailable">Storage information unavailable</string>
     <string name="text_explorer_storage_usage">%1$s used, %2$s available</string>
+    <string name="text_explorer_stream_access_lost">File reading stopped because privileged access or its connection is unavailable. Restore access and open the file again</string>
+    <string name="text_explorer_stream_changed">The file changed or its storage was removed. Open it again</string>
+    <string name="text_explorer_stream_compatibility_open">Open compatibility copy</string>
+    <string name="text_explorer_stream_copy_cancelled">Temporary copy cancelled</string>
+    <string name="text_explorer_stream_copy_confirm">Use this only when the viewing app cannot use in-place or on-demand access. The entire file will first be copied to the app\'s temporary directory, requiring an additional %1$s of space, and opened when copying finishes. Cancel to return without copying.\n\n%2$s\nAvailable temporary space: %3$s</string>
+    <string name="text_explorer_stream_copy_progress">%1$s / %2$s</string>
+    <string name="text_explorer_stream_copy_title">Open a temporary copy</string>
+    <string name="text_explorer_stream_expired">The file link expired. Open the file again from the file manager</string>
+    <string name="text_explorer_stream_read_only">This link is read only</string>
+    <string name="text_explorer_stream_unsupported">This device cannot provide seekable on-demand access. A temporary copy can be used instead</string>
     <string name="text_explorer_up">Up</string>
     <string name="text_export">Export</string>
     <string name="text_export_all">Export all</string>

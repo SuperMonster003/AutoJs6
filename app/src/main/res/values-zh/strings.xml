@@ -1677,7 +1677,7 @@
     <string name="text_explorer_privileged_conflict">目标已存在, 请更换目录或名称. 已有文件未被覆盖.</string>
     <string name="text_explorer_privileged_delete_confirmation">以下项目将永久删除, 不经过回收站:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">选择目标文件夹. 若已存在同名项目, 操作将停止.</string>
-    <string name="text_explorer_privileged_file_hint">文本文件可编辑, 经核验后保存到原文件. 通过其他应用打开的文件仍使用只读临时副本.</string>
+    <string name="text_explorer_privileged_file_hint">文本文件可编辑, 经核验后保存到原文件. 其他应用以只读方式原地或按需读取文件, 仅在确认兼容方式后创建临时副本.</string>
     <string name="text_explorer_privileged_invalid_name">请输入有效的单个文件名 (不能为 . 或 .., 也不能包含 / 或空字符).</string>
     <string name="text_explorer_privileged_move_scope">跨文件系统移动仅支持共享存储之间的操作. 请先复制并核实目标, 再单独处理源文件.</string>
     <string name="text_explorer_privileged_no_space">目标存储可用空间不足.</string>
@@ -1694,6 +1694,16 @@
     <string name="text_explorer_storage_root">根目录</string>
     <string name="text_explorer_storage_unavailable">存储信息不可用</string>
     <string name="text_explorer_storage_usage">已用 %1$s, 可用 %2$s</string>
+    <string name="text_explorer_stream_access_lost">文件读取已中断, 高权限连接或授权不可用. 请重新授权后再次打开</string>
+    <string name="text_explorer_stream_changed">读取期间文件发生变化或存储被移除. 请重新打开文件</string>
+    <string name="text_explorer_stream_compatibility_open">兼容方式打开</string>
+    <string name="text_explorer_stream_copy_cancelled">已取消临时复制</string>
+    <string name="text_explorer_stream_copy_confirm">仅当查看应用无法使用原地或按需读取时使用此方式. 将先完整复制文件到应用临时目录, 需要额外 %1$s 空间, 完成后再打开. 取消则不复制文件.\n\n%2$s\n临时目录可用空间: %3$s</string>
+    <string name="text_explorer_stream_copy_progress">%1$s / %2$s</string>
+    <string name="text_explorer_stream_copy_title">使用临时副本打开</string>
+    <string name="text_explorer_stream_expired">打开链接已失效, 请回到文件管理器重新打开</string>
+    <string name="text_explorer_stream_read_only">此链接只允许读取</string>
+    <string name="text_explorer_stream_unsupported">当前设备无法提供支持跳转的按需读取, 可改用临时副本打开</string>
     <string name="text_explorer_up">向上</string>
     <string name="text_export">导出</string>
     <string name="text_export_all">导出全部</string>

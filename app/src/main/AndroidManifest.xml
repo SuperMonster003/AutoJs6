@@ -477,6 +477,12 @@
             android:grantUriPermissions="false" />
 
         <provider
+            android:name="org.autojs.autojs.model.explorer.PrivilegedViewProvider"
+            android:authorities="${applicationId}.privileged-view"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
+        <provider
             android:name="org.autojs.autojs.core.plugin.settings.OfficialPluginSettingsProvider"
             android:authorities="${applicationId}.plugin.settings"
             android:exported="true"

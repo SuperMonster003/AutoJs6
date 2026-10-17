@@ -1682,7 +1682,7 @@
     <string name="text_explorer_privileged_conflict">الوجهة موجودة بالفعل. اختر مجلدا آخر أو اسما آخر. لم يتم استبدال الملفات الموجودة.</string>
     <string name="text_explorer_privileged_delete_confirmation">ستحذف هذه العناصر نهائيا دون نقلها إلى سلة المحذوفات:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">اختر مجلد الوجهة. تتوقف العملية إذا كان هناك عنصر بالاسم نفسه.</string>
-    <string name="text_explorer_privileged_file_hint">يمكن تحرير الملفات النصية وحفظها في الملف الأصلي بعد التحقق. الملفات المفتوحة في تطبيقات أخرى تستخدم نسخا مؤقتة للقراءة فقط.</string>
+    <string name="text_explorer_privileged_file_hint">يمكن تحرير الملفات النصية وحفظها في الملف الأصلي بعد التحقق. تقرأ التطبيقات الأخرى الملفات مباشرة أو عند الطلب بصلاحية القراءة فقط. لا يتم إنشاء نسخة مؤقتة للتوافق إلا بعد التأكيد.</string>
     <string name="text_explorer_privileged_invalid_name">أدخل اسم ملف واحدا صالحا (ليس . أو .., وبدون / أو محرف NUL).</string>
     <string name="text_explorer_privileged_move_scope">النقل بين أنظمة الملفات مدعوم فقط بين مواقع التخزين المشترك. انسخ الملفات وتحقق من الوجهة قبل التعامل مع المصدر بشكل منفصل.</string>
     <string name="text_explorer_privileged_no_space">لا توجد مساحة خالية كافية في وحدة التخزين الوجهة.</string>
@@ -1699,6 +1699,16 @@
     <string name="text_explorer_storage_root">الدليل الجذر</string>
     <string name="text_explorer_storage_unavailable">معلومات التخزين غير متاحة</string>
     <string name="text_explorer_storage_usage">%1$s مستخدمة, %2$s متاحة</string>
+    <string name="text_explorer_stream_access_lost">توقفت قراءة الملف لعدم توفر الوصول بصلاحيات مرتفعة أو الاتصال به. أعد منح الإذن وافتح الملف مجددا</string>
+    <string name="text_explorer_stream_changed">تغير الملف أو تمت إزالة وحدة التخزين الخاصة به. افتحه مجددا</string>
+    <string name="text_explorer_stream_compatibility_open">فتح نسخة للتوافق</string>
+    <string name="text_explorer_stream_copy_cancelled">تم إلغاء النسخ المؤقت</string>
+    <string name="text_explorer_stream_copy_confirm">استخدم هذه الطريقة فقط عندما يتعذر على تطبيق العرض القراءة مباشرة أو عند الطلب. سيتم أولا نسخ الملف بالكامل إلى المجلد المؤقت للتطبيق, مما يتطلب مساحة إضافية قدرها %1$s, ثم فتحه بعد اكتمال النسخ. يمكنك الإلغاء للعودة دون نسخ.\n\n%2$s\nالمساحة المؤقتة المتاحة: %3$s</string>
+    <string name="text_explorer_stream_copy_progress">%1$s / %2$s</string>
+    <string name="text_explorer_stream_copy_title">فتح نسخة مؤقتة</string>
+    <string name="text_explorer_stream_expired">انتهت صلاحية رابط الملف. افتح الملف مجددا من مدير الملفات</string>
+    <string name="text_explorer_stream_read_only">يسمح هذا الرابط بالقراءة فقط</string>
+    <string name="text_explorer_stream_unsupported">لا يستطيع هذا الجهاز توفير قراءة عند الطلب مع الانتقال داخل الملف. يمكن استخدام نسخة مؤقتة بدلا من ذلك</string>
     <string name="text_explorer_up">إلى الأعلى</string>
     <string name="text_export">يصدّر</string>
     <string name="text_export_all">تصدير الكل</string>

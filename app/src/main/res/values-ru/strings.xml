@@ -1680,7 +1680,7 @@
     <string name="text_explorer_privileged_conflict">Целевой объект уже существует. Выберите другую папку или имя. Существующие файлы не были заменены.</string>
     <string name="text_explorer_privileged_delete_confirmation">Эти объекты будут удалены безвозвратно, минуя корзину:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">Выберите папку назначения. Операция остановится, если объект с таким именем уже существует.</string>
-    <string name="text_explorer_privileged_file_hint">Текстовые файлы можно редактировать и сохранять в оригинал после проверки. Файлы, открываемые в других приложениях, используют временные копии только для чтения.</string>
+    <string name="text_explorer_privileged_file_hint">Текстовые файлы можно редактировать и сохранять в оригинал после проверки. Другие приложения читают файлы на месте или по запросу с доступом только для чтения. Временная совместимая копия создаётся только после подтверждения.</string>
     <string name="text_explorer_privileged_invalid_name">Введите одно допустимое имя файла (не . и не .., без / и NUL).</string>
     <string name="text_explorer_privileged_move_scope">Перемещение между файловыми системами поддерживается только между расположениями в общем хранилище. Сначала скопируйте и проверьте результат, затем обработайте источник отдельно.</string>
     <string name="text_explorer_privileged_no_space">В целевом хранилище недостаточно свободного места.</string>
@@ -1697,6 +1697,16 @@
     <string name="text_explorer_storage_root">Корневой каталог</string>
     <string name="text_explorer_storage_unavailable">Информация о хранилище недоступна</string>
     <string name="text_explorer_storage_usage">Занято %1$s, доступно %2$s</string>
+    <string name="text_explorer_stream_access_lost">Чтение остановлено, поскольку повышенные права или соединение недоступны. Восстановите доступ и откройте файл снова</string>
+    <string name="text_explorer_stream_changed">Файл изменился или его накопитель извлечён. Откройте файл снова</string>
+    <string name="text_explorer_stream_compatibility_open">Открыть совместимую копию</string>
+    <string name="text_explorer_stream_copy_cancelled">Временное копирование отменено</string>
+    <string name="text_explorer_stream_copy_confirm">Используйте этот способ, только если приложение просмотра не поддерживает чтение на месте или по запросу. Сначала файл будет полностью скопирован во временный каталог приложения, для чего дополнительно потребуется %1$s, и открыт после завершения копирования. Отмена возвращает назад без копирования.\n\n%2$s\nДоступное временное пространство: %3$s</string>
+    <string name="text_explorer_stream_copy_progress">%1$s / %2$s</string>
+    <string name="text_explorer_stream_copy_title">Открыть временную копию</string>
+    <string name="text_explorer_stream_expired">Ссылка на файл истекла. Откройте файл повторно из файлового менеджера</string>
+    <string name="text_explorer_stream_read_only">Эта ссылка доступна только для чтения</string>
+    <string name="text_explorer_stream_unsupported">Устройство не поддерживает чтение по запросу с переходом по файлу. Вместо этого можно использовать временную копию</string>
     <string name="text_explorer_up">Вверх</string>
     <string name="text_export">Экспорт</string>
     <string name="text_export_all">Экспортировать все</string>

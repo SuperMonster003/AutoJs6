@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <activity
+            android:name="org.autojs.autojs.model.explorer.ExternalFileReceiverProbeActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:process=":external_file_receiver_probe"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
         <activity android:name="org.autojs.autojs.core.plugin.center.LauncherIconFixtureActivity"
             android:exported="true" />
         <activity-alias android:name="${applicationId}.launcher.Auto"

@@ -10,6 +10,7 @@
     <item type="id" name="code_editor_settings_dialog_container" />
     <item type="id" name="editor_dialog_theme_applier_excluded_subtree" />
     <item type="id" name="explorer_privileged_backups" />
+    <item type="id" name="explorer_privileged_open_compatibility" />
     <item type="id" name="minimize" />
     <item type="id" name="move_or_resize" />
 </resources>

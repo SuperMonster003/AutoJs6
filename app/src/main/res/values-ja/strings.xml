@@ -1681,7 +1681,7 @@
     <string name="text_explorer_privileged_conflict">宛先は既に存在します. 別のフォルダーまたは名前を選択してください. 既存のファイルは上書きされていません.</string>
     <string name="text_explorer_privileged_delete_confirmation">以下の項目はゴミ箱を使わずに完全に削除されます:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">宛先フォルダーを選択してください. 同じ名前の項目が既に存在する場合は操作を停止します.</string>
-    <string name="text_explorer_privileged_file_hint">テキストファイルは編集でき, 検証後に元のファイルへ保存できます. 他のアプリで開くファイルには読み取り専用の一時コピーを使用します.</string>
+    <string name="text_explorer_privileged_file_hint">テキストファイルは編集でき, 検証後に元のファイルへ保存できます. 他のアプリは元の場所から, またはオンデマンドで読み取り専用アクセスします. 互換用の一時コピーは確認後にのみ作成します.</string>
     <string name="text_explorer_privileged_invalid_name">有効な単一のファイル名を入力してください (. や .. は使用できず, / や NUL を含めることもできません).</string>
     <string name="text_explorer_privileged_move_scope">異なるファイルシステム間の移動は共有ストレージ間でのみ対応しています. 先にコピーして宛先を確認し, その後で元のファイルを別途処理してください.</string>
     <string name="text_explorer_privileged_no_space">宛先のストレージに十分な空き容量がありません.</string>
@@ -1698,6 +1698,16 @@
     <string name="text_explorer_storage_root">ルートディレクトリ</string>
     <string name="text_explorer_storage_unavailable">ストレージ情報を取得できません</string>
     <string name="text_explorer_storage_usage">%1$s 使用済み, %2$s 使用可能</string>
+    <string name="text_explorer_stream_access_lost">特権アクセスまたはその接続が利用できなくなったため, ファイルの読み取りを停止しました. 再度権限を付与してから開き直してください</string>
+    <string name="text_explorer_stream_changed">ファイルが変更されたか, ストレージが取り外されました. ファイルを開き直してください</string>
+    <string name="text_explorer_stream_compatibility_open">互換用コピーで開く</string>
+    <string name="text_explorer_stream_copy_cancelled">一時コピーをキャンセルしました</string>
+    <string name="text_explorer_stream_copy_confirm">閲覧アプリが元の場所からの読み取りやオンデマンド読み取りに対応していない場合のみ使用してください. ファイル全体をアプリの一時ディレクトリにコピーするため, 追加で %1$s の空き容量が必要です. コピー完了後に開きます. キャンセルするとコピーせずに戻ります.\n\n%2$s\n一時ディレクトリの空き容量: %3$s</string>
+    <string name="text_explorer_stream_copy_progress">%1$s / %2$s</string>
+    <string name="text_explorer_stream_copy_title">一時コピーで開く</string>
+    <string name="text_explorer_stream_expired">ファイルリンクの有効期限が切れました. ファイルマネージャーから開き直してください</string>
+    <string name="text_explorer_stream_read_only">このリンクは読み取り専用です</string>
+    <string name="text_explorer_stream_unsupported">この端末ではシーク可能なオンデマンド読み取りを利用できません. 代わりに一時コピーで開けます</string>
     <string name="text_explorer_up">上へ</string>
     <string name="text_export">輸出</string>
     <string name="text_export_all">全てエクスポート</string>

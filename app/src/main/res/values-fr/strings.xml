@@ -1680,7 +1680,7 @@
     <string name="text_explorer_privileged_conflict">La destination existe déjà. Choisissez un autre dossier ou nom. Aucun fichier existant n\'a été remplacé.</string>
     <string name="text_explorer_privileged_delete_confirmation">Ces éléments seront définitivement supprimés sans passer par la corbeille:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">Choisissez un dossier de destination. L\'opération s\'arrête si un élément du même nom existe déjà.</string>
-    <string name="text_explorer_privileged_file_hint">Les fichiers texte peuvent être modifiés et enregistrés dans l\'original après vérification. Les fichiers ouverts dans d\'autres applications utilisent des copies temporaires en lecture seule.</string>
+    <string name="text_explorer_privileged_file_hint">Les fichiers texte peuvent être modifiés et enregistrés dans l\'original après vérification. Les autres applications lisent les fichiers sur place ou à la demande en lecture seule. Une copie temporaire de compatibilité est créée uniquement après confirmation.</string>
     <string name="text_explorer_privileged_invalid_name">Saisissez un seul nom de fichier valide (ni . ni .., et sans / ni NUL).</string>
     <string name="text_explorer_privileged_move_scope">Le déplacement entre systèmes de fichiers est pris en charge uniquement entre des emplacements de stockage partagé. Copiez les fichiers et vérifiez la destination avant de traiter la source séparément.</string>
     <string name="text_explorer_privileged_no_space">L\'espace libre à destination est insuffisant.</string>
@@ -1697,6 +1697,16 @@
     <string name="text_explorer_storage_root">Dossier racine</string>
     <string name="text_explorer_storage_unavailable">Informations de stockage indisponibles</string>
     <string name="text_explorer_storage_usage">%1$s utilisés, %2$s disponibles</string>
+    <string name="text_explorer_stream_access_lost">La lecture du fichier s\'est arrêtée, car l\'accès privilégié ou sa connexion est indisponible. Rétablissez l\'accès et ouvrez à nouveau le fichier</string>
+    <string name="text_explorer_stream_changed">Le fichier a changé ou son support de stockage a été retiré. Ouvrez-le à nouveau</string>
+    <string name="text_explorer_stream_compatibility_open">Ouvrir une copie compatible</string>
+    <string name="text_explorer_stream_copy_cancelled">Copie temporaire annulée</string>
+    <string name="text_explorer_stream_copy_confirm">Utilisez cette option uniquement si l\'application de consultation ne peut pas lire le fichier sur place ou à la demande. Le fichier entier sera d\'abord copié dans le dossier temporaire de l\'application, nécessitant %1$s supplémentaires, puis ouvert à la fin de la copie. Annulez pour revenir sans copier.\n\n%2$s\nEspace temporaire disponible: %3$s</string>
+    <string name="text_explorer_stream_copy_progress">%1$s / %2$s</string>
+    <string name="text_explorer_stream_copy_title">Ouvrir une copie temporaire</string>
+    <string name="text_explorer_stream_expired">Le lien du fichier a expiré. Ouvrez-le à nouveau depuis le gestionnaire de fichiers</string>
+    <string name="text_explorer_stream_read_only">Ce lien est en lecture seule</string>
+    <string name="text_explorer_stream_unsupported">Cet appareil ne peut pas fournir une lecture à la demande avec déplacement dans le fichier. Une copie temporaire peut être utilisée à la place</string>
     <string name="text_explorer_up">Remonter</string>
     <string name="text_export">Export</string>
     <string name="text_export_all">Tout exporter</string>
