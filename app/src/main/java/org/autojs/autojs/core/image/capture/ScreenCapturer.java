@@ -73,6 +73,7 @@ public class ScreenCapturer {
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
     private volatile boolean mRecordingSurface;
+    private Surface mRecordingInput;
     private OnScreenCaptureAvailableListener mOnScreenCaptureAvailableListener;
     private int mDetectedOrientation;
     private int mAppliedOrientation = ORIENTATION_AUTO;
@@ -487,6 +488,7 @@ public class ScreenCapturer {
         if (mReleased || mVirtualDisplay == null) throw new IllegalStateException("Screen capture has stopped.");
         if (mRecordingSurface) throw new IllegalStateException("Screen recording is already active.");
         mRecordingSurface = true;
+        mRecordingInput = surface;
         mVirtualDisplay.setSurface(null);
         mVirtualDisplay.resize(width, height, mScreenDensity);
         mVirtualDisplay.setSurface(surface);
@@ -495,6 +497,7 @@ public class ScreenCapturer {
     public synchronized void restoreCaptureSurface() {
         if (!mRecordingSurface) return;
         mRecordingSurface = false;
+        mRecordingInput = null;
         if (mReleased) return;
         refreshDetectedOrientation();
         refreshVirtualDisplay(mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation, false);
@@ -503,6 +506,30 @@ public class ScreenCapturer {
 
     public synchronized void detachRecordingSurface() {
         if (mRecordingSurface && mVirtualDisplay != null) mVirtualDisplay.setSurface(null);
+    }
+
+    public android.graphics.Point getCaptureDimensions() {
+        if (mOrientation == ORIENTATION_NONE) return new android.graphics.Point(mOptions.width, mOptions.height);
+        int orientation = mOrientation;
+        if (orientation == ORIENTATION_AUTO) {
+            int rotation = ScreenMetrics.getRotation();
+            orientation = rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270 ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+        }
+        return new android.graphics.Point(ScreenMetrics.getOrientationAwareScreenWidth(orientation), ScreenMetrics.getOrientationAwareScreenHeight(orientation));
+    }
+
+    public synchronized void replaceRecordingSurface(Surface surface, int width, int height) {
+        if (mReleased || !mRecordingSurface || mVirtualDisplay == null) throw new IllegalStateException("Recording display is unavailable.");
+        // A fresh consumer avoids OEM pipelines retaining stale buffer geometry across rotation.
+        mVirtualDisplay.setSurface(null);
+        mVirtualDisplay.resize(width, height, mScreenDensity);
+        mRecordingInput = surface;
+        mVirtualDisplay.setSurface(mRecordingInput);
+    }
+
+    public synchronized MediaProjection getAudioProjection() {
+        if (mReleased || mMediaProjection == null) throw new IllegalStateException("Screen capture has stopped.");
+        return mMediaProjection;
     }
 
     @Subscribe

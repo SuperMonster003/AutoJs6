@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_record_microphone_grant">允许 Bun 录屏使用麦克风音频. 需要 Android 录音权限和麦克风前台服务, 默认关闭.</string>
+    <string name="summary_bun_screen_record_playback_grant">允许 Bun 捕获允许录音的应用播放声音. 需要 Android 录音权限和录屏授权, 默认关闭.</string>
+    <string name="text_bun_screen_record_microphone_grant">录屏麦克风音频</string>
+    <string name="text_bun_screen_record_playback_grant">录屏应用播放音频</string>
+</resources>

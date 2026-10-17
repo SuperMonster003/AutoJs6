@@ -2190,8 +2190,8 @@
     <string name="text_no_symbols_hint">الاعدادات الحالية فارغة.\nاضغط هنا لانشاء رمز.</string>
     <string name="text_no_user_color_libraries">لا توجد مكتبات ألوان خاصة بعد</string>
     <string name="text_no_version_history">لا يوجد سجل للاصدارات</string>
-    <string name="text_node_audio_recording">يسجل Node.js الصوت</string>
-    <string name="text_node_audio_recording_channel">تسجيل الصوت عبر Node.js</string>
+    <string name="text_node_audio_recording">يسجل البرنامج النصي الصوت</string>
+    <string name="text_node_audio_recording_channel">تسجيل صوت البرنامج النصي</string>
     <string name="text_node_cache_cleared">تم مسح ذاكرة التخزين المؤقت للعقد</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">تشخيص Node.js</string>

@@ -2190,8 +2190,8 @@
     <string name="text_no_symbols_hint">현재 설정이 비어 있습니다.\n여기를 눌러 기호를 만드세요.</string>
     <string name="text_no_user_color_libraries">아직 사용자 색상 라이브러리가 없습니다</string>
     <string name="text_no_version_history">버전 기록 없음</string>
-    <string name="text_node_audio_recording">Node.js에서 오디오를 녹음하고 있습니다</string>
-    <string name="text_node_audio_recording_channel">Node.js 오디오 녹음</string>
+    <string name="text_node_audio_recording">스크립트가 오디오를 녹음 중</string>
+    <string name="text_node_audio_recording_channel">스크립트 오디오 녹음</string>
     <string name="text_node_cache_cleared">노드 캐시를 지웠습니다</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Node.js Doctor</string>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_screen_record_grant">السماح لـ Bun بترميز فيديو MP4 بدون صوت وحفظ ملفات المضيف. يتطلب موافقة التقاط الشاشة; معطل افتراضيا. تسري التغييرات عند التشغيل التالي.</string>
+    <string name="summary_bun_screen_record_grant">السماح لـ Bun بترميز فيديو MP4 وحفظ ملفات المضيف. يتطلب موافقة التقاط الشاشة; معطل افتراضيا. تسري التغييرات عند التشغيل التالي.</string>
     <string name="text_bun_screen_record_grant">تسجيل فيديو الشاشة</string>
 </resources>

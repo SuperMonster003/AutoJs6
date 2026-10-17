@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_screen_record_grant">Allow Bun to encode silent MP4 screen videos and save host files. Requires screen capture consent; disabled by default. Changes apply to the next execution.</string>
+    <string name="summary_bun_screen_record_grant">Allow Bun to encode MP4 screen videos and save host files. Requires screen capture consent; disabled by default. Changes apply to the next execution.</string>
     <string name="text_bun_screen_record_grant">Screen video recording</string>
 </resources>

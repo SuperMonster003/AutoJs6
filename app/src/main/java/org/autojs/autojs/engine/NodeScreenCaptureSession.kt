@@ -138,8 +138,18 @@ internal class NodeScreenCaptureSession(
             ?: throw SecurityException("Request screen capture permission before capturing an image.")
         val delay = readyAt - SystemClock.uptimeMillis()
         if (delay > 0) Thread.sleep(delay)
-        val frame = captureFreshFrame { capture.capture() }
-        try { ImageWrapper.toBitmap(frame) } finally { frame.close() }
+        recording?.let { return@synchronized it.capture() }
+        captureFreshFrame {
+            val frame = capture.capture() ?: return@captureFreshFrame null
+            val bitmap = try { ImageWrapper.toBitmap(frame) } finally { frame.close() }
+            if (isTransparentProjectionBuffer(bitmap)) {
+                // Some display producers deliver a cleared RGBA buffer immediately after resize.
+                // Black (opaque) content and partially transparent content remain valid frames.
+                android.util.Log.d("NodeScreenCapture", "Waiting for a composed frame after a transparent projection buffer.")
+                bitmap.recycle()
+                null
+            } else bitmap
+        }
     }
 
     fun stop(expectedId: String? = null) = synchronized(lock) {
@@ -158,7 +168,11 @@ internal class NodeScreenCaptureSession(
             ?: throw SecurityException("Request Android screen capture consent before recording.")
         check(recording == null) { "Screen recording is already active." }
         val size = info()
-        val next = NodeScreenRecording(capture, output, options, size.getInt("width"), size.getInt("height"))
+        lateinit var next: NodeScreenRecording
+        next = NodeScreenRecording(context, capture, output, options, size.getInt("width"), size.getInt("height")) {
+            // The service stop action must not wait for a session lock on the Android main thread.
+            Thread({ synchronized(lock) { if (recording === next) cancelRecording() } }, "ScreenRecording-notification-stop").start()
+        }
         next.start().also { recording = next }
     }
 
@@ -201,6 +215,15 @@ internal class NodeScreenCaptureSession(
     }
 
     companion object {
+        internal fun isTransparentProjectionBuffer(bitmap: Bitmap): Boolean {
+            if (bitmap.getPixel(bitmap.width / 2, bitmap.height / 2) ushr 24 != 0) return false
+            val row = IntArray(bitmap.width)
+            for (y in 0 until bitmap.height) {
+                bitmap.getPixels(row, 0, bitmap.width, 0, y, bitmap.width, 1)
+                if (row.any { it ushr 24 != 0 }) return false
+            }
+            return true
+        }
         /** Each native capture waits at most 1.2 s and refreshes its display on timeout. Retry the
          * refreshed pipeline, as Images.captureScreen does, within the bridge's 15 s budget. */
         internal fun <T : Any> captureFreshFrame(pause: () -> Unit = { Thread.sleep(40L) }, capture: () -> T?): T {

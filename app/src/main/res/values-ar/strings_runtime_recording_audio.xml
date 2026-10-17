@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_record_microphone_grant">السماح بصوت الميكروفون في تسجيلات Bun. يتطلب إذن التسجيل في Android وخدمة ميكروفون أمامية; معطل افتراضيا.</string>
+    <string name="summary_bun_screen_record_playback_grant">السماح لـ Bun بالتقاط صوت التطبيقات التي تسمح بذلك. يتطلب إذن التسجيل وموافقة التقاط الشاشة في Android; معطل افتراضيا.</string>
+    <string name="text_bun_screen_record_microphone_grant">ميكروفون تسجيل الشاشة</string>
+    <string name="text_bun_screen_record_playback_grant">صوت التطبيقات في تسجيل الشاشة</string>
+</resources>

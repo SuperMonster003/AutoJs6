@@ -44,13 +44,25 @@ import java.util.concurrent.atomic.AtomicReference
 class CaptureWorkerBridgeDeviceTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context get() = instrumentation.targetContext
-    private val automation:UiAutomation by lazy {
+    internal val automation:UiAutomation by lazy {
         instrumentation.getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES).apply {
             serviceInfo=serviceInfo.apply { flags=flags or AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS }
         }
     }
     private val global get() = AutoJs.instance.globalConsole
     private val evidence = JSONArray()
+
+    @Test fun projectionReadinessDistinguishesClearedBuffersFromBlackContent() {
+        val bitmap=Bitmap.createBitmap(8,6,Bitmap.Config.ARGB_8888)
+        try {
+            bitmap.eraseColor(Color.TRANSPARENT)
+            assertTrue(NodeScreenCaptureSession.isTransparentProjectionBuffer(bitmap))
+            bitmap.eraseColor(Color.BLACK)
+            assertFalse("A black display is a valid frame",NodeScreenCaptureSession.isTransparentProjectionBuffer(bitmap))
+            bitmap.eraseColor(Color.TRANSPARENT);bitmap.setPixel(0,0,Color.RED)
+            assertFalse("Opaque content away from the center is valid",NodeScreenCaptureSession.isTransparentProjectionBuffer(bitmap))
+        } finally {bitmap.recycle()}
+    }
 
     @Test fun bunRecordsPlayableMp4AcrossRotationAndRestoresCapture() = withGrants {
         val folder=File(context.getExternalFilesDir(null),"recording-${UUID.randomUUID()}").apply{mkdirs()}
@@ -68,10 +80,16 @@ class CaptureWorkerBridgeDeviceTest {
                     const started=await recorder.start(dir+'/portrait.mp4',{width:192,height:320,frameRate:15,bitRate:1000000});
                     eq(started.width,192,'width');eq(started.state,'recording','state');
                     await rejects(()=>recorder.start(dir+'/duplicate.mp4'));
-                    await rejects(()=>images.captureScreen());
+                    const concurrent=await images.captureScreen();
+                    eq(await images.pixel(concurrent,Math.floor(concurrent.width/2),Math.floor(concurrent.height/2)),$COLOR,'parallel screenshot');
+                    const concurrentSize=images.getSize(concurrent);await images.recycle(concurrent);
                     await pause(1200);console.log('$marker');
                     while((await host.coordinates.getInfo()).rotation!==1)await pause(100);
-                    await pause(1600);const portrait=await recorder.stop();
+                    await pause(1000);
+                    const rotated=await images.captureScreen();
+                    const screen=await host.coordinates.getInfo();eq(images.getSize(rotated),{width:screen.width,height:screen.height},'rotated parallel dimensions');
+                    eq(await images.pixel(rotated,Math.floor(rotated.width/2),Math.floor(rotated.height/2)),$COLOR,'rotated parallel pixel');
+                    await images.recycle(rotated);await pause(600);const portrait=await recorder.stop();
                     eq((await recorder.getStatus()).state,'idle','stopped status');eq(await recorder.stop(),null,'second stop');
                     const shot=await images.captureScreen();eq(await images.pixel(shot,Math.floor(shot.width/2),Math.floor(shot.height/2)),$COLOR,'restored screenshot');await images.recycle(shot);
                     await rejects(()=>recorder.start(dir+'/portrait.mp4',{width:192,height:320}));
@@ -351,7 +369,7 @@ class CaptureWorkerBridgeDeviceTest {
         writeEvidence("worker-modules")
     }
 
-    private fun execute(kind:String,body:String,owned:AtomicReference<BunPluginScriptEngine>?=null):JSONObject {
+    internal fun execute(kind:String,body:String,owned:AtomicReference<BunPluginScriptEngine>?=null):JSONObject {
         val marker="CAPTURE_WORKER_${UUID.randomUUID()}:"
         val imports=if(kind=="bun") "const {createHostClient}=await import(process.env.AUTOJS6_HOST_CLIENT_MODULE);const host=await createHostClient();const images=host.images;"
             else "const images=require('images');"
@@ -386,14 +404,16 @@ class CaptureWorkerBridgeDeviceTest {
         return JSONObject(line.substringAfter(marker)).also { evidence.put(JSONObject().put("runtime",kind).put("result",it)) }
     }
 
-    private fun withGrants(action:()->Unit) {
+    internal fun withGrants(action:()->Unit) {
         val store=context.getSharedPreferences("bun_host_capability_grants",Context.MODE_PRIVATE)
-        val keys=listOf(BunHostCapabilityGrants.SCREEN_CAPTURE,BunHostCapabilityGrants.SCREEN_RECORD,BunHostCapabilityGrants.IMAGE_PROCESS,BunHostCapabilityGrants.SCREEN_METRICS)
+        val keys=listOf(BunHostCapabilityGrants.SCREEN_CAPTURE,BunHostCapabilityGrants.SCREEN_RECORD,
+            BunHostCapabilityGrants.SCREEN_RECORD_MICROPHONE,BunHostCapabilityGrants.SCREEN_RECORD_PLAYBACK,
+            BunHostCapabilityGrants.IMAGE_PROCESS,BunHostCapabilityGrants.SCREEN_METRICS)
         val previous=keys.associateWith{if(store.contains(it))store.getBoolean(it,false) else null}
         store.edit().apply{keys.forEach{putBoolean(it,true)}}.commit()
         try {action()}finally{store.edit().apply{previous.forEach{(k,v)->if(v==null)remove(k)else putBoolean(k,v)}}.commit()}
     }
-    private fun withFixture(action:()->Unit) {
+    internal fun withFixture(setup:(Activity)->Unit = {}, action:()->Unit) {
         val saved=listOf(Settings.System.USER_ROTATION,Settings.System.ACCELEROMETER_ROTATION).associateWith{Settings.System.getString(context.contentResolver,it)}
         val rotation=displayRotation()
         val activity=instrumentation.startActivitySync(Intent(context,RuntimeCaptureFixtureActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -404,6 +424,7 @@ class CaptureWorkerBridgeDeviceTest {
                 canvas.drawRect(0f,0f,40f,40f,Paint().apply{color=if(SystemClock.uptimeMillis()/100%2==0L)Color.RED else Color.GREEN})
                 postInvalidateDelayed(80)
             }})
+            setup(activity)
         }
         try {assertTrue(automation.setRotation(0));await("portrait"){displayRotation()==0};SystemClock.sleep(400);action()}
         finally {
@@ -412,7 +433,7 @@ class CaptureWorkerBridgeDeviceTest {
             instrumentation.runOnMainSync {activity.finish()}
         }
     }
-    private fun consentButton(positive:Boolean):AccessibilityNodeInfo? {
+    internal fun consentButton(positive:Boolean):AccessibilityNodeInfo? {
         val root=automation.rootInActiveWindow?:return null
         if(root.packageName?.toString()==context.packageName)return null
         val nodes=root.findAccessibilityNodeInfosByViewId(if(positive)"android:id/button1" else "android:id/button2")
@@ -427,10 +448,10 @@ class CaptureWorkerBridgeDeviceTest {
         }
         return null
     }
-    private fun clickConsent(positive:Boolean) {assertTrue("System consent button",checkNotNull(consentButton(positive)).performAction(AccessibilityNodeInfo.ACTION_CLICK))}
-    private fun await(label:String,test:()->Boolean) {val deadline=SystemClock.elapsedRealtime()+20_000;while(SystemClock.elapsedRealtime()<deadline){if(test())return;SystemClock.sleep(80)};fail("Timed out: $label")}
+    internal fun clickConsent(positive:Boolean) {assertTrue("System consent button",checkNotNull(consentButton(positive)).performAction(AccessibilityNodeInfo.ACTION_CLICK))}
+    internal fun await(label:String,test:()->Boolean) {val deadline=SystemClock.elapsedRealtime()+20_000;while(SystemClock.elapsedRealtime()<deadline){if(test())return;SystemClock.sleep(80)};fail("Timed out: $label")}
     private fun shell(command:String)=ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command)).bufferedReader().use{it.readText()}
-    private fun awaitNoProjection(){await("MediaProjection released"){!shell("dumpsys media_projection").contains(context.packageName)}}
+    internal fun awaitNoProjection(){await("MediaProjection released"){!shell("dumpsys media_projection").contains(context.packageName)}}
     @Suppress("DEPRECATION") private fun displaySize()=Point().also{display().getRealSize(it)}.let{it.x to it.y}
     private fun display()=(context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager).getDisplay(Display.DEFAULT_DISPLAY)
     private fun displayRotation()=display().rotation

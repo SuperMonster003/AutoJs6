@@ -144,7 +144,7 @@
         "Node.js Workers support OpenCC and image modules through the parent runtime, including CJS, ESM, nested Workers and binary image data",
         "Bun supports screen capture with a separate opt-in grant, Android consent, timeout/cancellation cleanup and repeated authorization",
         "Node.js Workers support pinyin, pinyin4j, console controls and coordinate conversion, sharing the parent execution while retaining native output streams",
-        "Bun screenRecorder records silent H.264 MP4 files with a separate opt-in grant, fixed output dimensions, explicit finalization and cancellation cleanup"
+        "Bun screenRecorder writes H.264 MP4 with optional microphone, app-playback or mixed AAC audio and screenshots during recording, with independent audio grants and cancellation cleanup"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
@@ -278,7 +278,8 @@
         "Node.js console window and styling methods having no effect",
         "Bun losing trailing logs when the synchronous result arrived before output callbacks at script completion",
         "Screen capture consent ending prematurely when its caller is covered, system dialogs remaining after cancellation, and requested image dimensions being ignored",
-        "Pinyin numeric style/mode constants being rejected after conversion to JSON or Rhino numbers"
+        "Pinyin numeric style/mode constants being rejected after conversion to JSON or Rhino numbers",
+        "Screen capture discards cleared transparent projection buffers while preserving valid black frames"
       ],
       "improvement": [
         "Deferred initialization of noncritical components to improve app startup speed",

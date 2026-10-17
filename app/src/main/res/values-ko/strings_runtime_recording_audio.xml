@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_record_microphone_grant">Bun 화면 녹화의 마이크 오디오를 허용합니다. Android 녹음 권한과 마이크 포그라운드 서비스가 필요하며 기본적으로 꺼져 있습니다.</string>
+    <string name="summary_bun_screen_record_playback_grant">캡처를 허용하는 앱의 재생 오디오를 Bun이 캡처하도록 허용합니다. Android 녹음 권한과 화면 캡처 승인이 필요하며 기본적으로 꺼져 있습니다.</string>
+    <string name="text_bun_screen_record_microphone_grant">화면 녹화 마이크 오디오</string>
+    <string name="text_bun_screen_record_playback_grant">화면 녹화 앱 재생 오디오</string>
+</resources>

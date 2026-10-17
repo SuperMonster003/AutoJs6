@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_record_microphone_grant">Permitir audio del micrófono en vídeos Bun. Requiere permiso de Android y servicio de micrófono en primer plano; desactivado por defecto.</string>
+    <string name="summary_bun_screen_record_playback_grant">Permitir a Bun capturar aplicaciones que lo autoricen. Requiere permiso de grabación y consentimiento de captura de Android; desactivado por defecto.</string>
+    <string name="text_bun_screen_record_microphone_grant">Micrófono en grabación de pantalla</string>
+    <string name="text_bun_screen_record_playback_grant">Audio de aplicaciones en grabación de pantalla</string>
+</resources>

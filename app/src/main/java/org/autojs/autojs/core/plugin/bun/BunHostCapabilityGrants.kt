@@ -22,6 +22,8 @@ object BunHostCapabilityGrants {
     const val IMAGE_FILES = "image.files"
     const val SCREEN_CAPTURE = "screen.capture"
     const val SCREEN_RECORD = "screen.record"
+    const val SCREEN_RECORD_MICROPHONE = "screen.record.microphone"
+    const val SCREEN_RECORD_PLAYBACK = "screen.record.playback"
     const val SCREEN_METRICS = "screen.metrics"
     const val CONSOLE_CONTROL = "console.control"
 
@@ -81,6 +83,11 @@ object BunHostCapabilityGrants {
     fun isScreenRecordGranted(context: Context): Boolean = isGranted(context, SCREEN_RECORD, false)
     fun setScreenRecordGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_RECORD, granted)
 
+    fun isScreenRecordMicrophoneGranted(context: Context): Boolean = isGranted(context, SCREEN_RECORD_MICROPHONE, false)
+    fun setScreenRecordMicrophoneGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_RECORD_MICROPHONE, granted)
+    fun isScreenRecordPlaybackGranted(context: Context): Boolean = isGranted(context, SCREEN_RECORD_PLAYBACK, false)
+    fun setScreenRecordPlaybackGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_RECORD_PLAYBACK, granted)
+
     fun isScreenMetricsGranted(context: Context): Boolean = isGranted(context, SCREEN_METRICS, true)
     fun setScreenMetricsGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_METRICS, granted)
 
@@ -106,6 +113,8 @@ object BunHostCapabilityGrants {
         if (isImageFilesGranted(context)) add(IMAGE_FILES)
         if (isScreenCaptureGranted(context)) add(SCREEN_CAPTURE)
         if (isScreenRecordGranted(context)) add(SCREEN_RECORD)
+        if (isScreenRecordMicrophoneGranted(context)) add(SCREEN_RECORD_MICROPHONE)
+        if (isScreenRecordPlaybackGranted(context)) add(SCREEN_RECORD_PLAYBACK)
         if (isScreenMetricsGranted(context)) add(SCREEN_METRICS)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
     }

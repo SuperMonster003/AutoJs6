@@ -2185,8 +2185,8 @@
     <string name="text_no_symbols_hint">當前配置為空.\n點選此處可新建符號.</string>
     <string name="text_no_user_color_libraries">暫無自建顏色庫</string>
     <string name="text_no_version_history">無版本歷史</string>
-    <string name="text_node_audio_recording">Node.js 正在錄音</string>
-    <string name="text_node_audio_recording_channel">Node.js 錄音</string>
+    <string name="text_node_audio_recording">指令碼正在錄音</string>
+    <string name="text_node_audio_recording_channel">指令碼錄音</string>
     <string name="text_node_cache_cleared">節點快取已清除</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Node.js Doctor</string>

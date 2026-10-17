@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_screen_record_grant">允许 Bun 编码无声 MP4 屏幕视频并保存宿主文件. 需要录屏授权, 默认关闭. 修改对下一次执行生效.</string>
+    <string name="summary_bun_screen_record_grant">允许 Bun 编码MP4 屏幕视频并保存宿主文件. 需要录屏授权, 默认关闭. 修改对下一次执行生效.</string>
     <string name="text_bun_screen_record_grant">屏幕视频录制</string>
 </resources>

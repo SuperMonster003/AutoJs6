@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_screen_record_grant">Autoriser Bun à encoder des vidéos MP4 sans son et à enregistrer des fichiers hôtes. Consentement de capture requis; désactivé par défaut. Changements au prochain lancement.</string>
+    <string name="summary_bun_screen_record_grant">Autoriser Bun à encoder des vidéos MP4 et à enregistrer des fichiers hôtes. Consentement de capture requis; désactivé par défaut. Changements au prochain lancement.</string>
     <string name="text_bun_screen_record_grant">Enregistrement vidéo écran</string>
 </resources>

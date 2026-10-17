@@ -30,6 +30,14 @@ sample timestamps and decoded fixture pixels, then verify capture restoration,
 existing-file rejection and partial-file cleanup. Video sample presentation times
 may be reordered by B frames; the test does not confuse decode order with display
 order. `PinyinOptionsTest` covers integer-valued JSON/Rhino number representations.
+`RecordingAudioDeviceTest` decodes real AAC, measures an owned tone against a
+video pulse, checks microphone/playback/mixed modes and source opt-out policy,
+and takes four-quadrant screenshots across rotation while recording. It also
+checks notification stop, execution cancellation, independent grants and cleanup.
+Run `RecordingAudioPermissionDeviceTest` separately with RECORD_AUDIO denied;
+revoking that Android permission kills the host process. Restore the previous
+permission and media volume after testing. The fixture discards all recorded
+files and preserves only numeric evidence, not microphone recordings.
 
 The extractor also resolves Mail's explicit default-client forwarding table,
 including its synchronous-only methods and generated Async names. List suffixes,

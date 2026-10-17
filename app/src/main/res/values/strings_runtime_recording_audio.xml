@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_record_microphone_grant">Allow microphone audio in Bun screen recordings. Requires Android recording permission and a microphone foreground service; disabled by default.</string>
+    <string name="summary_bun_screen_record_playback_grant">Allow Bun to capture audio from apps that permit playback capture. Requires Android recording permission and screen capture consent; disabled by default.</string>
+    <string name="text_bun_screen_record_microphone_grant">Screen recording microphone</string>
+    <string name="text_bun_screen_record_playback_grant">Screen recording playback audio</string>
+</resources>

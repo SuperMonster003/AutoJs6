@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_screen_record_grant">Bun의 무음 MP4 화면 동영상 인코딩과 호스트 파일 저장을 허용합니다. 화면 캡처 승인이 필요하며 기본적으로 꺼져 있습니다. 변경 사항은 다음 실행부터 적용됩니다.</string>
+    <string name="summary_bun_screen_record_grant">Bun의 MP4 화면 동영상 인코딩과 호스트 파일 저장을 허용합니다. 화면 캡처 승인이 필요하며 기본적으로 꺼져 있습니다. 변경 사항은 다음 실행부터 적용됩니다.</string>
     <string name="text_bun_screen_record_grant">화면 동영상 녹화</string>
 </resources>

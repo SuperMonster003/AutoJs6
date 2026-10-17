@@ -144,7 +144,7 @@
         "Los Workers de Node.js usan OpenCC e imágenes mediante el runtime padre, con CJS, ESM, Workers anidados y transferencia binaria",
         "Bun ofrece captura de pantalla con permiso independiente, consentimiento de Android, limpieza al cancelar o expirar y nueva solicitud",
         "Los Workers de Node.js ofrecen pinyin, pinyin4j, controles de consola y coordenadas, compartiendo el estado padre y conservando los flujos nativos",
-        "Bun screenRecorder graba vídeos de pantalla H.264 MP4 sin audio con permiso independiente, dimensiones fijas, finalización explícita y limpieza al cancelar"
+        "Bun screenRecorder genera MP4 H.264 con audio AAC opcional del micrófono, aplicaciones o mezcla y capturas durante la grabación, con permisos de audio independientes y limpieza al cancelar"
       ],
       "fix": [
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",
@@ -278,7 +278,8 @@
         "Métodos de ventana y estilo de consola de Node.js que no tenían efecto",
         "Pérdida de los últimos registros de Bun cuando el resultado síncrono llegaba antes de los callbacks de salida al finalizar el script",
         "Finalización prematura del consentimiento al ocultarse su actividad, diálogos persistentes tras cancelar y dimensiones de captura ignoradas",
-        "Constantes numéricas style/mode de pinyin rechazadas tras convertirse en números JSON o Rhino"
+        "Constantes numéricas style/mode de pinyin rechazadas tras convertirse en números JSON o Rhino",
+        "La captura descarta búferes transparentes sin componer y conserva los fotogramas negros válidos"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",

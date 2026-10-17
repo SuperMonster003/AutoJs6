@@ -2185,8 +2185,8 @@
     <string name="text_no_symbols_hint">Current configuration is empty.\nTap here to create a symbol.</string>
     <string name="text_no_user_color_libraries">No color libraries of your own yet</string>
     <string name="text_no_version_history">No version history</string>
-    <string name="text_node_audio_recording">Node.js is recording audio</string>
-    <string name="text_node_audio_recording_channel">Node.js audio recording</string>
+    <string name="text_node_audio_recording">Script is recording audio</string>
+    <string name="text_node_audio_recording_channel">Script audio recording</string>
     <string name="text_node_cache_cleared">Node cache cleared</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Node.js Doctor</string>

@@ -317,6 +317,13 @@ internal class BunHostCapabilityBroker(
         if (BunHostCapabilityGrants.SCREEN_CAPTURE !in capabilities) throw SecurityException("Screen recording also requires the screen.capture grant.")
         val (method, args) = parseMethodCall(request)
         require(method in SCREEN_RECORD_METHODS) { "Unsupported screen recording method: $method" }
+        if (method == "start") {
+            val audio = NodeScreenRecording.audioSource(args.optJSONObject(1) ?: JSONObject())
+            if ((audio == "microphone" || audio == "mixed") && BunHostCapabilityGrants.SCREEN_RECORD_MICROPHONE !in capabilities)
+                throw SecurityException("Screen microphone recording requires the screen.record.microphone grant.")
+            if ((audio == "playback" || audio == "mixed") && BunHostCapabilityGrants.SCREEN_RECORD_PLAYBACK !in capabilities)
+                throw SecurityException("Playback audio recording requires the screen.record.playback grant.")
+        }
         val result = CompletableFuture<NodeBridgeResponse>()
         imagesProvider().dispatchScreenRecording(NodeBridgeRequest(
             id = "$executionId-recording-${UUID.randomUUID()}", module = NodeBridgeModules.MEDIA_PROJECTION,

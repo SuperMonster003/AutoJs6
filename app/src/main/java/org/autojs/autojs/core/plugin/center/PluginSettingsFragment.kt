@@ -81,6 +81,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunImageFilesGrantPreference: ThemeColorSwitchPreference? = null
     private var bunScreenCaptureGrantPreference: ThemeColorSwitchPreference? = null
     private var bunScreenRecordGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunScreenRecordMicrophoneGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunScreenRecordPlaybackGrantPreference: ThemeColorSwitchPreference? = null
     private var bunImageProcessGrantPreference: ThemeColorSwitchPreference? = null
     private var bunOpenccGrantPreference: ThemeColorSwitchPreference? = null
     private var bunPinyin4jGrantPreference: ThemeColorSwitchPreference? = null
@@ -213,6 +215,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunImageFilesGrantPreference = findPreference("plugin_bun_image_files_grant")
         bunScreenCaptureGrantPreference = findPreference("plugin_bun_screen_capture_grant")
         bunScreenRecordGrantPreference = findPreference("plugin_bun_screen_record_grant")
+        bunScreenRecordMicrophoneGrantPreference = findPreference("plugin_bun_screen_record_microphone_grant")
+        bunScreenRecordPlaybackGrantPreference = findPreference("plugin_bun_screen_record_playback_grant")
         bunImageProcessGrantPreference = findPreference("plugin_bun_image_process_grant")
         bunOpenccGrantPreference = findPreference("plugin_bun_opencc_grant")
         bunPinyin4jGrantPreference = findPreference("plugin_bun_pinyin4j_grant")
@@ -313,6 +317,14 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setScreenRecordGranted(requireContext(), value == true)
             true
         }
+        bunScreenRecordMicrophoneGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setScreenRecordMicrophoneGranted(requireContext(), value == true)
+            true
+        }
+        bunScreenRecordPlaybackGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setScreenRecordPlaybackGranted(requireContext(), value == true)
+            true
+        }
         bunImageProcessGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setImageProcessGranted(requireContext(), value == true)
             true
@@ -396,6 +408,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunImageFilesGrantPreference?.isChecked = BunHostCapabilityGrants.isImageFilesGranted(requireContext())
         bunScreenCaptureGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenCaptureGranted(requireContext())
         bunScreenRecordGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenRecordGranted(requireContext())
+        bunScreenRecordMicrophoneGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenRecordMicrophoneGranted(requireContext())
+        bunScreenRecordPlaybackGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenRecordPlaybackGranted(requireContext())
         bunImageProcessGrantPreference?.isChecked = BunHostCapabilityGrants.isImageProcessGranted(requireContext())
         bunOpenccGrantPreference?.isChecked = BunHostCapabilityGrants.isTextOpenccGranted(requireContext())
         bunPinyin4jGrantPreference?.isChecked = BunHostCapabilityGrants.isTextPinyin4jGranted(requireContext())

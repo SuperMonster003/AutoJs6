@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_record_microphone_grant">Разрешить микрофон в видеозаписях Bun. Нужны разрешение Android и служба микрофона переднего плана; по умолчанию отключено.</string>
+    <string name="summary_bun_screen_record_playback_grant">Разрешить Bun захватывать звук приложений, которые это допускают. Нужны разрешение записи и согласие на захват Android; по умолчанию отключено.</string>
+    <string name="text_bun_screen_record_microphone_grant">Микрофон при записи экрана</string>
+    <string name="text_bun_screen_record_playback_grant">Звук приложений при записи экрана</string>
+</resources>

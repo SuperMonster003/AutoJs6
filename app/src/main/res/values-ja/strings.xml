@@ -2189,8 +2189,8 @@
     <string name="text_no_symbols_hint">現在の設定は空です.\nここをタップして記号を作成します.</string>
     <string name="text_no_user_color_libraries">ユーザーカラーライブラリはまだありません</string>
     <string name="text_no_version_history">バージョン履歴なし</string>
-    <string name="text_node_audio_recording">Node.js が音声を録音しています</string>
-    <string name="text_node_audio_recording_channel">Node.js の音声録音</string>
+    <string name="text_node_audio_recording">スクリプトが録音中</string>
+    <string name="text_node_audio_recording_channel">スクリプトの録音</string>
     <string name="text_node_cache_cleared">ノードキャッシュをクリアしました</string>
     <string name="text_nodejs">Node.js</string>
     <string name="text_nodejs_doctor">Node.js Doctor</string>

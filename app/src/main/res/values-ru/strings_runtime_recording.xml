@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_screen_record_grant">Разрешить Bun кодировать MP4 без звука и сохранять файлы хоста. Требуется согласие на захват экрана; по умолчанию отключено. Изменения действуют со следующего запуска.</string>
+    <string name="summary_bun_screen_record_grant">Разрешить Bun кодировать MP4 и сохранять файлы хоста. Требуется согласие на захват экрана; по умолчанию отключено. Изменения действуют со следующего запуска.</string>
     <string name="text_bun_screen_record_grant">Видеозапись экрана</string>
 </resources>
