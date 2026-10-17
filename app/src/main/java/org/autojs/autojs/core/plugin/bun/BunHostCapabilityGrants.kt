@@ -17,6 +17,9 @@ object BunHostCapabilityGrants {
     // Host-owned capabilities. The plugin negotiates these IDs through /v1/info, without a new AIDL version.
     const val TEXT_PINYIN = "text.pinyin"
     const val TEXT_PINYIN4J = "text.pinyin4j"
+    const val TEXT_OPENCC = "text.opencc"
+    const val IMAGE_PROCESS = "image.process"
+    const val IMAGE_FILES = "image.files"
     const val SCREEN_METRICS = "screen.metrics"
     const val CONSOLE_CONTROL = "console.control"
 
@@ -58,6 +61,16 @@ object BunHostCapabilityGrants {
     fun isTextPinyin4jGranted(context: Context): Boolean = isGranted(context, TEXT_PINYIN4J, true)
     fun setTextPinyin4jGranted(context: Context, granted: Boolean) = setGranted(context, TEXT_PINYIN4J, granted)
 
+    fun isTextOpenccGranted(context: Context): Boolean = isGranted(context, TEXT_OPENCC, true)
+    fun setTextOpenccGranted(context: Context, granted: Boolean) = setGranted(context, TEXT_OPENCC, granted)
+
+    fun isImageProcessGranted(context: Context): Boolean = isGranted(context, IMAGE_PROCESS, true)
+    fun setImageProcessGranted(context: Context, granted: Boolean) = setGranted(context, IMAGE_PROCESS, granted)
+
+    /** Host file access is separate from processing images supplied by the script. */
+    fun isImageFilesGranted(context: Context): Boolean = isGranted(context, IMAGE_FILES, false)
+    fun setImageFilesGranted(context: Context, granted: Boolean) = setGranted(context, IMAGE_FILES, granted)
+
     fun isScreenMetricsGranted(context: Context): Boolean = isGranted(context, SCREEN_METRICS, true)
     fun setScreenMetricsGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_METRICS, granted)
 
@@ -78,6 +91,9 @@ object BunHostCapabilityGrants {
         if (isDeviceInfoGranted(context)) add(BunRuntimeContract.HOST_CAPABILITY_DEVICE_INFO)
         if (isTextPinyinGranted(context)) add(TEXT_PINYIN)
         if (isTextPinyin4jGranted(context)) add(TEXT_PINYIN4J)
+        if (isTextOpenccGranted(context)) add(TEXT_OPENCC)
+        if (isImageProcessGranted(context)) add(IMAGE_PROCESS)
+        if (isImageFilesGranted(context)) add(IMAGE_FILES)
         if (isScreenMetricsGranted(context)) add(SCREEN_METRICS)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
     }

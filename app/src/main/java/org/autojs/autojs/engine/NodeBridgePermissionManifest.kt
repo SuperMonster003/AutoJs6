@@ -37,6 +37,7 @@ object NodeBridgePermissionManifest {
     const val MEDIA_LIBRARY = "media.library"
     const val MEDIA_LIBRARY_MUTATE = "media.library.mutate"
     const val PINYIN = "pinyin"
+    const val OPENCC = "opencc"
     const val PINYIN4J = "pinyin4j"
     const val STORAGE = "storage"
     const val DATABASE = "database"
@@ -126,6 +127,7 @@ object NodeBridgePermissionManifest {
         MEDIA_LIBRARY,
         MEDIA_LIBRARY_MUTATE,
         PINYIN,
+        OPENCC,
         PINYIN4J,
         STORAGE,
         DATABASE,
@@ -503,6 +505,7 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.MEDIAINFO -> listOf(MEDIA, MEDIA_METADATA)
             NodeBridgeModules.RECORDER -> listOf(MEDIA, MEDIA_RECORDING)
             NodeBridgeModules.PINYIN -> listOf(PINYIN)
+            NodeBridgeModules.OPENCC -> listOf(OPENCC)
             NodeBridgeModules.PINYIN4J -> listOf(PINYIN4J)
             NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
             NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE -> listOf(DATABASE)

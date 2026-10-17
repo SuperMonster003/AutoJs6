@@ -31,6 +31,8 @@ internal object OpenccConversionPlan {
 
     val compositeNames: Set<String> = compositeChains.keys
 
+    val supportedNames: Set<String> = (OpenccConversionTypes.ALL.map { it.lowercase(Locale.ROOT) } + aliases.keys + compositeChains.keys).toSet()
+
     fun chainFor(name: String): List<String>? {
         val normalizedName = name.lowercase(Locale.ROOT)
         return aliases[normalizedName] ?: compositeChains[normalizedName]

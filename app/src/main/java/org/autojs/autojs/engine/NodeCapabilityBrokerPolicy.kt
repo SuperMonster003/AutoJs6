@@ -44,6 +44,8 @@ object NodeCapabilityBrokerPolicy {
                         requiredCapabilities = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method),
                         maxArgsBytes = when {
                             module == NodeBridgeModules.PINYIN && method == "convert" -> PINYIN_CONVERT_MAX_ARGS_BYTES
+                            module == NodeBridgeModules.OPENCC -> 64 * 1024
+                            module in NodeBridgeModules.imageModules && method == "fromBase64" -> 64 * 1024
                             module == NodeBridgeModules.FILES && method == "write" -> FILES_WRITE_MAX_ARGS_BYTES
                             module == NodeBridgeModules.PLUGIN_TOOLS && method == "invoke" -> PLUGIN_TOOLS_INVOKE_MAX_ARGS_BYTES
                             else -> DEFAULT_MAX_ARGS_BYTES

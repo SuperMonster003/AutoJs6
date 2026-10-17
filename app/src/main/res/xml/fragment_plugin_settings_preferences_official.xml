@@ -106,6 +106,30 @@
             app:summary="@string/summary_bun_pinyin4j_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_opencc_grant"
+            app:defaultValue="true"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_opencc_grant"
+            app:summary="@string/summary_bun_opencc_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_image_process_grant"
+            app:defaultValue="true"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_image_process_grant"
+            app:summary="@string/summary_bun_image_process_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_image_files_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_image_files_grant"
+            app:summary="@string/summary_bun_image_files_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_screen_metrics_grant"
             app:defaultValue="true"
             app:layout="@layout/preference_custom"

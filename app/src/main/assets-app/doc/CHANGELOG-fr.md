@@ -140,6 +140,7 @@
 * `Fonctionnalité` Le mode client permet la reconnexion après une coupure imprévue, de nouvelles tentatives au retour du réseau et la restauration de la connexion au démarrage de l'application
 * `Fonctionnalité` Module Node.js screen_metrics et fonctions globales de conversion compatibles, partageant les règles de l'hôte avec le SDK Bun et suivant la rotation de l'écran
 * `Fonctionnalité` Client explicite de l'API hôte Bun pour Pinyin, Pinyin4j, les coordonnées et la console, avec des interrupteurs de capacités indépendants
+* `Fonctionnalité` Node.js et Bun prennent en charge OpenCC asynchrone, les codecs, la lecture des pixels, les transformations et la recherche de couleurs; accès aux fichiers image de Bun autorisé séparément
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés

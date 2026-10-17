@@ -20,6 +20,7 @@ import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
+import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -62,8 +63,12 @@ internal object NodeBridgePluginFamilyStatus {
         Family("barcode", methodsOf(NodeBridgeModules.BARCODE, NodeBridgeModules.barcodeMethods)) { serviceFamily(it, BarcodePluginHost.ACTION_BARCODE) },
         Family("pinyin", methodsOf(NodeBridgeModules.PINYIN, NodeBridgeModules.pinyinMethods)) { serviceFamily(it, PinyinPluginHost.ACTION_PINYIN) },
         Family("pinyin4j", methodsOf(NodeBridgeModules.PINYIN4J, NodeBridgeModules.pinyin4jMethods)) { serviceFamily(it, Pinyin4jPluginHost.ACTION_PINYIN4J) },
+        Family("opencc", methodsOf(NodeBridgeModules.OPENCC, NodeBridgeModules.openccMethods)) { serviceFamily(it, OpenccPluginHost.ACTION_OPENCC) },
         Family("mediainfo", methodsOf(NodeBridgeModules.MEDIAINFO, NodeBridgeModules.mediainfoMethods)) { serviceFamily(it, MediainfoPluginHost.ACTION_MEDIAINFO) },
-        Family("opencv", listOf("image.findColor", "image.findImage", "image.findMultiColors", "image.matchTemplate"), ::openCvFamily),
+        Family("opencv", methodsOf(NodeBridgeModules.IMAGE, listOf(
+            "resize", "scale", "grayscale", "threshold", "blur", "gaussianBlur", "medianBlur", "invert",
+            "findColor", "findImage", "findMultiColors", "matchTemplate", "findAllPointsForColor",
+        )), ::openCvFamily),
         Family("docs", listOf("app.listDocs", "app.readDoc"), ::docsFamily),
     )
 

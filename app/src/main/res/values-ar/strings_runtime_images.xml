@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_image_files_grant">السماح بقراءة الصور وحفظها بصلاحيات المضيف. معطل افتراضيا.</string>
+    <string name="summary_bun_image_process_grant">السماح بفك ترميز الصور وتحويلها والبحث عن وحدات البكسل.</string>
+    <string name="summary_bun_opencc_grant">السماح بتحويلات OpenCC عبر إضافة المضيف.</string>
+    <string name="text_bun_image_files_grant">الوصول إلى ملفات الصور</string>
+    <string name="text_bun_image_process_grant">معالجة الصور</string>
+    <string name="text_bun_opencc_grant">تحويل OpenCC</string>
+</resources>

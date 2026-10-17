@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_image_files_grant">Permitir leer y guardar imágenes con los permisos del anfitrión. Desactivado por defecto.</string>
+    <string name="summary_bun_image_process_grant">Permitir decodificar, transformar y buscar píxeles.</string>
+    <string name="summary_bun_opencc_grant">Permitir conversiones OpenCC mediante el plugin anfitrión.</string>
+    <string name="text_bun_image_files_grant">Acceso a archivos de imagen</string>
+    <string name="text_bun_image_process_grant">Procesamiento de imágenes</string>
+    <string name="text_bun_opencc_grant">Conversión OpenCC</string>
+</resources>

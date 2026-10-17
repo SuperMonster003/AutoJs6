@@ -16,6 +16,10 @@ import org.autojs.plugin.bun.runtime.api.IBunHostCapabilityCallback
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -33,7 +37,7 @@ internal class BunHostCapabilityBroker(
     private val executionId: String,
     capabilities: List<String>,
     consoleProvider: () -> ConsoleImpl,
-    workingDirectory: String? = null,
+    private val workingDirectory: String? = null,
 ) : IBunHostCapabilityBroker.Stub() {
     private val appContext = context.applicationContext ?: context
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -44,6 +48,9 @@ internal class BunHostCapabilityBroker(
     private val console = RuntimeConsoleBridge(consoleProvider, workingDirectory)
     private val pinyin by lazy { AndroidNodePinyinBackend(appContext) }
     private val pinyin4j by lazy { AndroidNodePinyin4jBackend(appContext) }
+    private val opencc by lazy { AndroidNodeOpenccBackend(appContext) }
+    private val imageScopeLock = Any()
+    private var imageProvider: AndroidNodeBridgeCapabilityProvider? = null
 
     /** Granted capability IDs in contract order; a broker is only attached when this is non-empty. */
     val capabilities: List<String> = capabilities.toList()
@@ -56,7 +63,9 @@ internal class BunHostCapabilityBroker(
 
     /** After this no call is answered; the plugin fails its pending calls itself when the run ends. */
     fun close() {
-        closed.set(true)
+        if (!closed.compareAndSet(false, true)) return
+        val provider = synchronized(imageScopeLock) { imageProvider.also { imageProvider = null } }
+        provider?.destroy(NodeBridgeError.processDead("Bun execution finished"))
     }
 
     override fun invoke(request: Bundle?, callback: IBunHostCapabilityCallback?) {
@@ -132,6 +141,11 @@ internal class BunHostCapabilityBroker(
             BunHostCapabilityGrants.TEXT_PINYIN4J -> textCall(request, NodeBridgeModules.PINYIN4J, PINYIN4J_METHODS) {
                 NodePinyin4jBridge.dispatch(it, pinyin4j)
             }
+            BunHostCapabilityGrants.TEXT_OPENCC -> textCall(request, NodeBridgeModules.OPENCC, NodeOpenccBridge.METHODS) {
+                NodeOpenccBridge.dispatch(it, opencc)
+            }
+            BunHostCapabilityGrants.IMAGE_PROCESS -> imageCall(request, IMAGE_PROCESS_METHODS)
+            BunHostCapabilityGrants.IMAGE_FILES -> imageCall(request, IMAGE_FILE_METHODS)
             BunHostCapabilityGrants.SCREEN_METRICS -> methodCall(request, coordinates::invoke)
             BunHostCapabilityGrants.CONSOLE_CONTROL -> methodCall(request, console::invoke)
             else -> Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_UNKNOWN_CAPABILITY, "Capability is not implemented by this host")
@@ -167,6 +181,10 @@ internal class BunHostCapabilityBroker(
         val (method, args) = parseMethodCall(request)
         require(method in methods) { "Unsupported $module method: $method" }
         val response = dispatch(NodeBridgeRequest(executionId, module, method, args.toString(), BunRuntimeContract.HOST_CALL_TIMEOUT_MILLIS.toLong()))
+        return bridgeResponse(response)
+    }
+
+    private fun bridgeResponse(response: NodeBridgeResponse): Outcome {
         if (response.ok) {
             // The Bun wire contract requires an outer object, including for strings, matrices and null.
             return Outcome.Success("{\"value\":${response.resultJson ?: "null"}}")
@@ -177,9 +195,41 @@ internal class BunHostCapabilityBroker(
             NodeBridgeErrorCategory.PERMISSION_DENIED, NodeBridgeErrorCategory.CAPABILITY_DENIED -> BunRuntimeContract.HOST_CALL_ERROR_NOT_GRANTED
             NodeBridgeErrorCategory.TIMEOUT -> BunRuntimeContract.HOST_CALL_ERROR_TIMEOUT
             NodeBridgeErrorCategory.UNAVAILABLE, NodeBridgeErrorCategory.PROCESS_DEAD -> BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE
+            NodeBridgeErrorCategory.RESOURCE_LIMIT -> BunRuntimeContract.HOST_CALL_ERROR_QUOTA_EXCEEDED
+            NodeBridgeErrorCategory.RATE_LIMITED -> BunRuntimeContract.HOST_CALL_ERROR_TOO_MANY_REQUESTS
             else -> BunRuntimeContract.HOST_CALL_ERROR_INTERNAL
         }
-        return Outcome.Failure(code, error?.message ?: "Text provider failed")
+        return Outcome.Failure(code, error?.message ?: "Host capability failed")
+    }
+
+    /** Reuses Node's codec, serial image lane, execution-owned handles and resource cleanup. */
+    private fun imageCall(request: JSONObject, methods: Set<String>): Outcome {
+        val (method, args) = parseMethodCall(request)
+        require(method in methods) { "Image method is not part of this capability: $method" }
+        val provider = synchronized(imageScopeLock) {
+            if (closed.get()) return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE, "Bun execution has finished")
+            imageProvider ?: AndroidNodeBridgeCapabilityProvider(
+                appContext,
+                engineInfo = NodeBridgeEngineInfo.fromContext(appContext, id = executionId, cwd = workingDirectory.orEmpty())
+                    .copy(engineName = "bun", backend = "plugin"),
+                javaInteropEnabled = false,
+                permissionManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf(NodeBridgePermissionManifest.IMAGE)),
+            ).also { imageProvider = it }
+        }
+        val result = CompletableFuture<NodeBridgeResponse>()
+        provider.dispatch(NodeBridgeRequest(
+            id = "$executionId-image-${UUID.randomUUID()}", module = NodeBridgeModules.IMAGES, method = method,
+            argsJson = args.toString(), timeoutMs = IMAGE_CALL_TIMEOUT_MILLIS,
+            permissions = listOf(NodeBridgePermissionManifest.IMAGE),
+        )) { response -> result.complete(response) }
+        return try {
+            bridgeResponse(result.get(IMAGE_CALL_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS))
+        } catch (_: TimeoutException) {
+            Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_TIMEOUT, "Image operation did not finish within $IMAGE_CALL_TIMEOUT_MILLIS ms")
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+            Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE, "Image execution is finishing")
+        }
     }
 
     /** `{}` in, the `android.os.Build` facts out; never a serial, IMEI, Android ID, account or network identifier. */
@@ -238,6 +288,13 @@ internal class BunHostCapabilityBroker(
         const val MAX_CALL_ID_CHARS = 256
         val PINYIN_METHODS = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
         val PINYIN4J_METHODS = setOf("of", "as", "readings")
+        const val IMAGE_CALL_TIMEOUT_MILLIS = 9_000L
+        val IMAGE_PROCESS_METHODS = setOf(
+            "fromBase64", "toBase64", "pixel", "readPixels", "copy", "clip", "resize", "scale", "rotate", "flip",
+            "grayscale", "threshold", "blur", "gaussianBlur", "medianBlur", "invert",
+            "findImage", "matchTemplate", "findColor", "findMultiColors", "detectsColor", "findAllPointsForColor", "recycle",
+        )
+        val IMAGE_FILE_METHODS = setOf("readImage", "saveImage")
         const val TOAST_TEXT_KEY = "text"
         const val TOAST_DURATION_KEY = "duration"
         const val TOAST_DURATION_SHORT = "short"

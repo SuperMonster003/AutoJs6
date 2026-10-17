@@ -200,6 +200,11 @@ public class ColorFinder {
         return result.isEmpty() ? null : result.get(0);
     }
 
+    /** All matches in raw image coordinates, without a ScriptRuntime or screen-metric scaling. */
+    public static Point[] findPointsByColors(Bitmap bitmap, Mat source, int color, int threshold, Rect rect, int[] points, int maxResults) {
+        return findPointsByColorsInternal(source, color, threshold, rect, points, readerOf(bitmap), maxResults, true).toArray(new Point[0]);
+    }
+
     @Nullable
     @ScriptInterface
     public Point findPointByColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
@@ -270,6 +275,10 @@ public class ColorFinder {
      */
     @NonNull
     static List<Point> findPointsByColorsInternal(Mat source, int firstColor, int threshold, @Nullable Rect rect, int[] points, PixelReader reader, int limit) {
+        return findPointsByColorsInternal(source, firstColor, threshold, rect, points, reader, limit, false);
+    }
+
+    private static List<Point> findPointsByColorsInternal(Mat source, int firstColor, int threshold, @Nullable Rect rect, int[] points, PixelReader reader, int limit, boolean requireComplete) {
         if (points.length % 3 != 0) {
             throw new IllegalArgumentException("Color paths must be flat triples of [x, y, color], but got " + points.length + " values");
         }
@@ -284,6 +293,9 @@ public class ColorFinder {
             int candidateCount = Core.countNonZero(mask);
             if (candidateCount == 0) {
                 return Collections.emptyList();
+            }
+            if (requireComplete && points.length == 0 && candidateCount > limit) {
+                throw new IllegalArgumentException("JSON color results exceed " + limit + " points; choose a smaller region");
             }
             if (points.length > 0 && candidateCount >= PATH_PREFILTER_MIN_CANDIDATES) {
                 narrowCandidatesByPaths(source, mask, regionX, regionY, reader.width(), reader.height(), threshold, points);
@@ -302,7 +314,10 @@ public class ColorFinder {
                 int y = coordinates[i * 2 + 1] + regionY;
                 if (checksPath(reader, x, y, threshold, points, detectors)) {
                     result.add(new Point(x, y));
-                    if (result.size() >= limit) {
+                    if (requireComplete && result.size() > limit) {
+                        throw new IllegalArgumentException("JSON color results exceed " + limit + " points; choose a smaller region");
+                    }
+                    if (!requireComplete && result.size() >= limit) {
                         break;
                     }
                 }

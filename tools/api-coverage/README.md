@@ -7,12 +7,19 @@ plugin's actual semantic and static completion providers.
 
 `node tools/api-coverage/check-runtime-bridges.mjs` compares the real Node client
 exports and Bun SDK method table with the host's Pinyin, Pinyin4j, coordinate and
-console control routes. It uses sibling Node/Bun repositories by default; two
+console control routes, all OpenCC names and image routes. OpenCC checks invoke
+every real client alias and require an asynchronous host dispatch; image checks
+also match the development catalog and explicitly account for client helpers.
+It uses sibling Node/Bun repositories by default; two
 optional positional paths select other checkouts. It also guards the Node type
 index entries. This focused cross-repository check does not treat unsupported
 stubs, no-ops, native alternatives or Rhino delegation as full API coverage.
 Run the Node wrapper regression, Bun client tests and the host's
 `RuntimeApiBridgeDeviceTest` separately for argument, error and device behavior.
+`OpenccImageBridgeDeviceTest` additionally covers real CJS/ESM/Bun conversions,
+ARGB pixels and alpha, transforms, encoded and PFD byte round trips, bounded JSON
+results, revoked grants and execution-owned handles. Workers use their documented
+`autojs6:bridge` entry rather than the main-thread module facade.
 
 The extractor also resolves Mail's explicit default-client forwarding table,
 including its synchronous-only methods and generated Async names. List suffixes,

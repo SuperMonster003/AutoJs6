@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_image_files_grant">Autoriser la lecture et la sauvegarde des images avec les droits de l\'hôte. Désactivé par défaut.</string>
+    <string name="summary_bun_image_process_grant">Autoriser le décodage, la transformation et la recherche de pixels.</string>
+    <string name="summary_bun_opencc_grant">Autoriser les conversions OpenCC via le plugin hôte.</string>
+    <string name="text_bun_image_files_grant">Accès aux fichiers image</string>
+    <string name="text_bun_image_process_grant">Traitement des images</string>
+    <string name="text_bun_opencc_grant">Conversion OpenCC</string>
+</resources>

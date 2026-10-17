@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_image_files_grant">Разрешить чтение и сохранение изображений с правами хоста. По умолчанию отключено.</string>
+    <string name="summary_bun_image_process_grant">Разрешить декодирование, преобразование и поиск пикселей.</string>
+    <string name="summary_bun_opencc_grant">Разрешить преобразования OpenCC через плагин хоста.</string>
+    <string name="text_bun_image_files_grant">Доступ к файлам изображений</string>
+    <string name="text_bun_image_process_grant">Обработка изображений</string>
+    <string name="text_bun_opencc_grant">Преобразование OpenCC</string>
+</resources>

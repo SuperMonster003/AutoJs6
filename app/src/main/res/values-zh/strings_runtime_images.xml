@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_image_files_grant">允许以宿主权限读取和保存图像文件. 默认关闭.</string>
+    <string name="summary_bun_image_process_grant">允许图像解码, 变换和像素查找.</string>
+    <string name="summary_bun_opencc_grant">允许通过宿主插件进行 OpenCC 转换.</string>
+    <string name="text_bun_image_files_grant">图像文件访问</string>
+    <string name="text_bun_image_process_grant">图像处理</string>
+    <string name="text_bun_opencc_grant">OpenCC 转换</string>
+</resources>

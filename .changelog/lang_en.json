@@ -137,7 +137,8 @@
         "Connection manager in client and server modes, for viewing connection status, managing clients and accessing address history",
         "Client mode supports automatic reconnection after unexpected disconnection, retries when the network returns and connection restoration at app startup",
         "Node.js screen_metrics module and compatibility coordinate globals, sharing host conversion rules with the Bun SDK and following current screen rotation",
-        "Explicit Bun host API client with Pinyin, Pinyin4j, coordinate and console operations, with independent capability switches"
+        "Explicit Bun host API client with Pinyin, Pinyin4j, coordinate and console operations, with independent capability switches",
+        "Node.js and Bun support asynchronous OpenCC conversions and common image codecs, pixel reads, transforms and color searches; Bun image file access is authorized separately"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",

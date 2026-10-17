@@ -673,6 +673,7 @@ object NodeBridgeModules {
     const val MEDIA_STORE = "media_store"
     const val RECORDER = "recorder"
     const val PINYIN = NodeBridgePermissionManifest.PINYIN
+    const val OPENCC = NodeBridgePermissionManifest.OPENCC
     const val PINYIN4J = NodeBridgePermissionManifest.PINYIN4J
     const val STORAGE = NodeBridgePermissionManifest.STORAGE
     const val STORAGES = "storages"
@@ -766,6 +767,8 @@ object NodeBridgeModules {
         "findColor",
         "findMultiColors",
         "recycle",
+        "fromBase64", "fromBytes", "toBase64", "pixel", "readPixels", "copy", "rotate", "scale", "flip",
+        "blur", "gaussianBlur", "medianBlur", "invert", "detectsColor", "findAllPointsForColor",
     )
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
@@ -777,6 +780,7 @@ object NodeBridgeModules {
     val recorderMethods = setOf("getStatus", "start", "stop")
     val pinyinMethods = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
     val pinyin4jMethods = setOf("of", "as", "readings")
+    val openccMethods = NodeOpenccBridge.METHODS
     val storageModules = setOf(STORAGE, STORAGES)
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
     val databaseModules = setOf(DATABASE, SQLITE)
@@ -829,6 +833,7 @@ object NodeBridgeModules {
         MEDIA_STORE to mediaStoreMethods,
         RECORDER to recorderMethods,
         PINYIN to pinyinMethods,
+        OPENCC to openccMethods,
         PINYIN4J to pinyin4jMethods,
         STORAGE to storageMethods,
         STORAGES to storageMethods,
@@ -894,6 +899,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val bridgeLimits: NodeBridgeLimits.Policy = NodeBridgeLimits.defaults,
     private val pinyinBackend: NodePinyinBackend = AndroidNodePinyinBackend(context),
     private val pinyin4jBackend: NodePinyin4jBackend = AndroidNodePinyin4jBackend(context),
+    private val openccBackend: NodeOpenccBackend = AndroidNodeOpenccBackend(context),
     private val permissionManifest: NodeBridgePermissionManifest.Manifest? = null,
     private val agentScriptRoots: List<File> = emptyList(),
     private val executionConsole: org.autojs.autojs.core.console.ConsoleImpl? = null,
@@ -1091,6 +1097,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.RECORDER && request.method in NodeBridgeModules.recorderMethods -> dispatchRecorder(request, auditedCallback)
             request.module == NodeBridgeModules.PINYIN && request.method in NodeBridgeModules.pinyinMethods -> auditedCallback(NodePinyinBridge.dispatch(request, pinyinBackend))
             request.module == NodeBridgeModules.PINYIN4J && request.method in NodeBridgeModules.pinyin4jMethods -> auditedCallback(NodePinyin4jBridge.dispatch(request, pinyin4jBackend))
+            request.module == NodeBridgeModules.OPENCC && request.method in NodeBridgeModules.openccMethods -> auditedCallback(NodeOpenccBridge.dispatch(request, openccBackend))
             request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, auditedCallback)
             request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, auditedCallback)
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, auditedCallback)
@@ -2202,17 +2209,50 @@ class AndroidNodeBridgeCapabilityProvider(
             when (request.method) {
                 "captureScreen" -> registerImage(screenCapture.capture(), "screen").toJson().toString()
                 "saveImage" -> saveImage(request)
+                "fromBase64", "fromBytes" -> {
+                    val args = request.argsArray()
+                    val bitmap = if (request.method == "fromBytes") {
+                        val options = args.optJSONObject(0) ?: throw IllegalArgumentException("fromBytes requires an upload descriptor.")
+                        val upload = requireNotNull(request.upload) { "fromBytes requires descriptor upload support." }
+                        require(options.optString("bodyTransport") == "pfd" && options.optLong("bodyBytes", -1) == upload.byteCount && upload.byteCount > 0) { "Image upload descriptor does not match the received bytes." }
+                        upload.openStream().use { BitmapFactory.decodeStream(it) }
+                    } else {
+                        val text = args.opt(0) as? String ?: throw IllegalArgumentException("fromBase64 requires a base64 string.")
+                        val encoded = if (text.startsWith("data:", ignoreCase = true)) {
+                            val comma = text.indexOf(',')
+                            require(comma > 0 && text.substring(0, comma).endsWith(";base64", ignoreCase = true)) { "Image data URL must use base64 encoding." }
+                            text.substring(comma + 1)
+                        } else text
+                        val bytes = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT)
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    requireNotNull(bitmap) { "Encoded data could not be decoded as an image." }
+                    registerImage(bitmap, request.method).toJson().toString()
+                }
+                "toBase64" -> {
+                    val args = request.argsArray()
+                    val options = args.optJSONObject(1) ?: JSONObject()
+                    val format = options.optString("format", "png").lowercase(Locale.ROOT)
+                    require(format in setOf("png", "jpg", "jpeg", "webp")) { "Base64 image format must be png, jpg, jpeg or webp." }
+                    val encoded = NodeImageByteTransport.encode(appContext, imageArgument(args, 0).bitmap, format, options.optInt("quality", 100))
+                    val bytes = ParcelFileDescriptor.AutoCloseInputStream(encoded.descriptor).use { it.readBytes() }
+                    NodeBridgeJson.valueToJson(android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP))
+                }
                 "toBytes" -> {
                     require(request.binary) { "Image bytes require a client with PFD transport support." }
                     val args = request.argsArray()
-                    val format = (args.optJSONObject(1) ?: JSONObject()).optString("format", "png")
-                    val bytes = NodeImageByteTransport.encode(appContext, imageArgument(args, 0).bitmap, format)
+                    val options = args.optJSONObject(1) ?: JSONObject()
+                    val format = options.optString("format", "png").lowercase(Locale.ROOT)
+                    val bitmap = imageArgument(args, 0).bitmap
+                    val region = imageOperations.region(bitmap, options)
+                    val bytes = NodeImageByteTransport.encode(appContext, bitmap, format, options.optInt("quality", 100),
+                        android.graphics.Rect(region.x, region.y, region.x + region.width, region.y + region.height))
                     callback(NodeBridgeResponse(request.id, true,
                         JSONObject().put("byteCount", bytes.size).put("format", format).toString(),
                         binary = bytes.descriptor, binaryByteCount = bytes.size))
                     null
                 }
-                "clip", "resize", "grayscale", "threshold" -> {
+                "clip", "resize", "grayscale", "threshold", "copy", "rotate", "scale", "flip", "blur", "gaussianBlur", "medianBlur", "invert" -> {
                     val args = request.argsArray()
                     val bitmap = imageOperations.transform(request.method, imageArgument(args, 0).bitmap, args.optJSONObject(1) ?: JSONObject())
                     registerImage(bitmap, request.method).toJson().toString()
@@ -2227,6 +2267,22 @@ class AndroidNodeBridgeCapabilityProvider(
                     val multiple = request.method == "findMultiColors"
                     imageOperations.findColors(imageArgument(args, 0).bitmap, args.get(1),
                         if (multiple) args.getJSONArray(2) else JSONArray(), args.optJSONObject(if (multiple) 3 else 2) ?: JSONObject())
+                }
+                "pixel" -> {
+                    val args = request.argsArray()
+                    imageOperations.pixel(imageArgument(args, 0).bitmap, imageOperations.integer(args.opt(1), "x"), imageOperations.integer(args.opt(2), "y")).toString()
+                }
+                "readPixels" -> {
+                    val args = request.argsArray()
+                    imageOperations.readPixels(imageArgument(args, 0).bitmap, args.optJSONObject(1) ?: JSONObject()).toString()
+                }
+                "detectsColor" -> {
+                    val args = request.argsArray()
+                    imageOperations.detectsColor(imageArgument(args, 0).bitmap, args.get(1), imageOperations.integer(args.opt(2), "x"), imageOperations.integer(args.opt(3), "y"), args.optJSONObject(4) ?: JSONObject()).toString()
+                }
+                "findAllPointsForColor" -> {
+                    val args = request.argsArray()
+                    imageOperations.findAllPointsForColor(imageArgument(args, 0).bitmap, args.get(1), args.optJSONObject(2) ?: JSONObject())
                 }
                 "readImage" -> {
                     dispatchImageRead(request, callback)
@@ -2266,7 +2322,7 @@ class AndroidNodeBridgeCapabilityProvider(
         val message = error.message ?: "Image operation failed."
         val failure = when (error) {
             is SecurityException -> NodeBridgeError.permissionDenied(message, request.module, request.method)
-            is IllegalArgumentException -> NodeBridgeError.invalidRequest(message, request.module, request.method)
+            is IllegalArgumentException, is org.json.JSONException -> NodeBridgeError.invalidRequest(message, request.module, request.method)
             is java.util.concurrent.TimeoutException -> NodeBridgeError.timeout(request.module, request.method)
             is java.util.concurrent.CancellationException, is InterruptedException -> NodeBridgeError.processDead(message)
             is ImageHandleLimitException -> NodeBridgeError.resourceLimit(message, request.module, request.method)

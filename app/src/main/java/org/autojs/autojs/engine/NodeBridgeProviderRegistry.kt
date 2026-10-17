@@ -133,6 +133,7 @@ object NodeBridgeProviderRegistry {
     private const val DATABASE_PROVIDER = "database"
     private const val MEDIA_PROVIDER = "media"
     private const val PINYIN_PROVIDER = "pinyin"
+    private const val OPENCC_PROVIDER = "opencc"
     private const val PINYIN4J_PROVIDER = "pinyin4j"
     private const val NOTIFICATIONS_PROVIDER = "notifications"
     private const val DEVICE_PROVIDER = "device"
@@ -230,6 +231,12 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.PINYIN),
             capabilities = listOf(NodeBridgePermissionManifest.PINYIN),
             packagedSupport = packagedProviderDependent("requires the official Pinyin plugin and the packaged pinyin capability"),
+        ),
+        provider(
+            id = OPENCC_PROVIDER,
+            modules = listOf(NodeBridgeModules.OPENCC),
+            capabilities = listOf(NodeBridgePermissionManifest.OPENCC),
+            packagedSupport = packagedProviderDependent("requires an installed and enabled OpenCC provider"),
         ),
         provider(
             id = PINYIN4J_PROVIDER,
@@ -424,6 +431,7 @@ object NodeBridgeProviderRegistry {
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         MEDIA_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         PINYIN_PROVIDER -> if (PinyinPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
+        OPENCC_PROVIDER -> if (org.autojs.autojs.core.plugin.text.OpenccPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         PINYIN4J_PROVIDER -> if (Pinyin4jPluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
         DEVICE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
@@ -497,6 +505,12 @@ object NodeBridgeProviderRegistry {
             "rawObjectPolicy" to "no raw MediaPlayer, ExoPlayer, AudioManager, MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaMetadataRetriever, MediaInfo, MediaStore cursor, ParcelFileDescriptor, Uri, file descriptor, foreground service handle, or Context object crosses the bridge; MediaStore rows carry URI strings only",
             "statusReason" to "metadata, audio stream control, recording, session playback and scoped MediaStore access are available",
         )
+        OPENCC_PROVIDER -> linkedMapOf(
+            "liveMethods" to NodeOpenccBridge.METHODS.sorted().joinToString(","),
+            "capability" to NodeBridgePermissionManifest.OPENCC,
+            "pluginServiceCount" to org.autojs.autojs.core.plugin.text.OpenccPluginHost.queryServiceCount(context).toString(),
+            "statusReason" to "Native and composed conversions use the selected OpenCC plugin",
+        )
         PINYIN_PROVIDER -> linkedMapOf(
             "liveMethods" to NodeBridgeModules.pinyinMethods.sorted().joinToString(","),
             "capability" to NodeBridgePermissionManifest.PINYIN,
@@ -559,8 +573,8 @@ object NodeBridgeProviderRegistry {
             "rawObjectPolicy" to "only image and capturer handles cross the bridge",
         )
         IMAGE_PROVIDER -> linkedMapOf(
-            "liveMethods" to "captureScreen,readImage,saveImage,toBytes,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors,recycle",
-            "byteTransport" to "PFD attachment; PNG or straight-alpha sRGB RGBA8; no pixel data in JSON",
+            "liveMethods" to NodeBridgeModules.imageMethods.sorted().joinToString(","),
+            "byteTransport" to "PFD encoded images or straight-alpha RGBA8; JSON base64 and bounded signed ARGB32 pixel regions",
             "fakeMethods" to "captureScreen,readImage,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors,recycle",
             "blockedMethods" to "",
             "analysisDependency" to "OpenCV plugin used by the host Images implementation",

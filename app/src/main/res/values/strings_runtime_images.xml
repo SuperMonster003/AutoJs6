@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_image_files_grant">Allow reading and saving image files with host permissions. Disabled by default.</string>
+    <string name="summary_bun_image_process_grant">Allow image decoding, transformations and pixel searches.</string>
+    <string name="summary_bun_opencc_grant">Allow OpenCC conversions through the host plugin.</string>
+    <string name="text_bun_image_files_grant">Image file access</string>
+    <string name="text_bun_image_process_grant">Image processing</string>
+    <string name="text_bun_opencc_grant">OpenCC conversion</string>
+</resources>

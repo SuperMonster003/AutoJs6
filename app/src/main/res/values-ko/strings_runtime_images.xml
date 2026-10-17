@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_image_files_grant">호스트 권한으로 이미지 파일 읽기와 저장을 허용합니다. 기본적으로 꺼져 있습니다.</string>
+    <string name="summary_bun_image_process_grant">이미지 디코딩, 변환 및 픽셀 검색을 허용합니다.</string>
+    <string name="summary_bun_opencc_grant">호스트 플러그인을 통한 OpenCC 변환을 허용합니다.</string>
+    <string name="text_bun_image_files_grant">이미지 파일 접근</string>
+    <string name="text_bun_image_process_grant">이미지 처리</string>
+    <string name="text_bun_opencc_grant">OpenCC 변환</string>
+</resources>
