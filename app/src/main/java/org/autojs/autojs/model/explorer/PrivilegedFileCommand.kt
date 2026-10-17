@@ -9,6 +9,7 @@ import kotlin.system.exitProcess
 /** app_process entry point: Root and Shizuku execute the same filesystem implementation. */
 @Keep
 object PrivilegedFileCommand {
+    internal const val SAVE_STARTED_MARKER = "AUTOJS6_PRIVILEGED_SAVE_STARTED"
     @Keep
     @JvmStatic
     fun main(arguments: Array<String>) {
@@ -29,6 +30,15 @@ object PrivilegedFileCommand {
                     }
                     System.out.flush()
                 }
+            } else if (json.optString("operation") == "snapshot") {
+                System.out.println(PrivilegedFileSaveEngine.statSnapshot(request))
+            } else if (json.optString("operation") == "reconcile") {
+                System.out.println(PrivilegedFileSaveEngine.reconcile(request))
+            } else if (json.optString("operation") == "save") {
+                // Distinguish a denied su/app_process launch from a write whose reply was lost.
+                System.err.println(SAVE_STARTED_MARKER)
+                System.err.flush()
+                System.out.println(PrivilegedFileSaveEngine.save(request, System.`in`))
             } else {
                 System.out.println(PrivilegedFileEngine.execute(request))
             }

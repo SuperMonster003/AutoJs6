@@ -44,6 +44,24 @@ object PrivilegedFileOperations {
     fun stat(context: Context, mode: PrivilegedAccessMode, path: String): JSONObject =
         execute(context, mode, "stat", path)
 
+    fun snapshot(context: Context, mode: PrivilegedAccessMode, path: String): JSONObject =
+        execute(context, mode, "snapshot", path)
+
+    /** Content travels through a descriptor/stdin, never through a Binder byte array or shell text. */
+    internal fun save(context: Context, mode: PrivilegedAccessMode, request: JSONObject, contents: File): JSONObject {
+        configureRequest(context, request)
+        val remaining = (request.getLong("deadlineMillis") - System.currentTimeMillis()).coerceAtLeast(1L)
+        return executePrepared(context, mode, request, true, remaining, contents)
+    }
+
+    internal fun reconcileSave(context: Context, mode: PrivilegedAccessMode, attempt: JSONObject): JSONObject {
+        val request = JSONObject(attempt.toString()).put("operation", "reconcile")
+            .put("deadlineMillis", System.currentTimeMillis() + 30_000L)
+        configureRequest(context, request)
+        // Reconciliation may retire the old transaction, but never writes the original content.
+        return executeRequest(context, mode, request, false, 30_000L)
+    }
+
     fun execute(
         context: Context,
         mode: PrivilegedAccessMode,
@@ -52,18 +70,27 @@ object PrivilegedFileOperations {
         destination: String? = null,
         expected: JSONObject? = null,
     ): JSONObject {
-        val mutation = operation != "stat"
+        val mutation = operation !in listOf("stat", "snapshot")
         val timeoutMs = if (mutation) OPERATION_TIMEOUT_MS else 60_000L
         val request = request(operation, source, expected, timeoutMs).apply {
-            put("nativeLibrary", File(context.applicationInfo.nativeLibraryDir, "libautojs6_file_ops.so").path)
-            put("apkPath", context.applicationInfo.sourceDir)
-            put("client64Bit", android.os.Process.is64Bit())
+            configureRequest(context, this)
             destination?.let { put("destination", it) }
         }
-        val receipt = if (mutation) PrivilegedFileOperationJournal.begin(context, request) else null
+        return executePrepared(context, mode, request, mutation, timeoutMs)
+    }
+
+    private fun configureRequest(context: Context, request: JSONObject) {
+        request.put("nativeLibrary", File(context.applicationInfo.nativeLibraryDir, "libautojs6_file_ops.so").path)
+        request.put("apkPath", context.applicationInfo.sourceDir)
+        request.put("client64Bit", android.os.Process.is64Bit())
+    }
+
+    private fun executePrepared(context: Context, mode: PrivilegedAccessMode, request: JSONObject, mutation: Boolean, timeoutMs: Long, contents: File? = null): JSONObject {
+        // Editor sessions persist their own request, draft, and recovery paths before sending it.
+        val receipt = if (mutation && request.optString("operation") != "save") PrivilegedFileOperationJournal.begin(context, request) else null
         var preserveReceipt = false
         return try {
-            executeRequest(context, mode, request, mutation, timeoutMs).also { result ->
+            executeRequest(context, mode, request, mutation, timeoutMs, contents).also { result ->
                 if (receipt != null && result.optBoolean("cleanupPending")) {
                     preserveReceipt = true
                     result.put("_receipt", receipt.path)
@@ -84,15 +111,31 @@ object PrivilegedFileOperations {
         }
     }
 
-    private fun executeRequest(context: Context, mode: PrivilegedAccessMode, request: JSONObject, mutation: Boolean, timeoutMs: Long): JSONObject {
+    private fun executeRequest(context: Context, mode: PrivilegedAccessMode, request: JSONObject, mutation: Boolean, timeoutMs: Long, contents: File? = null): JSONObject {
         val response = try {
             when (mode) {
                 PrivilegedAccessMode.SHIZUKU -> callShizuku(timeoutMs + 5000) {
-                    requireShizuku().executeExplorerFileOperation(request.toString())
+                    val service = requireShizuku()
+                    when (request.getString("operation")) {
+                        "snapshot" -> service.snapshotExplorerFile(request.toString())
+                        "reconcile" -> service.reconcileExplorerFileSave(request.toString())
+                        "save" -> ParcelFileDescriptor.open(checkNotNull(contents), ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+                            service.saveExplorerFile(request.toString(), descriptor)
+                        }
+                        else -> service.executeExplorerFileOperation(request.toString())
+                    }
                 }
                 PrivilegedAccessMode.ROOT -> {
-                    val result = PrivilegedExplorerProcess.run(rootCommand(context, request, timeoutMs), timeoutMs + 10000)
-                    if (result.exitCode != 0) throw IOException(result.stderr.ifBlank { "Root exited with ${result.exitCode}" })
+                    val result = contents?.inputStream().use { input ->
+                        PrivilegedExplorerProcess.run(rootCommand(context, request, timeoutMs), timeoutMs + 10000, input)
+                    }
+                    if (result.exitCode != 0) {
+                        val message = result.stderr.ifBlank { "Root exited with ${result.exitCode}" }
+                        if (request.optString("operation") == "save" && !result.stderr.contains(PrivilegedFileCommand.SAVE_STARTED_MARKER)) {
+                            throw PrivilegedFileOperationException("ACCESS_UNAVAILABLE", message)
+                        }
+                        throw IOException(message)
+                    }
                     result.stdout.toString(Charsets.UTF_8)
                 }
             }
@@ -192,7 +235,11 @@ object PrivilegedFileOperations {
         }
         thread(name = "ExplorerFileRead", isDaemon = true) { reader.run() }
         try {
-            reader.get(OPEN_TIMEOUT_MS + 5000, TimeUnit.MILLISECONDS)
+            try {
+                reader.get(OPEN_TIMEOUT_MS + 5000, TimeUnit.MILLISECONDS)
+            } catch (error: ExecutionException) {
+                throw error.cause ?: error
+            }
             val exitDeadline = System.nanoTime() + 5_000_000_000L
             while (runCatching { process.exitValue() }.isFailure) {
                 if (System.nanoTime() >= exitDeadline) throw IOException("Root file read did not finish")

@@ -1682,7 +1682,7 @@
     <string name="text_explorer_privileged_conflict">대상이 이미 존재합니다. 다른 폴더나 이름을 선택하세요. 기존 파일은 덮어쓰지 않았습니다.</string>
     <string name="text_explorer_privileged_delete_confirmation">다음 항목은 휴지통을 거치지 않고 영구적으로 삭제됩니다:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">대상 폴더를 선택하세요. 같은 이름의 항목이 이미 있으면 작업이 중지됩니다.</string>
-    <string name="text_explorer_privileged_file_hint">파일은 임시 복사본으로 열립니다. 복사본의 변경 사항은 원본 파일에 저장되지 않습니다.</string>
+    <string name="text_explorer_privileged_file_hint">텍스트 파일은 편집할 수 있으며 검증 후 원본에 저장할 수 있습니다. 다른 앱에서 여는 파일은 읽기 전용 임시 복사본을 사용합니다.</string>
     <string name="text_explorer_privileged_invalid_name">유효한 단일 파일 이름을 입력하세요 (. 또는 ..은 사용할 수 없으며, / 또는 NUL을 포함할 수 없습니다).</string>
     <string name="text_explorer_privileged_move_scope">서로 다른 파일 시스템 간 이동은 공유 저장소 위치 간에만 지원됩니다. 먼저 복사하고 대상을 확인한 후 원본을 별도로 처리하세요.</string>
     <string name="text_explorer_privileged_no_space">대상 저장소의 여유 공간이 부족합니다.</string>
@@ -2475,6 +2475,17 @@
     <string name="text_press_again_to_exit">종료하려면 다시 누릅니다</string>
     <string name="text_press_back_or_vol_down_to_close_window">창을 닫으려면 \"뒤로\" 또는 \"볼륨 감소\" 버튼을 누르세요</string>
     <string name="text_preview">시사</string>
+    <string name="text_privileged_edit_access_hint">접근 방식을 변경하거나 다시 권한을 부여한 후 저장을 다시 누르세요. 편집 내용은 유지됩니다.</string>
+    <string name="text_privileged_edit_backup">원본 파일에 저장했습니다. 이전 버전은 다음 위치에 보관됩니다:\n%1$s</string>
+    <string name="text_privileged_edit_conflict">다른 프로그램이 원본 파일을 변경, 이동 또는 교체했습니다. 편집 내용은 유지되었습니다. 별도 복사본으로 저장하거나 원본을 다시 열어 비교한 후 저장하세요.</string>
+    <string name="text_privileged_edit_external_apps">이 문서는 높은 권한으로 편집 중입니다. 다른 앱에서 열기 전에 일반 접근이 가능한 파일로 다른 이름으로 저장하세요.</string>
+    <string name="text_privileged_edit_failed">원본 파일을 저장할 수 없습니다. 편집 내용은 유지되었습니다.\n\n%1$s</string>
+    <string name="text_privileged_edit_keep_editing">계속 편집</string>
+    <string name="text_privileged_edit_pending">저장하지 않은 편집 내용을 복구했습니다</string>
+    <string name="text_privileged_edit_permission">권한이 부족하거나 더 이상 사용할 수 없어 원본 파일에 쓸 수 없습니다. 편집 내용은 유지되었습니다. 다시 권한을 부여하거나 다른 접근 방식을 선택한 후 다시 저장하세요.</string>
+    <string name="text_privileged_edit_recovery">복구 파일:\n%1$s</string>
+    <string name="text_privileged_edit_unknown">저장 결과를 확인할 수 없습니다. 편집 내용과 복구 파일은 유지되었습니다. 다음 저장 시 추가로 쓰기 전에 원본을 확인합니다.</string>
+    <string name="text_privileged_edit_unsupported">이 파일 또는 파일 시스템은 속성을 보존하는 안전한 교체를 지원하지 않습니다. 편집 내용은 유지되었습니다. 다른 이름으로 저장을 사용하여 별도 복사본을 보관하세요.</string>
     <string name="text_process_exit_history">프로세스 종료 기록</string>
     <string name="text_process_exit_history_anr">앱이 응답하지 않음</string>
     <string name="text_process_exit_history_crash">앱 충돌</string>

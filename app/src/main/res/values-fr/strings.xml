@@ -1680,7 +1680,7 @@
     <string name="text_explorer_privileged_conflict">La destination existe déjà. Choisissez un autre dossier ou nom. Aucun fichier existant n\'a été remplacé.</string>
     <string name="text_explorer_privileged_delete_confirmation">Ces éléments seront définitivement supprimés sans passer par la corbeille:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">Choisissez un dossier de destination. L\'opération s\'arrête si un élément du même nom existe déjà.</string>
-    <string name="text_explorer_privileged_file_hint">Les fichiers sont ouverts sous forme de copies temporaires. Les modifications d\'une copie ne sont pas enregistrées dans le fichier original.</string>
+    <string name="text_explorer_privileged_file_hint">Les fichiers texte peuvent être modifiés et enregistrés dans l\'original après vérification. Les fichiers ouverts dans d\'autres applications utilisent des copies temporaires en lecture seule.</string>
     <string name="text_explorer_privileged_invalid_name">Saisissez un seul nom de fichier valide (ni . ni .., et sans / ni NUL).</string>
     <string name="text_explorer_privileged_move_scope">Le déplacement entre systèmes de fichiers est pris en charge uniquement entre des emplacements de stockage partagé. Copiez les fichiers et vérifiez la destination avant de traiter la source séparément.</string>
     <string name="text_explorer_privileged_no_space">L\'espace libre à destination est insuffisant.</string>
@@ -2473,6 +2473,17 @@
     <string name="text_press_again_to_exit">Appuyez à nouveau pour quitter</string>
     <string name="text_press_back_or_vol_down_to_close_window">Pour fermer, appuyez sur \"Retour\" ou \"Volume bas\"</string>
     <string name="text_preview">Préview</string>
+    <string name="text_privileged_edit_access_hint">Après avoir changé de méthode d\'accès ou renouvelé l\'autorisation, appuyez à nouveau sur Enregistrer. Vos modifications seront conservées.</string>
+    <string name="text_privileged_edit_backup">Enregistré dans le fichier original. Une version précédente est conservée à cet emplacement:\n%1$s</string>
+    <string name="text_privileged_edit_conflict">Le fichier original a été modifié, déplacé ou remplacé par un autre programme. Vos modifications ont été conservées. Enregistrez une copie distincte ou rouvrez l\'original pour le comparer avant d\'enregistrer.</string>
+    <string name="text_privileged_edit_external_apps">Ce document est modifié avec un accès privilégié. Enregistrez-le dans un fichier accessible normalement avant de l\'ouvrir dans une autre application.</string>
+    <string name="text_privileged_edit_failed">Le fichier original n\'a pas pu être enregistré. Vos modifications ont été conservées.\n\n%1$s</string>
+    <string name="text_privileged_edit_keep_editing">Continuer la modification</string>
+    <string name="text_privileged_edit_pending">Modifications non enregistrées récupérées</string>
+    <string name="text_privileged_edit_permission">Impossible d\'écrire dans le fichier original, car les droits sont insuffisants ou l\'autorisation n\'est plus disponible. Vos modifications ont été conservées. Renouvelez l\'autorisation ou choisissez une autre méthode d\'accès, puis enregistrez à nouveau.</string>
+    <string name="text_privileged_edit_recovery">Fichiers de récupération:\n%1$s</string>
+    <string name="text_privileged_edit_unknown">Le résultat de l\'enregistrement n\'a pas pu être confirmé. Vos modifications et les fichiers de récupération ont été conservés. Au prochain enregistrement, l\'original sera vérifié avant toute nouvelle écriture.</string>
+    <string name="text_privileged_edit_unsupported">Ce fichier ou système de fichiers ne permet pas un remplacement sûr conservant ses attributs. Vos modifications ont été conservées. Utilisez Enregistrer sous pour conserver une copie distincte.</string>
     <string name="text_process_exit_history">Historique des arrêts de processus</string>
     <string name="text_process_exit_history_anr">Application sans réponse</string>
     <string name="text_process_exit_history_crash">Plantage de l’application</string>

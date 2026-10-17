@@ -11,6 +11,7 @@ import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.explorer.PrivilegedAccessMode
+import org.autojs.autojs.model.explorer.PrivilegedEditSessions
 import org.autojs.autojs.model.explorer.PrivilegedExplorerItem
 import org.autojs.autojs.model.explorer.PrivilegedFileOperationException
 import org.autojs.autojs.model.explorer.PrivilegedFileOperationJournal
@@ -63,10 +64,22 @@ internal class PrivilegedExplorerOperationsController(private val explorer: Expl
 
     fun open(item: ExplorerItem) {
         val mode = modeOf(item) ?: return
-        run(R.string.text_open, { PrivilegedFileOperations.materialize(context.applicationContext, mode, item.path) }) { file ->
-            if (item.type.isTextEditable()) {
-                EditActivity.viewPath(context, item.name, file.path, false)
-            } else {
+        if (item.type.isTextEditable()) {
+            run(R.string.text_open, { PrivilegedEditSessions.create(context.applicationContext, mode, item.path) }, abandoned = { uri ->
+                PrivilegedEditSessions.detach(context, uri)
+                Schedulers.io().scheduleDirect { runCatching { PrivilegedEditSessions.markCleanlyClosed(context, uri) } }
+            }) { uri ->
+                try {
+                    if (!EditActivity.editPrivilegedDocument(context, uri, item.name)) {
+                        PrivilegedEditSessions.detach(context, uri)
+                    }
+                } catch (error: Exception) {
+                    PrivilegedEditSessions.detach(context, uri)
+                    throw error
+                }
+            }
+        } else {
+            run(R.string.text_open, { PrivilegedFileOperations.materialize(context.applicationContext, mode, item.path) }) { file ->
                 IntentUtils.viewFile(context, file.path, exceptionHolder = IntentUtils.ToastExceptionHolder(context))
             }
         }
@@ -181,7 +194,7 @@ internal class PrivilegedExplorerOperationsController(private val explorer: Expl
         }
     }
 
-    private fun <T : Any> run(title: Int, work: () -> T, refresh: Boolean = false, success: (T) -> Unit) {
+    private fun <T : Any> run(title: Int, work: () -> T, refresh: Boolean = false, abandoned: (T) -> Unit = {}, success: (T) -> Unit) {
         if (isBusy) return
         isBusy = true
         progress = MaterialDialog.Builder(context)
@@ -194,7 +207,7 @@ internal class PrivilegedExplorerOperationsController(private val explorer: Expl
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ result ->
                 finish(refresh)
-                if (explorer.isAttachedToWindow) success(result)
+                if (explorer.isAttachedToWindow) success(result) else abandoned(result)
             }, { error ->
                 finish(refresh)
                 if (explorer.isAttachedToWindow) showFailure(title, error)

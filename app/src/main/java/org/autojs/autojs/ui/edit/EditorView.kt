@@ -67,6 +67,8 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
+import org.autojs.autojs.model.explorer.PrivilegedAccessMode
+import org.autojs.autojs.model.explorer.PrivilegedEditSessions
 import org.autojs.autojs.model.indices.AndroidClass
 import org.autojs.autojs.model.indices.ClassSearchingItem
 import org.autojs.autojs.model.indices.Module
@@ -77,6 +79,7 @@ import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_LINE_NUMBER
 import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE
 import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSenderInteractive
+import org.autojs.autojs.permission.ShizukuPermission
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.script.JavaScriptFileSource
@@ -372,6 +375,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val encoding = result.record.encoding
         val savedText = result.savedText
         val destinationUri = Uri.fromFile(destination)
+        if (PrivilegedEditSessions.isSessionUri(context, sourceUri)) {
+            mRunEnabledByIntent = true
+        }
         uri = destinationUri
         name = getNameWithoutExtension(destination.path)
         syncEditorDocumentPath()
@@ -388,6 +394,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         updateEncodingStatus()
         if (editor.textSnapshot == savedText) {
             fileService.discardStableDraft(sourceUri)
+            resolvePrivilegedDraftAfterSaveAs(sourceUri)
             editor.markTextAsSaved()
             saveStickyDirty = false
             mHadDirectEditSinceSave = false
@@ -404,6 +411,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return true
     }
 
+    private fun resolvePrivilegedDraftAfterSaveAs(sourceUri: Uri) {
+        if (!PrivilegedEditSessions.isSessionUri(context, sourceUri)) return
+        Schedulers.io().scheduleDirect {
+            runCatching { PrivilegedEditSessions.discardDraft(context, sourceUri) }
+                .onFailure(Throwable::printStackTrace)
+        }
+    }
+
     // Whether a draft has been restored in this session.
     // If true, subsequent async file-load setInitialText() must NOT overwrite the restored draft.
     //
@@ -412,6 +427,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // 若为 true, 则后续异步文件加载触发的 setInitialText() 不得覆盖已恢复的草稿.
     @Volatile
     private var mDraftRestoredInThisSession: Boolean = false
+    private var mPrivilegedDraftNeedsSave: Boolean = false
+    private var mPrivilegedDraftNoticeShown: Boolean = false
     @Volatile
     private var mDraftEncodingValidationPending: Boolean = false
     @Volatile
@@ -465,6 +482,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         set(value) {
             mDocumentIdentityGeneration++
             field = value
+            mPrivilegedDraftNeedsSave = false
+            mPrivilegedDraftNoticeShown = false
             mDocumentDisplayName = value
                 ?.takeIf { it.scheme.equals("file", ignoreCase = true) }
                 ?.path
@@ -476,13 +495,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
     private fun currentDocumentPathOrName(): String? {
+        if (uri?.let { PrivilegedEditSessions.isSessionUri(context, it) } == true) {
+            // The session token is neither a source path nor a language hint.
+            return mDocumentDisplayName ?: _name
+        }
         return uri?.path?.takeIf { it.isNotBlank() }
             ?: uri?.toString()?.takeIf { it.isNotBlank() }
             ?: _name?.takeIf { it.isNotBlank() }
     }
 
     private fun isRunEnabledForCurrentDocument(): Boolean =
-        mRunEnabledByIntent && mRunEnabledForDocument
+        mRunEnabledByIntent && mRunEnabledForDocument &&
+            uri?.let { !PrivilegedEditSessions.isSessionUri(context, it) } != false
 
     private fun refreshDocumentRunPolicy() {
         mRunEnabledForDocument = EditorScriptRunPolicy.isRunEnabledForDocument(
@@ -1215,6 +1239,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mHadDirectEditSinceSave = true
         syncPrimaryMenuState()
     }
+
+    fun discardPrivilegedDraftForExit(): Observable<Unit> {
+        val currentUri = uri?.takeIf { PrivilegedEditSessions.isSessionUri(context, it) }
+            ?: return Observable.just(Unit)
+        return Observable.fromCallable { PrivilegedEditSessions.discardDraft(context, currentUri) }
+            .subscribeOn(Schedulers.io())
+    }
+
+    internal fun isPrivilegedSessionCleanForClose(): Boolean =
+        !shouldSaveDraft() && !mFileSaveInProgress && !mSaveAsInProgress &&
+            !mSaveThenReloadInProgress && !mEncodingOperationInProgress &&
+            !mDraftRestoreInProgress && !mEditorLoading && !editor.isLoadingText
 
     fun getEditorTheme() = themeFontService.currentTheme
 
@@ -2015,6 +2051,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ContentLengthResult(
                 sizeOrNull = runCatching { fileService.queryContentLengthOrNull(uri) }.getOrNull(),
                 displayName = runCatching { fileService.queryDisplayNameOrNull(uri) }.getOrNull(),
+                privilegedDraftNeedsSave = PrivilegedEditSessions.isSessionUri(context, uri) &&
+                    PrivilegedEditSessions.hasPendingDraft(context, uri),
             )
         }
             .subscribeOn(Schedulers.io())
@@ -2023,6 +2061,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (!isCurrentFileLoad(loadGeneration)) {
                     Observable.empty()
                 } else {
+                    mPrivilegedDraftNeedsSave = result.privilegedDraftNeedsSave
                     mCurrentFileSizeBytes = result.sizeOrNull
                     result.displayName?.let { displayName ->
                         if (this.uri == uri) {
@@ -2030,6 +2069,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                                 mDocumentIdentityGeneration++
                             }
                             mDocumentDisplayName = displayName
+                            syncEditorDocumentPath()
                             updateEditorStatusMetadata()
                             refreshDocumentRunPolicy()
                         }
@@ -2563,6 +2603,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     updateEncodingStatus()
 
                     mEditorLoading = false
+                    preservePendingPrivilegedDraft()
                     syncPrimaryMenuState()
 
                     // IMPORTANT: end loading UI on success.
@@ -2756,9 +2797,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (endLoadingUi) {
             endEditorLoadingUi()
         }
+        preservePendingPrivilegedDraft()
         syncPrimaryMenuState()
         tryFinalizeCompletedSaveAsAdoption()
         scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor)
+    }
+
+    private fun preservePendingPrivilegedDraft() {
+        if (mPrivilegedDraftNeedsSave) {
+            saveStickyDirty = true
+            mHadDirectEditSinceSave = true
+            if (!mPrivilegedDraftNoticeShown) {
+                mPrivilegedDraftNoticeShown = true
+                post {
+                    if (!mDestroyed) showSnack(this, R.string.text_privileged_edit_pending, true)
+                }
+            }
+        }
     }
 
     private fun tryFinalizeCompletedSaveAsAdoption() {
@@ -2809,6 +2864,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (mPendingCompletedSaveAs?.operationId != record.operationId) return
         mPendingCompletedSaveAs = null
         if (exactSavedSnapshot) {
+            resolvePrivilegedDraftAfterSaveAs(record.sourceUri)
             editor.markTextAsSaved()
             saveStickyDirty = false
             mHadDirectEditSinceSave = false
@@ -5503,9 +5559,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     if (!mDestroyed && error is EditorFileRollbackFailedException) {
                         markFileStateRequiresReload()
                     }
+                    if (!mDestroyed && uri?.let { PrivilegedEditSessions.isSessionUri(context, it) } == true) {
+                        mPrivilegedDraftNeedsSave = true
+                        markRestoredDraftAsDirty()
+                    }
                 }
                 .doOnNext { result ->
                     if (mDestroyed) return@doOnNext
+                    mPrivilegedDraftNeedsSave = false
                     mCurrentFileSizeBytes = null
                     // The write has completed even if the editor changed while IO was in flight.
                     // Keep the external disk baseline independent from undo/redo history state.
@@ -5584,9 +5645,63 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(Observers.emptyConsumer()) { e: Throwable ->
                 e.printStackTrace()
-                showSnack(this, e.message, true)
-                showToast(context, e.message, true)
+                if (!showPrivilegedSaveError(e)) {
+                    showSnack(this, e.message, true)
+                    showToast(context, e.message, true)
+                }
             }
+    }
+
+    @SuppressLint("CheckResult")
+    fun showPrivilegedSaveError(error: Throwable): Boolean {
+        val currentUri = uri?.takeIf { PrivilegedEditSessions.isSessionUri(context, it) } ?: return false
+        if (mDestroyed) return true
+        editorTextProvider.getTextForSaving()
+            .take(1)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ text ->
+                if (!mDestroyed && uri == currentUri) {
+                    fileService.showPrivilegedSaveFailure(
+                        uri = currentUri,
+                        displayName = name,
+                        text = text,
+                        encoding = EditorFileSaveEncoding(mCurrentCharset, mHadBom),
+                        error = error,
+                        configureAccess = { showPrivilegedAccessOptions(currentUri) },
+                    )
+                }
+            }, { readError ->
+                showSnack(this, error.message ?: readError.message, true)
+            })
+        return true
+    }
+
+    @SuppressLint("CheckResult")
+    private fun showPrivilegedAccessOptions(currentUri: Uri) {
+        if (mDestroyed || uri != currentUri) return
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_explorer_access_mode)
+                .content(R.string.text_privileged_edit_access_hint)
+                .items(
+                    context.getString(R.string.text_explorer_access_shizuku),
+                    context.getString(R.string.text_explorer_access_root),
+                )
+                .itemsCallback { _, _, which, _ ->
+                    val mode = if (which == 0) PrivilegedAccessMode.SHIZUKU else PrivilegedAccessMode.ROOT
+                    Observable.fromCallable { PrivilegedEditSessions.changeAccessMode(context, currentUri, mode) }
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                            if (!mDestroyed && uri == currentUri && mode == PrivilegedAccessMode.SHIZUKU) {
+                                val permission = ShizukuPermission(context)
+                                if (!permission.has()) permission.request()
+                            }
+                        }, { error -> showSnack(this, error.message, true) })
+                }
+                .negativeText(R.string.dialog_button_cancel)
+                .build()
+        }
     }
 
     private fun findNext() = editor.findNext()
@@ -5611,6 +5726,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun openByOtherApps() {
+        if (showPrivilegedExternalOpenNotice()) return
         uri?.let { openByOtherApps(it) } ?: run {
             DialogUtils.buildAndShowAdaptive {
                 MaterialDialog.Builder(context)
@@ -5629,10 +5745,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private class DesignerHandoff(val uri: Uri, val fingerprint: String?)
 
-    fun isThreeBlockComposeDesignerAvailable(): Boolean = ThreeBlockComposeDesigner.isAvailable(context)
+    fun isThreeBlockComposeDesignerAvailable(): Boolean =
+        uri?.let { !PrivilegedEditSessions.isSessionUri(context, it) } != false &&
+            ThreeBlockComposeDesigner.isAvailable(context)
 
     /** Saves the current file when needed, then opens it in the plugin's designer with a read / write grant. */
     fun openInThreeBlockComposeDesigner() {
+        if (showPrivilegedExternalOpenNotice()) return
         val currentUri = uri ?: run {
             DialogUtils.buildAndShowAdaptive {
                 MaterialDialog.Builder(context)
@@ -5654,6 +5773,41 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         } else {
             handOverToDesigner(currentUri)
         }
+    }
+
+    @SuppressLint("CheckResult")
+    private fun showPrivilegedExternalOpenNotice(): Boolean {
+        val currentUri = uri?.takeIf { PrivilegedEditSessions.isSessionUri(context, it) } ?: return false
+        if (mFileSaveInProgress || mSaveAsInProgress || mEditorLoading || editor.isLoadingText ||
+            mEncodingOperationInProgress || mDraftRestoreInProgress
+        ) {
+            showSnack(this, R.string.text_please_wait)
+            return true
+        }
+        editorTextProvider.getTextForSaving()
+            .take(1)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ text ->
+                if (mDestroyed || uri != currentUri) return@subscribe
+                val encoding = EditorFileSaveEncoding(mCurrentCharset, mHadBom)
+                DialogUtils.buildAndShowAdaptive {
+                    MaterialDialog.Builder(context)
+                        .title(R.string.text_explorer_privileged_access)
+                        .content(R.string.text_privileged_edit_external_apps)
+                        .negativeText(R.string.dialog_button_cancel)
+                        .onNegative { dialog, _ -> dialog.dismiss() }
+                        .positiveText(R.string.dialog_button_save_as)
+                        .positiveColorRes(R.color.dialog_button_attraction)
+                        .onPositive { dialog, _ ->
+                            fileService.saveCopyFromDialog(dialog, currentUri, name, text, encoding)
+                        }
+                        .autoDismiss(false)
+                        .build()
+                }
+            }, { error ->
+                if (!mDestroyed) showSnack(this, error.message, true)
+            })
+        return true
     }
 
     private fun handOverToDesigner(currentUri: Uri) {
@@ -6106,6 +6260,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                         editor.setLoadingText(false)
                         saveStickyDirty = false
                         mHadDirectEditSinceSave = false
+                        preservePendingPrivilegedDraft()
                         finishEncodingReload(rollback)
                     }
                 }
@@ -7917,6 +8072,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private data class ContentLengthResult(
         val sizeOrNull: Long?,
         val displayName: String?,
+        val privilegedDraftNeedsSave: Boolean,
     )
 
     private data class EncodingReloadReadResult(

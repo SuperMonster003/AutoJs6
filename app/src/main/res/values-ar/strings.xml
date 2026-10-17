@@ -1682,7 +1682,7 @@
     <string name="text_explorer_privileged_conflict">الوجهة موجودة بالفعل. اختر مجلدا آخر أو اسما آخر. لم يتم استبدال الملفات الموجودة.</string>
     <string name="text_explorer_privileged_delete_confirmation">ستحذف هذه العناصر نهائيا دون نقلها إلى سلة المحذوفات:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">اختر مجلد الوجهة. تتوقف العملية إذا كان هناك عنصر بالاسم نفسه.</string>
-    <string name="text_explorer_privileged_file_hint">تفتح الملفات كنسخ مؤقتة. لا تحفظ التغييرات التي تجرى على النسخة في الملف الأصلي.</string>
+    <string name="text_explorer_privileged_file_hint">يمكن تحرير الملفات النصية وحفظها في الملف الأصلي بعد التحقق. الملفات المفتوحة في تطبيقات أخرى تستخدم نسخا مؤقتة للقراءة فقط.</string>
     <string name="text_explorer_privileged_invalid_name">أدخل اسم ملف واحدا صالحا (ليس . أو .., وبدون / أو محرف NUL).</string>
     <string name="text_explorer_privileged_move_scope">النقل بين أنظمة الملفات مدعوم فقط بين مواقع التخزين المشترك. انسخ الملفات وتحقق من الوجهة قبل التعامل مع المصدر بشكل منفصل.</string>
     <string name="text_explorer_privileged_no_space">لا توجد مساحة خالية كافية في وحدة التخزين الوجهة.</string>
@@ -2475,6 +2475,17 @@
     <string name="text_press_again_to_exit">اضغط مرة أخرى للخروج</string>
     <string name="text_press_back_or_vol_down_to_close_window">لإغلاق، اضغط على \"رجوع\" أو \"خفض الصوت\"</string>
     <string name="text_preview">معاينة</string>
+    <string name="text_privileged_edit_access_hint">بعد تغيير طريقة الوصول أو تجديد الإذن, اضغط على حفظ مجددا. سيتم الاحتفاظ بتعديلاتك.</string>
+    <string name="text_privileged_edit_backup">تم الحفظ إلى الملف الأصلي. تم الاحتفاظ بإصدار سابق في:\n%1$s</string>
+    <string name="text_privileged_edit_conflict">تم تغيير الملف الأصلي أو نقله أو استبداله بواسطة برنامج آخر. تم الاحتفاظ بتعديلاتك. احفظ نسخة منفصلة أو أعد فتح الأصل للمقارنة قبل الحفظ.</string>
+    <string name="text_privileged_edit_external_apps">يتم تحرير هذا المستند عبر وصول بصلاحيات مرتفعة. احفظه كملف يمكن الوصول إليه بشكل عادي قبل فتحه في تطبيق آخر.</string>
+    <string name="text_privileged_edit_failed">تعذر حفظ الملف الأصلي. تم الاحتفاظ بتعديلاتك.\n\n%1$s</string>
+    <string name="text_privileged_edit_keep_editing">متابعة التحرير</string>
+    <string name="text_privileged_edit_pending">تم استرداد التعديلات غير المحفوظة</string>
+    <string name="text_privileged_edit_permission">تعذرت الكتابة إلى الملف الأصلي بسبب عدم كفاية الصلاحيات أو انتهاء الإذن. تم الاحتفاظ بتعديلاتك. جدد الإذن أو اختر طريقة وصول أخرى, ثم احفظ مجددا.</string>
+    <string name="text_privileged_edit_recovery">ملفات الاسترداد:\n%1$s</string>
+    <string name="text_privileged_edit_unknown">تعذر تأكيد نتيجة الحفظ. تم الاحتفاظ بتعديلاتك وملفات الاسترداد. عند الحفظ التالي, سيتم التحقق من الملف الأصلي قبل أي كتابة أخرى.</string>
+    <string name="text_privileged_edit_unsupported">لا يدعم هذا الملف أو نظام الملفات استبدالا آمنا يحافظ على خصائصه. تم الاحتفاظ بتعديلاتك. استخدم حفظ باسم للاحتفاظ بنسخة منفصلة.</string>
     <string name="text_process_exit_history">سجل خروج العمليات</string>
     <string name="text_process_exit_history_anr">التطبيق لا يستجيب</string>
     <string name="text_process_exit_history_crash">تعطل التطبيق</string>

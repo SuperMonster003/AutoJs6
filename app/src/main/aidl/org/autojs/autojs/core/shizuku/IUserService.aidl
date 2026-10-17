@@ -19,5 +19,8 @@ interface IUserService {
     oneway void closeExplorerDirectory(String snapshotToken) = 22;
     String executeExplorerFileOperation(String requestJson) = 23;
     ParcelFileDescriptor openExplorerFile(String requestJson) = 24;
+    String snapshotExplorerFile(String requestJson) = 25;
+    String saveExplorerFile(String requestJson, in ParcelFileDescriptor contents) = 26;
+    String reconcileExplorerFileSave(String requestJson) = 27;
 
 }

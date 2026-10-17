@@ -1677,7 +1677,7 @@
     <string name="text_explorer_privileged_conflict">目標已存在, 請更換目錄或名稱. 現有檔案未被覆寫.</string>
     <string name="text_explorer_privileged_delete_confirmation">以下項目將永久刪除, 不經過回收站:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">選擇目標資料夾. 若已存在同名項目, 操作將停止.</string>
-    <string name="text_explorer_privileged_file_hint">檔案以暫存副本開啟, 對副本的修改不會寫回原始檔案.</string>
+    <string name="text_explorer_privileged_file_hint">文字檔案可編輯, 經核對後儲存至原始檔案. 透過其他應用程式開啟的檔案仍使用唯讀暫存副本.</string>
     <string name="text_explorer_privileged_invalid_name">請輸入有效的單一檔名 (不能為 . 或 .., 也不能包含 / 或空字元).</string>
     <string name="text_explorer_privileged_move_scope">跨檔案系統移動僅支援共用儲存空間之間的操作. 請先複製並確認目標, 再單獨處理來源檔案.</string>
     <string name="text_explorer_privileged_no_space">目標儲存空間不足.</string>
@@ -2470,6 +2470,17 @@
     <string name="text_press_again_to_exit">再按一次退出</string>
     <string name="text_press_back_or_vol_down_to_close_window">如需關閉視窗, 可按 \"返回鍵\" 或 \"音量減鍵\"</string>
     <string name="text_preview">預覽</string>
+    <string name="text_privileged_edit_access_hint">變更存取方式或重新授權後, 請再次點選儲存. 目前的編輯內容會保留.</string>
+    <string name="text_privileged_edit_backup">已儲存至原始檔案. 先前版本保留在:\n%1$s</string>
+    <string name="text_privileged_edit_conflict">原始檔案已被其他程式修改, 移動或取代. 目前的編輯內容已保留. 請另存副本, 或重新開啟原始檔案比較後再儲存.</string>
+    <string name="text_privileged_edit_external_apps">此文件透過高權限工作階段編輯. 請先另存為一般可存取的檔案, 再用其他應用程式開啟.</string>
+    <string name="text_privileged_edit_failed">無法儲存原始檔案. 目前的編輯內容已保留.\n\n%1$s</string>
+    <string name="text_privileged_edit_keep_editing">繼續編輯</string>
+    <string name="text_privileged_edit_pending">已復原未儲存的編輯內容</string>
+    <string name="text_privileged_edit_permission">無法寫入原始檔案, 權限不足或授權已失效. 目前的編輯內容已保留. 請重新授權或變更存取方式後再次儲存.</string>
+    <string name="text_privileged_edit_recovery">復原檔案:\n%1$s</string>
+    <string name="text_privileged_edit_unknown">無法確認本次儲存結果. 目前的編輯內容和復原檔案已保留. 下次儲存時會先核對原始檔案.</string>
+    <string name="text_privileged_edit_unsupported">此檔案或檔案系統不支援保留原有屬性的安全取代. 目前的編輯內容已保留, 請另存為副本.</string>
     <string name="text_process_exit_history">程序結束記錄</string>
     <string name="text_process_exit_history_anr">應用程式無回應</string>
     <string name="text_process_exit_history_crash">應用程式當機</string>

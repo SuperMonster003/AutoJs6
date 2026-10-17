@@ -1681,7 +1681,7 @@
     <string name="text_explorer_privileged_conflict">宛先は既に存在します. 別のフォルダーまたは名前を選択してください. 既存のファイルは上書きされていません.</string>
     <string name="text_explorer_privileged_delete_confirmation">以下の項目はゴミ箱を使わずに完全に削除されます:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">宛先フォルダーを選択してください. 同じ名前の項目が既に存在する場合は操作を停止します.</string>
-    <string name="text_explorer_privileged_file_hint">ファイルは一時コピーとして開かれます. コピーへの変更は元のファイルには反映されません.</string>
+    <string name="text_explorer_privileged_file_hint">テキストファイルは編集でき, 検証後に元のファイルへ保存できます. 他のアプリで開くファイルには読み取り専用の一時コピーを使用します.</string>
     <string name="text_explorer_privileged_invalid_name">有効な単一のファイル名を入力してください (. や .. は使用できず, / や NUL を含めることもできません).</string>
     <string name="text_explorer_privileged_move_scope">異なるファイルシステム間の移動は共有ストレージ間でのみ対応しています. 先にコピーして宛先を確認し, その後で元のファイルを別途処理してください.</string>
     <string name="text_explorer_privileged_no_space">宛先のストレージに十分な空き容量がありません.</string>
@@ -2474,6 +2474,17 @@
     <string name="text_press_again_to_exit">もう一度押すと終了します</string>
     <string name="text_press_back_or_vol_down_to_close_window">閉じるには \"戻る\" または \"音量を下げる\" を押してください</string>
     <string name="text_preview">プレビュー</string>
+    <string name="text_privileged_edit_access_hint">アクセス方法を変更するか権限を再度付与した後, もう一度保存を押してください. 編集内容は保持されます.</string>
+    <string name="text_privileged_edit_backup">元のファイルに保存しました. 以前のバージョンは次の場所に保持されています:\n%1$s</string>
+    <string name="text_privileged_edit_conflict">元のファイルが他のプログラムによって変更, 移動または置換されました. 編集内容は保持されています. 別のコピーとして保存するか, 元のファイルを開き直して比較してから保存してください.</string>
+    <string name="text_privileged_edit_external_apps">この文書は特権アクセスで編集中です. 他のアプリで開く前に, 通常アクセスできるファイルとして別名で保存してください.</string>
+    <string name="text_privileged_edit_failed">元のファイルを保存できませんでした. 編集内容は保持されています.\n\n%1$s</string>
+    <string name="text_privileged_edit_keep_editing">編集を続ける</string>
+    <string name="text_privileged_edit_pending">未保存の編集内容を復元しました</string>
+    <string name="text_privileged_edit_permission">権限が不足しているか利用できなくなったため, 元のファイルに書き込めませんでした. 編集内容は保持されています. 権限を再度付与するか別のアクセス方法を選択してから, もう一度保存してください.</string>
+    <string name="text_privileged_edit_recovery">復元用ファイル:\n%1$s</string>
+    <string name="text_privileged_edit_unknown">保存結果を確認できませんでした. 編集内容と復元用ファイルは保持されています. 次回の保存時は, 書き込む前に元のファイルを確認します.</string>
+    <string name="text_privileged_edit_unsupported">このファイルまたはファイルシステムでは, 属性を保持した安全な置換ができません. 編集内容は保持されています. 名前を付けて保存で別のコピーを保存してください.</string>
     <string name="text_process_exit_history">プロセス終了履歴</string>
     <string name="text_process_exit_history_anr">アプリが応答していません</string>
     <string name="text_process_exit_history_crash">アプリのクラッシュ</string>

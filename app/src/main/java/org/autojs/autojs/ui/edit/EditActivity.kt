@@ -25,6 +25,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.MaterialDialogThemeDelegate
 import com.afollestad.materialdialogs.MaterialDialogThemeOwner
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.App
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
@@ -33,6 +34,7 @@ import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
 import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerStartupPrewarm
 import org.autojs.autojs.core.plugin.typescript.TypeScriptProjectSessionPolicy
+import org.autojs.autojs.model.explorer.PrivilegedEditSessions
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.edit.editor.service.EditorDraftService
@@ -115,6 +117,7 @@ open class EditActivity :
     private var mPendingSaveAsRegistration: EditorPendingSaveAsRegistration? = null
     private var mEditorIntentHandled = false
     private var mActivityDestroyed = false
+    private var mAttachedPrivilegedSession: Uri? = null
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,6 +126,7 @@ open class EditActivity :
             applyPendingSaveAsRecordToIntent(it)
         }
         super.onCreate(savedInstanceState)
+        trackPrivilegedDocument(intent.data)
         prewarmTypeScriptCompilerForEditorIntent()
 
         val binding = ActivityEditBinding.inflate(layoutInflater).also {
@@ -168,6 +172,8 @@ open class EditActivity :
             log = { message -> Log.d(LOG_TAG, message) },
         )
         editorView.setDocumentLocationChangedListener { documentUri, documentName ->
+            val wasPrivileged = mAttachedPrivilegedSession != null
+            trackPrivilegedDocument(documentUri)
             val newDraftKey = documentUri.editorDocumentIdentity()
             draftService.rebindDraftKeyPath(newDraftKey)
             intent = Intent(intent).apply {
@@ -179,6 +185,9 @@ open class EditActivity :
                     removeExtra(EditorView.EXTRA_PATH)
                 }
                 putExtra(EditorView.EXTRA_NAME, documentName)
+                if (wasPrivileged && mAttachedPrivilegedSession == null) {
+                    removeExtra(EditorView.EXTRA_RUN_ENABLED)
+                }
             }
         }
 
@@ -222,8 +231,12 @@ open class EditActivity :
             removeExtra(EditorView.EXTRA_CONTENT)
             putExtra(EditorView.EXTRA_PATH, record.destination.path)
             putExtra(EditorView.EXTRA_NAME, record.destination.nameWithoutExtension)
+            if (PrivilegedEditSessions.isSessionUri(this@EditActivity, record.sourceUri)) {
+                removeExtra(EditorView.EXTRA_RUN_ENABLED)
+            }
         }
         if (::draftService.isInitialized) {
+            trackPrivilegedDocument(destinationUri)
             draftService.rebindDraftKeyPath(destinationUri.editorDocumentIdentity())
         }
     }
@@ -589,8 +602,18 @@ open class EditActivity :
                 .onNeutral { d, _ -> d.dismiss() }
                 .negativeColorRes(R.color.dialog_button_caution)
                 .onNegative { d, _ ->
-                    runCatching { d.dismiss() }
-                    finishAndRemoveFromRecents()
+                    d.setCancelable(false)
+                    DialogAction.values().forEach { d.getActionButton(it).isEnabled = false }
+                    mEditorView.discardPrivilegedDraftForExit()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                            if (mAttachedPrivilegedSession != null) draftService.deleteDraft()
+                            runCatching { d.dismiss() }
+                            finishAndRemoveFromRecents()
+                        }, { error ->
+                            runCatching { d.dismiss() }
+                            showSaveErrorDialog(error.message)
+                        })
                 }
                 .positiveText(R.string.text_save_and_exit)
                 .positiveColorRes(R.color.dialog_button_warn)
@@ -631,7 +654,9 @@ open class EditActivity :
                             // zh-CN: 保存失败, 保持编辑器不退出.
                             e.printStackTrace()
                             runCatching { d.dismiss() }
-                            showSaveErrorDialog(e.message)
+                            if (!mEditorView.showPrivilegedSaveError(e)) {
+                                showSaveErrorDialog(e.message)
+                            }
                         })
                 }
                 .autoDismiss(false)
@@ -674,11 +699,30 @@ open class EditActivity :
 
     override fun onDestroy() {
         mActivityDestroyed = true
+        val cleanlyClosed = mAttachedPrivilegedSession?.takeIf {
+            isFinishing && mEditorView.isPrivilegedSessionCleanForClose()
+        }
+        trackPrivilegedDocument(null)
+        cleanlyClosed?.let { sessionUri ->
+            val appContext = applicationContext
+            Schedulers.io().scheduleDirect {
+                runCatching { PrivilegedEditSessions.markCleanlyClosed(appContext, sessionUri) }
+                    .onFailure { Log.w(LOG_TAG, "Cannot mark the closed privileged document", it) }
+            }
+        }
         mPendingSaveAsRegistration?.close()
         mPendingSaveAsRegistration = null
         draftService.destroy()
         mEditorView.destroy()
         super.onDestroy()
+    }
+
+    private fun trackPrivilegedDocument(documentUri: Uri?) {
+        val sessionUri = documentUri?.takeIf { PrivilegedEditSessions.isSessionUri(this, it) }
+        if (sessionUri == mAttachedPrivilegedSession) return
+        mAttachedPrivilegedSession?.let { PrivilegedEditSessions.detach(this, it) }
+        mAttachedPrivilegedSession = sessionUri
+        sessionUri?.let { PrivilegedEditSessions.attach(this, it) }
     }
 
     override fun getOnActivityResultDelegateMediator(): OnActivityResultDelegate.Mediator {
@@ -747,6 +791,19 @@ open class EditActivity :
         @JvmStatic
         fun editFile(context: Context, uri: Uri?, newTask: Boolean) =
             editFile(context, uri, newTask, 0)
+
+        /** The private session URI stays inside AutoJs6; scripts cannot run under its authority. */
+        @JvmStatic
+        fun editPrivilegedDocument(context: Context, uri: Uri, name: String): Boolean {
+            fun Intent.withDocument() = apply {
+                data = uri
+                putExtra(EditorView.EXTRA_NAME, File(name).nameWithoutExtension.ifBlank { name })
+                putExtra(EditorView.EXTRA_RUN_ENABLED, false)
+                putExtra(EditorView.EXTRA_READ_ONLY, false)
+            }
+            return newIntent(context).withDocument().startSafely(context) ||
+                newIntentFallback(context, context !is Activity).withDocument().startSafely(context)
+        }
 
         @JvmStatic
         fun editFile(context: Context, uri: Uri?, newTask: Boolean, uriPermissionFlags: Int): Boolean {

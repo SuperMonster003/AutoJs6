@@ -1680,7 +1680,7 @@
     <string name="text_explorer_privileged_conflict">Целевой объект уже существует. Выберите другую папку или имя. Существующие файлы не были заменены.</string>
     <string name="text_explorer_privileged_delete_confirmation">Эти объекты будут удалены безвозвратно, минуя корзину:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">Выберите папку назначения. Операция остановится, если объект с таким именем уже существует.</string>
-    <string name="text_explorer_privileged_file_hint">Файлы открываются как временные копии. Изменения копии не сохраняются в исходном файле.</string>
+    <string name="text_explorer_privileged_file_hint">Текстовые файлы можно редактировать и сохранять в оригинал после проверки. Файлы, открываемые в других приложениях, используют временные копии только для чтения.</string>
     <string name="text_explorer_privileged_invalid_name">Введите одно допустимое имя файла (не . и не .., без / и NUL).</string>
     <string name="text_explorer_privileged_move_scope">Перемещение между файловыми системами поддерживается только между расположениями в общем хранилище. Сначала скопируйте и проверьте результат, затем обработайте источник отдельно.</string>
     <string name="text_explorer_privileged_no_space">В целевом хранилище недостаточно свободного места.</string>
@@ -2473,6 +2473,17 @@
     <string name="text_press_again_to_exit">Нажмите еще раз, чтобы выйти</string>
     <string name="text_press_back_or_vol_down_to_close_window">Чтобы закрыть, нажмите \"Назад\" или \"Уменьшение громкости\"</string>
     <string name="text_preview">Предварительный просмотр</string>
+    <string name="text_privileged_edit_access_hint">После смены способа доступа или повторного предоставления разрешения нажмите Сохранить ещё раз. Ваши изменения будут сохранены.</string>
+    <string name="text_privileged_edit_backup">Изменения записаны в исходный файл. Предыдущая версия сохранена по адресу:\n%1$s</string>
+    <string name="text_privileged_edit_conflict">Исходный файл изменён, перемещён или заменён другой программой. Ваши изменения сохранены. Сохраните отдельную копию или повторно откройте оригинал для сравнения перед сохранением.</string>
+    <string name="text_privileged_edit_external_apps">Этот документ редактируется с повышенными правами. Сохраните его как файл с обычным доступом, прежде чем открывать в другом приложении.</string>
+    <string name="text_privileged_edit_failed">Не удалось сохранить исходный файл. Ваши изменения сохранены.\n\n%1$s</string>
+    <string name="text_privileged_edit_keep_editing">Продолжить редактирование</string>
+    <string name="text_privileged_edit_pending">Несохранённые изменения восстановлены</string>
+    <string name="text_privileged_edit_permission">Не удалось записать исходный файл: недостаточно прав или разрешение больше недоступно. Ваши изменения сохранены. Предоставьте разрешение повторно или выберите другой способ доступа, затем сохраните ещё раз.</string>
+    <string name="text_privileged_edit_recovery">Файлы восстановления:\n%1$s</string>
+    <string name="text_privileged_edit_unknown">Не удалось подтвердить результат сохранения. Ваши изменения и файлы восстановления сохранены. При следующем сохранении исходный файл будет проверен перед новой записью.</string>
+    <string name="text_privileged_edit_unsupported">Этот файл или файловая система не поддерживает безопасную замену с сохранением атрибутов. Ваши изменения сохранены. Используйте Сохранить как для сохранения отдельной копии.</string>
     <string name="text_process_exit_history">История завершений процессов</string>
     <string name="text_process_exit_history_anr">Приложение не отвечает</string>
     <string name="text_process_exit_history_crash">Сбой приложения</string>

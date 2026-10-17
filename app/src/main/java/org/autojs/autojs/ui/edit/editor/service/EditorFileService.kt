@@ -13,10 +13,13 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.model.explorer.PrivilegedEditSessions
+import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.storage.file.EmergencyDraftDirectoryGuard
 import org.autojs.autojs.storage.file.StableDraftFileHelper
 import org.autojs.autojs.storage.history.HistoryPaths
@@ -29,6 +32,7 @@ import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadResult
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
@@ -107,7 +111,7 @@ class EditorFileService(
     }
 
     fun readText(uri: Uri, charsetOverride: Charset? = null): EditorFileReadResult {
-        return fileReadPipeline.readText(uri, charsetOverride)
+        return fileReadPipeline.readText(uri, effectiveReadCharset(uri, charsetOverride))
     }
 
     fun streamTextChunks(
@@ -122,9 +126,14 @@ class EditorFileService(
             cancel = cancel,
             streamRef = streamRef,
             onMetadata = onMetadata,
-            charsetOverride = charsetOverride,
+            charsetOverride = effectiveReadCharset(uri, charsetOverride),
         )
     }
+
+    private fun effectiveReadCharset(uri: Uri, charsetOverride: Charset?): Charset? =
+        charsetOverride ?: if (PrivilegedEditSessions.isSessionUri(context, uri)) {
+            PrivilegedEditSessions.pendingCharset(context, uri)
+        } else null
 
     fun readEncodingProbe(uri: Uri, limitBytes: Int = ENCODING_PROBE_LIMIT_BYTES): EditorEncodingProbe {
         require(limitBytes > 0)
@@ -191,6 +200,38 @@ class EditorFileService(
         val needBom = encoding.hadBom
 
         val newBytes = buildBytesToWrite(text, targetCharset, needBom)
+        if (PrivilegedEditSessions.isSessionUri(context, uri)) {
+            // This private provider exposes a durable editor snapshot, not a writable copy of
+            // the source. Only the session can verify and publish bytes to the original file.
+            PrivilegedEditSessions.save(context, uri, newBytes, targetCharset.name(), needBom)
+            // App-UID file observers cannot watch restricted source directories. Refresh their
+            // privileged row metadata after a confirmed save, including the next rename/delete.
+            mainHandler.post {
+                Explorers.external().invalidateCache()
+                Explorers.workspace().refreshAll()
+            }
+            runCatching { PrivilegedEditSessions.consumeSaveNotice(context, uri) }.getOrNull()?.let { notice ->
+                hostView.post {
+                    if (!destroyed.get() && hostView.isAttachedToWindow) {
+                        Snackbar.make(hostView, R.string.text_done, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.dialog_button_details) {
+                                DialogUtils.buildAndShowAdaptive {
+                                    MaterialDialog.Builder(context)
+                                        .title(R.string.text_done)
+                                        .content(notice)
+                                        .positiveText(R.string.dialog_button_dismiss)
+                                        .neutralText(R.string.text_copy_all)
+                                        .onNeutral { _, _ -> ClipboardUtils.setClip(context, notice) }
+                                        .build()
+                                        .apply { makeTextCopyable(contentView) }
+                                }
+                            }
+                            .show()
+                    }
+                }
+            }
+            return
+        }
         val oldBytes = try {
             resolver.openInputStream(uri)?.use { it.readBytes() }
                 ?: throw IOException("Cannot capture original bytes before writing: $uri")
@@ -521,11 +562,63 @@ class EditorFileService(
         runCatching { file.delete() }
     }
 
+    /** Keeps the current editor snapshot available when the original cannot be written safely. */
+    fun showPrivilegedSaveFailure(
+        uri: Uri,
+        displayName: String,
+        text: String,
+        encoding: EditorFileSaveEncoding,
+        error: Throwable,
+        configureAccess: () -> Unit,
+    ) {
+        if (destroyed.get()) return
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.error_failed_to_save)
+                .content(error.message ?: error.toString())
+                .negativeText(R.string.text_privileged_edit_keep_editing)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative { dialog, _ -> dialog.dismiss() }
+                .positiveText(R.string.dialog_button_save_as)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive { dialog, _ ->
+                    saveCopyFromDialog(dialog, uri, displayName, text, encoding)
+                }
+                .neutralText(R.string.text_explorer_access_mode)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral { dialog, _ ->
+                    dialog.dismiss()
+                    configureAccess()
+                }
+                .autoDismiss(false)
+                .build()
+                .apply { makeTextCopyable(contentView) }
+        }
+    }
+
+    fun saveCopyFromDialog(
+        dialog: MaterialDialog,
+        uri: Uri,
+        displayName: String,
+        text: String,
+        encoding: EditorFileSaveEncoding,
+    ) {
+        showSaveAsDialog(
+            failureDialog = dialog,
+            uri = uri,
+            displayName = displayName,
+            newBytes = null,
+            newText = text,
+            newEncoding = encoding,
+            recoveryFiles = emptyList(),
+        )
+    }
+
     private fun showSaveAsDialog(
         failureDialog: MaterialDialog,
         uri: Uri,
         displayName: String,
-        newBytes: ByteArray,
+        newBytes: ByteArray?,
         newText: String,
         newEncoding: EditorFileSaveEncoding,
         recoveryFiles: List<File>,
@@ -554,15 +647,19 @@ class EditorFileService(
                     if (directorySelected) return@subscribe
                     directorySelected = true
                     saveAsWriteStarted = true
-                    val ext = uri.path?.let { targetExtFromPath(it) } ?: ""
 
                     Schedulers.io().scheduleDirect {
                         runCatching {
+                            val bytes = newBytes ?: buildBytesToWrite(newText, newEncoding.charset, newEncoding.hadBom)
+                            val sourcePath = if (PrivilegedEditSessions.isSessionUri(context, uri)) {
+                                PrivilegedEditSessions.originalPath(context, uri)
+                            } else uri.path
+                            val ext = sourcePath?.let(::targetExtFromPath).orEmpty()
                             val dest = writeSaveAsFileSafely(
                                 directory = File(dir.path),
                                 baseName = displayName,
                                 ext = ext,
-                                bytes = newBytes,
+                                bytes = bytes,
                             )
 
                             releaseRecoveryFiles(recoveryFiles)
@@ -570,8 +667,8 @@ class EditorFileService(
                                 token = operationToken,
                                 destination = dest,
                                 encoding = newEncoding,
-                                savedByteCount = newBytes.size.toLong(),
-                                savedSha256 = sha256(newBytes).toHexString(),
+                                savedByteCount = bytes.size.toLong(),
+                                savedSha256 = sha256(bytes).toHexString(),
                             ) ?: throw IOException("Save As operation is no longer active")
                             val result = EditorPendingSaveAsResult(record, newText)
                             mainHandler.post {
@@ -609,6 +706,7 @@ class EditorFileService(
     }
 
     private fun setSaveAsDialogBusy(dialog: MaterialDialog, busy: Boolean) {
+        runCatching { dialog.getActionButton(DialogAction.NEUTRAL).isEnabled = !busy }
         runCatching { dialog.getActionButton(DialogAction.NEGATIVE).isEnabled = !busy }
         runCatching { dialog.getActionButton(DialogAction.POSITIVE).isEnabled = !busy }
     }

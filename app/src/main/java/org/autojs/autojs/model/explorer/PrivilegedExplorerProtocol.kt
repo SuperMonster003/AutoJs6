@@ -138,10 +138,17 @@ internal object PrivilegedExplorerProtocol {
 internal object PrivilegedExplorerProcess {
     data class Result(val exitCode: Int, val stdout: ByteArray, val stderr: String)
 
-    fun run(command: List<String>, timeoutMs: Long = PrivilegedExplorerProtocol.TIMEOUT_MS): Result {
+    fun run(command: List<String>, timeoutMs: Long = PrivilegedExplorerProtocol.TIMEOUT_MS, input: InputStream? = null): Result {
         if (Thread.currentThread().isInterrupted) throw InterruptedException("Directory request cancelled")
         val process = ProcessBuilder(command).start()
-        process.outputStream.close()
+        val writer = if (input == null) {
+            process.outputStream.close()
+            null
+        } else thread(name = "ExplorerRootInput", isDaemon = true) {
+            // An early structured rejection can close stdin before all bytes have been sent.
+            // The response, rather than a resulting broken pipe, describes the operation outcome.
+            runCatching { input.use { source -> process.outputStream.use { source.copyTo(it, 64 * 1024) } } }
+        }
         val exceeded = AtomicBoolean(false)
         val stdout = Capture(process.inputStream, PrivilegedExplorerProtocol.MAX_OUTPUT_BYTES, exceeded)
         val stderr = Capture(process.errorStream, 64 * 1024, exceeded)
@@ -157,6 +164,7 @@ internal object PrivilegedExplorerProcess {
                 val exitCode = try { process.exitValue() } catch (_: IllegalThreadStateException) { null }
                 if (exitCode != null) {
                     readers.forEach { it.join(1000L) }
+                    writer?.join(1000L)
                     if (readers.any { it.isAlive }) throw IOException("Root output stream did not close")
                     if (exceeded.get()) {
                         throw PrivilegedExplorerAccessException(PrivilegedExplorerAccessException.Reason.TOO_LARGE, "Directory response exceeds the safe output limit")
@@ -178,8 +186,11 @@ internal object PrivilegedExplorerProcess {
                 runCatching { process.destroy() }
                 runCatching { process.inputStream.close() }
                 runCatching { process.errorStream.close() }
+                runCatching { process.outputStream.close() }
+                runCatching { input?.close() }
             }
             readers.forEach { if (it.isAlive) it.interrupt() }
+            writer?.interrupt()
         }
     }
 

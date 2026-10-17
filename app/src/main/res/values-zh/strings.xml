@@ -1677,7 +1677,7 @@
     <string name="text_explorer_privileged_conflict">目标已存在, 请更换目录或名称. 已有文件未被覆盖.</string>
     <string name="text_explorer_privileged_delete_confirmation">以下项目将永久删除, 不经过回收站:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">选择目标文件夹. 若已存在同名项目, 操作将停止.</string>
-    <string name="text_explorer_privileged_file_hint">文件以临时副本打开, 对副本的修改不会写回原文件.</string>
+    <string name="text_explorer_privileged_file_hint">文本文件可编辑, 经核验后保存到原文件. 通过其他应用打开的文件仍使用只读临时副本.</string>
     <string name="text_explorer_privileged_invalid_name">请输入有效的单个文件名 (不能为 . 或 .., 也不能包含 / 或空字符).</string>
     <string name="text_explorer_privileged_move_scope">跨文件系统移动仅支持共享存储之间的操作. 请先复制并核实目标, 再单独处理源文件.</string>
     <string name="text_explorer_privileged_no_space">目标存储可用空间不足.</string>
@@ -2470,6 +2470,17 @@
     <string name="text_press_again_to_exit">再按一次退出</string>
     <string name="text_press_back_or_vol_down_to_close_window">如需关闭窗口, 可按 \"返回键\" 或 \"音量减键\"</string>
     <string name="text_preview">预览</string>
+    <string name="text_privileged_edit_access_hint">更改访问方式或重新授权后, 请再次点击保存. 当前编辑内容会保留.</string>
+    <string name="text_privileged_edit_backup">已保存到原文件. 先前版本保留在:\n%1$s</string>
+    <string name="text_privileged_edit_conflict">原文件已被其他程序修改, 移动或替换. 当前编辑内容已保留. 请另存副本, 或重新打开原文件对比后再保存.</string>
+    <string name="text_privileged_edit_external_apps">此文档通过高权限会话编辑. 请先另存为普通可访问的文件, 再用其他应用打开.</string>
+    <string name="text_privileged_edit_failed">无法保存原文件. 当前编辑内容已保留.\n\n%1$s</string>
+    <string name="text_privileged_edit_keep_editing">继续编辑</string>
+    <string name="text_privileged_edit_pending">已恢复未保存的编辑内容</string>
+    <string name="text_privileged_edit_permission">无法写入原文件, 权限不足或授权已失效. 当前编辑内容已保留. 请重新授权或更换访问方式后再次保存.</string>
+    <string name="text_privileged_edit_recovery">恢复文件:\n%1$s</string>
+    <string name="text_privileged_edit_unknown">无法确认本次保存结果. 当前编辑内容和恢复文件已保留. 下次保存时会先核对原文件.</string>
+    <string name="text_privileged_edit_unsupported">此文件或文件系统不支持保留原有属性的安全替换. 当前编辑内容已保留, 请另存为副本.</string>
     <string name="text_process_exit_history">进程退出记录</string>
     <string name="text_process_exit_history_anr">应用无响应</string>
     <string name="text_process_exit_history_crash">应用崩溃</string>

@@ -4,16 +4,19 @@ import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.os.Process
+import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.Keep
 import org.autojs.autojs.model.explorer.PrivilegedExplorerDirectoryService
 import org.autojs.autojs.model.explorer.PrivilegedFileEngine
 import org.autojs.autojs.model.explorer.PrivilegedFileNative
+import org.autojs.autojs.model.explorer.PrivilegedFileSaveEngine
 import org.autojs.autojs.model.explorer.PrivilegedFileCommand
 import org.autojs.autojs.model.explorer.PrivilegedExplorerProcess
 import android.util.Base64
 import java.io.File
+import java.io.InputStream
 import org.json.JSONObject
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
@@ -110,17 +113,7 @@ class UserService : IUserService.Stub {
         // Shizuku starts a 64-bit service on a 64-bit device even for a 32-bit host APK.
         // Run native moves in the host's architecture under the same authorized UID.
         if (request.optString("operation") in listOf("move", "rename") && client64Bit != Process.is64Bit()) {
-            val appProcess = if (client64Bit) "/system/bin/app_process64" else "/system/bin/app_process32"
-            val apkPath = request.getString("apkPath")
-            require(File(apkPath).isAbsolute && apkPath.endsWith(".apk"))
-            val timeout = (request.optLong("deadlineMillis") - System.currentTimeMillis()).coerceIn(1, 600_000)
-            val result = PrivilegedExplorerProcess.run(listOf(
-                "/system/bin/env", "CLASSPATH=$apkPath", "/system/bin/toybox", "timeout", "-k", "2", "-s", "TERM",
-                (timeout / 1000 + 3).toString(), appProcess, "/system/bin", PrivilegedFileCommand::class.java.name,
-                Base64.encodeToString(requestJson.toByteArray(Charsets.UTF_8), Base64.NO_WRAP),
-            ), timeout + 10000)
-            if (result.exitCode != 0) throw IllegalStateException(result.stderr.ifBlank { "File operation process exited before reporting its result" })
-            return result.stdout.toString(Charsets.UTF_8)
+            return executeMatchingProcess(request)
         }
         PrivilegedFileNative.configure(request.optString("nativeLibrary").takeIf { it.isNotEmpty() })
         return PrivilegedFileEngine.execute(requestJson)
@@ -130,6 +123,46 @@ class UserService : IUserService.Stub {
         PrivilegedFileEngine.openReadDescriptor(requestJson)
     } catch (error: Exception) {
         throw IllegalStateException(error.message ?: "Unable to open file", error)
+    }
+
+    override fun snapshotExplorerFile(requestJson: String): String = PrivilegedFileSaveEngine.statSnapshot(requestJson)
+
+    override fun reconcileExplorerFileSave(requestJson: String): String {
+        val request = JSONObject(requestJson)
+        if (request.optBoolean("client64Bit", Process.is64Bit()) != Process.is64Bit()) return executeMatchingProcess(request)
+        PrivilegedFileNative.configure(request.optString("nativeLibrary").takeIf { it.isNotEmpty() })
+        return PrivilegedFileSaveEngine.reconcile(requestJson)
+    }
+
+    override fun saveExplorerFile(requestJson: String, contents: ParcelFileDescriptor): String =
+        ParcelFileDescriptor.AutoCloseInputStream(contents).use { input ->
+            val request = JSONObject(requestJson)
+            if (request.optBoolean("client64Bit", Process.is64Bit()) != Process.is64Bit()) {
+                executeMatchingProcess(request, input)
+            } else {
+                PrivilegedFileNative.configure(request.optString("nativeLibrary").takeIf { it.isNotEmpty() })
+                PrivilegedFileSaveEngine.save(requestJson, input)
+            }
+        }
+
+    private fun executeMatchingProcess(request: JSONObject, input: InputStream? = null): String {
+        val appProcess = if (request.optBoolean("client64Bit")) "/system/bin/app_process64" else "/system/bin/app_process32"
+        val apkPath = request.getString("apkPath")
+        require(File(apkPath).isAbsolute && apkPath.endsWith(".apk"))
+        val timeout = (request.optLong("deadlineMillis") - System.currentTimeMillis()).coerceIn(1, 600_000)
+        val result = PrivilegedExplorerProcess.run(listOf(
+            "/system/bin/env", "CLASSPATH=$apkPath", "/system/bin/toybox", "timeout", "-k", "2", "-s", "TERM",
+            (timeout / 1000 + 3).toString(), appProcess, "/system/bin", PrivilegedFileCommand::class.java.name,
+            Base64.encodeToString(request.toString().toByteArray(Charsets.UTF_8), Base64.NO_WRAP),
+        ), timeout + 10000, input)
+        if (result.exitCode != 0) {
+            if (request.optString("operation") == "save" && !result.stderr.contains(PrivilegedFileCommand.SAVE_STARTED_MARKER)) {
+                return JSONObject().put("ok", false).put("code", "ACCESS_UNAVAILABLE")
+                    .put("message", result.stderr).toString()
+            }
+            throw IllegalStateException(result.stderr.ifBlank { "File operation process exited before reporting its result" })
+        }
+        return result.stdout.toString(Charsets.UTF_8)
     }
 
 }

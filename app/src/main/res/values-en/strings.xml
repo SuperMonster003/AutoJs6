@@ -1677,7 +1677,7 @@
     <string name="text_explorer_privileged_conflict">The destination already exists. Choose another folder or name. Existing files have not been replaced.</string>
     <string name="text_explorer_privileged_delete_confirmation">These items will be permanently deleted without using the trash:\n\n%1$s</string>
     <string name="text_explorer_privileged_destination_hint">Choose a destination folder. The operation stops if an item with the same name already exists.</string>
-    <string name="text_explorer_privileged_file_hint">Files are opened as temporary copies. Changes made to a copy are not written back to the original file.</string>
+    <string name="text_explorer_privileged_file_hint">Text files can be edited and saved to the original after verification. Files opened in other apps use read-only temporary copies.</string>
     <string name="text_explorer_privileged_invalid_name">Enter a valid single file name (not . or .., and without / or NUL).</string>
     <string name="text_explorer_privileged_move_scope">Moving across filesystems is supported only between shared-storage locations. Copy and verify the destination before handling the source separately.</string>
     <string name="text_explorer_privileged_no_space">The destination does not have enough free space.</string>
@@ -2470,6 +2470,17 @@
     <string name="text_press_again_to_exit">Press again to exit</string>
     <string name="text_press_back_or_vol_down_to_close_window">To close, press \"Back\" or \"Volume Down\"</string>
     <string name="text_preview">Preview</string>
+    <string name="text_privileged_edit_access_hint">After changing the access method or renewing authorization, tap Save again. Your edits will be kept.</string>
+    <string name="text_privileged_edit_backup">Saved to the original file. A previous version is kept at:\n%1$s</string>
+    <string name="text_privileged_edit_conflict">The original file was changed, moved, or replaced by another program. Your edits have been kept. Save a separate copy or reopen the original to compare before saving.</string>
+    <string name="text_privileged_edit_external_apps">This document is being edited through privileged access. Save it as a normally accessible file before opening it in another app.</string>
+    <string name="text_privileged_edit_failed">The original file could not be saved. Your edits have been kept.\n\n%1$s</string>
+    <string name="text_privileged_edit_keep_editing">Continue editing</string>
+    <string name="text_privileged_edit_pending">Unsaved edits recovered</string>
+    <string name="text_privileged_edit_permission">The original file could not be written because access is insufficient or authorization is no longer available. Your edits have been kept. Renew authorization or choose another access method, then save again.</string>
+    <string name="text_privileged_edit_recovery">Recovery files:\n%1$s</string>
+    <string name="text_privileged_edit_unknown">The save result could not be confirmed. Your edits and recovery files have been kept. On the next save, the original will be checked before any further write.</string>
+    <string name="text_privileged_edit_unsupported">This file or filesystem does not support a safe replacement that preserves its attributes. Your edits have been kept. Use Save as to keep a separate copy.</string>
     <string name="text_process_exit_history">Process exit history</string>
     <string name="text_process_exit_history_anr">App not responding</string>
     <string name="text_process_exit_history_crash">App crash</string>
