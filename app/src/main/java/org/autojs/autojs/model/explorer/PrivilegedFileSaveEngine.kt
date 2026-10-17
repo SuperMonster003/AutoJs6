@@ -66,6 +66,15 @@ object PrivilegedFileSaveEngine {
     /** The caller owns [input] and must close/cancel its transport when a request times out. */
     fun save(requestJson: String, input: InputStream): String = saveInternal(requestJson, input, null)
 
+    /** Backup restoration borrows the caller's parent lease; it never unlocks that description. */
+    internal fun saveFromBackup(
+        requestJson: String,
+        input: InputStream,
+        parent: Directory,
+        metadataSource: ParcelFileDescriptor,
+        checkBackup: () -> Unit,
+    ): String = saveInternal(requestJson, input, null, parent, metadataSource, checkBackup)
+
     /**
      * Proves an interrupted transaction can no longer mutate its original before allowing a
      * client to compare hashes and decide whether a new save is safe. A directory lease excludes
@@ -122,10 +131,17 @@ object PrivilegedFileSaveEngine {
     internal fun saveWithCommitObserver(requestJson: String, input: InputStream, observer: (String) -> Unit): String =
         saveInternal(requestJson, input, observer)
 
-    private fun saveInternal(requestJson: String, input: InputStream, observer: ((String) -> Unit)?): String {
+    private fun saveInternal(
+        requestJson: String,
+        input: InputStream,
+        observer: ((String) -> Unit)?,
+        borrowedParent: Directory? = null,
+        metadataSource: ParcelFileDescriptor? = null,
+        checkBackup: (() -> Unit)? = null,
+    ): String {
         var operation: Save? = null
         val result = try {
-            operation = Save(parseRequest(requestJson), input, observer)
+            operation = Save(parseRequest(requestJson), input, observer, borrowedParent, metadataSource, checkBackup)
             operation.run()
         } catch (error: Exception) {
             operation?.failure(error) ?: failure(error)
@@ -142,9 +158,16 @@ object PrivilegedFileSaveEngine {
         private val request: JSONObject,
         private val input: InputStream,
         private val observer: ((String) -> Unit)?,
+        private val borrowedParent: Directory?,
+        private val metadataSource: ParcelFileDescriptor?,
+        private val checkBackup: (() -> Unit)?,
     ) {
         private val deadline = Deadline(request)
-        private val expectedDigest = checkedDigest(request.getString("expectedDigest"))
+        private val createdAt = System.currentTimeMillis()
+        private val expectedMissing = request.optBoolean("expectedMissing").also {
+            requireThat(!it || metadataSource != null, "INVALID_REQUEST", "Missing files can only be restored from a verified backup")
+        }
+        private val expectedDigest = if (expectedMissing) null else checkedDigest(request.getString("expectedDigest"))
         private val contentDigest = checkedDigest(request.getString("contentDigest"))
         private val contentSize = request.getLong("contentSize").also {
             requireThat(it in 0..MAX_CONTENT_BYTES, "LIMIT_EXCEEDED", "Edited files are limited to 1 GiB")
@@ -160,19 +183,23 @@ object PrivilegedFileSaveEngine {
 
         fun run(): JSONObject {
             deadline.check()
-            Target.open(checkedPath(request.getString("source"))).use { target ->
+            val path = checkedPath(request.getString("source"))
+            (borrowedParent?.let { Target.borrow(path, it) } ?: Target.open(path)).use { target ->
                 target.parent.acquireLease()
+                deadline.check()
                 target.checkParent()
+                if (expectedMissing) return restoreMissing(target)
                 val original = target.identity()
                 requireRegular(original)
                 requireSingleLink(original)
                 requireExpected(request, original, required = true)
                 // Opening O_RDWR is an explicit DAC/SELinux write-access check without writing.
                 openFile(target.path, original, writable = true).use { originalFd ->
-                    requireDigest(originalFd, original, expectedDigest)
+                    requireDigest(originalFd, original, requireNotNull(expectedDigest))
                     target.checkParent()
                     requireUnchanged(original, target.identity())
                     val stagingName = ".autojs6-save-$transactionId"
+                    deadline.check()
                     Os.mkdir(target.parent.child(stagingName), OWNER_DIRECTORY_MODE)
                     val stagingPath = target.parent.actualChild(stagingName)
                     recoveryPaths += stagingPath
@@ -196,12 +223,13 @@ object PrivilegedFileSaveEngine {
                                 requireUnchanged(replacement, identity(stagedPath))
                                 // Re-read the original, including same-size/same-mtime modifications,
                                 // after all potentially long staging and attribute work has finished.
-                                requireDigest(originalFd, original, expectedDigest)
+                                requireDigest(originalFd, original, requireNotNull(expectedDigest))
                                 target.checkParent()
                                 staging.checkAttached()
                                 requireUnchanged(original, target.identity())
                                 requireMetadata(PrivilegedFileNative.compareSaveMetadata(originalFd.fd, stagedFd.fd))
                                 requireUnchanged(replacement, identity(stagedPath))
+                                checkBackup?.invoke()
                                 deadline.check()
                                 requireExchange(PrivilegedFileNative.exchange(target.path, stagedPath))
                                 commitState = "unknown"
@@ -209,11 +237,12 @@ object PrivilegedFileSaveEngine {
                                 recoveryPaths += target.actualPath
                                 try {
                                     observer?.invoke(requireNotNull(backupPath))
+                                    checkBackup?.invoke()
                                     target.checkParent()
                                     staging.checkAttached()
                                     requireUnchanged(original, identity(stagedPath), ignoreChanged = true)
                                     requireUnchanged(replacement, target.identity(), ignoreChanged = true)
-                                    requireDigest(originalFd, original, expectedDigest, ignoreChanged = true)
+                                    requireDigest(originalFd, original, requireNotNull(expectedDigest), ignoreChanged = true)
                                     requireDigest(stagedFd, replacement, contentDigest, ignoreChanged = true)
                                     requireMetadata(PrivilegedFileNative.compareSaveMetadata(originalFd.fd, stagedFd.fd))
                                     requireUnchanged(original, identity(stagedPath), ignoreChanged = true)
@@ -233,6 +262,7 @@ object PrivilegedFileSaveEngine {
                                     recoveryPaths.remove(target.actualPath)
                                     return successSnapshot(target.actualPath, resultIdentity, contentDigest)
                                         .put("transactionId", transactionId).put("commitState", commitState)
+                                        .put("createdAt", createdAt)
                                         .put("backupPath", backupPath).put("backupIdentity", backupIdentity.json())
                                         .put("backupDigest", expectedDigest).put("cleanupPending", true)
                                         .put("directorySync", stagingPrepared && parentPrepared && stagingSynced && parentSynced)
@@ -259,6 +289,101 @@ object PrivilegedFileSaveEngine {
             }
         }
 
+        private fun restoreMissing(target: Target): JSONObject {
+            requireThat(!exists(target.path), "SOURCE_CHANGED", "A file appeared at the restore destination")
+            val stagingName = ".autojs6-save-$transactionId"
+            deadline.check()
+            Os.mkdir(target.parent.child(stagingName), OWNER_DIRECTORY_MODE)
+            val stagingPath = target.parent.actualChild(stagingName)
+            recoveryPaths += stagingPath
+            Directory.open(target.parent.child(stagingName), stagingPath).use { staging ->
+                staging.acquireLease()
+                requireThat(!exists(staging.child("result.json")), "TRANSACTION_FINISHED", "This restore transaction was already completed")
+                completedDirectoryPath = stagingPath
+                completedDirectoryIdentity = staging.openedIdentity
+                try {
+                    writeManifest(staging, target.actualPath)
+                    val stagedPath = staging.child("original")
+                    openExclusive(stagedPath).use { stagedFd ->
+                        transfer(stagedFd)
+                        checkBackup?.invoke()
+                        requireMetadata(PrivilegedFileNative.copySaveMetadata(requireNotNull(metadataSource).fd, stagedFd.fd))
+                        Os.fsync(stagedFd.fileDescriptor)
+                        val stagingPrepared = staging.sync()
+                        val parentPrepared = target.parent.sync()
+                        val replacement = Identity.from(Os.fstat(stagedFd.fileDescriptor))
+                        requireSingleLink(replacement)
+                        requireDigest(stagedFd, replacement, contentDigest)
+                        target.checkParent()
+                        staging.checkAttached()
+                        requireUnchanged(replacement, identity(stagedPath))
+                        checkBackup?.invoke()
+                        deadline.check()
+                        requireThat(!exists(target.path), "SOURCE_CHANGED", "A file appeared at the restore destination")
+                        requireNoReplace(PrivilegedFileNative.renameNoReplace(stagedPath, target.path))
+                        commitState = "unknown"
+                        recoveryPaths += target.actualPath
+                        try {
+                            checkBackup?.invoke()
+                            target.checkParent()
+                            staging.checkAttached()
+                            requireUnchanged(replacement, target.identity(), ignoreChanged = true)
+                            requireDigest(stagedFd, replacement, contentDigest, ignoreChanged = true)
+                            requireMetadata(PrivilegedFileNative.compareSaveMetadata(requireNotNull(metadataSource).fd, stagedFd.fd))
+                            val resultIdentity = target.identity()
+                            Os.fsync(stagedFd.fileDescriptor)
+                            val stagingSynced = staging.sync()
+                            val parentSynced = target.parent.sync()
+                            deadline.check()
+                            target.checkParent()
+                            staging.checkAttached()
+                            requireUnchanged(resultIdentity, target.identity())
+                            commitState = "committed"
+                            recoveryPaths.clear()
+                            return successSnapshot(target.actualPath, resultIdentity, contentDigest)
+                                .put("transactionId", transactionId).put("commitState", commitState)
+                                .put("createdAt", createdAt).put("missingTargetRestored", true)
+                                .put("stagePath", staging.actualPath).put("fenceRetained", true)
+                                .put("cleanupPending", false).put("directorySync", stagingPrepared && parentPrepared && stagingSynced && parentSynced)
+                                .put("recoveryPaths", JSONArray())
+                        } catch (error: Exception) {
+                            rollbackMissing(target, staging, stagedFd, replacement)
+                            throw error
+                        }
+                    }
+                } finally {
+                    val currentStaging = staging.currentPath()
+                    completedDirectoryPath = currentStaging
+                    if (currentStaging != stagingPath && recoveryPaths.remove(stagingPath)) recoveryPaths += currentStaging
+                    if (commitState == "unknown") recoveryPaths += target.currentPath()
+                }
+            }
+        }
+
+        private fun rollbackMissing(target: Target, staging: Directory, stagedFd: ParcelFileDescriptor, replacement: Identity) {
+            val recoveryDeadline = Deadline(JSONObject().put("deadlineMillis", System.currentTimeMillis() + 15_000), ignoreInterrupt = true)
+            try {
+                target.checkParent()
+                staging.checkAttached()
+                requireUnchanged(replacement, target.identity(), ignoreChanged = true)
+                requireThat(digest(stagedFd, replacement, recoveryDeadline, ignoreChanged = true) == contentDigest,
+                    "SOURCE_CHANGED", "The restored file was edited before rollback")
+                requireNoReplace(PrivilegedFileNative.renameNoReplace(target.path, staging.child("original")))
+                requireUnchanged(replacement, identity(staging.child("original")), ignoreChanged = true)
+                requireThat(!exists(target.path), "SOURCE_CHANGED", "Another file appeared during restore rollback")
+                target.checkParent()
+                staging.checkAttached()
+                staging.sync()
+                target.parent.sync()
+                commitState = "rolled_back"
+                recoveryPaths.remove(target.actualPath)
+                backupPath = staging.actualChild("original")
+            } catch (error: Exception) {
+                commitState = "unknown"
+                rollbackError = error.message.orEmpty().take(1024)
+            }
+        }
+
         /** Best effort, and deliberately called only after [run] has closed all source FDs. */
         fun recordResult(result: JSONObject) {
             val path = completedDirectoryPath ?: return
@@ -275,7 +400,9 @@ object PrivilegedFileSaveEngine {
 
         private fun writeManifest(staging: Directory, source: String) {
             val manifest = JSONObject().put("source", source).put("transactionId", transactionId)
-                .put("expected", request.getJSONObject("expected")).put("expectedDigest", expectedDigest)
+                .put("createdAt", createdAt).put("deadlineMillis", request.optLong("deadlineMillis", 0L))
+                .put("expectedMissing", expectedMissing)
+                .put("expected", request.optJSONObject("expected")).put("expectedDigest", expectedDigest)
                 .put("contentSize", contentSize).put("contentDigest", contentDigest)
             openExclusive(staging.child("request.json")).use { descriptor ->
                 ParcelFileDescriptor.AutoCloseOutputStream(ParcelFileDescriptor.dup(descriptor.fileDescriptor)).use { output ->
@@ -364,7 +491,7 @@ object PrivilegedFileSaveEngine {
             }
     }
 
-    private class Deadline(request: JSONObject, private val ignoreInterrupt: Boolean = false) {
+    internal class Deadline(request: JSONObject, private val ignoreInterrupt: Boolean = false) {
         private val end: Long
 
         init {
@@ -380,7 +507,7 @@ object PrivilegedFileSaveEngine {
         }
     }
 
-    private class Directory private constructor(
+    internal class Directory private constructor(
         private val descriptor: ParcelFileDescriptor,
         private val attachedPath: String,
         val actualPath: String,
@@ -398,6 +525,9 @@ object PrivilegedFileSaveEngine {
             }
         }
         fun child(name: String) = "$path/${checkedName(name)}"
+        fun names(limit: Int = 64): List<String> = (File(path).list() ?: throw Failure("PERMISSION_DENIED", "Cannot list the backup directory"))
+            .also { requireThat(it.size <= limit, "LIMIT_EXCEEDED", "The directory contains too many entries") }
+            .map(::checkedName).sorted()
         fun actualChild(name: String) = "${actualPath.trimEnd('/')}/${checkedName(name)}"
         fun currentPath() = runCatching { Os.readlink(path).takeUnless { it.endsWith(" (deleted)") } }.getOrNull() ?: actualPath
         fun checkAttached() = requireThat(before.sameObject(identity(attachedPath), checkMode = false),
@@ -427,13 +557,13 @@ object PrivilegedFileSaveEngine {
         }
     }
 
-    private class Target(val parent: Directory, private val name: String) : Closeable {
+    internal class Target(val parent: Directory, private val name: String, private val ownsParent: Boolean = true) : Closeable {
         val path get() = parent.child(name)
         val actualPath get() = parent.actualChild(name)
         fun currentPath() = "${parent.currentPath().trimEnd('/')}/$name"
         fun identity() = identity(path)
         fun checkParent() = parent.checkAttached()
-        override fun close() = parent.close()
+        override fun close() { if (ownsParent) parent.close() }
 
         companion object {
             fun open(path: String): Target {
@@ -441,10 +571,18 @@ object PrivilegedFileSaveEngine {
                 val parentPath = requireNotNull(file.parentFile).canonicalPath
                 return Target(Directory.open(parentPath), checkedName(file.name))
             }
+
+            fun borrow(path: String, parent: Directory): Target {
+                val file = File(path)
+                requireThat(requireNotNull(file.parentFile).canonicalPath == parent.actualPath,
+                    "INVALID_PATH", "The leased directory does not match the restore destination")
+                parent.checkAttached()
+                return Target(parent, checkedName(file.name), ownsParent = false)
+            }
         }
     }
 
-    private data class Identity(
+    internal data class Identity(
         val dev: Long, val ino: Long, val mode: Int, val size: Long,
         val modified: Long, val changed: Long, val uid: Int, val gid: Int, val links: Long,
     ) {
@@ -461,15 +599,15 @@ object PrivilegedFileSaveEngine {
         }
     }
 
-    private class Failure(val code: String, message: String) : IOException(message)
+    internal class Failure(val code: String, message: String) : IOException(message)
 
-    private fun identity(path: String) = Identity.from(Os.lstat(path))
-    private fun requireRegular(identity: Identity) = requireThat(OsConstants.S_ISREG(identity.mode),
+    internal fun identity(path: String) = Identity.from(Os.lstat(path))
+    internal fun requireRegular(identity: Identity) = requireThat(OsConstants.S_ISREG(identity.mode),
         "UNSUPPORTED_TYPE", "Only regular files can be edited; symbolic links and special files are not followed")
-    private fun requireSingleLink(identity: Identity) = requireThat(identity.links == 1L,
+    internal fun requireSingleLink(identity: Identity) = requireThat(identity.links == 1L,
         "UNSUPPORTED_HARD_LINK", "Replacing a file with multiple hard links would break its link relationships")
 
-    private fun openFile(path: String, expected: Identity, writable: Boolean): ParcelFileDescriptor {
+    internal fun openFile(path: String, expected: Identity, writable: Boolean): ParcelFileDescriptor {
         requireRegular(expected)
         val raw = Os.open(path, (if (writable) OsConstants.O_RDWR else OsConstants.O_RDONLY) or
             OsConstants.O_NOFOLLOW or OsConstants.O_NONBLOCK or O_CLOEXEC_LINUX, 0)
@@ -481,7 +619,7 @@ object PrivilegedFileSaveEngine {
         }
     }
 
-    private fun openExclusive(path: String): ParcelFileDescriptor {
+    internal fun openExclusive(path: String): ParcelFileDescriptor {
         val raw = Os.open(path, OsConstants.O_RDWR or OsConstants.O_CREAT or OsConstants.O_EXCL or
             OsConstants.O_NOFOLLOW or O_CLOEXEC_LINUX, OWNER_FILE_MODE)
         try {
@@ -491,7 +629,7 @@ object PrivilegedFileSaveEngine {
         }
     }
 
-    private fun digest(descriptor: ParcelFileDescriptor, expected: Identity, deadline: Deadline, ignoreChanged: Boolean = false): String {
+    internal fun digest(descriptor: ParcelFileDescriptor, expected: Identity, deadline: Deadline, ignoreChanged: Boolean = false): String {
         deadline.check()
         requireRegular(expected)
         requireThat(expected.size in 0..MAX_CONTENT_BYTES, "LIMIT_EXCEEDED", "Edited files are limited to 1 GiB")
@@ -516,7 +654,7 @@ object PrivilegedFileSaveEngine {
         return digest.digest().toHex()
     }
 
-    private fun requireExpected(request: JSONObject, actual: Identity, required: Boolean) {
+    internal fun requireExpected(request: JSONObject, actual: Identity, required: Boolean) {
         val expected = request.optJSONObject("expected")
         requireThat(!required || expected != null, "INVALID_REQUEST", "A saved source identity is required")
         if (expected == null) return
@@ -530,7 +668,7 @@ object PrivilegedFileSaveEngine {
         }
     }
 
-    private fun requireUnchanged(expected: Identity, actual: Identity, ignoreChanged: Boolean = false) = requireThat(
+    internal fun requireUnchanged(expected: Identity, actual: Identity, ignoreChanged: Boolean = false) = requireThat(
         expected.sameObject(actual) && expected.size == actual.size && expected.modified == actual.modified &&
             (ignoreChanged || expected.changed == actual.changed) && expected.uid == actual.uid &&
             expected.gid == actual.gid && expected.links == actual.links,
@@ -552,6 +690,16 @@ object PrivilegedFileSaveEngine {
             0 -> Unit
             OsConstants.ENOSYS, OsConstants.EINVAL, OsConstants.EOPNOTSUPP, OsConstants.EXDEV ->
                 throw Failure("UNSUPPORTED_REPLACE", "This filesystem cannot atomically exchange a file with its recovery copy")
+            else -> throw ErrnoException("renameat2", errno)
+        }
+    }
+
+    private fun requireNoReplace(errno: Int) {
+        when (errno) {
+            0 -> Unit
+            OsConstants.EEXIST, OsConstants.ENOTEMPTY -> throw Failure("SOURCE_CHANGED", "A file appeared at the restore destination")
+            OsConstants.ENOSYS, OsConstants.EINVAL, OsConstants.EOPNOTSUPP, OsConstants.EXDEV ->
+                throw Failure("UNSUPPORTED_REPLACE", "This filesystem cannot publish the restored file without replacing another entry")
             else -> throw ErrnoException("renameat2", errno)
         }
     }
@@ -601,7 +749,7 @@ object PrivilegedFileSaveEngine {
         }.getOrNull()
     }
 
-    private fun exists(path: String): Boolean = try {
+    internal fun exists(path: String): Boolean = try {
         Os.lstat(path)
         true
     } catch (error: ErrnoException) {
@@ -618,18 +766,18 @@ object PrivilegedFileSaveEngine {
         return JSONObject(json)
     }
 
-    private fun checkedDigest(value: String): String {
+    internal fun checkedDigest(value: String): String {
         requireThat(digestPattern.matches(value), "INVALID_REQUEST", "A SHA-256 digest is required")
         return value.lowercase()
     }
 
-    private fun checkedTransactionId(value: String): String {
+    internal fun checkedTransactionId(value: String): String {
         requireThat(runCatching { UUID.fromString(value).toString() == value.lowercase() }.getOrDefault(false),
             "INVALID_REQUEST", "transactionId must be a UUID")
         return value
     }
 
-    private fun checkedPath(path: String): String {
+    internal fun checkedPath(path: String): String {
         requireThat(path.startsWith('/') && '\u0000' !in path && path.toByteArray(Charsets.UTF_8).size <= 4096,
             "INVALID_PATH", "An absolute path of at most 4096 bytes without NUL is required")
         val components = path.split('/').filter(String::isNotEmpty)
@@ -650,7 +798,7 @@ object PrivilegedFileSaveEngine {
 
     private fun ByteArray.toHex() = joinToString("") { "%02x".format(it.toInt() and 0xff) }
 
-    private fun errorCode(error: Exception): String = when (error) {
+    internal fun errorCode(error: Exception): String = when (error) {
         is Failure -> error.code
         is SecurityException -> "PERMISSION_DENIED"
         is InterruptedException -> "CANCELLED"

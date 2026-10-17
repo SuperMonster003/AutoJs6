@@ -29,6 +29,7 @@ class PrivilegedEditSessionsDeviceTest {
 
     @Before
     fun removeFixturesLeftByAnInterruptedTestRun() {
+        PrivilegedBackupManager.awaitIdle()
         if (!WrappedShizuku.isRunning() || !WrappedShizuku.hasPermission()) return
         val service = WrappedShizuku.getServiceOrNull() ?: return
         val sessions = File(context.filesDir, "privileged-edit-sessions")
@@ -46,6 +47,7 @@ class PrivilegedEditSessionsDeviceTest {
         context.cacheDir.listFiles().orEmpty().filter {
             it.name.matches(Regex("privileged-edit-(session-test|process)-[a-f0-9-]{36}"))
         }.forEach(::removeFixture)
+        cleanupCatalog()
     }
 
     @Test
@@ -217,10 +219,12 @@ class PrivilegedEditSessionsDeviceTest {
         fixture.shell("mkdir -m 700 -- ${quote(fixture.root)}")
         var primary: Throwable? = null
         try { action(fixture) } catch (error: Throwable) { primary = error; throw error } finally {
+            PrivilegedBackupManager.awaitIdle()
             val cleanupErrors = listOf<() -> Unit>(
                 { fixture.uris.forEach { uri -> PrivilegedEditSessions.detach(context, uri) } },
                 { fixture.uris.distinct().forEach { uri -> removeFixture(directory(uri)) } },
                 { removeFixture(fixture.cache) },
+                { cleanupCatalog(fixture.root) },
                 {
                     check(fixture.root.matches(Regex("/data/local/tmp/autojs6-edit-save-[a-f0-9-]{36}")))
                     fixture.shell("rm -rf -- ${quote(fixture.root)}")
@@ -228,6 +232,14 @@ class PrivilegedEditSessionsDeviceTest {
             ).mapNotNull { runCatching(it).exceptionOrNull() }
             if (primary != null) cleanupErrors.forEach(primary::addSuppressed)
             else if (cleanupErrors.isNotEmpty()) throw cleanupErrors.first().apply { cleanupErrors.drop(1).forEach(::addSuppressed) }
+        }
+    }
+
+    private fun cleanupCatalog(root: String? = null) {
+        File(context.filesDir, "privileged-edit-backups").listFiles().orEmpty().filter { it.extension == "json" }.forEach { file ->
+            val record = runCatching { AtomicFile(file).openRead().bufferedReader().use { JSONObject(it.readText()) } }.getOrNull() ?: return@forEach
+            val parent = File(record.optString("source")).parent.orEmpty()
+            if (parent.matches(Regex("/data/local/tmp/autojs6-edit-save-[a-f0-9-]{36}")) && (root == null || parent == root)) AtomicFile(file).delete()
         }
     }
 

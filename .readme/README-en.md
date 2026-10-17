@@ -523,6 +523,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Faster page display when opening files in the code editor
 * `Improvement` File manager loads package information on demand, with improved display of large packages and manifest information
 * `Improvement` Unified file preview and plugin action entries in the file manager, with incremental list refreshes that retain scroll position
+* `Improvement` Privileged file edit backups can be viewed, restored and cleaned in one place, with automatic retention by version count and space target per file (default: up to 5 versions, a 64 MiB target, and at least the latest backup); recovery data that is in use, has changed or has an unconfirmed outcome is not cleaned automatically
 * `Improvement` Version history avoids duplicate snapshots and preserves original content before overwrites; restoring recycle bin items to a new path also migrates their version history
 * `Improvement` Improved recycle bin storage hints, recovery of damaged entries and error messages, with incremental list refreshes
 * `Improvement` Layout hierarchy inspection supports attribute summaries, parent highlighting, horizontal scrolling and selecting parent widgets level by level

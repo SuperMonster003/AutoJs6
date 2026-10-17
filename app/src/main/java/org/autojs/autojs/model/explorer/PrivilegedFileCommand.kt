@@ -32,6 +32,12 @@ object PrivilegedFileCommand {
                 }
             } else if (json.optString("operation") == "snapshot") {
                 System.out.println(PrivilegedFileSaveEngine.statSnapshot(request))
+            } else if (json.optString("operation").startsWith("backup_")) {
+                if (json.optString("operation") in listOf("backup_delete", "backup_restore")) {
+                    System.err.println(SAVE_STARTED_MARKER)
+                    System.err.flush()
+                }
+                System.out.println(PrivilegedFileBackupEngine.execute(request))
             } else if (json.optString("operation") == "reconcile") {
                 System.out.println(PrivilegedFileSaveEngine.reconcile(request))
             } else if (json.optString("operation") == "save") {

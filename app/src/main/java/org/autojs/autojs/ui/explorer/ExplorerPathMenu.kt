@@ -183,6 +183,11 @@ internal class ExplorerPathMenu(
             contentDescription = "${context.getString(R.string.text_file_extensions_title)}, ${context.resources.getStringArray(R.array.values_file_extensions)[extensionIndex()]}"
         }
         body.addView(extensionRow)
+        body.addView(divider())
+        body.addView(settingRow(R.string.text_privileged_backups, null) {
+            dismiss()
+            PrivilegedBackupUi.show(explorer, directory = page.path.takeUnless { page is ArchiveExplorerPage }, mode = explorer.privilegedAccessMode)
+        }.apply { id = R.id.explorer_privileged_backups })
 
         val scroll = ScrollView(context).apply {
             id = R.id.explorer_menu_panel

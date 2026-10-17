@@ -4,6 +4,7 @@ import android.app.Activity
 import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
+import android.util.AtomicFile
 import android.util.Base64
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,7 @@ import org.autojs.autojs.core.shizuku.IUserService
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.explorer.PrivilegedAccessMode
+import org.autojs.autojs.model.explorer.PrivilegedBackupManager
 import org.autojs.autojs.model.explorer.PrivilegedEditSessions
 import org.autojs.autojs.model.explorer.PrivilegedFileOperationException
 import org.autojs.autojs.runtime.api.WrappedShizuku
@@ -82,6 +84,7 @@ class PrivilegedEditorSaveDeviceTest {
             activities.distinct().forEach { if (!it.isDestroyed) it.finishAndRemoveTask() }
         }
         waitUntil("Editor test activities should close") { onMain { activities.all(Activity::isDestroyed) } }
+        PrivilegedBackupManager.awaitIdle()
         sessionUris.distinct().forEach { uri ->
             val token = uri.pathSegments.single()
             check(token.matches(Regex("[a-f0-9-]{36}")))
@@ -91,6 +94,14 @@ class PrivilegedEditorSaveDeviceTest {
         }
         if (::remoteRoot.isInitialized) {
             check(remoteRoot.matches(Regex("/data/local/tmp/autojs6-privileged-editor-ui-[a-f0-9-]{36}")))
+            File(context.filesDir, "privileged-edit-backups").listFiles().orEmpty()
+                .filter { it.name.matches(Regex("[a-f0-9-]{36}\\.json")) }
+                .forEach { file ->
+                    val record = runCatching { JSONObject(file.readText()) }.getOrNull() ?: return@forEach
+                    if (record.optString("source").startsWith("$remoteRoot/") || record.optString("requestedSource").startsWith("$remoteRoot/")) {
+                        AtomicFile(file).delete()
+                    }
+                }
             shell("chmod -R u+rwX -- ${quote(remoteRoot)}")
             shell("rm -rf -- ${quote(remoteRoot)}")
         }

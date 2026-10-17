@@ -12,6 +12,7 @@ import org.autojs.autojs.model.explorer.PrivilegedExplorerDirectoryService
 import org.autojs.autojs.model.explorer.PrivilegedFileEngine
 import org.autojs.autojs.model.explorer.PrivilegedFileNative
 import org.autojs.autojs.model.explorer.PrivilegedFileSaveEngine
+import org.autojs.autojs.model.explorer.PrivilegedFileBackupEngine
 import org.autojs.autojs.model.explorer.PrivilegedFileCommand
 import org.autojs.autojs.model.explorer.PrivilegedExplorerProcess
 import android.util.Base64
@@ -127,6 +128,13 @@ class UserService : IUserService.Stub {
 
     override fun snapshotExplorerFile(requestJson: String): String = PrivilegedFileSaveEngine.statSnapshot(requestJson)
 
+    override fun manageExplorerFileBackup(requestJson: String): String {
+        val request = JSONObject(requestJson)
+        if (request.optBoolean("client64Bit", Process.is64Bit()) != Process.is64Bit()) return executeMatchingProcess(request)
+        PrivilegedFileNative.configure(request.optString("nativeLibrary").takeIf { it.isNotEmpty() })
+        return PrivilegedFileBackupEngine.execute(requestJson)
+    }
+
     override fun reconcileExplorerFileSave(requestJson: String): String {
         val request = JSONObject(requestJson)
         if (request.optBoolean("client64Bit", Process.is64Bit()) != Process.is64Bit()) return executeMatchingProcess(request)
@@ -156,7 +164,7 @@ class UserService : IUserService.Stub {
             Base64.encodeToString(request.toString().toByteArray(Charsets.UTF_8), Base64.NO_WRAP),
         ), timeout + 10000, input)
         if (result.exitCode != 0) {
-            if (request.optString("operation") == "save" && !result.stderr.contains(PrivilegedFileCommand.SAVE_STARTED_MARKER)) {
+            if (request.optString("operation") in listOf("save", "backup_delete", "backup_restore") && !result.stderr.contains(PrivilegedFileCommand.SAVE_STARTED_MARKER)) {
                 return JSONObject().put("ok", false).put("code", "ACCESS_UNAVAILABLE")
                     .put("message", result.stderr).toString()
             }

@@ -64,6 +64,7 @@ object PrivilegedEditSessions {
         uri.scheme == "content" && uri.authority == authority(context)
 
     fun create(context: Context, mode: PrivilegedAccessMode, path: String): Uri {
+        PrivilegedBackupManager.ensureImported(context)
         cleanupClosedSessions(context)
         findRecoverable(context, path)?.let { uri ->
             try { changeAccessMode(context, uri, mode) } catch (error: Exception) {
@@ -146,24 +147,40 @@ object PrivilegedEditSessions {
             metadata.put("pending", pending.name).put("charset", charsetName).put("hadBom", hadBom).remove("draftResolved")
             writeMetadata(directory, metadata)
             cleanupUnreferencedContents(directory, metadata)
-            synchronized(lock("source:${metadata.optString("canonicalSource", path)}")) {
+            synchronized(lock("source:${metadata.optString("canonicalSource", path)}")) sourceSave@{
                 val mode = PrivilegedAccessMode.valueOf(metadata.getString("mode"))
                 assertNoOtherActiveSave(context, directory, metadata.optString("canonicalSource", path), mode)
                 reconcilePreviousSave(context, directory, metadata, mode)
                 metadata = readMetadata(directory)
+                val contentDigest = digest(bytes)
+                if (contentDigest == metadata.getString("digest")) {
+                    // Repeated Ctrl+S still checks for external changes, but creates no new version.
+                    val current = PrivilegedFileOperations.snapshot(context, mode, path)
+                    if (current.getString("digest") != contentDigest || !sameIdentity(metadata.getJSONObject("identity"), current.getJSONObject("identity"))) {
+                        throw PrivilegedFileOperationException("SOURCE_CHANGED", "The original changed after opening")
+                    }
+                    metadata.put("baseline", pending.name).put("baselineCharset", charsetName)
+                    metadata.remove("pending")
+                    writeMetadata(directory, metadata)
+                    cleanupUnreferencedContents(directory, metadata)
+                    return@sourceSave
+                }
                 val transaction = UUID.randomUUID().toString()
                 val request = JSONObject()
                     .put("operation", "save").put("source", path)
+                    .put("canonicalSource", metadata.optString("canonicalSource", path))
                     .put("expected", metadata.getJSONObject("identity")).put("expectedDigest", metadata.getString("digest"))
-                    .put("contentSize", bytes.size).put("contentDigest", digest(bytes))
+                    .put("contentSize", bytes.size).put("contentDigest", contentDigest)
                     .put("transactionId", transaction).put("deadlineMillis", System.currentTimeMillis() + SAVE_TIMEOUT_MS)
                 val attempt = JSONObject(request.toString()).put("content", pending.name).put("charset", charsetName)
                     .put("backupPath", File(File(metadata.optString("canonicalSource", path)).parentFile, ".autojs6-save-$transaction/original").path)
                 metadata.put("attempt", attempt)
                 writeMetadata(directory, metadata)
+                PrivilegedBackupManager.registerAttempt(context, mode, request, metadata.optString("canonicalSource", path))
                 val result = try {
                     PrivilegedFileOperations.save(context, mode, request, pending)
                 } catch (error: Exception) {
+                    runCatching { PrivilegedBackupManager.recordFailure(context, transaction, error) }
                     var failure = error as? PrivilegedFileOperationException
                     if (failure == null || failure.code == "OUTCOME_UNKNOWN" || failure.partial) {
                         val paths = (failure?.recoveryPaths.orEmpty() + attempt.getString("backupPath")).distinct()
@@ -192,6 +209,10 @@ object PrivilegedEditSessions {
                 try { writeMetadata(directory, metadata) } catch (error: Exception) {
                     throw PrivilegedFileOperationException("OUTCOME_UNKNOWN", "The save completed but its local record could not be committed", cause = error)
                 }
+                // The original is already confirmed saved. A catalog/retention problem must not
+                // report that write as failed; the pre-dispatch record can be inspected later.
+                runCatching { PrivilegedBackupManager.recordResult(context, transaction, result) }
+                PrivilegedBackupManager.scheduleCleanup(context, metadata.optString("canonicalSource", path))
                 cleanupUnreferencedContents(directory, metadata)
             }
         } catch (error: Exception) {
@@ -284,6 +305,11 @@ object PrivilegedEditSessions {
     }
 
     private fun authority(context: Context) = "${context.packageName}.privileged-editor"
+
+    internal fun legacyBackupMetadata(context: Context): List<JSONObject> =
+        File(context.filesDir, DIRECTORY).listFiles().orEmpty().filter { tokens.matches(it.name) }.mapNotNull { directory ->
+            runCatching { readMetadata(directory).put("_sessionUpdatedAt", File(directory, "session.json").lastModified()) }.getOrNull()
+        }
 
     private fun cleanupClosedSessions(context: Context) {
         val cutoff = System.currentTimeMillis() - CLEAN_SESSION_RETENTION_MS

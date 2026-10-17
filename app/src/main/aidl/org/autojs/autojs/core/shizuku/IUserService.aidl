@@ -22,5 +22,6 @@ interface IUserService {
     String snapshotExplorerFile(String requestJson) = 25;
     String saveExplorerFile(String requestJson, in ParcelFileDescriptor contents) = 26;
     String reconcileExplorerFileSave(String requestJson) = 27;
+    String manageExplorerFileBackup(String requestJson) = 28;
 
 }

@@ -30,6 +30,7 @@ import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadMetadata
 import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadPipeline
 import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadResult
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
+import org.autojs.autojs.ui.explorer.PrivilegedBackupUi
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
@@ -220,6 +221,11 @@ class EditorFileService(
                                         .title(R.string.text_done)
                                         .content(notice)
                                         .positiveText(R.string.dialog_button_dismiss)
+                                        .negativeText(R.string.text_privileged_backups)
+                                        .onNegative { _, _ ->
+                                            val source = PrivilegedEditSessions.originalPath(context, uri)
+                                            PrivilegedBackupUi.show(hostView, source, source?.let { File(it).parent }, PrivilegedEditSessions.accessMode(context, uri))
+                                        }
                                         .neutralText(R.string.text_copy_all)
                                         .onNeutral { _, _ -> ClipboardUtils.setClip(context, notice) }
                                         .build()

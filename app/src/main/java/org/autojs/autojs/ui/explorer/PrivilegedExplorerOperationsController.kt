@@ -44,6 +44,7 @@ internal class PrivilegedExplorerOperationsController(private val explorer: Expl
             menu.add(0, R.id.action_delete, 4, R.string.text_delete)
             menu.add(0, R.id.action_copy_path, 5, R.string.text_copy_path)
             menu.add(0, R.id.action_info, 6, R.string.text_info)
+            if (item !is ExplorerPage) menu.add(0, R.id.explorer_privileged_backups, 7, R.string.text_privileged_backups)
             setOnMenuItemClickListener { action -> handleMenu(action, item) }
         }.show()
     }
@@ -57,6 +58,7 @@ internal class PrivilegedExplorerOperationsController(private val explorer: Expl
             R.id.action_delete -> delete(listOf(item))
             R.id.action_copy_path -> ExplorerViewHelper.copyPaths(context, listOf(item))
             R.id.action_info -> ExplorerDirectoryAccessUi.showFileInfo(explorer, item)
+            R.id.explorer_privileged_backups -> PrivilegedBackupUi.show(explorer, item.path, File(item.path).parent, modeOf(item))
             else -> return false
         }
         return true

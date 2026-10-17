@@ -523,6 +523,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Affichage plus rapide de la page lors de l'ouverture de fichiers dans l'éditeur de code
 * `Amélioration` Chargement à la demande des informations de paquets dans le gestionnaire de fichiers, avec meilleur affichage des gros paquets et manifestes
 * `Amélioration` Accès unifiés aux aperçus et actions de plugins dans le gestionnaire de fichiers, avec actualisation différentielle de la liste conservant le défilement
+* `Amélioration` Les sauvegardes des fichiers modifiés avec privilèges peuvent être consultées, restaurées et nettoyées depuis un même emplacement, avec conservation automatique selon le nombre de versions et l'espace cible par fichier (par défaut: jusqu'à 5 versions, cible de 64 MiB et conservation d'au moins la sauvegarde la plus récente); les données de récupération utilisées, modifiées ou dont le résultat est incertain ne sont pas nettoyées automatiquement
 * `Amélioration` L'historique évite les instantanés en double, conserve le contenu avant écrasement et migre lors d'une restauration de corbeille vers un nouveau chemin
 * `Amélioration` Indications de capacité, restauration d'entrées endommagées et messages d'erreur améliorés dans la corbeille, avec actualisation différentielle de la liste
 * `Amélioration` Résumés de propriétés, mise en évidence du parent, défilement horizontal et sélection progressive des parents dans l'analyse hiérarchique de disposition

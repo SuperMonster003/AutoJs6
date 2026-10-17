@@ -12,6 +12,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.FutureTask
 import java.util.concurrent.SynchronousQueue
@@ -19,6 +21,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.concurrent.thread
+import kotlin.concurrent.withLock
 
 class PrivilegedFileOperationException(
     val code: String,
@@ -36,6 +39,7 @@ object PrivilegedFileOperations {
     private const val OPEN_TIMEOUT_MS = 180_000L
     private const val MAX_OPEN_BYTES = 1024L * 1024 * 1024
     private const val CACHE_LIFETIME_MS = 24L * 60 * 60 * 1000
+    private val directoryLeases = ConcurrentHashMap<String, ReentrantLock>()
     private val ipcExecutor = ThreadPoolExecutor(
         0, 2, 60L, TimeUnit.SECONDS, SynchronousQueue(),
         { task -> Thread(task, "ExplorerFileOperation").apply { isDaemon = true } },
@@ -47,19 +51,36 @@ object PrivilegedFileOperations {
     fun snapshot(context: Context, mode: PrivilegedAccessMode, path: String): JSONObject =
         execute(context, mode, "snapshot", path)
 
-    /** Content travels through a descriptor/stdin, never through a Binder byte array or shell text. */
-    internal fun save(context: Context, mode: PrivilegedAccessMode, request: JSONObject, contents: File): JSONObject {
+    internal fun backup(context: Context, mode: PrivilegedAccessMode, request: JSONObject): JSONObject = withDirectoryLease(request) {
+        val mutation = request.getString("operation") in listOf("backup_delete", "backup_restore")
+        val timeout = if (mutation) 180_000L else 60_000L
+        request.put("deadlineMillis", System.currentTimeMillis() + timeout)
         configureRequest(context, request)
-        val remaining = (request.getLong("deadlineMillis") - System.currentTimeMillis()).coerceAtLeast(1L)
-        return executePrepared(context, mode, request, true, remaining, contents)
+        executeRequest(context, mode, request, mutation, timeout)
     }
 
-    internal fun reconcileSave(context: Context, mode: PrivilegedAccessMode, attempt: JSONObject): JSONObject {
+    /** Content travels through a descriptor/stdin, never through a Binder byte array or shell text. */
+    internal fun save(context: Context, mode: PrivilegedAccessMode, request: JSONObject, contents: File): JSONObject = withDirectoryLease(request) {
+        configureRequest(context, request)
+        val remaining = (request.getLong("deadlineMillis") - System.currentTimeMillis()).coerceAtLeast(1L)
+        executePrepared(context, mode, request, true, remaining, contents)
+    }
+
+    internal fun reconcileSave(context: Context, mode: PrivilegedAccessMode, attempt: JSONObject): JSONObject = withDirectoryLease(attempt) {
         val request = JSONObject(attempt.toString()).put("operation", "reconcile")
             .put("deadlineMillis", System.currentTimeMillis() + 30_000L)
         configureRequest(context, request)
         // Reconciliation may retire the old transaction, but never writes the original content.
-        return executeRequest(context, mode, request, false, 30_000L)
+        executeRequest(context, mode, request, false, 30_000L)
+    }
+
+    private fun <T> withDirectoryLease(request: JSONObject, action: () -> T): T {
+        val source = File(request.optString("canonicalSource", request.getString("source")))
+        val directory = if (request.optString("operation") == "backup_scan") source else source.parentFile ?: source
+        val key = runCatching { directory.canonicalPath }.getOrDefault(directory.absolutePath)
+        // Fair local queuing avoids a background cleanup racing the next save. Remote flock and
+        // expected hashes remain authoritative against other processes and lost connections.
+        return directoryLeases.getOrPut(key) { ReentrantLock(true) }.withLock(action)
     }
 
     fun execute(
@@ -116,10 +137,11 @@ object PrivilegedFileOperations {
             when (mode) {
                 PrivilegedAccessMode.SHIZUKU -> callShizuku(timeoutMs + 5000) {
                     val service = requireShizuku()
-                    when (request.getString("operation")) {
-                        "snapshot" -> service.snapshotExplorerFile(request.toString())
-                        "reconcile" -> service.reconcileExplorerFileSave(request.toString())
-                        "save" -> ParcelFileDescriptor.open(checkNotNull(contents), ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+                    when {
+                        request.getString("operation").startsWith("backup_") -> service.manageExplorerFileBackup(request.toString())
+                        request.getString("operation") == "snapshot" -> service.snapshotExplorerFile(request.toString())
+                        request.getString("operation") == "reconcile" -> service.reconcileExplorerFileSave(request.toString())
+                        request.getString("operation") == "save" -> ParcelFileDescriptor.open(checkNotNull(contents), ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
                             service.saveExplorerFile(request.toString(), descriptor)
                         }
                         else -> service.executeExplorerFileOperation(request.toString())
@@ -131,7 +153,7 @@ object PrivilegedFileOperations {
                     }
                     if (result.exitCode != 0) {
                         val message = result.stderr.ifBlank { "Root exited with ${result.exitCode}" }
-                        if (request.optString("operation") == "save" && !result.stderr.contains(PrivilegedFileCommand.SAVE_STARTED_MARKER)) {
+                        if (request.optString("operation") in listOf("save", "backup_delete", "backup_restore") && !result.stderr.contains(PrivilegedFileCommand.SAVE_STARTED_MARKER)) {
                             throw PrivilegedFileOperationException("ACCESS_UNAVAILABLE", message)
                         }
                         throw IOException(message)

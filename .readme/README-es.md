@@ -523,6 +523,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Visualización más rápida de la página al abrir archivos en el editor de código
 * `Mejora` Información de instaladores cargada bajo demanda en el administrador, con mejor presentación de paquetes grandes y manifiestos
 * `Mejora` Accesos de previsualización y operaciones de complementos unificados; actualización diferencial de listas conservando el desplazamiento
+* `Mejora` Las copias de edición de archivos con privilegios se pueden consultar, restaurar y limpiar desde un solo lugar, con retención automática por cantidad de versiones y espacio objetivo por archivo (por defecto: hasta 5 versiones, objetivo de 64 MiB y al menos la copia más reciente); los datos de recuperación en uso, modificados o con resultado sin confirmar no se limpian automáticamente
 * `Mejora` El historial evita instantáneas duplicadas, conserva el contenido antes de sobrescribir y migra la historia al restaurar la papelera a otra ruta
 * `Mejora` Mejores avisos de capacidad, restauración de entradas dañadas y mensajes de error de la papelera, con actualización diferencial
 * `Mejora` El inspector jerárquico admite resúmenes de atributos, resaltado de padres, desplazamiento horizontal y selección ascendente de padres
