@@ -30417,6 +30417,147 @@
         }
       ]
     },
+    "speech": {
+      "doc": "AutoJs6 Speech API",
+      "members": [
+        {
+          "name": "isAvailable",
+          "kind": "function",
+          "doc": "isAvailable(): boolean;",
+          "signature": "isAvailable(): boolean;"
+        },
+        {
+          "name": "capabilities",
+          "kind": "function",
+          "doc": "capabilities(): Speech.Capabilities;",
+          "signature": "capabilities(): Speech.Capabilities;"
+        },
+        {
+          "name": "listen",
+          "kind": "function",
+          "doc": "listen(options?: Speech.ListenOptions | null): Speech.Session;",
+          "signature": "listen(options?: Speech.ListenOptions | null): Speech.Session;"
+        },
+        {
+          "name": "recognize",
+          "kind": "function",
+          "doc": "recognize(source: Speech.AudioSource, options?: Speech.RecognizeOptions | null): Speech.Recognition;",
+          "signature": "recognize(source: Speech.AudioSource, options?: Speech.RecognizeOptions | null): Speech.Recognition;"
+        },
+        {
+          "name": "recognizeAsync",
+          "kind": "function",
+          "doc": "recognizeAsync(source: Speech.AudioSource, options?: Speech.RecognizeOptions | null): Promise<Speech.Recognition>;",
+          "signature": "recognizeAsync(source: Speech.AudioSource, options?: Speech.RecognizeOptions | null): Promise<Speech.Recognition>;"
+        },
+        {
+          "name": "detectVoice",
+          "kind": "function",
+          "doc": "detectVoice(source: Speech.AudioSource, options?: Speech.VadOptions | null): Speech.VadResult;",
+          "signature": "detectVoice(source: Speech.AudioSource, options?: Speech.VadOptions | null): Speech.VadResult;"
+        },
+        {
+          "name": "wake",
+          "kind": "function",
+          "doc": "wake(keywords: Speech.KeywordInput | readonly Speech.KeywordInput[], options?: Speech.WakeOptions | null): Speech.WakeSession;",
+          "signature": "wake(keywords: Speech.KeywordInput | readonly Speech.KeywordInput[], options?: Speech.WakeOptions | null): Speech.WakeSession;"
+        },
+        {
+          "name": "synthesize",
+          "kind": "function",
+          "doc": "synthesize(text: string, path: string, options?: Speech.SynthesisOptions | null): Speech.SynthesisResult;",
+          "signature": "synthesize(text: string, path: string, options?: Speech.SynthesisOptions | null): Speech.SynthesisResult;"
+        },
+        {
+          "name": "synthesizeAsync",
+          "kind": "function",
+          "doc": "synthesizeAsync(text: string, path: string, options?: Speech.SynthesisOptions | null): Promise<Speech.SynthesisResult>;",
+          "signature": "synthesizeAsync(text: string, path: string, options?: Speech.SynthesisOptions | null): Promise<Speech.SynthesisResult>;"
+        },
+        {
+          "name": "speak",
+          "kind": "function",
+          "doc": "speak(text: string, options?: Speech.SpeakOptions | null): Promise<Tts.Result>;",
+          "signature": "speak(text: string, options?: Speech.SpeakOptions | null): Promise<Tts.Result>;"
+        },
+        {
+          "name": "models",
+          "kind": "variable",
+          "doc": "models: Speech.Models;",
+          "signature": "models: Speech.Models;"
+        },
+        {
+          "name": "SpeechError",
+          "kind": "variable",
+          "doc": "SpeechError: Speech.ErrorConstructor;",
+          "signature": "SpeechError: Speech.ErrorConstructor;"
+        }
+      ]
+    },
+    "speech.models": {
+      "doc": "AutoJs6 speech.models API",
+      "members": [
+        {
+          "name": "list",
+          "kind": "function",
+          "doc": "list(filter?: ModelFilter | null): ModelInfo[];",
+          "signature": "list(filter?: ModelFilter | null): ModelInfo[];"
+        },
+        {
+          "name": "install",
+          "kind": "function",
+          "doc": "install(id: string, options?: InstallOptions | null): ModelInfo;",
+          "signature": "install(id: string, options?: InstallOptions | null): ModelInfo;"
+        },
+        {
+          "name": "installAsync",
+          "kind": "function",
+          "doc": "installAsync(id: string, options?: InstallOptions | null): Promise<ModelInfo>;",
+          "signature": "installAsync(id: string, options?: InstallOptions | null): Promise<ModelInfo>;"
+        },
+        {
+          "name": "importFile",
+          "kind": "function",
+          "doc": "importFile(path: string, options?: ImportOptions | null): ModelInfo;",
+          "signature": "importFile(path: string, options?: ImportOptions | null): ModelInfo;"
+        },
+        {
+          "name": "remove",
+          "kind": "function",
+          "doc": "remove(id: string): boolean;",
+          "signature": "remove(id: string): boolean;"
+        },
+        {
+          "name": "setDefault",
+          "kind": "function",
+          "doc": "setDefault(kind: Kind, id: string): ModelInfo;",
+          "signature": "setDefault(kind: Kind, id: string): ModelInfo;"
+        },
+        {
+          "name": "getDefault",
+          "kind": "function",
+          "doc": "getDefault(kind: Kind): ModelInfo | null;",
+          "signature": "getDefault(kind: Kind): ModelInfo | null;"
+        },
+        {
+          "name": "refreshCatalog",
+          "kind": "function",
+          "doc": "refreshCatalog(): { version: number; updated: boolean; };",
+          "signature": "refreshCatalog(): { version: number; updated: boolean; };"
+        }
+      ]
+    },
+    "speech.SpeechError": {
+      "doc": "AutoJs6 speech.SpeechError API",
+      "members": [
+        {
+          "name": "prototype",
+          "kind": "variable",
+          "doc": "prototype: SpeechError;",
+          "signature": "prototype: SpeechError;"
+        }
+      ]
+    },
     "sqlite": {
       "doc": "AutoJs6 SQLite API",
       "members": [
@@ -33079,6 +33220,7 @@
     "$mail": "mail",
     "$epub": "epub",
     "$gallery": "gallery",
+    "$speech": "speech",
     "$terminal": "terminal",
     "$media": "media",
     "$notice": "notice",

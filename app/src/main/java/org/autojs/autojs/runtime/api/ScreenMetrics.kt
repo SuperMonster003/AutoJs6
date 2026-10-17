@@ -163,6 +163,8 @@ class ScreenMetrics {
         val deviceScreenHeight: Int
             get() = stableSides.height
 
+        internal fun dimensions(): ScreenMetricsCache.Dimensions = stableSides.dimensions()
+
         @JvmStatic
         val orientation: Int
             get() = resources?.configuration?.orientation ?: ORIENTATION_PORTRAIT

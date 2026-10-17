@@ -8,7 +8,8 @@
         "El SDK de destino de las aplicaciones empaquetadas cambia de 29 a 37; el acceso al almacenamiento compartido y a la red local requiere los permisos exigidos por el sistema",
         "Al usar images u otras funciones que dependen de OpenCV en aplicaciones empaquetadas, selecciona el complemento OpenCV al empaquetar",
         "El control console y la consola flotante muestran los registros del script actual; los registros globales se consultan mediante globalconsole o la página de registros",
-        "Los registros en archivos utilizan una implementación integrada que conserva las opciones documentadas y los formatos PatternLayout habituales; las demás API de Log4j dejan de estar disponibles"
+        "Los registros en archivos utilizan una implementación integrada que conserva las opciones documentadas y los formatos PatternLayout habituales; las demás API de Log4j dejan de estar disponibles",
+        "Node.js pinyin/pinyin4j y los controles de ventana de consola ahora llaman al host de forma asíncrona; los scripts deben esperar los resultados con await"
       ],
       "feature": [
         "Los accesos nuevos y ya fijados se archivan automáticamente, con exportación/importación y restauración en lote; los iconos ilegibles se pueden elegir individualmente o completar en lote con los predeterminados sin sobrescribir los guardados; tras descongelar, los accesos ausentes se muestran en la página de copias sin avisos en la página principal, y las eliminaciones manuales reconocidas no se seleccionan por defecto; las copias del mismo script conservan sus ID independientes (búsqueda de accesos existentes con Android 7.1+, detección automática con Android 8+) (acceso: Ajustes > Configuración > Copia de accesos directos)",
@@ -134,7 +135,9 @@
         "La conexión del complemento VSCode admite escaneo QR, confirmación de emparejamiento y detección en la red local (requiere el complemento VSCode 1.1.0+)",
         "El complemento VSCode admite gestión remota de archivos y ejecución de scripts del dispositivo, con progreso en transferencias grandes (requiere el complemento VSCode 1.1.0+)",
         "Administrador de conexiones en los modos cliente y servidor para consultar estados, gestionar clientes y acceder al historial de direcciones",
-        "El modo cliente admite reconexión automática tras desconexiones inesperadas, reintentos al recuperarse la red y restauración de conexiones al iniciar la aplicación"
+        "El modo cliente admite reconexión automática tras desconexiones inesperadas, reintentos al recuperarse la red y restauración de conexiones al iniciar la aplicación",
+        "Módulo Node.js screen_metrics y funciones globales de coordenadas compatibles, con las reglas del host compartidas con el SDK Bun y la rotación actual de pantalla",
+        "Cliente explícito de API del host para Bun con Pinyin, Pinyin4j, coordenadas y consola, con interruptores de capacidades independientes"
       ],
       "fix": [
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",
@@ -263,7 +266,10 @@
         "Errores al resolver el SDK y las rutas de plantillas de empaquetado durante la construcción Gradle",
         "cXy/cYx ignoraban el modo de coordenadas absolutas con false, invertían la relación de aspecto horizontal y rechazaban algunas llamadas al cambiar una sola base",
         "setScaleBases modificaba el otro eje y consumía su única asignación cuando el segundo argumento era inválido o una base ya estaba establecida",
-        "device.width/height y las conversiones de coordenadas leían dimensiones nulas al recrearse una actividad durante la lectura del tamaño por un script"
+        "device.width/height y las conversiones de coordenadas leían dimensiones nulas al recrearse una actividad durante la lectura del tamaño por un script",
+        "Node.js pinyin/pinyin4j solo convertía un pequeño diccionario integrado; ahora usa los plugins Pinyin instalados",
+        "Métodos de ventana y estilo de consola de Node.js que no tenían efecto",
+        "Pérdida de los últimos registros de Bun cuando el resultado síncrono llegaba antes de los callbacks de salida al finalizar el script"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",

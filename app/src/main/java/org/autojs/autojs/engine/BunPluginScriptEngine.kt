@@ -4,9 +4,11 @@ import android.content.Context
 import android.os.Binder
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.plugin.bun.BunBinderCallException
 import org.autojs.autojs.core.plugin.bun.BunBinderCallFailure
@@ -30,15 +32,20 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
 /** Independent JavaScript engine proxy whose source is evaluated only by the Bun plugin. */
-class BunPluginScriptEngine(
+class BunPluginScriptEngine internal constructor(
     context: Context,
-    private val console: GlobalConsole,
+    console: GlobalConsole,
+    private val consoleFactory: () -> ConsoleImpl,
 ) : ScriptEngine.AbstractScriptEngine<JavaScriptSource>() {
+    constructor(context: Context, console: GlobalConsole) : this(context, console, { ConsoleImpl(console.uiHandler, console) })
+
     private val appContext = context.applicationContext
     private val stopped = AtomicBoolean(false)
     private val selectedRuntime = AtomicReference<BunRuntimePluginClient.Selection?>()
@@ -72,9 +79,10 @@ class BunPluginScriptEngine(
         val executionId = "bun-engine-${id}-${UUID.randomUUID()}"
         check(activeExecutionId.compareAndSet(null, executionId)) { "Bun engine already has an active execution" }
         val timeoutMillis = executionTimeoutMillis()
-        val callback = OutputCallback(executionId, selection.providerUid)
+        val executionConsole = consoleFactory().apply { setTitle(scriptSource.name) }
+        val callback = OutputCallback(executionId, selection.providerUid, executionConsole)
         var payloadFile: File? = null
-        val broker = createCapabilityBroker(selection, executionId)
+        val broker = createCapabilityBroker(selection, executionId, executionConsole)
         try {
             val payload = createPayload(scriptSource, selection, executionId, timeoutMillis)
             broker?.attachTo(payload.request)
@@ -101,6 +109,22 @@ class BunPluginScriptEngine(
                     requestCancellation(selection, executionId)
                     throw BunRuntimeExecutionException(error.message ?: "Bun runtime RPC timed out")
                 }
+                // runScript is synchronous, but output and finished are oneway Binder calls. Its return
+                // can overtake callbacks already queued for this process. Drain through finished before
+                // finally closes the callback, otherwise the last stdout/stderr chunks can disappear.
+                if (!stopped.get() && !result.getBoolean(BunRuntimeContract.KEY_CANCELLED)) {
+                    val drained = try {
+                        callback.awaitFinished(OUTPUT_DRAIN_MILLIS) { stopped.get() || isDestroyed }
+                    } catch (error: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        throw ScriptInterruptedException()
+                    }
+                    // Early plugin failures may return even when their finished callback cannot be
+                    // delivered. Preserve that terminal error below instead of masking its cause.
+                    if (!drained && result.getBoolean(BunRuntimeContract.KEY_SUCCEEDED) && !stopped.get() && !isDestroyed) {
+                        throw BunRuntimeExecutionException("Bun output callbacks did not finish within $OUTPUT_DRAIN_MILLIS ms")
+                    }
+                }
                 if (stopped.get() || result.getBoolean(BunRuntimeContract.KEY_CANCELLED)) {
                     throw ScriptInterruptedException()
                 }
@@ -115,6 +139,8 @@ class BunPluginScriptEngine(
         } finally {
             broker?.close()
             callback.close()
+            executionConsole.onRuntimeExit()
+            if (executionConsole.configurator.isExitOnClose) executionConsole.hideDelayed()
             activeExecutionId.compareAndSet(executionId, null)
             payloadFile?.takeIf(File::exists)?.let { stale ->
                 if (!stale.delete()) Log.w(TAG, "Unable to delete stale Bun payload: ${stale.name}")
@@ -205,11 +231,12 @@ class BunPluginScriptEngine(
     private fun createCapabilityBroker(
         selection: BunRuntimePluginClient.Selection,
         executionId: String,
+        executionConsole: ConsoleImpl,
     ): BunHostCapabilityBroker? {
         if (!supportsCapabilityBridge(selection)) return null
         val granted = BunHostCapabilityGrants.grantedBridgeCapabilities(appContext)
         if (granted.isEmpty()) return null
-        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted)
+        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted, { executionConsole }, cwd())
     }
 
     private fun supportsCapabilityBridge(selection: BunRuntimePluginClient.Selection): Boolean =
@@ -252,15 +279,30 @@ class BunPluginScriptEngine(
         putBundle(BunRuntimeContract.KEY_ENVIRONMENT, Bundle())
     }
 
-    private inner class OutputCallback(
+    internal class OutputCallback(
         private val executionId: String,
         private val expectedProviderUid: Int,
+        private val executionConsole: ConsoleImpl,
     ) : IBunRuntimeCallback.Stub() {
         private val closed = AtomicBoolean(false)
         private val acceptedOutputBytes = AtomicLong(0L)
+        private val finished = CountDownLatch(1)
 
         fun close() {
             closed.set(true)
+        }
+
+        /** Does not mistake a local close/cancellation for the plugin's completed output delivery. */
+        @Throws(InterruptedException::class)
+        fun awaitFinished(timeoutMillis: Long, cancelled: () -> Boolean = { false }): Boolean {
+            val deadline = SystemClock.elapsedRealtime() + timeoutMillis.coerceAtLeast(0L)
+            while (true) {
+                if (cancelled()) return false
+                if (finished.count == 0L) return true
+                val remaining = deadline - SystemClock.elapsedRealtime()
+                if (remaining <= 0L) return false
+                if (finished.await(minOf(remaining, 50L), TimeUnit.MILLISECONDS)) return true
+            }
         }
 
         override fun onEvent(event: Bundle?) {
@@ -271,6 +313,7 @@ class BunPluginScriptEngine(
             val level = when (event.getString(BunRuntimeContract.KEY_EVENT_TYPE)) {
                 BunRuntimeContract.EVENT_FINISHED -> {
                     close()
+                    finished.countDown()
                     return
                 }
                 BunRuntimeContract.EVENT_STARTED -> return
@@ -283,7 +326,7 @@ class BunPluginScriptEngine(
             if (byteCount > BunRuntimeContract.MAX_CALLBACK_CHUNK_BYTES || !reserveOutputBytes(byteCount)) return
             val identity = Binder.clearCallingIdentity()
             try {
-                if (!closed.get()) console.println(level, text)
+                if (!closed.get()) executionConsole.println(level, text)
             } finally {
                 Binder.restoreCallingIdentity(identity)
             }
@@ -441,6 +484,7 @@ class BunPluginScriptEngine(
         const val SELECT_RPC_DEADLINE_MILLIS = 70_000L
         const val PREWARM_RPC_DEADLINE_MILLIS = 70_000L
         const val EXECUTION_RPC_GRACE_MILLIS = 15_000L
+        const val OUTPUT_DRAIN_MILLIS = 5_000L
     }
 }
 

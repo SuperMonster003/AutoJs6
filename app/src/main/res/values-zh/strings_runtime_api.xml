@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_console_control_grant">允许 Bun 脚本修改其控制台窗口和日志设置. 下次执行起生效.</string>
+    <string name="summary_bun_pinyin_grant">使用已安装的拼音插件转换中文文本. 下次执行起生效.</string>
+    <string name="summary_bun_pinyin4j_grant">使用已安装的 Pinyin4j 插件查询读音和转换声调. 下次执行起生效.</string>
+    <string name="summary_bun_screen_metrics_grant">读取当前屏幕尺寸并按脚本基数换算坐标. 下次执行起生效.</string>
+    <string name="text_bun_console_control_grant">控制台控制</string>
+    <string name="text_bun_pinyin_grant">拼音</string>
+    <string name="text_bun_pinyin4j_grant">Pinyin4j</string>
+    <string name="text_bun_screen_metrics_grant">屏幕坐标</string>
+</resources>

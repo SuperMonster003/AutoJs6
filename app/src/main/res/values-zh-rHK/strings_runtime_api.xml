@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_console_control_grant">允許 Bun 指令碼修改其控制台視窗和日誌設定. 下次執行起生效.</string>
+    <string name="summary_bun_pinyin_grant">使用已安裝的拼音外掛程式轉換中文文字. 下次執行起生效.</string>
+    <string name="summary_bun_pinyin4j_grant">使用已安裝的 Pinyin4j 外掛程式查詢讀音和轉換聲調. 下次執行起生效.</string>
+    <string name="summary_bun_screen_metrics_grant">讀取目前螢幕尺寸並按指令碼基數換算座標. 下次執行起生效.</string>
+    <string name="text_bun_console_control_grant">控制台控制</string>
+    <string name="text_bun_pinyin_grant">拼音</string>
+    <string name="text_bun_pinyin4j_grant">Pinyin4j</string>
+    <string name="text_bun_screen_metrics_grant">螢幕座標</string>
+</resources>

@@ -114,6 +114,7 @@ class NodePluginJavaScriptEngine(
                     )
                 }.orEmpty(),
                 stdinListener = input::onState,
+                console = runtime.console,
                 outputListener = { type, text ->
                     printScriptOutput(
                         if (type == NodeJsRuntimeContract.EVENT_STDERR) {

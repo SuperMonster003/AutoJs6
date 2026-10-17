@@ -21,14 +21,22 @@ import org.json.JSONObject
  */
 internal class NodeBridgeConsoleBridge(
     private val consoleProvider: () -> ConsoleImpl = { AutoJs.instance.globalConsole },
+    private val controls: RuntimeConsoleBridge? = null,
 ) {
 
     fun dispatch(request: NodeBridgeRequest): NodeBridgeResponse {
         return try {
             when (request.method) {
                 "tail" -> tail(request)
+                in RuntimeConsoleBridge.METHODS -> {
+                    val control = checkNotNull(controls) { "Console controls require a script execution" }
+                    control.invoke(request.method, JSONArray(request.argsJson))
+                    NodeBridgeResponse.success(request.id, "null")
+                }
                 else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
             }
+        } catch (error: SecurityException) {
+            NodeBridgeResponse.failure(request.id, NodeBridgeError.permissionDenied(error.message ?: "Console permission denied", request.module, request.method))
         } catch (error: IllegalArgumentException) {
             NodeBridgeResponse.failure(
                 request.id,

@@ -684,6 +684,7 @@ object NodeBridgeModules {
     const val UI_OVERLAY = NodeBridgePermissionManifest.UI_OVERLAY
     const val CLIPBOARD = NodeBridgePermissionManifest.CLIPBOARD
     const val DEVICE = NodeBridgePermissionManifest.DEVICE
+    const val SCREEN_METRICS = "screen_metrics"
     const val SHELL = NodeBridgePermissionManifest.SHELL
     const val FETCH = "fetch"
     const val WEBSOCKET = "websocket"
@@ -807,7 +808,8 @@ object NodeBridgeModules {
     val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
     val filesMethods = setOf("list", "stat", "read", "write", "mkdir", "rename", "delete")
-    val consoleMethods = setOf("tail")
+    val consoleMethods = setOf("tail") + RuntimeConsoleBridge.METHODS
+    val screenMetricsMethods = RuntimeCoordinateBridge.METHODS
     val eventsMethods = setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
@@ -838,6 +840,7 @@ object NodeBridgeModules {
         UI_OVERLAY to uiOverlayMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
+        SCREEN_METRICS to screenMetricsMethods,
         EVENTS to eventsMethods,
         KEYS to keysMethods,
         SHELL to shellMethods,
@@ -893,6 +896,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val pinyin4jBackend: NodePinyin4jBackend = AndroidNodePinyin4jBackend(context),
     private val permissionManifest: NodeBridgePermissionManifest.Manifest? = null,
     private val agentScriptRoots: List<File> = emptyList(),
+    private val executionConsole: org.autojs.autojs.core.console.ConsoleImpl? = null,
 ) : NodeBridgeCapabilityProvider {
 
     private val appContext = context.applicationContext
@@ -979,7 +983,13 @@ class AndroidNodeBridgeCapabilityProvider(
         if (policy == null) NodeBridgeFilesBridge(appContext)
         else NodeBridgeFilesBridge(appContext, rootProvider = { policy.workingRoot }, modelPathPolicy = policy)
     }
-    private val consoleBridge by lazy { NodeBridgeConsoleBridge() }
+    private val consoleBridge by lazy {
+        NodeBridgeConsoleBridge(controls = if (modelFacingPluginSession) null else RuntimeConsoleBridge(
+            consoleProvider = { executionConsole ?: org.autojs.autojs.AutoJs.instance.globalConsole },
+            workingDirectory = engineInfo.cwd,
+        ))
+    }
+    private val coordinateBridge = RuntimeCoordinateBridge()
     private val hostEnginesBridge by lazy { NodeBridgeHostEnginesBridge() }
     private val samplesBridge by lazy { NodeBridgeSamplesBridge(appContext) }
     // Self-described plugin tools (MCP roadmap P12 D29); the screen is captured like accessibility.captureScreenImage.
@@ -1089,6 +1099,13 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.UI_OVERLAY && request.method in NodeBridgeModules.uiOverlayMethods -> dispatchUiOverlay(request, auditedCallback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, auditedCallback)
+            request.module == NodeBridgeModules.SCREEN_METRICS && request.method in NodeBridgeModules.screenMetricsMethods -> dispatchOnMain(request, auditedCallback) {
+                try {
+                    NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(coordinateBridge.invoke(request.method, request.argsArray())))
+                } catch (error: IllegalArgumentException) {
+                    NodeBridgeResponse.failure(request.id, NodeBridgeError.invalidRequest(error.message ?: "Invalid coordinate arguments", request.module, request.method))
+                }
+            }
             request.module == NodeBridgeModules.EVENTS && request.method in NodeBridgeModules.eventsMethods -> dispatchEvents(request, auditedCallback)
             request.module == NodeBridgeModules.KEYS && request.method in NodeBridgeModules.keysMethods -> dispatchKeys(request, auditedCallback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, auditedCallback)

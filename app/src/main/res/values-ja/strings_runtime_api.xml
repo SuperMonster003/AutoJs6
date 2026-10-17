@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_console_control_grant">Bun スクリプトによるコンソールウィンドウとログ設定の変更を許可します. 次回の実行から適用されます.</string>
+    <string name="summary_bun_pinyin_grant">インストール済みの Pinyin プラグインで中国語テキストを変換します. 次回の実行から適用されます.</string>
+    <string name="summary_bun_pinyin4j_grant">インストール済みの Pinyin4j プラグインで読みと声調を変換します. 次回の実行から適用されます.</string>
+    <string name="summary_bun_screen_metrics_grant">現在の画面サイズを読み取り, スクリプトの基準値で座標を変換します. 次回の実行から適用されます.</string>
+    <string name="text_bun_console_control_grant">コンソール制御</string>
+    <string name="text_bun_pinyin_grant">ピンイン</string>
+    <string name="text_bun_pinyin4j_grant">Pinyin4j</string>
+    <string name="text_bun_screen_metrics_grant">画面座標</string>
+</resources>

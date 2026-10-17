@@ -517,6 +517,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(UI_OVERLAY)
             }
             NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
+            NodeBridgeModules.SCREEN_METRICS -> listOf(DEVICE)
             NodeBridgeModules.DEVICE -> when (method) {
                 "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings",
                 "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake" -> listOf(DEVICE, DEVICE_POWER)

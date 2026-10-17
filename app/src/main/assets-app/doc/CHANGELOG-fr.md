@@ -13,6 +13,7 @@
 * `Astuce` Pour utiliser images ou d'autres fonctions dépendant d'OpenCV dans une application empaquetée, sélectionnez le plugin OpenCV lors de l'empaquetage
 * `Astuce` Le composant console et la console flottante affichent désormais les journaux du script courant; les journaux globaux sont accessibles via le composant globalconsole ou la page des journaux
 * `Astuce` La journalisation dans des fichiers utilise désormais une implémentation intégrée, conservant les options documentées et les formats PatternLayout courants; les autres API Log4j ne sont plus disponibles
+* `Astuce` Les méthodes Node.js pinyin/pinyin4j et les contrôles de fenêtre de console appellent désormais l'hôte de façon asynchrone; les scripts doivent attendre leurs résultats avec await
 * `Fonctionnalité` Les raccourcis nouveaux et déjà épinglés sont archivés automatiquement, avec export/import et restauration en lot; les icônes illisibles peuvent être choisies individuellement ou remplacées en lot par les icônes par défaut sans écraser les icônes enregistrées; après dégel, les raccourcis manquants sont indiqués sur la page de sauvegarde sans rappel sur la page principale, et les suppressions manuelles reconnues ne sont pas cochées par défaut; les copies du même script conservent leurs ID distincts (recherche des raccourcis existants sous Android 7.1+, détection automatique sous Android 8+) (accès: Paramètres > Configuration > Sauvegarde des raccourcis)
 * `Fonctionnalité` Assistant de configuration, pour exécuter successivement les assistants d'autorisation et d'installation des plugins, accessible depuis le message de bienvenue après le premier démarrage (accès: Paramètres > Configuration > Assistant de configuration)
 * `Fonctionnalité` Assistant d'autorisation, pour sélectionner les autorisations du tiroir d'accueil et les demander successivement, avec les profils intégrés "Standard"/"Minimal"/"Tout" et des profils personnalisés; les autorisations accordées peuvent être masquées par le menu (accès: Assistant de configuration/bouton du titre du groupe "Autorisations" du tiroir d'accueil)
@@ -137,6 +138,8 @@
 * `Fonctionnalité` Gestion distante des fichiers et exécution des scripts de l'appareil via le plugin VSCode, avec progression des transferts volumineux (nécessite le plugin VSCode 1.1.0+)
 * `Fonctionnalité` Gestionnaire de connexions en modes client et serveur, pour consulter l'état, gérer les clients et accéder à l'historique des adresses
 * `Fonctionnalité` Le mode client permet la reconnexion après une coupure imprévue, de nouvelles tentatives au retour du réseau et la restauration de la connexion au démarrage de l'application
+* `Fonctionnalité` Module Node.js screen_metrics et fonctions globales de conversion compatibles, partageant les règles de l'hôte avec le SDK Bun et suivant la rotation de l'écran
+* `Fonctionnalité` Client explicite de l'API hôte Bun pour Pinyin, Pinyin4j, les coordonnées et la console, avec des interrupteurs de capacités indépendants
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés
@@ -264,6 +267,9 @@
 * `Correction` cXy/cYx ignoraient le mode de coordonnées absolues avec false, inversaient les rapports largeur/hauteur en paysage et rejetaient certains appels après la modification d'une seule base
 * `Correction` setScaleBases modifiant l'autre axe et consommant son unique affectation lorsque le second argument est invalide ou qu'une base est déjà définie
 * `Correction` device.width/height et les conversions de coordonnées lisant des dimensions nulles lorsqu'une activité est recréée pendant la lecture des dimensions par un script
+* `Correction` Node.js pinyin/pinyin4j limité à un petit dictionnaire intégré; les plugins Pinyin installés sont désormais utilisés
+* `Correction` Méthodes Node.js de contrôle de la fenêtre et du style de console sans effet
+* `Correction` Perte des derniers journaux Bun lorsque le résultat synchrone arrivait avant les rappels de sortie en fin de script
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan

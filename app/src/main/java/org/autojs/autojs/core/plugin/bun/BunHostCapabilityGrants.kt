@@ -14,6 +14,12 @@ import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
  */
 object BunHostCapabilityGrants {
 
+    // Host-owned capabilities. The plugin negotiates these IDs through /v1/info, without a new AIDL version.
+    const val TEXT_PINYIN = "text.pinyin"
+    const val TEXT_PINYIN4J = "text.pinyin4j"
+    const val SCREEN_METRICS = "screen.metrics"
+    const val CONSOLE_CONTROL = "console.control"
+
     private const val SP_NAME = "bun_host_capability_grants"
 
     /** Read-only host info snapshot: host package, version and advisory locale/build date. */
@@ -46,10 +52,34 @@ object BunHostCapabilityGrants {
         context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE).edit { putBoolean(KEY_DEVICE_INFO, granted) }
     }
 
+    fun isTextPinyinGranted(context: Context): Boolean = isGranted(context, TEXT_PINYIN, true)
+    fun setTextPinyinGranted(context: Context, granted: Boolean) = setGranted(context, TEXT_PINYIN, granted)
+
+    fun isTextPinyin4jGranted(context: Context): Boolean = isGranted(context, TEXT_PINYIN4J, true)
+    fun setTextPinyin4jGranted(context: Context, granted: Boolean) = setGranted(context, TEXT_PINYIN4J, granted)
+
+    fun isScreenMetricsGranted(context: Context): Boolean = isGranted(context, SCREEN_METRICS, true)
+    fun setScreenMetricsGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_METRICS, granted)
+
+    /** Window and global log configuration are opt-in, independently of normal stdout/stderr forwarding. */
+    fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
+    fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
+
+    private fun isGranted(context: Context, key: String, default: Boolean): Boolean =
+        context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE).getBoolean(key, default)
+
+    private fun setGranted(context: Context, key: String, granted: Boolean) {
+        context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE).edit { putBoolean(key, granted) }
+    }
+
     /** Capability IDs of the runtime bridge (plugin M7, dynamic calls) that are currently granted, in contract order. */
     fun grantedBridgeCapabilities(context: Context): List<String> = buildList {
         if (isUiToastGranted(context)) add(BunRuntimeContract.HOST_CAPABILITY_UI_TOAST)
         if (isDeviceInfoGranted(context)) add(BunRuntimeContract.HOST_CAPABILITY_DEVICE_INFO)
+        if (isTextPinyinGranted(context)) add(TEXT_PINYIN)
+        if (isTextPinyin4jGranted(context)) add(TEXT_PINYIN4J)
+        if (isScreenMetricsGranted(context)) add(SCREEN_METRICS)
+        if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
     }
 
 }

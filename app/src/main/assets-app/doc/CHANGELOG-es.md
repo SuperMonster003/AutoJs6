@@ -13,6 +13,7 @@
 * `Sugerencia` Al usar images u otras funciones que dependen de OpenCV en aplicaciones empaquetadas, selecciona el complemento OpenCV al empaquetar
 * `Sugerencia` El control console y la consola flotante muestran los registros del script actual; los registros globales se consultan mediante globalconsole o la página de registros
 * `Sugerencia` Los registros en archivos utilizan una implementación integrada que conserva las opciones documentadas y los formatos PatternLayout habituales; las demás API de Log4j dejan de estar disponibles
+* `Sugerencia` Node.js pinyin/pinyin4j y los controles de ventana de consola ahora llaman al host de forma asíncrona; los scripts deben esperar los resultados con await
 * `Nuevo` Los accesos nuevos y ya fijados se archivan automáticamente, con exportación/importación y restauración en lote; los iconos ilegibles se pueden elegir individualmente o completar en lote con los predeterminados sin sobrescribir los guardados; tras descongelar, los accesos ausentes se muestran en la página de copias sin avisos en la página principal, y las eliminaciones manuales reconocidas no se seleccionan por defecto; las copias del mismo script conservan sus ID independientes (búsqueda de accesos existentes con Android 7.1+, detección automática con Android 8+) (acceso: Ajustes > Configuración > Copia de accesos directos)
 * `Nuevo` Asistente de configuración para ejecutar sucesivamente los asistentes de permisos e instalación de complementos, accesible desde el mensaje de bienvenida tras el primer inicio (acceso: Ajustes > Configuración > Asistente de configuración)
 * `Nuevo` Asistente de permisos para seleccionar los permisos del panel lateral y solicitarlos sucesivamente, con perfiles "Estándar"/"Mínimo"/"Todos" y perfiles personalizados; los permisos concedidos pueden ocultarse desde el menú (acceso: Asistente de configuración/botón del encabezado "Permisos" del panel lateral)
@@ -137,6 +138,8 @@
 * `Nuevo` El complemento VSCode admite gestión remota de archivos y ejecución de scripts del dispositivo, con progreso en transferencias grandes (requiere el complemento VSCode 1.1.0+)
 * `Nuevo` Administrador de conexiones en los modos cliente y servidor para consultar estados, gestionar clientes y acceder al historial de direcciones
 * `Nuevo` El modo cliente admite reconexión automática tras desconexiones inesperadas, reintentos al recuperarse la red y restauración de conexiones al iniciar la aplicación
+* `Nuevo` Módulo Node.js screen_metrics y funciones globales de coordenadas compatibles, con las reglas del host compartidas con el SDK Bun y la rotación actual de pantalla
+* `Nuevo` Cliente explícito de API del host para Bun con Pinyin, Pinyin4j, coordenadas y consola, con interruptores de capacidades independientes
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
@@ -264,6 +267,9 @@
 * `Corrección` cXy/cYx ignoraban el modo de coordenadas absolutas con false, invertían la relación de aspecto horizontal y rechazaban algunas llamadas al cambiar una sola base
 * `Corrección` setScaleBases modificaba el otro eje y consumía su única asignación cuando el segundo argumento era inválido o una base ya estaba establecida
 * `Corrección` device.width/height y las conversiones de coordenadas leían dimensiones nulas al recrearse una actividad durante la lectura del tamaño por un script
+* `Corrección` Node.js pinyin/pinyin4j solo convertía un pequeño diccionario integrado; ahora usa los plugins Pinyin instalados
+* `Corrección` Métodos de ventana y estilo de consola de Node.js que no tenían efecto
+* `Corrección` Pérdida de los últimos registros de Bun cuando el resultado síncrono llegaba antes de los callbacks de salida al finalizar el script
 * `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
 * `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
 * `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano

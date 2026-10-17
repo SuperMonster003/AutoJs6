@@ -89,6 +89,39 @@
             app:title="@string/text_bun_device_info_grant"
             app:summary="@string/summary_bun_device_info_grant" />
 
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_pinyin_grant"
+            app:defaultValue="true"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_pinyin_grant"
+            app:summary="@string/summary_bun_pinyin_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_pinyin4j_grant"
+            app:defaultValue="true"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_pinyin4j_grant"
+            app:summary="@string/summary_bun_pinyin4j_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_screen_metrics_grant"
+            app:defaultValue="true"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_screen_metrics_grant"
+            app:summary="@string/summary_bun_screen_metrics_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_console_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_console_control_grant"
+            app:summary="@string/summary_bun_console_control_grant" />
+
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory

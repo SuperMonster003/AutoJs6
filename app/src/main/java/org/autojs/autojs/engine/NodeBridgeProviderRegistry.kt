@@ -245,7 +245,7 @@ object NodeBridgeProviderRegistry {
         ),
         provider(
             id = DEVICE_PROVIDER,
-            modules = listOf(NodeBridgeModules.DEVICE),
+            modules = listOf(NodeBridgeModules.DEVICE, NodeBridgeModules.SCREEN_METRICS),
             capabilities = listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER),
             packagedSupport = packagedProviderDependent("basic device methods use live or queued provider metadata; power settings require live bridge metadata and user-visible settings disclosure"),
         ),
@@ -327,7 +327,7 @@ object NodeBridgeProviderRegistry {
             id = CONSOLE_PROVIDER,
             modules = listOf(NodeBridgeModules.CONSOLE),
             capabilities = listOf(NodeBridgePermissionManifest.CONSOLE),
-            packagedSupport = packagedSupported("bounded tail of the shared global console (500 lines / 256 KiB per call)"),
+            packagedSupport = packagedSupported("bounded global console tail and script console controls; showing a window requires overlay permission"),
         ),
         provider(
             id = RHINO_PROVIDER,

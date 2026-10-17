@@ -77,6 +77,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunHostInfoGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiToastGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDeviceInfoGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunPinyinGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunPinyin4jGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunScreenMetricsGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val args = requireArguments()
@@ -200,6 +204,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunHostInfoGrantPreference = findPreference(KEY_PLUGIN_BUN_HOST_INFO_GRANT)
         bunUiToastGrantPreference = findPreference(KEY_PLUGIN_BUN_UI_TOAST_GRANT)
         bunDeviceInfoGrantPreference = findPreference(KEY_PLUGIN_BUN_DEVICE_INFO_GRANT)
+        bunPinyinGrantPreference = findPreference("plugin_bun_pinyin_grant")
+        bunPinyin4jGrantPreference = findPreference("plugin_bun_pinyin4j_grant")
+        bunScreenMetricsGrantPreference = findPreference("plugin_bun_screen_metrics_grant")
+        bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
 
         launcherIconPreference.setOnPreferenceChangeListener { _, value ->
             val context = requireContext().applicationContext
@@ -279,6 +287,22 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setDeviceInfoGranted(requireContext(), newValue as? Boolean ?: true)
             true
         }
+        bunPinyinGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setTextPinyinGranted(requireContext(), value == true)
+            true
+        }
+        bunPinyin4jGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setTextPinyin4jGranted(requireContext(), value == true)
+            true
+        }
+        bunScreenMetricsGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setScreenMetricsGranted(requireContext(), value == true)
+            true
+        }
+        bunConsoleControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
+            true
+        }
 
         instructionPreference.setOnPreferenceClickListener {
             PluginInstructionActivity.launch(
@@ -338,6 +362,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunHostInfoGrantPreference?.isChecked = BunHostCapabilityGrants.isHostInfoGranted(requireContext())
         bunUiToastGrantPreference?.isChecked = BunHostCapabilityGrants.isUiToastGranted(requireContext())
         bunDeviceInfoGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceInfoGranted(requireContext())
+        bunPinyinGrantPreference?.isChecked = BunHostCapabilityGrants.isTextPinyinGranted(requireContext())
+        bunPinyin4jGrantPreference?.isChecked = BunHostCapabilityGrants.isTextPinyin4jGranted(requireContext())
+        bunScreenMetricsGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenMetricsGranted(requireContext())
+        bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
         autoCheckPreference.isEnabled = globalAutoCheckEnabled
         autoCheckPreference.setTitleColorVisualEnabledWith { globalAutoCheckEnabled }
         autoCheckPreference.setSummaryColorVisualEnabledWith { globalAutoCheckEnabled }

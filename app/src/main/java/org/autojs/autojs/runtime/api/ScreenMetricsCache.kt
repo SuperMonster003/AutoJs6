@@ -14,6 +14,8 @@ internal class ScreenMetricsCache(
         }
     }
 
+    data class Dimensions(val width: Int, val height: Int, val rotation: Int)
+
     @Volatile
     private var cached: Sides? = null
 
@@ -27,16 +29,19 @@ internal class ScreenMetricsCache(
     }
 
     val width: Int
-        get() {
-            val sides = snapshot()
-            val turn = rotation()
-            return if (turn == ROTATION_90 || turn == ROTATION_270) sides.long else sides.short
-        }
+        get() = dimensions().width
 
     val height: Int
-        get() {
-            val sides = snapshot()
-            val turn = rotation()
-            return if (turn == ROTATION_90 || turn == ROTATION_270) sides.short else sides.long
+        get() = dimensions().height
+
+    /** A single rotation read keeps both dimensions coherent while the device turns. */
+    fun dimensions(): Dimensions {
+        val sides = snapshot()
+        val turn = rotation()
+        return if (turn == ROTATION_90 || turn == ROTATION_270) {
+            Dimensions(sides.long, sides.short, turn)
+        } else {
+            Dimensions(sides.short, sides.long, turn)
         }
+    }
 }

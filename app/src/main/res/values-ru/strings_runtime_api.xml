@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_console_control_grant">Разрешить скриптам Bun изменять окно консоли и настройки журнала. Применяется со следующего запуска.</string>
+    <string name="summary_bun_pinyin_grant">Использовать установленный плагин Pinyin для преобразования китайского текста. Применяется со следующего запуска.</string>
+    <string name="summary_bun_pinyin4j_grant">Использовать установленный плагин Pinyin4j для чтений и тонов. Применяется со следующего запуска.</string>
+    <string name="summary_bun_screen_metrics_grant">Читать текущие размеры экрана и преобразовывать координаты по базам скрипта. Применяется со следующего запуска.</string>
+    <string name="text_bun_console_control_grant">Управление консолью</string>
+    <string name="text_bun_pinyin_grant">Pinyin</string>
+    <string name="text_bun_pinyin4j_grant">Pinyin4j</string>
+    <string name="text_bun_screen_metrics_grant">Координаты экрана</string>
+</resources>

@@ -6,6 +6,15 @@ import org.junit.Test
 
 class ScreenMetricsCacheTest {
     @Test
+    fun dimensionsReadsRotationOnceForBothSides() {
+        var turns = 0
+        val cache = ScreenMetricsCache({ ScreenMetricsCache.Sides(720, 1280) }, { turns++ % 4 })
+        assertEquals(ScreenMetricsCache.Dimensions(720, 1280, 0), cache.dimensions())
+        assertEquals(ScreenMetricsCache.Dimensions(1280, 720, 1), cache.dimensions())
+        assertEquals(2, turns)
+    }
+
+    @Test
     fun activityResetDuringRotationReadCannotTurnWidthOrHeightIntoZero() {
         for (readWidth in listOf(true, false)) {
             lateinit var cache: ScreenMetricsCache

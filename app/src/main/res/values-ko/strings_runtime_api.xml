@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_console_control_grant">Bun 스크립트가 콘솔 창과 로그 설정을 변경하도록 허용합니다. 다음 실행부터 적용됩니다.</string>
+    <string name="summary_bun_pinyin_grant">설치된 Pinyin 플러그인으로 중국어 텍스트를 변환합니다. 다음 실행부터 적용됩니다.</string>
+    <string name="summary_bun_pinyin4j_grant">설치된 Pinyin4j 플러그인으로 발음과 성조를 변환합니다. 다음 실행부터 적용됩니다.</string>
+    <string name="summary_bun_screen_metrics_grant">현재 화면 크기를 읽고 스크립트 기준값으로 좌표를 변환합니다. 다음 실행부터 적용됩니다.</string>
+    <string name="text_bun_console_control_grant">콘솔 제어</string>
+    <string name="text_bun_pinyin_grant">병음</string>
+    <string name="text_bun_pinyin4j_grant">Pinyin4j</string>
+    <string name="text_bun_screen_metrics_grant">화면 좌표</string>
+</resources>

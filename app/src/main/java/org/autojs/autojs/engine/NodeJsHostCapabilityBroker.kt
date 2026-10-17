@@ -16,6 +16,7 @@ internal class NodeJsHostCapabilityBroker(
     context: Context,
     request: NodePluginScriptRequest,
     launchSurface: String,
+    console: org.autojs.autojs.core.console.ConsoleImpl? = null,
 ) : INodeJsHostCapabilityBroker.Stub() {
 
     val id: String = request.executionId
@@ -45,6 +46,7 @@ internal class NodeJsHostCapabilityBroker(
         engineInfo = engineInfo,
         javaInteropEnabled = request.javaInteropEnabled != false,
         bridgeLimits = bridgeLimits,
+        executionConsole = console,
     )
 
     override fun getBrokerInfo(): Bundle {

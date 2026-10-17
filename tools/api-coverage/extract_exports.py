@@ -143,16 +143,30 @@ def extract(host):
     for m in re.finditer('^import org\\.autojs\\.autojs\\.runtime\\.api\\.augment\\.([\\w.]+)(?: as (\\w+))?$', runtime, re.M):
         imports[m[2] or m[1].split('.')[-1]] = m[1]
     routes = []
-    for m in re.finditer('^\\s*(\\w+)(?:\\([^\\n]*?\\))?(?:\\.also\\s*\\{[^\\n]*?\\})?\\.(augmentWithRuntime|augment|assignWithRuntime|proxying)\\((\\w+)', runtime, re.M):
+    # Mount syntax is code, not strings or comments. Keep offsets for matching
+    # a trailing also lambda to the object returned by its enclosing mount.
+    mount_source = re.sub(r'"""[\s\S]*?"""|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
+                          lambda m: re.sub(r'[^\n]', ' ', m[0]), masked(runtime))
+    scopes = []
+    for m in re.finditer(r'(?<![\w.])(\w+)(?:\([^\n]*?\))?(?:\.also\s*\{[^\n]*?\})?\.(augmentWithRuntime|augment|assignWithRuntime|proxying)\((\w+)(?=\s*[,\)])', mount_source):
         if m[1] in imports:
-            routes.append((m[1], imports[m[1]], m[2], m[3]))
+            owner = next((index for start, end, alias, index in reversed(scopes)
+                          if start < m.start() < end and alias == m[3]), None)
+            routes.append((m[1], imports[m[1]], m[2], m[3], owner))
+            call_open = mount_source.rfind('(', m.start(), m.end())
+            call_end = end_group(mount_source, call_open)
+            continuation = re.match(r'\s*\.also\s*\{\s*(?:(\w+)\s*->)?', mount_source[call_end + 1:])
+            if continuation:
+                start = call_end + 1 + continuation[0].index('{')
+                scopes.append((start, end_group(mount_source, start), continuation[1] or 'it', len(routes) - 1))
     records = []
     modules = []
     unresolved = []
-    mount_calls = list(re.finditer(r'\.(augmentWithRuntime|augment|assignWithRuntime|proxying)\(', masked(runtime)))
+    mount_calls = list(re.finditer(r'\.(augmentWithRuntime|augment|assignWithRuntime|proxying)\(', mount_source))
     if len(mount_calls) != len(routes):
         unresolved.append({'reason': 'Unrecognized runtime mount syntax', 'mountCalls': len(mount_calls), 'parsedRoutes': len(routes)})
-    for imported, qual, operation, target in routes:
+    route_modules = {}
+    for route_index, (imported, qual, operation, target, owner) in enumerate(routes):
         rel = '/'.join(qual.split('.')[:-1])
         class_name = qual.split('.')[-1]
         candidates = list((BASE / rel).glob('*.kt'))
@@ -179,7 +193,11 @@ def extract(host):
         else:
             name = class_name[0].lower() + class_name[1:]
             keys = [name, '$' + name]
-        module = '' if operation == 'assignWithRuntime' else ('' if target == 'target' else target + '.') + keys[0]
+        if target == 'it' and owner is None:
+            unresolved.append({'class': qual, 'reason': 'Unbound mount lambda receiver', 'target': target})
+        parent = route_modules.get(owner, target)
+        module = '' if operation == 'assignWithRuntime' else ('' if parent == 'target' else parent + '.') + keys[0]
+        route_modules[route_index] = module
         modules.append({'module': module, 'class': qual, 'source': str(path), 'operation': operation, 'target': target, 'aliases': keys if module else [], 'callable': bool(re.search('\\bInvokable\\b', s.split('override val')[0]))})
         for decl in re.finditer('override val ((?:self|global)Assignment\\w+)', s):
             reg = decl[1]

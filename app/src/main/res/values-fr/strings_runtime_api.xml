@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_console_control_grant">Autoriser les scripts Bun à modifier leur fenêtre de console et les paramètres du journal. Applicable à la prochaine exécution.</string>
+    <string name="summary_bun_pinyin_grant">Utiliser le plugin Pinyin installé pour convertir le texte chinois. Applicable à la prochaine exécution.</string>
+    <string name="summary_bun_pinyin4j_grant">Utiliser le plugin Pinyin4j installé pour les lectures et les tons. Applicable à la prochaine exécution.</string>
+    <string name="summary_bun_screen_metrics_grant">Lire les dimensions actuelles et convertir les coordonnées selon les bases du script. Applicable à la prochaine exécution.</string>
+    <string name="text_bun_console_control_grant">Contrôle de la console</string>
+    <string name="text_bun_pinyin_grant">Pinyin</string>
+    <string name="text_bun_pinyin4j_grant">Pinyin4j</string>
+    <string name="text_bun_screen_metrics_grant">Coordonnées de l\'écran</string>
+</resources>

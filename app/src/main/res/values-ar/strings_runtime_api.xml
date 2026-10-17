@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_console_control_grant">السماح لبرامج Bun بتغيير نافذة وحدة التحكم وإعدادات السجل. يسري في التشغيل التالي.</string>
+    <string name="summary_bun_pinyin_grant">استخدام إضافة Pinyin المثبتة لتحويل النص الصيني. يسري في التشغيل التالي.</string>
+    <string name="summary_bun_pinyin4j_grant">استخدام إضافة Pinyin4j المثبتة للقراءات والنغمات. يسري في التشغيل التالي.</string>
+    <string name="summary_bun_screen_metrics_grant">قراءة أبعاد الشاشة الحالية وتحويل الإحداثيات وفق قواعد البرنامج. يسري في التشغيل التالي.</string>
+    <string name="text_bun_console_control_grant">التحكم في وحدة التحكم</string>
+    <string name="text_bun_pinyin_grant">Pinyin</string>
+    <string name="text_bun_pinyin4j_grant">Pinyin4j</string>
+    <string name="text_bun_screen_metrics_grant">إحداثيات الشاشة</string>
+</resources>

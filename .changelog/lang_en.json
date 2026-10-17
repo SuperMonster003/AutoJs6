@@ -8,7 +8,8 @@
         "The target SDK of packaged apps changes from 29 to 37; shared storage and local network access require permissions according to system requirements",
         "When packaged apps use images or other features that depend on OpenCV, select the OpenCV plugin when packaging",
         "The console element and floating console now display logs from the current script; global logs are available through the globalconsole element or the log page",
-        "File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available"
+        "File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available",
+        "Node.js pinyin/pinyin4j and console window controls now call the host asynchronously; scripts must await their results"
       ],
       "feature": [
         "Desktop shortcuts support automatic archiving of new and pre-existing pinned shortcuts, backup export/import and batch restoration; unreadable icons can be chosen individually or filled with defaults in bulk without replacing saved icons; missing shortcuts after unfreezing are shown on the shortcut backup page without home page prompts, and recognized manual removals are not selected by default; copies of the same script keep separate original IDs (existing shortcut discovery requires Android 7.1+, automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)",
@@ -134,7 +135,9 @@
         "QR code scanning, pairing confirmation and local network discovery for VSCode plugin connections (requires VSCode plugin 1.1.0+)",
         "Remote file management and device script execution through the VSCode plugin, with progress display for large file transfers (requires VSCode plugin 1.1.0+)",
         "Connection manager in client and server modes, for viewing connection status, managing clients and accessing address history",
-        "Client mode supports automatic reconnection after unexpected disconnection, retries when the network returns and connection restoration at app startup"
+        "Client mode supports automatic reconnection after unexpected disconnection, retries when the network returns and connection restoration at app startup",
+        "Node.js screen_metrics module and compatibility coordinate globals, sharing host conversion rules with the Bun SDK and following current screen rotation",
+        "Explicit Bun host API client with Pinyin, Pinyin4j, coordinate and console operations, with independent capability switches"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
@@ -263,7 +266,10 @@
         "Incorrect SDK resolution and packaging template path resolution during Gradle builds",
         "cXy/cYx ignoring absolute coordinate mode when false is specified, reversing landscape aspect ratios, and rejecting some calls after setting only one scale base",
         "setScaleBases changing the other axis and consuming its one-time assignment when the second argument is invalid or a scale base has already been set",
-        "device.width/height and coordinate conversions reading zero dimensions when an activity is recreated concurrently with a script screen-size read"
+        "device.width/height and coordinate conversions reading zero dimensions when an activity is recreated concurrently with a script screen-size read",
+        "Node.js pinyin/pinyin4j converting only a small built-in dictionary; they now use the installed Pinyin plugins",
+        "Node.js console window and styling methods having no effect",
+        "Bun losing trailing logs when the synchronous result arrived before output callbacks at script completion"
       ],
       "improvement": [
         "Deferred initialization of noncritical components to improve app startup speed",

@@ -84,6 +84,32 @@ class RegistrationTests(unittest.TestCase):
             runtime_file.write_text(runtime_file.read_text(encoding="utf-8").replace("Sample(this)", "Sample(\nthis\n)"), encoding="utf-8")
             self.assertTrue(any(item.get("reason") == "Unrecognized runtime mount syntax" for item in extract(root)["unresolved"]))
 
+    def test_inline_nested_mounts_keep_the_returned_parent_and_ignore_string_examples(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            java = root / 'app/src/main/java/org/autojs/autojs/runtime'
+            base = java / 'api/augment/sample'
+            base.mkdir(parents=True)
+            for name, key in [('Parent', 'speech'), ('Child', 'models'), ('Other', 'tools')]:
+                (base / (name + '.kt')).write_text(f'''class {name} : Augmentable() {{
+                    override val keys = listOf(AugmentableKey("{key}", withDollarPrefix = false))
+                    override val selfAssignmentFunctions = listOf(::list.name)
+                }}''', encoding='utf-8')
+            runtime = '\n'.join('import org.autojs.autojs.runtime.api.augment.sample.' + name for name in ['Parent', 'Child', 'Other'])
+            runtime += '''
+                Parent(this).augment(target).also { Child(this).augment(it).also { child -> Other(this).augment(child) } }
+                val example = "Parent(this).augment(target)"
+                // Child(this).augment(target)
+            '''
+            runtime_file = java / 'ScriptRuntime.kt'
+            runtime_file.write_text(runtime, encoding='utf-8')
+            result = extract(root)
+            self.assertEqual([], result['unresolved'])
+            self.assertEqual({'speech.list', 'speech.models.list', 'speech.models.tools.list'},
+                             {row['api'] for row in result['records']})
+            runtime_file.write_text(runtime.replace('augment(it)', 'augment(makeTarget())'), encoding='utf-8')
+            self.assertTrue(any(row.get('reason') == 'Unrecognized runtime mount syntax' for row in extract(root)['unresolved']))
+
 
 class CoverageTests(unittest.TestCase):
     def test_doc_search_is_scoped_and_does_not_match_partial_identifiers(self):

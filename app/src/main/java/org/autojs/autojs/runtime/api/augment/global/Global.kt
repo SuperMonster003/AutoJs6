@@ -645,25 +645,29 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun cX(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtMost(args, 3) { argList ->
-            CoordinateScale.convert(CoordinateScale.Axis.X, ScreenMetrics.deviceScreenWidth, ScreenMetrics.deviceScreenHeight, scriptRuntime.scale, argList)
+            val display = ScreenMetrics.dimensions()
+            CoordinateScale.convert(CoordinateScale.Axis.X, display.width, display.height, scriptRuntime.scale, argList)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun cY(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtMost(args, 3) { argList ->
-            CoordinateScale.convert(CoordinateScale.Axis.Y, ScreenMetrics.deviceScreenWidth, ScreenMetrics.deviceScreenHeight, scriptRuntime.scale, argList)
+            val display = ScreenMetrics.dimensions()
+            CoordinateScale.convert(CoordinateScale.Axis.Y, display.width, display.height, scriptRuntime.scale, argList)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun cYx(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsLengthInRange(args, 1..3) { argList ->
-            CoordinateScale.convert(CoordinateScale.Axis.Y_FROM_X, ScreenMetrics.deviceScreenWidth, ScreenMetrics.deviceScreenHeight, scriptRuntime.scale, argList)
+            val display = ScreenMetrics.dimensions()
+            CoordinateScale.convert(CoordinateScale.Axis.Y_FROM_X, display.width, display.height, scriptRuntime.scale, argList)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun cXy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsLengthInRange(args, 1..3) { argList ->
-            CoordinateScale.convert(CoordinateScale.Axis.X_FROM_Y, ScreenMetrics.deviceScreenWidth, ScreenMetrics.deviceScreenHeight, scriptRuntime.scale, argList)
+            val display = ScreenMetrics.dimensions()
+            CoordinateScale.convert(CoordinateScale.Axis.X_FROM_Y, display.width, display.height, scriptRuntime.scale, argList)
         }
 
         @JvmStatic

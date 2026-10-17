@@ -13,6 +13,7 @@
 * `Hint` When packaged apps use images or other features that depend on OpenCV, select the OpenCV plugin when packaging
 * `Hint` The console element and floating console now display logs from the current script; global logs are available through the globalconsole element or the log page
 * `Hint` File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available
+* `Hint` Node.js pinyin/pinyin4j and console window controls now call the host asynchronously; scripts must await their results
 * `Feature` Desktop shortcuts support automatic archiving of new and pre-existing pinned shortcuts, backup export/import and batch restoration; unreadable icons can be chosen individually or filled with defaults in bulk without replacing saved icons; missing shortcuts after unfreezing are shown on the shortcut backup page without home page prompts, and recognized manual removals are not selected by default; copies of the same script keep separate original IDs (existing shortcut discovery requires Android 7.1+, automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)
 * `Feature` Setup wizard, for running the permission wizard and plugin installation wizard in sequence, with an entry in the home page welcome prompt after first launch (entry: Settings > Configuration > Setup wizard)
 * `Feature` Permission wizard, for selecting permissions from the home drawer and requesting them in sequence, with built-in "Standard"/"Minimal"/"All" profiles and custom profiles; granted permissions can be hidden through the menu (entry: Setup wizard/the button in the home drawer's "Permissions" group heading)
@@ -137,6 +138,8 @@
 * `Feature` Remote file management and device script execution through the VSCode plugin, with progress display for large file transfers (requires VSCode plugin 1.1.0+)
 * `Feature` Connection manager in client and server modes, for viewing connection status, managing clients and accessing address history
 * `Feature` Client mode supports automatic reconnection after unexpected disconnection, retries when the network returns and connection restoration at app startup
+* `Feature` Node.js screen_metrics module and compatibility coordinate globals, sharing host conversion rules with the Bun SDK and following current screen rotation
+* `Feature` Explicit Bun host API client with Pinyin, Pinyin4j, coordinate and console operations, with independent capability switches
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
@@ -264,6 +267,9 @@
 * `Fix` cXy/cYx ignoring absolute coordinate mode when false is specified, reversing landscape aspect ratios, and rejecting some calls after setting only one scale base
 * `Fix` setScaleBases changing the other axis and consuming its one-time assignment when the second argument is invalid or a scale base has already been set
 * `Fix` device.width/height and coordinate conversions reading zero dimensions when an activity is recreated concurrently with a script screen-size read
+* `Fix` Node.js pinyin/pinyin4j converting only a small built-in dictionary; they now use the installed Pinyin plugins
+* `Fix` Node.js console window and styling methods having no effect
+* `Fix` Bun losing trailing logs when the synchronous result arrived before output callbacks at script completion
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions
