@@ -148,6 +148,9 @@
 * `新增` Node.js Worker 支援 pinyin, pinyin4j, 控制台視窗和座標換算, 共用父執行狀態並保留原生輸出串流
 * `新增` Bun screenRecorder 支援 H.264 MP4 螢幕錄製, 可選麥克風/應用程式播放/混合 AAC 音軌及錄製期間擷取畫面, 包含獨立音訊授權和取消清理
 * `新增` Node.js 主執行緒與 Worker 支援 H.264 MP4 錄屏, 麥克風/播放/混合 AAC 音訊, 錄製期間並行截圖及 Worker 未儲存錄屏清理
+* `新增` Node.js/Bun images 支援進階濾鏡, 色彩空間轉換, 多點找色, 圓形偵測, 相似度指標及 URL 載入
+* `新增` Node.js/Bun images 支援 SIFT/ORB 特徵擷取與比對, 返回場景座標和 ObjectFrame 幾何資訊, 並管理執行內的 Mat/特徵控制代碼
+* `新增` Node.js/Bun images 支援 PNG 量化和壓縮, 提供品質/記憶體度量, 二進位結果及檔案描述元輸出
 * `修復` runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題
 * `修復` Android 7.x 調用 runtime.loadDex 方法時可能損壞 DEX 緩存並導致類加載失敗的問題
 * `修復` Rhino 引擎及內置模塊的作用域, 參數轉換與返回值處理不兼容導致部分腳本行為異常的問題

@@ -771,6 +771,7 @@ object NodeBridgeModules {
         "recycle",
         "fromBase64", "fromBytes", "toBase64", "pixel", "readPixels", "copy", "rotate", "scale", "flip",
         "blur", "gaussianBlur", "medianBlur", "invert", "detectsColor", "findAllPointsForColor",
+        "initOpenCvIfNeeded", "isGrayscale", "inRange", "interval", "adaptiveThreshold", "bilateralFilter", "cvtColor", "findCircles", "concat", "detectMultiColors", "findPointsByColors", "countPointsByColor", "getMeanColor", "imread", "matToImage", "detectAndComputeFeatures", "matchFeatures", "quantize", "quantizeToFile", "compress", "compressToBytes", "downsample", "psnr", "ssim", "mssim", "hist", "mse", "ncc", "isEqual", "getSimilarity", "load", "getScreenCaptureOptions",
     )
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
@@ -950,6 +951,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val mediaPlayback = lazy { NodeMediaPlayback(appContext, ::resolveAndroidFile) }
     private val mediaStore = lazy { NodeMediaStore(appContext, ::resolveAndroidFile) }
     private val imageOperations = NodeImageOperations(appContext)
+    private val advancedImages = lazy { NodeAdvancedImages(appContext, resourceRegistry, ::checkImageRoom) }
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
     private val barcodeOperations = ConcurrentHashMap<String, ControlledBarcodeOperation>()
@@ -1141,7 +1143,7 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(websocketDiagnostics.nativeValues())
         putAll(ocrDiagnostics.nativeValues())
         putAll(barcodeDiagnostics.nativeValues())
-        put("embedded_script.image_active_handle_count", imageHandles.size.toString())
+        put("embedded_script.image_active_handle_count", imageHandleCount().toString())
         put("embedded_script.ocr_active_operation_count", ocrOperations.size.toString())
         put("embedded_script.barcode_active_operation_count", barcodeOperations.size.toString())
         put("embedded_script.database_active_handle_count", databaseHandles.size.toString())
@@ -1178,7 +1180,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "websocket" to websocketSessions.size,
                 "ocr" to ocrOperations.size,
                 "barcode" to barcodeOperations.size,
-                "image" to imageHandles.size,
+                "image" to imageHandleCount(),
                 "database" to databaseHandles.size,
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
@@ -1197,6 +1199,7 @@ class AndroidNodeBridgeCapabilityProvider(
         if (pluginToolsBridge.isInitialized()) pluginToolsBridge.value.destroy()
         accessibilityDiagnostics.clearNodeRefs()
         imageDestroyed.set(true)
+        if (advancedImages.isInitialized()) advancedImages.value.cancelPending()
         imageExecutor.shutdownNow()
         screenCapture.close()
         deviceControls.close()
@@ -1858,7 +1861,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchCaptureScreenImage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val timeoutMs = request.timeoutMs.coerceIn(1L, MAX_TIMEOUT_MS)
         imageOperation(request, callback) {
-            if (imageHandles.size >= bridgeLimits.maxImageHandles) {
+            if (imageHandleCount() >= bridgeLimits.maxImageHandles) {
                 // Refuse before taking a screenshot nobody could keep; registerImage rechecks under the same lock.
                 bridgeResourceLimitRejections.incrementAndGet()
                 throw ImageHandleLimitException("Image bridge exceeded ${bridgeLimits.maxImageHandles} active handles.")
@@ -2241,6 +2244,7 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         imageOperation(request, callback) {
             when (request.method) {
+                "initOpenCvIfNeeded", "isGrayscale", "inRange", "interval", "adaptiveThreshold", "bilateralFilter", "cvtColor", "findCircles", "concat", "detectMultiColors", "findPointsByColors", "countPointsByColor", "getMeanColor", "imread", "matToImage", "detectAndComputeFeatures", "matchFeatures", "quantize", "quantizeToFile", "compress", "compressToBytes", "downsample", "psnr", "ssim", "mssim", "hist", "mse", "ncc", "isEqual", "getSimilarity", "load", "getScreenCaptureOptions" -> dispatchAdvancedImage(request, callback)
                 "captureScreen" -> registerImage(screenCapture.capture(), "screen").toJson().toString()
                 "saveImage" -> saveImage(request)
                 "fromBase64", "fromBytes" -> {
@@ -2288,8 +2292,11 @@ class AndroidNodeBridgeCapabilityProvider(
                 }
                 "clip", "resize", "grayscale", "threshold", "copy", "rotate", "scale", "flip", "blur", "gaussianBlur", "medianBlur", "invert" -> {
                     val args = request.argsArray()
-                    val bitmap = imageOperations.transform(request.method, imageArgument(args, 0).bitmap, args.optJSONObject(1) ?: JSONObject())
-                    registerImage(bitmap, request.method).toJson().toString()
+                    val source = imageArgument(args, 0)
+                    val bitmap = imageOperations.transform(request.method, source.bitmap, args.optJSONObject(1) ?: JSONObject())
+                    val retained = source.nativeMat?.let { advancedImages.value.matFromBitmap(bitmap,
+                        if (request.method in setOf("grayscale", "threshold")) 1 else it.channels()) }
+                    registerImage(bitmap, request.method, retained).toJson().toString()
                 }
                 "findImage", "matchTemplate" -> {
                     val args = request.argsArray()
@@ -2336,6 +2343,115 @@ class AndroidNodeBridgeCapabilityProvider(
         }
     }
 
+    private fun dispatchAdvancedImage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit): String? {
+        val args=request.argsArray();val method=request.method;val advanced=advancedImages.value
+        fun options(index:Int)=args.optJSONObject(index)?:JSONObject()
+        fun path(index:Int):String {
+            val value=args.opt(index)
+            require(value is String && value.isNotEmpty() && '\u0000' !in value){"Image path or URL must be a non-empty string without NUL."}
+            return value
+        }
+        fun publish(value:NodeAdvancedImages.NativeImage)=registerImage(value.bitmap,method,value.mat).toJson().toString()
+        fun bytes(value:ByteArray,metadata:JSONObject=JSONObject()):String? {
+            if(request.binary){
+                val data=NodeImageByteTransport.bytes(appContext,value)
+                callback(NodeBridgeResponse(request.id,true,metadata.put("byteCount",value.size).toString(),binary=data.descriptor,binaryByteCount=data.size))
+                return null
+            }
+            val base64=android.util.Base64.encodeToString(value,android.util.Base64.NO_WRAP)
+            return if(method=="quantize")metadata.put("base64",base64).toString() else NodeBridgeJson.valueToJson(base64)
+        }
+        fun quantizationMetadata(result:org.autojs.autojs.runtime.api.PngQuantBridge.Result)=JSONObject().put("size",result.size)
+            .put("quality",result.quality).put("quantizationError",result.quantizationError).put("peakWorkingMemoryBytes",result.peakWorkingMemoryBytes)
+        when(method){
+            "initOpenCvIfNeeded"->{require(args.length()==0);advanced.init();return "null"}
+            "getScreenCaptureOptions"->{require(args.length()==0);return screenCapture.captureOptions()?.toString()?:"null"}
+            "imread"->{val file=resolveReadableFile(request,path(0))?:throw IllegalArgumentException("Invalid image path.");return advanced.imread(file.path).toString()}
+            "matToImage"->return publish(advanced.matToImage(args.getJSONObject(0)))
+            "load"->{
+                val url=java.net.URL(path(0))
+                if(url.protocol=="file"){
+                    val file=resolveReadableFile(request,java.io.File(url.toURI()).path)?:throw IllegalArgumentException("Invalid image path.")
+                    return BitmapFactory.decodeFile(file.path)?.let{registerImage(it,method).toJson().toString()}?:"null"
+                }
+                require(url.protocol in setOf("http","https")){"Image URL must use http, https or file."}
+                val connection=url.openConnection().apply{connectTimeout=5000;readTimeout=5000;doInput=true}
+                try{return connection.getInputStream().use{BitmapFactory.decodeStream(it)}?.let{registerImage(it,method).toJson().toString()}?:"null"}
+                finally{(connection as? java.net.HttpURLConnection)?.disconnect()}
+            }
+            "matchFeatures"->{
+                val opt=options(2);val temporary=mutableListOf<NodeAdvancedImages.Features>()
+                fun descriptor(index:Int):NodeAdvancedImages.Features {
+                    advanced.feature(args.opt(index))?.let{return it}
+                    val image=imageArgument(args,index)
+                    val detection=JSONObject().apply{for(key in listOf("method","scale","grayscale","maxFeatures"))if(opt.has(key))put(key,opt.get(key))}
+                    return advanced.detect(image.bitmap,image.nativeMat,detection).also{temporary.add(it)}
+                }
+                try{
+                    val draw=opt.opt("drawMatches")?.takeUnless{it==JSONObject.NULL}?.let {
+                        require(it is String){"drawMatches must be an output path."}
+                        resolveWritableFile(request,it)?:throw IllegalArgumentException("Invalid match drawing path.")
+                    }
+                    return advanced.match(descriptor(0),descriptor(1),opt,draw?.let{file->{bitmap:Bitmap->
+                        file.parentFile?.mkdirs();file.outputStream().use{check(bitmap.compress(Bitmap.CompressFormat.JPEG,100,it)){"Match drawing encoding failed."}}
+                    }})?.toString()?:"null"
+                }finally{temporary.forEach{it.descriptor.release()}}
+            }
+        }
+        val input=imageArgument(args,0);val bitmap=input.bitmap;val opt=options(1)
+        return when(method){
+            "isGrayscale"->advanced.isGrayscale(bitmap).toString()
+            "inRange","interval","adaptiveThreshold","bilateralFilter","cvtColor"->publish(advanced.filter(method,bitmap,input.nativeMat,opt))
+            "findCircles"->advanced.circles(bitmap,input.nativeMat,opt).toString()
+            "findPointsByColors"->advanced.findPoints(bitmap,args.get(1),args.getJSONArray(2),options(3)).toString()
+            "countPointsByColor"->advanced.count(bitmap,args.get(1),options(2)).toString()
+            "getMeanColor"->advanced.mean(bitmap,opt).toString()
+            "detectMultiColors"->advanced.detectMultiple(bitmap,args.get(1),args.getJSONArray(2),imageOperations.integer(args.opt(3),"x"),imageOperations.integer(args.opt(4),"y"),options(5)).toString()
+            "detectAndComputeFeatures"->advanced.registerFeatures(advanced.detect(bitmap,input.nativeMat,opt)).toString()
+            "psnr","ssim","mssim","hist","mse","ncc","isEqual","getSimilarity"->{
+                val other=imageArgument(args,1);NodeBridgeJson.valueToJson(advanced.similarity(method,bitmap,input.nativeMat,other.bitmap,other.nativeMat,options(2)))
+            }
+            "concat"->{
+                val second=imageArgument(args,1).bitmap
+                val direction=options(2).optString("direction","right").lowercase()
+                require(direction in setOf("left","right","top","bottom","start","end")){"Invalid image concatenation direction."}
+                val horizontal=direction in setOf("left","right","start","end")
+                val first=if(direction in setOf("left","top","start"))second else bitmap
+                val last=if(first===bitmap)second else bitmap
+                val width=if(horizontal)Math.addExact(first.width,last.width)else maxOf(first.width,last.width)
+                val height=if(horizontal)maxOf(first.height,last.height)else Math.addExact(first.height,last.height)
+                val output=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+                val canvas=android.graphics.Canvas(output);val paint=android.graphics.Paint()
+                if(horizontal){canvas.drawBitmap(first,0f,(height-first.height)/2f,paint);canvas.drawBitmap(last,first.width.toFloat(),(height-last.height)/2f,paint)}
+                else{canvas.drawBitmap(first,(width-first.width)/2f,0f,paint);canvas.drawBitmap(last,(width-last.width)/2f,first.height.toFloat(),paint)}
+                registerImage(output,method).toJson().toString()
+            }
+            "quantize","quantizeToFile"->{
+                if(method=="quantizeToFile"){
+                    val file=resolveWritableFile(request,path(1))?:throw IllegalArgumentException("Invalid quantization output path.")
+                    val quant=advanced.quantizeToFile(bitmap,file,options(2))
+                    JSONObject().put("path",file.path).put("size",quant.size).put("quality",quant.quality)
+                        .put("quantizationError",quant.quantizationError).put("peakWorkingMemoryBytes",quant.peakWorkingMemoryBytes).toString()
+                }else {val quant=advanced.quantize(bitmap,opt);bytes(quant.bytes,quantizationMetadata(quant))}
+            }
+            "compress","compressToBytes"->{
+                val format=opt.optString("format","png").lowercase();val quality=imageOperations.integer(opt.opt("quality")?:60,"quality")
+                val quantOptions=opt.optJSONObject("quantization")
+                if(quantOptions!=null)require(format=="png"){"Named quantization options require PNG format."}
+                val encoded=if(format=="png"&&(quality!=100||quantOptions!=null))advanced.quantize(bitmap,quantOptions?:JSONObject().put("quality",quality)).bytes else advanced.encode(bitmap,format,quality)
+                if(method=="compressToBytes")bytes(encoded)else registerImage(requireNotNull(BitmapFactory.decodeByteArray(encoded,0,encoded.size)){"Compressed image could not be decoded."},method).toJson().toString()
+            }
+            "downsample"->{
+                val width=imageOperations.integer(opt.opt("width"),"width");val height=imageOperations.integer(opt.opt("height"),"height")
+                require(width>0&&height>0){"Downsample dimensions must be positive."}
+                val scaled=org.autojs.autojs.util.BitmapUtils.downsample(bitmap,width,height,opt.optBoolean("withAlpha",true))
+                val owned=if(scaled===bitmap)checkNotNull(bitmap.copy(Bitmap.Config.ARGB_8888,false))else scaled
+                registerImage(owned,method).toJson().toString()
+            }
+            else->throw IllegalArgumentException("Unknown advanced image method: $method")
+        }
+    }
+
     private fun imageOperation(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit, operation: () -> String?) {
         try {
             imageExecutor.execute {
@@ -2367,17 +2483,22 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private class ImageHandleLimitException(message: String) : RuntimeException(message)
 
-    private fun registerImage(bitmap: Bitmap, source: String): ControlledImageHandle {
-        if (imageHandles.size >= bridgeLimits.maxImageHandles) {
-            bitmap.recycle()
+    private fun imageHandleCount() = imageHandles.size + (if (advancedImages.isInitialized()) advancedImages.value.handleCount else 0)
+
+    private fun checkImageRoom() {
+        if (imageHandleCount() >= bridgeLimits.maxImageHandles) {
             bridgeResourceLimitRejections.incrementAndGet()
-            throw ImageHandleLimitException("Image bridge exceeded ${bridgeLimits.maxImageHandles} active handles.")
+            throw ImageHandleLimitException("Image bridge exceeded ${bridgeLimits.maxImageHandles} active image/Mat/feature handles.")
         }
+    }
+
+    private fun registerImage(bitmap: Bitmap, source: String, nativeMat: org.opencv.core.Mat? = null): ControlledImageHandle {
+        try { checkImageRoom() } catch (error: Throwable) { bitmap.recycle(); nativeMat?.release(); throw error }
         val id = "image-${UUID.randomUUID()}"
         val resource = resourceRegistry.register(NodeBridgeResourceType.IMAGE_HANDLE, id, mapOf(
             "source" to source, "width" to bitmap.width.toString(), "height" to bitmap.height.toString(),
-        )) { if (!bitmap.isRecycled) bitmap.recycle() }
-        return ControlledImageHandle(id, bitmap, resource).also { imageHandles[id] = it }
+        )) { if (!bitmap.isRecycled) bitmap.recycle(); nativeMat?.release() }
+        return ControlledImageHandle(id, bitmap, resource, nativeMat).also { imageHandles[id] = it }
     }
 
     private fun imageArgument(args: JSONArray, index: Int): ControlledImageHandle {
@@ -2985,7 +3106,7 @@ class AndroidNodeBridgeCapabilityProvider(
             )
             return
         }
-        if (imageHandles.size >= bridgeLimits.maxImageHandles) {
+        if (imageHandleCount() >= bridgeLimits.maxImageHandles) {
             bridgeResourceLimitRejections.incrementAndGet()
             callback(
                 NodeBridgeResponse.failure(
@@ -3058,6 +3179,7 @@ class AndroidNodeBridgeCapabilityProvider(
                     ),
                 ),
             )
+        if (advancedImages.isInitialized() && advancedImages.value.recycle(id)) { callback(NodeBridgeResponse.success(request.id, "true")); return }
         val handle = imageHandles.remove(id)
         if (handle != null) {
             handle.resource.close("recycle")
@@ -7937,10 +8059,12 @@ private data class ControlledImageHandle(
     val id: String,
     val bitmap: Bitmap,
     val resource: NodeBridgeResourceHandle,
+    val nativeMat: org.opencv.core.Mat? = null,
 ) {
     fun toJson(): JSONObject = JSONObject()
         .put("id", id)
         .put("__autojs6ImageHandle", id)
+        .put("channels", nativeMat?.channels() ?: 4)
         .put("width", bitmap.width)
         .put("height", bitmap.height)
 

@@ -12,6 +12,12 @@ import java.nio.ByteOrder
 internal object NodeImageByteTransport {
     data class Encoded(val descriptor: ParcelFileDescriptor, val size: Long)
 
+    fun bytes(context: Context, bytes: ByteArray): Encoded {
+        val file = File.createTempFile("node-image-bytes-", ".bin", context.cacheDir)
+        try { file.writeBytes(bytes); return Encoded(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY), bytes.size.toLong()) }
+        finally { file.delete() }
+    }
+
     fun encode(context: Context, bitmap: Bitmap, format: String, quality: Int = 100, region: Rect? = null): Encoded {
         require(format in setOf("png", "jpg", "jpeg", "webp", "rgba")) { "Image byte format must be png, jpg, jpeg, webp or rgba." }
         require(quality in 0..100) { "Image quality must be in 0..100." }

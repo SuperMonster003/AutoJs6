@@ -207,7 +207,7 @@ internal class NodeImageOperations(private val context: Context) {
             ?.let { point(it).toString() } ?: "null"
     }
 
-    private fun parseColor(value: Any): Int = Colors.toIntRhino(value)
+    fun parseColor(value: Any): Int = Colors.toIntRhino(value)
 
     private fun point(point: Point, offset: Rect? = null) = JSONObject()
         .put("x", point.x + (offset?.x ?: 0)).put("y", point.y + (offset?.y ?: 0))

@@ -148,6 +148,9 @@
 * `Feature` Node.js Workers support pinyin, pinyin4j, console controls and coordinate conversion, sharing the parent execution while retaining native output streams
 * `Feature` Bun screenRecorder writes H.264 MP4 with optional microphone, app-playback or mixed AAC audio and screenshots during recording, with independent audio grants and cancellation cleanup
 * `Feature` Node.js main thread and Workers support H.264 MP4 recording with microphone, playback or mixed AAC audio, concurrent screenshots and cleanup of unsaved Worker recordings
+* `Feature` Node.js/Bun images supports advanced filters, color conversion, multi-color searches, circles, similarity metrics and URL loading
+* `Feature` Node.js/Bun images supports SIFT/ORB extraction and matching with scene coordinates, ObjectFrame geometry and execution-owned Mat/feature handles
+* `Feature` Node.js/Bun images supports PNG quantization and compression with quality/memory metrics, binary results and descriptor-backed file output
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules

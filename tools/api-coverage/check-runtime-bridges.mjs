@@ -124,7 +124,9 @@ for (const [module,names,capability] of [['opencc',openccMethods,'opencc'],['ima
     && item.requiredCapabilities.includes(capability)),`Development catalog missing ${module}.${method}`);
 }
 const nodeImageAdaptors = ['getSize','getWidth','getHeight','isRecycled','requestScreenCapture','stopScreenCapture',
-  'detectColor','findPointsByColor','findColorEquals','findPointByColor','findPointByColors','read','save'];
+  'detectColor','findPointsByColor','findColorEquals','findPointByColor','findPointByColors','read','save',
+  'loadAsync','requestScreenCaptureAsync','detectsMultiColors','findPointByColorExactly','findColorInRegion',
+  'findImageInRegion','findPointByImage','buildRegion','__buildRegion','ObjectFrame'];
 assert.deepEqual(sorted(keys(node.image)),sorted([...imageMethods,...nodeImageAdaptors]),'Node image export/host drift');
 assert.deepEqual(sorted(keys(node.images)),sorted(keys(node.image)),'image/images export drift');
 for (const [capability,field] of [['image.process','IMAGE_PROCESS_METHODS'],['image.files','IMAGE_FILE_METHODS'],['screen.capture','SCREEN_CAPTURE_METHODS'],['screen.record','SCREEN_RECORD_METHODS']]) {
@@ -132,9 +134,17 @@ for (const [capability,field] of [['image.process','IMAGE_PROCESS_METHODS'],['im
 }
 assert.deepEqual(sorted(keys(bunClient.images)),sorted([
   ...bun.HOST_API_METHODS['image.process'],...bun.HOST_API_METHODS['image.files'],
-  'fromBytes','toBytes','getSize','detectColor','findPointsByColor',
-  'requestScreenCapture','captureScreen','stopScreenCapture',
+  ...nodeImageAdaptors,'fromBytes','toBytes','captureScreen','getScreenCaptureOptions',
 ]),'Bun public image wrapper drift');
+const imageRegistration=read(path.join(host,'app/src/main/java/org/autojs/autojs/runtime/api/augment/images/Images.kt'))
+  .split('override val selfAssignmentFunctions = listOf(')[1].split('override val selfAssignmentJavaClasses')[0];
+const imageExports=sorted([...imageRegistration.matchAll(/::(\w+)\.name/g)].map(match=>match[1]));
+for(const name of imageExports) for(const [runtime,api] of [['Node',node.images],['Bun',bunClient.images]])
+  assert.equal(typeof api[name],'function',`${runtime}: missing registered images.${name}`);
+const imageExtensions = new Function('return ('+segment('  function __autojs6_image_extensions(', '  function __autojs6_limited_image(')+')')();
+const bunSource=read(path.join(bunRoot,'app/src/main/assets/autojs6/host-client.mjs'));
+const bunAdapter=bunSource.slice(bunSource.indexOf('  function __autojs6_image_extensions('),bunSource.indexOf('const isObject ='));
+assert.equal(imageExtensions.toString(),new Function('return ('+bunAdapter+')')().toString(),'Portable Node/Bun image adapters drifted');
 const createWorkerModules = new Function('return (' + segment('  function __autojs6_worker_host_modules(', '  async function __autojs6_worker_invoke(') + ')')();
 const workerCalls = [];
 const workerModules = createWorkerModules(async (...call) => { workerCalls.push(call); return 'converted'; },
@@ -142,7 +152,7 @@ const workerModules = createWorkerModules(async (...call) => { workerCalls.push(
     screen_metrics:keys(node.coordinates),console:keys(node.console),screen_recorder:keys(node.screenRecorder),
     media_projection:keys(node.media_projection),recorder:keys(node.recorder)},
   {pinyin:Object.fromEntries(Object.entries(node.pinyin).filter(([,v])=>typeof v!=='function'))},
-  keys(node.console).filter(name=>node.console[name].__autojs6ConsoleControl));
+  keys(node.console).filter(name=>node.console[name].__autojs6ConsoleControl),console,imageExtensions);
 for (const name of ['opencc','image','images','pinyin','pinyin4j','console','screen_metrics','screen_recorder','media_projection','recorder']) {
   const target=name==='screen_metrics'?node.coordinates:name==='screen_recorder'?node.screenRecorder:node[name];
   assert.deepEqual(sorted(keys(workerModules.get(name))),sorted(keys(target)));
@@ -161,6 +171,6 @@ assert.match(index,/input_observer\.d\.ts/);
 assert.match(index,/screen_metrics\.d\.ts/);
 console.log(JSON.stringify({passed:true,groups:Object.fromEntries(groups.map(([name,methods])=>[name,methods.length])),
   opencc:{conversions:conversionTypes.length,methods:openccMethods.length,dispatchChecks:nodeCalls.length+bunCalls.length},
-  images:{node:keys(node.images).length,bun:keys(bunClient.images).length},
+  images:{rhinoFunctions:imageExports.length,node:keys(node.images).length,bun:keys(bunClient.images).length},
   workers:{modules:workerModules.size,openccDispatches:workerCalls.length},
   scope:'Actual Node main/Worker and Bun clients versus host; not full Rhino equivalence or Android execution'},null,2));

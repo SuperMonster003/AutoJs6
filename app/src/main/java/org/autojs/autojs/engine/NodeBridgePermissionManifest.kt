@@ -494,7 +494,8 @@ object NodeBridgePermissionManifest {
             }
             NodeBridgeModules.MEDIA_PROJECTION -> listOf(SCREEN_CAPTURE)
             NodeBridgeModules.IMAGE, NodeBridgeModules.IMAGES -> when (method) {
-                "captureScreen" -> listOf(IMAGE, SCREEN_CAPTURE)
+                "captureScreen", "getScreenCaptureOptions" -> listOf(IMAGE, SCREEN_CAPTURE)
+                "load" -> listOf(IMAGE, NETWORK)
                 else -> listOf(IMAGE)
             }
             NodeBridgeModules.OCR -> listOf(OCR, IMAGE)

@@ -344,6 +344,9 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` Node.js Worker 支持 pinyin, pinyin4j, 控制台窗口和坐标换算, 共享父执行状态并保留原生输出流
 * `新增` Bun screenRecorder 支持 H.264 MP4 录屏, 可选麦克风/应用播放/混合 AAC 音轨及录制期间截图, 包含独立音频授权和取消清理
 * `新增` Node.js 主线程与 Worker 支持 H.264 MP4 录屏, 麦克风/播放/混合 AAC 音频, 录制期间并行截图及 Worker 未保存录屏清理
+* `新增` Node.js/Bun images 支持高级滤镜, 颜色空间转换, 多点找色, 圆检测, 相似度指标及 URL 载入
+* `新增` Node.js/Bun images 支持 SIFT/ORB 特征提取与匹配, 返回场景坐标和 ObjectFrame 几何信息, 并管理执行内的 Mat/特征句柄
+* `新增` Node.js/Bun images 支持 PNG 量化和压缩, 提供质量/内存度量, 二进制结果及文件描述符输出
 * `修复` runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题

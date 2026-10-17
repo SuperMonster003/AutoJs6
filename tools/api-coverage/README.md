@@ -50,6 +50,19 @@ they cover abort/startup races and keep consent options out of image.captureScre
 The structural bridge check includes all ten current Worker modules and compares
 screen_recorder methods and catalog records with the host and Bun method sets.
 
+`AdvancedImageBridgeDeviceTest` validates advanced images through Node CJS/main ESM,
+CJS/ESM/nested Workers and Bun, using owned images and a local HTTP fixture. It checks
+filters and straight-alpha pixels, HSV channel round trips, circles, multi-color
+searches, similarity metrics, SIFT/ORB ROI/scale coordinates, no-match nulls, opaque
+Mat/feature lifetimes, PNG bytes/quality/resource metrics and descriptor-backed file
+output. It also verifies file/network/processing grants, shared image/Mat/feature
+quotas, execution isolation and the async capture alias/options. Inputs, outputs
+and temporary quantization files are removed; only numeric evidence is retained.
+The bridge check compares all 81 host image function registrations with the Node,
+Bun and Worker exports, and checks the shared portable adapter bodies for drift.
+The Node test-advanced-images.js and Bun host-client tests exercise public dispatch,
+Frame reconstruction, Buffer restoration and client cleanup separately from Android.
+
 The extractor also resolves Mail's explicit default-client forwarding table,
 including its synchronous-only methods and generated Async names. List suffixes,
 mutation chains and dynamic aliases that are not understood must be reported as

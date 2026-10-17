@@ -188,6 +188,14 @@ internal class NodeScreenCaptureSession(
         true
     }
 
+    fun captureOptions(): JSONObject? = synchronized(lock) {
+        val capture = capturer?.takeUnless { closed || it.isReleased } ?: return@synchronized null
+        val size = capture.captureDimensions
+        JSONObject().put("width",size.x).put("height",size.y).put("orientation", when(capture.options.orientation()) {
+            ScreenCapturer.ORIENTATION_PORTRAIT -> "portrait"; ScreenCapturer.ORIENTATION_LANDSCAPE -> "landscape"; else -> "auto"
+        })
+    }
+
     fun recordingStatus(): JSONObject = synchronized(lock) {
         recording?.status() ?: JSONObject().put("state", "idle")
     }

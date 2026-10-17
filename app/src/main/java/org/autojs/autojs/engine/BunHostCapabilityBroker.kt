@@ -218,6 +218,7 @@ internal class BunHostCapabilityBroker(
                 javaInteropEnabled = false,
                 permissionManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(buildList {
                     add(NodeBridgePermissionManifest.IMAGE)
+                    if (BunHostCapabilityGrants.IMAGE_FILES in capabilities) add(NodeBridgePermissionManifest.NETWORK)
                     if (BunHostCapabilityGrants.SCREEN_CAPTURE in capabilities) add(NodeBridgePermissionManifest.SCREEN_CAPTURE)
                 }),
             ).also { imageProvider = it }
@@ -227,6 +228,11 @@ internal class BunHostCapabilityBroker(
     private fun imageCall(request: JSONObject, methods: Set<String>): Outcome {
         val (method, args) = parseMethodCall(request)
         require(method in methods) { "Image method is not part of this capability: $method" }
+        if (method == "quantizeToFile" && BunHostCapabilityGrants.IMAGE_PROCESS !in capabilities)
+            throw SecurityException("PNG quantization requires the image.process grant.")
+        if (method == "matchFeatures" && args.optJSONObject(2)?.has("drawMatches") == true &&
+            !args.getJSONObject(2).isNull("drawMatches") && BunHostCapabilityGrants.IMAGE_FILES !in capabilities)
+            throw SecurityException("Drawing feature matches requires the image.files grant.")
         return awaitImageCall(NodeBridgeModules.IMAGES, method, args)
     }
 
@@ -292,6 +298,7 @@ internal class BunHostCapabilityBroker(
                     if (response.ok) value(JSONObject().put("state", "granted")) else bridgeResponse(response)
                 } catch (_: TimeoutException) { value(JSONObject().put("state", "pending")) }
             }
+            "getScreenCaptureOptions" -> { require(args.length() == 0); awaitImageCall(NodeBridgeModules.IMAGES, method, args) }
             "captureScreen" -> {
                 require(args.length() == 0) { "captureScreen takes no arguments" }
                 val id = synchronized(captureLock) { captureId }
@@ -394,9 +401,10 @@ internal class BunHostCapabilityBroker(
             "fromBase64", "toBase64", "pixel", "readPixels", "copy", "clip", "resize", "scale", "rotate", "flip",
             "grayscale", "threshold", "blur", "gaussianBlur", "medianBlur", "invert",
             "findImage", "matchTemplate", "findColor", "findMultiColors", "detectsColor", "findAllPointsForColor", "recycle",
+            "initOpenCvIfNeeded", "isGrayscale", "inRange", "interval", "adaptiveThreshold", "bilateralFilter", "cvtColor", "findCircles", "concat", "detectMultiColors", "findPointsByColors", "countPointsByColor", "getMeanColor", "matToImage", "detectAndComputeFeatures", "matchFeatures", "quantize", "compress", "compressToBytes", "downsample", "psnr", "ssim", "mssim", "hist", "mse", "ncc", "isEqual", "getSimilarity",
         )
-        val IMAGE_FILE_METHODS = setOf("readImage", "saveImage")
-        val SCREEN_CAPTURE_METHODS = setOf("requestScreenCapture", "getRequestResult", "captureScreen", "stopScreenCapture")
+        val IMAGE_FILE_METHODS = setOf("readImage", "saveImage", "imread", "load", "quantizeToFile", "recycle")
+        val SCREEN_CAPTURE_METHODS = setOf("requestScreenCapture", "getRequestResult", "captureScreen", "stopScreenCapture", "getScreenCaptureOptions")
         val SCREEN_RECORD_METHODS = setOf("start", "stop", "cancel", "getStatus")
         const val TOAST_TEXT_KEY = "text"
         const val TOAST_DURATION_KEY = "duration"
