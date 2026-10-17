@@ -85,8 +85,12 @@ Detailed build/device logs, screenshots and installation/restoration records are
 retained in the repositories' ignored `.bak/opencc-images-20261017` directories.
 No APK, private backup, signing material or generated test report is committed.
 The final tested arm64 host APK and matching instrumentation APK are retained under
-the host evidence directory's `artifacts/` folder; temporary build checkout and
-restoration APK backups are removed after verification.
+the host evidence directory's `artifacts/` folder. Restoration APK backups were
+deleted after verification. Git removed the temporary worktree registration, but
+directory cleanup failed on Windows long paths. Automatic approval review rejected
+both the recursive cleanup and the narrower removal of signing/machine-configuration
+copies with "blocked by policy". The residual build tree, including those local
+configuration copies, remains ignored at `.bak/oi-check`; no cleanup bypass was used.
 The installed host/runtime/editor/provider APK hashes match the tested build files.
 The final physical suites total 55 passed tests. Original installed APK bytes and
 rotation settings are restored, and packages introduced only for this batch are
