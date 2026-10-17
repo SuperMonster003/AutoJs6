@@ -487,6 +487,11 @@ object NodeBridgePermissionManifest {
                 "readScreenText" -> listOf(ACCESSIBILITY, SCREEN_CAPTURE, OCR)
                 else -> listOf(ACCESSIBILITY)
             }
+            NodeBridgeModules.SCREEN_RECORDER -> {
+                val audio = if (method == "start") runCatching { org.json.JSONArray(argsJson).optJSONObject(1)?.opt("audio") }.getOrNull() else null
+                if (audio != null && audio != org.json.JSONObject.NULL && audio != false && audio != "none")
+                    listOf(SCREEN_CAPTURE, MEDIA, MEDIA_RECORDING) else listOf(SCREEN_CAPTURE)
+            }
             NodeBridgeModules.MEDIA_PROJECTION -> listOf(SCREEN_CAPTURE)
             NodeBridgeModules.IMAGE, NodeBridgeModules.IMAGES -> when (method) {
                 "captureScreen" -> listOf(IMAGE, SCREEN_CAPTURE)

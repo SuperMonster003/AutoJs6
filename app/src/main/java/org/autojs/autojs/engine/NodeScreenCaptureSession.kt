@@ -176,13 +176,13 @@ internal class NodeScreenCaptureSession(
         next.start().also { recording = next }
     }
 
-    fun stopRecording(): JSONObject? = synchronized(lock) {
-        val active = recording ?: return@synchronized null
+    fun stopRecording(expectedId: String? = null): JSONObject? = synchronized(lock) {
+        val active = recording?.takeIf { expectedId == null || it.status().optString("id") == expectedId } ?: return@synchronized null
         try { active.finish() } finally { recording = null }
     }
 
-    fun cancelRecording(): Boolean = synchronized(lock) {
-        val active = recording ?: return@synchronized false
+    fun cancelRecording(expectedId: String? = null): Boolean = synchronized(lock) {
+        val active = recording?.takeIf { expectedId == null || it.status().optString("id") == expectedId } ?: return@synchronized false
         recording = null
         active.close()
         true

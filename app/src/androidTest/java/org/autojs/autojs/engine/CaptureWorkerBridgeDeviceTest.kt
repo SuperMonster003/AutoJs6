@@ -369,10 +369,10 @@ class CaptureWorkerBridgeDeviceTest {
         writeEvidence("worker-modules")
     }
 
-    internal fun execute(kind:String,body:String,owned:AtomicReference<BunPluginScriptEngine>?=null):JSONObject {
+    internal fun execute(kind:String,body:String,owned:AtomicReference<BunPluginScriptEngine>?=null, capabilities:List<String>?=null):JSONObject {
         val marker="CAPTURE_WORKER_${UUID.randomUUID()}:"
         val imports=if(kind=="bun") "const {createHostClient}=await import(process.env.AUTOJS6_HOST_CLIENT_MODULE);const host=await createHostClient();const images=host.images;"
-            else "const images=require('images');"
+            else "const images=require('images');const host={screenRecorder:require('screen_recorder'),coordinates:require('screen_metrics')};"
         val source="""
             ${if(kind=="bun") "\"bun\";" else "\"nodejs\";"}
             (async()=>{ $imports
@@ -393,7 +393,7 @@ class CaptureWorkerBridgeDeviceTest {
             output=console.snapshotLogEntries().joinToString("\n"){it.content.toString()}
         } else {
             try {
-                val manifest=NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("opencc","image","media_projection","pinyin","pinyin4j","console","device"))
+                val manifest=NodeBridgePermissionManifest.fromDeclaredCapabilities(capabilities?:listOf("opencc","image","media_projection","pinyin","pinyin4j","console","device","media","media.recording"))
                 val result=NodeJsRuntimePluginBridge.runScript(context,NodePluginScriptRequest(source=source,sourceName="capture-worker.cjs",
                     workingDirectory=context.cacheDir.path,timeoutMs=90_000,runtimeModuleSources=mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson())),console=console,
                     outputListener={_,text->console.println(android.util.Log.DEBUG,text)})
@@ -449,7 +449,7 @@ class CaptureWorkerBridgeDeviceTest {
         return null
     }
     internal fun clickConsent(positive:Boolean) {assertTrue("System consent button",checkNotNull(consentButton(positive)).performAction(AccessibilityNodeInfo.ACTION_CLICK))}
-    internal fun await(label:String,test:()->Boolean) {val deadline=SystemClock.elapsedRealtime()+20_000;while(SystemClock.elapsedRealtime()<deadline){if(test())return;SystemClock.sleep(80)};fail("Timed out: $label")}
+    internal fun await(label:String,timeoutMs:Long=20_000,test:()->Boolean) {val deadline=SystemClock.elapsedRealtime()+timeoutMs;while(SystemClock.elapsedRealtime()<deadline){if(test())return;SystemClock.sleep(80)};fail("Timed out: $label")}
     private fun shell(command:String)=ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command)).bufferedReader().use{it.readText()}
     internal fun awaitNoProjection(){await("MediaProjection released"){!shell("dumpsys media_projection").contains(context.packageName)}}
     @Suppress("DEPRECATION") private fun displaySize()=Point().also{display().getRealSize(it)}.let{it.x to it.y}

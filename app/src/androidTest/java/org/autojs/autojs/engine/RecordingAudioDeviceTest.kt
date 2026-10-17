@@ -45,7 +45,9 @@ class RecordingAudioDeviceTest {
     private val global get()=AutoJs.instance.globalConsole
     @Volatile private var pulse=false
 
-    @Test fun playbackAudioAndScreenshotsShareOneLiveRecordingAcrossRotation()=harness.withGrants {
+    @Test fun playbackAudioAndScreenshotsShareOneLiveRecordingAcrossRotation() = verifyPlayback("bun")
+
+    internal fun verifyPlayback(kind:String)=harness.withGrants {
         val folder=File(context.getExternalFilesDir(null),"audio-recording-${UUID.randomUUID()}").apply{mkdirs()}
         try {Tone(context,true).use {tone ->
             harness.withFixture(setup={activity -> activity.setContentView(object:View(activity) {
@@ -61,7 +63,7 @@ class RecordingAudioDeviceTest {
             })}) {
                 val pool=Executors.newSingleThreadExecutor();val ready="AUDIO_READY_${UUID.randomUUID()}";val rotate="AUDIO_ROTATE_${UUID.randomUUID()}"
                 try {
-                    val future=pool.submit<JSONObject>{harness.execute("bun","""
+                    val future=pool.submit<JSONObject>{harness.execute(kind,"""
                         await images.requestScreenCapture({timeoutMs:30000});await pause(500);
                         const active=await host.screenRecorder.start(${JSONObject.quote(File(folder,"playback.mp4").absolutePath)},
                           {width:192,height:320,frameRate:20,bitRate:1000000,audio:'playback'});
@@ -105,19 +107,21 @@ class RecordingAudioDeviceTest {
                     assertTrue("Calibrated A/V onset video=$videoOnset audio=${decoded.onsetUs}",abs(videoOnset-decoded.onsetUs)<150_000)
                     result.put("decodedAudio",decoded.json()).put("videoOnsetUs",videoOnset)
                         .put("fixturePlaybackBufferMs",(presentationNs-commandNs)/1_000_000.0)
-                    evidence("playback-parallel",result);harness.awaitNoProjection()
+                    evidence("$kind-playback-parallel",result);harness.awaitNoProjection()
                 } finally {pool.shutdownNow();pulse=false}
             }
         }}finally{folder.deleteRecursively()}
     }
 
-    @Test fun microphoneMixedNotificationStopAndIndependentAudioGrants()=harness.withGrants {
+    @Test fun microphoneMixedNotificationStopAndIndependentAudioGrants() = verifyMicrophone("bun")
+
+    internal fun verifyMicrophone(kind:String)=harness.withGrants {
         val folder=File(context.getExternalFilesDir(null),"audio-microphone-${UUID.randomUUID()}").apply{mkdirs()}
         try {Tone(context,true).use {tone -> tone.enabled=true
             harness.withFixture {
                 val pool=Executors.newSingleThreadExecutor();val notify="AUDIO_NOTIFICATION_${UUID.randomUUID()}"
                 try {
-                    val future=pool.submit<JSONObject>{harness.execute("bun","""
+                    val future=pool.submit<JSONObject>{harness.execute(kind,"""
                         await images.requestScreenCapture({timeoutMs:30000});const movies=[];
                         for(const audio of ['microphone','mixed']){
                           await host.screenRecorder.start(${JSONObject.quote(folder.absolutePath)}+'/'+audio+'.mp4',{width:320,height:192,audio});
@@ -142,28 +146,32 @@ class RecordingAudioDeviceTest {
                     assertFalse(File(folder,"notification.mp4").exists())
                     assertEquals(setOf("microphone.mp4","mixed.mp4"),folder.list()!!.toSet())
                     harness.await("microphone disclosure released"){manager.activeNotifications.none{it.notification.channelId=="node_audio_recording"}}
+                    if(kind=="bun") {
                     BunHostCapabilityGrants.setScreenRecordMicrophoneGranted(context,false)
-                    harness.execute("bun","""
+                    harness.execute(kind,"""
                         eq((await rejects(()=>host.screenRecorder.start('/sdcard/denied.mp4',{audio:'microphone'}))).code,'NOT_GRANTED','microphone grant');
                         eq((await rejects(()=>host.screenRecorder.start('/sdcard/denied.mp4',{audio:'mixed'}))).code,'NOT_GRANTED','mixed microphone grant');
                         const response=await fetch('http://autojs6/v1/screen.record',{unix:process.env.AUTOJS6_HOST_BRIDGE_SOCKET,method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'start',args:['/sdcard/denied.mp4',{audio:'microphone'}]})});
                         eq(response.status,403,'raw microphone bypass');return {denied:true};
                     """.trimIndent())
                     BunHostCapabilityGrants.setScreenRecordPlaybackGranted(context,false)
-                    harness.execute("bun","eq((await rejects(()=>host.screenRecorder.start('/sdcard/denied.mp4',{audio:'playback'}))).code,'NOT_GRANTED','playback grant');return {denied:true};")
-                    evidence("microphone-mixed",result);harness.awaitNoProjection()
+                    harness.execute(kind,"eq((await rejects(()=>host.screenRecorder.start('/sdcard/denied.mp4',{audio:'playback'}))).code,'NOT_GRANTED','playback grant');return {denied:true};")
+                    }
+                    evidence("$kind-microphone-mixed",result);harness.awaitNoProjection()
                 }finally{pool.shutdownNow()}
             }
         }}finally{folder.deleteRecursively()}
     }
 
-    @Test fun playbackCaptureHonorsTheSourceOptOutPolicy()=harness.withGrants {
+    @Test fun playbackCaptureHonorsTheSourceOptOutPolicy() = verifyPolicy("bun")
+
+    internal fun verifyPolicy(kind:String)=harness.withGrants {
         val folder=File(context.getExternalFilesDir(null),"audio-policy-${UUID.randomUUID()}").apply{mkdirs()}
         try {Tone(context,false).use {tone -> tone.enabled=true
             harness.withFixture {
                 val pool=Executors.newSingleThreadExecutor()
                 try {
-                    val future=pool.submit<JSONObject>{harness.execute("bun","""
+                    val future=pool.submit<JSONObject>{harness.execute(kind,"""
                         await images.requestScreenCapture({timeoutMs:30000});
                         await host.screenRecorder.start(${JSONObject.quote(File(folder,"policy.mp4").absolutePath)},{width:320,height:192,audio:'playback'});
                         await pause(1800);const movie=await host.screenRecorder.stop();await images.stopScreenCapture();return {movie};
@@ -171,7 +179,7 @@ class RecordingAudioDeviceTest {
                     harness.await("policy consent"){if(future.isDone)fail(future.get().toString());harness.consentButton(true)!=null};harness.clickConsent(true)
                     val result=future.get(20,TimeUnit.SECONDS);val decoded=decodeAudio(File(result.getJSONObject("movie").getString("path")))
                     assertTrue("Disallowed playback leaked: $decoded",decoded.peakTone<10)
-                    evidence("playback-policy",result.put("decodedAudio",decoded.json()));harness.awaitNoProjection()
+                    evidence("$kind-playback-policy",result.put("decodedAudio",decoded.json()));harness.awaitNoProjection()
                 }finally{pool.shutdownNow()}
             }
         }}finally{folder.deleteRecursively()}
@@ -205,10 +213,10 @@ class RecordingAudioDeviceTest {
     private fun logged(marker:String)=global.snapshotLogEntries().any{it.content.toString().contains(marker)}
     private fun evidence(name:String,value:JSONObject){File(context.getExternalFilesDir(null),"recording-audio-$name.json").writeText(value.toString(2))}
 
-    private data class AudioProof(val samples:Int,val rms:Double,val peakTone:Double,val onsetUs:Long) {
+    internal data class AudioProof(val samples:Int,val rms:Double,val peakTone:Double,val onsetUs:Long) {
         fun json()=JSONObject().put("samples",samples).put("rms",rms).put("peak660Hz",peakTone).put("onsetUs",onsetUs)
     }
-    private fun decodeAudio(file:File):AudioProof {
+    internal fun decodeAudio(file:File):AudioProof {
         val extractor=MediaExtractor();var decoder:MediaCodec?=null
         try {
             extractor.setDataSource(file.absolutePath)
@@ -244,7 +252,7 @@ class RecordingAudioDeviceTest {
         }finally{runCatching{decoder?.stop()};decoder?.release();extractor.release()}
     }
 
-    private class Tone(context:Context,allowed:Boolean):AutoCloseable {
+    internal class Tone(context:Context,allowed:Boolean):AutoCloseable {
         @Volatile var enabled=false
         @Volatile private var writtenEnabled=false
         @Volatile private var transitionFrame=-1L

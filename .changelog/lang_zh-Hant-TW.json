@@ -144,7 +144,8 @@
         "Node.js Worker 支援透過父執行環境呼叫 OpenCC 與影像模組, 包含 CJS, ESM, 巢狀 Worker 和影像二進位傳輸",
         "Bun 支援獨立授權的螢幕擷取, Android 錄製權限申請, 逾時/取消清理和重新申請",
         "Node.js Worker 支援 pinyin, pinyin4j, 主控台視窗和座標換算, 共用父執行狀態並保留原生輸出串流",
-        "Bun screenRecorder 支援 H.264 MP4 螢幕錄製, 可選麥克風/應用程式播放/混合 AAC 音軌及錄製期間擷取畫面, 包含獨立音訊授權和取消清理"
+        "Bun screenRecorder 支援 H.264 MP4 螢幕錄製, 可選麥克風/應用程式播放/混合 AAC 音軌及錄製期間擷取畫面, 包含獨立音訊授權和取消清理",
+        "Node.js 主執行緒與 Worker 支援 H.264 MP4 螢幕錄影, 麥克風/播放/混合 AAC 音訊, 錄製期間並行截圖及 Worker 未儲存錄影清理"
       ],
       "fix": [
         "runtime.loadJar 方法無法動態載入較高 Java 版本編譯的 class 檔案的問題",

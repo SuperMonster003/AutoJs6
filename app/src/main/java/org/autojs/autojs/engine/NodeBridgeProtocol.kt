@@ -663,6 +663,7 @@ object NodeBridgeModules {
     const val AGENT = NodeBridgePermissionManifest.AGENT
     const val DIALOGS = NodeBridgePermissionManifest.DIALOGS
     const val ACCESSIBILITY = NodeBridgePermissionManifest.ACCESSIBILITY
+    const val SCREEN_RECORDER = "screen_recorder"
     const val MEDIA_PROJECTION = "media_projection"
     const val IMAGE = NodeBridgePermissionManifest.IMAGE
     const val IMAGES = "images"
@@ -751,6 +752,7 @@ object NodeBridgeModules {
         "inspectNode",
         "captureScreenImage",
     )
+    val screenRecorderMethods = setOf("start", "stop", "cancel", "getStatus")
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
     val imageMethods = setOf(
@@ -823,6 +825,7 @@ object NodeBridgeModules {
         AGENT to agentMethods,
         DIALOGS to dialogsMethods,
         ACCESSIBILITY to accessibilityMethods,
+        SCREEN_RECORDER to screenRecorderMethods,
         MEDIA_PROJECTION to mediaProjectionMethods,
         IMAGE to imageMethods,
         IMAGES to imageMethods,
@@ -1086,6 +1089,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.ENGINES && request.method in NodeBridgeModules.enginesMethods -> dispatchEngines(request, auditedCallback)
             request.module == NodeBridgeModules.DIALOGS && request.method in NodeBridgeModules.dialogsMethods -> dispatchDialogs(request, auditedCallback)
             request.module == NodeBridgeModules.ACCESSIBILITY && request.method in NodeBridgeModules.accessibilityMethods -> dispatchAccessibility(request, auditedCallback)
+            request.module == NodeBridgeModules.SCREEN_RECORDER && request.method in NodeBridgeModules.screenRecorderMethods -> dispatchScreenRecording(request, auditedCallback)
             request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, auditedCallback)
             request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, auditedCallback)
             request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, auditedCallback)
@@ -2202,7 +2206,7 @@ class AndroidNodeBridgeCapabilityProvider(
 
     @Volatile private var screenCaptureResourceId: String? = null
 
-    /** Bun's separately granted recording API shares this execution's capture and image lane. */
+    /** Node and Bun share the execution capture session and serialized image lane. */
     internal fun dispatchScreenRecording(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) = imageOperation(request, callback) {
         val args = request.argsArray()
         when (request.method) {
@@ -2211,8 +2215,15 @@ class AndroidNodeBridgeCapabilityProvider(
                 val file = resolveWritableFile(request, args.getString(0)) ?: throw IllegalArgumentException("Invalid recording output path.")
                 screenCapture.startRecording(file, args.optJSONObject(1) ?: JSONObject()).toString()
             }
-            "stop" -> { require(args.length() == 0); screenCapture.stopRecording()?.toString() ?: "null" }
-            "cancel" -> { require(args.length() == 0); screenCapture.cancelRecording().toString() }
+            "stop", "cancel" -> {
+                require(args.length() <= 1 && (args.length() == 0 || args.opt(0) is JSONObject)) { "Recording control expects optional options." }
+                val options = args.optJSONObject(0)
+                val expected = if (options?.has("id") == true) options.opt("id").also {
+                    require(it is String && it.isNotBlank()) { "Recording id must be a non-empty string." }
+                } as String else null
+                if (request.method == "stop") screenCapture.stopRecording(expected)?.toString() ?: "null"
+                else screenCapture.cancelRecording(expected).toString()
+            }
             "getStatus" -> { require(args.length() == 0); screenCapture.recordingStatus().toString() }
             else -> throw IllegalArgumentException("Unknown screen recording operation.")
         }

@@ -26,6 +26,7 @@ const create = new Function('__autojs6_call_autojs', '__autojs6_invalid_arg_type
   let __autojs6_limited_pinyin_cache, __autojs6_limited_pinyin4j_cache;
   let __autojs6_limited_screen_metrics_cache, __autojs6_limited_console_cache;
   let __autojs6_limited_opencc_cache, __autojs6_limited_image_cache, __autojs6_limited_images_cache;
+  let __autojs6_limited_screen_recorder_cache, __autojs6_limited_media_projection_cache, __autojs6_limited_recorder_cache;
   const __autojs6_recycled_image_handles = new Set();
   const __autojs6_rhino_compat_request_screen_capture = () => { throw Error('Screen capture is not exercised by this structural check'); };
   const __autojs6_rhino_compat_stop_screen_capture = __autojs6_rhino_compat_request_screen_capture;
@@ -34,8 +35,11 @@ const create = new Function('__autojs6_call_autojs', '__autojs6_invalid_arg_type
   ${segment('  const __autojs6_pinyin_styles =','  function __autojs6_jsox_mathx_flatten(')}
   ${segment('  function __autojs6_limited_image(moduleName)','  function __autojs6_ocr_bridge_options(')}
   ${segment('  function __autojs6_limited_console()','  let __autojs6_main_module_ref =')}
+  ${segment('  function __autojs6_limited_screen_recorder()','  function __autojs6_limited_image(')}
+  ${segment('  function __autojs6_limited_recorder()','  function __autojs6_media_file_path(')}
   return {pinyin:__autojs6_limited_pinyin(),pinyin4j:__autojs6_limited_pinyin4j(),
-    coordinates:__autojs6_limited_screen_metrics(),console:__autojs6_limited_console(),
+    coordinates:__autojs6_limited_screen_metrics(),console:__autojs6_limited_console(),screenRecorder:__autojs6_limited_screen_recorder(),
+    media_projection:__autojs6_limited_media_projection(),recorder:__autojs6_limited_recorder(),
     opencc:__autojs6_limited_opencc(),image:__autojs6_limited_image('image'),images:__autojs6_limited_image('images')};
 `);
 const nodeCalls = [];
@@ -105,6 +109,16 @@ await assert.rejects(node.opencc.s2t(null));
 await assert.rejects(bunClient.opencc.s2t(null));
 const imageMethods = methods('NodeBridgeProtocol.kt','imageMethods');
 const catalog = JSON.parse(read(path.join(nodeRoot,'app/src/main/assets/nodejs/node-capability-catalog.json')));
+const recordingMethods=methods('NodeBridgeProtocol.kt','screenRecorderMethods');
+assert.deepEqual(sorted(keys(node.screenRecorder)),recordingMethods,'Node recording exports differ from host');
+assert.deepEqual(sorted(bun.HOST_API_METHODS['screen.record']),recordingMethods,'Node/Bun recording exports drift');
+for(const method of recordingMethods) assert(catalog.bridge.operations.some(item=>item.module==='screen_recorder'&&item.method===method
+  &&item.requiredCapabilities.includes('screen_capture')),`Catalog missing screen_recorder.${method}`);
+for(const module of ['screen_recorder','media_projection','recorder']) {
+  assert(source.includes(`${module}: Object.keys(__autojs6_limited_${module}()),`),`Worker missing ${module}`);
+  const declaration=read(path.join(nodeRoot,`docs/nodejs/types/autojs6-node/${module}.d.ts`));
+  assert(declaration.includes(`declare module "autojs6:${module}"`),`Canonical declaration missing ${module}`);
+}
 for (const [module,names,capability] of [['opencc',openccMethods,'opencc'],['image',imageMethods,'image']]) {
   for (const method of names) assert(catalog.bridge.operations.some(item => item.module === module && item.method === method
     && item.requiredCapabilities.includes(capability)),`Development catalog missing ${module}.${method}`);
@@ -125,11 +139,12 @@ const createWorkerModules = new Function('return (' + segment('  function __auto
 const workerCalls = [];
 const workerModules = createWorkerModules(async (...call) => { workerCalls.push(call); return 'converted'; },
   {opencc:keys(node.opencc),image:keys(node.image),images:keys(node.images),pinyin:Object.keys(node.pinyin),pinyin4j:keys(node.pinyin4j),
-    screen_metrics:keys(node.coordinates),console:keys(node.console)},
+    screen_metrics:keys(node.coordinates),console:keys(node.console),screen_recorder:keys(node.screenRecorder),
+    media_projection:keys(node.media_projection),recorder:keys(node.recorder)},
   {pinyin:Object.fromEntries(Object.entries(node.pinyin).filter(([,v])=>typeof v!=='function'))},
   keys(node.console).filter(name=>node.console[name].__autojs6ConsoleControl));
-for (const name of ['opencc','image','images','pinyin','pinyin4j','console','screen_metrics']) {
-  const target=name==='screen_metrics'?node.coordinates:node[name];
+for (const name of ['opencc','image','images','pinyin','pinyin4j','console','screen_metrics','screen_recorder','media_projection','recorder']) {
+  const target=name==='screen_metrics'?node.coordinates:name==='screen_recorder'?node.screenRecorder:node[name];
   assert.deepEqual(sorted(keys(workerModules.get(name))),sorted(keys(target)));
 }
 for (const [name,value] of Object.entries(node.pinyin).filter(([,v])=>typeof v!=='function')) assert.equal(workerModules.get('pinyin')[name],value);

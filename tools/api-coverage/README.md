@@ -39,6 +39,17 @@ revoking that Android permission kills the host process. Restore the previous
 permission and media volume after testing. The fixture discards all recorded
 files and preserves only numeric evidence, not microphone recordings.
 
+`NodeScreenRecordingDeviceTest` reuses the AAC/rotation fixtures on the Node main
+thread and exercises all four audio modes in real CJS/ESM/nested Workers. It checks
+concurrent parent/Worker screenshots, audio-only recorder forwarding, cross-thread
+stop, stale-ID protection, Worker exit cleanup and raw capability rejection.
+`NodeScreenRecordingPermissionDeviceTest` runs separately with Android RECORD_AUDIO
+denied, checking that silent recording and screenshots remain usable. Run the Node
+`test-screen-recording.js` and `test-opencc-images.js` wrapper regressions as well:
+they cover abort/startup races and keep consent options out of image.captureScreen.
+The structural bridge check includes all ten current Worker modules and compares
+screen_recorder methods and catalog records with the host and Bun method sets.
+
 The extractor also resolves Mail's explicit default-client forwarding table,
 including its synchronous-only methods and generated Async names. List suffixes,
 mutation chains and dynamic aliases that are not understood must be reported as
