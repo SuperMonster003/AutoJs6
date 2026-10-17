@@ -36,6 +36,11 @@ class NodePinyinBridgeInstrumentationTest {
             "{\"重行\":[[\"chóng\"],[\"háng\"]]}",
             backend.lastOptions.getString(PinyinOptionKeys.CUSTOM_DICTIONARY_JSON),
         )
+        val numeric = dispatch(provider, request("convert", """["北京",{"style":0.0,"mode":2.0}]"""))
+        assertTrue(numeric.toString(), numeric.ok)
+        assertEquals(0, backend.lastOptions.getInt(PinyinOptionKeys.STYLE))
+        assertEquals(2, backend.lastOptions.getInt(PinyinOptionKeys.MODE))
+        assertFalse(dispatch(provider, request("convert", """["北京",{"style":0.5}]""")).ok)
 
         assertEquals(
             "\"zhongxin\"",

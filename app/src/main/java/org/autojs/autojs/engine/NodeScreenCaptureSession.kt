@@ -14,6 +14,7 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.json.JSONObject
 import java.util.UUID
+import java.io.File
 import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeoutException
 
@@ -31,6 +32,7 @@ internal class NodeScreenCaptureSession(
     private var readyAt = 0L
     private var pending: ((Result<JSONObject>) -> Unit)? = null
     private var timeout: Runnable? = null
+    private var recording: NodeScreenRecording? = null
 
     fun request(options: JSONObject, timeoutMs: Long, callback: (Result<JSONObject>) -> Unit) {
         main.post {
@@ -102,6 +104,7 @@ internal class NodeScreenCaptureSession(
                                 capture.setOnMediaProjectionStopListener {
                                     synchronized(lock) {
                                         if (capturer === capture) {
+                                            cancelRecording()
                                             val stoppedId = id
                                             capturer = null
                                             id = null
@@ -141,12 +144,38 @@ internal class NodeScreenCaptureSession(
 
     fun stop(expectedId: String? = null) = synchronized(lock) {
         if (expectedId != null && expectedId != id) return@synchronized
+        cancelRecording()
         pending?.let { finish(Result.failure(CancellationException("Screen capture was stopped."))) }
         capturer?.release()
         capturer = null
         id = null
         requester?.cancel()
         requester = null
+    }
+
+    fun startRecording(output: File, options: JSONObject): JSONObject = synchronized(lock) {
+        val capture = capturer?.takeUnless { closed || it.isReleased }
+            ?: throw SecurityException("Request Android screen capture consent before recording.")
+        check(recording == null) { "Screen recording is already active." }
+        val size = info()
+        val next = NodeScreenRecording(capture, output, options, size.getInt("width"), size.getInt("height"))
+        next.start().also { recording = next }
+    }
+
+    fun stopRecording(): JSONObject? = synchronized(lock) {
+        val active = recording ?: return@synchronized null
+        try { active.finish() } finally { recording = null }
+    }
+
+    fun cancelRecording(): Boolean = synchronized(lock) {
+        val active = recording ?: return@synchronized false
+        recording = null
+        active.close()
+        true
+    }
+
+    fun recordingStatus(): JSONObject = synchronized(lock) {
+        recording?.status() ?: JSONObject().put("state", "idle")
     }
 
     override fun close() = synchronized(lock) {

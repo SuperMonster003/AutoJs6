@@ -152,6 +152,7 @@ internal class BunHostCapabilityBroker(
             BunHostCapabilityGrants.IMAGE_PROCESS -> imageCall(request, IMAGE_PROCESS_METHODS)
             BunHostCapabilityGrants.IMAGE_FILES -> imageCall(request, IMAGE_FILE_METHODS)
             BunHostCapabilityGrants.SCREEN_CAPTURE -> screenCaptureCall(request)
+            BunHostCapabilityGrants.SCREEN_RECORD -> screenRecordingCall(request)
             BunHostCapabilityGrants.SCREEN_METRICS -> methodCall(request, coordinates::invoke)
             BunHostCapabilityGrants.CONSOLE_CONTROL -> methodCall(request, console::invoke)
             else -> Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_UNKNOWN_CAPABILITY, "Capability is not implemented by this host")
@@ -312,6 +313,19 @@ internal class BunHostCapabilityBroker(
 
     private fun value(value: Any) = Outcome.Success(JSONObject().put("value", value).toString())
 
+    private fun screenRecordingCall(request: JSONObject): Outcome {
+        if (BunHostCapabilityGrants.SCREEN_CAPTURE !in capabilities) throw SecurityException("Screen recording also requires the screen.capture grant.")
+        val (method, args) = parseMethodCall(request)
+        require(method in SCREEN_RECORD_METHODS) { "Unsupported screen recording method: $method" }
+        val result = CompletableFuture<NodeBridgeResponse>()
+        imagesProvider().dispatchScreenRecording(NodeBridgeRequest(
+            id = "$executionId-recording-${UUID.randomUUID()}", module = NodeBridgeModules.MEDIA_PROJECTION,
+            method = method, argsJson = args.toString(), timeoutMs = IMAGE_CALL_TIMEOUT_MILLIS,
+        )) { result.complete(it) }
+        return try { bridgeResponse(result.get(IMAGE_CALL_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) }
+        catch (_: TimeoutException) { Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_TIMEOUT, "Screen recording operation timed out") }
+    }
+
     /** `{}` in, the `android.os.Build` facts out; never a serial, IMEI, Android ID, account or network identifier. */
     private fun deviceInfo(request: JSONObject): Outcome {
         if (request.length() != 0) {
@@ -376,6 +390,7 @@ internal class BunHostCapabilityBroker(
         )
         val IMAGE_FILE_METHODS = setOf("readImage", "saveImage")
         val SCREEN_CAPTURE_METHODS = setOf("requestScreenCapture", "getRequestResult", "captureScreen", "stopScreenCapture")
+        val SCREEN_RECORD_METHODS = setOf("start", "stop", "cancel", "getStatus")
         const val TOAST_TEXT_KEY = "text"
         const val TOAST_DURATION_KEY = "duration"
         const val TOAST_DURATION_SHORT = "short"

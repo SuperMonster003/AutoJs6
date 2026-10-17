@@ -11,11 +11,12 @@ internal object PinyinOptions {
         return when {
             unwrapped.isJsNullish() -> null
             unwrapped is PinyinMode -> unwrapped.value
-            unwrapped is Int -> {
-                require(PinyinMode.entries.any { it.value == unwrapped }) {
+            unwrapped is Number -> {
+                val number = unwrapped.toDouble()
+                require(PinyinMode.entries.any { it.value.toDouble() == number }) {
                     "Invalid mode constant: $unwrapped"
                 }
-                unwrapped
+                number.toInt()
             }
             else -> coerceString(unwrapped, "").uppercase().let { name ->
                 PinyinMode.entries.find { it.name == name }?.value
@@ -29,11 +30,12 @@ internal object PinyinOptions {
         return when {
             unwrapped.isJsNullish() -> null
             unwrapped is PinyinStyle -> unwrapped.value
-            unwrapped is Int -> {
-                require(PinyinStyle.entries.any { it.value == unwrapped }) {
+            unwrapped is Number -> {
+                val number = unwrapped.toDouble()
+                require(PinyinStyle.entries.any { it.value.toDouble() == number }) {
                     "Invalid style constant: $unwrapped"
                 }
-                unwrapped
+                number.toInt()
             }
             else -> coerceString(unwrapped, "").uppercase().let { name ->
                 PinyinStyle.entries.find { it.name == name }?.value

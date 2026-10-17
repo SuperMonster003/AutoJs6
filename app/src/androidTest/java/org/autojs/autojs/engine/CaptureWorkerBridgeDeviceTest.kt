@@ -10,6 +10,10 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.Paint
+import android.media.MediaExtractor
+import android.media.MediaFormat
+import android.media.MediaMetadataRetriever
 import android.hardware.display.DisplayManager
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
@@ -47,6 +51,136 @@ class CaptureWorkerBridgeDeviceTest {
     }
     private val global get() = AutoJs.instance.globalConsole
     private val evidence = JSONArray()
+
+    @Test fun bunRecordsPlayableMp4AcrossRotationAndRestoresCapture() = withGrants {
+        val folder=File(context.getExternalFilesDir(null),"recording-${UUID.randomUUID()}").apply{mkdirs()}
+        try { withFixture {
+            val pool=Executors.newSingleThreadExecutor()
+            val marker="RECORD_ROTATE_${UUID.randomUUID()}"
+            try {
+                val future=pool.submit<JSONObject>{execute("bun","""
+                    const recorder=host.screenRecorder,dir=${JSONObject.quote(folder.absolutePath)};
+                    await rejects(()=>recorder.start(dir+'/no-consent.mp4'));
+                    await images.requestScreenCapture({timeoutMs:30000});await pause(600);
+                    eq((await recorder.getStatus()).state,'idle','initial status');
+                    await rejects(()=>recorder.start(dir+'/invalid.mp4',{width:319,height:192}));
+                    await rejects(()=>recorder.start(dir+'/invalid.mp4',{audio:true}));
+                    const started=await recorder.start(dir+'/portrait.mp4',{width:192,height:320,frameRate:15,bitRate:1000000});
+                    eq(started.width,192,'width');eq(started.state,'recording','state');
+                    await rejects(()=>recorder.start(dir+'/duplicate.mp4'));
+                    await rejects(()=>images.captureScreen());
+                    await pause(1200);console.log('$marker');
+                    while((await host.coordinates.getInfo()).rotation!==1)await pause(100);
+                    await pause(1600);const portrait=await recorder.stop();
+                    eq((await recorder.getStatus()).state,'idle','stopped status');eq(await recorder.stop(),null,'second stop');
+                    const shot=await images.captureScreen();eq(await images.pixel(shot,Math.floor(shot.width/2),Math.floor(shot.height/2)),$COLOR,'restored screenshot');await images.recycle(shot);
+                    await rejects(()=>recorder.start(dir+'/portrait.mp4',{width:192,height:320}));
+                    await recorder.start(dir+'/landscape.mp4',{width:320,height:192,frameRate:15,bitRate:1000000});
+                    await pause(1600);const landscape=await recorder.stop();
+                    await recorder.start(dir+'/cancelled.mp4',{width:320,height:192});await pause(400);
+                    eq(await recorder.cancel(),true,'cancel');eq(await recorder.cancel(),false,'second cancel');
+                    await images.stopScreenCapture();return {portrait,landscape};
+                """.trimIndent())}
+                await("video consent"){if(future.isDone)fail("No consent: ${future.get()}");consentButton(true)!=null};clickConsent(true)
+                await("video rotation checkpoint"){if(future.isDone)fail("No rotation checkpoint: ${future.get()}");global.snapshotLogEntries().any{it.content.toString().contains(marker)}}
+                assertTrue(automation.setRotation(1));await("video landscape"){displayRotation()==1}
+                val result=future.get(35,TimeUnit.SECONDS)
+                for((name,width,height) in listOf(Triple("portrait",192,320),Triple("landscape",320,192))) {
+                    val data=result.getJSONObject(name);val file=File(data.getString("path"))
+                    assertEquals(file.length(),data.getLong("size"));assertTrue(data.toString(),data.getLong("durationMs")>=1000)
+                    val extractor=MediaExtractor()
+                    try {
+                        extractor.setDataSource(file.absolutePath);assertEquals(1,extractor.trackCount)
+                        val format=extractor.getTrackFormat(0);assertEquals("video/avc",format.getString(MediaFormat.KEY_MIME))
+                        assertEquals(width,format.getInteger(MediaFormat.KEY_WIDTH));assertEquals(height,format.getInteger(MediaFormat.KEY_HEIGHT))
+                        extractor.selectTrack(0);var samples=0;val timestamps=mutableSetOf<Long>()
+                        while(extractor.sampleTime>=0){timestamps.add(extractor.sampleTime);samples++;extractor.advance()}
+                        assertTrue("Encoded samples=$samples",samples>=10)
+                        assertTrue("Video timestamps",timestamps.size>=10&&timestamps.max()-timestamps.min()>=900_000L)
+                        data.put("samples",samples)
+                    } finally {extractor.release()}
+                    val retriever=MediaMetadataRetriever()
+                    try {
+                        retriever.setDataSource(file.absolutePath)
+                        for(time in listOf(500_000L,1_200_000L)) {
+                            val frame=checkNotNull(retriever.getFrameAtTime(time,MediaMetadataRetriever.OPTION_CLOSEST))
+                            try {val pixel=frame.getPixel(frame.width/2,frame.height/2)
+                                for(channel in listOf(Color::red,Color::green,Color::blue))assertTrue("Decoded pixel $pixel",kotlin.math.abs(channel(pixel)-channel(COLOR))<20)
+                            } finally {frame.recycle()}
+                        }
+                        data.put("decodedFixture",true)
+                    } finally {retriever.release()}
+                }
+                assertEquals(setOf("portrait.mp4","landscape.mp4"),folder.list()!!.toSet())
+                evidence.put(result);awaitNoProjection()
+            } finally {pool.shutdownNow()}
+        };writeEvidence("video-output") } finally {folder.deleteRecursively()}
+    }
+
+    @Test fun bunVideoCancellationAndSeparateGrantCleanUnfinishedOutput() = withGrants {
+        val folder=File(context.getExternalFilesDir(null),"recording-cleanup-${UUID.randomUUID()}").apply{mkdirs()}
+        try {withFixture {
+            val pool=Executors.newSingleThreadExecutor();val owned=AtomicReference<BunPluginScriptEngine>()
+            val marker="VIDEO_ACTIVE_${UUID.randomUUID()}"
+            try {
+                val future=pool.submit<JSONObject>{execute("bun","""
+                    await images.requestScreenCapture({timeoutMs:30000});
+                    await host.screenRecorder.start(${JSONObject.quote(File(folder,"exit.mp4").absolutePath)},{width:320,height:192});
+                    console.log('$marker');await pause(60000);return {unexpected:true};
+                """.trimIndent(),owned)}
+                await("cancel video consent"){if(future.isDone)fail("No consent: ${future.get()}");consentButton(true)!=null};clickConsent(true)
+                await("active recording"){if(future.isDone)fail("No active recording: ${future.get()}");global.snapshotLogEntries().any{it.content.toString().contains(marker)}}
+                owned.get().forceStop();assertNotNull(runCatching{future.get(15,TimeUnit.SECONDS)}.exceptionOrNull())
+                awaitNoProjection();await("partial files removed"){folder.list()!!.isEmpty()}
+                BunHostCapabilityGrants.setScreenRecordGranted(context,false)
+                execute("bun","""
+                    eq(host.hasCapability('screen.record'),false,'record grant');
+                    eq((await rejects(()=>host.screenRecorder.start('/sdcard/denied.mp4'))).code,'NOT_GRANTED','denied');
+                    const response=await fetch('http://autojs6/v1/screen.record',{unix:process.env.AUTOJS6_HOST_BRIDGE_SOCKET,method:'POST',
+                      headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'start',args:['/sdcard/denied.mp4']})});
+                    eq(response.status,403,'raw recording bypass');
+                    await rejects(()=>host.call('screen.capture',{method:'start',args:['/sdcard/denied.mp4']}));
+                    return {recordingGrantRejected:true};
+                """.trimIndent())
+            } finally {pool.shutdownNow()}
+        };writeEvidence("video-cleanup")}finally{folder.deleteRecursively()}
+    }
+
+    @Test fun workerPinyinConsoleAndCoordinatesShareTheParentExecution() = withFixture {
+        for(rotation in listOf(0,1)) {
+            assertTrue(automation.setRotation(rotation));await("worker rotation"){displayRotation()==rotation};SystemClock.sleep(400)
+            val(width,height)=displaySize()
+            for((baseX,baseY) in listOf(720 to 1280,1080 to 1920,1920 to 1080)) {
+                val body="""
+                    (async()=>{
+                      function eq(a,b){if(JSON.stringify(a)!==JSON.stringify(b))throw Error(JSON.stringify([a,b]));}
+                      eq(pinyin.STYLE_NORMAL,0);eq(pinyin.MODE_PLACE_NAME,2);
+                      const rows=await pinyin(Buffer.from('北京'),{style:pinyin.STYLE_NORMAL,mode:pinyin.MODE_NORMAL});eq(rows,[['bei'],['jing']]);eq(await rows.compact(),[['bei','jing']]);
+                      eq(await pinyin.simple({toString(){return '北京';}}),'beijing');eq(await four('北京',{separator:' '}),'bei jing');
+                      eq(await four.readings('北京',{tone:'WITH_TONE_NUMBER'}),[['bei3'],['jing1']]);
+                      eq(await screen.getScaleBases(),{x:$baseX,y:$baseY});
+                      const values=[];for(const [m,a] of [['cX',[]],['cY',[]],['cX',[360]],['cY',[640]],['cXy',[0.5,'16:9']],['cYx',[0.5,'16:9']]]) values.push(await screen[m](...a));
+                      eq(values,[$width,$height,${kotlin.math.round(360.0*width/baseX).toInt()},${kotlin.math.round(640.0*height/baseY).toInt()},${kotlin.math.floor(height*0.5*16/9+0.5).toInt()},${kotlin.math.floor(width*0.5*9/16+0.5).toInt()}]);
+                      let rejected=0;for(const action of [()=>screen.cX(undefined),()=>screen.cY(NaN),()=>screen.setScaleBaseX(720)]){try{await action()}catch(e){rejected++}}eq(rejected,3);
+                      await controls.setTitle('Worker API validation');await console.setSize(0.6,0.3);await controls.show();await new Promise(r=>setTimeout(r,150));await controls.hide();
+                      eq(console.log('WORKER_STDOUT_${rotation}_${baseX}'),undefined);
+                      parentPort.postMessage({values,compact:true});
+                    })().catch(e=>{throw e});
+                """.trimIndent()
+                val cjs="const {parentPort}=require('node:worker_threads');const pinyin=require('autojs6:pinyin'),four=require('pinyin4j'),screen=require('screen_metrics'),controls=require('node:console');$body"
+                val esm="import {parentPort} from 'node:worker_threads';import pinyin from 'pinyin';import four from 'autojs6:pinyin4j';import screen from 'autojs6:screen_metrics';import controls from 'autojs6:console';$body"
+                val nested="const {Worker,parentPort}=require('node:worker_threads');const w=new Worker(${JSONObject.quote(cjs)},{eval:true});w.on('message',v=>parentPort.postMessage(v));w.on('error',e=>{throw e});"
+                execute("node","""
+                    await require('screen_metrics').setScaleBases($baseX,$baseY);
+                    const {Worker}=require('node:worker_threads');const results=[];
+                    for(const [source,esm] of [[${JSONObject.quote(cjs)},false],[${JSONObject.quote(esm)},true],[${JSONObject.quote(nested)},false]]) {
+                      let result;await new Promise((resolve,reject)=>{const w=new Worker(esm?new URL('data:text/javascript,'+encodeURIComponent(source)):source,{eval:!esm});
+                        w.on('message',v=>result=v);w.on('error',reject);w.on('exit',c=>c===0?resolve():reject(Error('Worker exit '+c)));});results.push(result);
+                    }return {rotation:$rotation,baseX:$baseX,baseY:$baseY,results};
+                """.trimIndent())
+            }
+        };writeEvidence("worker-text-console-coordinates")
+    }
 
     @Test fun terminatingWorkerCancelsItsPendingConsentWhileParentStaysAlive() {
         withFixture {
@@ -241,7 +375,7 @@ class CaptureWorkerBridgeDeviceTest {
             output=console.snapshotLogEntries().joinToString("\n"){it.content.toString()}
         } else {
             try {
-                val manifest=NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("opencc","image","media_projection"))
+                val manifest=NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("opencc","image","media_projection","pinyin","pinyin4j","console","device"))
                 val result=NodeJsRuntimePluginBridge.runScript(context,NodePluginScriptRequest(source=source,sourceName="capture-worker.cjs",
                     workingDirectory=context.cacheDir.path,timeoutMs=90_000,runtimeModuleSources=mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson())),console=console,
                     outputListener={_,text->console.println(android.util.Log.DEBUG,text)})
@@ -254,7 +388,7 @@ class CaptureWorkerBridgeDeviceTest {
 
     private fun withGrants(action:()->Unit) {
         val store=context.getSharedPreferences("bun_host_capability_grants",Context.MODE_PRIVATE)
-        val keys=listOf(BunHostCapabilityGrants.SCREEN_CAPTURE,BunHostCapabilityGrants.IMAGE_PROCESS,BunHostCapabilityGrants.SCREEN_METRICS)
+        val keys=listOf(BunHostCapabilityGrants.SCREEN_CAPTURE,BunHostCapabilityGrants.SCREEN_RECORD,BunHostCapabilityGrants.IMAGE_PROCESS,BunHostCapabilityGrants.SCREEN_METRICS)
         val previous=keys.associateWith{if(store.contains(it))store.getBoolean(it,false) else null}
         store.edit().apply{keys.forEach{putBoolean(it,true)}}.commit()
         try {action()}finally{store.edit().apply{previous.forEach{(k,v)->if(v==null)remove(k)else putBoolean(k,v)}}.commit()}
@@ -265,7 +399,11 @@ class CaptureWorkerBridgeDeviceTest {
         val activity=instrumentation.startActivitySync(Intent(context,RuntimeCaptureFixtureActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         instrumentation.runOnMainSync {
             activity.requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            activity.setContentView(object:View(activity){override fun onDraw(canvas:Canvas){canvas.drawColor(COLOR)}})
+            activity.setContentView(object:View(activity){override fun onDraw(canvas:Canvas){
+                canvas.drawColor(COLOR)
+                canvas.drawRect(0f,0f,40f,40f,Paint().apply{color=if(SystemClock.uptimeMillis()/100%2==0L)Color.RED else Color.GREEN})
+                postInvalidateDelayed(80)
+            }})
         }
         try {assertTrue(automation.setRotation(0));await("portrait"){displayRotation()==0};SystemClock.sleep(400);action()}
         finally {

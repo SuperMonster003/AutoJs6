@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_record_grant">Permitir a Bun codificar vídeos MP4 sin audio y guardar archivos del host. Requiere consentimiento de captura; desactivado por defecto. Cambios en la siguiente ejecución.</string>
+    <string name="text_bun_screen_record_grant">Grabación de vídeo de pantalla</string>
+</resources>

@@ -2202,6 +2202,22 @@ class AndroidNodeBridgeCapabilityProvider(
 
     @Volatile private var screenCaptureResourceId: String? = null
 
+    /** Bun's separately granted recording API shares this execution's capture and image lane. */
+    internal fun dispatchScreenRecording(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) = imageOperation(request, callback) {
+        val args = request.argsArray()
+        when (request.method) {
+            "start" -> {
+                require(args.length() in 1..2 && args.opt(0) is String && (args.length() < 2 || args.opt(1) is JSONObject)) { "Recording start expects a path and optional options object." }
+                val file = resolveWritableFile(request, args.getString(0)) ?: throw IllegalArgumentException("Invalid recording output path.")
+                screenCapture.startRecording(file, args.optJSONObject(1) ?: JSONObject()).toString()
+            }
+            "stop" -> { require(args.length() == 0); screenCapture.stopRecording()?.toString() ?: "null" }
+            "cancel" -> { require(args.length() == 0); screenCapture.cancelRecording().toString() }
+            "getStatus" -> { require(args.length() == 0); screenCapture.recordingStatus().toString() }
+            else -> throw IllegalArgumentException("Unknown screen recording operation.")
+        }
+    }
+
     private fun onScreenCaptureStopped(id: String) {
         resourceRegistry.release(id, "media_projection.stopped")
         if (screenCaptureResourceId == id) screenCaptureResourceId = null

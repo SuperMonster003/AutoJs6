@@ -23,6 +23,13 @@ results, revoked grants and execution-owned handles. Workers use their documente
 adds the real CJS/ESM/nested Worker facades, large byte transfers, Bun consent
 and actual pixels across rotation, fixed dimensions, denial, timeout, cancellation
 and grant checks. The screen tests use an owned color fixture and real Android UI.
+The same suite checks Worker pinyin constants and compact results, native console
+output plus host window controls, and parent-owned coordinate bases in both
+orientations. Bun recording checks inspect actual H.264 tracks, MP4 duration,
+sample timestamps and decoded fixture pixels, then verify capture restoration,
+existing-file rejection and partial-file cleanup. Video sample presentation times
+may be reordered by B frames; the test does not confuse decode order with display
+order. `PinyinOptionsTest` covers integer-valued JSON/Rhino number representations.
 
 The extractor also resolves Mail's explicit default-client forwarding table,
 including its synchronous-only methods and generated Async names. List suffixes,

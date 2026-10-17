@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_screen_record_grant">Bun に音声なしの MP4 画面動画のエンコードとホストへの保存を許可します. 画面キャプチャの同意が必要です. 初期設定は無効で, 変更は次回実行から適用されます.</string>
+    <string name="text_bun_screen_record_grant">画面動画の録画</string>
+</resources>

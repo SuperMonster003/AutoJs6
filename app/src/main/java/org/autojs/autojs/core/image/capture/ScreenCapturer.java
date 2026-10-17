@@ -72,6 +72,7 @@ public class ScreenCapturer {
     private volatile ImageReader mImageReader;
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
+    private volatile boolean mRecordingSurface;
     private OnScreenCaptureAvailableListener mOnScreenCaptureAvailableListener;
     private int mDetectedOrientation;
     private int mAppliedOrientation = ORIENTATION_AUTO;
@@ -316,8 +317,8 @@ public class ScreenCapturer {
         setImageListener(mImageCallbackHandler);
     }
 
-    private void refreshVirtualDisplay(int orientation, boolean isInit) {
-        if (mReleased) {
+    private synchronized void refreshVirtualDisplay(int orientation, boolean isInit) {
+        if (mReleased || mRecordingSurface) {
             return;
         }
 
@@ -395,6 +396,7 @@ public class ScreenCapturer {
 
     @Nullable
     public Image capture() {
+        if (mRecordingSurface) throw new IllegalStateException("Stop screen recording before capturing an image.");
         if (mReleased) {
             return null;
         }
@@ -478,6 +480,29 @@ public class ScreenCapturer {
 
     public Options getOptions() {
         return mOptions;
+    }
+
+    /** Switch the existing display to an encoder; never reuse a consent token for a second display. */
+    public synchronized void setRecordingSurface(Surface surface, int width, int height) {
+        if (mReleased || mVirtualDisplay == null) throw new IllegalStateException("Screen capture has stopped.");
+        if (mRecordingSurface) throw new IllegalStateException("Screen recording is already active.");
+        mRecordingSurface = true;
+        mVirtualDisplay.setSurface(null);
+        mVirtualDisplay.resize(width, height, mScreenDensity);
+        mVirtualDisplay.setSurface(surface);
+    }
+
+    public synchronized void restoreCaptureSurface() {
+        if (!mRecordingSurface) return;
+        mRecordingSurface = false;
+        if (mReleased) return;
+        refreshDetectedOrientation();
+        refreshVirtualDisplay(mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation, false);
+        mShouldRefreshVirtualDisplayOnNextCapture = false;
+    }
+
+    public synchronized void detachRecordingSurface() {
+        if (mRecordingSurface && mVirtualDisplay != null) mVirtualDisplay.setSurface(null);
     }
 
     @Subscribe

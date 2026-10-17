@@ -80,6 +80,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunPinyinGrantPreference: ThemeColorSwitchPreference? = null
     private var bunImageFilesGrantPreference: ThemeColorSwitchPreference? = null
     private var bunScreenCaptureGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunScreenRecordGrantPreference: ThemeColorSwitchPreference? = null
     private var bunImageProcessGrantPreference: ThemeColorSwitchPreference? = null
     private var bunOpenccGrantPreference: ThemeColorSwitchPreference? = null
     private var bunPinyin4jGrantPreference: ThemeColorSwitchPreference? = null
@@ -211,6 +212,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunPinyinGrantPreference = findPreference("plugin_bun_pinyin_grant")
         bunImageFilesGrantPreference = findPreference("plugin_bun_image_files_grant")
         bunScreenCaptureGrantPreference = findPreference("plugin_bun_screen_capture_grant")
+        bunScreenRecordGrantPreference = findPreference("plugin_bun_screen_record_grant")
         bunImageProcessGrantPreference = findPreference("plugin_bun_image_process_grant")
         bunOpenccGrantPreference = findPreference("plugin_bun_opencc_grant")
         bunPinyin4jGrantPreference = findPreference("plugin_bun_pinyin4j_grant")
@@ -307,6 +309,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setScreenCaptureGranted(requireContext(), value == true)
             true
         }
+        bunScreenRecordGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setScreenRecordGranted(requireContext(), value == true)
+            true
+        }
         bunImageProcessGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setImageProcessGranted(requireContext(), value == true)
             true
@@ -389,6 +395,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunPinyinGrantPreference?.isChecked = BunHostCapabilityGrants.isTextPinyinGranted(requireContext())
         bunImageFilesGrantPreference?.isChecked = BunHostCapabilityGrants.isImageFilesGranted(requireContext())
         bunScreenCaptureGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenCaptureGranted(requireContext())
+        bunScreenRecordGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenRecordGranted(requireContext())
         bunImageProcessGrantPreference?.isChecked = BunHostCapabilityGrants.isImageProcessGranted(requireContext())
         bunOpenccGrantPreference?.isChecked = BunHostCapabilityGrants.isTextOpenccGranted(requireContext())
         bunPinyin4jGrantPreference?.isChecked = BunHostCapabilityGrants.isTextPinyin4jGranted(requireContext())

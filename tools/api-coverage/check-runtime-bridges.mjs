@@ -113,7 +113,7 @@ const nodeImageAdaptors = ['getSize','getWidth','getHeight','isRecycled','reques
   'detectColor','findPointsByColor','findColorEquals','findPointByColor','findPointByColors','read','save'];
 assert.deepEqual(sorted(keys(node.image)),sorted([...imageMethods,...nodeImageAdaptors]),'Node image export/host drift');
 assert.deepEqual(sorted(keys(node.images)),sorted(keys(node.image)),'image/images export drift');
-for (const [capability,field] of [['image.process','IMAGE_PROCESS_METHODS'],['image.files','IMAGE_FILE_METHODS'],['screen.capture','SCREEN_CAPTURE_METHODS']]) {
+for (const [capability,field] of [['image.process','IMAGE_PROCESS_METHODS'],['image.files','IMAGE_FILE_METHODS'],['screen.capture','SCREEN_CAPTURE_METHODS'],['screen.record','SCREEN_RECORD_METHODS']]) {
   assert.deepEqual(sorted(bun.HOST_API_METHODS[capability]),methods('BunHostCapabilityBroker.kt',field),`${capability}: Bun host/client drift`);
 }
 assert.deepEqual(sorted(keys(bunClient.images)),sorted([
@@ -124,8 +124,16 @@ assert.deepEqual(sorted(keys(bunClient.images)),sorted([
 const createWorkerModules = new Function('return (' + segment('  function __autojs6_worker_host_modules(', '  async function __autojs6_worker_invoke(') + ')')();
 const workerCalls = [];
 const workerModules = createWorkerModules(async (...call) => { workerCalls.push(call); return 'converted'; },
-  {opencc:keys(node.opencc),image:keys(node.image),images:keys(node.images)});
-for (const name of ['opencc','image','images']) assert.deepEqual(sorted(keys(workerModules.get(name))),sorted(keys(node[name])));
+  {opencc:keys(node.opencc),image:keys(node.image),images:keys(node.images),pinyin:Object.keys(node.pinyin),pinyin4j:keys(node.pinyin4j),
+    screen_metrics:keys(node.coordinates),console:keys(node.console)},
+  {pinyin:Object.fromEntries(Object.entries(node.pinyin).filter(([,v])=>typeof v!=='function'))},
+  keys(node.console).filter(name=>node.console[name].__autojs6ConsoleControl));
+for (const name of ['opencc','image','images','pinyin','pinyin4j','console','screen_metrics']) {
+  const target=name==='screen_metrics'?node.coordinates:node[name];
+  assert.deepEqual(sorted(keys(workerModules.get(name))),sorted(keys(target)));
+}
+for (const [name,value] of Object.entries(node.pinyin).filter(([,v])=>typeof v!=='function')) assert.equal(workerModules.get('pinyin')[name],value);
+assert.deepEqual(sorted(keys(bunClient.screenRecorder)),sorted(bun.HOST_API_METHODS['screen.record']));
 for (const name of conversionTypes) {
   assert.equal(await workerModules.get('opencc')[name]('汉字'),'converted');
   assert.deepEqual(workerCalls.at(-1).slice(0,3),['autojs6:worker-module:opencc',name,['汉字']]);
