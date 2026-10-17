@@ -197,6 +197,21 @@ internal class ShortcutBackupRepository private constructor(private val context:
         replaceIcon(id, defaultIcon(entry.target))
     }
 
+    @Synchronized
+    fun useDefaultIconsForMissing(): Int {
+        // Read under the same lock as replaceIcon/import, never from a stale UI selection.
+        val state = read()
+        val count = state.entries.count { it.icon == null }
+        if (count == 0) return 0
+        val icons = mutableMapOf<String, ByteArray>()
+        val completed = ShortcutBackupPolicy.fillMissingIcons(state) { target ->
+            icons.getOrPut(target) { encodeIcon(defaultIcon(target)) }
+        }
+        // One atomic write: an encoding or storage failure must not leave a partial batch.
+        save(completed)
+        return count
+    }
+
     private fun encodeIcon(drawable: Drawable): ByteArray {
         val bounds = Rect(drawable.bounds)
         // Keep the original aspect ratio: custom icons need not be square. Bounding the

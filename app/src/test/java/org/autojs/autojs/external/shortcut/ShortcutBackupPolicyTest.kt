@@ -11,6 +11,45 @@ class ShortcutBackupPolicyTest {
 
     private fun state(vararg entries: ShortcutBackupEntry) = ShortcutBackupState(entries.toList(), "generation", "home", "activity")
 
+    @Test fun batchDefaultsKeepSavedAndManuallyChosenIconsByteForByte() {
+        val saved = entry("saved").copy(icon = byteArrayOf(1, 2, 3))
+        val chosen = entry("chosen").copy(icon = byteArrayOf(4, 5, 6), iconNoticeShown = true)
+        val missing = entry("missing").copy(icon = null)
+        val original = state(saved, chosen, missing)
+        val result = ShortcutBackupPolicy.fillMissingIcons(original) { byteArrayOf(7, 8) }
+        assertSame(saved, result.entries[0])
+        assertSame(chosen, result.entries[1])
+        assertArrayEquals(byteArrayOf(1, 2, 3), result.entries[0].icon)
+        assertArrayEquals(byteArrayOf(4, 5, 6), result.entries[1].icon)
+        assertArrayEquals(byteArrayOf(7, 8), result.entries[2].icon)
+        assertNull(original.entries[2].icon)
+    }
+
+    @Test fun batchDefaultsPreserveDuplicateIdsAndAllRestorationDecisions() {
+        val copies = Status.entries.mapIndexed { index, status ->
+            entry("copy-$index", status).copy(icon = null, notified = true, requestToken = "request-$index")
+        }
+        val settings = entry("settings", Status.SAVED).copy(target = "settings", path = null, icon = null)
+        val original = state(*(copies + settings).toTypedArray())
+        val result = ShortcutBackupPolicy.fillMissingIcons(original) { target ->
+            if (target == "settings") byteArrayOf(9) else byteArrayOf(8)
+        }
+        assertEquals(original.markerToken, result.markerToken)
+        assertEquals(original.launcher, result.launcher)
+        assertEquals(original.activity, result.activity)
+        original.entries.zip(result.entries).forEach { (before, after) ->
+            assertEquals(before.copy(icon = after.icon, iconNoticeShown = true), after)
+            assertArrayEquals(if (before.target == "settings") byteArrayOf(9) else byteArrayOf(8), after.icon)
+        }
+        assertEquals(copies.map { it.id } + "settings", result.entries.map { it.id })
+    }
+
+    @Test fun repeatedBatchDefaultsDoNotReadOrReplaceAnyExistingIcon() {
+        val completed = ShortcutBackupPolicy.fillMissingIcons(state(entry("one").copy(icon = null))) { byteArrayOf(8) }
+        assertEquals(completed, ShortcutBackupPolicy.fillMissingIcons(completed) { error("No icon should be requested") })
+        assertEquals(ShortcutBackupState(), ShortcutBackupPolicy.fillMissingIcons(ShortcutBackupState()) { error("Empty backup") })
+    }
+
     @Test fun removingOneOfSeveralCopiesOnlyRetiresThatInstance() {
         val result = ShortcutBackupPolicy.reconcile(state(entry("one"), entry("two")), setOf("two"), true, true)
         assertEquals(listOf(Status.REMOVED, Status.PINNED), result.entries.map { it.status })

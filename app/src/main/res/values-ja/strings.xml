@@ -768,6 +768,9 @@
     <string name="shortcut_backup_complete">確認済みの追加: %1$d; スキップまたは未確認: %2$d</string>
     <string name="shortcut_backup_complete_icons">バックアップのアイコンを補完</string>
     <string name="shortcut_backup_count">保存済みショートカット: %1$d</string>
+    <string name="shortcut_backup_default_icons">既定のアイコンを一括適用</string>
+    <string name="shortcut_backup_default_icons_applied">既定のアイコンで補完した件数: %1$d</string>
+    <string name="shortcut_backup_default_icons_summary">バックアップ内の不足しているアイコンのみを補完します. 保存済みまたは手動で選択したアイコンは保持します.</string>
     <string name="shortcut_backup_description">新規およびシステムに固定済みの AutoJs6 ショートカットを自動保存します. 読み取れないアイコンは復元前に選択してください. アンインストール前に書き出してください. 設定とアイコンを保存するため, スクリプトは別途保存してください. 復元前にスクリプトとストレージ権限を準備してください. 削除または無視した項目は初期選択されません.</string>
     <string name="shortcut_backup_empty">復元するショートカットはありません</string>
     <string name="shortcut_backup_error">ショートカットのバックアップ: %1$s</string>

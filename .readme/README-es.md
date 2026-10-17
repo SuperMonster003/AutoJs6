@@ -190,14 +190,14 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/10/16 - Algunas funciones pasan a complementos; actualiza con precaución
+###### 2026/10/17 - Algunas funciones pasan a complementos; actualiza con precaución
 
 * `Sugerencia` Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas
 * `Sugerencia` El SDK de destino de las aplicaciones empaquetadas cambia de 29 a 37; el acceso al almacenamiento compartido y a la red local requiere los permisos exigidos por el sistema
 * `Sugerencia` Al usar images u otras funciones que dependen de OpenCV en aplicaciones empaquetadas, selecciona el complemento OpenCV al empaquetar
 * `Sugerencia` El control console y la consola flotante muestran los registros del script actual; los registros globales se consultan mediante globalconsole o la página de registros
 * `Sugerencia` Los registros en archivos utilizan una implementación integrada que conserva las opciones documentadas y los formatos PatternLayout habituales; las demás API de Log4j dejan de estar disponibles
-* `Nuevo` Los accesos nuevos y ya fijados se archivan automáticamente, con elección de iconos ilegibles, exportación/importación y restauración en lote, y recuperación tras descongelar; las eliminaciones manuales reconocidas no vuelven a avisar y las copias del mismo script conservan sus ID independientes (búsqueda de accesos existentes con Android 7.1+, detección automática con Android 8+) (acceso: Ajustes > Configuración > Copia de accesos directos)
+* `Nuevo` Los accesos nuevos y ya fijados se archivan automáticamente, con exportación/importación y restauración en lote; los iconos ilegibles se pueden elegir individualmente o completar en lote con los predeterminados sin sobrescribir los guardados; tras descongelar, los accesos ausentes se muestran en la página de copias sin avisos en la página principal, y las eliminaciones manuales reconocidas no se seleccionan por defecto; las copias del mismo script conservan sus ID independientes (búsqueda de accesos existentes con Android 7.1+, detección automática con Android 8+) (acceso: Ajustes > Configuración > Copia de accesos directos)
 * `Nuevo` Asistente de configuración para ejecutar sucesivamente los asistentes de permisos e instalación de complementos, accesible desde el mensaje de bienvenida tras el primer inicio (acceso: Ajustes > Configuración > Asistente de configuración)
 * `Nuevo` Asistente de permisos para seleccionar los permisos del panel lateral y solicitarlos sucesivamente, con perfiles "Estándar"/"Mínimo"/"Todos" y perfiles personalizados; los permisos concedidos pueden ocultarse desde el menú (acceso: Asistente de configuración/botón del encabezado "Permisos" del panel lateral)
 * `Nuevo` Asistente de instalación de complementos para seleccionar por categorías e instalar en lotes complementos oficiales, con perfiles "Estándar"/"Mínimo"/"Todos" y guardado, cambio de nombre y eliminación de perfiles personalizados (acceso: Asistente de configuración/menú del botón flotante de la pestaña de complementos/menú "+" del Centro de complementos)

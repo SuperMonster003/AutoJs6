@@ -769,6 +769,9 @@
     <string name="shortcut_backup_complete">확인된 추가: %1$d; 건너뛰거나 미확인: %2$d</string>
     <string name="shortcut_backup_complete_icons">백업 아이콘 완성</string>
     <string name="shortcut_backup_count">저장된 바로가기: %1$d</string>
+    <string name="shortcut_backup_default_icons">기본 아이콘 일괄 적용</string>
+    <string name="shortcut_backup_default_icons_applied">기본 아이콘으로 보완한 항목: %1$d</string>
+    <string name="shortcut_backup_default_icons_summary">백업에서 누락된 아이콘만 보완합니다. 저장되었거나 수동으로 선택한 아이콘은 유지됩니다.</string>
     <string name="shortcut_backup_description">새 바로가기와 시스템에 고정된 기존 AutoJs6 바로가기를 자동 저장합니다. 읽을 수 없는 아이콘은 복원 전에 선택하세요. 제거 전에 내보내세요. 백업에는 설정과 아이콘이 포함되므로 스크립트는 별도로 저장하세요. 복원 전에 스크립트와 저장소 권한을 준비하세요. 삭제하거나 무시한 항목은 기본 선택되지 않습니다.</string>
     <string name="shortcut_backup_empty">복원할 바로가기가 없습니다</string>
     <string name="shortcut_backup_error">바로가기 백업: %1$s</string>

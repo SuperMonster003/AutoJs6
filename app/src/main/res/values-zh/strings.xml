@@ -763,6 +763,9 @@
     <string name="shortcut_backup_complete">确认已添加: %1$d; 已跳过或未确认: %2$d</string>
     <string name="shortcut_backup_complete_icons">补全备份图标</string>
     <string name="shortcut_backup_count">已存档的快捷方式: %1$d</string>
+    <string name="shortcut_backup_default_icons">批量使用默认图标</string>
+    <string name="shortcut_backup_default_icons_applied">已使用默认图标补全: %1$d</string>
+    <string name="shortcut_backup_default_icons_summary">仅补全缺少图标的备份条目, 保留已保存或手动补选的图标.</string>
     <string name="shortcut_backup_description">新建快捷方式及系统已登记的 AutoJs6 固定快捷方式会自动存档. 原图标无法读取时, 请在恢复前补选. 卸载前请导出备份. 备份包含配置和图标, 脚本文件需单独保存. 恢复前请还原脚本并授予存储访问权限. 已移除或忽略的项目默认不勾选.</string>
     <string name="shortcut_backup_empty">没有需要恢复的快捷方式</string>
     <string name="shortcut_backup_error">快捷方式备份: %1$s</string>

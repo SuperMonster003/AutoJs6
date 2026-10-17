@@ -767,6 +767,9 @@
     <string name="shortcut_backup_complete">Ajouts confirmés: %1$d; ignorés ou non confirmés: %2$d</string>
     <string name="shortcut_backup_complete_icons">Compléter les icônes</string>
     <string name="shortcut_backup_count">Raccourcis enregistrés: %1$d</string>
+    <string name="shortcut_backup_default_icons">Utiliser les icônes par défaut en lot</string>
+    <string name="shortcut_backup_default_icons_applied">Icônes de sauvegarde complétées par défaut: %1$d</string>
+    <string name="shortcut_backup_default_icons_summary">Compléter uniquement les icônes manquantes. Les icônes enregistrées ou choisies manuellement sont conservées.</string>
     <string name="shortcut_backup_description">Les raccourcis AutoJs6 nouveaux et déjà épinglés par le système sont enregistrés automatiquement. Complétez les icônes illisibles avant la restauration. Exportez avant la désinstallation. La sauvegarde contient les paramètres et les icônes; enregistrez les scripts séparément. Restaurez les scripts et les autorisations de stockage. Les éléments supprimés ou ignorés ne sont pas présélectionnés.</string>
     <string name="shortcut_backup_empty">Aucun raccourci à restaurer</string>
     <string name="shortcut_backup_error">Sauvegarde des raccourcis: %1$s</string>

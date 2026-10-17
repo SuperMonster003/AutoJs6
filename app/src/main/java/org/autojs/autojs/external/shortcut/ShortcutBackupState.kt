@@ -33,6 +33,13 @@ internal data class ShortcutBackupState(
 )
 
 internal object ShortcutBackupPolicy {
+    /** Fill only absent icons in the current state; keep every copy and its restoration decisions. */
+    fun fillMissingIcons(state: ShortcutBackupState, iconForTarget: (String) -> ByteArray): ShortcutBackupState =
+        state.copy(entries = state.entries.map { entry ->
+            if (entry.icon != null) entry
+            else entry.copy(icon = iconForTarget(entry.target), iconNoticeShown = true)
+        })
+
     /** Keep the system ID, including separate IDs with identical labels, paths and intents. */
     fun adoptPinned(state: ShortcutBackupState, discovered: List<ShortcutBackupEntry>): ShortcutBackupState {
         val entries = state.entries.associateByTo(linkedMapOf()) { it.id }

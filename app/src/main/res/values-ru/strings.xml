@@ -767,6 +767,9 @@
     <string name="shortcut_backup_complete">Подтверждено: %1$d; пропущено или не подтверждено: %2$d</string>
     <string name="shortcut_backup_complete_icons">Дополнить значки копии</string>
     <string name="shortcut_backup_count">Сохранено ярлыков: %1$d</string>
+    <string name="shortcut_backup_default_icons">Применить значки по умолчанию пакетом</string>
+    <string name="shortcut_backup_default_icons_applied">Значков дополнено значками по умолчанию: %1$d</string>
+    <string name="shortcut_backup_default_icons_summary">Дополняются только отсутствующие значки в копии. Сохраненные и выбранные вручную значки остаются без изменений.</string>
     <string name="shortcut_backup_description">Новые и уже закрепленные системой ярлыки AutoJs6 сохраняются автоматически. Выберите недоступные значки перед восстановлением. Экспортируйте копию перед удалением приложения. Копия содержит настройки и значки; скрипты сохраните отдельно. Сначала восстановите скрипты и разрешения хранилища. Удаленные и пропущенные элементы не выбраны по умолчанию.</string>
     <string name="shortcut_backup_empty">Нет ярлыков для восстановления</string>
     <string name="shortcut_backup_error">Копия ярлыков: %1$s</string>

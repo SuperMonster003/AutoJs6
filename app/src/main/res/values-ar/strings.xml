@@ -769,6 +769,9 @@
     <string name="shortcut_backup_complete">الإضافات المؤكدة: %1$d; المتخطاة أو غير المؤكدة: %2$d</string>
     <string name="shortcut_backup_complete_icons">إكمال أيقونات النسخة</string>
     <string name="shortcut_backup_count">الاختصارات المحفوظة: %1$d</string>
+    <string name="shortcut_backup_default_icons">استخدام الأيقونات الافتراضية دفعة واحدة</string>
+    <string name="shortcut_backup_default_icons_applied">الأيقونات المكتملة باستخدام الافتراضيات: %1$d</string>
+    <string name="shortcut_backup_default_icons_summary">إكمال الأيقونات المفقودة في النسخة الاحتياطية فقط. تبقى الأيقونات المحفوظة أو المختارة يدويا كما هي.</string>
     <string name="shortcut_backup_description">تحفظ اختصارات AutoJs6 الجديدة والمثبتة حاليا في النظام تلقائيا. أكمل الأيقونات غير المقروءة قبل الاستعادة. صدر النسخة قبل إزالة التطبيق. تشمل النسخة الإعدادات والأيقونات; احفظ البرامج النصية منفصلة. استعد الملفات وأذونات التخزين أولا. لا تحدد العناصر المحذوفة أو المتجاهلة افتراضيا.</string>
     <string name="shortcut_backup_empty">لا توجد اختصارات لاستعادتها</string>
     <string name="shortcut_backup_error">نسخة الاختصارات: %1$s</string>

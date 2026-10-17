@@ -764,6 +764,9 @@
     <string name="shortcut_backup_complete">確認已新增: %1$d; 已略過或未確認: %2$d</string>
     <string name="shortcut_backup_complete_icons">補全備份圖示</string>
     <string name="shortcut_backup_count">已存檔的捷徑: %1$d</string>
+    <string name="shortcut_backup_default_icons">批次使用預設圖示</string>
+    <string name="shortcut_backup_default_icons_applied">已使用預設圖示補全: %1$d</string>
+    <string name="shortcut_backup_default_icons_summary">僅補全缺少圖示的備份項目, 保留已儲存或手動補選的圖示.</string>
     <string name="shortcut_backup_description">新增捷徑及系統已登記的 AutoJs6 固定捷徑會自動存檔. 原圖示無法讀取時, 請在還原前補選. 解除安裝前請匯出備份. 備份包含設定和圖示, 指令碼檔案需另外儲存. 還原前請還原指令碼並授予儲存空間存取權限. 已移除或忽略的項目預設不勾選.</string>
     <string name="shortcut_backup_empty">沒有需要還原的捷徑</string>
     <string name="shortcut_backup_error">捷徑備份: %1$s</string>

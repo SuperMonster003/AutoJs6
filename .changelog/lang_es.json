@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/16",
+      "released_date": "2026/10/17",
       "released_hint": "Algunas funciones pasan a complementos; actualiza con precaución",
       "hint": [
         "Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas",
@@ -11,7 +11,7 @@
         "Los registros en archivos utilizan una implementación integrada que conserva las opciones documentadas y los formatos PatternLayout habituales; las demás API de Log4j dejan de estar disponibles"
       ],
       "feature": [
-        "Los accesos nuevos y ya fijados se archivan automáticamente, con elección de iconos ilegibles, exportación/importación y restauración en lote, y recuperación tras descongelar; las eliminaciones manuales reconocidas no vuelven a avisar y las copias del mismo script conservan sus ID independientes (búsqueda de accesos existentes con Android 7.1+, detección automática con Android 8+) (acceso: Ajustes > Configuración > Copia de accesos directos)",
+        "Los accesos nuevos y ya fijados se archivan automáticamente, con exportación/importación y restauración en lote; los iconos ilegibles se pueden elegir individualmente o completar en lote con los predeterminados sin sobrescribir los guardados; tras descongelar, los accesos ausentes se muestran en la página de copias sin avisos en la página principal, y las eliminaciones manuales reconocidas no se seleccionan por defecto; las copias del mismo script conservan sus ID independientes (búsqueda de accesos existentes con Android 7.1+, detección automática con Android 8+) (acceso: Ajustes > Configuración > Copia de accesos directos)",
         "Asistente de configuración para ejecutar sucesivamente los asistentes de permisos e instalación de complementos, accesible desde el mensaje de bienvenida tras el primer inicio (acceso: Ajustes > Configuración > Asistente de configuración)",
         "Asistente de permisos para seleccionar los permisos del panel lateral y solicitarlos sucesivamente, con perfiles \"Estándar\"/\"Mínimo\"/\"Todos\" y perfiles personalizados; los permisos concedidos pueden ocultarse desde el menú (acceso: Asistente de configuración/botón del encabezado \"Permisos\" del panel lateral)",
         "Asistente de instalación de complementos para seleccionar por categorías e instalar en lotes complementos oficiales, con perfiles \"Estándar\"/\"Mínimo\"/\"Todos\" y guardado, cambio de nombre y eliminación de perfiles personalizados (acceso: Asistente de configuración/menú del botón flotante de la pestaña de complementos/menú \"+\" del Centro de complementos)",

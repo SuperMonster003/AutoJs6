@@ -190,14 +190,14 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.8.0
 
-###### 2026/10/16 - Some features moved to plugins; upgrade with care
+###### 2026/10/17 - Some features moved to plugins; upgrade with care
 
 * `Hint` Some built-in features are now provided by independent plugins (such as OCR, barcode recognition, OpenCV, OpenCC, Pinyin, MediaInfo, the terminal and offline project documentation); install and enable the corresponding plugins in the Plugin Center before use
 * `Hint` The target SDK of packaged apps changes from 29 to 37; shared storage and local network access require permissions according to system requirements
 * `Hint` When packaged apps use images or other features that depend on OpenCV, select the OpenCV plugin when packaging
 * `Hint` The console element and floating console now display logs from the current script; global logs are available through the globalconsole element or the log page
 * `Hint` File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available
-* `Feature` Desktop shortcuts support automatic archiving of new and pre-existing pinned shortcuts, reselection of unreadable icons, backup export/import and batch restoration, and recovery prompts after unfreezing; recognized manual removals are not prompted again, and copies of the same script keep separate original IDs (existing shortcut discovery requires Android 7.1+, automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)
+* `Feature` Desktop shortcuts support automatic archiving of new and pre-existing pinned shortcuts, backup export/import and batch restoration; unreadable icons can be chosen individually or filled with defaults in bulk without replacing saved icons; missing shortcuts after unfreezing are shown on the shortcut backup page without home page prompts, and recognized manual removals are not selected by default; copies of the same script keep separate original IDs (existing shortcut discovery requires Android 7.1+, automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)
 * `Feature` Setup wizard, for running the permission wizard and plugin installation wizard in sequence, with an entry in the home page welcome prompt after first launch (entry: Settings > Configuration > Setup wizard)
 * `Feature` Permission wizard, for selecting permissions from the home drawer and requesting them in sequence, with built-in "Standard"/"Minimal"/"All" profiles and custom profiles; granted permissions can be hidden through the menu (entry: Setup wizard/the button in the home drawer's "Permissions" group heading)
 * `Feature` Plugin installation wizard, for selecting official plugins by category and installing them in batches, with built-in "Standard"/"Minimal"/"All" profiles and support for saving, renaming and deleting custom profiles (entry: Setup wizard/the floating button menu on the home Plugins tab/the Plugin Center's "+" menu)

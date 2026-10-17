@@ -82,6 +82,7 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
     private lateinit var exportPreference: Preference
     private lateinit var importPreference: Preference
     private lateinit var iconsPreference: Preference
+    private lateinit var defaultIconsPreference: Preference
     private lateinit var scanPreference: Preference
 
     private val pickIcon = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -159,6 +160,12 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
             }
         }.apply { isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 }
         iconsPreference = preference(R.string.shortcut_backup_complete_icons) { selectMissingIcon() }
+        defaultIconsPreference = preference(R.string.shortcut_backup_default_icons) {
+            operation {
+                val count = withContext(Dispatchers.IO) { repository.useDefaultIconsForMissing() }
+                ViewUtils.showToast(requireContext(), getString(R.string.shortcut_backup_default_icons_applied, count), true)
+            }
+        }.apply { setSummary(R.string.shortcut_backup_default_icons_summary) }
         restorePreference = preference(R.string.dialog_button_restore) { selectRestore() }
         exportPreference = preference(R.string.text_export) { exportFile.launch("AutoJs6-shortcuts.zip") }
         importPreference = preference(R.string.text_import) { importFile.launch(arrayOf("application/zip", "application/octet-stream")) }
@@ -202,6 +209,7 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
             val missingIcons = entries.count { it.icon == null }
             iconsPreference.summary = getString(R.string.shortcut_backup_icons_pending, missingIcons)
             iconsPreference.isEnabled = idle && missingIcons > 0
+            defaultIconsPreference.isEnabled = idle && missingIcons > 0
             scanPreference.isEnabled = idle
             restorePreference.isEnabled = idle && entries.any { it.status != ShortcutBackupEntry.Status.PINNED }
             exportPreference.isEnabled = idle && entries.isNotEmpty()
@@ -393,6 +401,7 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
         exportPreference.isEnabled = entries.isNotEmpty()
         importPreference.isEnabled = true
         iconsPreference.isEnabled = entries.any { it.icon == null }
+        defaultIconsPreference.isEnabled = entries.any { it.icon == null }
         scanPreference.isEnabled = true
         reportCompleted()
     }
@@ -407,6 +416,7 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
             importPreference.isEnabled = false
             exportPreference.isEnabled = false
             iconsPreference.isEnabled = false
+            defaultIconsPreference.isEnabled = false
             scanPreference.isEnabled = false
             try {
                 block()

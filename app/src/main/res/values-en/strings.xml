@@ -764,6 +764,9 @@
     <string name="shortcut_backup_complete">Confirmed additions: %1$d; skipped or unconfirmed: %2$d</string>
     <string name="shortcut_backup_complete_icons">Complete backup icons</string>
     <string name="shortcut_backup_count">Saved shortcuts: %1$d</string>
+    <string name="shortcut_backup_default_icons">Use default icons in bulk</string>
+    <string name="shortcut_backup_default_icons_applied">Backup icons completed with defaults: %1$d</string>
+    <string name="shortcut_backup_default_icons_summary">Fill only missing backup icons. Saved and manually chosen icons are kept.</string>
     <string name="shortcut_backup_description">New and existing system-pinned AutoJs6 shortcuts are saved automatically. Complete any unreadable icons before restoration. Export before uninstalling. Backups contain settings and icons; save scripts separately. Restore scripts and storage permissions first. Removed or ignored shortcuts are not selected by default.</string>
     <string name="shortcut_backup_empty">No shortcuts need to be restored</string>
     <string name="shortcut_backup_error">Shortcut backup: %1$s</string>
