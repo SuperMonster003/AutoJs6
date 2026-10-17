@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.shizuku;
 
+import android.os.ParcelFileDescriptor;
+
 interface IUserService {
 
     void destroy() = 16777114; // Destroy method defined by Shizuku server
@@ -15,5 +17,7 @@ interface IUserService {
 
     String listExplorerDirectory(String path, String snapshotToken, int offset) = 21;
     oneway void closeExplorerDirectory(String snapshotToken) = 22;
+    String executeExplorerFileOperation(String requestJson) = 23;
+    ParcelFileDescriptor openExplorerFile(String requestJson) = 24;
 
 }

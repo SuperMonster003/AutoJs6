@@ -12,6 +12,8 @@ import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
+import org.autojs.autojs.model.explorer.ExplorerPage;
+import org.autojs.autojs.model.explorer.PrivilegedAccessMode;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.theme.ThemeColorHelper;
@@ -44,6 +46,8 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
     private String mRootDir;
     private String mInitialDir;
     private boolean mSelectCurrentDirectoryWhenEmpty = true;
+    private boolean mDirectoriesOnly;
+    private PrivilegedAccessMode mPrivilegedAccessMode;
 
     public FileChooserDialogBuilder(@NonNull Context context) {
         super(context);
@@ -96,18 +100,30 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
     }
 
     public FileChooserDialogBuilder justScriptFile() {
+        mDirectoriesOnly = false;
         mFileFilter = Scripts.FILE_FILTER;
         return this;
     }
 
     public FileChooserDialogBuilder chooseDir() {
+        mDirectoriesOnly = true;
         mFileFilter = File::isDirectory;
         mFileChooseListView.setCanChooseDir(true);
         return this;
     }
 
+    public FileChooserDialogBuilder privilegedAccess(PrivilegedAccessMode mode) {
+        mPrivilegedAccessMode = mode;
+        return this;
+    }
+
+    public PrivilegedAccessMode getPrivilegedAccessMode() {
+        return mFileChooseListView.getPrivilegedAccessMode();
+    }
+
     /** Allows one explicit multi-selection to contain both regular files and directories. */
     public FileChooserDialogBuilder chooseFilesAndDirectories() {
+        mDirectoriesOnly = false;
         mFileFilter = null;
         mFileChooseListView.setCanChooseDir(true);
         return this;
@@ -175,6 +191,8 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
         } else {
             mFileChooseListView.setExplorer(explorer, root, new ExplorerDirPage(mInitialDir, root));
         }
+        if (mDirectoriesOnly) mFileChooseListView.setFilter(item -> item instanceof ExplorerPage);
+        if (mPrivilegedAccessMode != null) mFileChooseListView.configurePrivilegedAccess(mPrivilegedAccessMode);
         return super.build();
     }
 }

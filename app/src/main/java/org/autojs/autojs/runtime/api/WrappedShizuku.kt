@@ -70,7 +70,8 @@ object WrappedShizuku {
         Shizuku.UserServiceArgs(ComponentName(pkg, UserService::class.java.name))
             .processNameSuffix("shizuku-service-for-${pkg.substringAfterLast(".")}")
             // Recreate an older user process when its AIDL implementation changes after an update.
-            .version(BuildConfig.VERSION_CODE)
+            // The extra revision also replaces a service from an earlier build with the same versionCode.
+            .version(BuildConfig.VERSION_CODE + 1)
             .daemon(false)
     }
 

@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.model.explorer.ExplorerDirectoryAccessException
 import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.PrivilegedAccessMode
 import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.ShizukuPermission
@@ -129,12 +130,12 @@ internal class ExplorerDirectoryAccessUi(private val explorer: ExplorerView) {
             val context = explorer.context
             MaterialDialog.Builder(context)
                 .title(item.name)
-                .content(listOf(
-                    item.path,
-                    PFiles.formatSizeWithUnit(item.size),
-                    PFile.getFullDateString(item.lastModified()),
-                    context.getString(R.string.text_explorer_privileged_file_hint),
-                ).joinToString("\n\n"))
+                .content(buildList {
+                    add(item.path)
+                    if (item !is ExplorerPage) add(PFiles.formatSizeWithUnit(item.size))
+                    add(PFile.getFullDateString(item.lastModified()))
+                    if (item !is ExplorerPage) add(context.getString(R.string.text_explorer_privileged_file_hint))
+                }.joinToString("\n\n"))
                 .neutralText(R.string.text_copy_path)
                 .onNeutral { _, _ ->
                     ClipboardUtils.setClip(context, item.path)

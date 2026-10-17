@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Rect
-import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.text.TextUtils
@@ -56,9 +55,10 @@ internal class ExplorerPathMenu(
     private val context: Context get() = anchor.context
     private var popup: PopupWindow? = null
     private var storageRequest: Disposable? = null
-    private val foregroundColor get() = context.getColor(R.color.text_color_primary)
-    private val secondary get() = context.getColor(R.color.text_color_primary_alpha_70)
-    private val surface get() = context.getColor(R.color.window_background)
+    private val foregroundColor get() = themeColor(android.R.attr.textColorPrimary, R.color.text_color_primary)
+    private val secondary get() = themeColor(android.R.attr.textColorSecondary, R.color.text_color_primary_alpha_70)
+    private val categoryColor get() = context.getColor(R.color.explorer_category_operation_button)
+    private val surface get() = context.getColor(R.color.item_background_dark)
     private val accent: Int
         get() {
             val theme = ThemeColorManager.colorPrimary
@@ -89,30 +89,10 @@ internal class ExplorerPathMenu(
         val availableHeight = frame.bottom - screen[1] - anchor.height - dp(12)
         if (width <= 0 || availableHeight <= 0) return
 
-        val body = column().apply {
-            setPadding(dp(16), dp(14), dp(16), dp(14))
-        }
-        val header = row().apply { gravity = Gravity.CENTER_VERTICAL }
-        header.addView(label(R.string.text_explorer_path_menu, 17f, true), weighted())
-        header.addView(ImageView(context).apply {
-            setImageResource(R.drawable.ic_close_black_24dp)
-            imageTintList = ColorStateList.valueOf(secondary)
-            contentDescription = context.getString(R.string.dialog_button_dismiss)
-            setPadding(dp(10), dp(10), dp(10), dp(10))
-            background = ripple(0, 24)
-            setOnClickListener { dismiss() }
-            isFocusable = true
-        }, LinearLayout.LayoutParams(dp(44), dp(44)))
-        body.addView(header)
-        body.addView(label(page.path, 12f).apply {
-            setTextColor(secondary)
-            maxLines = 1
-            ellipsize = TextUtils.TruncateAt.MIDDLE
-            textDirection = View.TEXT_DIRECTION_LTR
-            setPadding(0, 0, 0, dp(12))
-        })
-
-        val navigation = row()
+        // The path row already identifies the current location. Keep the popup a compact
+        // continuation of the file list, without repeating its path or adding a large header.
+        val body = column().apply { setPadding(0, dp(4), 0, dp(4)) }
+        val navigation = actionRow()
         navigation.addView(action(R.id.explorer_menu_back, R.string.text_back, R.drawable.ic_explorer_back, explorer.canNavigateBackFromPathMenu()) {
             explorer.goBackFromPathMenu()
         }, weighted())
@@ -126,8 +106,9 @@ internal class ExplorerPathMenu(
             explorer.refreshFromPathMenu()
         }, weighted())
         body.addView(navigation)
+        body.addView(divider())
 
-        val paths = row().apply { setPadding(0, dp(8), 0, 0) }
+        val paths = actionRow()
         paths.addView(action(R.id.explorer_menu_home, R.string.text_explorer_home, R.drawable.ic_explorer_home) {
             explorer.navigateToPath(WorkingDirectoryUtils.path)
         }, weighted())
@@ -139,47 +120,52 @@ internal class ExplorerPathMenu(
             ScriptOperations(context, explorer, page).setAsWorkingDir(page.toScriptFile())
         }, weighted())
         body.addView(paths)
+        body.addView(divider())
 
         body.addView(section(R.string.text_explorer_storage))
         val storage = column().apply { id = R.id.explorer_menu_storage }
-        storage.addView(label(R.string.text_loading_with_dots, 13f).apply { setTextColor(secondary) })
+        storage.addView(storageMessage(R.string.text_loading_with_dots))
         body.addView(storage)
 
-        val special = row().apply { setPadding(0, dp(6), 0, 0) }
+        val special = actionRow()
         listOf("data", "obb").forEach { directory ->
             special.addView(label("Android/$directory", 12f).apply {
                 gravity = Gravity.CENTER
                 minHeight = dp(48)
-                background = ripple(cardColor(), 10)
+                background = ripple()
                 val lock = context.getDrawable(R.drawable.ic_explorer_lock)?.mutate()?.apply {
-                    setTint(secondary)
+                    setTint(categoryColor)
                     setBounds(0, 0, dp(15), dp(15))
                 }
                 setCompoundDrawablesRelative(lock, null, null, null)
-                compoundDrawablePadding = dp(6)
-                setPadding(dp(10), 0, dp(10), 0)
+                compoundDrawablePadding = dp(5)
+                setPadding(dp(8), dp(4), dp(8), dp(4))
                 isFocusable = true
                 setOnClickListener {
                     dismiss()
                     explorer.navigateToPath(File(EnvironmentUtils.externalStorageDirectory, "Android/$directory").path)
                 }
                 buttonRole(this)
-            }, weighted().apply { marginEnd = dp(4) })
+            }, weighted())
         }
         body.addView(special)
+        body.addView(divider())
         body.addView(settingRow(R.string.text_explorer_access_mode, explorer.directoryAccessLabel) {
             dismiss()
             explorer.showDirectoryAccessOptions()
         })
+        body.addView(divider())
 
-        body.addView(section(R.string.text_explorer_display_options))
+        body.addView(displaySection())
         body.addView(SwitchCompat(context).apply {
             id = R.id.explorer_menu_hidden
             text = context.getString(R.string.text_hidden_files_title)
             setTextColor(foregroundColor)
             textSize = 14f
-            minHeight = dp(52)
-            setPadding(dp(4), 0, dp(4), 0)
+            minHeight = dp(48)
+            setPadding(dp(12), dp(4), dp(12), dp(4))
+            switchPadding = dp(12)
+            background = ripple()
             isChecked = Pref.isHiddenFilesShown
             val checked = intArrayOf(android.R.attr.state_checked)
             thumbTintList = ColorStateList(arrayOf(checked, intArrayOf()), intArrayOf(accent, secondary))
@@ -189,28 +175,28 @@ internal class ExplorerPathMenu(
                 explorer.refreshFromPathMenu()
             }
         })
+        body.addView(divider())
         val extensionRow = settingRow(R.string.text_file_extensions_title, extensionSummary()) {
             showExtensions()
-        }.apply { id = R.id.explorer_menu_extensions }
+        }.apply {
+            id = R.id.explorer_menu_extensions
+            contentDescription = "${context.getString(R.string.text_file_extensions_title)}, ${context.resources.getStringArray(R.array.values_file_extensions)[extensionIndex()]}"
+        }
         body.addView(extensionRow)
-        body.addView(settingRow(R.string.text_settings, null) {
-            dismiss()
-            PreferencesActivity.launch(context)
-        })
 
         val scroll = ScrollView(context).apply {
             id = R.id.explorer_menu_panel
             isFillViewport = false
             clipToOutline = true
-            background = rounded(surface, 16)
+            background = rounded(surface, 4)
             addView(body, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
             overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
         }
         scroll.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(availableHeight, View.MeasureSpec.AT_MOST))
         val panel = PopupWindow(scroll, width, scroll.measuredHeight.coerceAtMost(availableHeight), true).apply {
             isOutsideTouchable = true
-            setBackgroundDrawable(rounded(surface, 16))
-            elevation = dp(12).toFloat()
+            setBackgroundDrawable(rounded(surface, 4))
+            elevation = dp(3).toFloat()
             inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
             softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
             setOnDismissListener {
@@ -239,12 +225,16 @@ internal class ExplorerPathMenu(
                 storage.removeAllViews()
                 val selectedPath = entries.filter { ExplorerPathSegmentBuilder.isSameOrDescendant(page.path, it.path) }
                     .maxByOrNull { it.path.length }?.path
-                entries.forEach { entry -> storage.addView(storageRow(entry, entry.path == selectedPath)) }
+                entries.forEach { entry ->
+                    storage.addView(storageRow(entry, entry.path == selectedPath))
+                    storage.addView(divider())
+                }
                 resize(panel, scroll, width, availableHeight)
             }, {
                 if (popup !== panel) return@subscribe
                 storage.removeAllViews()
-                storage.addView(label(R.string.text_explorer_storage_unavailable, 13f))
+                storage.addView(storageMessage(R.string.text_explorer_storage_unavailable))
+                storage.addView(divider())
                 resize(panel, scroll, width, availableHeight)
             })
     }
@@ -257,31 +247,31 @@ internal class ExplorerPathMenu(
     private fun storageRow(entry: ExplorerStorageEntry, selected: Boolean): View {
         val line = row().apply {
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(12), dp(12), dp(12), dp(12))
-            background = ripple(if (selected) ColorUtils.blendARGB(surface, accent, 0.1f) else cardColor(), 12)
+            minimumHeight = dp(56)
+            setPadding(dp(12), dp(6), dp(12), dp(6))
+            background = ripple(if (selected) context.getColor(R.color.window_background_selected) else Color.TRANSPARENT)
+            isSelected = selected
             isFocusable = true
             setOnClickListener {
                 dismiss()
                 explorer.navigateToPath(entry.path)
             }
-            layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(6) }
+            layoutParams = LinearLayout.LayoutParams(-1, -2)
             buttonRole(this)
         }
         line.addView(ImageView(context).apply {
             setImageResource(if (entry.kind == ExplorerStorageKind.REMOVABLE) R.drawable.ic_explorer_sd_card else R.drawable.ic_explorer_storage)
-            imageTintList = ColorStateList.valueOf(if (selected) accent else secondary)
-            setPadding(dp(8), dp(8), dp(8), dp(8))
-            background = rounded(ColorUtils.setAlphaComponent(accent, 20), 20)
+            imageTintList = ColorStateList.valueOf(if (selected) accent else categoryColor)
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-        }, LinearLayout.LayoutParams(dp(38), dp(38)).apply { marginEnd = dp(12) })
+        }, LinearLayout.LayoutParams(dp(24), dp(24)).apply { marginEnd = dp(12) })
         val content = column()
         val title = row().apply { gravity = Gravity.CENTER_VERTICAL }
-        title.addView(label(entry.title, 14f, selected).apply {
+        title.addView(label(entry.title, 14f).apply {
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
         }, weighted())
         val usage = entry.usage
-        if (usage != null) title.addView(label(context.getString(R.string.text_explorer_storage_percent, usage.usedPercent), 12f).apply {
+        if (usage != null) title.addView(label(context.getString(R.string.text_explorer_storage_percent, usage.usedPercent), 11f).apply {
             setTextColor(accent)
             setPadding(dp(8), 0, 0, 0)
         })
@@ -293,7 +283,7 @@ internal class ExplorerPathMenu(
                 progressTintList = ColorStateList.valueOf(accent)
                 progressBackgroundTintList = ColorStateList.valueOf(ColorUtils.setAlphaComponent(secondary, 35))
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-            }, LinearLayout.LayoutParams(-1, dp(4)).apply { topMargin = dp(6); bottomMargin = dp(4) })
+            }, LinearLayout.LayoutParams(-1, dp(3)).apply { topMargin = dp(3); bottomMargin = dp(3) })
         }
         content.addView(label(if (usage == null) context.getString(R.string.text_explorer_storage_unavailable) else context.getString(
             R.string.text_explorer_storage_usage,
@@ -333,14 +323,18 @@ internal class ExplorerPathMenu(
         return keys.indexOf(value).takeIf { it >= 0 } ?: keys.indexOf(context.getString(R.string.default_key_file_extensions)).coerceAtLeast(0)
     }
 
-    private fun extensionSummary() = context.resources.getStringArray(R.array.values_file_extensions)[extensionIndex()]
+    private fun extensionSummary() = context.getString(when (extensionIndex()) {
+        0 -> R.string.text_explorer_extensions_hidden
+        1 -> R.string.text_explorer_extensions_visible
+        else -> R.string.text_explorer_extensions_except_scripts
+    })
 
     private fun action(id: Int, title: Int, icon: Int, enabled: Boolean = true, onClick: () -> Unit): View = column().apply {
         this.id = id
         gravity = Gravity.CENTER
-        minimumHeight = dp(64)
-        setPadding(dp(2), dp(8), dp(2), dp(8))
-        background = ripple(cardColor(), 12)
+        minimumHeight = dp(48)
+        setPadding(dp(3), dp(4), dp(3), dp(4))
+        background = ripple()
         contentDescription = context.getString(title)
         isEnabled = enabled
         alpha = if (enabled) 1f else 0.32f
@@ -349,55 +343,102 @@ internal class ExplorerPathMenu(
         buttonRole(this)
         addView(ImageView(context).apply {
             setImageResource(icon)
-            imageTintList = ColorStateList.valueOf(accent)
+            imageTintList = ColorStateList.valueOf(categoryColor)
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-        }, LinearLayout.LayoutParams(dp(22), dp(22)))
+        }, LinearLayout.LayoutParams(dp(20), dp(20)))
         addView(label(title, 12f).apply {
             gravity = Gravity.CENTER
-            maxLines = 2
-            ellipsize = TextUtils.TruncateAt.END
+            // Let translated labels and larger system fonts grow the row instead of clipping.
+            includeFontPadding = false
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-        }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(5) })
+        }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(2) })
     }
 
     private fun settingRow(title: Int, summary: String?, action: () -> Unit): LinearLayout = row().apply {
         gravity = Gravity.CENTER_VERTICAL
-        minimumHeight = dp(52)
-        setPadding(dp(4), dp(7), dp(4), dp(7))
-        background = ripple(0, 8)
+        minimumHeight = dp(48)
+        setPadding(dp(12), dp(6), dp(12), dp(6))
+        background = ripple()
         isFocusable = true
         setOnClickListener { action() }
         buttonRole(this)
-        addView(column().apply {
-            addView(label(title, 14f))
-            if (summary != null) addView(label(summary, 12f).apply { setTextColor(secondary) })
+        addView(label(title, 14f), weighted())
+        if (summary != null) addView(label(summary, 12f).apply {
+            setTextColor(secondary)
+            gravity = Gravity.END
+            setPadding(dp(8), 0, dp(4), 0)
         }, weighted())
         addView(ImageView(context).apply {
             setImageResource(R.drawable.ic_explorer_chevron)
-            imageTintList = ColorStateList.valueOf(secondary)
+            imageTintList = ColorStateList.valueOf(categoryColor)
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-        }, LinearLayout.LayoutParams(dp(18), dp(18)))
+        }, LinearLayout.LayoutParams(dp(16), dp(16)))
     }
 
-    private fun section(title: Int) = label(title, 12f, true).apply {
-        setTextColor(secondary)
-        setPadding(dp(2), dp(18), 0, dp(8))
+    private fun displaySection() = row().apply {
+        gravity = Gravity.CENTER_VERTICAL
+        addView(section(R.string.text_explorer_display_options), weighted())
+        addView(label(R.string.text_all_settings, 12f).apply {
+            setTextColor(categoryColor)
+            gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            minWidth = dp(48)
+            minHeight = dp(48)
+            setPadding(dp(12), dp(6), dp(12), dp(6))
+            background = ripple()
+            isFocusable = true
+            setOnClickListener {
+                dismiss()
+                PreferencesActivity.launch(context)
+            }
+            buttonRole(this)
+        }, weighted())
+    }
+
+    private fun section(title: Int) = label(title, 13f).apply {
+        setTextColor(categoryColor)
+        setPadding(dp(12), dp(6), dp(12), dp(6))
         ViewCompat.setAccessibilityHeading(this, true)
     }
 
-    private fun label(res: Int, size: Float, bold: Boolean = false) = label(context.getString(res), size, bold)
-    private fun label(value: String, size: Float, bold: Boolean = false) = TextView(context).apply {
+    private fun storageMessage(message: Int) = label(message, 12f).apply {
+        setTextColor(secondary)
+        gravity = Gravity.CENTER_VERTICAL
+        minHeight = dp(56)
+        setPadding(dp(12), dp(6), dp(12), dp(6))
+    }
+
+    private fun divider() = View(context).apply {
+        val value = TypedValue()
+        if (context.theme.resolveAttribute(android.R.attr.divider, value, true)) {
+            if (value.resourceId != 0) setBackgroundResource(value.resourceId) else setBackgroundColor(value.data)
+        } else {
+            setBackgroundColor(ColorUtils.setAlphaComponent(foregroundColor, 32))
+        }
+        // File rows use a physical pixel separator; preserve that density here as well.
+        layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1)
+        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+    }
+
+    private fun label(res: Int, size: Float) = label(context.getString(res), size)
+    private fun label(value: String, size: Float) = TextView(context).apply {
         text = value
         setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
         setTextColor(foregroundColor)
-        if (bold) typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+    }
+    private fun themeColor(attribute: Int, fallback: Int): Int {
+        val values = context.obtainStyledAttributes(intArrayOf(attribute))
+        return try {
+            values.getColor(0, context.getColor(fallback))
+        } finally {
+            values.recycle()
+        }
     }
     private fun column() = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
     private fun row() = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL; isBaselineAligned = false }
-    private fun weighted() = LinearLayout.LayoutParams(0, -2, 1f).apply { marginStart = dp(2); marginEnd = dp(2) }
+    private fun actionRow() = row().apply { gravity = Gravity.CENTER_VERTICAL; setPadding(dp(4), 0, dp(4), 0) }
+    private fun weighted() = LinearLayout.LayoutParams(0, -2, 1f)
     private fun rounded(color: Int, radius: Int) = GradientDrawable().apply { setColor(color); cornerRadius = dp(radius).toFloat() }
-    private fun ripple(color: Int, radius: Int) = RippleDrawable(ColorStateList.valueOf(ColorUtils.setAlphaComponent(accent, 35)), rounded(color, radius), rounded(Color.WHITE, radius))
-    private fun cardColor() = ColorUtils.blendARGB(surface, foregroundColor, 0.045f)
+    private fun ripple(color: Int = Color.TRANSPARENT) = RippleDrawable(ColorStateList.valueOf(ColorUtils.setAlphaComponent(accent, 35)), rounded(color, 0), rounded(Color.WHITE, 0))
     private fun dp(value: Int) = (context.resources.displayMetrics.density * value).roundToInt()
     private fun buttonRole(view: View) = ViewCompat.setAccessibilityDelegate(view, object : AccessibilityDelegateCompat() {
         override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {

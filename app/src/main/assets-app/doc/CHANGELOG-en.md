@@ -91,6 +91,8 @@
 * `Feature` appWindowsFallback flag in auto.setFlags, for using application window root nodes when the active window root is unavailable (disabled by default)
 * `Feature` File manager supports selecting multiple files and batch copying/moving/deleting
 * `Feature` Path bar in the file manager, supporting navigation to parent directories by clicking and horizontal scrolling
+* `Feature` Compact layout for the file manager path bar menu, with back/forward/up/refresh navigation, returning to the working directory, copying the path and setting the working directory, storage capacity display and switching between internal storage and storage cards, plus quick settings for hidden files and file extensions
+* `Feature` File manager supports browsing restricted directories through Shizuku or Root, opening files as temporary copies, copying/moving/renaming files or folders and permanently deleting them, with multiple selection, no replacement of existing targets and permission status and preserved paths shown on failure (requires the corresponding authorization, accessible locations depend on the system; moves across filesystems are limited to shared storage)
 * `Feature` "Floating run" option in the file manager script menu, for running/stopping scripts, editing files and viewing logs through a floating toolbar
 * `Feature` "Run with AutoJs4" option in the file manager script menu, for running scripts or projects with the AutoJs4 engine and comparing results (requires the AutoJs4 Runtime plugin)
 * `Feature` "Run with AutoJs4 and compare" option in the file manager script menu, for running the same script or project with the AutoJs6 and AutoJs4 engines in sequence to compare differences (requires the AutoJs4 Runtime plugin)
@@ -365,6 +367,7 @@
 * `Dependency` Added AndroidX Test Ext JUnit version 1.3.0
 * `Dependency` Added ZXing Android Embedded version 4.3.0
 * `Dependency` Added Android Hidden API Bypass version 6.1
+* `Dependency` Added NDK version 28.2.13676358 and CMake version 3.22.1 for building the native components of privileged file operations
 * `Dependency` Upgraded Android SDK version 36 -> 37
 * `Dependency` Upgraded Gradle 9 version 9.4.0 -> 9.7.1
 * `Dependency` Upgraded AndroidX Lifecycle version 2.6.2 -> 2.9.4

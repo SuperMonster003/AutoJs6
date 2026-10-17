@@ -91,6 +91,8 @@
 * `Fonctionnalité` La méthode auto.setFlags accepte le drapeau appWindowsFallback, pour utiliser la racine d'une fenêtre d'application lorsque celle de la fenêtre active est indisponible (désactivé par défaut)
 * `Fonctionnalité` Sélection multiple et copie/déplacement/suppression par lots dans le gestionnaire de fichiers
 * `Fonctionnalité` Barre de chemin dans le gestionnaire de fichiers, permettant d'accéder aux dossiers parents par un appui et de parcourir le chemin horizontalement
+* `Fonctionnalité` Disposition compacte du menu de la barre de chemin du gestionnaire de fichiers, avec navigation retour/avancer/remonter/actualiser, retour au dossier de travail, copie du chemin et définition du dossier de travail, affichage de la capacité et bascule entre stockage interne et cartes de stockage, ainsi que réglages rapides des fichiers cachés et des extensions
+* `Fonctionnalité` Le gestionnaire de fichiers permet de parcourir les dossiers restreints via Shizuku ou Root, d'ouvrir les fichiers sous forme de copies temporaires, de copier/déplacer/renommer les fichiers ou dossiers et de les supprimer définitivement, avec sélection multiple, sans remplacer les destinations existantes et avec affichage de l'état des autorisations et des chemins conservés en cas d'échec (autorisation correspondante requise, l'étendue de l'accès dépend du système; le déplacement entre systèmes de fichiers se limite au stockage partagé)
 * `Fonctionnalité` Option "Exécution flottante" dans le menu des scripts du gestionnaire de fichiers, pour exécuter/arrêter les scripts, modifier les fichiers et consulter les journaux via une barre d'outils flottante
 * `Fonctionnalité` Option "Exécuter avec AutoJs4" dans le menu des scripts du gestionnaire de fichiers, pour exécuter un script ou projet avec le moteur AutoJs4 et examiner ses résultats (nécessite le plugin AutoJs4 Runtime)
 * `Fonctionnalité` Option "Exécuter avec AutoJs4 et comparer" dans le menu des scripts du gestionnaire de fichiers, pour exécuter successivement le même script ou projet avec AutoJs6 et AutoJs4 et comparer les différences (nécessite le plugin AutoJs4 Runtime)
@@ -365,6 +367,7 @@
 * `Dépendance` Ajout de AndroidX Test Ext JUnit version 1.3.0
 * `Dépendance` Ajout de ZXing Android Embedded version 4.3.0
 * `Dépendance` Ajout de Android Hidden API Bypass version 6.1
+* `Dépendance` Ajout de NDK version 28.2.13676358 et de CMake version 3.22.1 pour compiler les composants natifs des opérations de fichiers avec privilèges
 * `Dépendance` Mise à niveau de Android SDK version 36 -> 37
 * `Dépendance` Mise à niveau de Gradle 9 version 9.4.0 -> 9.7.1
 * `Dépendance` Mise à niveau de AndroidX Lifecycle version 2.6.2 -> 2.9.4

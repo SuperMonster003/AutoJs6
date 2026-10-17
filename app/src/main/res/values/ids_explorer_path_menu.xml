@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item name="explorer_privileged_open" type="id" />
     <item name="explorer_menu_back" type="id" />
     <item name="explorer_menu_copy_path" type="id" />
     <item name="explorer_menu_extensions" type="id" />

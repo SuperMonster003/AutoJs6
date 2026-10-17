@@ -8,6 +8,13 @@ import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.Keep
 import org.autojs.autojs.model.explorer.PrivilegedExplorerDirectoryService
+import org.autojs.autojs.model.explorer.PrivilegedFileEngine
+import org.autojs.autojs.model.explorer.PrivilegedFileNative
+import org.autojs.autojs.model.explorer.PrivilegedFileCommand
+import org.autojs.autojs.model.explorer.PrivilegedExplorerProcess
+import android.util.Base64
+import java.io.File
+import org.json.JSONObject
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
 import kotlin.system.exitProcess
@@ -96,5 +103,33 @@ class UserService : IUserService.Stub {
         explorerDirectories.listDirectory(path, snapshotToken, offset)
 
     override fun closeExplorerDirectory(snapshotToken: String) = explorerDirectories.closeDirectory(snapshotToken)
+
+    override fun executeExplorerFileOperation(requestJson: String): String {
+        val request = JSONObject(requestJson)
+        val client64Bit = request.optBoolean("client64Bit", Process.is64Bit())
+        // Shizuku starts a 64-bit service on a 64-bit device even for a 32-bit host APK.
+        // Run native moves in the host's architecture under the same authorized UID.
+        if (request.optString("operation") in listOf("move", "rename") && client64Bit != Process.is64Bit()) {
+            val appProcess = if (client64Bit) "/system/bin/app_process64" else "/system/bin/app_process32"
+            val apkPath = request.getString("apkPath")
+            require(File(apkPath).isAbsolute && apkPath.endsWith(".apk"))
+            val timeout = (request.optLong("deadlineMillis") - System.currentTimeMillis()).coerceIn(1, 600_000)
+            val result = PrivilegedExplorerProcess.run(listOf(
+                "/system/bin/env", "CLASSPATH=$apkPath", "/system/bin/toybox", "timeout", "-k", "2", "-s", "TERM",
+                (timeout / 1000 + 3).toString(), appProcess, "/system/bin", PrivilegedFileCommand::class.java.name,
+                Base64.encodeToString(requestJson.toByteArray(Charsets.UTF_8), Base64.NO_WRAP),
+            ), timeout + 10000)
+            if (result.exitCode != 0) throw IllegalStateException(result.stderr.ifBlank { "File operation process exited before reporting its result" })
+            return result.stdout.toString(Charsets.UTF_8)
+        }
+        PrivilegedFileNative.configure(request.optString("nativeLibrary").takeIf { it.isNotEmpty() })
+        return PrivilegedFileEngine.execute(requestJson)
+    }
+
+    override fun openExplorerFile(requestJson: String) = try {
+        PrivilegedFileEngine.openReadDescriptor(requestJson)
+    } catch (error: Exception) {
+        throw IllegalStateException(error.message ?: "Unable to open file", error)
+    }
 
 }

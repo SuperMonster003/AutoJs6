@@ -134,12 +134,7 @@ internal class ExplorerPageViewHolder(
     private fun showOptionsMenu() {
         val explorerPage = mExplorerPage ?: return
         if (explorerPage is PrivilegedExplorerItem) {
-            PopupMenu(host.context, mOptions).apply {
-                menu.add(R.string.text_copy_path).setOnMenuItemClickListener {
-                    ExplorerViewHelper.copyPaths(host.context, listOf(explorerPage))
-                    true
-                }
-            }.show()
+            host.explorerView.showPrivilegedFileMenu(mOptions, explorerPage)
             return
         }
         val popupMenu = PopupMenu(host.context, mOptions)

@@ -22,10 +22,11 @@ abstract class PrivilegedExplorerEntryItem internal constructor(
     final override fun lastModified() = entry.modified
     final override fun getSize() = entry.size
     final override fun getType() = cachedType
-    final override fun canCopy() = false
-    final override fun canMove() = false
-    final override fun canRename() = false
-    final override fun canDelete() = false
+    // These are offered operations, not cached grants. The authorized engine checks each request.
+    final override fun canCopy() = absolutePath != "/"
+    final override fun canMove() = absolutePath != "/"
+    final override fun canRename() = absolutePath != "/"
+    final override fun canDelete() = absolutePath != "/"
     final override fun canBuildApk() = false
     final override fun canSetAsWorkingDir() = false
     final override fun isExecutable() = false

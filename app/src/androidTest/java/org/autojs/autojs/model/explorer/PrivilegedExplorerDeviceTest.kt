@@ -168,7 +168,7 @@ class PrivilegedExplorerDeviceTest {
         val entries = page.toList()
         assertTrue(entries.isNotEmpty())
         assertTrue(entries.all { it is PrivilegedExplorerItem })
-        assertTrue(entries.all { !it.canCopy() && !it.canMove() && !it.canDelete() && !it.canRename() && !it.isExecutable })
+        assertTrue(entries.all { it.canCopy() && it.canMove() && it.canDelete() && it.canRename() && !it.isExecutable })
     }
 
     private fun runShellListing(directory: File) = PrivilegedExplorerProcess.run(

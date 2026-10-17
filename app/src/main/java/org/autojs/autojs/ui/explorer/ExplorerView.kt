@@ -126,9 +126,19 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     private var mExplorerRootPath: String? = null
     private var mPathMenu: ExplorerPathMenu? = null
     private val mDirectoryAccessUi = ExplorerDirectoryAccessUi(this)
+    private val mPrivilegedOperations = PrivilegedExplorerOperationsController(this)
     private var mDirectoryAccessMode: PrivilegedAccessMode? = null
     private var mDirectoryAccessFailed = false
     private var mDirectoryNavigationPending = false
+
+    val privilegedAccessMode: PrivilegedAccessMode?
+        get() = mDirectoryAccessMode
+
+    fun configurePrivilegedAccess(mode: PrivilegedAccessMode?) = setDirectoryAccessMode(mode)
+
+    internal fun openPrivilegedFile(item: ExplorerItem) = mPrivilegedOperations.open(item)
+    internal fun showPrivilegedFileMenu(anchor: View, item: ExplorerItem) = mPrivilegedOperations.showMenu(anchor, item)
+    internal fun clearPrivilegedSelection() = clearSelection()
 
     internal val directoryAccessLabel: String
         get() = context.getString(when (mDirectoryAccessMode) {
@@ -667,12 +677,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         mExplorer?.registerChangeListener(this)
+        if (mPluginActions.surface == ExplorerSurface.MAIN_FILES) mPrivilegedOperations.showInterruptedOperations()
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         mPathMenu?.dismiss()
         mDirectoryAccessUi.detach()
+        mPrivilegedOperations.detach()
         mDirectoryAccessMode = null
         mArchiveCoordinator.release()
         closeArchiveNavigation(restorePrevious = false)
@@ -689,7 +701,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
         super.onWindowFocusChanged(hasWindowFocus)
-        if (hasWindowFocus) mDirectoryAccessUi.onWindowFocusGained()
+        if (hasWindowFocus) {
+            mDirectoryAccessUi.onWindowFocusGained()
+            if (mPluginActions.surface == ExplorerSurface.MAIN_FILES) mPrivilegedOperations.onWindowFocusGained()
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -813,7 +828,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun isItemSelectable(item: ExplorerItem) = when (item) {
-        is PrivilegedExplorerItem -> false
+        is PrivilegedExplorerItem -> !mPrivilegedOperations.isBusy && item.path != "/"
         is ArchiveExplorerItem -> {
             val provider = mArchiveNavigationState?.provider
             provider != null &&
@@ -842,7 +857,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         // The plugin button runs the highest-priority action and "More" offers the others, so a second
         // plugin for the same files (an image converter next to an image viewer) stays reachable.
         // zh-CN: 插件按钮执行优先级最高的动作, "更多" 列出其余动作, 同类文件的第二个插件 (如图片查看器旁的图片转换) 也能用到.
-        val pluginActions = if (selectedItems.isEmpty() || archiveSelection) {
+        val pluginActions = if (selectedItems.isEmpty() || archiveSelection || selectedItems.any { it is PrivilegedExplorerItem }) {
             emptyList()
         } else {
             runCatching {
@@ -949,6 +964,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun copySelectedItems() {
+        if (mSelection.items.any { it is PrivilegedExplorerItem }) {
+            mPrivilegedOperations.transfer(mSelection.items.toList(), move = false)
+            return
+        }
         val selectedFiles = selectedScriptFiles()
         if (selectedFiles.isEmpty()) return
         ScriptOperations(context, this@ExplorerView, currentPage)
@@ -957,6 +976,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun moveSelectedItems() {
+        if (mSelection.items.any { it is PrivilegedExplorerItem }) {
+            mPrivilegedOperations.transfer(mSelection.items.toList(), move = true)
+            return
+        }
         val selectedFiles = selectedScriptFiles()
         if (selectedFiles.isEmpty()) return
         ScriptOperations(context, this@ExplorerView, currentPage)
@@ -972,6 +995,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
     }
 
     private fun deleteSelectedItems() {
+        if (mSelection.items.any { it is PrivilegedExplorerItem }) {
+            mPrivilegedOperations.delete(mSelection.items.toList())
+            return
+        }
         val archiveItems = mSelection.items.mapNotNull { it as? ArchiveExplorerItem }
         if (archiveItems.size == mSelection.size && archiveItems.isNotEmpty()) {
             confirmArchiveDeletion(archiveItems)
@@ -1005,6 +1032,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         provider: ExplorerPluginActionProvider?,
     ) {
         mPluginActions.setProvider(surface, provider)
+        if (surface == ExplorerSurface.MAIN_FILES && isAttachedToWindow) mPrivilegedOperations.showInterruptedOperations()
         if (mSelection.isActive) {
             updateSelectionToolbar()
         }
@@ -1808,13 +1836,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
         val fetch: Single<ExplorerPage> = if (accessMode != null && page !is ArchiveExplorerPage && findSampleRootPath(page.path) == null) {
             val privilegedFetch = Single.fromCallable { PrivilegedExplorerAccess.listDirectory(page.path, accessMode) }
                 .subscribeOn(Schedulers.io())
-            // Android may return only this app's own directory without reporting an error.
-            // Once explicitly authorized, use the selected reader for the full restricted listing.
-            if (ExplorerStorageCatalog.isAndroidRestrictedPath(page.path)) privilegedFetch else {
-                ordinaryFetch.onErrorResumeNext { error ->
-                    if (error is ExplorerDirectoryAccessException || error is SecurityException) privilegedFetch else Single.error(error)
-                }
-            }
+            // Explicitly choosing an access mode also determines which process performs operations.
+            // Do not mix local File capabilities with entries returned by the authorized reader.
+            privilegedFetch
         } else {
             ordinaryFetch
         }

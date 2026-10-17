@@ -103,7 +103,7 @@
             android:focusable="true"
             android:paddingHorizontal="12dp"
             android:paddingVertical="8dp"
-            android:text="@string/text_explorer_access_read_only"
+            android:text="@string/text_explorer_privileged_access"
             android:textColor="?android:textColorSecondary"
             android:textSize="12sp"
             android:visibility="gone" />

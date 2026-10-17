@@ -92,10 +92,14 @@ public class Explorer {
     }
 
     public void refreshAll() {
+        invalidateCache();
+        mEventBus.post(ExplorerChangeEvent.EVENT_ALL);
+    }
+
+    public void invalidateCache() {
         if (mExplorerPageLruCache != null) {
             mExplorerPageLruCache.evictAll();
         }
-        mEventBus.post(ExplorerChangeEvent.EVENT_ALL);
     }
 
     public Single<ExplorerPage> fetchChildren(ExplorerPage page) {

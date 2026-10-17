@@ -322,12 +322,12 @@ internal class ExplorerItemViewHolder(
     }
 
     private fun onItemClick() {
-        if (mExplorerItem is PrivilegedExplorerItem) {
-            ExplorerDirectoryAccessUi.showFileInfo(host.explorerView, mExplorerItem)
-            return
-        }
         if (host.isInSelectionMode) {
             host.toggleItemSelection(mExplorerItem)
+            return
+        }
+        if (mExplorerItem is PrivilegedExplorerItem) {
+            host.explorerView.openPrivilegedFile(mExplorerItem)
             return
         }
         // A saved layout opens in the layout inspector rather than in the text editor.
@@ -642,7 +642,7 @@ internal class ExplorerItemViewHolder(
     @SuppressLint("CheckResult")
     private fun showOptionsMenu() {
         if (mExplorerItem is PrivilegedExplorerItem) {
-            ExplorerDirectoryAccessUi.showFileInfo(host.explorerView, mExplorerItem)
+            host.explorerView.showPrivilegedFileMenu(mOptions, mExplorerItem)
             return
         }
         val actionItem = mExplorerItem
