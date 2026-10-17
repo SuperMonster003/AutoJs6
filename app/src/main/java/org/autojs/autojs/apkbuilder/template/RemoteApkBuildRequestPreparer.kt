@@ -199,6 +199,10 @@ object RemoteApkBuildRequestPreparer {
                 remoteConfig.setLibs((remoteConfig.libs + ApkBuildLibrary.NODEJS_RUNTIME.label).distinct())
                 remoteConfig.setPermissions((remoteConfig.permissions + NodeJsPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
             }
+            if (requiresBunRuntime(projectConfig, source)) {
+                org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants.validatePackagedCapabilities(projectConfig.bunConfig?.hostCapabilities.orEmpty())
+                remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.bun.runtime.api.BunPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
+            }
             typeScriptPlan = TypeScriptApkBuildCompiler.prepare(
                 context = appContext,
                 projectConfig = projectConfig,
@@ -416,18 +420,6 @@ object RemoteApkBuildRequestPreparer {
                     "QuickJS Runtime plugin installed."
             )
         }
-        if ((entryExecutionMode ?: 0) and JavaScriptSource.EXECUTION_MODE_BUN != 0 || requestsExternalBunRuntime(
-                projectType = projectConfig.projectType,
-                configuredEntryName = projectConfig.mainScriptFileName,
-                sourceName = source.name,
-                entryExecutionMode = entryExecutionMode,
-            )
-        ) {
-            throw IOException(
-                "Bun Runtime is provided by an external AutoJs6 plugin and cannot be embedded " +
-                    "in a packaged APK. Run Bun scripts from the AutoJs6 host with the Bun Runtime plugin installed."
-            )
-        }
         if (hasLegacyEmbeddedNodeLibrary(projectConfig.libs)) {
             throw IOException(
                 "Embedded Node.js packaging was retired. Select Node.js Runtime to use the installed external plugin."
@@ -461,6 +453,15 @@ object RemoteApkBuildRequestPreparer {
             sourceName = source.name,
             entryExecutionMode = mode,
         )
+    }
+
+    internal fun requiresBunRuntime(config: ProjectConfig, source: File): Boolean {
+        val entry = resolveProjectEntry(source, config.mainScriptFileName)?.takeIf(File::isFile)
+        val mode = entry?.let {
+            val flags = EncryptedScriptFileHeader.getHeaderFlags(it)
+            if (flags == EncryptedScriptFileHeader.FLAG_INVALID_FILE) ScriptFileEncoding.openReader(it).use(JavaScriptSource::parseExecutionMode).mode else flags.toInt()
+        }
+        return requestsExternalBunRuntime(config.projectType, config.mainScriptFileName, source.name, mode)
     }
 
     internal fun requestsExternalQuickJsRuntime(

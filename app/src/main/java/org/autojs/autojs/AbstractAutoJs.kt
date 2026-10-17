@@ -87,10 +87,10 @@ abstract class AbstractAutoJs protected constructor(val application: Application
                 PythonPluginScriptEngine(applicationContext, globalConsole)
             }
         }
+        scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_BUN) {
+            BunPluginScriptEngine(applicationContext, globalConsole)
+        }
         if (!isInrt) {
-            scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_BUN) {
-                BunPluginScriptEngine(applicationContext, globalConsole)
-            }
             scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_QUICKJS) {
                 QuickJsPluginScriptEngine(applicationContext, globalConsole)
             }

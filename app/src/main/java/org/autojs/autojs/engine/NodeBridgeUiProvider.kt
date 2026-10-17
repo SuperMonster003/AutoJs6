@@ -376,6 +376,8 @@ class NodeBridgeUiSession(
     private val stateLock = Any()
     private val state = linkedMapOf<String, JSONObject>()
     private val pendingPatches = mutableListOf<JSONObject>()
+    private var interopObserver: ((JSONObject) -> Unit)? = null
+    internal fun observeInteropEvents(observer: (JSONObject) -> Unit) { interopObserver = observer }
 
     @Volatile
     private var descriptorText = descriptor.toString()
@@ -562,6 +564,7 @@ class NodeBridgeUiSession(
             eventCount.decrementAndGet()
         }
         eventStream?.publish(event)
+        interopObserver?.invoke(JSONObject(event.toString()))
         if (event.optString("type") == "close" && eventStream != null) {
             eventStream = null
             NodeBridgeUiSessionStore.remove(id)
@@ -573,8 +576,8 @@ class NodeBridgeUiSession(
     }
 }
 
-private class NodeBridgeUiRenderer(
-    private val activity: Activity,
+internal class NodeBridgeUiRenderer(
+    private val activity: Context,
     private val session: NodeBridgeUiSession,
 ) {
 
@@ -582,6 +585,11 @@ private class NodeBridgeUiRenderer(
         val type = normalizeType(descriptor.optString("type"))
         val id = descriptor.optString("id")
         val view = when (type) {
+            "Frame", "Compose" -> (if(type == "Compose") RuntimeComposeContainer(activity) else android.widget.FrameLayout(activity)).apply {
+                val children=descriptor.optJSONArray("children")
+                if(type == "Compose") require(children == null || children.length() == 0) { "Compose containers must initially be empty" }
+                if(children != null) repeat(children.length()){ addView(createView(children.getJSONObject(it))) }
+            }
             TYPE_COLUMN -> createLinearLayout(descriptor, LinearLayout.VERTICAL, isRoot)
             TYPE_ROW -> createLinearLayout(descriptor, LinearLayout.HORIZONTAL, isRoot)
             TYPE_TEXT -> createText(descriptor)
@@ -605,6 +613,7 @@ private class NodeBridgeUiRenderer(
         if (view.layoutParams == null) {
             view.layoutParams = defaultLayoutParams(isRoot)
         }
+        RuntimeUiInterop.applyAttributes(view, descriptor)
         return view
     }
 
@@ -1011,6 +1020,7 @@ private class NodeBridgeUiRenderer(
         private const val TYPE_WEB_VIEW = "WebView"
 
         private val supportedTypes = setOf(
+            "Frame", "Compose",
             TYPE_COLUMN,
             TYPE_ROW,
             TYPE_TEXT,
@@ -1064,14 +1074,16 @@ private class NodeBridgeUiRenderer(
         }
 
         private fun normalizeType(rawType: String): String = when (rawType) {
+            "frame", "Frame", "FrameLayout" -> "Frame"
+            "compose", "Compose" -> "Compose"
             "Vertical", "vertical", "LinearLayout", "linearLayout", "Column", "column" -> TYPE_COLUMN
             "Horizontal", "horizontal", "Row", "row" -> TYPE_ROW
-            "Text", "text" -> TYPE_TEXT
+            "Text", "text", "TextView" -> TYPE_TEXT
             "Button", "button" -> TYPE_BUTTON
             "Input", "input", "EditText", "editText" -> TYPE_INPUT
-            "Image", "image" -> TYPE_IMAGE
+            "Image", "image", "ImageView" -> TYPE_IMAGE
             "ScrollView", "scrollView" -> TYPE_SCROLL_VIEW
-            "List", "list" -> TYPE_LIST
+            "List", "list", "ListView" -> TYPE_LIST
             "Switch", "switch" -> TYPE_SWITCH
             "Checkbox", "CheckBox", "checkbox", "checkBox" -> TYPE_CHECKBOX
             "Progress", "ProgressBar", "progress", "progressBar" -> TYPE_PROGRESS

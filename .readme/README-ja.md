@@ -336,6 +336,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Node.js/Bun images が SIFT/ORB 特徴抽出と照合, シーン座標と ObjectFrame の幾何情報, 実行単位の Mat/特徴ハンドル管理に対応
 * `新機能` Node.js/Bun images が PNG 量子化と圧縮, 品質/メモリ指標, バイナリ結果とファイル記述子への出力に対応
 * `新機能` Node.js/Bun UI と Compose がネイティブレイアウト, データコンポーネント, リアクティブ状態, ウィンドウイベント, 個別権限と自動クリーンアップに対応
+* `新機能` Node.js/Bun が実行に属する View ハンドル, 非同期 AndroidView ファクトリー, XML Compose コンテナへの接続, Worker 終了時の解放とパッケージ化アプリに対応
 * `修正` runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題
 * `修正` Android 7.x で runtime.loadDex が DEX キャッシュを破損させ, クラス読込に失敗する場合がある問題
 * `修正` Rhino エンジンと組み込みモジュールのスコープ, 引数変換と戻り値処理の非互換により一部スクリプトの動作が異常になる問題

@@ -146,7 +146,13 @@ class RuntimeUiComposeDeviceTest {
                     harness.await("Rotation text input") { if(future.isDone)fail(future.get().toString());find("$label-input")!=null }
                     assertTrue(requireNotNull(find("$label-input")).performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,
                         Bundle().apply{putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,"$label-edited")}))
-                    fun click() {harness.await("Rotation button ready") { find("$label-next")!=null };var node=requireNotNull(find("$label-next"));while(!node.isClickable&&node.parent!=null)node=node.parent;assertTrue(node.performAction(AccessibilityNodeInfo.ACTION_CLICK))}
+                    fun click() {
+                        harness.await("Rotation button action") {
+                            var node=find("$label-next") ?: return@await false
+                            while(!node.isClickable&&node.parent!=null)node=node.parent
+                            node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        }
+                    }
                     click();harness.await("State before rotation") { find("$label:1")!=null }
                     val instrumentation=InstrumentationRegistry.getInstrumentation()
                     val monitor=instrumentation.addMonitor(RuntimeComposeActivity::class.java.name,null,false)
@@ -164,7 +170,7 @@ class RuntimeUiComposeDeviceTest {
         write("rotation")
     }
 
-    private fun interact(mode: String, code: String, click: String, edit: Pair<String, String>? = null) {
+    internal fun interact(mode: String, code: String, click: String, edit: Pair<String, String>? = null) {
         val executor = Executors.newSingleThreadExecutor()
         try {
             val result = executor.submit<JSONObject> { run(mode, code) }
@@ -183,7 +189,7 @@ class RuntimeUiComposeDeviceTest {
         } finally { executor.shutdownNow() }
     }
 
-    private fun find(text: String): AccessibilityNodeInfo? {
+    internal fun find(text: String): AccessibilityNodeInfo? {
         fun walk(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
             if (node == null) return null
             if (node.text?.toString() == text && node.isVisibleToUser) return node
@@ -193,7 +199,7 @@ class RuntimeUiComposeDeviceTest {
         return harness.automation.windows.firstNotNullOfOrNull { walk(it.root) } ?: walk(harness.automation.rootInActiveWindow)
     }
 
-    private fun run(mode: String, code: String): JSONObject {
+    internal fun run(mode: String, code: String): JSONObject {
         val code = "try{$code}finally{for(const session of compose.sessions)await session.close().catch(()=>{});}"
         val body = when(mode) {
             "bun" -> "const ui=host.ui,compose=host.compose;$code"
@@ -210,7 +216,7 @@ class RuntimeUiComposeDeviceTest {
         }
         return harness.execute(if(mode=="bun") "bun" else "node", body, capabilities=listOf("ui", "image"))
     }
-    private fun grants(action: () -> Unit) {
+    internal fun grants(action: () -> Unit) {
         val prefs=context.getSharedPreferences("bun_host_capability_grants", Context.MODE_PRIVATE)
         val keys=listOf(BunHostCapabilityGrants.UI_LAYOUT, BunHostCapabilityGrants.UI_COMPOSE)
         val before=keys.associateWith { if(prefs.contains(it)) prefs.getBoolean(it,false) else null }

@@ -20,7 +20,7 @@ import org.autojs.plugin.bun.runtime.api.IBunRuntimePlugin
 
 internal object BunRuntimePluginClient {
     private val host = AidlPluginHost(
-        action = BunPluginActions.RUNTIME,
+        action = if (org.autojs.autojs6.BuildConfig.isInrt) BunPluginActions.PACKAGED_RUNTIME else BunPluginActions.RUNTIME,
         category = BunPluginActions.CATEGORY,
         tag = "BunRuntimePluginClient",
         moduleLabel = "Bun Runtime",
@@ -115,8 +115,9 @@ internal object BunRuntimePluginClient {
     private fun validateServiceForNewCall(context: Context, serviceInfo: ServiceInfo) {
         check(serviceInfo.exported) { "Bun runtime service is not exported" }
         check(serviceInfo.enabled && serviceInfo.applicationInfo.enabled) { "Bun runtime service is disabled" }
-        check(serviceInfo.permission == BunRuntimeContract.PLUGIN_PERMISSION) {
-            "Bun runtime service must require ${BunRuntimeContract.PLUGIN_PERMISSION}"
+        val permission = if (org.autojs.autojs6.BuildConfig.isInrt) BunPluginActions.PACKAGED_RUNTIME_PERMISSION else BunRuntimeContract.PLUGIN_PERMISSION
+        check(serviceInfo.permission == permission) {
+            "Bun runtime service must require $permission"
         }
         check(PluginTrustManager.isAuthorized(context, serviceInfo.packageName)) {
             "Bun Runtime plugin is not authorized: ${serviceInfo.packageName}"

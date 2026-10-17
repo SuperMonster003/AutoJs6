@@ -33,6 +33,7 @@
 
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
     <uses-permission android:name="org.autojs.plugin.nodejs.permission.RUNTIME" />
+    <uses-permission android:name="org.autojs.permission.BUN_PACKAGED_RUNTIME" />
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
 
     <queries>
@@ -58,6 +59,10 @@
         </intent>
         <intent>
             <action android:name="org.autojs.plugin.bun.RUNTIME" />
+            <category android:name="bun" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.bun.PACKAGED_RUNTIME" />
             <category android:name="bun" />
         </intent>
         <intent>
@@ -704,6 +709,12 @@
 
         <activity
             android:name="org.autojs.autojs.engine.RuntimeComposeActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@style/ScriptTheme" />
+
+        <activity
+            android:name="org.autojs.autojs.engine.RuntimeInteropActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:theme="@style/ScriptTheme" />

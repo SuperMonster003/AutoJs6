@@ -22,6 +22,7 @@ import org.autojs.autojs6.R
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.catalog.ComponentInvocation
 import org.autojs.plugin.compose.api.dialog.DialogOptionsV1
+import org.autojs.plugin.compose.api.interop.AndroidViewBindingV1
 import org.autojs.plugin.compose.api.model.*
 import org.autojs.plugin.compose.api.v2.ComposeUiV2
 import org.json.JSONArray
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /** Data-only bridge. All renderer operations and ownership changes are confined to Android main. */
 internal class RuntimeComposeBridge(
     private val context: Context,
+    private val interop: RuntimeUiInterop,
     private val image: (JSONObject) -> Bitmap,
 ) : Closeable {
     private val main = Handler(Looper.getMainLooper())
@@ -54,15 +56,17 @@ internal class RuntimeComposeBridge(
                     "version" -> host().load().let { loaded -> JSONObject()
                         .put("plugin", loaded.identity.version).put("contract", loaded.factory.contractVersion())
                         .put("compose", loaded.factory.capabilities().getString(ComposeUiCapabilityKeys.COMPOSE_VERSION)) }
-                    "mount", "dialog", "floaty" -> {
+                    "mount", "dialog", "floaty", "attach" -> {
                         require(sessions.values.count { !it.closed } < ComposeUiLimits.MAX_SESSIONS_PER_ENGINE) { "At most ${ComposeUiLimits.MAX_SESSIONS_PER_ENGINE} Compose sessions may be active" }
                         val loaded = host().load()
-                        val session = Session("compose-${UUID.randomUUID()}", loaded, request.method, args.optJSONObject(1) ?: JSONObject())
+                        val container=if(request.method=="attach")interop.container(args.getJSONObject(0))else null
+                        val rootIndex=if(container==null)0 else 1
+                        val session = Session("compose-${UUID.randomUUID()}", loaded, request.method, args.optJSONObject(rootIndex+1) ?: JSONObject(),container)
                         try {
-                            session.prepare(args.getJSONObject(0))
+                            session.prepare(args.getJSONObject(rootIndex))
                             sessions[session.id] = session
                             RuntimeComposeActivity.sessions[session.id] = session
-                            if (request.method == "floaty") session.attach(null) else context.startActivity(
+                            if (request.method == "floaty" || container != null) session.attach(null) else context.startActivity(
                                 Intent(context, RuntimeComposeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
                                     .putExtra("session", session.id))
                             session.snapshot()
@@ -108,6 +112,7 @@ internal class RuntimeComposeBridge(
     internal inner class Session(
         val id: String, private val loaded: ComposeUiPluginLoader.Loaded,
         private val mode: String, private val options: JSONObject,
+        val container: RuntimeUiInterop.NativeView? = null,
     ) {
         @Volatile var closed = false; private set
         val events = ArrayDeque<JSONObject>()
@@ -117,6 +122,11 @@ internal class RuntimeComposeBridge(
         private var overlay: View? = null
         private var watch: Closeable? = null
         private var tree: UiTree? = null
+        private var bindings: List<AndroidViewBindingV1> = emptyList()
+        private var mountedView: View? = null
+        private var renderOwner: ComponentActivity? = null
+        private var containerListener: View.OnAttachStateChangeListener? = null
+        private var containerDisposal: Closeable? = null
         private var ids: Map<Int, Int> = emptyMap()
         private var generation = 0L
         private var rendererEpoch = 0L
@@ -141,6 +151,7 @@ internal class RuntimeComposeBridge(
         fun prepare(descriptor: JSONObject) {
             check(!closed)
             val nodes = ArrayList<UiNode>()
+            val nativeViews = HashMap<Int,RuntimeUiInterop.NativeView>()
             val visiting = HashSet<Int>()
             collectingImages = ArrayList()
             fun node(raw: JSONObject, depth: Int): Int {
@@ -149,8 +160,14 @@ internal class RuntimeComposeBridge(
                 require(number > 0 && visiting.add(number)) { "Repeated Compose node" }
                 val type = raw.getString("type")
                 val spec = catalog.component(type) ?: error("Unknown Compose component: $type")
-                require(spec.invocation == ComponentInvocation.NODE && type != "AndroidView" && type in loaded.components) { "Component unavailable in this runtime: $type" }
-                val props = values.normalize(type, objectMap(raw.optJSONObject("props") ?: JSONObject()))
+                require(spec.invocation == ComponentInvocation.NODE && type in loaded.components) { "Component unavailable in this runtime: $type" }
+                val fields=JSONObject((raw.optJSONObject("props")?:JSONObject()).toString())
+                if(type=="AndroidView"){
+                    require(loaded.androidViewFactory!=null){"The renderer has no AndroidView interop extension"}
+                    val record=interop.resolve(fields.getJSONObject("view"));nativeViews[number]=record
+                    fields.put("view",record.lease)
+                }
+                val props = values.normalize(type, objectMap(fields))
                 val modifiers = raw.optJSONArray("modifier") ?: JSONArray()
                 val operations = (0 until modifiers.length()).map { index ->
                     val item = modifiers.getJSONObject(index)
@@ -193,7 +210,14 @@ internal class RuntimeComposeBridge(
                     } else node
                 })
                 val nextGeneration = generation + 1
-                renderer?.apply(UiPatchBatch(1, nextGeneration, TreeReconciler.diff(tree, next)))
+                val nextBindings=nativeViews.map { (draft,record)->AndroidViewBindingV1(result.draftToStable.getValue(draft),record.lease,record.view) }
+                nextBindings.forEach { binding ->
+                    var ancestor:View?=container?.view
+                    while(ancestor!=null){require(ancestor!==binding.view){"An AndroidView cannot contain its own Compose container"};ancestor=ancestor.parent as? View}
+                }
+                renderer?.validateViews(nextBindings)
+                renderer?.apply(UiPatchBatch(1, nextGeneration, TreeReconciler.diff(tree, next)),nextBindings)
+                bindings=nextBindings
                 tree = next; ids = result.draftToStable; generation = nextGeneration
                 commands.forEach { command -> renderer?.execute(command); edits[command.nodeId] = command.editSeq to command.text.orEmpty() }
                 edits.keys.retainAll(next.nodes.map { it.nodeId }.toSet())
@@ -207,15 +231,26 @@ internal class RuntimeComposeBridge(
 
         fun attach(owner: RuntimeComposeActivity?) {
             if (closed) { owner?.finish(); return }
+            if (container != null && containerDisposal == null) containerDisposal = interop.onDispose(container) { close() }
             activity = owner
+            val lifecycle=owner?:container?.let(interop::activity)
+            renderOwner=lifecycle
             val epoch = ++rendererEpoch
             try {
-                val base = owner ?: ContextThemeWrapper(context, R.style.ScriptTheme)
+                val base = lifecycle ?: container?.view?.context ?: ContextThemeWrapper(context, R.style.ScriptTheme)
                 if (mode == "floaty") check(Settings.canDrawOverlays(context)) { "Android overlay permission is required" }
                 val manager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                val owners = if (owner == null) ComposeFloatyOwners() else null
+                val owners = if (lifecycle == null) ComposeFloatyOwners() else null
+                val previous=container?.let { target->sessions.values.firstOrNull{it!==this&&!it.closed&&it.container?.view===target.view} }
                 val target = ComposeAndroidRenderer(base, loaded, 1, { view ->
-                    if (owner != null) owner.setContentView(view) else {
+                    mountedView=view
+                    if(container!=null){
+                        interop.container(container.json())
+                        val parent=container.view as ViewGroup
+                        require(parent.childCount==0 || previous?.mountedView?.parent===parent&&parent.childCount==1){"Compose container already has unrelated content"}
+                        previous?.close()
+                        parent.addView(view,ViewGroup.LayoutParams(-1,-1))
+                    } else if (owner != null) owner.setContentView(view) else {
                         val params = WindowManager.LayoutParams(
                             options.optInt("width", -2), options.optInt("height", -2),
                             org.autojs.autojs.ui.enhancedfloaty.util.WindowTypeCompat.getPhoneWindowType(),
@@ -226,10 +261,10 @@ internal class RuntimeComposeBridge(
                         if (!options.optBoolean("touchable", true)) params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                         manager.addView(view, params); overlay = view
                     }
-                }, owner, owners, onDestroyed = { if (owner?.isChangingConfigurations != true) close() }, rendererFactory = if (mode != "dialog") null else { environment ->
+                }, lifecycle, owners, onDestroyed = { if (lifecycle?.isChangingConfigurations != true) close() }, rendererFactory = if (mode != "dialog") null else { environment ->
                     requireNotNull(loaded.dialogFactory) { "Compose dialog extension is unavailable" }.create(environment,
                         DialogOptionsV1(options.optString("type", "alert"), options.optBoolean("cancelable", true)))
-                }, useActivityInsets = mode != "dialog")
+                }, useActivityInsets = mode != "dialog" && container == null)
                 renderer = target
                 target.open { event ->
                     main.post {
@@ -262,7 +297,22 @@ internal class RuntimeComposeBridge(
                             node.modifier, node.children, node.slots, node.callbacks)
                     }
                 }) }
-                target.apply(UiPatchBatch(1, generation, listOf(UiPatch.SetRoot(requireNotNull(tree)))))
+                target.validateViews(bindings)
+                target.apply(UiPatchBatch(1, generation, listOf(UiPatch.SetRoot(requireNotNull(tree)))),bindings)
+                if(container!=null&&containerListener==null){
+                    containerListener=object:View.OnAttachStateChangeListener{
+                        override fun onViewDetachedFromWindow(view:View){
+                            if(closed)return
+                            if(interop.recreating(container)||renderOwner?.isChangingConfigurations==true)pauseRenderer()else close()
+                        }
+                        override fun onViewAttachedToWindow(view:View){
+                            if(!closed){
+                                if(renderer!=null&&renderOwner==null&&interop.activity(container)!=null)pauseRenderer()
+                                if(renderer==null)attach(null)
+                            }
+                        }
+                    }.also{container.view.addOnAttachStateChangeListener(it)}
+                }
                 target.attach()
                 watch = host().watch(loaded.identity) { error -> main.post { emit(JSONObject().put("type", "error").put("message", error.message)); close() } }
                 emit(JSONObject().put("type", "shown"))
@@ -272,10 +322,10 @@ internal class RuntimeComposeBridge(
         fun detach(owner: RuntimeComposeActivity) {
             if (activity !== owner) return
             if (owner.isChangingConfigurations && !closed) {
-                rendererEpoch++
-                watch?.close(); watch = null; renderer?.dispose(); renderer = null; activity = null
+                pauseRenderer(); activity = null
             } else close()
         }
+        private fun pauseRenderer(){rendererEpoch++;watch?.close();watch=null;renderer?.dispose();renderer=null;mountedView=null;renderOwner=null}
         fun setTheme(value: JSONObject) { check(!closed); val next = values.theme(objectMap(value)); renderer?.setTheme(next); theme = next }
         fun command(value: JSONObject) {
             check(!closed)
@@ -350,11 +400,14 @@ internal class RuntimeComposeBridge(
             closed = true; RuntimeComposeActivity.sessions.remove(id)
             rendererEpoch++
             watch?.close(); watch = null
+            containerListener?.let { container?.view?.removeOnAttachStateChangeListener(it) };containerListener=null
+            containerDisposal?.close(); containerDisposal = null
             runCatching { overlay?.let { (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).removeViewImmediate(it) } }
                 .onFailure { emit(JSONObject().put("type", "error").put("message", it.message)) }
             overlay = null
             runCatching { renderer?.dispose() }.onFailure { emit(JSONObject().put("type", "error").put("message", it.message)) }
             renderer = null
+            mountedView=null;bindings=emptyList()
             images.forEach { it.recycle() }; images.clear(); tree = null; ids = emptyMap(); edits.clear()
             activity?.finish(); activity = null
             emit(JSONObject().put("type", "close"))
@@ -362,7 +415,7 @@ internal class RuntimeComposeBridge(
     }
 
     companion object {
-        val methods = setOf("isAvailable", "version", "mount", "dialog", "floaty", "render", "setTheme", "command", "window", "drainEvents", "close")
+        val methods = setOf("isAvailable", "version", "mount", "dialog", "floaty", "attach", "render", "setTheme", "command", "window", "drainEvents", "close")
         private fun rawValue(value: Any?): Any? = when (value) {
             is JSONObject -> objectMap(value)
             is JSONArray -> (0 until value.length()).map { rawValue(value.opt(it)) }

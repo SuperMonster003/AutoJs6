@@ -5,6 +5,9 @@ import android.system.OsConstants
 import org.autojs.autojs.util.OsConstantsCompat
 import android.system.StructStat
 import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
+import org.autojs.autojs.script.EncryptedScriptFileHeader
+import org.autojs.autojs.engine.encryption.ScriptEncryption
+import java.io.ByteArrayOutputStream
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -57,14 +60,14 @@ internal class BunPluginWorkspaceArchive private constructor(
          * Writes the archive for [root] into a new temporary file below [directory]. [entryBytes]
          * replace the on-disk entry file (or add it when the semantic path is not on disk).
          */
-        fun create(root: File, entryFile: File, entryBytes: ByteArray, directory: File): BunPluginWorkspaceArchive {
+        fun create(root: File, entryFile: File, entryBytes: ByteArray, directory: File, decryptProjectScripts: Boolean = false): BunPluginWorkspaceArchive {
             val canonicalRoot = root.canonicalFile
             val entryPoint = relativePath(canonicalRoot, entryFile.canonicalFile)
                 ?: throw IOException("Bun entry file is outside its project root: ${entryFile.path}")
             validateRelativePath(entryPoint)
             val archive = File.createTempFile("bun-project-", ".zip", directory)
             try {
-                val (entryCount, totalBytes) = writeArchive(canonicalRoot, entryPoint, entryBytes, archive)
+                val (entryCount, totalBytes) = writeArchive(canonicalRoot, entryPoint, entryBytes, archive, decryptProjectScripts)
                 return BunPluginWorkspaceArchive(archive, entryPoint, entryCount, totalBytes)
             } catch (error: Throwable) {
                 archive.delete()
@@ -72,7 +75,7 @@ internal class BunPluginWorkspaceArchive private constructor(
             }
         }
 
-        private fun writeArchive(root: File, entryPoint: String, entryBytes: ByteArray, archive: File): Pair<Int, Long> {
+        private fun writeArchive(root: File, entryPoint: String, entryBytes: ByteArray, archive: File, decryptProjectScripts: Boolean): Pair<Int, Long> {
             var entryCount = 0
             var totalBytes = 0L
             var entryWritten = false
@@ -113,7 +116,7 @@ internal class BunPluginWorkspaceArchive private constructor(
                                     output.write(entryBytes)
                                     entryWritten = true
                                 } else {
-                                    copyRegularFile(child, stat, output, buffer, ::account)
+                                    copyRegularFile(child, stat, output, buffer, ::account, decryptProjectScripts)
                                 }
                                 output.closeEntry()
                             }
@@ -142,6 +145,7 @@ internal class BunPluginWorkspaceArchive private constructor(
             output: ZipOutputStream,
             buffer: ByteArray,
             account: (Long) -> Unit,
+            decryptProjectScripts: Boolean,
         ) {
             val descriptor = Os.open(
                 file.path,
@@ -156,6 +160,26 @@ internal class BunPluginWorkspaceArchive private constructor(
                         opened.st_ino != expected.st_ino
                     ) {
                         throw IOException("Bun project file changed while it was being archived: ${file.path}")
+                    }
+                    if (decryptProjectScripts && file.extension.lowercase() in setOf("js", "mjs", "cjs", "jsx", "ts", "mts", "cts", "tsx")) {
+                        val maximum = BunRuntimeContract.MAX_SOURCE_BYTES + EncryptedScriptFileHeader.BLOCK_SIZE + 16
+                        val stored = ByteArrayOutputStream()
+                        while (true) {
+                            val count = input.read(buffer)
+                            if (count < 0) break
+                            require(stored.size().toLong() + count <= maximum) { "Bun project script exceeds its stored size limit" }
+                            stored.write(buffer, 0, count)
+                        }
+                        val bytes = stored.toByteArray()
+                        var cleartext: ByteArray? = null
+                        try {
+                            cleartext = if (bytes.size >= EncryptedScriptFileHeader.BLOCK_SIZE && EncryptedScriptFileHeader.isValidFile(bytes))
+                                ScriptEncryption.decrypt(bytes, EncryptedScriptFileHeader.BLOCK_SIZE) else bytes
+                            require(cleartext.size.toLong() <= BunRuntimeContract.MAX_SOURCE_BYTES) { "Bun project script exceeds its source size limit" }
+                            account(cleartext.size.toLong())
+                            output.write(cleartext)
+                        } finally { bytes.fill(0); cleartext?.fill(0) }
+                        return
                     }
                     while (true) {
                         val count = input.read(buffer)

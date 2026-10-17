@@ -183,6 +183,7 @@ class BunPluginScriptEngine internal constructor(
                 entryFile = semanticFile(fileSource),
                 entryBytes = bytes,
                 directory = directory,
+                decryptProjectScripts = BuildConfig.isInrt,
             )
             request.putInt(BunRuntimeContract.KEY_WORKSPACE_ARCHIVE_VERSION, BunRuntimeContract.WORKSPACE_ARCHIVE_VERSION)
             request.putString(BunRuntimeContract.KEY_WORKSPACE_ENTRY_POINT, archive.entryPoint)

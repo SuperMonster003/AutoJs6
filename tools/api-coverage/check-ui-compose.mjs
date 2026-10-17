@@ -18,7 +18,9 @@ const names=canonical.match(/type Compose(?:CatalogNodeName|V2NodeName) = [^;]+/
   .flatMap(line=>[...line.matchAll(/"([^"\n]+)"/g)].map(match=>match[1]));
 assert.equal(names.length,54);
 for(const name of names) {assert.equal(typeof compose[name],'function');assert(compose[name]({}));}
-assert.equal(compose.AndroidView,undefined,'Native Views require a different interop contract');
+assert.equal(typeof compose.AndroidView,'function');
+assert.equal(typeof compose.attach,'function');
+for(const method of ['inflate','createView','context','findView','view'])assert.equal(typeof ui[method],'function');
 const native=read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt'));
 assert(read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt'))
   .includes('modules = listOf(NodeBridgeModules.UI, NodeBridgeModules.COMPOSE)'), 'Provider discovery must advertise Compose');
@@ -33,4 +35,7 @@ const client=await createHostClient({socket:'/test',fetch:async()=>({status:200,
 assert.deepEqual(Object.keys(client.ui),Object.keys(ui));assert.deepEqual(Object.keys(client.compose),Object.keys(compose));
 await assert.rejects(client.compose.isAvailable(),error=>error.code==='NOT_GRANTED');
 await assert.rejects(client.ui.showLayout({type:'Text',text:'denied'}),error=>error.code==='NOT_GRANTED');
-console.log(JSON.stringify({composeFactories:names.length,composeHostOperations:methods.length,sharedUiFacades:true,workerWindowCleanup:true}));
+const interop=read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt'));
+const viewMethods=[...interop.match(/val methods=setOf\(([^)]+)\)/)[1].matchAll(/"([^"]+)"/g)].map(match=>match[1]);
+for(const method of viewMethods)assert(catalog.bridge.operations.some(op=>op.module==='ui'&&op.method===method&&op.requiredCapabilities.includes('ui')),method);
+console.log(JSON.stringify({composeFactories:names.length+1,composeHostOperations:methods.length,nativeViewOperations:viewMethods.length,sharedUiFacades:true,workerWindowCleanup:true}));

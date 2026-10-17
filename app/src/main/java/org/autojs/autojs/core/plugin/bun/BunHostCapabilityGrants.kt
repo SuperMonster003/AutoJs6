@@ -110,7 +110,12 @@ object BunHostCapabilityGrants {
     }
 
     /** Capability IDs of the runtime bridge (plugin M7, dynamic calls) that are currently granted, in contract order. */
-    fun grantedBridgeCapabilities(context: Context): List<String> = buildList {
+    fun grantedBridgeCapabilities(context: Context): List<String> {
+        if (org.autojs.autojs6.BuildConfig.isInrt) {
+            val config = org.autojs.autojs.project.ProjectConfig.fromAssets(context, "project/project.json")
+            return validatePackagedCapabilities(config?.bunConfig?.hostCapabilities.orEmpty())
+        }
+        return buildList {
         if (isUiLayoutGranted(context)) add(UI_LAYOUT)
         if (isUiComposeGranted(context)) add(UI_COMPOSE)
         if (isUiToastGranted(context)) add(BunRuntimeContract.HOST_CAPABILITY_UI_TOAST)
@@ -126,6 +131,16 @@ object BunHostCapabilityGrants {
         if (isScreenRecordPlaybackGranted(context)) add(SCREEN_RECORD_PLAYBACK)
         if (isScreenMetricsGranted(context)) add(SCREEN_METRICS)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
+        }
+    }
+
+    internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
+        val supported = setOf(UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
+            TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL)
+        require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
+        require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
+        return capabilities.toList()
     }
 
 }

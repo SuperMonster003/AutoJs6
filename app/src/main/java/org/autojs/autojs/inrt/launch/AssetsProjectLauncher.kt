@@ -111,9 +111,6 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             if (source.engineName == JavaScriptSource.ENGINE_NODEJS && activity != null) {
                 NodeJsRuntimePluginHost.activatePackagedRuntimeIfNeeded(activity)
             }
-            check(source.engineName != JavaScriptSource.ENGINE_BUN) {
-                "Packaged apps do not support the external Bun Runtime plugin."
-            }
             check(source.engineName != JavaScriptSource.ENGINE_QUICKJS) {
                 "Packaged apps do not support the external QuickJS Runtime plugin."
             }

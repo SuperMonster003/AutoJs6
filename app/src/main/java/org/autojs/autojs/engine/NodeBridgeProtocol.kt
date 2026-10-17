@@ -791,7 +791,7 @@ object NodeBridgeModules {
     val databaseMethods = setOf("open", "exec", "run", "get", "all", "transaction", "close")
     val notificationsMethods = setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings")
     val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
-    val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents")
+    val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents") + RuntimeUiInterop.methods
     val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings", "info",
@@ -975,7 +975,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
     private val notificationIdCounter = AtomicInteger(1_000_000)
     private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
-    private val composeBridge = lazy { RuntimeComposeBridge(appContext) { value ->
+    private val uiInterop = lazy { RuntimeUiInterop(appContext) }
+    private val composeBridge = lazy { RuntimeComposeBridge(appContext, uiInterop.value) { value ->
         synchronized(imageLock) { requireNotNull(imageArgument(JSONArray().put(value), 0).bitmap.copy(Bitmap.Config.ARGB_8888, false)) }
     } }
     private val uiSessionIds = ConcurrentHashMap.newKeySet<String>()
@@ -1190,7 +1191,8 @@ class AndroidNodeBridgeCapabilityProvider(
                 "database" to databaseHandles.size,
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
-                "ui" to uiSessionIds.size + if (composeBridge.isInitialized()) composeBridge.value.activeCount else 0,
+                "ui" to uiSessionIds.size + (if (composeBridge.isInitialized()) composeBridge.value.activeCount else 0) +
+                    (if (uiInterop.isInitialized()) uiInterop.value.activeCount else 0),
                 NodeBridgeModules.UI_OVERLAY to overlaySessionIds.size,
                 "input_observer" to inputObserverSubscriptions.size,
                 "work_manager" to workManagerTasks.size,
@@ -1203,6 +1205,7 @@ class AndroidNodeBridgeCapabilityProvider(
     override fun destroy(reason: NodeBridgeError) {
         closeAgentHelpers()
         if (composeBridge.isInitialized()) composeBridge.value.close()
+        if (uiInterop.isInitialized()) uiInterop.value.close()
         if (pluginToolsBridge.isInitialized()) pluginToolsBridge.value.destroy()
         accessibilityDiagnostics.clearNodeRefs()
         imageDestroyed.set(true)
@@ -1353,6 +1356,11 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchUi(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args=JSONArray(request.argsJson)
+        if(request.method in RuntimeUiInterop.methods || request.method == "showLayout" && RuntimeUiInterop.isLayout(args.opt(0)) ||
+            uiInterop.isInitialized() && uiInterop.value.ownsWindow(args.optString(0))) {
+            uiInterop.value.dispatch(request,callback);return
+        }
         when (request.method) {
             "showLayout" -> dispatchUiShowLayout(request, callback)
             "close" -> dispatchOwnedUiRequest(request, releaseOnClose = true, callback = callback)

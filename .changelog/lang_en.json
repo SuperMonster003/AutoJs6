@@ -149,7 +149,8 @@
         "Node.js/Bun images supports advanced filters, color conversion, multi-color searches, circles, similarity metrics and URL loading",
         "Node.js/Bun images supports SIFT/ORB extraction and matching with scene coordinates, ObjectFrame geometry and execution-owned Mat/feature handles",
         "Node.js/Bun images supports PNG quantization and compression with quality/memory metrics, binary results and descriptor-backed file output",
-        "Node.js/Bun UI and Compose support native layouts, data components, reactive state and window events, with independent grants and automatic window cleanup"
+        "Node.js/Bun UI and Compose support native layouts, data components, reactive state and window events, with independent grants and automatic window cleanup",
+        "Node.js/Bun support execution-owned View handles, asynchronous AndroidView factories and XML Compose container attachments, with Worker cleanup and packaged application support"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",

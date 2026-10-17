@@ -157,7 +157,7 @@ documentation tooltip. These are physical-device results only when run on an
 identified physical serial; desktop jsdom checks are complementary.
 
 The runtime bridge check also runs `check-ui-compose.mjs`. It compares the 54
-portable Compose factories with the canonical component declarations, the 11
+portable Compose factories plus AndroidView, the 12
 host operations with the development catalog/provider discovery, Node/Bun facade
 bytes and Worker window cleanup. Node's `tools/nodejs/api/test-ui-compose.js`
 executes real desktop CJS/ESM Workers and checks state/ref/memo, bindings, late
@@ -165,3 +165,9 @@ creation replies and cancellation. `RuntimeUiComposeDeviceTest` covers native
 interaction, dialogs, Snackbar, floating geometry, grants, Worker cleanup and
 Activity recreation in the real runtime processes. Full evidence and the native
 interop boundaries are in `docs/dev/runtime-ui-compose-2026-10-18.md`.
+The subsequent `RuntimeUiInteropDeviceTest` checks XML attachments, native Views,
+factory retention, execution ownership, detached-container cleanup and rotation.
+`RuntimeInteropPackagedDeviceTest` builds actual Node/Bun project APKs, verifies
+their binary Manifest permissions and exercises the installed outputs. The seven
+native View operations are checked against the permission catalog as well.
+See `docs/dev/runtime-ui-interop-2026-10-18.md` for this batch's evidence.

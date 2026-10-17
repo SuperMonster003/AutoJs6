@@ -13,6 +13,19 @@ class RuntimeUiComposeContractsTest {
             assertEquals(listOf("ui"), NodeBridgePermissionManifest.requiredCapabilitiesFor("compose", method))
         }
         assertFalse(NodeBridgeModules.supports("compose", "AndroidView"))
-        assertFalse(NodeBridgeModules.supports("compose", "attach"))
+        assertTrue(NodeBridgeModules.supports("compose", "attach"))
+        for (method in RuntimeUiInterop.methods) {
+            assertTrue(NodeBridgeModules.supports("ui", method))
+            assertEquals(listOf("ui"), NodeBridgePermissionManifest.requiredCapabilitiesFor("ui", method))
+        }
+    }
+
+    @Test fun packagedBunCapabilitiesAreExplicitAndValidated() {
+        val grants = org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
+        assertEquals(emptyList<String>(), grants.validatePackagedCapabilities(emptyList()))
+        assertEquals(listOf("ui.layout", "ui.compose"), grants.validatePackagedCapabilities(listOf("ui.layout", "ui.compose")))
+        for (bad in listOf(listOf("ui.layout", "ui.layout"), listOf("all"))) {
+            assertThrows(IllegalArgumentException::class.java) { grants.validatePackagedCapabilities(bad) }
+        }
     }
 }

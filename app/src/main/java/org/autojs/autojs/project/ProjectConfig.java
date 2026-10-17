@@ -180,6 +180,10 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     @SerializedName("node")
     private NodeConfig mNodeConfig;
 
+    @Nullable
+    @SerializedName("bun")
+    private BunConfig mBunConfig;
+
     /** Optional Agent registration; execution validates its strict schema separately. */
     @Nullable
     @SerializedName("agent")
@@ -970,6 +974,14 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         return this;
     }
 
+    @Nullable
+    public BunConfig getBunConfig() { return mBunConfig; }
+
+    public ProjectConfig setBunConfig(@Nullable BunConfig bunConfig) {
+        mBunConfig = bunConfig;
+        return this;
+    }
+
     public String getSignatureScheme() {
         return mSignatureScheme;
     }
@@ -987,6 +999,20 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     public ProjectConfig setKeyStore(@Nullable KeyStore keyStore) {
         mKeyStore = keyStore;
         return this;
+    }
+
+    public static class BunConfig {
+        @SerializedName("hostCapabilities")
+        private List<String> mHostCapabilities = new ArrayList<>();
+
+        public List<String> getHostCapabilities() {
+            return mHostCapabilities == null ? Collections.emptyList() : mHostCapabilities;
+        }
+
+        public BunConfig setHostCapabilities(List<String> capabilities) {
+            mHostCapabilities = capabilities;
+            return this;
+        }
     }
 
     public static class NodeConfig {
