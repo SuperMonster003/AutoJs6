@@ -2703,6 +2703,8 @@
     <string name="text_run_simplified">Запуст</string>
     <string name="text_run_with_autojs4">Запустить в AutoJs4</string>
     <string name="text_running_task">Выполняемая задача</string>
+    <string name="text_runtime_web_media_capturing">Веб-страница захватывает медиа</string>
+    <string name="text_runtime_web_media_channel">Захват медиа веб-страницы</string>
     <string name="text_same_as_current_file">Совпадает с текущим файлом</string>
     <string name="text_same_as_state">Как %1$s</string>
     <string name="text_sample">Образцы</string>

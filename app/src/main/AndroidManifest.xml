@@ -238,6 +238,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
@@ -706,6 +707,11 @@
             android:name="org.autojs.autojs.engine.NodeAudioRecordingService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+
+        <service
+            android:name="org.autojs.autojs.engine.RuntimeWebMediaService"
+            android:exported="false"
+            android:foregroundServiceType="camera|microphone" />
 
         <activity
             android:name="org.autojs.autojs.engine.RuntimeComposeActivity"

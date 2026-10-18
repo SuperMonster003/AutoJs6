@@ -229,7 +229,7 @@ internal class RuntimeWebMediaControls(private val harness:CaptureWorkerBridgeDe
         await("Media action $text"){if(future?.isDone==true)fail(future.get().toString());var node=labelled(text)?:return@await false;while(!node.isClickable&&node.parent!=null)node=node.parent;node.performAction(AccessibilityNodeInfo.ACTION_CLICK)}
     }
     fun permission(allow:Boolean):Boolean {
-        if(find{val text=it.text?.toString().orEmpty();listOf("AutoJs6","Interop","Web media","Web streams","Camera","相机","相機").any(text::contains)}==null)return false
+        if(find{val text=it.text?.toString().orEmpty();listOf("AutoJs6","Interop","Web media","Web streams","Web display","Camera","相机","相機").any(text::contains)}==null)return false
         val node=find{val id=it.viewIdResourceName.orEmpty();val text=it.text?.toString();if(allow)id.endsWith(":id/permission_allow_foreground_only_button")||text in listOf("仅在使用中允许","While using the app","WHILE USING THE APP","Allow only while using the app") else id.endsWith(":id/permission_deny_button")||id.endsWith(":id/permission_deny_and_dont_ask_again_button")||text in listOf("拒绝","拒绝且不再询问","Don't allow","DENY","Deny","Deny and don't ask again")}?:return false
         var target=node;while(!target.isClickable&&target.parent!=null)target=target.parent
         return target.performAction(AccessibilityNodeInfo.ACTION_CLICK)

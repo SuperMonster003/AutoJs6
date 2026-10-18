@@ -2699,6 +2699,8 @@
     <string name="text_run_simplified">Run</string>
     <string name="text_run_with_autojs4">Run with AutoJs4</string>
     <string name="text_running_task">Running task</string>
+    <string name="text_runtime_web_media_capturing">A web page is capturing media</string>
+    <string name="text_runtime_web_media_channel">Web media capture</string>
     <string name="text_same_as_current_file">Same as the current file</string>
     <string name="text_same_as_state">Same as %1$s</string>
     <string name="text_sample">Samples</string>

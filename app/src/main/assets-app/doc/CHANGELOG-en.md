@@ -160,6 +160,7 @@
 * `Feature` Bun project timeoutMs configuration for interactive camera and file workflows, including packaged applications
 * `Feature` Node.js/Bun: WebView video capture and foreground AAC/M4A audio recording, with media options, configurable chooser deadlines and temporary-file cleanup
 * `Feature` WebView getUserMedia/MediaRecorder streaming audio and video, awaited page Promises, explicit Android media permission requests and Worker lifecycle support
+* `Feature` WebView screen sharing adapter, foreground-service audio capture and native background camera recording in Node.js/Bun, including Node Workers
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules

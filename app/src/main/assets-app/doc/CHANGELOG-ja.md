@@ -160,6 +160,7 @@
 * `新機能` 撮影やファイル操作を待つ Bun プロジェクトとパッケージ化アプリ向けの timeoutMs 実行時間設定
 * `新機能` Node.js/Bun: WebView の動画撮影と前面での AAC/M4A 録音, メディア設定, 選択待ち時間の指定と一時ファイルの削除
 * `新機能` WebView の getUserMedia/MediaRecorder による音声と動画のストリーミング, ページの Promise 待機, Android メディア権限の明示的な要求と Worker のライフサイクル管理
+* `新機能` Node.js/Bun の WebView 画面共有アダプター, フォアグラウンドサービスによる録音とネイティブのバックグラウンド動画録画, Node Worker にも対応
 * `修正` runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題
 * `修正` Android 7.x で runtime.loadDex が DEX キャッシュを破損させ, クラス読込に失敗する場合がある問題
 * `修正` Rhino エンジンと組み込みモジュールのスコープ, 引数変換と戻り値処理の非互換により一部スクリプトの動作が異常になる問題

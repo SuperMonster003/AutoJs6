@@ -2700,6 +2700,8 @@
     <string name="text_run_simplified">執行</string>
     <string name="text_run_with_autojs4">使用 AutoJs4 執行</string>
     <string name="text_running_task">執行中任務</string>
+    <string name="text_runtime_web_media_capturing">網頁正在擷取媒體</string>
+    <string name="text_runtime_web_media_channel">網頁媒體擷取</string>
     <string name="text_same_as_current_file">與目前檔案一致</string>
     <string name="text_same_as_state">與 %1$s 相同</string>
     <string name="text_sample">示例程式碼</string>

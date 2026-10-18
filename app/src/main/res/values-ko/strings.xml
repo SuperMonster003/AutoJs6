@@ -2705,6 +2705,8 @@
     <string name="text_run_simplified">운영</string>
     <string name="text_run_with_autojs4">AutoJs4로 실행</string>
     <string name="text_running_task">실행 작업</string>
+    <string name="text_runtime_web_media_capturing">웹 페이지에서 미디어를 캡처하고 있습니다</string>
+    <string name="text_runtime_web_media_channel">웹 미디어 캡처</string>
     <string name="text_same_as_current_file">현재 파일과 동일</string>
     <string name="text_same_as_state">%1$s과(와) 동일</string>
     <string name="text_sample">샘플</string>

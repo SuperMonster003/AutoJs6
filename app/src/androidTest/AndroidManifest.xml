@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <activity android:name="org.autojs.autojs.engine.RuntimeWebBackgroundFixtureActivity"
+            android:exported="true" android:process=":web_background_fixture"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
         <provider
             android:name="org.autojs.autojs.engine.RuntimeWebDocumentsProvider"
             android:authorities="${applicationId}.web.documents"

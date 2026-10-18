@@ -2705,6 +2705,8 @@
     <string name="text_run_simplified">يجري</string>
     <string name="text_run_with_autojs4">تشغيل باستخدام AutoJs4</string>
     <string name="text_running_task">تشغيل المهمة</string>
+    <string name="text_runtime_web_media_capturing">صفحة ويب تلتقط الوسائط</string>
+    <string name="text_runtime_web_media_channel">التقاط وسائط الويب</string>
     <string name="text_same_as_current_file">مطابق للملف الحالي</string>
     <string name="text_same_as_state">مثل %1$s</string>
     <string name="text_sample">عينات</string>

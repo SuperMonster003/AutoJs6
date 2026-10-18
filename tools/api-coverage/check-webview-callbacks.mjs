@@ -26,7 +26,7 @@ for(const [field,nativeField] of [['webViewClientCallbacks','clientNames'],['web
 }
 const createUi=new Function(source+';return __autojs6_create_ui;')();
 const view=createUi(()=>{throw Error('Unexpected RPC');}).view({__autojs6ViewHandle:'test'});
-const methods=['setWebViewClient','setWebChromeClient','setDownloadListener','chooseFiles','cancelFileChooser','exitFullscreen','download','getDownload','cancelDownload','readDownload','readDocument','evaluateJavascriptAsync'];
+const methods=['setWebViewClient','setWebChromeClient','setDownloadListener','chooseFiles','cancelFileChooser','exitFullscreen','download','getDownload','cancelDownload','readDownload','readDocument','evaluateJavascriptAsync','enableDisplayCapture','disableDisplayCapture','stopMediaCapture','startBackgroundRecording','stopBackgroundRecording','getBackgroundRecording','cancelBackgroundRecording'];
 for(const name of methods){assert.equal(typeof view[name],'function');assert(docs.includes(name+'('),name+' lacks runtime documentation');for(const types of [nodeTypes,bunTypes])assert(types.includes(name+'('),name);}
 assert(!Object.keys(view).includes('setWebViewClient'));
 const {createWebFixture,exercise}=require(path.join(root,'AutoJs6-Plugin-NodeJs-Runtime/tools/nodejs/api/test-webview.js'));
@@ -48,4 +48,5 @@ for(const mode of ['open','multiple','directory','save']) {
   assert(nodeTypes.includes("'"+mode+"'"));assert(bunTypes.includes("'"+mode+"'"));assert(docs.includes(mode));
 }
 await import('./test-web-download-stream.mjs');
+await import('./test-web-display-stream.mjs');
 console.log(JSON.stringify({webCallbacks:callbacks,publicWebMethods:methods.length,nativeClientNamesMatch:true,callbackResultsAndTaskCancellation:true,nodeAndBun:true}));

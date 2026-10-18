@@ -252,27 +252,46 @@ class RecordingAudioDeviceTest {
         }finally{runCatching{decoder?.stop()};decoder?.release();extractor.release()}
     }
 
-    internal class Tone(context:Context,allowed:Boolean):AutoCloseable {
+    internal class Tone(context:Context,allowed:Boolean,quiet:Boolean=false):AutoCloseable {
         @Volatile var enabled=false
+        @Volatile private var pulseDeadline=Long.MAX_VALUE
+        @Volatile private var pulseFrames=0L
         @Volatile private var writtenEnabled=false
         @Volatile private var transitionFrame=-1L
         @Volatile private var running=true
         private val manager=context.getSystemService(AudioManager::class.java)
         private val previous=manager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        private val maximum=manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        private val volume=if(quiet)maxOf(1,(maximum+14)/15) else maxOf(1,maximum/3)
         private val track=AudioTrack.Builder().setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).setAllowedCapturePolicy(if(allowed)AudioAttributes.ALLOW_CAPTURE_BY_ALL else AudioAttributes.ALLOW_CAPTURE_BY_NONE).build())
             .setAudioFormat(AudioFormat.Builder().setSampleRate(48000).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).setEncoding(AudioFormat.ENCODING_PCM_16BIT).build())
             .setTransferMode(AudioTrack.MODE_STREAM).setBufferSizeInBytes(3840).build()
         private val worker:Thread
         init {
-            manager.setStreamVolume(AudioManager.STREAM_MUSIC,maxOf(1,manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)/3),0)
+            manager.setStreamVolume(AudioManager.STREAM_MUSIC,volume,0)
             track.play()
             worker=Thread({val samples=ShortArray(480);var position=0L
-                while(running){val audible=enabled
+                while(running){if(SystemClock.elapsedRealtime()>=pulseDeadline)enabled=false
+                    val audible=enabled
                     if(audible!=writtenEnabled){transitionFrame=position;writtenEnabled=audible}
                     for(i in samples.indices)samples[i]=(if(audible)sin(2*PI*660*(position+i)/48000)*12000 else 0.0).toInt().toShort()
-                    if(track.write(samples,0,samples.size,AudioTrack.WRITE_BLOCKING)<0)break;position+=samples.size}
+                    if(track.write(samples,0,samples.size,AudioTrack.WRITE_BLOCKING)<0)break
+                    if(audible)pulseFrames+=samples.size
+                    position+=samples.size}
             },"RecordingAudio-test-tone").apply{start()}
+        }
+        /** A bounded acoustic proof; stops even if the surrounding test fails while waiting. */
+        fun pulse(durationMs:Long=700) {
+            require(durationMs in 1..1000)
+            pulseFrames=0
+            pulseDeadline=SystemClock.elapsedRealtime()+durationMs
+            enabled=true
+        }
+        fun pulseProof():JSONObject {
+            check(!enabled){"Fixture pulse still playing"}
+            return JSONObject().put("frequencyHz",660).put("volumeIndex",manager.getStreamVolume(AudioManager.STREAM_MUSIC))
+                .put("maxVolumeIndex",maximum).put("emittedMs",pulseFrames/48.0)
         }
         fun awaitPresentation(value:Boolean):Long {
             val timestamp=AudioTimestamp();val deadline=System.nanoTime()+2_000_000_000L
@@ -285,7 +304,11 @@ class RecordingAudioDeviceTest {
             }
             throw AssertionError("No AudioTrack presentation timestamp for the fixture pulse")
         }
-        override fun close(){running=false;track.pause();track.flush();worker.join(1500);track.stop();track.release();manager.setStreamVolume(AudioManager.STREAM_MUSIC,previous,0)}
+        override fun close(){
+            running=false
+            try{track.pause();track.flush();worker.join(1500);track.stop()}
+            finally{try{track.release()}finally{manager.setStreamVolume(AudioManager.STREAM_MUSIC,previous,0)}}
+        }
     }
 }
 

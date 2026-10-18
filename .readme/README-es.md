@@ -344,6 +344,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Configuración timeoutMs de proyectos Bun para fotos y archivos interactivos, incluidas las aplicaciones empaquetadas
 * `Nuevo` Node.js/Bun: Captura de vídeo WebView y audio AAC/M4A en primer plano, con opciones multimedia, plazos configurables y limpieza de archivos temporales
 * `Nuevo` Audio y video en directo con WebView getUserMedia/MediaRecorder, espera de Promise de pagina, solicitudes explicitas de permisos multimedia Android y ciclo de vida de Worker
+* `Nuevo` Adaptador para compartir pantalla WebView, captura de audio mediante servicio en primer plano y grabacion de camara nativa en segundo plano para Node.js/Bun y Node Worker
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados

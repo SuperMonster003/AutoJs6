@@ -43,6 +43,11 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
     private val permissionRequests = HashMap<PermissionRequest, String>()
     private val mediaPermissions = HashMap<PermissionRequest, java.io.Closeable>()
     private var mediaGranted = false
+    private val backgroundMedia = LinkedHashMap<String, java.io.Closeable>()
+    private var displayCapture: RuntimeWebDisplayCapture? = null
+    private var cameraRecording: RuntimeWebCameraRecording? = null
+    private var cameraStart: java.io.Closeable? = null
+    private var cameraStartId: String? = null
     private val historyRequests = ArrayList<ValueCallback<Array<String>>>()
     private var uiEpoch = 0
     var resolveView: ((JSONObject) -> RuntimeWebView)? = null
@@ -160,6 +165,8 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
     val client = object : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
             mediaGranted = false
+            displayCapture?.close(); displayCapture = null
+            backgroundMedia.values.toList().forEach { it.close() }; backgroundMedia.clear()
             downloads.cancelPageJobs()
             asyncEvaluations.toList().forEach { tasks.remove(it)?.invoke() }; asyncEvaluations.clear()
             pending.filterValues { it.name == "onPermissionRequest" }.keys.toList().forEach(::cancel)
@@ -278,12 +285,12 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
                     require(response is JSONArray); val resources = (0 until response.length()).map(response::getString).distinct()
                     require(resources.all { it in permission.resources }) { "Cannot grant an unrequested web resource" }
                     if (value is JSONObject && value.optBoolean("requestAndroidPermissions")) {
-                        requestMediaPermissions(permission, resources)
+                        requestMediaPermissions(permission, resources, value.optBoolean("backgroundCapture"))
                         return@request
                     }
                     require(PermissionRequest.RESOURCE_AUDIO_CAPTURE !in resources || permitted(Manifest.permission.RECORD_AUDIO)) { "Android microphone permission is required" }
                     require(PermissionRequest.RESOURCE_VIDEO_CAPTURE !in resources || permitted(Manifest.permission.CAMERA)) { "Android camera permission is required" }
-                    if (resources.isEmpty()) permission.deny() else grantMedia(permission, resources)
+                    if (resources.isEmpty()) permission.deny() else grantMedia(permission, resources, value is JSONObject && value.optBoolean("backgroundCapture"))
                 }
             }
             if (id == null) permission.deny() else permissionRequests[permission] = id
@@ -411,6 +418,42 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
                 true
             }
             "exitFullscreen" -> { val active = fullscreen != null; fullscreen?.close(); fullscreen = null; active }
+            "stopMediaCapture" -> { cancelUi(); web.loadUrl("about:blank"); true }
+            "startBackgroundRecording" -> startBackgroundRecording(args.optJSONObject(0) ?: JSONObject())
+            "getBackgroundRecording" -> cameraRecording?.status() ?: JSONObject().put("state", if (cameraStart != null) "starting" else "idle")
+            "cancelBackgroundRecording" -> {
+                val id = if (args.isNull(0)) null else args.getString(0)
+                val cancelStart = cameraStart != null && (id == null || id == cameraStartId)
+                val recorder = cameraRecording?.takeIf { id == null || it.id == id }
+                val active = cancelStart || recorder?.status()?.optString("state") in listOf("starting", "recording")
+                if (!active) false
+                else {
+                    if (cancelStart) cameraStart?.close()
+                    if (recorder != null) { recorder.cancel { complete(Result.success(active)) }; return }
+                    active
+                }
+            }
+            "stopBackgroundRecording" -> {
+                val recorder = requireNotNull(cameraRecording) { "No camera recording" }
+                val task = UUID.randomUUID().toString()
+                tasks[task] = { recorder.close() }
+                recorder.stop { result -> tasks.remove(task); webResult(task, result) }
+                JSONObject().put("taskId", task)
+            }
+            "enableDisplayCapture" -> {
+                displayCapture?.close()
+                val next = RuntimeWebDisplayCapture(web); displayCapture = next
+                try { next.install(args.getJSONObject(0)) { result ->
+                    if (result.isFailure && displayCapture === next) displayCapture = null
+                    complete(result)
+                } } catch (error: Throwable) { next.close(); if (displayCapture === next) displayCapture = null; throw error }
+                return
+            }
+            "disableDisplayCapture" -> {
+                val current = displayCapture
+                if (current == null || !args.isNull(0) && args.getString(0) != current.id) false
+                else { displayCapture = null; current.close(); true }
+            }
             "download" -> downloads.start(args.getJSONObject(0))
             "getDownload" -> downloads.get(downloadId(args.get(0)))
             "cancelDownload" -> downloads.remove(downloadId(args.get(0)))
@@ -424,14 +467,61 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
         complete(Result.success(value))
     }
     fun cancelUi() {
+        cameraStart?.close(); cameraRecording?.close()
+        displayCapture?.close(); displayCapture = null
         downloads.cancelPageJobs()
         uiEpoch++
         tasks.values.toList().forEach { it() }; tasks.clear()
         asyncEvaluations.clear()
         pending.keys.toList().forEach(::cancel); permissionRequests.clear()
         mediaPermissions.values.toList().forEach { it.close() }; mediaPermissions.clear()
+        backgroundMedia.values.toList().forEach { it.close() }; backgroundMedia.clear()
         htmlChooser?.invoke(); htmlChooser = null
         actions.values.toList().forEach { it.close() }; actions.clear(); pickerActions.clear(); fullscreen?.close(); fullscreen = null
+    }
+
+    private fun webResult(task: String, result: Result<Any?>) {
+        result.fold({ signal("webTaskResult", JSONObject().put("taskId", task).put("value", it ?: JSONObject.NULL)) },
+            { signal("webTaskResult", JSONObject().put("taskId", task).put("error", it.message ?: "Recording failed")) })
+    }
+    private fun startBackgroundRecording(options: JSONObject): JSONObject {
+        check(web.isShown && web.hasWindowFocus()) { "Start background recording while the WebView is visible" }
+        check(cameraStart == null && cameraRecording?.status()?.optString("state") !in listOf("starting", "recording")) { "Camera recording is already active" }
+        val permissions = listOf(Manifest.permission.CAMERA) + if (options.optBoolean("audio")) listOf(Manifest.permission.RECORD_AUDIO) else emptyList()
+        val declared = web.context.packageManager.getPackageInfo(web.context.packageName, PackageManager.GET_PERMISSIONS).requestedPermissions.orEmpty()
+        require(permissions.all { it in declared }) { "Background recording permissions must be declared in the application manifest" }
+        val timeoutMs = options.opt("timeoutMs")?.let { RuntimeViewAttributes.integer(it, 100, 120000).toLong() } ?: 120000
+        val task = UUID.randomUUID().toString(); var finished = false
+        var action: java.io.Closeable? = null
+        lateinit var timeout: Runnable
+        fun complete(result: Result<JSONObject>) {
+            if (finished) return
+            finished = true; main.removeCallbacks(timeout); cameraStart = null; cameraStartId = null; tasks.remove(task)
+            action?.close(); webResult(task, result)
+        }
+        val cancel = java.io.Closeable { complete(Result.failure(IllegalStateException("Camera recording start cancelled"))); cameraRecording?.close() }
+        cameraStart = cancel; cameraStartId = task; tasks[task] = { cancel.close() }
+        timeout = Runnable { cancel.close() }; main.postDelayed(timeout, timeoutMs)
+        fun start() {
+            if (finished || web.disposed) return
+            try {
+                val next = RuntimeWebCameraRecording(web.context, options, (web.display?.rotation ?: 0) * 90, task) { result ->
+                    result.onSuccess { value ->
+                        val uri = Uri.parse(value.getString("uri"))
+                        if (web.disposed) RuntimeWebFileAccess.discardUnusedCapture(uri) else selected(listOf(uri))
+                    }
+                    result.fold({ signal("backgroundRecordingStopped", it) }, { signal("backgroundRecordingError", JSONObject().put("id", task).put("message", it.message)) })
+                }
+                cameraRecording = next; next.start(::complete)
+            } catch (error: Throwable) { complete(Result.failure(error)) }
+        }
+        if (permissions.all(::permitted)) start() else {
+            action = RuntimeWebActionActivity.mediaPermissions(web.context, web.url.orEmpty(), permissions.filterNot(::permitted).toTypedArray()) { allow ->
+                if (allow) start() else complete(Result.failure(SecurityException("Camera or microphone permission denied")))
+            }
+            if (finished) action?.close()
+        }
+        return JSONObject().put("taskId", task).put("recordingId", task)
     }
 
     fun closePresentation() {
@@ -440,19 +530,43 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
         if (mediaGranted && !web.disposed) { mediaGranted = false; web.loadUrl("about:blank") }
     }
 
-    private fun grantMedia(permission: PermissionRequest, resources: List<String>) {
+    private fun grantMedia(permission: PermissionRequest, resources: List<String>, background: Boolean = false) {
+        if (background) {
+            require(resources.any { it == PermissionRequest.RESOURCE_VIDEO_CAPTURE || it == PermissionRequest.RESOURCE_AUDIO_CAPTURE }) { "Background capture needs camera or microphone" }
+            val id = UUID.randomUUID().toString(); var done = false; var accepted = false
+            var lease: java.io.Closeable? = null
+            val timeout = Runnable { mediaPermissions.remove(permission)?.close() }
+            val cancel = java.io.Closeable {
+                if (!done) { done = true; permission.deny() }
+                main.removeCallbacks(timeout); mediaPermissions.remove(permission)
+                backgroundMedia.remove(id); lease?.close()
+            }
+            mediaPermissions[permission] = cancel; main.postDelayed(timeout, 10000)
+            val started = RuntimeWebMediaService.acquire(web.context, PermissionRequest.RESOURCE_VIDEO_CAPTURE in resources,
+                PermissionRequest.RESOURCE_AUDIO_CAPTURE in resources, { result ->
+                    if (!done) {
+                        if (result.isSuccess && !web.disposed) {
+                            done = true; accepted = true; main.removeCallbacks(timeout); mediaPermissions.remove(permission)
+                            grantMedia(permission, resources)
+                        } else { cancel.close(); signal("webCallbackError", JSONObject().put("callback", "onPermissionRequest").put("message", result.exceptionOrNull()?.message ?: "WebView is disposed")) }
+                    }
+                }, { cancel.close(); if (!web.disposed) web.loadUrl("about:blank") })
+            lease = started
+            if (done && !accepted) started.close() else backgroundMedia[id] = started
+            return
+        }
         permission.grant(resources.toTypedArray())
         if (resources.any { it == PermissionRequest.RESOURCE_AUDIO_CAPTURE || it == PermissionRequest.RESOURCE_VIDEO_CAPTURE }) mediaGranted = true
     }
 
-    private fun requestMediaPermissions(permission: PermissionRequest, resources: List<String>) {
+    private fun requestMediaPermissions(permission: PermissionRequest, resources: List<String>, background: Boolean) {
         if (resources.isEmpty()) { permission.deny(); return }
         val android = resources.mapNotNull { when (it) {
             PermissionRequest.RESOURCE_AUDIO_CAPTURE -> Manifest.permission.RECORD_AUDIO
             PermissionRequest.RESOURCE_VIDEO_CAPTURE -> Manifest.permission.CAMERA
             else -> null
         } }.filterNot(::permitted).toTypedArray()
-        if (android.isEmpty()) { grantMedia(permission, resources); return }
+        if (android.isEmpty()) { grantMedia(permission, resources, background); return }
         val declared = web.context.packageManager.getPackageInfo(web.context.packageName, PackageManager.GET_PERMISSIONS).requestedPermissions.orEmpty()
         if (!web.isAttachedToWindow || android.any { it !in declared }) { permission.deny(); return }
         var done = false
@@ -461,7 +575,7 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
         fun finish(allow: Boolean) {
             if (done) return
             done = true; main.removeCallbacks(timeout); mediaPermissions.remove(permission)
-            if (allow && !web.disposed && android.all(::permitted)) grantMedia(permission, resources) else permission.deny()
+            if (allow && !web.disposed && android.all(::permitted)) grantMedia(permission, resources, background) else permission.deny()
         }
         val cancel = java.io.Closeable { finish(false); action?.close() }
         timeout = Runnable { cancel.close() }
@@ -490,6 +604,6 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
         val chromeNames = setOf("onProgressChanged", "onReceivedTitle", "onReceivedIcon", "onReceivedTouchIconUrl", "onConsoleMessage",
             "onJsAlert", "onJsConfirm", "onJsPrompt", "onJsBeforeUnload", "onPermissionRequest", "onPermissionRequestCanceled",
             "onGeolocationPermissionsShowPrompt", "onGeolocationPermissionsHidePrompt", "onShowFileChooser", "onCreateWindow", "onCloseWindow", "onRequestFocus", "onShowCustomView", "onHideCustomView", "getVisitedHistory")
-        val methods = setOf("configureWebClient", "clearWebClient", "replyWebRequest", "beginWebEvaluation", "beginAsyncWebEvaluation", "cancelWebTask", "chooseFiles", "cancelFileChooser", "exitFullscreen", "download", "getDownload", "cancelDownload", "readDownload", "readDocument")
+        val methods = setOf("configureWebClient", "clearWebClient", "replyWebRequest", "beginWebEvaluation", "beginAsyncWebEvaluation", "cancelWebTask", "chooseFiles", "cancelFileChooser", "exitFullscreen", "stopMediaCapture", "enableDisplayCapture", "disableDisplayCapture", "startBackgroundRecording", "getBackgroundRecording", "stopBackgroundRecording", "cancelBackgroundRecording", "download", "getDownload", "cancelDownload", "readDownload", "readDocument")
     }
 }

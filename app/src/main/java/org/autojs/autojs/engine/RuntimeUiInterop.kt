@@ -60,7 +60,19 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
         private val main = Handler(Looper.getMainLooper())
         private var pending: Pair<NodeBridgeRequest, (NodeBridgeResponse) -> Unit>? = null
         private var timeout: Runnable? = null
+        private val subscribers = LinkedHashMap<String, EventQueue>()
+        private var legacyReader = false
+        fun subscribe(id: String) {
+            require(id.isNotEmpty())
+            if (id !in subscribers) {
+                subscribers[id] = EventQueue(ArrayDeque(events.map { JSONObject(it.toString()) }))
+                if (!legacyReader) events.clear()
+            }
+        }
+        fun unsubscribe(id: String) { subscribers.remove(id)?.wake() }
         fun emit(value: JSONObject) {
+            subscribers.values.toList().forEach { it.emit(value) }
+            if (subscribers.isNotEmpty() && !legacyReader) return
             // Notifications may be dropped under pressure, but replies and cancellation must remain deliverable.
             fun required(event: JSONObject): Boolean {
                 val type = event.optString("type")
@@ -72,14 +84,19 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
             }
             events.add(JSONObject(value.toString())); reply()
         }
-        fun read(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        fun read(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit, subscriber: String? = null) {
+            if (subscriber != null) {
+                requireNotNull(subscribers[subscriber]) { "View event subscription is closed" }.read(request, callback)
+                return
+            }
+            legacyReader = true
             check(pending == null) { "Only one reader may drain this UI event queue" }
             pending = request to callback
             if (events.isNotEmpty()) reply() else {
                 timeout = Runnable { reply() }.also { main.postDelayed(it, 1000) }
             }
         }
-        fun wake() { reply() }
+        fun wake() { reply(); subscribers.values.toList().forEach { it.wake() } }
         private fun reply() {
             val call = pending ?: return
             pending = null; timeout?.let(main::removeCallbacks); timeout = null
@@ -150,6 +167,11 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
                     "viewUpdate" -> { val view = resolve(args.getJSONObject(0)); update(view, args.getJSONObject(1)); snapshot(view.view) }
                     "viewCommand" -> {
                         val view = resolve(args.getJSONObject(0))
+                        if (args.getString(1) in listOf("subscribeViewEvents", "releaseViewEvents")) {
+                            val subscriber = args.getJSONArray(2).getString(0)
+                            if (args.getString(1) == "subscribeViewEvents") view.queue.subscribe(subscriber) else view.queue.unsubscribe(subscriber)
+                            callback(NodeBridgeResponse.success(request.id, "true")); return@post
+                        }
                         RuntimeViewComponents.command(view.view, args.getString(1), args.getJSONArray(2)) { result ->
                             if (args.getString(1) == "clearWebClient" && result.getOrNull() == true) view.queue.wake()
                             result.fold({ value -> callback(NodeBridgeResponse.success(request.id, if (value is String) JSONObject.quote(value) else (value ?: JSONObject.NULL).toString())) },
@@ -157,7 +179,7 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
                         }
                         return@post
                     }
-                    "viewEvents" -> { resolve(args.getJSONObject(0)).queue.read(request, callback); return@post }
+                    "viewEvents" -> { resolve(args.getJSONObject(0)).queue.read(request, callback, if (args.isNull(1)) null else args.getString(1)); return@post }
                     "disposeView" -> { dispose(resolve(args.getJSONObject(0))); JSONObject.NULL }
                     else -> {
                         val window = windows[args.getString(0)] ?: error("Window is closed or belongs to another execution")

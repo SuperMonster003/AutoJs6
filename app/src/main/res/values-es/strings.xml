@@ -2703,6 +2703,8 @@
     <string name="text_run_simplified">Ejec</string>
     <string name="text_run_with_autojs4">Ejecutar con AutoJs4</string>
     <string name="text_running_task">Ejecutar tarea</string>
+    <string name="text_runtime_web_media_capturing">Una pagina web esta capturando medios</string>
+    <string name="text_runtime_web_media_channel">Captura multimedia web</string>
     <string name="text_same_as_current_file">Igual que el archivo actual</string>
     <string name="text_same_as_state">Igual que %1$s</string>
     <string name="text_sample">Muestras</string>

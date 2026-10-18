@@ -2704,6 +2704,8 @@
     <string name="text_run_simplified">実行</string>
     <string name="text_run_with_autojs4">AutoJs4 で実行</string>
     <string name="text_running_task">タスクの実行</string>
+    <string name="text_runtime_web_media_capturing">ウェブページがメディアをキャプチャしています</string>
+    <string name="text_runtime_web_media_channel">ウェブメディアキャプチャ</string>
     <string name="text_same_as_current_file">現在のファイルと同一</string>
     <string name="text_same_as_state">%1$s と同じ</string>
     <string name="text_sample">サンプル</string>
