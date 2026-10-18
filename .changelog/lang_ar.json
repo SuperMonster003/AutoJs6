@@ -152,7 +152,8 @@
         "يدعم Node.js/Bun UI و Compose التخطيطات الأصلية ومكونات البيانات والحالة التفاعلية وأحداث النوافذ مع أذونات مستقلة وإغلاق تلقائي للنوافذ",
         "يدعم Node.js/Bun مقابض View الخاصة بالتنفيذ ومصانع AndroidView غير المتزامنة وحاويات XML Compose مع تنظيف Worker والتطبيقات المعبأة",
         "يدعم Node.js/Bun نماذج وتخطيطات XML الشائعة وخصائص View غير المتزامنة مع الإسناد المرتب والتعافي من الأخطاء و Worker",
-        "Node.js/Bun: تحميل صفحات WebView ونتائج JavaScript ولوحات Drawer والتنقل وقوائم Toolbar وصفحات ViewPager والأحداث الأصلية غير المتزامنة"
+        "Node.js/Bun: تحميل صفحات WebView ونتائج JavaScript ولوحات Drawer والتنقل وقوائم Toolbar وصفحات ViewPager والأحداث الأصلية غير المتزامنة",
+        "Node.js/Bun: تنزيلات HTTP(S) في WebView واختيار ملفات النظام واستدعاءات WebViewClient/WebChromeClient غير المتزامنة مع قواعد التنقل والموارد الأصلية"
       ],
       "fix": [
         "تعذر تحميل ملفات class المترجمة بإصدارات Java أحدث ديناميكيا عبر runtime.loadJar",

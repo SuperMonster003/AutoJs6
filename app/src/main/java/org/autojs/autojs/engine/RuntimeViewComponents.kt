@@ -86,6 +86,7 @@ internal object RuntimeViewComponents {
             if (it is RuntimeViewPager) { it.clearOnPageChangeListeners(); it.adapter = null; it.pages.clear() }
         }
     }
+    fun cancelWebUi(view: View) { descendants(view).filterIsInstance<RuntimeWebView>().forEach { it.callbacks.cancelUi() } }
 
     fun side(value: String) = when (value) { "start" -> GravityCompat.START; "end" -> GravityCompat.END; else -> error("Drawer side must be start or end") }
     fun validateDrawer(parent: DrawerLayout, changed: View? = null, gravity: Int = 0) {
@@ -134,6 +135,10 @@ internal object RuntimeViewComponents {
 
     /** Completion can be asynchronous for evaluateJavascript; callers receive its decoded JSON result. */
     fun command(view: View, name: String, args: JSONArray, complete: (Result<Any?>) -> Unit) {
+        if (name in RuntimeWebCallbacks.methods) {
+            require(view is RuntimeWebView) { "$name requires WebView" }
+            view.callbacks.command(name, args, complete); return
+        }
         if (name == "evaluateJavascript") {
             require(view is RuntimeWebView) { "$name requires WebView" }
             view.evaluate(args.getString(0), complete); return
@@ -181,46 +186,29 @@ internal class RuntimeViewPager(context: Context) : ViewPager(context) {
 }
 
 internal class RuntimeWebView(context: Context, private val emit: (String, JSONObject) -> Unit) : WebView(context) {
-    var disposed = false; private set
+    @Volatile var disposed = false; private set
+    val callbacks = RuntimeWebCallbacks(this, emit)
     private val main = Handler(Looper.getMainLooper())
     private val evaluations = LinkedHashMap<Any, (Result<Any?>) -> Unit>()
-    init {
-        webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) { if (!disposed) emit("pageStarted", JSONObject().put("url", url)) }
-            override fun onPageFinished(view: WebView, url: String?) { if (!disposed) emit("pageFinished", JSONObject().put("url", url)) }
-            override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
-                if (!disposed) emit("webError", JSONObject().put("url", request.url.toString()).put("mainFrame", request.isForMainFrame)
-                    .put("errorCode", error.errorCode).put("message", error.description.toString()))
-            }
-            override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
-                if (!disposed) emit("httpError", JSONObject().put("url", request.url.toString()).put("mainFrame", request.isForMainFrame).put("statusCode", response.statusCode))
-            }
-            override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
-                emit("webError", JSONObject().put("message", "WebView renderer exited").put("didCrash", detail.didCrash()))
-                release(); return true
-            }
-        }
-        webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView, newProgress: Int) { if (!disposed) emit("progressChanged", JSONObject().put("progress", newProgress)) }
-            override fun onReceivedTitle(view: WebView, title: String?) { if (!disposed) emit("titleChanged", JSONObject().put("title", title)) }
-        }
-    }
+    init { callbacks.install() }
 
-    fun evaluate(source: String, complete: (Result<Any?>) -> Unit) {
+    fun evaluate(source: String, complete: (Result<Any?>) -> Unit, timeoutMillis: Long = 10000): java.io.Closeable {
         check(!disposed) { "WebView is disposed" }
         require(settings.javaScriptEnabled) { "evaluateJavascript requires javaScriptEnabled" }
         val key = Any()
         val timeout = Runnable { evaluations.remove(key)?.invoke(Result.failure(IllegalStateException("WebView JavaScript result timed out"))) }
         evaluations[key] = { result -> main.removeCallbacks(timeout); complete(result) }
-        main.postDelayed(timeout, 10000)
+        main.postDelayed(timeout, timeoutMillis)
         try {
             evaluateJavascript(source) { json -> evaluations.remove(key)?.invoke(runCatching { JSONTokener(json ?: "null").nextValue() }) }
         } catch (failure: Throwable) { evaluations.remove(key)?.invoke(Result.failure(failure)) }
+        return java.io.Closeable { evaluations.remove(key)?.invoke(Result.failure(IllegalStateException("WebView evaluation cancelled"))) }
     }
 
     fun release() {
         if (disposed) return
         disposed = true
+        callbacks.close()
         evaluations.values.toList().also { evaluations.clear() }.forEach { it(Result.failure(IllegalStateException("WebView is disposed"))) }
         (parent as? ViewGroup)?.removeView(this)
         stopLoading(); webChromeClient = null; webViewClient = WebViewClient(); removeAllViews(); destroy()

@@ -720,6 +720,12 @@
             android:theme="@style/ScriptTheme" />
 
         <activity
+            android:name="org.autojs.autojs.engine.RuntimeWebActionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@style/ScriptTheme.Transparent" />
+
+        <activity
             android:name="org.autojs.autojs.engine.NodeBridgeUiActivity"
             android:excludeFromRecents="true"
             android:exported="false"

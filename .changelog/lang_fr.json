@@ -152,7 +152,8 @@
         "Node.js/Bun UI et Compose prennent en charge les interfaces natives, composants de données, états réactifs et événements, avec autorisations distinctes et fermeture automatique",
         "Node.js/Bun prennent en charge les handles View propres à une exécution, les fabriques AndroidView asynchrones, les conteneurs XML Compose, la fermeture des Workers et les applications empaquetées",
         "Node.js/Bun prennent en charge les formulaires et interfaces XML courants, les propriétés View asynchrones, les affectations ordonnées, la reprise après erreur et les Workers",
-        "Node.js/Bun: Chargement WebView et résultats JavaScript, panneaux Drawer, navigation et menus Toolbar, pages ViewPager et événements natifs asynchrones"
+        "Node.js/Bun: Chargement WebView et résultats JavaScript, panneaux Drawer, navigation et menus Toolbar, pages ViewPager et événements natifs asynchrones",
+        "Node.js/Bun: Téléchargements HTTP(S) WebView, sélection de fichiers système et rappels WebViewClient/WebChromeClient asynchrones avec règles natives de navigation et de ressources"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",

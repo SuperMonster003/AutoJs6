@@ -416,7 +416,7 @@ internal class RuntimeComposeBridge(
             overlay = null
             runCatching { renderer?.dispose() }.onFailure { emit(JSONObject().put("type", "error").put("message", it.message)) }
             renderer = null
-            borrowedViews.forEach { if (it.borrower === this) it.borrower = null }; borrowedViews = emptyList()
+            borrowedViews.forEach { RuntimeViewComponents.cancelWebUi(it.view); if (it.borrower === this) it.borrower = null }; borrowedViews = emptyList()
             mountedView=null;bindings=emptyList()
             images.forEach { it.recycle() }; images.clear(); tree = null; ids = emptyMap(); edits.clear()
             activity?.finish(); activity = null

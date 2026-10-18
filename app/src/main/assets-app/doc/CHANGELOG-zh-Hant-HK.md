@@ -155,6 +155,7 @@
 * `新增` Node.js/Bun 支援執行所屬 View 控制代碼, 非同步 AndroidView 工廠與 XML Compose 容器掛載, 同步支援 Worker 清理及打包應用
 * `新增` Node.js/Bun 支援常用 XML 表單與佈局組件及原生 View 非同步屬性代理, 包含順序賦值, 錯誤恢復與 Worker 呼叫
 * `新增` Node.js/Bun: WebView 頁面載入與 JavaScript 回傳值, Drawer 側欄, Toolbar 導覽與選單, ViewPager 頁面及非同步原生事件
+* `新增` Node.js/Bun: WebView HTTP(S) 下載, 系統檔案選擇及非同步 WebViewClient/WebChromeClient 回調, 支援原生導覽和資源規則
 * `修復` runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題
 * `修復` Android 7.x 調用 runtime.loadDex 方法時可能損壞 DEX 緩存並導致類加載失敗的問題
 * `修復` Rhino 引擎及內置模塊的作用域, 參數轉換與返回值處理不兼容導致部分腳本行為異常的問題

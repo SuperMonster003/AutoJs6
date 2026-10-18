@@ -191,3 +191,13 @@ JavaScript results, navigation history, Drawer/Toolbar events, offscreen page
 lookup, Activity recreation and WebView disposal in all six runtime modes.
 The packaged fixture exercises the same four components before its Compose
 rotation flow. See `docs/dev/runtime-view-components-2026-10-18.md` for results.
+
+
+`check-webview-callbacks.mjs` compares 40 callback names and 10 public methods
+across native handlers, shared clients and Node/Bun declarations. It executes
+both facades against controlled transport, including callback replacement,
+asynchronous evaluation, early file results and download bytes. Desktop Workers
+exercise termination and conditional client cleanup. `RuntimeWebViewDeviceTest`
+uses actual WebViews, DocumentsUI, a standalone document provider, HTTP/TLS and
+DownloadManager; it does not substitute native callback results. Evidence and
+limits are recorded in `docs/dev/runtime-webview-callbacks-2026-10-18.md`.

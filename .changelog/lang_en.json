@@ -152,7 +152,8 @@
         "Node.js/Bun UI and Compose support native layouts, data components, reactive state and window events, with independent grants and automatic window cleanup",
         "Node.js/Bun support execution-owned View handles, asynchronous AndroidView factories and XML Compose container attachments, with Worker cleanup and packaged application support",
         "Node.js/Bun support common XML form and layout widgets and asynchronous native View property access, including ordered assignments, error recovery and Worker use",
-        "Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events"
+        "Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events",
+        "Node.js/Bun: WebView HTTP(S) downloads, system file selection and asynchronous WebViewClient/WebChromeClient callbacks with native navigation and resource rules"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",

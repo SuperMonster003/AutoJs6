@@ -152,7 +152,8 @@
         "Node.js/Bun UI y Compose admiten diseños nativos, componentes de datos, estado reactivo y eventos, con permisos independientes y cierre automático",
         "Node.js/Bun admiten identificadores View de cada ejecución, fábricas AndroidView asíncronas, contenedores XML Compose, limpieza de Workers y aplicaciones empaquetadas",
         "Node.js/Bun admiten formularios y diseños XML comunes, propiedades View asíncronas, asignaciones ordenadas, recuperación de errores y Workers",
-        "Node.js/Bun: Carga WebView y resultados JavaScript, paneles Drawer, navegación y menús Toolbar, páginas ViewPager y eventos nativos asíncronos"
+        "Node.js/Bun: Carga WebView y resultados JavaScript, paneles Drawer, navegación y menús Toolbar, páginas ViewPager y eventos nativos asíncronos",
+        "Node.js/Bun: Descargas HTTP(S) de WebView, selección de archivos del sistema y callbacks asíncronos WebViewClient/WebChromeClient con reglas nativas de navegación y recursos"
       ],
       "fix": [
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",

@@ -61,7 +61,15 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
         private var pending: Pair<NodeBridgeRequest, (NodeBridgeResponse) -> Unit>? = null
         private var timeout: Runnable? = null
         fun emit(value: JSONObject) {
-            if (events.size == 128) events.removeFirst()
+            // Notifications may be dropped under pressure, but replies and cancellation must remain deliverable.
+            fun required(event: JSONObject): Boolean {
+                val type = event.optString("type")
+                return event.has("requestId") || type == "webTaskResult" || type == "close"
+            }
+            if (events.size >= 128) {
+                val notification = events.indexOfFirst { !required(it) }
+                if (notification >= 0) events.removeAt(notification) else if (!required(value)) return
+            }
             events.add(JSONObject(value.toString())); reply()
         }
         fun read(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -71,6 +79,7 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
                 timeout = Runnable { reply() }.also { main.postDelayed(it, 1000) }
             }
         }
+        fun wake() { reply() }
         private fun reply() {
             val call = pending ?: return
             pending = null; timeout?.let(main::removeCallbacks); timeout = null
@@ -142,6 +151,7 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
                     "viewCommand" -> {
                         val view = resolve(args.getJSONObject(0))
                         RuntimeViewComponents.command(view.view, args.getString(1), args.getJSONArray(2)) { result ->
+                            if (args.getString(1) == "clearWebClient" && result.getOrNull() == true) view.queue.wake()
                             result.fold({ value -> callback(NodeBridgeResponse.success(request.id, if (value is String) JSONObject.quote(value) else (value ?: JSONObject.NULL).toString())) },
                                 { failure -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.invalidRequest(failure.message ?: "Native View command failed", "ui", request.method))) })
                         }
@@ -195,7 +205,12 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
 
     private fun record(view: View, root: NativeView?, session: NodeBridgeUiSession? = null): NativeView = byView[view] ?: run {
         check(nextLease > 0) { "View identity space exhausted" }
-        NativeView("view-${UUID.randomUUID()}", nextLease++, view, root, session ?: requireNotNull(root).session).also { records[it.id]=it;byView[view]=it }
+        NativeView("view-${UUID.randomUUID()}", nextLease++, view, root, session ?: requireNotNull(root).session).also {
+            records[it.id]=it;byView[view]=it
+            if (view is RuntimeWebView) view.callbacks.resolveView = { token ->
+                (resolve(token).view as? RuntimeWebView)?.also { target -> check(!target.disposed) } ?: error("A popup requires a WebView handle")
+            }
+        }
     }
     private fun update(record: NativeView, patch: JSONObject) {
         RuntimeViewAttributes.apply(record.view, patch, strict = true, image = image)
@@ -249,6 +264,7 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
         fun close(disposeRoot:Boolean=true) {
             if(closed)return
             closed=true;recreating=false
+            RuntimeViewComponents.cancelWebUi(root.view)
             (root.view.parent as? ViewGroup)?.removeView(root.view)
             root.view.setViewTreeLifecycleOwner(null);root.view.setViewTreeSavedStateRegistryOwner(null);root.view.setTag(androidx.activity.R.id.view_tree_on_back_pressed_dispatcher_owner, null)
             activity?.finish();activity=null;root.window=null

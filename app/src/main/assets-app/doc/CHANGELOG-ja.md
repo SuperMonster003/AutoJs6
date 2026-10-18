@@ -155,6 +155,7 @@
 * `新機能` Node.js/Bun が実行に属する View ハンドル, 非同期 AndroidView ファクトリー, XML Compose コンテナへの接続, Worker 終了時の解放とパッケージ化アプリに対応
 * `新機能` Node.js/Bun が一般的な XML フォームとレイアウト, ネイティブ View の非同期プロパティ操作, 順序付き代入, エラー復旧と Worker 呼び出しに対応
 * `新機能` Node.js/Bun: WebView のページ読み込みと JavaScript 戻り値, Drawer パネル, Toolbar ナビゲーションとメニュー, ViewPager ページと非同期ネイティブイベント
+* `新機能` Node.js/Bun: WebView の HTTP(S) ダウンロード, システムファイル選択, 非同期 WebViewClient/WebChromeClient コールバックとネイティブのナビゲーションおよびリソース規則
 * `修正` runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題
 * `修正` Android 7.x で runtime.loadDex が DEX キャッシュを破損させ, クラス読込に失敗する場合がある問題
 * `修正` Rhino エンジンと組み込みモジュールのスコープ, 引数変換と戻り値処理の非互換により一部スクリプトの動作が異常になる問題

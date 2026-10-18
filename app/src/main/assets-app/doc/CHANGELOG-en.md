@@ -155,6 +155,7 @@
 * `Feature` Node.js/Bun support execution-owned View handles, asynchronous AndroidView factories and XML Compose container attachments, with Worker cleanup and packaged application support
 * `Feature` Node.js/Bun support common XML form and layout widgets and asynchronous native View property access, including ordered assignments, error recovery and Worker use
 * `Feature` Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events
+* `Feature` Node.js/Bun: WebView HTTP(S) downloads, system file selection and asynchronous WebViewClient/WebChromeClient callbacks with native navigation and resource rules
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules

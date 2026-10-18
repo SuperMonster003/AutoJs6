@@ -31,9 +31,9 @@ class RuntimeInteropPackagedDeviceTest {
             val entry=if(kind=="bun")"main.bun.js" else "main.cjs"
             val config=ProjectConfig().setName("Interop $kind").setPackageName(packageName)
                 .setVersionName("1.0.0").setVersionCode(1).setMainScriptFileName(entry).setProjectType(kind)
-                .setSourcePath(root.path).setAbis(listOf("arm64-v8a")).setLibs(emptyList()).setPermissions(emptyList())
+                .setSourcePath(root.path).setAbis(listOf("arm64-v8a")).setLibs(emptyList()).setPermissions(listOf(android.Manifest.permission.INTERNET))
             config.launchConfig.apply{isSplashVisible=false;isLogsVisible=false;isRunOnBoot=false;requiresSharedStorage=false}
-            if(kind=="node")config.setNodeConfig(ProjectConfig.NodeConfig().setPermissions(listOf("ui")))
+            if(kind=="node")config.setNodeConfig(ProjectConfig.NodeConfig().setPermissions(listOf("ui")).setTimeoutMs(120000L))
             else {
                 config.setBunConfig(ProjectConfig.BunConfig().setHostCapabilities(listOf("ui.layout","ui.compose")))
                 val sdk=File(context.getExternalFilesDir(null),"interop-host-client.mjs")
@@ -41,9 +41,29 @@ class RuntimeInteropPackagedDeviceTest {
                 sdk.copyTo(File(root,"host-client.mjs"),overwrite=true)
             }
             val imports=if(kind=="node")"const ui=require('ui'),compose=require('compose');" else "const {createHostClient}=await import('./host-client.mjs');const host=await createHostClient(),ui=host.ui,compose=host.compose;"
-            File(root,entry).writeText("\"$kind\";\n(async()=>{$imports"+"""
+            File(root,entry).writeText("\"$kind\";\n(async()=>{$imports try {"+"""
                 const ctx=await ui.context();
                 if(ctx.packageName!=='$packageName'||ctx.applicationVersionCode!==1||ctx.runtimeVersionCode!==${BuildConfig.VERSION_CODE})throw Error('Wrong packaged identity '+JSON.stringify(ctx));
+                const browserRoot=await ui.inflate('<vertical><input id="fixture" text="Fixture-$kind" singleLine="true"/><webview id="browser" h="300" javaScriptEnabled="true"/></vertical>');
+                const browserWindow=await ui.showLayout(browserRoot),browser=await browserRoot.findView('browser'),address=await browserRoot.findView('fixture');
+                let browserDownload,job,chooser=0,prompts=0,loaded=0;
+                async function browserWait(fn,label){const end=Date.now()+60000;while(!await fn()){if(Date.now()>end)throw Error(label);await new Promise(r=>setTimeout(r,80));}}
+                try {
+                  await browserWait(async()=>String(await address.text).startsWith('http://127.0.0.1:'),'packaged fixture address');const base=await address.text;
+                  await browser.setWebViewClient({onPageFinished(){loaded++;}},{resourceRules:[{url:base+'/virtual.js',response:{mimeType:'application/javascript',body:'window.virtualLoaded=73;'}}]});
+                  await browser.setWebChromeClient({onJsPrompt(){prompts++;return 'packaged-$kind';},onShowFileChooser(e){chooser++;return this.chooseFiles({...e,initialUri:'content://org.autojs.autojs6.test.web.documents/root/fixtures'});}});
+                  await browser.setDownloadListener(e=>browserDownload=e);await browser.loadUrl(base+'/index');
+                  await browserWait(async()=>await browser.evaluateJavascript('document.readyState==="complete"&&!!document.getElementById("pick")')===true,'packaged web page');
+                  if(await browser.evaluateJavascript('window.virtualLoaded')!==73||await browser.evaluateJavascript('prompt("Packaged prompt")')!=='packaged-$kind')throw Error('Packaged WebView callbacks');
+                  await browser.evaluateJavascript('document.getElementById("pick").textContent="Packaged-$kind-pick"');
+                  await browserWait(async()=>await browser.evaluateJavascript('window.uploaded')===true,'packaged file upload');
+                  if((await browser.evaluateJavascript('window.fileTexts'))[0]!==${JSONObject.quote(RuntimeWebDocumentsProvider.content("alpha"))})throw Error('Packaged file bytes');
+                  await browser.evaluateJavascript('document.getElementById("download").textContent="Packaged-$kind-download"');
+                  await browserWait(()=>browserDownload,'packaged download event');
+                  job=await browser.download({url:browserDownload.url,fileName:'autojs6-packaged-web-$kind-'+Date.now()+'.txt'});
+                  await browserWait(async()=>{const state=await browser.getDownload(job.id);if(state.status==='failed')throw Error('Packaged download '+state.reason);return state.status==='successful';},'packaged download completion');
+                  if(new TextDecoder().decode(await browser.readDownload(job.id))!==${JSONObject.quote(RuntimeWebFixtureServer.DOWNLOAD)}||!loaded||chooser!==1||prompts!==1)throw Error('Packaged browser results');
+                } finally {if(job)await browser.cancelDownload(job.id);await browserWindow.close();await browserRoot.dispose();}
                 const components=await ui.inflate('<drawer id="drawer"><vertical><toolbar id="toolbar" title="Packaged components" h="56" navigationIcon="@android:drawable/ic_menu_more" navigationContentDescription="Packaged-$kind-open"/><viewpager id="pager" h="64"><text text="First page"/><text text="Second page"/></viewpager><webview id="web" h="64" javaScriptEnabled="true"/></vertical><vertical w="220" h="*" layout_gravity="start" bg="#ffffff"><button id="close" text="Packaged-$kind-close"/></vertical></drawer>');
                 const componentWindow=await ui.showLayout(components),toolbar=await components.findView('toolbar'),pager=await components.findView('pager'),web=await components.findView('web');
                 let navigation=0,menu=0,closed=0,componentError;
@@ -66,11 +86,12 @@ class RuntimeInteropPackagedDeviceTest {
                 const session=await compose.attach(await root.findView('content'),()=>compose.Column({},
                     compose.AndroidView({key:'native',view:native}),compose.Text({text:'Packaged-$kind-count:'+count.value}),
                     compose.Button({onClick(){count.value++;}},compose.Text({text:'Packaged-$kind-next'}))));
-                const end=Date.now()+120000;while((count.value<2||nativeClicks<1)&&Date.now()<end)await new Promise(r=>setTimeout(r,30));
+                let composeFailure;session.on('error',e=>composeFailure=e.message);
+                const end=Date.now()+120000;while((count.value<2||nativeClicks<1)&&Date.now()<end){if(composeFailure||session.isClosed())throw Error('Packaged Compose: '+(composeFailure||'session closed'));await new Promise(r=>setTimeout(r,30));}
                 if(count.value!==2||nativeClicks!==1)throw Error('Packaged callbacks missing');
                 if(await spinner.selectedIndex!==2||await seek.progress!==75||await native.text!=='Packaged-$kind-native')throw Error('Packaged XML properties lost');
                 await session.close();await native.dispose();await window.close();await root.dispose();
-            """.trimIndent()+"})().catch(e=>{console.error(e.stack);throw e;});\n")
+            """.trimIndent()+"} catch(e){const errorView=await ui.createView('Text',{text:'Packaged failure: '+String(e.stack||e)});await ui.showLayout(errorView);await new Promise(r=>setTimeout(r,40000));throw e;}})().catch(e=>{console.error(e.stack);throw e;});\n")
             File(root,"project.json").writeText(config.toJson(false))
             val result=RemoteApkBuildClient.buildBlocking(context,config,output,AtomicBoolean(false),
                 RemoteApkBuildClient.ProgressListener{},ApkBuilderTemplatePluginIds.PACKAGE_NAME)
@@ -78,6 +99,7 @@ class RuntimeInteropPackagedDeviceTest {
             val archive=requireNotNull(context.packageManager.getPackageArchiveInfo(output.path,android.content.pm.PackageManager.GET_PERMISSIONS))
             assertEquals(packageName,archive.packageName);assertEquals(1L,PackageInfoCompat.getLongVersionCode(archive))
             assertFalse(archive.requestedPermissions.orEmpty().contains("org.autojs.permission.PLUGIN"))
+            assertTrue(archive.requestedPermissions.orEmpty().contains(android.Manifest.permission.INTERNET))
             assertTrue("Packaged runtime permission must be present in the binary Manifest",
                 archive.requestedPermissions.orEmpty().contains(if(kind=="bun") "org.autojs.permission.BUN_PACKAGED_RUNTIME" else "org.autojs.plugin.nodejs.permission.RUNTIME"))
             File(output.parentFile,output.name+".json").writeText(JSONObject().put("packageName",packageName)
@@ -85,17 +107,42 @@ class RuntimeInteropPackagedDeviceTest {
         } finally {check(root.canonicalPath.startsWith(context.cacheDir.canonicalPath+File.separator));root.deleteRecursively()}
     }
 
-    @Test fun runInstalledOutput() = harness.withFixture {
+    @Test fun runInstalledOutput() = harness.withFixture { RuntimeWebFixtureServer().use { server ->
         val launch=requireNotNull(context.packageManager.getLaunchIntentForPackage(packageName))
         harness.automation.setRotation(android.app.UiAutomation.ROTATION_FREEZE_0)
         context.startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        fun failure(node:AccessibilityNodeInfo?):String? {
+            if(node==null)return null
+            val text=node.text?.toString();if(text?.startsWith("Packaged failure:")==true)return text
+            for(i in 0 until node.childCount)failure(node.getChild(i))?.let{return it};return null
+        }
+        fun wait(label:String,timeout:Long=15000,predicate:()->Boolean) {
+            harness.await(label,timeout){failure(harness.automation.rootInActiveWindow)?.let{fail(it+"\nHTTP fixture: "+server.requests)};predicate()}
+        }
         fun click(label:String){
-            harness.await("Packaged action: $label",20000){
-                var node=fixture.find(label) ?: return@await false
+            wait("Packaged action: $label",75000){
+                var node=fixture.find(label) ?: return@wait false
                 while(!node.isClickable&&node.parent!=null)node=node.parent
                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             }
         }
+        wait("Packaged fixture address",45000) {
+            fixture.find("Fixture-$kind")?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,android.os.Bundle().apply {
+                putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,server.url)
+            })==true
+        }
+        click("Packaged-$kind-pick")
+        wait("Packaged document picker",20000){fixture.find("aj6-web-fixture-alpha.txt")!=null}
+        harness.automation.waitForIdle(500,5000)
+        var fileNode=requireNotNull(fixture.find("aj6-web-fixture-alpha.txt"));var fileParent=fileNode.parent
+        while(fileParent!=null){if(fileParent.viewIdResourceName?.endsWith(":id/item_root")==true){fileNode=fileParent;break};fileParent=fileParent.parent}
+        val bounds=android.graphics.Rect();fileNode.getBoundsInScreen(bounds)
+        android.os.ParcelFileDescriptor.AutoCloseInputStream(harness.automation.executeShellCommand("input touchscreen tap ${bounds.centerX()} ${bounds.centerY()}")).use{it.readBytes()}
+        android.os.SystemClock.sleep(800)
+        if(fixture.find("aj6-web-fixture-alpha.txt")!=null) {
+            android.os.ParcelFileDescriptor.AutoCloseInputStream(harness.automation.executeShellCommand("input touchscreen tap ${bounds.centerX()} ${bounds.centerY()}")).use{it.readBytes()}
+        }
+        click("Packaged-$kind-download")
         // The navigation control is located by content description; its icon has no text.
         fun navigation(node:AccessibilityNodeInfo?):AccessibilityNodeInfo? {
             if(node==null)return null
@@ -104,19 +151,21 @@ class RuntimeInteropPackagedDeviceTest {
             return null
         }
         val pageAction="Packaged-$kind-page".uppercase(java.util.Locale.ROOT)
-        harness.await("Packaged WebView initialized",45000){fixture.find(pageAction)!=null}
-        harness.await("Packaged drawer action",20000){navigation(harness.automation.rootInActiveWindow)?.performAction(AccessibilityNodeInfo.ACTION_CLICK)==true}
+        wait("Packaged WebView initialized",45000){fixture.find(pageAction)!=null}
+        wait("Packaged drawer action",20000){navigation(harness.automation.rootInActiveWindow)?.performAction(AccessibilityNodeInfo.ACTION_CLICK)==true}
         click("Packaged-$kind-close");click(pageAction)
-        harness.await("Packaged runtime identity",45000){fixture.find("Identity-$kind-1-${BuildConfig.VERSION_CODE}")!=null}
+        wait("Packaged runtime identity",45000){fixture.find("Identity-$kind-1-${BuildConfig.VERSION_CODE}")!=null}
         click("Packaged-$kind-native");click("Packaged-$kind-next")
-        harness.await("Packaged state"){fixture.find("Packaged-$kind-count:1")!=null}
+        wait("Packaged state"){fixture.find("Packaged-$kind-count:1")!=null}
         harness.automation.setRotation(android.app.UiAutomation.ROTATION_FREEZE_90)
         val display=(context.getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay
-        harness.await("Packaged landscape display"){display.rotation==android.view.Surface.ROTATION_90}
-        harness.await("Packaged state after rotation"){fixture.find("Packaged-$kind-count:1")!=null}
+        wait("Packaged landscape display"){display.rotation==android.view.Surface.ROTATION_90}
+        wait("Packaged state after rotation"){failure(harness.automation.rootInActiveWindow)?.let{fail(it)};fixture.find("Packaged-$kind-count:1")!=null}
         click("Packaged-$kind-next")
-        harness.await("Packaged window released"){fixture.find("Packaged-$kind-next")==null}
-    }
+        wait("Packaged window released"){fixture.find("Packaged-$kind-next")==null}
+        assertEquals(1,server.uploads.size)
+        assertTrue(server.uploads.single().toString(Charsets.UTF_8).contains(RuntimeWebDocumentsProvider.content("alpha")))
+    } }
 
     private fun sha256(file:File)=MessageDigest.getInstance("SHA-256").digest(file.readBytes()).joinToString(""){"%02x".format(it.toInt() and 255)}
 }

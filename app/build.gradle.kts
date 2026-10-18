@@ -828,6 +828,7 @@ dependencies /* Test */ {
     // BKS keystores in JVM tests need a provider named "BC" (Android ships one, the desktop JDK does not).
     // zh-CN: JVM 测试中的 BKS 密钥库需要名为 "BC" 的 provider (Android 自带, 桌面 JDK 没有).
     testImplementation(libs.bcprov.jdk15on)
+    androidTestImplementation(libs.bcpkix.jdk15on)
     androidTestImplementation(libs.test.runner)
     androidTestImplementation(libs.test.ext.junit)
 
