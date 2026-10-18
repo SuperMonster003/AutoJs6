@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Compare actual client exports with host method sets; runtime behavior has separate tests.
 import './check-ui-compose.mjs';
+import './check-runtime-views.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

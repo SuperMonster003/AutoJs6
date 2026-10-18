@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /** Execution-owned native Views. Only identifiers and JSON values cross the process boundary. */
-internal class RuntimeUiInterop(private val context: Context) : Closeable {
+internal class RuntimeUiInterop(private val context: Context, private val image: (JSONObject) -> android.graphics.Bitmap) : Closeable {
     private val main = Handler(Looper.getMainLooper())
     private val closed = AtomicBoolean()
     private val contextId = "context-${UUID.randomUUID()}"
@@ -160,14 +160,19 @@ internal class RuntimeUiInterop(private val context: Context) : Closeable {
     private fun inflate(input: Any): NativeView {
         val descriptor = when (input) { is String -> xml(input); is JSONObject -> input; else -> error("inflate requires XML or a layout descriptor") }
         val pending=ArrayDeque<Pair<JSONObject,Int>>();pending.add(descriptor to 1);var count=0
+        val ids = HashSet<String>()
         while(pending.isNotEmpty()){
             val (node,depth)=pending.removeFirst();require(depth<=16&&++count<=5000){"Layout exceeds node or depth limits"}
+            val id = node.optString("id")
+            require(id.isBlank() || ids.add(id)) { "Duplicate native View id: $id" }
             node.optJSONArray("children")?.let{children->require(children.length()<=128);repeat(children.length()){pending.add(children.getJSONObject(it) to depth+1)}}
+            node.optJSONArray("tabs")?.let { tabs -> require(tabs.length() <= 128); repeat(tabs.length()) { pending.add(tabs.getJSONObject(it) to depth + 1) } }
+            node.optJSONObject("content")?.let { pending.add(it to depth + 1) }
         }
         NodeBridgeUiRenderer.validateDescriptor(descriptor)?.let { error(it) }
         val session = NodeBridgeUiSession("view-events-${UUID.randomUUID()}", descriptor)
         // Install the observer after construction; widget initialization is not a user event.
-        val view = NodeBridgeUiRenderer(themed, session).createView(descriptor, true)
+        val view = NodeBridgeUiRenderer(themed, session, image).createView(descriptor, true)
         val root = record(view, null, session)
         session.observeInteropEvents { event ->
             event.remove("snapshot")
@@ -183,17 +188,9 @@ internal class RuntimeUiInterop(private val context: Context) : Closeable {
         NativeView("view-${UUID.randomUUID()}", nextLease++, view, root, session ?: requireNotNull(root).session).also { records[it.id]=it;byView[view]=it }
     }
     private fun update(record: NativeView, patch: JSONObject) {
-        require(!patch.has("type") && !patch.has("children")) { "Native View updates cannot replace identity or children" }
-        NodeBridgeUiRenderer(record.view.context, record.session).applyPatch(record.view, patch)
-        applyAttributes(record.view, patch)
+        RuntimeViewAttributes.apply(record.view, patch, strict = true, image = image)
     }
-    private fun snapshot(view: View) = JSONObject().put("id",view.tag).put("type",view.javaClass.simpleName)
-        .put("width",view.width).put("height",view.height).put("enabled",view.isEnabled)
-        .put("visible",view.visibility==View.VISIBLE).put("attached",view.isAttachedToWindow)
-        .put("contentDescription",view.contentDescription?.toString() ?: JSONObject.NULL).apply {
-            if(view is TextView)put("text",view.text.toString())
-            if(view is CompoundButton)put("checked",view.isChecked)
-        }
+    private fun snapshot(view: View) = RuntimeViewAttributes.snapshot(view)
     private fun dispose(record: NativeView, force: Boolean = false) {
         require(record.root == null) { "Dispose the inflated root, not a child alias" }
         if(!force)require(!AndroidViewClaimsV1.isClaimed(record.view)) { "Close the borrowing Compose session before disposing its View" }
@@ -236,7 +233,7 @@ internal class RuntimeUiInterop(private val context: Context) : Closeable {
             check(!closed)
             val name=patch.optString("id")
             val target=if(name.isBlank())root else record(requireNotNull(root.view.findViewWithTag<View>(name)){"Unknown View id: $name"},root)
-            update(target,patch)
+            update(target,JSONObject(patch.toString()).apply { remove("id") })
         }
         fun close(disposeRoot:Boolean=true) {
             if(closed)return
@@ -284,26 +281,7 @@ internal class RuntimeUiInterop(private val context: Context) : Closeable {
             }
             return requireNotNull(root){"XML layout has no root"}
         }
-        internal fun applyAttributes(view:View,props:JSONObject) {
-            val density=view.resources.displayMetrics.density
-            fun dimension(raw:Any):Int=when(raw.toString()){"*","match_parent","fill_parent"->-1;"wrap_content","auto"->-2;else->{val text=raw.toString();val pixels=text.endsWith("px");val value=text.removeSuffix("dp").removeSuffix("px").toDouble();require(value.isFinite()&&value>=0&&value<=1_000_000);(value*(if(pixels)1f else density)).toInt()}}
-            if(props.has("width")||props.has("height")){
-                val params=view.layoutParams?:ViewGroup.LayoutParams(-2,-2)
-                if(props.has("width"))params.width=dimension(props.get("width"))
-                if(props.has("height"))params.height=dimension(props.get("height"))
-                view.layoutParams=params
-            }
-            if(props.has("weight")){val old=view.layoutParams;view.layoutParams=LinearLayout.LayoutParams(old?.width?:-2,old?.height?:-2,props.getDouble("weight").toFloat())}
-            if(props.has("padding")){val n=dimension(props.get("padding"));require(n>=0);view.setPadding(n,n,n,n)}
-            if(props.has("enabled"))view.isEnabled=props.getBoolean("enabled")
-            if(props.has("visible"))view.visibility=if(props.getBoolean("visible"))View.VISIBLE else View.GONE
-            if(props.has("contentDescription"))view.contentDescription=props.getString("contentDescription")
-            if(props.has("backgroundColor")||props.has("bg")){val value=props.opt("backgroundColor")?:props.get("bg");view.setBackgroundColor(if(value is Number)value.toInt()else Color.parseColor(value.toString()))}
-            if(view is TextView){
-                if(props.has("textColor")){val value=props.get("textColor");view.setTextColor(if(value is Number)value.toInt()else Color.parseColor(value.toString()))}
-                if(props.has("textSize"))view.textSize=props.getString("textSize").removeSuffix("sp").toFloat()
-            }
-        }
+
     }
 }
 

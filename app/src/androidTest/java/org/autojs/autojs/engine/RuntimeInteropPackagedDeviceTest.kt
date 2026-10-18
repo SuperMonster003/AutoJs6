@@ -44,14 +44,17 @@ class RuntimeInteropPackagedDeviceTest {
             File(root,entry).writeText("\"$kind\";\n(async()=>{$imports"+"""
                 const ctx=await ui.context();
                 if(ctx.packageName!=='$packageName'||ctx.applicationVersionCode!==1||ctx.runtimeVersionCode!==${BuildConfig.VERSION_CODE})throw Error('Wrong packaged identity '+JSON.stringify(ctx));
-                const root=await ui.inflate('<vertical><text text="Identity-$kind-'+ctx.applicationVersionCode+'-'+ctx.runtimeVersionCode+'"/><compose id="content" h="420"/></vertical>');
+                const root=await ui.inflate('<vertical><card cardCornerRadius="8"><text text="Identity-$kind-'+ctx.applicationVersionCode+'-'+ctx.runtimeVersionCode+'"/></card><spinner id="spinner" entries="One|Two|Three"/><seekbar id="seek" max="100"/><compose id="content" h="240"/></vertical>');
                 const window=await ui.showLayout(root),native=await ui.createView('Button',{text:'Packaged-$kind-native'});
+                const spinner=await root.findView('spinner'),seek=await root.findView('seek');
+                spinner.selectedIndex=2;seek.progress=75;native.text='Packaged-$kind-native';await spinner.flush();await seek.flush();await native.flush();
                 let nativeClicks=0;native.on('click',()=>nativeClicks++);const count=compose.state(0);
                 const session=await compose.attach(await root.findView('content'),()=>compose.Column({},
                     compose.AndroidView({key:'native',view:native}),compose.Text({text:'Packaged-$kind-count:'+count.value}),
                     compose.Button({onClick(){count.value++;}},compose.Text({text:'Packaged-$kind-next'}))));
                 const end=Date.now()+120000;while((count.value<2||nativeClicks<1)&&Date.now()<end)await new Promise(r=>setTimeout(r,30));
                 if(count.value!==2||nativeClicks!==1)throw Error('Packaged callbacks missing');
+                if(await spinner.selectedIndex!==2||await seek.progress!==75||await native.text!=='Packaged-$kind-native')throw Error('Packaged XML properties lost');
                 await session.close();await native.dispose();await window.close();await root.dispose();
             """.trimIndent()+"})().catch(e=>{console.error(e.stack);throw e;});\n")
             File(root,"project.json").writeText(config.toJson(false))

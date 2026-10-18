@@ -96,7 +96,11 @@ class RuntimeUiInteropDeviceTest {
                         if(clicks!==2||session.isClosed())throw Error('Attachment lost on rotation '+clicks);
                         await session.close();await native.dispose();await window.close();await root.dispose();return {clicks};
                     """.trimIndent())}
-                    fun click(){harness.await("Interop rotation button",20000){if(future.isDone)fail(future.get().toString());fixture.find("Rotate-$mode-next")!=null};assertTrue(requireNotNull(fixture.find("Rotate-$mode-next")).performAction(AccessibilityNodeInfo.ACTION_CLICK))}
+                    fun click(){harness.await("Interop rotation button action",20000){
+                        if(future.isDone)fail(future.get().toString())
+                        val node=fixture.find("Rotate-$mode-next")?:return@await false
+                        node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    }}
                     click()
                     val instrumentation=InstrumentationRegistry.getInstrumentation()
                     val monitor=instrumentation.addMonitor(RuntimeInteropActivity::class.java.name,null,false)

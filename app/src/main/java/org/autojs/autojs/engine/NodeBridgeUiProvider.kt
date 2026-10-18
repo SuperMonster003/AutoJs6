@@ -579,16 +579,18 @@ class NodeBridgeUiSession(
 internal class NodeBridgeUiRenderer(
     private val activity: Context,
     private val session: NodeBridgeUiSession,
+    private val image: ((JSONObject) -> android.graphics.Bitmap)? = null,
 ) {
 
-    fun createView(descriptor: JSONObject, isRoot: Boolean = false): View {
+    fun createView(rawDescriptor: JSONObject, isRoot: Boolean = false): View {
+        val descriptor = RuntimeViewAttributes.normalize(rawDescriptor)
         val type = normalizeType(descriptor.optString("type"))
         val id = descriptor.optString("id")
         val view = when (type) {
             "Frame", "Compose" -> (if(type == "Compose") RuntimeComposeContainer(activity) else android.widget.FrameLayout(activity)).apply {
                 val children=descriptor.optJSONArray("children")
                 if(type == "Compose") require(children == null || children.length() == 0) { "Compose containers must initially be empty" }
-                if(children != null) repeat(children.length()){ addView(createView(children.getJSONObject(it))) }
+                if(children != null) repeat(children.length()){ RuntimeViewWidgets.addChild(this, createView(children.getJSONObject(it))) }
             }
             TYPE_COLUMN -> createLinearLayout(descriptor, LinearLayout.VERTICAL, isRoot)
             TYPE_ROW -> createLinearLayout(descriptor, LinearLayout.HORIZONTAL, isRoot)
@@ -603,9 +605,11 @@ internal class NodeBridgeUiRenderer(
             TYPE_PROGRESS -> createProgress(descriptor)
             TYPE_TABS -> createTabs(descriptor)
             TYPE_TAB -> createTabPlaceholder(descriptor)
-            else -> throw IllegalArgumentException("Unsupported ui component type: ${descriptor.optString("type")}")
+            else -> RuntimeViewWidgets.create(type, activity, descriptor, session) { createView(it) }
+                ?: throw IllegalArgumentException("Unsupported ui component type: ${descriptor.optString("type")}")
         }
         if (id.isNotBlank()) {
+            view.id = View.generateViewId()
             view.tag = id
             view.contentDescription = id
             session.recordState(id, componentState(type, descriptor, view))
@@ -613,7 +617,12 @@ internal class NodeBridgeUiRenderer(
         if (view.layoutParams == null) {
             view.layoutParams = defaultLayoutParams(isRoot)
         }
-        RuntimeUiInterop.applyAttributes(view, descriptor)
+        if (view !is CompoundButton && view !is android.widget.CheckedTextView && view !is Button && view !is android.widget.AdapterView<*>) {
+            val clickable = view.isClickable
+            view.setOnClickListener { session.emitComponentEvent("click", id, JSONObject()) }
+            view.isClickable = clickable
+        }
+        RuntimeViewAttributes.apply(view, descriptor, image = image)
         return view
     }
 
@@ -676,6 +685,7 @@ internal class NodeBridgeUiRenderer(
                 target.hint = patch.optString("hint")
             }
         }
+        RuntimeViewAttributes.apply(target, patch, image = image)
         val id = patch.optString("id").takeIf { it.isNotBlank() } ?: (target.tag as? String).orEmpty()
         if (id.isNotBlank()) {
             session.recordState(id, componentState(type, patch, target))
@@ -695,7 +705,7 @@ internal class NodeBridgeUiRenderer(
         val children = descriptor.optJSONArray("children") ?: JSONArray()
         for (index in 0 until children.length()) {
             val child = children.optJSONObject(index) ?: continue
-            layout.addView(createView(child), defaultLayoutParams(false))
+            RuntimeViewWidgets.addChild(layout, createView(child))
         }
         return layout
     }
@@ -778,7 +788,7 @@ internal class NodeBridgeUiRenderer(
         }
         for (index in 0 until children.length()) {
             val child = children.optJSONObject(index) ?: continue
-            content.addView(createView(child), defaultLayoutParams(false))
+            RuntimeViewWidgets.addChild(content, createView(child))
         }
         scrollView.addView(content, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         return scrollView
@@ -790,7 +800,7 @@ internal class NodeBridgeUiRenderer(
         return ListView(activity).apply {
             adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, listLabels(items))
             setOnItemClickListener { _, _, position, _ ->
-                val item = listItem(items, position)
+                val item = listItem(RuntimeViewAttributes.declared(this).optJSONArray("items") ?: items, position)
                 session.recordState(
                     id,
                     JSONObject()
@@ -881,10 +891,10 @@ internal class NodeBridgeUiRenderer(
             if (tabChildren != null) {
                 for (childIndex in 0 until tabChildren.length()) {
                     val child = tabChildren.optJSONObject(childIndex) ?: continue
-                    content.addView(createView(child), defaultLayoutParams(false))
+                    RuntimeViewWidgets.addChild(content, createView(child))
                 }
             } else if (tabContent != null) {
-                content.addView(createView(tabContent), defaultLayoutParams(false))
+                RuntimeViewWidgets.addChild(content, createView(tabContent))
             }
         }
         for (index in 0 until tabs.length()) {
@@ -1047,7 +1057,7 @@ internal class NodeBridgeUiRenderer(
             if (normalizedType == TYPE_WEB_VIEW) {
                 return "ui descriptor component type WebView requires a separate security gate."
             }
-            if (rawType.isNotBlank() && normalizedType !in supportedTypes) {
+            if (rawType.isNotBlank() && normalizedType !in supportedTypes && normalizedType !in RuntimeViewWidgets.types) {
                 return "ui descriptor uses an unsupported component type: $rawType."
             }
             val children = descriptor.optJSONArray("children")
@@ -1090,7 +1100,7 @@ internal class NodeBridgeUiRenderer(
             "Tabs", "tabs" -> TYPE_TABS
             "Tab", "tab" -> TYPE_TAB
             "WebView", "webView", "webview" -> TYPE_WEB_VIEW
-            else -> rawType
+            else -> RuntimeViewWidgets.aliases[rawType] ?: rawType
         }
     }
 }

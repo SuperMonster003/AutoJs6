@@ -975,7 +975,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
     private val notificationIdCounter = AtomicInteger(1_000_000)
     private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
-    private val uiInterop = lazy { RuntimeUiInterop(appContext) }
+    private val uiInterop = lazy { RuntimeUiInterop(appContext) { value ->
+        synchronized(imageLock) { requireNotNull(imageArgument(JSONArray().put(value), 0).bitmap.copy(Bitmap.Config.ARGB_8888, false)) }
+    } }
     private val composeBridge = lazy { RuntimeComposeBridge(appContext, uiInterop.value) { value ->
         synchronized(imageLock) { requireNotNull(imageArgument(JSONArray().put(value), 0).bitmap.copy(Bitmap.Config.ARGB_8888, false)) }
     } }
