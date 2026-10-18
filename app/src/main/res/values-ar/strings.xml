@@ -602,6 +602,7 @@
     <string name="error_unknown_picker_selector_type" formatted="false">محدد غير معروف {الاسم: %s ، اكتب: %s}</string>
     <string name="error_unknown_type">نوع غير معروف: %s</string>
     <string name="error_unsupported_plugin_connection">طريقة اتصال الاضافة غير مدعومة</string>
+    <string name="error_web_audio_capture">تعذر تسجيل الصوت: %1$s</string>
     <string name="error_webp_lossless_quality_not_supported">لا يمكن ضغط تنسيق WebP-Lossless باستخدام معامل الجودة؛ استخدم JPEG/PNG/WebP-Lossy بدلاً من ذلك</string>
     <string name="file_not_exist_or_readable">الملف غير موجود او غير قابل للقراءة</string>
     <string name="file_not_exist_or_readable_with_path">الملف غير موجود أو قابلاً للقراءة: %s</string>
@@ -3056,6 +3057,9 @@
     <string name="text_wallpaper_color_tertiary">الثالث</string>
     <string name="text_wallpaper_colors_need_android_8_1">يتطلب Android 8.1 أو أحدث</string>
     <string name="text_wallpaper_colors_unavailable">تعذرت قراءة ألوان الخلفية الحالية</string>
+    <string name="text_web_audio_capture">تسجيل الصوت</string>
+    <string name="text_web_audio_capture_instruction">اضغط بدء التسجيل لاستخدام الميكروفون. يتوقف التسجيل عندما تغادر هذه الشاشة الواجهة الأمامية.</string>
+    <string name="text_web_use_recording">استخدام التسجيل</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>
     <string name="text_weekly_task_should_check_day_of_week">يجب اختيار يوم واحد على الأقل</string>
     <string name="text_welcome_to_app">مرحبًا بك في %1$s</string>

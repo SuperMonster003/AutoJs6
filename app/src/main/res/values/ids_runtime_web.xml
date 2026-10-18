@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="runtime_web_audio_cancel" />
+    <item type="id" name="runtime_web_audio_start" />
+    <item type="id" name="runtime_web_audio_status" />
+    <item type="id" name="runtime_web_audio_stop" />
+    <item type="id" name="runtime_web_audio_use" />
+</resources>

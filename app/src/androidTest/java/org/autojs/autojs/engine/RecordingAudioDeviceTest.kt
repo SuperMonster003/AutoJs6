@@ -216,11 +216,11 @@ class RecordingAudioDeviceTest {
     internal data class AudioProof(val samples:Int,val rms:Double,val peakTone:Double,val onsetUs:Long) {
         fun json()=JSONObject().put("samples",samples).put("rms",rms).put("peak660Hz",peakTone).put("onsetUs",onsetUs)
     }
-    internal fun decodeAudio(file:File):AudioProof {
+    internal fun decodeAudio(file:File, expectedTracks:Int=2):AudioProof {
         val extractor=MediaExtractor();var decoder:MediaCodec?=null
         try {
             extractor.setDataSource(file.absolutePath)
-            assertEquals("One AVC and one AAC track",2,extractor.trackCount)
+            assertEquals("Expected media track count",expectedTracks,extractor.trackCount)
             val audio=(0 until extractor.trackCount).single{extractor.getTrackFormat(it).getString(MediaFormat.KEY_MIME)==MediaFormat.MIMETYPE_AUDIO_AAC}
             val format=extractor.getTrackFormat(audio);assertEquals(48000,format.getInteger(MediaFormat.KEY_SAMPLE_RATE));assertEquals(1,format.getInteger(MediaFormat.KEY_CHANNEL_COUNT))
             format.setInteger(MediaFormat.KEY_PCM_ENCODING,AudioFormat.ENCODING_PCM_16BIT)

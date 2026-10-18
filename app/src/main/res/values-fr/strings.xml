@@ -600,6 +600,7 @@
     <string name="error_unknown_picker_selector_type" formatted="false">Sélecteur inconnu {nom : %s, type : %s}</string>
     <string name="error_unknown_type">Type inconnu : %s</string>
     <string name="error_unsupported_plugin_connection">Connexion de plugin non prise en charge</string>
+    <string name="error_web_audio_capture">Impossible d\'enregistrer le son: %1$s</string>
     <string name="error_webp_lossless_quality_not_supported">Le format WebP-Lossless ne peut pas être compressé avec un paramètre de qualité ; utilisez plutôt JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">Le fichier n\'existe pas ou n\'est pas lisible</string>
     <string name="file_not_exist_or_readable_with_path">Le fichier n\'existe pas ou n\'est pas lisible : %s</string>
@@ -3054,6 +3055,9 @@
     <string name="text_wallpaper_color_tertiary">Tertiaire</string>
     <string name="text_wallpaper_colors_need_android_8_1">Nécessite Android 8.1 ou une version ultérieure</string>
     <string name="text_wallpaper_colors_unavailable">Impossible de lire les couleurs du fond d\'écran actuel</string>
+    <string name="text_web_audio_capture">Enregistrer le son</string>
+    <string name="text_web_audio_capture_instruction">Appuyez sur Démarrer pour utiliser le microphone. L\'enregistrement s\'arrête lorsque cet écran quitte le premier plan.</string>
+    <string name="text_web_use_recording">Utiliser l\'enregistrement</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>
     <string name="text_weekly_task_should_check_day_of_week">Au moins un jour doit être sélectionné</string>
     <string name="text_welcome_to_app">Bienvenue dans %1$s</string>

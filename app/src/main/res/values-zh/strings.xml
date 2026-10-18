@@ -596,6 +596,7 @@
     <string name="error_unknown_picker_selector_type" formatted="false">未知选择器 {名称: %s, 类型: %s}</string>
     <string name="error_unknown_type">未知类型: %s</string>
     <string name="error_unsupported_plugin_connection">不支持的插件连接方式</string>
+    <string name="error_web_audio_capture">无法录音: %1$s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 格式无法使用 quality 质量参数进行压缩, 可改用 JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">文件不存在或不可读</string>
     <string name="file_not_exist_or_readable_with_path">文件不存在或不可读: %s</string>
@@ -3051,6 +3052,9 @@
     <string name="text_wallpaper_color_tertiary">第三色</string>
     <string name="text_wallpaper_colors_need_android_8_1">需要 Android 8.1 或更高版本</string>
     <string name="text_wallpaper_colors_unavailable">无法读取当前壁纸的颜色</string>
+    <string name="text_web_audio_capture">录音</string>
+    <string name="text_web_audio_capture_instruction">点击开始录制后使用麦克风. 此页面离开前台时录制会停止.</string>
+    <string name="text_web_use_recording">使用录音</string>
     <string name="text_weekly_task">每周任务</string>
     <string name="text_weekly_task_should_check_day_of_week">需至少选择一天</string>
     <string name="text_welcome_to_app">欢迎使用 %1$s</string>

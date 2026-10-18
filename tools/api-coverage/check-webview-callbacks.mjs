@@ -41,7 +41,7 @@ const bun=await createHostClient({socket:'/fixture',fetch:async(url,init)=>{
   catch(error){return Response.json({ok:false,error:{code:'INVALID_REQUEST',message:error.message}},{status:400});}
 }});
 await exercise(bun.ui,bunFixture);
-for(const field of ['captureEnabled','fileName','writable','permissionMode','destinationUri','directoryUri','WebDownloadId']) {
+for(const field of ['captureEnabled','captureKind','videoQuality','durationLimitSeconds','sizeLimitBytes','timeoutMs','fileName','writable','permissionMode','destinationUri','directoryUri','WebDownloadId']) {
   for(const types of [nodeTypes,bunTypes])assert(types.includes(field),field+' lacks a runtime declaration');
 }
 for(const mode of ['open','multiple','directory','save']) {

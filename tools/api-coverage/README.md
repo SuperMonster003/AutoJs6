@@ -1,5 +1,15 @@
 # Script API coverage checks
 
+`RuntimeWebMediaDeviceTest` covers actual video/audio file capture across Node
+main-thread imports, CJS/ESM/nested Workers and Bun. It verifies browser uploads,
+media digests, video-frame/AAC decoding, native audio limits, rotation/background
+stop, picker timeout and Worker exit while a parent View remains open. Run
+`RuntimeWebMediaPermissionDeviceTest` separately with RECORD_AUDIO revoked, then
+restore the original permission flags; revocation kills the host process.
+`RuntimeWebMediaPackagedDeviceTest` produces and exercises genuine Node, nested
+Worker and Bun APKs. Only numeric media evidence is retained. Preserve original
+APKs, permission flags, volume and rotation before running these device suites.
+
 `extract_exports.py` reads the actual `ScriptRuntime` mounts and explicit
 `Augmentable` assignments. `check.py` compares those names with the associated
 documentation pages, resolves their real TypeScript symbols, and queries the

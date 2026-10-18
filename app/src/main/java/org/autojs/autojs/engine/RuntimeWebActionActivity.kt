@@ -36,6 +36,10 @@ class RuntimeWebActionActivity : Activity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         action?.permissions(requestCode, grantResults)
     }
+    override fun onStop() {
+        if (!isChangingConfigurations) action?.background()
+        super.onStop()
+    }
     override fun onDestroy() {
         val task = action
         if (task?.activity?.get() === this) {
@@ -49,7 +53,7 @@ class RuntimeWebActionActivity : Activity() {
     internal abstract class Action(private val context: Context) : Closeable {
         val id = UUID.randomUUID().toString()
         var activity: WeakReference<RuntimeWebActionActivity>? = null
-        private var done = false
+        @Volatile private var done = false
         protected val isDone get() = done
         fun launch(): Action {
             actions[id] = this
@@ -61,6 +65,7 @@ class RuntimeWebActionActivity : Activity() {
         abstract fun attach(activity: Activity, state: Bundle?)
         open fun result(code: Int, data: Intent?) = Unit
         open fun detach() = Unit
+        open fun background() = Unit
         open fun permissions(code: Int, results: IntArray) = Unit
         protected fun finish(completion: () -> Unit) {
             if (done) return

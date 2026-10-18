@@ -52,7 +52,7 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
         val allowed = when (name) { "client" -> clientNames; "chrome" -> chromeNames; "download" -> setOf("onDownloadStart"); else -> error("Invalid WebView client family") }
         require(callbacks.all { it in allowed }) { "Unsupported WebView callback name" }
         val options = value.optJSONObject("options") ?: JSONObject()
-        val next = Client(value.getString("clientId"), callbacks, options.opt("callbackTimeoutMs")?.let { RuntimeViewAttributes.integer(it, 100, 120000).toLong() })
+        val next = Client(value.getString("clientId"), callbacks, options.opt("callbackTimeoutMs")?.let { RuntimeViewAttributes.integer(it, 100, Int.MAX_VALUE).toLong() })
         val rules = if (name == "client") RuntimeWebPolicy(options) else null
         cancelFamily(name)
         when (name) {
@@ -121,6 +121,7 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
         return selected((0 until value.length()).map { Uri.parse(value.getString(it)) })
     }
     private fun picker(options: JSONObject, complete: (Result<Array<Uri>?>) -> Unit): String {
+        val timeoutMs = if (options.isNull("timeoutMs")) 120000L else RuntimeViewAttributes.integer(options.get("timeoutMs"), 100, Int.MAX_VALUE).toLong()
         pickerActions.toList().forEach { actions.remove(it)?.close() }; pickerActions.clear()
         val id = UUID.randomUUID().toString()
         val timeout = Runnable { actions.remove(id)?.close() }
@@ -128,7 +129,7 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
             actions.remove(id); pickerActions.remove(id); main.removeCallbacks(timeout)
             complete(value.mapCatching { selected(it) })
         }
-        actions[id] = action; pickerActions.add(id); main.postDelayed(timeout, 120000)
+        actions[id] = action; pickerActions.add(id); main.postDelayed(timeout, timeoutMs)
         return id
     }
     private fun js(kind: String, url: String?, message: String?, result: JsResult, defaultValue: String? = null): Boolean {
@@ -294,6 +295,7 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
             fun complete(value: Array<Uri>?) { if (done.compareAndSet(false, true)) { htmlChooser = null; callback.onReceiveValue(value) } }
             val options = JSONObject().put("acceptTypes", JSONArray(params.acceptTypes.toList())).put("multiple", params.mode == FileChooserParams.MODE_OPEN_MULTIPLE)
                 .put("mode", params.mode).put("captureEnabled", params.isCaptureEnabled).put("filenameHint", params.filenameHint ?: JSONObject.NULL)
+                .put("timeoutMs", chromeClient.timeout ?: 120000L)
             if (Build.VERSION.SDK_INT >= 37) options.put("permissionMode", params.permissionMode)
             val data = JSONObject(options.toString()).put("mode", params.mode).put("captureEnabled", params.isCaptureEnabled)
                 .put("title", params.title?.toString() ?: JSONObject.NULL).put("filenameHint", params.filenameHint ?: JSONObject.NULL)

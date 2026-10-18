@@ -595,6 +595,7 @@
     <string name="error_unknown_picker_selector_type" formatted="false">Unknown selector {name: %s, type: %s}</string>
     <string name="error_unknown_type">Unknown type: %s</string>
     <string name="error_unsupported_plugin_connection">Unsupported plugin connection</string>
+    <string name="error_web_audio_capture">Unable to record audio: %1$s</string>
     <string name="error_webp_lossless_quality_not_supported">Format WebP-Lossless cannot be compressed with a quality parameter, use JPEG/PNG/WebP-Lossy instead</string>
     <string name="file_not_exist_or_readable">File does not exist or readable</string>
     <string name="file_not_exist_or_readable_with_path">File does not exist or readable: %s</string>
@@ -3050,6 +3051,9 @@
     <string name="text_wallpaper_color_tertiary">Tertiary</string>
     <string name="text_wallpaper_colors_need_android_8_1">Needs Android 8.1 or later</string>
     <string name="text_wallpaper_colors_unavailable">The colors of the current wallpaper cannot be read</string>
+    <string name="text_web_audio_capture">Record audio</string>
+    <string name="text_web_audio_capture_instruction">Tap Start recording to use the microphone. Recording stops when this screen leaves the foreground.</string>
+    <string name="text_web_use_recording">Use recording</string>
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_welcome_to_app">Welcome to %1$s</string>

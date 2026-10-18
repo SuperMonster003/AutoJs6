@@ -158,6 +158,7 @@
 * `Feature` Node.js/Bun: WebView HTTP(S) downloads, system file selection and asynchronous WebViewClient/WebChromeClient callbacks with native navigation and resource rules
 * `Feature` Node.js/Bun: WebView full-size camera capture, save and directory selection, document byte reads, and streamed blob/data downloads with selected output locations
 * `Feature` Bun project timeoutMs configuration for interactive camera and file workflows, including packaged applications
+* `Feature` Node.js/Bun: WebView video capture and foreground AAC/M4A audio recording, with media options, configurable chooser deadlines and temporary-file cleanup
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules

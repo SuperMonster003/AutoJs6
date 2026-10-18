@@ -602,6 +602,7 @@
     <string name="error_unknown_picker_selector_type" formatted="false">알 수없는 선택기 {이름: %s, 유형: %s}</string>
     <string name="error_unknown_type">알 수없는 유형: %s</string>
     <string name="error_unsupported_plugin_connection">지원되지 않는 플러그인 연결 방식입니다</string>
+    <string name="error_web_audio_capture">오디오를 녹음할 수 없습니다: %1$s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 형식은 품질 파라미터로 압축할 수 없습니다, 대신 JPEG/PNG/WebP-Lossy를 사용하세요</string>
     <string name="file_not_exist_or_readable">파일이 없거나 읽을 수 없습니다</string>
     <string name="file_not_exist_or_readable_with_path">파일이 존재하지 않거나 읽을 수 없습니다: %s</string>
@@ -3056,6 +3057,9 @@
     <string name="text_wallpaper_color_tertiary">세 번째 색</string>
     <string name="text_wallpaper_colors_need_android_8_1">Android 8.1 이상이 필요합니다</string>
     <string name="text_wallpaper_colors_unavailable">현재 배경화면의 색상을 읽을 수 없습니다</string>
+    <string name="text_web_audio_capture">오디오 녹음</string>
+    <string name="text_web_audio_capture_instruction">녹음 시작을 누르면 마이크를 사용합니다. 이 화면이 전면에서 사라지면 녹음이 중지됩니다.</string>
+    <string name="text_web_use_recording">녹음 사용</string>
     <string name="text_weekly_task">주간 과제</string>
     <string name="text_weekly_task_should_check_day_of_week">최소한 하루를 선택해야합니다</string>
     <string name="text_welcome_to_app">%1$s에 오신 것을 환영합니다</string>

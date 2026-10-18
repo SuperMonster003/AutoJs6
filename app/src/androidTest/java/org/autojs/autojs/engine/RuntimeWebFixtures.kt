@@ -56,6 +56,17 @@ internal class RuntimeWebFixtureServer private constructor(private val server: S
         requests.add(pathname)
         var status = "200 OK"; var mime = "text/html; charset=utf-8"; val extra = ArrayList<String>()
         val response = when {
+            pathname in listOf("/capture-video", "/capture-audio") -> {
+                val kind=pathname.removePrefix("/capture-")
+                """<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Media $kind</title>
+                    <input id="media" type="file" accept="$kind/*" capture="environment" hidden><button id="capture" onclick="document.getElementById('media').click()">Capture $kind</button>
+                    <script>window.uploaded=false;window.onunhandledrejection=e=>window.captureError=String(e.reason);
+                    document.getElementById('media').onchange=async function(){var file=this.files[0],bytes=new Uint8Array(await file.arrayBuffer()),media=document.createElement('$kind');
+                    media.preload='metadata';var loaded=new Promise((r,j)=>{media.onloadedmetadata=r;media.onerror=()=>j(Error('Media decode failed'))});media.src=URL.createObjectURL(file);await loaded;
+                    var hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+                    window.mediaInfo={size:file.size,mime:file.type,duration:media.duration,width:media.videoWidth||0,height:media.videoHeight||0,sha256:hash,head:Array.from(bytes.slice(0,16)),tail:Array.from(bytes.slice(-16))};
+                    var form=new FormData();form.append('media',file);window.uploaded=(await fetch('/upload',{method:'POST',body:form})).ok;};</script>""".trimIndent().toByteArray()
+            }
             pathname == "/capture" -> """<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Camera fixture</title>
                 <input id="photo" type="file" accept="image/*" capture="environment" hidden><button id="capture" onclick="document.getElementById('photo').click()">Capture</button>
                 <script>window.uploaded=false;window.onunhandledrejection=e=>window.captureError=String(e.reason);

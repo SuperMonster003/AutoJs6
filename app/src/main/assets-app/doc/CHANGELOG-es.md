@@ -158,6 +158,7 @@
 * `Nuevo` Node.js/Bun: Descargas HTTP(S) de WebView, selección de archivos del sistema y callbacks asíncronos WebViewClient/WebChromeClient con reglas nativas de navegación y recursos
 * `Nuevo` Node.js/Bun: Captura WebView de fotos completas, selección de archivos y directorios, lectura de bytes y descargas blob/data hacia los destinos elegidos
 * `Nuevo` Configuración timeoutMs de proyectos Bun para fotos y archivos interactivos, incluidas las aplicaciones empaquetadas
+* `Nuevo` Node.js/Bun: Captura de vídeo WebView y audio AAC/M4A en primer plano, con opciones multimedia, plazos configurables y limpieza de archivos temporales
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
