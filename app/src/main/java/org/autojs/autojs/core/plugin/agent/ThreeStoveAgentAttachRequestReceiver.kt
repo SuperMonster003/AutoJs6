@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentActions
@@ -50,6 +51,23 @@ class ThreeStoveAgentAttachRequestReceiver : BroadcastReceiver() {
             if (!hasPluginIdentity(context, request)) return null
             if (!isAuthorized(context)) return ForegroundRequest.Unauthorized
             return requestedConfiguration(request).getOrNull()?.let { ForegroundRequest.Attach(it.value) }
+        }
+
+        private val FOREGROUND_EXTRAS = setOf(
+            ThreeStoveAgentActions.EXTRA_THREE_STOVE_AGENT_ATTACH,
+            ThreeStoveAgentActions.EXTRA_ATTACH_IDENTITY,
+            ThreeStoveAgentContract.KEY_LINK_CONFIG_JSON,
+        )
+
+        /**
+         * The plugin opens the host through its launcher entry, which is the splash screen.
+         * Hand only the request extras on to the main activity; nothing else is forwarded.
+         */
+        fun forwardForegroundRequest(from: Intent?, to: Intent): Intent {
+            if (from?.getBooleanExtra(ThreeStoveAgentActions.EXTRA_THREE_STOVE_AGENT_ATTACH, false) != true) return to
+            val extras = Bundle(from.extras ?: return to)
+            extras.keySet().toList().filter { it !in FOREGROUND_EXTRAS }.forEach(extras::remove)
+            return to.putExtras(extras)
         }
 
         private fun deliver(context: Context, intent: Intent) {

@@ -80,6 +80,9 @@ CLAUDE.md
 !/tools/ocr/
 !/tools/ocr/auto_mode_smoke.js
 !/tools/ocr/auto_mode_smoke.py
+!/tools/three-stove-agent/
+!/tools/three-stove-agent/**
+/tools/three-stove-agent/__pycache__/
 
 /gradle/wrappers/backup/
 

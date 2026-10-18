@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.databinding.ActivitySplashBinding
 
 /**
@@ -55,7 +57,8 @@ class SplashActivity : BaseActivity() {
     private fun enterNextActivity() {
         if (!mAlreadyEnterNextActivity && !mPaused) {
             mAlreadyEnterNextActivity = true
-            MainActivity.launch(this)
+            // A launcher entry can carry the 3-Stove Agent "Open AutoJs6" request.
+            ThreeStoveAgentAttachRequestReceiver.forwardForegroundRequest(intent, MainActivity.getIntent(this)).startSafely(this)
             finish()
         }
     }

@@ -139,6 +139,27 @@ class ThreeStoveAgentEntryDeviceTest {
         } finally { identity.cancel() }
     }
 
+    /** The plugin's launcher intent reaches the splash screen first; only the request extras move on. */
+    @Test fun splashForwardsOnlyTheAttachRequestExtras() {
+        val identity = PendingIntent.getBroadcast(context, 520,
+            Intent("org.autojs.autojs6.test.AGENT_FORWARD").setPackage(context.packageName),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
+        try {
+            val launch = Intent(Intent.ACTION_MAIN).putExtra(ThreeStoveAgentActions.EXTRA_THREE_STOVE_AGENT_ATTACH, true)
+                .putExtra(ThreeStoveAgentActions.EXTRA_ATTACH_IDENTITY, identity)
+                .putExtra(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_LINK_CONFIG_JSON, "{}")
+                .putExtra("unrelated", 1)
+            val main = ThreeStoveAgentAttachRequestReceiver.forwardForegroundRequest(launch, Intent())
+            assertTrue(main.getBooleanExtra(ThreeStoveAgentActions.EXTRA_THREE_STOVE_AGENT_ATTACH, false))
+            @Suppress("DEPRECATION")
+            assertEquals(identity, main.getParcelableExtra<PendingIntent>(ThreeStoveAgentActions.EXTRA_ATTACH_IDENTITY))
+            assertEquals("{}", main.getStringExtra(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_LINK_CONFIG_JSON))
+            assertFalse(main.hasExtra("unrelated"))
+            val plain = ThreeStoveAgentAttachRequestReceiver.forwardForegroundRequest(Intent().putExtra("unrelated", 1), Intent())
+            assertNull(plain.extras)
+        } finally { identity.cancel() }
+    }
+
     /** Only an unrecognized signer still asks in a dialog; every other state opens Plugin Center instead. */
     @Test fun signerConfirmationIsTheOnlyGuideDialog() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
