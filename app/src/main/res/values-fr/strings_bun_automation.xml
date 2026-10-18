@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_control_grant">Autorise la recherche et le contrôle de l\'interface via le service d\'accessibilité hôte. Activez séparément le service Android.</string>
+    <string name="summary_bun_accessibility_gesture_grant">Autorise les balayages et les gestes en plus des commandes d\'accessibilité.</string>
+    <string name="summary_bun_app_control_grant">Autorise les requêtes sur les applications, les activités, les services et les diffusions dans les nouvelles exécutions Bun. Les restrictions Android restent applicables.</string>
+    <string name="summary_bun_clipboard_control_grant">Autorise la lecture et le remplacement du presse-papiers système. Les restrictions Android au premier plan restent applicables.</string>
+    <string name="text_bun_accessibility_control_grant">Commandes d\'accessibilité</string>
+    <string name="text_bun_accessibility_gesture_grant">Gestes d\'accessibilité</string>
+    <string name="text_bun_app_control_grant">Actions sur les applications</string>
+    <string name="text_bun_clipboard_control_grant">Accès au presse-papiers</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_control_grant">Разрешает поиск и управление интерфейсом через службу доступности хоста. Службу Android нужно включить отдельно.</string>
+    <string name="summary_bun_accessibility_gesture_grant">Разрешает свайпы и жесты в дополнение к управлению доступностью.</string>
+    <string name="summary_bun_app_control_grant">Разрешает запросы о приложениях, запуск экранов и служб, отправку сообщений в новых запусках Bun. Ограничения Android сохраняются.</string>
+    <string name="summary_bun_clipboard_control_grant">Разрешает чтение и замену системного буфера обмена. Ограничения Android для фонового доступа сохраняются.</string>
+    <string name="text_bun_accessibility_control_grant">Управление доступностью</string>
+    <string name="text_bun_accessibility_gesture_grant">Жесты доступности</string>
+    <string name="text_bun_app_control_grant">Операции с приложениями</string>
+    <string name="text_bun_clipboard_control_grant">Доступ к буферу обмена</string>
+</resources>

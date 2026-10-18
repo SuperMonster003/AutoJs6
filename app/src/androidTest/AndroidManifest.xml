@@ -55,6 +55,12 @@
             android:name="org.autojs.autojs.ui.pager.ScrollControllableViewPagerTestActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity android:name="org.autojs.autojs.engine.BunAutomationFixtureActivity" android:exported="true" android:process=":bun_automation_fixture" android:launchMode="singleTask" android:label="Bun Automation Fixture">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+            <intent-filter><action android:name="android.intent.action.VIEW" /><category android:name="android.intent.category.DEFAULT" /><category android:name="android.intent.category.BROWSABLE" /><data android:scheme="autojs6-bun-fixture" /></intent-filter>
+        </activity>
+        <receiver android:name="org.autojs.autojs.engine.BunAutomationFixtureActivity$Receiver" android:exported="true" android:process=":bun_automation_fixture" />
+        <service android:name="org.autojs.autojs.engine.BunAutomationFixtureActivity$FixtureService" android:exported="true" android:process=":bun_automation_fixture" />
     </application>
 
 </manifest>

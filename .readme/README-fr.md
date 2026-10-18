@@ -345,6 +345,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Node.js/Bun: Capture vidéo WebView et enregistrement audio AAC/M4A au premier plan, avec options média, délais configurables et nettoyage des fichiers temporaires
 * `Fonctionnalité` Flux audio et video WebView getUserMedia/MediaRecorder, attente des Promise de page, demandes explicites de permissions multimedia Android et cycle de vie des Worker
 * `Fonctionnalité` Adaptateur de partage ecran WebView, capture audio par service de premier plan et enregistrement camera natif en arriere-plan pour Node.js/Bun et Node Worker
+* `Fonctionnalité` API Bun pour accessibilité, applications et presse-papiers alignées sur Node.js, avec autorisations distinctes et applications empaquetées
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés

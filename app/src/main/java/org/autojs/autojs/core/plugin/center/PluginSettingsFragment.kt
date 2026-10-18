@@ -87,6 +87,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunOpenccGrantPreference: ThemeColorSwitchPreference? = null
     private var bunPinyin4jGrantPreference: ThemeColorSwitchPreference? = null
     private var bunScreenMetricsGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunAppControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunAccessibilityControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunAccessibilityGestureGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunClipboardControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiLayoutGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiComposeGrantPreference: ThemeColorSwitchPreference? = null
@@ -223,6 +227,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunOpenccGrantPreference = findPreference("plugin_bun_opencc_grant")
         bunPinyin4jGrantPreference = findPreference("plugin_bun_pinyin4j_grant")
         bunScreenMetricsGrantPreference = findPreference("plugin_bun_screen_metrics_grant")
+        bunAppControlGrantPreference = findPreference("plugin_bun_app_control_grant")
+        bunAccessibilityControlGrantPreference = findPreference("plugin_bun_accessibility_control_grant")
+        bunAccessibilityGestureGrantPreference = findPreference("plugin_bun_accessibility_gesture_grant")
+        bunClipboardControlGrantPreference = findPreference("plugin_bun_clipboard_control_grant")
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
         bunUiLayoutGrantPreference = findPreference("plugin_bun_ui_layout_grant")
         bunUiComposeGrantPreference = findPreference("plugin_bun_ui_compose_grant")
@@ -345,6 +353,22 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setScreenMetricsGranted(requireContext(), value == true)
             true
         }
+        bunAppControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setAppControlGranted(requireContext(), value == true)
+            true
+        }
+        bunAccessibilityControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setAccessibilityControlGranted(requireContext(), value == true)
+            true
+        }
+        bunAccessibilityGestureGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setAccessibilityGestureGranted(requireContext(), value == true)
+            true
+        }
+        bunClipboardControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setClipboardControlGranted(requireContext(), value == true)
+            true
+        }
         bunConsoleControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
             true
@@ -426,6 +450,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunOpenccGrantPreference?.isChecked = BunHostCapabilityGrants.isTextOpenccGranted(requireContext())
         bunPinyin4jGrantPreference?.isChecked = BunHostCapabilityGrants.isTextPinyin4jGranted(requireContext())
         bunScreenMetricsGrantPreference?.isChecked = BunHostCapabilityGrants.isScreenMetricsGranted(requireContext())
+        bunAppControlGrantPreference?.isChecked = BunHostCapabilityGrants.isAppControlGranted(requireContext())
+        bunAccessibilityControlGrantPreference?.isChecked = BunHostCapabilityGrants.isAccessibilityControlGranted(requireContext())
+        bunAccessibilityGestureGrantPreference?.isChecked = BunHostCapabilityGrants.isAccessibilityGestureGranted(requireContext())
+        bunClipboardControlGrantPreference?.isChecked = BunHostCapabilityGrants.isClipboardControlGranted(requireContext())
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
         bunUiLayoutGrantPreference?.isChecked = BunHostCapabilityGrants.isUiLayoutGranted(requireContext())
         bunUiComposeGrantPreference?.isChecked = BunHostCapabilityGrants.isUiComposeGranted(requireContext())

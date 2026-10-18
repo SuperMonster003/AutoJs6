@@ -357,6 +357,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` Node.js/Bun: WebView 视频拍摄与前台 AAC/M4A 录音, 支持媒体参数, 可配置选择等待时限和临时文件清理
 * `新增` WebView getUserMedia/MediaRecorder 流式音视频, 支持等待网页 Promise, 显式申请 Android 媒体权限及 Worker 生命周期管理
 * `新增` Node.js/Bun 的 WebView 屏幕共享适配, 前台服务后台录音及原生后台摄像头录像, 包括 Node Worker 封装
+* `新增` Bun 无障碍, 应用操作与剪贴板 API 对齐 Node.js 对应接口, 支持独立授权和打包应用
 * `修复` runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题

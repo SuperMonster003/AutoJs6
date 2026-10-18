@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_control_grant">ホストのユーザー補助サービスで UI の検索と操作を許可します. Android のサービスは別途有効にしてください.</string>
+    <string name="summary_bun_accessibility_gesture_grant">ユーザー補助の制御に加えて, スワイプとジェスチャーを許可します.</string>
+    <string name="summary_bun_app_control_grant">新しい Bun 実行でアプリの照会, 画面やサービスの起動, ブロードキャストの送信を許可します. Android の制限は引き続き適用されます.</string>
+    <string name="summary_bun_clipboard_control_grant">システムクリップボードの読み取りと置換を許可します. Android のフォアグラウンド制限は引き続き適用されます.</string>
+    <string name="text_bun_accessibility_control_grant">ユーザー補助の制御</string>
+    <string name="text_bun_accessibility_gesture_grant">ユーザー補助のジェスチャー</string>
+    <string name="text_bun_app_control_grant">アプリ操作</string>
+    <string name="text_bun_clipboard_control_grant">クリップボードへのアクセス</string>
+</resources>

@@ -29,6 +29,11 @@ object BunHostCapabilityGrants {
     const val SCREEN_METRICS = "screen.metrics"
     const val CONSOLE_CONTROL = "console.control"
 
+    const val APP_CONTROL = "app.control"
+    const val ACCESSIBILITY_CONTROL = "accessibility.control"
+    const val ACCESSIBILITY_GESTURE = "accessibility.gesture"
+    const val CLIPBOARD_CONTROL = "clipboard.control"
+
     private const val SP_NAME = "bun_host_capability_grants"
 
     /** Read-only host info snapshot: host package, version and advisory locale/build date. */
@@ -94,6 +99,18 @@ object BunHostCapabilityGrants {
     fun setScreenMetricsGranted(context: Context, granted: Boolean) = setGranted(context, SCREEN_METRICS, granted)
 
     /** Window and global log configuration are opt-in, independently of normal stdout/stderr forwarding. */
+    fun isAppControlGranted(context: Context): Boolean = isGranted(context, APP_CONTROL, false)
+    fun setAppControlGranted(context: Context, granted: Boolean) = setGranted(context, APP_CONTROL, granted)
+
+    fun isAccessibilityControlGranted(context: Context): Boolean = isGranted(context, ACCESSIBILITY_CONTROL, false)
+    fun setAccessibilityControlGranted(context: Context, granted: Boolean) = setGranted(context, ACCESSIBILITY_CONTROL, granted)
+
+    fun isAccessibilityGestureGranted(context: Context): Boolean = isGranted(context, ACCESSIBILITY_GESTURE, false)
+    fun setAccessibilityGestureGranted(context: Context, granted: Boolean) = setGranted(context, ACCESSIBILITY_GESTURE, granted)
+
+    fun isClipboardControlGranted(context: Context): Boolean = isGranted(context, CLIPBOARD_CONTROL, false)
+    fun setClipboardControlGranted(context: Context, granted: Boolean) = setGranted(context, CLIPBOARD_CONTROL, granted)
+
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
@@ -130,6 +147,10 @@ object BunHostCapabilityGrants {
         if (isScreenRecordMicrophoneGranted(context)) add(SCREEN_RECORD_MICROPHONE)
         if (isScreenRecordPlaybackGranted(context)) add(SCREEN_RECORD_PLAYBACK)
         if (isScreenMetricsGranted(context)) add(SCREEN_METRICS)
+        if (isAppControlGranted(context)) add(APP_CONTROL)
+        if (isAccessibilityControlGranted(context)) add(ACCESSIBILITY_CONTROL)
+        if (isAccessibilityGestureGranted(context)) add(ACCESSIBILITY_GESTURE)
+        if (isClipboardControlGranted(context)) add(CLIPBOARD_CONTROL)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
         }
     }
@@ -137,7 +158,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL)
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL)
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()

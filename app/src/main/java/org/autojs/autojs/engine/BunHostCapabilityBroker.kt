@@ -51,6 +51,7 @@ internal class BunHostCapabilityBroker(
     private val opencc by lazy { AndroidNodeOpenccBackend(appContext) }
     private val imageScopeLock = Any()
     private var imageProvider: AndroidNodeBridgeCapabilityProvider? = null
+    private val automation = BunAutomationBridge(appContext, capabilities, ::imagesProvider)
     private val captureLock = Any()
     private data class CaptureAttempt(val id: String, val result: CompletableFuture<NodeBridgeResponse>)
     private var captureAttempt: CaptureAttempt? = null
@@ -68,6 +69,7 @@ internal class BunHostCapabilityBroker(
     /** After this no call is answered; the plugin fails its pending calls itself when the run ends. */
     fun close() {
         if (!closed.compareAndSet(false, true)) return
+        automation.close()
         synchronized(captureLock) { captureAttempt = null; captureId = null }
         val provider = synchronized(imageScopeLock) { imageProvider.also { imageProvider = null } }
         provider?.destroy(NodeBridgeError.processDead("Bun execution finished"))
@@ -138,6 +140,8 @@ internal class BunHostCapabilityBroker(
             return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "Request is not a JSON object")
         }
         val outcome = when (capability) {
+            BunHostCapabilityGrants.APP_CONTROL, BunHostCapabilityGrants.ACCESSIBILITY_CONTROL,
+            BunHostCapabilityGrants.CLIPBOARD_CONTROL -> bridgeResponse(automation.invoke(capability, request))
             BunHostCapabilityGrants.UI_LAYOUT, BunHostCapabilityGrants.UI_COMPOSE -> {
                 val (method, args) = parseMethodCall(request)
                 val compose = capability == BunHostCapabilityGrants.UI_COMPOSE
@@ -224,6 +228,7 @@ internal class BunHostCapabilityBroker(
                 javaInteropEnabled = false,
                 permissionManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(buildList {
                     add(NodeBridgePermissionManifest.IMAGE)
+                    addAll(BunAutomationBridge.nodeCapabilities(capabilities))
                     if (BunHostCapabilityGrants.UI_LAYOUT in capabilities || BunHostCapabilityGrants.UI_COMPOSE in capabilities) add(NodeBridgePermissionManifest.UI)
                     if (BunHostCapabilityGrants.IMAGE_FILES in capabilities) add(NodeBridgePermissionManifest.NETWORK)
                     if (BunHostCapabilityGrants.SCREEN_CAPTURE in capabilities) add(NodeBridgePermissionManifest.SCREEN_CAPTURE)

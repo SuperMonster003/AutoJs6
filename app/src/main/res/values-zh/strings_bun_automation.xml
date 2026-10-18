@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_control_grant">允许通过宿主无障碍服务查找和操作界面. 需另行开启 Android 无障碍服务.</string>
+    <string name="summary_bun_accessibility_gesture_grant">在无障碍控制之外, 允许滑动和手势操作.</string>
+    <string name="summary_bun_app_control_grant">允许新的 Bun 执行查询应用, 启动页面和服务以及发送广播. 仍受 Android 限制.</string>
+    <string name="summary_bun_clipboard_control_grant">允许读取和替换系统剪贴板内容. 仍受 Android 前台访问限制.</string>
+    <string name="text_bun_accessibility_control_grant">无障碍控制</string>
+    <string name="text_bun_accessibility_gesture_grant">无障碍手势</string>
+    <string name="text_bun_app_control_grant">应用操作</string>
+    <string name="text_bun_clipboard_control_grant">剪贴板访问</string>
+</resources>

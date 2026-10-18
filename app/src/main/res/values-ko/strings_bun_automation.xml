@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_control_grant">호스트 접근성 서비스를 통한 UI 검색과 조작을 허용합니다. Android 서비스는 별도로 켜야 합니다.</string>
+    <string name="summary_bun_accessibility_gesture_grant">접근성 제어에 추가로 스와이프와 제스처를 허용합니다.</string>
+    <string name="summary_bun_app_control_grant">새 Bun 실행에서 앱 조회, 화면과 서비스 시작 및 브로드캐스트 전송을 허용합니다. Android 제한은 계속 적용됩니다.</string>
+    <string name="summary_bun_clipboard_control_grant">시스템 클립보드 읽기와 변경을 허용합니다. Android 포그라운드 접근 제한은 계속 적용됩니다.</string>
+    <string name="text_bun_accessibility_control_grant">접근성 제어</string>
+    <string name="text_bun_accessibility_gesture_grant">접근성 제스처</string>
+    <string name="text_bun_app_control_grant">앱 작업</string>
+    <string name="text_bun_clipboard_control_grant">클립보드 접근</string>
+</resources>

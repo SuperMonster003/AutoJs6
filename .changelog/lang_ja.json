@@ -158,7 +158,8 @@
         "撮影やファイル操作を待つ Bun プロジェクトとパッケージ化アプリ向けの timeoutMs 実行時間設定",
         "Node.js/Bun: WebView の動画撮影と前面での AAC/M4A 録音, メディア設定, 選択待ち時間の指定と一時ファイルの削除",
         "WebView の getUserMedia/MediaRecorder による音声と動画のストリーミング, ページの Promise 待機, Android メディア権限の明示的な要求と Worker のライフサイクル管理",
-        "Node.js/Bun の WebView 画面共有アダプター, フォアグラウンドサービスによる録音とネイティブのバックグラウンド動画録画, Node Worker にも対応"
+        "Node.js/Bun の WebView 画面共有アダプター, フォアグラウンドサービスによる録音とネイティブのバックグラウンド動画録画, Node Worker にも対応",
+        "Bun のユーザー補助, アプリ操作, クリップボード API を Node.js の対応インターフェースに合わせ, 個別の許可とパッケージ化アプリに対応"
       ],
       "fix": [
         "runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題",

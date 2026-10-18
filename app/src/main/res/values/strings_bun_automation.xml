@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_control_grant">Allows finding and operating UI through the host accessibility service. Enable the Android service separately.</string>
+    <string name="summary_bun_accessibility_gesture_grant">Allows swipe and gesture operations in addition to accessibility controls.</string>
+    <string name="summary_bun_app_control_grant">Allows package queries and app activities, services and broadcasts in new Bun runs. Android restrictions still apply.</string>
+    <string name="summary_bun_clipboard_control_grant">Allows reading and replacing the system clipboard. Android foreground access restrictions still apply.</string>
+    <string name="text_bun_accessibility_control_grant">Accessibility controls</string>
+    <string name="text_bun_accessibility_gesture_grant">Accessibility gestures</string>
+    <string name="text_bun_app_control_grant">App operations</string>
+    <string name="text_bun_clipboard_control_grant">Clipboard access</string>
+</resources>

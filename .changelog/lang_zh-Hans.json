@@ -170,7 +170,8 @@
         "Bun 项目的 timeoutMs 执行期限配置, 适用于等待拍照或文件操作的脚本及打包应用",
         "Node.js/Bun: WebView 视频拍摄与前台 AAC/M4A 录音, 支持媒体参数, 可配置选择等待时限和临时文件清理",
         "WebView getUserMedia/MediaRecorder 流式音视频, 支持等待网页 Promise, 显式申请 Android 媒体权限及 Worker 生命周期管理",
-        "Node.js/Bun 的 WebView 屏幕共享适配, 前台服务后台录音及原生后台摄像头录像, 包括 Node Worker 封装"
+        "Node.js/Bun 的 WebView 屏幕共享适配, 前台服务后台录音及原生后台摄像头录像, 包括 Node Worker 封装",
+        "Bun 无障碍, 应用操作与剪贴板 API 对齐 Node.js 对应接口, 支持独立授权和打包应用"
       ],
       "fix": [
         "runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题",

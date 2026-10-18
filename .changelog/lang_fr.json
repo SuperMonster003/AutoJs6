@@ -158,7 +158,8 @@
         "Configuration timeoutMs des projets Bun pour les interactions photo et fichiers, y compris les applications empaquetées",
         "Node.js/Bun: Capture vidéo WebView et enregistrement audio AAC/M4A au premier plan, avec options média, délais configurables et nettoyage des fichiers temporaires",
         "Flux audio et video WebView getUserMedia/MediaRecorder, attente des Promise de page, demandes explicites de permissions multimedia Android et cycle de vie des Worker",
-        "Adaptateur de partage ecran WebView, capture audio par service de premier plan et enregistrement camera natif en arriere-plan pour Node.js/Bun et Node Worker"
+        "Adaptateur de partage ecran WebView, capture audio par service de premier plan et enregistrement camera natif en arriere-plan pour Node.js/Bun et Node Worker",
+        "API Bun pour accessibilité, applications et presse-papiers alignées sur Node.js, avec autorisations distinctes et applications empaquetées"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",

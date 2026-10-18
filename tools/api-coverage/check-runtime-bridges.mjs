@@ -3,6 +3,7 @@
 import './check-ui-compose.mjs';
 import './check-runtime-views.mjs';
 import './check-webview-callbacks.mjs';
+import './check-bun-automation.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -90,7 +91,7 @@ const bunClient = await bun.createHostClient({socket:'coverage-socket',fetch:asy
   const capability = url.split('/v1/')[1];
   const reply = capability === 'info' ? {ok:true,bridgeVersion:1,capabilities:Object.keys(bun.HOST_API_METHODS),
     limits:{maxRequestBytes:65536,maxResultBytes:262144,maxCallsPerExecution:128,maxConcurrentCalls:4,callTimeoutMillis:10000}}
-    : {ok:true,capability,result:{value:'converted'}};
+    : {ok:true,capability,result:{value:capability==='app.control'?{packageName:'coverage',versionName:'1.0',versionCode:1}:'converted'}};
   if (capability !== 'info') bunCalls.push({capability,...JSON.parse(options.body)});
   return {ok:true,status:200,json:async()=>reply};
 }});
