@@ -201,3 +201,12 @@ exercise termination and conditional client cleanup. `RuntimeWebViewDeviceTest`
 uses actual WebViews, DocumentsUI, a standalone document provider, HTTP/TLS and
 DownloadManager; it does not substitute native callback results. Evidence and
 limits are recorded in `docs/dev/runtime-webview-callbacks-2026-10-18.md`.
+
+The file extension gate also checks all four chooser modes, readDocument and opaque
+download identifiers. `test-web-download-stream.mjs` executes the real page helper
+with binary data, backpressure, cancellation and failure cases. Native
+`RuntimeWebFilesDeviceTest` exercises real system camera capture, SAF creation/tree
+grants, blob/data link notifications, byte integrity, cancellation and navigation.
+The packaged fixture saves and hashes an actual camera upload, creates a tree child,
+and verifies the embedded page helper with a binary blob. See
+`docs/dev/runtime-webview-files-2026-10-18.md` for accepted results and limits.

@@ -52,10 +52,17 @@ internal class RuntimeWebFixtureServer private constructor(private val server: S
         while (true) { val field = line(); if (field.isBlank()) break; headers[field.substringBefore(':').lowercase()] = field.substringAfter(':').trim() }
         val body = if (headers["transfer-encoding"] == "chunked") ByteArrayOutputStream().apply {
             while (true) { val size = line().substringBefore(';').toInt(16); if (size == 0) { line(); break }; require(size <= 1048576); write(input.readNBytes(size)); line() }
-        }.toByteArray() else input.readNBytes((headers["content-length"]?.toInt() ?: 0).also { require(it <= 1048576) })
+        }.toByteArray() else input.readNBytes((headers["content-length"]?.toInt() ?: 0).also { require(it <= 64 * 1048576) })
         requests.add(pathname)
         var status = "200 OK"; var mime = "text/html; charset=utf-8"; val extra = ArrayList<String>()
         val response = when {
+            pathname == "/capture" -> """<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Camera fixture</title>
+                <input id="photo" type="file" accept="image/*" capture="environment" hidden><button id="capture" onclick="document.getElementById('photo').click()">Capture</button>
+                <script>window.uploaded=false;window.onunhandledrejection=e=>window.captureError=String(e.reason);
+                document.getElementById('photo').onchange=async function(){var file=this.files[0],bytes=new Uint8Array(await file.arrayBuffer()),image=new Image();
+                image.src=URL.createObjectURL(file);await new Promise((r,j)=>{image.onload=r;image.onerror=j});
+                window.photoInfo={size:file.size,mime:file.type,width:image.naturalWidth,height:image.naturalHeight,header:Array.from(bytes.slice(0,3))};
+                var form=new FormData();form.append('photo',file);window.uploaded=(await fetch('/upload',{method:'POST',body:form})).ok;};</script>""".trimIndent().toByteArray()
             pathname == "/index" -> """<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web callbacks</title>
                 <script src="/virtual.js"></script><script>console.log('web-fixture');window.uploaded=false;window.onunhandledrejection=e=>window.uploadError=String(e.reason);</script>
                 <a id="download" href="/download">Download pending</a>

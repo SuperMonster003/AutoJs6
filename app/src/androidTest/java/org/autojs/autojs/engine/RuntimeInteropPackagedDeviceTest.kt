@@ -24,6 +24,27 @@ class RuntimeInteropPackagedDeviceTest {
     private val kind get()=requireNotNull(args.getString("runtimeKind")).also{require(it in listOf("node","bun"))}
     private val packageName get()="org.autojs.autojs6.interop.$kind"
 
+    @Test fun bunProjectTimeoutAndExecutionOverride() {
+        val root=File(context.cacheDir,"bun-project-timeout-${java.util.UUID.randomUUID()}").apply{mkdirs()}
+        val source=File(root,"main.bun.js").apply { writeText("\"bun\"; await new Promise(r=>setTimeout(r,1200));") }
+        val project=ProjectConfig().setName("Bun timeout fixture").setMainScriptFileName(source.name).setProjectType("bun")
+            .setBunConfig(ProjectConfig.BunConfig().setTimeoutMs(150L))
+        File(root,"project.json").writeText(project.toJson(false))
+        assertEquals(150L,ProjectConfig.fromProjectDirForExecution(root.path)?.bunConfig?.timeoutMs)
+        fun run(explicit:Long?) {
+            val engine=BunPluginScriptEngine(context,org.autojs.autojs.AutoJs.instance.globalConsole)
+            engine.setTag(org.autojs.autojs.execution.ExecutionConfig.tag,org.autojs.autojs.execution.ExecutionConfig().apply {
+                workingDirectory=root.path
+                explicit?.let { setArgument("bun.timeoutMillis",it) }
+            })
+            try { engine.init();engine.execute(org.autojs.autojs.script.JavaScriptFileSource(source)) } finally { engine.destroy() }
+        }
+        try {
+            try { run(null);fail("Project timeout ignored") } catch(error:BunRuntimeExecutionException) { assertTrue(error.message.orEmpty().contains("TIMEOUT")) }
+            run(10000L)
+        } finally { check(root.canonicalPath.startsWith(context.cacheDir.canonicalPath+File.separator));root.deleteRecursively() }
+    }
+
     @Test fun produce() {
         val root=File(context.cacheDir,"runtime-interop-package-$kind").apply{mkdirs()}
         val output=File(context.getExternalFilesDir(null),"runtime-interop-$kind.apk")
@@ -35,7 +56,7 @@ class RuntimeInteropPackagedDeviceTest {
             config.launchConfig.apply{isSplashVisible=false;isLogsVisible=false;isRunOnBoot=false;requiresSharedStorage=false}
             if(kind=="node")config.setNodeConfig(ProjectConfig.NodeConfig().setPermissions(listOf("ui")).setTimeoutMs(120000L))
             else {
-                config.setBunConfig(ProjectConfig.BunConfig().setHostCapabilities(listOf("ui.layout","ui.compose")))
+                config.setBunConfig(ProjectConfig.BunConfig().setHostCapabilities(listOf("ui.layout","ui.compose")).setTimeoutMs(180000L))
                 val sdk=File(context.getExternalFilesDir(null),"interop-host-client.mjs")
                 assertEquals("The SDK must match the recorded candidate",args.getString("sdkSha256"),sha256(sdk))
                 sdk.copyTo(File(root,"host-client.mjs"),overwrite=true)
@@ -46,12 +67,13 @@ class RuntimeInteropPackagedDeviceTest {
                 if(ctx.packageName!=='$packageName'||ctx.applicationVersionCode!==1||ctx.runtimeVersionCode!==${BuildConfig.VERSION_CODE})throw Error('Wrong packaged identity '+JSON.stringify(ctx));
                 const browserRoot=await ui.inflate('<vertical><input id="fixture" text="Fixture-$kind" singleLine="true"/><webview id="browser" h="300" javaScriptEnabled="true"/></vertical>');
                 const browserWindow=await ui.showLayout(browserRoot),browser=await browserRoot.findView('browser'),address=await browserRoot.findView('fixture');
-                let browserDownload,job,chooser=0,prompts=0,loaded=0;
+                let browserDownload,job,lastSelection,chooser=0,prompts=0,loaded=0;const localJobs=[];
                 async function browserWait(fn,label){const end=Date.now()+60000;while(!await fn()){if(Date.now()>end)throw Error(label);await new Promise(r=>setTimeout(r,80));}}
+                async function downloaded(job){let state;await browserWait(async()=>{state=await browser.getDownload(job.id);if(state.status==='failed')throw Error(state.error||state.reason);return state.status==='successful';},'local download');return state;}
                 try {
                   await browserWait(async()=>String(await address.text).startsWith('http://127.0.0.1:'),'packaged fixture address');const base=await address.text;
                   await browser.setWebViewClient({onPageFinished(){loaded++;}},{resourceRules:[{url:base+'/virtual.js',response:{mimeType:'application/javascript',body:'window.virtualLoaded=73;'}}]});
-                  await browser.setWebChromeClient({onJsPrompt(){prompts++;return 'packaged-$kind';},onShowFileChooser(e){chooser++;return this.chooseFiles({...e,initialUri:'content://org.autojs.autojs6.test.web.documents/root/fixtures'});}});
+                  await browser.setWebChromeClient({onJsPrompt(){prompts++;return 'packaged-$kind';},async onShowFileChooser(e){chooser++;lastSelection=await this.chooseFiles({...e,initialUri:'content://org.autojs.autojs6.test.web.documents/root/fixtures'});return lastSelection;}});
                   await browser.setDownloadListener(e=>browserDownload=e);await browser.loadUrl(base+'/index');
                   await browserWait(async()=>await browser.evaluateJavascript('document.readyState==="complete"&&!!document.getElementById("pick")')===true,'packaged web page');
                   if(await browser.evaluateJavascript('window.virtualLoaded')!==73||await browser.evaluateJavascript('prompt("Packaged prompt")')!=='packaged-$kind')throw Error('Packaged WebView callbacks');
@@ -63,7 +85,23 @@ class RuntimeInteropPackagedDeviceTest {
                   job=await browser.download({url:browserDownload.url,fileName:'autojs6-packaged-web-$kind-'+Date.now()+'.txt'});
                   await browserWait(async()=>{const state=await browser.getDownload(job.id);if(state.status==='failed')throw Error('Packaged download '+state.reason);return state.status==='successful';},'packaged download completion');
                   if(new TextDecoder().decode(await browser.readDownload(job.id))!==${JSONObject.quote(RuntimeWebFixtureServer.DOWNLOAD)}||!loaded||chooser!==1||prompts!==1)throw Error('Packaged browser results');
-                } finally {if(job)await browser.cancelDownload(job.id);await browserWindow.close();await browserRoot.dispose();}
+                  const blobUrl=await browser.evaluateJavascript('(function(){var data=new Uint8Array(131241);for(var i=0;i<data.length;i++)data[i]=(i*19+137)%256;return URL.createObjectURL(new Blob([data]));})()');
+                  const blobJob=await browser.download({url:blobUrl,fileName:'autojs6-packaged-blob-$kind-'+Date.now()+'.bin'});localJobs.push(blobJob.id);await downloaded(blobJob);
+                  let offset=0;while(offset<131241){const chunk=await browser.readDownload(blobJob.id,offset);if(!chunk.length)throw Error('Packaged short blob');for(let i=0;i<chunk.length;i++)if(chunk[i]!==((offset+i)*19+137)%256)throw Error('Packaged blob byte');offset+=chunk.length;}
+                  await browser.loadUrl(base+'/capture');await browserWait(async()=>await browser.evaluateJavascript('document.readyState==="complete"&&!!document.getElementById("capture")')===true,'packaged camera page');
+                  await browser.evaluateJavascript('document.getElementById("capture").textContent="Packaged-$kind-camera"');await browserWait(async()=>await browser.evaluateJavascript('window.uploaded')===true,'packaged camera upload');
+                  const photo=await browser.evaluateJavascript('window.photoInfo');if(photo.size<20000||!lastSelection||photo.width<200)throw Error('Packaged camera photo');
+                  const saved=await browser.chooseFiles({mode:'save',fileName:'autojs6-webfile-fixture-$kind-photo-'+Date.now()+'.jpg',acceptTypes:['image/jpeg'],initialUri:'content://org.autojs.autojs6.test.web.documents/document/outputs'});if(!saved)throw Error('Packaged save cancelled');
+                  const photoJob=await browser.download({url:lastSelection[0],destinationUri:saved[0],mimeType:'image/jpeg'});localJobs.push(photoJob.id);const savedState=await downloaded(photoJob);if(savedState.bytesDownloaded!==photo.size)throw Error('Packaged saved photo size');
+                  const bytes=new Uint8Array(photo.size);offset=0;while(offset<bytes.length){const chunk=await browser.readDocument(saved[0],offset);if(!chunk.length)throw Error('Packaged short photo');bytes.set(chunk,offset);offset+=chunk.length;}
+                  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+                  await address.set({text:'Photo-$kind-'+photo.size+'-'+hash});
+                  await browserWait(async()=>await address.text==='Photo-checked','photo byte acknowledgement');
+                  const tree=await browser.chooseFiles({mode:'directory',writable:true,initialUri:'content://org.autojs.autojs6.test.web.documents/document/outputs'});if(!tree)throw Error('Packaged tree cancelled');
+                  const treeJob=await browser.download({url:'data:text/plain;charset=UTF-8,packaged%20tree%20%2B%20%E4%BD%A0',directoryUri:tree[0],fileName:'autojs6-webfile-fixture-$kind-tree-'+Date.now()+'.txt'});localJobs.push(treeJob.id);const treeState=await downloaded(treeJob);
+                  if(new TextDecoder().decode(await browser.readDocument(treeState.contentUri))!=='packaged tree + 你')throw Error('Packaged tree file');await browser.cancelDownload(treeJob.id);
+                  if(new TextDecoder().decode(await browser.readDocument(treeState.contentUri))!=='packaged tree + 你')throw Error('SAF output deleted');
+                } finally {if(job)await browser.cancelDownload(job.id);for(const id of localJobs)await browser.cancelDownload(id).catch(()=>{});await browserWindow.close();await browserRoot.dispose();}
                 const components=await ui.inflate('<drawer id="drawer"><vertical><toolbar id="toolbar" title="Packaged components" h="56" navigationIcon="@android:drawable/ic_menu_more" navigationContentDescription="Packaged-$kind-open"/><viewpager id="pager" h="64"><text text="First page"/><text text="Second page"/></viewpager><webview id="web" h="64" javaScriptEnabled="true"/></vertical><vertical w="220" h="*" layout_gravity="start" bg="#ffffff"><button id="close" text="Packaged-$kind-close"/></vertical></drawer>');
                 const componentWindow=await ui.showLayout(components),toolbar=await components.findView('toolbar'),pager=await components.findView('pager'),web=await components.findView('web');
                 let navigation=0,menu=0,closed=0,componentError;
@@ -126,6 +164,12 @@ class RuntimeInteropPackagedDeviceTest {
                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             }
         }
+        fun findNode(predicate:(AccessibilityNodeInfo)->Boolean):AccessibilityNodeInfo? {
+            fun walk(node:AccessibilityNodeInfo?):AccessibilityNodeInfo?{if(node==null)return null;if(node.isVisibleToUser&&predicate(node))return node;for(i in 0 until node.childCount)walk(node.getChild(i))?.let{return it};return null}
+            return walk(harness.automation.rootInActiveWindow)
+        }
+        fun tap(node:AccessibilityNodeInfo){val box=android.graphics.Rect();node.getBoundsInScreen(box);android.os.ParcelFileDescriptor.AutoCloseInputStream(harness.automation.executeShellCommand("input touchscreen tap ${box.centerX()} ${box.centerY()}")).use{it.readBytes()}}
+        fun button(label:String,values:List<String>){wait(label,45000){var node=findNode{it.text?.toString() in values}?:return@wait false;while(!node.isClickable&&node.parent!=null)node=node.parent;node.performAction(AccessibilityNodeInfo.ACTION_CLICK)}}
         wait("Packaged fixture address",45000) {
             fixture.find("Fixture-$kind")?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,android.os.Bundle().apply {
                 putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,server.url)
@@ -143,6 +187,28 @@ class RuntimeInteropPackagedDeviceTest {
             android.os.ParcelFileDescriptor.AutoCloseInputStream(harness.automation.executeShellCommand("input touchscreen tap ${bounds.centerX()} ${bounds.centerY()}")).use{it.readBytes()}
         }
         click("Packaged-$kind-download")
+        click("Packaged-$kind-camera")
+        wait("Packaged system camera",30000){findNode{it.isEnabled&&(it.viewIdResourceName?.endsWith(":id/shutter_button")==true||it.viewIdResourceName?.endsWith(":id/v9_shutter_button_internal")==true)}!=null}
+        harness.automation.waitForIdle(500,5000);android.os.SystemClock.sleep(800)
+        tap(requireNotNull(findNode{it.viewIdResourceName?.endsWith(":id/shutter_button")==true||it.viewIdResourceName?.endsWith(":id/v9_shutter_button_internal")==true}))
+        var lastCameraAccept=0L
+        wait("Packaged camera result",45000){
+            if(harness.automation.rootInActiveWindow?.packageName?.toString()?.contains("documentsui")==true)return@wait true
+            val accept=findNode{val id=it.viewIdResourceName.orEmpty();val text=(it.contentDescription?:it.text)?.toString();id.endsWith(":id/intent_done_apply")||id.endsWith(":id/done_button")||id.endsWith(":id/v9_btn_done")||text in listOf("Done","OK","Save","完成","确定","確定")}
+            if(accept?.isEnabled==true&&android.os.SystemClock.uptimeMillis()-lastCameraAccept>800){tap(accept);lastCameraAccept=android.os.SystemClock.uptimeMillis()};false
+        }
+        button("Save camera document",listOf("SAVE","Save","保存"))
+        wait("Copied camera bytes",60000){
+            val field=findNode{it.text?.toString()?.startsWith("Photo-$kind-")==true}?:return@wait false
+            val match=requireNotNull(Regex("Photo-$kind-(\\d+)-([a-f0-9]{64})").matchEntire(field.text.toString()))
+            val size=match.groupValues[1].toInt();val upload=server.uploads.lastOrNull()?:return@wait false
+            val start=(0 until upload.size-2).first{upload[it]==(-1).toByte()&&upload[it+1]==(-40).toByte()&&upload[it+2]==(-1).toByte()}
+            val digest=MessageDigest.getInstance("SHA-256").digest(upload.copyOfRange(start,start+size)).joinToString(""){"%02x".format(it.toInt() and 255)}
+            assertEquals("Saved camera content differs from the actual upload",digest,match.groupValues[2])
+            field.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,android.os.Bundle().apply{putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,"Photo-checked")})
+        }
+        button("Select output directory",listOf("USE THIS FOLDER","Use this folder","使用此文件夹","使用此資料夾"))
+        button("Grant output directory",listOf("ALLOW","Allow","允许","允許"))
         // The navigation control is located by content description; its icon has no text.
         fun navigation(node:AccessibilityNodeInfo?):AccessibilityNodeInfo? {
             if(node==null)return null
@@ -163,8 +229,8 @@ class RuntimeInteropPackagedDeviceTest {
         wait("Packaged state after rotation"){failure(harness.automation.rootInActiveWindow)?.let{fail(it)};fixture.find("Packaged-$kind-count:1")!=null}
         click("Packaged-$kind-next")
         wait("Packaged window released"){fixture.find("Packaged-$kind-next")==null}
-        assertEquals(1,server.uploads.size)
-        assertTrue(server.uploads.single().toString(Charsets.UTF_8).contains(RuntimeWebDocumentsProvider.content("alpha")))
+        assertEquals(2,server.uploads.size)
+        assertTrue(server.uploads.first().toString(Charsets.UTF_8).contains(RuntimeWebDocumentsProvider.content("alpha")))
     } }
 
     private fun sha256(file:File)=MessageDigest.getInstance("SHA-256").digest(file.readBytes()).joinToString(""){"%02x".format(it.toInt() and 255)}

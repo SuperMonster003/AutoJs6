@@ -352,6 +352,8 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` Node.js/Bun 支持常用 XML 表单与布局组件及原生 View 异步属性代理, 包含顺序赋值, 错误恢复与 Worker 调用
 * `新增` Node.js/Bun: WebView 页面加载与 JavaScript 返回值, Drawer 侧栏, Toolbar 导航与菜单, ViewPager 页面及异步原生事件
 * `新增` Node.js/Bun: WebView HTTP(S) 下载, 系统文件选择及异步 WebViewClient/WebChromeClient 回调, 支持原生导航和资源规则
+* `新增` Node.js/Bun: WebView 完整照片拍摄, 保存和目录选择, 文档字节读取, blob/data 分块下载及所选位置输出
+* `新增` Bun 项目的 timeoutMs 执行期限配置, 适用于等待拍照或文件操作的脚本及打包应用
 * `修复` runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题

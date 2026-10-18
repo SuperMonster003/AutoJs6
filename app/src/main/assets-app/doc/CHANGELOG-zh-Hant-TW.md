@@ -156,6 +156,8 @@
 * `新增` Node.js/Bun 支援常用 XML 表單與版面配置元件及原生 View 非同步屬性代理, 包含循序賦值, 錯誤復原與 Worker 呼叫
 * `新增` Node.js/Bun: WebView 頁面載入與 JavaScript 回傳值, Drawer 側欄, Toolbar 導覽與選單, ViewPager 頁面及非同步原生事件
 * `新增` Node.js/Bun: WebView HTTP(S) 下載, 系統檔案選擇及非同步 WebViewClient/WebChromeClient 回呼, 支援原生導覽和資源規則
+* `新增` Node.js/Bun: WebView 完整照片拍攝, 儲存和目錄選擇, 文件位元組讀取, blob/data 分塊下載及所選位置輸出
+* `新增` Bun 專案的 timeoutMs 執行期限設定, 適用於等待拍照或檔案操作的腳本及封裝應用
 * `修復` runtime.loadJar 方法無法動態載入較高 Java 版本編譯的 class 檔案的問題
 * `修復` Android 7.x 呼叫 runtime.loadDex 方法時可能損壞 DEX 快取並導致類載入失敗的問題
 * `修復` Rhino 引擎及內建模組的作用域, 參數轉換與回傳值處理不相容導致部分指令碼行為異常的問題

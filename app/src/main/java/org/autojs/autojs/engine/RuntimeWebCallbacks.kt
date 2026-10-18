@@ -152,6 +152,7 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
 
     val client = object : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+            downloads.cancelPageJobs()
             signal("pageStarted", location(url)); notify("client", "onPageStarted", location(url))
         }
         override fun onPageFinished(view: WebView, url: String?) {
@@ -292,6 +293,8 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
             val done = AtomicBoolean()
             fun complete(value: Array<Uri>?) { if (done.compareAndSet(false, true)) { htmlChooser = null; callback.onReceiveValue(value) } }
             val options = JSONObject().put("acceptTypes", JSONArray(params.acceptTypes.toList())).put("multiple", params.mode == FileChooserParams.MODE_OPEN_MULTIPLE)
+                .put("mode", params.mode).put("captureEnabled", params.isCaptureEnabled).put("filenameHint", params.filenameHint ?: JSONObject.NULL)
+            if (Build.VERSION.SDK_INT >= 37) options.put("permissionMode", params.permissionMode)
             val data = JSONObject(options.toString()).put("mode", params.mode).put("captureEnabled", params.isCaptureEnabled)
                 .put("title", params.title?.toString() ?: JSONObject.NULL).put("filenameHint", params.filenameHint ?: JSONObject.NULL)
             val requestId = request("chrome", "onShowFileChooser", data, { complete(null) }) { value ->
@@ -300,11 +303,12 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
             }
             if (requestId != null) htmlChooser = { cancel(requestId); complete(null) } else {
                 if (!web.isAttachedToWindow) { complete(null); return true }
-                if (params.mode !in setOf(FileChooserParams.MODE_OPEN, FileChooserParams.MODE_OPEN_MULTIPLE)) {
-                    complete(null); signal("webCallbackError", JSONObject().put("callback", "onShowFileChooser").put("message", "The default document picker supports open and multiple modes")); return true
+                try {
+                    val id = picker(options) { value -> value.fold(::complete) { complete(null); signal("webCallbackError", JSONObject().put("callback", "onShowFileChooser").put("message", it.message)) } }
+                    htmlChooser = { actions.remove(id)?.close(); complete(null) }
+                } catch (error: Throwable) {
+                    complete(null); signal("webCallbackError", JSONObject().put("callback", "onShowFileChooser").put("message", error.message))
                 }
-                val id = picker(options) { value -> value.fold(::complete) { complete(null); signal("webCallbackError", JSONObject().put("callback", "onShowFileChooser").put("message", it.message)) } }
-                htmlChooser = { actions.remove(id)?.close(); complete(null) }
             }
             return true
         }
@@ -385,18 +389,19 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
             }
             "exitFullscreen" -> { val active = fullscreen != null; fullscreen?.close(); fullscreen = null; active }
             "download" -> downloads.start(args.getJSONObject(0))
-            "getDownload" -> downloads.get(downloadNumber(args.get(0), 1))
-            "cancelDownload" -> downloads.remove(downloadNumber(args.get(0), 1))
-            "readDownload" -> {
-                val id = downloadNumber(args.get(0), 1); val offset = if (args.isNull(1)) 0 else downloadNumber(args.get(1), 0)
+            "getDownload" -> downloads.get(downloadId(args.get(0)))
+            "cancelDownload" -> downloads.remove(downloadId(args.get(0)))
+            "readDownload", "readDocument" -> {
+                val id = if (name == "readDocument") args.getString(0) else downloadId(args.get(0)); val offset = if (args.isNull(1)) 0 else downloadNumber(args.get(1), 0)
                 val length = if (args.isNull(2)) 32768 else RuntimeViewAttributes.integer(args.get(2), 1, 32768)
-                io.execute { val result = runCatching { downloads.read(id, offset, length) }; main.post { complete(result) } }; return
+                io.execute { val result = runCatching { if (name == "readDocument") downloads.readDocument(Uri.parse(id as String), offset, length) else downloads.read(id, offset, length) }; main.post { complete(result) } }; return
             }
             else -> error("Unknown WebView operation: $name")
         }
         complete(Result.success(value))
     }
     fun cancelUi() {
+        downloads.cancelPageJobs()
         uiEpoch++
         tasks.values.toList().forEach { it() }; tasks.clear()
         pending.keys.toList().forEach(::cancel); permissionRequests.clear()
@@ -410,6 +415,7 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
     }
 
     companion object {
+        private fun downloadId(value: Any): Any = if (value is String) value else downloadNumber(value, 1)
         private fun downloadNumber(value: Any, min: Int): Long {
             val number = (value as? Number)?.toDouble()
             require(number != null && number.isFinite() && number % 1.0 == 0.0 && number >= min && number <= 9007199254740991.0) { "Download IDs and offsets must be safe integers" }
@@ -422,6 +428,6 @@ internal class RuntimeWebCallbacks(private val web: RuntimeWebView, private val 
         val chromeNames = setOf("onProgressChanged", "onReceivedTitle", "onReceivedIcon", "onReceivedTouchIconUrl", "onConsoleMessage",
             "onJsAlert", "onJsConfirm", "onJsPrompt", "onJsBeforeUnload", "onPermissionRequest", "onPermissionRequestCanceled",
             "onGeolocationPermissionsShowPrompt", "onGeolocationPermissionsHidePrompt", "onShowFileChooser", "onCreateWindow", "onCloseWindow", "onRequestFocus", "onShowCustomView", "onHideCustomView", "getVisitedHistory")
-        val methods = setOf("configureWebClient", "clearWebClient", "replyWebRequest", "beginWebEvaluation", "cancelWebTask", "chooseFiles", "cancelFileChooser", "exitFullscreen", "download", "getDownload", "cancelDownload", "readDownload")
+        val methods = setOf("configureWebClient", "clearWebClient", "replyWebRequest", "beginWebEvaluation", "cancelWebTask", "chooseFiles", "cancelFileChooser", "exitFullscreen", "download", "getDownload", "cancelDownload", "readDownload", "readDocument")
     }
 }

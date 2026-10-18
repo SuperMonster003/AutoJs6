@@ -18,6 +18,7 @@ import org.autojs.autojs.core.plugin.bun.BunRuntimeCleanupBinderCallLane
 import org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
@@ -78,7 +79,7 @@ class BunPluginScriptEngine internal constructor(
         val selection = selectedRuntime.get() ?: error("Bun engine was not initialized")
         val executionId = "bun-engine-${id}-${UUID.randomUUID()}"
         check(activeExecutionId.compareAndSet(null, executionId)) { "Bun engine already has an active execution" }
-        val timeoutMillis = executionTimeoutMillis()
+        val timeoutMillis = executionTimeoutMillis(scriptSource)
         val executionConsole = consoleFactory().apply { setTitle(scriptSource.name) }
         val callback = OutputCallback(executionId, selection.providerUid, executionConsole)
         var payloadFile: File? = null
@@ -464,12 +465,14 @@ class BunPluginScriptEngine internal constructor(
             ?: "script.bun.js"
     }
 
-    private fun executionTimeoutMillis(): Long {
+    private fun executionTimeoutMillis(source: JavaScriptSource): Long {
         val config = getTag(ExecutionConfig.tag) as? ExecutionConfig
-        return (config?.getArgument("bun.timeoutMillis") as? Number)
-            ?.toLong()
-            ?.coerceIn(1L, BunRuntimeContract.MAX_TIMEOUT_MILLIS)
-            ?: BunRuntimeContract.DEFAULT_TIMEOUT_MILLIS
+        val explicit = (config?.getArgument("bun.timeoutMillis") as? Number)?.toLong()
+        val project = if (explicit == null) (source as? JavaScriptFileSource)
+            ?.let { BunPluginWorkspaceArchive.findProjectRoot(semanticFile(it)) }
+            ?.let { ProjectConfig.fromProjectDirForExecution(it.path)?.bunConfig?.timeoutMs } else null
+        return (explicit ?: project ?: BunRuntimeContract.DEFAULT_TIMEOUT_MILLIS)
+            .coerceIn(1L, BunRuntimeContract.MAX_TIMEOUT_MILLIS)
     }
 
     private fun requireSupportedMode(mode: Int) {

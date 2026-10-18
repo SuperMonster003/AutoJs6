@@ -10,9 +10,7 @@ import android.os.Bundle
 import android.os.Process
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.MimeTypeMap
 import android.widget.EditText
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.Closeable
 import java.lang.ref.WeakReference
@@ -34,6 +32,10 @@ class RuntimeWebActionActivity : Activity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST) action?.result(resultCode, data)
     }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        action?.permissions(requestCode, grantResults)
+    }
     override fun onDestroy() {
         val task = action
         if (task?.activity?.get() === this) {
@@ -48,6 +50,7 @@ class RuntimeWebActionActivity : Activity() {
         val id = UUID.randomUUID().toString()
         var activity: WeakReference<RuntimeWebActionActivity>? = null
         private var done = false
+        protected val isDone get() = done
         fun launch(): Action {
             actions[id] = this
             try { context.startActivity(Intent(context, RuntimeWebActionActivity::class.java)
@@ -58,6 +61,7 @@ class RuntimeWebActionActivity : Activity() {
         abstract fun attach(activity: Activity, state: Bundle?)
         open fun result(code: Int, data: Intent?) = Unit
         open fun detach() = Unit
+        open fun permissions(code: Int, results: IntArray) = Unit
         protected fun finish(completion: () -> Unit) {
             if (done) return
             done = true; actions.remove(id)
@@ -68,40 +72,8 @@ class RuntimeWebActionActivity : Activity() {
         private const val REQUEST = 4027
         private val actions = ConcurrentHashMap<String, Action>()
 
-        internal fun chooseFiles(context: Context, options: JSONObject, complete: (Result<List<Uri>?>) -> Unit): Action {
-            val accepts = options.optJSONArray("acceptTypes") ?: JSONArray()
-            val mimeTypes = (0 until accepts.length()).flatMap { accepts.getString(it).split(',') }.mapNotNull { raw ->
-                val value = raw.trim()
-                when { value.isBlank() -> null; value.startsWith('.') -> MimeTypeMap.getSingleton().getMimeTypeFromExtension(value.substring(1).lowercase()); else -> value }
-            }.distinct()
-            val multiple = options.optBoolean("multiple", false)
-            val picker = Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
-                .setType(mimeTypes.singleOrNull() ?: "*/*")
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-                .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, multiple)
-            if (mimeTypes.size > 1) picker.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
-            if (android.os.Build.VERSION.SDK_INT >= 26 && options.has("initialUri")) picker.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, Uri.parse(options.getString("initialUri")))
-            return object : Action(context) {
-                override fun attach(activity: Activity, state: Bundle?) {
-                    if (state == null) try { activity.startActivityForResult(picker, REQUEST) }
-                    catch (failure: Throwable) { finish { complete(Result.failure(failure)) } }
-                }
-                override fun result(code: Int, data: Intent?) {
-                    val value = runCatching {
-                        if (code != RESULT_OK || data == null) null else {
-                            val uris = data.clipData?.let { clip -> (0 until clip.itemCount).map { clip.getItemAt(it).uri } }
-                                ?: listOfNotNull(data.data)
-                            require(multiple || uris.size <= 1) { "A single-file request returned multiple files" }
-                            require(uris.isNotEmpty()) { "The document picker returned no URI" }
-                            uris.distinct().onEach { RuntimeWebFileAccess.validate(context, it) }
-                        }
-                    }
-                    // Acquire document grants before the delegated Activity finishes.
-                    finish { complete(value) }
-                }
-                override fun close() = finish { complete(Result.success(null)) }
-            }.launch()
-        }
+        internal fun chooseFiles(context: Context, options: JSONObject, complete: (Result<List<Uri>?>) -> Unit): Action =
+            RuntimeWebFileChooser.create(context, options, complete)
 
         internal fun dialog(context: Context, kind: String, data: JSONObject, complete: (Any?) -> Unit): Action = object : Action(context) {
             private var dialog: AlertDialog? = null
@@ -130,30 +102,37 @@ class RuntimeWebActionActivity : Activity() {
 
 /** Reference counts only grants acquired by this feature; existing user grants remain intact. */
 internal object RuntimeWebFileAccess {
-    private data class Grant(var users: Int, val acquired: Boolean)
+    private data class Grant(var users: Int = 0, var acquired: Int = 0)
     private val grants = HashMap<String, Grant>()
-    fun validate(context: Context, uri: Uri) {
-        require(uri.scheme == "content") { "File selection requires a readable content URI" }
+    private val captures = HashMap<String, java.io.File>()
+    @Synchronized fun capture(uri: Uri, file: java.io.File) { captures[uri.toString()] = file }
+    @Synchronized fun isCapture(uri: Uri) = captures.containsKey(uri.toString())
+    @Synchronized fun discardUnusedCapture(uri: Uri) { if (!grants.containsKey(uri.toString())) captures.remove(uri.toString())?.delete() }
+    fun validate(context: Context, uri: Uri, writable: Boolean = false) {
+        require(uri.scheme == "content") { "File selection requires a content URI" }
         val provider = context.packageManager.resolveContentProvider(uri.authority.orEmpty(), 0)
-        require(provider != null && provider.applicationInfo.uid != Process.myUid()) { "A picker cannot expose this app's private provider" }
-        require(context.checkUriPermission(uri, Process.myPid(), Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION) == PackageManager.PERMISSION_GRANTED) { "Document read permission was not granted" }
+        require(provider != null && (provider.applicationInfo.uid != Process.myUid() || isCapture(uri))) { "A picker cannot expose this app's private provider" }
+        if (provider.applicationInfo.uid == Process.myUid() && isCapture(uri)) return
+        val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or if (writable) Intent.FLAG_GRANT_WRITE_URI_PERMISSION else 0
+        require(context.checkUriPermission(uri, Process.myPid(), Process.myUid(), flags) == PackageManager.PERMISSION_GRANTED) { "Document permission was not granted" }
     }
-    fun acquire(context: Context, uri: Uri) {
+    @Synchronized fun acquire(context: Context, uri: Uri) {
         validate(context, uri)
-        grants[uri.toString()]?.let { it.users++; return }
-        val existing = context.contentResolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission }
-        val acquired = if (existing) false else try {
-            context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION); true
-        } catch (_: SecurityException) {
-            // Custom handlers may return an ordinary temporary read grant. Android owns its lifetime.
-            validate(context, uri); false
+        val grant = grants.getOrPut(uri.toString()) { Grant() }
+        for (flag in listOf(Intent.FLAG_GRANT_READ_URI_PERMISSION, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)) {
+            val existing = context.contentResolver.persistedUriPermissions.any { it.uri == uri && if (flag == Intent.FLAG_GRANT_READ_URI_PERMISSION) it.isReadPermission else it.isWritePermission }
+            if (!existing && context.checkUriPermission(uri, Process.myPid(), Process.myUid(), flag) == PackageManager.PERMISSION_GRANTED) {
+                try { context.contentResolver.takePersistableUriPermission(uri, flag); grant.acquired = grant.acquired or flag }
+                catch (_: SecurityException) { /* Temporary grants and capture files keep their Android lifetime. */ }
+            }
         }
-        grants[uri.toString()] = Grant(1, acquired)
+        grant.users++
     }
-    fun release(context: Context, uri: Uri) {
+    @Synchronized fun release(context: Context, uri: Uri) {
         val grant = grants[uri.toString()] ?: return
         if (--grant.users != 0) return
         grants.remove(uri.toString())
-        if (grant.acquired) context.contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        try { if (grant.acquired != 0) context.contentResolver.releasePersistableUriPermission(uri, grant.acquired) }
+        finally { captures.remove(uri.toString())?.delete() }
     }
 }

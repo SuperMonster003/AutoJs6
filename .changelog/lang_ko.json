@@ -153,7 +153,9 @@
         "Node.js/Bun에서 실행 소유 View 핸들, 비동기 AndroidView 팩터리, XML Compose 컨테이너 연결, Worker 종료 시 정리 및 패키징 앱 지원",
         "Node.js/Bun에서 일반 XML 양식과 레이아웃, 네이티브 View 비동기 속성, 순차 대입, 오류 복구 및 Worker 호출 지원",
         "Node.js/Bun: WebView 페이지 로딩과 JavaScript 반환값, Drawer 패널, Toolbar 탐색과 메뉴, ViewPager 페이지 및 비동기 네이티브 이벤트",
-        "Node.js/Bun: WebView HTTP(S) 다운로드, 시스템 파일 선택, 비동기 WebViewClient/WebChromeClient 콜백 및 네이티브 탐색과 리소스 규칙"
+        "Node.js/Bun: WebView HTTP(S) 다운로드, 시스템 파일 선택, 비동기 WebViewClient/WebChromeClient 콜백 및 네이티브 탐색과 리소스 규칙",
+        "Node.js/Bun: WebView 원본 크기 사진 촬영, 저장 및 디렉터리 선택, 문서 바이트 읽기, blob/data 분할 다운로드와 선택한 위치로 출력",
+        "사진 촬영이나 파일 작업을 기다리는 Bun 프로젝트 및 패키지 앱의 timeoutMs 실행 시간 설정"
       ],
       "fix": [
         "runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제",

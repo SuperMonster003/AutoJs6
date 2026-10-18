@@ -156,6 +156,8 @@
 * `추가` Node.js/Bun에서 일반 XML 양식과 레이아웃, 네이티브 View 비동기 속성, 순차 대입, 오류 복구 및 Worker 호출 지원
 * `추가` Node.js/Bun: WebView 페이지 로딩과 JavaScript 반환값, Drawer 패널, Toolbar 탐색과 메뉴, ViewPager 페이지 및 비동기 네이티브 이벤트
 * `추가` Node.js/Bun: WebView HTTP(S) 다운로드, 시스템 파일 선택, 비동기 WebViewClient/WebChromeClient 콜백 및 네이티브 탐색과 리소스 규칙
+* `추가` Node.js/Bun: WebView 원본 크기 사진 촬영, 저장 및 디렉터리 선택, 문서 바이트 읽기, blob/data 분할 다운로드와 선택한 위치로 출력
+* `추가` 사진 촬영이나 파일 작업을 기다리는 Bun 프로젝트 및 패키지 앱의 timeoutMs 실행 시간 설정
 * `수정` runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제
 * `수정` Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제
 * `수정` Rhino 엔진과 내장 모듈의 스코프, 인수 변환 및 반환값 처리 비호환으로 일부 스크립트 동작이 비정상적인 문제

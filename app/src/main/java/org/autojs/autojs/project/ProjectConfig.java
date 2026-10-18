@@ -1002,6 +1002,18 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     }
 
     public static class BunConfig {
+        @Nullable
+        @SerializedName("timeoutMs")
+        private Long mTimeoutMs;
+
+        @Nullable
+        public Long getTimeoutMs() { return mTimeoutMs; }
+
+        public BunConfig setTimeoutMs(@Nullable Long timeoutMs) {
+            mTimeoutMs = timeoutMs;
+            return this;
+        }
+
         @SerializedName("hostCapabilities")
         private List<String> mHostCapabilities = new ArrayList<>();
 

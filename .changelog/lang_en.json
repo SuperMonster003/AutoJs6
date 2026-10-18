@@ -153,7 +153,9 @@
         "Node.js/Bun support execution-owned View handles, asynchronous AndroidView factories and XML Compose container attachments, with Worker cleanup and packaged application support",
         "Node.js/Bun support common XML form and layout widgets and asynchronous native View property access, including ordered assignments, error recovery and Worker use",
         "Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events",
-        "Node.js/Bun: WebView HTTP(S) downloads, system file selection and asynchronous WebViewClient/WebChromeClient callbacks with native navigation and resource rules"
+        "Node.js/Bun: WebView HTTP(S) downloads, system file selection and asynchronous WebViewClient/WebChromeClient callbacks with native navigation and resource rules",
+        "Node.js/Bun: WebView full-size camera capture, save and directory selection, document byte reads, and streamed blob/data downloads with selected output locations",
+        "Bun project timeoutMs configuration for interactive camera and file workflows, including packaged applications"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
