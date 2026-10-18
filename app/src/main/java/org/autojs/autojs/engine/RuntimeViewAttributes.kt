@@ -11,6 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.WeakHashMap
@@ -22,7 +24,9 @@ internal object RuntimeViewAttributes {
         "width", "height", "padding", "margin", "backgroundColor", "gravity", "layoutGravity", "weight", "orientation",
         "min", "max", "progress", "indeterminate", "rating", "numStars", "stepSize", "isIndicator",
         "items", "selectedIndex", "checkedId", "textOn", "textOff", "value", "wrapSelectorWheel", "displayedValues",
-        "cardCornerRadius", "cardElevation", "src", "scaleType", "adjustViewBounds")
+        "cardCornerRadius", "cardElevation", "src", "scaleType", "adjustViewBounds",
+        "url", "html", "javaScriptEnabled", "domStorageEnabled", "title", "subtitle",
+        "navigationIcon", "navigationContentDescription", "menu", "drawerLockMode", "currentItem", "offscreenPageLimit")
     val aliases = mapOf("w" to "width", "h" to "height", "bg" to "backgroundColor", "entries" to "items",
         "layout_width" to "width", "layout_height" to "height", "layout_weight" to "weight",
         "layout_gravity" to "layoutGravity", "layout_margin" to "margin", "checkedButton" to "checkedId")
@@ -53,10 +57,10 @@ internal object RuntimeViewAttributes {
         require(result != null && result.isFinite() && result in min..max) { "Invalid native numeric value: $value" }
         return result
     }
-    private fun integer(value: Any, min: Int, max: Int): Int = number(value, min.toDouble(), max.toDouble()).also {
+    internal fun integer(value: Any, min: Int, max: Int): Int = number(value, min.toDouble(), max.toDouble()).also {
         require(it % 1.0 == 0.0) { "Native integer value required" }
     }.toInt()
-    private fun boolean(value: Any): Boolean = when (value) {
+    internal fun boolean(value: Any): Boolean = when (value) {
         true, "true" -> true
         false, "false" -> false
         else -> throw IllegalArgumentException("Native boolean value required")
@@ -92,6 +96,7 @@ internal object RuntimeViewAttributes {
 
     fun apply(view: View, raw: JSONObject, strict: Boolean = false, image: ((JSONObject) -> Bitmap)? = null) {
         val props = normalize(raw)
+        check(view !is RuntimeWebView || !view.disposed) { "WebView is disposed" }
         if (strict) require(props.keys().asSequence().all { it in writable }) { "Unknown or read-only native View attribute" }
         val actions = ArrayList<() -> Unit>()
         fun prop(name: String, supported: Boolean = true, action: (Any) -> (() -> Unit)) {
@@ -151,9 +156,13 @@ internal object RuntimeViewAttributes {
             val params = view.layoutParams as? ViewGroup.MarginLayoutParams ?: ViewGroup.MarginLayoutParams(view.layoutParams ?: ViewGroup.LayoutParams(-2, -2))
             params.setMargins(n[0], n[1], n[2], n[3]); view.layoutParams = params
         } }
-        prop("layoutGravity", view.parent == null || view.parent is LinearLayout || view.parent is FrameLayout) { value -> val n = gravity(value); {
+        prop("layoutGravity", view.parent == null || view.parent is LinearLayout || view.parent is FrameLayout || view.parent is DrawerLayout || view.parent is Toolbar) { value ->
+            val n = gravity(value)
+            (view.parent as? DrawerLayout)?.let { RuntimeViewComponents.validateDrawer(it, view, n) }
+            return@prop {
             val params = view.layoutParams
-            when (params) { is LinearLayout.LayoutParams -> params.gravity = n; is FrameLayout.LayoutParams -> params.gravity = n }
+            when (params) { is LinearLayout.LayoutParams -> params.gravity = n; is FrameLayout.LayoutParams -> params.gravity = n
+                is DrawerLayout.LayoutParams -> params.gravity = n; is Toolbar.LayoutParams -> params.gravity = n }
             view.requestLayout()
         } }
         prop("weight", view.parent == null || view.parent is LinearLayout) { value -> val n = number(value, 0.0, 10000.0).toFloat(); {
@@ -187,7 +196,7 @@ internal object RuntimeViewAttributes {
             prop("value", progress != null || text != null || compound != null) { value -> when {
                 compound != null -> { val flag = boolean(value); { compound.isChecked = flag } }
                 progress != null -> { val n = integer(value, nextMin, nextMax); { progress.progress = n } }
-                else -> { val s = value.toString(); { text!!.text = s } }
+                else -> { val s = value.toString(); { if (text!!.text.toString() != s) text.text = s } }
             } }
             prop("displayedValues", false) { {} }
         }
@@ -208,7 +217,7 @@ internal object RuntimeViewAttributes {
         }
         prop("selectedIndex", spinner != null || view is ListView) { value ->
             val count = nextItems?.length() ?: (view as AdapterView<*>).count
-            val n = integer(value, if (count == 0) -1 else 0, count - 1)
+            val n = integer(value, -1, count - 1)
             return@prop { if (spinner != null) spinner.setSelection(n) else (view as ListView).setSelection(n) }
         }
         prop("checkedId", view is RadioGroup) { value ->
@@ -242,6 +251,26 @@ internal object RuntimeViewAttributes {
                 }
             }
         }
+        val web = view as? RuntimeWebView
+        val toolbar = view as? Toolbar
+        val pager = view as? RuntimeViewPager
+        prop("javaScriptEnabled", web != null) { value -> val flag = boolean(value); { web!!.settings.javaScriptEnabled = flag } }
+        prop("domStorageEnabled", web != null) { value -> val flag = boolean(value); { web!!.settings.domStorageEnabled = flag } }
+        require(!props.has("url") || !props.has("html")) { "Use either url or html in one View update" }
+        prop("url", web != null) { value -> val url = value.toString().also { require(it.isNotBlank()) }; { web!!.loadUrl(url); declared(view).remove("html"); Unit } }
+        prop("html", web != null) { value -> val html = value.toString(); { web!!.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null) } }
+        prop("title", toolbar != null) { value -> val title = value.toString(); { toolbar!!.title = title } }
+        prop("subtitle", toolbar != null) { value -> val title = value.toString(); { toolbar!!.subtitle = title } }
+        prop("navigationIcon", toolbar != null) { value -> val icon = RuntimeViewComponents.icon(view, value); { toolbar!!.navigationIcon = icon } }
+        prop("navigationContentDescription", toolbar != null) { value -> val label = value.toString(); { toolbar!!.navigationContentDescription = label } }
+        prop("menu", toolbar != null) { value -> RuntimeViewComponents.menu(toolbar!!, value) }
+        prop("drawerLockMode", view is DrawerLayout) { value ->
+            val mode = mapOf("unlocked" to DrawerLayout.LOCK_MODE_UNLOCKED, "lockedClosed" to DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
+                "lockedOpen" to DrawerLayout.LOCK_MODE_LOCKED_OPEN)[value.toString()] ?: error("Invalid drawerLockMode")
+            return@prop { (view as DrawerLayout).setDrawerLockMode(mode) }
+        }
+        prop("currentItem", pager != null) { value -> val index = integer(value, 0, pager!!.pages.size - 1); { pager.setCurrentItem(index, false) } }
+        prop("offscreenPageLimit", pager != null) { value -> val count = integer(value, 1, 128); { pager!!.offscreenPageLimit = count } }
         actions.forEach { it() }
         props.keys().forEach { key -> declared(view).put(key, if (key == "items") nextItems else props.get(key)) }
     }
@@ -260,6 +289,8 @@ internal object RuntimeViewAttributes {
                 if (params is ViewGroup.MarginLayoutParams) put("margin", JSONArray(listOf(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin)))
                 if (params is LinearLayout.LayoutParams) { put("weight", params.weight.toDouble()); put("layoutGravity", params.gravity) }
                 if (params is FrameLayout.LayoutParams) put("layoutGravity", params.gravity)
+                if (params is DrawerLayout.LayoutParams) put("layoutGravity", params.gravity)
+                if (params is Toolbar.LayoutParams) put("layoutGravity", params.gravity)
             }
             if (view is TextView) {
                 put("text", view.text.toString()); put("hint", view.hint?.toString().orEmpty())
@@ -282,5 +313,24 @@ internal object RuntimeViewAttributes {
             if (view is NumberPicker) { put("min", view.minValue); put("max", view.maxValue); put("value", view.value); put("wrapSelectorWheel", view.wrapSelectorWheel); put("displayedValues", view.displayedValues?.let { JSONArray(it.toList()) } ?: JSONObject.NULL) }
             if (view is CardView) { put("cardCornerRadius", view.radius.toDouble()); put("cardElevation", view.cardElevation.toDouble()) }
             if (view is ImageView) { put("src", declared(view).opt("src") ?: JSONObject.NULL); put("scaleType", view.scaleType.name); put("adjustViewBounds", view.adjustViewBounds); put("drawableWidth", view.drawable?.intrinsicWidth ?: 0); put("drawableHeight", view.drawable?.intrinsicHeight ?: 0) }
+            if (view is RuntimeWebView) {
+                check(!view.disposed) { "WebView is disposed" }
+                put("url", view.url ?: JSONObject.NULL); put("html", declared(view).opt("html") ?: JSONObject.NULL)
+                put("title", view.title ?: JSONObject.NULL); put("progress", view.progress)
+                put("javaScriptEnabled", view.settings.javaScriptEnabled); put("domStorageEnabled", view.settings.domStorageEnabled)
+                put("canGoBack", view.canGoBack()); put("canGoForward", view.canGoForward())
+            }
+            if (view is Toolbar) {
+                put("title", view.title?.toString().orEmpty()); put("subtitle", view.subtitle?.toString().orEmpty())
+                put("navigationIcon", declared(view).opt("navigationIcon") ?: JSONObject.NULL)
+                put("navigationContentDescription", view.navigationContentDescription?.toString().orEmpty())
+                put("menu", declared(view).optJSONArray("menu") ?: JSONArray())
+            }
+            if (view is DrawerLayout) {
+                put("drawerLockMode", when (view.getDrawerLockMode(androidx.core.view.GravityCompat.START)) {
+                    DrawerLayout.LOCK_MODE_LOCKED_CLOSED -> "lockedClosed"; DrawerLayout.LOCK_MODE_LOCKED_OPEN -> "lockedOpen"; else -> "unlocked" })
+                put("drawerOpenStart", view.isDrawerOpen(androidx.core.view.GravityCompat.START)); put("drawerOpenEnd", view.isDrawerOpen(androidx.core.view.GravityCompat.END))
+            }
+            if (view is RuntimeViewPager) { put("currentItem", view.currentItem); put("pageCount", view.pages.size); put("offscreenPageLimit", view.offscreenPageLimit) }
         }
 }

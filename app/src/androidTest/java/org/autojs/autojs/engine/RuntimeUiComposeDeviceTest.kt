@@ -112,6 +112,9 @@ class RuntimeUiComposeDeviceTest {
     }
 
     @Test fun snackbarActionsReachTheCreatingRuntime() = grants {
+        // Keep this action test stable when the physical device's auto-rotate sensor is active.
+        // Explicit recreation and retained state are exercised by the rotation tests below.
+        harness.withFixture {
         for(mode in modes) {
             val label="Snackbar-$mode"
             interact(mode,"""
@@ -121,6 +124,7 @@ class RuntimeUiComposeDeviceTest {
                 const end=Date.now()+20000;while(!actions&&Date.now()<end)await new Promise(r=>setTimeout(r,30));
                 if(actions!==1)throw Error('Snackbar callback');await window.close();return {actions,closed:window.isClosed()};
             """.trimIndent(),"$label-next")
+        }
         }
         write("snackbar")
     }
@@ -176,14 +180,19 @@ class RuntimeUiComposeDeviceTest {
             val result = executor.submit<JSONObject> { run(mode, code) }
             harness.await("$mode native window", 25000) { if(result.isDone) fail(result.get().toString()); find(click) != null }
             edit?.let { (before, after) ->
-                val node = requireNotNull(find(before))
-                assertTrue("Native text edit", node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,
-                    Bundle().apply { putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, after) }))
+                harness.await("$mode native text edit", 10000) {
+                    if(result.isDone) fail(result.get().toString())
+                    find(before)?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,
+                        Bundle().apply { putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, after) }) == true
+                }
                 harness.await("$mode text updated") { find(after) != null }
             }
-            var target = requireNotNull(find(click))
-            while (!target.isClickable && target.parent != null) target = target.parent
-            assertTrue("Native click: $click", target.performAction(AccessibilityNodeInfo.ACTION_CLICK))
+            harness.await("$mode native click: $click", 10000) {
+                if(result.isDone) fail(result.get().toString())
+                var target = find(click) ?: return@await false
+                while (!target.isClickable && target.parent != null) target = target.parent
+                target.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            }
             val value = result.get(35, TimeUnit.SECONDS)
             evidence.put(JSONObject().put("mode", mode).put("result", value))
         } finally { executor.shutdownNow() }

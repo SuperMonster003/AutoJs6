@@ -92,9 +92,15 @@ class RuntimeUiInteropDeviceTest {
                         const native=await ui.createView('Button',{text:'Rotate-$mode-next'});let clicks=0;native.on('click',()=>clicks++);
                         const window=await ui.showLayout(root),container=await root.findView('content');
                         const session=await compose.attach(container,compose.AndroidView({view:native}));
-                        const end=Date.now()+30000;while(clicks<2&&Date.now()<end)await new Promise(r=>setTimeout(r,30));
+                        let rejectedDisposals=0;
+                        const end=Date.now()+30000;while(clicks<2&&Date.now()<end){
+                            try {await native.dispose();throw Error('Borrowed native View was disposed');}
+                            catch(error){if(!String(error.message).includes('Close the borrowing Compose session'))throw error;rejectedDisposals++;}
+                            await new Promise(r=>setTimeout(r,100));
+                        }
                         if(clicks!==2||session.isClosed())throw Error('Attachment lost on rotation '+clicks);
-                        await session.close();await native.dispose();await window.close();await root.dispose();return {clicks};
+                        if(!rejectedDisposals)throw Error('Borrowed disposal was not exercised');
+                        await session.close();await native.dispose();await window.close();await root.dispose();return {clicks,rejectedDisposals};
                     """.trimIndent())}
                     fun click(){harness.await("Interop rotation button action",20000){
                         if(future.isDone)fail(future.get().toString())

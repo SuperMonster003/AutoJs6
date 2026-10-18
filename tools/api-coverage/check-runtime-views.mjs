@@ -7,6 +7,7 @@ const host=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),ro
 const read=file=>fs.readFileSync(file,'utf8');
 const native=read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/RuntimeViewAttributes.kt'));
 const widgets=read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/RuntimeViewWidgets.kt'));
+const components=read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/RuntimeViewComponents.kt'));
 const source=read(path.join(root,'AutoJs6-Plugin-NodeJs-Runtime/tools/nodejs/api/portable-ui-compose.js'));
 const nodeTypes=read(path.join(root,'AutoJs6-Plugin-NodeJs-Runtime/docs/nodejs/types/autojs6-node/ui.d.ts'));
 const bunTypes=read(path.join(root,'AutoJs6-Plugin-Bun-Runtime/app/src/main/assets/autojs6/host-client.d.mts'));
@@ -21,7 +22,7 @@ const snapshot=native.slice(native.indexOf('fun snapshot('));
 for(const key of writable)assert(snapshot.includes('put("'+key+'"'),'Attribute lacks a native getter: '+key);
 const additionalWidgets=strings(widgets.match(/val types = setOf\(([\s\S]*?)\)\n/)[1]);
 for(const type of additionalWidgets) {
-  assert(widgets.includes('"'+type+'" ->'),type+' lacks a native factory');
+  assert((widgets+components).includes('"'+type+'" ->'),type+' lacks a native factory');
   assert(nodeTypes.includes('"'+type+'"'),type+' lacks a declaration');
 }
 const createUi=new Function(source+';return __autojs6_create_ui;')();
@@ -41,3 +42,8 @@ assert.equal(calls,0);
 assert.equal(typeof view.flush,'function');
 console.log(JSON.stringify({nativePropertyProxies:writable.length,additionalXmlWidgetFactories:additionalWidgets.length,
   declarationsAndHandlersAgree:true,plainSerializableHandles:true}));
+
+const commands=[...source.match(/const commands = \{([\s\S]*?)\n      \};/)[1].matchAll(/(\w+): (?:\([^)]*\)|\w+) => command/g)].map(m=>m[1]);
+assert.equal(commands.length,12);
+for(const name of commands){assert.equal(typeof view[name],'function');assert(components.includes('"'+name+'"'),name+' lacks a native command');for(const types of [nodeTypes,bunTypes])assert(types.includes(name+'('),name+' lacks a declaration');}
+console.log(JSON.stringify({nativeCommands:commands.length,webViewDisposal:components.includes('it.release()'),offscreenPages:components.includes('view.pages.toList()')}));

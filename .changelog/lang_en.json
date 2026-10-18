@@ -151,7 +151,8 @@
         "Node.js/Bun images supports PNG quantization and compression with quality/memory metrics, binary results and descriptor-backed file output",
         "Node.js/Bun UI and Compose support native layouts, data components, reactive state and window events, with independent grants and automatic window cleanup",
         "Node.js/Bun support execution-owned View handles, asynchronous AndroidView factories and XML Compose container attachments, with Worker cleanup and packaged application support",
-        "Node.js/Bun support common XML form and layout widgets and asynchronous native View property access, including ordered assignments, error recovery and Worker use"
+        "Node.js/Bun support common XML form and layout widgets and asynchronous native View property access, including ordered assignments, error recovery and Worker use",
+        "Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
@@ -286,7 +287,9 @@
         "Bun losing trailing logs when the synchronous result arrived before output callbacks at script completion",
         "Screen capture consent ending prematurely when its caller is covered, system dialogs remaining after cancellation, and requested image dimensions being ignored",
         "Pinyin numeric style/mode constants being rejected after conversion to JSON or Rhino numbers",
-        "Screen capture discards cleared transparent projection buffers while preserving valid black frames"
+        "Screen capture discards cleared transparent projection buffers while preserving valid black frames",
+        "AndroidView bindings retain native View ownership during Compose renderer recreation, preventing premature disposal and reuse by another session",
+        "JSON UI restores unselected lists and tab state during Activity recreation without treating event payloads as View properties"
       ],
       "improvement": [
         "Deferred initialization of noncritical components to improve app startup speed",

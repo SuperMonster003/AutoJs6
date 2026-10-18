@@ -151,7 +151,8 @@
         "Node.js/Bun images admite cuantización PNG y compresión con métricas de calidad/memoria, resultados binarios y salida mediante descriptor de archivo",
         "Node.js/Bun UI y Compose admiten diseños nativos, componentes de datos, estado reactivo y eventos, con permisos independientes y cierre automático",
         "Node.js/Bun admiten identificadores View de cada ejecución, fábricas AndroidView asíncronas, contenedores XML Compose, limpieza de Workers y aplicaciones empaquetadas",
-        "Node.js/Bun admiten formularios y diseños XML comunes, propiedades View asíncronas, asignaciones ordenadas, recuperación de errores y Workers"
+        "Node.js/Bun admiten formularios y diseños XML comunes, propiedades View asíncronas, asignaciones ordenadas, recuperación de errores y Workers",
+        "Node.js/Bun: Carga WebView y resultados JavaScript, paneles Drawer, navegación y menús Toolbar, páginas ViewPager y eventos nativos asíncronos"
       ],
       "fix": [
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",
@@ -286,7 +287,9 @@
         "Pérdida de los últimos registros de Bun cuando el resultado síncrono llegaba antes de los callbacks de salida al finalizar el script",
         "Finalización prematura del consentimiento al ocultarse su actividad, diálogos persistentes tras cancelar y dimensiones de captura ignoradas",
         "Constantes numéricas style/mode de pinyin rechazadas tras convertirse en números JSON o Rhino",
-        "La captura descarta búferes transparentes sin componer y conserva los fotogramas negros válidos"
+        "La captura descarta búferes transparentes sin componer y conserva los fotogramas negros válidos",
+        "Los enlaces AndroidView conservan las View durante la recreación del renderizador Compose, evitando liberaciones prematuras y reutilización por otra sesión",
+        "JSON UI restaura listas sin selección y pestañas al recrear Activity, sin tratar datos de eventos como propiedades View"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",

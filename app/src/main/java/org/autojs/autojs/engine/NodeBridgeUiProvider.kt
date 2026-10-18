@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class NodeBridgeUiActivity : Activity() {
 
     private var session: NodeBridgeUiSession? = null
+    private var renderedView: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +57,7 @@ class NodeBridgeUiActivity : Activity() {
     }
 
     override fun onDestroy() {
+        renderedView?.let(RuntimeViewComponents::dispose); renderedView = null
         session?.detach(this)
         session = null
         super.onDestroy()
@@ -64,6 +66,7 @@ class NodeBridgeUiActivity : Activity() {
     fun render(descriptor: JSONObject) {
         val currentSession = session ?: return
         val view = NodeBridgeUiRenderer(this, currentSession).createView(descriptor, isRoot = true)
+        renderedView?.let(RuntimeViewComponents::dispose); renderedView = view
         setContentView(view)
         currentSession.markShown()
     }
@@ -76,7 +79,7 @@ class NodeBridgeUiActivity : Activity() {
             return true
         }
         val targetId = patch.optString("id").takeIf { it.isNotBlank() } ?: return false
-        val target = window?.decorView?.findViewWithTag<View>(targetId) ?: return false
+        val target = renderedView?.let { RuntimeViewComponents.find(it, targetId) } ?: return false
         NodeBridgeUiRenderer(this, currentSession).applyPatch(target, patch)
         return true
     }
@@ -388,7 +391,10 @@ class NodeBridgeUiSession(
     fun rootDescriptor(): JSONObject = JSONObject(descriptorText).also { root ->
         fun restore(node: JSONObject) {
             synchronized(stateLock) { state[node.optString("id")]?.let { saved ->
-                saved.keys().forEach { key -> if (key !in setOf("type", "itemCount")) node.put(key, saved.opt(key)) }
+                saved.keys().forEach { key ->
+                    val eventPayload = saved.optString("type") in setOf("List", "Tabs") && key in setOf("text", "value")
+                    if (key !in setOf("type", "itemCount") && !eventPayload) node.put(key, saved.opt(key))
+                }
             } }
             for (key in listOf("children", "tabs")) node.optJSONArray(key)?.let { children ->
                 for (i in 0 until children.length()) children.optJSONObject(i)?.let(::restore)
@@ -582,7 +588,16 @@ internal class NodeBridgeUiRenderer(
     private val image: ((JSONObject) -> android.graphics.Bitmap)? = null,
 ) {
 
+    private val created = ArrayList<View>()
+    private var creationDepth = 0
     fun createView(rawDescriptor: JSONObject, isRoot: Boolean = false): View {
+        val outer = creationDepth++ == 0
+        try { return createNativeView(rawDescriptor, isRoot) } catch (failure: Throwable) {
+            if (outer) created.asReversed().forEach(RuntimeViewComponents::dispose)
+            throw failure
+        } finally { creationDepth--; if (outer) created.clear() }
+    }
+    private fun createNativeView(rawDescriptor: JSONObject, isRoot: Boolean): View {
         val descriptor = RuntimeViewAttributes.normalize(rawDescriptor)
         val type = normalizeType(descriptor.optString("type"))
         val id = descriptor.optString("id")
@@ -608,6 +623,7 @@ internal class NodeBridgeUiRenderer(
             else -> RuntimeViewWidgets.create(type, activity, descriptor, session) { createView(it) }
                 ?: throw IllegalArgumentException("Unsupported ui component type: ${descriptor.optString("type")}")
         }
+        created.add(view)
         if (id.isNotBlank()) {
             view.id = View.generateViewId()
             view.tag = id
@@ -622,7 +638,9 @@ internal class NodeBridgeUiRenderer(
             view.setOnClickListener { session.emitComponentEvent("click", id, JSONObject()) }
             view.isClickable = clickable
         }
-        RuntimeViewAttributes.apply(view, descriptor, image = image)
+        // Tabs consumes its initial selection while constructing the content; it is not an AdapterView.
+        val attributes = if (type == TYPE_TABS) JSONObject(descriptor.toString()).apply { remove("selectedIndex") } else descriptor
+        RuntimeViewAttributes.apply(view, attributes, image = image)
         return view
     }
 
@@ -884,6 +902,7 @@ internal class NodeBridgeUiRenderer(
             setPadding(0, dp(8), 0, 0)
         }
         fun renderContent(index: Int) {
+            RuntimeViewComponents.dispose(content)
             content.removeAllViews()
             val tab = tabs.optJSONObject(index) ?: return
             val tabChildren = tab.optJSONArray("children")
@@ -1054,9 +1073,6 @@ internal class NodeBridgeUiRenderer(
                 return "ui descriptor requires a component type."
             }
             val normalizedType = normalizeType(rawType)
-            if (normalizedType == TYPE_WEB_VIEW) {
-                return "ui descriptor component type WebView requires a separate security gate."
-            }
             if (rawType.isNotBlank() && normalizedType !in supportedTypes && normalizedType !in RuntimeViewWidgets.types) {
                 return "ui descriptor uses an unsupported component type: $rawType."
             }

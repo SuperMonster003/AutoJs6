@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,10 +19,12 @@ internal object RuntimeViewWidgets {
         "ratingbar" to "RatingBar", "radiogroup" to "RadioGroup", "radio" to "RadioButton",
         "radiobutton" to "RadioButton", "toggle" to "ToggleButton", "togglebutton" to "ToggleButton",
         "checkedtext" to "CheckedTextView", "checkedtextview" to "CheckedTextView", "numberpicker" to "NumberPicker",
-        "img" to "Image", "linear" to "Column"
+        "img" to "Image", "linear" to "Column", "webview" to "WebView", "webView" to "WebView",
+        "drawer" to "Drawer", "DrawerLayout" to "Drawer", "toolbar" to "Toolbar", "viewpager" to "ViewPager", "viewPager" to "ViewPager"
     )
     val types = setOf("HorizontalScrollView", "Space", "RelativeLayout", "Card", "Spinner", "SeekBar",
-        "RatingBar", "RadioGroup", "RadioButton", "ToggleButton", "CheckedTextView", "NumberPicker")
+        "RatingBar", "RadioGroup", "RadioButton", "ToggleButton", "CheckedTextView", "NumberPicker",
+        "WebView", "Drawer", "Toolbar", "ViewPager")
 
     fun create(type: String, context: Context, descriptor: JSONObject, session: NodeBridgeUiSession,
                child: (JSONObject) -> View): View? {
@@ -77,7 +81,7 @@ internal object RuntimeViewWidgets {
                 maxValue = 100
                 setOnValueChangedListener { _, old, next -> emit("change", "oldValue" to old, "value" to next) }
             }
-            else -> return null
+            else -> return RuntimeViewComponents.create(type, context, descriptor, session, child)
         }
         val children = descriptor.optJSONArray("children") ?: JSONArray()
         if (view is ViewGroup && type in setOf("RelativeLayout", "Card", "RadioGroup", "HorizontalScrollView")) {
@@ -96,8 +100,14 @@ internal object RuntimeViewWidgets {
         val old = child.layoutParams ?: ViewGroup.LayoutParams(-1, -2)
         val props = RuntimeViewAttributes.declared(child)
         require(!props.has("weight") || parent is LinearLayout) { "weight requires a linear parent" }
-        require(!props.has("layoutGravity") || parent is LinearLayout || parent is FrameLayout) { "layoutGravity requires a linear/frame parent" }
+        require(!props.has("layoutGravity") || parent is LinearLayout || parent is FrameLayout || parent is DrawerLayout || parent is Toolbar) { "layoutGravity requires a linear/frame/drawer/toolbar parent" }
         val params: ViewGroup.MarginLayoutParams = when (parent) {
+            is DrawerLayout -> DrawerLayout.LayoutParams(old.width, old.height).also {
+                it.gravity = RuntimeViewAttributes.gravity(props.opt("layoutGravity") ?: 0)
+            }
+            is Toolbar -> Toolbar.LayoutParams(old.width, old.height).also {
+                it.gravity = RuntimeViewAttributes.gravity(props.opt("layoutGravity") ?: android.view.Gravity.START)
+            }
             is RadioGroup -> RadioGroup.LayoutParams(old.width, old.height).also {
                 it.weight = props.optDouble("weight", 0.0).toFloat()
                 it.gravity = RuntimeViewAttributes.gravity(props.opt("layoutGravity") ?: -1)

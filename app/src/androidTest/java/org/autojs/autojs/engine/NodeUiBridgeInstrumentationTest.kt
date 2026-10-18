@@ -422,7 +422,7 @@ class NodeUiBridgeInstrumentationTest {
     }
 
     @Test
-    fun androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource() {
+    fun androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource() = CaptureWorkerBridgeDeviceTest().withFixture {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val monitor = instrumentation.addMonitor(NodeBridgeUiActivity::class.java.name, null, false)
         val provider = AndroidNodeBridgeCapabilityProvider(
@@ -462,9 +462,23 @@ class NodeUiBridgeInstrumentationTest {
             assertTrue(handleId.startsWith("ui-"))
             assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
 
-            val activity = monitor.waitForActivityWithTimeout(5_000L) as? NodeBridgeUiActivity
+            var activity = monitor.waitForActivityWithTimeout(5_000L) as? NodeBridgeUiActivity
             assertNotNull("Node UI Activity did not open", activity)
             instrumentation.waitForIdleSync()
+            fun recreate() {
+                val observer = instrumentation.addMonitor(NodeBridgeUiActivity::class.java.name, null, false)
+                try {
+                    instrumentation.runOnMainSync { activity!!.recreate() }
+                    activity = observer.waitForActivityWithTimeout(10000) as? NodeBridgeUiActivity
+                    assertNotNull("Legacy UI did not recreate", activity)
+                    instrumentation.waitForIdleSync()
+                } finally { instrumentation.removeMonitor(observer) }
+            }
+            recreate()
+            instrumentation.runOnMainSync {
+                val list = activity!!.window.decorView.findViewWithTag<View>("choices") as ListView
+                assertEquals(2, list.count); assertEquals(-1, list.selectedItemPosition)
+            }
             instrumentation.runOnMainSync {
                 val root = activity!!.window.decorView
                 assertEquals("Node UI", (root.findViewWithTag<View>("title") as TextView).text.toString())
@@ -510,6 +524,13 @@ class NodeUiBridgeInstrumentationTest {
             val tab = events.firstEvent("tab", "tabs")
             assertEquals(1, tab.getInt("selectedIndex"))
             assertEquals("second", tab.getString("tabId"))
+            recreate()
+            instrumentation.runOnMainSync {
+                val root = activity!!.window.decorView
+                assertEquals("Alice", (root.findViewWithTag<View>("name") as EditText).text.toString())
+                assertNotNull("Selected tab was not restored", root.findViewWithTag<View>("tab-second"))
+            }
+
 
             val batchUpdate = dispatch(
                 provider,
@@ -522,7 +543,7 @@ class NodeUiBridgeInstrumentationTest {
                 assertEquals(90, (activity!!.window.decorView.findViewWithTag<View>("progress") as ProgressBar).progress)
                 assertEquals(
                     "Batch Updated",
-                    (activity.window.decorView.findViewWithTag<View>("title") as TextView).text.toString(),
+                    (activity!!.window.decorView.findViewWithTag<View>("title") as TextView).text.toString(),
                 )
             }
 
@@ -794,9 +815,13 @@ class NodeUiBridgeInstrumentationTest {
             method = "showLayout",
             argsJson = """[{"type":"WebView","id":"web"}]""",
         )
-        assertFalse(webView.toString(), webView.ok)
-        assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, webView.error?.code)
-        assertTrue(webView.error?.message.orEmpty().contains("separate security gate"))
+        assertTrue(webView.toString(), webView.ok)
+        val webHandle = JSONObject(webView.resultJson.orEmpty()).getString("id")
+        try {
+            assertTrue("WebView was not rendered", waitUntil { NodeBridgeUiSessionStore.get(webHandle)?.snapshot()?.optBoolean("shown") == true })
+        } finally {
+            assertTrue(dispatch(provider, method = "close", argsJson = JSONArray().put(webHandle).toString()).ok)
+        }
         assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
 
         val foreignUpdate = dispatch(

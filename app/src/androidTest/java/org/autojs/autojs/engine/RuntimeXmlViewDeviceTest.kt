@@ -30,6 +30,7 @@ class RuntimeXmlViewDeviceTest {
                 label.text='first';label.text='last';eq(await label.text,'last','ordered write/read');
                 label.textColor='#123456';label.textSize=18;label.textStyle='bold';label.padding=[2,3];label.margin=[1,2,3,4];label.alpha=0.5;await label.flush();
                 eq(await label.xmlId,'label','XML identity');eq(await label.textStyle,'bold','style');eq(await label.textColor,0xff123456|0,'color');eq(await label.alpha,0.5,'alpha');
+                spinner.selectedIndex=-1;eq(await spinner.selectedIndex,-1,'no selection');
                 spinner.items=['Alpha','Beta','Gamma'];spinner.selectedIndex=2;eq(await spinner.selectedIndex,2,'spinner');eq(await spinner.items,['Alpha','Beta','Gamma'],'entries');
                 seek.progress=13;eq(await seek.progress,13,'seek');rating.rating=4;eq(await rating.rating,4,'rating');
                 radios.checkedId='second';eq(await radios.checkedId,'second','radio identity');eq(await (await get('second')).checked,true,'radio state');
@@ -162,7 +163,10 @@ class RuntimeXmlViewDeviceTest {
                     val copy=(image.drawable as android.graphics.drawable.BitmapDrawable).bitmap
                     assertFalse(copy.isRecycled);assertEquals(8,copy.width);assertEquals(6,copy.height);assertEquals(android.graphics.Color.GREEN,copy.getPixel(0,0))
                 }
-                assertTrue(requireNotNull(findDescription("XML-picture-$mode")).performAction(AccessibilityNodeInfo.ACTION_CLICK))
+                harness.await("ImageView inspection action",10000) {
+                    if(future.isDone)fail(future.get().toString())
+                    findDescription("XML-picture-$mode")?.performAction(AccessibilityNodeInfo.ACTION_CLICK)==true
+                }
                 evidence.put(JSONObject().put("mode",mode).put("result",future.get(30,TimeUnit.SECONDS)))
             } finally {executor.shutdownNow()}
         }
@@ -190,7 +194,10 @@ class RuntimeXmlViewDeviceTest {
                     assertTrue("below.top=${view("below").top}, above.bottom=${view("above").bottom}, margin=${(4*density).toInt()}",
                         view("below").top>=view("above").bottom+(4*density).toInt())
                 }
-                assertTrue(requireNotNull(fixture.find("XML-layout-$mode-done")).performAction(AccessibilityNodeInfo.ACTION_CLICK))
+                harness.await("XML geometry completion action",10000) {
+                    if(future.isDone)fail(future.get().toString())
+                    fixture.find("XML-layout-$mode-done")?.performAction(AccessibilityNodeInfo.ACTION_CLICK)==true
+                }
                 evidence.put(JSONObject().put("mode",mode).put("result",future.get(30,TimeUnit.SECONDS)))
             } finally {executor.shutdownNow()}
         }

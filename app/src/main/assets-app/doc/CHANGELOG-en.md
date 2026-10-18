@@ -154,6 +154,7 @@
 * `Feature` Node.js/Bun UI and Compose support native layouts, data components, reactive state and window events, with independent grants and automatic window cleanup
 * `Feature` Node.js/Bun support execution-owned View handles, asynchronous AndroidView factories and XML Compose container attachments, with Worker cleanup and packaged application support
 * `Feature` Node.js/Bun support common XML form and layout widgets and asynchronous native View property access, including ordered assignments, error recovery and Worker use
+* `Feature` Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
@@ -287,6 +288,8 @@
 * `Fix` Screen capture consent ending prematurely when its caller is covered, system dialogs remaining after cancellation, and requested image dimensions being ignored
 * `Fix` Pinyin numeric style/mode constants being rejected after conversion to JSON or Rhino numbers
 * `Fix` Screen capture discards cleared transparent projection buffers while preserving valid black frames
+* `Fix` AndroidView bindings retain native View ownership during Compose renderer recreation, preventing premature disposal and reuse by another session
+* `Fix` JSON UI restores unselected lists and tab state during Activity recreation without treating event payloads as View properties
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions

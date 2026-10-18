@@ -48,6 +48,8 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
         val queue = EventQueue(events)
         val disposeListeners = LinkedHashSet<() -> Unit>()
         var window: Window? = null
+        // A renderer can be absent during Activity recreation while its session still borrows this View.
+        var borrower: Any? = null
         val group get() = root ?: this
         fun json() = JSONObject().put("__autojs6ViewHandle", id).put("id", id)
             .put("type", if (view is RuntimeComposeContainer) "Compose" else view.javaClass.simpleName)
@@ -115,7 +117,7 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
                         val input = args.get(0)
                         val borrowed = input is JSONObject && input.has("__autojs6ViewHandle")
                         val root = if (borrowed) resolve(input as JSONObject) else inflate(input)
-                        require(root.root == null && root.view.parent == null && !AndroidViewClaimsV1.isClaimed(root.view)) { "View is already parented or borrowed" }
+                        require(root.root == null && root.view.parent == null && root.borrower == null && !AndroidViewClaimsV1.isClaimed(root.view)) { "View is already parented or borrowed" }
                         check(root.window == null) { "View already owns a window" }
                         val window = Window("ui-interop-${UUID.randomUUID()}", root, !borrowed)
                         windows[window.id] = window; root.window = window; RuntimeInteropActivity.windows[window.id] = window
@@ -128,7 +130,7 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
                     "findView" -> {
                         val source = args.get(0)
                         val root = if (source is String) requireNotNull(windows[source]) { "Window is not owned by this execution" }.root else resolve(source as JSONObject)
-                        val found = root.view.findViewWithTag<View>(args.getString(1))
+                        val found = RuntimeViewComponents.find(root.view, args.getString(1))
                         if (found == null) JSONObject.NULL else record(found, root.group).json()
                     }
                     "viewGet" -> {
@@ -137,6 +139,14 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
                         if (args.length() > 1) { val key = args.getString(1); require(snapshot.has(key)) { "Unknown View attribute: $key" }; snapshot.get(key) } else snapshot
                     }
                     "viewUpdate" -> { val view = resolve(args.getJSONObject(0)); update(view, args.getJSONObject(1)); snapshot(view.view) }
+                    "viewCommand" -> {
+                        val view = resolve(args.getJSONObject(0))
+                        RuntimeViewComponents.command(view.view, args.getString(1), args.getJSONArray(2)) { result ->
+                            result.fold({ value -> callback(NodeBridgeResponse.success(request.id, if (value is String) JSONObject.quote(value) else (value ?: JSONObject.NULL).toString())) },
+                                { failure -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.invalidRequest(failure.message ?: "Native View command failed", "ui", request.method))) })
+                        }
+                        return@post
+                    }
                     "viewEvents" -> { resolve(args.getJSONObject(0)).queue.read(request, callback); return@post }
                     "disposeView" -> { dispose(resolve(args.getJSONObject(0))); JSONObject.NULL }
                     else -> {
@@ -193,11 +203,12 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
     private fun snapshot(view: View) = RuntimeViewAttributes.snapshot(view)
     private fun dispose(record: NativeView, force: Boolean = false) {
         require(record.root == null) { "Dispose the inflated root, not a child alias" }
-        if(!force)require(!AndroidViewClaimsV1.isClaimed(record.view)) { "Close the borrowing Compose session before disposing its View" }
+        if(!force)require(records.values.none { it.group === record && (it.borrower != null || AndroidViewClaimsV1.isClaimed(it.view)) }) { "Close the borrowing Compose session before disposing its View" }
         record.disposeListeners.toList().forEach { it() }
         record.disposeListeners.clear()
         record.window?.close(disposeRoot=false)
         (record.view.parent as? ViewGroup)?.removeView(record.view)
+        RuntimeViewComponents.dispose(record.view)
         record.session.close("disposed")
         records.values.filter { it.group===record }.toList().forEach {
             it.queue.emit(JSONObject().put("type","close"));records.remove(it.id);byView.remove(it.view)
@@ -232,7 +243,7 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
         fun update(patch:JSONObject) {
             check(!closed)
             val name=patch.optString("id")
-            val target=if(name.isBlank())root else record(requireNotNull(root.view.findViewWithTag<View>(name)){"Unknown View id: $name"},root)
+            val target=if(name.isBlank())root else record(requireNotNull(RuntimeViewComponents.find(root.view,name)){"Unknown View id: $name"},root)
             update(target,JSONObject(patch.toString()).apply { remove("id") })
         }
         fun close(disposeRoot:Boolean=true) {
@@ -250,7 +261,7 @@ internal class RuntimeUiInterop(private val context: Context, private val image:
     }
 
     companion object {
-        val methods=setOf("context","inflate","findView","viewGet","viewUpdate","viewEvents","disposeView")
+        val methods=setOf("context","inflate","findView","viewGet","viewUpdate","viewCommand","viewEvents","disposeView")
         fun isLayout(value:Any?)=value is String || value is JSONObject&&value.has("__autojs6ViewHandle")
         private val tags=mapOf("vertical" to "Column","horizontal" to "Row","frame" to "Frame","compose" to "Compose",
             "text" to "Text","button" to "Button","input" to "Input","image" to "Image","scroll" to "ScrollView",

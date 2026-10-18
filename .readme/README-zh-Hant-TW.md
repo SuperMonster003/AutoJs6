@@ -338,6 +338,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `新增` Node.js/Bun UI 與 Compose 支援原生版面配置, 資料元件, 響應式狀態及視窗事件, 提供獨立授權與視窗自動清理
 * `新增` Node.js/Bun 支援執行所屬 View 控制代碼, 非同步 AndroidView 工廠與 XML Compose 容器掛載, 同步支援 Worker 清理及打包應用程式
 * `新增` Node.js/Bun 支援常用 XML 表單與版面配置元件及原生 View 非同步屬性代理, 包含循序賦值, 錯誤復原與 Worker 呼叫
+* `新增` Node.js/Bun: WebView 頁面載入與 JavaScript 回傳值, Drawer 側欄, Toolbar 導覽與選單, ViewPager 頁面及非同步原生事件
 * `修復` runtime.loadJar 方法無法動態載入較高 Java 版本編譯的 class 檔案的問題
 * `修復` Android 7.x 呼叫 runtime.loadDex 方法時可能損壞 DEX 快取並導致類載入失敗的問題
 * `修復` Rhino 引擎及內建模組的作用域, 參數轉換與回傳值處理不相容導致部分指令碼行為異常的問題
@@ -471,6 +472,8 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `修復` 錄製授權呼叫端被遮擋時請求提前結束, 取消後系統對話框殘留及指定擷取尺寸失效的問題
 * `修復` 拼音 style/mode 數字常數轉換為 JSON 或 Rhino 數值後無法識別的問題
 * `修復` 螢幕擷取跳過尚未合成的全透明投影緩衝, 保留正常黑色畫面
+* `修復` AndroidView 在 Compose 算繪器重建期間保持原生 View 借用狀態, 防止提前釋放或被其他工作階段重複使用
+* `修復` JSON UI 在 Activity 重建時復原未選取清單和分頁狀態, 避免將事件資料誤作 View 屬性而發生例外
 * `最佳化` 延遲初始化非關鍵元件以提升應用啟動速度
 * `最佳化` 應用啟動時不再自動彈出權限申請對話方塊, 缺少所有檔案管理權限時改為在主頁顯示可直接授權的提醒
 * `最佳化` 應用及打包應用適配 Android 17, 完善本地網路授權, 高階保護及後臺音訊限制的提示

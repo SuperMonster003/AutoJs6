@@ -151,7 +151,8 @@
         "Node.js/Bun images prend en charge la quantification PNG et la compression avec mesures de qualité/mémoire, résultats binaires et sortie par descripteur de fichier",
         "Node.js/Bun UI et Compose prennent en charge les interfaces natives, composants de données, états réactifs et événements, avec autorisations distinctes et fermeture automatique",
         "Node.js/Bun prennent en charge les handles View propres à une exécution, les fabriques AndroidView asynchrones, les conteneurs XML Compose, la fermeture des Workers et les applications empaquetées",
-        "Node.js/Bun prennent en charge les formulaires et interfaces XML courants, les propriétés View asynchrones, les affectations ordonnées, la reprise après erreur et les Workers"
+        "Node.js/Bun prennent en charge les formulaires et interfaces XML courants, les propriétés View asynchrones, les affectations ordonnées, la reprise après erreur et les Workers",
+        "Node.js/Bun: Chargement WebView et résultats JavaScript, panneaux Drawer, navigation et menus Toolbar, pages ViewPager et événements natifs asynchrones"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
@@ -286,7 +287,9 @@
         "Perte des derniers journaux Bun lorsque le résultat synchrone arrivait avant les rappels de sortie en fin de script",
         "Fin prématurée du consentement lorsque son activité est masquée, dialogues persistants après annulation et dimensions de capture ignorées",
         "Constantes numériques style/mode de pinyin rejetées après conversion en nombres JSON ou Rhino",
-        "La capture ignore les tampons entièrement transparents non composés et conserve les images noires valides"
+        "La capture ignore les tampons entièrement transparents non composés et conserve les images noires valides",
+        "Les liaisons AndroidView conservent les View pendant la recréation du rendu Compose, évitant leur libération prématurée ou leur réutilisation par une autre session",
+        "JSON UI restaure les listes sans sélection et les onglets lors de la recréation de Activity, sans traiter les événements comme des propriétés View"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",

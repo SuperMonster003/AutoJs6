@@ -123,6 +123,7 @@ internal class RuntimeComposeBridge(
         private var watch: Closeable? = null
         private var tree: UiTree? = null
         private var bindings: List<AndroidViewBindingV1> = emptyList()
+        private var borrowedViews: List<RuntimeUiInterop.NativeView> = emptyList()
         private var mountedView: View? = null
         private var renderOwner: ComponentActivity? = null
         private var containerListener: View.OnAttachStateChangeListener? = null
@@ -211,12 +212,20 @@ internal class RuntimeComposeBridge(
                 })
                 val nextGeneration = generation + 1
                 val nextBindings=nativeViews.map { (draft,record)->AndroidViewBindingV1(result.draftToStable.getValue(draft),record.lease,record.view) }
+                val nextViews = nativeViews.values.toList()
+                require(nextViews.distinct().size == nextViews.size) { "An AndroidView cannot be bound twice" }
+                nextViews.forEach { record ->
+                    require(record.borrower == null || record.borrower === this) { "AndroidView belongs to another Compose session" }
+                    require(record.view.parent == null || record.borrower === this) { "AndroidView already has a parent" }
+                }
                 nextBindings.forEach { binding ->
                     var ancestor:View?=container?.view
                     while(ancestor!=null){require(ancestor!==binding.view){"An AndroidView cannot contain its own Compose container"};ancestor=ancestor.parent as? View}
                 }
                 renderer?.validateViews(nextBindings)
                 renderer?.apply(UiPatchBatch(1, nextGeneration, TreeReconciler.diff(tree, next)),nextBindings)
+                borrowedViews.filter { it !in nextViews }.forEach { if (it.borrower === this) it.borrower = null }
+                nextViews.forEach { it.borrower = this }; borrowedViews = nextViews
                 bindings=nextBindings
                 tree = next; ids = result.draftToStable; generation = nextGeneration
                 commands.forEach { command -> renderer?.execute(command); edits[command.nodeId] = command.editSeq to command.text.orEmpty() }
@@ -407,6 +416,7 @@ internal class RuntimeComposeBridge(
             overlay = null
             runCatching { renderer?.dispose() }.onFailure { emit(JSONObject().put("type", "error").put("message", it.message)) }
             renderer = null
+            borrowedViews.forEach { if (it.borrower === this) it.borrower = null }; borrowedViews = emptyList()
             mountedView=null;bindings=emptyList()
             images.forEach { it.recycle() }; images.clear(); tree = null; ids = emptyMap(); edits.clear()
             activity?.finish(); activity = null

@@ -168,12 +168,12 @@ interop boundaries are in `docs/dev/runtime-ui-compose-2026-10-18.md`.
 The subsequent `RuntimeUiInteropDeviceTest` checks XML attachments, native Views,
 factory retention, execution ownership, detached-container cleanup and rotation.
 `RuntimeInteropPackagedDeviceTest` builds actual Node/Bun project APKs, verifies
-their binary Manifest permissions and exercises the installed outputs. The seven
+their binary Manifest permissions and exercises the installed outputs. The eight
 native View operations are checked against the permission catalog as well.
 See `docs/dev/runtime-ui-interop-2026-10-18.md` for this batch's evidence.
 
-`check-runtime-views.mjs` compares all 46 writable View properties across native
-handlers, getters, shared Node/Bun accessors and declarations. It also checks 12
+`check-runtime-views.mjs` compares all 58 writable View properties across native
+handlers, getters, shared Node/Bun accessors and declarations. It also checks 16
 additional XML widget factories and that property proxies stay out of serialized
 View identities. The desktop tests exercise ordered assignments, flush/recovery,
 array snapshots and protection against retargeting a wrapped token. Ace checks
@@ -182,3 +182,12 @@ XML literals only for the typed runtime inflater, including Promise signatures.
 selection/progress callbacks, updated list items, error recovery, rotation and
 copied image pixels. Packaged tests mix Card/Spinner/SeekBar/property assignments
 with Compose. See `docs/dev/runtime-xml-views-2026-10-18.md` for accepted results.
+
+The gate also checks all 12 WebView/Drawer/Toolbar/ViewPager commands against
+native handlers and both declaration sets. Desktop tests verify commands and
+assignments share a queue, including CJS/ESM Workers and Bun's granted transport.
+`RuntimeViewComponentsDeviceTest` exercises real HTML/URL loading, decoded page
+JavaScript results, navigation history, Drawer/Toolbar events, offscreen page
+lookup, Activity recreation and WebView disposal in all six runtime modes.
+The packaged fixture exercises the same four components before its Compose
+rotation flow. See `docs/dev/runtime-view-components-2026-10-18.md` for results.
