@@ -220,3 +220,5 @@ grants, blob/data link notifications, byte integrity, cancellation and navigatio
 The packaged fixture saves and hashes an actual camera upload, creates a tree child,
 and verifies the embedded page helper with a binary blob. See
 `docs/dev/runtime-webview-files-2026-10-18.md` for accepted results and limits.
+
+WebView streaming media uses the same `check-webview-callbacks.mjs` shared-facade check, strict Node/Bun declaration smoke files and Ace semantic queries. On supported devices, `RuntimeWebStreamsDeviceTest` covers awaited results, rejection/timeouts/navigation, real audio/video chunks, pause/resume, encoded output, and nested Worker microphone release. `RuntimeWebStreamsPermissionDeviceTest` runs separately with media permissions revoked. `RuntimeWebStreamsPackagedDeviceTest` builds and executes actual Node, nested Worker and Bun APKs. Evidence: `docs/dev/runtime-webview-streams-2026-10-18.md`.

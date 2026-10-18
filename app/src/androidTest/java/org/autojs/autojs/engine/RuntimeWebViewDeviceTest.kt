@@ -246,7 +246,7 @@ class RuntimeWebViewDeviceTest {
         };save("worker-exit")
     } }
 
-    private fun run(mode: String, code: String) = fixture.run(mode, "function eq(a,b,label){if(JSON.stringify(a)!==JSON.stringify(b))throw Error(label+': '+JSON.stringify([a,b]));}\n" + code)
+    private fun run(mode: String, code: String) = fixture.run(mode, "function eq(a,b,label){if(JSON.stringify(a)!==JSON.stringify(b)){const message=label+': '+JSON.stringify([a,b]);const error=Error(message);error.stack=message;throw error;}}\n" + code)
     private fun cleanDownloads(base: String, prefix: String) {
         val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         manager.query(DownloadManager.Query()).use { cursor ->

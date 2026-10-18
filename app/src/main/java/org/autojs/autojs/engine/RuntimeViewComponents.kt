@@ -86,7 +86,7 @@ internal object RuntimeViewComponents {
             if (it is RuntimeViewPager) { it.clearOnPageChangeListeners(); it.adapter = null; it.pages.clear() }
         }
     }
-    fun cancelWebUi(view: View) { descendants(view).filterIsInstance<RuntimeWebView>().forEach { it.callbacks.cancelUi() } }
+    fun cancelWebUi(view: View) { descendants(view).filterIsInstance<RuntimeWebView>().forEach { it.callbacks.closePresentation() } }
 
     fun side(value: String) = when (value) { "start" -> GravityCompat.START; "end" -> GravityCompat.END; else -> error("Drawer side must be start or end") }
     fun validateDrawer(parent: DrawerLayout, changed: View? = null, gravity: Int = 0) {

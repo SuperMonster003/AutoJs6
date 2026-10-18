@@ -80,6 +80,18 @@ class RuntimeWebActionActivity : Activity() {
         internal fun chooseFiles(context: Context, options: JSONObject, complete: (Result<List<Uri>?>) -> Unit): Action =
             RuntimeWebFileChooser.create(context, options, complete)
 
+        internal fun mediaPermissions(context: Context, origin: String, permissions: Array<String>, complete: (Boolean) -> Unit): Action = object : Action(context) {
+            private var requested = false
+            override fun attach(activity: Activity, state: Bundle?) {
+                activity.title = origin
+                if (!requested) { requested = true; activity.requestPermissions(permissions, REQUEST) }
+            }
+            override fun permissions(code: Int, results: IntArray) {
+                if (code == REQUEST) finish { complete(permissions.all { context.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }) }
+            }
+            override fun close() = finish { complete(false) }
+        }.launch()
+
         internal fun dialog(context: Context, kind: String, data: JSONObject, complete: (Any?) -> Unit): Action = object : Action(context) {
             private var dialog: AlertDialog? = null
             override fun attach(activity: Activity, state: Bundle?) {
