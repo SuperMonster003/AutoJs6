@@ -747,14 +747,7 @@
     <string name="prompt_terminal_plugin_install_required">ثبّت 3-Shell Terminal من مركز الإضافات لاستخدام الطرفية. تم نقل الطرفية المدمجة إلى هذه الإضافة.</string>
     <string name="prompt_terminal_plugin_requires_host">يتطلب 3-Shell Terminal الإصدار %1$d من AutoJs6 أو أحدث. حدّث AutoJs6 أو ثبّت إصدارًا متوافقًا من الإضافة من مركز الإضافات.</string>
     <string name="prompt_terminal_plugin_update_required">إصدار 3-Shell Terminal المثبّت لا يوفر مدخل الطرفية الذي يتوقعه هذا الإصدار من AutoJs6. حدّث الإضافة من مركز الإضافات.</string>
-    <string name="prompt_three_stove_agent_activate">تم تثبيت Three Stove Agent لكن Android لم يفعله بعد. فعله للسماح بالاتصال مع AutoJs6.</string>
-    <string name="prompt_three_stove_agent_application_disabled">عطل Android تطبيق Three Stove Agent. فعله في إعدادات النظام ثم حاول مجددا.</string>
-    <string name="prompt_three_stove_agent_authorize">امنح هذه الإضافة الإذن في مركز الإضافات قبل ربط Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent معطل في مركز الإضافات. قم بتمكينه هناك ثم حاول مرة أخرى.</string>
-    <string name="prompt_three_stove_agent_failed">تعذر الاتصال مع Three Stove Agent. تحقق من حالته وإصداره في مركز الإضافات ثم حاول مجددا.</string>
-    <string name="prompt_three_stove_agent_incompatible">تتطلب هذه الإضافة AutoJs6 بالبناء %1$d أو أحدث. ثبت إصدارين متوافقين من AutoJs6 و Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_install">نزل Three Stove Agent من صفحة إصداراته الرسمية ثم ثبته وفعله في AutoJs6. إذا لم يتوفر إصدار فتحقق لاحقا.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">صفحة مهام Three Stove Agent غير متاحة. تحقق في مركز الإضافات من تفعيل التطبيق وتحديثه.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">صفحة مهام 3-Stove Agent غير متاحة. تحقق في مركز الإضافات من تفعيل التطبيق وتحديثه.</string>
     <string name="prompt_three_stove_agent_trust">منحت هذه الإضافة إذنا يدويا لكن جهة توقيعها ليست رسمية أو موثوقة. هل تسمح لهذه الجهة باستخدام نماذج AutoJs6 وقدرات الجهاز?</string>
     <string name="python_long_running_notification_channel_description">حالة مشاريع Python طويلة التشغيل التي بدأها المستخدم وعناصر التحكم في إيقافها</string>
     <string name="python_long_running_notification_channel_name">مهام Python طويلة التشغيل</string>

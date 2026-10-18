@@ -27,7 +27,7 @@ import org.junit.Assert.*
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 
-/** Requires the official Three Stove Agent APK. No Agent task or model request is started. */
+/** Requires the official 3-Stove Agent APK. No Agent task or model request is started. */
 class ThreeStoveAgentEntryDeviceTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
@@ -133,13 +133,14 @@ class ThreeStoveAgentEntryDeviceTest {
             assertFalse("A host-created identity is not a plugin-created identity",
                 ThreeStoveAgentAttachRequestReceiver.isAuthorizedRequest(context, request))
             val foreground = Intent(request).putExtra(ThreeStoveAgentActions.EXTRA_THREE_STOVE_AGENT_ATTACH, true)
-            ThreeStoveAgentAttachRequestReceiver.handleForegroundRequest(context, foreground)
+            assertNull(ThreeStoveAgentAttachRequestReceiver.takeForegroundRequest(context, foreground))
             assertFalse(foreground.hasExtra(ThreeStoveAgentActions.EXTRA_THREE_STOVE_AGENT_ATTACH))
             assertFalse(foreground.hasExtra(ThreeStoveAgentActions.EXTRA_ATTACH_IDENTITY))
         } finally { identity.cancel() }
     }
 
-    @Test fun allDiscoveryGuidesShowTheirSpecificMessageAndDismissCleanly() {
+    /** Only an unrecognized signer still asks in a dialog; every other state opens Plugin Center instead. */
+    @Test fun signerConfirmationIsTheOnlyGuideDialog() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val activity = instrumentation.startActivitySync(Intent(context, NodeAccessibilitySmokeActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -147,30 +148,15 @@ class ThreeStoveAgentEntryDeviceTest {
             instrumentation.runOnMainSync {
                 val themed = ContextThemeWrapper(activity, context.applicationInfo.theme)
                 val tool = ThreeStoveAgentGuide(themed)
-                val show = ThreeStoveAgentGuide::class.java.getDeclaredMethod("showGuide", ThreeStoveAgentInspection::class.java).apply { isAccessible = true }
+                val confirm = ThreeStoveAgentGuide::class.java.getDeclaredMethod("confirmSigner", ThreeStoveAgentInspection::class.java, String::class.java).apply { isAccessible = true }
                 val field = ThreeStoveAgentGuide::class.java.getDeclaredField("dialog").apply { isAccessible = true }
-                val messages = mapOf(
-                    ThreeStoveAgentUiState.NOT_INSTALLED to R.string.prompt_three_stove_agent_install,
-                    ThreeStoveAgentUiState.APPLICATION_DISABLED to R.string.prompt_three_stove_agent_application_disabled,
-                    ThreeStoveAgentUiState.ACTIVATION_REQUIRED to R.string.prompt_three_stove_agent_activate,
-                    ThreeStoveAgentUiState.PLUGIN_DISABLED to R.string.prompt_three_stove_agent_enable,
-                    ThreeStoveAgentUiState.AUTHORIZATION_REQUIRED to R.string.prompt_three_stove_agent_authorize,
-                    ThreeStoveAgentUiState.TRUST_CONFIRMATION_REQUIRED to R.string.prompt_three_stove_agent_trust,
-                    ThreeStoveAgentUiState.FAILED to R.string.prompt_three_stove_agent_failed,
-                )
                 try {
-                    for ((state, message) in messages) {
-                        show.invoke(tool, ThreeStoveAgentInspection(state))
-                        val dialog = field.get(tool) as MaterialDialog
-                        assertTrue(state.name, dialog.isShowing)
-                        assertEquals(themed.getString(message), dialog.contentView!!.text.toString())
-                        dialog.dismiss()
-                    }
-                    val required = BuildConfig.VERSION_CODE.toLong() + 1
-                    show.invoke(tool, ThreeStoveAgentInspection(ThreeStoveAgentUiState.INCOMPATIBLE, required))
+                    confirm.invoke(tool, ThreeStoveAgentInspection(ThreeStoveAgentUiState.TRUST_CONFIRMATION_REQUIRED), null)
                     val dialog = field.get(tool) as MaterialDialog
                     assertTrue(dialog.isShowing)
-                    assertEquals(themed.getString(R.string.prompt_three_stove_agent_incompatible, required), dialog.contentView!!.text.toString())
+                    assertEquals(themed.getString(R.string.prompt_three_stove_agent_trust), dialog.contentView!!.text.toString())
+                    assertEquals("3-Stove Agent", dialog.titleView!!.text.toString())
+                    dialog.dismiss()
                 } finally { tool.dispose() }
             }
         } finally { instrumentation.runOnMainSync { activity.finish() } }

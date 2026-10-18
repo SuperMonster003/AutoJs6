@@ -161,7 +161,7 @@ internal class AgentRunNativeObject(
                 Thread.sleep(10)
             }
             dispatcher.drainOnOriginatingThread()
-            (localFailure.get() ?: record.failure)?.let { throw org.autojs.autojs.core.plugin.agent.ThreeStoveAgentControlException(it["code"].asString) }
+            (localFailure.get() ?: record.failure)?.let { throw org.autojs.autojs.core.plugin.agent.ThreeStoveAgentControlException(it["code"].asString, it["hint"]?.asString) }
             return js_json_parse(checkNotNull(record.result).toString())
         } finally { joining = false }
     }

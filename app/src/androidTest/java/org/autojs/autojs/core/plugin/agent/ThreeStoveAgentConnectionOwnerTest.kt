@@ -42,12 +42,12 @@ class ThreeStoveAgentConnectionOwnerTest {
     }
 
     @Test fun aSynchronousUiCallerNeverStartsAnOnDemandBind() = fixture { f ->
-        assertFalse(f.controller.ensureConnected(allowConnect = false))
+        assertEquals(ThreeStoveAgentUiState.DETACHED, f.controller.ensureConnected(allowConnect = false))
         assertEquals(0, f.attaches.get())
         f.owner.connect().await()
-        assertTrue(f.controller.ensureConnected(allowConnect = false))
+        assertEquals(ThreeStoveAgentUiState.ATTACHED, f.controller.ensureConnected(allowConnect = false))
         f.controller.detach()
-        assertFalse(f.controller.ensureConnected(allowConnect = false))
+        assertEquals(ThreeStoveAgentUiState.DETACHED, f.controller.ensureConnected(allowConnect = false))
         assertEquals(1, f.attaches.get())
     }
 
@@ -65,14 +65,25 @@ class ThreeStoveAgentConnectionOwnerTest {
         assertEquals(2, f.attaches.get())
     }
 
-    @Test fun pluginRequestsQueueForegroundGuidanceWithoutBindingAnUnavailablePlugin() = fixture { f ->
+    @Test fun pluginRequestsReportTheStateWithoutBindingAnUnavailablePlugin() = fixture { f ->
         f.inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.AUTHORIZATION_REQUIRED)
         f.owner.requestFromPlugin()
-        val guide = withTimeout(2000) { f.owner.pendingGuide.first { it != null } }!!
-        assertEquals(ThreeStoveAgentUiState.AUTHORIZATION_REQUIRED, guide.state)
+        withTimeout(2000) { f.owner.state.first { it.state == ThreeStoveAgentUiState.AUTHORIZATION_REQUIRED } }
         assertEquals(0, f.attaches.get())
-        assertTrue(f.owner.consumeGuide(guide))
-        assertFalse(f.owner.consumeGuide(guide))
+        f.inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.AVAILABLE)
+        f.owner.requestFromPlugin()
+        withTimeout(2000) { f.owner.state.first { it.state == ThreeStoveAgentUiState.ATTACHED } }
+        assertEquals(1, f.attaches.get())
+    }
+
+    @Test fun scriptConnectionsCarryTheUnavailableReason() = fixture { f ->
+        f.inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.PLUGIN_DISABLED)
+        val failure = withContext(Dispatchers.IO) { runCatching { f.controller.scriptRuns.presets() }.exceptionOrNull() }
+        assertEquals(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.ERROR_PLUGIN_UNAVAILABLE, (failure as ThreeStoveAgentControlException).code)
+        assertEquals(ThreeStoveAgentUiPolicy.unavailableHint(ThreeStoveAgentUiState.PLUGIN_DISABLED), failure.hint)
+        val record = withContext(Dispatchers.IO) { f.controller.scriptRuns.start("Unavailable fixture", com.google.gson.JsonObject()) }
+        assertEquals(ThreeStoveAgentUiPolicy.unavailableHint(ThreeStoveAgentUiState.PLUGIN_DISABLED), record.failure!!["hint"].asString)
+        assertEquals(0, f.attaches.get())
     }
 
     @Test fun disablingWhileBindingRevokesTheCompletedLeaseWithoutStartingATask() = fixture { f ->
@@ -84,11 +95,10 @@ class ThreeStoveAgentConnectionOwnerTest {
         assertEquals(0, f.runs.get())
     }
 
-    @Test fun catalogFallsBackWithoutAnEnableGuideAndConnectsWhenAvailable() = fixture { f ->
+    @Test fun catalogFallsBackWhileUnavailableAndConnectsWhenAvailable() = fixture { f ->
         for (state in listOf(ThreeStoveAgentUiState.NOT_INSTALLED, ThreeStoveAgentUiState.PLUGIN_DISABLED, ThreeStoveAgentUiState.INCOMPATIBLE)) {
             f.inspection = ThreeStoveAgentInspection(state)
             assertEquals(emptyList<String>(), withContext(Dispatchers.IO) { f.controller.scriptRuns.roots() })
-            assertNull(f.owner.pendingGuide.value)
         }
         assertEquals(0, f.attaches.get())
         f.inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.AVAILABLE)
@@ -143,7 +153,7 @@ class ThreeStoveAgentConnectionOwnerTest {
         var onAttach: () -> Unit = {}
         @Volatile var inspection = ThreeStoveAgentInspection(ThreeStoveAgentUiState.AVAILABLE)
         val controller: ThreeStoveAgentLinkController = ThreeStoveAgentLinkController(context, scope = scope, available = { inspection.state == ThreeStoveAgentUiState.AVAILABLE }, uid = { Process.myUid() },
-            connectOnDemand = { showGuide -> owner.ensureConnected(showGuide) },
+            connectOnDemand = { owner.ensureConnected() },
             attachLink = { config, _, _ ->
                 configurations.add(config.getString(org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract.KEY_LINK_CONFIG_JSON)!!)
                 attaches.incrementAndGet()

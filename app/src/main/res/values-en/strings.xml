@@ -742,14 +742,7 @@
     <string name="prompt_terminal_plugin_install_required">Install 3-Shell Terminal from Plugin Center to use the terminal. The built-in terminal has moved into this plugin.</string>
     <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal requires AutoJs6 build %1$d or later. Update AutoJs6, or install a compatible plugin version from Plugin Center.</string>
     <string name="prompt_terminal_plugin_update_required">The installed 3-Shell Terminal does not provide the terminal entry this AutoJs6 build expects. Update the plugin from Plugin Center.</string>
-    <string name="prompt_three_stove_agent_activate">Three Stove Agent is installed but has not been activated by Android. Activate it to allow AutoJs6 to connect.</string>
-    <string name="prompt_three_stove_agent_application_disabled">Android has disabled Three Stove Agent. Enable the app in system settings and try again.</string>
-    <string name="prompt_three_stove_agent_authorize">Authorize this plugin in the Plugin Center before connecting Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent is disabled in Plugin Center. Enable it there and try again.</string>
-    <string name="prompt_three_stove_agent_failed">Cannot connect to Three Stove Agent. Check its status and version in the Plugin Center, then try again.</string>
-    <string name="prompt_three_stove_agent_incompatible">This plugin requires AutoJs6 build %1$d or later. Install compatible versions of AutoJs6 and Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_install">Download Three Stove Agent from its official releases page, then install and enable it in AutoJs6. If no release is available, check again later.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">The Three Stove Agent task page is unavailable. Check whether the app is enabled and up to date in the Plugin Center.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">The 3-Stove Agent task page is unavailable. Check whether the app is enabled and up to date in the Plugin Center.</string>
     <string name="prompt_three_stove_agent_trust">You authorized this plugin manually, but its signer is not official or trusted. Allow this signer to use AutoJs6 model and device capabilities?</string>
     <string name="python_long_running_notification_channel_description">Status and stop controls for user-started long-running Python projects</string>
     <string name="python_long_running_notification_channel_name">Python long-running tasks</string>

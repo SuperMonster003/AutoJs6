@@ -157,7 +157,7 @@ internal class ThreeStoveAgentModelBroker(
     }
 
     private fun enforceCaller() {
-        if (Binder.getCallingUid() != expectedCallerUid) throw SecurityException("Three Stove Agent model broker caller UID is not authorized")
+        if (Binder.getCallingUid() != expectedCallerUid) throw SecurityException("3-Stove Agent model broker caller UID is not authorized")
     }
 
     private fun submit(request: Bundle?, callback: IThreeStoveAgentModelCallback?, catalogOnly: Boolean) {

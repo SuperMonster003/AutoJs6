@@ -22,7 +22,7 @@ internal object AiAgentArguments {
             require(target.matches(Regex("[a-z0-9][a-z0-9._-]{0,127}:[a-z0-9][a-z0-9._-]{0,127}"))) { "Invalid Agent target" }
         }
         value["locale"]?.let { text(string(it), "locale", 64) }
-        // plan: Three Stove Agent plan mode (a reviewed plan before the first tool); the plugin validates it again.
+        // plan: 3-Stove Agent plan mode (a reviewed plan before the first tool); the plugin validates it again.
         for (name in listOf("detached", "memory", "plan")) value[name]?.let { flag(it) }
         value["confirm"]?.let { require(string(it) in setOf("default", "cautious")) { "Invalid confirmation policy" } }
         value["interaction"]?.let { require(string(it) in setOf("plugin", "script")) { "Invalid interaction mode" } }

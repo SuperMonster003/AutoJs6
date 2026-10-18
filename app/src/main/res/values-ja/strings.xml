@@ -746,14 +746,7 @@
     <string name="prompt_terminal_plugin_install_required">ターミナルを使うにはプラグインセンターから 3-Shell Terminal をインストールしてください. 内蔵ターミナルはこのプラグインに移行しました.</string>
     <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal には AutoJs6 ビルド %1$d 以降が必要です. AutoJs6 を更新するか, プラグインセンターから互換性のあるプラグインをインストールしてください.</string>
     <string name="prompt_terminal_plugin_update_required">インストール済みの 3-Shell Terminal は, この AutoJs6 ビルドが必要とするターミナル入口を提供していません. プラグインセンターからプラグインを更新してください.</string>
-    <string name="prompt_three_stove_agent_activate">Three Stove Agent はインストール済みですが, Android でまだ有効化されていません. AutoJs6 に接続するには有効化してください.</string>
-    <string name="prompt_three_stove_agent_application_disabled">Android で Three Stove Agent が無効になっています. システム設定でアプリを有効にして再試行してください.</string>
-    <string name="prompt_three_stove_agent_authorize">Three Stove Agent に接続する前に, プラグインセンターでこのプラグインを許可してください.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent はプラグインセンターで無効になっています. 有効にして再試行してください.</string>
-    <string name="prompt_three_stove_agent_failed">Three Stove Agent に接続できません. プラグインセンターで状態とバージョンを確認して再試行してください.</string>
-    <string name="prompt_three_stove_agent_incompatible">このプラグインには AutoJs6 ビルド %1$d 以降が必要です. 互換性のある AutoJs6 と Three Stove Agent をインストールしてください.</string>
-    <string name="prompt_three_stove_agent_install">Three Stove Agent の公式リリースページからダウンロードし, インストール後に AutoJs6 で有効にしてください. 未公開の場合は後で確認してください.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">Three Stove Agent のタスク画面を開けません. プラグインセンターでアプリが有効か, 更新が必要かを確認してください.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">3-Stove Agent のタスク画面を開けません. プラグインセンターでアプリが有効か, 更新が必要かを確認してください.</string>
     <string name="prompt_three_stove_agent_trust">このプラグインは手動で許可されていますが, 署名者は公式または信頼済みではありません. この署名者に AutoJs6 のモデルと端末機能の使用を許可しますか?</string>
     <string name="python_long_running_notification_channel_description">ユーザーが開始した Python の長時間実行プロジェクトの状態表示と停止操作</string>
     <string name="python_long_running_notification_channel_name">Python の長時間実行タスク</string>

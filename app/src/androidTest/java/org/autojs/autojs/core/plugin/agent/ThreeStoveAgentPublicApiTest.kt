@@ -219,7 +219,7 @@ class ThreeStoveAgentPublicApiTest {
             r.result.then(function(){throw Error('unexpected resolution');},function(e){files.write('result.json',JSON.stringify(e));});
         """.trimIndent()).await()
         val result=JSONObject(File(work,"result.json").readText())
-        assertEquals("PLUGIN_UNAVAILABLE",result.getString("code")); assertTrue(result.getString("hint").contains("drawer"))
+        assertEquals("PLUGIN_UNAVAILABLE",result.getString("code")); assertTrue(result.getString("hint").contains("Plugin Center"))
     }
 
     @Test fun queriesAssistantSnapshotsAndTerminalGetUsePublicJavaScriptValues() = withPlugin(Model { _,_ -> done() }) { _,work ->

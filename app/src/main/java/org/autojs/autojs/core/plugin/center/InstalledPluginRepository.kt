@@ -249,7 +249,7 @@ class InstalledPluginRepository {
         }
         ThreeStoveAgentActions.SERVICE_ACTION -> {
             if (packageName != ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME) {
-                listOf(preferred.copy(error = IllegalArgumentException("Unsupported Three Stove Agent package")))
+                listOf(preferred.copy(error = IllegalArgumentException("Unsupported 3-Stove Agent package")))
             } else {
                 ThreeStoveAgentPluginHost.discover(context).map {
                     Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = ThreeStoveAgentActions.SERVICE_ACTION)

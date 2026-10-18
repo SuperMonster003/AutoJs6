@@ -745,14 +745,7 @@
     <string name="prompt_terminal_plugin_install_required">Установите 3-Shell Terminal из центра плагинов, чтобы использовать терминал. Встроенный терминал перенесён в этот плагин.</string>
     <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal требует AutoJs6 сборки %1$d или новее. Обновите AutoJs6 или установите совместимую версию плагина из центра плагинов.</string>
     <string name="prompt_terminal_plugin_update_required">Установленный 3-Shell Terminal не предоставляет точку входа терминала, которую ожидает эта сборка AutoJs6. Обновите плагин из центра плагинов.</string>
-    <string name="prompt_three_stove_agent_activate">Three Stove Agent установлен, но еще не активирован Android. Активируйте его для подключения к AutoJs6.</string>
-    <string name="prompt_three_stove_agent_application_disabled">Android отключил Three Stove Agent. Включите приложение в системных настройках и повторите попытку.</string>
-    <string name="prompt_three_stove_agent_authorize">Разрешите этот плагин в центре плагинов перед подключением Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent отключен в центре плагинов. Включите его там и повторите попытку.</string>
-    <string name="prompt_three_stove_agent_failed">Не удалось подключить Three Stove Agent. Проверьте его состояние и версию в центре плагинов и повторите попытку.</string>
-    <string name="prompt_three_stove_agent_incompatible">Плагину требуется AutoJs6 сборки %1$d или новее. Установите совместимые версии AutoJs6 и Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_install">Скачайте Three Stove Agent с официальной страницы выпусков, установите и включите его в AutoJs6. Если выпусков пока нет, проверьте позже.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">Страница задач Three Stove Agent недоступна. Проверьте в центре плагинов, включено ли приложение и обновлено ли оно.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">Страница задач 3-Stove Agent недоступна. Проверьте в центре плагинов, включено ли приложение и обновлено ли оно.</string>
     <string name="prompt_three_stove_agent_trust">Вы разрешили этот плагин вручную, но его подпись не является официальной или доверенной. Разрешить этой подписи доступ к моделям и функциям устройства AutoJs6?</string>
     <string name="python_long_running_notification_channel_description">Состояние и остановка длительных проектов Python, запущенных пользователем</string>
     <string name="python_long_running_notification_channel_name">Длительные задачи Python</string>

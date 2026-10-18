@@ -30,4 +30,12 @@ class ThreeStoveAgentUiStateTest {
             assertFalse(state.name, ThreeStoveAgentUiPolicy.needsGuide(state))
         }
     }
+
+    @Test fun scriptErrorsNameTheUnavailableStateWithTheDisplayName() {
+        assertEquals("3-Stove Agent is disabled in AutoJs6 Plugin Center; enable it there",
+            ThreeStoveAgentUiPolicy.unavailableHint(ThreeStoveAgentUiState.PLUGIN_DISABLED))
+        val hints = ThreeStoveAgentUiState.entries.filter(ThreeStoveAgentUiPolicy::needsGuide).map(ThreeStoveAgentUiPolicy::unavailableHint)
+        assertTrue(hints.all { it.contains("3-Stove Agent") && !it.contains("Three Stove Agent") })
+        assertEquals("Each specific state has its own hint", 8, hints.toSet().size)
+    }
 }

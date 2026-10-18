@@ -741,14 +741,7 @@
     <string name="prompt_terminal_plugin_install_required">请从插件中心安装 3-Shell Terminal 以使用终端. 内置终端已迁入此插件.</string>
     <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal 需要 AutoJs6 构建 %1$d 或更高版本. 请更新 AutoJs6, 或从插件中心安装兼容的插件版本.</string>
     <string name="prompt_terminal_plugin_update_required">已安装的 3-Shell Terminal 未提供此 AutoJs6 构建所需的终端入口. 请从插件中心更新插件.</string>
-    <string name="prompt_three_stove_agent_activate">已安装 Three Stove Agent, 但 Android 尚未激活它. 请先激活, 以便 AutoJs6 建立连接.</string>
-    <string name="prompt_three_stove_agent_application_disabled">Android 已停用 Three Stove Agent. 请在系统设置中启用应用后重试.</string>
-    <string name="prompt_three_stove_agent_authorize">请先在插件中心授权此插件, 再连接 Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent 已在插件中心禁用. 请在插件中心启用后重试.</string>
-    <string name="prompt_three_stove_agent_failed">无法连接 Three Stove Agent. 请在插件中心检查插件状态和版本后重试.</string>
-    <string name="prompt_three_stove_agent_incompatible">此插件需要 AutoJs6 构建 %1$d 或更高版本. 请安装相互兼容的 AutoJs6 与 Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_install">请从 Three Stove Agent 的官方发行页面下载安装包, 安装后在 AutoJs6 中启用. 如果尚无发行版本, 请稍后查看.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">无法打开 Three Stove Agent 任务页. 请在插件中心检查应用是否启用及是否需要更新.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">无法打开 3-Stove Agent 任务页. 请在插件中心检查应用是否启用及是否需要更新.</string>
     <string name="prompt_three_stove_agent_trust">你已手动授权此插件, 但其签名不在官方或受信列表中. 是否允许此签名使用 AutoJs6 的模型与设备能力?</string>
     <string name="python_long_running_notification_channel_description">显示用户启动的 Python 长任务状态与停止操作</string>
     <string name="python_long_running_notification_channel_name">Python 长任务</string>

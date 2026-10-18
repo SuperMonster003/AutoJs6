@@ -22,7 +22,10 @@ internal object AiAgentJsErrors {
             is TimeoutException -> "JOIN_TIMEOUT"
             else -> error.message?.takeIf { it in C.ERROR_CODES } ?: C.ERROR_INVALID_REQUEST
         }
-        val json = JsonObject().apply { addProperty("code", code); addProperty("message", error.message ?: code) }
+        val json = JsonObject().apply {
+            addProperty("code", code); addProperty("message", error.message ?: code)
+            (error as? ThreeStoveAgentControlException)?.hint?.let { addProperty("hint", it) }
+        }
         throw JavaScriptException(js_json_parse(json.toString()), "ai.agent", 0)
     }
 }

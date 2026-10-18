@@ -26,7 +26,7 @@ object ThreeStoveAgentPluginHost {
         action = ThreeStoveAgentActions.SERVICE_ACTION,
         category = ThreeStoveAgentActions.SERVICE_CATEGORY,
         tag = "ThreeStoveAgentHost",
-        moduleLabel = "Three Stove Agent",
+        moduleLabel = "3-Stove Agent",
         proxyFactory = IThreeStoveAgentPlugin.Stub::asInterface,
         infoReader = { validatePluginInfo(it.getInfo()) },
         // attach() first enforces the signer-aware default and saved enablement via the inspector.
@@ -39,20 +39,20 @@ object ThreeStoveAgentPluginHost {
     }
 
     suspend fun probe(context: Context, packageName: String): PluginInfo = withContext(Dispatchers.IO) {
-        require(packageName == ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME) { "Unsupported Three Stove Agent package" }
+        require(packageName == ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME) { "Unsupported 3-Stove Agent package" }
         host.probe(context, packageName)
     }
 
     /** Plugin Center enables the installed package via INFO; attach still validates the runtime. */
     suspend fun probeMetadata(context: Context, packageName: String): PluginInfo = withContext(Dispatchers.IO) {
-        require(packageName == ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME) { "Unsupported Three Stove Agent package" }
+        require(packageName == ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME) { "Unsupported 3-Stove Agent package" }
         PluginInfoServiceHost.probe(context, packageName).also { info ->
             require(info.id == ThreeStoveAgentIds.PLUGIN_ID && info.engine == ThreeStoveAgentIds.ENGINE && info.variant == ThreeStoveAgentIds.VARIANT_DEFAULT) {
-                "Unexpected Three Stove Agent identity"
+                "Unexpected 3-Stove Agent identity"
             }
             val required = PluginCapabilityResolver.resolveRequiresHostVersion(info.capabilities)
             require(required != null && required >= ThreeStoveAgentIds.REQUIRED_HOST_VERSION_CODE && required <= org.autojs.autojs6.BuildConfig.VERSION_CODE) {
-                "Incompatible Three Stove Agent metadata"
+                "Incompatible 3-Stove Agent metadata"
             }
         }
     }
@@ -68,40 +68,40 @@ object ThreeStoveAgentPluginHost {
         check(ThreeStoveAgentPluginInspector.inspect(context).state == ThreeStoveAgentUiState.AVAILABLE) {
             ThreeStoveAgentContract.ERROR_PLUGIN_UNAVAILABLE
         }
-        val target = host.selectOrThrow(context, ThreeStoveAgentIds.PLUGIN_ID, ThreeStoveAgentIds.ENGINE, ThreeStoveAgentIds.VARIANT_DEFAULT, "Three Stove Agent")
+        val target = host.selectOrThrow(context, ThreeStoveAgentIds.PLUGIN_ID, ThreeStoveAgentIds.ENGINE, ThreeStoveAgentIds.VARIANT_DEFAULT, "3-Stove Agent")
         // Retrying attach after RemoteException could replace a live link and replay a task.
         host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
             validatePluginInfo(proxy.getInfo())
             checkNotNull(proxy.attach(config, brokers.modelBroker, brokers.capabilityBroker, callback)) {
-                "Three Stove Agent returned no link"
+                "3-Stove Agent returned no link"
             }
         }
     }
 
     internal fun validatePluginInfo(info: PluginInfo): PluginInfo = info.also {
         require(it.id == ThreeStoveAgentIds.PLUGIN_ID && it.engine == ThreeStoveAgentIds.ENGINE && it.variant == ThreeStoveAgentIds.VARIANT_DEFAULT) {
-            "Unexpected Three Stove Agent identity"
+            "Unexpected 3-Stove Agent identity"
         }
-        val capabilities = requireNotNull(it.capabilities) { "Three Stove Agent capabilities are missing" }
+        val capabilities = requireNotNull(it.capabilities) { "3-Stove Agent capabilities are missing" }
         val version = PluginCapabilityResolver.coerceLong(
             @Suppress("DEPRECATION") capabilities.get(ThreeStoveAgentCapabilityKeys.CONTRACT_VERSION),
         ) ?: 0L
         require(version in ThreeStoveAgentContract.MIN_SUPPORTED_CONTRACT_VERSION.toLong()..ThreeStoveAgentContract.MAX_SUPPORTED_CONTRACT_VERSION.toLong()) {
-            "Unsupported Three Stove Agent contract version"
+            "Unsupported 3-Stove Agent contract version"
         }
         require((PluginCapabilityResolver.resolveRequiresHostVersion(capabilities) ?: 0) >= ThreeStoveAgentIds.REQUIRED_HOST_VERSION_CODE) {
-            "Three Stove Agent required host version is missing or invalid"
+            "3-Stove Agent required host version is missing or invalid"
         }
     }
 
     private fun validateService(context: Context, service: ServiceInfo) {
         require(service.packageName == ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME && service.exported && service.enabled) {
-            "Invalid Three Stove Agent service"
+            "Invalid 3-Stove Agent service"
         }
-        require(service.permission == ThreeStoveAgentActions.PLUGIN_PERMISSION) { "Three Stove Agent service permission is missing" }
+        require(service.permission == ThreeStoveAgentActions.PLUGIN_PERMISSION) { "3-Stove Agent service permission is missing" }
         val components = queryContractServices(context)
         require(components.size == 1 && ComponentName(service.packageName, service.name) in components) {
-            "Ambiguous or invalid Three Stove Agent service action/category"
+            "Ambiguous or invalid 3-Stove Agent service action/category"
         }
     }
 

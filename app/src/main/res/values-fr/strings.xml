@@ -745,14 +745,7 @@
     <string name="prompt_terminal_plugin_install_required">Installez 3-Shell Terminal depuis le centre de plugins pour utiliser le terminal. Le terminal intégré a été déplacé dans ce plugin.</string>
     <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal nécessite AutoJs6 build %1$d ou ultérieur. Mettez à jour AutoJs6 ou installez une version compatible du plugin depuis le centre de plugins.</string>
     <string name="prompt_terminal_plugin_update_required">Le 3-Shell Terminal installé ne fournit pas l\'entrée de terminal attendue par cette version d\'AutoJs6. Mettez à jour le plugin depuis le centre de plugins.</string>
-    <string name="prompt_three_stove_agent_activate">Three Stove Agent est installé mais Android ne l\'a pas encore activé. Activez-le pour permettre la connexion à AutoJs6.</string>
-    <string name="prompt_three_stove_agent_application_disabled">Android a désactivé Three Stove Agent. Activez l\'application dans les paramètres système, puis réessayez.</string>
-    <string name="prompt_three_stove_agent_authorize">Autorisez ce plugin dans le centre de plugins avant de connecter Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent est désactivé dans le centre de plugins. Activez-le et réessayez.</string>
-    <string name="prompt_three_stove_agent_failed">Impossible de connecter Three Stove Agent. Vérifiez son état et sa version dans le centre de plugins, puis réessayez.</string>
-    <string name="prompt_three_stove_agent_incompatible">Ce plugin nécessite AutoJs6 build %1$d ou ultérieur. Installez des versions compatibles d\'AutoJs6 et d\'Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_install">Téléchargez Three Stove Agent depuis sa page officielle des versions, puis installez-le et activez-le dans AutoJs6. Si aucune version n\'est disponible, revenez plus tard.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">La page des tâches Three Stove Agent est indisponible. Vérifiez dans le centre de plugins que l\'application est activée et à jour.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">La page des tâches 3-Stove Agent est indisponible. Vérifiez dans le centre de plugins que l\'application est activée et à jour.</string>
     <string name="prompt_three_stove_agent_trust">Vous avez autorisé ce plugin manuellement, mais son signataire n\'est ni officiel ni approuvé. Autoriser ce signataire à utiliser les modèles et fonctions de l\'appareil via AutoJs6?</string>
     <string name="python_long_running_notification_channel_description">État et commandes d\'arrêt des projets Python de longue durée lancés par l\'utilisateur</string>
     <string name="python_long_running_notification_channel_name">Tâches Python de longue durée</string>

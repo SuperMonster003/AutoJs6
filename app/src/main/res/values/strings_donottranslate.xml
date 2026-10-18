@@ -426,13 +426,12 @@
     <string name="text_share_app" translatable="false">AutoJs6:\n&url_github_autojs6;</string>
     <string name="text_should_never_happen" translatable="false">Should never happen</string>
     <string name="text_str_colon_space_str_formatter" translatable="false">%s: %s</string>
-    <string name="text_three_stove_agent" translatable="false">Three Stove Agent</string>
+    <string name="text_three_stove_agent" translatable="false">3-Stove Agent</string>
     <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
     <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
     <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
     <string name="url_github_autojs6_vscode_extension_repo" translatable="false">&url_github_autojs6_vscode_extension;</string>
     <string name="url_github_autojs6_vscode_extension_usage" translatable="false">&url_github_autojs6_vscode_extension;/#%E4%BD%BF%E7%94%A8-usage</string>
-    <string name="url_three_stove_agent_releases" translatable="false">https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Stove-Agent/releases</string>
     <string name="value_app_language_default" translatable="false">@string/value_app_language_follow_system</string>
     <string name="value_app_language_english" translatable="false">EN</string>
     <string name="value_app_language_follow_system" translatable="false">Auto</string>

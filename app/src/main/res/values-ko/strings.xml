@@ -747,14 +747,7 @@
     <string name="prompt_terminal_plugin_install_required">터미널을 사용하려면 플러그인 센터에서 3-Shell Terminal 을 설치하세요. 내장 터미널은 이 플러그인으로 이전되었습니다.</string>
     <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal 은 AutoJs6 빌드 %1$d 이상이 필요합니다. AutoJs6 를 업데이트하거나 플러그인 센터에서 호환되는 플러그인 버전을 설치하세요.</string>
     <string name="prompt_terminal_plugin_update_required">설치된 3-Shell Terminal 은 이 AutoJs6 빌드가 요구하는 터미널 진입점을 제공하지 않습니다. 플러그인 센터에서 플러그인을 업데이트하세요.</string>
-    <string name="prompt_three_stove_agent_activate">Three Stove Agent가 설치되었지만 Android에서 아직 활성화되지 않았습니다. AutoJs6에 연결하려면 활성화하세요.</string>
-    <string name="prompt_three_stove_agent_application_disabled">Android에서 Three Stove Agent를 사용 중지했습니다. 시스템 설정에서 앱을 사용 설정하고 다시 시도하세요.</string>
-    <string name="prompt_three_stove_agent_authorize">Three Stove Agent에 연결하기 전에 플러그인 센터에서 이 플러그인을 승인하세요.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent가 플러그인 센터에서 비활성화되어 있습니다. 활성화한 후 다시 시도하세요.</string>
-    <string name="prompt_three_stove_agent_failed">Three Stove Agent에 연결할 수 없습니다. 플러그인 센터에서 상태와 버전을 확인하고 다시 시도하세요.</string>
-    <string name="prompt_three_stove_agent_incompatible">이 플러그인은 AutoJs6 빌드 %1$d 이상이 필요합니다. 호환되는 AutoJs6와 Three Stove Agent를 설치하세요.</string>
-    <string name="prompt_three_stove_agent_install">Three Stove Agent 공식 출시 페이지에서 다운로드하고 설치한 후 AutoJs6에서 활성화하세요. 출시 버전이 없다면 나중에 다시 확인하세요.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">Three Stove Agent 작업 화면을 열 수 없습니다. 플러그인 센터에서 앱 활성화 및 업데이트 여부를 확인하세요.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">3-Stove Agent 작업 화면을 열 수 없습니다. 플러그인 센터에서 앱 활성화 및 업데이트 여부를 확인하세요.</string>
     <string name="prompt_three_stove_agent_trust">이 플러그인을 수동으로 승인했지만 서명자는 공식 또는 신뢰 목록에 없습니다. 이 서명자가 AutoJs6의 모델 및 기기 기능을 사용하도록 허용할까요?</string>
     <string name="python_long_running_notification_channel_description">사용자가 시작한 Python 장기 실행 프로젝트의 상태 및 중지 제어</string>
     <string name="python_long_running_notification_channel_name">Python 장기 실행 작업</string>

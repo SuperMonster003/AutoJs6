@@ -46,7 +46,7 @@ class ThreeStoveAgentLinkController(
     private val attachLink: suspend (Bundle, ThreeStoveAgentLinkBrokers, IThreeStoveAgentLinkCallback) -> AidlPluginHost.LeasedCall<IThreeStoveAgentLink> = { config, brokers, callback ->
         ThreeStoveAgentPluginHost.attach(context.applicationContext, config, brokers, callback)
     },
-    private val connectOnDemand: (suspend (Boolean) -> Boolean)? = null,
+    private val connectOnDemand: (suspend () -> ThreeStoveAgentUiState)? = null,
 ) {
     interface Listener {
         fun onStatus(status: ThreeStoveAgentLinkStatus) {}
@@ -87,13 +87,16 @@ class ThreeStoveAgentLinkController(
         scope.launch { runCatching { attach() } }
     }
 
-    internal suspend fun ensureConnected(allowConnect: Boolean = true, showGuide: Boolean = true): Boolean = if (status.value.state == "attached") {
-        available()
-    } else allowConnect && connectOnDemand?.invoke(showGuide) == true
+    /** ATTACHED, or why the plugin cannot be used now (DETACHED when this caller may not bind). */
+    internal suspend fun ensureConnected(allowConnect: Boolean = true): ThreeStoveAgentUiState = when {
+        status.value.state == "attached" -> if (available()) ThreeStoveAgentUiState.ATTACHED else ThreeStoveAgentUiState.FAILED
+        !allowConnect -> ThreeStoveAgentUiState.DETACHED
+        else -> connectOnDemand?.invoke() ?: ThreeStoveAgentUiState.DETACHED
+    }
 
     suspend fun attach(configJson: String = "{}"): Unit = mutex.withLock {
         validateConfig(configJson)
-        check(active == null) { "Three Stove Agent is already attached" }
+        check(active == null) { "3-Stove Agent is already attached" }
         check(available()) { C.ERROR_PLUGIN_UNAVAILABLE }
         rebindJob?.cancel()
         desiredConfig = configJson
@@ -251,8 +254,8 @@ class ThreeStoveAgentLinkController(
         @Volatile private var instance: ThreeStoveAgentLinkController? = null
 
         fun get(context: Context): ThreeStoveAgentLinkController = instance ?: synchronized(this) {
-            instance ?: ThreeStoveAgentLinkController(context.applicationContext, connectOnDemand = { showGuide ->
-                ThreeStoveAgentConnectionOwner.get(context.applicationContext).ensureConnected(showGuide)
+            instance ?: ThreeStoveAgentLinkController(context.applicationContext, connectOnDemand = {
+                ThreeStoveAgentConnectionOwner.get(context.applicationContext).ensureConnected()
             }).also { instance = it }
         }
 

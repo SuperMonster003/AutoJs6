@@ -745,14 +745,7 @@
     <string name="prompt_terminal_plugin_install_required">Instale 3-Shell Terminal desde el centro de complementos para usar la terminal. La terminal integrada se ha trasladado a este complemento.</string>
     <string name="prompt_terminal_plugin_requires_host">3-Shell Terminal requiere AutoJs6 build %1$d o posterior. Actualice AutoJs6 o instale una versión compatible del complemento desde el centro de complementos.</string>
     <string name="prompt_terminal_plugin_update_required">El 3-Shell Terminal instalado no ofrece la entrada de terminal que espera esta versión de AutoJs6. Actualice el complemento desde el centro de complementos.</string>
-    <string name="prompt_three_stove_agent_activate">Three Stove Agent está instalado, pero Android aún no lo ha activado. Actívalo para permitir la conexión a AutoJs6.</string>
-    <string name="prompt_three_stove_agent_application_disabled">Android ha deshabilitado Three Stove Agent. Habilita la aplicación en los ajustes del sistema e inténtalo de nuevo.</string>
-    <string name="prompt_three_stove_agent_authorize">Autoriza este complemento en el centro de complementos antes de conectar Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_enable">Three Stove Agent está desactivado en el centro de complementos. Actívelo allí e inténtelo de nuevo.</string>
-    <string name="prompt_three_stove_agent_failed">No se puede conectar a Three Stove Agent. Comprueba su estado y versión en el centro de complementos e inténtalo de nuevo.</string>
-    <string name="prompt_three_stove_agent_incompatible">Este complemento requiere AutoJs6 compilación %1$d o posterior. Instala versiones compatibles de AutoJs6 y Three Stove Agent.</string>
-    <string name="prompt_three_stove_agent_install">Descarga Three Stove Agent desde su página oficial de versiones, instálalo y habilítalo en AutoJs6. Si no hay versiones disponibles, vuelve más tarde.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">La página de tareas de Three Stove Agent no está disponible. Comprueba en el centro de complementos si la aplicación está habilitada y actualizada.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">La página de tareas de 3-Stove Agent no está disponible. Comprueba en el centro de complementos si la aplicación está habilitada y actualizada.</string>
     <string name="prompt_three_stove_agent_trust">Autorizaste este complemento manualmente, pero su firmante no es oficial ni de confianza. Permitir que este firmante use los modelos y funciones del dispositivo de AutoJs6?</string>
     <string name="python_long_running_notification_channel_description">Estado y controles de parada de proyectos de Python de larga duración iniciados por el usuario</string>
     <string name="python_long_running_notification_channel_name">Tareas de Python de larga duración</string>

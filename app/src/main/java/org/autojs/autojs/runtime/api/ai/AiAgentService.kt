@@ -85,7 +85,8 @@ internal class AiAgentService(private val runtime: ScriptRuntime) : Closeable {
             } catch (failure: Exception) {
                 val error = JsonObject().apply {
                     addProperty("code", (failure as? ThreeStoveAgentControlException)?.code ?: "INVALID_REQUEST")
-                    addProperty("message", "Three Stove Agent request could not be completed")
+                    addProperty("message", "3-Stove Agent request could not be completed")
+                    (failure as? ThreeStoveAgentControlException)?.hint?.let { addProperty("hint", it) }
                 }.toString()
                 dispatcher.terminalValues(arrayOf(error)) { values ->
                     try { promise.reject(js_json_parse(values[0] as String)) } finally { pending.remove(dispatcher) }

@@ -43,7 +43,8 @@ class ThreeStoveAgentHostEntryContractTest {
                 .associate { it.getAttribute("name") to it.textContent }
         }
         val english = translated.getValue("values")
-        assertEquals(9, english.size)
+        // Only the task page and signer prompts remain: unavailable states open Plugin Center instead.
+        assertEquals(setOf("prompt_three_stove_agent_launcher_unavailable", "prompt_three_stove_agent_trust"), english.keys)
         assertEquals(english, translated.getValue("values-en"))
         translated.forEach { (locale, values) ->
             assertEquals(locale, english.keys, values.keys)
@@ -51,6 +52,7 @@ class ThreeStoveAgentHostEntryContractTest {
                 assertEquals("$locale/$key", Regex("%[1-9]\\$[ds]").findAll(english.getValue(key)).map { it.value }.toList(),
                     Regex("%[1-9]\\$[ds]").findAll(value).map { it.value }.toList())
                 assertTrue("$locale/$key", value.isNotBlank())
+                assertFalse("$locale/$key uses the display name 3-Stove Agent", value.contains("Three Stove Agent"))
             }
         }
     }

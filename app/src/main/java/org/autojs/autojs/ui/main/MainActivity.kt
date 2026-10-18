@@ -129,6 +129,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private val mForeGroundService = ForegroundService(this)
     private var mSearchViewItem: SearchViewItem? = null
     private var mPendingSearchState: Bundle? = null
+    private var threeStoveAgentGuide: org.autojs.autojs.ui.settings.ThreeStoveAgentGuide? = null
     private val mA11yTool = AccessibilityTool(this)
     private val shortcutBackup = ShortcutBackupReconciler(this)
 
@@ -198,14 +199,13 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         // until the user answers it, later launches only remind of missing permissions.
         // zh-CN: 启动时不主动申请权限: 欢迎 Snackbar 在用户作出选择前提供设置向导, 之后的启动仅提醒缺少的权限.
         SetupWizards.onHomeCreated(this, savedInstanceState)
-        org.autojs.autojs.ui.settings.ThreeStoveAgentGuide(this)
-        org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver.handleForegroundRequest(this, intent)
+        threeStoveAgentGuide = org.autojs.autojs.ui.settings.ThreeStoveAgentGuide(this).also { it.handleForegroundRequest(intent) }
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        org.autojs.autojs.core.plugin.agent.ThreeStoveAgentAttachRequestReceiver.handleForegroundRequest(this, intent)
+        threeStoveAgentGuide?.handleForegroundRequest(intent)
     }
 
     override fun onPostResume() {

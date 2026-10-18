@@ -21,7 +21,7 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
     private val poller = Executors.newSingleThreadScheduledExecutor { task -> Thread(task, "agent-run-observer").apply { isDaemon = true } }
     init { controller.observeLoss { code ->
         val previous = runs.values.toList(); runs.clear()
-        previous.forEach { it.fail(code, "Three Stove Agent link was lost") }
+        previous.forEach { it.fail(code, "3-Stove Agent link was lost") }
     } }
     val available: Boolean get() = controller.status.value.state == "attached"
 
@@ -44,7 +44,8 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
             }
         } catch (failure: Exception) {
             startedId?.let { id -> runCatching { cancelId(id, "admission-failed") } }
-            rejected(goal, detached, interaction, (failure as? ThreeStoveAgentControlException)?.code ?: C.ERROR_PLUGIN_UNAVAILABLE)
+            val control = failure as? ThreeStoveAgentControlException
+            rejected(goal, detached, interaction, control?.code ?: C.ERROR_PLUGIN_UNAVAILABLE, control?.hint)
         }
     }
 
@@ -93,30 +94,31 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
         status.errorCode?.let { addProperty("errorCode", it) }
     }
     // Local catalog metadata remains available without a plugin. Extra roots are optional;
-    // their discovery must neither reject the local query nor display an installation guide.
+    // their discovery must not reject the local query.
     fun roots(): List<String> = runCatching {
-        ensureConnection(showGuide = false)
+        ensureConnection()
         call { link -> decode(link.status, C.KEY_STATUS_JSON)["scriptRoots"]?.asJsonArray?.map { it.asString }.orEmpty() }
     }.getOrDefault(emptyList())
 
-    private fun ensureConnection(showGuide: Boolean = true) {
+    private fun ensureConnection() {
         // ServiceConnection callbacks arrive on the main looper; blocking it during a cold
         // bind would deadlock. Normal script execution and async queries use worker threads.
         val allowConnect = Looper.myLooper() != Looper.getMainLooper()
         check(available || allowConnect) {
             "Use a script worker thread for the initial Agent connection"
         }
-        if (!runBlocking { controller.ensureConnected(allowConnect, showGuide) }) throw ThreeStoveAgentControlException(C.ERROR_PLUGIN_UNAVAILABLE)
+        val state = runBlocking { controller.ensureConnected(allowConnect) }
+        if (state != ThreeStoveAgentUiState.ATTACHED) throw ThreeStoveAgentControlException(C.ERROR_PLUGIN_UNAVAILABLE, ThreeStoveAgentUiPolicy.unavailableHint(state))
     }
 
     private fun <T> call(action: (IThreeStoveAgentLink) -> T): T {
         if (!available) throw ThreeStoveAgentControlException(C.ERROR_PLUGIN_UNAVAILABLE)
         return runBlocking { controller.withLink(action) }
     }
-    private fun rejected(goal: String, detached: Boolean, interaction: String, code: String) =
+    private fun rejected(goal: String, detached: Boolean, interaction: String, code: String, hint: String?) =
         ThreeStoveAgentRunRecord(UUID.randomUUID().toString(), goal, System.currentTimeMillis(), detached, interaction).apply {
-            fail(code, "Three Stove Agent could not accept the task", if (code == C.ERROR_PLUGIN_UNAVAILABLE)
-                "Check Three Stove Agent in AutoJs6 Plugin Center; initial connection requires a script worker thread" else null)
+            fail(code, "3-Stove Agent could not accept the task", hint ?: if (code == C.ERROR_PLUGIN_UNAVAILABLE)
+                "Check 3-Stove Agent in AutoJs6 Plugin Center; initial connection requires a script worker thread" else null)
         }
 
     private inner class Channel(private val ownerUid: Int) : IThreeStoveAgentRunCallback.Stub() {
@@ -160,4 +162,4 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
     }
 }
 
-internal class ThreeStoveAgentControlException(val code: String) : IllegalStateException(code)
+internal class ThreeStoveAgentControlException(val code: String, val hint: String? = null) : IllegalStateException(code)

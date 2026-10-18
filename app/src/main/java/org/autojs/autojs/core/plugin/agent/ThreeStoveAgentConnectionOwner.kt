@@ -29,8 +29,6 @@ class ThreeStoveAgentConnectionOwner internal constructor(
     private val context = context.applicationContext
     private val operation = Mutex()
     private val availability = MutableStateFlow(ThreeStoveAgentUiState.AVAILABLE)
-    private val mutableGuide = MutableStateFlow<ThreeStoveAgentInspection?>(null)
-    val pendingGuide = mutableGuide.asStateFlow()
     val state = combine(availability, controller.status) { available, status ->
         ThreeStoveAgentConnectionState(if (available == ThreeStoveAgentUiState.AVAILABLE) ThreeStoveAgentUiPolicy.linkState(status.state) else available, status)
     }.stateIn(scope, SharingStarted.Eagerly, ThreeStoveAgentConnectionState(ThreeStoveAgentUiState.DETACHED))
@@ -60,11 +58,12 @@ class ThreeStoveAgentConnectionOwner internal constructor(
         }, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
+    /**
+     * A background request from the plugin only connects. When the plugin is unavailable, its own
+     * workbench explains why; the host keeps no guide to show later on an unrelated screen.
+     */
     fun requestFromPlugin(configuration: String? = null) {
-        scope.launch {
-            val inspection = connect(configuration = configuration).await()
-            if (ThreeStoveAgentUiPolicy.needsGuide(inspection.state)) mutableGuide.value = inspection
-        }
+        connect(configuration = configuration)
     }
 
     /** Called on the main thread, including script requests marshalled here by ensureConnected. */
@@ -77,7 +76,6 @@ class ThreeStoveAgentConnectionOwner internal constructor(
         connectingConfiguration = normalized
         return scope.async {
             operation.withLock {
-                mutableGuide.value = null
                 availability.value = ThreeStoveAgentUiState.ATTACHING
                 var inspection = inspect()
                 if (inspection.state == ThreeStoveAgentUiState.ACTIVATION_REQUIRED &&
@@ -117,7 +115,6 @@ class ThreeStoveAgentConnectionOwner internal constructor(
 
     fun disconnect() {
         connectJob?.cancel()
-        mutableGuide.value = null
         scope.launch {
             operation.withLock {
                 withContext(Dispatchers.IO) { controller.detach() }
@@ -126,10 +123,9 @@ class ThreeStoveAgentConnectionOwner internal constructor(
         }
     }
 
-    suspend fun ensureConnected(showGuide: Boolean = true): Boolean = withContext(Dispatchers.Main.immediate) {
-        val inspection = connect().await()
-        if (showGuide && ThreeStoveAgentUiPolicy.needsGuide(inspection.state)) mutableGuide.value = inspection
-        inspection.state == ThreeStoveAgentUiState.ATTACHED
+    /** Script connections report the unavailable state in their error instead of queueing a guide. */
+    suspend fun ensureConnected(): ThreeStoveAgentUiState = withContext(Dispatchers.Main.immediate) {
+        connect().await().state
     }
 
     fun refresh() {
@@ -146,8 +142,6 @@ class ThreeStoveAgentConnectionOwner internal constructor(
             }
         }
     }
-
-    fun consumeGuide(inspection: ThreeStoveAgentInspection): Boolean = mutableGuide.compareAndSet(inspection, null)
 
     private suspend fun inspect() = withContext(Dispatchers.IO) {
         runCatching { inspectPlugin() }.getOrElse { ThreeStoveAgentInspection(ThreeStoveAgentUiState.FAILED) }
