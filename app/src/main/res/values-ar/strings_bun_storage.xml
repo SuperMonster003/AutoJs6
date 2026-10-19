@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_files_control_grant">يسمح بقراءة ملفات المضيف وكتابتها وحذفها. تظل أذونات ملفات Android سارية.</string>
+    <string name="summary_bun_storage_control_grant">يسمح بتخزين JSON مسمى لكل تطبيق ومجلد عمل النص البرمجي.</string>
+    <string name="text_bun_files_control_grant">الوصول إلى ملفات المضيف</string>
+    <string name="text_bun_storage_control_grant">تخزين دائم</string>
+</resources>

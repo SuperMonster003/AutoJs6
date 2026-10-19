@@ -346,6 +346,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` WebView getUserMedia/MediaRecorder 오디오 및 비디오 스트리밍, 페이지 Promise 대기, 명시적 Android 미디어 권한 요청 및 Worker 수명 주기 관리
 * `추가` Node.js/Bun WebView 화면 공유 어댑터, 포그라운드 서비스 녹음 및 네이티브 백그라운드 카메라 녹화, Node Worker 지원
 * `추가` Bun 접근성, 앱 작업 및 클립보드 API를 Node.js 인터페이스에 맞추고 개별 권한과 패키징 앱 지원
+* `추가` Bun 파일 및 영구 저장소 API, 별도의 호스트 파일 권한과 Node.js 저장소 공유 지원
 * `수정` runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제
 * `수정` Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제
 * `수정` Rhino 엔진과 내장 모듈의 스코프, 인수 변환 및 반환값 처리 비호환으로 일부 스크립트 동작이 비정상적인 문제

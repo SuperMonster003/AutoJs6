@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_files_control_grant">允許讀取, 寫入及刪除宿主檔案. 仍受 Android 檔案權限限制.</string>
+    <string name="summary_bun_storage_control_grant">允許使用按應用程式及腳本工作目錄區分的命名 JSON 儲存.</string>
+    <string name="text_bun_files_control_grant">宿主檔案存取</string>
+    <string name="text_bun_storage_control_grant">持久化儲存</string>
+</resources>

@@ -178,6 +178,7 @@
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题
 * `修复` Object.fromEntries 使用数字或数字字符串作为键时, 生成的属性无法正常访问且控制台显示不完整的问题 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
+* `新增` Bun 文件与持久化存储 API, 支持独立授权的宿主文件读写及 Node.js 存储互通
 * `修复` 正则表达式在 Android 7.x 上使用 Unicode 属性转义 (如 `\p{L}`) 时抛出 UnsupportedOperationException 的问题
 * `修复` 部分本地化的脚本错误消息丢失参数或触发 MessageFormat 异常的问题
 * `修复` Proxy 包装函数及部分 JavaScript 回调可能无法传入内置模块, 或出现参数嵌套与重载歧义的问题

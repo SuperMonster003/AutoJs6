@@ -52,6 +52,7 @@ internal class BunHostCapabilityBroker(
     private val imageScopeLock = Any()
     private var imageProvider: AndroidNodeBridgeCapabilityProvider? = null
     private val automation = BunAutomationBridge(appContext, capabilities, ::imagesProvider)
+    private val files = BunFilesBridge(java.io.File(workingDirectory?.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath))
     private val captureLock = Any()
     private data class CaptureAttempt(val id: String, val result: CompletableFuture<NodeBridgeResponse>)
     private var captureAttempt: CaptureAttempt? = null
@@ -141,7 +142,16 @@ internal class BunHostCapabilityBroker(
         }
         val outcome = when (capability) {
             BunHostCapabilityGrants.APP_CONTROL, BunHostCapabilityGrants.ACCESSIBILITY_CONTROL,
-            BunHostCapabilityGrants.CLIPBOARD_CONTROL -> bridgeResponse(automation.invoke(capability, request))
+            BunHostCapabilityGrants.CLIPBOARD_CONTROL, BunHostCapabilityGrants.STORAGE_CONTROL -> bridgeResponse(automation.invoke(capability, request))
+            BunHostCapabilityGrants.FILES_CONTROL -> {
+                try {
+                    val (method, args) = parseMethodCall(request)
+                    val value = files.invoke(method, List(args.length()) { args.opt(it).takeUnless { value -> value === JSONObject.NULL } })
+                    Outcome.Success(JSONObject().put("value", JSONObject.wrap(value)).toString())
+                }
+                catch (error: BunFilePayloadException) { Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_PAYLOAD_TOO_LARGE, error.message!!) }
+                catch (error: java.io.IOException) { Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INTERNAL, error.message ?: "File operation failed") }
+            }
             BunHostCapabilityGrants.UI_LAYOUT, BunHostCapabilityGrants.UI_COMPOSE -> {
                 val (method, args) = parseMethodCall(request)
                 val compose = capability == BunHostCapabilityGrants.UI_COMPOSE

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_files_control_grant">ホストファイルの読み取り, 書き込み, 削除を許可します. Android のファイル権限は引き続き適用されます.</string>
+    <string name="summary_bun_storage_control_grant">アプリとスクリプトの作業ディレクトリごとに名前付き JSON ストレージを許可します.</string>
+    <string name="text_bun_files_control_grant">ホストファイルへのアクセス</string>
+    <string name="text_bun_storage_control_grant">永続ストレージ</string>
+</resources>

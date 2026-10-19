@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_files_control_grant">Allows reading, writing and removing host files. Android file permissions still apply.</string>
+    <string name="summary_bun_storage_control_grant">Allows named JSON storage scoped to this app and script working directory.</string>
+    <string name="text_bun_files_control_grant">Host file access</string>
+    <string name="text_bun_storage_control_grant">Persistent storage</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_files_control_grant">Разрешает чтение, запись и удаление файлов хоста. Разрешения Android продолжают действовать.</string>
+    <string name="summary_bun_storage_control_grant">Разрешает именованное хранилище JSON для приложения и рабочего каталога скрипта.</string>
+    <string name="text_bun_files_control_grant">Доступ к файлам хоста</string>
+    <string name="text_bun_storage_control_grant">Постоянное хранилище</string>
+</resources>

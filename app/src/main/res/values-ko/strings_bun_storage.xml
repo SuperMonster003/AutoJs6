@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_files_control_grant">호스트 파일 읽기, 쓰기 및 삭제를 허용합니다. Android 파일 권한이 계속 적용됩니다.</string>
+    <string name="summary_bun_storage_control_grant">앱과 스크립트 작업 디렉터리별로 구분된 이름 있는 JSON 저장소를 허용합니다.</string>
+    <string name="text_bun_files_control_grant">호스트 파일 접근</string>
+    <string name="text_bun_storage_control_grant">영구 저장소</string>
+</resources>

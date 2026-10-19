@@ -159,7 +159,8 @@
         "Node.js/Bun: WebView 影片拍攝與前台 AAC/M4A 錄音, 支援媒體參數, 可設定選擇等待時限及臨時檔案清理",
         "WebView getUserMedia/MediaRecorder 串流音訊與影片, 支援等待網頁 Promise, 明確申請 Android 媒體權限及 Worker 生命週期管理",
         "Node.js/Bun 的 WebView 螢幕共享適配, 前景服務背景錄音及原生背景攝影機錄影, 包括 Node Worker 封裝",
-        "Bun 無障礙, 應用程式操作與剪貼簿 API 對齊 Node.js 對應介面, 支援獨立授權和打包應用程式"
+        "Bun 無障礙, 應用程式操作與剪貼簿 API 對齊 Node.js 對應介面, 支援獨立授權和打包應用程式",
+        "Bun 檔案與持久化儲存 API, 支援獨立授權的宿主檔案讀寫及 Node.js 儲存互通"
       ],
       "fix": [
         "runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題",

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_files_control_grant">Permite leer, escribir y eliminar archivos del anfitrión. Se mantienen los permisos de Android.</string>
+    <string name="summary_bun_storage_control_grant">Permite almacenamiento JSON con nombre por aplicación y directorio de trabajo del script.</string>
+    <string name="text_bun_files_control_grant">Acceso a archivos del anfitrión</string>
+    <string name="text_bun_storage_control_grant">Almacenamiento persistente</string>
+</resources>

@@ -99,13 +99,15 @@ internal class BunAutomationBridge(
                 if (Grants.ACCESSIBILITY_GESTURE in grants) add(NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE)
             }
             if (Grants.CLIPBOARD_CONTROL in grants) add(NodeBridgePermissionManifest.CLIPBOARD)
+            if (Grants.STORAGE_CONTROL in grants) add(NodeBridgePermissionManifest.STORAGE)
         }
         val gestureMethods = setOf("swipe", "gesture")
         val methods = mapOf(
             Grants.APP_CONTROL to setOf("launchPackage", "launchApp", "openAppSetting", "startActivity", "getPackageName", "getAppName", "isInstalled", "viewFile", "editFile", "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo"),
             Grants.ACCESSIBILITY_CONTROL to setOf("isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture"),
             Grants.CLIPBOARD_CONTROL to setOf("getText", "setText", "hasText"),
+            Grants.STORAGE_CONTROL to setOf("get", "put", "remove", "clear", "keys", "contains"),
         )
-        private val modules = mapOf(Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD)
+        private val modules = mapOf(Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE)
     }
 }
