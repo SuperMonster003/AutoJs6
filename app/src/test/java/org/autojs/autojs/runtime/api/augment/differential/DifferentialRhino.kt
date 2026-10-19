@@ -8,6 +8,10 @@ import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.VarScope
+import org.mozilla.javascript.WrapFactory
+import org.mozilla.javascript.lc.type.TypeInfo
 import sun.misc.Unsafe
 import java.lang.reflect.Field
 import android.content.Context as AndroidContext
@@ -25,6 +29,7 @@ internal class DifferentialRhino : AutoCloseable {
     val context: Context = Context.enter().apply {
         languageVersion = Context.VERSION_ES6
         isInterpretedMode = true
+        wrapFactory = EngineWrapFactory()
     }
 
     val jsScope: TopLevelScope = newScope()
@@ -45,6 +50,8 @@ internal class DifferentialRhino : AutoCloseable {
     private fun newScope(): TopLevelScope = TopLevelScope().apply {
         initStandardObjects(context, false)
         with(RhinoUtils) { context.registerStandardObjects(this@apply) }
+        // The engine registers `android` as a top-level package; a plain scope only knows java / org / com.
+        ScriptableObject.putProperty(globalThis, "android", context.evaluateString(this, "Packages.android", "packages", 1, null))
     }
 
     fun evalJs(source: String): Any? = context.evaluateString(jsScope, source, "js-side", 1, null)
@@ -64,7 +71,9 @@ internal class DifferentialRhino : AutoCloseable {
      * JVM android stubs refuse ("not mocked"), so every Kotlin failure would surface as that stub error. The
      * original exception is only printed to `System.err` by the wrapper, so it is captured here and used
      * instead: `throws <SimpleName>` for real failures, `unavailable(jvm) <SimpleName>` when the failure is a
-     * missing Android class or static initializer, which the differential cases skip.
+     * missing Android class or static initializer or an Android method the mockable jar does not implement
+     * (`not mocked`, for classes without a JVM fake in `app/src/test/java/android/`), which the differential
+     * cases skip.
      */
     fun render(side: Side, expression: String): Rendered {
         val previousErr = System.err
@@ -75,12 +84,23 @@ internal class DifferentialRhino : AutoCloseable {
         } finally {
             System.setErr(previousErr)
         }
-        if (rendered.detail?.contains("not mocked") != true) return rendered
-        val firstLine = captured.toString("UTF-8").lineSequence().map { it.trim() }.firstOrNull { it.isNotEmpty() } ?: return rendered
+        val detail = rendered.detail
+        if (detail?.contains("not mocked") != true) return rendered
+        val firstLine = captured.toString("UTF-8").lineSequence().map { it.trim() }.firstOrNull { it.isNotEmpty() }
+        if (firstLine == null) {
+            // Nothing printed an original exception, so the call that was not mocked is the failure itself, unless it is
+            // the message lookup of a wrapper that does not print (a callable module): that one hides the real error.
+            // zh-CN: 没有打印原始异常时, 未 mock 的调用本身就是失败原因; 但不打印的包装 (可调用模块) 在查消息时失败则掩盖了真实错误.
+            return if (detail.contains("android.content.Context")) rendered else Rendered("unavailable(jvm) not mocked", detail)
+        }
         val exceptionName = firstLine.substringBefore(':').substringAfterLast('.')
         val message = firstLine.substringAfter(':', "").trim().take(160).ifEmpty { null }
-        return when (exceptionName) {
-            "ExceptionInInitializerError", "NoClassDefFoundError", "UnsatisfiedLinkError" -> Rendered("unavailable(jvm) $exceptionName", message)
+        return when {
+            // A resource lookup is only made to build an error message: the call failed, its own message is lost.
+            // zh-CN: 只有构造错误消息时才查资源: 调用确实失败了, 只是丢失了原本的消息.
+            firstLine.contains("not mocked") && firstLine.contains("android.content.Context") -> Rendered("throws MessageLookup", message)
+            firstLine.contains("not mocked") -> Rendered("unavailable(jvm) not mocked", message)
+            exceptionName in UNAVAILABLE_EXCEPTIONS -> Rendered("unavailable(jvm) $exceptionName", message)
             else -> Rendered("throws $exceptionName", message)
         }
     }
@@ -118,6 +138,20 @@ internal class DifferentialRhino : AutoCloseable {
     enum class Side { JS, KT }
 
     /**
+     * Mirrors the string handling of the engine's `AndroidContextFactory.WrapFactory`: a Java String returned to the
+     * script becomes a JS string (the obsolete modules call string methods such as `replace` on `name()` results),
+     * while boxed numbers stay Java objects as with the default `javaPrimitiveWrap`.
+     */
+    private class EngineWrapFactory : WrapFactory() {
+
+        override fun wrap(cx: Context, scope: VarScope, obj: Any?, staticType: TypeInfo): Any? = when (obj) {
+            is String -> obj
+            else -> super.wrap(cx, scope, obj, staticType)
+        }
+
+    }
+
+    /**
      * Stands in for the application context. `Context.getString` is final and delegates to [getResources],
      * so the resources are faked too: every string resource renders as `res:<id>` with its arguments, which is
      * enough for the error messages the augmentables build.
@@ -147,6 +181,8 @@ internal class DifferentialRhino : AutoCloseable {
     }
 
     companion object {
+
+        private val UNAVAILABLE_EXCEPTIONS = setOf("ExceptionInInitializerError", "NoClassDefFoundError", "UnsatisfiedLinkError")
 
         fun <T> allocateWithoutConstructor(type: Class<T>): T {
             val unsafe = Unsafe::class.java.getDeclaredField("theUnsafe").run {

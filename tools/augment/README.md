@@ -1,6 +1,6 @@
 # Augment 重构工具
 
-配合 `docs/augment/ROADMAP.md` 使用. 三个工具都只读宿主源码或已安装的宿主, 不修改设备上的宿主数据; 真机脚本通过 `RunIntentActivity` 启动, 结果从 logcat 的 `GlobalConsole` 行读取 (轮询累积, 从不清空 logcat).
+配合 `docs/augment/ROADMAP.md` 使用. 这些工具都只读宿主源码或已安装的宿主, 不修改设备上的宿主数据; 真机脚本通过 `RunIntentActivity` 启动, 结果从 logcat 的 `GlobalConsole` 行读取 (轮询累积, 从不清空 logcat).
 
 ## device_bench.py: 真机计时
 
@@ -23,6 +23,14 @@ py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL [--out tools/augm
 在设备上运行 `surface_snapshot.js`, 枚举 `global` 的全部自有属性, 对模块对象再向下两层记录每个属性的特性 (可枚举 / 可写 / 可配置 / 访问器), 值的种类 (函数名与参数个数, 对象标签, Java 类名, 原始值) 与原型链, 并记录 `Object.keys(global)` 的顺序和 `$` 别名的同一性. 结果转换为按路径排序的文本 `surface-<model>-<versionCode>.txt` (一行一个属性, 便于 diff), 原始 JSON 放在同名 `.json`. 访问器属性只记录存在性, 不求值; 数据属性的值会被读取, 因此快照过程会触发 Java 侧 getter.
 
 新实现切换前, 对同一设备再生成一份并与基线 diff, 只允许出现 ROADMAP 红线 R1 允许的差异.
+
+## device_eval.py: 真机复核差分测试记录的 Kotlin 值
+
+```
+py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep]
+```
+
+JVM 差分测试 (`app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/`) 运行时把已记录的偏差与 JVM 上只能跳过的表达式导出到 `app/build/augment-differential/<测试类>.json`. 本脚本把这些表达式合成一个脚本在设备上运行, 按 `DifferentialRhino.render` 的规则渲染结果, 与 JVM 上记录的 Kotlin 值比对 (两侧都抛出时视为一致, JVM 构造不出 Kotlin 的错误消息); 跳过的表达式没有期望值, 只打印设备结果. 输出只有不一致的条目与汇总行. 先运行差分测试生成 JSON; 设备上的临时目录 `/sdcard/Download/aj6-augment-bench` 用完即删 (`--keep` 保留).
 
 ## inventory_diff.py: 旧 JS 成员名 对 Kotlin 注册名
 

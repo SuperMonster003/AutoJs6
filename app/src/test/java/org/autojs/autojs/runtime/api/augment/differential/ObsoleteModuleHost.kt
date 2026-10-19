@@ -14,25 +14,40 @@ import java.io.File
  *
  * Each module is a CommonJS factory (`module.exports = function (scriptRuntime, scope) { ... }`). The host
  * wraps the source in a function that supplies `module` and `exports`, calls the factory with a stub runtime and
- * the global object, and returns the exported module value. The few globals the old modules expected from
- * `init.js` (`global`, `util.ensureArrayType` / `ensureNumberType` / `getClassName`, `species`, `isNullish`)
- * are provided as JavaScript stubs that mirror the original definitions; modules that need more (Android
- * classes, the real runtime) are out of scope for this host and get their own stubs when they are added.
+ * the global object, and returns the exported module value. The globals the old modules expected from the
+ * pre-6.6.0 `init.js` (`global`, `util.ensureArrayType` / `ensureNumberType` / `getClassName`, `species`,
+ * `isNullish`, `isObject`, `isJavaClass`, the imported classes `TimeUnit` / `StandardCharsets` / `ArrayUtils`, the
+ * `runtime` object) are provided as JavaScript stubs that mirror the original definitions. A module that needs
+ * another module loads it with [loadAndDefine] first (mime calls `util.format`, so its test loads the obsolete
+ * util module). Members of the ScriptRuntime argument are set per test with [setRuntimeProperty].
+ *
+ * Android classes are not stubbed here: the JVM fakes in `app/src/test/java/android/` (Base64, Point) replace the
+ * mockable android.jar classes for both sides, so the obsolete module and the Kotlin module run on the same
+ * implementation and a difference can only come from the module code. Classes without a fake stay "not mocked";
+ * [DifferentialRhino.render] reports such calls as `unavailable(jvm)`.
  *
  * zh-CN: 把 6.6.0 之前的 `__xxx__.js` 模块加载到纯 JVM 的 Rhino 作用域. 每个模块是 CommonJS 工厂函数, 宿主提供
- * `module` / `exports`, 以 stub 运行时与全局对象调用工厂并返回导出值. 旧模块依赖的少量 init.js 全局 (util 的几个
- * ensure 函数, species, isNullish) 以镜像原定义的 JavaScript stub 提供.
+ * `module` / `exports`, 以 stub 运行时与全局对象调用工厂并返回导出值. 旧模块依赖的 init.js 全局 (util 的几个函数,
+ * species, isNullish, isObject, isJavaClass, 导入的 TimeUnit / StandardCharsets / ArrayUtils, runtime) 以镜像原定义的
+ * JavaScript stub 提供; 依赖其他模块的先用 [loadAndDefine] 加载 (mime 调用 util.format). Android 类不在这里遮蔽,
+ * 由 `app/src/test/java/android/` 的 JVM fake (Base64, Point) 同时替换两侧, 使差异只可能来自模块代码; 没有 fake 的类仍
+ * "not mocked", 由 [DifferentialRhino.render] 记为 `unavailable(jvm)`.
  */
 internal class ObsoleteModuleHost(private val context: Context, val scope: TopLevelScope) {
 
     val global: ScriptableObject = scope.globalThis
 
-    /** Stand-in for the ScriptRuntime argument of the factories; the first batch of modules never touches it. */
+    /** Stand-in for the ScriptRuntime argument of the factories; members are added with [setRuntimeProperty]. */
     private val runtimeStub: Scriptable = context.newObject(scope)
 
     init {
         scope.defineProperty("global", global, PERMANENT)
         context.evaluateString(scope, STUBS, "obsolete-stubs", 1, null)
+    }
+
+    /** Sets `scriptRuntime.[name]` as the factories see it; Java values are wrapped as the engine would. */
+    fun setRuntimeProperty(name: String, value: Any?) {
+        runtimeStub.put(name, runtimeStub, Context.javaToJS(value, scope))
     }
 
     /** Loads `__[name]__.js` and returns its exported value without defining it anywhere. */
@@ -83,9 +98,9 @@ internal class ObsoleteModuleHost(private val context: Context, val scope: TopLe
                         }
                     }
                 },
+                // The obsolete util module delegated to JavaUtils.getClassName (the Java class name of the value).
                 getClassName: function (o) {
-                    if (o === null || o === undefined) return String(o);
-                    return (o.constructor && o.constructor.name) || typeof o;
+                    return String(Packages.org.autojs.autojs.util.JavaUtils.getClassName(o));
                 },
             };
             global.species = function species(o) {
@@ -95,8 +110,27 @@ internal class ObsoleteModuleHost(private val context: Context, val scope: TopLe
             };
             global.species.isObject = function (o) { return species(o) === "Object"; };
             global.isNullish = function isNullish(o) { return o === null || o === undefined; };
-            // The engine registers `android` as a top-level package; a plain scope only knows java / org / com.
-            global.android = Packages.android;
+            global.isObject = function isObject(o) { return species(o) === "Object"; };
+            global.isJavaClass = function isJavaClass(o) { return species(o) === "JavaClass"; };
+            // Classes init.js imported into the global scope.
+            global.TimeUnit = java.util.concurrent.TimeUnit;
+            global.StandardCharsets = java.nio.charset.StandardCharsets;
+            global.ArrayUtils = {
+                // Mirrors the removed Java ArrayUtils.jsBytesToByteArray: Number.byteValue() per element, 0 for non-numbers.
+                jsBytesToByteArray: function (values) {
+                    var bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, values.length);
+                    for (var i = 0; i < values.length; i++) {
+                        if (typeof values[i] === "number") bytes[i] = java.lang.Double.valueOf(values[i]).byteValue();
+                    }
+                    return bytes;
+                },
+            };
+            // The colors module needs android.graphics.Color, which has no JVM fake; s13n.color cases that reach it
+            // are unavailable on the Kotlin side as well.
+            global.Color = function Color() { throw Error("Color is not available on the JVM"); };
+            // init.js ran with the ScriptRuntime as `runtime`; util.inspect compares values with its top-level scope.
+            global.runtime = { topLevelScope: global };
+            global.UiObjectCollection = {};
         """.trimIndent()
 
     }

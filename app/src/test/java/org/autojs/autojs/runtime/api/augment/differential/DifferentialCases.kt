@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.augment.differential
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import java.io.File
 
 /**
  * Runs the same expressions on the JS side and the Kotlin side of a [DifferentialRhino] and checks that the
@@ -56,9 +57,45 @@ internal object DifferentialCases {
         }
         if (skipped.isNotEmpty()) report.appendLine("skipped ${skipped.size} expression(s) that need Android at runtime; cover them with tools/augment on a device")
         println(report)
+        exportForDevice(expressions.filter { it in knownByExpression || it in skipped }, knownByExpression)
         val undocumented = knownByExpression.keys - expressions.toSet()
         assertTrue("Known differences must be listed in the expressions: $undocumented", undocumented.isEmpty())
         assertTrue("Undocumented differences between the obsolete JS module and the Kotlin module:\n" + unexpected.joinToString("\n"), unexpected.isEmpty())
+    }
+
+    /**
+     * Writes the documented differences and the skipped expressions of the calling test class to
+     * `build/augment-differential/<TestClass>.json`, where `tools/augment/device_eval.py` picks them up to evaluate the
+     * same expressions with the installed host: the Kotlin values recorded here come from the JVM (fakes, stubs), the
+     * device run confirms them. Skipped expressions have no expected value.
+     * zh-CN: 把调用方测试类已记录的偏差与跳过的表达式写到 build/augment-differential/<测试类>.json, 供 tools/augment/device_eval.py
+     * 用已安装的宿主求值同一批表达式, 以真机确认 JVM 上记录的 Kotlin 值.
+     */
+    private fun exportForDevice(expressions: List<String>, known: Map<String, KnownDifference>) {
+        val testClass = Thread.currentThread().stackTrace.map { it.className }.firstOrNull { it.endsWith("DifferentialTest") } ?: return
+        val dir = File("build/augment-differential").apply { mkdirs() }
+        val entries = expressions.joinToString(",\n") { expression ->
+            val documented = known[expression]
+            "  {\"expression\": ${json(expression)}, \"js\": ${json(documented?.js)}, \"kt\": ${json(documented?.kt)}, \"reason\": ${json(documented?.reason)}}"
+        }
+        File(dir, testClass.substringAfterLast('.') + ".json").writeText("[\n$entries\n]\n", Charsets.UTF_8)
+    }
+
+    private fun json(value: String?): String = when (value) {
+        null -> "null"
+        else -> buildString {
+            append('"')
+            value.forEach { c ->
+                when {
+                    c == '"' -> append("\\\"")
+                    c == '\\' -> append("\\\\")
+                    c == '\n' -> append("\\n")
+                    c < ' ' || c.code > 0x7e -> append("\\u%04x".format(c.code))
+                    else -> append(c)
+                }
+            }
+            append('"')
+        }
     }
 
 }

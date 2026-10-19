@@ -47,7 +47,9 @@ internal object SurfaceDiff {
      * Members of [target] and of its prototype chain below `Object.prototype` / `Function.prototype` (the
      * obsolete modules keep their methods on a constructor prototype, the Kotlin ones on the object itself).
      * Function intrinsics (`length`, `name`, `arguments`, `caller`, `prototype`), `constructor` and internal
-     * `__xxx__` names are left out; a member that cannot be read is typed `inaccessible`.
+     * `__xxx__` names are left out; a member that cannot be read is typed `inaccessible`. A Java object in the chain
+     * (util and mime use one as prototype) contributes its public members; it has no attributes, so they are
+     * recorded as enumerable, writable and permanent.
      */
     fun surface(target: Any?, scope: Scriptable): Map<String, Member> {
         require(target is ScriptableObject) { "Surface requires a ScriptableObject, got ${target?.javaClass?.name}" }
@@ -55,10 +57,10 @@ internal object SurfaceDiff {
         val result = linkedMapOf<String, Member>()
         var current: Scriptable? = target
         var depth = 0
-        while (current is ScriptableObject && depth < 8 && current !in terminals) {
+        while (current != null && depth < 8 && current !in terminals) {
             val owner = current
-            owner.allIds
-                .filterIsInstance<String>()
+            val ids = if (owner is ScriptableObject) owner.allIds else owner.ids
+            ids.filterIsInstance<String>()
                 .filterNot { it in SKIPPED || (it.startsWith("__") && it.endsWith("__")) }
                 .forEach { name ->
                     if (name in result) return@forEach
@@ -67,7 +69,7 @@ internal object SurfaceDiff {
                     } catch (e: RuntimeException) {
                         INACCESSIBLE
                     }
-                    val attributes = owner.getAttributes(name)
+                    val attributes = (owner as? ScriptableObject)?.getAttributes(name) ?: ScriptableObject.PERMANENT
                     result[name] = Member(
                         name = name,
                         type = if (value === INACCESSIBLE) "inaccessible" else RhinoScriptRuntime.`typeof`(value),

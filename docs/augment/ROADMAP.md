@@ -99,7 +99,7 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 | T4 | 参数规格来自实现方法的真实 Kotlin 签名: 重载按 (参数个数, 类型) 生成分发; 需要原始 JS 值的参数声明为 `Any?` / `Scriptable`; `vararg` 表示可变参; 可选参数用 Kotlin 默认值; 返回 `Unit` 映射为 `undefined`, 其余经统一的 `toJsValue`. 类型转换表 (JS 值 -> Kotlin 类型) 只在生成层一处实现, 含 ConsString, Java 包装数值, NativeArray -> List / Array, NativeObject -> Map 等. | P1.2 原型评审. |
 | T5 | 错误模型 (D10): 生成层把转换失败抛为 Rhino `TypeError` / `RangeError` (消息沿用现有多语言资源), 实现方法抛出的 `JavaScriptException` / `EcmaError` 原样透传, 其他 Java 异常保留类型, 由统一的 `ScriptErrorMapper` 加前缀; `ScriptInterruptedException` 原样; 调试打印由开发者选项控制. | P1.2 原型评审. |
 | T6 | Context 纪律: 生成的调用代码直接接收 Rhino `Context` 与 `Scriptable scope`, 模块函数只在持有 Context 的脚本线程执行; 需要跨线程回调的模块经 `ScriptRuntime` 的派发器回到脚本线程; 新实现禁止 `withRhinoContext` 兜底进入 Context. | P3 迁移 floaty / dialogs / ui 时若发现必须在 UI 线程直接求值的场景, 为这些场景单独定义带 WrapFactory 的 Context 进入点. |
-| T7 | 差分测试基础设施在 `app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/`: `DifferentialRhino` (一个 Context 两个独立顶层作用域, 假 `GlobalAppContext`), `ObsoleteModuleHost` (在 JVM Rhino 中执行旧 JS 工厂函数并提供 `util` / `species` / `isNullish` / `android` 等 stub), `SurfaceDiff` (含原型链的成员表比对), `DifferentialCases` (同一组表达式两侧求值, 已记录的偏差按记录断言, 两侧都抛错时 P0 暂不比较错误类型). 现有 Kotlin 的错误包装会调用 `Context.getString`, 纯 JVM 的 android 桩拒绝它, 因此真实异常从 `System.err` 捕获; 触及 Android 静态初始化的函数 (如经 `StringUtils`) 标为 `unavailable(jvm)` 跳过, 由 `tools/augment` 真机复核. P0 以 "旧 JS 对 现有 Kotlin" 记录既有偏差 (附录 E), P2 起改为 "旧 JS 对 新实现" 并关闭错误类型容忍. | 无. |
+| T7 | 差分测试基础设施在 `app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/`: `DifferentialRhino` (一个 Context 两个独立顶层作用域, 假 `GlobalAppContext`), `ObsoleteModuleHost` (在 JVM Rhino 中执行旧 JS 工厂函数并提供 `util` / `species` / `isNullish` / `android` 等 stub), `SurfaceDiff` (含原型链的成员表比对), `DifferentialCases` (同一组表达式两侧求值, 已记录的偏差按记录断言, 两侧都抛错时 P0 暂不比较错误类型). 现有 Kotlin 的错误包装会调用 `Context.getString`, 纯 JVM 的 android 桩拒绝它, 因此真实异常从 `System.err` 捕获; 触及 Android 静态初始化的函数 (如经 `StringUtils`) 标为 `unavailable(jvm)` 跳过, 由 `tools/augment` 真机复核. P0 以 "旧 JS 对 现有 Kotlin" 记录既有偏差 (附录 E), P2 起改为 "旧 JS 对 新实现" 并关闭错误类型容忍. P0.5 增补: (1) 单元测试 classpath 上的 Android 框架类 JVM fake (`app/src/test/java/android/util/Base64.java`, `android/graphics/Point.java`, 行为照 AOSP), 测试类排在 mockable android.jar 之前, 两侧共用同一实现, 差异只可能来自模块代码 (只用 JS 对象遮蔽只能覆盖旧 JS 一侧, Kotlin 一侧仍会 not mocked); 没有 fake 的类 (如 `android.graphics.Color`) 照旧跳过. (2) Context 的 WrapFactory 照引擎 (`AndroidContextFactory.WrapFactory`) 把 Java String 交给脚本为 JS 字符串. (3) 渲染时 not mocked 的 Android 调用记为 `unavailable(jvm)`, 只为构造错误消息而查资源失败的记为 `throws MessageLookup`. (4) `SurfaceDiff` 计入原型链上 Java 对象的成员 (util / mime 以 Java 对象为原型). (5) `DifferentialCases` 把已记录偏差与跳过的表达式导出到 `app/build/augment-differential/*.json`, `tools/augment/device_eval.py` 用已安装的宿主在真机上求值同一批表达式, 确认 JVM 上记录的 Kotlin 值. | 无. |
 | T8 | 开关 (D8): `Pref` 布尔项 (开发者选项 "使用新的脚本模块实现"), 默认关; `ScriptRuntime.initPrologue` 按开关二选一挂载. 不提供脚本级指令, 避免两套实现在同一进程混用. | P5 切换默认值时可删除开关. |
 | T9 | 工具与基线: `tools/augment/` (真机计时, 表面快照, 清单比对, 用法见其 README), 基线文件放 `tools/augment/baseline/` 并入库. | 无. |
 | T10 | 文档与 d.ts: P5 起 `tools/api-coverage/extract_exports.py` 与 android-dts-generator 改读 KSP 产出的 `script-modules.json`, 不再解析 Kotlin 源码. | P5 评审. |
@@ -124,7 +124,7 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 - [x] P0.2 (工具) `tools/augment/`: `device_bench.py` (启动计时 + 旧 JS 编译计时 + 单次调用开销), `device_surface_snapshot.py` + `surface_snapshot.js` (真机 API 表面快照), `inventory_diff.py` (旧 JS 成员名 对 Kotlin 注册名, d.ts 过滤). 证据: 本次提交.
 - [x] P0.3 (基线) `tools/augment/baseline/registrations.json` (Kotlin 注册清单, 由 `tools/api-coverage/extract_exports.py` 生成), `surface-<model>-<versionCode>.txt` (真机表面快照), 附录 A 计时表. 证据: 本次提交与附录 A.
 - [x] P0.4 (测试) JVM 差分骨架 `ObsoleteModuleHost` + `SurfaceDiff` + `DifferentialCases`, 并让第一批纯逻辑模块的旧 JS (Arrayx / Mathx / Numberx) 在 JVM 中跑通, 记录旧 JS 对现有 Kotlin 的既有偏差. 证据: `app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/` 的 `ArrayxDifferentialTest` / `NumberxDifferentialTest` / `MathxDifferentialTest` (6 个用例, `:app:testAppDebugUnitTest`), 既有偏差见附录 E, 其中 Mathx 的 fraction 折叠与 `median([])` 已在 XQ-AT72 复核.
-- [ ] P0.5 (测试) 第一批其余模块 (base64 / s13n / mime / nanoid / converter / formatter) 的旧 JS 在 JVM 中跑通 (Android 依赖以 JS stub 遮蔽).
+- [x] P0.5 (测试) 第一批其余有旧 JS 的模块 (base64 / s13n / mime / util 的纯逻辑部分: format, inspect, 类型判断与字符串辅助) 的旧 JS 在 JVM 中跑通并记录既有偏差; nanoid / cvt / fmt 是 6.6.0 之后新增, 没有旧 JS, 不做差分 (P2.2 以现有单元测试对比新实现). 证据: `Base64DifferentialTest` / `S13nDifferentialTest` / `MimeDifferentialTest` / `UtilDifferentialTest` (连同 P0.4 共 7 个测试类 14 个用例, `:app:testAppDebugUnitTest`), harness 增补见 T7; 全部已记录的 Kotlin 值 (含 P0.4) 经 `tools/augment/device_eval.py` 在 XQ-AT72 (debug 宿主 5586) 复核, 73 条一致; 偏差见附录 E, 跨模块的多余参数问题见附录 C Q7.
 
 ### P1 新基座
 
@@ -214,6 +214,7 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 | Q4 | 开发者选项中调试打印开关 (T5) 的粒度: 全局一个, 还是按模块. | P1.2 |
 | Q5 | 按需第三方库 (axios, cheerio, dayjs, i18n, pangu, lodash, 约 850 KB) 是否迁出宿主 APK 到插件 (如 "Bundled Libraries" 插件), 或保留在 `assets/modules`. 不影响启动耗时. | P5 之前 |
 | Q6 | Node 兼容垫片 (buffer, events, fs, os, path, process, nodejs) 在 NodeJs Runtime 插件已覆盖 npm 场景的前提下是否下线. | P3.7 |
+| Q7 | 多余参数: 旧 JS 忽略多传的参数, 现有 Kotlin 以 `ensureArgumentsLength*` 拒绝 (6.6.0 起, P0.5 差分在 base64 / s13n / mime 上均有体现). 新生成层 (T4) 是否继续按签名拒绝. 建议: 继续拒绝 (6.6.0 起已是此行为, 能尽早暴露参数错误), 错误类型改为 TypeError (D10), 个别需要宽松的函数以 `vararg` 声明. | P1.2 |
 
 ## 附录 D 工具用法
 
@@ -221,7 +222,7 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 
 ## 附录 E P0 差分测试发现的既有偏差 (旧 JS 对 现有 Kotlin, 2026-10-20)
 
-第一批三个模块的差分测试 (`ArrayxDifferentialTest`, `NumberxDifferentialTest`, `MathxDifferentialTest`) 首轮结果, 标 "真机" 的已在 XQ-AT72 (debug 宿主 5586) 复核. 判定依据是 d.ts 与文档: 与文档一致的一方为准.
+第一批模块的差分测试首轮结果: P0.4 的 `ArrayxDifferentialTest`, `NumberxDifferentialTest`, `MathxDifferentialTest` 与 P0.5 的 `Base64DifferentialTest`, `S13nDifferentialTest`, `MimeDifferentialTest`, `UtilDifferentialTest`. 判定依据是 d.ts 与文档: 与文档一致的一方为准; 文档 (`AutoJs6-Documentation/api`) 与 d.ts 冲突时以文档为准并注明需同步的一方; 两者都未定义时按 D3 恢复旧行为, 除非旧行为本身是 bug 或 Kotlin 只是更宽松且无害. 标 "真机" 的已在 XQ-AT72 (debug 宿主 5586) 复核; P0.5 起全部已记录的 Kotlin 值 (表中 "现有 Kotlin" 列, 含 P0.4) 都经 `tools/augment/device_eval.py` 在同一设备复核 (73 条一致), 因此 P0.5 各行不再逐条标注. 表达式中的 `你好` 等字符在测试代码里以 `\uXXXX` 书写.
 
 | 模块 | 表达式 | 旧 JS | 现有 Kotlin | 判定 |
 | --- | --- | --- | --- | --- |
@@ -236,5 +237,34 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 | Numberx | `parseFloat(1.25, 2)` | 抛 TypeError (`in` 作用于非对象) | 0.25 | 旧 JS bug, Kotlin 正确. |
 | Arrayx | `sortedByDescending(a, f)` 对输入的影响 | 原数组被就地排序 (调用了 `sortByDescending(arr)` 而非副本) | 原数组不变 | 旧 JS bug, Kotlin 符合 `sorted*` 系列的文档语义. |
 | Arrayx / Numberx | `typeof Arrayx`, `Numberx('3')` | "function" (`Array.bind(Array)` / `Number.bind(Number)` 上挂成员, 可调用) | "object", 调用抛 TypeError (真机) | d.ts 的 `interface Arrayx` / `Numberx` 无调用签名, 可调用形态从未文档化; 新实现保持对象形态 (附录 C 不另立项). |
+| base64 | `encode('你好', 'utf_16le')`, `encode('é', 'latin1')`, `encode('你好', 'GBK')`, `decode('xOO6ww==', 'GBK')` | 只认 6 个 StandardCharsets, 去掉 `\W+` 后比较 (下划线不会被去掉), 认不出时静默用默认字符集 (Android 为 UTF-8) | 按全部可用字符集及别名匹配, 忽略大小写与标点 | 文档写明 "字符集名称匹配忽略空白, 标点和大小写"; Kotlin 正确. |
+| base64 | `encode('a', 'definitely-not-a-charset')`, `decode('aGk=', 'definitely-not-a-charset')` | 静默用默认字符集 | 抛出参数异常 | 文档写明 "未知字符集会抛出参数异常"; Kotlin 正确. |
+| base64 | `encode({ toString() { return 'obj'; } })`, `decode({ toString() { return 'aGk='; } })` | 调用脚本的 toString | 调用 NativeObject 的 Kotlin toString, 实际编码 / 解码的是 "[object Object]" | Kotlin bug (d.ts 输入类型含 `{ toString(): string }`). P2.2 修复. |
+| base64 | `encode(123)` | "MTIz" (即 "123") | "MTIzLjA=" (即 "123.0") | Kotlin bug: 装箱 Double 用了 Kotlin toString, 应按 JS ToString. P2.2. |
+| s13n | `time(60, java.util.concurrent.TimeUnit.SECONDS, java.util.concurrent.TimeUnit.MINUTES)` | 1 | 抛 ClassCastException | Kotlin bug: 文档写明 fromUnit / toUnit 接受 TimeUnit, Kotlin 用 isJsObject 把 TimeUnit 当成选项对象再强转失败. P2.2. |
+| s13n | `time(null)` | 0 (经 `Number(null)`) | 抛出异常 | 文档的 source 类型为 number / string / Date, 不含 null; 保留 Kotlin. |
+| s13n | `point(1, null)` | Point(1, 0) | Point(1, 1) | 文档: 省略 y 时两个坐标都取 source; Kotlin 把 nullish 的 y 视为省略, 与其他 API 的 isJsNullish 惯例一致; 保留 Kotlin. |
+| s13n | `color('#FF0000')` 等颜色转换 | - | - | 两侧都需要 `android.graphics.Color` (无 JVM fake), Kotlin 还把失败改写为自己的消息, JVM 上无法区分; 差分只覆盖转换前就失败的路径 (null / true / {}), 转换本身留给 P2.2 的真机 smoke. |
+| mime | `String(mime('text/html; charset=UTF-8'))` | `parameters: { charset: 'UTF-8' },` | `parameters: '{ charset: 'UTF-8' }',` (多一层引号且不配对) | Kotlin bug, 恢复旧格式. P2.2. |
+| mime | `JSON.stringify(mime('text/plain; a=1'))`, `Object.keys(mime('text/plain'))` | 普通 JS 对象, 字段可枚举, 可 JSON 序列化 | Java 对象: JSON.stringify 得到 toString 文本, Object.keys 列出 getClass 等 Java 成员 | d.ts 声明的是只读字段对象; 按 D3 恢复为 JS 对象 (或提供 toJSON 与可枚举字段). P2.2. |
+| mime | `mime(123)` | 抛 TypeError | 把 123 转成 "123" 并解析为 "123/*" | d.ts 参数为 string; 恢复 TypeError. P2.2. |
+| util | `inspect('a\'b')`, `inspect('a"b')` | `'a\'b'`, `'a"b'` | `'a'b'`, `'a'b'` | Kotlin bug: 单引号不转义, 双引号被替换成单引号 (内容被改). P2.3. |
+| util | `inspect({ a: 1, 'b-c': 2, '1': 4 })` | 非标识符键用单引号 `'b-c'` | 双引号 `"b-c"` | 旧格式 (Node 旧版) 为单引号; Kotlin 漏了替换引号一步. P2.3. |
+| util | `inspect(o, false, 0)`, `inspect(1, false, 2, true)` | 支持位置参数 (value, showHidden, depth, colors) | 最多 2 个参数且第二个须为选项对象, 否则抛出异常 | d.ts 声明了位置参数形式, 文档只写选项形式; 两种都接受不冲突, 恢复. P2.3. |
+| util | `inspect()` | "undefined" | 抛出异常 | d.ts 中 value 可选; 恢复. P2.3. |
+| util | `inspect(o, { depth: null })` | 不限深度 | 按默认 2 | 文档未定义, 旧行为同 Node 语义, 按 D3 恢复. P2.3. |
+| util | 多行的嵌套值, `inspect(function () { })`, `inspect(Object.assign(/re/, { p: 1 }))` | 嵌套多行值前换行; `[Function]`; `{ /re/ p: 1 }` | 丢失换行; `[Function ()]`; `/re/` | 前两项是 Kotlin bug; 第三项文档未定义, 按 D3 恢复. P2.3. |
+| util | `inspect(new Error('boom'))`, `inspect(Object.assign(new Error('e'), { code: 1 }))`, `format('x', new Error('e'))` | `[Error: boom]`, `{ [Error: e] code: 1 }`, `x [Error: e]` | `Error: boom`, `Error: e`, `x Error: e` | Kotlin 的 `formatError` 本有方括号形式, 但 "自定义 toString" 判断先命中; 恢复旧格式. P2.3. |
+| util | `inspect({ inspect() { return 'custom'; } })` | 调用对象自身的 inspect | 不调用 | 文档现写 customInspect 默认 false (现有 Kotlin), d.ts 的 util.format 示例依赖旧默认 true; 以文档为准保留 Kotlin, d.ts 示例待同步. |
+| util | `inspect(java.lang.Integer.valueOf(7))`, `inspect(Java int[2])` | `[JavaObject: 7]`, `[0, 0]` (Arrays.toString) | `7`, `[ 0, 0 ]` | 文档未定义; 旧格式能区分 Java 值与 JS 值 (typeof / === 不同), 按 D3 恢复. P2.3. |
+| util | `inspect(java.lang.String)`, `inspect(new java.util.ArrayList())` | 抛出异常; `{}` | `class java.lang.String`; `[]` | 旧 JS bug (前者在自身的 JavaClass 分支之前读 getClass 抛错, 后者看不到 Java 集合元素); 保留 Kotlin. |
+| util | `util.inspect.colors`, `util.inspect.styles` | undefined | 映射对象 | 文档写明的 getter; 旧 JS 把它们挂在未绑定的内部函数上, 脚本拿不到; 保留 Kotlin. |
+| util | `format('%d', 1e21)` | "1e+21" | "1000000000000000000000" | %d 按数值转换, 应按 JS 数值转字符串; Kotlin bug. P2.3. |
+| util | `isString(new java.lang.String('j'))` | false | true | 文档: "JavaScript 类型是否为 string"; 恢复 typeof 语义. P2.3. |
+| util | `isError(Object.create(Error.prototype))` | true | false | d.ts 源码摘要含 `e instanceof Error`, Kotlin 缺这一支; 恢复. P2.3. |
+| util | `isEmptyObject(Object.create({ a: 1 }))` | false (for-in 含继承属性) | true | 文档: "不含自有属性"; 保留 Kotlin. |
+| util | `checkStringParam('abc', /b/)`, `checkStringParam({ toString() { return 'abc'; } }, 'abc')` | 支持 RegExp (按 source 搜索) 与带 toString 的对象 | 只认 kotlin.text.Regex (脚本无法传入), 抛 java.lang.Error; 对象被拒且消息为 "Param src must be non-nullish" | d.ts 声明 `string \| RegExp` 并有 RegExp 示例, 文档照抄了 Kotlin 的 Regex 与 "仅原始值"; 恢复 RegExp 与 toString 处理 (至少对兼容别名 checkStringParam), 修正文档. P2.3. |
+| util | `toRegularAndCall(f, 1, 2)`, `toRegularAndApply(f, [1, 2])` | 可用 | 始终抛 ObsoletedRhinoFunctionException | 文档标为 ABANDONED (始终抛出); 保留 Kotlin; toRegularAndApply 的消息误写为 toRegularAndCall. |
+| 全部 | 多余参数: `base64.encode('a', 'UTF-8', 'extra')`, `s13n.time(1, 'ms', 's', 'extra')`, `mime('text/plain', 'extra')` | 忽略 | 抛出参数个数异常 (`ensureArgumentsLength*`) | 跨模块问题, 见附录 C Q7. |
 | 全部 | 参数错误的错误类型 | TypeError / RangeError / Error, `e instanceof TypeError` 成立 | 统一 InternalError (`WrappedRuntimeException`), `instanceof TypeError` 为 false (真机) | 即 D10 要解决的问题; P0 差分以 `tolerateErrorTypes = true` 暂不比较错误类型, P2 起关闭. |
 | 全部 | 实现中触及 Android 静态初始化的函数 (如 `Numberx.padStart` / `parseRatio` 经 `StringUtils`) | 可在 JVM 比较 | JVM 中 `ExceptionInInitializerError`, 真机正常 | 差分 harness 以 `unavailable(jvm)` 跳过并提示用 `tools/augment` 真机复核; 新实现的纯逻辑模块必须 Android-free (与 toolkit core 同一做法), 这类跳过应归零. |
