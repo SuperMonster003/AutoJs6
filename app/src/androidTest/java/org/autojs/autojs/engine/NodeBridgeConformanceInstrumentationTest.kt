@@ -182,7 +182,10 @@ class NodeBridgeConformanceInstrumentationTest {
                       };
                     }
                   } else if (moduleName === "shell") {
-                    result = { code: 0, stdout: "ok\n", stderr: "" };
+                    if (method === "spawn" || method === "open") result = { id: "shell-conformance", pid: 1, mode: "sh" };
+                    else if (method === "drain") result = [{type:"stdout",data:Buffer.from("ok\n").toString("base64")},{type:"exit",code:0,timedOut:false}];
+                    else if (method === "close") result = {wasAlive:false,code:0};
+                    else result = null;
                   } else if (moduleName === "engines") {
                     if (method === "all") result = request.args[0];
                     else if (method === "stopAll") result = 2;
@@ -736,12 +739,10 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual((await expectPromise("shell.exec", shell.exec("echo ok", { timeoutMs: 1027 }))).code, 0);
               assert.strictEqual(shell.setDefaultTimeout(2000), 2000);
               const shizukuAccess = shell.checkAccess({ shizuku: true });
-              assert.strictEqual(shizukuAccess.shizuku, false);
-              assert(Array.isArray(shizukuAccess.missingCapabilities), "Shizuku access diagnostics must expose missingCapabilities");
-              const beforeShellRejects = requests.length;
-              await expectRejectCode("shell.execShizuku", shell.execShizuku("id"), "ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED");
-              await expectRejectCode("shell.exec.shizuku", shell.exec("id", { shizuku: true }), "ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED");
-              assert.strictEqual(requests.length, beforeShellRejects, "shell Shizuku rejected stubs must not dispatch bridge requests");
+              assert.strictEqual(shizukuAccess.shizuku, true);
+              assert(Array.isArray(shizukuAccess.missingCapabilities));
+              assert.strictEqual((await shell.execShizuku("id")).code,0);
+              assert(requests.some(r=>r.module==="shell"&&r.method==="spawn"&&r.args[1].shizuku===true));
               assert.strictEqual((await expectPromise("shell.execFile", shell.execFile("scripts/run.sh", ["--dry-run"], { timeoutMs: 1028 }))).code, 0);
               assert.strictEqual((await expectPromise("engines.all", engines.all({ timeoutMs: 1028 }))).length >= 1, true);
               assert.strictEqual(await expectPromise("engines.stopAll", engines.stopAll({ timeoutMs: 1029 })), 2);
@@ -1047,7 +1048,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 "device.vibrate",
                 "device.isIgnoringBatteryOptimizations",
                 "device.openBatteryOptimizationSettings",
-                "shell.exec",
+                "shell.spawn",
                 "engines.execScriptFile",
                 "accessibility.findAll",
                 "accessibility.setText",
@@ -1080,7 +1081,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 "notifications.cancelAll",
                 "notifications.getPermissionStatus",
                 "notifications.openSettings",
-                "sensors.once",
+                "sensors.subscribe",
                 "sensors.unsubscribe",
                 "ui.showLayout",
                 "ui.drainEvents",
@@ -1292,7 +1293,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),
             NodeBridgeModules.DEVICE to setOf("info", "isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings",
                 "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake"),
-            NodeBridgeModules.SHELL to setOf("exec"),
+            NodeBridgeModules.SHELL to setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission"),
             NodeBridgeModules.ENGINES to setOf("list", "stop", "myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"),
             NodeBridgeModules.ACCESSIBILITY to setOf(
                 "isEnabled",

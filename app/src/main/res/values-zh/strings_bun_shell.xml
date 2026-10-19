@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_shell_control_grant">允许以当前应用身份执行命令和流式进程.</string>
+    <string name="summary_bun_shell_root_grant">允许 shell.control 经 su 执行命令. 仍需 Android Root 授权.</string>
+    <string name="summary_bun_shell_shizuku_grant">允许 shell.control 经 Shizuku 执行命令. 当前应用须获得 Shizuku 授权.</string>
+    <string name="text_bun_shell_control_grant">宿主 Shell</string>
+    <string name="text_bun_shell_root_grant">宿主 Shell Root</string>
+    <string name="text_bun_shell_shizuku_grant">宿主 Shell Shizuku</string>
+</resources>

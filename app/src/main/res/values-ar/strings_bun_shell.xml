@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_shell_control_grant">يسمح بالأوامر والعمليات المتدفقة بصلاحيات هذا التطبيق.</string>
+    <string name="summary_bun_shell_root_grant">يسمح باستخدام su عبر shell.control. لا يزال تفويض Root من Android مطلوبا.</string>
+    <string name="summary_bun_shell_shizuku_grant">يسمح باستخدام Shizuku عبر shell.control. يجب تفويض هذا التطبيق في Shizuku.</string>
+    <string name="text_bun_shell_control_grant">Shell المضيف</string>
+    <string name="text_bun_shell_root_grant">Shell المضيف Root</string>
+    <string name="text_bun_shell_shizuku_grant">Shell المضيف Shizuku</string>
+</resources>

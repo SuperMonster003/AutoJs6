@@ -42,3 +42,6 @@ Bun still has no explicit host shell capability. Node's shell facade has its own
 ## Reproduce
 
 Run `python tools/api-coverage/check.py`, `node tools/api-coverage/check-shell-contract.mjs`, `node tools/ace-completion/generate-editor-assets.mjs --check` and `node tools/ace-completion/test-completer.mjs`. Run the declarations repository's tools/verify-api-coverage.mjs with each compiler and Ace's verify-api-coverage / verify-runtime-api-coverage Gradle tasks. Device scripts: tools/shell-stream/device_shell_stream_test.py with isolated fixtures; UI class: AceApiCoverageDeviceTest.
+
+
+Follow-up: the [host Shell runtime delivery](runtime-shell-2026-10-19.md) subsequently implemented the Bun/Node/Worker shell and Shizuku bridges listed above, with actual privileged-UID and packaged-app verification. Broader event/notification and dedicated runtime surfaces remain separate audit work.

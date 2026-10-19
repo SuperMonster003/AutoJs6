@@ -250,3 +250,6 @@ result fields and actual popup signatures. `tools/shell-stream/device_shell_stre
 executes owned commands with no audio; it reports Root/Shizuku modes only when they
 are available and checks explicit Shizuku denial otherwise. Preserve device APKs
 and settings, use an isolated fixture path, and clean only owned files.
+
+
+Host Shell coverage: `check-runtime-shell.mjs` verifies ten native routes and the shared Node/Worker/Bun factory and declarations. Node and Bun SDK tests cover streams, backpressure, binary chunk limits and cancellation. `NodeShellBridgeInstrumentationTest` checks raw routes, privilege requirements, quota cleanup and PTY EOF. `RuntimeShellDeviceTest` checks ordinary/Shizuku main and Worker execution; `RuntimeShellPackagedDeviceTest` produces and verifies real Bun/Worker APKs. All commands operate on owned processes and use no acoustic signal.

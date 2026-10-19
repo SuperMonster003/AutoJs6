@@ -197,10 +197,13 @@ object RemoteApkBuildRequestPreparer {
             val remoteConfig = cloneForRemoteRequest(projectConfig)
             if (requiresNodeRuntime(projectConfig, source)) {
                 remoteConfig.setLibs((remoteConfig.libs + ApkBuildLibrary.NODEJS_RUNTIME.label).distinct())
+                val shellManifest=org.autojs.autojs.engine.NodeBridgePermissionManifest.fromJsonSources(projectConfig.toJson(false),File(source,"package.json").takeIf { it.isFile }?.readText())
+                if("moe.shizuku.manager.permission.API_V23" in shellManifest.androidPermissions)remoteConfig.setPermissions((remoteConfig.permissions+"moe.shizuku.manager.permission.API_V23").distinct())
                 remoteConfig.setPermissions((remoteConfig.permissions + NodeJsPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
             }
             if (requiresBunRuntime(projectConfig, source)) {
                 org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants.validatePackagedCapabilities(projectConfig.bunConfig?.hostCapabilities.orEmpty())
+                if("shell.shizuku" in projectConfig.bunConfig?.hostCapabilities.orEmpty())remoteConfig.setPermissions((remoteConfig.permissions+"moe.shizuku.manager.permission.API_V23").distinct())
                 remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.bun.runtime.api.BunPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
             }
             typeScriptPlan = TypeScriptApkBuildCompiler.prepare(

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_shell_control_grant">このアプリの権限でコマンドとストリームプロセスを実行します.</string>
+    <string name="summary_bun_shell_root_grant">shell.control で su を利用します. Android の Root 許可が必要です.</string>
+    <string name="summary_bun_shell_shizuku_grant">shell.control で Shizuku を利用します. このアプリの Shizuku 許可が必要です.</string>
+    <string name="text_bun_shell_control_grant">ホスト Shell</string>
+    <string name="text_bun_shell_root_grant">ホスト Shell Root</string>
+    <string name="text_bun_shell_shizuku_grant">ホスト Shell Shizuku</string>
+</resources>

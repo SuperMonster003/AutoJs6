@@ -37,7 +37,21 @@ internal class PtyProcess private constructor(private val master: ParcelFileDesc
     private var exitCode: Int? = null
 
     private val input: InputStream = MasterInputStream(FileInputStream(master.fileDescriptor))
-    private val output: OutputStream = FileOutputStream(master.fileDescriptor)
+    // The PTY master is full-duplex. Closing its write descriptor would also interrupt stdout.
+    // Canonical terminal input ends with VEOF; the second byte also handles an unterminated input line.
+    private val output: OutputStream = object : OutputStream() {
+        private val writer=FileOutputStream(master.fileDescriptor)
+        private var inputClosed=false
+        @Synchronized override fun write(value:Int){checkOpen();writer.write(value)}
+        @Synchronized override fun write(bytes:ByteArray,offset:Int,count:Int){checkOpen();writer.write(bytes,offset,count)}
+        @Synchronized override fun flush(){checkOpen();writer.flush()}
+        @Synchronized override fun close(){
+            if(inputClosed)return
+            inputClosed=true
+            if(!masterClosed.get())runCatching { writer.write(byteArrayOf(4,4));writer.flush() }
+        }
+        private fun checkOpen(){if(inputClosed||masterClosed.get())throw IOException("The PTY input is closed")}
+    }
 
     init {
         Thread({

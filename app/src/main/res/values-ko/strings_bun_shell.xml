@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_shell_control_grant">이 앱 권한으로 명령과 스트리밍 프로세스를 실행합니다.</string>
+    <string name="summary_bun_shell_root_grant">shell.control에서 su를 사용합니다. Android Root 승인이 필요합니다.</string>
+    <string name="summary_bun_shell_shizuku_grant">shell.control에서 Shizuku를 사용합니다. 이 앱의 Shizuku 승인이 필요합니다.</string>
+    <string name="text_bun_shell_control_grant">호스트 Shell</string>
+    <string name="text_bun_shell_root_grant">호스트 Shell Root</string>
+    <string name="text_bun_shell_shizuku_grant">호스트 Shell Shizuku</string>
+</resources>

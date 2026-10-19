@@ -19,7 +19,7 @@ internal class BunAutomationBridge(
     private val grants: List<String>,
     private val provider: () -> AndroidNodeBridgeCapabilityProvider,
 ) : Closeable {
-    private data class Job(val capability: String, val method: String, val deadline: Long, val future: CompletableFuture<NodeBridgeResponse>,
+    private data class Job(val id:String, val capability: String, val method: String, val deadline: Long, val future: CompletableFuture<NodeBridgeResponse>,
         val abandoned: java.util.concurrent.atomic.AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean(false))
     private val jobs = LinkedHashMap<String, Job>()
     private val executor = Executors.newFixedThreadPool(2)
@@ -63,7 +63,7 @@ internal class BunAutomationBridge(
         val timeout = (request.opt("timeoutMs") ?: 10000) as? Number ?: throw IllegalArgumentException("timeoutMs must be an integer")
         require(timeout.toDouble().isFinite() && timeout.toDouble() == timeout.toLong().toDouble() && timeout.toLong() in 1..120000)
         val id = UUID.randomUUID().toString()
-        val job = Job(capability, method, SystemClock.elapsedRealtime() + timeout.toLong(), CompletableFuture())
+        val job = Job(id, capability, method, SystemClock.elapsedRealtime() + timeout.toLong(), CompletableFuture())
         synchronized(jobs) {
             check(!closed) { "Automation execution is closed" }
             // Completed calls still belong to their caller until drained, but abandoned timeouts do not fill the map.
@@ -76,7 +76,8 @@ internal class BunAutomationBridge(
                 if (!job.future.isDone && SystemClock.elapsedRealtime() < job.deadline) try {
                     val module = modules.getValue(capability)
                     provider().dispatch(NodeBridgeRequest(id, module, method, args.toString(), timeout.toLong(),
-                        permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method))) { job.future.complete(it) }
+                        permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method, args.toString()))) { job.future.complete(it) }
+                    if(job.abandoned.get() && capability==Grants.SHELL_CONTROL)provider().cancelShellRequest(id)
                 } catch (error: Exception) {
                     job.future.complete(NodeBridgeResponse.failure(id, if (error is IllegalArgumentException || error is org.json.JSONException)
                         NodeBridgeError.invalidRequest(error.message ?: "Invalid automation arguments", modules.getValue(capability), method)
@@ -92,17 +93,19 @@ internal class BunAutomationBridge(
     }
     private fun abandon(job: Job) {
         if (!job.abandoned.compareAndSet(false, true)) return
+        if(job.capability==Grants.SHELL_CONTROL && job.method=="exec")provider().cancelShellRequest(job.id)
         val database = job.capability == Grants.DATABASE_CONTROL && job.method == "open"
+        val shell = job.capability == Grants.SHELL_CONTROL && job.method in setOf("spawn","open")
         val sensor = job.capability == Grants.SENSORS_CONTROL && job.method == "subscribe"
-        if (!database && !sensor) { job.future.cancel(false); return }
+        if (!database && !sensor && !shell) { job.future.cancel(false); return }
         // Preserve late creation replies so cancelled callers cannot strand native resources.
         job.future.whenComplete { response, _ ->
             if (response?.ok == true) runCatching {
                 val id = JSONObject(response.resultJson.orEmpty()).getString("id")
-                val module = if (database) NodeBridgeModules.DATABASE else NodeBridgeModules.SENSORS
-                val args = if (database) JSONArray().put(id) else JSONArray().put(JSONObject().put("id", id))
-                provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), module, if (database) "close" else "unsubscribe",
-                    args.toString(), 5000, permissions = listOf(if (database) NodeBridgePermissionManifest.DATABASE else NodeBridgePermissionManifest.SENSORS))) {}
+                val module = if (database) NodeBridgeModules.DATABASE else if (shell) NodeBridgeModules.SHELL else NodeBridgeModules.SENSORS
+                val args = if (database || shell) JSONArray().put(id) else JSONArray().put(JSONObject().put("id", id))
+                provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), module, if (database || shell) "close" else "unsubscribe",
+                    args.toString(), 5000, permissions = listOf(if (database) NodeBridgePermissionManifest.DATABASE else if (shell) NodeBridgePermissionManifest.SHELL else NodeBridgePermissionManifest.SENSORS))) {}
             }
         }
     }
@@ -120,6 +123,9 @@ internal class BunAutomationBridge(
             if (Grants.CLIPBOARD_CONTROL in grants) add(NodeBridgePermissionManifest.CLIPBOARD)
             if (Grants.STORAGE_CONTROL in grants) add(NodeBridgePermissionManifest.STORAGE)
             if (Grants.DATABASE_CONTROL in grants) add(NodeBridgePermissionManifest.DATABASE)
+            if (Grants.SHELL_CONTROL in grants) add(NodeBridgePermissionManifest.SHELL)
+            if (Grants.SHELL_ROOT in grants) add(NodeBridgePermissionManifest.SHELL_ROOT)
+            if (Grants.SHELL_SHIZUKU in grants) add(NodeBridgePermissionManifest.SHELL_SHIZUKU)
             if (Grants.SENSORS_CONTROL in grants) add(NodeBridgePermissionManifest.SENSORS)
         }
         val gestureMethods = setOf("swipe", "gesture")
@@ -128,9 +134,10 @@ internal class BunAutomationBridge(
             Grants.ACCESSIBILITY_CONTROL to setOf("isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture"),
             Grants.CLIPBOARD_CONTROL to setOf("getText", "setText", "hasText"),
             Grants.STORAGE_CONTROL to setOf("get", "put", "remove", "clear", "keys", "contains"),
+            Grants.SHELL_CONTROL to setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission"),
             Grants.SENSORS_CONTROL to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             Grants.DATABASE_CONTROL to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
         )
-        private val modules = mapOf(Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS)
+        private val modules = mapOf(Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
     }
 }

@@ -274,6 +274,7 @@ object NodeBridgePermissionManifest {
     )
 
     private val androidPermissionsByCapability = linkedMapOf(
+        SHELL_SHIZUKU to listOf("moe.shizuku.manager.permission.API_V23"),
         NOTIFICATIONS to listOf(ANDROID_PERMISSION_POST_NOTIFICATIONS),
         MEDIA_RECORDING to listOf(
             ANDROID_PERMISSION_RECORD_AUDIO,
@@ -595,18 +596,13 @@ object NodeBridgePermissionManifest {
             .filterNot { required -> declaresCapability(declared, required) }
     }
 
-    private fun shellRequiredCapabilities(method: String, argsJson: String): List<String> {
-        if (method != "exec") {
-            return listOf(SHELL)
-        }
-        val root = runCatching {
-            val args = JSONArray(argsJson.ifBlank { "[]" })
-            args.optJSONObject(1)?.optBoolean("root", false) ?: false
-        }.getOrDefault(false)
-        return if (root) {
-            listOf(SHELL, SHELL_ROOT)
-        } else {
-            listOf(SHELL)
+    private fun shellRequiredCapabilities(method: String, argsJson: String): List<String> = buildList {
+        add(SHELL)
+        if(method=="requestShizukuPermission")add(SHELL_SHIZUKU)
+        if(method in setOf("exec","spawn","open")) {
+            val options=runCatching { JSONArray(argsJson).optJSONObject(if(method=="open")0 else 1) }.getOrNull()
+            if(options?.optBoolean("root",false)==true)add(SHELL_ROOT)
+            if(options?.optBoolean("shizuku",false)==true || options?.optBoolean("adb",false)==true)add(SHELL_SHIZUKU)
         }
     }
 

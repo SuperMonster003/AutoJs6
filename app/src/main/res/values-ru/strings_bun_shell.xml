@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_shell_control_grant">Разрешает команды и потоковые процессы с правами этого приложения.</string>
+    <string name="summary_bun_shell_root_grant">Разрешает su через shell.control. Требуется разрешение Root Android.</string>
+    <string name="summary_bun_shell_shizuku_grant">Разрешает Shizuku через shell.control. Приложению требуется разрешение Shizuku.</string>
+    <string name="text_bun_shell_control_grant">Shell хоста</string>
+    <string name="text_bun_shell_root_grant">Shell хоста Root</string>
+    <string name="text_bun_shell_shizuku_grant">Shell хоста Shizuku</string>
+</resources>

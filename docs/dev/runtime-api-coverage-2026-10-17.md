@@ -71,3 +71,6 @@ The full host coverage gate measures documentation, types and completion against
 
 
 The sensor delivery's 2026-10-19 broader rescan identified five declaration/Ace gaps: shell.checkAccess, shell.isRootAvailable, shell.setDefaultOptions, shell.spawn and shizuku.spawn. The subsequent [shell declaration/completion delivery](shell-api-coverage-2026-10-19.md) closes all five, adds process/constructor/result contracts and fixes default-editor Context/result dependencies. Its expanded gate covers 1356 explicit exports and 1589 paths with zero failures, plus actual shell and Ace device checks. These are Rhino declaration/completion results; Bun's host shell capability and Node streaming/Shizuku/Worker integration remain runtime audit items.
+
+
+The [host Shell delivery](runtime-shell-2026-10-19.md) adds Bun shell/shizuku and Node main/Worker streaming, explicit Shizuku app authorization, PTY and owned-process cleanup. It verifies actual shell UID execution and real packaged Bun/Worker applications on Android 13/15. Bun transport quotas, Root availability and the broader runtime gaps remain explicit; the Redmi cold-binding retry is retained separately.

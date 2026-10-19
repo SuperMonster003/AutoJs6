@@ -799,7 +799,7 @@ object NodeBridgeModules {
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings", "info",
         "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake")
-    val shellMethods = setOf("exec")
+    val shellMethods = setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission")
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
@@ -996,6 +996,13 @@ class AndroidNodeBridgeCapabilityProvider(
         appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
     }
     private val resourceRegistry = NodeBridgeResourceRegistry(engineInfo.id)
+    private val shellScopeLock=Any()
+    private var shellScopeClosed=false
+    private val shellBridge=lazy { RuntimeShellBridge(engineInfo.cwd.ifBlank { appContext.filesDir.path },resourceRegistry,
+        {tryAcquireShellCommand().also { if(!it)bridgeResourceLimitRejections.incrementAndGet() }},{activeShellCommands.updateAndGet { (it-1).coerceAtLeast(0) }},{bridgePermissionManifest}) }
+    internal fun cancelShellRequest(id:String){if(shellBridge.isInitialized())shellBridge.value.cancelRequest(id)}
+    internal fun closeShellProcesses(){synchronized(shellScopeLock){shellScopeClosed=true;if(shellBridge.isInitialized())shellBridge.value.close()}}
+
     private val activeShellCommands = AtomicInteger(0)
     private val maxActiveShellCommands = AtomicInteger(0)
     private val bridgeResourceLimitRejections = AtomicInteger(0)
@@ -1179,6 +1186,7 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(packageInstallManager.nativeValues())
         putAll(capabilityBrokerAudit.nativeDiagnostics())
         putAll(resourceRegistry.nativeDiagnostics())
+        put("embedded_script.shell.active_handle_count",if(shellBridge.isInitialized())shellBridge.value.activeCount.toString()else "0")
         putAll(bridgeLimits.nativeDiagnostics())
         put("embedded_script.bridge_resource_limit_rejection_count", bridgeResourceLimitRejections.get().toString())
         put("embedded_script.bridge_rate_limited_count", bridgeRateLimitedRejections.get().toString())
@@ -1211,6 +1219,7 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     override fun destroy(reason: NodeBridgeError) {
+        closeShellProcesses()
         closeAgentHelpers()
         if (composeBridge.isInitialized()) composeBridge.value.close()
         if (uiInterop.isInitialized()) uiInterop.value.close()
@@ -4304,43 +4313,11 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchShell(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        if (!tryAcquireShellCommand()) {
-            bridgeResourceLimitRejections.incrementAndGet()
-            callback(
-                NodeBridgeResponse.failure(
-                    request.id,
-                    NodeBridgeError.resourceLimit(
-                        message = "AutoJs6 shell bridge exceeded ${bridgeLimits.maxShellCommands} active commands.",
-                        module = request.module,
-                        method = request.method,
-                    ),
-                ),
-            )
-            return
+        val bridge=synchronized(shellScopeLock){
+            if(shellScopeClosed){callback(NodeBridgeResponse.failure(request.id,NodeBridgeError.processDead("Shell execution is closed")));return}
+            shellBridge.value
         }
-        thread(name = "AutoJs6NodeShellExec-${request.id}", isDaemon = true) {
-            val response = try {
-                runCatching {
-                    when (request.method) {
-                        "exec" -> executeShell(request)
-                        else -> unavailable(request)
-                    }
-                }.getOrElse { error ->
-                    NodeBridgeResponse.failure(
-                        request.id,
-                        NodeBridgeError.providerFailed(
-                            message = error.message ?: error.javaClass.name,
-                            module = request.module,
-                            method = request.method,
-                            stack = error.stackTraceToString(),
-                        ),
-                    )
-                }
-            } finally {
-                activeShellCommands.updateAndGet { current -> (current - 1).coerceAtLeast(0) }
-            }
-            callback(response)
-        }
+        bridge.dispatch(request,callback)
     }
 
     private fun tryAcquireShellCommand(): Boolean {
@@ -5512,175 +5489,6 @@ class AndroidNodeBridgeCapabilityProvider(
             request.id,
             NodeBridgeError.permissionDenied(
                 message = "AutoJs6 device bridge could not access device capability: ${error.message ?: error.javaClass.name}",
-                module = request.module,
-                method = request.method,
-            ),
-        )
-    }
-
-    private fun executeShell(request: NodeBridgeRequest): NodeBridgeResponse {
-        val args = request.argsArray()
-        val command = args.optString(0, "")
-        if (command.isBlank() || command.indexOf('\u0000') >= 0) {
-            return shellPolicyFailure(request, "shell.exec requires a non-empty command without NUL bytes.")
-        }
-        val options = args.optJSONObject(1) ?: JSONObject()
-        val root = options.optBoolean("root", false)
-        val timeoutMs = parseShellTimeoutMs(options.opt("timeoutMs"))
-        val maxOutputBytes = try {
-            NodeBridgeShellOutput.limit(options.opt("maxOutputBytes"))
-        } catch (_: IllegalArgumentException) {
-            return NodeBridgeResponse.failure(request.id, NodeBridgeError.invalidRequest("shell.exec maxOutputBytes must be an integer from 1 to ${NodeBridgeShellOutput.MAX_BYTES}.", module = request.module, method = request.method))
-        }
-        val cwd = resolveShellCwd(options.optString("cwd", ""))
-            ?: return shellPolicyFailure(request, "shell.exec cwd must stay inside the scoped working directory.")
-        val env = parseShellEnv(options.optJSONObject("env"))
-            ?: return shellPolicyFailure(request, "shell.exec env must be a JSON object with string keys and string values.")
-
-        val result = runControlledShellCommand(
-            requestId = request.id,
-            command = command,
-            root = root,
-            cwd = cwd,
-            env = env,
-            timeoutMs = timeoutMs,
-            maxOutputBytes = maxOutputBytes,
-        )
-        return NodeBridgeResponse.success(request.id, result.toJson())
-    }
-
-    private fun parseShellTimeoutMs(value: Any?): Long {
-        val parsed = when (value) {
-            null, JSONObject.NULL -> 30_000L
-            is Int -> value.toLong()
-            is Long -> value
-            is Number -> value.toLong()
-            is String -> value.toLongOrNull() ?: 30_000L
-            else -> 30_000L
-        }
-        return parsed.coerceIn(1L, MAX_TIMEOUT_MS)
-    }
-
-    private fun parseShellEnv(envJson: JSONObject?): Map<String, String>? {
-        if (envJson == null) {
-            return emptyMap()
-        }
-        val env = linkedMapOf<String, String>()
-        val keys = envJson.keys()
-        while (keys.hasNext()) {
-            val key = keys.next()
-            val value = envJson.opt(key)
-            if (key.isBlank() || key.indexOf('\u0000') >= 0 || value !is String || value.indexOf('\u0000') >= 0) {
-                return null
-            }
-            env[key] = value
-        }
-        return env
-    }
-
-    private fun resolveShellCwd(rawCwd: String): File? {
-        if (rawCwd.indexOf('\u0000') >= 0) {
-            return null
-        }
-        val base = File(engineInfo.cwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath)
-            .canonicalFile
-        val input = rawCwd.trim()
-        if (input.isBlank()) {
-            return base
-        }
-        val candidateInput = File(input)
-        if (candidateInput.isAbsolute) {
-            return null
-        }
-        val segments = input.replace('\\', '/').split('/').filter { it.isNotBlank() }
-        if (segments.any { it == ".." }) {
-            return null
-        }
-        val candidate = File(base, input).canonicalFile
-        val basePath = base.path.trimEnd(File.separatorChar)
-        val candidatePath = candidate.path
-        if (candidatePath != basePath && !candidatePath.startsWith(basePath + File.separator)) {
-            return null
-        }
-        return candidate.takeIf { it.isDirectory }
-    }
-
-    private fun runControlledShellCommand(
-        requestId: String,
-        command: String,
-        root: Boolean,
-        cwd: File,
-        env: Map<String, String>,
-        timeoutMs: Long,
-        maxOutputBytes: Int?,
-    ): ShellExecResult {
-        val commandLine = if (root) {
-            listOf("su", "-c", command)
-        } else {
-            listOf("sh", "-c", command)
-        }
-        val process = runCatching {
-            ProcessBuilder(commandLine)
-                .directory(cwd)
-                .apply { environment().putAll(env) }
-                .start()
-        }.getOrElse { error ->
-            return ShellExecResult(
-                code = 1,
-                stdout = "",
-                stderr = NodeBridgeShellOutput.text((error.message ?: error.javaClass.name).toByteArray(Charsets.UTF_8), maxOutputBytes ?: SHELL_OUTPUT_LIMIT_BYTES),
-            )
-        }
-        val resource = resourceRegistry.register(
-            type = NodeBridgeResourceType.SHELL_EXECUTION,
-            id = "shell-$requestId",
-            metadata = mapOf(
-                "cwd" to cwd.absolutePath,
-                "root" to root.toString(),
-            ),
-        ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) process.destroyForcibly() else process.destroy()
-        }
-        val stdout = StreamCapture(process.inputStream, maxOutputBytes)
-        val stderr = StreamCapture(process.errorStream, maxOutputBytes)
-        val stdoutThread = thread(name = "AutoJs6NodeShellStdout", isDaemon = true) { stdout.read() }
-        val stderrThread = thread(name = "AutoJs6NodeShellStderr", isDaemon = true) { stderr.read() }
-        val finished = runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) process.waitFor(timeoutMs, TimeUnit.MILLISECONDS)
-            else NodeBridgeShellOutput.awaitExit(process, timeoutMs)
-        }.getOrDefault(false)
-        val code = if (finished) {
-            process.exitValue().also { exitCode ->
-                resource.release("exit:$exitCode")
-            }
-        } else {
-            resource.close("timeout:$timeoutMs")
-            124
-        }
-        stdoutThread.join(SHELL_STREAM_JOIN_MS)
-        stderrThread.join(SHELL_STREAM_JOIN_MS)
-        val timeoutMessage = if (finished) {
-            ""
-        } else {
-            "AutoJs6 shell command timed out after ${timeoutMs}ms."
-        }
-        val output = if (maxOutputBytes == null) stdout.text() to listOf(stderr.text(), timeoutMessage).filter { it.isNotBlank() }.joinToString("\n")
-            else NodeBridgeShellOutput.bound(stdout.text(), stderr.text(), maxOutputBytes)
-        return ShellExecResult(
-            code = code,
-            stdout = output.first,
-            stderr = output.second,
-            truncated = stdout.truncated || stderr.truncated || (maxOutputBytes != null &&
-                stdout.text().toByteArray(Charsets.UTF_8).size + stderr.text().toByteArray(Charsets.UTF_8).size > maxOutputBytes),
-            timedOut = !finished,
-        )
-    }
-
-    private fun shellPolicyFailure(request: NodeBridgeRequest, message: String): NodeBridgeResponse {
-        return NodeBridgeResponse.failure(
-            request.id,
-            NodeBridgeError.permissionDenied(
-                message = message,
                 module = request.module,
                 method = request.method,
             ),

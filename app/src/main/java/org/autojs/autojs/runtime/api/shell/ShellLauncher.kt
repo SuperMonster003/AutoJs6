@@ -83,7 +83,9 @@ internal object ShellLauncher {
      * zh-CN: 经 `sh -c` 或 `su -c` 运行一条命令行. 工作目录与环境变量在命令行内设置, 因为部分 `su` 实现会重置二者.
      */
     fun startCommand(commandLine: String, options: Options): Process {
-        val script = (if (options.pty) NO_ECHO else "") + prelude(options) + commandLine
+        // PtyTermios configures our PTY before it is exposed. Running stty again can flush input
+        // already written by the caller. Only su's additional terminal still needs the shell-side setup.
+        val script = (if (options.pty && options.root) NO_ECHO else "") + prelude(options) + commandLine
         return when {
             options.root -> startRoot(options.adb, options.pty) { script }
             else -> start(listOf("sh", "-c", script), options.adb, options.pty)

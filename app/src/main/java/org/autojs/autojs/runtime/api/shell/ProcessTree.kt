@@ -14,7 +14,8 @@ import java.io.File
  */
 internal object ProcessTree {
 
-    private const val SIGTERM = 15
+    private const val SIGKILL = 9
+    private const val SIGSTOP = 19
     private const val POLL_MILLIS = 10L
 
     fun pidOf(process: Process): Int = when (process) {
@@ -25,12 +26,24 @@ internal object ProcessTree {
     }
 
     fun terminate(process: Process) {
+        // These wrappers own a process group or a remote cleanup token even after the leader exits.
+        if(process is PtyProcess || process is ShizukuShellProcess || process is RootShellProcess){runCatching { process.destroy() };return}
+        // Do not signal a cached PID after its original local process has already exited.
+        if (runCatching { process.exitValue() }.isSuccess) return
         if (process !is ShizukuShellProcess && process !is RootShellProcess) {
             val pid = pidOf(process)
             if (pid > 0) {
-                descendantsOf(pid).asReversed().forEach { child ->
-                    runCatching { android.os.Process.sendSignal(child, SIGTERM) }
+                // Freeze the tree before collecting it: a loop can otherwise fork between collection and kill.
+                // SIGKILL also releases pipes when a command ignores or traps SIGTERM.
+                runCatching { android.os.Process.sendSignal(pid, SIGSTOP) }
+                val stopped = linkedSetOf<Int>()
+                while (true) {
+                    val found=descendantsOf(pid).filterNot { it in stopped }
+                    if(found.isEmpty())break
+                    found.forEach { child -> runCatching { android.os.Process.sendSignal(child,SIGSTOP) };stopped.add(child) }
                 }
+                stopped.toList().asReversed().forEach { child -> runCatching { android.os.Process.sendSignal(child,SIGKILL) } }
+                runCatching { android.os.Process.sendSignal(pid,SIGKILL) }
             }
         }
         // A Shizuku process forwards destroy() to the user service, which runs this method next to the real process;

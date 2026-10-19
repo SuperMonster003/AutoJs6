@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_shell_control_grant">Autorise les commandes et processus en flux avec les droits de cette application.</string>
+    <string name="summary_bun_shell_root_grant">Autorise su via shell.control. Une autorisation Root Android reste nécessaire.</string>
+    <string name="summary_bun_shell_shizuku_grant">Autorise Shizuku via shell.control. Cette application doit être autorisée dans Shizuku.</string>
+    <string name="text_bun_shell_control_grant">Shell hôte</string>
+    <string name="text_bun_shell_root_grant">Shell hôte Root</string>
+    <string name="text_bun_shell_shizuku_grant">Shell hôte Shizuku</string>
+</resources>

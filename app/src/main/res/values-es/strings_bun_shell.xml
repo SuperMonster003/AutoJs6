@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_shell_control_grant">Permite comandos y procesos en flujo con los permisos de esta aplicación.</string>
+    <string name="summary_bun_shell_root_grant">Permite su mediante shell.control. Requiere autorización Root de Android.</string>
+    <string name="summary_bun_shell_shizuku_grant">Permite Shizuku mediante shell.control. Esta aplicación necesita autorización de Shizuku.</string>
+    <string name="text_bun_shell_control_grant">Shell del anfitrión</string>
+    <string name="text_bun_shell_root_grant">Shell del anfitrión Root</string>
+    <string name="text_bun_shell_shizuku_grant">Shell del anfitrión Shizuku</string>
+</resources>

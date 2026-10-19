@@ -162,7 +162,8 @@
         "Bun 無障礙, 應用程式操作與剪貼簿 API 對齊 Node.js 對應介面, 支援獨立授權和打包應用程式",
         "Bun 檔案與持久化儲存 API, 支援獨立授權的宿主檔案讀寫及 Node.js 儲存互通",
         "Node.js Worker 與 Bun 的 database/sqlite API, 支援參數化查詢, 交易和資料庫持久化",
-        "Bun 與 Node.js Worker 的感應器取樣及訂閱 API, 支援取消和監聽器自動釋放"
+        "Bun 與 Node.js Worker 的感應器取樣及訂閱 API, 支援取消和監聽器自動釋放",
+        "Bun, Node.js 及 Worker 的宿主 Shell API, 支援串流輸入輸出, Shizuku 授權與進程清理"
       ],
       "fix": [
         "runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題",
@@ -301,7 +302,8 @@
         "AndroidView 在 Compose 渲染器重建期間保持原生 View 借用狀態, 防止提前釋放或被其他工作階段重複使用",
         "JSON UI 在 Activity 重建時恢復未選取清單和分頁狀態, 避免將事件資料誤作 View 屬性而發生異常",
         "資料庫橋接查詢遺失 null/數字參數類型, 多列 INSERT 影響行數不正確及未結束交易保留連線的問題",
-        "感應器單次取樣取消, 輪詢失敗及宿主銷毀時排隊註冊可能遺留監聽器的問題"
+        "感應器單次取樣取消, 輪詢失敗及宿主銷毀時排隊註冊可能遺留監聽器的問題",
+        "Shell 命令忽略 SIGTERM 時結束清理可能阻塞的問題, 結束前凍結並清理子進程"
       ],
       "improvement": [
         "延遲初始化非關鍵組件以提升應用啓動速度",

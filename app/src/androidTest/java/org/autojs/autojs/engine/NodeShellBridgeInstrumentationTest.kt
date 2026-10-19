@@ -1,475 +1,120 @@
 package org.autojs.autojs.engine
 
+import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants as Grants
+import org.json.JSONArray
 import org.json.JSONObject
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Assert.*
 import org.junit.Test
-import java.io.File
-import java.util.concurrent.CountDownLatch
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 class NodeShellBridgeInstrumentationTest {
-
-    private val context = InstrumentationRegistry.getInstrumentation().targetContext
-
-    @Before
-    fun settleBefore() {
-        NodePluginTestHarness.settlePluginRuntime()
+    private val context=InstrumentationRegistry.getInstrumentation().targetContext
+    private fun provider(caps:List<String> = listOf("shell","shell.shizuku"))=AndroidNodeBridgeCapabilityProvider(context,
+        NodeBridgeEngineInfo.fromContext(context,id="shell-native-${UUID.randomUUID()}",cwd=context.cacheDir.path),
+        permissionManifest=NodeBridgePermissionManifest.fromDeclaredCapabilities(caps))
+    private fun call(p:NodeBridgeCapabilityProvider,method:String,args:JSONArray=JSONArray()):NodeBridgeResponse {
+        val f=CompletableFuture<NodeBridgeResponse>();val text=args.toString()
+        p.dispatch(NodeBridgeRequest(UUID.randomUUID().toString(),"shell",method,text,10000,permissions=NodeBridgePermissionManifest.requiredCapabilitiesFor("shell",method,text))){f.complete(it)}
+        return f.get(12,TimeUnit.SECONDS)
     }
-
-    @After
-    fun settleAfter() {
-        NodePluginTestHarness.settlePluginRuntime()
+    @Test fun registryAndDynamicPrivilegeRequirementsMatchShellOptions() {
+        assertEquals(setOf("exec","spawn","open","drain","write","closeInput","kill","close","getAccess","requestShizukuPermission"),NodeBridgeModules.shellMethods)
+        val options=JSONObject().put("root",true).put("shizuku",true)
+        assertEquals(listOf("shell","shell.root","shell.shizuku"),NodeBridgePermissionManifest.requiredCapabilitiesFor("shell","spawn",JSONArray().put("true").put(options).toString()))
+        assertEquals(listOf("shell","shell.shizuku"),NodeBridgePermissionManifest.requiredCapabilitiesFor("shell","requestShizukuPermission"))
+        assertTrue(NodeBridgePermissionManifest.androidPermissionsForCapabilities(listOf("shell.shizuku")).contains("moe.shizuku.manager.permission.API_V23"))
     }
-
-    @Test
-    fun kotlinShellBridgeRegistryAndFakeProviderAreStable() {
-        assertTrue(NodeBridgeModules.supports("shell", "exec"))
-        assertFalse(NodeBridgeModules.supports("shell", "spawn"))
-        assertFalse(NodeBridgeModules.supports("shell", "open"))
-
-        val provider = FakeNodeBridgeCapabilityProvider { request ->
-            assertEquals("shell", request.module)
-            when (request.method) {
-                "exec" -> NodeBridgeResponse.success(
-                    request.id,
-                    JSONObject().apply {
-                        put("code", 0)
-                        put("stdout", "ok\n")
-                        put("stderr", "")
-                    }.toString(),
-                )
-                else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+    @Test fun rawExecUsesHostPathsTypedResultsAndBoundedOutput() {
+        val p=provider();try {
+            val response=call(p,"exec",JSONArray().put("printf out; printf err >&2; exit 7").put(JSONObject().put("cwd","/system")));assertTrue(response.toString(),response.ok)
+            val data=JSONObject(response.resultJson);assertEquals(7,data.getInt("code"));assertEquals("out",data.getString("stdout"));assertEquals("err",data.getString("stderr"))
+            val limited=call(p,"exec",JSONArray().put("printf 123456789").put(JSONObject().put("maxOutputBytes",3)));assertTrue(limited.toString(),limited.ok);val capped=JSONObject(limited.resultJson);assertTrue(capped.getBoolean("truncated"));assertEquals("123",capped.getString("stdout"))
+        }finally{p.destroy()}
+    }
+    @Test fun timeoutKillsCommandsThatIgnoreTermAndReleasesResources() {
+        val p=provider();try {
+            val response=call(p,"exec",JSONArray().put("trap '' TERM; while true; do sleep 1; done").put(JSONObject().put("timeoutMs",150)));assertTrue(response.toString(),response.ok)
+            val data=JSONObject(response.resultJson);assertEquals(124,data.getInt("code"));assertTrue(data.getBoolean("timedOut"));assertEquals("0",p.nativeDiagnostics()["embedded_script.shell.active_handle_count"])
+        }finally{p.destroy()}
+    }
+    @Test fun rootAndShizukuRequireExplicitProjectCapabilities() {
+        val p=provider(listOf("shell"));try {
+            for(key in listOf("root","shizuku","adb"))assertFalse(key,call(p,"spawn",JSONArray().put("true").put(JSONObject().put(key,true))).ok)
+            assertFalse(call(p,"requestShizukuPermission").ok)
+            assertEquals("0",p.nativeDiagnostics()["embedded_script.shell.active_handle_count"])
+        }finally{p.destroy()}
+    }
+    @Test fun cancelledBunStartsAndRawExecCallsReleaseTheirProcesses() {
+        for(method in listOf("spawn","exec")) {
+            val p=provider();val bridge=BunAutomationBridge(context,listOf(Grants.SHELL_CONTROL)){p}
+            try {
+                val started=bridge.invoke(Grants.SHELL_CONTROL,JSONObject().put("method",method).put("args",JSONArray().put("sleep 20")))
+                assertTrue(started.toString(),started.ok);val id=JSONObject(started.resultJson).getString("id")
+                val deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(5)
+                while(p.nativeDiagnostics()["embedded_script.shell.active_handle_count"]!="1"&&System.nanoTime()<deadline)Thread.sleep(10)
+                assertEquals("1",p.nativeDiagnostics()["embedded_script.shell.active_handle_count"])
+                assertTrue(bridge.invoke(Grants.SHELL_CONTROL,JSONObject().put("action","cancel").put("id",id)).ok)
+                val end=System.nanoTime()+TimeUnit.SECONDS.toNanos(5)
+                while(p.nativeDiagnostics()["embedded_script.shell.active_handle_count"]!="0"&&System.nanoTime()<end)Thread.sleep(10)
+                assertEquals("0",p.nativeDiagnostics()["embedded_script.shell.active_handle_count"])
+            }finally{bridge.close();p.destroy()}
+        }
+    }
+    @Test fun ptyInputEofKeepsOutputReadable() {
+        repeat(8){ index ->
+            val p=provider();try {
+                val opened=call(p,"open",JSONArray().put(JSONObject().put("cmd","cat").put("pty",true).put("timeoutMs",3000)))
+                assertTrue(opened.toString(),opened.ok);val id=JSONObject(opened.resultJson).getString("id")
+                val write=call(p,"write",JSONArray().put(id).put(android.util.Base64.encodeToString("pty line\n".toByteArray(),android.util.Base64.NO_WRAP)));assertTrue(write.toString(),write.ok)
+                val rows=JSONArray();val output=StringBuilder();val deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(2)
+                while(output.isEmpty() && System.nanoTime()<deadline){val response=call(p,"drain",JSONArray().put(id));assertTrue(response.toString(),response.ok);val events=JSONArray(response.resultJson);for(n in 0 until events.length()){val event=events.getJSONObject(n);rows.put(event);if(event.optString("type")=="stdout")output.append(String(android.util.Base64.decode(event.getString("data"),android.util.Base64.DEFAULT)))}}
+                assertEquals("PTY iteration $index events=$rows","pty line\n",output.toString())
+                assertTrue(call(p,"closeInput",JSONArray().put(id)).ok)
+                var exited=false;val end=System.nanoTime()+TimeUnit.SECONDS.toNanos(3)
+                while(!exited&&System.nanoTime()<end){val response=call(p,"drain",JSONArray().put(id));assertTrue(response.toString(),response.ok);val events=JSONArray(response.resultJson);for(n in 0 until events.length()){val event=events.getJSONObject(n);if(event.optString("type")=="exit"){assertEquals(event.toString(),0,event.getInt("code"));exited=true}}}
+                assertTrue("PTY did not consume EOF",exited)
+            }finally{p.destroy()}
+        }
+    }
+    @Test fun bunCallQuotaTerminatesAnExistingHostProcess() {
+        val execution="shell-quota-${UUID.randomUUID()}"
+        val broker=BunHostCapabilityBroker(context,android.os.Process.myUid(),execution,listOf(Grants.SHELL_CONTROL),{throw IllegalStateException("Unused console")},context.cacheDir.path)
+        var count=0
+        fun invoke(body:JSONObject):android.os.Bundle {
+            count++
+            val future=CompletableFuture<android.os.Bundle>()
+            val request=android.os.Bundle().apply {
+                putInt(org.autojs.plugin.bun.runtime.api.BunRuntimeContract.KEY_HOST_CAPABILITY_BRIDGE_VERSION,1)
+                putString(org.autojs.plugin.bun.runtime.api.BunRuntimeContract.KEY_EXECUTION_ID,execution)
+                putString(org.autojs.plugin.bun.runtime.api.BunRuntimeContract.KEY_HOST_CALL_ID,"owned-$count")
+                putString(org.autojs.plugin.bun.runtime.api.BunRuntimeContract.KEY_HOST_CAPABILITY,Grants.SHELL_CONTROL)
+                putString(org.autojs.plugin.bun.runtime.api.BunRuntimeContract.KEY_HOST_CALL_REQUEST_JSON,body.toString())
             }
+            broker.invoke(request,object:org.autojs.plugin.bun.runtime.api.IBunHostCapabilityCallback.Stub(){override fun onResult(reply:android.os.Bundle?){future.complete(requireNotNull(reply))}})
+            return future.get(5,TimeUnit.SECONDS)
         }
-
-        val responses = mutableListOf<NodeBridgeResponse>()
-        provider.dispatch(
-            NodeBridgeRequest(
-                id = "shell-exec-1",
-                module = "shell",
-                method = "exec",
-                argsJson = """["echo ok",{"root":false,"timeoutMs":1000,"cwd":"","env":{"A":"B"}}]""",
-                timeoutMs = 2000L,
-                permissions = listOf("shell"),
-            ),
-        ) { response -> responses += response }
-
-        assertEquals(1, provider.requests.size)
-        assertEquals("exec", provider.requests.single().method)
-        assertTrue("shell" in provider.requests.single().permissions)
-        assertTrue(responses.single().ok)
-        val result = JSONObject(responses.single().resultJson.orEmpty())
-        assertEquals(0, result.getInt("code"))
-        assertEquals("ok\n", result.getString("stdout"))
-        assertEquals("", result.getString("stderr"))
+        fun result(reply:android.os.Bundle)=JSONObject(reply.getString(org.autojs.plugin.bun.runtime.api.BunRuntimeContract.KEY_HOST_CALL_RESULT_JSON)!!).getJSONObject("value")
+        try {
+            val id=result(invoke(JSONObject().put("method","spawn").put("args",JSONArray().put("sleep 20")))).getString("id")
+            var record:JSONObject?=null
+            while(record==null){val reply=result(invoke(JSONObject().put("action","poll").put("id",id)));if(reply.getBoolean("done"))record=reply.getJSONObject("value")}
+            val pid=record.getInt("pid");assertTrue(pid>0)
+            var final=android.os.Bundle()
+            while(count<=org.autojs.plugin.bun.runtime.api.BunRuntimeContract.MAX_HOST_CALLS_PER_EXECUTION)final=invoke(JSONObject().put("method","unsupported"))
+            assertEquals(org.autojs.plugin.bun.runtime.api.BunRuntimeContract.HOST_CALL_ERROR_TOO_MANY_REQUESTS,final.getString(org.autojs.plugin.bun.runtime.api.BunRuntimeContract.KEY_ERROR_CODE))
+            val alive=runCatching { android.system.Os.kill(pid,0);true }.getOrDefault(false);assertFalse("Quota left process $pid running",alive)
+        }finally{broker.close()}
     }
-
-    @Test
-    fun jsShellModuleUsesFakeTransportAndKeepsChildProcessDisabled() {
-        NodePluginTestHarness.assumePluginRuntimeAvailable("Node shell bridge focused regression")
-
-        val workDir = File(context.cacheDir, "node-bridge-shell-shadow").apply {
-            deleteRecursively()
-            check(mkdirs()) { "Failed to create shell bridge working directory: $absolutePath" }
+    @Test fun destructionDuringCreationLeavesNoLateHandle() {
+        repeat(6){
+            val p=provider();val f=CompletableFuture<NodeBridgeResponse>()
+            p.dispatch(NodeBridgeRequest("late","shell","spawn","[\"sleep 20\"]",5000,permissions=listOf("shell"))){f.complete(it)}
+            p.destroy();f.get(6,TimeUnit.SECONDS)
+            assertEquals("0",p.nativeDiagnostics()["embedded_script.shell.active_handle_count"])
         }
-        File(workDir, "sub").apply {
-            check(mkdirs()) { "Failed to create shell bridge cwd directory: $absolutePath" }
-        }
-        File(workDir, "scripts").apply {
-            check(mkdirs()) { "Failed to create shell bridge scripts directory: $absolutePath" }
-        }
-        // A bare working directory only ships its explicit inputs to the plugin (entry, env paths, module-source
-        // overlays), so the planted package also travels as a module-source overlay; otherwise the plugin never
-        // sees it and the shadow check would be vacuous.
-        val shadowPackageSource = """module.exports = { shadow: true, exec: () => "shadow" };"""
-        File(workDir, "node_modules/shell").apply {
-            check(mkdirs()) { "Failed to create shell shadow module directory: $absolutePath" }
-        }.resolve("index.js").writeText(shadowPackageSource)
-
-        val result = NodePluginTestHarness.runPluginScript(
-            """
-            "nodejs";
-            (async function main() {
-              const bridge = require("autojs6:bridge");
-              const requests = [];
-              bridge.__test.setTransport({
-                postMessage(message) {
-                  const request = JSON.parse(message);
-                  requests.push(request);
-                  let result = { code: 0, stdout: "ok\n", stderr: "" };
-                  if (request.module === "shell" && request.method === "exec" && request.args[1].root === true) {
-                    result = { code: 0, stdout: "root-ok\n", stderr: "" };
-                  } else if (request.module === "shell" && request.method === "exec" && request.args[0].indexOf("scripts/run.sh") >= 0) {
-                    result = { code: 0, stdout: "file-ok\n", stderr: "" };
-                  } else if (request.module === "shell" && request.method === "exec" && request.args[0] === "echo default") {
-                    result = { code: 0, stdout: "default-ok\n", stderr: "" };
-                  }
-                  setImmediate(() => {
-                    bridge.__test.receiveMessage(JSON.stringify({
-                      id: request.id,
-                      ok: true,
-                      result
-                    }));
-                  });
-                }
-              });
-
-              const shell = require("shell");
-              const resolved = require.resolve("shell");
-              const normal = await shell.exec("echo ok", {
-                timeoutMs: 1234,
-                cwd: "sub",
-                env: { AUTOJS6_SHELL_TEST: "ok" }
-              });
-              const root = await shell.exec("id", { root: true, timeoutMs: 1235 });
-              const defaultTimeout = shell.setDefaultTimeout(4321);
-              const access = shell.checkAccess({ root: true, shizuku: true });
-              const file = await shell.execFile("scripts/run.sh", ["--dry-run", "value with space"], { timeoutMs: 1236 });
-              const defaulted = await shell.exec("echo default");
-              let cwdEscapeCode = "";
-              try {
-                await shell.exec("echo denied", { cwd: "../escape" });
-              } catch (error) {
-                cwdEscapeCode = error && (error.autojs6Code || error.code) || "";
-              }
-              let execFileEscapeCode = "";
-              try {
-                await shell.execFile("../escape.sh");
-              } catch (error) {
-                execFileEscapeCode = error && (error.autojs6Code || error.code) || "";
-              }
-              let execFileArgsCode = "";
-              try {
-                await shell.execFile("scripts/run.sh", [1]);
-              } catch (error) {
-                execFileArgsCode = error && (error.autojs6Code || error.code) || "";
-              }
-              let defaultTimeoutCode = "";
-              try {
-                shell.setDefaultTimeout(0);
-              } catch (error) {
-                defaultTimeoutCode = error && (error.autojs6Code || error.code) || "";
-              }
-              let childProcessCode = "";
-              try {
-                require("child_process");
-              } catch (error) {
-                childProcessCode = error && (error.autojs6Code || error.code) || "";
-              }
-              console.log("shell.resolve=" + resolved);
-              console.log("shell.shadow=" + (shell.shadow === true));
-              console.log("shell.frozen=" + Object.isFrozen(shell));
-              console.log("shell.methods=" + [typeof shell.exec, typeof shell.execFile, typeof shell.checkAccess, typeof shell.setDefaultTimeout, typeof shell.spawn, typeof shell.open].join("|"));
-              console.log("shell.normal=" + [normal.code, normal.stdout, normal.stderr].join("|"));
-              console.log("shell.root=" + [root.code, root.stdout, root.stderr].join("|"));
-              console.log("shell.execFile=" + [file.code, file.stdout, file.stderr].join("|"));
-              console.log("shell.defaulted=" + [defaulted.code, defaulted.stdout, defaulted.stderr, defaultTimeout].join("|"));
-              console.log("shell.access=" + [access.shell, access.root, access.shizuku, access.missingCapabilities.join(",")].join("|"));
-              console.log("shell.requests=" + requests.map(r => r.method).join("|"));
-              console.log("shell.command=" + requests[0].args[0]);
-              console.log("shell.execFile.command=" + requests[2].args[0]);
-              console.log("shell.cwd=" + requests[0].args[1].cwd);
-              console.log("shell.env=" + requests[0].args[1].env.AUTOJS6_SHELL_TEST);
-              console.log("shell.root.flag=" + requests[1].args[1].root);
-              console.log("shell.timeouts=" + requests.map(r => r.args[1].timeoutMs + "/" + r.timeoutMs).join("|"));
-              console.log("shell.permissions=" + requests.map(r => r.permissions.join(",")).join("|"));
-              console.log("shell.cwd_escape=" + cwdEscapeCode);
-              console.log("shell.execFile_escape=" + execFileEscapeCode);
-              console.log("shell.execFile_args=" + execFileArgsCode);
-              console.log("shell.default_timeout_invalid=" + defaultTimeoutCode);
-              console.log("shell.child_process=" + childProcessCode);
-              console.log("shell.pending=" + bridge.__test.pendingCount());
-            })();
-            """.trimIndent(),
-            "<embedded-autojs-shell-fake-source.js>",
-            workingDirectory = workDir,
-            moduleSources = mapOf("node_modules/shell/index.js" to shadowPackageSource),
-            // The Node runtime plugin ships every bare script with an enforced bridge-permission manifest that declares
-            // only "network" (runtime:stable-network), so the facade rejects any other capability with
-            // ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED before the request reaches the (fake) transport; declare what
-            // the script uses, exactly as a project.json would.
-            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
-                .fromDeclaredCapabilities(listOf("shell", "shell.root")).toJson()),
-            // Node runtime 1.6.0 enables child_process by default; this test covers the request-level gate, so it closes it.
-            childProcessEnabled = false,
-        )
-
-        NodePluginTestHarness.assertSucceeded("shell fake bridge", result)
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.resolve=autojs6:shell")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.shadow=false")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.frozen=true")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.methods=function|function|function|function|undefined|undefined")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.normal=0|ok")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.root=0|root-ok")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.execFile=0|file-ok")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.defaulted=0|default-ok")
-        assertTrue(result.stdout, result.stdout.contains("shell.access=true|true|false|"))
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.requests=exec|exec|exec|exec")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.command=echo ok")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.execFile.command='scripts/run.sh' '--dry-run' 'value with space'")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.cwd=sub")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.env=ok")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.root.flag=true")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.timeouts=1234/2234|1235/2235|1236/2236|4321/5321")
-        assertTrue(result.stdout, result.stdout.contains("shell.permissions=shell|shell,shell.root|shell|shell"))
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.cwd_escape=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.execFile_escape=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.execFile_args=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.default_timeout_invalid=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.child_process=ERR_AUTOJS6_BUILTIN_DISABLED")
-        NodePluginTestHarness.assertStdoutContains("shell fake bridge", result, "shell.pending=0")
-    }
-
-    @Test
-    fun jsShellModuleIsChildProcessAlternativeAndRequiresDeclaredCapability() {
-        NodePluginTestHarness.assumePluginRuntimeAvailable("Node shell child_process alternative policy")
-
-        val shellManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("shell"))
-        val allowed = NodePluginTestHarness.runPluginScript(
-            """
-            "nodejs";
-            (async function main() {
-              const bridge = require("autojs6:bridge");
-              const requests = [];
-              bridge.__test.setTransport({
-                postMessage(message) {
-                  const request = JSON.parse(message);
-                  requests.push(request);
-                  setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
-                    id: request.id,
-                    ok: true,
-                    result: { code: 0, stdout: "allowed\n", stderr: "" }
-                  })));
-                }
-              });
-
-              let childProcessCode = "";
-              try {
-                require("child_process").exec("echo denied");
-              } catch (error) {
-                childProcessCode = String(error && (error.autojs6Code || error.code || ""));
-              }
-
-              const shell = require("shell");
-              const access = shell.checkAccess({ root: true, shizuku: true });
-              const result = await shell.exec("echo allowed", { timeoutMs: 1234 });
-              let rootDeniedCode = "";
-              let rootMissing = "";
-              try {
-                await shell.exec("id", { root: true, timeoutMs: 1234 });
-              } catch (error) {
-                rootDeniedCode = String(error && (error.autojs6Code || error.code || ""));
-                rootMissing = Array.isArray(error && error.missingCapabilities)
-                  ? error.missingCapabilities.join("|")
-                  : "";
-              }
-
-              console.log("shell.policy.child_process=" + childProcessCode);
-              console.log("shell.policy.exec=" + result.code + "/" + result.stdout.trim() + "/" + requests.length);
-              console.log("shell.policy.access=" + [access.shell, access.root, access.shizuku, access.missingCapabilities.join("|")].join("|"));
-              console.log("shell.policy.permissions=" + requests[0].permissions.join("|"));
-              console.log("shell.policy.root_denied=" + rootDeniedCode + "/" + rootMissing + "/" + requests.length);
-              console.log("shell.policy.methods=" + [typeof shell.exec, typeof shell.execFile, typeof shell.checkAccess, typeof shell.setDefaultTimeout, typeof shell.spawn, typeof shell.open].join("|"));
-              console.log("shell.policy.pending=" + bridge.__test.pendingCount());
-            })();
-            """.trimIndent(),
-            "<embedded-autojs-shell-child-process-policy.js>",
-            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to shellManifest.toJson()),
-            // Node runtime 1.6.0 enables child_process by default; this test covers the request-level gate, so it closes it.
-            childProcessEnabled = false,
-        )
-
-        NodePluginTestHarness.assertSucceeded("shell child_process alternative declared capability", allowed)
-        assertTrue(allowed.stdout.contains("shell.policy.child_process=ERR_AUTOJS6_BUILTIN_DISABLED"))
-        assertTrue(allowed.stdout.contains("shell.policy.exec=0/allowed/1"))
-        assertTrue(allowed.stdout.contains("shell.policy.access=true|false|false|shell.root|shell.shizuku"))
-        assertTrue(allowed.stdout.contains("shell.policy.permissions=shell"))
-        assertTrue(
-            allowed.stdout.contains(
-                "shell.policy.root_denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}/shell.root/1",
-            ),
-        )
-        assertTrue(allowed.stdout.contains("shell.policy.methods=function|function|function|function|undefined|undefined"))
-        assertTrue(allowed.stdout.contains("shell.policy.pending=0"))
-
-        NodePluginTestHarness.settlePluginRuntime()
-
-        val toastOnlyManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("toast"))
-        val denied = NodePluginTestHarness.runPluginScript(
-            """
-            "nodejs";
-            (async function main() {
-              const bridge = require("autojs6:bridge");
-              const profile = require("autojs6:profile");
-              const requests = [];
-              bridge.__test.setTransport({
-                postMessage(message) {
-                  const request = JSON.parse(message);
-                  requests.push(request);
-                  setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
-                    id: request.id,
-                    ok: false,
-                    error: {
-                      name: "Error",
-                      message: "shell request unexpectedly reached transport",
-                      code: "ERR_TEST_SHELL_TRANSPORT_REACHED",
-                      module: request.module,
-                      method: request.method
-                    }
-                  })));
-                }
-              });
-
-              let deniedCode = "";
-              let missing = "";
-              try {
-                await require("shell").exec("echo denied", { timeoutMs: 1000 });
-              } catch (error) {
-                deniedCode = String(error && (error.autojs6Code || error.code || ""));
-                missing = Array.isArray(error && error.missingCapabilities)
-                  ? error.missingCapabilities.join("|")
-                  : "";
-              }
-
-              console.log("shell.policy.manifest_denied=" + deniedCode + "/" + missing + "/" + requests.length);
-              console.log("shell.policy.manifest_report=" + profile.bridgePermissions.enforced + "/" + profile.bridgePermissions.normalizedPermissions.join("|"));
-              console.log("shell.policy.manifest_pending=" + bridge.__test.pendingCount());
-            })();
-            """.trimIndent(),
-            "<embedded-autojs-shell-missing-capability-policy.js>",
-            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to toastOnlyManifest.toJson()),
-        )
-
-        NodePluginTestHarness.assertSucceeded("shell child_process alternative missing capability", denied)
-        assertTrue(
-            denied.stdout.contains(
-                "shell.policy.manifest_denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}/shell/0",
-            ),
-        )
-        assertTrue(denied.stdout.contains("shell.policy.manifest_report=true/toast"))
-        assertTrue(denied.stdout.contains("shell.policy.manifest_pending=0"))
-    }
-
-    @Test
-    fun abortSignalCancelsInFlightShellExecAndClearsPendingBridgeCall() {
-        NodePluginTestHarness.assumePluginRuntimeAvailable("Node shell AbortSignal cancellation")
-
-        val result = NodePluginTestHarness.runPluginScript(
-            """
-            "nodejs";
-            (async function main() {
-              const bridge = require("autojs6:bridge");
-              const shell = require("shell");
-              const requests = [];
-              bridge.__test.setTransport({
-                postMessage(message) {
-                  requests.push(JSON.parse(message));
-                }
-              });
-
-              const controller = new AbortController();
-              const shellPromise = shell.exec("sleep 30", {
-                timeoutMs: 10000,
-                signal: controller.signal
-              });
-              const requestCountAtStart = requests.length;
-              controller.abort();
-
-              let code = "";
-              let moduleName = "";
-              let methodName = "";
-              try {
-                await shellPromise;
-              } catch (error) {
-                code = String(error && (error.autojs6Code || error.code || ""));
-                moduleName = String(error && error.module || "");
-                methodName = String(error && error.method || "");
-              }
-
-              console.log("shell.abort.request_count=" + requestCountAtStart);
-              console.log("shell.abort.code=" + code);
-              console.log("shell.abort.module_method=" + moduleName + "/" + methodName);
-              console.log("shell.abort.pending=" + bridge.__test.pendingCount());
-              console.log("shell.abort.timeout=" + requests[0].args[1].timeoutMs + "/" + requests[0].timeoutMs);
-              console.log("shell.abort.permissions=" + requests[0].permissions.join("|"));
-            })();
-            """.trimIndent(),
-            "<embedded-autojs-shell-abort-signal.js>",
-            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to NodeBridgePermissionManifest
-                .fromDeclaredCapabilities(listOf("shell")).toJson()),
-        )
-
-        NodePluginTestHarness.assertSucceeded("shell AbortSignal cancellation", result)
-        assertTrue(result.stdout.contains("shell.abort.request_count=1"))
-        assertTrue(result.stdout.contains("shell.abort.code=${NodeRuntimeErrorCodes.BRIDGE_CANCELLED}"))
-        assertTrue(result.stdout.contains("shell.abort.module_method=shell/exec"))
-        assertTrue(result.stdout.contains("shell.abort.pending=0"))
-        assertTrue(result.stdout.contains("shell.abort.timeout=10000/11000"))
-        assertTrue(result.stdout.contains("shell.abort.permissions=shell"))
-    }
-
-    @Test
-    fun androidShellProviderRunsNonRootCommandAndEnforcesPolicy() {
-        val workDir = File(context.cacheDir, "node-bridge-shell-provider").apply {
-            deleteRecursively()
-            check(mkdirs()) { "Failed to create shell provider working directory: $absolutePath" }
-        }
-        File(workDir, "sub").apply {
-            check(mkdirs()) { "Failed to create shell provider cwd directory: $absolutePath" }
-        }
-        val provider = AndroidNodeBridgeCapabilityProvider(
-            context,
-            NodeBridgeEngineInfo.fromContext(context, cwd = workDir.absolutePath),
-        )
-
-        val echo = dispatch(provider, """["echo ${"$"}AUTOJS6_SHELL_TEST",{"timeoutMs":3000,"cwd":"sub","env":{"AUTOJS6_SHELL_TEST":"provider-ok"}}]""")
-        assertTrue(echo.ok)
-        JSONObject(echo.resultJson.orEmpty()).also { result ->
-            assertEquals(0, result.getInt("code"))
-            assertEquals("provider-ok", result.getString("stdout").trim())
-            assertEquals("", result.getString("stderr"))
-        }
-
-        val nonZero = dispatch(provider, """["exit 7",{"timeoutMs":3000}]""")
-        assertTrue(nonZero.ok)
-        assertEquals(7, JSONObject(nonZero.resultJson.orEmpty()).getInt("code"))
-
-        val timeout = dispatch(provider, """["sleep 2",{"timeoutMs":100}]""")
-        assertTrue(timeout.ok)
-        JSONObject(timeout.resultJson.orEmpty()).also { result ->
-            assertEquals(124, result.getInt("code"))
-            assertTrue(result.getString("stderr").contains("timed out"))
-        }
-
-        val deniedCwd = dispatch(provider, """["echo denied",{"cwd":"../escape","timeoutMs":1000}]""")
-        assertFalse(deniedCwd.ok)
-        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, deniedCwd.error?.code)
-        assertEquals("shell", deniedCwd.error?.module)
-        assertEquals("exec", deniedCwd.error?.method)
-    }
-
-    private fun dispatch(provider: NodeBridgeCapabilityProvider, argsJson: String): NodeBridgeResponse {
-        val latch = CountDownLatch(1)
-        var response: NodeBridgeResponse? = null
-        provider.dispatch(
-            NodeBridgeRequest(
-                id = "shell-provider-${System.nanoTime()}",
-                module = "shell",
-                method = "exec",
-                argsJson = argsJson,
-                timeoutMs = 5_000L,
-                permissions = listOf("shell"),
-            ),
-        ) { bridgeResponse ->
-            response = bridgeResponse
-            latch.countDown()
-        }
-        assertTrue("Timed out waiting for shell provider response", latch.await(5, TimeUnit.SECONDS))
-        return checkNotNull(response) { "Missing shell provider response" }
     }
 }

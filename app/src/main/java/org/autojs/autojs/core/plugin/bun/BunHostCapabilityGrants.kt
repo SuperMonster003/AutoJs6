@@ -37,6 +37,9 @@ object BunHostCapabilityGrants {
     const val STORAGE_CONTROL = "storage.control"
     const val DATABASE_CONTROL = "database.control"
     const val SENSORS_CONTROL = "sensors.control"
+    const val SHELL_CONTROL = "shell.control"
+    const val SHELL_ROOT = "shell.root"
+    const val SHELL_SHIZUKU = "shell.shizuku"
 
     private const val SP_NAME = "bun_host_capability_grants"
 
@@ -127,6 +130,15 @@ object BunHostCapabilityGrants {
     fun isSensorsControlGranted(context: Context): Boolean = isGranted(context, SENSORS_CONTROL, false)
     fun setSensorsControlGranted(context: Context, granted: Boolean) = setGranted(context, SENSORS_CONTROL, granted)
 
+    fun isShellShizukuGranted(context: Context): Boolean = isGranted(context, SHELL_SHIZUKU, false)
+    fun setShellShizukuGranted(context: Context, granted: Boolean) = setGranted(context, SHELL_SHIZUKU, granted)
+
+    fun isShellRootGranted(context: Context): Boolean = isGranted(context, SHELL_ROOT, false)
+    fun setShellRootGranted(context: Context, granted: Boolean) = setGranted(context, SHELL_ROOT, granted)
+
+    fun isShellControlGranted(context: Context): Boolean = isGranted(context, SHELL_CONTROL, false)
+    fun setShellControlGranted(context: Context, granted: Boolean) = setGranted(context, SHELL_CONTROL, granted)
+
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
@@ -171,6 +183,9 @@ object BunHostCapabilityGrants {
         if (isStorageControlGranted(context)) add(STORAGE_CONTROL)
         if (isDatabaseControlGranted(context)) add(DATABASE_CONTROL)
         if (isSensorsControlGranted(context)) add(SENSORS_CONTROL)
+        if (isShellControlGranted(context)) add(SHELL_CONTROL)
+        if (isShellRootGranted(context)) add(SHELL_ROOT)
+        if (isShellShizukuGranted(context)) add(SHELL_SHIZUKU)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
         }
     }
@@ -178,7 +193,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL)
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU)
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()
