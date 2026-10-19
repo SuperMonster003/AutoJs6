@@ -68,6 +68,10 @@ CLAUDE.md
 !/tools/autojs4/**
 /tools/autojs4/__pycache__/
 /tools/autojs4/compare/
+!/tools/augment/
+!/tools/augment/**
+/tools/augment/__pycache__/
+/tools/augment/baseline/surface-*.json
 !/tools/sdk37/
 !/tools/sdk37/**
 /tools/sdk37/__pycache__/
