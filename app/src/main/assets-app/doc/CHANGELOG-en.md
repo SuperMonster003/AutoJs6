@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/17 - Some features moved to plugins; upgrade with care
+###### 2026/10/19 - Some features moved to plugins; upgrade with care
 
 * `Hint` Some built-in features are now provided by independent plugins (such as OCR, barcode recognition, OpenCV, OpenCC, Pinyin, MediaInfo, the terminal and offline project documentation); install and enable the corresponding plugins in the Plugin Center before use
 * `Hint` The target SDK of packaged apps changes from 29 to 37; shared storage and local network access require permissions according to system requirements
@@ -163,6 +163,7 @@
 * `Feature` WebView screen sharing adapter, foreground-service audio capture and native background camera recording in Node.js/Bun, including Node Workers
 * `Feature` Bun accessibility, app operations and clipboard APIs aligned with the Node.js interfaces, with independent grants and packaged-app support
 * `Feature` Bun file and persistent storage APIs with separate host-file grants and shared Node.js storage
+* `Feature` Host database/sqlite APIs for Bun and Node.js Workers with parameterized queries, transactions and persistence
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
@@ -298,6 +299,7 @@
 * `Fix` Screen capture discards cleared transparent projection buffers while preserving valid black frames
 * `Fix` AndroidView bindings retain native View ownership during Compose renderer recreation, preventing premature disposal and reuse by another session
 * `Fix` JSON UI restores unselected lists and tab state during Activity recreation without treating event payloads as View properties
+* `Fix` Database queries losing null/numeric parameter types, incorrect multirow INSERT counts and unfinished transactions retaining connections
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions

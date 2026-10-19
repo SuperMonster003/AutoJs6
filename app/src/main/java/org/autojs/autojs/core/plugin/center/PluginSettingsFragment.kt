@@ -93,6 +93,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunClipboardControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunFilesControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunStorageControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunDatabaseControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiLayoutGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiComposeGrantPreference: ThemeColorSwitchPreference? = null
@@ -235,6 +236,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunClipboardControlGrantPreference = findPreference("plugin_bun_clipboard_control_grant")
         bunFilesControlGrantPreference = findPreference("plugin_bun_files_control_grant")
         bunStorageControlGrantPreference = findPreference("plugin_bun_storage_control_grant")
+        bunDatabaseControlGrantPreference = findPreference("plugin_bun_database_control_grant")
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
         bunUiLayoutGrantPreference = findPreference("plugin_bun_ui_layout_grant")
         bunUiComposeGrantPreference = findPreference("plugin_bun_ui_compose_grant")
@@ -381,6 +383,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setStorageControlGranted(requireContext(), value == true)
             true
         }
+        bunDatabaseControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setDatabaseControlGranted(requireContext(), value == true)
+            true
+        }
         bunConsoleControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
             true
@@ -468,6 +474,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunClipboardControlGrantPreference?.isChecked = BunHostCapabilityGrants.isClipboardControlGranted(requireContext())
         bunFilesControlGrantPreference?.isChecked = BunHostCapabilityGrants.isFilesControlGranted(requireContext())
         bunStorageControlGrantPreference?.isChecked = BunHostCapabilityGrants.isStorageControlGranted(requireContext())
+        bunDatabaseControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDatabaseControlGranted(requireContext())
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
         bunUiLayoutGrantPreference?.isChecked = BunHostCapabilityGrants.isUiLayoutGranted(requireContext())
         bunUiComposeGrantPreference?.isChecked = BunHostCapabilityGrants.isUiComposeGranted(requireContext())

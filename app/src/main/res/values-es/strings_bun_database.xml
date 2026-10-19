@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_database_control_grant">Permite consultas SQL y transacciones en las bases de datos persistentes de esta aplicación.</string>
+    <string name="text_bun_database_control_grant">Bases de datos del anfitrión</string>
+</resources>

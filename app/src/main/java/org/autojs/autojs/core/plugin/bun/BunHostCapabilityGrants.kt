@@ -35,6 +35,7 @@ object BunHostCapabilityGrants {
     const val CLIPBOARD_CONTROL = "clipboard.control"
     const val FILES_CONTROL = "files.control"
     const val STORAGE_CONTROL = "storage.control"
+    const val DATABASE_CONTROL = "database.control"
 
     private const val SP_NAME = "bun_host_capability_grants"
 
@@ -119,6 +120,9 @@ object BunHostCapabilityGrants {
     fun isStorageControlGranted(context: Context): Boolean = isGranted(context, STORAGE_CONTROL, false)
     fun setStorageControlGranted(context: Context, granted: Boolean) = setGranted(context, STORAGE_CONTROL, granted)
 
+    fun isDatabaseControlGranted(context: Context): Boolean = isGranted(context, DATABASE_CONTROL, false)
+    fun setDatabaseControlGranted(context: Context, granted: Boolean) = setGranted(context, DATABASE_CONTROL, granted)
+
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
@@ -161,6 +165,7 @@ object BunHostCapabilityGrants {
         if (isClipboardControlGranted(context)) add(CLIPBOARD_CONTROL)
         if (isFilesControlGranted(context)) add(FILES_CONTROL)
         if (isStorageControlGranted(context)) add(STORAGE_CONTROL)
+        if (isDatabaseControlGranted(context)) add(DATABASE_CONTROL)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
         }
     }
@@ -168,7 +173,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL)
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL)
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()

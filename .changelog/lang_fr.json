@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/17",
+      "released_date": "2026/10/19",
       "released_hint": "Certaines fonctions passent par des plugins, mise à niveau avec prudence",
       "hint": [
         "Certaines fonctions intégrées sont désormais fournies par des plugins indépendants (OCR, reconnaissance de codes-barres, OpenCV, OpenCC, pinyin, MediaInfo, terminal et documentation hors ligne du projet); installez et activez les plugins correspondants dans le centre de plugins avant utilisation",
@@ -160,7 +160,8 @@
         "Flux audio et video WebView getUserMedia/MediaRecorder, attente des Promise de page, demandes explicites de permissions multimedia Android et cycle de vie des Worker",
         "Adaptateur de partage ecran WebView, capture audio par service de premier plan et enregistrement camera natif en arriere-plan pour Node.js/Bun et Node Worker",
         "API Bun pour accessibilité, applications et presse-papiers alignées sur Node.js, avec autorisations distinctes et applications empaquetées",
-        "API Bun de fichiers et de stockage persistant, avec autorisations distinctes et stockage partagé avec Node.js"
+        "API Bun de fichiers et de stockage persistant, avec autorisations distinctes et stockage partagé avec Node.js",
+        "API hôtes database/sqlite pour Bun et les Workers Node.js, avec requêtes paramétrées, transactions et persistance"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
@@ -297,7 +298,8 @@
         "Constantes numériques style/mode de pinyin rejetées après conversion en nombres JSON ou Rhino",
         "La capture ignore les tampons entièrement transparents non composés et conserve les images noires valides",
         "Les liaisons AndroidView conservent les View pendant la recréation du rendu Compose, évitant leur libération prématurée ou leur réutilisation par une autre session",
-        "JSON UI restaure les listes sans sélection et les onglets lors de la recréation de Activity, sans traiter les événements comme des propriétés View"
+        "JSON UI restaure les listes sans sélection et les onglets lors de la recréation de Activity, sans traiter les événements comme des propriétés View",
+        "Perte des types null/numériques dans les requêtes, comptage incorrect des INSERT multiples et connexions retenues par les transactions inachevées"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",

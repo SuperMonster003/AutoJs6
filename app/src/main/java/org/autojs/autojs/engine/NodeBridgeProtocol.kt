@@ -13,9 +13,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.database.DatabaseUtils
+import android.database.sqlite.SQLiteCursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteStatement
+import android.database.sqlite.SQLiteProgram
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -964,8 +967,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private val databaseHandles = ConcurrentHashMap<String, ControlledDatabaseHandle>()
     private val databaseHandleCounter = AtomicInteger(1)
     private val databaseDestroyed = AtomicBoolean(false)
+    @Volatile private var databaseThread: Thread? = null
     private val databaseExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "AutoJs6NodeDatabase").apply { isDaemon = true }
+        Thread(runnable, "AutoJs6NodeDatabase").apply { isDaemon = true; databaseThread = this }
     }
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
     private val packageInstallManager by lazy {
@@ -1230,9 +1234,11 @@ class AndroidNodeBridgeCapabilityProvider(
         barcodeOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
         barcodeOperations.clear()
         databaseDestroyed.set(true)
-        databaseExecutor.shutdownNow()
         val closingWebSockets = websocketSessions.values.toList()
         synchronized(imageLock) { resourceRegistry.closeAll(destroyReason) }
+        // SQLite sessions and manual transactions belong to the executor thread. Drain their
+        // close/rollback jobs before stopping it; interrupting and closing from another thread leaks locks.
+        databaseExecutor.shutdown()
         // The registry only enqueued the 1001 close frames; OkHttp writes them from its task runner.
         // Cancelling the dispatcher (which runs the WebSocket reader) and evicting the pool right away
         // would drop the socket first, so peers would see an abrupt disconnect instead of the close.
@@ -3459,7 +3465,12 @@ class AndroidNodeBridgeCapabilityProvider(
             ),
         ) {
             databaseHandles.remove(handleId)
-            runCatching { database.close() }
+            val release = Runnable {
+                runCatching { while (database.isOpen && database.inTransaction()) database.endTransaction() }
+                runCatching { database.close() }
+            }
+            if (Thread.currentThread() === databaseThread) release.run()
+            else try { databaseExecutor.execute(release) } catch (_: RejectedExecutionException) { release.run() }
         }
         databaseHandles[handleId] = ControlledDatabaseHandle(
             id = handleId,
@@ -3468,6 +3479,11 @@ class AndroidNodeBridgeCapabilityProvider(
             database = database,
             resource = resource,
         )
+        if (databaseDestroyed.get()) {
+            databaseHandles.remove(handleId)
+            resource.close("database.open.after_destroy")
+            throw DatabaseBridgeException(NodeBridgeError.processDead("AutoJs6 database bridge provider is destroyed."))
+        }
         val result = JSONObject()
             .put("id", handleId)
             .put("name", name)
@@ -3565,7 +3581,7 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private fun databaseClose(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
         val handleId = NodeDatabaseBridgePolicy.handleId(request, args.opt(0))
-        val closed = resourceRegistry.close(handleId, "database.close")
+        val closed = databaseHandles.containsKey(handleId) && resourceRegistry.close(handleId, "database.close")
         return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(closed))
     }
 
@@ -7739,10 +7755,31 @@ private data class ControlledDatabaseHandle(
             NodeDatabaseBridgePolicy.bind(statement, params)
             return when (command) {
                 "INSERT", "REPLACE" -> {
-                    val insertId = statement.executeInsert()
-                    JSONObject()
-                        .put("rowsAffected", if (insertId >= 0L) 1 else 0)
-                        .put("insertId", if (insertId >= 0L) insertId else JSONObject.NULL)
+                    // Keep the statement and changes() on the same connection, including with WAL.
+                    val ownTransaction = !database.inTransaction()
+                    if (ownTransaction) database.beginTransaction()
+                    var failed = false
+                    try {
+                        val insertId = statement.executeInsert()
+                        val changed = DatabaseUtils.longForQuery(database, "SELECT changes()", null)
+                        val result = JSONObject().put("rowsAffected", changed)
+                            .put("insertId", if (changed > 0 && insertId >= 0L) insertId else JSONObject.NULL)
+                        if (ownTransaction) database.setTransactionSuccessful()
+                        result
+                    } catch (error: Throwable) {
+                        failed = true
+                        throw error
+                    } finally {
+                        if (ownTransaction) {
+                            if (failed) {
+                                // This transaction only pins the connection. Preserve SQLite's
+                                // autocommit conflict semantics: OR FAIL keeps earlier rows, while
+                                // OR ROLLBACK may already have ended the native transaction.
+                                runCatching { database.setTransactionSuccessful() }
+                                runCatching { database.endTransaction() }
+                            } else database.endTransaction()
+                        }
+                    }
                 }
                 "UPDATE", "DELETE" -> JSONObject()
                     .put("rowsAffected", statement.executeUpdateDelete())
@@ -7765,7 +7802,7 @@ private data class ControlledDatabaseHandle(
         params: List<Any?>,
     ): JSONObject? {
         ensureOpen(request)
-        val cursor = database.rawQuery(sql, NodeDatabaseBridgePolicy.queryArgs(params))
+        val cursor = queryCursor(sql, params)
         try {
             if (!cursor.moveToFirst()) {
                 return null
@@ -7800,7 +7837,7 @@ private data class ControlledDatabaseHandle(
     ): List<JSONObject> {
         ensureOpen(request)
         val rows = mutableListOf<JSONObject>()
-        val cursor = database.rawQuery(sql, NodeDatabaseBridgePolicy.queryArgs(params))
+        val cursor = queryCursor(sql, params)
         try {
             var projectedBytes = 2
             while (cursor.moveToNext()) {
@@ -7831,6 +7868,13 @@ private data class ControlledDatabaseHandle(
         }
         return rows
     }
+
+    private fun queryCursor(sql: String, params: List<Any?>): Cursor = database.rawQueryWithFactory(
+        { _, driver, editTable, query ->
+            NodeDatabaseBridgePolicy.bind(query, params)
+            SQLiteCursor(driver, editTable, query)
+        }, sql, emptyArray(), "",
+    )
 
     private fun ensureOpen(request: NodeBridgeRequest) {
         if (!database.isOpen) {
@@ -8007,7 +8051,7 @@ private object NodeDatabaseBridgePolicy {
         }
     }
 
-    fun bind(statement: SQLiteStatement, params: List<Any?>) {
+    fun bind(statement: SQLiteProgram, params: List<Any?>) {
         params.forEachIndexed { index, value ->
             val position = index + 1
             when (value) {
@@ -8019,16 +8063,6 @@ private object NodeDatabaseBridgePolicy {
                 else -> statement.bindString(position, value.toString())
             }
         }
-    }
-
-    fun queryArgs(params: List<Any?>): Array<String> {
-        return params.map { value ->
-            when (value) {
-                null -> ""
-                is Boolean -> if (value) "1" else "0"
-                else -> value.toString()
-            }
-        }.toTypedArray()
     }
 
     fun cursorRow(cursor: Cursor): JSONObject {
@@ -8049,7 +8083,15 @@ private object NodeDatabaseBridgePolicy {
     }
 
     fun command(sql: String): String {
-        return sql.trimStart()
+        var text = sql.trimStart()
+        while (true) {
+            text = when {
+                text.startsWith("--") -> text.substringAfter('\n', "").trimStart()
+                text.startsWith("/*") && text.indexOf("*/", 2) >= 0 -> text.substring(text.indexOf("*/", 2) + 2).trimStart()
+                else -> break
+            }
+        }
+        return text
             .takeWhile { !it.isWhitespace() && it != '(' }
             .uppercase(Locale.US)
     }

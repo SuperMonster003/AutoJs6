@@ -190,7 +190,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/10/17 - Algunas funciones pasan a complementos; actualiza con precaución
+###### 2026/10/19 - Algunas funciones pasan a complementos; actualiza con precaución
 
 * `Sugerencia` Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas
 * `Sugerencia` El SDK de destino de las aplicaciones empaquetadas cambia de 29 a 37; el acceso al almacenamiento compartido y a la red local requiere los permisos exigidos por el sistema
@@ -347,6 +347,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` Adaptador para compartir pantalla WebView, captura de audio mediante servicio en primer plano y grabacion de camara nativa en segundo plano para Node.js/Bun y Node Worker
 * `Nuevo` API de accesibilidad, aplicaciones y portapapeles de Bun alineadas con Node.js, con permisos independientes y aplicaciones empaquetadas
 * `Nuevo` API de archivos y almacenamiento persistente de Bun, con permisos independientes y almacenamiento compartido con Node.js
+* `Nuevo` API database/sqlite del anfitrión para Bun y Workers de Node.js, con consultas parametrizadas, transacciones y persistencia
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
@@ -482,6 +483,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` La captura descarta búferes transparentes sin componer y conserva los fotogramas negros válidos
 * `Corrección` Los enlaces AndroidView conservan las View durante la recreación del renderizador Compose, evitando liberaciones prematuras y reutilización por otra sesión
 * `Corrección` JSON UI restaura listas sin selección y pestañas al recrear Activity, sin tratar datos de eventos como propiedades View
+* `Corrección` Pérdida de tipos null/numéricos, recuentos incorrectos de INSERT de varias filas y conexiones retenidas por transacciones sin finalizar
 * `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
 * `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
 * `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano

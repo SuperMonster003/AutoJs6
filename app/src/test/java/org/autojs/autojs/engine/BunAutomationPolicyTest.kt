@@ -19,6 +19,6 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        assertEquals(38,BunAutomationBridge.methods.values.sumOf{it.size})
+        assertEquals(45,BunAutomationBridge.methods.values.sumOf{it.size})
     }
 }

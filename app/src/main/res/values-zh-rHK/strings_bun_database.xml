@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_database_control_grant">允許在目前應用程式的命名持久化資料庫中執行 SQL 查詢和交易.</string>
+    <string name="text_bun_database_control_grant">宿主資料庫</string>
+</resources>

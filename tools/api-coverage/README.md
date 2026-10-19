@@ -231,3 +231,6 @@ Bun automation coverage: `check-bun-automation.mjs` compares 32 public native ro
 
 
 Bun file/storage coverage: `check-bun-storage.mjs` compares all 15 usable Node file names, the six native storage routes and reproducible declarations. `BunStorageDeviceTest` compares actual Node/Bun encoding and file semantics, cross-execution storage persistence, cross-runtime sharing, directory isolation, grants and payload rejection. `BunStoragePackagedDeviceTest` produces a genuine APK and verifies file/storage persistence after a force-stop and relaunch. Ace checks actual default-setting file/store completion popups. These tests do not play audio.
+
+
+Database coverage: `check-bun-database.mjs` checks the common main/Worker/Bun factory, its declarations and seven native methods. Node has facade and real Worker lifecycle desktop tests; Bun includes database SDK tests in CI. `BunDatabaseDeviceTest` checks real SQL types, counts, rollback, scope, grants, cancelled opens and Worker cleanup. `BunDatabasePackagedDeviceTest` produces actual Bun and Node Worker APKs and verifies persistence after force-stop/relaunch. These tests do not play audio.

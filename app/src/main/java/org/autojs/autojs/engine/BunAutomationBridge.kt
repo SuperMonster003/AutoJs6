@@ -19,7 +19,8 @@ internal class BunAutomationBridge(
     private val grants: List<String>,
     private val provider: () -> AndroidNodeBridgeCapabilityProvider,
 ) : Closeable {
-    private data class Job(val capability: String, val deadline: Long, val future: CompletableFuture<NodeBridgeResponse>)
+    private data class Job(val capability: String, val method: String, val deadline: Long, val future: CompletableFuture<NodeBridgeResponse>,
+        val abandoned: java.util.concurrent.atomic.AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean(false))
     private val jobs = LinkedHashMap<String, Job>()
     private val executor = Executors.newFixedThreadPool(2)
     private var closed = false
@@ -40,7 +41,7 @@ internal class BunAutomationBridge(
             val job = synchronized(jobs) { jobs[id]?.takeIf { it.capability == capability } }
                 ?: throw IllegalArgumentException("Automation task is closed or belongs to another capability")
             if (action == "cancel") {
-                synchronized(jobs) { jobs.remove(id) }; job.future.cancel(false)
+                synchronized(jobs) { jobs.remove(id) }; abandon(job)
                 return success(true)
             }
             val remaining = job.deadline - SystemClock.elapsedRealtime()
@@ -50,7 +51,7 @@ internal class BunAutomationBridge(
                 return if (response.ok) success(JSONObject().put("done", true).put("value", org.json.JSONTokener(response.resultJson ?: "null").nextValue())) else response
             } catch (_: TimeoutException) {
                 if (SystemClock.elapsedRealtime() < job.deadline) return success(JSONObject().put("done", false))
-                synchronized(jobs) { jobs.remove(id) }; job.future.cancel(false)
+                synchronized(jobs) { jobs.remove(id) }; abandon(job)
                 return NodeBridgeResponse.failure(id, NodeBridgeError.timeout(modules.getValue(capability), "poll"))
             }
         }
@@ -62,15 +63,16 @@ internal class BunAutomationBridge(
         val timeout = (request.opt("timeoutMs") ?: 10000) as? Number ?: throw IllegalArgumentException("timeoutMs must be an integer")
         require(timeout.toDouble().isFinite() && timeout.toDouble() == timeout.toLong().toDouble() && timeout.toLong() in 1..120000)
         val id = UUID.randomUUID().toString()
-        val job = Job(capability, SystemClock.elapsedRealtime() + timeout.toLong(), CompletableFuture())
+        val job = Job(capability, method, SystemClock.elapsedRealtime() + timeout.toLong(), CompletableFuture())
         synchronized(jobs) {
             check(!closed) { "Automation execution is closed" }
             // Completed calls still belong to their caller until drained, but abandoned timeouts do not fill the map.
-            jobs.entries.removeAll { (_, value) -> if (SystemClock.elapsedRealtime() >= value.deadline) { value.future.cancel(false); true } else false }
+            jobs.entries.removeAll { (_, value) -> if (SystemClock.elapsedRealtime() >= value.deadline) { abandon(value); true } else false }
             if (jobs.size >= 4) return NodeBridgeResponse.failure(id, NodeBridgeError.resourceLimit(
                 "At most four automation tasks may be outstanding", modules.getValue(capability), method))
             jobs[id] = job
             executor.execute {
+                if (job.abandoned.get() || SystemClock.elapsedRealtime() >= job.deadline) { job.future.cancel(false); return@execute }
                 if (!job.future.isDone && SystemClock.elapsedRealtime() < job.deadline) try {
                     val module = modules.getValue(capability)
                     provider().dispatch(NodeBridgeRequest(id, module, method, args.toString(), timeout.toLong(),
@@ -86,7 +88,20 @@ internal class BunAutomationBridge(
     }
 
     override fun close() {
-        synchronized(jobs) { closed = true; jobs.values.forEach { it.future.cancel(false) }; jobs.clear(); executor.shutdownNow() }
+        synchronized(jobs) { closed = true; jobs.values.forEach(::abandon); jobs.clear(); executor.shutdownNow() }
+    }
+    private fun abandon(job: Job) {
+        if (!job.abandoned.compareAndSet(false, true)) return
+        if (job.capability != Grants.DATABASE_CONTROL || job.method != "open") { job.future.cancel(false); return }
+        // A cancelled caller cannot receive its newly opened database. Keep that completion
+        // observable so the handle can be released, including when open finishes after cancel.
+        job.future.whenComplete { response, _ ->
+            if (response?.ok == true) runCatching {
+                val id = JSONObject(response.resultJson.orEmpty()).getString("id")
+                provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), NodeBridgeModules.DATABASE, "close",
+                    JSONArray().put(id).toString(), 5000, permissions = listOf(NodeBridgePermissionManifest.DATABASE))) {}
+            }
+        }
     }
     private fun success(value: Any?) = NodeBridgeResponse.success("bun-automation", NodeBridgeJson.valueToJson(value))
 
@@ -100,6 +115,7 @@ internal class BunAutomationBridge(
             }
             if (Grants.CLIPBOARD_CONTROL in grants) add(NodeBridgePermissionManifest.CLIPBOARD)
             if (Grants.STORAGE_CONTROL in grants) add(NodeBridgePermissionManifest.STORAGE)
+            if (Grants.DATABASE_CONTROL in grants) add(NodeBridgePermissionManifest.DATABASE)
         }
         val gestureMethods = setOf("swipe", "gesture")
         val methods = mapOf(
@@ -107,7 +123,8 @@ internal class BunAutomationBridge(
             Grants.ACCESSIBILITY_CONTROL to setOf("isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture"),
             Grants.CLIPBOARD_CONTROL to setOf("getText", "setText", "hasText"),
             Grants.STORAGE_CONTROL to setOf("get", "put", "remove", "clear", "keys", "contains"),
+            Grants.DATABASE_CONTROL to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
         )
-        private val modules = mapOf(Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE)
+        private val modules = mapOf(Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE)
     }
 }

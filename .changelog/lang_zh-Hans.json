@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/17",
+      "released_date": "2026/10/19",
       "released_hint": "部分功能插件化, 谨慎升级",
       "hint": [
         "部分内置功能改由独立插件提供 (如 OCR, 条码识别, OpenCV, OpenCC, 拼音, MediaInfo, 终端及离线项目文档), 使用前需在插件中心安装并启用对应插件",
@@ -176,7 +176,8 @@
         "WebView getUserMedia/MediaRecorder 流式音视频, 支持等待网页 Promise, 显式申请 Android 媒体权限及 Worker 生命周期管理",
         "Node.js/Bun 的 WebView 屏幕共享适配, 前台服务后台录音及原生后台摄像头录像, 包括 Node Worker 封装",
         "Bun 无障碍, 应用操作与剪贴板 API 对齐 Node.js 对应接口, 支持独立授权和打包应用",
-        "Bun 文件与持久化存储 API, 支持独立授权的宿主文件读写及 Node.js 存储互通"
+        "Bun 文件与持久化存储 API, 支持独立授权的宿主文件读写及 Node.js 存储互通",
+        "Node.js Worker 与 Bun 的 database/sqlite API, 支持参数化查询, 事务和数据库持久化"
       ],
       "fix": [
         "runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题",
@@ -323,7 +324,8 @@
         "拼音 style/mode 数字常量转换为 JSON 或 Rhino 数值后无法识别的问题",
         "屏幕截图跳过尚未合成的全透明投影缓冲, 保留正常黑色画面",
         "AndroidView 在 Compose 渲染器重建期间保持原生 View 借用状态, 防止提前释放或被其他会话重复使用",
-        "JSON UI 在 Activity 重建时恢复未选中列表和选项卡状态, 避免将事件数据误作 View 属性而发生异常"
+        "JSON UI 在 Activity 重建时恢复未选中列表和选项卡状态, 避免将事件数据误作 View 属性而发生异常",
+        "数据库桥接查询丢失 null/数字参数类型, 多行 INSERT 影响行数不正确及未结束事务保留连接的问题"
       ],
       "improvement": [
         "延迟初始化非关键组件以提升应用启动速度",

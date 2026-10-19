@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_database_control_grant">Разрешает SQL-запросы и транзакции в именованных постоянных базах данных этого приложения.</string>
+    <string name="text_bun_database_control_grant">Базы данных хоста</string>
+</resources>
