@@ -123,6 +123,8 @@ junit-quickcheck-generators = { module = "com.pholser:junit-quickcheck-generator
 juniversalchardet = { module = "com.github.albfernandez:juniversalchardet", version.ref = "juniversalchardet" }
 kotlin-csv-jvm = { module = "com.github.doyaaaaaken:kotlin-csv-jvm", version.ref = "kotlin-csv-jvm" }
 ksp-version-codes-processor = { module = "logic:ksp-version-codes-processor" }
+ksp-script-modules-annotations = { module = "logic:ksp-script-modules-annotations" }
+ksp-script-modules-processor = { module = "logic:ksp-script-modules-processor" }
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 licensesdialog = { module = "de.psdev.licensesdialog:licensesdialog", version.ref = "licensesdialog" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }

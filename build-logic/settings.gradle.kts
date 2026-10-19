@@ -4,6 +4,8 @@ rootProject.name = "logic"
 
 include(":convention")
 include(":ksp-version-codes-processor")
+include(":ksp-script-modules-annotations")
+include(":ksp-script-modules-processor")
 
 dependencyResolutionManagement {
     repositories {
