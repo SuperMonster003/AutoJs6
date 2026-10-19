@@ -159,8 +159,12 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
                 else -> throw IllegalArgumentException("Argument command must be a string or an array of strings instead of ${command.jsBrief()}")
             }
             require(commandLine.isNotBlank()) { "Argument command must not be blank" }
-            val defaults = defaultsOf(scriptRuntime)
-            val base = ShellLauncher.Options(root = defaults?.root ?: false, adb = defaults?.adb ?: false)
+            // shizuku.spawn keeps out of the shell module's setDefaultOptions, like shizuku() does.
+            // zh-CN: shizuku.spawn 与 shizuku() 一样, 不受 shell 模块 setDefaultOptions 的影响.
+            val base = when {
+                forceAdb -> ShellLauncher.Options(adb = true)
+                else -> defaultsOf(scriptRuntime).let { ShellLauncher.Options(root = it?.root ?: false, adb = it?.adb ?: false) }
+            }
             val parsed = when (options) {
                 null, is Undefined -> base
                 is Boolean -> base.copy(root = options)

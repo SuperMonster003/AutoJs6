@@ -343,12 +343,15 @@ function mainPhase() {
             let viaDefault = Number(String(shell('id -u').result).trim());
             let spawned = Number(String(shell.spawn('id -u').readLine()).trim());
             let explicitRoot = shell('id -u', false);
+            // shizuku.spawn does not read the shell module's defaults (a root default would need su inside Shizuku).
+            $shell.setDefaultOptions({ root: true });
+            let shizukuIgnoresDefaults = uidOk('adb', Number(String(shizuku.spawn('id -u').readLine()).trim()));
             $shell.setDefaultOptions(null);
             let cleared = Number(String(shell('id -u').result).trim());
             let unknown = throwsWith(() => $shell.setDefaultOptions({ cmd: 'su' }), 'Unknown default shell option');
             let ok = uidOk('adb', viaDefault) && uidOk('adb', spawned) && uidOk('adb', Number(String(explicitRoot.result).trim())) &&
-                cleared === appUid && unknown;
-            return { pass: ok, detail: 'default=' + viaDefault + ' spawned=' + spawned + ' cleared=' + cleared };
+                cleared === appUid && unknown && shizukuIgnoresDefaults;
+            return { pass: ok, detail: 'default=' + viaDefault + ' spawned=' + spawned + ' cleared=' + cleared + ' shizukuIgnoresDefaults=' + shizukuIgnoresDefaults };
         });
 
         check('shizuku.spawn', () => {
