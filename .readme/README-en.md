@@ -218,9 +218,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Bun Runtime plugin, for running JavaScript/TypeScript files and projects (supports the "bun" mode directive and .bun.js/.bun.ts/.bun.tsx files)
 * `Feature` TypeScript Engine plugin, for compiling TypeScript files and projects for Rhino/Node.js, with type checking and Source Map support
 * `Feature` ai module, for accessing local or online models through AI Provider plugins (such as Three Stone AI), with streaming output, persistent sessions and structured JSON results (see Sample code > ai)
-* `Feature` ai.agent script API, for starting, querying, responding to, confirming and cancelling Three Stove Agent tasks, with detached background tasks (requires the Three Stove Agent plugin) (see Sample code > agent)
-* `Feature` plan option for ai.agent.run/create, for having Three Stove Agent propose a step-by-step plan before execution in plan mode
-* `Feature` Scripts can be registered for Three Stove Agent to call through project.json or an @agent header comment, with argument validation, stopping on timeout and returning structured results
+* `Feature` ai.agent script API, for starting, querying, responding to, confirming and cancelling 3-Stove Agent tasks, with detached background tasks (requires the 3-Stove Agent plugin) (see Sample code > agent)
+* `Feature` plan option for ai.agent.run/create, for having 3-Stove Agent propose a step-by-step plan before execution in plan mode
+* `Feature` Scripts can be registered for 3-Stove Agent to call through project.json or an @agent header comment, with argument validation, stopping on timeout and returning structured results
 * `Feature` compose module, for building interfaces with Jetpack Compose, providing node factories, long-lived node handles, reactive state/render/ref and theme control (requires the 3-Block Compose plugin) (see Sample code > 3-Block Compose)
 * `Feature` "Open in 3-Block Compose designer" in the editor menu: saves the current file and opens it in the visual designer of the 3-Block Compose plugin (1.2.0 or later); returning to the editor automatically reloads content saved by the designer (asks first if there are unsaved changes) (see Sample code > 3-Block Compose)
 * `Feature` ui-mode layout preview service, which lets the 3-Block Compose designer preview XML layouts on its canvas with the host's real layout inflater, embedded on Android 11 and later and as a snapshot on older versions (requires 3-Block Compose plugin 1.6.0 or later)

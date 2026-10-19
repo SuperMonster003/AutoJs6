@@ -34,9 +34,9 @@
 * `新增` Bun Runtime 外掛, 用於執行 JavaScript/TypeScript 檔案及專案 (支援 "bun" 模式參數及 .bun.js/.bun.ts/.bun.tsx 檔案)
 * `新增` TypeScript Engine 外掛, 用於編譯 Rhino/Node.js 的 TypeScript 檔案及專案, 支援型別檢查與 Source Map
 * `新增` ai 模組, 用於透過 AI Provider 外掛 (如 Three Stone AI) 呼叫本地或線上模型, 支援流式輸出, 持久工作階段及結構化 JSON 結果 (參閱 範例程式碼 > ai)
-* `新增` ai.agent 指令碼 API, 用於啟動, 查詢, 回應, 確認及取消 Three Stove Agent 任務, 支援 detached 後臺任務 (需要 Three Stove Agent 外掛) (參閱 範例程式碼 > agent)
-* `新增` ai.agent.run/create 方法支援 plan 選項參數, 用於讓 Three Stove Agent 以計劃模式先提出步驟計劃再執行
-* `新增` 指令碼可透過 project.json 或 @agent 頭註釋登記為 Three Stove Agent 可呼叫的指令碼, 支援參數校驗, 超時停止及結構化結果回傳
+* `新增` ai.agent 指令碼 API, 用於啟動, 查詢, 回應, 確認及取消 3-Stove Agent 任務, 支援 detached 後臺任務 (需要 3-Stove Agent 外掛) (參閱 範例程式碼 > agent)
+* `新增` ai.agent.run/create 方法支援 plan 選項參數, 用於讓 3-Stove Agent 以計劃模式先提出步驟計劃再執行
+* `新增` 指令碼可透過 project.json 或 @agent 頭註釋登記為 3-Stove Agent 可呼叫的指令碼, 支援參數校驗, 超時停止及結構化結果回傳
 * `新增` compose 模組, 用於以 Jetpack Compose 構建介面, 提供節點工廠, 長期節點控制代碼, 響應式 state/render/ref 及主題控制 (需要 3-Block Compose 外掛) (參閱 範例程式碼 > 3-Block Compose)
 * `新增` 編輯器選單新增 "在 3-Block Compose 設計器中開啟": 儲存目前檔案後交給 3-Block Compose 外掛 (1.2.0 及以上) 的視覺化設計器編輯, 回到編輯器時自動重新載入設計器儲存的內容 (有未儲存修改時先詢問) (參閱 範例程式碼 > 3-Block Compose)
 * `新增` ui 模式佈局預覽服務, 供 3-Block Compose 設計器在畫布內以宿主真實佈局器預覽 XML 佈局, Android 11 及以上嵌入顯示, 更低版本提供快照 (需要 3-Block Compose 外掛 1.6.0 及以上)

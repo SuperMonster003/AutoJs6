@@ -219,9 +219,9 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` Bun Runtime 插件, 用于运行 JavaScript/TypeScript 文件及项目 (支持 "bun" 模式参数及 .bun.js/.bun.ts/.bun.tsx 文件)
 * `新增` TypeScript Engine 插件, 用于编译 Rhino/Node.js 的 TypeScript 文件及项目, 支持类型检查与 Source Map
 * `新增` ai 模块, 用于通过 AI Provider 插件 (如 Three Stone AI) 调用本地或在线模型, 支持流式输出, 持久会话及结构化 JSON 结果 (参阅 示例代码 > ai)
-* `新增` ai.agent 脚本 API, 用于启动, 查询, 回应, 确认及取消 Three Stove Agent 任务, 支持 detached 后台任务 (需要 Three Stove Agent 插件) (参阅 示例代码 > agent)
-* `新增` ai.agent.run/create 方法支持 plan 选项参数, 用于让 Three Stove Agent 以计划模式先提出步骤计划再执行
-* `新增` 脚本可通过 project.json 或 @agent 头注释登记为 Three Stove Agent 可调用的脚本, 支持参数校验, 超时停止及结构化结果回传
+* `新增` ai.agent 脚本 API, 用于启动, 查询, 回应, 确认及取消 3-Stove Agent 任务, 支持 detached 后台任务 (需要 3-Stove Agent 插件) (参阅 示例代码 > agent)
+* `新增` ai.agent.run/create 方法支持 plan 选项参数, 用于让 3-Stove Agent 以计划模式先提出步骤计划再执行
+* `新增` 脚本可通过 project.json 或 @agent 头注释登记为 3-Stove Agent 可调用的脚本, 支持参数校验, 超时停止及结构化结果回传
 * `新增` plugins.tools 模块, 用于列出并调用插件自行声明的工具, 支持同步与异步调用; 参数按工具声明的格式校验, 图片参数支持当前屏幕, 文件路径或 ImageWrapper, 目录参数把目录中的文件 (例如模型文件) 交给插件, 工具生成的文件或目录 (例如解压结果) 写入指定路径 (需要提供工具的插件) (参阅 项目文档 > [插件](https://docs.autojs6.com/#/plugins))
 * `新增` 插件工具契约, 用于插件声明自己提供的工具 (名称, 说明, 参数格式及风险等级), 由 AutoJs6 汇总, 校验参数并转发调用, 供脚本及 MCP Server 等插件使用; 只实现该契约的第三方插件也会列在插件中心 (仅收录在插件中心启用并授权的插件)
 * `新增` compose 模块, 用于以 Jetpack Compose 构建界面, 提供节点工厂, 长期节点句柄, 响应式 state/render/ref 及主题控制 (需要 3-Block Compose 插件) (参阅 示例代码 > 3-Block Compose)

@@ -218,9 +218,9 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Bun Runtime プラグイン, JavaScript/TypeScript ファイルとプロジェクトを実行 ("bun" モード引数と .bun.js/.bun.ts/.bun.tsx ファイルに対応)
 * `新機能` TypeScript Engine プラグイン, Rhino/Node.js 向け TypeScript ファイルとプロジェクトをコンパイルし, 型検査と Source Map に対応
 * `新機能` ai モジュール, AI Provider プラグイン (Three Stone AI など) を通じてローカル/オンラインモデルを呼び出し, ストリーミング出力, 永続セッションと構造化 JSON 結果に対応 (参照: サンプルコード > ai)
-* `新機能` ai.agent スクリプト API, Three Stove Agent タスクの開始, 照会, 応答, 確認とキャンセルに使用し, detached バックグラウンドタスクに対応 (Three Stove Agent プラグインが必要) (参照: サンプルコード > agent)
-* `新機能` ai.agent.run/create メソッドの plan オプション, Three Stove Agent が計画モードで手順を提示してから実行するために使用
-* `新機能` project.json または @agent ヘッダーコメントで Three Stove Agent から呼び出せるスクリプトを登録し, 引数検査, タイムアウト停止と構造化結果の返送に対応
+* `新機能` ai.agent スクリプト API, 3-Stove Agent タスクの開始, 照会, 応答, 確認とキャンセルに使用し, detached バックグラウンドタスクに対応 (3-Stove Agent プラグインが必要) (参照: サンプルコード > agent)
+* `新機能` ai.agent.run/create メソッドの plan オプション, 3-Stove Agent が計画モードで手順を提示してから実行するために使用
+* `新機能` project.json または @agent ヘッダーコメントで 3-Stove Agent から呼び出せるスクリプトを登録し, 引数検査, タイムアウト停止と構造化結果の返送に対応
 * `新機能` compose モジュール, Jetpack Compose で UI を構築し, ノードファクトリー, 長期間有効なノードハンドル, リアクティブな state/render/ref とテーマ制御を提供 (3-Block Compose プラグインが必要) (参照: サンプルコード > 3-Block Compose)
 * `新機能` エディターメニューの "3-Block Compose デザイナーで開く": 現在のファイルを保存し, 3-Block Compose プラグイン (1.2.0 以降) のビジュアルデザイナーで編集, エディターへ戻るとデザイナーの保存内容を自動再読込 (未保存の変更があれば先に確認) (参照: サンプルコード > 3-Block Compose)
 * `新機能` ui モードのレイアウトプレビューサービス, 3-Block Compose デザイナーがキャンバス内でホストの実際のレイアウトインフレーターにより XML レイアウトをプレビューできるようにし, Android 11 以降は埋め込み表示, それ未満ではスナップショットを提供 (3-Block Compose プラグイン 1.6.0 以降が必要)
