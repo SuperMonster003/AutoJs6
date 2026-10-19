@@ -111,7 +111,7 @@
     <string name="description_ace_touch_magnifier_enabled_preference">أثناء سحب المؤشر أو أحد مقابض التحديد, يعرض فوق الإصبع صورة مكبرة للنص القريب لتحديد الموضع بدقة.</string>
     <string name="description_ace_whitespaces_in_selection_enabled_preference">يظهر المسافات كنقاط وعلامات الجدولة كخطوط في النص المحدد لتمييزها. يغير هذا طريقة عرض الشفرة فقط.</string>
     <string name="description_ace_word_wrap_enabled_preference">فعّل التفاف الأسطر الطويلة في المحرر. لا يؤدي هذا إلى تعديل محتويات الملف.</string>
-    <string name="description_ai_settings_preference">افتح 3-Stone AI لإدارة النماذج المحلية والخدمات عبر الإنترنت والهدف الافتراضي الذي تستخدمه وحدة ai العامة.</string>
+    <string name="description_ai_settings_preference">افتح ⁨3-Stone AI⁩ لإدارة النماذج المحلية والخدمات عبر الإنترنت والهدف الافتراضي الذي تستخدمه وحدة ai العامة.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">يسمح إذن \"إدارة جميع الملفات\" (أو \"الوصول إلى جميع الملفات\") لـ AutoJs6 بـ [ إنشاء / قراءة / تعديل / حذف ] الملفات مباشرةً عبر مسارات الملفات العادية ضمن مساحة التخزين المشتركة، مما يتيح للسكربتات الوصول إلى \"Internal Storage\" ويُمكّن مدير الملفات من عرض الملفات وإدارتها بشكل صحيح.\n\nعلى أجهزة Android 11+، تُعد هذه الطريقة الأساسية لتحقيق قدرة القراءة والكتابة على كامل التخزين.</string>
     <string name="description_app_language_preference">هذا التفضيل لتغيير لغة العرض لـ AutoJs6 ، بما في ذلك رسائل الاستثناء من تشغيل البرامج النصية.\n\nملاحظة: قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة تطبيقها كما هو متوقع.</string>
     <string name="description_auto_night_mode">عند تفعيل الوضع الليلي التلقائي، سيقوم AutoJs6 بالتبديل تلقائيًا إلى الوضع الليلي وفقًا لإعدادات النظام.\n\nملاحظة: مفتاح الوضع الليلي التلقائي ومفتاح الوضع الليلي مرتبطان ويؤثر كل منهما في الآخر.</string>
@@ -152,7 +152,7 @@
     <string name="description_launcher_icon_preference">يدعم رمز المشغّل وضعي عرض: الرمز المتكيّف أو الرمز التقليدي بخلفية شفافة. قد يختلف تأثير العرض الفعلي عبر أنظمة أندرويد المختلفة. قد يستغرق الأمر بضع ثوانٍ ليصبح التغيير ساريًا بعد تبديل وضع العرض.</string>
     <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
     <string name="description_local_network_permission">السماح بالاتصال بالأجهزة والخدمات على الشبكة المحلية, بما فيها VS Code. يمكن للبرامج النصية طلب هذا الإذن صراحة.</string>
-    <string name="description_mail_settings_preference">افتح 3-Stamp Mail لحفظ الحسابات المستخدمة مع mail.connect(\'alias\') واختبار اتصالها واختيار الحساب الافتراضي.</string>
+    <string name="description_mail_settings_preference">افتح ⁨3-Stamp Mail⁩ لحفظ الحسابات المستخدمة مع mail.connect(\'alias\') واختبار اتصالها واختيار الحساب الافتراضي.</string>
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
     <string name="description_mcp_server">اسمح لعملاء الذكاء الاصطناعي المقترنين بأتمتة هذا الجهاز عبر إضافة MCP Server. افتح الإعدادات لاختيار المنفذ والشبكة والرمز ومجموعات الأدوات.</string>
     <string name="description_night_mode">يُستخدم للتحكم في استراتيجية الوضع الليلي في AutoJs6 وعكسها.\n\nملاحظة: مفتاح الوضع الليلي ومفتاح الوضع الليلي التلقائي مرتبطان ويؤثر كل منهما في الآخر.</string>
@@ -175,7 +175,7 @@
     <string name="description_server_mode">يُستخدم وضع الخادم لتمكين AutoJs6 من تشغيل خدمة على الجهاز الحالي والانتظار لاتصالات عملاء خارجيين لتنفيذ [ نقل السكربتات / طباعة السجلات / التحكم عن بُعد ].\n\nيدعم وضع الخادم في AutoJs6 طريقتين للاتصال:\n1. الشبكة المحلية (LAN)\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">يتيح Shizuku استخدام واجهة برمجة تطبيقات النظام مع امتيازات ADB</string>
     <string name="description_stable_mode">يجعل الوضع المستقر أكثر استقرارًا عند الحصول على حدود تخطيط ، ولكن قد يتم تجاهل بعض النتائج.\nإعادة تشغيل خدمة الوصول المطلوبة.</string>
-    <string name="description_terminal">توفره إضافة 3-Shell Terminal: نفذ الأوامر في جلسات shell مستقلة تستمر في العمل في الخلفية. يعرض المفتاح الجلسات قيد التشغيل، وإيقافه ينهي جميع الجلسات.</string>
+    <string name="description_terminal">توفره إضافة ⁨3-Shell Terminal⁩: نفذ الأوامر في جلسات shell مستقلة تستمر في العمل في الخلفية. يعرض المفتاح الجلسات قيد التشغيل، وإيقافه ينهي جميع الجلسات.</string>
     <string name="description_theme_color_preference">يتم تطبيق لون النسق على عناصر واجهة المستخدم بما في ذلك على سبيل المثال لا الحصر العناصر التالية:\nشريط الحالة\nAppbar\nرمز الملف\nرمز عنصر المهمة\nفاب\nعنوان فئة الإعدادات\nزر التغيير\n\nملاحظة: اعتبارًا من الإصدار 6.2.0 من AutoJs6 ، لم يكن هناك فرق بين اللون الأساسي واللون الأساسي الداكن ولون التمييز حتى الآن.</string>
     <string name="description_timed_task_backend">يتحكم في الآلية الأساسية لتشغيل السكربتات بشكل مجدول.\n\nAlarmManager: عبر منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن أن تصبح المهام أقرب إلى التنفيذ في الوقت المحدد.\nWorkManager: صديق للنظام؛ مناسب للمهام غير الحرجة التي تتحمل بعض التأخير.\nJobScheduler: تنفيذ قديم محفوظ للتوافق؛ احتمال التأخير أعلى.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">حالات الاستخدام والفروقات:\n\n1. AlarmManager\nمناسب للمهام الحسّاسة للتوقيت، مثل [التذكيرات/السكربتات الدقيقة التوقيت/...].\nعلى Android 12+ ومع منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن التنفيذ بدقة أكبر حتى مع إيقاف الشاشة أو في وضع السكون.\nبدون الإذن قد يقلل النظام الدقة أو يؤخر التنفيذ.\n\n2. WorkManager\nمناسب للمهام التي لا تتطلب دقة زمنية صارمة مثل [مزامنة غير حرجة/تنظيف/إحصاءات/...].\nيتم الجدولة وفق [حالة البطارية/الشبكة/الشحن/سياسات السكون/...], وقد تتأخر المهام عند إيقاف الشاشة أو في وضع السكون.\nلا يضمن الدقة الزمنية لكنه يوفر مزايا في [إتمام موثوق/إعادة المحاولة عند الفشل/سلاسل المهام/إزالة التكرار].\n\n3. JobScheduler\nتنفيذ تاريخي لأغراض التوافق.\nفي إصدارات أندرويد الحديثة قد تحدث تأخيرات أكبر.\nلا يُنصح به إلا لاعتبارات التوافق.</string>
@@ -360,20 +360,20 @@
     <string name="error_compass_cannot_be_null">لا يمكن أن تكون البوصلة لاغية</string>
     <string name="error_compose_duplicate_key">يجب أن تستخدم عقد Compose التابعة لنفس الأصل مفاتيح مختلفة.</string>
     <string name="error_compose_host_too_old">حدث AutoJs6 لاستخدام الإضافة \"%1$s\".</string>
-    <string name="error_compose_internal">حدث خطأ داخلي في 3-Block Compose.</string>
-    <string name="error_compose_invalid_argument">وسيطة 3-Block Compose غير صالحة.</string>
+    <string name="error_compose_internal">حدث خطأ داخلي في ⁨3-Block Compose⁩.</string>
+    <string name="error_compose_invalid_argument">وسيطة ⁨3-Block Compose⁩ غير صالحة.</string>
     <string name="error_compose_invalid_modifier">معدّل Compose غير صالح.</string>
-    <string name="error_compose_limit_exceeded">تم تجاوز أحد حدود جلسة 3-Block Compose.</string>
+    <string name="error_compose_limit_exceeded">تم تجاوز أحد حدود جلسة ⁨3-Block Compose⁩.</string>
     <string name="error_compose_node_detached">عقدة Compose غير متصلة بهذه الجلسة.</string>
     <string name="error_compose_permission_required">اسمح لـ AutoJs6 بعرض النوافذ العائمة لاستخدام واجهة Compose العائمة.</string>
     <string name="error_compose_plugin_incompatible">الإضافة \"%1$s\" غير متوافقة. حدث AutoJs6 والإضافة.</string>
     <string name="error_compose_plugin_system_disabled">الإضافة \"%1$s\" معطلة في إعدادات Android. فعلها ثم حاول مجددا.</string>
     <string name="error_compose_render_failed">فشل تنفيذ دالة عرض Compose.</string>
-    <string name="error_compose_renderer_failed">فشل محرك عرض 3-Block Compose.</string>
+    <string name="error_compose_renderer_failed">فشل محرك عرض ⁨3-Block Compose⁩.</string>
     <string name="error_compose_scope_mismatch">لا يمكن استخدام معدّل Compose هذا في تخطيط الأصل الحالي.</string>
-    <string name="error_compose_session_closed">تم إغلاق جلسة 3-Block Compose.</string>
+    <string name="error_compose_session_closed">تم إغلاق جلسة ⁨3-Block Compose⁩.</string>
     <string name="error_compose_shared_dependencies">تبعيات AutoJs6 والإضافة \"%1$s\" غير متطابقة. حدث كليهما إلى إصدارين متوافقين.</string>
-    <string name="error_compose_ui_mode_required">يتطلب عرض 3-Block Compose وضع UI. أضف \"ui\"; في بداية البرنامج النصي.</string>
+    <string name="error_compose_ui_mode_required">يتطلب عرض ⁨3-Block Compose⁩ وضع UI. أضف \"ui\"; في بداية البرنامج النصي.</string>
     <string name="error_compose_unknown_component">مكوّن Compose غير معروف.</string>
     <string name="error_compose_unknown_prop">خاصية Compose غير معروفة.</string>
     <string name="error_conditions_not_met_for_record">يتطلب تسجيل السكربتات توفر شرط واحد على الاقل مما يلي:\n- صلاحيات Root\n- صلاحيات Shizuku</string>
@@ -392,7 +392,7 @@
     <string name="error_empty_github_release_assets">لا توجد أصول إصدار GitHub للتنزيل</string>
     <string name="error_empty_shell_command">الأمر فارغ</string>
     <string name="error_enable_server">لا يمكن تمكين خادم AutoJs6: %s</string>
-    <string name="error_epub_plugin_unavailable">ملحق 3-Folio EPUB غير متاح. ثبته أو مكّنه أو حدّثه في مركز الملحقات ثم أعد المحاولة.</string>
+    <string name="error_epub_plugin_unavailable">ملحق ⁨3-Folio EPUB⁩ غير متاح. ثبته أو مكّنه أو حدّثه في مركز الملحقات ثم أعد المحاولة.</string>
     <string name="error_excessive_height_for_template_n_region">الارتفاع الزائد: القالب [%1$d] > المنطقة [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">العرض الزائد: القالب [%1$d] > المنطقة [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">فشل في تطبيق سجل اللون الحالي</string>
@@ -429,7 +429,7 @@
     <string name="error_find_on_ui_thread_timeout">لم يكتمل البحث المرسل إلى مؤشر ترابط واجهة المستخدم (العلامة \"findOnUiThread\") خلال %1$d مللي ثانية. قد يكون مؤشر ترابط واجهة المستخدم محظورا</string>
     <string name="error_function_called_in_ui_thread">لا يمكن حظر مؤشر ترابط واجهة المستخدم. حاول تشغيل %s() في الخيط الفرعي أو النصف الفرعي</string>
     <string name="error_function_called_more_than_once">%s() دعا أكثر من مرة</string>
-    <string name="error_gallery_plugin_unavailable">ملحق 3-Maple Image غير متاح. ثبته أو مكّنه أو حدّثه في مركز الملحقات ثم أعد المحاولة.</string>
+    <string name="error_gallery_plugin_unavailable">ملحق ⁨3-Maple Image⁩ غير متاح. ثبته أو مكّنه أو حدّثه في مركز الملحقات ثم أعد المحاولة.</string>
     <string name="error_get_github_latest_release">لا يمكن الحصول على أحدث إصدار من GitHub</string>
     <string name="error_handshake_timed_out">تم توقيت المصافحة بعد %d MS</string>
     <string name="error_illegal_argument" formatted="false">حجة غير قانونية %s: %s</string>
@@ -715,15 +715,15 @@
     <string name="prompt_ace_editor_plugin_required">ثبّت اضافة محرر Ace أو فعّلها في مركز الاضافات لاستخدام محرك Ace.</string>
     <string name="prompt_add_ignored_app_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات التطبيق.</string>
     <string name="prompt_add_ignored_plugin_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات الإضافة.</string>
-    <string name="prompt_ai_plugin_application_enable_required">تم تعطيل 3-Stone AI بواسطة Android. فعّله من إعدادات التطبيق في النظام قبل فتح إعدادات خدمة AI.</string>
-    <string name="prompt_ai_plugin_enable_required">تم تعطيل 3-Stone AI في مركز الإضافات. فعّله قبل فتح إعدادات خدمة AI.</string>
-    <string name="prompt_ai_plugin_install_required">ثبّت 3-Stone AI من مركز الإضافات قبل فتح إعدادات خدمة AI.</string>
-    <string name="prompt_ai_plugin_settings_unavailable">لا يوفر 3-Stone AI المثبت مدخل إعدادات موثوقًا. حدّثه أو أعد تثبيته من مركز الإضافات.</string>
+    <string name="prompt_ai_plugin_application_enable_required">تم تعطيل ⁨3-Stone AI⁩ بواسطة Android. فعّله من إعدادات التطبيق في النظام قبل فتح إعدادات خدمة AI.</string>
+    <string name="prompt_ai_plugin_enable_required">تم تعطيل ⁨3-Stone AI⁩ في مركز الإضافات. فعّله قبل فتح إعدادات خدمة AI.</string>
+    <string name="prompt_ai_plugin_install_required">ثبّت ⁨3-Stone AI⁩ من مركز الإضافات قبل فتح إعدادات خدمة AI.</string>
+    <string name="prompt_ai_plugin_settings_unavailable">لا يوفر ⁨3-Stone AI⁩ المثبت مدخل إعدادات موثوقًا. حدّثه أو أعد تثبيته من مركز الإضافات.</string>
     <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">قد لا يكون الملف الحالي حزمة ملحق صالحة. هل تريد المتابعة بالتثبيت؟\n\nURI: \"%1$s\"</string>
-    <string name="prompt_mail_plugin_application_enable_required">تم تعطيل 3-Stamp Mail بواسطة Android. فعّله من إعدادات التطبيق في النظام قبل فتح إعدادات حسابات البريد.</string>
-    <string name="prompt_mail_plugin_enable_required">تم تعطيل 3-Stamp Mail في مركز الإضافات. فعّله قبل فتح إعدادات حسابات البريد.</string>
-    <string name="prompt_mail_plugin_install_required">ثبّت 3-Stamp Mail من مركز الإضافات قبل فتح إعدادات حسابات البريد.</string>
-    <string name="prompt_mail_plugin_settings_unavailable">لا يوفر 3-Stamp Mail المثبت مدخل إعدادات موثوقًا. حدّثه أو أعد تثبيته من مركز الإضافات.</string>
+    <string name="prompt_mail_plugin_application_enable_required">تم تعطيل ⁨3-Stamp Mail⁩ بواسطة Android. فعّله من إعدادات التطبيق في النظام قبل فتح إعدادات حسابات البريد.</string>
+    <string name="prompt_mail_plugin_enable_required">تم تعطيل ⁨3-Stamp Mail⁩ في مركز الإضافات. فعّله قبل فتح إعدادات حسابات البريد.</string>
+    <string name="prompt_mail_plugin_install_required">ثبّت ⁨3-Stamp Mail⁩ من مركز الإضافات قبل فتح إعدادات حسابات البريد.</string>
+    <string name="prompt_mail_plugin_settings_unavailable">لا يوفر ⁨3-Stamp Mail⁩ المثبت مدخل إعدادات موثوقًا. حدّثه أو أعد تثبيته من مركز الإضافات.</string>
     <string name="prompt_mcp_server_activate">MCP Server مثبت لكن Android لم ينشطه بعد. نشطه الآن للسماح باتصال AutoJs6.</string>
     <string name="prompt_mcp_server_application_disabled">عطل Android تطبيق MCP Server. فعله في إعدادات النظام ثم حاول مجددا.</string>
     <string name="prompt_mcp_server_authorize">تحتاج هذه الإضافة إلى تفويض في مركز الإضافات قبل السماح بوصول MCP إلى الجهاز.</string>
@@ -742,12 +742,12 @@
     <string name="prompt_plugin_native_page_alignment">المكتبات الأصلية في الملحق %1$s غير محاذاة لصفحات 16 KB. قد لا يعمل الملحق على هذا الجهاز. قم بترقيته قبل الاستخدام. هل تريد المتابعة رغم ذلك?</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">هناك حاجة إلى إعادة تشغيل التطبيق لتطبيق إعدادات جديدة</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة مطبقًا كما هو متوقع</string>
-    <string name="prompt_terminal_plugin_application_disabled">قام Android بتعطيل 3-Shell Terminal. فعّل التطبيق من إعدادات تطبيقات النظام ثم أعد المحاولة.</string>
-    <string name="prompt_terminal_plugin_enable_required">3-Shell Terminal معطّل أو غير مصرّح به في مركز الإضافات. فعّله وصرّح به قبل استخدام الطرفية.</string>
-    <string name="prompt_terminal_plugin_install_required">ثبّت 3-Shell Terminal من مركز الإضافات لاستخدام الطرفية. تم نقل الطرفية المدمجة إلى هذه الإضافة.</string>
-    <string name="prompt_terminal_plugin_requires_host">يتطلب 3-Shell Terminal الإصدار %1$d من AutoJs6 أو أحدث. حدّث AutoJs6 أو ثبّت إصدارًا متوافقًا من الإضافة من مركز الإضافات.</string>
-    <string name="prompt_terminal_plugin_update_required">إصدار 3-Shell Terminal المثبّت لا يوفر مدخل الطرفية الذي يتوقعه هذا الإصدار من AutoJs6. حدّث الإضافة من مركز الإضافات.</string>
-    <string name="prompt_three_stove_agent_launcher_unavailable">صفحة مهام 3-Stove Agent غير متاحة. تحقق في مركز الإضافات من تفعيل التطبيق وتحديثه.</string>
+    <string name="prompt_terminal_plugin_application_disabled">قام Android بتعطيل ⁨3-Shell Terminal⁩. فعّل التطبيق من إعدادات تطبيقات النظام ثم أعد المحاولة.</string>
+    <string name="prompt_terminal_plugin_enable_required">⁨3-Shell Terminal⁩ معطّل أو غير مصرّح به في مركز الإضافات. فعّله وصرّح به قبل استخدام الطرفية.</string>
+    <string name="prompt_terminal_plugin_install_required">ثبّت ⁨3-Shell Terminal⁩ من مركز الإضافات لاستخدام الطرفية. تم نقل الطرفية المدمجة إلى هذه الإضافة.</string>
+    <string name="prompt_terminal_plugin_requires_host">يتطلب ⁨3-Shell Terminal⁩ الإصدار %1$d من AutoJs6 أو أحدث. حدّث AutoJs6 أو ثبّت إصدارًا متوافقًا من الإضافة من مركز الإضافات.</string>
+    <string name="prompt_terminal_plugin_update_required">إصدار ⁨3-Shell Terminal⁩ المثبّت لا يوفر مدخل الطرفية الذي يتوقعه هذا الإصدار من AutoJs6. حدّث الإضافة من مركز الإضافات.</string>
+    <string name="prompt_three_stove_agent_launcher_unavailable">صفحة مهام ⁨3-Stove Agent⁩ غير متاحة. تحقق في مركز الإضافات من تفعيل التطبيق وتحديثه.</string>
     <string name="prompt_three_stove_agent_trust">منحت هذه الإضافة إذنا يدويا لكن جهة توقيعها ليست رسمية أو موثوقة. هل تسمح لهذه الجهة باستخدام نماذج AutoJs6 وقدرات الجهاز?</string>
     <string name="python_long_running_notification_channel_description">حالة مشاريع Python طويلة التشغيل التي بدأها المستخدم وعناصر التحكم في إيقافها</string>
     <string name="python_long_running_notification_channel_name">مهام Python طويلة التشغيل</string>
@@ -2230,9 +2230,9 @@
     <string name="text_only_latest_few_items_will_be_sent">سيتم إرسال أحدث %d من العناصر فقط</string>
     <string name="text_open">فتح</string>
     <string name="text_open_by_other_apps">افتح من قبل التطبيقات الأخرى</string>
-    <string name="text_open_in_three_block_compose_designer">فتح في مصمم 3-Block Compose</string>
+    <string name="text_open_in_three_block_compose_designer">فتح في مصمم ⁨3-Block Compose⁩</string>
     <string name="text_designer_changed_file_title">تم تعديل الملف بواسطة المصمم</string>
-    <string name="description_designer_changed_file_reload_or_keep">حفظ 3-Block Compose هذا الملف. إعادة التحميل تستبدل نص المحرر بالملف المحفوظ وتتجاهل التغييرات غير المحفوظة هنا; الإلغاء يحتفظ بنص المحرر.</string>
+    <string name="description_designer_changed_file_reload_or_keep">حفظ ⁨3-Block Compose⁩ هذا الملف. إعادة التحميل تستبدل نص المحرر بالملف المحفوظ وتتجاهل التغييرات غير المحفوظة هنا; الإلغاء يحتفظ بنص المحرر.</string>
     <string name="text_open_in_terminal">فتح في الطرفية</string>
     <string name="text_open_main_activity">فتح النشاط الرئيسي</string>
     <string name="text_open_with">مفتوحة مع</string>
@@ -2907,10 +2907,10 @@
     <string name="text_task">مهمة</string>
     <string name="text_terminal">الطرفية</string>
     <string name="text_terminal_new_session">جلسة جديدة</string>
-    <string name="text_terminal_plugin_disabled">إضافة 3-Shell Terminal معطّلة أو غير مصرّح بها</string>
-    <string name="text_terminal_plugin_incompatible">إضافة 3-Shell Terminal غير متوافقة</string>
-    <string name="text_terminal_plugin_required">إضافة 3-Shell Terminal مطلوبة</string>
-    <string name="text_terminal_plugin_unavailable">إضافة 3-Shell Terminal غير متاحة</string>
+    <string name="text_terminal_plugin_disabled">إضافة ⁨3-Shell Terminal⁩ معطّلة أو غير مصرّح بها</string>
+    <string name="text_terminal_plugin_incompatible">إضافة ⁨3-Shell Terminal⁩ غير متوافقة</string>
+    <string name="text_terminal_plugin_required">إضافة ⁨3-Shell Terminal⁩ مطلوبة</string>
+    <string name="text_terminal_plugin_unavailable">إضافة ⁨3-Shell Terminal⁩ غير متاحة</string>
     <string name="text_terminal_running_sessions">قيد التشغيل\u0020\u0020[ الجلسات: %1$d ]</string>
     <string name="text_text_size">حجم الخط</string>
     <string name="text_text_size_current_value" formatted="true">حجم النص: %d</string>
@@ -3090,6 +3090,6 @@
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
     <string name="warning_apk_native_page_alignment_unsupported">محاذاة المكتبة الأصلية %1$s هي %2$d بايت. قد لا يعمل ملف APK الناتج على أجهزة بصفحات 16 KB. يرجى تحديث المكتبة أو الإضافة.</string>
-    <string name="ui_preview_window_function_ignored">ui.%1$s ليس له تأثير في معاينة 3-Block Compose, التي لا تملك نافذة Activity</string>
-    <string name="ui_preview_default_label">معاينة 3-Block Compose</string>
+    <string name="ui_preview_window_function_ignored">ui.%1$s ليس له تأثير في معاينة ⁨3-Block Compose⁩, التي لا تملك نافذة Activity</string>
+    <string name="ui_preview_default_label">معاينة ⁨3-Block Compose⁩</string>
 </resources>
