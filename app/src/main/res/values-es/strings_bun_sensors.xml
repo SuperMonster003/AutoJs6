@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_sensors_control_grant">Permite muestras y suscripciones del acelerómetro, giroscopio y sensor de luz.</string>
+    <string name="text_bun_sensors_control_grant">Sensores del anfitrión</string>
+</resources>

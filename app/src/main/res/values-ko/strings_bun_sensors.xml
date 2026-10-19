@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_sensors_control_grant">가속도계, 자이로스코프 및 광 센서 샘플링과 구독을 허용합니다.</string>
+    <string name="text_bun_sensors_control_grant">호스트 센서</string>
+</resources>

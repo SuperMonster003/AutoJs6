@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_sensors_control_grant">加速度, ジャイロ, 光センサーの取得と購読を許可します.</string>
+    <string name="text_bun_sensors_control_grant">ホストセンサー</string>
+</resources>

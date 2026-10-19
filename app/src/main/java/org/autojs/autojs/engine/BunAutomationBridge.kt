@@ -92,17 +92,21 @@ internal class BunAutomationBridge(
     }
     private fun abandon(job: Job) {
         if (!job.abandoned.compareAndSet(false, true)) return
-        if (job.capability != Grants.DATABASE_CONTROL || job.method != "open") { job.future.cancel(false); return }
-        // A cancelled caller cannot receive its newly opened database. Keep that completion
-        // observable so the handle can be released, including when open finishes after cancel.
+        val database = job.capability == Grants.DATABASE_CONTROL && job.method == "open"
+        val sensor = job.capability == Grants.SENSORS_CONTROL && job.method == "subscribe"
+        if (!database && !sensor) { job.future.cancel(false); return }
+        // Preserve late creation replies so cancelled callers cannot strand native resources.
         job.future.whenComplete { response, _ ->
             if (response?.ok == true) runCatching {
                 val id = JSONObject(response.resultJson.orEmpty()).getString("id")
-                provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), NodeBridgeModules.DATABASE, "close",
-                    JSONArray().put(id).toString(), 5000, permissions = listOf(NodeBridgePermissionManifest.DATABASE))) {}
+                val module = if (database) NodeBridgeModules.DATABASE else NodeBridgeModules.SENSORS
+                val args = if (database) JSONArray().put(id) else JSONArray().put(JSONObject().put("id", id))
+                provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), module, if (database) "close" else "unsubscribe",
+                    args.toString(), 5000, permissions = listOf(if (database) NodeBridgePermissionManifest.DATABASE else NodeBridgePermissionManifest.SENSORS))) {}
             }
         }
     }
+
     private fun success(value: Any?) = NodeBridgeResponse.success("bun-automation", NodeBridgeJson.valueToJson(value))
 
     companion object {
@@ -116,6 +120,7 @@ internal class BunAutomationBridge(
             if (Grants.CLIPBOARD_CONTROL in grants) add(NodeBridgePermissionManifest.CLIPBOARD)
             if (Grants.STORAGE_CONTROL in grants) add(NodeBridgePermissionManifest.STORAGE)
             if (Grants.DATABASE_CONTROL in grants) add(NodeBridgePermissionManifest.DATABASE)
+            if (Grants.SENSORS_CONTROL in grants) add(NodeBridgePermissionManifest.SENSORS)
         }
         val gestureMethods = setOf("swipe", "gesture")
         val methods = mapOf(
@@ -123,8 +128,9 @@ internal class BunAutomationBridge(
             Grants.ACCESSIBILITY_CONTROL to setOf("isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture"),
             Grants.CLIPBOARD_CONTROL to setOf("getText", "setText", "hasText"),
             Grants.STORAGE_CONTROL to setOf("get", "put", "remove", "clear", "keys", "contains"),
+            Grants.SENSORS_CONTROL to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             Grants.DATABASE_CONTROL to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
         )
-        private val modules = mapOf(Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE)
+        private val modules = mapOf(Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS)
     }
 }

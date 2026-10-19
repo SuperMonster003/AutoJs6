@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_sensors_control_grant">Allows accelerometer, gyroscope and light sampling and subscriptions.</string>
+    <string name="text_bun_sensors_control_grant">Host sensors</string>
+</resources>

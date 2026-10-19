@@ -348,6 +348,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` API de accesibilidad, aplicaciones y portapapeles de Bun alineadas con Node.js, con permisos independientes y aplicaciones empaquetadas
 * `Nuevo` API de archivos y almacenamiento persistente de Bun, con permisos independientes y almacenamiento compartido con Node.js
 * `Nuevo` API database/sqlite del anfitrión para Bun y Workers de Node.js, con consultas parametrizadas, transacciones y persistencia
+* `Nuevo` Muestras y suscripciones de sensores para Bun y Workers de Node.js, con cancelación y liberación automática de escuchas
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
@@ -484,6 +485,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Los enlaces AndroidView conservan las View durante la recreación del renderizador Compose, evitando liberaciones prematuras y reutilización por otra sesión
 * `Corrección` JSON UI restaura listas sin selección y pestañas al recrear Activity, sin tratar datos de eventos como propiedades View
 * `Corrección` Pérdida de tipos null/numéricos, recuentos incorrectos de INSERT de varias filas y conexiones retenidas por transacciones sin finalizar
+* `Corrección` Escuchas de sensores retenidas tras cancelación, fallo de sondeo o registro durante la destrucción del proveedor
 * `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
 * `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
 * `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano

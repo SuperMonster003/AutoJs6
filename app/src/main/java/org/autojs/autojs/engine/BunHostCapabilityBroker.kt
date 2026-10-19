@@ -143,7 +143,7 @@ internal class BunHostCapabilityBroker(
         val outcome = when (capability) {
             BunHostCapabilityGrants.APP_CONTROL, BunHostCapabilityGrants.ACCESSIBILITY_CONTROL,
             BunHostCapabilityGrants.CLIPBOARD_CONTROL, BunHostCapabilityGrants.STORAGE_CONTROL,
-            BunHostCapabilityGrants.DATABASE_CONTROL -> bridgeResponse(automation.invoke(capability, request))
+            BunHostCapabilityGrants.DATABASE_CONTROL, BunHostCapabilityGrants.SENSORS_CONTROL -> bridgeResponse(automation.invoke(capability, request))
             BunHostCapabilityGrants.FILES_CONTROL -> {
                 try {
                     val (method, args) = parseMethodCall(request)

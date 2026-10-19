@@ -298,9 +298,10 @@ class NodeBridgeConformanceInstrumentationTest {
                     } else if (method === "once") {
                       result = { type: request.args[0].type, timestamp: 1, accuracy: 3, values: [1, 2, 3] };
                     } else if (method === "subscribe") {
+                      globalThis.__sensorConformanceType=request.args[0].type;
                       result = { id: "sensor-conformance", type: request.args[0].type, samplingIntervalMs: request.args[0].samplingIntervalMs, maxQueueSize: request.args[0].maxQueueSize };
                     } else if (method === "drainEvents") {
-                      result = [{ type: "event", event: { type: "light", timestamp: 2, accuracy: 3, values: [42] } }];
+                      result = [{ type: "event", event: { type: globalThis.__sensorConformanceType, timestamp: 2, accuracy: 3, values: globalThis.__sensorConformanceType === "light" ? [42] : [1,2,3] } }];
                     } else if (method === "unsubscribe") {
                       result = null;
                     }

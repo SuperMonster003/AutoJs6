@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_sensors_control_grant">允许加速度计, 陀螺仪和光线传感器采样及订阅.</string>
+    <string name="text_bun_sensors_control_grant">宿主传感器</string>
+</resources>

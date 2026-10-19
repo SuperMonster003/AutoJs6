@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_sensors_control_grant">允許加速度計, 陀螺儀和光線感應器取樣及訂閱.</string>
+    <string name="text_bun_sensors_control_grant">宿主感應器</string>
+</resources>

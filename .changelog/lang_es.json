@@ -161,7 +161,8 @@
         "Adaptador para compartir pantalla WebView, captura de audio mediante servicio en primer plano y grabacion de camara nativa en segundo plano para Node.js/Bun y Node Worker",
         "API de accesibilidad, aplicaciones y portapapeles de Bun alineadas con Node.js, con permisos independientes y aplicaciones empaquetadas",
         "API de archivos y almacenamiento persistente de Bun, con permisos independientes y almacenamiento compartido con Node.js",
-        "API database/sqlite del anfitrión para Bun y Workers de Node.js, con consultas parametrizadas, transacciones y persistencia"
+        "API database/sqlite del anfitrión para Bun y Workers de Node.js, con consultas parametrizadas, transacciones y persistencia",
+        "Muestras y suscripciones de sensores para Bun y Workers de Node.js, con cancelación y liberación automática de escuchas"
       ],
       "fix": [
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",
@@ -299,7 +300,8 @@
         "La captura descarta búferes transparentes sin componer y conserva los fotogramas negros válidos",
         "Los enlaces AndroidView conservan las View durante la recreación del renderizador Compose, evitando liberaciones prematuras y reutilización por otra sesión",
         "JSON UI restaura listas sin selección y pestañas al recrear Activity, sin tratar datos de eventos como propiedades View",
-        "Pérdida de tipos null/numéricos, recuentos incorrectos de INSERT de varias filas y conexiones retenidas por transacciones sin finalizar"
+        "Pérdida de tipos null/numéricos, recuentos incorrectos de INSERT de varias filas y conexiones retenidas por transacciones sin finalizar",
+        "Escuchas de sensores retenidas tras cancelación, fallo de sondeo o registro durante la destrucción del proveedor"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",

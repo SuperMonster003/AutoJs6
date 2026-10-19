@@ -164,6 +164,7 @@
 * `Fonctionnalité` API Bun pour accessibilité, applications et presse-papiers alignées sur Node.js, avec autorisations distinctes et applications empaquetées
 * `Fonctionnalité` API Bun de fichiers et de stockage persistant, avec autorisations distinctes et stockage partagé avec Node.js
 * `Fonctionnalité` API hôtes database/sqlite pour Bun et les Workers Node.js, avec requêtes paramétrées, transactions et persistance
+* `Fonctionnalité` Mesures et abonnements aux capteurs pour Bun et les Workers Node.js, avec annulation et libération automatique des écouteurs
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés
@@ -300,6 +301,7 @@
 * `Correction` Les liaisons AndroidView conservent les View pendant la recréation du rendu Compose, évitant leur libération prématurée ou leur réutilisation par une autre session
 * `Correction` JSON UI restaure les listes sans sélection et les onglets lors de la recréation de Activity, sans traiter les événements comme des propriétés View
 * `Correction` Perte des types null/numériques dans les requêtes, comptage incorrect des INSERT multiples et connexions retenues par les transactions inachevées
+* `Correction` Écouteurs de capteurs conservés après annulation, échec de lecture ou inscription pendant la destruction du fournisseur
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan

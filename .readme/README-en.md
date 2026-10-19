@@ -348,6 +348,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Bun accessibility, app operations and clipboard APIs aligned with the Node.js interfaces, with independent grants and packaged-app support
 * `Feature` Bun file and persistent storage APIs with separate host-file grants and shared Node.js storage
 * `Feature` Host database/sqlite APIs for Bun and Node.js Workers with parameterized queries, transactions and persistence
+* `Feature` Sensor sampling and subscriptions for Bun and Node.js Workers with cancellation and automatic listener cleanup
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
@@ -484,6 +485,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` AndroidView bindings retain native View ownership during Compose renderer recreation, preventing premature disposal and reuse by another session
 * `Fix` JSON UI restores unselected lists and tab state during Activity recreation without treating event payloads as View properties
 * `Fix` Database queries losing null/numeric parameter types, incorrect multirow INSERT counts and unfinished transactions retaining connections
+* `Fix` Sensor listeners surviving cancelled samples, failed polling or registration queued during provider destruction
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_sensors_control_grant">Autorise les mesures et abonnements de l\'accéléromètre, du gyroscope et du capteur de lumière.</string>
+    <string name="text_bun_sensors_control_grant">Capteurs hôtes</string>
+</resources>

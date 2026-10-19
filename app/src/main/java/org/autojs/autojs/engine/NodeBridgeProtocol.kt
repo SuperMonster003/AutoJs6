@@ -978,6 +978,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private val javaHandles = ConcurrentHashMap<String, Any>()
     private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
     private val notificationIdCounter = AtomicInteger(1_000_000)
+    private val sensorLock = Any()
+    private var sensorsDestroyed = false
     private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
     private val uiInterop = lazy { RuntimeUiInterop(appContext) { value ->
         synchronized(imageLock) { requireNotNull(imageArgument(JSONArray().put(value), 0).bitmap.copy(Bitmap.Config.ARGB_8888, false)) }
@@ -1235,7 +1237,10 @@ class AndroidNodeBridgeCapabilityProvider(
         barcodeOperations.clear()
         databaseDestroyed.set(true)
         val closingWebSockets = websocketSessions.values.toList()
-        synchronized(imageLock) { resourceRegistry.closeAll(destroyReason) }
+        synchronized(sensorLock) {
+            sensorsDestroyed = true
+            synchronized(imageLock) { resourceRegistry.closeAll(destroyReason) }
+        }
         // SQLite sessions and manual transactions belong to the executor thread. Drain their
         // close/rollback jobs before stopping it; interrupting and closing from another thread leaks locks.
         databaseExecutor.shutdown()
@@ -3842,7 +3847,11 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.failure(request.id, descriptor.error ?: NodeBridgeError.processDead()))
             return
         }
-        mainHandler.post {
+        mainHandler.post { synchronized(sensorLock) {
+            if (sensorsDestroyed) {
+                callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Sensors provider is destroyed.")))
+                return@post
+            }
             val manager = sensorManager
             val sensor = manager?.getDefaultSensor(descriptor.value.sensorType)
             if (manager == null || sensor == null) {
@@ -3889,7 +3898,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 return@post
             }
             mainHandler.postDelayed(timeoutRunnable, descriptor.value.timeoutMs)
-        }
+        } }
     }
 
     private fun dispatchSensorSubscribe(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -3898,7 +3907,11 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.failure(request.id, descriptor.error ?: NodeBridgeError.processDead()))
             return
         }
-        mainHandler.post {
+        mainHandler.post { synchronized(sensorLock) {
+            if (sensorsDestroyed) {
+                callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Sensors provider is destroyed.")))
+                return@post
+            }
             val manager = sensorManager
             val sensor = manager?.getDefaultSensor(descriptor.value.sensorType)
             if (manager == null || sensor == null) {
@@ -3957,7 +3970,7 @@ class AndroidNodeBridgeCapabilityProvider(
             }
             val result = subscription.toJson(descriptor.value)
             eventStream?.acknowledge(result) ?: callback(NodeBridgeResponse.success(request.id, result.toString()))
-        }
+        } }
     }
 
     private fun dispatchSensorUnsubscribe(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -3967,7 +3980,9 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.failure(request.id, sensorInvalidRequest(request, "sensors.unsubscribe requires a subscription id.")))
             return
         }
-        resourceRegistry.close(subscriptionId, "sensor.unsubscribe")
+        synchronized(sensorLock) {
+            if (sensorSubscriptions.containsKey(subscriptionId)) resourceRegistry.close(subscriptionId, "sensor.unsubscribe")
+        }
         callback(NodeBridgeResponse.success(request.id, "null"))
     }
 

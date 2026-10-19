@@ -64,7 +64,7 @@ class NodeSensorsBridgeInstrumentationTest {
             (async function main() {
               const bridge = require("autojs6:bridge");
               const requests = [];
-              let drained = false;
+              let drained = false, sensorType;
               bridge.__test.setTransport({
                 postMessage(message) {
                   const request = JSON.parse(message);
@@ -78,9 +78,10 @@ class NodeSensorsBridgeInstrumentationTest {
                   } else if (request.method === "once") {
                     result = { type: request.args[0].type, timestamp: 11, accuracy: 3, values: [1, 2, 3] };
                   } else if (request.method === "subscribe") {
+                    drained=false; sensorType=request.args[0].type;
                     result = { id: "sensor-fake-1", type: request.args[0].type, samplingIntervalMs: request.args[0].samplingIntervalMs, maxQueueSize: request.args[0].maxQueueSize };
                   } else if (request.method === "drainEvents") {
-                    result = drained ? [] : [{ type: "event", event: { type: "light", timestamp: 12, accuracy: 3, values: [44] } }];
+                    result = drained ? [] : [{ type: "event", event: { type: sensorType, timestamp: 12, accuracy: 3, values: sensorType === "light" ? [44] : [1,2,3] } }];
                     drained = true;
                   } else if (request.method === "unsubscribe") {
                     result = null;
@@ -150,7 +151,7 @@ class NodeSensorsBridgeInstrumentationTest {
         NodePluginTestHarness.assertStdoutContains("sensors fake bridge", result, "sensors.once=accelerometer|1,2,3|true|true")
         NodePluginTestHarness.assertStdoutContains("sensors fake bridge", result, "sensors.sub=sensor-fake-1|light|true|true|light:44:true")
         NodePluginTestHarness.assertStdoutContains("sensors fake bridge", result, "sensors.invalid=${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}|${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}")
-        NodePluginTestHarness.assertStdoutContains("sensors fake bridge", result, "sensors.requests=sensors.getAvailableSensors|sensors.once|sensors.subscribe|sensors.drainEvents|sensors.unsubscribe")
+        NodePluginTestHarness.assertStdoutContains("sensors fake bridge", result, "sensors.requests=sensors.getAvailableSensors|sensors.subscribe|sensors.drainEvents|sensors.unsubscribe|sensors.subscribe|sensors.drainEvents|sensors.unsubscribe")
         NodePluginTestHarness.assertStdoutContains("sensors fake bridge", result, "sensors.permissions=sensors")
         NodePluginTestHarness.assertStdoutContains("sensors fake bridge", result, "sensors.pending=0")
     }

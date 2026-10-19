@@ -234,3 +234,6 @@ Bun file/storage coverage: `check-bun-storage.mjs` compares all 15 usable Node f
 
 
 Database coverage: `check-bun-database.mjs` checks the common main/Worker/Bun factory, its declarations and seven native methods. Node has facade and real Worker lifecycle desktop tests; Bun includes database SDK tests in CI. `BunDatabaseDeviceTest` checks real SQL types, counts, rollback, scope, grants, cancelled opens and Worker cleanup. `BunDatabasePackagedDeviceTest` produces actual Bun and Node Worker APKs and verifies persistence after force-stop/relaunch. These tests do not play audio.
+
+
+Sensors coverage: `check-bun-sensors.mjs` checks five native routes and the shared main/Worker/Bun factory and declarations. Node facade and real Worker tests cover cancellation, timeouts, late registration and termination. Bun SDK tests cover negotiated grants and lifecycle. `BunSensorsDeviceTest` and `BunSensorsPackagedDeviceTest` check real sensor data, cleanup and packaged runtime identity without audio.

@@ -94,6 +94,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunFilesControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunStorageControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDatabaseControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunSensorsControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiLayoutGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiComposeGrantPreference: ThemeColorSwitchPreference? = null
@@ -237,6 +238,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunFilesControlGrantPreference = findPreference("plugin_bun_files_control_grant")
         bunStorageControlGrantPreference = findPreference("plugin_bun_storage_control_grant")
         bunDatabaseControlGrantPreference = findPreference("plugin_bun_database_control_grant")
+        bunSensorsControlGrantPreference = findPreference("plugin_bun_sensors_control_grant")
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
         bunUiLayoutGrantPreference = findPreference("plugin_bun_ui_layout_grant")
         bunUiComposeGrantPreference = findPreference("plugin_bun_ui_compose_grant")
@@ -387,6 +389,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setDatabaseControlGranted(requireContext(), value == true)
             true
         }
+        bunSensorsControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setSensorsControlGranted(requireContext(), value == true)
+            true
+        }
         bunConsoleControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
             true
@@ -475,6 +481,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunFilesControlGrantPreference?.isChecked = BunHostCapabilityGrants.isFilesControlGranted(requireContext())
         bunStorageControlGrantPreference?.isChecked = BunHostCapabilityGrants.isStorageControlGranted(requireContext())
         bunDatabaseControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDatabaseControlGranted(requireContext())
+        bunSensorsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isSensorsControlGranted(requireContext())
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
         bunUiLayoutGrantPreference?.isChecked = BunHostCapabilityGrants.isUiLayoutGranted(requireContext())
         bunUiComposeGrantPreference?.isChecked = BunHostCapabilityGrants.isUiComposeGranted(requireContext())

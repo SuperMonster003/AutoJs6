@@ -19,6 +19,12 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        assertEquals(45,BunAutomationBridge.methods.values.sumOf{it.size})
+        assertEquals(50,BunAutomationBridge.methods.values.sumOf{it.size})
     }
+    @Test fun sensorsGrantMapsOnlyToSensorsAndCoversEveryNativeMethod() {
+        assertEquals(listOf("sensors"),BunAutomationBridge.nodeCapabilities(listOf(Grants.SENSORS_CONTROL)))
+        for (method in BunAutomationBridge.methods.getValue(Grants.SENSORS_CONTROL))
+            assertEquals(listOf("sensors"),NodeBridgePermissionManifest.requiredCapabilitiesFor("sensors",method))
+    }
+
 }
