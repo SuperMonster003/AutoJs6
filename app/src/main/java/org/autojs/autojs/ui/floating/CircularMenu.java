@@ -519,6 +519,12 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
 
     private CurrentComponent getCurrentComponentByShizuku() {
         if (WrappedShizuku.INSTANCE.isOperational()) {
+            // Ask the Shizuku server first: a user service takes 1 s or more to start after AutoJs6 does.
+            // zh-CN: 优先询问 Shizuku 服务端: AutoJs6 启动后, 用户服务需要 1 秒或更久才能启动.
+            ComponentName topActivity = WrappedShizuku.getTopActivityOrNull();
+            if (topActivity != null) {
+                return createCurrentComponent(topActivity);
+            }
             try {
                 IUserService service = WrappedShizuku.getServiceOrNull();
                 if (service != null) {

@@ -1,14 +1,18 @@
 package org.autojs.autojs.runtime.api
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Binder
+import android.os.Build
 import android.os.DeadObjectException
 import android.os.IBinder
 import android.util.Log
+import android.view.Display
+import androidx.annotation.VisibleForTesting
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.App
 import org.autojs.autojs.annotation.ScriptInterface
@@ -21,7 +25,11 @@ import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.shizuku.Shizuku
+import rikka.shizuku.ShizukuBinderWrapper
+import rikka.shizuku.SystemServiceHelper
+import java.lang.reflect.Method
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -153,6 +161,66 @@ object WrappedShizuku {
 
     @ScriptInterface
     fun hasService() = service != null
+
+    /**
+     * Returns the top activity of the foreground task, as ActivityManager.getRunningTasks(1) run by the Shizuku server,
+     * or null when Shizuku is not operational or the query fails. The server can be used as soon as its binder is
+     * received, while a user service process takes 1 s or more to start after AutoJs6 does.
+     * zh-CN: 由 Shizuku 服务端执行 ActivityManager.getRunningTasks(1), 返回前台任务顶部的 Activity; Shizuku 不可用或查询失败时返回 null.
+     * 服务端在收到其 binder 后即可使用, 而 AutoJs6 启动后用户服务进程需要 1 秒或更久才能启动.
+     */
+    @JvmStatic
+    fun getTopActivityOrNull(): ComponentName? {
+        if (!isOperational()) return null
+        return runCatching {
+            val query = mTopTaskQuery ?: return null
+            val binder = SystemServiceHelper.getSystemService(query.serviceName) ?: return null
+            val service = query.asInterface.invoke(null, ShizukuBinderWrapper(binder))
+            val tasks = query.getTasks.invoke(service, *query.arguments) as List<*>?
+            (tasks?.firstOrNull() as ActivityManager.RunningTaskInfo?)?.topActivity
+        }.onFailure { Log.w(TAG, "getTopActivityOrNull failed", it) }.getOrNull()
+    }
+
+    @VisibleForTesting
+    internal fun hasTopTaskQuery() = mTopTaskQuery != null
+
+    private class TopTaskQuery(val serviceName: String, val asInterface: Method, val getTasks: Method, val arguments: Array<Any>)
+
+    private val mTopTaskQuery: TopTaskQuery? by lazy {
+        runCatching {
+            val (serviceName, interfaceName) = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> "activity_task" to "android.app.IActivityTaskManager"
+                else -> Context.ACTIVITY_SERVICE to "android.app.IActivityManager"
+            }
+            val asInterface = getDeclaredMethods(Class.forName("$interfaceName\$Stub")).first { it.name == "asInterface" }
+            getDeclaredMethods(Class.forName(interfaceName)).filter { it.name == "getTasks" }.firstNotNullOfOrNull { getTasks ->
+                getTopTaskArguments(getTasks.parameterTypes)?.let { TopTaskQuery(serviceName, asInterface, getTasks, it) }
+            }
+        }.onFailure { Log.w(TAG, "Top task query is unavailable", it) }.getOrNull()
+    }
+
+    // The arguments ActivityManager.getRunningTasks(1) passes to getTasks, or null for an unknown signature.
+    // zh-CN: ActivityManager.getRunningTasks(1) 传给 getTasks 的参数; 签名未知时为 null.
+    private fun getTopTaskArguments(types: Array<Class<*>>): Array<Any>? {
+        val int = Int::class.java
+        val boolean = Boolean::class.java
+        return when (types.toList()) {
+            // maxNum, flags (Android 7-8.1).
+            listOf(int, int) -> arrayOf(1, 0)
+            // maxNum (Android 9-11).
+            listOf(int) -> arrayOf(1)
+            // maxNum, filterOnlyVisibleRecents, keepIntentExtra (Android 12-12L).
+            listOf(int, boolean, boolean) -> arrayOf(1, false, false)
+            // maxNum, filterOnlyVisibleRecents, keepIntentExtra, displayId (Android 13+).
+            listOf(int, boolean, boolean, int) -> arrayOf(1, false, false, Display.INVALID_DISPLAY)
+            else -> null
+        }
+    }
+
+    private fun getDeclaredMethods(clazz: Class<*>): List<Method> = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> HiddenApiBypass.getDeclaredMethods(clazz).filterIsInstance<Method>()
+        else -> clazz.declaredMethods.toList()
+    }
 
     @JvmStatic
     fun getServiceOrNull(): IUserService? {

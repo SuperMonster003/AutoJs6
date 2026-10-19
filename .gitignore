@@ -86,6 +86,8 @@ CLAUDE.md
 !/tools/shell-stream/
 !/tools/shell-stream/**
 /tools/shell-stream/.*.generated.js
+!/tools/floaty/
+!/tools/floaty/**
 
 /gradle/wrappers/backup/
 

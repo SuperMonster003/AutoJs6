@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.platform.app.InstrumentationRegistry;
 import com.afollestad.materialdialogs.MaterialDialog;
+import org.autojs.autojs.runtime.api.WrappedShizuku;
 import org.autojs.autojs6.R;
 import org.junit.After;
 import org.junit.Before;
@@ -48,6 +49,11 @@ public class CircularMenuMoreDialogInstrumentationTest {
                     + (loaded < times.size() ? "loaded after " + (times.get(loaded) - clickedAt) + " ms" : "not loaded") + ", "
                     + "placeholder in first frame=" + (loaded > 0) + ", frames=" + times.size() + ", "
                     + "rows " + Arrays.toString(rows.get(0)) + " -> " + Arrays.toString(rows.get(rows.size() - 1));
+        }
+
+        @Nullable
+        String placeholderInFirstFrame(String placeholder) {
+            return subtitles.get(0).contains(placeholder) ? "Placeholder in the first frame: " + subtitles.get(0) : null;
         }
 
         @Nullable
@@ -94,22 +100,29 @@ public class CircularMenuMoreDialogInstrumentationTest {
         assertNotNull(menu);
         String placeholder = "[" + instrumentation.getTargetContext().getString(R.string.ellipsis_six) + "]";
 
-        // The first opening after the process starts may outwait Shizuku or root and fill in placeholders later,
-        // so it is only reported. The second opening is what a running AutoJs6 shows.
-        // zh-CN: 进程启动后首次打开可能等不到 Shizuku 或 root 的结果而稍后填入占位内容, 因此只报告.
-        // 第二次打开才是 AutoJs6 运行中的常态.
+        // Shizuku answers at once even in a process that has just started, so the first opening must show its final
+        // subtitles too. Without Shizuku, the first opening may outwait root and fill in placeholders later, so it is
+        // only reported. The second opening is what a running AutoJs6 shows.
+        // zh-CN: 即使进程刚启动, Shizuku 也能立即返回结果, 因此首次打开同样须显示最终副标题. 没有 Shizuku 时, 首次打开可能等不到 root 的结果
+        // 而稍后填入占位内容, 因此只报告. 第二次打开才是 AutoJs6 运行中的常态.
+        boolean shizuku = WrappedShizuku.INSTANCE.isOperational();
         Opening first = openMoreMenu(menu);
         Opening second = openMoreMenu(menu);
 
-        String[] movement = new String[1];
+        String[] failure = new String[1];
         instrumentation.runOnMainSync(() -> {
-            Log.i(TAG, first.report("first opening", placeholder) + ", moved=" + (first.movement() != null));
+            Log.i(TAG, first.report("first opening", placeholder) + ", moved=" + (first.movement() != null) + ", shizuku=" + shizuku);
             Log.i(TAG, second.report("second opening", placeholder));
             Log.d(TAG, "subtitles " + second.subtitles().get(0) + " -> " + second.subtitles().get(second.subtitles().size() - 1));
-            movement[0] = second.movement();
+            String firstFailure = null;
+            if (shizuku) {
+                firstFailure = first.placeholderInFirstFrame(placeholder);
+                if (firstFailure == null) firstFailure = first.movement();
+            }
+            failure[0] = firstFailure != null ? "First opening: " + firstFailure : second.movement();
         });
-        if (movement[0] != null) {
-            fail(movement[0]);
+        if (failure[0] != null) {
+            fail(failure[0]);
         }
     }
 
