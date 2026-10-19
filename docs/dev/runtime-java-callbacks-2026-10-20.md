@@ -47,6 +47,8 @@ Four APKs were generated through the real paired Runtime Kit and APK Builder. Ei
 
 Retained failures include the initial implicit Kotlin type cycle, missing future import, ConcurrentHashMap contains ambiguity, the machine's older javac on PATH, stale never declarations, missing contextual this typing, and Rect/Locale assertions expecting eager toString snapshots. None were accepted by weakening callback or loading behavior. The startup process death and ADB interruption are retained separately.
 
+Post-commit repository-wide release-text checks have two unrelated exceptions. Host v6.8.0 already has 16 feature, 12 fix and 7 improvement entries missing from each non-default language; the default CHANGELOG alias also already differs from its source-generated alias. Comparison against the starting commit proves these differences are unchanged. This batch's three entries are present once in all ten languages, and the other 21 generated host artifacts match their committed sources. Documentation's subsequent concurrent speech commit 2912b01 changes api/changelog.md without the repository-history JSON updates, so its current global Markdown check fails. The batch's pinned source 20bc81d passes both the Markdown check and the complete 164-module documentation check. These shared release issues are preserved and are not reported as passing checks.
+
 ## Versions, limits and source basis
 
 Host 6.8.0/build 5592; Node Runtime 1.23.0/build 271; Bun Runtime 0.12.0/build 271; declarations 4.70.0; Ace 2.32.0/build 310; Offline Docs 6.8.29/build 186; Builder 1.2.17/repository build 92; Documentation revision 149.
