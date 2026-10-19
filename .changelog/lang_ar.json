@@ -31,7 +31,7 @@
         "إضافة QuickJS Runtime, لتشغيل ملفات JavaScript وES module (تدعم معاملي الوضع \"quickjs\"/\"qjs\" وملفات .quickjs.js/.quickjs.mjs)",
         "إضافة Bun Runtime, لتشغيل ملفات ومشاريع JavaScript/TypeScript (تدعم معامل الوضع \"bun\" وملفات .bun.js/.bun.ts/.bun.tsx)",
         "إضافة TypeScript Engine, لترجمة ملفات ومشاريع TypeScript الخاصة بـ Rhino/Node.js, مع فحص الأنواع ودعم Source Map",
-        "وحدة ai, لاستدعاء نماذج محلية أو عبر الإنترنت بواسطة إضافات AI Provider (مثل Three Stone AI), مع إخراج متدفق وجلسات دائمة ونتائج JSON منظمة (راجع أمثلة الشفرة > ai)",
+        "وحدة ai, لاستدعاء نماذج محلية أو عبر الإنترنت بواسطة إضافات AI Provider (مثل 3-Stone AI), مع إخراج متدفق وجلسات دائمة ونتائج JSON منظمة (راجع أمثلة الشفرة > ai)",
         "واجهة البرمجة النصية ai.agent, لبدء مهام 3-Stove Agent والاستعلام عنها والرد عليها وتأكيدها وإلغائها, مع دعم مهام الخلفية detached (تتطلب إضافة 3-Stove Agent) (راجع أمثلة الشفرة > agent)",
         "تدعم طريقتا ai.agent.run/create خيار plan, لجعل 3-Stove Agent يقترح خطة خطوات أولا ثم ينفذها في وضع التخطيط",
         "يمكن تسجيل البرامج النصية ليتمكن 3-Stove Agent من استدعائها عبر project.json أو تعليق رأس @agent, مع التحقق من المعاملات والإيقاف عند انتهاء المهلة وإرجاع نتائج منظمة",

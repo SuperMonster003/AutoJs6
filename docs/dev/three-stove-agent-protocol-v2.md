@@ -1,10 +1,10 @@
-# Three Stove Agent plugin protocol V2
+# 3-Stove Agent plugin protocol V2
 
 Status: **versioned V2**. V2 (2026-09-27) is the renamed contract line of the former
 AI Agent protocol V1 (`docs/dev/ai-agent-protocol-v1.md` in git history before the
 rename). The plugin ID/engine/category, service action, attach broadcast and extras,
 AIDL package, interface names, contract classes and capability keys all changed to
-Three Stove Agent identifiers, so a V1 plugin cannot bind the V2 host and
+3-Stove Agent identifiers, so a V1 plugin cannot bind the V2 host and
 `ThreeStoveAgentContract.MIN_SUPPORTED_CONTRACT_VERSION` is **2**. The transaction
 order, Bundle keys, JSON envelopes, limits and error vocabulary are unchanged from V1;
 the host build shipping the rename is **5298** and
@@ -455,14 +455,14 @@ task control. Registered-script examples are under `sample/agent/`.
 
 ## Installation catalog and release index
 
-The host installation wizard categorizes Three Stove Agent under Tools using the exact
+The host installation wizard categorizes 3-Stove Agent under Tools using the exact
 official package. It is optional in both built-in profiles. Plugin Center is the
 sole enablement control; the official installation defaults to enabled unless the
 user has explicitly saved a disabled choice.
 
 Download entries come from the separate AutoJs6-Official-Plugins-Index repository.
 Its generator admits published releases with APK assets and validates the required
-repository inventory. Add Three Stove Agent to that inventory and regenerate after the
+repository inventory. Add 3-Stove Agent to that inventory and regenerate after the
 first APK release is published. Before publication, the wizard omits the missing
 download entry; no placeholder release URL or fabricated version/hash is used.
 

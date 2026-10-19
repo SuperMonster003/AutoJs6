@@ -31,7 +31,7 @@
         "QuickJS Runtime 插件, 用於運行 JavaScript 文件及 ES module (支持 \"quickjs\"/\"qjs\" 模式參數及 .quickjs.js/.quickjs.mjs 文件)",
         "Bun Runtime 插件, 用於運行 JavaScript/TypeScript 文件及項目 (支持 \"bun\" 模式參數及 .bun.js/.bun.ts/.bun.tsx 文件)",
         "TypeScript Engine 插件, 用於編譯 Rhino/Node.js 的 TypeScript 文件及項目, 支持類型檢查與 Source Map",
-        "ai 模塊, 用於通過 AI Provider 插件 (如 Three Stone AI) 調用本地或在線模型, 支持流式輸出, 持久會話及結構化 JSON 結果 (參閲 示例代碼 > ai)",
+        "ai 模塊, 用於通過 AI Provider 插件 (如 3-Stone AI) 調用本地或在線模型, 支持流式輸出, 持久會話及結構化 JSON 結果 (參閲 示例代碼 > ai)",
         "ai.agent 腳本 API, 用於啓動, 查詢, 回應, 確認及取消 3-Stove Agent 任務, 支持 detached 後台任務 (需要 3-Stove Agent 插件) (參閲 示例代碼 > agent)",
         "ai.agent.run/create 方法支持 plan 選項參數, 用於讓 3-Stove Agent 以計劃模式先提出步驟計劃再執行",
         "腳本可通過 project.json 或 @agent 頭註釋登記為 3-Stove Agent 可調用的腳本, 支持參數校驗, 超時停止及結構化結果回傳",

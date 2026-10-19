@@ -101,7 +101,7 @@ object HostCapabilityContract {
         ERROR_PROCESS_DEAD, ERROR_RUNTIME_ERROR,
     )
 
-    /** Shared ceiling; a family grant may narrow it (Three Stove Agent allows at most two). */
+    /** Shared ceiling; a family grant may narrow it (3-Stove Agent allows at most two). */
     const val MAX_CONCURRENT_TOOL_CALLS = 4
     const val DEFAULT_TOOL_TIMEOUT_MS = 30_000L
     const val MAX_TOOL_TIMEOUT_MS = 300_000L

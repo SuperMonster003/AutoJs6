@@ -1,4 +1,4 @@
-// AutoJs6 6.8.0 / build 5293+. Enable Three Stove Agent in Plugin Center; the script connects automatically.
+// AutoJs6 6.8.0 / build 5293+. Enable 3-Stove Agent in Plugin Center; the script connects automatically.
 // Configure a default model in 3-Stone AI, or pass execArgv.target explicitly.
 let args = engines.myEngine().execArgv;
 let options = { tools: ['observe', 'user'], budget: { maxSteps: 6 } };

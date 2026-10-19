@@ -1,4 +1,4 @@
-# Registered-script execution checks (Three Stove Agent P1.4 / P3.3)
+# Registered-script execution checks (3-Stove Agent P1.4 / P3.3)
 
 `AgentRegisteredScriptExecutionTest` exercises the host `AndroidNodeBridgeCapabilityProvider`
 `agent` module through catalog discovery, manifest/default-argument validation, main-process
@@ -65,7 +65,7 @@ before any plugin engine is launched. Execution through other supported script e
 the existing source factory and is not established by the Rhino device fixture. A test file by
 itself is not execution evidence; record the actual build/device results separately.
 
-## Generated JavaScript (Three Stove Agent P9.3)
+## Generated JavaScript (3-Stove Agent P9.3)
 
 The same owned execution lifetime now backs `engines.execScript(name, source, options)` when
 `options.agentInvocationId` is present. An Agent broker advertises `engines.execScript` in

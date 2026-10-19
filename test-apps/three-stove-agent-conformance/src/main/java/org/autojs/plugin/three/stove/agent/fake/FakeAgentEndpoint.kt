@@ -18,7 +18,7 @@ internal class FakeAgentEndpoint(private val enforce: () -> Unit) : IThreeStoveA
     private val links = CopyOnWriteArrayList<Link>()
     private val worker = Executors.newSingleThreadExecutor()
     override fun getInfo(): PluginInfo { enforce(); return PluginInfo().apply {
-        name = "Three Stove Agent Conformance"; id = "three-stove-agent"; engine = "three-stove-agent"; variant = "default"
+        name = "3-Stove Agent Conformance"; id = "three-stove-agent"; engine = "three-stove-agent"; variant = "default"
         versionName = "1.0.0"; versionCode = 1; supportedAbis = emptyArray()
     } }
     override fun getCapabilities(): Bundle { enforce(); return Bundle().apply { putInt(C.KEY_CONTRACT_VERSION, C.CONTRACT_VERSION) } }

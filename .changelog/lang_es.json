@@ -31,7 +31,7 @@
         "Complemento QuickJS Runtime para ejecutar archivos JavaScript y ES module (admite los parámetros de modo \"quickjs\"/\"qjs\" y archivos .quickjs.js/.quickjs.mjs)",
         "Complemento Bun Runtime para ejecutar archivos y proyectos JavaScript/TypeScript (admite el parámetro de modo \"bun\" y archivos .bun.js/.bun.ts/.bun.tsx)",
         "Complemento TypeScript Engine para compilar archivos y proyectos TypeScript de Rhino/Node.js, con comprobación de tipos y Source Map",
-        "Módulo ai para invocar modelos locales o en línea mediante complementos AI Provider (como Three Stone AI), con salida progresiva, sesiones persistentes y resultados JSON estructurados (consulta: Ejemplos > ai)",
+        "Módulo ai para invocar modelos locales o en línea mediante complementos AI Provider (como 3-Stone AI), con salida progresiva, sesiones persistentes y resultados JSON estructurados (consulta: Ejemplos > ai)",
         "API de scripts ai.agent para iniciar, consultar, responder, confirmar y cancelar tareas de 3-Stove Agent, con tareas en segundo plano detached (requiere 3-Stove Agent) (consulta: Ejemplos > agent)",
         "Los métodos ai.agent.run/create admiten la opción plan para que 3-Stove Agent proponga un plan de pasos antes de ejecutarlo en modo de planificación",
         "Los scripts pueden registrarse mediante project.json o un comentario de cabecera @agent para que 3-Stove Agent los invoque, con validación de parámetros, parada por tiempo excedido y devolución de resultados estructurados",

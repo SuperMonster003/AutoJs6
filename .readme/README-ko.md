@@ -217,7 +217,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` QuickJS Runtime 플러그인, JavaScript 파일 및 ES module 실행 ("quickjs"/"qjs" 모드 인수 및 .quickjs.js/.quickjs.mjs 파일 지원)
 * `추가` Bun Runtime 플러그인, JavaScript/TypeScript 파일과 프로젝트 실행 ("bun" 모드 인수 및 .bun.js/.bun.ts/.bun.tsx 파일 지원)
 * `추가` TypeScript Engine 플러그인, Rhino/Node.js의 TypeScript 파일과 프로젝트 컴파일, 형식 검사와 Source Map 지원
-* `추가` ai 모듈, AI Provider 플러그인 (Three Stone AI 등)을 통해 로컬/온라인 모델 호출, 스트리밍 출력, 영구 세션 및 구조화된 JSON 결과 지원 (참조: 예제 코드 > ai)
+* `추가` ai 모듈, AI Provider 플러그인 (3-Stone AI 등)을 통해 로컬/온라인 모델 호출, 스트리밍 출력, 영구 세션 및 구조화된 JSON 결과 지원 (참조: 예제 코드 > ai)
 * `추가` ai.agent 스크립트 API, 3-Stove Agent 작업의 시작, 조회, 응답, 확인 및 취소, detached 백그라운드 작업 지원 (3-Stove Agent 플러그인 필요) (참조: 예제 코드 > agent)
 * `추가` ai.agent.run/create 메서드의 plan 옵션, 3-Stove Agent가 계획 모드에서 단계 계획을 제안한 뒤 실행하도록 설정
 * `추가` project.json 또는 @agent 헤더 주석으로 3-Stove Agent가 호출할 스크립트 등록, 인수 검증, 시간 초과 중지 및 구조화된 결과 반환 지원

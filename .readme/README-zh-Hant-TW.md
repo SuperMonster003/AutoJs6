@@ -217,7 +217,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `新增` QuickJS Runtime 外掛, 用於執行 JavaScript 檔案及 ES module (支援 "quickjs"/"qjs" 模式參數及 .quickjs.js/.quickjs.mjs 檔案)
 * `新增` Bun Runtime 外掛, 用於執行 JavaScript/TypeScript 檔案及專案 (支援 "bun" 模式參數及 .bun.js/.bun.ts/.bun.tsx 檔案)
 * `新增` TypeScript Engine 外掛, 用於編譯 Rhino/Node.js 的 TypeScript 檔案及專案, 支援型別檢查與 Source Map
-* `新增` ai 模組, 用於透過 AI Provider 外掛 (如 Three Stone AI) 呼叫本地或線上模型, 支援流式輸出, 持久工作階段及結構化 JSON 結果 (參閱 範例程式碼 > ai)
+* `新增` ai 模組, 用於透過 AI Provider 外掛 (如 3-Stone AI) 呼叫本地或線上模型, 支援流式輸出, 持久工作階段及結構化 JSON 結果 (參閱 範例程式碼 > ai)
 * `新增` ai.agent 指令碼 API, 用於啟動, 查詢, 回應, 確認及取消 3-Stove Agent 任務, 支援 detached 後臺任務 (需要 3-Stove Agent 外掛) (參閱 範例程式碼 > agent)
 * `新增` ai.agent.run/create 方法支援 plan 選項參數, 用於讓 3-Stove Agent 以計劃模式先提出步驟計劃再執行
 * `新增` 指令碼可透過 project.json 或 @agent 頭註釋登記為 3-Stove Agent 可呼叫的指令碼, 支援參數校驗, 超時停止及結構化結果回傳

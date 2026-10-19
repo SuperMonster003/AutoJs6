@@ -1,4 +1,4 @@
-# Three Stove Agent model broker checks
+# 3-Stove Agent model broker checks
 
 The P1.2 broker uses the existing Android AI Provider catalog, ask and stream runners. Its JVM
 checks cover strict request admission, byte limits, rolling call limits, token reservations,

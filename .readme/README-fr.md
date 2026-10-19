@@ -217,7 +217,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Plugin QuickJS Runtime, pour exécuter des fichiers JavaScript et des ES module (prise en charge des paramètres de mode "quickjs"/"qjs" et des fichiers .quickjs.js/.quickjs.mjs)
 * `Fonctionnalité` Plugin Bun Runtime, pour exécuter des fichiers et projets JavaScript/TypeScript (prise en charge du paramètre de mode "bun" et des fichiers .bun.js/.bun.ts/.bun.tsx)
 * `Fonctionnalité` Plugin TypeScript Engine, pour compiler les fichiers et projets TypeScript pour Rhino/Node.js, avec vérification des types et Source Map
-* `Fonctionnalité` Module ai, pour appeler des modèles locaux ou en ligne via des plugins AI Provider (comme Three Stone AI), avec sortie en continu, sessions persistantes et résultats JSON structurés (voir Exemples de code > ai)
+* `Fonctionnalité` Module ai, pour appeler des modèles locaux ou en ligne via des plugins AI Provider (comme 3-Stone AI), avec sortie en continu, sessions persistantes et résultats JSON structurés (voir Exemples de code > ai)
 * `Fonctionnalité` API de script ai.agent, pour démarrer, consulter, répondre, confirmer et annuler les tâches 3-Stove Agent, avec tâches en arrière-plan detached (nécessite le plugin 3-Stove Agent) (voir Exemples de code > agent)
 * `Fonctionnalité` Les méthodes ai.agent.run/create acceptent l'option plan, pour que 3-Stove Agent propose d'abord un plan d'étapes puis l'exécute en mode planification
 * `Fonctionnalité` Les scripts peuvent être enregistrés comme scripts appelables par 3-Stove Agent via project.json ou un commentaire d'en-tête @agent, avec validation des paramètres, arrêt sur délai dépassé et retour de résultats structurés

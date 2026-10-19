@@ -1,4 +1,4 @@
-# Three Stove Agent host conformance fixture
+# 3-Stove Agent host conformance fixture
 
 This debug-only, `testOnly` APK runs under its own UID and `:agent` process. It has no network, accessibility, storage or device-control permissions. The exported driver requires the host's signature permission and verifies both the host package and its signer on every entry point. Do not ship this APK.
 
@@ -13,7 +13,7 @@ The driver receives the production host capability/model Binder objects, invokes
 - All eight capability/model Binder entry points with a foreign UID, including destroy/cancel, and a valid owner as positive control.
 - Model input bytes, calls per minute, token reservation and settlement, using injected deterministic provider runners. No real model is invoked.
 - Host logcat exclusion of private request text, including an explicitly logged toast through the shared plugin broker.
-- Real ordered broadcasts to the production manifest receiver, from a same-signer package that is not the Three Stove Agent. Missing, mistyped and foreign-created identity tokens must be rejected. Claimed package-name extras do not provide authority.
+- Real ordered broadcasts to the production manifest receiver, from a same-signer package that is not the 3-Stove Agent. Missing, mistyped and foreign-created identity tokens must be rejected. Claimed package-name extras do not provide authority.
 
 Build/install with the repository JDK and usual Gradle vendor flags:
 

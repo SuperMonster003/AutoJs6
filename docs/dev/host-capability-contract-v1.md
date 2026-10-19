@@ -1,11 +1,11 @@
 # Host capability broker contract V1
 
-Status: host implementation for Three Stove Agent roadmap P1.1/P1.3. The public module is
+Status: host implementation for 3-Stove Agent roadmap P1.1/P1.3. The public module is
 `plugin-api/host-capability-api`, package `org.autojs.plugin.host.capability.api`.
-MCP contract V2 and Three Stove Agent contract V2 consume the same data plane. A plugin does
+MCP contract V2 and 3-Stove Agent contract V2 consume the same data plane. A plugin does
 not need an MCP server, an HTTP connection or a second accessibility service.
 
-The complete P1 Three Stove Agent host integration requires AutoJs6 6.8.0 / build 5285.
+The complete P1 3-Stove Agent host integration requires AutoJs6 6.8.0 / build 5285.
 This is the Agent family's minimum, not a new minimum for existing MCP V1 APKs.
 The two shared-interface consumers are the Agent attachment's
 `HostCapabilityBrokerStub(ThreeStoveAgentGrant)` and MCP V2's `openServerV2` session.
@@ -120,7 +120,7 @@ admission, timeout, destruction, UID rejection and response ownership. MCP V1
 and V2 round trips are tested independently; a V2 module build does not imply
 that the separately installed MCP plugin has migrated to V2.
 
-See [Three Stove Agent protocol V2](three-stove-agent-protocol-v2.md) for attachment admission and
+See [3-Stove Agent protocol V2](three-stove-agent-protocol-v2.md) for attachment admission and
 user entry points, and [Agent script manifest V1](agent-script-manifest-v1.md)
 for the registered-script methods. Host entry evidence and remaining independent
 conformance-APK checks are recorded in

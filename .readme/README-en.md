@@ -217,7 +217,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` QuickJS Runtime plugin, for running JavaScript files and ES modules (supports the "quickjs"/"qjs" mode directives and .quickjs.js/.quickjs.mjs files)
 * `Feature` Bun Runtime plugin, for running JavaScript/TypeScript files and projects (supports the "bun" mode directive and .bun.js/.bun.ts/.bun.tsx files)
 * `Feature` TypeScript Engine plugin, for compiling TypeScript files and projects for Rhino/Node.js, with type checking and Source Map support
-* `Feature` ai module, for accessing local or online models through AI Provider plugins (such as Three Stone AI), with streaming output, persistent sessions and structured JSON results (see Sample code > ai)
+* `Feature` ai module, for accessing local or online models through AI Provider plugins (such as 3-Stone AI), with streaming output, persistent sessions and structured JSON results (see Sample code > ai)
 * `Feature` ai.agent script API, for starting, querying, responding to, confirming and cancelling 3-Stove Agent tasks, with detached background tasks (requires the 3-Stove Agent plugin) (see Sample code > agent)
 * `Feature` plan option for ai.agent.run/create, for having 3-Stove Agent propose a step-by-step plan before execution in plan mode
 * `Feature` Scripts can be registered for 3-Stove Agent to call through project.json or an @agent header comment, with argument validation, stopping on timeout and returning structured results

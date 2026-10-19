@@ -31,7 +31,7 @@
         "QuickJS Runtime プラグイン, JavaScript ファイルと ES module を実行 (\"quickjs\"/\"qjs\" モード引数と .quickjs.js/.quickjs.mjs ファイルに対応)",
         "Bun Runtime プラグイン, JavaScript/TypeScript ファイルとプロジェクトを実行 (\"bun\" モード引数と .bun.js/.bun.ts/.bun.tsx ファイルに対応)",
         "TypeScript Engine プラグイン, Rhino/Node.js 向け TypeScript ファイルとプロジェクトをコンパイルし, 型検査と Source Map に対応",
-        "ai モジュール, AI Provider プラグイン (Three Stone AI など) を通じてローカル/オンラインモデルを呼び出し, ストリーミング出力, 永続セッションと構造化 JSON 結果に対応 (参照: サンプルコード > ai)",
+        "ai モジュール, AI Provider プラグイン (3-Stone AI など) を通じてローカル/オンラインモデルを呼び出し, ストリーミング出力, 永続セッションと構造化 JSON 結果に対応 (参照: サンプルコード > ai)",
         "ai.agent スクリプト API, 3-Stove Agent タスクの開始, 照会, 応答, 確認とキャンセルに使用し, detached バックグラウンドタスクに対応 (3-Stove Agent プラグインが必要) (参照: サンプルコード > agent)",
         "ai.agent.run/create メソッドの plan オプション, 3-Stove Agent が計画モードで手順を提示してから実行するために使用",
         "project.json または @agent ヘッダーコメントで 3-Stove Agent から呼び出せるスクリプトを登録し, 引数検査, タイムアウト停止と構造化結果の返送に対応",

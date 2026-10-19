@@ -3,7 +3,7 @@ package org.autojs.plugin.three.stove.agent.api
 import org.autojs.plugin.host.capability.api.HostCapabilityContract
 
 /**
- * Three Stove Agent control and model data plane, version 2 (the renamed contract line;
+ * 3-Stove Agent control and model data plane, version 2 (the renamed contract line;
  * version 1 belonged to the retired AI Agent identifiers).
  *
  * Every Bundle includes KEY_CONTRACT_VERSION and is a non-null immutable snapshot. JSON strings

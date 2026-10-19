@@ -439,7 +439,7 @@ decision.
 
 ## V2 extension: shared host capability broker
 
-Three Stove Agent roadmap D33 introduces `plugin-api/host-capability-api`. MCP contract V2
+3-Stove Agent roadmap D33 introduces `plugin-api/host-capability-api`. MCP contract V2
 depends on that module and appends one transaction after `getInfo`,
 `getCapabilities`, and `openServer`:
 
@@ -484,9 +484,9 @@ Released plugin APKs up to 1.0.3 declare version 1 and stay on the legacy path.
 Device evidence: a 5329 host opened the listener through `openServerV2` and a
 5282 host through `openServer`, both with tool calls through the selected broker.
 
-Three Stove Agent's complete P1 integration declares host build 5285 (AutoJs6 6.8.0).
+3-Stove Agent's complete P1 integration declares host build 5285 (AutoJs6 6.8.0).
 That family-specific requirement does not raise the minimum for existing MCP V1
-plugins or make Three Stove Agent depend on an installed MCP server. The MCP plugin's
+plugins or make 3-Stove Agent depend on an installed MCP server. The MCP plugin's
 1.1.0 line uses the host compact dumps and nodeRef handling instead of its own
 formatter and references: `ui_dump` returns the host's compact text and `snapshotId`,
 and its action tools pass `{nodeRef, snapshotId}` to the host, which relocates the node

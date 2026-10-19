@@ -1,7 +1,7 @@
 # Agent script manifest V1
 
 Status: **versioned V1**. This is the host registration format for scripts that
-explicitly opt in to Three Stove Agent. The bounded catalog, parameter validation/defaults,
+explicitly opt in to 3-Stove Agent. The bounded catalog, parameter validation/defaults,
 missing-value questions, confirmation, invocation and structured result channel
 are implemented. Public `ai.agent.result` and `ai.agent.context` are available
 from host build 5287; task creation/control requires build 5293.
@@ -10,7 +10,7 @@ The current plugin requires AutoJs6 6.8.0 / build 5289 for its inspected screen
 actions; the base V1 contract retains its historical 5286 floor. Use build 5293+
 for the complete task API. Registration is consumed through the attached, granted
 host capability broker, not a general plugin filesystem API. Connection and
-management are described in [Three Stove Agent protocol V2](three-stove-agent-protocol-v2.md).
+management are described in [3-Stove Agent protocol V2](three-stove-agent-protocol-v2.md).
 Versioned protocol status does not declare that plugin release gates have passed.
 
 ## Project registration

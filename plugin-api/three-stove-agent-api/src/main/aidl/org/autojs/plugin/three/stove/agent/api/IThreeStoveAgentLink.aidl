@@ -4,7 +4,7 @@ import android.os.Bundle;
 import org.autojs.plugin.three.stove.agent.api.IThreeStoveAgentRunCallback;
 
 /**
- * Three Stove Agent contract version 2; transaction order is frozen and future methods append only.
+ * 3-Stove Agent contract version 2; transaction order is frozen and future methods append only.
  * All Bundle parameters and returns are non-null snapshots, never mutated after sending.
  * Binder threads may call concurrently. Synchronous methods validate/enqueue within 200 ms.
  * Receivers own incoming descriptors and must close rejected/unread descriptors immediately.

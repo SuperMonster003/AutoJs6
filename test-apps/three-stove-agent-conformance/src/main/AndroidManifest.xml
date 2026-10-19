@@ -5,7 +5,7 @@
     </queries>
     <application
         android:allowBackup="false"
-        android:label="AutoJs6 Three Stove Agent Conformance"
+        android:label="AutoJs6 3-Stove Agent Conformance"
         android:supportsRtl="true"
         android:testOnly="true"
         android:usesCleartextTraffic="false">
