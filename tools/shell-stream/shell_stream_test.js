@@ -331,6 +331,22 @@ function mainPhase() {
         return { pass: String(command) === 'pm list packages', detail: String(command) };
     });
 
+    check('shell.defaultsWithoutPrivileges', () => {
+        $shell.setDefaultOptions({root:false,adb:false});
+        let child=shell.spawn('id -u');
+        let ok=Number(child.readLine())===appUid && child.waitFor()===0 && child.mode==='sh';
+        $shell.setDefaultOptions(null);$shell.setDefaultOptions(undefined);
+        ok=ok && throwsWith(()=>$shell.setDefaultOptions({pty:true}),'Unknown default shell option');
+        return {pass:ok,detail:'explicit sh defaults, null/undefined reset, invalid default option'};
+    });
+    check('spawn.strictOptions', () => ({pass:
+        throwsWith(()=>shell.spawn('echo owned',1),'boolean or an object') &&
+        throwsWith(()=>shell.spawn('echo owned',{cmd:'sh'}),'applies to new Shell') &&
+        throwsWith(()=>shizuku.spawn('echo owned',1),'boolean or an object'),detail:'numeric flags and constructor-only options rejected'}));
+    if (!adbAvailable) check('shizuku.spawnUnavailable', () => ({
+        pass:throwsWith(()=>shizuku.spawn('true'),'Shizuku'),detail:'unavailable Shizuku rejected explicitly'
+    }));
+
     if (adbAvailable) {
         check('shell.adbOption', () => {
             let r = shell('id -u', { adb: true });

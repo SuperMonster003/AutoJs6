@@ -30065,6 +30065,30 @@
           ]
         },
         {
+          "name": "spawn",
+          "kind": "function",
+          "doc": "spawn(command: Shell.Command, options?: Shell.SpawnOptions | boolean | null): Shell.Process;",
+          "signature": "spawn(command: Shell.Command, options?: Shell.SpawnOptions | boolean | null): Shell.Process;"
+        },
+        {
+          "name": "setDefaultOptions",
+          "kind": "function",
+          "doc": "setDefaultOptions(options: Shell.DefaultOptions | null | undefined): void;",
+          "signature": "setDefaultOptions(options: Shell.DefaultOptions | null | undefined): void;"
+        },
+        {
+          "name": "checkAccess",
+          "kind": "function",
+          "doc": "checkAccess(type: 'root' | 'adb'): boolean;",
+          "signature": "checkAccess(type: 'root' | 'adb'): boolean;"
+        },
+        {
+          "name": "isRootAvailable",
+          "kind": "function",
+          "doc": "isRootAvailable(): boolean;",
+          "signature": "isRootAvailable(): boolean;"
+        },
+        {
           "name": "fromIntent",
           "kind": "function",
           "doc": "fromIntent(i: Intent.Common): string;",
@@ -30128,6 +30152,12 @@
             "getCommand(command: Shell.Command, commandArgument: Shell.CommandArguments): string;",
             "getCommand(command: Shell.Command, commandArgument: Shell.CommandArguments, withRoot: boolean | number): string;"
           ]
+        },
+        {
+          "name": "spawn",
+          "kind": "function",
+          "doc": "spawn(command: Shell.Command, options?: Shell.SpawnOptions | boolean | null): Shell.Process;",
+          "signature": "spawn(command: Shell.Command, options?: Shell.SpawnOptions | boolean | null): Shell.Process;"
         },
         {
           "name": "kill",

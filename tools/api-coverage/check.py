@@ -86,6 +86,14 @@ def main():
         command += ["--typescript", str(args.typescript.resolve())]
     if args.skip_ace:
         command += ["--skip-ace"]
+    contract_command = ["node", str(HERE / "check-shell-contract.mjs"), "--host", str(host), "--declarations", str(declarations), "--ace", str(ace)]
+    if args.typescript:
+        contract_command += ["--typescript", str(args.typescript.resolve())]
+    if args.skip_ace:
+        contract_command.append("--skip-ace")
+    contract = subprocess.run(contract_command, check=False)
+    if contract.returncode:
+        failures.append("Shell process/options/event contract differs from native source or Ace copies")
     result = subprocess.run(command, check=False)
     if result.returncode:
         failures.append("TypeScript/Ace surface checks failed; see surfaces.json")

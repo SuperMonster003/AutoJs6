@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+const argument=(name,fallback)=>{const at=process.argv.indexOf(name);return at<0?fallback:path.resolve(process.argv[at+1]);};
+const host=argument('--host',root),types=argument('--declarations',path.resolve(host,'../AutoJs6-TypeScript-Declarations'));
+const ace=argument('--ace',path.resolve(host,'../AutoJs6-Plugin-Ace-Editor'));
+const lock=JSON.parse(fs.readFileSync(path.join(ace,'tools/ace-lsp/ace-builds-lock.json')));
+const ts=createRequire(import.meta.url)(argument('--typescript',path.join(ace,lock.assetRoot,'autojs6/typescript/typescript.js')));
+const skipAce=process.argv.includes('--skip-ace');
+const program=ts.createProgram([path.join(types,'declarations/autojs6/index.d.ts')],{skipLibCheck:true,noEmit:true,types:[]});
+const checker=program.getTypeChecker(),source=program.getSourceFile(path.join(types,'declarations/autojs6/aj6-int-shell.d.ts'));
+const shell=checker.getSymbolsInScope(source,ts.SymbolFlags.Namespace).find(x=>x.name==='Shell');assert(shell);
+const symbols=checker.getExportsOfModule(shell);
+const members=name=>checker.getPropertiesOfType(checker.getDeclaredTypeOfSymbol(symbols.find(x=>x.name===name))).map(x=>x.name).sort();
+const read=p=>fs.readFileSync(path.join(host,p),'utf8');
+const native=read('app/src/main/java/org/autojs/autojs/runtime/api/augment/shell/ShellProcess.kt');
+const exports=[...native.matchAll(/(?:function|listenerFunction|defineProperty)\("([^"]+)"/g)].map(m=>m[1]).sort();
+assert.equal(exports.length,25);assert.deepEqual(members('Process'),exports,'Shell.Process differs from the actual script object');
+const options=read('app/src/main/java/org/autojs/autojs/runtime/api/shell/ShellPipes.kt').match(/OPTION_KEYS = setOf\(([^)]*)\)/)[1];
+const keys=[...options.matchAll(/"(\w+)"/g)].map(m=>m[1]).sort();
+assert.deepEqual(members('Options'),keys);assert.deepEqual(members('SpawnOptions'),keys.filter(k=>k!=='cmd'));const defaults=read('app/src/main/java/org/autojs/autojs/runtime/api/augment/shell/Shell.kt').match(/DEFAULT_OPTION_KEYS = setOf\(([^)]*)\)/)[1];
+assert.deepEqual(members('DefaultOptions'),[...defaults.matchAll(/"(\w+)"/g)].map(m=>m[1]).sort());
+const events=[...native.matchAll(/const val EVENT_\w+ = "([^"]+)"/g)].map(m=>m[1]).sort();assert.deepEqual(members('ProcessEventMap'),events);
+if(!skipAce)for(const name of ['aj6-int-shell.d.ts','aj6-int-shizuku.d.ts','aj6-int-init.d.ts']){
+ const canonical=fs.readFileSync(path.join(types,'declarations/autojs6',name),'utf8').replaceAll('\r\n','\n');
+ assert.equal(fs.readFileSync(path.join(ace,lock.assetRoot,'autojs6/types/autojs6',name),'utf8').replaceAll('\r\n','\n'),canonical,`${name}: Ace copy drift`);
+}
+console.log(JSON.stringify({shellProcessMembers:exports.length,eventPayloads:events,constructorOptions:keys,aceCopiesMatch:skipAce?null:true}));

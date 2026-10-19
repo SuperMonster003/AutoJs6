@@ -65,3 +65,6 @@ Runtime Kit: `autojs6-runtime-v6.8.0+5581-d2d4b8044de84c884f83f381dd07561c99a8e2
 Run `node tools/api-coverage/check-bun-sensors.mjs`, the Node tools/nodejs/api/test-sensors-facade.js and test-worker-sensors.js tests, Bun tools/host-client/sensors.test.mjs, declaration smoke checks and Ace tools/ace-lsp/verify-runtime-api-coverage.mjs. Android classes: BunSensorsDeviceTest, NodeSensorsBridgeInstrumentationTest and BunSensorsPackagedDeviceTest. The packaged producer consumes the exact SDK SHA-256 and requires the real matching Runtime Kit.
 
 Ignored `.bak/bun-sensors-20261019/` retains baseline diffs, final APKs, SDK/hardware/popup JSON, logs, certificates, counts and per-install SHA-256 receipts. Original APK/settings restoration and owned-fixture cleanup are recorded in each device's restoration.json and owned-file-cleanup.json; finalization.json verifies restored hashes before deleting the temporary original APK copies. The five pre-existing host draft files remain uncommitted.
+
+
+Follow-up: the [shell declaration/completion delivery](shell-api-coverage-2026-10-19.md) subsequently closed the five broader-audit gaps recorded above. The expanded global gate now passes; the original sensor validation results and limitations remain as recorded.

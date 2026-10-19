@@ -237,3 +237,16 @@ Database coverage: `check-bun-database.mjs` checks the common main/Worker/Bun fa
 
 
 Sensors coverage: `check-bun-sensors.mjs` checks five native routes and the shared main/Worker/Bun factory and declarations. Node facade and real Worker tests cover cancellation, timeouts, late registration and termination. Bun SDK tests cover negotiated grants and lifecycle. `BunSensorsDeviceTest` and `BunSensorsPackagedDeviceTest` check real sensor data, cleanup and packaged runtime identity without audio.
+
+
+Shell process coverage: `check-shell-contract.mjs` compares all 25 script-visible
+ShellProcess properties/methods and the three event names with the native object,
+checks constructor/spawn/default option keys and verifies canonical/Ace declaration
+copies. `check.py` includes it and follows process and shell-result return chains.
+The declarations repository's `shell-process-smoke.ts` checks event payloads,
+nullable results, constructor compatibility and invalid arguments with TypeScript
+5.1 and 6. Ace checks default and optional declaration groups, constructor options,
+result fields and actual popup signatures. `tools/shell-stream/device_shell_stream_test.py`
+executes owned commands with no audio; it reports Root/Shizuku modes only when they
+are available and checks explicit Shizuku denial otherwise. Preserve device APKs
+and settings, use an isolated fixture path, and clean only owned files.

@@ -1,25 +1,77 @@
 {
   "documentationModules": {
-    "global": ["global"],
-    "species": ["global"],
-    "isNullish": ["global"],
-    "auto": ["automator"],
-    "automator": ["automator"],
-    "selector": ["uiSelectorType", "global"],
-    "Canvas": ["canvas"],
-    "images": ["image", "imageWrapperType"],
-    "colors": ["color", "colorType", "colorTable"],
-    "Color": ["colorType", "color"],
-    "Mathx": ["mathx"],
-    "Arrayx": ["arrayx"],
-    "Numberx": ["numberx"],
-    "RootAutomator": ["automator"],
-    "WebSocket": ["webSocketType", "web"],
-    "flow": ["flow", "flowType"],
-    "compose": ["compose", "composeComponents"],
-    "util": ["util", "versionType"],
-    "notice": ["notice", "noticeChannelOptionsType"],
-    "http": ["http", "httpResponseType", "httpResponseBodyType"]
+    "global": [
+      "global"
+    ],
+    "species": [
+      "global"
+    ],
+    "isNullish": [
+      "global"
+    ],
+    "auto": [
+      "automator"
+    ],
+    "automator": [
+      "automator"
+    ],
+    "selector": [
+      "uiSelectorType",
+      "global"
+    ],
+    "Canvas": [
+      "canvas"
+    ],
+    "images": [
+      "image",
+      "imageWrapperType"
+    ],
+    "colors": [
+      "color",
+      "colorType",
+      "colorTable"
+    ],
+    "Color": [
+      "colorType",
+      "color"
+    ],
+    "Mathx": [
+      "mathx"
+    ],
+    "Arrayx": [
+      "arrayx"
+    ],
+    "Numberx": [
+      "numberx"
+    ],
+    "RootAutomator": [
+      "automator"
+    ],
+    "WebSocket": [
+      "webSocketType",
+      "web"
+    ],
+    "flow": [
+      "flow",
+      "flowType"
+    ],
+    "compose": [
+      "compose",
+      "composeComponents"
+    ],
+    "util": [
+      "util",
+      "versionType"
+    ],
+    "notice": [
+      "notice",
+      "noticeChannelOptionsType"
+    ],
+    "http": [
+      "http",
+      "httpResponseType",
+      "httpResponseBodyType"
+    ]
   },
   "internalExports": {
     "__autojs6Tsx": "Compiler-generated TSX bridge, not a user script API.",
@@ -60,6 +112,68 @@
     "files.readAssets",
     "files.getHumanReadableSize",
     "files.formatSizeWithUnit",
-    "files.getSimplifiedPath"
+    "files.getSimplifiedPath",
+    "shell.spawn.().pid",
+    "shell.spawn.().command",
+    "shell.spawn.().mode",
+    "shell.spawn.().exitCode",
+    "shell.spawn.().isAlive",
+    "shell.spawn.().readLine",
+    "shell.spawn.().readErrorLine",
+    "shell.spawn.().write",
+    "shell.spawn.().writeLine",
+    "shell.spawn.().closeInput",
+    "shell.spawn.().waitFor",
+    "shell.spawn.().kill",
+    "shell.spawn.().getInputStream",
+    "shell.spawn.().getErrorStream",
+    "shell.spawn.().getOutputStream",
+    "shell.spawn.().on",
+    "shell.spawn.().addListener",
+    "shell.spawn.().once",
+    "shell.spawn.().prependListener",
+    "shell.spawn.().prependOnceListener",
+    "shell.spawn.().off",
+    "shell.spawn.().removeListener",
+    "shell.spawn.().removeAllListeners",
+    "shell.spawn.().listenerCount",
+    "shell.spawn.().toString",
+    "shizuku.spawn.().pid",
+    "shizuku.spawn.().command",
+    "shizuku.spawn.().mode",
+    "shizuku.spawn.().exitCode",
+    "shizuku.spawn.().isAlive",
+    "shizuku.spawn.().readLine",
+    "shizuku.spawn.().readErrorLine",
+    "shizuku.spawn.().write",
+    "shizuku.spawn.().writeLine",
+    "shizuku.spawn.().closeInput",
+    "shizuku.spawn.().waitFor",
+    "shizuku.spawn.().kill",
+    "shizuku.spawn.().getInputStream",
+    "shizuku.spawn.().getErrorStream",
+    "shizuku.spawn.().getOutputStream",
+    "shizuku.spawn.().on",
+    "shizuku.spawn.().addListener",
+    "shizuku.spawn.().once",
+    "shizuku.spawn.().prependListener",
+    "shizuku.spawn.().prependOnceListener",
+    "shizuku.spawn.().off",
+    "shizuku.spawn.().removeListener",
+    "shizuku.spawn.().removeAllListeners",
+    "shizuku.spawn.().listenerCount",
+    "shizuku.spawn.().toString",
+    "shell.().code",
+    "shell.().result",
+    "shell.().error",
+    "shell.().throwIfError",
+    "shell.().toJson",
+    "shell.().toString",
+    "shizuku.().code",
+    "shizuku.().result",
+    "shizuku.().error",
+    "shizuku.().throwIfError",
+    "shizuku.().toJson",
+    "shizuku.().toString"
   ]
 }
