@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import org.autojs.autojs.external.ScriptIntents;
+import org.autojs.autojs.engine.RuntimeTasksBridge;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTaskManager;
@@ -27,6 +28,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
             TimedTaskManager.getIntentTaskOfAction(intent.getAction())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .filter(task -> !task.isLocal())
                     .subscribe(intentTask -> runTask(context, intent, intentTask), Throwable::printStackTrace);
         } catch (Exception e) {
             ViewUtils.showToast(context, e.getMessage(), true);
@@ -34,6 +36,10 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
     }
 
     public static void runTask(Context context, Intent intent, IntentTask task) {
+        if (!java.util.Objects.equals(task.getAction(), intent.getAction())) return;
+        if (task.getCategory() != null && !intent.hasCategory(task.getCategory())) return;
+        if (task.getDataType() != null && task.getIntentFilter().matchData(intent.getType(), intent.getScheme(), intent.getData()) < 0) return;
+        RuntimeTasksBridge.recordIntent(context, task, intent);
         Log.d(LOG_TAG, "runTask: action = " + intent.getAction() + ", script = " + task.getScriptPath());
         try {
             Intent launchIntent = new Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, task.getScriptPath());

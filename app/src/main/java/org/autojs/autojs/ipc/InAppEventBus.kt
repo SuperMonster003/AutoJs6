@@ -8,13 +8,20 @@ object InAppEventBus {
 
     // Map<action, eventStream>
     private val streams = mutableMapOf<String, MutableSharedFlow<Unit>>()
+    private val payloadStreams = mutableMapOf<String, MutableSharedFlow<Any?>>()
+
+    @JvmStatic
+    @Synchronized
+    fun streamPayloadsOf(action: String): SharedFlow<Any?> = payloadStreams.getOrPut(action) {
+        MutableSharedFlow(replay = 0, extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    }
 
     @JvmStatic
     @Synchronized
     fun streamOf(action: String): SharedFlow<Unit> {
         return streams.getOrPut(action) {
             MutableSharedFlow(
-                replay = 1,
+                replay = 0,
                 extraBufferCapacity = 64,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
@@ -24,13 +31,21 @@ object InAppEventBus {
     @JvmStatic
     @Synchronized
     fun tryEmit(action: String): Boolean {
-        return streams[action]?.tryEmit(Unit) == true
+        return tryEmitPayload(action, null)
+    }
+
+    @JvmStatic
+    @Synchronized
+    fun tryEmitPayload(action: String, payload: Any?): Boolean {
+        val emitted = streams[action]?.tryEmit(Unit) == true
+        return (payloadStreams[action]?.tryEmit(payload) == true) || emitted
     }
 
     @JvmStatic
     @Synchronized
     fun clear() {
         streams.clear()
+        payloadStreams.clear()
     }
 
 }

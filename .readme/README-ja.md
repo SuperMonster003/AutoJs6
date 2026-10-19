@@ -352,6 +352,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` Bun, Node.js と Worker のホスト Shell API, ストリーム入出力, Shizuku 許可とプロセス解放
 * `新機能` Bun と Node.js Worker のホストイベントと通知 API, 独立した購読と通知の解放
 * `新機能` Bun と Node.js Worker のデバイス制御とダイアログ API, 明るさ, 音量と独立したウィンドウ解放
+* `新機能` Node.js, Bun と Worker の Android オブジェクトヘルパー, Paint, ColorStateList, テーマ色と FileProvider URI
+* `新機能` Node.js と Bun の永続的なカレンダーと IntentTask API, 毎日, 毎週, 毎月, 毎年, 単発, カウントダウンとブロードキャストのタスク
 * `修正` runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題
 * `修正` Android 7.x で runtime.loadDex が DEX キャッシュを破損させ, クラス読込に失敗する場合がある問題
 * `修正` Rhino エンジンと組み込みモジュールのスコープ, 引数変換と戻り値処理の非互換により一部スクリプトの動作が異常になる問題
@@ -492,6 +494,9 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` SIGTERM を無視する Shell コマンドの終了処理停止, 子プロセスを停止してから終了
 * `修正` 異なるスクリプト実行で同じ数値 ID の通知が上書きまたは取り消される問題
 * `修正` 進行状況の更新後も古い値を返す問題とキャンセル後にダイアログが残る問題
+* `修正` 夏時間の切り替えで毎日と毎週のタスクの実行時刻がずれる問題
+* `修正` IntentTask のローカルと外部受信の競合および更新や削除後に登録が残る問題
+* `修正` ビルドしたアプリの FileProvider URI が実際のマニフェストではなくテンプレートの authority を使用する問題
 * `改善` 重要でない部品の初期化を遅延し, アプリ起動を高速化
 * `改善` アプリ起動時の自動権限ダイアログを廃止し, 全ファイル管理権限がない場合はホームに直接許可できる通知を表示
 * `改善` アプリ/パッケージ化アプリを Android 17 に対応させ, ローカルネットワーク権限, 高度な保護とバックグラウンド音声制限の案内を改善
@@ -576,6 +581,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` Gradle プラットフォーム互換データと更新タスクを AutoJs6-Gradle-Platform-Versions に移し, Scrapers でリポジトリ間同期に対応
 * `改善` device.getAndroidId の useSystemId 真偽値引数, Android 8.0+ で Shizuku/Root により実行アプリの Android ユーザーのシステム値を取得, 権限/読込失敗時は例外, 旧システムでは引数を無視
 * `改善` cX/cY/cXy/cYx で auto モードの明示指定に対応し, 座標と基準値の検証を統一, Long の範囲を超える有限値の計算結果を保持
+* `改善` Bun のホスト呼び出しが期限内に待機し, 待機のキャンセルと短時間重なるタスクの順次実行に対応
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

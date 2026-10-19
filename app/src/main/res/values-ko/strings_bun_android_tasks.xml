@@ -1,0 +1,6 @@
+<resources>
+    <string name="summary_bun_android_objects_grant">네이티브 Paint, 색상 상태, 테마 색상 및 파일 URI 도우미 허용</string>
+    <string name="summary_bun_tasks_control_grant">영구 달력 및 IntentTask 일정 생성, 조회, 갱신 및 삭제 허용</string>
+    <string name="text_bun_android_objects_grant">Android 객체 도우미</string>
+    <string name="text_bun_tasks_control_grant">달력 및 브로드캐스트 작업</string>
+</resources>

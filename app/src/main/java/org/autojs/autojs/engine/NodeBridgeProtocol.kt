@@ -694,6 +694,8 @@ object NodeBridgeModules {
     const val SHELL = NodeBridgePermissionManifest.SHELL
     const val FETCH = "fetch"
     const val WEBSOCKET = "websocket"
+    const val ANDROID_OBJECTS = "android"
+    const val TASKS = "tasks"
     const val WORK_MANAGER = NodeBridgePermissionManifest.WORK_MANAGER
     const val PACKAGE_MANAGER = NodeBridgePermissionManifest.PACKAGE_MANAGER
     const val JAVA = "java"
@@ -860,6 +862,8 @@ object NodeBridgeModules {
         SHELL to shellMethods,
         FETCH to fetchMethods,
         WEBSOCKET to websocketMethods,
+        ANDROID_OBJECTS to RuntimeAndroidObjects.methods,
+        TASKS to RuntimeTasksBridge.methods,
         WORK_MANAGER to workManagerMethods,
         PACKAGE_MANAGER to packageManagerMethods,
         JAVA to javaMethods,
@@ -952,6 +956,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private val deviceControls = NodeDeviceControls(appContext)
     private val eventObservers = NodeEventObservers(appContext)
     private val dialogs = NodeDialogs(appContext)
+    private val androidObjects = RuntimeAndroidObjects(appContext,engineInfo.cwd)
+    private val calendarTasks = RuntimeTasksBridge(appContext,engineInfo.cwd)
+    internal fun closeAndroidObjects() = androidObjects.close()
     private val audioRecorder = lazy { NodeAudioRecorder(appContext, ::resolveAndroidFile) }
     private val mediaPlayback = lazy { NodeMediaPlayback(appContext, ::resolveAndroidFile) }
     private val mediaStore = lazy { NodeMediaStore(appContext, ::resolveAndroidFile) }
@@ -1121,6 +1128,16 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.TOAST && request.method in NodeBridgeModules.toastMethods -> dispatchToast(request, auditedCallback)
             request.module == NodeBridgeModules.APP && request.method in NodeBridgeModules.appMethods -> dispatchApp(request, auditedCallback)
             request.module == NodeBridgeModules.ENGINES && request.method in NodeBridgeModules.enginesMethods -> dispatchEngines(request, auditedCallback)
+            request.module in setOf(NodeBridgeModules.ANDROID_OBJECTS,NodeBridgeModules.TASKS) -> dispatchOnMain(request,auditedCallback) {
+                try {
+                    val result=if(request.module==NodeBridgeModules.ANDROID_OBJECTS)androidObjects.invoke(request.method,request.argsArray())else calendarTasks.invoke(request.method,request.argsArray())
+                    NodeBridgeResponse.success(request.id,NodeBridgeJson.valueToJson(result))
+                } catch(error:Exception) { NodeBridgeResponse.failure(request.id,when(error){
+                    is SecurityException -> NodeBridgeError.permissionDenied(error.message?:"Android permission denied.",request.module,request.method)
+                    is IllegalArgumentException, is org.json.JSONException -> NodeBridgeError.invalidRequest(error.message?:"Invalid Android or task argument.",request.module,request.method)
+                    else -> NodeBridgeError.providerFailed(error.message?:"Android operation failed.",request.module,request.method)
+                }) }
+            }
             request.module == NodeBridgeModules.DIALOGS && request.method in NodeBridgeModules.dialogsMethods -> dispatchDialogs(request, auditedCallback)
             request.module == NodeBridgeModules.ACCESSIBILITY && request.method in NodeBridgeModules.accessibilityMethods -> dispatchAccessibility(request, auditedCallback)
             request.module == NodeBridgeModules.SCREEN_RECORDER && request.method in NodeBridgeModules.screenRecorderMethods -> dispatchScreenRecording(request, auditedCallback)
@@ -1197,6 +1214,7 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(packageInstallManager.nativeValues())
         putAll(capabilityBrokerAudit.nativeDiagnostics())
         putAll(resourceRegistry.nativeDiagnostics())
+        put("embedded_script.android.active_object_count",androidObjects.activeCount().toString())
         put("embedded_script.device.active_wake_lock_count", deviceControls.activeCount().toString())
         put("embedded_script.events.active_handle_count", eventObservers.activeCount().toString())
         put("embedded_script.shell.active_handle_count",if(shellBridge.isInitialized())shellBridge.value.activeCount.toString()else "0")
@@ -1248,6 +1266,7 @@ class AndroidNodeBridgeCapabilityProvider(
         deviceControls.close()
         eventObservers.closeAll()
         dialogs.closeAll()
+        androidObjects.close()
         if (audioRecorder.isInitialized()) audioRecorder.value.close()
         if (mediaPlayback.isInitialized()) mediaPlayback.value.close()
         if (mediaStore.isInitialized()) mediaStore.value.close()

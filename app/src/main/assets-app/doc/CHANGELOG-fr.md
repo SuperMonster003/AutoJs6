@@ -168,6 +168,8 @@
 * `Fonctionnalité` Shell hôte avec flux, autorisation Shizuku et nettoyage des processus pour Bun, Node.js et les Workers
 * `Fonctionnalité` Événements et notifications hôtes pour Bun et les Workers Node.js, avec nettoyage indépendant des abonnements et notifications
 * `Fonctionnalité` Commandes de périphérique et dialogues pour Bun et les Workers Node.js, avec luminosité, volume et nettoyage indépendant des fenêtres
+* `Fonctionnalité` Objets Android pour Node.js, Bun et les Workers, avec Paint, ColorStateList, couleurs du thème et URI FileProvider
+* `Fonctionnalité` API persistantes de calendrier et IntentTask pour Node.js et Bun, avec tâches quotidiennes, hebdomadaires, mensuelles, annuelles, ponctuelles, différées et de diffusion
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés
@@ -308,6 +310,9 @@
 * `Correction` Blocage du nettoyage des commandes ignorant SIGTERM, avec arrêt des descendants avant terminaison
 * `Correction` Notifications de scripts distincts portant le même ID numérique qui se remplacent ou se suppriment
 * `Correction` Valeurs obsolètes après la mise à jour des dialogues de progression et fenêtres restant ouvertes après annulation
+* `Correction` Décalage de l'heure locale des tâches quotidiennes et hebdomadaires lors des changements d'heure
+* `Correction` Conflits entre récepteurs IntentTask locaux et externes et inscriptions restantes après modification ou suppression
+* `Correction` URI FileProvider des applications générées utilisant l'autorité du modèle au lieu de celle du manifeste réel
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan
@@ -392,6 +397,7 @@
 * `Amélioration` Données de compatibilité des plateformes Gradle et tâches de mise à jour déplacées vers AutoJs6-Gradle-Platform-Versions, avec synchronisation inter-dépôts dans l'outil Scrapers
 * `Amélioration` device.getAndroidId accepte le booléen useSystemId, pour obtenir via Shizuku/Root la valeur système de l'utilisateur Android auquel appartient l'application sous Android 8.0+; un échec d'autorisation ou de lecture lève une exception, et les anciens systèmes ignorent ce paramètre
 * `Amélioration` cX/cY/cXy/cYx prennent en charge le mode auto explicite, valident les coordonnées et les bases de façon cohérente et préservent les grands résultats finis au-delà de la plage Long
+* `Amélioration` Appels hôtes Bun mis en attente dans leur délai, avec annulation de l'attente et exécution successive des déclenchements rapprochés
 * `Dépendance` Intégration en module de Android AXML
 * `Dépendance` Intégration en module de Android ARSC Editor
 * `Dépendance` Intégration en module de APK Signer

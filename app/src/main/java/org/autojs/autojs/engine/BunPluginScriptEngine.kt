@@ -365,6 +365,7 @@ class BunPluginScriptEngine internal constructor(
                 onAbandoned = {
                     if (poisonOnAbandoned) BunRuntimeBinderCallLane.poison()
                 },
+                isCancelled = { stopped.get() || isDestroyed },
             ) { runBlocking { block() } }
         } catch (error: BunBinderCallException) {
             if (error.failure == BunBinderCallFailure.TIMEOUT) {

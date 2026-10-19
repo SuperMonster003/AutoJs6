@@ -199,7 +199,7 @@ object RemoteApkBuildRequestPreparer {
                 remoteConfig.setLibs((remoteConfig.libs + ApkBuildLibrary.NODEJS_RUNTIME.label).distinct())
                 val shellManifest=org.autojs.autojs.engine.NodeBridgePermissionManifest.fromJsonSources(projectConfig.toJson(false),File(source,"package.json").takeIf { it.isFile }?.readText())
                 remoteConfig.setPermissions((remoteConfig.permissions + shellManifest.androidPermissions.filter {
-                    it in setOf("android.permission.WAKE_LOCK", "android.permission.VIBRATE", "android.permission.WRITE_SETTINGS", "android.permission.MODIFY_AUDIO_SETTINGS")
+                    it in setOf("android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.SCHEDULE_EXACT_ALARM", "android.permission.WAKE_LOCK", "android.permission.VIBRATE", "android.permission.WRITE_SETTINGS", "android.permission.MODIFY_AUDIO_SETTINGS")
                 }).distinct())
                 if ("android.permission.POST_NOTIFICATIONS" in shellManifest.androidPermissions) remoteConfig.setPermissions((remoteConfig.permissions + "android.permission.POST_NOTIFICATIONS").distinct())
                 if("moe.shizuku.manager.permission.API_V23" in shellManifest.androidPermissions)remoteConfig.setPermissions((remoteConfig.permissions+"moe.shizuku.manager.permission.API_V23").distinct())
@@ -209,7 +209,7 @@ object RemoteApkBuildRequestPreparer {
                 org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants.validatePackagedCapabilities(projectConfig.bunConfig?.hostCapabilities.orEmpty())
                 val deviceCapabilities = org.autojs.autojs.engine.BunAutomationBridge.nodeCapabilities(projectConfig.bunConfig?.hostCapabilities.orEmpty())
                 val devicePermissions = org.autojs.autojs.engine.NodeBridgePermissionManifest.fromDeclaredCapabilities(deviceCapabilities).androidPermissions.filter {
-                    it in setOf("android.permission.WAKE_LOCK", "android.permission.VIBRATE", "android.permission.WRITE_SETTINGS", "android.permission.MODIFY_AUDIO_SETTINGS")
+                    it in setOf("android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.SCHEDULE_EXACT_ALARM", "android.permission.WAKE_LOCK", "android.permission.VIBRATE", "android.permission.WRITE_SETTINGS", "android.permission.MODIFY_AUDIO_SETTINGS")
                 }
                 remoteConfig.setPermissions((remoteConfig.permissions + devicePermissions).distinct())
                 if ("notifications.post" in projectConfig.bunConfig?.hostCapabilities.orEmpty()) remoteConfig.setPermissions((remoteConfig.permissions + "android.permission.POST_NOTIFICATIONS").distinct())

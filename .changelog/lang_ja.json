@@ -165,7 +165,9 @@
         "Bun と Node.js Worker のセンサー取得と購読 API, キャンセルとリスナーの自動解放",
         "Bun, Node.js と Worker のホスト Shell API, ストリーム入出力, Shizuku 許可とプロセス解放",
         "Bun と Node.js Worker のホストイベントと通知 API, 独立した購読と通知の解放",
-        "Bun と Node.js Worker のデバイス制御とダイアログ API, 明るさ, 音量と独立したウィンドウ解放"
+        "Bun と Node.js Worker のデバイス制御とダイアログ API, 明るさ, 音量と独立したウィンドウ解放",
+        "Node.js, Bun と Worker の Android オブジェクトヘルパー, Paint, ColorStateList, テーマ色と FileProvider URI",
+        "Node.js と Bun の永続的なカレンダーと IntentTask API, 毎日, 毎週, 毎月, 毎年, 単発, カウントダウンとブロードキャストのタスク"
       ],
       "fix": [
         "runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題",
@@ -307,7 +309,10 @@
         "取得のキャンセル, ポーリング失敗, ホスト終了時の登録によるセンサーリスナーの残留",
         "SIGTERM を無視する Shell コマンドの終了処理停止, 子プロセスを停止してから終了",
         "異なるスクリプト実行で同じ数値 ID の通知が上書きまたは取り消される問題",
-        "進行状況の更新後も古い値を返す問題とキャンセル後にダイアログが残る問題"
+        "進行状況の更新後も古い値を返す問題とキャンセル後にダイアログが残る問題",
+        "夏時間の切り替えで毎日と毎週のタスクの実行時刻がずれる問題",
+        "IntentTask のローカルと外部受信の競合および更新や削除後に登録が残る問題",
+        "ビルドしたアプリの FileProvider URI が実際のマニフェストではなくテンプレートの authority を使用する問題"
       ],
       "improvement": [
         "重要でない部品の初期化を遅延し, アプリ起動を高速化",
@@ -393,7 +398,8 @@
         "Gradle ビルドで Kotlin/KSP/AGP/R8 の互換版を動的に選択し, 起動時メモリ削減とコンパイル警告整理を実施",
         "Gradle プラットフォーム互換データと更新タスクを AutoJs6-Gradle-Platform-Versions に移し, Scrapers でリポジトリ間同期に対応",
         "device.getAndroidId の useSystemId 真偽値引数, Android 8.0+ で Shizuku/Root により実行アプリの Android ユーザーのシステム値を取得, 権限/読込失敗時は例外, 旧システムでは引数を無視",
-        "cX/cY/cXy/cYx で auto モードの明示指定に対応し, 座標と基準値の検証を統一, Long の範囲を超える有限値の計算結果を保持"
+        "cX/cY/cXy/cYx で auto モードの明示指定に対応し, 座標と基準値の検証を統一, Long の範囲を超える有限値の計算結果を保持",
+        "Bun のホスト呼び出しが期限内に待機し, 待機のキャンセルと短時間重なるタスクの順次実行に対応"
       ],
       "dependency": [
         "Android AXML をモジュール化",

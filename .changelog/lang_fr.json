@@ -165,7 +165,9 @@
         "Mesures et abonnements aux capteurs pour Bun et les Workers Node.js, avec annulation et libération automatique des écouteurs",
         "Shell hôte avec flux, autorisation Shizuku et nettoyage des processus pour Bun, Node.js et les Workers",
         "Événements et notifications hôtes pour Bun et les Workers Node.js, avec nettoyage indépendant des abonnements et notifications",
-        "Commandes de périphérique et dialogues pour Bun et les Workers Node.js, avec luminosité, volume et nettoyage indépendant des fenêtres"
+        "Commandes de périphérique et dialogues pour Bun et les Workers Node.js, avec luminosité, volume et nettoyage indépendant des fenêtres",
+        "Objets Android pour Node.js, Bun et les Workers, avec Paint, ColorStateList, couleurs du thème et URI FileProvider",
+        "API persistantes de calendrier et IntentTask pour Node.js et Bun, avec tâches quotidiennes, hebdomadaires, mensuelles, annuelles, ponctuelles, différées et de diffusion"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
@@ -307,7 +309,10 @@
         "Écouteurs de capteurs conservés après annulation, échec de lecture ou inscription pendant la destruction du fournisseur",
         "Blocage du nettoyage des commandes ignorant SIGTERM, avec arrêt des descendants avant terminaison",
         "Notifications de scripts distincts portant le même ID numérique qui se remplacent ou se suppriment",
-        "Valeurs obsolètes après la mise à jour des dialogues de progression et fenêtres restant ouvertes après annulation"
+        "Valeurs obsolètes après la mise à jour des dialogues de progression et fenêtres restant ouvertes après annulation",
+        "Décalage de l'heure locale des tâches quotidiennes et hebdomadaires lors des changements d'heure",
+        "Conflits entre récepteurs IntentTask locaux et externes et inscriptions restantes après modification ou suppression",
+        "URI FileProvider des applications générées utilisant l'autorité du modèle au lieu de celle du manifeste réel"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",
@@ -393,7 +398,8 @@
         "Correspondance dynamique des versions compatibles Kotlin/KSP/AGP/R8 dans Gradle, avec réduction de mémoire au démarrage et nettoyage des avertissements de compilation",
         "Données de compatibilité des plateformes Gradle et tâches de mise à jour déplacées vers AutoJs6-Gradle-Platform-Versions, avec synchronisation inter-dépôts dans l'outil Scrapers",
         "device.getAndroidId accepte le booléen useSystemId, pour obtenir via Shizuku/Root la valeur système de l'utilisateur Android auquel appartient l'application sous Android 8.0+; un échec d'autorisation ou de lecture lève une exception, et les anciens systèmes ignorent ce paramètre",
-        "cX/cY/cXy/cYx prennent en charge le mode auto explicite, valident les coordonnées et les bases de façon cohérente et préservent les grands résultats finis au-delà de la plage Long"
+        "cX/cY/cXy/cYx prennent en charge le mode auto explicite, valident les coordonnées et les bases de façon cohérente et préservent les grands résultats finis au-delà de la plage Long",
+        "Appels hôtes Bun mis en attente dans leur délai, avec annulation de l'attente et exécution successive des déclenchements rapprochés"
       ],
       "dependency": [
         "Intégration en module de Android AXML",

@@ -168,6 +168,8 @@
 * `Nuevo` Shell del anfitrión con flujos, autorización Shizuku y limpieza de procesos para Bun, Node.js y Workers
 * `Nuevo` Eventos y notificaciones del anfitrión para Bun y Workers de Node.js, con limpieza independiente de suscripciones y notificaciones
 * `Nuevo` Control del dispositivo y diálogos para Bun y Workers de Node.js, con brillo, volumen y limpieza independiente de ventanas
+* `Nuevo` Objetos Android para Node.js, Bun y Workers, con Paint, ColorStateList, colores del tema y URI FileProvider
+* `Nuevo` API persistentes de calendario e IntentTask para Node.js y Bun, con tareas diarias, semanales, mensuales, anuales, únicas, de cuenta atrás y de difusión
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
@@ -308,6 +310,9 @@
 * `Corrección` Bloqueo al limpiar comandos que ignoran SIGTERM, deteniendo los descendientes antes de terminarlos
 * `Corrección` Notificaciones de ejecuciones distintas con el mismo ID numérico que se sobrescribían o cancelaban
 * `Corrección` Valores obsoletos tras actualizar diálogos de progreso y ventanas abiertas después de cancelar
+* `Corrección` Desplazamiento de la hora local de tareas diarias y semanales al cambiar el horario de verano
+* `Corrección` Conflictos entre receptores IntentTask locales y externos y registros obsoletos tras actualizar o eliminar
+* `Corrección` URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real
 * `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
 * `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
 * `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano
@@ -392,6 +397,7 @@
 * `Mejora` Datos de compatibilidad de plataformas Gradle y tareas de actualización trasladados a AutoJs6-Gradle-Platform-Versions; Scrapers permite sincronizar entre repositorios
 * `Mejora` device.getAndroidId admite useSystemId booleano para obtener en Android 8.0+ el valor del sistema del usuario Android que ejecuta la aplicación mediante Shizuku/Root; lanza excepciones si fallan permisos o lectura y los sistemas anteriores ignoran el parámetro
 * `Mejora` cX/cY/cXy/cYx admiten el modo auto explícito, validan de forma coherente las coordenadas y las bases, y conservan resultados finitos que superan el rango Long
+* `Mejora` Llamadas del anfitrión Bun en cola dentro de sus plazos, con cancelación de espera y ejecución secuencial de tareas próximas
 * `Dependencia` Modularizado Android AXML
 * `Dependencia` Modularizado Android ARSC Editor
 * `Dependencia` Modularizado APK Signer

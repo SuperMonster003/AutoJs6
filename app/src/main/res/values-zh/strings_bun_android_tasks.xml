@@ -1,0 +1,6 @@
+<resources>
+    <string name="summary_bun_android_objects_grant">允许使用原生画笔, 颜色状态, 主题色和文件 URI 辅助接口</string>
+    <string name="summary_bun_tasks_control_grant">允许创建, 查询, 更新和删除持久日历与 IntentTask 调度任务</string>
+    <string name="text_bun_android_objects_grant">Android 对象辅助接口</string>
+    <string name="text_bun_tasks_control_grant">日历和广播任务</string>
+</resources>

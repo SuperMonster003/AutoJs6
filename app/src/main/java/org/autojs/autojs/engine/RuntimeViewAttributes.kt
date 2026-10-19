@@ -113,7 +113,12 @@ internal object RuntimeViewAttributes {
 
         prop("text", text != null) { value -> val s = value.toString(); { if (text!!.text.toString() != s) text.text = s } }
         prop("hint", text != null) { value -> val s = value.toString(); { text!!.hint = s } }
-        prop("textColor", text != null) { value -> val c = color(value); { text!!.setTextColor(c) } }
+        prop("textColor", text != null) { value ->
+            if(value is JSONObject && value.optString("__autojs6AndroidObject")=="colorStateList") {
+                val colors=RuntimeAndroidObjects.colorStateList(value);return@prop { text!!.setTextColor(colors) }
+            }
+            val c=color(value);{ text!!.setTextColor(c) }
+        }
         prop("textSize", text != null) { value ->
             val s = value.toString(); val n = number(s.removeSuffix("sp").removeSuffix("px"), 0.0, 1000.0).toFloat()
             val unit = if (s.endsWith("px")) TypedValue.COMPLEX_UNIT_PX else TypedValue.COMPLEX_UNIT_SP

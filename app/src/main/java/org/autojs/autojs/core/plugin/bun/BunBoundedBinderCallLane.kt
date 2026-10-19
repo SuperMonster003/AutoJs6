@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.LockSupport
+import java.util.concurrent.locks.ReentrantLock
 
 internal enum class BunBinderCallFailure {
     BUSY,
@@ -229,16 +230,50 @@ internal class BunBoundedBinderCallLane(
     }
 }
 
-/** Main lane is permanently poisoned if a synchronous run dispatch times out. */
-internal object BunRuntimeBinderCallLane {
-    private val lane = BunBoundedBinderCallLane("autojs-bun-binder")
+/** Waits before dispatch without occupying the Binder worker or poisoning an unsubmitted call. */
+internal class BunQueuedBinderCallLane(threadNamePrefix: String) {
+    private val admission = ReentrantLock(true)
+    private val lane = BunBoundedBinderCallLane(threadNamePrefix)
 
     fun <T> call(
         operationName: String,
         timeoutMillis: Long,
         onAbandoned: () -> Unit = {},
+        isCancelled: () -> Boolean = { false },
         operation: () -> T,
-    ): T = lane.call(operationName, timeoutMillis, onAbandoned, operation)
+    ): T {
+        require(timeoutMillis in 1L..15L * 60L * 1000L)
+        val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis)
+        while (true) {
+            if (isCancelled()) throw InterruptedException("Bun call cancelled before dispatch")
+            val remaining = deadline - System.nanoTime()
+            if (remaining <= 0) throw BunBinderCallException(BunBinderCallFailure.TIMEOUT, operationName)
+            if (admission.tryLock(minOf(remaining, TimeUnit.MILLISECONDS.toNanos(50)), TimeUnit.NANOSECONDS)) break
+        }
+        try {
+            if (isCancelled()) throw InterruptedException("Bun call cancelled before dispatch")
+            val remaining = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime())
+            if (remaining <= 0) throw BunBinderCallException(BunBinderCallFailure.TIMEOUT, operationName)
+            return lane.call(operationName, remaining, onAbandoned, operation)
+        } finally {
+            admission.unlock()
+        }
+    }
+
+    fun poison() = lane.poison()
+}
+
+/** Main lane is permanently poisoned only after an uncertain synchronous dispatch. */
+internal object BunRuntimeBinderCallLane {
+    private val lane = BunQueuedBinderCallLane("autojs-bun-binder")
+
+    fun <T> call(
+        operationName: String,
+        timeoutMillis: Long,
+        onAbandoned: () -> Unit = {},
+        isCancelled: () -> Boolean = { false },
+        operation: () -> T,
+    ): T = lane.call(operationName, timeoutMillis, onAbandoned, isCancelled, operation)
 
     fun poison() = lane.poison()
 }

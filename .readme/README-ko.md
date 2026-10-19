@@ -352,6 +352,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` Bun, Node.js 및 Worker의 호스트 Shell API, 스트리밍 입출력, Shizuku 승인 및 프로세스 정리
 * `추가` Bun 및 Node.js Worker의 호스트 이벤트 및 알림 API, 독립 구독과 알림 정리
 * `추가` Bun 및 Node.js Worker의 기기 제어와 대화상자 API, 밝기, 음량 및 독립 창 정리
+* `추가` Node.js, Bun 및 Worker의 Android 객체 도우미, Paint, ColorStateList, 테마 색상 및 FileProvider URI 지원
+* `추가` Node.js 및 Bun의 영구 달력 및 IntentTask API, 일간, 주간, 월간, 연간, 일회성, 카운트다운 및 브로드캐스트 작업 지원
 * `수정` runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제
 * `수정` Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제
 * `수정` Rhino 엔진과 내장 모듈의 스코프, 인수 변환 및 반환값 처리 비호환으로 일부 스크립트 동작이 비정상적인 문제
@@ -492,6 +494,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` SIGTERM을 무시하는 Shell 명령의 종료 정리 중단, 종료 전에 자식 프로세스 정지 및 정리
 * `수정` 서로 다른 스크립트 실행에서 같은 숫자 ID의 알림이 덮어쓰거나 취소되는 문제
 * `수정` 진행 대화상자 갱신 후 이전 값이 반환되고 취소 후 창이 남는 문제
+* `수정` 일간 및 주간 작업의 실행 시간이 일광 절약 시간 전환 후 달라지는 문제
+* `수정` IntentTask 로컬 및 외부 수신 충돌과 갱신이나 삭제 후 등록이 남는 문제
+* `수정` 빌드된 앱의 FileProvider URI가 실제 매니페스트 대신 템플릿 authority를 사용하는 문제
 * `개선` 필수적이지 않은 구성요소 초기화를 지연하여 앱 시작 속도 향상
 * `개선` 앱 시작 시 자동 권한 대화상자 대신 모든 파일 관리 권한이 없으면 홈에서 바로 허용할 수 있는 안내 표시
 * `개선` 앱/패키징 앱의 Android 17 대응, 로컬 네트워크 권한, 고급 보호 및 백그라운드 오디오 제한 안내 보완
@@ -576,6 +581,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Gradle 플랫폼 호환 데이터와 갱신 작업을 AutoJs6-Gradle-Platform-Versions로 이전, Scrapers의 저장소 간 동기화 지원
 * `개선` device.getAndroidId의 useSystemId 불리언 인수, Android 8.0+에서 Shizuku/Root로 실행 앱의 Android 사용자 시스템 값을 조회하며 권한/읽기 실패 시 예외, 구형 시스템에서는 인수 무시
 * `개선` cX/cY/cXy/cYx의 명시적 auto 모드 지원, 좌표와 기준값의 일관된 검증 및 Long 범위를 초과하는 유한한 계산 결과 보존
+* `개선` Bun 호스트 호출이 제한 시간 내에서 대기하고 대기 취소와 짧게 겹치는 작업의 순차 실행 지원
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

@@ -51,6 +51,8 @@ object NodeBridgePermissionManifest {
     const val UI_OVERLAY_PACKAGED = "ui.overlay.packaged"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
+    const val ANDROID_OBJECTS = "android.objects"
+    const val TASKS = "tasks"
     const val DEVICE_POWER = "device.power"
     const val SHELL = "shell"
     const val SHELL_ROOT = "shell.root"
@@ -141,6 +143,8 @@ object NodeBridgePermissionManifest {
         UI_OVERLAY_PACKAGED,
         CLIPBOARD,
         DEVICE,
+        ANDROID_OBJECTS,
+        TASKS,
         DEVICE_POWER,
         SHELL,
         SHELL_ROOT,
@@ -274,6 +278,7 @@ object NodeBridgePermissionManifest {
     )
 
     private val androidPermissionsByCapability = linkedMapOf(
+        TASKS to listOf("android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.WAKE_LOCK", "android.permission.SCHEDULE_EXACT_ALARM"),
         DEVICE to listOf("android.permission.WAKE_LOCK", "android.permission.VIBRATE"),
         DEVICE_POWER to listOf("android.permission.WRITE_SETTINGS", "android.permission.WAKE_LOCK"),
         MEDIA_AUDIO to listOf("android.permission.MODIFY_AUDIO_SETTINGS"),
@@ -305,6 +310,7 @@ object NodeBridgePermissionManifest {
     )
 
     private val androidPermissionOrder = listOf(
+        "android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.WAKE_LOCK", "android.permission.VIBRATE", "android.permission.WRITE_SETTINGS", "android.permission.MODIFY_AUDIO_SETTINGS",
         ANDROID_PERMISSION_POST_NOTIFICATIONS,
         ANDROID_PERMISSION_RECORD_AUDIO,
@@ -483,6 +489,8 @@ object NodeBridgePermissionManifest {
                 "execRegistered" -> listOf(AGENT, AGENT_EXEC, ENGINES, ENGINES_EXEC)
                 else -> listOf(AGENT)
             }
+            NodeBridgeModules.ANDROID_OBJECTS -> listOf(ANDROID_OBJECTS)
+            NodeBridgeModules.TASKS -> listOf(TASKS)
             NodeBridgeModules.DIALOGS -> listOf(DIALOGS)
             NodeBridgeModules.KEYS -> listOf(KEYS)
             NodeBridgeModules.ACCESSIBILITY -> when (method) {

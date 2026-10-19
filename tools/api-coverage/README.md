@@ -259,3 +259,7 @@ Run `node tools/api-coverage/check-runtime-events.mjs` for event/notification ho
 ## Runtime device controls and dialogs
 
 Run `node tools/api-coverage/check-runtime-device-dialogs.mjs` to compare the native device/dialog routes and shared Node/Bun factories and types. Behavior is covered by Node facade/real Worker tests, Bun device-dialogs.test.mjs, declaration smoke programs, Ace default popup checks and RuntimeDeviceDialogsNativeTest/DeviceTest/PackagedDeviceTest. The fixtures keep media volume unchanged and play no audio. Full host API counts describe documentation/type/completion coverage, not complete Node/Bun implementation parity.
+
+## Runtime Android objects and calendar tasks
+
+Run `node tools/api-coverage/check-runtime-android-tasks.mjs` to compare the native object/task routes with the shared Node/Bun factories and declarations. Node real Worker tests, Bun client tests, type smoke fixtures and Ace default popup tests cover the public surface. CalendarTaskTimesTest checks short/long days and gap/overlap rules. RuntimeAndroidTasksNativeTest/DeviceTest/PackagedDeviceTest verify real Android objects, persistent task CRUD, filtered broadcasts, actual child execution and packaged relaunch. Fixtures use owned task sources and verify task removal without playing test audio.

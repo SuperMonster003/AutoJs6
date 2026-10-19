@@ -74,6 +74,7 @@ object TimedTaskManager {
     fun addTask(intentTask: IntentTask) {
         mIntentTaskDatabase.insert(intentTask)
             .subscribe({
+                org.autojs.autojs.engine.RuntimeTasksBridge.forgetIntent(globalAppContext,intentTask.id)
                 if (!TextUtils.isEmpty(intentTask.action)) {
                     app.dynamicBroadcastReceivers
                         .registerIntent(intentTask)
@@ -108,7 +109,7 @@ object TimedTaskManager {
             .subscribe({
                 if (!TextUtils.isEmpty(intentTask.action)) {
                     app.dynamicBroadcastReceivers
-                        .unregister(intentTask.action)
+                        .refresh(intentTask.action)
                 }
             }) { obj: Throwable -> obj.printStackTrace() }
     }
@@ -121,7 +122,10 @@ object TimedTaskManager {
 
     @JvmStatic
     fun removeTaskSync(intentTask: IntentTask): Boolean {
-        return mIntentTaskDatabase.deleteSync(intentTask) > 0
+        return (mIntentTaskDatabase.deleteSync(intentTask)>0).also { removed -> if(removed) {
+            org.autojs.autojs.engine.RuntimeTasksBridge.forgetIntent(globalAppContext,intentTask.id)
+            app.dynamicBroadcastReceivers.refresh(intentTask.action)
+        } }
     }
 
     @JvmStatic
@@ -157,10 +161,11 @@ object TimedTaskManager {
     @JvmStatic
     @SuppressLint("CheckResult")
     fun updateTaskSync(task: IntentTask): Boolean {
+        val previousAction=mIntentTaskDatabase.queryById(task.id)?.action
         val id = mIntentTaskDatabase.updateSync(task)
-        if (id > 0 && !TextUtils.isEmpty(task.action)) {
-            app.dynamicBroadcastReceivers
-                .registerIntent(task)
+        if (id > 0) {
+            app.dynamicBroadcastReceivers.refresh(previousAction)
+            if(task.action!=previousAction)app.dynamicBroadcastReceivers.refresh(task.action)
         }
         return id > 0
     }

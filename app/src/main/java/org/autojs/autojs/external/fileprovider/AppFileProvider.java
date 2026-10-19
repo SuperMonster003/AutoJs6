@@ -1,6 +1,8 @@
 package org.autojs.autojs.external.fileprovider;
 
 import android.content.Context;
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import androidx.core.content.FileProvider;
 
@@ -26,7 +28,17 @@ public class AppFileProvider extends FileProvider {
         return BuildConfig.FILE_PROVIDER_AUTHORITY;
     }
 
+    private static String authority(Context context) {
+        try {
+            // APK Builder changes the manifest authority without rewriting the shared runtime DEX.
+            return context.getPackageManager().getProviderInfo(
+                    new ComponentName(context, FileProvider.class), 0).authority;
+        } catch (PackageManager.NameNotFoundException error) {
+            throw new IllegalArgumentException("FileProvider is not declared in " + context.getPackageName(), error);
+        }
+    }
+
     public static Uri getUriForFile(Context context, File file){
-        return FileProvider.getUriForFile(context, AUTHORITY, file);
+        return FileProvider.getUriForFile(context, authority(context), file);
     }
 }

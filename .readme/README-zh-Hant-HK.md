@@ -352,6 +352,8 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `新增` Bun, Node.js 及 Worker 的宿主 Shell API, 支援串流輸入輸出, Shizuku 授權與進程清理
 * `新增` Bun 與 Node.js Worker 的宿主事件及通知 API, 支援獨立訂閱與通知清理
 * `新增` Bun 與 Node.js Worker 的裝置控制及對話框 API, 支援亮度, 音量和獨立視窗清理
+* `新增` Node.js/Bun 的 Android 物件輔助介面及 Worker 封裝, 支援 Paint, ColorStateList, 主題色和 FileProvider URI
+* `新增` Node.js/Bun 的持久日曆與 IntentTask API, 支援每日, 每週, 每月, 每年, 單次, 倒數計時和廣播任務
 * `修復` runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題
 * `修復` Android 7.x 調用 runtime.loadDex 方法時可能損壞 DEX 緩存並導致類加載失敗的問題
 * `修復` Rhino 引擎及內置模塊的作用域, 參數轉換與返回值處理不兼容導致部分腳本行為異常的問題
@@ -492,6 +494,9 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `修復` Shell 命令忽略 SIGTERM 時結束清理可能阻塞的問題, 結束前凍結並清理子進程
 * `修復` 不同腳本執行使用相同數字 ID 的通知互相覆寫或取消的問題
 * `修復` 進度對話框控制代碼更新後仍傳回舊值及取消後視窗未及時關閉的問題
+* `修復` 每日和每週任務跨夏令時間轉換後本地執行時刻偏移的問題
+* `修復` IntentTask 本地與外部接收器衝突及更新或刪除後的註冊殘留問題
+* `修復` 打包應用的 FileProvider URI 輔助介面使用範本識別碼而非實際清單識別碼的問題
 * `優化` 延遲初始化非關鍵組件以提升應用啓動速度
 * `優化` 應用啓動時不再自動彈出權限申請對話框, 缺少所有文件管理權限時改為在主頁顯示可直接授權的提醒
 * `優化` 應用及打包應用適配 Android 17, 完善本地網絡授權, 高級保護及後台音頻限制的提示
@@ -576,6 +581,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `優化` Gradle 平台兼容數據及更新任務遷移至 AutoJs6-Gradle-Platform-Versions, Scrapers 工具支持跨倉庫同步
 * `優化` device.getAndroidId 支持 useSystemId 布爾參數, 在 Android 8.0+ 上通過 Shizuku/Root 獲取運行應用所屬 Android 用户的系統值, 權限或讀取失敗時拋出異常, 舊系統忽略此參數
 * `優化` cX/cY/cXy/cYx 支援明確指定 auto 模式, 統一驗證座標和基數, 並避免有限大數換算被截斷至 Long 範圍
+* `優化` Bun 宿主呼叫支援預算內排隊和取消等待, 使短時間重疊觸發的任務依序執行
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

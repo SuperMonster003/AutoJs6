@@ -68,3 +68,5 @@ Both phones' original APK hashes, camera/audio/notification permission flags, no
 Reproduce with tools/api-coverage/check-runtime-device-dialogs.mjs, Node test-device-dialog-facades.js/test-worker-device-dialogs.js, Bun device-dialogs.test.mjs, declaration smoke checks and Ace runtime/default coverage. Physical suites are RuntimeDeviceDialogsNativeTest, RuntimeDeviceDialogsDeviceTest and RuntimeDeviceDialogsPackagedDeviceTest.
 
 Remaining audit areas include Android-object helpers, calendar/IntentTask scheduling, dedicated AI/flow/TTS/mail/EPUB and other plugin surfaces, plus APIs whose Rhino/Java object model has no portable equivalent. This batch completes device/dialog parity with the current Node portable surface, with the documented Bun startup-metadata difference; it does not establish full Rhino parity.
+
+The [Android object and persistent task delivery](runtime-android-tasks-2026-10-19.md) adds Node/Bun/Worker native object helpers, calendar/IntentTask APIs, scoped object cleanup, persistent registrations, DST-correct recurrence, filtered receiver lifecycle, queued Bun host calls and actual host/packaged validation on Android 13/15.

@@ -1,0 +1,6 @@
+<resources>
+    <string name="summary_bun_android_objects_grant">السماح بكائنات Paint الأصلية وحالات الألوان وألوان السمة ومساعدات URI للملفات</string>
+    <string name="summary_bun_tasks_control_grant">السماح بإنشاء واستعلام وتحديث وحذف جداول التقويم وIntentTask الدائمة</string>
+    <string name="text_bun_android_objects_grant">مساعدات كائنات Android</string>
+    <string name="text_bun_tasks_control_grant">مهام التقويم والبث</string>
+</resources>

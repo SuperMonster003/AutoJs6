@@ -165,7 +165,9 @@
         "Muestras y suscripciones de sensores para Bun y Workers de Node.js, con cancelación y liberación automática de escuchas",
         "Shell del anfitrión con flujos, autorización Shizuku y limpieza de procesos para Bun, Node.js y Workers",
         "Eventos y notificaciones del anfitrión para Bun y Workers de Node.js, con limpieza independiente de suscripciones y notificaciones",
-        "Control del dispositivo y diálogos para Bun y Workers de Node.js, con brillo, volumen y limpieza independiente de ventanas"
+        "Control del dispositivo y diálogos para Bun y Workers de Node.js, con brillo, volumen y limpieza independiente de ventanas",
+        "Objetos Android para Node.js, Bun y Workers, con Paint, ColorStateList, colores del tema y URI FileProvider",
+        "API persistentes de calendario e IntentTask para Node.js y Bun, con tareas diarias, semanales, mensuales, anuales, únicas, de cuenta atrás y de difusión"
       ],
       "fix": [
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",
@@ -307,7 +309,10 @@
         "Escuchas de sensores retenidas tras cancelación, fallo de sondeo o registro durante la destrucción del proveedor",
         "Bloqueo al limpiar comandos que ignoran SIGTERM, deteniendo los descendientes antes de terminarlos",
         "Notificaciones de ejecuciones distintas con el mismo ID numérico que se sobrescribían o cancelaban",
-        "Valores obsoletos tras actualizar diálogos de progreso y ventanas abiertas después de cancelar"
+        "Valores obsoletos tras actualizar diálogos de progreso y ventanas abiertas después de cancelar",
+        "Desplazamiento de la hora local de tareas diarias y semanales al cambiar el horario de verano",
+        "Conflictos entre receptores IntentTask locales y externos y registros obsoletos tras actualizar o eliminar",
+        "URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",
@@ -393,7 +398,8 @@
         "Gradle permite emparejar dinámicamente versiones compatibles Kotlin/KSP/AGP/R8, reduce la memoria de inicio y elimina advertencias de compilación",
         "Datos de compatibilidad de plataformas Gradle y tareas de actualización trasladados a AutoJs6-Gradle-Platform-Versions; Scrapers permite sincronizar entre repositorios",
         "device.getAndroidId admite useSystemId booleano para obtener en Android 8.0+ el valor del sistema del usuario Android que ejecuta la aplicación mediante Shizuku/Root; lanza excepciones si fallan permisos o lectura y los sistemas anteriores ignoran el parámetro",
-        "cX/cY/cXy/cYx admiten el modo auto explícito, validan de forma coherente las coordenadas y las bases, y conservan resultados finitos que superan el rango Long"
+        "cX/cY/cXy/cYx admiten el modo auto explícito, validan de forma coherente las coordenadas y las bases, y conservan resultados finitos que superan el rango Long",
+        "Llamadas del anfitrión Bun en cola dentro de sus plazos, con cancelación de espera y ejecución secuencial de tareas próximas"
       ],
       "dependency": [
         "Modularizado Android AXML",

@@ -352,6 +352,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Host Shell streaming, Shizuku authorization and process cleanup for Bun, Node.js and Workers
 * `Feature` Host event observers and notifications for Bun and Node.js Workers, with independent subscription and notification cleanup
 * `Feature` Device controls and dialogs for Bun and Node.js Workers, including brightness, volume and independent window cleanup
+* `Feature` Android object helpers for Node.js, Bun and Workers, including Paint, ColorStateList, theme colors and FileProvider URIs
+* `Feature` Persistent calendar and IntentTask APIs for Node.js and Bun, with daily, weekly, monthly, yearly, one-shot, countdown and broadcast tasks
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
@@ -492,6 +494,9 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Shell cleanup hanging when commands ignore SIGTERM; process descendants are stopped before termination
 * `Fix` Notifications with the same numeric ID from separate script executions overwriting or cancelling each other
 * `Fix` Progress dialog handles retaining stale values after an update and pending dialogs remaining open after cancellation
+* `Fix` Daily and weekly calendar tasks shifting their local execution time across daylight-saving transitions
+* `Fix` IntentTask local and external receiver conflicts and stale registrations after updates or removal
+* `Fix` FileProvider URI helpers in built applications using the template authority instead of the actual manifest authority
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions
@@ -576,6 +581,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Moved Gradle platform compatibility data and update tasks to AutoJs6-Gradle-Platform-Versions, with cross-repository synchronization in Scrapers
 * `Improvement` Added the useSystemId Boolean argument to device.getAndroidId, obtaining the system value for the Android user running the app through Shizuku/Root on Android 8.0+; permission or read failures throw exceptions, and older systems ignore this argument
 * `Improvement` cX/cY/cXy/cYx support explicit auto mode, consistently validate coordinates and scale bases, and preserve large finite results beyond the Long range
+* `Improvement` Bun host calls wait within their deadlines and support cancellation while queued, allowing short overlapping task triggers to run in sequence
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

@@ -181,7 +181,9 @@
         "Bun 与 Node.js Worker 的传感器采样及订阅 API, 支持取消和监听器自动释放",
         "Bun, Node.js 及 Worker 的宿主 Shell API, 支持流式输入输出, Shizuku 授权与进程清理",
         "Bun 与 Node.js Worker 的宿主事件和通知 API, 支持独立订阅与通知清理",
-        "Bun 与 Node.js Worker 的设备控制和对话框 API, 支持亮度, 音量和独立窗口清理"
+        "Bun 与 Node.js Worker 的设备控制和对话框 API, 支持亮度, 音量和独立窗口清理",
+        "Node.js/Bun 的 Android 对象辅助接口及 Worker 封装, 支持 Paint, ColorStateList, 主题色和 FileProvider URI",
+        "Node.js/Bun 的持久日历与 IntentTask API, 支持每日, 每周, 每月, 每年, 一次性, 倒计时和广播任务"
       ],
       "fix": [
         "runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题",
@@ -334,7 +336,10 @@
         "传感器单次采样取消, 轮询失败及宿主销毁时排队注册可能遗留监听器的问题",
         "Shell 命令忽略 SIGTERM 时退出清理可能阻塞的问题, 结束前冻结并清理子进程",
         "不同脚本执行使用相同数字 ID 的通知相互覆盖或取消的问题",
-        "进度对话框句柄更新后仍返回旧值及取消后窗口未及时关闭的问题"
+        "进度对话框句柄更新后仍返回旧值及取消后窗口未及时关闭的问题",
+        "每日和每周任务跨夏令时转换后本地执行时刻发生偏移的问题",
+        "IntentTask 本地与外部接收器冲突及更新或删除后的注册残留问题",
+        "打包应用的 FileProvider URI 辅助接口使用模板标识而非实际清单标识的问题"
       ],
       "improvement": [
         "延迟初始化非关键组件以提升应用启动速度",
@@ -427,7 +432,8 @@
         "device.getAndroidId 支持 useSystemId 布尔参数, 在 Android 8.0+ 上通过 Shizuku/Root 获取运行应用所属 Android 用户的系统值, 权限或读取失败时抛出异常, 旧系统忽略此参数",
         "cX/cY/cXy/cYx 支持显式 auto 模式, 统一校验坐标和基数, 并避免有限大数换算被截断到 Long 范围",
         "原生 Android XML 布局中无法设置或未知的属性改为跳过并在控制台警告一次, 不再导致整个布局加载失败",
-        "UI 布局属性按书写顺序应用, 后写的属性覆盖先写的属性 (如 padding 之后的 paddingHorizontal)"
+        "UI 布局属性按书写顺序应用, 后写的属性覆盖先写的属性 (如 padding 之后的 paddingHorizontal)",
+        "Bun 宿主调用支持预算内排队和取消等待, 使短时重叠触发的任务依次执行"
       ],
       "dependency": [
         "模块化 Android AXML",

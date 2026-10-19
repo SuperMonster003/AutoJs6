@@ -1,0 +1,6 @@
+<resources>
+    <string name="summary_bun_android_objects_grant">ネイティブの Paint, 色の状態, テーマ色とファイル URI を許可</string>
+    <string name="summary_bun_tasks_control_grant">永続的なカレンダーと IntentTask の作成, 取得, 更新と削除を許可</string>
+    <string name="text_bun_android_objects_grant">Android オブジェクトヘルパー</string>
+    <string name="text_bun_tasks_control_grant">カレンダーとブロードキャストタスク</string>
+</resources>

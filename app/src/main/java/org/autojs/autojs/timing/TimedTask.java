@@ -136,12 +136,7 @@ public class TimedTask extends BaseModel {
     }
 
     private long getNextTimeOfDailyTask() {
-        LocalTime time = LocalTime.fromMillisOfDay(mMillis);
-        long nextTimeMillis = time.toDateTimeToday().getMillis();
-        if (System.currentTimeMillis() > nextTimeMillis) {
-            return nextTimeMillis + TimeUnit.DAYS.toMillis(1);
-        }
-        return nextTimeMillis;
+        return CalendarTaskTimes.nextWeekday(mMillis, FLAG_EVERYDAY, DateTime.now());
     }
 
     @ScriptInterface
@@ -150,18 +145,7 @@ public class TimedTask extends BaseModel {
     }
 
     private long getNextTimeOfWeeklyTask(Context context) {
-        int dayOfWeek = DateTime.now().getDayOfWeek();
-        long nextTimeMillis = LocalTime.fromMillisOfDay(mMillis).toDateTimeToday().getMillis();
-        for (int i = 0; i < 8; i++) {
-            if ((getDayOfWeekTimeFlag(context, dayOfWeek) & mTimeFlag) != 0) {
-                if (System.currentTimeMillis() <= nextTimeMillis) {
-                    return nextTimeMillis;
-                }
-            }
-            dayOfWeek++;
-            nextTimeMillis += TimeUnit.DAYS.toMillis(1);
-        }
-        return -1;
+        return CalendarTaskTimes.nextWeekday(mMillis, mTimeFlag, DateTime.now());
     }
 
     private long getNextTimeOfMonthlyTask() {
@@ -177,7 +161,7 @@ public class TimedTask extends BaseModel {
     private DateTime createMonthlyDateTime(int year, int monthOfYear) {
         DateTime firstDay = new LocalDate(year, monthOfYear, 1).toDateTimeAtStartOfDay();
         int dayOfMonth = normalizeDayOfMonth(firstDay);
-        return firstDay.withDayOfMonth(dayOfMonth).withMillisOfDay((int) mMillis);
+        return new DateTime(CalendarTaskTimes.atLocalTime(firstDay.withDayOfMonth(dayOfMonth).toLocalDate(), mMillis, firstDay.getZone()), firstDay.getZone());
     }
 
     private long getNextTimeOfYearlyTask() {
@@ -193,7 +177,7 @@ public class TimedTask extends BaseModel {
         int monthOfYear = mMonthOfYear <= 0 ? 1 : Math.min(mMonthOfYear, DateTimeConstants.DECEMBER);
         DateTime firstDay = new LocalDate(year, monthOfYear, 1).toDateTimeAtStartOfDay();
         int dayOfMonth = normalizeDayOfMonth(firstDay);
-        return firstDay.withDayOfMonth(dayOfMonth).withMillisOfDay((int) mMillis);
+        return new DateTime(CalendarTaskTimes.atLocalTime(firstDay.withDayOfMonth(dayOfMonth).toLocalDate(), mMillis, firstDay.getZone()), firstDay.getZone());
     }
 
     private int normalizeDayOfMonth(DateTime dateTime) {

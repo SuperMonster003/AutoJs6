@@ -108,6 +108,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunDevicePowerGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDeviceAudioGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDialogsControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunAndroidObjectsGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunTasksControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiLayoutGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiComposeGrantPreference: ThemeColorSwitchPreference? = null
@@ -265,6 +267,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunDevicePowerGrantPreference = findPreference("plugin_bun_device_power_grant")
         bunDeviceAudioGrantPreference = findPreference("plugin_bun_device_audio_grant")
         bunDialogsControlGrantPreference = findPreference("plugin_bun_dialogs_control_grant")
+        bunAndroidObjectsGrantPreference = findPreference("plugin_bun_android_objects_grant")
+        bunTasksControlGrantPreference = findPreference("plugin_bun_tasks_control_grant")
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
         bunUiLayoutGrantPreference = findPreference("plugin_bun_ui_layout_grant")
         bunUiComposeGrantPreference = findPreference("plugin_bun_ui_compose_grant")
@@ -471,6 +475,14 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setDialogsControlGranted(requireContext(), value == true)
             true
         }
+        bunAndroidObjectsGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setAndroidObjectsGranted(requireContext(), value == true)
+            true
+        }
+        bunTasksControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setTasksControlGranted(requireContext(), value == true)
+            true
+        }
         bunConsoleControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
             true
@@ -573,6 +585,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunDevicePowerGrantPreference?.isChecked = BunHostCapabilityGrants.isDevicePowerGranted(requireContext())
         bunDeviceAudioGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceAudioGranted(requireContext())
         bunDialogsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDialogsControlGranted(requireContext())
+        bunAndroidObjectsGrantPreference?.isChecked = BunHostCapabilityGrants.isAndroidObjectsGranted(requireContext())
+        bunTasksControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTasksControlGranted(requireContext())
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
         bunUiLayoutGrantPreference?.isChecked = BunHostCapabilityGrants.isUiLayoutGranted(requireContext())
         bunUiComposeGrantPreference?.isChecked = BunHostCapabilityGrants.isUiComposeGranted(requireContext())
