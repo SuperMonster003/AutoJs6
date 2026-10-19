@@ -185,6 +185,91 @@ public class CircularMenuOperationDialogInstrumentationTest {
                 && hasSubtitle(dialog[0], 1, "[ " + dialog[0].getContext().getString(R.string.text_no_content) + " ]"));
     }
 
+    @Test
+    public void menuWaitsForSubtitlesBeforeShowing() throws Exception {
+        CountDownLatch entered = new CountDownLatch(1);
+        CountDownLatch release = gate();
+        MaterialDialog[] dialog = new MaterialDialog[1];
+        instrumentation.runOnMainSync(() -> {
+            CircularMenuOperationDialogBuilder builder = newBuilder()
+                    .item(R.drawable.ic_text_fields_black_48dp, "Slow", () -> {
+                        entered.countDown();
+                        await(release);
+                        return "Loaded";
+                    })
+                    .item(R.drawable.ic_home_black_48dp, "Action");
+            dialog[0] = builder.build();
+            dialogs.add(dialog[0]);
+            builder.showWhenSubtitlesLoaded(5000, () -> true);
+        });
+        assertTrue(entered.await(5, TimeUnit.SECONDS));
+        instrumentation.waitForIdleSync();
+        instrumentation.runOnMainSync(() -> assertFalse(dialog[0].isShowing()));
+        release.countDown();
+        waitOnMain(() -> dialog[0].isShowing() && hasSubtitle(dialog[0], 0, "Loaded"));
+    }
+
+    @Test
+    public void lateSubtitleAfterTimeoutMovesRowsBelowWithoutAnimation() {
+        CountDownLatch release = gate();
+        MaterialDialog[] dialog = new MaterialDialog[1];
+        int[] initialHeight = new int[1];
+        instrumentation.runOnMainSync(() -> {
+            CircularMenuOperationDialogBuilder builder = newBuilder()
+                    .item(R.drawable.ic_text_fields_black_48dp, "Slow", () -> {
+                        await(release);
+                        return "Loaded\nSecond line";
+                    })
+                    .item(R.drawable.ic_home_black_48dp, "Below");
+            dialog[0] = builder.build();
+            dialogs.add(dialog[0]);
+            builder.showWhenSubtitlesLoaded(50, () -> true);
+        });
+        waitOnMain(() -> dialog[0].isShowing() && holder(dialog[0], 1) != null && holder(dialog[0], 0).itemView.getHeight() > 0);
+        instrumentation.runOnMainSync(() -> {
+            assertTrue(hasSubtitle(dialog[0], 0, dialog[0].getContext().getString(R.string.ellipsis_six)));
+            initialHeight[0] = holder(dialog[0], 0).itemView.getHeight();
+        });
+        release.countDown();
+        waitOnMain(() -> hasSubtitle(dialog[0], 0, "Loaded\nSecond line") && holder(dialog[0], 0).itemView.getHeight() > initialHeight[0]);
+        instrumentation.runOnMainSync(() -> {
+            View below = holder(dialog[0], 1).itemView;
+            assertEquals(0f, below.getTranslationY(), 0f);
+            assertEquals(holder(dialog[0], 0).itemView.getBottom(), below.getTop());
+        });
+    }
+
+    @Test
+    public void menuNoLongerWantedIsNotShownAndCancelsLoading() throws Exception {
+        CountDownLatch entered = new CountDownLatch(1);
+        CountDownLatch interrupted = new CountDownLatch(1);
+        CountDownLatch release = gate();
+        AtomicInteger dismissals = new AtomicInteger();
+        MaterialDialog[] dialog = new MaterialDialog[1];
+        instrumentation.runOnMainSync(() -> {
+            CircularMenuOperationDialogBuilder builder = newBuilder()
+                    .item(R.drawable.ic_text_fields_black_48dp, "Slow", () -> {
+                        entered.countDown();
+                        try {
+                            release.await(10, TimeUnit.SECONDS);
+                        } catch (InterruptedException e) {
+                            interrupted.countDown();
+                        }
+                        return "Stale";
+                    });
+            builder.dismissListener(d -> dismissals.incrementAndGet());
+            dialog[0] = builder.build();
+            dialogs.add(dialog[0]);
+            builder.showWhenSubtitlesLoaded(50, () -> false);
+        });
+        assertTrue(entered.await(5, TimeUnit.SECONDS));
+        assertTrue(interrupted.await(5, TimeUnit.SECONDS));
+        instrumentation.runOnMainSync(() -> {
+            assertFalse(dialog[0].isShowing());
+            assertEquals(1, dismissals.get());
+        });
+    }
+
     private CircularMenuOperationDialogBuilder newBuilder() {
         return new CircularMenuOperationDialogBuilder(instrumentation.getTargetContext());
     }

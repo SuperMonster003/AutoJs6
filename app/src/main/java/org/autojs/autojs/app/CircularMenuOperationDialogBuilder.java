@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.afollestad.materialdialogs.MaterialDialog;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.OperationDialogItemBinding;
 
@@ -24,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -48,12 +50,18 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
     private final Map<Integer, FutureTask<String>> mSubtitleRequests = new HashMap<>();
     private final Handler mSubtitleHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.Adapter<ViewHolder> mAdapter;
+    private final Runnable mRunPendingShow = this::runPendingShow;
     private boolean mSubtitleLoadingCancelled;
+    private MaterialDialog mDialog;
+    private Runnable mPendingShow;
 
     public CircularMenuOperationDialogBuilder(@NonNull Context context) {
         super(context);
         RecyclerView operations = new RecyclerView(context);
         operations.setLayoutManager(new LinearLayoutManager(context));
+        // A subtitle that loads late may change its row height; move the rows below at once instead of sliding them down.
+        // zh-CN: 较晚加载的副标题可能改变条目高度, 此时下方条目直接就位, 不以动画向下滑动.
+        operations.setItemAnimator(null);
         mAdapter = new RecyclerView.Adapter<>() {
             @NonNull
             @Override
@@ -145,6 +153,9 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
                     if (!subtitle.equals(mSubtitleCache.put(position, subtitle))) {
                         mAdapter.notifyItemChanged(position, SUBTITLE_PAYLOAD);
                     }
+                    if (mPendingShow != null && areSubtitlesLoaded()) {
+                        runPendingShow();
+                    }
                 });
             }
         };
@@ -152,20 +163,80 @@ public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuild
         SUBTITLE_EXECUTOR.execute(request);
     }
 
+    private boolean areSubtitlesLoaded() {
+        for (int i = 0; i < mSubtitleSuppliers.size(); i++) {
+            if (mSubtitleSuppliers.get(i) != null && !mSubtitleCache.containsKey(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void runPendingShow() {
+        Runnable show = mPendingShow;
+        mPendingShow = null;
+        mSubtitleHandler.removeCallbacks(mRunPendingShow);
+        if (show != null) {
+            show.run();
+        }
+    }
+
+    private void cancelSubtitleLoading() {
+        mSubtitleLoadingCancelled = true;
+        mPendingShow = null;
+        mSubtitleRequests.values().forEach(request -> request.cancel(true));
+        mSubtitleRequests.clear();
+        mSubtitleHandler.removeCallbacksAndMessages(null);
+    }
+
     @Override
     public MaterialDialog build() {
         MaterialDialog dialog = super.build();
         var listener = dismissListener;
         dialog.setOnDismissListener(d -> {
-            mSubtitleLoadingCancelled = true;
-            mSubtitleRequests.values().forEach(request -> request.cancel(true));
-            mSubtitleRequests.clear();
-            mSubtitleHandler.removeCallbacksAndMessages(null);
+            cancelSubtitleLoading();
             if (listener != null) {
                 listener.onDismiss(d);
             }
         });
+        mDialog = dialog;
         return dialog;
+    }
+
+    /**
+     * Shows the built dialog once every subtitle has loaded, or after timeoutMillis, so rows appear
+     * with their final height instead of shifting after the dialog becomes visible.
+     * If isWanted returns false by then, the dialog is not shown and is cleaned up as if dismissed.
+     * Must be called on the main thread.
+     * zh-CN: 全部副标题加载完成或超时后再显示已构建的对话框, 使条目以最终高度出现, 不在显示后发生位移.
+     * 届时若 isWanted 返回 false, 则不再显示, 并按对话框关闭时的方式清理. 须在主线程调用.
+     */
+    public void showWhenSubtitlesLoaded(long timeoutMillis, @NonNull BooleanSupplier isWanted) {
+        MaterialDialog dialog = mDialog;
+        if (dialog == null) {
+            throw new IllegalStateException("The dialog has not been built");
+        }
+        mPendingShow = () -> {
+            if (isWanted.getAsBoolean()) {
+                DialogUtils.showAdaptive(dialog);
+                return;
+            }
+            cancelSubtitleLoading();
+            if (dismissListener != null) {
+                dismissListener.onDismiss(dialog);
+            }
+        };
+        for (int i = 0; i < mSubtitleSuppliers.size(); i++) {
+            var supplier = mSubtitleSuppliers.get(i);
+            if (supplier != null && !mSubtitleCache.containsKey(i)) {
+                loadSubtitle(i, supplier);
+            }
+        }
+        if (areSubtitlesLoaded()) {
+            runPendingShow();
+        } else {
+            mSubtitleHandler.postDelayed(mRunPendingShow, timeoutMillis);
+        }
     }
 
     public CircularMenuOperationDialogBuilder item(int iconRes, int titleRes) {

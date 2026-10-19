@@ -76,6 +76,10 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     public static final int STATE_NORMAL = 0;
     public static final int STATE_RECORDING = 1;
 
+    // No longer than the menu collapse animation. A slower query still updates the menu after it appears.
+    // zh-CN: 不超过菜单收起动画的时长. 更慢的查询仍在菜单显示后更新.
+    private static final long MENU_SUBTITLE_WAIT_MILLIS = 200;
+
     CircularMenuWindow mWindow;
 
     private int mState;
@@ -284,7 +288,8 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
 
             dismissSettingsDialog();
 
-            mMenuOperationDialog = new CircularMenuOperationDialogBuilder(mContext)
+            CircularMenuOperationDialogBuilder builder = new CircularMenuOperationDialogBuilder(mContext);
+            MaterialDialog dialog = mMenuOperationDialog = builder
                     .item(R.drawable.ic_accessibility_black_48dp, mContext.getString(R.string.text_a11y_service), this::getA11yState, onCircularMenuItemClick(itemView -> {
                         mA11yTool.launchSettings(false, true);
                     }))
@@ -309,10 +314,12 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                         closeAndSaveState(false);
                     }))
                     .title(mContext.getString(R.string.text_more))
-                    .dismissListener(dialog -> currentComponent.cancel(true))
+                    .dismissListener(d -> currentComponent.cancel(true))
                     .build();
 
-            DialogUtils.showAdaptive(mMenuOperationDialog);
+            // Wait briefly for the subtitles so that rows do not shift after the menu appears.
+            // zh-CN: 短暂等待副标题加载, 避免菜单显示后条目发生位移.
+            builder.showWhenSubtitlesLoaded(MENU_SUBTITLE_WAIT_MILLIS, () -> mMenuOperationDialog == dialog);
         });
     }
 
