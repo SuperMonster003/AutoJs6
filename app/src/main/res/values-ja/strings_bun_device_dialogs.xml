@@ -1,0 +1,10 @@
+<resources>
+    <string name="summary_bun_device_audio_grant">メディア, 通知とアラームの音量取得と変更を許可</string>
+    <string name="summary_bun_device_control_grant">リアルタイム情報の取得, 画面の起動と振動を許可</string>
+    <string name="summary_bun_device_power_grant">明るさと時間指定の画面点灯を許可; 明るさの変更には Android のシステム設定変更権限も必要</string>
+    <string name="summary_bun_dialogs_control_grant">入力, 選択と進行状況のダイアログを許可</string>
+    <string name="text_bun_device_audio_grant">デバイス音量の制御</string>
+    <string name="text_bun_device_control_grant">デバイス制御</string>
+    <string name="text_bun_device_power_grant">画面電源の制御</string>
+    <string name="text_bun_dialogs_control_grant">ダイアログ</string>
+</resources>

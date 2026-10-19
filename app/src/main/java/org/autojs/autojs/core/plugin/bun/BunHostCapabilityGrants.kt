@@ -48,6 +48,11 @@ object BunHostCapabilityGrants {
     const val NOTIFICATIONS_POST = "notifications.post"
     const val NOTIFICATIONS_SETTINGS = "notifications.settings"
 
+    const val DEVICE_CONTROL = "device.control"
+    const val DEVICE_POWER = "device.power"
+    const val DEVICE_AUDIO = "device.audio"
+    const val DIALOGS_CONTROL = "dialogs.control"
+
     private const val SP_NAME = "bun_host_capability_grants"
 
     /** Read-only host info snapshot: host package, version and advisory locale/build date. */
@@ -164,6 +169,18 @@ object BunHostCapabilityGrants {
     fun isNotificationsSettingsGranted(context: Context): Boolean = isGranted(context, NOTIFICATIONS_SETTINGS, false)
     fun setNotificationsSettingsGranted(context: Context, granted: Boolean) = setGranted(context, NOTIFICATIONS_SETTINGS, granted)
 
+    fun isDeviceControlGranted(context: Context): Boolean = isGranted(context, DEVICE_CONTROL, false)
+    fun setDeviceControlGranted(context: Context, granted: Boolean) = setGranted(context, DEVICE_CONTROL, granted)
+
+    fun isDevicePowerGranted(context: Context): Boolean = isGranted(context, DEVICE_POWER, false)
+    fun setDevicePowerGranted(context: Context, granted: Boolean) = setGranted(context, DEVICE_POWER, granted)
+
+    fun isDeviceAudioGranted(context: Context): Boolean = isGranted(context, DEVICE_AUDIO, false)
+    fun setDeviceAudioGranted(context: Context, granted: Boolean) = setGranted(context, DEVICE_AUDIO, granted)
+
+    fun isDialogsControlGranted(context: Context): Boolean = isGranted(context, DIALOGS_CONTROL, false)
+    fun setDialogsControlGranted(context: Context, granted: Boolean) = setGranted(context, DIALOGS_CONTROL, granted)
+
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
@@ -217,6 +234,10 @@ object BunHostCapabilityGrants {
         if (isEventsKeyGranted(context)) add(EVENTS_KEY)
         if (isNotificationsPostGranted(context)) add(NOTIFICATIONS_POST)
         if (isNotificationsSettingsGranted(context)) add(NOTIFICATIONS_SETTINGS)
+        if (isDeviceControlGranted(context)) add(DEVICE_CONTROL)
+        if (isDevicePowerGranted(context)) add(DEVICE_POWER)
+        if (isDeviceAudioGranted(context)) add(DEVICE_AUDIO)
+        if (isDialogsControlGranted(context)) add(DIALOGS_CONTROL)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
         }
     }
@@ -224,7 +245,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS)
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL)
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()

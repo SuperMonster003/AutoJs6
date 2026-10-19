@@ -1,0 +1,10 @@
+<resources>
+    <string name="summary_bun_device_audio_grant">Permitir leer y cambiar el volumen multimedia, de notificaciones y alarmas</string>
+    <string name="summary_bun_device_control_grant">Permitir información actualizada, activación de pantalla y vibración</string>
+    <string name="summary_bun_device_power_grant">Permitir brillo y mantener la pantalla encendida temporalmente; el brillo también requiere permiso de ajustes de Android</string>
+    <string name="summary_bun_dialogs_control_grant">Permitir diálogos de entrada, selección y progreso</string>
+    <string name="text_bun_device_audio_grant">Volumen del dispositivo</string>
+    <string name="text_bun_device_control_grant">Control del dispositivo</string>
+    <string name="text_bun_device_power_grant">Energía de pantalla</string>
+    <string name="text_bun_dialogs_control_grant">Diálogos</string>
+</resources>

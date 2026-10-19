@@ -1,0 +1,10 @@
+<resources>
+    <string name="summary_bun_device_audio_grant">미디어, 알림 및 알람 음량 읽기와 변경 허용</string>
+    <string name="summary_bun_device_control_grant">실시간 기기 정보, 화면 깨우기 및 진동 허용</string>
+    <string name="summary_bun_device_power_grant">밝기 및 화면 켜짐 시간 제어 허용; 밝기 변경에는 Android 시스템 설정 수정 권한도 필요</string>
+    <string name="summary_bun_dialogs_control_grant">입력, 선택 및 진행 대화상자 허용</string>
+    <string name="text_bun_device_audio_grant">기기 음량 제어</string>
+    <string name="text_bun_device_control_grant">기기 제어</string>
+    <string name="text_bun_device_power_grant">화면 전원 제어</string>
+    <string name="text_bun_dialogs_control_grant">대화상자</string>
+</resources>

@@ -164,7 +164,8 @@
         "API hôtes database/sqlite pour Bun et les Workers Node.js, avec requêtes paramétrées, transactions et persistance",
         "Mesures et abonnements aux capteurs pour Bun et les Workers Node.js, avec annulation et libération automatique des écouteurs",
         "Shell hôte avec flux, autorisation Shizuku et nettoyage des processus pour Bun, Node.js et les Workers",
-        "Événements et notifications hôtes pour Bun et les Workers Node.js, avec nettoyage indépendant des abonnements et notifications"
+        "Événements et notifications hôtes pour Bun et les Workers Node.js, avec nettoyage indépendant des abonnements et notifications",
+        "Commandes de périphérique et dialogues pour Bun et les Workers Node.js, avec luminosité, volume et nettoyage indépendant des fenêtres"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
@@ -305,7 +306,8 @@
         "Perte des types null/numériques dans les requêtes, comptage incorrect des INSERT multiples et connexions retenues par les transactions inachevées",
         "Écouteurs de capteurs conservés après annulation, échec de lecture ou inscription pendant la destruction du fournisseur",
         "Blocage du nettoyage des commandes ignorant SIGTERM, avec arrêt des descendants avant terminaison",
-        "Notifications de scripts distincts portant le même ID numérique qui se remplacent ou se suppriment"
+        "Notifications de scripts distincts portant le même ID numérique qui se remplacent ou se suppriment",
+        "Valeurs obsolètes après la mise à jour des dialogues de progression et fenêtres restant ouvertes après annulation"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",

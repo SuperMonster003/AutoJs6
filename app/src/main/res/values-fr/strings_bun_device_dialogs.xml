@@ -1,0 +1,10 @@
+<resources>
+    <string name="summary_bun_device_audio_grant">Autoriser la lecture et la modification des volumes des médias, notifications et alarmes</string>
+    <string name="summary_bun_device_control_grant">Autoriser les informations en direct, le réveil et les vibrations</string>
+    <string name="summary_bun_device_power_grant">Autoriser la luminosité et le maintien temporaire de l\'écran; la luminosité nécessite aussi la permission Android de modifier les paramètres</string>
+    <string name="summary_bun_dialogs_control_grant">Autoriser les dialogues de saisie, de choix et de progression</string>
+    <string name="text_bun_device_audio_grant">Volume du périphérique</string>
+    <string name="text_bun_device_control_grant">Commandes du périphérique</string>
+    <string name="text_bun_device_power_grant">Alimentation de l\'écran</string>
+    <string name="text_bun_dialogs_control_grant">Boîtes de dialogue</string>
+</resources>

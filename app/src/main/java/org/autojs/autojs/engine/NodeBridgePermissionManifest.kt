@@ -274,6 +274,9 @@ object NodeBridgePermissionManifest {
     )
 
     private val androidPermissionsByCapability = linkedMapOf(
+        DEVICE to listOf("android.permission.WAKE_LOCK", "android.permission.VIBRATE"),
+        DEVICE_POWER to listOf("android.permission.WRITE_SETTINGS", "android.permission.WAKE_LOCK"),
+        MEDIA_AUDIO to listOf("android.permission.MODIFY_AUDIO_SETTINGS"),
         SHELL_SHIZUKU to listOf("moe.shizuku.manager.permission.API_V23"),
         NOTIFICATIONS to listOf(ANDROID_PERMISSION_POST_NOTIFICATIONS),
         MEDIA_RECORDING to listOf(
@@ -302,6 +305,7 @@ object NodeBridgePermissionManifest {
     )
 
     private val androidPermissionOrder = listOf(
+        "android.permission.WAKE_LOCK", "android.permission.VIBRATE", "android.permission.WRITE_SETTINGS", "android.permission.MODIFY_AUDIO_SETTINGS",
         ANDROID_PERMISSION_POST_NOTIFICATIONS,
         ANDROID_PERMISSION_RECORD_AUDIO,
         ANDROID_PERMISSION_INTERNET,
@@ -530,7 +534,7 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.SCREEN_METRICS -> listOf(DEVICE)
             NodeBridgeModules.DEVICE -> when (method) {
                 "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings",
-                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake" -> listOf(DEVICE, DEVICE_POWER)
+                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake", "closeScope" -> listOf(DEVICE, DEVICE_POWER)
                 else -> listOf(DEVICE)
             }
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)

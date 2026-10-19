@@ -1289,10 +1289,10 @@ class NodeBridgeConformanceInstrumentationTest {
                 "currentWindow",
                 "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo",
             ),
-            NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select", "rawInput", "singleChoice", "multiChoice", "progressShow", "progressUpdate", "progressDismiss"),
+            NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select", "rawInput", "singleChoice", "multiChoice", "progressShow", "progressUpdate", "progressDismiss", "cancelRequest", "closeScope"),
             NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),
             NodeBridgeModules.DEVICE to setOf("info", "isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings",
-                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake"),
+                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake", "closeScope"),
             NodeBridgeModules.SHELL to setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission"),
             NodeBridgeModules.ENGINES to setOf("list", "stop", "myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"),
             NodeBridgeModules.ACCESSIBILITY to setOf(

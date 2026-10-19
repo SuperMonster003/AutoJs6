@@ -19,7 +19,16 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        assertEquals(71,BunAutomationBridge.methods.values.sumOf{it.size})
+        assertEquals(97,BunAutomationBridge.methods.values.sumOf{it.size})
+    }
+    @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
+        assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
+        assertEquals(listOf("device.power"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_POWER)))
+        assertEquals(listOf("media","media.audio"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_AUDIO)))
+        assertEquals(listOf("dialogs"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DIALOGS_CONTROL)))
+        assertEquals(setOf("getAudioStreamVolume","getAudioStreamMaxVolume","setAudioStreamVolume"),BunAutomationBridge.methods[Grants.DEVICE_AUDIO])
+        val permissions=NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("device","device.power","media.audio")).androidPermissions
+        assertTrue(permissions.containsAll(listOf("android.permission.WAKE_LOCK","android.permission.VIBRATE","android.permission.WRITE_SETTINGS","android.permission.MODIFY_AUDIO_SETTINGS")))
     }
     @Test fun sensorsGrantMapsOnlyToSensorsAndCoversEveryNativeMethod() {
         assertEquals(listOf("sensors"),BunAutomationBridge.nodeCapabilities(listOf(Grants.SENSORS_CONTROL)))

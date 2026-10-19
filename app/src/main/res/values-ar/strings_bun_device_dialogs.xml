@@ -1,0 +1,10 @@
+<resources>
+    <string name="summary_bun_device_audio_grant">السماح بقراءة وتغيير صوت الوسائط والإشعارات والمنبه</string>
+    <string name="summary_bun_device_control_grant">السماح بمعلومات الجهاز المباشرة والإيقاظ والاهتزاز</string>
+    <string name="summary_bun_device_power_grant">السماح بالسطوع وإبقاء الشاشة مضاءة مؤقتا; يتطلب السطوع أيضا إذن تعديل إعدادات Android</string>
+    <string name="summary_bun_dialogs_control_grant">السماح بمربعات حوار الإدخال والاختيار والتقدم</string>
+    <string name="text_bun_device_audio_grant">التحكم بمستوى الصوت</string>
+    <string name="text_bun_device_control_grant">التحكم بالجهاز</string>
+    <string name="text_bun_device_power_grant">التحكم بطاقة الشاشة</string>
+    <string name="text_bun_dialogs_control_grant">مربعات الحوار</string>
+</resources>

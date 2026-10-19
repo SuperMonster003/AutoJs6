@@ -21,24 +21,44 @@ internal class NodeDialogs(private val context: Context) {
     private val handler = Handler(Looper.getMainLooper())
     private val sessions = linkedMapOf<String, NodeDialogSession>()
     private var closed = false
+    private val closedScopes = hashSetOf<String>()
+    private val cancelledRequests = hashSetOf<String>()
 
     fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) = handler.post {
         try {
             check(!closed) { "The script has ended." }
             val args = JSONArray(request.argsJson)
             when (request.method) {
+                "cancelRequest" -> {
+                    val token = args.getString(0)
+                    val scope = args.optString(1)
+                    require(token.isNotBlank()) { "A dialog cancellation token is required." }
+                    rememberCancellation("token:$scope:$token")
+                    sessions.values.toList().filter { it.token == token && it.scope == scope }.forEach { it.cancel() }
+                    callback(NodeBridgeResponse.success(request.id, "true"))
+                }
+                "closeScope" -> {
+                    val scope = args.getString(0)
+                    closedScopes.add(scope)
+                    sessions.values.toList().filter { it.scope == scope }.forEach { it.cancel() }
+                    callback(NodeBridgeResponse.success(request.id, "true"))
+                }
                 "progressUpdate" -> {
                     val session = sessions[args.getString(0)] ?: error("The progress dialog is closed.")
+                    require(session.scope == args.optString(2)) { "The dialog belongs to another client." }
                     session.update(args.getJSONObject(1))
                     callback(NodeBridgeResponse.success(request.id, session.snapshot().toString()))
                 }
                 "progressDismiss" -> {
                     val session = sessions[args.getString(0)]
+                    require(session == null || session.scope == args.optString(1)) { "The dialog belongs to another client." }
                     session?.finish(null)
                     callback(NodeBridgeResponse.success(request.id, (session != null).toString()))
                 }
                 else -> {
                     val session = NodeDialogSession(request, args, callback) { id -> sessions.remove(id) }
+                    check(session.scope !in closedScopes && !cancelledRequests.remove("native:${request.id}") &&
+                        !cancelledRequests.remove("token:${session.scope}:${session.token}")) { "The dialog request was cancelled." }
                     sessions[session.id] = session
                     NodeDialogActivity.sessions[session.id] = session
                     session.expire = Runnable { session.timeout() }
@@ -58,9 +78,24 @@ internal class NodeDialogs(private val context: Context) {
         }
     }
 
+    private fun rememberCancellation(key: String) {
+        cancelledRequests.add(key)
+        handler.postDelayed({ cancelledRequests.remove(key) }, 120000)
+    }
+
+    /** Bun transport cancellation also handles raw calls that do not carry SDK tokens. */
+    fun cancelRequest(requestId: String) = handler.post {
+        if (!closed) {
+            rememberCancellation("native:$requestId")
+            sessions.values.toList().filter { it.requestId == requestId }.forEach { it.cancel() }
+        }
+    }
+
     fun closeAll() = handler.post {
         closed = true
         sessions.values.toList().forEach { it.cancel() }
+        cancelledRequests.clear()
+        closedScopes.clear()
     }
 }
 
@@ -71,9 +106,12 @@ internal class NodeDialogSession(
     private val remove: (String) -> Unit,
 ) {
     val id = "dialog-${UUID.randomUUID()}"
+    val requestId = request.id
     private val isProgress = request.method == "progressShow"
     private val options = if (isProgress) args.getJSONObject(0) else args.optJSONObject(
         if (request.method == "singleChoice" || request.method == "multiChoice") 3 else 2) ?: JSONObject()
+    val scope = options.optString("__scope")
+    val token = options.optString("__requestId")
     private var activity: NodeDialogActivity? = null
     private var finished = false
     private var progressBar: ProgressBar? = null
@@ -95,6 +133,7 @@ internal class NodeDialogSession(
     }
 
     fun attach(owner: NodeDialogActivity) {
+        if (finished) { owner.finish(); return }
         activity = owner
         val title = if (isProgress) state.optString("title") else args.optString(0)
         val builder = AlertDialog.Builder(owner).setTitle(title)
@@ -151,6 +190,7 @@ internal class NodeDialogSession(
             }
             else -> throw IllegalArgumentException("Unknown dialog method: ${request.method}")
         }
+        if (!isProgress && options.optString("neutral").isNotBlank()) builder.setNeutralButton(options.getString("neutral")) { _, _ -> finish(cancelled) }
         val dialog = builder.create()
         owner.dialog = dialog
         dialog.setOnCancelListener { finish(cancelled) }
@@ -182,7 +222,7 @@ internal class NodeDialogSession(
         }
     }
 
-    fun snapshot(): JSONObject = JSONObject(state.toString()).put("id", id).put("shown", !finished)
+    fun snapshot(): JSONObject = JSONObject(state.toString()).apply { remove("__scope"); remove("__requestId") }.put("id", id).put("shown", !finished)
         .put("max", state.optInt("max", 100)).put("value", state.optInt("value", 0))
         .put("indeterminate", state.optBoolean("indeterminate", false))
 

@@ -78,6 +78,7 @@ internal class BunAutomationBridge(
                     provider().dispatch(NodeBridgeRequest(id, module, method, args.toString(), timeout.toLong(),
                         permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method, args.toString()))) { job.future.complete(it) }
                     if(job.abandoned.get() && capability==Grants.SHELL_CONTROL)provider().cancelShellRequest(id)
+                    if(job.abandoned.get() && capability==Grants.DIALOGS_CONTROL)provider().cancelDialogRequest(id)
                 } catch (error: Exception) {
                     job.future.complete(NodeBridgeResponse.failure(id, if (error is IllegalArgumentException || error is org.json.JSONException)
                         NodeBridgeError.invalidRequest(error.message ?: "Invalid automation arguments", modules.getValue(capability), method)
@@ -99,10 +100,17 @@ internal class BunAutomationBridge(
         val sensor = job.capability == Grants.SENSORS_CONTROL && job.method == "subscribe"
         val events = job.capability == Grants.EVENTS_OBSERVE && job.method.startsWith("observe")
         val notification = job.capability == Grants.NOTIFICATIONS_POST && job.method == "notify"
-        if (!database && !sensor && !shell && !events && !notification) { job.future.cancel(false); return }
+        if (job.capability == Grants.DIALOGS_CONTROL) provider().cancelDialogRequest(job.id)
+        val awake = job.capability == Grants.DEVICE_CONTROL && job.method == "keepScreenOn"
+        if (!database && !sensor && !shell && !events && !notification && !awake) { job.future.cancel(false); return }
         // Preserve late creation replies so cancelled callers cannot strand native resources.
         job.future.whenComplete { response, _ ->
             if (response?.ok == true) runCatching {
+                if (awake) {
+                    provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), NodeBridgeModules.DEVICE, "cancelKeepingAwake",
+                        JSONArray().put(JSONArray(job.argsJson).optString(1)).toString(), 5000, permissions = listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER))) {}
+                    return@runCatching
+                }
                 if (notification) {
                     val args = JSONArray().put(org.json.JSONTokener(response.resultJson.orEmpty()).nextValue()).put(JSONArray(job.argsJson).optString(1, ""))
                     provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), NodeBridgeModules.NOTIFICATIONS, "cancel", args.toString(), 5000, permissions = listOf(NodeBridgePermissionManifest.NOTIFICATIONS))) {}
@@ -121,6 +129,10 @@ internal class BunAutomationBridge(
 
     companion object {
         fun nodeCapabilities(grants: List<String>): List<String> = buildList {
+            if (Grants.DEVICE_CONTROL in grants) add(NodeBridgePermissionManifest.DEVICE)
+            if (Grants.DEVICE_POWER in grants) add(NodeBridgePermissionManifest.DEVICE_POWER)
+            if (Grants.DEVICE_AUDIO in grants) addAll(listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_AUDIO))
+            if (Grants.DIALOGS_CONTROL in grants) add(NodeBridgePermissionManifest.DIALOGS)
             if (Grants.APP_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.APP, NodeBridgePermissionManifest.APP_LAUNCH,
                 NodeBridgePermissionManifest.APP_SETTINGS, NodeBridgePermissionManifest.APP_ACTIVITY, NodeBridgePermissionManifest.APP_QUERY))
             if (Grants.ACCESSIBILITY_CONTROL in grants) {
@@ -143,6 +155,9 @@ internal class BunAutomationBridge(
         }
         val gestureMethods = setOf("swipe", "gesture")
         val methods = mapOf(
+            Grants.DEVICE_CONTROL to NodeBridgeModules.deviceMethods,
+            Grants.DEVICE_AUDIO to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "setAudioStreamVolume"),
+            Grants.DIALOGS_CONTROL to NodeBridgeModules.dialogsMethods,
             Grants.EVENTS_OBSERVE to setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close"),
             Grants.NOTIFICATIONS_POST to setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings"),
             Grants.APP_CONTROL to setOf("launchPackage", "launchApp", "openAppSetting", "startActivity", "getPackageName", "getAppName", "isInstalled", "viewFile", "editFile", "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo"),
@@ -153,6 +168,6 @@ internal class BunAutomationBridge(
             Grants.SENSORS_CONTROL to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             Grants.DATABASE_CONTROL to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
         )
-        private val modules = mapOf(Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
+        private val modules = mapOf(Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
     }
 }

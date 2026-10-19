@@ -255,3 +255,7 @@ and settings, use an isolated fixture path, and clean only owned files.
 Host Shell coverage: `check-runtime-shell.mjs` verifies ten native routes and the shared Node/Worker/Bun factory and declarations. Node and Bun SDK tests cover streams, backpressure, binary chunk limits and cancellation. `NodeShellBridgeInstrumentationTest` checks raw routes, privilege requirements, quota cleanup and PTY EOF. `RuntimeShellDeviceTest` checks ordinary/Shizuku main and Worker execution; `RuntimeShellPackagedDeviceTest` produces and verifies real Bun/Worker APKs. All commands operate on owned processes and use no acoustic signal.
 
 Run `node tools/api-coverage/check-runtime-events.mjs` for event/notification host routes and the shared Node/Worker/Bun factories and types. Behavior is covered by the client/Worker suites and RuntimeEventsNativeTest/RuntimeEventsDeviceTest/RuntimeEventsPackagedDeviceTest.
+
+## Runtime device controls and dialogs
+
+Run `node tools/api-coverage/check-runtime-device-dialogs.mjs` to compare the native device/dialog routes and shared Node/Bun factories and types. Behavior is covered by Node facade/real Worker tests, Bun device-dialogs.test.mjs, declaration smoke programs, Ace default popup checks and RuntimeDeviceDialogsNativeTest/DeviceTest/PackagedDeviceTest. The fixtures keep media volume unchanged and play no audio. Full host API counts describe documentation/type/completion coverage, not complete Node/Bun implementation parity.

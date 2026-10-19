@@ -730,7 +730,7 @@ object NodeBridgeModules {
     )
     val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile", "list", "stop")
     val agentMethods = setOf("listScripts", "readManifest", "execRegistered")
-    val dialogsMethods = setOf("alert", "confirm", "input", "select", "rawInput", "singleChoice", "multiChoice", "progressShow", "progressUpdate", "progressDismiss")
+    val dialogsMethods = setOf("alert", "confirm", "input", "select", "rawInput", "singleChoice", "multiChoice", "progressShow", "progressUpdate", "progressDismiss", "cancelRequest", "closeScope")
     val keysMethods = setOf("notifications", "quickSettings", "lockScreen", "takeScreenshot", "splitScreen", "powerDialog")
     val accessibilityMethods = setOf(
         "isEnabled",
@@ -798,7 +798,7 @@ object NodeBridgeModules {
     val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings", "info",
-        "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake")
+        "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake", "closeScope")
     val shellMethods = setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission")
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
@@ -979,6 +979,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private val notificationHandles = ConcurrentHashMap<Pair<String, Int>, NodeBridgeResourceHandle>()
     private val notificationTag = "autojs6-runtime-${UUID.randomUUID()}"
     private val notificationsClosed = AtomicBoolean(false)
+    internal fun closeDeviceDialogResources() { deviceControls.close(); dialogs.closeAll() }
+    internal fun cancelDialogRequest(requestId: String) { dialogs.cancelRequest(requestId) }
     internal fun closeEventResources() {
         eventObservers.closeAll()
         synchronized(notificationHandles) {
@@ -1195,6 +1197,7 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(packageInstallManager.nativeValues())
         putAll(capabilityBrokerAudit.nativeDiagnostics())
         putAll(resourceRegistry.nativeDiagnostics())
+        put("embedded_script.device.active_wake_lock_count", deviceControls.activeCount().toString())
         put("embedded_script.events.active_handle_count", eventObservers.activeCount().toString())
         put("embedded_script.shell.active_handle_count",if(shellBridge.isInitialized())shellBridge.value.activeCount.toString()else "0")
         putAll(bridgeLimits.nativeDiagnostics())
@@ -1217,6 +1220,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "database" to databaseHandles.size,
                 "notifications" to notificationHandles.size,
                 "events" to eventObservers.activeCount(),
+                "device" to deviceControls.activeCount(),
                 "sensors" to sensorSubscriptions.size,
                 "ui" to uiSessionIds.size + (if (composeBridge.isInitialized()) composeBridge.value.activeCount else 0) +
                     (if (uiInterop.isInitialized()) uiInterop.value.activeCount else 0),
@@ -4285,16 +4289,17 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchDevice(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         dispatchOnMain(request, callback) {
             when (request.method) {
-                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake" -> runCatching {
+                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake", "closeScope" -> runCatching {
                     val value = request.argsArray().opt(0)
-                    if (request.method != "cancelKeepingAwake") require(value is Number && value.toDouble().isFinite() && value.toDouble() == value.toLong().toDouble()) {
+                    if (request.method !in setOf("cancelKeepingAwake", "closeScope")) require(value is Number && value.toDouble().isFinite() && value.toDouble() == value.toLong().toDouble()) {
                         "device.${request.method} requires an integer."
                     }
                     when (request.method) {
                         "setBrightness" -> { require((value as Number).toLong() in 0..255); deviceControls.setBrightness(value.toInt()) }
                         "setBrightnessMode" -> { require((value as Number).toLong() in 0..1); deviceControls.setBrightnessMode(value.toInt()) }
-                        "keepScreenOn" -> deviceControls.keepScreenOn((value as Number).toLong())
-                        else -> deviceControls.cancelKeepingAwake()
+                        "keepScreenOn" -> deviceControls.keepScreenOn((value as Number).toLong(), request.argsArray().optString(1))
+                        "closeScope" -> deviceControls.closeScope(request.argsArray().optString(0))
+                        else -> deviceControls.cancelKeepingAwake(request.argsArray().optString(0))
                     }
                     NodeBridgeResponse.success(request.id, "null")
                 }.getOrElse { error ->

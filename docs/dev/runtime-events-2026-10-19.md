@@ -81,3 +81,5 @@ Original APK hashes, notification-listener access, camera/audio/notification per
 Reproduce with tools/api-coverage/check-runtime-events.mjs, Node test-event-facades.js/test-worker-events.js, Bun events.test.mjs, declaration smoke checks and Ace runtime/default coverage tools. Android suites are RuntimeEventsNativeTest, RuntimeEventsDeviceTest and RuntimeEventsPackagedDeviceTest.
 
 The remaining audit includes broader Bun/Worker device-control and dialog facades, Android-object helpers, calendar/IntentTask scheduling, and dedicated AI/flow/TTS/mail/EPUB and other plugin surfaces. This delivery does not imply full Rhino API equivalence.
+
+The [device/dialog delivery](runtime-device-dialogs-2026-10-19.md) adds Bun and Node Worker device/dialog facades, scoped wake locks, precise cancellation, live progress handles, four independent Bun grants, derived APK permissions and Android 13/15 host/packaged validation. The original Bun device.info format remains compatible; full snapshots use getInfo.

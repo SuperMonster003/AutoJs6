@@ -180,7 +180,8 @@
         "Node.js Worker 与 Bun 的 database/sqlite API, 支持参数化查询, 事务和数据库持久化",
         "Bun 与 Node.js Worker 的传感器采样及订阅 API, 支持取消和监听器自动释放",
         "Bun, Node.js 及 Worker 的宿主 Shell API, 支持流式输入输出, Shizuku 授权与进程清理",
-        "Bun 与 Node.js Worker 的宿主事件和通知 API, 支持独立订阅与通知清理"
+        "Bun 与 Node.js Worker 的宿主事件和通知 API, 支持独立订阅与通知清理",
+        "Bun 与 Node.js Worker 的设备控制和对话框 API, 支持亮度, 音量和独立窗口清理"
       ],
       "fix": [
         "runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题",
@@ -331,7 +332,8 @@
         "数据库桥接查询丢失 null/数字参数类型, 多行 INSERT 影响行数不正确及未结束事务保留连接的问题",
         "传感器单次采样取消, 轮询失败及宿主销毁时排队注册可能遗留监听器的问题",
         "Shell 命令忽略 SIGTERM 时退出清理可能阻塞的问题, 结束前冻结并清理子进程",
-        "不同脚本执行使用相同数字 ID 的通知相互覆盖或取消的问题"
+        "不同脚本执行使用相同数字 ID 的通知相互覆盖或取消的问题",
+        "进度对话框句柄更新后仍返回旧值及取消后窗口未及时关闭的问题"
       ],
       "improvement": [
         "延迟初始化非关键组件以提升应用启动速度",

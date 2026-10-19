@@ -1,0 +1,10 @@
+<resources>
+    <string name="summary_bun_device_audio_grant">Allow reading and changing music, notification and alarm volume</string>
+    <string name="summary_bun_device_control_grant">Allow live device information, wake and vibration</string>
+    <string name="summary_bun_device_power_grant">Allow brightness and timed screen wake locks; Android settings permission is also required for brightness</string>
+    <string name="summary_bun_dialogs_control_grant">Allow input, choice and progress dialogs</string>
+    <string name="text_bun_device_audio_grant">Device volume controls</string>
+    <string name="text_bun_device_control_grant">Device controls</string>
+    <string name="text_bun_device_power_grant">Screen power controls</string>
+    <string name="text_bun_dialogs_control_grant">Dialogs</string>
+</resources>

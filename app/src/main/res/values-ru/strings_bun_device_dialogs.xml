@@ -1,0 +1,10 @@
+<resources>
+    <string name="summary_bun_device_audio_grant">Разрешить чтение и изменение громкости мультимедиа, уведомлений и будильника</string>
+    <string name="summary_bun_device_control_grant">Разрешить актуальные сведения, пробуждение и вибрацию</string>
+    <string name="summary_bun_device_power_grant">Разрешить яркость и временное удержание экрана; для яркости также нужно разрешение Android на изменение настроек</string>
+    <string name="summary_bun_dialogs_control_grant">Разрешить диалоги ввода, выбора и прогресса</string>
+    <string name="text_bun_device_audio_grant">Громкость устройства</string>
+    <string name="text_bun_device_control_grant">Управление устройством</string>
+    <string name="text_bun_device_power_grant">Питание экрана</string>
+    <string name="text_bun_dialogs_control_grant">Диалоги</string>
+</resources>

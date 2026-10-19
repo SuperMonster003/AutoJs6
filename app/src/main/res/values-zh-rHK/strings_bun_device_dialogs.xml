@@ -1,0 +1,10 @@
+<resources>
+    <string name="summary_bun_device_audio_grant">允許讀取和調整媒體, 通知和鬧鐘音量</string>
+    <string name="summary_bun_device_control_grant">允許取得即時裝置資訊, 喚醒和震動</string>
+    <string name="summary_bun_device_power_grant">允許調整亮度和定時保持螢幕開啟; 調整亮度還需 Android 修改系統設定權限</string>
+    <string name="summary_bun_dialogs_control_grant">允許顯示輸入, 選擇和進度對話框</string>
+    <string name="text_bun_device_audio_grant">裝置音量控制</string>
+    <string name="text_bun_device_control_grant">裝置控制</string>
+    <string name="text_bun_device_power_grant">螢幕電源控制</string>
+    <string name="text_bun_dialogs_control_grant">對話框</string>
+</resources>

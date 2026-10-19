@@ -4,9 +4,10 @@ import android.content.Context
 import android.os.PowerManager
 import android.provider.Settings
 
-/** One execution owns one timed screen wake lock; termination releases it immediately. */
+/** Each runtime client owns its timed wake lock; execution shutdown releases every lock. */
 internal class NodeDeviceControls(private val context: Context) {
-    private var wakeLock: PowerManager.WakeLock? = null
+    private val wakeLocks = linkedMapOf<String, PowerManager.WakeLock>()
+    private val closedScopes = hashSetOf<String>()
     private var closed = false
 
     fun setBrightness(value: Int) {
@@ -28,26 +29,32 @@ internal class NodeDeviceControls(private val context: Context) {
 
     @Synchronized
     @Suppress("DEPRECATION")
-    fun keepScreenOn(timeoutMs: Long) {
-        check(!closed) { "The script has ended." }
+    fun keepScreenOn(timeoutMs: Long, scope: String = "") {
+        check(!closed && scope !in closedScopes) { "The script has ended." }
         require(timeoutMs > 0) { "device.keepScreenOn requires a positive timeout in milliseconds." }
-        cancelKeepingAwake()
+        cancelKeepingAwake(scope)
         val manager = checkNotNull(context.getSystemService(Context.POWER_SERVICE) as? PowerManager)
-        wakeLock = manager.newWakeLock(
+        wakeLocks[scope] = manager.newWakeLock(
             PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "AutoJs6:NodeScreen",
         ).apply { setReferenceCounted(false); acquire(timeoutMs) }
     }
 
     @Synchronized
-    fun cancelKeepingAwake() {
-        wakeLock?.let { if (it.isHeld) it.release() }
-        wakeLock = null
+    fun cancelKeepingAwake(scope: String = "") {
+        wakeLocks.remove(scope)?.let { if (it.isHeld) it.release() }
     }
+
+    @Synchronized
+    fun closeScope(scope: String) { closedScopes.add(scope); cancelKeepingAwake(scope) }
+
+    @Synchronized
+    fun activeCount(): Int = wakeLocks.values.count { it.isHeld }
 
     @Synchronized
     fun close() {
         closed = true
-        cancelKeepingAwake()
+        wakeLocks.keys.toList().forEach(::cancelKeepingAwake)
+        closedScopes.clear()
     }
 }

@@ -104,6 +104,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunEventsKeyGrantPreference: ThemeColorSwitchPreference? = null
     private var bunNotificationsPostGrantPreference: ThemeColorSwitchPreference? = null
     private var bunNotificationsSettingsGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunDeviceControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunDevicePowerGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunDeviceAudioGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunDialogsControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiLayoutGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiComposeGrantPreference: ThemeColorSwitchPreference? = null
@@ -257,6 +261,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunEventsKeyGrantPreference = findPreference("plugin_bun_events_key_grant")
         bunNotificationsPostGrantPreference = findPreference("plugin_bun_notifications_post_grant")
         bunNotificationsSettingsGrantPreference = findPreference("plugin_bun_notifications_settings_grant")
+        bunDeviceControlGrantPreference = findPreference("plugin_bun_device_control_grant")
+        bunDevicePowerGrantPreference = findPreference("plugin_bun_device_power_grant")
+        bunDeviceAudioGrantPreference = findPreference("plugin_bun_device_audio_grant")
+        bunDialogsControlGrantPreference = findPreference("plugin_bun_dialogs_control_grant")
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
         bunUiLayoutGrantPreference = findPreference("plugin_bun_ui_layout_grant")
         bunUiComposeGrantPreference = findPreference("plugin_bun_ui_compose_grant")
@@ -447,6 +455,22 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setNotificationsSettingsGranted(requireContext(), value == true)
             true
         }
+        bunDeviceControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setDeviceControlGranted(requireContext(), value == true)
+            true
+        }
+        bunDevicePowerGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setDevicePowerGranted(requireContext(), value == true)
+            true
+        }
+        bunDeviceAudioGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setDeviceAudioGranted(requireContext(), value == true)
+            true
+        }
+        bunDialogsControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setDialogsControlGranted(requireContext(), value == true)
+            true
+        }
         bunConsoleControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
             true
@@ -545,6 +569,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunEventsKeyGrantPreference?.isChecked = BunHostCapabilityGrants.isEventsKeyGranted(requireContext())
         bunNotificationsPostGrantPreference?.isChecked = BunHostCapabilityGrants.isNotificationsPostGranted(requireContext())
         bunNotificationsSettingsGrantPreference?.isChecked = BunHostCapabilityGrants.isNotificationsSettingsGranted(requireContext())
+        bunDeviceControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceControlGranted(requireContext())
+        bunDevicePowerGrantPreference?.isChecked = BunHostCapabilityGrants.isDevicePowerGranted(requireContext())
+        bunDeviceAudioGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceAudioGranted(requireContext())
+        bunDialogsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDialogsControlGranted(requireContext())
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
         bunUiLayoutGrantPreference?.isChecked = BunHostCapabilityGrants.isUiLayoutGranted(requireContext())
         bunUiComposeGrantPreference?.isChecked = BunHostCapabilityGrants.isUiComposeGranted(requireContext())
