@@ -3,6 +3,7 @@ package org.autojs.autojs.core.shizuku
 import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
+import android.os.IBinder
 import android.os.Process
 import android.os.ParcelFileDescriptor
 import android.os.RemoteException
@@ -21,6 +22,7 @@ import java.io.InputStream
 import org.json.JSONObject
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
+import org.autojs.autojs.runtime.api.shell.PtyProcess
 import kotlin.system.exitProcess
 
 class UserService : IUserService.Stub {
@@ -93,6 +95,29 @@ class UserService : IUserService.Stub {
         } catch (e: Exception) {
             AbstractShell.Result(1, e).toJson()
         }
+    }
+
+    override fun newShellProcess(command: Array<String>, env: Array<String>?, dir: String?, pty: Boolean, client: IBinder?): IRemoteShellProcess {
+        val variables = env.orEmpty().mapNotNull { entry ->
+            entry.indexOf('=').takeIf { it > 0 }?.let { entry.substring(0, it) to entry.substring(it + 1) }
+        }.toMap()
+        val process = when {
+            pty -> {
+                require(dir == null) { "A working directory is not supported with pty" }
+                try {
+                    PtyProcess.start(command.toList(), variables)
+                } catch (e: LinkageError) {
+                    // The termexec library could not be loaded in this process.
+                    // zh-CN: 此进程中无法加载 termexec 库.
+                    throw IllegalStateException("A pseudo-terminal is not available in the Shizuku service: $e")
+                }
+            }
+            else -> ProcessBuilder(command.toList()).apply {
+                dir?.let { directory(File(it)) }
+                environment().putAll(variables)
+            }.start()
+        }
+        return RemoteShellProcessHolder(process, client)
     }
 
     override fun currentPackage() = currentActivity?.packageName ?: ""

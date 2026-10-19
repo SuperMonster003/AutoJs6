@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.shizuku;
 
 import android.os.ParcelFileDescriptor;
+import org.autojs.autojs.core.shizuku.IRemoteShellProcess;
 
 interface IUserService {
 
@@ -23,5 +24,8 @@ interface IUserService {
     String saveExplorerFile(String requestJson, in ParcelFileDescriptor contents) = 26;
     String reconcileExplorerFileSave(String requestJson) = 27;
     String manageExplorerFileBackup(String requestJson) = 28;
+
+    // A long-lived process with piped streams, or on a pseudo-terminal with pty; it ends when the host process (client) dies.
+    IRemoteShellProcess newShellProcess(in String[] command, in String[] env, String dir, boolean pty, IBinder client) = 31;
 
 }

@@ -83,6 +83,9 @@ CLAUDE.md
 !/tools/three-stove-agent/
 !/tools/three-stove-agent/**
 /tools/three-stove-agent/__pycache__/
+!/tools/shell-stream/
+!/tools/shell-stream/**
+/tools/shell-stream/.*.generated.js
 
 /gradle/wrappers/backup/
 

@@ -236,6 +236,10 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` ui.inflate 方法支持编译后的 XML TSX 布局及其 onClick 回调绑定
 * `新增` flow 模块及 waitAsync 全局方法, 用于异步等待与链式操作, 支持分支, 循环, 超时, 重试及取消 (参阅 项目文档 > [流程](https://docs.autojs6.com/#/flow))
 * `新增` terminal 全局对象, 用于终端会话管理, 可见执行与输出监听, 支持等待输出及退出码 (需要 3-Shell Terminal 插件) (参阅 示例代码 > 终端)
+* `新增` shell.spawn/shizuku.spawn 方法, 用于以进程运行命令并实时读取输出, 支持逐行读取, output/errorOutput/exit 事件, 写入 stdin, 限时等待及结束进程 (连同其启动的子进程), 脚本结束时自动结束进程 (adb 选项与 shizuku.spawn 需要 Shizuku, root 选项需要 Root 权限)
+* `新增` Shell 构造器支持选项对象 { cmd, root, adb, pty, env, cwd } (兼容 Auto.js Pro), 以此创建的 Shell 基于管道运行并提供 getInputStream/getErrorStream/getOutputStream/waitFor/exitCode/exitAndReadOutput/raw/execForResult 方法, 可经 Shizuku (adb 选项) 运行, 其 execAndWaitFor 按退出码标记分割每条命令的输出
+* `新增` shell.spawn 及选项构造的 Shell 支持 pty 选项, 用于在伪终端上运行命令, 使 getevent/awk 等在管道上缓冲输出的程序逐行输出 (stderr 并入 stdout)
+* `新增` $shell.setDefaultOptions/checkAccess/isRootAvailable 方法 (兼容 Auto.js Pro), 用于设置当前脚本中 shell 函数等的默认 root/adb 选项, 以及检查 Root/Shizuku 权限
 * `新增` installer 模块, 用于安装, 更新及卸载应用, 支持 Shizuku/Root/Dhizuku 静默操作及通知安装等选项 (需要 3-Setup Installer 插件) (参阅 项目文档 > [安装器](https://docs.autojs6.com/#/installer))
 * `新增` mail 模块, 用于邮件收发, 查询, 附件下载及文件夹管理, 支持同步与异步调用 (需要 3-Stamp Mail 插件) (参阅 项目文档 > [邮件](https://docs.autojs6.com/#/mail))
 * `新增` mail.watch 方法, 用于监听新邮件并支持断线重连
@@ -476,6 +480,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` 插件中心冷启动后立即打开插件详情时, 对话框随列表刷新被整体重建而闪烁的问题
 * `修复` 插件中心在插件暂时无法连接 (如更新安装期间) 后持续保持其禁用的问题
 * `修复` Shizuku 权限请求监听器在销毁后未正确注销的问题
+* `修复` AutoJs6 更新后首次使用 Shizuku 相关功能时, 因 Shizuku 仍保留旧版服务记录而报告无法使用 Shizuku 服务的问题
 * `修复` 后台安装 APK 时无法继续确认安装的问题
 * `修复` APK 打包取消时可能误报构建失败的问题
 * `修复` APK 打包产物的签名证书一致性校验及 Android 9-11 签名识别异常
@@ -551,6 +556,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `优化` 屏幕截图支持暂时无可用帧时重试, 并减少截图资源释放对并发图像操作的影响
 * `优化` mediainfo 模块支持 snapshot/capabilities 方法及媒体流计数, 并减少文件详情查询耗时
 * `优化` KeyCode 方法提升参数兼容性并支持使用 Shizuku 权限发送键码指令 _[`issue #492`](http://issues.autojs6.com/492)_
+* `优化` shell 函数支持 adb 选项, 用于经 Shizuku 执行命令 (兼容 Auto.js Pro); arguments 中的 adb 键不再转为 --adb 参数, 需要该参数时写作 "--adb"
 * `优化` 无障碍服务支持使用 Shizuku 自动启用, 并支持与官方伴生插件同步启停状态
 * `优化` auto.registerEvent 回调的 source 节点改为按需解析 (Android 13 以下需在回调内读取)
 * `优化` 无障碍窗口查询跳过不可用根节点, 并完善不同安卓版本的节点回收策略

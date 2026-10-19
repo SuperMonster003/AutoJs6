@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.Binder
 import android.os.DeadObjectException
 import android.os.IBinder
 import android.util.Log
@@ -14,6 +15,7 @@ import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.shizuku.IUserService
 import org.autojs.autojs.core.shizuku.UserService
+import org.autojs.autojs.runtime.api.shell.ShizukuShellProcess
 import org.autojs.autojs.util.App.SHIZUKU
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
@@ -34,6 +36,7 @@ object WrappedShizuku {
     var service: IUserService? = null
 
     private const val TAG = "WrappedShizuku"
+    private const val SERVICE_BIND_TIMEOUT_MILLIS = 10_000L
 
     private val mRequestCode = when {
         isInrt -> "shizuku-request-code-inrt".hashCode()
@@ -71,7 +74,7 @@ object WrappedShizuku {
             .processNameSuffix("shizuku-service-for-${pkg.substringAfterLast(".")}")
             // Recreate an older user process when its AIDL implementation changes after an update.
             // The extra revision also replaces a service from an earlier build with the same versionCode.
-            .version(BuildConfig.VERSION_CODE + 3)
+            .version(BuildConfig.VERSION_CODE + 4)
             .daemon(false)
     }
 
@@ -185,18 +188,51 @@ object WrappedShizuku {
         return execCommandWithAutoReconnect(context, cmd, allowRetry = true)
     }
 
-    private fun execCommandWithAutoReconnect(context: Context, cmd: String, allowRetry: Boolean): ShellResult {
+    /**
+     * Starts [command] as a long-lived process in the user service, with the uid Shizuku runs as (shell or root), and
+     * returns it as a local [Process] whose streams are pipes. The process ends when it is destroyed or this process dies.
+     * zh-CN: 在用户服务中以 Shizuku 的运行身份 (shell 或 root) 启动常驻进程 [command], 并以本地 [Process] 的形式返回, 其流为管道. 进程在被销毁或本进程
+     * 死亡时结束.
+     */
+    @JvmOverloads
+    fun newProcess(command: Array<String>, env: Array<String>? = null, dir: String? = null, pty: Boolean = false): Process {
+        val context = GlobalAppContext.get()
+        val client = Binder()
+        val remote = try {
+            connectedService(context).newShellProcess(command, env, dir, pty, client)
+        } catch (e: DeadObjectException) {
+            Log.d(TAG, "newProcess: binder died, reconnecting", e)
+            this.service = null
+            connectedService(context).newShellProcess(command, env, dir, pty, client)
+        } ?: throw IllegalStateException(context.getString(R.string.error_unable_to_use_shizuku_service))
+        return ShizukuShellProcess(remote, client)
+    }
+
+    private fun connectedService(context: Context): IUserService {
         if (!hasService() && hasPermission()) {
             onCreate()
             bindUserServiceIfNeeded()
-            initializeShizukuServiceAndWait(5000L)
+            initializeShizukuServiceAndWait(SERVICE_BIND_TIMEOUT_MILLIS)
+            if (service == null) {
+                // Right after AutoJs6 is updated, Shizuku may keep a service record of the old APK whose process exits at
+                // once; new binds wait on it until Shizuku gives up (30 s). Removing the record lets a fresh bind start.
+                // zh-CN: AutoJs6 刚更新时, Shizuku 可能保留旧 APK 的服务记录, 其进程会立即退出; 新的绑定会一直等它, 直到 Shizuku 放弃 (30 秒).
+                // 移除该记录后, 重新绑定即可启动服务.
+                Log.d(TAG, "connectedService: no service after ${SERVICE_BIND_TIMEOUT_MILLIS} ms, rebinding")
+                unbindUserService()
+                bindUserServiceIfNeeded()
+                initializeShizukuServiceAndWait(SERVICE_BIND_TIMEOUT_MILLIS)
+            }
         }
-
-        val service = service ?: when {
+        return service ?: when {
             !hasPermission() -> R.string.error_no_permission_to_access_shizuku
             !isRunning() -> R.string.error_shizuku_service_may_be_not_running
             else -> R.string.error_unable_to_use_shizuku_service
         }.let { throw IllegalStateException(context.getString(it)) }
+    }
+
+    private fun execCommandWithAutoReconnect(context: Context, cmd: String, allowRetry: Boolean): ShellResult {
+        val service = connectedService(context)
 
         return try {
             ShellResult.fromJson(

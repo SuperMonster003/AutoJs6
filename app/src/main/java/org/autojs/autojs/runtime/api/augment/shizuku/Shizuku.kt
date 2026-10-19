@@ -2,6 +2,8 @@ package org.autojs.autojs.runtime.api.augment.shizuku
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
@@ -10,6 +12,7 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.app.App
 import org.autojs.autojs.runtime.api.augment.shell.Shell
+import org.autojs.autojs.runtime.api.augment.shell.ShellProcess
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import java.util.function.Supplier
 
@@ -23,6 +26,7 @@ class Shizuku(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         ::currentPackage.name,
         ::currentActivity.name,
         ::currentComponent.name,
+        ::spawn.name,
     )
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
@@ -51,6 +55,19 @@ class Shizuku(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun getCommand(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..3) { argList ->
             Shell.getCommandData(argList).command
+        }
+
+        /**
+         * `shizuku.spawn(command, options?)`: same as `shell.spawn` with `adb: true`. Options: a boolean (`root`, su
+         * inside Shizuku) or `{ root?, env?, cwd? }`.
+         * zh-CN: `shizuku.spawn(command, options?)`: 等同于带 `adb: true` 的 `shell.spawn`. 选项: 布尔值 (`root`, 在 Shizuku 中运行 su) 或
+         * `{ root?, env?, cwd? }`.
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun spawn(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ShellProcess = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+            val (command, options) = argList
+            Shell.spawnRhino(scriptRuntime, command, options, forceAdb = true)
         }
 
         @JvmStatic

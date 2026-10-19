@@ -8,10 +8,16 @@ import androidx.preference.PreferenceManager;
 
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
+import org.autojs.autojs.runtime.api.shell.PipeShell;
+import org.autojs.autojs.runtime.api.shell.ShellLauncher;
+import org.autojs.autojs.runtime.api.shell.ShellPipes;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Map;
 
 import jackpal.androidterm.ShellTermSession;
 import jackpal.androidterm.emulatorview.TermSession;
@@ -69,8 +75,41 @@ public class Shell extends AbstractShell {
     private volatile String mCommandOutput = null;
     private Callback mCallback;
 
+    /**
+     * Non-null for a pipe-based Shell (options or command constructor); a terminal-session Shell keeps it null.
+     * zh-CN: 基于管道的 Shell (选项或命令构造器) 时非空; 终端会话 Shell 保持为 null.
+     */
+    private final PipeShell mPipe;
+
     public Shell(Context context, boolean root) {
         super(context, root);
+        mPipe = null;
+    }
+
+    /**
+     * A pipe-based shell, compatible with Auto.js Pro 9.3 (see {@link PipeShell}): options {@code cmd}, {@code root},
+     * {@code adb} (runs in the Shizuku user service), {@code pty} (output on a pseudo-terminal), {@code env} and
+     * {@code cwd}. Unlike the terminal-session constructors it offers the stream methods,
+     * {@link #execForResult(String)} and a reliable {@link #execAndWaitFor(String)}.
+     * zh-CN: 基于管道的 shell, 兼容 Auto.js Pro 9.3 (见 {@link PipeShell}): 选项 {@code cmd}, {@code root}, {@code adb} (在 Shizuku 用户服务中运行),
+     * {@code pty} (输出接到伪终端), {@code env} 与 {@code cwd}. 与终端会话构造器不同, 它提供流方法, {@link #execForResult(String)} 以及可靠的
+     * {@link #execAndWaitFor(String)}.
+     */
+    public Shell(Map<?, ?> options) {
+        this(ShellPipes.optionsOf(options));
+    }
+
+    /**
+     * Auto.js Pro 9.3 compatible: a pipe-based shell running {@code cmd}, such as "sh" or "su".
+     * zh-CN: 兼容 Auto.js Pro 9.3: 运行 {@code cmd} (如 "sh" 或 "su") 的基于管道的 shell.
+     */
+    public Shell(String cmd) {
+        this(ShellPipes.optionsOfCommand(cmd));
+    }
+
+    private Shell(ShellLauncher.Options options) {
+        super(ScriptRuntime.getApplicationContext(), options.getRoot(), false);
+        mPipe = ShellPipes.open(options);
     }
 
     /**
@@ -116,11 +155,18 @@ public class Shell extends AbstractShell {
     }
 
     public void exec(String command) {
+        if (mPipe != null) {
+            mPipe.exec(command);
+            return;
+        }
         ensureInitialized();
         mTermSession.write(command + "\n");
     }
 
     public String execAndWaitFor(String command) {
+        if (mPipe != null) {
+            return mPipe.execAndWaitFor(command);
+        }
         exec(command);
         synchronized (mCommandOutputLock) {
             try {
@@ -132,12 +178,81 @@ public class Shell extends AbstractShell {
         }
     }
 
+    /**
+     * Runs {@code command}, waits for it and returns its stdout, stderr and exit code, split by a marker after the
+     * command. Pipe-based Shell only.
+     * zh-CN: 运行 {@code command}, 等待其结束并返回 stdout, stderr 与退出码, 由命令后的标记分割. 仅限基于管道的 Shell.
+     */
+    public Result execForResult(String command) {
+        return requirePipe("execForResult").execForResult(command);
+    }
+
     public void setCallback(Callback callback) {
+        if (mPipe != null) {
+            mPipe.setCallback(callback);
+            return;
+        }
         mCallback = callback;
     }
 
     public boolean isInitialized() {
-        return mInitialized;
+        return mPipe != null || mInitialized;
+    }
+
+    /**
+     * Whether this Shell runs in the Shizuku user service ({@code adb: true}).
+     * zh-CN: 此 Shell 是否运行在 Shizuku 用户服务中 ({@code adb: true}).
+     */
+    public boolean isAdb() {
+        return mPipe != null && mPipe.getOptions().getAdb();
+    }
+
+    public InputStream getInputStream() {
+        return requirePipe("getInputStream").getInputStream();
+    }
+
+    public InputStream getErrorStream() {
+        return requirePipe("getErrorStream").getErrorStream();
+    }
+
+    public OutputStream getOutputStream() {
+        return requirePipe("getOutputStream").getOutputStream();
+    }
+
+    public int waitFor() {
+        return requirePipe("waitFor").waitFor();
+    }
+
+    /**
+     * The exit code, or null while the shell runs. Pipe-based Shell only.
+     * zh-CN: 退出码, shell 运行期间为 null. 仅限基于管道的 Shell.
+     */
+    public Integer exitCode() {
+        return requirePipe("exitCode").exitCode();
+    }
+
+    /**
+     * Closes stdin and returns the remaining stdout once the shell exited. Pipe-based Shell only.
+     * zh-CN: 关闭 stdin, shell 退出后返回剩余的 stdout. 仅限基于管道的 Shell.
+     */
+    public String exitAndReadOutput() {
+        return requirePipe("exitAndReadOutput").exitAndReadOutput();
+    }
+
+    /**
+     * The underlying {@link Process} of a pipe-based Shell, or the {@link TermSession} of a terminal-session Shell.
+     * zh-CN: 基于管道的 Shell 的底层 {@link Process}, 或终端会话 Shell 的 {@link TermSession}.
+     */
+    public Object raw() {
+        return mPipe != null ? mPipe.raw() : mTermSession;
+    }
+
+    private PipeShell requirePipe(String method) {
+        if (mPipe == null) {
+            throw new IllegalStateException(method + "() is not available on a Shell running in a terminal session (new Shell() / new Shell(root)). "
+                    + "Create a pipe-based Shell instead, for example new Shell({ root: true }) or new Shell({ adb: true })");
+        }
+        return mPipe;
     }
 
     private void ensureInitialized() {
@@ -197,11 +312,19 @@ public class Shell extends AbstractShell {
 
     @Override
     public void exit() {
+        if (mPipe != null) {
+            mPipe.exit();
+            return;
+        }
         mTermSession.finish();
     }
 
     @Override
     public void exitAndWaitFor() {
+        if (mPipe != null) {
+            mPipe.exitAndWaitFor();
+            return;
+        }
         execExitAndWait();
         if (!isExecWithRoot()) {
             return;
@@ -221,6 +344,10 @@ public class Shell extends AbstractShell {
         }
     }
 
+    /**
+     * The terminal session; null for a pipe-based Shell.
+     * zh-CN: 终端会话; 基于管道的 Shell 为 null.
+     */
     public TermSession getTermSession() {
         return mTermSession;
     }

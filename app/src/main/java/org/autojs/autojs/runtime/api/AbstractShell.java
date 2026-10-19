@@ -121,12 +121,22 @@ public abstract class AbstractShell {
     }
 
     public AbstractShell(Context context, boolean isExecWithRoot) {
+        this(context, isExecWithRoot, true);
+    }
+
+    /**
+     * With {@code initialize} false, {@link #init(String)} is not called: the subclass starts its process itself.
+     * zh-CN: {@code initialize} 为 false 时不调用 {@link #init(String)}: 由子类自行启动进程.
+     */
+    protected AbstractShell(Context context, boolean isExecWithRoot, boolean initialize) {
         mContext = context;
         mIsExecWithRoot = isExecWithRoot;
         if (context != null) {
             mTouchDevice = RootAutomatorEngine.getTouchDeviceId(context);
         }
-        init(isExecWithRoot ? COMMAND_SU : COMMAND_SH);
+        if (initialize) {
+            init(isExecWithRoot ? COMMAND_SU : COMMAND_SH);
+        }
     }
 
     public boolean isExecWithRoot() {
