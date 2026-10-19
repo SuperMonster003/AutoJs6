@@ -21,11 +21,11 @@ object SpeechPluginIds {
     const val VARIANT_DEFAULT = "default"
 
     /**
-     * Smallest host `versionCode` a plugin may declare through `PluginCapabilityKeys.REQUIRES_HOST_VERSION`: the 6.8.0
-     * host build that ships the script object `speech` on top of this contract (roadmap D28, P1.3 temporary value;
-     * P6.4 raises it to the final 6.8.0 build).
-     * zh-CN: 插件经 `PluginCapabilityKeys.REQUIRES_HOST_VERSION` 可声明的最小宿主 `versionCode`: 在本契约之上提供脚本对象 `speech` 的
-     * 6.8.0 宿主构建 (路线图 D28, P1.3 临时值; P6.4 回填为最终的 6.8.0 构建号).
+     * Smallest host `versionCode` a plugin may declare through `PluginCapabilityKeys.REQUIRES_HOST_VERSION`: the first
+     * 6.8.0 host build with every host change of the speech plugin, up to commit 11f75efbe (`VERSION_BUILD` 3804 +
+     * 1652; roadmap D28, the P6.4 value replacing the P1.3 temporary value 5451).
+     * zh-CN: 插件经 `PluginCapabilityKeys.REQUIRES_HOST_VERSION` 可声明的最小宿主 `versionCode`: 含语音插件全部宿主改动 (至提交
+     * 11f75efbe) 的首个 6.8.0 宿主构建 (`VERSION_BUILD` 3804 + 1652; 路线图 D28, P6.4 回填值, 取代 P1.3 的临时值 5451).
      */
-    const val REQUIRED_HOST_VERSION_CODE = 5451L
+    const val REQUIRED_HOST_VERSION_CODE = 5456L
 }

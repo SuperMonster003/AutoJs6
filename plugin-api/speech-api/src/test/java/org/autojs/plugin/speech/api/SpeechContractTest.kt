@@ -32,8 +32,9 @@ class SpeechContractTest {
         assertEquals("speech", SpeechPluginIds.CATEGORY)
         assertEquals(SpeechPluginActions.SERVICE_CATEGORY, SpeechPluginIds.CATEGORY)
         assertEquals("default", SpeechPluginIds.VARIANT_DEFAULT)
-        // Roadmap D28: above the roadmap baseline 5448 (host 33a1514b74); P6.4 raises it to the final 6.8.0 build.
-        assertEquals(5451L, SpeechPluginIds.REQUIRED_HOST_VERSION_CODE)
+        // Roadmap D28: above the roadmap baseline 5448 (host 33a1514b74); the P6.4 value is the first build with the last
+        // speech host change (11f75efbe, VERSION_BUILD 3804 + 1652).
+        assertEquals(5456L, SpeechPluginIds.REQUIRED_HOST_VERSION_CODE)
         assertTrue(SpeechPluginIds.REQUIRED_HOST_VERSION_CODE > 5448L)
         assertEquals("org.autojs.plugin.speech.api.ISpeechPlugin", ISpeechPlugin.DESCRIPTOR)
         assertEquals("org.autojs.plugin.speech.api.ISpeechSession", ISpeechSession.DESCRIPTOR)

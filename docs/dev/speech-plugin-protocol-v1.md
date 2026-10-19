@@ -37,7 +37,7 @@ Center lists the official package once, under its INFO identity, and probes it t
 
 | Key | Type | Meaning |
 | --- | --- | --- |
-| `requiresHostVersion` | Long | at least 5451 (`SpeechPluginIds.REQUIRED_HOST_VERSION_CODE`; temporary, see Status) |
+| `requiresHostVersion` | Long | at least 5456 (`SpeechPluginIds.REQUIRED_HOST_VERSION_CODE`, see Status) |
 | `speechContractVersion` | Int | 1 |
 | `speechFeatures` | String array | the features the build implements, a subset of the table below |
 | `speechCatalogVersion` | Int | version of the bundled model catalog, 0 before one is bundled |
@@ -472,5 +472,6 @@ place (plugin roadmap P1). `SpeechContractTest`, `SpeechAidlOrderTest`, `AidlPlu
 `asrStreaming`, `vad` and `kws` since plugin roadmap P3 and `tts` and `ttsSystemEngine` (with `speechTtsEnginePackage`)
 since P4 (not released yet); its `device_host_scripts.py` and `device_tts_run.py` run the host scripts against the real
 plugin.
-`SpeechPluginIds.REQUIRED_HOST_VERSION_CODE` (5451) is the temporary value of plugin roadmap D28: the host build that
-ships this module; plugin roadmap P6.4 raises it to the final 6.8.0 build.
+`SpeechPluginIds.REQUIRED_HOST_VERSION_CODE` (5456) is the value of plugin roadmap D28 written in P6.4: the first host
+build with every host change of the speech plugin, up to commit `11f75efbe` (`VERSION_BUILD` 3804 + 1652; the P1.3
+temporary value was 5451, the build that first shipped this module).
