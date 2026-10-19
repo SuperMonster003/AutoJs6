@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/19",
+      "released_date": "2026/10/20",
       "released_hint": "一部機能をプラグイン化, 更新時は注意",
       "hint": [
         "一部の組み込み機能 (OCR, バーコード認識, OpenCV, OpenCC, Pinyin, MediaInfo, ターミナル, オフライン文書など) を独立したプラグインで提供, 使用前にプラグインセンターで対応プラグインのインストールと有効化が必要",
@@ -167,7 +167,8 @@
         "Bun と Node.js Worker のホストイベントと通知 API, 独立した購読と通知の解放",
         "Bun と Node.js Worker のデバイス制御とダイアログ API, 明るさ, 音量と独立したウィンドウ解放",
         "Node.js, Bun と Worker の Android オブジェクトヘルパー, Paint, ColorStateList, テーマ色と FileProvider URI",
-        "Node.js と Bun の永続的なカレンダーと IntentTask API, 毎日, 毎週, 毎月, 毎年, 単発, カウントダウンとブロードキャストのタスク"
+        "Node.js と Bun の永続的なカレンダーと IntentTask API, 毎日, 毎週, 毎月, 毎年, 単発, カウントダウンとブロードキャストのタスク",
+        "Node.js/Bun/Worker の Java/Android 相互運用で公開コンストラクターとメンバー, 配列, 正確な long 値, 明示的なオーバーロードとアプリの Context ハンドルに対応"
       ],
       "fix": [
         "runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題",
@@ -312,7 +313,8 @@
         "進行状況の更新後も古い値を返す問題とキャンセル後にダイアログが残る問題",
         "夏時間の切り替えで毎日と毎週のタスクの実行時刻がずれる問題",
         "IntentTask のローカルと外部受信の競合および更新や削除後に登録が残る問題",
-        "ビルドしたアプリの FileProvider URI が実際のマニフェストではなくテンプレートの authority を使用する問題"
+        "ビルドしたアプリの FileProvider URI が実際のマニフェストではなくテンプレートの authority を使用する問題",
+        "Node.js のホストモジュールに java.new などの予約語があると ESM インポートが失敗する問題"
       ],
       "improvement": [
         "重要でない部品の初期化を遅延し, アプリ起動を高速化",

@@ -725,7 +725,7 @@ object NodeBridgeProviderRegistry {
             "packagedSupport" to "unsupported",
             "packagedPolicy" to "P12-26 rejects packaged Rhino JSON-only execution until explicit shim metadata is designed; future metadata may authorize only JSON-only run, never install or globals",
             "installPolicy" to "rhino.install remains unsupported by default; P13-14 allows explicit Java proxy globals only when Java interop is enabled",
-            "globalsPolicy" to "no global importClass, importPackage, JavaAdapter, compat.rhino, or unrestricted Rhino globals are installed into V8; Packages/java/android proxies route only through the stable Java allowlist; module import helpers and JavaAdapter return stable unsupported errors",
+            "globalsPolicy" to "no global importClass, importPackage, JavaAdapter, compat.rhino, or unrestricted Rhino globals are installed into V8; Packages/java/android proxies route through the explicit host Java bridge; module import helpers and JavaAdapter return stable unsupported errors",
             "timeoutPolicy" to "timeoutMs is required; provider calls forceStop and destroy before reporting timeout lifecycle",
             "statusReason" to "P12-25 live provider POC is available only for explicit one-shot requests; P12-26 keeps packaged APK execution fail-closed",
         )

@@ -122,8 +122,6 @@ import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Modifier
 import java.util.UUID
 import kotlin.concurrent.thread
 
@@ -817,7 +815,7 @@ object NodeBridgeModules {
         "update",
         "remove",
     )
-    val javaMethods = setOf("type", "callStatic", "new", "call", "callInstance", "getField", "getStatic", "release", "dispose")
+    val javaMethods = ControlledJavaInteropPolicy.methods
     val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
     val filesMethods = setOf("list", "stat", "read", "write", "mkdir", "rename", "delete")
@@ -983,6 +981,22 @@ class AndroidNodeBridgeCapabilityProvider(
         NodeAndroidPackageInstallManager(File(appContext.filesDir, "nodejs/package-manager-store"))
     }
     private val javaHandles = ConcurrentHashMap<String, Any>()
+    private val javaLock = Any()
+    @Volatile private var javaClosed = false
+    internal fun closeJavaObjects() = synchronized(javaLock) {
+        javaClosed = true
+        javaHandles.keys.toList().forEach { resourceRegistry.close(it, "java.execution.finished") }
+        javaHandles.clear()
+    }
+    internal fun releaseJavaResult(json: String?) {
+        fun release(value: Any?) {
+            when (value) {
+                is JSONArray -> for (i in 0 until value.length()) release(value.opt(i))
+                is JSONObject -> if (value.has("__autojs6JavaHandle")) resourceRegistry.close(value.getString("__autojs6JavaHandle"), "java.abandoned")
+            }
+        }
+        runCatching { release(org.json.JSONTokener(json ?: "null").nextValue()) }
+    }
     private val notificationHandles = ConcurrentHashMap<Pair<String, Int>, NodeBridgeResourceHandle>()
     private val notificationTag = "autojs6-runtime-${UUID.randomUUID()}"
     private val notificationsClosed = AtomicBoolean(false)
@@ -1306,7 +1320,7 @@ class AndroidNodeBridgeCapabilityProvider(
         imageHandles.clear()
         databaseHandles.clear()
         workManagerTasks.clear()
-        javaHandles.clear()
+        closeJavaObjects()
         notificationHandles.clear()
         sensorSubscriptions.clear()
         uiSessionIds.clear()
@@ -4760,53 +4774,31 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchJava(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        val response = runCatching {
-            if (!javaInteropEnabled) {
-                return@runCatching NodeBridgeResponse.failure(
-                    request.id,
-                    NodeBridgeError.javaInterop(
-                        message = "AutoJs6 Java interop is unavailable for this request; the stable allowlist policy remains enforced.",
-                        code = NodeRuntimeErrorCodes.JAVA_INTEROP_DISABLED,
-                        module = request.module,
-                        method = request.method,
-                    ),
-                )
+        val action = {
+            if (!javaInteropEnabled) NodeBridgeResponse.failure(request.id, NodeBridgeError.javaInterop(
+                message = "Java interop is disabled for this execution.", code = NodeRuntimeErrorCodes.JAVA_INTEROP_DISABLED,
+                module = request.module, method = request.method))
+            else if (javaClosed) javaPolicyFailure(request, "Java execution has finished")
+            else {
+                val payload = request.firstObjectArg() ?: JSONObject()
+                if (request.method in setOf("release", "dispose")) releaseJavaObject(request)
+                else javaResult(request, ControlledJavaInteropPolicy.execute(request.method, payload, javaInteropHandles, appContext))
             }
-            when (request.method) {
-                "type" -> describeJavaType(request)
-                "callStatic" -> callJavaStatic(request)
-                "new" -> newJavaObject(request)
-                "call", "callInstance" -> callJavaInstance(request)
-                "getField" -> getJavaField(request)
-                "getStatic" -> getJavaStaticField(request)
-                "release", "dispose" -> releaseJavaObject(request)
-                else -> unavailable(request)
-            }
-        }.getOrElse { error ->
-            NodeBridgeResponse.failure(
-                request.id,
-                NodeBridgeError.javaInterop(
-                    message = error.message ?: error.javaClass.name,
-                    code = NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
-                    module = request.module,
-                    method = request.method,
-                    stack = error.stackTraceToString(),
-                ),
-            )
         }
-        callback(response)
+        if (request.firstObjectArg()?.optString("thread") == "main") dispatchOnMain(request, callback, action)
+        else callback(action())
     }
 
     private fun dispatchRhino(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         NodeBridgeRhinoExecutionService.dispatch(appContext, request, callback)
     }
 
-    // M20.2 batch 15: the host allowlist is the whole Java interop policy; the members it names are
-    // resolved by reflection at call time and object results travel as registry-backed handles.
+    // Public members are resolved in the host process; object references belong to this execution.
     private val javaInteropHandles = object : ControlledJavaInteropPolicy.Handles {
         override fun resolve(handleId: String): Any? = javaHandles[handleId]
 
-        override fun register(value: Any, spec: JavaInteropClassSpec): JSONObject {
+        override fun register(value: Any, spec: JavaInteropClassSpec): JSONObject = synchronized(javaLock) {
+            check(!javaClosed) { "Java execution has finished" }
             val handleId = "java-${UUID.randomUUID()}"
             javaHandles[handleId] = value
             resourceRegistry.register(
@@ -4816,75 +4808,8 @@ class AndroidNodeBridgeCapabilityProvider(
             ) {
                 javaHandles.remove(handleId)
             }
-            return ControlledJavaInteropPolicy.handleJson(handleId, value, spec)
+            ControlledJavaInteropPolicy.handleJson(handleId, value, spec)
         }
-    }
-
-    private fun describeJavaType(request: NodeBridgeRequest): NodeBridgeResponse {
-        val payload = request.firstObjectArg()
-            ?: return javaPolicyFailure(request, "java.type requires a class descriptor.")
-        val className = payload.optNonBlankString("className")
-            ?: return javaPolicyFailure(request, "java.type requires a non-empty className.")
-        ControlledJavaInteropPolicy.validateClass(className)?.let { return NodeBridgeResponse.failure(request.id, it.toBridgeError(request)) }
-        return NodeBridgeResponse.success(
-            request.id,
-            ControlledJavaInteropPolicy.describeClass(className).toString(),
-        )
-    }
-
-    private fun callJavaStatic(request: NodeBridgeRequest): NodeBridgeResponse {
-        val payload = request.firstObjectArg()
-            ?: return javaPolicyFailure(request, "java.callStatic requires a call descriptor.")
-        val className = payload.optNonBlankString("className")
-            ?: return javaPolicyFailure(request, "java.callStatic requires a non-empty className.")
-        val method = payload.optNonBlankString("method")
-            ?: return javaPolicyFailure(request, "java.callStatic requires a non-empty method.")
-        ControlledJavaInteropPolicy.validateClass(className)?.let { return NodeBridgeResponse.failure(request.id, it.toBridgeError(request)) }
-        val args = payload.optJSONArray("args") ?: JSONArray()
-        return javaResult(request, ControlledJavaInteropPolicy.callStatic(className, method, args, javaInteropHandles))
-    }
-
-    private fun newJavaObject(request: NodeBridgeRequest): NodeBridgeResponse {
-        val payload = request.firstObjectArg()
-            ?: return javaPolicyFailure(request, "java.new requires a constructor descriptor.")
-        val className = payload.optNonBlankString("className")
-            ?: return javaPolicyFailure(request, "java.new requires a non-empty className.")
-        ControlledJavaInteropPolicy.validateClass(className)?.let { return NodeBridgeResponse.failure(request.id, it.toBridgeError(request)) }
-        val args = payload.optJSONArray("args") ?: JSONArray()
-        return javaResult(request, ControlledJavaInteropPolicy.newInstance(className, args, javaInteropHandles))
-    }
-
-    private fun callJavaInstance(request: NodeBridgeRequest): NodeBridgeResponse {
-        val payload = request.firstObjectArg()
-            ?: return javaPolicyFailure(request, "java.call requires an object handle descriptor.")
-        val method = payload.optNonBlankString("method")
-            ?: return javaPolicyFailure(request, "java.call requires a non-empty method.")
-        val target = javaHandleTarget(payload)
-            ?: return javaPolicyFailure(request, "AutoJs6 Java interop handle is not available.")
-        val args = payload.optJSONArray("args") ?: JSONArray()
-        return javaResult(request, ControlledJavaInteropPolicy.callInstance(target, method, args, javaInteropHandles))
-    }
-
-    private fun getJavaField(request: NodeBridgeRequest): NodeBridgeResponse {
-        val payload = request.firstObjectArg()
-            ?: return javaPolicyFailure(request, "java.getField requires an object handle descriptor.")
-        val field = payload.optNonBlankString("field")
-            ?: return javaPolicyFailure(request, "java.getField requires a non-empty field.")
-        val target = javaHandleTarget(payload)
-            ?: return javaPolicyFailure(request, "AutoJs6 Java interop handle is not available.")
-        return javaResult(request, ControlledJavaInteropPolicy.getInstanceField(target, field, javaInteropHandles))
-    }
-
-    private fun getJavaStaticField(request: NodeBridgeRequest): NodeBridgeResponse {
-        val payload = request.firstObjectArg()
-            ?: return javaPolicyFailure(request, "java.getStatic requires a field descriptor.")
-        val className = payload.optNonBlankString("className")
-            ?: return javaPolicyFailure(request, "java.getStatic requires a non-empty className.")
-        val field = payload.optNonBlankString("field")
-            ?: payload.optNonBlankString("name")
-            ?: return javaPolicyFailure(request, "java.getStatic requires a non-empty field.")
-        ControlledJavaInteropPolicy.validateClass(className)?.let { return NodeBridgeResponse.failure(request.id, it.toBridgeError(request)) }
-        return javaResult(request, ControlledJavaInteropPolicy.getStaticField(className, field, javaInteropHandles))
     }
 
     private fun releaseJavaObject(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -4892,7 +4817,7 @@ class AndroidNodeBridgeCapabilityProvider(
             ?: return javaPolicyFailure(request, "java.release requires an object handle descriptor.")
         val handleId = javaHandleId(payload)
             ?: return javaPolicyFailure(request, "java.release requires a non-empty Java handle.")
-        val closed = resourceRegistry.close(handleId, "java.${request.method}")
+        val closed = synchronized(javaLock) { javaHandles.containsKey(handleId) && resourceRegistry.close(handleId, "java.${request.method}") }
         return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(closed))
     }
 
@@ -6675,492 +6600,6 @@ private data class ControlledWorkTaskParseResult(
     val value: ControlledWorkTaskDescriptor? = null,
     val error: NodeBridgeError? = null,
 )
-
-/**
- * One allowlisted class: the members scripts may touch. Anything not named here is denied, so the
- * table is the whole policy (M20.2 batch 15).
- */
-internal class JavaInteropClassSpec(
-    val className: String,
-    val constructable: Boolean = false,
-    val staticMethods: Set<String> = emptySet(),
-    val instanceMethods: Set<String> = emptySet(),
-    val staticFields: Set<String> = emptySet(),
-    val instanceFields: Set<String> = emptySet(),
-) {
-    fun toJson(): JSONObject = JSONObject()
-        .put("className", className)
-        .put("explicit", true)
-        .put("constructable", constructable)
-        .put("staticMethods", JSONArray(staticMethods.sorted()))
-        .put("instanceMethods", JSONArray(instanceMethods.sorted()))
-        .put("staticFields", JSONArray(staticFields.sorted()))
-        .put("instanceFields", JSONArray(instanceFields.sorted()))
-        // Older readers looked for "fields"; it is the instance field list.
-        .put("fields", JSONArray(instanceFields.sorted()))
-}
-
-/**
- * M20.2 batch 15: the host owns the Java interop allowlist and executes it by reflection. Only
- * public members named in the table are reachable; arguments are JSON primitives or handles of
- * objects the table already admitted; object results become handles only when their class (or a
- * supertype) is in the table, otherwise the call is refused rather than leaking the object.
- */
-internal object ControlledJavaInteropPolicy {
-
-    interface Handles {
-        fun resolve(handleId: String): Any?
-        fun register(value: Any, spec: JavaInteropClassSpec): JSONObject
-    }
-
-    private val objectMethods = setOf("toString", "equals", "hashCode")
-
-    private val specs: Map<String, JavaInteropClassSpec> = listOf(
-        JavaInteropClassSpec(
-            "java.lang.Math",
-            staticMethods = setOf(
-                "abs", "ceil", "floor", "max", "min", "pow", "round", "sqrt", "cbrt", "hypot", "exp", "expm1",
-                "log", "log10", "log1p", "sin", "cos", "tan", "asin", "acos", "atan", "atan2", "sinh", "cosh", "tanh",
-                "signum", "toRadians", "toDegrees", "floorDiv", "floorMod", "random", "rint",
-            ),
-            staticFields = setOf("PI", "E"),
-        ),
-        JavaInteropClassSpec(
-            "java.util.UUID",
-            staticMethods = setOf("randomUUID", "fromString"),
-            instanceMethods = objectMethods + setOf("version", "variant", "getMostSignificantBits", "getLeastSignificantBits", "compareTo"),
-        ),
-        JavaInteropClassSpec(
-            "android.graphics.Rect",
-            constructable = true,
-            staticMethods = setOf("intersects", "unflattenFromString"),
-            instanceMethods = objectMethods + setOf(
-                "width", "height", "centerX", "centerY", "exactCenterX", "exactCenterY", "isEmpty", "contains",
-                "intersect", "intersects", "setIntersect", "union", "offset", "offsetTo", "inset", "set", "setEmpty",
-                "sort", "toShortString", "flattenToString",
-            ),
-            instanceFields = setOf("left", "top", "right", "bottom"),
-        ),
-        JavaInteropClassSpec(
-            "android.graphics.Point",
-            constructable = true,
-            instanceMethods = objectMethods + setOf("set", "negate", "offset"),
-            instanceFields = setOf("x", "y"),
-        ),
-        JavaInteropClassSpec(
-            "android.graphics.Color",
-            staticMethods = setOf("argb", "rgb", "alpha", "red", "green", "blue", "parseColor", "luminance"),
-            staticFields = setOf("BLACK", "DKGRAY", "GRAY", "LTGRAY", "WHITE", "RED", "GREEN", "BLUE", "YELLOW", "CYAN", "MAGENTA", "TRANSPARENT"),
-        ),
-        JavaInteropClassSpec(
-            "java.util.Locale",
-            staticMethods = setOf("getDefault", "forLanguageTag"),
-            instanceMethods = objectMethods + setOf(
-                "getLanguage", "getCountry", "getVariant", "getScript", "toLanguageTag", "getDisplayName",
-                "getDisplayLanguage", "getDisplayCountry", "getISO3Language", "getISO3Country",
-            ),
-            staticFields = setOf(
-                "ROOT", "ENGLISH", "US", "UK", "CANADA", "CHINA", "CHINESE", "SIMPLIFIED_CHINESE", "TRADITIONAL_CHINESE",
-                "TAIWAN", "JAPAN", "JAPANESE", "KOREA", "KOREAN", "FRANCE", "FRENCH", "GERMANY", "GERMAN", "ITALY", "ITALIAN",
-            ),
-        ),
-        JavaInteropClassSpec(
-            "android.os.Build",
-            staticFields = setOf(
-                "MODEL", "MANUFACTURER", "BRAND", "DEVICE", "PRODUCT", "HARDWARE", "BOARD", "DISPLAY", "ID", "TAGS", "TYPE",
-                "SUPPORTED_ABIS", "SUPPORTED_32_BIT_ABIS", "SUPPORTED_64_BIT_ABIS",
-            ),
-        ),
-        JavaInteropClassSpec(
-            "android.os.Build\$VERSION",
-            staticFields = setOf("SDK_INT", "RELEASE", "CODENAME", "INCREMENTAL", "BASE_OS", "SECURITY_PATCH", "PREVIEW_SDK_INT"),
-        ),
-        JavaInteropClassSpec(
-            "java.util.concurrent.TimeUnit",
-            staticFields = setOf("NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS", "MINUTES", "HOURS", "DAYS"),
-            instanceMethods = objectMethods + setOf(
-                "toNanos", "toMicros", "toMillis", "toSeconds", "toMinutes", "toHours", "toDays", "convert", "name", "ordinal",
-            ),
-        ),
-    ).associateBy { it.className }
-
-    private val deniedExactClasses = setOf(
-        "java.lang.Class",
-        "java.lang.ClassLoader",
-        "java.lang.Runtime",
-        "java.lang.Process",
-        "java.lang.ProcessBuilder",
-        "java.lang.System",
-        "dalvik.system.DexClassLoader",
-        "dalvik.system.PathClassLoader",
-        "dalvik.system.InMemoryDexClassLoader",
-    )
-
-    private val deniedPrefixes = listOf(
-        "java.io.",
-        "java.nio.file.",
-        "java.net.",
-        "android.content.",
-        "android.app.",
-        "android.view.",
-        "android.accessibilityservice.",
-        "android.media.projection.",
-    )
-
-    private val reflectionPrefixes = listOf(
-        "java.lang.reflect.",
-        "kotlin.reflect.",
-        "java.lang.invoke.",
-    )
-
-    val allowedClasses: List<String>
-        get() = specs.keys.sorted()
-
-    /** What the plugin runtime shows as `java.policy`; published through getBrokerInfo(). */
-    fun policyJson(): JSONObject = JSONObject()
-        .put("limitsEnforcedBy", "host_provider")
-        .put("allowedClasses", JSONArray(allowedClasses))
-        .put("deniedClassPrefixes", JSONArray(deniedPrefixes + reflectionPrefixes))
-        .put(
-            "classes",
-            JSONObject().apply {
-                specs.values.sortedBy { it.className }.forEach { spec -> put(spec.className, spec.toJson()) }
-            },
-        )
-
-    fun validateClass(className: String): ErrorDescriptor? {
-        val normalized = className.trim()
-        if (normalized.isBlank()) {
-            return ErrorDescriptor(
-                code = NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
-                message = "AutoJs6 Java interop requires a non-empty className.",
-            )
-        }
-        if (reflectionPrefixes.any { normalized.startsWith(it) }) {
-            return ErrorDescriptor(
-                code = NodeRuntimeErrorCodes.JAVA_REFLECTION_DENIED,
-                message = "AutoJs6 Java interop denies reflection class $normalized.",
-            )
-        }
-        if (normalized in deniedExactClasses || deniedPrefixes.any { normalized.startsWith(it) }) {
-            return ErrorDescriptor(
-                code = NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
-                message = "AutoJs6 Java interop denies class $normalized.",
-            )
-        }
-        if (normalized !in specs) {
-            return ErrorDescriptor(
-                code = NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
-                message = "AutoJs6 Java interop allowlist does not include $normalized.",
-            )
-        }
-        return null
-    }
-
-    fun describeClass(className: String): JSONObject = specs.getValue(className.trim()).toJson()
-
-    fun callStatic(className: String, method: String, args: JSONArray, handles: Handles): Result {
-        val spec = specs[className.trim()] ?: return notAllowlisted(className)
-        val label = "${spec.className}.$method"
-        if (method !in spec.staticMethods) {
-            return Result.denied(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, "AutoJs6 Java interop allowlist does not include static $label.")
-        }
-        val type = loadClass(spec.className) ?: return unavailable(spec.className)
-        val candidates = type.methods
-            .filter { it.name == method && Modifier.isStatic(it.modifiers) && it.parameterTypes.size == args.length() }
-            .map { it to it.parameterTypes }
-        val (chosen, coerced) = selectOverload(candidates, args, handles)
-            ?: return noOverload(label, candidates.isEmpty(), args.length())
-        return reflectCall(label) { chosen.invoke(null, *coerced) }.marshal(handles, label)
-    }
-
-    fun newInstance(className: String, args: JSONArray, handles: Handles): Result {
-        val spec = specs[className.trim()] ?: return notAllowlisted(className)
-        val label = "new ${spec.className}"
-        if (!spec.constructable) {
-            return Result.denied(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, "AutoJs6 Java interop allowlist does not allow constructing ${spec.className}.")
-        }
-        val type = loadClass(spec.className) ?: return unavailable(spec.className)
-        val candidates = type.constructors
-            .filter { Modifier.isPublic(it.modifiers) && it.parameterTypes.size == args.length() }
-            .map { it to it.parameterTypes }
-        val (chosen, coerced) = selectOverload(candidates, args, handles)
-            ?: return noOverload(label, candidates.isEmpty(), args.length())
-        return reflectCall(label) { chosen.newInstance(*coerced) }.marshal(handles, label)
-    }
-
-    fun callInstance(target: Any, method: String, args: JSONArray, handles: Handles): Result {
-        val spec = specFor(target.javaClass)
-            ?: return Result.denied(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, "AutoJs6 Java interop allowlist does not include ${target.javaClass.name}.")
-        val label = "${spec.className}.$method"
-        if (method !in spec.instanceMethods) {
-            return Result.denied(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, "AutoJs6 Java interop allowlist does not include $label.")
-        }
-        val candidates = target.javaClass.methods
-            .filter { it.name == method && !Modifier.isStatic(it.modifiers) && it.parameterTypes.size == args.length() }
-            .map { it to it.parameterTypes }
-        val (chosen, coerced) = selectOverload(candidates, args, handles)
-            ?: return noOverload(label, candidates.isEmpty(), args.length())
-        return reflectCall(label) { chosen.invoke(target, *coerced) }.marshal(handles, label)
-    }
-
-    fun getInstanceField(target: Any, field: String, handles: Handles): Result {
-        val spec = specFor(target.javaClass)
-            ?: return Result.denied(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, "AutoJs6 Java interop allowlist does not include ${target.javaClass.name}.")
-        val label = "${spec.className}.$field"
-        if (field !in spec.instanceFields) {
-            return Result.denied(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, "AutoJs6 Java interop allowlist does not include field $label.")
-        }
-        return reflectCall(label) {
-            val member = target.javaClass.getField(field)
-            if (Modifier.isStatic(member.modifiers)) throw NoSuchFieldException("$label is static")
-            member.get(target)
-        }.marshal(handles, label)
-    }
-
-    fun getStaticField(className: String, field: String, handles: Handles): Result {
-        val spec = specs[className.trim()] ?: return notAllowlisted(className)
-        val label = "${spec.className}.$field"
-        if (field !in spec.staticFields) {
-            return Result.denied(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, "AutoJs6 Java interop allowlist does not include static field $label.")
-        }
-        val type = loadClass(spec.className) ?: return unavailable(spec.className)
-        return reflectCall(label) {
-            val member = type.getField(field)
-            if (!Modifier.isStatic(member.modifiers)) throw NoSuchFieldException("$label is not static")
-            member.get(null)
-        }.marshal(handles, label)
-    }
-
-    /** A handle payload: the id, the allowlisted class name and a JSON snapshot of the admitted fields. */
-    fun handleJson(handleId: String, value: Any, spec: JavaInteropClassSpec): JSONObject {
-        val snapshot = JSONObject()
-        runCatching { snapshot.put("string", value.toString()) }
-        if (value is Enum<*>) {
-            snapshot.put("name", value.name)
-        }
-        for (field in spec.instanceFields.sorted()) {
-            val raw = runCatching { value.javaClass.getField(field).get(value) }.getOrNull()
-            if (raw == null) {
-                snapshot.put(field, JSONObject.NULL)
-                continue
-            }
-            when (raw) {
-                is Boolean, is String -> snapshot.put(field, raw)
-                is Int, is Long, is Short, is Byte -> snapshot.put(field, (raw as Number).toLong())
-                is Float, is Double -> snapshot.put(field, jsonNumber((raw as Number).toDouble()))
-                else -> Unit
-            }
-        }
-        return JSONObject()
-            .put("__autojs6JavaHandle", handleId)
-            .put("className", spec.className)
-            .put("value", snapshot)
-    }
-
-    private fun specFor(type: Class<*>): JavaInteropClassSpec? {
-        var current: Class<*>? = type
-        while (current != null) {
-            specs[current.name]?.let { return it }
-            for (iface in current.interfaces) {
-                specs[iface.name]?.let { return it }
-            }
-            current = current.superclass
-        }
-        return null
-    }
-
-    private fun loadClass(className: String): Class<*>? = runCatching { Class.forName(className) }.getOrNull()
-
-    private fun notAllowlisted(className: String): Result = Result.denied(
-        NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
-        "AutoJs6 Java interop allowlist does not include ${className.trim()}.",
-    )
-
-    private fun unavailable(className: String): Result = Result.denied(
-        NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
-        "AutoJs6 Java interop cannot load $className on this device.",
-    )
-
-    private fun noOverload(label: String, none: Boolean, argCount: Int): Result = Result.denied(
-        NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
-        if (none) {
-            "AutoJs6 Java interop found no public $label taking $argCount argument(s)."
-        } else {
-            "AutoJs6 Java interop could not match the arguments of $label; JSON primitives and Java object handles are accepted."
-        },
-    )
-
-    private class Coerced(val value: Any?, val score: Int)
-
-    /**
-     * Picks the public overload whose parameters accept the JSON arguments best: exact primitive
-     * matches score highest, widening and boxing lower, so Math.max(3, 7) hits the int overload.
-     */
-    private fun <T> selectOverload(
-        candidates: List<Pair<T, Array<Class<*>>>>,
-        args: JSONArray,
-        handles: Handles,
-    ): Pair<T, Array<Any?>>? {
-        var best: Pair<T, Array<Any?>>? = null
-        var bestScore = -1
-        for ((member, types) in candidates) {
-            val coerced = arrayOfNulls<Any?>(types.size)
-            var score = 0
-            var matched = true
-            for (index in types.indices) {
-                val value = coerce(args.opt(index), types[index], handles)
-                if (value == null) {
-                    matched = false
-                    break
-                }
-                coerced[index] = value.value
-                score += value.score
-            }
-            if (matched && score > bestScore) {
-                best = member to coerced
-                bestScore = score
-            }
-        }
-        return best
-    }
-
-    private fun coerce(value: Any?, type: Class<*>, handles: Handles): Coerced? {
-        val loose = type == Any::class.java || type == java.io.Serializable::class.java || type == Comparable::class.java
-        if (value == null || value === JSONObject.NULL) {
-            return if (type.isPrimitive) null else Coerced(null, 1)
-        }
-        return when (value) {
-            is Boolean -> when {
-                type == Boolean::class.javaPrimitiveType || type == Boolean::class.javaObjectType -> Coerced(value, 3)
-                loose -> Coerced(value, 1)
-                else -> null
-            }
-            is Number -> coerceNumber(value, type, loose)
-            is String -> when {
-                type == String::class.java -> Coerced(value, 3)
-                type == CharSequence::class.java -> Coerced(value, 2)
-                (type == Char::class.javaPrimitiveType || type == Char::class.javaObjectType) && value.length == 1 -> Coerced(value[0], 2)
-                loose -> Coerced(value, 1)
-                else -> null
-            }
-            is JSONObject -> {
-                val handleId = value.optString("__autojs6JavaHandle").takeIf { it.isNotBlank() } ?: return null
-                val target = handles.resolve(handleId) ?: return null
-                when {
-                    target.javaClass == type -> Coerced(target, 3)
-                    type.isInstance(target) -> Coerced(target, if (loose) 1 else 2)
-                    else -> null
-                }
-            }
-            else -> null
-        }
-    }
-
-    private fun coerceNumber(value: Number, type: Class<*>, loose: Boolean): Coerced? {
-        val double = value.toDouble()
-        val integral = value is Int || value is Long ||
-            (double.isFinite() && double % 1.0 == 0.0 && kotlin.math.abs(double) <= 9_007_199_254_740_992.0)
-        val long = if (integral) value.toLong() else 0L
-        return when (type) {
-            Int::class.javaPrimitiveType, Int::class.javaObjectType ->
-                if (integral && long >= Int.MIN_VALUE && long <= Int.MAX_VALUE) Coerced(long.toInt(), if (value is Int) 3 else 2) else null
-            Long::class.javaPrimitiveType, Long::class.javaObjectType ->
-                if (integral) Coerced(long, if (value is Long) 3 else 2) else null
-            Short::class.javaPrimitiveType, Short::class.javaObjectType ->
-                if (integral && long >= Short.MIN_VALUE && long <= Short.MAX_VALUE) Coerced(long.toShort(), 2) else null
-            Byte::class.javaPrimitiveType, Byte::class.javaObjectType ->
-                if (integral && long >= Byte.MIN_VALUE && long <= Byte.MAX_VALUE) Coerced(long.toByte(), 2) else null
-            Double::class.javaPrimitiveType, Double::class.javaObjectType -> Coerced(double, if (value is Double) 3 else 1)
-            Float::class.javaPrimitiveType, Float::class.javaObjectType -> Coerced(double.toFloat(), if (value is Double) 2 else 1)
-            Number::class.java -> Coerced(value, 1)
-            else -> if (loose) Coerced(value, 1) else null
-        }
-    }
-
-    private inline fun reflectCall(label: String, block: () -> Any?): Result {
-        return try {
-            Result.value(block())
-        } catch (error: InvocationTargetException) {
-            val cause = error.targetException ?: error
-            Result.denied(
-                NodeRuntimeErrorCodes.JAVA_CALL_FAILED,
-                "$label threw ${cause.javaClass.name}: ${cause.message.orEmpty()}".trimEnd(':', ' '),
-            )
-        } catch (error: ReflectiveOperationException) {
-            Result.denied(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, "$label is not accessible: ${error.message.orEmpty()}".trimEnd(':', ' '))
-        } catch (error: IllegalArgumentException) {
-            Result.denied(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, "$label rejected the arguments: ${error.message.orEmpty()}".trimEnd(':', ' '))
-        }
-    }
-
-    /** Turns a raw reflection result into a JSON value or a registry handle, or refuses it. */
-    private fun Result.marshal(handles: Handles, label: String): Result {
-        if (error != null) return this
-        val raw = value ?: return Result.value(JSONObject.NULL)
-        return when (raw) {
-            is Boolean, is String -> Result.value(raw)
-            is Char -> Result.value(raw.toString())
-            is Int, is Long, is Short, is Byte -> Result.value((raw as Number).toLong())
-            is Float, is Double -> Result.value(jsonNumber((raw as Number).toDouble()))
-            is CharSequence -> Result.value(raw.toString())
-            is Enum<*> -> specFor(raw.javaClass)?.let { Result.value(handles.register(raw, it)) } ?: Result.value(raw.name)
-            is BooleanArray -> Result.value(JSONArray().also { array -> raw.forEach { array.put(it) } })
-            is IntArray -> Result.value(JSONArray().also { array -> raw.forEach { array.put(it) } })
-            is LongArray -> Result.value(JSONArray().also { array -> raw.forEach { array.put(it) } })
-            is ShortArray -> Result.value(JSONArray().also { array -> raw.forEach { array.put(it.toInt()) } })
-            is ByteArray -> Result.value(JSONArray().also { array -> raw.forEach { array.put(it.toInt()) } })
-            is FloatArray -> Result.value(JSONArray().also { array -> raw.forEach { array.put(jsonNumber(it.toDouble())) } })
-            is DoubleArray -> Result.value(JSONArray().also { array -> raw.forEach { array.put(jsonNumber(it)) } })
-            is CharArray -> Result.value(JSONArray().also { array -> raw.forEach { array.put(it.toString()) } })
-            is Array<*> -> {
-                if (raw.all { it == null || it is String || it is Number || it is Boolean || it is Char }) {
-                    Result.value(JSONArray().also { array -> raw.forEach { array.put(if (it is Char) it.toString() else it ?: JSONObject.NULL) } })
-                } else {
-                    Result.denied(
-                        NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
-                        "AutoJs6 Java interop cannot return a ${raw.javaClass.componentType?.name} array from $label.",
-                    )
-                }
-            }
-            else -> specFor(raw.javaClass)?.let { Result.value(handles.register(raw, it)) }
-                ?: Result.denied(
-                    NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
-                    "AutoJs6 Java interop cannot return a ${raw.javaClass.name} from $label; the class is not in the host allowlist.",
-                )
-        }
-    }
-
-    /** org.json refuses NaN / infinity; scripts receive those as their JavaScript spellings. */
-    private fun jsonNumber(value: Double): Any = if (value.isFinite()) value else value.toString()
-
-    data class ErrorDescriptor(
-        val code: String,
-        val message: String,
-    ) {
-        fun toBridgeError(request: NodeBridgeRequest): NodeBridgeError {
-            return NodeBridgeError.javaInterop(
-                message = message,
-                code = code,
-                module = request.module,
-                method = request.method,
-            )
-        }
-    }
-
-    data class Result(
-        val value: Any? = null,
-        val error: ErrorDescriptor? = null,
-    ) {
-        companion object {
-            fun value(value: Any?): Result = Result(value = value)
-
-            fun denied(code: String, message: String): Result = Result(
-                error = ErrorDescriptor(code = code, message = message),
-            )
-        }
-    }
-}
 
 private object ControlledFetchPolicy {
     const val MAX_CONCURRENT_REQUESTS = 16

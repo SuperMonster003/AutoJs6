@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/19 - Algunas funciones pasan a complementos; actualiza con precaución
+###### 2026/10/20 - Algunas funciones pasan a complementos; actualiza con precaución
 
 * `Sugerencia` Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas
 * `Sugerencia` El SDK de destino de las aplicaciones empaquetadas cambia de 29 a 37; el acceso al almacenamiento compartido y a la red local requiere los permisos exigidos por el sistema
@@ -170,6 +170,7 @@
 * `Nuevo` Control del dispositivo y diálogos para Bun y Workers de Node.js, con brillo, volumen y limpieza independiente de ventanas
 * `Nuevo` Objetos Android para Node.js, Bun y Workers, con Paint, ColorStateList, colores del tema y URI FileProvider
 * `Nuevo` API persistentes de calendario e IntentTask para Node.js y Bun, con tareas diarias, semanales, mensuales, anuales, únicas, de cuenta atrás y de difusión
+* `Nuevo` Interoperabilidad Java/Android para Node.js, Bun y Workers, con constructores y miembros públicos, matrices, valores long exactos, sobrecargas explícitas y referencias Context
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados
@@ -313,6 +314,7 @@
 * `Corrección` Desplazamiento de la hora local de tareas diarias y semanales al cambiar el horario de verano
 * `Corrección` Conflictos entre receptores IntentTask locales y externos y registros obsoletos tras actualizar o eliminar
 * `Corrección` URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real
+* `Corrección` Error de importación ESM en Node.js cuando el módulo anfitrión exporta un nombre reservado como java.new
 * `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
 * `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
 * `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/19",
+      "released_date": "2026/10/20",
       "released_hint": "部分功能插件化, 謹慎升級",
       "hint": [
         "部分內置功能改由獨立插件提供 (如 OCR, 條碼識別, OpenCV, OpenCC, 拼音, MediaInfo, 終端及離線項目文檔), 使用前需在插件中心安裝並啓用對應插件",
@@ -167,7 +167,8 @@
         "Bun 與 Node.js Worker 的宿主事件及通知 API, 支援獨立訂閱與通知清理",
         "Bun 與 Node.js Worker 的裝置控制及對話框 API, 支援亮度, 音量和獨立視窗清理",
         "Node.js/Bun 的 Android 物件輔助介面及 Worker 封裝, 支援 Paint, ColorStateList, 主題色和 FileProvider URI",
-        "Node.js/Bun 的持久日曆與 IntentTask API, 支援每日, 每週, 每月, 每年, 單次, 倒數計時和廣播任務"
+        "Node.js/Bun 的持久日曆與 IntentTask API, 支援每日, 每週, 每月, 每年, 單次, 倒數計時和廣播任務",
+        "Node.js/Bun/Worker 的 Java/Android 物件互操作, 支援公開建構函式和成員, 陣列, 精確 long 值, 明確多載及應用程式 Context 控制代碼"
       ],
       "fix": [
         "runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題",
@@ -312,7 +313,8 @@
         "進度對話框控制代碼更新後仍傳回舊值及取消後視窗未及時關閉的問題",
         "每日和每週任務跨夏令時間轉換後本地執行時刻偏移的問題",
         "IntentTask 本地與外部接收器衝突及更新或刪除後的註冊殘留問題",
-        "打包應用的 FileProvider URI 輔助介面使用範本識別碼而非實際清單識別碼的問題"
+        "打包應用的 FileProvider URI 輔助介面使用範本識別碼而非實際清單識別碼的問題",
+        "Node.js 宿主模組包含 java.new 等保留字成員時 ESM 匯入失敗的問題"
       ],
       "improvement": [
         "延遲初始化非關鍵組件以提升應用啓動速度",

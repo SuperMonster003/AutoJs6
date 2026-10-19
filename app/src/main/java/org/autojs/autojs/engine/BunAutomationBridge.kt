@@ -102,12 +102,14 @@ internal class BunAutomationBridge(
         val notification = job.capability == Grants.NOTIFICATIONS_POST && job.method == "notify"
         if (job.capability == Grants.DIALOGS_CONTROL) provider().cancelDialogRequest(job.id)
         val awake = job.capability == Grants.DEVICE_CONTROL && job.method == "keepScreenOn"
+        val javaObject = job.capability == Grants.JAVA_INTEROP
         val androidObject=job.capability==Grants.ANDROID_OBJECTS && job.method in setOf("createPaint","createColorStateList")
         val task=job.capability==Grants.TASKS_CONTROL && job.method in setOf("addTimedTask","addIntentTask")
-        if (!database && !sensor && !shell && !events && !notification && !awake && !androidObject && !task) { job.future.cancel(false); return }
+        if (!database && !sensor && !shell && !events && !notification && !awake && !androidObject && !task && !javaObject) { job.future.cancel(false); return }
         // Preserve late creation replies so cancelled callers cannot strand native resources.
         job.future.whenComplete { response, _ ->
             if (response?.ok == true) runCatching {
+                if (javaObject) { provider().releaseJavaResult(response.resultJson); return@runCatching }
                 if(androidObject || task) {
                     val value=JSONObject(response.resultJson.orEmpty())
                     provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(),if(task)NodeBridgeModules.TASKS else NodeBridgeModules.ANDROID_OBJECTS,
@@ -138,6 +140,7 @@ internal class BunAutomationBridge(
 
     companion object {
         fun nodeCapabilities(grants: List<String>): List<String> = buildList {
+            if (Grants.JAVA_INTEROP in grants) add(NodeBridgePermissionManifest.JAVA_INTEROP)
             if (Grants.ANDROID_OBJECTS in grants) add(NodeBridgePermissionManifest.ANDROID_OBJECTS)
             if (Grants.TASKS_CONTROL in grants) add(NodeBridgePermissionManifest.TASKS)
             if (Grants.DEVICE_CONTROL in grants) add(NodeBridgePermissionManifest.DEVICE)
@@ -166,6 +169,7 @@ internal class BunAutomationBridge(
         }
         val gestureMethods = setOf("swipe", "gesture")
         val methods = mapOf(
+            Grants.JAVA_INTEROP to ControlledJavaInteropPolicy.methods,
             Grants.ANDROID_OBJECTS to RuntimeAndroidObjects.methods,
             Grants.TASKS_CONTROL to RuntimeTasksBridge.methods,
             Grants.DEVICE_CONTROL to NodeBridgeModules.deviceMethods,
@@ -181,6 +185,6 @@ internal class BunAutomationBridge(
             Grants.SENSORS_CONTROL to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             Grants.DATABASE_CONTROL to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
         )
-        private val modules = mapOf(Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
+        private val modules = mapOf(Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
     }
 }

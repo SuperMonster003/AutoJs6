@@ -35,7 +35,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
     }
 
     @Test
-    fun hostBrokerPublishesTheJavaInteropAllowlist() {
+    fun hostBrokerPublishesPublicJavaAccess() {
         val broker = NodeJsHostCapabilityBroker(
             context,
             NodePluginScriptRequest(
@@ -55,32 +55,9 @@ class NodeJavaInteropBridgeInstrumentationTest {
                     ?: error("broker info does not publish the Java interop policy"),
             )
             assertEquals("host_provider", policy.getString("limitsEnforcedBy"))
-            assertEquals(
-                listOf(
-                    "android.graphics.Color",
-                    "android.graphics.Point",
-                    "android.graphics.Rect",
-                    "android.os.Build",
-                    "android.os.Build\$VERSION",
-                    "java.lang.Math",
-                    "java.util.Locale",
-                    "java.util.UUID",
-                    "java.util.concurrent.TimeUnit",
-                ),
-                policy.getJSONArray("allowedClasses").toList(),
-            )
-            assertTrue(policy.getJSONArray("deniedClassPrefixes").toList().contains("java.lang.reflect."))
-            val classes = policy.getJSONObject("classes")
-            val rect = classes.getJSONObject("android.graphics.Rect")
-            assertTrue(rect.getBoolean("constructable"))
-            assertTrue(rect.getJSONArray("instanceMethods").toList().contains("width"))
-            assertEquals(listOf("bottom", "left", "right", "top"), rect.getJSONArray("instanceFields").toList())
-            assertEquals(listOf("intersects", "unflattenFromString"), rect.getJSONArray("staticMethods").toList())
-            val math = classes.getJSONObject("java.lang.Math")
-            assertFalse(math.getBoolean("constructable"))
-            assertEquals(listOf("E", "PI"), math.getJSONArray("staticFields").toList())
-            assertTrue(math.getJSONArray("staticMethods").toList().contains("floorDiv"))
-            assertTrue(classes.getJSONObject("java.util.concurrent.TimeUnit").getJSONArray("staticFields").toList().contains("SECONDS"))
+            assertEquals("public", policy.getString("access"))
+            assertEquals(0, policy.getJSONArray("allowedClasses").length())
+            assertEquals(0, policy.getJSONArray("deniedClassPrefixes").length())
         } finally {
             broker.destroy(null)
         }
@@ -91,7 +68,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
     }
 
     @Test
-    fun androidJavaProviderExecutesTheAllowlistByReflection() {
+    fun androidJavaProviderExecutesPublicMembersByReflection() {
         fun dispatch(provider: NodeBridgeCapabilityProvider, method: String, payload: JSONObject): NodeBridgeResponse {
             val latch = CountDownLatch(1)
             var response: NodeBridgeResponse? = null
@@ -219,19 +196,14 @@ class NodeJavaInteropBridgeInstrumentationTest {
             assertFalse(described.getBoolean("constructable"))
 
             // Denials stay host-side: unlisted classes, loaders and processes, reflection, unlisted members, wrong arity.
-            assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, code("type", JSONObject().put("className", "java.lang.Runtime")))
-            assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, code("callStatic", statik("java.lang.Runtime", "exec", "id")))
-            assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, code("type", JSONObject().put("className", "java.lang.ClassLoader")))
-            assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, code("type", JSONObject().put("className", "java.lang.ProcessBuilder")))
-            assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, code("callStatic", statik("java.lang.System", "loadLibrary", "autojs6-node")))
-            assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, code("callStatic", statik("java.io.File", "listRoots")))
-            assertEquals(NodeRuntimeErrorCodes.JAVA_REFLECTION_DENIED, code("type", JSONObject().put("className", "java.lang.reflect.Method")))
-            assertEquals(NodeRuntimeErrorCodes.JAVA_REFLECTION_DENIED, code("callStatic", statik("java.lang.reflect.Array", "newInstance")))
+            for (className in listOf("java.lang.Runtime", "java.lang.ClassLoader", "java.lang.ProcessBuilder", "java.lang.System", "java.io.File", "java.lang.reflect.Method")) {
+                assertEquals(className, JSONObject(ok("type", JSONObject().put("className", className))).getString("className"))
+            }
             assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, code("callStatic", statik("java.lang.Math", "getClass")))
             assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, code("new", ctor("java.lang.Math")))
             assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, code("getField", field(rect, "bogus")))
             assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, code("call", call(rect, "set", 1)))
-            assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, code("call", call(rect, "getClass")))
+            assertEquals("java.lang.Class", JSONObject(ok("call", call(rect, "getClass"))).getString("className"))
             assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, code("getStatic", staticField("java.lang.Math", "getClass")))
             assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, code("callStatic", statik("java.lang.Math", "max", "a", "b")))
 
@@ -609,7 +581,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("java.frozen=true"))
         assertTrue(result.stdout, result.stdout.contains("java.rect_frozen=true"))
         assertTrue(result.stdout, result.stdout.contains("java.profile=true|stable|true"))
-        assertTrue(result.stdout, result.stdout.contains("java.policy=host_provider|true|9|true|true"))
+        assertTrue(result.stdout, result.stdout.contains("java.policy=host_provider|true|0|true|true"))
         assertTrue(
             result.stdout,
             result.stdout.contains(
@@ -644,7 +616,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
     }
 
     @Test
-    fun javaModuleForwardsToTheHostAllowlist() {
+    fun javaModuleForwardsToThePublicHostProvider() {
         NodePluginTestHarness.assumePluginRuntimeAvailable("Java interop host allowlist")
         // java_interop is a critical capability: bare scripts do not get it, the project must declare it.
         val workDir = File(context.cacheDir, "node-java-interop-live-${System.nanoTime()}").apply {
@@ -677,8 +649,8 @@ class NodeJavaInteropBridgeInstrumentationTest {
                     policy.enabled,
                     policy.limitsEnforcedBy,
                     policy.allowedClasses.length,
-                    policy.allowedClasses.indexOf("android.os.Build${'$'}VERSION") >= 0,
-                    policy.classes && policy.classes["android.graphics.Rect"] ? policy.classes["android.graphics.Rect"].constructable : "none"
+                    policy.access === "public",
+                    (await java.describe("android.graphics.Rect")).constructable
                   ].join("|"));
                   const math = java.type("java.lang.Math");
                   const max = await math.callStatic("max", [3, 7]);
@@ -708,8 +680,8 @@ class NodeJavaInteropBridgeInstrumentationTest {
                     released
                   ].join("|"));
                   console.log("java.live.codes=" + [
-                    await failCode(java.callStatic("java.lang.Runtime", "getRuntime")),
-                    await failCode(java.describe("java.lang.reflect.Method")),
+                    await failCode(java.callStatic("java.lang.Runtime", "missingMethod")),
+                    await failCode(java.describe("missing.runtime.Class")),
                     await failCode(math.callStatic("getClass")),
                     await failCode(java.callStatic("java.lang.Math", "floorDiv", [1, 0])),
                     await failCode(rect.call("width")),
@@ -723,12 +695,12 @@ class NodeJavaInteropBridgeInstrumentationTest {
         workDir.deleteRecursively()
         NodePluginTestHarness.assertSucceeded("java interop live", result)
         val details = NodePluginTestHarness.describeResult("java interop live", result)
-        assertTrue(details, result.stdout.contains("java.live.policy=true|host_provider|9|true|true"))
+        assertTrue(details, result.stdout.contains("java.live.policy=true|host_provider|0|true|true"))
         assertTrue(details, result.stdout.contains("java.live.values=7|3.1416|10|2|android.graphics.Rect|1|true|SECONDS|5000|true|true|true"))
         assertTrue(
             details,
             result.stdout.contains(
-                "java.live.codes=ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_REFLECTION_DENIED|ERR_AUTOJS6_JAVA_METHOD_DENIED|" +
+                "java.live.codes=ERR_AUTOJS6_JAVA_METHOD_DENIED|ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_METHOD_DENIED|" +
                     "ERR_AUTOJS6_JAVA_CALL_FAILED|ERR_AUTOJS6_JAVA_METHOD_DENIED|ERR_AUTOJS6_JAVA_METHOD_DENIED",
             ),
         )

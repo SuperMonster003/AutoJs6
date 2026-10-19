@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/19",
+      "released_date": "2026/10/20",
       "released_hint": "일부 기능 플러그인화, 신중하게 업데이트",
       "hint": [
         "일부 내장 기능 (OCR, 바코드 인식, OpenCV, OpenCC, Pinyin, MediaInfo, 터미널 및 오프라인 프로젝트 문서 등)을 독립 플러그인으로 제공하며, 사용 전에 플러그인 센터에서 해당 플러그인을 설치하고 활성화해야 함",
@@ -167,7 +167,8 @@
         "Bun 및 Node.js Worker의 호스트 이벤트 및 알림 API, 독립 구독과 알림 정리",
         "Bun 및 Node.js Worker의 기기 제어와 대화상자 API, 밝기, 음량 및 독립 창 정리",
         "Node.js, Bun 및 Worker의 Android 객체 도우미, Paint, ColorStateList, 테마 색상 및 FileProvider URI 지원",
-        "Node.js 및 Bun의 영구 달력 및 IntentTask API, 일간, 주간, 월간, 연간, 일회성, 카운트다운 및 브로드캐스트 작업 지원"
+        "Node.js 및 Bun의 영구 달력 및 IntentTask API, 일간, 주간, 월간, 연간, 일회성, 카운트다운 및 브로드캐스트 작업 지원",
+        "Node.js/Bun/Worker의 Java/Android 상호 운용으로 공개 생성자와 멤버, 배열, 정확한 long 값, 명시적 오버로드 및 앱 Context 핸들 지원"
       ],
       "fix": [
         "runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제",
@@ -312,7 +313,8 @@
         "진행 대화상자 갱신 후 이전 값이 반환되고 취소 후 창이 남는 문제",
         "일간 및 주간 작업의 실행 시간이 일광 절약 시간 전환 후 달라지는 문제",
         "IntentTask 로컬 및 외부 수신 충돌과 갱신이나 삭제 후 등록이 남는 문제",
-        "빌드된 앱의 FileProvider URI가 실제 매니페스트 대신 템플릿 authority를 사용하는 문제"
+        "빌드된 앱의 FileProvider URI가 실제 매니페스트 대신 템플릿 authority를 사용하는 문제",
+        "Node.js 호스트 모듈에 java.new 같은 예약어 멤버가 있을 때 ESM 가져오기가 실패하는 문제"
       ],
       "improvement": [
         "필수적이지 않은 구성요소 초기화를 지연하여 앱 시작 속도 향상",

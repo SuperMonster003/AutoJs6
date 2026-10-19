@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_java_interop_grant">Permitir miembros públicos de Java y Android en el proceso anfitrión, según los permisos de Android</string>
+    <string name="text_bun_java_interop_grant">Interoperabilidad Java/Android</string>
+</resources>

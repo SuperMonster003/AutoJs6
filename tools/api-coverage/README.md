@@ -263,3 +263,8 @@ Run `node tools/api-coverage/check-runtime-device-dialogs.mjs` to compare the na
 ## Runtime Android objects and calendar tasks
 
 Run `node tools/api-coverage/check-runtime-android-tasks.mjs` to compare the native object/task routes with the shared Node/Bun factories and declarations. Node real Worker tests, Bun client tests, type smoke fixtures and Ace default popup tests cover the public surface. CalendarTaskTimesTest checks short/long days and gap/overlap rules. RuntimeAndroidTasksNativeTest/DeviceTest/PackagedDeviceTest verify real Android objects, persistent task CRUD, filtered broadcasts, actual child execution and packaged relaunch. Fixtures use owned task sources and verify task removal without playing test audio.
+
+
+## Java/Android object interop
+
+Run `node tools/api-coverage/check-runtime-java-interop.mjs` for the 19 native Java routes, the shared Node/Bun facade and synchronized types. Node uses `test-java-interop.js` and `test-worker-java-interop.js`; Bun uses `java-interop.test.mjs`. These verify transport serialization, exact long values, reserved ESM exports, cancellation and Worker ownership. The full Android contract is exercised by `RuntimeJavaInteropNativeTest`, `RuntimeJavaInteropDeviceTest`, `NodeJavaInteropBridgeInstrumentationTest` and `RuntimeJavaInteropPackagedDeviceTest`. Packaged checks use a genuine Runtime Kit and run the generated Bun and Node/Worker applications before and after relaunch. No audio stimulus is used. The coverage counts describe explicit routes and declared facade members, not all possible Java classes, all overloads or Rhino parity.

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/19",
+      "released_date": "2026/10/20",
       "released_hint": "Certaines fonctions passent par des plugins, mise à niveau avec prudence",
       "hint": [
         "Certaines fonctions intégrées sont désormais fournies par des plugins indépendants (OCR, reconnaissance de codes-barres, OpenCV, OpenCC, pinyin, MediaInfo, terminal et documentation hors ligne du projet); installez et activez les plugins correspondants dans le centre de plugins avant utilisation",
@@ -167,7 +167,8 @@
         "Événements et notifications hôtes pour Bun et les Workers Node.js, avec nettoyage indépendant des abonnements et notifications",
         "Commandes de périphérique et dialogues pour Bun et les Workers Node.js, avec luminosité, volume et nettoyage indépendant des fenêtres",
         "Objets Android pour Node.js, Bun et les Workers, avec Paint, ColorStateList, couleurs du thème et URI FileProvider",
-        "API persistantes de calendrier et IntentTask pour Node.js et Bun, avec tâches quotidiennes, hebdomadaires, mensuelles, annuelles, ponctuelles, différées et de diffusion"
+        "API persistantes de calendrier et IntentTask pour Node.js et Bun, avec tâches quotidiennes, hebdomadaires, mensuelles, annuelles, ponctuelles, différées et de diffusion",
+        "Interopérabilité Java/Android pour Node.js, Bun et Workers, avec constructeurs et membres publics, tableaux, valeurs long exactes, surcharges explicites et handles Context"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
@@ -312,7 +313,8 @@
         "Valeurs obsolètes après la mise à jour des dialogues de progression et fenêtres restant ouvertes après annulation",
         "Décalage de l'heure locale des tâches quotidiennes et hebdomadaires lors des changements d'heure",
         "Conflits entre récepteurs IntentTask locaux et externes et inscriptions restantes après modification ou suppression",
-        "URI FileProvider des applications générées utilisant l'autorité du modèle au lieu de celle du manifeste réel"
+        "URI FileProvider des applications générées utilisant l'autorité du modèle au lieu de celle du manifeste réel",
+        "Échec des imports ESM Node.js lorsque le module hôte exporte un nom réservé tel que java.new"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_java_interop_grant">Android 권한에 따라 호스트 프로세스의 Java 및 Android 공개 멤버 사용</string>
+    <string name="text_bun_java_interop_grant">Java/Android 상호 운용</string>
+</resources>

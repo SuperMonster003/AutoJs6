@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/19",
+      "released_date": "2026/10/20",
       "released_hint": "Algunas funciones pasan a complementos; actualiza con precaución",
       "hint": [
         "Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas",
@@ -167,7 +167,8 @@
         "Eventos y notificaciones del anfitrión para Bun y Workers de Node.js, con limpieza independiente de suscripciones y notificaciones",
         "Control del dispositivo y diálogos para Bun y Workers de Node.js, con brillo, volumen y limpieza independiente de ventanas",
         "Objetos Android para Node.js, Bun y Workers, con Paint, ColorStateList, colores del tema y URI FileProvider",
-        "API persistentes de calendario e IntentTask para Node.js y Bun, con tareas diarias, semanales, mensuales, anuales, únicas, de cuenta atrás y de difusión"
+        "API persistentes de calendario e IntentTask para Node.js y Bun, con tareas diarias, semanales, mensuales, anuales, únicas, de cuenta atrás y de difusión",
+        "Interoperabilidad Java/Android para Node.js, Bun y Workers, con constructores y miembros públicos, matrices, valores long exactos, sobrecargas explícitas y referencias Context"
       ],
       "fix": [
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",
@@ -312,7 +313,8 @@
         "Valores obsoletos tras actualizar diálogos de progreso y ventanas abiertas después de cancelar",
         "Desplazamiento de la hora local de tareas diarias y semanales al cambiar el horario de verano",
         "Conflictos entre receptores IntentTask locales y externos y registros obsoletos tras actualizar o eliminar",
-        "URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real"
+        "URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real",
+        "Error de importación ESM en Node.js cuando el módulo anfitrión exporta un nombre reservado como java.new"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",

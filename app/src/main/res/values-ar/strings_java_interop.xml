@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_java_interop_grant">السماح بالأعضاء العامة في Java وAndroid داخل عملية المضيف وفقا لأذونات Android</string>
+    <string name="text_bun_java_interop_grant">تكامل Java/Android</string>
+</resources>

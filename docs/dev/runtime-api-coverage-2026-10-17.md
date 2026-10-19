@@ -80,3 +80,8 @@ The [event/notification delivery](runtime-events-2026-10-19.md) adds Bun and Nod
 The [device/dialog delivery](runtime-device-dialogs-2026-10-19.md) adds Bun and Node Worker device/dialog facades, scoped wake locks, precise cancellation, live progress handles, four independent Bun grants, derived APK permissions and Android 13/15 host/packaged validation. The original Bun device.info format remains compatible; full snapshots use getInfo.
 
 The [Android object and persistent task delivery](runtime-android-tasks-2026-10-19.md) adds Node/Bun/Worker native object helpers, calendar/IntentTask APIs, scoped object cleanup, persistent registrations, DST-correct recurrence, filtered receiver lifecycle, queued Bun host calls and actual host/packaged validation on Android 13/15.
+
+
+## 2026-10-20 Java/Android interop follow-up
+
+Node.js main threads, Bun and CJS/ESM/nested Workers now share explicit public Java object access, application Context handles, typed arrays and overload selection. The host no longer limits these calls to nine predefined classes. Exact long values and reserved ESM names are supported; cancellation retains late object replies for cleanup. Bun uses its independent java.interop grant and unchanged native runtime. See [this batch](runtime-java-interop-2026-10-20.md) for final verification and restoration. JavaScript callback/subclass generation, dedicated loadDex/loadJar helpers and the remaining specialized plugin surfaces remain outside this batch; this is not complete Rhino parity.

@@ -5,6 +5,11 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class BunAutomationPolicyTest {
+    @Test fun javaGrantMatchesPublicRoutesAndRemainsIndependent() {
+        assertEquals(listOf("java_interop"),BunAutomationBridge.nodeCapabilities(listOf(Grants.JAVA_INTEROP)))
+        assertEquals(ControlledJavaInteropPolicy.methods,BunAutomationBridge.methods[Grants.JAVA_INTEROP])
+        assertEquals(listOf("java.interop"),Grants.validatePackagedCapabilities(listOf("java.interop")))
+    }
     @Test fun appGrantCoversTheActualProviderRequirementsWithoutOtherCapabilities() {
         val granted=BunAutomationBridge.nodeCapabilities(listOf(Grants.APP_CONTROL)).toSet()
         assertEquals(setOf("app","app.launch","app.settings","app.activity","app.query"),granted)
@@ -19,7 +24,7 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        assertEquals(117,BunAutomationBridge.methods.values.sumOf{it.size})
+        assertEquals(136,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
