@@ -42,19 +42,22 @@ def run_phase(serial, package, phase, run_id, timeout, touch_seconds=0):
     adb(serial, "shell", "am", "start", "-n", f"{package}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
 
     deadline = time.monotonic() + timeout
-    seen = 0
+    # Whole logcat lines (with their timestamps) identify what was read: the ring buffer drops old lines on busy
+    # devices (Magisk logs every su call), so positions in successive dumps do not line up.
+    seen = set()
     events = []
     touch_announced = False
     while time.monotonic() < deadline:
-        lines = [line for line in adb(serial, "logcat", "-d", "-s", f"{TAG}:I").stdout.splitlines() if f" {run_id} " in line + " "]
-        for line in lines[seen:]:
+        for line in adb(serial, "logcat", "-d", "-s", f"{TAG}:I").stdout.splitlines():
+            if f" {run_id} " not in line + " " or line in seen:
+                continue
+            seen.add(line)
             payload = line.split(f" {run_id} ", 1)[1].strip()
             if payload == "TOUCH_NOW" and not touch_announced:
                 touch_announced = True
                 print(f"  >>> 请在 {touch_seconds} 秒内在设备上多次触摸屏幕 (测试 getevent 实时输出)", flush=True)
                 continue
             events.append(payload)
-        seen = len(lines)
         if events and events[-1] == "DONE":
             return events[:-1], True
         time.sleep(1)
@@ -63,11 +66,15 @@ def run_phase(serial, package, phase, run_id, timeout, touch_seconds=0):
 
 def summarize(phase, events, finished):
     passed = failed = 0
+    reported = None
     for payload in events:
         try:
             item = json.loads(payload)
         except json.JSONDecodeError:
             print(f"  ?    {payload}")
+            continue
+        if item.get("info") == "reported":
+            reported = item.get("value")
             continue
         if "info" in item:
             print(f"  info {item['info']}={item.get('value')}")
@@ -79,6 +86,9 @@ def summarize(phase, events, finished):
     if not finished:
         failed += 1
         print(f"  FAIL {phase}: no DONE within the timeout")
+    elif reported is not None and reported != passed + failed:
+        failed += 1
+        print(f"  FAIL {phase}: the device reported {reported} results, {passed + failed} were read from logcat")
     return passed, failed
 
 

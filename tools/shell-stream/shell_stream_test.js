@@ -11,8 +11,17 @@ function emitLine(text) {
     android.util.Log.i(TAG, RUN_ID + ' ' + text);
 }
 
+let reportedCount = 0;
+
 function report(name, pass, detail) {
+    reportedCount++;
     emitLine(JSON.stringify({ name: name, pass: !!pass, detail: detail === undefined ? '' : String(detail) }));
+}
+
+// The runner compares this count with the results it read, so lines lost from logcat fail the run.
+function finishPhase() {
+    emitLine(JSON.stringify({ info: 'reported', value: reportedCount }));
+    emitLine('DONE');
 }
 
 function check(name, fn) {
@@ -82,7 +91,7 @@ function asyncCheck(name, timeoutMillis, fn) {
 function runNextAsync() {
     let t = asyncQueue.shift();
     if (!t) {
-        emitLine('DONE');
+        finishPhase();
         return;
     }
     let finished = false;
@@ -427,7 +436,7 @@ function addTouchCheck() {
 function touchPhase() {
     if (!adbAvailable) {
         report('pipe.adb.getevent', false, 'Shizuku is not operational');
-        emitLine('DONE');
+        finishPhase();
         return;
     }
     addTouchCheck();
@@ -443,7 +452,7 @@ function keepalivePhase() {
     p.on('output', (line) => got = String(line));
     p.on('exit', (code) => {
         report('keepalive.untilExit', got === 'hi' && code === 0, 'got=' + got + ' code=' + code);
-        emitLine('DONE');
+        finishPhase();
     });
 }
 
@@ -480,7 +489,7 @@ function cleanupPhase() {
     let missing = markers.filter((m) => listing.indexOf(m) < 0);
     report('cleanup.started', missing.length === 0, 'markers=' + markers.length + ' missing=' + (missing.join(',') || '-'));
     emitLine(JSON.stringify({ info: 'markers', value: markers.join(',') }));
-    emitLine('DONE');
+    finishPhase();
 }
 
 if (PHASE === 'touch') touchPhase();
