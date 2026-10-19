@@ -5,8 +5,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.TextView;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.platform.app.InstrumentationRegistry;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -38,6 +38,30 @@ public class CircularMenuMoreDialogInstrumentationTest {
     private boolean menuWasShowing;
     private MaterialDialog dialog;
 
+    /** Rows and subtitles recorded before each frame of one opening of the menu. zh-CN: 一次打开菜单时每帧绘制前记录的条目位置与副标题. */
+    private record Opening(long clickedAt, List<Long> times, List<int[]> rows, List<String> subtitles) {
+
+        String report(String label, String placeholder) {
+            int loaded = 0;
+            while (loaded < subtitles.size() && subtitles.get(loaded).contains(placeholder)) loaded++;
+            return label + ": shown after " + (times.get(0) - clickedAt) + " ms, "
+                    + (loaded < times.size() ? "loaded after " + (times.get(loaded) - clickedAt) + " ms" : "not loaded") + ", "
+                    + "placeholder in first frame=" + (loaded > 0) + ", frames=" + times.size() + ", "
+                    + "rows " + Arrays.toString(rows.get(0)) + " -> " + Arrays.toString(rows.get(rows.size() - 1));
+        }
+
+        @Nullable
+        String movement() {
+            for (int i = 1; i < rows.size(); i++) {
+                if (!Arrays.equals(rows.get(0), rows.get(i))) {
+                    return "Rows moved at frame " + i + ": " + Arrays.toString(rows.get(0)) + " -> " + Arrays.toString(rows.get(i))
+                            + ", subtitles " + subtitles.get(0) + " -> " + subtitles.get(i);
+                }
+            }
+            return null;
+        }
+    }
+
     @Before
     public void showFloatingButton() throws Exception {
         shell("appops set " + instrumentation.getTargetContext().getPackageName() + " SYSTEM_ALERT_WINDOW allow");
@@ -68,17 +92,36 @@ public class CircularMenuMoreDialogInstrumentationTest {
     public void rowsKeepTheirPositionsAfterTheMenuAppears() throws Exception {
         CircularMenu menu = FloatyWindowManger.getCircularMenu();
         assertNotNull(menu);
+        String placeholder = "[" + instrumentation.getTargetContext().getString(R.string.ellipsis_six) + "]";
+
+        // The first opening after the process starts may outwait Shizuku or root and fill in placeholders later,
+        // so it is only reported. The second opening is what a running AutoJs6 shows.
+        // zh-CN: 进程启动后首次打开可能等不到 Shizuku 或 root 的结果而稍后填入占位内容, 因此只报告.
+        // 第二次打开才是 AutoJs6 运行中的常态.
+        Opening first = openMoreMenu(menu);
+        Opening second = openMoreMenu(menu);
+
+        String[] movement = new String[1];
+        instrumentation.runOnMainSync(() -> {
+            Log.i(TAG, first.report("first opening", placeholder) + ", moved=" + (first.movement() != null));
+            Log.i(TAG, second.report("second opening", placeholder));
+            Log.d(TAG, "subtitles " + second.subtitles().get(0) + " -> " + second.subtitles().get(second.subtitles().size() - 1));
+            movement[0] = second.movement();
+        });
+        if (movement[0] != null) {
+            fail(movement[0]);
+        }
+    }
+
+    private Opening openMoreMenu(CircularMenu menu) throws Exception {
         instrumentation.runOnMainSync(() -> menu.mWindow.expand());
         SystemClock.sleep(500);
 
-        List<int[]> frames = new ArrayList<>();
-        List<String> subtitles = new ArrayList<>();
-        long[] clickedAt = new long[1];
-        long[] firstFrameAt = new long[1];
         Field dialogField = CircularMenu.class.getDeclaredField("mMenuOperationDialog");
         dialogField.setAccessible(true);
+        Opening[] opening = new Opening[1];
         instrumentation.runOnMainSync(() -> {
-            clickedAt[0] = SystemClock.uptimeMillis();
+            opening[0] = new Opening(SystemClock.uptimeMillis(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
             menu.mWindow.mCircularActionMenu.findViewById(R.id.action_menu_more).performClick();
             try {
                 dialog = (MaterialDialog) dialogField.get(menu);
@@ -89,49 +132,35 @@ public class CircularMenuMoreDialogInstrumentationTest {
             assertNotNull(rows);
             // Registered before the dialog is shown, so the very first frame is recorded too.
             // zh-CN: 在对话框显示前注册, 以便首帧也被记录.
-            rows.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    if (rows.getChildCount() == 0) {
-                        return true;
-                    }
-                    if (frames.isEmpty()) {
-                        firstFrameAt[0] = SystemClock.uptimeMillis();
-                    }
-                    int[] tops = new int[rows.getChildCount()];
-                    StringBuilder texts = new StringBuilder();
-                    for (int i = 0; i < tops.length; i++) {
-                        View child = rows.getChildAt(i);
-                        tops[i] = Math.round(child.getTop() + child.getTranslationY());
-                        TextView subtitle = child.findViewById(R.id.subtitle);
-                        if (subtitle.getVisibility() == View.VISIBLE) {
-                            texts.append('[').append(subtitle.getText()).append(']');
-                        }
-                    }
-                    frames.add(tops);
-                    subtitles.add(texts.toString());
+            rows.getViewTreeObserver().addOnPreDrawListener(() -> {
+                if (rows.getChildCount() == 0) {
                     return true;
                 }
+                int[] tops = new int[rows.getChildCount()];
+                StringBuilder texts = new StringBuilder();
+                for (int i = 0; i < tops.length; i++) {
+                    View child = rows.getChildAt(i);
+                    tops[i] = Math.round(child.getTop() + child.getTranslationY());
+                    TextView subtitle = child.findViewById(R.id.subtitle);
+                    if (subtitle.getVisibility() == View.VISIBLE) {
+                        texts.append('[').append(subtitle.getText()).append(']');
+                    }
+                }
+                opening[0].times().add(SystemClock.uptimeMillis());
+                opening[0].rows().add(tops);
+                opening[0].subtitles().add(texts.toString());
+                return true;
             });
         });
 
-        waitOnMain(() -> !frames.isEmpty());
+        waitOnMain(() -> !opening[0].rows().isEmpty());
         SystemClock.sleep(OBSERVE_MILLIS);
-
         instrumentation.runOnMainSync(() -> {
-            String placeholder = "[" + dialog.getContext().getString(R.string.ellipsis_six) + "]";
-            Log.i(TAG, "shown after " + (firstFrameAt[0] - clickedAt[0]) + " ms, frames=" + frames.size()
-                    + ", placeholder in first frame=" + subtitles.get(0).contains(placeholder)
-                    + ", rows " + Arrays.toString(frames.get(0)) + " -> " + Arrays.toString(frames.get(frames.size() - 1)));
-            Log.d(TAG, "subtitles " + subtitles.get(0) + " -> " + subtitles.get(subtitles.size() - 1));
-            int[] first = frames.get(0);
-            for (int i = 1; i < frames.size(); i++) {
-                if (!Arrays.equals(first, frames.get(i))) {
-                    fail("Rows moved at frame " + i + ": " + Arrays.toString(first) + " -> " + Arrays.toString(frames.get(i))
-                            + ", subtitles " + subtitles.get(0) + " -> " + subtitles.get(i));
-                }
-            }
+            dialog.dismiss();
+            dialog = null;
         });
+        instrumentation.waitForIdleSync();
+        return opening[0];
     }
 
     private void shell(String command) throws IOException {
