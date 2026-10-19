@@ -98,6 +98,12 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunShellControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunShellRootGrantPreference: ThemeColorSwitchPreference? = null
     private var bunShellShizukuGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunEventsObserveGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunEventsNotificationGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunEventsToastGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunEventsKeyGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunNotificationsPostGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunNotificationsSettingsGrantPreference: ThemeColorSwitchPreference? = null
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiLayoutGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiComposeGrantPreference: ThemeColorSwitchPreference? = null
@@ -245,6 +251,12 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunShellControlGrantPreference = findPreference("plugin_bun_shell_control_grant")
         bunShellRootGrantPreference = findPreference("plugin_bun_shell_root_grant")
         bunShellShizukuGrantPreference = findPreference("plugin_bun_shell_shizuku_grant")
+        bunEventsObserveGrantPreference = findPreference("plugin_bun_events_observe_grant")
+        bunEventsNotificationGrantPreference = findPreference("plugin_bun_events_notification_grant")
+        bunEventsToastGrantPreference = findPreference("plugin_bun_events_toast_grant")
+        bunEventsKeyGrantPreference = findPreference("plugin_bun_events_key_grant")
+        bunNotificationsPostGrantPreference = findPreference("plugin_bun_notifications_post_grant")
+        bunNotificationsSettingsGrantPreference = findPreference("plugin_bun_notifications_settings_grant")
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
         bunUiLayoutGrantPreference = findPreference("plugin_bun_ui_layout_grant")
         bunUiComposeGrantPreference = findPreference("plugin_bun_ui_compose_grant")
@@ -411,6 +423,30 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setShellShizukuGranted(requireContext(), value == true)
             true
         }
+        bunEventsObserveGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setEventsObserveGranted(requireContext(), value == true)
+            true
+        }
+        bunEventsNotificationGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setEventsNotificationGranted(requireContext(), value == true)
+            true
+        }
+        bunEventsToastGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setEventsToastGranted(requireContext(), value == true)
+            true
+        }
+        bunEventsKeyGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setEventsKeyGranted(requireContext(), value == true)
+            true
+        }
+        bunNotificationsPostGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setNotificationsPostGranted(requireContext(), value == true)
+            true
+        }
+        bunNotificationsSettingsGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setNotificationsSettingsGranted(requireContext(), value == true)
+            true
+        }
         bunConsoleControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
             true
@@ -503,6 +539,12 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunShellControlGrantPreference?.isChecked = BunHostCapabilityGrants.isShellControlGranted(requireContext())
         bunShellRootGrantPreference?.isChecked = BunHostCapabilityGrants.isShellRootGranted(requireContext())
         bunShellShizukuGrantPreference?.isChecked = BunHostCapabilityGrants.isShellShizukuGranted(requireContext())
+        bunEventsObserveGrantPreference?.isChecked = BunHostCapabilityGrants.isEventsObserveGranted(requireContext())
+        bunEventsNotificationGrantPreference?.isChecked = BunHostCapabilityGrants.isEventsNotificationGranted(requireContext())
+        bunEventsToastGrantPreference?.isChecked = BunHostCapabilityGrants.isEventsToastGranted(requireContext())
+        bunEventsKeyGrantPreference?.isChecked = BunHostCapabilityGrants.isEventsKeyGranted(requireContext())
+        bunNotificationsPostGrantPreference?.isChecked = BunHostCapabilityGrants.isNotificationsPostGranted(requireContext())
+        bunNotificationsSettingsGrantPreference?.isChecked = BunHostCapabilityGrants.isNotificationsSettingsGranted(requireContext())
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
         bunUiLayoutGrantPreference?.isChecked = BunHostCapabilityGrants.isUiLayoutGranted(requireContext())
         bunUiComposeGrantPreference?.isChecked = BunHostCapabilityGrants.isUiComposeGranted(requireContext())

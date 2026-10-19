@@ -20,7 +20,7 @@ import org.json.JSONObject
 import java.util.ArrayDeque
 import java.util.UUID
 
-/** One subscription per Android event source and script. JSON events share the existing bridge channel. */
+/** Independent, execution-owned subscriptions for main threads, Workers and Bun clients. */
 internal class NodeEventObservers(private val context: Context) {
     private val sessions = linkedMapOf<String, Session>()
     private var destroyed = false
@@ -29,7 +29,6 @@ internal class NodeEventObservers(private val context: Context) {
     fun observe(kind: String, stream: NodeBridgeEventStream?): Session {
         check(!destroyed) { "The script has ended." }
         sessions.entries.removeAll { it.value.closed }
-        require(sessions.values.none { it.kind == kind && !it.closed }) { "This script already observes $kind." }
         val session = Session(stream?.subscriptionId ?: "events-${UUID.randomUUID()}", kind, stream)
         try {
             when (kind) {
@@ -54,7 +53,9 @@ internal class NodeEventObservers(private val context: Context) {
         }
     }
 
-    @Synchronized fun drain(id: String): JSONArray = sessions[id]?.drain() ?: JSONArray()
+    @Synchronized fun drain(id: String): JSONArray = requireNotNull(sessions[id]) { "Event subscription is closed or belongs to another execution." }.drain()
+    @Synchronized fun isDestroyed(): Boolean = destroyed
+    @Synchronized fun activeCount(): Int = sessions.values.count { !it.closed }
     @Synchronized fun close(id: String, reason: String): Boolean = sessions.remove(id)?.let { it.close(reason); true } ?: false
     @Synchronized fun closeAll() { destroyed = true; sessions.values.forEach { it.close("script-ended") }; sessions.clear() }
 
@@ -98,6 +99,7 @@ internal class NodeEventObservers(private val context: Context) {
     }
 
     private fun attachBroadcasts(session: Session) {
+        var lastBattery: String? = null
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val event = when (intent.action) {
@@ -114,15 +116,23 @@ internal class NodeEventObservers(private val context: Context) {
                     }
                     else -> return
                 }
+                if (event.optString("type") == "battery_changed") {
+                    val snapshot = event.toString()
+                    if (snapshot == lastBattery) return
+                    lastBattery = snapshot
+                }
                 session.publish(event)
             }
         }
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_ON); addAction(Intent.ACTION_SCREEN_OFF); addAction(Intent.ACTION_BATTERY_CHANGED)
         }
-        if (Build.VERSION.SDK_INT >= 33) context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        val sticky = if (Build.VERSION.SDK_INT >= 33) context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
         else @Suppress("DEPRECATION") context.registerReceiver(receiver, filter)
         session.detach = { context.unregisterReceiver(receiver) }
+        // Some OEMs do not enqueue an initial callback for a background registration. Preserve the
+        // actual sticky snapshot returned by Android and deduplicate the later identical callback.
+        sticky?.let { receiver.onReceive(context, it) }
     }
 
     class Session(val id: String, val kind: String, private val stream: NodeBridgeEventStream?) {
@@ -130,15 +140,22 @@ internal class NodeEventObservers(private val context: Context) {
             private set
         var detach: () -> Unit = {}
         private val queue = ArrayDeque<JSONObject>()
+        private var dropped = 0
         @Synchronized fun publish(event: JSONObject) {
             if (closed) return
             event.put("time", System.currentTimeMillis()).put("source", kind)
             if (stream != null) stream.publish(event) else {
-                if (queue.size == 128) queue.removeFirst()
+                if (queue.size == 128) { queue.removeFirst(); dropped++ }
                 queue.addLast(event)
             }
         }
-        @Synchronized fun drain(): JSONArray = JSONArray().also { while (queue.isNotEmpty()) it.put(queue.removeFirst()) }
+        @Synchronized fun drain(): JSONArray = JSONArray().also { result ->
+            if (dropped > 0) {
+                result.put(JSONObject().put("type", "overflow").put("source", kind).put("dropped", dropped).put("time", System.currentTimeMillis()))
+                dropped = 0
+            }
+            while (queue.isNotEmpty() && result.length() < 32) result.put(queue.removeFirst())
+        }
         @Synchronized fun close(reason: String) {
             if (closed) return
             queue.clear()

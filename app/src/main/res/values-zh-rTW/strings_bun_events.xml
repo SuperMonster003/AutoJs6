@@ -1,0 +1,14 @@
+<resources>
+    <string name="summary_bun_events_key_grant">允許透過無障礙服務監聽按鍵, 不攔截按鍵</string>
+    <string name="summary_bun_events_notification_grant">取得 Android 通知存取權後允許讀取通知內容</string>
+    <string name="summary_bun_events_observe_grant">允許指令碼監聽螢幕與電量事件</string>
+    <string name="summary_bun_events_toast_grant">允許透過無障礙服務監聽 Toast 訊息</string>
+    <string name="summary_bun_notifications_post_grant">允許指令碼傳送及取消自身通知</string>
+    <string name="summary_bun_notifications_settings_grant">允許指令碼開啟 Android 通知設定</string>
+    <string name="text_bun_events_key_grant">監聽按鍵事件</string>
+    <string name="text_bun_events_notification_grant">監聽通知</string>
+    <string name="text_bun_events_observe_grant">監聽系統事件</string>
+    <string name="text_bun_events_toast_grant">監聽 Toast 訊息</string>
+    <string name="text_bun_notifications_post_grant">傳送通知</string>
+    <string name="text_bun_notifications_settings_grant">開啟通知設定</string>
+</resources>

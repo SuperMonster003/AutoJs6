@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <activity android:name="org.autojs.autojs.engine.RuntimeEventsToastFixtureActivity"
+            android:exported="true" android:process=":events_toast_fixture"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
         <activity android:name="org.autojs.autojs.engine.RuntimeWebBackgroundFixtureActivity"
             android:exported="true" android:process=":web_background_fixture"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />

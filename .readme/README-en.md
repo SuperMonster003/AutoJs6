@@ -350,6 +350,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Host database/sqlite APIs for Bun and Node.js Workers with parameterized queries, transactions and persistence
 * `Feature` Sensor sampling and subscriptions for Bun and Node.js Workers with cancellation and automatic listener cleanup
 * `Feature` Host Shell streaming, Shizuku authorization and process cleanup for Bun, Node.js and Workers
+* `Feature` Host event observers and notifications for Bun and Node.js Workers, with independent subscription and notification cleanup
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
@@ -488,6 +489,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Database queries losing null/numeric parameter types, incorrect multirow INSERT counts and unfinished transactions retaining connections
 * `Fix` Sensor listeners surviving cancelled samples, failed polling or registration queued during provider destruction
 * `Fix` Shell cleanup hanging when commands ignore SIGTERM; process descendants are stopped before termination
+* `Fix` Notifications with the same numeric ID from separate script executions overwriting or cancelling each other
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions

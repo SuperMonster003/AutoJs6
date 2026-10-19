@@ -1,0 +1,14 @@
+<resources>
+    <string name="summary_bun_events_key_grant">允许通过无障碍服务监听按键, 不拦截按键</string>
+    <string name="summary_bun_events_notification_grant">获得 Android 通知使用权后允许读取通知内容</string>
+    <string name="summary_bun_events_observe_grant">允许脚本监听屏幕与电量事件</string>
+    <string name="summary_bun_events_toast_grant">允许通过无障碍服务监听 Toast 消息</string>
+    <string name="summary_bun_notifications_post_grant">允许脚本发送和取消自身通知</string>
+    <string name="summary_bun_notifications_settings_grant">允许脚本打开 Android 通知设置</string>
+    <string name="text_bun_events_key_grant">监听按键事件</string>
+    <string name="text_bun_events_notification_grant">监听通知</string>
+    <string name="text_bun_events_observe_grant">监听系统事件</string>
+    <string name="text_bun_events_toast_grant">监听 Toast 消息</string>
+    <string name="text_bun_notifications_post_grant">发送通知</string>
+    <string name="text_bun_notifications_settings_grant">打开通知设置</string>
+</resources>

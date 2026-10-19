@@ -41,6 +41,13 @@ object BunHostCapabilityGrants {
     const val SHELL_ROOT = "shell.root"
     const val SHELL_SHIZUKU = "shell.shizuku"
 
+    const val EVENTS_OBSERVE = "events.observe"
+    const val EVENTS_NOTIFICATION = "events.notification"
+    const val EVENTS_TOAST = "events.toast"
+    const val EVENTS_KEY = "events.key"
+    const val NOTIFICATIONS_POST = "notifications.post"
+    const val NOTIFICATIONS_SETTINGS = "notifications.settings"
+
     private const val SP_NAME = "bun_host_capability_grants"
 
     /** Read-only host info snapshot: host package, version and advisory locale/build date. */
@@ -139,6 +146,24 @@ object BunHostCapabilityGrants {
     fun isShellControlGranted(context: Context): Boolean = isGranted(context, SHELL_CONTROL, false)
     fun setShellControlGranted(context: Context, granted: Boolean) = setGranted(context, SHELL_CONTROL, granted)
 
+    fun isEventsObserveGranted(context: Context): Boolean = isGranted(context, EVENTS_OBSERVE, false)
+    fun setEventsObserveGranted(context: Context, granted: Boolean) = setGranted(context, EVENTS_OBSERVE, granted)
+
+    fun isEventsNotificationGranted(context: Context): Boolean = isGranted(context, EVENTS_NOTIFICATION, false)
+    fun setEventsNotificationGranted(context: Context, granted: Boolean) = setGranted(context, EVENTS_NOTIFICATION, granted)
+
+    fun isEventsToastGranted(context: Context): Boolean = isGranted(context, EVENTS_TOAST, false)
+    fun setEventsToastGranted(context: Context, granted: Boolean) = setGranted(context, EVENTS_TOAST, granted)
+
+    fun isEventsKeyGranted(context: Context): Boolean = isGranted(context, EVENTS_KEY, false)
+    fun setEventsKeyGranted(context: Context, granted: Boolean) = setGranted(context, EVENTS_KEY, granted)
+
+    fun isNotificationsPostGranted(context: Context): Boolean = isGranted(context, NOTIFICATIONS_POST, false)
+    fun setNotificationsPostGranted(context: Context, granted: Boolean) = setGranted(context, NOTIFICATIONS_POST, granted)
+
+    fun isNotificationsSettingsGranted(context: Context): Boolean = isGranted(context, NOTIFICATIONS_SETTINGS, false)
+    fun setNotificationsSettingsGranted(context: Context, granted: Boolean) = setGranted(context, NOTIFICATIONS_SETTINGS, granted)
+
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
@@ -186,6 +211,12 @@ object BunHostCapabilityGrants {
         if (isShellControlGranted(context)) add(SHELL_CONTROL)
         if (isShellRootGranted(context)) add(SHELL_ROOT)
         if (isShellShizukuGranted(context)) add(SHELL_SHIZUKU)
+        if (isEventsObserveGranted(context)) add(EVENTS_OBSERVE)
+        if (isEventsNotificationGranted(context)) add(EVENTS_NOTIFICATION)
+        if (isEventsToastGranted(context)) add(EVENTS_TOAST)
+        if (isEventsKeyGranted(context)) add(EVENTS_KEY)
+        if (isNotificationsPostGranted(context)) add(NOTIFICATIONS_POST)
+        if (isNotificationsSettingsGranted(context)) add(NOTIFICATIONS_SETTINGS)
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
         }
     }
@@ -193,7 +224,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU)
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS)
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()

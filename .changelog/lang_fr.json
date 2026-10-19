@@ -163,7 +163,8 @@
         "API Bun de fichiers et de stockage persistant, avec autorisations distinctes et stockage partagé avec Node.js",
         "API hôtes database/sqlite pour Bun et les Workers Node.js, avec requêtes paramétrées, transactions et persistance",
         "Mesures et abonnements aux capteurs pour Bun et les Workers Node.js, avec annulation et libération automatique des écouteurs",
-        "Shell hôte avec flux, autorisation Shizuku et nettoyage des processus pour Bun, Node.js et les Workers"
+        "Shell hôte avec flux, autorisation Shizuku et nettoyage des processus pour Bun, Node.js et les Workers",
+        "Événements et notifications hôtes pour Bun et les Workers Node.js, avec nettoyage indépendant des abonnements et notifications"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
@@ -303,7 +304,8 @@
         "JSON UI restaure les listes sans sélection et les onglets lors de la recréation de Activity, sans traiter les événements comme des propriétés View",
         "Perte des types null/numériques dans les requêtes, comptage incorrect des INSERT multiples et connexions retenues par les transactions inachevées",
         "Écouteurs de capteurs conservés après annulation, échec de lecture ou inscription pendant la destruction du fournisseur",
-        "Blocage du nettoyage des commandes ignorant SIGTERM, avec arrêt des descendants avant terminaison"
+        "Blocage du nettoyage des commandes ignorant SIGTERM, avec arrêt des descendants avant terminaison",
+        "Notifications de scripts distincts portant le même ID numérique qui se remplacent ou se suppriment"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",

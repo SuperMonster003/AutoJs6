@@ -77,3 +77,5 @@ Final restoration verified all original APK hashes and removed 13 fresh original
 Run tools/api-coverage/check-runtime-shell.mjs and check.py, the Node test-shell-facade.js/test-worker-shell.js tests, Bun shell.test.mjs, declaration compiler checks and Ace completion gates. Android suites are NodeShellBridgeInstrumentationTest, RuntimeShellDeviceTest and RuntimeShellPackagedDeviceTest. The paired producer verifies the exact Bun SDK checksum and consumes the genuine Runtime Kit.
 
 The next remaining areas include Bun/Worker event and notification facades and the broader Android-object, scheduling and dedicated plugin surfaces recorded in the overall audit. Passing this delivery does not imply that every Rhino API has a direct Node/Bun implementation.
+
+The [event/notification delivery](runtime-events-2026-10-19.md) adds Bun and Node Worker facades, independent subscriptions, scoped notifications, cancellation/overflow cleanup and actual host/packaged validation on Android 13/15. Android service authorization and Bun transport budgets remain explicit; it does not imply full Rhino parity.

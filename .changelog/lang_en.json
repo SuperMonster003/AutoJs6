@@ -163,7 +163,8 @@
         "Bun file and persistent storage APIs with separate host-file grants and shared Node.js storage",
         "Host database/sqlite APIs for Bun and Node.js Workers with parameterized queries, transactions and persistence",
         "Sensor sampling and subscriptions for Bun and Node.js Workers with cancellation and automatic listener cleanup",
-        "Host Shell streaming, Shizuku authorization and process cleanup for Bun, Node.js and Workers"
+        "Host Shell streaming, Shizuku authorization and process cleanup for Bun, Node.js and Workers",
+        "Host event observers and notifications for Bun and Node.js Workers, with independent subscription and notification cleanup"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
@@ -303,7 +304,8 @@
         "JSON UI restores unselected lists and tab state during Activity recreation without treating event payloads as View properties",
         "Database queries losing null/numeric parameter types, incorrect multirow INSERT counts and unfinished transactions retaining connections",
         "Sensor listeners surviving cancelled samples, failed polling or registration queued during provider destruction",
-        "Shell cleanup hanging when commands ignore SIGTERM; process descendants are stopped before termination"
+        "Shell cleanup hanging when commands ignore SIGTERM; process descendants are stopped before termination",
+        "Notifications with the same numeric ID from separate script executions overwriting or cancelling each other"
       ],
       "improvement": [
         "Deferred initialization of noncritical components to improve app startup speed",

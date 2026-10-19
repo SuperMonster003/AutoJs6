@@ -74,3 +74,5 @@ The sensor delivery's 2026-10-19 broader rescan identified five declaration/Ace 
 
 
 The [host Shell delivery](runtime-shell-2026-10-19.md) adds Bun shell/shizuku and Node main/Worker streaming, explicit Shizuku app authorization, PTY and owned-process cleanup. It verifies actual shell UID execution and real packaged Bun/Worker applications on Android 13/15. Bun transport quotas, Root availability and the broader runtime gaps remain explicit; the Redmi cold-binding retry is retained separately.
+
+The [event/notification delivery](runtime-events-2026-10-19.md) adds Bun and Node Worker facades, independent subscriptions, scoped notifications, cancellation/overflow cleanup and actual host/packaged validation on Android 13/15. Android service authorization and Bun transport budgets remain explicit; it does not imply full Rhino parity.

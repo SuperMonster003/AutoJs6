@@ -976,7 +976,16 @@ class AndroidNodeBridgeCapabilityProvider(
         NodeAndroidPackageInstallManager(File(appContext.filesDir, "nodejs/package-manager-store"))
     }
     private val javaHandles = ConcurrentHashMap<String, Any>()
-    private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
+    private val notificationHandles = ConcurrentHashMap<Pair<String, Int>, NodeBridgeResourceHandle>()
+    private val notificationTag = "autojs6-runtime-${UUID.randomUUID()}"
+    private val notificationsClosed = AtomicBoolean(false)
+    internal fun closeEventResources() {
+        eventObservers.closeAll()
+        synchronized(notificationHandles) {
+            notificationsClosed.set(true)
+            notificationHandles.values.toList().forEach { it.close("execution-ended") }
+        }
+    }
     private val notificationIdCounter = AtomicInteger(1_000_000)
     private val sensorLock = Any()
     private var sensorsDestroyed = false
@@ -1186,6 +1195,7 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(packageInstallManager.nativeValues())
         putAll(capabilityBrokerAudit.nativeDiagnostics())
         putAll(resourceRegistry.nativeDiagnostics())
+        put("embedded_script.events.active_handle_count", eventObservers.activeCount().toString())
         put("embedded_script.shell.active_handle_count",if(shellBridge.isInitialized())shellBridge.value.activeCount.toString()else "0")
         putAll(bridgeLimits.nativeDiagnostics())
         put("embedded_script.bridge_resource_limit_rejection_count", bridgeResourceLimitRejections.get().toString())
@@ -1206,6 +1216,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "image" to imageHandleCount(),
                 "database" to databaseHandles.size,
                 "notifications" to notificationHandles.size,
+                "events" to eventObservers.activeCount(),
                 "sensors" to sensorSubscriptions.size,
                 "ui" to uiSessionIds.size + (if (composeBridge.isInitialized()) composeBridge.value.activeCount else 0) +
                     (if (uiInterop.isInitialized()) uiInterop.value.activeCount else 0),
@@ -1220,6 +1231,7 @@ class AndroidNodeBridgeCapabilityProvider(
 
     override fun destroy(reason: NodeBridgeError) {
         closeShellProcesses()
+        closeEventResources()
         closeAgentHelpers()
         if (composeBridge.isInitialized()) composeBridge.value.close()
         if (uiInterop.isInitialized()) uiInterop.value.close()
@@ -3629,8 +3641,13 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private fun dispatchNotifications(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         dispatchOnMain(request, callback) {
-            runCatching {
+            synchronized(notificationHandles) { runCatching {
+                check(!notificationsClosed.get()) { "The notification execution has ended." }
                 val args = JSONArray(request.argsJson.ifBlank { "[]" })
+                val rawScope = args.opt(if (request.method == "cancelAll") 0 else 1)
+                require(rawScope == null || rawScope === JSONObject.NULL || rawScope is String && rawScope.length <= 80) { "Invalid notification scope." }
+                val scope = rawScope as? String ?: ""
+                val tag = "$notificationTag:$scope"
                 when (request.method) {
                     "notify" -> {
                         val payload = args.optJSONObject(0)
@@ -3647,8 +3664,9 @@ class AndroidNodeBridgeCapabilityProvider(
                             fallbackId = notificationIdCounter.getAndIncrement(),
                             defaultChannelName = appContext.getString(R.string.app_name),
                         )
+                        val key = scope to descriptor.id
                         ensureNotificationPostingAllowed(request)
-                        if (!notificationHandles.containsKey(descriptor.id) &&
+                        if (!notificationHandles.containsKey(key) &&
                             notificationHandles.size >= ControlledNotificationPolicy.MAX_ACTIVE_NOTIFICATIONS
                         ) {
                             bridgeResourceLimitRejections.incrementAndGet()
@@ -3662,7 +3680,7 @@ class AndroidNodeBridgeCapabilityProvider(
                         }
                         ensureNotificationChannel(descriptor)
                         try {
-                            NotificationManagerCompat.from(appContext).notify(descriptor.id, descriptor.toNotification(appContext))
+                            NotificationManagerCompat.from(appContext).notify(tag, descriptor.id, descriptor.toNotification(appContext))
                         } catch (error: SecurityException) {
                             // Preserve the bridge's permission-denied response if permission is revoked after the check.
                             throw NotificationBridgeException(
@@ -3673,28 +3691,28 @@ class AndroidNodeBridgeCapabilityProvider(
                                 ),
                             )
                         }
-                        notificationHandles.remove(descriptor.id)?.release("notification.update")
+                        notificationHandles.remove(key)?.release("notification.update")
                         val handle = resourceRegistry.register(
                             type = NodeBridgeResourceType.NOTIFICATION,
-                            id = "notification-${descriptor.id}",
+                            id = "notification-$scope-${descriptor.id}",
                             metadata = mapOf(
                                 "channel" to descriptor.channel,
                                 "ongoing" to descriptor.ongoing.toString(),
                             ),
                         ) {
-                            notificationHandles.remove(descriptor.id)
-                            NotificationManagerCompat.from(appContext).cancel(descriptor.id)
+                            notificationHandles.remove(key)
+                            NotificationManagerCompat.from(appContext).cancel(tag, descriptor.id)
                         }
-                        notificationHandles[descriptor.id] = handle
+                        notificationHandles[key] = handle
                         NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(descriptor.id))
                     }
                     "cancel" -> {
                         val id = ControlledNotificationDescriptor.parseNotificationIdArg(request, args, 0)
-                        notificationHandles.remove(id)?.close("notification.cancel")
+                        notificationHandles.remove(scope to id)?.close("notification.cancel")
                         NodeBridgeResponse.success(request.id, "null")
                     }
                     "cancelAll" -> {
-                        notificationHandles.values.toList().forEach { handle ->
+                        notificationHandles.filterKeys { it.first == scope }.values.toList().forEach { handle ->
                             handle.close("notification.cancelAll")
                         }
                         NodeBridgeResponse.success(request.id, "null")
@@ -3726,7 +3744,7 @@ class AndroidNodeBridgeCapabilityProvider(
                     )
                 }
                 NodeBridgeResponse.failure(request.id, bridgeError)
-            }
+            } }
         }
     }
 
@@ -4220,7 +4238,22 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        mainHandler.post {
+        val deadline = android.os.SystemClock.elapsedRealtime() + request.timeoutMs.coerceIn(1L, 4000L)
+        var rebindRequested = false
+        lateinit var deliver: Runnable
+        deliver = Runnable {
+            if (request.method == "observeNotification" && !eventObservers.isDestroyed() &&
+                org.autojs.autojs.core.notification.NotificationListenerService.isNotificationListenerEnabled(appContext) &&
+                org.autojs.autojs.core.notification.NotificationListenerService.instance?.connected != true) {
+                if (!rebindRequested) {
+                    rebindRequested = true
+                    org.autojs.autojs.core.notification.NotificationListenerService.requestRebindIfPossible(appContext)
+                }
+                if (android.os.SystemClock.elapsedRealtime() < deadline) {
+                    mainHandler.postDelayed(deliver, 50L)
+                    return@Runnable
+                }
+            }
             runCatching {
                 when (request.method) {
                     "close" -> callback(NodeBridgeResponse.success(request.id, eventObservers.close(request.argsArray().optString(0), "closed").toString()))
@@ -4246,6 +4279,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 }))
             }
         }
+        mainHandler.post(deliver)
     }
 
     private fun dispatchDevice(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
