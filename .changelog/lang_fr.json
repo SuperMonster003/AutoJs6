@@ -168,7 +168,8 @@
         "Commandes de périphérique et dialogues pour Bun et les Workers Node.js, avec luminosité, volume et nettoyage indépendant des fenêtres",
         "Objets Android pour Node.js, Bun et les Workers, avec Paint, ColorStateList, couleurs du thème et URI FileProvider",
         "API persistantes de calendrier et IntentTask pour Node.js et Bun, avec tâches quotidiennes, hebdomadaires, mensuelles, annuelles, ponctuelles, différées et de diffusion",
-        "Interopérabilité Java/Android pour Node.js, Bun et Workers, avec constructeurs et membres publics, tableaux, valeurs long exactes, surcharges explicites et handles Context"
+        "Interopérabilité Java/Android pour Node.js, Bun et Workers, avec constructeurs et membres publics, tableaux, valeurs long exactes, surcharges explicites et handles Context",
+        "Callbacks Java, sous-classes générées et chargement JAR/DEX pour Node.js, Bun et Workers, avec retours Promise, appels de la superclasse et libération en fin de session"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
@@ -314,7 +315,8 @@
         "Décalage de l'heure locale des tâches quotidiennes et hebdomadaires lors des changements d'heure",
         "Conflits entre récepteurs IntentTask locaux et externes et inscriptions restantes après modification ou suppression",
         "URI FileProvider des applications générées utilisant l'autorité du modèle au lieu de celle du manifeste réel",
-        "Échec des imports ESM Node.js lorsque le module hôte exporte un nom réservé tel que java.new"
+        "Échec des imports ESM Node.js lorsque le module hôte exporte un nom réservé tel que java.new",
+        "Arrêt prématuré de la page de lancement des applications Bun masquées, exposant le processus à la récupération pendant le démarrage à froid"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",
@@ -401,7 +403,8 @@
         "Données de compatibilité des plateformes Gradle et tâches de mise à jour déplacées vers AutoJs6-Gradle-Platform-Versions, avec synchronisation inter-dépôts dans l'outil Scrapers",
         "device.getAndroidId accepte le booléen useSystemId, pour obtenir via Shizuku/Root la valeur système de l'utilisateur Android auquel appartient l'application sous Android 8.0+; un échec d'autorisation ou de lecture lève une exception, et les anciens systèmes ignorent ce paramètre",
         "cX/cY/cXy/cYx prennent en charge le mode auto explicite, valident les coordonnées et les bases de façon cohérente et préservent les grands résultats finis au-delà de la plage Long",
-        "Appels hôtes Bun mis en attente dans leur délai, avec annulation de l'attente et exécution successive des déclenchements rapprochés"
+        "Appels hôtes Bun mis en attente dans leur délai, avec annulation de l'attente et exécution successive des déclenchements rapprochés",
+        "Les instantanés Java utilisent une identité textuelle sans appeler implicitement toString ni déclencher de callback"
       ],
       "dependency": [
         "Intégration en module de Android AXML",

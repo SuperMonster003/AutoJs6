@@ -168,7 +168,8 @@
         "Device controls and dialogs for Bun and Node.js Workers, including brightness, volume and independent window cleanup",
         "Android object helpers for Node.js, Bun and Workers, including Paint, ColorStateList, theme colors and FileProvider URIs",
         "Persistent calendar and IntentTask APIs for Node.js and Bun, with daily, weekly, monthly, yearly, one-shot, countdown and broadcast tasks",
-        "Java/Android object interop for Node.js, Bun and Workers, including public constructors and members, arrays, exact long values, explicit overloads and application Context handles"
+        "Java/Android object interop for Node.js, Bun and Workers, including public constructors and members, arrays, exact long values, explicit overloads and application Context handles",
+        "Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
@@ -314,7 +315,8 @@
         "Daily and weekly calendar tasks shifting their local execution time across daylight-saving transitions",
         "IntentTask local and external receiver conflicts and stale registrations after updates or removal",
         "FileProvider URI helpers in built applications using the template authority instead of the actual manifest authority",
-        "Node.js ESM imports fail when a host module exports a reserved name such as java.new"
+        "Node.js ESM imports fail when a host module exports a reserved name such as java.new",
+        "Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization"
       ],
       "improvement": [
         "Deferred initialization of noncritical components to improve app startup speed",
@@ -401,7 +403,8 @@
         "Moved Gradle platform compatibility data and update tasks to AutoJs6-Gradle-Platform-Versions, with cross-repository synchronization in Scrapers",
         "Added the useSystemId Boolean argument to device.getAndroidId, obtaining the system value for the Android user running the app through Shizuku/Root on Android 8.0+; permission or read failures throw exceptions, and older systems ignore this argument",
         "cX/cY/cXy/cYx support explicit auto mode, consistently validate coordinates and scale bases, and preserve large finite results beyond the Long range",
-        "Bun host calls wait within their deadlines and support cancellation while queued, allowing short overlapping task triggers to run in sequence"
+        "Bun host calls wait within their deadlines and support cancellation while queued, allowing short overlapping task triggers to run in sequence",
+        "Java object snapshots use identity text instead of implicitly invoking toString and triggering callbacks"
       ],
       "dependency": [
         "Modularized Android AXML",

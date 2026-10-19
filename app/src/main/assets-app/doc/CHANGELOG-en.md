@@ -171,6 +171,7 @@
 * `Feature` Android object helpers for Node.js, Bun and Workers, including Paint, ColorStateList, theme colors and FileProvider URIs
 * `Feature` Persistent calendar and IntentTask APIs for Node.js and Bun, with daily, weekly, monthly, yearly, one-shot, countdown and broadcast tasks
 * `Feature` Java/Android object interop for Node.js, Bun and Workers, including public constructors and members, arrays, exact long values, explicit overloads and application Context handles
+* `Feature` Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
@@ -315,6 +316,7 @@
 * `Fix` IntentTask local and external receiver conflicts and stale registrations after updates or removal
 * `Fix` FileProvider URI helpers in built applications using the template authority instead of the actual manifest authority
 * `Fix` Node.js ESM imports fail when a host module exports a reserved name such as java.new
+* `Fix` Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions
@@ -400,6 +402,7 @@
 * `Improvement` Added the useSystemId Boolean argument to device.getAndroidId, obtaining the system value for the Android user running the app through Shizuku/Root on Android 8.0+; permission or read failures throw exceptions, and older systems ignore this argument
 * `Improvement` cX/cY/cXy/cYx support explicit auto mode, consistently validate coordinates and scale bases, and preserve large finite results beyond the Long range
 * `Improvement` Bun host calls wait within their deadlines and support cancellation while queued, allowing short overlapping task triggers to run in sequence
+* `Improvement` Java object snapshots use identity text instead of implicitly invoking toString and triggering callbacks
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer

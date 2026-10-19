@@ -29,6 +29,14 @@ internal class BunAutomationBridge(
         require(capability in methods) { "Unsupported automation capability" }
         if (capability !in grants) throw SecurityException("Automation capability is not granted")
         val action = request.optString("action", "start")
+        if (action == "callback") {
+            require(capability==Grants.JAVA_INTEROP && request.keys().asSequence().all { it in setOf("action","method","args") })
+            val method=request.getString("method");require(method in RuntimeJavaSession.controlMethods)
+            val args=request.getJSONArray("args");val future=CompletableFuture<NodeBridgeResponse>()
+            provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(),NodeBridgeModules.JAVA,method,args.toString(),2000,
+                permissions=listOf(NodeBridgePermissionManifest.JAVA_INTEROP))){future.complete(it)}
+            return future.get(2500,TimeUnit.MILLISECONDS)
+        }
         if (action == "identity") {
             require(capability == Grants.APP_CONTROL && request.length() == 1)
             val info = context.packageManager.getPackageInfo(context.packageName, 0)

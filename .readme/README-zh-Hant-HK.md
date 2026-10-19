@@ -355,6 +355,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `新增` Node.js/Bun 的 Android 物件輔助介面及 Worker 封裝, 支援 Paint, ColorStateList, 主題色和 FileProvider URI
 * `新增` Node.js/Bun 的持久日曆與 IntentTask API, 支援每日, 每週, 每月, 每年, 單次, 倒數計時和廣播任務
 * `新增` Node.js/Bun/Worker 的 Java/Android 物件互操作, 支援公開建構函式和成員, 陣列, 精確 long 值, 明確多載及應用程式 Context 控制代碼
+* `新增` Node.js/Bun/Worker 的 Java 回調代理, 子類別產生和 JAR/DEX 載入, 支援 Promise 回傳值, 父類別呼叫及執行結束清理
 * `修復` runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題
 * `修復` Android 7.x 調用 runtime.loadDex 方法時可能損壞 DEX 緩存並導致類加載失敗的問題
 * `修復` Rhino 引擎及內置模塊的作用域, 參數轉換與返回值處理不兼容導致部分腳本行為異常的問題
@@ -499,6 +500,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `修復` IntentTask 本地與外部接收器衝突及更新或刪除後的註冊殘留問題
 * `修復` 打包應用的 FileProvider URI 輔助介面使用範本識別碼而非實際清單識別碼的問題
 * `修復` Node.js 宿主模組包含 java.new 等保留字成員時 ESM 匯入失敗的問題
+* `修復` Bun 打包應用程式隱藏啟動畫面和日誌畫面時, 啟動 Activity 過早結束導致冷啟動初始化期間程序被系統回收的問題
 * `優化` 延遲初始化非關鍵組件以提升應用啓動速度
 * `優化` 應用啓動時不再自動彈出權限申請對話框, 缺少所有文件管理權限時改為在主頁顯示可直接授權的提醒
 * `優化` 應用及打包應用適配 Android 17, 完善本地網絡授權, 高級保護及後台音頻限制的提示
@@ -584,6 +586,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `優化` device.getAndroidId 支持 useSystemId 布爾參數, 在 Android 8.0+ 上通過 Shizuku/Root 獲取運行應用所屬 Android 用户的系統值, 權限或讀取失敗時拋出異常, 舊系統忽略此參數
 * `優化` cX/cY/cXy/cYx 支援明確指定 auto 模式, 統一驗證座標和基數, 並避免有限大數換算被截斷至 Long 範圍
 * `優化` Bun 宿主呼叫支援預算內排隊和取消等待, 使短時間重疊觸發的任務依序執行
+* `優化` Java 物件快照使用物件識別, 避免隱含執行 toString 並觸發回調
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

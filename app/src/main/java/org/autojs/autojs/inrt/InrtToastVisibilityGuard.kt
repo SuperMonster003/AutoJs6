@@ -9,10 +9,10 @@ object InrtToastVisibilityGuard {
     private var potentialToastHoldUntilElapsedMs = 0L
 
     @Synchronized
-    fun holdForPotentialNodeBridgeToast() {
+    fun holdForPotentialRuntimeBridgeToast() {
         potentialToastHoldUntilElapsedMs = max(
             potentialToastHoldUntilElapsedMs,
-            SystemClock.elapsedRealtime() + POTENTIAL_NODE_BRIDGE_TOAST_MS,
+            SystemClock.elapsedRealtime() + POTENTIAL_RUNTIME_BRIDGE_TOAST_MS,
         )
     }
 
@@ -29,7 +29,7 @@ object InrtToastVisibilityGuard {
         return (holdUntilElapsedMs - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
     }
 
-    private const val POTENTIAL_NODE_BRIDGE_TOAST_MS = 12_000L
+    private const val POTENTIAL_RUNTIME_BRIDGE_TOAST_MS = 12_000L
     private const val SHORT_TOAST_VISIBLE_MS = 3_200L
     private const val LONG_TOAST_VISIBLE_MS = 4_800L
 }

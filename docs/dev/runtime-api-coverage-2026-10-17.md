@@ -85,3 +85,8 @@ The [Android object and persistent task delivery](runtime-android-tasks-2026-10-
 ## 2026-10-20 Java/Android interop follow-up
 
 Node.js main threads, Bun and CJS/ESM/nested Workers now share explicit public Java object access, application Context handles, typed arrays and overload selection. The host no longer limits these calls to nine predefined classes. Exact long values and reserved ESM names are supported; cancellation retains late object replies for cleanup. Bun uses its independent java.interop grant and unchanged native runtime. See [this batch](runtime-java-interop-2026-10-20.md) for final verification and restoration. JavaScript callback/subclass generation, dedicated loadDex/loadJar helpers and the remaining specialized plugin surfaces remain outside this batch; this is not complete Rhino parity.
+
+
+## 2026-10-20 Java callback and loading follow-up
+
+Node/Bun and Worker now provide proxy/wrap, generated subclasses, callSuper, callback argument retention and loadJar/loadDex. Return-valued and Promise callbacks stay in the owning JS runtime; Java calls can reenter the waiting native thread. Read-only class copies and class loaders are execution-scoped. See [the callback batch](runtime-java-callbacks-2026-10-20.md) for verification, limits and restoration. This does not add synchronous Rhino package globals, automatic function-to-interface conversion, AAR resources or JNI deployment.

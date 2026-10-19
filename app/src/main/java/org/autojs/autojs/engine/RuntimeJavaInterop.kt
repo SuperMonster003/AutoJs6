@@ -26,11 +26,14 @@ internal class JavaInteropClassSpec(val type: Class<*>) {
 /** The legacy name is retained for broker compatibility; there is no class/member allowlist. */
 internal object ControlledJavaInteropPolicy {
     val methods = setOf("type", "callStatic", "new", "call", "callInstance", "getField", "getStatic", "setField", "setStatic",
-        "release", "dispose", "getContext", "newArray", "arrayLength", "getArrayItem", "setArrayItem", "toArray", "instanceOf", "getClassName")
+        "release", "dispose", "getContext", "newArray", "arrayLength", "getArrayItem", "setArrayItem", "toArray", "instanceOf", "getClassName", "proxy", "defineClass", "loadDex", "loadJar", "drainCallbacks", "completeCallback", "closeCallbacks", "callSuper", "retain")
 
     interface Handles {
         fun resolve(handleId: String): Any?
         fun register(value: Any, spec: JavaInteropClassSpec): JSONObject
+        fun loadClass(name: String, loader: String? = null): Class<*> = ControlledJavaInteropPolicy.loadClass(name)
+        fun constructorPrefix(type: Class<*>): Array<Any?> = emptyArray()
+        fun describeClass(type: Class<*>): JSONObject = JavaInteropClassSpec(type).toJson()
     }
 
     private val primitives = mapOf("boolean" to Boolean::class.javaPrimitiveType!!, "byte" to Byte::class.javaPrimitiveType!!,
@@ -59,7 +62,7 @@ internal object ControlledJavaInteropPolicy {
 
     fun handleJson(id: String, value: Any, spec: JavaInteropClassSpec): JSONObject {
         val snapshot = JSONObject()
-        if (!value.javaClass.isArray) runCatching { snapshot.put("string", value.toString()) }
+        snapshot.put("string", if (value is String) value else if (value is Enum<*>) value.name else value.javaClass.name + "@" + Integer.toHexString(System.identityHashCode(value)))
         if (value is Enum<*>) snapshot.put("name", value.name)
         // Only immutable primitive snapshots; object graphs are accessed through explicit calls.
         for (field in value.javaClass.fields.filterNot { Modifier.isStatic(it.modifiers) }) runCatching {
@@ -75,10 +78,10 @@ internal object ControlledJavaInteropPolicy {
     }
 
     fun execute(method: String, payload: JSONObject, handles: Handles, context: Any): Result = reflectCall(method) {
-        fun type() = loadClass(payload.getString("className"))
+        fun type() = handles.loadClass(payload.getString("className"), payload.optString("loader").takeIf { it.isNotEmpty() })
         fun target() = handles.resolve(payload.getString("handle")) ?: error("Java object handle is released or belongs to another execution")
         fun args() = payload.optJSONArray("args") ?: JSONArray()
-        fun types(): Array<Class<*>>? = payload.optJSONArray("parameterTypes")?.let { a -> Array(a.length()) { loadClass(a.getString(it)) } }
+        fun types(): Array<Class<*>>? = payload.optJSONArray("parameterTypes")?.let { a -> Array(a.length()) { handles.loadClass(a.getString(it),payload.optString("loader").takeIf { it.isNotEmpty() }) } }
         fun field(target: Any?, type: Class<*>, static: Boolean, write: Boolean): Any? {
             val member = type.getField(payload.getString("field"))
             require(Modifier.isStatic(member.modifiers) == static) { "Field static/instance mismatch" }
@@ -89,14 +92,15 @@ internal object ControlledJavaInteropPolicy {
             return true
         }
         when (method) {
-            "type" -> return@reflectCall describeClass(payload.getString("className"))
+            "type" -> return@reflectCall handles.describeClass(type())
             "getContext" -> return@reflectCall handles.register(context, JavaInteropClassSpec(context.javaClass))
             "getClassName" -> return@reflectCall target().javaClass.name
             "instanceOf" -> return@reflectCall type().isInstance(target())
             "new" -> {
                 val klass = type()
-                val (member, values) = selectOverload(klass.constructors.map { it to it.parameterTypes }, args(), handles, types())
-                return@reflectCall handles.register(member.newInstance(*values), JavaInteropClassSpec(klass))
+                val prefix = handles.constructorPrefix(klass)
+                val (member, values) = selectOverload(klass.constructors.map { it to it.parameterTypes.drop(prefix.size).toTypedArray() }, args(), handles, types())
+                return@reflectCall handles.register(member.newInstance(*prefix, *values), JavaInteropClassSpec(klass))
             }
             "callStatic", "call", "callInstance" -> {
                 val static = method == "callStatic"
@@ -177,7 +181,7 @@ internal object ControlledJavaInteropPolicy {
         if (value == null || value === JSONObject.NULL) return if (type.isPrimitive) null else Coerced(null, 0)
         if (value is JSONObject) {
             if (value.has("__autojs6JavaType")) {
-                val explicit = loadClass(value.getString("__autojs6JavaType"))
+                val explicit = handles.loadClass(value.getString("__autojs6JavaType"))
                 if (explicit != type && !(boxed[explicit] ?: explicit).let { !type.isPrimitive && type.isAssignableFrom(it) }) return null
                 val input = value.opt("value")
                 val converted = if (explicit == Long::class.javaPrimitiveType && input is String) input.toLongOrNull()?.let { Coerced(it, 20) }
@@ -229,7 +233,7 @@ internal object ControlledJavaInteropPolicy {
             for (i in 0 until JavaArray.getLength(value)) out.put(marshal(JavaArray.get(value, i), handles, seen))
         }} finally { seen.remove(value) }
     }
-    private fun marshal(value: Any?, handles: Handles, seen: MutableSet<Any> = java.util.Collections.newSetFromMap(java.util.IdentityHashMap())): Any = when (value) {
+    internal fun marshal(value: Any?, handles: Handles, seen: MutableSet<Any> = java.util.Collections.newSetFromMap(java.util.IdentityHashMap())): Any = when (value) {
         null -> JSONObject.NULL
         is String, is Boolean, is Int, is Short, is Byte -> value
         is Long -> longValue(value)
@@ -237,6 +241,11 @@ internal object ControlledJavaInteropPolicy {
         is Char -> value.toString()
         // Mutable CharSequence implementations (StringBuilder, Spannable) must remain live handles.
         else -> if (value.javaClass.isArray && value !in seen) arrayJson(value, handles, seen) else handles.register(value, JavaInteropClassSpec(value.javaClass))
+    }
+
+    internal fun callbackValue(value: Any?, type: Class<*>, handles: Handles): Any? {
+        if (type == Void.TYPE) return null
+        return (coerce(value, type, handles) ?: error("Callback return value does not match ${type.name}")).value
     }
 
     private inline fun reflectCall(label: String, block: () -> Any?): Result = try { Result(value = block()) } catch (error: Exception) {

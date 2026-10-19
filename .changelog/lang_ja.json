@@ -168,7 +168,8 @@
         "Bun と Node.js Worker のデバイス制御とダイアログ API, 明るさ, 音量と独立したウィンドウ解放",
         "Node.js, Bun と Worker の Android オブジェクトヘルパー, Paint, ColorStateList, テーマ色と FileProvider URI",
         "Node.js と Bun の永続的なカレンダーと IntentTask API, 毎日, 毎週, 毎月, 毎年, 単発, カウントダウンとブロードキャストのタスク",
-        "Node.js/Bun/Worker の Java/Android 相互運用で公開コンストラクターとメンバー, 配列, 正確な long 値, 明示的なオーバーロードとアプリの Context ハンドルに対応"
+        "Node.js/Bun/Worker の Java/Android 相互運用で公開コンストラクターとメンバー, 配列, 正確な long 値, 明示的なオーバーロードとアプリの Context ハンドルに対応",
+        "Node.js/Bun/Worker の Java コールバック, サブクラス生成と JAR/DEX 読み込みで Promise の戻り値, 親クラス呼び出しと終了時の解放に対応"
       ],
       "fix": [
         "runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題",
@@ -314,7 +315,8 @@
         "夏時間の切り替えで毎日と毎週のタスクの実行時刻がずれる問題",
         "IntentTask のローカルと外部受信の競合および更新や削除後に登録が残る問題",
         "ビルドしたアプリの FileProvider URI が実際のマニフェストではなくテンプレートの authority を使用する問題",
-        "Node.js のホストモジュールに java.new などの予約語があると ESM インポートが失敗する問題"
+        "Node.js のホストモジュールに java.new などの予約語があると ESM インポートが失敗する問題",
+        "起動画面とログ画面を非表示にした Bun パッケージアプリで, Activity が早く終了し初期化中にプロセスが回収される問題"
       ],
       "improvement": [
         "重要でない部品の初期化を遅延し, アプリ起動を高速化",
@@ -401,7 +403,8 @@
         "Gradle プラットフォーム互換データと更新タスクを AutoJs6-Gradle-Platform-Versions に移し, Scrapers でリポジトリ間同期に対応",
         "device.getAndroidId の useSystemId 真偽値引数, Android 8.0+ で Shizuku/Root により実行アプリの Android ユーザーのシステム値を取得, 権限/読込失敗時は例外, 旧システムでは引数を無視",
         "cX/cY/cXy/cYx で auto モードの明示指定に対応し, 座標と基準値の検証を統一, Long の範囲を超える有限値の計算結果を保持",
-        "Bun のホスト呼び出しが期限内に待機し, 待機のキャンセルと短時間重なるタスクの順次実行に対応"
+        "Bun のホスト呼び出しが期限内に待機し, 待機のキャンセルと短時間重なるタスクの順次実行に対応",
+        "Java オブジェクトのスナップショットで識別情報を使用し, 暗黙の toString 呼び出しとコールバックを回避"
       ],
       "dependency": [
         "Android AXML をモジュール化",

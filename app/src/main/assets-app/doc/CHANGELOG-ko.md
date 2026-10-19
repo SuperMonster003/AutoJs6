@@ -171,6 +171,7 @@
 * `추가` Node.js, Bun 및 Worker의 Android 객체 도우미, Paint, ColorStateList, 테마 색상 및 FileProvider URI 지원
 * `추가` Node.js 및 Bun의 영구 달력 및 IntentTask API, 일간, 주간, 월간, 연간, 일회성, 카운트다운 및 브로드캐스트 작업 지원
 * `추가` Node.js/Bun/Worker의 Java/Android 상호 운용으로 공개 생성자와 멤버, 배열, 정확한 long 값, 명시적 오버로드 및 앱 Context 핸들 지원
+* `추가` Node.js/Bun/Worker의 Java 콜백, 하위 클래스 생성 및 JAR/DEX 로드로 Promise 반환값, 부모 클래스 호출 및 실행 종료 정리 지원
 * `수정` runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제
 * `수정` Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제
 * `수정` Rhino 엔진과 내장 모듈의 스코프, 인수 변환 및 반환값 처리 비호환으로 일부 스크립트 동작이 비정상적인 문제
@@ -315,6 +316,7 @@
 * `수정` IntentTask 로컬 및 외부 수신 충돌과 갱신이나 삭제 후 등록이 남는 문제
 * `수정` 빌드된 앱의 FileProvider URI가 실제 매니페스트 대신 템플릿 authority를 사용하는 문제
 * `수정` Node.js 호스트 모듈에 java.new 같은 예약어 멤버가 있을 때 ESM 가져오기가 실패하는 문제
+* `수정` 시작 및 로그 화면을 숨긴 Bun 패키지 앱에서 Activity가 너무 일찍 종료되어 초기화 중 프로세스가 회수되는 문제
 * `개선` 필수적이지 않은 구성요소 초기화를 지연하여 앱 시작 속도 향상
 * `개선` 앱 시작 시 자동 권한 대화상자 대신 모든 파일 관리 권한이 없으면 홈에서 바로 허용할 수 있는 안내 표시
 * `개선` 앱/패키징 앱의 Android 17 대응, 로컬 네트워크 권한, 고급 보호 및 백그라운드 오디오 제한 안내 보완
@@ -400,6 +402,7 @@
 * `개선` device.getAndroidId의 useSystemId 불리언 인수, Android 8.0+에서 Shizuku/Root로 실행 앱의 Android 사용자 시스템 값을 조회하며 권한/읽기 실패 시 예외, 구형 시스템에서는 인수 무시
 * `개선` cX/cY/cXy/cYx의 명시적 auto 모드 지원, 좌표와 기준값의 일관된 검증 및 Long 범위를 초과하는 유한한 계산 결과 보존
 * `개선` Bun 호스트 호출이 제한 시간 내에서 대기하고 대기 취소와 짧게 겹치는 작업의 순차 실행 지원
+* `개선` Java 객체 스냅샷에 식별 정보를 사용하여 암시적 toString 호출과 콜백 방지
 * `의존성` Android AXML 모듈화
 * `의존성` Android ARSC Editor 모듈화
 * `의존성` APK Signer 모듈화

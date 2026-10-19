@@ -24,7 +24,7 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        assertEquals(136,BunAutomationBridge.methods.values.sumOf{it.size})
+        assertEquals(145,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))

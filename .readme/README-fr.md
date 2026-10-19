@@ -355,6 +355,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Objets Android pour Node.js, Bun et les Workers, avec Paint, ColorStateList, couleurs du thème et URI FileProvider
 * `Fonctionnalité` API persistantes de calendrier et IntentTask pour Node.js et Bun, avec tâches quotidiennes, hebdomadaires, mensuelles, annuelles, ponctuelles, différées et de diffusion
 * `Fonctionnalité` Interopérabilité Java/Android pour Node.js, Bun et Workers, avec constructeurs et membres publics, tableaux, valeurs long exactes, surcharges explicites et handles Context
+* `Fonctionnalité` Callbacks Java, sous-classes générées et chargement JAR/DEX pour Node.js, Bun et Workers, avec retours Promise, appels de la superclasse et libération en fin de session
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés
@@ -499,6 +500,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Conflits entre récepteurs IntentTask locaux et externes et inscriptions restantes après modification ou suppression
 * `Correction` URI FileProvider des applications générées utilisant l'autorité du modèle au lieu de celle du manifeste réel
 * `Correction` Échec des imports ESM Node.js lorsque le module hôte exporte un nom réservé tel que java.new
+* `Correction` Arrêt prématuré de la page de lancement des applications Bun masquées, exposant le processus à la récupération pendant le démarrage à froid
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan
@@ -584,6 +586,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` device.getAndroidId accepte le booléen useSystemId, pour obtenir via Shizuku/Root la valeur système de l'utilisateur Android auquel appartient l'application sous Android 8.0+; un échec d'autorisation ou de lecture lève une exception, et les anciens systèmes ignorent ce paramètre
 * `Amélioration` cX/cY/cXy/cYx prennent en charge le mode auto explicite, valident les coordonnées et les bases de façon cohérente et préservent les grands résultats finis au-delà de la plage Long
 * `Amélioration` Appels hôtes Bun mis en attente dans leur délai, avec annulation de l'attente et exécution successive des déclenchements rapprochés
+* `Amélioration` Les instantanés Java utilisent une identité textuelle sans appeler implicitement toString ni déclencher de callback
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0

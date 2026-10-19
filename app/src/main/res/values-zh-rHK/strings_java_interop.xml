@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_java_interop_grant">允許在宿主程序存取 Java 和 Android 公開成員, 受 Android 權限約束</string>
+    <string name="summary_bun_java_interop_grant">允許存取 Java/Android 物件和回調, 以及載入 JAR/DEX, 受 Android 權限約束</string>
     <string name="text_bun_java_interop_grant">Java/Android 物件互操作</string>
 </resources>

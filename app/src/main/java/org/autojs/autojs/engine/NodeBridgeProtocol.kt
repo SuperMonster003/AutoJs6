@@ -982,9 +982,12 @@ class AndroidNodeBridgeCapabilityProvider(
     }
     private val javaHandles = ConcurrentHashMap<String, Any>()
     private val javaLock = Any()
+    private val javaSessionDelegate: Lazy<RuntimeJavaSession> = lazy { RuntimeJavaSession(appContext,engineInfo.cwd,javaInteropHandles) { resourceRegistry.close(it,"java.callback.argument") } }
+    private val javaSession: RuntimeJavaSession by javaSessionDelegate
     @Volatile private var javaClosed = false
     internal fun closeJavaObjects() = synchronized(javaLock) {
         javaClosed = true
+        if(javaSessionDelegate.isInitialized())javaSession.close()
         javaHandles.keys.toList().forEach { resourceRegistry.close(it, "java.execution.finished") }
         javaHandles.clear()
     }
@@ -1224,6 +1227,7 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.input_observer_live_listener_count", inputObserverSubscriptions.values.sumOf { it.liveListenerCount() }.toString())
         putAll(NodeLifecycleCheckpointStore.nativeDiagnostics(appContext, engineInfo))
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
+        if(javaSessionDelegate.isInitialized())putAll(javaSession.diagnostics())
         put("embedded_script.package_manager_record_count", runCatching { packageInstallManager.list().size }.getOrDefault(0).toString())
         putAll(packageInstallManager.nativeValues())
         putAll(capabilityBrokerAudit.nativeDiagnostics())
@@ -4782,11 +4786,19 @@ class AndroidNodeBridgeCapabilityProvider(
             else {
                 val payload = request.firstObjectArg() ?: JSONObject()
                 if (request.method in setOf("release", "dispose")) releaseJavaObject(request)
-                else javaResult(request, ControlledJavaInteropPolicy.execute(request.method, payload, javaInteropHandles, appContext))
+                else javaResult(request, if(request.method in RuntimeJavaSession.sessionMethods)javaSession.invoke(request.method,payload)
+                    else ControlledJavaInteropPolicy.execute(request.method, payload, javaInteropHandles, appContext))
             }
         }
-        if (request.firstObjectArg()?.optString("thread") == "main") dispatchOnMain(request, callback, action)
-        else callback(action())
+        val payload=request.firstObjectArg()
+        // Return from oneway Binder dispatch immediately; callback polling uses the same Binder.
+        javaSession.submit(request,callback) {
+            if(payload?.optString("thread")=="main" && Looper.myLooper()!=Looper.getMainLooper()) {
+                val result=java.util.concurrent.CompletableFuture<NodeBridgeResponse>()
+                mainHandler.post { result.complete(runCatching { javaSession.nativeCall(action) }.getOrElse { NodeBridgeResponse.failure(request.id,NodeBridgeError.javaInterop(it.toString(),NodeRuntimeErrorCodes.JAVA_CALL_FAILED,request.module,request.method)) }) }
+                result.get(request.timeoutMs.coerceAtLeast(1),TimeUnit.MILLISECONDS)
+            } else action()
+        }
     }
 
     private fun dispatchRhino(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -4794,8 +4806,11 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     // Public members are resolved in the host process; object references belong to this execution.
-    private val javaInteropHandles = object : ControlledJavaInteropPolicy.Handles {
+    private val javaInteropHandles: ControlledJavaInteropPolicy.Handles = object : ControlledJavaInteropPolicy.Handles {
         override fun resolve(handleId: String): Any? = javaHandles[handleId]
+        override fun loadClass(name:String,loader:String?):Class<*> = javaSession.loadClass(name,loader)
+        override fun constructorPrefix(type:Class<*>):Array<Any?> = javaSession.constructorPrefix(type)
+        override fun describeClass(type:Class<*>):JSONObject = javaSession.describeClass(type)
 
         override fun register(value: Any, spec: JavaInteropClassSpec): JSONObject = synchronized(javaLock) {
             check(!javaClosed) { "Java execution has finished" }
@@ -4807,6 +4822,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 metadata = mapOf("className" to spec.className),
             ) {
                 javaHandles.remove(handleId)
+                javaSession.onRelease(handleId)
             }
             ControlledJavaInteropPolicy.handleJson(handleId, value, spec)
         }

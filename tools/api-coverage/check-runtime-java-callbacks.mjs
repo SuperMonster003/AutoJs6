@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {execFileSync} from 'node:child_process';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
+execFileSync(process.execPath,[resolve(root,'tools/api-coverage/check-runtime-java-interop.mjs')],{stdio:'inherit'});
+const session=readFileSync(resolve(root,'app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSession.kt'),'utf8');
+const generator=readFileSync(resolve(root,'app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSubclassGenerator.kt'),'utf8');
+const bun=readFileSync(resolve(root,'app/src/main/java/org/autojs/autojs/engine/BunAutomationBridge.kt'),'utf8');
+for(const method of ['proxy','defineClass','loadJar','loadDex','drainCallbacks','completeCallback','closeCallbacks','callSuper','retain'])assert(session.includes('"'+method+'"'),method);
+assert(session.includes('ClassFileDexer.convertToDexJar'));assert(session.includes('destination.setReadOnly()'));
+assert(session.includes('frame.reentry.offer'));assert(session.includes('frame.borrowed.forEach(release)'));
+assert(generator.includes('RuntimeJavaCallbackHandler'));assert(generator.includes('ByteCode.INVOKESPECIAL'));
+assert(bun.includes('action == "callback"')&&bun.includes('RuntimeJavaSession.controlMethods'));
+console.log('Java callback/loading routes use native class generation, local dex conversion, reentry and owned-reference cleanup');

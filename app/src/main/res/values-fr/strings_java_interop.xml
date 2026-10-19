@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_java_interop_grant">Autoriser les membres publics Java et Android dans le processus hôte, selon les autorisations Android</string>
+    <string name="summary_bun_java_interop_grant">Autoriser les objets Java/Android, les callbacks et le chargement JAR/DEX selon les autorisations Android</string>
     <string name="text_bun_java_interop_grant">Interopérabilité Java/Android</string>
 </resources>

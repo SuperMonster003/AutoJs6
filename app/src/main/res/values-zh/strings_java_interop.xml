@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_java_interop_grant">允许在宿主进程访问 Java 和 Android 公开成员, 受 Android 权限约束</string>
+    <string name="summary_bun_java_interop_grant">允许访问 Java/Android 对象和回调, 以及加载 JAR/DEX, 受 Android 权限约束</string>
     <string name="text_bun_java_interop_grant">Java/Android 对象互操作</string>
 </resources>

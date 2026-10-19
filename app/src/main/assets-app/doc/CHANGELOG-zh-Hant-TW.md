@@ -171,6 +171,7 @@
 * `新增` Node.js/Bun 的 Android 物件輔助介面及 Worker 封裝, 支援 Paint, ColorStateList, 主題色和 FileProvider URI
 * `新增` Node.js/Bun 的持久日曆與 IntentTask API, 支援每日, 每週, 每月, 每年, 單次, 倒數計時和廣播工作
 * `新增` Node.js/Bun/Worker 的 Java/Android 物件互操作, 支援公開建構函式和成員, 陣列, 精確 long 值, 明確多載及應用程式 Context 控制代碼
+* `新增` Node.js/Bun/Worker 的 Java 回呼代理, 子類別產生和 JAR/DEX 載入, 支援 Promise 回傳值, 父類別呼叫及執行結束清理
 * `修復` runtime.loadJar 方法無法動態載入較高 Java 版本編譯的 class 檔案的問題
 * `修復` Android 7.x 呼叫 runtime.loadDex 方法時可能損壞 DEX 快取並導致類載入失敗的問題
 * `修復` Rhino 引擎及內建模組的作用域, 參數轉換與回傳值處理不相容導致部分指令碼行為異常的問題
@@ -315,6 +316,7 @@
 * `修復` IntentTask 本地與外部接收器衝突及更新或刪除後的註冊殘留問題
 * `修復` 打包應用的 FileProvider URI 輔助介面使用範本識別碼而非實際資訊清單識別碼的問題
 * `修復` Node.js 宿主模組包含 java.new 等保留字成員時 ESM 匯入失敗的問題
+* `修復` Bun 打包應用程式隱藏啟動畫面和日誌畫面時, 啟動 Activity 過早結束導致冷啟動初始化期間程序被系統回收的問題
 * `最佳化` 延遲初始化非關鍵元件以提升應用啟動速度
 * `最佳化` 應用啟動時不再自動彈出權限申請對話方塊, 缺少所有檔案管理權限時改為在主頁顯示可直接授權的提醒
 * `最佳化` 應用及打包應用適配 Android 17, 完善本地網路授權, 高階保護及後臺音訊限制的提示
@@ -400,6 +402,7 @@
 * `最佳化` device.getAndroidId 支援 useSystemId 布林參數, 在 Android 8.0+ 上透過 Shizuku/Root 獲取執行應用所屬 Android 使用者的系統值, 權限或讀取失敗時丟擲異常, 舊系統忽略此參數
 * `最佳化` cX/cY/cXy/cYx 支援明確指定 auto 模式, 統一驗證座標和基數, 並避免有限大數換算被截斷至 Long 範圍
 * `最佳化` Bun 宿主呼叫支援預算內排隊和取消等待, 使短時間重疊觸發的工作依序執行
+* `最佳化` Java 物件快照使用物件識別, 避免隱含執行 toString 並觸發回呼
 * `依賴` 模組化 Android AXML
 * `依賴` 模組化 Android ARSC Editor
 * `依賴` 模組化 APK Signer

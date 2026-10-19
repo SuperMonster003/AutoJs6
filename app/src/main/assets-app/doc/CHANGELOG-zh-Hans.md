@@ -187,6 +187,7 @@
 * `新增` Node.js/Bun 的 Android 对象辅助接口及 Worker 封装, 支持 Paint, ColorStateList, 主题色和 FileProvider URI
 * `新增` Node.js/Bun 的持久日历与 IntentTask API, 支持每日, 每周, 每月, 每年, 一次性, 倒计时和广播任务
 * `新增` Node.js/Bun/Worker 的 Java/Android 对象互操作, 支持公开构造器和成员, 数组, 精确 long 值, 显式重载及应用 Context 句柄
+* `新增` Node.js/Bun/Worker 的 Java 回调代理, 子类生成和 JAR/DEX 加载, 支持 Promise 返回值, 父类调用及执行结束清理
 * `修复` runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题
@@ -343,6 +344,7 @@
 * `修复` IntentTask 本地与外部接收器冲突及更新或删除后的注册残留问题
 * `修复` 打包应用的 FileProvider URI 辅助接口使用模板标识而非实际清单标识的问题
 * `修复` Node.js 宿主模块包含 java.new 等保留字成员时 ESM 导入失败的问题
+* `修复` Bun 打包应用隐藏启动页和日志页时, 启动 Activity 过早结束导致冷启动初始化期间进程被系统回收的问题
 * `优化` 延迟初始化非关键组件以提升应用启动速度
 * `优化` 应用启动时不再自动弹出权限申请对话框, 缺少所有文件管理权限时改为在主页显示可直接授权的提醒
 * `优化` 应用及打包应用适配 Android 17, 完善本地网络授权, 高级保护及后台音频限制的提示
@@ -435,6 +437,7 @@
 * `优化` 原生 Android XML 布局中无法设置或未知的属性改为跳过并在控制台警告一次, 不再导致整个布局加载失败
 * `优化` UI 布局属性按书写顺序应用, 后写的属性覆盖先写的属性 (如 padding 之后的 paddingHorizontal)
 * `优化` Bun 宿主调用支持预算内排队和取消等待, 使短时重叠触发的任务依次执行
+* `优化` Java 对象快照使用对象标识, 避免隐式执行 toString 并触发回调
 * `依赖` 模块化 Android AXML
 * `依赖` 模块化 Android ARSC Editor
 * `依赖` 模块化 APK Signer

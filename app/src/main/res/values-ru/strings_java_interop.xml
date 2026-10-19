@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="summary_bun_java_interop_grant">Доступ к открытым членам Java и Android в процессе приложения с учетом разрешений Android</string>
+    <string name="summary_bun_java_interop_grant">Доступ к объектам Java/Android, обратным вызовам и загрузке JAR/DEX с учетом разрешений Android</string>
     <string name="text_bun_java_interop_grant">Взаимодействие Java/Android</string>
 </resources>

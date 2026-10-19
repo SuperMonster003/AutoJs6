@@ -15,10 +15,8 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Java interop: the host owns the allowlist as a declarative table (M20.2 batch 15), executes the
- * admitted members by reflection and publishes the table through the broker info; the plugin
- * runtime forwards calls and shows the table as `java.policy`. The disabled gate, the module
- * shadowing rule and the fake-transport contract predate batch 15 and still hold.
+ * Public Java reflection and the legacy fake-transport contract. Policy publication, explicit
+ * disable, reserved-module resolution, object references and caller-visible failures remain covered.
  */
 class NodeJavaInteropBridgeInstrumentationTest {
 
@@ -150,7 +148,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
             assertEquals("android.graphics.Rect", rect.getString("className"))
             assertEquals(1, rect.getJSONObject("value").getInt("left"))
             assertEquals(22, rect.getJSONObject("value").getInt("bottom"))
-            assertEquals("Rect(1, 2 - 11, 22)", rect.getJSONObject("value").getString("string"))
+            assertTrue(rect.getJSONObject("value").getString("string").matches(Regex("android\\.graphics\\.Rect@[0-9a-f]+")))
             assertEquals("10", ok("call", call(rect, "width")))
             assertEquals("2", ok("getField", field(rect, "top")))
             assertEquals("true", ok("call", call(rect, "contains", 5, 5)))
@@ -171,7 +169,8 @@ class NodeJavaInteropBridgeInstrumentationTest {
             // Static fields that are objects come back as handles; enums keep their name.
             val us = JSONObject(ok("getStatic", staticField("java.util.Locale", "US")))
             assertEquals("java.util.Locale", us.getString("className"))
-            assertEquals("en_US", us.getJSONObject("value").getString("string"))
+            assertTrue(us.getJSONObject("value").getString("string").matches(Regex("java\\.util\\.Locale@[0-9a-f]+")))
+            assertEquals("\"en_US\"", ok("call",call(us,"toString")))
             assertEquals("\"en\"", ok("call", call(us, "getLanguage")))
             val chinese = JSONObject(ok("callStatic", statik("java.util.Locale", "forLanguageTag", "zh-CN")))
             assertEquals("\"zh-CN\"", ok("call", call(chinese, "toLanguageTag")))
@@ -190,12 +189,12 @@ class NodeJavaInteropBridgeInstrumentationTest {
             assertTrue(JSONArray(ok("getStatic", staticField("android.os.Build", "SUPPORTED_ABIS"))).length() >= 1)
             assertTrue(number(ok("getStatic", staticField("android.os.Build\$VERSION", "SDK_INT"))) >= 24.0)
 
-            // The class descriptor is the table entry.
+            // The class descriptor reflects the available public members.
             val described = JSONObject(ok("type", JSONObject().put("className", "java.lang.Math")))
             assertTrue(described.getJSONArray("staticMethods").toList().contains("max"))
             assertFalse(described.getBoolean("constructable"))
 
-            // Denials stay host-side: unlisted classes, loaders and processes, reflection, unlisted members, wrong arity.
+            // Public classes load; nonexistent members, inaccessible constructors and wrong argument shapes reject.
             for (className in listOf("java.lang.Runtime", "java.lang.ClassLoader", "java.lang.ProcessBuilder", "java.lang.System", "java.io.File", "java.lang.reflect.Method")) {
                 assertEquals(className, JSONObject(ok("type", JSONObject().put("className", className))).getString("className"))
             }
@@ -466,13 +465,13 @@ class NodeJavaInteropBridgeInstrumentationTest {
               const forwardedDenials = requests.length - beforeDenials;
               let defineClassCode = "";
               try {
-                java.defineClass({ name: "org.autojs6.node.GeneratedListener", interfaces: ["java.lang.Runnable"] });
+                await java.defineClass(null);
               } catch (error) {
                 defineClassCode = codeOf(error);
               }
               let autojsDefineClassCode = "";
               try {
-                autojsJava.defineClass({ name: "org.autojs6.node.GeneratedListener", interfaces: ["java.lang.Runnable"] });
+                await autojsJava.defineClass(null);
               } catch (error) {
                 autojsDefineClassCode = codeOf(error);
               }
@@ -602,7 +601,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
         )
         assertTrue(result.stdout, result.stdout.contains("java.permissions=true"))
         assertTrue(result.stdout, result.stdout.contains("java.timeout=1234"))
-        // Runtime / reflect / ProcessBuilder / System now reach the host; defineClass, an empty class
+        // Runtime / reflect / ProcessBuilder / System reach the host; an invalid class definition, an empty class
         // name and a non-JSON argument are still rejected before any request is made.
         assertTrue(result.stdout, result.stdout.contains("java.forwarded_denials=4|0"))
         assertTrue(

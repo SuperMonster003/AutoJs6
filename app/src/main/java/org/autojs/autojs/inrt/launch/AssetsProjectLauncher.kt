@@ -117,8 +117,10 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             if (source.executionMode and JavaScriptSource.EXECUTION_MODE_UI != 0) {
                 config.intentFlags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
             } else {
-                if (source.engineName == JavaScriptSource.ENGINE_NODEJS) {
-                    InrtToastVisibilityGuard.holdForPotentialNodeBridgeToast()
+                if (source.engineName in setOf(JavaScriptSource.ENGINE_NODEJS, JavaScriptSource.ENGINE_BUN)) {
+                    // Keep the existing startup visibility window while either external runtime initializes.
+                    // Finishing immediately can leave the packaged host cached before its first UI request.
+                    InrtToastVisibilityGuard.holdForPotentialRuntimeBridgeToast()
                 }
                 if (finishActivity) finishHostActivity(activity)
             }
