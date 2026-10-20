@@ -34,7 +34,7 @@ py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--
 
 JVM 差分测试 (`app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/`) 运行时把已记录的偏差与 JVM 上只能跳过的表达式导出到 `app/build/augment-differential/<测试类>.json`. 本脚本把这些表达式合成一个脚本在设备上运行, 按 `DifferentialRhino.render` 的规则渲染结果, 与 JVM 上记录的 Kotlin 值比对 (两侧都抛出时视为一致, JVM 构造不出 Kotlin 的错误消息); 跳过的表达式没有期望值, 只打印设备结果. 输出只有不一致的条目与汇总行. 先运行差分测试生成 JSON; 设备上的临时目录 `/sdcard/Download/aj6-augment-bench` 用完即删 (`--keep` 保留).
 
-新脚本模块层的 JVM 测试 (`app/src/test/java/org/autojs/autojs/runtime/api/modules/`) 把新模块的期望值导出到 `app/build/script-modules-device/*.json` (同一格式, 期望值在 `kt`). 复核新模块时打开开关并比较错误类型: `--cases app/build/script-modules-device --new-modules on --strict-errors` (`--new-modules` 与 device_bench.py 相同, 结束后恢复原值; `--strict-errors` 让两侧都抛出时也要求错误名一致).
+新脚本模块层的 JVM 测试 (`app/src/test/java/org/autojs/autojs/runtime/api/modules/`) 把新模块的期望值导出到 `app/build/script-modules-device/*.json` (同一格式, 期望值在 `kt`). 复核新模块时打开开关并比较错误类型: `--cases app/build/script-modules-device --new-modules on --strict-errors` (`--new-modules` 与 device_bench.py 相同, 结束后恢复原值; `--strict-errors` 让两侧都抛出时也要求错误名一致). `--debug-print on|off` 同样临时设置新模块层调试打印的总开关 (附录 C Q4, 键 `key_$_script_module_debug_print`), `--console` 打印本次运行期间 logcat 中 `GlobalConsole` (脚本控制台) 与 `ScriptModules` 标签的行, 用于查看调试条目原文.
 
 ## inventory_diff.py: 旧 JS 成员名 对 Kotlin 注册名
 
