@@ -161,11 +161,14 @@ class Threads(private val scriptRuntime: ScriptRuntime) {
             private val mThreads = WeakReference(set)
 
             public override fun onExit() {
-                super.onExit()
+                // Leave the set before waking the main looper: woken earlier, it could still see this thread as running,
+                // go idle again and never end the script (a run of gate S4e N on AVD API 24 hung until its timeout).
+                // zh-CN: 先离开线程集合再唤醒主 Looper: 若先唤醒, 主线程可能仍看到本线程在运行, 再次空闲后脚本就不会结束 (门禁 S4e N 在 AVD API 24 上曾有一次挂起至超时).
                 val set = mThreads.get()
                 if (set != null) {
                     synchronized(set) { set.remove(this) }
                 }
+                super.onExit()
             }
 
         }
