@@ -15,13 +15,13 @@ import org.autojs.autojs.core.pref.SettingType
  * `commit = true` is `commit()` (as `Pref.putXxxSync` does).
  *
  * Typed access through a declared key ([get], [getOrNull], [set], [storedOrNull]) is added by extension functions
- * below; P1.2 has no caller of them yet.
+ * below; callers usually go through the members of the key itself (`PrefKey.get()` / `set()`, P2).
  *
  * zh-CN: 一个设置存储 (ROADMAP T3): 默认 SharedPreferences, 命名 SharedPreferences 文件或 JSON 文件, 成员统一. 值类型与规则
  * 同 SharedPreferences: 一个 [edit] 块为一次写入, 块内 `clear()` 先于 put 执行, null 值即删除, 写入相等的值不算变化, 类型不符
  * 时类型化读取抛 [ClassCastException]. [edit] 返回值发生变化的键; 监听器对每个变化的键收到一次通知, clear 之后收到 null.
  * `commit = false` 对应 `apply()` (同 `Pref.putXxx`), `commit = true` 对应 `commit()` (同 `Pref.putXxxSync`). 经键声明的
- * 类型化读写由下方扩展函数提供, P1.2 尚无调用方.
+ * 类型化读写由下方扩展函数提供, 调用方通常经键自身的成员 (`PrefKey.get()` / `set()`, P2) 读写.
  */
 interface SettingsStore {
 
@@ -151,8 +151,18 @@ operator fun <T : Any> SettingsStore.get(key: PrefKey<T>): T =
 
 /** Writes [value] for [key] (null removes it). */
 operator fun <T : Any> SettingsStore.set(key: PrefKey<T>, value: T?) {
+    put(key, value, commit = false)
+}
+
+/**
+ * Writes [value] for [key] (null removes it) as one write and returns the changed keys; `commit = true` is
+ * `commit()` like `Pref.putXxxSync`, `false` is `apply()` like `Pref.putXxx`.
+ * zh-CN: 把 [key] 的值写为 [value] (null 即删除), 作为一次写入并返回变化的键; `commit = true` 对应 `commit()` (同
+ * `Pref.putXxxSync`), `false` 对应 `apply()` (同 `Pref.putXxx`).
+ */
+fun <T : Any> SettingsStore.put(key: PrefKey<T>, value: T?, commit: Boolean): Set<String> {
     checkStore(key)
-    put(key.name, value?.let(key::encode))
+    return put(key.name, value?.let(key::encode), commit)
 }
 
 private fun SettingsStore.checkStore(key: PrefKey<*>) {

@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.theme.widget.ThemeColorRadioButton
 import org.autojs.autojs.theme.widget.ThemeColorSeekBar
 import org.autojs.autojs.util.StringUtils.key
@@ -31,13 +31,13 @@ class ScheduledRestartSettingsDialogBuilder(context: Context) : MaterialDialog.B
     private var mSeekBar: ThemeColorSeekBar
 
     init {
-        var initialRestartDelayValue = Pref.getInt(R.string.key_scheduled_restart_delay, context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value))
+        var initialRestartDelayValue = GeneralKeys.SCHEDULED_RESTART_DELAY.get()
 
         _binding = DialogScheduledRestartSettingsBinding.inflate(LayoutInflater.from(context)).also { binding ->
             mOptionWorkManager = binding.optionWorkManager
             mOptionAlarmManager = binding.optionAlarmManager
 
-            when (Pref.getString(R.string.key_scheduled_restart_backend, key(R.string.default_key_scheduled_restart_backend))) {
+            when (GeneralKeys.SCHEDULED_RESTART_BACKEND.storedKeyOrDefault()) {
                 key(R.string.key_scheduled_restart_backend_alarm_manager) -> {
                     mOptionAlarmManager.isChecked = true
                 }
@@ -87,10 +87,10 @@ class ScheduledRestartSettingsDialogBuilder(context: Context) : MaterialDialog.B
         positiveColorRes(R.color.dialog_button_attraction)
         onPositive { d, _ ->
             when {
-                mOptionWorkManager.isChecked -> Pref.putString(R.string.key_scheduled_restart_backend, key(R.string.key_scheduled_restart_backend_work_manager))
-                mOptionAlarmManager.isChecked -> Pref.putString(R.string.key_scheduled_restart_backend, key(R.string.key_scheduled_restart_backend_alarm_manager))
+                mOptionWorkManager.isChecked -> GeneralKeys.SCHEDULED_RESTART_BACKEND.set(key(R.string.key_scheduled_restart_backend_work_manager))
+                mOptionAlarmManager.isChecked -> GeneralKeys.SCHEDULED_RESTART_BACKEND.set(key(R.string.key_scheduled_restart_backend_alarm_manager))
             }
-            Pref.putInt(R.string.key_scheduled_restart_delay, mStartDelayMinValue + mSeekBar.progress * 100)
+            GeneralKeys.SCHEDULED_RESTART_DELAY.set(mStartDelayMinValue + mSeekBar.progress * 100)
             d.dismiss()
         }
         autoDismiss(false)

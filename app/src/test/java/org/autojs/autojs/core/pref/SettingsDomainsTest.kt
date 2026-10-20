@@ -1,0 +1,135 @@
+package org.autojs.autojs.core.pref
+
+import org.junit.AfterClass
+import org.junit.Assert.fail
+import org.junit.BeforeClass
+import org.junit.Test
+import java.io.File
+
+/**
+ * The declarations of every domain in [SettingsRegistry.DOMAINS] against the P0 baseline (docs/settings/ROADMAP.md P2,
+ * R2): the value type and the default of each `SettingKey` agree with a source that P0.4 recorded for the key
+ * (`tools/settings/baseline/inventory-2026-10-20.json`, the data of docs/settings/defaults.md), a computed default
+ * reads exactly the resource its source names, and Enum keys have their default among the candidates, which are all
+ * registered value constants. Kind, category, deployment and effect are checked by [SettingsRegistryGuardTest].
+ *
+ * zh-CN: 以 P0 基线核对 [SettingsRegistry.DOMAINS] 中各领域的声明 (ROADMAP P2, R2): 每个 `SettingKey` 的值类型与默认值与 P0.4
+ * 为该键记录的某个来源一致 (defaults.md 的数据), 计算型默认值读取的正是其来源所写的资源, Enum 键的默认值在候选项中且候选项都已
+ * 登记为设置值常量. kind / 分类 / 部署项 / 生效方式由 [SettingsRegistryGuardTest] 核对.
+ */
+class SettingsDomainsTest {
+
+    @Test
+    fun computedDefaultsReadTheResourceTheyName() {
+        val problems = mutableListOf<String>()
+        var checked = 0
+        SettingsRegistry.keys.forEach { key ->
+            val default = key.default as? SettingDefault.Computed ?: return@forEach
+            if (!default.source.startsWith("R.")) return@forEach
+            SettingsTestResources.reads.clear()
+            key.defaultOrNull()
+            checked++
+            val reads = SettingsTestResources.reads.toList()
+            if (reads != listOf(default.source)) problems.add("${key.name}: source ${default.source}, read $reads")
+        }
+        println("P2 resource defaults checked: $checked")
+        assertNone("computed defaults that read another resource than their source names", problems)
+    }
+
+    @Test
+    fun typesAndDefaultsMatchTheBaseline() {
+        val problems = mutableListOf<String>()
+        var checked = 0
+        SettingsRegistry.keys.filterIsInstance<SettingKey<*>>().forEach { key ->
+            val baselineName = baselineNameOf(key)
+            val sources = baselineDefaults[baselineName]
+            if (sources == null) {
+                problems.add("$baselineName: no default source in the baseline")
+                return@forEach
+            }
+            sources.mapNotNull { it["type"] as String? }.filter { !isCompatible(key.type, it) }.forEach {
+                problems.add("$baselineName: declared ${key.type.tag}, the baseline has a $it source")
+            }
+            if (sources.none { matches(key, it) }) {
+                problems.add("$baselineName: default ${key.default} matches none of ${sources.map { it["expr"] to it["value"] }}")
+            }
+            checked++
+        }
+        println("P2 settings checked against the baseline defaults: $checked")
+        assertNone("declarations that disagree with the P0.4 default sources", problems)
+    }
+
+    @Test
+    fun enumDefaultsAndCandidatesAreRegistered() {
+        val problems = mutableListOf<String>()
+        val constants = SettingsRegistry.describe().filter { it.kind == SettingKind.VALUE_CONSTANT }.map { it.name }.toSet()
+        val candidates = mutableSetOf<String>()
+        SettingsRegistry.keys.filterIsInstance<SettingKey.Enum<*>>().forEach { key ->
+            if (!key.isDefaultCandidate()) problems.add("${key.name}: default ${key.defaultOrNull()} is not a candidate")
+            key.enumType.candidateKeys.forEach { candidate ->
+                candidates.add(candidate)
+                if (candidate !in constants) problems.add("${key.name}: candidate $candidate is not a registered value constant")
+            }
+        }
+        (constants - candidates - VALUE_CONSTANTS_WITHOUT_ENUM).forEach { problems.add("value constant $it is no candidate of a declared Enum key") }
+        assertNone("Enum keys and value constants", problems)
+    }
+
+    // ------------------------------------------------------------------------------------------------- helpers
+
+    private fun baselineNameOf(key: PrefKey<*>): String = if (key.keyRes != 0) SettingsTestResources.nameOf("string", key.keyRes) else key.name
+
+    private fun isCompatible(type: SettingType<*>, baselineType: String): Boolean = when (type.tag) {
+        "bool" -> baselineType == "Boolean"
+        "int" -> baselineType == "Int"
+        "long" -> baselineType == "Long"
+        "float" -> baselineType == "Float"
+        "string" -> baselineType == "String" || baselineType == "String (Enum)"
+        "stringSet" -> baselineType == "StringSet"
+        "json" -> baselineType.startsWith("Json")
+        else -> false
+    }
+
+    /** True when [source] (one baseline default source) is where the declared default of [key] comes from. */
+    private fun matches(key: SettingKey<*>, source: Map<String, Any?>): Boolean = when (val default = key.default) {
+        is SettingDefault.Constant -> source["value"] == key.defaultText
+        SettingDefault.None -> source["value"] == "null"
+        is SettingDefault.Computed -> {
+            val resource = Regex("""^R\.(bool|integer|string)\.(\w+)$""").find(default.source)
+            when (resource) {
+                null -> source["expr"] == default.source
+                else -> source["form"] == "R.${resource.groupValues[1]}" && source["ref"] == resource.groupValues[2] &&
+                        source["value"] == key.defaultOrNull().toString()
+            }
+        }
+    }
+
+    private fun assertNone(message: String, items: List<String>) {
+        if (items.isNotEmpty()) fail("$message (${items.size}):\n  " + items.sorted().joinToString("\n  "))
+    }
+
+    companion object {
+
+        /** Registered value constants that no declared Enum key lists as a candidate (none so far). */
+        private val VALUE_CONSTANTS_WITHOUT_ENUM = emptySet<String>()
+
+        private lateinit var resources: AutoCloseable
+        private lateinit var baselineDefaults: Map<String, List<Map<String, Any?>>>
+
+        @BeforeClass
+        @JvmStatic
+        fun load() {
+            resources = SettingsTestResources.install()
+            val file = File(SettingsTestResources.root, "tools/settings/baseline/inventory-2026-10-20.json")
+            @Suppress("UNCHECKED_CAST")
+            val inventory = SettingsJson.parse(file.readText()) as Map<String, Any?>
+            @Suppress("UNCHECKED_CAST")
+            baselineDefaults = (inventory["defaults"] as Map<String, Any?>).mapValues { (_, list) -> (list as List<Any?>).map { it as Map<String, Any?> } }
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun restore() {
+            resources.close()
+        }    }
+}

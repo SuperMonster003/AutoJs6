@@ -7,6 +7,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.PrefKey
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.ViewUtils
@@ -25,6 +26,10 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
     private var mOnLaunchSettingsListener: ((MaterialDialog) -> Unit)? = null
 
     private var mOnNotifyItemChangedListener: ((DrawerMenuItem) -> Unit)? = null
+
+    // The declared key behind the switch (docs/settings/ROADMAP.md P2), read as `Pref.getBoolean(prefKey, false)` was.
+    // zh-CN: 开关背后的键声明 (ROADMAP P2), 读法与原先的 `Pref.getBoolean(prefKey, false)` 相同.
+    private var mPrefSetting: PrefKey<Boolean>? = null
 
     constructor(
         helper: DrawerMenuItemHelper,
@@ -56,6 +61,23 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         descriptionRes: Int? = null,
         onTitleContainerClickListener: (MaterialDialog.Builder.() -> Any?)? = null,
     ) : super(icon, title, prefKey) {
+        init(helper, switchOnHintRes, descriptionRes, onTitleContainerClickListener)
+    }
+
+    /**
+     * An item whose switch mirrors the declared key [prefSetting] (a key declared with a `keyRes`).
+     * zh-CN: 开关与键声明 [prefSetting] 同步的条目 (以 `keyRes` 声明的键).
+     */
+    constructor(
+        helper: DrawerMenuItemHelper,
+        icon: Int,
+        title: Int,
+        prefSetting: PrefKey<Boolean>,
+        switchOnHintRes: Int? = null,
+        descriptionRes: Int? = null,
+        onTitleContainerClickListener: (MaterialDialog.Builder.() -> Any?)? = null,
+    ) : super(icon, title, prefSetting.keyRes) {
+        mPrefSetting = prefSetting
         init(helper, switchOnHintRes, descriptionRes, onTitleContainerClickListener)
     }
 
@@ -178,7 +200,10 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         if (!isHidden) {
             val aimState = mItemHelper.isActive
             if (prefKey != DEFAULT_PREFERENCE_KEY && isPrefEnabled() != aimState) {
-                Pref.putBoolean(prefKey, aimState)
+                when (val setting = mPrefSetting) {
+                    null -> Pref.putBoolean(prefKey, aimState)
+                    else -> setting.set(aimState)
+                }
             } else {
                 setCheckedIfNeeded(aimState)
             }
@@ -255,6 +280,9 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         }
     }
 
-    private fun isPrefEnabled() = prefKey != DEFAULT_PREFERENCE_KEY && Pref.getBoolean(prefKey, false)
+    private fun isPrefEnabled() = prefKey != DEFAULT_PREFERENCE_KEY && when (val setting = mPrefSetting) {
+        null -> Pref.getBoolean(prefKey, false)
+        else -> setting.storedOrNull() ?: false
+    }
 
 }

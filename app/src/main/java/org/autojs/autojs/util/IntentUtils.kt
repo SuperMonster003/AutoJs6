@@ -27,6 +27,7 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.runtime.api.Mime
@@ -351,7 +352,7 @@ object IntentUtils {
             val launchIntent = getLaunchIntent(context)
                 ?: throw RuntimeException("Failed to create launch intent for AutoJs6")
 
-            if (context is AppCompatActivity && Pref.isQuickRestartEnabled) {
+            if (context is AppCompatActivity && GeneralKeys.isQuickRestartEnabled) {
                 // When clicking the "Restart" button in the main drawer,
                 // if "Quick Restart" is enabled, the Intent#startSafely method will be called.
                 // zh-CN: 主页抽屉 "重启" 按钮点击时, 如果启用了 "快速重启", 则调用 Intent#startSafely 方法.
@@ -362,7 +363,7 @@ object IntentUtils {
                 scheduleAppLaunch(context, launchIntent)
             }
 
-            if (context is AppCompatActivity && !Pref.isQuickRestartEnabled) {
+            if (context is AppCompatActivity && !GeneralKeys.isQuickRestartEnabled) {
                 ViewUtils.showToast(context, R.string.text_app_restarting, true)
             }
 
@@ -370,11 +371,11 @@ object IntentUtils {
         }
 
         private fun scheduleAppLaunch(context: Context, launchIntent: Intent) {
-            val delay = Pref.getInt(R.string.key_scheduled_restart_delay, context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value)).let {
+            val delay = GeneralKeys.SCHEDULED_RESTART_DELAY.get().let {
                 TimeUnit.MILLISECONDS.toMillis(it.toLong())
             }
             val triggerAtMillis = SystemClock.elapsedRealtime() + delay
-            when (Pref.isScheduledRestartPreferredWorkManager) {
+            when (GeneralKeys.isScheduledRestartPreferredWorkManager) {
                 true -> runCatching {
                     scheduleRestartWorker(delay, context)
                 }.onFailure {
@@ -439,7 +440,7 @@ object IntentUtils {
                 Pref.putStringSync(key(R.string.key_scripts_after_app_restart), scriptsAfterRestart.joinToString("\n") { it.trim() })
             }
 
-            if (context is AppCompatActivity && Pref.isQuickRestartEnabled) {
+            if (context is AppCompatActivity && GeneralKeys.isQuickRestartEnabled) {
                 // When clicking the "Restart" button in the main drawer,
                 // if "Quick Restart" is enabled, the finishAllAppTasksSafely method will not be called.
                 // zh-CN: 主页抽屉 "重启" 按钮点击时, 如果启用了 "快速重启", 则不调用 finishAllAppTasksSafely 方法.

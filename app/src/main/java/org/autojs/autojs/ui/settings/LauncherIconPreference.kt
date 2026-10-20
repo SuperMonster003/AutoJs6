@@ -13,6 +13,7 @@ import android.util.AttributeSet
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.theme.preference.MaterialListPreference
@@ -58,8 +59,8 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
 
     private fun resetIfNeeded(aimValueRes: Int) {
         val aimValue = prefContext.getString(aimValueRes)
-        if (getPersistedString("") != aimValue) {
-            persistString(aimValue)
+        if (GeneralKeys.LAUNCHER_ICON.storedKey() != aimValue) {
+            GeneralKeys.LAUNCHER_ICON.set(aimValue)
             notifyChanged()
         }
     }

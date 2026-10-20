@@ -4,9 +4,8 @@ import android.content.Context
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.rhino.extension.IterableExtensions.toHashCode
-import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on Mar 5, 2017.
@@ -40,9 +39,9 @@ class ThemeColor(@JvmField var colorPrimary: Int, @JvmField var colorPrimaryDark
     fun colorAccent(colorAccent: Int) = also { this.colorAccent = colorAccent }
 
     fun saveIn() {
-        Pref.putInt(R.string.key_theme_color_primary, colorPrimary)
-        Pref.putInt(R.string.key_theme_color_primary_dark, colorPrimaryDark)
-        Pref.putInt(R.string.key_theme_color_accent, colorAccent)
+        AppearanceKeys.THEME_COLOR_PRIMARY.set(colorPrimary)
+        AppearanceKeys.THEME_COLOR_PRIMARY_DARK.set(colorPrimaryDark)
+        AppearanceKeys.THEME_COLOR_ACCENT.set(colorAccent)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -56,9 +55,9 @@ class ThemeColor(@JvmField var colorPrimary: Int, @JvmField var colorPrimaryDark
     }
 
     fun readFrom() = also {
-        colorPrimary = Pref.getInt(R.string.key_theme_color_primary, ThemeColorManager.defaultThemeColor.colorPrimary)
-        colorAccent = Pref.getInt(R.string.key_theme_color_accent, ThemeColorManager.defaultThemeColor.colorAccent)
-        colorPrimaryDark = Pref.getInt(R.string.key_theme_color_primary_dark, ThemeColorManager.defaultThemeColor.colorPrimaryDark)
+        colorPrimary = AppearanceKeys.THEME_COLOR_PRIMARY.get()
+        colorAccent = AppearanceKeys.THEME_COLOR_ACCENT.get()
+        colorPrimaryDark = AppearanceKeys.THEME_COLOR_PRIMARY_DARK.get()
     }
 
     override fun hashCode(): Int {
@@ -68,11 +67,10 @@ class ThemeColor(@JvmField var colorPrimary: Int, @JvmField var colorPrimaryDark
     companion object {
 
         fun fromPreferences(): ThemeColor? {
-            return if (Pref.containsKey(
-                    R.string.key_theme_color_primary,
-                    R.string.key_theme_color_primary_dark,
-                    R.string.key_theme_color_accent
-                )
+            return if (
+                AppearanceKeys.THEME_COLOR_PRIMARY.isStored() &&
+                AppearanceKeys.THEME_COLOR_PRIMARY_DARK.isStored() &&
+                AppearanceKeys.THEME_COLOR_ACCENT.isStored()
             ) ThemeColor().readFrom() else null
         }
 

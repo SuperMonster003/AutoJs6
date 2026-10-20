@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
@@ -30,18 +30,18 @@ class NightModePreference : MaterialListPreference {
         when (dialog.items?.get(dialog.selectedIndex)?.toString()) {
             prefContext.getString(R.string.entry_night_mode_follow_system) -> {
                 ViewUtils.setDefaultNightMode(ViewUtils.MODE.FOLLOW)
-                Pref.putBoolean(R.string.key_auto_night_mode_enabled, true)
-                Pref.putBoolean(R.string.key_night_mode_enabled, ViewUtils.isSystemDarkModeEnabled(prefContext))
+                AppearanceKeys.AUTO_NIGHT_MODE_ENABLED.set(true)
+                AppearanceKeys.NIGHT_MODE_ENABLED.set(ViewUtils.isSystemDarkModeEnabled(prefContext))
             }
             prefContext.getString(R.string.entry_night_mode_always_on) -> {
                 ViewUtils.setDefaultNightMode(ViewUtils.MODE.NIGHT)
-                Pref.putBoolean(R.string.key_auto_night_mode_enabled, false)
-                Pref.putBoolean(R.string.key_night_mode_enabled, true)
+                AppearanceKeys.AUTO_NIGHT_MODE_ENABLED.set(false)
+                AppearanceKeys.NIGHT_MODE_ENABLED.set(true)
             }
             prefContext.getString(R.string.entry_night_mode_always_off) -> {
                 ViewUtils.setDefaultNightMode(ViewUtils.MODE.DAY)
-                Pref.putBoolean(R.string.key_auto_night_mode_enabled, false)
-                Pref.putBoolean(R.string.key_night_mode_enabled, false)
+                AppearanceKeys.AUTO_NIGHT_MODE_ENABLED.set(false)
+                AppearanceKeys.NIGHT_MODE_ENABLED.set(false)
             }
             else -> Unit
         }

@@ -25,6 +25,8 @@ import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
 import org.autojs.autojs.app.tool.McpServerTool
 import org.autojs.autojs.core.plugin.mcp.McpServerUiPolicy
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.ui.settings.McpServerSettingsLauncher
 import kotlinx.coroutines.launch
 import org.autojs.autojs.app.tool.PointerLocationTool
@@ -35,7 +37,6 @@ import org.autojs.autojs.core.plugin.screencolorpicker.ScreenColorPickerPluginSt
 import org.autojs.autojs.core.plugin.terminal.TerminalLauncher
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginState
 import org.autojs.autojs.core.plugin.terminal.TerminalPluginStateMonitor
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.PrefRx
 import org.autojs.autojs.external.foreground.AppForegroundService
 import org.autojs.autojs.permission.AllFilesAccessPermission
@@ -246,7 +247,7 @@ open class DrawerFragment : Fragment() {
             icon = R.drawable.ic_service_green,
             title = R.string.text_foreground_service,
             descriptionRes = R.string.description_foreground_service,
-            prefKey = R.string.key_foreground_service,
+            prefSetting = GeneralKeys.FOREGROUND_SERVICE,
         ).setOnLaunchSettingsListener {
             NotificationUtils.launchChannelSettings(mContext, AppForegroundService::class.java)
         }
@@ -620,12 +621,12 @@ open class DrawerFragment : Fragment() {
                     ViewUtils.setDefaultNightMode(mode)
                     if (isTurningOn) {
                         ViewUtils.isNightModeEnabled = ViewUtils.isSystemDarkModeEnabled(mContext)
-                        Pref.putString(R.string.key_night_mode, MODE.FOLLOW.key)
+                        AppearanceKeys.NIGHT_MODE.set(MODE.FOLLOW.key)
                     } else {
                         when (isNightModeYes) {
                             true -> MODE.NIGHT.key
                             else -> MODE.DAY.key
-                        }.let { Pref.putString(R.string.key_night_mode, it) }
+                        }.let { AppearanceKeys.NIGHT_MODE.set(it) }
                     }
                 }.isSuccess
 
@@ -637,7 +638,7 @@ open class DrawerFragment : Fragment() {
             icon = R.drawable.ic_automatic_brightness_thicker,
             title = R.string.text_auto_night_mode,
             descriptionRes = R.string.description_auto_night_mode,
-            prefKey = R.string.key_auto_night_mode_enabled,
+            prefSetting = AppearanceKeys.AUTO_NIGHT_MODE_ENABLED,
         ).also { item ->
             item.setOnLaunchSettingsListener {
                 Intent(Settings.ACTION_DISPLAY_SETTINGS)
@@ -656,12 +657,12 @@ open class DrawerFragment : Fragment() {
                         true -> {
                             ViewUtils.setDefaultNightMode(MODE.NIGHT)
                             ViewUtils.isNightModeEnabled = true
-                            Pref.putString(R.string.key_night_mode, MODE.NIGHT.key)
+                            AppearanceKeys.NIGHT_MODE.set(MODE.NIGHT.key)
                         }
                         else -> {
                             ViewUtils.setDefaultNightMode(MODE.DAY)
                             ViewUtils.isNightModeEnabled = false
-                            Pref.putString(R.string.key_night_mode, MODE.DAY.key)
+                            AppearanceKeys.NIGHT_MODE.set(MODE.DAY.key)
                         }
                     }
                 }.isSuccess
@@ -674,7 +675,7 @@ open class DrawerFragment : Fragment() {
             icon = R.drawable.ic_night_mode_thicker,
             title = R.string.text_night_mode,
             descriptionRes = R.string.description_night_mode,
-            prefKey = R.string.key_night_mode_enabled,
+            prefSetting = AppearanceKeys.NIGHT_MODE_ENABLED,
         ).setOnLaunchSettingsListener {
             Intent(Settings.ACTION_DISPLAY_SETTINGS)
                 .startSafely(mContext)
@@ -696,7 +697,7 @@ open class DrawerFragment : Fragment() {
                 override fun refreshSubtitle(aimState: Boolean) {
                     val oldSubtitle = mKeepScreenOnWhenInForegroundItem.subtitle
                     val aimSubtitle = if (ViewUtils.isKeepScreenOnWhenInForegroundDisabled) null else {
-                        val i = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground).indexOf(Pref.keyKeepScreenOnWhenInForeground)
+                        val i = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground).indexOf(AppearanceKeys.keepScreenOnWhenInForegroundKey)
                         resources.getStringArray(R.array.values_keep_screen_on_when_in_foreground)[i]
                     }
                     if (mKeepScreenOnWhenInForegroundItem.subtitle != aimSubtitle) {

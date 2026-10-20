@@ -24,10 +24,10 @@ import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.companion.AccessibilityCompanionSync
 import org.autojs.autojs.core.plugin.terminal.TerminalLegacyCleanup
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputCoordinator
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerStartupPrewarm
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.engine.NodeJsRuntimePluginHost
@@ -185,7 +185,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
         ViewUtils.setDefaultNightMode(
             when {
                 ViewUtils.isAutoNightModeEnabled -> ViewUtils.MODE.FOLLOW
-                Pref.containsKey(R.string.key_night_mode_enabled) -> {
+                AppearanceKeys.NIGHT_MODE_ENABLED.isStored() -> {
                     when (ViewUtils.isNightModeEnabled) {
                         true -> ViewUtils.MODE.NIGHT
                         else -> ViewUtils.MODE.DAY

@@ -11,6 +11,8 @@ import org.autojs.autojs.App.Companion.app
 import org.autojs.autojs.annotation.KeyRes
 import org.autojs.autojs.annotation.ScriptInterfaceCompatible
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.store.SettingsStore
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.SharedPreferencesStore
@@ -52,7 +54,7 @@ object Pref {
     init {
         // AccessibilityConfig.refreshUnintendedGuardState()
         registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener)
-        if (!containsKey(R.string.key_auto_night_mode_enabled)) {
+        if (!AppearanceKeys.AUTO_NIGHT_MODE_ENABLED.isStored()) {
             ViewUtils.isAutoNightModeEnabled = isFunctional().also {
                 AppCompatDelegate.setDefaultNightMode(
                     when (it) {
@@ -62,7 +64,7 @@ object Pref {
                 )
             }
         }
-        if (!containsKey(R.string.key_night_mode_enabled)) {
+        if (!AppearanceKeys.NIGHT_MODE_ENABLED.isStored()) {
             ViewUtils.isNightModeEnabled = isNightModeYes(app)
         }
     }
@@ -211,8 +213,9 @@ object Pref {
         get() = getTimestamp(R.string.key_last_updates_auto_checked)
 
     @JvmStatic
+    @Deprecated("Use AppearanceKeys.keepScreenOnWhenInForegroundKey (docs/settings/ROADMAP.md P2.1)", ReplaceWith("AppearanceKeys.keepScreenOnWhenInForegroundKey", "org.autojs.autojs.core.pref.keys.AppearanceKeys"))
     val keyKeepScreenOnWhenInForeground: String
-        get() = getString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.default_key_keep_screen_on_when_in_foreground))
+        get() = AppearanceKeys.keepScreenOnWhenInForegroundKey
 
     @JvmStatic
     var rootMode: RootUtils.RootMode
@@ -237,12 +240,14 @@ object Pref {
         )
 
     @JvmStatic
+    @Deprecated("Use GeneralKeys.isQuickRestartEnabled (docs/settings/ROADMAP.md P2.1)", ReplaceWith("GeneralKeys.isQuickRestartEnabled", "org.autojs.autojs.core.pref.keys.GeneralKeys"))
     val isQuickRestartEnabled
-        get() = getString(R.string.key_restart_strategy, key(R.string.default_key_restart_strategy)) == key(R.string.key_restart_strategy_quick)
+        get() = GeneralKeys.isQuickRestartEnabled
 
     @JvmStatic
+    @Deprecated("Use GeneralKeys.isScheduledRestartPreferredWorkManager (docs/settings/ROADMAP.md P2.1)", ReplaceWith("GeneralKeys.isScheduledRestartPreferredWorkManager", "org.autojs.autojs.core.pref.keys.GeneralKeys"))
     val isScheduledRestartPreferredWorkManager
-        get() = getString(R.string.key_scheduled_restart_backend, key(R.string.default_key_scheduled_restart_backend)) == key(R.string.key_scheduled_restart_backend_work_manager)
+        get() = GeneralKeys.isScheduledRestartPreferredWorkManager
 
     @JvmStatic
     val isHiddenFilesShown

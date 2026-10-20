@@ -1,6 +1,12 @@
 package org.autojs.autojs.core.pref
 
+import org.autojs.autojs.core.pref.store.SettingsStore
+import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.StoreId
+import org.autojs.autojs.core.pref.store.get
+import org.autojs.autojs.core.pref.store.getOrNull
+import org.autojs.autojs.core.pref.store.put
+import org.autojs.autojs.core.pref.store.storedOrNull
 import org.autojs.autojs.util.StringUtils
 
 /**
@@ -103,6 +109,41 @@ sealed class PrefKey<T : Any>(
     /** The stored form of [value] (one of the SharedPreferences types). */
     fun encode(value: T): Any = type.toStored(value)
 
+    // Reads and writes through the store of the key (P2): the readers that move to declared keys call these, with
+    // the semantics of the typed getters of SharedPreferences (a value of another type throws ClassCastException).
+    // zh-CN: 经键所在存储的读写 (P2): 迁移到键声明的读取方调用这些成员, 语义同 SharedPreferences 的类型化读取 (其他类型的值抛
+    // ClassCastException).
+
+    /** The store of this key ([SettingsStores]). */
+    val settingsStore: SettingsStore
+        get() = SettingsStores[store]
+
+    /** The stored value, else the default; throws [IllegalStateException] for a key with neither ([SettingDefault.None]). */
+    fun get(): T = settingsStore[this]
+
+    /** The stored value, else the default (null only for [SettingDefault.None]). */
+    fun getOrNull(): T? = settingsStore.getOrNull(this)
+
+    /** The stored value, or null when absent or invalid (see [SettingType]). */
+    fun storedOrNull(): T? = settingsStore.storedOrNull(this)
+
+    /** True when the store holds a value for [name] (`Pref.containsKey`). */
+    fun isStored(): Boolean = settingsStore.contains(name)
+
+    /**
+     * Writes [value] (null removes the key); [commit] is `commit()` like `Pref.putXxxSync`, otherwise `apply()`.
+     * zh-CN: 写入 [value] (null 即删除); [commit] 为 `commit()` (同 `Pref.putXxxSync`), 否则为 `apply()`.
+     */
+    @JvmOverloads
+    fun set(value: T?, commit: Boolean = false) {
+        settingsStore.put(this, value, commit)
+    }
+
+    @JvmOverloads
+    fun remove(commit: Boolean = false) {
+        settingsStore.remove(name, commit)
+    }
+
     override fun toString(): String = "${javaClass.simpleName}($name, ${type.tag}, $store)"
 }
 
@@ -112,11 +153,10 @@ sealed class PrefKey<T : Any>(
  * category) and an optional [deployment] item (D20 / T18).
  *
  * The subclasses are the value types: [Bool], [Int], [Long], [Float], [Str], [StrSet], [Enum] and [Json]. Domain
- * objects (`core/pref/keys/<Domain>Keys.kt`, P2 onwards) declare them; P1.1 only defines the model and no caller uses
- * it yet.
+ * objects (`core/pref/keys/<Domain>Keys.kt`, P2 onwards) declare them and their callers read and write through them.
  *
  * zh-CN: 用户设置的声明 (ROADMAP T1): 向导中的分类 (不能是 `other` 或数据分类), 变化后的生效方式 (D10), 凭据标记 (D2, 只在
- * `credentials` 分类) 与可选的部署项 (D20 / T18). 子类即值类型. 领域 `object` (P2 起) 声明这些键; P1.1 只定义模型, 尚无调用方.
+ * `credentials` 分类) 与可选的部署项 (D20 / T18). 子类即值类型. 领域 `object` (P2 起) 声明这些键, 调用方经它们读写.
  */
 sealed class SettingKey<T : Any>(
     keyRes: kotlin.Int,
@@ -231,6 +271,32 @@ sealed class SettingKey<T : Any>(
 
         /** True when the default is a candidate (computed defaults are evaluated). */
         fun isDefaultCandidate(): Boolean = defaultOrNull()?.let(enumType::isCandidate) ?: true
+
+        /**
+         * The stored key string as it is, also one that is not a candidate, or null when absent; a stored value of
+         * another type throws [ClassCastException] like `getString`. For readers that compared the raw string
+         * (`Pref.getStringOrNull(key) == ...`), so that a value out of the candidates keeps matching none (R2).
+         * zh-CN: 原样返回存储的键字符串 (不在候选项中也返回), 不存在时为 null; 其他类型的存储值与 `getString` 一样抛
+         * [ClassCastException]. 供原先比较原始字符串的读取方使用, 使候选项之外的值仍然一个都不匹配 (R2).
+         */
+        fun storedKey(): String? = settingsStore.getString(name, null)
+
+        /**
+         * [storedKey], else the key of the default: what `Pref.getString(key, defaultKey)` returned (R2).
+         * zh-CN: [storedKey], 不存在时为默认值的键: 即 `Pref.getString(key, defaultKey)` 的返回值 (R2).
+         */
+        fun storedKeyOrDefault(): String = storedKey() ?: defaultOrNull()?.let(enumType::keyOf)
+            ?: throw IllegalStateException("$name has neither a stored value nor a default")
+
+        /**
+         * Writes [key] as it is (null removes it), without the candidate check of [set]: for writers that copy a key
+         * string read from elsewhere, as `Pref.putString` did (R2).
+         * zh-CN: 原样写入 [key] (null 即删除), 不做 [set] 的候选项检查: 供复制他处读来的键字符串的写入方使用, 同 `Pref.putString` (R2).
+         */
+        @JvmOverloads
+        fun setStoredKey(key: String?, commit: Boolean = false) {
+            settingsStore.put(name, key, commit)
+        }
     }
 
     class Json<V : Any> @JvmOverloads constructor(

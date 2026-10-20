@@ -71,6 +71,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.intelligent.NightModeState
@@ -112,26 +113,26 @@ object ViewUtils {
 
     @JvmStatic
     var isKeepScreenOnWhenInForegroundEnabled
-        get() = Pref.getBoolean(R.string.key_keep_screen_on_when_in_foreground_enabled, false)
-        private set(b) = Pref.putBoolean(R.string.key_keep_screen_on_when_in_foreground_enabled, b)
+        get() = AppearanceKeys.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND_ENABLED.get()
+        private set(b) = AppearanceKeys.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND_ENABLED.set(b)
 
     val isKeepScreenOnWhenInForegroundDisabled
-        get() = Pref.keyKeepScreenOnWhenInForeground == key(R.string.key_keep_screen_on_when_in_foreground_disabled)
+        get() = AppearanceKeys.keepScreenOnWhenInForegroundKey == key(R.string.key_keep_screen_on_when_in_foreground_disabled)
 
     val isKeepScreenOnWhenInForegroundAllPages
-        get() = Pref.keyKeepScreenOnWhenInForeground == key(R.string.key_keep_screen_on_when_in_foreground_all_pages)
+        get() = AppearanceKeys.keepScreenOnWhenInForegroundKey == key(R.string.key_keep_screen_on_when_in_foreground_all_pages)
 
     private var keepScreenOnWhenInForegroundFromLastEnabledState: String
         get() = Pref.getString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, key(R.string.key_keep_screen_on_when_in_foreground_homepage_only))
         set(s) = Pref.putString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, s)
 
     var isAutoNightModeEnabled: Boolean
-        get() = Pref.getBoolean(R.string.key_auto_night_mode_enabled, AutoNightMode.isFunctional())
-        set(b) = Pref.putBoolean(R.string.key_auto_night_mode_enabled, b)
+        get() = AppearanceKeys.AUTO_NIGHT_MODE_ENABLED.get()
+        set(b) = AppearanceKeys.AUTO_NIGHT_MODE_ENABLED.set(b)
 
     var isNightModeEnabled: Boolean
-        get() = Pref.getBoolean(R.string.key_night_mode_enabled, false)
-        set(b) = Pref.putBoolean(R.string.key_night_mode_enabled, b)
+        get() = AppearanceKeys.NIGHT_MODE_ENABLED.get()
+        set(b) = AppearanceKeys.NIGHT_MODE_ENABLED.set(b)
 
     val Toolbar.titleView: TextView?
         get() = this.findViewById(androidx.appcompat.R.id.action_bar_title)
@@ -1289,24 +1290,24 @@ object ViewUtils {
     }
 
     fun setKeepScreenOnWhenInForegroundDisabled() {
-        Pref.putString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.key_keep_screen_on_when_in_foreground_disabled))
+        AppearanceKeys.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND.set(key(R.string.key_keep_screen_on_when_in_foreground_disabled))
         isKeepScreenOnWhenInForegroundEnabled = false
     }
 
     fun setKeepScreenOnWhenInForegroundAllPages() {
-        Pref.putString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.key_keep_screen_on_when_in_foreground_all_pages))
+        AppearanceKeys.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND.set(key(R.string.key_keep_screen_on_when_in_foreground_all_pages))
         keepScreenOnWhenInForegroundFromLastEnabledState = key(R.string.key_keep_screen_on_when_in_foreground_all_pages)
         isKeepScreenOnWhenInForegroundEnabled = true
     }
 
     fun setKeepScreenOnWhenInForegroundHomepageOnly() {
-        Pref.putString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.key_keep_screen_on_when_in_foreground_homepage_only))
+        AppearanceKeys.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND.set(key(R.string.key_keep_screen_on_when_in_foreground_homepage_only))
         keepScreenOnWhenInForegroundFromLastEnabledState = key(R.string.key_keep_screen_on_when_in_foreground_homepage_only)
         isKeepScreenOnWhenInForegroundEnabled = true
     }
 
     fun setKeepScreenOnWhenInForegroundFromLastEnabledState() {
-        Pref.putString(R.string.key_keep_screen_on_when_in_foreground, keepScreenOnWhenInForegroundFromLastEnabledState)
+        AppearanceKeys.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND.setStoredKey(keepScreenOnWhenInForegroundFromLastEnabledState)
         isKeepScreenOnWhenInForegroundEnabled = true
     }
 

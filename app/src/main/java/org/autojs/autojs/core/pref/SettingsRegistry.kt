@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.pref
 
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.store.StoreId
 
 /**
@@ -45,20 +47,22 @@ interface SettingsDomain {
  * [describe] turns them into [SettingDescriptor] rows. Keys name their category where they are declared; the registry
  * only builds the reverse index ([byCategory]).
  *
- * P1.3 is the skeleton: no domain is declared yet ([DOMAINS] is empty until P2.1), so every `key_*` resource, literal
- * key and named store is still "pending migration" and is allowed by `tools/settings/classification.json` in the
- * guard tests (T5); the count goes down as P2 to P5 declare them. The deployment items of T18 are not implemented yet
- * either ([DEPLOYMENT_IMPLEMENTATIONS], P7.6).
+ * [DOMAINS] grows from P2.1 on; every `key_*` resource, literal key and named store not declared yet is "pending
+ * migration" and is allowed by `tools/settings/classification.json` in the guard tests (T5), and the count goes down
+ * as P2 to P5 declare them. The deployment items of T18 are not implemented yet ([DEPLOYMENT_IMPLEMENTATIONS], P7.6).
  *
  * zh-CN: 全部键声明的注册表 (ROADMAP T4): 聚合各领域 `object`, [describe] 把它们转为 [SettingDescriptor] 行; 键在声明处写分类,
- * 注册表只做反向索引. P1.3 为骨架: 尚未声明任何领域 ([DOMAINS] 在 P2.1 之前为空), 因此所有 `key_*` 资源, 字面量键与命名存储仍是
- * "待迁移", 在守卫测试 (T5) 中由 `classification.json` 放行, 计数随 P2 到 P5 的声明下降. T18 的部署项也尚未实现 (P7.6).
+ * 注册表只做反向索引. [DOMAINS] 自 P2.1 起逐步填充; 尚未声明的 `key_*` 资源, 字面量键与命名存储为 "待迁移", 在守卫测试 (T5)
+ * 中由 `classification.json` 放行, 计数随 P2 到 P5 的声明下降. T18 的部署项尚未实现 (P7.6).
  */
 object SettingsRegistry {
 
-    /** The domain objects in page order (appendix A.1); P2.1 adds the first ones. */
+    /** The domain objects in page order (appendix A.1), filled by P2 to P5. */
     @JvmField
-    val DOMAINS: List<SettingsDomain> = emptyList()
+    val DOMAINS: List<SettingsDomain> = listOf(
+        AppearanceKeys,
+        GeneralKeys,
+    )
 
     /** Deployment kinds that have a registered implementation (T5 e); filled by P7.6. */
     @JvmField

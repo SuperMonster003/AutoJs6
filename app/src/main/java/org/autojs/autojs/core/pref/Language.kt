@@ -2,6 +2,7 @@ package org.autojs.autojs.core.pref
 
 import android.content.Context
 import org.autojs.autojs.annotation.KeyRes
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
@@ -74,8 +75,9 @@ enum class Language(@JvmField val languageTag: String, @KeyRes private val keyRe
         fun getPrefLanguage() = getPrefLanguageOrNull() ?: AUTO
 
         @JvmStatic
-        fun getPrefLanguageOrNull() = values().find {
-            it.getKey() == Pref.getStringOrNull(R.string.key_app_language)
+        fun getPrefLanguageOrNull(): Language? {
+            val stored = AppearanceKeys.APP_LANGUAGE.storedKey()
+            return values().find { it.getKey() == stored }
         }
 
         fun setPrefLanguage(locale: Locale) {
@@ -94,15 +96,15 @@ enum class Language(@JvmField val languageTag: String, @KeyRes private val keyRe
                     return@find splitCandidate.subList(0, maxLettersLen).joinToString("-")
                         .startsWith(splitLocale.subList(0, maxLettersLen).joinToString("-"), true)
                 }?.let {
-                    Pref.putString(R.string.key_app_language, it.getKey()).also { return }
+                    AppearanceKeys.APP_LANGUAGE.set(it.getKey()).also { return }
                 }
             } while (--maxLettersLen > 0)
 
-            Pref.putString(R.string.key_app_language, null)
+            AppearanceKeys.APP_LANGUAGE.set(null)
         }
 
         fun setPrefLanguageAuto() {
-            Pref.putString(R.string.key_app_language, AUTO.getKey())
+            AppearanceKeys.APP_LANGUAGE.set(AUTO.getKey())
         }
 
     }

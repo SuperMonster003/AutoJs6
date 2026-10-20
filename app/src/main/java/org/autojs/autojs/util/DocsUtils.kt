@@ -1,6 +1,6 @@
 package org.autojs.autojs.util
 
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
@@ -20,7 +20,7 @@ object DocsUtils {
 
     @JvmStatic
     val currentSource: Source
-        get() = Pref.getStringOrNull(R.string.key_documentation_source).let { preference ->
+        get() = GeneralKeys.DOCUMENTATION_SOURCE.storedKey().let { preference ->
             if (preference == null || preference == key(R.string.key_documentation_source_local)) {
                 Source.OFFLINE
             } else {
@@ -54,7 +54,7 @@ object DocsUtils {
 
     @JvmStatic
     fun isDocumentationSourcePreferenceKey(changedKey: String?) =
-        changedKey == key(R.string.key_documentation_source)
+        changedKey == GeneralKeys.DOCUMENTATION_SOURCE.name
 
     @JvmStatic
     fun extractUrlSuffix(url: String?): String? {

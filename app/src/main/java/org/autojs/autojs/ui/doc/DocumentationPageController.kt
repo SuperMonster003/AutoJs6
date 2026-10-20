@@ -12,6 +12,7 @@ import org.autojs.autojs.core.plugin.center.PluginIndexSource
 import org.autojs.autojs.core.plugin.docs.OfflineDocsAssetPathHandler
 import org.autojs.autojs.core.plugin.docs.OfflineDocsPluginStateMonitor
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.DocsUtils
@@ -269,10 +270,7 @@ class DocumentationPageController(
             .positiveColorRes(R.color.dialog_button_attraction)
             .widgetThemeColor()
             .onPositive { _, _ ->
-                Pref.putString(
-                    R.string.key_documentation_source,
-                    key(R.string.key_documentation_source_online),
-                )
+                GeneralKeys.DOCUMENTATION_SOURCE.set(key(R.string.key_documentation_source_online))
             }
             .show()
     }

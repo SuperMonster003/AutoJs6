@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.pref
 
 import org.autojs.autojs.core.pref.store.SettingsStores
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -210,12 +211,14 @@ class SettingsRegistryGuardTest {
         private lateinit var classification: Map<String, Any?>
         private lateinit var keyResources: Map<String, String>
         private lateinit var sources: Map<String, String>
+        private lateinit var resources: AutoCloseable
 
         @BeforeClass
         @JvmStatic
         fun load() {
-            root = generateSequence(File("").absoluteFile) { it.parentFile }.firstOrNull { File(it, "tools/settings/classification.json").isFile }
-                ?: throw IllegalStateException("tools/settings/classification.json not found above ${File("").absolutePath}")
+            // Declared keys resolve their names from res/values in JVM tests (P2).
+            resources = SettingsTestResources.install()
+            root = SettingsTestResources.root
             @Suppress("UNCHECKED_CAST")
             classification = SettingsJson.parse(File(root, "tools/settings/classification.json").readText()) as Map<String, Any?>
             val resources = LinkedHashMap<String, String>()
@@ -226,6 +229,12 @@ class SettingsRegistryGuardTest {
             val base = File(root, "app/src/main/java/org/autojs/autojs")
             sources = base.walkTopDown().filter { it.isFile && (it.name.endsWith(".kt") || it.name.endsWith(".java")) }
                 .associate { it.relativeTo(base).invariantSeparatorsPath to it.readText() }
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun restore() {
+            resources.close()
         }
 
         @Suppress("UNCHECKED_CAST")
