@@ -20,31 +20,35 @@ The paired host is 6.8.0/build 5621 from be1b3eee0ab9817fff5ebbdffcada282330e931
 
 ## Accepted physical validation
 
-Redmi bek749scrwv4wo8h, model 22120RN86C, Android 13/API 33, arm64-v8a and 4096-byte pages:
+Redmi bek749scrwv4wo8h, model 22120RN86C, Android 13/API 33, and Xiaomi 968e9f18, model 23046RP50C, Android 15/API 35, both arm64-v8a with 4096-byte pages. Xiaomi's final run was completed after the user released the device and the other session's memory-test driver exited naturally:
 
-| Suite | Cases | Result |
-| --- | ---: | --- |
-| RuntimeSpeechNativeTest | 2 | Pass |
-| RuntimeSpeechDeviceTest | 5 | Pass |
-| Node NpmEcosystemSmokeTest and NodeRuntimePluginAndroidConformanceTest | 34 | Pass |
-| BunRuntimeInstrumentedTest | 13 | Pass |
-| RuntimeSpeechPackagedDeviceTest.produce | 1 | Pass |
-| RuntimeSpeechPackagedDeviceTest.installedApplicationsUseOwnContextBeforeAndAfterRelaunch | 1 | Pass |
-| Total on Redmi | 56 | Pass |
+| Suite | Cases per device | Redmi | Xiaomi |
+| --- | ---: | --- | --- |
+| RuntimeSpeechNativeTest | 2 | Pass | Pass |
+| RuntimeSpeechDeviceTest | 5 | Pass | Pass |
+| Node NpmEcosystemSmokeTest and NodeRuntimePluginAndroidConformanceTest | 34 | Pass | Pass |
+| BunRuntimeInstrumentedTest | 13 | Pass | Pass |
+| RuntimeSpeechPackagedDeviceTest.produce | 1 | Pass | Pass |
+| RuntimeSpeechPackagedDeviceTest.installedApplicationsUseOwnContextBeforeAndAfterRelaunch | 1 | Pass | Pass |
+| Total per device | 56 | Pass | Pass |
 
-Two independently signed APKs each pass an initial launch and force-stop/reopen: four launches and six program results, covering Bun twice and Node main plus Worker twice. Their DEX hashes match the paired Runtime Kit; their signatures differ from the host signature. The Bun package deliberately omits RECORD_AUDIO and asserts microphone/wake PERMISSION_DENIED while file/model operations succeed. The Node/Worker package declares and receives RECORD_AUDIO and successfully opens/stops both session types. Both report their own application Context and runtime build 5621.
+On each device, two independently signed APKs each pass an initial launch and force-stop/reopen: four launches and six program results, covering Bun twice and Node main plus Worker twice. Their DEX hashes match the paired Runtime Kit; their signatures differ from the host signature. The Bun package deliberately omits RECORD_AUDIO and asserts microphone/wake PERMISSION_DENIED while file/model operations succeed. The Node/Worker package declares and receives RECORD_AUDIO and successfully opens/stops both session types. Both report their own application Context and runtime build 5621. Xiaomi's old task-generated applications were uninstalled before the newly generated APKs were installed, so its first launches use fresh application data.
 
 Real programs recognize the 6.625-second LibriSpeech WAV and offset PCM views, check transcription content, VAD segments, external-session event ordering, cancellation and plugin error codes. Model checks import an owned management archive with progress, temporarily change and restore the ASR default, remove the imported model and verify installation of already installed model files. The archive is a management fixture, not an inference model. No new model download or license acceptance is claimed. Existing installed ASR, KWS and TTS models are reused.
 
 Actual 3-Macaw synthesis produces valid RIFF/WAVE output. Playback requests use volume zero and media usage. No sustained tone is played, and silent completion is not acoustic quality acceptance. CJS/ESM/nested Worker lifecycle and more than 1024 actual Bun speech transport calls also pass. Final inventory matches the pre-test installed model IDs, versions, sizes, licenses and defaults, with no owned imported model left.
 
-Before the Xiaomi installation conflict below, AceApiCoverageDeviceTest passed all 17 cases on Xiaomi 968e9f18, Android 15/API 35. The Ace artifact has not changed since that run. The saved proof confirms default preferences and rotation were restored. Four inspected screenshots show typed recognition results and final-event text completions for Node and Bun. These 17 Ace cases are counted separately from the 56 accepted Redmi cases, for 73 accepted physical cases.
+Before the Xiaomi installation conflict below, AceApiCoverageDeviceTest passed all 17 cases on Xiaomi 968e9f18, Android 15/API 35. The Ace artifact has not changed since that run. The saved proof confirms default preferences and rotation were restored. Four inspected screenshots show typed recognition results and final-event text completions for Node and Bun. Those 17 cases were not rerun during the follow-up. The final accepted physical total is 129: 56 Redmi cases, 56 final Xiaomi cases and the earlier 17 Xiaomi Ace cases.
 
-## Xiaomi deferred by the user
+## Xiaomi installation conflict and completed follow-up
 
 During final Xiaomi validation, another session replaced the host APK. The expected 5621 SHA-256 was f129d449a6955de532352088179729ec28475038b8100ec445811d697bf308a3; the observed external 5620 SHA-256 was f7727e88b2b2a18976deed12569d20de384d9bcd4939af236fae1bfe5974233c. The 5621 Builder correctly refused that mismatched host.
 
-The user confirmed the other session was using Xiaomi and requested Redmi first. Further Xiaomi host/packaged verification, device cleanup and restoration are therefore deferred. Earlier/final Xiaomi runtime logs are retained but are not counted as acceptance of the expected 5621 combination. Original APK/settings backups and the external-host hash record remain intact; no subsequent Xiaomi operation is performed. The completed Ace run is the only Xiaomi result included in the accepted physical total.
+The user initially confirmed the other session was using Xiaomi and requested Redmi first. Xiaomi host/packaged verification, cleanup and restoration were deferred at that handoff. The conflicting earlier runtime logs remain excluded from acceptance of the expected 5621 combination.
+
+The user subsequently released Xiaomi for the final verification. Read-only inspection still found a memory-test driver running, so no installation or test interruption occurred until that driver finished naturally. A separate takeover backup captured the current APK hashes, permissions, settings and speech model inventory. The current host also reported build 5621, but its SHA-256 was 70c0b6ed4b5eada5d5a75dc491c6e404c42be5c4be437901956588302ba2cade, different from the accepted speech APK. The current test APK and Speech build 74 were also external-session changes.
+
+The follow-up used the previously accepted archived host, Node, Bun, Speech build 69 and paired Builder bytes, without rebuilding the concurrently edited workspace. Every suite checked the installed APK hashes before and after execution. The same six suites pass on Xiaomi, including fresh device-generated Bun and Node/Worker applications. Packaged DEX and certificate checks pass, the six installed models and their defaults match the fresh pre-test inventory, and the independent speech contract check still reports all 18 registered methods covered.
 
 ## Desktop and build checks
 
@@ -62,7 +66,7 @@ The user confirmed the other session was using Xiaomi and requested Redmi first.
 | Speech-specific gate | 18 methods, shared facade/types, provider routes, signed/packaged entries and both APK permission paths passed |
 | Builds | Host/Node/Bun/Speech/Builder build and lint, Ace build/tests and Offline debug/release APK verification passed |
 
-The augment totals describe explicit documentation/declaration/completion coverage, not full Node/Bun runtime parity. The new speech gate runs from .github/workflows/api-coverage.yml with an explicit Speech repository checkout/ref. Node native syntax was checked against its actual NDK compile command. Existing Python repository/generator checks pass. No new ABI, Android 9-12L or 16 KB device acceptance is claimed.
+The augment totals describe explicit documentation/declaration/completion coverage, not full Node/Bun runtime parity. The new speech gate runs from .github/workflows/api-coverage.yml with an explicit Speech repository checkout/ref. Node native syntax was checked against its actual NDK compile command. Existing Python repository/generator checks pass. These desktop/build results belong to the original implementation batch; the Xiaomi follow-up reuses its exact accepted artifacts and does not claim another JVM/build run. No new ABI, Android 9-12L or 16 KB device acceptance is claimed.
 
 Documentation revision 152 is committed as 90ca57c07495a459db49b744126664a9ecc2d525. Declaration version is 4.72.0, Ace 2.34.0/build 313, Builder 1.2.19/repository build 94 with HOST_VERSION_BUILD 5621, and Offline Docs 6.8.32/build 189. Offline provenance pins that exact Documentation commit; both APK variants verify 224 documentation files with canonical content SHA-256 3a614c029773036bde0f0c9a8a56bf0d325d9805df2bfc6ab33a7966a8252663.
 
@@ -79,6 +83,10 @@ Documentation revision 152 is committed as 90ca57c07495a459db49b744126664a9ecc2d
 
 Redmi's six original APKs were restored and their SHA-256 hashes verified. Task-only test/generated packages and owned external fixtures were removed; the prior SDK-file state was restored. Host/provider microphone grants and flags, camera/notification grants, voice assistant/recognition settings, volume, rotation, screen settings and notification-listener access match the baseline. The originally enabled host accessibility service is bound. Installed model inventory/defaults were verified before restoring the older host.
 
-The speech provider was restored without uninstalling or clearing its model store: a same-version, same-signature debug APK permitted the data-preserving downgrade from tested release build 69 to original release build 52. This temporary debug APK is a restoration tool, not an accepted test artifact. Original Redmi backups were removed only after full restoration verification. Xiaomi backups remain because its restoration is deferred.
+The speech provider on Redmi was restored without uninstalling or clearing its model store: a same-version, same-signature debug APK permitted the data-preserving downgrade from tested release build 69 to original release build 52. This temporary debug APK is a restoration tool, not an accepted test artifact. Original Redmi backups were removed only after full restoration verification. Redmi was not operated during the Xiaomi follow-up.
 
-Local evidence is under .bak/runtime-speech-20261020: evidence.json, certificates.json, junit-totals.json and archived XML, artifact-bound receipts, failed and accepted logs, Ace screenshots, model inventories and per-device restoration records. The temporary host worktree and owned Worker fixture directories are cleaned or archived under the owning repository's ignored .bak before handoff. Existing user release drafts are preserved. Changes are local commits; nothing is pushed, tagged or publicly released.
+Xiaomi restoration preserves the newer work of the other session. Nine installed APKs were verified against their selected restoration hashes: the takeover host (70c0b6ed4b5e), test APK (f9c6b80a7aba) and Speech build 74 (33ca38f5bc00), plus the original Node, Node test, Bun, Builder, Ace and Ace test APKs. The task-only Bun test package and two generated applications were removed. Eighteen owned external files were removed after hash checks, including six WAV/ZIP files left by the earlier interrupted run. Existing user applications were replaced without clearing their data or the speech model store.
+
+Fresh takeover permissions, Bun capability grants, volumes, screen settings, voice-assistant selections, notification-listener access and relevant app-op modes were restored and checked. The originally enabled AutoJs4 Runtime and 3-Macaw Speech accessibility services are both bound, with no binding or crashed services. A final inventory through the restored Speech build 74 confirms all six installed models and defaults remain unchanged. There is no active MediaProjection or task-generated application process. The original Xiaomi backups and the separate takeover backups remain under the ignored evidence directory for recovery across the concurrent sessions.
+
+Local evidence is under .bak/runtime-speech-20261020: evidence.json, certificates.json, junit-totals.json and archived XML, artifact-bound receipts, failed and accepted logs, Ace screenshots, model inventories and per-device restoration records. The completed Xiaomi follow-up is under xiaomi-resume-20261020, including takeover.json, ready-state.json, accepted-evidence.json, owned-file-cleanup.json, restoration.json and finalization.json. The earlier deferred summaries are preserved there before the main summaries are updated. The temporary host worktree and owned Worker fixture directories were cleaned or archived before handoff; this follow-up creates no new worktree or repository compilation. Existing user release drafts and concurrent changes are preserved. Changes are local commits; nothing is pushed, tagged or publicly released.
