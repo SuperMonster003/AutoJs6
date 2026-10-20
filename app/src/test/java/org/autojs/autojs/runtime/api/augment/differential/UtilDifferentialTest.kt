@@ -32,7 +32,7 @@ class UtilDifferentialTest {
         ktUtil = Util.augmentWithRuntime(rhino.ktScope.globalThis, runtime, ApiUtil).also { util ->
             UtilJava.augmentWithRuntime(util, runtime)
             UtilVersion.augmentWithRuntime(util, runtime)
-            UtilVersionCodes.augmentWithRuntime(util, runtime, VersionCodesInfo.obj)
+            UtilVersionCodes.augmentWithRuntime(util, runtime, VersionCodesInfo.newObj(rhino.ktScope))
             UtilInspect.augmentWithRuntime(util, runtime)
             UtilMorseCode.augmentWithRuntime(util, runtime)
         }

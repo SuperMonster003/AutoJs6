@@ -33,6 +33,10 @@ class WebSocket @JvmOverloads constructor(
     private lateinit var webSocket: okhttp3.WebSocket
     private val networkClient = LocalNetworkDiagnostics.withDiagnostics(client)
 
+    // The script runtime this socket belongs to; only that runtime's exit releases it (docs/memory/ROADMAP.md H19 / R2).
+    // zh-CN: 本连接所属的脚本运行时; 只有该运行时结束时才释放本连接 (docs/memory/ROADMAP.md H19 / R2).
+    private val mOwner = WeakReference(scriptRuntime)
+
     init {
         WebSocketMessageListener(this).also { listener = it }
         build()
@@ -40,7 +44,7 @@ class WebSocket @JvmOverloads constructor(
 
     private fun build() {
         webSocket = networkClient.newWebSocket(Builder().url(url).build(), listener)
-        instances.add(WeakReference(this))
+        synchronized(instances) { instances.add(WeakReference(this)) }
     }
 
     fun rebuild() {
@@ -88,31 +92,47 @@ class WebSocket @JvmOverloads constructor(
         exitOnCloseTimeout = maxOf(0, timeout)
     }
 
-    inner class WebSocketMessageListener(private val ws: WebSocket) : WebSocketListener() {
+    class WebSocketMessageListener(ws: WebSocket) : WebSocketListener() {
+
+        // Cleared when the owning script exits: the okhttp reader thread holds this listener for as long as the
+        // connection lives, and must not keep the script runtime reachable through it (docs/memory/ROADMAP.md H19).
+        // zh-CN: 所属脚本结束时清空: okhttp 读线程在连接存续期间一直持有本监听器, 不能经由它让脚本运行时保持可达 (docs/memory/ROADMAP.md H19).
+        @Volatile
+        private var ws: WebSocket? = ws
+
+        fun detach() {
+            ws = null
+        }
 
         override fun onOpen(webSocket: okhttp3.WebSocket, response: Response) {
+            val ws = ws ?: return
             ws.emit(EVENT_OPEN, response, ws)
         }
 
         override fun onMessage(webSocket: okhttp3.WebSocket, text: String) {
+            val ws = ws ?: return
             ws.emit(EVENT_MESSAGE, text, ws)
             ws.emit(EVENT_TEXT, text, ws)
         }
 
         override fun onMessage(webSocket: okhttp3.WebSocket, bytes: ByteString) {
+            val ws = ws ?: return
             ws.emit(EVENT_MESSAGE, bytes, ws)
             ws.emit(EVENT_BYTES, bytes, ws)
         }
 
         override fun onClosing(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
+            val ws = ws ?: return
             ws.emit(EVENT_CLOSING, code, reason, ws)
         }
 
         override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
+            val ws = ws ?: return
             ws.emit(EVENT_CLOSED, code, reason, ws)
         }
 
         override fun onFailure(webSocket: okhttp3.WebSocket, t: Throwable, response: Response?) {
+            val ws = ws ?: return
             Log.w(TAG, "onFailure")
             t.printStackTrace()
             ws.emit(EVENT_FAILURE, t, response, ws)
@@ -242,17 +262,34 @@ class WebSocket @JvmOverloads constructor(
 
         private const val DEFAULT_EXIT_ON_CLOSE_TIMEOUT = 0L
 
+        /**
+         * Releases the sockets of an exiting script runtime (docs/memory/ROADMAP.md H19), never those of other running scripts (R2).
+         * A socket set to exitOnClose is closed normally after its timeout, as before; any other socket is cancelled,
+         * which also ends its okhttp reader thread. Either way the socket stops delivering events to the script.
+         * zh-CN: 释放结束中的脚本运行时的连接 (docs/memory/ROADMAP.md H19), 不触及其他仍在运行的脚本的连接 (R2).
+         * 设置了 exitOnClose 的连接仍按原方式在超时后正常关闭; 其余连接被取消, 其 okhttp 读线程随之结束. 两种情况下连接都不再向脚本派发事件.
+         */
         @JvmStatic
-        fun onExit(reason: String?) {
-            val wsList = instances.mapNotNull { ref -> ref.get() }
+        fun onExit(scriptRuntime: ScriptRuntime, reason: String?) {
+            val wsList = synchronized(instances) {
+                val owned = instances.mapNotNull { ref -> ref.get()?.takeIf { it.mOwner.get() === scriptRuntime } }.distinct()
+                instances.removeAll { ref -> ref.get().let { it == null || it.mOwner.get() === scriptRuntime } }
+                owned
+            }
             if (wsList.isNotEmpty()) {
                 Log.d(TAG, "onExit ready")
                 wsList.forEach {
-                    val r = {
-                        Log.d(TAG, "onExit triggered after delayed")
-                        if (it.isExitOnClose) it.close(CODE_CLOSE_NORMAL, reason)
+                    it.listener.detach()
+                    val socket = it.webSocket
+                    if (it.isExitOnClose) {
+                        val r = Runnable {
+                            Log.d(TAG, "onExit triggered after delayed")
+                            socket.close(CODE_CLOSE_NORMAL, reason)
+                        }
+                        AutoJs.instance.uiHandler.postDelayed(r, it.exitOnCloseTimeout)
+                    } else {
+                        socket.cancel()
                     }
-                    AutoJs.instance.uiHandler.postDelayed(r, it.exitOnCloseTimeout)
                 }
             }
         }

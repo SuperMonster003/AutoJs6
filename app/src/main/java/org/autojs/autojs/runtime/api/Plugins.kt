@@ -32,6 +32,10 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
 
     private val mPlugins = ConcurrentHashMap<String, Plugin>()
 
+    // Connections passed to bindService, unbound when the script exits (docs/memory/ROADMAP.md H8).
+    // zh-CN: 传给 bindService 的连接, 在脚本结束时解绑 (docs/memory/ROADMAP.md H8).
+    private val mBoundPlugins: MutableSet<Plugin> = ConcurrentHashMap.newKeySet()
+
     fun load(packageName: String): Plugin {
         mPlugins[packageName]?.let { return it }
 
@@ -66,6 +70,9 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
         val componentName = plugin.componentName ?: return
         if (plugin.pkg.installed) {
             val intent = Intent().apply { setComponent(componentName) }
+            // A connection must be unbound even if bindService returns false.
+            // zh-CN: 即使 bindService 返回 false, 连接也需要解绑.
+            mBoundPlugins.add(plugin)
             context.applicationContext.bindService(intent, plugin, Context.BIND_AUTO_CREATE)
         } else {
             val service = UnsupportedConnection().asBinder()
@@ -79,6 +86,20 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
 
     fun clear() {
         deleteRecursively(mPluginCacheDir)
+    }
+
+    /**
+     * Unbinds the plugin services bound by this script when it exits (docs/memory/ROADMAP.md H8). Until a connection is
+     * unbound, the system keeps it, together with the plugin instance and the script runtime the plugin was loaded for.
+     * zh-CN: 脚本结束时解绑本脚本绑定的插件服务 (docs/memory/ROADMAP.md H8). 连接解绑之前, 系统会一直持有它, 连同插件实例及其加载时所属的脚本运行时.
+     */
+    fun unbindAll() {
+        mPlugins.clear()
+        val bound = mBoundPlugins.toList()
+        mBoundPlugins.clear()
+        bound.forEach { plugin ->
+            runCatching { context.applicationContext.unbindService(plugin) }
+        }
     }
 
     private fun loadInstalledPackage(packageName: String) = try {

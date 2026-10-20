@@ -815,7 +815,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             }
         }
 
-        ignoresException { CoreWebSocket.onExit("Triggered by $TAG") }
+        ignoresException { CoreWebSocket.onExit(this, "Triggered by $TAG") }
 
         // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
         //  ! 清空无障碍事件.
@@ -886,9 +886,20 @@ class ScriptRuntime private constructor(builder: Builder) {
             }
         }
 
+        // Unbind the plugin services this script has bound; the system would keep the connections, and this runtime with them (docs/memory/ROADMAP.md H8).
+        // zh-CN: 解绑本脚本绑定的插件服务; 否则系统会一直持有这些连接, 连同本运行时 (docs/memory/ROADMAP.md H8).
+        if (::plugins.isInitialized) ignoresException { plugins.unbindAll() }
+
         if (::events.isInitialized) ignoresException { events.recycle() }
         ignoresException { media.recycle() }
         if (::loopers.isInitialized) ignoresException { loopers.recycle() }
+
+        // The gesture dispatcher installed on this script's bridge runs on the servant looper just quit by loopers.recycle.
+        // The bridge may stay referenced as the process-wide default bridge (AccessibilityService.bridge), so drop the dispatcher,
+        // which holds this runtime (docs/memory/ROADMAP.md H17); nodes found through the bridge then use a standalone automator.
+        // zh-CN: 本脚本 bridge 上安装的手势派发器运行在刚被 loopers.recycle 退出的 servant Looper 上.
+        // 该 bridge 可能仍作为进程级默认 bridge (AccessibilityService.bridge) 被引用, 因此移除持有本运行时的派发器 (docs/memory/ROADMAP.md H17); 之后经该 bridge 找到的节点使用独立的 automator.
+        ignoresException { accessibilityBridge.tap = null }
         ignoresException { recycleShell() }
         ignoresException { images.releaseScreenCapturer() }
         ignoresException { images.stopScreenCapturerForegroundService() }
@@ -1051,7 +1062,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             "util" -> Util.augmentWithRuntime(target, this, util).also { util ->
                 UtilJava.augmentWithRuntime(util, this)
                 UtilVersion.augmentWithRuntime(util, this)
-                UtilVersionCodes.augmentWithRuntime(util, this, VersionCodesInfo.obj)
+                UtilVersionCodes.augmentWithRuntime(util, this, VersionCodesInfo.newObj(topLevelScope))
                 UtilInspect.augmentWithRuntime(util, this)
                 UtilMorseCode.augmentWithRuntime(util, this)
             }
