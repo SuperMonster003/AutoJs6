@@ -113,6 +113,7 @@ public class Device {
 
     private final Context mContext;
     private PowerManager.WakeLock mWakeLock;
+    private volatile AudioManager mAudioManager;
     private int mWakeLockFlag;
 
     public Device(Context context) {
@@ -162,52 +163,83 @@ public class Device {
         Settings.System.putInt(mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE, b);
     }
 
+    /**
+     * The AudioManager of the context. AudioManager binds its event handler to the Looper of the thread that first obtains it
+     * from a context, and the application context keeps that instance for the lifetime of the process; obtained first on a script
+     * thread, it kept that thread and its whole ScriptRuntime reachable (docs/memory/ROADMAP.md H22). On a thread with its own
+     * Looper the instance is therefore first obtained on a helper thread without one, which binds the handler to the main Looper.
+     * zh-CN: 该 Context 的 AudioManager. AudioManager 把事件 Handler 绑定到最先从 Context 取得它的线程的 Looper 上, 而应用 Context 会在进程生命周期内一直保留该实例;
+     * 若最先在脚本线程上取得, 就会让该线程及其整个 ScriptRuntime 一直可达 (docs/memory/ROADMAP.md H22). 因此在自带 Looper 的线程上, 先在不带 Looper 的辅助线程上取得该实例, 使 Handler 绑定到主 Looper.
+     */
+    private AudioManager getAudioManager() {
+        AudioManager cached = mAudioManager;
+        if (cached != null) {
+            return cached;
+        }
+        Looper looper = Looper.myLooper();
+        if (looper == null || looper == Looper.getMainLooper()) {
+            return mAudioManager = getSystemService(Context.AUDIO_SERVICE);
+        }
+        AudioManager[] result = new AudioManager[1];
+        Thread thread = new Thread(() -> {
+            try {
+                result[0] = getSystemService(Context.AUDIO_SERVICE);
+            } catch (RuntimeException ignored) {
+                /* Falls back to the calling thread below. */
+            }
+        }, "AudioManager-Init");
+        thread.start();
+        boolean interrupted = false;
+        while (thread.isAlive()) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
+        }
+        return mAudioManager = result[0] != null ? result[0] : getSystemService(Context.AUDIO_SERVICE);
+    }
+
     public int getMusicVolume() {
-        return ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .getStreamVolume(AudioManager.STREAM_MUSIC);
+        return getAudioManager().getStreamVolume(AudioManager.STREAM_MUSIC);
     }
 
     public int getNotificationVolume() {
-        return ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+        return getAudioManager().getStreamVolume(AudioManager.STREAM_NOTIFICATION);
     }
 
     public int getAlarmVolume() {
-        return ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .getStreamVolume(AudioManager.STREAM_ALARM);
+        return getAudioManager().getStreamVolume(AudioManager.STREAM_ALARM);
     }
 
     public int getMusicMaxVolume() {
-        return ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        return getAudioManager().getStreamMaxVolume(AudioManager.STREAM_MUSIC);
     }
 
     public int getNotificationMaxVolume() {
-        return ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
+        return getAudioManager().getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
     }
 
     public int getAlarmMaxVolume() {
-        return ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .getStreamMaxVolume(AudioManager.STREAM_ALARM);
+        return getAudioManager().getStreamMaxVolume(AudioManager.STREAM_ALARM);
     }
 
     public void setMusicVolume(int i) {
         ensureWriteSettingsPermission();
-        ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .setStreamVolume(AudioManager.STREAM_MUSIC, i, 0);
+        getAudioManager().setStreamVolume(AudioManager.STREAM_MUSIC, i, 0);
     }
 
     public void setAlarmVolume(int i) {
         ensureWriteSettingsPermission();
-        ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .setStreamVolume(AudioManager.STREAM_ALARM, i, 0);
+        getAudioManager().setStreamVolume(AudioManager.STREAM_ALARM, i, 0);
     }
 
     public void setNotificationVolume(int i) {
         ensureWriteSettingsPermission();
-        ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
-                .setStreamVolume(AudioManager.STREAM_NOTIFICATION, i, 0);
+        getAudioManager().setStreamVolume(AudioManager.STREAM_NOTIFICATION, i, 0);
     }
 
     public float getBattery() {
