@@ -173,6 +173,7 @@ class ScriptModuleBindingPrototypeTest {
             "(function () { try { base64.encode(null); } catch (e) { return e instanceof TypeError; } })()" to "true",
             "(function () { try { base64.decode('aGk=', 'no-such-charset'); } catch (e) { return e instanceof RangeError; } })()" to "true",
             "base64.decode(base64.encode([104, 105]))" to "\"hi\"",
+            "(function () { try { base64.decode('='); } catch (e) { return e.name + ':' + e.javaException.getClass().getSimpleName(); } })()" to "\"JavaException:IllegalArgumentException\"",
             "\$base64 === base64" to "true",
         )
 

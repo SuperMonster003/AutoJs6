@@ -30,6 +30,7 @@ class ScriptModuleMounterTest {
 
     private lateinit var rhino: DifferentialRhino
     private lateinit var mounter: ScriptModuleMounter
+    private val consoleEntries = mutableListOf<Pair<Int, String>>()
 
     @Before
     fun setUp() {
@@ -37,7 +38,8 @@ class ScriptModuleMounterTest {
         EagerProbeModule.created = 0
         rhino = DifferentialRhino()
         val emitters = ScriptModuleMounter.EmitterFactory { _, scope -> ScriptModuleMounter.EmitterFactory.emitterObject(FakeEmitter(), scope) }
-        mounter = ScriptModuleMounter(TestScriptModules, rhino.ktRuntime, rhino.ktScope, rhino.ktScope.globalThis, emitters)
+        val console = ScriptErrorMapper.DebugConsole { level, text -> consoleEntries += level to text.toString() }
+        mounter = ScriptModuleMounter(TestScriptModules, rhino.ktRuntime, rhino.ktScope, rhino.ktScope.globalThis, emitters, console)
         assertTrue(mounter.install("probe"))
         assertTrue(mounter.install("eagerProbe"))
         assertFalse(mounter.install("noSuchModule"))
@@ -176,30 +178,41 @@ class ScriptModuleMounterTest {
         assertThrows(ScriptInterruptedException::class.java) { rhino.evalKt("probe.interrupt()") }
     }
 
-    /** Appendix C Q4: stack traces are printed only for the modules the policy allows. */
+    /**
+     * Appendix C Q4: with the switch on (and the module not excluded), mapping a Java exception writes one D-level console
+     * entry, also when the script catches it; argument errors and script errors never do, and nothing is written with
+     * the switch off.
+     */
     @Test
-    fun debugPrintingFollowsThePerModulePolicy() {
+    fun debugPrintingWritesConsoleEntriesPerModule() {
         val previous = ScriptErrorMapper.debugPrinting
+        val quiet = listOf(
+            "(function () { try { probe.ping(1, 2); } catch (e) { return e.name; } })()" to "\"TypeError\"",
+            "(function () { try { probe.callBack(function () { throw new Error('x'); }); } catch (e) { return e.message; } })()" to "\"x\"",
+        )
         try {
+            ScriptErrorMapper.debugPrinting = ScriptErrorMapper.DebugPrinting { false }
+            check(quiet + ("(function () { try { probe.fail(); } catch (e) { return 'caught'; } })()" to "\"caught\""))
+            assertTrue("No entries with the switch off: $consoleEntries", consoleEntries.isEmpty())
+
             ScriptErrorMapper.debugPrinting = ScriptErrorMapper.DebugPrinting { it == "probe" }
-            assertTrue(stderrOf { runCatching { rhino.evalKt("probe.fail()") } }.contains("IllegalStateException: boom"))
+            check(quiet + ("(function () { try { probe.fail(); } catch (e) { return 'caught'; } })()" to "\"caught\""))
+            assertEquals("Exactly the Java exception is printed: $consoleEntries", 1, consoleEntries.size)
+            val (level, text) = consoleEntries.single()
+            assertEquals(android.util.Log.DEBUG, level)
+            val lines = text.lines()
+            assertEquals("[modules] probe.fail: java.lang.IllegalStateException: boom", lines.first())
+            assertTrue(text, lines.drop(1).dropLast(1).all { it.startsWith("    at org.autojs.autojs.runtime.api.modules.") })
+            assertTrue(text, lines.any { it.startsWith("    at org.autojs.autojs.runtime.api.modules.sample.ProbeModule.fail(") })
+            assertTrue(text, lines.last().startsWith("    ... ") && lines.last().endsWith(" more"))
+
+            consoleEntries.clear()
             ScriptErrorMapper.debugPrinting = ScriptErrorMapper.DebugPrinting { it == "base64" }
-            assertEquals("", stderrOf { runCatching { rhino.evalKt("probe.fail()") } })
+            check(listOf("(function () { try { probe.fail(); } catch (e) { return 'caught'; } })()" to "\"caught\""))
+            assertTrue("An excluded module prints nothing: $consoleEntries", consoleEntries.isEmpty())
         } finally {
             ScriptErrorMapper.debugPrinting = previous
         }
-    }
-
-    private fun stderrOf(block: () -> Unit): String {
-        val previousErr = System.err
-        val printed = java.io.ByteArrayOutputStream()
-        System.setErr(java.io.PrintStream(printed, true, "UTF-8"))
-        try {
-            block()
-        } finally {
-            System.setErr(previousErr)
-        }
-        return printed.toString("UTF-8")
     }
 
     @Test

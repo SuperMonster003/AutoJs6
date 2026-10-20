@@ -1,6 +1,7 @@
 """Evaluates the documented differences of the JVM differential tests with the host installed on a device.
 
 Usage: py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep] [--new-modules on|off] [--strict-errors]
+       [--debug-print on|off] [--console]
 
 The differential tests (app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/) write their
 documented differences and the expressions they had to skip on the JVM to app/build/augment-differential/*.json.
@@ -14,6 +15,8 @@ unless --keep is given.
 afterwards; with --strict-errors two failures only agree when their error names are the same. The new layer's JVM
 tests write their cases to app/build/script-modules-device/ (expected values in "kt"), for example:
 py -3.12 -I tools/augment/device_eval.py -s SERIAL --cases app/build/script-modules-device --new-modules on --strict-errors
+--debug-print sets the master switch of the new layer's debug printing (appendix C Q4) the same way, and --console
+prints the console (GlobalConsole) and ScriptModules logcat lines written while the cases ran.
 """
 import argparse
 import json
@@ -32,6 +35,7 @@ RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
 MARK = "AJ6EVAL"
 SWITCH_KEY = "key_$_new_script_module_layer"
+DEBUG_PRINT_KEY = "key_$_script_module_debug_print"
 SWITCH_MARK = "AJ6SWITCH"
 
 RENDER_JS = r"""
@@ -93,11 +97,16 @@ def run_script(serial, remote, count, wait):
 
 def set_new_modules(serial, value):
     """Sets the hidden switch of the new script module layer (ROADMAP T8) and returns its previous value."""
+    return set_pref(serial, SWITCH_KEY, value, "new script module layer")
+
+
+def set_pref(serial, key, value, label):
+    """Sets the boolean preference [key] through Pref.putBooleanSync in a small script and returns its previous value."""
     lines = [
         "var pref = org.autojs.autojs.core.pref.Pref.INSTANCE;",
-        f"var before = pref.getBoolean('{SWITCH_KEY}', false);",
-        f"pref.putBooleanSync('{SWITCH_KEY}', {'true' if value else 'false'});",
-        f"console.log('{SWITCH_MARK} ' + before + ' ' + pref.getBoolean('{SWITCH_KEY}', false));",
+        f"var before = pref.getBoolean('{key}', false);",
+        f"pref.putBooleanSync('{key}', {'true' if value else 'false'});",
+        f"console.log('{SWITCH_MARK} ' + before + ' ' + pref.getBoolean('{key}', false));",
     ]
     local = HERE / "__pycache__" / "aj6_switch.js"
     local.parent.mkdir(exist_ok=True)
@@ -117,9 +126,24 @@ def set_new_modules(serial, value):
             before, after = line[start + len(SWITCH_MARK) + 1:].split()[:2]
             if after != ("true" if value else "false"):
                 sys.exit(f"the switch did not change: {line}")
-            print(f"new script module layer: {before} -> {after}")
+            print(f"{label}: {before} -> {after}")
             return before == "true"
     sys.exit("no switch output from the device")
+
+
+def device_epoch(serial):
+    return adb(serial, "shell", "date", "+%s", check=True).stdout.strip()
+
+
+def console_since(serial, epoch):
+    """GlobalConsole and ScriptModules logcat lines since [epoch] (device seconds), as "Tag/L: message"."""
+    out = adb(serial, "logcat", "-d", "-v", "epoch", "-T", f"{epoch}.000", "-s", "GlobalConsole", "ScriptModules").stdout
+    lines = []
+    for line in out.splitlines():
+        m = re.match(r"^\s*\d+\.\d+\s+\d+\s+\d+\s+([VDIWEF])\s+([^:]+?)\s*:\s?(.*)$", line)
+        if m:
+            lines.append(f"{m.group(2)}/{m.group(1)}: {m.group(3)}")
+    return lines
 
 
 def key_of(rendered):
@@ -145,6 +169,8 @@ def main():
     parser.add_argument("--wait", type=int, default=120)
     parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
     parser.add_argument("--strict-errors", action="store_true", help="two failures agree only with the same error name")
+    parser.add_argument("--debug-print", choices=["on", "off"], help="set the debug printing master switch for the run")
+    parser.add_argument("--console", action="store_true", help="print the console and ScriptModules lines of the run")
     args = parser.parse_args()
     # Device results may hold characters the console code page cannot show (a GBK console on Windows).
     sys.stdout.reconfigure(errors="backslashreplace")
@@ -161,9 +187,20 @@ def main():
     adb(args.serial, "push", str(local), remote, check=True)
     wanted = args.new_modules == "on"
     previous = set_new_modules(args.serial, wanted) if args.new_modules else None
+    wanted_debug = args.debug_print == "on"
+    previous_debug = set_pref(args.serial, DEBUG_PRINT_KEY, wanted_debug, "debug printing") if args.debug_print else None
+    started = device_epoch(args.serial)
     try:
         results = run_script(args.serial, remote, len(cases), args.wait)
+        if args.console:
+            print("--- console ---")
+            for line in console_since(args.serial, started):
+                if MARK not in line:
+                    print(line)
+            print("--- end of console ---")
     finally:
+        if previous_debug is not None and previous_debug != wanted_debug:
+            set_pref(args.serial, DEBUG_PRINT_KEY, previous_debug, "debug printing")
         if previous is not None and previous != wanted:
             set_new_modules(args.serial, previous)
         if not args.keep:

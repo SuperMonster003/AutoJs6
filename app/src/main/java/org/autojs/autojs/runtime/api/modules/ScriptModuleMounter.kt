@@ -49,6 +49,8 @@ class ScriptModuleMounter @JvmOverloads constructor(
     private val scope: VarScope,
     private val global: ScriptableObject,
     private val emitterFactory: EmitterFactory = EmitterFactory.DEFAULT,
+    /** Receives the debug entries of [ScriptErrorMapper]: the runtime's script console unless a test passes its own. */
+    private val debugConsole: ScriptErrorMapper.DebugConsole? = runtime?.let { r -> ScriptErrorMapper.DebugConsole { level, text -> r.console.println(level, text) } },
 ) {
 
     /** Creates the event emitter object appended to the prototype chain of `emitter = true` modules. */
@@ -125,7 +127,7 @@ class ScriptModuleMounter @JvmOverloads constructor(
     private inline fun <T> guarded(member: String, block: () -> T): T = try {
         block()
     } catch (e: Throwable) {
-        throw ScriptErrorMapper.map(e, member, member.removePrefix("new ").substringBefore('.'))
+        throw ScriptErrorMapper.map(e, member, member.removePrefix("new ").substringBefore('.'), debugConsole)
     }
 
     @Suppress("UNCHECKED_CAST")
