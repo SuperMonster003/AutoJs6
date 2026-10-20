@@ -57,10 +57,11 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 - 只有主脚本线程经 `LoopBasedJavaScriptEngine.destroy()` -> `LooperHelper.quitForThread(thread)` 正确移除.
 - 引用链: `LooperHelper.sLoopers` (静态) -> `Looper` -> `MessageQueue` -> `mIdleHandlers` -> `Loopers` -> `Loopers.scriptRuntime` -> `ScriptRuntime` 的全部 64 个字段 (引擎, 作用域, 定时器, 图像, UI, 插件桥接...). 对 UI 脚本还会经 `ScriptExecuteActivity` 钉住整个 Activity 与 View 树.
 - 结论: 每个用过 `threads.start()` 的脚本, 无论子线程正常结束还是被中断, 都整份留在堆里; 高频起线程 + `engines.execScriptFile` 重启自身的脚本 (issue #548 的用法) 线性累积直到 OOM. 修复在 P1.1.
+- 真机证据 (P0.2, 2026-10-20, XQ-AT72 API 31, versionCode 5620): 门禁 S2 正常结束模式 20 次全部残留. shark 给出的最短链经表的键 (已结束的线程对象): `LooperHelper.sLoopers (static) -> ConcurrentHashMap 节点 -> TimerThread.target -> RhinoUtils 回调 -> ScriptRuntime`; 忽略 `Thread.target` 的第二遍正是上面预测的链: `LooperHelper.sLoopers (static) -> ConcurrentHashMap 节点 -> Looper.mQueue -> MessageQueue.mIdleHandlers -> Loopers.scriptRuntime -> ScriptRuntime`. 报告见附录 A 的 S2 行.
 
 ### 1.3 可疑点清单 (待门禁验证)
 
-以下各项由代码阅读得出, 没有真机证据, 按 "门禁报出 -> shark 引用链 -> 修复" 的流程逐个确认或排除; 编号在第 5 节与附录 A 中引用.
+以下各项由代码阅读得出, 没有真机证据, 按 "门禁报出 -> shark 引用链 -> 修复" 的流程逐个确认或排除; 编号在第 5 节与附录 A 中引用. P0.5 修前基线 (附录 A) 的结论: 证实 H2 (S2 第二遍链经 `MessageQueue.mIdleHandlers`), H8 (S12), H15 (S2 F); 本轮未复现 H6 (S9), H7 (S11), H10 / H13 (S5 只有 H17 / H18 的单 runtime 残留), H3 (S8 无额外 runtime 残留, 生成类数量留给 P4.4); 新增 H17-H21 (门禁发现).
 
 | 编号 | 位置 | 证据 | 假设的引用链或后果 | 验证场景 (T2) |
 | --- | --- | --- | --- | --- |
@@ -79,6 +80,11 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 | H14 | 原生资源 | Bitmap (API 26+ 像素在原生堆, 随 Java 对象 GC 经 NativeAllocationRegistry 释放, 因此 Java 泄漏直接表现为原生增长), `core/opencv/Mat` (`finalize` 删头部, 数据引用计数), media `Image` (必须 `close()`, 否则 ImageReader 的 maxImages 用尽后 `captureScreen` 卡住, 即 #204 的现象), `AccessibilityNodeInfo` (API < 33 需 recycle), MediaProjection | 7 GB (#372) 与 `Bitmap.copy` OOM (#200) 都在这一层; `largeHeap=true` 只推迟 Java 堆 OOM | S4 系列, P3 |
 | H15 | `runtime/api/Threads.kt` | `mThreads` 为 WeakHashMap 键集, `threadPools: HashSet<ThreadPoolExecutor>` 由 `shutDownAll` 关闭; 池线程若进入过 Rhino Context 而未退出则回到 H4 | 池线程残留 | S2 (含 `threads.pool`) |
 | H16 | `core/accessibility/AccessibilityService` companion 总线 | 脚本回调按 owner id 由 `automator.removeAllEventsForThisRuntime()` 移除; 委托 / 观察者 / 按键监听 "故意比 service 实例活得久", 依赖 `events.recycle()` 等逐个清理; `scriptCallbackCount` 可作度量 | 任一类型漏清即钉住 runtime | S7, 度量总线计数回基线 |
+| H17 (门禁发现) | `core/accessibility/SimpleActionAutomator.kt` init + `AccessibilityService.defaultBridge` | 每个 runtime 创建 `SimpleActionAutomator` 时执行 `accessibilityBridge.tap = Tap { ... }`, lambda 捕获自身 (持 `scriptRuntime`), 而无障碍服务未运行时 bridge 是进程级静态 `defaultBridge` | `AccessibilityService.defaultBridge (static) -> AccessibilityBridgeImpl.tap -> SimpleActionAutomator 回调 -> SimpleActionAutomator.scriptRuntime -> ScriptRuntime`, 始终钉住最近启动的一个 runtime (约 1.5 MB); P0.5 四台全部场景都出现 | 全部场景 (N / F) |
+| H18 (门禁发现) | `runtime/api/augment/util/VersionCodesList.kt` (`VersionCodesInfo.obj = VersionCodesInfoGenerated.obj`) | 进程级 `NativeObject` 在第一个用到它的脚本中创建, 父作用域是该脚本的 TopLevelScope | `VersionCodesInfo.obj (static) -> NativeObject.parentScopeObject -> TopLevelScope.associatedValues -> ComposeJsErrors$Localizer -> Compose -> AndroidComposeScriptPlatform.runtime -> ScriptRuntime`, 钉住进程内第一个 runtime | 全部场景 (落在预热) |
+| H19 (门禁发现) | `core/web/WebSocket.kt` + okhttp `RealWebSocket` | 强制停止时 `CoreWebSocket.onExit` 未让读线程结束 (或未关闭连接), 读线程栈上的 `RealWebSocket` 仍持监听器 | `Thread<local> -> RealWebSocket.listener -> WebSocket$WebSocketMessageListener.this$0 -> WebSocket.mBridges -> ScriptBridges.engine -> LoopBasedJavaScriptEngine.mRuntime -> ScriptRuntime`; S10 F 在四台残留 16-20 / 20, 正常关闭 (N) 时不出现 | S10 F |
+| H20 (门禁发现, 崩溃) | `ScriptRuntime.onExit()` 释放顺序 (附录 B.3) | `ImageWrapper.recycleAll(this)` 在 `threads.shutDownAll()` 之前执行, 强制停止时子线程仍在用图像 | 不是泄漏而是 R2 所说的 "更早释放换更早崩溃": S4e F (4 个 `threads.start` 线程循环 `images.copy` + `findImage`) 在 XQ-AT72 上 5 次有 4 次 `SIGABRT: 'Error, cannot access an invalid/free'd bitmap here!'`, 栈为 `Spawn-N -> Images.copy -> ImageWrapper.clone -> Bitmap.copy` (`docs/memory/evidence/crash-XQ-AT72-5620-S4e-force-20261020.txt`), issue #200 的 "停止 / 启动后崩溃" 可能与此有关 | S4e F |
+| H21 (门禁发现, 待复核) | 线程栈局部变量 | S4b / S4c / S4d 的 F 模式在 23046RP50C 与 AVD 上偶有第 2 个残留, 根为某个 `TermSession$2` 线程的栈局部变量 | `TermSession$2<local> -> Message.callback -> LoopBasedJavaScriptEngine 回调 -> mRuntime -> ScriptRuntime`, 可能是暂态 (线程空闲时寄存器残留), 也可能是消息被别的线程取走后未释放 | S4b-S4d F |
 
 ### 1.4 现有诊断与测试基础设施 (可复用)
 
@@ -158,18 +164,27 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 
 ### P0 门禁与基线 (D3 / D6)
 
-- [ ] P0.1 (文档) 本文: 现状证据, 12 项决策, 派生决策, 红线, 阶段任务, 附录模板. 证据: 本文件.
-- [ ] P0.2 (测试) `RuntimeLeakGateDeviceTest` 骨架 (T3): 场景 S1 跑通 "预热 2 + 执行 20 -> GC -> WeakReference 断言 + 六项度量 (T1) -> JSON 报告"; `shark-android` 依赖与失败时的 hprof dump + 最短引用链解析 (T4); 用 S2 证明门禁有效 (修前预期失败, 报告中引用链应指向 `LooperHelper.sLoopers` -> `Loopers`, 作为 H1 的真机证据). 度量先以测试内的临时实现提供, P2.1 落地后切换到 `MemoryDiagnostics`.
+- [x] P0.1 (文档) 本文: 现状证据, 12 项决策, 派生决策, 红线, 阶段任务, 附录模板. 证据: 本文件 (`fc5d4ef3b`).
+- [x] P0.2 (测试) `RuntimeLeakGateDeviceTest` 骨架 (T3): 场景 S1 跑通 "预热 2 + 执行 20 -> GC -> WeakReference 断言 + 六项度量 (T1) -> JSON 报告"; `shark-android` 依赖与失败时的 hprof dump + 最短引用链解析 (T4); 用 S2 证明门禁有效 (修前预期失败, 报告中引用链应指向 `LooperHelper.sLoopers` -> `Loopers`, 作为 H1 的真机证据). 度量先以测试内的临时实现提供, P2.1 落地后切换到 `MemoryDiagnostics`.
+  - 证据 (E3): `b6f4763a6`, `app/src/androidTest/java/org/autojs/autojs/memory/` (`RuntimeLeakGateDeviceTest` 每个场景一个 `@Test`, `GateMetrics` 六项度量的临时实现, `GateHeapPathAnalyzer` shark 分析, `GateLoopbackServer` S10 回环服务, `scenarios/GateScenarios.kt` 场景脚本); `androidTestImplementation(libs.leakcanary.shark.android)` (2.14). XQ-AT72 API 31, versionCode 5620: S1 正常结束 20 次残留 1 (Java 堆 +0.04 MB, 原生 +0.03 MB, 线程 / Context / 引擎 0; 这 1 个不是噪声, 是静态 `defaultBridge` 钉住的最近一个 runtime, 见 1.3 H17, 因此 S1 在修 H17 / H18 之前不会通过), S2 正常结束 20/20 残留, 引用链见 1.2 H1 的真机证据; 报告 `docs/memory/evidence/gate-XQ-AT72-5620-baseline-20261020.md`.
+  - 实现要点: runtime 的弱引用在 `EngineLifecycleCallback.onEngineRemove` 取得 (经 `ScriptEngineService.registerEngineLifecycleCallback`, 本次运行创建的每个引擎都跟踪, S9 的子引擎也算); 已退出的 runtime 在 hprof 中以 `isExiting == true` 识别, 不需要对象身份映射; 最短链经 `Thread.target` 时再做一遍忽略该字段的分析, 给出第二条链. 设备端转储约 2 s, shark 分析约 8-15 s (XQ-AT72), 远低于 T4 的 60 s 推翻点, 因此保持设备端解析. Rhino Context 计数用反射读取 `AndroidContextFactory.mContextCount`, 未改宿主源码 (没有新增只读计数器). 每个场景与模式各用一个进程 (`run_gate.py`), 某个场景的泄漏不影响下一个场景的数值.
+  - 口径补充: 每次运行后最长轮询 10 s, 连续 3 次未回收后降为 1 s (控制时长), 场景结束时再统一回收一次判定 "残留"; Java / 原生堆增量为 "预热第 2 次结束" 到 "第 20 次结束" (均在强制回收后); 线程只数名含 `ScriptThread-` / `Spawn-` / `Pool-` / `Timer` / `ScreenCapturer` / `LooperThread` 的线程, 全部线程数另记不作判定. 脚本以 `exit()` 或被中断结束不算脚本错误; 强制停止触发后抛出的异常另记为 `stopErrors` (例: S3 F 偶发 `TimerCallbackRejectedException: ... its looper is exiting`), 不使场景变为 error.
 - [ ] P0.3 (测试) 场景矩阵 S1-S12 (T2) 全部实现, 每个场景两种模式; UI 脚本场景经 `ScriptExecuteActivity` 并等待 `onDestroy`; 截屏场景在首次运行时等待维护者授权, 之后复用.
-- [ ] P0.4 (工具) `tools/memory/run_gate.py` + `tools/memory/README.md` (T3): `am instrument` 驱动, 拉取 JSON, 生成 evidence markdown / json, `--hprof` 拉回; 复用 `tools/sdk37/physical_device.py`; 输出只保留每场景通过 / 失败与六项数值 (遵守 `device-testing.md`).
+  - 进度 (2026-10-20, `b6f4763a6`): 16 个场景 (S4 按附录 A 拆为 S4a-S4e) 全部实现于 `scenarios/GateScenarios.kt`, 每个场景一个 `@Test`, 两种模式; S5 经 `ScriptExecuteActivity` (`ExecutionConfig.intentFlags = NEW_TASK`), 以引擎在 `onDestroy` 中移除为结束; S9 跟踪 4 个引擎 (根 + 3 层 `engines.execScriptFile`); S10 用测试进程内的回环 HTTP / WebSocket 服务; S12 用 3-ImGui (唯一保留 `plugins.load` 注册表的官方插件), 未安装 / 未启用 / 未授权时跳过; S7 按宿主无障碍服务是否运行决定是否加入 `auto.registerEvent` / `events.observeKey`. 除 S4a 外的 15 个场景已在四台设备上跑完 (P0.5).
+  - 未完成: S4a 已实现但默认跳过 (`--capture on` 才运行). 现有代码每次运行都会重新申请 MediaProjection, "首次授权后复用" 不成立, 待附录 C Q3 拍板授权方式后在四台上补跑, 然后勾选本条.
+- [x] P0.4 (工具) `tools/memory/run_gate.py` + `tools/memory/README.md` (T3): `am instrument` 驱动, 拉取 JSON, 生成 evidence markdown / json, `--hprof` 拉回; 复用 `tools/sdk37/physical_device.py`; 输出只保留每场景通过 / 失败与六项数值 (遵守 `device-testing.md`).
+  - 证据 (E0): `8e7de1f71`, `b12bd2609` (设备占用防护, `--merge`, 崩溃日志保存); `tools/memory/run_gate.py` (每个场景与模式一个 `am instrument` 进程, 结果依次从 instrumentation status `aj6mem_json`, 设备上的 JSON 文件, logcat `AJ6MEM` 分段行读取; 报告名 `gate-<model>-<versionCode>[-<label>]-<yyyyMMdd>.md` / `.json`; `--hprof` 拉回 `docs/memory/evidence/hprof/` (目录 `.gitignore` 忽略全部内容); `--label`, `--capture`, `--wake`, `--no-analyze`), `tools/memory/test_run_gate.py` (解析, 合并与渲染, 6 项通过), `tools/memory/README.md`. `.gitignore` 的 `/tools/*` 增加 `tools/memory` 放行. 脚本不安装 APK, 不点屏幕, 不改设置.
 - [ ] P0.5 (基线) XQ-AT72, G8441, 23046RP50C 三台 + 本机 AVD API 24 跑完整矩阵, 结果填附录 A "修前基线" 列 (预期多个场景残留 > 0); 报告存 `docs/memory/evidence/gate-*-baseline-*.md`. 这一列永久保留.
-- [ ] P0.6 (工具) `tools/memory/static_audit.py`: 扫描 `app/src/main/java`, 输出 (a) 静态字段类型为 ScriptRuntime / ScriptEngine / Scriptable / Context / Activity / View / Fragment / Dialog 的清单, (b) `registerReceiver` / `bindService` / `.subscribe(` / `WebView(` / `addIdleHandler` / `Looper.prepare` / `ThreadLocal` 的文件及同文件是否出现对应释放调用, 写入 `docs/memory/evidence/static-audit-<date>.md`; 作为附录 B 初稿与 T8 白名单来源. 证据: 报告文件 + 本文附录 B 回填.
+  - 进度 (2026-10-20, 宿主 debug versionCode 5620, 证据 `7b06b5f45`): 四台都跑完 S1-S12 (S4a 除外) 两种模式, 报告 `gate-XQ-AT72-5620-baseline-20261020`, `gate-G8441-5620-baseline-20261020`, `gate-23046RP50C-5620-baseline-20261020`, `gate-Android_SDK_built_for_x86-5620-baseline-20261020` (`.md` / `.json`), 附录 A "修前基线" 列已按 XQ-AT72 填写并附四台差异. 结果: 30 个已运行的场景模式全部失败 (预期内), 线性泄漏 S2 / S3 / S4e / S12 / S10 F, 其余场景各残留 1 个 (H17 / H18); 新发现 H17-H21 写入 1.3. AVD 补装了官方 OpenCV 插件 v1.1.4 x86 (`images.findImage` 依赖它) 后重跑.
+  - 未完成: (1) S4a 四台待补 (附录 C Q3); (2) 23046RP50C 的 S12 F 缺失 (该机被其他会话占用, 见附录 A 说明), 需在该机空闲时 `run_gate.py -s 968e9f18 --label baseline --merge --scenarios S12 --mode force`; (3) S7 的无障碍部分待附录 C Q9. 三项补齐后勾选本条.
+- [x] P0.6 (工具) `tools/memory/static_audit.py`: 扫描 `app/src/main/java`, 输出 (a) 静态字段类型为 ScriptRuntime / ScriptEngine / Scriptable / Context / Activity / View / Fragment / Dialog 的清单, (b) `registerReceiver` / `bindService` / `.subscribe(` / `WebView(` / `addIdleHandler` / `Looper.prepare` / `ThreadLocal` 的文件及同文件是否出现对应释放调用, 写入 `docs/memory/evidence/static-audit-<date>.md`; 作为附录 B 初稿与 T8 白名单来源. 证据: 报告文件 + 本文附录 B 回填.
+  - 证据 (E0): `8e7de1f71` (`tools/memory/static_audit.py`), `7b06b5f45` (报告), 报告 `docs/memory/evidence/static-audit-20261020.md` (2642 个文件, HEAD `94c0b0d1e`). 结果: (a) 类型命中八类的进程级字段 12 个强引用 / 5 个弱引用, 其中真正持有脚本对象的只有 `RhinoUtils` 的三个原型 (进程级标准作用域, 白名单候选), 其余为按 `Class` 或函数类型的表; (c) 进程级注册表 42 个; (b) 未在同文件释放: `registerReceiver` 12 / 21 个文件, `bindService` 3 / 9, `.subscribe(` 42 / 55, WebView 创建 8 / 9, `ThreadLocal` 4 / 6, `addIdleHandler` 与 `Looper.prepare` 均成对 (但 H1 / H2 说明 "同文件有释放" 不等于 "每条路径都释放"). 摘要回填附录 B.1 / B.2. 门禁比静态审计多找到两处单 runtime 钉住 (H17 / H18, 见 1.3), 都不在八类类型清单内 (经 lambda 与 `NativeObject` 间接持有), 说明 T8 的源码守卫只能作补充.
 
 ### P1 已确认根因与 LeakCanary (D5 / D6)
 
 - [ ] P1.1 (宿主) H1 修复: `TimerThread.run()` 以 `finally` 调 `LooperHelper.quitForThread(currentThread())`, `interrupt()` 改走 `quitForThread`; `LooperHelper.sLoopers` 在 `quit(looper)` 时按值移除, 并改为弱引用键 (T7) 兜底; `Loopers.recycle()` 对所有登记过 IdleHandler 的线程队列移除 (登记时记录队列的弱引用), 或 IdleHandler 改为只持 `WeakReference<Loopers>` 的静态内部类 (二选一, 以门禁 S2 / S3 / S9 两种模式转绿为准). changelog: 改写 6.8.0 "(试修)" 条目 (R5). 证据: S2 / S3 / S9 修前修后报告, LeakCanary 截图或文本.
 - [ ] P1.2 (宿主) LeakCanary debug 默认启用 + ObjectWatcher 挂点 + 开发者选项开关 (T5); `LeakCanarySetup` 直接依赖; debug StrictMode 增加泄漏检测项 (1.4); 验证: 用 P1.1 之前的构建跑 S2, LeakCanary 报出 `Loopers` 引用链 (证据截图), P1.1 之后不报. 同时核对 inrt debug 变体的行为 (附录 C Q6).
-- [ ] P1.3 (宿主) P0.5 基线中其余残留场景逐个修复, 每个修复一条子项 `P1.3.x`, 记录: 场景, shark 引用链摘要 (类名.字段 链), 改动文件, 提交 hash, 修后报告. 预计涉及 H2 (IdleHandler 异常路径), H5 (ScreenCapturer 线程与回调), H6 (全局执行监听器), H10 (UI 脚本 WebView `destroy()`), H13 (UI 脚本作用域), H16 (无障碍总线). 不在此处做结构性改动 (留给 P4), 只断链.
+- [ ] P1.3 (宿主) P0.5 基线中其余残留场景逐个修复, 每个修复一条子项 `P1.3.x`, 记录: 场景, shark 引用链摘要 (类名.字段 链), 改动文件, 提交 hash, 修后报告. 预计涉及 H2 (IdleHandler 异常路径), H5 (ScreenCapturer 线程与回调), H6 (全局执行监听器), H10 (UI 脚本 WebView `destroy()`), H13 (UI 脚本作用域), H16 (无障碍总线). P0.5 后确定要做的: H17 (`defaultBridge.tap`), H18 (`VersionCodesInfo.obj`), H8 (`plugins.load` 的绑定在 onExit 解绑), H15 (强制停止时关闭 `threads.pool`), H19 (强制停止时关闭 WebSocket 并结束读线程), H20 (onExit 先停子线程再回收图像, 或回收前等待子线程结束; 属于崩溃修复, 优先级最高), H21 (先复核). 不在此处做结构性改动 (留给 P4), 只断链.
 - [ ] P1.4 (基线) 三台真机 + AVD 复测, 附录 A 新增 "P1 后" 列; 完成条件: 全部场景两种模式 "残留 runtime" 为 0, Java 堆增量达标; 原生列允许仍有失败 (留给 P3) 但要记编号.
 
 ### P2 开发者选项 "内存诊断" 页面 (D8 / T10)
@@ -216,24 +231,33 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 
 | 场景 | 模式 | 修前基线 (P0.5) | P1 后 | P3 后 | P4 后 | 终表 (P6.2) |
 | --- | --- | --- | --- | --- | --- | --- |
-| S1 空脚本 | N / F | | | | | |
-| S2 threads.start + pool | N / F | | | | | |
-| S3 timers 嵌套 | N / F | | | | | |
-| S4a captureScreen 连续 | N / F | | | | | |
-| S4b read + findImage | N / F | | | | | |
-| S4c copy / clip / resize | N / F | | | | | |
-| S4d matchTemplate + oneShot | N / F | | | | | |
-| S4e #372 / #200 复现 | N / F | | | | | |
-| S5 UI 脚本 + webview | N / F | | | | | |
-| S6 floaty | N / F | | | | | |
-| S7 事件 / 按键 / 传感器 | N / F | | | | | |
-| S8 JavaAdapter + loadDex | N / F | | | | | |
-| S9 execScriptFile 重启 | N / F | | | | | |
-| S10 http + websocket | N / F | | | | | |
-| S11 device 接收器 | N / F | | | | | |
-| S12 plugins 绑定 | N / F | | | | | |
+| S1 空脚本 | N / F | N `1 / +0.04 / +0.03 / +0 / +0 / 0`; F `1 / +0.04 / +0.02 / +0 / +0 / 0` (单 runtime 钉住 (H17 最近一个 + H18 第一个, 预热里那次计入 retainedWarmups)) | | | | |
+| S2 threads.start + pool | N / F | N `20 / +30.18 / +0.44 / +0 / +0 / 0`; F `20 / +30.21 / +0.88 / +44 / +44 / 0` (H1 (N, 第二遍链经 Looper.mQueue -> mIdleHandlers -> Loopers); F 另有 44 个池线程与 Rhino Context 存活 (H15)) | | | | |
+| S3 timers 嵌套 | N / F | N `20 / +29.23 / +0.36 / +0 / +0 / 0`; F `20 / +29.32 / +0.39 / +0 / +0 / 0` (H1; F 偶发 stopErrors `TimerCallbackRejectedException`) | | | | |
+| S4a captureScreen 连续 | N / F | 跳过 (跳过, 待附录 C Q3) | | | | |
+| S4b read + findImage | N / F | N `1 / +0.04 / -0.67 / +0 / +0 / 0`; F `1 / +0.04 / -2.47 / +0 / +0 / 0` | | | | |
+| S4c copy / clip / resize | N / F | N `1 / +0.04 / -0.81 / +0 / +0 / 0`; F `1 / +0.04 / -0.31 / +0 / +0 / 0` | | | | |
+| S4d matchTemplate + oneShot | N / F | N `1 / +0.04 / -1.29 / +0 / +0 / 0`; F `1 / +0.03 / -5.93 / +0 / +0 / 0` | | | | |
+| S4e #372 / #200 复现 | N / F | N `20 / +29.59 / -5.80 / +0 / +0 / 0`; F `20 / +29.82 / -3.48 / +0 / +0 / 0` (H1; F 5 次中 4 次原生崩溃 (H20, `crash-XQ-AT72-5620-S4e-force-20261020.txt`), 表中为第 5 次的完整结果) | | | | |
+| S5 UI 脚本 + webview | N / F | N `1 / +0.06 / -0.20 / +0 / +0 / 0`; F `1 / +0.05 / -0.20 / +0 / +0 / 0` (只有 H17 / H18) | | | | |
+| S6 floaty | N / F | N `1 / +0.06 / +0.09 / +0 / +0 / 0`; F `1 / +0.06 / +0.09 / +0 / +0 / 0` | | | | |
+| S7 事件 / 按键 / 传感器 | N / F | N `1 / +0.04 / +0.03 / +0 / +0 / 0`; F `1 / +0.04 / +0.04 / +0 / +0 / 0` (未启用无障碍部分 (附录 C Q9)) | | | | |
+| S8 JavaAdapter + loadDex | N / F | N `1 / +0.04 / -0.37 / +0 / +0 / 0`; F `1 / +0.04 / -0.45 / +0 / +0 / 0` (无额外 runtime 残留; 生成类数量留给 P4.4 看 hprof) | | | | |
+| S9 execScriptFile 重启 | N / F | N `1 / +0.08 / +0.01 / +0 / +0 / 0`; F `1 / +0.08 / +0.03 / +0 / +0 / 0` (无额外残留 (H6 未复现)) | | | | |
+| S10 http + websocket | N / F | N `1 / +0.08 / +0.07 / +0 / +0 / 0`; F `19 / +26.90 / +0.69 / +0 / +0 / 0` (F: 19/20 经 okhttp `RealWebSocket` 读线程局部变量钉住 (H19)) | | | | |
+| S11 device 接收器 | N / F | N `1 / +0.10 / +0.03 / +0 / +0 / 0`; F `1 / +0.09 / +0.04 / +0 / +0 / 0` (无额外残留 (H7 未复现)) | | | | |
+| S12 plugins 绑定 | N / F | N `20 / +53.47 / +0.34 / +0 / +0 / 0`; F `20 / +53.56 / +0.35 / +0 / +0 / 0` (H8: `LoadedApk$ServiceDispatcher.mConnection -> Plugin.pluginInstance -> ImGuiPluginConnection.runtime`, 每次约 2.7 MB) | | | | |
 
 设备: XQ-AT72 (API 31) 主表; G8441 (API 28), 23046RP50C (API 35), AVD API 24 各一份同结构表 (放在 evidence 报告中, 本表只记 XQ-AT72 与差异备注).
+
+修前基线 (P0.5, 2026-10-20, 宿主 debug versionCode 5620, 预热 2 + 计数 20, 两种模式): 主表报告 `gate-XQ-AT72-5620-baseline-20261020.md` / `.json`; 其余 `gate-G8441-5620-baseline-20261020.*`, `gate-23046RP50C-5620-baseline-20261020.*`, `gate-Android_SDK_built_for_x86-5620-baseline-20261020.*` (AVD_API_24, x86). 四台共同结论:
+
+- 没有一个场景通过: 每个场景至少残留 1 个 runtime (H17 钉住最近一个, H18 钉住第一个, 后者落在预热里), Java 堆增量 0.03-0.17 MB, 说明单 runtime 钉住之外的噪声很小, T1 的 2 MB 阈值不需要调.
+- 线性泄漏 (20/20, 每个 runtime 约 1.5 MB Java 堆, 20 次 +29 至 +31 MB): S2 / S3 / S4e 两种模式 (H1), S12 两种模式 (H8, 约 2.7 MB / 次, 20 次 +53 MB; AVD 上只有 1 个残留, 该机 3-ImGui 未走 `bindService` 路径, 待 P1.3 核对), S10 强制停止 (H19, XQ-AT72 19/20, G8441 17/20, 23046RP50C 19/20, AVD 20/20).
+- S2 强制停止四台都是线程 +44 / Rhino Context +44 (每次 2 个池核心线程留在 `sleep` 中且已进入 Context, H15); 其余场景线程与 Context 回到开始前, 只有 23046RP50C 的 S5 / S6 多 1 个脚本线程 (待查).
+- 原生堆: XQ-AT72 与 23046RP50C 在 +-1 MB 内 (图像场景常为负, 位图在原生堆释放), G8441 (低内存) 0.7-3.4 MB 正向波动, AVD S12 F +9.99 MB 为唯一超 4 MB 的格; 附录 C Q1 维持 "不放宽".
+- 强制停止的副作用: S3 / S6 / S8 / S12 的 F 模式偶发 `TimerCallbackRejectedException: Unable to schedule a timer callback because its looper is exiting` (记为 stopErrors, 不影响判定); S4b / S4c / S4d 的 F 模式在 23046RP50C 与 AVD 上偶有第 2 个残留, 链为 `TermSession$2<local> -> Message.callback -> LoopBasedJavaScriptEngine 回调 -> mRuntime` (线程栈局部变量, 待复核是否只是暂态); S4e F 在 XQ-AT72 上 5 次有 4 次进程原生崩溃 (H20), 其余三台本次未崩.
+- 覆盖缺口: S4a 四台都跳过 (附录 C Q3); S7 未启用无障碍部分 (Q9); 23046RP50C 的 S12 F 缺失: 该机在基线期间 3 次被其他会话重装宿主或测试 APK (16:53, 17:19, 约 17:48; 之后该机断开 adb), S6-S12 改为补跑并以 `--merge` 合并, 最后一次补跑在 S12 F 中途被打断. `run_gate.py` 因此增加了设备占用防护 (开始前有其他 `am instrument` 就等待, 运行中宿主或测试 APK 被替换就停止并标记).
 
 ---
 
@@ -252,10 +276,34 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 | `engine/ScriptEngineService` 全局执行监听器 | List (强) | 10 注册 / 4 注销 | 成对或执行级 | P4.2 |
 | `engine/ScriptEngineManager.mGlobalVariableMap` | name -> Object | 只有 "context" (Application) | 保持 | - |
 | `app/GlobalAppContext` | Application + 主线程 Handler | 进程级 | 白名单 | - |
+| `core/accessibility/AccessibilityService.defaultBridge` (P0.5 门禁发现) | 进程级默认 `AccessibilityBridgeImpl`, 其 `tap` 由每个脚本的 `SimpleActionAutomator` 初始化时写入 | 强引用最近一个 runtime (H17), 每个场景残留 1 | `tap` 改为按 runtime 登记并在 onExit 撤销, 或只持弱引用 | P1.3 |
+| `runtime/api/augment/util/VersionCodesInfo.obj` (P0.5 门禁发现) | 进程级 `NativeObject`, 父作用域为首次访问它的脚本的 TopLevelScope | 强引用第一个 runtime (H18) | 在进程级标准作用域中创建, 或按 runtime 缓存 | P1.3 |
+| `core/console/ConsoleImpl.sShowingConsoles` | `CopyOnWriteArraySet<ConsoleImpl>` (强) | 显示中加入, 隐藏时移除 | 门禁加 "控制台悬浮窗显示后结束" 场景再定 | P4.2 |
+| `core/web/WebSocket.instances` | `ArrayList<WeakReference<WebSocket>>` | 值为弱引用, 列表本身只增不减 (留下已清除的弱引用) | onExit 时顺带清理已清除的项 | P4.2 |
+| `runtime/api/augment/shell/Shell.runtimeDefaults` | `synchronizedMap(WeakHashMap<ScriptRuntime, ...>)` | 已弱 | 保持 | - |
+| `runtime/api/ScriptToast.queue` | `ArrayDeque<ToastTask>` (只含消息与 owner id 字符串) | 不持 runtime | 保持 | - |
+| `runtime/api/Plugins.packages` | packageName -> 插件 `Package` (进程级) | 不持 runtime; 脚本侧绑定见 H8 | 保持 | - |
+| `engine/RuntimeWebActionActivity.actions / grants / captures`, `RuntimeWebLocalDownloads.active`, `RuntimeWebMediaService.entries` | 字符串 id -> 会话对象 (强) | 未核对按脚本清理 | 逐个核对, 必要时按 owner id 清理 | P4.2 |
+| `util/RhinoUtils.objectPrototype / arrayPrototype / functionPrototype` | 进程级标准作用域的原型 (强 `Scriptable`) | 不属于任何脚本 | 白名单 (T8) | - |
 
 ### B.2 配对清单 (登记 -> 释放)
 
-由 `static_audit.py` 生成, 每行: 文件, 登记调用, 同文件释放调用, 归属 (进程级 / 按脚本 / 按页面), 处置. 初稿见 1.3 的 H7 / H8 / H9 / H10 列表.
+由 `static_audit.py` 生成 (完整表见 `docs/memory/evidence/static-audit-20261020.md`), 这里只列按脚本创建或门禁已证实的项; 归属按包路径推断, 已人工复核过 "处置" 一列.
+
+| 文件 | 登记 -> 同文件释放 | 归属 | 门禁 / 复核结论 | 处置阶段 |
+| --- | --- | --- | --- | --- |
+| `core/looper/LooperHelper.java` | `Looper.prepare` 1 -> quit 3 | 按脚本 | 释放路径不覆盖 `threads.start` 子线程 (H1, S2 / S3 / S4e 证实) | P1.1 |
+| `core/looper/Loopers.kt` | `addIdleHandler` 1 -> `removeIdleHandler` 1; `ThreadLocal` 6 -> `remove()` 0 | 按脚本 | IdleHandler 只从主脚本线程队列移除 (H2, S2 第二遍链经 `MessageQueue.mIdleHandlers`); 6 个 ThreadLocal 由 Loopers 实例持有, UI 脚本的值落在主线程的 ThreadLocalMap 中, 待门禁确认 | P1.1 / P1.3 |
+| `runtime/api/Plugins.kt` | `bindService` 3 -> `unbindService` 0 | 按脚本 | H8 证实: S12 经 `LoadedApk$ServiceDispatcher.mConnection -> Plugin.pluginInstance -> ImGuiPluginConnection.runtime -> PluginRuntime.topLevelScope` 钉住 runtime | P1.3 |
+| `runtime/api/tts/AndroidTtsBackend.kt` | `bindService` 2 -> 0 | 按脚本 | 实为 `TextToSpeech` 构造与 `shutdown()` (由 TextToSpeech 内部解绑), 文本扫描误报, 待 TTS 场景确认 | P4.2 |
+| `core/plugin/PluginAutoWake.kt` | `bindService` 2 -> 0 | 进程级 | 唤醒用的短绑定, 进程级可接受, P4.2 复核 | P4.2 |
+| `runtime/api/Device.java` | `registerReceiver` 1 -> 0 | 按脚本 | `registerReceiver(null, ...)` 读粘性广播, 排除 (H7) | - |
+| 其余 `registerReceiver` 11 个文件 (`AutoJs.kt`, `McpServerTool`, `ThreeStoveAgentConnectionOwner`, `PluginLauncherIconController`, 4 个 `*PluginStateMonitor`, `PythonHostCapabilityBroker`, `NodeBridgeDeviceInfo`, `NodeJsRuntimePluginHost`, `DeviceUtils`) | -> 0 | 进程级 | 与 H7 清单一致, 均为进程级单例; S11 未见接收器相关残留 | P4.2 复核 |
+| `core/accessibility/AccessibilityService.kt`, `AccessibilityTool.kt`, `KeyInterceptor.kt`, `OnKeyListener.kt`, `event/A11yEventPulse.kt`, `core/record/GlobalActionRecorder.java`, `runtime/api/augment/terminal/TerminalSessionNativeObject.kt`, `runtime/api/augment/toolkit/RuntimeToolkit.kt` | `.subscribe(` -> dispose 0 | 按脚本 | H9 / H16; 门禁 S7 暂未启用无障碍部分 (附录 C Q9) | P1.3 / P4.2 |
+| `core/web/InjectableWebClient.java`, `engine/RuntimeViewComponents.kt`, `runtime/api/augment/web/Web.kt`, `core/ui/inflater/inflaters/JsWebViewInflater.kt` / `WebViewInflater.kt`, `core/ui/widget/EventWebView.kt` | WebView 创建 -> `destroy()` 0 | 按脚本 | H10; S5 (UI 脚本 + webview) 的结果见附录 A | P1.3 |
+| `ui/doc/DocumentationPageController.kt`, `ui/widget/NestedWebView.java` | WebView 创建 -> `destroy()` 0 | 按页面 | 非脚本路径, 留给 P4.5 LeakCanary 巡检 | P4.5 |
+| 其余 `.subscribe(` 34 个文件 (`ui/`, `timing/TimedTaskManager.kt`, `network/UpdateChecker.java`, `pluginclient/` 等) | -> dispose 0 | 按页面 / 进程级 | 大多是一次性 `Observable` (完成即释放), P4.5 巡检时逐个确认 | P4.5 |
+| `engine/RuntimeJavaSession.kt`, `runtime/api/augment/installer/InstallerPromises.kt`, `runtime/api/augment/terminal/TerminalPromises.kt` | `ThreadLocal` -> `remove()` 0 | 按脚本 | 待对应模块的门禁场景 | P4.2 |
 
 ### B.3 `ScriptRuntime.onExit()` 现有释放顺序 (P4.1 迁移时保持)
 
@@ -270,6 +318,8 @@ images.cancelPendingQuantizations -> console.onRuntimeExit -> CoreWebSocket.onEx
 | Q1 | G8441 (API 28, 低内存) 上 T1 的 Java 堆 / 原生堆阈值是否放宽 | P0.5 之后 | 不放宽 (a) 的 0 残留, 其余按噪声 +50% |
 | Q2 | `memory` 模块写旧 augment 包 (`augment/memory/Memory.kt`) 还是直接写新脚本模块层 (`runtime/api/modules`, augment 路线图 P1.2 的 KSP 层, 当前隐藏开关默认关) | P5.1 之前 | 旧包新文件 (开关关时也可用); 若届时新层已默认开则写新层 |
 | Q3 | 门禁场景 S4 的截屏授权: debug 构建是否加一个 "测试用授权缓存" 开发者选项, 避免每次人工点 | P0.3 | 加 (仅 debug, 默认关) |
+| | P0.3 补充 (2026-10-20): S4a 每次运行都是新的 runtime, 脚本结束时 `images.releaseScreenCapturer()` 释放 MediaProjection, 所以 "授权一次后复用" 在现有代码里不成立 (每次运行都会弹系统授权框, 一台设备 44 次); API 34 起系统也禁止重用同一授权结果, 宿主侧缓存只对 API 33 及以下有效. 可选: (a) 门禁期间用 `adb shell appops set org.autojs.autojs6 PROJECT_MEDIA allow` 让系统跳过授权框, 跑完恢复为 `default` (不改宿主代码, 对 API 24-35 都有效, 但这是设备上的授权设置, 须维护者同意); (b) 按原倾向加 debug 授权缓存 (宿主改动, 只覆盖 API <= 33); (c) 维护者逐次点击. S4a 已实现, 默认跳过 (`--capture on` 才运行) | P0.3 (待维护者) | (a) |
+| Q9 | S7 的按键监听 (`events.observeKey`) 与无障碍事件 (`auto.registerEvent`) 需要宿主自身的无障碍服务; 四台门禁设备上都只开着 AutoJs4 Runtime 插件的无障碍服务, 宿主的未开启, 因此基线 S7 只覆盖 `events.on` / `events.emitter` / `sensors`. 是否请维护者在 XQ-AT72 上开启宿主无障碍服务后补跑 S7 | P0.5 (待维护者) | 补跑 (XQ-AT72 一台即可, G8441 留给 P3.4) |
 | Q4 | issue #474 (Shizuku 僵尸进程 OOM) 是否纳入本路线图 | P6 | 不纳入, 单独立项 |
 | Q5 | 第二期: Node / Bun / Lua / Python / QuickJS 插件引擎在宿主进程内的桥接对象 (`engine/NodeBridge*` 约 60 个文件) 的门禁场景 | P6.4 | 另开路线图, 复用本文门禁框架 |
 | Q6 | inrt debug 变体是否也默认包含 LeakCanary | P1.2 | 包含 (同一 gradle 属性) |
@@ -310,11 +360,14 @@ fork 位置 `D:/idea-projects/Rhino-For-AutoJs6` (基线 `90693268c`, 2026-10-20
 | `docs/memory/evidence/gate-<model>-<versionCode>-<date>.md` / `.json` | 门禁报告 | P0.5 起 |
 | `docs/memory/evidence/static-audit-<date>.md` | 静态审计报告 | P0.6 |
 | `docs/memory/evidence/hprof/` (gitignore) | 拉回的 hprof | P0.2 |
-| `tools/memory/run_gate.py`, `README.md` | 门禁驱动 | P0.4 |
+| `tools/memory/run_gate.py`, `test_run_gate.py`, `README.md` | 门禁驱动与其单元测试 | P0.4 |
 | `tools/memory/static_audit.py` | 源码静态审计 | P0.6 |
+| `app/src/androidTest/java/org/autojs/autojs/memory/GateMetrics.kt` | 六项度量的临时实现 (P2.1 后改用 `MemoryDiagnostics`) | P0.2 |
+| `app/src/androidTest/java/org/autojs/autojs/memory/GateHeapPathAnalyzer.kt` | shark 最短引用链 (含忽略 `Thread.target` 的第二遍) | P0.2 |
+| `app/src/androidTest/java/org/autojs/autojs/memory/GateLoopbackServer.kt` | S10 的回环 HTTP / WebSocket 服务 | P0.3 |
 | `tools/memory/device_diagnostics_page.py` | 诊断页面截图 | P2.2 |
 | `app/src/androidTest/java/org/autojs/autojs/memory/RuntimeLeakGateDeviceTest.kt` | 门禁测试 | P0.2 |
-| `app/src/androidTest/java/org/autojs/autojs/memory/scenarios/*.js` (或 Kotlin 字符串) | 场景脚本 | P0.3 |
+| `app/src/androidTest/java/org/autojs/autojs/memory/scenarios/GateScenarios.kt` | 场景脚本 (Kotlin 字符串, ES5) | P0.3 |
 | `app/src/main/java/org/autojs/autojs/runtime/memory/MemoryDiagnostics.kt` | 诊断数据源 | P2.1 |
 | `app/src/main/java/org/autojs/autojs/ui/settings/memory/MemoryDiagnosticsActivity.kt` | 诊断页面 | P2.2 |
 | `app/src/main/java/org/autojs/autojs/runtime/resource/RuntimeResourceScope.kt` | 统一所有权 | P4.1 |
