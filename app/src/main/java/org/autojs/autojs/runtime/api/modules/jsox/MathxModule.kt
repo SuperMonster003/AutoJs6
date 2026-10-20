@@ -10,6 +10,7 @@ import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.Wrapper
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.ln
@@ -207,16 +208,8 @@ object MathxModule {
     private fun minOfValues(values: List<Double>): Double = values.fold(Double.POSITIVE_INFINITY) { acc, x -> Math.min(acc, x) }
 
     private fun randomIntOf(function: String, range: Array<out Any?>): Double {
-        val values = JsoxValues.flatten(range.asList().dropLastWhile { Undefined.isUndefined(it) })
-        return when (values.size) {
-            0 -> randomIntIn(MIN_SAFE_INTEGER, MAX_SAFE_INTEGER, function)
-            1 -> single(function, values[0], range).let { n -> if (n > 0) randomIntIn(0.0, n, function) else randomIntIn(n, 0.0, function) }
-            else -> {
-                val numbers = values.map { JsoxValues.toNumber(it) }.filterNot { it.isNaN() }
-                if (numbers.isEmpty()) throw JsoxValues.rangeError(function, ScriptMessages.argumentNoNumber("range"))
-                randomIntIn(numbers.min(), numbers.max(), function)
-            }
-        }
+        val bounds = rangeOf(function, range) ?: return randomIntIn(MIN_SAFE_INTEGER, MAX_SAFE_INTEGER, function)
+        return randomIntIn(bounds[0], bounds[1], function)
     }
 
     private fun randomIntIn(low: Double, high: Double, function: String): Double {
@@ -227,16 +220,50 @@ object MathxModule {
     }
 
     private fun randomFloatOf(function: String, range: Array<out Any?>): Double {
-        val values = JsoxValues.flatten(range.asList().dropLastWhile { Undefined.isUndefined(it) })
-        return when (values.size) {
-            0 -> Math.random()
-            1 -> single(function, values[0], range).let { n -> if (n > 0) randomFloatIn(0.0, n) else randomFloatIn(n, 0.0) }
-            else -> {
-                val numbers = values.map { JsoxValues.toNumber(it) }.filterNot { it.isNaN() }
-                if (numbers.isEmpty()) throw JsoxValues.rangeError(function, ScriptMessages.argumentNoNumber("range"))
-                randomFloatIn(numbers.min(), numbers.max())
+        val bounds = rangeOf(function, range) ?: return Math.random()
+        return randomFloatIn(bounds[0], bounds[1])
+    }
+
+    /**
+     * The bounds of a random range: null without values (trailing `undefined` arguments count as omitted), [0, n] or
+     * [n, 0] for a single number, otherwise the smallest and the largest number with NaN left out. Arguments that are all
+     * plain values (the usual `randomInt(min, max)`; no arrays, collections or Java objects) are read without flattening or
+     * intermediate lists.
+     */
+    private fun rangeOf(function: String, range: Array<out Any?>): DoubleArray? {
+        var n = range.size
+        while (n > 0 && Undefined.isUndefined(range[n - 1])) n--
+        var plain = true
+        for (i in 0 until n) {
+            val v = range[i]
+            if (v is NativeArray || v is Wrapper || v is Iterable<*> || v is Array<*>) {
+                plain = false
+                break
             }
         }
+        val values = if (plain) range.asList().subList(0, n) else JsoxValues.flatten(range.asList().subList(0, n))
+        when (values.size) {
+            0 -> return null
+            1 -> {
+                val x = single(function, values[0], range)
+                return if (x > 0) doubleArrayOf(0.0, x) else doubleArrayOf(x, 0.0)
+            }
+        }
+        var min = Double.NaN
+        var max = Double.NaN
+        for (v in values) {
+            val d = if (v is Number) v.toDouble() else JsoxValues.toNumber(v)
+            if (d.isNaN()) continue
+            if (min.isNaN()) {
+                min = d
+                max = d
+            } else {
+                min = Math.min(min, d)
+                max = Math.max(max, d)
+            }
+        }
+        if (min.isNaN()) throw JsoxValues.rangeError(function, ScriptMessages.argumentNoNumber("range"))
+        return doubleArrayOf(min, max)
     }
 
     private fun randomFloatIn(min: Double, max: Double): Double = Math.random() * (max - min) + min

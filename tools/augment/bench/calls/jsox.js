@@ -2,6 +2,8 @@
 // device_bench.py --calls jsox. With the switch of the new script module layer on they reach the new modules, with it
 // off the old augment ones. "ok" cases succeed; the other cases fail with an argument error (arity, type, range) or a
 // RangeError of the implementation, compared with the "ref" cases of the prelude (Rhino's own errors).
+// What Mathx.sum-fraction adds to Mathx.sum (the old Kotlin module skipped the rounding, ROADMAP appendix E), in Rhino.
+time("ref rhino-sum-toFixed", () => { try { Number((1.111 + 2.222).toFixed(1)); } catch (e) { } });
 time("ok Mathx.sum", () => { try { Mathx.sum([1, 2, 3]); } catch (e) { } });
 time("ok Mathx.sum-fraction", () => { try { Mathx.sum([1.111, 2.222], 1); } catch (e) { } });
 time("ok Mathx.randInt", () => { try { Mathx.randInt(1, 10); } catch (e) { } });
