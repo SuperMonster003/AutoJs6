@@ -2,7 +2,7 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-20",
  "git": {
-  "commit": "218ea2f45",
+  "commit": "665c35482",
   "branch": "master",
   "dirtyScannedFiles": 0
  },
@@ -118,7 +118,10 @@
      "file": "ui/main/drawer/DrawerFragment.kt",
      "line": 230
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "抽屉 \"无障碍服务\" 开关的镜像, DrawerMenuToggleableItem.sync() 按服务实际状态回写"
   },
   {
    "name": "key_a11y_service_manager_control_level",
@@ -134,7 +137,10 @@
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
      "line": 312
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "无障碍服务管理器对话框的展开级别"
   },
   {
    "name": "key_a11y_service_manager_settings_collapsed",
@@ -146,7 +152,10 @@
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
      "line": 180
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器设置区折叠状态"
   },
   {
    "name": "key_a11y_service_manager_status_level",
@@ -162,7 +171,10 @@
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
      "line": 293
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器状态区展开级别"
   },
   {
    "name": "key_about_app_and_developer",
@@ -182,7 +194,9 @@
       "关于"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (打开关于页), 不持久化值"
   },
   {
    "name": "key_about_app_tips",
@@ -202,7 +216,9 @@
       "关于"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (提示对话框), 不持久化值"
   },
   {
    "name": "key_ace_custom_scrollbar_enabled",
@@ -239,7 +255,10 @@
      "line": 22,
      "const": "KEY_CUSTOM_SCROLLBAR_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ace_editor_font",
@@ -284,37 +303,51 @@
      "line": 7,
      "const": "KEY_ACE_EDITOR_FONT"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "字体 id; 字体未安装时作为部署项下载 (D20 / Q2)",
+   "deployment": "DOWNLOAD_EDITOR_FONT"
   },
   {
    "name": "key_ace_editor_font_cascadia_code",
    "value": "cascadia_code",
    "file": "strings_donottranslate.xml",
-   "line": 89
+   "line": 89,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_editor_font_fira_code",
    "value": "fira_code",
    "file": "strings_donottranslate.xml",
-   "line": 90
+   "line": 90,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_editor_font_hack",
    "value": "hack",
    "file": "strings_donottranslate.xml",
-   "line": 91
+   "line": 91,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_editor_font_ibm_plex_mono",
    "value": "ibm_plex_mono",
    "file": "strings_donottranslate.xml",
-   "line": 92
+   "line": 92,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_editor_font_intel_one_mono",
    "value": "intel_one_mono",
    "file": "strings_donottranslate.xml",
-   "line": 93
+   "line": 93,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_editor_font_iosevka",
@@ -323,31 +356,41 @@
    "line": 94,
    "defaultOf": [
     "default_key_ace_editor_font"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, `default_key_ace_editor_font` 的目标"
   },
   {
    "name": "key_ace_editor_font_iosevka_slab",
    "value": "iosevka_slab",
    "file": "strings_donottranslate.xml",
-   "line": 95
+   "line": 95,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_editor_font_jetbrains_mono",
    "value": "jetbrains_mono",
    "file": "strings_donottranslate.xml",
-   "line": 96
+   "line": 96,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_editor_font_source_code_pro",
    "value": "source_code_pro",
    "file": "strings_donottranslate.xml",
-   "line": 97
+   "line": 97,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_editor_font_system_monospace",
    "value": "system_monospace",
    "file": "strings_donottranslate.xml",
-   "line": 98
+   "line": 98,
+   "kind": "ValueConstant",
+   "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_ace_font_ligatures_enabled",
@@ -384,7 +427,10 @@
      "line": 15,
      "const": "KEY_FONT_LIGATURES_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ace_font_styles_enabled",
@@ -421,7 +467,10 @@
      "line": 16,
      "const": "KEY_FONT_STYLES_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ace_highlight_indent_guides_enabled",
@@ -458,7 +507,10 @@
      "line": 20,
      "const": "KEY_HIGHLIGHT_INDENT_GUIDES_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ace_indent_guides_enabled",
@@ -495,7 +547,10 @@
      "line": 11,
      "const": "KEY_INDENT_GUIDES_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ace_inline_completion_preview_enabled",
@@ -532,7 +587,10 @@
      "line": 34,
      "const": "KEY_SMART_HINT_INLINE_COMPLETION_PREVIEW"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_smart_hint",
+   "note": "开关"
   },
   {
    "name": "key_ace_language_support_matrix",
@@ -562,7 +620,9 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 38
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (语言支持矩阵对话框), 不持久化值"
   },
   {
    "name": "key_ace_line_numbers_enabled",
@@ -595,7 +655,10 @@
      "line": 9,
      "const": "KEY_LINE_NUMBERS_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_gutter",
+   "note": "开关"
   },
   {
    "name": "key_ace_lsp_declaration_groups",
@@ -636,7 +699,10 @@
      "line": 9,
      "const": "KEY_ACE_LSP_DECLARATION_GROUPS"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_assistance",
+   "note": "声明组集合"
   },
   {
    "name": "key_ace_lsp_enabled",
@@ -681,7 +747,10 @@
      "line": 6,
      "const": "KEY_ACE_LSP_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_assistance",
+   "note": "开关"
   },
   {
    "name": "key_ace_lsp_file_types",
@@ -722,7 +791,10 @@
      "line": 7,
      "const": "KEY_ACE_LSP_FILE_TYPES"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_assistance",
+   "note": "文件类型列表; 迁移版本号见字面量键 `key_$_ace_lsp_file_types_revision`"
   },
   {
    "name": "key_ace_print_margin_enabled",
@@ -759,7 +831,10 @@
      "line": 10,
      "const": "KEY_PRINT_MARGIN_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ace_scrollbar_auto_hide_enabled",
@@ -796,7 +871,10 @@
      "line": 23,
      "const": "KEY_SCROLLBAR_AUTO_HIDE_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ace_semantic_languages",
@@ -826,7 +904,9 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 42
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目, 值存于 5 个 `key_$_ace_semantic_*_enabled` 字面量键"
   },
   {
    "name": "key_ace_smart_hint_arrow_overload_cycling",
@@ -863,7 +943,10 @@
      "line": 32,
      "const": "KEY_SMART_HINT_ARROW_OVERLOAD_CYCLING"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_smart_hint",
+   "note": "开关"
   },
   {
    "name": "key_ace_smart_hint_completion_delay",
@@ -900,7 +983,10 @@
      "line": 30,
      "const": "KEY_SMART_HINT_COMPLETION_DELAY"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_smart_hint",
+   "note": "列表项"
   },
   {
    "name": "key_ace_smart_hint_completion_delay_0",
@@ -915,7 +1001,9 @@
    ],
    "defaultOf": [
     "default_key_ace_smart_hint_completion_delay"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_completion_delay_100",
@@ -927,7 +1015,9 @@
      "array": "keys_ace_smart_hint_completion_delay",
      "owner": "key_ace_smart_hint_completion_delay"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_completion_delay_250",
@@ -939,7 +1029,9 @@
      "array": "keys_ace_smart_hint_completion_delay",
      "owner": "key_ace_smart_hint_completion_delay"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_completion_min_chars",
@@ -976,7 +1068,10 @@
      "line": 29,
      "const": "KEY_SMART_HINT_COMPLETION_MIN_CHARS"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_smart_hint",
+   "note": "列表项"
   },
   {
    "name": "key_ace_smart_hint_completion_min_chars_1",
@@ -995,7 +1090,9 @@
    ],
    "defaultOf": [
     "default_key_ace_smart_hint_completion_min_chars"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_completion_min_chars_2",
@@ -1011,7 +1108,9 @@
      "array": "values_ace_smart_hint_completion_min_chars",
      "owner": null
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_completion_min_chars_3",
@@ -1027,7 +1126,9 @@
      "array": "values_ace_smart_hint_completion_min_chars",
      "owner": null
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_completion_trigger",
@@ -1064,7 +1165,10 @@
      "line": 28,
      "const": "KEY_SMART_HINT_COMPLETION_TRIGGER"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_smart_hint",
+   "note": "列表项"
   },
   {
    "name": "key_ace_smart_hint_completion_trigger_dot",
@@ -1076,7 +1180,9 @@
      "array": "keys_ace_smart_hint_completion_trigger",
      "owner": "key_ace_smart_hint_completion_trigger"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_completion_trigger_identifier",
@@ -1091,7 +1197,9 @@
    ],
    "defaultOf": [
     "default_key_ace_smart_hint_completion_trigger"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_completion_trigger_off",
@@ -1103,7 +1211,9 @@
      "array": "keys_ace_smart_hint_completion_trigger",
      "owner": "key_ace_smart_hint_completion_trigger"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_signature_trigger",
@@ -1140,7 +1250,10 @@
      "line": 31,
      "const": "KEY_SMART_HINT_SIGNATURE_TRIGGER"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_smart_hint",
+   "note": "列表项"
   },
   {
    "name": "key_ace_smart_hint_signature_trigger_cursor",
@@ -1155,7 +1268,9 @@
    ],
    "defaultOf": [
     "default_key_ace_smart_hint_signature_trigger"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_signature_trigger_off",
@@ -1167,7 +1282,9 @@
      "array": "keys_ace_smart_hint_signature_trigger",
      "owner": "key_ace_smart_hint_signature_trigger"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_smart_hint_signature_trigger_typing",
@@ -1179,7 +1296,9 @@
      "array": "keys_ace_smart_hint_signature_trigger",
      "owner": "key_ace_smart_hint_signature_trigger"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_ace_svg_gutter_icons_enabled",
@@ -1216,7 +1335,10 @@
      "line": 21,
      "const": "KEY_SVG_GUTTER_ICONS_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_gutter",
+   "note": "开关"
   },
   {
    "name": "key_ace_symbol_highlight_enabled",
@@ -1253,7 +1375,10 @@
      "line": 33,
      "const": "KEY_SMART_HINT_SYMBOL_HIGHLIGHT"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_smart_hint",
+   "note": "开关"
   },
   {
    "name": "key_ace_touch_magnifier_enabled",
@@ -1290,7 +1415,10 @@
      "line": 25,
      "const": "KEY_TOUCH_MAGNIFIER_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_gestures",
+   "note": "开关"
   },
   {
    "name": "key_ace_whitespaces_in_selection_enabled",
@@ -1327,7 +1455,10 @@
      "line": 24,
      "const": "KEY_WHITESPACES_IN_SELECTION_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ace_word_wrap_enabled",
@@ -1368,7 +1499,10 @@
      "line": 7,
      "const": "KEY_WORD_WRAP_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关"
   },
   {
    "name": "key_ai_settings",
@@ -1388,7 +1522,9 @@
       "AI"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目, 打开 AI 插件设置 (插件自身设置第一期不含, D3)"
   },
   {
    "name": "key_all_files_access",
@@ -1410,7 +1546,9 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 42
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "inrt 设置页的权限开关, 反映系统授权状态"
   },
   {
    "name": "key_app_language",
@@ -1448,7 +1586,10 @@
      "file": "core/pref/Language.kt",
      "line": 105
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "列表项 (Language)"
   },
   {
    "name": "key_app_language_ar",
@@ -1466,7 +1607,9 @@
      "file": "core/pref/Language.kt",
      "line": 21
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_auto",
@@ -1487,7 +1630,9 @@
      "file": "core/pref/Language.kt",
      "line": 22
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值, 默认值"
   },
   {
    "name": "key_app_language_en",
@@ -1505,7 +1650,9 @@
      "file": "core/pref/Language.kt",
      "line": 15
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_es",
@@ -1523,7 +1670,9 @@
      "file": "core/pref/Language.kt",
      "line": 17
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_fr",
@@ -1541,7 +1690,9 @@
      "file": "core/pref/Language.kt",
      "line": 16
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_ja",
@@ -1559,7 +1710,9 @@
      "file": "core/pref/Language.kt",
      "line": 18
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_ko",
@@ -1577,7 +1730,9 @@
      "file": "core/pref/Language.kt",
      "line": 19
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_ru",
@@ -1595,7 +1750,9 @@
      "file": "core/pref/Language.kt",
      "line": 20
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_zh_hans",
@@ -1613,7 +1770,9 @@
      "file": "core/pref/Language.kt",
      "line": 12
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_zh_hant_hk",
@@ -1631,7 +1790,9 @@
      "file": "core/pref/Language.kt",
      "line": 13
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_app_language_zh_hant_tw",
@@ -1649,7 +1810,9 @@
      "file": "core/pref/Language.kt",
      "line": 14
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "Language 枚举候选值"
   },
   {
    "name": "key_auto_check_for_updates",
@@ -1675,7 +1838,10 @@
      "file": "core/pref/Pref.kt",
      "line": 176
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "updates",
+   "note": "开关"
   },
   {
    "name": "key_auto_night_mode_enabled",
@@ -1719,7 +1885,10 @@
      "file": "util/ViewUtils.kt",
      "line": 130
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "与 `key_night_mode` 一起由 NightModePreference 与抽屉写入"
   },
   {
    "name": "key_batch_rename_history_retention",
@@ -1735,7 +1904,10 @@
      "file": "core/plugin/batchrename/BatchRenameHistoryPrefs.kt",
      "line": 18
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "批量重命名历史保留批数 (BatchRenameHistoryPrefs)"
   },
   {
    "name": "key_change_working_dir",
@@ -1755,7 +1927,9 @@
       "文件管理器"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目, 工作目录存于 `key_working_directory`"
   },
   {
    "name": "key_check_for_updates",
@@ -1775,7 +1949,9 @@
       "更新"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (立即检查更新)"
   },
   {
    "name": "key_check_for_updates_while_ignoring_the_local_version",
@@ -1795,7 +1971,9 @@
       "更新"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (开发者选项, 忽略本机版本检查一次)"
   },
   {
    "name": "key_clear_explorer_playback_history",
@@ -1815,7 +1993,9 @@
       "文件管理器"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (清除回放历史)"
   },
   {
    "name": "key_client_mode_auto_reconnect",
@@ -1831,7 +2011,10 @@
      "file": "ui/devplugin/ClientModeManagerDialog.kt",
      "line": 70
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "connection",
+   "note": "客户端模式管理器开关"
   },
   {
    "name": "key_client_mode_manager_clients_level",
@@ -1843,7 +2026,10 @@
      "file": "ui/devplugin/ClientModeManagerDialog.kt",
      "line": 34
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器对话框展开级别"
   },
   {
    "name": "key_client_mode_manager_control_level",
@@ -1855,7 +2041,10 @@
      "file": "ui/devplugin/ClientModeManagerDialog.kt",
      "line": 32
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器对话框展开级别"
   },
   {
    "name": "key_client_mode_manager_settings_collapsed",
@@ -1867,7 +2056,10 @@
      "file": "ui/devplugin/ClientModeManagerDialog.kt",
      "line": 33
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器设置区折叠状态"
   },
   {
    "name": "key_client_mode_manager_status_level",
@@ -1879,7 +2071,10 @@
      "file": "ui/devplugin/ClientModeManagerDialog.kt",
      "line": 31
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器对话框展开级别"
   },
   {
    "name": "key_client_mode_reconnect_on_network_change",
@@ -1895,7 +2090,10 @@
      "file": "ui/devplugin/ClientModeManagerDialog.kt",
      "line": 76
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "connection",
+   "note": "客户端模式管理器开关"
   },
   {
    "name": "key_client_mode_restore_on_launch",
@@ -1911,7 +2109,10 @@
      "file": "ui/devplugin/ClientModeManagerDialog.kt",
      "line": 82
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "connection",
+   "note": "客户端模式管理器开关"
   },
   {
    "name": "key_client_socket_normally_closed",
@@ -1927,7 +2128,10 @@
      "file": "pluginclient/JsonSocketClient.kt",
      "line": 477
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "上次连接是否正常关闭, 用于启动时恢复"
   },
   {
    "name": "key_codegen_model_current",
@@ -1939,7 +2143,10 @@
      "file": "ui/settings/codegen/CodegenModelStoreFactory.kt",
      "line": 27
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "layout_inspector",
+   "note": "代码生成当前模型 id (经 selectionPreferenceKey 派生实际键); 模型文件不导出, 本机缺该模型时的处理待 P7.2 计划器定"
   },
   {
    "name": "key_color_select_activity_legacy_layout",
@@ -1955,7 +2162,10 @@
      "file": "theme/app/ColorSelectBaseActivity.kt",
      "line": 1046
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "ColorLibrariesActivity / ColorSelectActivity 打开前写入的界面模式, 不是用户设置 (Q13)"
   },
   {
    "name": "key_console_element_time_format",
@@ -1967,7 +2177,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 16
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "ConsoleTimeSettings.CONSOLE_ELEMENT"
   },
   {
    "name": "key_console_element_time_visible",
@@ -1979,7 +2192,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 16
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "ConsoleTimeSettings.CONSOLE_ELEMENT"
   },
   {
    "name": "key_delete_permanently_also_clear_history",
@@ -2005,25 +2221,37 @@
      "file": "storage/history/HistoryPrefs.kt",
      "line": 64
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "开关"
   },
   {
    "name": "key_dialog_foreground_svc",
    "value": "key_$_dialog_foreground_svc",
    "file": "strings_donottranslate.xml",
-   "line": 166
+   "line": 166,
+   "kind": "State",
+   "category": "other",
+   "note": "不再提示类键名, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_dialog_layout_inspector_exit_tips",
    "value": "key_$_dialog_layout_inspector_exit_tips",
    "file": "strings_donottranslate.xml",
-   "line": 167
+   "line": 167,
+   "kind": "State",
+   "category": "other",
+   "note": "不再提示类键名, 只在注释掉的代码中出现 (Q12)"
   },
   {
    "name": "key_dialog_log_entries_exported",
    "value": "key_$_dialog_log_entries_exported",
    "file": "strings_donottranslate.xml",
-   "line": 168
+   "line": 168,
+   "kind": "State",
+   "category": "other",
+   "note": "不再提示类键名, 源码与资源均无引用 (Q12)"
   },
   {
    "name": "key_dialog_num_of_log_entries_exceeds_limit_for_sending",
@@ -2035,7 +2263,10 @@
      "file": "core/console/ConsoleImpl.kt",
      "line": 419
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "NotAskAgainDialog 不再提示"
   },
   {
    "name": "key_dialog_selected_abi_is_unavailable",
@@ -2047,7 +2278,10 @@
      "file": "ui/project/BuildActivity.java",
      "line": 1780
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "NotAskAgainDialog 不再提示 (BuildActivity)"
   },
   {
    "name": "key_dialog_transparent_background_launcher_icon",
@@ -2063,7 +2297,10 @@
      "file": "ui/settings/LauncherIconPreference.kt",
      "line": 110
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "NotAskAgainDialog 不再提示"
   },
   {
    "name": "key_display_over_other_apps",
@@ -2081,7 +2318,9 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 36
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "inrt 设置页的权限开关, 反映系统授权状态"
   },
   {
    "name": "key_documentation_source",
@@ -2115,7 +2354,10 @@
      "file": "util/DocsUtils.kt",
      "line": 57
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "列表项"
   },
   {
    "name": "key_documentation_source_local",
@@ -2136,7 +2378,9 @@
      "file": "util/DocsUtils.kt",
      "line": 24
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_documentation_source_online",
@@ -2154,7 +2398,9 @@
      "file": "ui/doc/DocumentationPageController.kt",
      "line": 274
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_drafts_max_days",
@@ -2184,7 +2430,10 @@
      "file": "ui/settings/RetentionLimitSettings.kt",
      "line": 40
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_drafts_max_total_bytes",
@@ -2214,7 +2463,10 @@
      "file": "ui/settings/RetentionLimitSettings.kt",
      "line": 41
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_editor_auto_show_log_bottom_sheet_on_run",
@@ -2268,7 +2520,10 @@
      "file": "ui/settings/PreferencesFragment.kt",
      "line": 76
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_log",
+   "note": "开关, 设置页与代码编辑器设置两处"
   },
   {
    "name": "key_editor_breakpoint_markers_enabled",
@@ -2301,7 +2556,10 @@
      "line": 12,
      "const": "KEY_BREAKPOINT_MARKERS_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_gutter",
+   "note": "开关"
   },
   {
    "name": "key_editor_code_highlight_threshold_bytes",
@@ -2339,7 +2597,10 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 57
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_performance",
+   "note": "阈值"
   },
   {
    "name": "key_editor_engine",
@@ -2404,7 +2665,10 @@
      "line": 11,
      "const": "KEY_EDITOR_ENGINE"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_general",
+   "note": "列表项, 与字面量键 `key_$_editor_engine_selection_mode` 一起写入"
   },
   {
    "name": "key_editor_engine_ace",
@@ -2416,7 +2680,9 @@
      "array": "keys_editor_engine",
      "owner": "key_editor_engine"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_editor_engine_native",
@@ -2431,7 +2697,9 @@
    ],
    "defaultOf": [
     "default_key_editor_engine"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_editor_fold_markers_enabled",
@@ -2468,7 +2736,10 @@
      "line": 13,
      "const": "KEY_FOLD_MARKERS_ENABLED"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_gutter",
+   "note": "开关"
   },
   {
    "name": "key_editor_fullscreen_mode",
@@ -2514,7 +2785,10 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 24
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "开关, 编辑器菜单也会写入"
   },
   {
    "name": "key_editor_gutter_width_mode",
@@ -2551,7 +2825,10 @@
      "line": 14,
      "const": "KEY_GUTTER_WIDTH_MODE"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_gutter",
+   "note": "列表项"
   },
   {
    "name": "key_editor_gutter_width_mode_dynamic",
@@ -2566,7 +2843,9 @@
    ],
    "defaultOf": [
     "default_key_editor_gutter_width_mode"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_editor_gutter_width_mode_fixed",
@@ -2578,7 +2857,9 @@
      "array": "keys_editor_gutter_width_mode",
      "owner": "key_editor_gutter_width_mode"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_editor_large_file_mode_threshold_bytes",
@@ -2616,7 +2897,10 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 58
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_performance",
+   "note": "阈值"
   },
   {
    "name": "key_editor_log_button_behavior",
@@ -2666,7 +2950,10 @@
      "file": "ui/settings/PreferencesFragment.kt",
      "line": 77
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_log",
+   "note": "列表项, 设置页与代码编辑器设置两处"
   },
   {
    "name": "key_editor_log_button_behavior_bottom_sheet",
@@ -2681,7 +2968,9 @@
    ],
    "defaultOf": [
     "default_key_editor_log_button_behavior"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_editor_log_button_behavior_fullscreen_page",
@@ -2699,7 +2988,9 @@
      "file": "ui/edit/EditorView.kt",
      "line": 277
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_editor_log_panel_input_bar_visible",
@@ -2711,7 +3002,10 @@
      "file": "ui/log/LogBottomSheet.kt",
      "line": 237
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_log",
+   "note": "日志面板输入栏 (LogPageConsoleSettings)"
   },
   {
    "name": "key_editor_log_panel_time_format",
@@ -2723,7 +3017,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 13
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_log",
+   "note": "ConsoleTimeSettings.EDITOR_PANEL"
   },
   {
    "name": "key_editor_log_panel_time_visible",
@@ -2735,7 +3032,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 13
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_log",
+   "note": "ConsoleTimeSettings.EDITOR_PANEL"
   },
   {
    "name": "key_editor_log_panel_typescript_console_visible",
@@ -2751,7 +3051,10 @@
      "file": "ui/log/LogBottomSheet.kt",
      "line": 374
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_log",
+   "note": "日志面板开关"
   },
   {
    "name": "key_editor_pinch_to_zoom_change_text_size",
@@ -2772,7 +3075,9 @@
      "file": "ui/settings/EditorPinchToZoomPreference.kt",
      "line": 84
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "旧策略键 `key_editor_pinch_to_zoom_strategy` 的候选值, `default_key_editor_pinch_to_zoom_strategy` 的目标"
   },
   {
    "name": "key_editor_pinch_to_zoom_change_text_size_enabled",
@@ -2817,7 +3122,10 @@
      "line": 11,
      "const": "PINCH_TO_ZOOM_CHANGE_TEXT_SIZE_ENABLED_KEY"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_gestures",
+   "note": "开关, 取代旧策略键"
   },
   {
    "name": "key_editor_pinch_to_zoom_disable",
@@ -2839,7 +3147,9 @@
      "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
      "line": 23
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "旧策略键的候选值, 迁移时比较"
   },
   {
    "name": "key_editor_pinch_to_zoom_scale_view",
@@ -2851,7 +3161,9 @@
      "file": "ui/settings/EditorPinchToZoomPreference.kt",
      "line": 83
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "旧策略键的候选值, 只在未被设置页引用的 EditorPinchToZoomPreference 中使用"
   },
   {
    "name": "key_editor_pinch_to_zoom_strategy",
@@ -2878,7 +3190,10 @@
      "line": 10,
      "const": "LEGACY_PINCH_TO_ZOOM_STRATEGY_KEY"
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "旧版策略设置, 只作 migrateLegacyPreferenceIfNeeded 的迁移来源; 写入方 EditorPinchToZoomPreference 已不在任何设置页"
   },
   {
    "name": "key_editor_shortcut_input_bar",
@@ -2904,7 +3219,9 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 37
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目, 打开 SymbolsSettingsActivity (数据在命名存储 `editor_symbols_config`)"
   },
   {
    "name": "key_editor_text_size",
@@ -2942,7 +3259,10 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 23
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "字号"
   },
   {
    "name": "key_editor_theme",
@@ -2992,7 +3312,10 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 21
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "统一模式下的主题名"
   },
   {
    "name": "key_editor_theme_dark",
@@ -3028,7 +3351,10 @@
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 103
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "分离模式下的深色主题名 (Themes.java)"
   },
   {
    "name": "key_editor_theme_light",
@@ -3064,7 +3390,10 @@
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 102
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "分离模式下的浅色主题名 (Themes.java)"
   },
   {
    "name": "key_editor_theme_mode",
@@ -3102,7 +3431,10 @@
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 20
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "列表项"
   },
   {
    "name": "key_editor_theme_mode_separate",
@@ -3117,7 +3449,9 @@
    ],
    "defaultOf": [
     "default_key_editor_theme_mode"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_editor_theme_mode_unified",
@@ -3135,7 +3469,9 @@
      "file": "ui/edit/theme/Themes.java",
      "line": 255
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_editor_word_wrap_indent_style",
@@ -3176,7 +3512,10 @@
      "line": 8,
      "const": "KEY_WORD_WRAP_INDENT_STYLE"
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_appearance",
+   "note": "列表项"
   },
   {
    "name": "key_editor_word_wrap_indent_style_classic",
@@ -3188,7 +3527,9 @@
      "array": "keys_editor_word_wrap_indent_style",
      "owner": "key_editor_word_wrap_indent_style"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_editor_word_wrap_indent_style_continuation",
@@ -3203,7 +3544,9 @@
    ],
    "defaultOf": [
     "default_key_editor_word_wrap_indent_style"
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_enable_a11y_service_with_root_access",
@@ -3247,7 +3590,10 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 85
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "a11y",
+   "note": "开关, 也是脚本 API settings 的 ROOT_ACCESSIBILITY_SERVICE"
   },
   {
    "name": "key_enable_a11y_service_with_secure_settings",
@@ -3277,7 +3623,10 @@
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
      "line": 193
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "a11y",
+   "note": "开关"
   },
   {
    "name": "key_enable_a11y_service_with_shizuku",
@@ -3307,13 +3656,19 @@
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
      "line": 199
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "a11y",
+   "note": "开关"
   },
   {
    "name": "key_enable_observe_key",
    "value": "key_$_enable_observe_key",
    "file": "strings_donottranslate.xml",
-   "line": 216
+   "line": 216,
+   "kind": "Setting",
+   "category": "a11y",
+   "note": "按 ROADMAP 附录 A 归 a11y (按键观察), 但源码与资源均无读写方 (Q12)"
   },
   {
    "name": "key_explorer_file_default_prefix",
@@ -3333,7 +3688,10 @@
      "file": "ui/common/ScriptOperations.java",
      "line": 206
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "新文件默认前缀序号 (ScriptOperations)"
   },
   {
    "name": "key_explorer_playback_history",
@@ -3359,7 +3717,10 @@
      "file": "core/pref/Pref.kt",
      "line": 248
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "开关; 历史数据在命名存储 `explorer_playback_history` (永久排除)"
   },
   {
    "name": "key_extending_js_build_in_objects",
@@ -3385,7 +3746,10 @@
      "file": "core/pref/Pref.kt",
      "line": 124
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "extensibility",
+   "note": "开关"
   },
   {
    "name": "key_file_extensions",
@@ -3427,7 +3791,10 @@
      "file": "ui/explorer/ExplorerPathMenu.kt",
      "line": 327
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "列表项, 文件管理器菜单也会写入"
   },
   {
    "name": "key_file_extensions_not_show",
@@ -3445,7 +3812,9 @@
      "file": "core/pref/Pref.kt",
      "line": 262
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_file_extensions_show_all",
@@ -3466,7 +3835,9 @@
      "file": "core/pref/Pref.kt",
      "line": 254
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_file_extensions_show_all_but_executable",
@@ -3484,7 +3855,9 @@
      "file": "core/pref/Pref.kt",
      "line": 258
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_floating_console_time_format",
@@ -3496,7 +3869,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 17
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "ConsoleTimeSettings.FLOATING_WINDOW"
   },
   {
    "name": "key_floating_console_time_visible",
@@ -3508,7 +3884,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 17
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "ConsoleTimeSettings.FLOATING_WINDOW"
   },
   {
    "name": "key_floating_menu_shown",
@@ -3524,7 +3903,10 @@
      "file": "ui/main/drawer/DrawerFragment.kt",
      "line": 279
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "抽屉 \"悬浮按钮\" 开关的镜像, 按悬浮窗实际状态回写"
   },
   {
    "name": "key_foreground_service",
@@ -3550,7 +3932,10 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 12
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "主应用中是抽屉 \"前台服务\" 开关的镜像; 脚本 API settings 与 inrt 把它当设置读写 (Q13)"
   },
   {
    "name": "key_gesture_observing",
@@ -3562,7 +3947,10 @@
      "file": "core/pref/Pref.kt",
      "line": 229
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "a11y",
+   "note": "开关 (手势观察)"
   },
   {
    "name": "key_github_token",
@@ -3582,7 +3970,9 @@
       "GitHub"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目, 令牌存于命名存储 `github_auth` (credentials)"
   },
   {
    "name": "key_global_console_element_time_format",
@@ -3594,7 +3984,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 15
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT"
   },
   {
    "name": "key_global_console_element_time_visible",
@@ -3606,7 +3999,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 15
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT"
   },
   {
    "name": "key_guard_mode",
@@ -3632,7 +4028,10 @@
      "file": "core/pref/Pref.kt",
      "line": 155
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "running",
+   "note": "开关"
   },
   {
    "name": "key_hidden_files",
@@ -3662,7 +4061,10 @@
      "file": "ui/explorer/ExplorerPathMenu.kt",
      "line": 174
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "列表项, 文件管理器菜单也会写入"
   },
   {
    "name": "key_hidden_files_not_show",
@@ -3683,7 +4085,9 @@
      "file": "ui/explorer/ExplorerPathMenu.kt",
      "line": 174
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_hidden_files_show",
@@ -3705,7 +4109,9 @@
      "file": "ui/explorer/ExplorerPathMenu.kt",
      "line": 174
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_history_max_days",
@@ -3735,7 +4141,10 @@
      "file": "ui/settings/RetentionLimitSettings.kt",
      "line": 33
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_history_max_file_size_to_track_bytes",
@@ -3765,7 +4174,10 @@
      "file": "ui/settings/RetentionLimitSettings.kt",
      "line": 37
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_history_max_total_bytes",
@@ -3803,7 +4215,10 @@
      "file": "ui/storage/VersionHistoryActivity.kt",
      "line": 109
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_history_max_total_bytes_per_file",
@@ -3833,7 +4248,10 @@
      "file": "ui/settings/RetentionLimitSettings.kt",
      "line": 35
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_history_max_versions",
@@ -3863,7 +4281,10 @@
      "file": "ui/settings/RetentionLimitSettings.kt",
      "line": 34
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_ignored_updates",
@@ -3895,7 +4316,10 @@
      "file": "util/UpdateUtils.kt",
      "line": 142
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "updates",
+   "note": "默认偏好中的忽略版本列表 (Gson LinkedHashSet); 同一字符串也是 UpdateIgnoreStore 命名存储的文件名"
   },
   {
    "name": "key_keep_screen_on_when_in_foreground",
@@ -3945,7 +4369,10 @@
      "file": "util/ViewUtils.kt",
      "line": 1309
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "列表项"
   },
   {
    "name": "key_keep_screen_on_when_in_foreground_all_pages",
@@ -3971,7 +4398,9 @@
      "file": "util/ViewUtils.kt",
      "line": 1298
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_keep_screen_on_when_in_foreground_disabled",
@@ -3996,7 +4425,9 @@
      "file": "util/ViewUtils.kt",
      "line": 1292
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_keep_screen_on_when_in_foreground_enabled",
@@ -4012,7 +4443,10 @@
      "file": "util/ViewUtils.kt",
      "line": 116
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "与主键一起由 ViewUtils 写入的布尔镜像, 须与主键同进同出"
   },
   {
    "name": "key_keep_screen_on_when_in_foreground_homepage_only",
@@ -4038,7 +4472,9 @@
      "file": "util/ViewUtils.kt",
      "line": 1304
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_keep_screen_on_when_in_foreground_last_enabled",
@@ -4054,7 +4490,10 @@
      "file": "util/ViewUtils.kt",
      "line": 126
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "抽屉开关恢复用的上次启用模式"
   },
   {
    "name": "key_last_no_newer_updates",
@@ -4074,7 +4513,10 @@
      "file": "core/pref/Pref.kt",
      "line": 308
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "时间戳"
   },
   {
    "name": "key_last_updates_auto_checked",
@@ -4094,7 +4536,10 @@
      "file": "core/pref/Pref.kt",
      "line": 311
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "时间戳"
   },
   {
    "name": "key_last_updates_checked",
@@ -4114,7 +4559,10 @@
      "file": "core/pref/Pref.kt",
      "line": 310
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "时间戳"
   },
   {
    "name": "key_last_updates_postponed",
@@ -4134,7 +4582,10 @@
      "file": "core/pref/Pref.kt",
      "line": 309
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "时间戳"
   },
   {
    "name": "key_launcher_icon",
@@ -4154,7 +4605,10 @@
       "配置"
      ]
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "列表项, LauncherIconPreference.persistString; 生效需切换组件 (APPLY)"
   },
   {
    "name": "key_launcher_icon_adaptive",
@@ -4183,7 +4637,9 @@
      "file": "ui/settings/LauncherIconPreference.kt",
      "line": 216
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_launcher_icon_transparent_background",
@@ -4205,7 +4661,9 @@
      "file": "ui/settings/LauncherIconPreference.kt",
      "line": 215
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_launcher_shortcuts",
@@ -4225,7 +4683,9 @@
       "配置"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (启动器快捷方式对话框), 不持久化值"
   },
   {
    "name": "key_layout_inspector_field_mode_introduced",
@@ -4241,7 +4701,10 @@
      "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
      "line": 29
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "功能介绍已展示"
   },
   {
    "name": "key_layout_inspector_filter_profile_selected",
@@ -4257,7 +4720,10 @@
      "file": "ui/floating/layoutinspector/search/FilterProfileStore.kt",
      "line": 29
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "layout_inspector",
+   "note": "选中的筛选配置档 id"
   },
   {
    "name": "key_layout_inspector_filter_profiles",
@@ -4273,7 +4739,10 @@
      "file": "ui/floating/layoutinspector/search/FilterProfileStore.kt",
      "line": 24
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "layout_inspector",
+   "note": "筛选配置档 JSON"
   },
   {
    "name": "key_layout_inspector_node_copy_mode",
@@ -4289,7 +4758,10 @@
      "file": "ui/floating/layoutinspector/NodeInfoDialog.kt",
      "line": 27
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "layout_inspector",
+   "note": "节点复制模式"
   },
   {
    "name": "key_layout_inspector_query_history",
@@ -4305,7 +4777,10 @@
      "file": "ui/floating/layoutinspector/search/QueryHistoryStore.kt",
      "line": 20
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "查询历史 JSON"
   },
   {
    "name": "key_layout_inspector_query_mode",
@@ -4321,7 +4796,10 @@
      "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
      "line": 22
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "layout_inspector",
+   "note": "查询模式"
   },
   {
    "name": "key_layout_inspector_selector_mode_introduced",
@@ -4337,7 +4815,10 @@
      "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
      "line": 35
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1)"
   },
   {
    "name": "key_local_network_permission",
@@ -4355,7 +4836,9 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 24
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "inrt 设置页的权限开关, 反映系统授权状态"
   },
   {
    "name": "key_log_activity_input_bar_visible",
@@ -4367,7 +4850,10 @@
      "file": "ui/log/LogActivity.kt",
      "line": 77
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "日志页 (LogPageConsoleSettings)"
   },
   {
    "name": "key_log_activity_log_coloring",
@@ -4383,7 +4869,10 @@
      "file": "ui/log/LogPageConsoleSettings.kt",
      "line": 41
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "日志页"
   },
   {
    "name": "key_log_activity_text_size",
@@ -4399,7 +4888,10 @@
      "file": "ui/log/LogPageConsoleSettings.kt",
      "line": 68
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "日志页"
   },
   {
    "name": "key_log_activity_time_format",
@@ -4411,7 +4903,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 14
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "ConsoleTimeSettings.LOG_ACTIVITY"
   },
   {
    "name": "key_log_activity_time_visible",
@@ -4423,7 +4918,10 @@
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 14
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "ConsoleTimeSettings.LOG_ACTIVITY"
   },
   {
    "name": "key_log_activity_typescript_console_visible",
@@ -4439,7 +4937,10 @@
      "file": "ui/log/LogActivity.kt",
      "line": 202
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "console",
+   "note": "日志页"
   },
   {
    "name": "key_mail_settings",
@@ -4459,7 +4960,9 @@
       "邮件"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目, 打开邮件插件设置 (插件自身设置第一期不含, D3)"
   },
   {
    "name": "key_manage_ignored_updates",
@@ -4479,7 +4982,9 @@
       "更新"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (管理忽略的更新)"
   },
   {
    "name": "key_mcp_server_normally_closed",
@@ -4495,7 +5000,10 @@
      "file": "app/tool/McpServerTool.kt",
      "line": 169
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "上次是否正常关闭, 用于启动时恢复"
   },
   {
    "name": "key_new_script_module_layer",
@@ -4521,7 +5029,10 @@
      "file": "core/pref/Pref.kt",
      "line": 135
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "开关"
   },
   {
    "name": "key_night_mode",
@@ -4567,7 +5078,10 @@
      "file": "ui/main/plugin/PluginFragment.kt",
      "line": 64
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "列表项 (ViewUtils.MODE)"
   },
   {
    "name": "key_night_mode_always_off",
@@ -4589,7 +5103,9 @@
      "file": "util/ViewUtils.kt",
      "line": 1674
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值 (MODE.DAY)"
   },
   {
    "name": "key_night_mode_always_on",
@@ -4607,7 +5123,9 @@
      "file": "util/ViewUtils.kt",
      "line": 1675
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值 (MODE.NIGHT)"
   },
   {
    "name": "key_night_mode_enabled",
@@ -4655,7 +5173,10 @@
      "file": "util/ViewUtils.kt",
      "line": 134
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "与 `key_night_mode` 一起由 NightModePreference 与抽屉写入"
   },
   {
    "name": "key_night_mode_follow_system",
@@ -4680,7 +5201,9 @@
      "file": "util/ViewUtils.kt",
      "line": 1676
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值 (MODE.FOLLOW), 默认值"
   },
   {
    "name": "key_night_mode_null",
@@ -4692,7 +5215,9 @@
      "file": "util/ViewUtils.kt",
      "line": 1677
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "ViewUtils.MODE.NULL, 不在列表候选中"
   },
   {
    "name": "key_nodejs_doctor_report",
@@ -4712,7 +5237,9 @@
       "Node.js"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (生成 Node.js 诊断报告)"
   },
   {
    "name": "key_nodejs_inspector_enabled",
@@ -4738,7 +5265,10 @@
      "file": "engine/NodeJsRuntimePluginBridge.kt",
      "line": 78
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "开关"
   },
   {
    "name": "key_not_showing_main_activity",
@@ -4764,7 +5294,9 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 72
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "inrt 运行配置 (打包时由 launchConfig 写入); 主应用只经脚本 API settings 读写, 无消费方"
   },
   {
    "name": "key_pc_server_address_history",
@@ -4780,7 +5312,10 @@
      "file": "pluginclient/JsonSocketClient.kt",
      "line": 448
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "地址历史 (Gson LinkedHashSet)"
   },
   {
    "name": "key_plugin_center_auto_check_updates",
@@ -4810,7 +5345,10 @@
      "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
      "line": 25
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "开关"
   },
   {
    "name": "key_plugin_center_last_online_check_ts",
@@ -4826,7 +5364,10 @@
      "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
      "line": 49
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "时间戳"
   },
   {
    "name": "key_plugin_center_show_official_plugins",
@@ -4856,7 +5397,10 @@
      "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
      "line": 13
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "开关"
   },
   {
    "name": "key_plugin_center_show_third_party_plugins",
@@ -4886,7 +5430,10 @@
      "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
      "line": 19
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "开关"
   },
   {
    "name": "key_post_notifications_permission",
@@ -4904,7 +5451,9 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 30
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "inrt 设置页的权限开关, 反映系统授权状态"
   },
   {
    "name": "key_post_notifications_permission_request_attempted",
@@ -4928,7 +5477,10 @@
      "file": "ui/wizard/permission/PermissionWizardRunner.kt",
      "line": 128
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "是否已请求过通知权限"
   },
   {
    "name": "key_pref_bundle_default_item",
@@ -4948,7 +5500,9 @@
      "file": "ui/settings/NightModePreference.kt",
      "line": 54
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "MaterialListPreference 的 Bundle 参数名, 不是偏好键 (附录 A.2)"
   },
   {
    "name": "key_pref_bundle_disabled_items",
@@ -4968,7 +5522,9 @@
      "file": "ui/settings/NightModePreference.kt",
      "line": 55
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "MaterialListPreference 的 Bundle 参数名, 不是偏好键 (附录 A.2)"
   },
   {
    "name": "key_record_toast",
@@ -4994,7 +5550,10 @@
      "file": "core/pref/Pref.kt",
      "line": 267
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "record",
+   "note": "开关"
   },
   {
    "name": "key_release_history",
@@ -5014,7 +5573,9 @@
       "更新"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (发行历史)"
   },
   {
    "name": "key_restart_strategy",
@@ -5040,7 +5601,10 @@
      "file": "core/pref/Pref.kt",
      "line": 235
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "列表项"
   },
   {
    "name": "key_restart_strategy_quick",
@@ -5061,7 +5625,9 @@
      "file": "core/pref/Pref.kt",
      "line": 235
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_restart_strategy_scheduled",
@@ -5073,7 +5639,9 @@
      "array": "keys_restart_strategy",
      "owner": "key_restart_strategy"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_rhino_java_primitive_wrap",
@@ -5099,7 +5667,10 @@
      "file": "rhino/AndroidContextFactory.kt",
      "line": 77
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "extensibility",
+   "note": "开关"
   },
   {
    "name": "key_root_manager_apps_cache",
@@ -5115,7 +5686,9 @@
      "file": "ui/accessibility/RootManagerAppsDialog.kt",
      "line": 216
     }
-   ]
+   ],
+   "kind": "Cache",
+   "note": "Root 管理器应用列表缓存 (附录 A.2)"
   },
   {
    "name": "key_root_manager_apps_custom",
@@ -5135,7 +5708,10 @@
      "file": "ui/accessibility/RootManagerAppsDialog.kt",
      "line": 173
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "running",
+   "note": "用户追加的 Root 管理器包名 (StringSet)"
   },
   {
    "name": "key_root_mode",
@@ -5165,7 +5741,10 @@
      "file": "core/pref/Pref.kt",
      "line": 218
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "running",
+   "note": "列表项 (RootUtils.RootMode)"
   },
   {
    "name": "key_root_mode_auto_detect",
@@ -5186,7 +5765,9 @@
      "file": "util/RootUtils.java",
      "line": 133
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_root_mode_force_non_root",
@@ -5204,7 +5785,9 @@
      "file": "util/RootUtils.java",
      "line": 132
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_root_mode_force_root",
@@ -5222,7 +5805,9 @@
      "file": "util/RootUtils.java",
      "line": 131
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_root_record_out_file_type",
@@ -5248,7 +5833,10 @@
      "file": "core/pref/Pref.kt",
      "line": 341
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "record",
+   "note": "列表项"
   },
   {
    "name": "key_root_record_out_file_type_binary",
@@ -5269,7 +5857,9 @@
      "file": "core/pref/Pref.kt",
      "line": 341
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_root_record_out_file_type_js",
@@ -5281,7 +5871,9 @@
      "array": "keys_root_record_out_file_type",
      "owner": "key_root_record_out_file_type"
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_run_on_boot_inrt",
@@ -5303,7 +5895,9 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 66
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "inrt 运行配置 (打包时由 launchConfig 写入)"
   },
   {
    "name": "key_scheduled_restart_backend",
@@ -5327,7 +5921,10 @@
      "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
      "line": 91
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "计划重启后端 (ScheduledRestartSettingsDialogBuilder)"
   },
   {
    "name": "key_scheduled_restart_backend_alarm_manager",
@@ -5347,7 +5944,9 @@
      "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
      "line": 91
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_scheduled_restart_backend_work_manager",
@@ -5366,7 +5965,9 @@
      "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
      "line": 90
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
   },
   {
    "name": "key_scheduled_restart_delay",
@@ -5386,7 +5987,10 @@
      "file": "util/IntentUtils.kt",
      "line": 373
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "计划重启延迟"
   },
   {
    "name": "key_screen_capture_request_delay",
@@ -5420,7 +6024,10 @@
      "file": "ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt",
      "line": 72
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "running",
+   "note": "截图授权延迟"
   },
   {
    "name": "key_script_module_debug_print",
@@ -5446,7 +6053,10 @@
      "file": "core/pref/Pref.kt",
      "line": 145
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "开关"
   },
   {
    "name": "key_script_module_debug_print_disabled_modules",
@@ -5476,7 +6086,10 @@
      "file": "core/pref/Pref.kt",
      "line": 150
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "StringSet"
   },
   {
    "name": "key_scripts_after_app_restart",
@@ -5492,7 +6105,9 @@
      "file": "util/IntentUtils.kt",
      "line": 477
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "重启前写入, 重启后由 runAfterRestartIfNeeded 消费的一次性交接值 (同附录 A.2 的运行时状态)"
   },
   {
    "name": "key_server_address",
@@ -5508,7 +6123,10 @@
      "file": "core/pref/Pref.kt",
      "line": 338
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "connection",
+   "note": "服务端地址"
   },
   {
    "name": "key_server_mode_lan_discovery",
@@ -5524,7 +6142,10 @@
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
      "line": 89
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "connection",
+   "note": "服务端模式管理器开关"
   },
   {
    "name": "key_server_mode_manager_clients_level",
@@ -5536,7 +6157,10 @@
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
      "line": 39
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器对话框展开级别"
   },
   {
    "name": "key_server_mode_manager_control_level",
@@ -5548,7 +6172,10 @@
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
      "line": 37
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器对话框展开级别"
   },
   {
    "name": "key_server_mode_manager_settings_collapsed",
@@ -5560,7 +6187,10 @@
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
      "line": 38
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器设置区折叠状态"
   },
   {
    "name": "key_server_mode_manager_status_level",
@@ -5572,7 +6202,10 @@
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
      "line": 36
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "管理器对话框展开级别"
   },
   {
    "name": "key_server_mode_notify_connection_changes",
@@ -5588,7 +6221,10 @@
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
      "line": 83
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "connection",
+   "note": "服务端模式管理器开关"
   },
   {
    "name": "key_server_mode_restore_on_launch",
@@ -5604,7 +6240,10 @@
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
      "line": 77
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "connection",
+   "note": "服务端模式管理器开关"
   },
   {
    "name": "key_server_socket_normally_closed",
@@ -5620,7 +6259,10 @@
      "file": "pluginclient/JsonSocketServer.kt",
      "line": 169
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "上次是否正常关闭, 用于启动时恢复"
   },
   {
    "name": "key_setup_wizard_welcome_done",
@@ -5640,7 +6282,10 @@
      "file": "ui/wizard/SetupWizards.kt",
      "line": 84
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "欢迎向导已完成"
   },
   {
    "name": "key_setup_wizards",
@@ -5666,7 +6311,9 @@
      "file": "ui/settings/PreferencesFragment.kt",
      "line": 24
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (打开设置向导)"
   },
   {
    "name": "key_stable_mode",
@@ -5714,7 +6361,10 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 92
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "a11y",
+   "note": "开关, 也出现在无障碍服务管理器与脚本 API settings"
   },
   {
    "name": "key_theme_color",
@@ -5734,7 +6384,9 @@
       "外观"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (打开主题色选择), 值存于 `key_theme_color_primary` / `_primary_dark` / `_accent`"
   },
   {
    "name": "key_theme_color_accent",
@@ -5754,7 +6406,10 @@
      "file": "theme/ThemeColor.kt",
      "line": 74
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "主题色三项之一"
   },
   {
    "name": "key_theme_color_primary",
@@ -5774,7 +6429,10 @@
      "file": "theme/ThemeColor.kt",
      "line": 72
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "主题色三项之一"
   },
   {
    "name": "key_theme_color_primary_dark",
@@ -5794,7 +6452,10 @@
      "file": "theme/ThemeColor.kt",
      "line": 73
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "主题色三项之一"
   },
   {
    "name": "key_timed_task_backend",
@@ -5820,7 +6481,10 @@
      "file": "timing/TimedTaskScheduler.kt",
      "line": 32
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "timed_task",
+   "note": "列表项"
   },
   {
    "name": "key_timed_task_backend_alarm",
@@ -5845,7 +6509,9 @@
      "file": "timing/TimedTaskScheduler.kt",
      "line": 35
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值; 同一字符串还被 ExactAlarmPermissionHelper 用作 NotAskAgainDialog 的键 (默认偏好中的 Boolean 状态, P4.1 另行声明 StateKey)"
   },
   {
    "name": "key_timed_task_backend_job",
@@ -5863,7 +6529,9 @@
      "file": "timing/TimedTaskScheduler.kt",
      "line": 37
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_timed_task_backend_work",
@@ -5881,7 +6549,9 @@
      "file": "timing/TimedTaskScheduler.kt",
      "line": 36
     }
-   ]
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
   },
   {
    "name": "key_trash_and_version_history_settings",
@@ -5901,7 +6571,9 @@
       "回收站与版本历史"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (打开回收站与版本历史子页)"
   },
   {
    "name": "key_trash_max_days",
@@ -5931,7 +6603,10 @@
      "file": "ui/settings/RetentionLimitSettings.kt",
      "line": 38
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_trash_max_total_bytes",
@@ -5969,7 +6644,10 @@
      "file": "ui/storage/TrashActivity.kt",
      "line": 115
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "history",
+   "note": "保留策略"
   },
   {
    "name": "key_updates_checked_states_cleared",
@@ -5989,7 +6667,9 @@
       "更新"
      ]
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "动作条目 (开发者选项, 清除检查更新状态)"
   },
   {
    "name": "key_use_volume_control_record",
@@ -6015,7 +6695,10 @@
      "file": "core/pref/Pref.kt",
      "line": 169
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "record",
+   "note": "开关"
   },
   {
    "name": "key_use_volume_control_running",
@@ -6055,7 +6738,10 @@
      "file": "res/xml/fragment_preferences_inrt.xml",
      "line": 60
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "running",
+   "note": "开关, 也是脚本 API settings 的 STOP_ALL_ON_VOLUME_UP"
   },
   {
    "name": "key_version_history_restore_does_not_auto_save_to_disk",
@@ -6067,7 +6753,10 @@
      "file": "storage/history/VersionHistoryController.kt",
      "line": 443
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13)"
   },
   {
    "name": "key_working_directory",
@@ -6091,7 +6780,11 @@
      "file": "util/WorkingDirectoryUtils.kt",
      "line": 63
     }
-   ]
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "工作目录; 目标不存在时作为部署项创建 (D20 / Q1)",
+   "deployment": "CREATE_DIRECTORY"
   },
   {
    "name": "key_working_directory_history",
@@ -6107,7 +6800,10 @@
      "file": "util/WorkingDirectoryUtils.kt",
      "line": 17
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "工作目录历史 (Gson LinkedHashSet)"
   },
   {
    "name": "key_working_directory_initialized",
@@ -6119,7 +6815,10 @@
      "file": "util/WorkingDirectoryUtils.kt",
      "line": 58
     }
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "首次确定工作目录的标记"
   }
  ],
  "pageLiteralKeys": [
@@ -6134,7 +6833,9 @@
    "categoryTitles": [
     "调试"
    ],
-   "literalKey": "process_exit_history"
+   "literalKey": "process_exit_history",
+   "kind": "Excluded",
+   "note": "开发者选项动作条目 (进程退出历史)"
   },
   {
    "page": "fragment_plugin_center_preferences.xml",
@@ -6147,7 +6848,9 @@
    "categoryTitles": [
     "显示"
    ],
-   "literalKey": "plugin_center_hidden_plugin_management"
+   "literalKey": "plugin_center_hidden_plugin_management",
+   "kind": "Excluded",
+   "note": "插件中心设置动作条目 (隐藏插件管理)"
   },
   {
    "page": "fragment_plugin_center_preferences.xml",
@@ -6160,7 +6863,9 @@
    "categoryTitles": [
     "挂载"
    ],
-   "literalKey": "plugin_center_auto_mount_management"
+   "literalKey": "plugin_center_auto_mount_management",
+   "kind": "Excluded",
+   "note": "插件中心设置动作条目 (自动挂载管理)"
   }
  ],
  "literalKeys": [
@@ -6175,7 +6880,11 @@
    ],
    "storeGuess": [
     "ace_editor_font_ui_preferences"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "属于命名存储, 随整份计数",
+   "store": "ace_editor_font_ui_preferences"
   },
   {
    "name": "key_$_ace_editor_font_preview_excluded_features",
@@ -6188,7 +6897,11 @@
    ],
    "storeGuess": [
     "ace_editor_font_ui_preferences"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "属于命名存储, 随整份计数",
+   "store": "ace_editor_font_ui_preferences"
   },
   {
    "name": "key_$_ace_editor_font_preview_excluded_types",
@@ -6201,7 +6914,11 @@
    ],
    "storeGuess": [
     "ace_editor_font_ui_preferences"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "属于命名存储, 随整份计数",
+   "store": "ace_editor_font_ui_preferences"
   },
   {
    "name": "key_$_ace_editor_font_selected_variant_",
@@ -6214,7 +6931,11 @@
    ],
    "storeGuess": [
     "ace_editor_font_ui_preferences"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "ace_editor_font_ui_preferences"
   },
   {
    "name": "key_$_ace_editor_font_size_sort_type_locked",
@@ -6227,7 +6948,11 @@
    ],
    "storeGuess": [
     "ace_editor_font_ui_preferences"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "属于命名存储, 随整份计数",
+   "store": "ace_editor_font_ui_preferences"
   },
   {
    "name": "key_$_ace_editor_font_sort_mode",
@@ -6240,7 +6965,11 @@
    ],
    "storeGuess": [
     "ace_editor_font_ui_preferences"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "属于命名存储, 随整份计数",
+   "store": "ace_editor_font_ui_preferences"
   },
   {
    "name": "key_$_ace_lsp_file_types_revision",
@@ -6253,7 +6982,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "默认文件类型列表的迁移版本号 (AceEditorLspPreferences)",
+   "store": "default"
   },
   {
    "name": "key_$_ace_semantic_java_enabled",
@@ -6266,7 +6999,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_assistance",
+   "note": "语义语言开关 (AceSemanticLanguagesPreference)",
+   "store": "default"
   },
   {
    "name": "key_$_ace_semantic_kotlin_enabled",
@@ -6279,7 +7016,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_assistance",
+   "note": "语义语言开关",
+   "store": "default"
   },
   {
    "name": "key_$_ace_semantic_lua_enabled",
@@ -6292,7 +7033,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_assistance",
+   "note": "语义语言开关",
+   "store": "default"
   },
   {
    "name": "key_$_ace_semantic_python_enabled",
@@ -6305,7 +7050,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_assistance",
+   "note": "语义语言开关",
+   "store": "default"
   },
   {
    "name": "key_$_ace_semantic_typescript_enabled",
@@ -6318,7 +7067,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_assistance",
+   "note": "语义语言开关",
+   "store": "default"
   },
   {
    "name": "key_$_dialog_terminal_tips",
@@ -6331,7 +7084,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "已移除的宿主终端的旧键, TerminalLegacyCleanup 每次启动删除",
+   "store": "default"
   },
   {
    "name": "key_$_editor_engine_selection_mode",
@@ -6344,7 +7100,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_general",
+   "note": "与 `key_editor_engine` 一起由 EditorEnginePreferences.persist 写入",
+   "store": "default"
   },
   {
    "name": "key_$_enabled_plugin_$_*",
@@ -6357,7 +7117,11 @@
    ],
    "storeGuess": [
     "plugin_center_enable_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_enable_state",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_enable_state"
   },
   {
    "name": "key_$_ignored_plugin_$_*",
@@ -6370,7 +7134,11 @@
    ],
    "storeGuess": [
     "key_$_ignored_updates"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "updates",
+   "note": "UpdateIgnoreStore 中忽略的插件版本, 随整份计数",
+   "store": "key_$_ignored_updates"
   },
   {
    "name": "key_$_last_install_time_$_*",
@@ -6383,7 +7151,28 @@
    ],
    "storeGuess": [
     "plugin_center_recent"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_recent"
+  },
+  {
+   "name": "key_$_last_orientation",
+   "refs": [
+    {
+     "file": "ui/floating/CircularMenuWindow.java",
+     "line": 22,
+     "const": "KEY_LAST_ORIENTATION"
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "CircularMenuWindow 悬浮按钮上次的屏幕方向",
+   "store": "default"
   },
   {
    "name": "key_$_last_uninstall_time_$_*",
@@ -6396,7 +7185,11 @@
    ],
    "storeGuess": [
     "plugin_center_recent"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_recent"
   },
   {
    "name": "key_$_permission_wizard",
@@ -6409,7 +7202,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "wizards",
+   "note": "WizardProfileStore 的 keyPrefix, 键在命名存储中, 随整份计数",
+   "store": "permission_wizard"
   },
   {
    "name": "key_$_plugin_abi_mismatch_download_prompt",
@@ -6422,7 +7219,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "不再提示",
+   "store": "default"
   },
   {
    "name": "key_$_plugin_abi_mismatch_enable_prompt",
@@ -6435,7 +7236,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "不再提示",
+   "store": "default"
   },
   {
    "name": "key_$_plugin_auth_$_*$_*",
@@ -6448,7 +7253,11 @@
    ],
    "storeGuess": [
     "plugin_center_authorization"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "credentials",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_authorization"
   },
   {
    "name": "key_$_plugin_center_filter_enabled_state",
@@ -6461,7 +7270,11 @@
    ],
    "storeGuess": [
     "plugin_center_filter_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_filter_state"
   },
   {
    "name": "key_$_plugin_center_filter_install_state",
@@ -6474,7 +7287,11 @@
    ],
    "storeGuess": [
     "plugin_center_filter_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_filter_state"
   },
   {
    "name": "key_$_plugin_center_filter_mechanism_state",
@@ -6487,7 +7304,11 @@
    ],
    "storeGuess": [
     "plugin_center_filter_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_filter_state"
   },
   {
    "name": "key_$_plugin_center_filter_source_state",
@@ -6500,7 +7321,11 @@
    ],
    "storeGuess": [
     "plugin_center_filter_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_filter_state"
   },
   {
    "name": "key_$_plugin_center_filter_state",
@@ -6513,7 +7338,11 @@
    ],
    "storeGuess": [
     "plugin_center_filter_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "旧版序号键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_filter_state"
   },
   {
    "name": "key_$_plugin_center_filter_updatable_only",
@@ -6526,7 +7355,11 @@
    ],
    "storeGuess": [
     "plugin_center_filter_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_filter_state"
   },
   {
    "name": "key_$_plugin_center_hidden_packages",
@@ -6539,7 +7372,11 @@
    ],
    "storeGuess": [
     "plugin_center_visibility_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_visibility_state"
   },
   {
    "name": "key_$_plugin_center_hidden_source_",
@@ -6552,7 +7389,11 @@
    ],
    "storeGuess": [
     "plugin_center_visibility_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_visibility_state"
   },
   {
    "name": "key_$_plugin_center_hidden_title_",
@@ -6565,7 +7406,11 @@
    ],
    "storeGuess": [
     "plugin_center_visibility_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_visibility_state"
   },
   {
    "name": "key_$_plugin_center_sort_state",
@@ -6578,7 +7423,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginSortStore, 属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_ascending_",
@@ -6591,7 +7440,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_mechanism_secondary",
@@ -6604,7 +7457,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_official",
@@ -6617,7 +7474,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginSortStoreOfficial, 与另两个类共用同一份存储",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_official_ascending_",
@@ -6630,7 +7491,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_official_mechanism_secondary",
@@ -6643,7 +7508,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_official_secondary_",
@@ -6656,7 +7525,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_official_source_secondary",
@@ -6669,7 +7542,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_secondary_",
@@ -6682,7 +7559,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_source_secondary",
@@ -6695,7 +7576,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_third_party",
@@ -6708,7 +7593,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginSortStoreThirdParty, 与另两个类共用同一份存储",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_third_party_ascending_",
@@ -6721,7 +7610,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_third_party_mechanism_secondary",
@@ -6734,7 +7627,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_third_party_secondary_",
@@ -6747,7 +7644,11 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "前缀键, 属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_center_sort_state_third_party_source_secondary",
@@ -6760,20 +7661,28 @@
    ],
    "storeGuess": [
     "plugin_center_sort_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "属于命名存储, 随整份计数",
+   "store": "plugin_center_sort_state"
   },
   {
    "name": "key_$_plugin_hide_confirm_prompt",
    "refs": [
     {
      "file": "core/plugin/center/PluginSettingsFragment.kt",
-     "line": 1158,
+     "line": 1165,
      "const": "KEY_PLUGIN_HIDE_CONFIRM_PROMPT"
     }
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "隐藏插件确认的不再提示",
+   "store": "default"
   },
   {
    "name": "key_$_plugin_install_wizard",
@@ -6786,7 +7695,11 @@
    ],
    "storeGuess": [
     "plugin_install_wizard"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "wizards",
+   "note": "WizardProfileStore 的 keyPrefix, 键在命名存储中, 随整份计数",
+   "store": "plugin_install_wizard"
   },
   {
    "name": "key_$_plugin_mount_enabled_$_",
@@ -6799,7 +7712,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginMountStore 前缀键 (挂载开关), P3.1 登记为 Json 键集合",
+   "store": "default"
   },
   {
    "name": "key_$_plugin_mount_object_name_$_",
@@ -6812,7 +7729,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginMountStore 前缀键 (挂载对象名)",
+   "store": "default"
   },
   {
    "name": "key_$_plugin_mount_packages",
@@ -6825,7 +7746,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginMountStore 已配置包名列表",
+   "store": "default"
   },
   {
    "name": "key_$_plugin_mount_point_$_",
@@ -6838,7 +7763,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginMountStore 前缀键 (挂载点)",
+   "store": "default"
   },
   {
    "name": "key_$_plugin_update_check_$_",
@@ -6851,7 +7780,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginUpdateCheckStore 每个插件的 \"检查更新\" 开关, 是用户设置 (ROADMAP P4.2 列为状态, 见 Q13)",
+   "store": "default"
   },
   {
    "name": "key_$_plugin_variant_priority_$_",
@@ -6864,7 +7797,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "PluginVariantPriorityStore 每个引擎的变体优先级 (JSON 数组)",
+   "store": "default"
   },
   {
    "name": "key_$_seen_ace_fallback_notice",
@@ -6877,7 +7814,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "一次性提示已展示 (EditorEnginePreferences)",
+   "store": "default"
   },
   {
    "name": "key_$_seen_ace_large_file_notice",
@@ -6890,7 +7831,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "一次性提示已展示",
+   "store": "default"
   },
   {
    "name": "key_$_seen_editor_switch_undo_notice",
@@ -6903,7 +7848,11 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "一次性提示已展示",
+   "store": "default"
   },
   {
    "name": "key_$_suspended_plugin_$_*",
@@ -6916,7 +7865,11 @@
    ],
    "storeGuess": [
     "plugin_center_enable_state"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_enable_state",
+   "note": "挂起标记, 属于命名存储, 随整份计数",
+   "store": "plugin_center_enable_state"
   },
   {
    "name": "key_$_terminal_",
@@ -6929,20 +7882,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
-  },
-  {
-   "name": "key_*",
-   "refs": [
-    {
-     "file": "ui/floating/CircularMenuWindow.java",
-     "line": 22,
-     "const": "KEY_LAST_ORIENTATION"
-    }
    ],
-   "storeGuess": [
-    "default"
-   ]
+   "kind": "Excluded",
+   "note": "已移除的宿主终端的旧键前缀, TerminalLegacyCleanup 每次启动删除",
+   "store": "default"
   },
   {
    "name": "key_dont_show_main_activity",
@@ -6955,7 +7898,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本 API settings 模块的别名字符串, 不是偏好键",
+   "store": "default"
   },
   {
    "name": "key_down",
@@ -6983,7 +7929,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "按键事件名, 不是偏好键",
+   "store": "default"
   },
   {
    "name": "key_enable_a11y_service_with_root_access",
@@ -6996,7 +7945,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键",
+   "store": "default"
   },
   {
    "name": "key_enable_accessibility_service_by_root",
@@ -7009,7 +7961,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本 API settings 模块的别名字符串, 不是偏好键",
+   "store": "default"
   },
   {
    "name": "key_first_using",
@@ -7022,7 +7977,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "inrt 打包应用运行时状态 (附录 A.2)",
+   "store": "default"
   },
   {
    "name": "key_foreground_service",
@@ -7035,7 +7993,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键",
+   "store": "default"
   },
   {
    "name": "key_inrt_applied_build_id",
@@ -7048,7 +8009,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "inrt 打包应用运行时状态 (附录 A.2)",
+   "store": "default"
   },
   {
    "name": "key_not_showing_main_activity",
@@ -7061,7 +8025,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键",
+   "store": "default"
   },
   {
    "name": "key_stable_mode",
@@ -7074,7 +8041,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键",
+   "store": "default"
   },
   {
    "name": "key_up",
@@ -7097,7 +8067,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "按键事件名, 不是偏好键",
+   "store": "default"
   },
   {
    "name": "key_use_volume_control_running",
@@ -7110,7 +8083,10 @@
    ],
    "storeGuess": [
     "default"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键",
+   "store": "default"
   }
  ],
  "namedStores": [
@@ -7126,7 +8102,10 @@
    ],
    "files": [
     "ui/edit/keyboard/FunctionsKeyboardHelper.java"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "编辑器功能键盘配置 (附录 A)"
   },
   {
    "name": "ScriptWidgets",
@@ -7140,7 +8119,9 @@
    ],
    "files": [
     "external/widget/ScriptWidgets.java"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "桌面小部件 id 由启动器分配, 仅本机有效 (附录 A.2)"
   },
   {
    "name": "ace_action_history",
@@ -7154,7 +8135,10 @@
    ],
    "files": [
     "ui/edit/keyboard/AceActionHistoryStore.kt"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "Ace 动作历史 (P3.2 为 State)"
   },
   {
    "name": "ace_editor_font_ui_preferences",
@@ -7168,7 +8152,10 @@
    ],
    "files": [
     "ui/edit/editor/ace/AceEditorFontUiPreferences.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "字体选择界面的排序 / 预览 / 变体偏好 (附录 A)"
   },
   {
    "name": "autojs.localstorage.*",
@@ -7195,21 +8182,25 @@
    "files": [
     "core/storage/LocalStorage.java",
     "runtime/api/augment/storages/Storages.kt"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本自己的数据 (附录 A.2)"
   },
   {
    "name": "autojs.node.storage.*.*.*",
    "calls": [
     {
      "file": "engine/NodeBridgeProtocol.kt",
-     "line": 3342,
+     "line": 3354,
      "arg": "storagePreferencesName(storeName)",
-     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3457)"
+     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3469)"
     }
    ],
    "files": [
     "engine/NodeBridgeProtocol.kt"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2 补登, Q13)"
   },
   {
    "name": "build_apk_config_profiles",
@@ -7223,63 +8214,69 @@
    ],
    "files": [
     "ui/project/BuildConfigStore.java"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "apk_build",
+   "note": "APK 构建配置档"
   },
   {
    "name": "bun_host_capability_grants",
    "calls": [
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 67,
+     "line": 68,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:61)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 70,
+     "line": 71,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:61)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 80,
+     "line": 81,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:61)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 83,
+     "line": 84,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:61)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 87,
+     "line": 88,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:61)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 90,
+     "line": 91,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:61)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 210,
+     "line": 214,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:61)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 213,
+     "line": 217,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:61)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
     }
    ],
    "files": [
     "core/plugin/bun/BunHostCapabilityGrants.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "credentials",
+   "note": "Bun 宿主能力授权, sensitive"
   },
   {
    "name": "device_id_prefs",
@@ -7293,7 +8290,9 @@
    ],
    "files": [
     "deviceid/DeviceIdProvider.kt"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "设备标识 (附录 A.2)"
   },
   {
    "name": "editor_symbols_config",
@@ -7307,7 +8306,10 @@
    ],
    "files": [
     "ui/edit/keyboard/SymbolsConfigStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "符号键盘配置 (附录 A)"
   },
   {
    "name": "explorer_playback_history",
@@ -7333,7 +8335,9 @@
    ],
    "files": [
     "core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "媒体回放进度, 指向本机文件 (P3.5 永久排除)"
   },
   {
    "name": "github_auth",
@@ -7347,7 +8351,10 @@
    ],
    "files": [
     "network/GitHubTokenStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "credentials",
+   "note": "GitHub 令牌, sensitive"
   },
   {
    "name": "jvm_source_provider_selection",
@@ -7367,7 +8374,10 @@
    ],
    "files": [
     "core/plugin/jvm/JvmSourceProviderSelection.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "JVM 源码提供方选择 (附录 A)"
   },
   {
    "name": "key_$_ignored_updates",
@@ -7381,7 +8391,10 @@
    ],
    "files": [
     "network/UpdateIgnoreStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "updates",
+   "note": "UpdateIgnoreStore (文件名取自 `R.string.key_ignored_updates`), 忽略的插件更新"
   },
   {
    "name": "lua-runtime-storage-v1-*",
@@ -7395,7 +8408,9 @@
    ],
    "files": [
     "engine/LuaHostStorage.kt"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "脚本自己的数据 (附录 A.2)"
   },
   {
    "name": "mcp_server_trust_confirmation",
@@ -7416,7 +8431,10 @@
    "files": [
     "app/tool/McpServerTool.kt",
     "core/plugin/mcp/McpServerPluginInspector.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "credentials",
+   "note": "MCP Server 签名信任确认, sensitive"
   },
   {
    "name": "permission_wizard",
@@ -7430,7 +8448,10 @@
    ],
    "files": [
     "ui/wizard/WizardProfileStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "wizards",
+   "note": "权限向导自定义配置档; 其中 `_last_profile_id` 是状态 (附录 A), 整份随 wizards"
   },
   {
    "name": "plugin_center_attention",
@@ -7450,7 +8471,10 @@
    ],
    "files": [
     "core/plugin/center/PluginCenterAttentionStore.kt"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "插件中心临时置顶 (P4.2)"
   },
   {
    "name": "plugin_center_authorization",
@@ -7476,7 +8500,10 @@
    ],
    "files": [
     "core/plugin/center/PluginAuthorizationStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "credentials",
+   "note": "插件授权记录, sensitive"
   },
   {
    "name": "plugin_center_enable_state",
@@ -7514,7 +8541,10 @@
    ],
    "files": [
     "core/plugin/center/PluginEnableStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_enable_state",
+   "note": "插件启用与挂起状态"
   },
   {
    "name": "plugin_center_filter_state",
@@ -7528,7 +8558,10 @@
    ],
    "files": [
     "core/plugin/center/PluginFilterStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "筛选"
   },
   {
    "name": "plugin_center_recent",
@@ -7560,7 +8593,10 @@
    ],
    "files": [
     "core/plugin/center/PluginRecentStore.kt"
-   ]
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "最近安装 / 卸载时间 (P4.2)"
   },
   {
    "name": "plugin_center_sort_state",
@@ -7588,7 +8624,10 @@
     "core/plugin/center/PluginSortStore.kt",
     "core/plugin/center/PluginSortStoreOfficial.kt",
     "core/plugin/center/PluginSortStoreThirdParty.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "排序, PluginSortStore / Official / ThirdParty 三个类共用一份"
   },
   {
    "name": "plugin_center_visibility_state",
@@ -7602,7 +8641,10 @@
    ],
    "files": [
     "core/plugin/center/PluginVisibilityStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "隐藏的插件"
   },
   {
    "name": "plugin_install_wizard",
@@ -7629,7 +8671,10 @@
    "files": [
     "core/plugin/center/wizard/PluginInstallWizardProfileStore.kt",
     "ui/wizard/WizardProfileStore.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "wizards",
+   "note": "插件安装向导自定义配置档; 其中 `_last_profile_id` 是状态, 整份随 wizards"
   },
   {
    "name": "plugin_launcher_icons",
@@ -7643,7 +8688,10 @@
    ],
    "files": [
     "core/plugin/center/PluginLauncherIconController.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "插件启动图标显示状态 (PluginLauncherIconController)"
   },
   {
    "name": "privileged_edit_backups",
@@ -7681,7 +8729,9 @@
    ],
    "files": [
     "model/explorer/PrivilegedBackupManager.kt"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "指向本机文件的操作日志 (附录 A.2)"
   },
   {
    "name": "runtime_task_intents",
@@ -7695,7 +8745,9 @@
    ],
    "files": [
     "engine/RuntimeTasksBridge.kt"
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "运行时状态 (附录 A.2)"
   },
   {
    "name": "three_stove_agent_trust_confirmation",
@@ -7716,7 +8768,10 @@
    "files": [
     "core/plugin/agent/ThreeStoveAgentPluginInspector.kt",
     "ui/settings/ThreeStoveAgentGuide.kt"
-   ]
+   ],
+   "kind": "Setting",
+   "category": "credentials",
+   "note": "3-Stove Agent 签名信任确认, sensitive"
   }
  ],
  "defaultPrefsBypass": [
@@ -7912,7 +8967,9 @@
      "name": "autojs6_installed_plugin_metadata_v1.json",
      "line": 21
     }
-   ]
+   ],
+   "kind": "Cache",
+   "note": "已安装插件元数据缓存 (附录 A.2)"
   },
   {
    "file": "core/plugin/center/PluginIndexRepository.kt",
@@ -7937,7 +8994,9 @@
      "name": "plugins.generated.json",
      "line": 44
     }
-   ]
+   ],
+   "kind": "Cache",
+   "note": "插件索引缓存; 另外三个 .json 是索引仓库内的路径"
   },
   {
    "file": "core/plugin/python/PythonPrivateExecutionSnapshot.kt",
@@ -7950,7 +9009,9 @@
      "name": ".json",
      "line": 152
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "运行时快照, 进程结束即失效 (附录 A.2)"
   },
   {
    "file": "engine/NodeLifecycleCheckpointStore.kt",
@@ -7964,7 +9025,9 @@
      "name": "*.json",
      "line": 228
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "运行时检查点 (附录 A.2)"
   },
   {
    "file": "engine/NodeWorkManagerBridgeScheduler.kt",
@@ -7981,7 +9044,9 @@
      "name": "*.json",
      "line": 455
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "运行时调度记录 (附录 A.2)"
   },
   {
    "file": "engine/RuntimeWebLocalDownloads.kt",
@@ -7994,7 +9059,9 @@
      "name": "runtime-web-downloads/*.json",
      "line": 270
     }
-   ]
+   ],
+   "kind": "Cache",
+   "note": "可重新下载的资源 (附录 A.2)"
   },
   {
    "file": "model/explorer/PrivilegedBackupManager.kt",
@@ -8009,7 +9076,9 @@
      "name": "*.json",
      "line": 317
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "指向本机文件的备份记录 (附录 A.2)"
   },
   {
    "file": "model/explorer/PrivilegedEditSessions.kt",
@@ -8037,7 +9106,9 @@
      "name": "session.json",
      "line": 355
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "指向本机文件的编辑会话 (附录 A.2)"
   },
   {
    "file": "model/explorer/PrivilegedFileOperationJournal.kt",
@@ -8051,7 +9122,9 @@
      "name": "*.json",
      "line": 16
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "指向本机文件的操作日志 (附录 A.2)"
   },
   {
    "file": "ui/edit/editor/ace/font/FontCatalogRepository.kt",
@@ -8068,7 +9141,9 @@
      "name": "catalog-v1.sig.json",
      "line": 413
     }
-   ]
+   ],
+   "kind": "Cache",
+   "note": "字体目录缓存与签名 (附录 A.2)"
   },
   {
    "file": "ui/edit/editor/ace/font/FontStore.kt",
@@ -8081,7 +9156,9 @@
      "name": "installed.json",
      "line": 468
     }
-   ]
+   ],
+   "kind": "Cache",
+   "note": "已安装字体清单与字体文件 (附录 A.2)"
   },
   {
    "file": "ui/project/BuildActivity.java",
@@ -8094,7 +9171,9 @@
      "name": ".json",
      "line": 1350
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "`.json` 是 SAF 导出配置档的建议文件名, 不是内部存储"
   },
   {
    "file": "ui/settings/NodeDoctorReportGenerator.kt",
@@ -8107,7 +9186,9 @@
      "name": "node-doctor-report.json",
      "line": 45
     }
-   ]
+   ],
+   "kind": "Excluded",
+   "note": "诊断报告输出文件, 不是存储"
   }
  ],
  "jsonFileStoresReconcile": {
@@ -8123,8 +9204,8 @@
   "key_$_ace_editor_font_preview_excluded_features": [
    {
     "expr": "emptySet()",
-    "form": "表达式",
-    "value": null,
+    "form": "调用处字面量",
+    "value": "[]",
     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
     "line": 156,
     "method": "getStringSet",
@@ -8134,8 +9215,8 @@
   "key_$_ace_editor_font_preview_excluded_types": [
    {
     "expr": "emptySet()",
-    "form": "表达式",
-    "value": null,
+    "form": "调用处字面量",
+    "value": "[]",
     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
     "line": 162,
     "method": "getStringSet",
@@ -8193,6 +9274,18 @@
     "line": 27,
     "method": "getBoolean",
     "type": "Boolean"
+   }
+  ],
+  "key_$_last_orientation": [
+   {
+    "expr": "ORIENTATION_PORTRAIT",
+    "form": "表达式",
+    "value": null,
+    "via": "常量 ORIENTATION_PORTRAIT (core/image/capture/ScreenCapturer.java:63)",
+    "file": "ui/floating/CircularMenuWindow.java",
+    "line": 233,
+    "method": "getInt",
+    "type": "Int"
    }
   ],
   "key_$_plugin_center_filter_enabled_state": [
@@ -8265,8 +9358,8 @@
   "key_$_plugin_center_hidden_packages": [
    {
     "expr": "emptySet()",
-    "form": "表达式",
-    "value": null,
+    "form": "调用处字面量",
+    "value": "[]",
     "file": "core/plugin/center/PluginVisibilityStore.kt",
     "line": 95,
     "method": "getStringSet",
@@ -8276,8 +9369,9 @@
   "key_$_plugin_center_sort_state": [
    {
     "expr": "defaultSortOrdinal",
-    "form": "表达式",
+    "form": "调用方传入",
     "value": null,
+    "note": "函数参数 defaultSortOrdinal, 默认值由调用方决定",
     "file": "core/plugin/center/PluginSortStore.kt",
     "line": 26,
     "method": "getInt",
@@ -8287,8 +9381,9 @@
   "key_$_plugin_center_sort_state_official": [
    {
     "expr": "defaultSortOrdinal",
-    "form": "表达式",
+    "form": "调用方传入",
     "value": null,
+    "note": "函数参数 defaultSortOrdinal, 默认值由调用方决定",
     "file": "core/plugin/center/PluginSortStoreOfficial.kt",
     "line": 29,
     "method": "getInt",
@@ -8298,8 +9393,9 @@
   "key_$_plugin_center_sort_state_third_party": [
    {
     "expr": "defaultSortOrdinal",
-    "form": "表达式",
+    "form": "调用方传入",
     "value": null,
+    "note": "函数参数 defaultSortOrdinal, 默认值由调用方决定",
     "file": "core/plugin/center/PluginSortStoreThirdParty.kt",
     "line": 29,
     "method": "getInt",
@@ -8343,24 +9439,12 @@
   "key_$_plugin_mount_packages": [
    {
     "expr": "emptySet()",
-    "form": "表达式",
-    "value": null,
+    "form": "调用处字面量",
+    "value": "[]",
     "file": "core/plugin/center/PluginMountStore.kt",
     "line": 128,
     "method": "getStringSet",
     "type": "StringSet"
-   }
-  ],
-  "key_*": [
-   {
-    "expr": "ORIENTATION_PORTRAIT",
-    "form": "表达式",
-    "value": null,
-    "via": "常量 ORIENTATION_PORTRAIT (core/image/capture/ScreenCapturer.java:63)",
-    "file": "ui/floating/CircularMenuWindow.java",
-    "line": 233,
-    "method": "getInt",
-    "type": "Int"
    }
   ],
   "key_a11y_service_manager_control_level": [
@@ -8400,13 +9484,14 @@
   "key_ace_editor_font": [
    {
     "expr": "AceEditorFont.IOSEVKA.preferenceValue",
-    "form": "表达式",
-    "value": null,
-    "note": "枚举成员属性, 需人工核对",
+    "form": "伴生常量",
+    "value": "iosevka",
+    "note": "枚举 AceEditorFont.IOSEVKA, 与 `default_key_ace_editor_font` 一致",
     "file": "ui/edit/editor/ace/AceEditorFontPreferences.kt",
     "line": 12,
     "method": "getString",
-    "type": "String"
+    "type": "String",
+    "manual": true
    }
   ],
   "key_ace_font_ligatures_enabled": [
@@ -8524,12 +9609,14 @@
   "key_ace_lsp_declaration_groups": [
    {
     "expr": "\"\"",
-    "form": "调用处字面量",
-    "value": "",
+    "form": "伴生常量",
+    "value": "[] (缺键时 DEFAULT_DECLARATION_GROUPS)",
     "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
     "line": 290,
     "method": "getString",
-    "type": "String"
+    "type": "String",
+    "note": "先判断 containsKey, 缺键返回 DEFAULT_DECLARATION_GROUPS (233 行); 空串只在键存在时出现",
+    "manual": true
    }
   ],
   "key_ace_lsp_enabled": [
@@ -8557,12 +9644,14 @@
   "key_ace_lsp_file_types": [
    {
     "expr": "\"\"",
-    "form": "调用处字面量",
-    "value": "",
+    "form": "伴生常量",
+    "value": "DEFAULT_FILE_TYPES (19 个扩展名, 缺键时)",
     "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
     "line": 256,
     "method": "getString",
-    "type": "String"
+    "type": "String",
+    "note": "先判断 containsKey, 缺键返回 DEFAULT_FILE_TYPES (56 行); 空串只在键存在时出现",
+    "manual": true
    }
   ],
   "key_ace_print_margin_enabled": [
@@ -8781,11 +9870,23 @@
    {
     "expr": "AutoNightMode.isFunctional()",
     "form": "表达式",
-    "value": null,
+    "value": "运行时: AutoNightMode.isFunctional()",
     "file": "util/ViewUtils.kt",
     "line": 129,
     "method": "getBoolean",
-    "type": "Boolean"
+    "type": "Boolean",
+    "ignoreForConflict": true,
+    "manual": true
+   },
+   {
+    "form": "表达式",
+    "type": "Boolean",
+    "expr": "ViewUtils.isAutoNightModeEnabled = isFunctional()",
+    "value": "运行时: 缺键时 Pref 初始化写入 isFunctional()",
+    "file": "core/pref/Pref.kt",
+    "line": 49,
+    "ignoreForConflict": true,
+    "manual": true
    }
   ],
   "key_batch_rename_history_retention": [
@@ -9003,13 +10104,14 @@
   "key_editor_engine": [
    {
     "expr": "EditorEngineType.NATIVE.preferenceValue",
-    "form": "表达式",
-    "value": null,
-    "note": "枚举成员属性, 需人工核对",
+    "form": "伴生常量",
+    "value": "native",
+    "note": "枚举 EditorEngineType.NATIVE",
     "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
     "line": 110,
     "method": "getString",
-    "type": "String"
+    "type": "String",
+    "manual": true
    },
    {
     "form": "调用处字面量",
@@ -9243,14 +10345,43 @@
   "key_editor_text_size": [
    {
     "expr": "defValue",
-    "form": "R.integer",
-    "value": "350",
-    "ref": "screen_capture_request_delay_default_value",
-    "via": "常量 defValue (core/pref/Pref.kt:72)",
+    "form": "调用方传入",
+    "value": null,
+    "note": "函数参数 defValue, 默认值由调用方决定",
     "file": "core/pref/Pref.kt",
     "line": 347,
     "method": "getInt",
     "type": "Int"
+   },
+   {
+    "form": "R.integer",
+    "type": "Int",
+    "expr": "getEditorTextSize(resources.getInteger(R.integer.editor_text_size_default_value))",
+    "value": "14",
+    "file": "ui/settings/EditorTextSizePreference.kt",
+    "line": 52,
+    "note": "设置页显示的默认字号",
+    "manual": true
+   },
+   {
+    "form": "表达式",
+    "type": "Int",
+    "expr": "getEditorTextSize(pxToSp(it.textSize).toInt())",
+    "value": "15",
+    "file": "ui/edit/editor/CodeEditor.kt",
+    "line": 65,
+    "note": "原生编辑器取布局 res/layout/code_editor.xml:14 的 textSize 15sp",
+    "manual": true
+   },
+   {
+    "form": "表达式",
+    "type": "Int",
+    "expr": "getEditorTextSize(editor.getTextSizeSp().toInt())",
+    "value": "运行时: 当前编辑器字号",
+    "file": "ui/edit/editor/service/EditorThemeFontService.kt",
+    "line": 69,
+    "ignoreForConflict": true,
+    "manual": true
    }
   ],
   "key_editor_theme": [
@@ -9262,6 +10393,16 @@
     "line": 273,
     "method": "getStringOrNull",
     "type": "String"
+   },
+   {
+    "form": "表达式",
+    "type": "String",
+    "expr": "Themes.getCurrentThemeName(...)",
+    "value": "运行时: 原生编辑器 \"Quiet Light\" (分离模式夜间 \"Dark (Visual Studio)\"), Ace 为 AceEditorThemes.getDefault(dark)",
+    "file": "ui/edit/theme/Themes.java",
+    "line": 181,
+    "ignoreForConflict": true,
+    "manual": true
    }
   ],
   "key_editor_theme_dark": [
@@ -9300,6 +10441,16 @@
     "line": 233,
     "method": "getStringOrNull",
     "type": "String"
+   },
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "firstNonBlank(..., DARK_THEME)",
+    "value": "Dark (Visual Studio)",
+    "file": "ui/edit/theme/Themes.java",
+    "line": 219,
+    "note": "原生编辑器分离模式夜间的回退",
+    "manual": true
    }
   ],
   "key_editor_theme_light": [
@@ -9338,6 +10489,16 @@
     "line": 235,
     "method": "getStringOrNull",
     "type": "String"
+   },
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "firstNonBlank(..., DEFAULT_THEME)",
+    "value": "Quiet Light",
+    "file": "ui/edit/theme/Themes.java",
+    "line": 222,
+    "note": "原生编辑器分离模式日间的回退 (先回退到 `key_editor_theme`)",
+    "manual": true
    }
   ],
   "key_editor_theme_mode": [
@@ -9416,6 +10577,16 @@
     "line": 217,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
+   },
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
+    "value": "false",
+    "file": "runtime/api/augment/settings/Settings.kt",
+    "line": 50,
+    "note": "脚本 API settings.isEnabled 对所有别名统一用 false",
+    "manual": true
    }
   ],
   "key_enable_a11y_service_with_secure_settings": [
@@ -10012,6 +11183,16 @@
     "line": 133,
     "method": "getBoolean",
     "type": "Boolean"
+   },
+   {
+    "form": "表达式",
+    "type": "Boolean",
+    "expr": "ViewUtils.isNightModeEnabled = isNightModeYes(app)",
+    "value": "运行时: 缺键时 Pref 初始化写入系统当前是否夜间",
+    "file": "core/pref/Pref.kt",
+    "line": 59,
+    "ignoreForConflict": true,
+    "manual": true
    }
   ],
   "key_nodejs_inspector_enabled": [
@@ -10246,8 +11427,8 @@
   "key_root_manager_apps_custom": [
    {
     "expr": "mutableSetOf()",
-    "form": "表达式",
-    "value": null,
+    "form": "调用处字面量",
+    "value": "[]",
     "file": "ui/accessibility/RootManagerAppsDialog.kt",
     "line": 115,
     "method": "getStringSet",
@@ -10255,8 +11436,8 @@
    },
    {
     "expr": "mutableSetOf()",
-    "form": "表达式",
-    "value": null,
+    "form": "调用处字面量",
+    "value": "[]",
     "file": "ui/accessibility/RootManagerAppsDialog.kt",
     "line": 171,
     "method": "getStringSet",
@@ -10266,13 +11447,14 @@
   "key_root_mode": [
    {
     "expr": "RootUtils.RootMode.AUTO_DETECT.key",
-    "form": "表达式",
-    "value": null,
-    "via": "常量 key (core/pref/Pref.kt:214)",
+    "form": "R.string",
+    "value": "key_$_root_mode_auto_detect",
+    "note": "RootMode.AUTO_DETECT = key(R.string.key_root_mode_auto_detect)",
     "file": "core/pref/Pref.kt",
     "line": 214,
     "method": "getString",
-    "type": "String"
+    "type": "String",
+    "manual": true
    },
    {
     "form": "R.string",
@@ -10436,11 +11618,13 @@
    {
     "expr": "if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS",
     "form": "表达式",
-    "value": null,
+    "value": "运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)",
     "file": "core/pref/Pref.kt",
     "line": 335,
     "method": "getString",
-    "type": "String"
+    "type": "String",
+    "ignoreForConflict": true,
+    "manual": true
    }
   ],
   "key_server_mode_lan_discovery": [
@@ -10521,60 +11705,61 @@
     "line": 238,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
+   },
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
+    "value": "false",
+    "file": "runtime/api/augment/settings/Settings.kt",
+    "line": 50,
+    "note": "脚本 API settings.isEnabled",
+    "manual": true
    }
   ],
   "key_theme_color_accent": [
    {
     "expr": "ThemeColorManager.defaultThemeColor.colorAccent",
-    "form": "表达式",
-    "value": null,
+    "form": "伴生常量",
+    "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
     "file": "theme/ThemeColor.kt",
     "line": 60,
     "method": "getInt",
-    "type": "Int"
+    "type": "Int",
+    "ignoreForConflict": true,
+    "note": "ThemeColorManager.kt:20 defaultThemeColor",
+    "manual": true
    }
   ],
   "key_theme_color_primary": [
    {
     "expr": "ThemeColorManager.defaultThemeColor.colorPrimary",
-    "form": "表达式",
-    "value": null,
+    "form": "伴生常量",
+    "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
     "file": "theme/ThemeColor.kt",
     "line": 59,
     "method": "getInt",
-    "type": "Int"
+    "type": "Int",
+    "ignoreForConflict": true,
+    "note": "ThemeColorManager.kt:20 defaultThemeColor",
+    "manual": true
    }
   ],
   "key_theme_color_primary_dark": [
    {
     "expr": "ThemeColorManager.defaultThemeColor.colorPrimaryDark",
-    "form": "表达式",
-    "value": null,
+    "form": "伴生常量",
+    "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
     "file": "theme/ThemeColor.kt",
     "line": 61,
     "method": "getInt",
-    "type": "Int"
+    "type": "Int",
+    "ignoreForConflict": true,
+    "note": "ThemeColorManager.kt:20 defaultThemeColor",
+    "manual": true
    }
   ],
   "key_timed_task_backend": [
-   {
-    "expr": "-1",
-    "form": "调用处字面量",
-    "value": "-1",
-    "file": "core/pref/Pref.kt",
-    "line": 278,
-    "method": "getLong",
-    "type": "Long"
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "core/pref/Pref.kt",
-    "line": 457,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
    {
     "expr": "defRes",
     "form": "R.string",
@@ -10674,17 +11859,40 @@
     "line": 256,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
+   },
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
+    "value": "false",
+    "file": "runtime/api/augment/settings/Settings.kt",
+    "line": 50,
+    "note": "脚本 API settings.isEnabled 对所有别名统一用 false",
+    "manual": true
    }
   ],
   "key_working_directory": [
    {
     "expr": "str(R.string.default_value_working_directory)",
-    "form": "表达式",
-    "value": null,
+    "form": "R.string",
+    "value": "/Scripts",
+    "ref": "default_value_working_directory",
+    "resolved": "default_value_working_directory",
     "file": "util/WorkingDirectoryUtils.kt",
     "line": 21,
     "method": "getString",
     "type": "String"
+   },
+   {
+    "form": "表达式",
+    "type": "String",
+    "expr": "WorkingDirectoryUtils.determineIfNeeded()",
+    "value": "运行时: 首次启动在各语言的默认目录中选最近修改且非空者",
+    "file": "util/WorkingDirectoryUtils.kt",
+    "line": 57,
+    "ignoreForConflict": true,
+    "note": "`default_value_working_directory` 按语言不同 (/Scripts, /脚本 等 10 种)",
+    "manual": true
    }
   ],
   "key_working_directory_history": [
@@ -10697,6 +11905,455 @@
     "method": "getLinkedHashSet",
     "type": "Json (Gson LinkedHashSet)"
    }
+  ],
+  "key_codegen_model_current": [
+   {
+    "form": "调用处字面量",
+    "type": "String",
+    "expr": "preferences.getString(preferenceKey, null)",
+    "value": "null",
+    "file": "ui/settings/codegen/CodegenModelStoreFactory.kt",
+    "line": 40,
+    "note": "未选择模型",
+    "manual": true
+   }
+  ],
+  "key_console_element_time_format": [
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_console_element_time_visible": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "CONSOLE_ELEMENT(..., false)",
+    "value": "false",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 16,
+    "manual": true
+   }
+  ],
+  "key_editor_log_panel_input_bar_visible": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_INPUT_BAR_VISIBLE",
+    "value": "false",
+    "file": "ui/log/LogPageConsoleSettings.kt",
+    "line": 61,
+    "manual": true
+   }
+  ],
+  "key_editor_log_panel_time_format": [
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_editor_log_panel_time_visible": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "EDITOR_PANEL(..., true)",
+    "value": "true",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 13,
+    "manual": true
+   }
+  ],
+  "key_enable_observe_key": [
+   {
+    "form": "表达式",
+    "type": "Boolean",
+    "expr": "(无)",
+    "value": "无读写方",
+    "ignoreForConflict": true,
+    "note": "源码与资源均无引用 (Q12)",
+    "manual": true
+   }
+  ],
+  "key_floating_console_time_format": [
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_floating_console_time_visible": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "FLOATING_WINDOW(..., false)",
+    "value": "false",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 17,
+    "manual": true
+   }
+  ],
+  "key_global_console_element_time_format": [
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_global_console_element_time_visible": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "GLOBAL_CONSOLE_ELEMENT(..., false)",
+    "value": "false",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 15,
+    "manual": true
+   }
+  ],
+  "key_log_activity_input_bar_visible": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_INPUT_BAR_VISIBLE",
+    "value": "false",
+    "file": "ui/log/LogPageConsoleSettings.kt",
+    "line": 61,
+    "manual": true
+   }
+  ],
+  "key_log_activity_time_format": [
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_log_activity_time_visible": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "LOG_ACTIVITY(..., true)",
+    "value": "true",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 14,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_java_enabled": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[java]",
+    "value": "true",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_kotlin_enabled": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[kotlin]",
+    "value": "false",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_lua_enabled": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[lua]",
+    "value": "true",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_python_enabled": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[python]",
+    "value": "true",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_typescript_enabled": [
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[typescript]",
+    "value": "true",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_plugin_mount_enabled_$_": [
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "Pref.getBoolean(enabledKey(packageName), false)",
+    "value": "false",
+    "file": "core/plugin/center/PluginMountStore.kt",
+    "line": 32,
+    "manual": true
+   }
+  ],
+  "key_$_plugin_mount_object_name_$_": [
+   {
+    "form": "调用处字面量",
+    "type": "String",
+    "expr": "Pref.getStringOrNull(objectNameKey(packageName))",
+    "value": "null",
+    "file": "core/plugin/center/PluginMountStore.kt",
+    "line": 43,
+    "note": "缺省时用 defaultObjectName(packageName)",
+    "manual": true
+   }
+  ],
+  "key_$_plugin_mount_point_$_": [
+   {
+    "form": "调用处字面量",
+    "type": "String",
+    "expr": "Pref.getStringOrNull(mountPointKey(packageName))",
+    "value": "null",
+    "file": "core/plugin/center/PluginMountStore.kt",
+    "line": 61,
+    "note": "null 与 \"global\" 都表示全局挂载点",
+    "manual": true
+   }
+  ],
+  "key_$_plugin_update_check_$_": [
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "isEnabled(packageName, defaultEnabled = true)",
+    "value": "true",
+    "file": "core/plugin/center/PluginUpdateCheckStore.kt",
+    "line": 12,
+    "manual": true
+   }
+  ],
+  "key_$_plugin_variant_priority_$_": [
+   {
+    "form": "调用处字面量",
+    "type": "Json (JSON 数组)",
+    "expr": "Pref.getStringOrNull(key).orEmpty()",
+    "value": "[]",
+    "file": "core/plugin/center/PluginVariantPriorityStore.kt",
+    "line": 15,
+    "manual": true
+   }
   ]
- }
+ },
+ "categoryCounts": {
+  "appearance": {
+   "keys": 9,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "general": {
+   "keys": 5,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "explorer": {
+   "keys": 6,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "history": {
+   "keys": 10,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "editor_general": {
+   "keys": 1,
+   "literalKeys": 1,
+   "stores": 0
+  },
+  "editor_appearance": {
+   "keys": 17,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "editor_log": {
+   "keys": 6,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "editor_assistance": {
+   "keys": 3,
+   "literalKeys": 5,
+   "stores": 0
+  },
+  "editor_smart_hint": {
+   "keys": 7,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "editor_gestures": {
+   "keys": 2,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "editor_gutter": {
+   "keys": 5,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "editor_performance": {
+   "keys": 2,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "editor_keyboard": {
+   "keys": 0,
+   "literalKeys": 0,
+   "stores": 3
+  },
+  "timed_task": {
+   "keys": 1,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "a11y": {
+   "keys": 6,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "running": {
+   "keys": 5,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "record": {
+   "keys": 3,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "extensibility": {
+   "keys": 2,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "updates": {
+   "keys": 2,
+   "literalKeys": 0,
+   "stores": 1
+  },
+  "console": {
+   "keys": 12,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "connection": {
+   "keys": 7,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "layout_inspector": {
+   "keys": 5,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "developer": {
+   "keys": 4,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "plugin_center": {
+   "keys": 3,
+   "literalKeys": 6,
+   "stores": 5
+  },
+  "plugin_enable_state": {
+   "keys": 0,
+   "literalKeys": 0,
+   "stores": 1
+  },
+  "apk_build": {
+   "keys": 0,
+   "literalKeys": 0,
+   "stores": 1
+  },
+  "wizards": {
+   "keys": 0,
+   "literalKeys": 0,
+   "stores": 2
+  },
+  "data_shortcuts": {
+   "keys": 0,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "data_color_library": {
+   "keys": 0,
+   "literalKeys": 0,
+   "stores": 0
+  },
+  "credentials": {
+   "keys": 0,
+   "literalKeys": 0,
+   "stores": 5
+  },
+  "other": {
+   "keys": 40,
+   "literalKeys": 8,
+   "stores": 3
+  }
+ },
+ "classificationProblems": [],
+ "defaultConflicts": [
+  {
+   "key": "key_editor_text_size",
+   "values": [
+    "14",
+    "15"
+   ]
+  },
+  {
+   "key": "key_enable_a11y_service_with_root_access",
+   "values": [
+    "false",
+    "true"
+   ]
+  },
+  {
+   "key": "key_use_volume_control_running",
+   "values": [
+    "false",
+    "true"
+   ]
+  }
+ ],
+ "defaultsMissing": []
 }

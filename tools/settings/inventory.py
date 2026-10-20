@@ -62,9 +62,15 @@ CATEGORIES = (
     'appearance', 'general', 'explorer', 'history', 'editor_general', 'editor_appearance', 'editor_log',
     'editor_assistance', 'editor_smart_hint', 'editor_gestures', 'editor_gutter', 'editor_performance',
     'editor_keyboard', 'timed_task', 'a11y', 'running', 'record', 'extensibility', 'updates', 'console', 'connection',
-    'layout_inspector', 'developer', 'plugin_center', 'plugin_enable_state', 'apk_build', 'wizards', 'credentials',
-    'other',
+    'layout_inspector', 'developer', 'plugin_center', 'plugin_enable_state', 'apk_build', 'wizards', 'data_shortcuts',
+    'data_color_library', 'credentials', 'other',
 )
+
+# Data categories (D21 / T19) hold no keys; their entries are counted per item at run time.
+DATA_CATEGORIES = ('data_shortcuts', 'data_color_library')
+
+# Deployment kinds of ROADMAP T18 (P2.2 / P2.3).
+DEPLOYMENTS = ('CREATE_DIRECTORY', 'DOWNLOAD_EDITOR_FONT')
 
 # The 14 file-based JSON stores listed in ROADMAP 1.1, used to reconcile the heuristic scan.
 ROADMAP_JSON_STORES = (
@@ -375,16 +381,22 @@ class Resolver:
         if not found:
             return None
         if qualifier:
+            # `Foo.BAR` only resolves inside Foo.kt / Foo.java (an enum member path such as `Mode.AUTO.key` does not).
             stem = qualifier.split('.')[-1]
             scoped = [d for d in found if d[0].stem == stem]
-            if scoped:
-                return scoped[0]
+            return scoped[0] if scoped else None
         local = [d for d in found if d[0] is here]
         if local:
             return local[0]
+        # Only constant-looking names (`SP_NAME`, `PREFS`) are looked up in other files; `keyRes` or `key` there
+        # would be some unrelated local variable.
+        if not re.fullmatch(r'[A-Z][A-Z0-9_]*', name):
+            return None
         return found[0] if len(found) == 1 else None
 
     def template(self, body, here, depth):
+        if here.path.suffix != '.kt':
+            return body.replace('\\"', '"').replace('\\\\', '\\')
         out, i = [], 0
         while i < len(body):
             c = body[i]
@@ -493,10 +505,16 @@ class Resolver:
         """Nearest `val name = expr` above `before_line` within 60 lines."""
         pattern = re.compile(r'^\s*(?:final\s+)?(?:val|var|int|long|boolean|float|String)\s+' + re.escape(name)
                              + r'\s*(?::\s*[\w.<>?]+)?\s*=\s*(.+?)\s*;?\s*$')
-        for ln in range(before_line - 1, max(0, before_line - 60), -1):
-            m = pattern.match(here.lines[ln - 1])
-            if m:
+        # The search stays inside the enclosing function: it stops at the first `fun` (Kotlin) or method header
+        # (Java) above the call, which also covers the call sitting on the header line itself.
+        boundary = re.compile(r'\bfun\s+\w+\s*\(|^\s*(?:public|private|protected|static)\b[^=;]*\([^;]*\)\s*(?:throws[^{]*)?\{?\s*$')
+        for ln in range(before_line, max(0, before_line - 60), -1):
+            text = here.lines[ln - 1]
+            m = pattern.match(text)
+            if m and ln < before_line:
                 return m.group(1), ln
+            if boundary.search(text):
+                return None
         return None
 
     def default_value(self, expr, here, line, depth=0):
@@ -514,6 +532,8 @@ class Resolver:
         m = re.fullmatch(r'"((?:[^"\\]|\\.)*)"', expr)
         if m:
             return dict(out, form='调用处字面量', value=m.group(1).replace('\\$', '$'))
+        if re.fullmatch(r'(?:mutable|linked|hash)?(?:[Ss]etOf|[Ll]istOf|empty(?:Set|List))\(\s*\)', expr):
+            return dict(out, form='调用处字面量', value='[]')
         m = re.search(r'R\.bool\.(\w+)', expr)
         if m and re.fullmatch(r'(?:[\w.()]*\.)?(?:getBoolean\()?\s*R\.bool\.\w+\s*\)?', expr):
             v = res.bools.get(m.group(1), {}).get('value')
@@ -522,7 +542,7 @@ class Resolver:
         if m and re.fullmatch(r'(?:[\w.()]*\.)?(?:getInteger\()?\s*R\.integer\.\w+\s*\)?(?:\.to\w+\(\))?', expr):
             v = res.integers.get(m.group(1), {}).get('value')
             return dict(out, form='R.integer', value=v, ref=m.group(1))
-        m = re.fullmatch(r'(?:[\w.()]*\.)?(?:key|getString)\(\s*R\.string\.(\w+)\s*\)|R\.string\.(\w+)', expr)
+        m = re.fullmatch(r'(?:[\w.()]*\.)?(?:key|str|getString)\(\s*R\.string\.(\w+)\s*\)|R\.string\.(\w+)', expr)
         if m:
             ref = m.group(1) or m.group(2)
             final, v = res.string(ref)
@@ -537,6 +557,12 @@ class Resolver:
                     inner['via'] = f'局部变量 {name} ({here.display}:{local[1]})'
                     inner['expr'] = expr
                     return inner
+                header = re.compile(r'\bfun\s+\w+\s*\((?:[^()]|\([^()]*\))*\b' + re.escape(name) + r'\s*:')
+                for ln in range(line, max(0, line - 60), -1):
+                    if header.search(here.lines[ln - 1]):
+                        return dict(out, form='调用方传入', value=None, note=f'函数参数 {name}, 默认值由调用方决定')
+                    if re.search(r'\bfun\s+\w+\s*\(', here.lines[ln - 1]):
+                        break
             decl = self.find_decl(name, here, qualifier)
             if decl:
                 f, value_expr, decl_line = decl
@@ -635,8 +661,11 @@ def scan_sources(sources, res, key_values):
                 raw = m.group(1)
                 if not KEY_LITERAL_PREFIX.match(raw):
                     continue
-                name = raw.replace('\\$', '\x00')
-                name = re.sub(r'\$\{[^}]*\}|\$[A-Za-z_]\w*', '*', name).replace('\x00', '$')
+                if f.path.suffix == '.kt':
+                    name = raw.replace('\\$', '\x00')
+                    name = re.sub(r'\$\{[^}]*\}|\$[A-Za-z_]\w*', '*', name).replace('\x00', '$')
+                else:
+                    name = raw
                 if not re.fullmatch(r'key_[\w$*]*', name) or name.startswith('key_') and len(name) <= 4:
                     continue
                 const = re.search(r'\b(?:const\s+val|val|static\s+final\s+String|final\s+String)\s+([A-Za-z_]\w*)\s*'
@@ -921,20 +950,34 @@ def merge_classification(data, cls):
             if c is None:
                 problems.append(f'{cls_key}: {ident} 未分类')
                 continue
-            for field in ('kind', 'category', 'note', 'effect', 'store'):
+            for field in ('kind', 'category', 'note', 'effect', 'store', 'deployment'):
                 if field in c:
                     item[field] = c[field]
             if c.get('kind') not in KINDS:
                 problems.append(f'{cls_key}: {ident} kind 无效: {c.get("kind")}')
-            if c.get('category') is not None and c['category'] not in CATEGORIES:
+            if c.get('category') is not None and (c['category'] not in CATEGORIES or c['category'] in DATA_CATEGORIES):
                 problems.append(f'{cls_key}: {ident} 分类 id 无效: {c["category"]}')
+            if c.get('deployment') is not None and (c['deployment'] not in DEPLOYMENTS or c.get('kind') != 'Setting'):
+                problems.append(f'{cls_key}: {ident} deployment 无效或不是 Setting: {c["deployment"]}')
             if c.get('kind') in ('Setting', 'State') and not c.get('category'):
                 problems.append(f'{cls_key}: {ident} 缺分类 id')
         for ident in sorted(set(table) - seen):
             if not ident.startswith('_'):
                 problems.append(f'{cls_key}: {ident} 在扫描结果中不存在')
+    # An extra default with "match" completes the scanned sources whose expression equals it (value, form, note);
+    # one without "match" is appended as a source of its own.
     for name, extra in cls.get('extraDefaults', {}).items():
-        data['defaults'].setdefault(name, []).extend(dict(e, manual=True) for e in extra)
+        sources = data['defaults'].setdefault(name, [])
+        for e in extra:
+            if 'match' in e:
+                hits = [s for s in sources if s.get('expr') == e['match']]
+                if not hits:
+                    problems.append(f'extraDefaults: {name} 没有表达式为 {e["match"]} 的来源')
+                for s in hits:
+                    s.update({k: v for k, v in e.items() if k != 'match'})
+                    s['manual'] = True
+            else:
+                sources.append(dict(e, manual=True))
     data['categoryCounts'] = category_counts(data)
     return problems
 
@@ -945,7 +988,9 @@ def category_counts(data):
         if k.get('kind') in ('Setting', 'State') and k.get('category') in counts:
             counts[k['category']]['keys'] += 1
     for k in data['literalKeys']:
-        if k.get('kind') in ('Setting', 'State') and k.get('category') in counts:
+        # Literal keys inside a named store are counted with that store ("one store = one entry").
+        store = k.get('store') or (k['storeGuess'][0] if len(k['storeGuess']) == 1 else None)
+        if store == 'default' and k.get('kind') in ('Setting', 'State') and k.get('category') in counts:
             counts[k['category']]['literalKeys'] += 1
     for s in data['namedStores']:
         if s.get('kind') in ('Setting', 'State') and s.get('category') in counts:
@@ -970,6 +1015,15 @@ def refs_cell(refs, limit=6):
     if len(items) > limit:
         return ', '.join(items[:limit]) + ' 等 %d 处' % len(items)
     return ', '.join(items)
+
+
+def category_cell(item):
+    if not item.get('category'):
+        return ''
+    cell = code(item['category'])
+    if item.get('deployment'):
+        cell += ', deployment %s' % code(item['deployment'])
+    return cell
 
 
 def page_cell(k):
@@ -1041,7 +1095,7 @@ def render_inventory(data):
         refs = k.get('sourceRefs', []) + [dict(r, file=r['file']) for r in k.get('literalRefs', [])]
         w('| %s | %s | %s | %s | %s | %s |' % (
             code(k['name']), md_escape(page_cell(k)), md_escape(refs_cell(refs)), k.get('kind', ''),
-            code(k['category']) if k.get('category') else '', md_escape(k.get('note', ''))))
+            category_cell(k), md_escape(k.get('note', ''))))
     w('')
     w('## 3. 源码字面量键')
     w('')
@@ -1096,10 +1150,20 @@ def render_inventory(data):
     if 'categoryCounts' in data:
         w('## 7. 分类条目数 (回填 ROADMAP 附录 A)')
         w('')
-        w('| 分类 id | `key_*` 键 | 字面量键 | 命名存储 |')
-        w('| --- | --- | --- | --- |')
+        w('Setting 与 State 计入条目数; 默认偏好中的字面量键 (含前缀键, 每组算 1 条) 单独计数, 命名存储每份算 1 条, '
+          '存储内部的键随整份计数. 数据分类 (D21) 不含键, 条目数在运行时按条 / 按库计算.')
+        w('')
+        w('| 分类 id | `key_*` 键 | 字面量键 (默认偏好) | 命名存储 | 合计 | 部署项 |')
+        w('| --- | --- | --- | --- | --- | --- |')
+        deployments = {}
+        for item in data['keys'] + data['literalKeys']:
+            if item.get('deployment') and item.get('category'):
+                deployments.setdefault(item['category'], []).append('%s (%s)' % (code(item['deployment']),
+                                                                                code(item['name'])))
         for cid, c in data['categoryCounts'].items():
-            w('| %s | %d | %d | %d |' % (code(cid), c['keys'], c['literalKeys'], c['stores']))
+            total = '数据' if cid in DATA_CATEGORIES else str(c['keys'] + c['literalKeys'] + c['stores'])
+            w('| %s | %d | %d | %d | %s | %s |' % (code(cid), c['keys'], c['literalKeys'], c['stores'], total,
+                                                ', '.join(deployments.get(cid, []))))
         w('')
     return '\n'.join(out)
 
@@ -1107,8 +1171,8 @@ def render_inventory(data):
 def fmt_value(d):
     v = d.get('value')
     if v is None:
-        return '(需人工核对)'
-    text = str(v)
+        return '(由调用方决定)' if d.get('form') == '调用方传入' else '(需人工核对)'
+    text = str(v) if str(v) != '' else '""'
     if d.get('resolved') and d.get('resolved') != d.get('ref'):
         text = '%s = %s' % (d['resolved'], text)
     return text
@@ -1127,7 +1191,7 @@ def render_defaults(data, cls):
     w = out.append
     keys = {k['name']: k for k in data['keys']}
     settings = [k for k in data['keys'] if k.get('kind') == 'Setting']
-    literal_settings = [k for k in data['literalKeys'] if k.get('kind') == 'Setting']
+    literal_settings = [k for k in data['literalKeys'] if k.get('kind') == 'Setting' and k.get('store') == 'default']
     w('# 设置默认值表 (defaults)')
     w('')
     w('由 `tools/settings/inventory.py` 生成, 不要手工编辑; 人工补充的来源写在 `tools/settings/classification.json` 的 '
@@ -1143,8 +1207,8 @@ def render_defaults(data, cls):
     w('')
     w('## 1. 默认值来源')
     w('')
-    w('| 键 | 类型 | 来源形式 | 表达式 | 取值 | 位置 |')
-    w('| --- | --- | --- | --- | --- | --- |')
+    w('| 键 | 类型 | 来源形式 | 表达式 | 取值 | 位置 | 备注 |')
+    w('| --- | --- | --- | --- | --- | --- | --- |')
     conflicts = []
     missing = []
     for k in settings + literal_settings:
@@ -1152,29 +1216,31 @@ def render_defaults(data, cls):
         sources = data['defaults'].get(name, [])
         if not sources:
             missing.append(name)
-            w('| %s | | (未找到) | | | |' % code(name))
+            w('| %s | | (未找到) | | | | |' % code(name))
             continue
         for d in sources:
             expr = d.get('expr', '')
             if d.get('via'):
                 expr += ' (经 %s)' % d['via']
-            w('| %s | %s | %s | %s | %s | %s |' % (
+            w('| %s | %s | %s | %s | %s | %s | %s |' % (
                 code(name), d.get('type') or '', d.get('form', '') + (' (人工)' if d.get('manual') else ''),
                 md_escape(code(expr) if expr else ''), md_escape(code(fmt_value(d))),
-                '%s:%s' % (d.get('file', ''), d.get('line', '')) if d.get('file') else md_escape(d.get('note', ''))))
+                '%s:%s' % (d['file'], d.get('line', '')) if d.get('file') else '', md_escape(d.get('note', ''))))
         values = {}
         for d in sources:
             if d.get('ignoreForConflict'):
                 continue
             nv = norm_value(d.get('value'))
-            if nv is not None:
+            # `null` means "no default here, the caller falls back" (getStringOrNull, change detection); not compared.
+            if nv is not None and nv != 'null':
                 values.setdefault(nv, []).append(d)
         if len(values) > 1:
             conflicts.append((name, values))
     w('')
     w('## 2. 同一键多处默认值不一致')
     w('')
-    w('只比较能求出取值的来源 (登记在 ROADMAP 附录 C Q10, 由维护者定统一值; P1-P5 期间保持现状, 红线 R2).')
+    w('只比较能求出取值的来源; 取值为 `null` 的行 (`getStringOrNull` 或变更检测, 调用处自行回退) 不参与比较. '
+      '逐条登记在 ROADMAP 附录 C Q10, 由维护者定统一值; P1-P5 期间保持现状 (红线 R2).')
     w('')
     if not conflicts:
         w('无.')
