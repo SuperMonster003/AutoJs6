@@ -16,6 +16,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import time
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "sdk37"))
@@ -158,6 +159,9 @@ def markdown(meta, reports, failures):
         f"- Host: {meta['package']} versionCode {meta['versionCode']} ({meta.get('versionName')}), debuggable",
         f"- Run: {meta['runId']}, label {meta.get('label') or '-'}, {meta['started']} -> {meta['finished']}",
         f"- Device state at start: {meta.get('deviceState')}",
+        *([f"- Merged runs: " + "; ".join(f"{r.get('runId')} ({', '.join(r.get('scenarios') or ['all'])})"
+                                         for r in meta["mergedRuns"])] if meta.get("mergedRuns") else []),
+        *([f"- Stopped early: {meta['interrupted']}"] if meta.get("interrupted") else []),
         f"- Warm-ups {meta['warmups']}, iterations {meta['iterations']}, poll {meta['pollMs']} ms, force delay {meta['forceDelayMs']} ms, capture {meta['capture']}",
         "- Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)",
         "- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start",
@@ -170,7 +174,10 @@ def markdown(meta, reports, failures):
         lines.append(f"| {report.get('scenario')} {report.get('title', '')} | {MODES.get(report.get('mode'), '?')} | "
                      f"{report.get('status')} | {cell(report)} | {reasons} |")
     for item in failures:
-        lines.append(f"| {item['scenario']} | {MODES.get(item['mode'], '?')} | no report | - | instrumentation {item['outcome']} |")
+        signal = next((l.strip() for l in (item.get("crashLog") or "").splitlines()
+                       if re.search(r"Fatal signal|Abort message|FATAL EXCEPTION", l)), "")
+        detail = f"; {signal[:160]}".replace("|", "/") if signal else ""
+        lines.append(f"| {item['scenario']} | {MODES.get(item['mode'], '?')} | no report | - | instrumentation {item['outcome']}{detail} |")
     leaks = [(report, leak_lines(report)) for report in reports if leak_lines(report)]
     if leaks:
         lines += ["", "## Shortest strong reference paths (shark, exited ScriptRuntime instances)", ""]
@@ -198,6 +205,40 @@ def write_evidence(path_json, meta, reports, failures):
     body = ",\n".join("    " + json.dumps(report, ensure_ascii=False, separators=(",", ":")) for report in reports)
     head = json.dumps({**meta, "failures": failures}, ensure_ascii=False, indent=2)
     path_json.write_text(head[:-2] + ',\n  "results": [\n' + body + "\n  ]\n}\n", encoding="utf-8")
+
+
+def merge_evidence(previous, reports, failures, meta):
+    """Keep earlier results for scenario / mode pairs that this run did not produce (same device and versionCode)."""
+    order = [(s, m) for s in SCENARIOS for m in MODES]
+    rerun = {(r.get("scenario"), r.get("mode")) for r in reports} | {(f["scenario"], f["mode"]) for f in failures}
+    kept = [r for r in previous.get("results", []) if (r.get("scenario"), r.get("mode")) not in rerun]
+    kept_failures = [f for f in previous.get("failures", []) if (f["scenario"], f["mode"]) not in rerun
+                     and (f["scenario"], f["mode"]) not in {(r.get("scenario"), r.get("mode")) for r in kept}]
+    merged = sorted(kept + reports, key=lambda r: order.index((r.get("scenario"), r.get("mode"))))
+    runs = previous.get("mergedRuns") or [{"runId": previous.get("runId"), "started": previous.get("started"),
+                                           "finished": previous.get("finished")}]
+    meta = {**meta, "started": previous.get("started", meta["started"]), "deviceState": previous.get("deviceState"),
+            "scenarios": sorted({r.get("scenario") for r in merged}, key=list(SCENARIOS).index),
+            "mergedRuns": runs + [{"runId": meta["runId"], "started": meta["started"], "finished": meta["finished"],
+                                   "scenarios": sorted({s for s, _ in rerun}, key=list(SCENARIOS).index)}]}
+    return merged, kept_failures + failures, meta
+
+
+def package_stamp(device, package):
+    """versionCode and lastUpdateTime of the host and its test APK; a change means another session reinstalled them."""
+    stamp = []
+    for name in (package, package + ".test"):
+        dump = device.shell("dumpsys", "package", name)["stdout"]
+        stamp += re.findall(r"versionCode=(\d+)", dump)[:1] + re.findall(r"lastUpdateTime=([^\r\n]+)", dump)[:1]
+    return stamp
+
+
+def foreign_instrumentation(device):
+    """Command lines of `am instrument` processes already running (ROADMAP R6: no parallel device tasks)."""
+    result = device.shell("ps", "-A", "-o", "ARGS")
+    if result["exitCode"] != 0:
+        return []
+    return [line.strip() for line in result["stdout"].splitlines() if "am instrument" in line and "grep" not in line]
 
 
 def device_state(device):
@@ -228,6 +269,7 @@ def main():
     parser.add_argument("--label", default="", help="Inserted into the report name, e.g. baseline")
     parser.add_argument("--out", type=Path, default=ROOT / "docs" / "memory" / "evidence")
     parser.add_argument("--wake", action="store_true", help="Send KEYCODE_WAKEUP before each scenario (no taps)")
+    parser.add_argument("--merge", action="store_true", help="Replace only the rerun scenarios in an existing report of the same name")
     args = parser.parse_args()
     if args.label and not re.fullmatch(r"[a-z0-9-]{1,32}", args.label):
         parser.error("--label must be lower-case letters, digits or '-'")
@@ -259,8 +301,21 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
     device_dir = DEVICE_DIR.format(package=args.package)
     reports, failures = [], []
+    stamp = package_stamp(device, args.package)
+    interrupted = None
     for scenario in args.scenarios:
         for mode in modes:
+            if interrupted:
+                break
+            waited = 0
+            while foreign_instrumentation(device) and waited < 600:
+                if waited == 0:
+                    print(f"Another instrumentation is running on {args.serial}; waiting (ROADMAP R6)", file=sys.stderr)
+                time.sleep(15)
+                waited += 15
+            if foreign_instrumentation(device):
+                interrupted = "another instrumentation kept running for 10 minutes"
+                break
             if args.wake:
                 device.shell("input", "keyevent", "KEYCODE_WAKEUP")
             device.shell("am", "force-stop", args.package)
@@ -293,9 +348,15 @@ def main():
                 for line in leak_lines(report)[:3]:
                     print(f"     {line[:220]}")
             if not found:
+                # The next scenario clears logcat, so keep the crash buffer of a crashed process now.
+                crash = device.call("logcat", "-d", "-b", "crash", "-v", "brief", timeout=60)["stdout"] if outcome == "crashed" else ""
+                start = max(crash.rfind("Fatal signal"), crash.rfind("*** *** ***"), crash.rfind("FATAL EXCEPTION"))
+                crash = crash[max(0, start - 200):][:8000] if start >= 0 else crash[-6000:]
                 failures.append({"scenario": scenario, "mode": mode, "outcome": outcome,
-                                 "tail": text[-1500:]})
+                                 "tail": text[-1500:], "crashLog": crash})
                 print(f"{scenario:<4} {MODES[mode]} NO REPORT (instrumentation {outcome})")
+                for line in [l for l in crash.splitlines() if re.search(r"Fatal signal|Abort message|FATAL EXCEPTION", l)][:2]:
+                    print(f"     {line[:220]}")
             if args.hprof:
                 for report in found:
                     hprof = (report.get("heap") or {}).get("hprof")
@@ -306,6 +367,12 @@ def main():
                         if pulled["exitCode"] == 0:
                             device.shell("rm", "-f", hprof)
                             report["heap"]["pulledTo"] = str((target / Path(hprof).name).relative_to(ROOT)).replace("\\", "/")
+            if package_stamp(device, args.package) != stamp:
+                interrupted = f"the host or test APK was reinstalled during {scenario} {mode} (another session?)"
+                for report in found:
+                    report["status"], report["reasons"] = "invalid", [interrupted]
+    if interrupted:
+        print(f"Stopped: {interrupted}; scenarios after this point were not run", file=sys.stderr)
     device.shell("am", "force-stop", args.package)
     meta = {"suite": "memory-gate", "runId": run_id, "label": args.label, "started": started,
             "finished": physical_device.utc_now(), "date": today, "package": args.package,
@@ -313,8 +380,11 @@ def main():
             "device": {k: identity.get(k) for k in ("serial", "manufacturer", "model", "sdk", "release", "abiList", "emulator")},
             "deviceState": state, "modes": modes, "scenarios": args.scenarios, "warmups": args.warmups,
             "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms,
-            "capture": args.capture, "hprof": args.hprof}
+            "capture": args.capture, "hprof": args.hprof, "interrupted": interrupted}
     stem = f"gate-{model}-{version[1]}" + (f"-{args.label}" if args.label else "") + f"-{today}"
+    if args.merge and (args.out / f"{stem}.json").is_file():
+        reports, failures, meta = merge_evidence(json.loads((args.out / f"{stem}.json").read_text(encoding="utf-8")),
+                                                 reports, failures, meta)
     write_evidence(args.out / f"{stem}.json", meta, reports, failures)
     (args.out / f"{stem}.md").write_text(markdown(meta, reports, failures), encoding="utf-8")
     counts = {}

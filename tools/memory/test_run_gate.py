@@ -51,6 +51,20 @@ class ParseTest(unittest.TestCase):
             run_gate.scenario_list("S13")
 
 
+class MergeTest(unittest.TestCase):
+    def test_rerun_pairs_replace_earlier_results_and_failures(self):
+        previous = {"runId": "old", "started": "t0", "finished": "t1", "deviceState": {"powered": ["USB"]},
+                    "results": [report("S1", "normal", "fail", 1), report("S2", "normal")],
+                    "failures": [{"scenario": "S6", "mode": "normal", "outcome": "crashed"}]}
+        meta = {"runId": "new", "started": "t2", "finished": "t3"}
+        merged, failures, merged_meta = run_gate.merge_evidence(
+            previous, [report("S6", "normal", "pass", 0), report("S1", "normal", "pass", 0)], [], meta)
+        self.assertEqual([("S1", "pass"), ("S2", "fail"), ("S6", "pass")], [(r["scenario"], r["status"]) for r in merged])
+        self.assertEqual([], failures)
+        self.assertEqual("t0", merged_meta["started"])
+        self.assertEqual(["old", "new"], [r["runId"] for r in merged_meta["mergedRuns"]])
+
+
 class RenderTest(unittest.TestCase):
     def test_cell_and_markdown(self):
         self.assertEqual("20 / +3.00 / -1.00 / +0 / +1 / 0", run_gate.cell(report()))
