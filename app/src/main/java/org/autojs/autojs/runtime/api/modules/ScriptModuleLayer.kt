@@ -45,9 +45,23 @@ object ScriptModuleLayer {
     @JvmField
     val TOP_LEVEL_ORDER: List<String> = ORDER.filter { '.' !in it }
 
-    /** Top-level modules served by the new layer when the switch is on. */
+    /**
+     * Top-level modules served by the new layer when the switch is on: every top-level module of the host registry
+     * `generated.ScriptModules`, that is, a module is migrated once its @ScriptModule class exists in this package (P2.1;
+     * [ORDER] still decides where it is mounted). A migrated module brings all its sub-modules: the old augment call it
+     * replaces mounted them too (`ScriptModuleOrderTest` checks every registered module against [ORDER]).
+     */
+    @JvmStatic
+    val MIGRATED: Set<String> by lazy { ScriptModules.moduleNames.toSet() }
+
+    /**
+     * The modules `jsox.extendAll()` and the "extend JavaScript built-in objects" option apply, in the order of the old
+     * `Jsox.presetModules` (roadmap P2.1).
+     */
     @JvmField
-    val MIGRATED: Set<String> = setOf("base64")
+    val BUILT_IN_EXTENSIONS: List<String> = listOf("Mathx", "Numberx", "Arrayx")
+
+    private const val JSOX = "jsox"
 
     private val noDebugPrinting = ScriptErrorMapper.DebugPrinting { false }
 
@@ -84,6 +98,16 @@ object ScriptModuleLayer {
     @JvmStatic
     inline fun mountOr(mounter: ScriptModuleMounter?, name: String, legacy: () -> Unit) {
         if (mounter == null || name !in MIGRATED || !mounter.install(name)) legacy()
+    }
+
+    /**
+     * The "extend JavaScript built-in objects" option in `initEpilogue`: with [mounter] and jsox migrated, the modules of
+     * [BUILT_IN_EXTENSIONS] extend their built-in objects ([ScriptBuiltInExtender]); otherwise [legacy] runs (the old
+     * `Jsox.extendAllRhinoWithRuntime`).
+     */
+    @JvmStatic
+    fun extendBuiltInsOr(mounter: ScriptModuleMounter?, legacy: () -> Unit) {
+        if (mounter == null || JSOX !in MIGRATED) legacy() else BUILT_IN_EXTENSIONS.forEach { mounter.builtIns.extend(it) }
     }
 
 }

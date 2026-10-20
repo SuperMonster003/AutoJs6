@@ -1,9 +1,12 @@
 """Runs the Augment timing scripts on a device through RunIntentActivity and prints the timing lines.
 
 Usage: py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] [--skip-calls] [--skip-errors]
-    [--new-modules on|off]
+    [--new-modules on|off] [--calls NAME ...] [--skip-init]
 --new-modules sets the hidden switch of the new script module layer (ROADMAP T8) for the run and restores it afterwards.
 The failing call benchmark (bench/error_path.js) runs --runs times and prints min / median / max per case.
+--calls runs bench/calls_prelude.js followed by bench/calls/NAME.js (the success and failing calls of one module group,
+next to Rhino reference cases) --runs times each and prints min / median / max per case; --skip-init skips the startup
+timing.
 GlobalConsole lines are polled from logcat every half second and accumulated, so a logcat clear by another
 process in the middle of a run only loses lines that were never seen. logcat is never cleared here.
 """
@@ -26,6 +29,7 @@ TIMING_RE = re.compile(r"(runtime-init-prologue|script-init|runtime-init-epilogu
 # The end line of a script run in the app language: "... 用时 N 秒" (Chinese) or "... finished in N seconds" (English).
 TOTAL_RE = re.compile(r"用时 ([\d.]+) 秒|finished in ([\d.]+) seconds")
 ERROR_RE = re.compile(r"AJ6BENCH error (.+) ([\d.]+) us$")
+CALL_RE = re.compile(r"AJ6BENCH call (.+) ([\d.]+) us$")
 # The end line of a script run in the Chinese or the English app language.
 END_RE = re.compile(r"运行结束|finished in [\d.]+ seconds")
 
@@ -103,7 +107,12 @@ def main():
     parser.add_argument("--skip-calls", action="store_true", help="skip the per-call overhead benchmark")
     parser.add_argument("--skip-errors", action="store_true", help="skip the failing call (error path) benchmark")
     parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
+    parser.add_argument("--calls", nargs="*", default=[], help="module call benchmarks to run (bench/calls/NAME.js)")
+    parser.add_argument("--skip-init", action="store_true", help="skip the startup timing")
     args = parser.parse_args()
+    missing = [n for n in args.calls if not (HERE / "bench" / "calls" / f"{n}.js").is_file()]
+    if missing:
+        sys.exit(f"no such call benchmark: {', '.join(missing)} (bench/calls/NAME.js)")
     s = args.serial
     previous = set_new_modules(s, args.new_modules == "on") if args.new_modules else None
     try:
@@ -113,12 +122,40 @@ def main():
             set_new_modules(s, previous)
 
 
+def bench_calls(s, name, runs):
+    """Runs the prelude and bench/calls/[name].js as one script [runs] times; prints min / median / max per case."""
+    local = HERE / "__pycache__" / f"aj6_calls_{name}.js"
+    local.parent.mkdir(exist_ok=True)
+    prelude = (HERE / "bench" / "calls_prelude.js").read_text(encoding="utf-8")
+    calls = (HERE / "bench" / "calls" / f"{name}.js").read_text(encoding="utf-8")
+    local.write_text(prelude + chr(10) + calls, encoding="utf-8")
+    adb(s, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
+    remote = f"{DEVICE_DIR}/{local.name}"
+    adb(s, "push", str(local), remote, check=True)
+    print(f"--- module calls: {name} ---")
+    samples = {}
+    for i in range(runs):
+        for l in run_script(s, remote, 240):
+            m = CALL_RE.search(l)
+            if m:
+                samples.setdefault(m.group(1), []).append(float(m.group(2)))
+            elif "/E:" in l and i == 0:
+                print(l)
+        time.sleep(2)
+    for label, vals in samples.items():
+        vals.sort()
+        print(f"{label}: min={vals[0]} median={vals[len(vals) // 2]} max={vals[-1]} us n={len(vals)}")
+
+
 def bench(args):
     s = args.serial
 
+    for name in args.calls:
+        bench_calls(s, name, args.runs)
+
     init_script = push_script(s, "aj6_init_timing.js")
     rows = []
-    for i in range(args.runs):
+    for i in range(0 if args.skip_init else args.runs):
         lines = run_script(s, init_script, 30)
         row = {}
         for l in lines:

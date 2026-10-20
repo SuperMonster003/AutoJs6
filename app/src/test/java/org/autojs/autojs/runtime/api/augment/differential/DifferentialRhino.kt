@@ -6,6 +6,9 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
+import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
+import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ScriptableObject
@@ -52,6 +55,23 @@ internal class DifferentialRhino : AutoCloseable {
         with(RhinoUtils) { context.registerStandardObjects(this@apply) }
         // The engine registers `android` as a top-level package; a plain scope only knows java / org / com.
         ScriptableObject.putProperty(globalThis, "android", context.evaluateString(this, "Packages.android", "packages", 1, null))
+    }
+
+    /**
+     * Mounts the top-level modules [names] of the new script module layer on the "kt" side the way
+     * `ScriptRuntime.augment()` does with the switch on (roadmap T8, P2): a mounter of the host registry
+     * `generated.ScriptModules` with `ScriptModuleLayer.ORDER`, each name in that order through
+     * `ScriptModuleLayer.mountOr`; a name that is not migrated fails the test. The returned mounter also extends the
+     * built-in objects (`builtIns`), as `initEpilogue` does with the "extend JavaScript built-in objects" option.
+     */
+    fun mountNewModules(vararg names: String): ScriptModuleMounter {
+        val unknown = names.filter { it !in ScriptModuleLayer.TOP_LEVEL_ORDER }
+        require(unknown.isEmpty()) { "Not top-level names of ScriptModuleLayer.ORDER: $unknown" }
+        val mounter = ScriptModuleMounter(ScriptModules, ktRuntime, ktScope, ktScope.globalThis, order = ScriptModuleLayer.ORDER)
+        ScriptModuleLayer.TOP_LEVEL_ORDER.filter { it in names }.forEach { name ->
+            ScriptModuleLayer.mountOr(mounter, name) { throw AssertionError("Script module $name is not migrated to the new layer") }
+        }
+        return mounter
     }
 
     fun evalJs(source: String): Any? = context.evaluateString(jsScope, source, "js-side", 1, null)

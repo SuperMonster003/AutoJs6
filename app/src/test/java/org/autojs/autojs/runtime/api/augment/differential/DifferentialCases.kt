@@ -21,20 +21,29 @@ internal object DifferentialCases {
      * names differ. The current Kotlin augmentables wrap every failure into an `InternalError`
      * (`WrappedRuntimeException`), which roadmap decision D10 replaces; until then the error type is not a
      * useful signal and would otherwise have to be documented for every failing call.
+     * @param exportDir where [exportForDevice] writes the device cases: `build/augment-differential` for the "old JS
+     * against the current Kotlin" tests (P0), `build/script-modules-device` for the "old JS against the new layer" tests
+     * (P2 on, evaluated with `device_eval.py --new-modules on --strict-errors`).
+     * @param exportAll export every expression with its Kotlin side value, not only the documented differences and the
+     * skipped expressions (P2 on: the device run then confirms the whole set on the new layer).
      */
     fun run(
         rhino: DifferentialRhino,
         expressions: List<String>,
         known: List<KnownDifference> = emptyList(),
         tolerateErrorTypes: Boolean = false,
+        exportDir: String = "build/augment-differential",
+        exportAll: Boolean = false,
     ) {
         val knownByExpression = known.associateBy { it.expression }
         val unexpected = mutableListOf<String>()
         val skipped = mutableListOf<String>()
+        val ktValues = mutableMapOf<String, String>()
         val report = StringBuilder()
         expressions.forEach { expression ->
             val js = rhino.render(DifferentialRhino.Side.JS, expression)
             val kt = rhino.render(DifferentialRhino.Side.KT, expression)
+            ktValues[expression] = kt.key
             val documented = knownByExpression[expression]
             val bothThrow = js.key.startsWith("throws") && kt.key.startsWith("throws")
             when {
@@ -57,7 +66,8 @@ internal object DifferentialCases {
         }
         if (skipped.isNotEmpty()) report.appendLine("skipped ${skipped.size} expression(s) that need Android at runtime; cover them with tools/augment on a device")
         println(report)
-        exportForDevice(expressions.filter { it in knownByExpression || it in skipped }, knownByExpression)
+        val exported = if (exportAll) expressions.filter { it !in skipped } else expressions.filter { it in knownByExpression || it in skipped }
+        exportForDevice(exported, knownByExpression, if (exportAll) ktValues else emptyMap(), exportDir)
         val undocumented = knownByExpression.keys - expressions.toSet()
         assertTrue("Known differences must be listed in the expressions: $undocumented", undocumented.isEmpty())
         assertTrue("Undocumented differences between the obsolete JS module and the Kotlin module:\n" + unexpected.joinToString("\n"), unexpected.isEmpty())
@@ -71,12 +81,13 @@ internal object DifferentialCases {
      * zh-CN: 把调用方测试类已记录的偏差与跳过的表达式写到 build/augment-differential/<测试类>.json, 供 tools/augment/device_eval.py
      * 用已安装的宿主求值同一批表达式, 以真机确认 JVM 上记录的 Kotlin 值.
      */
-    private fun exportForDevice(expressions: List<String>, known: Map<String, KnownDifference>) {
+    private fun exportForDevice(expressions: List<String>, known: Map<String, KnownDifference>, ktValues: Map<String, String>, exportDir: String) {
         val testClass = Thread.currentThread().stackTrace.map { it.className }.firstOrNull { it.endsWith("DifferentialTest") } ?: return
-        val dir = File("build/augment-differential").apply { mkdirs() }
+        val dir = File(exportDir).apply { mkdirs() }
         val entries = expressions.joinToString(",\n") { expression ->
             val documented = known[expression]
-            "  {\"expression\": ${json(expression)}, \"js\": ${json(documented?.js)}, \"kt\": ${json(documented?.kt)}, \"reason\": ${json(documented?.reason)}}"
+            val kt = documented?.kt ?: ktValues[expression]
+            "  {\"expression\": ${json(expression)}, \"js\": ${json(documented?.js)}, \"kt\": ${json(kt)}, \"reason\": ${json(documented?.reason)}}"
         }
         File(dir, testClass.substringAfterLast('.') + ".json").writeText("[\n$entries\n]\n", Charsets.UTF_8)
     }

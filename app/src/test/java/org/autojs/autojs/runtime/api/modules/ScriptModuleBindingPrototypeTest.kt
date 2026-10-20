@@ -129,8 +129,9 @@ class ScriptModuleBindingPrototypeTest {
 
     @Test
     fun registriesListTheirCompilationUnit() {
-        assertEquals(listOf("base64"), ScriptModules.bindings.map { it.spec.name })
-        assertEquals(listOf("eagerProbe", "probe", "sample", "child", "sibling"), TestScriptModules.bindings.map { it.spec.name })
+        // The host registry grows with every migrated module (P2-P4); ScriptModuleOrderTest checks it against the mount order.
+        assertTrue("base64" in ScriptModules.bindings.map { it.spec.name })
+        assertEquals(listOf("eagerProbe", "numberProbe", "probe", "sample", "child", "sibling"), TestScriptModules.bindings.map { it.spec.name })
         assertEquals("org.autojs.autojs.runtime.api.modules.sample.ProbeModule", TestScriptModules.find("\$probeAlias")?.spec?.className)
         assertEquals(listOf("child", "sibling"), TestScriptModules.childrenOf("org.autojs.autojs.runtime.api.modules.sample.ProbeModule").map { it.spec.name })
     }

@@ -530,11 +530,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">المسار المُحلّ لـ \"%1$s\" لا يمكن أن يكون null</string>
     <string name="error_save_failed">فشل الحفظ</string>
     <string name="error_script_argument_cannot_be">الوسيطة \"%1$s\" لا يمكن أن تكون %2$s</string>
+    <string name="error_script_argument_has_no_valid_number">الوسيطة \"%1$s\" لا تحتوي على أي رقم صالح</string>
     <string name="error_script_argument_must_be_integer">يجب أن تكون الوسيطة \"%1$s\" عددا صحيحا من %2$d بت, القيمة الفعلية %3$s</string>
     <string name="error_script_argument_must_be_of_type">يجب أن تكون الوسيطة \"%1$s\" من النوع %2$s, القيمة الفعلية %3$s</string>
+    <string name="error_script_argument_must_be_positive">يجب أن تكون الوسيطة \"%1$s\" عددا موجبا, القيمة الفعلية %2$s</string>
+    <string name="error_script_argument_must_have_length">يجب أن يكون طول الوسيطة \"%1$s\" هو %2$d, الطول الفعلي %3$d</string>
     <string name="error_script_is_on_exiting">السيناريو عند الخروج</string>
     <string name="error_script_no_overload_accepts_arguments">لا توجد صيغة محملة تقبل الوسائط (%1$s). الصيغ المرشحة: %2$s</string>
+    <string name="error_script_range_has_no_integer">لا يوجد عدد صحيح ضمن النطاق [%1$s, %2$s]</string>
     <string name="error_script_shortcut_descriptor_mismatch">لم يعد اختصار البرنامج النصي يطابق المحرك المحفوظ. أعد إنشاء الاختصار.</string>
+    <string name="error_script_unknown_built_in_extension">امتداد كائن مضمن غير معروف \"%1$s\", القيم المتوقعة %2$s</string>
     <string name="error_selector_method_without_calling">يجب أن تسمى طريقة المحدد بدلاً من تمريرها كمعلمة: %s</string>
     <string name="error_selector_result_type_with_compass">لا يمكن استخدام بوصلة عندما يكون نوع النتيجة محددًا</string>
     <string name="error_set_both_icon_res_and_icon">لا يمكن تعيين كل من الأيقونات والأيقونة</string>

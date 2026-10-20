@@ -524,11 +524,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析后的路径 \"%1$s\" 不可为 null</string>
     <string name="error_save_failed">保存失败</string>
     <string name="error_script_argument_cannot_be">参数 \"%1$s\" 不能为 %2$s</string>
+    <string name="error_script_argument_has_no_valid_number">参数 \"%1$s\" 不包含有效的数字</string>
     <string name="error_script_argument_must_be_integer">参数 \"%1$s\" 需要是 %2$d 位整数, 实际为 %3$s</string>
     <string name="error_script_argument_must_be_of_type">参数 \"%1$s\" 需要是 %2$s 类型, 实际为 %3$s</string>
+    <string name="error_script_argument_must_be_positive">参数 \"%1$s\" 需要是正数, 实际为 %2$s</string>
+    <string name="error_script_argument_must_have_length">参数 \"%1$s\" 的长度需要为 %2$d, 实际为 %3$d</string>
     <string name="error_script_is_on_exiting">脚本正在退出中</string>
     <string name="error_script_no_overload_accepts_arguments">没有可接受参数 (%1$s) 的重载. 候选: %2$s</string>
+    <string name="error_script_range_has_no_integer">范围 [%1$s, %2$s] 内没有整数</string>
     <string name="error_script_shortcut_descriptor_mismatch">脚本快捷方式保存的引擎信息与当前文件不一致. 请重新创建该快捷方式.</string>
+    <string name="error_script_unknown_built_in_extension">未知的内置对象扩展 \"%1$s\", 可选值为 %2$s</string>
     <string name="error_selector_method_without_calling">选择器方法需调用而不可作为参数直接传入: %s</string>
     <string name="error_selector_result_type_with_compass">结果类型为 selector 时, 无法同时使用罗盘参数</string>
     <string name="error_set_both_icon_res_and_icon">不支持同时设置 iconRes 与 icon</string>

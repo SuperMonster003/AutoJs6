@@ -33,6 +33,9 @@ import kotlin.reflect.KClass
  * (the current `augment(target, additionalAttributes = READONLY)` of selector / continuation adds READONLY).
  * @property emitter append an event emitter object (the methods of `scriptRuntime.events.emitter()`) to the end of the
  * module object's prototype chain, after the [ScriptPrototype] objects (the current `AsEmitter` of engines / images).
+ * @property builtIn the JavaScript built-in object (a global such as `Array`, `Math` or `Number`) that the "extend
+ * JavaScript built-in objects" option and `jsox` extend with the members declaring [ScriptFunction.builtIn] /
+ * [ScriptProperty.builtIn] (the current `JsBuildInObjectExtensible` of Arrayx / Mathx / Numberx); "" for none.
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
@@ -45,6 +48,7 @@ annotation class ScriptModule(
     val parent: KClass<*> = Unit::class,
     val attributes: Int = ScriptAttributes.PERMANENT,
     val emitter: Boolean = false,
+    val builtIn: String = "",
 )
 
 /**
@@ -63,6 +67,9 @@ annotation class ScriptModule(
  * @property attributes Rhino property attributes ([ScriptAttributes]).
  * @property toStringRole for a script function named (or aliased) `toString`: whether it describes the module object
  * or converts its arguments ([ScriptToString]); any other function keeps [ScriptToString.NONE].
+ * @property builtIn where the function is also bound when the module's [ScriptModule.builtIn] object is extended.
+ * @property builtInOnly bind the function only there, neither on the module object nor on the global object (the
+ * current `AS_IGNORED` flag of `Math.maxi` / `Math.mini`).
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
@@ -73,6 +80,8 @@ annotation class ScriptFunction(
     val global: ScriptGlobal = ScriptGlobal.NONE,
     val attributes: Int = ScriptAttributes.PERMANENT,
     val toStringRole: ScriptToString = ScriptToString.NONE,
+    val builtIn: Array<ScriptBuiltIn> = [],
+    val builtInOnly: Boolean = false,
 )
 
 /**
@@ -88,7 +97,10 @@ annotation class ScriptGetter(
     val attributes: Int = ScriptAttributes.PERMANENT,
 )
 
-/** Exposes a property as a data property whose value is read once, when the module object is built. */
+/**
+ * Exposes a property as a data property whose value is read once, when the module object is built; [builtIn] as for
+ * [ScriptFunction.builtIn] ([ScriptBuiltIn.PROTOTYPE] does not apply to a property).
+ */
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.BINARY)
 @MustBeDocumented
@@ -96,6 +108,7 @@ annotation class ScriptProperty(
     val name: String = "",
     val global: ScriptGlobal = ScriptGlobal.NONE,
     val attributes: Int = ScriptAttributes.PERMANENT,
+    val builtIn: Array<ScriptBuiltIn> = [],
 )
 
 /** Binds a Java class (as `NativeJavaClass`) under [name] on the module object or the global object. */
@@ -145,6 +158,24 @@ enum class ScriptGlobal {
 
     /** Only on the global object (the current `globalAssignmentFunctions` / `globalAssignmentGetters`). */
     ONLY,
+}
+
+/**
+ * Where a member of a module declaring [ScriptModule.builtIn] is bound when that built-in object is extended (the
+ * current `AS_JSOX_STATIC` / `AS_JSOX_PROTO` / `AS_JSOX_GLOBAL` flags).
+ */
+enum class ScriptBuiltIn {
+    /** On the built-in object itself (`Math.sum`, `Array.ensureArray`, `Number.ICU`). */
+    STATIC,
+
+    /**
+     * On the built-in object's prototype, with the receiver (`this`, a primitive for `Number.prototype`) passed as the
+     * first argument (`[1, 1].distinct()` calls `distinct([1, 1])`); the function `length` leaves the receiver out.
+     */
+    PROTOTYPE,
+
+    /** On the global object, replacing what is there (`parseFloat`). */
+    GLOBAL,
 }
 
 /**

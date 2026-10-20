@@ -525,11 +525,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析後的路徑 \"%1$s\" 不可為 null</string>
     <string name="error_save_failed">保存失敗</string>
     <string name="error_script_argument_cannot_be">參數 \"%1$s\" 不能為 %2$s</string>
+    <string name="error_script_argument_has_no_valid_number">參數 \"%1$s\" 不包含有效的數字</string>
     <string name="error_script_argument_must_be_integer">參數 \"%1$s\" 需要是 %2$d 位整數, 實際為 %3$s</string>
     <string name="error_script_argument_must_be_of_type">參數 \"%1$s\" 需要是 %2$s 類型, 實際為 %3$s</string>
+    <string name="error_script_argument_must_be_positive">參數 \"%1$s\" 需要是正數, 實際為 %2$s</string>
+    <string name="error_script_argument_must_have_length">參數 \"%1$s\" 的長度需要為 %2$d, 實際為 %3$d</string>
     <string name="error_script_is_on_exiting">腳本正在退出中</string>
     <string name="error_script_no_overload_accepts_arguments">沒有可接受參數 (%1$s) 的重載. 候選: %2$s</string>
+    <string name="error_script_range_has_no_integer">範圍 [%1$s, %2$s] 內沒有整數</string>
     <string name="error_script_shortcut_descriptor_mismatch">腳本快捷方式保存的引擎信息與當前文件不一致. 請重新創建該快捷方式.</string>
+    <string name="error_script_unknown_built_in_extension">未知的內置對象擴展 \"%1$s\", 可選值為 %2$s</string>
     <string name="error_selector_method_without_calling">選擇器方法需調用而不可作為參數直接傳入: %s</string>
     <string name="error_selector_result_type_with_compass">結果類型為 selector 時, 無法同時使用羅盤參數</string>
     <string name="error_set_both_icon_res_and_icon">不支持同時設置 iconRes 與 icon</string>

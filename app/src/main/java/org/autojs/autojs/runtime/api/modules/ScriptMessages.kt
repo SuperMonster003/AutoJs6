@@ -56,6 +56,31 @@ object ScriptMessages {
     @JvmStatic
     fun unknownCharset(name: String): String = string(R.string.error_unknown_charset, UNKNOWN_CHARSET, name)
 
+    /** "Argument "[param]" must be a positive number, got [actual]" (P2.1). */
+    @JvmStatic
+    fun argumentPositive(param: String, actual: String): String =
+        string(R.string.error_script_argument_must_be_positive, ARGUMENT_POSITIVE, param, actual)
+
+    /** "Argument "[param]" contains no valid number": a list or range argument of numbers that are all NaN or missing (P2.1). */
+    @JvmStatic
+    fun argumentNoNumber(param: String): String =
+        string(R.string.error_script_argument_has_no_valid_number, ARGUMENT_NO_NUMBER, param)
+
+    /** "Argument "[param]" must have a length of [expected], got [actual]" (P2.1). */
+    @JvmStatic
+    fun argumentLength(param: String, expected: Int, actual: Int): String =
+        string(R.string.error_script_argument_must_have_length, ARGUMENT_LENGTH, param, expected, actual)
+
+    /** "No integer lies within the range [[min], [max]]" (P2.1). */
+    @JvmStatic
+    fun rangeNoInteger(min: String, max: String): String =
+        string(R.string.error_script_range_has_no_integer, RANGE_NO_INTEGER, min, max)
+
+    /** "Unknown built-in object extension "[name]", expected one of [candidates]" (P2.1, jsox). */
+    @JvmStatic
+    fun unknownBuiltInExtension(name: String, candidates: String): String =
+        string(R.string.error_script_unknown_built_in_extension, UNKNOWN_BUILT_IN_EXTENSION, name, candidates)
+
     private fun string(id: Int, fallback: String, vararg args: Any?): String {
         val texts = texts() ?: return format(Locale.ROOT, '0', fallback, args)
         return format(texts.locale, texts.zero, texts.string(id), args)
@@ -170,5 +195,10 @@ object ScriptMessages {
     internal const val ARGUMENT_INTEGER = "Argument \"%1\$s\" must be a %2\$d-bit integer, got %3\$s"
     internal const val NO_OVERLOAD = "No overload accepts the arguments (%1\$s). Candidates: %2\$s"
     internal const val UNKNOWN_CHARSET = "Unknown charset \"%1\$s\""
+    internal const val ARGUMENT_POSITIVE = "Argument \"%1\$s\" must be a positive number, got %2\$s"
+    internal const val ARGUMENT_NO_NUMBER = "Argument \"%1\$s\" contains no valid number"
+    internal const val ARGUMENT_LENGTH = "Argument \"%1\$s\" must have a length of %2\$d, got %3\$d"
+    internal const val RANGE_NO_INTEGER = "No integer lies within the range [%1\$s, %2\$s]"
+    internal const val UNKNOWN_BUILT_IN_EXTENSION = "Unknown built-in object extension \"%1\$s\", expected one of %2\$s"
 
 }

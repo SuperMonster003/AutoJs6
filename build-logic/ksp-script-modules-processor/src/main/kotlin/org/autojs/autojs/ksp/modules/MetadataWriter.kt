@@ -30,6 +30,7 @@ internal object MetadataWriter {
         "parent" to m.parent,
         "attributes" to m.attributes,
         "emitter" to m.emitter,
+        "builtIn" to m.builtIn,
         "class" to m.qualifiedName,
         "binding" to "${BindingGenerator.PACKAGE}.${m.bindingName}",
         "source" to m.source,
@@ -44,6 +45,8 @@ internal object MetadataWriter {
                 "global" to g.placement.label,
                 "attributes" to g.attributes,
                 "toStringRole" to g.toStringRole,
+                "builtIn" to g.builtIn,
+                "builtInOnly" to g.builtInOnly,
                 "length" to g.length,
                 "overloads" to g.overloads.map(::overload),
             )
@@ -57,6 +60,7 @@ internal object MetadataWriter {
                 "type" to a.type,
                 "global" to a.placement.label,
                 "attributes" to a.attributes,
+                "builtIn" to a.builtIn,
                 "source" to a.source,
             )
         },

@@ -127,6 +127,9 @@ class ScriptModuleMounter @JvmOverloads constructor(
     /** Whether the installed top-level module [name] has been built. */
     fun isBuilt(name: String): Boolean = installed[name]?.isBuilt == true
 
+    /** Extends the JavaScript built-in objects with the modules of this registry declaring `@ScriptModule(builtIn)`. */
+    val builtIns: ScriptBuiltInExtender by lazy { ScriptBuiltInExtender(registry, runtime, scope, global, debugConsole) }
+
     /** Runs [block] for [member] (as `base64.encode`) of the top-level module [module], mapping what it throws (T5). */
     private inline fun <T> guarded(member: String, module: String, block: () -> T): T = try {
         block()

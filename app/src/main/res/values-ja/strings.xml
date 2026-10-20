@@ -529,11 +529,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" の解決済みパスは null にできません</string>
     <string name="error_save_failed">保存に失敗しました</string>
     <string name="error_script_argument_cannot_be">引数 \"%1$s\" は %2$s にできません</string>
+    <string name="error_script_argument_has_no_valid_number">引数 \"%1$s\" に有効な数値が含まれていません</string>
     <string name="error_script_argument_must_be_integer">引数 \"%1$s\" は %2$d ビット整数である必要がありますが, %3$s が渡されました</string>
     <string name="error_script_argument_must_be_of_type">引数 \"%1$s\" は %2$s 型である必要がありますが, %3$s が渡されました</string>
+    <string name="error_script_argument_must_be_positive">引数 \"%1$s\" は正の数である必要がありますが, %2$s が渡されました</string>
+    <string name="error_script_argument_must_have_length">引数 \"%1$s\" の長さは %2$d である必要がありますが, %3$d でした</string>
     <string name="error_script_is_on_exiting">スクリプトが終了してしまう</string>
     <string name="error_script_no_overload_accepts_arguments">引数 (%1$s) を受け付けるオーバーロードがありません. 候補: %2$s</string>
+    <string name="error_script_range_has_no_integer">範囲 [%1$s, %2$s] に整数がありません</string>
     <string name="error_script_shortcut_descriptor_mismatch">スクリプトのショートカットが保存済みのエンジンと一致しなくなりました. ショートカットを作り直してください.</string>
+    <string name="error_script_unknown_built_in_extension">不明な組み込みオブジェクト拡張 \"%1$s\" です. 使用できる値: %2$s</string>
     <string name="error_selector_method_without_calling">セレクタメソッドはパラメータとして渡されるのではなく, 呼び出される必要があります: %s</string>
     <string name="error_selector_result_type_with_compass">結果タイプがセレクタの場合, コンパスを使用できません</string>
     <string name="error_set_both_icon_res_and_icon">iconRes とアイコンの両方を設定できません</string>

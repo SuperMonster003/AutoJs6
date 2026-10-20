@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.modules
 
 import com.google.gson.JsonParser
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
 import org.autojs.autojs.runtime.api.modules.generated.TestScriptModules
 import org.autojs.autojs.runtime.api.modules.sample.FakeEmitter
 import org.junit.Assert.assertEquals
@@ -60,11 +61,29 @@ class ScriptModuleOrderTest {
         val labels = Regex("^ {12}\"([^\"]+)\" ->", RegexOption.MULTILINE).findAll(body).map { it.groupValues[1] }.toList()
         assertEquals(topLevel, labels)
         assertTrue("augment() must walk ScriptModuleLayer.ORDER", source.contains("ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }"))
+        assertTrue("initEpilogue() must extend the built-in objects through the layer", source.contains("ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }"))
     }
 
     @Test
     fun migratedModulesAreListed() {
         assertTrue(ScriptModuleLayer.MIGRATED.all { it in topLevel })
+    }
+
+    /**
+     * P2.1: MIGRATED is the set of top-level modules of the host registry, and every registered module (sub-modules by
+     * their path `parent.name`) has its place in ORDER, so a new @ScriptModule class is mounted where its old augment call
+     * was. A migrated top-level module must bring all the sub-modules its old augment call mounted.
+     */
+    @Test
+    fun migratedModulesComeFromTheHostRegistry() {
+        val names = ScriptModules.bindings.associateBy { it.spec.className }
+        fun path(binding: ScriptModuleBinding<*>): String = binding.spec.parent?.let { "${path(names.getValue(it))}.${binding.spec.name}" } ?: binding.spec.name
+        assertEquals(ScriptModules.moduleNames.toSet(), ScriptModuleLayer.MIGRATED)
+        val paths = ScriptModules.bindings.map(::path)
+        assertEquals("registered modules missing from ORDER", emptyList<String>(), paths.filter { it !in order })
+        val missingChildren = ScriptModuleLayer.MIGRATED.flatMap { top -> order.filter { it.startsWith("$top.") && it !in paths } }
+        assertEquals("sub-modules of migrated modules that are not migrated", emptyList<String>(), missingChildren)
+        assertTrue("base64" in ScriptModuleLayer.MIGRATED)
     }
 
     /** Sub-modules follow the order list; without one (or for paths it does not list) the registry order is kept. */

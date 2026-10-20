@@ -525,11 +525,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析後的路徑 \"%1$s\" 不可為 null</string>
     <string name="error_save_failed">儲存失敗</string>
     <string name="error_script_argument_cannot_be">引數 \"%1$s\" 不能為 %2$s</string>
+    <string name="error_script_argument_has_no_valid_number">引數 \"%1$s\" 不包含有效的數字</string>
     <string name="error_script_argument_must_be_integer">引數 \"%1$s\" 需要是 %2$d 位元整數, 實際為 %3$s</string>
     <string name="error_script_argument_must_be_of_type">引數 \"%1$s\" 需要是 %2$s 型別, 實際為 %3$s</string>
+    <string name="error_script_argument_must_be_positive">引數 \"%1$s\" 需要是正數, 實際為 %2$s</string>
+    <string name="error_script_argument_must_have_length">引數 \"%1$s\" 的長度需要為 %2$d, 實際為 %3$d</string>
     <string name="error_script_is_on_exiting">指令碼正在退出中</string>
     <string name="error_script_no_overload_accepts_arguments">沒有可接受引數 (%1$s) 的多載. 候選: %2$s</string>
+    <string name="error_script_range_has_no_integer">範圍 [%1$s, %2$s] 內沒有整數</string>
     <string name="error_script_shortcut_descriptor_mismatch">指令碼快捷方式儲存的引擎資訊與目前檔案不一致. 請重新建立該快捷方式.</string>
+    <string name="error_script_unknown_built_in_extension">未知的內建物件擴充 \"%1$s\", 可選值為 %2$s</string>
     <string name="error_selector_method_without_calling">選擇器方法需呼叫而不可作為引數直接傳入: %s</string>
     <string name="error_selector_result_type_with_compass">結果型別為 selector 時, 無法同時使用羅盤引數</string>
     <string name="error_set_both_icon_res_and_icon">不支援同時設定 iconRes 與 icon</string>

@@ -528,11 +528,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Le chemin résolu pour \"%1$s\" ne peut pas être nul</string>
     <string name="error_save_failed">Echec de l\'enregistrement</string>
     <string name="error_script_argument_cannot_be">L\'argument \"%1$s\" ne peut pas être %2$s</string>
+    <string name="error_script_argument_has_no_valid_number">L\'argument \"%1$s\" ne contient aucun nombre valide</string>
     <string name="error_script_argument_must_be_integer">L\'argument \"%1$s\" doit être un entier de %2$d bits, reçu %3$s</string>
     <string name="error_script_argument_must_be_of_type">L\'argument \"%1$s\" doit être de type %2$s, reçu %3$s</string>
+    <string name="error_script_argument_must_be_positive">L\'argument \"%1$s\" doit être un nombre positif, reçu %2$s</string>
+    <string name="error_script_argument_must_have_length">L\'argument \"%1$s\" doit avoir une longueur de %2$d, reçu %3$d</string>
     <string name="error_script_is_on_exiting">Le script est en train de sortir</string>
     <string name="error_script_no_overload_accepts_arguments">Aucune surcharge n\'accepte les arguments (%1$s). Candidats : %2$s</string>
+    <string name="error_script_range_has_no_integer">Aucun entier ne se trouve dans l\'intervalle [%1$s, %2$s]</string>
     <string name="error_script_shortcut_descriptor_mismatch">Le raccourci du script ne correspond plus au moteur enregistré. Recréez le raccourci.</string>
+    <string name="error_script_unknown_built_in_extension">Extension d\'objet intégré inconnue \"%1$s\", valeurs attendues: %2$s</string>
     <string name="error_selector_method_without_calling">La méthode du sélecteur doit être appelée plutôt que passée en paramètre : %s.</string>
     <string name="error_selector_result_type_with_compass">Impossible d\'utiliser un compas lorsque le type de résultat est un sélecteur</string>
     <string name="error_set_both_icon_res_and_icon">Impossible de définir iconRes et icon simultanément</string>

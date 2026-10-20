@@ -1,7 +1,11 @@
 """Takes a script API surface snapshot on a device and stores it as a sorted, diff-friendly text file.
 
-Usage: py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL [--out tools/augment/baseline]
-Writes surface-<model>-<versionCode>.txt (one line per property) and the raw surface-<model>-<versionCode>.json.
+Usage: py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL [--out tools/augment/baseline] [--tag TAG]
+    [--new-modules on|off] [--extend-builtins on|off] [--roots Array.prototype Number.prototype ...]
+Writes surface-<model>-<versionCode>[-TAG].txt (one line per property) and the raw .json next to it.
+--new-modules / --extend-builtins set the switch of the new script module layer (ROADMAP T8) / the "extend JavaScript
+built-in objects" option for the snapshot and restore them afterwards. --roots also records the own properties of the
+given objects (paths from global, as "Array.prototype"), as lines prefixed with "@<path>." after the global ones.
 """
 import argparse
 import json
@@ -17,6 +21,11 @@ RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
 # The end line of a script run in the Chinese or the English app language.
 END_RE = re.compile(r"运行结束|finished in [\d.]+ seconds")
+SWITCH_MARK = "AJ6SWITCH"
+SWITCH_KEYS = {
+    "new_modules": ("key_$_new_script_module_layer", "new script module layer"),
+    "extend_builtins": ("key_$_extending_js_build_in_objects", "extend JavaScript built-in objects"),
+}
 
 
 def adb(serial, *args, check=False, text=True):
@@ -29,11 +38,47 @@ def console_lines(serial):
     return [re.sub(r"^.*GlobalConsole: ", "", l).rstrip() for l in out.splitlines() if "GlobalConsole:" in l]
 
 
-def run_snapshot(serial):
+def set_pref(serial, key, value, label):
+    """Sets the boolean preference [key] through Pref.putBooleanSync in a small script and returns its previous value."""
+    lines = [
+        "var pref = org.autojs.autojs.core.pref.Pref.INSTANCE;",
+        f"var before = pref.getBoolean('{key}', false);",
+        f"pref.putBooleanSync('{key}', {'true' if value else 'false'});",
+        f"console.log('{SWITCH_MARK} ' + before + ' ' + pref.getBoolean('{key}', false));",
+    ]
+    local = HERE / "__pycache__" / "aj6_switch.js"
+    local.parent.mkdir(exist_ok=True)
+    local.write_text(chr(10).join(lines) + chr(10), encoding="utf-8")
+    remote = f"{DEVICE_DIR}/aj6_switch.js"
+    adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
+    adb(serial, "push", str(local), remote, check=True)
+    before_lines = set(console_lines(serial))
+    adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        time.sleep(0.5)
+        for line in console_lines(serial):
+            start = line.find(SWITCH_MARK + " ")
+            if line in before_lines or start < 0:
+                continue
+            before, after = line[start + len(SWITCH_MARK) + 1:].split()[:2]
+            if after != ("true" if value else "false"):
+                sys.exit(f"the preference did not change: {line}")
+            print(f"{label}: {before} -> {after}")
+            return before == "true"
+    sys.exit("no preference output from the device")
+
+
+def run_snapshot(serial, roots):
     before = set(console_lines(serial))
     adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
     adb(serial, "shell", "rm", "-f", f"{DEVICE_DIR}/surface.json")
-    adb(serial, "push", str(HERE / "surface_snapshot.js"), f"{DEVICE_DIR}/surface_snapshot.js", check=True)
+    source = (HERE / "surface_snapshot.js").read_text(encoding="utf-8")
+    source = source.replace("let EXTRA_ROOTS = [];", "let EXTRA_ROOTS = " + json.dumps(roots) + ";", 1)
+    local = HERE / "__pycache__" / "surface_snapshot.js"
+    local.parent.mkdir(exist_ok=True)
+    local.write_text(source, encoding="utf-8")
+    adb(serial, "push", str(local), f"{DEVICE_DIR}/surface_snapshot.js", check=True)
     adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", f"{DEVICE_DIR}/surface_snapshot.js", check=True)
     deadline = time.time() + 120
     seen = []
@@ -102,17 +147,36 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--out", type=pathlib.Path, default=HERE / "baseline")
+    parser.add_argument("--tag", help="suffix of the output file names, as on / off")
+    parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the snapshot")
+    parser.add_argument("--extend-builtins", choices=["on", "off"], help="set the extend JavaScript built-in objects option for the snapshot")
+    parser.add_argument("--roots", nargs="*", default=[], help="further objects to record, as paths from global (Array.prototype)")
     args = parser.parse_args()
 
-    snapshot = run_snapshot(args.serial)
+    previous = {}
+    try:
+        for option, (key, label) in SWITCH_KEYS.items():
+            wanted = getattr(args, option)
+            if wanted:
+                previous[option] = (set_pref(args.serial, key, wanted == "on", label), wanted == "on")
+        snapshot = run_snapshot(args.serial, args.roots)
+    finally:
+        for option, (before, wanted) in previous.items():
+            if before != wanted:
+                key, label = SWITCH_KEYS[option]
+                set_pref(args.serial, key, before, label)
     model = adb(args.serial, "shell", "getprop", "ro.product.model").stdout.strip().replace(" ", "_")
-    stem = f"surface-{model}-{snapshot['versionCode']}"
+    stem = f"surface-{model}-{snapshot['versionCode']}" + (f"-{args.tag}" if args.tag else "")
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / f"{stem}.json").write_text(json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     lines = []
     flatten(snapshot["global"], "", lines)
     lines.sort()
+    for root, props in snapshot.get("roots", {}).items():
+        root_lines = []
+        flatten(props, f"@{root}.", root_lines)
+        lines += sorted(root_lines)
     header = [
         f"# AutoJs6 script API surface: {snapshot['versionName']} ({snapshot['versionCode']}) on {snapshot['device']}",
         f"# global own properties: {len(snapshot['global'])}; Object.keys(global): {len(snapshot['keysOrder'])}",

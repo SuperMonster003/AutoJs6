@@ -200,6 +200,7 @@ import org.autojs.autojs.runtime.api.augment.util.MorseCode as UtilMorseCode
 import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
 import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCodes
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
+import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
 import org.autojs.autojs.script.JavaScriptSource
 
 /**
@@ -423,6 +424,13 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     internal lateinit var consoleProxyObject: ProxyObject
 
+    /**
+     * The mounter of the new script module layer for this runtime, or null when its switch was off when the runtime
+     * started (roadmap T8); `initEpilogue` extends the built-in objects with it (P2.1).
+     * zh-CN: 本运行时的新脚本模块层挂载器, 运行时启动时开关关闭则为 null (T8); initEpilogue 用它扩展内置对象 (P2.1).
+     */
+    private var scriptModules: ScriptModuleMounter? = null
+
     internal lateinit var augmentedApp: ScriptableObject
 
     internal lateinit var augmentedAutojs: ScriptableObject
@@ -552,7 +560,9 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         callFunction(this, js_structured_clone, topLevelScope, topLevelScope.globalThis, arrayOf(topLevelScope.globalThis))
 
-        if (Pref.isExtendingJsBuildInObjectsEnabled) Jsox.extendAllRhinoWithRuntime(this)
+        // Roadmap P2.1: with the new script module layer serving jsox, the built-in objects are extended by its modules.
+        // zh-CN: ROADMAP P2.1: 新脚本模块层提供 jsox 时, 由新层的模块扩展内置对象.
+        if (Pref.isExtendingJsBuildInObjectsEnabled) ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }
 
         // @Hint by Stardust (https://github.com/hyb1996) on Feb 27, 2018
         //  ! 重定向 require 以支持相对路径和 npm 模块.
@@ -999,7 +1009,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         // mounter is null and every module comes from its old augment call (augmentLegacy) as before.
         // zh-CN: ROADMAP T8 / 附录 C Q8: ScriptModuleLayer.ORDER 决定每个模块的挂载位置. 隐藏开关打开时, 已迁移的模块在该位置由新脚本模块层挂载;
         // 关闭时 mounter 为 null, 所有模块照旧来自原 augment 调用 (augmentLegacy).
-        val modules = ScriptModuleLayer.mounterOrNull(this, target)
+        val modules = ScriptModuleLayer.mounterOrNull(this, target).also { scriptModules = it }
         ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)

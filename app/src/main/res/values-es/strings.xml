@@ -528,11 +528,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">La ruta resuelta para \"%1$s\" no puede ser nula</string>
     <string name="error_save_failed">Error al guardar</string>
     <string name="error_script_argument_cannot_be">El argumento \"%1$s\" no puede ser %2$s</string>
+    <string name="error_script_argument_has_no_valid_number">El argumento \"%1$s\" no contiene ningún número válido</string>
     <string name="error_script_argument_must_be_integer">El argumento \"%1$s\" debe ser un entero de %2$d bits, se recibió %3$s</string>
     <string name="error_script_argument_must_be_of_type">El argumento \"%1$s\" debe ser de tipo %2$s, se recibió %3$s</string>
+    <string name="error_script_argument_must_be_positive">El argumento \"%1$s\" debe ser un número positivo, se recibió %2$s</string>
+    <string name="error_script_argument_must_have_length">El argumento \"%1$s\" debe tener una longitud de %2$d, se recibió %3$d</string>
     <string name="error_script_is_on_exiting">El script está al salir</string>
     <string name="error_script_no_overload_accepts_arguments">Ninguna sobrecarga acepta los argumentos (%1$s). Candidatos: %2$s</string>
+    <string name="error_script_range_has_no_integer">No hay ningún entero en el rango [%1$s, %2$s]</string>
     <string name="error_script_shortcut_descriptor_mismatch">El acceso directo del script ya no coincide con el motor guardado. Vuelve a crear el acceso directo.</string>
+    <string name="error_script_unknown_built_in_extension">Extensión de objeto integrado desconocida \"%1$s\", se esperaba uno de %2$s</string>
     <string name="error_selector_method_without_calling">Se debería llamar al método selector en lugar de pasarlo como parámetro: %s</string>
     <string name="error_selector_result_type_with_compass">No se puede usar una brújula cuando el tipo de resultado es selector</string>
     <string name="error_set_both_icon_res_and_icon">No se puede establecer tanto el iconoRes como el icono</string>

@@ -528,11 +528,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
     <string name="error_save_failed">Не удалось сохранить</string>
     <string name="error_script_argument_cannot_be">Аргумент \"%1$s\" не может быть %2$s</string>
+    <string name="error_script_argument_has_no_valid_number">Аргумент \"%1$s\" не содержит допустимых чисел</string>
     <string name="error_script_argument_must_be_integer">Аргумент \"%1$s\" должен быть %2$d-битным целым числом, получено %3$s</string>
     <string name="error_script_argument_must_be_of_type">Аргумент \"%1$s\" должен иметь тип %2$s, получено %3$s</string>
+    <string name="error_script_argument_must_be_positive">Аргумент \"%1$s\" должен быть положительным числом, получено %2$s</string>
+    <string name="error_script_argument_must_have_length">Аргумент \"%1$s\" должен иметь длину %2$d, получено %3$d</string>
     <string name="error_script_is_on_exiting">Скрипт завершается</string>
     <string name="error_script_no_overload_accepts_arguments">Нет перегрузки, принимающей аргументы (%1$s). Варианты: %2$s</string>
+    <string name="error_script_range_has_no_integer">В диапазоне [%1$s, %2$s] нет целых чисел</string>
     <string name="error_script_shortcut_descriptor_mismatch">Ярлык скрипта больше не соответствует сохраненному движку. Создайте ярлык заново.</string>
+    <string name="error_script_unknown_built_in_extension">Неизвестное расширение встроенного объекта \"%1$s\", допустимые значения: %2$s</string>
     <string name="error_selector_method_without_calling">Метод селектора должен быть вызван, а не передан в качестве параметра: %s</string>
     <string name="error_selector_result_type_with_compass">Невозможно использовать компас, когда тип результата - селектор</string>
     <string name="error_set_both_icon_res_and_icon">Невозможно установить как iconRes, так и icon</string>

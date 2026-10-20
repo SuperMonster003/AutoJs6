@@ -29,6 +29,11 @@ class ScriptMessagesTest {
         assertEquals("Argument \"n\" must be a 32-bit integer, got 1.5", ScriptMessages.argumentInteger("n", 32, "1.5"))
         assertEquals("No overload accepts the arguments (boolean). Candidates: f(a: kotlin.String)", ScriptMessages.noOverload("boolean", "f(a: kotlin.String)"))
         assertEquals("Unknown charset \"x\"", ScriptMessages.unknownCharset("x"))
+        assertEquals("Argument \"cycle\" must be a positive number, got 0", ScriptMessages.argumentPositive("cycle", "0"))
+        assertEquals("Argument \"range\" contains no valid number", ScriptMessages.argumentNoNumber("range"))
+        assertEquals("Argument \"pointA\" must have a length of 2, got 3", ScriptMessages.argumentLength("pointA", 2, 3))
+        assertEquals("No integer lies within the range [1.2, 1.8]", ScriptMessages.rangeNoInteger("1.2", "1.8"))
+        assertEquals("Unknown built-in object extension \"x\", expected one of Arrayx", ScriptMessages.unknownBuiltInExtension("x", "Arrayx"))
     }
 
     @Test
@@ -43,6 +48,11 @@ class ScriptMessagesTest {
             strings.getValue("error_script_argument_must_be_integer") to ScriptMessages.ARGUMENT_INTEGER,
             strings.getValue("error_script_no_overload_accepts_arguments") to ScriptMessages.NO_OVERLOAD,
             strings.getValue("error_unknown_charset") to ScriptMessages.UNKNOWN_CHARSET,
+            strings.getValue("error_script_argument_must_be_positive") to ScriptMessages.ARGUMENT_POSITIVE,
+            strings.getValue("error_script_argument_has_no_valid_number") to ScriptMessages.ARGUMENT_NO_NUMBER,
+            strings.getValue("error_script_argument_must_have_length") to ScriptMessages.ARGUMENT_LENGTH,
+            strings.getValue("error_script_range_has_no_integer") to ScriptMessages.RANGE_NO_INTEGER,
+            strings.getValue("error_script_unknown_built_in_extension") to ScriptMessages.UNKNOWN_BUILT_IN_EXTENSION,
             plurals.getValue("error_method_only_accepts_n_arguments/one") to ScriptMessages.EXACTLY_ONE,
             plurals.getValue("error_method_only_accepts_n_arguments/other") to ScriptMessages.EXACTLY_OTHER,
             plurals.getValue("error_method_only_accepts_no_less_than_n_arguments/one") to ScriptMessages.NO_LESS_THAN_ONE,
@@ -52,13 +62,7 @@ class ScriptMessagesTest {
     }
 
     @Test
-    fun newMessagesExistInEveryLanguage() = checkEveryLanguage(
-        "error_script_argument_cannot_be",
-        "error_script_argument_must_be_integer",
-        "error_script_argument_must_be_of_type",
-        "error_script_no_overload_accepts_arguments",
-        "error_unknown_charset",
-    )
+    fun newMessagesExistInEveryLanguage() = checkEveryLanguage(*MESSAGE_STRINGS.filter { it.startsWith("error_script_") || it == "error_unknown_charset" }.toTypedArray())
 
     /** P1.3: the strings of the developer options entries follow the same rules. */
     @Test
@@ -199,6 +203,12 @@ class ScriptMessagesTest {
             "error_script_argument_must_be_of_type",
             "error_script_no_overload_accepts_arguments",
             "error_unknown_charset",
+            // P2.1 (Arrayx / Mathx / Numberx / jsox).
+            "error_script_argument_has_no_valid_number",
+            "error_script_argument_must_be_positive",
+            "error_script_argument_must_have_length",
+            "error_script_range_has_no_integer",
+            "error_script_unknown_built_in_extension",
         )
         private val MESSAGE_PLURALS = listOf("error_method_only_accepts_n_arguments", "error_method_only_accepts_no_less_than_n_arguments")
 

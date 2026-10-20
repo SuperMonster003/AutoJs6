@@ -27,6 +27,8 @@ internal data class ModuleModel(
     val accessors: List<Accessor>,
     val javaClasses: List<JavaClassBinding>,
     val prototype: Member?,
+    /** The JavaScript built-in object the module extends (`@ScriptModule(builtIn)`), or null. */
+    val builtIn: String?,
     val source: String,
 ) {
     val bindingName: String get() = "${simpleName}Binding"
@@ -55,6 +57,10 @@ internal data class FunctionGroup(
     /** `NONE`, `LITERAL` or `FUNCTIONAL` (the annotation's `ScriptToString` entry). */
     val toStringRole: String,
     val overloads: List<Overload>,
+    /** `ScriptBuiltIn` entries (STATIC, PROTOTYPE, GLOBAL) where the built-in extension binds the function. */
+    val builtIn: List<String> = emptyList(),
+    /** Bound only by the built-in extension (neither on the module object nor on the global object). */
+    val builtInOnly: Boolean = false,
 ) {
     /** The JS `length` of the function object: the parameters before the first optional one, over all overloads. */
     val length: Int get() = overloads.minOf { it.required }
@@ -131,6 +137,8 @@ internal data class Accessor(
     val placement: Placement,
     val attributes: Int,
     val source: String,
+    /** `ScriptBuiltIn` entries (STATIC, GLOBAL) where the built-in extension binds the property. */
+    val builtIn: List<String> = emptyList(),
 )
 
 internal data class JavaClassBinding(

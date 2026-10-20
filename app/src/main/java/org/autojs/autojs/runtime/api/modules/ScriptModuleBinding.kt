@@ -80,6 +80,8 @@ class ScriptModuleSpec(
     val attributes: Int,
     /** Whether an event emitter object ends the prototype chain of the module object. */
     val emitter: Boolean,
+    /** The JavaScript built-in object (as `Math`) the module extends ([ScriptBuiltInExtender]), or null. */
+    val builtIn: String?,
     /** JS `length` of the callable module object, or -1 when the module object is not callable. */
     val invokeLength: Int,
     /** JS `length` of the constructor, or -1 when the module object is not a constructor. */
@@ -102,6 +104,12 @@ class ScriptFunctionSpec(
     val length: Int,
     /** A `toString` that converts its arguments: the module object also gets the hidden custom toString marker. */
     val functionalToString: Boolean,
+    /** Bound on the module's built-in object when it is extended (as `Math.sum`). */
+    val onBuiltIn: Boolean = false,
+    /** Bound on the built-in object's prototype, taking the receiver as its first argument (as `[].distinct()`). */
+    val onBuiltInPrototype: Boolean = false,
+    /** Bound on the global object when the built-in object is extended (as `parseFloat`). */
+    val onBuiltInGlobal: Boolean = false,
 )
 
 class ScriptAccessorSpec(
@@ -113,6 +121,10 @@ class ScriptAccessorSpec(
     val onModule: Boolean,
     val onGlobal: Boolean,
     val attributes: Int,
+    /** Bound on the module's built-in object when it is extended (as `Number.ICU`); data properties only. */
+    val onBuiltIn: Boolean = false,
+    /** Bound on the global object when the built-in object is extended; data properties only. */
+    val onBuiltInGlobal: Boolean = false,
 )
 
 class ScriptJavaClassSpec(

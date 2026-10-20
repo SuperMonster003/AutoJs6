@@ -221,6 +221,12 @@ class ScriptArgsTest {
         val obj = js("({})")
         assertSame(obj, ScriptArgs.typed(obj, Scriptable::class.java, "f", "p"))
         assertEquals("TypeError: Failed to call method \"f\": [ Argument \"p\" must be of type java.util.concurrent.TimeUnit, got string ]", errorOf { ScriptArgs.typed("SECONDS", TimeUnit::class.java, "f", "p") })
+        // P2.1: Rhino types are named the script way in messages.
+        assertEquals("TypeError: Failed to call method \"f\": [ Argument \"p\" must be of type Array, got number ]", errorOf { ScriptArgs.typed(1.0, NativeArray::class.java, "f", "p") })
+        assertEquals(listOf("Array", "Object", "function", "function", "object", "object"), listOf(
+            NativeArray::class.java, NativeObject::class.java, org.mozilla.javascript.Callable::class.java, org.mozilla.javascript.BaseFunction::class.java,
+            Scriptable::class.java, org.mozilla.javascript.ScriptableObject::class.java,
+        ).map { ScriptArgs.scriptTypeName(it) })
         assertEquals("TypeError", errorName { ScriptArgs.typed(null, TimeUnit::class.java, "f", "p") })
         assertNull(ScriptArgs.typedOrNull(undefined, TimeUnit::class.java, "f", "p"))
         assertEquals("TypeError: Failed to call method \"f\": [ Argument \"p\" cannot be undefined ]", errorOf { ScriptArgs.nonNullish(undefined, "f", "p") })

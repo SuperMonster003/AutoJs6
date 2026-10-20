@@ -19,6 +19,8 @@ py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] 
 
 `--new-modules on|off` 在计时前用一个小脚本设置新脚本模块层的隐藏开关 (ROADMAP T8, 偏好设置键 `key_$_new_script_module_layer`, 经 `Pref.putBooleanSync` 写入), 结束后恢复原值; 开关只影响之后启动的脚本.
 
+`--calls NAME ...` (P2.1 起) 把 `bench/calls_prelude.js` 与 `bench/calls/NAME.js` 合成一个脚本运行 `--runs` 次, 给出每项的最小 / 中位 / 最大值 (微秒, 计时规则同 `error_path.js`). 前导部分带有 Rhino 参照项 (`ref` 开头: 空循环, `undefined.x`, 桥接 Java 异常, `Math.max`), 每个模块组的成功与失败调用写在自己的 `bench/calls/<组>.js` 中 (如 `jsox.js`), 各 P2 / P3 会话只新增自己的文件, 不改共享脚本. `--skip-init` 跳过启动计时, 只测调用.
+
 ## device_surface_snapshot.py: 真机 API 表面快照
 
 ```
@@ -28,6 +30,22 @@ py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL [--out tools/augm
 在设备上运行 `surface_snapshot.js`, 枚举 `global` 的全部自有属性, 对模块对象再向下两层记录每个属性的特性 (可枚举 / 可写 / 可配置 / 访问器), 值的种类 (函数名与参数个数, 对象标签, Java 类名, 原始值) 与原型链, 并记录 `Object.keys(global)` 的顺序和 `$` 别名的同一性. 结果转换为按路径排序的文本 `surface-<model>-<versionCode>.txt` (一行一个属性, 便于 diff), 原始 JSON 放在同名 `.json`. 访问器属性只记录存在性, 不求值; 数据属性的值会被读取, 因此快照过程会触发 Java 侧 getter.
 
 新实现切换前, 对同一设备再生成一份并与基线 diff, 只允许出现 ROADMAP 红线 R1 允许的差异.
+
+P2.1 增补: `--new-modules on|off` 与 `--extend-builtins on|off` 在快照前分别设置新脚本模块层开关与 "JavaScript 内置对象扩展" 设置 (键 `key_$_extending_js_build_in_objects`), 结束后恢复原值; `--roots Array.prototype Number.prototype` 另外记录这些对象的自有属性 (对 `global` 的遍历把 `Array.prototype` 当作数组, 不展开), 输出为排在全局各行之后的 `@<路径>.` 前缀行; `--tag on` 等给输出文件名加后缀, 避免开 / 关两份互相覆盖. 例如 P2.4 的比对:
+
+```
+py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL --out OUT --tag off --new-modules off --extend-builtins on --roots Array.prototype Number.prototype
+py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL --out OUT --tag on --new-modules on --extend-builtins on --roots Array.prototype Number.prototype
+py -3.12 -I tools/augment/surface_compare.py OUT/surface-<model>-<versionCode>-off.txt OUT/surface-<model>-<versionCode>-on.txt --only Arrayx Mathx Numberx jsox randomInt randomFloat parseFloat Array Math Number @Array.prototype @Number.prototype --allow-length
+```
+
+## surface_compare.py: 比对两份表面快照
+
+```
+py -3.12 -I tools/augment/surface_compare.py BEFORE.txt AFTER.txt [--only NAME ...] [--allow-length]
+```
+
+逐行比对 `device_surface_snapshot.py` 写出的两份文本: 只在一侧出现的属性, 特性或值不同的属性, 全局键顺序与 `$` 别名的差异 (版本号, 设备与计数等头部信息不比较). `--only` 只比较给定的顶层名称 (含其 `$` 别名与下级路径; `@Array.prototype` 表示 `--roots` 记录的对象) 以及这些名称在全局键中的相对顺序; `--allow-length` 接受只有函数 `length` 不同的差异 (函数行的 `length=N`, 以及 `.length` / `.arity` 行的数值, 即 ROADMAP 附录 C Q9 允许的差异). 有未被接受的差异时退出码为 1.
 
 ## device_eval.py: 真机复核差分测试记录的 Kotlin 值
 

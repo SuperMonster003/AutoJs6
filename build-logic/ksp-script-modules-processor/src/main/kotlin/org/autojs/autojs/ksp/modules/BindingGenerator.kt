@@ -71,13 +71,16 @@ internal object BindingGenerator {
         appendLine("        parent = ${model.parent?.let(::lit) ?: "null"},")
         appendLine("        attributes = ${model.attributes},")
         appendLine("        emitter = ${model.emitter},")
+        appendLine("        builtIn = ${model.builtIn?.let(::lit) ?: "null"},")
         appendLine("        invokeLength = ${model.invoke?.required ?: -1},")
         appendLine("        constructLength = ${model.construct?.required ?: -1},")
         appendLine("        functions = ${list(model.functions.map { g ->
-            "ScriptFunctionSpec(id = ${g.id}, name = ${lit(g.name)}, aliases = ${list(g.aliases.map(::lit))}, onModule = ${g.placement.onModule}, onGlobal = ${g.placement.onGlobal}, attributes = ${g.attributes}, length = ${g.length}, functionalToString = ${g.toStringRole == "FUNCTIONAL"})"
+            "ScriptFunctionSpec(id = ${g.id}, name = ${lit(g.name)}, aliases = ${list(g.aliases.map(::lit))}, onModule = ${g.placement.onModule}, onGlobal = ${g.placement.onGlobal}, attributes = ${g.attributes}, length = ${g.length}, functionalToString = ${g.toStringRole == "FUNCTIONAL"}" +
+                ", onBuiltIn = ${"STATIC" in g.builtIn}, onBuiltInPrototype = ${"PROTOTYPE" in g.builtIn}, onBuiltInGlobal = ${"GLOBAL" in g.builtIn})"
         }, "        ")},")
         appendLine("        accessors = ${list(model.accessors.map { a ->
-            "ScriptAccessorSpec(id = ${a.id}, name = ${lit(a.name)}, getter = ${a.isGetter}, writable = ${a.mutable}, onModule = ${a.placement.onModule}, onGlobal = ${a.placement.onGlobal}, attributes = ${a.attributes})"
+            "ScriptAccessorSpec(id = ${a.id}, name = ${lit(a.name)}, getter = ${a.isGetter}, writable = ${a.mutable}, onModule = ${a.placement.onModule}, onGlobal = ${a.placement.onGlobal}, attributes = ${a.attributes}" +
+                ", onBuiltIn = ${"STATIC" in a.builtIn}, onBuiltInGlobal = ${"GLOBAL" in a.builtIn})"
         }, "        ")},")
         appendLine("        javaClasses = ${list(model.javaClasses.map { j ->
             "ScriptJavaClassSpec(name = ${lit(j.name)}, type = ${j.type}::class.java, onModule = ${j.placement.onModule}, onGlobal = ${j.placement.onGlobal}, attributes = ${j.attributes})"

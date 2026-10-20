@@ -49,6 +49,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         val accessors = mutableListOf<Accessor>()
         var prototype: Member? = null
         val scriptName = "${moduleAnnotation.string("name")}"
+        val builtIn = moduleAnnotation.string("builtIn").ifEmpty { null }
 
         declaration.declarations.forEach { member ->
             when (member) {
@@ -82,8 +83,13 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         val groups = functions
             .groupBy { (function, annotation) -> annotation.string("name").ifEmpty { function.simpleName.asString() } }
             .entries
-            .mapIndexed { id, (name, members) -> groupOf(id, name, scriptName, members) }
+            .mapIndexed { id, (name, members) -> groupOf(id, name, scriptName, members, builtIn) }
             .filterNotNull()
+        accessors.filter { it.builtIn.isNotEmpty() }.forEach { a ->
+            if (builtIn == null) error(declaration, "$scriptName.${a.name}: builtIn needs @ScriptModule(builtIn) on the module")
+            if (!a.placement.onModule || a.isGetter) error(declaration, "$scriptName.${a.name}: builtIn applies to a @ScriptProperty bound on the module object")
+            if ("PROTOTYPE" in a.builtIn) error(declaration, "$scriptName.${a.name}: a property cannot extend the prototype of a built-in object")
+        }
 
         val javaClasses = declaration.annotations(ScriptModuleNames.JAVA_CLASS).mapNotNull { annotation ->
             val type = annotation.type("type") ?: return@mapNotNull null.also { error(declaration, "@ScriptJavaClass needs a type") }
@@ -96,6 +102,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         }.toList()
 
         checkDuplicateNames(declaration, groups, accessors, javaClasses)
+        checkDuplicateBuiltInNames(declaration, groups, accessors)
 
         val parent = moduleAnnotation.type("parent")?.declaration?.qualifiedName?.asString()?.takeUnless { it == "kotlin.Unit" }
         if (parent == qualifiedName) error(declaration, "A script module cannot be its own parent")
@@ -118,6 +125,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             accessors = accessors,
             javaClasses = javaClasses,
             prototype = prototype,
+            builtIn = builtIn,
             source = sourceOf(declaration),
         ).takeUnless { failed }
     }
@@ -133,17 +141,25 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         return error(declaration, "A @ScriptModule class needs a public constructor taking nothing or one $SCRIPT_RUNTIME")
     }
 
-    private fun groupOf(id: Int, name: String, moduleName: String, members: List<Pair<KSFunctionDeclaration, KSAnnotation>>): FunctionGroup? {
+    private fun groupOf(id: Int, name: String, moduleName: String, members: List<Pair<KSFunctionDeclaration, KSAnnotation>>, moduleBuiltIn: String?): FunctionGroup? {
         val (first, firstAnnotation) = members.first()
-        val placement = firstAnnotation.placement()
+        val builtIn = firstAnnotation.enumEntries("builtIn")
+        val builtInOnly = firstAnnotation.boolean("builtInOnly", false)
+        val placement = if (builtInOnly) Placement(onModule = false, onGlobal = false) else firstAnnotation.placement()
         val attributes = firstAnnotation.int("attributes", PERMANENT)
         val aliases = firstAnnotation.strings("aliases")
         val toStringRole = firstAnnotation.enumEntry("toStringRole", "NONE")
         members.drop(1).forEach { (function, annotation) ->
-            if (annotation.placement() != placement || annotation.int("attributes", PERMANENT) != attributes || annotation.strings("aliases") != aliases || annotation.enumEntry("toStringRole", "NONE") != toStringRole) {
-                error(function, "Overloads of script function \"$name\" must declare the same aliases, global placement, attributes and toStringRole as ${first.simpleName.asString()}")
+            if (annotation.placement() != firstAnnotation.placement() || annotation.int("attributes", PERMANENT) != attributes || annotation.strings("aliases") != aliases ||
+                annotation.enumEntry("toStringRole", "NONE") != toStringRole || annotation.enumEntries("builtIn") != builtIn || annotation.boolean("builtInOnly", false) != builtInOnly
+            ) {
+                error(function, "Overloads of script function \"$name\" must declare the same aliases, global placement, attributes, toStringRole and built-in placement as ${first.simpleName.asString()}")
             }
         }
+        if (builtIn.isNotEmpty() && moduleBuiltIn == null) error(first, "$moduleName.$name: builtIn needs @ScriptModule(builtIn) on the module")
+        if (builtInOnly && builtIn.isEmpty()) error(first, "$moduleName.$name: builtInOnly needs at least one builtIn placement")
+        if (builtInOnly && firstAnnotation.enumEntry("global", "NONE") != "NONE") error(first, "$moduleName.$name: a builtInOnly function cannot be global")
+        if ("PROTOTYPE" in builtIn && aliases.isNotEmpty()) error(first, "$moduleName.$name: a function extending a built-in prototype cannot have aliases")
         if (toStringRole != "NONE" && "toString" !in listOf(name) + aliases) {
             error(first, "$moduleName.$name: toStringRole applies to a script function named or aliased \"toString\" only")
         }
@@ -152,8 +168,11 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         }
         val overloads = members.mapNotNull { (function, _) -> overloadOf(function, "$moduleName.$name") }
         if (overloads.size != members.size) return null
+        if ("PROTOTYPE" in builtIn && overloads.any { it.required < 1 }) {
+            error(first, "$moduleName.$name: a function extending a built-in prototype takes the receiver as its first, required parameter")
+        }
         checkAmbiguity(first, name, overloads)
-        return FunctionGroup(id, name, aliases, placement, attributes, toStringRole, overloads)
+        return FunctionGroup(id, name, aliases, placement, attributes, toStringRole, overloads, builtIn, builtInOnly)
     }
 
     private fun overloadOf(function: KSFunctionDeclaration, display: String): Overload? {
@@ -246,7 +265,8 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
                     val kind = SIMPLE_KINDS[qualified] ?: ParamKind.TYPED
                     Param("value", render(type), qualified, kind, type.isMarkedNullable, optional = false, vararg = false)
                 } else null
-                Accessor(id, name, kotlinName, isFunction = false, isGetter = isGetter, mutable = mutable, render(member.type.resolve()), setterParam, annotation.placement(), annotation.int("attributes", PERMANENT), sourceOf(member))
+                val builtIn = if (isGetter) emptyList() else annotation.enumEntries("builtIn")
+                Accessor(id, name, kotlinName, isFunction = false, isGetter = isGetter, mutable = mutable, render(member.type.resolve()), setterParam, annotation.placement(), annotation.int("attributes", PERMANENT), sourceOf(member), builtIn)
             }
             else -> error(member, "Unsupported accessor declaration")
         }
@@ -286,6 +306,15 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         javaClasses.forEach { count(listOf(it.name), it.placement) }
         val duplicates = (onModule.filterValues { it > 1 }.keys + onGlobal.filterValues { it > 1 }.keys).sorted()
         if (duplicates.isNotEmpty()) error(declaration, "Duplicate script member names: ${duplicates.joinToString()}")
+    }
+
+    /** Names bound by the built-in extension are unique per target (the built-in object, its prototype, the global object). */
+    private fun checkDuplicateBuiltInNames(declaration: KSClassDeclaration, groups: List<FunctionGroup>, accessors: List<Accessor>) {
+        val names = mutableMapOf<String, MutableList<String>>()
+        groups.forEach { g -> g.builtIn.forEach { target -> (listOf(g.name) + g.aliases).forEach { names.getOrPut(target) { mutableListOf() } += it } } }
+        accessors.forEach { a -> a.builtIn.forEach { target -> names.getOrPut(target) { mutableListOf() } += a.name } }
+        val duplicates = names.flatMap { (target, list) -> list.groupingBy { it }.eachCount().filterValues { it > 1 }.keys.map { "$target $it" } }.sorted()
+        if (duplicates.isNotEmpty()) error(declaration, "Duplicate built-in extension names: ${duplicates.joinToString()}")
     }
 
     private fun sourceOf(node: KSNode): String {
@@ -356,6 +385,15 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         fun KSAnnotation.strings(name: String): List<String> = (value(name) as? List<*>)?.map { it.toString() } ?: emptyList()
 
         fun KSAnnotation.type(name: String): KSType? = value(name) as? KSType
+
+        /** Entries of an enum array argument by simple name, in the order written, without repetition. */
+        fun KSAnnotation.enumEntries(name: String): List<String> = (value(name) as? List<*>)?.map { raw ->
+            when (raw) {
+                is KSType -> raw.declaration.simpleName.asString()
+                is KSDeclaration -> raw.simpleName.asString()
+                else -> raw.toString().substringAfterLast('.')
+            }
+        }?.distinct() ?: emptyList()
 
         /** Enum arguments arrive as the entry's declaration (KSP2) or as its type (KSP1). */
         fun KSAnnotation.enumEntry(name: String, default: String): String = when (val raw = value(name)) {

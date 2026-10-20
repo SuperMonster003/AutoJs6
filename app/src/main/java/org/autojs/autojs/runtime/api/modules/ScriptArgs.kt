@@ -1,10 +1,12 @@
 package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.util.RhinoUtils
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
@@ -160,7 +162,20 @@ object ScriptArgs {
         if (type.isInstance(value)) return value as T
         val unwrapped = (value as? Wrapper)?.unwrap()
         if (type.isInstance(unwrapped)) return unwrapped as T
-        throw typeError(function, param, type.name, value)
+        throw typeError(function, param, scriptTypeName(type), value)
+    }
+
+    /**
+     * The expected type of a [typed] parameter in messages: the script name for the Rhino types a module declares to get
+     * script values (Array, Object, function, object; P2.1), the Java class name otherwise.
+     */
+    @JvmStatic
+    fun scriptTypeName(type: Class<*>): String = when {
+        type == NativeArray::class.java -> "Array"
+        type == NativeObject::class.java -> "Object"
+        Callable::class.java.isAssignableFrom(type) -> "function"
+        type == Scriptable::class.java || type == ScriptableObject::class.java -> "object"
+        else -> type.name
     }
 
     @JvmStatic

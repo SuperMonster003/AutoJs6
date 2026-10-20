@@ -525,11 +525,16 @@
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
     <string name="error_save_failed">Save failed</string>
     <string name="error_script_argument_cannot_be">Argument \"%1$s\" cannot be %2$s</string>
+    <string name="error_script_argument_has_no_valid_number">Argument \"%1$s\" contains no valid number</string>
     <string name="error_script_argument_must_be_integer">Argument \"%1$s\" must be a %2$d-bit integer, got %3$s</string>
     <string name="error_script_argument_must_be_of_type">Argument \"%1$s\" must be of type %2$s, got %3$s</string>
+    <string name="error_script_argument_must_be_positive">Argument \"%1$s\" must be a positive number, got %2$s</string>
+    <string name="error_script_argument_must_have_length">Argument \"%1$s\" must have a length of %2$d, got %3$d</string>
     <string name="error_script_is_on_exiting">Script is on exiting</string>
     <string name="error_script_no_overload_accepts_arguments">No overload accepts the arguments (%1$s). Candidates: %2$s</string>
+    <string name="error_script_range_has_no_integer">No integer lies within the range [%1$s, %2$s]</string>
     <string name="error_script_shortcut_descriptor_mismatch">The script shortcut no longer matches its saved engine. Recreate the shortcut.</string>
+    <string name="error_script_unknown_built_in_extension">Unknown built-in object extension \"%1$s\", expected one of %2$s</string>
     <string name="error_selector_method_without_calling">Selector method should be called rather than passed as a parameter: %s</string>
     <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
     <string name="error_set_both_icon_res_and_icon">Cannot set both iconRes and icon</string>
