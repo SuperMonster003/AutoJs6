@@ -42,12 +42,14 @@ class RuntimeSpeechPackagedDeviceTest {
                     assertArrayEquals(installed,sdk.readBytes());sdk.copyTo(File(root,"host-client.mjs"))
                 }
                 val prelude="const expectedPackage=${JSONObject.quote(packageName(mode))};const eq=(a,b,label)=>{if(JSON.stringify(a)!==JSON.stringify(b))throw Error(label);};"
-                val program=prelude+RuntimeSpeechPrograms.body(packagedMicrophone=!bun)
-                val worker="const {parentPort}=require('node:worker_threads'),java=require('autojs6:java'),speech=require('speech');(async()=>{$program})().then(v=>parentPort.postMessage(v)).catch(e=>{throw e;});"
+                val program=prelude+RuntimeSpeechPrograms.body(packagedMicrophone=!bun,audioExpression="Buffer.from(audio)")
+                val worker="const {parentPort,workerData}=require('node:worker_threads'),java=require('autojs6:java'),speech=require('speech');const audio=workerData.audio;(async()=>{$program})().then(v=>parentPort.postMessage(v)).catch(e=>{throw e;});"
                 val imports=if(bun)"const {createHostClient}=await import('./host-client.mjs');const host=await createHostClient(),java=host.java,speech=host.speech,ui=host.ui;"
                     else "const java=require('java'),speech=require('autojs6:speech'),ui=require('ui'),{Worker}=require('node:worker_threads');"
+                val loadAudio=if(bun)"const audio=(await import('node:fs')).readFileSync(new URL('./runtime-speech-input.wav',import.meta.url));"
+                    else "const audio=require('node:fs').readFileSync(require('node:path').join(__dirname,'runtime-speech-input.wav'));"
                 val run="const main=await(async()=>{$program})();"+if(bun)"const result={main};" else
-                    "const w=new Worker(${JSONObject.quote(worker)},{eval:true});let child;try{child=await new Promise((resolve,reject)=>{w.once('message',resolve);w.once('error',reject);});}finally{await w.terminate();}const result={main,worker:child};"
+                    "const w=new Worker(${JSONObject.quote(worker)},{eval:true,workerData:{audio}});let child;try{child=await new Promise((resolve,reject)=>{w.once('message',resolve);w.once('error',reject);});}finally{await w.terminate();}const result={main,worker:child};"
                 File(root,entry).writeText("""
                     "${if(bun)"bun" else "nodejs"}";(async()=>{
                         $imports
@@ -56,12 +58,17 @@ class RuntimeSpeechPackagedDeviceTest {
                             const end=Date.now()+90000;while(!String(await field.text).startsWith('RUN ')){if(Date.now()>end)throw Error('Checkpoint timeout');await pause(100);}
                             const parts=String(await field.text).split(' '),round=Number(parts[1]),url=parts[2],identity=await ui.context();
                             if(identity.packageName!==${JSONObject.quote(packageName(mode))}||identity.runtimeVersionCode!==${BuildConfig.VERSION_CODE})throw Error('Packaged identity');
+                            $loadAudio
                             $run
 
                             await window.close();await field.dispose();await fetch(url+'/upload',{method:'POST',body:JSON.stringify({identity,result,mode:'$mode',round})});
                         }catch(error){await field.set({text:'Speech failure '+String(error.stack||error)});await pause(60000);throw error;}
                     })().catch(e=>{console.error(e.stack||e);process.exitCode=1;});
                 """.trimIndent())
+                assertTrue(File(root,entry).length()<NodeRuntimeCapabilities.RUNTIME_SCRIPT_SOURCE_MAX_BYTES)
+                InstrumentationRegistry.getInstrumentation().context.assets.open("runtime-speech/en.wav").use { input ->
+                    File(root,"runtime-speech-input.wav").outputStream().use { input.copyTo(it) }
+                }
                 File(root,"NOTICE.txt").writeText(InstrumentationRegistry.getInstrumentation().context.assets.open("runtime-speech/NOTICE.txt").bufferedReader().use{it.readText()})
                 File(root,"project.json").writeText(config.toJson(false))
                 val built=RemoteApkBuildClient.buildBlocking(context,config,output,AtomicBoolean(false),RemoteApkBuildClient.ProgressListener{},ApkBuilderTemplatePluginIds.PACKAGE_NAME)
@@ -78,7 +85,7 @@ class RuntimeSpeechPackagedDeviceTest {
             context.startActivity(requireNotNull(context.packageManager.getLaunchIntentForPackage(pkg)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             fun receipt()=server.uploads.map{JSONObject(it.toString(Charsets.UTF_8))}.firstOrNull{it.optString("mode")==mode&&it.optInt("round")==round}
             fun wait(label:String,fn:()->Boolean)=controls.await(label,160000){controls.find{it.text?.toString()?.startsWith("Speech failure ")==true}?.let{fail(it.text.toString())};fn()}
-            wait("Speech entry"){controls.labelled("Speech ready $mode")!=null}
+            wait("Speech entry $mode/$round"){controls.labelled("Speech ready $mode")!=null}
             assertTrue(controls.labelled("Speech ready $mode")?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,Bundle().apply{putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,"RUN $round "+server.url)})==true)
             wait("Speech result"){receipt()!=null}
             val row=receipt()!!;assertEquals(pkg,row.getJSONObject("identity").getString("packageName"));assertEquals(BuildConfig.VERSION_CODE,row.getJSONObject("identity").getInt("runtimeVersionCode"))
@@ -92,7 +99,9 @@ class RuntimeSpeechPackagedDeviceTest {
                 assertTrue(value.getInt("externalCharacters")>20)
                 assertEquals(mode=="worker",value.getBoolean("packagedMicrophone"))
             }
-            proofs.put(row);Thread.sleep(2000);shell("am force-stop $pkg")
+            proofs.put(row)
+            File(context.getExternalFilesDir(null),"runtime-speech-packaged.json").writeText(proofs.toString(2))
+            Thread.sleep(2000);shell("am force-stop $pkg")
         }
         File(context.getExternalFilesDir(null),"runtime-speech-packaged.json").writeText(proofs.toString(2))
     }}

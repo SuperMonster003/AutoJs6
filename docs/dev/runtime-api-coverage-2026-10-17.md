@@ -95,3 +95,7 @@ Node/Bun and Worker now provide proxy/wrap, generated subclasses, callSuper, cal
 ## 2026-10-20 TTS follow-up
 
 The [TTS delivery](runtime-tts-2026-10-20.md) adds Node/Bun/Worker engine and voice queries, speech, silence, atomic file synthesis and task events through the shared host service. All 31 registered TTS method names have counterparts, with explicit async task handles and isolated client cleanup. AI/flow/mail/EPUB, speech recognition/model management and other specialized modules remain separate audit items. See the delivery report for current verification status; name coverage does not imply inherited Rhino object or prototype parity.
+
+## 2026-10-20 Speech follow-up
+
+The [speech delivery](runtime-speech-2026-10-20.md) adds all 18 registered speech/models method names to Node main threads, Bun and CJS/ESM/nested Workers, including recognition, VAD, microphone/external PCM sessions, wake events, model management and synthesis. A separate permissioned provider entry enables independently signed generated applications while retaining caller microphone checks and UID-scoped cancellation. Redmi host/packaged validation and the earlier Xiaomi Ace run pass. Xiaomi's final host/packaged verification and restoration are deferred at the user's request because another session is using that device. AI/flow/mail/EPUB and other specialized surfaces remain separate audit work; this method-name coverage does not establish complete Rhino parity.

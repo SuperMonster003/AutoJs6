@@ -41,6 +41,9 @@ on:
       bun_runtime_ref:
         description: Bun Runtime branch or commit (empty uses default branch)
         required: false
+      speech_plugin_ref:
+        description: Speech plugin branch or commit (empty uses default branch)
+        required: false
 
 permissions:
   contents: read
@@ -83,6 +86,12 @@ jobs:
           repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Bun-Runtime
           ref: ${{ inputs.bun_runtime_ref }}
           path: AutoJs6-Plugin-Bun-Runtime
+          lfs: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Three-Macaw-Speech
+          ref: ${{ inputs.speech_plugin_ref }}
+          path: AutoJs6-Plugin-Three-Macaw-Speech
           lfs: false
       - uses: actions/setup-node@v4
         with:

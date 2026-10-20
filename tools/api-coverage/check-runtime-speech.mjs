@@ -31,4 +31,18 @@ const host = read(resolve(root, 'app/src/main/java/org/autojs/autojs/engine/Runt
 for (const route of ['recognizeFile', 'detectVoiceFile', 'openSession', 'openWakeSession', 'installModel', 'importModel', 'refreshCatalog', 'synthesizeToFile'])
   assert(host.includes('SpeechPluginHost.' + route), `Native speech provider ${route}`);
 assert(host.includes('scope.cancel()') && host.includes('SpeechAudio.writeWavHeader'));
-console.log(JSON.stringify({rhinoSpeechMethods: count, nodeBunWorker: true, sharedPlugin: true}));
+const contract=read(resolve(root,'plugin-api/speech-api/src/main/java/org/autojs/plugin/speech/api/SpeechPluginActions.kt'));
+const literal=name=>contract.match(new RegExp('const val '+name+' = "([^"]+)"'))?.[1];
+const plugin=resolve(workspace,'AutoJs6-Plugin-Three-Macaw-Speech');
+const manifest=read(resolve(plugin,'app/src/main/AndroidManifest.xml'));
+const service=name=>manifest.match(new RegExp('<service\\s+android:name="\\.service\\.'+name+'"[\\s\\S]*?</service>'))?.[0];
+assert(service('ThreeMacawSpeechService')?.includes('android:permission="'+literal('PLUGIN_PERMISSION')+'"'));
+const packaged=service('ThreeMacawSpeechPackagedService');
+assert(packaged?.includes('android:permission="'+literal('PACKAGED_PERMISSION')+'"'));
+assert(packaged.includes('android:name="'+literal('PACKAGED_SPEECH')+'"'));
+const appManifest=read(resolve(root,'app/src/main/AndroidManifest.xml'));
+assert(appManifest.includes('<uses-permission android:name="'+literal('PACKAGED_PERMISSION')+'"'));
+assert(appManifest.includes('<action android:name="'+literal('PACKAGED_SPEECH')+'"'));
+const prepare=read(resolve(root,'app/src/main/java/org/autojs/autojs/apkbuilder/template/RemoteApkBuildRequestPreparer.kt'));
+assert.equal(prepare.split('SpeechPluginActions.PACKAGED_PERMISSION').length-1,2,'Both Node and Bun package preparation must retain speech permission');
+console.log(JSON.stringify({rhinoSpeechMethods: count, nodeBunWorker: true, sharedPlugin: true, packagedEntry: true}));

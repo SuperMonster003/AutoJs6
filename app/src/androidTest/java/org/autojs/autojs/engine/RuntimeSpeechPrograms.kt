@@ -8,7 +8,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 internal object RuntimeSpeechPrograms {
-    fun body(packagedMicrophone: Boolean? = null) : String {
+    fun body(packagedMicrophone: Boolean? = null, audioExpression: String? = null) : String {
         val audio = InstrumentationRegistry.getInstrumentation().context.assets.open("runtime-speech/en.wav").use { it.readBytes() }
         val archive = ByteArrayOutputStream().also { bytes ->
             ZipOutputStream(bytes).use { zip ->
@@ -18,7 +18,7 @@ internal object RuntimeSpeechPrograms {
             }
         }.toByteArray()
         return """
-            const wav=Buffer.from(${JSONObject.quote(Base64.encodeToString(audio,Base64.NO_WRAP))},'base64');
+            const wav=${audioExpression ?: "Buffer.from(${JSONObject.quote(Base64.encodeToString(audio,Base64.NO_WRAP))},'base64')"};
             const packagedMicrophone=${packagedMicrophone?.toString() ?: "null"};
             const archive=Buffer.from(${JSONObject.quote(Base64.encodeToString(archive,Base64.NO_WRAP))},'base64');
             const check=(value,label)=>{if(!value)throw Error(label);};
