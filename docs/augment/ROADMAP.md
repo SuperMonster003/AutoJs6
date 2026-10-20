@@ -61,8 +61,8 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 | 启动必载 | `result-adapter.js` + `result_adapter.js` (旧名转发) | `RhinoJavaScriptEngine.init` 定义全局 `ResultAdapter`; images / automator / dialogs / UI 的 Kotlin 侧反向调用 | Kotlin 化 (已有 `ScriptPromiseAdapter` / `PromiseInterop` 可复用), P2.5; 旧名转发文件删除前核对无脚本 `require("result_adapter")` |
 | 启动必载 | `object-observe-lite.min.js`, `array-observe.min.js`, `structured-clone.min.js` (polyfill, d.ts 有公开声明) | `initEpilogue` | 改为首次访问 `Object.observe` / `Array.observe` / `structuredClone` 时安装 (accessor), 或 Kotlin 实现; P2.5 |
 | UI 时注入 | `ui-ext.js` (WebView JsBridge, 源自 Pro `__ui__.js`) | `UI.kt` 注入 WebView 时 | 可 Kotlin 化, 不在启动路径, 优先级低, P3.2 顺带 |
-| 按需第三方库 | `axios/` (11 文件), `axios.js`, `cheerio.js` (611 KB), `dayjs/`, `dayjs.js`, `i18n.js` + `banana-i18n.js`, `pangu.min.js` + `pangu.js` + LICENSE, `lodash.js` | `Global.kt` 的 Supplier getter 首次访问或 `require` 时 | 不 Kotlin 化; 不影响启动, 只影响 APK 体积与目录数量; 是否迁入插件见附录 C Q5 |
-| Node 兼容垫片 | `buffer.js`, `events.js`, `fs.js`, `os.js`, `path.js`, `process.js`, `nodejs.js` | `jvm-npm.js` 为 npm 包解析核心模块名时 | 不 Kotlin 化; 随 P3.7 决定去留 (附录 C Q6) |
+| 按需第三方库 | `axios/` (11 文件), `axios.js`, `cheerio.js` (611 KB), `dayjs/`, `dayjs.js`, `i18n.js` + `banana-i18n.js`, `pangu.min.js` + `pangu.js` + LICENSE, `lodash.js` | `Global.kt` 的 Supplier getter 首次访问或 `require` 时 | 不 Kotlin 化; 不影响启动, 只影响 APK 体积与目录数量; 迁入 Bundled Libraries 插件 (P4.3, 附录 C Q5 已拍板) |
+| Node 兼容垫片 | `buffer.js`, `events.js`, `fs.js`, `os.js`, `path.js`, `process.js`, `nodejs.js` | `jvm-npm.js` 为 npm 包解析核心模块名时 | 不 Kotlin 化; 随第三方库迁入 Bundled Libraries 插件 (P4.3, 附录 C Q6 已拍板) |
 
 ---
 
@@ -150,7 +150,7 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 - [ ] P3.4 app / autojs / device / engines / files (含 batchRename) / storages / shell / shizuku / sysprops / settings / power / tasks / WorkManager / threads / timers / continuation / plugins.
 - [ ] P3.5 http / web / WebSocket / zip / sqlite / media / sensors / recorder / crypto / tts.
 - [ ] P3.6 每个模块同 P2.4; 第二批额外要求真机 smoke (XQ-AT72 与 G8441 各一次).
-- [ ] P3.7 `jvm-npm.js` Kotlin 化: 基于 Rhino commonjs `Require` 实现 AutoJs6 的路径解析 (相对路径, npm 目录, 核心模块名), 模块缓存与函数包装隔离, 修复 issue #564; 同时决定 Node 兼容垫片的去留 (附录 C Q6).
+- [ ] P3.7 `jvm-npm.js` Kotlin 化: 基于 Rhino commonjs `Require` 实现 AutoJs6 的路径解析 (相对路径, npm 目录, 核心模块名), 模块缓存与函数包装隔离, 修复 issue #564; 核心模块名与第三方库名的解析交给 T11 的插件模块源 (附录 C Q6 已拍板: 垫片随 P4.3 迁入插件).
 
 ### P4 第三批: 6.6.0 之后新增模块
 
@@ -162,7 +162,7 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 
 - [ ] P5.1 开关默认开; 真机矩阵 (附录 B 设备) 跑 `tools/augment` 全套与现有设备测试; `.changelog` 记录.
 - [ ] P5.2 删除旧 `augment` 包与 `assets/modules/obsolete/`; 删除开关; `AGENTS.md` 路径更新; `.changelog` 记录.
-- [ ] P5.3 (文档) `tools/api-coverage` 与 android-dts-generator 改读 `script-modules.json` (T10); 文档仓库与 d.ts 仓库同步.
+- [ ] P5.3 (文档) `tools/api-coverage` 与 android-dts-generator 改读 `script-modules.json` (T10); 文档仓库与 d.ts 仓库同步. 附录 C Q3 已拍板的两项: 生成 "桥接覆盖报告" (参数与返回全为原始值 / JSON 的函数中尚无 Node 入口者, 与 `NodeBridgeProtocol` 的方法名表比对, 产物放 `tools/augment/`), NodeJs Runtime 插件的 d.ts 生成 (`node-types.gradle.kts`) 改读 `script-modules.json` 的参数规格; 不生成桥接分发代码.
 
 ### P6 门禁
 
@@ -212,10 +212,10 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 | --- | --- | --- |
 | Q1 | 新包名是否采用 T1 的 `runtime.api.modules`, 还是切换完成后改回 `augment`. P1.1 按 T1 实现 (注解, 运行时契约, 生成代码都在该包); 若改回, 在 P5.2 删除旧包后整体改名即可. | 已拍板 (2026-10-20, 维护者): 采用 `runtime.api.modules`. |
 | Q2 | `$` 前缀别名在新实现中是否继续可枚举 (现状: 与主名同属性特性). | 已拍板 (2026-10-20, 维护者): 保留 `$` 前缀别名, 目的是兼容 Auto.js Pro 的 `$files` / `$device` 等写法 (基线 64 个顶层 `$` 别名, 属性特性与主名相同), 新实现照旧. |
-| Q3 | Node / Bun 桥接 (`NodeBridgeProtocol` 等) 是否复用 `script-modules.json` 的参数规格生成客户端存根. | 2026-10-20 已向维护者详述现状 (宿主 `NodeBridgeProtocol.kt` 8933 行与 `NodeBridgeProviderRegistry.kt` 27 个 provider 的手写分发, 插件 `node_bridge_sources.cpp` 27918 行内嵌 JS facade, 73 个手写 d.ts; 三处各自维护, 能力面是按使用频度挑选的子集, 参数经 JSON 序列化, Java 对象以句柄传递, 每个 provider 受权限清单约束). 建议: 不用元数据生成桥接分发 (对象句柄, 回调, 权限与异步语义无法从签名推出), P5.3 只生成 "桥接覆盖报告" (参数与返回全为原始值 / JSON 的函数中哪些尚无 Node 入口) 供插件补齐, 并让插件的 d.ts 生成读取 `script-modules.json` 的参数规格以保持签名一致. 待维护者拍板. |
+| Q3 | Node / Bun 桥接 (`NodeBridgeProtocol` 等) 是否复用 `script-modules.json` 的参数规格生成客户端存根. | 2026-10-20 已向维护者详述现状 (宿主 `NodeBridgeProtocol.kt` 8933 行与 `NodeBridgeProviderRegistry.kt` 27 个 provider 的手写分发, 插件 `node_bridge_sources.cpp` 27918 行内嵌 JS facade, 73 个手写 d.ts; 三处各自维护, 能力面是按使用频度挑选的子集, 参数经 JSON 序列化, Java 对象以句柄传递, 每个 provider 受权限清单约束). 建议: 不用元数据生成桥接分发 (对象句柄, 回调, 权限与异步语义无法从签名推出), P5.3 只生成 "桥接覆盖报告" (参数与返回全为原始值 / JSON 的函数中哪些尚无 Node 入口) 供插件补齐, 并让插件的 d.ts 生成读取 `script-modules.json` 的参数规格以保持签名一致. 已拍板 (2026-10-20, 维护者): 按建议, 不生成桥接分发; P5.3 只出覆盖报告并让插件 d.ts 读参数规格. |
 | Q4 | 开发者选项中调试打印开关 (T5) 的粒度: 全局一个, 还是按模块. | 已拍板 (2026-10-20, 维护者): 按模块, 同时有全局总开关; 形状见 T5. |
 | Q5 | 按需第三方库 (axios, cheerio, dayjs, i18n, pangu, lodash, 约 850 KB) 是否迁出宿主 APK 到插件 (如 "Bundled Libraries" 插件), 或保留在 `assets/modules`. 不影响启动耗时. | 已拍板 (2026-10-20, 维护者): 迁出到官方插件 "Bundled Libraries" (仓库 `AutoJs6-Plugin-Bundled-Libraries`), 插件设置中每个库可单独启用 / 禁用, 默认启用; 宿主侧机制见 T11, 任务见 P4.3. |
-| Q6 | Node 兼容垫片 (buffer, events, fs, os, path, process, nodejs) 在 NodeJs Runtime 插件已覆盖 npm 场景的前提下是否下线. | 2026-10-20 已向维护者详述现状 (7 个文件共约 44 KB, 2026-06-14 随 `feat(node): add CommonJS compatibility modules` 加入; 只在 `jvm-npm.js` 解析 `require('path')` / `require('node:events')` 等核心模块名时从 classpath 读取, 不在启动路径; 无 d.ts, 无文档, 无示例, 更新日志未单列; 作用是让 Rhino 模式下通过 node_modules 加载的纯 JS npm 包能找到 events / path / buffer 等依赖, fs / process / os 只是部分模拟, 无 stream / child_process; `nodejs.js` 把 process / Buffer / setImmediate 写到全局). 建议: 与 Q5 同机制迁入 Bundled Libraries 插件作为 "Node 兼容垫片" 分组 (默认启用, 可逐个关闭), 宿主 `assets/modules` 不再保留; 不建议直接删除, 因为依赖它们的 Rhino 脚本会在 require 时静默失败. 待维护者拍板. |
+| Q6 | Node 兼容垫片 (buffer, events, fs, os, path, process, nodejs) 在 NodeJs Runtime 插件已覆盖 npm 场景的前提下是否下线. | 2026-10-20 已向维护者详述现状 (7 个文件共约 44 KB, 2026-06-14 随 `feat(node): add CommonJS compatibility modules` 加入; 只在 `jvm-npm.js` 解析 `require('path')` / `require('node:events')` 等核心模块名时从 classpath 读取, 不在启动路径; 无 d.ts, 无文档, 无示例, 更新日志未单列; 作用是让 Rhino 模式下通过 node_modules 加载的纯 JS npm 包能找到 events / path / buffer 等依赖, fs / process / os 只是部分模拟, 无 stream / child_process; `nodejs.js` 把 process / Buffer / setImmediate 写到全局). 建议: 与 Q5 同机制迁入 Bundled Libraries 插件作为 "Node 兼容垫片" 分组 (默认启用, 可逐个关闭), 宿主 `assets/modules` 不再保留; 不建议直接删除, 因为依赖它们的 Rhino 脚本会在 require 时静默失败. 已拍板 (2026-10-20, 维护者): 按建议, 随 Q5 迁入 Bundled Libraries 插件 (P4.3), 不删除. |
 | Q7 | 多余参数: 旧 JS 忽略多传的参数, 现有 Kotlin 以 `ensureArgumentsLength*` 拒绝 (6.6.0 起, P0.5 差分在 base64 / s13n / mime 上均有体现). 新生成层 (T4) 是否继续按签名拒绝. 决定: 继续按签名拒绝 (6.6.0 起已是此行为, 能尽早暴露参数错误), 错误类型改为 TypeError (D10), 个别需要宽松的函数以 `vararg` 声明. | 已拍板 (2026-10-20, 维护者) |
 
 ## 附录 D 工具用法
