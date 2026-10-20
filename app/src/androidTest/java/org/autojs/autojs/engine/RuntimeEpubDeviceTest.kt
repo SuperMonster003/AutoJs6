@@ -6,6 +6,8 @@ import android.view.WindowManager
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
 import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants as Grants
 import org.json.JSONObject
 import org.junit.Assert.*
@@ -15,7 +17,7 @@ import java.io.File
 class RuntimeEpubDeviceTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val harness = CaptureWorkerBridgeDeviceTest()
-    private fun fixture(action: () -> Unit) {
+    private fun fixture(action: () -> Unit) = withOwnedProvider {
         assertEquals("Only the owned 3-Folio installation may be used by this fixture",
             "io.github.supermonster003.autojs6.plugin.three.folio.epub",
             runBlocking { EpubPluginHost.selectOrThrow(context).serviceInfo.packageName })
@@ -25,6 +27,25 @@ class RuntimeEpubDeviceTest {
         prefs.edit().apply { keys.forEach { putBoolean(it, true) } }.commit()
         try { harness.withFixture(setup = { it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }) { action() } }
         finally { prefs.edit().apply { saved.forEach { (key, value) -> if (value == null) remove(key) else putBoolean(key, value) } }.commit() }
+    }
+
+    private fun withOwnedProvider(action: () -> Unit) {
+        val packages = listOf("io.github.supermonster003.autojs6.plugin.readium.epub.reader",
+            "io.github.supermonster003.autojs6.plugin.three.folio.epub")
+        val prefs = context.getSharedPreferences("plugin_center_enable_state", Context.MODE_PRIVATE)
+        val keys = packages.flatMap { listOf("key_\$_enabled_plugin_\$_$it", "key_\$_suspended_plugin_\$_$it") }
+        val saved = prefs.all.filterKeys { it in keys }
+        try {
+            PluginEnableStore.setEnabled(context, packages[0], false)
+            PluginEnableStore.setEnabled(context, packages[1], true)
+            action()
+        } finally {
+            prefs.edit().apply {
+                keys.forEach(::remove)
+                saved.forEach { (key, value) -> putBoolean(key, value as Boolean) }
+            }.commit()
+            packages.forEach(PluginStateChangeRegistry::notifyChanged)
+        }
     }
 
     private fun exercise(mode: String) = fixture {
