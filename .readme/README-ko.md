@@ -357,6 +357,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` Node.js/Bun/Worker의 Java/Android 상호 운용으로 공개 생성자와 멤버, 배열, 정확한 long 값, 명시적 오버로드 및 앱 Context 핸들 지원
 * `추가` Node.js/Bun/Worker의 Java 콜백, 하위 클래스 생성 및 JAR/DEX 로드로 Promise 반환값, 부모 클래스 호출 및 실행 종료 정리 지원
 * `추가` Node.js/Bun/Worker의 음성 합성 API로 엔진과 음성 조회, 읽기, 무음, 오디오 파일 합성 및 작업 이벤트 지원
+* `추가` Node.js/Bun/Worker의 speech 음성 인식 및 모델 관리 API로 WAV/PCM, 받아쓰기와 호출어 세션, 모델 설치와 가져오기, 음성 합성 및 취소 시 정리 지원
 * `수정` runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제
 * `수정` Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제
 * `수정` Rhino 엔진과 내장 모듈의 스코프, 인수 변환 및 반환값 처리 비호환으로 일부 스크립트 동작이 비정상적인 문제

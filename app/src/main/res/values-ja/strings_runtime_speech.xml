@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_speech_control_grant">音声プラグインによる音声認識, マイクセッション, 音声合成とモデル管理を許可します.</string>
+    <string name="text_bun_speech_control_grant">Bun 音声認識とモデル</string>
+</resources>

@@ -109,6 +109,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunDeviceAudioGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDialogsControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunAndroidObjectsGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunSpeechControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTtsControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunJavaInteropGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTasksControlGrantPreference: ThemeColorSwitchPreference? = null
@@ -270,6 +271,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunDeviceAudioGrantPreference = findPreference("plugin_bun_device_audio_grant")
         bunDialogsControlGrantPreference = findPreference("plugin_bun_dialogs_control_grant")
         bunAndroidObjectsGrantPreference = findPreference("plugin_bun_android_objects_grant")
+        bunSpeechControlGrantPreference = findPreference("plugin_bun_speech_control_grant")
         bunTtsControlGrantPreference = findPreference("plugin_bun_tts_control_grant")
         bunJavaInteropGrantPreference = findPreference("plugin_bun_java_interop_grant")
         bunTasksControlGrantPreference = findPreference("plugin_bun_tasks_control_grant")
@@ -483,6 +485,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setAndroidObjectsGranted(requireContext(), value == true)
             true
         }
+        bunSpeechControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setSpeechControlGranted(requireContext(), value == true)
+            true
+        }
         bunTtsControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setTtsControlGranted(requireContext(), value == true)
             true
@@ -598,6 +604,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunDeviceAudioGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceAudioGranted(requireContext())
         bunDialogsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDialogsControlGranted(requireContext())
         bunAndroidObjectsGrantPreference?.isChecked = BunHostCapabilityGrants.isAndroidObjectsGranted(requireContext())
+        bunSpeechControlGrantPreference?.isChecked = BunHostCapabilityGrants.isSpeechControlGranted(requireContext())
         bunTtsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTtsControlGranted(requireContext())
         bunJavaInteropGrantPreference?.isChecked = BunHostCapabilityGrants.isJavaInteropGranted(requireContext())
         bunTasksControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTasksControlGranted(requireContext())

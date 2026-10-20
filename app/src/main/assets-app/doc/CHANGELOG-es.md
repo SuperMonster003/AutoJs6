@@ -173,6 +173,7 @@
 * `Nuevo` Interoperabilidad Java/Android para Node.js, Bun y Workers, con constructores y miembros públicos, matrices, valores long exactos, sobrecargas explícitas y referencias Context
 * `Nuevo` Callbacks Java, subclases generadas y carga de JAR/DEX para Node.js, Bun y Workers, con resultados Promise, llamadas a la superclase y limpieza al terminar
 * `Nuevo` API de síntesis de voz para Node.js, Bun y Workers con consultas de motores y voces, lectura, silencio, archivos de audio y eventos de tareas
+* `Nuevo` API speech de reconocimiento y gestión de modelos para Node.js, Bun y Workers con WAV/PCM, dictado y activación por voz, instalación/importación, síntesis y cancelación
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados

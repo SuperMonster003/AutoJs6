@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_speech_control_grant">Разрешить распознавание речи, сеансы микрофона, синтез и управление моделями через речевой плагин.</string>
+    <string name="text_bun_speech_control_grant">Распознавание речи и модели Bun</string>
+</resources>

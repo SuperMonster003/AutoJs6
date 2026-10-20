@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_speech_control_grant">음성 플러그인을 통한 음성 인식, 마이크 세션, 음성 합성 및 모델 관리를 허용합니다.</string>
+    <string name="text_bun_speech_control_grant">Bun 음성 인식 및 모델</string>
+</resources>

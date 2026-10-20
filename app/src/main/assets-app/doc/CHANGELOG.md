@@ -185,6 +185,7 @@
 * `新增` Node.js/Bun/Worker 的 Java/Android 对象互操作, 支持公开构造器和成员, 数组, 精确 long 值, 显式重载及应用 Context 句柄
 * `新增` Node.js/Bun/Worker 的 Java 回调代理, 子类生成和 JAR/DEX 加载, 支持 Promise 返回值, 父类调用及执行结束清理
 * `新增` Node.js/Bun/Worker 的文字转语音接口, 支持引擎与音色查询, 朗读, 静音任务, 音频文件合成和任务事件
+* `新增` Node.js/Bun/Worker 的 speech 语音识别与模型管理接口, 支持 WAV/PCM, 听写与唤醒会话, 模型安装/导入, 语音合成和取消清理
 * `修复` runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题

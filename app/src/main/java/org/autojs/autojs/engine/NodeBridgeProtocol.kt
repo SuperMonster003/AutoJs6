@@ -696,6 +696,7 @@ object NodeBridgeModules {
     const val TASKS = "tasks"
     const val WORK_MANAGER = NodeBridgePermissionManifest.WORK_MANAGER
     const val PACKAGE_MANAGER = NodeBridgePermissionManifest.PACKAGE_MANAGER
+    const val SPEECH = "speech"
     const val TTS = "tts"
     const val JAVA = "java"
     const val RHINO = NodeBridgePermissionManifest.RHINO
@@ -865,6 +866,7 @@ object NodeBridgeModules {
         TASKS to RuntimeTasksBridge.methods,
         WORK_MANAGER to workManagerMethods,
         PACKAGE_MANAGER to packageManagerMethods,
+        SPEECH to RuntimeSpeechBridge.methods,
         TTS to RuntimeTtsBridge.methods,
         JAVA to javaMethods,
         RHINO to rhinoMethods,
@@ -953,6 +955,10 @@ class AndroidNodeBridgeCapabilityProvider(
     private var agentHelpersClosed = false
     private val screenText = lazy { NodeBridgeScreenText(appContext, { screenCapture.capture() }) }
     private val agentBridge = lazy { NodeBridgeAgentBridge(appContext, engineInfo, agentScriptRoots) }
+    private val speechScopeLock = Any()
+    private var speechScopeClosed = false
+    private val speechBridge = lazy { RuntimeSpeechBridge(appContext, engineInfo.cwd) }
+    internal fun closeSpeechClient(id: String) { if (speechBridge.isInitialized()) speechBridge.value.closeClient(id) }
     private val ttsScopeLock = Any()
     private var ttsScopeClosed = false
     private val ttsBridge = lazy { RuntimeTtsBridge(appContext, engineInfo.cwd) }
@@ -1200,6 +1206,11 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, auditedCallback)
             request.module == NodeBridgeModules.PACKAGE_MANAGER && request.method in NodeBridgeModules.packageManagerMethods -> dispatchPackageManager(request, auditedCallback)
             request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, auditedCallback)
+            request.module == NodeBridgeModules.SPEECH && request.method in RuntimeSpeechBridge.methods -> {
+                val bridge = synchronized(speechScopeLock) { if (speechScopeClosed) null else speechBridge.value }
+                if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Speech execution has ended")))
+                else bridge.dispatch(request, auditedCallback)
+            }
             request.module == NodeBridgeModules.TTS && request.method in RuntimeTtsBridge.methods -> {
                 val bridge = synchronized(ttsScopeLock) { if (ttsScopeClosed) null else ttsBridge.value }
                 if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("TTS execution has ended")))
@@ -1284,6 +1295,7 @@ class AndroidNodeBridgeCapabilityProvider(
         closeShellProcesses()
         closeEventResources()
         closeAgentHelpers()
+        synchronized(speechScopeLock) { speechScopeClosed = true; if (speechBridge.isInitialized()) speechBridge.value.close() }
         synchronized(ttsScopeLock) { ttsScopeClosed = true; if (ttsBridge.isInitialized()) ttsBridge.value.close() }
         if (composeBridge.isInitialized()) composeBridge.value.close()
         if (uiInterop.isInitialized()) uiInterop.value.close()

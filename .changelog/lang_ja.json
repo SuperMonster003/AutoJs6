@@ -170,7 +170,8 @@
         "Node.js と Bun の永続的なカレンダーと IntentTask API, 毎日, 毎週, 毎月, 毎年, 単発, カウントダウンとブロードキャストのタスク",
         "Node.js/Bun/Worker の Java/Android 相互運用で公開コンストラクターとメンバー, 配列, 正確な long 値, 明示的なオーバーロードとアプリの Context ハンドルに対応",
         "Node.js/Bun/Worker の Java コールバック, サブクラス生成と JAR/DEX 読み込みで Promise の戻り値, 親クラス呼び出しと終了時の解放に対応",
-        "Node.js/Bun/Worker の音声合成 API でエンジンと音声の照会, 読み上げ, 無音, 音声ファイル合成とタスクイベントに対応"
+        "Node.js/Bun/Worker の音声合成 API でエンジンと音声の照会, 読み上げ, 無音, 音声ファイル合成とタスクイベントに対応",
+        "Node.js/Bun/Worker の speech 音声認識とモデル管理 API で WAV/PCM, 書き起こしとウェイクワードのセッション, モデルのインストールとインポート, 音声合成とキャンセル時の解放に対応"
       ],
       "fix": [
         "runtime.loadJar で新しい Java バージョンでコンパイルした class を動的に読み込めない問題",

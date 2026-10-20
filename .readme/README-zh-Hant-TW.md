@@ -357,6 +357,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `新增` Node.js/Bun/Worker 的 Java/Android 物件互操作, 支援公開建構函式和成員, 陣列, 精確 long 值, 明確多載及應用程式 Context 控制代碼
 * `新增` Node.js/Bun/Worker 的 Java 回呼代理, 子類別產生和 JAR/DEX 載入, 支援 Promise 回傳值, 父類別呼叫及執行結束清理
 * `新增` Node.js/Bun/Worker 的文字轉語音介面, 支援引擎與音色查詢, 朗讀, 靜音工作, 音訊檔案合成和工作事件
+* `新增` Node.js/Bun/Worker 的 speech 語音辨識與模型管理介面, 支援 WAV/PCM, 聽寫與喚醒工作階段, 模型安裝/匯入, 語音合成及取消清理
 * `修復` runtime.loadJar 方法無法動態載入較高 Java 版本編譯的 class 檔案的問題
 * `修復` Android 7.x 呼叫 runtime.loadDex 方法時可能損壞 DEX 快取並導致類載入失敗的問題
 * `修復` Rhino 引擎及內建模組的作用域, 參數轉換與回傳值處理不相容導致部分指令碼行為異常的問題

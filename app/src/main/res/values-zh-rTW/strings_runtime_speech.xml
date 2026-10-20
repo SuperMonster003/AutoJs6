@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_speech_control_grant">允許透過語音外掛辨識語音, 使用麥克風工作階段, 合成語音及管理模型.</string>
+    <string name="text_bun_speech_control_grant">Bun 語音辨識與模型</string>
+</resources>

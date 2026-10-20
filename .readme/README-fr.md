@@ -357,6 +357,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` Interopérabilité Java/Android pour Node.js, Bun et Workers, avec constructeurs et membres publics, tableaux, valeurs long exactes, surcharges explicites et handles Context
 * `Fonctionnalité` Callbacks Java, sous-classes générées et chargement JAR/DEX pour Node.js, Bun et Workers, avec retours Promise, appels de la superclasse et libération en fin de session
 * `Fonctionnalité` API de synthèse vocale pour Node.js, Bun et Workers avec requêtes des moteurs et voix, lecture, silence, fichiers audio et événements des tâches
+* `Fonctionnalité` API speech de reconnaissance vocale et de gestion des modèles pour Node.js, Bun et Workers avec WAV/PCM, dictée et activation vocale, installation/importation, synthèse et annulation
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés

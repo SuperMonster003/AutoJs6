@@ -62,6 +62,7 @@ object NodeBridgePermissionManifest {
     const val WORK_MANAGER = "work_manager"
     const val PACKAGE_MANAGER = "package_manager"
     const val PACKAGE_MANAGER_MUTATE = "package_manager.mutate"
+    const val SPEECH = "speech"
     const val TTS = "tts"
     const val JAVA_INTEROP = "java_interop"
     const val RHINO = "rhino"
@@ -155,6 +156,7 @@ object NodeBridgePermissionManifest {
         WORK_MANAGER,
         PACKAGE_MANAGER,
         PACKAGE_MANAGER_MUTATE,
+        SPEECH,
         TTS,
         JAVA_INTEROP,
         RHINO,
@@ -554,6 +556,7 @@ object NodeBridgePermissionManifest {
                 "install", "update", "remove" -> listOf(PACKAGE_MANAGER, PACKAGE_MANAGER_MUTATE)
                 else -> listOf(PACKAGE_MANAGER)
             }
+            NodeBridgeModules.SPEECH -> listOf(SPEECH)
             NodeBridgeModules.TTS -> listOf(TTS)
             NodeBridgeModules.JAVA -> listOf(JAVA_INTEROP)
             NodeBridgeModules.RHINO -> listOf(RHINO)

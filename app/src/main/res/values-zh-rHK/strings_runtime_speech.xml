@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_speech_control_grant">允許透過語音插件識別語音, 使用麥克風會話, 合成語音及管理模型.</string>
+    <string name="text_bun_speech_control_grant">Bun 語音識別與模型</string>
+</resources>

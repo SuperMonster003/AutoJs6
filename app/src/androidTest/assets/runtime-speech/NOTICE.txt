@@ -1,0 +1,11 @@
+en.wav is an unchanged LibriSpeech recording, licensed under CC BY 4.0.
+Dataset: Vassil Panayotov, Guoguo Chen, Daniel Povey and Sanjeev Khudanpur,
+LibriSpeech: An ASR corpus based on public domain audio books (2015).
+Dataset and license: https://www.openslr.org/12/
+License: https://creativecommons.org/licenses/by/4.0/
+Source archive:
+https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20.tar.bz2
+Member: sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20/test_wavs/en_0.wav
+SHA-256: 6bc58a4efdf20daac252b6b1502632601a71efe0308f6757dc1eda34891a7e4f
+Copied from the matching AutoJs6-Plugin-Three-Macaw-Speech test-audio fixture.
+This recording is a test input and is not packaged in the AutoJs6 application.

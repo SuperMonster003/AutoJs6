@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_speech_control_grant">السماح بالتعرف على الكلام وجلسات الميكروفون والتوليف وإدارة النماذج عبر ملحق الكلام.</string>
+    <string name="text_bun_speech_control_grant">التعرف على الكلام والنماذج في Bun</string>
+</resources>

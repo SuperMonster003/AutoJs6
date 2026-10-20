@@ -170,7 +170,8 @@
         "API persistantes de calendrier et IntentTask pour Node.js et Bun, avec tâches quotidiennes, hebdomadaires, mensuelles, annuelles, ponctuelles, différées et de diffusion",
         "Interopérabilité Java/Android pour Node.js, Bun et Workers, avec constructeurs et membres publics, tableaux, valeurs long exactes, surcharges explicites et handles Context",
         "Callbacks Java, sous-classes générées et chargement JAR/DEX pour Node.js, Bun et Workers, avec retours Promise, appels de la superclasse et libération en fin de session",
-        "API de synthèse vocale pour Node.js, Bun et Workers avec requêtes des moteurs et voix, lecture, silence, fichiers audio et événements des tâches"
+        "API de synthèse vocale pour Node.js, Bun et Workers avec requêtes des moteurs et voix, lecture, silence, fichiers audio et événements des tâches",
+        "API speech de reconnaissance vocale et de gestion des modèles pour Node.js, Bun et Workers avec WAV/PCM, dictée et activation vocale, installation/importation, synthèse et annulation"
       ],
       "fix": [
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_speech_control_grant">Autoriser la reconnaissance, les sessions microphone, la synthèse et la gestion des modèles via le module vocal.</string>
+    <string name="text_bun_speech_control_grant">Reconnaissance et modèles vocaux Bun</string>
+</resources>

@@ -5,6 +5,8 @@ on:
     paths:
       - 'app/src/main/java/org/autojs/autojs/runtime/api/augment/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/api/tts/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/speech/**'
+      - 'app/src/main/java/org/autojs/autojs/core/plugin/speech/**'
       - 'app/src/main/java/org/autojs/autojs/engine/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
       - 'tools/api-coverage/**'
@@ -15,6 +17,8 @@ on:
     paths:
       - 'app/src/main/java/org/autojs/autojs/runtime/api/augment/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/api/tts/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/speech/**'
+      - 'app/src/main/java/org/autojs/autojs/core/plugin/speech/**'
       - 'app/src/main/java/org/autojs/autojs/engine/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
       - 'tools/api-coverage/**'
@@ -93,6 +97,7 @@ jobs:
           python tools/api-coverage/check.py
           node tools/api-coverage/check-runtime-java-callbacks.mjs
           node tools/api-coverage/check-runtime-tts.mjs
+          node tools/api-coverage/check-runtime-speech.mjs
       - name: Check handwritten types and conditional extensions
         working-directory: AutoJs6-TypeScript-Declarations
         run: |

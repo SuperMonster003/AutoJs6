@@ -357,6 +357,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Java/Android object interop for Node.js, Bun and Workers, including public constructors and members, arrays, exact long values, explicit overloads and application Context handles
 * `Feature` Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup
 * `Feature` Text-to-speech APIs for Node.js, Bun and Workers, with engine and voice queries, speech, silence, audio file synthesis and task events
+* `Feature` Speech recognition and model management APIs for Node.js, Bun and Workers, with WAV/PCM, dictation and wake sessions, model installation/import, synthesis and cancellation cleanup
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
