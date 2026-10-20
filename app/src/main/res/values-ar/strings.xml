@@ -855,6 +855,7 @@
     <string name="summary_github_token_set">معين. مخفي للخصوصية; ينتهي بـ %1$s.</string>
     <string name="summary_guard_mode">منع إجراءات الأتمتة من البرامج النصية عندما يكون AutoJs6 في المقدمة</string>
     <string name="summary_lan_discovery">الإعلان عن هذا الجهاز باسم _autojs6._tcp ليعرضه VSCode (الإضافة 1.1.0+) عند الاتصال عبر الشبكة المحلية</string>
+    <string name="summary_new_script_module_layer">تحميل وحدات البرامج النصية المرحلة (حاليا base64) من طبقة الوحدات الجديدة. يسري على البرامج النصية التي تبدأ بعد ذلك</string>
     <string name="summary_nodejs_doctor_report">إنشاء تقرير تشخيصي لوقت تشغيل Node منقح للخصوصية لاستخدامه في تقارير الأخطاء</string>
     <string name="summary_nodejs_inspector_enabled">السماح للنصوص باستخدام التصحيح المحلي وتحليل الأداء. اتصل بأدوات DevTools على الكمبيوتر عبر إعادة توجيه منافذ ADB.</string>
     <string name="summary_not_showing_main_activity">قم بتشغيل البرنامج النصي مباشرة دون إظهار النشاط الرئيسي</string>
@@ -876,6 +877,8 @@
     <string name="summary_restore_connection_on_launch">عند بدء التطبيق, إعادة الاتصال بآخر خادم ما لم يتم قطع الاتصال صراحة</string>
     <string name="summary_restore_server_on_launch">عند بدء التطبيق, الاستماع مجددا ما لم يتم إيقاف الخادم صراحة</string>
     <string name="summary_retention_policies">ايام الاحتفاظ وحدود الحجم لسجل الاصدارات وسلة المحذوفات والمسودات الطارئة</string>
+    <string name="summary_script_module_debug_print">عندما تطرح وحدة برنامج نصي استثناء Java, تتم طباعة إدخال تصحيح مع إطارات الوحدة في وحدة تحكم البرنامج النصي (لا تتم طباعة قيم الوسائط أبدا). يسري على البرامج النصية التي تبدأ بعد ذلك</string>
+    <string name="summary_script_module_debug_print_modules">الوحدات التي تطبع استثناءات Java الخاصة بها إدخال تصحيح عند تشغيل طباعة التصحيح. الوحدات غير المحددة لا تطبع شيئا</string>
     <string name="summary_setup_wizard_welcome_reset">إظهار رسالة ترحيب معالجات الإعداد في الصفحة الرئيسية مرة أخرى عند التشغيل التالي</string>
     <string name="summary_setup_wizards">منح الأذونات الشائعة وتثبيت الإضافات الرسمية</string>
     <string name="text_accent_and_dark">التمييز / الداكن</string>
@@ -2163,6 +2166,7 @@
     <string name="text_new_path">طريق جديد</string>
     <string name="text_new_path_is_same_as_old_path">المسار الجديد هو نفس المسار القديم</string>
     <string name="text_new_project">مشروع جديد</string>
+    <string name="text_new_script_module_layer">استخدام التنفيذ الجديد لوحدات البرامج النصية</string>
     <string name="text_new_version_found">تم العثور على نسخة جديدة</string>
     <string name="text_new_watching_variables">متغيرات مشاهدة جديدة</string>
     <string name="text_next_retry">المحاولة التالية</string>
@@ -2732,6 +2736,9 @@
     <string name="text_screen_capture_request_delay">تأخير طلب إذن التقاط الشاشة</string>
     <string name="text_screen_color_picker">منتقي ألوان الشاشة</string>
     <string name="text_script_change_undone">تمت استعادة لون الموضوع قبل تغيير البرنامج النصي</string>
+    <string name="text_script_module_debug_print">طباعة التصحيح</string>
+    <string name="text_script_module_debug_print_modules">الوحدات المراد طباعتها</string>
+    <string name="text_script_modules">وحدات البرامج النصية</string>
     <string name="text_script_music">موسيقى البرنامج النصي</string>
     <string name="text_script_record">تسجيل السيناريو</string>
     <string name="text_script_running">البرنامج النصي</string>

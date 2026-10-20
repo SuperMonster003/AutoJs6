@@ -853,6 +853,7 @@
     <string name="summary_github_token_set">Défini. Masqué pour protéger la confidentialité; se termine par %1$s.</string>
     <string name="summary_guard_mode">Prévenir les actions d\'automatisation des scripts lorsque AutoJs6 est au premier plan.</string>
     <string name="summary_lan_discovery">Annoncer cet appareil en tant que _autojs6._tcp pour que VSCode (extension 1.1.0+) le liste lors de la connexion sur le réseau local</string>
+    <string name="summary_new_script_module_layer">Monte les modules de script migrés (actuellement base64) depuis la nouvelle couche de modules. S\'applique aux scripts démarrés ensuite</string>
     <string name="summary_nodejs_doctor_report">Générer un rapport de diagnostic de l\'environnement Node expurgé des données privées pour signaler des erreurs</string>
     <string name="summary_nodejs_inspector_enabled">Autoriser le débogage local et le profilage. Connecter DevTools sur ordinateur via la redirection de ports ADB.</string>
     <string name="summary_not_showing_main_activity">Exécutez directement le script sans afficher l\'activité principale.</string>
@@ -874,6 +875,8 @@
     <string name="summary_restore_connection_on_launch">Au démarrage de l\'application, se reconnecter au dernier serveur, sauf si la connexion a été fermée explicitement</string>
     <string name="summary_restore_server_on_launch">Au démarrage de l\'application, se remettre en écoute, sauf si le serveur a été arrêté explicitement</string>
     <string name="summary_retention_policies">Jours de conservation et limites de taille de l\'historique des versions, de la corbeille et des brouillons d\'urgence</string>
+    <string name="summary_script_module_debug_print">Lorsqu\'un module de script lève une exception Java, affiche dans la console du script une entrée de débogage avec ses cadres du module (les valeurs des arguments ne sont jamais affichées). S\'applique aux scripts démarrés ensuite</string>
+    <string name="summary_script_module_debug_print_modules">Modules dont les exceptions Java affichent une entrée de débogage lorsque l\'affichage de débogage est activé. Les modules non cochés n\'affichent rien</string>
     <string name="summary_setup_wizard_welcome_reset">Afficher à nouveau le message de bienvenue des assistants de configuration sur la page d\'accueil au prochain lancement</string>
     <string name="summary_setup_wizards">Accorder les permissions courantes et installer les plugins officiels</string>
     <string name="text_accent_and_dark">Accent / sombre</string>
@@ -2161,6 +2164,7 @@
     <string name="text_new_path">Nouveau chemin</string>
     <string name="text_new_path_is_same_as_old_path">Le nouveau chemin est identique à l\'ancien</string>
     <string name="text_new_project">Nouveau projet</string>
+    <string name="text_new_script_module_layer">Utiliser la nouvelle implémentation des modules de script</string>
     <string name="text_new_version_found">Nouvelle version trouvée</string>
     <string name="text_new_watching_variables">Nouvelles variables de surveillance</string>
     <string name="text_next_retry">Prochaine tentative</string>
@@ -2730,6 +2734,9 @@
     <string name="text_screen_capture_request_delay">Délai de demande d\'autorisation de capture d\'écran</string>
     <string name="text_screen_color_picker">Sélecteur de couleur d\'écran</string>
     <string name="text_script_change_undone">La couleur du thème d\'avant la modification du script est rétablie</string>
+    <string name="text_script_module_debug_print">Affichage de débogage</string>
+    <string name="text_script_module_debug_print_modules">Modules à afficher</string>
+    <string name="text_script_modules">Modules de script</string>
     <string name="text_script_music">Musique du script</string>
     <string name="text_script_record">Enregistrement de scripts</string>
     <string name="text_script_running">Script en cours d\'exécution</string>

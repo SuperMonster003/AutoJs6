@@ -126,9 +126,9 @@ object Pref {
         )
 
     /**
-     * Hidden switch of the Augment refactor (docs/augment/ROADMAP.md T8), off by default and without a settings entry yet:
-     * scripts started while it is on mount the migrated modules from the new script module layer.
-     * zh-CN: Augment 重构的隐藏开关 (ROADMAP T8), 默认关, 暂无设置入口: 打开后新启动的脚本从新脚本模块层挂载已迁移的模块.
+     * Switch of the Augment refactor (docs/augment/ROADMAP.md T8), off by default, in the developer options (P1.3): scripts
+     * started while it is on mount the migrated modules from the new script module layer.
+     * zh-CN: Augment 重构的开关 (ROADMAP T8), 默认关, 位于开发者选项 (P1.3): 打开后新启动的脚本从新脚本模块层挂载已迁移的模块.
      */
     @JvmStatic
     val isNewScriptModuleLayerEnabled
@@ -137,16 +137,17 @@ object Pref {
     /**
      * Debug printing of the new script module layer (ROADMAP T5, appendix C Q4): the master switch, off by default, and the
      * top-level modules excluded from printing (empty by default, so every module prints once the master switch is on).
-     * Hidden until the developer options of P1.3.
-     * zh-CN: 新脚本模块层的调试打印 (ROADMAP T5, 附录 C Q4): 总开关默认关; 不打印的顶层模块列表默认为空 (总开关打开后全部模块都打印). P1.3 的开发者选项之前为隐藏项.
+     * Set from the developer options (P1.3).
+     * zh-CN: 新脚本模块层的调试打印 (ROADMAP T5, 附录 C Q4): 总开关默认关; 不打印的顶层模块列表默认为空 (总开关打开后全部模块都打印). 在开发者选项中设置 (P1.3).
      */
     @JvmStatic
     val isScriptModuleDebugPrintEnabled
         get() = getBoolean(R.string.key_script_module_debug_print, false)
 
     @JvmStatic
-    val scriptModuleDebugPrintDisabledModules: Set<String>
-        get() = getStringSet(R.string.key_script_module_debug_print_disabled_modules, null) ?: emptySet()
+    var scriptModuleDebugPrintDisabledModules: Set<String>
+        get() = getStringSet(R.string.key_script_module_debug_print_disabled_modules, null)?.toSet() ?: emptySet()
+        set(value) = putStringSet(R.string.key_script_module_debug_print_disabled_modules, value.toMutableSet())
 
     @JvmStatic
     val isGuardModeEnabled

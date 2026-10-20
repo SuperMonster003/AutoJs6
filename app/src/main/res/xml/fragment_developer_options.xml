@@ -4,6 +4,33 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_script_modules">
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="@string/key_new_script_module_layer"
+            app:layout="@layout/preference_custom"
+            app:defaultValue="false"
+            app:summary="@string/summary_new_script_module_layer"
+            app:title="@string/text_new_script_module_layer" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="@string/key_script_module_debug_print"
+            app:layout="@layout/preference_custom"
+            app:defaultValue="false"
+            app:summary="@string/summary_script_module_debug_print"
+            app:title="@string/text_script_module_debug_print" />
+
+        <org.autojs.autojs.ui.settings.ScriptModuleDebugPrintModulesPreference
+            app:key="@string/key_script_module_debug_print_disabled_modules"
+            app:layout="@layout/preference_custom"
+            app:dependency="@string/key_script_module_debug_print"
+            app:persistent="false"
+            app:title="@string/text_script_module_debug_print_modules" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_updates">
 
         <org.autojs.autojs.ui.settings.ClearUpdatesCheckedStatesPreference

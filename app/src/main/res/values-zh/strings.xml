@@ -849,6 +849,7 @@
     <string name="summary_github_token_set">已设置. 已在界面隐藏, 末尾为 %1$s.</string>
     <string name="summary_guard_mode">当 AutoJs6 前置时禁用自动化行为以避免误操作</string>
     <string name="summary_lan_discovery">以 _autojs6._tcp 广播本设备, 使 VSCode (插件 1.1.0+) 建立局域网连接时可直接列出本设备</string>
+    <string name="summary_new_script_module_layer">从新的模块层挂载已迁移的脚本模块 (目前为 base64). 对之后启动的脚本生效</string>
     <string name="summary_nodejs_doctor_report">生成已隐去隐私信息的 Node 运行时诊断报告, 用于提交错误报告</string>
     <string name="summary_nodejs_inspector_enabled">允许脚本进行本地调试和性能分析. 桌面 DevTools 通过 ADB 端口转发连接.</string>
     <string name="summary_not_showing_main_activity">启动应用后直接运行脚本</string>
@@ -870,6 +871,8 @@
     <string name="summary_restore_connection_on_launch">应用启动时重新连接上次的服务端 (显式断开连接后除外)</string>
     <string name="summary_restore_server_on_launch">应用启动时重新开始监听 (显式停止后除外)</string>
     <string name="summary_retention_policies">版本历史, 回收站与紧急草稿的保留天数与容量上限</string>
+    <string name="summary_script_module_debug_print">脚本模块抛出 Java 异常时, 向脚本控制台打印一条带模块调用帧的调试条目 (不打印参数值). 对之后启动的脚本生效</string>
+    <string name="summary_script_module_debug_print_modules">调试打印打开时, 其 Java 异常会打印调试条目的模块. 未勾选的模块不打印</string>
     <string name="summary_setup_wizard_welcome_reset">下次启动时在主页再次显示设置向导的欢迎提示</string>
     <string name="summary_setup_wizards">授予常用权限及安装官方插件</string>
     <string name="text_accent_and_dark">强调色 / 深色</string>
@@ -2158,6 +2161,7 @@
     <string name="text_new_path">新路径</string>
     <string name="text_new_path_is_same_as_old_path">新旧路径相同</string>
     <string name="text_new_project">新建项目</string>
+    <string name="text_new_script_module_layer">使用新的脚本模块实现</string>
     <string name="text_new_version_found">检测到新版本</string>
     <string name="text_new_watching_variables">增加监视的变量或表达式</string>
     <string name="text_next_retry">下次重试</string>
@@ -2727,6 +2731,9 @@
     <string name="text_screen_capture_request_delay">屏幕捕获权限申请延迟</string>
     <string name="text_screen_color_picker">屏幕取色</string>
     <string name="text_script_change_undone">已恢复脚本修改前的主题色</string>
+    <string name="text_script_module_debug_print">调试打印</string>
+    <string name="text_script_module_debug_print_modules">打印的模块</string>
+    <string name="text_script_modules">脚本模块</string>
     <string name="text_script_music">脚本音乐</string>
     <string name="text_script_record">录制脚本</string>
     <string name="text_script_running">脚本运行</string>

@@ -854,6 +854,7 @@
     <string name="summary_github_token_set">設定済みです. プライバシー保護のため非表示で, 末尾は %1$s です.</string>
     <string name="summary_guard_mode">AutoJs6 がフォアグラウンドにあるときにスクリプトから自動化アクションが実行されないようにする</string>
     <string name="summary_lan_discovery">このデバイスを _autojs6._tcp として通知し, VSCode (拡張機能 1.1.0+) が LAN 接続時に一覧表示できるようにします</string>
+    <string name="summary_new_script_module_layer">移行済みのスクリプトモジュール (現在は base64) を新しいモジュール層からマウントします. 以降に開始したスクリプトに適用されます</string>
     <string name="summary_nodejs_doctor_report">不具合報告用にプライバシー情報を除去した Node ランタイム診断レポートを生成</string>
     <string name="summary_nodejs_inspector_enabled">スクリプトのローカルデバッグとプロファイリングを許可します. PC の DevTools は ADB ポート転送で接続します.</string>
     <string name="summary_not_showing_main_activity">メインのアクティビティを表示せずにスクリプトを直接実行</string>
@@ -875,6 +876,8 @@
     <string name="summary_restore_connection_on_launch">アプリ起動時に前回のサーバーへ再接続します (明示的に切断した場合を除く)</string>
     <string name="summary_restore_server_on_launch">アプリ起動時に再び待機します (明示的に停止した場合を除く)</string>
     <string name="summary_retention_policies">バージョン履歴, ゴミ箱, 緊急下書きの保持日数とサイズ上限</string>
+    <string name="summary_script_module_debug_print">スクリプトモジュールが Java 例外をスローしたとき, モジュール内のフレームを含むデバッグ項目をスクリプトコンソールに出力します (引数の値は出力しません). 以降に開始したスクリプトに適用されます</string>
+    <string name="summary_script_module_debug_print_modules">デバッグ出力がオンのとき, Java 例外でデバッグ項目を出力するモジュールです. チェックしていないモジュールは何も出力しません</string>
     <string name="summary_setup_wizard_welcome_reset">次回起動時にホームでセットアップウィザードのウェルカム表示を再表示します</string>
     <string name="summary_setup_wizards">よく使う権限の付与と公式プラグインのインストール</string>
     <string name="text_accent_and_dark">アクセント / ダーク</string>
@@ -2162,6 +2165,7 @@
     <string name="text_new_path">新しいパス</string>
     <string name="text_new_path_is_same_as_old_path">新しいパスが古いパスと同じ</string>
     <string name="text_new_project">新しいプロジェクト</string>
+    <string name="text_new_script_module_layer">新しいスクリプトモジュール実装を使用</string>
     <string name="text_new_version_found">新しいバージョンが見つかりました</string>
     <string name="text_new_watching_variables">新しいウォッチング変数</string>
     <string name="text_next_retry">次回の再試行</string>
@@ -2731,6 +2735,9 @@
     <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
     <string name="text_screen_color_picker">画面カラーピッカー</string>
     <string name="text_script_change_undone">スクリプトによる変更前のテーマカラーに戻しました</string>
+    <string name="text_script_module_debug_print">デバッグ出力</string>
+    <string name="text_script_module_debug_print_modules">出力するモジュール</string>
+    <string name="text_script_modules">スクリプトモジュール</string>
     <string name="text_script_music">スクリプトの音楽</string>
     <string name="text_script_record">スクリプトの記録</string>
     <string name="text_script_running">スクリプトの実行</string>

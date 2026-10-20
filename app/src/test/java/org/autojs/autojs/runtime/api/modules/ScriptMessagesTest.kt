@@ -50,14 +50,27 @@ class ScriptMessagesTest {
     }
 
     @Test
-    fun newMessagesExistInEveryLanguage() {
-        val names = listOf(
-            "error_script_argument_cannot_be",
-            "error_script_argument_must_be_integer",
-            "error_script_argument_must_be_of_type",
-            "error_script_no_overload_accepts_arguments",
-            "error_unknown_charset",
-        )
+    fun newMessagesExistInEveryLanguage() = checkEveryLanguage(
+        "error_script_argument_cannot_be",
+        "error_script_argument_must_be_integer",
+        "error_script_argument_must_be_of_type",
+        "error_script_no_overload_accepts_arguments",
+        "error_unknown_charset",
+    )
+
+    /** P1.3: the strings of the developer options entries follow the same rules. */
+    @Test
+    fun developerOptionStringsExistInEveryLanguage() = checkEveryLanguage(
+        "summary_new_script_module_layer",
+        "summary_script_module_debug_print",
+        "summary_script_module_debug_print_modules",
+        "text_new_script_module_layer",
+        "text_script_module_debug_print",
+        "text_script_module_debug_print_modules",
+        "text_script_modules",
+    )
+
+    private fun checkEveryLanguage(vararg names: String) {
         val default = resources(File(res, "values/strings.xml"))
         val languages = listOf("values", "values-en", "values-ar", "values-es", "values-fr", "values-ja", "values-ko", "values-ru", "values-zh", "values-zh-rHK", "values-zh-rTW")
         val problems = languages.flatMap { dir ->

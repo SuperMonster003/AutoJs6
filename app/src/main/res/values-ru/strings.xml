@@ -853,6 +853,7 @@
     <string name="summary_github_token_set">Задан. Скрыт для конфиденциальности; оканчивается на %1$s.</string>
     <string name="summary_guard_mode">Предотвращение действий автоматизации из скриптов, когда AutoJs6 находится на переднем плане</string>
     <string name="summary_lan_discovery">Объявлять это устройство как _autojs6._tcp, чтобы VSCode (расширение 1.1.0+) показывал его при подключении по локальной сети</string>
+    <string name="summary_new_script_module_layer">Подключать перенесенные модули скриптов (сейчас base64) из нового слоя модулей. Действует для скриптов, запущенных после изменения</string>
     <string name="summary_nodejs_doctor_report">Создать диагностический отчёт среды Node со скрытыми конфиденциальными данными для сообщения об ошибке</string>
     <string name="summary_nodejs_inspector_enabled">Разрешить локальную отладку и профилирование. Подключайте DevTools на компьютере через переадресацию портов ADB.</string>
     <string name="summary_not_showing_main_activity">Выполнять скрипт напрямую, не показывая основную активность</string>
@@ -874,6 +875,8 @@
     <string name="summary_restore_connection_on_launch">При запуске приложения подключаться к последнему серверу, если подключение не было разорвано явно</string>
     <string name="summary_restore_server_on_launch">При запуске приложения снова начинать прослушивание, если сервер не был остановлен явно</string>
     <string name="summary_retention_policies">Сроки хранения и ограничения размера для истории версий, корзины и аварийных черновиков</string>
+    <string name="summary_script_module_debug_print">Когда модуль скрипта выбрасывает исключение Java, выводить в консоль скрипта отладочную запись с кадрами модуля (значения аргументов не выводятся). Действует для скриптов, запущенных после изменения</string>
+    <string name="summary_script_module_debug_print_modules">Модули, исключения Java которых выводят отладочную запись при включенном отладочном выводе. Модули без отметки ничего не выводят</string>
     <string name="summary_setup_wizard_welcome_reset">Снова показать приветствие мастеров настройки на главной странице при следующем запуске</string>
     <string name="summary_setup_wizards">Предоставление основных разрешений и установка официальных плагинов</string>
     <string name="text_accent_and_dark">Акцент / тёмный</string>
@@ -2161,6 +2164,7 @@
     <string name="text_new_path">Новый путь</string>
     <string name="text_new_path_is_same_as_old_path">Новый путь совпадает со старым путем</string>
     <string name="text_new_project">Новый проект</string>
+    <string name="text_new_script_module_layer">Использовать новую реализацию модулей скриптов</string>
     <string name="text_new_version_found">Найдена новая версия</string>
     <string name="text_new_watching_variables">Новые наблюдающие переменные</string>
     <string name="text_next_retry">Следующая попытка</string>
@@ -2730,6 +2734,9 @@
     <string name="text_screen_capture_request_delay">Задержка запроса разрешения на захват экрана</string>
     <string name="text_screen_color_picker">Пипетка цвета экрана</string>
     <string name="text_script_change_undone">Цвет темы до изменения скриптом восстановлен</string>
+    <string name="text_script_module_debug_print">Отладочный вывод</string>
+    <string name="text_script_module_debug_print_modules">Модули для вывода</string>
+    <string name="text_script_modules">Модули скриптов</string>
     <string name="text_script_music">Музыка скрипта</string>
     <string name="text_script_record">Запись сценария</string>
     <string name="text_script_running">Выполнение сценария</string>

@@ -853,6 +853,7 @@
     <string name="summary_github_token_set">Configurado. Oculto por privacidad; termina en %1$s.</string>
     <string name="summary_guard_mode">Evitar las acciones de automatización de los scripts cuando AutoJs6 está en primer plano</string>
     <string name="summary_lan_discovery">Anunciar este dispositivo como _autojs6._tcp para que VSCode (extensión 1.1.0+) lo liste al conectar por LAN</string>
+    <string name="summary_new_script_module_layer">Monta los módulos de script migrados (actualmente base64) desde la nueva capa de módulos. Se aplica a los scripts iniciados después</string>
     <string name="summary_nodejs_doctor_report">Generar un informe de diagnóstico del entorno de ejecución de Node con datos privados eliminados para informar errores</string>
     <string name="summary_nodejs_inspector_enabled">Permitir depuración local y análisis de rendimiento. Conecta DevTools del ordenador mediante reenvío de puertos ADB.</string>
     <string name="summary_not_showing_main_activity">Ejecutar el script directamente sin mostrar la actividad principal</string>
@@ -874,6 +875,8 @@
     <string name="summary_restore_connection_on_launch">Al iniciar la aplicación, reconectar con el último servidor, salvo que la conexión se haya cerrado explícitamente</string>
     <string name="summary_restore_server_on_launch">Al iniciar la aplicación, volver a escuchar, salvo que el servidor se haya detenido explícitamente</string>
     <string name="summary_retention_policies">Días de retención y límites de tamaño del historial de versiones, la papelera y los borradores de emergencia</string>
+    <string name="summary_script_module_debug_print">Cuando un módulo de script lanza una excepción de Java, imprime en la consola del script una entrada de depuración con sus marcos del módulo (nunca se imprimen los valores de los argumentos). Se aplica a los scripts iniciados después</string>
+    <string name="summary_script_module_debug_print_modules">Módulos cuyas excepciones de Java imprimen una entrada de depuración mientras la impresión de depuración está activada. Los módulos sin marcar no imprimen nada</string>
     <string name="summary_setup_wizard_welcome_reset">Volver a mostrar el aviso de bienvenida de los asistentes de configuración en la página de inicio en el próximo inicio</string>
     <string name="summary_setup_wizards">Conceder permisos habituales e instalar plugins oficiales</string>
     <string name="text_accent_and_dark">Acento / oscuro</string>
@@ -2161,6 +2164,7 @@
     <string name="text_new_path">Nueva ruta</string>
     <string name="text_new_path_is_same_as_old_path">La nueva ruta es la misma que la antigua</string>
     <string name="text_new_project">Nuevo proyecto</string>
+    <string name="text_new_script_module_layer">Usar la nueva implementación de módulos de script</string>
     <string name="text_new_version_found">Nueva versión encontrada</string>
     <string name="text_new_watching_variables">Nuevas variables de observación</string>
     <string name="text_next_retry">Próximo reintento</string>
@@ -2730,6 +2734,9 @@
     <string name="text_screen_capture_request_delay">Retraso de solicitud del permiso de captura de pantalla</string>
     <string name="text_screen_color_picker">Selector de color de pantalla</string>
     <string name="text_script_change_undone">Se ha restaurado el color del tema anterior al cambio del script</string>
+    <string name="text_script_module_debug_print">Impresión de depuración</string>
+    <string name="text_script_module_debug_print_modules">Módulos que imprimen</string>
+    <string name="text_script_modules">Módulos de script</string>
     <string name="text_script_music">Música del script</string>
     <string name="text_script_record">Grabación del script</string>
     <string name="text_script_running">Script en ejecución</string>
