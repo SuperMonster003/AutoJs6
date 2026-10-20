@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.LambdaFunction
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.SerializableCallable
@@ -63,7 +64,12 @@ class ScriptBuiltInExtender(
             (listOf(f.name) + f.aliases).forEach { name -> target.defineProperty(name, function(binding, module, f, name, "$builtIn.$name", receiver = false), f.attributes) }
         }
         spec.functions.filter { it.onBuiltInPrototype }.forEach { f ->
-            prototype.defineProperty(f.name, function(binding, module, f, f.name, "$builtIn.prototype.${f.name}", receiver = true), f.attributes)
+            val function = function(binding, module, f, f.name, "$builtIn.prototype.${f.name}", receiver = true)
+            // As the old extension (RhinoUtils.initNewBaseFunction): a "prototype" object whose "constructor" is the function.
+            val functionPrototype = RhinoUtils.newNativeObject(scope)
+            functionPrototype.defineProperty("constructor", function, ScriptableObject.DONTENUM)
+            function.defineProperty("prototype", functionPrototype, ScriptableObject.DONTENUM)
+            prototype.defineProperty(f.name, function, f.attributes)
         }
         spec.functions.filter { it.onBuiltInGlobal }.forEach { f ->
             (listOf(f.name) + f.aliases).forEach { name -> global.defineProperty(name, function(binding, module, f, name, name, receiver = false), f.attributes) }

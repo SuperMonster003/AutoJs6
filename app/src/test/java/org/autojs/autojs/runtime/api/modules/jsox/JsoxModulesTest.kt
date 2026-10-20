@@ -374,7 +374,23 @@ class JsoxModulesTest {
             (function () {
                 var out = [];
                 function attrs(d) { return (d.enumerable ? 'E' : '-') + (d.writable ? 'W' : '-') + (d.configurable ? 'C' : '-') + (d.get || d.set ? 'A' : ''); }
-                function kind(v) { return typeof v === 'function' ? 'function ' + v.name : typeof v === 'object' ? 'object' : typeof v + ' ' + String(v); }
+                function own(v) {
+                    return Object.getOwnPropertyNames(v).filter(function (k) { return ['length', 'arity', 'name'].indexOf(k) < 0; }).map(function (k) {
+                        var d = Object.getOwnPropertyDescriptor(v, k);
+                        var inner = k === 'prototype' && d.value && typeof d.value === 'object' && d.value.constructor === v ? ' {' + Object.getOwnPropertyNames(d.value).map(function (p) {
+                            var pd = Object.getOwnPropertyDescriptor(d.value, p);
+                            return p + ' ' + attrs(pd) + (pd.value === v ? ' self' : '');
+                        }).join(',') + '}' : '';
+                        return k + ' ' + attrs(d) + inner;
+                    });
+                }
+                function kind(v) {
+                    if (typeof v === 'function') {
+                        var extra = own(v);
+                        return 'function ' + v.name + (extra.length ? ' [' + extra.join(',') + ']' : '');
+                    }
+                    return typeof v === 'object' ? 'object' : typeof v + ' ' + String(v);
+                }
                 function walk(label, o, names) {
                     (names || Object.getOwnPropertyNames(o)).forEach(function (k) {
                         var d = Object.getOwnPropertyDescriptor(o, k);

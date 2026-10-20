@@ -78,6 +78,9 @@ class ScriptBuiltInExtenderTest {
                 "Number.prototype.plus.name" to "\"plus\"",
                 "Object.keys(Number).join()" to "\"ANSWER,twice,negate,describe\"",
                 "(function () { var d = Object.getOwnPropertyDescriptor(Number.prototype, 'plus'); return [d.enumerable, d.writable, d.configurable]; })()" to "[true,true,false]",
+                // As the old extension: a prototype function has a "prototype" object whose "constructor" is the function.
+                "(function () { var f = Number.prototype.plus; var d = Object.getOwnPropertyDescriptor(f, 'prototype'); var c = Object.getOwnPropertyDescriptor(d.value, 'constructor'); return [d.enumerable, d.writable, d.configurable, c.value === f, c.enumerable, Object.getPrototypeOf(d.value) === Object.prototype]; })()" to "[false,true,true,true,false,true]",
+                "Object.getOwnPropertyNames(Number.twice).indexOf('prototype')" to "-1",
                 "(function () { var d = Object.getOwnPropertyDescriptor(Number, 'ANSWER'); return [d.enumerable, d.writable, d.configurable]; })()" to "[true,true,false]",
                 "Object.getOwnPropertyDescriptor(globalThis, 'numberProbeGlobal').enumerable" to "true",
                 "Number.twice('x')" to "throws TypeError",
