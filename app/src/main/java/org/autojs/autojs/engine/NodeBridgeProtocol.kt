@@ -696,6 +696,7 @@ object NodeBridgeModules {
     const val TASKS = "tasks"
     const val WORK_MANAGER = NodeBridgePermissionManifest.WORK_MANAGER
     const val PACKAGE_MANAGER = NodeBridgePermissionManifest.PACKAGE_MANAGER
+    const val EPUB = "epub"
     const val SPEECH = "speech"
     const val TTS = "tts"
     const val JAVA = "java"
@@ -866,6 +867,7 @@ object NodeBridgeModules {
         TASKS to RuntimeTasksBridge.methods,
         WORK_MANAGER to workManagerMethods,
         PACKAGE_MANAGER to packageManagerMethods,
+        EPUB to RuntimeEpubBridge.methods,
         SPEECH to RuntimeSpeechBridge.methods,
         TTS to RuntimeTtsBridge.methods,
         JAVA to javaMethods,
@@ -955,6 +957,10 @@ class AndroidNodeBridgeCapabilityProvider(
     private var agentHelpersClosed = false
     private val screenText = lazy { NodeBridgeScreenText(appContext, { screenCapture.capture() }) }
     private val agentBridge = lazy { NodeBridgeAgentBridge(appContext, engineInfo, agentScriptRoots) }
+    private val epubScopeLock = Any()
+    private var epubScopeClosed = false
+    private val epubBridge = lazy { RuntimeEpubBridge(appContext, engineInfo.cwd) }
+    internal fun closeEpubClient(id: String) { if (epubBridge.isInitialized()) epubBridge.value.closeClient(id) }
     private val speechScopeLock = Any()
     private var speechScopeClosed = false
     private val speechBridge = lazy { RuntimeSpeechBridge(appContext, engineInfo.cwd) }
@@ -1206,6 +1212,11 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, auditedCallback)
             request.module == NodeBridgeModules.PACKAGE_MANAGER && request.method in NodeBridgeModules.packageManagerMethods -> dispatchPackageManager(request, auditedCallback)
             request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, auditedCallback)
+            request.module == NodeBridgeModules.EPUB && request.method in RuntimeEpubBridge.methods -> {
+                val bridge = synchronized(epubScopeLock) { if (epubScopeClosed) null else epubBridge.value }
+                if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("EPUB execution has ended")))
+                else bridge.dispatch(request, auditedCallback)
+            }
             request.module == NodeBridgeModules.SPEECH && request.method in RuntimeSpeechBridge.methods -> {
                 val bridge = synchronized(speechScopeLock) { if (speechScopeClosed) null else speechBridge.value }
                 if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Speech execution has ended")))
@@ -1295,6 +1306,7 @@ class AndroidNodeBridgeCapabilityProvider(
         closeShellProcesses()
         closeEventResources()
         closeAgentHelpers()
+        synchronized(epubScopeLock) { epubScopeClosed = true; if (epubBridge.isInitialized()) epubBridge.value.close() }
         synchronized(speechScopeLock) { speechScopeClosed = true; if (speechBridge.isInitialized()) speechBridge.value.close() }
         synchronized(ttsScopeLock) { ttsScopeClosed = true; if (ttsBridge.isInitialized()) ttsBridge.value.close() }
         if (composeBridge.isInitialized()) composeBridge.value.close()

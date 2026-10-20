@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_epub_control_grant">允许通过 EPUB 插件读取书籍, 提取内容, 导出资源及控制阅读器.</string>
+    <string name="text_bun_epub_control_grant">Bun EPUB 书籍与阅读器</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_epub_control_grant">Allow EPUB reading, extraction, resource export and reader controls through the EPUB plugin.</string>
+    <string name="text_bun_epub_control_grant">Bun EPUB books and reader</string>
+</resources>

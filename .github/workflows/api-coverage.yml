@@ -7,6 +7,9 @@ on:
       - 'app/src/main/java/org/autojs/autojs/runtime/api/tts/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/api/speech/**'
       - 'app/src/main/java/org/autojs/autojs/core/plugin/speech/**'
+      - 'app/src/main/java/org/autojs/autojs/core/plugin/epub/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/epub/**'
+      - 'plugin-api/epub-api/**'
       - 'app/src/main/java/org/autojs/autojs/engine/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
       - 'tools/api-coverage/**'
@@ -19,6 +22,9 @@ on:
       - 'app/src/main/java/org/autojs/autojs/runtime/api/tts/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/api/speech/**'
       - 'app/src/main/java/org/autojs/autojs/core/plugin/speech/**'
+      - 'app/src/main/java/org/autojs/autojs/core/plugin/epub/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/epub/**'
+      - 'plugin-api/epub-api/**'
       - 'app/src/main/java/org/autojs/autojs/engine/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
       - 'tools/api-coverage/**'
@@ -43,6 +49,9 @@ on:
         required: false
       speech_plugin_ref:
         description: Speech plugin branch or commit (empty uses default branch)
+        required: false
+      epub_plugin_ref:
+        description: EPUB plugin branch or commit (empty uses default branch)
         required: false
 
 permissions:
@@ -93,6 +102,12 @@ jobs:
           ref: ${{ inputs.speech_plugin_ref }}
           path: AutoJs6-Plugin-Three-Macaw-Speech
           lfs: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Three-Folio-EPUB
+          ref: ${{ inputs.epub_plugin_ref }}
+          path: AutoJs6-Plugin-Three-Folio-EPUB
+          lfs: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -107,6 +122,7 @@ jobs:
           node tools/api-coverage/check-runtime-java-callbacks.mjs
           node tools/api-coverage/check-runtime-tts.mjs
           node tools/api-coverage/check-runtime-speech.mjs
+          node tools/api-coverage/check-runtime-epub.mjs
       - name: Check handwritten types and conditional extensions
         working-directory: AutoJs6-TypeScript-Declarations
         run: |

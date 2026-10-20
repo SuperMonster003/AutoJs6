@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/20",
+      "released_date": "2026/10/21",
       "released_hint": "일부 기능 플러그인화, 신중하게 업데이트",
       "hint": [
         "일부 내장 기능 (OCR, 바코드 인식, OpenCV, OpenCC, Pinyin, MediaInfo, 터미널 및 오프라인 프로젝트 문서 등)을 독립 플러그인으로 제공하며, 사용 전에 플러그인 센터에서 해당 플러그인을 설치하고 활성화해야 함",
@@ -171,7 +171,8 @@
         "Node.js/Bun/Worker의 Java/Android 상호 운용으로 공개 생성자와 멤버, 배열, 정확한 long 값, 명시적 오버로드 및 앱 Context 핸들 지원",
         "Node.js/Bun/Worker의 Java 콜백, 하위 클래스 생성 및 JAR/DEX 로드로 Promise 반환값, 부모 클래스 호출 및 실행 종료 정리 지원",
         "Node.js/Bun/Worker의 음성 합성 API로 엔진과 음성 조회, 읽기, 무음, 오디오 파일 합성 및 작업 이벤트 지원",
-        "Node.js/Bun/Worker의 speech 음성 인식 및 모델 관리 API로 WAV/PCM, 받아쓰기와 호출어 세션, 모델 설치와 가져오기, 음성 합성 및 취소 시 정리 지원"
+        "Node.js/Bun/Worker의 speech 음성 인식 및 모델 관리 API로 WAV/PCM, 받아쓰기와 호출어 세션, 모델 설치와 가져오기, 음성 합성 및 취소 시 정리 지원",
+        "Node.js/Bun/Worker: EPUB 도서 읽기, 리소스 내보내기, 검색 및 이벤트를 지원하는 리더 세션"
       ],
       "fix": [
         "runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제",

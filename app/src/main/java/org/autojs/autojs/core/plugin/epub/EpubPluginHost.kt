@@ -44,32 +44,40 @@ object EpubPluginHost {
 
     private val defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(EpubIds.ENGINE)
 
-    private val host = AidlPluginHost(
-        action = ACTION_EPUB,
+    private val signedHost = createHost(ACTION_EPUB, EpubActions.PLUGIN_PERMISSION)
+    private val packagedHost = createHost(EpubActions.PACKAGED_SERVICE_ACTION, EpubActions.PACKAGED_PERMISSION)
+
+    internal fun isPackaged(context: Context): Boolean =
+        context.packageName != "org.autojs.autojs6" || context.checkSelfPermission(EpubActions.PLUGIN_PERMISSION) != PackageManager.PERMISSION_GRANTED
+
+    private fun hostFor(context: Context) = if (isPackaged(context)) packagedHost else signedHost
+
+    private fun createHost(action: String, permission: String) = AidlPluginHost(
+        action = action,
         category = EpubActions.SERVICE_CATEGORY,
         tag = "EpubPluginHost",
         moduleLabel = LABEL,
         proxyFactory = { binder -> IEpubPlugin.Stub.asInterface(binder) },
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
         defaultEnabled = defaultEnabled,
-        preBindValidator = ::validateService,
+        preBindValidator = { context, service -> validateService(context, service, action, permission) },
     )
 
     suspend fun discover(context: Context, packageName: String? = null) = withContext(Dispatchers.IO) {
-        host.discover(context, packageName)
+        hostFor(context).discover(context, packageName)
     }
 
     suspend fun probe(context: Context, packageName: String): PluginInfo = withContext(Dispatchers.IO) {
-        host.probe(context, packageName)
+        hostFor(context).probe(context, packageName)
     }
 
-    fun queryServiceCount(context: Context): Int = host.queryServiceCount(context)
+    fun queryServiceCount(context: Context): Int = hostFor(context).queryServiceCount(context)
 
     /** The capabilities bundle of the selected plugin; failures carry the contract codes like every other call. */
     suspend fun getCapabilities(context: Context): Bundle = withContext(Dispatchers.IO) {
         val target = selectForCall(context)
         try {
-            host.call(context, target) { proxy -> proxy.getCapabilities() ?: Bundle() }
+            hostFor(context).call(context, target) { proxy -> proxy.getCapabilities() ?: Bundle() }
         } catch (t: Throwable) {
             throw EpubPluginException(EpubErrorMapper.fromThrowable(t, EpubErrorMapper.Phase.OPEN), t)
         }
@@ -147,13 +155,13 @@ object EpubPluginHost {
     private suspend fun discoveryError(context: Context, cause: Throwable): EpubError {
         val mapped = EpubErrorMapper.fromThrowable(cause, EpubErrorMapper.Phase.DISCOVERY)
         if (mapped.code != EpubErrorCodes.PLUGIN_UNAVAILABLE) return mapped
-        val packages = runCatching { host.discover(context).map { it.serviceInfo.packageName }.distinct() }.getOrDefault(emptyList())
+        val packages = runCatching { hostFor(context).discover(context).map { it.serviceInfo.packageName }.distinct() }.getOrDefault(emptyList())
         if (packages.isEmpty() || packages.any { PluginEnableStore.isEnabled(context, it, defaultEnabled) }) return mapped
         return EpubErrorMapper.normalize(EpubErrorCodes.PLUGIN_DISABLED, "EPUB plugin is disabled: " + packages.joinToString())
     }
 
     private suspend fun <T> lease(context: Context, target: AidlPluginHost.Discovered, block: (IEpubPlugin) -> T): AidlPluginHost.LeasedCall<T> = try {
-        host.callWithDedicatedBindingLease(context.applicationContext, target, retryOnRemoteException = false, block = block)
+        hostFor(context).callWithDedicatedBindingLease(context.applicationContext, target, retryOnRemoteException = false, block = block)
     } catch (e: EpubPluginException) {
         throw e
     } catch (t: Throwable) {
@@ -161,7 +169,7 @@ object EpubPluginHost {
     }
 
     internal suspend fun selectOrThrow(context: Context): AidlPluginHost.Discovered {
-        return host.selectOrThrow(
+        return hostFor(context).selectOrThrow(
             context = context,
             engineId = null,
             engine = EpubIds.ENGINE,
@@ -203,21 +211,21 @@ object EpubPluginHost {
         @Suppress("DEPRECATION") capabilities.get(EpubCapabilityKeys.CONTRACT_VERSION),
     )?.toInt() ?: 0
 
-    private fun validateService(context: Context, serviceInfo: ServiceInfo) {
+    private fun validateService(context: Context, serviceInfo: ServiceInfo, action: String, permission: String) {
         require(serviceInfo.exported && serviceInfo.enabled) {
             "EPUB plugin service is not exported and enabled"
         }
-        require(serviceInfo.permission == EpubActions.PLUGIN_PERMISSION) {
-            "EPUB plugin service must require ${EpubActions.PLUGIN_PERMISSION}"
+        require(serviceInfo.permission == permission) {
+            "EPUB plugin service must require $permission"
         }
         val component = ComponentName(serviceInfo.packageName, serviceInfo.name)
-        require(component in queryContractServices(context, serviceInfo.packageName)) {
+        require(component in queryContractServices(context, serviceInfo.packageName, action)) {
             "EPUB plugin service does not declare the required action and category"
         }
     }
 
-    private fun queryContractServices(context: Context, packageName: String): Set<ComponentName> {
-        val intent = Intent(EpubActions.SERVICE_ACTION).apply {
+    private fun queryContractServices(context: Context, packageName: String, action: String): Set<ComponentName> {
+        val intent = Intent(action).apply {
             addCategory(EpubActions.SERVICE_CATEGORY)
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             setPackage(packageName)

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/20",
+      "released_date": "2026/10/21",
       "released_hint": "部分功能外掛化, 謹慎升級",
       "hint": [
         "部分內建功能改由獨立外掛提供 (如 OCR, 條碼識別, OpenCV, OpenCC, 拼音, MediaInfo, 終端及離線專案文件), 使用前需在外掛中心安裝並啟用對應外掛",
@@ -171,7 +171,8 @@
         "Node.js/Bun/Worker 的 Java/Android 物件互操作, 支援公開建構函式和成員, 陣列, 精確 long 值, 明確多載及應用程式 Context 控制代碼",
         "Node.js/Bun/Worker 的 Java 回呼代理, 子類別產生和 JAR/DEX 載入, 支援 Promise 回傳值, 父類別呼叫及執行結束清理",
         "Node.js/Bun/Worker 的文字轉語音介面, 支援引擎與音色查詢, 朗讀, 靜音工作, 音訊檔案合成和工作事件",
-        "Node.js/Bun/Worker 的 speech 語音辨識與模型管理介面, 支援 WAV/PCM, 聽寫與喚醒工作階段, 模型安裝/匯入, 語音合成及取消清理"
+        "Node.js/Bun/Worker 的 speech 語音辨識與模型管理介面, 支援 WAV/PCM, 聽寫與喚醒工作階段, 模型安裝/匯入, 語音合成及取消清理",
+        "Node.js/Bun/Worker: EPUB 書籍讀取, 資源匯出, 搜尋及含事件的閱讀器工作階段"
       ],
       "fix": [
         "runtime.loadJar 方法無法動態載入較高 Java 版本編譯的 class 檔案的問題",

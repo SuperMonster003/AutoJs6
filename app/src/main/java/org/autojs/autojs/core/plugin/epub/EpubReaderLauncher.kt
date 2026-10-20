@@ -16,10 +16,12 @@ import org.autojs.plugin.epub.api.EpubErrorCodes
  * with the session token as its only extra. The plugin never starts the Activity itself.
  */
 object EpubReaderLauncher {
+    private fun action(context: Context) = if (EpubPluginHost.isPackaged(context))
+        EpubActions.PACKAGED_READER_ACTIVITY_ACTION else EpubActions.READER_ACTIVITY_ACTION
 
     /** The single Activity of [packageName] that answers the reader action, or `PLUGIN_INCOMPATIBLE`. */
     fun resolve(context: Context, packageName: String): ComponentName {
-        val intent = Intent(EpubActions.READER_ACTIVITY_ACTION).apply {
+        val intent = Intent(action(context)).apply {
             addCategory(Intent.CATEGORY_DEFAULT)
             setPackage(packageName)
         }
@@ -43,7 +45,7 @@ object EpubReaderLauncher {
     }
 
     fun intent(context: Context, component: ComponentName, token: String): Intent =
-        Intent(EpubActions.READER_ACTIVITY_ACTION).apply {
+        Intent(action(context)).apply {
             this.component = component
             addCategory(Intent.CATEGORY_DEFAULT)
             putExtra(EpubActions.EXTRA_SESSION_TOKEN, token)

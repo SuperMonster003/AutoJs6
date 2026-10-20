@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_epub_control_grant">Autoriser la lecture, la récupération du contenu, les exports et les commandes du lecteur via le module EPUB.</string>
+    <string name="text_bun_epub_control_grant">Livres et lecteur EPUB Bun</string>
+</resources>

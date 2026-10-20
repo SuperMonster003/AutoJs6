@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_epub_control_grant">EPUB 플러그인을 통한 도서 읽기, 콘텐츠 추출, 리소스 내보내기 및 리더 제어를 허용합니다.</string>
+    <string name="text_bun_epub_control_grant">Bun EPUB 도서 및 리더</string>
+</resources>

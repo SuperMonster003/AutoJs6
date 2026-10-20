@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_epub_control_grant">允許透過 EPUB 外掛讀取書籍, 擷取內容, 匯出資源及控制閱讀器.</string>
+    <string name="text_bun_epub_control_grant">Bun EPUB 書籍與閱讀器</string>
+</resources>

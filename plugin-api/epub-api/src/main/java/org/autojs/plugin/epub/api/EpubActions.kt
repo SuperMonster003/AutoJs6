@@ -21,6 +21,11 @@ object EpubActions {
     /** Signature permission every Binder entry point and the reader entry of the plugin require. */
     const val PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN"
 
+    /** Separate entry for independently signed applications carrying the AutoJs6 runtime. */
+    const val PACKAGED_SERVICE_ACTION = "org.autojs.plugin.EPUB_PACKAGED"
+    const val PACKAGED_PERMISSION = "org.autojs.plugin.epub.permission.RUNTIME"
+    const val PACKAGED_READER_ACTIVITY_ACTION = "org.autojs.plugin.EPUB_PACKAGED_READER_OPEN"
+
     /**
      * Action of the plugin reader Activity that claims a session opened by [IEpubPlugin.openReader].
      * The host starts it with an explicit component and [EXTRA_SESSION_TOKEN] as the only extra;

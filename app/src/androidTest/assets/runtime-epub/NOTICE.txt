@@ -1,0 +1,1 @@
+Synthetic EPUB derived from the repository-owned 3-Folio EPUB minimal-epub3 fixture and expanded for Unicode transport testing. No user books or external content. MPL-2.0.
