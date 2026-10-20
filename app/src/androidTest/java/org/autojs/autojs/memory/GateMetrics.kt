@@ -42,6 +42,13 @@ internal object GateMetrics {
      */
     val SCRIPT_THREAD_MARKERS = listOf("ScriptThread-", "Spawn-", "Pool-", "Timer", "ScreenCapturer", "LooperThread")
 
+    /**
+     * Framework threads whose names contain a marker but which scripts never create: `SurfaceSyncGroupTimer`
+     * (Android 14+, created on demand by the view system; appendix A of docs/memory/ROADMAP.md, 23046RP50C).
+     * zh-CN: 名称含标记但并非脚本创建的框架线程: `SurfaceSyncGroupTimer` (Android 14 起, 视图系统按需创建; docs/memory/ROADMAP.md 附录 A, 23046RP50C).
+     */
+    val NON_SCRIPT_THREAD_NAMES = setOf("SurfaceSyncGroupTimer")
+
     private const val GC_ROUNDS = 3
 
     private val contextCountField by lazy {
@@ -74,7 +81,7 @@ internal object GateMetrics {
         return buffer.take(count).filterNotNull()
     }
 
-    fun isScriptThread(thread: Thread) = SCRIPT_THREAD_MARKERS.any { thread.name.contains(it) }
+    fun isScriptThread(thread: Thread) = thread.name !in NON_SCRIPT_THREAD_NAMES && SCRIPT_THREAD_MARKERS.any { thread.name.contains(it) }
 
     fun forceGc() {
         val runtime = Runtime.getRuntime()

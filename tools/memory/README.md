@@ -49,7 +49,15 @@ py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --scenarios S7 --keep-process 
 
 场景表 (T2): S1 空脚本, S2 `threads.start` x 10 + `threads.pool`, S3 定时器嵌套, S4a 截屏 (需授权), S4b `images.read` + `findImage`, S4c `copy` / `clip` / `resize`, S4d `matchTemplate` + `oneShot`, S4e 多线程图像 (#372 / #200 的有限版本), S5 UI 脚本 + webview (经 `ScriptExecuteActivity`, 等 `onDestroy`), S6 `floaty.window` + `floaty.rawWindow`, S7 事件 / 按键 / 传感器 / 无障碍事件 (按键与无障碍部分需宿主无障碍服务, 未开启时只跑其余部分并在报告中记录), S8 `JavaAdapter` + `runtime.loadDex`, S9 `engines.execScriptFile` 自我重启 3 层, S10 `http.get` + WebSocket (测试进程内的回环服务, 不需要网络), S11 `device.*` 读取 / 振动 / `keepScreenOn`, S12 `plugins.load` (3-ImGui, 未安装时跳过).
 
-度量目前是测试内的临时实现 (`GateMetrics.kt`; Rhino Context 计数经反射读取 `AndroidContextFactory.mContextCount`), ROADMAP P2.1 的 `MemoryDiagnostics` 落地后切换.
+度量目前是测试内的临时实现 (`GateMetrics.kt`; Rhino Context 计数经反射读取 `AndroidContextFactory.mContextCount`), ROADMAP P2.1 的 `MemoryDiagnostics` 落地后切换. 脚本线程按线程名标记计数 (`ScriptThread-` / `Spawn-` / `Pool-` / `Timer` / `ScreenCapturer` / `LooperThread`), Android 14 起框架自带的 `SurfaceSyncGroupTimer` 不计 (P1 起).
+
+## leakcanary_probe.py: LeakCanary 报告核对
+
+```
+py -3.12 -I -u tools/memory/leakcanary_probe.py -s SERIAL [--scenario S2] [--runs 6] [--wait 300] [--expect Loopers] [--expect-leaks yes|no] [--out FILE]
+```
+
+LeakCanary 在 instrumentation 测试进程里不转储堆, 所以门禁看不到它的报告 (ROADMAP P1.2 / T5). 本脚本把场景脚本 (门禁正常结束模式的版本, 目前 S1 / S2) 推到 `/sdcard/Download/aj6-memory-probe/`, 经 `RunIntentActivity` 以普通脚本运行 `--runs` 次, 然后在 `--wait` 秒内从 logcat (`LeakCanary` 标签) 收集 LeakCanary 的堆分析结果. 输出: 每次启动一行, LeakCanary 记录的监视对象与最大残留数, 是否出现分析, 应用泄漏数, 引用链是否包含 `--expect`; `--out` 把分析文本 (与 LeakCanary 泄漏列表中显示的文本相同) 写入文件. `--expect-leaks yes` 时出现含 `--expect` 的应用泄漏即 PASS (修前构建), `no` 时等待期内没有应用泄漏即 PASS (修后构建). 需要 debug 构建且开发者选项中的 LeakCanary 开关为开 (默认). 脚本不点屏幕, 不改设置.
 
 ## static_audit.py: 源码静态审计
 
