@@ -94,7 +94,7 @@ class RuntimeEpubPackagedDeviceTest {
                 assertEquals(pkg,value.getString("packageName"))
                 assertTrue(value.getBoolean("quiet"))
                 assertTrue(value.getBoolean("errors"))
-                assertTrue(value.getBoolean("mutedEpub"))
+                assertTrue(value.getBoolean("readerClosed"))
                 assertTrue(value.getLong("coverBytes")>8)
                 assertEquals(10000,value.getInt("unicodeMarkers"))
                 assertTrue(value.getInt("searchHits")>0)
