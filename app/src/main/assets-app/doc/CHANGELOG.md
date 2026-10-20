@@ -23,6 +23,7 @@
 * `新增` 无障碍服务管理器, 支持服务启停, 缓存清理, 自检, 事件监视及诊断信息复制 (入口: 主页抽屉无障碍服务条目)
 * `新增` 开发者选项页面支持查看进程退出记录及复制诊断信息 (Android 11+) (入口: 关于应用与开发者页面长按应用图标)
 * `新增` 开发者选项增加 "允许 Node.js 脚本使用 Inspector" 开关 (默认关闭), 用于配合 Node.js Runtime 插件进行断点调试及 CPU/堆分析
+* `新增` debug 构建默认包含 LeakCanary, 监视已结束脚本的引擎, 运行时, 线程及悬浮窗, 用于发现脚本结束后未被回收的对象; 开发者选项增加 "LeakCanary" 开关 (仅 debug 构建显示) (可通过 Gradle 属性 autojs.leakcanary.enabled 排除)
 * `新增` 代码生成模型管理页, 支持本地导入, 按需下载, 多版本管理与对比及官方模型更新 (入口: 设置页面 > 无障碍服务 > 代码生成模型)
 * `新增` MCP Server 插件, 用于通过 MCP 客户端访问 AutoJs6 的脚本, 文件及设备操作能力 (入口: 主页抽屉/插件中心)
 * `新增` 3-Shell Terminal 插件, 提供终端能力 (入口: 主页抽屉, 项目工具栏, 文件管理器目录菜单)
@@ -52,6 +53,10 @@
 * `新增` ui.inflate 方法支持编译后的 XML TSX 布局及其 onClick 回调绑定
 * `新增` flow 模块及 waitAsync 全局方法, 用于异步等待与链式操作, 支持分支, 循环, 超时, 重试及取消 (参阅 项目文档 > [流程](https://docs.autojs6.com/#/flow))
 * `新增` terminal 全局对象, 用于终端会话管理, 可见执行与输出监听, 支持等待输出及退出码 (需要 3-Shell Terminal 插件) (参阅 示例代码 > 终端)
+* `新增` shell.spawn/shizuku.spawn 方法, 用于以进程运行命令并实时读取输出, 支持逐行读取, output/errorOutput/exit 事件, 写入 stdin, 限时等待及结束进程 (连同其启动的子进程), 脚本结束时自动结束进程 (adb 选项与 shizuku.spawn 需要 Shizuku, root 选项需要 Root 权限)
+* `新增` Shell 构造器支持选项对象 { cmd, root, adb, pty, env, cwd } (兼容 Auto.js Pro), 以此创建的 Shell 基于管道运行并提供 getInputStream/getErrorStream/getOutputStream/waitFor/exitCode/exitAndReadOutput/raw/execForResult 方法, 可经 Shizuku (adb 选项) 运行, 其 execAndWaitFor 按退出码标记分割每条命令的输出
+* `新增` shell.spawn 及选项构造的 Shell 支持 pty 选项, 用于在伪终端上运行命令, 使 getevent/awk 等在管道上缓冲输出的程序逐行输出 (stderr 并入 stdout)
+* `新增` $shell.setDefaultOptions/checkAccess/isRootAvailable 方法 (兼容 Auto.js Pro), 用于设置当前脚本中 shell 函数等的默认 root/adb 选项, 以及检查 Root/Shizuku 权限
 * `新增` installer 模块, 用于安装, 更新及卸载应用, 支持 Shizuku/Root/Dhizuku 静默操作及通知安装等选项 (需要 3-Setup Installer 插件) (参阅 项目文档 > [安装器](https://docs.autojs6.com/#/installer))
 * `新增` mail 模块, 用于邮件收发, 查询, 附件下载及文件夹管理, 支持同步与异步调用 (需要 3-Stamp Mail 插件) (参阅 项目文档 > [邮件](https://docs.autojs6.com/#/mail))
 * `新增` mail.watch 方法, 用于监听新邮件并支持断线重连
@@ -200,6 +205,7 @@
 * `修复` dialogs.multiChoice 方法返回的多选结果被错误转换为字符串的问题 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修复` 脚本对话框在线程结束时关闭可能导致应用崩溃的问题
 * `修复` 取消定时器或停止子线程后, 过期回调可能阻止脚本自动结束的问题
+* `修复` 停止脚本时其子线程仍在处理图像可能导致应用崩溃的问题
 * `修复` floaty.window/rawWindow 的聚焦相关方法在脚本线程调用时可能出现线程异常的问题
 * `修复` console.setPosition/setSize/setGravity 等方法的设置结果受调用顺序或窗口显示时机影响的问题
 * `修复` 控制台浮动窗口标题栏拖动可能失效及窗口无法贴近屏幕边缘的问题
@@ -254,7 +260,8 @@
 * `修复` images.findImage/matchTemplate 的边缘匹配, 坐标精度, 结果排序及数量限制异常
 * `修复` images.matchTemplate 无法正确处理通道数不同的图像, 纯色模板或透明遮罩, 以及 MatchingResult#sortBy 不接受小数比较结果的问题
 * `修复` images.matchFeatures 返回边框与实际位置不符, 以及小图像特征检测, 匹配结果绘制与资源释放异常
-* `修复` 脚本反复运行后内存占用可能持续增长的问题 (试修) _[`issue #548`](http://issues.autojs6.com/548)_
+* `修复` 脚本结束后占用的内存未被释放的问题: 使用 threads.start, 子线程定时器或 plugins.load 的脚本, 以及强制停止时仍有 threads.pool 线程或 WebSocket 连接的脚本, 每次运行的内存都会残留, 反复运行时内存占用持续增长; 其他脚本结束后也会有一个脚本的内存一直无法释放 _[`issue #548`](http://issues.autojs6.com/548)_
+* `修复` web.newWebSocket 创建的连接在脚本结束后仍保持打开, 以及设置了 exitOnClose 的连接会在任意脚本结束时被关闭的问题 (连接现只在所属脚本结束时处理: 设置了 exitOnClose 的连接按超时正常关闭, 其余连接断开)
 * `修复` 通过外部 URI 或后台运行脚本时可能丢失原始路径或文件扩展名的问题 _[`issue #545`](http://issues.autojs6.com/545)_
 * `修复` Tasker 无法正常调用并运行脚本的问题 _[`issue #501`](http://issues.autojs6.com/501)_
 * `修复` 小组件批量更新时脚本路径及点击映射可能被误删的问题
@@ -307,6 +314,7 @@
 * `修复` 插件中心冷启动后立即打开插件详情时, 对话框随列表刷新被整体重建而闪烁的问题
 * `修复` 插件中心在插件暂时无法连接 (如更新安装期间) 后持续保持其禁用的问题
 * `修复` Shizuku 权限请求监听器在销毁后未正确注销的问题
+* `修复` AutoJs6 更新后首次使用 Shizuku 相关功能时, 因 Shizuku 仍保留旧版服务记录而报告无法使用 Shizuku 服务的问题
 * `修复` 后台安装 APK 时无法继续确认安装的问题
 * `修复` APK 打包取消时可能误报构建失败的问题
 * `修复` APK 打包产物的签名证书一致性校验及 Android 9-11 签名识别异常
@@ -393,6 +401,7 @@
 * `优化` 屏幕截图支持暂时无可用帧时重试, 并减少截图资源释放对并发图像操作的影响
 * `优化` mediainfo 模块支持 snapshot/capabilities 方法及媒体流计数, 并减少文件详情查询耗时
 * `优化` KeyCode 方法提升参数兼容性并支持使用 Shizuku 权限发送键码指令 _[`issue #492`](http://issues.autojs6.com/492)_
+* `优化` shell 函数支持 adb 选项, 用于经 Shizuku 执行命令 (兼容 Auto.js Pro); arguments 中的 adb 键不再转为 --adb 参数, 需要该参数时写作 "--adb"
 * `优化` 无障碍服务支持使用 Shizuku 自动启用, 并支持与官方伴生插件同步启停状态
 * `优化` auto.registerEvent 回调的 source 节点改为按需解析 (Android 13 以下需在回调内读取)
 * `优化` 无障碍窗口查询跳过不可用根节点, 并完善不同安卓版本的节点回收策略
