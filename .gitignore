@@ -92,6 +92,9 @@ CLAUDE.md
 /tools/shell-stream/.*.generated.js
 !/tools/floaty/
 !/tools/floaty/**
+!/tools/settings/
+!/tools/settings/**
+/tools/settings/__pycache__/
 
 /gradle/wrappers/backup/
 
