@@ -4,6 +4,8 @@ import android.view.ContextThemeWrapper
 import androidx.preference.PreferenceManager
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.autojs.autojs.core.pref.keys.ConsoleKeys
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.ui.widget.JsConsoleView
 import org.autojs.autojs.core.ui.widget.JsGlobalConsoleView
 import org.autojs.autojs.tool.UiHandler
@@ -30,8 +32,8 @@ class ConsoleTimeSettingsDeviceTest {
                 val themed = ContextThemeWrapper(context, R.style.AppTheme)
                 val activityView = ConsoleView(themed)
                 val panelView = ConsoleView(themed)
-                val activity = LogPageConsoleSettings(activityView, R.string.key_log_activity_input_bar_visible)
-                val panel = LogPageConsoleSettings(panelView, R.string.key_editor_log_panel_input_bar_visible, ConsoleTimeSettings.EDITOR_PANEL)
+                val activity = LogPageConsoleSettings(activityView, ConsoleKeys.LOG_ACTIVITY_INPUT_BAR_VISIBLE)
+                val panel = LogPageConsoleSettings(panelView, EditorKeys.EDITOR_LOG_PANEL_INPUT_BAR_VISIBLE, ConsoleTimeSettings.EDITOR_PANEL)
                 activity.apply()
                 panel.apply()
                 assertTrue(activityView.isTimeVisible)
