@@ -356,6 +356,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` API persistantes de calendrier et IntentTask pour Node.js et Bun, avec tâches quotidiennes, hebdomadaires, mensuelles, annuelles, ponctuelles, différées et de diffusion
 * `Fonctionnalité` Interopérabilité Java/Android pour Node.js, Bun et Workers, avec constructeurs et membres publics, tableaux, valeurs long exactes, surcharges explicites et handles Context
 * `Fonctionnalité` Callbacks Java, sous-classes générées et chargement JAR/DEX pour Node.js, Bun et Workers, avec retours Promise, appels de la superclasse et libération en fin de session
+* `Fonctionnalité` API de synthèse vocale pour Node.js, Bun et Workers avec requêtes des moteurs et voix, lecture, silence, fichiers audio et événements des tâches
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes
 * `Correction` Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés
@@ -501,6 +502,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` URI FileProvider des applications générées utilisant l'autorité du modèle au lieu de celle du manifeste réel
 * `Correction` Échec des imports ESM Node.js lorsque le module hôte exporte un nom réservé tel que java.new
 * `Correction` Arrêt prématuré de la page de lancement des applications Bun masquées, exposant le processus à la récupération pendant le démarrage à froid
+* `Correction` tts.engines liste les moteurs installés même si le moteur par défaut ne peut pas démarrer
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan

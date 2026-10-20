@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_tts_control_grant">読み上げ, 音声エンジンの照会と音声ファイルの合成を許可します.</string>
+    <string name="text_bun_tts_control_grant">Bun 音声合成</string>
+</resources>

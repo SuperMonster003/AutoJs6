@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_tts_control_grant">允許朗讀, 查詢語音引擎及合成音訊檔案.</string>
+    <string name="text_bun_tts_control_grant">Bun 文字轉語音</string>
+</resources>

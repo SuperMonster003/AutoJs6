@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {resolve, dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {execFileSync} from 'node:child_process';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
+const workspace=resolve(root,'..');
+const node=resolve(workspace,'AutoJs6-Plugin-NodeJs-Runtime');
+const bun=resolve(workspace,'AutoJs6-Plugin-Bun-Runtime');
+const read=file=>readFileSync(file,'utf8');
+execFileSync(process.execPath,[resolve(bun,'tools/host-client/sync-tts.mjs'),'--check'],{stdio:'inherit'});
+const source=read(resolve(node,'app/src/main/cpp/node_bridge_sources.cpp'));
+const start=source.indexOf('  // Shared TTS facade.'),end=source.indexOf('  // End shared TTS facade.',start);
+assert(start>=0&&end>start);
+const create=new Function(source.slice(start,end)+';return __autojs6_create_tts;')();
+const api=create(()=>{throw Error('Coverage inspection must not call the host');});
+const rhino=read(resolve(root,'app/src/main/java/org/autojs/autojs/runtime/api/augment/tts/Tts.kt'));
+const assignments=rhino.slice(rhino.indexOf('val FUNCTION_ASSIGNMENTS'),rhino.indexOf('private data class OptionalString'));
+const methods=new Set([...assignments.matchAll(/Tts::(\w+)/g)].map(m=>m[1]).concat([...assignments.matchAll(/"(\w+)"/g)].map(m=>m[1])));
+for(const method of methods)assert.equal(typeof api[method],'function',`Missing Rhino TTS member: ${method}`);
+assert.equal(api.QUEUE_FLUSH,'flush');assert.equal(api.QUEUE_ADD,'add');assert.equal(api.maxInputLength,3999);assert.equal(api.maxSynthesisFileSize,536870912);
+const types=read(resolve(node,'docs/nodejs/types/autojs6-node/tts.d.ts'));
+const docs=read(resolve(workspace,'AutoJs6-Documentation/api/runtimeApis.md')).split('## Node.js / Bun / Worker 的文字转语音')[1];assert(docs);
+for(const method of methods){assert(types.includes(method+'('),`Missing TTS declaration: ${method}`);assert(docs.includes(method),`Missing TTS documentation: ${method}`);}
+const provider=read(resolve(root,'app/src/main/java/org/autojs/autojs/engine/RuntimeTtsBridge.kt'));
+assert(provider.includes('TtsService(context, client)'));assert(provider.includes('selected: Set<String>?'));assert(provider.includes('session.pending.values.toList()'));
+assert(source.includes('for(const id of ttsClients)closeTts(id)'));
+console.log(JSON.stringify({rhinoTtsMethods:methods.size,sharedFacadeMembers:Object.keys(api).length,nodeBunWorker:true,sharedNativeService:true}));

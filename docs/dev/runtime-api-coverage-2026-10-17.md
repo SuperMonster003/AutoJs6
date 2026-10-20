@@ -90,3 +90,8 @@ Node.js main threads, Bun and CJS/ESM/nested Workers now share explicit public J
 ## 2026-10-20 Java callback and loading follow-up
 
 Node/Bun and Worker now provide proxy/wrap, generated subclasses, callSuper, callback argument retention and loadJar/loadDex. Return-valued and Promise callbacks stay in the owning JS runtime; Java calls can reenter the waiting native thread. Read-only class copies and class loaders are execution-scoped. See [the callback batch](runtime-java-callbacks-2026-10-20.md) for verification, limits and restoration. This does not add synchronous Rhino package globals, automatic function-to-interface conversion, AAR resources or JNI deployment.
+
+
+## 2026-10-20 TTS follow-up
+
+The [TTS delivery](runtime-tts-2026-10-20.md) adds Node/Bun/Worker engine and voice queries, speech, silence, atomic file synthesis and task events through the shared host service. All 31 registered TTS method names have counterparts, with explicit async task handles and isolated client cleanup. AI/flow/mail/EPUB, speech recognition/model management and other specialized modules remain separate audit items. See the delivery report for current verification status; name coverage does not imply inherited Rhino object or prototype parity.

@@ -53,6 +53,7 @@ object BunHostCapabilityGrants {
     const val DEVICE_AUDIO = "device.audio"
     const val DIALOGS_CONTROL = "dialogs.control"
 
+    const val TTS_CONTROL = "tts.control"
     const val JAVA_INTEROP = "java.interop"
     const val ANDROID_OBJECTS = "android.objects"
     const val TASKS_CONTROL = "tasks.control"
@@ -185,6 +186,9 @@ object BunHostCapabilityGrants {
     fun isDialogsControlGranted(context: Context): Boolean = isGranted(context, DIALOGS_CONTROL, false)
     fun setDialogsControlGranted(context: Context, granted: Boolean) = setGranted(context, DIALOGS_CONTROL, granted)
 
+    fun isTtsControlGranted(context: Context): Boolean = isGranted(context, TTS_CONTROL, false)
+    fun setTtsControlGranted(context: Context, granted: Boolean) = setGranted(context, TTS_CONTROL, granted)
+
     fun isJavaInteropGranted(context: Context): Boolean = isGranted(context, JAVA_INTEROP, false)
     fun setJavaInteropGranted(context: Context, granted: Boolean) = setGranted(context, JAVA_INTEROP, granted)
 
@@ -251,6 +255,7 @@ object BunHostCapabilityGrants {
         if (isDevicePowerGranted(context)) add(DEVICE_POWER)
         if (isDeviceAudioGranted(context)) add(DEVICE_AUDIO)
         if (isDialogsControlGranted(context)) add(DIALOGS_CONTROL)
+        if (isTtsControlGranted(context)) add(TTS_CONTROL)
         if (isJavaInteropGranted(context)) add(JAVA_INTEROP)
         if (isAndroidObjectsGranted(context)) add(ANDROID_OBJECTS)
         if (isTasksControlGranted(context)) add(TASKS_CONTROL)
@@ -259,7 +264,7 @@ object BunHostCapabilityGrants {
     }
 
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
-        val supported = setOf(UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
+        val supported = setOf(TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
             SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP)
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }

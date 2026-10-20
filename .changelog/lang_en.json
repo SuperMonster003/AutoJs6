@@ -169,7 +169,8 @@
         "Android object helpers for Node.js, Bun and Workers, including Paint, ColorStateList, theme colors and FileProvider URIs",
         "Persistent calendar and IntentTask APIs for Node.js and Bun, with daily, weekly, monthly, yearly, one-shot, countdown and broadcast tasks",
         "Java/Android object interop for Node.js, Bun and Workers, including public constructors and members, arrays, exact long values, explicit overloads and application Context handles",
-        "Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup"
+        "Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup",
+        "Text-to-speech APIs for Node.js, Bun and Workers, with engine and voice queries, speech, silence, audio file synthesis and task events"
       ],
       "fix": [
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
@@ -316,7 +317,8 @@
         "IntentTask local and external receiver conflicts and stale registrations after updates or removal",
         "FileProvider URI helpers in built applications using the template authority instead of the actual manifest authority",
         "Node.js ESM imports fail when a host module exports a reserved name such as java.new",
-        "Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization"
+        "Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization",
+        "tts.engines lists installed engines even when initialization of the default engine fails"
       ],
       "improvement": [
         "Deferred initialization of noncritical components to improve app startup speed",

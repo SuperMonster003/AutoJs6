@@ -3,6 +3,8 @@ package org.autojs.autojs.runtime.api.augment.tts
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.tts.TtsTask
+import org.autojs.autojs.runtime.api.tts.TtsTaskController
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.ScriptAsyncDispatcher
 import org.autojs.autojs.runtime.api.augment.toJsPromise
@@ -206,7 +208,7 @@ class TtsUtterance internal constructor(
      */
     internal class Controller internal constructor(
         val utterance: TtsUtterance,
-    ) {
+    ) : TtsTaskController {
 
         constructor(
             scriptRuntime: ScriptRuntime,
@@ -226,32 +228,43 @@ class TtsUtterance internal constructor(
             ),
         )
 
-        val id: String
+        override val task = object : TtsTask {
+            override val id get() = utterance.id
+            override val operation get() = utterance.operation
+            override val text get() = utterance.text
+            override val result get() = utterance.result
+            override val state get() = utterance.state
+            override val isDone get() = utterance.isDone
+            override val publicValue get() = utterance
+            override fun stop(): TtsTask { utterance.stop(); return this }
+        }
+
+        override val id: String
             get() = utterance.id
 
-        val isDone: Boolean
+        override val isDone: Boolean
             get() = utterance.isDone
 
-        fun queued(info: Any?): Boolean = utterance.queued(info)
+        override fun queued(info: Any?): Boolean = utterance.queued(info)
 
-        fun start(info: Any?): Boolean = utterance.start(info)
+        override fun start(info: Any?): Boolean = utterance.start(info)
 
-        fun chunk(info: Any?): Boolean = utterance.chunk(info)
+        override fun chunk(info: Any?): Boolean = utterance.chunk(info)
 
-        fun range(info: Any?): Boolean = utterance.range(info)
+        override fun range(info: Any?): Boolean = utterance.range(info)
 
-        fun synthesis(info: Any?): Boolean = utterance.synthesis(info)
+        override fun synthesis(info: Any?): Boolean = utterance.synthesis(info)
 
-        fun audio(info: Any?): Boolean = utterance.audio(info)
+        override fun audio(info: Any?): Boolean = utterance.audio(info)
 
-        fun complete(value: Any?): Boolean = utterance.complete(value)
+        override fun complete(value: Any?): Boolean = utterance.complete(value)
 
-        fun fail(error: Throwable): Boolean = utterance.fail(error)
+        override fun fail(error: Throwable): Boolean = utterance.fail(error)
 
-        fun stop(info: Any?, error: Throwable, cancelled: Boolean): Boolean =
+        override fun stop(info: Any?, error: Throwable, cancelled: Boolean): Boolean =
             utterance.stop(info, error, cancelled)
 
-        fun cancelSilently(): Boolean = utterance.cancelSilently()
+        override fun cancelSilently(): Boolean = utterance.cancelSilently()
     }
 
     companion object {

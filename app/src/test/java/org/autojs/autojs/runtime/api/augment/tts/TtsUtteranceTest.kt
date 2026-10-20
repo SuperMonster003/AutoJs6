@@ -107,6 +107,8 @@ class TtsUtteranceTest {
             val fixture = Fixture()
             val wrapped = Context.javaToJS(fixture.utterance, scope) as Scriptable
             ScriptableObject.putProperty(scope, "utterance", wrapped)
+            assertEquals("boolean", context.evaluateString(scope, "typeof utterance.isDone", "tts-is-done-type", 1, null))
+            assertEquals(false, context.evaluateString(scope, "utterance.isDone", "tts-is-done", 1, null))
 
             context.evaluateString(
                 scope,

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_tts_control_grant">Разрешить озвучивание, запросы к движкам и синтез аудиофайлов.</string>
+    <string name="text_bun_tts_control_grant">Синтез речи Bun</string>
+</resources>

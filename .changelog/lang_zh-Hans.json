@@ -185,7 +185,8 @@
         "Node.js/Bun 的 Android 对象辅助接口及 Worker 封装, 支持 Paint, ColorStateList, 主题色和 FileProvider URI",
         "Node.js/Bun 的持久日历与 IntentTask API, 支持每日, 每周, 每月, 每年, 一次性, 倒计时和广播任务",
         "Node.js/Bun/Worker 的 Java/Android 对象互操作, 支持公开构造器和成员, 数组, 精确 long 值, 显式重载及应用 Context 句柄",
-        "Node.js/Bun/Worker 的 Java 回调代理, 子类生成和 JAR/DEX 加载, 支持 Promise 返回值, 父类调用及执行结束清理"
+        "Node.js/Bun/Worker 的 Java 回调代理, 子类生成和 JAR/DEX 加载, 支持 Promise 返回值, 父类调用及执行结束清理",
+        "Node.js/Bun/Worker 的文字转语音接口, 支持引擎与音色查询, 朗读, 静音任务, 音频文件合成和任务事件"
       ],
       "fix": [
         "runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题",
@@ -344,7 +345,8 @@
         "IntentTask 本地与外部接收器冲突及更新或删除后的注册残留问题",
         "打包应用的 FileProvider URI 辅助接口使用模板标识而非实际清单标识的问题",
         "Node.js 宿主模块包含 java.new 等保留字成员时 ESM 导入失败的问题",
-        "Bun 打包应用隐藏启动页和日志页时, 启动 Activity 过早结束导致冷启动初始化期间进程被系统回收的问题"
+        "Bun 打包应用隐藏启动页和日志页时, 启动 Activity 过早结束导致冷启动初始化期间进程被系统回收的问题",
+        "tts.engines 查询不再依赖默认引擎初始化, 默认引擎不可用时仍可列出其他已安装引擎"
       ],
       "improvement": [
         "延迟初始化非关键组件以提升应用启动速度",

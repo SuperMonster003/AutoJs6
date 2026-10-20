@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_tts_control_grant">읽기, 음성 엔진 조회 및 오디오 파일 합성을 허용합니다.</string>
+    <string name="text_bun_tts_control_grant">Bun 음성 합성</string>
+</resources>

@@ -8,7 +8,6 @@ import org.autojs.autojs.core.tts.TtsTextChunk
 import org.autojs.autojs.core.tts.TtsTextChunker
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.ScriptAsyncDispatcher
 import org.autojs.autojs.runtime.api.augment.tts.TtsUtterance
 import java.util.ArrayDeque
 import java.util.Collections
@@ -21,13 +20,23 @@ import java.util.concurrent.atomic.AtomicReference
 
 internal class TtsService(
     context: Context,
-    private val scriptRuntime: ScriptRuntime,
+    private val client: TtsClient,
     commandScheduler: TtsCommandScheduler? = null,
     backendFactory: TtsBackendFactory? = null,
     private val blockingCallRunner: TtsBlockingCallRunner = AndroidTtsBlockingCallRunner,
     deadlineScheduler: TtsDeadlineScheduler? = null,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
+
+    constructor(
+        context: Context,
+        scriptRuntime: ScriptRuntime,
+        commandScheduler: TtsCommandScheduler? = null,
+        backendFactory: TtsBackendFactory? = null,
+        blockingCallRunner: TtsBlockingCallRunner = AndroidTtsBlockingCallRunner,
+        deadlineScheduler: TtsDeadlineScheduler? = null,
+        clock: () -> Long = System::currentTimeMillis,
+    ) : this(context, RhinoTtsClient(scriptRuntime), commandScheduler, backendFactory, blockingCallRunner, deadlineScheduler, clock)
 
     private val applicationContext = context.applicationContext ?: context
     private val schedulerDelegate = lazy {
@@ -65,7 +74,7 @@ internal class TtsService(
         MAX_PENDING_AUDIO_EVENTS,
         MAX_PENDING_AUDIO_BYTES.toLong(),
     )
-    private val liveUtterances = ConcurrentHashMap<String, TtsUtterance.Controller>()
+    private val liveUtterances = ConcurrentHashMap<String, TtsTaskController>()
     private val liveOutputs = Collections.newSetFromMap(
         ConcurrentHashMap<TtsOutputFile, Boolean>(),
     )
@@ -161,7 +170,14 @@ internal class TtsService(
         options: JsonObject,
         forcedQueueMode: TtsQueueMode? = null,
         selection: TtsSelection? = null,
-    ): TtsUtterance {
+    ): TtsUtterance = speechTask(text, options, forcedQueueMode, selection).publicValue as TtsUtterance
+
+    fun speechTask(
+        text: String,
+        options: JsonObject,
+        forcedQueueMode: TtsQueueMode? = null,
+        selection: TtsSelection? = null,
+    ): TtsTask {
         val merged = TtsOptionsParser.merge(defaults.get(), options, forcedQueueMode)
         val applies = selection != null &&
             (selection !is TtsSelection.PreferredLanguage || (merged.speech.locale == null && merged.speech.voice == null))
@@ -199,7 +215,7 @@ internal class TtsService(
             options = parsed.speech,
             silenceMillis = durationMillis,
         )
-        return if (observable) utterance else utterance.result
+        return if (observable) utterance.publicValue else utterance.result
     }
 
     fun synthesis(
@@ -235,7 +251,7 @@ internal class TtsService(
             discardOutput(output)?.let(error::addSuppressed)
             throw error
         }
-        return if (observable) utterance else utterance.result
+        return if (observable) utterance.publicValue else utterance.result
     }
 
     fun ready(engine: String? = defaults.get().engine): ScriptPromiseAdapter =
@@ -244,9 +260,9 @@ internal class TtsService(
         }
 
     fun engines(engine: String? = null): ScriptPromiseAdapter =
-        query(engine) { current ->
-            current.engines().map { it.toPublicValue() }
-        }
+        query(engine, independent = {
+            TtsEngineDirectory.list(applicationContext, normalizeTtsEngineName(engine)).map { it.toPublicValue() }
+        })
 
     fun voices(
         engine: String? = defaults.get().engine,
@@ -266,7 +282,7 @@ internal class TtsService(
     }
 
     fun languages(engine: String? = defaults.get().engine): ScriptPromiseAdapter =
-        query(engine, TtsBackend::languages)
+        query(engine, operation = TtsBackend::languages)
 
     fun languageAvailability(
         languageTag: String,
@@ -433,7 +449,7 @@ internal class TtsService(
         options: TtsOptions,
         silenceMillis: Long? = null,
         output: TtsOutputFile? = null,
-    ): TtsUtterance {
+    ): TtsTask {
         synchronized(lifecycleLock) {
             requireOpen()
             val characters = text?.length?.toLong() ?: 0L
@@ -444,8 +460,7 @@ internal class TtsService(
                 )
             val id = "tts-${UUID.randomUUID()}"
             val controller = try {
-                TtsUtterance.Controller(
-                    scriptRuntime = scriptRuntime,
+                client.createTask(
                     id = id,
                     operation = operation.value,
                     text = text,
@@ -488,7 +503,7 @@ internal class TtsService(
                 controller.cancelSilently()
                 throw error
             }
-            return controller.utterance
+            return controller.task
         }
     }
 
@@ -1410,7 +1425,8 @@ internal class TtsService(
 
     private fun query(
         requestedEngine: String?,
-        operation: (TtsBackend) -> Any?,
+        independent: (() -> Any?)? = null,
+        operation: (TtsBackend) -> Any? = { null },
     ): ScriptPromiseAdapter {
         synchronized(lifecycleLock) {
             requireOpen()
@@ -1421,7 +1437,7 @@ internal class TtsService(
                 )
             lateinit var pending: PendingResult
             try {
-                pending = PendingResult(scriptRuntime) {
+                pending = PendingResult(client.createResultDispatcher()) {
                     liveQueries.remove(pending)
                     ingressReservation.release()
                 }
@@ -1463,6 +1479,16 @@ internal class TtsService(
                 )
                 scheduler.post {
                     if (pending.isDone) return@post
+                    if (independent != null) {
+                        val accepted = blockingCallRunner.execute {
+                            val result = runCatching(independent)
+                            tryPostCallback {
+                                if (!pending.isDone) result.fold(pending::resolve) { pending.reject(it.toTtsException("QUERY")) }
+                            }
+                        }
+                        if (!accepted) pending.reject(TtsException("NATIVE_BACKPRESSURE", "TTS native-call capacity is exhausted"))
+                        return@post
+                    }
                     val requestedKey = requestedEngine.normalizeEngine()
                     val currentJob = activeJob
                     if (
@@ -1702,7 +1728,7 @@ internal class TtsService(
     }
 
     private data class Job(
-        val controller: TtsUtterance.Controller,
+        val controller: TtsTaskController,
         val operation: Operation,
         val text: String?,
         val chunks: List<TtsTextChunk>,
@@ -1797,12 +1823,11 @@ internal class TtsService(
     )
 
     private class PendingResult(
-        scriptRuntime: ScriptRuntime,
+        private val dispatcher: TtsResultDispatcher,
         private val onTerminal: () -> Unit,
     ) {
 
         val adapter = ScriptPromiseAdapter()
-        private val dispatcher = ScriptAsyncDispatcher(scriptRuntime)
         private val timeoutTask = AtomicReference<TtsScheduledTask?>(null)
         var backendGeneration: Long? = null
 

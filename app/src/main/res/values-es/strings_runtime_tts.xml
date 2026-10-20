@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_tts_control_grant">Permitir lectura, consultas de motores y síntesis de archivos de audio.</string>
+    <string name="text_bun_tts_control_grant">Síntesis de voz de Bun</string>
+</resources>
