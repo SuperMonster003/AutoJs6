@@ -72,3 +72,16 @@ py -3.12 -I tools/augment/inventory_diff.py [--host D:/idea-projects/AutoJs6] [-
 ```
 
 用正则从 `assets/modules/obsolete/__xxx__.js` 收集方法, getter 与对象字面量键, 与 `tools/api-coverage/extract_exports.py` 解析出的 Kotlin 注册名比对, 再用 d.ts 公开声明过滤. 这是启发式的: Java 原型链成员, 子模块 (如 `util.java`), 返回对象的成员与 JS 内部辅助函数都会被列为 "仅 JS", 需要人工核对. 它只用于初筛, 正式的兼容性证据来自 JVM 差分测试与真机表面快照.
+
+## device_bootstrap_check.py: 启动必载对象的真机探针与 smoke (P2.5)
+
+```
+py -3.12 -I tools/augment/device_bootstrap_check.py -s SERIAL --probe [--save FILE] [--compare FILE]
+py -3.12 -I tools/augment/device_bootstrap_check.py -s SERIAL --smoke coroutine images automator ui [--wait 60] [--ui-wait 180]
+```
+
+`--probe` 运行 `bench/bootstrap_probe.js`, 逐项打印 ROADMAP P2.5 收编的对象 (`__exitIfError__`, `__asGlobal__`, `continuation.await` / `delay`, `ResultAdapter`) 与首次访问时安装的 polyfill (`Object.observe` / `Array.observe` / `structuredClone`) 的表面与行为; 前几项在读取任何 polyfill 名称之前记录数组方法与键顺序. `--save` 把结果写入 JSON, `--compare` 列出与保存的一次运行 (如改动前的构建) 不同的项.
+
+`--smoke` 运行 `bench/bootstrap_smoke/`: `coroutine` 与 `ui` 是启用 continuation 特性的项目, 经 `ProjectLauncher` 按应用运行项目的方式启动 (`project.json` 的 `useFeatures` 生效); `ui` 显示 `dialogs.confirm` 并等待在手机上点按 (`--ui-wait` 秒), 需要维护者操作; `images` 运行 `images.loadAsync` (经 `ResultAdapter.promise`); `automator` 运行 `automator.captureScreen` (经 `ResultAdapter.wait`, 需要 AutoJs6 无障碍服务与 Android 11+, 服务未开启时跳过). 只打印带标记的控制台行. 设备上的临时目录 `/sdcard/Download/aj6-augment-bench/p25` 用完即删.
+
+`device_bench.py --calls bootstrap` (`bench/calls/bootstrap.js`) 计时数组 push / pop 与 splice (在读取 observe 名称之前与之后各一次), `__exitIfError__`, `structuredClone` 与 `ResultAdapter.promise`.

@@ -1,0 +1,8 @@
+{
+  "name": "aj6-p25-ui",
+  "main": "main.js",
+  "packageName": "org.autojs.autojs6.p25.ui",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "useFeatures": ["continuation"]
+}
