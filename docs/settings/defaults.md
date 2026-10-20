@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; 人工补充的来源写在 `tools/settings/classification.json` 的 `extraDefaults`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.4, 红线 R2).
 
-- 生成日期: 2026-10-20, 扫描基线: `master@665c35482`
+- 生成日期: 2026-10-20, 扫描基线: `master@124f826d5`
 - 来源形式: `R.bool` / `R.integer` / `R.string` (含 `default_key_*` 别名) / 伴生常量 / 调用处字面量 / XML 字面量 (设置页 `app:defaultValue`); "表达式" 表示运行时计算, 取值列写明依据.
 - 自动提取规则: `getBoolean` / `getInt` / `getLong` / `getFloat` / `getString` / `getStringSet` 等调用的第一个参数解析为键 (`R.string.key_*`, 常量或局部变量), 第二个参数经资源, 常量与局部变量求值; 设置页的 `app:defaultValue` 与 `app:itemDefaultKey` 单独成行. 人工补充行标 "(人工)".
 - 范围: kind 为 Setting 的 `key_*` 键与默认偏好中的字面量键; 命名存储整份作为条目, 其内部默认值不在本表.
@@ -118,7 +118,6 @@
 | `key_enable_a11y_service_with_secure_settings` | Boolean | R.bool | `app:defaultValue="@bool/pref_enable_a11y_service_with_secure_settings"` | `true` | res/xml/fragment_preferences.xml:224 |  |
 | `key_enable_a11y_service_with_shizuku` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_enable_a11y_service_with_shizuku)` | `true` | core/pref/Pref.kt:327 |  |
 | `key_enable_a11y_service_with_shizuku` | Boolean | R.bool | `app:defaultValue="@bool/pref_enable_a11y_service_with_shizuku"` | `true` | res/xml/fragment_preferences.xml:231 |  |
-| `key_enable_observe_key` | Boolean | 表达式 (人工) | `(无)` | `无读写方` |  | 源码与资源均无引用 (Q12) |
 | `key_explorer_file_default_prefix` | Int | 调用处字面量 | `0` | `0` | ui/common/ScriptOperations.java:166 |  |
 | `key_explorer_file_default_prefix` | Int | 调用处字面量 | `0` | `0` | ui/common/ScriptOperations.java:205 |  |
 | `key_explorer_playback_history` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_explorer_playback_history)` | `false` | core/pref/Pref.kt:247 |  |
@@ -132,6 +131,8 @@
 | `key_file_extensions` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_file_extensions"` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | res/xml/fragment_preferences.xml:118 |  |
 | `key_floating_console_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
 | `key_floating_console_time_visible` | Boolean | 伴生常量 (人工) | `FLOATING_WINDOW(..., false)` | `false` | core/console/ConsoleTimeSettings.kt:17 |  |
+| `key_foreground_service` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(prefKey, false)` | `false` | ui/main/drawer/DrawerMenuToggleableItem.kt:258 | 抽屉 "前台服务" 开关 (prefKey = R.string.key_foreground_service) |
+| `key_foreground_service` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(resolvePreferenceKey(it), false)` | `false` | runtime/api/augment/settings/Settings.kt:50 | 脚本 API settings.isEnabled |
 | `key_gesture_observing` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_gesture_observing)` | `false` | core/pref/Pref.kt:228 |  |
 | `key_global_console_element_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
 | `key_global_console_element_time_visible` | Boolean | 伴生常量 (人工) | `GLOBAL_CONSOLE_ELEMENT(..., false)` | `false` | core/console/ConsoleTimeSettings.kt:15 |  |

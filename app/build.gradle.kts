@@ -843,6 +843,9 @@ dependencies /* Test */ {
     // BKS keystores in JVM tests need a provider named "BC" (Android ships one, the desktop JDK does not).
     // zh-CN: JVM 测试中的 BKS 密钥库需要名为 "BC" 的 provider (Android 自带, 桌面 JDK 没有).
     testImplementation(libs.bcprov.jdk15on)
+    // A real org.json for JVM tests (android.jar only has stubs that throw "Stub!"); the APK keeps the Android one (docs/settings/ROADMAP.md Q14).
+    // zh-CN: JVM 测试用的真实 org.json (android.jar 中只有抛出 "Stub!" 的桩); APK 仍用 Android 自带的实现 (docs/settings/ROADMAP.md Q14).
+    testImplementation(libs.org.json)
     androidTestImplementation(libs.bcpkix.jdk15on)
     androidTestImplementation(libs.test.runner)
     androidTestImplementation(libs.test.ext.junit)

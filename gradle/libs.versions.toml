@@ -59,6 +59,7 @@ licensesdialog = "2.2.0"
 lifecycle = "2.9.4"
 material = "1.13.0"
 materialprogressbar = "1.6.1"
+org-json = "20231013"
 paho-android-service = "1.1.1"
 paho-client-mqttv3 = "1.2.5"
 preference-ktx = "1.2.1"
@@ -134,6 +135,7 @@ localbroadcastmanager = { module = "androidx.localbroadcastmanager:localbroadcas
 material = { module = "com.google.android.material:material", version.ref = "material" }
 materialprogressbar = { module = "me.zhanghai.android.materialprogressbar:library", version.ref = "materialprogressbar" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+org-json = { module = "org.json:json", version.ref = "org-json" }
 paho-android-service = { module = "org.eclipse.paho:org.eclipse.paho.android.service", version.ref = "paho-android-service" }
 paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "paho-client-mqttv3" }
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preference-ktx" }

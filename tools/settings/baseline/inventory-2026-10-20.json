@@ -2,7 +2,7 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-20",
  "git": {
-  "commit": "665c35482",
+  "commit": "124f826d5",
   "branch": "master",
   "dirtyScannedFiles": 0
  },
@@ -1548,7 +1548,7 @@
     }
    ],
    "kind": "Excluded",
-   "note": "inrt 设置页的权限开关, 反映系统授权状态"
+   "note": "inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板)"
   },
   {
    "name": "key_app_language",
@@ -2165,7 +2165,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "ColorLibrariesActivity / ColorSelectActivity 打开前写入的界面模式, 不是用户设置 (Q13)"
+   "note": "ColorLibrariesActivity / ColorSelectActivity 打开前写入的界面模式, 不是用户设置 (Q13 (b) 已拍板, P4.2)"
   },
   {
    "name": "key_console_element_time_format",
@@ -2320,7 +2320,7 @@
     }
    ],
    "kind": "Excluded",
-   "note": "inrt 设置页的权限开关, 反映系统授权状态"
+   "note": "inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板)"
   },
   {
    "name": "key_documentation_source",
@@ -3666,9 +3666,9 @@
    "value": "key_$_enable_observe_key",
    "file": "strings_donottranslate.xml",
    "line": 216,
-   "kind": "Setting",
-   "category": "a11y",
-   "note": "按 ROADMAP 附录 A 归 a11y (按键观察), 但源码与资源均无读写方 (Q12)"
+   "kind": "State",
+   "category": "other",
+   "note": "按键观察, 源码与资源均无读写方, 不作为可导入设置 (Q12 已拍板)"
   },
   {
    "name": "key_explorer_file_default_prefix",
@@ -3933,9 +3933,10 @@
      "line": 12
     }
    ],
-   "kind": "State",
-   "category": "other",
-   "note": "主应用中是抽屉 \"前台服务\" 开关的镜像; 脚本 API settings 与 inrt 把它当设置读写 (Q13)"
+   "kind": "Setting",
+   "category": "general",
+   "note": "抽屉 \"前台服务\" 开关, 脚本 API settings 与 inrt 也读写; 导入后按值启动或停止前台服务 (Q13 (d) 已拍板, T12)",
+   "effect": "APPLY"
   },
   {
    "name": "key_gesture_observing",
@@ -4838,7 +4839,7 @@
     }
    ],
    "kind": "Excluded",
-   "note": "inrt 设置页的权限开关, 反映系统授权状态"
+   "note": "inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板)"
   },
   {
    "name": "key_log_activity_input_bar_visible",
@@ -5296,7 +5297,7 @@
     }
    ],
    "kind": "Excluded",
-   "note": "inrt 运行配置 (打包时由 launchConfig 写入); 主应用只经脚本 API settings 读写, 无消费方"
+   "note": "inrt 运行配置 (打包时由 launchConfig 写入); 主应用只经脚本 API settings 读写, 无消费方 (附录 A.2, Q13 已拍板)"
   },
   {
    "name": "key_pc_server_address_history",
@@ -5453,7 +5454,7 @@
     }
    ],
    "kind": "Excluded",
-   "note": "inrt 设置页的权限开关, 反映系统授权状态"
+   "note": "inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板)"
   },
   {
    "name": "key_post_notifications_permission_request_attempted",
@@ -5897,7 +5898,7 @@
     }
    ],
    "kind": "Excluded",
-   "note": "inrt 运行配置 (打包时由 launchConfig 写入)"
+   "note": "inrt 运行配置 (打包时由 launchConfig 写入; 附录 A.2, Q13 已拍板)"
   },
   {
    "name": "key_scheduled_restart_backend",
@@ -6107,7 +6108,7 @@
     }
    ],
    "kind": "Excluded",
-   "note": "重启前写入, 重启后由 runAfterRestartIfNeeded 消费的一次性交接值 (同附录 A.2 的运行时状态)"
+   "note": "重启前写入, 重启后由 runAfterRestartIfNeeded 消费的一次性交接值 (附录 A.2, Q13 已拍板)"
   },
   {
    "name": "key_server_address",
@@ -6756,7 +6757,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13)"
+   "note": "VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13 (a) 已拍板, P4.1)"
   },
   {
    "name": "key_working_directory",
@@ -7086,7 +7087,7 @@
     "default"
    ],
    "kind": "Excluded",
-   "note": "已移除的宿主终端的旧键, TerminalLegacyCleanup 每次启动删除",
+   "note": "已移除的宿主终端的旧键, TerminalLegacyCleanup 每次启动删除 (附录 A.2, Q13 已拍板)",
    "store": "default"
   },
   {
@@ -7783,7 +7784,7 @@
    ],
    "kind": "Setting",
    "category": "plugin_center",
-   "note": "PluginUpdateCheckStore 每个插件的 \"检查更新\" 开关, 是用户设置 (ROADMAP P4.2 列为状态, 见 Q13)",
+   "note": "PluginUpdateCheckStore 每个插件的 \"检查更新\" 开关, 是用户设置 (Q13 (c) 已拍板, P3.1)",
    "store": "default"
   },
   {
@@ -7884,7 +7885,7 @@
     "default"
    ],
    "kind": "Excluded",
-   "note": "已移除的宿主终端的旧键前缀, TerminalLegacyCleanup 每次启动删除",
+   "note": "已移除的宿主终端的旧键前缀, TerminalLegacyCleanup 每次启动删除 (附录 A.2, Q13 已拍板)",
    "store": "default"
   },
   {
@@ -8200,7 +8201,7 @@
     "engine/NodeBridgeProtocol.kt"
    ],
    "kind": "Excluded",
-   "note": "Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2 补登, Q13)"
+   "note": "Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板)"
   },
   {
    "name": "build_apk_config_profiles",
@@ -11906,6 +11907,28 @@
     "type": "Json (Gson LinkedHashSet)"
    }
   ],
+  "key_foreground_service": [
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "Pref.getBoolean(prefKey, false)",
+    "value": "false",
+    "file": "ui/main/drawer/DrawerMenuToggleableItem.kt",
+    "line": 258,
+    "note": "抽屉 \"前台服务\" 开关 (prefKey = R.string.key_foreground_service)",
+    "manual": true
+   },
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
+    "value": "false",
+    "file": "runtime/api/augment/settings/Settings.kt",
+    "line": 50,
+    "note": "脚本 API settings.isEnabled",
+    "manual": true
+   }
+  ],
   "key_codegen_model_current": [
    {
     "form": "调用处字面量",
@@ -11970,17 +11993,6 @@
     "value": "true",
     "file": "core/console/ConsoleTimeSettings.kt",
     "line": 13,
-    "manual": true
-   }
-  ],
-  "key_enable_observe_key": [
-   {
-    "form": "表达式",
-    "type": "Boolean",
-    "expr": "(无)",
-    "value": "无读写方",
-    "ignoreForConflict": true,
-    "note": "源码与资源均无引用 (Q12)",
     "manual": true
    }
   ],
@@ -12181,7 +12193,7 @@
    "stores": 0
   },
   "general": {
-   "keys": 5,
+   "keys": 6,
    "literalKeys": 0,
    "stores": 0
   },
@@ -12246,7 +12258,7 @@
    "stores": 0
   },
   "a11y": {
-   "keys": 6,
+   "keys": 5,
    "literalKeys": 0,
    "stores": 0
   },
