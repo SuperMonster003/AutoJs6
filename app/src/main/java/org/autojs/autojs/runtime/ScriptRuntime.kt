@@ -136,7 +136,6 @@ import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs.util.RhinoUtils.isMainThread
-import org.autojs.autojs.util.RhinoUtils.js_object_assign
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.SdkVersionUtils
 import org.autojs.autojs.util.StringUtils
@@ -201,6 +200,10 @@ import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
 import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCodes
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
+import org.autojs.autojs.runtime.api.modules.bootstrap.ContinuationPrototype
+import org.autojs.autojs.runtime.api.modules.bootstrap.InternalGlobals
+import org.autojs.autojs.runtime.api.modules.bootstrap.ResultAdapterFunction
+import org.autojs.autojs.runtime.api.modules.bootstrap.ScriptPolyfills
 import org.autojs.autojs.script.JavaScriptSource
 
 /**
@@ -482,7 +485,14 @@ class ScriptRuntime private constructor(builder: Builder) {
      */
     internal val js_Promise by lazy { rhinoRequire("promise") as BaseFunction }
 
-    internal val js_ResultAdapter by lazy { rhinoRequire("result-adapter") as BaseFunction }
+    /**
+     * The global `ResultAdapter`, in Kotlin since roadmap P2.5 (formerly `assets/modules/result-adapter.js`); the name stays
+     * for its callers in the augment package (unchanged until P5.2, R5). As the module was, it is created on first use (in
+     * `RhinoJavaScriptEngine.init`), and the thread it is created on chooses the variant.
+     * zh-CN: 全局 `ResultAdapter`, ROADMAP P2.5 起为 Kotlin 实现 (原 `assets/modules/result-adapter.js`); 名称因 augment 包中的调用方保留 (P5.2 前不改, R5).
+     * 与原模块相同, 首次使用时 (在 `RhinoJavaScriptEngine.init` 中) 创建, 由创建时所在的线程选定变体.
+     */
+    internal val js_ResultAdapter: BaseFunction by lazy { ResultAdapterFunction(topLevelScope, topLevelScope.globalThis, isMainThread()) }
     internal val js_UiExt by lazy { rhinoRequire("ui-ext") as BaseFunction }
     internal val js_Module by lazy { rhinoRequire("jvm-npm") as ScriptableObject }
 
@@ -492,12 +502,12 @@ class ScriptRuntime private constructor(builder: Builder) {
     internal val js_mod_i18n by lazy { rhinoRequire("i18n") as BaseFunction }
     internal val js_mod_pangu by lazy { rhinoRequire("pangu") as ScriptableObject }
 
-    internal val js_mod_continuation by lazy { rhinoRequire("continuation") as ScriptableObject }
-    internal val js_mod_internal by lazy { rhinoRequire("internal") as ScriptableObject }
-
-    internal val js_object_observe_lite_min by lazy { rhinoRequire("object-observe-lite.min") as BaseFunction }
-    internal val js_array_observe_min by lazy { rhinoRequire("array-observe.min") as BaseFunction }
-    internal val js_structured_clone by lazy { rhinoRequire("structured-clone.min") as BaseFunction }
+    /**
+     * The prototype of the `continuation` module object with `await` / `delay`, in Kotlin since roadmap P2.5 (formerly
+     * `assets/modules/continuation.js`).
+     * zh-CN: `continuation` 模块对象的原型 (含 await / delay), ROADMAP P2.5 起为 Kotlin 实现 (原 `assets/modules/continuation.js`).
+     */
+    internal val js_mod_continuation: ScriptableObject by lazy { ContinuationPrototype.create(topLevelScope) }
 
     init {
         info = accessibilityBridge.infoProvider
@@ -552,13 +562,13 @@ class ScriptRuntime private constructor(builder: Builder) {
     }
 
     fun initEpilogue() {
-        // @OrderMatters by SuperMonster003 on Jul 24, 2024.
-        //  ! "object observe" must be ahead of "array observe".
-        //  ! zh-CN: "object observe" 需要先于 "array observe".
-        callFunction(this, js_object_observe_lite_min, topLevelScope, topLevelScope.globalThis, arrayOf(topLevelScope.globalThis))
-        callFunction(this, js_array_observe_min, topLevelScope, topLevelScope.globalThis, arrayOf(topLevelScope.globalThis))
-
-        callFunction(this, js_structured_clone, topLevelScope, topLevelScope.globalThis, arrayOf(topLevelScope.globalThis))
+        // Roadmap P2.5: the polyfills Object.observe (with "array observe" after "object observe") and structuredClone are
+        // installed on first access, from lazy data properties where their modules put them, instead of for every script.
+        // zh-CN: ROADMAP P2.5: polyfill Object.observe ("array observe" 在 "object observe" 之后) 与 structuredClone 改为首次访问时安装,
+        // 惰性数据属性定义在原模块赋值的位置, 不再为每个脚本执行.
+        ScriptPolyfills(topLevelScope, topLevelScope.globalThis, ::rhinoRequire) { function, thisObj, args ->
+            callFunction(this, function, topLevelScope, thisObj, args)
+        }.install()
 
         if (Pref.isExtendingJsBuildInObjectsEnabled) extendJsBuiltIns()
 
@@ -1155,8 +1165,9 @@ class ScriptRuntime private constructor(builder: Builder) {
         }
     }
 
-    private fun applyInternalModules(global: Scriptable) {
-        js_object_assign(global, js_mod_internal)
+    /** `__exitIfError__` and `__asGlobal__`, in Kotlin since roadmap P2.5 (formerly `assets/modules/internal.js`). */
+    private fun applyInternalModules(global: ScriptableObject) {
+        InternalGlobals.install(topLevelScope, global)
     }
 
     private fun rhinoRequire(id: String): Any? {

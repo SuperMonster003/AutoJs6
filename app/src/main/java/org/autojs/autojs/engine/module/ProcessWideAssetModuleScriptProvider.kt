@@ -124,14 +124,9 @@ class ProcessWideAssetModuleScriptProvider internal constructor(
 
         private const val JAVASCRIPT_EXTENSION = ".js"
         private val URI_SCHEME = Regex("^[A-Za-z][A-Za-z0-9+.-]*:")
+        // The modules every script loads (roadmap P2.5 left promise and jvm-npm; the polyfills now load on first access).
         private val STRONGLY_CACHED_MODULES = setOf(
             "promise.js",
-            "result-adapter.js",
-            "continuation.js",
-            "internal.js",
-            "object-observe-lite.min.js",
-            "array-observe.min.js",
-            "structured-clone.min.js",
             "jvm-npm.js",
         )
 
