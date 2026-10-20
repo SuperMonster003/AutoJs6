@@ -15,6 +15,7 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
 import org.autojs.autojs.app.CircularMenuOperationDialogBuilder;
+import org.autojs.autojs.core.pref.keys.RecordKeys;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.app.tool.PointerLocationTool;
 import org.autojs.autojs.core.accessibility.AccessibilityTool;
@@ -432,7 +433,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     }
 
     private void onVolumeDownForRecord() {
-        if (!Pref.isUseVolumeControlRecordEnabled() || mState == STATE_CLOSED) {
+        if (!RecordKeys.USE_VOLUME_CONTROL_RECORD.get() || mState == STATE_CLOSED) {
             return;
         }
         Runnable toggleTask = () -> {

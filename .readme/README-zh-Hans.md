@@ -427,6 +427,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` automator 全局操作首次调用时可能出现空指针异常, 以及手势纵坐标缩放错误的问题
 * `修复` 无障碍服务在连续执行 back 等操作时可能意外中断的问题 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修复` Node.js 脚本 accessibility.ensureEnabled 方法在无障碍服务已启用但未能及时绑定时报告桥接调用超时而不是返回 false 的问题
+* `修复` settings.isEnabled 方法读取从未修改过的 Root 自动启用无障碍服务与音量键控制脚本运行两项设置时返回 false, 与设置页显示的默认开启状态不一致的问题
 * `修复` 通知观察器将系统通知误报为消息浮动框并遗漏通知事件的问题
 * `修复` Android 14+ 申请屏幕捕获权限时可能因前台服务启动异常导致应用崩溃的问题 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修复` 多线程或跨文件重复调用 OCR 时可能反复申请屏幕捕获权限的问题 _[`issue #551`](http://issues.autojs6.com/551)_

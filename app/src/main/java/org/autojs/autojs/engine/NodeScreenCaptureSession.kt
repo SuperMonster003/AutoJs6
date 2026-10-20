@@ -10,7 +10,7 @@ import android.os.SystemClock
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
 import org.autojs.autojs.core.image.capture.ScreenCapturer
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.json.JSONObject
 import java.util.UUID
@@ -100,7 +100,7 @@ internal class NodeScreenCaptureSession(
                                 ), main)
                                 capturer = capture
                                 id = "screen-${UUID.randomUUID()}"
-                                readyAt = SystemClock.uptimeMillis() + Pref.screenCaptureRequestDelay.coerceIn(0, 2000)
+                                readyAt = SystemClock.uptimeMillis() + RunningKeys.screenCaptureRequestDelay.coerceIn(0, 2000)
                                 capture.setOnMediaProjectionStopListener {
                                     synchronized(lock) {
                                         if (capturer === capture) {

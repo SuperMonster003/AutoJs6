@@ -2,7 +2,7 @@ package org.autojs.autojs.util;
 
 import androidx.annotation.NonNull;
 import com.stericson.RootShell.RootShell;
-import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.core.pref.keys.RunningKeys;
 import org.autojs.autojs6.R;
 
 import java.io.File;
@@ -34,7 +34,7 @@ public class RootUtils {
 
     public static void setRootMode(RootMode mode, boolean isWriteInfoPreference) {
         if (isWriteInfoPreference) {
-            Pref.setRootMode(mode);
+            RunningKeys.setRootMode(mode);
         } else {
             runtimeOverriddenRootMode = mode.key;
         }
@@ -46,7 +46,7 @@ public class RootUtils {
 
     public static RootMode getRootMode() {
         if (runtimeOverriddenRootMode.equals(RootMode.AUTO_DETECT.key)) {
-            return Pref.getRootMode();
+            return RunningKeys.getRootMode();
         }
         return RootMode.getRootMode(runtimeOverriddenRootMode);
     }

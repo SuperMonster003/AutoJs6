@@ -24,6 +24,8 @@ import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceDiagnostics.R
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceSelfCheck
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateListener
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.SettingKey
+import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.permission.WriteSecureSettingsPermission
 import org.autojs.autojs.permission.ShizukuPermission
 import org.autojs.autojs.runtime.api.WrappedShizuku
@@ -184,22 +186,19 @@ class A11yServiceManagerDialog private constructor(
         createSwitchRow(
             R.string.text_enable_a11y_service_with_root_access_automatically,
             R.string.summary_enable_a11y_service_with_root_access,
-            R.string.key_enable_a11y_service_with_root_access,
-            R.bool.pref_enable_a11y_service_with_root_access,
+            A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS,
         )
         createSwitchRow(
             R.string.text_enable_a11y_service_with_secure_settings_automatically,
             R.string.summary_enable_a11y_service_with_secure_settings,
-            R.string.key_enable_a11y_service_with_secure_settings,
-            R.bool.pref_enable_a11y_service_with_secure_settings,
+            A11yKeys.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS,
         )
         createSwitchRow(
             R.string.text_enable_a11y_service_with_shizuku_automatically,
             R.string.summary_enable_a11y_service_with_shizuku,
-            R.string.key_enable_a11y_service_with_shizuku,
-            R.bool.pref_enable_a11y_service_with_shizuku,
+            A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU,
         )
-        createSwitchRow(R.string.text_stable_mode, R.string.summary_stable_mode, R.string.key_stable_mode, R.bool.pref_stable_mode)
+        createSwitchRow(R.string.text_stable_mode, R.string.summary_stable_mode, A11yKeys.STABLE_MODE)
 
         dialog = MaterialDialog.Builder(context)
             .title(R.string.text_a11y_service_manager)
@@ -395,12 +394,12 @@ class A11yServiceManagerDialog private constructor(
         }
     }
 
-    private fun createSwitchRow(@StringRes titleRes: Int, @StringRes summaryRes: Int, @StringRes keyRes: Int, defaultRes: Int) {
+    private fun createSwitchRow(@StringRes titleRes: Int, @StringRes summaryRes: Int, key: SettingKey.Bool) {
         A11yServiceManagerSwitchItemBinding.inflate(inflater, binding.settingsContainer, true).apply {
             title.setText(titleRes)
             subtitle.setText(summaryRes)
-            sw.setPrefKey(context.getString(keyRes), context.resources.getBoolean(defaultRes))
-            if (keyRes == R.string.key_stable_mode) {
+            sw.setPrefKey(key.name, key.defaultOrNull() ?: false)
+            if (key === A11yKeys.STABLE_MODE) {
                 sw.setOnCheckedChangeListener { _, _ -> refresh() }
             }
             root.setOnClickListener { sw.toggle() }
@@ -425,7 +424,7 @@ class A11yServiceManagerDialog private constructor(
     }
 
     private fun setStableMode(enabled: Boolean) {
-        Pref.putBoolean(R.string.key_stable_mode, enabled)
+        A11yKeys.STABLE_MODE.set(enabled)
         refresh()
     }
 

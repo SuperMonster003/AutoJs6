@@ -16,7 +16,7 @@ import org.autojs.autojs.core.accessibility.node.default
 import org.autojs.autojs.core.accessibility.node.release
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.util.SettingsUtils
 import org.autojs.autojs6.BuildConfig
@@ -163,20 +163,20 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
         )
 
         add(
-            Field.ROOT_ACCESS, "${enabledText(Pref.shouldStartA11yServiceWithRoot())} | " + when (probes.rootAvailable) {
+            Field.ROOT_ACCESS, "${enabledText(A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS.get())} | " + when (probes.rootAvailable) {
                 true -> string(R.string.text_available)
                 false -> unavailable
                 null -> string(R.string.text_unknown)
             },
         )
         add(
-            Field.WRITE_SECURE_SETTINGS, "${enabledText(Pref.shouldStartA11yServiceWithSecureSettings())} | " + when {
+            Field.WRITE_SECURE_SETTINGS, "${enabledText(A11yKeys.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS.get())} | " + when {
                 SettingsUtils.SecureSettings.isGranted(context) -> string(R.string.text_granted)
                 else -> string(R.string.text_not_granted)
             },
         )
         add(
-            Field.SHIZUKU, "${enabledText(Pref.shouldStartA11yServiceWithShizuku())} | " + when {
+            Field.SHIZUKU, "${enabledText(A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU.get())} | " + when {
                 !WrappedShizuku.isInstalled(context) -> string(R.string.text_not_installed)
                 !WrappedShizuku.isRunning() -> string(R.string.text_not_running)
                 !WrappedShizuku.hasPermission() -> string(R.string.text_not_granted)
@@ -190,7 +190,7 @@ class A11yServiceDiagnostics(private val context: Context, private val tool: Acc
                     " | observer ${AccessibilityService.eventObserverCount}",
         )
         probes.selfCheck?.let { add(Field.SELF_CHECK, it) }
-        add(Field.STABLE_MODE, enabledText(Pref.isStableModeEnabled))
+        add(Field.STABLE_MODE, enabledText(A11yKeys.STABLE_MODE.get()))
 
         return Report(status, header(), string(R.string.text_label_state), entries)
     }

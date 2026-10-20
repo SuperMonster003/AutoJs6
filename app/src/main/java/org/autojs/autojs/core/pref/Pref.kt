@@ -11,10 +11,15 @@ import org.autojs.autojs.App.Companion.app
 import org.autojs.autojs.annotation.KeyRes
 import org.autojs.autojs.annotation.ScriptInterfaceCompatible
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
+import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
+import org.autojs.autojs.core.pref.keys.RecordKeys
+import org.autojs.autojs.core.pref.keys.RunningKeys
+import org.autojs.autojs.core.pref.keys.UpdatesKeys
 import org.autojs.autojs.core.pref.store.SettingsStore
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.SharedPreferencesStore
@@ -74,16 +79,9 @@ object Pref {
     fun get(): SharedPreferences = sPref
 
     @JvmStatic
+    @Deprecated("Use RunningKeys.screenCaptureRequestDelay (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RunningKeys.screenCaptureRequestDelay", "org.autojs.autojs.core.pref.keys.RunningKeys"))
     val screenCaptureRequestDelay: Int
-        get() {
-            // Default 350ms is a practical value for most ROMs' permission dialog fade-out animation.
-            // zh-CN: 默认 350ms 通常可覆盖多数 ROM 授权弹窗的渐隐动画时间.
-            val defValue = resources.getInteger(R.integer.screen_capture_request_delay_default_value)
-            val minValue = resources.getInteger(R.integer.screen_capture_request_delay_min_value)
-            val maxValue = resources.getInteger(R.integer.screen_capture_request_delay_max_value)
-            val value = getInt(R.string.key_screen_capture_request_delay, defValue)
-            return value.coerceIn(minValue, maxValue)
-        }
+        get() = RunningKeys.screenCaptureRequestDelay
 
     @JvmStatic
     @Deprecated("Use EditorKeys.codeHighlightThresholdChars (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.codeHighlightThresholdChars", "org.autojs.autojs.core.pref.keys.EditorKeys"))
@@ -104,11 +102,9 @@ object Pref {
     fun shouldEnableLargeFileModeForSize(size: Long): Boolean = EditorKeys.shouldEnableLargeFileModeForSize(size)
 
     @JvmStatic
+    @Deprecated("Use ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS (docs/settings/ROADMAP.md P2.4)", ReplaceWith("ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS.get()", "org.autojs.autojs.core.pref.keys.ExtensibilityKeys"))
     val isExtendingJsBuildInObjectsEnabled
-        get() = getBoolean(
-            R.string.key_extending_js_build_in_objects,
-            resources.getBoolean(R.bool.pref_extending_js_build_in_objects),
-        )
+        get() = ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS.get()
 
     /**
      * Switch of the Augment refactor (docs/augment/ROADMAP.md T8), off by default, in the developer options (P1.3): scripts
@@ -135,32 +131,24 @@ object Pref {
         set(value) = putStringSet(R.string.key_script_module_debug_print_disabled_modules, value.toMutableSet())
 
     @JvmStatic
+    @Deprecated("Use RunningKeys.GUARD_MODE (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RunningKeys.GUARD_MODE.get()", "org.autojs.autojs.core.pref.keys.RunningKeys"))
     val isGuardModeEnabled
-        get() = getBoolean(
-            R.string.key_guard_mode,
-            resources.getBoolean(R.bool.pref_guard_mode)
-        )
+        get() = RunningKeys.GUARD_MODE.get()
 
     @JvmStatic
+    @Deprecated("Use RunningKeys.USE_VOLUME_CONTROL_RUNNING (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RunningKeys.USE_VOLUME_CONTROL_RUNNING.get()", "org.autojs.autojs.core.pref.keys.RunningKeys"))
     val isUseVolumeControlRunningEnabled
-        get() = getBoolean(
-            R.string.key_use_volume_control_running,
-            resources.getBoolean(R.bool.pref_use_volume_control_running),
-        )
+        get() = RunningKeys.USE_VOLUME_CONTROL_RUNNING.get()
 
     @JvmStatic
+    @Deprecated("Use RecordKeys.USE_VOLUME_CONTROL_RECORD (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RecordKeys.USE_VOLUME_CONTROL_RECORD.get()", "org.autojs.autojs.core.pref.keys.RecordKeys"))
     val isUseVolumeControlRecordEnabled
-        get() = getBoolean(
-            R.string.key_use_volume_control_record,
-            resources.getBoolean(R.bool.pref_use_volume_control_record),
-        )
+        get() = RecordKeys.USE_VOLUME_CONTROL_RECORD.get()
 
     @JvmStatic
+    @Deprecated("Use UpdatesKeys.AUTO_CHECK_FOR_UPDATES (docs/settings/ROADMAP.md P2.4)", ReplaceWith("UpdatesKeys.AUTO_CHECK_FOR_UPDATES.get()", "org.autojs.autojs.core.pref.keys.UpdatesKeys"))
     val isAutoCheckForUpdatesEnabled
-        get() = getBoolean(
-            R.string.key_auto_check_for_updates,
-            resources.getBoolean(R.bool.pref_auto_check_for_updates),
-        )
+        get() = UpdatesKeys.AUTO_CHECK_FOR_UPDATES.get()
 
     private val lastUpdatesCheckedTimestamp: Long
         get() = getTimestamp(R.string.key_last_updates_checked)
@@ -195,26 +183,20 @@ object Pref {
         get() = AppearanceKeys.keepScreenOnWhenInForegroundKey
 
     @JvmStatic
+    @Deprecated("Use RunningKeys.rootMode (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RunningKeys.rootMode", "org.autojs.autojs.core.pref.keys.RunningKeys"))
     var rootMode: RootUtils.RootMode
-        get() {
-            val key = getString(R.string.key_root_mode, RootUtils.RootMode.AUTO_DETECT.key)
-            return RootUtils.RootMode.getRootMode(key)
-        }
+        get() = RunningKeys.rootMode
         set(mode) {
-            putString(key(R.string.key_root_mode), mode.key)
+            RunningKeys.rootMode = mode
         }
 
+    @Deprecated("Use A11yKeys.STABLE_MODE (docs/settings/ROADMAP.md P2.4)", ReplaceWith("A11yKeys.STABLE_MODE.get()", "org.autojs.autojs.core.pref.keys.A11yKeys"))
     val isStableModeEnabled
-        get() = getBoolean(
-            R.string.key_stable_mode,
-            resources.getBoolean(R.bool.pref_stable_mode)
-        )
+        get() = A11yKeys.STABLE_MODE.get()
 
+    @Deprecated("Use A11yKeys.GESTURE_OBSERVING (docs/settings/ROADMAP.md P2.4)", ReplaceWith("A11yKeys.GESTURE_OBSERVING.get()", "org.autojs.autojs.core.pref.keys.A11yKeys"))
     val isGestureObservingEnabled
-        get() = getBoolean(
-            R.string.key_gesture_observing,
-            resources.getBoolean(R.bool.pref_gesture_observing)
-        )
+        get() = A11yKeys.GESTURE_OBSERVING.get()
 
     @JvmStatic
     @Deprecated("Use GeneralKeys.isQuickRestartEnabled (docs/settings/ROADMAP.md P2.1)", ReplaceWith("GeneralKeys.isQuickRestartEnabled", "org.autojs.autojs.core.pref.keys.GeneralKeys"))
@@ -252,11 +234,9 @@ object Pref {
         get() = ExplorerKeys.isFileExtensionsHidden
 
     @JvmStatic
+    @Deprecated("Use RecordKeys.RECORD_TOAST (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RecordKeys.RECORD_TOAST.get()", "org.autojs.autojs.core.pref.keys.RecordKeys"))
     val isRecordToastEnabled
-        get() = getBoolean(
-            R.string.key_record_toast,
-            resources.getBoolean(R.bool.pref_record_toast)
-        )
+        get() = RecordKeys.RECORD_TOAST.get()
 
     @JvmStatic
     @Deprecated("Use EditorKeys.EDITOR_THEME (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.EDITOR_THEME", "org.autojs.autojs.core.pref.keys.EditorKeys"))
@@ -303,22 +283,16 @@ object Pref {
     }
 
     @JvmStatic
-    fun shouldStartA11yServiceWithRoot() = getBoolean(
-        R.string.key_enable_a11y_service_with_root_access,
-        resources.getBoolean(R.bool.pref_enable_a11y_service_with_root_access),
-    )
+    @Deprecated("Use A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS (docs/settings/ROADMAP.md P2.4)", ReplaceWith("A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS.get()", "org.autojs.autojs.core.pref.keys.A11yKeys"))
+    fun shouldStartA11yServiceWithRoot() = A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS.get()
 
     @JvmStatic
-    fun shouldStartA11yServiceWithSecureSettings() = getBoolean(
-        R.string.key_enable_a11y_service_with_secure_settings,
-        resources.getBoolean(R.bool.pref_enable_a11y_service_with_secure_settings)
-    )
+    @Deprecated("Use A11yKeys.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS (docs/settings/ROADMAP.md P2.4)", ReplaceWith("A11yKeys.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS.get()", "org.autojs.autojs.core.pref.keys.A11yKeys"))
+    fun shouldStartA11yServiceWithSecureSettings() = A11yKeys.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS.get()
 
     @JvmStatic
-    fun shouldStartA11yServiceWithShizuku() = getBoolean(
-        R.string.key_enable_a11y_service_with_shizuku,
-        resources.getBoolean(R.bool.pref_enable_a11y_service_with_shizuku),
-    )
+    @Deprecated("Use A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU (docs/settings/ROADMAP.md P2.4)", ReplaceWith("A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU.get()", "org.autojs.autojs.core.pref.keys.A11yKeys"))
+    fun shouldStartA11yServiceWithShizuku() = A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU.get()
 
     private fun updateTimestamp(@KeyRes keyRes: Int) = putLong(keyRes, System.currentTimeMillis())
 
@@ -333,7 +307,8 @@ object Pref {
     fun setServerAddress(address: String?) = putString(R.string.key_server_address, address)
 
     @JvmStatic
-    fun rootRecordGeneratesBinary() = getString(R.string.key_root_record_out_file_type, key(R.string.default_key_root_record_out_file_type)) == key(R.string.key_root_record_out_file_type_binary)
+    @Deprecated("Use RecordKeys.rootRecordGeneratesBinary (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RecordKeys.rootRecordGeneratesBinary()", "org.autojs.autojs.core.pref.keys.RecordKeys"))
+    fun rootRecordGeneratesBinary() = RecordKeys.rootRecordGeneratesBinary()
 
     @JvmStatic
     @Deprecated("Use EditorKeys.EDITOR_TEXT_SIZE (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.EDITOR_TEXT_SIZE.set(value)", "org.autojs.autojs.core.pref.keys.EditorKeys"))

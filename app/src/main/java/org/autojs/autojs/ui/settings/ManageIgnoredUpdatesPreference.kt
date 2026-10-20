@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.util.AttributeSet
 import androidx.preference.Preference.SummaryProvider
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.UpdatesKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs6.R
@@ -25,7 +26,7 @@ class ManageIgnoredUpdatesPreference : MaterialPreference, SharedPreferences.OnS
     init {
         Pref.registerOnSharedPreferenceChangeListener(this)
         summaryProvider = SummaryProvider<ManageIgnoredUpdatesPreference> {
-            Pref.getLinkedHashSet(R.string.key_ignored_updates).let {
+            UpdatesKeys.ignoredUpdates().let {
                 prefContext.resources.getQuantityString(R.plurals.text_items_total_sum_with_colon, it.size, it.size)
             }
         }

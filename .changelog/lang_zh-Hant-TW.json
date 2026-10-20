@@ -218,6 +218,7 @@
         "automator 全域操作首次呼叫時可能出現空指標異常, 以及手勢縱座標縮放錯誤的問題",
         "無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_",
         "Node.js 指令碼 accessibility.ensureEnabled 方法在無障礙服務已啟用但未能及時繫結時報告橋接呼叫逾時而不是傳回 false 的問題",
+        "settings.isEnabled 方法讀取從未修改過的 Root 自動啟用無障礙服務與音量鍵控制指令碼執行兩項設定時傳回 false, 與設定頁顯示的預設開啟狀態不一致的問題",
         "通知觀察器將系統通知誤報為訊息浮動框並遺漏通知事件的問題",
         "Android 14+ 申請螢幕捕獲權限時可能因前臺服務啟動異常導致應用崩潰的問題 _[`issue #516`](http://issues.autojs6.com/516)_",
         "多執行緒或跨檔案重複呼叫 OCR 時可能反覆申請螢幕捕獲權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_",

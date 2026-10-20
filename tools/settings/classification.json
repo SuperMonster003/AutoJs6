@@ -255,7 +255,7 @@
   "key_theme_color_accent": {"kind": "Setting", "category": "appearance", "effect": "APPLY", "note": "主题色三项之一"},
   "key_theme_color_primary": {"kind": "Setting", "category": "appearance", "effect": "APPLY", "note": "主题色三项之一"},
   "key_theme_color_primary_dark": {"kind": "Setting", "category": "appearance", "effect": "APPLY", "note": "主题色三项之一"},
-  "key_timed_task_backend": {"kind": "Setting", "category": "timed_task", "note": "列表项"},
+  "key_timed_task_backend": {"kind": "Setting", "category": "timed_task", "effect": "APPLY", "note": "列表项"},
   "key_timed_task_backend_alarm": {"kind": "ValueConstant", "note": "候选值, 默认值; 同一字符串还被 ExactAlarmPermissionHelper 用作 NotAskAgainDialog 的键 (默认偏好中的 Boolean 状态, P4.1 另行声明 StateKey)"},
   "key_timed_task_backend_job": {"kind": "ValueConstant", "note": "候选值"},
   "key_timed_task_backend_work": {"kind": "ValueConstant", "note": "候选值"},
@@ -409,8 +409,7 @@
    {"form": "表达式", "type": "Boolean", "expr": "ViewUtils.isAutoNightModeEnabled = isFunctional()", "value": "运行时: 缺键时 Pref 初始化写入 isFunctional()", "file": "core/pref/Pref.kt", "line": 49, "ignoreForConflict": true}
   ],
   "key_foreground_service": [
-   {"form": "调用处字面量", "type": "Boolean", "expr": "Pref.getBoolean(prefKey, false)", "value": "false", "file": "ui/main/drawer/DrawerMenuToggleableItem.kt", "line": 258, "note": "抽屉 \"前台服务\" 开关 (prefKey = R.string.key_foreground_service)"},
-   {"form": "调用处字面量", "type": "Boolean", "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)", "value": "false", "file": "runtime/api/augment/settings/Settings.kt", "line": 50, "note": "脚本 API settings.isEnabled"}
+   {"form": "调用处字面量", "type": "Boolean", "expr": "setting.storedOrNull() ?: false", "value": "false", "file": "ui/main/drawer/DrawerMenuToggleableItem.kt", "line": 285, "note": "抽屉 \"前台服务\" 开关 (prefSetting = GeneralKeys.FOREGROUND_SERVICE); 脚本 API settings.isEnabled 缺键时读声明的默认值 (附录 C Q10, P2.4)"}
   ],
   "key_night_mode_enabled": [
    {"form": "表达式", "type": "Boolean", "expr": "ViewUtils.isNightModeEnabled = isNightModeYes(app)", "value": "运行时: 缺键时 Pref 初始化写入系统当前是否夜间", "file": "core/pref/Pref.kt", "line": 59, "ignoreForConflict": true}
@@ -445,9 +444,6 @@
   "key_editor_theme_light": [
    {"form": "伴生常量", "type": "String", "expr": "firstNonBlank(..., DEFAULT_THEME)", "value": "Quiet Light", "file": "ui/edit/theme/Themes.java", "line": 222, "note": "原生编辑器分离模式日间的回退 (先回退到 `key_editor_theme`)"}
   ],
-  "key_enable_a11y_service_with_root_access": [
-   {"form": "调用处字面量", "type": "Boolean", "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)", "value": "false", "file": "runtime/api/augment/settings/Settings.kt", "line": 50, "note": "脚本 API settings.isEnabled 对所有别名统一用 false"}
-  ],
   "key_floating_console_time_format": [
    {"form": "伴生常量", "type": "String", "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN", "value": "HH:mm:ss.SSS", "file": "core/console/ConsoleTimeSettings.kt", "line": 24}
   ],
@@ -469,14 +465,8 @@
   "key_log_activity_time_visible": [
    {"form": "伴生常量", "type": "Boolean", "expr": "LOG_ACTIVITY(..., true)", "value": "true", "file": "core/console/ConsoleTimeSettings.kt", "line": 14}
   ],
-  "key_root_mode": [
-   {"match": "RootUtils.RootMode.AUTO_DETECT.key", "form": "R.string", "value": "key_$_root_mode_auto_detect", "note": "RootMode.AUTO_DETECT = key(R.string.key_root_mode_auto_detect)"}
-  ],
   "key_server_address": [
    {"match": "if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS", "value": "运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)", "ignoreForConflict": true}
-  ],
-  "key_stable_mode": [
-   {"form": "调用处字面量", "type": "Boolean", "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)", "value": "false", "file": "runtime/api/augment/settings/Settings.kt", "line": 50, "note": "脚本 API settings.isEnabled"}
   ],
   "key_theme_color_accent": [
    {"match": "ThemeColorManager.defaultThemeColor.colorAccent", "form": "伴生常量", "value": "由 #FFDEAD 派生 (inrt 为 #263238)", "ignoreForConflict": true, "note": "ThemeColorManager.kt:20 defaultThemeColor"}
@@ -486,9 +476,6 @@
   ],
   "key_theme_color_primary_dark": [
    {"match": "ThemeColorManager.defaultThemeColor.colorPrimaryDark", "form": "伴生常量", "value": "由 #FFDEAD 派生 (inrt 为 #263238)", "ignoreForConflict": true, "note": "ThemeColorManager.kt:20 defaultThemeColor"}
-  ],
-  "key_use_volume_control_running": [
-   {"form": "调用处字面量", "type": "Boolean", "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)", "value": "false", "file": "runtime/api/augment/settings/Settings.kt", "line": 50, "note": "脚本 API settings.isEnabled 对所有别名统一用 false"}
   ],
   "key_working_directory": [
    {"form": "表达式", "type": "String", "expr": "WorkingDirectoryUtils.determineIfNeeded()", "value": "运行时: 首次启动在各语言的默认目录中选最近修改且非空者", "file": "util/WorkingDirectoryUtils.kt", "line": 57, "ignoreForConflict": true, "note": "`default_value_working_directory` 按语言不同 (/Scripts, /脚本 等 10 种)"}

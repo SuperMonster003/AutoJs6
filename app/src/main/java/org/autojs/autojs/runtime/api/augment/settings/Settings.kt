@@ -1,7 +1,9 @@
 package org.autojs.autojs.runtime.api.augment.settings
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.SettingType
+import org.autojs.autojs.core.pref.SettingsRegistry
+import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -47,15 +49,26 @@ class Settings(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun isEnabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
-            Pref.getBoolean(resolvePreferenceKey(it), false)
+            isEnabledFor(resolvePreferenceKey(it))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setEnabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsLength(args, 2) {
             val (key, enabled) = it
-            Pref.putBoolean(resolvePreferenceKey(key), coerceBoolean(enabled))
+            SettingsStores.default.put(resolvePreferenceKey(key), coerceBoolean(enabled))
             UNDEFINED
+        }
+
+        /**
+         * The stored switch of [preferenceKey], else the default of its Boolean declaration, as the settings page shows
+         * it (docs/settings/ROADMAP.md appendix C Q10); false for a name without one, as before.
+         * zh-CN: [preferenceKey] 的存储值, 缺键时为其 Boolean 键声明的默认值, 与设置页显示一致 (ROADMAP 附录 C Q10); 没有声明的名称
+         * 仍为 false.
+         */
+        internal fun isEnabledFor(preferenceKey: String): Boolean {
+            val declared = SettingsRegistry.find(preferenceKey)?.takeIf { it.type == SettingType.Bool }
+            return SettingsStores.default.getBoolean(preferenceKey, declared?.defaultOrNull() as Boolean? ?: false)
         }
 
         internal fun resolveSetting(key: Any?): Setting? {

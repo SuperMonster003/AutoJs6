@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-20",
  "git": {
-  "commit": "09e355833",
+  "commit": "a4b6d2d34",
   "branch": "master",
-  "dirtyScannedFiles": 24
+  "dirtyScannedFiles": 29
  },
  "summary": {
   "keyResources": 268,
@@ -33,19 +33,13 @@
    "key_about_app_and_developer",
    "key_about_app_tips",
    "key_ai_settings",
-   "key_check_for_updates",
-   "key_check_for_updates_while_ignoring_the_local_version",
    "key_dialog_foreground_svc",
    "key_dialog_layout_inspector_exit_tips",
    "key_dialog_log_entries_exported",
    "key_enable_observe_key",
    "key_github_token",
    "key_mail_settings",
-   "key_manage_ignored_updates",
-   "key_nodejs_doctor_report",
-   "key_release_history",
-   "key_root_record_out_file_type_js",
-   "key_updates_checked_states_cleared"
+   "key_nodejs_doctor_report"
   ],
   "keysWithoutAnyRefs": [
    "key_dialog_foreground_svc",
@@ -58,7 +52,7 @@
   "namedStoreCallFiles": 34,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 8,
-  "prefUserFiles": 100,
+  "prefUserFiles": 88,
   "jsonFileStores": 13
  },
  "keys": [
@@ -85,11 +79,11 @@
    "sourceRefs": [
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 129
+     "line": 131
     },
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 312
+     "line": 311
     }
    ],
    "kind": "State",
@@ -104,7 +98,7 @@
    "sourceRefs": [
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 180
+     "line": 182
     }
    ],
    "kind": "State",
@@ -119,11 +113,11 @@
    "sourceRefs": [
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 128
+     "line": 130
     },
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 293
+     "line": 292
     }
    ],
    "kind": "State",
@@ -2062,8 +2056,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 161
+     "file": "core/pref/keys/UpdatesKeys.kt",
+     "line": 25
     }
    ],
    "kind": "Setting",
@@ -2156,6 +2150,12 @@
      ]
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/UpdatesKeys.kt",
+     "line": 39
+    }
+   ],
    "kind": "Excluded",
    "note": "动作条目 (立即检查更新)"
   },
@@ -2176,6 +2176,12 @@
      "categoryTitles": [
       "更新"
      ]
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/UpdatesKeys.kt",
+     "line": 40
     }
    ],
    "kind": "Excluded",
@@ -3805,8 +3811,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 307
+     "file": "core/pref/keys/A11yKeys.kt",
+     "line": 21
     },
     {
      "file": "inrt/Pref.kt",
@@ -3814,11 +3820,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 26
-    },
-    {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 187
+     "line": 28
     }
    ],
    "otherResRefs": [
@@ -3852,12 +3854,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 313
-    },
-    {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 193
+     "file": "core/pref/keys/A11yKeys.kt",
+     "line": 27
     }
    ],
    "kind": "Setting",
@@ -3885,12 +3883,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 319
-    },
-    {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 199
+     "file": "core/pref/keys/A11yKeys.kt",
+     "line": 33
     }
    ],
    "kind": "Setting",
@@ -3971,8 +3965,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 109
+     "file": "core/pref/keys/ExtensibilityKeys.kt",
+     "line": 20
     }
    ],
    "kind": "Setting",
@@ -4121,7 +4115,7 @@
    "sourceRefs": [
     {
      "file": "ui/floating/CircularMenu.java",
-     "line": 495
+     "line": 496
     },
     {
      "file": "ui/main/drawer/DrawerFragment.kt",
@@ -4148,7 +4142,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 29
+     "line": 31
     }
    ],
    "otherResRefs": [
@@ -4169,8 +4163,8 @@
    "line": 228,
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 215
+     "file": "core/pref/keys/A11yKeys.kt",
+     "line": 41
     }
    ],
    "kind": "Setting",
@@ -4250,8 +4244,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 140
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 37
     }
    ],
    "kind": "Setting",
@@ -4494,28 +4488,12 @@
    "line": 241,
    "sourceRefs": [
     {
+     "file": "core/pref/keys/UpdatesKeys.kt",
+     "line": 32
+    },
+    {
      "file": "network/UpdateIgnoreStore.kt",
      "line": 13
-    },
-    {
-     "file": "ui/settings/ManageIgnoredUpdatesPreference.kt",
-     "line": 28
-    },
-    {
-     "file": "util/UpdateUtils.kt",
-     "line": 27
-    },
-    {
-     "file": "util/UpdateUtils.kt",
-     "line": 130
-    },
-    {
-     "file": "util/UpdateUtils.kt",
-     "line": 137
-    },
-    {
-     "file": "util/UpdateUtils.kt",
-     "line": 142
     }
    ],
    "kind": "Setting",
@@ -4696,15 +4674,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 182
+     "line": 170
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 289
+     "line": 269
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 299
+     "line": 279
     }
    ],
    "kind": "State",
@@ -4719,15 +4697,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 190
+     "line": 178
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 295
+     "line": 275
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 302
+     "line": 282
     }
    ],
    "kind": "State",
@@ -4742,15 +4720,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 166
+     "line": 154
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 286
+     "line": 266
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 301
+     "line": 281
     }
    ],
    "kind": "State",
@@ -4765,15 +4743,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 186
+     "line": 174
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 292
+     "line": 272
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 300
+     "line": 280
     }
    ],
    "kind": "State",
@@ -5226,6 +5204,12 @@
      ]
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/UpdatesKeys.kt",
+     "line": 41
+    }
+   ],
    "kind": "Excluded",
    "note": "动作条目 (管理忽略的更新)"
   },
@@ -5270,7 +5254,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 120
+     "line": 116
     }
    ],
    "kind": "Setting",
@@ -5507,7 +5491,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 28
+     "line": 30
     }
    ],
    "otherResRefs": [
@@ -5768,8 +5752,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 257
+     "file": "core/pref/keys/RecordKeys.kt",
+     "line": 30
     }
    ],
    "kind": "Setting",
@@ -5793,6 +5777,12 @@
      "categoryTitles": [
       "更新"
      ]
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/UpdatesKeys.kt",
+     "line": 42
     }
    ],
    "kind": "Excluded",
@@ -5895,8 +5885,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "rhino/AndroidContextFactory.kt",
-     "line": 77
+     "file": "core/pref/keys/ExtensibilityKeys.kt",
+     "line": 26
     }
    ],
    "kind": "Setting",
@@ -5910,12 +5900,8 @@
    "line": 299,
    "sourceRefs": [
     {
-     "file": "ui/accessibility/RootManagerAppsDialog.kt",
-     "line": 117
-    },
-    {
-     "file": "ui/accessibility/RootManagerAppsDialog.kt",
-     "line": 216
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 59
     }
    ],
    "kind": "Cache",
@@ -5928,16 +5914,8 @@
    "line": 300,
    "sourceRefs": [
     {
-     "file": "ui/accessibility/RootManagerAppsDialog.kt",
-     "line": 115
-    },
-    {
-     "file": "ui/accessibility/RootManagerAppsDialog.kt",
-     "line": 171
-    },
-    {
-     "file": "ui/accessibility/RootManagerAppsDialog.kt",
-     "line": 173
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 55
     }
    ],
    "kind": "Setting",
@@ -5965,12 +5943,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 200
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 204
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 42
     }
    ],
    "kind": "Setting",
@@ -5993,6 +5967,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 25
+    },
+    {
      "file": "util/RootUtils.java",
      "line": 133
     }
@@ -6013,6 +5991,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 27
+    },
+    {
      "file": "util/RootUtils.java",
      "line": 132
     }
@@ -6032,6 +6014,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 26
+    },
     {
      "file": "util/RootUtils.java",
      "line": 131
@@ -6061,8 +6047,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 336
+     "file": "core/pref/keys/RecordKeys.kt",
+     "line": 34
     }
    ],
    "kind": "Setting",
@@ -6085,8 +6071,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 336
+     "file": "core/pref/keys/RecordKeys.kt",
+     "line": 19
+    },
+    {
+     "file": "core/pref/keys/RecordKeys.kt",
+     "line": 44
     }
    ],
    "kind": "ValueConstant",
@@ -6101,6 +6091,12 @@
     {
      "array": "keys_root_record_out_file_type",
      "owner": "key_root_record_out_file_type"
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/RecordKeys.kt",
+     "line": 20
     }
    ],
    "kind": "ValueConstant",
@@ -6232,16 +6228,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 84
-    },
-    {
-     "file": "ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt",
-     "line": 29
-    },
-    {
-     "file": "ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt",
-     "line": 72
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 49
     }
    ],
    "kind": "Setting",
@@ -6270,7 +6258,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 130
+     "line": 126
     }
    ],
    "kind": "Setting",
@@ -6299,11 +6287,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 134
+     "line": 130
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 135
+     "line": 131
     }
    ],
    "kind": "Setting",
@@ -6340,11 +6328,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 330
+     "line": 304
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 333
+     "line": 307
     }
    ],
    "kind": "Setting",
@@ -6563,24 +6551,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 209
+     "file": "core/pref/keys/A11yKeys.kt",
+     "line": 38
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 25
-    },
-    {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 202
-    },
-    {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 403
-    },
-    {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 428
+     "line": 27
     }
    ],
    "otherResRefs": [
@@ -6690,13 +6666,14 @@
    ],
    "sourceRefs": [
     {
-     "file": "timing/TimedTaskScheduler.kt",
-     "line": 32
+     "file": "core/pref/keys/TimedTaskKeys.kt",
+     "line": 28
     }
    ],
    "kind": "Setting",
    "category": "timed_task",
-   "note": "列表项"
+   "note": "列表项",
+   "effect": "APPLY"
   },
   {
    "name": "key_timed_task_backend_alarm",
@@ -6714,12 +6691,16 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/TimedTaskKeys.kt",
+     "line": 20
+    },
+    {
      "file": "timing/ExactAlarmPermissionHelper.kt",
      "line": 39
     },
     {
      "file": "timing/TimedTaskScheduler.kt",
-     "line": 35
+     "line": 33
     }
    ],
    "kind": "ValueConstant",
@@ -6738,8 +6719,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/TimedTaskKeys.kt",
+     "line": 22
+    },
+    {
      "file": "timing/TimedTaskScheduler.kt",
-     "line": 37
+     "line": 35
     }
    ],
    "kind": "ValueConstant",
@@ -6758,8 +6743,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/TimedTaskKeys.kt",
+     "line": 21
+    },
+    {
      "file": "timing/TimedTaskScheduler.kt",
-     "line": 36
+     "line": 34
     }
    ],
    "kind": "ValueConstant",
@@ -6870,6 +6859,12 @@
      ]
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/UpdatesKeys.kt",
+     "line": 43
+    }
+   ],
    "kind": "Excluded",
    "note": "动作条目 (开发者选项, 清除检查更新状态)"
   },
@@ -6894,8 +6889,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 154
+     "file": "core/pref/keys/RecordKeys.kt",
+     "line": 25
     }
    ],
    "kind": "Setting",
@@ -6923,8 +6918,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 147
+     "file": "core/pref/keys/RunningKeys.kt",
+     "line": 32
     },
     {
      "file": "inrt/Pref.kt",
@@ -6932,7 +6927,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 27
+     "line": 29
     }
    ],
    "otherResRefs": [
@@ -8112,7 +8107,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 41,
+     "line": 43,
      "const": null
     }
    ],
@@ -8159,7 +8154,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 37,
+     "line": 39,
      "const": null
     }
    ],
@@ -8175,7 +8170,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 36,
+     "line": 38,
      "const": null
     }
    ],
@@ -8207,7 +8202,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 44,
+     "line": 46,
      "const": null
     }
    ],
@@ -8239,7 +8234,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 42,
+     "line": 44,
      "const": null
     }
    ],
@@ -8255,7 +8250,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 34,
+     "line": 36,
      "const": null
     }
    ],
@@ -8297,7 +8292,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 39,
+     "line": 41,
      "const": null
     }
    ],
@@ -8998,7 +8993,7 @@
   {
    "file": "core/pref/Pref.kt",
    "lines": [
-    47
+    52
    ]
   },
   {
@@ -9057,10 +9052,6 @@
  "prefUsers": [
   "app/tool/JsonSocketClientTool.kt",
   "app/tool/McpServerTool.kt",
-  "core/accessibility/AccessibilityServiceUsher.kt",
-  "core/accessibility/AccessibilityTool.kt",
-  "core/accessibility/companion/AccessibilityCompanionSync.kt",
-  "core/accessibility/diagnostics/A11yServiceDiagnostics.kt",
   "core/console/ConsoleTimeSettings.kt",
   "core/plugin/agent/ThreeStoveAgentConnectionOwner.kt",
   "core/plugin/center/PluginCenterFragment.kt",
@@ -9078,9 +9069,9 @@
   "core/pref/keys/EditorKeys.kt",
   "core/pref/keys/ExplorerKeys.kt",
   "core/pref/keys/GeneralKeys.kt",
-  "core/record/GlobalActionRecorder.java",
-  "engine/NodeScreenCaptureSession.kt",
-  "event/GlobalKeyObserver.java",
+  "core/pref/keys/RecordKeys.kt",
+  "core/pref/keys/RunningKeys.kt",
+  "core/pref/keys/UpdatesKeys.kt",
   "external/open/ImportProjectIntentActivity.kt",
   "inrt/InrtBootCompletedReceiver.kt",
   "inrt/InrtLaunchGate.kt",
@@ -9094,12 +9085,9 @@
   "pluginclient/DevPluginPrefs.kt",
   "pluginclient/DevPluginService.kt",
   "pluginclient/JsonSocketClient.kt",
-  "rhino/AndroidContextFactory.kt",
   "runtime/ScriptRuntime.kt",
-  "runtime/accessibility/AccessibilityConfig.kt",
   "runtime/api/Images.java",
   "runtime/api/augment/colors/ColorsTheme.kt",
-  "runtime/api/augment/settings/Settings.kt",
   "runtime/api/modules/ScriptModuleLayer.kt",
   "runtime/api/modules/colors/ColorsThemeModule.kt",
   "theme/ThemeColorManager.kt",
@@ -9111,9 +9099,7 @@
   "theme/app/VirtualColorLibraryActivity.kt",
   "theme/intelligent/IntelligentColorEngine.kt",
   "theme/preference/MaterialListPreference.kt",
-  "timing/TimedTaskScheduler.kt",
   "ui/accessibility/A11yServiceManagerDialog.kt",
-  "ui/accessibility/RootManagerAppsDialog.kt",
   "ui/common/ManagerSettingsSection.kt",
   "ui/devplugin/ClientModeManagerDialog.kt",
   "ui/devplugin/ConnectionManagerDialog.kt",
@@ -9142,8 +9128,6 @@
   "ui/settings/LauncherIconPreference.kt",
   "ui/settings/ManageIgnoredUpdatesPreference.kt",
   "ui/settings/ResetSetupWizardWelcomePreference.kt",
-  "ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt",
-  "ui/settings/ScreenCaptureRequestDelayPreference.kt",
   "ui/settings/ScriptModuleDebugPrintModulesPreference.kt",
   "ui/settings/ThemeColorPreference.kt",
   "ui/viewmodel/ExplorerItemManager.kt",
@@ -9151,7 +9135,6 @@
   "ui/wizard/SetupWizards.kt",
   "ui/wizard/permission/PermissionWizardRunner.kt",
   "util/IntentUtils.kt",
-  "util/RootUtils.java",
   "util/UpdateUtils.kt",
   "util/ViewUtils.kt",
   "util/WorkingDirectoryUtils.kt"
@@ -9750,7 +9733,7 @@
     "form": "表达式",
     "value": null,
     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-    "line": 129,
+    "line": 131,
     "method": "getInt",
     "type": "Int"
    }
@@ -9761,7 +9744,7 @@
     "form": "表达式",
     "value": null,
     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-    "line": 128,
+    "line": 130,
     "method": "getInt",
     "type": "Int"
    }
@@ -10282,13 +10265,13 @@
   ],
   "key_auto_check_for_updates": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_auto_check_for_updates)",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_auto_check_for_updates",
-    "file": "core/pref/Pref.kt",
-    "line": 160,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_auto_check_for_updates, \"pref_auto_check_for_updates\")",
+    "file": "core/pref/keys/UpdatesKeys.kt",
+    "line": 24,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -10927,16 +10910,6 @@
   ],
   "key_enable_a11y_service_with_root_access": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_enable_a11y_service_with_root_access)",
-    "form": "R.bool",
-    "value": "true",
-    "ref": "pref_enable_a11y_service_with_root_access",
-    "file": "core/pref/Pref.kt",
-    "line": 306,
-    "method": "getBoolean",
-    "type": "Boolean"
-   },
-   {
     "expr": "true",
     "form": "调用处字面量",
     "value": "true",
@@ -10949,32 +10922,32 @@
     "form": "R.bool",
     "ref": "pref_enable_a11y_service_with_root_access",
     "value": "true",
+    "expr": "boolResource(R.bool.pref_enable_a11y_service_with_root_access, \"pref_enable_a11y_service_with_root_access\")",
+    "file": "core/pref/keys/A11yKeys.kt",
+    "line": 20,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_enable_a11y_service_with_root_access",
+    "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_enable_a11y_service_with_root_access\"",
     "file": "res/xml/fragment_preferences.xml",
     "line": 217,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
-   },
-   {
-    "form": "调用处字面量",
-    "type": "Boolean",
-    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
-    "value": "false",
-    "file": "runtime/api/augment/settings/Settings.kt",
-    "line": 50,
-    "note": "脚本 API settings.isEnabled 对所有别名统一用 false",
-    "manual": true
    }
   ],
   "key_enable_a11y_service_with_secure_settings": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_enable_a11y_service_with_secure_settings)",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_enable_a11y_service_with_secure_settings",
-    "file": "core/pref/Pref.kt",
-    "line": 312,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_enable_a11y_service_with_secure_settings, \"pref_enable_a11y_service_with_secure_settings\")",
+    "file": "core/pref/keys/A11yKeys.kt",
+    "line": 26,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -10990,13 +10963,13 @@
   ],
   "key_enable_a11y_service_with_shizuku": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_enable_a11y_service_with_shizuku)",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_enable_a11y_service_with_shizuku",
-    "file": "core/pref/Pref.kt",
-    "line": 318,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_enable_a11y_service_with_shizuku, \"pref_enable_a11y_service_with_shizuku\")",
+    "file": "core/pref/keys/A11yKeys.kt",
+    "line": 32,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11045,13 +11018,13 @@
   ],
   "key_extending_js_build_in_objects": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_extending_js_build_in_objects)",
     "form": "R.bool",
-    "value": "false",
     "ref": "pref_extending_js_build_in_objects",
-    "file": "core/pref/Pref.kt",
-    "line": 108,
-    "method": "getBoolean",
+    "value": "false",
+    "expr": "boolResource(R.bool.pref_extending_js_build_in_objects, \"pref_extending_js_build_in_objects\")",
+    "file": "core/pref/keys/ExtensibilityKeys.kt",
+    "line": 19,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11113,45 +11086,35 @@
    {
     "form": "调用处字面量",
     "type": "Boolean",
-    "expr": "Pref.getBoolean(prefKey, false)",
+    "expr": "setting.storedOrNull() ?: false",
     "value": "false",
     "file": "ui/main/drawer/DrawerMenuToggleableItem.kt",
-    "line": 258,
-    "note": "抽屉 \"前台服务\" 开关 (prefKey = R.string.key_foreground_service)",
-    "manual": true
-   },
-   {
-    "form": "调用处字面量",
-    "type": "Boolean",
-    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
-    "value": "false",
-    "file": "runtime/api/augment/settings/Settings.kt",
-    "line": 50,
-    "note": "脚本 API settings.isEnabled",
+    "line": 285,
+    "note": "抽屉 \"前台服务\" 开关 (prefSetting = GeneralKeys.FOREGROUND_SERVICE); 脚本 API settings.isEnabled 缺键时读声明的默认值 (附录 C Q10, P2.4)",
     "manual": true
    }
   ],
   "key_gesture_observing": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_gesture_observing)",
     "form": "R.bool",
-    "value": "false",
     "ref": "pref_gesture_observing",
-    "file": "core/pref/Pref.kt",
-    "line": 214,
-    "method": "getBoolean",
+    "value": "false",
+    "expr": "boolResource(R.bool.pref_gesture_observing, \"pref_gesture_observing\")",
+    "file": "core/pref/keys/A11yKeys.kt",
+    "line": 41,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
   "key_guard_mode": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_guard_mode)",
     "form": "R.bool",
-    "value": "false",
     "ref": "pref_guard_mode",
-    "file": "core/pref/Pref.kt",
-    "line": 139,
-    "method": "getBoolean",
+    "value": "false",
+    "expr": "boolResource(R.bool.pref_guard_mode, \"pref_guard_mode\")",
+    "file": "core/pref/keys/RunningKeys.kt",
+    "line": 37,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11251,22 +11214,13 @@
   ],
   "key_ignored_updates": [
    {
+    "expr": "SettingDefault.of(emptyList())",
     "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "[] (键不存在时)",
-    "file": "ui/settings/ManageIgnoredUpdatesPreference.kt",
-    "line": 28,
-    "method": "getLinkedHashSet",
-    "type": "Json (Gson LinkedHashSet)"
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "[] (键不存在时)",
-    "file": "util/UpdateUtils.kt",
-    "line": 27,
-    "method": "getLinkedHashSet",
-    "type": "Json (Gson LinkedHashSet)"
+    "value": "[]",
+    "file": "core/pref/keys/UpdatesKeys.kt",
+    "line": 31,
+    "method": "SettingKey.Json",
+    "type": "Json"
    }
   ],
   "key_inrt_applied_build_id": [
@@ -11334,7 +11288,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 182,
+    "line": 170,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11345,7 +11299,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 190,
+    "line": 178,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11356,7 +11310,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 166,
+    "line": 154,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11367,7 +11321,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 186,
+    "line": 174,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11535,7 +11489,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/Pref.kt",
-    "line": 120,
+    "line": 116,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11746,13 +11700,13 @@
   ],
   "key_record_toast": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_record_toast)",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_record_toast",
-    "file": "core/pref/Pref.kt",
-    "line": 256,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_record_toast, \"pref_record_toast\")",
+    "file": "core/pref/keys/RecordKeys.kt",
+    "line": 30,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11792,13 +11746,13 @@
   ],
   "key_rhino_java_primitive_wrap": [
    {
-    "expr": "R.bool.pref_rhino_java_primitive_wrap",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_rhino_java_primitive_wrap",
-    "file": "rhino/AndroidContextFactory.kt",
-    "line": 77,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_rhino_java_primitive_wrap, \"pref_rhino_java_primitive_wrap\")",
+    "file": "core/pref/keys/ExtensibilityKeys.kt",
+    "line": 25,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11812,48 +11766,28 @@
     "type": "Boolean"
    }
   ],
-  "key_root_manager_apps_cache": [
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/accessibility/RootManagerAppsDialog.kt",
-    "line": 216,
-    "method": "getStringOrNull",
-    "type": "String"
-   }
-  ],
   "key_root_manager_apps_custom": [
    {
-    "expr": "mutableSetOf()",
+    "expr": "SettingDefault.of(emptySet())",
     "form": "调用处字面量",
     "value": "[]",
-    "file": "ui/accessibility/RootManagerAppsDialog.kt",
-    "line": 115,
-    "method": "getStringSet",
-    "type": "StringSet"
-   },
-   {
-    "expr": "mutableSetOf()",
-    "form": "调用处字面量",
-    "value": "[]",
-    "file": "ui/accessibility/RootManagerAppsDialog.kt",
-    "line": 171,
-    "method": "getStringSet",
+    "file": "core/pref/keys/RunningKeys.kt",
+    "line": 55,
+    "method": "SettingKey.StrSet",
     "type": "StringSet"
    }
   ],
   "key_root_mode": [
    {
-    "expr": "RootUtils.RootMode.AUTO_DETECT.key",
     "form": "R.string",
+    "ref": "default_key_root_mode",
+    "resolved": "key_root_mode_auto_detect",
     "value": "key_$_root_mode_auto_detect",
-    "note": "RootMode.AUTO_DETECT = key(R.string.key_root_mode_auto_detect)",
-    "file": "core/pref/Pref.kt",
-    "line": 200,
-    "method": "getString",
-    "type": "String",
-    "manual": true
+    "expr": "keyResource(R.string.default_key_root_mode, \"default_key_root_mode\")",
+    "file": "core/pref/keys/RunningKeys.kt",
+    "line": 41,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -11869,15 +11803,15 @@
   ],
   "key_root_record_out_file_type": [
    {
-    "expr": "key(R.string.default_key_root_record_out_file_type)",
     "form": "R.string",
-    "value": "key_$_root_record_out_file_type_binary",
     "ref": "default_key_root_record_out_file_type",
     "resolved": "key_root_record_out_file_type_binary",
-    "file": "core/pref/Pref.kt",
-    "line": 336,
-    "method": "getString",
-    "type": "String"
+    "value": "key_$_root_record_out_file_type_binary",
+    "expr": "keyResource(R.string.default_key_root_record_out_file_type, \"default_key_root_record_out_file_type\")",
+    "file": "core/pref/keys/RecordKeys.kt",
+    "line": 33,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -11929,24 +11863,13 @@
   ],
   "key_screen_capture_request_delay": [
    {
-    "expr": "defValue",
     "form": "R.integer",
-    "value": "350",
     "ref": "screen_capture_request_delay_default_value",
-    "via": "局部变量 defValue (core/pref/Pref.kt:81)",
-    "file": "core/pref/Pref.kt",
-    "line": 84,
-    "method": "getInt",
-    "type": "Int"
-   },
-   {
-    "expr": "context.resources.getInteger(R.integer.screen_capture_request_delay_default_value)",
-    "form": "R.integer",
     "value": "350",
-    "ref": "screen_capture_request_delay_default_value",
-    "file": "ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt",
-    "line": 29,
-    "method": "getInt",
+    "expr": "intResource(R.integer.screen_capture_request_delay_default_value, \"screen_capture_request_delay_default_value\")",
+    "file": "core/pref/keys/RunningKeys.kt",
+    "line": 48,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
@@ -11956,7 +11879,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/Pref.kt",
-    "line": 130,
+    "line": 126,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11976,7 +11899,7 @@
     "form": "调用处字面量",
     "value": "null",
     "file": "core/pref/Pref.kt",
-    "line": 134,
+    "line": 130,
     "method": "getStringSet",
     "type": "StringSet"
    }
@@ -11998,7 +11921,7 @@
     "form": "表达式",
     "value": "运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)",
     "file": "core/pref/Pref.kt",
-    "line": 330,
+    "line": 304,
     "method": "getString",
     "type": "String",
     "ignoreForConflict": true,
@@ -12065,13 +11988,13 @@
   ],
   "key_stable_mode": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_stable_mode)",
     "form": "R.bool",
-    "value": "false",
     "ref": "pref_stable_mode",
-    "file": "core/pref/Pref.kt",
-    "line": 208,
-    "method": "getBoolean",
+    "value": "false",
+    "expr": "boolResource(R.bool.pref_stable_mode, \"pref_stable_mode\")",
+    "file": "core/pref/keys/A11yKeys.kt",
+    "line": 38,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -12083,16 +12006,6 @@
     "line": 238,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
-   },
-   {
-    "form": "调用处字面量",
-    "type": "Boolean",
-    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
-    "value": "false",
-    "file": "runtime/api/augment/settings/Settings.kt",
-    "line": 50,
-    "note": "脚本 API settings.isEnabled",
-    "manual": true
    }
   ],
   "key_theme_color_accent": [
@@ -12139,16 +12052,15 @@
   ],
   "key_timed_task_backend": [
    {
-    "expr": "defRes",
     "form": "R.string",
-    "value": "key_$_timed_task_backend_alarm",
     "ref": "default_key_timed_task_backend",
     "resolved": "key_timed_task_backend_alarm",
-    "via": "局部变量 defRes (timing/TimedTaskScheduler.kt:33)",
-    "file": "timing/TimedTaskScheduler.kt",
-    "line": 34,
-    "method": "getString",
-    "type": "String"
+    "value": "key_$_timed_task_backend_alarm",
+    "expr": "keyResource(R.string.default_key_timed_task_backend, \"default_key_timed_task_backend\")",
+    "file": "core/pref/keys/TimedTaskKeys.kt",
+    "line": 27,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -12188,13 +12100,13 @@
   ],
   "key_use_volume_control_record": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_use_volume_control_record)",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_use_volume_control_record",
-    "file": "core/pref/Pref.kt",
-    "line": 153,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_use_volume_control_record, \"pref_use_volume_control_record\")",
+    "file": "core/pref/keys/RecordKeys.kt",
+    "line": 24,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -12210,16 +12122,6 @@
   ],
   "key_use_volume_control_running": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_use_volume_control_running)",
-    "form": "R.bool",
-    "value": "true",
-    "ref": "pref_use_volume_control_running",
-    "file": "core/pref/Pref.kt",
-    "line": 146,
-    "method": "getBoolean",
-    "type": "Boolean"
-   },
-   {
     "expr": "true",
     "form": "调用处字面量",
     "value": "true",
@@ -12232,21 +12134,21 @@
     "form": "R.bool",
     "ref": "pref_use_volume_control_running",
     "value": "true",
+    "expr": "boolResource(R.bool.pref_use_volume_control_running, \"pref_use_volume_control_running\")",
+    "file": "core/pref/keys/RunningKeys.kt",
+    "line": 31,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_use_volume_control_running",
+    "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_use_volume_control_running\"",
     "file": "res/xml/fragment_preferences.xml",
     "line": 256,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
-   },
-   {
-    "form": "调用处字面量",
-    "type": "Boolean",
-    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
-    "value": "false",
-    "file": "runtime/api/augment/settings/Settings.kt",
-    "line": 50,
-    "note": "脚本 API settings.isEnabled 对所有别名统一用 false",
-    "manual": true
    }
   ],
   "key_working_directory": [
@@ -12611,21 +12513,6 @@
   }
  },
  "classificationProblems": [],
- "defaultConflicts": [
-  {
-   "key": "key_enable_a11y_service_with_root_access",
-   "values": [
-    "false",
-    "true"
-   ]
-  },
-  {
-   "key": "key_use_volume_control_running",
-   "values": [
-    "false",
-    "true"
-   ]
-  }
- ],
+ "defaultConflicts": [],
  "defaultsMissing": []
 }

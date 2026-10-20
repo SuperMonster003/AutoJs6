@@ -218,6 +218,7 @@
 * `Corrección` La primera llamada a operaciones globales automator podía lanzar una excepción de puntero nulo y el escalado vertical de gestos era incorrecto
 * `Corrección` El servicio de accesibilidad podía interrumpirse inesperadamente al ejecutar repetidamente operaciones como back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Corrección` El método Node.js accessibility.ensureEnabled notificaba un tiempo de espera agotado del puente en lugar de devolver false cuando el servicio de accesibilidad estaba habilitado pero no se enlazaba a tiempo
+* `Corrección` El método settings.isEnabled devolvía false para los ajustes nunca modificados de habilitar automáticamente el servicio de accesibilidad con acceso root y de controlar la ejecución de scripts con la tecla de volumen, en lugar del estado activado predeterminado que muestra la página de ajustes
 * `Corrección` El observador de notificaciones confundía notificaciones del sistema con mensajes flotantes y omitía eventos de notificación
 * `Corrección` En Android 14+, solicitar captura de pantalla podía bloquear la aplicación por errores al iniciar el servicio en primer plano _[`issue #516`](http://issues.autojs6.com/516)_
 * `Corrección` Invocar OCR repetidamente desde varios hilos o archivos podía solicitar una y otra vez el permiso de captura _[`issue #551`](http://issues.autojs6.com/551)_

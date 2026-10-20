@@ -351,6 +351,72 @@ var CALLERS = {
             return expect(K.ACE_SEMANTIC_KOTLIN_ENABLED.get(), Lsp.INSTANCE.getDEFAULT_SEMANTIC_LANGUAGES().get('kotlin'), 'semantic default');
         });
     },
+    TimedTaskKeys: function () {
+        check('timed-task-backend', function () {
+            var T = Keys.TimedTaskKeys;
+            return expect(T.TIMED_TASK_BACKEND.storedKeyOrDefault(), sp.getString(T.TIMED_TASK_BACKEND.getName(), key('key_timed_task_backend_alarm')), 'backend');
+        });
+    },
+    A11yKeys: function () {
+        var A = Keys.A11yKeys;
+        check('a11y-deprecated-readers', function () {
+            var pairs = [
+                [Pref.shouldStartA11yServiceWithRoot(), A.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS],
+                [Pref.shouldStartA11yServiceWithSecureSettings(), A.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS],
+                [Pref.shouldStartA11yServiceWithShizuku(), A.ENABLE_A11Y_SERVICE_WITH_SHIZUKU],
+                [Pref.isStableModeEnabled(), A.STABLE_MODE],
+                [Pref.isGestureObservingEnabled(), A.GESTURE_OBSERVING],
+            ];
+            var bad = pairs.filter(function (p) { return !same(p[0], p[1].get()); }).map(function (p) { return String(p[1].getName()); });
+            return bad.length === 0 || bad.join(' ');
+        });
+        // Appendix C Q10 (2) / (3): a missing switch reads the default of its declaration through the script API.
+        check('settings-isEnabled-missing-keys', function () {
+            touch(A.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS);
+            touch(Keys.RunningKeys.USE_VOLUME_CONTROL_RUNNING);
+            touch(A.STABLE_MODE);
+            A.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS.remove(true);
+            Keys.RunningKeys.USE_VOLUME_CONTROL_RUNNING.remove(true);
+            A.STABLE_MODE.remove(true);
+            var results = [settings.isEnabled('enable_accessibility_service_by_root'), settings.isEnabled('stop_all_on_volume_up'), settings.isEnabled('stable_mode')];
+            if (!same(results.join(','), 'true,true,false')) return 'missing keys read ' + results.join(',');
+            settings.setEnabled('stop_all_on_volume_up', false);
+            return expect(settings.isEnabled('stop_all_on_volume_up'), false, 'stored false');
+        });
+    },
+    RunningKeys: function () {
+        var R = Keys.RunningKeys;
+        check('running-deprecated-readers', function () {
+            if (!same(Pref.isGuardModeEnabled(), R.GUARD_MODE.get())) return 'guard mode';
+            if (!same(Pref.isUseVolumeControlRunningEnabled(), R.USE_VOLUME_CONTROL_RUNNING.get())) return 'volume key';
+            if (!same(Pref.getRootMode(), R.getRootMode())) return 'root mode';
+            var delay = sp.getInt(R.SCREEN_CAPTURE_REQUEST_DELAY.getName(), 350);
+            return expect(Pref.getScreenCaptureRequestDelay(), Math.min(2000, Math.max(0, delay)), 'screen capture delay');
+        });
+    },
+    RecordKeys: function () {
+        var R = Keys.RecordKeys;
+        check('record-deprecated-readers', function () {
+            var binary = same(sp.getString(R.ROOT_RECORD_OUT_FILE_TYPE.getName(), key('key_root_record_out_file_type_binary')), key('key_root_record_out_file_type_binary'));
+            if (!same(Pref.rootRecordGeneratesBinary(), binary)) return 'root record';
+            return same(Pref.isRecordToastEnabled(), R.RECORD_TOAST.get()) && same(Pref.isUseVolumeControlRecordEnabled(), R.USE_VOLUME_CONTROL_RECORD.get()) || 'toast / volume key';
+        });
+    },
+    ExtensibilityKeys: function () {
+        check('extensibility-deprecated-readers', function () {
+            return expect(Pref.isExtendingJsBuildInObjectsEnabled(), Keys.ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS.get(), 'extending');
+        });
+    },
+    UpdatesKeys: function () {
+        var U = Keys.UpdatesKeys;
+        check('updates-ignored-versions', function () {
+            var raw = sp.getString(U.IGNORED_UPDATES.getName(), null);
+            var set = U.ignoredUpdates();
+            if (raw === null) return set.size() === 0 || 'missing key is not empty';
+            var encoded = org.autojs.autojs.core.pref.SettingsJson.INSTANCE.encodeStringList(set);
+            return expect(encoded, raw, 'text written back');
+        });
+    },
 };
 
 info('registry: ' + Registry.DOMAINS.size() + ' domains, ' + Registry.getKeys().size() + ' keys, ' + Registry.describe().size() + ' descriptors');

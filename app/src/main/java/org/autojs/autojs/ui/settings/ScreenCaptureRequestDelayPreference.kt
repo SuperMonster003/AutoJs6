@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.settings
 import android.content.Context
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs6.R
 
@@ -27,7 +27,7 @@ class ScreenCaptureRequestDelayPreference : MaterialPreference {
             prefContext.getString(
                 R.string.text_property_colon_value_unit,
                 prefContext.getString(R.string.text_delay_time),
-                Pref.screenCaptureRequestDelay,
+                RunningKeys.screenCaptureRequestDelay,
                 "ms",
             )
         }

@@ -2,7 +2,7 @@ package org.autojs.autojs.rhino
 
 import android.util.Log
 import org.autojs.autojs.core.automator.UiObjectCollection
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
@@ -74,7 +74,7 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
     open class WrapFactory : org.mozilla.javascript.WrapFactory() {
 
         init {
-            isJavaPrimitiveWrap = Pref.getBoolean(R.string.key_rhino_java_primitive_wrap, R.bool.pref_rhino_java_primitive_wrap)
+            isJavaPrimitiveWrap = ExtensibilityKeys.RHINO_JAVA_PRIMITIVE_WRAP.get()
         }
 
         override fun wrap(cx: Context, scope: VarScope, obj: Any?, staticType: TypeInfo): Any? = when {

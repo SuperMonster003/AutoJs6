@@ -9,7 +9,8 @@ import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.OnKeyListener;
 import org.autojs.autojs.core.inputevent.InputEventObserver;
 import org.autojs.autojs.core.inputevent.ShellKeyObserver;
-import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.core.pref.keys.RecordKeys;
+import org.autojs.autojs.core.pref.keys.RunningKeys;
 
 /**
  * Created by Stardust on Aug 14, 2017.
@@ -66,7 +67,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
 
     public void onVolumeUp() {
         Log.d(LOG_TAG, "onVolumeUp at " + System.currentTimeMillis());
-        if (Pref.isUseVolumeControlRunningEnabled()) {
+        if (RunningKeys.USE_VOLUME_CONTROL_RUNNING.get()) {
             AutoJs.getInstance().getScriptEngineService().stopAllAndToast();
         }
     }
@@ -131,6 +132,6 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
     }
 
     private static boolean isVolumeControlEnabled() {
-        return Pref.isUseVolumeControlRunningEnabled() || Pref.isUseVolumeControlRecordEnabled();
+        return RunningKeys.USE_VOLUME_CONTROL_RUNNING.get() || RecordKeys.USE_VOLUME_CONTROL_RECORD.get();
     }
 }

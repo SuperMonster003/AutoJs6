@@ -402,6 +402,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Possible null pointer exceptions on the first call to automator global actions, and incorrect gesture Y-coordinate scaling
 * `Fix` Issue where the accessibility service could be unexpectedly interrupted when repeatedly performing back and similar actions _[`issue #527`](http://issues.autojs6.com/527)_
 * `Fix` Node.js accessibility.ensureEnabled reporting a bridge call timeout instead of returning false when the accessibility service was enabled but did not bind in time
+* `Fix` Issue where settings.isEnabled returned false for the never-changed settings of enabling the accessibility service with root access automatically and controlling script running with the volume key, unlike their default on state shown on the settings page
 * `Fix` Issue where the notification observer misreported system notifications as toasts and missed notification events
 * `Fix` Issue where requesting screen capture permission on Android 14+ could crash the app due to foreground service startup failures _[`issue #516`](http://issues.autojs6.com/516)_
 * `Fix` Issue where repeated OCR calls across threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_

@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.theme.widget.ThemeColorSeekBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogScreenCaptureRequestDelaySettingsBinding
@@ -26,7 +26,7 @@ class ScreenCaptureRequestDelayDialogBuilder(context: Context, onChangeConfirmed
     private var mSeekBar: ThemeColorSeekBar
 
     init {
-        var initialRestartDelayValue = Pref.getInt(R.string.key_screen_capture_request_delay, context.resources.getInteger(R.integer.screen_capture_request_delay_default_value))
+        var initialRestartDelayValue = RunningKeys.SCREEN_CAPTURE_REQUEST_DELAY.get()
 
         _binding = DialogScreenCaptureRequestDelaySettingsBinding.inflate(LayoutInflater.from(context)).also { binding ->
             mScreenCaptureRequestDelayTitlePrefix = context.getString(R.string.text_delay_time)
@@ -69,7 +69,7 @@ class ScreenCaptureRequestDelayDialogBuilder(context: Context, onChangeConfirmed
         positiveText(R.string.dialog_button_confirm)
         positiveColorRes(R.color.dialog_button_attraction)
         onPositive { d, _ ->
-            Pref.putInt(R.string.key_screen_capture_request_delay, mStartDelayMinValue + mSeekBar.progress * 50)
+            RunningKeys.SCREEN_CAPTURE_REQUEST_DELAY.set(mStartDelayMinValue + mSeekBar.progress * 50)
             onChangeConfirmed()
             d.dismiss()
         }

@@ -3,9 +3,9 @@ package org.autojs.autojs.core.record;
 import android.content.Context;
 import android.view.ContextThemeWrapper;
 import com.afollestad.materialdialogs.MaterialDialog;
+import org.autojs.autojs.core.pref.keys.RecordKeys;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.app.GlobalAppContext;
-import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.record.inputevent.InputEventRecorder;
 import org.autojs.autojs.core.record.inputevent.InputEventToAutoFileRecorder;
 import org.autojs.autojs.core.record.inputevent.InputEventToRootAutomatorRecorder;
@@ -55,7 +55,7 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
         return new TouchRecorder(mContext) {
             @Override
             protected InputEventRecorder createInputEventRecorder() {
-                return Pref.rootRecordGeneratesBinary()
+                return RecordKeys.rootRecordGeneratesBinary()
                         ? new InputEventToAutoFileRecorder(mContext)
                         : new InputEventToRootAutomatorRecorder(mContext);
             }
@@ -99,7 +99,7 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
 
     @Override
     public void onStart() {
-        if (Pref.isRecordToastEnabled()) {
+        if (RecordKeys.RECORD_TOAST.get()) {
             ViewUtils.showToast(mContext, R.string.text_start_record);
         }
         for (Recorder.OnStateChangedListener listener : mOnStateChangedListeners) {
@@ -109,7 +109,7 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
 
     @Override
     public void onStop() {
-        if (Pref.isRecordToastEnabled()) {
+        if (RecordKeys.RECORD_TOAST.get()) {
             ViewUtils.showToast(mContext, R.string.text_record_stopped);
         }
         if (!mDiscard) {

@@ -22,7 +22,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.theme.widget.ThemeColorScrollView
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -112,9 +112,9 @@ class RootManagerAppsDialog private constructor(private val context: Context) {
         work.add(Single.fromCallable { installed(context, force) }
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe({ apps ->
-                val custom = Pref.getStringSet(R.string.key_root_manager_apps_custom, mutableSetOf()).orEmpty().toSet()
+                val custom = RunningKeys.ROOT_MANAGER_APPS_CUSTOM.get().toSet()
                 val candidates = apps.filter { it.packageName in custom || isCandidate(it.packageName, it.label) }
-                Pref.putString(R.string.key_root_manager_apps_cache, JSONArray().apply {
+                RunningKeys.ROOT_MANAGER_APPS_CACHE.set(JSONArray().apply {
                     candidates.forEach { put(JSONObject().put("package", it.packageName).put("label", it.label)) }
                 }.toString())
                 if (dialog.isShowing) render(candidates)
@@ -168,9 +168,9 @@ class RootManagerAppsDialog private constructor(private val context: Context) {
                 this.adapter = adapter
                 setOnItemClickListener { _, _, position, _ ->
                     val app = adapter.getItem(position) ?: return@setOnItemClickListener
-                    val custom = Pref.getStringSet(R.string.key_root_manager_apps_custom, mutableSetOf()).orEmpty().toMutableSet()
+                    val custom = RunningKeys.ROOT_MANAGER_APPS_CUSTOM.get().toMutableSet()
                     custom.add(app.packageName)
-                    Pref.putStringSet(R.string.key_root_manager_apps_custom, custom)
+                    RunningKeys.ROOT_MANAGER_APPS_CUSTOM.set(custom)
                     picker?.dismiss()
                     refresh()
                 }
@@ -213,7 +213,7 @@ class RootManagerAppsDialog private constructor(private val context: Context) {
         fun show(context: Context): MaterialDialog {
             val owner = RootManagerAppsDialog(context)
             val cached = runCatching {
-                val json = JSONArray(Pref.getStringOrNull(R.string.key_root_manager_apps_cache) ?: "[]")
+                val json = JSONArray(RunningKeys.ROOT_MANAGER_APPS_CACHE.storedOrNull() ?: "[]")
                 (0 until json.length()).map { json.getJSONObject(it).let { Candidate(it.getString("package"), it.getString("label")) } }
             }.getOrDefault(emptyList())
             owner.render(cached)

@@ -5,10 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.core.pref.Pref.isAutoCheckForUpdatesEnabled
 import org.autojs.autojs.core.pref.Pref.lastNoNewerUpdatesTimestamp
 import org.autojs.autojs.core.pref.Pref.lastUpdatesAutoCheckedTimestamp
 import org.autojs.autojs.core.pref.Pref.lastUpdatesPostponedTimestamp
+import org.autojs.autojs.core.pref.keys.UpdatesKeys
 import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.network.entity.VersionInfo
@@ -24,7 +24,7 @@ import org.autojs.autojs6.R
 object UpdateUtils {
 
     private val ignoredVersions: LinkedHashSet<String> by lazy {
-        Pref.getLinkedHashSet(R.string.key_ignored_updates)
+        UpdatesKeys.ignoredUpdates()
     }
 
     fun manageIgnoredUpdates(context: Context) {
@@ -127,25 +127,25 @@ object UpdateUtils {
     @JvmStatic
     fun addIgnoredVersion(versionInfo: VersionInfo) {
         ignoredVersions.add(versionInfo.toSummary())
-        Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
+        UpdatesKeys.setIgnoredUpdates(ignoredVersions)
     }
 
     private fun removeIgnoredVersion(versionInfo: VersionInfo) = removeIgnoredVersion(versionInfo.toSummary())
 
     private fun removeIgnoredVersion(versionSummary: CharSequence) {
         ignoredVersions.remove(versionSummary.toString())
-        Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
+        UpdatesKeys.setIgnoredUpdates(ignoredVersions)
     }
 
     private fun clearIgnoredVersions() {
         ignoredVersions.clear()
-        Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
+        UpdatesKeys.setIgnoredUpdates(ignoredVersions)
     }
 
     @JvmStatic
     @JvmOverloads
     fun autoCheckForUpdatesIfNeededWithSnackbar(activity: AppCompatActivity, snackbarViewIdRes: Int = android.R.id.content) {
-        if (!isAutoCheckForUpdatesEnabled) return
+        if (!UpdatesKeys.AUTO_CHECK_FOR_UPDATES.get()) return
 
         val checker = IntervalChecker()
         if (!checker.isBeyondNoNewer || !checker.isBeyondPostponed || !checker.isBeyondAutoChecked) return

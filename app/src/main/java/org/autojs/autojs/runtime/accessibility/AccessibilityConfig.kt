@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.accessibility
 
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.util.DeveloperUtils
 
 /**
@@ -33,7 +33,7 @@ class AccessibilityConfig {
     companion object {
 
         @JvmStatic
-        fun isUnintendedGuardEnabled() = Pref.isGuardModeEnabled
+        fun isUnintendedGuardEnabled() = RunningKeys.GUARD_MODE.get()
 
     }
 

@@ -21,7 +21,7 @@ import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateLi
 import org.autojs.autojs.core.accessibility.registry.ConnectionListeners
 import org.autojs.autojs.core.plugin.center.PluginInfoServiceHost
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.SettingsUtils
@@ -161,7 +161,7 @@ object AccessibilityCompanionSync {
                 name = "root",
                 serviceName = serviceName,
                 store = RootEnabledServicesStore(log),
-                available = { Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable() },
+                available = { A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS.get() && RootUtils.isRootAvailable() },
                 readBack = readBack,
                 log = log,
             ),
@@ -169,7 +169,7 @@ object AccessibilityCompanionSync {
                 name = "secure settings",
                 serviceName = serviceName,
                 store = SecureEnabledServicesStore(resolver),
-                available = { Pref.shouldStartA11yServiceWithSecureSettings() && SettingsUtils.SecureSettings.isGranted(context) },
+                available = { A11yKeys.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS.get() && SettingsUtils.SecureSettings.isGranted(context) },
                 readBack = readBack,
                 log = log,
             ),
@@ -177,7 +177,7 @@ object AccessibilityCompanionSync {
                 name = "shizuku",
                 serviceName = serviceName,
                 store = ShizukuEnabledServicesStore(context, log),
-                available = { Pref.shouldStartA11yServiceWithShizuku() && WrappedShizuku.isOperational() },
+                available = { A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU.get() && WrappedShizuku.isOperational() },
                 readBack = readBack,
                 log = log,
             ),

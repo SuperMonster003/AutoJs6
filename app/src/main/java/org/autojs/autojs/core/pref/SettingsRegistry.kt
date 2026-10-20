@@ -1,10 +1,16 @@
 package org.autojs.autojs.core.pref
 
+import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
+import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.HistoryKeys
+import org.autojs.autojs.core.pref.keys.RecordKeys
+import org.autojs.autojs.core.pref.keys.RunningKeys
+import org.autojs.autojs.core.pref.keys.TimedTaskKeys
+import org.autojs.autojs.core.pref.keys.UpdatesKeys
 import org.autojs.autojs.core.pref.store.StoreId
 
 /**
@@ -68,6 +74,12 @@ object SettingsRegistry {
         ExplorerKeys,
         HistoryKeys,
         EditorKeys,
+        TimedTaskKeys,
+        A11yKeys,
+        RunningKeys,
+        RecordKeys,
+        ExtensibilityKeys,
+        UpdatesKeys,
     )
 
     /** Deployment kinds that have a registered implementation (T5 e); filled by P7.6. */
@@ -82,6 +94,14 @@ object SettingsRegistry {
     @JvmStatic
     val keys: List<PrefKey<*>>
         get() = DOMAINS.flatMap { it.keys }
+
+    /**
+     * The declared key named [name] in [store], or null.
+     * zh-CN: [store] 中名为 [name] 的键声明, 不存在时为 null.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun find(name: String, store: StoreId = StoreId.DEFAULT): PrefKey<*>? = keys.firstOrNull { it.name == name && it.store == store }
 
     /** Descriptors of [DOMAINS]: keys first, then registered names, both in declaration order. */
     @JvmStatic

@@ -218,6 +218,7 @@
         "Les opérations globales automator pouvaient provoquer une exception de pointeur nul au premier appel, et les coordonnées verticales des gestes étaient mal mises à l'échelle",
         "Le service d'accessibilité pouvait s'interrompre lors d'opérations répétées telles que back _[`issue #527`](http://issues.autojs6.com/527)_",
         "La méthode Node.js accessibility.ensureEnabled signalait un délai d'appel du pont dépassé au lieu de renvoyer false lorsque le service d'accessibilité était activé mais ne se liait pas à temps",
+        "La méthode settings.isEnabled renvoyait false pour les réglages jamais modifiés d'activation automatique du service d'accessibilité avec l'accès root et de contrôle de l'exécution des scripts par la touche de volume, au lieu de l'état activé par défaut affiché dans les paramètres",
         "L'observateur de notifications signalait les notifications système comme messages flottants et omettait les événements de notification",
         "Sous Android 14+, la demande d'autorisation de capture d'écran pouvait faire planter l'application à cause d'un échec de démarrage du service au premier plan _[`issue #516`](http://issues.autojs6.com/516)_",
         "Les appels OCR répétés depuis plusieurs fils ou fichiers pouvaient demander à nouveau l'autorisation de capture d'écran _[`issue #551`](http://issues.autojs6.com/551)_",

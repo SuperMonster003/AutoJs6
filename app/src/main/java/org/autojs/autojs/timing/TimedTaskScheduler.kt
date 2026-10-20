@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.TimedTaskKeys
 import org.autojs.autojs.external.ScriptIntents.handleIntent
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
@@ -29,9 +29,7 @@ object TimedTaskScheduler {
 
     fun init(context: Context) {
         val backend = run initBackend@{
-            val keyRes = R.string.key_timed_task_backend
-            val defRes = R.string.default_key_timed_task_backend
-            when (val prefValue = Pref.getString(keyRes, defRes)) {
+            when (val prefValue = TimedTaskKeys.TIMED_TASK_BACKEND.storedKeyOrDefault()) {
                 key(R.string.key_timed_task_backend_alarm) -> AlarmTimedTaskScheduler
                 key(R.string.key_timed_task_backend_work) -> WorkTimedTaskScheduler
                 key(R.string.key_timed_task_backend_job) -> JobTimedTaskScheduler

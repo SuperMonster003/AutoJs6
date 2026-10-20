@@ -21,7 +21,7 @@ import org.autojs.autojs.core.accessibility.control.SecureEnabledServicesStore
 import org.autojs.autojs.core.accessibility.control.SettingsStoreStartStrategy
 import org.autojs.autojs.core.accessibility.control.ShizukuEnabledServicesStore
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.State
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -241,7 +241,7 @@ class AccessibilityTool(private val context: Context? = null) {
                         name = "root",
                         serviceName = serviceName,
                         store = RootEnabledServicesStore(log),
-                        available = { Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable() },
+                        available = { A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS.get() && RootUtils.isRootAvailable() },
                         readBack = readEnabledServices,
                         log = log,
                     ),
@@ -249,7 +249,7 @@ class AccessibilityTool(private val context: Context? = null) {
                         name = "secure settings",
                         serviceName = serviceName,
                         store = SecureEnabledServicesStore(resolver),
-                        available = { Pref.shouldStartA11yServiceWithSecureSettings() && SettingsUtils.SecureSettings.isGranted(context) },
+                        available = { A11yKeys.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS.get() && SettingsUtils.SecureSettings.isGranted(context) },
                         readBack = readEnabledServices,
                         log = log,
                     ),
@@ -259,7 +259,7 @@ class AccessibilityTool(private val context: Context? = null) {
                         name = "shizuku",
                         serviceName = serviceName,
                         store = ShizukuEnabledServicesStore(context, log),
-                        available = { Pref.shouldStartA11yServiceWithShizuku() && WrappedShizuku.isOperational() },
+                        available = { A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU.get() && WrappedShizuku.isOperational() },
                         readBack = readEnabledServices,
                         log = log,
                     ),
