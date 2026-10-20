@@ -677,9 +677,16 @@ def scan_sources(sources, res, key_values):
     return refs, literals
 
 
+# The settings store layer (ROADMAP P1.2, T3) is where SharedPreferences are meant to be opened: its calls are not
+# named stores of their own, and it is the whitelist of guard (d) for getDefaultSharedPreferences (T5).
+STORE_LAYER = 'core/pref/store/'
+
+
 def scan_named_stores(sources, resolver):
     calls = []
     for f in sources:
+        if f.display.startswith(STORE_LAYER):
+            continue
         for m in re.finditer(r'\bgetSharedPreferences\s*\(', f.text):
             line = f.line_of(m.start())
             if f.is_comment_line(line):
@@ -708,6 +715,8 @@ def scan_named_stores(sources, resolver):
 def scan_default_bypass(sources):
     out = []
     for f in sources:
+        if f.display.startswith(STORE_LAYER):
+            continue
         lines = [i for i, line in enumerate(f.lines, 1)
                  if 'getDefaultSharedPreferences' in line and not f.is_comment_line(i)]
         if lines:
@@ -718,7 +727,7 @@ def scan_default_bypass(sources):
 def scan_pref_users(sources):
     users = []
     for f in sources:
-        if f.display in ('core/pref/Pref.kt', 'inrt/Pref.kt'):
+        if f.display in ('core/pref/Pref.kt', 'inrt/Pref.kt') or f.display.startswith(STORE_LAYER):
             continue
         if re.search(r'(?<![\w.])Pref\.\w', f.text):
             users.append(f.display)
@@ -1305,9 +1314,9 @@ def main():
             len(problems), len(conflicts), len(missing)))
         for p in problems[:40]:
             print('  ' + p)
-    print('wrote %s, %s%s' % (json_path.relative_to(host).as_posix() if json_path.is_relative_to(host) else json_path,
-                              md_path.relative_to(host).as_posix() if md_path.is_relative_to(host) else md_path,
-                              ', ' + defaults_path.relative_to(host).as_posix() if cls is not None else ''))
+    def shown(path):
+        return path.relative_to(host).as_posix() if path.resolve().is_relative_to(host) else str(path)
+    print('wrote %s, %s%s' % (shown(json_path), shown(md_path), ', ' + shown(defaults_path) if cls is not None else ''))
     if args.check and (cls is None or problems):
         return 2
     return 0

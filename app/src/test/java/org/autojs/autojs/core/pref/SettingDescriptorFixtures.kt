@@ -5,12 +5,11 @@ package org.autojs.autojs.core.pref
  * (`SettingDescriptor(name, type, store, category, defaultText, effect, kind, deployment)`), as primitive values only
  * (R3).
  *
- * P1.1 has not fixed the shape of the main `SettingDescriptor` yet, so tests build rows of this type through
- * [SettingDescriptorFixtures]; once P1.3 adds the real type, the fixture gains a mapping to it instead of tests
- * changing their construction code.
+ * Tests build rows of this type through [SettingDescriptorFixtures]; [toDescriptor] and [SettingDescriptor.toSpec]
+ * map it to and from the main `SettingDescriptor` of P1.3, so the construction code of tests does not change.
  *
- * zh-CN: 只含 ROADMAP T4 字段的描述行, 全部为原始类型 (R3). P1.1 尚未确定主代码 `SettingDescriptor` 的形状, 测试经
- * [SettingDescriptorFixtures] 构造本类型; P1.3 引入真实类型后由夹具增加映射, 测试的构造代码不必改动.
+ * zh-CN: 只含 ROADMAP T4 字段的描述行, 全部为原始类型 (R3). 测试经 [SettingDescriptorFixtures] 构造本类型; [toDescriptor] 与
+ * [SettingDescriptor.toSpec] 在它与 P1.3 的主代码 `SettingDescriptor` 之间转换, 测试的构造代码不必改动.
  */
 data class SettingDescriptorSpec(
     val name: String,
@@ -133,3 +132,18 @@ object SettingDescriptorFixtures {
         return store
     }
 }
+
+/** Maps a fixture row to the main descriptor type of P1.3. */
+fun SettingDescriptorSpec.toDescriptor() = SettingDescriptor(
+    name = name,
+    type = type,
+    store = store,
+    category = category,
+    defaultText = defaultText,
+    effect = SettingEffect.valueOf(effect),
+    kind = SettingKind.ofLabel(kind),
+    deployment = deployment?.let(DeploymentKind::valueOf),
+)
+
+/** Maps a main descriptor back to a fixture row, checking it against the roadmap rules. */
+fun SettingDescriptor.toSpec() = SettingDescriptorFixtures.spec(name, type, store, category, defaultText, effect.name, kind.label, deployment?.name)
